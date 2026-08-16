@@ -7,6 +7,14 @@
     "icon": "./assets/icon.png",
     "scheme": "poststreak",
     "userInterfaceStyle": "light",
+    "plugins": [
+      [
+        "expo-dev-client",
+        {
+          "launchMode": "launcher"
+        }
+      ]
+    ],
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.poststreak.app"
