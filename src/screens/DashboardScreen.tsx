@@ -1,0 +1,3654 @@
+import React, { useState, useRef, useEffect, useCallback } from 'react';
+import {
+  StyleSheet,
+  View,
+  Text,
+  Pressable,
+  ScrollView,
+  Platform,
+  Image,
+  SafeAreaView,
+  StatusBar,
+  Animated,
+  Modal,
+  Dimensions,
+  NativeSyntheticEvent,
+  NativeScrollEvent,
+} from 'react-native';
+import Svg, { Path, Circle, Rect } from 'react-native-svg';
+import * as Haptics from 'expo-haptics';
+
+interface DashboardScreenProps {
+  onLogout?: () => void;
+  onStartMission?: () => void;
+  onNavigateTab?: (tab: TabType) => void;
+}
+
+type TabType = 'home' | 'create' | 'match' | 'quests' | 'growth';
+type NotificationFilter = 'all' | 'unread' | 'quests';
+
+interface MonthData {
+  id: string;
+  monthName: string;
+  year: number;
+  daysCount: number;
+  startOffset: number; // 0 for Mon, 1 for Tue, etc.
+  completedDays: number[];
+  scheduledDays: number[];
+  freezeDays: number[];
+  isCurrent?: boolean;
+}
+
+interface NotificationItem {
+  id: string;
+  type: 'streak' | 'collab' | 'quest' | 'level' | 'growth';
+  title: string;
+  body: string;
+  time: string;
+  unread: boolean;
+  iconEmoji: string;
+  badgeBg: string;
+  badgeBorder: string;
+  actionText?: string;
+}
+
+const INITIAL_NOTIFICATIONS: NotificationItem[] = [
+  {
+    id: 'n1',
+    type: 'streak',
+    title: 'Streak Lock Reminder 🔥',
+    body: 'Post 1 Reel before 11:30 AM today to lock in Day 48 and protect your consistency score.',
+    time: '15m ago',
+    unread: true,
+    iconEmoji: '🔥',
+    badgeBg: '#FEF3C7',
+    badgeBorder: '#FDE68A',
+    actionText: 'Post Now',
+  },
+  {
+    id: 'n2',
+    type: 'quest',
+    title: 'New Brand Quest Available',
+    body: 'Lagos Food Festival ($450 Bounty) is looking for creators in your niche. Tap to review brief.',
+    time: '1h ago',
+    unread: true,
+    iconEmoji: '🎯',
+    badgeBg: '#EDE8FC',
+    badgeBorder: '#DDD6FE',
+    actionText: 'View Quest',
+  },
+  {
+    id: 'n3',
+    type: 'collab',
+    title: 'Collab Match Suggested',
+    body: 'Amara Okafor (85k followers) is active in Travel & Food and open to co-creating this weekend.',
+    time: '3h ago',
+    unread: true,
+    iconEmoji: '🤝',
+    badgeBg: '#E0F2FE',
+    badgeBorder: '#BAE6FD',
+    actionText: 'Connect',
+  },
+  {
+    id: 'n4',
+    type: 'level',
+    title: 'XP Milestone Unlocked 🏆',
+    body: 'You earned +350 XP this week! You are now 550 XP away from Level 43 Master Storyteller.',
+    time: 'Yesterday',
+    unread: false,
+    iconEmoji: '⚡',
+    badgeBg: '#FEF3C7',
+    badgeBorder: '#FDE68A',
+  },
+  {
+    id: 'n5',
+    type: 'growth',
+    title: 'Top 5% Consistency Tier',
+    body: 'Your 96% posting consistency ranks you in the top 5% of creator accounts on Jarvis this month.',
+    time: '2d ago',
+    unread: false,
+    iconEmoji: '📈',
+    badgeBg: '#ECFDF5',
+    badgeBorder: '#A7F3D0',
+  },
+];
+
+const CALENDAR_DATA_CHRONOLOGICAL: MonthData[] = [
+  {
+    id: 'jan',
+    monthName: 'January',
+    year: 2024,
+    daysCount: 31,
+    startOffset: 0,
+    completedDays: [10, 11, 12, 17, 18, 19, 24, 25, 26, 31],
+    scheduledDays: [],
+    freezeDays: [],
+  },
+  {
+    id: 'feb',
+    monthName: 'February',
+    year: 2024,
+    daysCount: 29,
+    startOffset: 3,
+    completedDays: [1, 2, 7, 8, 9, 14, 15, 16, 21, 22, 23, 28, 29],
+    scheduledDays: [],
+    freezeDays: [],
+  },
+  {
+    id: 'mar',
+    monthName: 'March',
+    year: 2024,
+    daysCount: 31,
+    startOffset: 4,
+    completedDays: [15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31],
+    scheduledDays: [],
+    freezeDays: [],
+  },
+  {
+    id: 'apr',
+    monthName: 'April',
+    year: 2024,
+    daysCount: 30,
+    startOffset: 0,
+    completedDays: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30],
+    scheduledDays: [],
+    freezeDays: [],
+  },
+  {
+    id: 'may',
+    monthName: 'May',
+    year: 2024,
+    daysCount: 31,
+    startOffset: 2,
+    completedDays: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16],
+    scheduledDays: [17, 18, 19, 21, 23, 25, 28],
+    freezeDays: [20],
+    isCurrent: true,
+  },
+  {
+    id: 'jun',
+    monthName: 'June',
+    year: 2024,
+    daysCount: 30,
+    startOffset: 5,
+    completedDays: [],
+    scheduledDays: [1, 3, 5, 7, 10, 12, 14, 17, 19, 21, 24, 26],
+    freezeDays: [],
+  },
+  {
+    id: 'jul',
+    monthName: 'July',
+    year: 2024,
+    daysCount: 31,
+    startOffset: 0,
+    completedDays: [],
+    scheduledDays: [2, 4, 8, 11, 15, 18, 22, 25, 29],
+    freezeDays: [],
+  },
+  {
+    id: 'aug',
+    monthName: 'August',
+    year: 2024,
+    daysCount: 31,
+    startOffset: 3,
+    completedDays: [],
+    scheduledDays: [1, 5, 8, 12, 15, 19, 22, 26, 29],
+    freezeDays: [],
+  },
+  {
+    id: 'sep',
+    monthName: 'September',
+    year: 2024,
+    daysCount: 30,
+    startOffset: 6,
+    completedDays: [],
+    scheduledDays: [],
+    freezeDays: [],
+  },
+  {
+    id: 'oct',
+    monthName: 'October',
+    year: 2024,
+    daysCount: 31,
+    startOffset: 1,
+    completedDays: [],
+    scheduledDays: [],
+    freezeDays: [],
+  },
+  {
+    id: 'nov',
+    monthName: 'November',
+    year: 2024,
+    daysCount: 30,
+    startOffset: 4,
+    completedDays: [],
+    scheduledDays: [],
+    freezeDays: [],
+  },
+  {
+    id: 'dec',
+    monthName: 'December',
+    year: 2024,
+    daysCount: 31,
+    startOffset: 6,
+    completedDays: [],
+    scheduledDays: [],
+    freezeDays: [],
+  },
+];
+
+const PRESET_AVATARS = [
+  {
+    id: 'ghost',
+    name: 'Ghost Mascot',
+    source: require('../../assets/images/jarvis-ghost-clean.png'),
+  },
+  {
+    id: 'flame',
+    name: 'Jarvis Core',
+    source: require('../../assets/images/jarvis-core-flame.png'),
+  },
+  {
+    id: 'hero',
+    name: 'Jarvis Hero',
+    source: require('../../assets/images/jarvis-hero.png'),
+  },
+  {
+    id: 'mascot',
+    name: 'Creator Glow',
+    source: require('../../assets/images/jarvis-mascot-clean.png'),
+  },
+];
+
+// Exact Custom Figma Vector Icons for Bottom Navigation Bar
+const HomeNavIcon = ({ color }: { color: string }) => (
+  <Svg width={26} height={26} viewBox="0 0 24 24" fill={color}>
+    <Path
+      d="M12 2.5L2 11.5H5.5V21.5H9.5V14.5C9.5 13.67 10.17 13 11 13H13C13.83 13 14.5 13.67 14.5 14.5V21.5H18.5V11.5H22L12 2.5Z"
+      fill={color}
+    />
+  </Svg>
+);
+
+const CreateNavIcon = ({ color }: { color: string }) => (
+  <Svg width={26} height={26} viewBox="0 0 24 24" fill="none">
+    <Circle cx="12" cy="12" r="9.5" stroke={color} strokeWidth="2.8" />
+    <Path d="M12 7.5V16.5M7.5 12H16.5" stroke={color} strokeWidth="2.8" strokeLinecap="round" />
+  </Svg>
+);
+
+const MatchNavIcon = ({ color }: { color: string }) => (
+  <Svg width={28} height={26} viewBox="0 0 28 24" fill={color}>
+    {/* Center Leader Avatar */}
+    <Circle cx="14" cy="5.8" r="3.6" fill={color} />
+    <Path
+      d="M8.2 18.2C8.2 15 10.8 12.2 14 12.2C17.2 12.2 19.8 15 19.8 18.2V20.5H8.2V18.2Z"
+      fill={color}
+    />
+    {/* Left Flanking Avatar */}
+    <Circle cx="5.2" cy="8.2" r="2.8" fill={color} />
+    <Path
+      d="M1.2 19.2C1.2 17 3 15 5.2 15C6.1 15 6.9 15.3 7.5 15.7C7.3 16.5 7.2 17.4 7.2 18.2V20.5H1.2V19.2Z"
+      fill={color}
+    />
+    {/* Right Flanking Avatar */}
+    <Circle cx="22.8" cy="8.2" r="2.8" fill={color} />
+    <Path
+      d="M26.8 19.2C26.8 17 25 15 22.8 15C21.9 15 21.1 15.3 20.5 15.7C20.7 16.5 20.8 17.4 20.8 18.2V20.5H26.8V19.2Z"
+      fill={color}
+    />
+  </Svg>
+);
+
+const QuestsNavIcon = ({ color }: { color: string }) => (
+  <Svg width={26} height={26} viewBox="0 0 24 24" fill="none">
+    {/* Sword 1: Top-Left to Bottom-Right */}
+    <Path
+      d="M3.5 3.5L5.8 2L13.2 9.4L11.4 11.2L4 3.8V3.5Z"
+      fill={color}
+    />
+    <Path
+      d="M3.5 3.5L2 5.8L9.4 13.2L11.2 11.4L3.8 4H3.5Z"
+      fill={color}
+    />
+    {/* Guard 1 */}
+    <Path
+      d="M14.5 9.2L9.8 13.9L11.3 15.4L16 10.7L14.5 9.2Z"
+      fill={color}
+    />
+    {/* Grip 1 */}
+    <Path
+      d="M13.2 15.2L17.5 19.5"
+      stroke={color}
+      strokeWidth="2.8"
+      strokeLinecap="round"
+    />
+    {/* Pommel 1 */}
+    <Circle cx="18.5" cy="20.5" r="1.8" fill={color} />
+
+    {/* Sword 2: Top-Right to Bottom-Left */}
+    <Path
+      d="M20.5 3.5L18.2 2L10.8 9.4L12.6 11.2L20 3.8V3.5Z"
+      fill={color}
+    />
+    <Path
+      d="M20.5 3.5L22 5.8L14.6 13.2L12.8 11.4L20.2 4H20.5Z"
+      fill={color}
+    />
+    {/* Guard 2 */}
+    <Path
+      d="M9.5 9.2L14.2 13.9L12.7 15.4L8 10.7L9.5 9.2Z"
+      fill={color}
+    />
+    {/* Grip 2 */}
+    <Path
+      d="M10.8 15.2L6.5 19.5"
+      stroke={color}
+      strokeWidth="2.8"
+      strokeLinecap="round"
+    />
+    {/* Pommel 2 */}
+    <Circle cx="5.5" cy="20.5" r="1.8" fill={color} />
+  </Svg>
+);
+
+const GrowthNavIcon = ({ color }: { color: string }) => (
+  <Svg width={26} height={26} viewBox="0 0 24 24" fill="none">
+    <Path
+      d="M3.5 17L9 11.5L13 15L20.5 7"
+      stroke={color}
+      strokeWidth="3.2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+    <Path
+      d="M14.5 7H20.5V13"
+      stroke={color}
+      strokeWidth="3.2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  </Svg>
+);
+
+export const DashboardScreen: React.FC<DashboardScreenProps> = ({
+  onLogout,
+  onStartMission,
+  onNavigateTab,
+}) => {
+  const [activeTab, setActiveTab] = useState<TabType>('home');
+  const [matchConnected, setMatchConnected] = useState(false);
+  const [showProModal, setShowProModal] = useState(false);
+  const [showMissionModal, setShowMissionModal] = useState(false);
+  const [showCalendarModal, setShowCalendarModal] = useState(false);
+  const [showPhotoModal, setShowPhotoModal] = useState(false);
+  const [showNotificationModal, setShowNotificationModal] = useState(false);
+
+  // Notification State
+  const [notifications, setNotifications] = useState<NotificationItem[]>(INITIAL_NOTIFICATIONS);
+  const [notifFilter, setNotifFilter] = useState<NotificationFilter>('all');
+
+  // Profile Photo State
+  const [selectedAvatarId, setSelectedAvatarId] = useState<string | null>(null);
+  const [previewAvatarId, setPreviewAvatarId] = useState<string | null>('ghost');
+  const [uploadToastMessage, setUploadToastMessage] = useState<string | null>(null);
+
+  const [selectedDayInfo, setSelectedDayInfo] = useState<string | null>(null);
+  const [selectedMonthIndex, setSelectedMonthIndex] = useState(4); // Default to May (index 4)
+  const [pagerWidth, setPagerWidth] = useState(Dimensions.get('window').width - 68);
+
+  // Animations
+  const ghostFloatY = useRef(new Animated.Value(0)).current;
+  const ghostScale = useRef(new Animated.Value(1)).current;
+  const flamePulse = useRef(new Animated.Value(1)).current;
+  const modalPopScale = useRef(new Animated.Value(0.85)).current;
+  const calendarModalScale = useRef(new Animated.Value(0.9)).current;
+  const photoModalScale = useRef(new Animated.Value(0.85)).current;
+  const notifModalScale = useRef(new Animated.Value(0.85)).current;
+
+  // Refs for auto-scrolling
+  const monthPagerRef = useRef<ScrollView>(null);
+  const monthChipsScrollRef = useRef<ScrollView>(null);
+  const lastHapticIndex = useRef<number>(4);
+
+  const unreadCount = notifications.filter((n) => n.unread).length;
+
+  useEffect(() => {
+    // 1. Ghost Mascot Floating Buoyancy
+    const ghostLoop = Animated.loop(
+      Animated.sequence([
+        Animated.parallel([
+          Animated.timing(ghostFloatY, {
+            toValue: -5,
+            duration: 1400,
+            useNativeDriver: true,
+          }),
+          Animated.timing(ghostScale, {
+            toValue: 1.06,
+            duration: 1400,
+            useNativeDriver: true,
+          }),
+        ]),
+        Animated.parallel([
+          Animated.timing(ghostFloatY, {
+            toValue: 3,
+            duration: 1300,
+            useNativeDriver: true,
+          }),
+          Animated.timing(ghostScale, {
+            toValue: 0.96,
+            duration: 1300,
+            useNativeDriver: true,
+          }),
+        ]),
+      ])
+    );
+
+    // 2. Flame Pulse Loop
+    const flameLoop = Animated.loop(
+      Animated.sequence([
+        Animated.timing(flamePulse, {
+          toValue: 1.16,
+          duration: 900,
+          useNativeDriver: true,
+        }),
+        Animated.timing(flamePulse, {
+          toValue: 1.0,
+          duration: 900,
+          useNativeDriver: true,
+        }),
+      ])
+    );
+
+    ghostLoop.start();
+    flameLoop.start();
+
+    return () => {
+      ghostLoop.stop();
+      flameLoop.stop();
+    };
+  }, [ghostFloatY, ghostScale, flamePulse]);
+
+  // Center and highlight active month chip
+  const centerMonthChip = useCallback((index: number) => {
+    const chipWidthWithGap = 70;
+    const targetScrollX = Math.max(0, index * chipWidthWithGap - 110);
+    monthChipsScrollRef.current?.scrollTo({
+      x: targetScrollX,
+      animated: true,
+    });
+  }, []);
+
+  // Sync scroll position when chip is clicked or button pressed
+  const scrollToMonth = (index: number, animated = true) => {
+    if (index >= 0 && index < CALENDAR_DATA_CHRONOLOGICAL.length) {
+      setSelectedMonthIndex(index);
+      setSelectedDayInfo(null);
+      lastHapticIndex.current = index;
+      monthPagerRef.current?.scrollTo({
+        x: index * pagerWidth,
+        animated,
+      });
+      centerMonthChip(index);
+    }
+  };
+
+  const handleTabPress = (tab: TabType) => {
+    if (Platform.OS !== 'web') {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    }
+    setActiveTab(tab);
+    if (tab === 'quests' && onStartMission) {
+      onStartMission();
+    } else if (onNavigateTab) {
+      onNavigateTab(tab);
+    }
+  };
+
+  const handleToggleMatch = () => {
+    if (Platform.OS !== 'web') {
+      Haptics.notificationAsync(
+        matchConnected
+          ? Haptics.NotificationFeedbackType.Warning
+          : Haptics.NotificationFeedbackType.Success
+      );
+    }
+    setMatchConnected(!matchConnected);
+  };
+
+  const openMissionModal = () => {
+    if (Platform.OS !== 'web') {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    }
+    setShowMissionModal(true);
+    Animated.spring(modalPopScale, {
+      toValue: 1,
+      useNativeDriver: true,
+      speed: 22,
+      bounciness: 10,
+    }).start();
+  };
+
+  const openProModal = () => {
+    if (Platform.OS !== 'web') {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    }
+    setShowProModal(true);
+    Animated.spring(modalPopScale, {
+      toValue: 1,
+      useNativeDriver: true,
+      speed: 22,
+      bounciness: 10,
+    }).start();
+  };
+
+  const openCalendarModal = () => {
+    if (Platform.OS !== 'web') {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    }
+    setShowCalendarModal(true);
+    setSelectedDayInfo(null);
+    Animated.spring(calendarModalScale, {
+      toValue: 1,
+      useNativeDriver: true,
+      speed: 20,
+      bounciness: 8,
+    }).start();
+
+    setTimeout(() => {
+      scrollToMonth(4, false);
+    }, 80);
+  };
+
+  const openPhotoModal = () => {
+    if (Platform.OS !== 'web') {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    }
+    setPreviewAvatarId(selectedAvatarId || 'ghost');
+    setUploadToastMessage(null);
+    setShowPhotoModal(true);
+    Animated.spring(photoModalScale, {
+      toValue: 1,
+      useNativeDriver: true,
+      speed: 22,
+      bounciness: 10,
+    }).start();
+  };
+
+  const openNotificationModal = () => {
+    if (Platform.OS !== 'web') {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    }
+    setShowNotificationModal(true);
+    Animated.spring(notifModalScale, {
+      toValue: 1,
+      useNativeDriver: true,
+      speed: 22,
+      bounciness: 10,
+    }).start();
+  };
+
+  const handleMarkAllNotifsRead = () => {
+    if (Platform.OS !== 'web') {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    }
+    setNotifications((prev) =>
+      prev.map((n) => ({
+        ...n,
+        unread: false,
+      }))
+    );
+  };
+
+  const handleNotificationPress = (id: string) => {
+    if (Platform.OS !== 'web') {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    }
+    setNotifications((prev) =>
+      prev.map((n) => (n.id === id ? { ...n, unread: false } : n))
+    );
+  };
+
+  const handleSelectPreset = (id: string) => {
+    if (Platform.OS !== 'web') {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    }
+    setPreviewAvatarId(id);
+    setUploadToastMessage(null);
+  };
+
+  const handleSimulateGalleryUpload = () => {
+    if (Platform.OS !== 'web') {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    }
+    setPreviewAvatarId('ghost');
+    setUploadToastMessage('✓ Photo loaded from Photo Library');
+  };
+
+  const handleSimulateCamera = () => {
+    if (Platform.OS !== 'web') {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    }
+    setPreviewAvatarId('mascot');
+    setUploadToastMessage('✓ Photo captured from Camera');
+  };
+
+  const handleSaveProfilePhoto = () => {
+    if (Platform.OS !== 'web') {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    }
+    setSelectedAvatarId(previewAvatarId);
+    setShowPhotoModal(false);
+  };
+
+  const handleRemovePhoto = () => {
+    if (Platform.OS !== 'web') {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    }
+    setSelectedAvatarId(null);
+    setPreviewAvatarId('ghost');
+    setShowPhotoModal(false);
+  };
+
+  const handleDayPress = (day: number, month: MonthData) => {
+    if (Platform.OS !== 'web') {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    }
+    if (month.completedDays.includes(day)) {
+      setSelectedDayInfo(`🔥 ${month.monthName} ${day}: Reel Posted (Streak Maintained)`);
+    } else if (month.scheduledDays.includes(day)) {
+      setSelectedDayInfo(`⏰ ${month.monthName} ${day}: Scheduled Reel at 11:30 AM`);
+    } else if (month.freezeDays.includes(day)) {
+      setSelectedDayInfo(`❄️ ${month.monthName} ${day}: Protected with Streak Freeze`);
+    } else {
+      setSelectedDayInfo(`⚪ ${month.monthName} ${day}: Creator Rest Day`);
+    }
+  };
+
+  // Real-time instantaneous swipe tracking
+  const handleScroll = (e: NativeSyntheticEvent<NativeScrollEvent>) => {
+    const offsetX = e.nativeEvent.contentOffset.x;
+    if (pagerWidth > 0) {
+      const newIdx = Math.round(offsetX / pagerWidth);
+      if (
+        newIdx >= 0 &&
+        newIdx < CALENDAR_DATA_CHRONOLOGICAL.length &&
+        newIdx !== selectedMonthIndex
+      ) {
+        setSelectedMonthIndex(newIdx);
+        setSelectedDayInfo(null);
+        centerMonthChip(newIdx);
+
+        if (lastHapticIndex.current !== newIdx) {
+          lastHapticIndex.current = newIdx;
+          if (Platform.OS !== 'web') {
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+          }
+        }
+      }
+    }
+  };
+
+  const handlePrevMonth = () => {
+    if (selectedMonthIndex > 0) {
+      if (Platform.OS !== 'web') {
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+      }
+      scrollToMonth(selectedMonthIndex - 1);
+    }
+  };
+
+  const handleNextMonth = () => {
+    if (selectedMonthIndex < CALENDAR_DATA_CHRONOLOGICAL.length - 1) {
+      if (Platform.OS !== 'web') {
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+      }
+      scrollToMonth(selectedMonthIndex + 1);
+    }
+  };
+
+  // Streak grid dataset matching the May 2024 reference
+  const streakGrid = [
+    [false, false, true, true, true, true],
+    [true, true, true, true, true, true],
+    [false, false, false, false, false, false],
+  ];
+
+  const currentSelectedAvatar = PRESET_AVATARS.find((a) => a.id === selectedAvatarId);
+  const currentPreviewAvatar = PRESET_AVATARS.find((a) => a.id === previewAvatarId) || PRESET_AVATARS[0];
+
+  // Filtered Notifications
+  const filteredNotifications = notifications.filter((item) => {
+    if (notifFilter === 'unread') return item.unread;
+    if (notifFilter === 'quests') return item.type === 'quest';
+    return true;
+  });
+
+  const getTabColor = (tab: TabType) => (activeTab === tab ? '#582CDB' : '#1A1626');
+
+  return (
+    <SafeAreaView style={styles.safeArea}>
+      <StatusBar barStyle="dark-content" backgroundColor="#FAF8F5" />
+      <View style={styles.container}>
+        {/* 1. TOP APP BAR: Ghost Mascot on Left & Notification/Profile on Right */}
+        <View style={styles.headerBar}>
+          {/* Top-Left: Ghost Logo Mascot */}
+          <Animated.View
+            style={[
+              styles.headerLogoWrapper,
+              {
+                transform: [
+                  { translateY: ghostFloatY },
+                  { scale: ghostScale },
+                ],
+              },
+            ]}
+          >
+            <Image
+              source={require('../../assets/images/jarvis-ghost-clean.png')}
+              style={styles.headerGhostLogo}
+              resizeMode="contain"
+            />
+          </Animated.View>
+
+          {/* Right: Message, Notification & Person Profile Photo Upload */}
+          <View style={styles.headerRightGroup}>
+            {/* Chat Bubble Button */}
+            <Pressable
+              style={({ pressed }) => [styles.headerIconBtn, pressed && styles.headerIconBtnPressed]}
+              hitSlop={8}
+            >
+              <Svg width={20} height={20} viewBox="0 0 24 24" fill="none">
+                <Path
+                  d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"
+                  stroke="#1A1626"
+                  strokeWidth="2.2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </Svg>
+            </Pressable>
+
+            {/* Notification Bell with Glowing Badge -> Opens Notification Modal */}
+            <Pressable
+              onPress={openNotificationModal}
+              style={({ pressed }) => [styles.headerIconBtn, pressed && styles.headerIconBtnPressed]}
+              hitSlop={8}
+            >
+              <Svg width={20} height={20} viewBox="0 0 24 24" fill="none">
+                <Path
+                  d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"
+                  stroke="#1A1626"
+                  strokeWidth="2.2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+                <Path
+                  d="M13.73 21a2 2 0 0 1-3.46 0"
+                  stroke="#1A1626"
+                  strokeWidth="2.2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </Svg>
+              {unreadCount > 0 && <View style={styles.notificationDot} />}
+            </Pressable>
+
+            {/* Top-Right: Person Icon Placeholder where users add their profile picture */}
+            <Pressable
+              onPress={openPhotoModal}
+              style={({ pressed }) => [
+                styles.profilePhotoBtn,
+                currentSelectedAvatar && styles.profilePhotoBtnActive,
+                pressed && styles.headerIconBtnPressed,
+              ]}
+              hitSlop={8}
+            >
+              {currentSelectedAvatar ? (
+                <Image
+                  source={currentSelectedAvatar.source}
+                  style={styles.headerCustomAvatarImage}
+                  resizeMode="cover"
+                />
+              ) : (
+                <Svg width={19} height={19} viewBox="0 0 24 24" fill="none">
+                  <Path
+                    d="M20 21V19C20 17.9 19.5 16.9 18.7 16.2C17.9 15.5 16.9 15 15.8 15H8.2C7.1 15 6.1 15.5 5.3 16.2C4.5 16.9 4 17.9 4 19V21"
+                    stroke="#582CDB"
+                    strokeWidth="2.3"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                  <Circle
+                    cx="12"
+                    cy="7"
+                    r="4"
+                    stroke="#582CDB"
+                    strokeWidth="2.3"
+                  />
+                </Svg>
+              )}
+
+              {/* Small "+" Add Photo Badge */}
+              <View style={styles.addPhotoPlusBadge}>
+                <Text style={styles.addPhotoPlusText}>
+                  {currentSelectedAvatar ? '✎' : '+'}
+                </Text>
+              </View>
+            </Pressable>
+          </View>
+        </View>
+
+        {/* 2. MAIN SCROLLABLE CONTENT */}
+        <ScrollView
+          contentContainerStyle={styles.scrollContent}
+          showsVerticalScrollIndicator={false}
+          bounces={true}
+        >
+          {/* 3. TODAY'S FOCUS HERO BANNER */}
+          <View style={styles.focusHeroSection}>
+            <View style={styles.focusPillRow}>
+              <View style={styles.focusTag}>
+                <View style={styles.focusLiveDot} />
+                <Text style={styles.focusTagText}>TODAY&apos;S FOCUS</Text>
+              </View>
+              <Text style={styles.nextPostCountdown}>Next post in 2h 45m</Text>
+            </View>
+
+            <Text style={styles.focusHeadline}>Post 1 Reel to protect your streak</Text>
+
+            {/* Status Pills */}
+            <View style={styles.statusPillsRow}>
+              <View style={styles.levelPillBadge}>
+                <Text style={styles.levelPillBadgeText}>Level 42</Text>
+              </View>
+
+              <View style={styles.streakPillBadge}>
+                <Animated.Text
+                  style={[
+                    styles.streakPillFire,
+                    { transform: [{ scale: flamePulse }] },
+                  ]}
+                >
+                  🔥
+                </Animated.Text>
+                <Text style={styles.streakPillBadgeText}>47-Day Streak</Text>
+              </View>
+
+              <View style={styles.nextPostPillBadge}>
+                <Svg width={12} height={12} viewBox="0 0 24 24" fill="none">
+                  <Circle cx="12" cy="12" r="10" stroke="#6B7280" strokeWidth="2.2" />
+                  <Path d="M12 6V12L16 14" stroke="#6B7280" strokeWidth="2.2" strokeLinecap="round" />
+                </Svg>
+                <Text style={styles.nextPostPillBadgeText}>11:30 AM</Text>
+              </View>
+            </View>
+          </View>
+
+          {/* 4. CARD 1: YOUR STREAK HEATMAP */}
+          <Pressable
+            onPress={openCalendarModal}
+            style={({ pressed }) => [
+              styles.dashboardCard,
+              pressed && styles.cardPressed,
+            ]}
+          >
+            <View style={styles.cardHeaderRow}>
+              <View style={styles.cardTitleGroup}>
+                <Text style={styles.cardSectionTitle}>Your Streak</Text>
+                <Text style={styles.streakSubtext}>Consistency is key 🔗 (Tap to swipe full calendar)</Text>
+              </View>
+
+              <View style={styles.streakCountBadge}>
+                <Text style={styles.streakCountNumber}>47-Day Streak</Text>
+                <Animated.Text
+                  style={[
+                    styles.streakFireEmoji,
+                    { transform: [{ scale: flamePulse }] },
+                  ]}
+                >
+                  🔥
+                </Animated.Text>
+              </View>
+            </View>
+
+            {/* Month Header & Days of Week */}
+            <View style={styles.calendarMetaRow}>
+              <Text style={styles.monthLabel}>MAY 2024  ›</Text>
+              <Text style={styles.streakStatusHighlight}>96% Consistent</Text>
+            </View>
+
+            <View style={styles.daysHeaderRow}>
+              {['M', '·', 'W', 'T', 'F', '·'].map((d, idx) => (
+                <Text key={`day_h_${idx}`} style={styles.dayColHeader}>
+                  {d}
+                </Text>
+              ))}
+            </View>
+
+            {/* Calendar Heatmap Grid */}
+            <View style={styles.heatmapGrid}>
+              {streakGrid.map((row, rIdx) => (
+                <View key={`row_${rIdx}`} style={styles.heatmapRow}>
+                  {row.map((active, cIdx) => (
+                    <View
+                      key={`cell_${rIdx}_${cIdx}`}
+                      style={[
+                        styles.heatmapCell,
+                        active && styles.heatmapCellActive,
+                      ]}
+                    >
+                      {active && (
+                        <Svg width={14} height={14} viewBox="0 0 24 24" fill="none">
+                          <Path
+                            d="M20 6L9 17L4 12"
+                            stroke="#FFFFFF"
+                            strokeWidth="3.2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          />
+                        </Svg>
+                      )}
+                    </View>
+                  ))}
+                </View>
+              ))}
+            </View>
+
+            {/* Jarvis Insight Banner inside Streak Card */}
+            <View style={styles.jarvisStreakInsight}>
+              <Animated.View
+                style={[
+                  styles.jarvisFlameWrapper,
+                  {
+                    transform: [
+                      { translateY: ghostFloatY },
+                      { scale: ghostScale },
+                    ],
+                  },
+                ]}
+              >
+                <Image
+                  source={require('../../assets/images/jarvis-core-flame.png')}
+                  style={styles.jarvisFlameImage}
+                  resizeMode="contain"
+                />
+              </Animated.View>
+              <Text style={styles.jarvisInsightText}>
+                <Text style={styles.jarvisInsightBold}>Jarvis Insight: </Text>
+                Your streak is strong. Tap calendar to swipe across all months.
+              </Text>
+            </View>
+          </Pressable>
+
+          {/* 5. CARD 2: SCHEDULED POSTS VELOCITY */}
+          <View style={styles.dashboardCard}>
+            <View style={styles.scheduledHeaderRow}>
+              <Pressable
+                onPress={openCalendarModal}
+                style={({ pressed }) => [styles.scheduledLabelGroup, pressed && styles.headerIconBtnPressed]}
+                hitSlop={6}
+              >
+                <View style={styles.calendarIconBox}>
+                  <Svg width={16} height={16} viewBox="0 0 24 24" fill="none">
+                    <Rect x="3" y="4" width="18" height="18" rx="2" stroke="#582CDB" strokeWidth="2.2" />
+                    <Path d="M16 2V6M8 2V6M3 10H21" stroke="#582CDB" strokeWidth="2.2" strokeLinecap="round" />
+                  </Svg>
+                </View>
+                <Text style={styles.scheduledTitle}>SCHEDULED</Text>
+              </Pressable>
+
+              <View style={styles.scheduledTimePill}>
+                <Text style={styles.scheduledTimeText}>11:30 AM</Text>
+              </View>
+            </View>
+
+            <View style={styles.scheduledMetricsContainer}>
+              <View style={styles.postsMetricRow}>
+                <Text style={styles.postsCountBig}>03</Text>
+                <Text style={styles.postsCountLabel}>Posts Ready</Text>
+              </View>
+
+              <View style={styles.weekIncreaseBadge}>
+                <Svg width={13} height={13} viewBox="0 0 24 24" fill="none">
+                  <Circle cx="12" cy="12" r="10" stroke="#582CDB" strokeWidth="2.2" />
+                  <Path d="M12 6V12L16 14" stroke="#582CDB" strokeWidth="2.2" strokeLinecap="round" />
+                </Svg>
+                <Text style={styles.weekIncreaseText}>+2 this week</Text>
+              </View>
+            </View>
+
+            {/* Next Up Box */}
+            <View style={styles.nextUpBox}>
+              <Text style={styles.nextUpLabel}>NEXT UP</Text>
+              <View style={styles.nextUpRow}>
+                <Text style={styles.nextUpDay}>Tomorrow</Text>
+                <Text style={styles.nextUpTime}>11:30 AM</Text>
+              </View>
+            </View>
+
+            {/* Weekly Progress Bar */}
+            <View style={styles.weeklyProgressHeader}>
+              <Text style={styles.weeklyProgressLabel}>WEEKLY PROGRESS</Text>
+              <Text style={styles.weeklyProgressPercent}>42% Complete</Text>
+            </View>
+
+            <View style={styles.weeklySegmentsRow}>
+              <View style={[styles.weeklySegment, styles.weeklySegmentFilled]} />
+              <View style={[styles.weeklySegment, styles.weeklySegmentFilled]} />
+              <View style={[styles.weeklySegment, styles.weeklySegmentFilled]} />
+              <View style={styles.weeklySegment} />
+              <View style={styles.weeklySegment} />
+              <View style={styles.weeklySegment} />
+              <View style={styles.weeklySegment} />
+            </View>
+          </View>
+
+          {/* 6. CARD 3: CREATOR LEVEL & QUEST ("Elite Storyteller") */}
+          <View style={styles.dashboardCard}>
+            <View style={styles.levelCardHeader}>
+              <View style={styles.levelBadgeGroup}>
+                <View style={styles.levelGoldPill}>
+                  <Text style={styles.levelGoldPillText}>LEVEL 42</Text>
+                </View>
+                <Text style={styles.levelNameHeading}>Elite Storyteller</Text>
+              </View>
+              <View style={styles.trophyIconBox}>
+                <Text style={styles.trophyEmoji}>🏆</Text>
+              </View>
+            </View>
+
+            <Text style={styles.levelDescription}>
+              Publish 1 high impact Reel today to unlock <Text style={styles.goldTextBold}>Level 43</Text> rewards.
+            </Text>
+
+            {/* XP Progress Bar */}
+            <View style={styles.xpLabelsRow}>
+              <Text style={styles.xpCurrent}>2,450 XP</Text>
+              <Text style={styles.xpTarget}>3,000 XP</Text>
+            </View>
+
+            <View style={styles.xpProgressBarBg}>
+              <View style={[styles.xpProgressBarFill, { width: '82%' }]} />
+            </View>
+
+            {/* Start First Mission Action Button */}
+            <Pressable
+              onPress={() => {
+                if (onStartMission) {
+                  onStartMission();
+                } else {
+                  openMissionModal();
+                }
+              }}
+              style={({ pressed }) => [
+                styles.missionButton,
+                pressed && styles.missionButtonPressed,
+              ]}
+            >
+              <Text style={styles.missionButtonText}>Start First Mission  🚀</Text>
+            </Pressable>
+          </View>
+
+          {/* 7. CARD 4: ACTIVE BRAND QUEST ("Lagos Food Festival") */}
+          <View style={styles.questCard}>
+            <View style={styles.questTargetIconBox}>
+              <Svg width={20} height={20} viewBox="0 0 24 24" fill="none">
+                <Circle cx="12" cy="12" r="10" stroke="#582CDB" strokeWidth="2.2" />
+                <Circle cx="12" cy="4.5" fill="#582CDB" />
+              </Svg>
+            </View>
+
+            <View style={styles.questContentGroup}>
+              <View style={styles.activeQuestTag}>
+                <Text style={styles.activeQuestTagText}>ACTIVE QUEST</Text>
+              </View>
+              <Text style={styles.questTitle}>Lagos Food Festival</Text>
+              <Text style={styles.questSubtext}>Review &amp; Vlog</Text>
+            </View>
+
+            <View style={styles.bountyPill}>
+              <Text style={styles.bountyText}>$450 Bounty</Text>
+            </View>
+          </View>
+
+          {/* 8. CARD 5: SUGGESTED MATCH ("Amara Okafor") */}
+          <View style={styles.dashboardCard}>
+            <View style={styles.matchHeaderRow}>
+              <Text style={styles.matchSectionTitle}>Suggested Match</Text>
+              <View style={styles.growthActionPill}>
+                <Text style={styles.growthActionText}>GROWTH ACTION</Text>
+              </View>
+            </View>
+
+            {/* Creator Profile Row */}
+            <View style={styles.creatorProfileRow}>
+              <View style={styles.creatorAvatarBox}>
+                <Image
+                  source={require('../../assets/images/jarvis-ghost-clean.png')}
+                  style={styles.creatorAvatarImage}
+                  resizeMode="cover"
+                />
+              </View>
+              <View style={styles.creatorDetails}>
+                <Text style={styles.creatorName}>Amara Okafor</Text>
+                <Text style={styles.creatorFollowers}>Travel Vlogger • 85k Followers</Text>
+              </View>
+            </View>
+
+            {/* Why This Match Box */}
+            <View style={styles.whyMatchBox}>
+              <Text style={styles.whyMatchSparkle}>✨</Text>
+              <Text style={styles.whyMatchText}>
+                <Text style={styles.whyMatchBold}>Why this match? </Text>
+                Similar niche, strong activity, and open to collaboration.
+              </Text>
+            </View>
+
+            {/* Connect Button */}
+            <Pressable
+              onPress={handleToggleMatch}
+              style={({ pressed }) => [
+                styles.connectMatchButton,
+                matchConnected && styles.connectMatchButtonActive,
+                pressed && styles.connectMatchButtonPressed,
+              ]}
+            >
+              <Text
+                style={[
+                  styles.connectMatchButtonText,
+                  matchConnected && styles.connectMatchButtonTextActive,
+                ]}
+              >
+                {matchConnected ? '✓ Connection Sent' : 'Connect'}
+              </Text>
+            </Pressable>
+          </View>
+
+          {/* 9. CARD 6: UNLOCK JARVIS PRO */}
+          <View style={styles.proCard}>
+            <View style={styles.proHeaderRow}>
+              <View style={styles.proIconBox}>
+                <Image
+                  source={require('../../assets/images/jarvis-core-flame.png')}
+                  style={styles.proIconImage}
+                  resizeMode="contain"
+                />
+              </View>
+              <View style={styles.proTitleGroup}>
+                <Text style={styles.proTitle}>Unlock Jarvis Pro</Text>
+                <Text style={styles.proSubtitle}>PREMIUM CREATOR SUITE</Text>
+              </View>
+            </View>
+
+            <Text style={styles.proDescription}>
+              Get AI voice cloning, advanced growth analytics, and premium brand quests.
+            </Text>
+
+            <Pressable
+              onPress={openProModal}
+              style={({ pressed }) => [
+                styles.upgradeButton,
+                pressed && styles.upgradeButtonPressed,
+              ]}
+            >
+              <Text style={styles.upgradeButtonText}>Upgrade Now</Text>
+            </Pressable>
+          </View>
+        </ScrollView>
+
+        {/* 10. EXACT FIGMA BOTTOM NAVIGATION BAR */}
+        <View style={styles.bottomTabBar}>
+          {/* Tab 1: HOME */}
+          <Pressable
+            onPress={() => handleTabPress('home')}
+            style={styles.tabItem}
+            hitSlop={8}
+          >
+            <View style={styles.tabIconWrapper}>
+              <HomeNavIcon color={getTabColor('home')} />
+            </View>
+            <Text style={[styles.tabLabel, activeTab === 'home' && styles.tabLabelActive]}>
+              HOME
+            </Text>
+          </Pressable>
+
+          {/* Tab 2: CREATE */}
+          <Pressable
+            onPress={() => handleTabPress('create')}
+            style={styles.tabItem}
+            hitSlop={8}
+          >
+            <View style={styles.tabIconWrapper}>
+              <CreateNavIcon color={getTabColor('create')} />
+            </View>
+            <Text style={[styles.tabLabel, activeTab === 'create' && styles.tabLabelActive]}>
+              CREATE
+            </Text>
+          </Pressable>
+
+          {/* Tab 3: MATCH */}
+          <Pressable
+            onPress={() => handleTabPress('match')}
+            style={styles.tabItem}
+            hitSlop={8}
+          >
+            <View style={styles.tabIconWrapper}>
+              <MatchNavIcon color={getTabColor('match')} />
+            </View>
+            <Text style={[styles.tabLabel, activeTab === 'match' && styles.tabLabelActive]}>
+              MATCH
+            </Text>
+          </Pressable>
+
+          {/* Tab 4: QUESTS */}
+          <Pressable
+            onPress={() => handleTabPress('quests')}
+            style={styles.tabItem}
+            hitSlop={8}
+          >
+            <View style={styles.tabIconWrapper}>
+              <QuestsNavIcon color={getTabColor('quests')} />
+            </View>
+            <Text style={[styles.tabLabel, activeTab === 'quests' && styles.tabLabelActive]}>
+              QUESTS
+            </Text>
+          </Pressable>
+
+          {/* Tab 5: GROWTH */}
+          <Pressable
+            onPress={() => handleTabPress('growth')}
+            style={styles.tabItem}
+            hitSlop={8}
+          >
+            <View style={styles.tabIconWrapper}>
+              <GrowthNavIcon color={getTabColor('growth')} />
+            </View>
+            <Text style={[styles.tabLabel, activeTab === 'growth' && styles.tabLabelActive]}>
+              GROWTH
+            </Text>
+          </Pressable>
+        </View>
+
+        {/* 11. NOTIFICATION CENTER POP-UP MODAL */}
+        <Modal
+          visible={showNotificationModal}
+          transparent={true}
+          animationType="fade"
+          onRequestClose={() => setShowNotificationModal(false)}
+        >
+          <View style={styles.modalOverlay}>
+            <Animated.View
+              style={[
+                styles.notifModalCard,
+                { transform: [{ scale: notifModalScale }] },
+              ]}
+            >
+              {/* Notification Header */}
+              <View style={styles.notifModalHeader}>
+                <View style={styles.notifHeaderTitleRow}>
+                  <Text style={styles.notifModalMainTitle}>Notifications</Text>
+                  {unreadCount > 0 && (
+                    <View style={styles.unreadCountBadge}>
+                      <Text style={styles.unreadCountBadgeText}>{unreadCount} NEW</Text>
+                    </View>
+                  )}
+                </View>
+
+                <Pressable
+                  onPress={() => setShowNotificationModal(false)}
+                  style={({ pressed }) => [styles.calendarCloseButton, pressed && styles.headerIconBtnPressed]}
+                  hitSlop={8}
+                >
+                  <Svg width={20} height={20} viewBox="0 0 24 24" fill="none">
+                    <Path d="M18 6L6 18M6 6L18 18" stroke="#1A1626" strokeWidth="2.4" strokeLinecap="round" />
+                  </Svg>
+                </Pressable>
+              </View>
+
+              {/* Top Controls: Filter Pills & "Mark all read" */}
+              <View style={styles.notifFilterBar}>
+                <View style={styles.notifFiltersRow}>
+                  <Pressable
+                    onPress={() => setNotifFilter('all')}
+                    style={[styles.notifFilterPill, notifFilter === 'all' && styles.notifFilterPillActive]}
+                  >
+                    <Text style={[styles.notifFilterText, notifFilter === 'all' && styles.notifFilterTextActive]}>
+                      All ({notifications.length})
+                    </Text>
+                  </Pressable>
+
+                  <Pressable
+                    onPress={() => setNotifFilter('unread')}
+                    style={[styles.notifFilterPill, notifFilter === 'unread' && styles.notifFilterPillActive]}
+                  >
+                    <Text style={[styles.notifFilterText, notifFilter === 'unread' && styles.notifFilterTextActive]}>
+                      Unread ({unreadCount})
+                    </Text>
+                  </Pressable>
+
+                  <Pressable
+                    onPress={() => setNotifFilter('quests')}
+                    style={[styles.notifFilterPill, notifFilter === 'quests' && styles.notifFilterPillActive]}
+                  >
+                    <Text style={[styles.notifFilterText, notifFilter === 'quests' && styles.notifFilterTextActive]}>
+                      Quests
+                    </Text>
+                  </Pressable>
+                </View>
+
+                {unreadCount > 0 && (
+                  <Pressable onPress={handleMarkAllNotifsRead} hitSlop={6}>
+                    <Text style={styles.markAllReadText}>Mark all read</Text>
+                  </Pressable>
+                )}
+              </View>
+
+              {/* Scrollable Notification List */}
+              <ScrollView
+                style={styles.notifScrollView}
+                showsVerticalScrollIndicator={true}
+                bounces={true}
+              >
+                {filteredNotifications.length === 0 ? (
+                  <View style={styles.emptyNotifBox}>
+                    <Text style={styles.emptyNotifEmoji}>✨</Text>
+                    <Text style={styles.emptyNotifTitle}>All Caught Up!</Text>
+                    <Text style={styles.emptyNotifSubtitle}>No notifications in this filter.</Text>
+                  </View>
+                ) : (
+                  filteredNotifications.map((item) => (
+                    <Pressable
+                      key={item.id}
+                      onPress={() => handleNotificationPress(item.id)}
+                      style={({ pressed }) => [
+                        styles.notifCard,
+                        item.unread && styles.notifCardUnread,
+                        pressed && styles.notifCardPressed,
+                      ]}
+                    >
+                      {/* Left Icon Badge */}
+                      <View
+                        style={[
+                          styles.notifIconBadge,
+                          { backgroundColor: item.badgeBg, borderColor: item.badgeBorder },
+                        ]}
+                      >
+                        <Text style={styles.notifIconEmoji}>{item.iconEmoji}</Text>
+                      </View>
+
+                      {/* Content */}
+                      <View style={styles.notifContent}>
+                        <View style={styles.notifTitleRow}>
+                          <Text style={styles.notifTitle}>{item.title}</Text>
+                          <Text style={styles.notifTime}>{item.time}</Text>
+                        </View>
+                        <Text style={styles.notifBody}>{item.body}</Text>
+
+                        {/* Action Link if present */}
+                        {item.actionText && (
+                          <View style={styles.notifActionRow}>
+                            <Text style={styles.notifActionLink}>{item.actionText}  ›</Text>
+                          </View>
+                        )}
+                      </View>
+
+                      {/* Unread Glow Dot */}
+                      {item.unread && <View style={styles.notifUnreadDot} />}
+                    </Pressable>
+                  ))
+                )}
+              </ScrollView>
+
+              {/* Modal Footer Done Button */}
+              <Pressable
+                onPress={() => setShowNotificationModal(false)}
+                style={({ pressed }) => [styles.savePhotoPrimaryBtn, pressed && styles.savePhotoPrimaryBtnPressed]}
+              >
+                <Text style={styles.savePhotoPrimaryBtnText}>Done  ✓</Text>
+              </Pressable>
+            </Animated.View>
+          </View>
+        </Modal>
+
+        {/* 12. BEAUTIFUL PROFILE PHOTO UPLOAD MODAL */}
+        <Modal
+          visible={showPhotoModal}
+          transparent={true}
+          animationType="fade"
+          onRequestClose={() => setShowPhotoModal(false)}
+        >
+          <View style={styles.modalOverlay}>
+            <Animated.View
+              style={[
+                styles.photoModalCard,
+                { transform: [{ scale: photoModalScale }] },
+              ]}
+            >
+              {/* Modal Header */}
+              <View style={styles.photoModalHeader}>
+                <View style={styles.photoModalTitleGroup}>
+                  <Text style={styles.photoModalMainTitle}>Creator Profile Picture</Text>
+                  <Text style={styles.photoModalSubtitle}>Personalize your creator identity</Text>
+                </View>
+
+                <Pressable
+                  onPress={() => setShowPhotoModal(false)}
+                  style={({ pressed }) => [styles.calendarCloseButton, pressed && styles.headerIconBtnPressed]}
+                  hitSlop={8}
+                >
+                  <Svg width={20} height={20} viewBox="0 0 24 24" fill="none">
+                    <Path d="M18 6L6 18M6 6L18 18" stroke="#1A1626" strokeWidth="2.4" strokeLinecap="round" />
+                  </Svg>
+                </Pressable>
+              </View>
+
+              {/* Large Avatar Preview with Camera Badge */}
+              <View style={styles.largeAvatarPreviewContainer}>
+                <View style={styles.largeAvatarRing}>
+                  <Image
+                    source={currentPreviewAvatar.source}
+                    style={styles.largeAvatarImage}
+                    resizeMode="cover"
+                  />
+                  <View style={styles.cameraIconBadge}>
+                    <Svg width={14} height={14} viewBox="0 0 24 24" fill="none">
+                      <Path
+                        d="M23 19C23 19.5304 22.7893 20.0391 22.4142 20.4142C22.0391 20.7893 21.5304 21 21 21H3C2.46957 21 1.96086 20.7893 1.58579 20.4142C1.21071 20.0391 1 19.5304 1 19V8C1 7.46957 1.21071 6.96086 1.58579 6.58579C1.96086 6.21071 2.46957 6 3 6H7L9 3H15L17 6H21C21.5304 6 22.0391 6.21071 22.4142 6.58579C22.7893 6.96086 23 7.46957 23 8V19Z"
+                        stroke="#FFFFFF"
+                        strokeWidth="2.2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                      <Circle cx="12" cy="13" r="4" stroke="#FFFFFF" strokeWidth="2.2" />
+                    </Svg>
+                  </View>
+                </View>
+
+                <Text style={styles.creatorProfilePreviewName}>Alex Rivera</Text>
+                <Text style={styles.creatorProfilePreviewHandle}>@alexcreates • Level 42</Text>
+              </View>
+
+              {/* Upload Feedback Toast */}
+              {uploadToastMessage && (
+                <View style={styles.uploadToastBanner}>
+                  <Text style={styles.uploadToastText}>{uploadToastMessage}</Text>
+                </View>
+              )}
+
+              {/* 2 Primary Upload Action Cards */}
+              <View style={styles.uploadActionRow}>
+                <Pressable
+                  onPress={handleSimulateGalleryUpload}
+                  style={({ pressed }) => [
+                    styles.uploadActionCard,
+                    pressed && styles.uploadActionCardPressed,
+                  ]}
+                >
+                  <View style={styles.uploadActionIconBox}>
+                    <Svg width={20} height={20} viewBox="0 0 24 24" fill="none">
+                      <Rect x="3" y="3" width="18" height="18" rx="2" stroke="#582CDB" strokeWidth="2.2" />
+                      <Circle cx="8.5" cy="8.5" r="1.5" fill="#582CDB" />
+                      <Path d="M21 15L16 10L5 21" stroke="#582CDB" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
+                    </Svg>
+                  </View>
+                  <Text style={styles.uploadActionCardTitle}>Photo Library</Text>
+                  <Text style={styles.uploadActionCardSubtext}>Choose from device</Text>
+                </Pressable>
+
+                <Pressable
+                  onPress={handleSimulateCamera}
+                  style={({ pressed }) => [
+                    styles.uploadActionCard,
+                    pressed && styles.uploadActionCardPressed,
+                  ]}
+                >
+                  <View style={styles.uploadActionIconBox}>
+                    <Svg width={20} height={20} viewBox="0 0 24 24" fill="none">
+                      <Path
+                        d="M23 19C23 19.5304 22.7893 20.0391 22.4142 20.4142C22.0391 20.7893 21.5304 21 21 21H3C2.46957 21 1.96086 20.7893 1.58579 20.4142C1.21071 20.0391 1 19.5304 1 19V8C1 7.46957 1.21071 6.96086 1.58579 6.58579C1.96086 6.21071 2.46957 6 3 6H7L9 3H15L17 6H21C21.5304 6 22.0391 6.21071 22.4142 6.58579C22.7893 6.96086 23 7.46957 23 8V19Z"
+                        stroke="#582CDB"
+                        strokeWidth="2.2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                      <Circle cx="12" cy="13" r="4" stroke="#582CDB" strokeWidth="2.2" />
+                    </Svg>
+                  </View>
+                  <Text style={styles.uploadActionCardTitle}>Take Photo</Text>
+                  <Text style={styles.uploadActionCardSubtext}>Use instant camera</Text>
+                </Pressable>
+              </View>
+
+              {/* Creator Preset Avatars Section */}
+              <View style={styles.presetAvatarsSection}>
+                <Text style={styles.presetSectionHeader}>OR CHOOSE A CREATOR AVATAR</Text>
+                <View style={styles.presetGrid}>
+                  {PRESET_AVATARS.map((avatar) => {
+                    const isSelected = previewAvatarId === avatar.id;
+                    return (
+                      <Pressable
+                        key={`preset_${avatar.id}`}
+                        onPress={() => handleSelectPreset(avatar.id)}
+                        style={({ pressed }) => [
+                          styles.presetAvatarTile,
+                          isSelected && styles.presetAvatarTileActive,
+                          pressed && styles.presetAvatarTilePressed,
+                        ]}
+                      >
+                        <Image
+                          source={avatar.source}
+                          style={styles.presetAvatarThumb}
+                          resizeMode="contain"
+                        />
+                        {isSelected && (
+                          <View style={styles.presetCheckBadge}>
+                            <Text style={styles.presetCheckText}>✓</Text>
+                          </View>
+                        )}
+                      </Pressable>
+                    );
+                  })}
+                </View>
+              </View>
+
+              {/* Modal Buttons */}
+              <View style={styles.photoModalFooter}>
+                <Pressable
+                  onPress={handleSaveProfilePhoto}
+                  style={({ pressed }) => [
+                    styles.savePhotoPrimaryBtn,
+                    pressed && styles.savePhotoPrimaryBtnPressed,
+                  ]}
+                >
+                  <Text style={styles.savePhotoPrimaryBtnText}>Save Profile Picture  ✓</Text>
+                </Pressable>
+
+                {selectedAvatarId && (
+                  <Pressable
+                    onPress={handleRemovePhoto}
+                    style={styles.removePhotoBtn}
+                    hitSlop={8}
+                  >
+                    <Text style={styles.removePhotoBtnText}>Remove Current Photo</Text>
+                  </Pressable>
+                )}
+              </View>
+            </Animated.View>
+          </View>
+        </Modal>
+
+        {/* 13. SWIPEABLE STREAK CALENDAR MODAL */}
+        <Modal
+          visible={showCalendarModal}
+          transparent={true}
+          animationType="fade"
+          onRequestClose={() => setShowCalendarModal(false)}
+        >
+          <View style={styles.calendarModalOverlay}>
+            <Animated.View
+              style={[
+                styles.calendarModalCard,
+                { transform: [{ scale: calendarModalScale }] },
+              ]}
+              onLayout={(e) => {
+                const width = e.nativeEvent.layout.width - 36;
+                if (width > 0 && width !== pagerWidth) {
+                  setPagerWidth(width);
+                }
+              }}
+            >
+              {/* Modal Header */}
+              <View style={styles.calendarModalHeader}>
+                <View style={styles.calendarModalTitleGroup}>
+                  <Text style={styles.calendarModalMainTitle}>Streak Calendar 2024</Text>
+                  <Text style={styles.calendarModalSubtitle}>Swipe naturally to browse across months</Text>
+                </View>
+
+                <Pressable
+                  onPress={() => setShowCalendarModal(false)}
+                  style={({ pressed }) => [styles.calendarCloseButton, pressed && styles.headerIconBtnPressed]}
+                  hitSlop={8}
+                >
+                  <Svg width={20} height={20} viewBox="0 0 24 24" fill="none">
+                    <Path d="M18 6L6 18M6 6L18 18" stroke="#1A1626" strokeWidth="2.4" strokeLinecap="round" />
+                  </Svg>
+                </Pressable>
+              </View>
+
+              {/* Quick Stats Banner */}
+              <View style={styles.calendarStatsRow}>
+                <View style={styles.calendarStatCard}>
+                  <Text style={styles.calendarStatValue}>47 Days 🔥</Text>
+                  <Text style={styles.calendarStatLabel}>Current</Text>
+                </View>
+                <View style={styles.calendarStatCard}>
+                  <Text style={styles.calendarStatValue}>52 Days 🏆</Text>
+                  <Text style={styles.calendarStatLabel}>Best</Text>
+                </View>
+                <View style={styles.calendarStatCard}>
+                  <Text style={styles.calendarStatValue}>96% ⚡</Text>
+                  <Text style={styles.calendarStatLabel}>Consistency</Text>
+                </View>
+              </View>
+
+              {/* Horizontal Month Chips (Jan -> Dec) - Synchronized with Swipe */}
+              <ScrollView
+                ref={monthChipsScrollRef}
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={styles.monthChipsContainer}
+              >
+                {CALENDAR_DATA_CHRONOLOGICAL.map((m, idx) => {
+                  const isSelected = selectedMonthIndex === idx;
+                  return (
+                    <Pressable
+                      key={`chip_${m.id}`}
+                      onPress={() => {
+                        if (Platform.OS !== 'web') {
+                          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                        }
+                        scrollToMonth(idx);
+                      }}
+                      style={({ pressed }) => [
+                        styles.monthChipPill,
+                        isSelected && styles.monthChipPillActive,
+                        pressed && styles.monthChipPillPressed,
+                      ]}
+                    >
+                      <Text
+                        style={[
+                          styles.monthChipText,
+                          isSelected && styles.monthChipTextActive,
+                        ]}
+                      >
+                        {m.monthName.slice(0, 3)}
+                      </Text>
+                      {m.isCurrent && (
+                        <View style={[styles.monthChipCurrentDot, isSelected && styles.monthChipCurrentDotActive]} />
+                      )}
+                    </Pressable>
+                  );
+                })}
+              </ScrollView>
+
+              {/* Selected Day Toast/Info Banner */}
+              {selectedDayInfo && (
+                <View style={styles.selectedDayBanner}>
+                  <Text style={styles.selectedDayText}>{selectedDayInfo}</Text>
+                </View>
+              )}
+
+              {/* SWIPEABLE HORIZONTAL PAGER FOR ALL MONTHS */}
+              <View style={styles.pagerOuterContainer}>
+                {/* Month Navigator Header with ‹ and › buttons */}
+                <View style={styles.monthNavHeader}>
+                  <Pressable
+                    onPress={handlePrevMonth}
+                    disabled={selectedMonthIndex === 0}
+                    style={({ pressed }) => [
+                      styles.monthNavChevronBtn,
+                      selectedMonthIndex === 0 && styles.monthNavChevronDisabled,
+                      pressed && styles.headerIconBtnPressed,
+                    ]}
+                    hitSlop={8}
+                  >
+                    <Svg width={20} height={20} viewBox="0 0 24 24" fill="none">
+                      <Path d="M15 18L9 12L15 6" stroke={selectedMonthIndex === 0 ? '#C4B5FD' : '#582CDB'} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+                    </Svg>
+                  </Pressable>
+
+                  <View style={styles.monthNameTitleGroup}>
+                    <Text style={styles.focusedMonthTitle}>
+                      {CALENDAR_DATA_CHRONOLOGICAL[selectedMonthIndex].monthName} 2024
+                    </Text>
+                    {CALENDAR_DATA_CHRONOLOGICAL[selectedMonthIndex].isCurrent && (
+                      <View style={styles.currentMonthBadge}>
+                        <Text style={styles.currentMonthBadgeText}>CURRENT 🔥</Text>
+                      </View>
+                    )}
+                  </View>
+
+                  <Pressable
+                    onPress={handleNextMonth}
+                    disabled={selectedMonthIndex === CALENDAR_DATA_CHRONOLOGICAL.length - 1}
+                    style={({ pressed }) => [
+                      styles.monthNavChevronBtn,
+                      selectedMonthIndex === CALENDAR_DATA_CHRONOLOGICAL.length - 1 && styles.monthNavChevronDisabled,
+                      pressed && styles.headerIconBtnPressed,
+                    ]}
+                    hitSlop={8}
+                  >
+                    <Svg width={20} height={20} viewBox="0 0 24 24" fill="none">
+                      <Path d="M9 18L15 12L9 6" stroke={selectedMonthIndex === CALENDAR_DATA_CHRONOLOGICAL.length - 1 ? '#C4B5FD' : '#582CDB'} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+                    </Svg>
+                  </Pressable>
+                </View>
+
+                {/* Day of Week Headers */}
+                <View style={styles.calendarDayNamesRow}>
+                  {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((dayName, dIdx) => (
+                    <Text key={`dn_${dIdx}`} style={styles.calendarDayNameText}>
+                      {dayName}
+                    </Text>
+                  ))}
+                </View>
+
+                {/* Swipeable ScrollView with Real-Time Instant Scroll Tracking */}
+                <ScrollView
+                  ref={monthPagerRef}
+                  horizontal
+                  pagingEnabled
+                  showsHorizontalScrollIndicator={false}
+                  onScroll={handleScroll}
+                  scrollEventThrottle={16}
+                  contentContainerStyle={styles.pagerContent}
+                >
+                  {CALENDAR_DATA_CHRONOLOGICAL.map((month) => {
+                    const totalGridCells = month.daysCount + month.startOffset;
+                    const totalRows = Math.ceil(totalGridCells / 7);
+
+                    return (
+                      <View
+                        key={`page_${month.id}`}
+                        style={[styles.monthPageCard, { width: pagerWidth }]}
+                      >
+                        <View style={styles.calendarMonthGrid}>
+                          {Array.from({ length: totalRows * 7 }).map((_, cellIdx) => {
+                            const dayNum = cellIdx - month.startOffset + 1;
+                            const isValidDay = dayNum >= 1 && dayNum <= month.daysCount;
+
+                            if (!isValidDay) {
+                              return <View key={`empty_${cellIdx}`} style={styles.calendarCellEmpty} />;
+                            }
+
+                            const isCompleted = month.completedDays.includes(dayNum);
+                            const isScheduled = month.scheduledDays.includes(dayNum);
+                            const isFreeze = month.freezeDays.includes(dayNum);
+
+                            return (
+                              <Pressable
+                                key={`day_${dayNum}`}
+                                onPress={() => handleDayPress(dayNum, month)}
+                                style={({ pressed }) => [
+                                  styles.calendarCell,
+                                  isCompleted && styles.calendarCellCompleted,
+                                  isScheduled && styles.calendarCellScheduled,
+                                  isFreeze && styles.calendarCellFreeze,
+                                  pressed && styles.calendarCellPressed,
+                                ]}
+                              >
+                                <Text
+                                  style={[
+                                    styles.calendarCellDayNumber,
+                                    isCompleted && styles.calendarCellTextCompleted,
+                                    isScheduled && styles.calendarCellTextScheduled,
+                                    isFreeze && styles.calendarCellTextFreeze,
+                                  ]}
+                                >
+                                  {dayNum}
+                                </Text>
+
+                                {isCompleted && (
+                                  <Text style={styles.cellMiniIcon}>✓</Text>
+                                )}
+                                {isScheduled && (
+                                  <Text style={styles.cellMiniIconScheduled}>⏰</Text>
+                                )}
+                                {isFreeze && (
+                                  <Text style={styles.cellMiniIconFreeze}>❄️</Text>
+                                )}
+                              </Pressable>
+                            );
+                          })}
+                        </View>
+                      </View>
+                    );
+                  })}
+                </ScrollView>
+              </View>
+
+              {/* Calendar Legend */}
+              <View style={styles.calendarLegendBox}>
+                <View style={styles.legendItemsGrid}>
+                  <View style={styles.legendItem}>
+                    <View style={[styles.legendDot, { backgroundColor: '#582CDB' }]} />
+                    <Text style={styles.legendLabel}>Streak Posted (✓)</Text>
+                  </View>
+                  <View style={styles.legendItem}>
+                    <View style={[styles.legendDot, { backgroundColor: '#DDD6FE' }]} />
+                    <Text style={styles.legendLabel}>Scheduled (⏰)</Text>
+                  </View>
+                  <View style={styles.legendItem}>
+                    <View style={[styles.legendDot, { backgroundColor: '#93C5FD' }]} />
+                    <Text style={styles.legendLabel}>Streak Freeze (❄️)</Text>
+                  </View>
+                  <View style={styles.legendItem}>
+                    <View style={[styles.legendDot, { backgroundColor: '#FAF8FF', borderWidth: 1, borderColor: '#ECE6F6' }]} />
+                    <Text style={styles.legendLabel}>Rest Day</Text>
+                  </View>
+                </View>
+              </View>
+
+              {/* Modal Footer Done Button */}
+              <Pressable
+                onPress={() => setShowCalendarModal(false)}
+                style={({ pressed }) => [styles.calendarDoneButton, pressed && styles.missionButtonPressed]}
+              >
+                <Text style={styles.calendarDoneButtonText}>Done  ✓</Text>
+              </Pressable>
+            </Animated.View>
+          </View>
+        </Modal>
+
+        {/* 14. MISSION DETAILS MODAL */}
+        <Modal
+          visible={showMissionModal}
+          transparent={true}
+          animationType="fade"
+          onRequestClose={() => setShowMissionModal(false)}
+        >
+          <View style={styles.modalOverlay}>
+            <Animated.View
+              style={[
+                styles.modalCard,
+                { transform: [{ scale: modalPopScale }] },
+              ]}
+            >
+              <Animated.View
+                style={[
+                  styles.modalPureStarWrapper,
+                  {
+                    transform: [
+                      { translateY: ghostFloatY },
+                      { scale: ghostScale },
+                    ],
+                  },
+                ]}
+              >
+                <Image
+                  source={require('../../assets/images/jarvis-core-flame.png')}
+                  style={styles.modalPureStarImage}
+                  resizeMode="contain"
+                />
+              </Animated.View>
+
+              <Text style={styles.modalTitle}>Mission 1: The Reel Hook 🚀</Text>
+              <Text style={styles.modalText}>
+                Create a 15-second high-energy Reel sharing your creator journey hook. Post before 11:30 AM to maintain your{' '}
+                <Text style={styles.modalBold}>47-Day Streak</Text>!
+              </Text>
+
+              <Pressable
+                onPress={() => setShowMissionModal(false)}
+                style={({ pressed }) => [styles.modalActionButton, pressed && styles.modalActionButtonPressed]}
+              >
+                <Text style={styles.modalActionButtonText}>Let&apos;s Create  ✓</Text>
+              </Pressable>
+            </Animated.View>
+          </View>
+        </Modal>
+
+        {/* 15. JARVIS PRO UPGRADE MODAL */}
+        <Modal
+          visible={showProModal}
+          transparent={true}
+          animationType="fade"
+          onRequestClose={() => setShowProModal(false)}
+        >
+          <View style={styles.modalOverlay}>
+            <Animated.View
+              style={[
+                styles.modalCard,
+                { transform: [{ scale: modalPopScale }] },
+              ]}
+            >
+              <Text style={styles.proBadgeModal}>⚡ JARVIS PRO</Text>
+              <Text style={styles.modalTitle}>Unlock Creator Superpowers</Text>
+              <Text style={styles.modalText}>
+                Includes AI voice cloning, smart scheduling algorithms, automated collaboration matching, and access to $500+ brand bounties.
+              </Text>
+
+              <Pressable
+                onPress={() => setShowProModal(false)}
+                style={({ pressed }) => [styles.modalGoldButton, pressed && styles.modalGoldButtonPressed]}
+              >
+                <Text style={styles.modalGoldButtonText}>Start 7-Day Free Trial</Text>
+              </Pressable>
+
+              <Pressable onPress={() => setShowProModal(false)} hitSlop={8}>
+                <Text style={styles.modalDismissText}>Maybe Later</Text>
+              </Pressable>
+            </Animated.View>
+          </View>
+        </Modal>
+      </View>
+    </SafeAreaView>
+  );
+};
+
+const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+    backgroundColor: '#FAF8F5',
+  },
+  container: {
+    flex: 1,
+    backgroundColor: '#FAF8F5',
+  },
+  headerBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 20,
+    paddingTop: 8,
+    paddingBottom: 12,
+    backgroundColor: '#FAF8F5',
+  },
+  headerLogoWrapper: {
+    width: 40,
+    height: 40,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  headerGhostLogo: {
+    width: 38,
+    height: 38,
+  },
+  headerRightGroup: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  headerIconBtn: {
+    width: 38,
+    height: 38,
+    borderRadius: 12,
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1,
+    borderColor: '#ECE6F6',
+    justifyContent: 'center',
+    alignItems: 'center',
+    position: 'relative',
+    shadowColor: '#1A1626',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.03,
+    shadowRadius: 4,
+    elevation: 1,
+  },
+  headerIconBtnPressed: {
+    opacity: 0.6,
+  },
+  notificationDot: {
+    position: 'absolute',
+    top: 7,
+    right: 7,
+    width: 7,
+    height: 7,
+    borderRadius: 3.5,
+    backgroundColor: '#EF4444',
+    borderWidth: 1,
+    borderColor: '#FFFFFF',
+  },
+  profilePhotoBtn: {
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    backgroundColor: '#EDE8FC',
+    borderWidth: 1.5,
+    borderColor: '#582CDB',
+    justifyContent: 'center',
+    alignItems: 'center',
+    position: 'relative',
+    shadowColor: '#582CDB',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  profilePhotoBtnActive: {
+    backgroundColor: '#FAF8FF',
+    borderColor: '#582CDB',
+  },
+  headerCustomAvatarImage: {
+    width: 34,
+    height: 34,
+    borderRadius: 17,
+  },
+  addPhotoPlusBadge: {
+    position: 'absolute',
+    bottom: -2,
+    right: -2,
+    width: 14,
+    height: 14,
+    borderRadius: 7,
+    backgroundColor: '#582CDB',
+    borderWidth: 1.5,
+    borderColor: '#FFFFFF',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  addPhotoPlusText: {
+    fontSize: 9,
+    fontWeight: '900',
+    color: '#FFFFFF',
+    lineHeight: 11,
+  },
+  scrollContent: {
+    paddingHorizontal: 20,
+    paddingTop: 4,
+    paddingBottom: 32,
+  },
+  focusHeroSection: {
+    marginBottom: 18,
+  },
+  focusPillRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  focusTag: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#582CDB',
+    borderRadius: 7,
+    paddingVertical: 3.5,
+    paddingHorizontal: 8,
+    gap: 5,
+  },
+  focusLiveDot: {
+    width: 5,
+    height: 5,
+    borderRadius: 2.5,
+    backgroundColor: '#34D399',
+  },
+  focusTagText: {
+    color: '#FFFFFF',
+    fontSize: 10.5,
+    fontWeight: '900',
+    letterSpacing: 0.6,
+  },
+  nextPostCountdown: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#736B88',
+  },
+  focusHeadline: {
+    fontSize: 22,
+    fontWeight: '900',
+    color: '#1A1626',
+    letterSpacing: -0.5,
+    lineHeight: 28,
+    marginBottom: 12,
+  },
+  statusPillsRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+  },
+  levelPillBadge: {
+    backgroundColor: '#FEF3C7',
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#FDE68A',
+    paddingVertical: 5,
+    paddingHorizontal: 12,
+  },
+  levelPillBadgeText: {
+    fontSize: 12,
+    fontWeight: '800',
+    color: '#92400E',
+  },
+  streakPillBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#EDE8FC',
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#DDD6FE',
+    paddingVertical: 5,
+    paddingHorizontal: 12,
+    gap: 4,
+  },
+  streakPillFire: {
+    fontSize: 13,
+  },
+  streakPillBadgeText: {
+    fontSize: 12,
+    fontWeight: '800',
+    color: '#582CDB',
+  },
+  nextPostPillBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#F3F4F6',
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
+    paddingVertical: 5,
+    paddingHorizontal: 12,
+    gap: 5,
+  },
+  nextPostPillBadgeText: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#4B5563',
+  },
+  dashboardCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 24,
+    borderWidth: 1.2,
+    borderColor: '#ECE6F6',
+    padding: 18,
+    marginBottom: 18,
+    shadowColor: '#582CDB',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.04,
+    shadowRadius: 16,
+    elevation: 3,
+  },
+  cardPressed: {
+    opacity: 0.95,
+    transform: [{ scale: 0.99 }],
+  },
+  cardHeaderRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    marginBottom: 12,
+  },
+  cardTitleGroup: {
+    flex: 1,
+  },
+  cardSectionTitle: {
+    fontSize: 17,
+    fontWeight: '900',
+    color: '#1A1626',
+    letterSpacing: -0.3,
+  },
+  streakSubtext: {
+    fontSize: 12.5,
+    fontWeight: '500',
+    color: '#736B88',
+    marginTop: 2,
+  },
+  streakCountBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    backgroundColor: '#FAF8FF',
+    paddingVertical: 5,
+    paddingHorizontal: 11,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#EDE8FC',
+  },
+  streakCountNumber: {
+    fontSize: 15.5,
+    fontWeight: '900',
+    color: '#1A1626',
+    letterSpacing: -0.3,
+  },
+  streakFireEmoji: {
+    fontSize: 15,
+  },
+  calendarMetaRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 10,
+    paddingHorizontal: 2,
+  },
+  monthLabel: {
+    fontSize: 12,
+    fontWeight: '900',
+    color: '#582CDB',
+    letterSpacing: 0.8,
+  },
+  streakStatusHighlight: {
+    fontSize: 11.5,
+    fontWeight: '800',
+    color: '#582CDB',
+  },
+  daysHeaderRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingHorizontal: 4,
+    marginBottom: 10,
+  },
+  dayColHeader: {
+    fontSize: 11.5,
+    fontWeight: '800',
+    color: '#736B88',
+    width: 44,
+    textAlign: 'center',
+  },
+  heatmapGrid: {
+    gap: 8,
+    marginBottom: 16,
+  },
+  heatmapRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  heatmapCell: {
+    width: 44,
+    height: 44,
+    borderRadius: 12,
+    backgroundColor: '#F3EEFB',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  heatmapCellActive: {
+    backgroundColor: '#582CDB',
+    shadowColor: '#582CDB',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  jarvisStreakInsight: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#FAF8FF',
+    borderRadius: 16,
+    padding: 12,
+    borderWidth: 1,
+    borderColor: '#EDE8FC',
+    gap: 10,
+  },
+  jarvisFlameWrapper: {
+    width: 30,
+    height: 30,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  jarvisFlameImage: {
+    width: 28,
+    height: 28,
+  },
+  jarvisInsightText: {
+    flex: 1,
+    fontSize: 12.5,
+    color: '#4B435E',
+    lineHeight: 17,
+  },
+  jarvisInsightBold: {
+    fontWeight: '900',
+    color: '#1A1626',
+  },
+  scheduledHeaderRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 14,
+  },
+  scheduledLabelGroup: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  calendarIconBox: {
+    width: 32,
+    height: 32,
+    borderRadius: 9,
+    backgroundColor: '#EDE8FC',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  scheduledTitle: {
+    fontSize: 12,
+    fontWeight: '900',
+    color: '#1A1626',
+    letterSpacing: 0.8,
+  },
+  scheduledTimePill: {
+    backgroundColor: '#582CDB',
+    borderRadius: 10,
+    paddingVertical: 3.5,
+    paddingHorizontal: 9,
+  },
+  scheduledTimeText: {
+    color: '#FFFFFF',
+    fontSize: 11,
+    fontWeight: '800',
+  },
+  scheduledMetricsContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-end',
+    marginBottom: 14,
+  },
+  postsMetricRow: {
+    flexDirection: 'row',
+    alignItems: 'baseline',
+    gap: 6,
+  },
+  postsCountBig: {
+    fontSize: 38,
+    fontWeight: '900',
+    color: '#1A1626',
+    letterSpacing: -1,
+  },
+  postsCountLabel: {
+    fontSize: 15,
+    fontWeight: '800',
+    color: '#736B88',
+  },
+  weekIncreaseBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#EDE8FC',
+    borderRadius: 10,
+    paddingVertical: 5,
+    paddingHorizontal: 9,
+    gap: 5,
+  },
+  weekIncreaseText: {
+    fontSize: 12,
+    fontWeight: '800',
+    color: '#582CDB',
+  },
+  nextUpBox: {
+    backgroundColor: '#FAF8FF',
+    borderRadius: 14,
+    paddingVertical: 12,
+    paddingHorizontal: 14,
+    borderWidth: 1,
+    borderColor: '#EDE8FC',
+    marginBottom: 14,
+  },
+  nextUpLabel: {
+    fontSize: 9.5,
+    fontWeight: '900',
+    color: '#8A829C',
+    letterSpacing: 0.8,
+    marginBottom: 4,
+  },
+  nextUpRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  nextUpDay: {
+    fontSize: 14.5,
+    fontWeight: '800',
+    color: '#1A1626',
+  },
+  nextUpTime: {
+    fontSize: 13.5,
+    fontWeight: '800',
+    color: '#582CDB',
+  },
+  weeklyProgressHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  weeklyProgressLabel: {
+    fontSize: 10.5,
+    fontWeight: '900',
+    color: '#8A829C',
+    letterSpacing: 0.6,
+  },
+  weeklyProgressPercent: {
+    fontSize: 12,
+    fontWeight: '800',
+    color: '#582CDB',
+  },
+  weeklySegmentsRow: {
+    flexDirection: 'row',
+    gap: 6,
+  },
+  weeklySegment: {
+    flex: 1,
+    height: 7,
+    borderRadius: 3.5,
+    backgroundColor: '#EAE5F8',
+  },
+  weeklySegmentFilled: {
+    backgroundColor: '#582CDB',
+  },
+  levelCardHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 10,
+  },
+  levelBadgeGroup: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  levelGoldPill: {
+    backgroundColor: '#FEF3C7',
+    borderRadius: 6,
+    paddingVertical: 2.5,
+    paddingHorizontal: 6,
+    borderWidth: 1,
+    borderColor: '#FDE68A',
+  },
+  levelGoldPillText: {
+    fontSize: 10,
+    fontWeight: '900',
+    color: '#92400E',
+  },
+  levelNameHeading: {
+    fontSize: 17,
+    fontWeight: '900',
+    color: '#1A1626',
+  },
+  trophyIconBox: {
+    width: 34,
+    height: 34,
+    borderRadius: 17,
+    backgroundColor: '#FEF3C7',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  trophyEmoji: {
+    fontSize: 17,
+  },
+  levelDescription: {
+    fontSize: 13.5,
+    color: '#4B435E',
+    lineHeight: 19,
+    marginBottom: 14,
+  },
+  goldTextBold: {
+    fontWeight: '800',
+    color: '#B45309',
+  },
+  xpLabelsRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 6,
+  },
+  xpCurrent: {
+    fontSize: 12,
+    fontWeight: '800',
+    color: '#582CDB',
+  },
+  xpTarget: {
+    fontSize: 12,
+    fontWeight: '800',
+    color: '#8A829C',
+  },
+  xpProgressBarBg: {
+    height: 9,
+    borderRadius: 4.5,
+    backgroundColor: '#EAE5F8',
+    overflow: 'hidden',
+    marginBottom: 16,
+  },
+  xpProgressBarFill: {
+    height: '100%',
+    backgroundColor: '#8B5CF6',
+    borderRadius: 4.5,
+  },
+  missionButton: {
+    backgroundColor: '#582CDB',
+    height: 52,
+    borderRadius: 14,
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: '#582CDB',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  missionButtonPressed: {
+    opacity: 0.9,
+    transform: [{ scale: 0.98 }],
+  },
+  missionButtonText: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontWeight: '800',
+  },
+  questCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#FFFFFF',
+    borderRadius: 22,
+    borderWidth: 1.2,
+    borderColor: '#ECE6F6',
+    padding: 16,
+    marginBottom: 18,
+    gap: 12,
+    shadowColor: '#582CDB',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.03,
+    shadowRadius: 10,
+    elevation: 2,
+  },
+  questTargetIconBox: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: '#EDE8FC',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  questContentGroup: {
+    flex: 1,
+  },
+  activeQuestTag: {
+    backgroundColor: '#FEF3C7',
+    borderRadius: 6,
+    paddingVertical: 2,
+    paddingHorizontal: 6,
+    alignSelf: 'flex-start',
+    marginBottom: 4,
+    borderWidth: 1,
+    borderColor: '#FDE68A',
+  },
+  activeQuestTagText: {
+    fontSize: 9.5,
+    fontWeight: '900',
+    color: '#92400E',
+  },
+  questTitle: {
+    fontSize: 15.5,
+    fontWeight: '900',
+    color: '#1A1626',
+  },
+  questSubtext: {
+    fontSize: 12.5,
+    color: '#736B88',
+  },
+  bountyPill: {
+    backgroundColor: '#FFFBEB',
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#FDE68A',
+  },
+  bountyText: {
+    fontSize: 14,
+    fontWeight: '900',
+    color: '#B45309',
+  },
+  matchHeaderRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 14,
+  },
+  matchSectionTitle: {
+    fontSize: 17,
+    fontWeight: '900',
+    color: '#1A1626',
+  },
+  growthActionPill: {
+    backgroundColor: '#EDE8FC',
+    borderRadius: 8,
+    paddingVertical: 3,
+    paddingHorizontal: 8,
+  },
+  growthActionText: {
+    fontSize: 10,
+    fontWeight: '900',
+    color: '#582CDB',
+    letterSpacing: 0.6,
+  },
+  creatorProfileRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    marginBottom: 12,
+  },
+  creatorAvatarBox: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: '#F3EEFB',
+    overflow: 'hidden',
+    borderWidth: 1.5,
+    borderColor: '#E2DCF2',
+  },
+  creatorAvatarImage: {
+    width: 48,
+    height: 48,
+  },
+  creatorDetails: {
+    flex: 1,
+  },
+  creatorName: {
+    fontSize: 16,
+    fontWeight: '900',
+    color: '#1A1626',
+    marginBottom: 2,
+  },
+  creatorFollowers: {
+    fontSize: 12.5,
+    color: '#736B88',
+  },
+  whyMatchBox: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#FAF8FF',
+    borderRadius: 14,
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+    borderWidth: 1,
+    borderColor: '#EDE8FC',
+    gap: 8,
+    marginBottom: 14,
+  },
+  whyMatchSparkle: {
+    fontSize: 14,
+  },
+  whyMatchText: {
+    flex: 1,
+    fontSize: 12,
+    color: '#4B435E',
+    lineHeight: 17,
+  },
+  whyMatchBold: {
+    fontWeight: '800',
+    color: '#582CDB',
+  },
+  connectMatchButton: {
+    backgroundColor: '#FFFFFF',
+    height: 46,
+    borderRadius: 14,
+    borderWidth: 1.2,
+    borderColor: '#E2DCF2',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  connectMatchButtonActive: {
+    backgroundColor: '#EDE8FC',
+    borderColor: '#582CDB',
+  },
+  connectMatchButtonPressed: {
+    transform: [{ scale: 0.98 }],
+  },
+  connectMatchButtonText: {
+    fontSize: 14.5,
+    fontWeight: '800',
+    color: '#1A1626',
+  },
+  connectMatchButtonTextActive: {
+    color: '#582CDB',
+  },
+  proCard: {
+    backgroundColor: '#F7F4FD',
+    borderRadius: 24,
+    borderWidth: 1.2,
+    borderColor: '#ECE6F6',
+    padding: 18,
+    marginBottom: 8,
+  },
+  proHeaderRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    marginBottom: 10,
+  },
+  proIconBox: {
+    width: 44,
+    height: 44,
+    borderRadius: 14,
+    backgroundColor: '#582CDB',
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: '#582CDB',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.3,
+    shadowRadius: 6,
+    elevation: 3,
+  },
+  proIconImage: {
+    width: 32,
+    height: 32,
+  },
+  proTitleGroup: {
+    flex: 1,
+  },
+  proTitle: {
+    fontSize: 17,
+    fontWeight: '900',
+    color: '#1A1626',
+  },
+  proSubtitle: {
+    fontSize: 10.5,
+    fontWeight: '900',
+    color: '#582CDB',
+    letterSpacing: 0.6,
+  },
+  proDescription: {
+    fontSize: 13,
+    color: '#4B435E',
+    lineHeight: 18,
+    marginBottom: 16,
+  },
+  upgradeButton: {
+    backgroundColor: '#D4A038',
+    height: 50,
+    borderRadius: 14,
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: '#D4A038',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 3,
+  },
+  upgradeButtonPressed: {
+    opacity: 0.9,
+    transform: [{ scale: 0.98 }],
+  },
+  upgradeButtonText: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontWeight: '900',
+  },
+
+  // 10. EXACT FIGMA BOTTOM NAVIGATION BAR STYLES
+  bottomTabBar: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 8,
+    paddingTop: 12,
+    paddingBottom: Platform.OS === 'ios' ? 14 : 10,
+    borderTopLeftRadius: 28,
+    borderTopRightRadius: 28,
+    borderTopWidth: 1.5,
+    borderLeftWidth: 1.5,
+    borderRightWidth: 1.5,
+    borderColor: '#ECE6F6',
+    backgroundColor: '#FAF8F5',
+    shadowColor: '#582CDB',
+    shadowOffset: { width: 0, height: -4 },
+    shadowOpacity: 0.04,
+    shadowRadius: 12,
+    elevation: 8,
+  },
+  tabItem: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 4,
+  },
+  tabIconWrapper: {
+    height: 28,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  tabLabel: {
+    fontSize: 11,
+    fontWeight: '900',
+    color: '#1A1626',
+    letterSpacing: 0.6,
+    textAlign: 'center',
+  },
+  tabLabelActive: {
+    color: '#582CDB',
+    fontWeight: '900',
+  },
+
+  // 11. NOTIFICATION CENTER STYLES
+  notifModalCard: {
+    width: '100%',
+    maxWidth: 345,
+    maxHeight: '85%',
+    backgroundColor: '#FFFFFF',
+    borderRadius: 28,
+    paddingTop: 22,
+    paddingHorizontal: 18,
+    paddingBottom: 18,
+    shadowColor: '#582CDB',
+    shadowOffset: { width: 0, height: 16 },
+    shadowOpacity: 0.2,
+    shadowRadius: 28,
+    elevation: 12,
+    borderWidth: 1.5,
+    borderColor: '#ECE6F6',
+  },
+  notifModalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  notifHeaderTitleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  notifModalMainTitle: {
+    fontSize: 21,
+    fontWeight: '900',
+    color: '#1A1626',
+    letterSpacing: -0.4,
+  },
+  unreadCountBadge: {
+    backgroundColor: '#582CDB',
+    borderRadius: 8,
+    paddingVertical: 2,
+    paddingHorizontal: 7,
+  },
+  unreadCountBadgeText: {
+    fontSize: 9.5,
+    fontWeight: '900',
+    color: '#FFFFFF',
+    letterSpacing: 0.6,
+  },
+  notifFilterBar: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 12,
+    paddingBottom: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: '#F3EEFB',
+  },
+  notifFiltersRow: {
+    flexDirection: 'row',
+    gap: 6,
+  },
+  notifFilterPill: {
+    paddingVertical: 4.5,
+    paddingHorizontal: 10,
+    borderRadius: 10,
+    backgroundColor: '#FAF8FF',
+    borderWidth: 1,
+    borderColor: '#EDE8FC',
+  },
+  notifFilterPillActive: {
+    backgroundColor: '#EDE8FC',
+    borderColor: '#582CDB',
+  },
+  notifFilterText: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: '#736B88',
+  },
+  notifFilterTextActive: {
+    color: '#582CDB',
+    fontWeight: '900',
+  },
+  markAllReadText: {
+    fontSize: 11,
+    fontWeight: '800',
+    color: '#582CDB',
+  },
+  notifScrollView: {
+    maxHeight: 360,
+    marginBottom: 14,
+  },
+  emptyNotifBox: {
+    alignItems: 'center',
+    paddingVertical: 36,
+    gap: 4,
+  },
+  emptyNotifEmoji: {
+    fontSize: 28,
+    marginBottom: 6,
+  },
+  emptyNotifTitle: {
+    fontSize: 15,
+    fontWeight: '800',
+    color: '#1A1626',
+  },
+  emptyNotifSubtitle: {
+    fontSize: 12,
+    color: '#736B88',
+  },
+  notifCard: {
+    flexDirection: 'row',
+    backgroundColor: '#FAF8FF',
+    borderRadius: 16,
+    padding: 12,
+    marginBottom: 10,
+    borderWidth: 1,
+    borderColor: '#ECE6F6',
+    gap: 10,
+    position: 'relative',
+  },
+  notifCardUnread: {
+    backgroundColor: '#FFFFFF',
+    borderColor: '#DDD6FE',
+    shadowColor: '#582CDB',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 6,
+    elevation: 2,
+  },
+  notifCardPressed: {
+    transform: [{ scale: 0.98 }],
+    opacity: 0.9,
+  },
+  notifIconBadge: {
+    width: 36,
+    height: 36,
+    borderRadius: 12,
+    borderWidth: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  notifIconEmoji: {
+    fontSize: 16,
+  },
+  notifContent: {
+    flex: 1,
+  },
+  notifTitleRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'baseline',
+    marginBottom: 2,
+  },
+  notifTitle: {
+    fontSize: 13.5,
+    fontWeight: '900',
+    color: '#1A1626',
+    flex: 1,
+    marginRight: 6,
+  },
+  notifTime: {
+    fontSize: 10.5,
+    color: '#8A829C',
+    fontWeight: '600',
+  },
+  notifBody: {
+    fontSize: 12,
+    color: '#4B435E',
+    lineHeight: 16,
+    marginBottom: 4,
+  },
+  notifActionRow: {
+    marginTop: 2,
+  },
+  notifActionLink: {
+    fontSize: 11.5,
+    fontWeight: '800',
+    color: '#582CDB',
+  },
+  notifUnreadDot: {
+    position: 'absolute',
+    top: 10,
+    right: 10,
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: '#582CDB',
+  },
+
+  // 12. PROFILE PHOTO UPLOAD MODAL STYLES
+  photoModalCard: {
+    width: '100%',
+    maxWidth: 340,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 28,
+    paddingTop: 22,
+    paddingHorizontal: 20,
+    paddingBottom: 20,
+    shadowColor: '#582CDB',
+    shadowOffset: { width: 0, height: 16 },
+    shadowOpacity: 0.2,
+    shadowRadius: 28,
+    elevation: 12,
+    borderWidth: 1.5,
+    borderColor: '#ECE6F6',
+  },
+  photoModalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  photoModalTitleGroup: {
+    flex: 1,
+  },
+  photoModalMainTitle: {
+    fontSize: 19,
+    fontWeight: '900',
+    color: '#1A1626',
+    letterSpacing: -0.4,
+  },
+  photoModalSubtitle: {
+    fontSize: 12.5,
+    color: '#736B88',
+    marginTop: 2,
+  },
+  largeAvatarPreviewContainer: {
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  largeAvatarRing: {
+    width: 86,
+    height: 86,
+    borderRadius: 43,
+    backgroundColor: '#FAF8FF',
+    borderWidth: 2.5,
+    borderColor: '#582CDB',
+    justifyContent: 'center',
+    alignItems: 'center',
+    position: 'relative',
+    shadowColor: '#582CDB',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.18,
+    shadowRadius: 10,
+    elevation: 4,
+    marginBottom: 8,
+  },
+  largeAvatarImage: {
+    width: 76,
+    height: 76,
+    borderRadius: 38,
+  },
+  cameraIconBadge: {
+    position: 'absolute',
+    bottom: -2,
+    right: -2,
+    width: 26,
+    height: 26,
+    borderRadius: 13,
+    backgroundColor: '#582CDB',
+    borderWidth: 2,
+    borderColor: '#FFFFFF',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  creatorProfilePreviewName: {
+    fontSize: 16,
+    fontWeight: '900',
+    color: '#1A1626',
+  },
+  creatorProfilePreviewHandle: {
+    fontSize: 12,
+    color: '#736B88',
+    marginTop: 2,
+  },
+  uploadToastBanner: {
+    backgroundColor: '#EDE8FC',
+    borderRadius: 10,
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: '#DDD6FE',
+  },
+  uploadToastText: {
+    fontSize: 12,
+    fontWeight: '800',
+    color: '#582CDB',
+    textAlign: 'center',
+  },
+  uploadActionRow: {
+    flexDirection: 'row',
+    gap: 10,
+    marginBottom: 16,
+  },
+  uploadActionCard: {
+    flex: 1,
+    backgroundColor: '#FAF8FF',
+    borderRadius: 16,
+    borderWidth: 1.2,
+    borderColor: '#ECE6F6',
+    paddingVertical: 12,
+    paddingHorizontal: 10,
+    alignItems: 'center',
+  },
+  uploadActionCardPressed: {
+    backgroundColor: '#EDE8FC',
+    borderColor: '#582CDB',
+    transform: [{ scale: 0.98 }],
+  },
+  uploadActionIconBox: {
+    width: 38,
+    height: 38,
+    borderRadius: 12,
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1,
+    borderColor: '#EDE8FC',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 6,
+  },
+  uploadActionCardTitle: {
+    fontSize: 13,
+    fontWeight: '900',
+    color: '#1A1626',
+    marginBottom: 2,
+  },
+  uploadActionCardSubtext: {
+    fontSize: 10.5,
+    color: '#736B88',
+    textAlign: 'center',
+  },
+  presetAvatarsSection: {
+    marginBottom: 16,
+  },
+  presetSectionHeader: {
+    fontSize: 9.5,
+    fontWeight: '900',
+    color: '#8A829C',
+    letterSpacing: 0.8,
+    marginBottom: 8,
+  },
+  presetGrid: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  presetAvatarTile: {
+    width: 60,
+    height: 60,
+    borderRadius: 16,
+    backgroundColor: '#FAF8FF',
+    borderWidth: 1.5,
+    borderColor: '#ECE6F6',
+    justifyContent: 'center',
+    alignItems: 'center',
+    position: 'relative',
+  },
+  presetAvatarTileActive: {
+    borderColor: '#582CDB',
+    backgroundColor: '#EDE8FC',
+    shadowColor: '#582CDB',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  presetAvatarTilePressed: {
+    transform: [{ scale: 0.94 }],
+  },
+  presetAvatarThumb: {
+    width: 44,
+    height: 44,
+  },
+  presetCheckBadge: {
+    position: 'absolute',
+    top: -4,
+    right: -4,
+    width: 16,
+    height: 16,
+    borderRadius: 8,
+    backgroundColor: '#582CDB',
+    borderWidth: 1.5,
+    borderColor: '#FFFFFF',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  presetCheckText: {
+    fontSize: 9,
+    fontWeight: '900',
+    color: '#FFFFFF',
+    lineHeight: 11,
+  },
+  photoModalFooter: {
+    gap: 8,
+  },
+  savePhotoPrimaryBtn: {
+    backgroundColor: '#582CDB',
+    height: 48,
+    borderRadius: 14,
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: '#582CDB',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  savePhotoPrimaryBtnPressed: {
+    opacity: 0.9,
+    transform: [{ scale: 0.98 }],
+  },
+  savePhotoPrimaryBtnText: {
+    color: '#FFFFFF',
+    fontSize: 15,
+    fontWeight: '800',
+  },
+  removePhotoBtn: {
+    paddingVertical: 6,
+    alignItems: 'center',
+  },
+  removePhotoBtnText: {
+    fontSize: 12.5,
+    fontWeight: '700',
+    color: '#EF4444',
+  },
+
+  // 13. CALENDAR MODAL STYLES
+  calendarModalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(26, 22, 38, 0.6)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 16,
+  },
+  calendarModalCard: {
+    width: '100%',
+    maxHeight: '92%',
+    backgroundColor: '#FFFFFF',
+    borderRadius: 30,
+    paddingTop: 22,
+    paddingHorizontal: 18,
+    paddingBottom: 18,
+    shadowColor: '#582CDB',
+    shadowOffset: { width: 0, height: 16 },
+    shadowOpacity: 0.2,
+    shadowRadius: 28,
+    elevation: 12,
+    borderWidth: 1.5,
+    borderColor: '#ECE6F6',
+  },
+  calendarModalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  calendarModalTitleGroup: {
+    flex: 1,
+  },
+  calendarModalMainTitle: {
+    fontSize: 22,
+    fontWeight: '900',
+    color: '#1A1626',
+    letterSpacing: -0.4,
+  },
+  calendarModalSubtitle: {
+    fontSize: 12.5,
+    color: '#736B88',
+    marginTop: 2,
+  },
+  calendarCloseButton: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: '#FAF8FF',
+    borderWidth: 1,
+    borderColor: '#ECE6F6',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  calendarStatsRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    gap: 8,
+    marginBottom: 12,
+  },
+  calendarStatCard: {
+    flex: 1,
+    backgroundColor: '#FAF8FF',
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: '#EDE8FC',
+    paddingVertical: 8,
+    paddingHorizontal: 6,
+    alignItems: 'center',
+  },
+  calendarStatValue: {
+    fontSize: 13.5,
+    fontWeight: '900',
+    color: '#1A1626',
+    marginBottom: 2,
+  },
+  calendarStatLabel: {
+    fontSize: 10,
+    fontWeight: '800',
+    color: '#582CDB',
+  },
+  monthChipsContainer: {
+    flexDirection: 'row',
+    gap: 6,
+    paddingBottom: 10,
+    paddingHorizontal: 2,
+  },
+  monthChipPill: {
+    position: 'relative',
+    paddingVertical: 7,
+    paddingHorizontal: 14,
+    borderRadius: 14,
+    backgroundColor: '#F3EEFB',
+    borderWidth: 1.2,
+    borderColor: '#E2DCF2',
+  },
+  monthChipPillActive: {
+    backgroundColor: '#582CDB',
+    borderColor: '#582CDB',
+    shadowColor: '#582CDB',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.28,
+    shadowRadius: 6,
+    elevation: 3,
+  },
+  monthChipPillPressed: {
+    opacity: 0.85,
+    transform: [{ scale: 0.96 }],
+  },
+  monthChipText: {
+    fontSize: 12.5,
+    fontWeight: '800',
+    color: '#582CDB',
+  },
+  monthChipTextActive: {
+    color: '#FFFFFF',
+    fontWeight: '900',
+  },
+  monthChipCurrentDot: {
+    position: 'absolute',
+    top: 4,
+    right: 5,
+    width: 5.5,
+    height: 5.5,
+    borderRadius: 3,
+    backgroundColor: '#F59E0B',
+  },
+  monthChipCurrentDotActive: {
+    backgroundColor: '#FBBF24',
+    borderWidth: 0.8,
+    borderColor: '#FFFFFF',
+  },
+  selectedDayBanner: {
+    backgroundColor: '#EDE8FC',
+    borderRadius: 12,
+    paddingVertical: 7,
+    paddingHorizontal: 12,
+    marginBottom: 8,
+    borderWidth: 1,
+    borderColor: '#DDD6FE',
+  },
+  selectedDayText: {
+    fontSize: 12,
+    fontWeight: '800',
+    color: '#582CDB',
+    textAlign: 'center',
+  },
+  pagerOuterContainer: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 20,
+    borderWidth: 1.2,
+    borderColor: '#ECE6F6',
+    paddingVertical: 12,
+    paddingHorizontal: 8,
+    marginBottom: 10,
+  },
+  monthNavHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 10,
+    paddingHorizontal: 6,
+  },
+  monthNavChevronBtn: {
+    width: 34,
+    height: 34,
+    borderRadius: 10,
+    backgroundColor: '#FAF8FF',
+    borderWidth: 1,
+    borderColor: '#ECE6F6',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  monthNavChevronDisabled: {
+    opacity: 0.35,
+  },
+  monthNameTitleGroup: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  focusedMonthTitle: {
+    fontSize: 17,
+    fontWeight: '900',
+    color: '#1A1626',
+  },
+  currentMonthBadge: {
+    backgroundColor: '#582CDB',
+    borderRadius: 6,
+    paddingVertical: 2,
+    paddingHorizontal: 6,
+  },
+  currentMonthBadgeText: {
+    fontSize: 9.5,
+    fontWeight: '900',
+    color: '#FFFFFF',
+    letterSpacing: 0.5,
+  },
+  calendarDayNamesRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 8,
+    paddingHorizontal: 4,
+  },
+  calendarDayNameText: {
+    fontSize: 11,
+    fontWeight: '800',
+    color: '#8A829C',
+    width: 36,
+    textAlign: 'center',
+  },
+  pagerContent: {
+    flexDirection: 'row',
+  },
+  monthPageCard: {
+    paddingHorizontal: 2,
+  },
+  calendarMonthGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+    rowGap: 6,
+  },
+  calendarCell: {
+    width: 38,
+    height: 42,
+    borderRadius: 10,
+    backgroundColor: '#FAF8FF',
+    borderWidth: 1,
+    borderColor: '#EDE8FC',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  calendarCellEmpty: {
+    width: 38,
+    height: 42,
+  },
+  calendarCellCompleted: {
+    backgroundColor: '#582CDB',
+    borderColor: '#582CDB',
+    shadowColor: '#582CDB',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 3,
+    elevation: 2,
+  },
+  calendarCellScheduled: {
+    backgroundColor: '#EDE8FC',
+    borderColor: '#DDD6FE',
+  },
+  calendarCellFreeze: {
+    backgroundColor: '#E0F2FE',
+    borderColor: '#BAE6FD',
+  },
+  calendarCellPressed: {
+    transform: [{ scale: 0.92 }],
+  },
+  calendarCellDayNumber: {
+    fontSize: 12,
+    fontWeight: '800',
+    color: '#1A1626',
+  },
+  calendarCellTextCompleted: {
+    color: '#FFFFFF',
+  },
+  calendarCellTextScheduled: {
+    color: '#582CDB',
+  },
+  calendarCellTextFreeze: {
+    color: '#0284C7',
+  },
+  cellMiniIcon: {
+    fontSize: 9,
+    fontWeight: '900',
+    color: '#FFFFFF',
+    marginTop: 1,
+  },
+  cellMiniIconScheduled: {
+    fontSize: 8,
+    marginTop: 1,
+  },
+  cellMiniIconFreeze: {
+    fontSize: 8,
+    marginTop: 1,
+  },
+  calendarLegendBox: {
+    backgroundColor: '#FAF8FF',
+    borderRadius: 14,
+    padding: 10,
+    borderWidth: 1,
+    borderColor: '#ECE6F6',
+    marginBottom: 12,
+  },
+  legendItemsGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 10,
+  },
+  legendItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    width: '46%',
+  },
+  legendDot: {
+    width: 9,
+    height: 9,
+    borderRadius: 4.5,
+  },
+  legendLabel: {
+    fontSize: 11,
+    fontWeight: '600',
+    color: '#4B435E',
+  },
+  calendarDoneButton: {
+    backgroundColor: '#582CDB',
+    height: 48,
+    borderRadius: 14,
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: '#582CDB',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  calendarDoneButtonText: {
+    color: '#FFFFFF',
+    fontSize: 15.5,
+    fontWeight: '800',
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(26, 22, 38, 0.55)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 24,
+  },
+  modalCard: {
+    width: '100%',
+    maxWidth: 340,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 28,
+    paddingVertical: 26,
+    paddingHorizontal: 22,
+    alignItems: 'center',
+    shadowColor: '#582CDB',
+    shadowOffset: { width: 0, height: 12 },
+    shadowOpacity: 0.18,
+    shadowRadius: 24,
+    elevation: 10,
+    borderWidth: 1.5,
+    borderColor: '#ECE6F6',
+  },
+  modalPureStarWrapper: {
+    width: 60,
+    height: 60,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  modalPureStarImage: {
+    width: 56,
+    height: 56,
+  },
+  proBadgeModal: {
+    fontSize: 11.5,
+    fontWeight: '900',
+    color: '#D4A038',
+    letterSpacing: 0.8,
+    marginBottom: 6,
+  },
+  modalTitle: {
+    fontSize: 19,
+    fontWeight: '900',
+    color: '#1A1626',
+    marginBottom: 10,
+    textAlign: 'center',
+    letterSpacing: -0.4,
+  },
+  modalText: {
+    fontSize: 13.5,
+    color: '#4B435E',
+    textAlign: 'center',
+    lineHeight: 19,
+    marginBottom: 20,
+  },
+  modalBold: {
+    fontWeight: '800',
+    color: '#582CDB',
+  },
+  modalActionButton: {
+    width: '100%',
+    height: 48,
+    borderRadius: 14,
+    backgroundColor: '#582CDB',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalActionButtonPressed: {
+    opacity: 0.9,
+    transform: [{ scale: 0.98 }],
+  },
+  modalActionButtonText: {
+    color: '#FFFFFF',
+    fontSize: 15.5,
+    fontWeight: '800',
+  },
+  modalGoldButton: {
+    width: '100%',
+    height: 48,
+    borderRadius: 14,
+    backgroundColor: '#D4A038',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  modalGoldButtonPressed: {
+    opacity: 0.9,
+    transform: [{ scale: 0.98 }],
+  },
+  modalGoldButtonText: {
+    color: '#FFFFFF',
+    fontSize: 15.5,
+    fontWeight: '800',
+  },
+  modalDismissText: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: '#736B88',
+    marginTop: 4,
+  },
+});
