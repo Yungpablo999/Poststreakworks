@@ -17,6 +17,7 @@ import Svg, { Path, Circle, Rect } from 'react-native-svg';
 import * as Haptics from 'expo-haptics';
 import { LinearGradient } from 'expo-linear-gradient';
 import { FloatingTabBar, TabType } from '../components/FloatingTabBar';
+import { AnimatedCompletionModal } from '../components/AnimatedCompletionModal';
 
 interface CreateScreenProps {
   onLogout?: () => void;
@@ -119,9 +120,12 @@ export const CreateScreen: React.FC<CreateScreenProps> = ({
   const [showNotificationModal, setShowNotificationModal] = useState(false);
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [showChatModal, setShowChatModal] = useState(false);
-  const [showSuccessModal, setShowSuccessModal] = useState(false);
-  const [successModalTitle, setSuccessModalTitle] = useState('');
-  const [successModalBody, setSuccessModalBody] = useState('');
+  const [showCelebrationModal, setShowCelebrationModal] = useState(false);
+  const [celebrationTitle, setCelebrationTitle] = useState('Mission Accomplished!');
+  const [celebrationSubtitle, setCelebrationSubtitle] = useState('Your post has been scheduled & streak is protected.');
+  const [celebrationSpeech, setCelebrationSpeech] = useState('Great job staying consistent today!');
+  const [celebrationBadge, setCelebrationBadge] = useState('POST SCHEDULED');
+  const [celebrationXp, setCelebrationXp] = useState(50);
 
   const [selectedDraft, setSelectedDraft] = useState<DraftItem | null>(null);
 
@@ -256,11 +260,13 @@ export const CreateScreen: React.FC<CreateScreenProps> = ({
     setShowNewPostModal(false);
     setPostTitle('');
 
-    // Trigger Success Modal
-    setSuccessModalTitle('Post Draft Saved!');
-    setSuccessModalBody('Your draft is stored and scheduled. Your 47-day momentum is fully protected.');
-    triggerModalPop();
-    setShowSuccessModal(true);
+    // Trigger Animated Ghost Celebration Modal
+    setCelebrationTitle('Post Draft Scheduled!');
+    setCelebrationSubtitle('Your draft is stored and scheduled for tomorrow at 11:30 AM.');
+    setCelebrationSpeech('Ghost says: You are on fire today Amara! 47 days and counting!');
+    setCelebrationBadge('STREAK PROTECTED');
+    setCelebrationXp(50);
+    setShowCelebrationModal(true);
   };
 
   const handleOpenScheduleView = () => {
@@ -660,6 +666,21 @@ export const CreateScreen: React.FC<CreateScreenProps> = ({
                   <Text style={styles.modalTitle}>New Post</Text>
                   <Text style={styles.modalSubtitle}>Create from scratch and protect your streak.</Text>
                 </View>
+              {/* Ghost Character Speech Header */}
+              <View style={styles.modalGhostRow}>
+                <Animated.View style={[styles.modalGhostImgWrapper, { transform: [{ translateY: flameFloatY }] }]}>
+                  <Image
+                    source={require('../../assets/images/jarvis-ghost-clean.png')}
+                    style={styles.modalGhostImg}
+                    resizeMode="contain"
+                  />
+                </Animated.View>
+                <View style={styles.modalGhostSpeechBubble}>
+                  <Text style={styles.modalGhostSpeechText}>
+                    "Batch create today Amara — consistent posting beats sporadic motivation!"
+                  </Text>
+                </View>
+              </View>
                 <Pressable
                   onPress={() => setShowNewPostModal(false)}
                   style={styles.modalCloseCircle}
@@ -751,6 +772,21 @@ export const CreateScreen: React.FC<CreateScreenProps> = ({
                   <Text style={styles.modalTitle}>AI Hook Sparks</Text>
                   <Text style={styles.modalSubtitle}>Trending angles customized for your niche:</Text>
                 </View>
+              {/* Ghost Character Speech Header */}
+              <View style={styles.modalGhostRow}>
+                <Animated.View style={[styles.modalGhostImgWrapper, { transform: [{ translateY: flameFloatY }] }]}>
+                  <Image
+                    source={require('../../assets/images/jarvis-ghost-clean.png')}
+                    style={styles.modalGhostImg}
+                    resizeMode="contain"
+                  />
+                </Animated.View>
+                <View style={styles.modalGhostSpeechBubble}>
+                  <Text style={styles.modalGhostSpeechText}>
+                    "I analyzed 1,400 top Reels in your niche. Tap any spark to use it!"
+                  </Text>
+                </View>
+              </View>
                 <Pressable
                   onPress={() => setShowIdeasModal(false)}
                   style={styles.modalCloseCircle}
@@ -799,6 +835,21 @@ export const CreateScreen: React.FC<CreateScreenProps> = ({
                   <Text style={styles.modalTitle}>Script Builder</Text>
                   <Text style={styles.modalSubtitle}>Hook ➔ Story ➔ Lesson ➔ CTA formula:</Text>
                 </View>
+              {/* Ghost Character Speech Header */}
+              <View style={styles.modalGhostRow}>
+                <Animated.View style={[styles.modalGhostImgWrapper, { transform: [{ translateY: flameFloatY }] }]}>
+                  <Image
+                    source={require('../../assets/images/jarvis-ghost-clean.png')}
+                    style={styles.modalGhostImg}
+                    resizeMode="contain"
+                  />
+                </Animated.View>
+                <View style={styles.modalGhostSpeechBubble}>
+                  <Text style={styles.modalGhostSpeechText}>
+                    "The first 3 seconds are everything. Keep your hook punchy and bold!"
+                  </Text>
+                </View>
+              </View>
                 <Pressable
                   onPress={() => setShowScriptModal(false)}
                   style={styles.modalCloseCircle}
@@ -910,10 +961,12 @@ export const CreateScreen: React.FC<CreateScreenProps> = ({
                 style={styles.modalFullBtn}
                 onPress={() => {
                   setShowCaptionModal(false);
-                  setSuccessModalTitle('Caption Copied!');
-                  setSuccessModalBody('Your caption and creator hashtags are ready to paste into your video editor.');
-                  triggerModalPop();
-                  setShowSuccessModal(true);
+                  setCelebrationTitle('Caption Copied!');
+                  setCelebrationSubtitle('Your caption and viral creator hashtags are copied to your clipboard.');
+                  setCelebrationSpeech('Ghost says: Captions with clear takeaways get 40% more saves & shares!');
+                  setCelebrationBadge('VIRAL COPY READY');
+                  setCelebrationXp(25);
+                  setShowCelebrationModal(true);
                 }}
               >
                 <Text style={styles.modalFullBtnText}>Copy Caption &amp; Hashtags ✓</Text>
@@ -1177,29 +1230,18 @@ export const CreateScreen: React.FC<CreateScreenProps> = ({
           </View>
         </Modal>
 
-        {/* MODAL 10: ACTION SUCCESS CELEBRATION */}
-        <Modal
-          visible={showSuccessModal}
-          transparent={true}
-          animationType="fade"
-          onRequestClose={() => setShowSuccessModal(false)}
-        >
-          <View style={styles.modalOverlay}>
-            <Animated.View style={[styles.modalCard, { transform: [{ scale: modalPopScale }] }]}>
-              <View style={styles.successIconCircle}>
-                <Text style={{ fontSize: 28 }}>✨</Text>
-              </View>
-              <Text style={styles.successModalTitle}>{successModalTitle}</Text>
-              <Text style={styles.successModalBody}>{successModalBody}</Text>
-              <Pressable
-                style={styles.modalFullBtn}
-                onPress={() => setShowSuccessModal(false)}
-              >
-                <Text style={styles.modalFullBtnText}>Continue</Text>
-              </Pressable>
-            </Animated.View>
-          </View>
-        </Modal>
+        {/* SIGNATURE ANIMATED GHOST CELEBRATION MODAL */}
+        <AnimatedCompletionModal
+          visible={showCelebrationModal}
+          title={celebrationTitle}
+          subtitle={celebrationSubtitle}
+          speechBubble={celebrationSpeech}
+          badgeText={celebrationBadge}
+          xpEarned={celebrationXp}
+          streakCount={47}
+          actionText="Continue ➔"
+          onDismiss={() => setShowCelebrationModal(false)}
+        />
       </View>
     </SafeAreaView>
   );
@@ -1734,6 +1776,40 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     padding: 20,
+  },
+  // Ghost Speech Header inside Modals
+  modalGhostRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    backgroundColor: '#F5F3FF',
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: '#E9D5FF',
+    padding: 10,
+    marginBottom: 14,
+  },
+  modalGhostImgWrapper: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: '#FFFFFF',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalGhostImg: {
+    width: 28,
+    height: 28,
+  },
+  modalGhostSpeechBubble: {
+    flex: 1,
+  },
+  modalGhostSpeechText: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#6D28D9',
+    fontStyle: 'italic',
+    lineHeight: 16,
   },
   modalCard: {
     width: '100%',

@@ -21,6 +21,7 @@ export interface AnimatedCompletionModalProps {
   badgeText?: string;
   xpEarned?: number;
   streakCount?: number;
+  speechBubble?: string;
   actionText?: string;
   onDismiss: () => void;
 }
@@ -32,6 +33,7 @@ export const AnimatedCompletionModal: React.FC<AnimatedCompletionModalProps> = (
   badgeText = 'POST COMPLETED',
   xpEarned = 50,
   streakCount = 48,
+  speechBubble,
   actionText = 'Continue',
   onDismiss,
 }) => {
@@ -267,6 +269,13 @@ export const AnimatedCompletionModal: React.FC<AnimatedCompletionModalProps> = (
             </Animated.View>
           </View>
 
+          {/* Optional Ghost Speech Bubble */}
+          {speechBubble ? (
+            <View style={styles.speechBubbleContainer}>
+              <View style={styles.speechBubblePointer} />
+              <Text style={styles.speechBubbleText}>&ldquo;{speechBubble}&rdquo;</Text>
+            </View>
+          ) : null}
           {/* Title & Subtitle */}
           <Text style={styles.modalTitle}>{title}</Text>
           <Text style={styles.modalSubtitle}>{subtitle}</Text>
@@ -413,6 +422,42 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.35,
     shadowRadius: 6,
     elevation: 4,
+  },
+  speechBubbleContainer: {
+    backgroundColor: 'rgba(255, 255, 255, 0.95)',
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: '#E9D5FF',
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    marginBottom: 14,
+    maxWidth: 290,
+    alignSelf: 'center',
+    shadowColor: '#582CDB',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 10,
+    elevation: 3,
+  },
+  speechBubblePointer: {
+    position: 'absolute',
+    top: -6,
+    alignSelf: 'center',
+    width: 12,
+    height: 12,
+    backgroundColor: '#FFFFFF',
+    transform: [{ rotate: '45deg' }],
+    borderTopWidth: 1,
+    borderLeftWidth: 1,
+    borderColor: '#E9D5FF',
+  },
+  speechBubbleText: {
+    fontSize: 13,
+    color: '#582CDB',
+    fontWeight: '700',
+    textAlign: 'center',
+    fontStyle: 'italic',
+    lineHeight: 18,
   },
   modalTitle: {
     fontSize: 20,
