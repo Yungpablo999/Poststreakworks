@@ -261,8 +261,8 @@ export const CreateScreen: React.FC<CreateScreenProps> = ({
               ]}
             >
               <Image
-                source={require('../../assets/images/jarvis-core-flame.png')}
-                style={styles.headerFlameLogo}
+                source={require('../../assets/images/jarvis-ghost-clean.png')}
+                style={styles.headerGhostLogo}
                 resizeMode="contain"
               />
             </Animated.View>
@@ -273,6 +273,24 @@ export const CreateScreen: React.FC<CreateScreenProps> = ({
           </View>
 
           <View style={styles.headerRightGroup}>
+            {/* Message / Chat Bubble Button */}
+            <Pressable
+              style={({ pressed }) => [styles.headerIconBtn, pressed && styles.btnPressed]}
+              hitSlop={8}
+              onPress={() => showToast('💬 Messages')}
+            >
+              <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
+                <Path
+                  d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"
+                  stroke="#171420"
+                  strokeWidth="2.2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </Svg>
+            </Pressable>
+
+            {/* Notification Bell */}
             <Pressable
               style={({ pressed }) => [styles.headerIconBtn, pressed && styles.btnPressed]}
               hitSlop={8}
@@ -297,6 +315,7 @@ export const CreateScreen: React.FC<CreateScreenProps> = ({
               <View style={styles.unreadBadgeDot} />
             </Pressable>
 
+            {/* Profile Avatar */}
             <Pressable
               style={({ pressed }) => [styles.headerProfileBtn, pressed && styles.btnPressed]}
               hitSlop={6}
@@ -986,9 +1005,9 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  headerFlameLogo: {
-    width: 26,
-    height: 26,
+  headerGhostLogo: {
+    width: 30,
+    height: 30,
   },
   headerTitle: {
     fontSize: 16,
