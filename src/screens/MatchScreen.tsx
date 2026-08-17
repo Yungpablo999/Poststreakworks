@@ -24,12 +24,21 @@ import { AnimatedCompletionModal } from '../components/AnimatedCompletionModal';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const SWIPE_THRESHOLD = 110;
-const SWIPE_UP_THRESHOLD = 100;
+const SWIPE_UP_THRESHOLD = 90;
 
 interface MatchScreenProps {
   onLogout?: () => void;
   onNavigateTab?: (tab: TabType) => void;
   onOpenMessages?: () => void;
+}
+
+interface TrackedMetrics {
+  growthRate: string;
+  postingPace: string;
+  engagementScore: string;
+  bestCollabWindow: string;
+  statusText: string;
+  lastActive: string;
 }
 
 interface CreatorProfile {
@@ -43,6 +52,7 @@ interface CreatorProfile {
   collabGoal: string;
   jarvisInsight: string;
   streak: number;
+  tracking: TrackedMetrics;
 }
 
 const CREATOR_DECK: CreatorProfile[] = [
@@ -59,6 +69,14 @@ const CREATOR_DECK: CreatorProfile[] = [
     jarvisInsight:
       'Amara matches your audience style, niche and posting rhythm. High collab synergy!',
     streak: 44,
+    tracking: {
+      growthRate: '+4.2k this month',
+      postingPace: '4 posts/week',
+      engagementScore: '94/100',
+      bestCollabWindow: 'Fri & Sun • 7:30 PM',
+      statusText: '🟢 Active today (Posted 2h ago)',
+      lastActive: '2 hours ago',
+    },
   },
   {
     id: 'creator_2',
@@ -73,6 +91,14 @@ const CREATOR_DECK: CreatorProfile[] = [
     jarvisInsight:
       'High overlap in productivity and workflow audience with 4.8x average viral reach.',
     streak: 52,
+    tracking: {
+      growthRate: '+12.8k this month',
+      postingPace: '5 posts/week',
+      engagementScore: '98/100',
+      bestCollabWindow: 'Wed & Thu • 6:00 PM',
+      statusText: '🔥 Viral breakout Reel yesterday',
+      lastActive: 'Yesterday',
+    },
   },
   {
     id: 'creator_3',
@@ -87,6 +113,14 @@ const CREATOR_DECK: CreatorProfile[] = [
     jarvisInsight:
       'Strong visual aesthetic alignment with high comment-to-view ratios.',
     streak: 38,
+    tracking: {
+      growthRate: '+2.1k this month',
+      postingPace: '3 posts/week',
+      engagementScore: '91/100',
+      bestCollabWindow: 'Sat • 11:30 AM',
+      statusText: '✨ Open to co-creations this week',
+      lastActive: 'Today',
+    },
   },
   {
     id: 'creator_4',
@@ -101,6 +135,14 @@ const CREATOR_DECK: CreatorProfile[] = [
     jarvisInsight:
       'Massive streak alignment. Both of you thrive on high-discipline posting schedules.',
     streak: 60,
+    tracking: {
+      growthRate: '+8.5k this month',
+      postingPace: '7 posts/week',
+      engagementScore: '96/100',
+      bestCollabWindow: 'Mon - Fri • 7:00 AM',
+      statusText: '💪 100% daily posting consistency',
+      lastActive: '3 hours ago',
+    },
   },
   {
     id: 'creator_5',
@@ -115,6 +157,14 @@ const CREATOR_DECK: CreatorProfile[] = [
     jarvisInsight:
       'Her pacing and visual sound design can amplify your video watch-through rates.',
     streak: 41,
+    tracking: {
+      growthRate: '+6.4k this month',
+      postingPace: '4 posts/week',
+      engagementScore: '95/100',
+      bestCollabWindow: 'Tue & Sat • 8:00 PM',
+      statusText: '🎬 Producing cinematic series',
+      lastActive: '5 hours ago',
+    },
   },
 ];
 
@@ -124,18 +174,19 @@ export const MatchScreen: React.FC<MatchScreenProps> = ({
   onOpenMessages,
 }) => {
   const [activeTab, setActiveTab] = useState<TabType>('match');
-  const [activeSection, setActiveSection] = useState<'deck' | 'saved' | 'connected'>('deck');
+  const [activeSection, setActiveSection] = useState<'deck' | 'tracking' | 'connected'>('deck');
   const [activeFilter, setActiveFilter] = useState<'niche' | 'streak' | 'nearby' | 'ai'>('niche');
   const [currentIndex, setCurrentIndex] = useState(0);
 
-  // Tracking stats
+  // Tracking state
   const [matchesLeft, setMatchesLeft] = useState(5);
-  const [savedCreators, setSavedCreators] = useState<CreatorProfile[]>([]);
+  const [savedCreators, setSavedCreators] = useState<CreatorProfile[]>([
+    CREATOR_DECK[0], // Amara Okafor tracked by default
+  ]);
   const [connectedCreators, setConnectedCreators] = useState<CreatorProfile[]>([
     CREATOR_DECK[1], // Tomi Adebayo
     CREATOR_DECK[2], // Zainab Okafor
   ]);
-  const [swipeHistory, setSwipeHistory] = useState<number[]>([]);
 
   // Modals state
   const [showConnectModal, setShowConnectModal] = useState(false);
@@ -148,17 +199,17 @@ export const MatchScreen: React.FC<MatchScreenProps> = ({
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
-  // Animated values for Swipe gesture
+  // Animated values for pure swipe gesture
   const position = useRef(new Animated.ValueXY()).current;
   const ghostFloatY = useRef(new Animated.Value(0)).current;
   const toastOpacity = useRef(new Animated.Value(0)).current;
 
-  // PanResponder for Tinder Swipe
+  // Pure PanResponder Swipe
   const panResponder = useRef(
     PanResponder.create({
       onStartShouldSetPanResponder: () => true,
       onMoveShouldSetPanResponder: (_, gesture) =>
-        Math.abs(gesture.dx) > 8 || Math.abs(gesture.dy) > 8,
+        Math.abs(gesture.dx) > 6 || Math.abs(gesture.dy) > 6,
       onPanResponderMove: (_, gesture) => {
         position.setValue({ x: gesture.dx, y: gesture.dy });
       },
@@ -216,12 +267,12 @@ export const MatchScreen: React.FC<MatchScreenProps> = ({
 
   const swipeCard = (direction: 'left' | 'right' | 'up') => {
     const creator = CREATOR_DECK[currentIndex % CREATOR_DECK.length];
-    const x = direction === 'right' ? SCREEN_WIDTH + 100 : direction === 'left' ? -SCREEN_WIDTH - 100 : 0;
-    const y = direction === 'up' ? -SCREEN_WIDTH - 100 : 0;
+    const x = direction === 'right' ? SCREEN_WIDTH + 120 : direction === 'left' ? -SCREEN_WIDTH - 120 : 0;
+    const y = direction === 'up' ? -SCREEN_WIDTH - 120 : 0;
 
     Animated.timing(position, {
       toValue: { x, y },
-      duration: 260,
+      duration: 250,
       useNativeDriver: true,
     }).start(() => {
       onSwipeComplete(direction, creator);
@@ -229,12 +280,11 @@ export const MatchScreen: React.FC<MatchScreenProps> = ({
   };
 
   const onSwipeComplete = (direction: 'left' | 'right' | 'up', creator: CreatorProfile) => {
-    setSwipeHistory((prev) => [...prev, currentIndex]);
     position.setValue({ x: 0, y: 0 });
     setCurrentIndex((prev) => prev + 1);
 
     if (direction === 'right') {
-      // Connect
+      // Accept / Match / Connect
       if (Platform.OS !== 'web') {
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       }
@@ -243,44 +293,33 @@ export const MatchScreen: React.FC<MatchScreenProps> = ({
       setLastConnectedCreator(creator);
       setShowConnectModal(true);
     } else if (direction === 'left') {
-      // Pass
+      // Decline / Pass
       if (Platform.OS !== 'web') {
         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
       }
-      showToast(`Passed on ${creator.name}`);
+      showToast(`Declined ${creator.name}`);
     } else if (direction === 'up') {
-      // Save
+      // Save & Track
       if (Platform.OS !== 'web') {
         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
       }
       setSavedCreators((prev) => (prev.some((c) => c.id === creator.id) ? prev : [creator, ...prev]));
-      showToast(`⭐ Saved ${creator.name} to bookmarks!`);
+      showToast(`⭐ Saved & Tracking ${creator.name} over time!`);
     }
   };
 
-  const handleRewind = () => {
-    if (swipeHistory.length === 0) {
-      showToast('No previous swipes to rewind.');
-      return;
-    }
+  const handleToggleTrack = (creator: CreatorProfile) => {
     if (Platform.OS !== 'web') {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     }
-    const lastIndex = swipeHistory[swipeHistory.length - 1];
-    setSwipeHistory((prev) => prev.slice(0, -1));
-    setCurrentIndex(lastIndex);
-    position.setValue({ x: 0, y: 0 });
-    showToast('↩ Undid previous swipe');
-  };
-
-  const handleSaveButton = () => {
-    const creator = CREATOR_DECK[currentIndex % CREATOR_DECK.length];
-    if (Platform.OS !== 'web') {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    const isAlreadySaved = savedCreators.some((c) => c.id === creator.id);
+    if (isAlreadySaved) {
+      setSavedCreators((prev) => prev.filter((c) => c.id !== creator.id));
+      showToast(`Stopped tracking ${creator.name}`);
+    } else {
+      setSavedCreators((prev) => [creator, ...prev]);
+      showToast(`⭐ Now tracking ${creator.name} over time!`);
     }
-    setSavedCreators((prev) => (prev.some((c) => c.id === creator.id) ? prev : [creator, ...prev]));
-    showToast(`⭐ Saved ${creator.name}!`);
-    swipeCard('up');
   };
 
   const handleSendMessage = () => {
@@ -293,6 +332,7 @@ export const MatchScreen: React.FC<MatchScreenProps> = ({
 
   const currentCreator = CREATOR_DECK[currentIndex % CREATOR_DECK.length];
   const nextCreator = CREATOR_DECK[(currentIndex + 1) % CREATOR_DECK.length];
+  const isCurrentSaved = savedCreators.some((c) => c.id === currentCreator.id);
 
   // Card rotation & stamp interpolation
   const rotate = position.x.interpolate({
@@ -308,20 +348,20 @@ export const MatchScreen: React.FC<MatchScreenProps> = ({
     ],
   };
 
-  const matchStampOpacity = position.x.interpolate({
-    inputRange: [15, SWIPE_THRESHOLD],
+  const acceptStampOpacity = position.x.interpolate({
+    inputRange: [20, SWIPE_THRESHOLD],
     outputRange: [0, 1],
     extrapolate: 'clamp',
   });
 
-  const passStampOpacity = position.x.interpolate({
-    inputRange: [-SWIPE_THRESHOLD, -15],
+  const declineStampOpacity = position.x.interpolate({
+    inputRange: [-SWIPE_THRESHOLD, -20],
     outputRange: [1, 0],
     extrapolate: 'clamp',
   });
 
   const saveStampOpacity = position.y.interpolate({
-    inputRange: [-SWIPE_UP_THRESHOLD, -15],
+    inputRange: [-SWIPE_UP_THRESHOLD, -20],
     outputRange: [1, 0],
     extrapolate: 'clamp',
   });
@@ -420,7 +460,7 @@ export const MatchScreen: React.FC<MatchScreenProps> = ({
           contentContainerStyle={styles.scrollContent}
           showsVerticalScrollIndicator={false}
         >
-          {/* SECTION 1: MATCH HEADER & LIVE TRACKING METRICS */}
+          {/* SECTION 1: MATCH HEADER & LIVE RADAR STATS */}
           <View style={styles.pageHeaderSection}>
             <View style={styles.pageBadgeRow}>
               <LinearGradient
@@ -429,7 +469,7 @@ export const MatchScreen: React.FC<MatchScreenProps> = ({
                 end={{ x: 1, y: 1 }}
                 style={styles.matchPillGradient}
               >
-                <Text style={styles.matchPillText}>CREATOR TINDER</Text>
+                <Text style={styles.matchPillText}>CREATOR RADAR</Text>
               </LinearGradient>
 
               <View style={styles.freeDiscoveryBadge}>
@@ -439,7 +479,7 @@ export const MatchScreen: React.FC<MatchScreenProps> = ({
 
             <Text style={styles.pageHeadline}>Find creators worth building with.</Text>
             <Text style={styles.pageSubtitle}>
-              Swipe right to connect, swipe left to pass, or swipe up to save.
+              Swipe right to accept, left to decline, or swipe up to save & track.
             </Text>
 
             {/* LIVE TRACKING STATS BAR */}
@@ -450,18 +490,18 @@ export const MatchScreen: React.FC<MatchScreenProps> = ({
               </View>
               <View style={styles.trackingStatDivider} />
               <View style={styles.trackingStatItem}>
-                <Text style={styles.trackingStatVal}>💜 {connectedCreators.length}</Text>
-                <Text style={styles.trackingStatLbl}>Connected</Text>
+                <Text style={styles.trackingStatVal}>📡 {savedCreators.length}</Text>
+                <Text style={styles.trackingStatLbl}>Tracked</Text>
               </View>
               <View style={styles.trackingStatDivider} />
               <View style={styles.trackingStatItem}>
-                <Text style={styles.trackingStatVal}>⭐ {savedCreators.length}</Text>
-                <Text style={styles.trackingStatLbl}>Saved</Text>
+                <Text style={styles.trackingStatVal}>💜 {connectedCreators.length}</Text>
+                <Text style={styles.trackingStatLbl}>Connected</Text>
               </View>
             </View>
           </View>
 
-          {/* VIEW SWITCHER TABS: DECK vs SAVED vs CONNECTED */}
+          {/* VIEW SWITCHER TABS: SWIPE DECK vs CREATOR TRACKER vs CONNECTED */}
           <View style={styles.sectionTabsRow}>
             <Pressable
               style={[styles.sectionTab, activeSection === 'deck' && styles.sectionTabActive]}
@@ -473,11 +513,11 @@ export const MatchScreen: React.FC<MatchScreenProps> = ({
             </Pressable>
 
             <Pressable
-              style={[styles.sectionTab, activeSection === 'saved' && styles.sectionTabActive]}
-              onPress={() => setActiveSection('saved')}
+              style={[styles.sectionTab, activeSection === 'tracking' && styles.sectionTabActive]}
+              onPress={() => setActiveSection('tracking')}
             >
-              <Text style={[styles.sectionTabText, activeSection === 'saved' && styles.sectionTabTextActive]}>
-                Saved ({savedCreators.length})
+              <Text style={[styles.sectionTabText, activeSection === 'tracking' && styles.sectionTabTextActive]}>
+                Tracked Radar ({savedCreators.length})
               </Text>
             </Pressable>
 
@@ -491,7 +531,7 @@ export const MatchScreen: React.FC<MatchScreenProps> = ({
             </Pressable>
           </View>
 
-          {/* TAB 1: SWIPE DECK VIEW */}
+          {/* TAB 1: PURE GESTURE SWIPE DECK */}
           {activeSection === 'deck' && (
             <View>
               {/* FILTER PILLS */}
@@ -588,31 +628,31 @@ export const MatchScreen: React.FC<MatchScreenProps> = ({
                     style={styles.cardGlass}
                   >
                     {/* SWIPE STAMP OVERLAYS */}
-                    {/* GREEN MATCH STAMP (DRAG RIGHT) */}
+                    {/* GREEN ACCEPT STAMP (SWIPE RIGHT) */}
                     <Animated.View
                       style={[
                         styles.stampOverlay,
-                        styles.matchStamp,
-                        { opacity: matchStampOpacity },
+                        styles.acceptStamp,
+                        { opacity: acceptStampOpacity },
                       ]}
                       pointerEvents="none"
                     >
-                      <Text style={styles.matchStampText}>CONNECT 💜</Text>
+                      <Text style={styles.acceptStampText}>ACCEPT 💜</Text>
                     </Animated.View>
 
-                    {/* RED PASS STAMP (DRAG LEFT) */}
+                    {/* RED DECLINE STAMP (SWIPE LEFT) */}
                     <Animated.View
                       style={[
                         styles.stampOverlay,
-                        styles.passStamp,
-                        { opacity: passStampOpacity },
+                        styles.declineStamp,
+                        { opacity: declineStampOpacity },
                       ]}
                       pointerEvents="none"
                     >
-                      <Text style={styles.passStampText}>PASS ✖</Text>
+                      <Text style={styles.declineStampText}>DECLINE ✖</Text>
                     </Animated.View>
 
-                    {/* GOLD SAVE STAMP (DRAG UP) */}
+                    {/* GOLD SAVE & TRACK STAMP (SWIPE UP) */}
                     <Animated.View
                       style={[
                         styles.stampOverlay,
@@ -621,16 +661,29 @@ export const MatchScreen: React.FC<MatchScreenProps> = ({
                       ]}
                       pointerEvents="none"
                     >
-                      <Text style={styles.saveStampText}>SAVED ⭐</Text>
+                      <Text style={styles.saveStampText}>TRACKING ⭐</Text>
                     </Animated.View>
 
-                    {/* Cover Photo */}
+                    {/* Cover Photo with Quick Save Button */}
                     <View style={styles.creatorCoverContainer}>
                       <Image
                         source={currentCreator.coverImage}
                         style={styles.creatorCoverImage}
                         resizeMode="cover"
                       />
+
+                      {/* On-Card Save / Track Toggle Button */}
+                      <Pressable
+                        style={[styles.onCardSaveBtn, isCurrentSaved && styles.onCardSaveBtnActive]}
+                        onPress={() => handleToggleTrack(currentCreator)}
+                        hitSlop={8}
+                      >
+                        <Text style={{ fontSize: 16 }}>{isCurrentSaved ? '⭐' : '☆'}</Text>
+                        <Text style={[styles.onCardSaveText, isCurrentSaved && styles.onCardSaveTextActive]}>
+                          {isCurrentSaved ? 'Tracking' : 'Save'}
+                        </Text>
+                      </Pressable>
+
                       <LinearGradient
                         colors={['transparent', 'rgba(23, 20, 32, 0.85)']}
                         style={styles.creatorCoverGradient}
@@ -674,6 +727,13 @@ export const MatchScreen: React.FC<MatchScreenProps> = ({
                         ))}
                       </View>
 
+                      {/* Live Tracking Radar Badge on Card */}
+                      <View style={styles.liveTrackingCardBadge}>
+                        <Text style={styles.liveTrackingCardStatus}>
+                          {currentCreator.tracking.statusText}
+                        </Text>
+                      </View>
+
                       {/* Collab Goal */}
                       <View style={styles.collabGoalBox}>
                         <Text style={styles.collabGoalLabel}>COLLAB GOAL</Text>
@@ -697,46 +757,13 @@ export const MatchScreen: React.FC<MatchScreenProps> = ({
                 </Animated.View>
               </View>
 
-              {/* TINDER TACTILE ACTION CONTROLS */}
-              <View style={styles.tactileControlsRow}>
-                {/* Rewind */}
-                <Pressable
-                  style={({ pressed }) => [styles.tactileBtnSmall, pressed && styles.btnPressed]}
-                  onPress={handleRewind}
-                >
-                  <Text style={{ fontSize: 18 }}>↩</Text>
-                </Pressable>
-
-                {/* Pass (Swipe Left) */}
-                <Pressable
-                  style={({ pressed }) => [styles.tactileBtnLarge, styles.passControlBtn, pressed && styles.btnPressed]}
-                  onPress={() => swipeCard('left')}
-                >
-                  <Text style={styles.passControlBtnIcon}>✖</Text>
-                </Pressable>
-
-                {/* Save (Swipe Up) */}
-                <Pressable
-                  style={({ pressed }) => [styles.tactileBtnSmall, styles.saveControlBtn, pressed && styles.btnPressed]}
-                  onPress={handleSaveButton}
-                >
-                  <Text style={{ fontSize: 20 }}>⭐</Text>
-                </Pressable>
-
-                {/* Connect (Swipe Right) */}
-                <Pressable
-                  style={({ pressed }) => [styles.tactileBtnLarge, styles.connectControlBtn, pressed && styles.btnPressed]}
-                  onPress={() => swipeCard('right')}
-                >
-                  <LinearGradient
-                    colors={['#784DF0', '#582CDB']}
-                    start={{ x: 0, y: 0 }}
-                    end={{ x: 1, y: 1 }}
-                    style={styles.connectControlGradient}
-                  >
-                    <Text style={styles.connectControlBtnIcon}>💜</Text>
-                  </LinearGradient>
-                </Pressable>
+              {/* GESTURE HINT STRIP (MINIMAL & INTUITIVE) */}
+              <View style={styles.gestureHintRow}>
+                <Text style={styles.gestureHintText}>👈 Swipe left to decline</Text>
+                <Text style={styles.gestureHintDot}>•</Text>
+                <Text style={styles.gestureHintText}>👆 Up to save & track</Text>
+                <Text style={styles.gestureHintDot}>•</Text>
+                <Text style={styles.gestureHintText}>Right to accept 👉</Text>
               </View>
 
               {/* SUGGESTED COLLAB CARD */}
@@ -778,15 +805,22 @@ export const MatchScreen: React.FC<MatchScreenProps> = ({
             </View>
           )}
 
-          {/* TAB 2: SAVED CREATORS LIST */}
-          {activeSection === 'saved' && (
+          {/* TAB 2: CREATOR GROWTH TRACKING RADAR */}
+          {activeSection === 'tracking' && (
             <View style={styles.tabContentSection}>
+              <View style={styles.radarHeaderBanner}>
+                <Text style={styles.radarHeaderTitle}>📡 Creator Growth Radar</Text>
+                <Text style={styles.radarHeaderSubtitle}>
+                  Jarvis tracks your saved creators over time, monitoring posting streaks, growth surges, and peak collab windows.
+                </Text>
+              </View>
+
               {savedCreators.length === 0 ? (
                 <View style={styles.emptyStateBox}>
                   <Text style={styles.emptyStateEmoji}>⭐</Text>
-                  <Text style={styles.emptyStateTitle}>No Saved Creators Yet</Text>
+                  <Text style={styles.emptyStateTitle}>No Creators Tracked Yet</Text>
                   <Text style={styles.emptyStateSubtitle}>
-                    Swipe up or tap the star button on any creator card to bookmark them for later.
+                    Swipe up on any creator card to start tracking their audience growth and consistency.
                   </Text>
                   <Pressable
                     style={styles.emptyStateBtn}
@@ -797,22 +831,49 @@ export const MatchScreen: React.FC<MatchScreenProps> = ({
                 </View>
               ) : (
                 savedCreators.map((creator) => (
-                  <View key={creator.id} style={styles.matchItemCard}>
-                    <Image source={creator.coverImage} style={styles.matchAvatarImg} resizeMode="cover" />
-                    <View style={styles.matchInfoCol}>
-                      <Text style={styles.matchNameText}>{creator.name}</Text>
-                      <Text style={styles.matchMetaText}>{creator.role} • {creator.followers}</Text>
+                  <View key={creator.id} style={styles.trackedCreatorCard}>
+                    {/* Creator Header Row */}
+                    <View style={styles.trackedCardHeaderRow}>
+                      <Image source={creator.coverImage} style={styles.trackedAvatarImg} resizeMode="cover" />
+                      <View style={styles.trackedInfoCol}>
+                        <View style={styles.trackedNameRow}>
+                          <Text style={styles.trackedNameText}>{creator.name}</Text>
+                          <View style={styles.streakBadgeMini}>
+                            <Text style={styles.streakBadgeMiniText}>🔥 {creator.streak}d</Text>
+                          </View>
+                        </View>
+                        <Text style={styles.trackedMetaText}>{creator.role} • {creator.followers}</Text>
+                      </View>
+                      <Pressable
+                        style={styles.connectSmallBtn}
+                        onPress={() => {
+                          setConnectedCreators((prev) => [creator, ...prev]);
+                          setLastConnectedCreator(creator);
+                          setShowConnectModal(true);
+                        }}
+                      >
+                        <Text style={styles.connectSmallBtnText}>Accept</Text>
+                      </Pressable>
                     </View>
-                    <Pressable
-                      style={styles.connectSmallBtn}
-                      onPress={() => {
-                        setConnectedCreators((prev) => [creator, ...prev]);
-                        setLastConnectedCreator(creator);
-                        setShowConnectModal(true);
-                      }}
-                    >
-                      <Text style={styles.connectSmallBtnText}>Connect</Text>
-                    </Pressable>
+
+                    {/* Live Tracking Intelligence Box */}
+                    <View style={styles.trackingMetricsBox}>
+                      <View style={styles.trackingMetricRow}>
+                        <Text style={styles.trackingMetricLabel}>📈 Growth Velocity:</Text>
+                        <Text style={styles.trackingMetricValue}>{creator.tracking.growthRate}</Text>
+                      </View>
+                      <View style={styles.trackingMetricRow}>
+                        <Text style={styles.trackingMetricLabel}>⏱ Posting Rhythm:</Text>
+                        <Text style={styles.trackingMetricValue}>{creator.tracking.postingPace}</Text>
+                      </View>
+                      <View style={styles.trackingMetricRow}>
+                        <Text style={styles.trackingMetricLabel}>✨ Best Collab Window:</Text>
+                        <Text style={styles.trackingMetricValue}>{creator.tracking.bestCollabWindow}</Text>
+                      </View>
+                      <View style={styles.trackingStatusRow}>
+                        <Text style={styles.trackingStatusText}>{creator.tracking.statusText}</Text>
+                      </View>
+                    </View>
                   </View>
                 ))
               )}
@@ -1283,7 +1344,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#E8E3FA',
   },
 
-  // SECTION TABS ROW (DECK vs SAVED vs CONNECTED)
+  // SECTION TABS ROW (DECK vs TRACKING vs CONNECTED)
   sectionTabsRow: {
     flexDirection: 'row',
     backgroundColor: 'rgba(237, 232, 252, 0.7)',
@@ -1347,7 +1408,7 @@ const styles = StyleSheet.create({
   cardStackContainer: {
     position: 'relative',
     height: 480,
-    marginBottom: 16,
+    marginBottom: 12,
   },
   bottomCardContainer: {
     position: 'absolute',
@@ -1388,25 +1449,25 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     borderWidth: 2.5,
   },
-  matchStamp: {
+  acceptStamp: {
     left: 20,
     borderColor: '#10B981',
-    backgroundColor: 'rgba(16, 185, 129, 0.18)',
+    backgroundColor: 'rgba(16, 185, 129, 0.2)',
     transform: [{ rotate: '-12deg' }],
   },
-  matchStampText: {
+  acceptStampText: {
     fontSize: 18,
     fontWeight: '900',
     color: '#10B981',
     letterSpacing: 1,
   },
-  passStamp: {
+  declineStamp: {
     right: 20,
     borderColor: '#EF4444',
-    backgroundColor: 'rgba(239, 68, 68, 0.18)',
+    backgroundColor: 'rgba(239, 68, 68, 0.2)',
     transform: [{ rotate: '12deg' }],
   },
-  passStampText: {
+  declineStampText: {
     fontSize: 18,
     fontWeight: '900',
     color: '#EF4444',
@@ -1415,7 +1476,7 @@ const styles = StyleSheet.create({
   saveStamp: {
     alignSelf: 'center',
     borderColor: '#F59E0B',
-    backgroundColor: 'rgba(245, 158, 11, 0.18)',
+    backgroundColor: 'rgba(245, 158, 11, 0.2)',
   },
   saveStampText: {
     fontSize: 18,
@@ -1433,6 +1494,33 @@ const styles = StyleSheet.create({
   creatorCoverImage: {
     width: '100%',
     height: '100%',
+  },
+  onCardSaveBtn: {
+    position: 'absolute',
+    top: 14,
+    right: 14,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    backgroundColor: 'rgba(255, 255, 255, 0.92)',
+    paddingVertical: 5,
+    paddingHorizontal: 10,
+    borderRadius: 100,
+    borderWidth: 1,
+    borderColor: 'rgba(235, 230, 248, 0.9)',
+    zIndex: 50,
+  },
+  onCardSaveBtnActive: {
+    backgroundColor: '#FEF3C7',
+    borderColor: '#FDE68A',
+  },
+  onCardSaveText: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: '#582CDB',
+  },
+  onCardSaveTextActive: {
+    color: '#D97706',
   },
   creatorCoverGradient: {
     position: 'absolute',
@@ -1490,7 +1578,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: 6,
-    marginBottom: 10,
+    marginBottom: 8,
   },
   tagPill: {
     backgroundColor: '#FAF8FF',
@@ -1521,8 +1609,23 @@ const styles = StyleSheet.create({
     color: '#4338CA',
   },
 
+  liveTrackingCardBadge: {
+    backgroundColor: '#F0FDF4',
+    borderWidth: 1,
+    borderColor: '#DCFCE7',
+    paddingVertical: 4,
+    paddingHorizontal: 10,
+    borderRadius: 8,
+    marginBottom: 8,
+  },
+  liveTrackingCardStatus: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: '#15803D',
+  },
+
   collabGoalBox: {
-    marginBottom: 10,
+    marginBottom: 8,
   },
   collabGoalLabel: {
     fontSize: 10,
@@ -1569,66 +1672,27 @@ const styles = StyleSheet.create({
     fontWeight: '500',
   },
 
-  // TACTILE CONTROLS ROW
-  tactileControlsRow: {
+  // GESTURE HINT STRIP
+  gestureHintRow: {
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
-    gap: 16,
-    marginBottom: 22,
+    gap: 8,
+    marginBottom: 20,
+    paddingVertical: 8,
+    backgroundColor: 'rgba(255, 255, 255, 0.8)',
+    borderRadius: 100,
+    borderWidth: 1,
+    borderColor: '#E8E3FA',
   },
-  tactileBtnSmall: {
-    width: 46,
-    height: 46,
-    borderRadius: 23,
-    backgroundColor: '#FFFFFF',
-    borderWidth: 1.2,
-    borderColor: '#E5E1F0',
-    justifyContent: 'center',
-    alignItems: 'center',
-    shadowColor: '#171420',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.08,
-    shadowRadius: 10,
-    elevation: 3,
+  gestureHintText: {
+    fontSize: 11,
+    fontWeight: '600',
+    color: '#7F7894',
   },
-  tactileBtnLarge: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-    justifyContent: 'center',
-    alignItems: 'center',
-    shadowColor: '#582CDB',
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.16,
-    shadowRadius: 14,
-    elevation: 5,
-  },
-  passControlBtn: {
-    backgroundColor: '#FFFFFF',
-    borderWidth: 1.5,
-    borderColor: '#FECDD3',
-  },
-  passControlBtnIcon: {
-    fontSize: 22,
-    color: '#E11D48',
-    fontWeight: '900',
-  },
-  saveControlBtn: {
-    borderColor: '#FDE68A',
-    backgroundColor: '#FEF3C7',
-  },
-  connectControlBtn: {
-    overflow: 'hidden',
-  },
-  connectControlGradient: {
-    width: '100%',
-    height: '100%',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  connectControlBtnIcon: {
-    fontSize: 24,
+  gestureHintDot: {
+    color: '#DDD6FE',
+    fontSize: 12,
   },
 
   // SUGGESTED COLLAB CARD
@@ -1718,10 +1782,119 @@ const styles = StyleSheet.create({
     fontWeight: '800',
   },
 
-  // TAB CONTENT SECTIONS (SAVED / CONNECTED)
+  // TAB CONTENT SECTIONS
   tabContentSection: {
     marginBottom: 20,
   },
+  radarHeaderBanner: {
+    backgroundColor: 'rgba(237, 232, 252, 0.85)',
+    borderRadius: 18,
+    padding: 14,
+    borderWidth: 1.2,
+    borderColor: 'rgba(221, 214, 254, 0.9)',
+    marginBottom: 14,
+  },
+  radarHeaderTitle: {
+    fontSize: 14.5,
+    fontWeight: '800',
+    color: '#582CDB',
+    marginBottom: 4,
+  },
+  radarHeaderSubtitle: {
+    fontSize: 11.5,
+    color: '#524C62',
+    lineHeight: 16,
+  },
+
+  trackedCreatorCard: {
+    backgroundColor: 'rgba(255, 255, 255, 0.95)',
+    borderRadius: 20,
+    padding: 14,
+    borderWidth: 1.2,
+    borderColor: 'rgba(235, 230, 248, 0.95)',
+    marginBottom: 12,
+    shadowColor: '#582CDB',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.06,
+    shadowRadius: 10,
+    elevation: 2,
+  },
+  trackedCardHeaderRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  trackedAvatarImg: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    marginRight: 12,
+  },
+  trackedInfoCol: {
+    flex: 1,
+  },
+  trackedNameRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    marginBottom: 2,
+  },
+  trackedNameText: {
+    fontSize: 15,
+    fontWeight: '800',
+    color: '#171420',
+  },
+  streakBadgeMini: {
+    backgroundColor: '#FEF3C7',
+    paddingVertical: 2,
+    paddingHorizontal: 6,
+    borderRadius: 100,
+  },
+  streakBadgeMiniText: {
+    fontSize: 10,
+    fontWeight: '800',
+    color: '#D97706',
+  },
+  trackedMetaText: {
+    fontSize: 11.5,
+    color: '#7F7894',
+    fontWeight: '500',
+  },
+
+  trackingMetricsBox: {
+    backgroundColor: '#FAF8FF',
+    borderRadius: 14,
+    padding: 12,
+    borderWidth: 1,
+    borderColor: '#E8E3FA',
+  },
+  trackingMetricRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 6,
+  },
+  trackingMetricLabel: {
+    fontSize: 11.5,
+    fontWeight: '600',
+    color: '#7F7894',
+  },
+  trackingMetricValue: {
+    fontSize: 11.5,
+    fontWeight: '800',
+    color: '#171420',
+  },
+  trackingStatusRow: {
+    marginTop: 4,
+    paddingTop: 6,
+    borderTopWidth: 1,
+    borderTopColor: '#EDE8FC',
+  },
+  trackingStatusText: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: '#582CDB',
+  },
+
   emptyStateBox: {
     backgroundColor: 'rgba(255, 255, 255, 0.95)',
     borderRadius: 22,
