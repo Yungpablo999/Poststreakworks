@@ -298,7 +298,7 @@ export default function App() {
 
         {currentScreen === 'schedule' && (
           <ScheduleScreen
-            onBack={() => navigateTo('create')}
+            onBack={() => navigateTo(previousScreen === 'quests' ? 'quests' : 'create')}
             onLogout={handleLogout}
             onNavigateTab={(tab: TabType) => {
               if (tab === 'home') {
@@ -356,6 +356,7 @@ export default function App() {
             onLogout={handleLogout}
             onOpenMissionDetail={() => navigateTo('mission-detail')}
             onOpenCommunityChallenge={() => navigateTo('challenge-detail')}
+            onOpenSchedule={() => navigateTo('schedule')}
             onNavigateTab={(tab: TabType) => {
               if (tab === 'home') {
                 navigateTo('dashboard');
@@ -365,6 +366,8 @@ export default function App() {
                 navigateTo('match');
               } else if (tab === 'growth') {
                 navigateTo('growth');
+              } else if ((tab as string) === 'schedule') {
+                navigateTo('schedule');
               }
             }}
           />

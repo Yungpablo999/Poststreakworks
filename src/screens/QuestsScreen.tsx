@@ -24,6 +24,7 @@ interface QuestsScreenProps {
   onNavigateTab?: (tab: TabType) => void;
   onOpenMissionDetail?: () => void;
   onOpenCommunityChallenge?: () => void;
+  onOpenSchedule?: () => void;
 }
 
 export const QuestsScreen: React.FC<QuestsScreenProps> = ({
@@ -32,6 +33,7 @@ export const QuestsScreen: React.FC<QuestsScreenProps> = ({
   onNavigateTab,
   onOpenMissionDetail,
   onOpenCommunityChallenge,
+  onOpenSchedule,
 }) => {
   const [activeTab, setActiveTab] = useState<TabType>('quests');
   const [completedQuests, setCompletedQuests] = useState<string[]>([]);
@@ -386,7 +388,16 @@ export const QuestsScreen: React.FC<QuestsScreenProps> = ({
               </View>
               <Pressable
                 style={({ pressed }) => [styles.starterQuestActionBtn, pressed && styles.btnPressed]}
-                onPress={() => handleStartStarterQuest('q3', 'Schedule your next post', 50, 'schedule' as TabType)}
+                onPress={() => {
+                  if (Platform.OS !== 'web') {
+                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                  }
+                  if (onOpenSchedule) {
+                    onOpenSchedule();
+                  } else if (onNavigateTab) {
+                    onNavigateTab('schedule' as TabType);
+                  }
+                }}
                 hitSlop={8}
               >
                 <Text style={styles.starterQuestActionText}>Schedule</Text>
