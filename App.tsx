@@ -48,7 +48,7 @@ export default function App() {
         (nextScreen === 'create'
           ? 'Opening Creator Studio'
           : nextScreen === 'match'
-          ? 'Opening Collab Studio'
+          ? 'Scanning Match Radar'
           : nextScreen === 'dashboard'
           ? 'Syncing Creator Feed'
           : nextScreen === 'mission-detail'

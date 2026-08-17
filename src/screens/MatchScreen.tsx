@@ -12,10 +12,9 @@ import {
   TextInput,
   Image,
   Platform,
-  Alert,
   Dimensions,
 } from 'react-native';
-import Svg, { Path, Circle, Rect } from 'react-native-svg';
+import Svg, { Path, Circle } from 'react-native-svg';
 import * as Haptics from 'expo-haptics';
 import { LinearGradient } from 'expo-linear-gradient';
 import { FloatingTabBar, TabType } from '../components/FloatingTabBar';
@@ -30,145 +29,162 @@ interface MatchScreenProps {
   onOpenMessages?: () => void;
 }
 
+interface CreatorProfile {
+  id: string;
+  name: string;
+  role: string;
+  followers: string;
+  location: string;
+  coverImage: any;
+  tags: string[];
+  collabGoal: string;
+  jarvisInsight: string;
+  connected?: boolean;
+  saved?: boolean;
+}
+
+const INITIAL_CREATORS: CreatorProfile[] = [
+  {
+    id: 'creator_1',
+    name: 'Amara Okafor',
+    role: 'Travel Vlogger',
+    followers: '85k Followers',
+    location: 'Lagos, NG',
+    coverImage: require('../../assets/images/amara-creator-cover.jpg'),
+    tags: ['Lifestyle', 'Travel', '44-Day Streak', 'High Consistency'],
+    collabGoal:
+      'Wants to create short-form lifestyle and travel content that focuses on authentic local stories.',
+    jarvisInsight:
+      'Amara matches your audience style, niche and posting rhythm. This could be a strong collab fit.',
+  },
+  {
+    id: 'creator_2',
+    name: 'Tomi Adebayo',
+    role: 'Tech Creator',
+    followers: '156k Followers',
+    location: 'London, UK',
+    coverImage: require('../../assets/images/tomi-avatar.jpg'),
+    tags: ['Tech', 'AI Tools', '52-Day Streak', 'Top 1% Creator'],
+    collabGoal:
+      'Looking to co-produce deep dives on AI creator workflows and gadget reviews.',
+    jarvisInsight:
+      'High overlap in productivity and workflow audience with 4.8x average engagement.',
+  },
+];
+
 export const MatchScreen: React.FC<MatchScreenProps> = ({
   onLogout,
   onNavigateTab,
   onOpenMessages,
 }) => {
-  const activeTab: TabType = 'match';
+  const [activeTab, setActiveTab] = useState<TabType>('match');
+  const [activeFilter, setActiveFilter] = useState<'niche' | 'streak' | 'nearby' | 'ai'>('niche');
+  const [creatorIndex, setCreatorIndex] = useState(0);
+  const [creators, setCreators] = useState<CreatorProfile[]>(INITIAL_CREATORS);
+  const currentCreator = creators[creatorIndex] || creators[0];
 
-  // State
-  const [isBookmarked, setIsBookmarked] = useState(false);
-  const [isConnected, setIsConnected] = useState(false);
-  const [toastMessage, setToastMessage] = useState<string | null>(null);
-
-  // Modals
+  // Modals state
   const [showConnectModal, setShowConnectModal] = useState(false);
-  const [showCollabPlanModal, setShowCollabPlanModal] = useState(false);
+  const [showCollabIdeaModal, setShowCollabIdeaModal] = useState(false);
+  const [showMessageModal, setShowMessageModal] = useState(false);
+  const [selectedMatch, setSelectedMatch] = useState<string | null>(null);
+  const [messageText, setMessageText] = useState('');
   const [showNotificationModal, setShowNotificationModal] = useState(false);
   const [showProfileModal, setShowProfileModal] = useState(false);
-  const [showCompletionModal, setShowCompletionModal] = useState(false);
-
-  // Form Inputs
-  const [collabNote, setCollabNote] = useState(
-    "Hey Amara! Loved your Lagos travel stories. I’m thinking we do a '24 Hours Creating in Lagos' split-screen Reel this weekend. Let's build together!"
-  );
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   // Animations
   const ghostFloatY = useRef(new Animated.Value(0)).current;
-  const ghostScale = useRef(new Animated.Value(1)).current;
+  const cardScale = useRef(new Animated.Value(1)).current;
   const toastOpacity = useRef(new Animated.Value(0)).current;
-  const vennPulse = useRef(new Animated.Value(1)).current;
 
   useEffect(() => {
-    // Floating ghost animation
-    const ghostLoop = Animated.loop(
+    // Ghost floating loop
+    const floatLoop = Animated.loop(
       Animated.sequence([
-        Animated.parallel([
-          Animated.timing(ghostFloatY, {
-            toValue: -5,
-            duration: 1500,
-            useNativeDriver: true,
-          }),
-          Animated.timing(ghostScale, {
-            toValue: 1.04,
-            duration: 1500,
-            useNativeDriver: true,
-          }),
-        ]),
-        Animated.parallel([
-          Animated.timing(ghostFloatY, {
-            toValue: 4,
-            duration: 1500,
-            useNativeDriver: true,
-          }),
-          Animated.timing(ghostScale, {
-            toValue: 0.97,
-            duration: 1500,
-            useNativeDriver: true,
-          }),
-        ]),
-      ])
-    );
-
-    // Venn diagram subtle pulse
-    const vennLoop = Animated.loop(
-      Animated.sequence([
-        Animated.timing(vennPulse, {
-          toValue: 1.05,
-          duration: 1800,
+        Animated.timing(ghostFloatY, {
+          toValue: -5,
+          duration: 1600,
           useNativeDriver: true,
         }),
-        Animated.timing(vennPulse, {
-          toValue: 1,
-          duration: 1800,
+        Animated.timing(ghostFloatY, {
+          toValue: 3,
+          duration: 1600,
           useNativeDriver: true,
         }),
       ])
     );
-
-    ghostLoop.start();
-    vennLoop.start();
-
-    return () => {
-      ghostLoop.stop();
-      vennLoop.stop();
-    };
-  }, [ghostFloatY, ghostScale, vennPulse]);
+    floatLoop.start();
+    return () => floatLoop.stop();
+  }, [ghostFloatY]);
 
   const showToast = (msg: string) => {
     setToastMessage(msg);
-    toastOpacity.setValue(0);
     Animated.sequence([
-      Animated.timing(toastOpacity, {
-        toValue: 1,
-        duration: 200,
-        useNativeDriver: true,
-      }),
+      Animated.timing(toastOpacity, { toValue: 1, duration: 180, useNativeDriver: true }),
       Animated.delay(2200),
-      Animated.timing(toastOpacity, {
-        toValue: 0,
-        duration: 200,
-        useNativeDriver: true,
-      }),
+      Animated.timing(toastOpacity, { toValue: 0, duration: 250, useNativeDriver: true }),
     ]).start(() => setToastMessage(null));
   };
 
   const handleTabPress = (tab: TabType) => {
-    if (tab !== 'match' && onNavigateTab) {
-      if (Platform.OS !== 'web') {
-        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-      }
+    setActiveTab(tab);
+    if (onNavigateTab) {
       onNavigateTab(tab);
     }
   };
 
-  const handleToggleBookmark = () => {
+  const handleConnect = () => {
+    if (Platform.OS !== 'web') {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    }
+    setCreators((prev) =>
+      prev.map((c, i) => (i === creatorIndex ? { ...c, connected: true } : c))
+    );
+    setShowConnectModal(true);
+  };
+
+  const handlePass = () => {
+    if (Platform.OS !== 'web') {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    }
+    Animated.sequence([
+      Animated.timing(cardScale, { toValue: 0.96, duration: 100, useNativeDriver: true }),
+      Animated.timing(cardScale, { toValue: 1, duration: 150, useNativeDriver: true }),
+    ]).start();
+    setCreatorIndex((prev) => (prev + 1) % creators.length);
+    showToast('Skipped creator match.');
+  };
+
+  const handleSave = () => {
     if (Platform.OS !== 'web') {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     }
-    const next = !isBookmarked;
-    setIsBookmarked(next);
-    showToast(next ? '🔖 Saved Amara to Collab Wishlist' : 'Removed from Wishlist');
+    setCreators((prev) =>
+      prev.map((c, i) => (i === creatorIndex ? { ...c, saved: !c.saved } : c))
+    );
+    showToast(currentCreator.saved ? 'Removed from saved creators' : '⭐ Creator saved to bookmarks!');
   };
 
-  const handleSendConnect = () => {
-    setShowConnectModal(false);
-    setIsConnected(true);
-    setShowCompletionModal(true);
+  const handleSendMessage = () => {
+    if (!messageText.trim()) return;
+    const recipient = selectedMatch || 'Creator';
+    setShowMessageModal(false);
+    setMessageText('');
+    showToast(`✓ Message sent to ${recipient}!`);
   };
 
   return (
     <SafeAreaView style={styles.safeArea}>
       <StatusBar barStyle="dark-content" backgroundColor="#FAF9F6" />
       <View style={styles.container}>
-        {/* 1. TOP AIRY APP BAR */}
+        {/* 1. TOP HEADER APP BAR */}
         <View style={styles.headerBar}>
           <View style={styles.headerLeftGroup}>
             <Animated.View
               style={[
                 styles.headerLogoWrapper,
-                { transform: [{ translateY: ghostFloatY }, { scale: ghostScale }] },
+                { transform: [{ translateY: ghostFloatY }] },
               ]}
             >
               <Image
@@ -178,20 +194,17 @@ export const MatchScreen: React.FC<MatchScreenProps> = ({
               />
             </Animated.View>
             <View>
-              <Text style={styles.headerTitle}>Collab Studio</Text>
-              <Text style={styles.headerSubTitle}>AI Match Engine</Text>
+              <Text style={styles.headerTitle}>Match Radar</Text>
+              <Text style={styles.headerSubTitle}>47-Day Streak Active</Text>
             </View>
           </View>
 
           <View style={styles.headerRightGroup}>
-            {/* Message / Chat Bubble */}
+            {/* Message / Chat Bubble Button */}
             <Pressable
               style={({ pressed }) => [styles.headerIconBtn, pressed && styles.btnPressed]}
               hitSlop={8}
-              onPress={() => {
-                if (onOpenMessages) onOpenMessages();
-                else showToast('💬 Messages');
-              }}
+              onPress={() => showToast('💬 Match Messages')}
             >
               <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
                 <Path
@@ -229,7 +242,7 @@ export const MatchScreen: React.FC<MatchScreenProps> = ({
               <View style={styles.unreadBadgeDot} />
             </Pressable>
 
-            {/* User Profile Person Icon */}
+            {/* Top-Right: User Profile Person Icon */}
             <Pressable
               style={({ pressed }) => [styles.headerProfileBtn, pressed && styles.btnPressed]}
               hitSlop={6}
@@ -249,418 +262,461 @@ export const MatchScreen: React.FC<MatchScreenProps> = ({
           </View>
         </View>
 
-        {/* 2. MAIN SCROLLABLE CONTENT WITH SPACIOUS PADDING */}
+        {/* 2. MAIN SCROLLABLE CONTENT WITH GENEROUS BREATHING ROOM */}
         <ScrollView
           style={styles.scrollView}
           contentContainerStyle={styles.scrollContent}
           showsVerticalScrollIndicator={false}
         >
-          {/* SECTION A: HERO CREATOR CARD WITH HIGH-RES PORTRAIT */}
-          <View style={styles.heroCardContainer}>
-            <View style={styles.heroImageWrapper}>
+          {/* SECTION 1: MATCH HEADER & BADGE */}
+          <View style={styles.pageHeaderSection}>
+            <View style={styles.pageBadgeRow}>
+              <LinearGradient
+                colors={['#784DF0', '#582CDB']}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                style={styles.matchPillGradient}
+              >
+                <Text style={styles.matchPillText}>MATCH</Text>
+              </LinearGradient>
+
+              <View style={styles.freeDiscoveryBadge}>
+                <Text style={styles.freeDiscoveryText}>Free Discovery</Text>
+              </View>
+            </View>
+
+            <Text style={styles.pageHeadline}>Find creators worth building with.</Text>
+            <Text style={styles.pageSubtitle}>
+              Discover creators who match your niche, style and growth goals.
+            </Text>
+
+            {/* Match Allowance Strip */}
+            <View style={styles.allowanceCard}>
+              <View style={styles.allowanceRow}>
+                <Text style={styles.allowanceItem}>⭐ 5 free matches left today</Text>
+                <Text style={styles.allowanceItem}>👥 2 mutual matches</Text>
+              </View>
+              <View style={styles.allowanceTagsRow}>
+                <View style={styles.allowanceChip}><Text style={styles.allowanceChipText}>Lifestyle</Text></View>
+                <View style={styles.allowanceChip}><Text style={styles.allowanceChipText}>Nearby</Text></View>
+                <View style={[styles.allowanceChip, styles.allowanceChipGold]}>
+                  <Text style={styles.allowanceChipTextGold}>⚡ 47-Day Streak</Text>
+                </View>
+              </View>
+            </View>
+          </View>
+
+          {/* SECTION 2: SEGMENTED FILTER PILLS */}
+          <View style={styles.filterPillsRow}>
+            <Pressable
+              style={[styles.filterPill, activeFilter === 'niche' && styles.filterPillActive]}
+              onPress={() => setActiveFilter('niche')}
+            >
+              <Text style={[styles.filterPillText, activeFilter === 'niche' && styles.filterPillTextActive]}>
+                Same Niche
+              </Text>
+            </Pressable>
+
+            <Pressable
+              style={[styles.filterPill, activeFilter === 'streak' && styles.filterPillActive]}
+              onPress={() => setActiveFilter('streak')}
+            >
+              <Text style={[styles.filterPillText, activeFilter === 'streak' && styles.filterPillTextActive]}>
+                Similar Streak
+              </Text>
+            </Pressable>
+
+            <Pressable
+              style={[styles.filterPill, activeFilter === 'nearby' && styles.filterPillActive]}
+              onPress={() => setActiveFilter('nearby')}
+            >
+              <Text style={[styles.filterPillText, activeFilter === 'nearby' && styles.filterPillTextActive]}>
+                Nearby
+              </Text>
+            </Pressable>
+
+            <Pressable
+              style={[styles.filterPill, activeFilter === 'ai' && styles.filterPillActive]}
+              onPress={() => setActiveFilter('ai')}
+            >
+              <Text style={[styles.filterPillText, activeFilter === 'ai' && styles.filterPillTextActive]}>
+                AI Pick
+              </Text>
+            </Pressable>
+          </View>
+
+          {/* SECTION 3: HERO CREATOR MATCH CARD (AMARA OKAFOR) */}
+          <Animated.View style={[{ transform: [{ scale: cardScale }] }, styles.creatorCardWrapper]}>
+            <LiquidGlassBackground
+              borderRadius={28}
+              light={0.94}
+              refraction={26}
+              frost={16}
+              dispersion={0.2}
+              style={styles.creatorCardGlass}
+            >
+              {/* Creator Photo Header with Overlay */}
+              <View style={styles.creatorCoverContainer}>
+                <Image
+                  source={currentCreator.coverImage}
+                  style={styles.creatorCoverImage}
+                  resizeMode="cover"
+                />
+                <LinearGradient
+                  colors={['transparent', 'rgba(23, 20, 32, 0.85)']}
+                  style={styles.creatorCoverGradient}
+                >
+                  <View style={styles.creatorCoverInfoRow}>
+                    <View style={styles.creatorCoverTextCol}>
+                      <Text style={styles.creatorHeroName}>{currentCreator.name}</Text>
+                      <Text style={styles.creatorHeroMeta}>
+                        {currentCreator.role} • {currentCreator.followers}
+                      </Text>
+                    </View>
+                    <View style={styles.locationPill}>
+                      <Text style={styles.locationPillText}>📍 {currentCreator.location}</Text>
+                    </View>
+                  </View>
+                </LinearGradient>
+              </View>
+
+              {/* Creator Tags */}
+              <View style={styles.creatorBodySection}>
+                <View style={styles.creatorTagsRow}>
+                  {currentCreator.tags.map((tag, idx) => (
+                    <View
+                      key={idx}
+                      style={[
+                        styles.tagPill,
+                        tag.includes('Streak') && styles.tagPillStreak,
+                        tag.includes('High') && styles.tagPillHigh,
+                      ]}
+                    >
+                      <Text
+                        style={[
+                          styles.tagPillText,
+                          tag.includes('Streak') && styles.tagPillTextStreak,
+                          tag.includes('High') && styles.tagPillTextHigh,
+                        ]}
+                      >
+                        {tag}
+                      </Text>
+                    </View>
+                  ))}
+                </View>
+
+                {/* Collab Goal */}
+                <View style={styles.collabGoalBox}>
+                  <Text style={styles.collabGoalLabel}>COLLAB GOAL</Text>
+                  <Text style={styles.collabGoalText}>{currentCreator.collabGoal}</Text>
+                </View>
+
+                {/* Jarvis Insight Box */}
+                <View style={styles.jarvisInsightBox}>
+                  <Image
+                    source={require('../../assets/images/jarvis-ghost-clean.png')}
+                    style={styles.jarvisInsightGhost}
+                    resizeMode="contain"
+                  />
+                  <View style={styles.jarvisInsightContent}>
+                    <Text style={styles.jarvisInsightTitle}>JARVIS INSIGHT</Text>
+                    <Text style={styles.jarvisInsightText}>{currentCreator.jarvisInsight}</Text>
+                  </View>
+                </View>
+
+                {/* Card Action Buttons */}
+                <View style={styles.creatorActionRow}>
+                  <Pressable
+                    style={({ pressed }) => [styles.passBtn, pressed && styles.btnPressed]}
+                    onPress={handlePass}
+                  >
+                    <Text style={styles.passBtnText}>Pass</Text>
+                  </Pressable>
+
+                  <Pressable
+                    style={({ pressed }) => [styles.saveBtn, pressed && styles.btnPressed]}
+                    onPress={handleSave}
+                  >
+                    <Text style={styles.saveBtnText}>{currentCreator.saved ? 'Saved' : 'Save'}</Text>
+                  </Pressable>
+
+                  <Pressable
+                    style={({ pressed }) => [styles.connectPrimaryBtn, pressed && styles.btnPressed]}
+                    onPress={handleConnect}
+                  >
+                    <LinearGradient
+                      colors={['#7048EC', '#582CDB']}
+                      start={{ x: 0, y: 0 }}
+                      end={{ x: 1, y: 1 }}
+                      style={styles.connectBtnGradient}
+                    >
+                      <Text style={styles.connectBtnText}>
+                        {currentCreator.connected ? '✓ Connected' : 'Connect'}
+                      </Text>
+                    </LinearGradient>
+                  </Pressable>
+                </View>
+              </View>
+            </LiquidGlassBackground>
+          </Animated.View>
+
+          {/* SECTION 4: JARVIS SUGGESTED COLLAB CARD */}
+          <View style={styles.suggestedCollabCard}>
+            <View style={styles.collabHeaderRow}>
+              <View style={styles.collabHeaderLeft}>
+                <Image
+                  source={require('../../assets/images/jarvis-ghost-clean.png')}
+                  style={styles.collabGhostIcon}
+                  resizeMode="contain"
+                />
+                <Text style={styles.collabHeaderTitle}>JARVIS SUGGESTED COLLAB</Text>
+              </View>
+              <View style={styles.potencyBadge}>
+                <Text style={styles.potencyBadgeText}>📈 High potency</Text>
+              </View>
+            </View>
+
+            <Text style={styles.collabHeadline}>‘Day in Lagos’ co-created Reel</Text>
+            <View style={styles.collabMetaRow}>
+              <View style={styles.collabMetaChip}><Text style={styles.collabMetaChipText}>Reel</Text></View>
+              <View style={styles.collabMetaChip}><Text style={styles.collabMetaChipText}>7:30 PM Peak</Text></View>
+            </View>
+
+            <Pressable
+              style={({ pressed }) => [styles.buildIdeaBtn, pressed && styles.btnPressed]}
+              onPress={() => setShowCollabIdeaModal(true)}
+            >
+              <LinearGradient
+                colors={['#784DF0', '#582CDB']}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                style={styles.buildIdeaGradient}
+              >
+                <Text style={styles.buildIdeaBtnText}>⚡ Build Idea</Text>
+              </LinearGradient>
+            </Pressable>
+          </View>
+
+          {/* SECTION 5: YOUR MATCHES */}
+          <View style={styles.yourMatchesSection}>
+            <View style={styles.sectionHeaderRow}>
+              <Text style={styles.sectionHeading}>Your Matches</Text>
+              <Pressable onPress={() => showToast('Viewing all 14 matches')}>
+                <Text style={styles.viewAllText}>View all</Text>
+              </Pressable>
+            </View>
+
+            {/* Match 1: Tomi Adebayo */}
+            <View style={styles.matchItemCard}>
               <Image
-                source={require('../../assets/images/amara-portrait.jpg')}
-                style={styles.heroCoverImage}
+                source={require('../../assets/images/tomi-avatar.jpg')}
+                style={styles.matchAvatarImg}
                 resizeMode="cover"
               />
-              {/* Subtle top/bottom glass overlay */}
-              <LinearGradient
-                colors={['rgba(0,0,0,0.15)', 'transparent', 'rgba(0,0,0,0.45)']}
-                style={StyleSheet.absoluteFill}
-              />
-
-              {/* Floating Top Pill */}
-              <View style={styles.availabilityPill}>
-                <View style={styles.greenLiveDot} />
-                <Text style={styles.availabilityText}>Available This Week</Text>
+              <View style={styles.matchInfoCol}>
+                <Text style={styles.matchNameText}>Tomi Adebayo</Text>
+                <Text style={styles.matchMetaText}>Tech • 156K followers</Text>
               </View>
-            </View>
-
-            {/* Bottom Glass Panel on Card */}
-            <View style={styles.heroInfoPanel}>
-              <View style={styles.heroStatsRow}>
-                <View>
-                  <Text style={styles.heroStatValue}>85K</Text>
-                  <Text style={styles.heroStatLabel}>Followers</Text>
-                </View>
-                <View style={styles.statDivider} />
-                <View>
-                  <Text style={[styles.heroStatValue, { color: '#582CDB' }]}>High (96%)</Text>
-                  <Text style={styles.heroStatLabel}>Compatibility</Text>
-                </View>
-              </View>
-            </View>
-          </View>
-
-          {/* SECTION B: NICHE CHIPS */}
-          <View style={styles.nicheChipsRow}>
-            {['Lifestyle', 'Travel', 'Storytelling', 'Short-form Video'].map((tag, idx) => (
-              <View key={idx} style={styles.nicheChip}>
-                <Text style={styles.nicheChipText}>{tag}</Text>
-              </View>
-            ))}
-          </View>
-
-          {/* SECTION C: WHY THIS MATCH FITS (AI ANALYSIS) */}
-          <LiquidGlassBackground
-            borderRadius={24}
-            light={0.92}
-            refraction={24}
-            tint="light"
-            accentColor="#582CDB"
-            style={styles.sectionGlassCard}
-          >
-            <View style={styles.cardHeaderRow}>
-              <Text style={styles.sparkleIcon}>✦</Text>
-              <Text style={styles.cardSectionTitle}>Why This Match Fits</Text>
-            </View>
-            <Text style={styles.cardBodyText}>
-              Amara's audience overlaps significantly with your lifestyle and creator journey
-              content. This match could support a high-converting short-form collaboration.
-            </Text>
-
-            <View style={styles.pillListRow}>
-              <View style={styles.purplePill}>
-                <Text style={styles.purplePillText}>Audience Overlap</Text>
-              </View>
-              <View style={styles.purplePill}>
-                <Text style={styles.purplePillText}>Similar Content Style</Text>
-              </View>
-              <View style={styles.purplePill}>
-                <Text style={styles.purplePillText}>Strong Posting Rhythm</Text>
-              </View>
-            </View>
-          </LiquidGlassBackground>
-
-          {/* SECTION D: COLLAB IDEA STUDIO */}
-          <LiquidGlassBackground
-            borderRadius={24}
-            light={0.92}
-            refraction={26}
-            tint="light"
-            accentColor="#582CDB"
-            goldAccentColor="#F59E0B"
-            style={styles.sectionGlassCard}
-          >
-            <View style={styles.cardHeaderRow}>
-              <Text style={styles.ideaBulbIcon}>💡</Text>
-              <Text style={styles.cardSectionTitle}>Collab Idea</Text>
-            </View>
-
-            <Text style={styles.collabIdeaTitle}>“24 Hours Creating in Lagos”</Text>
-
-            <View style={styles.collabDetailsList}>
-              <View style={styles.collabDetailItem}>
-                <Text style={styles.collabDetailKey}>Hook</Text>
-                <Text style={styles.collabDetailVal}>Two creators, one city, zero sleep.</Text>
-              </View>
-              <View style={styles.collabDetailItem}>
-                <Text style={styles.collabDetailKey}>BTS</Text>
-                <Text style={styles.collabDetailVal}>Phone and natural lighting.</Text>
-              </View>
-              <View style={styles.collabDetailItem}>
-                <Text style={styles.collabDetailKey}>Lesson</Text>
-                <Text style={styles.collabDetailVal}>How we both built our streaks today.</Text>
-              </View>
-            </View>
-
-            <View style={styles.collabMetaRow}>
-              <View style={styles.collabMetaTag}>
-                <Text style={styles.collabMetaText}>Reel</Text>
-              </View>
-              <View style={styles.collabMetaTag}>
-                <Text style={styles.collabMetaText}>30–45 Sec</Text>
-              </View>
-              <View style={styles.collabMetaTag}>
-                <Text style={styles.collabMetaText}>Sat 2 PM</Text>
-              </View>
-            </View>
-
-            <Pressable
-              style={({ pressed }) => [styles.buildPlanBtn, pressed && styles.btnPressed]}
-              onPress={() => setShowCollabPlanModal(true)}
-            >
-              <LinearGradient
-                colors={['#7048EC', '#582CDB']}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 1 }}
-                style={styles.buildPlanGradient}
+              <Pressable
+                style={({ pressed }) => [styles.messageBtn, pressed && styles.btnPressed]}
+                onPress={() => {
+                  setSelectedMatch('Tomi Adebayo');
+                  setShowMessageModal(true);
+                }}
               >
-                <Text style={styles.buildPlanBtnText}>Build Collab Plan</Text>
-              </LinearGradient>
-            </Pressable>
-          </LiquidGlassBackground>
-
-          {/* SECTION E: 2-COLUMN KEY STATS */}
-          <View style={styles.statsGridRow}>
-            {/* AUDIENCE STAT */}
-            <View style={styles.statBoxCard}>
-              <View style={styles.statBoxHeader}>
-                <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
-                  <Path
-                    d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"
-                    stroke="#582CDB"
-                    strokeWidth="2.2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                  <Circle cx="9" cy="7" r="4" stroke="#582CDB" strokeWidth="2.2" />
-                </Svg>
-                <Text style={styles.statBoxKey}>AUDIENCE</Text>
-              </View>
-              <Text style={styles.statBoxNumber}>85,000+</Text>
+                <Text style={styles.messageBtnText}>Message</Text>
+              </Pressable>
             </View>
 
-            {/* STREAK STAT */}
-            <View style={styles.statBoxCard}>
-              <View style={styles.statBoxHeader}>
-                <Text style={{ fontSize: 16 }}>🔥</Text>
-                <Text style={styles.statBoxKey}>STREAK</Text>
+            {/* Match 2: Zainab Okafor */}
+            <View style={styles.matchItemCard}>
+              <Image
+                source={require('../../assets/images/zainab-avatar.jpg')}
+                style={styles.matchAvatarImg}
+                resizeMode="cover"
+              />
+              <View style={styles.matchInfoCol}>
+                <Text style={styles.matchNameText}>Zainab Okafor</Text>
+                <Text style={styles.matchMetaText}>Lifestyle • 52K followers</Text>
               </View>
-              <Text style={[styles.statBoxNumber, { color: '#F59E0B' }]}>44 Days</Text>
+              <Pressable
+                style={({ pressed }) => [styles.messageBtn, pressed && styles.btnPressed]}
+                onPress={() => {
+                  setSelectedMatch('Zainab Okafor');
+                  setShowMessageModal(true);
+                }}
+              >
+                <Text style={styles.messageBtnText}>Message</Text>
+              </Pressable>
             </View>
           </View>
 
-          {/* SECTION F: AUDIENCE CORRELATION (VENN DIAGRAM) */}
-          <LiquidGlassBackground
-            borderRadius={24}
-            light={0.92}
-            refraction={22}
-            tint="light"
-            accentColor="#582CDB"
-            goldAccentColor="#F59E0B"
-            style={styles.sectionGlassCard}
-          >
-            <Text style={styles.vennSectionTitle}>AUDIENCE CORRELATION</Text>
-
-            {/* Venn Graphic */}
-            <View style={styles.vennGraphicContainer}>
-              <Animated.View style={[styles.vennCirclesWrapper, { transform: [{ scale: vennPulse }] }]}>
-                {/* Left Circle: You */}
-                <View style={styles.vennCircleLeft}>
-                  <Text style={styles.vennCircleLabel}>YOU</Text>
-                </View>
-
-                {/* Right Circle: Amara */}
-                <View style={styles.vennCircleRight}>
-                  <Text style={styles.vennCircleLabelRight}>AMARA</Text>
-                </View>
-
-                {/* Overlap Pill */}
-                <View style={styles.vennOverlapCapsule}>
-                  <Text style={styles.vennOverlapText}>76%</Text>
-                </View>
-              </Animated.View>
-            </View>
-
-            {/* Affinity Breakdown Row */}
-            <View style={styles.affinityRow}>
-              <View style={styles.affinityCard}>
-                <Text style={styles.affinityLabel}>LIFESTYLE</Text>
-                <Text style={styles.affinityValueGreen}>High (88%)</Text>
+          {/* SECTION 6: CREATOR SQUADS PRO BANNER */}
+          <View style={styles.squadsBannerCard}>
+            <LinearGradient
+              colors={['#582CDB', '#3F1AA8']}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={styles.squadsGradient}
+            >
+              <View style={styles.squadsTitleRow}>
+                <Svg width={20} height={20} viewBox="0 0 24 24" fill="#FFFFFF">
+                  <Circle cx="9" cy="7" r="4" />
+                  <Path d="M3 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2" />
+                  <Circle cx="17" cy="11" r="3" />
+                  <Path d="M16 3.13a4 4 0 0 1 0 7.75" />
+                </Svg>
+                <Text style={styles.squadsTitleText}>Creator Squads</Text>
               </View>
-              <View style={styles.affinityCard}>
-                <Text style={styles.affinityLabel}>TRAVEL</Text>
-                <Text style={styles.affinityValuePurple}>Medium (74%)</Text>
-              </View>
-            </View>
-          </LiquidGlassBackground>
 
-          {/* SECTION G: JARVIS AI INSIGHT */}
-          <View style={styles.jarvisInsightCard}>
+              <Text style={styles.squadsDescText}>
+                Collaborate at scale. Join private circles of creators in your niche to share resources, feedback, and growth hacks.
+              </Text>
+
+              <View style={styles.squadsFooterRow}>
+                <Text style={styles.squadsAvailableText}>Available on Pro</Text>
+                <Pressable
+                  style={({ pressed }) => [styles.unlockSquadsBtn, pressed && styles.btnPressed]}
+                  onPress={() => showToast('✨ Pro Squads unlocked!')}
+                >
+                  <LinearGradient
+                    colors={['#FDE047', '#EAB308', '#CA8A04']}
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 1, y: 1 }}
+                    style={styles.goldBtnGradient}
+                  >
+                    <Text style={styles.unlockSquadsBtnText}>Unlock Creator Squads</Text>
+                  </LinearGradient>
+                </Pressable>
+              </View>
+            </LinearGradient>
+          </View>
+
+          {/* SECTION 7: JARVIS ENGINE WISDOM CARD */}
+          <View style={styles.wisdomCard}>
             <Image
               source={require('../../assets/images/jarvis-ghost-clean.png')}
-              style={styles.jarvisGhostIcon}
+              style={styles.wisdomGhostIcon}
               resizeMode="contain"
             />
-            <Text style={styles.jarvisInsightTag}>JARVIS INSIGHT</Text>
-            <Text style={styles.jarvisInsightBody}>
-              Amara's content style matches your creator journey niche. A simple day-in-the-life
-              collab could generate 3x normal reach for both audiences.
-            </Text>
-          </View>
-
-          {/* SECTION H: READINESS CHECKLIST */}
-          <LiquidGlassBackground
-            borderRadius={24}
-            light={0.92}
-            refraction={22}
-            tint="light"
-            accentColor="#10B981"
-            style={styles.sectionGlassCard}
-          >
-            <View style={styles.readinessHeaderRow}>
-              <Text style={styles.cardSectionTitle}>Readiness</Text>
-              <View style={styles.readyGreenBadge}>
-                <Text style={styles.readyGreenBadgeText}>✓ Ready</Text>
-              </View>
+            <View style={styles.wisdomContentCol}>
+              <Text style={styles.wisdomQuote}>
+                “Creators with similar niches and consistent posting habits tend to collaborate better.”
+              </Text>
+              <Text style={styles.wisdomAuthor}>— Jarvis Engine</Text>
             </View>
-
-            <View style={styles.readinessList}>
-              <View style={styles.readinessItem}>
-                <Text style={styles.readinessIcon}>👤</Text>
-                <Text style={styles.readinessText}>Profile verified & complete</Text>
-              </View>
-              <View style={styles.readinessItem}>
-                <Text style={styles.readinessIcon}>⚡</Text>
-                <Text style={styles.readinessText}>Active high-performance streak (44d)</Text>
-              </View>
-              <View style={styles.readinessItem}>
-                <Text style={styles.readinessIcon}>💬</Text>
-                <Text style={styles.readinessText}>High response likelihood (&lt; 2 hours)</Text>
-              </View>
-            </View>
-          </LiquidGlassBackground>
-
-          {/* SECTION I: STICKY BOTTOM ACTION ROW */}
-          <View style={styles.bottomActionRow}>
-            <Pressable
-              style={({ pressed }) => [styles.connectMainBtn, pressed && styles.btnPressed]}
-              onPress={() => setShowConnectModal(true)}
-            >
-              <LinearGradient
-                colors={isConnected ? ['#10B981', '#059669'] : ['#7048EC', '#582CDB']}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 1 }}
-                style={styles.connectMainGradient}
-              >
-                <Text style={styles.connectMainBtnText}>
-                  {isConnected ? '✓ Connection Sent' : 'Connect'}
-                </Text>
-              </LinearGradient>
-            </Pressable>
-
-            <Pressable
-              style={({ pressed }) => [
-                styles.bookmarkBtn,
-                isBookmarked && styles.bookmarkBtnActive,
-                pressed && styles.btnPressed,
-              ]}
-              onPress={handleToggleBookmark}
-              hitSlop={6}
-            >
-              <Svg width={20} height={20} viewBox="0 0 24 24" fill={isBookmarked ? '#582CDB' : 'none'}>
-                <Path
-                  d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"
-                  stroke={isBookmarked ? '#582CDB' : '#171420'}
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </Svg>
-            </Pressable>
           </View>
         </ScrollView>
 
-        {/* 3. FLOATING LIQUID GLASS BOTTOM NAVIGATION BAR */}
-        <FloatingTabBar activeTab={activeTab} onTabPress={handleTabPress} />
-
-        {/* TOAST CONFIRMATION */}
+        {/* 3. TOAST OVERLAY */}
         {toastMessage && (
           <Animated.View style={[styles.toastContainer, { opacity: toastOpacity }]}>
             <Text style={styles.toastText}>{toastMessage}</Text>
           </Animated.View>
         )}
 
-        {/* MODAL 1: SEND COLLAB CONNECT REQUEST */}
-        <Modal
+        {/* 4. FLOATING LIQUID GLASS BOTTOM NAVIGATION BAR */}
+        <FloatingTabBar activeTab={activeTab} onTabPress={handleTabPress} />
+
+        {/* 5. ANIMATED COMPLETION CELEBRATION MODAL (ON CONNECT) */}
+        <AnimatedCompletionModal
           visible={showConnectModal}
+          title="Connection Request Sent!"
+          subtitle={`You connected with ${currentCreator.name}. +40 XP awarded to your streak!`}
+          badgeText="CREATOR CONNECTED"
+          xpEarned={40}
+          streakCount={48}
+          actionText="Continue Exploring"
+          onDismiss={() => setShowConnectModal(false)}
+        />
+
+        {/* 6. BUILD COLLAB IDEA MODAL */}
+        <Modal
+          visible={showCollabIdeaModal}
           transparent={true}
           animationType="fade"
-          onRequestClose={() => setShowConnectModal(false)}
+          onRequestClose={() => setShowCollabIdeaModal(false)}
         >
           <View style={styles.modalOverlay}>
             <View style={styles.modalCard}>
-              <View style={styles.modalPillBadge}>
-                <Text style={styles.modalPillBadgeText}>AI MATCH • 96% COMPATIBILITY</Text>
+              <View style={styles.modalBadgePill}>
+                <Text style={styles.modalBadgeText}>COLLAB WORKSPACE</Text>
               </View>
-
-              <Text style={styles.modalTitle}>Connect with Amara</Text>
+              <Text style={styles.modalTitle}>‘Day in Lagos’ Co-created Reel</Text>
               <Text style={styles.modalSubtitle}>
-                Send a personalized pitch note or use Jarvis AI's recommended collab hook.
+                A dynamic split-screen / alternating POV short-form Reel comparing creative routines in Lagos.
               </Text>
 
-              <Text style={styles.modalInputLabel}>COLLAB PITCH NOTE</Text>
+              <View style={styles.ideaScriptBox}>
+                <Text style={styles.ideaScriptHeading}>Suggested Script Blueprint:</Text>
+                <Text style={styles.ideaScriptStep}>1. Hook (0-3s): “2 creators, 1 city — how we create on the go.”</Text>
+                <Text style={styles.ideaScriptStep}>2. Body (4-15s): Fast cuts between your gear & Amara’s travel footage.</Text>
+                <Text style={styles.ideaScriptStep}>3. CTA (16-20s): Drop top travel tips in comments.</Text>
+              </View>
+
+              <View style={styles.modalBtnRow}>
+                <Pressable
+                  style={styles.modalCancelBtn}
+                  onPress={() => setShowCollabIdeaModal(false)}
+                >
+                  <Text style={styles.modalCancelBtnText}>Close</Text>
+                </Pressable>
+                <Pressable
+                  style={styles.modalPrimaryBtn}
+                  onPress={() => {
+                    setShowCollabIdeaModal(false);
+                    showToast('✓ Collab draft added to Create schedule!');
+                  }}
+                >
+                  <Text style={styles.modalPrimaryBtnText}>Add to Schedule</Text>
+                </Pressable>
+              </View>
+            </View>
+          </View>
+        </Modal>
+
+        {/* 7. DIRECT MESSAGE MODAL */}
+        <Modal
+          visible={showMessageModal}
+          transparent={true}
+          animationType="fade"
+          onRequestClose={() => setShowMessageModal(false)}
+        >
+          <View style={styles.modalOverlay}>
+            <View style={styles.modalCard}>
+              <Text style={styles.modalTitle}>Message {selectedMatch || 'Creator'}</Text>
+              <Text style={styles.modalSubtitle}>Start a collaborative dialogue directly.</Text>
+
               <TextInput
                 style={styles.modalTextAreaInput}
-                placeholder="Write your collaboration note..."
+                placeholder="Hey, loved your latest post! Let’s collaborate on a co-created Reel..."
                 placeholderTextColor="#A39CB5"
-                value={collabNote}
-                onChangeText={setCollabNote}
+                value={messageText}
+                onChangeText={setMessageText}
                 multiline={true}
-                numberOfLines={4}
+                numberOfLines={3}
                 textAlignVertical="top"
               />
 
               <View style={styles.modalBtnRow}>
                 <Pressable
                   style={styles.modalCancelBtn}
-                  onPress={() => setShowConnectModal(false)}
+                  onPress={() => setShowMessageModal(false)}
                 >
                   <Text style={styles.modalCancelBtnText}>Cancel</Text>
                 </Pressable>
                 <Pressable
                   style={styles.modalPrimaryBtn}
-                  onPress={handleSendConnect}
+                  onPress={handleSendMessage}
                 >
-                  <Text style={styles.modalPrimaryBtnText}>Send Request</Text>
+                  <Text style={styles.modalPrimaryBtnText}>Send Message</Text>
                 </Pressable>
               </View>
             </View>
           </View>
         </Modal>
 
-        {/* MODAL 2: BUILD COLLAB PLAN BLUEPRINT */}
-        <Modal
-          visible={showCollabPlanModal}
-          transparent={true}
-          animationType="fade"
-          onRequestClose={() => setShowCollabPlanModal(false)}
-        >
-          <View style={styles.modalOverlay}>
-            <View style={styles.modalCard}>
-              <View style={styles.modalPillBadge}>
-                <Text style={styles.modalPillBadgeText}>COLLAB BLUEPRINT</Text>
-              </View>
-
-              <Text style={styles.modalTitle}>24 Hours Creating in Lagos</Text>
-              <Text style={styles.modalSubtitle}>3-Step Co-Creation Production Plan</Text>
-
-              <View style={styles.planStepBox}>
-                <Text style={styles.planStepNumber}>STEP 1: HOOK (0-5s)</Text>
-                <Text style={styles.planStepBody}>
-                  Fast-cut split screen: You waking up in mainland, Amara on Victoria Island.
-                </Text>
-              </View>
-
-              <View style={styles.planStepBox}>
-                <Text style={styles.planStepNumber}>STEP 2: STORY (5-30s)</Text>
-                <Text style={styles.planStepBody}>
-                  Meeting up for afternoon content sprint & sharing streak tips.
-                </Text>
-              </View>
-
-              <View style={styles.planStepBox}>
-                <Text style={styles.planStepNumber}>STEP 3: CTA (30-45s)</Text>
-                <Text style={styles.planStepBody}>
-                  Challenge both creator audiences to lock in their Day 1 streak.
-                </Text>
-              </View>
-
-              <Pressable
-                style={[styles.modalPrimaryBtn, { width: '100%', marginTop: 12 }]}
-                onPress={() => {
-                  setShowCollabPlanModal(false);
-                  showToast('✓ Collab blueprint exported to Studio Schedule!');
-                }}
-              >
-                <Text style={styles.modalPrimaryBtnText}>Export to Schedule</Text>
-              </Pressable>
-            </View>
-          </View>
-        </Modal>
-
-        {/* MODAL 3: NOTIFICATIONS */}
+        {/* 8. NOTIFICATIONS MODAL */}
         <Modal
           visible={showNotificationModal}
           transparent={true}
@@ -669,13 +725,13 @@ export const MatchScreen: React.FC<MatchScreenProps> = ({
         >
           <View style={styles.modalOverlay}>
             <View style={styles.modalCard}>
-              <Text style={styles.modalTitle}>Match Notifications</Text>
-              <Text style={styles.modalSubtitle}>Live Collab Engine Alerts</Text>
+              <Text style={styles.modalTitle}>Match Radar Alerts</Text>
+              <Text style={styles.modalSubtitle}>Live creator recommendations</Text>
 
               <View style={styles.notifCard}>
-                <Text style={styles.notifTitle}>✨ New Match: Amara Okafor</Text>
+                <Text style={styles.notifTitle}>✨ 2 Mutual Match Sparks</Text>
                 <Text style={styles.notifBody}>
-                  Amara's audience has an 76% overlap with your creator niche. Ready to co-create.
+                  Amara Okafor and Tomi Adebayo are active in your creative circle today.
                 </Text>
               </View>
 
@@ -689,7 +745,7 @@ export const MatchScreen: React.FC<MatchScreenProps> = ({
           </View>
         </Modal>
 
-        {/* MODAL 4: PROFILE */}
+        {/* 9. PROFILE MODAL */}
         <Modal
           visible={showProfileModal}
           transparent={true}
@@ -698,21 +754,16 @@ export const MatchScreen: React.FC<MatchScreenProps> = ({
         >
           <View style={styles.modalOverlay}>
             <View style={styles.modalCard}>
-              <Svg width={48} height={48} viewBox="0 0 24 24" fill="none">
-                <Path
-                  d="M20 21V19C20 17.9 19.5 16.9 18.7 16.2C17.9 15.5 16.9 15 15.8 15H8.2C7.1 15 6.1 15.5 5.3 16.2C4.5 16.9 4 17.9 4 19V21"
-                  stroke="#582CDB"
-                  strokeWidth="2.2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-                <Circle cx="12" cy="7" r="4" stroke="#582CDB" strokeWidth="2.2" />
-              </Svg>
-              <Text style={[styles.modalTitle, { marginTop: 10 }]}>Creator Profile</Text>
+              <Image
+                source={require('../../assets/images/jarvis-ghost-clean.png')}
+                style={{ width: 64, height: 64, marginBottom: 8 }}
+                resizeMode="contain"
+              />
+              <Text style={styles.modalTitle}>Creator Profile</Text>
               <Text style={styles.modalSubtitle}>47-Day Streak • Free Plan</Text>
 
               <Pressable
-                style={[styles.modalPrimaryBtn, { width: '100%', marginTop: 14 }]}
+                style={[styles.modalPrimaryBtn, { width: '100%', marginTop: 12 }]}
                 onPress={() => {
                   setShowProfileModal(false);
                   if (onLogout) onLogout();
@@ -730,18 +781,6 @@ export const MatchScreen: React.FC<MatchScreenProps> = ({
             </View>
           </View>
         </Modal>
-
-        {/* MODAL 5: ANIMATED COMPLETION MODAL */}
-        <AnimatedCompletionModal
-          visible={showCompletionModal}
-          title="Collab Request Sent!"
-          subtitle="Your pitch note has been delivered to Amara Okafor. Day 48 streak is safe!"
-          badgeText="COLLAB PITCH SENT"
-          xpEarned={50}
-          streakCount={48}
-          actionText="Awesome, Back to Matches"
-          onDismiss={() => setShowCompletionModal(false)}
-        />
       </View>
     </SafeAreaView>
   );
@@ -756,8 +795,7 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#FAF9F6',
   },
-
-  // 1. TOP AIRY APP BAR
+  // 1. TOP HEADER APP BAR
   headerBar: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -776,21 +814,26 @@ const styles = StyleSheet.create({
     width: 38,
     height: 38,
     borderRadius: 19,
-    backgroundColor: '#FAF8FF',
-    borderWidth: 1,
-    borderColor: '#EDE8FC',
+    backgroundColor: 'rgba(255, 255, 255, 0.95)',
     justifyContent: 'center',
     alignItems: 'center',
+    shadowColor: '#582CDB',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.12,
+    shadowRadius: 10,
+    elevation: 3,
+    borderWidth: 1,
+    borderColor: 'rgba(235, 230, 248, 0.9)',
   },
   headerGhostLogo: {
-    width: 32,
-    height: 32,
+    width: 30,
+    height: 30,
   },
   headerTitle: {
     fontSize: 16,
     fontWeight: '800',
     color: '#171420',
-    letterSpacing: -0.3,
+    letterSpacing: -0.2,
   },
   headerSubTitle: {
     fontSize: 11,
@@ -800,37 +843,49 @@ const styles = StyleSheet.create({
   headerRightGroup: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 10,
+    gap: 8,
   },
   headerIconBtn: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: '#FFFFFF',
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    backgroundColor: 'rgba(255, 255, 255, 0.92)',
     borderWidth: 1,
-    borderColor: '#EFEBF8',
+    borderColor: 'rgba(235, 230, 248, 0.9)',
     justifyContent: 'center',
     alignItems: 'center',
     position: 'relative',
+    shadowColor: '#171420',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.04,
+    shadowRadius: 6,
+    elevation: 2,
   },
   headerProfileBtn: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: '#EDE8FC',
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    backgroundColor: 'rgba(237, 232, 252, 0.95)',
     borderWidth: 1.2,
-    borderColor: '#DDD6FE',
+    borderColor: 'rgba(221, 214, 254, 0.9)',
     justifyContent: 'center',
     alignItems: 'center',
+    shadowColor: '#582CDB',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 6,
+    elevation: 2,
   },
   unreadBadgeDot: {
     position: 'absolute',
-    top: 7,
+    top: 8,
     right: 8,
-    width: 6,
-    height: 6,
-    borderRadius: 3,
-    backgroundColor: '#EF4444',
+    width: 7,
+    height: 7,
+    borderRadius: 3.5,
+    backgroundColor: '#E11D48',
+    borderWidth: 1.2,
+    borderColor: '#FFFFFF',
   },
 
   // 2. MAIN SCROLLABLE CONTENT
@@ -839,471 +894,581 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     paddingHorizontal: 20,
-    paddingTop: 8,
-    paddingBottom: 130, // Clearance for FloatingTabBar
-    gap: 16,
+    paddingTop: 10,
+    paddingBottom: 130,
   },
 
-  // SECTION A: HERO CREATOR CARD
-  heroCardContainer: {
-    borderRadius: 28,
-    overflow: 'hidden',
-    backgroundColor: '#FFFFFF',
-    borderWidth: 1.2,
-    borderColor: 'rgba(235, 230, 248, 0.95)',
-    shadowColor: '#582CDB',
-    shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 0.08,
-    shadowRadius: 20,
-    elevation: 4,
+  // PAGE HEADER SECTION
+  pageHeaderSection: {
+    marginBottom: 16,
   },
-  heroImageWrapper: {
-    width: '100%',
-    height: 380,
-    position: 'relative',
-  },
-  heroCoverImage: {
-    width: '100%',
-    height: '100%',
-  },
-  availabilityPill: {
-    position: 'absolute',
-    bottom: 16,
-    left: 16,
+  pageBadgeRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
-    backgroundColor: 'rgba(255, 255, 255, 0.92)',
-    paddingVertical: 6,
+    justifyContent: 'space-between',
+    marginBottom: 8,
+  },
+  matchPillGradient: {
+    paddingVertical: 5,
     paddingHorizontal: 12,
     borderRadius: 100,
   },
-  greenLiveDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: '#10B981',
-  },
-  availabilityText: {
-    fontSize: 12,
-    fontWeight: '700',
-    color: '#171420',
-  },
-  heroInfoPanel: {
-    padding: 16,
-    backgroundColor: '#FFFFFF',
-  },
-  heroStatsRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 20,
-  },
-  heroStatValue: {
-    fontSize: 16,
+  matchPillText: {
+    fontSize: 10.5,
     fontWeight: '800',
-    color: '#F59E0B',
-    marginBottom: 2,
+    color: '#FFFFFF',
+    letterSpacing: 0.8,
   },
-  heroStatLabel: {
+  freeDiscoveryBadge: {
+    backgroundColor: 'rgba(240, 236, 250, 0.85)',
+    paddingVertical: 4,
+    paddingHorizontal: 10,
+    borderRadius: 100,
+    borderWidth: 1,
+    borderColor: 'rgba(221, 214, 254, 0.7)',
+  },
+  freeDiscoveryText: {
     fontSize: 11,
     fontWeight: '600',
     color: '#7F7894',
   },
-  statDivider: {
-    width: 1,
-    height: 24,
-    backgroundColor: '#EFEBF8',
+  pageHeadline: {
+    fontSize: 24,
+    fontWeight: '900',
+    color: '#171420',
+    letterSpacing: -0.5,
+    lineHeight: 30,
+    marginBottom: 6,
+  },
+  pageSubtitle: {
+    fontSize: 13,
+    fontWeight: '500',
+    color: '#7F7894',
+    lineHeight: 18,
+    marginBottom: 14,
   },
 
-  // SECTION B: NICHE CHIPS
-  nicheChipsRow: {
+  // Match Allowance Strip
+  allowanceCard: {
+    backgroundColor: 'rgba(255, 255, 255, 0.95)',
+    borderRadius: 18,
+    padding: 14,
+    borderWidth: 1.2,
+    borderColor: 'rgba(235, 230, 248, 0.95)',
+    shadowColor: '#582CDB',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.05,
+    shadowRadius: 14,
+    elevation: 2,
+  },
+  allowanceRow: {
     flexDirection: 'row',
-    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+    marginBottom: 10,
+  },
+  allowanceItem: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#171420',
+  },
+  allowanceTagsRow: {
+    flexDirection: 'row',
     gap: 8,
   },
-  nicheChip: {
-    backgroundColor: '#FFFFFF',
-    borderWidth: 1,
-    borderColor: '#EDE8FC',
+  allowanceChip: {
+    backgroundColor: '#FAF8FF',
+    paddingVertical: 4,
+    paddingHorizontal: 10,
     borderRadius: 100,
-    paddingVertical: 6,
-    paddingHorizontal: 14,
+    borderWidth: 1,
+    borderColor: '#E8E3FA',
   },
-  nicheChipText: {
-    fontSize: 12,
+  allowanceChipGold: {
+    backgroundColor: '#FEF3C7',
+    borderColor: '#FDE68A',
+  },
+  allowanceChipText: {
+    fontSize: 11,
     fontWeight: '600',
-    color: '#524C62',
+    color: '#582CDB',
+  },
+  allowanceChipTextGold: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: '#D97706',
   },
 
-  // GLASS CARD COMMON
-  sectionGlassCard: {
-    padding: 20,
+  // SECTION 2: FILTER PILLS
+  filterPillsRow: {
+    flexDirection: 'row',
+    gap: 8,
+    marginBottom: 18,
+  },
+  filterPill: {
+    paddingVertical: 7,
+    paddingHorizontal: 13,
+    borderRadius: 100,
+    backgroundColor: 'rgba(255, 255, 255, 0.92)',
     borderWidth: 1.2,
     borderColor: 'rgba(235, 230, 248, 0.95)',
   },
-  cardHeaderRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    marginBottom: 10,
+  filterPillActive: {
+    backgroundColor: '#582CDB',
+    borderColor: '#582CDB',
   },
-  sparkleIcon: {
-    fontSize: 16,
-    color: '#582CDB',
+  filterPillText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#7F7894',
   },
-  ideaBulbIcon: {
-    fontSize: 16,
-  },
-  cardSectionTitle: {
-    fontSize: 16,
+  filterPillTextActive: {
+    color: '#FFFFFF',
     fontWeight: '800',
-    color: '#171420',
-    letterSpacing: -0.2,
-  },
-  cardBodyText: {
-    fontSize: 13,
-    color: '#524C62',
-    lineHeight: 19,
-    marginBottom: 14,
-  },
-  pillListRow: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 8,
-  },
-  purplePill: {
-    backgroundColor: '#FAF8FF',
-    borderWidth: 1,
-    borderColor: '#DDD6FE',
-    borderRadius: 100,
-    paddingVertical: 5,
-    paddingHorizontal: 12,
-  },
-  purplePillText: {
-    fontSize: 11,
-    fontWeight: '700',
-    color: '#582CDB',
   },
 
-  // SECTION D: COLLAB IDEA STUDIO
-  collabIdeaTitle: {
-    fontSize: 15.5,
-    fontWeight: '800',
-    color: '#171420',
-    marginBottom: 12,
+  // SECTION 3: HERO CREATOR CARD
+  creatorCardWrapper: {
+    marginBottom: 20,
   },
-  collabDetailsList: {
-    gap: 8,
-    marginBottom: 14,
-  },
-  collabDetailItem: {
-    flexDirection: 'row',
-    gap: 8,
-  },
-  collabDetailKey: {
-    fontSize: 12.5,
-    fontWeight: '800',
-    color: '#582CDB',
-    width: 50,
-  },
-  collabDetailVal: {
-    fontSize: 12.5,
-    color: '#524C62',
-    flex: 1,
-    lineHeight: 18,
-  },
-  collabMetaRow: {
-    flexDirection: 'row',
-    gap: 8,
-    marginBottom: 16,
-  },
-  collabMetaTag: {
-    backgroundColor: '#F3F0FA',
-    borderRadius: 8,
-    paddingVertical: 4,
-    paddingHorizontal: 10,
-  },
-  collabMetaText: {
-    fontSize: 11,
-    fontWeight: '700',
-    color: '#524C62',
-  },
-  buildPlanBtn: {
-    width: '100%',
-    height: 44,
-    borderRadius: 12,
+  creatorCardGlass: {
     overflow: 'hidden',
   },
-  buildPlanGradient: {
+  creatorCoverContainer: {
+    height: 190,
+    position: 'relative',
+    backgroundColor: '#EDE8FC',
+  },
+  creatorCoverImage: {
+    width: '100%',
+    height: '100%',
+  },
+  creatorCoverGradient: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    bottom: 0,
+    height: 110,
+    justifyContent: 'flex-end',
+    padding: 16,
+  },
+  creatorCoverInfoRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-end',
+  },
+  creatorCoverTextCol: {
+    flex: 1,
+  },
+  creatorHeroName: {
+    fontSize: 21,
+    fontWeight: '900',
+    color: '#FFFFFF',
+    letterSpacing: -0.3,
+    textShadowColor: 'rgba(0, 0, 0, 0.5)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 4,
+  },
+  creatorHeroMeta: {
+    fontSize: 12.5,
+    fontWeight: '600',
+    color: 'rgba(255, 255, 255, 0.9)',
+    marginTop: 2,
+  },
+  locationPill: {
+    backgroundColor: 'rgba(254, 243, 199, 0.95)',
+    paddingVertical: 5,
+    paddingHorizontal: 10,
+    borderRadius: 100,
+    borderWidth: 1,
+    borderColor: 'rgba(253, 230, 138, 0.9)',
+  },
+  locationPillText: {
+    fontSize: 11,
+    fontWeight: '800',
+    color: '#92400E',
+  },
+
+  creatorBodySection: {
+    padding: 16,
+  },
+  creatorTagsRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 6,
+    marginBottom: 14,
+  },
+  tagPill: {
+    backgroundColor: '#FAF8FF',
+    paddingVertical: 4,
+    paddingHorizontal: 10,
+    borderRadius: 100,
+    borderWidth: 1,
+    borderColor: '#E8E3FA',
+  },
+  tagPillStreak: {
+    backgroundColor: '#EDE8FC',
+    borderColor: '#DDD6FE',
+  },
+  tagPillHigh: {
+    backgroundColor: '#F5F3FF',
+    borderColor: '#E0E7FF',
+  },
+  tagPillText: {
+    fontSize: 11,
+    fontWeight: '600',
+    color: '#582CDB',
+  },
+  tagPillTextStreak: {
+    color: '#582CDB',
+    fontWeight: '800',
+  },
+  tagPillTextHigh: {
+    color: '#4338CA',
+  },
+
+  collabGoalBox: {
+    marginBottom: 14,
+  },
+  collabGoalLabel: {
+    fontSize: 10.5,
+    fontWeight: '800',
+    color: '#7F7894',
+    letterSpacing: 0.6,
+    marginBottom: 4,
+  },
+  collabGoalText: {
+    fontSize: 13,
+    color: '#171420',
+    lineHeight: 18,
+    fontWeight: '500',
+  },
+
+  jarvisInsightBox: {
+    flexDirection: 'row',
+    gap: 10,
+    backgroundColor: 'rgba(245, 243, 255, 0.85)',
+    borderRadius: 16,
+    padding: 12,
+    borderWidth: 1,
+    borderColor: 'rgba(221, 214, 254, 0.7)',
+    marginBottom: 16,
+  },
+  jarvisInsightGhost: {
+    width: 24,
+    height: 24,
+    marginTop: 2,
+  },
+  jarvisInsightContent: {
+    flex: 1,
+  },
+  jarvisInsightTitle: {
+    fontSize: 10.5,
+    fontWeight: '800',
+    color: '#582CDB',
+    letterSpacing: 0.6,
+    marginBottom: 2,
+  },
+  jarvisInsightText: {
+    fontSize: 12,
+    color: '#4B4360',
+    lineHeight: 16,
+    fontWeight: '500',
+  },
+
+  creatorActionRow: {
+    flexDirection: 'row',
+    gap: 8,
+  },
+  passBtn: {
+    flex: 1,
+    height: 44,
+    borderRadius: 14,
+    borderWidth: 1.2,
+    borderColor: '#E5E1F0',
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#FAF9F6',
+  },
+  passBtnText: {
+    fontSize: 13.5,
+    fontWeight: '700',
+    color: '#7F7894',
+  },
+  saveBtn: {
+    flex: 1,
+    height: 44,
+    borderRadius: 14,
+    borderWidth: 1.2,
+    borderColor: '#DDD6FE',
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#FAF8FF',
+  },
+  saveBtnText: {
+    fontSize: 13.5,
+    fontWeight: '700',
+    color: '#582CDB',
+  },
+  connectPrimaryBtn: {
+    flex: 2,
+    height: 44,
+    borderRadius: 14,
+    overflow: 'hidden',
+  },
+  connectBtnGradient: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
   },
-  buildPlanBtnText: {
+  connectBtnText: {
+    fontSize: 14,
+    fontWeight: '800',
     color: '#FFFFFF',
-    fontSize: 13.5,
-    fontWeight: '700',
   },
 
-  // SECTION E: 2-COLUMN STATS
-  statsGridRow: {
-    flexDirection: 'row',
-    gap: 12,
-  },
-  statBoxCard: {
-    flex: 1,
-    backgroundColor: '#FFFFFF',
-    borderRadius: 20,
+  // SECTION 4: JARVIS SUGGESTED COLLAB CARD
+  suggestedCollabCard: {
+    backgroundColor: 'rgba(255, 255, 255, 0.95)',
+    borderRadius: 22,
     padding: 16,
     borderWidth: 1.2,
     borderColor: 'rgba(235, 230, 248, 0.95)',
+    shadowColor: '#582CDB',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.06,
+    shadowRadius: 16,
+    elevation: 2,
+    marginBottom: 20,
   },
-  statBoxHeader: {
+  collabHeaderRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  collabHeaderLeft: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
-    marginBottom: 8,
   },
-  statBoxKey: {
+  collabGhostIcon: {
+    width: 16,
+    height: 16,
+  },
+  collabHeaderTitle: {
     fontSize: 10.5,
     fontWeight: '800',
     color: '#7F7894',
     letterSpacing: 0.6,
   },
-  statBoxNumber: {
-    fontSize: 20,
-    fontWeight: '800',
-    color: '#171420',
-  },
-
-  // SECTION F: VENN DIAGRAM
-  vennSectionTitle: {
-    fontSize: 12,
-    fontWeight: '800',
-    color: '#7F7894',
-    letterSpacing: 1,
-    textAlign: 'center',
-    marginBottom: 16,
-  },
-  vennGraphicContainer: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginVertical: 10,
-  },
-  vennCirclesWrapper: {
-    position: 'relative',
-    width: 220,
-    height: 120,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  vennCircleLeft: {
-    position: 'absolute',
-    left: 15,
-    width: 110,
-    height: 110,
-    borderRadius: 55,
-    backgroundColor: 'rgba(112, 72, 236, 0.25)',
-    borderWidth: 2,
-    borderColor: '#784DF0',
-    justifyContent: 'center',
-    alignItems: 'flex-start',
-    paddingLeft: 20,
-  },
-  vennCircleRight: {
-    position: 'absolute',
-    right: 15,
-    width: 110,
-    height: 110,
-    borderRadius: 55,
-    backgroundColor: 'rgba(245, 158, 11, 0.22)',
-    borderWidth: 2,
-    borderColor: '#F59E0B',
-    justifyContent: 'center',
-    alignItems: 'flex-end',
-    paddingRight: 14,
-  },
-  vennCircleLabel: {
-    fontSize: 10,
-    fontWeight: '800',
-    color: '#582CDB',
-  },
-  vennCircleLabelRight: {
-    fontSize: 10,
-    fontWeight: '800',
-    color: '#B45309',
-  },
-  vennOverlapCapsule: {
-    backgroundColor: '#FFFFFF',
+  potencyBadge: {
+    backgroundColor: '#EDE8FC',
+    paddingVertical: 3,
+    paddingHorizontal: 8,
     borderRadius: 100,
-    paddingVertical: 5,
-    paddingHorizontal: 12,
-    borderWidth: 1.5,
-    borderColor: '#DDD6FE',
-    shadowColor: '#582CDB',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.15,
-    shadowRadius: 8,
-    elevation: 3,
   },
-  vennOverlapText: {
-    fontSize: 13,
-    fontWeight: '800',
+  potencyBadgeText: {
+    fontSize: 10.5,
+    fontWeight: '700',
     color: '#582CDB',
   },
-  affinityRow: {
-    flexDirection: 'row',
-    gap: 12,
-    marginTop: 16,
-  },
-  affinityCard: {
-    flex: 1,
-    backgroundColor: '#FFFFFF',
-    borderRadius: 14,
-    paddingVertical: 10,
-    paddingHorizontal: 14,
-    borderWidth: 1,
-    borderColor: '#EDE8FC',
-    alignItems: 'center',
-  },
-  affinityLabel: {
-    fontSize: 10,
-    fontWeight: '800',
-    color: '#7F7894',
-    letterSpacing: 0.5,
-    marginBottom: 2,
-  },
-  affinityValueGreen: {
-    fontSize: 12.5,
-    fontWeight: '800',
-    color: '#10B981',
-  },
-  affinityValuePurple: {
-    fontSize: 12.5,
-    fontWeight: '800',
-    color: '#582CDB',
-  },
-
-  // SECTION G: JARVIS INSIGHT
-  jarvisInsightCard: {
-    backgroundColor: 'rgba(237, 232, 252, 0.65)',
-    borderRadius: 24,
-    padding: 20,
-    alignItems: 'center',
-    borderWidth: 1.2,
-    borderColor: 'rgba(221, 214, 254, 0.8)',
-  },
-  jarvisGhostIcon: {
-    width: 44,
-    height: 44,
+  collabHeadline: {
+    fontSize: 17,
+    fontWeight: '900',
+    color: '#171420',
+    letterSpacing: -0.2,
     marginBottom: 8,
   },
-  jarvisInsightTag: {
-    fontSize: 11,
-    fontWeight: '800',
-    color: '#582CDB',
-    letterSpacing: 0.8,
-    marginBottom: 6,
-  },
-  jarvisInsightBody: {
-    fontSize: 12.5,
-    color: '#524C62',
-    textAlign: 'center',
-    lineHeight: 18,
-  },
-
-  // SECTION H: READINESS
-  readinessHeaderRow: {
+  collabMetaRow: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    gap: 8,
     marginBottom: 14,
   },
-  readyGreenBadge: {
-    backgroundColor: 'rgba(16, 185, 129, 0.12)',
+  collabMetaChip: {
+    backgroundColor: '#FAF8FF',
     paddingVertical: 4,
     paddingHorizontal: 10,
     borderRadius: 100,
+    borderWidth: 1,
+    borderColor: '#E8E3FA',
   },
-  readyGreenBadgeText: {
+  collabMetaChipText: {
     fontSize: 11,
-    fontWeight: '800',
-    color: '#10B981',
+    fontWeight: '700',
+    color: '#582CDB',
   },
-  readinessList: {
-    gap: 10,
-  },
-  readinessItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-  },
-  readinessIcon: {
-    fontSize: 14,
-  },
-  readinessText: {
-    fontSize: 12.5,
-    fontWeight: '600',
-    color: '#524C62',
-  },
-
-  // SECTION I: BOTTOM STICKY BAR
-  bottomActionRow: {
-    flexDirection: 'row',
-    gap: 12,
-    marginTop: 6,
-  },
-  connectMainBtn: {
-    flex: 1,
-    height: 52,
-    borderRadius: 16,
+  buildIdeaBtn: {
+    height: 44,
+    borderRadius: 14,
     overflow: 'hidden',
-    shadowColor: '#582CDB',
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.25,
-    shadowRadius: 16,
-    elevation: 6,
   },
-  connectMainGradient: {
+  buildIdeaGradient: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
   },
-  connectMainBtnText: {
+  buildIdeaBtnText: {
     color: '#FFFFFF',
-    fontSize: 15,
+    fontSize: 13.5,
     fontWeight: '800',
   },
-  bookmarkBtn: {
-    width: 52,
-    height: 52,
-    borderRadius: 16,
-    backgroundColor: '#FFFFFF',
-    borderWidth: 1.2,
-    borderColor: '#EDE8FC',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  bookmarkBtnActive: {
-    backgroundColor: '#EDE8FC',
-    borderColor: '#DDD6FE',
-  },
 
-  // TOAST
-  toastContainer: {
-    position: 'absolute',
-    top: 54,
-    alignSelf: 'center',
-    backgroundColor: '#171420',
-    paddingVertical: 8,
-    paddingHorizontal: 16,
-    borderRadius: 100,
-    zIndex: 999,
+  // SECTION 5: YOUR MATCHES
+  yourMatchesSection: {
+    marginBottom: 20,
   },
-  toastText: {
-    color: '#FFFFFF',
+  sectionHeaderRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  sectionHeading: {
+    fontSize: 18,
+    fontWeight: '900',
+    color: '#171420',
+    letterSpacing: -0.2,
+  },
+  viewAllText: {
+    fontSize: 12.5,
+    fontWeight: '700',
+    color: '#582CDB',
+  },
+  matchItemCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(255, 255, 255, 0.95)',
+    borderRadius: 18,
+    padding: 12,
+    borderWidth: 1.2,
+    borderColor: 'rgba(235, 230, 248, 0.95)',
+    marginBottom: 10,
+    shadowColor: '#171420',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.04,
+    shadowRadius: 8,
+    elevation: 2,
+  },
+  matchAvatarImg: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    marginRight: 12,
+  },
+  matchInfoCol: {
+    flex: 1,
+  },
+  matchNameText: {
+    fontSize: 14,
+    fontWeight: '800',
+    color: '#171420',
+    marginBottom: 2,
+  },
+  matchMetaText: {
+    fontSize: 11.5,
+    color: '#7F7894',
+    fontWeight: '500',
+  },
+  messageBtn: {
+    backgroundColor: '#FAF8FF',
+    borderWidth: 1,
+    borderColor: '#DDD6FE',
+    borderRadius: 10,
+    paddingVertical: 6,
+    paddingHorizontal: 14,
+  },
+  messageBtnText: {
     fontSize: 12,
     fontWeight: '700',
+    color: '#582CDB',
+  },
+
+  // SECTION 6: CREATOR SQUADS PRO
+  squadsBannerCard: {
+    borderRadius: 24,
+    overflow: 'hidden',
+    marginBottom: 20,
+    shadowColor: '#582CDB',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.18,
+    shadowRadius: 20,
+    elevation: 6,
+  },
+  squadsGradient: {
+    padding: 20,
+  },
+  squadsTitleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginBottom: 8,
+  },
+  squadsTitleText: {
+    fontSize: 18,
+    fontWeight: '900',
+    color: '#FFFFFF',
+    letterSpacing: -0.2,
+  },
+  squadsDescText: {
+    fontSize: 12.5,
+    color: 'rgba(255, 255, 255, 0.88)',
+    lineHeight: 18,
+    fontWeight: '500',
+    marginBottom: 16,
+  },
+  squadsFooterRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  squadsAvailableText: {
+    fontSize: 11.5,
+    fontWeight: '700',
+    color: 'rgba(255, 255, 255, 0.75)',
+  },
+  unlockSquadsBtn: {
+    borderRadius: 100,
+    overflow: 'hidden',
+  },
+  goldBtnGradient: {
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+  },
+  unlockSquadsBtnText: {
+    fontSize: 12,
+    fontWeight: '900',
+    color: '#171420',
+  },
+
+  // SECTION 7: JARVIS ENGINE WISDOM
+  wisdomCard: {
+    flexDirection: 'row',
+    gap: 12,
+    backgroundColor: 'rgba(255, 255, 255, 0.85)',
+    borderRadius: 18,
+    padding: 14,
+    borderWidth: 1,
+    borderColor: 'rgba(235, 230, 248, 0.9)',
+    alignItems: 'center',
+  },
+  wisdomGhostIcon: {
+    width: 28,
+    height: 28,
+  },
+  wisdomContentCol: {
+    flex: 1,
+  },
+  wisdomQuote: {
+    fontSize: 11.5,
+    color: '#4B4360',
+    fontStyle: 'italic',
+    lineHeight: 16,
+    marginBottom: 3,
+  },
+  wisdomAuthor: {
+    fontSize: 10.5,
+    fontWeight: '800',
+    color: '#582CDB',
   },
 
   // MODALS
@@ -1312,65 +1477,85 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(23, 20, 32, 0.55)',
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 20,
+    padding: 24,
+    zIndex: 9999,
   },
   modalCard: {
     width: '100%',
-    maxWidth: 340,
+    maxWidth: 320,
     backgroundColor: '#FFFFFF',
     borderRadius: 24,
-    padding: 24,
+    padding: 22,
     alignItems: 'center',
     borderWidth: 1.2,
     borderColor: 'rgba(235, 230, 248, 0.95)',
+    shadowColor: '#582CDB',
+    shadowOffset: { width: 0, height: 12 },
+    shadowOpacity: 0.18,
+    shadowRadius: 28,
+    elevation: 10,
   },
-  modalPillBadge: {
-    backgroundColor: 'rgba(237, 232, 252, 0.9)',
+  modalBadgePill: {
+    backgroundColor: '#EDE8FC',
     paddingVertical: 4,
-    paddingHorizontal: 12,
+    paddingHorizontal: 10,
     borderRadius: 100,
     marginBottom: 8,
   },
-  modalPillBadgeText: {
-    fontSize: 10,
+  modalBadgeText: {
+    fontSize: 10.5,
     fontWeight: '800',
     color: '#582CDB',
-    letterSpacing: 0.6,
   },
   modalTitle: {
     fontSize: 18,
-    fontWeight: '800',
+    fontWeight: '900',
     color: '#171420',
+    letterSpacing: -0.2,
     marginBottom: 4,
     textAlign: 'center',
   },
   modalSubtitle: {
     fontSize: 12,
+    fontWeight: '500',
     color: '#7F7894',
     textAlign: 'center',
     lineHeight: 16,
+    marginBottom: 14,
+  },
+  ideaScriptBox: {
+    width: '100%',
+    backgroundColor: '#FAF8FF',
+    borderRadius: 14,
+    padding: 12,
+    borderWidth: 1,
+    borderColor: '#DDD6FE',
     marginBottom: 16,
   },
-  modalInputLabel: {
-    fontSize: 10.5,
+  ideaScriptHeading: {
+    fontSize: 11.5,
     fontWeight: '800',
-    color: '#7F7894',
-    alignSelf: 'flex-start',
+    color: '#582CDB',
     marginBottom: 6,
-    letterSpacing: 0.5,
+  },
+  ideaScriptStep: {
+    fontSize: 11.5,
+    color: '#171420',
+    lineHeight: 16,
+    marginBottom: 4,
   },
   modalTextAreaInput: {
     width: '100%',
-    height: 90,
+    height: 76,
     borderWidth: 1.2,
     borderColor: 'rgba(221, 214, 254, 0.9)',
     borderRadius: 12,
     paddingHorizontal: 12,
     paddingVertical: 10,
-    fontSize: 13,
+    fontSize: 13.5,
     color: '#171420',
-    backgroundColor: '#FAF8FF',
-    marginBottom: 16,
+    backgroundColor: 'rgba(250, 248, 255, 0.8)',
+    marginBottom: 14,
   },
   modalBtnRow: {
     flexDirection: 'row',
@@ -1379,20 +1564,22 @@ const styles = StyleSheet.create({
   },
   modalCancelBtn: {
     flex: 1,
-    height: 44,
+    height: 42,
     borderRadius: 12,
-    backgroundColor: '#F3F0FA',
+    borderWidth: 1.2,
+    borderColor: '#E5E1F0',
     justifyContent: 'center',
     alignItems: 'center',
+    backgroundColor: '#FAF9F6',
   },
   modalCancelBtnText: {
     fontSize: 13,
     fontWeight: '700',
-    color: '#524C62',
+    color: '#7F7894',
   },
   modalPrimaryBtn: {
-    flex: 1.4,
-    height: 44,
+    flex: 1,
+    height: 42,
     borderRadius: 12,
     backgroundColor: '#582CDB',
     justifyContent: 'center',
@@ -1400,35 +1587,15 @@ const styles = StyleSheet.create({
   },
   modalPrimaryBtnText: {
     fontSize: 13,
-    fontWeight: '700',
+    fontWeight: '800',
     color: '#FFFFFF',
   },
-  planStepBox: {
-    width: '100%',
-    backgroundColor: '#FAF8FF',
-    borderRadius: 12,
-    padding: 12,
-    borderWidth: 1,
-    borderColor: '#EDE8FC',
-    marginBottom: 8,
-  },
-  planStepNumber: {
-    fontSize: 10.5,
-    fontWeight: '800',
-    color: '#582CDB',
-    marginBottom: 2,
-  },
-  planStepBody: {
-    fontSize: 12,
-    color: '#524C62',
-    lineHeight: 16,
-  },
   notifCard: {
-    backgroundColor: '#FAF8FF',
+    backgroundColor: 'rgba(250, 248, 255, 0.85)',
     borderRadius: 14,
     padding: 12,
     borderWidth: 1,
-    borderColor: '#EDE8FC',
+    borderColor: 'rgba(237, 232, 252, 0.9)',
     marginBottom: 10,
   },
   notifTitle: {
@@ -1441,6 +1608,21 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: '#524C62',
     lineHeight: 16,
+  },
+  toastContainer: {
+    position: 'absolute',
+    bottom: 110,
+    alignSelf: 'center',
+    backgroundColor: 'rgba(23, 20, 32, 0.92)',
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 100,
+    zIndex: 9999,
+  },
+  toastText: {
+    color: '#FFFFFF',
+    fontSize: 13,
+    fontWeight: '700',
   },
   btnPressed: {
     opacity: 0.88,
