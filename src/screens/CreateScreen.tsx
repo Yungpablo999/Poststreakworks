@@ -101,6 +101,137 @@ const NOTIFICATIONS: NotificationItem[] = [
   },
 ];
 
+// Live Animated Studio Audio Waveform Visualizer
+const LiveVoiceWaveform: React.FC = () => {
+  const bar0 = useRef(new Animated.Value(0.35)).current;
+  const bar1 = useRef(new Animated.Value(0.55)).current;
+  const bar2 = useRef(new Animated.Value(0.75)).current;
+  const bar3 = useRef(new Animated.Value(0.95)).current;
+  const bar4 = useRef(new Animated.Value(1.0)).current;
+  const bar5 = useRef(new Animated.Value(0.85)).current;
+  const bar6 = useRef(new Animated.Value(0.65)).current;
+  const bar7 = useRef(new Animated.Value(0.45)).current;
+  const bar8 = useRef(new Animated.Value(0.3)).current;
+
+  const auraOpacity = useRef(new Animated.Value(0.35)).current;
+
+  useEffect(() => {
+    const createWaveLoop = (
+      anim: Animated.Value,
+      minVal: number,
+      maxVal: number,
+      midVal: number,
+      duration: number,
+      delay: number
+    ) => {
+      return Animated.loop(
+        Animated.sequence([
+          Animated.timing(anim, {
+            toValue: maxVal,
+            duration: duration * 0.4,
+            delay: delay,
+            useNativeDriver: true,
+          }),
+          Animated.timing(anim, {
+            toValue: minVal,
+            duration: duration * 0.35,
+            useNativeDriver: true,
+          }),
+          Animated.timing(anim, {
+            toValue: midVal,
+            duration: duration * 0.25,
+            useNativeDriver: true,
+          }),
+        ])
+      );
+    };
+
+    const l0 = createWaveLoop(bar0, 0.2, 0.65, 0.35, 620, 0);
+    const l1 = createWaveLoop(bar1, 0.28, 0.85, 0.5, 540, 60);
+    const l2 = createWaveLoop(bar2, 0.38, 0.95, 0.65, 480, 120);
+    const l3 = createWaveLoop(bar3, 0.42, 1.0, 0.72, 430, 80);
+    const l4 = createWaveLoop(bar4, 0.52, 1.0, 0.82, 390, 40); // Center gold peak
+    const l5 = createWaveLoop(bar5, 0.4, 0.95, 0.7, 460, 100);
+    const l6 = createWaveLoop(bar6, 0.32, 0.88, 0.58, 520, 140);
+    const l7 = createWaveLoop(bar7, 0.25, 0.75, 0.42, 580, 80);
+    const l8 = createWaveLoop(bar8, 0.18, 0.58, 0.3, 640, 20);
+
+    const auraLoop = Animated.loop(
+      Animated.sequence([
+        Animated.timing(auraOpacity, {
+          toValue: 0.8,
+          duration: 900,
+          useNativeDriver: true,
+        }),
+        Animated.timing(auraOpacity, {
+          toValue: 0.35,
+          duration: 900,
+          useNativeDriver: true,
+        }),
+      ])
+    );
+
+    l0.start();
+    l1.start();
+    l2.start();
+    l3.start();
+    l4.start();
+    l5.start();
+    l6.start();
+    l7.start();
+    l8.start();
+    auraLoop.start();
+
+    return () => {
+      l0.stop();
+      l1.stop();
+      l2.stop();
+      l3.stop();
+      l4.stop();
+      l5.stop();
+      l6.stop();
+      l7.stop();
+      l8.stop();
+      auraLoop.stop();
+    };
+  }, [bar0, bar1, bar2, bar3, bar4, bar5, bar6, bar7, bar8, auraOpacity]);
+
+  const barsData = [
+    { anim: bar0, color: '#582CDB', baseHeight: 38 },
+    { anim: bar1, color: '#6366F1', baseHeight: 42 },
+    { anim: bar2, color: '#8B5CF6', baseHeight: 44 },
+    { anim: bar3, color: '#A855F7', baseHeight: 46 },
+    { anim: bar4, color: '#FBBF24', baseHeight: 48 }, // Center bright gold
+    { anim: bar5, color: '#F59E0B', baseHeight: 46 }, // Warm amber
+    { anim: bar6, color: '#A855F7', baseHeight: 44 },
+    { anim: bar7, color: '#8B5CF6', baseHeight: 42 },
+    { anim: bar8, color: '#6366F1', baseHeight: 38 },
+  ];
+
+  return (
+    <View style={styles.waveformWrapper}>
+      {/* Glowing Backdrop Aura */}
+      <Animated.View style={[styles.waveformAura, { opacity: auraOpacity }]} />
+
+      <View style={styles.waveformContainer}>
+        {barsData.map((b, i) => (
+          <Animated.View
+            key={i}
+            style={[
+              styles.waveBar,
+              {
+                backgroundColor: b.color,
+                height: b.baseHeight,
+                transform: [{ scaleY: b.anim }],
+              },
+            ]}
+          />
+        ))}
+      </View>
+    </View>
+  );
+};
+
 export const CreateScreen: React.FC<CreateScreenProps> = ({
   onLogout,
   onNavigateTab,
@@ -615,15 +746,8 @@ export const CreateScreen: React.FC<CreateScreenProps> = ({
               Turn scripts into voiceovers with Pro.
             </Text>
 
-            {/* Audio Waveform Graphic */}
-            <View style={styles.waveformContainer}>
-              <View style={[styles.waveBar, { height: 16, backgroundColor: '#6366F1' }]} />
-              <View style={[styles.waveBar, { height: 26, backgroundColor: '#8B5CF6' }]} />
-              <View style={[styles.waveBar, { height: 40, backgroundColor: '#FBBF24' }]} />
-              <View style={[styles.waveBar, { height: 22, backgroundColor: '#F59E0B' }]} />
-              <View style={[styles.waveBar, { height: 34, backgroundColor: '#8B5CF6' }]} />
-              <View style={[styles.waveBar, { height: 18, backgroundColor: '#6366F1' }]} />
-            </View>
+            {/* Live Animated Audio Waveform Graphic */}
+            <LiveVoiceWaveform />
 
             {/* Unlock Voice Studio Metallic Gold Button */}
             <Pressable
@@ -1690,16 +1814,35 @@ const styles = StyleSheet.create({
     color: '#64748B',
     marginBottom: 16,
   },
+  waveformWrapper: {
+    height: 56,
+    justifyContent: 'center',
+    alignItems: 'center',
+    position: 'relative',
+    marginBottom: 16,
+    width: '100%',
+  },
+  waveformAura: {
+    position: 'absolute',
+    width: 140,
+    height: 38,
+    borderRadius: 20,
+    backgroundColor: 'rgba(139, 92, 246, 0.18)',
+    shadowColor: '#8B5CF6',
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.6,
+    shadowRadius: 18,
+  },
   waveformContainer: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'center',
     gap: 6,
-    height: 44,
-    marginBottom: 18,
+    height: 48,
   },
   waveBar: {
-    width: 6,
-    borderRadius: 3,
+    width: 6.5,
+    borderRadius: 10,
   },
   unlockVoiceBtn: {
     width: '100%',
