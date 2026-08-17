@@ -1121,7 +1121,12 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
             </View>
 
             {/* Creator Profile Row */}
-            <View style={styles.creatorProfileRow}>
+            <Pressable
+              style={styles.creatorProfileRow}
+              onPress={() => {
+                if (onNavigateTab) onNavigateTab('match');
+              }}
+            >
               <View style={styles.creatorAvatarBox}>
                 <Svg width={22} height={22} viewBox="0 0 24 24" fill="none">
                   <Path
@@ -1144,7 +1149,8 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
                 <Text style={styles.creatorName}>Amara Okafor</Text>
                 <Text style={styles.creatorFollowers}>Travel Vlogger • 85k Followers</Text>
               </View>
-            </View>
+              <Text style={{ fontSize: 12, fontWeight: '700', color: '#582CDB' }}>View ➔</Text>
+            </Pressable>
 
             {/* Why This Match Box */}
             <View style={styles.whyMatchBox}>

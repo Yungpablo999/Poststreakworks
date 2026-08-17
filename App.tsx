@@ -13,6 +13,7 @@ import { OnboardingCompleteScreen } from './src/screens/OnboardingCompleteScreen
 import { DashboardScreen } from './src/screens/DashboardScreen';
 import { MissionDetailScreen } from './src/screens/MissionDetailScreen';
 import { CreateScreen } from './src/screens/CreateScreen';
+import { MatchScreen } from './src/screens/MatchScreen';
 import { GhostLoadingScreen } from './src/components/GhostLoadingScreen';
 
 type Screen =
@@ -25,7 +26,8 @@ type Screen =
   | 'complete'
   | 'dashboard'
   | 'mission-detail'
-  | 'create';
+  | 'create'
+  | 'match';
 
 export default function App() {
   const [showSplash, setShowSplash] = useState(true);
@@ -45,6 +47,8 @@ export default function App() {
         customMessage ||
         (nextScreen === 'create'
           ? 'Opening Creator Studio'
+          : nextScreen === 'match'
+          ? 'Opening Collab Studio'
           : nextScreen === 'dashboard'
           ? 'Syncing Creator Feed'
           : nextScreen === 'mission-detail'
@@ -226,6 +230,8 @@ export default function App() {
             onNavigateTab={(tab) => {
               if (tab === 'create') {
                 navigateTo('create');
+              } else if (tab === 'match') {
+                navigateTo('match');
               } else if (tab === 'quests') {
                 navigateTo('mission-detail');
               }
@@ -242,6 +248,8 @@ export default function App() {
                 navigateTo('dashboard');
               } else if (tab === 'create') {
                 navigateTo('create');
+              } else if (tab === 'match') {
+                navigateTo('match');
               }
             }}
           />
@@ -253,6 +261,23 @@ export default function App() {
             onNavigateTab={(tab) => {
               if (tab === 'home') {
                 navigateTo('dashboard');
+              } else if (tab === 'match') {
+                navigateTo('match');
+              } else if (tab === 'quests') {
+                navigateTo('mission-detail');
+              }
+            }}
+          />
+        )}
+
+        {currentScreen === 'match' && (
+          <MatchScreen
+            onLogout={handleLogout}
+            onNavigateTab={(tab) => {
+              if (tab === 'home') {
+                navigateTo('dashboard');
+              } else if (tab === 'create') {
+                navigateTo('create');
               } else if (tab === 'quests') {
                 navigateTo('mission-detail');
               }
