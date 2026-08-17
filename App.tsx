@@ -13,6 +13,7 @@ import { OnboardingCompleteScreen } from './src/screens/OnboardingCompleteScreen
 import { DashboardScreen } from './src/screens/DashboardScreen';
 import { MissionDetailScreen } from './src/screens/MissionDetailScreen';
 import { CreateScreen } from './src/screens/CreateScreen';
+import { GhostLoadingScreen } from './src/components/GhostLoadingScreen';
 
 type Screen =
   | 'welcome'
@@ -30,15 +31,35 @@ export default function App() {
   const [showSplash, setShowSplash] = useState(true);
   const [currentScreen, setCurrentScreen] = useState<Screen>('welcome');
   const [previousScreen, setPreviousScreen] = useState<Screen>('welcome');
+  const [isPageLoading, setIsPageLoading] = useState(false);
+  const [loadingMessage, setLoadingMessage] = useState('Loading Studio...');
 
   // Creator Onboarding Data State
   const [selectedNiches, setSelectedNiches] = useState<string[]>(['lifestyle', 'comedy']);
   const [connectedPlatforms, setConnectedPlatforms] = useState<string[]>(['tiktok', 'instagram', 'youtube']);
 
-  // Navigation handlers
-  const navigateTo = (nextScreen: Screen) => {
-    setPreviousScreen(currentScreen);
-    setCurrentScreen(nextScreen);
+  // Animated page transition handler
+  const navigateTo = (nextScreen: Screen, customMessage?: string) => {
+    if (nextScreen !== currentScreen) {
+      const msg =
+        customMessage ||
+        (nextScreen === 'create'
+          ? 'Opening Creator Studio...'
+          : nextScreen === 'dashboard'
+          ? 'Syncing Creator Feed...'
+          : nextScreen === 'mission-detail'
+          ? 'Loading Quest Engine...'
+          : 'Switching screens...');
+      setLoadingMessage(msg);
+      setIsPageLoading(true);
+      setTimeout(() => {
+        setPreviousScreen(currentScreen);
+        setCurrentScreen(nextScreen);
+        setTimeout(() => {
+          setIsPageLoading(false);
+        }, 150);
+      }, 320);
+    }
   };
 
   // Welcome Screen actions
@@ -242,6 +263,9 @@ export default function App() {
         {showSplash && (
           <SplashScreen onFinish={() => setShowSplash(false)} />
         )}
+
+        {/* Global Animated Ghost Page Transition Loader */}
+        <GhostLoadingScreen visible={isPageLoading} message={loadingMessage} />
       </View>
     </SafeAreaProvider>
   );

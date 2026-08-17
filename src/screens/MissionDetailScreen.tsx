@@ -15,6 +15,7 @@ import {
 import Svg, { Path, Circle, Rect } from 'react-native-svg';
 import * as Haptics from 'expo-haptics';
 import { FloatingTabBar, TabType } from '../components/FloatingTabBar';
+import { AnimatedCompletionModal } from '../components/AnimatedCompletionModal';
 
 interface MissionDetailScreenProps {
   onBackToDashboard: () => void;
@@ -522,38 +523,20 @@ export const MissionDetailScreen: React.FC<MissionDetailScreenProps> = ({
         {/* 4. FLOATING LIQUID GLASS BOTTOM NAVIGATION BAR */}
         <FloatingTabBar activeTab={activeTab} onTabPress={handleTabPress} />
 
-        {/* 5. CELEBRATION MODAL */}
-        <Modal
+        {/* 5. ANIMATED COMPLETION CELEBRATION MODAL */}
+        <AnimatedCompletionModal
           visible={showCelebrationModal}
-          transparent={true}
-          animationType="fade"
-          onRequestClose={() => setShowCelebrationModal(false)}
-        >
-          <View style={styles.modalOverlay}>
-            <Animated.View
-              style={[
-                styles.celebrationCard,
-                { transform: [{ scale: celebrationScale }] },
-              ]}
-            >
-              <Text style={styles.celebrationTrophy}>🔥</Text>
-              <Text style={styles.celebrationTitle}>Streak Protected!</Text>
-              <Text style={styles.celebrationBody}>
-                You earned <Text style={styles.boldPurple}>+80 XP</Text> and locked in Day 48 of your creator streak!
-              </Text>
-
-              <Pressable
-                onPress={() => {
-                  setShowCelebrationModal(false);
-                  onBackToDashboard();
-                }}
-                style={({ pressed }) => [styles.celebrationDoneBtn, pressed && styles.createPostPrimaryBtnPressed]}
-              >
-                <Text style={styles.celebrationDoneBtnText}>Back to Dashboard  🚀</Text>
-              </Pressable>
-            </Animated.View>
-          </View>
-        </Modal>
+          title="Streak Protected!"
+          subtitle="You earned +80 XP and locked in Day 48 of your creator streak!"
+          badgeText="QUEST COMPLETED"
+          xpEarned={80}
+          streakCount={48}
+          actionText="Back to Dashboard 🚀"
+          onDismiss={() => {
+            setShowCelebrationModal(false);
+            onBackToDashboard();
+          }}
+        />
       </View>
     </SafeAreaView>
   );

@@ -19,6 +19,7 @@ import * as Haptics from 'expo-haptics';
 import { LinearGradient } from 'expo-linear-gradient';
 import { FloatingTabBar, TabType } from '../components/FloatingTabBar';
 import { LiquidGlassBackground } from '../components/LiquidGlassBackground';
+import { AnimatedCompletionModal } from '../components/AnimatedCompletionModal';
 
 interface CreateScreenProps {
   onLogout?: () => void;
@@ -132,6 +133,14 @@ export const CreateScreen: React.FC<CreateScreenProps> = ({
   const [showCalendarModal, setShowCalendarModal] = useState(false);
   const [showNotificationModal, setShowNotificationModal] = useState(false);
   const [showProfileModal, setShowProfileModal] = useState(false);
+  const [showCompletionModal, setShowCompletionModal] = useState(false);
+  const [completionConfig, setCompletionConfig] = useState({
+    title: 'Post Scheduled!',
+    subtitle: 'Your post is locked in & streak is safe.',
+    badgeText: 'POST COMPLETED',
+    xpEarned: 50,
+    streakCount: 48,
+  });
   const [selectedPost, setSelectedPost] = useState<ScheduledPost | null>(null);
 
   // Form Inputs
@@ -231,10 +240,14 @@ export const CreateScreen: React.FC<CreateScreenProps> = ({
     setPosts([newPost, ...posts]);
     setShowScheduleModal(false);
     setNewPostTitle('');
-    if (Platform.OS !== 'web') {
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-    }
-    showToast('✨ Post scheduled to timeline!');
+    setCompletionConfig({
+      title: 'Post Scheduled!',
+      subtitle: `Your ${newPost.platformLabel} is locked into your schedule. 47-day streak protected!`,
+      badgeText: 'POST SCHEDULED',
+      xpEarned: 50,
+      streakCount: 48,
+    });
+    setShowCompletionModal(true);
   };
 
   const handleSaveDraft = () => {
@@ -246,10 +259,14 @@ export const CreateScreen: React.FC<CreateScreenProps> = ({
       )
     );
     setShowFinishDraftModal(false);
-    if (Platform.OS !== 'web') {
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-    }
-    showToast('✓ Draft updated and scheduled!');
+    setCompletionConfig({
+      title: 'Draft Scheduled!',
+      subtitle: "Instagram Reel scheduled for tonight's 7:30 PM peak window.",
+      badgeText: 'DRAFT LOCKED',
+      xpEarned: 35,
+      streakCount: 48,
+    });
+    setShowCompletionModal(true);
   };
 
   const handleOpenEditCaption = () => {
@@ -297,10 +314,14 @@ export const CreateScreen: React.FC<CreateScreenProps> = ({
     }
 
     setShowEditCaptionModal(false);
-    if (Platform.OS !== 'web') {
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-    }
-    showToast('✓ Caption updated successfully!');
+    setCompletionConfig({
+      title: 'Caption Updated!',
+      subtitle: 'Your viral hook and hashtags have been successfully saved.',
+      badgeText: 'CAPTION SAVED',
+      xpEarned: 25,
+      streakCount: 48,
+    });
+    setShowCompletionModal(true);
   };
 
   const handleAIPolishCaption = () => {
@@ -1097,6 +1118,17 @@ export const CreateScreen: React.FC<CreateScreenProps> = ({
             </View>
           </View>
         </Modal>
+
+        {/* 8. ANIMATED COMPLETION CELEBRATION MODAL */}
+        <AnimatedCompletionModal
+          visible={showCompletionModal}
+          title={completionConfig.title}
+          subtitle={completionConfig.subtitle}
+          badgeText={completionConfig.badgeText}
+          xpEarned={completionConfig.xpEarned}
+          streakCount={completionConfig.streakCount}
+          onDismiss={() => setShowCompletionModal(false)}
+        />
       </View>
     </SafeAreaView>
   );
