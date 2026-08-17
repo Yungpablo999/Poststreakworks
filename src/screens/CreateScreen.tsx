@@ -666,21 +666,7 @@ export const CreateScreen: React.FC<CreateScreenProps> = ({
                   <Text style={styles.modalTitle}>New Post</Text>
                   <Text style={styles.modalSubtitle}>Create from scratch and protect your streak.</Text>
                 </View>
-              {/* Ghost Character Speech Header */}
-              <View style={styles.modalGhostRow}>
-                <Animated.View style={[styles.modalGhostImgWrapper, { transform: [{ translateY: flameFloatY }] }]}>
-                  <Image
-                    source={require('../../assets/images/jarvis-ghost-clean.png')}
-                    style={styles.modalGhostImg}
-                    resizeMode="contain"
-                  />
-                </Animated.View>
-                <View style={styles.modalGhostSpeechBubble}>
-                  <Text style={styles.modalGhostSpeechText}>
-                    "Batch create today Amara — consistent posting beats sporadic motivation!"
-                  </Text>
-                </View>
-              </View>
+
                 <Pressable
                   onPress={() => setShowNewPostModal(false)}
                   style={styles.modalCloseCircle}
@@ -772,21 +758,7 @@ export const CreateScreen: React.FC<CreateScreenProps> = ({
                   <Text style={styles.modalTitle}>AI Hook Sparks</Text>
                   <Text style={styles.modalSubtitle}>Trending angles customized for your niche:</Text>
                 </View>
-              {/* Ghost Character Speech Header */}
-              <View style={styles.modalGhostRow}>
-                <Animated.View style={[styles.modalGhostImgWrapper, { transform: [{ translateY: flameFloatY }] }]}>
-                  <Image
-                    source={require('../../assets/images/jarvis-ghost-clean.png')}
-                    style={styles.modalGhostImg}
-                    resizeMode="contain"
-                  />
-                </Animated.View>
-                <View style={styles.modalGhostSpeechBubble}>
-                  <Text style={styles.modalGhostSpeechText}>
-                    "I analyzed 1,400 top Reels in your niche. Tap any spark to use it!"
-                  </Text>
-                </View>
-              </View>
+
                 <Pressable
                   onPress={() => setShowIdeasModal(false)}
                   style={styles.modalCloseCircle}
@@ -835,21 +807,7 @@ export const CreateScreen: React.FC<CreateScreenProps> = ({
                   <Text style={styles.modalTitle}>Script Builder</Text>
                   <Text style={styles.modalSubtitle}>Hook ➔ Story ➔ Lesson ➔ CTA formula:</Text>
                 </View>
-              {/* Ghost Character Speech Header */}
-              <View style={styles.modalGhostRow}>
-                <Animated.View style={[styles.modalGhostImgWrapper, { transform: [{ translateY: flameFloatY }] }]}>
-                  <Image
-                    source={require('../../assets/images/jarvis-ghost-clean.png')}
-                    style={styles.modalGhostImg}
-                    resizeMode="contain"
-                  />
-                </Animated.View>
-                <View style={styles.modalGhostSpeechBubble}>
-                  <Text style={styles.modalGhostSpeechText}>
-                    "The first 3 seconds are everything. Keep your hook punchy and bold!"
-                  </Text>
-                </View>
-              </View>
+
                 <Pressable
                   onPress={() => setShowScriptModal(false)}
                   style={styles.modalCloseCircle}
