@@ -9,7 +9,7 @@ import {
   Platform,
   Dimensions,
 } from 'react-native';
-import Svg, { Circle, Defs, RadialGradient as SvgRadialGradient, Stop } from 'react-native-svg';
+import Svg, { Circle } from 'react-native-svg';
 import { BlurView } from 'expo-blur';
 import { LinearGradient } from 'expo-linear-gradient';
 
@@ -25,7 +25,7 @@ export interface GhostLoadingScreenProps {
 export const GhostLoadingScreen: React.FC<GhostLoadingScreenProps> = ({
   visible,
   message = 'PostStreak Studio',
-  subMessage = 'Optimizing algorithm flow...',
+  subMessage = 'Juggling creator hooks & algorithms...',
   onFinish,
 }) => {
   const [activeStepText, setActiveStepText] = useState(subMessage);
@@ -33,51 +33,61 @@ export const GhostLoadingScreen: React.FC<GhostLoadingScreenProps> = ({
   // Animation values
   const containerOpacity = useRef(new Animated.Value(0)).current;
   const ghostFloatY = useRef(new Animated.Value(0)).current;
+  const ghostTilt = useRef(new Animated.Value(0)).current;
   const ghostScale = useRef(new Animated.Value(0.92)).current;
   const shimmerTranslate = useRef(new Animated.Value(-1)).current;
   const progressFill = useRef(new Animated.Value(0)).current;
+  const sparkSpin = useRef(new Animated.Value(0)).current;
 
-  // Liquid ripple rings
+  // Concentric liquid ripple waves
   const ripple1 = useRef(new Animated.Value(0)).current;
   const ripple2 = useRef(new Animated.Value(0)).current;
-  const ripple3 = useRef(new Animated.Value(0)).current;
-
-  // Ambient orbs
-  const orbFloat = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
     if (visible) {
+      setActiveStepText(subMessage);
+
       // 1. Fade in screen smoothly
       Animated.timing(containerOpacity, {
         toValue: 1,
-        duration: 200,
+        duration: 220,
         useNativeDriver: true,
       }).start();
 
-      // 2. Ghost floating buoyancy loop
+      // 2. 3D Ghost Floating & Playful Tilt Physics
       const ghostLoop = Animated.loop(
         Animated.sequence([
           Animated.parallel([
             Animated.timing(ghostFloatY, {
-              toValue: -10,
-              duration: 1400,
+              toValue: -12,
+              duration: 1200,
+              useNativeDriver: true,
+            }),
+            Animated.timing(ghostTilt, {
+              toValue: 1,
+              duration: 1200,
               useNativeDriver: true,
             }),
             Animated.timing(ghostScale, {
-              toValue: 1.04,
-              duration: 1400,
+              toValue: 1.05,
+              duration: 1200,
               useNativeDriver: true,
             }),
           ]),
           Animated.parallel([
             Animated.timing(ghostFloatY, {
               toValue: 6,
-              duration: 1400,
+              duration: 1200,
+              useNativeDriver: true,
+            }),
+            Animated.timing(ghostTilt, {
+              toValue: -1,
+              duration: 1200,
               useNativeDriver: true,
             }),
             Animated.timing(ghostScale, {
               toValue: 0.96,
-              duration: 1400,
+              duration: 1200,
               useNativeDriver: true,
             }),
           ]),
@@ -88,12 +98,21 @@ export const GhostLoadingScreen: React.FC<GhostLoadingScreenProps> = ({
       const shimmerLoop = Animated.loop(
         Animated.timing(shimmerTranslate, {
           toValue: 1,
-          duration: 1200,
+          duration: 1100,
           useNativeDriver: true,
         })
       );
 
-      // 4. Progress bar fill
+      // 4. Spark spin loop
+      const sparkLoop = Animated.loop(
+        Animated.timing(sparkSpin, {
+          toValue: 1,
+          duration: 3500,
+          useNativeDriver: true,
+        })
+      );
+
+      // 5. Progress bar fill from 0 to 100%
       progressFill.setValue(0);
       Animated.timing(progressFill, {
         toValue: 1,
@@ -101,14 +120,14 @@ export const GhostLoadingScreen: React.FC<GhostLoadingScreenProps> = ({
         useNativeDriver: false,
       }).start();
 
-      // 5. Ripple wave loops (staggered)
+      // 6. Ripple wave loops
       const createRippleLoop = (anim: Animated.Value, delay: number) => {
         return Animated.loop(
           Animated.sequence([
             Animated.delay(delay),
             Animated.timing(anim, {
               toValue: 1,
-              duration: 1800,
+              duration: 1600,
               useNativeDriver: true,
             }),
             Animated.timing(anim, {
@@ -121,53 +140,33 @@ export const GhostLoadingScreen: React.FC<GhostLoadingScreenProps> = ({
       };
 
       const r1 = createRippleLoop(ripple1, 0);
-      const r2 = createRippleLoop(ripple2, 600);
-      const r3 = createRippleLoop(ripple3, 1200);
-
-      // 6. Ambient orb drift loop
-      const orbLoop = Animated.loop(
-        Animated.sequence([
-          Animated.timing(orbFloat, {
-            toValue: 1,
-            duration: 3000,
-            useNativeDriver: true,
-          }),
-          Animated.timing(orbFloat, {
-            toValue: 0,
-            duration: 3000,
-            useNativeDriver: true,
-          }),
-        ])
-      );
+      const r2 = createRippleLoop(ripple2, 800);
 
       ghostLoop.start();
       shimmerLoop.start();
+      sparkLoop.start();
       r1.start();
       r2.start();
-      r3.start();
-      orbLoop.start();
 
-      // Sub-message progression
+      // Dynamic Step Progression
       const t1 = setTimeout(() => {
-        setActiveStepText('Syncing creator feed...');
+        setActiveStepText('Syncing TikTok, IG & YouTube feeds...');
       }, 250);
 
       const t2 = setTimeout(() => {
-        setActiveStepText('Ready');
+        setActiveStepText('Ready ✨');
       }, 550);
 
       return () => {
         ghostLoop.stop();
         shimmerLoop.stop();
+        sparkLoop.stop();
         r1.stop();
         r2.stop();
-        r3.stop();
-        orbLoop.stop();
         clearTimeout(t1);
         clearTimeout(t2);
       };
     } else {
-      // Fade out smoothly
       Animated.timing(containerOpacity, {
         toValue: 0,
         duration: 200,
@@ -176,23 +175,32 @@ export const GhostLoadingScreen: React.FC<GhostLoadingScreenProps> = ({
         if (onFinish) onFinish();
       });
     }
-  }, [visible, containerOpacity, ghostFloatY, ghostScale, shimmerTranslate, progressFill, ripple1, ripple2, ripple3, orbFloat, onFinish]);
+  }, [visible, containerOpacity, ghostFloatY, ghostTilt, ghostScale, shimmerTranslate, sparkSpin, progressFill, ripple1, ripple2, subMessage, onFinish]);
 
   if (!visible) return null;
 
-  // Ripple interpolation
+  const tiltAngle = ghostTilt.interpolate({
+    inputRange: [-1, 1],
+    outputRange: ['-4deg', '4deg'],
+  });
+
+  const spinAngle = sparkSpin.interpolate({
+    inputRange: [0, 1],
+    outputRange: ['0deg', '360deg'],
+  });
+
   const getRippleStyle = (anim: Animated.Value) => ({
     transform: [
       {
         scale: anim.interpolate({
           inputRange: [0, 1],
-          outputRange: [0.6, 2.2],
+          outputRange: [0.7, 2.0],
         }),
       },
     ],
     opacity: anim.interpolate({
-      inputRange: [0, 0.3, 1],
-      outputRange: [0.8, 0.4, 0],
+      inputRange: [0, 0.4, 1],
+      outputRange: [0.7, 0.35, 0],
     }),
   });
 
@@ -203,13 +211,13 @@ export const GhostLoadingScreen: React.FC<GhostLoadingScreenProps> = ({
 
   const progressWidth = progressFill.interpolate({
     inputRange: [0, 1],
-    outputRange: ['10%', '100%'],
+    outputRange: ['12%', '100%'],
   });
 
   return (
     <Modal visible={visible} transparent={true} animationType="none">
       <Animated.View style={[styles.fullScreenBackdrop, { opacity: containerOpacity }]}>
-        {/* Layer 1: Native Optical Backdrop Blur */}
+        {/* Layer 1: Native Full-Screen Optical Blur */}
         <BlurView
           intensity={Platform.OS === 'ios' ? 85 : 95}
           tint="light"
@@ -218,84 +226,63 @@ export const GhostLoadingScreen: React.FC<GhostLoadingScreenProps> = ({
 
         {/* Layer 2: Ambient Glowing Liquid Orbs */}
         <View style={StyleSheet.absoluteFill} pointerEvents="none">
-          <Animated.View
-            style={[
-              styles.ambientOrbPurple,
-              {
-                transform: [
-                  {
-                    translateY: orbFloat.interpolate({
-                      inputRange: [0, 1],
-                      outputRange: [-20, 20],
-                    }),
-                  },
-                ],
-              },
-            ]}
-          />
-          <Animated.View
-            style={[
-              styles.ambientOrbGold,
-              {
-                transform: [
-                  {
-                    translateY: orbFloat.interpolate({
-                      inputRange: [0, 1],
-                      outputRange: [20, -20],
-                    }),
-                  },
-                ],
-              },
-            ]}
-          />
+          <View style={styles.ambientOrbPurple} />
+          <View style={styles.ambientOrbGold} />
         </View>
 
-        {/* Layer 3: Central Liquid Glass Stage */}
+        {/* Layer 3: Central 3D Ghost Stage */}
         <View style={styles.centerStage}>
           {/* Liquid Ripple Wave Rings */}
           <View style={styles.rippleContainer} pointerEvents="none">
             <Animated.View style={[styles.rippleRing, getRippleStyle(ripple1)]} />
             <Animated.View style={[styles.rippleRing, getRippleStyle(ripple2)]} />
-            <Animated.View style={[styles.rippleRing, getRippleStyle(ripple3)]} />
           </View>
 
-          {/* Central Floating Ghost Mascot with 3D Specular Shadow */}
+          {/* Orbiting Sparkles Circle */}
           <Animated.View
             style={[
-              styles.ghostHeroContainer,
+              styles.sparkleOrbitWrapper,
+              { transform: [{ rotate: spinAngle }] },
+            ]}
+            pointerEvents="none"
+          >
+            <View style={styles.orbitSparkle1}><Text style={{ fontSize: 16 }}>✨</Text></View>
+            <View style={styles.orbitSparkle2}><Text style={{ fontSize: 14 }}>🔥</Text></View>
+            <View style={styles.orbitSparkle3}><Text style={{ fontSize: 14 }}>⭐</Text></View>
+          </Animated.View>
+
+          {/* 3D JUGGLING GHOST MASCOT CONTAINER */}
+          <Animated.View
+            style={[
+              styles.ghostHeroFrame,
               {
                 transform: [
                   { translateY: ghostFloatY },
+                  { rotate: tiltAngle },
                   { scale: ghostScale },
                 ],
               },
             ]}
           >
-            {/* Ambient Aura Glow behind Ghost */}
-            <View style={styles.ghostGlowBackdrop} />
-
-            <Image
-              source={require('../../assets/images/jarvis-ghost-clean.png')}
-              style={styles.ghostHeroImage}
-              resizeMode="contain"
-            />
-
-            {/* Specular Sparkle Accents */}
-            <View style={styles.sparkleTopRight}>
-              <Text style={{ fontSize: 13 }}>✨</Text>
-            </View>
-            <View style={styles.sparkleBottomLeft}>
-              <Text style={{ fontSize: 11 }}>⚡</Text>
+            {/* Specular Liquid Glass Pod around 3D Mascot */}
+            <View style={styles.mascot3DContainer}>
+              <Image
+                source={require('../../assets/images/ghost-3d-juggling.jpg')}
+                style={styles.ghost3DImage}
+                resizeMode="cover"
+              />
+              {/* Top Specular Sheen Arc */}
+              <View style={styles.mascotSpecularSheen} />
             </View>
           </Animated.View>
 
-          {/* Typography & Luxury Status */}
+          {/* Typography & Status */}
           <View style={styles.metaContainer}>
             <Text style={styles.headlineText}>{message}</Text>
             <Text style={styles.stepText}>{activeStepText}</Text>
           </View>
 
-          {/* Luxury Slim Shimmer Progress Ray */}
+          {/* Luxury Shimmer Progress Ray */}
           <View style={styles.progressTrackWrapper}>
             <View style={styles.progressTrackBg}>
               <Animated.View style={[styles.progressFillBar, { width: progressWidth }]}>
@@ -317,7 +304,7 @@ export const GhostLoadingScreen: React.FC<GhostLoadingScreenProps> = ({
                 <LinearGradient
                   colors={[
                     'rgba(255, 255, 255, 0)',
-                    'rgba(255, 255, 255, 0.85)',
+                    'rgba(255, 255, 255, 0.9)',
                     'rgba(255, 255, 255, 0)',
                   ]}
                   start={{ x: 0, y: 0 }}
@@ -340,118 +327,136 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-    backgroundColor: 'rgba(250, 248, 245, 0.88)',
+    backgroundColor: 'rgba(250, 248, 245, 0.90)',
     justifyContent: 'center',
     alignItems: 'center',
     zIndex: 99999,
   },
-  // Ambient Soft Floating Light Orbs
   ambientOrbPurple: {
     position: 'absolute',
-    top: SCREEN_HEIGHT * 0.28,
-    left: SCREEN_WIDTH * 0.15,
+    top: SCREEN_HEIGHT * 0.24,
+    left: SCREEN_WIDTH * 0.1,
     width: 260,
     height: 260,
     borderRadius: 130,
-    backgroundColor: 'rgba(112, 72, 236, 0.14)',
+    backgroundColor: 'rgba(112, 72, 236, 0.16)',
   },
   ambientOrbGold: {
     position: 'absolute',
-    top: SCREEN_HEIGHT * 0.38,
-    right: SCREEN_WIDTH * 0.12,
-    width: 220,
-    height: 220,
-    borderRadius: 110,
-    backgroundColor: 'rgba(245, 158, 11, 0.10)',
+    top: SCREEN_HEIGHT * 0.36,
+    right: SCREEN_WIDTH * 0.1,
+    width: 240,
+    height: 240,
+    borderRadius: 120,
+    backgroundColor: 'rgba(245, 158, 11, 0.12)',
   },
-  // Central Stage
   centerStage: {
     alignItems: 'center',
     justifyContent: 'center',
   },
   rippleContainer: {
     position: 'absolute',
-    width: 180,
-    height: 180,
+    width: 260,
+    height: 260,
     alignItems: 'center',
     justifyContent: 'center',
   },
   rippleRing: {
     position: 'absolute',
-    width: 140,
-    height: 140,
-    borderRadius: 70,
+    width: 190,
+    height: 190,
+    borderRadius: 95,
     borderWidth: 1.5,
     borderColor: 'rgba(112, 72, 236, 0.45)',
   },
-  ghostHeroContainer: {
+  sparkleOrbitWrapper: {
+    position: 'absolute',
+    width: 260,
+    height: 260,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  orbitSparkle1: {
+    position: 'absolute',
+    top: 10,
+    right: 40,
+  },
+  orbitSparkle2: {
+    position: 'absolute',
+    bottom: 20,
+    left: 30,
+  },
+  orbitSparkle3: {
+    position: 'absolute',
+    top: 70,
+    left: 5,
+  },
+  ghostHeroFrame: {
     position: 'relative',
-    width: 110,
-    height: 110,
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 20,
   },
-  ghostGlowBackdrop: {
-    position: 'absolute',
-    width: 90,
-    height: 90,
-    borderRadius: 45,
-    backgroundColor: 'rgba(237, 232, 252, 0.9)',
+  mascot3DContainer: {
+    width: 175,
+    height: 175,
+    borderRadius: 88,
+    overflow: 'hidden',
+    borderWidth: 3,
+    borderColor: 'rgba(255, 255, 255, 0.95)',
     shadowColor: '#582CDB',
-    shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 0.25,
-    shadowRadius: 24,
-    elevation: 8,
+    shadowOffset: { width: 0, height: 16 },
+    shadowOpacity: 0.28,
+    shadowRadius: 30,
+    elevation: 14,
+    backgroundColor: '#FFFFFF',
   },
-  ghostHeroImage: {
-    width: 86,
-    height: 86,
+  ghost3DImage: {
+    width: '100%',
+    height: '100%',
   },
-  sparkleTopRight: {
+  mascotSpecularSheen: {
     position: 'absolute',
-    top: 2,
-    right: 4,
-  },
-  sparkleBottomLeft: {
-    position: 'absolute',
-    bottom: 4,
-    left: 4,
+    top: 0,
+    left: 20,
+    right: 20,
+    height: 2,
+    backgroundColor: 'rgba(255, 255, 255, 0.95)',
+    borderRadius: 1,
   },
   metaContainer: {
     alignItems: 'center',
-    marginBottom: 22,
+    marginBottom: 20,
   },
   headlineText: {
-    fontSize: 18,
+    fontSize: 19,
     fontWeight: '800',
     color: '#171420',
     letterSpacing: -0.3,
-    marginBottom: 5,
+    marginBottom: 4,
     textAlign: 'center',
   },
   stepText: {
-    fontSize: 12.5,
+    fontSize: 13,
     fontWeight: '600',
     color: '#7F7894',
     textAlign: 'center',
   },
-  // Luxury Slim Shimmer Progress Ray
   progressTrackWrapper: {
-    width: 170,
+    width: 180,
     alignItems: 'center',
   },
   progressTrackBg: {
     width: '100%',
-    height: 5,
-    borderRadius: 2.5,
-    backgroundColor: 'rgba(235, 230, 248, 0.85)',
+    height: 5.5,
+    borderRadius: 3,
+    backgroundColor: 'rgba(235, 230, 248, 0.88)',
     overflow: 'hidden',
     position: 'relative',
   },
   progressFillBar: {
     height: '100%',
-    borderRadius: 2.5,
+    borderRadius: 3,
   },
   shimmerRay: {
     position: 'absolute',

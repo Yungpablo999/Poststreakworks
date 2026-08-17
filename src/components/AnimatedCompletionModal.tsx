@@ -32,13 +32,14 @@ export const AnimatedCompletionModal: React.FC<AnimatedCompletionModalProps> = (
   badgeText = 'POST COMPLETED',
   xpEarned = 50,
   streakCount = 48,
-  actionText = 'Continue',
+  actionText = 'Awesome, Continue',
   onDismiss,
 }) => {
   // Animation values
-  const scaleAnim = useRef(new Animated.Value(0.7)).current;
+  const scaleAnim = useRef(new Animated.Value(0.6)).current;
   const opacityAnim = useRef(new Animated.Value(0)).current;
   const ghostBounceY = useRef(new Animated.Value(0)).current;
+  const ghostTilt = useRef(new Animated.Value(0)).current;
   const checkmarkScale = useRef(new Animated.Value(0)).current;
   const sparkleRotate = useRef(new Animated.Value(0)).current;
   const particleBurst = useRef(new Animated.Value(0)).current;
@@ -50,7 +51,7 @@ export const AnimatedCompletionModal: React.FC<AnimatedCompletionModalProps> = (
       }
 
       // Reset values
-      scaleAnim.setValue(0.7);
+      scaleAnim.setValue(0.6);
       opacityAnim.setValue(0);
       checkmarkScale.setValue(0);
       particleBurst.setValue(0);
@@ -65,38 +66,52 @@ export const AnimatedCompletionModal: React.FC<AnimatedCompletionModalProps> = (
         }),
         Animated.timing(opacityAnim, {
           toValue: 1,
-          duration: 250,
+          duration: 220,
           useNativeDriver: true,
         }),
         Animated.sequence([
-          Animated.delay(150),
+          Animated.delay(180),
           Animated.spring(checkmarkScale, {
             toValue: 1,
-            friction: 5,
-            tension: 80,
+            friction: 4,
+            tension: 85,
             useNativeDriver: true,
           }),
         ]),
         Animated.timing(particleBurst, {
           toValue: 1,
-          duration: 800,
+          duration: 900,
           useNativeDriver: true,
         }),
       ]).start();
 
-      // Ghost floating victory bounce loop
+      // 3D Victory Ghost Joyful Bounce & Tilt loop
       const ghostLoop = Animated.loop(
         Animated.sequence([
-          Animated.timing(ghostBounceY, {
-            toValue: -8,
-            duration: 800,
-            useNativeDriver: true,
-          }),
-          Animated.timing(ghostBounceY, {
-            toValue: 2,
-            duration: 800,
-            useNativeDriver: true,
-          }),
+          Animated.parallel([
+            Animated.timing(ghostBounceY, {
+              toValue: -10,
+              duration: 750,
+              useNativeDriver: true,
+            }),
+            Animated.timing(ghostTilt, {
+              toValue: 1,
+              duration: 750,
+              useNativeDriver: true,
+            }),
+          ]),
+          Animated.parallel([
+            Animated.timing(ghostBounceY, {
+              toValue: 3,
+              duration: 750,
+              useNativeDriver: true,
+            }),
+            Animated.timing(ghostTilt, {
+              toValue: -1,
+              duration: 750,
+              useNativeDriver: true,
+            }),
+          ]),
         ])
       );
 
@@ -117,7 +132,7 @@ export const AnimatedCompletionModal: React.FC<AnimatedCompletionModalProps> = (
         spinLoop.stop();
       };
     }
-  }, [visible, scaleAnim, opacityAnim, ghostBounceY, checkmarkScale, sparkleRotate, particleBurst]);
+  }, [visible, scaleAnim, opacityAnim, ghostBounceY, ghostTilt, checkmarkScale, sparkleRotate, particleBurst]);
 
   if (!visible) return null;
 
@@ -126,13 +141,18 @@ export const AnimatedCompletionModal: React.FC<AnimatedCompletionModalProps> = (
     outputRange: ['0deg', '360deg'],
   });
 
-  const p1_x = particleBurst.interpolate({ inputRange: [0, 1], outputRange: [0, -60] });
-  const p1_y = particleBurst.interpolate({ inputRange: [0, 1], outputRange: [0, -50] });
-  const p2_x = particleBurst.interpolate({ inputRange: [0, 1], outputRange: [0, 60] });
-  const p2_y = particleBurst.interpolate({ inputRange: [0, 1], outputRange: [0, -50] });
-  const p3_x = particleBurst.interpolate({ inputRange: [0, 1], outputRange: [0, -70] });
+  const tilt = ghostTilt.interpolate({
+    inputRange: [-1, 1],
+    outputRange: ['-3deg', '3deg'],
+  });
+
+  const p1_x = particleBurst.interpolate({ inputRange: [0, 1], outputRange: [0, -80] });
+  const p1_y = particleBurst.interpolate({ inputRange: [0, 1], outputRange: [0, -70] });
+  const p2_x = particleBurst.interpolate({ inputRange: [0, 1], outputRange: [0, 80] });
+  const p2_y = particleBurst.interpolate({ inputRange: [0, 1], outputRange: [0, -70] });
+  const p3_x = particleBurst.interpolate({ inputRange: [0, 1], outputRange: [0, -90] });
   const p3_y = particleBurst.interpolate({ inputRange: [0, 1], outputRange: [0, 30] });
-  const p4_x = particleBurst.interpolate({ inputRange: [0, 1], outputRange: [0, 70] });
+  const p4_x = particleBurst.interpolate({ inputRange: [0, 1], outputRange: [0, 90] });
   const p4_y = particleBurst.interpolate({ inputRange: [0, 1], outputRange: [0, 30] });
   const pOpacity = particleBurst.interpolate({ inputRange: [0, 0.7, 1], outputRange: [1, 1, 0] });
 
@@ -140,7 +160,7 @@ export const AnimatedCompletionModal: React.FC<AnimatedCompletionModalProps> = (
     <Modal visible={visible} transparent={true} animationType="fade">
       <View style={styles.modalOverlay}>
         <BlurView
-          intensity={Platform.OS === 'ios' ? 70 : 85}
+          intensity={Platform.OS === 'ios' ? 75 : 90}
           tint="dark"
           style={StyleSheet.absoluteFill}
         />
@@ -154,7 +174,7 @@ export const AnimatedCompletionModal: React.FC<AnimatedCompletionModalProps> = (
             },
           ]}
         >
-          {/* Confetti Particles */}
+          {/* Confetti Explosion Particles */}
           <Animated.View
             style={[
               styles.particle,
@@ -164,7 +184,7 @@ export const AnimatedCompletionModal: React.FC<AnimatedCompletionModalProps> = (
               },
             ]}
           >
-            <Text style={{ fontSize: 18 }}>✨</Text>
+            <Text style={{ fontSize: 22 }}>✨</Text>
           </Animated.View>
 
           <Animated.View
@@ -176,7 +196,7 @@ export const AnimatedCompletionModal: React.FC<AnimatedCompletionModalProps> = (
               },
             ]}
           >
-            <Text style={{ fontSize: 18 }}>⭐</Text>
+            <Text style={{ fontSize: 22 }}>⭐</Text>
           </Animated.View>
 
           <Animated.View
@@ -188,7 +208,7 @@ export const AnimatedCompletionModal: React.FC<AnimatedCompletionModalProps> = (
               },
             ]}
           >
-            <Text style={{ fontSize: 16 }}>🎉</Text>
+            <Text style={{ fontSize: 20 }}>🎉</Text>
           </Animated.View>
 
           <Animated.View
@@ -200,7 +220,7 @@ export const AnimatedCompletionModal: React.FC<AnimatedCompletionModalProps> = (
               },
             ]}
           >
-            <Text style={{ fontSize: 16 }}>🔥</Text>
+            <Text style={{ fontSize: 20 }}>🔥</Text>
           </Animated.View>
 
           {/* Top Badge */}
@@ -209,7 +229,7 @@ export const AnimatedCompletionModal: React.FC<AnimatedCompletionModalProps> = (
             <Text style={styles.completionBadgeText}>{badgeText}</Text>
           </View>
 
-          {/* Center Mascot & Checkmark */}
+          {/* 3D VICTORY GHOST MASCOT CONTAINER */}
           <View style={styles.mascotArea}>
             {/* Spinning Glow Ring */}
             <Animated.View
@@ -218,31 +238,39 @@ export const AnimatedCompletionModal: React.FC<AnimatedCompletionModalProps> = (
                 { transform: [{ rotate: spin }] },
               ]}
             >
-              <Svg width={120} height={120} viewBox="0 0 120 120">
+              <Svg width={180} height={180} viewBox="0 0 180 180">
                 <Circle
-                  cx="60"
-                  cy="60"
-                  r="52"
-                  stroke="rgba(253, 224, 71, 0.4)"
+                  cx="90"
+                  cy="90"
+                  r="82"
+                  stroke="rgba(253, 224, 71, 0.45)"
                   strokeWidth="2"
-                  strokeDasharray="12 12"
+                  strokeDasharray="14 14"
                   fill="none"
                 />
               </Svg>
             </Animated.View>
 
-            {/* Bouncing Celebratory Ghost */}
+            {/* 3D Victory Ghost Character with Cloud & Fireworks */}
             <Animated.View
               style={[
-                styles.ghostWrapper,
-                { transform: [{ translateY: ghostBounceY }] },
+                styles.ghost3DVictoryWrapper,
+                {
+                  transform: [
+                    { translateY: ghostBounceY },
+                    { rotate: tilt },
+                  ],
+                },
               ]}
             >
-              <Image
-                source={require('../../assets/images/jarvis-ghost-clean.png')}
-                style={styles.ghostImage}
-                resizeMode="contain"
-              />
+              <View style={styles.mascot3DVictoryPod}>
+                <Image
+                  source={require('../../assets/images/ghost-3d-victory.jpg')}
+                  style={styles.ghost3DVictoryImg}
+                  resizeMode="cover"
+                />
+                <View style={styles.mascotSpecularSheen} />
+              </View>
             </Animated.View>
 
             {/* Glowing Checkmark Badge */}
@@ -252,7 +280,7 @@ export const AnimatedCompletionModal: React.FC<AnimatedCompletionModalProps> = (
                 { transform: [{ scale: checkmarkScale }] },
               ]}
             >
-              <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
+              <Svg width={20} height={20} viewBox="0 0 24 24" fill="none">
                 <Path
                   d="M20 6L9 17L4 12"
                   stroke="#FFFFFF"
@@ -321,22 +349,22 @@ const styles = StyleSheet.create({
   },
   modalCard: {
     width: '100%',
-    maxWidth: 320,
+    maxWidth: 330,
     backgroundColor: 'rgba(255, 255, 255, 0.98)',
-    borderRadius: 28,
+    borderRadius: 30,
     padding: 24,
     alignItems: 'center',
-    borderWidth: 1.2,
+    borderWidth: 1.3,
     borderColor: 'rgba(235, 230, 248, 0.95)',
     shadowColor: '#582CDB',
-    shadowOffset: { width: 0, height: 16 },
-    shadowOpacity: 0.22,
-    shadowRadius: 32,
-    elevation: 16,
+    shadowOffset: { width: 0, height: 18 },
+    shadowOpacity: 0.26,
+    shadowRadius: 36,
+    elevation: 18,
   },
   particle: {
     position: 'absolute',
-    top: '35%',
+    top: '32%',
     left: '50%',
     zIndex: 100,
   },
@@ -344,13 +372,13 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 5,
-    backgroundColor: 'rgba(237, 232, 252, 0.9)',
+    backgroundColor: 'rgba(237, 232, 252, 0.95)',
     paddingVertical: 5,
     paddingHorizontal: 12,
     borderRadius: 100,
-    marginBottom: 16,
+    marginBottom: 12,
     borderWidth: 1,
-    borderColor: 'rgba(221, 214, 254, 0.8)',
+    borderColor: 'rgba(221, 214, 254, 0.9)',
   },
   completionBadgeIcon: {
     fontSize: 12,
@@ -363,36 +391,59 @@ const styles = StyleSheet.create({
   },
   mascotArea: {
     position: 'relative',
-    width: 120,
-    height: 120,
+    width: 170,
+    height: 170,
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 14,
   },
   sparkleRing: {
     position: 'absolute',
-    width: 120,
-    height: 120,
+    width: 180,
+    height: 180,
     justifyContent: 'center',
     alignItems: 'center',
   },
-  ghostWrapper: {
-    width: 72,
-    height: 72,
+  ghost3DVictoryWrapper: {
+    width: 155,
+    height: 155,
     justifyContent: 'center',
     alignItems: 'center',
   },
-  ghostImage: {
-    width: 68,
-    height: 68,
+  mascot3DVictoryPod: {
+    width: 150,
+    height: 150,
+    borderRadius: 75,
+    overflow: 'hidden',
+    borderWidth: 3,
+    borderColor: 'rgba(255, 255, 255, 0.95)',
+    shadowColor: '#582CDB',
+    shadowOffset: { width: 0, height: 12 },
+    shadowOpacity: 0.25,
+    shadowRadius: 24,
+    elevation: 10,
+    backgroundColor: '#FFFFFF',
+  },
+  ghost3DVictoryImg: {
+    width: '100%',
+    height: '100%',
+  },
+  mascotSpecularSheen: {
+    position: 'absolute',
+    top: 0,
+    left: 20,
+    right: 20,
+    height: 2,
+    backgroundColor: 'rgba(255, 255, 255, 0.95)',
+    borderRadius: 1,
   },
   checkmarkBadge: {
     position: 'absolute',
-    bottom: 8,
-    right: 18,
-    width: 28,
-    height: 28,
-    borderRadius: 14,
+    bottom: 6,
+    right: 14,
+    width: 32,
+    height: 32,
+    borderRadius: 16,
     backgroundColor: '#10B981',
     justifyContent: 'center',
     alignItems: 'center',
@@ -402,10 +453,10 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 3 },
     shadowOpacity: 0.35,
     shadowRadius: 6,
-    elevation: 4,
+    elevation: 5,
   },
   modalTitle: {
-    fontSize: 20,
+    fontSize: 21,
     fontWeight: '800',
     color: '#171420',
     letterSpacing: -0.3,
@@ -418,13 +469,13 @@ const styles = StyleSheet.create({
     color: '#7F7894',
     textAlign: 'center',
     lineHeight: 18,
-    marginBottom: 18,
+    marginBottom: 16,
     paddingHorizontal: 8,
   },
   rewardsRow: {
     flexDirection: 'row',
     gap: 10,
-    marginBottom: 20,
+    marginBottom: 18,
   },
   rewardChipXp: {
     flexDirection: 'row',
@@ -458,8 +509,8 @@ const styles = StyleSheet.create({
   },
   continueBtn: {
     width: '100%',
-    height: 46,
-    borderRadius: 14,
+    height: 48,
+    borderRadius: 16,
     overflow: 'hidden',
   },
   continueGradient: {
