@@ -1,65 +1,163 @@
 import { Platform, ViewStyle } from 'react-native';
+import { colors } from './colors';
 
 export const glassmorphism = {
   // Frosted Glass Background Colors
-  frostedLight: 'rgba(255, 255, 255, 0.72)',
-  frostedMedium: 'rgba(255, 255, 255, 0.55)',
-  frostedUltra: 'rgba(255, 255, 255, 0.88)',
-  frostedViolet: 'rgba(95, 58, 221, 0.08)',
+  frostedLight: colors.glassLight,
+  frostedMedium: colors.glassMedium,
+  frostedUltra: colors.glassUltra,
+  frostedViolet: colors.glassViolet,
   
   // Specular Glass Borders
-  borderLight: 'rgba(255, 255, 255, 0.85)',
-  borderSubtle: 'rgba(225, 218, 235, 0.65)',
-  borderDark: 'rgba(95, 58, 221, 0.15)',
+  borderLight: colors.cardBorderLight,
+  borderSubtle: colors.cardBorder,
+  borderDark: colors.glassVioletBorder,
   
-  // Glass Shadows
-  shadowLens: {
+  // Standard Glass Card Style Preset
+  card: {
+    backgroundColor: colors.backgroundCard,
+    borderRadius: 24,
+    borderWidth: 1,
+    borderColor: colors.cardBorder,
     ...Platform.select({
       ios: {
-        shadowColor: '#5F3ADD',
-        shadowOffset: { width: 0, height: 12 },
-        shadowOpacity: 0.12,
-        shadowRadius: 28,
-      },
-      android: {
-        elevation: 8,
-      },
-      web: {
-        boxShadow: '0 12px 32px rgba(95, 58, 221, 0.10), inset 0 1px 1px rgba(255, 255, 255, 0.8)',
-      } as any,
-    }),
-  } as ViewStyle,
-
-  shadowBadge: {
-    ...Platform.select({
-      ios: {
-        shadowColor: '#1A1720',
-        shadowOffset: { width: 0, height: 8 },
-        shadowOpacity: 0.07,
-        shadowRadius: 18,
-      },
-      android: {
-        elevation: 4,
-      },
-      web: {
-        boxShadow: '0 8px 24px rgba(26, 23, 32, 0.06), inset 0 1px 1px rgba(255, 255, 255, 0.9)',
-      } as any,
-    }),
-  } as ViewStyle,
-
-  shadowNav: {
-    ...Platform.select({
-      ios: {
-        shadowColor: '#1A1720',
-        shadowOffset: { width: 0, height: -6 },
-        shadowOpacity: 0.08,
+        shadowColor: '#171420',
+        shadowOffset: { width: 0, height: 10 },
+        shadowOpacity: 0.05,
         shadowRadius: 24,
       },
       android: {
-        elevation: 12,
+        elevation: 3,
       },
       web: {
-        boxShadow: '0 -6px 28px rgba(26, 23, 32, 0.08), inset 0 1px 1px rgba(255, 255, 255, 0.85)',
+        backdropFilter: 'blur(20px)',
+        WebkitBackdropFilter: 'blur(20px)',
+        boxShadow: '0 10px 30px rgba(23, 20, 32, 0.04), inset 0 1px 1px rgba(255, 255, 255, 0.95)',
+      } as any,
+    }),
+  } as ViewStyle,
+
+  // Floating Glass Lens Preset
+  lens: {
+    backgroundColor: colors.glassUltra,
+    borderRadius: 28,
+    borderWidth: 1.2,
+    borderColor: colors.cardBorderLight,
+    ...Platform.select({
+      ios: {
+        shadowColor: colors.primary,
+        shadowOffset: { width: 0, height: 14 },
+        shadowOpacity: 0.08,
+        shadowRadius: 32,
+      },
+      android: {
+        elevation: 6,
+      },
+      web: {
+        backdropFilter: 'blur(24px)',
+        WebkitBackdropFilter: 'blur(24px)',
+        boxShadow: '0 14px 40px rgba(88, 44, 219, 0.08), inset 0 1.5px 1.5px rgba(255, 255, 255, 1)',
+      } as any,
+    }),
+  } as ViewStyle,
+
+  // Glass Badge / Pill Preset
+  badge: {
+    backgroundColor: 'rgba(255, 255, 255, 0.85)',
+    borderRadius: 100,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.95)',
+    ...Platform.select({
+      ios: {
+        shadowColor: '#171420',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.04,
+        shadowRadius: 10,
+      },
+      android: {
+        elevation: 2,
+      },
+      web: {
+        backdropFilter: 'blur(12px)',
+        WebkitBackdropFilter: 'blur(12px)',
+        boxShadow: '0 4px 16px rgba(23, 20, 32, 0.03), inset 0 1px 1px rgba(255, 255, 255, 0.9)',
+      } as any,
+    }),
+  } as ViewStyle,
+
+  // Glass Bottom Navigation Bar Preset
+  navbar: {
+    backgroundColor: 'rgba(255, 255, 255, 0.90)',
+    borderTopLeftRadius: 28,
+    borderTopRightRadius: 28,
+    borderTopWidth: 1,
+    borderColor: 'rgba(235, 230, 245, 0.9)',
+    ...Platform.select({
+      ios: {
+        shadowColor: '#171420',
+        shadowOffset: { width: 0, height: -8 },
+        shadowOpacity: 0.06,
+        shadowRadius: 28,
+      },
+      android: {
+        elevation: 10,
+      },
+      web: {
+        backdropFilter: 'blur(24px)',
+        WebkitBackdropFilter: 'blur(24px)',
+        boxShadow: '0 -8px 32px rgba(23, 20, 32, 0.05), inset 0 1px 1px rgba(255, 255, 255, 0.9)',
+      } as any,
+    }),
+  } as ViewStyle,
+
+  // Backward Compatible Shadow Presets
+  shadowBadge: {
+    ...Platform.select({
+      ios: {
+        shadowColor: '#171420',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.04,
+        shadowRadius: 10,
+      },
+      android: {
+        elevation: 2,
+      },
+      web: {
+        boxShadow: '0 4px 16px rgba(23, 20, 32, 0.03)',
+      } as any,
+    }),
+  } as ViewStyle,
+
+  shadowLens: {
+    ...Platform.select({
+      ios: {
+        shadowColor: '#582CDB',
+        shadowOffset: { width: 0, height: 14 },
+        shadowOpacity: 0.08,
+        shadowRadius: 32,
+      },
+      android: {
+        elevation: 6,
+      },
+      web: {
+        boxShadow: '0 14px 40px rgba(88, 44, 219, 0.08)',
+      } as any,
+    }),
+  } as ViewStyle,
+
+  shadowCard: {
+    ...Platform.select({
+      ios: {
+        shadowColor: '#171420',
+        shadowOffset: { width: 0, height: 10 },
+        shadowOpacity: 0.05,
+        shadowRadius: 24,
+      },
+      android: {
+        elevation: 3,
+      },
+      web: {
+        boxShadow: '0 10px 30px rgba(23, 20, 32, 0.04)',
       } as any,
     }),
   } as ViewStyle,

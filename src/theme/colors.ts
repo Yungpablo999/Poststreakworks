@@ -1,27 +1,48 @@
 export const colors = {
-  // Backgrounds & Surfaces
+  // Backgrounds & Ambient Canvas
   background: '#FAF8F5',
-  backgroundWarm: '#F5F2EC',
-  cardBackground: 'rgba(255, 255, 255, 0.78)',
-  cardBorder: 'rgba(225, 220, 212, 0.85)',
-  cardBorderStrong: '#D8D2E4',
+  backgroundWarm: '#F5F2EB',
+  backgroundCard: 'rgba(255, 255, 255, 0.82)',
+  backgroundCardSolid: '#FFFFFF',
+  
+  // Frosted Glass Tints
+  glassLight: 'rgba(255, 255, 255, 0.88)',
+  glassMedium: 'rgba(255, 255, 255, 0.72)',
+  glassUltra: 'rgba(255, 255, 255, 0.95)',
+  glassViolet: 'rgba(95, 58, 221, 0.06)',
+  glassVioletBorder: 'rgba(95, 58, 221, 0.12)',
+  glassInput: 'rgba(255, 255, 255, 0.65)',
+  glassOverlay: 'rgba(22, 18, 33, 0.45)',
+
+  // Specular Borders
+  cardBorder: 'rgba(235, 230, 245, 0.85)',
+  cardBorderLight: 'rgba(255, 255, 255, 0.95)',
+  cardBorderStrong: 'rgba(215, 206, 235, 0.9)',
   
   // Brand & Accents
-  primary: '#5F3ADD',
-  primaryDark: '#4713C5',
-  primaryLight: '#7C5CFC',
-  primaryGlow: 'rgba(95, 58, 221, 0.28)',
+  primary: '#582CDB',
+  primaryDark: '#451EB8',
+  primaryLight: '#7850F0',
+  primaryGlow: 'rgba(88, 44, 219, 0.22)',
+  primarySoft: 'rgba(88, 44, 219, 0.08)',
   
-  // Brand Secondary / Badges
+  // Secondary / Badges / Achievements
   amber: '#D97706',
   amberDark: '#B45309',
   amberLight: '#FBBF24',
-  amberGlow: 'rgba(217, 119, 6, 0.18)',
+  amberGlow: 'rgba(217, 119, 6, 0.15)',
+  amberSoft: 'rgba(245, 158, 11, 0.09)',
+
+  // Emerald / Success
+  emerald: '#10B981',
+  emeraldSoft: 'rgba(16, 185, 129, 0.10)',
+  emeraldGlow: 'rgba(16, 185, 129, 0.20)',
   
   // Typography
-  textPrimary: '#1B1C19',
-  textSecondary: '#484555',
-  textMuted: '#6B7280',
+  textPrimary: '#171420',
+  textSecondary: '#524C62',
+  textMuted: '#7F7894',
+  textLight: '#A39CB5',
   textWhite: '#FFFFFF',
   
   // Status & Utility
@@ -30,7 +51,7 @@ export const colors = {
   transparent: 'transparent',
   
   // Halo Radials
-  haloStart: 'rgba(235, 230, 255, 0.9)',
-  haloMid: 'rgba(242, 238, 255, 0.45)',
+  haloStart: 'rgba(238, 233, 255, 0.95)',
+  haloMid: 'rgba(245, 241, 255, 0.50)',
   haloEnd: 'rgba(250, 248, 245, 0)',
 };
