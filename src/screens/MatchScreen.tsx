@@ -41,6 +41,20 @@ interface TrackedMetrics {
   lastActive: string;
 }
 
+interface IncomingRequest {
+  id: string;
+  name: string;
+  role: string;
+  followers: string;
+  location: string;
+  coverImage: any;
+  streak: number;
+  pitchMessage: string;
+  matchScore: string;
+  timeAgo: string;
+  tags: string[];
+}
+
 interface CreatorProfile {
   id: string;
   name: string;
@@ -54,6 +68,37 @@ interface CreatorProfile {
   streak: number;
   tracking: TrackedMetrics;
 }
+
+const INCOMING_REQUESTS_DATA: IncomingRequest[] = [
+  {
+    id: 'req_1',
+    name: 'Kemi Adeleke',
+    role: 'UI/UX & Product Design',
+    followers: '68k Followers',
+    location: 'Lagos, NG',
+    coverImage: require('../../assets/images/kemi-avatar.jpg'),
+    streak: 39,
+    pitchMessage:
+      'Hey! Loved your recent video on creator workflows. Would love to co-host a live Q&A session on design systems for creators!',
+    matchScore: '96% Match Synergy • Shared Tech Audience',
+    timeAgo: '2 hours ago',
+    tags: ['Design', 'Figma', '39-Day Streak'],
+  },
+  {
+    id: 'req_2',
+    name: 'David Osei',
+    role: 'Finance & Tech Educator',
+    followers: '120k Followers',
+    location: 'Accra, GH',
+    coverImage: require('../../assets/images/david-avatar.jpg'),
+    streak: 55,
+    pitchMessage:
+      'I saw your daily posting consistency! Let’s collaborate on a split-screen Reel breaking down monetization for modern creators.',
+    matchScore: '94% Match Synergy • High Engagement Overlap',
+    timeAgo: '5 hours ago',
+    tags: ['Finance', 'Creator Economy', '55-Day Streak'],
+  },
+];
 
 const CREATOR_DECK: CreatorProfile[] = [
   {
@@ -174,9 +219,12 @@ export const MatchScreen: React.FC<MatchScreenProps> = ({
   onOpenMessages,
 }) => {
   const [activeTab, setActiveTab] = useState<TabType>('match');
-  const [activeSection, setActiveSection] = useState<'deck' | 'tracking' | 'connected'>('deck');
+  const [activeSection, setActiveSection] = useState<'deck' | 'requests' | 'tracking' | 'connected'>('deck');
   const [activeFilter, setActiveFilter] = useState<'niche' | 'streak' | 'nearby' | 'ai'>('niche');
   const [currentIndex, setCurrentIndex] = useState(0);
+
+  // Incoming Connection Requests state
+  const [incomingRequests, setIncomingRequests] = useState<IncomingRequest[]>(INCOMING_REQUESTS_DATA);
 
   // Tracking state
   const [matchesLeft, setMatchesLeft] = useState(5);
@@ -190,7 +238,7 @@ export const MatchScreen: React.FC<MatchScreenProps> = ({
 
   // Modals state
   const [showConnectModal, setShowConnectModal] = useState(false);
-  const [lastConnectedCreator, setLastConnectedCreator] = useState<CreatorProfile | null>(null);
+  const [lastConnectedName, setLastConnectedName] = useState<string>('Creator');
   const [showCollabIdeaModal, setShowCollabIdeaModal] = useState(false);
   const [showMessageModal, setShowMessageModal] = useState(false);
   const [selectedRecipient, setSelectedRecipient] = useState<string | null>(null);
@@ -290,21 +338,21 @@ export const MatchScreen: React.FC<MatchScreenProps> = ({
       }
       setMatchesLeft((prev) => Math.max(0, prev - 1));
       setConnectedCreators((prev) => (prev.some((c) => c.id === creator.id) ? prev : [creator, ...prev]));
-      setLastConnectedCreator(creator);
+      setLastConnectedName(creator.name);
       setShowConnectModal(true);
     } else if (direction === 'left') {
       // Decline / Pass
       if (Platform.OS !== 'web') {
         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
       }
-      showToast(`Declined ${creator.name}`);
+      showToast('Declined ' + creator.name);
     } else if (direction === 'up') {
       // Save & Track
       if (Platform.OS !== 'web') {
         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
       }
       setSavedCreators((prev) => (prev.some((c) => c.id === creator.id) ? prev : [creator, ...prev]));
-      showToast(`⭐ Saved & Tracking ${creator.name} over time!`);
+      showToast('⭐ Saved & Tracking ' + creator.name + ' over time!');
     }
   };
 
@@ -315,11 +363,53 @@ export const MatchScreen: React.FC<MatchScreenProps> = ({
     const isAlreadySaved = savedCreators.some((c) => c.id === creator.id);
     if (isAlreadySaved) {
       setSavedCreators((prev) => prev.filter((c) => c.id !== creator.id));
-      showToast(`Stopped tracking ${creator.name}`);
+      showToast('Stopped tracking ' + creator.name);
     } else {
       setSavedCreators((prev) => [creator, ...prev]);
-      showToast(`⭐ Now tracking ${creator.name} over time!`);
+      showToast('⭐ Now tracking ' + creator.name + ' over time!');
     }
+  };
+
+  // INCOMING REQUEST ACTIONS: ACCEPT & DECLINE
+  const handleAcceptRequest = (req: IncomingRequest) => {
+    if (Platform.OS !== 'web') {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    }
+    // Remove from requests
+    setIncomingRequests((prev) => prev.filter((r) => r.id !== req.id));
+
+    // Add to connected
+    const newConnectedCreator: CreatorProfile = {
+      id: req.id,
+      name: req.name,
+      role: req.role,
+      followers: req.followers,
+      location: req.location,
+      coverImage: req.coverImage,
+      tags: req.tags,
+      collabGoal: req.pitchMessage,
+      jarvisInsight: req.matchScore,
+      streak: req.streak,
+      tracking: {
+        growthRate: '+5.5k this month',
+        postingPace: '4 posts/week',
+        engagementScore: '96/100',
+        bestCollabWindow: 'Weekdays 7:00 PM',
+        statusText: '🟢 Connected & available',
+        lastActive: 'Active today',
+      },
+    };
+    setConnectedCreators((prev) => [newConnectedCreator, ...prev]);
+    setLastConnectedName(req.name);
+    setShowConnectModal(true);
+  };
+
+  const handleDeclineRequest = (req: IncomingRequest) => {
+    if (Platform.OS !== 'web') {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    }
+    setIncomingRequests((prev) => prev.filter((r) => r.id !== req.id));
+    showToast('Declined request from ' + req.name);
   };
 
   const handleSendMessage = () => {
@@ -327,7 +417,7 @@ export const MatchScreen: React.FC<MatchScreenProps> = ({
     const rec = selectedRecipient || 'Creator';
     setShowMessageModal(false);
     setMessageText('');
-    showToast(`✓ Message sent to ${rec}!`);
+    showToast('✓ Message sent to ' + rec + '!');
   };
 
   const currentCreator = CREATOR_DECK[currentIndex % CREATOR_DECK.length];
@@ -479,7 +569,7 @@ export const MatchScreen: React.FC<MatchScreenProps> = ({
 
             <Text style={styles.pageHeadline}>Find creators worth building with.</Text>
             <Text style={styles.pageSubtitle}>
-              Swipe right to accept, left to decline, or swipe up to save & track.
+              Review incoming connection requests, swipe discovery, and track creators over time.
             </Text>
 
             {/* LIVE TRACKING STATS BAR */}
@@ -487,6 +577,11 @@ export const MatchScreen: React.FC<MatchScreenProps> = ({
               <View style={styles.trackingStatItem}>
                 <Text style={styles.trackingStatVal}>⭐ {matchesLeft}/5</Text>
                 <Text style={styles.trackingStatLbl}>Matches Left</Text>
+              </View>
+              <View style={styles.trackingStatDivider} />
+              <View style={styles.trackingStatItem}>
+                <Text style={styles.trackingStatVal}>📩 {incomingRequests.length}</Text>
+                <Text style={styles.trackingStatLbl}>Requests</Text>
               </View>
               <View style={styles.trackingStatDivider} />
               <View style={styles.trackingStatItem}>
@@ -501,15 +596,28 @@ export const MatchScreen: React.FC<MatchScreenProps> = ({
             </View>
           </View>
 
-          {/* VIEW SWITCHER TABS: SWIPE DECK vs CREATOR TRACKER vs CONNECTED */}
+          {/* VIEW SWITCHER TABS: SWIPE DECK vs INCOMING REQUESTS vs TRACKED RADAR vs CONNECTED */}
           <View style={styles.sectionTabsRow}>
             <Pressable
               style={[styles.sectionTab, activeSection === 'deck' && styles.sectionTabActive]}
               onPress={() => setActiveSection('deck')}
             >
               <Text style={[styles.sectionTabText, activeSection === 'deck' && styles.sectionTabTextActive]}>
-                Swipe Deck
+                Deck
               </Text>
+            </Pressable>
+
+            {/* REQUESTS TAB WITH BADGE DOT */}
+            <Pressable
+              style={[styles.sectionTab, activeSection === 'requests' && styles.sectionTabActive]}
+              onPress={() => setActiveSection('requests')}
+            >
+              <View style={styles.tabBadgeWrapper}>
+                <Text style={[styles.sectionTabText, activeSection === 'requests' && styles.sectionTabTextActive]}>
+                  Requests ({incomingRequests.length})
+                </Text>
+                {incomingRequests.length > 0 && <View style={styles.tabBadgeDot} />}
+              </View>
             </Pressable>
 
             <Pressable
@@ -517,7 +625,7 @@ export const MatchScreen: React.FC<MatchScreenProps> = ({
               onPress={() => setActiveSection('tracking')}
             >
               <Text style={[styles.sectionTabText, activeSection === 'tracking' && styles.sectionTabTextActive]}>
-                Tracked Radar ({savedCreators.length})
+                Tracked ({savedCreators.length})
               </Text>
             </Pressable>
 
@@ -757,7 +865,7 @@ export const MatchScreen: React.FC<MatchScreenProps> = ({
                 </Animated.View>
               </View>
 
-              {/* GESTURE HINT STRIP (MINIMAL & INTUITIVE) */}
+              {/* GESTURE HINT STRIP */}
               <View style={styles.gestureHintRow}>
                 <Text style={styles.gestureHintText}>👈 Swipe left to decline</Text>
                 <Text style={styles.gestureHintDot}>•</Text>
@@ -805,7 +913,99 @@ export const MatchScreen: React.FC<MatchScreenProps> = ({
             </View>
           )}
 
-          {/* TAB 2: CREATOR GROWTH TRACKING RADAR */}
+          {/* TAB 2: INCOMING CONNECTION REQUESTS (ACCEPT / DECLINE SPACE) */}
+          {activeSection === 'requests' && (
+            <View style={styles.tabContentSection}>
+              <View style={styles.requestsHeaderBanner}>
+                <View style={styles.requestsHeaderIconRow}>
+                  <Text style={styles.requestsHeaderTitle}>📩 Connection Requests</Text>
+                  <View style={styles.requestsCountPill}>
+                    <Text style={styles.requestsCountPillText}>{incomingRequests.length} Pending</Text>
+                  </View>
+                </View>
+                <Text style={styles.requestsHeaderSubtitle}>
+                  Creators who reached out to collaborate with you. Accept to connect and unlock direct messaging.
+                </Text>
+              </View>
+
+              {incomingRequests.length === 0 ? (
+                <View style={styles.emptyStateBox}>
+                  <Text style={styles.emptyStateEmoji}>✨</Text>
+                  <Text style={styles.emptyStateTitle}>All Caught Up!</Text>
+                  <Text style={styles.emptyStateSubtitle}>
+                    You have responded to all incoming connection requests. Keep your streak active to appear on more creator radars!
+                  </Text>
+                  <Pressable
+                    style={styles.emptyStateBtn}
+                    onPress={() => setActiveSection('deck')}
+                  >
+                    <Text style={styles.emptyStateBtnText}>Discover More Creators</Text>
+                  </Pressable>
+                </View>
+              ) : (
+                incomingRequests.map((req) => (
+                  <View key={req.id} style={styles.requestCard}>
+                    {/* Top Row: Avatar & Details */}
+                    <View style={styles.requestTopRow}>
+                      <Image source={req.coverImage} style={styles.requestAvatarImg} resizeMode="cover" />
+                      <View style={styles.requestInfoCol}>
+                        <View style={styles.requestNameRow}>
+                          <Text style={styles.requestNameText}>{req.name}</Text>
+                          <View style={styles.requestStreakBadge}>
+                            <Text style={styles.requestStreakBadgeText}>🔥 {req.streak}d</Text>
+                          </View>
+                        </View>
+                        <Text style={styles.requestRoleText}>{req.role} • {req.followers}</Text>
+                        <Text style={styles.requestTimeText}>📍 {req.location} • Sent {req.timeAgo}</Text>
+                      </View>
+                    </View>
+
+                    {/* Pitch Message Bubble */}
+                    <View style={styles.pitchMessageBubble}>
+                      <Text style={styles.pitchMessageLabel}>COLLAB PITCH:</Text>
+                      <Text style={styles.pitchMessageText}>“{req.pitchMessage}”</Text>
+                    </View>
+
+                    {/* Jarvis Compatibility Insight */}
+                    <View style={styles.requestCompatibilityRow}>
+                      <Image
+                        source={require('../../assets/images/jarvis-ghost-clean.png')}
+                        style={styles.requestGhostMini}
+                        resizeMode="contain"
+                      />
+                      <Text style={styles.requestCompatibilityText}>{req.matchScore}</Text>
+                    </View>
+
+                    {/* Action Buttons: Decline (Left) & Accept (Right) */}
+                    <View style={styles.requestActionBtnRow}>
+                      <Pressable
+                        style={({ pressed }) => [styles.requestDeclineBtn, pressed && styles.btnPressed]}
+                        onPress={() => handleDeclineRequest(req)}
+                      >
+                        <Text style={styles.requestDeclineBtnText}>✖ Decline</Text>
+                      </Pressable>
+
+                      <Pressable
+                        style={({ pressed }) => [styles.requestAcceptBtn, pressed && styles.btnPressed]}
+                        onPress={() => handleAcceptRequest(req)}
+                      >
+                        <LinearGradient
+                          colors={['#784DF0', '#582CDB']}
+                          start={{ x: 0, y: 0 }}
+                          end={{ x: 1, y: 1 }}
+                          style={styles.requestAcceptGradient}
+                        >
+                          <Text style={styles.requestAcceptBtnText}>💜 Accept (+50 XP)</Text>
+                        </LinearGradient>
+                      </Pressable>
+                    </View>
+                  </View>
+                ))
+              )}
+            </View>
+          )}
+
+          {/* TAB 3: CREATOR GROWTH TRACKING RADAR */}
           {activeSection === 'tracking' && (
             <View style={styles.tabContentSection}>
               <View style={styles.radarHeaderBanner}>
@@ -848,7 +1048,7 @@ export const MatchScreen: React.FC<MatchScreenProps> = ({
                         style={styles.connectSmallBtn}
                         onPress={() => {
                           setConnectedCreators((prev) => [creator, ...prev]);
-                          setLastConnectedCreator(creator);
+                          setLastConnectedName(creator.name);
                           setShowConnectModal(true);
                         }}
                       >
@@ -880,7 +1080,7 @@ export const MatchScreen: React.FC<MatchScreenProps> = ({
             </View>
           )}
 
-          {/* TAB 3: CONNECTED CREATORS LIST */}
+          {/* TAB 4: CONNECTED CREATORS LIST */}
           {activeSection === 'connected' && (
             <View style={styles.tabContentSection}>
               {connectedCreators.map((creator) => (
@@ -981,11 +1181,11 @@ export const MatchScreen: React.FC<MatchScreenProps> = ({
         <AnimatedCompletionModal
           visible={showConnectModal}
           title="It’s a Match! 🎉"
-          subtitle={`You connected with ${lastConnectedCreator?.name || 'Creator'}. +40 XP awarded to your streak!`}
-          badgeText="CREATOR MATCHED"
-          xpEarned={40}
+          subtitle={'You connected with ' + lastConnectedName + '. +50 XP awarded to your streak!'}
+          badgeText="CREATOR CONNECTED"
+          xpEarned={50}
           streakCount={48}
-          actionText="Continue Swiping"
+          actionText="Continue Exploring"
           onDismiss={() => setShowConnectModal(false)}
         />
 
@@ -1088,9 +1288,9 @@ export const MatchScreen: React.FC<MatchScreenProps> = ({
               <Text style={styles.modalSubtitle}>Live creator recommendations</Text>
 
               <View style={styles.notifCard}>
-                <Text style={styles.notifTitle}>✨ 2 Mutual Match Sparks</Text>
+                <Text style={styles.notifTitle}>✨ 2 Connection Requests</Text>
                 <Text style={styles.notifBody}>
-                  Amara Okafor and Tomi Adebayo are active in your creative circle today.
+                  Kemi Adeleke and David Osei sent you collaboration connection requests.
                 </Text>
               </View>
 
@@ -1313,11 +1513,11 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(255, 255, 255, 0.95)',
     borderRadius: 18,
     paddingVertical: 12,
-    paddingHorizontal: 16,
+    paddingHorizontal: 14,
     borderWidth: 1.2,
     borderColor: 'rgba(235, 230, 248, 0.95)',
     alignItems: 'center',
-    justifyContent: 'space-around',
+    justifyContent: 'space-between',
     shadowColor: '#582CDB',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.06,
@@ -1326,25 +1526,26 @@ const styles = StyleSheet.create({
   },
   trackingStatItem: {
     alignItems: 'center',
+    flex: 1,
   },
   trackingStatVal: {
-    fontSize: 14,
+    fontSize: 13.5,
     fontWeight: '800',
     color: '#171420',
     marginBottom: 2,
   },
   trackingStatLbl: {
-    fontSize: 10.5,
+    fontSize: 10,
     fontWeight: '600',
     color: '#7F7894',
   },
   trackingStatDivider: {
     width: 1,
-    height: 24,
+    height: 22,
     backgroundColor: '#E8E3FA',
   },
 
-  // SECTION TABS ROW (DECK vs TRACKING vs CONNECTED)
+  // SECTION TABS ROW
   sectionTabsRow: {
     flexDirection: 'row',
     backgroundColor: 'rgba(237, 232, 252, 0.7)',
@@ -1367,13 +1568,25 @@ const styles = StyleSheet.create({
     elevation: 2,
   },
   sectionTabText: {
-    fontSize: 12,
+    fontSize: 11.5,
     fontWeight: '700',
     color: '#7F7894',
   },
   sectionTabTextActive: {
     color: '#582CDB',
     fontWeight: '800',
+  },
+  tabBadgeWrapper: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    position: 'relative',
+  },
+  tabBadgeDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: '#E11D48',
+    marginLeft: 3,
   },
 
   // FILTER PILLS
@@ -1780,6 +1993,187 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontSize: 13.5,
     fontWeight: '800',
+  },
+
+  // INCOMING REQUESTS SECTION
+  requestsHeaderBanner: {
+    backgroundColor: 'rgba(254, 242, 242, 0.85)',
+    borderRadius: 18,
+    padding: 14,
+    borderWidth: 1.2,
+    borderColor: 'rgba(254, 205, 211, 0.9)',
+    marginBottom: 14,
+  },
+  requestsHeaderIconRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 4,
+  },
+  requestsHeaderTitle: {
+    fontSize: 15,
+    fontWeight: '800',
+    color: '#E11D48',
+  },
+  requestsCountPill: {
+    backgroundColor: '#E11D48',
+    paddingVertical: 3,
+    paddingHorizontal: 8,
+    borderRadius: 100,
+  },
+  requestsCountPillText: {
+    fontSize: 10.5,
+    fontWeight: '800',
+    color: '#FFFFFF',
+  },
+  requestsHeaderSubtitle: {
+    fontSize: 11.5,
+    color: '#881337',
+    lineHeight: 16,
+  },
+
+  requestCard: {
+    backgroundColor: 'rgba(255, 255, 255, 0.98)',
+    borderRadius: 22,
+    padding: 16,
+    borderWidth: 1.2,
+    borderColor: 'rgba(235, 230, 248, 0.95)',
+    marginBottom: 14,
+    shadowColor: '#582CDB',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.08,
+    shadowRadius: 14,
+    elevation: 3,
+  },
+  requestTopRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  requestAvatarImg: {
+    width: 52,
+    height: 52,
+    borderRadius: 26,
+    marginRight: 12,
+  },
+  requestInfoCol: {
+    flex: 1,
+  },
+  requestNameRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    marginBottom: 2,
+  },
+  requestNameText: {
+    fontSize: 15.5,
+    fontWeight: '800',
+    color: '#171420',
+  },
+  requestStreakBadge: {
+    backgroundColor: '#EDE8FC',
+    paddingVertical: 2,
+    paddingHorizontal: 6,
+    borderRadius: 100,
+  },
+  requestStreakBadgeText: {
+    fontSize: 10,
+    fontWeight: '800',
+    color: '#582CDB',
+  },
+  requestRoleText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#4B4360',
+    marginBottom: 2,
+  },
+  requestTimeText: {
+    fontSize: 11,
+    color: '#7F7894',
+    fontWeight: '500',
+  },
+
+  pitchMessageBubble: {
+    backgroundColor: '#FAF8FF',
+    borderRadius: 14,
+    padding: 12,
+    borderWidth: 1,
+    borderColor: '#EDE8FC',
+    marginBottom: 10,
+  },
+  pitchMessageLabel: {
+    fontSize: 10,
+    fontWeight: '800',
+    color: '#582CDB',
+    letterSpacing: 0.6,
+    marginBottom: 3,
+  },
+  pitchMessageText: {
+    fontSize: 12.5,
+    color: '#171420',
+    lineHeight: 17,
+    fontStyle: 'italic',
+    fontWeight: '500',
+  },
+
+  requestCompatibilityRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    backgroundColor: 'rgba(240, 253, 244, 0.85)',
+    paddingVertical: 6,
+    paddingHorizontal: 10,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: 'rgba(220, 252, 231, 0.9)',
+    marginBottom: 14,
+  },
+  requestGhostMini: {
+    width: 14,
+    height: 14,
+  },
+  requestCompatibilityText: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: '#15803D',
+    flex: 1,
+  },
+
+  requestActionBtnRow: {
+    flexDirection: 'row',
+    gap: 10,
+  },
+  requestDeclineBtn: {
+    flex: 1,
+    height: 42,
+    borderRadius: 12,
+    borderWidth: 1.2,
+    borderColor: '#FECDD3',
+    backgroundColor: '#FFF1F2',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  requestDeclineBtnText: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: '#E11D48',
+  },
+  requestAcceptBtn: {
+    flex: 1.4,
+    height: 42,
+    borderRadius: 12,
+    overflow: 'hidden',
+  },
+  requestAcceptGradient: {
+    width: '100%',
+    height: '100%',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  requestAcceptBtnText: {
+    fontSize: 13,
+    fontWeight: '800',
+    color: '#FFFFFF',
   },
 
   // TAB CONTENT SECTIONS
