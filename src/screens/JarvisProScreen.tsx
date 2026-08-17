@@ -162,7 +162,7 @@ export const JarvisProScreen: React.FC<JarvisProScreenProps> = ({
               ]}
             >
               <Image
-                source={require('../../assets/images/jarvis-core-flame.png')}
+                source={require('../../assets/images/jarvis-ghost-clean.png')}
                 style={styles.headerFlameLogo}
                 resizeMode="contain"
               />
