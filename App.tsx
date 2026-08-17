@@ -12,6 +12,7 @@ import { PlatformConnectScreen } from './src/screens/PlatformConnectScreen';
 import { OnboardingCompleteScreen } from './src/screens/OnboardingCompleteScreen';
 import { DashboardScreen } from './src/screens/DashboardScreen';
 import { MissionDetailScreen } from './src/screens/MissionDetailScreen';
+import { QuestsScreen } from './src/screens/QuestsScreen';
 import { CreateScreen } from './src/screens/CreateScreen';
 import { MatchScreen } from './src/screens/MatchScreen';
 import { JarvisProScreen } from './src/screens/JarvisProScreen';
@@ -29,7 +30,8 @@ type Screen =
   | 'mission-detail'
   | 'create'
   | 'match'
-  | 'growth';
+  | 'growth'
+  | 'quests';
 
 export default function App() {
   const [showSplash, setShowSplash] = useState(true);
@@ -47,7 +49,9 @@ export default function App() {
     if (nextScreen !== currentScreen) {
       const msg =
         customMessage ||
-        (nextScreen === 'growth'
+        (nextScreen === 'quests'
+          ? 'Entering Quests Hub'
+          : nextScreen === 'growth'
           ? 'Entering Jarvis Pro Suite'
           : nextScreen === 'create'
           ? 'Opening Creator Studio'
@@ -154,7 +158,7 @@ export default function App() {
 
   const handleStartFirstMission = () => {
     // Launch to Mission Detail Page
-    navigateTo('mission-detail');
+    navigateTo('quests');
   };
 
   const handleGoToDashboard = () => {
@@ -237,7 +241,7 @@ export default function App() {
               } else if (tab === 'match') {
                 navigateTo('match');
               } else if (tab === 'quests') {
-                navigateTo('mission-detail');
+                navigateTo('quests');
               } else if (tab === 'growth') {
                 navigateTo('growth');
               }
@@ -272,7 +276,7 @@ export default function App() {
               } else if (tab === 'match') {
                 navigateTo('match');
               } else if (tab === 'quests') {
-                navigateTo('mission-detail');
+                navigateTo('quests');
               } else if (tab === 'growth') {
                 navigateTo('growth');
               }
@@ -289,7 +293,7 @@ export default function App() {
               } else if (tab === 'create') {
                 navigateTo('create');
               } else if (tab === 'quests') {
-                navigateTo('mission-detail');
+                navigateTo('quests');
               } else if (tab === 'growth') {
                 navigateTo('growth');
               }
@@ -308,7 +312,25 @@ export default function App() {
               } else if (tab === 'match') {
                 navigateTo('match');
               } else if (tab === 'quests') {
-                navigateTo('mission-detail');
+                navigateTo('quests');
+              }
+            }}
+          />
+        )}
+
+        {currentScreen === 'quests' && (
+          <QuestsScreen
+            onBackToDashboard={() => navigateTo('dashboard')}
+            onLogout={handleLogout}
+            onNavigateTab={(tab) => {
+              if (tab === 'home') {
+                navigateTo('dashboard');
+              } else if (tab === 'create') {
+                navigateTo('create');
+              } else if (tab === 'match') {
+                navigateTo('match');
+              } else if (tab === 'growth') {
+                navigateTo('growth');
               }
             }}
           />
