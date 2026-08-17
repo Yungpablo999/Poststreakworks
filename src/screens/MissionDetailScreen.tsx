@@ -263,16 +263,27 @@ export const MissionDetailScreen: React.FC<MissionDetailScreenProps> = ({
               <View style={styles.notificationDot} />
             </Pressable>
 
-            {/* Profile Avatar */}
+            {/* Top-Right: User Profile Person Icon */}
             <Pressable
               style={({ pressed }) => [styles.profilePhotoBtn, pressed && styles.headerIconBtnPressed]}
               hitSlop={8}
             >
-              <Image
-                source={require('../../assets/images/jarvis-ghost-clean.png')}
-                style={styles.headerAvatarThumb}
-                resizeMode="cover"
-              />
+              <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
+                <Path
+                  d="M20 21V19C20 17.9 19.5 16.9 18.7 16.2C17.9 15.5 16.9 15 15.8 15H8.2C7.1 15 6.1 15.5 5.3 16.2C4.5 16.9 4 17.9 4 19V21"
+                  stroke="#582CDB"
+                  strokeWidth="2.2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+                <Circle
+                  cx="12"
+                  cy="7"
+                  r="4"
+                  stroke="#582CDB"
+                  strokeWidth="2.2"
+                />
+              </Svg>
             </Pressable>
           </View>
         </View>
