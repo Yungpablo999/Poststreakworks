@@ -44,12 +44,12 @@ export default function App() {
       const msg =
         customMessage ||
         (nextScreen === 'create'
-          ? 'Opening Creator Studio...'
+          ? 'Opening Creator Studio'
           : nextScreen === 'dashboard'
-          ? 'Syncing Creator Feed...'
+          ? 'Syncing Creator Feed'
           : nextScreen === 'mission-detail'
-          ? 'Loading Quest Engine...'
-          : 'Switching screens...');
+          ? 'Loading Quest Engine'
+          : 'Switching screens');
       setLoadingMessage(msg);
       setIsPageLoading(true);
       setTimeout(() => {
@@ -57,8 +57,8 @@ export default function App() {
         setCurrentScreen(nextScreen);
         setTimeout(() => {
           setIsPageLoading(false);
-        }, 150);
-      }, 320);
+        }, 200);
+      }, 550);
     }
   };
 
