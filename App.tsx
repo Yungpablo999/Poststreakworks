@@ -297,6 +297,23 @@ export default function App() {
           />
         )}
 
+        {currentScreen === 'growth' && (
+          <JarvisProScreen
+            onLogout={handleLogout}
+            onNavigateTab={(tab) => {
+              if (tab === 'home') {
+                navigateTo('dashboard');
+              } else if (tab === 'create') {
+                navigateTo('create');
+              } else if (tab === 'match') {
+                navigateTo('match');
+              } else if (tab === 'quests') {
+                navigateTo('mission-detail');
+              }
+            }}
+          />
+        )}
+
         {showSplash && (
           <SplashScreen onFinish={() => setShowSplash(false)} />
         )}
