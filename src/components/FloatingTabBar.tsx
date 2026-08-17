@@ -9,8 +9,8 @@ import {
 } from 'react-native';
 import Svg, { Path, Circle } from 'react-native-svg';
 import * as Haptics from 'expo-haptics';
-import { BlurView } from 'expo-blur';
 import { LinearGradient } from 'expo-linear-gradient';
+import { LiquidGlassBackground } from './LiquidGlassBackground';
 
 export type TabType = 'home' | 'create' | 'match' | 'quests' | 'growth';
 
@@ -113,89 +113,72 @@ export const FloatingTabBar: React.FC<FloatingTabBarProps> = ({
 
   return (
     <View style={[styles.floatingWrapper, style]}>
-      {/* Ambient Multi-Layer Liquid Shadow */}
-      <View style={styles.shadowLayer}>
-        {/* Native Optical BlurView Container */}
-        <BlurView
-          intensity={Platform.OS === 'ios' ? 75 : 85}
-          tint="light"
-          style={styles.blurCapsule}
-        >
-          {/* Liquid Glass Iridescent Gradient Sheen */}
-          <LinearGradient
-            colors={[
-              'rgba(255, 255, 255, 0.78)',
-              'rgba(246, 242, 255, 0.62)',
-              'rgba(255, 255, 255, 0.74)',
-            ]}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-            style={styles.liquidGlassSurface}
-          >
-            {/* Top Specular Light Highlight Arc */}
-            <View style={styles.topSpecularArc} />
+      {/* Apple Liquid Glass Background with SVG Displacement & Chromatic Dispersion */}
+      <LiquidGlassBackground
+        borderRadius={38}
+        light={0.9}
+        refraction={32}
+        depth={0.7}
+        dispersion={0.85}
+        frost={55}
+        splay={0.85}
+        tint="purple-gold"
+        accentColor="#582CDB"
+        goldAccentColor="#F59E0B"
+        hasShadow={true}
+        style={styles.tabsRow}
+      >
+        {TABS.map((tab) => {
+          const isActive = activeTab === tab.id;
 
-            {/* Bottom Subtle Refraction Rim */}
-            <View style={styles.bottomRefractionRim} />
-
-            {/* Tab Items */}
-            {TABS.map((tab) => {
-              const isActive = activeTab === tab.id;
-
-              if (isActive) {
-                return (
-                  <Pressable
-                    key={tab.id}
-                    onPress={() => handlePress(tab.id)}
-                    style={styles.activePillTouchable}
-                    hitSlop={6}
-                  >
-                    {/* Liquid Glass Active Droplet Capsule in Royal Purple & Gold */}
-                    <LinearGradient
-                      colors={['#784DF0', '#582CDB']}
-                      start={{ x: 0, y: 0 }}
-                      end={{ x: 0, y: 1 }}
-                      style={styles.activeLiquidPill}
-                    >
-                      {/* Pill Top Gloss Sheen */}
-                      <View style={styles.pillTopGloss} />
-
-                      <View style={styles.iconWrapper}>
-                        {tab.icon('#FFFFFF')}
-                      </View>
-                      <Text style={styles.tabLabelActive} numberOfLines={1}>
-                        {tab.label}
-                      </Text>
-
-                      {/* Gold Reward Jewel Accent Dot */}
-                      <View style={styles.activeGoldDot} />
-                    </LinearGradient>
-                  </Pressable>
-                );
-              }
-
-              return (
-                <Pressable
-                  key={tab.id}
-                  onPress={() => handlePress(tab.id)}
-                  style={({ pressed }) => [
-                    styles.inactiveTabItem,
-                    pressed && styles.inactiveTabPressed,
-                  ]}
-                  hitSlop={6}
+          if (isActive) {
+            return (
+              <Pressable
+                key={tab.id}
+                onPress={() => handlePress(tab.id)}
+                style={styles.activePillTouchable}
+                hitSlop={6}
+              >
+                {/* Liquid Droplet Capsule in Royal Purple with Gold Accent Dot */}
+                <LinearGradient
+                  colors={['#784DF0', '#582CDB']}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 0, y: 1 }}
+                  style={styles.activeLiquidPill}
                 >
+                  <View style={styles.pillTopGloss} />
                   <View style={styles.iconWrapper}>
-                    {tab.icon('#605874')}
+                    {tab.icon('#FFFFFF')}
                   </View>
-                  <Text style={styles.tabLabelInactive} numberOfLines={1}>
+                  <Text style={styles.tabLabelActive} numberOfLines={1}>
                     {tab.label}
                   </Text>
-                </Pressable>
-              );
-            })}
-          </LinearGradient>
-        </BlurView>
-      </View>
+                  <View style={styles.activeGoldDot} />
+                </LinearGradient>
+              </Pressable>
+            );
+          }
+
+          return (
+            <Pressable
+              key={tab.id}
+              onPress={() => handlePress(tab.id)}
+              style={({ pressed }) => [
+                styles.inactiveTabItem,
+                pressed && styles.inactiveTabPressed,
+              ]}
+              hitSlop={6}
+            >
+              <View style={styles.iconWrapper}>
+                {tab.icon('#605874')}
+              </View>
+              <Text style={styles.tabLabelInactive} numberOfLines={1}>
+                {tab.label}
+              </Text>
+            </Pressable>
+          );
+        })}
+      </LiquidGlassBackground>
     </View>
   );
 };
@@ -209,54 +192,13 @@ const styles = StyleSheet.create({
     zIndex: 999,
     alignItems: 'center',
   },
-  // Ambient Soft Floating Shadows
-  shadowLayer: {
-    width: '100%',
-    borderRadius: 38,
-    backgroundColor: 'transparent',
-    shadowColor: '#4C24C2',
-    shadowOffset: { width: 0, height: 12 },
-    shadowOpacity: 0.16,
-    shadowRadius: 28,
-    elevation: 10,
-  },
-  // Native BlurView Capsule with Fine Specular Border
-  blurCapsule: {
-    borderRadius: 38,
-    overflow: 'hidden',
-    borderWidth: 1.3,
-    borderColor: 'rgba(255, 255, 255, 0.88)',
-  },
-  // Liquid Glass Surface Container
-  liquidGlassSurface: {
-    position: 'relative',
+  tabsRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingVertical: 5.5,
     paddingHorizontal: 6,
   },
-  // Apple-style Top Specular Arc Reflection
-  topSpecularArc: {
-    position: 'absolute',
-    top: 0,
-    left: 24,
-    right: 24,
-    height: 1.2,
-    backgroundColor: 'rgba(255, 255, 255, 0.95)',
-    borderRadius: 1,
-  },
-  // Subtle Bottom Refraction Tint
-  bottomRefractionRim: {
-    position: 'absolute',
-    bottom: 0,
-    left: 28,
-    right: 28,
-    height: 0.8,
-    backgroundColor: 'rgba(215, 203, 248, 0.65)',
-    borderRadius: 1,
-  },
-  // Inactive Tab
   inactiveTabItem: {
     flex: 1,
     alignItems: 'center',
@@ -276,7 +218,6 @@ const styles = StyleSheet.create({
     letterSpacing: 0.5,
     textAlign: 'center',
   },
-  // Active Tab Liquid Droplet Capsule
   activePillTouchable: {
     flex: 1,
   },
@@ -295,7 +236,6 @@ const styles = StyleSheet.create({
     shadowRadius: 10,
     elevation: 5,
   },
-  // Top Gloss Sheen on the Active Pill
   pillTopGloss: {
     position: 'absolute',
     top: 1,
