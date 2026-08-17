@@ -19,7 +19,6 @@ import Svg, { Path, Circle, Defs, RadialGradient, Stop } from 'react-native-svg'
 import * as Haptics from 'expo-haptics';
 import { LinearGradient } from 'expo-linear-gradient';
 import { FloatingTabBar, TabType } from '../components/FloatingTabBar';
-import { LiquidGlassBackground } from '../components/LiquidGlassBackground';
 import { AnimatedCompletionModal } from '../components/AnimatedCompletionModal';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
@@ -350,6 +349,9 @@ export const MatchScreen: React.FC<MatchScreenProps> = ({
   // Incoming Connection Requests state
   const [incomingRequests, setIncomingRequests] = useState<IncomingRequest[]>(INCOMING_REQUESTS_DATA);
 
+  // Sent / Pending Invites state (tracked after sending a collab pitch)
+  const [pendingInvites, setPendingInvites] = useState<string[]>([]);
+
   // Tracking state
   const [matchesLeft, setMatchesLeft] = useState(5);
   const [savedCreators, setSavedCreators] = useState<CreatorProfile[]>([
@@ -372,7 +374,13 @@ export const MatchScreen: React.FC<MatchScreenProps> = ({
   const [lastConnectedName, setLastConnectedName] = useState<string>('Creator');
   const [showCollabIdeaModal, setShowCollabIdeaModal] = useState(false);
   
-  // Collab Schedule Pop-up States
+  // SEND COLLAB PITCH MODAL (STATE 1: NOT CONNECTED YET)
+  const [showPitchModal, setShowPitchModal] = useState(false);
+  const [pitchRecipient, setPitchRecipient] = useState<CreatorProfile>(CREATOR_DECK[0]);
+  const [pitchMessageDraft, setPitchMessageDraft] = useState('');
+  const [showPitchSuccessModal, setShowPitchSuccessModal] = useState(false);
+
+  // COLLAB SCHEDULE POP-UP (STATE 2: ALREADY CONNECTED)
   const [showScheduleConfirmModal, setShowScheduleConfirmModal] = useState(false);
   const [showScheduleSuccessModal, setShowScheduleSuccessModal] = useState(false);
   const [selectedCollabPlatform, setSelectedCollabPlatform] = useState<'instagram' | 'tiktok' | 'youtube'>('instagram');
@@ -390,6 +398,10 @@ export const MatchScreen: React.FC<MatchScreenProps> = ({
   const ghostFloatY = useRef(new Animated.Value(0)).current;
   const toastOpacity = useRef(new Animated.Value(0)).current;
   const pulseAnim = useRef(new Animated.Value(1)).current;
+
+  // Helpers to check connection and pitch status
+  const isCreatorConnected = (id: string) => connectedCreators.some((c) => c.id === id);
+  const isCreatorPending = (id: string) => pendingInvites.includes(id);
 
   // Ultra-smooth Tinder PanResponder with scroll locking
   const panResponder = useRef(
@@ -547,6 +559,37 @@ export const MatchScreen: React.FC<MatchScreenProps> = ({
     setShowDetailModal(true);
   };
 
+  // TRIGGER PITCH MODAL FOR UNCONNECTED CREATORS
+  const handleOpenPitchModal = (creator: CreatorProfile) => {
+    setPitchRecipient(creator);
+    setPitchMessageDraft(
+      'Hey ' +
+        creator.name.split(' ')[0] +
+        '! Loved your ' +
+        creator.role +
+        ' content. Jarvis suggested we co-create ' +
+        creator.collabIdea.title +
+        '. Would love to connect and film this together!'
+    );
+    setShowDetailModal(false);
+    setShowCollabIdeaModal(false);
+    setTimeout(() => {
+      setShowPitchModal(true);
+    }, 200);
+  };
+
+  // SEND COLLAB PITCH CONFIRMATION
+  const handleSendCollabPitch = () => {
+    setShowPitchModal(false);
+    if (Platform.OS !== 'web') {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    }
+    setPendingInvites((prev) => [...prev, pitchRecipient.id]);
+    setTimeout(() => {
+      setShowPitchSuccessModal(true);
+    }, 250);
+  };
+
   // INCOMING REQUEST ACTIONS: ACCEPT & DECLINE
   const handleAcceptRequest = (req: IncomingRequest) => {
     if (Platform.OS !== 'web') {
@@ -631,7 +674,12 @@ export const MatchScreen: React.FC<MatchScreenProps> = ({
   const currentCreator = CREATOR_DECK[currentIndex % CREATOR_DECK.length];
   const nextCreator = CREATOR_DECK[(currentIndex + 1) % CREATOR_DECK.length];
   const isCurrentSaved = savedCreators.some((c) => c.id === currentCreator.id);
+  const isCurrentConnected = isCreatorConnected(currentCreator.id);
+  const isCurrentPending = isCreatorPending(currentCreator.id);
+
   const isDetailSaved = savedCreators.some((c) => c.id === selectedCreatorForDetail.id);
+  const isDetailConnected = isCreatorConnected(selectedCreatorForDetail.id);
+  const isDetailPending = isCreatorPending(selectedCreatorForDetail.id);
 
   // Card rotation & stamp interpolation
   const rotate = position.x.interpolate({
@@ -1076,7 +1124,7 @@ export const MatchScreen: React.FC<MatchScreenProps> = ({
                 <Text style={styles.gestureHintText}>Right to accept 👉</Text>
               </View>
 
-              {/* SUGGESTED COLLAB CARD */}
+              {/* SUGGESTED COLLAB CARD (SMART 2-STATE: PITCH vs SCHEDULE) */}
               <View style={styles.suggestedCollabCard}>
                 <View style={styles.collabHeaderRow}>
                   <View style={styles.collabHeaderLeft}>
@@ -1087,8 +1135,10 @@ export const MatchScreen: React.FC<MatchScreenProps> = ({
                     />
                     <Text style={styles.collabHeaderTitle}>JARVIS SUGGESTED COLLAB</Text>
                   </View>
-                  <View style={styles.potencyBadge}>
-                    <Text style={styles.potencyBadgeText}>📈 High potency</Text>
+                  <View style={isCurrentConnected ? styles.connectedCollabBadge : styles.potencyBadge}>
+                    <Text style={isCurrentConnected ? styles.connectedCollabBadgeText : styles.potencyBadgeText}>
+                      {isCurrentConnected ? '💜 Connected Partner' : isCurrentPending ? '⏳ Pitch Sent' : '📈 High potency'}
+                    </Text>
                   </View>
                 </View>
 
@@ -1096,21 +1146,50 @@ export const MatchScreen: React.FC<MatchScreenProps> = ({
                 <View style={styles.collabMetaRow}>
                   <View style={styles.collabMetaChip}><Text style={styles.collabMetaChipText}>Reel</Text></View>
                   <View style={styles.collabMetaChip}><Text style={styles.collabMetaChipText}>7:30 PM Peak</Text></View>
+                  {!isCurrentConnected && (
+                    <View style={styles.collabMetaChipLock}>
+                      <Text style={styles.collabMetaChipLockText}>🔒 Needs Connection</Text>
+                    </View>
+                  )}
                 </View>
 
-                <Pressable
-                  style={({ pressed }) => [styles.buildIdeaBtn, pressed && styles.btnPressed]}
-                  onPress={() => setShowCollabIdeaModal(true)}
-                >
-                  <LinearGradient
-                    colors={['#784DF0', '#582CDB']}
-                    start={{ x: 0, y: 0 }}
-                    end={{ x: 1, y: 1 }}
-                    style={styles.buildIdeaGradient}
+                {/* 2-State Action Button */}
+                {isCurrentConnected ? (
+                  <Pressable
+                    style={({ pressed }) => [styles.buildIdeaBtn, pressed && styles.btnPressed]}
+                    onPress={() => {
+                      setCollabPostTitle('‘Day in Lagos’ Co-created Reel (feat. ' + currentCreator.name + ')');
+                      setShowScheduleConfirmModal(true);
+                    }}
                   >
-                    <Text style={styles.buildIdeaBtnText}>⚡ Build Idea</Text>
-                  </LinearGradient>
-                </Pressable>
+                    <LinearGradient
+                      colors={['#784DF0', '#582CDB']}
+                      start={{ x: 0, y: 0 }}
+                      end={{ x: 1, y: 1 }}
+                      style={styles.buildIdeaGradient}
+                    >
+                      <Text style={styles.buildIdeaBtnText}>⚡ Add to Content Schedule</Text>
+                    </LinearGradient>
+                  </Pressable>
+                ) : isCurrentPending ? (
+                  <View style={styles.pendingIdeaBtn}>
+                    <Text style={styles.pendingIdeaBtnText}>⏳ Collab Pitch Sent (Awaiting Acceptance)</Text>
+                  </View>
+                ) : (
+                  <Pressable
+                    style={({ pressed }) => [styles.buildIdeaBtn, pressed && styles.btnPressed]}
+                    onPress={() => handleOpenPitchModal(currentCreator)}
+                  >
+                    <LinearGradient
+                      colors={['#784DF0', '#582CDB']}
+                      start={{ x: 0, y: 0 }}
+                      end={{ x: 1, y: 1 }}
+                      style={styles.buildIdeaGradient}
+                    >
+                      <Text style={styles.buildIdeaBtnText}>✨ Pitch Collab & Connect (+50 XP)</Text>
+                    </LinearGradient>
+                  </Pressable>
+                )}
               </View>
             </View>
           )}
@@ -1126,7 +1205,7 @@ export const MatchScreen: React.FC<MatchScreenProps> = ({
                   </View>
                 </View>
                 <Text style={styles.requestsHeaderSubtitle}>
-                  Creators who reached out to collaborate with you. Accept to connect and unlock direct messaging.
+                  Creators who reached out to collaborate with you. Accept to connect and unlock direct messaging and shared post scheduling.
                 </Text>
               </View>
 
@@ -1292,15 +1371,26 @@ export const MatchScreen: React.FC<MatchScreenProps> = ({
                     <Text style={styles.matchNameText}>{creator.name}</Text>
                     <Text style={styles.matchMetaText}>{creator.role} • {creator.followers}</Text>
                   </View>
-                  <Pressable
-                    style={styles.messageBtn}
-                    onPress={() => {
-                      setSelectedRecipient(creator.name);
-                      setShowMessageModal(true);
-                    }}
-                  >
-                    <Text style={styles.messageBtnText}>Message</Text>
-                  </Pressable>
+                  <View style={{ flexDirection: 'row', gap: 6 }}>
+                    <Pressable
+                      style={styles.scheduleMiniBtn}
+                      onPress={() => {
+                        setCollabPostTitle('Co-created Reel with ' + creator.name);
+                        setShowScheduleConfirmModal(true);
+                      }}
+                    >
+                      <Text style={styles.scheduleMiniBtnText}>📅 Schedule</Text>
+                    </Pressable>
+                    <Pressable
+                      style={styles.messageBtn}
+                      onPress={() => {
+                        setSelectedRecipient(creator.name);
+                        setShowMessageModal(true);
+                      }}
+                    >
+                      <Text style={styles.messageBtnText}>Message</Text>
+                    </Pressable>
+                  </View>
                 </View>
               ))}
             </View>
@@ -1391,54 +1481,77 @@ export const MatchScreen: React.FC<MatchScreenProps> = ({
           onDismiss={() => setShowConnectModal(false)}
         />
 
-        {/* 6. BUILD COLLAB IDEA BLUEPRINT MODAL */}
+        {/* 6A. SEND COLLAB PITCH MODAL (STATE 1: NOT CONNECTED YET) */}
         <Modal
-          visible={showCollabIdeaModal}
+          visible={showPitchModal}
           transparent={true}
           animationType="fade"
-          onRequestClose={() => setShowCollabIdeaModal(false)}
+          onRequestClose={() => setShowPitchModal(false)}
         >
           <View style={styles.modalOverlay}>
-            <View style={styles.modalCard}>
+            <View style={[styles.modalCard, { maxWidth: 340 }]}>
               <View style={styles.modalBadgePill}>
-                <Text style={styles.modalBadgeText}>COLLAB WORKSPACE</Text>
+                <Text style={styles.modalBadgeText}>COLLAB PITCH • JARVIS AI</Text>
               </View>
-              <Text style={styles.modalTitle}>‘Day in Lagos’ Co-created Reel</Text>
+              <Text style={styles.modalTitle}>Pitch Collab to {pitchRecipient.name.split(' ')[0]}</Text>
               <Text style={styles.modalSubtitle}>
-                A dynamic split-screen / alternating POV short-form Reel comparing creative routines in Lagos.
+                Send a personalized collaboration proposal to connect. Once accepted, this post unlocks in your schedule.
               </Text>
 
-              <View style={styles.ideaScriptBox}>
-                <Text style={styles.ideaScriptHeading}>Suggested Script Blueprint:</Text>
-                <Text style={styles.ideaScriptStep}>1. Hook (0-3s): “2 creators, 1 city — how we create on the go.”</Text>
-                <Text style={styles.ideaScriptStep}>2. Body (4-15s): Fast cuts between your gear & Amara’s travel footage.</Text>
-                <Text style={styles.ideaScriptStep}>3. CTA (16-20s): Drop top travel tips in comments.</Text>
+              {/* Proposed Project & Time */}
+              <View style={styles.pitchIdeaPreviewBox}>
+                <Text style={styles.pitchIdeaPreviewTitle}>{pitchRecipient.collabIdea.title}</Text>
+                <Text style={styles.pitchIdeaPreviewMeta}>
+                  {pitchRecipient.collabIdea.chips.join(' • ')}
+                </Text>
+              </View>
+
+              {/* Pitch note textarea */}
+              <View style={styles.inputGroupFull}>
+                <Text style={styles.inputFieldLabel}>CUSTOM COLLAB NOTE</Text>
+                <TextInput
+                  style={styles.pitchTextAreaInput}
+                  value={pitchMessageDraft}
+                  onChangeText={setPitchMessageDraft}
+                  placeholder="Write your pitch message..."
+                  placeholderTextColor="#A39CB5"
+                  multiline={true}
+                  numberOfLines={3}
+                  textAlignVertical="top"
+                />
               </View>
 
               <View style={styles.modalBtnRow}>
                 <Pressable
                   style={styles.modalCancelBtn}
-                  onPress={() => setShowCollabIdeaModal(false)}
+                  onPress={() => setShowPitchModal(false)}
                 >
-                  <Text style={styles.modalCancelBtnText}>Close</Text>
+                  <Text style={styles.modalCancelBtnText}>Cancel</Text>
                 </Pressable>
                 <Pressable
                   style={styles.modalPrimaryBtn}
-                  onPress={() => {
-                    setShowCollabIdeaModal(false);
-                    setTimeout(() => {
-                      setShowScheduleConfirmModal(true);
-                    }, 200);
-                  }}
+                  onPress={handleSendCollabPitch}
                 >
-                  <Text style={styles.modalPrimaryBtnText}>Add to Schedule</Text>
+                  <Text style={styles.modalPrimaryBtnText}>Send Pitch (+50 XP)</Text>
                 </Pressable>
               </View>
             </View>
           </View>
         </Modal>
 
-        {/* 6B. COLLAB SCHEDULE POP-UP MODAL (STEP 2: CUSTOMIZE & CONFIRM) */}
+        {/* 6B. ANIMATED COMPLETION CELEBRATION (ON PITCH SENT SUCCESS) */}
+        <AnimatedCompletionModal
+          visible={showPitchSuccessModal}
+          title="Pitch Sent! 🚀"
+          subtitle={'Your collab pitch was sent to ' + pitchRecipient.name + '. +50 XP awarded! Once accepted, it unlocks in your schedule.'}
+          badgeText="PITCH DELIVERED"
+          xpEarned={50}
+          streakCount={48}
+          actionText="Explore More Creators"
+          onDismiss={() => setShowPitchSuccessModal(false)}
+        />
+
+        {/* 6C. COLLAB SCHEDULE POP-UP MODAL (STATE 2: FOR CONNECTED CREATORS) */}
         <Modal
           visible={showScheduleConfirmModal}
           transparent={true}
@@ -1452,7 +1565,7 @@ export const MatchScreen: React.FC<MatchScreenProps> = ({
               </View>
               <Text style={styles.modalTitle}>Schedule Collab Post</Text>
               <Text style={styles.modalSubtitle}>
-                Lock in your joint co-creation with Amara Okafor to protect your 48-day streak.
+                Lock in your joint co-creation with your connected partner to protect your 48-day streak.
               </Text>
 
               {/* Title / Hook input */}
@@ -1532,11 +1645,11 @@ export const MatchScreen: React.FC<MatchScreenProps> = ({
           </View>
         </Modal>
 
-        {/* 6C. ANIMATED COMPLETION CELEBRATION MODAL (ON SCHEDULE SUCCESS) */}
+        {/* 6D. ANIMATED COMPLETION CELEBRATION MODAL (ON SCHEDULE SUCCESS) */}
         <AnimatedCompletionModal
           visible={showScheduleSuccessModal}
           title="Collab Scheduled! 🚀"
-          subtitle="‘Day in Lagos’ added to your posting schedule. +50 XP awarded to your streak!"
+          subtitle="Co-created Reel added to your posting schedule. +50 XP awarded to your streak!"
           badgeText="COLLAB SCHEDULED"
           xpEarned={50}
           streakCount={48}
@@ -1549,7 +1662,7 @@ export const MatchScreen: React.FC<MatchScreenProps> = ({
           }}
         />
 
-        {/* 7. FULL DEEP-DIVE CREATOR PROFILE MODAL (ULTRA-PREMIUM REDESIGN) */}
+        {/* 7. FULL DEEP-DIVE CREATOR PROFILE MODAL (WITH SMART 2-STATE COLLAB BUTTON) */}
         <Modal
           visible={showDetailModal}
           animationType="slide"
@@ -1668,11 +1781,18 @@ export const MatchScreen: React.FC<MatchScreenProps> = ({
                 </View>
               </View>
 
-              {/* CARD 2: COLLAB IDEA */}
+              {/* CARD 2: COLLAB IDEA (SMART 2-STATE: PITCH vs SCHEDULE) */}
               <View style={styles.detailCollabIdeaCard}>
                 <View style={styles.collabIdeaTitleRow}>
-                  <Text style={styles.purplePinIcon}>📍</Text>
-                  <Text style={styles.detailCollabIdeaTitle}>Collab Blueprint</Text>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                    <Text style={styles.purplePinIcon}>📍</Text>
+                    <Text style={styles.detailCollabIdeaTitle}>Collab Blueprint</Text>
+                  </View>
+                  <View style={isDetailConnected ? styles.connectedCollabBadge : styles.potencyBadge}>
+                    <Text style={isDetailConnected ? styles.connectedCollabBadgeText : styles.potencyBadgeText}>
+                      {isDetailConnected ? '💜 Connected Partner' : isDetailPending ? '⏳ Pitch Sent' : '🔒 Requires Connection'}
+                    </Text>
+                  </View>
                 </View>
                 <Text style={styles.collabIdeaName}>{selectedCreatorForDetail.collabIdea.title}</Text>
 
@@ -1718,24 +1838,46 @@ export const MatchScreen: React.FC<MatchScreenProps> = ({
                   ))}
                 </View>
 
-                <Pressable
-                  style={({ pressed }) => [styles.buildCollabPlanBtn, pressed && styles.btnPressed]}
-                  onPress={() => {
-                    setShowDetailModal(false);
-                    setTimeout(() => {
-                      setShowScheduleConfirmModal(true);
-                    }, 250);
-                  }}
-                >
-                  <LinearGradient
-                    colors={['#784DF0', '#582CDB']}
-                    start={{ x: 0, y: 0 }}
-                    end={{ x: 1, y: 1 }}
-                    style={styles.buildCollabPlanGradient}
+                {/* SMART 2-STATE BUTTON */}
+                {isDetailConnected ? (
+                  <Pressable
+                    style={({ pressed }) => [styles.buildCollabPlanBtn, pressed && styles.btnPressed]}
+                    onPress={() => {
+                      setShowDetailModal(false);
+                      setCollabPostTitle('Co-created Reel (feat. ' + selectedCreatorForDetail.name + ')');
+                      setTimeout(() => {
+                        setShowScheduleConfirmModal(true);
+                      }, 250);
+                    }}
                   >
-                    <Text style={styles.buildCollabPlanBtnText}>⚡ Build Collab Plan</Text>
-                  </LinearGradient>
-                </Pressable>
+                    <LinearGradient
+                      colors={['#784DF0', '#582CDB']}
+                      start={{ x: 0, y: 0 }}
+                      end={{ x: 1, y: 1 }}
+                      style={styles.buildCollabPlanGradient}
+                    >
+                      <Text style={styles.buildCollabPlanBtnText}>⚡ Add to Content Schedule</Text>
+                    </LinearGradient>
+                  </Pressable>
+                ) : isDetailPending ? (
+                  <View style={styles.pendingIdeaBtn}>
+                    <Text style={styles.pendingIdeaBtnText}>⏳ Pitch Sent (Awaiting Response)</Text>
+                  </View>
+                ) : (
+                  <Pressable
+                    style={({ pressed }) => [styles.buildCollabPlanBtn, pressed && styles.btnPressed]}
+                    onPress={() => handleOpenPitchModal(selectedCreatorForDetail)}
+                  >
+                    <LinearGradient
+                      colors={['#784DF0', '#582CDB']}
+                      start={{ x: 0, y: 0 }}
+                      end={{ x: 1, y: 1 }}
+                      style={styles.buildCollabPlanGradient}
+                    >
+                      <Text style={styles.buildCollabPlanBtnText}>✨ Pitch Collab & Connect (+50 XP)</Text>
+                    </LinearGradient>
+                  </Pressable>
+                )}
               </View>
 
               {/* ROW OF 2 METRIC CARDS: AUDIENCE & STREAK */}
@@ -1876,8 +2018,15 @@ export const MatchScreen: React.FC<MatchScreenProps> = ({
               <Pressable
                 style={({ pressed }) => [styles.detailConnectBtn, pressed && styles.btnPressed]}
                 onPress={() => {
-                  setShowDetailModal(false);
-                  onSwipeComplete('right', selectedCreatorForDetail);
+                  if (isDetailConnected) {
+                    setShowDetailModal(false);
+                    setCollabPostTitle('Co-created Reel (feat. ' + selectedCreatorForDetail.name + ')');
+                    setTimeout(() => {
+                      setShowScheduleConfirmModal(true);
+                    }, 250);
+                  } else {
+                    handleOpenPitchModal(selectedCreatorForDetail);
+                  }
                 }}
               >
                 <LinearGradient
@@ -1886,7 +2035,9 @@ export const MatchScreen: React.FC<MatchScreenProps> = ({
                   end={{ x: 1, y: 1 }}
                   style={styles.detailConnectGradient}
                 >
-                  <Text style={styles.detailConnectBtnText}>💜 Connect (+50 XP)</Text>
+                  <Text style={styles.detailConnectBtnText}>
+                    {isDetailConnected ? '📅 Schedule Collab Post' : isDetailPending ? '⏳ Pitch Sent' : '✨ Pitch Collab & Connect (+50 XP)'}
+                  </Text>
                 </LinearGradient>
               </Pressable>
 
@@ -2639,6 +2790,19 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     color: '#582CDB',
   },
+  connectedCollabBadge: {
+    backgroundColor: '#FAF5FF',
+    paddingVertical: 3,
+    paddingHorizontal: 8,
+    borderRadius: 100,
+    borderWidth: 1,
+    borderColor: '#E9D5FF',
+  },
+  connectedCollabBadgeText: {
+    fontSize: 10.5,
+    fontWeight: '800',
+    color: '#7E22CE',
+  },
   collabHeadline: {
     fontSize: 17,
     fontWeight: '900',
@@ -2664,6 +2828,19 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     color: '#582CDB',
   },
+  collabMetaChipLock: {
+    backgroundColor: '#FEF2F2',
+    paddingVertical: 4,
+    paddingHorizontal: 10,
+    borderRadius: 100,
+    borderWidth: 1,
+    borderColor: '#FECDD3',
+  },
+  collabMetaChipLockText: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: '#E11D48',
+  },
   buildIdeaBtn: {
     height: 44,
     borderRadius: 14,
@@ -2678,6 +2855,20 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontSize: 13.5,
     fontWeight: '800',
+  },
+  pendingIdeaBtn: {
+    height: 44,
+    borderRadius: 14,
+    backgroundColor: '#EDE8FC',
+    borderWidth: 1.2,
+    borderColor: '#DDD6FE',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  pendingIdeaBtnText: {
+    fontSize: 12.5,
+    fontWeight: '800',
+    color: '#582CDB',
   },
 
   // INCOMING REQUESTS SECTION
@@ -3045,13 +3236,26 @@ const styles = StyleSheet.create({
     color: '#7F7894',
     fontWeight: '500',
   },
+  scheduleMiniBtn: {
+    backgroundColor: '#EDE8FC',
+    borderRadius: 10,
+    paddingVertical: 6,
+    paddingHorizontal: 10,
+    borderWidth: 1,
+    borderColor: '#DDD6FE',
+  },
+  scheduleMiniBtnText: {
+    fontSize: 11.5,
+    fontWeight: '800',
+    color: '#582CDB',
+  },
   messageBtn: {
     backgroundColor: '#FAF8FF',
     borderWidth: 1,
     borderColor: '#DDD6FE',
     borderRadius: 10,
     paddingVertical: 6,
-    paddingHorizontal: 14,
+    paddingHorizontal: 12,
   },
   messageBtnText: {
     fontSize: 12,
@@ -3420,9 +3624,9 @@ const styles = StyleSheet.create({
   },
   collabIdeaTitleRow: {
     flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'center',
-    gap: 6,
-    marginBottom: 6,
+    marginBottom: 8,
   },
   purplePinIcon: {
     fontSize: 13,
@@ -3788,6 +3992,41 @@ const styles = StyleSheet.create({
     borderColor: '#582CDB',
   },
 
+  // PITCH MODAL SPECIFIC STYLES
+  pitchIdeaPreviewBox: {
+    width: '100%',
+    backgroundColor: '#FAF8FF',
+    borderRadius: 14,
+    padding: 12,
+    borderWidth: 1,
+    borderColor: '#DDD6FE',
+    marginBottom: 12,
+  },
+  pitchIdeaPreviewTitle: {
+    fontSize: 13.5,
+    fontWeight: '800',
+    color: '#582CDB',
+    marginBottom: 2,
+  },
+  pitchIdeaPreviewMeta: {
+    fontSize: 11,
+    fontWeight: '600',
+    color: '#7F7894',
+  },
+  pitchTextAreaInput: {
+    width: '100%',
+    height: 80,
+    borderWidth: 1.2,
+    borderColor: 'rgba(221, 214, 254, 0.9)',
+    borderRadius: 12,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    fontSize: 13,
+    color: '#171420',
+    backgroundColor: 'rgba(250, 248, 255, 0.8)',
+    lineHeight: 18,
+  },
+
   // MODALS
   modalOverlay: {
     flex: 1,
@@ -3839,27 +4078,6 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     lineHeight: 16,
     marginBottom: 14,
-  },
-  ideaScriptBox: {
-    width: '100%',
-    backgroundColor: '#FAF8FF',
-    borderRadius: 14,
-    padding: 12,
-    borderWidth: 1,
-    borderColor: '#DDD6FE',
-    marginBottom: 16,
-  },
-  ideaScriptHeading: {
-    fontSize: 11.5,
-    fontWeight: '800',
-    color: '#582CDB',
-    marginBottom: 6,
-  },
-  ideaScriptStep: {
-    fontSize: 11.5,
-    color: '#171420',
-    lineHeight: 16,
-    marginBottom: 4,
   },
   inputGroupFull: {
     width: '100%',
