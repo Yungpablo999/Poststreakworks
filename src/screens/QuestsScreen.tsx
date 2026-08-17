@@ -137,6 +137,36 @@ export const QuestsScreen: React.FC<QuestsScreenProps> = ({
     setShowCelebrationModal(true);
   };
 
+  const handleUnderstoodReputation = () => {
+    if (Platform.OS !== 'web') {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    }
+    setShowReputationModal(false);
+    setTimeout(() => {
+      setCelebrationTitle('Reputation Goal Locked!');
+      setCelebrationSubtitle('Ghost is tracking your daily quests toward 100% Creator Passport rating.');
+      setCelebrationSpeech('Ghost says: Consistency is your secret weapon Amara! Keep up your 47-day streak!');
+      setCelebrationBadge('PASSPORT ACTIVE');
+      setCelebrationXp(40);
+      setShowCelebrationModal(true);
+    }, 200);
+  };
+
+  const handleUnderstoodBrand = () => {
+    if (Platform.OS !== 'web') {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    }
+    setShowBrandModal(false);
+    setTimeout(() => {
+      setCelebrationTitle('Brand Goal Target Set!');
+      setCelebrationSubtitle('Ghost will alert you as soon as you reach Level 3 requirements for sponsored campaigns.');
+      setCelebrationSpeech("Ghost says: Paid opportunities unlock soon! You're on fire today!");
+      setCelebrationBadge('BRAND RADAR');
+      setCelebrationXp(50);
+      setShowCelebrationModal(true);
+    }, 200);
+  };
+
   const handleExplorePro = () => {
     if (Platform.OS !== 'web') {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
@@ -664,8 +694,8 @@ export const QuestsScreen: React.FC<QuestsScreenProps> = ({
                 </View>
               </View>
 
-              <Pressable style={styles.modalFullBtn} onPress={() => setShowReputationModal(false)}>
-                <Text style={styles.modalFullBtnText}>Understood ✓</Text>
+              <Pressable style={styles.modalFullBtn} onPress={handleUnderstoodReputation}>
+                <Text style={styles.modalFullBtnText}>I Understood ✓</Text>
               </Pressable>
             </Animated.View>
           </View>
@@ -694,8 +724,8 @@ export const QuestsScreen: React.FC<QuestsScreenProps> = ({
                 Brands filter for creators who maintain a minimum 14-day streak and Level 4 Passport status. Complete your daily missions to unlock brand invites!
               </Text>
 
-              <Pressable style={styles.modalFullBtn} onPress={() => setShowBrandModal(false)}>
-                <Text style={styles.modalFullBtnText}>Got it!</Text>
+              <Pressable style={styles.modalFullBtn} onPress={handleUnderstoodBrand}>
+                <Text style={styles.modalFullBtnText}>I Understood ✓</Text>
               </Pressable>
             </Animated.View>
           </View>
