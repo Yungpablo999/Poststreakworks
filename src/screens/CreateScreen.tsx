@@ -17,8 +17,7 @@ import {
 import Svg, { Path, Circle, Rect } from 'react-native-svg';
 import * as Haptics from 'expo-haptics';
 import { LinearGradient } from 'expo-linear-gradient';
-
-export type TabType = 'home' | 'create' | 'match' | 'quests' | 'growth';
+import { FloatingTabBar, TabType } from '../components/FloatingTabBar';
 
 interface CreateScreenProps {
   onLogout?: () => void;
@@ -756,73 +755,8 @@ export const CreateScreen: React.FC<CreateScreenProps> = ({
           </Animated.View>
         )}
 
-        {/* 4. EXACT FIGMA BOTTOM NAVIGATION BAR */}
-        <View style={styles.bottomTabBar}>
-          <Pressable
-            onPress={() => handleTabPress('home')}
-            style={styles.tabItem}
-            hitSlop={8}
-          >
-            <View style={styles.tabIconWrapper}>
-              <HomeNavIcon color={getTabColor('home')} />
-            </View>
-            <Text style={[styles.tabLabel, activeTab === 'home' && styles.tabLabelActive]}>
-              HOME
-            </Text>
-          </Pressable>
-
-          <Pressable
-            onPress={() => handleTabPress('create')}
-            style={styles.tabItem}
-            hitSlop={8}
-          >
-            <View style={styles.tabIconWrapper}>
-              <CreateNavIcon color={getTabColor('create')} />
-            </View>
-            <Text style={[styles.tabLabel, activeTab === 'create' && styles.tabLabelActive]}>
-              CREATE
-            </Text>
-          </Pressable>
-
-          <Pressable
-            onPress={() => handleTabPress('match')}
-            style={styles.tabItem}
-            hitSlop={8}
-          >
-            <View style={styles.tabIconWrapper}>
-              <MatchNavIcon color={getTabColor('match')} />
-            </View>
-            <Text style={[styles.tabLabel, activeTab === 'match' && styles.tabLabelActive]}>
-              MATCH
-            </Text>
-          </Pressable>
-
-          <Pressable
-            onPress={() => handleTabPress('quests')}
-            style={styles.tabItem}
-            hitSlop={8}
-          >
-            <View style={styles.tabIconWrapper}>
-              <QuestsNavIcon color={getTabColor('quests')} />
-            </View>
-            <Text style={[styles.tabLabel, activeTab === 'quests' && styles.tabLabelActive]}>
-              QUESTS
-            </Text>
-          </Pressable>
-
-          <Pressable
-            onPress={() => handleTabPress('growth')}
-            style={styles.tabItem}
-            hitSlop={8}
-          >
-            <View style={styles.tabIconWrapper}>
-              <GrowthNavIcon color={getTabColor('growth')} />
-            </View>
-            <Text style={[styles.tabLabel, activeTab === 'growth' && styles.tabLabelActive]}>
-              GROWTH
-            </Text>
-          </Pressable>
-        </View>
+        {/* 4. FLOATING LIQUID GLASS BOTTOM NAVIGATION BAR */}
+        <FloatingTabBar activeTab={activeTab} onTabPress={handleTabPress} />
 
         {/* MODAL 1: SCHEDULE NEW POST */}
         <Modal
@@ -1309,7 +1243,7 @@ const styles = StyleSheet.create({
   scrollContent: {
     paddingHorizontal: 22,
     paddingTop: 4,
-    paddingBottom: 28,
+    paddingBottom: 120,
   },
 
   // A. HEADLINE SECTION

@@ -14,14 +14,13 @@ import {
 } from 'react-native';
 import Svg, { Path, Circle, Rect } from 'react-native-svg';
 import * as Haptics from 'expo-haptics';
+import { FloatingTabBar, TabType } from '../components/FloatingTabBar';
 
 interface MissionDetailScreenProps {
   onBackToDashboard: () => void;
-  onNavigateTab?: (tab: 'home' | 'create' | 'match' | 'quests' | 'growth') => void;
+  onNavigateTab?: (tab: TabType) => void;
   onLogout?: () => void;
 }
-
-type TabType = 'home' | 'create' | 'match' | 'quests' | 'growth';
 
 // Exact Custom Figma Vector Icons for Bottom Navigation Bar
 const HomeNavIcon = ({ color }: { color: string }) => (
@@ -520,78 +519,8 @@ export const MissionDetailScreen: React.FC<MissionDetailScreenProps> = ({
           </View>
         </ScrollView>
 
-        {/* 4. EXACT FIGMA BOTTOM NAVIGATION BAR */}
-        <View style={styles.bottomTabBar}>
-          {/* Tab 1: HOME */}
-          <Pressable
-            onPress={() => handleTabPress('home')}
-            style={styles.tabItem}
-            hitSlop={8}
-          >
-            <View style={styles.tabIconWrapper}>
-              <HomeNavIcon color={getTabColor('home')} />
-            </View>
-            <Text style={[styles.tabLabel, activeTab === 'home' && styles.tabLabelActive]}>
-              HOME
-            </Text>
-          </Pressable>
-
-          {/* Tab 2: CREATE */}
-          <Pressable
-            onPress={() => handleTabPress('create')}
-            style={styles.tabItem}
-            hitSlop={8}
-          >
-            <View style={styles.tabIconWrapper}>
-              <CreateNavIcon color={getTabColor('create')} />
-            </View>
-            <Text style={[styles.tabLabel, activeTab === 'create' && styles.tabLabelActive]}>
-              CREATE
-            </Text>
-          </Pressable>
-
-          {/* Tab 3: MATCH */}
-          <Pressable
-            onPress={() => handleTabPress('match')}
-            style={styles.tabItem}
-            hitSlop={8}
-          >
-            <View style={styles.tabIconWrapper}>
-              <MatchNavIcon color={getTabColor('match')} />
-            </View>
-            <Text style={[styles.tabLabel, activeTab === 'match' && styles.tabLabelActive]}>
-              MATCH
-            </Text>
-          </Pressable>
-
-          {/* Tab 4: QUESTS (Active in Mission Detail) */}
-          <Pressable
-            onPress={() => handleTabPress('quests')}
-            style={styles.tabItem}
-            hitSlop={8}
-          >
-            <View style={styles.tabIconWrapper}>
-              <QuestsNavIcon color={getTabColor('quests')} />
-            </View>
-            <Text style={[styles.tabLabel, activeTab === 'quests' && styles.tabLabelActive]}>
-              QUESTS
-            </Text>
-          </Pressable>
-
-          {/* Tab 5: GROWTH */}
-          <Pressable
-            onPress={() => handleTabPress('growth')}
-            style={styles.tabItem}
-            hitSlop={8}
-          >
-            <View style={styles.tabIconWrapper}>
-              <GrowthNavIcon color={getTabColor('growth')} />
-            </View>
-            <Text style={[styles.tabLabel, activeTab === 'growth' && styles.tabLabelActive]}>
-              GROWTH
-            </Text>
-          </Pressable>
-        </View>
+        {/* 4. FLOATING LIQUID GLASS BOTTOM NAVIGATION BAR */}
+        <FloatingTabBar activeTab={activeTab} onTabPress={handleTabPress} />
 
         {/* 5. CELEBRATION MODAL */}
         <Modal
@@ -730,7 +659,7 @@ const styles = StyleSheet.create({
   scrollContent: {
     paddingHorizontal: 20,
     paddingTop: 6,
-    paddingBottom: 40,
+    paddingBottom: 120,
   },
   toastBanner: {
     backgroundColor: 'rgba(237, 232, 252, 0.9)',
