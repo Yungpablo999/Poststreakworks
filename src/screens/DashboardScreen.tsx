@@ -498,9 +498,7 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     }
     setActiveTab(tab);
-    if (tab === 'quests' && onStartMission) {
-      onStartMission();
-    } else if (onNavigateTab) {
+    if (onNavigateTab) {
       onNavigateTab(tab);
     }
   };

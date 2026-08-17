@@ -234,7 +234,7 @@ export default function App() {
         {currentScreen === 'dashboard' && (
           <DashboardScreen
             onLogout={handleLogout}
-            onStartMission={() => navigateTo('mission-detail')}
+            onStartMission={() => navigateTo('quests')}
             onNavigateTab={(tab) => {
               if (tab === 'create') {
                 navigateTo('create');
@@ -250,7 +250,7 @@ export default function App() {
         )}
 
         {currentScreen === 'mission-detail' && (
-          <MissionDetailScreen
+          <QuestsScreen
             onBackToDashboard={() => navigateTo('dashboard')}
             onLogout={handleLogout}
             onNavigateTab={(tab) => {
