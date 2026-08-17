@@ -13,6 +13,7 @@ import { OnboardingCompleteScreen } from './src/screens/OnboardingCompleteScreen
 import { DashboardScreen } from './src/screens/DashboardScreen';
 import { MissionDetailScreen } from './src/screens/MissionDetailScreen';
 import { QuestsScreen } from './src/screens/QuestsScreen';
+import { ChallengeDetailScreen } from './src/screens/ChallengeDetailScreen';
 import { CreateScreen } from './src/screens/CreateScreen';
 import { ScheduleScreen } from './src/screens/ScheduleScreen';
 import { MatchScreen } from './src/screens/MatchScreen';
@@ -34,7 +35,8 @@ type Screen =
   | 'match'
   | 'growth'
   | 'quests'
-  | 'schedule';
+  | 'schedule'
+  | 'challenge-detail';
 
 export default function App() {
   const [showSplash, setShowSplash] = useState(true);
@@ -52,7 +54,9 @@ export default function App() {
     if (nextScreen !== currentScreen) {
       const msg =
         customMessage ||
-        (nextScreen === 'mission-detail'
+        (nextScreen === 'challenge-detail'
+          ? 'Entering Community Challenge'
+          : nextScreen === 'mission-detail'
           ? "Entering Today's Mission"
           : nextScreen === 'quests'
           ? 'Entering Quests Hub'
@@ -350,6 +354,8 @@ export default function App() {
           <QuestsScreen
             onBackToDashboard={() => navigateTo('dashboard')}
             onLogout={handleLogout}
+            onOpenMissionDetail={() => navigateTo('mission-detail')}
+            onOpenCommunityChallenge={() => navigateTo('challenge-detail')}
             onNavigateTab={(tab: TabType) => {
               if (tab === 'home') {
                 navigateTo('dashboard');
@@ -357,6 +363,26 @@ export default function App() {
                 navigateTo('create');
               } else if (tab === 'match') {
                 navigateTo('match');
+              } else if (tab === 'growth') {
+                navigateTo('growth');
+              }
+            }}
+          />
+        )}
+
+        {currentScreen === 'challenge-detail' && (
+          <ChallengeDetailScreen
+            onBackToDashboard={() => navigateTo('quests')}
+            onLogout={handleLogout}
+            onNavigateTab={(tab: TabType) => {
+              if (tab === 'home') {
+                navigateTo('dashboard');
+              } else if (tab === 'create') {
+                navigateTo('create');
+              } else if (tab === 'match') {
+                navigateTo('match');
+              } else if (tab === 'quests') {
+                navigateTo('quests');
               } else if (tab === 'growth') {
                 navigateTo('growth');
               }
