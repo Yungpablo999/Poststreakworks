@@ -1123,11 +1123,22 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
             {/* Creator Profile Row */}
             <View style={styles.creatorProfileRow}>
               <View style={styles.creatorAvatarBox}>
-                <Image
-                  source={require('../../assets/images/jarvis-ghost-clean.png')}
-                  style={styles.creatorAvatarImage}
-                  resizeMode="cover"
-                />
+                <Svg width={22} height={22} viewBox="0 0 24 24" fill="none">
+                  <Path
+                    d="M20 21V19C20 17.9 19.5 16.9 18.7 16.2C17.9 15.5 16.9 15 15.8 15H8.2C7.1 15 6.1 15.5 5.3 16.2C4.5 16.9 4 17.9 4 19V21"
+                    stroke="#582CDB"
+                    strokeWidth="2.2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                  <Circle
+                    cx="12"
+                    cy="7"
+                    r="4"
+                    stroke="#582CDB"
+                    strokeWidth="2.2"
+                  />
+                </Svg>
               </View>
               <View style={styles.creatorDetails}>
                 <Text style={styles.creatorName}>Amara Okafor</Text>
@@ -2563,10 +2574,11 @@ const styles = StyleSheet.create({
     width: 46,
     height: 46,
     borderRadius: 23,
-    backgroundColor: 'rgba(243, 238, 251, 0.8)',
-    overflow: 'hidden',
+    backgroundColor: 'rgba(237, 232, 252, 0.95)',
+    justifyContent: 'center',
+    alignItems: 'center',
     borderWidth: 1.2,
-    borderColor: 'rgba(226, 220, 242, 0.9)',
+    borderColor: 'rgba(221, 214, 254, 0.9)',
   },
   creatorAvatarImage: {
     width: 46,
