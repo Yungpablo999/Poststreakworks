@@ -9,6 +9,8 @@ import {
 } from 'react-native';
 import Svg, { Path, Circle } from 'react-native-svg';
 import * as Haptics from 'expo-haptics';
+import { BlurView } from 'expo-blur';
+import { LinearGradient } from 'expo-linear-gradient';
 
 export type TabType = 'home' | 'create' | 'match' | 'quests' | 'growth';
 
@@ -20,7 +22,7 @@ export interface FloatingTabBarProps {
 
 // Vector SVG Icons for Bottom Navigation
 const HomeNavIcon = ({ color }: { color: string }) => (
-  <Svg width={22} height={22} viewBox="0 0 24 24" fill={color}>
+  <Svg width={21} height={21} viewBox="0 0 24 24" fill={color}>
     <Path
       d="M12 2.5L2 11.5H5.5V21.5H9.5V14.5C9.5 13.67 10.17 13 11 13H13C13.83 13 14.5 13.67 14.5 14.5V21.5H18.5V11.5H22L12 2.5Z"
       fill={color}
@@ -29,14 +31,14 @@ const HomeNavIcon = ({ color }: { color: string }) => (
 );
 
 const CreateNavIcon = ({ color }: { color: string }) => (
-  <Svg width={22} height={22} viewBox="0 0 24 24" fill="none">
+  <Svg width={21} height={21} viewBox="0 0 24 24" fill="none">
     <Circle cx="12" cy="12" r="9.5" stroke={color} strokeWidth="2.4" />
     <Path d="M12 7.5V16.5M7.5 12H16.5" stroke={color} strokeWidth="2.4" strokeLinecap="round" />
   </Svg>
 );
 
 const MatchNavIcon = ({ color }: { color: string }) => (
-  <Svg width={24} height={22} viewBox="0 0 28 24" fill={color}>
+  <Svg width={23} height={21} viewBox="0 0 28 24" fill={color}>
     <Circle cx="14" cy="5.8" r="3.6" fill={color} />
     <Path
       d="M8.2 18.2C8.2 15 10.8 12.2 14 12.2C17.2 12.2 19.8 15 19.8 18.2V20.5H8.2V18.2Z"
@@ -56,7 +58,7 @@ const MatchNavIcon = ({ color }: { color: string }) => (
 );
 
 const QuestsNavIcon = ({ color }: { color: string }) => (
-  <Svg width={22} height={22} viewBox="0 0 24 24" fill="none">
+  <Svg width={21} height={21} viewBox="0 0 24 24" fill="none">
     <Path d="M3.5 3.5L5.8 2L13.2 9.4L11.4 11.2L4 3.8V3.5Z" fill={color} />
     <Path d="M3.5 3.5L2 5.8L9.4 13.2L11.2 11.4L3.8 4H3.5Z" fill={color} />
     <Path d="M14.5 9.2L9.8 13.9L11.3 15.4L16 10.7L14.5 9.2Z" fill={color} />
@@ -71,7 +73,7 @@ const QuestsNavIcon = ({ color }: { color: string }) => (
 );
 
 const GrowthNavIcon = ({ color }: { color: string }) => (
-  <Svg width={22} height={22} viewBox="0 0 24 24" fill="none">
+  <Svg width={21} height={21} viewBox="0 0 24 24" fill="none">
     <Path
       d="M3.5 17L9 11.5L13 15L20.5 7"
       stroke={color}
@@ -110,113 +112,215 @@ export const FloatingTabBar: React.FC<FloatingTabBarProps> = ({
   };
 
   return (
-    <View style={[styles.floatingContainer, style]}>
-      {/* Liquid Crystal Glass Frosted Dock */}
-      <View style={styles.liquidCrystalDock}>
-        {TABS.map((tab) => {
-          const isActive = activeTab === tab.id;
-          const iconColor = isActive ? '#FFFFFF' : '#7F7894';
+    <View style={[styles.floatingWrapper, style]}>
+      {/* Ambient Multi-Layer Liquid Shadow */}
+      <View style={styles.shadowLayer}>
+        {/* Native Optical BlurView Container */}
+        <BlurView
+          intensity={Platform.OS === 'ios' ? 75 : 85}
+          tint="light"
+          style={styles.blurCapsule}
+        >
+          {/* Liquid Glass Iridescent Gradient Sheen */}
+          <LinearGradient
+            colors={[
+              'rgba(255, 255, 255, 0.78)',
+              'rgba(246, 242, 255, 0.62)',
+              'rgba(255, 255, 255, 0.74)',
+            ]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={styles.liquidGlassSurface}
+          >
+            {/* Top Specular Light Highlight Arc */}
+            <View style={styles.topSpecularArc} />
 
-          return (
-            <Pressable
-              key={tab.id}
-              onPress={() => handlePress(tab.id)}
-              style={({ pressed }) => [
-                styles.tabItem,
-                isActive && styles.tabItemActive,
-                pressed && !isActive && styles.tabItemPressed,
-              ]}
-              hitSlop={6}
-            >
-              <View style={styles.iconWrapper}>{tab.icon(iconColor)}</View>
-              <Text
-                style={[
-                  styles.tabLabel,
-                  isActive && styles.tabLabelActive,
-                ]}
-                numberOfLines={1}
-              >
-                {tab.label}
-              </Text>
-              {isActive && <View style={styles.activeGoldAccentDot} />}
-            </Pressable>
-          );
-        })}
+            {/* Bottom Subtle Refraction Rim */}
+            <View style={styles.bottomRefractionRim} />
+
+            {/* Tab Items */}
+            {TABS.map((tab) => {
+              const isActive = activeTab === tab.id;
+
+              if (isActive) {
+                return (
+                  <Pressable
+                    key={tab.id}
+                    onPress={() => handlePress(tab.id)}
+                    style={styles.activePillTouchable}
+                    hitSlop={6}
+                  >
+                    {/* Liquid Glass Active Droplet Capsule in Royal Purple & Gold */}
+                    <LinearGradient
+                      colors={['#784DF0', '#582CDB']}
+                      start={{ x: 0, y: 0 }}
+                      end={{ x: 0, y: 1 }}
+                      style={styles.activeLiquidPill}
+                    >
+                      {/* Pill Top Gloss Sheen */}
+                      <View style={styles.pillTopGloss} />
+
+                      <View style={styles.iconWrapper}>
+                        {tab.icon('#FFFFFF')}
+                      </View>
+                      <Text style={styles.tabLabelActive} numberOfLines={1}>
+                        {tab.label}
+                      </Text>
+
+                      {/* Gold Reward Jewel Accent Dot */}
+                      <View style={styles.activeGoldDot} />
+                    </LinearGradient>
+                  </Pressable>
+                );
+              }
+
+              return (
+                <Pressable
+                  key={tab.id}
+                  onPress={() => handlePress(tab.id)}
+                  style={({ pressed }) => [
+                    styles.inactiveTabItem,
+                    pressed && styles.inactiveTabPressed,
+                  ]}
+                  hitSlop={6}
+                >
+                  <View style={styles.iconWrapper}>
+                    {tab.icon('#605874')}
+                  </View>
+                  <Text style={styles.tabLabelInactive} numberOfLines={1}>
+                    {tab.label}
+                  </Text>
+                </Pressable>
+              );
+            })}
+          </LinearGradient>
+        </BlurView>
       </View>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
-  floatingContainer: {
+  floatingWrapper: {
     position: 'absolute',
     bottom: Platform.OS === 'ios' ? 22 : 16,
-    left: 16,
-    right: 16,
+    left: 14,
+    right: 14,
     zIndex: 999,
     alignItems: 'center',
   },
-  // Liquid Crystal Glassmorphism Dock (Cream/White Crystal + Purple Specular Tint)
-  liquidCrystalDock: {
+  // Ambient Soft Floating Shadows
+  shadowLayer: {
+    width: '100%',
+    borderRadius: 38,
+    backgroundColor: 'transparent',
+    shadowColor: '#4C24C2',
+    shadowOffset: { width: 0, height: 12 },
+    shadowOpacity: 0.16,
+    shadowRadius: 28,
+    elevation: 10,
+  },
+  // Native BlurView Capsule with Fine Specular Border
+  blurCapsule: {
+    borderRadius: 38,
+    overflow: 'hidden',
+    borderWidth: 1.3,
+    borderColor: 'rgba(255, 255, 255, 0.88)',
+  },
+  // Liquid Glass Surface Container
+  liquidGlassSurface: {
+    position: 'relative',
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    width: '100%',
-    backgroundColor: 'rgba(255, 255, 255, 0.90)',
-    borderRadius: 36,
-    borderWidth: 1.2,
-    borderColor: 'rgba(226, 219, 248, 0.95)',
-    paddingVertical: 6,
-    paddingHorizontal: 7,
-    shadowColor: '#582CDB',
-    shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 0.12,
-    shadowRadius: 26,
-    elevation: 8,
+    paddingVertical: 5.5,
+    paddingHorizontal: 6,
   },
-  tabItem: {
+  // Apple-style Top Specular Arc Reflection
+  topSpecularArc: {
+    position: 'absolute',
+    top: 0,
+    left: 24,
+    right: 24,
+    height: 1.2,
+    backgroundColor: 'rgba(255, 255, 255, 0.95)',
+    borderRadius: 1,
+  },
+  // Subtle Bottom Refraction Tint
+  bottomRefractionRim: {
+    position: 'absolute',
+    bottom: 0,
+    left: 28,
+    right: 28,
+    height: 0.8,
+    backgroundColor: 'rgba(215, 203, 248, 0.65)',
+    borderRadius: 1,
+  },
+  // Inactive Tab
+  inactiveTabItem: {
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
     paddingVertical: 6,
-    paddingHorizontal: 4,
+    paddingHorizontal: 3,
     borderRadius: 22,
   },
-  // Active Liquid Capsule in Royal Purple & Gold Specular Accent
-  tabItemActive: {
-    backgroundColor: '#582CDB',
-    shadowColor: '#582CDB',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.28,
-    shadowRadius: 10,
-    elevation: 4,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.25)',
-  },
-  tabItemPressed: {
-    backgroundColor: 'rgba(237, 232, 252, 0.6)',
+  inactiveTabPressed: {
+    backgroundColor: 'rgba(235, 228, 255, 0.45)',
     transform: [{ scale: 0.96 }],
   },
+  tabLabelInactive: {
+    fontSize: 9,
+    fontWeight: '700',
+    color: '#655D79',
+    letterSpacing: 0.5,
+    textAlign: 'center',
+  },
+  // Active Tab Liquid Droplet Capsule
+  activePillTouchable: {
+    flex: 1,
+  },
+  activeLiquidPill: {
+    position: 'relative',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 6.5,
+    paddingHorizontal: 4,
+    borderRadius: 24,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.38)',
+    shadowColor: '#582CDB',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.32,
+    shadowRadius: 10,
+    elevation: 5,
+  },
+  // Top Gloss Sheen on the Active Pill
+  pillTopGloss: {
+    position: 'absolute',
+    top: 1,
+    left: 8,
+    right: 8,
+    height: 1.2,
+    backgroundColor: 'rgba(255, 255, 255, 0.42)',
+    borderRadius: 1,
+  },
   iconWrapper: {
-    height: 23,
+    height: 22,
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 2,
   },
-  tabLabel: {
-    fontSize: 9.5,
-    fontWeight: '700',
-    color: '#7F7894',
-    letterSpacing: 0.5,
-    textAlign: 'center',
-  },
   tabLabelActive: {
     color: '#FFFFFF',
     fontWeight: '800',
+    fontSize: 9,
+    letterSpacing: 0.4,
+    textAlign: 'center',
   },
-  activeGoldAccentDot: {
+  activeGoldDot: {
     position: 'absolute',
-    bottom: 3,
+    bottom: 2.5,
     width: 3.5,
     height: 3.5,
     borderRadius: 2,
