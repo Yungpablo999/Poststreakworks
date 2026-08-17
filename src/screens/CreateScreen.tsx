@@ -14,10 +14,11 @@ import {
   Platform,
   Alert,
 } from 'react-native';
-import Svg, { Path, Circle, Rect } from 'react-native-svg';
+import Svg, { Path, Circle, Rect, Line } from 'react-native-svg';
 import * as Haptics from 'expo-haptics';
 import { LinearGradient } from 'expo-linear-gradient';
 import { FloatingTabBar, TabType } from '../components/FloatingTabBar';
+import { LiquidGlassBackground } from '../components/LiquidGlassBackground';
 
 interface CreateScreenProps {
   onLogout?: () => void;
@@ -32,6 +33,7 @@ interface ScheduledPost {
   title: string;
   status: 'scheduled' | 'draft' | 'published';
   viewsForecast?: string;
+  viralScore?: number;
   hashtags?: string[];
 }
 
@@ -43,7 +45,8 @@ const INITIAL_POSTS: ScheduledPost[] = [
     time: '11:30 AM',
     title: '3 creator mistakes I stopped making this year',
     status: 'scheduled',
-    viewsForecast: '15.4K - 28K',
+    viewsForecast: '18.4K - 32K',
+    viralScore: 94,
     hashtags: ['#creatortips', '#growthmindset', '#contentcreator'],
   },
   {
@@ -53,36 +56,43 @@ const INITIAL_POSTS: ScheduledPost[] = [
     time: '7:30 PM',
     title: 'One thing I wish I knew before creating',
     status: 'draft',
-    viewsForecast: '8.2K - 14K',
+    viewsForecast: '9.5K - 16K',
+    viralScore: 88,
     hashtags: ['#reelsviral', '#behindthescenes', '#creatorhustle'],
   },
 ];
 
 const WEEK_DAYS = [
-  { day: 'MON', date: 12, fullDate: 'May 12' },
-  { day: 'TUE', date: 13, fullDate: 'May 13' },
-  { day: 'WED', date: 14, fullDate: 'May 14' },
-  { day: 'THU', date: 15, fullDate: 'May 15', isToday: true },
-  { day: 'FRI', date: 16, fullDate: 'May 16' },
-  { day: 'SAT', date: 17, fullDate: 'May 17' },
-  { day: 'SUN', date: 18, fullDate: 'May 18' },
+  { day: 'MON', date: 12, fullDate: 'May 12', hasScheduled: true, hasDraft: false },
+  { day: 'TUE', date: 13, fullDate: 'May 13', hasScheduled: true, hasDraft: false },
+  { day: 'WED', date: 14, fullDate: 'May 14', hasScheduled: true, hasDraft: true },
+  { day: 'THU', date: 15, fullDate: 'May 15', isToday: true, hasScheduled: true, hasDraft: true },
+  { day: 'FRI', date: 16, fullDate: 'May 16', hasScheduled: false, hasDraft: true },
+  { day: 'SAT', date: 17, fullDate: 'May 17', hasScheduled: true, hasDraft: false },
+  { day: 'SUN', date: 18, fullDate: 'May 18', hasScheduled: false, hasDraft: false },
 ];
 
-const PRESET_IDEAS = [
+const AI_VIRAL_HOOKS = [
   {
-    title: 'How I gained my first 1,000 engaged followers without ads',
+    hook: 'If you are starting content in 2026, stop doing this immediately...',
+    format: 'Short • 45s POV Video',
+    platform: 'TikTok',
+    viralScore: 96,
+    predictedViews: '35K - 60K',
+  },
+  {
+    hook: 'How I gained my first 10,000 engaged followers without spending  on ads',
     format: 'Carousel • 5 Slides',
     platform: 'Instagram',
+    viralScore: 92,
+    predictedViews: '20K - 38K',
   },
   {
-    title: '3 tools that save me 10 hours every week as a solo creator',
-    format: 'Short • 45s Video',
-    platform: 'TikTok',
-  },
-  {
-    title: 'The brutal truth about full-time content creation in 2026',
-    format: 'Reel • POV Hook',
+    hook: '3 tools that save me 10 hours every week as a solo creator',
+    format: 'Reel • Breakdown',
     platform: 'Instagram',
+    viralScore: 89,
+    predictedViews: '15K - 28K',
   },
 ];
 
@@ -101,74 +111,10 @@ const InstagramReelIcon = () => (
   </Svg>
 );
 
-// Bottom Nav Bar Icons
-const HomeNavIcon = ({ color }: { color: string }) => (
-  <Svg width={26} height={26} viewBox="0 0 24 24" fill={color}>
-    <Path
-      d="M12 2.5L2 11.5H5.5V21.5H9.5V14.5C9.5 13.67 10.17 13 11 13H13C13.83 13 14.5 13.67 14.5 14.5V21.5H18.5V11.5H22L12 2.5Z"
-      fill={color}
-    />
-  </Svg>
-);
-
-const CreateNavIcon = ({ color }: { color: string }) => (
-  <Svg width={26} height={26} viewBox="0 0 24 24" fill="none">
-    <Circle cx="12" cy="12" r="9.5" stroke={color} strokeWidth="2.8" />
-    <Path d="M12 7.5V16.5M7.5 12H16.5" stroke={color} strokeWidth="2.8" strokeLinecap="round" />
-  </Svg>
-);
-
-const MatchNavIcon = ({ color }: { color: string }) => (
-  <Svg width={28} height={26} viewBox="0 0 28 24" fill={color}>
-    <Circle cx="14" cy="5.8" r="3.6" fill={color} />
-    <Path
-      d="M8.2 18.2C8.2 15 10.8 12.2 14 12.2C17.2 12.2 19.8 15 19.8 18.2V20.5H8.2V18.2Z"
-      fill={color}
-    />
-    <Circle cx="5.2" cy="8.2" r="2.8" fill={color} />
-    <Path
-      d="M1.2 19.2C1.2 17 3 15 5.2 15C6.1 15 6.9 15.3 7.5 15.7C7.3 16.5 7.2 17.4 7.2 18.2V20.5H1.2V19.2Z"
-      fill={color}
-    />
-    <Circle cx="22.8" cy="8.2" r="2.8" fill={color} />
-    <Path
-      d="M26.8 19.2C26.8 17 25 15 22.8 15C21.9 15 21.1 15.3 20.5 15.7C20.7 16.5 20.8 17.4 20.8 18.2V20.5H26.8V19.2Z"
-      fill={color}
-    />
-  </Svg>
-);
-
-const QuestsNavIcon = ({ color }: { color: string }) => (
-  <Svg width={26} height={26} viewBox="0 0 24 24" fill="none">
-    <Path d="M3.5 3.5L5.8 2L13.2 9.4L11.4 11.2L4 3.8V3.5Z" fill={color} />
-    <Path d="M3.5 3.5L2 5.8L9.4 13.2L11.2 11.4L3.8 4H3.5Z" fill={color} />
-    <Path d="M14.5 9.2L9.8 13.9L11.3 15.4L16 10.7L14.5 9.2Z" fill={color} />
-    <Path d="M13.2 15.2L17.5 19.5" stroke={color} strokeWidth="2.8" strokeLinecap="round" />
-    <Circle cx="18.5" cy="20.5" r="1.8" fill={color} />
-    <Path d="M20.5 3.5L18.2 2L10.8 9.4L12.6 11.2L20 3.8V3.5Z" fill={color} />
-    <Path d="M20.5 3.5L22 5.8L14.6 13.2L12.8 11.4L20.2 4H20.5Z" fill={color} />
-    <Path d="M9.5 9.2L14.2 13.9L12.7 15.4L8 10.7L9.5 9.2Z" fill={color} />
-    <Path d="M10.8 15.2L6.5 19.5" stroke={color} strokeWidth="2.8" strokeLinecap="round" />
-    <Circle cx="5.5" cy="20.5" r="1.8" fill={color} />
-  </Svg>
-);
-
-const GrowthNavIcon = ({ color }: { color: string }) => (
-  <Svg width={26} height={26} viewBox="0 0 24 24" fill="none">
-    <Path
-      d="M3.5 17L9 11.5L13 15L20.5 7"
-      stroke={color}
-      strokeWidth="3.2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
-    <Path
-      d="M14.5 7H20.5V13"
-      stroke={color}
-      strokeWidth="3.2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
+const YouTubeShortsIcon = () => (
+  <Svg width={16} height={16} viewBox="0 0 24 24" fill="none">
+    <Rect x="2" y="4" width="20" height="16" rx="4" fill="#FF0000" />
+    <Path d="M10 8.5L16 12L10 15.5V8.5Z" fill="#FFFFFF" />
   </Svg>
 );
 
@@ -211,12 +157,12 @@ export const CreateScreen: React.FC<CreateScreenProps> = ({
       Animated.sequence([
         Animated.parallel([
           Animated.timing(flameFloatY, {
-            toValue: -5,
+            toValue: -4,
             duration: 1800,
             useNativeDriver: true,
           }),
           Animated.timing(flameScale, {
-            toValue: 1.04,
+            toValue: 1.05,
             duration: 1800,
             useNativeDriver: true,
           }),
@@ -294,7 +240,8 @@ export const CreateScreen: React.FC<CreateScreenProps> = ({
       time: newPostTime,
       title: newPostTitle.trim(),
       status: 'scheduled',
-      viewsForecast: '10K - 20K',
+      viewsForecast: '15K - 30K',
+      viralScore: 92,
     };
     setPosts([newPost, ...posts]);
     setShowScheduleModal(false);
@@ -302,7 +249,7 @@ export const CreateScreen: React.FC<CreateScreenProps> = ({
     if (Platform.OS !== 'web') {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     }
-    showToast('✨ Post scheduled successfully!');
+    showToast('✨ Post scheduled to timeline!');
   };
 
   const handleUseSuggestion = () => {
@@ -334,14 +281,13 @@ export const CreateScreen: React.FC<CreateScreenProps> = ({
     showToast('✓ Draft updated and scheduled!');
   };
 
-  const getTabColor = (tab: TabType) => (activeTab === tab ? '#582CDB' : '#171420');
-
   return (
     <SafeAreaView style={styles.safeArea}>
       <StatusBar barStyle="dark-content" backgroundColor="#FAF8F5" />
       <View style={styles.container}>
         {/* 1. TOP APP BAR */}
         <View style={styles.headerBar}>
+          {/* Top-Left: Jarvis Animated Flame Mascot */}
           <Animated.View
             style={[
               styles.headerLogoWrapper,
@@ -360,13 +306,21 @@ export const CreateScreen: React.FC<CreateScreenProps> = ({
             />
           </Animated.View>
 
+          {/* Center Pill: Studio Status */}
+          <View style={styles.studioStatusPill}>
+            <View style={styles.liveGreenDot} />
+            <Text style={styles.studioStatusText}>STUDIO FLOW</Text>
+          </View>
+
+          {/* Top-Right Group */}
           <View style={styles.headerRightGroup}>
+            {/* Chat Bubble */}
             <Pressable
-              style={({ pressed }) => [styles.headerIconBtn, pressed && styles.headerIconBtnPressed]}
+              style={({ pressed }) => [styles.headerIconBtn, pressed && styles.btnPressed]}
               hitSlop={8}
-              onPress={() => showToast('💬 Creator Chat connected.')}
+              onPress={() => showToast('💬 Jarvis Creator Chat is active.')}
             >
-              <Svg width={20} height={20} viewBox="0 0 24 24" fill="none">
+              <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
                 <Path
                   d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"
                   stroke="#171420"
@@ -377,12 +331,13 @@ export const CreateScreen: React.FC<CreateScreenProps> = ({
               </Svg>
             </Pressable>
 
+            {/* Notification Bell */}
             <Pressable
-              style={({ pressed }) => [styles.headerIconBtn, pressed && styles.headerIconBtnPressed]}
+              style={({ pressed }) => [styles.headerIconBtn, pressed && styles.btnPressed]}
               hitSlop={8}
               onPress={() => setShowNotificationModal(true)}
             >
-              <Svg width={20} height={20} viewBox="0 0 24 24" fill="none">
+              <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
                 <Path
                   d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"
                   stroke="#171420"
@@ -403,8 +358,9 @@ export const CreateScreen: React.FC<CreateScreenProps> = ({
               </View>
             </Pressable>
 
+            {/* User Profile Avatar */}
             <Pressable
-              style={({ pressed }) => [styles.headerProfileBtn, pressed && styles.headerProfileBtnPressed]}
+              style={({ pressed }) => [styles.headerProfileBtn, pressed && styles.btnPressed]}
               hitSlop={6}
               onPress={() => setShowProfileModal(true)}
             >
@@ -417,92 +373,92 @@ export const CreateScreen: React.FC<CreateScreenProps> = ({
           </View>
         </View>
 
-        {/* 2. MAIN SCROLLABLE CONTENT */}
+        {/* 2. MAIN SCROLLABLE CREATOR STUDIO CONTENT */}
         <ScrollView
           style={styles.scrollView}
           contentContainerStyle={styles.scrollContent}
           showsVerticalScrollIndicator={false}
         >
-          {/* A. CONTENT SCHEDULE BADGE & TITLE */}
-          <View style={styles.headlineSection}>
-            <View style={styles.topBadgesRow}>
-              <LinearGradient
-                colors={['#7048EC', '#582CDB']}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 1 }}
-                style={styles.contentSchedulePill}
+          {/* SECTION A: DYNAMIC STUDIO HERO LENS */}
+          <LiquidGlassBackground
+            borderRadius={26}
+            light={0.92}
+            refraction={30}
+            depth={0.7}
+            dispersion={0.8}
+            frost={55}
+            splay={0.85}
+            tint="purple-gold"
+            accentColor="#582CDB"
+            goldAccentColor="#F59E0B"
+            hasShadow={true}
+            containerStyle={styles.heroLensContainer}
+            style={styles.heroLensContent}
+          >
+            {/* Top Row: Date & Status Badges */}
+            <View style={styles.heroTopRow}>
+              <View>
+                <Text style={styles.heroDateLabel}>Thu, May 15 • Today</Text>
+                <Text style={styles.heroTitleText}>3 Posts Planned</Text>
+              </View>
+
+              {/* Streak Protection Shield Pill */}
+              <View style={styles.streakShieldBadge}>
+                <Text style={styles.streakFlameIcon}>🔥</Text>
+                <Text style={styles.streakShieldText}>Day 48 Safe</Text>
+              </View>
+            </View>
+
+            {/* Middle Progress Row */}
+            <View style={styles.heroProgressRow}>
+              <View style={styles.heroProgressTrack}>
+                <LinearGradient
+                  colors={['#784DF0', '#582CDB']}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 0 }}
+                  style={[styles.heroProgressFill, { width: '33.3%' }]}
+                />
+              </View>
+              <Text style={styles.heroProgressStatusText}>1 of 3 published • 33%</Text>
+            </View>
+
+            {/* Quick Action Dock Buttons */}
+            <View style={styles.heroActionDock}>
+              {/* Button 1: Plan Post */}
+              <Pressable
+                style={({ pressed }) => [styles.heroPrimaryBtn, pressed && styles.btnPressed]}
+                onPress={() => setShowScheduleModal(true)}
               >
-                <Text style={styles.contentScheduleText}>CONTENT SCHEDULE</Text>
-              </LinearGradient>
+                <LinearGradient
+                  colors={['#7048EC', '#582CDB']}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 1 }}
+                  style={styles.heroPrimaryGradient}
+                >
+                  <Svg width={16} height={16} viewBox="0 0 24 24" fill="none">
+                    <Path d="M12 5V19M5 12H19" stroke="#FFFFFF" strokeWidth="2.4" strokeLinecap="round" />
+                  </Svg>
+                  <Text style={styles.heroPrimaryBtnText}>Plan Post</Text>
+                </LinearGradient>
+              </Pressable>
 
-              <View style={styles.freeScheduleBadge}>
-                <Text style={styles.freeScheduleText}>Free Schedule</Text>
-              </View>
+              {/* Button 2: AI Hook Lab */}
+              <Pressable
+                style={({ pressed }) => [styles.heroSecondaryBtn, pressed && styles.btnPressed]}
+                onPress={() => setShowIdeaModal(true)}
+              >
+                <Text style={styles.heroSecondaryEmoji}>🪄</Text>
+                <Text style={styles.heroSecondaryBtnText}>AI Hook Lab</Text>
+              </Pressable>
             </View>
+          </LiquidGlassBackground>
 
-            <Text style={styles.mainTitle}>Your posts, planned clearly.</Text>
-            <Text style={styles.subTitle}>
-              See what is going live today, what is coming next, and what still needs to be finished.
-            </Text>
-          </View>
-
-          {/* B. HERO TODAY CARD */}
-          <View style={styles.todayCard}>
-            <View style={styles.todayHeaderRow}>
-              <Text style={styles.todayTitle}>Today</Text>
-              <View style={styles.todayBadgesGroup}>
-                <View style={styles.scheduledPill}>
-                  <Text style={styles.scheduledPillText}>1 Scheduled</Text>
-                </View>
-                <View style={styles.draftPill}>
-                  <Text style={styles.draftPillText}>1 Draft</Text>
-                </View>
-              </View>
-            </View>
-
-            <View style={styles.plannedCountRow}>
-              <Text style={styles.plannedBigNumber}>3</Text>
-              <Text style={styles.plannedText}>posts planned</Text>
-            </View>
-
-            <Text style={styles.nextPostTimeText}>Next post: 11:30 AM</Text>
-
-            <View style={styles.progressContainer}>
-              <Text style={styles.progressLabel}>Today&apos;s posting progress • 1 / 3 complete</Text>
-              <View style={styles.progressBarTrack}>
-                <View style={[styles.progressBarFill, { width: '33.3%' }]} />
-              </View>
-            </View>
-
-            <View style={styles.streakProtectionBanner}>
-              <Text style={styles.streakFlameEmoji}>🔥</Text>
-              <Text style={styles.streakProtectionText}>
-                Posting today protects your{' '}
-                <Text style={styles.streakDaysBold}>47-day streak</Text>.
-              </Text>
-            </View>
-
-            <Pressable
-              style={({ pressed }) => [styles.scheduleNewPostBtn, pressed && styles.btnPressed]}
-              onPress={() => setShowScheduleModal(true)}
-            >
-              <Text style={styles.scheduleNewPostBtnText}>Schedule New Post</Text>
-            </Pressable>
-
-            <Pressable
-              style={({ pressed }) => [styles.createFromIdeaBtn, pressed && styles.btnPressed]}
-              onPress={() => setShowIdeaModal(true)}
-            >
-              <Text style={styles.createFromIdeaBtnText}>Create From Idea</Text>
-            </Pressable>
-          </View>
-
-          {/* C. WEEKLY CALENDAR STRIP */}
-          <View style={styles.calendarStripSection}>
-            <View style={styles.calendarHeaderRow}>
-              <Text style={styles.thisWeekCountText}>This week: 8 posts planned</Text>
-              <Pressable onPress={() => setShowCalendarModal(true)} hitSlop={6}>
-                <Text style={styles.viewFullCalendarText}>View Full Calendar</Text>
+          {/* SECTION B: DYNAMIC STUDIO CALENDAR STRIP */}
+          <View style={styles.calendarSection}>
+            <View style={styles.calendarSectionHeader}>
+              <Text style={styles.calendarSectionTitle}>This Week: 8 Planned</Text>
+              <Pressable onPress={() => setShowCalendarModal(true)} hitSlop={8}>
+                <Text style={styles.viewMonthLink}>View Full Month</Text>
               </Pressable>
             </View>
 
@@ -534,228 +490,281 @@ export const CreateScreen: React.FC<CreateScreenProps> = ({
                     >
                       {dayItem.date}
                     </Text>
-                    {isSelected && <View style={styles.activeDayDot} />}
+
+                    {/* Status Dot */}
+                    <View style={styles.dayDotContainer}>
+                      {isSelected ? (
+                        <View style={styles.activeDayDot} />
+                      ) : dayItem.hasScheduled ? (
+                        <View style={styles.scheduledDot} />
+                      ) : dayItem.hasDraft ? (
+                        <View style={styles.draftDot} />
+                      ) : (
+                        <View style={styles.openDot} />
+                      )}
+                    </View>
                   </Pressable>
                 );
               })}
             </View>
           </View>
 
-          {/* D. TODAY'S SCHEDULE SECTION */}
-          <View style={styles.sectionHeaderRow}>
-            <Text style={styles.sectionHeading}>Today&apos;s Schedule</Text>
+          {/* SECTION C: CHRONOLOGICAL TIME-STREAM */}
+          <View style={styles.timeStreamSection}>
+            <View style={styles.sectionHeaderRow}>
+              <Text style={styles.sectionHeading}>Today&apos;s Time-Stream</Text>
+              <Text style={styles.sectionSubHeading}>Next slot in 45m</Text>
+            </View>
+
+            {/* Timeline Node 1: TikTok Scheduled */}
+            <View style={styles.timelineItemWrapper}>
+              <View style={styles.timelineTrackContainer}>
+                <View style={styles.timelineNodePurple}>
+                  <View style={styles.timelineNodeInnerDot} />
+                </View>
+                <View style={styles.timelineVerticalLine} />
+              </View>
+
+              <View style={styles.timelineCard}>
+                <View style={styles.timelineCardHeader}>
+                  <View style={styles.platformRow}>
+                    <TikTokLogoIcon />
+                    <Text style={styles.platformTimeText}>TikTok • 11:30 AM</Text>
+                  </View>
+                  <View style={styles.viralScoreBadge}>
+                    <Text style={styles.viralScoreText}>🔥 94 Score</Text>
+                  </View>
+                </View>
+
+                <Text style={styles.timelineCardTitle}>
+                  3 creator mistakes I stopped making this year
+                </Text>
+
+                <View style={styles.timelineCardFooter}>
+                  <Text style={styles.forecastViewsText}>📈 Forecast: 18.4K - 32K</Text>
+                  <Pressable
+                    style={({ pressed }) => [styles.viewDetailsBtn, pressed && styles.btnPressed]}
+                    onPress={() => {
+                      setSelectedPost(posts[0]);
+                      setShowViewPostModal(true);
+                    }}
+                  >
+                    <Text style={styles.viewDetailsBtnText}>View Details</Text>
+                  </Pressable>
+                </View>
+              </View>
+            </View>
+
+            {/* Timeline Node 2: Golden Open Afternoon Slot */}
+            <View style={styles.timelineItemWrapper}>
+              <View style={styles.timelineTrackContainer}>
+                <View style={styles.timelineNodeGold}>
+                  <Text style={{ fontSize: 10 }}>⚡</Text>
+                </View>
+                <View style={styles.timelineVerticalLine} />
+              </View>
+
+              <View style={[styles.timelineCard, styles.goldenSlotCard]}>
+                <View style={styles.timelineCardHeader}>
+                  <View style={styles.platformRow}>
+                    <YouTubeShortsIcon />
+                    <Text style={styles.platformTimeText}>YouTube Shorts • 4:00 PM</Text>
+                  </View>
+                  <View style={styles.goldenSlotBadge}>
+                    <Text style={styles.goldenSlotBadgeText}>Peak Window</Text>
+                  </View>
+                </View>
+
+                <Text style={styles.goldenSlotPrompt}>
+                  Open slot: Perfect time to post a quick behind-the-scenes Short.
+                </Text>
+
+                <Pressable
+                  style={({ pressed }) => [styles.fillSlotActionBtn, pressed && styles.btnPressed]}
+                  onPress={() => setShowFillSlotModal(true)}
+                >
+                  <Text style={styles.fillSlotActionBtnText}>+ Auto-Fill with AI Hook</Text>
+                </Pressable>
+              </View>
+            </View>
+
+            {/* Timeline Node 3: Instagram Reel Draft */}
+            <View style={styles.timelineItemWrapper}>
+              <View style={styles.timelineTrackContainer}>
+                <View style={styles.timelineNodeAmber}>
+                  <View style={styles.timelineNodeInnerDotAmber} />
+                </View>
+              </View>
+
+              <View style={[styles.timelineCard, styles.draftCardBorder]}>
+                <View style={styles.timelineCardHeader}>
+                  <View style={styles.platformRow}>
+                    <InstagramReelIcon />
+                    <Text style={styles.platformTimeText}>Instagram Reel • 7:30 PM</Text>
+                  </View>
+                  <View style={styles.draftStatusBadge}>
+                    <Text style={styles.draftStatusText}>Draft</Text>
+                  </View>
+                </View>
+
+                <Text style={styles.timelineCardTitle}>
+                  One thing I wish I knew before creating
+                </Text>
+
+                <View style={styles.timelineCardFooter}>
+                  <Text style={styles.forecastViewsText}>⏳ Needs final hook audio</Text>
+                  <Pressable
+                    style={({ pressed }) => [styles.polishDraftBtn, pressed && styles.btnPressed]}
+                    onPress={() => setShowFinishDraftModal(true)}
+                  >
+                    <Text style={styles.polishDraftBtnText}>⚡ Finish Draft</Text>
+                  </Pressable>
+                </View>
+              </View>
+            </View>
           </View>
 
-          {/* Post Card 1: TikTok Scheduled */}
-          <View style={styles.postCard}>
-            <View style={styles.postCardHeader}>
-              <View style={styles.platformBadgeRow}>
-                <TikTokLogoIcon />
-                <Text style={styles.platformTimeText}>TikTok • 11:30 AM</Text>
+          {/* SECTION D: STUDIO INTELLIGENCE BENTO GRID */}
+          <View style={styles.bentoSection}>
+            <Text style={styles.sectionHeading}>Studio Intelligence</Text>
+
+            <View style={styles.bentoRow}>
+              {/* Bento Tile 1: Platform Load Radar */}
+              <View style={styles.bentoTile}>
+                <Text style={styles.bentoTileTitle}>Platform Load</Text>
+                <Text style={styles.bentoTileSub}>TikTok is your weekly focus</Text>
+
+                <View style={styles.bentoBarGroup}>
+                  <View style={styles.bentoBarRow}>
+                    <Text style={styles.bentoPlatformName}>TikTok</Text>
+                    <Text style={styles.bentoPlatformCount}>3 posts (45%)</Text>
+                  </View>
+                  <View style={styles.bentoTrack}>
+                    <View style={[styles.bentoFill, { width: '45%', backgroundColor: '#582CDB' }]} />
+                  </View>
+                </View>
+
+                <View style={styles.bentoBarGroup}>
+                  <View style={styles.bentoBarRow}>
+                    <Text style={styles.bentoPlatformName}>Instagram</Text>
+                    <Text style={styles.bentoPlatformCount}>2 posts (30%)</Text>
+                  </View>
+                  <View style={styles.bentoTrack}>
+                    <View style={[styles.bentoFill, { width: '30%', backgroundColor: '#E1306C' }]} />
+                  </View>
+                </View>
+
+                <View style={styles.bentoBarGroup}>
+                  <View style={styles.bentoBarRow}>
+                    <Text style={styles.bentoPlatformName}>YouTube</Text>
+                    <Text style={styles.bentoPlatformCount}>2 posts (25%)</Text>
+                  </View>
+                  <View style={styles.bentoTrack}>
+                    <View style={[styles.bentoFill, { width: '25%', backgroundColor: '#FF0000' }]} />
+                  </View>
+                </View>
               </View>
+
+              {/* Bento Tile 2: Consistency Score */}
+              <View style={styles.bentoTile}>
+                <Text style={styles.bentoTileTitle}>Consistency</Text>
+                <Text style={styles.bentoTileSub}>Score: 98% (Grade A+)</Text>
+
+                <View style={styles.consistencyScoreRing}>
+                  <Text style={styles.consistencyScoreBig}>A+</Text>
+                  <Text style={styles.consistencyScoreSubtitle}>8 / 8 on pace</Text>
+                </View>
+
+                <View style={styles.consistencyStatRow}>
+                  <Text style={styles.consistencyStatLabel}>Streak Risk:</Text>
+                  <Text style={styles.consistencyStatValZero}>0% Low</Text>
+                </View>
+
+                <View style={styles.consistencyStatRow}>
+                  <Text style={styles.consistencyStatLabel}>Best Window:</Text>
+                  <Text style={styles.consistencyStatValHighlight}>7:30 PM</Text>
+                </View>
+              </View>
+            </View>
+          </View>
+
+          {/* SECTION E: JARVIS VIRAL HOOK LAB */}
+          <View style={styles.viralLabSection}>
+            <LiquidGlassBackground
+              borderRadius={22}
+              light={0.88}
+              refraction={25}
+              depth={0.65}
+              dispersion={0.7}
+              frost={45}
+              splay={0.8}
+              tint="purple-gold"
+              accentColor="#582CDB"
+              goldAccentColor="#F59E0B"
+              hasShadow={true}
+              style={styles.viralLabContent}
+            >
+              <View style={styles.viralLabHeader}>
+                <View style={styles.viralLabTitleRow}>
+                  <Text style={{ fontSize: 16 }}>🪄</Text>
+                  <Text style={styles.viralLabHeading}>Jarvis Viral Hook Lab</Text>
+                </View>
+                <View style={styles.nicheBadgePill}>
+                  <Text style={styles.nicheBadgeText}>Lifestyle &amp; Comedy</Text>
+                </View>
+              </View>
+
+              <Text style={styles.viralLabDescription}>
+                Jarvis AI analyzed 1,400 viral videos in your niche this morning. Here is today&apos;s highest potential hook:
+              </Text>
+
+              <View style={styles.viralHookPreviewCard}>
+                <Text style={styles.viralHookQuote}>
+                  &ldquo;If you are starting content in 2026, stop doing this immediately...&rdquo;
+                </Text>
+                <View style={styles.viralHookMetaRow}>
+                  <Text style={styles.viralHookScoreTag}>⚡ 96% Viral Probability</Text>
+                  <Text style={styles.viralHookFormatTag}>• 45s POV TikTok</Text>
+                </View>
+              </View>
+
               <Pressable
-                style={({ pressed }) => [styles.viewPostBtn, pressed && styles.btnPressed]}
+                style={({ pressed }) => [styles.useViralHookBtn, pressed && styles.btnPressed]}
                 onPress={() => {
-                  setSelectedPost(posts[0]);
-                  setShowViewPostModal(true);
+                  setNewPostTitle('If you are starting content in 2026, stop doing this immediately...');
+                  setNewPostPlatform('tiktok');
+                  setShowScheduleModal(true);
                 }}
               >
-                <Text style={styles.viewPostBtnText}>View Post</Text>
+                <LinearGradient
+                  colors={['#7048EC', '#582CDB']}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 1 }}
+                  style={styles.useViralHookGradient}
+                >
+                  <Text style={styles.useViralHookBtnText}>Use Hook in Schedule</Text>
+                </LinearGradient>
               </Pressable>
-            </View>
-
-            <Text style={styles.postTitleText}>
-              3 creator mistakes I stopped making this year
-            </Text>
-
-            <View style={styles.postCardFooter}>
-              <View style={styles.statusScheduledPill}>
-                <Text style={styles.statusScheduledText}>Scheduled</Text>
-              </View>
-            </View>
+            </LiquidGlassBackground>
           </View>
 
-          {/* Post Card 2: Instagram Reel Draft */}
-          <View style={[styles.postCard, styles.postCardDraftAccent]}>
-            <View style={styles.postCardHeader}>
-              <View style={styles.platformBadgeRow}>
-                <InstagramReelIcon />
-                <Text style={styles.platformTimeText}>Instagram Reel • 7:30 PM</Text>
-              </View>
-              <Pressable
-                style={({ pressed }) => [styles.finishDraftBtn, pressed && styles.btnPressed]}
-                onPress={() => setShowFinishDraftModal(true)}
-              >
-                <Text style={styles.finishDraftBtnText}>Finish Draft</Text>
-              </Pressable>
-            </View>
-
-            <Text style={styles.postTitleText}>
-              One thing I wish I knew before creating
-            </Text>
-
-            <View style={styles.postCardFooter}>
-              <View style={styles.statusDraftPill}>
-                <Text style={styles.statusDraftText}>Draft</Text>
-              </View>
-            </View>
-          </View>
-
-          {/* E. PLATFORM LOAD CARD */}
-          <View style={styles.cardContainer}>
-            <Text style={styles.cardTitle}>Platform Load</Text>
-
-            <View style={styles.platformLoadRow}>
-              <View style={styles.platformLoadLabelRow}>
-                <Text style={styles.platformLoadName}>TikTok</Text>
-                <Text style={styles.platformLoadCount}>3 posts</Text>
-              </View>
-              <View style={styles.platformTrack}>
-                <View style={[styles.platformFill, { width: '100%' }]} />
-              </View>
-            </View>
-
-            <View style={styles.platformLoadRow}>
-              <View style={styles.platformLoadLabelRow}>
-                <Text style={styles.platformLoadName}>Instagram</Text>
-                <Text style={styles.platformLoadCount}>2 posts</Text>
-              </View>
-              <View style={styles.platformTrack}>
-                <View style={[styles.platformFill, { width: '66.6%' }]} />
-              </View>
-            </View>
-
-            <View style={styles.platformLoadRow}>
-              <View style={styles.platformLoadLabelRow}>
-                <Text style={styles.platformLoadName}>YouTube</Text>
-                <Text style={styles.platformLoadCount}>2 posts</Text>
-              </View>
-              <View style={styles.platformTrack}>
-                <View style={[styles.platformFill, { width: '66.6%' }]} />
-              </View>
-            </View>
-
-            <Text style={styles.platformFocusFootnote}>
-              &ldquo;TikTok is your focus this week.&rdquo;
-            </Text>
-          </View>
-
-          {/* F. HEALTH & EFFICIENCY CARD */}
-          <View style={styles.cardContainer}>
-            <Text style={styles.cardTitle}>Health &amp; Efficiency</Text>
-
-            <View style={styles.healthItemRow}>
-              <View style={styles.healthIconPurpleCircle}>
-                <Svg width={14} height={14} viewBox="0 0 24 24" fill="none">
-                  <Path
-                    d="M20 6L9 17L4 12"
-                    stroke="#582CDB"
-                    strokeWidth="2.8"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </Svg>
-              </View>
-              <Text style={styles.healthItemText}>8 posts planned this week</Text>
-            </View>
-
-            <View style={styles.healthItemRow}>
-              <View style={styles.healthIconAmberCircle}>
-                <Svg width={14} height={14} viewBox="0 0 24 24" fill="none">
-                  <Path
-                    d="M21 8V21H3V8"
-                    stroke="#D97706"
-                    strokeWidth="2.2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                  <Path
-                    d="M23 3H1V8H23V3Z"
-                    stroke="#D97706"
-                    strokeWidth="2.2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                  <Path d="M10 12H14" stroke="#D97706" strokeWidth="2.2" strokeLinecap="round" />
-                </Svg>
-              </View>
-              <Text style={styles.healthItemText}>2 drafts need finishing</Text>
-            </View>
-
-            <View style={styles.healthItemRow}>
-              <View style={styles.healthIconAmberCircle}>
-                <Svg width={14} height={14} viewBox="0 0 24 24" fill="none">
-                  <Rect
-                    x="3"
-                    y="4"
-                    width="18"
-                    height="18"
-                    rx="2"
-                    stroke="#D97706"
-                    strokeWidth="2.2"
-                  />
-                  <Path d="M16 2V6M8 2V6M3 10H21" stroke="#D97706" strokeWidth="2.2" strokeLinecap="round" />
-                </Svg>
-              </View>
-              <Text style={styles.healthItemText}>1 open slot tomorrow</Text>
-            </View>
-
-            <Pressable
-              style={({ pressed }) => [styles.fillSlotBtn, pressed && styles.btnPressed]}
-              onPress={() => setShowFillSlotModal(true)}
-            >
-              <Text style={styles.fillSlotBtnText}>Fill Tomorrow&apos;s Slot</Text>
-            </Pressable>
-          </View>
-
-          {/* G. JARVIS RECOMMENDATION CARD */}
-          <View style={styles.jarvisCard}>
-            <View style={styles.jarvisHeaderRow}>
-              <View style={styles.jarvisFlameCircle}>
-                <Image
-                  source={require('../../assets/images/jarvis-core-flame.png')}
-                  style={styles.jarvisSmallFlame}
-                  resizeMode="contain"
-                />
-              </View>
-              <View style={styles.jarvisHeaderTextWrapper}>
-                <Text style={styles.jarvisTagText}>JARVIS RECOMMENDATION</Text>
-                <Text style={styles.jarvisRecommendationTitle}>Peak Reach Window</Text>
-              </View>
-            </View>
-
-            <Text style={styles.jarvisAdviceBody}>
-              Your strongest posting window today is{' '}
-              <Text style={styles.peakTimeHighlight}>7:30 PM</Text>. Finish your Instagram Reel draft
-              and schedule it for tonight.
-            </Text>
-
-            <Pressable
-              style={({ pressed }) => [styles.useSuggestionBtn, pressed && styles.btnPressed]}
-              onPress={handleUseSuggestion}
-            >
-              <Text style={styles.useSuggestionBtnText}>Use Suggestion</Text>
-            </Pressable>
-          </View>
-
-          {/* H. FOOTER ATTRIBUTION */}
+          {/* SECTION F: FOOTER ATTRIBUTION */}
           <View style={styles.footerNoteContainer}>
             <Text style={styles.footerNoteText}>
-              Free users can plan and track posts.{' '}
-              <Text style={styles.footerNoteLink}>Pro unlocks advanced best-time scheduling</Text> and
-              deeper analytics.
+              Free creators can plan and track up to 10 active posts.{' '}
+              <Text style={styles.footerNoteLink}>Pro unlocks unlimited multi-platform auto-posting</Text>.
             </Text>
           </View>
         </ScrollView>
 
-        {/* 3. TOAST ALERT NOTIFICATION */}
+        {/* 3. TOAST NOTIFICATION BANNER */}
         {toastMessage && (
           <Animated.View style={[styles.toastContainer, { opacity: toastOpacity }]}>
             <Text style={styles.toastText}>{toastMessage}</Text>
           </Animated.View>
         )}
 
-        {/* 4. FLOATING LIQUID GLASS BOTTOM NAVIGATION BAR */}
+        {/* 4. APPLE-STYLE LIQUID GLASS FLOATING TAB BAR */}
         <FloatingTabBar activeTab={activeTab} onTabPress={handleTabPress} />
 
         {/* MODAL 1: SCHEDULE NEW POST */}
@@ -767,9 +776,9 @@ export const CreateScreen: React.FC<CreateScreenProps> = ({
         >
           <View style={styles.modalOverlay}>
             <View style={styles.modalCard}>
-              <Text style={styles.modalTitle}>Schedule New Post</Text>
+              <Text style={styles.modalTitle}>Plan New Post</Text>
               <Text style={styles.modalSubtitle}>
-                Add a new hook or video prompt to your creator calendar.
+                Add a new hook or video prompt to your creator time-stream.
               </Text>
 
               <Text style={styles.modalInputLabel}>PLATFORM</Text>
@@ -834,7 +843,7 @@ export const CreateScreen: React.FC<CreateScreenProps> = ({
           </View>
         </Modal>
 
-        {/* MODAL 2: CREATE FROM IDEA */}
+        {/* MODAL 2: AI HOOK LAB MODAL */}
         <Modal
           visible={showIdeaModal}
           transparent={true}
@@ -845,27 +854,27 @@ export const CreateScreen: React.FC<CreateScreenProps> = ({
             <View style={styles.modalCard}>
               <View style={styles.jarvisCoreBadge}>
                 <Text style={styles.jarvisBadgeSparkle}>🔥</Text>
-                <Text style={styles.jarvisBadgeText}>JARVIS CORE IDEAS</Text>
+                <Text style={styles.jarvisBadgeText}>JARVIS VIRAL HOOKS</Text>
               </View>
               <Text style={styles.modalTitle}>AI Hook Sparks</Text>
               <Text style={styles.modalSubtitle}>
-                Select an idea to instantly import into your schedule.
+                Select a trending concept to import directly into your schedule.
               </Text>
 
-              {PRESET_IDEAS.map((idea, idx) => (
+              {AI_VIRAL_HOOKS.map((hookItem, idx) => (
                 <Pressable
                   key={idx}
                   style={styles.ideaItemCard}
                   onPress={() => {
-                    setNewPostTitle(idea.title);
+                    setNewPostTitle(hookItem.hook);
                     setShowIdeaModal(false);
                     setShowScheduleModal(true);
                   }}
                 >
-                  <Text style={styles.ideaItemTitle}>{idea.title}</Text>
+                  <Text style={styles.ideaItemTitle}>{hookItem.hook}</Text>
                   <View style={styles.ideaFormatRow}>
-                    <Text style={styles.ideaFormatTag}>{idea.format}</Text>
-                    <Text style={styles.ideaPlatformTag}>• {idea.platform}</Text>
+                    <Text style={styles.ideaFormatTag}>⚡ {hookItem.viralScore} Score</Text>
+                    <Text style={styles.ideaPlatformTag}>• {hookItem.format}</Text>
                   </View>
                 </Pressable>
               ))}
@@ -897,7 +906,7 @@ export const CreateScreen: React.FC<CreateScreenProps> = ({
               <View style={styles.postDetailsCard}>
                 <Text style={styles.postDetailsTitle}>{selectedPost?.title}</Text>
                 <Text style={styles.postDetailsForecast}>
-                  📈 Forecast: {selectedPost?.viewsForecast || '15K views'}
+                  📈 Viral Score: {selectedPost?.viralScore || 94}/100 • Predicted {selectedPost?.viewsForecast || '18K views'}
                 </Text>
                 <View style={styles.hashtagsRow}>
                   {selectedPost?.hashtags?.map((tag, i) => (
@@ -940,7 +949,7 @@ export const CreateScreen: React.FC<CreateScreenProps> = ({
             <View style={styles.modalCard}>
               <Text style={styles.modalTitle}>Finish Reel Draft</Text>
               <Text style={styles.modalSubtitle}>
-                Add final touches and set for today&apos;s peak reach window.
+                Add final hook adjustments and lock in for tonight&apos;s 7:30 PM peak reach window.
               </Text>
 
               <Text style={styles.modalInputLabel}>HOOK TITLE</Text>
@@ -981,9 +990,9 @@ export const CreateScreen: React.FC<CreateScreenProps> = ({
         >
           <View style={styles.modalOverlay}>
             <View style={styles.modalCard}>
-              <Text style={styles.modalTitle}>Fill Tomorrow&apos;s Slot</Text>
+              <Text style={styles.modalTitle}>Fill Afternoon Peak Slot</Text>
               <Text style={styles.modalSubtitle}>
-                Keep your 47-day streak protected by locking in Friday&apos;s post!
+                Auto-fill 4:00 PM with a high-retention YouTube Short concept:
               </Text>
 
               <Pressable
@@ -997,7 +1006,8 @@ export const CreateScreen: React.FC<CreateScreenProps> = ({
                       time: '4:00 PM',
                       title: 'Behind the scenes: My creator filming setup',
                       status: 'scheduled',
-                      viewsForecast: '12K - 22K',
+                      viewsForecast: '15K - 28K',
+                      viralScore: 91,
                     },
                     ...posts,
                   ]);
@@ -1005,13 +1015,13 @@ export const CreateScreen: React.FC<CreateScreenProps> = ({
                   if (Platform.OS !== 'web') {
                     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
                   }
-                  showToast('🔥 Friday slot filled & scheduled!');
+                  showToast('🔥 Peak afternoon slot locked!');
                 }}
               >
                 <Text style={styles.ideaItemTitle}>
                   Behind the scenes: My creator filming setup
                 </Text>
-                <Text style={styles.ideaFormatTag}>⚡ Recommended YouTube Short</Text>
+                <Text style={styles.ideaFormatTag}>⚡ 91 Score • Recommended YouTube Short</Text>
               </Pressable>
 
               <Pressable
@@ -1024,7 +1034,7 @@ export const CreateScreen: React.FC<CreateScreenProps> = ({
           </View>
         </Modal>
 
-        {/* MODAL 6: FULL CALENDAR MODAL */}
+        {/* MODAL 6: FULL MONTH CALENDAR MODAL */}
         <Modal
           visible={showCalendarModal}
           transparent={true}
@@ -1033,9 +1043,9 @@ export const CreateScreen: React.FC<CreateScreenProps> = ({
         >
           <View style={styles.modalOverlay}>
             <View style={styles.modalCard}>
-              <Text style={styles.modalTitle}>May 2026 Calendar</Text>
+              <Text style={styles.modalTitle}>May 2026 Schedule</Text>
               <Text style={styles.modalSubtitle}>
-                Total 32 posts scheduled this month. 47-day active streak.
+                Total 32 posts planned this month • 47-Day Active Streak
               </Text>
 
               <View style={styles.fullCalendarGrid}>
@@ -1089,13 +1099,13 @@ export const CreateScreen: React.FC<CreateScreenProps> = ({
         >
           <View style={styles.modalOverlay}>
             <View style={styles.modalCard}>
-              <Text style={styles.modalTitle}>Notifications</Text>
-              <Text style={styles.modalSubtitle}>Latest updates from Jarvis AI &amp; Collabs</Text>
+              <Text style={styles.modalTitle}>Studio Alerts</Text>
+              <Text style={styles.modalSubtitle}>Latest updates from Jarvis AI &amp; Platform Feeds</Text>
 
               <View style={styles.notifItemCard}>
-                <Text style={styles.notifItemTitle}>⏰ Best Posting Time Approaching</Text>
+                <Text style={styles.notifItemTitle}>⏰ Peak Window Approaching</Text>
                 <Text style={styles.notifItemBody}>
-                  Your Instagram Reel is ready for 7:30 PM peak reach.
+                  TikTok algorithm is currently peaking for creator advice topics. Your 11:30 AM slot is optimized.
                 </Text>
               </View>
 
@@ -1109,7 +1119,7 @@ export const CreateScreen: React.FC<CreateScreenProps> = ({
           </View>
         </Modal>
 
-        {/* MODAL 8: USER PROFILE MODAL */}
+        {/* MODAL 8: CREATOR PROFILE MODAL */}
         <Modal
           visible={showProfileModal}
           transparent={true}
@@ -1123,7 +1133,7 @@ export const CreateScreen: React.FC<CreateScreenProps> = ({
                 style={{ width: 70, height: 70, marginBottom: 8 }}
                 resizeMode="contain"
               />
-              <Text style={styles.modalTitle}>Creator Profile</Text>
+              <Text style={styles.modalTitle}>Creator Studio</Text>
               <Text style={styles.modalSubtitle}>Level 1 Starter Creator • 47-Day Streak</Text>
 
               <Pressable
@@ -1165,9 +1175,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: 22,
-    paddingTop: 10,
-    paddingBottom: 14,
+    paddingHorizontal: 20,
+    paddingTop: 8,
+    paddingBottom: 12,
     backgroundColor: '#FAF8F5',
   },
   headerLogoWrapper: {
@@ -1180,24 +1190,44 @@ const styles = StyleSheet.create({
     width: 32,
     height: 32,
   },
+  studioStatusPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    backgroundColor: 'rgba(235, 230, 248, 0.8)',
+    paddingVertical: 5,
+    paddingHorizontal: 12,
+    borderRadius: 100,
+    borderWidth: 1,
+    borderColor: 'rgba(221, 214, 254, 0.8)',
+  },
+  liveGreenDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: '#10B981',
+  },
+  studioStatusText: {
+    fontSize: 10.5,
+    fontWeight: '800',
+    color: '#582CDB',
+    letterSpacing: 0.8,
+  },
   headerRightGroup: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 12,
+    gap: 10,
   },
   headerIconBtn: {
     position: 'relative',
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: 'rgba(255, 255, 255, 0.85)',
+    width: 34,
+    height: 34,
+    borderRadius: 17,
+    backgroundColor: 'rgba(255, 255, 255, 0.88)',
     borderWidth: 1,
     borderColor: 'rgba(235, 230, 248, 0.9)',
     justifyContent: 'center',
     alignItems: 'center',
-  },
-  headerIconBtnPressed: {
-    opacity: 0.6,
   },
   unreadBadgeDot: {
     position: 'absolute',
@@ -1218,9 +1248,9 @@ const styles = StyleSheet.create({
     fontWeight: '800',
   },
   headerProfileBtn: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
+    width: 34,
+    height: 34,
+    borderRadius: 17,
     borderWidth: 1.5,
     borderColor: 'rgba(235, 230, 248, 0.9)',
     overflow: 'hidden',
@@ -1228,12 +1258,9 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  headerProfileBtnPressed: {
-    opacity: 0.6,
-  },
   headerProfileImg: {
-    width: 32,
-    height: 32,
+    width: 30,
+    height: 30,
   },
 
   // 2. SCROLL VIEW
@@ -1241,227 +1268,134 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   scrollContent: {
-    paddingHorizontal: 22,
-    paddingTop: 4,
+    paddingHorizontal: 18,
+    paddingTop: 6,
     paddingBottom: 120,
   },
 
-  // A. HEADLINE SECTION
-  headlineSection: {
+  // SECTION A: HERO LENS
+  heroLensContainer: {
     marginBottom: 16,
   },
-  topBadgesRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    marginBottom: 8,
+  heroLensContent: {
+    padding: 18,
   },
-  contentSchedulePill: {
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 8,
-  },
-  contentScheduleText: {
-    color: '#FFFFFF',
-    fontSize: 10,
-    fontWeight: '800',
-    letterSpacing: 0.8,
-  },
-  freeScheduleBadge: {
-    paddingHorizontal: 9,
-    paddingVertical: 3.5,
-    borderRadius: 8,
-    backgroundColor: 'rgba(235, 230, 248, 0.8)',
-  },
-  freeScheduleText: {
-    color: '#171420',
-    fontSize: 10.5,
-    fontWeight: '700',
-  },
-  mainTitle: {
-    fontSize: 26,
-    fontWeight: '700',
-    color: '#171420',
-    letterSpacing: -0.7,
-    marginBottom: 6,
-  },
-  subTitle: {
-    fontSize: 13.5,
-    fontWeight: '400',
-    color: '#7F7894',
-    lineHeight: 19,
-  },
-
-  // B. HERO TODAY CARD
-  todayCard: {
-    backgroundColor: 'rgba(255, 255, 255, 0.88)',
-    borderRadius: 24,
-    borderWidth: 1,
-    borderColor: 'rgba(235, 230, 248, 0.9)',
-    padding: 20,
-    marginBottom: 18,
-    shadowColor: '#171420',
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.04,
-    shadowRadius: 20,
-    elevation: 3,
-  },
-  todayHeaderRow: {
+  heroTopRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
+    alignItems: 'flex-start',
     marginBottom: 12,
   },
-  todayTitle: {
+  heroDateLabel: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#7F7894',
+    marginBottom: 2,
+  },
+  heroTitleText: {
     fontSize: 22,
-    fontWeight: '700',
+    fontWeight: '800',
     color: '#171420',
     letterSpacing: -0.4,
   },
-  todayBadgesGroup: {
-    flexDirection: 'row',
-    gap: 6,
-  },
-  scheduledPill: {
-    backgroundColor: 'rgba(237, 232, 252, 0.9)',
-    borderRadius: 6,
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-  },
-  scheduledPillText: {
-    fontSize: 10.5,
-    fontWeight: '700',
-    color: '#582CDB',
-  },
-  draftPill: {
-    backgroundColor: 'rgba(255, 247, 237, 0.9)',
-    borderRadius: 6,
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-  },
-  draftPillText: {
-    fontSize: 10.5,
-    fontWeight: '700',
-    color: '#D97706',
-  },
-  plannedCountRow: {
-    flexDirection: 'row',
-    alignItems: 'baseline',
-    gap: 8,
-    marginBottom: 2,
-  },
-  plannedBigNumber: {
-    fontSize: 32,
-    fontWeight: '800',
-    color: '#582CDB',
-    letterSpacing: -0.6,
-  },
-  plannedText: {
-    fontSize: 15.5,
-    fontWeight: '600',
-    color: '#524C62',
-  },
-  nextPostTimeText: {
-    fontSize: 12.5,
-    color: '#7F7894',
-    marginBottom: 14,
-  },
-  progressContainer: {
-    marginBottom: 14,
-  },
-  progressLabel: {
-    fontSize: 12,
-    fontWeight: '500',
-    color: '#524C62',
-    marginBottom: 6,
-  },
-  progressBarTrack: {
-    height: 7,
-    borderRadius: 3.5,
-    backgroundColor: 'rgba(234, 229, 248, 0.8)',
-    overflow: 'hidden',
-  },
-  progressBarFill: {
-    height: '100%',
-    backgroundColor: '#582CDB',
-    borderRadius: 3.5,
-  },
-  streakProtectionBanner: {
+  streakShieldBadge: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'rgba(255, 251, 235, 0.9)',
-    borderRadius: 14,
+    gap: 4,
+    backgroundColor: 'rgba(255, 251, 235, 0.95)',
     borderWidth: 1,
     borderColor: 'rgba(254, 243, 199, 0.95)',
-    paddingVertical: 10,
-    paddingHorizontal: 12,
-    gap: 8,
-    marginBottom: 16,
+    paddingVertical: 5,
+    paddingHorizontal: 10,
+    borderRadius: 100,
   },
-  streakFlameEmoji: {
-    fontSize: 14,
-  },
-  streakProtectionText: {
-    flex: 1,
+  streakFlameIcon: {
     fontSize: 12,
-    color: '#78350F',
-    lineHeight: 16,
   },
-  streakDaysBold: {
+  streakShieldText: {
+    fontSize: 11,
     fontWeight: '700',
     color: '#92400E',
   },
-  scheduleNewPostBtn: {
-    backgroundColor: '#582CDB',
-    height: 48,
+  heroProgressRow: {
+    marginBottom: 16,
+  },
+  heroProgressTrack: {
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: 'rgba(234, 229, 248, 0.85)',
+    overflow: 'hidden',
+    marginBottom: 6,
+  },
+  heroProgressFill: {
+    height: '100%',
+    borderRadius: 3,
+  },
+  heroProgressStatusText: {
+    fontSize: 11.5,
+    fontWeight: '600',
+    color: '#524C62',
+  },
+  heroActionDock: {
+    flexDirection: 'row',
+    gap: 10,
+  },
+  heroPrimaryBtn: {
+    flex: 1,
+    height: 44,
     borderRadius: 14,
+    overflow: 'hidden',
+  },
+  heroPrimaryGradient: {
+    flex: 1,
+    flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 10,
-    shadowColor: '#582CDB',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.25,
-    shadowRadius: 10,
-    elevation: 3,
+    gap: 6,
   },
-  scheduleNewPostBtnText: {
+  heroPrimaryBtnText: {
     color: '#FFFFFF',
-    fontSize: 15,
+    fontSize: 14,
     fontWeight: '700',
-    letterSpacing: -0.2,
   },
-  createFromIdeaBtn: {
-    backgroundColor: 'rgba(255, 255, 255, 0.95)',
-    height: 48,
+  heroSecondaryBtn: {
+    flex: 1,
+    height: 44,
     borderRadius: 14,
+    backgroundColor: 'rgba(255, 255, 255, 0.95)',
     borderWidth: 1.2,
     borderColor: 'rgba(221, 214, 254, 0.9)',
+    flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
+    gap: 6,
   },
-  createFromIdeaBtnText: {
+  heroSecondaryEmoji: {
+    fontSize: 14,
+  },
+  heroSecondaryBtnText: {
     color: '#171420',
-    fontSize: 15,
+    fontSize: 14,
     fontWeight: '700',
   },
 
-  // C. CALENDAR STRIP SECTION
-  calendarStripSection: {
-    marginBottom: 20,
+  // SECTION B: CALENDAR STRIP
+  calendarSection: {
+    marginBottom: 18,
   },
-  calendarHeaderRow: {
+  calendarSectionHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 10,
+    marginBottom: 8,
   },
-  thisWeekCountText: {
+  calendarSectionTitle: {
     fontSize: 13.5,
     fontWeight: '700',
     color: '#171420',
   },
-  viewFullCalendarText: {
-    fontSize: 12.5,
+  viewMonthLink: {
+    fontSize: 12,
     fontWeight: '700',
     color: '#582CDB',
   },
@@ -1472,83 +1406,169 @@ const styles = StyleSheet.create({
     borderRadius: 18,
     borderWidth: 1,
     borderColor: 'rgba(235, 230, 248, 0.9)',
-    paddingVertical: 8,
-    paddingHorizontal: 6,
-    shadowColor: '#171420',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.02,
-    shadowRadius: 6,
-    elevation: 1,
+    paddingVertical: 6,
+    paddingHorizontal: 4,
   },
   dayItemBtn: {
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 8,
+    paddingVertical: 6,
     borderRadius: 12,
   },
   dayItemBtnActive: {
     backgroundColor: '#582CDB',
   },
   dayItemName: {
-    fontSize: 9.5,
+    fontSize: 9,
     fontWeight: '700',
     color: '#7F7894',
-    marginBottom: 3,
+    marginBottom: 2,
   },
   dayItemNameActive: {
-    color: 'rgba(255, 255, 255, 0.9)',
+    color: 'rgba(255, 255, 255, 0.85)',
   },
   dayItemDate: {
-    fontSize: 14,
+    fontSize: 13.5,
     fontWeight: '700',
     color: '#171420',
+    marginBottom: 3,
   },
   dayItemDateActive: {
     color: '#FFFFFF',
+  },
+  dayDotContainer: {
+    height: 4,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   activeDayDot: {
     width: 4,
     height: 4,
     borderRadius: 2,
     backgroundColor: '#FDE047',
-    marginTop: 3,
+  },
+  scheduledDot: {
+    width: 4,
+    height: 4,
+    borderRadius: 2,
+    backgroundColor: '#784DF0',
+  },
+  draftDot: {
+    width: 4,
+    height: 4,
+    borderRadius: 2,
+    backgroundColor: '#F59E0B',
+  },
+  openDot: {
+    width: 3,
+    height: 3,
+    borderRadius: 1.5,
+    backgroundColor: '#CBD5E1',
   },
 
-  // D. TODAY'S SCHEDULE SECTION
+  // SECTION C: TIME-STREAM
+  timeStreamSection: {
+    marginBottom: 20,
+  },
   sectionHeaderRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'baseline',
     marginBottom: 10,
   },
   sectionHeading: {
-    fontSize: 17,
+    fontSize: 16.5,
     fontWeight: '700',
     color: '#171420',
     letterSpacing: -0.3,
   },
-  postCard: {
-    backgroundColor: 'rgba(255, 255, 255, 0.88)',
+  sectionSubHeading: {
+    fontSize: 12,
+    color: '#7F7894',
+    fontWeight: '500',
+  },
+  timelineItemWrapper: {
+    flexDirection: 'row',
+    marginBottom: 12,
+  },
+  timelineTrackContainer: {
+    width: 28,
+    alignItems: 'center',
+    marginRight: 8,
+  },
+  timelineNodePurple: {
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    backgroundColor: 'rgba(237, 232, 252, 0.95)',
+    borderWidth: 2,
+    borderColor: '#582CDB',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  timelineNodeInnerDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: '#582CDB',
+  },
+  timelineNodeGold: {
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    backgroundColor: '#FEF3C7',
+    borderWidth: 2,
+    borderColor: '#F59E0B',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  timelineNodeAmber: {
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    backgroundColor: '#FFF7ED',
+    borderWidth: 2,
+    borderColor: '#F59E0B',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  timelineNodeInnerDotAmber: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: '#F59E0B',
+  },
+  timelineVerticalLine: {
+    flex: 1,
+    width: 1.5,
+    backgroundColor: 'rgba(221, 214, 254, 0.7)',
+    marginVertical: 4,
+  },
+  timelineCard: {
+    flex: 1,
+    backgroundColor: 'rgba(255, 255, 255, 0.90)',
     borderRadius: 18,
     borderWidth: 1,
     borderColor: 'rgba(235, 230, 248, 0.9)',
-    padding: 16,
-    marginBottom: 12,
-    shadowColor: '#171420',
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.03,
-    shadowRadius: 8,
-    elevation: 2,
+    padding: 14,
   },
-  postCardDraftAccent: {
-    borderLeftWidth: 4,
+  goldenSlotCard: {
+    backgroundColor: 'rgba(255, 253, 245, 0.92)',
+    borderColor: 'rgba(254, 243, 199, 0.95)',
+    borderStyle: 'dashed',
+  },
+  draftCardBorder: {
+    borderLeftWidth: 3.5,
     borderLeftColor: '#F59E0B',
   },
-  postCardHeader: {
+  timelineCardHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 8,
+    marginBottom: 6,
   },
-  platformBadgeRow: {
+  platformRow: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
@@ -1558,244 +1578,284 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#524C62',
   },
-  viewPostBtn: {
-    backgroundColor: '#FFFFFF',
-    borderWidth: 1.2,
-    borderColor: '#582CDB',
-    borderRadius: 10,
-    paddingVertical: 5,
-    paddingHorizontal: 12,
-  },
-  viewPostBtnText: {
-    fontSize: 12,
-    fontWeight: '700',
-    color: '#582CDB',
-  },
-  finishDraftBtn: {
-    backgroundColor: '#F59E0B',
-    borderRadius: 10,
-    paddingVertical: 6,
-    paddingHorizontal: 14,
-  },
-  finishDraftBtnText: {
-    fontSize: 12,
-    fontWeight: '700',
-    color: '#FFFFFF',
-  },
-  postTitleText: {
-    fontSize: 15,
-    fontWeight: '700',
-    color: '#171420',
-    lineHeight: 20,
-    marginBottom: 10,
-  },
-  postCardFooter: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  statusScheduledPill: {
+  viralScoreBadge: {
     backgroundColor: 'rgba(237, 232, 252, 0.9)',
-    borderRadius: 6,
-    paddingHorizontal: 7,
+    paddingHorizontal: 8,
     paddingVertical: 2.5,
+    borderRadius: 6,
   },
-  statusScheduledText: {
+  viralScoreText: {
     fontSize: 10,
     fontWeight: '700',
     color: '#582CDB',
   },
-  statusDraftPill: {
-    backgroundColor: 'rgba(255, 247, 237, 0.9)',
-    borderRadius: 6,
-    paddingHorizontal: 7,
+  goldenSlotBadge: {
+    backgroundColor: '#FEF3C7',
+    paddingHorizontal: 8,
     paddingVertical: 2.5,
+    borderRadius: 6,
   },
-  statusDraftText: {
+  goldenSlotBadgeText: {
+    fontSize: 10,
+    fontWeight: '700',
+    color: '#92400E',
+  },
+  draftStatusBadge: {
+    backgroundColor: '#FFF7ED',
+    paddingHorizontal: 8,
+    paddingVertical: 2.5,
+    borderRadius: 6,
+  },
+  draftStatusText: {
     fontSize: 10,
     fontWeight: '700',
     color: '#D97706',
   },
-
-  // E. PLATFORM LOAD & HEALTH CARDS
-  cardContainer: {
-    backgroundColor: 'rgba(255, 255, 255, 0.88)',
-    borderRadius: 20,
-    borderWidth: 1,
-    borderColor: 'rgba(235, 230, 248, 0.9)',
-    padding: 18,
-    marginBottom: 16,
-    shadowColor: '#171420',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.03,
-    shadowRadius: 10,
-    elevation: 2,
-  },
-  cardTitle: {
-    fontSize: 15.5,
+  timelineCardTitle: {
+    fontSize: 14,
     fontWeight: '700',
     color: '#171420',
-    marginBottom: 14,
+    lineHeight: 19,
+    marginBottom: 8,
   },
-  platformLoadRow: {
-    marginBottom: 12,
+  goldenSlotPrompt: {
+    fontSize: 12,
+    color: '#78350F',
+    lineHeight: 17,
+    marginBottom: 10,
   },
-  platformLoadLabelRow: {
+  timelineCardFooter: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: 4,
+    alignItems: 'center',
   },
-  platformLoadName: {
-    fontSize: 12.5,
+  forecastViewsText: {
+    fontSize: 11,
+    fontWeight: '500',
+    color: '#7F7894',
+  },
+  viewDetailsBtn: {
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1,
+    borderColor: '#582CDB',
+    borderRadius: 8,
+    paddingVertical: 4,
+    paddingHorizontal: 10,
+  },
+  viewDetailsBtnText: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: '#582CDB',
+  },
+  fillSlotActionBtn: {
+    backgroundColor: '#F59E0B',
+    borderRadius: 10,
+    paddingVertical: 7,
+    alignItems: 'center',
+  },
+  fillSlotActionBtnText: {
+    color: '#FFFFFF',
+    fontSize: 12,
+    fontWeight: '700',
+  },
+  polishDraftBtn: {
+    backgroundColor: '#F59E0B',
+    borderRadius: 8,
+    paddingVertical: 4,
+    paddingHorizontal: 10,
+  },
+  polishDraftBtnText: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: '#FFFFFF',
+  },
+
+  // SECTION D: BENTO GRID
+  bentoSection: {
+    marginBottom: 18,
+  },
+  bentoRow: {
+    flexDirection: 'row',
+    gap: 10,
+    marginTop: 8,
+  },
+  bentoTile: {
+    flex: 1,
+    backgroundColor: 'rgba(255, 255, 255, 0.90)',
+    borderRadius: 18,
+    borderWidth: 1,
+    borderColor: 'rgba(235, 230, 248, 0.9)',
+    padding: 14,
+  },
+  bentoTileTitle: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: '#171420',
+    marginBottom: 1,
+  },
+  bentoTileSub: {
+    fontSize: 10.5,
+    color: '#7F7894',
+    marginBottom: 10,
+  },
+  bentoBarGroup: {
+    marginBottom: 8,
+  },
+  bentoBarRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 3,
+  },
+  bentoPlatformName: {
+    fontSize: 10.5,
     fontWeight: '600',
     color: '#171420',
   },
-  platformLoadCount: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: '#524C62',
+  bentoPlatformCount: {
+    fontSize: 9.5,
+    color: '#7F7894',
   },
-  platformTrack: {
-    height: 6,
-    borderRadius: 3,
+  bentoTrack: {
+    height: 5,
+    borderRadius: 2.5,
     backgroundColor: 'rgba(234, 229, 248, 0.8)',
     overflow: 'hidden',
   },
-  platformFill: {
+  bentoFill: {
     height: '100%',
-    backgroundColor: '#582CDB',
-    borderRadius: 3,
+    borderRadius: 2.5,
   },
-  platformFocusFootnote: {
-    fontSize: 11.5,
-    fontStyle: 'italic',
-    color: '#7F7894',
-    marginTop: 4,
-  },
-
-  // F. HEALTH & EFFICIENCY
-  healthItemRow: {
-    flexDirection: 'row',
+  consistencyScoreRing: {
     alignItems: 'center',
-    gap: 10,
-    marginBottom: 10,
-  },
-  healthIconPurpleCircle: {
-    width: 24,
-    height: 24,
-    borderRadius: 12,
-    backgroundColor: 'rgba(237, 232, 252, 0.9)',
     justifyContent: 'center',
-    alignItems: 'center',
+    marginVertical: 4,
   },
-  healthIconAmberCircle: {
-    width: 24,
-    height: 24,
-    borderRadius: 12,
-    backgroundColor: 'rgba(255, 247, 237, 0.9)',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  healthItemText: {
-    fontSize: 13,
-    fontWeight: '600',
-    color: '#171420',
-  },
-  fillSlotBtn: {
-    backgroundColor: 'rgba(255, 255, 255, 0.95)',
-    height: 44,
-    borderRadius: 12,
-    borderWidth: 1.2,
-    borderColor: '#F59E0B',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginTop: 6,
-  },
-  fillSlotBtnText: {
-    fontSize: 13.5,
-    fontWeight: '700',
-    color: '#D97706',
-  },
-
-  // G. JARVIS RECOMMENDATION CARD
-  jarvisCard: {
-    backgroundColor: 'rgba(237, 232, 252, 0.8)',
-    borderRadius: 20,
-    borderWidth: 1,
-    borderColor: 'rgba(221, 214, 254, 0.9)',
-    padding: 18,
-    marginBottom: 16,
-  },
-  jarvisHeaderRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-    marginBottom: 8,
-  },
-  jarvisFlameCircle: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: '#FFFFFF',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  jarvisSmallFlame: {
-    width: 26,
-    height: 26,
-  },
-  jarvisHeaderTextWrapper: {
-    flex: 1,
-  },
-  jarvisTagText: {
-    fontSize: 9.5,
+  consistencyScoreBig: {
+    fontSize: 24,
     fontWeight: '800',
     color: '#582CDB',
-    letterSpacing: 0.8,
   },
-  jarvisRecommendationTitle: {
-    fontSize: 14.5,
-    fontWeight: '700',
-    color: '#171420',
-  },
-  jarvisAdviceBody: {
-    fontSize: 12.5,
-    fontWeight: '500',
+  consistencyScoreSubtitle: {
+    fontSize: 10.5,
+    fontWeight: '600',
     color: '#524C62',
-    lineHeight: 18,
+  },
+  consistencyStatRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 6,
+  },
+  consistencyStatLabel: {
+    fontSize: 10.5,
+    color: '#7F7894',
+  },
+  consistencyStatValZero: {
+    fontSize: 10.5,
+    fontWeight: '700',
+    color: '#10B981',
+  },
+  consistencyStatValHighlight: {
+    fontSize: 10.5,
+    fontWeight: '700',
+    color: '#D97706',
+  },
+
+  // SECTION E: VIRAL HOOK LAB
+  viralLabSection: {
     marginBottom: 14,
   },
-  peakTimeHighlight: {
-    color: '#D97706',
-    fontWeight: '700',
+  viralLabContent: {
+    padding: 16,
   },
-  useSuggestionBtn: {
-    backgroundColor: '#582CDB',
-    height: 44,
+  viralLabHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 6,
+  },
+  viralLabTitleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  viralLabHeading: {
+    fontSize: 14.5,
+    fontWeight: '800',
+    color: '#171420',
+  },
+  nicheBadgePill: {
+    backgroundColor: 'rgba(237, 232, 252, 0.9)',
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 8,
+  },
+  nicheBadgeText: {
+    fontSize: 9.5,
+    fontWeight: '700',
+    color: '#582CDB',
+  },
+  viralLabDescription: {
+    fontSize: 11.5,
+    color: '#524C62',
+    lineHeight: 16,
+    marginBottom: 10,
+  },
+  viralHookPreviewCard: {
+    backgroundColor: 'rgba(255, 255, 255, 0.95)',
     borderRadius: 12,
+    borderWidth: 1,
+    borderColor: 'rgba(221, 214, 254, 0.9)',
+    padding: 12,
+    marginBottom: 10,
+  },
+  viralHookQuote: {
+    fontSize: 12.5,
+    fontWeight: '600',
+    color: '#171420',
+    lineHeight: 17,
+    marginBottom: 6,
+  },
+  viralHookMetaRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+  viralHookScoreTag: {
+    fontSize: 10.5,
+    fontWeight: '700',
+    color: '#582CDB',
+  },
+  viralHookFormatTag: {
+    fontSize: 10.5,
+    color: '#7F7894',
+  },
+  useViralHookBtn: {
+    height: 42,
+    borderRadius: 12,
+    overflow: 'hidden',
+  },
+  useViralHookGradient: {
+    flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    shadowColor: '#582CDB',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.2,
-    shadowRadius: 8,
-    elevation: 3,
   },
-  useSuggestionBtnText: {
+  useViralHookBtnText: {
     color: '#FFFFFF',
-    fontSize: 14,
+    fontSize: 13,
     fontWeight: '700',
   },
 
-  // H. FOOTER NOTE
+  // FOOTER NOTE
   footerNoteContainer: {
     paddingHorizontal: 12,
+    marginTop: 4,
     marginBottom: 8,
   },
   footerNoteText: {
-    fontSize: 11,
+    fontSize: 10.5,
     color: '#7F7894',
     textAlign: 'center',
-    lineHeight: 16,
+    lineHeight: 15,
   },
   footerNoteLink: {
     color: '#582CDB',
@@ -1811,57 +1871,12 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     paddingHorizontal: 18,
     borderRadius: 20,
-    shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.15,
-    shadowRadius: 10,
-    elevation: 6,
-    zIndex: 99,
+    zIndex: 999,
   },
   toastText: {
     color: '#FFFFFF',
     fontSize: 13,
     fontWeight: '600',
-  },
-
-  // BOTTOM NAVIGATION BAR
-  bottomTabBar: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-around',
-    height: 66,
-    backgroundColor: 'rgba(255, 255, 255, 0.95)',
-    borderTopWidth: 1,
-    borderTopColor: 'rgba(235, 230, 245, 0.9)',
-    paddingBottom: Platform.OS === 'ios' ? 6 : 0,
-    shadowColor: '#171420',
-    shadowOffset: { width: 0, height: -4 },
-    shadowOpacity: 0.04,
-    shadowRadius: 14,
-    elevation: 8,
-  },
-  tabItem: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    height: '100%',
-  },
-  tabIconWrapper: {
-    width: 28,
-    height: 28,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 2,
-  },
-  tabLabel: {
-    fontSize: 9.5,
-    fontWeight: '700',
-    color: '#171420',
-    letterSpacing: 0.6,
-  },
-  tabLabelActive: {
-    color: '#582CDB',
-    fontWeight: '800',
   },
 
   // MODALS
@@ -1870,7 +1885,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(23, 20, 32, 0.55)',
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 22,
+    padding: 20,
   },
   modalCard: {
     width: '100%',
@@ -1878,11 +1893,6 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(255, 255, 255, 0.98)',
     borderRadius: 24,
     padding: 22,
-    shadowColor: '#171420',
-    shadowOffset: { width: 0, height: 16 },
-    shadowOpacity: 0.16,
-    shadowRadius: 32,
-    elevation: 10,
     borderWidth: 1,
     borderColor: 'rgba(235, 230, 248, 0.95)',
   },
@@ -1894,10 +1904,10 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   modalSubtitle: {
-    fontSize: 12.5,
+    fontSize: 12,
     color: '#7F7894',
     textAlign: 'center',
-    marginBottom: 16,
+    marginBottom: 14,
     lineHeight: 17,
   },
   modalInputLabel: {
@@ -1908,24 +1918,24 @@ const styles = StyleSheet.create({
     marginBottom: 6,
   },
   modalTextInput: {
-    height: 46,
+    height: 44,
     borderWidth: 1.2,
     borderColor: 'rgba(221, 214, 254, 0.9)',
     borderRadius: 12,
     paddingHorizontal: 12,
-    fontSize: 14,
+    fontSize: 13.5,
     color: '#171420',
     backgroundColor: 'rgba(250, 248, 255, 0.8)',
-    marginBottom: 14,
+    marginBottom: 12,
   },
   platformSelectRow: {
     flexDirection: 'row',
     gap: 6,
-    marginBottom: 14,
+    marginBottom: 12,
   },
   platformSelectBtn: {
     flex: 1,
-    paddingVertical: 7,
+    paddingVertical: 6,
     borderRadius: 8,
     borderWidth: 1,
     borderColor: 'rgba(226, 220, 242, 0.9)',
@@ -1952,7 +1962,7 @@ const styles = StyleSheet.create({
   },
   modalCancelBtn: {
     flex: 1,
-    height: 44,
+    height: 42,
     borderRadius: 12,
     borderWidth: 1,
     borderColor: 'rgba(226, 220, 242, 0.9)',
@@ -1960,20 +1970,20 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   modalCancelBtnText: {
-    fontSize: 14,
+    fontSize: 13.5,
     fontWeight: '600',
     color: '#7F7894',
   },
   modalPrimaryBtn: {
     flex: 1,
-    height: 44,
+    height: 42,
     borderRadius: 12,
     backgroundColor: '#582CDB',
     justifyContent: 'center',
     alignItems: 'center',
   },
   modalPrimaryBtnText: {
-    fontSize: 14,
+    fontSize: 13.5,
     fontWeight: '700',
     color: '#FFFFFF',
   },
@@ -1992,7 +2002,7 @@ const styles = StyleSheet.create({
     fontSize: 12,
   },
   jarvisBadgeText: {
-    fontSize: 10.5,
+    fontSize: 10,
     fontWeight: '800',
     color: '#582CDB',
     letterSpacing: 0.8,
@@ -2006,7 +2016,7 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   ideaItemTitle: {
-    fontSize: 13.5,
+    fontSize: 13,
     fontWeight: '700',
     color: '#171420',
     marginBottom: 4,
@@ -2034,13 +2044,13 @@ const styles = StyleSheet.create({
     marginBottom: 14,
   },
   postDetailsTitle: {
-    fontSize: 14.5,
+    fontSize: 14,
     fontWeight: '700',
     color: '#171420',
     marginBottom: 6,
   },
   postDetailsForecast: {
-    fontSize: 12,
+    fontSize: 11.5,
     color: '#524C62',
     fontWeight: '500',
     marginBottom: 8,
@@ -2119,7 +2129,7 @@ const styles = StyleSheet.create({
     lineHeight: 16,
   },
   btnPressed: {
-    opacity: 0.9,
+    opacity: 0.88,
     transform: [{ scale: 0.98 }],
   },
 });
