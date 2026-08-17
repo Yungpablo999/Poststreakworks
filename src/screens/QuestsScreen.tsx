@@ -1125,7 +1125,9 @@ const styles = StyleSheet.create({
     letterSpacing: 0.6,
   },
   freeQuestTag: {
-    backgroundColor: '#ECE8F9',
+    backgroundColor: '#FEF3C7',
+    borderWidth: 1,
+    borderColor: '#FDE68A',
     paddingVertical: 4,
     paddingHorizontal: 12,
     borderRadius: 100,
@@ -1133,7 +1135,7 @@ const styles = StyleSheet.create({
   freeQuestTagText: {
     fontSize: 10.5,
     fontWeight: '800',
-    color: '#582CDB',
+    color: '#B45309',
     letterSpacing: 0.5,
   },
   pageTitle: {
@@ -1156,14 +1158,14 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
     borderRadius: 24,
     borderWidth: 1,
-    borderColor: '#EFEBF8',
+    borderColor: '#E9D5FF',
     padding: 20,
     marginBottom: 26,
     shadowColor: '#582CDB',
     shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.06,
+    shadowOpacity: 0.08,
     shadowRadius: 16,
-    elevation: 3,
+    elevation: 4,
   },
   heroTopStatusRow: {
     flexDirection: 'row',

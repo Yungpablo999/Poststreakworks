@@ -515,11 +515,16 @@ export const CreateScreen: React.FC<CreateScreenProps> = ({
           showsVerticalScrollIndicator={false}
           bounces={true}
         >
-          {/* TOP PILL BADGES */}
+          {/* TOP PILL BADGES (ROYAL PURPLE & METALLIC GOLD) */}
           <View style={styles.topBadgesRow}>
-            <View style={styles.createPill}>
+            <LinearGradient
+              colors={['#7C3AED', '#582CDB']}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 0 }}
+              style={styles.createPill}
+            >
               <Text style={styles.createPillText}>Create</Text>
-            </View>
+            </LinearGradient>
 
             <View style={styles.freeToolsPill}>
               <Text style={styles.freeToolsPillText}>✨ FREE CREATE TOOLS</Text>
@@ -558,16 +563,16 @@ export const CreateScreen: React.FC<CreateScreenProps> = ({
               </Text>
             </View>
 
-            {/* Platform & Suggested Time Row */}
+            {/* Platform & Suggested Time Row (Purple & Gold Accents) */}
             <View style={styles.tagsRow}>
-              <View style={styles.tagPillGray}>
-                <Text style={styles.tagPillGrayText}>TikTok</Text>
+              <View style={styles.tagPillPurple}>
+                <Text style={styles.tagPillPurpleText}>TikTok</Text>
               </View>
-              <View style={styles.tagPillGray}>
-                <Text style={styles.tagPillGrayText}>Instagram Reel</Text>
+              <View style={styles.tagPillPurple}>
+                <Text style={styles.tagPillPurpleText}>Instagram Reel</Text>
               </View>
-              <View style={styles.suggestedTimePill}>
-                <Text style={styles.suggestedTimePillText}>Suggested: 7:30 PM</Text>
+              <View style={styles.suggestedTimePillGold}>
+                <Text style={styles.suggestedTimePillGoldText}>⚡ Suggested: 7:30 PM</Text>
               </View>
             </View>
 
@@ -651,14 +656,14 @@ export const CreateScreen: React.FC<CreateScreenProps> = ({
               style={({ pressed }) => [styles.toolGridCard, pressed && styles.btnPressed]}
               onPress={openScript}
             >
-              <View style={[styles.toolIconBox, { backgroundColor: '#F1F5F9' }]}>
+              <View style={[styles.toolIconBox, { backgroundColor: '#EDE9FE' }]}>
                 <Svg width={20} height={20} viewBox="0 0 24 24" fill="none">
                   <Path
                     d="M19.82 2H4.18C2.97 2 2 2.97 2 4.18v15.64C2 21.03 2.97 22 4.18 22h15.64c1.21 0 2.18-.97 2.18-2.18V4.18C22 2.97 21.03 2 19.82 2z"
-                    stroke="#171420"
-                    strokeWidth="2"
+                    stroke="#582CDB"
+                    strokeWidth="2.2"
                   />
-                  <Path d="M7 2v20M17 2v20M2 12h20M2 7h5M2 17h5M17 7h5M17 17h5" stroke="#171420" strokeWidth="2" />
+                  <Path d="M7 2v20M17 2v20M2 12h20M2 7h5M2 17h5M17 7h5M17 17h5" stroke="#582CDB" strokeWidth="2.2" />
                 </Svg>
               </View>
               <Text style={styles.toolTitle}>Script</Text>
@@ -670,8 +675,8 @@ export const CreateScreen: React.FC<CreateScreenProps> = ({
               style={({ pressed }) => [styles.toolGridCard, pressed && styles.btnPressed]}
               onPress={openCaption}
             >
-              <View style={[styles.toolIconBox, { backgroundColor: '#F1F5F9' }]}>
-                <Text style={styles.quoteIconText}>99</Text>
+              <View style={[styles.toolIconBox, { backgroundColor: '#EDE9FE' }]}>
+                <Text style={[styles.quoteIconText, { color: '#582CDB' }]}>99</Text>
               </View>
               <Text style={styles.toolTitle}>Caption</Text>
               <Text style={styles.toolSubtitle}>Write in your voice</Text>
@@ -684,10 +689,10 @@ export const CreateScreen: React.FC<CreateScreenProps> = ({
             onPress={handleOpenScheduleView}
           >
             <View style={styles.scheduledLeft}>
-              <View style={styles.calendarIconBox}>
+              <View style={[styles.calendarIconBox, { backgroundColor: '#EDE9FE' }]}>
                 <Svg width={22} height={22} viewBox="0 0 24 24" fill="none">
-                  <Rect x="3" y="4" width="18" height="18" rx="3" stroke="#171420" strokeWidth="2" />
-                  <Path d="M16 2v4M8 2v4M3 10h18" stroke="#171420" strokeWidth="2" strokeLinecap="round" />
+                  <Rect x="3" y="4" width="18" height="18" rx="3" stroke="#582CDB" strokeWidth="2.2" />
+                  <Path d="M16 2v4M8 2v4M3 10h18" stroke="#582CDB" strokeWidth="2.2" strokeLinecap="round" />
                 </Svg>
               </View>
               <View>
@@ -1410,7 +1415,7 @@ const styles = StyleSheet.create({
     paddingTop: 8,
   },
 
-  // TOP PILL BADGES
+  // TOP PILL BADGES (ROYAL PURPLE & GOLD)
   topBadgesRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -1418,18 +1423,21 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   createPill: {
-    backgroundColor: '#784DF0',
-    paddingVertical: 4,
-    paddingHorizontal: 12,
+    paddingVertical: 5,
+    paddingHorizontal: 13,
     borderRadius: 100,
+    overflow: 'hidden',
   },
   createPillText: {
     fontSize: 11,
     fontWeight: '800',
     color: '#FFFFFF',
+    letterSpacing: 0.2,
   },
   freeToolsPill: {
-    backgroundColor: '#E2E8F0',
+    backgroundColor: '#FEF3C7',
+    borderWidth: 1,
+    borderColor: '#FDE68A',
     paddingVertical: 4,
     paddingHorizontal: 12,
     borderRadius: 100,
@@ -1437,7 +1445,7 @@ const styles = StyleSheet.create({
   freeToolsPillText: {
     fontSize: 10.5,
     fontWeight: '800',
-    color: '#475569',
+    color: '#B45309',
     letterSpacing: 0.5,
   },
 
@@ -1457,19 +1465,19 @@ const styles = StyleSheet.create({
     fontWeight: '500',
   },
 
-  // 1. HERO STREAK SAVER CARD
+  // 1. HERO STREAK SAVER CARD (PURPLE & GOLD ACCENTS)
   streakSaverCard: {
     backgroundColor: '#FFFFFF',
     borderRadius: 24,
     borderWidth: 1,
-    borderColor: '#EFEBF8',
+    borderColor: '#E9D5FF',
     padding: 20,
     marginBottom: 18,
     shadowColor: '#582CDB',
     shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.05,
+    shadowOpacity: 0.08,
     shadowRadius: 16,
-    elevation: 3,
+    elevation: 4,
   },
   streakHeaderRow: {
     flexDirection: 'row',
@@ -1487,6 +1495,8 @@ const styles = StyleSheet.create({
     height: 38,
     borderRadius: 19,
     backgroundColor: '#FEF3C7',
+    borderWidth: 1,
+    borderColor: '#FDE68A',
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -1494,9 +1504,9 @@ const styles = StyleSheet.create({
     fontSize: 18,
   },
   streakSaverTag: {
-    fontSize: 10,
+    fontSize: 10.5,
     fontWeight: '800',
-    color: '#6B7280',
+    color: '#B45309',
     letterSpacing: 0.6,
   },
   streakDaysTitle: {
@@ -1509,7 +1519,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
-    backgroundColor: '#F1F5F9',
+    backgroundColor: '#F5F3FF',
+    borderWidth: 1,
+    borderColor: '#DDD6FE',
     paddingVertical: 4,
     paddingHorizontal: 10,
     borderRadius: 100,
@@ -1522,22 +1534,23 @@ const styles = StyleSheet.create({
   },
   activePillText: {
     fontSize: 11,
-    fontWeight: '700',
-    color: '#475569',
+    fontWeight: '800',
+    color: '#582CDB',
   },
   promptInnerBox: {
-    backgroundColor: '#F8FAFC',
+    backgroundColor: '#FAF8F5',
     borderRadius: 14,
     borderWidth: 1,
-    borderColor: '#E2E8F0',
+    borderColor: '#E9D5FF',
     padding: 14,
     marginBottom: 14,
   },
   promptText: {
     fontSize: 13.5,
-    color: '#334155',
+    color: '#1E1B4B',
     lineHeight: 20,
     fontStyle: 'italic',
+    fontWeight: '500',
   },
   tagsRow: {
     flexDirection: 'row',
@@ -1545,27 +1558,31 @@ const styles = StyleSheet.create({
     gap: 8,
     marginBottom: 18,
   },
-  tagPillGray: {
-    backgroundColor: '#F1F5F9',
+  tagPillPurple: {
+    backgroundColor: '#F5F3FF',
+    borderWidth: 1,
+    borderColor: '#DDD6FE',
     paddingVertical: 4,
     paddingHorizontal: 10,
     borderRadius: 8,
   },
-  tagPillGrayText: {
-    fontSize: 11,
-    fontWeight: '600',
-    color: '#475569',
-  },
-  suggestedTimePill: {
-    backgroundColor: '#EDE9FE',
-    paddingVertical: 4,
-    paddingHorizontal: 10,
-    borderRadius: 8,
-  },
-  suggestedTimePillText: {
+  tagPillPurpleText: {
     fontSize: 11,
     fontWeight: '700',
-    color: '#6D28D9',
+    color: '#582CDB',
+  },
+  suggestedTimePillGold: {
+    backgroundColor: '#FEF3C7',
+    borderWidth: 1,
+    borderColor: '#FDE68A',
+    paddingVertical: 4,
+    paddingHorizontal: 10,
+    borderRadius: 8,
+  },
+  suggestedTimePillGoldText: {
+    fontSize: 11,
+    fontWeight: '800',
+    color: '#B45309',
   },
   useIdeaBtn: {
     height: 48,
@@ -1573,9 +1590,9 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     shadowColor: '#582CDB',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.25,
+    shadowOpacity: 0.3,
     shadowRadius: 10,
-    elevation: 3,
+    elevation: 4,
   },
   useIdeaGradient: {
     flex: 1,
@@ -1589,25 +1606,27 @@ const styles = StyleSheet.create({
     letterSpacing: -0.2,
   },
 
-  // 2. JARVIS SUGGESTION CARD
+  // 2. JARVIS SUGGESTION CARD (ROYAL PURPLE & GOLD)
   jarvisSuggestionCard: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 12,
-    backgroundColor: '#EDE9FE',
+    backgroundColor: '#F5F3FF',
     borderRadius: 18,
     padding: 14,
     marginBottom: 18,
-    borderWidth: 1,
+    borderWidth: 1.2,
     borderColor: '#DDD6FE',
   },
   jarvisFlameCircle: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
+    width: 38,
+    height: 38,
+    borderRadius: 19,
     backgroundColor: '#FFFFFF',
     justifyContent: 'center',
     alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#FDE68A',
   },
   jarvisFlameIcon: {
     width: 24,
@@ -1617,7 +1636,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   jarvisSuggestionTitle: {
-    fontSize: 13,
+    fontSize: 13.5,
     fontWeight: '800',
     color: '#582CDB',
     marginBottom: 2,
@@ -1626,6 +1645,7 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: '#6D28D9',
     lineHeight: 17,
+    fontWeight: '500',
   },
 
   // 3. 2x2 CREATION TOOLS GRID
@@ -1640,18 +1660,18 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
     borderRadius: 20,
     borderWidth: 1,
-    borderColor: '#EFEBF8',
+    borderColor: '#E9D5FF',
     padding: 16,
-    shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.03,
+    shadowColor: '#582CDB',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.04,
     shadowRadius: 8,
-    elevation: 1,
+    elevation: 2,
   },
   toolIconBox: {
-    width: 36,
-    height: 36,
-    borderRadius: 10,
+    width: 38,
+    height: 38,
+    borderRadius: 12,
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 12,
@@ -1659,7 +1679,7 @@ const styles = StyleSheet.create({
   quoteIconText: {
     fontSize: 16,
     fontWeight: '900',
-    color: '#475569',
+    color: '#582CDB',
   },
   toolTitle: {
     fontSize: 15,
@@ -1681,12 +1701,12 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
     borderRadius: 20,
     borderWidth: 1,
-    borderColor: '#EFEBF8',
+    borderColor: '#E9D5FF',
     padding: 16,
     marginBottom: 24,
-    shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.03,
+    shadowColor: '#582CDB',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.04,
     shadowRadius: 8,
   },
   scheduledLeft: {
@@ -1695,10 +1715,10 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   calendarIconBox: {
-    width: 40,
-    height: 40,
+    width: 42,
+    height: 42,
     borderRadius: 12,
-    backgroundColor: '#F1F5F9',
+    backgroundColor: '#EDE9FE',
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -1709,8 +1729,9 @@ const styles = StyleSheet.create({
   },
   scheduledSub: {
     fontSize: 12,
-    color: '#64748B',
+    color: '#6D28D9',
     marginTop: 2,
+    fontWeight: '500',
   },
   scheduledOpenLink: {
     fontSize: 13.5,
@@ -1746,12 +1767,12 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
     borderRadius: 18,
     borderWidth: 1,
-    borderColor: '#EFEBF8',
+    borderColor: '#E9D5FF',
     padding: 12,
     gap: 12,
-    shadowColor: '#000000',
+    shadowColor: '#582CDB',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.02,
+    shadowOpacity: 0.03,
     shadowRadius: 6,
   },
   draftThumbnail: {
@@ -1771,36 +1792,43 @@ const styles = StyleSheet.create({
   },
   draftMeta: {
     fontSize: 11.5,
-    color: '#64748B',
+    color: '#6D28D9',
+    fontWeight: '500',
   },
   draftMoreDots: {
     fontSize: 18,
-    color: '#94A3B8',
+    color: '#582CDB',
     paddingHorizontal: 6,
   },
 
-  // 6. VOICE STUDIO PRO CARD
+  // 6. VOICE STUDIO PRO CARD (METALLIC GOLD & PURPLE DASHED)
   voiceStudioCard: {
     backgroundColor: '#FAF8F5',
     borderRadius: 24,
     borderWidth: 1.5,
-    borderColor: '#CBD5E1',
+    borderColor: '#EAB308',
     borderStyle: 'dashed',
     padding: 22,
     alignItems: 'center',
     marginBottom: 10,
+    shadowColor: '#CA8A04',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.08,
+    shadowRadius: 12,
   },
   voiceStudioProPill: {
-    backgroundColor: '#F1F5F9',
-    paddingVertical: 3,
-    paddingHorizontal: 10,
+    backgroundColor: '#FEF3C7',
+    borderWidth: 1,
+    borderColor: '#FDE68A',
+    paddingVertical: 3.5,
+    paddingHorizontal: 12,
     borderRadius: 100,
     marginBottom: 10,
   },
   voiceStudioProPillText: {
     fontSize: 10,
     fontWeight: '800',
-    color: '#475569',
+    color: '#B45309',
     letterSpacing: 0.6,
   },
   voiceStudioTitle: {
@@ -1812,7 +1840,8 @@ const styles = StyleSheet.create({
   voiceStudioSubtitle: {
     fontSize: 13,
     color: '#64748B',
-    marginBottom: 16,
+    marginBottom: 14,
+    fontWeight: '500',
   },
   waveformWrapper: {
     height: 56,
