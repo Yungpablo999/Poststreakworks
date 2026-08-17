@@ -12,6 +12,7 @@ import { PlatformConnectScreen } from './src/screens/PlatformConnectScreen';
 import { OnboardingCompleteScreen } from './src/screens/OnboardingCompleteScreen';
 import { DashboardScreen } from './src/screens/DashboardScreen';
 import { MissionDetailScreen } from './src/screens/MissionDetailScreen';
+import { CreateScreen } from './src/screens/CreateScreen';
 
 type Screen =
   | 'welcome'
@@ -22,7 +23,8 @@ type Screen =
   | 'platforms'
   | 'complete'
   | 'dashboard'
-  | 'mission-detail';
+  | 'mission-detail'
+  | 'create';
 
 export default function App() {
   const [showSplash, setShowSplash] = useState(true);
@@ -200,6 +202,13 @@ export default function App() {
           <DashboardScreen
             onLogout={handleLogout}
             onStartMission={() => navigateTo('mission-detail')}
+            onNavigateTab={(tab) => {
+              if (tab === 'create') {
+                navigateTo('create');
+              } else if (tab === 'quests') {
+                navigateTo('mission-detail');
+              }
+            }}
           />
         )}
 
@@ -207,6 +216,26 @@ export default function App() {
           <MissionDetailScreen
             onBackToDashboard={() => navigateTo('dashboard')}
             onLogout={handleLogout}
+            onNavigateTab={(tab) => {
+              if (tab === 'home') {
+                navigateTo('dashboard');
+              } else if (tab === 'create') {
+                navigateTo('create');
+              }
+            }}
+          />
+        )}
+
+        {currentScreen === 'create' && (
+          <CreateScreen
+            onLogout={handleLogout}
+            onNavigateTab={(tab) => {
+              if (tab === 'home') {
+                navigateTo('dashboard');
+              } else if (tab === 'quests') {
+                navigateTo('mission-detail');
+              }
+            }}
           />
         )}
 
