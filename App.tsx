@@ -14,9 +14,11 @@ import { DashboardScreen } from './src/screens/DashboardScreen';
 import { MissionDetailScreen } from './src/screens/MissionDetailScreen';
 import { QuestsScreen } from './src/screens/QuestsScreen';
 import { CreateScreen } from './src/screens/CreateScreen';
+import { ScheduleScreen } from './src/screens/ScheduleScreen';
 import { MatchScreen } from './src/screens/MatchScreen';
 import { JarvisProScreen } from './src/screens/JarvisProScreen';
 import { GhostLoadingScreen } from './src/components/GhostLoadingScreen';
+import { TabType } from './src/components/FloatingTabBar';
 
 type Screen =
   | 'welcome'
@@ -31,7 +33,8 @@ type Screen =
   | 'create'
   | 'match'
   | 'growth'
-  | 'quests';
+  | 'quests'
+  | 'schedule';
 
 export default function App() {
   const [showSplash, setShowSplash] = useState(true);
@@ -53,6 +56,8 @@ export default function App() {
           ? 'Entering Quests Hub'
           : nextScreen === 'growth'
           ? 'Entering Jarvis Pro Suite'
+          : nextScreen === 'schedule'
+          ? 'Loading Content Timeline'
           : nextScreen === 'create'
           ? 'Opening Creator Studio'
           : nextScreen === 'match'
@@ -235,7 +240,7 @@ export default function App() {
           <DashboardScreen
             onLogout={handleLogout}
             onStartMission={() => navigateTo('quests')}
-            onNavigateTab={(tab) => {
+            onNavigateTab={(tab: TabType) => {
               if (tab === 'create') {
                 navigateTo('create');
               } else if (tab === 'match') {
@@ -253,7 +258,7 @@ export default function App() {
           <QuestsScreen
             onBackToDashboard={() => navigateTo('dashboard')}
             onLogout={handleLogout}
-            onNavigateTab={(tab) => {
+            onNavigateTab={(tab: TabType) => {
               if (tab === 'home') {
                 navigateTo('dashboard');
               } else if (tab === 'create') {
@@ -270,9 +275,30 @@ export default function App() {
         {currentScreen === 'create' && (
           <CreateScreen
             onLogout={handleLogout}
-            onNavigateTab={(tab) => {
+            onOpenSchedule={() => navigateTo('schedule')}
+            onNavigateTab={(tab: TabType) => {
               if (tab === 'home') {
                 navigateTo('dashboard');
+              } else if (tab === 'match') {
+                navigateTo('match');
+              } else if (tab === 'quests') {
+                navigateTo('quests');
+              } else if (tab === 'growth') {
+                navigateTo('growth');
+              }
+            }}
+          />
+        )}
+
+        {currentScreen === 'schedule' && (
+          <ScheduleScreen
+            onBack={() => navigateTo('create')}
+            onLogout={handleLogout}
+            onNavigateTab={(tab: TabType) => {
+              if (tab === 'home') {
+                navigateTo('dashboard');
+              } else if (tab === 'create') {
+                navigateTo('create');
               } else if (tab === 'match') {
                 navigateTo('match');
               } else if (tab === 'quests') {
@@ -287,7 +313,7 @@ export default function App() {
         {currentScreen === 'match' && (
           <MatchScreen
             onLogout={handleLogout}
-            onNavigateTab={(tab) => {
+            onNavigateTab={(tab: TabType) => {
               if (tab === 'home') {
                 navigateTo('dashboard');
               } else if (tab === 'create') {
@@ -304,7 +330,7 @@ export default function App() {
         {currentScreen === 'growth' && (
           <JarvisProScreen
             onLogout={handleLogout}
-            onNavigateTab={(tab) => {
+            onNavigateTab={(tab: TabType) => {
               if (tab === 'home') {
                 navigateTo('dashboard');
               } else if (tab === 'create') {
@@ -322,7 +348,7 @@ export default function App() {
           <QuestsScreen
             onBackToDashboard={() => navigateTo('dashboard')}
             onLogout={handleLogout}
-            onNavigateTab={(tab) => {
+            onNavigateTab={(tab: TabType) => {
               if (tab === 'home') {
                 navigateTo('dashboard');
               } else if (tab === 'create') {
