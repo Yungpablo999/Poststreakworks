@@ -240,6 +240,13 @@ export const MatchScreen: React.FC<MatchScreenProps> = ({
   const [showConnectModal, setShowConnectModal] = useState(false);
   const [lastConnectedName, setLastConnectedName] = useState<string>('Creator');
   const [showCollabIdeaModal, setShowCollabIdeaModal] = useState(false);
+  
+  // Collab Schedule Pop-up States
+  const [showScheduleConfirmModal, setShowScheduleConfirmModal] = useState(false);
+  const [showScheduleSuccessModal, setShowScheduleSuccessModal] = useState(false);
+  const [selectedCollabPlatform, setSelectedCollabPlatform] = useState<'instagram' | 'tiktok' | 'youtube'>('instagram');
+  const [collabPostTitle, setCollabPostTitle] = useState('‘Day in Lagos’ Co-created Reel (feat. Amara Okafor)');
+
   const [showMessageModal, setShowMessageModal] = useState(false);
   const [selectedRecipient, setSelectedRecipient] = useState<string | null>(null);
   const [messageText, setMessageText] = useState('');
@@ -410,6 +417,16 @@ export const MatchScreen: React.FC<MatchScreenProps> = ({
     }
     setIncomingRequests((prev) => prev.filter((r) => r.id !== req.id));
     showToast('Declined request from ' + req.name);
+  };
+
+  const handleConfirmSchedule = () => {
+    setShowScheduleConfirmModal(false);
+    if (Platform.OS !== 'web') {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    }
+    setTimeout(() => {
+      setShowScheduleSuccessModal(true);
+    }, 250);
   };
 
   const handleSendMessage = () => {
@@ -913,7 +930,7 @@ export const MatchScreen: React.FC<MatchScreenProps> = ({
             </View>
           )}
 
-          {/* TAB 2: INCOMING CONNECTION REQUESTS (ACCEPT / DECLINE SPACE) */}
+          {/* TAB 2: INCOMING CONNECTION REQUESTS */}
           {activeSection === 'requests' && (
             <View style={styles.tabContentSection}>
               <View style={styles.requestsHeaderBanner}>
@@ -976,7 +993,7 @@ export const MatchScreen: React.FC<MatchScreenProps> = ({
                       <Text style={styles.requestCompatibilityText}>{req.matchScore}</Text>
                     </View>
 
-                    {/* Action Buttons: Decline (Left) & Accept (Right) */}
+                    {/* Action Buttons: Decline & Accept */}
                     <View style={styles.requestActionBtnRow}>
                       <Pressable
                         style={({ pressed }) => [styles.requestDeclineBtn, pressed && styles.btnPressed]}
@@ -1189,7 +1206,7 @@ export const MatchScreen: React.FC<MatchScreenProps> = ({
           onDismiss={() => setShowConnectModal(false)}
         />
 
-        {/* 6. BUILD COLLAB IDEA MODAL */}
+        {/* 6. BUILD COLLAB IDEA BLUEPRINT MODAL */}
         <Modal
           visible={showCollabIdeaModal}
           transparent={true}
@@ -1224,7 +1241,9 @@ export const MatchScreen: React.FC<MatchScreenProps> = ({
                   style={styles.modalPrimaryBtn}
                   onPress={() => {
                     setShowCollabIdeaModal(false);
-                    showToast('✓ Collab draft added to Create schedule!');
+                    setTimeout(() => {
+                      setShowScheduleConfirmModal(true);
+                    }, 200);
                   }}
                 >
                   <Text style={styles.modalPrimaryBtnText}>Add to Schedule</Text>
@@ -1233,6 +1252,117 @@ export const MatchScreen: React.FC<MatchScreenProps> = ({
             </View>
           </View>
         </Modal>
+
+        {/* 6B. COLLAB SCHEDULE POP-UP MODAL (STEP 2: CUSTOMIZE & CONFIRM) */}
+        <Modal
+          visible={showScheduleConfirmModal}
+          transparent={true}
+          animationType="fade"
+          onRequestClose={() => setShowScheduleConfirmModal(false)}
+        >
+          <View style={styles.modalOverlay}>
+            <View style={[styles.modalCard, { maxWidth: 340 }]}>
+              <View style={styles.modalBadgePill}>
+                <Text style={styles.modalBadgeText}>COLLAB SCHEDULE • JARVIS AI</Text>
+              </View>
+              <Text style={styles.modalTitle}>Schedule Collab Post</Text>
+              <Text style={styles.modalSubtitle}>
+                Lock in your joint co-creation with Amara Okafor to protect your 48-day streak.
+              </Text>
+
+              {/* Title / Hook input */}
+              <View style={styles.inputGroupFull}>
+                <Text style={styles.inputFieldLabel}>POST HOOK / TITLE</Text>
+                <TextInput
+                  style={styles.singleLineInput}
+                  value={collabPostTitle}
+                  onChangeText={setCollabPostTitle}
+                  placeholder="Enter post hook..."
+                  placeholderTextColor="#A39CB5"
+                />
+              </View>
+
+              {/* Platform Selector */}
+              <View style={styles.inputGroupFull}>
+                <Text style={styles.inputFieldLabel}>SELECT PLATFORM</Text>
+                <View style={styles.platformPillRow}>
+                  <Pressable
+                    style={[styles.platformPill, selectedCollabPlatform === 'instagram' && styles.platformPillActive]}
+                    onPress={() => setSelectedCollabPlatform('instagram')}
+                  >
+                    <Text style={[styles.platformPillText, selectedCollabPlatform === 'instagram' && styles.platformPillTextActive]}>
+                      Instagram
+                    </Text>
+                  </Pressable>
+                  <Pressable
+                    style={[styles.platformPill, selectedCollabPlatform === 'tiktok' && styles.platformPillActive]}
+                    onPress={() => setSelectedCollabPlatform('tiktok')}
+                  >
+                    <Text style={[styles.platformPillText, selectedCollabPlatform === 'tiktok' && styles.platformPillTextActive]}>
+                      TikTok
+                    </Text>
+                  </Pressable>
+                  <Pressable
+                    style={[styles.platformPill, selectedCollabPlatform === 'youtube' && styles.platformPillActive]}
+                    onPress={() => setSelectedCollabPlatform('youtube')}
+                  >
+                    <Text style={[styles.platformPillText, selectedCollabPlatform === 'youtube' && styles.platformPillTextActive]}>
+                      Shorts
+                    </Text>
+                  </Pressable>
+                </View>
+              </View>
+
+              {/* Projected Reach & Peak Time */}
+              <View style={styles.collabScheduleInfoBox}>
+                <View style={styles.scheduleInfoRow}>
+                  <Text style={styles.scheduleInfoLabel}>📅 Target Slot:</Text>
+                  <Text style={styles.scheduleInfoValue}>Friday • 7:30 PM Peak</Text>
+                </View>
+                <View style={styles.scheduleInfoRow}>
+                  <Text style={styles.scheduleInfoLabel}>⚡ Projected Reach:</Text>
+                  <Text style={styles.scheduleInfoValue}>18.5K - 34.0K Views</Text>
+                </View>
+                <View style={styles.scheduleInfoRow}>
+                  <Text style={styles.scheduleInfoLabel}>🔥 Streak Protection:</Text>
+                  <Text style={[styles.scheduleInfoValue, { color: '#E11D48' }]}>Active (+50 XP)</Text>
+                </View>
+              </View>
+
+              <View style={styles.modalBtnRow}>
+                <Pressable
+                  style={styles.modalCancelBtn}
+                  onPress={() => setShowScheduleConfirmModal(false)}
+                >
+                  <Text style={styles.modalCancelBtnText}>Cancel</Text>
+                </Pressable>
+                <Pressable
+                  style={styles.modalPrimaryBtn}
+                  onPress={handleConfirmSchedule}
+                >
+                  <Text style={styles.modalPrimaryBtnText}>Confirm & Schedule</Text>
+                </Pressable>
+              </View>
+            </View>
+          </View>
+        </Modal>
+
+        {/* 6C. ANIMATED COMPLETION CELEBRATION MODAL (ON SCHEDULE SUCCESS) */}
+        <AnimatedCompletionModal
+          visible={showScheduleSuccessModal}
+          title="Collab Scheduled! 🚀"
+          subtitle="‘Day in Lagos’ added to your posting schedule. +50 XP awarded to your streak!"
+          badgeText="COLLAB SCHEDULED"
+          xpEarned={50}
+          streakCount={48}
+          actionText="View in Schedule"
+          onDismiss={() => {
+            setShowScheduleSuccessModal(false);
+            if (onNavigateTab) {
+              onNavigateTab('create');
+            }
+          }}
+        />
 
         {/* 7. DIRECT MESSAGE MODAL */}
         <Modal
@@ -2123,7 +2253,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(240, 253, 244, 0.85)',
     paddingVertical: 6,
     paddingHorizontal: 10,
-    borderRadius: 10,
+    borderRadius: 100,
     borderWidth: 1,
     borderColor: 'rgba(220, 252, 231, 0.9)',
     marginBottom: 14,
@@ -2545,6 +2675,77 @@ const styles = StyleSheet.create({
     color: '#171420',
     lineHeight: 16,
     marginBottom: 4,
+  },
+  inputGroupFull: {
+    width: '100%',
+    marginBottom: 12,
+  },
+  inputFieldLabel: {
+    fontSize: 10,
+    fontWeight: '800',
+    color: '#7F7894',
+    letterSpacing: 0.6,
+    marginBottom: 4,
+  },
+  singleLineInput: {
+    width: '100%',
+    height: 40,
+    borderWidth: 1.2,
+    borderColor: 'rgba(221, 214, 254, 0.9)',
+    borderRadius: 10,
+    paddingHorizontal: 12,
+    fontSize: 13,
+    color: '#171420',
+    backgroundColor: 'rgba(250, 248, 255, 0.8)',
+  },
+  platformPillRow: {
+    flexDirection: 'row',
+    gap: 8,
+  },
+  platformPill: {
+    flex: 1,
+    paddingVertical: 7,
+    borderRadius: 8,
+    alignItems: 'center',
+    backgroundColor: 'rgba(245, 243, 255, 0.8)',
+    borderWidth: 1,
+    borderColor: '#EDE8FC',
+  },
+  platformPillActive: {
+    backgroundColor: '#582CDB',
+    borderColor: '#582CDB',
+  },
+  platformPillText: {
+    fontSize: 11.5,
+    fontWeight: '700',
+    color: '#7F7894',
+  },
+  platformPillTextActive: {
+    color: '#FFFFFF',
+  },
+  collabScheduleInfoBox: {
+    width: '100%',
+    backgroundColor: '#FAF8FF',
+    borderRadius: 12,
+    padding: 10,
+    borderWidth: 1,
+    borderColor: '#EDE8FC',
+    marginBottom: 14,
+  },
+  scheduleInfoRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 4,
+  },
+  scheduleInfoLabel: {
+    fontSize: 11,
+    fontWeight: '600',
+    color: '#7F7894',
+  },
+  scheduleInfoValue: {
+    fontSize: 11,
+    fontWeight: '800',
+    color: '#171420',
   },
   modalTextAreaInput: {
     width: '100%',
