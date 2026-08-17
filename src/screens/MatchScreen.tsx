@@ -19,7 +19,6 @@ import Svg, { Path, Circle } from 'react-native-svg';
 import * as Haptics from 'expo-haptics';
 import { LinearGradient } from 'expo-linear-gradient';
 import { FloatingTabBar, TabType } from '../components/FloatingTabBar';
-import { LiquidGlassBackground } from '../components/LiquidGlassBackground';
 import { AnimatedCompletionModal } from '../components/AnimatedCompletionModal';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
@@ -62,9 +61,8 @@ interface CreatorProfile {
   followers: string;
   location: string;
   coverImage: any;
+  bio: string;
   tags: string[];
-  collabGoal: string;
-  jarvisInsight: string;
   streak: number;
   tracking: TrackedMetrics;
 }
@@ -104,15 +102,12 @@ const CREATOR_DECK: CreatorProfile[] = [
   {
     id: 'creator_1',
     name: 'Amara Okafor',
-    role: 'Travel Vlogger',
-    followers: '85k Followers',
+    role: 'Travel & Lifestyle Vlogger',
+    followers: '85k',
     location: 'Lagos, NG',
     coverImage: require('../../assets/images/amara-creator-cover.jpg'),
-    tags: ['Lifestyle', 'Travel', '44-Day Streak', 'High Consistency'],
-    collabGoal:
-      'Wants to create short-form lifestyle and travel content that focuses on authentic local stories.',
-    jarvisInsight:
-      'Amara matches your audience style, niche and posting rhythm. High collab synergy!',
+    bio: 'Filming authentic travel routines & luxury getaways across West Africa. Looking for lifestyle co-creators for dynamic split-screen Reels! 🌴',
+    tags: ['🌿 Travel', '✨ Lifestyle', '🎥 4K Vlogs'],
     streak: 44,
     tracking: {
       growthRate: '+4.2k this month',
@@ -126,15 +121,12 @@ const CREATOR_DECK: CreatorProfile[] = [
   {
     id: 'creator_2',
     name: 'Tomi Adebayo',
-    role: 'Tech Creator',
-    followers: '156k Followers',
+    role: 'Tech & AI Creator',
+    followers: '156k',
     location: 'London, UK',
     coverImage: require('../../assets/images/tomi-avatar.jpg'),
-    tags: ['Tech', 'AI Tools', '52-Day Streak', 'Top 1% Creator'],
-    collabGoal:
-      'Looking to co-produce deep dives on AI creator workflows and gadget reviews.',
-    jarvisInsight:
-      'High overlap in productivity and workflow audience with 4.8x average viral reach.',
+    bio: 'Building AI-first creator workflows & reviewing next-gen tech. Let’s co-produce deep dives that get millions of views! ⚡',
+    tags: ['🤖 AI Tools', '📱 Tech Reviews', '📈 Viral Reach'],
     streak: 52,
     tracking: {
       growthRate: '+12.8k this month',
@@ -148,15 +140,12 @@ const CREATOR_DECK: CreatorProfile[] = [
   {
     id: 'creator_3',
     name: 'Zainab Okafor',
-    role: 'Lifestyle & Fashion',
-    followers: '52k Followers',
+    role: 'Fashion & Aesthetic',
+    followers: '52k',
     location: 'Toronto, CA',
     coverImage: require('../../assets/images/zainab-avatar.jpg'),
-    tags: ['Lifestyle', 'Aesthetic', '38-Day Streak', 'High Engagement'],
-    collabGoal:
-      'Seeking travel and lifestyle co-creators for luxury aesthetic lookbooks and vlogs.',
-    jarvisInsight:
-      'Strong visual aesthetic alignment with high comment-to-view ratios.',
+    bio: 'Curating high-end aesthetic lookbooks, capsule wardrobes & studio vlogs. Seeking visual storytellers for collaborative shoots! ☕',
+    tags: ['👗 Fashion', '✨ Aesthetic', '☕ Lifestyle'],
     streak: 38,
     tracking: {
       growthRate: '+2.1k this month',
@@ -170,15 +159,12 @@ const CREATOR_DECK: CreatorProfile[] = [
   {
     id: 'creator_4',
     name: 'Marcus Vance',
-    role: 'Fitness & Routine',
-    followers: '110k Followers',
+    role: 'Fitness & Habit Coach',
+    followers: '110k',
     location: 'New York, US',
     coverImage: require('../../assets/images/marcus-avatar.jpg'),
-    tags: ['Fitness', 'Daily Habits', '60-Day Streak', 'Elite Consistency'],
-    collabGoal:
-      'Wants to build daily habit & creator workout challenges with accountability partners.',
-    jarvisInsight:
-      'Massive streak alignment. Both of you thrive on high-discipline posting schedules.',
+    bio: 'High-performance fitness & daily creator discipline routines. Looking for accountability partners for 30-day challenge series! 💪',
+    tags: ['🏋️ Fitness', '🔥 Daily Habits', '⚡ High Retention'],
     streak: 60,
     tracking: {
       growthRate: '+8.5k this month',
@@ -193,14 +179,11 @@ const CREATOR_DECK: CreatorProfile[] = [
     id: 'creator_5',
     name: 'Elena Rostova',
     role: 'Visual Storyteller',
-    followers: '94k Followers',
+    followers: '94k',
     location: 'Berlin, DE',
     coverImage: require('../../assets/images/elena-avatar.jpg'),
-    tags: ['Cinematography', 'Editing', '41-Day Streak', 'Viral Hooks'],
-    collabGoal:
-      'Co-directing high-production cinematic Reels with creators pushing editing limits.',
-    jarvisInsight:
-      'Her pacing and visual sound design can amplify your video watch-through rates.',
+    bio: 'Cinematographer & visual director crafting short films. Let’s co-direct high-production Reels that blow minds! 🎬',
+    tags: ['🎥 Filmmaking', '🎬 Editing', '✨ Viral Hooks'],
     streak: 41,
     tracking: {
       growthRate: '+6.4k this month',
@@ -405,9 +388,8 @@ export const MatchScreen: React.FC<MatchScreenProps> = ({
       followers: req.followers,
       location: req.location,
       coverImage: req.coverImage,
+      bio: req.pitchMessage,
       tags: req.tags,
-      collabGoal: req.pitchMessage,
-      jarvisInsight: req.matchScore,
       streak: req.streak,
       tracking: {
         growthRate: '+5.5k this month',
@@ -573,7 +555,7 @@ export const MatchScreen: React.FC<MatchScreenProps> = ({
           </View>
         </View>
 
-        {/* 2. MAIN SCROLLABLE CONTENT (LOCKED DURING SWIPE TO PREVENT GESTURE CONFLICTS) */}
+        {/* 2. MAIN SCROLLABLE CONTENT */}
         <ScrollView
           style={styles.scrollView}
           contentContainerStyle={styles.scrollContent}
@@ -599,7 +581,7 @@ export const MatchScreen: React.FC<MatchScreenProps> = ({
 
             <Text style={styles.pageHeadline}>Find creators worth building with.</Text>
             <Text style={styles.pageSubtitle}>
-              Review incoming connection requests, swipe discovery, and track creators over time.
+              Swipe right to accept, left to decline, or swipe up to track.
             </Text>
 
             {/* LIVE TRACKING STATS BAR */}
@@ -669,7 +651,7 @@ export const MatchScreen: React.FC<MatchScreenProps> = ({
             </Pressable>
           </View>
 
-          {/* TAB 1: PURE GESTURE SWIPE DECK */}
+          {/* TAB 1: PURE GESTURE SWIPE DECK (CLEAN TINDER-STYLE PHOTO CARD) */}
           {activeSection === 'deck' && (
             <View>
               {/* FILTER PILLS */}
@@ -715,41 +697,37 @@ export const MatchScreen: React.FC<MatchScreenProps> = ({
               <View style={styles.cardStackContainer}>
                 {/* BOTTOM / NEXT CARD IN STACK */}
                 <View style={styles.bottomCardContainer} pointerEvents="none">
-                  <LiquidGlassBackground
-                    borderRadius={28}
-                    light={0.92}
-                    refraction={22}
-                    frost={14}
-                    dispersion={0.2}
-                    style={styles.cardGlass}
-                  >
-                    <View style={styles.creatorCoverContainer}>
-                      <Image
-                        source={nextCreator.coverImage}
-                        style={styles.creatorCoverImage}
-                        resizeMode="cover"
-                      />
-                      <LinearGradient
-                        colors={['transparent', 'rgba(23, 20, 32, 0.85)']}
-                        style={styles.creatorCoverGradient}
-                      >
-                        <Text style={styles.creatorHeroName}>{nextCreator.name}</Text>
-                        <Text style={styles.creatorHeroMeta}>
-                          {nextCreator.role} • {nextCreator.followers}
-                        </Text>
-                      </LinearGradient>
-                    </View>
-                    <View style={styles.creatorBodySection}>
-                      <View style={styles.creatorTagsRow}>
+                  <View style={styles.tinderCardOuter}>
+                    <Image
+                      source={nextCreator.coverImage}
+                      style={styles.tinderCardCover}
+                      resizeMode="cover"
+                    />
+                    <LinearGradient
+                      colors={['transparent', 'rgba(12, 10, 20, 0.4)', 'rgba(12, 10, 20, 0.95)']}
+                      style={styles.tinderCardGradient}
+                    >
+                      <View style={styles.tinderCardHeaderRow}>
+                        <Text style={styles.tinderCreatorName}>{nextCreator.name}</Text>
+                        <View style={styles.tinderStreakBadge}>
+                          <Text style={styles.tinderStreakBadgeText}>🔥 {nextCreator.streak}d</Text>
+                        </View>
+                      </View>
+                      <Text style={styles.tinderCreatorRole}>
+                        {nextCreator.role} • {nextCreator.followers} • 📍 {nextCreator.location}
+                      </Text>
+                      <Text style={styles.tinderCreatorBio} numberOfLines={2}>
+                        {nextCreator.bio}
+                      </Text>
+                      <View style={styles.tinderTagsRow}>
                         {nextCreator.tags.map((tag, idx) => (
-                          <View key={idx} style={styles.tagPill}>
-                            <Text style={styles.tagPillText}>{tag}</Text>
+                          <View key={idx} style={styles.tinderTagPill}>
+                            <Text style={styles.tinderTagPillText}>{tag}</Text>
                           </View>
                         ))}
                       </View>
-                      <Text style={styles.collabGoalText}>{nextCreator.collabGoal}</Text>
-                    </View>
-                  </LiquidGlassBackground>
+                    </LinearGradient>
+                  </View>
                 </View>
 
                 {/* TOP ACTIVE SWIPEABLE CARD */}
@@ -757,14 +735,7 @@ export const MatchScreen: React.FC<MatchScreenProps> = ({
                   {...panResponder.panHandlers}
                   style={[styles.topCardContainer, animatedCardStyle]}
                 >
-                  <LiquidGlassBackground
-                    borderRadius={28}
-                    light={0.94}
-                    refraction={26}
-                    frost={16}
-                    dispersion={0.2}
-                    style={styles.cardGlass}
-                  >
+                  <View style={styles.tinderCardOuter}>
                     {/* SWIPE STAMP OVERLAYS */}
                     {/* GREEN ACCEPT STAMP (SWIPE RIGHT) */}
                     <Animated.View
@@ -802,96 +773,70 @@ export const MatchScreen: React.FC<MatchScreenProps> = ({
                       <Text style={styles.saveStampText}>TRACKING ⭐</Text>
                     </Animated.View>
 
-                    {/* Cover Photo with Quick Save Button */}
-                    <View style={styles.creatorCoverContainer}>
-                      <Image
-                        source={currentCreator.coverImage}
-                        style={styles.creatorCoverImage}
-                        resizeMode="cover"
-                      />
+                    {/* Full-bleed Photo */}
+                    <Image
+                      source={currentCreator.coverImage}
+                      style={styles.tinderCardCover}
+                      resizeMode="cover"
+                    />
 
-                      {/* On-Card Save / Track Toggle Button */}
+                    {/* Top Overlay Badges */}
+                    <View style={styles.tinderTopOverlayRow}>
+                      <View style={styles.tinderLiveRadarPill}>
+                        <Text style={styles.tinderLiveRadarText}>
+                          {currentCreator.tracking.statusText}
+                        </Text>
+                      </View>
+
+                      {/* On-Card Save / Track Toggle */}
                       <Pressable
                         style={[styles.onCardSaveBtn, isCurrentSaved && styles.onCardSaveBtnActive]}
                         onPress={() => handleToggleTrack(currentCreator)}
                         hitSlop={8}
                       >
-                        <Text style={{ fontSize: 16 }}>{isCurrentSaved ? '⭐' : '☆'}</Text>
+                        <Text style={{ fontSize: 15 }}>{isCurrentSaved ? '⭐' : '☆'}</Text>
                         <Text style={[styles.onCardSaveText, isCurrentSaved && styles.onCardSaveTextActive]}>
                           {isCurrentSaved ? 'Tracking' : 'Save'}
                         </Text>
                       </Pressable>
-
-                      <LinearGradient
-                        colors={['transparent', 'rgba(23, 20, 32, 0.85)']}
-                        style={styles.creatorCoverGradient}
-                      >
-                        <View style={styles.creatorCoverInfoRow}>
-                          <View style={styles.creatorCoverTextCol}>
-                            <Text style={styles.creatorHeroName}>{currentCreator.name}</Text>
-                            <Text style={styles.creatorHeroMeta}>
-                              {currentCreator.role} • {currentCreator.followers}
-                            </Text>
-                          </View>
-                          <View style={styles.locationPill}>
-                            <Text style={styles.locationPillText}>📍 {currentCreator.location}</Text>
-                          </View>
-                        </View>
-                      </LinearGradient>
                     </View>
 
-                    {/* Creator Body */}
-                    <View style={styles.creatorBodySection}>
-                      <View style={styles.creatorTagsRow}>
+                    {/* Bottom Frosted Dark Glass Gradient Over Photo */}
+                    <LinearGradient
+                      colors={['transparent', 'rgba(12, 10, 20, 0.45)', 'rgba(12, 10, 20, 0.96)']}
+                      style={styles.tinderCardGradient}
+                    >
+                      <View style={styles.tinderCardHeaderRow}>
+                        <View style={styles.nameVerifiedRow}>
+                          <Text style={styles.tinderCreatorName}>{currentCreator.name}</Text>
+                          <View style={styles.verifiedCheckBadge}>
+                            <Text style={styles.verifiedCheckText}>✓</Text>
+                          </View>
+                        </View>
+                        <View style={styles.tinderStreakBadge}>
+                          <Text style={styles.tinderStreakBadgeText}>🔥 {currentCreator.streak}d</Text>
+                        </View>
+                      </View>
+
+                      <Text style={styles.tinderCreatorRole}>
+                        {currentCreator.role} • {currentCreator.followers} • 📍 {currentCreator.location}
+                      </Text>
+
+                      {/* Clean 2-Line Punchy Intro Bio */}
+                      <Text style={styles.tinderCreatorBio} numberOfLines={2}>
+                        {currentCreator.bio}
+                      </Text>
+
+                      {/* Aesthetic Tag Pills */}
+                      <View style={styles.tinderTagsRow}>
                         {currentCreator.tags.map((tag, idx) => (
-                          <View
-                            key={idx}
-                            style={[
-                              styles.tagPill,
-                              tag.includes('Streak') && styles.tagPillStreak,
-                              tag.includes('High') && styles.tagPillHigh,
-                            ]}
-                          >
-                            <Text
-                              style={[
-                                styles.tagPillText,
-                                tag.includes('Streak') && styles.tagPillTextStreak,
-                                tag.includes('High') && styles.tagPillTextHigh,
-                              ]}
-                            >
-                              {tag}
-                            </Text>
+                          <View key={idx} style={styles.tinderTagPill}>
+                            <Text style={styles.tinderTagPillText}>{tag}</Text>
                           </View>
                         ))}
                       </View>
-
-                      {/* Live Tracking Radar Badge on Card */}
-                      <View style={styles.liveTrackingCardBadge}>
-                        <Text style={styles.liveTrackingCardStatus}>
-                          {currentCreator.tracking.statusText}
-                        </Text>
-                      </View>
-
-                      {/* Collab Goal */}
-                      <View style={styles.collabGoalBox}>
-                        <Text style={styles.collabGoalLabel}>COLLAB GOAL</Text>
-                        <Text style={styles.collabGoalText}>{currentCreator.collabGoal}</Text>
-                      </View>
-
-                      {/* Jarvis Insight */}
-                      <View style={styles.jarvisInsightBox}>
-                        <Image
-                          source={require('../../assets/images/jarvis-ghost-clean.png')}
-                          style={styles.jarvisInsightGhost}
-                          resizeMode="contain"
-                        />
-                        <View style={styles.jarvisInsightContent}>
-                          <Text style={styles.jarvisInsightTitle}>JARVIS INSIGHT</Text>
-                          <Text style={styles.jarvisInsightText}>{currentCreator.jarvisInsight}</Text>
-                        </View>
-                      </View>
-                    </View>
-                  </LiquidGlassBackground>
+                    </LinearGradient>
+                  </View>
                 </Animated.View>
               </View>
 
@@ -899,7 +844,7 @@ export const MatchScreen: React.FC<MatchScreenProps> = ({
               <View style={styles.gestureHintRow}>
                 <Text style={styles.gestureHintText}>👈 Swipe left to decline</Text>
                 <Text style={styles.gestureHintDot}>•</Text>
-                <Text style={styles.gestureHintText}>👆 Up to save & track</Text>
+                <Text style={styles.gestureHintText}>👆 Up to track</Text>
                 <Text style={styles.gestureHintDot}>•</Text>
                 <Text style={styles.gestureHintText}>Right to accept 👉</Text>
               </View>
@@ -1783,22 +1728,30 @@ const styles = StyleSheet.create({
     bottom: 0,
     zIndex: 10,
   },
-  cardGlass: {
+  tinderCardOuter: {
     flex: 1,
+    borderRadius: 28,
     overflow: 'hidden',
+    backgroundColor: '#1E1B2E',
     borderWidth: 1.5,
-    borderColor: 'rgba(255, 255, 255, 0.95)',
+    borderColor: 'rgba(255, 255, 255, 0.9)',
     shadowColor: '#582CDB',
     shadowOffset: { width: 0, height: 12 },
-    shadowOpacity: 0.16,
+    shadowOpacity: 0.2,
     shadowRadius: 24,
     elevation: 8,
+    position: 'relative',
+  },
+  tinderCardCover: {
+    width: '100%',
+    height: '100%',
+    position: 'absolute',
   },
 
   // SWIPE STAMPS
   stampOverlay: {
     position: 'absolute',
-    top: 20,
+    top: 24,
     zIndex: 100,
     paddingVertical: 6,
     paddingHorizontal: 16,
@@ -1808,7 +1761,7 @@ const styles = StyleSheet.create({
   acceptStamp: {
     left: 20,
     borderColor: '#10B981',
-    backgroundColor: 'rgba(16, 185, 129, 0.2)',
+    backgroundColor: 'rgba(16, 185, 129, 0.28)',
     transform: [{ rotate: '-12deg' }],
   },
   acceptStampText: {
@@ -1820,7 +1773,7 @@ const styles = StyleSheet.create({
   declineStamp: {
     right: 20,
     borderColor: '#EF4444',
-    backgroundColor: 'rgba(239, 68, 68, 0.2)',
+    backgroundColor: 'rgba(239, 68, 68, 0.28)',
     transform: [{ rotate: '12deg' }],
   },
   declineStampText: {
@@ -1832,7 +1785,7 @@ const styles = StyleSheet.create({
   saveStamp: {
     alignSelf: 'center',
     borderColor: '#F59E0B',
-    backgroundColor: 'rgba(245, 158, 11, 0.2)',
+    backgroundColor: 'rgba(245, 158, 11, 0.28)',
   },
   saveStampText: {
     fontSize: 18,
@@ -1841,20 +1794,31 @@ const styles = StyleSheet.create({
     letterSpacing: 1,
   },
 
-  // CREATOR COVER PHOTO
-  creatorCoverContainer: {
-    height: 200,
-    position: 'relative',
-    backgroundColor: '#EDE8FC',
-  },
-  creatorCoverImage: {
-    width: '100%',
-    height: '100%',
-  },
-  onCardSaveBtn: {
+  // TOP OVERLAYS ON CARD
+  tinderTopOverlayRow: {
     position: 'absolute',
     top: 14,
+    left: 14,
     right: 14,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    zIndex: 50,
+  },
+  tinderLiveRadarPill: {
+    backgroundColor: 'rgba(15, 23, 42, 0.72)',
+    paddingVertical: 5,
+    paddingHorizontal: 10,
+    borderRadius: 100,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.25)',
+  },
+  tinderLiveRadarText: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: '#34D399',
+  },
+  onCardSaveBtn: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
@@ -1864,7 +1828,6 @@ const styles = StyleSheet.create({
     borderRadius: 100,
     borderWidth: 1,
     borderColor: 'rgba(235, 230, 248, 0.9)',
-    zIndex: 50,
   },
   onCardSaveBtnActive: {
     backgroundColor: '#FEF3C7',
@@ -1878,154 +1841,98 @@ const styles = StyleSheet.create({
   onCardSaveTextActive: {
     color: '#D97706',
   },
-  creatorCoverGradient: {
+
+  // BOTTOM GRADIENT OVER PHOTO
+  tinderCardGradient: {
     position: 'absolute',
     left: 0,
     right: 0,
     bottom: 0,
-    height: 110,
+    paddingHorizontal: 18,
+    paddingTop: 40,
+    paddingBottom: 18,
     justifyContent: 'flex-end',
-    padding: 16,
   },
-  creatorCoverInfoRow: {
+  tinderCardHeaderRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'flex-end',
+    alignItems: 'center',
+    marginBottom: 4,
   },
-  creatorCoverTextCol: {
-    flex: 1,
+  nameVerifiedRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
   },
-  creatorHeroName: {
-    fontSize: 21,
+  tinderCreatorName: {
+    fontSize: 22,
     fontWeight: '900',
     color: '#FFFFFF',
     letterSpacing: -0.3,
-    textShadowColor: 'rgba(0, 0, 0, 0.5)',
+    textShadowColor: 'rgba(0, 0, 0, 0.6)',
     textShadowOffset: { width: 0, height: 1 },
     textShadowRadius: 4,
   },
-  creatorHeroMeta: {
-    fontSize: 12.5,
-    fontWeight: '600',
-    color: 'rgba(255, 255, 255, 0.9)',
-    marginTop: 2,
+  verifiedCheckBadge: {
+    width: 17,
+    height: 17,
+    borderRadius: 8.5,
+    backgroundColor: '#582CDB',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
-  locationPill: {
+  verifiedCheckText: {
+    fontSize: 10.5,
+    fontWeight: '900',
+    color: '#FFFFFF',
+  },
+  tinderStreakBadge: {
     backgroundColor: 'rgba(254, 243, 199, 0.95)',
-    paddingVertical: 5,
-    paddingHorizontal: 10,
+    paddingVertical: 3,
+    paddingHorizontal: 8,
     borderRadius: 100,
-    borderWidth: 1,
-    borderColor: 'rgba(253, 230, 138, 0.9)',
   },
-  locationPillText: {
+  tinderStreakBadgeText: {
     fontSize: 11,
     fontWeight: '800',
-    color: '#92400E',
+    color: '#B45309',
   },
-
-  // CREATOR BODY
-  creatorBodySection: {
-    padding: 16,
-    flex: 1,
-    justifyContent: 'space-between',
+  tinderCreatorRole: {
+    fontSize: 12.5,
+    fontWeight: '600',
+    color: 'rgba(255, 255, 255, 0.88)',
+    marginBottom: 8,
+    textShadowColor: 'rgba(0, 0, 0, 0.4)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 3,
   },
-  creatorTagsRow: {
+  tinderCreatorBio: {
+    fontSize: 13,
+    color: 'rgba(255, 255, 255, 0.95)',
+    lineHeight: 18,
+    fontWeight: '500',
+    marginBottom: 10,
+    textShadowColor: 'rgba(0, 0, 0, 0.5)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 3,
+  },
+  tinderTagsRow: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: 6,
-    marginBottom: 8,
   },
-  tagPill: {
-    backgroundColor: '#FAF8FF',
+  tinderTagPill: {
+    backgroundColor: 'rgba(255, 255, 255, 0.18)',
     paddingVertical: 4,
     paddingHorizontal: 10,
     borderRadius: 100,
     borderWidth: 1,
-    borderColor: '#E8E3FA',
+    borderColor: 'rgba(255, 255, 255, 0.28)',
   },
-  tagPillStreak: {
-    backgroundColor: '#EDE8FC',
-    borderColor: '#DDD6FE',
-  },
-  tagPillHigh: {
-    backgroundColor: '#F5F3FF',
-    borderColor: '#E0E7FF',
-  },
-  tagPillText: {
-    fontSize: 11,
-    fontWeight: '600',
-    color: '#582CDB',
-  },
-  tagPillTextStreak: {
-    color: '#582CDB',
-    fontWeight: '800',
-  },
-  tagPillTextHigh: {
-    color: '#4338CA',
-  },
-
-  liveTrackingCardBadge: {
-    backgroundColor: '#F0FDF4',
-    borderWidth: 1,
-    borderColor: '#DCFCE7',
-    paddingVertical: 4,
-    paddingHorizontal: 10,
-    borderRadius: 8,
-    marginBottom: 8,
-  },
-  liveTrackingCardStatus: {
+  tinderTagPillText: {
     fontSize: 11,
     fontWeight: '700',
-    color: '#15803D',
-  },
-
-  collabGoalBox: {
-    marginBottom: 8,
-  },
-  collabGoalLabel: {
-    fontSize: 10,
-    fontWeight: '800',
-    color: '#7F7894',
-    letterSpacing: 0.6,
-    marginBottom: 2,
-  },
-  collabGoalText: {
-    fontSize: 12.5,
-    color: '#171420',
-    lineHeight: 17,
-    fontWeight: '500',
-  },
-
-  jarvisInsightBox: {
-    flexDirection: 'row',
-    gap: 10,
-    backgroundColor: 'rgba(245, 243, 255, 0.85)',
-    borderRadius: 14,
-    padding: 10,
-    borderWidth: 1,
-    borderColor: 'rgba(221, 214, 254, 0.7)',
-  },
-  jarvisInsightGhost: {
-    width: 22,
-    height: 22,
-    marginTop: 2,
-  },
-  jarvisInsightContent: {
-    flex: 1,
-  },
-  jarvisInsightTitle: {
-    fontSize: 10,
-    fontWeight: '800',
-    color: '#582CDB',
-    letterSpacing: 0.6,
-    marginBottom: 2,
-  },
-  jarvisInsightText: {
-    fontSize: 11.5,
-    color: '#4B4360',
-    lineHeight: 15,
-    fontWeight: '500',
+    color: '#FFFFFF',
   },
 
   // GESTURE HINT STRIP
