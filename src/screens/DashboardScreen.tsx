@@ -532,6 +532,10 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
     if (Platform.OS !== 'web') {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     }
+    if (onNavigateTab) {
+      onNavigateTab('growth');
+      return;
+    }
     setShowProModal(true);
     Animated.spring(modalPopScale, {
       toValue: 1,

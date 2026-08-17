@@ -1353,7 +1353,13 @@ export const MatchScreen: React.FC<MatchScreenProps> = ({
                 <Text style={styles.squadsAvailableText}>Available on Pro</Text>
                 <Pressable
                   style={({ pressed }) => [styles.unlockSquadsBtn, pressed && styles.btnPressed]}
-                  onPress={() => showToast('✨ Pro Squads unlocked!')}
+                  onPress={() => {
+                    if (onNavigateTab) {
+                      onNavigateTab('growth');
+                    } else {
+                      showToast('✨ Pro Squads unlocked!');
+                    }
+                  }}
                 >
                   <LinearGradient
                     colors={['#FDE047', '#EAB308', '#CA8A04']}

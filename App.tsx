@@ -14,6 +14,7 @@ import { DashboardScreen } from './src/screens/DashboardScreen';
 import { MissionDetailScreen } from './src/screens/MissionDetailScreen';
 import { CreateScreen } from './src/screens/CreateScreen';
 import { MatchScreen } from './src/screens/MatchScreen';
+import { JarvisProScreen } from './src/screens/JarvisProScreen';
 import { GhostLoadingScreen } from './src/components/GhostLoadingScreen';
 
 type Screen =
@@ -27,7 +28,8 @@ type Screen =
   | 'dashboard'
   | 'mission-detail'
   | 'create'
-  | 'match';
+  | 'match'
+  | 'growth';
 
 export default function App() {
   const [showSplash, setShowSplash] = useState(true);
@@ -45,7 +47,9 @@ export default function App() {
     if (nextScreen !== currentScreen) {
       const msg =
         customMessage ||
-        (nextScreen === 'create'
+        (nextScreen === 'growth'
+          ? 'Entering Jarvis Pro Suite'
+          : nextScreen === 'create'
           ? 'Opening Creator Studio'
           : nextScreen === 'match'
           ? 'Scanning Match Radar'
@@ -234,6 +238,8 @@ export default function App() {
                 navigateTo('match');
               } else if (tab === 'quests') {
                 navigateTo('mission-detail');
+              } else if (tab === 'growth') {
+                navigateTo('growth');
               }
             }}
           />
@@ -250,6 +256,8 @@ export default function App() {
                 navigateTo('create');
               } else if (tab === 'match') {
                 navigateTo('match');
+              } else if (tab === 'growth') {
+                navigateTo('growth');
               }
             }}
           />
@@ -265,6 +273,8 @@ export default function App() {
                 navigateTo('match');
               } else if (tab === 'quests') {
                 navigateTo('mission-detail');
+              } else if (tab === 'growth') {
+                navigateTo('growth');
               }
             }}
           />
@@ -280,6 +290,8 @@ export default function App() {
                 navigateTo('create');
               } else if (tab === 'quests') {
                 navigateTo('mission-detail');
+              } else if (tab === 'growth') {
+                navigateTo('growth');
               }
             }}
           />
