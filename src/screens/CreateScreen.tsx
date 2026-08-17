@@ -174,6 +174,77 @@ export const CreateScreen: React.FC<CreateScreenProps> = ({
     <SafeAreaView style={styles.safeArea}>
       <StatusBar barStyle="dark-content" backgroundColor="#FAF8F5" />
       <View style={styles.container}>
+        {/* 1. TOP AIRY HEADER BAR */}
+        <View style={styles.headerBar}>
+          {/* Top-Left: Ghost Logo Mascot */}
+          <Animated.View
+            style={[
+              styles.headerLogoWrapper,
+              { transform: [{ translateY: flameFloatY }] },
+            ]}
+          >
+            <Image
+              source={require('../../assets/images/jarvis-ghost-clean.png')}
+              style={styles.headerGhostLogo}
+              resizeMode="contain"
+            />
+          </Animated.View>
+
+          {/* Right Icons: Messages, Notification Bell, Profile */}
+          <View style={styles.headerRightGroup}>
+            <Pressable
+              style={({ pressed }) => [styles.headerIconBtn, pressed && styles.btnPressed]}
+              hitSlop={8}
+              onPress={() => showToast('💬 Creator Chat: 2 unread messages')}
+            >
+              <Svg width={20} height={20} viewBox="0 0 24 24" fill="none">
+                <Path
+                  d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"
+                  stroke="#171420"
+                  strokeWidth="2.2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </Svg>
+            </Pressable>
+
+            <Pressable
+              style={({ pressed }) => [styles.headerIconBtn, pressed && styles.btnPressed]}
+              hitSlop={8}
+              onPress={() => showToast('🔔 No new notifications')}
+            >
+              <Svg width={20} height={20} viewBox="0 0 24 24" fill="none">
+                <Path
+                  d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"
+                  stroke="#171420"
+                  strokeWidth="2.2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+                <Path
+                  d="M13.73 21a2 2 0 0 1-3.46 0"
+                  stroke="#171420"
+                  strokeWidth="2.2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </Svg>
+              <View style={styles.notificationDot} />
+            </Pressable>
+
+            <Pressable
+              style={({ pressed }) => [styles.profilePhotoBtn, pressed && styles.btnPressed]}
+              hitSlop={8}
+              onPress={() => showToast('👤 Profile: Amara Okafor (Level 4)')}
+            >
+              <Image
+                source={require('../../assets/images/amara-portrait.jpg')}
+                style={styles.profileAvatarImg}
+                resizeMode="cover"
+              />
+            </Pressable>
+          </View>
+        </View>
         {/* MAIN SCROLLABLE CONTENT */}
         <ScrollView
           contentContainerStyle={styles.scrollContent}
@@ -778,6 +849,79 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#FAF8F5',
+  },
+  // 1. TOP HEADER BAR
+  headerBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 22,
+    paddingTop: 10,
+    paddingBottom: 14,
+    backgroundColor: '#FAF8F5',
+  },
+  headerLogoWrapper: {
+    width: 42,
+    height: 42,
+    borderRadius: 21,
+    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.95)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: '#171420',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.04,
+    shadowRadius: 10,
+    elevation: 2,
+  },
+  headerGhostLogo: {
+    width: 36,
+    height: 36,
+  },
+  headerRightGroup: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  headerIconBtn: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+    borderWidth: 1,
+    borderColor: 'rgba(235, 230, 248, 0.8)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    position: 'relative',
+    shadowColor: '#171420',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.03,
+    shadowRadius: 6,
+    elevation: 1,
+  },
+  notificationDot: {
+    position: 'absolute',
+    top: 9,
+    right: 9,
+    width: 7,
+    height: 7,
+    borderRadius: 3.5,
+    backgroundColor: '#EF4444',
+    borderWidth: 1.2,
+    borderColor: '#FFFFFF',
+  },
+  profilePhotoBtn: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    borderWidth: 1.5,
+    borderColor: '#582CDB',
+    overflow: 'hidden',
+  },
+  profileAvatarImg: {
+    width: '100%',
+    height: '100%',
   },
   scrollContent: {
     paddingHorizontal: 20,

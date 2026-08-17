@@ -330,7 +330,7 @@ export const QuestsScreen: React.FC<MissionDetailScreenProps> = ({
               onPress={() => setShowProfileModal(true)}
             >
               <Image
-                source={require('../../assets/images/amara-avatar.jpg')}
+                source={require('../../assets/images/amara-portrait.jpg')}
                 style={styles.profileAvatarImg}
                 resizeMode="cover"
               />
@@ -918,7 +918,7 @@ export const QuestsScreen: React.FC<MissionDetailScreenProps> = ({
           <View style={styles.modalOverlay}>
             <View style={styles.modalCard}>
               <Image
-                source={require('../../assets/images/amara-avatar.jpg')}
+                source={require('../../assets/images/amara-portrait.jpg')}
                 style={styles.modalProfileImg}
                 resizeMode="cover"
               />
