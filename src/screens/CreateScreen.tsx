@@ -127,6 +127,7 @@ export const CreateScreen: React.FC<CreateScreenProps> = ({
   const [showScheduleModal, setShowScheduleModal] = useState(false);
   const [showIdeaModal, setShowIdeaModal] = useState(false);
   const [showViewPostModal, setShowViewPostModal] = useState(false);
+  const [showEditCaptionModal, setShowEditCaptionModal] = useState(false);
   const [showFinishDraftModal, setShowFinishDraftModal] = useState(false);
   const [showCalendarModal, setShowCalendarModal] = useState(false);
   const [showNotificationModal, setShowNotificationModal] = useState(false);
@@ -138,6 +139,10 @@ export const CreateScreen: React.FC<CreateScreenProps> = ({
   const [newPostPlatform, setNewPostPlatform] = useState<'tiktok' | 'instagram' | 'youtube' | 'x'>('tiktok');
   const [newPostTime, setNewPostTime] = useState('5:00 PM');
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+
+  // Edit Caption Inputs
+  const [editCaptionTitle, setEditCaptionTitle] = useState('');
+  const [editCaptionHashtags, setEditCaptionHashtags] = useState('#creatortips #growthmindset');
 
   // Draft editing
   const [draftTitle, setDraftTitle] = useState('One thing I wish I knew before creating');
@@ -245,6 +250,67 @@ export const CreateScreen: React.FC<CreateScreenProps> = ({
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     }
     showToast('✓ Draft updated and scheduled!');
+  };
+
+  const handleOpenEditCaption = () => {
+    setShowViewPostModal(false);
+    if (selectedPost) {
+      setEditCaptionTitle(selectedPost.title);
+      setEditCaptionHashtags(
+        selectedPost.hashtags && selectedPost.hashtags.length > 0
+          ? selectedPost.hashtags.join(' ')
+          : '#creatortips #growthmindset'
+      );
+    }
+    setShowEditCaptionModal(true);
+  };
+
+  const handleSaveEditedCaption = () => {
+    if (!editCaptionTitle.trim()) {
+      Alert.alert('Missing Caption', 'Please enter a caption or hook.');
+      return;
+    }
+    const cleanHashtags = editCaptionHashtags
+      .split(' ')
+      .map((h) => h.trim())
+      .filter((h) => h.length > 0)
+      .map((h) => (h.startsWith('#') ? h : `#${h}`));
+
+    setPosts((prevPosts) =>
+      prevPosts.map((p) =>
+        p.id === selectedPost?.id
+          ? {
+              ...p,
+              title: editCaptionTitle.trim(),
+              hashtags: cleanHashtags,
+            }
+          : p
+      )
+    );
+
+    if (selectedPost) {
+      setSelectedPost({
+        ...selectedPost,
+        title: editCaptionTitle.trim(),
+        hashtags: cleanHashtags,
+      });
+    }
+
+    setShowEditCaptionModal(false);
+    if (Platform.OS !== 'web') {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    }
+    showToast('✓ Caption updated successfully!');
+  };
+
+  const handleAIPolishCaption = () => {
+    if (Platform.OS !== 'web') {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    }
+    setEditCaptionTitle(
+      `🔥 ${editCaptionTitle.replace(/^[🔥✨👀\s]+/, '')} (Must watch till end)`
+    );
+    showToast('🪄 Jarvis AI enhanced hook!');
   };
 
   return (
@@ -793,12 +859,76 @@ export const CreateScreen: React.FC<CreateScreenProps> = ({
                 </Pressable>
                 <Pressable
                   style={styles.modalPrimaryBtn}
-                  onPress={() => {
-                    setShowViewPostModal(false);
-                    showToast('✓ Caption saved!');
-                  }}
+                  onPress={handleOpenEditCaption}
                 >
                   <Text style={styles.modalPrimaryBtnText}>Edit Caption</Text>
+                </Pressable>
+              </View>
+            </View>
+          </View>
+        </Modal>
+
+        {/* MODAL 3B: EDIT CAPTION POPUP */}
+        <Modal
+          visible={showEditCaptionModal}
+          transparent={true}
+          animationType="fade"
+          onRequestClose={() => setShowEditCaptionModal(false)}
+        >
+          <View style={styles.modalOverlay}>
+            <View style={styles.modalCard}>
+              <View style={styles.modalPillBadge}>
+                <Text style={styles.modalPillBadgeText}>
+                  {selectedPost?.platformLabel || 'Post'} • {selectedPost?.time || '11:30 AM'}
+                </Text>
+              </View>
+
+              <Text style={styles.modalTitle}>Edit Post Caption</Text>
+              <Text style={styles.modalSubtitle}>
+                Refine your video hook, caption copy, and hashtags.
+              </Text>
+
+              <Text style={styles.modalInputLabel}>HOOK & CAPTION</Text>
+              <TextInput
+                style={styles.modalTextAreaInput}
+                placeholder="Write your post hook or caption..."
+                placeholderTextColor="#A39CB5"
+                value={editCaptionTitle}
+                onChangeText={setEditCaptionTitle}
+                multiline={true}
+                numberOfLines={3}
+                textAlignVertical="top"
+              />
+
+              <Text style={styles.modalInputLabel}>HASHTAGS</Text>
+              <TextInput
+                style={styles.modalTextInput}
+                placeholder="#creatortips #growth #viral"
+                placeholderTextColor="#A39CB5"
+                value={editCaptionHashtags}
+                onChangeText={setEditCaptionHashtags}
+              />
+
+              {/* AI Quick Polish Chip */}
+              <Pressable
+                style={({ pressed }) => [styles.aiPolishChipBtn, pressed && styles.btnPressed]}
+                onPress={handleAIPolishCaption}
+              >
+                <Text style={styles.aiPolishChipText}>🪄 Jarvis AI: Enhance Hook</Text>
+              </Pressable>
+
+              <View style={styles.modalBtnRow}>
+                <Pressable
+                  style={styles.modalCancelBtn}
+                  onPress={() => setShowEditCaptionModal(false)}
+                >
+                  <Text style={styles.modalCancelBtnText}>Cancel</Text>
+                </Pressable>
+                <Pressable
+                  style={styles.modalPrimaryBtn}
+                  onPress={handleSaveEditedCaption}
+                >
+                  <Text style={styles.modalPrimaryBtnText}>Save Caption</Text>
                 </Pressable>
               </View>
             </View>
@@ -1728,6 +1858,45 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: '#524C62',
     lineHeight: 16,
+  },
+  modalTextAreaInput: {
+    height: 76,
+    borderWidth: 1.2,
+    borderColor: 'rgba(221, 214, 254, 0.9)',
+    borderRadius: 12,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    fontSize: 13.5,
+    color: '#171420',
+    backgroundColor: 'rgba(250, 248, 255, 0.8)',
+    marginBottom: 12,
+  },
+  modalPillBadge: {
+    alignSelf: 'center',
+    backgroundColor: 'rgba(237, 232, 252, 0.9)',
+    paddingVertical: 4,
+    paddingHorizontal: 12,
+    borderRadius: 100,
+    marginBottom: 8,
+  },
+  modalPillBadgeText: {
+    fontSize: 10.5,
+    fontWeight: '700',
+    color: '#582CDB',
+  },
+  aiPolishChipBtn: {
+    backgroundColor: '#FAF8FF',
+    borderWidth: 1,
+    borderColor: '#DDD6FE',
+    borderRadius: 10,
+    paddingVertical: 7,
+    alignItems: 'center',
+    marginBottom: 14,
+  },
+  aiPolishChipText: {
+    fontSize: 11.5,
+    fontWeight: '700',
+    color: '#582CDB',
   },
   btnPressed: {
     opacity: 0.88,
