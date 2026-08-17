@@ -111,10 +111,11 @@ export const FloatingTabBar: React.FC<FloatingTabBarProps> = ({
 
   return (
     <View style={[styles.floatingContainer, style]}>
-      <View style={styles.glassDock}>
+      {/* Liquid Crystal Glass Frosted Dock */}
+      <View style={styles.liquidCrystalDock}>
         {TABS.map((tab) => {
           const isActive = activeTab === tab.id;
-          const iconColor = isActive ? '#FFFFFF' : 'rgba(255, 255, 255, 0.52)';
+          const iconColor = isActive ? '#FFFFFF' : '#7F7894';
 
           return (
             <Pressable
@@ -123,7 +124,7 @@ export const FloatingTabBar: React.FC<FloatingTabBarProps> = ({
               style={({ pressed }) => [
                 styles.tabItem,
                 isActive && styles.tabItemActive,
-                pressed && styles.tabItemPressed,
+                pressed && !isActive && styles.tabItemPressed,
               ]}
               hitSlop={6}
             >
@@ -137,6 +138,7 @@ export const FloatingTabBar: React.FC<FloatingTabBarProps> = ({
               >
                 {tab.label}
               </Text>
+              {isActive && <View style={styles.activeGoldAccentDot} />}
             </Pressable>
           );
         })}
@@ -154,22 +156,23 @@ const styles = StyleSheet.create({
     zIndex: 999,
     alignItems: 'center',
   },
-  glassDock: {
+  // Liquid Crystal Glassmorphism Dock (Cream/White Crystal + Purple Specular Tint)
+  liquidCrystalDock: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     width: '100%',
-    backgroundColor: 'rgba(23, 20, 32, 0.94)',
+    backgroundColor: 'rgba(255, 255, 255, 0.90)',
     borderRadius: 36,
     borderWidth: 1.2,
-    borderColor: 'rgba(255, 255, 255, 0.14)',
+    borderColor: 'rgba(226, 219, 248, 0.95)',
     paddingVertical: 6,
-    paddingHorizontal: 8,
-    shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 12 },
-    shadowOpacity: 0.28,
-    shadowRadius: 28,
-    elevation: 12,
+    paddingHorizontal: 7,
+    shadowColor: '#582CDB',
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.12,
+    shadowRadius: 26,
+    elevation: 8,
   },
   tabItem: {
     flex: 1,
@@ -177,32 +180,46 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     paddingVertical: 6,
     paddingHorizontal: 4,
-    borderRadius: 24,
+    borderRadius: 22,
   },
+  // Active Liquid Capsule in Royal Purple & Gold Specular Accent
   tabItemActive: {
-    backgroundColor: 'rgba(255, 255, 255, 0.16)',
+    backgroundColor: '#582CDB',
+    shadowColor: '#582CDB',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.28,
+    shadowRadius: 10,
+    elevation: 4,
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.18)',
+    borderColor: 'rgba(255, 255, 255, 0.25)',
   },
   tabItemPressed: {
-    opacity: 0.85,
+    backgroundColor: 'rgba(237, 232, 252, 0.6)',
     transform: [{ scale: 0.96 }],
   },
   iconWrapper: {
-    height: 24,
+    height: 23,
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 2,
   },
   tabLabel: {
     fontSize: 9.5,
-    fontWeight: '600',
-    color: 'rgba(255, 255, 255, 0.58)',
+    fontWeight: '700',
+    color: '#7F7894',
     letterSpacing: 0.5,
     textAlign: 'center',
   },
   tabLabelActive: {
     color: '#FFFFFF',
     fontWeight: '800',
+  },
+  activeGoldAccentDot: {
+    position: 'absolute',
+    bottom: 3,
+    width: 3.5,
+    height: 3.5,
+    borderRadius: 2,
+    backgroundColor: '#FDE047',
   },
 });
