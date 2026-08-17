@@ -8,6 +8,7 @@ import {
   StatusBar,
   Pressable,
   Animated,
+  PanResponder,
   Modal,
   TextInput,
   Image,
@@ -22,6 +23,8 @@ import { LiquidGlassBackground } from '../components/LiquidGlassBackground';
 import { AnimatedCompletionModal } from '../components/AnimatedCompletionModal';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
+const SWIPE_THRESHOLD = 110;
+const SWIPE_UP_THRESHOLD = 100;
 
 interface MatchScreenProps {
   onLogout?: () => void;
@@ -39,11 +42,10 @@ interface CreatorProfile {
   tags: string[];
   collabGoal: string;
   jarvisInsight: string;
-  connected?: boolean;
-  saved?: boolean;
+  streak: number;
 }
 
-const INITIAL_CREATORS: CreatorProfile[] = [
+const CREATOR_DECK: CreatorProfile[] = [
   {
     id: 'creator_1',
     name: 'Amara Okafor',
@@ -55,7 +57,8 @@ const INITIAL_CREATORS: CreatorProfile[] = [
     collabGoal:
       'Wants to create short-form lifestyle and travel content that focuses on authentic local stories.',
     jarvisInsight:
-      'Amara matches your audience style, niche and posting rhythm. This could be a strong collab fit.',
+      'Amara matches your audience style, niche and posting rhythm. High collab synergy!',
+    streak: 44,
   },
   {
     id: 'creator_2',
@@ -68,7 +71,50 @@ const INITIAL_CREATORS: CreatorProfile[] = [
     collabGoal:
       'Looking to co-produce deep dives on AI creator workflows and gadget reviews.',
     jarvisInsight:
-      'High overlap in productivity and workflow audience with 4.8x average engagement.',
+      'High overlap in productivity and workflow audience with 4.8x average viral reach.',
+    streak: 52,
+  },
+  {
+    id: 'creator_3',
+    name: 'Zainab Okafor',
+    role: 'Lifestyle & Fashion',
+    followers: '52k Followers',
+    location: 'Toronto, CA',
+    coverImage: require('../../assets/images/zainab-avatar.jpg'),
+    tags: ['Lifestyle', 'Aesthetic', '38-Day Streak', 'High Engagement'],
+    collabGoal:
+      'Seeking travel and lifestyle co-creators for luxury aesthetic lookbooks and vlogs.',
+    jarvisInsight:
+      'Strong visual aesthetic alignment with high comment-to-view ratios.',
+    streak: 38,
+  },
+  {
+    id: 'creator_4',
+    name: 'Marcus Vance',
+    role: 'Fitness & Routine',
+    followers: '110k Followers',
+    location: 'New York, US',
+    coverImage: require('../../assets/images/marcus-avatar.jpg'),
+    tags: ['Fitness', 'Daily Habits', '60-Day Streak', 'Elite Consistency'],
+    collabGoal:
+      'Wants to build daily habit & creator workout challenges with accountability partners.',
+    jarvisInsight:
+      'Massive streak alignment. Both of you thrive on high-discipline posting schedules.',
+    streak: 60,
+  },
+  {
+    id: 'creator_5',
+    name: 'Elena Rostova',
+    role: 'Visual Storyteller',
+    followers: '94k Followers',
+    location: 'Berlin, DE',
+    coverImage: require('../../assets/images/elena-avatar.jpg'),
+    tags: ['Cinematography', 'Editing', '41-Day Streak', 'Viral Hooks'],
+    collabGoal:
+      'Co-directing high-production cinematic Reels with creators pushing editing limits.',
+    jarvisInsight:
+      'Her pacing and visual sound design can amplify your video watch-through rates.',
+    streak: 41,
   },
 ];
 
@@ -78,25 +124,57 @@ export const MatchScreen: React.FC<MatchScreenProps> = ({
   onOpenMessages,
 }) => {
   const [activeTab, setActiveTab] = useState<TabType>('match');
+  const [activeSection, setActiveSection] = useState<'deck' | 'saved' | 'connected'>('deck');
   const [activeFilter, setActiveFilter] = useState<'niche' | 'streak' | 'nearby' | 'ai'>('niche');
-  const [creatorIndex, setCreatorIndex] = useState(0);
-  const [creators, setCreators] = useState<CreatorProfile[]>(INITIAL_CREATORS);
-  const currentCreator = creators[creatorIndex] || creators[0];
+  const [currentIndex, setCurrentIndex] = useState(0);
+
+  // Tracking stats
+  const [matchesLeft, setMatchesLeft] = useState(5);
+  const [savedCreators, setSavedCreators] = useState<CreatorProfile[]>([]);
+  const [connectedCreators, setConnectedCreators] = useState<CreatorProfile[]>([
+    CREATOR_DECK[1], // Tomi Adebayo
+    CREATOR_DECK[2], // Zainab Okafor
+  ]);
+  const [swipeHistory, setSwipeHistory] = useState<number[]>([]);
 
   // Modals state
   const [showConnectModal, setShowConnectModal] = useState(false);
+  const [lastConnectedCreator, setLastConnectedCreator] = useState<CreatorProfile | null>(null);
   const [showCollabIdeaModal, setShowCollabIdeaModal] = useState(false);
   const [showMessageModal, setShowMessageModal] = useState(false);
-  const [selectedMatch, setSelectedMatch] = useState<string | null>(null);
+  const [selectedRecipient, setSelectedRecipient] = useState<string | null>(null);
   const [messageText, setMessageText] = useState('');
   const [showNotificationModal, setShowNotificationModal] = useState(false);
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
-  // Animations
+  // Animated values for Swipe gesture
+  const position = useRef(new Animated.ValueXY()).current;
   const ghostFloatY = useRef(new Animated.Value(0)).current;
-  const cardScale = useRef(new Animated.Value(1)).current;
   const toastOpacity = useRef(new Animated.Value(0)).current;
+
+  // PanResponder for Tinder Swipe
+  const panResponder = useRef(
+    PanResponder.create({
+      onStartShouldSetPanResponder: () => true,
+      onMoveShouldSetPanResponder: (_, gesture) =>
+        Math.abs(gesture.dx) > 8 || Math.abs(gesture.dy) > 8,
+      onPanResponderMove: (_, gesture) => {
+        position.setValue({ x: gesture.dx, y: gesture.dy });
+      },
+      onPanResponderRelease: (_, gesture) => {
+        if (gesture.dx > SWIPE_THRESHOLD) {
+          swipeCard('right');
+        } else if (gesture.dx < -SWIPE_THRESHOLD) {
+          swipeCard('left');
+        } else if (gesture.dy < -SWIPE_UP_THRESHOLD) {
+          swipeCard('up');
+        } else {
+          resetCardPosition();
+        }
+      },
+    })
+  ).current;
 
   useEffect(() => {
     // Ghost floating loop
@@ -127,52 +205,126 @@ export const MatchScreen: React.FC<MatchScreenProps> = ({
     ]).start(() => setToastMessage(null));
   };
 
-  const handleTabPress = (tab: TabType) => {
-    setActiveTab(tab);
-    if (onNavigateTab) {
-      onNavigateTab(tab);
+  const resetCardPosition = () => {
+    Animated.spring(position, {
+      toValue: { x: 0, y: 0 },
+      friction: 6,
+      tension: 60,
+      useNativeDriver: true,
+    }).start();
+  };
+
+  const swipeCard = (direction: 'left' | 'right' | 'up') => {
+    const creator = CREATOR_DECK[currentIndex % CREATOR_DECK.length];
+    const x = direction === 'right' ? SCREEN_WIDTH + 100 : direction === 'left' ? -SCREEN_WIDTH - 100 : 0;
+    const y = direction === 'up' ? -SCREEN_WIDTH - 100 : 0;
+
+    Animated.timing(position, {
+      toValue: { x, y },
+      duration: 260,
+      useNativeDriver: true,
+    }).start(() => {
+      onSwipeComplete(direction, creator);
+    });
+  };
+
+  const onSwipeComplete = (direction: 'left' | 'right' | 'up', creator: CreatorProfile) => {
+    setSwipeHistory((prev) => [...prev, currentIndex]);
+    position.setValue({ x: 0, y: 0 });
+    setCurrentIndex((prev) => prev + 1);
+
+    if (direction === 'right') {
+      // Connect
+      if (Platform.OS !== 'web') {
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      }
+      setMatchesLeft((prev) => Math.max(0, prev - 1));
+      setConnectedCreators((prev) => (prev.some((c) => c.id === creator.id) ? prev : [creator, ...prev]));
+      setLastConnectedCreator(creator);
+      setShowConnectModal(true);
+    } else if (direction === 'left') {
+      // Pass
+      if (Platform.OS !== 'web') {
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+      }
+      showToast(`Passed on ${creator.name}`);
+    } else if (direction === 'up') {
+      // Save
+      if (Platform.OS !== 'web') {
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+      }
+      setSavedCreators((prev) => (prev.some((c) => c.id === creator.id) ? prev : [creator, ...prev]));
+      showToast(`⭐ Saved ${creator.name} to bookmarks!`);
     }
   };
 
-  const handleConnect = () => {
-    if (Platform.OS !== 'web') {
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+  const handleRewind = () => {
+    if (swipeHistory.length === 0) {
+      showToast('No previous swipes to rewind.');
+      return;
     }
-    setCreators((prev) =>
-      prev.map((c, i) => (i === creatorIndex ? { ...c, connected: true } : c))
-    );
-    setShowConnectModal(true);
-  };
-
-  const handlePass = () => {
-    if (Platform.OS !== 'web') {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    }
-    Animated.sequence([
-      Animated.timing(cardScale, { toValue: 0.96, duration: 100, useNativeDriver: true }),
-      Animated.timing(cardScale, { toValue: 1, duration: 150, useNativeDriver: true }),
-    ]).start();
-    setCreatorIndex((prev) => (prev + 1) % creators.length);
-    showToast('Skipped creator match.');
-  };
-
-  const handleSave = () => {
     if (Platform.OS !== 'web') {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     }
-    setCreators((prev) =>
-      prev.map((c, i) => (i === creatorIndex ? { ...c, saved: !c.saved } : c))
-    );
-    showToast(currentCreator.saved ? 'Removed from saved creators' : '⭐ Creator saved to bookmarks!');
+    const lastIndex = swipeHistory[swipeHistory.length - 1];
+    setSwipeHistory((prev) => prev.slice(0, -1));
+    setCurrentIndex(lastIndex);
+    position.setValue({ x: 0, y: 0 });
+    showToast('↩ Undid previous swipe');
+  };
+
+  const handleSaveButton = () => {
+    const creator = CREATOR_DECK[currentIndex % CREATOR_DECK.length];
+    if (Platform.OS !== 'web') {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    }
+    setSavedCreators((prev) => (prev.some((c) => c.id === creator.id) ? prev : [creator, ...prev]));
+    showToast(`⭐ Saved ${creator.name}!`);
+    swipeCard('up');
   };
 
   const handleSendMessage = () => {
     if (!messageText.trim()) return;
-    const recipient = selectedMatch || 'Creator';
+    const rec = selectedRecipient || 'Creator';
     setShowMessageModal(false);
     setMessageText('');
-    showToast(`✓ Message sent to ${recipient}!`);
+    showToast(`✓ Message sent to ${rec}!`);
   };
+
+  const currentCreator = CREATOR_DECK[currentIndex % CREATOR_DECK.length];
+  const nextCreator = CREATOR_DECK[(currentIndex + 1) % CREATOR_DECK.length];
+
+  // Card rotation & stamp interpolation
+  const rotate = position.x.interpolate({
+    inputRange: [-SCREEN_WIDTH * 1.5, 0, SCREEN_WIDTH * 1.5],
+    outputRange: ['-18deg', '0deg', '18deg'],
+  });
+
+  const animatedCardStyle = {
+    transform: [
+      { translateX: position.x },
+      { translateY: position.y },
+      { rotate },
+    ],
+  };
+
+  const matchStampOpacity = position.x.interpolate({
+    inputRange: [15, SWIPE_THRESHOLD],
+    outputRange: [0, 1],
+    extrapolate: 'clamp',
+  });
+
+  const passStampOpacity = position.x.interpolate({
+    inputRange: [-SWIPE_THRESHOLD, -15],
+    outputRange: [1, 0],
+    extrapolate: 'clamp',
+  });
+
+  const saveStampOpacity = position.y.interpolate({
+    inputRange: [-SWIPE_UP_THRESHOLD, -15],
+    outputRange: [1, 0],
+    extrapolate: 'clamp',
+  });
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -262,13 +414,13 @@ export const MatchScreen: React.FC<MatchScreenProps> = ({
           </View>
         </View>
 
-        {/* 2. MAIN SCROLLABLE CONTENT WITH GENEROUS BREATHING ROOM */}
+        {/* 2. MAIN SCROLLABLE CONTENT */}
         <ScrollView
           style={styles.scrollView}
           contentContainerStyle={styles.scrollContent}
           showsVerticalScrollIndicator={false}
         >
-          {/* SECTION 1: MATCH HEADER & BADGE */}
+          {/* SECTION 1: MATCH HEADER & LIVE TRACKING METRICS */}
           <View style={styles.pageHeaderSection}>
             <View style={styles.pageBadgeRow}>
               <LinearGradient
@@ -277,281 +429,421 @@ export const MatchScreen: React.FC<MatchScreenProps> = ({
                 end={{ x: 1, y: 1 }}
                 style={styles.matchPillGradient}
               >
-                <Text style={styles.matchPillText}>MATCH</Text>
+                <Text style={styles.matchPillText}>CREATOR TINDER</Text>
               </LinearGradient>
 
               <View style={styles.freeDiscoveryBadge}>
-                <Text style={styles.freeDiscoveryText}>Free Discovery</Text>
+                <Text style={styles.freeDiscoveryText}>Swipe to Match</Text>
               </View>
             </View>
 
             <Text style={styles.pageHeadline}>Find creators worth building with.</Text>
             <Text style={styles.pageSubtitle}>
-              Discover creators who match your niche, style and growth goals.
+              Swipe right to connect, swipe left to pass, or swipe up to save.
             </Text>
 
-            {/* Match Allowance Strip */}
-            <View style={styles.allowanceCard}>
-              <View style={styles.allowanceRow}>
-                <Text style={styles.allowanceItem}>⭐ 5 free matches left today</Text>
-                <Text style={styles.allowanceItem}>👥 2 mutual matches</Text>
+            {/* LIVE TRACKING STATS BAR */}
+            <View style={styles.trackingStatsBar}>
+              <View style={styles.trackingStatItem}>
+                <Text style={styles.trackingStatVal}>⭐ {matchesLeft}/5</Text>
+                <Text style={styles.trackingStatLbl}>Matches Left</Text>
               </View>
-              <View style={styles.allowanceTagsRow}>
-                <View style={styles.allowanceChip}><Text style={styles.allowanceChipText}>Lifestyle</Text></View>
-                <View style={styles.allowanceChip}><Text style={styles.allowanceChipText}>Nearby</Text></View>
-                <View style={[styles.allowanceChip, styles.allowanceChipGold]}>
-                  <Text style={styles.allowanceChipTextGold}>⚡ 47-Day Streak</Text>
-                </View>
+              <View style={styles.trackingStatDivider} />
+              <View style={styles.trackingStatItem}>
+                <Text style={styles.trackingStatVal}>💜 {connectedCreators.length}</Text>
+                <Text style={styles.trackingStatLbl}>Connected</Text>
+              </View>
+              <View style={styles.trackingStatDivider} />
+              <View style={styles.trackingStatItem}>
+                <Text style={styles.trackingStatVal}>⭐ {savedCreators.length}</Text>
+                <Text style={styles.trackingStatLbl}>Saved</Text>
               </View>
             </View>
           </View>
 
-          {/* SECTION 2: SEGMENTED FILTER PILLS */}
-          <View style={styles.filterPillsRow}>
+          {/* VIEW SWITCHER TABS: DECK vs SAVED vs CONNECTED */}
+          <View style={styles.sectionTabsRow}>
             <Pressable
-              style={[styles.filterPill, activeFilter === 'niche' && styles.filterPillActive]}
-              onPress={() => setActiveFilter('niche')}
+              style={[styles.sectionTab, activeSection === 'deck' && styles.sectionTabActive]}
+              onPress={() => setActiveSection('deck')}
             >
-              <Text style={[styles.filterPillText, activeFilter === 'niche' && styles.filterPillTextActive]}>
-                Same Niche
+              <Text style={[styles.sectionTabText, activeSection === 'deck' && styles.sectionTabTextActive]}>
+                Swipe Deck
               </Text>
             </Pressable>
 
             <Pressable
-              style={[styles.filterPill, activeFilter === 'streak' && styles.filterPillActive]}
-              onPress={() => setActiveFilter('streak')}
+              style={[styles.sectionTab, activeSection === 'saved' && styles.sectionTabActive]}
+              onPress={() => setActiveSection('saved')}
             >
-              <Text style={[styles.filterPillText, activeFilter === 'streak' && styles.filterPillTextActive]}>
-                Similar Streak
+              <Text style={[styles.sectionTabText, activeSection === 'saved' && styles.sectionTabTextActive]}>
+                Saved ({savedCreators.length})
               </Text>
             </Pressable>
 
             <Pressable
-              style={[styles.filterPill, activeFilter === 'nearby' && styles.filterPillActive]}
-              onPress={() => setActiveFilter('nearby')}
+              style={[styles.sectionTab, activeSection === 'connected' && styles.sectionTabActive]}
+              onPress={() => setActiveSection('connected')}
             >
-              <Text style={[styles.filterPillText, activeFilter === 'nearby' && styles.filterPillTextActive]}>
-                Nearby
-              </Text>
-            </Pressable>
-
-            <Pressable
-              style={[styles.filterPill, activeFilter === 'ai' && styles.filterPillActive]}
-              onPress={() => setActiveFilter('ai')}
-            >
-              <Text style={[styles.filterPillText, activeFilter === 'ai' && styles.filterPillTextActive]}>
-                AI Pick
+              <Text style={[styles.sectionTabText, activeSection === 'connected' && styles.sectionTabTextActive]}>
+                Connected ({connectedCreators.length})
               </Text>
             </Pressable>
           </View>
 
-          {/* SECTION 3: HERO CREATOR MATCH CARD (AMARA OKAFOR) */}
-          <Animated.View style={[{ transform: [{ scale: cardScale }] }, styles.creatorCardWrapper]}>
-            <LiquidGlassBackground
-              borderRadius={28}
-              light={0.94}
-              refraction={26}
-              frost={16}
-              dispersion={0.2}
-              style={styles.creatorCardGlass}
-            >
-              {/* Creator Photo Header with Overlay */}
-              <View style={styles.creatorCoverContainer}>
-                <Image
-                  source={currentCreator.coverImage}
-                  style={styles.creatorCoverImage}
-                  resizeMode="cover"
-                />
-                <LinearGradient
-                  colors={['transparent', 'rgba(23, 20, 32, 0.85)']}
-                  style={styles.creatorCoverGradient}
+          {/* TAB 1: SWIPE DECK VIEW */}
+          {activeSection === 'deck' && (
+            <View>
+              {/* FILTER PILLS */}
+              <View style={styles.filterPillsRow}>
+                <Pressable
+                  style={[styles.filterPill, activeFilter === 'niche' && styles.filterPillActive]}
+                  onPress={() => setActiveFilter('niche')}
                 >
-                  <View style={styles.creatorCoverInfoRow}>
-                    <View style={styles.creatorCoverTextCol}>
-                      <Text style={styles.creatorHeroName}>{currentCreator.name}</Text>
-                      <Text style={styles.creatorHeroMeta}>
-                        {currentCreator.role} • {currentCreator.followers}
-                      </Text>
-                    </View>
-                    <View style={styles.locationPill}>
-                      <Text style={styles.locationPillText}>📍 {currentCreator.location}</Text>
-                    </View>
-                  </View>
-                </LinearGradient>
+                  <Text style={[styles.filterPillText, activeFilter === 'niche' && styles.filterPillTextActive]}>
+                    Same Niche
+                  </Text>
+                </Pressable>
+
+                <Pressable
+                  style={[styles.filterPill, activeFilter === 'streak' && styles.filterPillActive]}
+                  onPress={() => setActiveFilter('streak')}
+                >
+                  <Text style={[styles.filterPillText, activeFilter === 'streak' && styles.filterPillTextActive]}>
+                    Similar Streak
+                  </Text>
+                </Pressable>
+
+                <Pressable
+                  style={[styles.filterPill, activeFilter === 'nearby' && styles.filterPillActive]}
+                  onPress={() => setActiveFilter('nearby')}
+                >
+                  <Text style={[styles.filterPillText, activeFilter === 'nearby' && styles.filterPillTextActive]}>
+                    Nearby
+                  </Text>
+                </Pressable>
+
+                <Pressable
+                  style={[styles.filterPill, activeFilter === 'ai' && styles.filterPillActive]}
+                  onPress={() => setActiveFilter('ai')}
+                >
+                  <Text style={[styles.filterPillText, activeFilter === 'ai' && styles.filterPillTextActive]}>
+                    AI Pick
+                  </Text>
+                </Pressable>
               </View>
 
-              {/* Creator Tags */}
-              <View style={styles.creatorBodySection}>
-                <View style={styles.creatorTagsRow}>
-                  {currentCreator.tags.map((tag, idx) => (
-                    <View
-                      key={idx}
-                      style={[
-                        styles.tagPill,
-                        tag.includes('Streak') && styles.tagPillStreak,
-                        tag.includes('High') && styles.tagPillHigh,
-                      ]}
-                    >
-                      <Text
-                        style={[
-                          styles.tagPillText,
-                          tag.includes('Streak') && styles.tagPillTextStreak,
-                          tag.includes('High') && styles.tagPillTextHigh,
-                        ]}
+              {/* TINDER SWIPEABLE CARD STACK */}
+              <View style={styles.cardStackContainer}>
+                {/* BOTTOM / NEXT CARD IN STACK */}
+                <View style={styles.bottomCardContainer} pointerEvents="none">
+                  <LiquidGlassBackground
+                    borderRadius={28}
+                    light={0.92}
+                    refraction={22}
+                    frost={14}
+                    dispersion={0.2}
+                    style={styles.cardGlass}
+                  >
+                    <View style={styles.creatorCoverContainer}>
+                      <Image
+                        source={nextCreator.coverImage}
+                        style={styles.creatorCoverImage}
+                        resizeMode="cover"
+                      />
+                      <LinearGradient
+                        colors={['transparent', 'rgba(23, 20, 32, 0.85)']}
+                        style={styles.creatorCoverGradient}
                       >
-                        {tag}
-                      </Text>
+                        <Text style={styles.creatorHeroName}>{nextCreator.name}</Text>
+                        <Text style={styles.creatorHeroMeta}>
+                          {nextCreator.role} • {nextCreator.followers}
+                        </Text>
+                      </LinearGradient>
                     </View>
-                  ))}
+                    <View style={styles.creatorBodySection}>
+                      <View style={styles.creatorTagsRow}>
+                        {nextCreator.tags.map((tag, idx) => (
+                          <View key={idx} style={styles.tagPill}>
+                            <Text style={styles.tagPillText}>{tag}</Text>
+                          </View>
+                        ))}
+                      </View>
+                      <Text style={styles.collabGoalText}>{nextCreator.collabGoal}</Text>
+                    </View>
+                  </LiquidGlassBackground>
                 </View>
 
-                {/* Collab Goal */}
-                <View style={styles.collabGoalBox}>
-                  <Text style={styles.collabGoalLabel}>COLLAB GOAL</Text>
-                  <Text style={styles.collabGoalText}>{currentCreator.collabGoal}</Text>
-                </View>
+                {/* TOP ACTIVE SWIPEABLE CARD */}
+                <Animated.View
+                  {...panResponder.panHandlers}
+                  style={[styles.topCardContainer, animatedCardStyle]}
+                >
+                  <LiquidGlassBackground
+                    borderRadius={28}
+                    light={0.94}
+                    refraction={26}
+                    frost={16}
+                    dispersion={0.2}
+                    style={styles.cardGlass}
+                  >
+                    {/* SWIPE STAMP OVERLAYS */}
+                    {/* GREEN MATCH STAMP (DRAG RIGHT) */}
+                    <Animated.View
+                      style={[
+                        styles.stampOverlay,
+                        styles.matchStamp,
+                        { opacity: matchStampOpacity },
+                      ]}
+                      pointerEvents="none"
+                    >
+                      <Text style={styles.matchStampText}>CONNECT 💜</Text>
+                    </Animated.View>
 
-                {/* Jarvis Insight Box */}
-                <View style={styles.jarvisInsightBox}>
-                  <Image
-                    source={require('../../assets/images/jarvis-ghost-clean.png')}
-                    style={styles.jarvisInsightGhost}
-                    resizeMode="contain"
-                  />
-                  <View style={styles.jarvisInsightContent}>
-                    <Text style={styles.jarvisInsightTitle}>JARVIS INSIGHT</Text>
-                    <Text style={styles.jarvisInsightText}>{currentCreator.jarvisInsight}</Text>
+                    {/* RED PASS STAMP (DRAG LEFT) */}
+                    <Animated.View
+                      style={[
+                        styles.stampOverlay,
+                        styles.passStamp,
+                        { opacity: passStampOpacity },
+                      ]}
+                      pointerEvents="none"
+                    >
+                      <Text style={styles.passStampText}>PASS ✖</Text>
+                    </Animated.View>
+
+                    {/* GOLD SAVE STAMP (DRAG UP) */}
+                    <Animated.View
+                      style={[
+                        styles.stampOverlay,
+                        styles.saveStamp,
+                        { opacity: saveStampOpacity },
+                      ]}
+                      pointerEvents="none"
+                    >
+                      <Text style={styles.saveStampText}>SAVED ⭐</Text>
+                    </Animated.View>
+
+                    {/* Cover Photo */}
+                    <View style={styles.creatorCoverContainer}>
+                      <Image
+                        source={currentCreator.coverImage}
+                        style={styles.creatorCoverImage}
+                        resizeMode="cover"
+                      />
+                      <LinearGradient
+                        colors={['transparent', 'rgba(23, 20, 32, 0.85)']}
+                        style={styles.creatorCoverGradient}
+                      >
+                        <View style={styles.creatorCoverInfoRow}>
+                          <View style={styles.creatorCoverTextCol}>
+                            <Text style={styles.creatorHeroName}>{currentCreator.name}</Text>
+                            <Text style={styles.creatorHeroMeta}>
+                              {currentCreator.role} • {currentCreator.followers}
+                            </Text>
+                          </View>
+                          <View style={styles.locationPill}>
+                            <Text style={styles.locationPillText}>📍 {currentCreator.location}</Text>
+                          </View>
+                        </View>
+                      </LinearGradient>
+                    </View>
+
+                    {/* Creator Body */}
+                    <View style={styles.creatorBodySection}>
+                      <View style={styles.creatorTagsRow}>
+                        {currentCreator.tags.map((tag, idx) => (
+                          <View
+                            key={idx}
+                            style={[
+                              styles.tagPill,
+                              tag.includes('Streak') && styles.tagPillStreak,
+                              tag.includes('High') && styles.tagPillHigh,
+                            ]}
+                          >
+                            <Text
+                              style={[
+                                styles.tagPillText,
+                                tag.includes('Streak') && styles.tagPillTextStreak,
+                                tag.includes('High') && styles.tagPillTextHigh,
+                              ]}
+                            >
+                              {tag}
+                            </Text>
+                          </View>
+                        ))}
+                      </View>
+
+                      {/* Collab Goal */}
+                      <View style={styles.collabGoalBox}>
+                        <Text style={styles.collabGoalLabel}>COLLAB GOAL</Text>
+                        <Text style={styles.collabGoalText}>{currentCreator.collabGoal}</Text>
+                      </View>
+
+                      {/* Jarvis Insight */}
+                      <View style={styles.jarvisInsightBox}>
+                        <Image
+                          source={require('../../assets/images/jarvis-ghost-clean.png')}
+                          style={styles.jarvisInsightGhost}
+                          resizeMode="contain"
+                        />
+                        <View style={styles.jarvisInsightContent}>
+                          <Text style={styles.jarvisInsightTitle}>JARVIS INSIGHT</Text>
+                          <Text style={styles.jarvisInsightText}>{currentCreator.jarvisInsight}</Text>
+                        </View>
+                      </View>
+                    </View>
+                  </LiquidGlassBackground>
+                </Animated.View>
+              </View>
+
+              {/* TINDER TACTILE ACTION CONTROLS */}
+              <View style={styles.tactileControlsRow}>
+                {/* Rewind */}
+                <Pressable
+                  style={({ pressed }) => [styles.tactileBtnSmall, pressed && styles.btnPressed]}
+                  onPress={handleRewind}
+                >
+                  <Text style={{ fontSize: 18 }}>↩</Text>
+                </Pressable>
+
+                {/* Pass (Swipe Left) */}
+                <Pressable
+                  style={({ pressed }) => [styles.tactileBtnLarge, styles.passControlBtn, pressed && styles.btnPressed]}
+                  onPress={() => swipeCard('left')}
+                >
+                  <Text style={styles.passControlBtnIcon}>✖</Text>
+                </Pressable>
+
+                {/* Save (Swipe Up) */}
+                <Pressable
+                  style={({ pressed }) => [styles.tactileBtnSmall, styles.saveControlBtn, pressed && styles.btnPressed]}
+                  onPress={handleSaveButton}
+                >
+                  <Text style={{ fontSize: 20 }}>⭐</Text>
+                </Pressable>
+
+                {/* Connect (Swipe Right) */}
+                <Pressable
+                  style={({ pressed }) => [styles.tactileBtnLarge, styles.connectControlBtn, pressed && styles.btnPressed]}
+                  onPress={() => swipeCard('right')}
+                >
+                  <LinearGradient
+                    colors={['#784DF0', '#582CDB']}
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 1, y: 1 }}
+                    style={styles.connectControlGradient}
+                  >
+                    <Text style={styles.connectControlBtnIcon}>💜</Text>
+                  </LinearGradient>
+                </Pressable>
+              </View>
+
+              {/* SUGGESTED COLLAB CARD */}
+              <View style={styles.suggestedCollabCard}>
+                <View style={styles.collabHeaderRow}>
+                  <View style={styles.collabHeaderLeft}>
+                    <Image
+                      source={require('../../assets/images/jarvis-ghost-clean.png')}
+                      style={styles.collabGhostIcon}
+                      resizeMode="contain"
+                    />
+                    <Text style={styles.collabHeaderTitle}>JARVIS SUGGESTED COLLAB</Text>
+                  </View>
+                  <View style={styles.potencyBadge}>
+                    <Text style={styles.potencyBadgeText}>📈 High potency</Text>
                   </View>
                 </View>
 
-                {/* Card Action Buttons */}
-                <View style={styles.creatorActionRow}>
-                  <Pressable
-                    style={({ pressed }) => [styles.passBtn, pressed && styles.btnPressed]}
-                    onPress={handlePass}
-                  >
-                    <Text style={styles.passBtnText}>Pass</Text>
-                  </Pressable>
+                <Text style={styles.collabHeadline}>‘Day in Lagos’ co-created Reel</Text>
+                <View style={styles.collabMetaRow}>
+                  <View style={styles.collabMetaChip}><Text style={styles.collabMetaChipText}>Reel</Text></View>
+                  <View style={styles.collabMetaChip}><Text style={styles.collabMetaChipText}>7:30 PM Peak</Text></View>
+                </View>
 
-                  <Pressable
-                    style={({ pressed }) => [styles.saveBtn, pressed && styles.btnPressed]}
-                    onPress={handleSave}
+                <Pressable
+                  style={({ pressed }) => [styles.buildIdeaBtn, pressed && styles.btnPressed]}
+                  onPress={() => setShowCollabIdeaModal(true)}
+                >
+                  <LinearGradient
+                    colors={['#784DF0', '#582CDB']}
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 1, y: 1 }}
+                    style={styles.buildIdeaGradient}
                   >
-                    <Text style={styles.saveBtnText}>{currentCreator.saved ? 'Saved' : 'Save'}</Text>
-                  </Pressable>
+                    <Text style={styles.buildIdeaBtnText}>⚡ Build Idea</Text>
+                  </LinearGradient>
+                </Pressable>
+              </View>
+            </View>
+          )}
 
+          {/* TAB 2: SAVED CREATORS LIST */}
+          {activeSection === 'saved' && (
+            <View style={styles.tabContentSection}>
+              {savedCreators.length === 0 ? (
+                <View style={styles.emptyStateBox}>
+                  <Text style={styles.emptyStateEmoji}>⭐</Text>
+                  <Text style={styles.emptyStateTitle}>No Saved Creators Yet</Text>
+                  <Text style={styles.emptyStateSubtitle}>
+                    Swipe up or tap the star button on any creator card to bookmark them for later.
+                  </Text>
                   <Pressable
-                    style={({ pressed }) => [styles.connectPrimaryBtn, pressed && styles.btnPressed]}
-                    onPress={handleConnect}
+                    style={styles.emptyStateBtn}
+                    onPress={() => setActiveSection('deck')}
                   >
-                    <LinearGradient
-                      colors={['#7048EC', '#582CDB']}
-                      start={{ x: 0, y: 0 }}
-                      end={{ x: 1, y: 1 }}
-                      style={styles.connectBtnGradient}
-                    >
-                      <Text style={styles.connectBtnText}>
-                        {currentCreator.connected ? '✓ Connected' : 'Connect'}
-                      </Text>
-                    </LinearGradient>
+                    <Text style={styles.emptyStateBtnText}>Start Swiping</Text>
                   </Pressable>
                 </View>
-              </View>
-            </LiquidGlassBackground>
-          </Animated.View>
-
-          {/* SECTION 4: JARVIS SUGGESTED COLLAB CARD */}
-          <View style={styles.suggestedCollabCard}>
-            <View style={styles.collabHeaderRow}>
-              <View style={styles.collabHeaderLeft}>
-                <Image
-                  source={require('../../assets/images/jarvis-ghost-clean.png')}
-                  style={styles.collabGhostIcon}
-                  resizeMode="contain"
-                />
-                <Text style={styles.collabHeaderTitle}>JARVIS SUGGESTED COLLAB</Text>
-              </View>
-              <View style={styles.potencyBadge}>
-                <Text style={styles.potencyBadgeText}>📈 High potency</Text>
-              </View>
+              ) : (
+                savedCreators.map((creator) => (
+                  <View key={creator.id} style={styles.matchItemCard}>
+                    <Image source={creator.coverImage} style={styles.matchAvatarImg} resizeMode="cover" />
+                    <View style={styles.matchInfoCol}>
+                      <Text style={styles.matchNameText}>{creator.name}</Text>
+                      <Text style={styles.matchMetaText}>{creator.role} • {creator.followers}</Text>
+                    </View>
+                    <Pressable
+                      style={styles.connectSmallBtn}
+                      onPress={() => {
+                        setConnectedCreators((prev) => [creator, ...prev]);
+                        setLastConnectedCreator(creator);
+                        setShowConnectModal(true);
+                      }}
+                    >
+                      <Text style={styles.connectSmallBtnText}>Connect</Text>
+                    </Pressable>
+                  </View>
+                ))
+              )}
             </View>
+          )}
 
-            <Text style={styles.collabHeadline}>‘Day in Lagos’ co-created Reel</Text>
-            <View style={styles.collabMetaRow}>
-              <View style={styles.collabMetaChip}><Text style={styles.collabMetaChipText}>Reel</Text></View>
-              <View style={styles.collabMetaChip}><Text style={styles.collabMetaChipText}>7:30 PM Peak</Text></View>
+          {/* TAB 3: CONNECTED CREATORS LIST */}
+          {activeSection === 'connected' && (
+            <View style={styles.tabContentSection}>
+              {connectedCreators.map((creator) => (
+                <View key={creator.id} style={styles.matchItemCard}>
+                  <Image source={creator.coverImage} style={styles.matchAvatarImg} resizeMode="cover" />
+                  <View style={styles.matchInfoCol}>
+                    <Text style={styles.matchNameText}>{creator.name}</Text>
+                    <Text style={styles.matchMetaText}>{creator.role} • {creator.followers}</Text>
+                  </View>
+                  <Pressable
+                    style={styles.messageBtn}
+                    onPress={() => {
+                      setSelectedRecipient(creator.name);
+                      setShowMessageModal(true);
+                    }}
+                  >
+                    <Text style={styles.messageBtnText}>Message</Text>
+                  </Pressable>
+                </View>
+              ))}
             </View>
+          )}
 
-            <Pressable
-              style={({ pressed }) => [styles.buildIdeaBtn, pressed && styles.btnPressed]}
-              onPress={() => setShowCollabIdeaModal(true)}
-            >
-              <LinearGradient
-                colors={['#784DF0', '#582CDB']}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 1 }}
-                style={styles.buildIdeaGradient}
-              >
-                <Text style={styles.buildIdeaBtnText}>⚡ Build Idea</Text>
-              </LinearGradient>
-            </Pressable>
-          </View>
-
-          {/* SECTION 5: YOUR MATCHES */}
-          <View style={styles.yourMatchesSection}>
-            <View style={styles.sectionHeaderRow}>
-              <Text style={styles.sectionHeading}>Your Matches</Text>
-              <Pressable onPress={() => showToast('Viewing all 14 matches')}>
-                <Text style={styles.viewAllText}>View all</Text>
-              </Pressable>
-            </View>
-
-            {/* Match 1: Tomi Adebayo */}
-            <View style={styles.matchItemCard}>
-              <Image
-                source={require('../../assets/images/tomi-avatar.jpg')}
-                style={styles.matchAvatarImg}
-                resizeMode="cover"
-              />
-              <View style={styles.matchInfoCol}>
-                <Text style={styles.matchNameText}>Tomi Adebayo</Text>
-                <Text style={styles.matchMetaText}>Tech • 156K followers</Text>
-              </View>
-              <Pressable
-                style={({ pressed }) => [styles.messageBtn, pressed && styles.btnPressed]}
-                onPress={() => {
-                  setSelectedMatch('Tomi Adebayo');
-                  setShowMessageModal(true);
-                }}
-              >
-                <Text style={styles.messageBtnText}>Message</Text>
-              </Pressable>
-            </View>
-
-            {/* Match 2: Zainab Okafor */}
-            <View style={styles.matchItemCard}>
-              <Image
-                source={require('../../assets/images/zainab-avatar.jpg')}
-                style={styles.matchAvatarImg}
-                resizeMode="cover"
-              />
-              <View style={styles.matchInfoCol}>
-                <Text style={styles.matchNameText}>Zainab Okafor</Text>
-                <Text style={styles.matchMetaText}>Lifestyle • 52K followers</Text>
-              </View>
-              <Pressable
-                style={({ pressed }) => [styles.messageBtn, pressed && styles.btnPressed]}
-                onPress={() => {
-                  setSelectedMatch('Zainab Okafor');
-                  setShowMessageModal(true);
-                }}
-              >
-                <Text style={styles.messageBtnText}>Message</Text>
-              </Pressable>
-            </View>
-          </View>
-
-          {/* SECTION 6: CREATOR SQUADS PRO BANNER */}
+          {/* SECTION: CREATOR SQUADS PRO BANNER */}
           <View style={styles.squadsBannerCard}>
             <LinearGradient
               colors={['#582CDB', '#3F1AA8']}
@@ -592,7 +884,7 @@ export const MatchScreen: React.FC<MatchScreenProps> = ({
             </LinearGradient>
           </View>
 
-          {/* SECTION 7: JARVIS ENGINE WISDOM CARD */}
+          {/* SECTION: JARVIS ENGINE WISDOM */}
           <View style={styles.wisdomCard}>
             <Image
               source={require('../../assets/images/jarvis-ghost-clean.png')}
@@ -616,17 +908,23 @@ export const MatchScreen: React.FC<MatchScreenProps> = ({
         )}
 
         {/* 4. FLOATING LIQUID GLASS BOTTOM NAVIGATION BAR */}
-        <FloatingTabBar activeTab={activeTab} onTabPress={handleTabPress} />
+        <FloatingTabBar
+          activeTab={activeTab}
+          onTabPress={(tab) => {
+            setActiveTab(tab);
+            if (onNavigateTab) onNavigateTab(tab);
+          }}
+        />
 
-        {/* 5. ANIMATED COMPLETION CELEBRATION MODAL (ON CONNECT) */}
+        {/* 5. ANIMATED COMPLETION CELEBRATION MODAL (ON MATCH/CONNECT) */}
         <AnimatedCompletionModal
           visible={showConnectModal}
-          title="Connection Request Sent!"
-          subtitle={`You connected with ${currentCreator.name}. +40 XP awarded to your streak!`}
-          badgeText="CREATOR CONNECTED"
+          title="It’s a Match! 🎉"
+          subtitle={`You connected with ${lastConnectedCreator?.name || 'Creator'}. +40 XP awarded to your streak!`}
+          badgeText="CREATOR MATCHED"
           xpEarned={40}
           streakCount={48}
-          actionText="Continue Exploring"
+          actionText="Continue Swiping"
           onDismiss={() => setShowConnectModal(false)}
         />
 
@@ -684,7 +982,7 @@ export const MatchScreen: React.FC<MatchScreenProps> = ({
         >
           <View style={styles.modalOverlay}>
             <View style={styles.modalCard}>
-              <Text style={styles.modalTitle}>Message {selectedMatch || 'Creator'}</Text>
+              <Text style={styles.modalTitle}>Message {selectedRecipient || 'Creator'}</Text>
               <Text style={styles.modalSubtitle}>Start a collaborative dialogue directly.</Text>
 
               <TextInput
@@ -948,65 +1246,84 @@ const styles = StyleSheet.create({
     marginBottom: 14,
   },
 
-  // Match Allowance Strip
-  allowanceCard: {
+  // TRACKING STATS BAR
+  trackingStatsBar: {
+    flexDirection: 'row',
     backgroundColor: 'rgba(255, 255, 255, 0.95)',
     borderRadius: 18,
-    padding: 14,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
     borderWidth: 1.2,
     borderColor: 'rgba(235, 230, 248, 0.95)',
+    alignItems: 'center',
+    justifyContent: 'space-around',
     shadowColor: '#582CDB',
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.05,
-    shadowRadius: 14,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.06,
+    shadowRadius: 12,
     elevation: 2,
   },
-  allowanceRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: 10,
+  trackingStatItem: {
+    alignItems: 'center',
   },
-  allowanceItem: {
-    fontSize: 12,
-    fontWeight: '700',
+  trackingStatVal: {
+    fontSize: 14,
+    fontWeight: '800',
     color: '#171420',
+    marginBottom: 2,
   },
-  allowanceTagsRow: {
-    flexDirection: 'row',
-    gap: 8,
-  },
-  allowanceChip: {
-    backgroundColor: '#FAF8FF',
-    paddingVertical: 4,
-    paddingHorizontal: 10,
-    borderRadius: 100,
-    borderWidth: 1,
-    borderColor: '#E8E3FA',
-  },
-  allowanceChipGold: {
-    backgroundColor: '#FEF3C7',
-    borderColor: '#FDE68A',
-  },
-  allowanceChipText: {
-    fontSize: 11,
+  trackingStatLbl: {
+    fontSize: 10.5,
     fontWeight: '600',
-    color: '#582CDB',
+    color: '#7F7894',
   },
-  allowanceChipTextGold: {
-    fontSize: 11,
-    fontWeight: '700',
-    color: '#D97706',
+  trackingStatDivider: {
+    width: 1,
+    height: 24,
+    backgroundColor: '#E8E3FA',
   },
 
-  // SECTION 2: FILTER PILLS
+  // SECTION TABS ROW (DECK vs SAVED vs CONNECTED)
+  sectionTabsRow: {
+    flexDirection: 'row',
+    backgroundColor: 'rgba(237, 232, 252, 0.7)',
+    borderRadius: 14,
+    padding: 3,
+    marginBottom: 16,
+  },
+  sectionTab: {
+    flex: 1,
+    paddingVertical: 8,
+    borderRadius: 11,
+    alignItems: 'center',
+  },
+  sectionTabActive: {
+    backgroundColor: '#FFFFFF',
+    shadowColor: '#582CDB',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 6,
+    elevation: 2,
+  },
+  sectionTabText: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#7F7894',
+  },
+  sectionTabTextActive: {
+    color: '#582CDB',
+    fontWeight: '800',
+  },
+
+  // FILTER PILLS
   filterPillsRow: {
     flexDirection: 'row',
     gap: 8,
-    marginBottom: 18,
+    marginBottom: 16,
   },
   filterPill: {
-    paddingVertical: 7,
-    paddingHorizontal: 13,
+    paddingVertical: 6,
+    paddingHorizontal: 12,
     borderRadius: 100,
     backgroundColor: 'rgba(255, 255, 255, 0.92)',
     borderWidth: 1.2,
@@ -1017,7 +1334,7 @@ const styles = StyleSheet.create({
     borderColor: '#582CDB',
   },
   filterPillText: {
-    fontSize: 12,
+    fontSize: 11.5,
     fontWeight: '600',
     color: '#7F7894',
   },
@@ -1026,15 +1343,90 @@ const styles = StyleSheet.create({
     fontWeight: '800',
   },
 
-  // SECTION 3: HERO CREATOR CARD
-  creatorCardWrapper: {
-    marginBottom: 20,
+  // TINDER CARD STACK CONTAINER
+  cardStackContainer: {
+    position: 'relative',
+    height: 480,
+    marginBottom: 16,
   },
-  creatorCardGlass: {
+  bottomCardContainer: {
+    position: 'absolute',
+    top: 10,
+    left: 8,
+    right: 8,
+    bottom: 0,
+    transform: [{ scale: 0.96 }],
+    opacity: 0.85,
+  },
+  topCardContainer: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    zIndex: 10,
+  },
+  cardGlass: {
+    flex: 1,
     overflow: 'hidden',
+    borderWidth: 1.5,
+    borderColor: 'rgba(255, 255, 255, 0.95)',
+    shadowColor: '#582CDB',
+    shadowOffset: { width: 0, height: 12 },
+    shadowOpacity: 0.16,
+    shadowRadius: 24,
+    elevation: 8,
   },
+
+  // SWIPE STAMPS
+  stampOverlay: {
+    position: 'absolute',
+    top: 20,
+    zIndex: 100,
+    paddingVertical: 6,
+    paddingHorizontal: 16,
+    borderRadius: 10,
+    borderWidth: 2.5,
+  },
+  matchStamp: {
+    left: 20,
+    borderColor: '#10B981',
+    backgroundColor: 'rgba(16, 185, 129, 0.18)',
+    transform: [{ rotate: '-12deg' }],
+  },
+  matchStampText: {
+    fontSize: 18,
+    fontWeight: '900',
+    color: '#10B981',
+    letterSpacing: 1,
+  },
+  passStamp: {
+    right: 20,
+    borderColor: '#EF4444',
+    backgroundColor: 'rgba(239, 68, 68, 0.18)',
+    transform: [{ rotate: '12deg' }],
+  },
+  passStampText: {
+    fontSize: 18,
+    fontWeight: '900',
+    color: '#EF4444',
+    letterSpacing: 1,
+  },
+  saveStamp: {
+    alignSelf: 'center',
+    borderColor: '#F59E0B',
+    backgroundColor: 'rgba(245, 158, 11, 0.18)',
+  },
+  saveStampText: {
+    fontSize: 18,
+    fontWeight: '900',
+    color: '#F59E0B',
+    letterSpacing: 1,
+  },
+
+  // CREATOR COVER PHOTO
   creatorCoverContainer: {
-    height: 190,
+    height: 200,
     position: 'relative',
     backgroundColor: '#EDE8FC',
   },
@@ -1088,14 +1480,17 @@ const styles = StyleSheet.create({
     color: '#92400E',
   },
 
+  // CREATOR BODY
   creatorBodySection: {
     padding: 16,
+    flex: 1,
+    justifyContent: 'space-between',
   },
   creatorTagsRow: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: 6,
-    marginBottom: 14,
+    marginBottom: 10,
   },
   tagPill: {
     backgroundColor: '#FAF8FF',
@@ -1127,19 +1522,19 @@ const styles = StyleSheet.create({
   },
 
   collabGoalBox: {
-    marginBottom: 14,
+    marginBottom: 10,
   },
   collabGoalLabel: {
-    fontSize: 10.5,
+    fontSize: 10,
     fontWeight: '800',
     color: '#7F7894',
     letterSpacing: 0.6,
-    marginBottom: 4,
+    marginBottom: 2,
   },
   collabGoalText: {
-    fontSize: 13,
+    fontSize: 12.5,
     color: '#171420',
-    lineHeight: 18,
+    lineHeight: 17,
     fontWeight: '500',
   },
 
@@ -1147,86 +1542,96 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     gap: 10,
     backgroundColor: 'rgba(245, 243, 255, 0.85)',
-    borderRadius: 16,
-    padding: 12,
+    borderRadius: 14,
+    padding: 10,
     borderWidth: 1,
     borderColor: 'rgba(221, 214, 254, 0.7)',
-    marginBottom: 16,
   },
   jarvisInsightGhost: {
-    width: 24,
-    height: 24,
+    width: 22,
+    height: 22,
     marginTop: 2,
   },
   jarvisInsightContent: {
     flex: 1,
   },
   jarvisInsightTitle: {
-    fontSize: 10.5,
+    fontSize: 10,
     fontWeight: '800',
     color: '#582CDB',
     letterSpacing: 0.6,
     marginBottom: 2,
   },
   jarvisInsightText: {
-    fontSize: 12,
+    fontSize: 11.5,
     color: '#4B4360',
-    lineHeight: 16,
+    lineHeight: 15,
     fontWeight: '500',
   },
 
-  creatorActionRow: {
+  // TACTILE CONTROLS ROW
+  tactileControlsRow: {
     flexDirection: 'row',
-    gap: 8,
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: 16,
+    marginBottom: 22,
   },
-  passBtn: {
-    flex: 1,
-    height: 44,
-    borderRadius: 14,
+  tactileBtnSmall: {
+    width: 46,
+    height: 46,
+    borderRadius: 23,
+    backgroundColor: '#FFFFFF',
     borderWidth: 1.2,
     borderColor: '#E5E1F0',
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#FAF9F6',
+    shadowColor: '#171420',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.08,
+    shadowRadius: 10,
+    elevation: 3,
   },
-  passBtnText: {
-    fontSize: 13.5,
-    fontWeight: '700',
-    color: '#7F7894',
-  },
-  saveBtn: {
-    flex: 1,
-    height: 44,
-    borderRadius: 14,
-    borderWidth: 1.2,
-    borderColor: '#DDD6FE',
+  tactileBtnLarge: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#FAF8FF',
+    shadowColor: '#582CDB',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.16,
+    shadowRadius: 14,
+    elevation: 5,
   },
-  saveBtnText: {
-    fontSize: 13.5,
-    fontWeight: '700',
-    color: '#582CDB',
+  passControlBtn: {
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1.5,
+    borderColor: '#FECDD3',
   },
-  connectPrimaryBtn: {
-    flex: 2,
-    height: 44,
-    borderRadius: 14,
+  passControlBtnIcon: {
+    fontSize: 22,
+    color: '#E11D48',
+    fontWeight: '900',
+  },
+  saveControlBtn: {
+    borderColor: '#FDE68A',
+    backgroundColor: '#FEF3C7',
+  },
+  connectControlBtn: {
     overflow: 'hidden',
   },
-  connectBtnGradient: {
-    flex: 1,
+  connectControlGradient: {
+    width: '100%',
+    height: '100%',
     justifyContent: 'center',
     alignItems: 'center',
   },
-  connectBtnText: {
-    fontSize: 14,
-    fontWeight: '800',
-    color: '#FFFFFF',
+  connectControlBtnIcon: {
+    fontSize: 24,
   },
 
-  // SECTION 4: JARVIS SUGGESTED COLLAB CARD
+  // SUGGESTED COLLAB CARD
   suggestedCollabCard: {
     backgroundColor: 'rgba(255, 255, 255, 0.95)',
     borderRadius: 22,
@@ -1313,26 +1718,45 @@ const styles = StyleSheet.create({
     fontWeight: '800',
   },
 
-  // SECTION 5: YOUR MATCHES
-  yourMatchesSection: {
+  // TAB CONTENT SECTIONS (SAVED / CONNECTED)
+  tabContentSection: {
     marginBottom: 20,
   },
-  sectionHeaderRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+  emptyStateBox: {
+    backgroundColor: 'rgba(255, 255, 255, 0.95)',
+    borderRadius: 22,
+    padding: 28,
     alignItems: 'center',
-    marginBottom: 12,
+    borderWidth: 1.2,
+    borderColor: 'rgba(235, 230, 248, 0.95)',
   },
-  sectionHeading: {
-    fontSize: 18,
-    fontWeight: '900',
+  emptyStateEmoji: {
+    fontSize: 36,
+    marginBottom: 10,
+  },
+  emptyStateTitle: {
+    fontSize: 17,
+    fontWeight: '800',
     color: '#171420',
-    letterSpacing: -0.2,
+    marginBottom: 4,
   },
-  viewAllText: {
+  emptyStateSubtitle: {
     fontSize: 12.5,
+    color: '#7F7894',
+    textAlign: 'center',
+    lineHeight: 18,
+    marginBottom: 16,
+  },
+  emptyStateBtn: {
+    backgroundColor: '#582CDB',
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 12,
+  },
+  emptyStateBtnText: {
+    color: '#FFFFFF',
+    fontSize: 13,
     fontWeight: '700',
-    color: '#582CDB',
   },
   matchItemCard: {
     flexDirection: 'row',
@@ -1350,16 +1774,16 @@ const styles = StyleSheet.create({
     elevation: 2,
   },
   matchAvatarImg: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
+    width: 46,
+    height: 46,
+    borderRadius: 23,
     marginRight: 12,
   },
   matchInfoCol: {
     flex: 1,
   },
   matchNameText: {
-    fontSize: 14,
+    fontSize: 14.5,
     fontWeight: '800',
     color: '#171420',
     marginBottom: 2,
@@ -1382,8 +1806,19 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     color: '#582CDB',
   },
+  connectSmallBtn: {
+    backgroundColor: '#582CDB',
+    borderRadius: 10,
+    paddingVertical: 6,
+    paddingHorizontal: 14,
+  },
+  connectSmallBtnText: {
+    fontSize: 12,
+    fontWeight: '800',
+    color: '#FFFFFF',
+  },
 
-  // SECTION 6: CREATOR SQUADS PRO
+  // CREATOR SQUADS PRO BANNER
   squadsBannerCard: {
     borderRadius: 24,
     overflow: 'hidden',
@@ -1440,7 +1875,7 @@ const styles = StyleSheet.create({
     color: '#171420',
   },
 
-  // SECTION 7: JARVIS ENGINE WISDOM
+  // JARVIS ENGINE WISDOM
   wisdomCard: {
     flexDirection: 'row',
     gap: 12,
