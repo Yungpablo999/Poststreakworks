@@ -15,10 +15,11 @@ import {
   Platform,
   Dimensions,
 } from 'react-native';
-import Svg, { Path, Circle } from 'react-native-svg';
+import Svg, { Path, Circle, Defs, RadialGradient, Stop } from 'react-native-svg';
 import * as Haptics from 'expo-haptics';
 import { LinearGradient } from 'expo-linear-gradient';
 import { FloatingTabBar, TabType } from '../components/FloatingTabBar';
+import { LiquidGlassBackground } from '../components/LiquidGlassBackground';
 import { AnimatedCompletionModal } from '../components/AnimatedCompletionModal';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
@@ -80,8 +81,8 @@ interface CreatorProfile {
   whyFitsPills: string[];
   collabIdea: CollabIdeaDetail;
   correlationPercent: number;
-  primaryNiche: { name: string; level: string; color: string };
-  secondaryNiche: { name: string; level: string; color: string };
+  primaryNiche: { name: string; level: string; percent: string; color: string };
+  secondaryNiche: { name: string; level: string; percent: string; color: string };
   jarvisDeepInsight: string;
   readinessChecks: string[];
   tracking: TrackedMetrics;
@@ -141,11 +142,11 @@ const CREATOR_DECK: CreatorProfile[] = [
       hook: 'Two creators, one city, zero sleep.',
       bts: 'iPhone and natural lighting.',
       lesson: 'How we both built our streaks today.',
-      chips: ['Reel', '30-45 Sec', 'Sat 2 PM'],
+      chips: ['🎥 Reel', '⏱ 30-45 Sec', '📅 Sat 2 PM'],
     },
     correlationPercent: 76,
-    primaryNiche: { name: 'LIFESTYLE', level: 'High', color: '#10B981' },
-    secondaryNiche: { name: 'TRAVEL', level: 'Medium', color: '#6366F1' },
+    primaryNiche: { name: 'LIFESTYLE', level: 'High', percent: '94%', color: '#10B981' },
+    secondaryNiche: { name: 'TRAVEL', level: 'Medium', percent: '68%', color: '#6366F1' },
     jarvisDeepInsight:
       'Amara’s content style matches your creator journey niche. A simple day-in-the-life collab could work well for both audiences.',
     readinessChecks: [
@@ -184,11 +185,11 @@ const CREATOR_DECK: CreatorProfile[] = [
       hook: 'Can AI cut video editing time by 80%? We tested it live.',
       bts: 'Screen recordings & live timer.',
       lesson: 'Top 3 automations every creator needs.',
-      chips: ['YouTube Short', '45 Sec', 'Thu 6 PM'],
+      chips: ['🎥 Short', '⏱ 45 Sec', '📅 Thu 6 PM'],
     },
     correlationPercent: 88,
-    primaryNiche: { name: 'AI & TECH', level: 'High', color: '#10B981' },
-    secondaryNiche: { name: 'WORKFLOW', level: 'High', color: '#6366F1' },
+    primaryNiche: { name: 'AI & TECH', level: 'High', percent: '96%', color: '#10B981' },
+    secondaryNiche: { name: 'WORKFLOW', level: 'High', percent: '91%', color: '#6366F1' },
     jarvisDeepInsight:
       'High overlap in productivity and workflow audience with 4.8x average viral reach across tech reels.',
     readinessChecks: [
@@ -227,11 +228,11 @@ const CREATOR_DECK: CreatorProfile[] = [
       hook: '5 essential pieces to film in 10 different cities.',
       bts: 'Studio lighting & color graded edits.',
       lesson: 'Visual minimalism in creator production.',
-      chips: ['Reel', '30 Sec', 'Sat 11 AM'],
+      chips: ['🎥 Reel', '⏱ 30 Sec', '📅 Sat 11 AM'],
     },
     correlationPercent: 72,
-    primaryNiche: { name: 'FASHION', level: 'High', color: '#10B981' },
-    secondaryNiche: { name: 'AESTHETIC', level: 'Medium', color: '#6366F1' },
+    primaryNiche: { name: 'FASHION', level: 'High', percent: '89%', color: '#10B981' },
+    secondaryNiche: { name: 'AESTHETIC', level: 'Medium', percent: '71%', color: '#6366F1' },
     jarvisDeepInsight:
       'Strong visual aesthetic alignment with top-tier comment-to-view ratios on aesthetic reels.',
     readinessChecks: [
@@ -270,11 +271,11 @@ const CREATOR_DECK: CreatorProfile[] = [
       hook: 'What happens when 2 creators optimize their mornings for 30 days?',
       bts: 'Split screen sunrise gym vs studio sessions.',
       lesson: 'Daily habit architecture for mental stamina.',
-      chips: ['Shorts', '45 Sec', 'Mon 7 AM'],
+      chips: ['🎥 Short', '⏱ 45 Sec', '📅 Mon 7 AM'],
     },
     correlationPercent: 84,
-    primaryNiche: { name: 'FITNESS', level: 'High', color: '#10B981' },
-    secondaryNiche: { name: 'HABITS', level: 'High', color: '#6366F1' },
+    primaryNiche: { name: 'FITNESS', level: 'High', percent: '95%', color: '#10B981' },
+    secondaryNiche: { name: 'HABITS', level: 'High', percent: '88%', color: '#6366F1' },
     jarvisDeepInsight:
       'Massive streak alignment. Both of you thrive on high-discipline posting schedules.',
     readinessChecks: [
@@ -313,11 +314,11 @@ const CREATOR_DECK: CreatorProfile[] = [
       hook: 'The 3 hidden audio layers that keep viewers hooked till the end.',
       bts: 'Timeline zoom-ins & foley sound breakdown.',
       lesson: 'Auditory psychology for retention.',
-      chips: ['Reel', '40 Sec', 'Tue 8 PM'],
+      chips: ['🎥 Reel', '⏱ 40 Sec', '📅 Tue 8 PM'],
     },
     correlationPercent: 81,
-    primaryNiche: { name: 'CINEMA', level: 'High', color: '#10B981' },
-    secondaryNiche: { name: 'EDITING', level: 'High', color: '#6366F1' },
+    primaryNiche: { name: 'CINEMA', level: 'High', percent: '93%', color: '#10B981' },
+    secondaryNiche: { name: 'EDITING', level: 'High', percent: '86%', color: '#6366F1' },
     jarvisDeepInsight:
       'Her pacing and visual sound design can amplify your video watch-through rates significantly.',
     readinessChecks: [
@@ -388,6 +389,7 @@ export const MatchScreen: React.FC<MatchScreenProps> = ({
   const position = useRef(new Animated.ValueXY()).current;
   const ghostFloatY = useRef(new Animated.Value(0)).current;
   const toastOpacity = useRef(new Animated.Value(0)).current;
+  const pulseAnim = useRef(new Animated.Value(1)).current;
 
   // Ultra-smooth Tinder PanResponder with scroll locking
   const panResponder = useRef(
@@ -438,8 +440,29 @@ export const MatchScreen: React.FC<MatchScreenProps> = ({
       ])
     );
     floatLoop.start();
-    return () => floatLoop.stop();
-  }, [ghostFloatY]);
+
+    // Pulse animation for live status dot
+    const pulseLoop = Animated.loop(
+      Animated.sequence([
+        Animated.timing(pulseAnim, {
+          toValue: 1.4,
+          duration: 1000,
+          useNativeDriver: true,
+        }),
+        Animated.timing(pulseAnim, {
+          toValue: 1,
+          duration: 1000,
+          useNativeDriver: true,
+        }),
+      ])
+    );
+    pulseLoop.start();
+
+    return () => {
+      floatLoop.stop();
+      pulseLoop.stop();
+    };
+  }, [ghostFloatY, pulseAnim]);
 
   const showToast = (msg: string) => {
     setToastMessage(msg);
@@ -553,11 +576,11 @@ export const MatchScreen: React.FC<MatchScreenProps> = ({
         hook: 'How to build reusable creator assets that save 10 hours a week.',
         bts: 'Live Figma screen share.',
         lesson: 'Designing for viral readability.',
-        chips: ['Reel', '30 Sec', 'Sat 2 PM'],
+        chips: ['🎥 Reel', '⏱ 30 Sec', '📅 Sat 2 PM'],
       },
       correlationPercent: 82,
-      primaryNiche: { name: 'DESIGN', level: 'High', color: '#10B981' },
-      secondaryNiche: { name: 'SYSTEMS', level: 'Medium', color: '#6366F1' },
+      primaryNiche: { name: 'DESIGN', level: 'High', percent: '92%', color: '#10B981' },
+      secondaryNiche: { name: 'SYSTEMS', level: 'Medium', percent: '74%', color: '#6366F1' },
       jarvisDeepInsight:
         'Audience loves actionable creator tooling and design hacks. High synergy potential.',
       readinessChecks: [
@@ -756,7 +779,7 @@ export const MatchScreen: React.FC<MatchScreenProps> = ({
 
             <Text style={styles.pageHeadline}>Find creators worth building with.</Text>
             <Text style={styles.pageSubtitle}>
-              Swipe right to accept, left to decline, or tap ⓘ for full match intelligence.
+              Swipe right to accept, left to decline, or tap ⓘ for deep-dive match intelligence.
             </Text>
 
             {/* LIVE TRACKING STATS BAR */}
@@ -958,6 +981,12 @@ export const MatchScreen: React.FC<MatchScreenProps> = ({
                     {/* Top Overlay Badges */}
                     <View style={styles.tinderTopOverlayRow}>
                       <View style={styles.tinderLiveRadarPill}>
+                        <Animated.View
+                          style={[
+                            styles.pulseDotInner,
+                            { transform: [{ scale: pulseAnim }] },
+                          ]}
+                        />
                         <Text style={styles.tinderLiveRadarText}>
                           {currentCreator.tracking.statusText}
                         </Text>
@@ -976,7 +1005,7 @@ export const MatchScreen: React.FC<MatchScreenProps> = ({
                           </Text>
                         </Pressable>
 
-                        {/* INFO ⓘ BUTTON OVERLAY */}
+                        {/* INFO ⓘ JEWEL BUTTON OVERLAY */}
                         <Pressable
                           style={({ pressed }) => [styles.onCardInfoBtn, pressed && styles.btnPressed]}
                           onPress={() => handleOpenInfo(currentCreator)}
@@ -1011,7 +1040,7 @@ export const MatchScreen: React.FC<MatchScreenProps> = ({
                             onPress={() => handleOpenInfo(currentCreator)}
                             hitSlop={8}
                           >
-                            <Text style={styles.cardBottomInfoPillText}>More info ➔</Text>
+                            <Text style={styles.cardBottomInfoPillText}>Deep Dive ➔</Text>
                           </Pressable>
                         </View>
                       </View>
@@ -1520,7 +1549,7 @@ export const MatchScreen: React.FC<MatchScreenProps> = ({
           }}
         />
 
-        {/* 7. FULL DEEP-DIVE CREATOR PROFILE MODAL (TRIGGERED BY ⓘ INFO BUTTON) */}
+        {/* 7. FULL DEEP-DIVE CREATOR PROFILE MODAL (ULTRA-PREMIUM REDESIGN) */}
         <Modal
           visible={showDetailModal}
           animationType="slide"
@@ -1528,15 +1557,27 @@ export const MatchScreen: React.FC<MatchScreenProps> = ({
           onRequestClose={() => setShowDetailModal(false)}
         >
           <SafeAreaView style={styles.detailSafeArea}>
+            {/* Sheet Handle Indicator & Top Bar */}
+            <View style={styles.sheetHandleContainer}>
+              <View style={styles.sheetHandleBar} />
+            </View>
+
             <View style={styles.detailHeaderBar}>
               <Pressable
                 style={({ pressed }) => [styles.detailCloseBtn, pressed && styles.btnPressed]}
                 onPress={() => setShowDetailModal(false)}
                 hitSlop={8}
               >
-                <Text style={styles.detailCloseBtnText}>✕</Text>
+                <Svg width={14} height={14} viewBox="0 0 24 24" fill="none">
+                  <Path d="M18 6L6 18M6 6l12 12" stroke="#582CDB" strokeWidth="2.6" strokeLinecap="round" />
+                </Svg>
               </Pressable>
-              <Text style={styles.detailHeaderTitle}>Creator Profile</Text>
+
+              <View style={styles.detailHeaderTitleBox}>
+                <Text style={styles.detailHeaderTitle}>Creator Match Deep-Dive</Text>
+                <Text style={styles.detailHeaderSubTitle}>Powered by Jarvis Engine</Text>
+              </View>
+
               <Pressable
                 style={({ pressed }) => [styles.detailSaveTopBtn, pressed && styles.btnPressed]}
                 onPress={() => handleToggleTrack(selectedCreatorForDetail)}
@@ -1558,21 +1599,43 @@ export const MatchScreen: React.FC<MatchScreenProps> = ({
                   style={styles.detailCoverImage}
                   resizeMode="cover"
                 />
+                
+                {/* Photo Bottom Glass Overlay */}
+                <LinearGradient
+                  colors={['transparent', 'rgba(15, 12, 24, 0.7)', 'rgba(15, 12, 24, 0.95)']}
+                  style={styles.detailCoverGradientOverlay}
+                >
+                  <View style={styles.heroNameRow}>
+                    <Text style={styles.heroCoverName}>{selectedCreatorForDetail.name}</Text>
+                    <View style={styles.verifiedCheckBadge}>
+                      <Text style={styles.verifiedCheckText}>✓</Text>
+                    </View>
+                  </View>
+                  <Text style={styles.heroCoverRole}>
+                    {selectedCreatorForDetail.role} • 📍 {selectedCreatorForDetail.location}
+                  </Text>
+                </LinearGradient>
+
                 <View style={styles.detailHeroBody}>
                   <View style={styles.detailAvailabilityRow}>
-                    <View style={styles.greenStatusDot} />
+                    <Animated.View
+                      style={[
+                        styles.greenStatusDot,
+                        { transform: [{ scale: pulseAnim }] },
+                      ]}
+                    />
                     <Text style={styles.detailAvailabilityText}>{selectedCreatorForDetail.availability}</Text>
                   </View>
 
                   <View style={styles.detailTwoStatRow}>
                     <View style={styles.detailTwoStatItem}>
                       <Text style={styles.detailStatValGold}>{selectedCreatorForDetail.followers}</Text>
-                      <Text style={styles.detailStatLbl}>Followers</Text>
+                      <Text style={styles.detailStatLbl}>Total Audience</Text>
                     </View>
                     <View style={styles.detailTwoStatDivider} />
                     <View style={styles.detailTwoStatItem}>
                       <Text style={styles.detailStatValPurple}>{selectedCreatorForDetail.consistencyRating}</Text>
-                      <Text style={styles.detailStatLbl}>Consistency</Text>
+                      <Text style={styles.detailStatLbl}>Consistency Tier</Text>
                     </View>
                   </View>
                 </View>
@@ -1609,25 +1672,44 @@ export const MatchScreen: React.FC<MatchScreenProps> = ({
               <View style={styles.detailCollabIdeaCard}>
                 <View style={styles.collabIdeaTitleRow}>
                   <Text style={styles.purplePinIcon}>📍</Text>
-                  <Text style={styles.detailCollabIdeaTitle}>Collab Idea</Text>
+                  <Text style={styles.detailCollabIdeaTitle}>Collab Blueprint</Text>
                 </View>
                 <Text style={styles.collabIdeaName}>{selectedCreatorForDetail.collabIdea.title}</Text>
 
-                <View style={styles.collabIdeaDetailCol}>
-                  <View style={styles.collabIdeaDetailRow}>
-                    <Text style={styles.collabIdeaDetailKey}>Hook</Text>
-                    <Text style={styles.collabIdeaDetailVal}>{selectedCreatorForDetail.collabIdea.hook}</Text>
+                {/* Structured Script Steps */}
+                <View style={styles.collabScriptStepsCol}>
+                  <View style={styles.scriptStepItem}>
+                    <View style={styles.stepNumBadge}>
+                      <Text style={styles.stepNumText}>01</Text>
+                    </View>
+                    <View style={styles.stepContentCol}>
+                      <Text style={styles.stepLabel}>HOOK (0-3s)</Text>
+                      <Text style={styles.stepValText}>{selectedCreatorForDetail.collabIdea.hook}</Text>
+                    </View>
                   </View>
-                  <View style={styles.collabIdeaDetailRow}>
-                    <Text style={styles.collabIdeaDetailKey}>BTS</Text>
-                    <Text style={styles.collabIdeaDetailVal}>{selectedCreatorForDetail.collabIdea.bts}</Text>
+
+                  <View style={styles.scriptStepItem}>
+                    <View style={styles.stepNumBadge}>
+                      <Text style={styles.stepNumText}>02</Text>
+                    </View>
+                    <View style={styles.stepContentCol}>
+                      <Text style={styles.stepLabel}>BTS / VISUALS</Text>
+                      <Text style={styles.stepValText}>{selectedCreatorForDetail.collabIdea.bts}</Text>
+                    </View>
                   </View>
-                  <View style={styles.collabIdeaDetailRow}>
-                    <Text style={styles.collabIdeaDetailKey}>Lesson</Text>
-                    <Text style={styles.collabIdeaDetailVal}>{selectedCreatorForDetail.collabIdea.lesson}</Text>
+
+                  <View style={styles.scriptStepItem}>
+                    <View style={styles.stepNumBadge}>
+                      <Text style={styles.stepNumText}>03</Text>
+                    </View>
+                    <View style={styles.stepContentCol}>
+                      <Text style={styles.stepLabel}>TAKEAWAY / LESSON</Text>
+                      <Text style={styles.stepValText}>{selectedCreatorForDetail.collabIdea.lesson}</Text>
+                    </View>
                   </View>
                 </View>
 
+                {/* Chips */}
                 <View style={styles.collabIdeaChipsRow}>
                   {selectedCreatorForDetail.collabIdea.chips.map((chip, idx) => (
                     <View key={idx} style={styles.collabIdeaChip}>
@@ -1651,7 +1733,7 @@ export const MatchScreen: React.FC<MatchScreenProps> = ({
                     end={{ x: 1, y: 1 }}
                     style={styles.buildCollabPlanGradient}
                   >
-                    <Text style={styles.buildCollabPlanBtnText}>Build Collab Plan</Text>
+                    <Text style={styles.buildCollabPlanBtnText}>⚡ Build Collab Plan</Text>
                   </LinearGradient>
                 </Pressable>
               </View>
@@ -1660,7 +1742,12 @@ export const MatchScreen: React.FC<MatchScreenProps> = ({
               <View style={styles.detailTwoCardsRow}>
                 <View style={styles.detailMetricCardHalf}>
                   <View style={styles.metricCardIconRow}>
-                    <Text style={{ fontSize: 14 }}>👥</Text>
+                    <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
+                      <Circle cx="9" cy="7" r="4" stroke="#582CDB" strokeWidth="2" />
+                      <Path d="M3 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2" stroke="#582CDB" strokeWidth="2" />
+                      <Circle cx="17" cy="11" r="3" stroke="#784DF0" strokeWidth="2" />
+                      <Path d="M16 3.13a4 4 0 0 1 0 7.75" stroke="#784DF0" strokeWidth="2" />
+                    </Svg>
                   </View>
                   <Text style={styles.metricCardLabel}>AUDIENCE</Text>
                   <Text style={styles.metricCardBigValue}>{selectedCreatorForDetail.audienceCount}</Text>
@@ -1668,7 +1755,12 @@ export const MatchScreen: React.FC<MatchScreenProps> = ({
 
                 <View style={styles.detailMetricCardHalf}>
                   <View style={styles.metricCardIconRow}>
-                    <Text style={{ fontSize: 14 }}>🔥</Text>
+                    <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
+                      <Path
+                        d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"
+                        fill="#F59E0B"
+                      />
+                    </Svg>
                   </View>
                   <Text style={styles.metricCardLabel}>STREAK</Text>
                   <Text style={styles.metricCardGoldValue}>{selectedCreatorForDetail.streak} Days</Text>
@@ -1681,26 +1773,38 @@ export const MatchScreen: React.FC<MatchScreenProps> = ({
 
                 {/* VENN DIAGRAM GRAPHIC */}
                 <View style={styles.vennContainer}>
-                  <Svg width={220} height={120} viewBox="0 0 220 120">
+                  <Svg width={240} height={130} viewBox="0 0 240 130">
+                    <Defs>
+                      <RadialGradient id="purpleGlow" cx="50%" cy="50%" r="50%">
+                        <Stop offset="0%" stopColor="#7C3AED" stopOpacity="0.35" />
+                        <Stop offset="100%" stopColor="#582CDB" stopOpacity="0.12" />
+                      </RadialGradient>
+                      <RadialGradient id="goldGlow" cx="50%" cy="50%" r="50%">
+                        <Stop offset="0%" stopColor="#F59E0B" stopOpacity="0.35" />
+                        <Stop offset="100%" stopColor="#D97706" stopOpacity="0.1" />
+                      </RadialGradient>
+                    </Defs>
+
                     {/* Left Circle: YOU */}
                     <Circle
-                      cx="85"
-                      cy="60"
-                      r="46"
-                      fill="rgba(124, 58, 237, 0.22)"
+                      cx="90"
+                      cy="65"
+                      r="52"
+                      fill="url(#purpleGlow)"
                       stroke="#7C3AED"
-                      strokeWidth="2"
+                      strokeWidth="2.2"
                     />
                     {/* Right Circle: CREATOR */}
                     <Circle
-                      cx="135"
-                      cy="60"
-                      r="46"
-                      fill="rgba(217, 119, 6, 0.18)"
+                      cx="150"
+                      cy="65"
+                      r="52"
+                      fill="url(#goldGlow)"
                       stroke="#D97706"
-                      strokeWidth="2"
+                      strokeWidth="2.2"
                     />
                   </Svg>
+
                   {/* Overlay Labels */}
                   <View style={styles.vennLabelLeft}>
                     <Text style={styles.vennLabelTextPurple}>YOU</Text>
@@ -1709,7 +1813,7 @@ export const MatchScreen: React.FC<MatchScreenProps> = ({
                     <Text style={styles.vennCenterPercent}>{selectedCreatorForDetail.correlationPercent}%</Text>
                   </View>
                   <View style={styles.vennLabelRight}>
-                    <Text style={styles.vennLabelTextGold}>AMARA</Text>
+                    <Text style={styles.vennLabelTextGold}>THEM</Text>
                   </View>
                 </View>
 
@@ -1718,13 +1822,13 @@ export const MatchScreen: React.FC<MatchScreenProps> = ({
                   <View style={styles.correlationIndicatorPill}>
                     <Text style={styles.indicatorName}>{selectedCreatorForDetail.primaryNiche.name}</Text>
                     <Text style={[styles.indicatorLevel, { color: selectedCreatorForDetail.primaryNiche.color }]}>
-                      {selectedCreatorForDetail.primaryNiche.level}
+                      {selectedCreatorForDetail.primaryNiche.level} ({selectedCreatorForDetail.primaryNiche.percent})
                     </Text>
                   </View>
                   <View style={styles.correlationIndicatorPill}>
                     <Text style={styles.indicatorName}>{selectedCreatorForDetail.secondaryNiche.name}</Text>
                     <Text style={[styles.indicatorLevel, { color: selectedCreatorForDetail.secondaryNiche.color }]}>
-                      {selectedCreatorForDetail.secondaryNiche.level}
+                      {selectedCreatorForDetail.secondaryNiche.level} ({selectedCreatorForDetail.secondaryNiche.percent})
                     </Text>
                   </View>
                 </View>
@@ -1739,7 +1843,7 @@ export const MatchScreen: React.FC<MatchScreenProps> = ({
                 />
                 <Text style={styles.detailJarvisInsightLabel}>JARVIS INSIGHT</Text>
                 <Text style={styles.detailJarvisInsightText}>
-                  {selectedCreatorForDetail.jarvisDeepInsight}
+                  “{selectedCreatorForDetail.jarvisDeepInsight}”
                 </Text>
               </View>
 
@@ -1748,23 +1852,21 @@ export const MatchScreen: React.FC<MatchScreenProps> = ({
                 <View style={styles.readinessHeaderRow}>
                   <Text style={styles.readinessTitle}>Readiness</Text>
                   <View style={styles.readinessReadyBadge}>
-                    <Text style={styles.readinessReadyText}>🟢 Ready</Text>
+                    <Text style={styles.readinessReadyText}>🟢 Ready to Collab</Text>
                   </View>
                 </View>
 
                 <View style={styles.readinessChecklistCol}>
-                  <View style={styles.readinessItemRow}>
-                    <Text style={styles.readinessItemIcon}>👤</Text>
-                    <Text style={styles.readinessItemText}>{selectedCreatorForDetail.readinessChecks[0]}</Text>
-                  </View>
-                  <View style={styles.readinessItemRow}>
-                    <Text style={styles.readinessItemIcon}>⚡</Text>
-                    <Text style={styles.readinessItemText}>{selectedCreatorForDetail.readinessChecks[1]}</Text>
-                  </View>
-                  <View style={styles.readinessItemRow}>
-                    <Text style={styles.readinessItemIcon}>💬</Text>
-                    <Text style={styles.readinessItemText}>{selectedCreatorForDetail.readinessChecks[2]}</Text>
-                  </View>
+                  {selectedCreatorForDetail.readinessChecks.map((check, idx) => (
+                    <View key={idx} style={styles.readinessItemRow}>
+                      <View style={styles.readinessCheckCircle}>
+                        <Svg width={10} height={10} viewBox="0 0 24 24" fill="none">
+                          <Path d="M20 6L9 17l-5-5" stroke="#582CDB" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round" />
+                        </Svg>
+                      </View>
+                      <Text style={styles.readinessItemText}>{check}</Text>
+                    </View>
+                  ))}
                 </View>
               </View>
             </ScrollView>
@@ -1784,7 +1886,7 @@ export const MatchScreen: React.FC<MatchScreenProps> = ({
                   end={{ x: 1, y: 1 }}
                   style={styles.detailConnectGradient}
                 >
-                  <Text style={styles.detailConnectBtnText}>Connect</Text>
+                  <Text style={styles.detailConnectBtnText}>💜 Connect (+50 XP)</Text>
                 </LinearGradient>
               </Pressable>
 
@@ -2295,12 +2397,21 @@ const styles = StyleSheet.create({
     zIndex: 50,
   },
   tinderLiveRadarPill: {
-    backgroundColor: 'rgba(15, 23, 42, 0.72)',
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    backgroundColor: 'rgba(15, 23, 42, 0.76)',
     paddingVertical: 5,
     paddingHorizontal: 10,
     borderRadius: 100,
     borderWidth: 1,
     borderColor: 'rgba(255, 255, 255, 0.25)',
+  },
+  pulseDotInner: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: '#34D399',
   },
   tinderLiveRadarText: {
     fontSize: 11,
@@ -2333,35 +2444,36 @@ const styles = StyleSheet.create({
 
   // INFO ⓘ BUTTONS
   onCardInfoBtn: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
-    backgroundColor: 'rgba(255, 255, 255, 0.92)',
-    borderWidth: 1,
-    borderColor: 'rgba(235, 230, 248, 0.9)',
+    width: 30,
+    height: 30,
+    borderRadius: 15,
+    backgroundColor: 'rgba(255, 255, 255, 0.95)',
+    borderWidth: 1.2,
+    borderColor: 'rgba(221, 214, 254, 0.9)',
     justifyContent: 'center',
     alignItems: 'center',
-    shadowColor: '#171420',
+    shadowColor: '#582CDB',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
+    shadowOpacity: 0.12,
+    shadowRadius: 6,
+    elevation: 3,
   },
   onCardInfoBtnText: {
-    fontSize: 14,
+    fontSize: 14.5,
     fontWeight: '900',
     color: '#582CDB',
   },
   cardBottomInfoPill: {
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
-    paddingVertical: 3,
-    paddingHorizontal: 8,
+    backgroundColor: 'rgba(255, 255, 255, 0.22)',
+    paddingVertical: 4,
+    paddingHorizontal: 10,
     borderRadius: 100,
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.3)',
+    borderColor: 'rgba(255, 255, 255, 0.35)',
   },
   cardBottomInfoPillText: {
-    fontSize: 10.5,
-    fontWeight: '700',
+    fontSize: 11,
+    fontWeight: '800',
     color: '#FFFFFF',
   },
 
@@ -3046,20 +3158,46 @@ const styles = StyleSheet.create({
     color: '#582CDB',
   },
 
-  // DEEP-DIVE CREATOR PROFILE MODAL (FROM ⓘ INFO BUTTON)
+  // DEEP-DIVE CREATOR PROFILE MODAL (ULTRA-PREMIUM REDESIGN)
   detailSafeArea: {
     flex: 1,
     backgroundColor: '#FAF9F6',
+  },
+  sheetHandleContainer: {
+    alignItems: 'center',
+    paddingTop: 8,
+    paddingBottom: 4,
+    backgroundColor: '#FAF9F6',
+  },
+  sheetHandleBar: {
+    width: 36,
+    height: 4,
+    borderRadius: 2,
+    backgroundColor: '#D1D5DB',
   },
   detailHeaderBar: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: 18,
-    paddingVertical: 12,
+    paddingVertical: 10,
     borderBottomWidth: 1,
     borderBottomColor: '#E8E3FA',
     backgroundColor: '#FAF9F6',
+  },
+  detailHeaderTitleBox: {
+    alignItems: 'center',
+  },
+  detailHeaderTitle: {
+    fontSize: 15.5,
+    fontWeight: '900',
+    color: '#171420',
+    letterSpacing: -0.2,
+  },
+  detailHeaderSubTitle: {
+    fontSize: 10.5,
+    fontWeight: '600',
+    color: '#582CDB',
   },
   detailCloseBtn: {
     width: 34,
@@ -3068,16 +3206,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#EDE8FC',
     justifyContent: 'center',
     alignItems: 'center',
-  },
-  detailCloseBtnText: {
-    fontSize: 16,
-    fontWeight: '800',
-    color: '#582CDB',
-  },
-  detailHeaderTitle: {
-    fontSize: 16,
-    fontWeight: '800',
-    color: '#171420',
   },
   detailSaveTopBtn: {
     width: 34,
@@ -3109,18 +3237,52 @@ const styles = StyleSheet.create({
     shadowRadius: 16,
     elevation: 3,
     marginBottom: 12,
+    position: 'relative',
   },
   detailCoverImage: {
     width: '100%',
-    height: 360,
+    height: 380,
+  },
+  detailCoverGradientOverlay: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    top: 240,
+    height: 140,
+    justifyContent: 'flex-end',
+    padding: 16,
+  },
+  heroNameRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    marginBottom: 2,
+  },
+  heroCoverName: {
+    fontSize: 22,
+    fontWeight: '900',
+    color: '#FFFFFF',
+    letterSpacing: -0.3,
+    textShadowColor: 'rgba(0, 0, 0, 0.6)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 4,
+  },
+  heroCoverRole: {
+    fontSize: 12.5,
+    fontWeight: '600',
+    color: 'rgba(255, 255, 255, 0.9)',
+    textShadowColor: 'rgba(0, 0, 0, 0.5)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 3,
   },
   detailHeroBody: {
     padding: 16,
+    backgroundColor: '#FFFFFF',
   },
   detailAvailabilityRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
+    gap: 8,
     marginBottom: 12,
   },
   greenStatusDot: {
@@ -3142,14 +3304,16 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   detailStatValGold: {
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: '900',
     color: '#EAB308',
+    letterSpacing: -0.3,
   },
   detailStatValPurple: {
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: '900',
     color: '#582CDB',
+    letterSpacing: -0.3,
   },
   detailStatLbl: {
     fontSize: 10.5,
@@ -3159,9 +3323,9 @@ const styles = StyleSheet.create({
   },
   detailTwoStatDivider: {
     width: 1,
-    height: 28,
+    height: 32,
     backgroundColor: '#E8E3FA',
-    marginHorizontal: 12,
+    marginHorizontal: 16,
   },
 
   // Category Pills Row
@@ -3240,7 +3404,7 @@ const styles = StyleSheet.create({
     color: '#582CDB',
   },
 
-  // Card 2: Collab Idea
+  // Card 2: Collab Idea Blueprint
   detailCollabIdeaCard: {
     backgroundColor: '#FAF8FF',
     borderRadius: 22,
@@ -3269,31 +3433,54 @@ const styles = StyleSheet.create({
     color: '#582CDB',
   },
   collabIdeaName: {
-    fontSize: 16,
+    fontSize: 16.5,
     fontWeight: '900',
     color: '#171420',
-    marginBottom: 10,
-  },
-  collabIdeaDetailCol: {
-    gap: 6,
     marginBottom: 12,
   },
-  collabIdeaDetailRow: {
-    flexDirection: 'row',
-    gap: 6,
+  collabScriptStepsCol: {
+    gap: 8,
+    marginBottom: 14,
   },
-  collabIdeaDetailKey: {
-    fontSize: 12,
+  scriptStepItem: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    backgroundColor: '#FFFFFF',
+    borderRadius: 12,
+    padding: 10,
+    borderWidth: 1,
+    borderColor: '#E8E3FA',
+    gap: 10,
+  },
+  stepNumBadge: {
+    width: 26,
+    height: 26,
+    borderRadius: 13,
+    backgroundColor: '#EDE8FC',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 1,
+  },
+  stepNumText: {
+    fontSize: 11,
+    fontWeight: '900',
+    color: '#582CDB',
+  },
+  stepContentCol: {
+    flex: 1,
+  },
+  stepLabel: {
+    fontSize: 9.5,
     fontWeight: '800',
     color: '#582CDB',
-    width: 52,
+    letterSpacing: 0.6,
+    marginBottom: 2,
   },
-  collabIdeaDetailVal: {
+  stepValText: {
     fontSize: 12,
-    fontWeight: '500',
     color: '#171420',
-    flex: 1,
     lineHeight: 16,
+    fontWeight: '500',
   },
   collabIdeaChipsRow: {
     flexDirection: 'row',
@@ -3302,19 +3489,19 @@ const styles = StyleSheet.create({
   },
   collabIdeaChip: {
     backgroundColor: '#FFFFFF',
-    paddingVertical: 4,
+    paddingVertical: 5,
     paddingHorizontal: 10,
     borderRadius: 8,
     borderWidth: 1,
     borderColor: '#E8E3FA',
   },
   collabIdeaChipText: {
-    fontSize: 10.5,
+    fontSize: 11,
     fontWeight: '700',
     color: '#7F7894',
   },
   buildCollabPlanBtn: {
-    height: 44,
+    height: 46,
     borderRadius: 14,
     overflow: 'hidden',
   },
@@ -3325,7 +3512,7 @@ const styles = StyleSheet.create({
   },
   buildCollabPlanBtnText: {
     color: '#FFFFFF',
-    fontSize: 13.5,
+    fontSize: 14,
     fontWeight: '800',
   },
 
@@ -3359,12 +3546,12 @@ const styles = StyleSheet.create({
     marginBottom: 2,
   },
   metricCardBigValue: {
-    fontSize: 17,
+    fontSize: 17.5,
     fontWeight: '900',
     color: '#171420',
   },
   metricCardGoldValue: {
-    fontSize: 17,
+    fontSize: 17.5,
     fontWeight: '900',
     color: '#D97706',
   },
@@ -3373,7 +3560,7 @@ const styles = StyleSheet.create({
   audienceCorrelationCard: {
     backgroundColor: '#FFFFFF',
     borderRadius: 22,
-    padding: 16,
+    padding: 18,
     borderWidth: 1.2,
     borderColor: '#E8E3FA',
     alignItems: 'center',
@@ -3392,48 +3579,51 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   vennContainer: {
-    width: 220,
-    height: 120,
+    width: 240,
+    height: 130,
     position: 'relative',
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 12,
+    marginBottom: 14,
   },
   vennLabelLeft: {
     position: 'absolute',
-    left: 45,
-    top: 50,
+    left: 48,
+    top: 54,
   },
   vennLabelTextPurple: {
-    fontSize: 11,
+    fontSize: 11.5,
     fontWeight: '900',
     color: '#7C3AED',
   },
   vennCenterBadge: {
     position: 'absolute',
-    top: 48,
+    top: 50,
     alignSelf: 'center',
     backgroundColor: '#FFFFFF',
-    paddingVertical: 3,
-    paddingHorizontal: 8,
+    paddingVertical: 4,
+    paddingHorizontal: 10,
     borderRadius: 100,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
+    shadowColor: '#582CDB',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.16,
+    shadowRadius: 6,
+    elevation: 3,
+    borderWidth: 1,
+    borderColor: '#EDE8FC',
   },
   vennCenterPercent: {
-    fontSize: 13,
+    fontSize: 13.5,
     fontWeight: '900',
     color: '#582CDB',
   },
   vennLabelRight: {
     position: 'absolute',
-    right: 36,
-    top: 50,
+    right: 44,
+    top: 54,
   },
   vennLabelTextGold: {
-    fontSize: 10.5,
+    fontSize: 11,
     fontWeight: '900',
     color: '#B45309',
   },
@@ -3445,8 +3635,8 @@ const styles = StyleSheet.create({
   correlationIndicatorPill: {
     flex: 1,
     backgroundColor: '#FAF8FF',
-    borderRadius: 12,
-    paddingVertical: 8,
+    borderRadius: 14,
+    paddingVertical: 10,
     paddingHorizontal: 12,
     borderWidth: 1,
     borderColor: '#E8E3FA',
@@ -3457,7 +3647,7 @@ const styles = StyleSheet.create({
     fontWeight: '800',
     color: '#7F7894',
     letterSpacing: 0.6,
-    marginBottom: 2,
+    marginBottom: 3,
   },
   indicatorLevel: {
     fontSize: 12.5,
@@ -3466,31 +3656,32 @@ const styles = StyleSheet.create({
 
   // Card 4: Jarvis Deep Insight Frosted Box
   detailJarvisInsightCard: {
-    backgroundColor: 'rgba(245, 243, 255, 0.85)',
+    backgroundColor: 'rgba(245, 243, 255, 0.9)',
     borderRadius: 22,
     padding: 16,
     borderWidth: 1.2,
-    borderColor: 'rgba(221, 214, 254, 0.8)',
+    borderColor: 'rgba(221, 214, 254, 0.85)',
     alignItems: 'center',
     marginBottom: 14,
   },
   detailJarvisGhost: {
-    width: 28,
-    height: 28,
+    width: 32,
+    height: 32,
     marginBottom: 6,
   },
   detailJarvisInsightLabel: {
-    fontSize: 10,
+    fontSize: 10.5,
     fontWeight: '800',
     color: '#582CDB',
     letterSpacing: 0.8,
-    marginBottom: 4,
+    marginBottom: 6,
   },
   detailJarvisInsightText: {
     fontSize: 12.5,
     color: '#4B4360',
     textAlign: 'center',
     lineHeight: 18,
+    fontStyle: 'italic',
     fontWeight: '500',
   },
 
@@ -3533,15 +3724,22 @@ const styles = StyleSheet.create({
     color: '#15803D',
   },
   readinessChecklistCol: {
-    gap: 8,
+    gap: 10,
   },
   readinessItemRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
+    gap: 10,
   },
-  readinessItemIcon: {
-    fontSize: 14,
+  readinessCheckCircle: {
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    backgroundColor: '#EDE8FC',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#DDD6FE',
   },
   readinessItemText: {
     fontSize: 12.5,
