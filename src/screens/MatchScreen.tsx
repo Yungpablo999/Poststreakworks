@@ -54,16 +54,36 @@ interface IncomingRequest {
   tags: string[];
 }
 
+interface CollabIdeaDetail {
+  title: string;
+  hook: string;
+  bts: string;
+  lesson: string;
+  chips: string[];
+}
+
 interface CreatorProfile {
   id: string;
   name: string;
   role: string;
   followers: string;
+  audienceCount: string;
   location: string;
   coverImage: any;
   bio: string;
   tags: string[];
+  categoryTags: string[];
   streak: number;
+  availability: string;
+  consistencyRating: string;
+  whyFitsDescription: string;
+  whyFitsPills: string[];
+  collabIdea: CollabIdeaDetail;
+  correlationPercent: number;
+  primaryNiche: { name: string; level: string; color: string };
+  secondaryNiche: { name: string; level: string; color: string };
+  jarvisDeepInsight: string;
+  readinessChecks: string[];
   tracking: TrackedMetrics;
 }
 
@@ -103,12 +123,36 @@ const CREATOR_DECK: CreatorProfile[] = [
     id: 'creator_1',
     name: 'Amara Okafor',
     role: 'Travel & Lifestyle Vlogger',
-    followers: '85k',
+    followers: '85K',
+    audienceCount: '85,000+',
     location: 'Lagos, NG',
     coverImage: require('../../assets/images/amara-creator-cover.jpg'),
     bio: 'Filming authentic travel routines & luxury getaways across West Africa. Looking for lifestyle co-creators for dynamic split-screen Reels! 🌴',
     tags: ['🌿 Travel', '✨ Lifestyle', '🎥 4K Vlogs'],
+    categoryTags: ['Lifestyle', 'Travel', 'Storytelling', 'Short-form Video'],
     streak: 44,
+    availability: 'Available This Week',
+    consistencyRating: 'High',
+    whyFitsDescription:
+      'Amara’s audience overlaps with your lifestyle and creator journey content. This match could support a strong short-form collaboration.',
+    whyFitsPills: ['Audience Overlap', 'Similar Content Style', 'Strong Posting Rhythm'],
+    collabIdea: {
+      title: '“24 Hours Creating in Lagos”',
+      hook: 'Two creators, one city, zero sleep.',
+      bts: 'iPhone and natural lighting.',
+      lesson: 'How we both built our streaks today.',
+      chips: ['Reel', '30-45 Sec', 'Sat 2 PM'],
+    },
+    correlationPercent: 76,
+    primaryNiche: { name: 'LIFESTYLE', level: 'High', color: '#10B981' },
+    secondaryNiche: { name: 'TRAVEL', level: 'Medium', color: '#6366F1' },
+    jarvisDeepInsight:
+      'Amara’s content style matches your creator journey niche. A simple day-in-the-life collab could work well for both audiences.',
+    readinessChecks: [
+      'Profile verified & complete',
+      'Active high-performance streak',
+      'High response likelihood',
+    ],
     tracking: {
       growthRate: '+4.2k this month',
       postingPace: '4 posts/week',
@@ -122,12 +166,36 @@ const CREATOR_DECK: CreatorProfile[] = [
     id: 'creator_2',
     name: 'Tomi Adebayo',
     role: 'Tech & AI Creator',
-    followers: '156k',
+    followers: '156K',
+    audienceCount: '156,000+',
     location: 'London, UK',
     coverImage: require('../../assets/images/tomi-avatar.jpg'),
     bio: 'Building AI-first creator workflows & reviewing next-gen tech. Let’s co-produce deep dives that get millions of views! ⚡',
     tags: ['🤖 AI Tools', '📱 Tech Reviews', '📈 Viral Reach'],
+    categoryTags: ['Tech', 'AI Workflows', 'Hardware', 'Productivity'],
     streak: 52,
+    availability: 'Available This Week',
+    consistencyRating: 'Elite',
+    whyFitsDescription:
+      'Tomi produces cutting-edge AI workflow content that aligns with your high-efficiency creator systems.',
+    whyFitsPills: ['Workflow Tech', 'High Retention', 'Elite Posting Streak'],
+    collabIdea: {
+      title: '“AI vs Manual: 1-Hour Video Challenge”',
+      hook: 'Can AI cut video editing time by 80%? We tested it live.',
+      bts: 'Screen recordings & live timer.',
+      lesson: 'Top 3 automations every creator needs.',
+      chips: ['YouTube Short', '45 Sec', 'Thu 6 PM'],
+    },
+    correlationPercent: 88,
+    primaryNiche: { name: 'AI & TECH', level: 'High', color: '#10B981' },
+    secondaryNiche: { name: 'WORKFLOW', level: 'High', color: '#6366F1' },
+    jarvisDeepInsight:
+      'High overlap in productivity and workflow audience with 4.8x average viral reach across tech reels.',
+    readinessChecks: [
+      'Profile verified & complete',
+      'Active high-performance streak',
+      'High response likelihood',
+    ],
     tracking: {
       growthRate: '+12.8k this month',
       postingPace: '5 posts/week',
@@ -141,12 +209,36 @@ const CREATOR_DECK: CreatorProfile[] = [
     id: 'creator_3',
     name: 'Zainab Okafor',
     role: 'Fashion & Aesthetic',
-    followers: '52k',
+    followers: '52K',
+    audienceCount: '52,000+',
     location: 'Toronto, CA',
     coverImage: require('../../assets/images/zainab-avatar.jpg'),
     bio: 'Curating high-end aesthetic lookbooks, capsule wardrobes & studio vlogs. Seeking visual storytellers for collaborative shoots! ☕',
     tags: ['👗 Fashion', '✨ Aesthetic', '☕ Lifestyle'],
+    categoryTags: ['Fashion', 'Minimalism', 'Studio Vlogs', 'Lookbooks'],
     streak: 38,
+    availability: 'Available Weekend',
+    consistencyRating: 'High',
+    whyFitsDescription:
+      'Zainab’s minimalist aesthetic and storytelling resonate strongly with lifestyle and visual branding audiences.',
+    whyFitsPills: ['Visual Style', 'Aesthetic Overlap', 'Engaged Audience'],
+    collabIdea: {
+      title: '“Capsule Wardrobe for Nomadic Creators”',
+      hook: '5 essential pieces to film in 10 different cities.',
+      bts: 'Studio lighting & color graded edits.',
+      lesson: 'Visual minimalism in creator production.',
+      chips: ['Reel', '30 Sec', 'Sat 11 AM'],
+    },
+    correlationPercent: 72,
+    primaryNiche: { name: 'FASHION', level: 'High', color: '#10B981' },
+    secondaryNiche: { name: 'AESTHETIC', level: 'Medium', color: '#6366F1' },
+    jarvisDeepInsight:
+      'Strong visual aesthetic alignment with top-tier comment-to-view ratios on aesthetic reels.',
+    readinessChecks: [
+      'Profile verified & complete',
+      'Active high-performance streak',
+      'High response likelihood',
+    ],
     tracking: {
       growthRate: '+2.1k this month',
       postingPace: '3 posts/week',
@@ -160,12 +252,36 @@ const CREATOR_DECK: CreatorProfile[] = [
     id: 'creator_4',
     name: 'Marcus Vance',
     role: 'Fitness & Habit Coach',
-    followers: '110k',
+    followers: '110K',
+    audienceCount: '110,000+',
     location: 'New York, US',
     coverImage: require('../../assets/images/marcus-avatar.jpg'),
     bio: 'High-performance fitness & daily creator discipline routines. Looking for accountability partners for 30-day challenge series! 💪',
     tags: ['🏋️ Fitness', '🔥 Daily Habits', '⚡ High Retention'],
+    categoryTags: ['Fitness', 'Discipline', 'Daily Routine', 'Mindset'],
     streak: 60,
+    availability: 'Available Daily',
+    consistencyRating: 'Elite',
+    whyFitsDescription:
+      'Marcus thrives on ironclad daily discipline, creating an ideal accountability synergy with your 47-day streak.',
+    whyFitsPills: ['Discipline Synergy', 'Streak Alignment', 'High Energy'],
+    collabIdea: {
+      title: '“The 5 AM Creator Morning Routine”',
+      hook: 'What happens when 2 creators optimize their mornings for 30 days?',
+      bts: 'Split screen sunrise gym vs studio sessions.',
+      lesson: 'Daily habit architecture for mental stamina.',
+      chips: ['Shorts', '45 Sec', 'Mon 7 AM'],
+    },
+    correlationPercent: 84,
+    primaryNiche: { name: 'FITNESS', level: 'High', color: '#10B981' },
+    secondaryNiche: { name: 'HABITS', level: 'High', color: '#6366F1' },
+    jarvisDeepInsight:
+      'Massive streak alignment. Both of you thrive on high-discipline posting schedules.',
+    readinessChecks: [
+      'Profile verified & complete',
+      'Active high-performance streak',
+      'High response likelihood',
+    ],
     tracking: {
       growthRate: '+8.5k this month',
       postingPace: '7 posts/week',
@@ -179,12 +295,36 @@ const CREATOR_DECK: CreatorProfile[] = [
     id: 'creator_5',
     name: 'Elena Rostova',
     role: 'Visual Storyteller',
-    followers: '94k',
+    followers: '94K',
+    audienceCount: '94,000+',
     location: 'Berlin, DE',
     coverImage: require('../../assets/images/elena-avatar.jpg'),
     bio: 'Cinematographer & visual director crafting short films. Let’s co-direct high-production Reels that blow minds! 🎬',
     tags: ['🎥 Filmmaking', '🎬 Editing', '✨ Viral Hooks'],
+    categoryTags: ['Cinematography', 'Sound Design', 'Short Film', 'Grading'],
     streak: 41,
+    availability: 'Available This Week',
+    consistencyRating: 'High',
+    whyFitsDescription:
+      'Elena’s cinematic editing and sound design elevate short-form videos into viral visual spectacles.',
+    whyFitsPills: ['Production Value', 'Cinematic Edits', 'Story Pacing'],
+    collabIdea: {
+      title: '“Sound Design Secrets of 10M-View Reels”',
+      hook: 'The 3 hidden audio layers that keep viewers hooked till the end.',
+      bts: 'Timeline zoom-ins & foley sound breakdown.',
+      lesson: 'Auditory psychology for retention.',
+      chips: ['Reel', '40 Sec', 'Tue 8 PM'],
+    },
+    correlationPercent: 81,
+    primaryNiche: { name: 'CINEMA', level: 'High', color: '#10B981' },
+    secondaryNiche: { name: 'EDITING', level: 'High', color: '#6366F1' },
+    jarvisDeepInsight:
+      'Her pacing and visual sound design can amplify your video watch-through rates significantly.',
+    readinessChecks: [
+      'Profile verified & complete',
+      'Active high-performance streak',
+      'High response likelihood',
+    ],
     tracking: {
       growthRate: '+6.4k this month',
       postingPace: '4 posts/week',
@@ -221,6 +361,10 @@ export const MatchScreen: React.FC<MatchScreenProps> = ({
 
   // Touch isolation state (disables outer ScrollView while dragging cards)
   const [isSwipingCard, setIsSwipingCard] = useState(false);
+
+  // Deep-Dive Creator Profile Modal (from Info ⓘ button)
+  const [showDetailModal, setShowDetailModal] = useState(false);
+  const [selectedCreatorForDetail, setSelectedCreatorForDetail] = useState<CreatorProfile>(CREATOR_DECK[0]);
 
   // Modals state
   const [showConnectModal, setShowConnectModal] = useState(false);
@@ -372,25 +516,55 @@ export const MatchScreen: React.FC<MatchScreenProps> = ({
     }
   };
 
+  const handleOpenInfo = (creator: CreatorProfile) => {
+    if (Platform.OS !== 'web') {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    }
+    setSelectedCreatorForDetail(creator);
+    setShowDetailModal(true);
+  };
+
   // INCOMING REQUEST ACTIONS: ACCEPT & DECLINE
   const handleAcceptRequest = (req: IncomingRequest) => {
     if (Platform.OS !== 'web') {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     }
-    // Remove from requests
     setIncomingRequests((prev) => prev.filter((r) => r.id !== req.id));
 
-    // Add to connected
     const newConnectedCreator: CreatorProfile = {
       id: req.id,
       name: req.name,
       role: req.role,
       followers: req.followers,
+      audienceCount: req.followers,
       location: req.location,
       coverImage: req.coverImage,
       bio: req.pitchMessage,
       tags: req.tags,
+      categoryTags: ['Design', 'Workflows', 'Creative'],
       streak: req.streak,
+      availability: 'Available This Week',
+      consistencyRating: 'High',
+      whyFitsDescription:
+        'Great synergy and audience overlap with your creator workflow niche.',
+      whyFitsPills: ['Audience Overlap', 'Shared Style', 'High Consistency'],
+      collabIdea: {
+        title: '“Creator Design Systems Workshop”',
+        hook: 'How to build reusable creator assets that save 10 hours a week.',
+        bts: 'Live Figma screen share.',
+        lesson: 'Designing for viral readability.',
+        chips: ['Reel', '30 Sec', 'Sat 2 PM'],
+      },
+      correlationPercent: 82,
+      primaryNiche: { name: 'DESIGN', level: 'High', color: '#10B981' },
+      secondaryNiche: { name: 'SYSTEMS', level: 'Medium', color: '#6366F1' },
+      jarvisDeepInsight:
+        'Audience loves actionable creator tooling and design hacks. High synergy potential.',
+      readinessChecks: [
+        'Profile verified & complete',
+        'Active high-performance streak',
+        'High response likelihood',
+      ],
       tracking: {
         growthRate: '+5.5k this month',
         postingPace: '4 posts/week',
@@ -434,6 +608,7 @@ export const MatchScreen: React.FC<MatchScreenProps> = ({
   const currentCreator = CREATOR_DECK[currentIndex % CREATOR_DECK.length];
   const nextCreator = CREATOR_DECK[(currentIndex + 1) % CREATOR_DECK.length];
   const isCurrentSaved = savedCreators.some((c) => c.id === currentCreator.id);
+  const isDetailSaved = savedCreators.some((c) => c.id === selectedCreatorForDetail.id);
 
   // Card rotation & stamp interpolation
   const rotate = position.x.interpolate({
@@ -581,7 +756,7 @@ export const MatchScreen: React.FC<MatchScreenProps> = ({
 
             <Text style={styles.pageHeadline}>Find creators worth building with.</Text>
             <Text style={styles.pageSubtitle}>
-              Swipe right to accept, left to decline, or swipe up to track.
+              Swipe right to accept, left to decline, or tap ⓘ for full match intelligence.
             </Text>
 
             {/* LIVE TRACKING STATS BAR */}
@@ -651,7 +826,7 @@ export const MatchScreen: React.FC<MatchScreenProps> = ({
             </Pressable>
           </View>
 
-          {/* TAB 1: PURE GESTURE SWIPE DECK (CLEAN TINDER-STYLE PHOTO CARD) */}
+          {/* TAB 1: PURE GESTURE SWIPE DECK (CLEAN TINDER-STYLE PHOTO CARD WITH ⓘ INFO BUTTON) */}
           {activeSection === 'deck' && (
             <View>
               {/* FILTER PILLS */}
@@ -788,17 +963,28 @@ export const MatchScreen: React.FC<MatchScreenProps> = ({
                         </Text>
                       </View>
 
-                      {/* On-Card Save / Track Toggle */}
-                      <Pressable
-                        style={[styles.onCardSaveBtn, isCurrentSaved && styles.onCardSaveBtnActive]}
-                        onPress={() => handleToggleTrack(currentCreator)}
-                        hitSlop={8}
-                      >
-                        <Text style={{ fontSize: 15 }}>{isCurrentSaved ? '⭐' : '☆'}</Text>
-                        <Text style={[styles.onCardSaveText, isCurrentSaved && styles.onCardSaveTextActive]}>
-                          {isCurrentSaved ? 'Tracking' : 'Save'}
-                        </Text>
-                      </Pressable>
+                      {/* Top Right Group: Track Button + INFO ⓘ Button */}
+                      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                        <Pressable
+                          style={[styles.onCardSaveBtn, isCurrentSaved && styles.onCardSaveBtnActive]}
+                          onPress={() => handleToggleTrack(currentCreator)}
+                          hitSlop={8}
+                        >
+                          <Text style={{ fontSize: 14 }}>{isCurrentSaved ? '⭐' : '☆'}</Text>
+                          <Text style={[styles.onCardSaveText, isCurrentSaved && styles.onCardSaveTextActive]}>
+                            {isCurrentSaved ? 'Tracking' : 'Save'}
+                          </Text>
+                        </Pressable>
+
+                        {/* INFO ⓘ BUTTON OVERLAY */}
+                        <Pressable
+                          style={({ pressed }) => [styles.onCardInfoBtn, pressed && styles.btnPressed]}
+                          onPress={() => handleOpenInfo(currentCreator)}
+                          hitSlop={8}
+                        >
+                          <Text style={styles.onCardInfoBtnText}>ⓘ</Text>
+                        </Pressable>
+                      </View>
                     </View>
 
                     {/* Bottom Frosted Dark Glass Gradient Over Photo */}
@@ -813,8 +999,20 @@ export const MatchScreen: React.FC<MatchScreenProps> = ({
                             <Text style={styles.verifiedCheckText}>✓</Text>
                           </View>
                         </View>
-                        <View style={styles.tinderStreakBadge}>
-                          <Text style={styles.tinderStreakBadgeText}>🔥 {currentCreator.streak}d</Text>
+
+                        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                          <View style={styles.tinderStreakBadge}>
+                            <Text style={styles.tinderStreakBadgeText}>🔥 {currentCreator.streak}d</Text>
+                          </View>
+
+                          {/* Info Button Next to Streak on Card Bottom */}
+                          <Pressable
+                            style={styles.cardBottomInfoPill}
+                            onPress={() => handleOpenInfo(currentCreator)}
+                            hitSlop={8}
+                          >
+                            <Text style={styles.cardBottomInfoPillText}>More info ➔</Text>
+                          </Pressable>
                         </View>
                       </View>
 
@@ -1322,7 +1520,298 @@ export const MatchScreen: React.FC<MatchScreenProps> = ({
           }}
         />
 
-        {/* 7. DIRECT MESSAGE MODAL */}
+        {/* 7. FULL DEEP-DIVE CREATOR PROFILE MODAL (TRIGGERED BY ⓘ INFO BUTTON) */}
+        <Modal
+          visible={showDetailModal}
+          animationType="slide"
+          presentationStyle="pageSheet"
+          onRequestClose={() => setShowDetailModal(false)}
+        >
+          <SafeAreaView style={styles.detailSafeArea}>
+            <View style={styles.detailHeaderBar}>
+              <Pressable
+                style={({ pressed }) => [styles.detailCloseBtn, pressed && styles.btnPressed]}
+                onPress={() => setShowDetailModal(false)}
+                hitSlop={8}
+              >
+                <Text style={styles.detailCloseBtnText}>✕</Text>
+              </Pressable>
+              <Text style={styles.detailHeaderTitle}>Creator Profile</Text>
+              <Pressable
+                style={({ pressed }) => [styles.detailSaveTopBtn, pressed && styles.btnPressed]}
+                onPress={() => handleToggleTrack(selectedCreatorForDetail)}
+                hitSlop={8}
+              >
+                <Text style={{ fontSize: 18 }}>{isDetailSaved ? '⭐' : '☆'}</Text>
+              </Pressable>
+            </View>
+
+            <ScrollView
+              style={styles.detailScrollView}
+              contentContainerStyle={styles.detailScrollContent}
+              showsVerticalScrollIndicator={false}
+            >
+              {/* TOP PHOTO & STATS HERO CARD */}
+              <View style={styles.detailHeroCard}>
+                <Image
+                  source={selectedCreatorForDetail.coverImage}
+                  style={styles.detailCoverImage}
+                  resizeMode="cover"
+                />
+                <View style={styles.detailHeroBody}>
+                  <View style={styles.detailAvailabilityRow}>
+                    <View style={styles.greenStatusDot} />
+                    <Text style={styles.detailAvailabilityText}>{selectedCreatorForDetail.availability}</Text>
+                  </View>
+
+                  <View style={styles.detailTwoStatRow}>
+                    <View style={styles.detailTwoStatItem}>
+                      <Text style={styles.detailStatValGold}>{selectedCreatorForDetail.followers}</Text>
+                      <Text style={styles.detailStatLbl}>Followers</Text>
+                    </View>
+                    <View style={styles.detailTwoStatDivider} />
+                    <View style={styles.detailTwoStatItem}>
+                      <Text style={styles.detailStatValPurple}>{selectedCreatorForDetail.consistencyRating}</Text>
+                      <Text style={styles.detailStatLbl}>Consistency</Text>
+                    </View>
+                  </View>
+                </View>
+              </View>
+
+              {/* CATEGORY TAG PILLS UNDER PHOTO */}
+              <View style={styles.detailCategoryPillsRow}>
+                {selectedCreatorForDetail.categoryTags.map((tag, idx) => (
+                  <View key={idx} style={styles.detailCategoryPill}>
+                    <Text style={styles.detailCategoryPillText}>{tag}</Text>
+                  </View>
+                ))}
+              </View>
+
+              {/* CARD 1: WHY THIS MATCH FITS */}
+              <View style={styles.detailWhyFitsCard}>
+                <View style={styles.detailCardTitleRow}>
+                  <Text style={styles.sparkleIcon}>✨</Text>
+                  <Text style={styles.detailCardTitleText}>Why This Match Fits</Text>
+                </View>
+                <Text style={styles.detailWhyFitsBody}>
+                  {selectedCreatorForDetail.whyFitsDescription}
+                </Text>
+                <View style={styles.detailWhyFitsPillsRow}>
+                  {selectedCreatorForDetail.whyFitsPills.map((pill, idx) => (
+                    <View key={idx} style={styles.whyFitsPill}>
+                      <Text style={styles.whyFitsPillText}>{pill}</Text>
+                    </View>
+                  ))}
+                </View>
+              </View>
+
+              {/* CARD 2: COLLAB IDEA */}
+              <View style={styles.detailCollabIdeaCard}>
+                <View style={styles.collabIdeaTitleRow}>
+                  <Text style={styles.purplePinIcon}>📍</Text>
+                  <Text style={styles.detailCollabIdeaTitle}>Collab Idea</Text>
+                </View>
+                <Text style={styles.collabIdeaName}>{selectedCreatorForDetail.collabIdea.title}</Text>
+
+                <View style={styles.collabIdeaDetailCol}>
+                  <View style={styles.collabIdeaDetailRow}>
+                    <Text style={styles.collabIdeaDetailKey}>Hook</Text>
+                    <Text style={styles.collabIdeaDetailVal}>{selectedCreatorForDetail.collabIdea.hook}</Text>
+                  </View>
+                  <View style={styles.collabIdeaDetailRow}>
+                    <Text style={styles.collabIdeaDetailKey}>BTS</Text>
+                    <Text style={styles.collabIdeaDetailVal}>{selectedCreatorForDetail.collabIdea.bts}</Text>
+                  </View>
+                  <View style={styles.collabIdeaDetailRow}>
+                    <Text style={styles.collabIdeaDetailKey}>Lesson</Text>
+                    <Text style={styles.collabIdeaDetailVal}>{selectedCreatorForDetail.collabIdea.lesson}</Text>
+                  </View>
+                </View>
+
+                <View style={styles.collabIdeaChipsRow}>
+                  {selectedCreatorForDetail.collabIdea.chips.map((chip, idx) => (
+                    <View key={idx} style={styles.collabIdeaChip}>
+                      <Text style={styles.collabIdeaChipText}>{chip}</Text>
+                    </View>
+                  ))}
+                </View>
+
+                <Pressable
+                  style={({ pressed }) => [styles.buildCollabPlanBtn, pressed && styles.btnPressed]}
+                  onPress={() => {
+                    setShowDetailModal(false);
+                    setTimeout(() => {
+                      setShowScheduleConfirmModal(true);
+                    }, 250);
+                  }}
+                >
+                  <LinearGradient
+                    colors={['#784DF0', '#582CDB']}
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 1, y: 1 }}
+                    style={styles.buildCollabPlanGradient}
+                  >
+                    <Text style={styles.buildCollabPlanBtnText}>Build Collab Plan</Text>
+                  </LinearGradient>
+                </Pressable>
+              </View>
+
+              {/* ROW OF 2 METRIC CARDS: AUDIENCE & STREAK */}
+              <View style={styles.detailTwoCardsRow}>
+                <View style={styles.detailMetricCardHalf}>
+                  <View style={styles.metricCardIconRow}>
+                    <Text style={{ fontSize: 14 }}>👥</Text>
+                  </View>
+                  <Text style={styles.metricCardLabel}>AUDIENCE</Text>
+                  <Text style={styles.metricCardBigValue}>{selectedCreatorForDetail.audienceCount}</Text>
+                </View>
+
+                <View style={styles.detailMetricCardHalf}>
+                  <View style={styles.metricCardIconRow}>
+                    <Text style={{ fontSize: 14 }}>🔥</Text>
+                  </View>
+                  <Text style={styles.metricCardLabel}>STREAK</Text>
+                  <Text style={styles.metricCardGoldValue}>{selectedCreatorForDetail.streak} Days</Text>
+                </View>
+              </View>
+
+              {/* CARD 3: AUDIENCE CORRELATION VENN DIAGRAM */}
+              <View style={styles.audienceCorrelationCard}>
+                <Text style={styles.correlationHeading}>AUDIENCE CORRELATION</Text>
+
+                {/* VENN DIAGRAM GRAPHIC */}
+                <View style={styles.vennContainer}>
+                  <Svg width={220} height={120} viewBox="0 0 220 120">
+                    {/* Left Circle: YOU */}
+                    <Circle
+                      cx="85"
+                      cy="60"
+                      r="46"
+                      fill="rgba(124, 58, 237, 0.22)"
+                      stroke="#7C3AED"
+                      strokeWidth="2"
+                    />
+                    {/* Right Circle: CREATOR */}
+                    <Circle
+                      cx="135"
+                      cy="60"
+                      r="46"
+                      fill="rgba(217, 119, 6, 0.18)"
+                      stroke="#D97706"
+                      strokeWidth="2"
+                    />
+                  </Svg>
+                  {/* Overlay Labels */}
+                  <View style={styles.vennLabelLeft}>
+                    <Text style={styles.vennLabelTextPurple}>YOU</Text>
+                  </View>
+                  <View style={styles.vennCenterBadge}>
+                    <Text style={styles.vennCenterPercent}>{selectedCreatorForDetail.correlationPercent}%</Text>
+                  </View>
+                  <View style={styles.vennLabelRight}>
+                    <Text style={styles.vennLabelTextGold}>AMARA</Text>
+                  </View>
+                </View>
+
+                {/* Bottom 2 Pill Indicators */}
+                <View style={styles.correlationIndicatorsRow}>
+                  <View style={styles.correlationIndicatorPill}>
+                    <Text style={styles.indicatorName}>{selectedCreatorForDetail.primaryNiche.name}</Text>
+                    <Text style={[styles.indicatorLevel, { color: selectedCreatorForDetail.primaryNiche.color }]}>
+                      {selectedCreatorForDetail.primaryNiche.level}
+                    </Text>
+                  </View>
+                  <View style={styles.correlationIndicatorPill}>
+                    <Text style={styles.indicatorName}>{selectedCreatorForDetail.secondaryNiche.name}</Text>
+                    <Text style={[styles.indicatorLevel, { color: selectedCreatorForDetail.secondaryNiche.color }]}>
+                      {selectedCreatorForDetail.secondaryNiche.level}
+                    </Text>
+                  </View>
+                </View>
+              </View>
+
+              {/* CARD 4: JARVIS DEEP INSIGHT FROSTED BOX */}
+              <View style={styles.detailJarvisInsightCard}>
+                <Image
+                  source={require('../../assets/images/jarvis-ghost-clean.png')}
+                  style={styles.detailJarvisGhost}
+                  resizeMode="contain"
+                />
+                <Text style={styles.detailJarvisInsightLabel}>JARVIS INSIGHT</Text>
+                <Text style={styles.detailJarvisInsightText}>
+                  {selectedCreatorForDetail.jarvisDeepInsight}
+                </Text>
+              </View>
+
+              {/* CARD 5: READINESS CHECKLIST */}
+              <View style={styles.detailReadinessCard}>
+                <View style={styles.readinessHeaderRow}>
+                  <Text style={styles.readinessTitle}>Readiness</Text>
+                  <View style={styles.readinessReadyBadge}>
+                    <Text style={styles.readinessReadyText}>🟢 Ready</Text>
+                  </View>
+                </View>
+
+                <View style={styles.readinessChecklistCol}>
+                  <View style={styles.readinessItemRow}>
+                    <Text style={styles.readinessItemIcon}>👤</Text>
+                    <Text style={styles.readinessItemText}>{selectedCreatorForDetail.readinessChecks[0]}</Text>
+                  </View>
+                  <View style={styles.readinessItemRow}>
+                    <Text style={styles.readinessItemIcon}>⚡</Text>
+                    <Text style={styles.readinessItemText}>{selectedCreatorForDetail.readinessChecks[1]}</Text>
+                  </View>
+                  <View style={styles.readinessItemRow}>
+                    <Text style={styles.readinessItemIcon}>💬</Text>
+                    <Text style={styles.readinessItemText}>{selectedCreatorForDetail.readinessChecks[2]}</Text>
+                  </View>
+                </View>
+              </View>
+            </ScrollView>
+
+            {/* FLOATING BOTTOM ACTION BAR IN MODAL */}
+            <View style={styles.detailBottomActionBar}>
+              <Pressable
+                style={({ pressed }) => [styles.detailConnectBtn, pressed && styles.btnPressed]}
+                onPress={() => {
+                  setShowDetailModal(false);
+                  onSwipeComplete('right', selectedCreatorForDetail);
+                }}
+              >
+                <LinearGradient
+                  colors={['#784DF0', '#582CDB']}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 1 }}
+                  style={styles.detailConnectGradient}
+                >
+                  <Text style={styles.detailConnectBtnText}>Connect</Text>
+                </LinearGradient>
+              </Pressable>
+
+              <Pressable
+                style={({ pressed }) => [
+                  styles.detailBookmarkBtn,
+                  isDetailSaved && styles.detailBookmarkBtnActive,
+                  pressed && styles.btnPressed,
+                ]}
+                onPress={() => handleToggleTrack(selectedCreatorForDetail)}
+                hitSlop={8}
+              >
+                <Svg width={20} height={20} viewBox="0 0 24 24" fill={isDetailSaved ? '#582CDB' : 'none'}>
+                  <Path
+                    d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"
+                    stroke="#582CDB"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </Svg>
+              </Pressable>
+            </View>
+          </SafeAreaView>
+        </Modal>
+
+        {/* 8. DIRECT MESSAGE MODAL */}
         <Modal
           visible={showMessageModal}
           transparent={true}
@@ -1363,7 +1852,7 @@ export const MatchScreen: React.FC<MatchScreenProps> = ({
           </View>
         </Modal>
 
-        {/* 8. NOTIFICATIONS MODAL */}
+        {/* 9. NOTIFICATIONS MODAL */}
         <Modal
           visible={showNotificationModal}
           transparent={true}
@@ -1392,7 +1881,7 @@ export const MatchScreen: React.FC<MatchScreenProps> = ({
           </View>
         </Modal>
 
-        {/* 9. PROFILE MODAL */}
+        {/* 10. PROFILE MODAL */}
         <Modal
           visible={showProfileModal}
           transparent={true}
@@ -1840,6 +2329,40 @@ const styles = StyleSheet.create({
   },
   onCardSaveTextActive: {
     color: '#D97706',
+  },
+
+  // INFO ⓘ BUTTONS
+  onCardInfoBtn: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: 'rgba(255, 255, 255, 0.92)',
+    borderWidth: 1,
+    borderColor: 'rgba(235, 230, 248, 0.9)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: '#171420',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+  },
+  onCardInfoBtnText: {
+    fontSize: 14,
+    fontWeight: '900',
+    color: '#582CDB',
+  },
+  cardBottomInfoPill: {
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    paddingVertical: 3,
+    paddingHorizontal: 8,
+    borderRadius: 100,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.3)',
+  },
+  cardBottomInfoPillText: {
+    fontSize: 10.5,
+    fontWeight: '700',
+    color: '#FFFFFF',
   },
 
   // BOTTOM GRADIENT OVER PHOTO
@@ -2521,6 +3044,550 @@ const styles = StyleSheet.create({
     fontSize: 10.5,
     fontWeight: '800',
     color: '#582CDB',
+  },
+
+  // DEEP-DIVE CREATOR PROFILE MODAL (FROM ⓘ INFO BUTTON)
+  detailSafeArea: {
+    flex: 1,
+    backgroundColor: '#FAF9F6',
+  },
+  detailHeaderBar: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 18,
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: '#E8E3FA',
+    backgroundColor: '#FAF9F6',
+  },
+  detailCloseBtn: {
+    width: 34,
+    height: 34,
+    borderRadius: 17,
+    backgroundColor: '#EDE8FC',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  detailCloseBtnText: {
+    fontSize: 16,
+    fontWeight: '800',
+    color: '#582CDB',
+  },
+  detailHeaderTitle: {
+    fontSize: 16,
+    fontWeight: '800',
+    color: '#171420',
+  },
+  detailSaveTopBtn: {
+    width: 34,
+    height: 34,
+    borderRadius: 17,
+    backgroundColor: '#EDE8FC',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  detailScrollView: {
+    flex: 1,
+  },
+  detailScrollContent: {
+    paddingHorizontal: 20,
+    paddingTop: 16,
+    paddingBottom: 110,
+  },
+
+  // Top Photo & Two-Stat Hero Card
+  detailHeroCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 24,
+    overflow: 'hidden',
+    borderWidth: 1.2,
+    borderColor: '#E8E3FA',
+    shadowColor: '#582CDB',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.08,
+    shadowRadius: 16,
+    elevation: 3,
+    marginBottom: 12,
+  },
+  detailCoverImage: {
+    width: '100%',
+    height: 360,
+  },
+  detailHeroBody: {
+    padding: 16,
+  },
+  detailAvailabilityRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    marginBottom: 12,
+  },
+  greenStatusDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: '#10B981',
+  },
+  detailAvailabilityText: {
+    fontSize: 12.5,
+    fontWeight: '700',
+    color: '#171420',
+  },
+  detailTwoStatRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  detailTwoStatItem: {
+    flex: 1,
+  },
+  detailStatValGold: {
+    fontSize: 18,
+    fontWeight: '900',
+    color: '#EAB308',
+  },
+  detailStatValPurple: {
+    fontSize: 18,
+    fontWeight: '900',
+    color: '#582CDB',
+  },
+  detailStatLbl: {
+    fontSize: 10.5,
+    fontWeight: '600',
+    color: '#7F7894',
+    marginTop: 2,
+  },
+  detailTwoStatDivider: {
+    width: 1,
+    height: 28,
+    backgroundColor: '#E8E3FA',
+    marginHorizontal: 12,
+  },
+
+  // Category Pills Row
+  detailCategoryPillsRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 6,
+    marginBottom: 16,
+  },
+  detailCategoryPill: {
+    backgroundColor: '#FAF8FF',
+    paddingVertical: 5,
+    paddingHorizontal: 12,
+    borderRadius: 100,
+    borderWidth: 1,
+    borderColor: '#E8E3FA',
+  },
+  detailCategoryPillText: {
+    fontSize: 11.5,
+    fontWeight: '700',
+    color: '#582CDB',
+  },
+
+  // Card 1: Why This Match Fits
+  detailWhyFitsCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 22,
+    padding: 16,
+    borderWidth: 1.2,
+    borderColor: '#E8E3FA',
+    marginBottom: 14,
+    shadowColor: '#582CDB',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.06,
+    shadowRadius: 12,
+    elevation: 2,
+  },
+  detailCardTitleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    marginBottom: 8,
+  },
+  sparkleIcon: {
+    fontSize: 14,
+    color: '#582CDB',
+  },
+  detailCardTitleText: {
+    fontSize: 15,
+    fontWeight: '800',
+    color: '#171420',
+  },
+  detailWhyFitsBody: {
+    fontSize: 12.5,
+    color: '#4B4360',
+    lineHeight: 18,
+    fontWeight: '500',
+    marginBottom: 12,
+  },
+  detailWhyFitsPillsRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 6,
+  },
+  whyFitsPill: {
+    backgroundColor: '#FAF8FF',
+    paddingVertical: 4,
+    paddingHorizontal: 10,
+    borderRadius: 100,
+    borderWidth: 1,
+    borderColor: '#DDD6FE',
+  },
+  whyFitsPillText: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: '#582CDB',
+  },
+
+  // Card 2: Collab Idea
+  detailCollabIdeaCard: {
+    backgroundColor: '#FAF8FF',
+    borderRadius: 22,
+    padding: 16,
+    borderWidth: 1.2,
+    borderColor: '#EDE8FC',
+    marginBottom: 14,
+    shadowColor: '#582CDB',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.06,
+    shadowRadius: 12,
+    elevation: 2,
+  },
+  collabIdeaTitleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    marginBottom: 6,
+  },
+  purplePinIcon: {
+    fontSize: 13,
+  },
+  detailCollabIdeaTitle: {
+    fontSize: 13,
+    fontWeight: '800',
+    color: '#582CDB',
+  },
+  collabIdeaName: {
+    fontSize: 16,
+    fontWeight: '900',
+    color: '#171420',
+    marginBottom: 10,
+  },
+  collabIdeaDetailCol: {
+    gap: 6,
+    marginBottom: 12,
+  },
+  collabIdeaDetailRow: {
+    flexDirection: 'row',
+    gap: 6,
+  },
+  collabIdeaDetailKey: {
+    fontSize: 12,
+    fontWeight: '800',
+    color: '#582CDB',
+    width: 52,
+  },
+  collabIdeaDetailVal: {
+    fontSize: 12,
+    fontWeight: '500',
+    color: '#171420',
+    flex: 1,
+    lineHeight: 16,
+  },
+  collabIdeaChipsRow: {
+    flexDirection: 'row',
+    gap: 6,
+    marginBottom: 14,
+  },
+  collabIdeaChip: {
+    backgroundColor: '#FFFFFF',
+    paddingVertical: 4,
+    paddingHorizontal: 10,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#E8E3FA',
+  },
+  collabIdeaChipText: {
+    fontSize: 10.5,
+    fontWeight: '700',
+    color: '#7F7894',
+  },
+  buildCollabPlanBtn: {
+    height: 44,
+    borderRadius: 14,
+    overflow: 'hidden',
+  },
+  buildCollabPlanGradient: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  buildCollabPlanBtnText: {
+    color: '#FFFFFF',
+    fontSize: 13.5,
+    fontWeight: '800',
+  },
+
+  // Row of 2 Metric Cards
+  detailTwoCardsRow: {
+    flexDirection: 'row',
+    gap: 10,
+    marginBottom: 14,
+  },
+  detailMetricCardHalf: {
+    flex: 1,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 18,
+    padding: 14,
+    borderWidth: 1.2,
+    borderColor: '#E8E3FA',
+    shadowColor: '#582CDB',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.04,
+    shadowRadius: 8,
+    elevation: 2,
+  },
+  metricCardIconRow: {
+    marginBottom: 4,
+  },
+  metricCardLabel: {
+    fontSize: 9.5,
+    fontWeight: '800',
+    color: '#7F7894',
+    letterSpacing: 0.6,
+    marginBottom: 2,
+  },
+  metricCardBigValue: {
+    fontSize: 17,
+    fontWeight: '900',
+    color: '#171420',
+  },
+  metricCardGoldValue: {
+    fontSize: 17,
+    fontWeight: '900',
+    color: '#D97706',
+  },
+
+  // Card 3: Audience Correlation Venn Diagram
+  audienceCorrelationCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 22,
+    padding: 16,
+    borderWidth: 1.2,
+    borderColor: '#E8E3FA',
+    alignItems: 'center',
+    marginBottom: 14,
+    shadowColor: '#582CDB',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.06,
+    shadowRadius: 12,
+    elevation: 2,
+  },
+  correlationHeading: {
+    fontSize: 11,
+    fontWeight: '800',
+    color: '#7F7894',
+    letterSpacing: 0.8,
+    marginBottom: 12,
+  },
+  vennContainer: {
+    width: 220,
+    height: 120,
+    position: 'relative',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  vennLabelLeft: {
+    position: 'absolute',
+    left: 45,
+    top: 50,
+  },
+  vennLabelTextPurple: {
+    fontSize: 11,
+    fontWeight: '900',
+    color: '#7C3AED',
+  },
+  vennCenterBadge: {
+    position: 'absolute',
+    top: 48,
+    alignSelf: 'center',
+    backgroundColor: '#FFFFFF',
+    paddingVertical: 3,
+    paddingHorizontal: 8,
+    borderRadius: 100,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+  },
+  vennCenterPercent: {
+    fontSize: 13,
+    fontWeight: '900',
+    color: '#582CDB',
+  },
+  vennLabelRight: {
+    position: 'absolute',
+    right: 36,
+    top: 50,
+  },
+  vennLabelTextGold: {
+    fontSize: 10.5,
+    fontWeight: '900',
+    color: '#B45309',
+  },
+  correlationIndicatorsRow: {
+    flexDirection: 'row',
+    gap: 10,
+    width: '100%',
+  },
+  correlationIndicatorPill: {
+    flex: 1,
+    backgroundColor: '#FAF8FF',
+    borderRadius: 12,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderWidth: 1,
+    borderColor: '#E8E3FA',
+    alignItems: 'center',
+  },
+  indicatorName: {
+    fontSize: 9.5,
+    fontWeight: '800',
+    color: '#7F7894',
+    letterSpacing: 0.6,
+    marginBottom: 2,
+  },
+  indicatorLevel: {
+    fontSize: 12.5,
+    fontWeight: '800',
+  },
+
+  // Card 4: Jarvis Deep Insight Frosted Box
+  detailJarvisInsightCard: {
+    backgroundColor: 'rgba(245, 243, 255, 0.85)',
+    borderRadius: 22,
+    padding: 16,
+    borderWidth: 1.2,
+    borderColor: 'rgba(221, 214, 254, 0.8)',
+    alignItems: 'center',
+    marginBottom: 14,
+  },
+  detailJarvisGhost: {
+    width: 28,
+    height: 28,
+    marginBottom: 6,
+  },
+  detailJarvisInsightLabel: {
+    fontSize: 10,
+    fontWeight: '800',
+    color: '#582CDB',
+    letterSpacing: 0.8,
+    marginBottom: 4,
+  },
+  detailJarvisInsightText: {
+    fontSize: 12.5,
+    color: '#4B4360',
+    textAlign: 'center',
+    lineHeight: 18,
+    fontWeight: '500',
+  },
+
+  // Card 5: Readiness Checklist
+  detailReadinessCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 22,
+    padding: 16,
+    borderWidth: 1.2,
+    borderColor: '#E8E3FA',
+    marginBottom: 14,
+    shadowColor: '#582CDB',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.06,
+    shadowRadius: 12,
+    elevation: 2,
+  },
+  readinessHeaderRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  readinessTitle: {
+    fontSize: 15,
+    fontWeight: '800',
+    color: '#171420',
+  },
+  readinessReadyBadge: {
+    backgroundColor: '#F0FDF4',
+    paddingVertical: 3,
+    paddingHorizontal: 8,
+    borderRadius: 100,
+    borderWidth: 1,
+    borderColor: '#DCFCE7',
+  },
+  readinessReadyText: {
+    fontSize: 11,
+    fontWeight: '800',
+    color: '#15803D',
+  },
+  readinessChecklistCol: {
+    gap: 8,
+  },
+  readinessItemRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  readinessItemIcon: {
+    fontSize: 14,
+  },
+  readinessItemText: {
+    fontSize: 12.5,
+    fontWeight: '600',
+    color: '#4B4360',
+  },
+
+  // Floating Bottom Action Bar
+  detailBottomActionBar: {
+    flexDirection: 'row',
+    gap: 10,
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    backgroundColor: '#FAF9F6',
+    borderTopWidth: 1,
+    borderTopColor: '#E8E3FA',
+  },
+  detailConnectBtn: {
+    flex: 1,
+    height: 48,
+    borderRadius: 14,
+    overflow: 'hidden',
+  },
+  detailConnectGradient: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  detailConnectBtnText: {
+    color: '#FFFFFF',
+    fontSize: 14.5,
+    fontWeight: '800',
+  },
+  detailBookmarkBtn: {
+    width: 48,
+    height: 48,
+    borderRadius: 14,
+    borderWidth: 1.2,
+    borderColor: '#DDD6FE',
+    backgroundColor: '#FFFFFF',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  detailBookmarkBtnActive: {
+    backgroundColor: '#EDE8FC',
+    borderColor: '#582CDB',
   },
 
   // MODALS
