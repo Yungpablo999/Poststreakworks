@@ -474,7 +474,14 @@ export const QuestsScreen: React.FC<QuestsScreenProps> = ({
                   style={({ pressed }) => [styles.joinChallengeBtn, pressed && styles.btnPressed]}
                   onPress={handleJoinCommunityChallenge}
                 >
-                  <Text style={styles.joinChallengeBtnText}>Join Challenge</Text>
+                  <LinearGradient
+                    colors={['#FDE047', '#EAB308', '#CA8A04']}
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 1, y: 1 }}
+                    style={styles.joinChallengeGradient}
+                  >
+                    <Text style={styles.joinChallengeBtnText}>Join Challenge</Text>
+                  </LinearGradient>
                 </Pressable>
               </View>
             </View>
@@ -1293,15 +1300,26 @@ const styles = StyleSheet.create({
     color: '#FDE047',
   },
   joinChallengeBtn: {
-    backgroundColor: '#171420',
+    borderRadius: 100,
+    overflow: 'hidden',
+    shadowColor: '#FDE047',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.35,
+    shadowRadius: 6,
+    elevation: 3,
+  },
+  joinChallengeGradient: {
     paddingVertical: 9,
     paddingHorizontal: 18,
     borderRadius: 100,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   joinChallengeBtnText: {
     fontSize: 12.5,
-    fontWeight: '800',
-    color: '#FFFFFF',
+    fontWeight: '900',
+    color: '#171420',
+    letterSpacing: -0.2,
   },
 
   // 5. CREATOR REPUTATION CARD
