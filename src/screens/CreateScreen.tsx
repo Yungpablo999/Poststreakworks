@@ -92,6 +92,48 @@ export const CreateScreen: React.FC<CreateScreenProps> = ({
 
   // Animations
   const flameFloatY = useRef(new Animated.Value(0)).current;
+  const modalPopScale = useRef(new Animated.Value(0.85)).current;
+
+  const triggerModalPop = () => {
+    if (Platform.OS !== 'web') {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    }
+    modalPopScale.setValue(0.85);
+    Animated.spring(modalPopScale, {
+      toValue: 1,
+      useNativeDriver: true,
+      speed: 24,
+      bounciness: 11,
+    }).start();
+  };
+
+  const openNewPost = (prefillTitle?: string, prefillPlatform?: 'tiktok' | 'instagram' | 'youtube') => {
+    if (prefillTitle) setPostTitle(prefillTitle);
+    if (prefillPlatform) setPostPlatform(prefillPlatform);
+    triggerModalPop();
+    setShowNewPostModal(true);
+  };
+
+  const openIdeas = () => {
+    triggerModalPop();
+    setShowIdeasModal(true);
+  };
+
+  const openScript = () => {
+    triggerModalPop();
+    setShowScriptModal(true);
+  };
+
+  const openCaption = () => {
+    triggerModalPop();
+    setShowCaptionModal(true);
+  };
+
+  const openDraft = (draft: DraftItem) => {
+    setSelectedDraft(draft);
+    triggerModalPop();
+    setShowDraftModal(true);
+  };
 
   useEffect(() => {
     const flameLoop = Animated.loop(
@@ -233,15 +275,26 @@ export const CreateScreen: React.FC<CreateScreenProps> = ({
             </Pressable>
 
             <Pressable
-              style={({ pressed }) => [styles.profilePhotoBtn, pressed && styles.btnPressed]}
+              style={({ pressed }) => [styles.headerIconBtn, pressed && styles.btnPressed]}
               hitSlop={8}
               onPress={() => showToast('👤 Profile: Amara Okafor (Level 4)')}
             >
-              <Image
-                source={require('../../assets/images/amara-portrait.jpg')}
-                style={styles.profileAvatarImg}
-                resizeMode="cover"
-              />
+              <Svg width={19} height={19} viewBox="0 0 24 24" fill="none">
+                <Path
+                  d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"
+                  stroke="#171420"
+                  strokeWidth="2.2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+                <Circle
+                  cx="12"
+                  cy="7"
+                  r="4"
+                  stroke="#171420"
+                  strokeWidth="2.2"
+                />
+              </Svg>
             </Pressable>
           </View>
         </View>
@@ -317,11 +370,7 @@ export const CreateScreen: React.FC<CreateScreenProps> = ({
             {/* Primary Action Button: Use This Idea */}
             <Pressable
               style={({ pressed }) => [styles.useIdeaBtn, pressed && styles.btnPressed]}
-              onPress={() => {
-                setPostTitle('One thing I wish I knew before I started creating');
-                setPostPlatform('instagram');
-                setShowNewPostModal(true);
-              }}
+              onPress={() => openNewPost('One thing I wish I knew before I started creating', 'instagram')}
             >
               <LinearGradient
                 colors={['#6366F1', '#582CDB']}
@@ -361,7 +410,7 @@ export const CreateScreen: React.FC<CreateScreenProps> = ({
             {/* Tool 1: New Post */}
             <Pressable
               style={({ pressed }) => [styles.toolGridCard, pressed && styles.btnPressed]}
-              onPress={() => setShowNewPostModal(true)}
+              onPress={() => openNewPost()}
             >
               <View style={[styles.toolIconBox, { backgroundColor: '#582CDB' }]}>
                 <Svg width={20} height={20} viewBox="0 0 24 24" fill="none">
@@ -375,7 +424,7 @@ export const CreateScreen: React.FC<CreateScreenProps> = ({
             {/* Tool 2: Ideas */}
             <Pressable
               style={({ pressed }) => [styles.toolGridCard, pressed && styles.btnPressed]}
-              onPress={() => setShowIdeasModal(true)}
+              onPress={openIdeas}
             >
               <View style={[styles.toolIconBox, { backgroundColor: '#FEF3C7' }]}>
                 <Svg width={20} height={20} viewBox="0 0 24 24" fill="none">
@@ -396,7 +445,7 @@ export const CreateScreen: React.FC<CreateScreenProps> = ({
             {/* Tool 3: Script */}
             <Pressable
               style={({ pressed }) => [styles.toolGridCard, pressed && styles.btnPressed]}
-              onPress={() => setShowScriptModal(true)}
+              onPress={openScript}
             >
               <View style={[styles.toolIconBox, { backgroundColor: '#F1F5F9' }]}>
                 <Svg width={20} height={20} viewBox="0 0 24 24" fill="none">
@@ -415,7 +464,7 @@ export const CreateScreen: React.FC<CreateScreenProps> = ({
             {/* Tool 4: Caption */}
             <Pressable
               style={({ pressed }) => [styles.toolGridCard, pressed && styles.btnPressed]}
-              onPress={() => setShowCaptionModal(true)}
+              onPress={openCaption}
             >
               <View style={[styles.toolIconBox, { backgroundColor: '#F1F5F9' }]}>
                 <Text style={styles.quoteIconText}>99</Text>
@@ -461,10 +510,7 @@ export const CreateScreen: React.FC<CreateScreenProps> = ({
               <Pressable
                 key={draft.id}
                 style={({ pressed }) => [styles.draftCard, pressed && styles.btnPressed]}
-                onPress={() => {
-                  setSelectedDraft(draft);
-                  setShowDraftModal(true);
-                }}
+                onPress={() => openDraft(draft)}
               >
                 <Image source={draft.imageSource} style={styles.draftThumbnail} resizeMode="cover" />
                 <View style={styles.draftContentCol}>
@@ -477,10 +523,7 @@ export const CreateScreen: React.FC<CreateScreenProps> = ({
                 </View>
                 <Pressable
                   hitSlop={8}
-                  onPress={() => {
-                    setSelectedDraft(draft);
-                    setShowDraftModal(true);
-                  }}
+                  onPress={() => openDraft(draft)}
                 >
                   <Text style={styles.draftMoreDots}>⋮</Text>
                 </Pressable>
@@ -540,7 +583,7 @@ export const CreateScreen: React.FC<CreateScreenProps> = ({
           onRequestClose={() => setShowNewPostModal(false)}
         >
           <View style={styles.modalOverlay}>
-            <View style={styles.modalCard}>
+            <Animated.View style={[styles.modalCard, { transform: [{ scale: modalPopScale }] }]}>
               <View style={styles.modalHeaderRow}>
                 <Text style={styles.modalTitle}>New Post</Text>
                 <Pressable onPress={() => setShowNewPostModal(false)}>
@@ -614,7 +657,7 @@ export const CreateScreen: React.FC<CreateScreenProps> = ({
                   </LinearGradient>
                 </Pressable>
               </View>
-            </View>
+            </Animated.View>
           </View>
         </Modal>
 
@@ -626,7 +669,7 @@ export const CreateScreen: React.FC<CreateScreenProps> = ({
           onRequestClose={() => setShowIdeasModal(false)}
         >
           <View style={styles.modalOverlay}>
-            <View style={styles.modalCard}>
+            <Animated.View style={[styles.modalCard, { transform: [{ scale: modalPopScale }] }]}>
               <View style={styles.modalHeaderRow}>
                 <Text style={styles.modalTitle}>AI Hook Sparks</Text>
                 <Pressable onPress={() => setShowIdeasModal(false)}>
@@ -657,7 +700,7 @@ export const CreateScreen: React.FC<CreateScreenProps> = ({
               >
                 <Text style={styles.modalCloseBtnText}>Close</Text>
               </Pressable>
-            </View>
+            </Animated.View>
           </View>
         </Modal>
 
@@ -669,7 +712,7 @@ export const CreateScreen: React.FC<CreateScreenProps> = ({
           onRequestClose={() => setShowScriptModal(false)}
         >
           <View style={styles.modalOverlay}>
-            <View style={styles.modalCard}>
+            <Animated.View style={[styles.modalCard, { transform: [{ scale: modalPopScale }] }]}>
               <View style={styles.modalHeaderRow}>
                 <Text style={styles.modalTitle}>Script Builder</Text>
                 <Pressable onPress={() => setShowScriptModal(false)}>
@@ -722,7 +765,7 @@ export const CreateScreen: React.FC<CreateScreenProps> = ({
               >
                 <Text style={styles.modalCloseBtnText}>Use in Next Post</Text>
               </Pressable>
-            </View>
+            </Animated.View>
           </View>
         </Modal>
 
@@ -734,7 +777,7 @@ export const CreateScreen: React.FC<CreateScreenProps> = ({
           onRequestClose={() => setShowCaptionModal(false)}
         >
           <View style={styles.modalOverlay}>
-            <View style={styles.modalCard}>
+            <Animated.View style={[styles.modalCard, { transform: [{ scale: modalPopScale }] }]}>
               <View style={styles.modalHeaderRow}>
                 <Text style={styles.modalTitle}>Caption Generator</Text>
                 <Pressable onPress={() => setShowCaptionModal(false)}>
@@ -782,7 +825,7 @@ export const CreateScreen: React.FC<CreateScreenProps> = ({
               >
                 <Text style={styles.modalCloseBtnText}>Copy Caption &amp; Hashtags</Text>
               </Pressable>
-            </View>
+            </Animated.View>
           </View>
         </Modal>
 
@@ -794,7 +837,7 @@ export const CreateScreen: React.FC<CreateScreenProps> = ({
           onRequestClose={() => setShowDraftModal(false)}
         >
           <View style={styles.modalOverlay}>
-            <View style={styles.modalCard}>
+            <Animated.View style={[styles.modalCard, { transform: [{ scale: modalPopScale }] }]}>
               <View style={styles.modalHeaderRow}>
                 <Text style={styles.modalTitle}>{selectedDraft?.platform} Draft</Text>
                 <Pressable onPress={() => setShowDraftModal(false)}>
@@ -833,7 +876,7 @@ export const CreateScreen: React.FC<CreateScreenProps> = ({
                   </LinearGradient>
                 </Pressable>
               </View>
-            </View>
+            </Animated.View>
           </View>
         </Modal>
       </View>

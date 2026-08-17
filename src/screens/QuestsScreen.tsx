@@ -112,6 +112,20 @@ export const QuestsScreen: React.FC<MissionDetailScreenProps> = ({
   const ghostFloatY = useRef(new Animated.Value(0)).current;
   const ghostScale = useRef(new Animated.Value(1)).current;
   const celebrationScale = useRef(new Animated.Value(0.85)).current;
+  const modalPopScale = useRef(new Animated.Value(0.85)).current;
+
+  const triggerModalPop = () => {
+    if (Platform.OS !== 'web') {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    }
+    modalPopScale.setValue(0.85);
+    Animated.spring(modalPopScale, {
+      toValue: 1,
+      useNativeDriver: true,
+      speed: 24,
+      bounciness: 11,
+    }).start();
+  };
 
   // Calculate completed steps & progress
   const completedCount = requirements.filter((r) => r.status === 'completed').length;
@@ -251,6 +265,7 @@ export const QuestsScreen: React.FC<MissionDetailScreenProps> = ({
     if (Platform.OS !== 'web') {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     }
+    triggerModalPop();
     setShowCreatePostModal(true);
   };
 
@@ -302,7 +317,10 @@ export const QuestsScreen: React.FC<MissionDetailScreenProps> = ({
             <Pressable
               style={({ pressed }) => [styles.headerIconBtn, pressed && styles.btnPressed]}
               hitSlop={8}
-              onPress={() => setShowNotificationsModal(true)}
+              onPress={() => {
+                triggerModalPop();
+                setShowNotificationsModal(true);
+              }}
             >
               <Svg width={20} height={20} viewBox="0 0 24 24" fill="none">
                 <Path
@@ -325,15 +343,29 @@ export const QuestsScreen: React.FC<MissionDetailScreenProps> = ({
 
             {/* Top-Right: User Profile Person Icon */}
             <Pressable
-              style={({ pressed }) => [styles.profilePhotoBtn, pressed && styles.btnPressed]}
+              style={({ pressed }) => [styles.headerIconBtn, pressed && styles.btnPressed]}
               hitSlop={8}
-              onPress={() => setShowProfileModal(true)}
+              onPress={() => {
+                triggerModalPop();
+                setShowProfileModal(true);
+              }}
             >
-              <Image
-                source={require('../../assets/images/amara-portrait.jpg')}
-                style={styles.profileAvatarImg}
-                resizeMode="cover"
-              />
+              <Svg width={19} height={19} viewBox="0 0 24 24" fill="none">
+                <Path
+                  d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"
+                  stroke="#171420"
+                  strokeWidth="2.2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+                <Circle
+                  cx="12"
+                  cy="7"
+                  r="4"
+                  stroke="#171420"
+                  strokeWidth="2.2"
+                />
+              </Svg>
             </Pressable>
           </View>
         </View>
@@ -419,7 +451,8 @@ export const QuestsScreen: React.FC<MissionDetailScreenProps> = ({
                   if (progressPercent >= 100) {
                     handleCompleteQuest();
                   } else {
-                    setShowCreatePostModal(true);
+                    triggerModalPop();
+    setShowCreatePostModal(true);
                   }
                 }}
               >
@@ -752,7 +785,7 @@ export const QuestsScreen: React.FC<MissionDetailScreenProps> = ({
           onRequestClose={() => setShowCreatePostModal(false)}
         >
           <View style={styles.modalOverlay}>
-            <View style={styles.modalCard}>
+            <Animated.View style={[styles.modalCard, { transform: [{ scale: modalPopScale }] }]}>
               <Text style={styles.modalTitle}>Plan Quest Post</Text>
               <Text style={styles.modalSubtitle}>
                 Lock this storyteller post into your timeline to protect your streak.
@@ -822,7 +855,7 @@ export const QuestsScreen: React.FC<MissionDetailScreenProps> = ({
                   </LinearGradient>
                 </Pressable>
               </View>
-            </View>
+            </Animated.View>
           </View>
         </Modal>
 
@@ -834,7 +867,7 @@ export const QuestsScreen: React.FC<MissionDetailScreenProps> = ({
           onRequestClose={() => setShowAiDraftModal(false)}
         >
           <View style={styles.modalOverlay}>
-            <View style={styles.modalCard}>
+            <Animated.View style={[styles.modalCard, { transform: [{ scale: modalPopScale }] }]}>
               <View style={styles.modalHeaderRow}>
                 <Text style={styles.modalTitle}>Jarvis Quest Draft</Text>
                 <Pressable onPress={() => setShowAiDraftModal(false)}>
@@ -864,7 +897,8 @@ export const QuestsScreen: React.FC<MissionDetailScreenProps> = ({
                       onPress={() => {
                         setPostTitle(script.title);
                         setShowAiDraftModal(false);
-                        setShowCreatePostModal(true);
+                        triggerModalPop();
+    setShowCreatePostModal(true);
                       }}
                     >
                       <Text style={styles.useDraftBtnText}>Use This Draft in Studio</Text>
@@ -872,7 +906,7 @@ export const QuestsScreen: React.FC<MissionDetailScreenProps> = ({
                   </View>
                 ))}
               </ScrollView>
-            </View>
+            </Animated.View>
           </View>
         </Modal>
 
@@ -884,7 +918,7 @@ export const QuestsScreen: React.FC<MissionDetailScreenProps> = ({
           onRequestClose={() => setShowNotificationsModal(false)}
         >
           <View style={styles.modalOverlay}>
-            <View style={styles.modalCard}>
+            <Animated.View style={[styles.modalCard, { transform: [{ scale: modalPopScale }] }]}>
               <Text style={styles.modalTitle}>Notifications</Text>
               <Text style={styles.modalSubtitle}>Recent alerts and mission updates</Text>
 
@@ -904,7 +938,7 @@ export const QuestsScreen: React.FC<MissionDetailScreenProps> = ({
               >
                 <Text style={styles.modalCloseBtnText}>Close</Text>
               </Pressable>
-            </View>
+            </Animated.View>
           </View>
         </Modal>
 
@@ -916,7 +950,7 @@ export const QuestsScreen: React.FC<MissionDetailScreenProps> = ({
           onRequestClose={() => setShowProfileModal(false)}
         >
           <View style={styles.modalOverlay}>
-            <View style={styles.modalCard}>
+            <Animated.View style={[styles.modalCard, { transform: [{ scale: modalPopScale }] }]}>
               <Image
                 source={require('../../assets/images/amara-portrait.jpg')}
                 style={styles.modalProfileImg}
@@ -946,7 +980,7 @@ export const QuestsScreen: React.FC<MissionDetailScreenProps> = ({
               >
                 <Text style={styles.modalCloseBtnText}>Done</Text>
               </Pressable>
-            </View>
+            </Animated.View>
           </View>
         </Modal>
 
