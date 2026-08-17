@@ -376,12 +376,7 @@ export const QuestsScreen: React.FC<MissionDetailScreenProps> = ({
           showsVerticalScrollIndicator={false}
           bounces={true}
         >
-          {/* Toast Notification Banner */}
-          {toastMessage && (
-            <View style={styles.toastBanner}>
-              <Text style={styles.toastBannerText}>{toastMessage}</Text>
-            </View>
-          )}
+
 
           {/* PAGE TITLE & BADGES */}
           <View style={styles.tagRow}>

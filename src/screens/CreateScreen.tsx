@@ -32,6 +32,17 @@ interface DraftItem {
   imageSource: any;
 }
 
+interface NotificationItem {
+  id: string;
+  title: string;
+  body: string;
+  time: string;
+  unread: boolean;
+  iconEmoji: string;
+  badgeBg: string;
+  badgeBorder: string;
+}
+
 const INITIAL_DRAFTS: DraftItem[] = [
   {
     id: 'draft_1',
@@ -56,6 +67,39 @@ const TRENDING_IDEAS = [
   'How I script 60-second viral Reels in 5 minutes.',
 ];
 
+const NOTIFICATIONS: NotificationItem[] = [
+  {
+    id: 'notif_1',
+    title: '🔥 Streak Protected!',
+    body: 'Your 47-day creator streak is safe for today.',
+    time: '10m ago',
+    unread: true,
+    iconEmoji: '🔥',
+    badgeBg: 'rgba(254, 243, 199, 0.9)',
+    badgeBorder: '#FDE68A',
+  },
+  {
+    id: 'notif_2',
+    title: '🏆 Storyteller Challenge',
+    body: 'Complete 1 more step to earn +150 XP and unlock your badge.',
+    time: '2h ago',
+    unread: true,
+    iconEmoji: '🏆',
+    badgeBg: 'rgba(237, 233, 254, 0.9)',
+    badgeBorder: '#DDD6FE',
+  },
+  {
+    id: 'notif_3',
+    title: '🤝 Elena liked your draft',
+    body: 'Elena left feedback on "3 creator mistakes I stopped making".',
+    time: '5h ago',
+    unread: false,
+    iconEmoji: '💬',
+    badgeBg: 'rgba(241, 245, 249, 0.9)',
+    badgeBorder: '#E2E8F0',
+  },
+];
+
 export const CreateScreen: React.FC<CreateScreenProps> = ({
   onLogout,
   onNavigateTab,
@@ -63,14 +107,22 @@ export const CreateScreen: React.FC<CreateScreenProps> = ({
 }) => {
   const [activeTab, setActiveTab] = useState<TabType>('create');
   const [drafts, setDrafts] = useState<DraftItem[]>(INITIAL_DRAFTS);
-  const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [notificationsList, setNotificationsList] = useState<NotificationItem[]>(NOTIFICATIONS);
 
-  // Modal States
+  // Modal Visibility States
   const [showNewPostModal, setShowNewPostModal] = useState(false);
   const [showIdeasModal, setShowIdeasModal] = useState(false);
   const [showScriptModal, setShowScriptModal] = useState(false);
   const [showCaptionModal, setShowCaptionModal] = useState(false);
   const [showDraftModal, setShowDraftModal] = useState(false);
+  const [showAllDraftsModal, setShowAllDraftsModal] = useState(false);
+  const [showNotificationModal, setShowNotificationModal] = useState(false);
+  const [showProfileModal, setShowProfileModal] = useState(false);
+  const [showChatModal, setShowChatModal] = useState(false);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [successModalTitle, setSuccessModalTitle] = useState('');
+  const [successModalBody, setSuccessModalBody] = useState('');
+
   const [selectedDraft, setSelectedDraft] = useState<DraftItem | null>(null);
 
   // New Post Form State
@@ -92,18 +144,37 @@ export const CreateScreen: React.FC<CreateScreenProps> = ({
 
   // Animations
   const flameFloatY = useRef(new Animated.Value(0)).current;
-  const modalPopScale = useRef(new Animated.Value(0.85)).current;
+  const modalPopScale = useRef(new Animated.Value(0.88)).current;
+
+  useEffect(() => {
+    const flameLoop = Animated.loop(
+      Animated.sequence([
+        Animated.timing(flameFloatY, {
+          toValue: -3,
+          duration: 1300,
+          useNativeDriver: true,
+        }),
+        Animated.timing(flameFloatY, {
+          toValue: 3,
+          duration: 1300,
+          useNativeDriver: true,
+        }),
+      ])
+    );
+    flameLoop.start();
+    return () => flameLoop.stop();
+  }, [flameFloatY]);
 
   const triggerModalPop = () => {
     if (Platform.OS !== 'web') {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     }
-    modalPopScale.setValue(0.85);
+    modalPopScale.setValue(0.88);
     Animated.spring(modalPopScale, {
       toValue: 1,
       useNativeDriver: true,
-      speed: 24,
-      bounciness: 11,
+      speed: 26,
+      bounciness: 12,
     }).start();
   };
 
@@ -135,28 +206,24 @@ export const CreateScreen: React.FC<CreateScreenProps> = ({
     setShowDraftModal(true);
   };
 
-  useEffect(() => {
-    const flameLoop = Animated.loop(
-      Animated.sequence([
-        Animated.timing(flameFloatY, {
-          toValue: -3,
-          duration: 1300,
-          useNativeDriver: true,
-        }),
-        Animated.timing(flameFloatY, {
-          toValue: 3,
-          duration: 1300,
-          useNativeDriver: true,
-        }),
-      ])
-    );
-    flameLoop.start();
-    return () => flameLoop.stop();
-  }, [flameFloatY]);
+  const openAllDrafts = () => {
+    triggerModalPop();
+    setShowAllDraftsModal(true);
+  };
 
-  const showToast = (msg: string) => {
-    setToastMessage(msg);
-    setTimeout(() => setToastMessage(null), 3200);
+  const openNotifications = () => {
+    triggerModalPop();
+    setShowNotificationModal(true);
+  };
+
+  const openProfile = () => {
+    triggerModalPop();
+    setShowProfileModal(true);
+  };
+
+  const openChat = () => {
+    triggerModalPop();
+    setShowChatModal(true);
   };
 
   const handleTabPress = (tab: TabType) => {
@@ -171,7 +238,6 @@ export const CreateScreen: React.FC<CreateScreenProps> = ({
 
   const handleCreatePostSubmit = () => {
     if (!postTitle.trim()) {
-      showToast('⚠️ Please enter a title or hook for your post');
       return;
     }
     if (Platform.OS !== 'web') {
@@ -189,7 +255,12 @@ export const CreateScreen: React.FC<CreateScreenProps> = ({
     setDrafts([newDraft, ...drafts]);
     setShowNewPostModal(false);
     setPostTitle('');
-    showToast('✨ Post draft saved! Streak momentum protected.');
+
+    // Trigger Success Modal
+    setSuccessModalTitle('Post Draft Saved!');
+    setSuccessModalBody('Your draft is stored and scheduled. Your 47-day momentum is fully protected.');
+    triggerModalPop();
+    setShowSuccessModal(true);
   };
 
   const handleOpenScheduleView = () => {
@@ -211,6 +282,8 @@ export const CreateScreen: React.FC<CreateScreenProps> = ({
       onNavigateTab('growth');
     }
   };
+
+  const unreadNotifCount = notificationsList.filter((n) => n.unread).length;
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -237,9 +310,9 @@ export const CreateScreen: React.FC<CreateScreenProps> = ({
             <Pressable
               style={({ pressed }) => [styles.headerIconBtn, pressed && styles.btnPressed]}
               hitSlop={8}
-              onPress={() => showToast('💬 Creator Chat: 2 unread messages')}
+              onPress={openChat}
             >
-              <Svg width={20} height={20} viewBox="0 0 24 24" fill="none">
+              <Svg width={19} height={19} viewBox="0 0 24 24" fill="none">
                 <Path
                   d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"
                   stroke="#171420"
@@ -253,9 +326,9 @@ export const CreateScreen: React.FC<CreateScreenProps> = ({
             <Pressable
               style={({ pressed }) => [styles.headerIconBtn, pressed && styles.btnPressed]}
               hitSlop={8}
-              onPress={() => showToast('🔔 No new notifications')}
+              onPress={openNotifications}
             >
-              <Svg width={20} height={20} viewBox="0 0 24 24" fill="none">
+              <Svg width={19} height={19} viewBox="0 0 24 24" fill="none">
                 <Path
                   d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"
                   stroke="#171420"
@@ -271,13 +344,13 @@ export const CreateScreen: React.FC<CreateScreenProps> = ({
                   strokeLinejoin="round"
                 />
               </Svg>
-              <View style={styles.notificationDot} />
+              {unreadNotifCount > 0 && <View style={styles.notificationDot} />}
             </Pressable>
 
             <Pressable
               style={({ pressed }) => [styles.headerIconBtn, pressed && styles.btnPressed]}
               hitSlop={8}
-              onPress={() => showToast('👤 Profile: Amara Okafor (Level 4)')}
+              onPress={openProfile}
             >
               <Svg width={19} height={19} viewBox="0 0 24 24" fill="none">
                 <Path
@@ -298,19 +371,13 @@ export const CreateScreen: React.FC<CreateScreenProps> = ({
             </Pressable>
           </View>
         </View>
-        {/* MAIN SCROLLABLE CONTENT */}
+
+        {/* 2. MAIN SCROLLABLE CONTENT */}
         <ScrollView
           contentContainerStyle={styles.scrollContent}
           showsVerticalScrollIndicator={false}
           bounces={true}
         >
-          {/* Toast Notification Banner */}
-          {toastMessage && (
-            <View style={styles.toastBanner}>
-              <Text style={styles.toastBannerText}>{toastMessage}</Text>
-            </View>
-          )}
-
           {/* TOP PILL BADGES */}
           <View style={styles.topBadgesRow}>
             <View style={styles.createPill}>
@@ -500,7 +567,7 @@ export const CreateScreen: React.FC<CreateScreenProps> = ({
           {/* 5. YOUR DRAFTS SECTION */}
           <View style={styles.draftsHeaderRow}>
             <Text style={styles.draftsSectionTitle}>Your Drafts</Text>
-            <Pressable onPress={() => showToast('📁 Showing all active creator drafts')}>
+            <Pressable onPress={openAllDrafts} hitSlop={6}>
               <Text style={styles.viewAllDraftsLink}>View all drafts</Text>
             </Pressable>
           </View>
@@ -575,6 +642,10 @@ export const CreateScreen: React.FC<CreateScreenProps> = ({
         {/* FLOATING LIQUID GLASS TAB BAR */}
         <FloatingTabBar activeTab={activeTab} onTabPress={handleTabPress} />
 
+        {/* ============================================================ */}
+        {/* FROSTED LIQUID GLASS MODALS (POSTSTREAK LUXURY STYLE) */}
+        {/* ============================================================ */}
+
         {/* MODAL 1: NEW POST */}
         <Modal
           visible={showNewPostModal}
@@ -585,13 +656,18 @@ export const CreateScreen: React.FC<CreateScreenProps> = ({
           <View style={styles.modalOverlay}>
             <Animated.View style={[styles.modalCard, { transform: [{ scale: modalPopScale }] }]}>
               <View style={styles.modalHeaderRow}>
-                <Text style={styles.modalTitle}>New Post</Text>
-                <Pressable onPress={() => setShowNewPostModal(false)}>
-                  <Text style={styles.modalCloseIcon}>✕</Text>
+                <View>
+                  <Text style={styles.modalTitle}>New Post</Text>
+                  <Text style={styles.modalSubtitle}>Create from scratch and protect your streak.</Text>
+                </View>
+                <Pressable
+                  onPress={() => setShowNewPostModal(false)}
+                  style={styles.modalCloseCircle}
+                  hitSlop={8}
+                >
+                  <Text style={styles.modalCloseCross}>✕</Text>
                 </Pressable>
               </View>
-
-              <Text style={styles.modalSubtitle}>Create from scratch and protect your streak.</Text>
 
               <Text style={styles.modalInputLabel}>CHOOSE PLATFORM</Text>
               <View style={styles.platformSelectRow}>
@@ -614,7 +690,7 @@ export const CreateScreen: React.FC<CreateScreenProps> = ({
                         ? 'TikTok'
                         : plat === 'instagram'
                         ? 'Instagram Reel'
-                        : 'YouTube Shorts'}
+                        : 'YouTube'}
                     </Text>
                   </Pressable>
                 ))}
@@ -653,7 +729,7 @@ export const CreateScreen: React.FC<CreateScreenProps> = ({
                     end={{ x: 1, y: 1 }}
                     style={styles.modalPrimaryGradient}
                   >
-                    <Text style={styles.modalPrimaryBtnText}>Save Draft &amp; Schedule</Text>
+                    <Text style={styles.modalPrimaryBtnText}>Save &amp; Schedule</Text>
                   </LinearGradient>
                 </Pressable>
               </View>
@@ -671,13 +747,18 @@ export const CreateScreen: React.FC<CreateScreenProps> = ({
           <View style={styles.modalOverlay}>
             <Animated.View style={[styles.modalCard, { transform: [{ scale: modalPopScale }] }]}>
               <View style={styles.modalHeaderRow}>
-                <Text style={styles.modalTitle}>AI Hook Sparks</Text>
-                <Pressable onPress={() => setShowIdeasModal(false)}>
-                  <Text style={styles.modalCloseIcon}>✕</Text>
+                <View>
+                  <Text style={styles.modalTitle}>AI Hook Sparks</Text>
+                  <Text style={styles.modalSubtitle}>Trending angles customized for your niche:</Text>
+                </View>
+                <Pressable
+                  onPress={() => setShowIdeasModal(false)}
+                  style={styles.modalCloseCircle}
+                  hitSlop={8}
+                >
+                  <Text style={styles.modalCloseCross}>✕</Text>
                 </Pressable>
               </View>
-
-              <Text style={styles.modalSubtitle}>Trending angles customized for your niche:</Text>
 
               {TRENDING_IDEAS.map((idea, idx) => (
                 <Pressable
@@ -686,7 +767,7 @@ export const CreateScreen: React.FC<CreateScreenProps> = ({
                   onPress={() => {
                     setPostTitle(idea);
                     setShowIdeasModal(false);
-                    setShowNewPostModal(true);
+                    openNewPost(idea);
                   }}
                 >
                   <Text style={styles.ideaItemText}>&ldquo;{idea}&rdquo;</Text>
@@ -695,10 +776,10 @@ export const CreateScreen: React.FC<CreateScreenProps> = ({
               ))}
 
               <Pressable
-                style={styles.modalCloseBtn}
+                style={styles.modalFullBtn}
                 onPress={() => setShowIdeasModal(false)}
               >
-                <Text style={styles.modalCloseBtnText}>Close</Text>
+                <Text style={styles.modalFullBtnText}>Done</Text>
               </Pressable>
             </Animated.View>
           </View>
@@ -714,15 +795,20 @@ export const CreateScreen: React.FC<CreateScreenProps> = ({
           <View style={styles.modalOverlay}>
             <Animated.View style={[styles.modalCard, { transform: [{ scale: modalPopScale }] }]}>
               <View style={styles.modalHeaderRow}>
-                <Text style={styles.modalTitle}>Script Builder</Text>
-                <Pressable onPress={() => setShowScriptModal(false)}>
-                  <Text style={styles.modalCloseIcon}>✕</Text>
+                <View>
+                  <Text style={styles.modalTitle}>Script Builder</Text>
+                  <Text style={styles.modalSubtitle}>Hook ➔ Story ➔ Lesson ➔ CTA formula:</Text>
+                </View>
+                <Pressable
+                  onPress={() => setShowScriptModal(false)}
+                  style={styles.modalCloseCircle}
+                  hitSlop={8}
+                >
+                  <Text style={styles.modalCloseCross}>✕</Text>
                 </Pressable>
               </View>
 
-              <Text style={styles.modalSubtitle}>Hook ➔ Story ➔ Lesson ➔ CTA formula:</Text>
-
-              <ScrollView style={{ maxHeight: 320 }} showsVerticalScrollIndicator={false}>
+              <ScrollView style={{ maxHeight: 290 }} showsVerticalScrollIndicator={false}>
                 <Text style={styles.modalInputLabel}>🎣 HOOK (0 - 3s)</Text>
                 <TextInput
                   style={styles.modalTextInput}
@@ -756,14 +842,13 @@ export const CreateScreen: React.FC<CreateScreenProps> = ({
               </ScrollView>
 
               <Pressable
-                style={styles.modalCloseBtn}
+                style={styles.modalFullBtn}
                 onPress={() => {
-                  setPostTitle(scriptHook);
                   setShowScriptModal(false);
-                  setShowNewPostModal(true);
+                  openNewPost(scriptHook);
                 }}
               >
-                <Text style={styles.modalCloseBtnText}>Use in Next Post</Text>
+                <Text style={styles.modalFullBtnText}>Use in Next Post ➔</Text>
               </Pressable>
             </Animated.View>
           </View>
@@ -779,13 +864,18 @@ export const CreateScreen: React.FC<CreateScreenProps> = ({
           <View style={styles.modalOverlay}>
             <Animated.View style={[styles.modalCard, { transform: [{ scale: modalPopScale }] }]}>
               <View style={styles.modalHeaderRow}>
-                <Text style={styles.modalTitle}>Caption Generator</Text>
-                <Pressable onPress={() => setShowCaptionModal(false)}>
-                  <Text style={styles.modalCloseIcon}>✕</Text>
+                <View>
+                  <Text style={styles.modalTitle}>Caption Generator</Text>
+                  <Text style={styles.modalSubtitle}>Craft high-engagement captions in your voice:</Text>
+                </View>
+                <Pressable
+                  onPress={() => setShowCaptionModal(false)}
+                  style={styles.modalCloseCircle}
+                  hitSlop={8}
+                >
+                  <Text style={styles.modalCloseCross}>✕</Text>
                 </Pressable>
               </View>
-
-              <Text style={styles.modalSubtitle}>Craft high-engagement captions in your voice:</Text>
 
               <View style={styles.platformSelectRow}>
                 {(['authentic', 'viral', 'educational'] as const).map((t) => (
@@ -810,20 +900,23 @@ export const CreateScreen: React.FC<CreateScreenProps> = ({
               </View>
 
               <TextInput
-                style={[styles.modalTextInput, { height: 110 }]}
+                style={[styles.modalTextInput, { height: 100 }]}
                 value={generatedCaption}
                 onChangeText={setGeneratedCaption}
                 multiline
               />
 
               <Pressable
-                style={styles.modalCloseBtn}
+                style={styles.modalFullBtn}
                 onPress={() => {
                   setShowCaptionModal(false);
-                  showToast('✓ Caption copied to clipboard!');
+                  setSuccessModalTitle('Caption Copied!');
+                  setSuccessModalBody('Your caption and creator hashtags are ready to paste into your video editor.');
+                  triggerModalPop();
+                  setShowSuccessModal(true);
                 }}
               >
-                <Text style={styles.modalCloseBtnText}>Copy Caption &amp; Hashtags</Text>
+                <Text style={styles.modalFullBtnText}>Copy Caption &amp; Hashtags ✓</Text>
               </Pressable>
             </Animated.View>
           </View>
@@ -839,13 +932,18 @@ export const CreateScreen: React.FC<CreateScreenProps> = ({
           <View style={styles.modalOverlay}>
             <Animated.View style={[styles.modalCard, { transform: [{ scale: modalPopScale }] }]}>
               <View style={styles.modalHeaderRow}>
-                <Text style={styles.modalTitle}>{selectedDraft?.platform} Draft</Text>
-                <Pressable onPress={() => setShowDraftModal(false)}>
-                  <Text style={styles.modalCloseIcon}>✕</Text>
+                <View>
+                  <Text style={styles.modalTitle}>{selectedDraft?.platform} Draft</Text>
+                  <Text style={styles.modalSubtitle}>{selectedDraft?.editedTime}</Text>
+                </View>
+                <Pressable
+                  onPress={() => setShowDraftModal(false)}
+                  style={styles.modalCloseCircle}
+                  hitSlop={8}
+                >
+                  <Text style={styles.modalCloseCross}>✕</Text>
                 </Pressable>
               </View>
-
-              <Text style={styles.modalSubtitle}>{selectedDraft?.editedTime}</Text>
 
               <View style={styles.promptInnerBox}>
                 <Text style={styles.promptText}>{selectedDraft?.title}</Text>
@@ -879,6 +977,229 @@ export const CreateScreen: React.FC<CreateScreenProps> = ({
             </Animated.View>
           </View>
         </Modal>
+
+        {/* MODAL 6: ALL DRAFTS LIST */}
+        <Modal
+          visible={showAllDraftsModal}
+          transparent={true}
+          animationType="fade"
+          onRequestClose={() => setShowAllDraftsModal(false)}
+        >
+          <View style={styles.modalOverlay}>
+            <Animated.View style={[styles.modalCard, { transform: [{ scale: modalPopScale }] }]}>
+              <View style={styles.modalHeaderRow}>
+                <View>
+                  <Text style={styles.modalTitle}>All Creator Drafts</Text>
+                  <Text style={styles.modalSubtitle}>Manage your active video concepts</Text>
+                </View>
+                <Pressable
+                  onPress={() => setShowAllDraftsModal(false)}
+                  style={styles.modalCloseCircle}
+                  hitSlop={8}
+                >
+                  <Text style={styles.modalCloseCross}>✕</Text>
+                </Pressable>
+              </View>
+
+              <ScrollView style={{ maxHeight: 280 }} showsVerticalScrollIndicator={false}>
+                {drafts.map((draft) => (
+                  <Pressable
+                    key={draft.id}
+                    style={styles.draftCard}
+                    onPress={() => {
+                      setShowAllDraftsModal(false);
+                      openDraft(draft);
+                    }}
+                  >
+                    <Image source={draft.imageSource} style={styles.draftThumbnail} resizeMode="cover" />
+                    <View style={styles.draftContentCol}>
+                      <Text style={styles.draftTitle} numberOfLines={1}>{draft.title}</Text>
+                      <Text style={styles.draftMeta}>{draft.platform} • {draft.editedTime}</Text>
+                    </View>
+                  </Pressable>
+                ))}
+              </ScrollView>
+
+              <Pressable
+                style={styles.modalFullBtn}
+                onPress={() => setShowAllDraftsModal(false)}
+              >
+                <Text style={styles.modalFullBtnText}>Done</Text>
+              </Pressable>
+            </Animated.View>
+          </View>
+        </Modal>
+
+        {/* MODAL 7: NOTIFICATION CENTER */}
+        <Modal
+          visible={showNotificationModal}
+          transparent={true}
+          animationType="fade"
+          onRequestClose={() => setShowNotificationModal(false)}
+        >
+          <View style={styles.modalOverlay}>
+            <Animated.View style={[styles.modalCard, { transform: [{ scale: modalPopScale }] }]}>
+              <View style={styles.modalHeaderRow}>
+                <View>
+                  <Text style={styles.modalTitle}>Notifications</Text>
+                  <Text style={styles.modalSubtitle}>Streak updates &amp; squad activity</Text>
+                </View>
+                <Pressable
+                  onPress={() => setShowNotificationModal(false)}
+                  style={styles.modalCloseCircle}
+                  hitSlop={8}
+                >
+                  <Text style={styles.modalCloseCross}>✕</Text>
+                </Pressable>
+              </View>
+
+              <ScrollView style={{ maxHeight: 280 }} showsVerticalScrollIndicator={false}>
+                {notificationsList.map((notif) => (
+                  <View key={notif.id} style={[styles.notifCard, notif.unread && styles.notifCardUnread]}>
+                    <View style={[styles.notifBadge, { backgroundColor: notif.badgeBg, borderColor: notif.badgeBorder }]}>
+                      <Text style={{ fontSize: 16 }}>{notif.iconEmoji}</Text>
+                    </View>
+                    <View style={{ flex: 1 }}>
+                      <Text style={styles.notifTitle}>{notif.title}</Text>
+                      <Text style={styles.notifBody}>{notif.body}</Text>
+                      <Text style={styles.notifTime}>{notif.time}</Text>
+                    </View>
+                  </View>
+                ))}
+              </ScrollView>
+
+              <Pressable
+                style={styles.modalFullBtn}
+                onPress={() => {
+                  setNotificationsList(notificationsList.map((n) => ({ ...n, unread: false })));
+                  setShowNotificationModal(false);
+                }}
+              >
+                <Text style={styles.modalFullBtnText}>Mark All Read &amp; Close</Text>
+              </Pressable>
+            </Animated.View>
+          </View>
+        </Modal>
+
+        {/* MODAL 8: CREATOR PROFILE */}
+        <Modal
+          visible={showProfileModal}
+          transparent={true}
+          animationType="fade"
+          onRequestClose={() => setShowProfileModal(false)}
+        >
+          <View style={styles.modalOverlay}>
+            <Animated.View style={[styles.modalCard, { transform: [{ scale: modalPopScale }] }]}>
+              <View style={styles.modalHeaderRow}>
+                <View>
+                  <Text style={styles.modalTitle}>Creator Passport</Text>
+                  <Text style={styles.modalSubtitle}>Your verified consistency record</Text>
+                </View>
+                <Pressable
+                  onPress={() => setShowProfileModal(false)}
+                  style={styles.modalCloseCircle}
+                  hitSlop={8}
+                >
+                  <Text style={styles.modalCloseCross}>✕</Text>
+                </Pressable>
+              </View>
+
+              <View style={styles.profileModalCardInner}>
+                <View style={styles.profileModalIconRing}>
+                  <Svg width={28} height={28} viewBox="0 0 24 24" fill="none">
+                    <Path
+                      d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"
+                      stroke="#582CDB"
+                      strokeWidth="2.2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                    <Circle cx="12" cy="7" r="4" stroke="#582CDB" strokeWidth="2.2" />
+                  </Svg>
+                </View>
+                <Text style={styles.profileModalName}>Amara Okafor</Text>
+                <Text style={styles.profileModalNiche}>Lifestyle &amp; Tech Creator</Text>
+                <View style={styles.profileModalLevelPill}>
+                  <Text style={styles.profileModalLevelText}>⚡ Level 4 Storyteller • 47-Day Streak</Text>
+                </View>
+              </View>
+
+              <Pressable
+                style={styles.modalFullBtn}
+                onPress={() => setShowProfileModal(false)}
+              >
+                <Text style={styles.modalFullBtnText}>Done</Text>
+              </Pressable>
+            </Animated.View>
+          </View>
+        </Modal>
+
+        {/* MODAL 9: CREATOR CHAT */}
+        <Modal
+          visible={showChatModal}
+          transparent={true}
+          animationType="fade"
+          onRequestClose={() => setShowChatModal(false)}
+        >
+          <View style={styles.modalOverlay}>
+            <Animated.View style={[styles.modalCard, { transform: [{ scale: modalPopScale }] }]}>
+              <View style={styles.modalHeaderRow}>
+                <View>
+                  <Text style={styles.modalTitle}>Creator Squad Chat</Text>
+                  <Text style={styles.modalSubtitle}>Connect &amp; collaborate with matched creators</Text>
+                </View>
+                <Pressable
+                  onPress={() => setShowChatModal(false)}
+                  style={styles.modalCloseCircle}
+                  hitSlop={8}
+                >
+                  <Text style={styles.modalCloseCross}>✕</Text>
+                </Pressable>
+              </View>
+
+              <View style={styles.chatMessageBubble}>
+                <Text style={styles.chatSender}>🤖 Jarvis Growth AI</Text>
+                <Text style={styles.chatBody}>Your morning creator brief is ready. 3 trending hook angles were matched to your audience.</Text>
+              </View>
+
+              <View style={styles.chatMessageBubble}>
+                <Text style={styles.chatSender}>📷 Elena Vance</Text>
+                <Text style={styles.chatBody}>Loved your latest Reel! Let us batch film tomorrow around 2 PM.</Text>
+              </View>
+
+              <Pressable
+                style={styles.modalFullBtn}
+                onPress={() => setShowChatModal(false)}
+              >
+                <Text style={styles.modalFullBtnText}>Close Chat</Text>
+              </Pressable>
+            </Animated.View>
+          </View>
+        </Modal>
+
+        {/* MODAL 10: ACTION SUCCESS CELEBRATION */}
+        <Modal
+          visible={showSuccessModal}
+          transparent={true}
+          animationType="fade"
+          onRequestClose={() => setShowSuccessModal(false)}
+        >
+          <View style={styles.modalOverlay}>
+            <Animated.View style={[styles.modalCard, { transform: [{ scale: modalPopScale }] }]}>
+              <View style={styles.successIconCircle}>
+                <Text style={{ fontSize: 28 }}>✨</Text>
+              </View>
+              <Text style={styles.successModalTitle}>{successModalTitle}</Text>
+              <Text style={styles.successModalBody}>{successModalBody}</Text>
+              <Pressable
+                style={styles.modalFullBtn}
+                onPress={() => setShowSuccessModal(false)}
+              >
+                <Text style={styles.modalFullBtnText}>Continue</Text>
+              </Pressable>
+            </Animated.View>
+          </View>
+        </Modal>
       </View>
     </SafeAreaView>
   );
@@ -893,6 +1214,11 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#FAF8F5',
   },
+  btnPressed: {
+    opacity: 0.78,
+    transform: [{ scale: 0.97 }],
+  },
+
   // 1. TOP HEADER BAR
   headerBar: {
     flexDirection: 'row',
@@ -954,38 +1280,10 @@ const styles = StyleSheet.create({
     borderWidth: 1.2,
     borderColor: '#FFFFFF',
   },
-  profilePhotoBtn: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    borderWidth: 1.5,
-    borderColor: '#582CDB',
-    overflow: 'hidden',
-  },
-  profileAvatarImg: {
-    width: '100%',
-    height: '100%',
-  },
+
   scrollContent: {
     paddingHorizontal: 20,
-    paddingTop: 16,
-  },
-  toastBanner: {
-    backgroundColor: '#171420',
-    paddingVertical: 10,
-    paddingHorizontal: 16,
-    borderRadius: 14,
-    marginBottom: 16,
-    alignItems: 'center',
-  },
-  toastBannerText: {
-    color: '#FFFFFF',
-    fontSize: 13,
-    fontWeight: '700',
-  },
-  btnPressed: {
-    opacity: 0.78,
-    transform: [{ scale: 0.97 }],
+    paddingTop: 8,
   },
 
   // TOP PILL BADGES
@@ -1427,10 +1725,12 @@ const styles = StyleSheet.create({
     letterSpacing: -0.2,
   },
 
-  // MODAL STYLES
+  // ============================================================
+  // POSTSTREAK LUXURY FROSTED MODAL STYLING
+  // ============================================================
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(23, 20, 32, 0.65)',
+    backgroundColor: 'rgba(15, 12, 24, 0.65)',
     justifyContent: 'center',
     alignItems: 'center',
     padding: 20,
@@ -1438,38 +1738,47 @@ const styles = StyleSheet.create({
   modalCard: {
     width: '100%',
     maxWidth: 380,
-    backgroundColor: '#FAF8F5',
-    borderRadius: 24,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 26,
+    borderWidth: 1,
+    borderColor: '#EFEBF8',
     padding: 22,
-    shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 0.25,
-    shadowRadius: 20,
-    elevation: 8,
+    shadowColor: '#582CDB',
+    shadowOffset: { width: 0, height: 12 },
+    shadowOpacity: 0.18,
+    shadowRadius: 28,
+    elevation: 10,
   },
   modalHeaderRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 4,
+    alignItems: 'flex-start',
+    marginBottom: 16,
   },
-  modalCloseIcon: {
-    fontSize: 18,
-    color: '#6B637B',
-    fontWeight: '700',
-    padding: 4,
+  modalCloseCircle: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: '#F1F5F9',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalCloseCross: {
+    fontSize: 14,
+    color: '#64748B',
+    fontWeight: '800',
   },
   modalTitle: {
-    fontSize: 19,
+    fontSize: 20,
     fontWeight: '800',
     color: '#171420',
-    letterSpacing: -0.3,
+    letterSpacing: -0.4,
+    marginBottom: 3,
   },
   modalSubtitle: {
     fontSize: 13,
     color: '#6B637B',
     lineHeight: 18,
-    marginBottom: 16,
   },
   modalInputLabel: {
     fontSize: 10.5,
@@ -1487,7 +1796,7 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingVertical: 8,
     borderRadius: 10,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: '#FAF8F5',
     borderWidth: 1,
     borderColor: '#EFEBF8',
     alignItems: 'center',
@@ -1505,7 +1814,7 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
   },
   modalTextInput: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: '#FAF8F5',
     borderWidth: 1,
     borderColor: '#EFEBF8',
     borderRadius: 12,
@@ -1518,15 +1827,15 @@ const styles = StyleSheet.create({
   modalBtnRow: {
     flexDirection: 'row',
     gap: 10,
-    marginTop: 4,
+    marginTop: 6,
   },
   modalSecondaryBtn: {
     flex: 1,
-    height: 46,
-    borderRadius: 12,
+    height: 48,
+    borderRadius: 14,
     borderWidth: 1,
     borderColor: '#EFEBF8',
-    backgroundColor: '#FFFFFF',
+    backgroundColor: '#FAF8F5',
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -1537,8 +1846,8 @@ const styles = StyleSheet.create({
   },
   modalPrimaryBtn: {
     flex: 2,
-    height: 46,
-    borderRadius: 12,
+    height: 48,
+    borderRadius: 14,
     overflow: 'hidden',
   },
   modalPrimaryGradient: {
@@ -1551,8 +1860,22 @@ const styles = StyleSheet.create({
     fontWeight: '800',
     color: '#FFFFFF',
   },
+  modalFullBtn: {
+    backgroundColor: '#582CDB',
+    height: 48,
+    borderRadius: 14,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 14,
+  },
+  modalFullBtnText: {
+    fontSize: 14,
+    fontWeight: '800',
+    color: '#FFFFFF',
+  },
+
   ideaItemCard: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: '#FAF8F5',
     borderRadius: 14,
     borderWidth: 1,
     borderColor: '#EFEBF8',
@@ -1570,17 +1893,131 @@ const styles = StyleSheet.create({
     color: '#582CDB',
     fontWeight: '600',
   },
-  modalCloseBtn: {
-    backgroundColor: '#582CDB',
-    height: 44,
-    borderRadius: 12,
+
+  // Notification Modal Styles
+  notifCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    backgroundColor: '#FAF8F5',
+    borderRadius: 14,
+    padding: 12,
+    marginBottom: 8,
+    borderWidth: 1,
+    borderColor: '#EFEBF8',
+  },
+  notifCardUnread: {
+    backgroundColor: '#F5F3FF',
+    borderColor: '#DDD6FE',
+  },
+  notifBadge: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
     justifyContent: 'center',
     alignItems: 'center',
-    marginTop: 10,
+    borderWidth: 1,
   },
-  modalCloseBtnText: {
-    fontSize: 13.5,
+  notifTitle: {
+    fontSize: 13,
     fontWeight: '800',
-    color: '#FFFFFF',
+    color: '#171420',
+    marginBottom: 2,
+  },
+  notifBody: {
+    fontSize: 11.5,
+    color: '#64748B',
+    lineHeight: 16,
+  },
+  notifTime: {
+    fontSize: 10.5,
+    color: '#94A3B8',
+    marginTop: 2,
+  },
+
+  // Profile Modal Styles
+  profileModalCardInner: {
+    alignItems: 'center',
+    paddingVertical: 10,
+  },
+  profileModalIconRing: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    backgroundColor: '#EDE9FE',
+    borderWidth: 2,
+    borderColor: '#582CDB',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 10,
+  },
+  profileModalName: {
+    fontSize: 18,
+    fontWeight: '800',
+    color: '#171420',
+    marginBottom: 2,
+  },
+  profileModalNiche: {
+    fontSize: 13,
+    color: '#64748B',
+    marginBottom: 8,
+  },
+  profileModalLevelPill: {
+    backgroundColor: '#EDE9FE',
+    paddingVertical: 5,
+    paddingHorizontal: 12,
+    borderRadius: 100,
+  },
+  profileModalLevelText: {
+    fontSize: 11.5,
+    fontWeight: '700',
+    color: '#6D28D9',
+  },
+
+  // Chat Modal Styles
+  chatMessageBubble: {
+    backgroundColor: '#FAF8F5',
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: '#EFEBF8',
+    padding: 12,
+    marginBottom: 10,
+  },
+  chatSender: {
+    fontSize: 12,
+    fontWeight: '800',
+    color: '#582CDB',
+    marginBottom: 3,
+  },
+  chatBody: {
+    fontSize: 12.5,
+    color: '#334155',
+    lineHeight: 18,
+  },
+
+  // Success Modal Styles
+  successIconCircle: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: '#EDE9FE',
+    justifyContent: 'center',
+    alignItems: 'center',
+    alignSelf: 'center',
+    marginBottom: 12,
+  },
+  successModalTitle: {
+    fontSize: 20,
+    fontWeight: '800',
+    color: '#171420',
+    textAlign: 'center',
+    marginBottom: 6,
+  },
+  successModalBody: {
+    fontSize: 13,
+    color: '#64748B',
+    textAlign: 'center',
+    lineHeight: 19,
+    paddingHorizontal: 10,
   },
 });
