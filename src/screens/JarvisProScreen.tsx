@@ -567,11 +567,11 @@ export const JarvisProScreen: React.FC<JarvisProScreenProps> = ({
             </View>
           </View>
 
-          {/* SECTION 4: PRICING CARD (.99 / MONTH) */}
+          {/* SECTION 4: PRICING CARD ($9.99 / MONTH) */}
           <View style={styles.pricingCard}>
             <Text style={styles.pricingPlanName}>Jarvis Pro</Text>
             <View style={styles.priceRow}>
-              <Text style={styles.priceBigText}>.99</Text>
+              <Text style={styles.priceBigText}>$9.99</Text>
               <Text style={styles.pricePeriodText}> / MONTH</Text>
             </View>
 
