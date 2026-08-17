@@ -197,15 +197,15 @@ const LiveVoiceWaveform: React.FC = () => {
   }, [bar0, bar1, bar2, bar3, bar4, bar5, bar6, bar7, bar8, auraOpacity]);
 
   const barsData = [
-    { anim: bar0, color: '#582CDB', baseHeight: 38 }, // Premium Royal Purple
-    { anim: bar1, color: '#EAB308', baseHeight: 42 }, // Rich Metallic Gold
-    { anim: bar2, color: '#7C3AED', baseHeight: 45 }, // Vibrant Electric Purple
-    { anim: bar3, color: '#F59E0B', baseHeight: 47 }, // Warm Amber Gold
-    { anim: bar4, color: '#FDE047', baseHeight: 50 }, // Radiant Gold Peak
-    { anim: bar5, color: '#F59E0B', baseHeight: 47 }, // Warm Amber Gold
-    { anim: bar6, color: '#7C3AED', baseHeight: 45 }, // Vibrant Electric Purple
-    { anim: bar7, color: '#EAB308', baseHeight: 42 }, // Rich Metallic Gold
-    { anim: bar8, color: '#582CDB', baseHeight: 38 }, // Premium Royal Purple
+    { anim: bar0, color: '#6366F1', baseHeight: 36 }, // Purple
+    { anim: bar1, color: '#8B5CF6', baseHeight: 42 }, // Violet Purple
+    { anim: bar2, color: '#FBBF24', baseHeight: 48 }, // Rich Gold
+    { anim: bar3, color: '#F59E0B', baseHeight: 46 }, // Amber Gold
+    { anim: bar4, color: '#8B5CF6', baseHeight: 50 }, // Center Purple Peak
+    { anim: bar5, color: '#FBBF24', baseHeight: 48 }, // Rich Gold
+    { anim: bar6, color: '#F59E0B', baseHeight: 46 }, // Amber Gold
+    { anim: bar7, color: '#8B5CF6', baseHeight: 42 }, // Violet Purple
+    { anim: bar8, color: '#6366F1', baseHeight: 36 }, // Purple
   ];
 
   return (
