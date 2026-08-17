@@ -13,143 +13,75 @@ import {
   Modal,
   TextInput,
 } from 'react-native';
-import Svg, { Path, Circle, Rect, G } from 'react-native-svg';
+import Svg, { Path, Circle, Rect } from 'react-native-svg';
 import * as Haptics from 'expo-haptics';
 import { LinearGradient } from 'expo-linear-gradient';
 import { FloatingTabBar, TabType } from '../components/FloatingTabBar';
 import { AnimatedCompletionModal } from '../components/AnimatedCompletionModal';
 
 interface MissionDetailScreenProps {
-  onBackToDashboard: () => void;
-  onNavigateTab?: (tab: TabType) => void;
+  onBackToDashboard?: () => void;
   onLogout?: () => void;
+  onNavigateTab?: (tab: TabType) => void;
 }
-
-interface QuestRequirement {
-  id: string;
-  title: string;
-  iconType: 'document' | 'lightbulb' | 'clock' | 'checkmark';
-  status: 'not_started' | 'in_progress' | 'completed' | 'locked';
-  statusLabel: string;
-}
-
-const INITIAL_REQUIREMENTS: QuestRequirement[] = [
-  {
-    id: 'req_1',
-    title: 'Create one personal story post',
-    iconType: 'document',
-    status: 'in_progress',
-    statusLabel: 'In progress',
-  },
-  {
-    id: 'req_2',
-    title: 'Add a clear lesson or takeaway',
-    iconType: 'lightbulb',
-    status: 'not_started',
-    statusLabel: 'Not started',
-  },
-  {
-    id: 'req_3',
-    title: 'Publish before deadline',
-    iconType: 'clock',
-    status: 'not_started',
-    statusLabel: 'Not started',
-  },
-  {
-    id: 'req_4',
-    title: 'Mark quest as completed',
-    iconType: 'checkmark',
-    status: 'locked',
-    statusLabel: 'Locked',
-  },
-];
-
-const AI_GENERATED_SCRIPTS = [
-  {
-    title: 'One thing I wish I knew before I started creating',
-    hook: 'The biggest lie beginner creators believe is that you need high-end gear to start.',
-    story: 'When I began, I delayed posting for 6 months waiting for a camera. When I finally posted on my phone, my 3rd video hit 50k views.',
-    lesson: 'Consistency and clear storytelling beat production value every single time.',
-    cta: 'What is one lesson you learned the hard way? Drop it below 👇',
-  },
-  {
-    title: 'The #1 mistake that held back my growth',
-    hook: 'I wasted 90 days trying to please everyone instead of talking to one specific person.',
-    story: 'Once I defined my exact creator niche, my engagement rate tripled in 3 weeks.',
-    lesson: 'Niche down until it hurts, then expand once you have momentum.',
-    cta: 'Save this post if you are refining your creator focus today.',
-  },
-];
 
 export const MissionDetailScreen: React.FC<MissionDetailScreenProps> = ({
   onBackToDashboard,
+  onLogout,
   onNavigateTab,
 }) => {
   const [activeTab, setActiveTab] = useState<TabType>('quests');
-  const [requirements, setRequirements] = useState<QuestRequirement[]>(INITIAL_REQUIREMENTS);
-  const [isQuestFinished, setIsQuestFinished] = useState(false);
-  const [showCelebrationModal, setShowCelebrationModal] = useState(false);
-  const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [isCompleted, setIsCompleted] = useState(false);
+  const [step1Done, setStep1Done] = useState(true);
+  const [step2Done, setStep2Done] = useState(false);
+  const [step3Done, setStep3Done] = useState(false);
 
   // Modal States
-  const [showCreatePostModal, setShowCreatePostModal] = useState(false);
-  const [showAiDraftModal, setShowAiDraftModal] = useState(false);
+  const [showCelebrationModal, setShowCelebrationModal] = useState(false);
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [showIdeaModal, setShowIdeaModal] = useState(false);
+  const [showNotificationModal, setShowNotificationModal] = useState(false);
   const [showProfileModal, setShowProfileModal] = useState(false);
-  const [showNotificationsModal, setShowNotificationsModal] = useState(false);
+  const [showChatModal, setShowChatModal] = useState(false);
 
-  // Create Post Form State
-  const [postTitle, setPostTitle] = useState('One thing I wish I knew before I started creating');
+  // Form State
+  const [postTitle, setPostTitle] = useState('One thing I wish I knew before I started creating.');
   const [postPlatform, setPostPlatform] = useState<'tiktok' | 'instagram' | 'youtube'>('tiktok');
-  const [postTime, setPostTime] = useState('7:30 PM');
 
   // Animations
-  const ghostFloatY = useRef(new Animated.Value(0)).current;
-  const ghostScale = useRef(new Animated.Value(1)).current;
-  const celebrationScale = useRef(new Animated.Value(0.85)).current;
-
-  // Calculate completed steps & progress
-  const completedCount = requirements.filter((r) => r.status === 'completed').length;
-  const progressPercent = isQuestFinished
-    ? 100
-    : Math.max(33, Math.round((completedCount / 3) * 100));
+  const flameFloatY = useRef(new Animated.Value(0)).current;
+  const modalPopScale = useRef(new Animated.Value(0.88)).current;
 
   useEffect(() => {
-    const ghostLoop = Animated.loop(
+    const flameLoop = Animated.loop(
       Animated.sequence([
-        Animated.parallel([
-          Animated.timing(ghostFloatY, {
-            toValue: -4,
-            duration: 1400,
-            useNativeDriver: true,
-          }),
-          Animated.timing(ghostScale, {
-            toValue: 1.05,
-            duration: 1400,
-            useNativeDriver: true,
-          }),
-        ]),
-        Animated.parallel([
-          Animated.timing(ghostFloatY, {
-            toValue: 3,
-            duration: 1300,
-            useNativeDriver: true,
-          }),
-          Animated.timing(ghostScale, {
-            toValue: 0.96,
-            duration: 1300,
-            useNativeDriver: true,
-          }),
-        ]),
+        Animated.timing(flameFloatY, {
+          toValue: -3,
+          duration: 1300,
+          useNativeDriver: true,
+        }),
+        Animated.timing(flameFloatY, {
+          toValue: 3,
+          duration: 1300,
+          useNativeDriver: true,
+        }),
       ])
     );
+    flameLoop.start();
+    return () => flameLoop.stop();
+  }, [flameFloatY]);
 
-    ghostLoop.start();
-    return () => ghostLoop.stop();
-  }, [ghostFloatY, ghostScale]);
-
-  const showToast = (msg: string) => {
-    setToastMessage(msg);
-    setTimeout(() => setToastMessage(null), 3200);
+  const triggerModalPop = () => {
+    if (Platform.OS !== 'web') {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    }
+    modalPopScale.setValue(0.88);
+    Animated.spring(modalPopScale, {
+      toValue: 1,
+      useNativeDriver: true,
+      speed: 26,
+      bounciness: 12,
+    }).start();
   };
 
   const handleTabPress = (tab: TabType) => {
@@ -157,95 +89,19 @@ export const MissionDetailScreen: React.FC<MissionDetailScreenProps> = ({
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     }
     setActiveTab(tab);
-    if (tab === 'home') {
-      onBackToDashboard();
-    } else if (onNavigateTab) {
+    if (onNavigateTab) {
       onNavigateTab(tab);
     }
   };
 
-  const handleToggleRequirement = (id: string) => {
-    if (Platform.OS !== 'web') {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    }
-
-    setRequirements((prev) => {
-      const updated = prev.map((req) => {
-        if (req.id === id) {
-          if (req.status === 'completed') {
-            return { ...req, status: 'in_progress' as const, statusLabel: 'In progress' };
-          } else {
-            return { ...req, status: 'completed' as const, statusLabel: 'Done ✓' };
-          }
-        }
-        return req;
-      });
-
-      // Check if steps 1-3 are completed to unlock step 4
-      const first3Done = updated.slice(0, 3).every((r) => r.status === 'completed');
-      if (first3Done) {
-        updated[3] = {
-          ...updated[3],
-          status: updated[3].status === 'completed' ? 'completed' : 'not_started',
-          statusLabel: updated[3].status === 'completed' ? 'Done ✓' : 'Ready to Complete',
-        };
-      } else {
-        updated[3] = {
-          ...updated[3],
-          status: 'locked',
-          statusLabel: 'Locked',
-        };
-      }
-
-      return updated;
-    });
-
-    showToast('⚡ Quest requirement updated!');
-  };
-
-  const handleCompleteQuest = () => {
+  const handleCompleteMission = () => {
     if (Platform.OS !== 'web') {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     }
-
-    setIsQuestFinished(true);
-    setRequirements((prev) =>
-      prev.map((r) => ({ ...r, status: 'completed', statusLabel: 'Done ✓' }))
-    );
-
+    setIsCompleted(true);
+    setStep2Done(true);
+    setStep3Done(true);
     setShowCelebrationModal(true);
-    Animated.spring(celebrationScale, {
-      toValue: 1,
-      useNativeDriver: true,
-      speed: 22,
-      bounciness: 10,
-    }).start();
-  };
-
-  const handleSchedulePost = () => {
-    if (Platform.OS !== 'web') {
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-    }
-    setShowCreatePostModal(false);
-
-    // Mark step 1 & 2 as completed
-    setRequirements((prev) =>
-      prev.map((r) => {
-        if (r.id === 'req_1' || r.id === 'req_2') {
-          return { ...r, status: 'completed', statusLabel: 'Done ✓' };
-        }
-        return r;
-      })
-    );
-
-    showToast(`✓ Post scheduled for ${postTime}! +50 XP awarded.`);
-  };
-
-  const handleUseIdea = () => {
-    if (Platform.OS !== 'web') {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    }
-    setShowCreatePostModal(true);
   };
 
   return (
@@ -254,35 +110,31 @@ export const MissionDetailScreen: React.FC<MissionDetailScreenProps> = ({
       <View style={styles.container}>
         {/* 1. TOP AIRY HEADER BAR */}
         <View style={styles.headerBar}>
-          {/* Top-Left: Ghost Logo Mascot (Tap to go Home) */}
-          <Pressable onPress={onBackToDashboard} hitSlop={8}>
-            <Animated.View
-              style={[
-                styles.headerLogoWrapper,
-                {
-                  transform: [
-                    { translateY: ghostFloatY },
-                    { scale: ghostScale },
-                  ],
-                },
-              ]}
-            >
-              <Image
-                source={require('../../assets/images/jarvis-ghost-clean.png')}
-                style={styles.headerGhostLogo}
-                resizeMode="contain"
-              />
-            </Animated.View>
-          </Pressable>
+          {/* Top-Left: Ghost Logo Mascot */}
+          <Animated.View
+            style={[
+              styles.headerLogoWrapper,
+              { transform: [{ translateY: flameFloatY }] },
+            ]}
+          >
+            <Image
+              source={require('../../assets/images/jarvis-ghost-clean.png')}
+              style={styles.headerGhostLogo}
+              resizeMode="contain"
+            />
+          </Animated.View>
 
           {/* Right Icons: Messages, Notification Bell, Profile */}
           <View style={styles.headerRightGroup}>
             <Pressable
               style={({ pressed }) => [styles.headerIconBtn, pressed && styles.btnPressed]}
               hitSlop={8}
-              onPress={() => showToast('💬 Creator Chat: 2 unread collab messages')}
+              onPress={() => {
+                triggerModalPop();
+                setShowChatModal(true);
+              }}
             >
-              <Svg width={20} height={20} viewBox="0 0 24 24" fill="none">
+              <Svg width={19} height={19} viewBox="0 0 24 24" fill="none">
                 <Path
                   d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"
                   stroke="#171420"
@@ -296,9 +148,12 @@ export const MissionDetailScreen: React.FC<MissionDetailScreenProps> = ({
             <Pressable
               style={({ pressed }) => [styles.headerIconBtn, pressed && styles.btnPressed]}
               hitSlop={8}
-              onPress={() => setShowNotificationsModal(true)}
+              onPress={() => {
+                triggerModalPop();
+                setShowNotificationModal(true);
+              }}
             >
-              <Svg width={20} height={20} viewBox="0 0 24 24" fill="none">
+              <Svg width={19} height={19} viewBox="0 0 24 24" fill="none">
                 <Path
                   d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"
                   stroke="#171420"
@@ -317,17 +172,24 @@ export const MissionDetailScreen: React.FC<MissionDetailScreenProps> = ({
               <View style={styles.notificationDot} />
             </Pressable>
 
-            {/* Top-Right: User Profile Person Icon */}
             <Pressable
-              style={({ pressed }) => [styles.profilePhotoBtn, pressed && styles.btnPressed]}
+              style={({ pressed }) => [styles.headerIconBtn, pressed && styles.btnPressed]}
               hitSlop={8}
-              onPress={() => setShowProfileModal(true)}
+              onPress={() => {
+                triggerModalPop();
+                setShowProfileModal(true);
+              }}
             >
-              <Image
-                source={require('../../assets/images/amara-portrait.jpg')}
-                style={styles.profileAvatarImg}
-                resizeMode="cover"
-              />
+              <Svg width={19} height={19} viewBox="0 0 24 24" fill="none">
+                <Path
+                  d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"
+                  stroke="#171420"
+                  strokeWidth="2.2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+                <Circle cx="12" cy="7" r="4" stroke="#171420" strokeWidth="2.2" />
+              </Svg>
             </Pressable>
           </View>
         </View>
@@ -338,414 +200,278 @@ export const MissionDetailScreen: React.FC<MissionDetailScreenProps> = ({
           showsVerticalScrollIndicator={false}
           bounces={true}
         >
-
-
-          {/* PAGE TITLE & BADGES */}
-          <View style={styles.tagRow}>
-            <View style={styles.activeQuestTag}>
-              <Text style={styles.activeQuestTagText}>ACTIVE QUEST</Text>
+          {/* TOP PILL BADGES */}
+          <View style={styles.topBadgesRow}>
+            <View style={styles.todayMissionPill}>
+              <Text style={styles.todayMissionPillText}>TODAY&apos;S MISSION</Text>
             </View>
-            <View style={styles.freeQuestTag}>
-              <Text style={styles.freeQuestTagText}>FREE QUEST</Text>
+
+            <View style={styles.freeMissionPill}>
+              <Text style={styles.freeMissionPillText}>FREE MISSION</Text>
             </View>
           </View>
 
-          <Text style={styles.pageTitle}>Storyteller Challenge</Text>
-          <Text style={styles.pageSubtitle}>
-            Share one personal creator lesson to build your storytelling habit and protect your streak.
+          {/* MAIN HEADLINE & SUBTITLE */}
+          <Text style={styles.mainHeading}>Post once before 9 PM.</Text>
+          <Text style={styles.mainSubtitle}>
+            Protect your <Text style={{ fontWeight: '800', color: '#171420' }}>47-day streak</Text> and keep your creator momentum alive.
           </Text>
 
-          {/* SECTION 1: HERO QUEST CARD */}
-          <View style={styles.heroQuestCard}>
-            <View style={styles.heroTopStatusRow}>
-              <View style={styles.inProgressPill}>
-                <Text style={styles.inProgressPillText}>IN PROGRESS</Text>
-              </View>
-              <Text style={styles.endsTomorrowText}>ENDS TOMORROW • 11:30 PM</Text>
+          {/* 1. MISSION PROGRESS CARD */}
+          <View style={styles.missionProgressCard}>
+            <View style={styles.progressHeaderRow}>
+              <Text style={styles.progressCardTitle}>Mission Progress</Text>
+              <Text style={styles.progressFractionText}>{isCompleted ? '1 / 1' : '0 / 1'}</Text>
             </View>
-
-            <Text style={styles.heroQuestTitle}>Storyteller Challenge</Text>
-            <Text style={styles.heroQuestDesc}>
-              Create a short post about one lesson you learned as a creator. Make it useful, honest and easy for your audience to relate to.
-            </Text>
 
             {/* Progress Bar */}
-            <View style={styles.progressSection}>
-              <View style={styles.progressLabelRow}>
-                <Text style={styles.progressStepLabel}>
-                  {isQuestFinished ? '3 / 3 steps completed' : `${completedCount || 1} / 3 steps completed`}
-                </Text>
-                <Text style={styles.progressPercentLabel}>{progressPercent}%</Text>
+            <View style={styles.progressBarTrack}>
+              <View style={[styles.progressBarFill, { width: isCompleted ? '100%' : '18%' }]} />
+            </View>
+
+            {/* 3 Metric Pills Row: +80 XP, Streak, 9:00 PM Deadline */}
+            <View style={styles.metricsRow}>
+              <View style={styles.metricBox}>
+                <Text style={styles.metricValueGold}>+80</Text>
+                <Text style={styles.metricLabel}>XP</Text>
               </View>
-              <View style={styles.progressBarTrack}>
-                <View
-                  style={[
-                    styles.progressBarFill,
-                    { width: `${progressPercent}%` },
-                  ]}
-                />
+
+              <View style={styles.metricBox}>
+                <Text style={styles.metricEmoji}>🔥</Text>
+                <Text style={styles.metricLabel}>STREAK</Text>
+              </View>
+
+              <View style={styles.metricBox}>
+                <Text style={styles.metricValueGold}>9:00 PM</Text>
+                <Text style={styles.metricLabel}>DEADLINE</Text>
               </View>
             </View>
 
-            {/* Reward Badges Row */}
-            <View style={styles.rewardsTagRow}>
-              <View style={styles.xpRewardPill}>
-                <Text style={styles.xpRewardPillText}>+150 XP</Text>
-              </View>
-              <View style={styles.badgeRewardPill}>
-                <Text style={styles.badgeRewardPillText}>🏆 Storyteller Badge</Text>
-              </View>
-              <View style={styles.passportRewardPill}>
-                <Text style={styles.passportRewardPillText}>Passport Activity</Text>
-              </View>
-            </View>
-
-            {/* Dual Action Buttons */}
-            <View style={styles.heroActionBtnCol}>
-              <Pressable
-                style={({ pressed }) => [styles.continueQuestBtn, pressed && styles.btnPressed]}
-                onPress={() => {
-                  if (progressPercent >= 100) {
-                    handleCompleteQuest();
-                  } else {
-                    setShowCreatePostModal(true);
-                  }
-                }}
-              >
-                <LinearGradient
-                  colors={['#784DF0', '#582CDB']}
-                  start={{ x: 0, y: 0 }}
-                  end={{ x: 1, y: 1 }}
-                  style={styles.continueQuestGradient}
-                >
-                  <Text style={styles.continueQuestBtnText}>
-                    {isQuestFinished ? '✓ Quest Completed' : 'Continue Quest'}
-                  </Text>
-                </LinearGradient>
-              </Pressable>
-
-              <Pressable
-                style={({ pressed }) => [styles.createPostOutlineBtn, pressed && styles.btnPressed]}
-                onPress={() => setShowCreatePostModal(true)}
-              >
-                <Text style={styles.createPostOutlineBtnText}>Create Post</Text>
-              </Pressable>
-            </View>
-          </View>
-
-          {/* SECTION 2: QUEST REQUIREMENTS */}
-          <Text style={styles.sectionHeading}>Quest Requirements</Text>
-          <View style={styles.requirementsList}>
-            {requirements.map((req) => (
-              <Pressable
-                key={req.id}
-                style={({ pressed }) => [
-                  styles.requirementCard,
-                  req.status === 'completed' && styles.requirementCardCompleted,
-                  pressed && styles.btnPressed,
-                ]}
-                onPress={() => {
-                  if (req.id === 'req_4' && req.status !== 'locked') {
-                    handleCompleteQuest();
-                  } else if (req.id !== 'req_4') {
-                    handleToggleRequirement(req.id);
-                  } else {
-                    showToast('🔒 Complete steps 1-3 first to unlock!');
-                  }
-                }}
-              >
-                <View style={styles.requirementLeft}>
-                  <View
-                    style={[
-                      styles.reqIconCircle,
-                      req.status === 'completed' && styles.reqIconCircleCompleted,
-                    ]}
-                  >
-                    {req.iconType === 'document' && (
-                      <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
-                        <Path
-                          d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"
-                          stroke={req.status === 'completed' ? '#582CDB' : '#524C62'}
-                          strokeWidth="2"
-                        />
-                        <Path
-                          d="M14 2v6h6M16 13H8M16 17H8M10 9H8"
-                          stroke={req.status === 'completed' ? '#582CDB' : '#524C62'}
-                          strokeWidth="2"
-                          strokeLinecap="round"
-                        />
-                      </Svg>
-                    )}
-                    {req.iconType === 'lightbulb' && (
-                      <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
-                        <Path
-                          d="M9 18h6M10 22h4M12 2a7 7 0 0 0-7 7c0 2.6 1.4 4.8 3.5 6h7c2.1-1.2 3.5-3.4 3.5-6a7 7 0 0 0-7-7z"
-                          stroke={req.status === 'completed' ? '#582CDB' : '#524C62'}
-                          strokeWidth="2"
-                          strokeLinecap="round"
-                        />
-                      </Svg>
-                    )}
-                    {req.iconType === 'clock' && (
-                      <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
-                        <Circle
-                          cx="12"
-                          cy="12"
-                          r="10"
-                          stroke={req.status === 'completed' ? '#582CDB' : '#524C62'}
-                          strokeWidth="2"
-                        />
-                        <Path
-                          d="M12 6v6l4 2"
-                          stroke={req.status === 'completed' ? '#582CDB' : '#524C62'}
-                          strokeWidth="2"
-                          strokeLinecap="round"
-                        />
-                      </Svg>
-                    )}
-                    {req.iconType === 'checkmark' && (
-                      <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
-                        <Circle
-                          cx="12"
-                          cy="12"
-                          r="10"
-                          stroke={req.status === 'completed' ? '#582CDB' : '#524C62'}
-                          strokeWidth="2"
-                        />
-                        <Path
-                          d="M9 12l2 2 4-4"
-                          stroke={req.status === 'completed' ? '#582CDB' : '#524C62'}
-                          strokeWidth="2"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        />
-                      </Svg>
-                    )}
-                  </View>
-                  <Text style={styles.requirementTitle}>{req.title}</Text>
-                </View>
-
-                <View
-                  style={[
-                    styles.reqStatusPill,
-                    req.status === 'completed' && styles.reqStatusPillDone,
-                    req.status === 'in_progress' && styles.reqStatusPillProgress,
-                    req.status === 'locked' && styles.reqStatusPillLocked,
-                  ]}
-                >
-                  <Text
-                    style={[
-                      styles.reqStatusPillText,
-                      req.status === 'completed' && styles.reqStatusPillTextDone,
-                      req.status === 'in_progress' && styles.reqStatusPillTextProgress,
-                    ]}
-                  >
-                    {req.status === 'locked' ? '🔒 Locked' : req.statusLabel}
-                  </Text>
-                </View>
-              </Pressable>
-            ))}
-          </View>
-
-          {/* SECTION 3: SUGGESTED ANGLE (Royal Purple Card) */}
-          <View style={styles.suggestedAngleCard}>
-            <LinearGradient
-              colors={['#6438E8', '#4F23D0', '#3E16B8']}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 1 }}
-              style={styles.suggestedAngleGradient}
-            >
-              <View style={styles.suggestedAngleTag}>
-                <Text style={styles.suggestedAngleTagText}>SUGGESTED ANGLE</Text>
-              </View>
-
-              <Text style={styles.suggestedAngleQuote}>
-                &ldquo;One thing I wish I knew before I started creating&rdquo;
+            {/* Warning / Reminder Banner */}
+            <View style={styles.warningBanner}>
+              <Text style={styles.warningBannerText}>
+                ! One post today keeps your streak alive.
               </Text>
-
-              {/* Formula Capsule */}
-              <View style={styles.formulaCapsule}>
-                <Text style={styles.formulaCapsuleText}>Hook ➔ Story ➔ Lesson ➔ CTA</Text>
-              </View>
-
-              {/* Platform Chips */}
-              <View style={styles.platformChipsRow}>
-                <View style={styles.platformTranslucentChip}>
-                  <Text style={styles.platformTranslucentChipText}>TikTok</Text>
-                </View>
-                <View style={styles.platformTranslucentChip}>
-                  <Text style={styles.platformTranslucentChipText}>Instagram Reel</Text>
-                </View>
-                <View style={styles.platformTranslucentChip}>
-                  <Text style={styles.platformTranslucentChipText}>YouTube Shorts</Text>
-                </View>
-              </View>
-
-              {/* White Action Button */}
-              <Pressable
-                style={({ pressed }) => [styles.useIdeaWhiteBtn, pressed && styles.btnPressed]}
-                onPress={handleUseIdea}
-              >
-                <Text style={styles.useIdeaWhiteBtnText}>Use This Idea</Text>
-              </Pressable>
-            </LinearGradient>
+            </View>
           </View>
 
-          {/* SECTION 4: YOUR QUEST PROGRESS (Circular Gauge) */}
-          <View style={styles.progressGaugeCard}>
-            {/* SVG Circular Progress Ring */}
-            <View style={styles.gaugeCenterBox}>
-              <Svg width={110} height={110} viewBox="0 0 110 110">
-                <Circle
-                  cx="55"
-                  cy="55"
-                  r="45"
-                  stroke="#EAE5F8"
-                  strokeWidth="9"
-                  fill="none"
-                />
-                <Circle
-                  cx="55"
-                  cy="55"
-                  r="45"
-                  stroke="#582CDB"
-                  strokeWidth="9"
-                  strokeDasharray={`${2 * Math.PI * 45}`}
-                  strokeDashoffset={`${2 * Math.PI * 45 * (1 - progressPercent / 100)}`}
-                  strokeLinecap="round"
-                  fill="none"
-                  transform="rotate(-90 55 55)"
-                />
+          {/* 2. STEP-BY-STEP GUIDE */}
+          <View style={styles.guideCard}>
+            <Text style={styles.guideSectionTitle}>STEP-BY-STEP GUIDE</Text>
+
+            {/* Step 1 */}
+            <View style={styles.stepRow}>
+              <View style={[styles.stepCircle, step1Done && styles.stepCircleActive]}>
+                <Text style={[styles.stepCircleNumber, step1Done && styles.stepCircleNumberActive]}>1</Text>
+              </View>
+              <View style={styles.stepContent}>
+                <Text style={styles.stepTitle}>Choose your idea</Text>
+                <Text style={styles.stepDescription}>Pick a trending topic or use a suggestion.</Text>
+              </View>
+            </View>
+
+            {/* Step 2 */}
+            <View style={styles.stepRow}>
+              <View style={[styles.stepCircle, step2Done && styles.stepCircleActive]}>
+                <Text style={[styles.stepCircleNumber, step2Done && styles.stepCircleNumberActive]}>2</Text>
+              </View>
+              <View style={styles.stepContent}>
+                <Text style={styles.stepTitle}>Write your script</Text>
+                <Text style={styles.stepDescription}>Keep it concise. Focus on the hook.</Text>
+              </View>
+            </View>
+
+            {/* Step 3 */}
+            <View style={[styles.stepRow, { marginBottom: 0 }]}>
+              <View style={[styles.stepCircle, step3Done && styles.stepCircleActive]}>
+                <Text style={[styles.stepCircleNumber, step3Done && styles.stepCircleNumberActive]}>3</Text>
+              </View>
+              <View style={styles.stepContent}>
+                <Text style={styles.stepTitle}>Publish before 9 PM</Text>
+                <Text style={styles.stepDescription}>Make sure your post goes live before the deadline.</Text>
+              </View>
+            </View>
+          </View>
+
+          {/* 3. SUGGESTED IDEA CARD (ROYAL PURPLE) */}
+          <View style={styles.suggestedIdeaCard}>
+            <View style={styles.suggestedHeaderRow}>
+              <Text style={styles.suggestedIdeaTag}>SUGGESTED IDEA</Text>
+              <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
+                <Rect x="2" y="3" width="20" height="14" rx="2" stroke="#E0E7FF" strokeWidth="2" />
+                <Path d="M8 21h8M12 17v4" stroke="#E0E7FF" strokeWidth="2" strokeLinecap="round" />
               </Svg>
-              <View style={styles.gaugeTextOverlay}>
-                <Text style={styles.gaugePercentText}>{progressPercent}%</Text>
-              </View>
             </View>
 
-            <Text style={styles.gaugeHeading}>Your Quest Progress</Text>
-            <View style={styles.gaugeBulletList}>
-              <Text style={styles.gaugeBulletText}>
-                • Steps completed: {completedCount || 1} of 3
-              </Text>
-              <Text style={styles.gaugeBulletText}>• Time remaining: 1 day</Text>
-              <Text style={styles.gaugeBulletText}>• Streak impact: protect momentum</Text>
-            </View>
-          </View>
-
-          {/* SECTION 5: WHY THIS QUEST MATTERS */}
-          <Text style={styles.sectionHeading}>Why this quest matters</Text>
-          <View style={styles.whyMattersCard}>
-            <Text style={styles.whyMattersText}>
-              Storytelling helps your audience trust you. Completing this quest improves your Creator Passport and strengthens your consistency record.
+            <Text style={styles.suggestedQuote}>
+              &ldquo;One thing I wish I knew before I started creating.&rdquo;
             </Text>
 
-            <View style={styles.whyMattersPillRow}>
-              <View style={styles.whyMattersPill}>
-                <Text style={styles.whyMattersPillText}>Trust</Text>
+            <View style={styles.suggestedFooterRow}>
+              <View style={styles.bestTimeRow}>
+                <Text style={styles.bestTimeText}>🕒 Best time: 7:30 PM</Text>
               </View>
-              <View style={styles.whyMattersPill}>
-                <Text style={styles.whyMattersPillText}>Consistency</Text>
+
+              <Pressable
+                style={({ pressed }) => [styles.useThisIdeaBtn, pressed && styles.btnPressed]}
+                onPress={() => {
+                  setPostTitle('One thing I wish I knew before I started creating');
+                  triggerModalPop();
+                  setShowCreateModal(true);
+                }}
+              >
+                <Text style={styles.useThisIdeaBtnText}>Use This Idea</Text>
+              </Pressable>
+            </View>
+          </View>
+
+          {/* 4. WHAT THIS MISSION IMPROVES */}
+          <View style={styles.improvesCard}>
+            <Text style={styles.improvesSectionTitle}>WHAT THIS MISSION IMPROVES</Text>
+            <View style={styles.improvesPillsRow}>
+              <View style={styles.improvesPillGray}>
+                <Text style={styles.improvesPillGrayText}>Consistency</Text>
               </View>
-              <View style={styles.whyMattersPill}>
-                <Text style={styles.whyMattersPillText}>Creator Passport</Text>
+              <View style={styles.improvesPillPurple}>
+                <Text style={styles.improvesPillPurpleText}>XP Boost</Text>
+              </View>
+              <View style={styles.improvesPillGold}>
+                <Text style={styles.improvesPillGoldText}>Growth</Text>
+              </View>
+              <View style={styles.improvesPillGray}>
+                <Text style={styles.improvesPillGrayText}>Passport</Text>
               </View>
             </View>
           </View>
 
-          {/* SECTION 6: REPUTATION EFFECT (2x2 Grid) */}
-          <Text style={styles.sectionHeading}>Reputation Effect</Text>
-          <View style={styles.reputationGrid}>
-            <View style={styles.reputationTile}>
-              <Text style={styles.reputationTileLabel}>Consistency</Text>
-              <Text style={styles.reputationTileValuePurple}>+4%</Text>
+          {/* 5. XP & REWARD CARD */}
+          <View style={styles.rewardCard}>
+            <View style={styles.rewardTopRow}>
+              <View style={styles.rewardMedalBox}>
+                <Text style={{ fontSize: 20 }}>🎖️</Text>
+              </View>
+              <View>
+                <Text style={styles.rewardTitle}>+80 XP Pending</Text>
+                <Text style={styles.rewardSubtitle}>Streak Protection</Text>
+              </View>
             </View>
-            <View style={styles.reputationTile}>
-              <Text style={styles.reputationTileLabel}>Passport</Text>
-              <Text style={styles.reputationTileValuePurple}>+6%</Text>
-            </View>
-            <View style={styles.reputationTile}>
-              <Text style={styles.reputationTileLabel}>Quests</Text>
-              <Text style={styles.reputationTileValueDark}>+1</Text>
-            </View>
-            <View style={styles.reputationTile}>
-              <Text style={styles.reputationTileLabel}>Status</Text>
-              <Text style={styles.reputationTileValueGold}>Ready</Text>
+
+            <View style={styles.momentumBadgePill}>
+              <Text style={styles.momentumBadgeText}>MOMENTUM BUILDER BADGE</Text>
             </View>
           </View>
 
-          {/* Reputation Callout Note */}
-          <View style={styles.reputationCalloutRow}>
-            <Text style={styles.reputationCalloutEmoji}>🛡️</Text>
-            <Text style={styles.reputationCalloutText}>
-              Brands are more likely to trust creators with consistent weekly activity.
-            </Text>
-          </View>
-
-          {/* SECTION 7: JARVIS INSIGHT */}
-          <View style={styles.jarvisInsightCard}>
+          {/* 6. JARVIS INSIGHT CARD */}
+          <View style={styles.jarvisCard}>
             <View style={styles.jarvisHeaderRow}>
-              <View style={styles.jarvisFlameIconBox}>
+              <Animated.View
+                style={[
+                  styles.jarvisFlameCircle,
+                  { transform: [{ translateY: flameFloatY }] },
+                ]}
+              >
                 <Image
                   source={require('../../assets/images/jarvis-core-flame.png')}
-                  style={styles.jarvisFlameIconImg}
+                  style={styles.jarvisFlameIcon}
                   resizeMode="contain"
                 />
-              </View>
+              </Animated.View>
               <View style={styles.jarvisTitleCol}>
-                <Text style={styles.jarvisInsightTitle}>Jarvis Insight</Text>
-                <Text style={styles.jarvisInsightSub}>CREATOR CORE AI</Text>
+                <Text style={styles.jarvisTitle}>Jarvis insight</Text>
+                <Text style={styles.jarvisTime}>2m ago</Text>
               </View>
             </View>
 
-            <Text style={styles.jarvisInsightQuoteText}>
-              Your audience responds well to practical creator lessons. Keep this post honest, specific and easy to save.
+            <Text style={styles.jarvisBody}>
+              Your audience responds well to honest creator lessons. Share a quick mistake or lesson from your journey.
             </Text>
 
             <Pressable
-              style={({ pressed }) => [styles.generateDraftBtn, pressed && styles.btnPressed]}
-              onPress={() => setShowAiDraftModal(true)}
+              style={styles.generateIdeaLink}
+              onPress={() => {
+                triggerModalPop();
+                setShowIdeaModal(true);
+              }}
+              hitSlop={6}
             >
-              <Text style={styles.generateDraftBtnText}>Generate Quest Draft ➔</Text>
+              <Text style={styles.generateIdeaLinkText}>✨ GENERATE IDEA</Text>
             </Pressable>
           </View>
 
-          {/* SECTION 8: REWARD PREVIEW */}
-          <Text style={styles.sectionHeading}>Reward Preview</Text>
-          <View style={styles.rewardPreviewCard}>
-            <View style={styles.rewardPreviewRow}>
-              <Text style={styles.rewardPreviewLabel}>Creator XP Reward</Text>
-              <Text style={styles.rewardPreviewValuePurple}>+150 XP</Text>
-            </View>
-            <View style={styles.rewardPreviewRow}>
-              <Text style={styles.rewardPreviewLabel}>Badge Progression</Text>
-              <Text style={styles.rewardPreviewValuePurple}>Storyteller</Text>
-            </View>
-            <View style={[styles.rewardPreviewRow, { borderBottomWidth: 0 }]}>
-              <Text style={styles.rewardPreviewLabel}>Passport Update</Text>
-              <Text style={styles.rewardPreviewValueDark}>Active</Text>
-            </View>
+          {/* 7. DUAL ACTION BUTTONS */}
+          <View style={styles.actionButtonsContainer}>
+            {/* Primary Button: Create Post */}
+            <Pressable
+              style={({ pressed }) => [styles.createPostBtn, pressed && styles.btnPressed]}
+              onPress={() => {
+                triggerModalPop();
+                setShowCreateModal(true);
+              }}
+            >
+              <LinearGradient
+                colors={['#6366F1', '#582CDB']}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                style={styles.createPostGradient}
+              >
+                <Text style={styles.createPostBtnText}>⊕  Create Post</Text>
+              </LinearGradient>
+            </Pressable>
+
+            {/* Secondary Button: I Published This */}
+            <Pressable
+              style={({ pressed }) => [styles.publishedBtn, pressed && styles.btnPressed]}
+              onPress={handleCompleteMission}
+            >
+              <Text style={styles.publishedBtnText}>✓  I Published This</Text>
+            </Pressable>
           </View>
 
-          {/* Bottom Spacing */}
-          <View style={{ height: 110 }} />
+          {/* Bottom Space for Floating Tab Bar */}
+          <View style={{ height: 120 }} />
         </ScrollView>
 
-        {/* 3. LIQUID GLASS FLOATING TAB BAR */}
+        {/* FLOATING LIQUID GLASS TAB BAR */}
         <FloatingTabBar activeTab={activeTab} onTabPress={handleTabPress} />
 
-        {/* MODAL 1: CREATE POST & SCHEDULE */}
+        {/* SIGNATURE ANIMATED GHOST CELEBRATION MODAL */}
+        <AnimatedCompletionModal
+          visible={showCelebrationModal}
+          title="Mission Accomplished!"
+          subtitle="Your daily post is live & your 47-day streak momentum is 100% protected."
+          speechBubble="Ghost says: Consistency is your superpower Amara! +80 XP added to your Passport!"
+          badgeText="MISSION COMPLETE"
+          xpEarned={80}
+          streakCount={47}
+          actionText="Continue ➔"
+          onDismiss={() => {
+            setShowCelebrationModal(false);
+            if (onBackToDashboard) onBackToDashboard();
+          }}
+        />
+
+        {/* CREATE POST MODAL */}
         <Modal
-          visible={showCreatePostModal}
+          visible={showCreateModal}
           transparent={true}
           animationType="fade"
-          onRequestClose={() => setShowCreatePostModal(false)}
+          onRequestClose={() => setShowCreateModal(false)}
         >
           <View style={styles.modalOverlay}>
-            <View style={styles.modalCard}>
-              <Text style={styles.modalTitle}>Plan Quest Post</Text>
-              <Text style={styles.modalSubtitle}>
-                Lock this storyteller post into your timeline to protect your streak.
-              </Text>
+            <Animated.View style={[styles.modalCard, { transform: [{ scale: modalPopScale }] }]}>
+              <View style={styles.modalHeaderRow}>
+                <View>
+                  <Text style={styles.modalTitle}>Create Mission Post</Text>
+                  <Text style={styles.modalSubtitle}>Post before 9 PM to protect your streak.</Text>
+                </View>
+                <Pressable
+                  onPress={() => setShowCreateModal(false)}
+                  style={styles.modalCloseCircle}
+                  hitSlop={8}
+                >
+                  <Text style={styles.modalCloseCross}>✕</Text>
+                </Pressable>
+              </View>
 
               <Text style={styles.modalInputLabel}>CHOOSE PLATFORM</Text>
               <View style={styles.platformSelectRow}>
@@ -768,136 +494,144 @@ export const MissionDetailScreen: React.FC<MissionDetailScreenProps> = ({
                         ? 'TikTok'
                         : plat === 'instagram'
                         ? 'Instagram Reel'
-                        : 'YouTube Shorts'}
+                        : 'YouTube'}
                     </Text>
                   </Pressable>
                 ))}
               </View>
 
-              <Text style={styles.modalInputLabel}>STORY HOOK / TOPIC</Text>
+              <Text style={styles.modalInputLabel}>POST TITLE / HOOK</Text>
               <TextInput
                 style={styles.modalTextInput}
                 value={postTitle}
                 onChangeText={setPostTitle}
-                placeholder="Enter your hook..."
-                placeholderTextColor="#A39CB5"
-              />
-
-              <Text style={styles.modalInputLabel}>SCHEDULE TIME</Text>
-              <TextInput
-                style={styles.modalTextInput}
-                value={postTime}
-                onChangeText={setPostTime}
-                placeholder="e.g. 7:30 PM"
-                placeholderTextColor="#A39CB5"
+                placeholder="e.g. One thing I wish I knew before creating..."
+                placeholderTextColor="#94A3B8"
               />
 
               <View style={styles.modalBtnRow}>
                 <Pressable
                   style={styles.modalSecondaryBtn}
-                  onPress={() => setShowCreatePostModal(false)}
+                  onPress={() => setShowCreateModal(false)}
                 >
                   <Text style={styles.modalSecondaryBtnText}>Cancel</Text>
                 </Pressable>
 
-                <Pressable style={styles.modalPrimaryBtn} onPress={handleSchedulePost}>
+                <Pressable
+                  style={styles.modalPrimaryBtn}
+                  onPress={() => {
+                    setShowCreateModal(false);
+                    handleCompleteMission();
+                  }}
+                >
                   <LinearGradient
-                    colors={['#784DF0', '#582CDB']}
+                    colors={['#6366F1', '#582CDB']}
                     start={{ x: 0, y: 0 }}
                     end={{ x: 1, y: 1 }}
                     style={styles.modalPrimaryGradient}
                   >
-                    <Text style={styles.modalPrimaryBtnText}>Schedule & Earn +50 XP</Text>
+                    <Text style={styles.modalPrimaryBtnText}>Publish &amp; Save</Text>
                   </LinearGradient>
                 </Pressable>
               </View>
-            </View>
+            </Animated.View>
           </View>
         </Modal>
 
-        {/* MODAL 2: AI SCRIPT GENERATOR */}
+        {/* AI IDEA SPARKS MODAL */}
         <Modal
-          visible={showAiDraftModal}
+          visible={showIdeaModal}
           transparent={true}
           animationType="fade"
-          onRequestClose={() => setShowAiDraftModal(false)}
+          onRequestClose={() => setShowIdeaModal(false)}
         >
           <View style={styles.modalOverlay}>
-            <View style={styles.modalCard}>
+            <Animated.View style={[styles.modalCard, { transform: [{ scale: modalPopScale }] }]}>
               <View style={styles.modalHeaderRow}>
-                <Text style={styles.modalTitle}>Jarvis Quest Draft</Text>
-                <Pressable onPress={() => setShowAiDraftModal(false)}>
-                  <Text style={styles.modalCloseIcon}>✕</Text>
+                <View>
+                  <Text style={styles.modalTitle}>AI Hook Sparks</Text>
+                  <Text style={styles.modalSubtitle}>Angles tailored for your 47-day streak:</Text>
+                </View>
+                <Pressable
+                  onPress={() => setShowIdeaModal(false)}
+                  style={styles.modalCloseCircle}
+                  hitSlop={8}
+                >
+                  <Text style={styles.modalCloseCross}>✕</Text>
                 </Pressable>
               </View>
 
-              <Text style={styles.modalSubtitle}>
-                AI crafted story structure based on your creator style:
-              </Text>
+              {[
+                'One thing I wish I knew before I started creating.',
+                '3 creator tools that saved me 10 hours this week.',
+                'Why consistency beats motivation every single time.',
+              ].map((spark, idx) => (
+                <Pressable
+                  key={idx}
+                  style={styles.sparkCard}
+                  onPress={() => {
+                    setPostTitle(spark);
+                    setShowIdeaModal(false);
+                    setShowCreateModal(true);
+                  }}
+                >
+                  <Text style={styles.sparkText}>&ldquo;{spark}&rdquo;</Text>
+                  <Text style={styles.sparkTag}>⚡ 94 Viral Score • High Retention</Text>
+                </Pressable>
+              ))}
 
-              <ScrollView style={{ maxHeight: 340 }} showsVerticalScrollIndicator={false}>
-                {AI_GENERATED_SCRIPTS.map((script, idx) => (
-                  <View key={idx} style={styles.scriptBlueprintBox}>
-                    <Text style={styles.scriptBlueprintTitle}>{script.title}</Text>
-                    <Text style={styles.scriptSectionLabel}>🎣 HOOK:</Text>
-                    <Text style={styles.scriptSectionText}>&ldquo;{script.hook}&rdquo;</Text>
-
-                    <Text style={styles.scriptSectionLabel}>📖 STORY:</Text>
-                    <Text style={styles.scriptSectionText}>{script.story}</Text>
-
-                    <Text style={styles.scriptSectionLabel}>💡 LESSON:</Text>
-                    <Text style={styles.scriptSectionText}>{script.lesson}</Text>
-
-                    <Pressable
-                      style={styles.useDraftBtn}
-                      onPress={() => {
-                        setPostTitle(script.title);
-                        setShowAiDraftModal(false);
-                        setShowCreatePostModal(true);
-                      }}
-                    >
-                      <Text style={styles.useDraftBtnText}>Use This Draft in Studio</Text>
-                    </Pressable>
-                  </View>
-                ))}
-              </ScrollView>
-            </View>
+              <Pressable
+                style={styles.modalFullBtn}
+                onPress={() => setShowIdeaModal(false)}
+              >
+                <Text style={styles.modalFullBtnText}>Done</Text>
+              </Pressable>
+            </Animated.View>
           </View>
         </Modal>
 
-        {/* MODAL 3: NOTIFICATIONS */}
+        {/* NOTIFICATION MODAL */}
         <Modal
-          visible={showNotificationsModal}
+          visible={showNotificationModal}
           transparent={true}
           animationType="fade"
-          onRequestClose={() => setShowNotificationsModal(false)}
+          onRequestClose={() => setShowNotificationModal(false)}
         >
           <View style={styles.modalOverlay}>
-            <View style={styles.modalCard}>
-              <Text style={styles.modalTitle}>Notifications</Text>
-              <Text style={styles.modalSubtitle}>Recent alerts and mission updates</Text>
-
-              <View style={styles.notificationItem}>
-                <Text style={styles.notifItemTitle}>⚡ Storyteller Challenge Live</Text>
-                <Text style={styles.notifItemTime}>Ends tomorrow at 11:30 PM</Text>
+            <Animated.View style={[styles.modalCard, { transform: [{ scale: modalPopScale }] }]}>
+              <View style={styles.modalHeaderRow}>
+                <View>
+                  <Text style={styles.modalTitle}>Mission Notifications</Text>
+                  <Text style={styles.modalSubtitle}>Today&apos;s streak updates</Text>
+                </View>
+                <Pressable
+                  onPress={() => setShowNotificationModal(false)}
+                  style={styles.modalCloseCircle}
+                  hitSlop={8}
+                >
+                  <Text style={styles.modalCloseCross}>✕</Text>
+                </Pressable>
               </View>
 
-              <View style={styles.notificationItem}>
-                <Text style={styles.notifItemTitle}>🔥 47-Day Streak Active</Text>
-                <Text style={styles.notifItemTime}>Posting today locks in Day 48</Text>
+              <View style={styles.notifCard}>
+                <Text style={{ fontSize: 18 }}>🔥</Text>
+                <View style={{ flex: 1 }}>
+                  <Text style={styles.notifTitle}>Post before 9 PM</Text>
+                  <Text style={styles.notifBody}>Your 47-day streak requires 1 post today.</Text>
+                </View>
               </View>
 
               <Pressable
-                style={styles.modalCloseBtn}
-                onPress={() => setShowNotificationsModal(false)}
+                style={styles.modalFullBtn}
+                onPress={() => setShowNotificationModal(false)}
               >
-                <Text style={styles.modalCloseBtnText}>Close</Text>
+                <Text style={styles.modalFullBtnText}>Close</Text>
               </Pressable>
-            </View>
+            </Animated.View>
           </View>
         </Modal>
 
-        {/* MODAL 4: PROFILE */}
+        {/* PROFILE MODAL */}
         <Modal
           visible={showProfileModal}
           transparent={true}
@@ -905,54 +639,85 @@ export const MissionDetailScreen: React.FC<MissionDetailScreenProps> = ({
           onRequestClose={() => setShowProfileModal(false)}
         >
           <View style={styles.modalOverlay}>
-            <View style={styles.modalCard}>
-              <Image
-                source={require('../../assets/images/amara-portrait.jpg')}
-                style={styles.modalProfileImg}
-                resizeMode="cover"
-              />
-              <Text style={styles.modalProfileName}>Amara Okafor</Text>
-              <Text style={styles.modalProfileHandle}>@amara.creates • Level 4 Creator</Text>
+            <Animated.View style={[styles.modalCard, { transform: [{ scale: modalPopScale }] }]}>
+              <View style={styles.modalHeaderRow}>
+                <View>
+                  <Text style={styles.modalTitle}>Creator Passport</Text>
+                  <Text style={styles.modalSubtitle}>Verified consistency record</Text>
+                </View>
+                <Pressable
+                  onPress={() => setShowProfileModal(false)}
+                  style={styles.modalCloseCircle}
+                  hitSlop={8}
+                >
+                  <Text style={styles.modalCloseCross}>✕</Text>
+                </Pressable>
+              </View>
 
-              <View style={styles.profileStatRow}>
-                <View style={styles.profileStatBox}>
-                  <Text style={styles.profileStatVal}>47</Text>
-                  <Text style={styles.profileStatLabel}>Streak</Text>
+              <View style={{ alignItems: 'center', paddingVertical: 12 }}>
+                <View style={styles.profileRing}>
+                  <Svg width={28} height={28} viewBox="0 0 24 24" fill="none">
+                    <Path
+                      d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"
+                      stroke="#582CDB"
+                      strokeWidth="2.2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                    <Circle cx="12" cy="7" r="4" stroke="#582CDB" strokeWidth="2.2" />
+                  </Svg>
                 </View>
-                <View style={styles.profileStatBox}>
-                  <Text style={styles.profileStatVal}>1,420</Text>
-                  <Text style={styles.profileStatLabel}>XP</Text>
-                </View>
-                <View style={styles.profileStatBox}>
-                  <Text style={styles.profileStatVal}>8</Text>
-                  <Text style={styles.profileStatLabel}>Quests</Text>
-                </View>
+                <Text style={{ fontSize: 18, fontWeight: '800', color: '#171420' }}>Amara Okafor</Text>
+                <Text style={{ fontSize: 13, color: '#64748B', marginTop: 2 }}>⚡ Level 4 Storyteller • 47-Day Streak</Text>
               </View>
 
               <Pressable
-                style={styles.modalCloseBtn}
+                style={styles.modalFullBtn}
                 onPress={() => setShowProfileModal(false)}
               >
-                <Text style={styles.modalCloseBtnText}>Done</Text>
+                <Text style={styles.modalFullBtnText}>Done</Text>
               </Pressable>
-            </View>
+            </Animated.View>
           </View>
         </Modal>
 
-        {/* 4. ANIMATED COMPLETION CELEBRATION MODAL */}
-        <AnimatedCompletionModal
-          visible={showCelebrationModal}
-          title="Storyteller Quest Completed!"
-          subtitle="You earned +150 XP, unlocked the Storyteller Badge, and protected Day 48 of your streak!"
-          badgeText="QUEST COMPLETE"
-          xpEarned={150}
-          streakCount={48}
-          actionText="Back to Dashboard 🚀"
-          onDismiss={() => {
-            setShowCelebrationModal(false);
-            onBackToDashboard();
-          }}
-        />
+        {/* CHAT MODAL */}
+        <Modal
+          visible={showChatModal}
+          transparent={true}
+          animationType="fade"
+          onRequestClose={() => setShowChatModal(false)}
+        >
+          <View style={styles.modalOverlay}>
+            <Animated.View style={[styles.modalCard, { transform: [{ scale: modalPopScale }] }]}>
+              <View style={styles.modalHeaderRow}>
+                <View>
+                  <Text style={styles.modalTitle}>Squad Chat</Text>
+                  <Text style={styles.modalSubtitle}>Collaborate with your creator squad</Text>
+                </View>
+                <Pressable
+                  onPress={() => setShowChatModal(false)}
+                  style={styles.modalCloseCircle}
+                  hitSlop={8}
+                >
+                  <Text style={styles.modalCloseCross}>✕</Text>
+                </Pressable>
+              </View>
+
+              <View style={styles.chatCard}>
+                <Text style={{ fontSize: 12, fontWeight: '800', color: '#582CDB', marginBottom: 2 }}>🤖 Jarvis Assistant</Text>
+                <Text style={{ fontSize: 13, color: '#334155' }}>Your peak audience reach starts at 7:30 PM today!</Text>
+              </View>
+
+              <Pressable
+                style={styles.modalFullBtn}
+                onPress={() => setShowChatModal(false)}
+              >
+                <Text style={styles.modalFullBtnText}>Close</Text>
+              </Pressable>
+            </Animated.View>
+          </View>
+        </Modal>
       </View>
     </SafeAreaView>
   );
@@ -966,6 +731,10 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#FAF8F5',
+  },
+  btnPressed: {
+    opacity: 0.78,
+    transform: [{ scale: 0.97 }],
   },
 
   // 1. TOP HEADER BAR
@@ -1029,226 +798,441 @@ const styles = StyleSheet.create({
     borderWidth: 1.2,
     borderColor: '#FFFFFF',
   },
-  profilePhotoBtn: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    borderWidth: 1.5,
-    borderColor: '#582CDB',
-    overflow: 'hidden',
-  },
-  profileAvatarImg: {
-    width: '100%',
-    height: '100%',
-  },
-  btnPressed: {
-    opacity: 0.78,
-    transform: [{ scale: 0.97 }],
-  },
 
-  // 2. SCROLL CONTENT
   scrollContent: {
     paddingHorizontal: 20,
-    paddingTop: 10,
-  },
-  toastBanner: {
-    backgroundColor: '#171420',
-    paddingVertical: 10,
-    paddingHorizontal: 16,
-    borderRadius: 14,
-    marginBottom: 16,
-    alignItems: 'center',
-  },
-  toastBannerText: {
-    color: '#FFFFFF',
-    fontSize: 13,
-    fontWeight: '700',
+    paddingTop: 8,
   },
 
-  // BADGES & HEADLINE
-  tagRow: {
+  // TOP PILL BADGES
+  topBadgesRow: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 8,
+    gap: 8,
+    marginBottom: 12,
   },
-  activeQuestTag: {
-    backgroundColor: '#582CDB',
+  todayMissionPill: {
+    backgroundColor: '#784DF0',
     paddingVertical: 4,
     paddingHorizontal: 12,
     borderRadius: 100,
   },
-  activeQuestTagText: {
-    fontSize: 10.5,
-    fontWeight: '900',
-    color: '#FFFFFF',
-    letterSpacing: 0.6,
-  },
-  freeQuestTag: {
-    backgroundColor: '#ECE8F9',
-    paddingVertical: 4,
-    paddingHorizontal: 12,
-    borderRadius: 100,
-  },
-  freeQuestTagText: {
+  todayMissionPillText: {
     fontSize: 10.5,
     fontWeight: '800',
-    color: '#582CDB',
-    letterSpacing: 0.5,
+    color: '#FFFFFF',
+    letterSpacing: 0.4,
   },
-  pageTitle: {
-    fontSize: 26,
+  freeMissionPill: {
+    backgroundColor: '#E2E8F0',
+    paddingVertical: 4,
+    paddingHorizontal: 12,
+    borderRadius: 100,
+  },
+  freeMissionPillText: {
+    fontSize: 10.5,
+    fontWeight: '800',
+    color: '#475569',
+    letterSpacing: 0.4,
+  },
+
+  // HEADLINE
+  mainHeading: {
+    fontSize: 28,
     fontWeight: '800',
     color: '#171420',
-    letterSpacing: -0.5,
-    marginBottom: 6,
+    letterSpacing: -0.6,
+    marginBottom: 4,
   },
-  pageSubtitle: {
-    fontSize: 13.5,
-    color: '#6B637B',
+  mainSubtitle: {
+    fontSize: 14,
+    color: '#524C62',
     lineHeight: 20,
     marginBottom: 20,
     fontWeight: '500',
   },
 
-  // HERO QUEST CARD
-  heroQuestCard: {
+  // 1. MISSION PROGRESS CARD
+  missionProgressCard: {
     backgroundColor: '#FFFFFF',
     borderRadius: 24,
     borderWidth: 1,
     borderColor: '#EFEBF8',
     padding: 20,
-    marginBottom: 26,
+    marginBottom: 18,
     shadowColor: '#582CDB',
     shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.06,
+    shadowOpacity: 0.05,
     shadowRadius: 16,
     elevation: 3,
   },
-  heroTopStatusRow: {
+  progressHeaderRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 14,
+    marginBottom: 12,
   },
-  inProgressPill: {
-    backgroundColor: '#ECE8F9',
-    paddingVertical: 3,
-    paddingHorizontal: 10,
-    borderRadius: 100,
-  },
-  inProgressPillText: {
-    fontSize: 10,
-    fontWeight: '900',
-    color: '#582CDB',
-    letterSpacing: 0.5,
-  },
-  endsTomorrowText: {
-    fontSize: 11,
-    fontWeight: '800',
-    color: '#B45309',
-    letterSpacing: 0.3,
-  },
-  heroQuestTitle: {
-    fontSize: 21,
+  progressCardTitle: {
+    fontSize: 16,
     fontWeight: '800',
     color: '#171420',
-    letterSpacing: -0.4,
-    marginBottom: 8,
   },
-  heroQuestDesc: {
-    fontSize: 13.5,
-    color: '#524C62',
-    lineHeight: 20,
-    marginBottom: 16,
-  },
-
-  // PROGRESS SECTION
-  progressSection: {
-    marginBottom: 16,
-  },
-  progressLabelRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 6,
-  },
-  progressStepLabel: {
-    fontSize: 12.5,
-    fontWeight: '600',
-    color: '#171420',
-  },
-  progressPercentLabel: {
-    fontSize: 13,
+  progressFractionText: {
+    fontSize: 14,
     fontWeight: '800',
     color: '#582CDB',
   },
   progressBarTrack: {
     height: 8,
     borderRadius: 4,
-    backgroundColor: '#EAE5F8',
+    backgroundColor: '#E2E8F0',
     overflow: 'hidden',
+    marginBottom: 16,
   },
   progressBarFill: {
     height: '100%',
     backgroundColor: '#582CDB',
     borderRadius: 4,
   },
+  metricsRow: {
+    flexDirection: 'row',
+    gap: 8,
+    marginBottom: 14,
+  },
+  metricBox: {
+    flex: 1,
+    backgroundColor: '#FAF8F5',
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: '#EFEBF8',
+    paddingVertical: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  metricValueGold: {
+    fontSize: 15,
+    fontWeight: '800',
+    color: '#D97706',
+    marginBottom: 2,
+  },
+  metricEmoji: {
+    fontSize: 15,
+    marginBottom: 2,
+  },
+  metricLabel: {
+    fontSize: 9.5,
+    fontWeight: '800',
+    color: '#6B7280',
+    letterSpacing: 0.5,
+  },
+  warningBanner: {
+    backgroundColor: '#FEF2F2',
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#FEE2E2',
+    paddingVertical: 10,
+    paddingHorizontal: 14,
+    alignItems: 'center',
+  },
+  warningBannerText: {
+    fontSize: 12.5,
+    fontWeight: '700',
+    color: '#DC2626',
+  },
 
-  // REWARDS PILLS
-  rewardsTagRow: {
+  // 2. STEP-BY-STEP GUIDE
+  guideCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 24,
+    borderWidth: 1,
+    borderColor: '#EFEBF8',
+    padding: 20,
+    marginBottom: 18,
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.03,
+    shadowRadius: 8,
+  },
+  guideSectionTitle: {
+    fontSize: 11,
+    fontWeight: '800',
+    color: '#6B7280',
+    letterSpacing: 0.6,
+    marginBottom: 16,
+  },
+  stepRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: 14,
+    marginBottom: 18,
+  },
+  stepCircle: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    borderWidth: 1.5,
+    borderColor: '#CBD5E1',
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#FFFFFF',
+    marginTop: 2,
+  },
+  stepCircleActive: {
+    borderColor: '#582CDB',
+    backgroundColor: '#F5F3FF',
+  },
+  stepCircleNumber: {
+    fontSize: 13,
+    fontWeight: '800',
+    color: '#64748B',
+  },
+  stepCircleNumberActive: {
+    color: '#582CDB',
+  },
+  stepContent: {
+    flex: 1,
+  },
+  stepTitle: {
+    fontSize: 15,
+    fontWeight: '800',
+    color: '#171420',
+    marginBottom: 2,
+  },
+  stepDescription: {
+    fontSize: 13,
+    color: '#64748B',
+    lineHeight: 18,
+  },
+
+  // 3. SUGGESTED IDEA CARD (ROYAL PURPLE)
+  suggestedIdeaCard: {
+    backgroundColor: '#582CDB',
+    borderRadius: 24,
+    padding: 20,
+    marginBottom: 18,
+    shadowColor: '#582CDB',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.3,
+    shadowRadius: 14,
+    elevation: 4,
+  },
+  suggestedHeaderRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  suggestedIdeaTag: {
+    fontSize: 10.5,
+    fontWeight: '800',
+    color: '#E0E7FF',
+    letterSpacing: 0.6,
+  },
+  suggestedQuote: {
+    fontSize: 18,
+    fontWeight: '800',
+    color: '#FFFFFF',
+    lineHeight: 25,
+    marginBottom: 18,
+  },
+  suggestedFooterRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  bestTimeRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  bestTimeText: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#E0E7FF',
+  },
+  useThisIdeaBtn: {
+    backgroundColor: '#FFFFFF',
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    borderRadius: 100,
+  },
+  useThisIdeaBtnText: {
+    fontSize: 12.5,
+    fontWeight: '800',
+    color: '#582CDB',
+  },
+
+  // 4. WHAT THIS MISSION IMPROVES
+  improvesCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 24,
+    borderWidth: 1,
+    borderColor: '#EFEBF8',
+    padding: 20,
+    marginBottom: 18,
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.03,
+    shadowRadius: 8,
+  },
+  improvesSectionTitle: {
+    fontSize: 11,
+    fontWeight: '800',
+    color: '#6B7280',
+    letterSpacing: 0.6,
+    marginBottom: 14,
+  },
+  improvesPillsRow: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: 8,
-    marginBottom: 20,
   },
-  xpRewardPill: {
-    backgroundColor: '#FEF3C7',
-    paddingVertical: 4,
-    paddingHorizontal: 10,
+  improvesPillGray: {
+    backgroundColor: '#F1F5F9',
+    paddingVertical: 6,
+    paddingHorizontal: 14,
     borderRadius: 100,
-    borderWidth: 1,
-    borderColor: '#FDE68A',
   },
-  xpRewardPillText: {
-    fontSize: 11,
-    fontWeight: '900',
-    color: '#B45309',
-  },
-  badgeRewardPill: {
-    backgroundColor: '#FEF3C7',
-    paddingVertical: 4,
-    paddingHorizontal: 10,
-    borderRadius: 100,
-    borderWidth: 1,
-    borderColor: '#FDE68A',
-  },
-  badgeRewardPillText: {
-    fontSize: 11,
-    fontWeight: '800',
-    color: '#92400E',
-  },
-  passportRewardPill: {
-    backgroundColor: '#F3E8FF',
-    paddingVertical: 4,
-    paddingHorizontal: 10,
-    borderRadius: 100,
-    borderWidth: 1,
-    borderColor: '#E9D5FF',
-  },
-  passportRewardPillText: {
-    fontSize: 11,
+  improvesPillGrayText: {
+    fontSize: 12,
     fontWeight: '700',
-    color: '#7E22CE',
+    color: '#475569',
+  },
+  improvesPillPurple: {
+    backgroundColor: '#EDE9FE',
+    paddingVertical: 6,
+    paddingHorizontal: 14,
+    borderRadius: 100,
+  },
+  improvesPillPurpleText: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#6D28D9',
+  },
+  improvesPillGold: {
+    backgroundColor: '#FEF3C7',
+    paddingVertical: 6,
+    paddingHorizontal: 14,
+    borderRadius: 100,
+  },
+  improvesPillGoldText: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#D97706',
   },
 
-  // DUAL BUTTONS
-  heroActionBtnCol: {
-    gap: 10,
+  // 5. XP & REWARD CARD
+  rewardCard: {
+    backgroundColor: '#F5F0E6',
+    borderRadius: 24,
+    borderWidth: 1,
+    borderColor: '#E8E1D3',
+    padding: 18,
+    marginBottom: 18,
   },
-  continueQuestBtn: {
-    height: 48,
-    borderRadius: 14,
+  rewardTopRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    marginBottom: 12,
+  },
+  rewardMedalBox: {
+    width: 40,
+    height: 40,
+    borderRadius: 12,
+    backgroundColor: '#FEF3C7',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  rewardTitle: {
+    fontSize: 15,
+    fontWeight: '800',
+    color: '#171420',
+  },
+  rewardSubtitle: {
+    fontSize: 12,
+    color: '#64748B',
+  },
+  momentumBadgePill: {
+    backgroundColor: '#EBE4D5',
+    borderRadius: 10,
+    paddingVertical: 8,
+    alignItems: 'center',
+  },
+  momentumBadgeText: {
+    fontSize: 10.5,
+    fontWeight: '800',
+    color: '#785928',
+    letterSpacing: 0.6,
+  },
+
+  // 6. JARVIS INSIGHT CARD
+  jarvisCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 24,
+    borderWidth: 1,
+    borderColor: '#EFEBF8',
+    padding: 20,
+    marginBottom: 20,
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.03,
+    shadowRadius: 8,
+  },
+  jarvisHeaderRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    marginBottom: 10,
+  },
+  jarvisFlameCircle: {
+    width: 34,
+    height: 34,
+    borderRadius: 17,
+    backgroundColor: '#FAF8F5',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  jarvisFlameIcon: {
+    width: 22,
+    height: 22,
+  },
+  jarvisTitleCol: {
+    flex: 1,
+  },
+  jarvisTitle: {
+    fontSize: 14,
+    fontWeight: '800',
+    color: '#171420',
+  },
+  jarvisTime: {
+    fontSize: 11,
+    color: '#94A3B8',
+  },
+  jarvisBody: {
+    fontSize: 13,
+    color: '#475569',
+    lineHeight: 19,
+    fontStyle: 'italic',
+    marginBottom: 12,
+  },
+  generateIdeaLink: {
+    alignSelf: 'flex-start',
+  },
+  generateIdeaLinkText: {
+    fontSize: 12,
+    fontWeight: '800',
+    color: '#582CDB',
+    letterSpacing: 0.5,
+  },
+
+  // 7. DUAL ACTION BUTTONS
+  actionButtonsContainer: {
+    gap: 12,
+    marginBottom: 10,
+  },
+  createPostBtn: {
+    height: 52,
+    borderRadius: 16,
     overflow: 'hidden',
     shadowColor: '#582CDB',
     shadowOffset: { width: 0, height: 4 },
@@ -1256,452 +1240,36 @@ const styles = StyleSheet.create({
     shadowRadius: 10,
     elevation: 3,
   },
-  continueQuestGradient: {
+  createPostGradient: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
   },
-  continueQuestBtnText: {
-    fontSize: 14.5,
+  createPostBtnText: {
+    fontSize: 15,
     fontWeight: '800',
     color: '#FFFFFF',
     letterSpacing: -0.2,
   },
-  createPostOutlineBtn: {
-    height: 48,
-    borderRadius: 14,
+  publishedBtn: {
+    height: 52,
+    borderRadius: 16,
     borderWidth: 1.5,
-    borderColor: '#E5DEFF',
+    borderColor: '#582CDB',
     backgroundColor: '#FFFFFF',
     justifyContent: 'center',
     alignItems: 'center',
   },
-  createPostOutlineBtnText: {
-    fontSize: 14.5,
-    fontWeight: '800',
-    color: '#171420',
-  },
-
-  // SECTION HEADINGS
-  sectionHeading: {
-    fontSize: 20,
-    fontWeight: '800',
-    color: '#171420',
-    letterSpacing: -0.4,
-    marginBottom: 14,
-  },
-
-  // REQUIREMENTS LIST
-  requirementsList: {
-    gap: 10,
-    marginBottom: 26,
-  },
-  requirementCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    backgroundColor: '#FFFFFF',
-    borderRadius: 18,
-    borderWidth: 1,
-    borderColor: '#FDE68A',
-    paddingVertical: 14,
-    paddingHorizontal: 16,
-    shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.03,
-    shadowRadius: 6,
-    elevation: 1,
-  },
-  requirementCardCompleted: {
-    borderColor: '#D8B4FE',
-    backgroundColor: '#FAF5FF',
-  },
-  requirementLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-    flex: 1,
-    paddingRight: 10,
-  },
-  reqIconCircle: {
-    width: 34,
-    height: 34,
-    borderRadius: 17,
-    backgroundColor: '#F7F5FC',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  reqIconCircleCompleted: {
-    backgroundColor: '#ECE8F9',
-  },
-  requirementTitle: {
-    fontSize: 13.5,
-    fontWeight: '700',
-    color: '#171420',
-    flex: 1,
-  },
-  reqStatusPill: {
-    backgroundColor: '#F3F4F6',
-    paddingVertical: 4,
-    paddingHorizontal: 10,
-    borderRadius: 100,
-  },
-  reqStatusPillProgress: {
-    backgroundColor: '#ECE8F9',
-  },
-  reqStatusPillDone: {
-    backgroundColor: '#DCFCE7',
-  },
-  reqStatusPillLocked: {
-    backgroundColor: '#F3F4F6',
-  },
-  reqStatusPillText: {
-    fontSize: 11,
-    fontWeight: '700',
-    color: '#6B7280',
-  },
-  reqStatusPillTextProgress: {
-    color: '#582CDB',
-  },
-  reqStatusPillTextDone: {
-    color: '#16A34A',
-  },
-
-  // SUGGESTED ANGLE (Royal Purple Card)
-  suggestedAngleCard: {
-    borderRadius: 24,
-    overflow: 'hidden',
-    marginBottom: 26,
-    shadowColor: '#582CDB',
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.3,
-    shadowRadius: 18,
-    elevation: 4,
-  },
-  suggestedAngleGradient: {
-    padding: 22,
-  },
-  suggestedAngleTag: {
-    alignSelf: 'flex-start',
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
-    paddingVertical: 3,
-    paddingHorizontal: 10,
-    borderRadius: 100,
-    marginBottom: 12,
-  },
-  suggestedAngleTagText: {
-    fontSize: 9.5,
-    fontWeight: '900',
-    color: '#FFFFFF',
-    letterSpacing: 0.6,
-  },
-  suggestedAngleQuote: {
-    fontSize: 19,
-    fontWeight: '800',
-    color: '#FFFFFF',
-    letterSpacing: -0.3,
-    lineHeight: 26,
-    marginBottom: 14,
-  },
-  formulaCapsule: {
-    backgroundColor: 'rgba(255, 255, 255, 0.16)',
-    paddingVertical: 8,
-    paddingHorizontal: 14,
-    borderRadius: 12,
-    marginBottom: 14,
-  },
-  formulaCapsuleText: {
-    fontSize: 12,
-    fontWeight: '700',
-    color: 'rgba(255, 255, 255, 0.95)',
-    textAlign: 'center',
-  },
-  platformChipsRow: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 8,
-    marginBottom: 18,
-  },
-  platformTranslucentChip: {
-    backgroundColor: 'rgba(255, 255, 255, 0.15)',
-    paddingVertical: 4,
-    paddingHorizontal: 10,
-    borderRadius: 8,
-  },
-  platformTranslucentChipText: {
-    fontSize: 11,
-    fontWeight: '600',
-    color: '#FFFFFF',
-  },
-  useIdeaWhiteBtn: {
-    backgroundColor: '#FFFFFF',
-    height: 46,
-    borderRadius: 12,
-    justifyContent: 'center',
-    alignItems: 'center',
-    shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.12,
-    shadowRadius: 8,
-  },
-  useIdeaWhiteBtnText: {
-    fontSize: 14,
-    fontWeight: '900',
-    color: '#582CDB',
-    letterSpacing: -0.2,
-  },
-
-  // CIRCULAR PROGRESS GAUGE CARD
-  progressGaugeCard: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 24,
-    borderWidth: 1,
-    borderColor: '#EFEBF8',
-    padding: 22,
-    alignItems: 'center',
-    marginBottom: 26,
-    shadowColor: '#582CDB',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.05,
-    shadowRadius: 12,
-    elevation: 2,
-  },
-  gaugeCenterBox: {
-    position: 'relative',
-    width: 110,
-    height: 110,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 14,
-  },
-  gaugeTextOverlay: {
-    position: 'absolute',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  gaugePercentText: {
-    fontSize: 24,
-    fontWeight: '900',
-    color: '#171420',
-  },
-  gaugeHeading: {
-    fontSize: 17,
-    fontWeight: '800',
-    color: '#171420',
-    marginBottom: 8,
-  },
-  gaugeBulletList: {
-    gap: 4,
-    alignItems: 'center',
-  },
-  gaugeBulletText: {
-    fontSize: 13,
-    color: '#524C62',
-    fontWeight: '500',
-  },
-
-  // WHY MATTERS CARD
-  whyMattersCard: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 20,
-    borderWidth: 1,
-    borderColor: '#EFEBF8',
-    padding: 18,
-    marginBottom: 26,
-    shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.03,
-    shadowRadius: 8,
-  },
-  whyMattersText: {
-    fontSize: 13.5,
-    color: '#524C62',
-    lineHeight: 20,
-    marginBottom: 14,
-  },
-  whyMattersPillRow: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 8,
-  },
-  whyMattersPill: {
-    backgroundColor: '#F4F2FA',
-    paddingVertical: 5,
-    paddingHorizontal: 12,
-    borderRadius: 100,
-  },
-  whyMattersPillText: {
-    fontSize: 11.5,
-    fontWeight: '700',
-    color: '#582CDB',
-  },
-
-  // REPUTATION GRID (2x2)
-  reputationGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 12,
-    marginBottom: 12,
-  },
-  reputationTile: {
-    width: '48%',
-    backgroundColor: '#FFFFFF',
-    borderRadius: 18,
-    borderWidth: 1,
-    borderColor: '#EFEBF8',
-    paddingVertical: 14,
-    paddingHorizontal: 16,
-    shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.03,
-    shadowRadius: 6,
-  },
-  reputationTileLabel: {
-    fontSize: 11.5,
-    color: '#6B637B',
-    fontWeight: '600',
-    marginBottom: 6,
-  },
-  reputationTileValuePurple: {
-    fontSize: 22,
-    fontWeight: '900',
-    color: '#582CDB',
-    letterSpacing: -0.5,
-  },
-  reputationTileValueDark: {
-    fontSize: 22,
-    fontWeight: '900',
-    color: '#171420',
-    letterSpacing: -0.5,
-  },
-  reputationTileValueGold: {
-    fontSize: 20,
-    fontWeight: '900',
-    color: '#B45309',
-    letterSpacing: -0.5,
-  },
-  reputationCalloutRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    backgroundColor: '#FEF3C7',
-    paddingVertical: 10,
-    paddingHorizontal: 14,
-    borderRadius: 14,
-    borderWidth: 1,
-    borderColor: '#FDE68A',
-    marginBottom: 26,
-  },
-  reputationCalloutEmoji: {
-    fontSize: 14,
-  },
-  reputationCalloutText: {
-    fontSize: 11.5,
-    fontWeight: '600',
-    color: '#92400E',
-    flex: 1,
-    lineHeight: 16,
-  },
-
-  // JARVIS INSIGHT CARD
-  jarvisInsightCard: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 24,
-    borderWidth: 1,
-    borderColor: '#EFEBF8',
-    padding: 20,
-    marginBottom: 26,
-    shadowColor: '#582CDB',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.06,
-    shadowRadius: 14,
-    elevation: 2,
-  },
-  jarvisHeaderRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-    marginBottom: 12,
-  },
-  jarvisFlameIconBox: {
-    width: 38,
-    height: 38,
-    borderRadius: 12,
-    backgroundColor: '#582CDB',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  jarvisFlameIconImg: {
-    width: 26,
-    height: 26,
-  },
-  jarvisTitleCol: {
-    flex: 1,
-  },
-  jarvisInsightTitle: {
-    fontSize: 16,
-    fontWeight: '800',
-    color: '#171420',
-  },
-  jarvisInsightSub: {
-    fontSize: 10,
-    fontWeight: '800',
-    color: '#582CDB',
-    letterSpacing: 0.6,
-  },
-  jarvisInsightQuoteText: {
-    fontSize: 13.5,
-    color: '#524C62',
-    lineHeight: 20,
-    marginBottom: 16,
-  },
-  generateDraftBtn: {
-    alignSelf: 'flex-start',
-  },
-  generateDraftBtnText: {
-    fontSize: 13.5,
+  publishedBtnText: {
+    fontSize: 15,
     fontWeight: '800',
     color: '#582CDB',
   },
 
-  // REWARD PREVIEW
-  rewardPreviewCard: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 20,
-    borderWidth: 1,
-    borderColor: '#EFEBF8',
-    paddingHorizontal: 18,
-    paddingVertical: 6,
-    marginBottom: 20,
-  },
-  rewardPreviewRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingVertical: 14,
-    borderBottomWidth: 1,
-    borderBottomColor: '#F4F2FA',
-  },
-  rewardPreviewLabel: {
-    fontSize: 13.5,
-    fontWeight: '600',
-    color: '#524C62',
-  },
-  rewardPreviewValuePurple: {
-    fontSize: 14,
-    fontWeight: '800',
-    color: '#582CDB',
-  },
-  rewardPreviewValueDark: {
-    fontSize: 14,
-    fontWeight: '800',
-    color: '#171420',
-  },
-
-  // MODAL OVERLAYS & CARDS
+  // MODALS
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(23, 20, 32, 0.65)',
+    backgroundColor: 'rgba(15, 12, 24, 0.65)',
     justifyContent: 'center',
     alignItems: 'center',
     padding: 20,
@@ -1709,39 +1277,47 @@ const styles = StyleSheet.create({
   modalCard: {
     width: '100%',
     maxWidth: 380,
-    backgroundColor: '#FAF8F5',
-    borderRadius: 24,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 26,
+    borderWidth: 1,
+    borderColor: '#EFEBF8',
     padding: 22,
-    shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 0.25,
-    shadowRadius: 20,
-    elevation: 8,
+    shadowColor: '#582CDB',
+    shadowOffset: { width: 0, height: 12 },
+    shadowOpacity: 0.18,
+    shadowRadius: 28,
+    elevation: 10,
   },
   modalHeaderRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 6,
+    alignItems: 'flex-start',
+    marginBottom: 16,
   },
-  modalCloseIcon: {
-    fontSize: 18,
-    color: '#6B637B',
-    fontWeight: '700',
-    padding: 4,
+  modalCloseCircle: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: '#F1F5F9',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalCloseCross: {
+    fontSize: 14,
+    color: '#64748B',
+    fontWeight: '800',
   },
   modalTitle: {
-    fontSize: 19,
+    fontSize: 20,
     fontWeight: '800',
     color: '#171420',
-    letterSpacing: -0.3,
-    marginBottom: 4,
+    letterSpacing: -0.4,
+    marginBottom: 3,
   },
   modalSubtitle: {
     fontSize: 13,
     color: '#6B637B',
     lineHeight: 18,
-    marginBottom: 16,
   },
   modalInputLabel: {
     fontSize: 10.5,
@@ -1759,7 +1335,7 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingVertical: 8,
     borderRadius: 10,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: '#FAF8F5',
     borderWidth: 1,
     borderColor: '#EFEBF8',
     alignItems: 'center',
@@ -1777,7 +1353,7 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
   },
   modalTextInput: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: '#FAF8F5',
     borderWidth: 1,
     borderColor: '#EFEBF8',
     borderRadius: 12,
@@ -1790,15 +1366,15 @@ const styles = StyleSheet.create({
   modalBtnRow: {
     flexDirection: 'row',
     gap: 10,
-    marginTop: 4,
+    marginTop: 6,
   },
   modalSecondaryBtn: {
     flex: 1,
-    height: 46,
-    borderRadius: 12,
+    height: 48,
+    borderRadius: 14,
     borderWidth: 1,
     borderColor: '#EFEBF8',
-    backgroundColor: '#FFFFFF',
+    backgroundColor: '#FAF8F5',
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -1809,8 +1385,8 @@ const styles = StyleSheet.create({
   },
   modalPrimaryBtn: {
     flex: 2,
-    height: 46,
-    borderRadius: 12,
+    height: 48,
+    borderRadius: 14,
     overflow: 'hidden',
   },
   modalPrimaryGradient: {
@@ -1823,117 +1399,75 @@ const styles = StyleSheet.create({
     fontWeight: '800',
     color: '#FFFFFF',
   },
-
-  // SCRIPT BLUEPRINT BOX
-  scriptBlueprintBox: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 16,
-    borderWidth: 1,
-    borderColor: '#EFEBF8',
-    padding: 16,
-    marginBottom: 14,
-  },
-  scriptBlueprintTitle: {
-    fontSize: 15,
-    fontWeight: '800',
-    color: '#171420',
-    marginBottom: 8,
-  },
-  scriptSectionLabel: {
-    fontSize: 10.5,
-    fontWeight: '800',
-    color: '#582CDB',
-    marginTop: 6,
-    marginBottom: 2,
-  },
-  scriptSectionText: {
-    fontSize: 12.5,
-    color: '#524C62',
-    lineHeight: 18,
-  },
-  useDraftBtn: {
-    marginTop: 12,
+  modalFullBtn: {
     backgroundColor: '#582CDB',
-    paddingVertical: 8,
-    borderRadius: 10,
-    alignItems: 'center',
-  },
-  useDraftBtnText: {
-    fontSize: 12.5,
-    fontWeight: '800',
-    color: '#FFFFFF',
-  },
-
-  // NOTIFICATION & PROFILE MODALS
-  notificationItem: {
-    backgroundColor: '#FFFFFF',
-    padding: 12,
-    borderRadius: 12,
-    marginBottom: 8,
-  },
-  notifItemTitle: {
-    fontSize: 13,
-    fontWeight: '700',
-    color: '#171420',
-  },
-  notifItemTime: {
-    fontSize: 11,
-    color: '#6B637B',
-    marginTop: 2,
-  },
-  modalCloseBtn: {
-    backgroundColor: '#582CDB',
-    height: 44,
-    borderRadius: 12,
+    height: 48,
+    borderRadius: 14,
     justifyContent: 'center',
     alignItems: 'center',
-    marginTop: 12,
+    marginTop: 14,
   },
-  modalCloseBtnText: {
-    fontSize: 13.5,
+  modalFullBtnText: {
+    fontSize: 14,
     fontWeight: '800',
     color: '#FFFFFF',
   },
-  modalProfileImg: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
-    alignSelf: 'center',
+  sparkCard: {
+    backgroundColor: '#FAF8F5',
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: '#EFEBF8',
+    padding: 14,
     marginBottom: 10,
+  },
+  sparkText: {
+    fontSize: 13.5,
+    fontWeight: '700',
+    color: '#171420',
+    marginBottom: 4,
+  },
+  sparkTag: {
+    fontSize: 11,
+    color: '#582CDB',
+    fontWeight: '600',
+  },
+  notifCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    backgroundColor: '#FAF8F5',
+    borderRadius: 14,
+    padding: 12,
+    borderWidth: 1,
+    borderColor: '#EFEBF8',
+  },
+  notifTitle: {
+    fontSize: 13,
+    fontWeight: '800',
+    color: '#171420',
+    marginBottom: 2,
+  },
+  notifBody: {
+    fontSize: 11.5,
+    color: '#64748B',
+  },
+  profileRing: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    backgroundColor: '#EDE9FE',
     borderWidth: 2,
     borderColor: '#582CDB',
-  },
-  modalProfileName: {
-    fontSize: 18,
-    fontWeight: '800',
-    color: '#171420',
-    textAlign: 'center',
-  },
-  modalProfileHandle: {
-    fontSize: 12,
-    color: '#6B637B',
-    textAlign: 'center',
-    marginBottom: 16,
-  },
-  profileStatRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    backgroundColor: '#FFFFFF',
-    borderRadius: 14,
-    paddingVertical: 12,
-    marginBottom: 14,
-  },
-  profileStatBox: {
+    justifyContent: 'center',
     alignItems: 'center',
+    marginBottom: 8,
   },
-  profileStatVal: {
-    fontSize: 16,
-    fontWeight: '800',
-    color: '#171420',
-  },
-  profileStatLabel: {
-    fontSize: 11,
-    color: '#6B637B',
-    marginTop: 2,
+  chatCard: {
+    backgroundColor: '#FAF8F5',
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: '#EFEBF8',
+    padding: 12,
+    marginBottom: 10,
   },
 });

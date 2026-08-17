@@ -52,7 +52,9 @@ export default function App() {
     if (nextScreen !== currentScreen) {
       const msg =
         customMessage ||
-        (nextScreen === 'quests'
+        (nextScreen === 'mission-detail'
+          ? "Entering Today's Mission"
+          : nextScreen === 'quests'
           ? 'Entering Quests Hub'
           : nextScreen === 'growth'
           ? 'Entering Jarvis Pro Suite'
@@ -64,8 +66,6 @@ export default function App() {
           ? 'Scanning Match Radar'
           : nextScreen === 'dashboard'
           ? 'Syncing Creator Feed'
-          : nextScreen === 'mission-detail'
-          ? 'Loading Quest Engine'
           : 'Switching screens');
       setLoadingMessage(msg);
       setIsPageLoading(true);
@@ -163,7 +163,7 @@ export default function App() {
 
   const handleStartFirstMission = () => {
     // Launch to Mission Detail Page
-    navigateTo('quests');
+    navigateTo('mission-detail');
   };
 
   const handleGoToDashboard = () => {
@@ -239,7 +239,7 @@ export default function App() {
         {currentScreen === 'dashboard' && (
           <DashboardScreen
             onLogout={handleLogout}
-            onStartMission={() => navigateTo('quests')}
+            onStartMission={() => navigateTo('mission-detail')}
             onNavigateTab={(tab: TabType) => {
               if (tab === 'create') {
                 navigateTo('create');
@@ -255,7 +255,7 @@ export default function App() {
         )}
 
         {currentScreen === 'mission-detail' && (
-          <QuestsScreen
+          <MissionDetailScreen
             onBackToDashboard={() => navigateTo('dashboard')}
             onLogout={handleLogout}
             onNavigateTab={(tab: TabType) => {
@@ -265,6 +265,8 @@ export default function App() {
                 navigateTo('create');
               } else if (tab === 'match') {
                 navigateTo('match');
+              } else if (tab === 'quests') {
+                navigateTo('quests');
               } else if (tab === 'growth') {
                 navigateTo('growth');
               }
