@@ -17,6 +17,7 @@ import {
 } from 'react-native';
 import Svg, { Path, Circle, Rect } from 'react-native-svg';
 import * as Haptics from 'expo-haptics';
+import { LinearGradient } from 'expo-linear-gradient';
 import { FloatingTabBar, TabType } from '../components/FloatingTabBar';
 
 interface DashboardScreenProps {
@@ -1191,22 +1192,31 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
               </View>
               <View style={styles.proTitleGroup}>
                 <Text style={styles.proTitle}>Unlock Jarvis Pro</Text>
-                <Text style={styles.proSubtitle}>PREMIUM CREATOR SUITE</Text>
+                <View style={styles.goldProPillBadge}>
+                  <Text style={styles.goldProPillText}>⚡ PRO SUITE</Text>
+                </View>
               </View>
             </View>
 
             <Text style={styles.proDescription}>
-              Get AI voice cloning, advanced growth analytics, and premium brand quests.
+              Get AI autonomous growth strategy, viral script generator, and priority matching.
             </Text>
 
             <Pressable
               onPress={openProModal}
               style={({ pressed }) => [
-                styles.upgradeButton,
+                styles.metallicGoldUpgradeBtn,
                 pressed && styles.upgradeButtonPressed,
               ]}
             >
-              <Text style={styles.upgradeButtonText}>Upgrade Now</Text>
+              <LinearGradient
+                colors={['#FDE047', '#EAB308', '#CA8A04', '#A16207']}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                style={styles.metallicGoldGradient}
+              >
+                <Text style={styles.metallicGoldUpgradeBtnText}>Upgrade to Pro ➔</Text>
+              </LinearGradient>
             </Pressable>
           </View>
         </ScrollView>
@@ -2652,6 +2662,43 @@ const styles = StyleSheet.create({
   },
 
   // 9. PRO UPGRADE CARD
+  goldProPillBadge: {
+    alignSelf: 'flex-start',
+    backgroundColor: '#FEF3C7',
+    paddingVertical: 2,
+    paddingHorizontal: 8,
+    borderRadius: 100,
+    borderWidth: 1,
+    borderColor: '#FDE68A',
+    marginTop: 2,
+  },
+  goldProPillText: {
+    fontSize: 9.5,
+    fontWeight: '900',
+    color: '#B45309',
+    letterSpacing: 0.6,
+  },
+  metallicGoldUpgradeBtn: {
+    height: 48,
+    borderRadius: 14,
+    overflow: 'hidden',
+    shadowColor: '#F59E0B',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.35,
+    shadowRadius: 10,
+    elevation: 4,
+  },
+  metallicGoldGradient: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  metallicGoldUpgradeBtnText: {
+    fontSize: 14.5,
+    fontWeight: '900',
+    color: '#171420',
+    letterSpacing: -0.2,
+  },
   proCard: {
     backgroundColor: 'rgba(247, 244, 253, 0.85)',
     borderRadius: 24,

@@ -398,18 +398,18 @@ export const JarvisProScreen: React.FC<JarvisProScreenProps> = ({
               </Pressable>
             </View>
 
-            {/* Purple Action Button */}
+            {/* Metallic Gold Action Button */}
             <Pressable
               style={({ pressed }) => [styles.usePlanBtn, pressed && styles.btnPressed]}
               onPress={handleUnlockPro}
             >
               <LinearGradient
-                colors={['#784DF0', '#582CDB']}
+                colors={['#FDE047', '#EAB308', '#CA8A04', '#A16207']}
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 1 }}
                 style={styles.usePlanGradient}
               >
-                <Text style={styles.usePlanBtnText}>Use This Plan With Pro</Text>
+                <Text style={styles.usePlanBtnText}>Use This Plan With Pro ⚡</Text>
               </LinearGradient>
             </Pressable>
           </View>
@@ -609,7 +609,7 @@ export const JarvisProScreen: React.FC<JarvisProScreenProps> = ({
               onPress={handleUnlockPro}
             >
               <LinearGradient
-                colors={['#D97706', '#CA8A04', '#A16207']}
+                colors={['#FDE047', '#EAB308', '#CA8A04', '#A16207']}
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 1 }}
                 style={styles.startProGradient}
@@ -1106,9 +1106,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   usePlanBtnText: {
-    fontSize: 14,
-    fontWeight: '800',
-    color: '#FFFFFF',
+    fontSize: 14.5,
+    fontWeight: '900',
+    color: '#171420',
   },
 
   // SECTION 3: FEATURES 2x3 GRID
@@ -1230,9 +1230,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   startProBtnText: {
-    fontSize: 14.5,
+    fontSize: 15,
     fontWeight: '900',
-    color: '#FFFFFF',
+    color: '#171420',
     letterSpacing: -0.2,
   },
   pricingGuaranteeText: {

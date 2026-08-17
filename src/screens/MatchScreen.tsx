@@ -1350,7 +1350,9 @@ export const MatchScreen: React.FC<MatchScreenProps> = ({
               </Text>
 
               <View style={styles.squadsFooterRow}>
-                <Text style={styles.squadsAvailableText}>Available on Pro</Text>
+                <View style={styles.squadsProPill}>
+                  <Text style={styles.squadsProPillText}>⚡ PRO SUITE</Text>
+                </View>
                 <Pressable
                   style={({ pressed }) => [styles.unlockSquadsBtn, pressed && styles.btnPressed]}
                   onPress={() => {
@@ -3036,10 +3038,19 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
   },
-  squadsAvailableText: {
-    fontSize: 11.5,
-    fontWeight: '700',
-    color: 'rgba(255, 255, 255, 0.75)',
+  squadsProPill: {
+    backgroundColor: '#FEF3C7',
+    paddingVertical: 4,
+    paddingHorizontal: 10,
+    borderRadius: 100,
+    borderWidth: 1,
+    borderColor: '#FDE68A',
+  },
+  squadsProPillText: {
+    fontSize: 10,
+    fontWeight: '900',
+    color: '#B45309',
+    letterSpacing: 0.6,
   },
   unlockSquadsBtn: {
     borderRadius: 100,
