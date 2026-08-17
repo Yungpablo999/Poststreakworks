@@ -19,7 +19,6 @@ import Svg, { Path, Circle, Defs, RadialGradient, Stop } from 'react-native-svg'
 import * as Haptics from 'expo-haptics';
 import { LinearGradient } from 'expo-linear-gradient';
 import { FloatingTabBar, TabType } from '../components/FloatingTabBar';
-import { LiquidGlassBackground } from '../components/LiquidGlassBackground';
 import { AnimatedCompletionModal } from '../components/AnimatedCompletionModal';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
@@ -349,6 +348,7 @@ export const MatchScreen: React.FC<MatchScreenProps> = ({
 
   // Incoming Connection Requests state
   const [incomingRequests, setIncomingRequests] = useState<IncomingRequest[]>(INCOMING_REQUESTS_DATA);
+  const [pendingPitches, setPendingPitches] = useState<string[]>([]);
 
   // Tracking state
   const [matchesLeft, setMatchesLeft] = useState(5);
@@ -372,11 +372,12 @@ export const MatchScreen: React.FC<MatchScreenProps> = ({
   const [lastConnectedName, setLastConnectedName] = useState<string>('Creator');
   const [showCollabIdeaModal, setShowCollabIdeaModal] = useState(false);
   
-  // Collab Schedule Pop-up States
-  const [showScheduleConfirmModal, setShowScheduleConfirmModal] = useState(false);
-  const [showScheduleSuccessModal, setShowScheduleSuccessModal] = useState(false);
-  const [selectedCollabPlatform, setSelectedCollabPlatform] = useState<'instagram' | 'tiktok' | 'youtube'>('instagram');
-  const [collabPostTitle, setCollabPostTitle] = useState('‘Day in Lagos’ Co-created Reel (feat. Amara Okafor)');
+  // Pitch & Collab Plan Modal
+  const [showPitchModal, setShowPitchModal] = useState(false);
+  const [pitchRecipient, setPitchRecipient] = useState<CreatorProfile>(CREATOR_DECK[0]);
+  const [pitchMessageDraft, setPitchMessageDraft] = useState('');
+  const [selectedPitchPlatform, setSelectedPitchPlatform] = useState<'instagram' | 'tiktok' | 'youtube'>('instagram');
+  const [showPitchSuccessModal, setShowPitchSuccessModal] = useState(false);
 
   const [showMessageModal, setShowMessageModal] = useState(false);
   const [selectedRecipient, setSelectedRecipient] = useState<string | null>(null);
@@ -547,6 +548,36 @@ export const MatchScreen: React.FC<MatchScreenProps> = ({
     setShowDetailModal(true);
   };
 
+  // OPEN PITCH & COLLAB PLAN MODAL
+  const handleOpenPitchModal = (creator: CreatorProfile) => {
+    setPitchRecipient(creator);
+    setPitchMessageDraft(
+      'Hey ' +
+        creator.name.split(' ')[0] +
+        '! Loved your ' +
+        creator.role +
+        ' content. Jarvis suggested we co-create ' +
+        creator.collabIdea.title +
+        '. Would love to connect and film this together!'
+    );
+    setShowDetailModal(false);
+    setShowCollabIdeaModal(false);
+    setTimeout(() => {
+      setShowPitchModal(true);
+    }, 200);
+  };
+
+  const handleSendPitchConfirm = () => {
+    setShowPitchModal(false);
+    if (Platform.OS !== 'web') {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    }
+    setPendingPitches((prev) => [...prev, pitchRecipient.id]);
+    setTimeout(() => {
+      setShowPitchSuccessModal(true);
+    }, 250);
+  };
+
   // INCOMING REQUEST ACTIONS: ACCEPT & DECLINE
   const handleAcceptRequest = (req: IncomingRequest) => {
     if (Platform.OS !== 'web') {
@@ -608,16 +639,6 @@ export const MatchScreen: React.FC<MatchScreenProps> = ({
     }
     setIncomingRequests((prev) => prev.filter((r) => r.id !== req.id));
     showToast('Declined request from ' + req.name);
-  };
-
-  const handleConfirmSchedule = () => {
-    setShowScheduleConfirmModal(false);
-    if (Platform.OS !== 'web') {
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-    }
-    setTimeout(() => {
-      setShowScheduleSuccessModal(true);
-    }, 250);
   };
 
   const handleSendMessage = () => {
@@ -1100,7 +1121,7 @@ export const MatchScreen: React.FC<MatchScreenProps> = ({
 
                 <Pressable
                   style={({ pressed }) => [styles.buildIdeaBtn, pressed && styles.btnPressed]}
-                  onPress={() => setShowCollabIdeaModal(true)}
+                  onPress={() => handleOpenPitchModal(currentCreator)}
                 >
                   <LinearGradient
                     colors={['#784DF0', '#582CDB']}
@@ -1108,7 +1129,7 @@ export const MatchScreen: React.FC<MatchScreenProps> = ({
                     end={{ x: 1, y: 1 }}
                     style={styles.buildIdeaGradient}
                   >
-                    <Text style={styles.buildIdeaBtnText}>⚡ Build Idea</Text>
+                    <Text style={styles.buildIdeaBtnText}>⚡ Build & Pitch Collab Plan</Text>
                   </LinearGradient>
                 </Pressable>
               </View>
@@ -1391,165 +1412,108 @@ export const MatchScreen: React.FC<MatchScreenProps> = ({
           onDismiss={() => setShowConnectModal(false)}
         />
 
-        {/* 6. BUILD COLLAB IDEA BLUEPRINT MODAL */}
+        {/* 6. PITCH COLLAB PLAN & CONNECT MODAL */}
         <Modal
-          visible={showCollabIdeaModal}
+          visible={showPitchModal}
           transparent={true}
           animationType="fade"
-          onRequestClose={() => setShowCollabIdeaModal(false)}
-        >
-          <View style={styles.modalOverlay}>
-            <View style={styles.modalCard}>
-              <View style={styles.modalBadgePill}>
-                <Text style={styles.modalBadgeText}>COLLAB WORKSPACE</Text>
-              </View>
-              <Text style={styles.modalTitle}>‘Day in Lagos’ Co-created Reel</Text>
-              <Text style={styles.modalSubtitle}>
-                A dynamic split-screen / alternating POV short-form Reel comparing creative routines in Lagos.
-              </Text>
-
-              <View style={styles.ideaScriptBox}>
-                <Text style={styles.ideaScriptHeading}>Suggested Script Blueprint:</Text>
-                <Text style={styles.ideaScriptStep}>1. Hook (0-3s): “2 creators, 1 city — how we create on the go.”</Text>
-                <Text style={styles.ideaScriptStep}>2. Body (4-15s): Fast cuts between your gear & Amara’s travel footage.</Text>
-                <Text style={styles.ideaScriptStep}>3. CTA (16-20s): Drop top travel tips in comments.</Text>
-              </View>
-
-              <View style={styles.modalBtnRow}>
-                <Pressable
-                  style={styles.modalCancelBtn}
-                  onPress={() => setShowCollabIdeaModal(false)}
-                >
-                  <Text style={styles.modalCancelBtnText}>Close</Text>
-                </Pressable>
-                <Pressable
-                  style={styles.modalPrimaryBtn}
-                  onPress={() => {
-                    setShowCollabIdeaModal(false);
-                    setTimeout(() => {
-                      setShowScheduleConfirmModal(true);
-                    }, 200);
-                  }}
-                >
-                  <Text style={styles.modalPrimaryBtnText}>Add to Schedule</Text>
-                </Pressable>
-              </View>
-            </View>
-          </View>
-        </Modal>
-
-        {/* 6B. COLLAB SCHEDULE POP-UP MODAL (STEP 2: CUSTOMIZE & CONFIRM) */}
-        <Modal
-          visible={showScheduleConfirmModal}
-          transparent={true}
-          animationType="fade"
-          onRequestClose={() => setShowScheduleConfirmModal(false)}
+          onRequestClose={() => setShowPitchModal(false)}
         >
           <View style={styles.modalOverlay}>
             <View style={[styles.modalCard, { maxWidth: 340 }]}>
               <View style={styles.modalBadgePill}>
-                <Text style={styles.modalBadgeText}>COLLAB SCHEDULE • JARVIS AI</Text>
+                <Text style={styles.modalBadgeText}>COLLAB PITCH • JARVIS AI</Text>
               </View>
-              <Text style={styles.modalTitle}>Schedule Collab Post</Text>
+              <Text style={styles.modalTitle}>Pitch Plan to {pitchRecipient.name.split(' ')[0]}</Text>
               <Text style={styles.modalSubtitle}>
-                Lock in your joint co-creation with Amara Okafor to protect your 48-day streak.
+                Send this co-creation blueprint as your connection invite.
               </Text>
 
-              {/* Title / Hook input */}
-              <View style={styles.inputGroupFull}>
-                <Text style={styles.inputFieldLabel}>POST HOOK / TITLE</Text>
-                <TextInput
-                  style={styles.singleLineInput}
-                  value={collabPostTitle}
-                  onChangeText={setCollabPostTitle}
-                  placeholder="Enter post hook..."
-                  placeholderTextColor="#A39CB5"
-                />
+              {/* Idea Preview Card */}
+              <View style={styles.pitchIdeaPreviewBox}>
+                <Text style={styles.pitchIdeaPreviewTitle}>{pitchRecipient.collabIdea.title}</Text>
+                <Text style={styles.pitchIdeaPreviewMeta}>
+                  {pitchRecipient.collabIdea.chips.join(' • ')}
+                </Text>
               </View>
 
               {/* Platform Selector */}
               <View style={styles.inputGroupFull}>
-                <Text style={styles.inputFieldLabel}>SELECT PLATFORM</Text>
+                <Text style={styles.inputFieldLabel}>TARGET PLATFORM</Text>
                 <View style={styles.platformPillRow}>
                   <Pressable
-                    style={[styles.platformPill, selectedCollabPlatform === 'instagram' && styles.platformPillActive]}
-                    onPress={() => setSelectedCollabPlatform('instagram')}
+                    style={[styles.platformPill, selectedPitchPlatform === 'instagram' && styles.platformPillActive]}
+                    onPress={() => setSelectedPitchPlatform('instagram')}
                   >
-                    <Text style={[styles.platformPillText, selectedCollabPlatform === 'instagram' && styles.platformPillTextActive]}>
+                    <Text style={[styles.platformPillText, selectedPitchPlatform === 'instagram' && styles.platformPillTextActive]}>
                       Instagram
                     </Text>
                   </Pressable>
                   <Pressable
-                    style={[styles.platformPill, selectedCollabPlatform === 'tiktok' && styles.platformPillActive]}
-                    onPress={() => setSelectedCollabPlatform('tiktok')}
+                    style={[styles.platformPill, selectedPitchPlatform === 'tiktok' && styles.platformPillActive]}
+                    onPress={() => setSelectedPitchPlatform('tiktok')}
                   >
-                    <Text style={[styles.platformPillText, selectedCollabPlatform === 'tiktok' && styles.platformPillTextActive]}>
+                    <Text style={[styles.platformPillText, selectedPitchPlatform === 'tiktok' && styles.platformPillTextActive]}>
                       TikTok
                     </Text>
                   </Pressable>
                   <Pressable
-                    style={[styles.platformPill, selectedCollabPlatform === 'youtube' && styles.platformPillActive]}
-                    onPress={() => setSelectedCollabPlatform('youtube')}
+                    style={[styles.platformPill, selectedPitchPlatform === 'youtube' && styles.platformPillActive]}
+                    onPress={() => setSelectedPitchPlatform('youtube')}
                   >
-                    <Text style={[styles.platformPillText, selectedCollabPlatform === 'youtube' && styles.platformPillTextActive]}>
+                    <Text style={[styles.platformPillText, selectedPitchPlatform === 'youtube' && styles.platformPillTextActive]}>
                       Shorts
                     </Text>
                   </Pressable>
                 </View>
               </View>
 
-              {/* Projected Reach & Peak Time */}
-              <View style={styles.collabScheduleInfoBox}>
-                <View style={styles.scheduleInfoRow}>
-                  <Text style={styles.scheduleInfoLabel}>📅 Target Slot:</Text>
-                  <Text style={styles.scheduleInfoValue}>Friday • 7:30 PM Peak</Text>
-                </View>
-                <View style={styles.scheduleInfoRow}>
-                  <Text style={styles.scheduleInfoLabel}>⚡ Projected Reach:</Text>
-                  <Text style={styles.scheduleInfoValue}>18.5K - 34.0K Views</Text>
-                </View>
-                <View style={styles.scheduleInfoRow}>
-                  <Text style={styles.scheduleInfoLabel}>🔥 Streak Protection:</Text>
-                  <Text style={[styles.scheduleInfoValue, { color: '#E11D48' }]}>Active (+50 XP)</Text>
-                </View>
+              {/* Pitch note textarea */}
+              <View style={styles.inputGroupFull}>
+                <Text style={styles.inputFieldLabel}>PERSONALIZED COLLAB PITCH</Text>
+                <TextInput
+                  style={styles.pitchTextAreaInput}
+                  value={pitchMessageDraft}
+                  onChangeText={setPitchMessageDraft}
+                  placeholder="Write your pitch message..."
+                  placeholderTextColor="#A39CB5"
+                  multiline={true}
+                  numberOfLines={3}
+                  textAlignVertical="top"
+                />
               </View>
 
               <View style={styles.modalBtnRow}>
                 <Pressable
                   style={styles.modalCancelBtn}
-                  onPress={() => setShowScheduleConfirmModal(false)}
+                  onPress={() => setShowPitchModal(false)}
                 >
                   <Text style={styles.modalCancelBtnText}>Cancel</Text>
                 </Pressable>
                 <Pressable
                   style={styles.modalPrimaryBtn}
-                  onPress={handleConfirmSchedule}
+                  onPress={handleSendPitchConfirm}
                 >
-                  <Text style={styles.modalPrimaryBtnText}>Confirm & Schedule</Text>
+                  <Text style={styles.modalPrimaryBtnText}>Send Pitch (+50 XP)</Text>
                 </Pressable>
               </View>
             </View>
           </View>
         </Modal>
 
-        {/* 6C. ANIMATED COMPLETION CELEBRATION MODAL (ON SCHEDULE SUCCESS) */}
+        {/* 6B. ANIMATED COMPLETION CELEBRATION (ON PITCH SENT SUCCESS) */}
         <AnimatedCompletionModal
-          visible={showScheduleSuccessModal}
-          title="Collab Scheduled! 🚀"
-          subtitle="‘Day in Lagos’ added to your posting schedule. +50 XP awarded to your streak!"
-          badgeText="COLLAB SCHEDULED"
+          visible={showPitchSuccessModal}
+          title="Collab Pitch Sent! 🚀"
+          subtitle={'Your proposal for ' + pitchRecipient.collabIdea.title + ' was delivered to ' + pitchRecipient.name + '. +50 XP awarded!'}
+          badgeText="PITCH DELIVERED"
           xpEarned={50}
           streakCount={48}
-          actionText="View in Schedule"
-          onDismiss={() => {
-            setShowScheduleSuccessModal(false);
-            if (onNavigateTab) {
-              onNavigateTab('create');
-            }
-          }}
+          actionText="Explore More Creators"
+          onDismiss={() => setShowPitchSuccessModal(false)}
         />
 
-        {/* 7. FULL DEEP-DIVE CREATOR PROFILE MODAL (ULTRA-PREMIUM REDESIGN) */}
+        {/* 7. FULL DEEP-DIVE CREATOR PROFILE MODAL (EXACT DESIGN MATCH WITH PITCH TRIGGER) */}
         <Modal
           visible={showDetailModal}
           animationType="slide"
@@ -1574,8 +1538,7 @@ export const MatchScreen: React.FC<MatchScreenProps> = ({
               </Pressable>
 
               <View style={styles.detailHeaderTitleBox}>
-                <Text style={styles.detailHeaderTitle}>Creator Match Deep-Dive</Text>
-                <Text style={styles.detailHeaderSubTitle}>Powered by Jarvis Engine</Text>
+                <Text style={styles.detailHeaderTitle}>Creator Profile</Text>
               </View>
 
               <Pressable
@@ -1599,22 +1562,6 @@ export const MatchScreen: React.FC<MatchScreenProps> = ({
                   style={styles.detailCoverImage}
                   resizeMode="cover"
                 />
-                
-                {/* Photo Bottom Glass Overlay */}
-                <LinearGradient
-                  colors={['transparent', 'rgba(15, 12, 24, 0.7)', 'rgba(15, 12, 24, 0.95)']}
-                  style={styles.detailCoverGradientOverlay}
-                >
-                  <View style={styles.heroNameRow}>
-                    <Text style={styles.heroCoverName}>{selectedCreatorForDetail.name}</Text>
-                    <View style={styles.verifiedCheckBadge}>
-                      <Text style={styles.verifiedCheckText}>✓</Text>
-                    </View>
-                  </View>
-                  <Text style={styles.heroCoverRole}>
-                    {selectedCreatorForDetail.role} • 📍 {selectedCreatorForDetail.location}
-                  </Text>
-                </LinearGradient>
 
                 <View style={styles.detailHeroBody}>
                   <View style={styles.detailAvailabilityRow}>
@@ -1630,12 +1577,12 @@ export const MatchScreen: React.FC<MatchScreenProps> = ({
                   <View style={styles.detailTwoStatRow}>
                     <View style={styles.detailTwoStatItem}>
                       <Text style={styles.detailStatValGold}>{selectedCreatorForDetail.followers}</Text>
-                      <Text style={styles.detailStatLbl}>Total Audience</Text>
+                      <Text style={styles.detailStatLbl}>Followers</Text>
                     </View>
                     <View style={styles.detailTwoStatDivider} />
                     <View style={styles.detailTwoStatItem}>
                       <Text style={styles.detailStatValPurple}>{selectedCreatorForDetail.consistencyRating}</Text>
-                      <Text style={styles.detailStatLbl}>Consistency Tier</Text>
+                      <Text style={styles.detailStatLbl}>Consistency</Text>
                     </View>
                   </View>
                 </View>
@@ -1668,44 +1615,27 @@ export const MatchScreen: React.FC<MatchScreenProps> = ({
                 </View>
               </View>
 
-              {/* CARD 2: COLLAB IDEA */}
+              {/* CARD 2: COLLAB IDEA (EXACT MATCH WITH BUILD COLLAB PLAN BUTTON) */}
               <View style={styles.detailCollabIdeaCard}>
                 <View style={styles.collabIdeaTitleRow}>
                   <Text style={styles.purplePinIcon}>📍</Text>
-                  <Text style={styles.detailCollabIdeaTitle}>Collab Blueprint</Text>
+                  <Text style={styles.detailCollabIdeaTitle}>Collab Idea</Text>
                 </View>
                 <Text style={styles.collabIdeaName}>{selectedCreatorForDetail.collabIdea.title}</Text>
 
                 {/* Structured Script Steps */}
                 <View style={styles.collabScriptStepsCol}>
                   <View style={styles.scriptStepItem}>
-                    <View style={styles.stepNumBadge}>
-                      <Text style={styles.stepNumText}>01</Text>
-                    </View>
-                    <View style={styles.stepContentCol}>
-                      <Text style={styles.stepLabel}>HOOK (0-3s)</Text>
-                      <Text style={styles.stepValText}>{selectedCreatorForDetail.collabIdea.hook}</Text>
-                    </View>
+                    <Text style={styles.scriptStepKey}>Hook</Text>
+                    <Text style={styles.scriptStepVal}>{selectedCreatorForDetail.collabIdea.hook}</Text>
                   </View>
-
                   <View style={styles.scriptStepItem}>
-                    <View style={styles.stepNumBadge}>
-                      <Text style={styles.stepNumText}>02</Text>
-                    </View>
-                    <View style={styles.stepContentCol}>
-                      <Text style={styles.stepLabel}>BTS / VISUALS</Text>
-                      <Text style={styles.stepValText}>{selectedCreatorForDetail.collabIdea.bts}</Text>
-                    </View>
+                    <Text style={styles.scriptStepKey}>BTS</Text>
+                    <Text style={styles.scriptStepVal}>{selectedCreatorForDetail.collabIdea.bts}</Text>
                   </View>
-
                   <View style={styles.scriptStepItem}>
-                    <View style={styles.stepNumBadge}>
-                      <Text style={styles.stepNumText}>03</Text>
-                    </View>
-                    <View style={styles.stepContentCol}>
-                      <Text style={styles.stepLabel}>TAKEAWAY / LESSON</Text>
-                      <Text style={styles.stepValText}>{selectedCreatorForDetail.collabIdea.lesson}</Text>
-                    </View>
+                    <Text style={styles.scriptStepKey}>Lesson</Text>
+                    <Text style={styles.scriptStepVal}>{selectedCreatorForDetail.collabIdea.lesson}</Text>
                   </View>
                 </View>
 
@@ -1720,12 +1650,7 @@ export const MatchScreen: React.FC<MatchScreenProps> = ({
 
                 <Pressable
                   style={({ pressed }) => [styles.buildCollabPlanBtn, pressed && styles.btnPressed]}
-                  onPress={() => {
-                    setShowDetailModal(false);
-                    setTimeout(() => {
-                      setShowScheduleConfirmModal(true);
-                    }, 250);
-                  }}
+                  onPress={() => handleOpenPitchModal(selectedCreatorForDetail)}
                 >
                   <LinearGradient
                     colors={['#784DF0', '#582CDB']}
@@ -1733,7 +1658,7 @@ export const MatchScreen: React.FC<MatchScreenProps> = ({
                     end={{ x: 1, y: 1 }}
                     style={styles.buildCollabPlanGradient}
                   >
-                    <Text style={styles.buildCollabPlanBtnText}>⚡ Build Collab Plan</Text>
+                    <Text style={styles.buildCollabPlanBtnText}>Build Collab Plan</Text>
                   </LinearGradient>
                 </Pressable>
               </View>
@@ -1813,7 +1738,7 @@ export const MatchScreen: React.FC<MatchScreenProps> = ({
                     <Text style={styles.vennCenterPercent}>{selectedCreatorForDetail.correlationPercent}%</Text>
                   </View>
                   <View style={styles.vennLabelRight}>
-                    <Text style={styles.vennLabelTextGold}>THEM</Text>
+                    <Text style={styles.vennLabelTextGold}>AMARA</Text>
                   </View>
                 </View>
 
@@ -1822,13 +1747,13 @@ export const MatchScreen: React.FC<MatchScreenProps> = ({
                   <View style={styles.correlationIndicatorPill}>
                     <Text style={styles.indicatorName}>{selectedCreatorForDetail.primaryNiche.name}</Text>
                     <Text style={[styles.indicatorLevel, { color: selectedCreatorForDetail.primaryNiche.color }]}>
-                      {selectedCreatorForDetail.primaryNiche.level} ({selectedCreatorForDetail.primaryNiche.percent})
+                      {selectedCreatorForDetail.primaryNiche.level}
                     </Text>
                   </View>
                   <View style={styles.correlationIndicatorPill}>
                     <Text style={styles.indicatorName}>{selectedCreatorForDetail.secondaryNiche.name}</Text>
                     <Text style={[styles.indicatorLevel, { color: selectedCreatorForDetail.secondaryNiche.color }]}>
-                      {selectedCreatorForDetail.secondaryNiche.level} ({selectedCreatorForDetail.secondaryNiche.percent})
+                      {selectedCreatorForDetail.secondaryNiche.level}
                     </Text>
                   </View>
                 </View>
@@ -1843,7 +1768,7 @@ export const MatchScreen: React.FC<MatchScreenProps> = ({
                 />
                 <Text style={styles.detailJarvisInsightLabel}>JARVIS INSIGHT</Text>
                 <Text style={styles.detailJarvisInsightText}>
-                  “{selectedCreatorForDetail.jarvisDeepInsight}”
+                  {selectedCreatorForDetail.jarvisDeepInsight}
                 </Text>
               </View>
 
@@ -1852,7 +1777,7 @@ export const MatchScreen: React.FC<MatchScreenProps> = ({
                 <View style={styles.readinessHeaderRow}>
                   <Text style={styles.readinessTitle}>Readiness</Text>
                   <View style={styles.readinessReadyBadge}>
-                    <Text style={styles.readinessReadyText}>🟢 Ready to Collab</Text>
+                    <Text style={styles.readinessReadyText}>🟢 Ready</Text>
                   </View>
                 </View>
 
@@ -1875,10 +1800,7 @@ export const MatchScreen: React.FC<MatchScreenProps> = ({
             <View style={styles.detailBottomActionBar}>
               <Pressable
                 style={({ pressed }) => [styles.detailConnectBtn, pressed && styles.btnPressed]}
-                onPress={() => {
-                  setShowDetailModal(false);
-                  onSwipeComplete('right', selectedCreatorForDetail);
-                }}
+                onPress={() => handleOpenPitchModal(selectedCreatorForDetail)}
               >
                 <LinearGradient
                   colors={['#784DF0', '#582CDB']}
@@ -1886,7 +1808,7 @@ export const MatchScreen: React.FC<MatchScreenProps> = ({
                   end={{ x: 1, y: 1 }}
                   style={styles.detailConnectGradient}
                 >
-                  <Text style={styles.detailConnectBtnText}>💜 Connect (+50 XP)</Text>
+                  <Text style={styles.detailConnectBtnText}>Connect</Text>
                 </LinearGradient>
               </Pressable>
 
@@ -3158,7 +3080,7 @@ const styles = StyleSheet.create({
     color: '#582CDB',
   },
 
-  // DEEP-DIVE CREATOR PROFILE MODAL (ULTRA-PREMIUM REDESIGN)
+  // DEEP-DIVE CREATOR PROFILE MODAL (EXACT DESIGN MATCH)
   detailSafeArea: {
     flex: 1,
     backgroundColor: '#FAF9F6',
@@ -3189,15 +3111,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   detailHeaderTitle: {
-    fontSize: 15.5,
-    fontWeight: '900',
+    fontSize: 16,
+    fontWeight: '800',
     color: '#171420',
-    letterSpacing: -0.2,
-  },
-  detailHeaderSubTitle: {
-    fontSize: 10.5,
-    fontWeight: '600',
-    color: '#582CDB',
   },
   detailCloseBtn: {
     width: 34,
@@ -3237,43 +3153,10 @@ const styles = StyleSheet.create({
     shadowRadius: 16,
     elevation: 3,
     marginBottom: 12,
-    position: 'relative',
   },
   detailCoverImage: {
     width: '100%',
-    height: 380,
-  },
-  detailCoverGradientOverlay: {
-    position: 'absolute',
-    left: 0,
-    right: 0,
-    top: 240,
-    height: 140,
-    justifyContent: 'flex-end',
-    padding: 16,
-  },
-  heroNameRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    marginBottom: 2,
-  },
-  heroCoverName: {
-    fontSize: 22,
-    fontWeight: '900',
-    color: '#FFFFFF',
-    letterSpacing: -0.3,
-    textShadowColor: 'rgba(0, 0, 0, 0.6)',
-    textShadowOffset: { width: 0, height: 1 },
-    textShadowRadius: 4,
-  },
-  heroCoverRole: {
-    fontSize: 12.5,
-    fontWeight: '600',
-    color: 'rgba(255, 255, 255, 0.9)',
-    textShadowColor: 'rgba(0, 0, 0, 0.5)',
-    textShadowOffset: { width: 0, height: 1 },
-    textShadowRadius: 3,
+    height: 360,
   },
   detailHeroBody: {
     padding: 16,
@@ -3444,43 +3327,20 @@ const styles = StyleSheet.create({
   },
   scriptStepItem: {
     flexDirection: 'row',
-    alignItems: 'flex-start',
-    backgroundColor: '#FFFFFF',
-    borderRadius: 12,
-    padding: 10,
-    borderWidth: 1,
-    borderColor: '#E8E3FA',
-    gap: 10,
+    gap: 8,
   },
-  stepNumBadge: {
-    width: 26,
-    height: 26,
-    borderRadius: 13,
-    backgroundColor: '#EDE8FC',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginTop: 1,
-  },
-  stepNumText: {
-    fontSize: 11,
-    fontWeight: '900',
-    color: '#582CDB',
-  },
-  stepContentCol: {
-    flex: 1,
-  },
-  stepLabel: {
-    fontSize: 9.5,
+  scriptStepKey: {
+    fontSize: 12,
     fontWeight: '800',
     color: '#582CDB',
-    letterSpacing: 0.6,
-    marginBottom: 2,
+    width: 52,
   },
-  stepValText: {
+  scriptStepVal: {
     fontSize: 12,
-    color: '#171420',
-    lineHeight: 16,
     fontWeight: '500',
+    color: '#171420',
+    flex: 1,
+    lineHeight: 16,
   },
   collabIdeaChipsRow: {
     flexDirection: 'row',
@@ -3652,6 +3512,7 @@ const styles = StyleSheet.create({
   indicatorLevel: {
     fontSize: 12.5,
     fontWeight: '800',
+    color: '#10B981',
   },
 
   // Card 4: Jarvis Deep Insight Frosted Box
@@ -3788,6 +3649,41 @@ const styles = StyleSheet.create({
     borderColor: '#582CDB',
   },
 
+  // PITCH MODAL STYLES
+  pitchIdeaPreviewBox: {
+    width: '100%',
+    backgroundColor: '#FAF8FF',
+    borderRadius: 14,
+    padding: 12,
+    borderWidth: 1,
+    borderColor: '#DDD6FE',
+    marginBottom: 12,
+  },
+  pitchIdeaPreviewTitle: {
+    fontSize: 13.5,
+    fontWeight: '800',
+    color: '#582CDB',
+    marginBottom: 2,
+  },
+  pitchIdeaPreviewMeta: {
+    fontSize: 11,
+    fontWeight: '600',
+    color: '#7F7894',
+  },
+  pitchTextAreaInput: {
+    width: '100%',
+    height: 80,
+    borderWidth: 1.2,
+    borderColor: 'rgba(221, 214, 254, 0.9)',
+    borderRadius: 12,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    fontSize: 13,
+    color: '#171420',
+    backgroundColor: 'rgba(250, 248, 255, 0.8)',
+    lineHeight: 18,
+  },
+
   // MODALS
   modalOverlay: {
     flex: 1,
@@ -3840,27 +3736,6 @@ const styles = StyleSheet.create({
     lineHeight: 16,
     marginBottom: 14,
   },
-  ideaScriptBox: {
-    width: '100%',
-    backgroundColor: '#FAF8FF',
-    borderRadius: 14,
-    padding: 12,
-    borderWidth: 1,
-    borderColor: '#DDD6FE',
-    marginBottom: 16,
-  },
-  ideaScriptHeading: {
-    fontSize: 11.5,
-    fontWeight: '800',
-    color: '#582CDB',
-    marginBottom: 6,
-  },
-  ideaScriptStep: {
-    fontSize: 11.5,
-    color: '#171420',
-    lineHeight: 16,
-    marginBottom: 4,
-  },
   inputGroupFull: {
     width: '100%',
     marginBottom: 12,
@@ -3907,30 +3782,6 @@ const styles = StyleSheet.create({
   },
   platformPillTextActive: {
     color: '#FFFFFF',
-  },
-  collabScheduleInfoBox: {
-    width: '100%',
-    backgroundColor: '#FAF8FF',
-    borderRadius: 12,
-    padding: 10,
-    borderWidth: 1,
-    borderColor: '#EDE8FC',
-    marginBottom: 14,
-  },
-  scheduleInfoRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: 4,
-  },
-  scheduleInfoLabel: {
-    fontSize: 11,
-    fontWeight: '600',
-    color: '#7F7894',
-  },
-  scheduleInfoValue: {
-    fontSize: 11,
-    fontWeight: '800',
-    color: '#171420',
   },
   modalTextAreaInput: {
     width: '100%',
