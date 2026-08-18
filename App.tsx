@@ -28,6 +28,7 @@ import { MessagesScreen } from './src/screens/MessagesScreen';
 import { CollabIdeaScreen } from './src/screens/CollabIdeaScreen';
 import { GhostLoadingScreen } from './src/components/GhostLoadingScreen';
 import { TabType } from './src/components/FloatingTabBar';
+import { UserProfileData } from './src/components/UserProfileModal';
 
 type Screen =
   | 'welcome'
@@ -66,6 +67,22 @@ export default function App() {
   const [connectedPlatforms, setConnectedPlatforms] = useState<string[]>(['tiktok', 'instagram', 'youtube']);
   const [selectedIdeaTitle, setSelectedIdeaTitle] = useState('One thing I wish I knew before I started creating');
   const [composerIdeaTitle, setComposerIdeaTitle] = useState('One thing I wish I knew before I started creating');
+  const [userProfile, setUserProfile] = useState<UserProfileData>({
+    name: 'Pablo',
+    handle: '@pablocreates',
+    bio: 'Consistency is my superpower. Building a 100-day creator streak with Jarvis AI.',
+    niche: 'Tech & Lifestyle Creator • Lagos',
+    avatarId: 'ghost',
+    avatarSource: require('./assets/images/jarvis-ghost-clean.png'),
+    streakCount: 47,
+    level: 5,
+    xp: 3450,
+    partnersCount: 12,
+    tiktokHandle: '@pablo.creates',
+    instagramHandle: '@pablocreates',
+    youtubeHandle: 'Pablo Creates',
+    niches: ['Lifestyle', 'Tech & AI', 'Storytelling'],
+  });
   const [collabPartnerData, setCollabPartnerData] = useState<{
     name: string;
     handle: string;
@@ -305,6 +322,8 @@ export default function App() {
                 navigateTo('growth');
               }
             }}
+            userProfile={userProfile}
+            onSaveProfile={(updated) => setUserProfile(updated)}
           />
         )}
 
@@ -326,6 +345,8 @@ export default function App() {
                 navigateTo('growth');
               }
             }}
+            userProfile={userProfile}
+            onSaveProfile={(updated) => setUserProfile(updated)}
           />
         )}
 
@@ -363,6 +384,8 @@ export default function App() {
                 navigateTo('growth');
               }
             }}
+            userProfile={userProfile}
+            onSaveProfile={(updated) => setUserProfile(updated)}
           />
         )}
 
@@ -386,6 +409,8 @@ export default function App() {
                 navigateTo('growth');
               }
             }}
+            userProfile={userProfile}
+            onSaveProfile={(updated) => setUserProfile(updated)}
           />
         )}
 
@@ -405,6 +430,8 @@ export default function App() {
                 navigateTo('growth');
               }
             }}
+            userProfile={userProfile}
+            onSaveProfile={(updated) => setUserProfile(updated)}
           />
         )}
 
@@ -425,6 +452,8 @@ export default function App() {
                 navigateTo('quests');
               }
             }}
+            userProfile={userProfile}
+            onSaveProfile={(updated) => setUserProfile(updated)}
           />
         )}
 
@@ -446,6 +475,8 @@ export default function App() {
                 navigateTo('growth');
               }
             }}
+            userProfile={userProfile}
+            onSaveProfile={(updated) => setUserProfile(updated)}
           />
         )}
 
@@ -471,6 +502,8 @@ export default function App() {
                 navigateTo('schedule');
               }
             }}
+            userProfile={userProfile}
+            onSaveProfile={(updated) => setUserProfile(updated)}
           />
         )}
 
@@ -492,6 +525,8 @@ export default function App() {
                 navigateTo('growth');
               }
             }}
+            userProfile={userProfile}
+            onSaveProfile={(updated) => setUserProfile(updated)}
           />
         )}
 
@@ -520,6 +555,8 @@ export default function App() {
                 navigateTo('growth');
               }
             }}
+            userProfile={userProfile}
+            onSaveProfile={(updated) => setUserProfile(updated)}
           />
         )}
 
@@ -544,6 +581,8 @@ export default function App() {
                 navigateTo('growth');
               }
             }}
+            userProfile={userProfile}
+            onSaveProfile={(updated) => setUserProfile(updated)}
           />
         )}
 
@@ -571,6 +610,8 @@ export default function App() {
                 navigateTo('growth');
               }
             }}
+            userProfile={userProfile}
+            onSaveProfile={(updated) => setUserProfile(updated)}
           />
         )}
 
@@ -599,6 +640,8 @@ export default function App() {
                 navigateTo('growth');
               }
             }}
+            userProfile={userProfile}
+            onSaveProfile={(updated) => setUserProfile(updated)}
           />
         )}
 
@@ -627,6 +670,8 @@ export default function App() {
                 navigateTo('growth');
               }
             }}
+            userProfile={userProfile}
+            onSaveProfile={(updated) => setUserProfile(updated)}
           />
         )}
 
@@ -659,6 +704,8 @@ export default function App() {
                 navigateTo('growth');
               }
             }}
+            userProfile={userProfile}
+            onSaveProfile={(updated) => setUserProfile(updated)}
           />
         )}
 
@@ -691,6 +738,8 @@ export default function App() {
                 navigateTo('growth');
               }
             }}
+            userProfile={userProfile}
+            onSaveProfile={(updated) => setUserProfile(updated)}
           />
         )}
 

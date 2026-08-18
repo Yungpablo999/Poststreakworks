@@ -19,6 +19,7 @@ import Svg, { Path, Circle, Rect } from 'react-native-svg';
 import * as Haptics from 'expo-haptics';
 import { LinearGradient } from 'expo-linear-gradient';
 import { FloatingTabBar, TabType } from '../components/FloatingTabBar';
+import { UserProfileModal, UserProfileData } from '../components/UserProfileModal';
 
 interface DashboardScreenProps {
   onLogout?: () => void;
@@ -27,6 +28,8 @@ interface DashboardScreenProps {
   onOpenJarvisPro?: () => void;
   onOpenSchedule?: () => void;
   onOpenMessages?: () => void;
+  userProfile?: UserProfileData;
+  onSaveProfile?: (updated: UserProfileData) => void;
 }
 type NotificationFilter = 'all' | 'unread' | 'quests';
 
@@ -381,7 +384,9 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
   onOpenJarvisPro,
   onOpenSchedule,
   onOpenMessages,
-}) => {
+
+  userProfile,
+  onSaveProfile,}) => {
   const [activeTab, setActiveTab] = useState<TabType>('home');
   const [matchConnected, setMatchConnected] = useState(false);
   const [showProModal, setShowProModal] = useState(false);
@@ -1394,172 +1399,17 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
           </View>
         </Modal>
 
-        {/* 12. BEAUTIFUL PROFILE PHOTO UPLOAD MODAL */}
-        <Modal
+        {/* UNIVERSAL CREATOR PASSPORT & PROFILE MODAL */}
+        <UserProfileModal
           visible={showPhotoModal}
-          transparent={true}
-          animationType="fade"
-          onRequestClose={() => setShowPhotoModal(false)}
-        >
-          <View style={styles.modalOverlay}>
-            <Animated.View
-              style={[
-                styles.photoModalCard,
-                { transform: [{ scale: photoModalScale }] },
-              ]}
-            >
-              {/* Modal Header */}
-              <View style={styles.photoModalHeader}>
-                <View style={styles.photoModalTitleGroup}>
-                  <Text style={styles.photoModalMainTitle}>Creator Profile Picture</Text>
-                  <Text style={styles.photoModalSubtitle}>Personalize your creator identity</Text>
-                </View>
-
-                <Pressable
-                  onPress={() => setShowPhotoModal(false)}
-                  style={({ pressed }) => [styles.calendarCloseButton, pressed && styles.headerIconBtnPressed]}
-                  hitSlop={8}
-                >
-                  <Svg width={20} height={20} viewBox="0 0 24 24" fill="none">
-                    <Path d="M18 6L6 18M6 6L18 18" stroke="#1A1626" strokeWidth="2.4" strokeLinecap="round" />
-                  </Svg>
-                </Pressable>
-              </View>
-
-              {/* Large Avatar Preview with Camera Badge */}
-              <View style={styles.largeAvatarPreviewContainer}>
-                <View style={styles.largeAvatarRing}>
-                  <Image
-                    source={currentPreviewAvatar.source}
-                    style={styles.largeAvatarImage}
-                    resizeMode="cover"
-                  />
-                  <View style={styles.cameraIconBadge}>
-                    <Svg width={14} height={14} viewBox="0 0 24 24" fill="none">
-                      <Path
-                        d="M23 19C23 19.5304 22.7893 20.0391 22.4142 20.4142C22.0391 20.7893 21.5304 21 21 21H3C2.46957 21 1.96086 20.7893 1.58579 20.4142C1.21071 20.0391 1 19.5304 1 19V8C1 7.46957 1.21071 6.96086 1.58579 6.58579C1.96086 6.21071 2.46957 6 3 6H7L9 3H15L17 6H21C21.5304 6 22.0391 6.21071 22.4142 6.58579C22.7893 6.96086 23 7.46957 23 8V19Z"
-                        stroke="#FFFFFF"
-                        strokeWidth="2.2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                      <Circle cx="12" cy="13" r="4" stroke="#FFFFFF" strokeWidth="2.2" />
-                    </Svg>
-                  </View>
-                </View>
-
-                <Text style={styles.creatorProfilePreviewName}>Alex Rivera</Text>
-                <Text style={styles.creatorProfilePreviewHandle}>@alexcreates • Level 42</Text>
-              </View>
-
-              {/* Upload Feedback Toast */}
-              {uploadToastMessage && (
-                <View style={styles.uploadToastBanner}>
-                  <Text style={styles.uploadToastText}>{uploadToastMessage}</Text>
-                </View>
-              )}
-
-              {/* 2 Primary Upload Action Cards */}
-              <View style={styles.uploadActionRow}>
-                <Pressable
-                  onPress={handleSimulateGalleryUpload}
-                  style={({ pressed }) => [
-                    styles.uploadActionCard,
-                    pressed && styles.uploadActionCardPressed,
-                  ]}
-                >
-                  <View style={styles.uploadActionIconBox}>
-                    <Svg width={20} height={20} viewBox="0 0 24 24" fill="none">
-                      <Rect x="3" y="3" width="18" height="18" rx="2" stroke="#582CDB" strokeWidth="2.2" />
-                      <Circle cx="8.5" cy="8.5" r="1.5" fill="#582CDB" />
-                      <Path d="M21 15L16 10L5 21" stroke="#582CDB" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
-                    </Svg>
-                  </View>
-                  <Text style={styles.uploadActionCardTitle}>Photo Library</Text>
-                  <Text style={styles.uploadActionCardSubtext}>Choose from device</Text>
-                </Pressable>
-
-                <Pressable
-                  onPress={handleSimulateCamera}
-                  style={({ pressed }) => [
-                    styles.uploadActionCard,
-                    pressed && styles.uploadActionCardPressed,
-                  ]}
-                >
-                  <View style={styles.uploadActionIconBox}>
-                    <Svg width={20} height={20} viewBox="0 0 24 24" fill="none">
-                      <Path
-                        d="M23 19C23 19.5304 22.7893 20.0391 22.4142 20.4142C22.0391 20.7893 21.5304 21 21 21H3C2.46957 21 1.96086 20.7893 1.58579 20.4142C1.21071 20.0391 1 19.5304 1 19V8C1 7.46957 1.21071 6.96086 1.58579 6.58579C1.96086 6.21071 2.46957 6 3 6H7L9 3H15L17 6H21C21.5304 6 22.0391 6.21071 22.4142 6.58579C22.7893 6.96086 23 7.46957 23 8V19Z"
-                        stroke="#582CDB"
-                        strokeWidth="2.2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                      <Circle cx="12" cy="13" r="4" stroke="#582CDB" strokeWidth="2.2" />
-                    </Svg>
-                  </View>
-                  <Text style={styles.uploadActionCardTitle}>Take Photo</Text>
-                  <Text style={styles.uploadActionCardSubtext}>Use instant camera</Text>
-                </Pressable>
-              </View>
-
-              {/* Creator Preset Avatars Section */}
-              <View style={styles.presetAvatarsSection}>
-                <Text style={styles.presetSectionHeader}>OR CHOOSE A CREATOR AVATAR</Text>
-                <View style={styles.presetGrid}>
-                  {PRESET_AVATARS.map((avatar) => {
-                    const isSelected = previewAvatarId === avatar.id;
-                    return (
-                      <Pressable
-                        key={`preset_${avatar.id}`}
-                        onPress={() => handleSelectPreset(avatar.id)}
-                        style={({ pressed }) => [
-                          styles.presetAvatarTile,
-                          isSelected && styles.presetAvatarTileActive,
-                          pressed && styles.presetAvatarTilePressed,
-                        ]}
-                      >
-                        <Image
-                          source={avatar.source}
-                          style={styles.presetAvatarThumb}
-                          resizeMode="contain"
-                        />
-                        {isSelected && (
-                          <View style={styles.presetCheckBadge}>
-                            <Text style={styles.presetCheckText}>✓</Text>
-                          </View>
-                        )}
-                      </Pressable>
-                    );
-                  })}
-                </View>
-              </View>
-
-              {/* Modal Buttons */}
-              <View style={styles.photoModalFooter}>
-                <Pressable
-                  onPress={handleSaveProfilePhoto}
-                  style={({ pressed }) => [
-                    styles.savePhotoPrimaryBtn,
-                    pressed && styles.savePhotoPrimaryBtnPressed,
-                  ]}
-                >
-                  <Text style={styles.savePhotoPrimaryBtnText}>Save Profile Picture  ✓</Text>
-                </Pressable>
-
-                {selectedAvatarId && (
-                  <Pressable
-                    onPress={handleRemovePhoto}
-                    style={styles.removePhotoBtn}
-                    hitSlop={8}
-                  >
-                    <Text style={styles.removePhotoBtnText}>Remove Current Photo</Text>
-                  </Pressable>
-                )}
-              </View>
-            </Animated.View>
-          </View>
-        </Modal>
+          onClose={() => setShowPhotoModal(false)}
+          onLogout={onLogout}
+          initialProfile={userProfile}
+          onSaveProfile={(updated) => {
+            if (onSaveProfile) onSaveProfile(updated);
+            setSelectedAvatarId(updated.avatarId);
+          }}
+        />
 
         {/* 13. SWIPEABLE STREAK CALENDAR MODAL */}
         <Modal

@@ -19,6 +19,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import * as Haptics from 'expo-haptics';
 import Svg, { Path, Circle, Rect } from 'react-native-svg';
 import { FloatingTabBar, TabType } from '../components/FloatingTabBar';
+import { UserProfileModal, UserProfileData } from '../components/UserProfileModal';
 import { AnimatedCompletionModal } from '../components/AnimatedCompletionModal';
 import { COLLAB_PLANS } from './CollabIdeaScreen';
 
@@ -34,6 +35,8 @@ interface MessagesScreenProps {
   onOpenCreate?: () => void;
   onOpenMatch?: () => void;
   onOpenCollabIdea?: (partnerData: { name: string; handle: string; niche: string; avatar: any; planIndex?: number }) => void;
+  userProfile?: UserProfileData;
+  onSaveProfile?: (updated: UserProfileData) => void;
 }
 
 interface StorySlide {
@@ -400,7 +403,9 @@ export const MessagesScreen: React.FC<MessagesScreenProps> = ({
   onOpenCreate,
   onOpenMatch,
   onOpenCollabIdea,
-}) => {
+
+  userProfile,
+  onSaveProfile,}) => {
   const [activeTab, setActiveTab] = useState<TabType>('match');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<'all' | 'buddies' | 'collabs' | 'jarvis'>('all');
@@ -1643,6 +1648,15 @@ export const MessagesScreen: React.FC<MessagesScreenProps> = ({
             </Animated.View>
           </View>
         </Modal>
+
+        {/* UNIVERSAL CREATOR PASSPORT & PROFILE MODAL */}
+        <UserProfileModal
+          visible={showProfileModal}
+          onClose={() => setShowProfileModal(false)}
+          onLogout={onLogout}
+          initialProfile={userProfile}
+          onSaveProfile={onSaveProfile}
+        />
 
         {/* SIGNATURE ANIMATED GHOST CELEBRATION MODAL */}
         <AnimatedCompletionModal

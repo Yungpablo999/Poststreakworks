@@ -16,6 +16,7 @@ import Svg, { Path, Circle, Rect, Defs, LinearGradient as SvgLinearGradient, Sto
 import * as Haptics from 'expo-haptics';
 import { LinearGradient } from 'expo-linear-gradient';
 import { FloatingTabBar, TabType } from '../components/FloatingTabBar';
+import { UserProfileModal, UserProfileData } from '../components/UserProfileModal';
 import { AnimatedCompletionModal } from '../components/AnimatedCompletionModal';
 
 interface GrowthScreenProps {
@@ -24,6 +25,8 @@ interface GrowthScreenProps {
   onNavigateTab?: (tab: TabType) => void;
   onOpenJarvisPro?: () => void;
   onOpenMessages?: () => void;
+  userProfile?: UserProfileData;
+  onSaveProfile?: (updated: UserProfileData) => void;
 }
 
 export const GrowthScreen: React.FC<GrowthScreenProps> = ({
@@ -32,7 +35,9 @@ export const GrowthScreen: React.FC<GrowthScreenProps> = ({
   onNavigateTab,
   onOpenJarvisPro,
   onOpenMessages,
-}) => {
+
+  userProfile,
+  onSaveProfile,}) => {
   const [activeTab, setActiveTab] = useState<TabType>('growth');
 
   // Modal States
@@ -947,47 +952,14 @@ export const GrowthScreen: React.FC<GrowthScreenProps> = ({
         </Modal>
 
         {/* PROFILE MODAL */}
-        <Modal
+        {/* UNIVERSAL CREATOR PASSPORT & PROFILE MODAL */}
+        <UserProfileModal
           visible={showProfileModal}
-          transparent={true}
-          animationType="fade"
-          onRequestClose={() => setShowProfileModal(false)}
-        >
-          <View style={styles.modalOverlay}>
-            <Animated.View style={[styles.modalCard, { transform: [{ scale: modalPopScale }] }]}>
-              <View style={styles.modalHeaderRow}>
-                <View>
-                  <Text style={styles.modalTitle}>Creator Passport</Text>
-                  <Text style={styles.modalSubtitle}>Growth Tier: Level 12</Text>
-                </View>
-                <Pressable onPress={() => setShowProfileModal(false)} style={styles.modalCloseCircle} hitSlop={8}>
-                  <Text style={styles.modalCloseCross}>✕</Text>
-                </Pressable>
-              </View>
-
-              <View style={{ alignItems: 'center', paddingVertical: 12 }}>
-                <View style={styles.profileRing}>
-                  <Svg width={28} height={28} viewBox="0 0 24 24" fill="none">
-                    <Path
-                      d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"
-                      stroke="#582CDB"
-                      strokeWidth="2.2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                    <Circle cx="12" cy="7" r="4" stroke="#582CDB" strokeWidth="2.2" />
-                  </Svg>
-                </View>
-                <Text style={{ fontSize: 18, fontWeight: '800', color: '#171420' }}>Amara Okafor</Text>
-                <Text style={{ fontSize: 13, color: '#64748B', marginTop: 2 }}>⚡ 24.8k Total Reach • 47-Day Streak</Text>
-              </View>
-
-              <Pressable style={styles.modalFullBtn} onPress={() => setShowProfileModal(false)}>
-                <Text style={styles.modalFullBtnText}>Done</Text>
-              </Pressable>
-            </Animated.View>
-          </View>
-        </Modal>
+          onClose={() => setShowProfileModal(false)}
+          onLogout={onLogout}
+          initialProfile={userProfile}
+          onSaveProfile={onSaveProfile}
+        />
 
         {/* CHAT MODAL */}
         <Modal

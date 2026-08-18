@@ -17,6 +17,7 @@ import Svg, { Path, Circle, Rect, G } from 'react-native-svg';
 import * as Haptics from 'expo-haptics';
 import { LinearGradient } from 'expo-linear-gradient';
 import { FloatingTabBar, TabType } from '../components/FloatingTabBar';
+import { UserProfileModal, UserProfileData } from '../components/UserProfileModal';
 import { AnimatedCompletionModal } from '../components/AnimatedCompletionModal';
 
 interface ChallengeDetailScreenProps {
@@ -24,6 +25,8 @@ interface ChallengeDetailScreenProps {
   onNavigateTab?: (tab: TabType) => void;
   onLogout?: () => void;
   onOpenMessages?: () => void;
+  userProfile?: UserProfileData;
+  onSaveProfile?: (updated: UserProfileData) => void;
 }
 
 interface QuestRequirement {
@@ -85,7 +88,10 @@ const AI_GENERATED_SCRIPTS = [
 export const ChallengeDetailScreen: React.FC<ChallengeDetailScreenProps> = ({
   onBackToDashboard,
   onNavigateTab,
+  onLogout,
   onOpenMessages,
+  userProfile,
+  onSaveProfile,
 }) => {
   const [activeTab, setActiveTab] = useState<TabType>('quests');
   const [requirements, setRequirements] = useState<QuestRequirement[]>(INITIAL_REQUIREMENTS);
@@ -943,46 +949,14 @@ export const ChallengeDetailScreen: React.FC<ChallengeDetailScreenProps> = ({
         </Modal>
 
         {/* MODAL 4: PROFILE */}
-        <Modal
+        {/* UNIVERSAL CREATOR PASSPORT & PROFILE MODAL */}
+        <UserProfileModal
           visible={showProfileModal}
-          transparent={true}
-          animationType="fade"
-          onRequestClose={() => setShowProfileModal(false)}
-        >
-          <View style={styles.modalOverlay}>
-            <Animated.View style={[styles.modalCard, { transform: [{ scale: modalPopScale }] }]}>
-              <Image
-                source={require('../../assets/images/amara-portrait.jpg')}
-                style={styles.modalProfileImg}
-                resizeMode="cover"
-              />
-              <Text style={styles.modalProfileName}>Amara Okafor</Text>
-              <Text style={styles.modalProfileHandle}>@amara.creates • Level 4 Creator</Text>
-
-              <View style={styles.profileStatRow}>
-                <View style={styles.profileStatBox}>
-                  <Text style={styles.profileStatVal}>47</Text>
-                  <Text style={styles.profileStatLabel}>Streak</Text>
-                </View>
-                <View style={styles.profileStatBox}>
-                  <Text style={styles.profileStatVal}>1,420</Text>
-                  <Text style={styles.profileStatLabel}>XP</Text>
-                </View>
-                <View style={styles.profileStatBox}>
-                  <Text style={styles.profileStatVal}>8</Text>
-                  <Text style={styles.profileStatLabel}>Quests</Text>
-                </View>
-              </View>
-
-              <Pressable
-                style={styles.modalCloseBtn}
-                onPress={() => setShowProfileModal(false)}
-              >
-                <Text style={styles.modalCloseBtnText}>Done</Text>
-              </Pressable>
-            </Animated.View>
-          </View>
-        </Modal>
+          onClose={() => setShowProfileModal(false)}
+          onLogout={onLogout}
+          initialProfile={userProfile}
+          onSaveProfile={onSaveProfile}
+        />
 
         {/* 4. ANIMATED COMPLETION CELEBRATION MODAL */}
         <AnimatedCompletionModal

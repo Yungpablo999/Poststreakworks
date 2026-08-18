@@ -18,6 +18,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import * as Haptics from 'expo-haptics';
 import Svg, { Path, Circle, Rect } from 'react-native-svg';
 import { FloatingTabBar, TabType } from '../components/FloatingTabBar';
+import { UserProfileModal, UserProfileData } from '../components/UserProfileModal';
 import { AnimatedCompletionModal } from '../components/AnimatedCompletionModal';
 
 interface ScriptScreenProps {
@@ -29,6 +30,8 @@ interface ScriptScreenProps {
   onNavigateTab?: (tab: TabType) => void;
   onUseAsPost?: (scriptData: { hook: string; body: string; takeaway: string; cta: string }) => void;
   onOpenMessages?: () => void;
+  userProfile?: UserProfileData;
+  onSaveProfile?: (updated: UserProfileData) => void;
 }
 
 interface NotificationItem {
@@ -189,7 +192,9 @@ export const ScriptScreen: React.FC<ScriptScreenProps> = ({
   onNavigateTab,
   onUseAsPost,
   onOpenMessages,
-}) => {
+
+  userProfile,
+  onSaveProfile,}) => {
   const [activeTab, setActiveTab] = useState<TabType>('create');
 
   // Live-Editable Script Components State
@@ -1221,57 +1226,14 @@ ${selectedCtaText}`;
           </Modal>
 
           {/* MODAL: CREATOR PROFILE PASSPORT */}
-          <Modal
-            visible={showProfileModal}
-            transparent={true}
-            animationType="fade"
-            onRequestClose={() => setShowProfileModal(false)}
-          >
-            <View style={styles.modalOverlay}>
-              <Animated.View style={[styles.modalCard, { transform: [{ scale: modalPopScale }] }]}>
-                <View style={styles.modalHeaderRow}>
-                  <View>
-                    <Text style={styles.modalTitle}>Creator Passport</Text>
-                    <Text style={styles.modalSubtitle}>Your verified consistency record</Text>
-                  </View>
-                  <Pressable
-                    onPress={() => setShowProfileModal(false)}
-                    style={styles.modalCloseCircle}
-                    hitSlop={8}
-                  >
-                    <Text style={styles.modalCloseCross}>✕</Text>
-                  </Pressable>
-                </View>
-
-                <View style={styles.profileModalCardInner}>
-                  <View style={styles.profileModalIconRing}>
-                    <Svg width={28} height={28} viewBox="0 0 24 24" fill="none">
-                      <Path
-                        d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"
-                        stroke="#582CDB"
-                        strokeWidth="2.2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                      <Circle cx="12" cy="7" r="4" stroke="#582CDB" strokeWidth="2.2" />
-                    </Svg>
-                  </View>
-                  <Text style={styles.profileModalName}>Amara Okafor</Text>
-                  <Text style={styles.profileModalNiche}>Lifestyle &amp; Tech Creator</Text>
-                  <View style={styles.profileModalLevelPill}>
-                    <Text style={styles.profileModalLevelText}>⚡ Level 4 Storyteller • 47-Day Streak</Text>
-                  </View>
-                </View>
-
-                <Pressable
-                  style={styles.modalFullBtn}
-                  onPress={() => setShowProfileModal(false)}
-                >
-                  <Text style={styles.modalFullBtnText}>Done</Text>
-                </Pressable>
-              </Animated.View>
-            </View>
-          </Modal>
+          {/* UNIVERSAL CREATOR PASSPORT & PROFILE MODAL */}
+        <UserProfileModal
+          visible={showProfileModal}
+          onClose={() => setShowProfileModal(false)}
+          onLogout={onLogout}
+          initialProfile={userProfile}
+          onSaveProfile={onSaveProfile}
+        />
 
           {/* MODAL: CREATOR CHAT */}
           <Modal

@@ -18,6 +18,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import * as Haptics from 'expo-haptics';
 import Svg, { Path, Circle, Rect } from 'react-native-svg';
 import { FloatingTabBar, TabType } from '../components/FloatingTabBar';
+import { UserProfileModal, UserProfileData } from '../components/UserProfileModal';
 import { AnimatedCompletionModal } from '../components/AnimatedCompletionModal';
 
 export interface CollabPlan {
@@ -217,6 +218,8 @@ interface CollabIdeaScreenProps {
   onNavigateTab?: (tab: TabType) => void;
   onStartCollaboration?: (collabData: { title: string; caption: string; partnerName: string }) => void;
   onOpenMessages?: () => void;
+  userProfile?: UserProfileData;
+  onSaveProfile?: (updated: UserProfileData) => void;
 }
 
 interface NotificationItem {
@@ -336,7 +339,9 @@ export const CollabIdeaScreen: React.FC<CollabIdeaScreenProps> = ({
   onNavigateTab,
   onStartCollaboration,
   onOpenMessages,
-}) => {
+
+  userProfile,
+  onSaveProfile,}) => {
   const [activeTab, setActiveTab] = useState<TabType>('match');
 
   // Dynamic Collab Plan Index
@@ -1355,53 +1360,14 @@ export const CollabIdeaScreen: React.FC<CollabIdeaScreenProps> = ({
             </View>
           </Modal>
 
-          {/* MODAL: PARTNER PROFILE */}
-          <Modal
-            visible={showProfileModal}
-            transparent={true}
-            animationType="fade"
-            onRequestClose={() => setShowProfileModal(false)}
-          >
-            <View style={styles.modalOverlay}>
-              <Animated.View style={[styles.modalCard, { transform: [{ scale: modalPopScale }] }]}>
-                <View style={styles.modalHeaderRow}>
-                  <View>
-                    <Text style={styles.modalTitle}>Creator Passport</Text>
-                    <Text style={styles.modalSubtitle}>Verified creator partner</Text>
-                  </View>
-                  <Pressable
-                    onPress={() => setShowProfileModal(false)}
-                    style={styles.modalCloseCircle}
-                    hitSlop={8}
-                  >
-                    <Text style={styles.modalCloseCross}>✕</Text>
-                  </Pressable>
-                </View>
-
-                <View style={styles.profileModalInner}>
-                  <Image source={partnerAvatar} style={styles.profileModalAvatar} resizeMode="cover" />
-                  <Text style={styles.profileModalName}>{partnerName}</Text>
-                  <Text style={styles.profileModalHandle}>{partnerHandle}</Text>
-                  <Text style={styles.profileModalNiche}>{partnerNiche}</Text>
-                  <View style={styles.profileStreakBadge}>
-                    <Text style={styles.profileStreakBadgeText}>⚡ 52-Day Streak • Level 5 Creator</Text>
-                  </View>
-                </View>
-
-                <Pressable
-                  style={styles.modalFullBtn}
-                  onPress={() => setShowProfileModal(false)}
-                >
-                  <LinearGradient
-                    colors={['#7C3AED', '#582CDB']}
-                    style={styles.modalFullBtnGradient}
-                  >
-                    <Text style={styles.modalFullBtnText}>Done</Text>
-                  </LinearGradient>
-                </Pressable>
-              </Animated.View>
-            </View>
-          </Modal>
+          {/* UNIVERSAL CREATOR PASSPORT & PROFILE MODAL */}
+        <UserProfileModal
+          visible={showProfileModal}
+          onClose={() => setShowProfileModal(false)}
+          onLogout={onLogout}
+          initialProfile={userProfile}
+          onSaveProfile={onSaveProfile}
+        />
 
           {/* MODAL: NOTIFICATIONS CENTER */}
           <Modal

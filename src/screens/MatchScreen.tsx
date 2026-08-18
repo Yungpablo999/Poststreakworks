@@ -19,6 +19,7 @@ import Svg, { Path, Circle, Defs, RadialGradient, Stop } from 'react-native-svg'
 import * as Haptics from 'expo-haptics';
 import { LinearGradient } from 'expo-linear-gradient';
 import { FloatingTabBar, TabType } from '../components/FloatingTabBar';
+import { UserProfileModal, UserProfileData } from '../components/UserProfileModal';
 import { AnimatedCompletionModal } from '../components/AnimatedCompletionModal';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
@@ -30,6 +31,8 @@ interface MatchScreenProps {
   onNavigateTab?: (tab: TabType) => void;
   onOpenMessages?: () => void;
   onOpenJarvisPro?: () => void;
+  userProfile?: UserProfileData;
+  onSaveProfile?: (updated: UserProfileData) => void;
 }
 
 interface TrackedMetrics {
@@ -342,7 +345,9 @@ export const MatchScreen: React.FC<MatchScreenProps> = ({
   onNavigateTab,
   onOpenMessages,
   onOpenJarvisPro,
-}) => {
+
+  userProfile,
+  onSaveProfile,}) => {
   const [activeTab, setActiveTab] = useState<TabType>('match');
   const [activeSection, setActiveSection] = useState<'deck' | 'requests' | 'tracking' | 'connected'>('deck');
   const [activeFilter, setActiveFilter] = useState<'niche' | 'streak' | 'nearby' | 'ai'>('niche');
@@ -1930,41 +1935,14 @@ export const MatchScreen: React.FC<MatchScreenProps> = ({
         </Modal>
 
         {/* 10. PROFILE MODAL */}
-        <Modal
+        {/* UNIVERSAL CREATOR PASSPORT & PROFILE MODAL */}
+        <UserProfileModal
           visible={showProfileModal}
-          transparent={true}
-          animationType="fade"
-          onRequestClose={() => setShowProfileModal(false)}
-        >
-          <View style={styles.modalOverlay}>
-            <View style={styles.modalCard}>
-              <Image
-                source={require('../../assets/images/jarvis-core-flame.png')}
-                style={{ width: 64, height: 64, marginBottom: 8 }}
-                resizeMode="contain"
-              />
-              <Text style={styles.modalTitle}>Creator Profile</Text>
-              <Text style={styles.modalSubtitle}>47-Day Streak • Free Plan</Text>
-
-              <Pressable
-                style={[styles.modalPrimaryBtn, { width: '100%', marginTop: 12 }]}
-                onPress={() => {
-                  setShowProfileModal(false);
-                  if (onLogout) onLogout();
-                }}
-              >
-                <Text style={styles.modalPrimaryBtnText}>Log Out</Text>
-              </Pressable>
-
-              <Pressable
-                style={[styles.modalCancelBtn, { width: '100%', marginTop: 8 }]}
-                onPress={() => setShowProfileModal(false)}
-              >
-                <Text style={styles.modalCancelBtnText}>Close</Text>
-              </Pressable>
-            </View>
-          </View>
-        </Modal>
+          onClose={() => setShowProfileModal(false)}
+          onLogout={onLogout}
+          initialProfile={userProfile}
+          onSaveProfile={onSaveProfile}
+        />
       </View>
     </SafeAreaView>
   );

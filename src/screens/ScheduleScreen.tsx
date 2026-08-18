@@ -18,6 +18,7 @@ import Svg, { Path, Circle, Rect } from 'react-native-svg';
 import * as Haptics from 'expo-haptics';
 import { LinearGradient } from 'expo-linear-gradient';
 import { FloatingTabBar, TabType } from '../components/FloatingTabBar';
+import { UserProfileModal, UserProfileData } from '../components/UserProfileModal';
 import { AnimatedCompletionModal } from '../components/AnimatedCompletionModal';
 
 interface ScheduleScreenProps {
@@ -27,6 +28,8 @@ interface ScheduleScreenProps {
   onOpenJarvisPro?: () => void;
   onOpenMessages?: () => void;
   onOpenCreateIdea?: () => void;
+  userProfile?: UserProfileData;
+  onSaveProfile?: (updated: UserProfileData) => void;
 }
 
 interface ScheduledPost {
@@ -116,7 +119,9 @@ export const ScheduleScreen: React.FC<ScheduleScreenProps> = ({
   onOpenJarvisPro,
   onOpenMessages,
   onOpenCreateIdea,
-}) => {
+
+  userProfile,
+  onSaveProfile,}) => {
   const [activeTab, setActiveTab] = useState<TabType>('create');
   const [selectedDay, setSelectedDay] = useState<number>(15);
   const [calendarSelectedDay, setCalendarSelectedDay] = useState<number>(15);
@@ -1077,47 +1082,14 @@ export const ScheduleScreen: React.FC<ScheduleScreenProps> = ({
         </Modal>
 
         {/* PROFILE MODAL */}
-        <Modal
+        {/* UNIVERSAL CREATOR PASSPORT & PROFILE MODAL */}
+        <UserProfileModal
           visible={showProfileModal}
-          transparent={true}
-          animationType="fade"
-          onRequestClose={() => setShowProfileModal(false)}
-        >
-          <View style={styles.modalOverlay}>
-            <Animated.View style={[styles.modalCard, { transform: [{ scale: modalPopScale }] }]}>
-              <View style={styles.modalHeaderRow}>
-                <View>
-                  <Text style={styles.modalTitle}>Creator Passport</Text>
-                  <Text style={styles.modalSubtitle}>Level 12 Creator</Text>
-                </View>
-                <Pressable onPress={() => setShowProfileModal(false)} style={styles.modalCloseCircle} hitSlop={8}>
-                  <Text style={styles.modalCloseCross}>✕</Text>
-                </Pressable>
-              </View>
-
-              <View style={{ alignItems: 'center', paddingVertical: 12 }}>
-                <View style={styles.profileRing}>
-                  <Svg width={28} height={28} viewBox="0 0 24 24" fill="none">
-                    <Path
-                      d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"
-                      stroke="#582CDB"
-                      strokeWidth="2.2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                    <Circle cx="12" cy="7" r="4" stroke="#582CDB" strokeWidth="2.2" />
-                  </Svg>
-                </View>
-                <Text style={{ fontSize: 18, fontWeight: '800', color: '#171420' }}>Amara Okafor</Text>
-                <Text style={{ fontSize: 13, color: '#64748B', marginTop: 2 }}>⚡ 47-Day Streak Active</Text>
-              </View>
-
-              <Pressable style={styles.modalFullBtn} onPress={() => setShowProfileModal(false)}>
-                <Text style={styles.modalFullBtnText}>Done</Text>
-              </Pressable>
-            </Animated.View>
-          </View>
-        </Modal>
+          onClose={() => setShowProfileModal(false)}
+          onLogout={onLogout}
+          initialProfile={userProfile}
+          onSaveProfile={onSaveProfile}
+        />
 
         {/* CHAT MODAL */}
         <Modal
