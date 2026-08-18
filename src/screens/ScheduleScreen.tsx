@@ -59,6 +59,45 @@ const INITIAL_POSTS: ScheduledPost[] = [
   },
 ];
 
+interface CalendarDayPost {
+  id: string;
+  platform: 'tiktok' | 'instagram' | 'youtube';
+  platformLabel: string;
+  time: string;
+  title: string;
+  status: 'scheduled' | 'draft' | 'published';
+}
+
+const MONTH_POSTS_MAP: { [day: number]: CalendarDayPost[] } = {
+  12: [
+    { id: 'm12_1', platform: 'tiktok', platformLabel: 'TikTok', time: '11:00 AM', title: 'Why consistency beats talent in 2026', status: 'published' }
+  ],
+  13: [
+    { id: 'm13_1', platform: 'instagram', platformLabel: 'Instagram Reel', time: '6:30 PM', title: '3 hooks that doubled my watch time', status: 'published' }
+  ],
+  14: [
+    { id: 'm14_1', platform: 'youtube', platformLabel: 'YouTube Shorts', time: '2:00 PM', title: 'Editing faster with mobile capcut tips', status: 'published' }
+  ],
+  15: [
+    { id: 'post_1', platform: 'tiktok', platformLabel: 'TikTok', time: '11:30 AM', title: '3 creator mistakes I stopped making this year', status: 'scheduled' },
+    { id: 'post_2', platform: 'instagram', platformLabel: 'Instagram Reel', time: '7:30 PM', title: 'One thing I wish I knew before creating', status: 'draft' },
+    { id: 'post_3', platform: 'youtube', platformLabel: 'YouTube Shorts', time: '9:00 PM', title: 'The 1 rule to 10x your views', status: 'scheduled' },
+  ],
+  16: [
+    { id: 'm16_1', platform: 'tiktok', platformLabel: 'TikTok', time: '12:00 PM', title: 'How to batch 5 videos in 1 hour', status: 'scheduled' },
+    { id: 'm16_2', platform: 'instagram', platformLabel: 'Instagram Reel', time: '6:00 PM', title: 'Behind the scenes creator workspace', status: 'scheduled' },
+  ],
+  19: [
+    { id: 'm19_1', platform: 'tiktok', platformLabel: 'TikTok', time: '11:30 AM', title: 'The secret to viral retention graph', status: 'scheduled' }
+  ],
+  22: [
+    { id: 'm22_1', platform: 'youtube', platformLabel: 'YouTube Shorts', time: '4:00 PM', title: 'Top 3 audio trends this weekend', status: 'scheduled' }
+  ],
+  26: [
+    { id: 'm26_1', platform: 'tiktok', platformLabel: 'TikTok', time: '1:00 PM', title: 'How to build your first creator squad', status: 'scheduled' }
+  ],
+};
+
 const WEEK_DAYS = [
   { day: 'MON', date: 12 },
   { day: 'TUE', date: 13 },
@@ -78,6 +117,7 @@ export const ScheduleScreen: React.FC<ScheduleScreenProps> = ({
 }) => {
   const [activeTab, setActiveTab] = useState<TabType>('create');
   const [selectedDay, setSelectedDay] = useState<number>(15);
+  const [calendarSelectedDay, setCalendarSelectedDay] = useState<number>(15);
   const [posts, setPosts] = useState<ScheduledPost[]>(INITIAL_POSTS);
 
   // Modals
@@ -798,7 +838,7 @@ export const ScheduleScreen: React.FC<ScheduleScreenProps> = ({
           </View>
         </Modal>
 
-        {/* MODAL 4: FULL CALENDAR */}
+        {/* MODAL 4: FULL INTERACTIVE MONTH CONTENT CALENDAR */}
         <Modal
           visible={showCalendarModal}
           transparent={true}
@@ -806,35 +846,189 @@ export const ScheduleScreen: React.FC<ScheduleScreenProps> = ({
           onRequestClose={() => setShowCalendarModal(false)}
         >
           <View style={styles.modalOverlay}>
-            <Animated.View style={[styles.modalCard, { transform: [{ scale: modalPopScale }] }]}>
+            <Animated.View style={[styles.fullCalendarModalCard, { transform: [{ scale: modalPopScale }] }]}>
+              {/* Header Row */}
               <View style={styles.modalHeaderRow}>
                 <View>
-                  <Text style={styles.modalTitle}>Content Calendar</Text>
-                  <Text style={styles.modalSubtitle}>May 2026 • 8 posts planned</Text>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                    <Text style={styles.modalTitle}>May 2026</Text>
+                    <View style={styles.calMonthBadge}>
+                      <Text style={styles.calMonthBadgeText}>8 POSTS PLANNED</Text>
+                    </View>
+                  </View>
+                  <Text style={styles.modalSubtitle}>Tap any date to inspect scheduled posts</Text>
                 </View>
                 <Pressable onPress={() => setShowCalendarModal(false)} style={styles.modalCloseCircle} hitSlop={8}>
                   <Text style={styles.modalCloseCross}>✕</Text>
                 </Pressable>
               </View>
 
-              <View style={{ gap: 8, marginVertical: 10 }}>
-                <View style={styles.calRowItem}>
-                  <Text style={{ fontWeight: '800', color: '#582CDB' }}>Thu 15</Text>
-                  <Text style={{ color: '#171420', flex: 1, marginLeft: 12 }}>3 posts (1 TikTok, 1 Reel, 1 Shorts)</Text>
+              {/* Day-of-Week Column Headers */}
+              <View style={styles.calGridHeaderRow}>
+                {['M', 'T', 'W', 'T', 'F', 'S', 'S'].map((d, idx) => (
+                  <Text key={`cal_h_${idx}`} style={styles.calGridHeaderText}>
+                    {d}
+                  </Text>
+                ))}
+              </View>
+
+              {/* 31-Day Calendar Grid (May 2026 starts on Friday = offset 4) */}
+              <View style={styles.calGridBody}>
+                {Array.from({ length: 35 }).map((_, cellIdx) => {
+                  const startOffset = 4; // May 1st on Fri
+                  const dayNum = cellIdx - startOffset + 1;
+                  const isValid = dayNum >= 1 && dayNum <= 31;
+
+                  if (!isValid) {
+                    return <View key={`empty_${cellIdx}`} style={styles.calCellEmpty} />;
+                  }
+
+                  const dayPosts = MONTH_POSTS_MAP[dayNum] || [];
+                  const hasPosts = dayPosts.length > 0;
+                  const isSelected = calendarSelectedDay === dayNum;
+                  const isToday = dayNum === 15;
+                  const hasDraft = dayPosts.some((p) => p.status === 'draft');
+                  const hasScheduled = dayPosts.some((p) => p.status === 'scheduled');
+                  const hasPublished = dayPosts.some((p) => p.status === 'published');
+
+                  return (
+                    <Pressable
+                      key={`cal_day_${dayNum}`}
+                      onPress={() => {
+                        if (Platform.OS !== 'web') {
+                          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                        }
+                        setCalendarSelectedDay(dayNum);
+                      }}
+                      style={[
+                        styles.calCell,
+                        hasPosts && styles.calCellHasPosts,
+                        isSelected && styles.calCellSelected,
+                      ]}
+                    >
+                      <Text
+                        style={[
+                          styles.calCellText,
+                          hasPosts && styles.calCellTextHasPosts,
+                          isSelected && styles.calCellTextSelected,
+                        ]}
+                      >
+                        {dayNum}
+                      </Text>
+
+                      {/* Status Dots */}
+                      <View style={styles.calCellDotsRow}>
+                        {hasScheduled && <View style={styles.dotScheduled} />}
+                        {hasDraft && <View style={styles.dotDraft} />}
+                        {hasPublished && <View style={styles.dotPublished} />}
+                        {isToday && !hasPosts && <View style={styles.dotToday} />}
+                      </View>
+                    </Pressable>
+                  );
+                })}
+              </View>
+
+              {/* Legend Row */}
+              <View style={styles.calLegendRow}>
+                <View style={styles.calLegendItem}>
+                  <View style={styles.dotScheduled} />
+                  <Text style={styles.calLegendText}>Scheduled (5)</Text>
                 </View>
-                <View style={styles.calRowItem}>
-                  <Text style={{ fontWeight: '800', color: '#171420' }}>Fri 16</Text>
-                  <Text style={{ color: '#64748B', flex: 1, marginLeft: 12 }}>2 posts scheduled</Text>
+                <View style={styles.calLegendItem}>
+                  <View style={styles.dotDraft} />
+                  <Text style={styles.calLegendText}>Draft (2)</Text>
                 </View>
-                <View style={styles.calRowItem}>
-                  <Text style={{ fontWeight: '800', color: '#171420' }}>Mon 19</Text>
-                  <Text style={{ color: '#64748B', flex: 1, marginLeft: 12 }}>1 post scheduled</Text>
+                <View style={styles.calLegendItem}>
+                  <View style={styles.dotPublished} />
+                  <Text style={styles.calLegendText}>Published (1)</Text>
                 </View>
               </View>
 
-              <Pressable style={styles.modalFullBtn} onPress={() => setShowCalendarModal(false)}>
-                <Text style={styles.modalFullBtnText}>Done</Text>
-              </Pressable>
+              {/* Selected Day Posts Breakdown */}
+              <View style={styles.selectedDayDetailCard}>
+                <View style={styles.selectedDayHeader}>
+                  <Text style={styles.selectedDayTitle}>
+                    {calendarSelectedDay === 15 ? 'Today, May 15' : `May ${calendarSelectedDay}, 2026`}
+                  </Text>
+                  <Text style={styles.selectedDayCount}>
+                    {(MONTH_POSTS_MAP[calendarSelectedDay] || []).length} posts
+                  </Text>
+                </View>
+
+                {MONTH_POSTS_MAP[calendarSelectedDay] && MONTH_POSTS_MAP[calendarSelectedDay].length > 0 ? (
+                  <ScrollView style={{ maxHeight: 150 }} showsVerticalScrollIndicator={false}>
+                    {MONTH_POSTS_MAP[calendarSelectedDay].map((p) => (
+                      <View key={p.id} style={styles.calPostItemRow}>
+                        <View style={styles.calPostIconBox}>
+                          <Text style={{ fontSize: 12 }}>
+                            {p.platform === 'tiktok' ? '♪' : p.platform === 'instagram' ? '📷' : '▶'}
+                          </Text>
+                        </View>
+                        <View style={{ flex: 1, paddingRight: 8 }}>
+                          <Text style={styles.calPostItemTitle} numberOfLines={1}>
+                            {p.title}
+                          </Text>
+                          <Text style={styles.calPostItemSub}>
+                            {p.platformLabel} • {p.time}
+                          </Text>
+                        </View>
+                        <View
+                          style={[
+                            styles.calPostStatusBadge,
+                            p.status === 'scheduled' && { backgroundColor: '#EDE9FE' },
+                            p.status === 'draft' && { backgroundColor: '#FEF3C7' },
+                            p.status === 'published' && { backgroundColor: '#DCFCE7' },
+                          ]}
+                        >
+                          <Text
+                            style={[
+                              styles.calPostStatusBadgeText,
+                              p.status === 'scheduled' && { color: '#6D28D9' },
+                              p.status === 'draft' && { color: '#D97706' },
+                              p.status === 'published' && { color: '#15803D' },
+                            ]}
+                          >
+                            {p.status.toUpperCase()}
+                          </Text>
+                        </View>
+                      </View>
+                    ))}
+                  </ScrollView>
+                ) : (
+                  <View style={styles.emptyDayBox}>
+                    <Text style={styles.emptyDayText}>No posts scheduled for May {calendarSelectedDay}</Text>
+                    <Pressable
+                      style={styles.planDayBtn}
+                      onPress={() => {
+                        setShowCalendarModal(false);
+                        setNewPostTime('11:30 AM');
+                        triggerModalPop();
+                        setShowScheduleModal(true);
+                      }}
+                    >
+                      <Text style={styles.planDayBtnText}>+ Plan Post For May {calendarSelectedDay}</Text>
+                    </Pressable>
+                  </View>
+                )}
+              </View>
+
+              {/* Bottom Buttons */}
+              <View style={styles.calModalBtnRow}>
+                <Pressable
+                  style={styles.calPlanMoreBtn}
+                  onPress={() => {
+                    setShowCalendarModal(false);
+                    triggerModalPop();
+                    setShowScheduleModal(true);
+                  }}
+                >
+                  <Text style={styles.calPlanMoreBtnText}>+ Schedule Post</Text>
+                </Pressable>
+
+                <Pressable style={styles.calDoneBtn} onPress={() => setShowCalendarModal(false)}>
+                  <Text style={styles.calDoneBtnText}>Done ✓</Text>
+                </Pressable>
+              </View>
             </Animated.View>
           </View>
         </Modal>
@@ -1750,5 +1944,255 @@ const styles = StyleSheet.create({
     borderColor: '#EFEBF8',
     padding: 12,
     marginBottom: 10,
+  },
+
+  // FULL CALENDAR MODAL STYLES
+  fullCalendarModalCard: {
+    width: '100%',
+    maxWidth: 395,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 26,
+    borderWidth: 1,
+    borderColor: '#EFEBF8',
+    padding: 20,
+    shadowColor: '#582CDB',
+    shadowOffset: { width: 0, height: 12 },
+    shadowOpacity: 0.18,
+    shadowRadius: 28,
+    elevation: 10,
+  },
+  calMonthBadge: {
+    backgroundColor: '#EDE9FE',
+    paddingVertical: 3,
+    paddingHorizontal: 8,
+    borderRadius: 8,
+  },
+  calMonthBadgeText: {
+    fontSize: 9.5,
+    fontWeight: '800',
+    color: '#6D28D9',
+    letterSpacing: 0.4,
+  },
+  calGridHeaderRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingHorizontal: 6,
+    marginBottom: 8,
+  },
+  calGridHeaderText: {
+    width: 40,
+    textAlign: 'center',
+    fontSize: 11.5,
+    fontWeight: '800',
+    color: '#64748B',
+  },
+  calGridBody: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+    backgroundColor: '#FAF8F5',
+    borderRadius: 18,
+    borderWidth: 1,
+    borderColor: '#EFEBF8',
+    padding: 8,
+    marginBottom: 12,
+  },
+  calCell: {
+    width: '13.5%',
+    aspectRatio: 1,
+    borderRadius: 10,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginVertical: 2,
+    position: 'relative',
+  },
+  calCellEmpty: {
+    width: '13.5%',
+    aspectRatio: 1,
+    marginVertical: 2,
+  },
+  calCellHasPosts: {
+    backgroundColor: '#EDE9FE',
+  },
+  calCellSelected: {
+    backgroundColor: '#582CDB',
+    shadowColor: '#582CDB',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.35,
+    shadowRadius: 6,
+  },
+  calCellText: {
+    fontSize: 12.5,
+    fontWeight: '700',
+    color: '#334155',
+  },
+  calCellTextHasPosts: {
+    color: '#582CDB',
+    fontWeight: '800',
+  },
+  calCellTextSelected: {
+    color: '#FFFFFF',
+    fontWeight: '900',
+  },
+  calCellDotsRow: {
+    flexDirection: 'row',
+    gap: 2,
+    position: 'absolute',
+    bottom: 3,
+  },
+  dotScheduled: {
+    width: 4,
+    height: 4,
+    borderRadius: 2,
+    backgroundColor: '#582CDB',
+  },
+  dotDraft: {
+    width: 4,
+    height: 4,
+    borderRadius: 2,
+    backgroundColor: '#F59E0B',
+  },
+  dotPublished: {
+    width: 4,
+    height: 4,
+    borderRadius: 2,
+    backgroundColor: '#22C55E',
+  },
+  dotToday: {
+    width: 4,
+    height: 4,
+    borderRadius: 2,
+    backgroundColor: '#EF4444',
+  },
+  calLegendRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    paddingVertical: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: '#F1F5F9',
+    marginBottom: 12,
+  },
+  calLegendItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+  },
+  calLegendText: {
+    fontSize: 11,
+    color: '#64748B',
+    fontWeight: '600',
+  },
+  selectedDayDetailCard: {
+    backgroundColor: '#FAF8F5',
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: '#EFEBF8',
+    padding: 12,
+    marginBottom: 14,
+  },
+  selectedDayHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  selectedDayTitle: {
+    fontSize: 13.5,
+    fontWeight: '800',
+    color: '#171420',
+  },
+  selectedDayCount: {
+    fontSize: 11.5,
+    fontWeight: '700',
+    color: '#582CDB',
+  },
+  calPostItemRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#FFFFFF',
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: '#EFEBF8',
+    padding: 8,
+    marginBottom: 6,
+  },
+  calPostIconBox: {
+    width: 26,
+    height: 26,
+    borderRadius: 6,
+    backgroundColor: '#FAF8F5',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 8,
+  },
+  calPostItemTitle: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#171420',
+  },
+  calPostItemSub: {
+    fontSize: 10,
+    color: '#64748B',
+  },
+  calPostStatusBadge: {
+    paddingVertical: 2,
+    paddingHorizontal: 6,
+    borderRadius: 4,
+  },
+  calPostStatusBadgeText: {
+    fontSize: 8.5,
+    fontWeight: '800',
+  },
+  emptyDayBox: {
+    alignItems: 'center',
+    paddingVertical: 8,
+  },
+  emptyDayText: {
+    fontSize: 12,
+    color: '#64748B',
+    marginBottom: 6,
+  },
+  planDayBtn: {
+    backgroundColor: '#EDE9FE',
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    borderRadius: 8,
+  },
+  planDayBtnText: {
+    fontSize: 11.5,
+    fontWeight: '800',
+    color: '#582CDB',
+  },
+  calModalBtnRow: {
+    flexDirection: 'row',
+    gap: 10,
+  },
+  calPlanMoreBtn: {
+    flex: 1,
+    height: 44,
+    borderRadius: 12,
+    backgroundColor: '#FAF8F5',
+    borderWidth: 1,
+    borderColor: '#EFEBF8',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  calPlanMoreBtnText: {
+    fontSize: 12.5,
+    fontWeight: '800',
+    color: '#582CDB',
+  },
+  calDoneBtn: {
+    flex: 1,
+    height: 44,
+    borderRadius: 12,
+    backgroundColor: '#582CDB',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  calDoneBtnText: {
+    fontSize: 13,
+    fontWeight: '800',
+    color: '#FFFFFF',
   },
 });
