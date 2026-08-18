@@ -1132,15 +1132,7 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
           </View>
 
           {/* 8. CARD 4: CREATOR MATCH VELOCITY */}
-          <Pressable
-            style={styles.dashboardCard}
-            onPress={() => {
-              if (Platform.OS !== 'web') {
-                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-              }
-              if (onNavigateTab) onNavigateTab('match');
-            }}
-          >
+          <View style={styles.dashboardCard}>
             <View style={styles.matchHeaderRow}>
               <Text style={styles.matchSectionTitle}>Suggested Match</Text>
               <View style={styles.growthActionPill}>
@@ -1196,7 +1188,7 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
                 <Text style={styles.connectMatchButtonText}>Connect &amp; View Creator Card ➔</Text>
               </LinearGradient>
             </Pressable>
-          </Pressable>
+          </View>
 
           {/* 9. CARD 6: UNLOCK JARVIS PRO */}
           <View style={styles.proCard}>
