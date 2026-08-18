@@ -704,20 +704,6 @@ export const OpportunityReadinessScreen: React.FC<OpportunityReadinessScreenProp
               </Text>
             </View>
           </View>
-
-          {/* PRIMARY BOTTOM ACTION BUTTON */}
-          <Pressable
-            style={({ pressed }) => [styles.primaryBottomBtn, pressed && styles.btnPressed]}
-            onPress={() => {
-              if (Platform.OS !== 'web') {
-                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-              }
-              triggerModalPop();
-              setShowProfileModal(true);
-            }}
-          >
-            <Text style={styles.primaryBottomBtnText}>Complete Profile</Text>
-          </Pressable>
         </ScrollView>
 
         {/* FLOATING LIQUID GLASS TAB BAR */}
