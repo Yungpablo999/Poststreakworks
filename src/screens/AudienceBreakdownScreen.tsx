@@ -196,6 +196,25 @@ const INITIAL_PLATFORMS: PlatformAccount[] = [
   },
 ];
 
+// Velocity Chart Data for 5 Weeks
+interface VelocityWeek {
+  id: string;
+  label: string;
+  fullDate: string;
+  gain: number;
+  displayGain: string;
+  barHeightRatio: number;
+  highlightText: string;
+}
+
+const VELOCITY_WEEKS: VelocityWeek[] = [
+  { id: 'w1', label: 'W1', fullDate: 'Jul 21 - Jul 27', gain: 340, displayGain: '+340', barHeightRatio: 0.35, highlightText: 'Baseline launch week' },
+  { id: 'w2', label: 'W2', fullDate: 'Jul 28 - Aug 03', gain: 520, displayGain: '+520', barHeightRatio: 0.50, highlightText: 'First viral reel surge' },
+  { id: 'w3', label: 'W3', fullDate: 'Aug 04 - Aug 10', gain: 680, displayGain: '+680', barHeightRatio: 0.62, highlightText: 'Educational tips trend' },
+  { id: 'w4', label: 'W4', fullDate: 'Aug 11 - Aug 17', gain: 890, displayGain: '+890', barHeightRatio: 0.76, highlightText: 'Cross-platform syndication' },
+  { id: 'w5', label: 'W5 (Now)', fullDate: 'Aug 18 - Current', gain: 1280, displayGain: '+1,280', barHeightRatio: 1.0, highlightText: '⚡ All-time record velocity!' },
+];
+
 interface AudienceBreakdownScreenProps {
   onBack: () => void;
   onLogout?: () => void;
@@ -227,6 +246,10 @@ export const AudienceBreakdownScreen: React.FC<AudienceBreakdownScreenProps> = (
   const [activeSegmentTab, setActiveSegmentTab] = useState<'overview' | 'posts'>('overview');
   const [activeTab, setActiveTab] = useState<TabType>('growth');
 
+  // Velocity State
+  const [velocityTimeframe, setVelocityTimeframe] = useState<'5w' | '7d' | '30d'>('5w');
+  const [selectedVelocityWeek, setSelectedVelocityWeek] = useState<VelocityWeek>(VELOCITY_WEEKS[4]);
+
   // Platform state list
   const [platformsList, setPlatformsList] = useState<PlatformAccount[]>(INITIAL_PLATFORMS);
   const [customHandleInput, setCustomHandleInput] = useState('');
@@ -246,9 +269,6 @@ export const AudienceBreakdownScreen: React.FC<AudienceBreakdownScreenProps> = (
   const flameFloatY = useRef(new Animated.Value(0)).current;
   const modalPopScale = useRef(new Animated.Value(0.9)).current;
   const toastFade = useRef(new Animated.Value(0)).current;
-  const barAnim1 = useRef(new Animated.Value(0)).current;
-  const barAnim2 = useRef(new Animated.Value(0)).current;
-  const barAnim3 = useRef(new Animated.Value(0)).current;
 
   // Calculate live dynamic total audience based on connected platforms
   const totalAudienceCount = platformsList
@@ -274,13 +294,6 @@ export const AudienceBreakdownScreen: React.FC<AudienceBreakdownScreenProps> = (
       ])
     );
     loopAnim.start();
-
-    // Bar progress animations
-    Animated.parallel([
-      Animated.timing(barAnim1, { toValue: 0.65, duration: 900, useNativeDriver: false }),
-      Animated.timing(barAnim2, { toValue: 0.25, duration: 900, useNativeDriver: false }),
-      Animated.timing(barAnim3, { toValue: 0.10, duration: 900, useNativeDriver: false }),
-    ]).start();
 
     return () => loopAnim.stop();
   }, []);
@@ -610,21 +623,224 @@ export const AudienceBreakdownScreen: React.FC<AudienceBreakdownScreenProps> = (
             </View>
           </View>
 
-          {/* CARD 2: WEEKLY VELOCITY CARD */}
+          {/* ========================================================================= */}
+          {/* CARD 2: ELEVATED BEAUTIFUL & INTERACTIVE WEEKLY VELOCITY CARD             */}
+          {/* ========================================================================= */}
           <View style={styles.velocityCard}>
-            <Text style={styles.cardHeaderLabel}>WEEKLY VELOCITY</Text>
-            <View style={styles.velocityMetricRow}>
-              <Text style={styles.velocityNumber}>+1,280</Text>
-              <Text style={styles.velocitySubtext}>NEW FOLLOWERS</Text>
+            {/* Top Bar with Live Indicator & Timeframe Toggle */}
+            <View style={styles.velocityCardTopRow}>
+              <View style={styles.velocityTitleGroup}>
+                <View style={styles.velocityPulseDot} />
+                <Text style={styles.cardHeaderLabel}>WEEKLY VELOCITY &amp; PACE</Text>
+              </View>
+
+              {/* Timeframe Chips */}
+              <View style={styles.timeframeChipsRow}>
+                <Pressable
+                  style={[
+                    styles.timeframeChip,
+                    velocityTimeframe === '5w' && styles.timeframeChipActive,
+                  ]}
+                  onPress={() => {
+                    if (Platform.OS !== 'web') {
+                      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                    }
+                    setVelocityTimeframe('5w');
+                  }}
+                >
+                  <Text
+                    style={[
+                      styles.timeframeChipText,
+                      velocityTimeframe === '5w' && styles.timeframeChipTextActive,
+                    ]}
+                  >
+                    5W
+                  </Text>
+                </Pressable>
+                <Pressable
+                  style={[
+                    styles.timeframeChip,
+                    velocityTimeframe === '7d' && styles.timeframeChipActive,
+                  ]}
+                  onPress={() => {
+                    if (Platform.OS !== 'web') {
+                      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                    }
+                    setVelocityTimeframe('7d');
+                    showToast('Viewing last 7 days velocity breakdown');
+                  }}
+                >
+                  <Text
+                    style={[
+                      styles.timeframeChipText,
+                      velocityTimeframe === '7d' && styles.timeframeChipTextActive,
+                    ]}
+                  >
+                    7D
+                  </Text>
+                </Pressable>
+                <Pressable
+                  style={[
+                    styles.timeframeChip,
+                    velocityTimeframe === '30d' && styles.timeframeChipActive,
+                  ]}
+                  onPress={() => {
+                    if (Platform.OS !== 'web') {
+                      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                    }
+                    setVelocityTimeframe('30d');
+                    showToast('Viewing last 30 days velocity breakdown');
+                  }}
+                >
+                  <Text
+                    style={[
+                      styles.timeframeChipText,
+                      velocityTimeframe === '30d' && styles.timeframeChipTextActive,
+                    ]}
+                  >
+                    30D
+                  </Text>
+                </Pressable>
+              </View>
             </View>
 
-            {/* 5 VELOCITY PILL BARS */}
-            <View style={styles.velocityPillsRow}>
-              <View style={[styles.velocityBar, { height: 20 }]} />
-              <View style={[styles.velocityBar, { height: 20 }]} />
-              <View style={[styles.velocityBar, { height: 20 }]} />
-              <View style={[styles.velocityBar, { height: 20 }]} />
-              <View style={[styles.velocityBar, styles.velocityBarActive, { height: 28 }]} />
+            {/* Big Metric Display */}
+            <View style={styles.velocityHeroBlock}>
+              <View style={styles.velocityMetricRow}>
+                <Text style={styles.velocityNumber}>{selectedVelocityWeek.displayGain}</Text>
+                <Text style={styles.velocitySubtext}>NEW FOLLOWERS</Text>
+              </View>
+
+              {/* Surge Badge */}
+              <View style={styles.velocitySurgeBadge}>
+                <Text style={styles.velocitySurgeText}>🔥 +43.8% vs previous cycle</Text>
+              </View>
+            </View>
+
+            {/* Interactive Selected Week Detail Pill */}
+            <View style={styles.velocityContextRow}>
+              <Text style={styles.velocityContextDate}>{selectedVelocityWeek.fullDate}</Text>
+              <Text style={styles.velocityContextHighlight}>
+                {selectedVelocityWeek.highlightText}
+              </Text>
+            </View>
+
+            {/* INTERACTIVE 5-BAR VELOCITY VISUALIZER */}
+            <View style={styles.velocityBarsVisualizerContainer}>
+              <View style={styles.velocityBarsGrid}>
+                {VELOCITY_WEEKS.map((w) => {
+                  const isSelected = selectedVelocityWeek.id === w.id;
+                  const isCurrentPeak = w.id === 'w5';
+                  const heightPx = Math.max(34, w.barHeightRatio * 96);
+
+                  return (
+                    <Pressable
+                      key={w.id}
+                      style={styles.velocityBarColumn}
+                      onPress={() => {
+                        if (Platform.OS !== 'web') {
+                          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                        }
+                        setSelectedVelocityWeek(w);
+                      }}
+                    >
+                      {/* Gain Number Above Bar */}
+                      <View
+                        style={[
+                          styles.barGainBadge,
+                          isSelected && styles.barGainBadgeActive,
+                        ]}
+                      >
+                        <Text
+                          style={[
+                            styles.barGainBadgeText,
+                            isSelected && styles.barGainBadgeTextActive,
+                          ]}
+                        >
+                          {w.displayGain}
+                        </Text>
+                      </View>
+
+                      {/* Bar Track & Fill */}
+                      <View style={styles.barPillTrack}>
+                        <View
+                          style={[
+                            styles.barPillFill,
+                            { height: heightPx },
+                            isSelected
+                              ? styles.barPillFillActive
+                              : styles.barPillFillInactive,
+                          ]}
+                        >
+                          {isCurrentPeak && (
+                            <LinearGradient
+                              colors={['#8B5CF6', '#582CDB', '#4318FF']}
+                              start={{ x: 0, y: 0 }}
+                              end={{ x: 0, y: 1 }}
+                              style={StyleSheet.absoluteFill}
+                            />
+                          )}
+                        </View>
+                      </View>
+
+                      {/* Week Label Below Bar */}
+                      <Text
+                        style={[
+                          styles.barWeekLabel,
+                          isSelected && styles.barWeekLabelActive,
+                        ]}
+                      >
+                        {w.label}
+                      </Text>
+                    </Pressable>
+                  );
+                })}
+              </View>
+            </View>
+
+            {/* GOAL TARGET TRACKER */}
+            <View style={styles.velocityGoalBox}>
+              <View style={styles.velocityGoalTopRow}>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                  <Text style={{ fontSize: 13 }}>🎯</Text>
+                  <Text style={styles.velocityGoalTitle}>Weekly Creator Goal</Text>
+                </View>
+                <Text style={styles.velocityGoalScore}>1,280 / 1,500 (85.3%)</Text>
+              </View>
+
+              {/* Progress Line */}
+              <View style={styles.velocityGoalTrack}>
+                <LinearGradient
+                  colors={['#582CDB', '#10B981']}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 0 }}
+                  style={[styles.velocityGoalFill, { width: '85.3%' }]}
+                />
+              </View>
+              <Text style={styles.velocityGoalSub}>
+                ⚡ Only 220 followers to reach your weekly streak record!
+              </Text>
+            </View>
+
+            {/* 3 QUICK VELOCITY INSIGHT PILLS */}
+            <View style={styles.velocityStatsGrid}>
+              <View style={styles.velocityMiniStatBox}>
+                <Text style={styles.velocityMiniLabel}>AVG DAILY GAIN</Text>
+                <Text style={styles.velocityMiniValue}>+183 / day</Text>
+                <Text style={styles.velocityMiniSub}>📈 +34% pace</Text>
+              </View>
+
+              <View style={styles.velocityMiniStatBox}>
+                <Text style={styles.velocityMiniLabel}>PEAK SURGE DAY</Text>
+                <Text style={styles.velocityMiniValue}>Thu (+340)</Text>
+                <Text style={styles.velocityMiniSub}>🎬 TikTok Post</Text>
+              </View>
+
+              <View style={styles.velocityMiniStatBox}>
+                <Text style={styles.velocityMiniLabel}>ENGAGEMENT</Text>
+                <Text style={styles.velocityMiniValue}>8.4%</Text>
+                <Text style={styles.velocityMiniSub}>🟢 Top 5%</Text>
+              </View>
             </View>
           </View>
 
@@ -1013,7 +1229,6 @@ export const AudienceBreakdownScreen: React.FC<AudienceBreakdownScreenProps> = (
                             {plat.handle} • ⚡ {plat.followers}
                           </Text>
                         </View>
-                        {/* USER SPECIFIED: REMOVE BUTTON (NOT MANAGE) */}
                         <Pressable
                           style={styles.removePlatformBtn}
                           onPress={() => handleRemoveSinglePlatform(plat.id)}
@@ -1491,46 +1706,275 @@ const styles = StyleSheet.create({
     letterSpacing: 0.5,
   },
 
-  // Card 2: Weekly Velocity Card
+  // =========================================================================
+  // CARD 2: ELEVATED BEAUTIFUL WEEKLY VELOCITY STYLES
+  // =========================================================================
   velocityCard: {
     backgroundColor: '#FFFFFF',
-    borderRadius: 20,
+    borderRadius: 24,
     borderWidth: 1,
     borderColor: '#EFEBF8',
     padding: 18,
     marginBottom: 20,
+    shadowColor: '#582CDB',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.07,
+    shadowRadius: 14,
+    elevation: 3,
+  },
+  velocityCardTopRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  velocityTitleGroup: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  velocityPulseDot: {
+    width: 7,
+    height: 7,
+    borderRadius: 3.5,
+    backgroundColor: '#10B981',
+  },
+  timeframeChipsRow: {
+    flexDirection: 'row',
+    backgroundColor: '#F1F5F9',
+    borderRadius: 10,
+    padding: 2,
+    gap: 2,
+  },
+  timeframeChip: {
+    paddingVertical: 3,
+    paddingHorizontal: 8,
+    borderRadius: 8,
+  },
+  timeframeChipActive: {
+    backgroundColor: '#FFFFFF',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.08,
+    shadowRadius: 2,
+    elevation: 1,
+  },
+  timeframeChipText: {
+    fontSize: 10,
+    fontWeight: '800',
+    color: '#64748B',
+  },
+  timeframeChipTextActive: {
+    color: '#582CDB',
+    fontWeight: '900',
+  },
+
+  // Velocity Hero Block
+  velocityHeroBlock: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    marginBottom: 4,
   },
   velocityMetricRow: {
     flexDirection: 'row',
     alignItems: 'baseline',
     gap: 6,
-    marginTop: 6,
-    marginBottom: 14,
   },
   velocityNumber: {
-    fontSize: 26,
+    fontSize: 28,
     fontWeight: '900',
     color: '#171420',
-    letterSpacing: -0.5,
+    letterSpacing: -0.6,
   },
   velocitySubtext: {
     fontSize: 11,
     fontWeight: '700',
     color: '#94A3B8',
   },
-  velocityPillsRow: {
+  velocitySurgeBadge: {
+    backgroundColor: '#ECFDF5',
+    paddingVertical: 4,
+    paddingHorizontal: 8,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#A7F3D0',
+  },
+  velocitySurgeText: {
+    fontSize: 10.5,
+    fontWeight: '900',
+    color: '#059669',
+  },
+
+  // Velocity Context Row
+  velocityContextRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  velocityContextDate: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: '#64748B',
+  },
+  velocityContextHighlight: {
+    fontSize: 11,
+    fontWeight: '800',
+    color: '#582CDB',
+  },
+
+  // Velocity 5-Bar Graph Visualizer
+  velocityBarsVisualizerContainer: {
+    backgroundColor: '#F8FAFC',
+    borderRadius: 18,
+    paddingVertical: 14,
+    paddingHorizontal: 12,
+    marginBottom: 16,
+    borderWidth: 1,
+    borderColor: '#EEF2F6',
+  },
+  velocityBarsGrid: {
     flexDirection: 'row',
     alignItems: 'flex-end',
     justifyContent: 'space-between',
+    height: 140,
+  },
+  velocityBarColumn: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'flex-end',
+    height: '100%',
+    paddingHorizontal: 3,
+  },
+  barGainBadge: {
+    backgroundColor: '#FFFFFF',
+    paddingVertical: 2,
+    paddingHorizontal: 5,
+    borderRadius: 6,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    marginBottom: 6,
+  },
+  barGainBadgeActive: {
+    backgroundColor: '#582CDB',
+    borderColor: '#582CDB',
+  },
+  barGainBadgeText: {
+    fontSize: 9,
+    fontWeight: '800',
+    color: '#64748B',
+  },
+  barGainBadgeTextActive: {
+    color: '#FFFFFF',
+    fontWeight: '900',
+  },
+  barPillTrack: {
+    width: '100%',
+    maxWidth: 24,
+    height: 96,
+    justifyContent: 'flex-end',
+    alignItems: 'center',
+  },
+  barPillFill: {
+    width: '100%',
+    borderRadius: 100,
+    overflow: 'hidden',
+  },
+  barPillFillActive: {
+    backgroundColor: '#582CDB',
+    shadowColor: '#582CDB',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.35,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  barPillFillInactive: {
+    backgroundColor: '#CBD5E1',
+  },
+  barWeekLabel: {
+    fontSize: 10,
+    fontWeight: '700',
+    color: '#94A3B8',
+    marginTop: 6,
+  },
+  barWeekLabelActive: {
+    color: '#582CDB',
+    fontWeight: '900',
+  },
+
+  // Goal Box
+  velocityGoalBox: {
+    backgroundColor: '#FAF5FF',
+    borderRadius: 16,
+    padding: 12,
+    borderWidth: 1,
+    borderColor: '#E9D5FF',
+    marginBottom: 14,
+  },
+  velocityGoalTopRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 6,
+  },
+  velocityGoalTitle: {
+    fontSize: 12,
+    fontWeight: '900',
+    color: '#582CDB',
+  },
+  velocityGoalScore: {
+    fontSize: 11.5,
+    fontWeight: '800',
+    color: '#171420',
+  },
+  velocityGoalTrack: {
+    height: 7,
+    borderRadius: 3.5,
+    backgroundColor: '#E2E8F0',
+    overflow: 'hidden',
+    marginBottom: 6,
+  },
+  velocityGoalFill: {
+    height: '100%',
+    borderRadius: 3.5,
+  },
+  velocityGoalSub: {
+    fontSize: 10.5,
+    fontWeight: '700',
+    color: '#6B21A8',
+  },
+
+  // 3 Mini Stat Pills
+  velocityStatsGrid: {
+    flexDirection: 'row',
     gap: 8,
   },
-  velocityBar: {
+  velocityMiniStatBox: {
     flex: 1,
-    borderRadius: 100,
-    backgroundColor: '#E2E8F0',
+    backgroundColor: '#F8FAFC',
+    borderRadius: 14,
+    padding: 10,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
   },
-  velocityBarActive: {
-    backgroundColor: '#582CDB',
+  velocityMiniLabel: {
+    fontSize: 8.5,
+    fontWeight: '900',
+    color: '#64748B',
+    letterSpacing: 0.4,
+    marginBottom: 2,
+  },
+  velocityMiniValue: {
+    fontSize: 13,
+    fontWeight: '900',
+    color: '#171420',
+  },
+  velocityMiniSub: {
+    fontSize: 9.5,
+    fontWeight: '700',
+    color: '#582CDB',
+    marginTop: 2,
   },
 
   // Section: Platform Split
