@@ -551,6 +551,14 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
     setScheduledTime(formattedStr);
     setPublishMode('schedule');
     setShowCalendarModal(false);
+
+    // Trigger celebration animation popup
+    setCelebrationTitle('Post Scheduled!');
+    setCelebrationSubtitle(`Your post has been locked in for ${formattedStr}.`);
+    setCelebrationSpeech('47-day streak protected! +50 XP added to your creator level.');
+    setTimeout(() => {
+      setShowCelebrationModal(true);
+    }, 250);
   };
 
   // Readiness Calculation
