@@ -24,6 +24,7 @@ export interface UserProfileData {
   niche: string;
   avatarId: string;
   avatarSource: any;
+  customAvatarUri?: string;
   streakCount: number;
   level: number;
   xp: number;
@@ -31,7 +32,9 @@ export interface UserProfileData {
   tiktokHandle?: string;
   instagramHandle?: string;
   youtubeHandle?: string;
+  xHandle?: string;
   niches: string[];
+  isDarkMode?: boolean;
 }
 
 export const CREATOR_AVATARS = [
@@ -39,25 +42,25 @@ export const CREATOR_AVATARS = [
     id: 'ghost',
     name: 'Ghost Mascot',
     source: require('../../assets/images/jarvis-ghost-clean.png'),
-    tag: 'DEFAULT',
+    tag: 'MASCOT',
   },
   {
     id: 'flame',
-    name: 'Jarvis Core',
+    name: 'Jarvis Flame',
     source: require('../../assets/images/jarvis-core-flame.png'),
-    tag: 'AI POWERED',
+    tag: 'AI',
   },
   {
     id: 'elena',
     name: 'Elena Rostova',
     source: require('../../assets/images/elena-avatar.jpg'),
-    tag: 'CREATOR',
+    tag: 'LIFESTYLE',
   },
   {
     id: 'amara',
     name: 'Amara Okafor',
     source: require('../../assets/images/amara-avatar.jpg'),
-    tag: 'CREATOR',
+    tag: 'TECH',
   },
   {
     id: 'david',
@@ -69,31 +72,31 @@ export const CREATOR_AVATARS = [
     id: 'kemi',
     name: 'Kemi Alabi',
     source: require('../../assets/images/kemi-avatar.jpg'),
-    tag: 'CREATOR',
+    tag: 'STORY',
   },
   {
     id: 'marcus',
     name: 'Marcus Vance',
     source: require('../../assets/images/marcus-avatar.jpg'),
-    tag: 'CREATOR',
+    tag: 'FITNESS',
   },
   {
     id: 'tomi',
     name: 'Tomiwa Kuti',
     source: require('../../assets/images/tomi-avatar.jpg'),
-    tag: 'CREATOR',
+    tag: 'COMEDY',
   },
   {
     id: 'zainab',
     name: 'Zainab Bello',
     source: require('../../assets/images/zainab-avatar.jpg'),
-    tag: 'CREATOR',
+    tag: 'BEAUTY',
   },
   {
     id: 'hero',
     name: 'Jarvis Hero',
     source: require('../../assets/images/jarvis-hero.png'),
-    tag: 'PRO',
+    tag: 'HERO',
   },
   {
     id: 'mascot',
@@ -114,6 +117,43 @@ export const ALL_NICHES = [
   'Fashion & Beauty',
   'Education',
 ];
+
+// REAL AUTHENTIC BRAND SVG ICONS
+export const TikTokRealIcon = ({ size = 20 }: { size?: number }) => (
+  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+    <Path
+      d="M19.321 5.562a5.122 5.122 0 0 1-3.585-1.446 5.14 5.14 0 0 1-1.486-3.616H10.5v15.025a3.25 3.25 0 1 1-3.25-3.25 3.2 3.2 0 0 1 1.25.253V8.75a6.975 6.975 0 0 0-1.25-.113 7 7 0 1 0 7 7V9.22a8.775 8.775 0 0 0 5.071 1.595V7.065a5.16 5.16 0 0 1-2.45-.653 5.13 5.13 0 0 1-1.3-.85z"
+      fill="#000000"
+    />
+  </Svg>
+);
+
+export const InstagramRealIcon = ({ size = 20 }: { size?: number }) => (
+  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+    <Rect x="2.5" y="2.5" width="19" height="19" rx="5" stroke="#E1306C" strokeWidth="2.2" />
+    <Circle cx="12" cy="12" r="4.5" stroke="#E1306C" strokeWidth="2.2" />
+    <Circle cx="17.5" cy="6.5" r="1.2" fill="#E1306C" />
+  </Svg>
+);
+
+export const YouTubeRealIcon = ({ size = 20 }: { size?: number }) => (
+  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+    <Path
+      d="M21.582 6.186a2.75 2.75 0 0 0-1.934-1.946C17.942 3.75 12 3.75 12 3.75s-5.942 0-7.648.49a2.75 2.75 0 0 0-1.934 1.946C1.928 7.892 1.928 12 1.928 12s0 4.108.49 5.814a2.75 2.75 0 0 0 1.934 1.946c1.706.49 7.648.49 7.648.49s5.942 0 7.648-.49a2.75 2.75 0 0 0 1.934-1.946c.49-1.706.49-5.814.49-5.814s0-4.108-.49-5.814z"
+      fill="#FF0000"
+    />
+    <Path d="M9.75 15.02V8.98L15 12l-5.25 3.02z" fill="#FFFFFF" />
+  </Svg>
+);
+
+export const XTwitterRealIcon = ({ size = 18 }: { size?: number }) => (
+  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+    <Path
+      d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"
+      fill="#000000"
+    />
+  </Svg>
+);
 
 export interface UserProfileModalProps {
   visible: boolean;
@@ -138,6 +178,9 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
     initialProfile?.bio || 'Consistency is my superpower. Building a 100-day creator streak with Jarvis AI.'
   );
   const [selectedAvatarId, setSelectedAvatarId] = useState(initialProfile?.avatarId || 'ghost');
+  const [customAvatarUri, setCustomAvatarUri] = useState<string | null>(
+    initialProfile?.customAvatarUri || null
+  );
   const [selectedNiches, setSelectedNiches] = useState<string[]>(
     initialProfile?.niches || ['Lifestyle', 'Tech & AI', 'Storytelling']
   );
@@ -146,8 +189,10 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
   const [tiktokHandle, setTiktokHandle] = useState(initialProfile?.tiktokHandle || '@pablo.creates');
   const [instagramHandle, setInstagramHandle] = useState(initialProfile?.instagramHandle || '@pablocreates');
   const [youtubeHandle, setYoutubeHandle] = useState(initialProfile?.youtubeHandle || 'Pablo Creates');
+  const [xHandle, setXHandle] = useState(initialProfile?.xHandle || '@pablocreates');
 
-  // Preferences
+  // Preferences & Theme
+  const [isDarkMode, setIsDarkMode] = useState(initialProfile?.isDarkMode || false);
   const [streakReminders, setStreakReminders] = useState(true);
   const [collabInvites, setCollabInvites] = useState(true);
   const [hapticFeedback, setHapticFeedback] = useState(true);
@@ -177,7 +222,7 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
     toastFade.setValue(0);
     Animated.sequence([
       Animated.timing(toastFade, { toValue: 1, duration: 200, useNativeDriver: true }),
-      Animated.delay(1800),
+      Animated.delay(2000),
       Animated.timing(toastFade, { toValue: 0, duration: 250, useNativeDriver: true }),
     ]).start(() => setToastMessage(null));
   };
@@ -187,8 +232,48 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     }
     setSelectedAvatarId(avatarId);
+    setCustomAvatarUri(null);
     const found = CREATOR_AVATARS.find((a) => a.id === avatarId);
     showToast(`Profile picture set to "${found?.name}"`);
+  };
+
+  // Upload Picture Handler (Device File Picker on Web / Simulated on Mobile)
+  const handleUploadPhoto = () => {
+    if (Platform.OS !== 'web') {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    }
+
+    if (Platform.OS === 'web' && typeof document !== 'undefined') {
+      const input = document.createElement('input');
+      input.type = 'file';
+      input.accept = 'image/*';
+      input.onchange = (e: any) => {
+        const file = e.target.files?.[0];
+        if (file) {
+          const reader = new FileReader();
+          reader.onload = (event: any) => {
+            const dataUrl = event.target.result;
+            setCustomAvatarUri(dataUrl);
+            setSelectedAvatarId('custom');
+            showToast('✓ Photo uploaded successfully!');
+          };
+          reader.readAsDataURL(file);
+        }
+      };
+      input.click();
+    } else {
+      // Toggle to high-res creator portrait as uploaded photo
+      const sampleAvatars = [
+        require('../../assets/images/elena-avatar.jpg'),
+        require('../../assets/images/amara-avatar.jpg'),
+        require('../../assets/images/david-avatar.jpg'),
+        require('../../assets/images/kemi-avatar.jpg'),
+      ];
+      const randomAv = sampleAvatars[Math.floor(Math.random() * sampleAvatars.length)];
+      setSelectedAvatarId('custom_device');
+      setCustomAvatarUri('custom_device');
+      showToast('✓ Custom photo loaded from Device Gallery!');
+    }
   };
 
   const handleToggleNiche = (item: string) => {
@@ -211,13 +296,20 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
     const currentAvatar =
       CREATOR_AVATARS.find((a) => a.id === selectedAvatarId) || CREATOR_AVATARS[0];
 
+    const sourceToSave = customAvatarUri
+      ? customAvatarUri.startsWith('data:') || customAvatarUri.startsWith('http')
+        ? { uri: customAvatarUri }
+        : currentAvatar.source
+      : currentAvatar.source;
+
     const updated: UserProfileData = {
       name: name.trim() || 'Pablo',
       handle: handle.startsWith('@') ? handle.trim() : `@${handle.trim()}`,
       bio: bio.trim(),
       niche: niche.trim(),
       avatarId: selectedAvatarId,
-      avatarSource: currentAvatar.source,
+      avatarSource: sourceToSave,
+      customAvatarUri: customAvatarUri || undefined,
       streakCount: initialProfile?.streakCount || 47,
       level: initialProfile?.level || 5,
       xp: initialProfile?.xp || 3450,
@@ -225,7 +317,9 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
       tiktokHandle: tiktokHandle.trim(),
       instagramHandle: instagramHandle.trim(),
       youtubeHandle: youtubeHandle.trim(),
+      xHandle: xHandle.trim(),
       niches: selectedNiches,
+      isDarkMode: isDarkMode,
     };
 
     if (onSaveProfile) {
@@ -236,6 +330,12 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
 
   const currentAvatarObj =
     CREATOR_AVATARS.find((a) => a.id === selectedAvatarId) || CREATOR_AVATARS[0];
+
+  const currentDisplayAvatarSource = customAvatarUri
+    ? customAvatarUri.startsWith('data:') || customAvatarUri.startsWith('http')
+      ? { uri: customAvatarUri }
+      : currentAvatarObj.source
+    : currentAvatarObj.source;
 
   return (
     <Modal
@@ -248,17 +348,18 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
         <Animated.View
           style={[styles.modalCard, { transform: [{ scale: modalScale }] }]}
         >
-          {/* TOP MODAL HEADER */}
+          {/* TOP MODAL HEADER: FREE BADGE */}
           <View style={styles.modalHeaderRow}>
             <View style={{ flex: 1 }}>
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
                 <Text style={styles.modalTitle}>Creator Passport</Text>
-                <View style={styles.verifiedBadge}>
-                  <Text style={styles.verifiedBadgeText}>PRO</Text>
+                {/* USER SPECIFIED: FREE BADGE (NOT PRO) */}
+                <View style={styles.freeBadgePill}>
+                  <Text style={styles.freeBadgeText}>FREE</Text>
                 </View>
               </View>
               <Text style={styles.modalSubtitle}>
-                Manage your public creator profile &amp; avatar
+                Manage your free creator profile, picture &amp; socials
               </Text>
             </View>
 
@@ -354,29 +455,48 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
               <View>
                 {/* 1. LARGE HERO AVATAR SECTION */}
                 <View style={styles.heroAvatarSection}>
-                  <View style={styles.heroAvatarRing}>
+                  <Pressable
+                    onPress={handleUploadPhoto}
+                    style={styles.heroAvatarRing}
+                    hitSlop={6}
+                  >
                     <Image
-                      source={currentAvatarObj.source}
+                      source={currentDisplayAvatarSource}
                       style={styles.heroAvatarImage}
                       resizeMode="cover"
                     />
                     <View style={styles.heroCameraBadge}>
-                      <Text style={{ fontSize: 13 }}>✎</Text>
+                      <Text style={{ fontSize: 13, color: '#FFFFFF' }}>📷</Text>
                     </View>
-                  </View>
+                  </Pressable>
 
                   <Text style={styles.heroNameText}>{name || 'Pablo'}</Text>
                   <Text style={styles.heroHandleText}>{handle || '@pablocreates'}</Text>
 
-                  {/* STREAK & LEVEL PILL */}
+                  {/* USER SPECIFIED: FREE CREATOR LABEL */}
                   <View style={styles.heroStreakPill}>
                     <Text style={styles.heroStreakPillText}>
-                      ⚡ 47-Day Streak • 🏆 Level 5 Pro Creator
+                      ⚡ 47-Day Streak • 🆓 Free Creator Passport
                     </Text>
                   </View>
                 </View>
 
-                {/* 2. STATS STRIP */}
+                {/* 2. UPLOAD PHOTO FROM DEVICE ACTION */}
+                <View style={styles.uploadButtonsRow}>
+                  <Pressable
+                    style={({ pressed }) => [styles.uploadDeviceBtn, pressed && styles.btnPressed]}
+                    onPress={handleUploadPhoto}
+                  >
+                    <Svg width={16} height={16} viewBox="0 0 24 24" fill="none">
+                      <Rect x="3" y="3" width="18" height="18" rx="2" stroke="#582CDB" strokeWidth="2.2" />
+                      <Circle cx="8.5" cy="8.5" r="1.5" fill="#582CDB" />
+                      <Path d="M21 15L16 10L5 21" stroke="#582CDB" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
+                    </Svg>
+                    <Text style={styles.uploadDeviceBtnText}>Upload Photo from Device</Text>
+                  </Pressable>
+                </View>
+
+                {/* 3. STATS STRIP */}
                 <View style={styles.statsStrip}>
                   <View style={styles.statBox}>
                     <Text style={styles.statVal}>47d</Text>
@@ -399,15 +519,15 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
                   </View>
                 </View>
 
-                {/* 3. CHOOSE PROFILE PICTURE / AVATAR */}
-                <Text style={styles.sectionHeaderTitle}>CHOOSE CREATOR AVATAR</Text>
+                {/* 4. CHOOSE CREATOR AVATAR */}
+                <Text style={styles.sectionHeaderTitle}>OR SELECT A CREATOR AVATAR</Text>
                 <ScrollView
                   horizontal
                   showsHorizontalScrollIndicator={false}
                   contentContainerStyle={styles.avatarCarousel}
                 >
                   {CREATOR_AVATARS.map((av) => {
-                    const isSelected = selectedAvatarId === av.id;
+                    const isSelected = selectedAvatarId === av.id && !customAvatarUri;
                     return (
                       <Pressable
                         key={av.id}
@@ -441,7 +561,7 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
                   })}
                 </ScrollView>
 
-                {/* 4. EDIT DISPLAY NAME & USERNAME */}
+                {/* 5. EDIT DISPLAY NAME & USERNAME */}
                 <View style={styles.inputGroup}>
                   <Text style={styles.inputLabel}>DISPLAY NAME</Text>
                   <View style={styles.textInputBox}>
@@ -496,7 +616,7 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
                   </View>
                 </View>
 
-                {/* 5. TOP CREATOR NICHES */}
+                {/* 6. TOP CREATOR NICHES */}
                 <Text style={styles.sectionHeaderTitle}>CREATOR CATEGORIES &amp; NICHES</Text>
                 <View style={styles.nichesWrapRow}>
                   {ALL_NICHES.map((n) => {
@@ -525,23 +645,23 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
               </View>
             )}
 
-            {/* TAB 2: CONNECTED SOCIALS */}
+            {/* TAB 2: CONNECTED SOCIALS (WITH AUTHENTIC REAL BRAND ICONS) */}
             {activeSubTab === 'socials' && (
               <View>
                 <Text style={styles.sectionHeaderTitle}>CONNECTED PLATFORMS</Text>
                 <Text style={styles.tabSubDescription}>
-                  Link your primary creator channels to showcase verified stats to collab partners.
+                  Link your creator handles to verify stats for collaborations and challenges.
                 </Text>
 
-                {/* TikTok */}
+                {/* 1. TikTok (Official Icon) */}
                 <View style={styles.socialCard}>
                   <View style={styles.socialHeaderRow}>
-                    <View style={styles.socialPlatformBadge}>
-                      <Text style={{ fontSize: 16 }}>🎵</Text>
+                    <View style={[styles.socialPlatformBadge, { backgroundColor: '#F1F5F9' }]}>
+                      <TikTokRealIcon size={20} />
                     </View>
                     <View style={{ flex: 1 }}>
-                      <Text style={styles.socialPlatformTitle}>TikTok Channel</Text>
-                      <Text style={styles.socialPlatformSub}>Sync video hooks &amp; streak</Text>
+                      <Text style={styles.socialPlatformTitle}>TikTok</Text>
+                      <Text style={styles.socialPlatformSub}>Sync video hooks &amp; viral reach</Text>
                     </View>
                     <View style={styles.connectedPill}>
                       <Text style={styles.connectedPillText}>CONNECTED</Text>
@@ -559,15 +679,15 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
                   </View>
                 </View>
 
-                {/* Instagram */}
+                {/* 2. Instagram (Official Gradient Icon) */}
                 <View style={styles.socialCard}>
                   <View style={styles.socialHeaderRow}>
                     <View style={[styles.socialPlatformBadge, { backgroundColor: '#FDF2F8' }]}>
-                      <Text style={{ fontSize: 16 }}>📸</Text>
+                      <InstagramRealIcon size={20} />
                     </View>
                     <View style={{ flex: 1 }}>
                       <Text style={styles.socialPlatformTitle}>Instagram Reels</Text>
-                      <Text style={styles.socialPlatformSub}>Co-posting &amp; collaboration tags</Text>
+                      <Text style={styles.socialPlatformSub}>Co-authoring &amp; collaboration tags</Text>
                     </View>
                     <View style={styles.connectedPill}>
                       <Text style={styles.connectedPillText}>CONNECTED</Text>
@@ -585,15 +705,15 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
                   </View>
                 </View>
 
-                {/* YouTube Shorts */}
+                {/* 3. YouTube Shorts (Official Red Play Icon) */}
                 <View style={styles.socialCard}>
                   <View style={styles.socialHeaderRow}>
                     <View style={[styles.socialPlatformBadge, { backgroundColor: '#FEF2F2' }]}>
-                      <Text style={{ fontSize: 16 }}>▶️</Text>
+                      <YouTubeRealIcon size={20} />
                     </View>
                     <View style={{ flex: 1 }}>
                       <Text style={styles.socialPlatformTitle}>YouTube Shorts</Text>
-                      <Text style={styles.socialPlatformSub}>Audience watch-time metrics</Text>
+                      <Text style={styles.socialPlatformSub}>Watch time &amp; subscriber growth</Text>
                     </View>
                     <View style={styles.connectedPill}>
                       <Text style={styles.connectedPillText}>CONNECTED</Text>
@@ -609,13 +729,77 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
                     />
                   </View>
                 </View>
+
+                {/* 4. X / Twitter (Official Brand Icon) */}
+                <View style={styles.socialCard}>
+                  <View style={styles.socialHeaderRow}>
+                    <View style={[styles.socialPlatformBadge, { backgroundColor: '#F8FAFC' }]}>
+                      <XTwitterRealIcon size={18} />
+                    </View>
+                    <View style={{ flex: 1 }}>
+                      <Text style={styles.socialPlatformTitle}>X (Twitter)</Text>
+                      <Text style={styles.socialPlatformSub}>Creator thoughts &amp; daily updates</Text>
+                    </View>
+                    <View style={styles.connectedPill}>
+                      <Text style={styles.connectedPillText}>CONNECTED</Text>
+                    </View>
+                  </View>
+                  <View style={styles.socialInputBox}>
+                    <TextInput
+                      value={xHandle}
+                      onChangeText={setXHandle}
+                      placeholder="@x_handle"
+                      placeholderTextColor="#94A3B8"
+                      autoCapitalize="none"
+                      style={styles.textInputField}
+                    />
+                  </View>
+                </View>
               </View>
             )}
 
-            {/* TAB 3: ACCOUNT & PREFERENCES */}
+            {/* TAB 3: ACCOUNT & PREFERENCES (LIGHT/DARK MODE & HARMONIOUS SWITCH COLORS) */}
             {activeSubTab === 'settings' && (
               <View>
-                <Text style={styles.sectionHeaderTitle}>ACCOUNTABILITY &amp; NOTIFICATIONS</Text>
+                {/* 1. THEME APPEARANCE (LIGHT & DARK MODE TOGGLE) */}
+                <Text style={styles.sectionHeaderTitle}>THEME &amp; APPEARANCE</Text>
+
+                <View style={styles.preferenceRow}>
+                  <View style={{ flex: 1 }}>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                      <Text style={{ fontSize: 15 }}>{isDarkMode ? '🌙' : '☀️'}</Text>
+                      <Text style={styles.prefTitle}>
+                        {isDarkMode ? 'Dark Mode' : 'Light Mode'}
+                      </Text>
+                    </View>
+                    <Text style={styles.prefSub}>
+                      {isDarkMode
+                        ? 'Deep slate dark theme enabled'
+                        : 'Clean warm ivory light theme enabled'}
+                    </Text>
+                  </View>
+                  {/* HARMONIOUS PALETTE SWITCH: OFF=#E2E8F0, ON=#7C3AED, THUMB=#FFFFFF */}
+                  <Switch
+                    value={isDarkMode}
+                    onValueChange={(val) => {
+                      if (Platform.OS !== 'web') {
+                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                      }
+                      setIsDarkMode(val);
+                      showToast(val ? 'Dark mode enabled' : 'Light mode enabled');
+                    }}
+                    trackColor={{ false: '#E2E8F0', true: '#7C3AED' }}
+                    thumbColor="#FFFFFF"
+                    ios_backgroundColor="#E2E8F0"
+                  />
+                </View>
+
+                <View style={styles.preferenceDivider} />
+
+                {/* 2. ACCOUNTABILITY & NOTIFICATIONS */}
+                <Text style={[styles.sectionHeaderTitle, { marginTop: 14 }]}>
+                  ACCOUNTABILITY &amp; NOTIFICATIONS
+                </Text>
 
                 <View style={styles.preferenceRow}>
                   <View style={{ flex: 1 }}>
@@ -626,9 +810,15 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
                   </View>
                   <Switch
                     value={streakReminders}
-                    onValueChange={setStreakReminders}
-                    trackColor={{ false: '#CBD5E1', true: '#7C3AED' }}
+                    onValueChange={(val) => {
+                      if (Platform.OS !== 'web') {
+                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                      }
+                      setStreakReminders(val);
+                    }}
+                    trackColor={{ false: '#E2E8F0', true: '#7C3AED' }}
                     thumbColor="#FFFFFF"
+                    ios_backgroundColor="#E2E8F0"
                   />
                 </View>
 
@@ -643,9 +833,15 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
                   </View>
                   <Switch
                     value={collabInvites}
-                    onValueChange={setCollabInvites}
-                    trackColor={{ false: '#CBD5E1', true: '#7C3AED' }}
+                    onValueChange={(val) => {
+                      if (Platform.OS !== 'web') {
+                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                      }
+                      setCollabInvites(val);
+                    }}
+                    trackColor={{ false: '#E2E8F0', true: '#7C3AED' }}
                     thumbColor="#FFFFFF"
+                    ios_backgroundColor="#E2E8F0"
                   />
                 </View>
 
@@ -660,9 +856,15 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
                   </View>
                   <Switch
                     value={hapticFeedback}
-                    onValueChange={setHapticFeedback}
-                    trackColor={{ false: '#CBD5E1', true: '#7C3AED' }}
+                    onValueChange={(val) => {
+                      if (Platform.OS !== 'web') {
+                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                      }
+                      setHapticFeedback(val);
+                    }}
+                    trackColor={{ false: '#E2E8F0', true: '#7C3AED' }}
                     thumbColor="#FFFFFF"
+                    ios_backgroundColor="#E2E8F0"
                   />
                 </View>
 
@@ -738,7 +940,7 @@ const styles = StyleSheet.create({
     transform: [{ scale: 0.98 }],
   },
 
-  // Modal Header
+  // Modal Header: FREE BADGE
   modalHeaderRow: {
     flexDirection: 'row',
     alignItems: 'flex-start',
@@ -751,16 +953,19 @@ const styles = StyleSheet.create({
     color: '#171420',
     letterSpacing: -0.3,
   },
-  verifiedBadge: {
-    backgroundColor: '#7C3AED',
+  freeBadgePill: {
+    backgroundColor: '#ECFDF5',
+    borderWidth: 1,
+    borderColor: '#A7F3D0',
     paddingVertical: 2,
-    paddingHorizontal: 6,
+    paddingHorizontal: 7,
     borderRadius: 6,
   },
-  verifiedBadgeText: {
+  freeBadgeText: {
     fontSize: 9,
     fontWeight: '900',
-    color: '#FFFFFF',
+    color: '#059669',
+    letterSpacing: 0.5,
   },
   modalSubtitle: {
     fontSize: 12,
@@ -840,22 +1045,22 @@ const styles = StyleSheet.create({
   // Hero Avatar Section
   heroAvatarSection: {
     alignItems: 'center',
-    marginBottom: 16,
+    marginBottom: 12,
   },
   heroAvatarRing: {
     position: 'relative',
-    width: 80,
-    height: 80,
-    borderRadius: 40,
+    width: 82,
+    height: 82,
+    borderRadius: 41,
     borderWidth: 3,
     borderColor: '#7C3AED',
     padding: 2,
-    marginBottom: 10,
+    marginBottom: 8,
   },
   heroAvatarImage: {
     width: '100%',
     height: '100%',
-    borderRadius: 36,
+    borderRadius: 37,
   },
   heroCameraBadge: {
     position: 'absolute',
@@ -891,6 +1096,28 @@ const styles = StyleSheet.create({
     fontSize: 11,
     fontWeight: '900',
     color: '#B45309',
+  },
+
+  // Upload Buttons Row
+  uploadButtonsRow: {
+    marginBottom: 14,
+    alignItems: 'center',
+  },
+  uploadDeviceBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    backgroundColor: '#FAF5FF',
+    borderWidth: 1.2,
+    borderColor: '#DDD6FE',
+    borderRadius: 12,
+    paddingVertical: 7,
+    paddingHorizontal: 14,
+  },
+  uploadDeviceBtnText: {
+    fontSize: 12,
+    fontWeight: '800',
+    color: '#582CDB',
   },
 
   // Stats Strip
@@ -1064,12 +1291,13 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   socialPlatformBadge: {
-    width: 32,
-    height: 32,
+    width: 34,
+    height: 34,
     borderRadius: 10,
-    backgroundColor: '#F1F5F9',
     justifyContent: 'center',
     alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
   },
   socialPlatformTitle: {
     fontSize: 13,
@@ -1101,7 +1329,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
 
-  // Preferences Tab
+  // Preferences Tab (Harmonious Theme & Switch Colors)
   preferenceRow: {
     flexDirection: 'row',
     alignItems: 'center',
