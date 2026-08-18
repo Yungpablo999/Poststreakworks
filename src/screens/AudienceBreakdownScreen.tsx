@@ -2344,36 +2344,36 @@ const styles = StyleSheet.create({
     backgroundColor: '#F1F5F9',
   },
 
-  // Card 7: Locked in Pro (Soft Lavender & Royal Violet)
+  // Card 7: Locked in Pro (Signature Gold Luxury Theme)
   lockedProCard: {
     backgroundColor: '#FFFFFF',
     borderRadius: 24,
     borderWidth: 1,
-    borderColor: '#EDE9FE',
+    borderColor: '#FEF08A',
     padding: 18,
     marginBottom: 16,
-    shadowColor: '#582CDB',
+    shadowColor: '#FDE047',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.06,
-    shadowRadius: 12,
-    elevation: 2,
+    shadowOpacity: 0.15,
+    shadowRadius: 14,
+    elevation: 3,
   },
   lockedPillRow: {
     alignItems: 'center',
     marginBottom: 10,
   },
   lockedPill: {
-    backgroundColor: '#EDE9FE',
+    backgroundColor: '#FEF9C3',
     paddingVertical: 4,
     paddingHorizontal: 12,
     borderRadius: 100,
     borderWidth: 1,
-    borderColor: '#DDD6FE',
+    borderColor: '#FDE047',
   },
   lockedPillText: {
     fontSize: 9.5,
     fontWeight: '900',
-    color: '#582CDB',
+    color: '#A16207',
     letterSpacing: 0.5,
   },
   lockedTitle: {
