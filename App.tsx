@@ -31,6 +31,7 @@ import { PostPerformanceScreen } from './src/screens/PostPerformanceScreen';
 import { PlatformGrowthScreen } from './src/screens/PlatformGrowthScreen';
 import { EarningsScreen } from './src/screens/EarningsScreen';
 import { OpportunityReadinessScreen } from './src/screens/OpportunityReadinessScreen';
+import { CreatorPassportScreen } from './src/screens/CreatorPassportScreen';
 import { GhostLoadingScreen } from './src/components/GhostLoadingScreen';
 import { TabType } from './src/components/FloatingTabBar';
 import { UserProfileData } from './src/components/UserProfileModal';
@@ -63,7 +64,8 @@ type Screen =
   | 'post-performance'
   | 'platform-growth'
   | 'earnings'
-  | 'opportunity-readiness';
+  | 'opportunity-readiness'
+  | 'creator-passport';
 
 export default function App() {
   const [showSplash, setShowSplash] = useState(true);
@@ -728,6 +730,35 @@ export default function App() {
         
         
         
+        
+        {currentScreen === 'creator-passport' && (
+          <CreatorPassportScreen
+            onBack={() => navigateTo(previousScreen ? previousScreen : 'earnings')}
+            onLogout={handleLogout}
+            onOpenMessages={() => navigateTo('messages')}
+            onOpenSchedule={() => navigateTo('schedule')}
+            onOpenJarvisPro={() => navigateTo('jarvis-pro')}
+            onOpenQuests={() => navigateTo('quests')}
+            onOpenReadiness={() => navigateTo('opportunity-readiness')}
+            onOpenPlatforms={() => navigateTo('platforms')}
+            onNavigateTab={(tab: TabType) => {
+              if (tab === 'home') {
+                navigateTo('dashboard');
+              } else if (tab === 'create') {
+                navigateTo('create');
+              } else if (tab === 'match') {
+                navigateTo('match');
+              } else if (tab === 'quests') {
+                navigateTo('quests');
+              } else if (tab === 'growth') {
+                navigateTo('growth');
+              }
+            }}
+            userProfile={userProfile}
+            onSaveProfile={(updated) => setUserProfile(updated)}
+          />
+        )}
+
         {currentScreen === 'opportunity-readiness' && (
           <OpportunityReadinessScreen
             onBack={() => navigateTo(previousScreen ? previousScreen : 'earnings')}
@@ -736,6 +767,7 @@ export default function App() {
             onOpenSchedule={() => navigateTo('schedule')}
             onOpenJarvisPro={() => navigateTo('jarvis-pro')}
             onOpenPlatforms={() => navigateTo('platforms')}
+            onOpenCreatorPassport={() => navigateTo('creator-passport')}
             onNavigateTab={(tab: TabType) => {
               if (tab === 'home') {
                 navigateTo('dashboard');
@@ -764,6 +796,7 @@ export default function App() {
             onOpenQuests={() => navigateTo('quests')}
             onOpenPlatforms={() => navigateTo('platforms')}
             onOpenReadiness={() => navigateTo('opportunity-readiness')}
+            onOpenCreatorPassport={() => navigateTo('creator-passport')}
             onNavigateTab={(tab: TabType) => {
               if (tab === 'home') {
                 navigateTo('dashboard');

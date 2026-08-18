@@ -194,6 +194,7 @@ interface OpportunityReadinessScreenProps {
   onOpenMessages?: () => void;
   onOpenSchedule?: () => void;
   onOpenPlatforms?: () => void;
+  onOpenCreatorPassport?: () => void;
   userProfile?: UserProfileData;
   onSaveProfile?: (updated: UserProfileData) => void;
   onLogout?: () => void;
@@ -206,6 +207,7 @@ export const OpportunityReadinessScreen: React.FC<OpportunityReadinessScreenProp
   onOpenMessages,
   onOpenSchedule,
   onOpenPlatforms,
+  onOpenCreatorPassport,
   userProfile,
   onSaveProfile,
   onLogout,
@@ -577,8 +579,15 @@ export const OpportunityReadinessScreen: React.FC<OpportunityReadinessScreenProp
             <Pressable
               style={styles.checklistCard}
               onPress={() => {
-                triggerModalPop();
-                setShowProfileModal(true);
+                if (Platform.OS !== 'web') {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                }
+                if (onOpenCreatorPassport) {
+                  onOpenCreatorPassport();
+                } else {
+                  triggerModalPop();
+                  setShowProfileModal(true);
+                }
               }}
             >
               <View style={styles.checklistLeft}>
