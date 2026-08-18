@@ -53,6 +53,11 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onFinish = () => {} 
   const screenFade = useRef(new Animated.Value(1)).current;
 
   useEffect(() => {
+    // Safety auto-dismiss on web or slow devices
+    const fallbackTimer = setTimeout(() => {
+      onFinish();
+    }, 2800);
+
     // Grand Duolingo + PowerPoint Cinematic Opening Sequence
     const playOpeningSequence = () => {
       Animated.sequence([
@@ -258,7 +263,10 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onFinish = () => {} 
     playOpeningSequence();
     hoverLoop.start();
 
-    return () => hoverLoop.stop();
+    return () => {
+      clearTimeout(fallbackTimer);
+      hoverLoop.stop();
+    };
   }, [
     ghostScale,
     ghostY,
