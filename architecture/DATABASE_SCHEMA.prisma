@@ -1,0 +1,156 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum Tier {
+  free
+  pro
+  founding
+}
+
+enum StreakStatus {
+  active
+  at_risk
+  frozen
+}
+
+enum QuestCategory {
+  daily
+  starter
+  community
+  brand
+}
+
+model User {
+  id                String             @id @default(uuid())
+  name              String
+  handle            String             @unique
+  email             String             @unique
+  passwordHash      String
+  avatarUrl         String?
+  bio               String?
+  niche             String             @default("General Creator")
+  tier              Tier               @default(free)
+  level             Int                @default(1)
+  xp                Int                @default(0)
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+
+  streak            DailyStreak?
+  passport          CreatorPassport?
+  connectedAccounts ConnectedAccount[]
+  posts             Post[]
+  userQuests        UserQuest[]
+  earnings          EarningsRecord[]
+  milestoneGoals    MilestoneGoal[]
+}
+
+model DailyStreak {
+  id             String       @id @default(uuid())
+  userId         String       @unique
+  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  currentCount   Int          @default(1)
+  longestCount   Int          @default(1)
+  lastPostDate   DateTime     @default(now())
+  streakStatus   StreakStatus @default(active)
+  freezeTokens   Int          @default(1)
+  updatedAt      DateTime     @updatedAt
+}
+
+model ConnectedAccount {
+  id                String    @id @default(uuid())
+  userId            String
+  user              User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  platformId        String
+  handle            String
+  followersCount    Int       @default(0)
+  oauthAccessToken  String?
+  oauthRefreshToken String?
+  tokenExpiresAt    DateTime?
+  autoSync          Boolean   @default(true)
+  lastSyncedAt      DateTime?
+  createdAt         DateTime  @default(now())
+
+  @@unique([userId, platformId])
+}
+
+model CreatorPassport {
+  id                   String   @id @default(uuid())
+  userId               String   @unique
+  user                 User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  passportScore        Int      @default(70)
+  profileStrength      Int      @default(80)
+  consistencyRating    String   @default("Strong")
+  collaborationLevel   String   @default("Beginner")
+  marketplaceReady     Boolean  @default(false)
+  identityVerified     Boolean  @default(true)
+  activityHistoryValid Boolean  @default(true)
+  updatedAt            DateTime @updatedAt
+}
+
+model Post {
+  id               String   @id @default(uuid())
+  userId           String
+  user             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  platformId       String
+  title            String
+  videoUrl         String?
+  views            Int      @default(0)
+  likes            Int      @default(0)
+  saves            Int      @default(0)
+  shares           Int      @default(0)
+  estimatedRevenue Float    @default(0.0)
+  velocityScore    Float    @default(1.0)
+  publishedAt      DateTime @default(now())
+}
+
+model Quest {
+  id              String        @id @default(uuid())
+  title           String
+  description     String?
+  category        QuestCategory @default(daily)
+  xpReward        Int           @default(80)
+  streakProtected Boolean       @default(true)
+  createdAt       DateTime      @default(now())
+  userQuests      UserQuest[]
+}
+
+model UserQuest {
+  id          String    @id @default(uuid())
+  userId      String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  questId     String
+  quest       Quest     @relation(fields: [questId], references: [id], onDelete: Cascade)
+  completed   Boolean   @default(false)
+  progress    Int       @default(0)
+  maxProgress Int       @default(1)
+  completedAt DateTime?
+
+  @@unique([userId, questId])
+}
+
+model EarningsRecord {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  amount    Float
+  source    String
+  status    String   @default("pending")
+  createdAt DateTime @default(now())
+}
+
+model MilestoneGoal {
+  id           String   @id @default(uuid())
+  userId       String
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  targetAmount Float    @default(50.00)
+  label        String   @default("First $50 Goal")
+  active       Boolean  @default(true)
+  achieved     Boolean  @default(false)
+  createdAt    DateTime @default(now())
+}
