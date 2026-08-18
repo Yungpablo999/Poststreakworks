@@ -1013,10 +1013,9 @@ export const IdeaDetailScreen: React.FC<IdeaDetailScreenProps> = ({
           badgeText="IDEA CRAFTED"
           xpEarned={40}
           streakCount={47}
-          actionText="Done ✓"
+          actionText="Keep Editing ➔"
           onDismiss={() => {
             setShowCelebrationModal(false);
-            onBack();
           }}
         />
       </View>
