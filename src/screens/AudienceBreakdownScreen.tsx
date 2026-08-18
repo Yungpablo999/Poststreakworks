@@ -1112,20 +1112,23 @@ export const AudienceBreakdownScreen: React.FC<AudienceBreakdownScreenProps> = (
               </View>
             </View>
 
+            {/* UNLOCK PRO BUTTON (SAME COLOR AS UNLOCK PRO & NAVIGATES TO PRO PAGE) */}
             <Pressable
               style={({ pressed }) => [styles.unlockAnalyticsBtn, pressed && styles.btnPressed]}
-              onPress={handleUnlockPro}
+              onPress={() => {
+                if (Platform.OS !== 'web') {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                }
+                if (onOpenJarvisPro) {
+                  onOpenJarvisPro();
+                } else {
+                  handleUnlockPro();
+                }
+              }}
             >
-              <LinearGradient
-                colors={['#F59E0B', '#D97706']}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 0 }}
-                style={styles.unlockGradient}
-              >
-                <Text style={styles.unlockAnalyticsBtnText}>
-                  {isProUnlocked ? '✓ Audience Analytics Unlocked' : 'Unlock Audience Analytics'}
-                </Text>
-              </LinearGradient>
+              <Text style={styles.unlockAnalyticsBtnText}>
+                Unlock Audience Analytics (Pro) ➔
+              </Text>
             </Pressable>
           </View>
 
@@ -2401,29 +2404,36 @@ const styles = StyleSheet.create({
     backgroundColor: '#F1F5F9',
   },
 
-  // Card 7: Locked in Pro (Luxury Amber Glow)
+  // Card 7: Locked in Pro (Soft Lavender & Royal Violet)
   lockedProCard: {
     backgroundColor: '#FFFFFF',
-    borderRadius: 20,
+    borderRadius: 24,
     borderWidth: 1,
-    borderColor: '#FDE68A',
+    borderColor: '#EDE9FE',
     padding: 18,
     marginBottom: 16,
+    shadowColor: '#582CDB',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.06,
+    shadowRadius: 12,
+    elevation: 2,
   },
   lockedPillRow: {
     alignItems: 'center',
     marginBottom: 10,
   },
   lockedPill: {
-    backgroundColor: '#FEF3C7',
-    paddingVertical: 3,
-    paddingHorizontal: 10,
+    backgroundColor: '#EDE9FE',
+    paddingVertical: 4,
+    paddingHorizontal: 12,
     borderRadius: 100,
+    borderWidth: 1,
+    borderColor: '#DDD6FE',
   },
   lockedPillText: {
     fontSize: 9.5,
     fontWeight: '900',
-    color: '#B45309',
+    color: '#582CDB',
     letterSpacing: 0.5,
   },
   lockedTitle: {
@@ -2465,19 +2475,18 @@ const styles = StyleSheet.create({
     backgroundColor: '#F8FAFC',
   },
   unlockAnalyticsBtn: {
-    height: 44,
-    borderRadius: 12,
-    overflow: 'hidden',
-  },
-  unlockGradient: {
-    flex: 1,
+    height: 46,
+    borderRadius: 14,
+    backgroundColor: '#EDE9FE',
+    borderWidth: 1,
+    borderColor: '#DDD6FE',
     justifyContent: 'center',
     alignItems: 'center',
   },
   unlockAnalyticsBtnText: {
-    fontSize: 12,
+    fontSize: 12.5,
     fontWeight: '900',
-    color: '#FFFFFF',
+    color: '#582CDB',
     letterSpacing: 0.4,
   },
 
