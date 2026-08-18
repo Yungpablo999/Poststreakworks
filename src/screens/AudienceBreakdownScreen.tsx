@@ -23,8 +23,8 @@ import { AnimatedCompletionModal } from '../components/AnimatedCompletionModal';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
-// Authentic Social SVG Icons
-const TikTokSvg = ({ size = 20 }: { size?: number }) => (
+// REAL AUTHENTIC BRAND SVG ICONS
+export const TikTokSvg = ({ size = 20 }: { size?: number }) => (
   <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
     <Path
       d="M19.321 5.562a5.122 5.122 0 0 1-3.585-1.446 5.14 5.14 0 0 1-1.486-3.616H10.5v15.025a3.25 3.25 0 1 1-3.25-3.25 3.2 3.2 0 0 1 1.25.253V8.75a6.975 6.975 0 0 0-1.25-.113 7 7 0 1 0 7 7V9.22a8.775 8.775 0 0 0 5.071 1.595V7.065a5.16 5.16 0 0 1-2.45-.653 5.13 5.13 0 0 1-1.3-.85z"
@@ -33,7 +33,7 @@ const TikTokSvg = ({ size = 20 }: { size?: number }) => (
   </Svg>
 );
 
-const InstagramSvg = ({ size = 20 }: { size?: number }) => (
+export const InstagramSvg = ({ size = 20 }: { size?: number }) => (
   <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
     <Rect x="2.5" y="2.5" width="19" height="19" rx="5" stroke="#E1306C" strokeWidth="2.2" />
     <Circle cx="12" cy="12" r="4.5" stroke="#E1306C" strokeWidth="2.2" />
@@ -41,7 +41,7 @@ const InstagramSvg = ({ size = 20 }: { size?: number }) => (
   </Svg>
 );
 
-const YouTubeSvg = ({ size = 20 }: { size?: number }) => (
+export const YouTubeSvg = ({ size = 20 }: { size?: number }) => (
   <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
     <Path
       d="M21.582 6.186a2.75 2.75 0 0 0-1.934-1.946C17.942 3.75 12 3.75 12 3.75s-5.942 0-7.648.49a2.75 2.75 0 0 0-1.934 1.946C1.928 7.892 1.928 12 1.928 12s0 4.108.49 5.814a2.75 2.75 0 0 0 1.934 1.946c1.706.49 7.648.49 7.648.49s5.942 0 7.648-.49a2.75 2.75 0 0 0 1.934-1.946c.49-1.706.49-5.814.49-5.814s0-4.108-.49-5.814z"
@@ -51,7 +51,19 @@ const YouTubeSvg = ({ size = 20 }: { size?: number }) => (
   </Svg>
 );
 
-const XSvg = ({ size = 18 }: { size?: number }) => (
+export const LinkedInSvg = ({ size = 20 }: { size?: number }) => (
+  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+    <Rect x="2" y="2" width="20" height="20" rx="4" fill="#0A66C2" />
+    <Circle cx="7" cy="7.5" r="1.5" fill="#FFFFFF" />
+    <Rect x="5.5" y="10" width="3" height="9" fill="#FFFFFF" />
+    <Path
+      d="M11 10h2.8v1.3h.1c.4-.8 1.4-1.6 2.9-1.6 3.1 0 3.7 2 3.7 4.7V19h-3v-4.1c0-1-.1-2.3-1.4-2.3-1.4 0-1.6 1.1-1.6 2.2V19h-3V10z"
+      fill="#FFFFFF"
+    />
+  </Svg>
+);
+
+export const XSvg = ({ size = 18 }: { size?: number }) => (
   <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
     <Path
       d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"
@@ -60,13 +72,52 @@ const XSvg = ({ size = 18 }: { size?: number }) => (
   </Svg>
 );
 
+export const SnapchatSvg = ({ size = 20 }: { size?: number }) => (
+  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+    <Rect x="2" y="2" width="20" height="20" rx="5" fill="#FFFC00" />
+    <Path
+      d="M12 5.5c-2.4 0-3.8 1.8-3.8 3.5 0 .8.3 1.5.3 1.5s-.6.2-.8.5c-.2.3 0 .7.3.7.6.1 1.1-.3 1.1-.3s.5 1.5 1.5 1.7c.3.1.5.3.5.5s-.8.6-1.7.9c-.8.3-1.2.9-.6 1.3.6.4 1.8.3 2.5-.2.4-.3.7-.3.7-.3s.3 0 .7.3c.7.5 1.9.6 2.5.2.6-.4.2-1-.6-1.3-.9-.3-1.7-.7-1.7-.9s.2-.4.5-.5c1-.2 1.5-1.7 1.5-1.7s.5.4 1.1.3c.3 0 .5-.4.3-.7-.2-.3-.8-.5-.8-.5s.3-.7.3-1.5c0-1.7-1.4-3.5-3.8-3.5z"
+      fill="#000000"
+    />
+  </Svg>
+);
+
+export const ThreadsSvg = ({ size = 20 }: { size?: number }) => (
+  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+    <Path
+      d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm3.84 12.3c-.45 2.1-2.03 3.32-4.14 3.32-2.58 0-4.4-1.84-4.4-4.47 0-2.67 1.88-4.57 4.54-4.57 2.45 0 4.1 1.62 4.17 3.86h-1.87c-.07-1.26-.98-2.14-2.3-2.14-1.62 0-2.65 1.25-2.65 2.85 0 1.63 1.05 2.8 2.58 2.8 1.15 0 1.97-.62 2.22-1.65h1.85z"
+      fill="#000000"
+    />
+  </Svg>
+);
+
+export const renderPlatformBrandIcon = (id: string, size = 20) => {
+  switch (id) {
+    case 'tiktok':
+      return <TikTokSvg size={size} />;
+    case 'instagram':
+      return <InstagramSvg size={size} />;
+    case 'youtube':
+      return <YouTubeSvg size={size} />;
+    case 'linkedin':
+      return <LinkedInSvg size={size} />;
+    case 'x_twitter':
+      return <XSvg size={size} />;
+    case 'snapchat':
+      return <SnapchatSvg size={size} />;
+    case 'threads':
+      return <ThreadsSvg size={size} />;
+    default:
+      return <TikTokSvg size={size} />;
+  }
+};
+
 interface PlatformAccount {
   id: string;
   name: string;
   handle: string;
   followers: string;
   countNumeric: number;
-  iconEmoji: string;
   bgTint: string;
   connected: boolean;
   canAdd: boolean;
@@ -79,8 +130,7 @@ const INITIAL_PLATFORMS: PlatformAccount[] = [
     handle: '@pablo.creates',
     followers: '12.4K',
     countNumeric: 12400,
-    iconEmoji: '🎬',
-    bgTint: '#EDE9FE',
+    bgTint: '#F1F5F9',
     connected: true,
     canAdd: false,
   },
@@ -90,7 +140,6 @@ const INITIAL_PLATFORMS: PlatformAccount[] = [
     handle: '@pablocreates',
     followers: '7.8K',
     countNumeric: 7800,
-    iconEmoji: '📷',
     bgTint: '#FDF2F8',
     connected: true,
     canAdd: false,
@@ -101,7 +150,6 @@ const INITIAL_PLATFORMS: PlatformAccount[] = [
     handle: 'Pablo Creates',
     followers: '4.6K',
     countNumeric: 4600,
-    iconEmoji: '📺',
     bgTint: '#FEF2F2',
     connected: false,
     canAdd: true,
@@ -112,8 +160,7 @@ const INITIAL_PLATFORMS: PlatformAccount[] = [
     handle: 'Pablo (Tech & Creator)',
     followers: '1.2K',
     countNumeric: 1200,
-    iconEmoji: '💼',
-    bgTint: '#F0FDF4',
+    bgTint: '#EFF6FF',
     connected: false,
     canAdd: true,
   },
@@ -123,7 +170,6 @@ const INITIAL_PLATFORMS: PlatformAccount[] = [
     handle: '@pablocreates',
     followers: '3.1K',
     countNumeric: 3100,
-    iconEmoji: '🐦',
     bgTint: '#F8FAFC',
     connected: false,
     canAdd: true,
@@ -134,7 +180,6 @@ const INITIAL_PLATFORMS: PlatformAccount[] = [
     handle: 'pablo.snaps',
     followers: '1.8K',
     countNumeric: 1800,
-    iconEmoji: '👻',
     bgTint: '#FEF9C3',
     connected: false,
     canAdd: true,
@@ -145,7 +190,6 @@ const INITIAL_PLATFORMS: PlatformAccount[] = [
     handle: '@pablocreates',
     followers: '2.2K',
     countNumeric: 2200,
-    iconEmoji: '🧵',
     bgTint: '#F5F3FF',
     connected: false,
     canAdd: true,
@@ -280,15 +324,15 @@ export const AudienceBreakdownScreen: React.FC<AudienceBreakdownScreenProps> = (
     showToast(`✓ ${targetPlat?.name || 'Platform'} connected! +${targetPlat?.followers} synced.`);
   };
 
-  const handleDisconnectSinglePlatform = (platformId: string) => {
+  const handleRemoveSinglePlatform = (platformId: string) => {
     if (Platform.OS !== 'web') {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     }
     setPlatformsList((prev) =>
       prev.map((p) => (p.id === platformId ? { ...p, connected: false } : p))
     );
     const targetPlat = platformsList.find((p) => p.id === platformId);
-    showToast(`Disconnected ${targetPlat?.name}`);
+    showToast(`Removed ${targetPlat?.name || 'account'}`);
   };
 
   const handleAddCustomPlatform = () => {
@@ -506,7 +550,7 @@ export const AudienceBreakdownScreen: React.FC<AudienceBreakdownScreenProps> = (
             See your total audience, weekly growth, platform split and fastest growing channel.
           </Text>
 
-          {/* CARD 1: TOTAL AUDIENCE HERO CARD (UNLOCK PRO REMOVED AS REQUESTED) */}
+          {/* CARD 1: TOTAL AUDIENCE HERO CARD */}
           <View style={styles.audienceCard}>
             <View style={styles.audienceCardTopRow}>
               <Text style={styles.cardHeaderLabel}>TOTAL AUDIENCE</Text>
@@ -546,7 +590,7 @@ export const AudienceBreakdownScreen: React.FC<AudienceBreakdownScreenProps> = (
               </View>
             </View>
 
-            {/* ACTION BUTTON INSIDE CARD: CONNECT PLATFORM (POPS UP FULL CONNECTOR) */}
+            {/* ACTION BUTTON: CONNECT PLATFORM */}
             <View style={styles.cardActionsCol}>
               <Pressable
                 style={({ pressed }) => [styles.purpleActionBtn, pressed && styles.btnPressed]}
@@ -656,13 +700,13 @@ export const AudienceBreakdownScreen: React.FC<AudienceBreakdownScreenProps> = (
             </Pressable>
           </View>
 
-          {/* 4 PLATFORM STATS GRID (2x2) */}
+          {/* 4 PLATFORM STATS GRID (2x2) WITH AUTHENTIC BRAND SVG ICONS */}
           <View style={styles.platformGrid2x2}>
             {platformsList.slice(0, 4).map((plat) => (
               <View key={plat.id} style={styles.platformGridBox}>
                 <View style={styles.platformGridHeader}>
                   <View style={[styles.platformMiniIconBadge, { backgroundColor: plat.bgTint }]}>
-                    <Text style={{ fontSize: 14 }}>{plat.iconEmoji}</Text>
+                    {renderPlatformBrandIcon(plat.id, 18)}
                   </View>
                   {plat.connected ? (
                     <View style={styles.connectedTag}>
@@ -956,7 +1000,7 @@ export const AudienceBreakdownScreen: React.FC<AudienceBreakdownScreenProps> = (
                     .map((plat) => (
                       <View key={plat.id} style={styles.connectedPlatformRow}>
                         <View style={[styles.platformIconCircle, { backgroundColor: plat.bgTint }]}>
-                          <Text style={{ fontSize: 18 }}>{plat.iconEmoji}</Text>
+                          {renderPlatformBrandIcon(plat.id, 20)}
                         </View>
                         <View style={{ flex: 1 }}>
                           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
@@ -966,15 +1010,16 @@ export const AudienceBreakdownScreen: React.FC<AudienceBreakdownScreenProps> = (
                             </View>
                           </View>
                           <Text style={styles.platformSubText}>
-                            {plat.handle} • ⚡ {plat.followers} Followers
+                            {plat.handle} • ⚡ {plat.followers}
                           </Text>
                         </View>
+                        {/* USER SPECIFIED: REMOVE BUTTON (NOT MANAGE) */}
                         <Pressable
-                          style={styles.disconnectBtn}
-                          onPress={() => handleDisconnectSinglePlatform(plat.id)}
+                          style={styles.removePlatformBtn}
+                          onPress={() => handleRemoveSinglePlatform(plat.id)}
                           hitSlop={6}
                         >
-                          <Text style={styles.disconnectBtnText}>Manage</Text>
+                          <Text style={styles.removePlatformBtnText}>Remove</Text>
                         </Pressable>
                       </View>
                     ))}
@@ -992,7 +1037,7 @@ export const AudienceBreakdownScreen: React.FC<AudienceBreakdownScreenProps> = (
                   {availableToAdd.map((plat) => (
                     <View key={plat.id} style={styles.availablePlatformRow}>
                       <View style={[styles.platformIconCircle, { backgroundColor: plat.bgTint }]}>
-                        <Text style={{ fontSize: 18 }}>{plat.iconEmoji}</Text>
+                        {renderPlatformBrandIcon(plat.id, 20)}
                       </View>
                       <View style={{ flex: 1 }}>
                         <Text style={styles.platformNameText}>{plat.name}</Text>
@@ -1017,7 +1062,7 @@ export const AudienceBreakdownScreen: React.FC<AudienceBreakdownScreenProps> = (
                     Select channel and enter your creator username:
                   </Text>
 
-                  {/* Channel Chips */}
+                  {/* Channel Chips with Real Icons */}
                   <ScrollView
                     horizontal
                     showsHorizontalScrollIndicator={false}
@@ -1034,14 +1079,17 @@ export const AudienceBreakdownScreen: React.FC<AudienceBreakdownScreenProps> = (
                           ]}
                           onPress={() => setSelectedPlatformToAdd(p.id)}
                         >
-                          <Text
-                            style={[
-                              styles.platformSelectChipText,
-                              isChosen && styles.platformSelectChipTextActive,
-                            ]}
-                          >
-                            {p.iconEmoji} {p.name.split(' ')[0]}
-                          </Text>
+                          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+                            {renderPlatformBrandIcon(p.id, 14)}
+                            <Text
+                              style={[
+                                styles.platformSelectChipText,
+                                isChosen && styles.platformSelectChipTextActive,
+                              ]}
+                            >
+                              {p.name.split(' ')[0]}
+                            </Text>
+                          </View>
                         </Pressable>
                       );
                     })}
@@ -1339,7 +1387,7 @@ const styles = StyleSheet.create({
     marginBottom: 18,
   },
 
-  // Card 1: Total Audience Card (Clean without Unlock Pro)
+  // Card 1: Total Audience Card
   audienceCard: {
     backgroundColor: '#FFFFFF',
     borderRadius: 20,
@@ -1633,11 +1681,13 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   platformMiniIconBadge: {
-    width: 28,
-    height: 28,
-    borderRadius: 8,
+    width: 32,
+    height: 32,
+    borderRadius: 9,
     justifyContent: 'center',
     alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
   },
   connectedTag: {
     backgroundColor: '#DCFCE7',
@@ -2081,6 +2131,8 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     justifyContent: 'center',
     alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
   },
   platformNameText: {
     fontSize: 13,
@@ -2103,16 +2155,18 @@ const styles = StyleSheet.create({
     color: '#64748B',
     marginTop: 1,
   },
-  disconnectBtn: {
+  removePlatformBtn: {
     paddingVertical: 5,
     paddingHorizontal: 10,
     borderRadius: 8,
-    backgroundColor: '#F1F5F9',
+    backgroundColor: '#FEF2F2',
+    borderWidth: 1,
+    borderColor: '#FECACA',
   },
-  disconnectBtnText: {
+  removePlatformBtnText: {
     fontSize: 10.5,
     fontWeight: '800',
-    color: '#64748B',
+    color: '#DC2626',
   },
   addPlatformActionBtn: {
     backgroundColor: '#EDE9FE',
@@ -2147,7 +2201,7 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
   platformSelectChip: {
-    paddingVertical: 4,
+    paddingVertical: 5,
     paddingHorizontal: 10,
     borderRadius: 8,
     backgroundColor: '#FFFFFF',
