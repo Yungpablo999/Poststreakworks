@@ -351,29 +351,20 @@ export const PostPerformanceScreen: React.FC<PostPerformanceScreenProps> = ({
               </View>
             </View>
 
-            {/* Dual Action Buttons */}
-            <View style={styles.postActionsRow}>
-              <Pressable
-                style={({ pressed }) => [styles.createSimilarBtn, pressed && styles.btnPressed]}
-                onPress={handleCreateSimilarPost}
+            {/* Action Button */}
+            <Pressable
+              style={({ pressed }) => [styles.createSimilarBtn, pressed && styles.btnPressed]}
+              onPress={handleCreateSimilarPost}
+            >
+              <LinearGradient
+                colors={['#582CDB', '#4318FF']}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 0 }}
+                style={styles.actionBtnGradient}
               >
-                <LinearGradient
-                  colors={['#582CDB', '#4318FF']}
-                  start={{ x: 0, y: 0 }}
-                  end={{ x: 1, y: 0 }}
-                  style={styles.actionBtnGradient}
-                >
-                  <Text style={styles.createSimilarBtnText}>✨ Create Similar Post</Text>
-                </LinearGradient>
-              </Pressable>
-
-              <Pressable
-                style={({ pressed }) => [styles.repurposeBtn, pressed && styles.btnPressed]}
-                onPress={handleRepurposePost}
-              >
-                <Text style={styles.repurposeBtnText}>Repurpose Post</Text>
-              </Pressable>
-            </View>
+                <Text style={styles.createSimilarBtnText}>✨ Create Similar Post</Text>
+              </LinearGradient>
+            </Pressable>
           </View>
 
           {/* CARD 2: PERFORMANCE 2x2 GRID */}
