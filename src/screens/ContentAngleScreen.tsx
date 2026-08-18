@@ -118,7 +118,8 @@ export const ContentAngleScreen: React.FC<ContentAngleScreenProps> = ({
   const [moreIdeas, setMoreIdeas] = useState<IdeaCardItem[]>(INITIAL_MORE_IDEAS);
   const [savedIdeasCount, setSavedIdeasCount] = useState(2);
   const [quotaUsed, setQuotaUsed] = useState(3);
-  const [selectedAngleFilter, setSelectedAngleFilter] = useState<'faster' | 'saves' | 'trend'>('faster');
+  const [selectedAngleFilters, setSelectedAngleFilters] = useState<string[]>(['faster']);
+  const [selectedJarvisChips, setSelectedJarvisChips] = useState<string[]>([]);
 
   // Modals
   const [showNotificationModal, setShowNotificationModal] = useState(false);
@@ -179,9 +180,7 @@ export const ContentAngleScreen: React.FC<ContentAngleScreenProps> = ({
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     }
     if (selectedNiches.includes(niche)) {
-      if (selectedNiches.length > 1) {
-        setSelectedNiches(selectedNiches.filter((n) => n !== niche));
-      }
+      setSelectedNiches(selectedNiches.filter((n) => n !== niche));
     } else {
       setSelectedNiches([...selectedNiches, niche]);
     }
@@ -192,11 +191,31 @@ export const ContentAngleScreen: React.FC<ContentAngleScreenProps> = ({
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     }
     if (selectedGoals.includes(goal)) {
-      if (selectedGoals.length > 1) {
-        setSelectedGoals(selectedGoals.filter((g) => g !== goal));
-      }
+      setSelectedGoals(selectedGoals.filter((g) => g !== goal));
     } else {
       setSelectedGoals([...selectedGoals, goal]);
+    }
+  };
+
+  const toggleAngleFilter = (filterId: string) => {
+    if (Platform.OS !== 'web') {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    }
+    if (selectedAngleFilters.includes(filterId)) {
+      setSelectedAngleFilters(selectedAngleFilters.filter((f) => f !== filterId));
+    } else {
+      setSelectedAngleFilters([...selectedAngleFilters, filterId]);
+    }
+  };
+
+  const toggleJarvisChip = (chipId: string) => {
+    if (Platform.OS !== 'web') {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    }
+    if (selectedJarvisChips.includes(chipId)) {
+      setSelectedJarvisChips(selectedJarvisChips.filter((c) => c !== chipId));
+    } else {
+      setSelectedJarvisChips([...selectedJarvisChips, chipId]);
     }
   };
 
@@ -528,23 +547,18 @@ export const ContentAngleScreen: React.FC<ContentAngleScreenProps> = ({
             </Pressable>
           </View>
 
-          {/* Quick Filters */}
+          {/* Quick Filters (Select & Unselect Support) */}
           <View style={styles.quickFilterRow}>
             {[
               { id: 'faster', label: 'Faster formats' },
               { id: 'saves', label: 'Higher save potential' },
               { id: 'trend', label: 'Trend-based' },
             ].map((f) => {
-              const isActive = selectedAngleFilter === f.id;
+              const isActive = selectedAngleFilters.includes(f.id);
               return (
                 <Pressable
                   key={f.id}
-                  onPress={() => {
-                    if (Platform.OS !== 'web') {
-                      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                    }
-                    setSelectedAngleFilter(f.id as 'faster' | 'saves' | 'trend');
-                  }}
+                  onPress={() => toggleAngleFilter(f.id)}
                   style={[
                     styles.quickFilterPill,
                     isActive && styles.quickFilterPillActive,
@@ -655,13 +669,33 @@ export const ContentAngleScreen: React.FC<ContentAngleScreenProps> = ({
               Ideas based on personal lessons are easier to finish quickly and protect your streak.
             </Text>
 
+            {/* Jarvis Chips (Select & Unselect Support) */}
             <View style={styles.jarvisChipsRow}>
-              <View style={styles.jarvisChip}>
-                <Text style={styles.jarvisChipText}>Make It Personal</Text>
-              </View>
-              <View style={styles.jarvisChip}>
-                <Text style={styles.jarvisChipText}>Add Hook</Text>
-              </View>
+              {[
+                { id: 'personal', label: 'Make It Personal' },
+                { id: 'hook', label: 'Add Hook' },
+              ].map((chip) => {
+                const isChipActive = selectedJarvisChips.includes(chip.id);
+                return (
+                  <Pressable
+                    key={chip.id}
+                    onPress={() => toggleJarvisChip(chip.id)}
+                    style={[
+                      styles.jarvisChip,
+                      isChipActive && styles.jarvisChipActive,
+                    ]}
+                  >
+                    <Text
+                      style={[
+                        styles.jarvisChipText,
+                        isChipActive && styles.jarvisChipTextActive,
+                      ]}
+                    >
+                      {chip.label}
+                    </Text>
+                  </Pressable>
+                );
+              })}
             </View>
           </LinearGradient>
 
@@ -1409,13 +1443,21 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     borderWidth: 1,
     borderColor: '#EDE9FE',
-    paddingVertical: 4.5,
-    paddingHorizontal: 10,
+    paddingVertical: 5,
+    paddingHorizontal: 11,
+  },
+  jarvisChipActive: {
+    backgroundColor: '#EDE9FE',
+    borderColor: '#DDD6FE',
   },
   jarvisChipText: {
     fontSize: 10.5,
     fontWeight: '800',
-    color: '#6D28D9',
+    color: '#64748B',
+  },
+  jarvisChipTextActive: {
+    color: '#582CDB',
+    fontWeight: '900',
   },
 
   // 7. Saved Ideas Section
