@@ -1127,9 +1127,9 @@ export const AudienceBreakdownScreen: React.FC<AudienceBreakdownScreenProps> = (
               }}
             >
               <LinearGradient
-                colors={['#F59E0B', '#D97706']}
+                colors={['#FDE047', '#EAB308', '#CA8A04', '#A16207']}
                 start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 0 }}
+                end={{ x: 1, y: 1 }}
                 style={styles.unlockGradient}
               >
                 <Text style={styles.unlockAnalyticsBtnText}>
@@ -2482,12 +2482,12 @@ const styles = StyleSheet.create({
     backgroundColor: '#F8FAFC',
   },
   unlockAnalyticsBtn: {
-    height: 46,
+    height: 48,
     borderRadius: 14,
     overflow: 'hidden',
-    shadowColor: '#D97706',
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.25,
+    shadowColor: '#FDE047',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.35,
     shadowRadius: 8,
     elevation: 3,
   },
@@ -2497,10 +2497,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   unlockAnalyticsBtnText: {
-    fontSize: 13,
+    fontSize: 13.5,
     fontWeight: '900',
-    color: '#FFFFFF',
-    letterSpacing: 0.4,
+    color: '#171420',
+    letterSpacing: -0.2,
   },
 
   // Card 8: Jarvis Core Insight
