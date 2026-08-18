@@ -234,6 +234,7 @@ const TIMEFRAME_DATA: Record<TimeframeMode, VelocityItem[]> = {
 
 interface AudienceBreakdownScreenProps {
   onBack: () => void;
+  onOpenPostPerformance?: () => void;
   onLogout?: () => void;
   onOpenSchedule?: () => void;
   onOpenJarvisPro?: () => void;
@@ -248,6 +249,7 @@ interface AudienceBreakdownScreenProps {
 
 export const AudienceBreakdownScreen: React.FC<AudienceBreakdownScreenProps> = ({
   onBack,
+  onOpenPostPerformance,
   onLogout,
   onOpenSchedule,
   onOpenJarvisPro,

@@ -197,6 +197,7 @@ const INITIAL_GROWTH_PLATFORMS: GrowthPlatformAccount[] = [
 
 interface GrowthScreenProps {
   onBackToDashboard?: () => void;
+  onOpenPostPerformance?: () => void;
   onLogout?: () => void;
   onNavigateTab?: (tab: TabType) => void;
   onOpenJarvisPro?: () => void;
@@ -208,6 +209,7 @@ interface GrowthScreenProps {
 
 export const GrowthScreen: React.FC<GrowthScreenProps> = ({
   onBackToDashboard,
+  onOpenPostPerformance,
   onLogout,
   onNavigateTab,
   onOpenJarvisPro,
@@ -730,8 +732,15 @@ export const GrowthScreen: React.FC<GrowthScreenProps> = ({
             <Pressable
               style={({ pressed }) => [styles.analyzeBtn, pressed && styles.btnPressed]}
               onPress={() => {
-                triggerModalPop();
-                setShowPostAnalysisModal(true);
+                if (Platform.OS !== 'web') {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                }
+                if (onOpenPostPerformance) {
+                  onOpenPostPerformance();
+                } else {
+                  triggerModalPop();
+                  setShowPostAnalysisModal(true);
+                }
               }}
             >
               <LinearGradient
