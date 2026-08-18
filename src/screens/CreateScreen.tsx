@@ -365,8 +365,12 @@ export const CreateScreen: React.FC<CreateScreenProps> = ({
 
   const openDraft = (draft: DraftItem) => {
     setSelectedDraft(draft);
-    triggerModalPop();
-    setShowDraftModal(true);
+    if (onOpenIdeaDetail) {
+      onOpenIdeaDetail(draft.title);
+    } else {
+      triggerModalPop();
+      setShowDraftModal(true);
+    }
   };
 
   const openAllDrafts = () => {
