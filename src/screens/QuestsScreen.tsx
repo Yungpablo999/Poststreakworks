@@ -25,6 +25,7 @@ interface QuestsScreenProps {
   onOpenMissionDetail?: () => void;
   onOpenCommunityChallenge?: () => void;
   onOpenSchedule?: () => void;
+  onOpenJarvisPro?: () => void;
 }
 
 export const QuestsScreen: React.FC<QuestsScreenProps> = ({
@@ -34,6 +35,7 @@ export const QuestsScreen: React.FC<QuestsScreenProps> = ({
   onOpenMissionDetail,
   onOpenCommunityChallenge,
   onOpenSchedule,
+  onOpenJarvisPro,
 }) => {
   const [activeTab, setActiveTab] = useState<TabType>('quests');
   const [completedQuests, setCompletedQuests] = useState<string[]>([]);
@@ -171,7 +173,9 @@ export const QuestsScreen: React.FC<QuestsScreenProps> = ({
     if (Platform.OS !== 'web') {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     }
-    if (onNavigateTab) {
+    if (onOpenJarvisPro) {
+      onOpenJarvisPro();
+    } else if (onNavigateTab) {
       onNavigateTab('growth');
     }
   };

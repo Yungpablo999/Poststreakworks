@@ -29,6 +29,7 @@ interface MatchScreenProps {
   onLogout?: () => void;
   onNavigateTab?: (tab: TabType) => void;
   onOpenMessages?: () => void;
+  onOpenJarvisPro?: () => void;
 }
 
 interface TrackedMetrics {
@@ -340,6 +341,7 @@ export const MatchScreen: React.FC<MatchScreenProps> = ({
   onLogout,
   onNavigateTab,
   onOpenMessages,
+  onOpenJarvisPro,
 }) => {
   const [activeTab, setActiveTab] = useState<TabType>('match');
   const [activeSection, setActiveSection] = useState<'deck' | 'requests' | 'tracking' | 'connected'>('deck');
@@ -1356,7 +1358,12 @@ export const MatchScreen: React.FC<MatchScreenProps> = ({
                 <Pressable
                   style={({ pressed }) => [styles.unlockSquadsBtn, pressed && styles.btnPressed]}
                   onPress={() => {
-                    if (onNavigateTab) {
+                    if (Platform.OS !== 'web') {
+                      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                    }
+                    if (onOpenJarvisPro) {
+                      onOpenJarvisPro();
+                    } else if (onNavigateTab) {
                       onNavigateTab('growth');
                     } else {
                       showToast('✨ Pro Squads unlocked!');

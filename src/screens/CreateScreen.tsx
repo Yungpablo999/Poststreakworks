@@ -23,6 +23,7 @@ interface CreateScreenProps {
   onLogout?: () => void;
   onNavigateTab?: (tab: TabType) => void;
   onOpenSchedule?: () => void;
+  onOpenJarvisPro?: () => void;
 }
 
 interface DraftItem {
@@ -236,6 +237,7 @@ export const CreateScreen: React.FC<CreateScreenProps> = ({
   onLogout,
   onNavigateTab,
   onOpenSchedule,
+  onOpenJarvisPro,
 }) => {
   const [activeTab, setActiveTab] = useState<TabType>('create');
   const [drafts, setDrafts] = useState<DraftItem[]>(INITIAL_DRAFTS);
@@ -415,7 +417,9 @@ export const CreateScreen: React.FC<CreateScreenProps> = ({
     if (Platform.OS !== 'web') {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     }
-    if (onNavigateTab) {
+    if (onOpenJarvisPro) {
+      onOpenJarvisPro();
+    } else if (onNavigateTab) {
       onNavigateTab('growth');
     }
   };

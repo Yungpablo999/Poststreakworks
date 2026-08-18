@@ -248,6 +248,7 @@ export default function App() {
           <DashboardScreen
             onLogout={handleLogout}
             onStartMission={() => navigateTo('mission-detail')}
+            onOpenJarvisPro={() => navigateTo('jarvis-pro')}
             onNavigateTab={(tab: TabType) => {
               if (tab === 'create') {
                 navigateTo('create');
@@ -286,6 +287,7 @@ export default function App() {
           <CreateScreen
             onLogout={handleLogout}
             onOpenSchedule={() => navigateTo('schedule')}
+            onOpenJarvisPro={() => navigateTo('jarvis-pro')}
             onNavigateTab={(tab: TabType) => {
               if (tab === 'home') {
                 navigateTo('dashboard');
@@ -323,6 +325,7 @@ export default function App() {
         {currentScreen === 'match' && (
           <MatchScreen
             onLogout={handleLogout}
+            onOpenJarvisPro={() => navigateTo('jarvis-pro')}
             onNavigateTab={(tab: TabType) => {
               if (tab === 'home') {
                 navigateTo('dashboard');
@@ -383,6 +386,7 @@ export default function App() {
             onOpenMissionDetail={() => navigateTo('mission-detail')}
             onOpenCommunityChallenge={() => navigateTo('challenge-detail')}
             onOpenSchedule={() => navigateTo('schedule')}
+            onOpenJarvisPro={() => navigateTo('jarvis-pro')}
             onNavigateTab={(tab: TabType) => {
               if (tab === 'home') {
                 navigateTo('dashboard');

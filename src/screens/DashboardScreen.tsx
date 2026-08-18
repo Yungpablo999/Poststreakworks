@@ -24,6 +24,7 @@ interface DashboardScreenProps {
   onLogout?: () => void;
   onStartMission?: () => void;
   onNavigateTab?: (tab: TabType) => void;
+  onOpenJarvisPro?: () => void;
 }
 type NotificationFilter = 'all' | 'unread' | 'quests';
 
@@ -375,6 +376,7 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
   onLogout,
   onStartMission,
   onNavigateTab,
+  onOpenJarvisPro,
 }) => {
   const [activeTab, setActiveTab] = useState<TabType>('home');
   const [matchConnected, setMatchConnected] = useState(false);
@@ -1201,7 +1203,16 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
             </Text>
 
             <Pressable
-              onPress={openProModal}
+              onPress={() => {
+                if (Platform.OS !== 'web') {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                }
+                if (onOpenJarvisPro) {
+                  onOpenJarvisPro();
+                } else {
+                  openProModal();
+                }
+              }}
               style={({ pressed }) => [
                 styles.metallicGoldUpgradeBtn,
                 pressed && styles.upgradeButtonPressed,
@@ -1862,10 +1873,13 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
               </Text>
 
               <Pressable
-                onPress={() => setShowProModal(false)}
+                onPress={() => {
+                  setShowProModal(false);
+                  if (onOpenJarvisPro) onOpenJarvisPro();
+                }}
                 style={({ pressed }) => [styles.modalGoldButton, pressed && styles.modalGoldButtonPressed]}
               >
-                <Text style={styles.modalGoldButtonText}>Start 7-Day Free Trial</Text>
+                <Text style={styles.modalGoldButtonText}>Explore Pro Suite ➔</Text>
               </Pressable>
 
               <Pressable onPress={() => setShowProModal(false)} hitSlop={8}>
