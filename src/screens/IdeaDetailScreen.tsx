@@ -94,6 +94,7 @@ export const IdeaDetailScreen: React.FC<IdeaDetailScreenProps> = ({
 
   userProfile,
   onSaveProfile,}) => {
+  const isDark = userProfile?.isDarkMode ?? false;
   const [activeTab, setActiveTab] = useState<TabType>('create');
   const [selectedHookIndex, setSelectedHookIndex] = useState(0);
   const [selectedPlatforms, setSelectedPlatforms] = useState<string[]>(['tiktok', 'instagram']);
@@ -259,9 +260,9 @@ export const IdeaDetailScreen: React.FC<IdeaDetailScreenProps> = ({
   const unreadNotifCount = notificationsList.filter((n) => n.unread).length;
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <StatusBar barStyle="dark-content" backgroundColor="#FAF8F5" />
-      <View style={styles.container}>
+    <SafeAreaView style={[styles.safeArea, isDark && { backgroundColor: '#0C0A12' }]}>
+      <StatusBar barStyle={isDark ? "light-content" : "dark-content"} backgroundColor={isDark ? "#0C0A12" : "#FAF8F5"} />
+      <View style={[styles.container, isDark && { backgroundColor: '#0C0A12' }]}>
         {/* 1. TOP AIRY HEADER BAR (UNIFIED APP-WIDE) */}
         <View style={styles.headerBar}>
           <View style={styles.headerLeftGroup}>
@@ -793,10 +794,7 @@ export const IdeaDetailScreen: React.FC<IdeaDetailScreenProps> = ({
         </ScrollView>
 
         {/* UNIFIED SIGNATURE FLOATING TAB BAR */}
-        <FloatingTabBar
-          activeTab={activeTab}
-          onTabPress={handleTabPress}
-        />
+        <FloatingTabBar activeTab={activeTab} onTabPress={handleTabPress} isDarkMode={isDark} />
 
         {/* MODAL 1: SCRIPT EDITOR */}
         <Modal

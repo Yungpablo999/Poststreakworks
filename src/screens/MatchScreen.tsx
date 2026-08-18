@@ -348,6 +348,7 @@ export const MatchScreen: React.FC<MatchScreenProps> = ({
 
   userProfile,
   onSaveProfile,}) => {
+  const isDark = userProfile?.isDarkMode ?? false;
   const [activeTab, setActiveTab] = useState<TabType>('match');
   const [activeSection, setActiveSection] = useState<'deck' | 'requests' | 'tracking' | 'connected'>('deck');
   const [activeFilter, setActiveFilter] = useState<'niche' | 'streak' | 'nearby' | 'ai'>('niche');
@@ -694,9 +695,9 @@ export const MatchScreen: React.FC<MatchScreenProps> = ({
   });
 
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <SafeAreaView style={[styles.safeArea, isDark && { backgroundColor: '#0C0A12' }]}>
       <StatusBar barStyle="dark-content" backgroundColor="#FAF9F6" />
-      <View style={styles.container}>
+      <View style={[styles.container, isDark && { backgroundColor: '#0C0A12' }]}>
         {/* 1. TOP HEADER APP BAR */}
         <View style={styles.headerBar}>
           <View style={styles.headerLeftGroup}>

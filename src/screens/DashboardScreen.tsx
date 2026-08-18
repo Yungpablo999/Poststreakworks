@@ -387,6 +387,7 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
 
   userProfile,
   onSaveProfile,}) => {
+  const isDark = userProfile?.isDarkMode ?? false;
   const [activeTab, setActiveTab] = useState<TabType>('home');
   const [matchConnected, setMatchConnected] = useState(false);
   const [showProModal, setShowProModal] = useState(false);
@@ -740,9 +741,9 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
   const getTabColor = (tab: TabType) => (activeTab === tab ? '#582CDB' : '#1A1626');
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <StatusBar barStyle="dark-content" backgroundColor="#FAF8F5" />
-      <View style={styles.container}>
+    <SafeAreaView style={[styles.safeArea, isDark && { backgroundColor: '#0C0A12' }]}>
+      <StatusBar barStyle={isDark ? "light-content" : "dark-content"} backgroundColor={isDark ? "#0C0A12" : "#FAF8F5"} />
+      <View style={[styles.container, isDark && { backgroundColor: '#0C0A12' }]}>
         {/* 1. TOP APP BAR: Ghost Mascot on Left & Notification/Profile on Right */}
         <View style={styles.headerBar}>
           {/* Top-Left: Ghost Logo Mascot */}
@@ -768,7 +769,7 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
           <View style={styles.headerRightGroup}>
             {/* Chat Bubble Button */}
             <Pressable
-              style={({ pressed }) => [styles.headerIconBtn, pressed && styles.headerIconBtnPressed]}
+              style={({ pressed }) => [styles.headerIconBtn, isDark && styles.headerIconBtnDark, pressed && styles.headerIconBtnPressed]}
               hitSlop={8}
               onPress={() => {
                 if (Platform.OS !== 'web') {
@@ -793,7 +794,7 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
             {/* Notification Bell with Glowing Badge -> Opens Notification Modal */}
             <Pressable
               onPress={openNotificationModal}
-              style={({ pressed }) => [styles.headerIconBtn, pressed && styles.headerIconBtnPressed]}
+              style={({ pressed }) => [styles.headerIconBtn, isDark && styles.headerIconBtnDark, pressed && styles.headerIconBtnPressed]}
               hitSlop={8}
             >
               <Svg width={20} height={20} viewBox="0 0 24 24" fill="none">
@@ -876,7 +877,7 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
               <Text style={styles.nextPostCountdown}>Next post in 2h 45m</Text>
             </View>
 
-            <Text style={styles.focusHeadline}>Post 1 Reel to protect your streak</Text>
+            <Text style={[styles.focusHeadline, isDark && styles.textWhite]}>Post 1 Reel to protect your streak</Text>
 
             {/* Status Pills */}
             <View style={styles.statusPillsRow}>
@@ -910,13 +911,13 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
           <Pressable
             onPress={openCalendarModal}
             style={({ pressed }) => [
-              styles.dashboardCard,
+              styles.dashboardCard, isDark && styles.dashboardCardDark,
               pressed && styles.cardPressed,
             ]}
           >
             <View style={styles.cardHeaderRow}>
               <View style={styles.cardTitleGroup}>
-                <Text style={styles.cardSectionTitle}>Your Streak</Text>
+                <Text style={[styles.cardSectionTitle, isDark && styles.textWhite]}>Your Streak</Text>
                 <Text style={styles.streakSubtext}>Consistency is key 🔗 (Tap to swipe full calendar)</Text>
               </View>
 
@@ -1256,7 +1257,7 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
         </ScrollView>
 
         {/* 10. FLOATING LIQUID GLASS BOTTOM NAVIGATION BAR */}
-        <FloatingTabBar activeTab={activeTab} onTabPress={handleTabPress} />
+        <FloatingTabBar activeTab={activeTab} onTabPress={handleTabPress} isDarkMode={isDark} />
 
         {/* 11. NOTIFICATION CENTER POP-UP MODAL */}
         <Modal
@@ -3580,5 +3581,21 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#7F7894',
     marginTop: 4,
+  },
+
+  dashboardCardDark: {
+    backgroundColor: '#161224',
+    borderColor: '#2B2342',
+    shadowColor: '#000000',
+  },
+  headerIconBtnDark: {
+    backgroundColor: '#1C172C',
+    borderColor: '#2B2342',
+  },
+  textWhite: {
+    color: '#F8FAFC',
+  },
+  textMutedDark: {
+    color: '#94A3B8',
   },
 });

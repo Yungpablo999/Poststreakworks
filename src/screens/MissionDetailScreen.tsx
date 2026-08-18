@@ -37,6 +37,7 @@ export const MissionDetailScreen: React.FC<MissionDetailScreenProps> = ({
 
   userProfile,
   onSaveProfile,}) => {
+  const isDark = userProfile?.isDarkMode ?? false;
   const [activeTab, setActiveTab] = useState<TabType>('quests');
   const [isCompleted, setIsCompleted] = useState(false);
   const [step1Done, setStep1Done] = useState(true);
@@ -112,9 +113,9 @@ export const MissionDetailScreen: React.FC<MissionDetailScreenProps> = ({
   };
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <StatusBar barStyle="dark-content" backgroundColor="#FAF8F5" />
-      <View style={styles.container}>
+    <SafeAreaView style={[styles.safeArea, isDark && { backgroundColor: '#0C0A12' }]}>
+      <StatusBar barStyle={isDark ? "light-content" : "dark-content"} backgroundColor={isDark ? "#0C0A12" : "#FAF8F5"} />
+      <View style={[styles.container, isDark && { backgroundColor: '#0C0A12' }]}>
         {/* 1. TOP AIRY HEADER BAR */}
         <View style={styles.headerBar}>
           {/* Top-Left: Ghost Logo Mascot */}
@@ -446,7 +447,7 @@ export const MissionDetailScreen: React.FC<MissionDetailScreenProps> = ({
         </ScrollView>
 
         {/* FLOATING LIQUID GLASS TAB BAR */}
-        <FloatingTabBar activeTab={activeTab} onTabPress={handleTabPress} />
+        <FloatingTabBar activeTab={activeTab} onTabPress={handleTabPress} isDarkMode={isDark} />
 
         {/* SIGNATURE ANIMATED GHOST CELEBRATION MODAL */}
         <AnimatedCompletionModal

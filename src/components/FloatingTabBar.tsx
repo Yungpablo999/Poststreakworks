@@ -18,6 +18,7 @@ export interface FloatingTabBarProps {
   activeTab: TabType;
   onTabPress: (tab: TabType) => void;
   style?: ViewStyle;
+  isDarkMode?: boolean;
 }
 
 // Vector SVG Icons for Bottom Navigation
@@ -103,6 +104,7 @@ export const FloatingTabBar: React.FC<FloatingTabBarProps> = ({
   activeTab,
   onTabPress,
   style,
+  isDarkMode = false,
 }) => {
   const handlePress = (tab: TabType) => {
     if (Platform.OS !== 'web') {
@@ -116,17 +118,17 @@ export const FloatingTabBar: React.FC<FloatingTabBarProps> = ({
       {/* Apple Liquid Glass Background with SVG Displacement & Chromatic Dispersion */}
       <LiquidGlassBackground
         borderRadius={38}
-        light={0.9}
+        light={isDarkMode ? 0.22 : 0.9}
         refraction={32}
         depth={0.7}
         dispersion={0.85}
         frost={55}
         splay={0.85}
-        tint="purple-gold"
+        tint={isDarkMode ? 'dark' : 'purple-gold'}
         accentColor="#582CDB"
         goldAccentColor="#F59E0B"
         hasShadow={true}
-        style={styles.tabsRow}
+        style={[styles.tabsRow, isDarkMode && { backgroundColor: 'rgba(20, 16, 32, 0.88)', borderColor: '#2E2545' }]}
       >
         {TABS.map((tab) => {
           const isActive = activeTab === tab.id;
@@ -170,9 +172,9 @@ export const FloatingTabBar: React.FC<FloatingTabBarProps> = ({
               hitSlop={6}
             >
               <View style={styles.iconWrapper}>
-                {tab.icon('#605874')}
+                {tab.icon(isDarkMode ? '#94A3B8' : '#605874')}
               </View>
-              <Text style={styles.tabLabelInactive} numberOfLines={1}>
+              <Text style={[styles.tabLabelInactive, isDarkMode && { color: '#94A3B8' }]} numberOfLines={1}>
                 {tab.label}
               </Text>
             </Pressable>

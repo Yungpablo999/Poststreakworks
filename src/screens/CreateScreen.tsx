@@ -256,6 +256,7 @@ export const CreateScreen: React.FC<CreateScreenProps> = ({
 
   userProfile,
   onSaveProfile,}) => {
+  const isDark = userProfile?.isDarkMode ?? false;
   const [activeTab, setActiveTab] = useState<TabType>('create');
   const [drafts, setDrafts] = useState<DraftItem[]>(INITIAL_DRAFTS);
   const [notificationsList, setNotificationsList] = useState<NotificationItem[]>(NOTIFICATIONS);
@@ -468,9 +469,9 @@ export const CreateScreen: React.FC<CreateScreenProps> = ({
   const unreadNotifCount = notificationsList.filter((n) => n.unread).length;
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <StatusBar barStyle="dark-content" backgroundColor="#FAF8F5" />
-      <View style={styles.container}>
+    <SafeAreaView style={[styles.safeArea, isDark && { backgroundColor: '#0C0A12' }]}>
+      <StatusBar barStyle={isDark ? "light-content" : "dark-content"} backgroundColor={isDark ? "#0C0A12" : "#FAF8F5"} />
+      <View style={[styles.container, isDark && { backgroundColor: '#0C0A12' }]}>
         {/* 1. TOP AIRY HEADER BAR */}
         <View style={styles.headerBar}>
           {/* Top-Left: Ghost Logo Mascot */}
@@ -829,7 +830,7 @@ export const CreateScreen: React.FC<CreateScreenProps> = ({
         </ScrollView>
 
         {/* FLOATING LIQUID GLASS TAB BAR */}
-        <FloatingTabBar activeTab={activeTab} onTabPress={handleTabPress} />
+        <FloatingTabBar activeTab={activeTab} onTabPress={handleTabPress} isDarkMode={isDark} />
 
         {/* ============================================================ */}
         {/* FROSTED LIQUID GLASS MODALS (POSTSTREAK LUXURY STYLE) */}

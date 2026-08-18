@@ -106,6 +106,7 @@ export const CaptionScreen: React.FC<CaptionScreenProps> = ({
 
   userProfile,
   onSaveProfile,}) => {
+  const isDark = userProfile?.isDarkMode ?? false;
   const [activeTab, setActiveTab] = useState<TabType>('create');
 
   // Live-Editable Screen State
@@ -279,13 +280,13 @@ export const CaptionScreen: React.FC<CaptionScreenProps> = ({
   const unreadNotifCount = notificationsList.filter((n) => n.unread).length;
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <StatusBar barStyle="dark-content" backgroundColor="#FAF8F5" />
+    <SafeAreaView style={[styles.safeArea, isDark && { backgroundColor: '#0C0A12' }]}>
+      <StatusBar barStyle={isDark ? "light-content" : "dark-content"} backgroundColor={isDark ? "#0C0A12" : "#FAF8F5"} />
       <KeyboardAvoidingView
         style={{ flex: 1 }}
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       >
-        <View style={styles.container}>
+        <View style={[styles.container, isDark && { backgroundColor: '#0C0A12' }]}>
           {/* 1. TOP AIRY HEADER BAR */}
           <View style={styles.headerBar}>
             <View style={styles.headerLeftGroup}>
@@ -704,10 +705,7 @@ export const CaptionScreen: React.FC<CaptionScreenProps> = ({
           </ScrollView>
 
           {/* UNIFIED SIGNATURE FLOATING TAB BAR */}
-          <FloatingTabBar
-            activeTab={activeTab}
-            onTabPress={handleTabPress}
-          />
+          <FloatingTabBar activeTab={activeTab} onTabPress={handleTabPress} isDarkMode={isDark} />
 
           {/* MODAL: CHANGE CONTENT GOAL */}
           <Modal

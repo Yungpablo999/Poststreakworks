@@ -406,6 +406,7 @@ export const MessagesScreen: React.FC<MessagesScreenProps> = ({
 
   userProfile,
   onSaveProfile,}) => {
+  const isDark = userProfile?.isDarkMode ?? false;
   const [activeTab, setActiveTab] = useState<TabType>('match');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<'all' | 'buddies' | 'collabs' | 'jarvis'>('all');
@@ -706,9 +707,9 @@ export const MessagesScreen: React.FC<MessagesScreenProps> = ({
   });
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <StatusBar barStyle="dark-content" backgroundColor="#FAF8F5" />
-      <View style={styles.container}>
+    <SafeAreaView style={[styles.safeArea, isDark && { backgroundColor: '#0C0A12' }]}>
+      <StatusBar barStyle={isDark ? "light-content" : "dark-content"} backgroundColor={isDark ? "#0C0A12" : "#FAF8F5"} />
+      <View style={[styles.container, isDark && { backgroundColor: '#0C0A12' }]}>
         {/* 1. TOP AIRY HEADER BAR */}
         <View style={styles.headerBar}>
           <View style={styles.headerLeftGroup}>
@@ -782,7 +783,7 @@ export const MessagesScreen: React.FC<MessagesScreenProps> = ({
 
             {/* Top-Right: Profile Icon after Plus button */}
             <Pressable
-              style={({ pressed }) => [styles.headerIconBtn, pressed && styles.btnPressed]}
+              style={({ pressed }) => [styles.headerIconBtn, isDark && styles.headerIconBtnDark, pressed && styles.btnPressed]}
               hitSlop={8}
               onPress={() => {
                 if (Platform.OS !== 'web') {
@@ -1350,10 +1351,7 @@ export const MessagesScreen: React.FC<MessagesScreenProps> = ({
         )}
 
         {/* UNIFIED SIGNATURE FLOATING TAB BAR */}
-        <FloatingTabBar
-          activeTab={activeTab}
-          onTabPress={handleTabPress}
-        />
+        <FloatingTabBar activeTab={activeTab} onTabPress={handleTabPress} isDarkMode={isDark} />
 
         {/* ========================================================================= */}
         {/* SNAPCHAT / INSTAGRAM STYLE IMMERSIVE STORY & HIGHLIGHTS VIEWER MODAL */}
@@ -2914,5 +2912,25 @@ const styles = StyleSheet.create({
     fontWeight: '900',
     color: '#FFFFFF',
     letterSpacing: 0.4,
+  },
+
+  messageCardDark: {
+    backgroundColor: '#161224',
+    borderColor: '#2B2342',
+    shadowColor: '#000000',
+  },
+  headerIconBtnDark: {
+    backgroundColor: '#1C172C',
+    borderColor: '#2B2342',
+  },
+  searchBarDark: {
+    backgroundColor: '#161224',
+    borderColor: '#2B2342',
+  },
+  textWhite: {
+    color: '#F8FAFC',
+  },
+  textMutedDark: {
+    color: '#94A3B8',
   },
 });
