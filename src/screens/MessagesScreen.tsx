@@ -69,7 +69,7 @@ const CREATOR_STORIES: CreatorStory[] = [
   {
     id: 'user',
     name: 'You',
-    avatar: require('../../assets/images/creator-elena.jpg'),
+    avatar: require('../../assets/images/amara-avatar.jpg'),
     streak: 47,
     isOnline: true,
     statusText: 'Filming Reel 🎬',
@@ -78,7 +78,7 @@ const CREATOR_STORIES: CreatorStory[] = [
   {
     id: 'c1',
     name: 'Elena R.',
-    avatar: require('../../assets/images/creator-elena.jpg'),
+    avatar: require('../../assets/images/elena-avatar.jpg'),
     streak: 52,
     isOnline: true,
     statusText: 'Editing week 3 batch',
@@ -86,7 +86,7 @@ const CREATOR_STORIES: CreatorStory[] = [
   {
     id: 'c2',
     name: 'Marcus C.',
-    avatar: require('../../assets/images/creator-marcus.jpg'),
+    avatar: require('../../assets/images/marcus-avatar.jpg'),
     streak: 38,
     isOnline: true,
     statusText: 'Writing 5 hooks',
@@ -94,7 +94,7 @@ const CREATOR_STORIES: CreatorStory[] = [
   {
     id: 'c3',
     name: 'Sophia T.',
-    avatar: require('../../assets/images/creator-sophia.jpg'),
+    avatar: require('../../assets/images/zainab-avatar.jpg'),
     streak: 41,
     isOnline: false,
     statusText: 'Studio day!',
@@ -102,7 +102,7 @@ const CREATOR_STORIES: CreatorStory[] = [
   {
     id: 'c4',
     name: 'David K.',
-    avatar: require('../../assets/images/creator-david.jpg'),
+    avatar: require('../../assets/images/david-avatar.jpg'),
     streak: 29,
     isOnline: true,
     statusText: 'Posted today! ⚡',
@@ -116,7 +116,7 @@ const INITIAL_CONVERSATIONS: ConversationThread[] = [
     name: 'Elena Rostova',
     handle: '@elenacreates',
     niche: 'Tech & Productivity',
-    avatar: require('../../assets/images/creator-elena.jpg'),
+    avatar: require('../../assets/images/elena-avatar.jpg'),
     streak: 52,
     isOnline: true,
     lastMessage: 'Loved your lesson on batch filming! Are you free for the duo challenge tomorrow?',
@@ -155,7 +155,7 @@ const INITIAL_CONVERSATIONS: ConversationThread[] = [
     name: 'Marcus Chen',
     handle: '@marcustech',
     niche: 'AI & Workflow',
-    avatar: require('../../assets/images/creator-marcus.jpg'),
+    avatar: require('../../assets/images/marcus-avatar.jpg'),
     streak: 38,
     isOnline: true,
     lastMessage: 'Sent you my caption hook draft. Let me know what you think!',
@@ -187,7 +187,7 @@ const INITIAL_CONVERSATIONS: ConversationThread[] = [
     name: 'Sophia Taylor',
     handle: '@sophiastyle',
     niche: 'Lifestyle & Content',
-    avatar: require('../../assets/images/creator-sophia.jpg'),
+    avatar: require('../../assets/images/zainab-avatar.jpg'),
     streak: 41,
     isOnline: false,
     lastMessage: 'Just scheduled my post for the 7:30 PM peak window! 🚀',
@@ -815,14 +815,14 @@ export const MessagesScreen: React.FC<MessagesScreenProps> = ({
                     handle: '@zoevlogs',
                     niche: 'Daily Vlog & Lifestyle',
                     streak: 64,
-                    avatar: require('../../assets/images/creator-elena.jpg'),
+                    avatar: require('../../assets/images/elena-avatar.jpg'),
                   },
                   {
                     name: 'Liam Vance',
                     handle: '@liamfilms',
                     niche: 'Shorts & Filmmaking',
                     streak: 33,
-                    avatar: require('../../assets/images/creator-david.jpg'),
+                    avatar: require('../../assets/images/david-avatar.jpg'),
                   },
                 ].map((c, i) => (
                   <View key={i} style={styles.discoverCreatorCard}>

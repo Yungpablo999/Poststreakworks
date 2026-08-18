@@ -648,15 +648,5 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#FAF8F5',
-    ...(Platform.OS === 'web'
-      ? {
-          minHeight: '100vh',
-          height: '100%',
-          width: '100%',
-          maxWidth: 480,
-          marginHorizontal: 'auto',
-          boxShadow: '0 0 40px rgba(88, 44, 219, 0.1)',
-        }
-      : {}),
   },
 });
