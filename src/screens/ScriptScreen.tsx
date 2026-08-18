@@ -11,6 +11,8 @@ import {
   Image,
   SafeAreaView,
   StatusBar,
+  TextInput,
+  KeyboardAvoidingView,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as Haptics from 'expo-haptics';
@@ -188,7 +190,7 @@ export const ScriptScreen: React.FC<ScriptScreenProps> = ({
 }) => {
   const [activeTab, setActiveTab] = useState<TabType>('create');
 
-  // Script Components State
+  // Live-Editable Script Components State
   const [selectedHook, setSelectedHook] = useState(HOOK_PRESETS[0].text);
   const [generationsLeft, setGenerationsLeft] = useState(2);
   const [bodyText, setBodyText] = useState(BODY_PRESETS[0].text);
@@ -259,7 +261,6 @@ export const ScriptScreen: React.FC<ScriptScreenProps> = ({
     }
   };
 
-  // Phase Button Click Handlers -> Open Dedicated Full Popups
   const handleOpenPhaseModal = (phase: 'hook' | 'body' | 'lesson' | 'cta') => {
     if (Platform.OS !== 'web') {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
@@ -404,887 +405,921 @@ ${selectedCtaText}`;
   return (
     <SafeAreaView style={styles.safeArea}>
       <StatusBar barStyle="dark-content" backgroundColor="#FAF8F5" />
-      <View style={styles.container}>
-        {/* 1. TOP AIRY HEADER BAR (UNIFIED APP-WIDE) */}
-        <View style={styles.headerBar}>
-          <View style={styles.headerLeftGroup}>
-            <Pressable
-              onPress={() => {
-                if (Platform.OS !== 'web') {
-                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                }
-                onBack();
-              }}
-              style={({ pressed }) => [styles.backCircleBtn, pressed && styles.btnPressed]}
-              hitSlop={8}
-            >
-              <Svg width={20} height={20} viewBox="0 0 24 24" fill="none">
-                <Path d="M15 18L9 12L15 6" stroke="#171420" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" />
-              </Svg>
-            </Pressable>
-
-            {/* Mascot Logo with Floating Animation */}
-            <Animated.View
-              style={[
-                styles.headerLogoWrapper,
-                { transform: [{ translateY: flameFloatY }] },
-              ]}
-            >
-              <Image
-                source={require('../../assets/images/jarvis-ghost-clean.png')}
-                style={styles.headerGhostLogo}
-                resizeMode="contain"
-              />
-            </Animated.View>
-          </View>
-
-          {/* Right Icons: Messages, Notification Bell, Profile */}
-          <View style={styles.headerRightGroup}>
-            <Pressable
-              style={({ pressed }) => [styles.headerIconBtn, pressed && styles.btnPressed]}
-              hitSlop={8}
-              onPress={() => {
-                triggerModalAnim();
-                setShowChatModal(true);
-              }}
-            >
-              <Svg width={19} height={19} viewBox="0 0 24 24" fill="none">
-                <Path
-                  d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"
-                  stroke="#171420"
-                  strokeWidth="2.2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </Svg>
-            </Pressable>
-
-            <Pressable
-              style={({ pressed }) => [styles.headerIconBtn, pressed && styles.btnPressed]}
-              hitSlop={8}
-              onPress={() => {
-                triggerModalAnim();
-                setShowNotificationModal(true);
-              }}
-            >
-              <Svg width={19} height={19} viewBox="0 0 24 24" fill="none">
-                <Path
-                  d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"
-                  stroke="#171420"
-                  strokeWidth="2.2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-                <Path
-                  d="M13.73 21a2 2 0 0 1-3.46 0"
-                  stroke="#171420"
-                  strokeWidth="2.2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </Svg>
-              {unreadNotifCount > 0 && <View style={styles.notificationDot} />}
-            </Pressable>
-
-            <Pressable
-              style={({ pressed }) => [styles.headerIconBtn, pressed && styles.btnPressed]}
-              hitSlop={8}
-              onPress={() => {
-                triggerModalAnim();
-                setShowProfileModal(true);
-              }}
-            >
-              <Svg width={19} height={19} viewBox="0 0 24 24" fill="none">
-                <Path
-                  d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"
-                  stroke="#171420"
-                  strokeWidth="2.2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-                <Circle cx="12" cy="7" r="4" stroke="#171420" strokeWidth="2.2" />
-              </Svg>
-            </Pressable>
-          </View>
-        </View>
-
-        {/* 2. MAIN SCROLLABLE CONTENT */}
-        <ScrollView
-          contentContainerStyle={styles.scrollContent}
-          showsVerticalScrollIndicator={false}
-          bounces={true}
-        >
-          {/* Top Pill Badge */}
-          <View style={styles.topBadgesRow}>
-            <View style={styles.freeScriptPill}>
-              <Text style={styles.freeScriptPillText}>Free Script Tool</Text>
-            </View>
-          </View>
-
-          {/* Main Title */}
-          <Text style={styles.mainTitle}>Turn your idea into a script.</Text>
-
-          {/* 1. SELECTED IDEA CARD */}
-          <View style={styles.selectedIdeaCard}>
-            <View style={styles.selectedIdeaHeaderRow}>
-              <Text style={styles.selectedIdeaLabel}>SELECTED IDEA</Text>
-              <Text style={styles.selectedIdeaDuration}>30-45 sec</Text>
-            </View>
-
-            <Text style={styles.selectedIdeaTitle}>&ldquo;{ideaTitle}&rdquo;</Text>
-
-            <View style={styles.selectedIdeaTagsRow}>
-              <View style={styles.ideaTagPill}>
-                <Text style={styles.ideaTagPillText}>Personal Lesson</Text>
-              </View>
-              <View style={styles.ideaTagPill}>
-                <Text style={styles.ideaTagPillText}>Creator Advice</Text>
-              </View>
-              <View style={styles.streakSaverPill}>
-                <Text style={styles.streakSaverPillText}>Streak Saver</Text>
-              </View>
-            </View>
-          </View>
-
-          {/* 2. SCRIPT PHASE BUTTONS (EACH OPENS A FULL DEDICATED POP-UP MODAL) */}
-          <View style={styles.phaseTabsRow}>
-            {[
-              { id: 'hook', label: '⚓ HOOK' },
-              { id: 'body', label: '📑 BODY' },
-              { id: 'lesson', label: '💡 LESSON' },
-              { id: 'cta', label: '📢 CTA' },
-            ].map((tab) => (
+      <KeyboardAvoidingView
+        style={{ flex: 1 }}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      >
+        <View style={styles.container}>
+          {/* 1. TOP AIRY HEADER BAR */}
+          <View style={styles.headerBar}>
+            <View style={styles.headerLeftGroup}>
               <Pressable
-                key={tab.id}
-                onPress={() => handleOpenPhaseModal(tab.id as 'hook' | 'body' | 'lesson' | 'cta')}
-                style={({ pressed }) => [
-                  styles.phaseTabBtn,
-                  tab.id === 'hook' && styles.phaseTabBtnPrimary,
-                  pressed && styles.btnPressed,
+                onPress={() => {
+                  if (Platform.OS !== 'web') {
+                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                  }
+                  onBack();
+                }}
+                style={({ pressed }) => [styles.backCircleBtn, pressed && styles.btnPressed]}
+                hitSlop={8}
+              >
+                <Svg width={20} height={20} viewBox="0 0 24 24" fill="none">
+                  <Path d="M15 18L9 12L15 6" stroke="#171420" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" />
+                </Svg>
+              </Pressable>
+
+              {/* Mascot Logo */}
+              <Animated.View
+                style={[
+                  styles.headerLogoWrapper,
+                  { transform: [{ translateY: flameFloatY }] },
                 ]}
               >
-                <Text
-                  style={[
-                    styles.phaseTabBtnText,
-                    tab.id === 'hook' && styles.phaseTabBtnTextPrimary,
-                  ]}
-                >
-                  {tab.label}
-                </Text>
-              </Pressable>
-            ))}
-          </View>
-
-          {/* 3. HOOK CARD */}
-          <View style={styles.sectionCard}>
-            <View style={styles.sectionHeaderRow}>
-              <View style={styles.sectionTitleGroup}>
-                <Text style={styles.sectionIcon}>⚓</Text>
-                <Text style={styles.sectionTitle}>Hook</Text>
-              </View>
-              <Pressable
-                onPress={() => handleOpenPhaseModal('hook')}
-                hitSlop={8}
-              >
-                <View style={styles.generationsBadge}>
-                  <Text style={styles.generationsBadgeText}>{generationsLeft} generations left ⚡</Text>
-                </View>
-              </Pressable>
-            </View>
-
-            {/* Active Selected Hook Box */}
-            <Pressable
-              style={styles.activeHookBox}
-              onPress={() => handleOpenPhaseModal('hook')}
-            >
-              <Text style={styles.activeHookText}>&ldquo;{selectedHook}&rdquo;</Text>
-            </Pressable>
-
-            <Text style={styles.alternativeHooksLabel}>ALTERNATIVE HOOKS (TAP TO SWAP)</Text>
-
-            {/* Alternative Hooks List */}
-            {HOOK_PRESETS.filter((h) => h.text !== selectedHook).slice(0, 2).map((hookItem, i) => (
-              <Pressable
-                key={i}
-                onPress={() => handleSelectHook(hookItem.text)}
-                style={styles.altHookBox}
-              >
-                <Text style={styles.altHookType}>{hookItem.type}</Text>
-                <Text style={styles.altHookText}>&ldquo;{hookItem.text}&rdquo;</Text>
-              </Pressable>
-            ))}
-          </View>
-
-          {/* 4. BODY CARD */}
-          <View style={styles.sectionCard}>
-            <View style={styles.sectionHeaderRow}>
-              <View style={styles.sectionTitleGroup}>
-                <Text style={styles.sectionIcon}>📑</Text>
-                <Text style={styles.sectionTitle}>Body</Text>
-              </View>
-              <Pressable onPress={() => handleOpenPhaseModal('body')} hitSlop={8}>
-                <Text style={styles.editSectionLink}>Edit in Studio ➔</Text>
-              </Pressable>
-            </View>
-
-            {/* Body Content Box */}
-            <Pressable
-              style={styles.bodyContentBox}
-              onPress={() => handleOpenPhaseModal('body')}
-            >
-              <Text style={styles.bodyContentText}>{bodyText}</Text>
-            </Pressable>
-
-            {/* Body Refinement Chips */}
-            <View style={styles.bodyChipsRow}>
-              {[
-                { id: 'shorter', label: 'Make Shorter' },
-                { id: 'personal', label: 'More Personal' },
-                { id: 'energetic', label: 'More Energetic' },
-              ].map((chip) => {
-                const isActive = selectedBodyPresetId === chip.id;
-                return (
-                  <Pressable
-                    key={chip.id}
-                    onPress={() => {
-                      const found = BODY_PRESETS.find((p) => p.id === chip.id);
-                      if (found) {
-                        handleApplyBodyFromModal(found);
-                      }
-                    }}
-                    style={[
-                      styles.bodyFilterChip,
-                      isActive && styles.bodyFilterChipActive,
-                    ]}
-                  >
-                    <Text
-                      style={[
-                        styles.bodyFilterChipText,
-                        isActive && styles.bodyFilterChipTextActive,
-                      ]}
-                    >
-                      {chip.label}
-                    </Text>
-                  </Pressable>
-                );
-              })}
-            </View>
-          </View>
-
-          {/* 5. JARVIS CREATIVE ASSISTANT BANNER */}
-          <LinearGradient
-            colors={['#582CDB', '#431FA8']}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-            style={styles.jarvisBannerCard}
-          >
-            <View style={styles.jarvisBannerHeaderRow}>
-              <View style={styles.jarvisBannerFlameRing}>
                 <Image
-                  source={require('../../assets/images/jarvis-core-flame.png')}
-                  style={styles.jarvisBannerFlame}
+                  source={require('../../assets/images/jarvis-ghost-clean.png')}
+                  style={styles.headerGhostLogo}
                   resizeMode="contain"
                 />
-              </View>
-              <Text style={styles.jarvisBannerText}>
-                Keep your script focused on one clear lesson so it\'s easier for viewers to remember and save.
-              </Text>
+              </Animated.View>
             </View>
 
-            <View style={styles.jarvisBannerChipsRow}>
+            {/* Right Icons */}
+            <View style={styles.headerRightGroup}>
               <Pressable
-                style={styles.jarvisBannerChip}
-                onPress={() => handleOpenPhaseModal('hook')}
-              >
-                <Text style={styles.jarvisBannerChipText}>Improve Hook</Text>
-              </Pressable>
-              <Pressable
-                style={styles.jarvisBannerChip}
-                onPress={() => handleOpenPhaseModal('body')}
-              >
-                <Text style={styles.jarvisBannerChipText}>Make More Personal</Text>
-              </Pressable>
-            </View>
-          </LinearGradient>
-
-          {/* 6. TAKEAWAY CARD */}
-          <View style={styles.sectionCard}>
-            <View style={styles.sectionHeaderRow}>
-              <View style={styles.sectionTitleGroup}>
-                <Text style={styles.sectionIcon}>💡</Text>
-                <Text style={styles.sectionTitle}>Takeaway</Text>
-              </View>
-            </View>
-
-            <Text style={styles.takeawayBodyText}>&ldquo;{takeawayText}&rdquo;</Text>
-
-            <Pressable
-              onPress={() => handleOpenPhaseModal('lesson')}
-              hitSlop={8}
-            >
-              <Text style={styles.improveTakeawayLink}>IMPROVE TAKEAWAY ➔</Text>
-            </Pressable>
-          </View>
-
-          {/* 7. CALL TO ACTION CARD */}
-          <View style={styles.sectionCard}>
-            <View style={styles.sectionHeaderRow}>
-              <View style={styles.sectionTitleGroup}>
-                <Text style={styles.sectionIcon}>📢</Text>
-                <Text style={styles.sectionTitle}>Call to Action</Text>
-              </View>
-              <Pressable onPress={() => handleOpenPhaseModal('cta')} hitSlop={8}>
-                <Text style={styles.editSectionLink}>Browse All ➔</Text>
-              </Pressable>
-            </View>
-
-            <View style={styles.ctaContentBox}>
-              <Text style={styles.ctaContentText}>&ldquo;{selectedCtaText}&rdquo;</Text>
-            </View>
-
-            <View style={styles.ctaActionRow}>
-              <Pressable
-                style={({ pressed }) => [styles.useCtaBtn, pressed && styles.btnPressed]}
-                onPress={() => handleOpenPhaseModal('cta')}
-              >
-                <Text style={styles.useCtaBtnText}>USE CTA</Text>
-              </Pressable>
-
-              <Pressable
-                style={({ pressed }) => [styles.shuffleCtaBtn, pressed && styles.btnPressed]}
-                onPress={handleShuffleCta}
+                style={({ pressed }) => [styles.headerIconBtn, pressed && styles.btnPressed]}
                 hitSlop={8}
+                onPress={() => {
+                  triggerModalAnim();
+                  setShowChatModal(true);
+                }}
               >
-                <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
+                <Svg width={19} height={19} viewBox="0 0 24 24" fill="none">
                   <Path
-                    d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3L21.5 8M22 12.5a10 10 0 0 1-18.8 4.2L2.5 16"
-                    stroke="#582CDB"
+                    d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"
+                    stroke="#171420"
                     strokeWidth="2.2"
                     strokeLinecap="round"
                     strokeLinejoin="round"
                   />
                 </Svg>
               </Pressable>
+
+              <Pressable
+                style={({ pressed }) => [styles.headerIconBtn, pressed && styles.btnPressed]}
+                hitSlop={8}
+                onPress={() => {
+                  triggerModalAnim();
+                  setShowNotificationModal(true);
+                }}
+              >
+                <Svg width={19} height={19} viewBox="0 0 24 24" fill="none">
+                  <Path
+                    d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"
+                    stroke="#171420"
+                    strokeWidth="2.2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                  <Path
+                    d="M13.73 21a2 2 0 0 1-3.46 0"
+                    stroke="#171420"
+                    strokeWidth="2.2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </Svg>
+                {unreadNotifCount > 0 && <View style={styles.notificationDot} />}
+              </Pressable>
+
+              <Pressable
+                style={({ pressed }) => [styles.headerIconBtn, pressed && styles.btnPressed]}
+                hitSlop={8}
+                onPress={() => {
+                  triggerModalAnim();
+                  setShowProfileModal(true);
+                }}
+              >
+                <Svg width={19} height={19} viewBox="0 0 24 24" fill="none">
+                  <Path
+                    d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"
+                    stroke="#171420"
+                    strokeWidth="2.2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                  <Circle cx="12" cy="7" r="4" stroke="#171420" strokeWidth="2.2" />
+                </Svg>
+              </Pressable>
             </View>
           </View>
 
-          {/* 8. STREAK IMPACT CARD */}
-          <View style={styles.streakImpactCard}>
-            <View style={styles.streakImpactHeaderRow}>
-              <View>
-                <Text style={styles.streakImpactLabel}>STREAK IMPACT</Text>
-                <Text style={styles.streakImpactSub}>Helps protect 47-day streak</Text>
-              </View>
-              <Text style={styles.streakImpactXp}>+40 XP</Text>
-            </View>
-
-            <View style={styles.streakProgressBarTrack}>
-              <View style={styles.streakProgressBarFill} />
-            </View>
-          </View>
-
-          {/* 9. SCRIPT PREVIEW CONTAINER */}
-          <View style={styles.scriptPreviewCard}>
-            <View style={styles.scriptPreviewHeaderRow}>
-              <Text style={styles.scriptPreviewLabel}>SCRIPT PREVIEW</Text>
-              <View style={styles.scriptPreviewPillsRow}>
-                <Text style={styles.scriptPreviewPillText}>⏱ Short-form</Text>
-                <Text style={styles.scriptPreviewPillText}>💡 Helpful</Text>
-              </View>
-            </View>
-
-            {/* Inner Preview Box */}
-            <View style={styles.scriptPreviewInnerBox}>
-              <Text style={styles.previewLineText}>
-                <Text style={styles.previewLineBold}>Hook: </Text>
-                {selectedHook}
-              </Text>
-              <Text style={[styles.previewLineText, { marginTop: 8 }]}>
-                <Text style={styles.previewLineBold}>Body: </Text>
-                {bodyText}
-              </Text>
-              <Text style={[styles.previewLineText, { marginTop: 8 }]}>
-                <Text style={styles.previewLineBold}>Takeaway: </Text>
-                {takeawayText}
-              </Text>
-              <Text style={[styles.previewLineText, { marginTop: 8 }]}>
-                <Text style={styles.previewLineBold}>CTA: </Text>
-                {selectedCtaText}
-              </Text>
-            </View>
-
-            {/* Dashed Copy Full Script Button */}
-            <Pressable
-              style={({ pressed }) => [styles.copyScriptBtn, pressed && styles.btnPressed]}
-              onPress={handleCopyFullScript}
-            >
-              <Svg width={16} height={16} viewBox="0 0 24 24" fill="none">
-                <Rect x="9" y="9" width="13" height="13" rx="2" stroke="#582CDB" strokeWidth="2.2" />
-                <Path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" stroke="#582CDB" strokeWidth="2.2" />
-              </Svg>
-              <Text style={styles.copyScriptBtnText}>COPY FULL SCRIPT</Text>
-            </Pressable>
-          </View>
-
-          {/* 10. PRIMARY BOTTOM ACTIONS */}
-          <Pressable
-            style={({ pressed }) => [styles.useAsPostBtn, pressed && styles.btnPressed]}
-            onPress={handleUseAsPost}
+          {/* 2. MAIN SCROLLABLE CONTENT */}
+          <ScrollView
+            contentContainerStyle={styles.scrollContent}
+            showsVerticalScrollIndicator={false}
+            bounces={true}
+            keyboardShouldPersistTaps="handled"
           >
-            <LinearGradient
-              colors={['#7C3AED', '#582CDB']}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 0 }}
-              style={styles.useAsPostGradient}
-            >
-              <Text style={styles.useAsPostBtnText}>USE AS POST</Text>
-            </LinearGradient>
-          </Pressable>
+            {/* Top Pill Badge */}
+            <View style={styles.topBadgesRow}>
+              <View style={styles.freeScriptPill}>
+                <Text style={styles.freeScriptPillText}>Free Script Tool</Text>
+              </View>
+            </View>
 
-          <View style={styles.secondaryActionsRow}>
-            <Pressable
-              style={({ pressed }) => [styles.secondaryBtn, pressed && styles.btnPressed]}
-              onPress={() => handleOpenPhaseModal('body')}
-            >
-              <Text style={styles.secondaryBtnText}>IMPROVE SCRIPT</Text>
-            </Pressable>
+            {/* Main Title */}
+            <Text style={styles.mainTitle}>Turn your idea into a script.</Text>
 
-            <Pressable
-              style={({ pressed }) => [styles.secondaryBtn, pressed && styles.btnPressed]}
-              onPress={handleSaveDraft}
-            >
-              <Text style={styles.secondaryBtnText}>SAVE DRAFT</Text>
-            </Pressable>
-          </View>
-
-          {/* Bottom spacing to clear floating tab bar */}
-          <View style={{ height: 110 }} />
-        </ScrollView>
-
-        {/* UNIFIED SIGNATURE FLOATING TAB BAR */}
-        <FloatingTabBar
-          activeTab={activeTab}
-          onTabPress={handleTabPress}
-        />
-
-        {/* ========================================================================= */}
-        {/* MODAL 1: FULL HOOK STUDIO POP-UP MODAL */}
-        {/* ========================================================================= */}
-        <Modal
-          visible={showHookModal}
-          transparent={true}
-          animationType="fade"
-          onRequestClose={() => setShowHookModal(false)}
-        >
-          <View style={styles.modalOverlay}>
-            <Animated.View style={[styles.modalCardLarge, { transform: [{ scale: modalPopScale }] }]}>
-              <View style={styles.modalHeaderRow}>
-                <View>
-                  <Text style={styles.modalTitle}>⚓ Viral Hook Studio</Text>
-                  <Text style={styles.modalSubtitle}>First 3 seconds that stop the scroll</Text>
-                </View>
-                <Pressable
-                  onPress={() => setShowHookModal(false)}
-                  style={styles.modalCloseCircle}
-                  hitSlop={8}
-                >
-                  <Text style={styles.modalCloseCross}>✕</Text>
-                </Pressable>
+            {/* 1. SELECTED IDEA CARD */}
+            <View style={styles.selectedIdeaCard}>
+              <View style={styles.selectedIdeaHeaderRow}>
+                <Text style={styles.selectedIdeaLabel}>SELECTED IDEA</Text>
+                <Text style={styles.selectedIdeaDuration}>30-45 sec</Text>
               </View>
 
-              <ScrollView style={{ maxHeight: 380 }} showsVerticalScrollIndicator={false}>
-                {HOOK_PRESETS.map((preset, index) => {
-                  const isSelected = selectedHook === preset.text;
-                  return (
-                    <Pressable
-                      key={index}
-                      onPress={() => handleSelectHook(preset.text)}
-                      style={[
-                        styles.hookModalItemCard,
-                        isSelected && styles.hookModalItemCardActive,
-                      ]}
-                    >
-                      <View style={styles.hookModalItemHeader}>
-                        <Text style={[styles.hookModalItemType, isSelected && styles.hookModalItemTypeActive]}>
-                          {preset.type}
-                        </Text>
-                        {isSelected && (
-                          <View style={styles.selectedCheckBadge}>
-                            <Text style={styles.selectedCheckText}>✓ ACTIVE</Text>
-                          </View>
-                        )}
-                      </View>
-                      <Text style={styles.hookModalItemText}>&ldquo;{preset.text}&rdquo;</Text>
-                      <Text style={styles.hookModalItemDesc}>{preset.desc}</Text>
-                    </Pressable>
-                  );
-                })}
-              </ScrollView>
+              <Text style={styles.selectedIdeaTitle}>&ldquo;{ideaTitle}&rdquo;</Text>
 
-              <Pressable
-                style={styles.modalFullBtn}
-                onPress={() => handleApplyHookFromModal(selectedHook)}
-              >
-                <Text style={styles.modalFullBtnText}>Apply Hook to Script ➔</Text>
-              </Pressable>
-            </Animated.View>
-          </View>
-        </Modal>
+              <View style={styles.selectedIdeaTagsRow}>
+                <View style={styles.ideaTagPill}>
+                  <Text style={styles.ideaTagPillText}>Personal Lesson</Text>
+                </View>
+                <View style={styles.ideaTagPill}>
+                  <Text style={styles.ideaTagPillText}>Creator Advice</Text>
+                </View>
+                <View style={styles.streakSaverPill}>
+                  <Text style={styles.streakSaverPillText}>Streak Saver</Text>
+                </View>
+              </View>
+            </View>
 
-        {/* ========================================================================= */}
-        {/* MODAL 2: FULL SCRIPT BODY STUDIO POP-UP MODAL */}
-        {/* ========================================================================= */}
-        <Modal
-          visible={showBodyModal}
-          transparent={true}
-          animationType="fade"
-          onRequestClose={() => setShowBodyModal(false)}
-        >
-          <View style={styles.modalOverlay}>
-            <Animated.View style={[styles.modalCardLarge, { transform: [{ scale: modalPopScale }] }]}>
-              <View style={styles.modalHeaderRow}>
-                <View>
-                  <Text style={styles.modalTitle}>📑 Script Body Studio</Text>
-                  <Text style={styles.modalSubtitle}>Pacing, storytelling &amp; high retention</Text>
+            {/* 2. SCRIPT PHASE BUTTONS (EACH OPENS A FULL DEDICATED POP-UP MODAL) */}
+            <View style={styles.phaseTabsRow}>
+              {[
+                { id: 'hook', label: '⚓ HOOK' },
+                { id: 'body', label: '📑 BODY' },
+                { id: 'lesson', label: '💡 LESSON' },
+                { id: 'cta', label: '📢 CTA' },
+              ].map((tab) => (
+                <Pressable
+                  key={tab.id}
+                  onPress={() => handleOpenPhaseModal(tab.id as 'hook' | 'body' | 'lesson' | 'cta')}
+                  style={({ pressed }) => [
+                    styles.phaseTabBtn,
+                    tab.id === 'hook' && styles.phaseTabBtnPrimary,
+                    pressed && styles.btnPressed,
+                  ]}
+                >
+                  <Text
+                    style={[
+                      styles.phaseTabBtnText,
+                      tab.id === 'hook' && styles.phaseTabBtnTextPrimary,
+                    ]}
+                  >
+                    {tab.label}
+                  </Text>
+                </Pressable>
+              ))}
+            </View>
+
+            {/* 3. HOOK CARD (LIVE-EDITABLE INPUT) */}
+            <View style={styles.sectionCard}>
+              <View style={styles.sectionHeaderRow}>
+                <View style={styles.sectionTitleGroup}>
+                  <Text style={styles.sectionIcon}>⚓</Text>
+                  <Text style={styles.sectionTitle}>Hook</Text>
+                  <Text style={styles.editableHintMicro}>Editable</Text>
                 </View>
                 <Pressable
-                  onPress={() => setShowBodyModal(false)}
-                  style={styles.modalCloseCircle}
+                  onPress={() => handleOpenPhaseModal('hook')}
                   hitSlop={8}
                 >
-                  <Text style={styles.modalCloseCross}>✕</Text>
-                </Pressable>
-              </View>
-
-              <ScrollView style={{ maxHeight: 380 }} showsVerticalScrollIndicator={false}>
-                {BODY_PRESETS.map((preset) => {
-                  const isSelected = selectedBodyPresetId === preset.id;
-                  return (
-                    <Pressable
-                      key={preset.id}
-                      onPress={() => {
-                        setSelectedBodyPresetId(preset.id);
-                        setBodyText(preset.text);
-                      }}
-                      style={[
-                        styles.bodyModalItemCard,
-                        isSelected && styles.bodyModalItemCardActive,
-                      ]}
-                    >
-                      <View style={styles.bodyModalItemHeader}>
-                        <Text style={styles.bodyModalItemTitle}>{preset.title}</Text>
-                        <View style={styles.bodyModalTagPill}>
-                          <Text style={styles.bodyModalTagText}>{preset.tag}</Text>
-                        </View>
-                      </View>
-                      <Text style={styles.bodyModalItemText}>{preset.text}</Text>
-                    </Pressable>
-                  );
-                })}
-              </ScrollView>
-
-              <Pressable
-                style={styles.modalFullBtn}
-                onPress={() => {
-                  const found = BODY_PRESETS.find((p) => p.id === selectedBodyPresetId) || BODY_PRESETS[0];
-                  handleApplyBodyFromModal(found);
-                }}
-              >
-                <Text style={styles.modalFullBtnText}>Apply Body to Script ➔</Text>
-              </Pressable>
-            </Animated.View>
-          </View>
-        </Modal>
-
-        {/* ========================================================================= */}
-        {/* MODAL 3: FULL LESSON / TAKEAWAY POP-UP MODAL */}
-        {/* ========================================================================= */}
-        <Modal
-          visible={showLessonModal}
-          transparent={true}
-          animationType="fade"
-          onRequestClose={() => setShowLessonModal(false)}
-        >
-          <View style={styles.modalOverlay}>
-            <Animated.View style={[styles.modalCardLarge, { transform: [{ scale: modalPopScale }] }]}>
-              <View style={styles.modalHeaderRow}>
-                <View>
-                  <Text style={styles.modalTitle}>💡 Core Lesson Studio</Text>
-                  <Text style={styles.modalSubtitle}>The memorable takeaway that gets saved</Text>
-                </View>
-                <Pressable
-                  onPress={() => setShowLessonModal(false)}
-                  style={styles.modalCloseCircle}
-                  hitSlop={8}
-                >
-                  <Text style={styles.modalCloseCross}>✕</Text>
-                </Pressable>
-              </View>
-
-              <ScrollView style={{ maxHeight: 380 }} showsVerticalScrollIndicator={false}>
-                {LESSON_PRESETS.map((lesson) => {
-                  const isSelected = selectedLessonId === lesson.id;
-                  return (
-                    <Pressable
-                      key={lesson.id}
-                      onPress={() => {
-                        setSelectedLessonId(lesson.id);
-                        setTakeawayText(lesson.text);
-                      }}
-                      style={[
-                        styles.lessonModalItemCard,
-                        isSelected && styles.lessonModalItemCardActive,
-                      ]}
-                    >
-                      <View style={styles.lessonModalItemHeader}>
-                        <Text style={styles.lessonModalItemTitle}>{lesson.title}</Text>
-                        <View style={styles.lessonModalTagPill}>
-                          <Text style={styles.lessonModalTagText}>{lesson.tag}</Text>
-                        </View>
-                      </View>
-                      <Text style={styles.lessonModalItemText}>&ldquo;{lesson.text}&rdquo;</Text>
-                    </Pressable>
-                  );
-                })}
-              </ScrollView>
-
-              <Pressable
-                style={styles.modalFullBtn}
-                onPress={() => {
-                  const found = LESSON_PRESETS.find((l) => l.id === selectedLessonId) || LESSON_PRESETS[0];
-                  handleApplyLessonFromModal(found);
-                }}
-              >
-                <Text style={styles.modalFullBtnText}>Apply Takeaway ➔</Text>
-              </Pressable>
-            </Animated.View>
-          </View>
-        </Modal>
-
-        {/* ========================================================================= */}
-        {/* MODAL 4: FULL CALL TO ACTION (CTA) POP-UP MODAL */}
-        {/* ========================================================================= */}
-        <Modal
-          visible={showCtaModal}
-          transparent={true}
-          animationType="fade"
-          onRequestClose={() => setShowCtaModal(false)}
-        >
-          <View style={styles.modalOverlay}>
-            <Animated.View style={[styles.modalCardLarge, { transform: [{ scale: modalPopScale }] }]}>
-              <View style={styles.modalHeaderRow}>
-                <View>
-                  <Text style={styles.modalTitle}>📢 Call to Action Studio</Text>
-                  <Text style={styles.modalSubtitle}>Drive comments, saves &amp; viral shares</Text>
-                </View>
-                <Pressable
-                  onPress={() => setShowCtaModal(false)}
-                  style={styles.modalCloseCircle}
-                  hitSlop={8}
-                >
-                  <Text style={styles.modalCloseCross}>✕</Text>
-                </Pressable>
-              </View>
-
-              <ScrollView style={{ maxHeight: 380 }} showsVerticalScrollIndicator={false}>
-                {CTA_PRESETS.map((cta, index) => {
-                  const isSelected = selectedCtaText === cta.text;
-                  return (
-                    <Pressable
-                      key={cta.id}
-                      onPress={() => {
-                        setSelectedCtaText(cta.text);
-                        setCtaIndex(index);
-                      }}
-                      style={[
-                        styles.ctaModalItemCard,
-                        isSelected && styles.ctaModalItemCardActive,
-                      ]}
-                    >
-                      <View style={styles.ctaModalItemHeader}>
-                        <Text style={[styles.ctaModalItemType, isSelected && styles.ctaModalItemTypeActive]}>
-                          {cta.type}
-                        </Text>
-                        <Text style={styles.ctaModalGoal}>{cta.goal}</Text>
-                      </View>
-                      <Text style={styles.ctaModalItemText}>&ldquo;{cta.text}&rdquo;</Text>
-                    </Pressable>
-                  );
-                })}
-              </ScrollView>
-
-              <Pressable
-                style={styles.modalFullBtn}
-                onPress={() => {
-                  const found = CTA_PRESETS.find((c) => c.text === selectedCtaText) || CTA_PRESETS[0];
-                  handleApplyCtaFromModal(found);
-                }}
-              >
-                <Text style={styles.modalFullBtnText}>Apply CTA to Script ➔</Text>
-              </Pressable>
-            </Animated.View>
-          </View>
-        </Modal>
-
-        {/* MODAL: NOTIFICATIONS CENTER */}
-        <Modal
-          visible={showNotificationModal}
-          transparent={true}
-          animationType="fade"
-          onRequestClose={() => setShowNotificationModal(false)}
-        >
-          <View style={styles.modalOverlay}>
-            <Animated.View style={[styles.modalCard, { transform: [{ scale: modalPopScale }] }]}>
-              <View style={styles.modalHeaderRow}>
-                <View>
-                  <Text style={styles.modalTitle}>Notifications</Text>
-                  <Text style={styles.modalSubtitle}>Streak updates &amp; creator alerts</Text>
-                </View>
-                <Pressable
-                  onPress={() => setShowNotificationModal(false)}
-                  style={styles.modalCloseCircle}
-                  hitSlop={8}
-                >
-                  <Text style={styles.modalCloseCross}>✕</Text>
-                </Pressable>
-              </View>
-
-              <ScrollView style={{ maxHeight: 260 }} showsVerticalScrollIndicator={false}>
-                {notificationsList.map((notif) => (
-                  <View key={notif.id} style={[styles.notifCard, notif.unread && styles.notifCardUnread]}>
-                    <View style={[styles.notifBadge, { backgroundColor: notif.badgeBg, borderColor: notif.badgeBorder }]}>
-                      <Text style={{ fontSize: 16 }}>{notif.iconEmoji}</Text>
-                    </View>
-                    <View style={{ flex: 1 }}>
-                      <Text style={styles.notifTitle}>{notif.title}</Text>
-                      <Text style={styles.notifBody}>{notif.body}</Text>
-                      <Text style={styles.notifTime}>{notif.time}</Text>
-                    </View>
+                  <View style={styles.generationsBadge}>
+                    <Text style={styles.generationsBadgeText}>{generationsLeft} generations left ⚡</Text>
                   </View>
-                ))}
-              </ScrollView>
-
-              <Pressable
-                style={styles.modalFullBtn}
-                onPress={() => {
-                  setNotificationsList(notificationsList.map((n) => ({ ...n, unread: false })));
-                  setShowNotificationModal(false);
-                }}
-              >
-                <Text style={styles.modalFullBtnText}>Mark All Read &amp; Close</Text>
-              </Pressable>
-            </Animated.View>
-          </View>
-        </Modal>
-
-        {/* MODAL: CREATOR PROFILE PASSPORT */}
-        <Modal
-          visible={showProfileModal}
-          transparent={true}
-          animationType="fade"
-          onRequestClose={() => setShowProfileModal(false)}
-        >
-          <View style={styles.modalOverlay}>
-            <Animated.View style={[styles.modalCard, { transform: [{ scale: modalPopScale }] }]}>
-              <View style={styles.modalHeaderRow}>
-                <View>
-                  <Text style={styles.modalTitle}>Creator Passport</Text>
-                  <Text style={styles.modalSubtitle}>Your verified consistency record</Text>
-                </View>
-                <Pressable
-                  onPress={() => setShowProfileModal(false)}
-                  style={styles.modalCloseCircle}
-                  hitSlop={8}
-                >
-                  <Text style={styles.modalCloseCross}>✕</Text>
                 </Pressable>
               </View>
 
-              <View style={styles.profileModalCardInner}>
-                <View style={styles.profileModalIconRing}>
-                  <Svg width={28} height={28} viewBox="0 0 24 24" fill="none">
+              {/* Active Selected Hook Box */}
+              <View style={styles.activeHookBox}>
+                <TextInput
+                  value={selectedHook}
+                  onChangeText={setSelectedHook}
+                  placeholder="Type your hook..."
+                  placeholderTextColor="#94A3B8"
+                  multiline
+                  style={styles.hookInput}
+                />
+              </View>
+
+              <Text style={styles.alternativeHooksLabel}>ALTERNATIVE HOOKS (TAP TO SWAP)</Text>
+
+              {/* Alternative Hooks List */}
+              {HOOK_PRESETS.filter((h) => h.text !== selectedHook).slice(0, 2).map((hookItem, i) => (
+                <Pressable
+                  key={i}
+                  onPress={() => handleSelectHook(hookItem.text)}
+                  style={styles.altHookBox}
+                >
+                  <Text style={styles.altHookType}>{hookItem.type}</Text>
+                  <Text style={styles.altHookText}>&ldquo;{hookItem.text}&rdquo;</Text>
+                </Pressable>
+              ))}
+            </View>
+
+            {/* 4. BODY CARD (LIVE-EDITABLE MULTILINE) */}
+            <View style={styles.sectionCard}>
+              <View style={styles.sectionHeaderRow}>
+                <View style={styles.sectionTitleGroup}>
+                  <Text style={styles.sectionIcon}>📑</Text>
+                  <Text style={styles.sectionTitle}>Body</Text>
+                  <Text style={styles.editableHintMicro}>Editable</Text>
+                </View>
+                <Pressable onPress={() => handleOpenPhaseModal('body')} hitSlop={8}>
+                  <Text style={styles.editSectionLink}>Studio ➔</Text>
+                </Pressable>
+              </View>
+
+              {/* Body Content Box */}
+              <View style={styles.bodyContentBox}>
+                <TextInput
+                  value={bodyText}
+                  onChangeText={setBodyText}
+                  placeholder="Write or customize script body..."
+                  placeholderTextColor="#94A3B8"
+                  multiline
+                  style={styles.bodyInput}
+                />
+              </View>
+
+              {/* Body Refinement Chips */}
+              <View style={styles.bodyChipsRow}>
+                {[
+                  { id: 'shorter', label: 'Make Shorter' },
+                  { id: 'personal', label: 'More Personal' },
+                  { id: 'energetic', label: 'More Energetic' },
+                ].map((chip) => {
+                  const isActive = selectedBodyPresetId === chip.id;
+                  return (
+                    <Pressable
+                      key={chip.id}
+                      onPress={() => {
+                        const found = BODY_PRESETS.find((p) => p.id === chip.id);
+                        if (found) {
+                          handleApplyBodyFromModal(found);
+                        }
+                      }}
+                      style={[
+                        styles.bodyFilterChip,
+                        isActive && styles.bodyFilterChipActive,
+                      ]}
+                    >
+                      <Text
+                        style={[
+                          styles.bodyFilterChipText,
+                          isActive && styles.bodyFilterChipTextActive,
+                        ]}
+                      >
+                        {chip.label}
+                      </Text>
+                    </Pressable>
+                  );
+                })}
+              </View>
+            </View>
+
+            {/* 5. JARVIS CREATIVE ASSISTANT BANNER */}
+            <LinearGradient
+              colors={['#582CDB', '#431FA8']}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={styles.jarvisBannerCard}
+            >
+              <View style={styles.jarvisBannerHeaderRow}>
+                <View style={styles.jarvisBannerFlameRing}>
+                  <Image
+                    source={require('../../assets/images/jarvis-core-flame.png')}
+                    style={styles.jarvisBannerFlame}
+                    resizeMode="contain"
+                  />
+                </View>
+                <Text style={styles.jarvisBannerText}>
+                  Keep your script focused on one clear lesson so it\'s easier for viewers to remember and save.
+                </Text>
+              </View>
+
+              <View style={styles.jarvisBannerChipsRow}>
+                <Pressable
+                  style={styles.jarvisBannerChip}
+                  onPress={() => handleOpenPhaseModal('hook')}
+                >
+                  <Text style={styles.jarvisBannerChipText}>Improve Hook</Text>
+                </Pressable>
+                <Pressable
+                  style={styles.jarvisBannerChip}
+                  onPress={() => handleOpenPhaseModal('body')}
+                >
+                  <Text style={styles.jarvisBannerChipText}>Make More Personal</Text>
+                </Pressable>
+              </View>
+            </LinearGradient>
+
+            {/* 6. TAKEAWAY CARD (LIVE-EDITABLE) */}
+            <View style={styles.sectionCard}>
+              <View style={styles.sectionHeaderRow}>
+                <View style={styles.sectionTitleGroup}>
+                  <Text style={styles.sectionIcon}>💡</Text>
+                  <Text style={styles.sectionTitle}>Takeaway</Text>
+                  <Text style={styles.editableHintMicro}>Editable</Text>
+                </View>
+              </View>
+
+              <View style={styles.takeawayBox}>
+                <TextInput
+                  value={takeawayText}
+                  onChangeText={setTakeawayText}
+                  placeholder="Type takeaway lesson..."
+                  placeholderTextColor="#94A3B8"
+                  multiline
+                  style={styles.takeawayInput}
+                />
+              </View>
+
+              <Pressable
+                onPress={() => handleOpenPhaseModal('lesson')}
+                hitSlop={8}
+              >
+                <Text style={styles.improveTakeawayLink}>IMPROVE TAKEAWAY ➔</Text>
+              </Pressable>
+            </View>
+
+            {/* 7. CALL TO ACTION CARD (LIVE-EDITABLE) */}
+            <View style={styles.sectionCard}>
+              <View style={styles.sectionHeaderRow}>
+                <View style={styles.sectionTitleGroup}>
+                  <Text style={styles.sectionIcon}>📢</Text>
+                  <Text style={styles.sectionTitle}>Call to Action</Text>
+                  <Text style={styles.editableHintMicro}>Editable</Text>
+                </View>
+                <Pressable onPress={() => handleOpenPhaseModal('cta')} hitSlop={8}>
+                  <Text style={styles.editSectionLink}>Browse All ➔</Text>
+                </Pressable>
+              </View>
+
+              <View style={styles.ctaContentBox}>
+                <TextInput
+                  value={selectedCtaText}
+                  onChangeText={setSelectedCtaText}
+                  placeholder="Type call to action..."
+                  placeholderTextColor="#94A3B8"
+                  multiline
+                  style={styles.ctaInput}
+                />
+              </View>
+
+              <View style={styles.ctaActionRow}>
+                <Pressable
+                  style={({ pressed }) => [styles.useCtaBtn, pressed && styles.btnPressed]}
+                  onPress={() => handleOpenPhaseModal('cta')}
+                >
+                  <Text style={styles.useCtaBtnText}>USE CTA</Text>
+                </Pressable>
+
+                <Pressable
+                  style={({ pressed }) => [styles.shuffleCtaBtn, pressed && styles.btnPressed]}
+                  onPress={handleShuffleCta}
+                  hitSlop={8}
+                >
+                  <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
                     <Path
-                      d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"
+                      d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3L21.5 8M22 12.5a10 10 0 0 1-18.8 4.2L2.5 16"
                       stroke="#582CDB"
                       strokeWidth="2.2"
                       strokeLinecap="round"
                       strokeLinejoin="round"
                     />
-                    <Circle cx="12" cy="7" r="4" stroke="#582CDB" strokeWidth="2.2" />
                   </Svg>
-                </View>
-                <Text style={styles.profileModalName}>Amara Okafor</Text>
-                <Text style={styles.profileModalNiche}>Lifestyle &amp; Tech Creator</Text>
-                <View style={styles.profileModalLevelPill}>
-                  <Text style={styles.profileModalLevelText}>⚡ Level 4 Storyteller • 47-Day Streak</Text>
-                </View>
-              </View>
-
-              <Pressable
-                style={styles.modalFullBtn}
-                onPress={() => setShowProfileModal(false)}
-              >
-                <Text style={styles.modalFullBtnText}>Done</Text>
-              </Pressable>
-            </Animated.View>
-          </View>
-        </Modal>
-
-        {/* MODAL: CREATOR CHAT */}
-        <Modal
-          visible={showChatModal}
-          transparent={true}
-          animationType="fade"
-          onRequestClose={() => setShowChatModal(false)}
-        >
-          <View style={styles.modalOverlay}>
-            <Animated.View style={[styles.modalCard, { transform: [{ scale: modalPopScale }] }]}>
-              <View style={styles.modalHeaderRow}>
-                <View>
-                  <Text style={styles.modalTitle}>Jarvis AI Chat</Text>
-                  <Text style={styles.modalSubtitle}>Real-time creative assistant</Text>
-                </View>
-                <Pressable
-                  onPress={() => setShowChatModal(false)}
-                  style={styles.modalCloseCircle}
-                  hitSlop={8}
-                >
-                  <Text style={styles.modalCloseCross}>✕</Text>
                 </Pressable>
               </View>
+            </View>
 
-              <View style={styles.chatCard}>
-                <Text style={styles.chatSpeaker}>Jarvis AI</Text>
-                <Text style={styles.chatMsg}>
-                  I optimized this 30-second script for TikTok &amp; Reels retention! The first 3 seconds hook audience attention.
+            {/* 8. STREAK IMPACT CARD */}
+            <View style={styles.streakImpactCard}>
+              <View style={styles.streakImpactHeaderRow}>
+                <View>
+                  <Text style={styles.streakImpactLabel}>STREAK IMPACT</Text>
+                  <Text style={styles.streakImpactSub}>Helps protect 47-day streak</Text>
+                </View>
+                <Text style={styles.streakImpactXp}>+40 XP</Text>
+              </View>
+
+              <View style={styles.streakProgressBarTrack}>
+                <View style={styles.streakProgressBarFill} />
+              </View>
+            </View>
+
+            {/* 9. SCRIPT PREVIEW CONTAINER */}
+            <View style={styles.scriptPreviewCard}>
+              <View style={styles.scriptPreviewHeaderRow}>
+                <Text style={styles.scriptPreviewLabel}>SCRIPT PREVIEW</Text>
+                <View style={styles.scriptPreviewPillsRow}>
+                  <Text style={styles.scriptPreviewPillText}>⏱ Short-form</Text>
+                  <Text style={styles.scriptPreviewPillText}>💡 Helpful</Text>
+                </View>
+              </View>
+
+              {/* Inner Preview Box */}
+              <View style={styles.scriptPreviewInnerBox}>
+                <Text style={styles.previewLineText}>
+                  <Text style={styles.previewLineBold}>Hook: </Text>
+                  {selectedHook}
+                </Text>
+                <Text style={[styles.previewLineText, { marginTop: 8 }]}>
+                  <Text style={styles.previewLineBold}>Body: </Text>
+                  {bodyText}
+                </Text>
+                <Text style={[styles.previewLineText, { marginTop: 8 }]}>
+                  <Text style={styles.previewLineBold}>Takeaway: </Text>
+                  {takeawayText}
+                </Text>
+                <Text style={[styles.previewLineText, { marginTop: 8 }]}>
+                  <Text style={styles.previewLineBold}>CTA: </Text>
+                  {selectedCtaText}
                 </Text>
               </View>
 
+              {/* Dashed Copy Full Script Button */}
               <Pressable
-                style={styles.modalFullBtn}
-                onPress={() => setShowChatModal(false)}
+                style={({ pressed }) => [styles.copyScriptBtn, pressed && styles.btnPressed]}
+                onPress={handleCopyFullScript}
               >
-                <Text style={styles.modalFullBtnText}>Close Chat</Text>
+                <Svg width={16} height={16} viewBox="0 0 24 24" fill="none">
+                  <Rect x="9" y="9" width="13" height="13" rx="2" stroke="#582CDB" strokeWidth="2.2" />
+                  <Path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" stroke="#582CDB" strokeWidth="2.2" />
+                </Svg>
+                <Text style={styles.copyScriptBtnText}>COPY FULL SCRIPT</Text>
               </Pressable>
-            </Animated.View>
-          </View>
-        </Modal>
+            </View>
 
-        {/* SIGNATURE ANIMATED GHOST CELEBRATION MODAL */}
-        <AnimatedCompletionModal
-          visible={showCelebrationModal}
-          title={celebrationTitle}
-          subtitle={celebrationSubtitle}
-          speechBubble={celebrationSpeech}
-          badgeText={celebrationBadge}
-          xpEarned={40}
-          streakCount={47}
-          actionText="Keep Editing ➔"
-          onDismiss={() => {
-            setShowCelebrationModal(false);
-          }}
-        />
-      </View>
+            {/* 10. PRIMARY BOTTOM ACTIONS */}
+            <Pressable
+              style={({ pressed }) => [styles.useAsPostBtn, pressed && styles.btnPressed]}
+              onPress={handleUseAsPost}
+            >
+              <LinearGradient
+                colors={['#7C3AED', '#582CDB']}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 0 }}
+                style={styles.useAsPostGradient}
+              >
+                <Text style={styles.useAsPostBtnText}>USE AS POST</Text>
+              </LinearGradient>
+            </Pressable>
+
+            <View style={styles.secondaryActionsRow}>
+              <Pressable
+                style={({ pressed }) => [styles.secondaryBtn, pressed && styles.btnPressed]}
+                onPress={() => handleOpenPhaseModal('body')}
+              >
+                <Text style={styles.secondaryBtnText}>IMPROVE SCRIPT</Text>
+              </Pressable>
+
+              <Pressable
+                style={({ pressed }) => [styles.secondaryBtn, pressed && styles.btnPressed]}
+                onPress={handleSaveDraft}
+              >
+                <Text style={styles.secondaryBtnText}>SAVE DRAFT</Text>
+              </Pressable>
+            </View>
+
+            {/* Bottom spacing to clear floating tab bar */}
+            <View style={{ height: 110 }} />
+          </ScrollView>
+
+          {/* UNIFIED SIGNATURE FLOATING TAB BAR */}
+          <FloatingTabBar
+            activeTab={activeTab}
+            onTabPress={handleTabPress}
+          />
+
+          {/* ========================================================================= */}
+          {/* MODAL 1: FULL HOOK STUDIO POP-UP MODAL */}
+          {/* ========================================================================= */}
+          <Modal
+            visible={showHookModal}
+            transparent={true}
+            animationType="fade"
+            onRequestClose={() => setShowHookModal(false)}
+          >
+            <View style={styles.modalOverlay}>
+              <Animated.View style={[styles.modalCardLarge, { transform: [{ scale: modalPopScale }] }]}>
+                <View style={styles.modalHeaderRow}>
+                  <View>
+                    <Text style={styles.modalTitle}>⚓ Viral Hook Studio</Text>
+                    <Text style={styles.modalSubtitle}>First 3 seconds that stop the scroll</Text>
+                  </View>
+                  <Pressable
+                    onPress={() => setShowHookModal(false)}
+                    style={styles.modalCloseCircle}
+                    hitSlop={8}
+                  >
+                    <Text style={styles.modalCloseCross}>✕</Text>
+                  </Pressable>
+                </View>
+
+                <ScrollView style={{ maxHeight: 380 }} showsVerticalScrollIndicator={false}>
+                  {HOOK_PRESETS.map((preset, index) => {
+                    const isSelected = selectedHook === preset.text;
+                    return (
+                      <Pressable
+                        key={index}
+                        onPress={() => handleSelectHook(preset.text)}
+                        style={[
+                          styles.hookModalItemCard,
+                          isSelected && styles.hookModalItemCardActive,
+                        ]}
+                      >
+                        <View style={styles.hookModalItemHeader}>
+                          <Text style={[styles.hookModalItemType, isSelected && styles.hookModalItemTypeActive]}>
+                            {preset.type}
+                          </Text>
+                          {isSelected && (
+                            <View style={styles.selectedCheckBadge}>
+                              <Text style={styles.selectedCheckText}>✓ ACTIVE</Text>
+                            </View>
+                          )}
+                        </View>
+                        <Text style={styles.hookModalItemText}>&ldquo;{preset.text}&rdquo;</Text>
+                        <Text style={styles.hookModalItemDesc}>{preset.desc}</Text>
+                      </Pressable>
+                    );
+                  })}
+                </ScrollView>
+
+                <Pressable
+                  style={styles.modalFullBtn}
+                  onPress={() => handleApplyHookFromModal(selectedHook)}
+                >
+                  <Text style={styles.modalFullBtnText}>Apply Hook to Script ➔</Text>
+                </Pressable>
+              </Animated.View>
+            </View>
+          </Modal>
+
+          {/* ========================================================================= */}
+          {/* MODAL 2: FULL SCRIPT BODY STUDIO POP-UP MODAL */}
+          {/* ========================================================================= */}
+          <Modal
+            visible={showBodyModal}
+            transparent={true}
+            animationType="fade"
+            onRequestClose={() => setShowBodyModal(false)}
+          >
+            <View style={styles.modalOverlay}>
+              <Animated.View style={[styles.modalCardLarge, { transform: [{ scale: modalPopScale }] }]}>
+                <View style={styles.modalHeaderRow}>
+                  <View>
+                    <Text style={styles.modalTitle}>📑 Script Body Studio</Text>
+                    <Text style={styles.modalSubtitle}>Pacing, storytelling &amp; high retention</Text>
+                  </View>
+                  <Pressable
+                    onPress={() => setShowBodyModal(false)}
+                    style={styles.modalCloseCircle}
+                    hitSlop={8}
+                  >
+                    <Text style={styles.modalCloseCross}>✕</Text>
+                  </Pressable>
+                </View>
+
+                <ScrollView style={{ maxHeight: 380 }} showsVerticalScrollIndicator={false}>
+                  {BODY_PRESETS.map((preset) => {
+                    const isSelected = selectedBodyPresetId === preset.id;
+                    return (
+                      <Pressable
+                        key={preset.id}
+                        onPress={() => {
+                          setSelectedBodyPresetId(preset.id);
+                          setBodyText(preset.text);
+                        }}
+                        style={[
+                          styles.bodyModalItemCard,
+                          isSelected && styles.bodyModalItemCardActive,
+                        ]}
+                      >
+                        <View style={styles.bodyModalItemHeader}>
+                          <Text style={styles.bodyModalItemTitle}>{preset.title}</Text>
+                          <View style={styles.bodyModalTagPill}>
+                            <Text style={styles.bodyModalTagText}>{preset.tag}</Text>
+                          </View>
+                        </View>
+                        <Text style={styles.bodyModalItemText}>{preset.text}</Text>
+                      </Pressable>
+                    );
+                  })}
+                </ScrollView>
+
+                <Pressable
+                  style={styles.modalFullBtn}
+                  onPress={() => {
+                    const found = BODY_PRESETS.find((p) => p.id === selectedBodyPresetId) || BODY_PRESETS[0];
+                    handleApplyBodyFromModal(found);
+                  }}
+                >
+                  <Text style={styles.modalFullBtnText}>Apply Body to Script ➔</Text>
+                </Pressable>
+              </Animated.View>
+            </View>
+          </Modal>
+
+          {/* ========================================================================= */}
+          {/* MODAL 3: FULL LESSON / TAKEAWAY POP-UP MODAL */}
+          {/* ========================================================================= */}
+          <Modal
+            visible={showLessonModal}
+            transparent={true}
+            animationType="fade"
+            onRequestClose={() => setShowLessonModal(false)}
+          >
+            <View style={styles.modalOverlay}>
+              <Animated.View style={[styles.modalCardLarge, { transform: [{ scale: modalPopScale }] }]}>
+                <View style={styles.modalHeaderRow}>
+                  <View>
+                    <Text style={styles.modalTitle}>💡 Core Lesson Studio</Text>
+                    <Text style={styles.modalSubtitle}>The memorable takeaway that gets saved</Text>
+                  </View>
+                  <Pressable
+                    onPress={() => setShowLessonModal(false)}
+                    style={styles.modalCloseCircle}
+                    hitSlop={8}
+                  >
+                    <Text style={styles.modalCloseCross}>✕</Text>
+                  </Pressable>
+                </View>
+
+                <ScrollView style={{ maxHeight: 380 }} showsVerticalScrollIndicator={false}>
+                  {LESSON_PRESETS.map((lesson) => {
+                    const isSelected = selectedLessonId === lesson.id;
+                    return (
+                      <Pressable
+                        key={lesson.id}
+                        onPress={() => {
+                          setSelectedLessonId(lesson.id);
+                          setTakeawayText(lesson.text);
+                        }}
+                        style={[
+                          styles.lessonModalItemCard,
+                          isSelected && styles.lessonModalItemCardActive,
+                        ]}
+                      >
+                        <View style={styles.lessonModalItemHeader}>
+                          <Text style={styles.lessonModalItemTitle}>{lesson.title}</Text>
+                          <View style={styles.lessonModalTagPill}>
+                            <Text style={styles.lessonModalTagText}>{lesson.tag}</Text>
+                          </View>
+                        </View>
+                        <Text style={styles.lessonModalItemText}>&ldquo;{lesson.text}&rdquo;</Text>
+                      </Pressable>
+                    );
+                  })}
+                </ScrollView>
+
+                <Pressable
+                  style={styles.modalFullBtn}
+                  onPress={() => {
+                    const found = LESSON_PRESETS.find((l) => l.id === selectedLessonId) || LESSON_PRESETS[0];
+                    handleApplyLessonFromModal(found);
+                  }}
+                >
+                  <Text style={styles.modalFullBtnText}>Apply Takeaway ➔</Text>
+                </Pressable>
+              </Animated.View>
+            </View>
+          </Modal>
+
+          {/* ========================================================================= */}
+          {/* MODAL 4: FULL CALL TO ACTION (CTA) POP-UP MODAL */}
+          {/* ========================================================================= */}
+          <Modal
+            visible={showCtaModal}
+            transparent={true}
+            animationType="fade"
+            onRequestClose={() => setShowCtaModal(false)}
+          >
+            <View style={styles.modalOverlay}>
+              <Animated.View style={[styles.modalCardLarge, { transform: [{ scale: modalPopScale }] }]}>
+                <View style={styles.modalHeaderRow}>
+                  <View>
+                    <Text style={styles.modalTitle}>📢 Call to Action Studio</Text>
+                    <Text style={styles.modalSubtitle}>Drive comments, saves &amp; viral shares</Text>
+                  </View>
+                  <Pressable
+                    onPress={() => setShowCtaModal(false)}
+                    style={styles.modalCloseCircle}
+                    hitSlop={8}
+                  >
+                    <Text style={styles.modalCloseCross}>✕</Text>
+                  </Pressable>
+                </View>
+
+                <ScrollView style={{ maxHeight: 380 }} showsVerticalScrollIndicator={false}>
+                  {CTA_PRESETS.map((cta, index) => {
+                    const isSelected = selectedCtaText === cta.text;
+                    return (
+                      <Pressable
+                        key={cta.id}
+                        onPress={() => {
+                          setSelectedCtaText(cta.text);
+                          setCtaIndex(index);
+                        }}
+                        style={[
+                          styles.ctaModalItemCard,
+                          isSelected && styles.ctaModalItemCardActive,
+                        ]}
+                      >
+                        <View style={styles.ctaModalItemHeader}>
+                          <Text style={[styles.ctaModalItemType, isSelected && styles.ctaModalItemTypeActive]}>
+                            {cta.type}
+                          </Text>
+                          <Text style={styles.ctaModalGoal}>{cta.goal}</Text>
+                        </View>
+                        <Text style={styles.ctaModalItemText}>&ldquo;{cta.text}&rdquo;</Text>
+                      </Pressable>
+                    );
+                  })}
+                </ScrollView>
+
+                <Pressable
+                  style={styles.modalFullBtn}
+                  onPress={() => {
+                    const found = CTA_PRESETS.find((c) => c.text === selectedCtaText) || CTA_PRESETS[0];
+                    handleApplyCtaFromModal(found);
+                  }}
+                >
+                  <Text style={styles.modalFullBtnText}>Apply CTA to Script ➔</Text>
+                </Pressable>
+              </Animated.View>
+            </View>
+          </Modal>
+
+          {/* MODAL: NOTIFICATIONS CENTER */}
+          <Modal
+            visible={showNotificationModal}
+            transparent={true}
+            animationType="fade"
+            onRequestClose={() => setShowNotificationModal(false)}
+          >
+            <View style={styles.modalOverlay}>
+              <Animated.View style={[styles.modalCard, { transform: [{ scale: modalPopScale }] }]}>
+                <View style={styles.modalHeaderRow}>
+                  <View>
+                    <Text style={styles.modalTitle}>Notifications</Text>
+                    <Text style={styles.modalSubtitle}>Streak updates &amp; creator alerts</Text>
+                  </View>
+                  <Pressable
+                    onPress={() => setShowNotificationModal(false)}
+                    style={styles.modalCloseCircle}
+                    hitSlop={8}
+                  >
+                    <Text style={styles.modalCloseCross}>✕</Text>
+                  </Pressable>
+                </View>
+
+                <ScrollView style={{ maxHeight: 260 }} showsVerticalScrollIndicator={false}>
+                  {notificationsList.map((notif) => (
+                    <View key={notif.id} style={[styles.notifCard, notif.unread && styles.notifCardUnread]}>
+                      <View style={[styles.notifBadge, { backgroundColor: notif.badgeBg, borderColor: notif.badgeBorder }]}>
+                        <Text style={{ fontSize: 16 }}>{notif.iconEmoji}</Text>
+                      </View>
+                      <View style={{ flex: 1 }}>
+                        <Text style={styles.notifTitle}>{notif.title}</Text>
+                        <Text style={styles.notifBody}>{notif.body}</Text>
+                        <Text style={styles.notifTime}>{notif.time}</Text>
+                      </View>
+                    </View>
+                  ))}
+                </ScrollView>
+
+                <Pressable
+                  style={styles.modalFullBtn}
+                  onPress={() => {
+                    setNotificationsList(notificationsList.map((n) => ({ ...n, unread: false })));
+                    setShowNotificationModal(false);
+                  }}
+                >
+                  <Text style={styles.modalFullBtnText}>Mark All Read &amp; Close</Text>
+                </Pressable>
+              </Animated.View>
+            </View>
+          </Modal>
+
+          {/* MODAL: CREATOR PROFILE PASSPORT */}
+          <Modal
+            visible={showProfileModal}
+            transparent={true}
+            animationType="fade"
+            onRequestClose={() => setShowProfileModal(false)}
+          >
+            <View style={styles.modalOverlay}>
+              <Animated.View style={[styles.modalCard, { transform: [{ scale: modalPopScale }] }]}>
+                <View style={styles.modalHeaderRow}>
+                  <View>
+                    <Text style={styles.modalTitle}>Creator Passport</Text>
+                    <Text style={styles.modalSubtitle}>Your verified consistency record</Text>
+                  </View>
+                  <Pressable
+                    onPress={() => setShowProfileModal(false)}
+                    style={styles.modalCloseCircle}
+                    hitSlop={8}
+                  >
+                    <Text style={styles.modalCloseCross}>✕</Text>
+                  </Pressable>
+                </View>
+
+                <View style={styles.profileModalCardInner}>
+                  <View style={styles.profileModalIconRing}>
+                    <Svg width={28} height={28} viewBox="0 0 24 24" fill="none">
+                      <Path
+                        d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"
+                        stroke="#582CDB"
+                        strokeWidth="2.2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                      <Circle cx="12" cy="7" r="4" stroke="#582CDB" strokeWidth="2.2" />
+                    </Svg>
+                  </View>
+                  <Text style={styles.profileModalName}>Amara Okafor</Text>
+                  <Text style={styles.profileModalNiche}>Lifestyle &amp; Tech Creator</Text>
+                  <View style={styles.profileModalLevelPill}>
+                    <Text style={styles.profileModalLevelText}>⚡ Level 4 Storyteller • 47-Day Streak</Text>
+                  </View>
+                </View>
+
+                <Pressable
+                  style={styles.modalFullBtn}
+                  onPress={() => setShowProfileModal(false)}
+                >
+                  <Text style={styles.modalFullBtnText}>Done</Text>
+                </Pressable>
+              </Animated.View>
+            </View>
+          </Modal>
+
+          {/* MODAL: CREATOR CHAT */}
+          <Modal
+            visible={showChatModal}
+            transparent={true}
+            animationType="fade"
+            onRequestClose={() => setShowChatModal(false)}
+          >
+            <View style={styles.modalOverlay}>
+              <Animated.View style={[styles.modalCard, { transform: [{ scale: modalPopScale }] }]}>
+                <View style={styles.modalHeaderRow}>
+                  <View>
+                    <Text style={styles.modalTitle}>Jarvis AI Chat</Text>
+                    <Text style={styles.modalSubtitle}>Real-time creative assistant</Text>
+                  </View>
+                  <Pressable
+                    onPress={() => setShowChatModal(false)}
+                    style={styles.modalCloseCircle}
+                    hitSlop={8}
+                  >
+                    <Text style={styles.modalCloseCross}>✕</Text>
+                  </Pressable>
+                </View>
+
+                <View style={styles.chatCard}>
+                  <Text style={styles.chatSpeaker}>Jarvis AI</Text>
+                  <Text style={styles.chatMsg}>
+                    I optimized this 30-second script for TikTok &amp; Reels retention! The first 3 seconds hook audience attention.
+                  </Text>
+                </View>
+
+                <Pressable
+                  style={styles.modalFullBtn}
+                  onPress={() => setShowChatModal(false)}
+                >
+                  <Text style={styles.modalFullBtnText}>Close Chat</Text>
+                </Pressable>
+              </Animated.View>
+            </View>
+          </Modal>
+
+          {/* SIGNATURE ANIMATED GHOST CELEBRATION MODAL */}
+          <AnimatedCompletionModal
+            visible={showCelebrationModal}
+            title={celebrationTitle}
+            subtitle={celebrationSubtitle}
+            speechBubble={celebrationSpeech}
+            badgeText={celebrationBadge}
+            xpEarned={40}
+            streakCount={47}
+            actionText="Keep Editing ➔"
+            onDismiss={() => {
+              setShowCelebrationModal(false);
+            }}
+          />
+        </View>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 };
@@ -1547,6 +1582,11 @@ const styles = StyleSheet.create({
     fontWeight: '800',
     color: '#171420',
   },
+  editableHintMicro: {
+    fontSize: 9.5,
+    color: '#94A3B8',
+    fontWeight: '700',
+  },
   generationsBadge: {
     backgroundColor: '#FEF3C7',
     borderWidth: 1,
@@ -1574,14 +1614,15 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     borderWidth: 1,
     borderColor: '#EDE9FE',
-    padding: 14,
+    padding: 12,
     marginBottom: 12,
   },
-  activeHookText: {
-    fontSize: 14,
+  hookInput: {
+    fontSize: 13.5,
     fontWeight: '700',
     color: '#171420',
-    lineHeight: 20,
+    lineHeight: 19,
+    minHeight: 36,
   },
   alternativeHooksLabel: {
     fontSize: 9.5,
@@ -1616,13 +1657,14 @@ const styles = StyleSheet.create({
     borderRadius: 14,
     borderWidth: 1,
     borderColor: '#E2E8F0',
-    padding: 14,
+    padding: 12,
     marginBottom: 12,
   },
-  bodyContentText: {
+  bodyInput: {
     fontSize: 13,
     color: '#334155',
     lineHeight: 19,
+    minHeight: 70,
   },
   bodyChipsRow: {
     flexDirection: 'row',
@@ -1703,11 +1745,19 @@ const styles = StyleSheet.create({
   },
 
   // Takeaway Card
-  takeawayBodyText: {
-    fontSize: 13.5,
-    color: '#171420',
-    lineHeight: 19,
+  takeawayBox: {
+    backgroundColor: '#F8FAFC',
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    padding: 12,
     marginBottom: 10,
+  },
+  takeawayInput: {
+    fontSize: 13,
+    color: '#171420',
+    lineHeight: 18,
+    minHeight: 36,
   },
   improveTakeawayLink: {
     fontSize: 11.5,
@@ -1725,10 +1775,11 @@ const styles = StyleSheet.create({
     padding: 12,
     marginBottom: 12,
   },
-  ctaContentText: {
+  ctaInput: {
     fontSize: 13,
     color: '#334155',
     lineHeight: 18,
+    minHeight: 36,
   },
   ctaActionRow: {
     flexDirection: 'row',

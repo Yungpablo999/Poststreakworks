@@ -12,6 +12,7 @@ import {
   SafeAreaView,
   StatusBar,
   TextInput,
+  KeyboardAvoidingView,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as Haptics from 'expo-haptics';
@@ -100,7 +101,7 @@ export const CaptionScreen: React.FC<CaptionScreenProps> = ({
 }) => {
   const [activeTab, setActiveTab] = useState<TabType>('create');
 
-  // Screen State
+  // Live-Editable Screen State
   const [postTopic, setPostTopic] = useState(ideaTitle);
   const [selectedGoal, setSelectedGoal] = useState('Get saves and comments');
   const [selectedTones, setSelectedTones] = useState<string[]>(['Helpful', 'Honest']);
@@ -109,10 +110,12 @@ export const CaptionScreen: React.FC<CaptionScreenProps> = ({
   const [suggestedIndex, setSuggestedIndex] = useState(0);
   const currentSuggestion = SUGGESTED_CAPTIONS_CATALOG[suggestedIndex];
 
-  // Draft Editor State
+  // Editable Draft Editor & Fields
   const [draftText, setDraftText] = useState(
     "I used to wait until every idea felt perfect before posting. But the truth is, perfection is the enemy of progress. If you're waiting for the right moment, you're just falling behind."
   );
+  const [quickCta, setQuickCta] = useState(currentSuggestion.cta);
+  const [hashtagsText, setHashtagsText] = useState(currentSuggestion.hashtags);
   const [isSavedBookmark, setIsSavedBookmark] = useState(false);
 
   // Modals & Celebrations
@@ -188,7 +191,10 @@ export const CaptionScreen: React.FC<CaptionScreenProps> = ({
     }
     const nextIdx = (suggestedIndex + 1) % SUGGESTED_CAPTIONS_CATALOG.length;
     setSuggestedIndex(nextIdx);
-    setDraftText(SUGGESTED_CAPTIONS_CATALOG[nextIdx].text);
+    const nextItem = SUGGESTED_CAPTIONS_CATALOG[nextIdx];
+    setDraftText(nextItem.text);
+    setQuickCta(nextItem.cta);
+    setHashtagsText(nextItem.hashtags);
 
     setCelebrationTitle('New Caption Generated!');
     setCelebrationSubtitle('Fresh viral angle and hashtags loaded into your editor.');
@@ -259,7 +265,7 @@ export const CaptionScreen: React.FC<CaptionScreenProps> = ({
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     }
     if (onAddToPost) {
-      onAddToPost(draftText, currentSuggestion.hashtags);
+      onAddToPost(draftText, hashtagsText);
     }
   };
 
@@ -268,589 +274,639 @@ export const CaptionScreen: React.FC<CaptionScreenProps> = ({
   return (
     <SafeAreaView style={styles.safeArea}>
       <StatusBar barStyle="dark-content" backgroundColor="#FAF8F5" />
-      <View style={styles.container}>
-        {/* 1. TOP AIRY HEADER BAR (UNIFIED APP-WIDE) */}
-        <View style={styles.headerBar}>
-          <View style={styles.headerLeftGroup}>
-            <Pressable
-              onPress={() => {
-                if (Platform.OS !== 'web') {
-                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                }
-                onBack();
-              }}
-              style={({ pressed }) => [styles.backCircleBtn, pressed && styles.btnPressed]}
-              hitSlop={8}
-            >
-              <Svg width={20} height={20} viewBox="0 0 24 24" fill="none">
-                <Path d="M15 18L9 12L15 6" stroke="#171420" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" />
-              </Svg>
-            </Pressable>
-
-            {/* Mascot Logo with Floating Animation */}
-            <Animated.View
-              style={[
-                styles.headerLogoWrapper,
-                { transform: [{ translateY: flameFloatY }] },
-              ]}
-            >
-              <Image
-                source={require('../../assets/images/jarvis-ghost-clean.png')}
-                style={styles.headerGhostLogo}
-                resizeMode="contain"
-              />
-            </Animated.View>
-          </View>
-
-          {/* Right Icons: Messages, Notification Bell, Profile */}
-          <View style={styles.headerRightGroup}>
-            <Pressable
-              style={({ pressed }) => [styles.headerIconBtn, pressed && styles.btnPressed]}
-              hitSlop={8}
-              onPress={() => {
-                triggerModalAnim();
-                setShowChatModal(true);
-              }}
-            >
-              <Svg width={19} height={19} viewBox="0 0 24 24" fill="none">
-                <Path
-                  d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"
-                  stroke="#171420"
-                  strokeWidth="2.2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </Svg>
-            </Pressable>
-
-            <Pressable
-              style={({ pressed }) => [styles.headerIconBtn, pressed && styles.btnPressed]}
-              hitSlop={8}
-              onPress={() => {
-                triggerModalAnim();
-                setShowNotificationModal(true);
-              }}
-            >
-              <Svg width={19} height={19} viewBox="0 0 24 24" fill="none">
-                <Path
-                  d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"
-                  stroke="#171420"
-                  strokeWidth="2.2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-                <Path
-                  d="M13.73 21a2 2 0 0 1-3.46 0"
-                  stroke="#171420"
-                  strokeWidth="2.2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </Svg>
-              {unreadNotifCount > 0 && <View style={styles.notificationDot} />}
-            </Pressable>
-
-            <Pressable
-              style={({ pressed }) => [styles.headerIconBtn, pressed && styles.btnPressed]}
-              hitSlop={8}
-              onPress={() => {
-                triggerModalAnim();
-                setShowProfileModal(true);
-              }}
-            >
-              <Svg width={19} height={19} viewBox="0 0 24 24" fill="none">
-                <Path
-                  d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"
-                  stroke="#171420"
-                  strokeWidth="2.2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-                <Circle cx="12" cy="7" r="4" stroke="#171420" strokeWidth="2.2" />
-              </Svg>
-            </Pressable>
-          </View>
-        </View>
-
-        {/* 2. MAIN SCROLLABLE CONTENT */}
-        <ScrollView
-          contentContainerStyle={styles.scrollContent}
-          showsVerticalScrollIndicator={false}
-          bounces={true}
-        >
-          {/* Top Pill Badges */}
-          <View style={styles.topBadgesRow}>
-            <View style={styles.captionWriterPill}>
-              <Text style={styles.captionWriterPillText}>CAPTION WRITER</Text>
-            </View>
-            <View style={styles.freeCaptionPill}>
-              <Text style={styles.freeCaptionPillText}>Free Caption Tool</Text>
-            </View>
-          </View>
-
-          {/* Main Title & Subtitle */}
-          <Text style={styles.mainTitle}>Write a caption that fits your post.</Text>
-          <Text style={styles.mainSubtitle}>
-            Create captions, CTAs and hashtags that match your content goal and platform.
-          </Text>
-
-          {/* 1. "WHAT IS THIS POST ABOUT?" HERO CARD */}
-          <View style={styles.topicHeroCard}>
-            <View style={styles.topicHeaderRow}>
-              <Text style={styles.topicHeaderIcon}>✍️</Text>
-              <Text style={styles.topicHeaderTitle}>What is this post about?</Text>
-            </View>
-
-            {/* Inner Topic Box */}
-            <View style={styles.topicInnerBox}>
-              <Text style={styles.topicInnerText}>{postTopic}</Text>
-            </View>
-
-            {/* Goal Line with Change Button */}
-            <View style={styles.goalRow}>
-              <View style={styles.goalLeftGroup}>
-                <Text style={styles.goalIcon}>🎯</Text>
-                <Text style={styles.goalLabel}>
-                  Goal: <Text style={styles.goalValue}>{selectedGoal}</Text>
-                </Text>
-              </View>
-
+      <KeyboardAvoidingView
+        style={{ flex: 1 }}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      >
+        <View style={styles.container}>
+          {/* 1. TOP AIRY HEADER BAR */}
+          <View style={styles.headerBar}>
+            <View style={styles.headerLeftGroup}>
               <Pressable
                 onPress={() => {
-                  triggerModalAnim();
-                  setShowGoalModal(true);
+                  if (Platform.OS !== 'web') {
+                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                  }
+                  onBack();
                 }}
+                style={({ pressed }) => [styles.backCircleBtn, pressed && styles.btnPressed]}
                 hitSlop={8}
               >
-                <Text style={styles.goalChangeLink}>Change</Text>
+                <Svg width={20} height={20} viewBox="0 0 24 24" fill="none">
+                  <Path d="M15 18L9 12L15 6" stroke="#171420" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" />
+                </Svg>
               </Pressable>
-            </View>
-          </View>
 
-          {/* 2. CHOOSE A TONE SECTION */}
-          <Text style={styles.sectionLabel}>Choose A Tone</Text>
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={styles.tonePillsRow}
-          >
-            {TONE_OPTIONS.map((tone) => {
-              const isSelected = selectedTones.includes(tone);
-              return (
-                <Pressable
-                  key={tone}
-                  onPress={() => toggleTone(tone)}
-                  style={[
-                    styles.tonePill,
-                    isSelected && styles.tonePillActive,
-                  ]}
-                >
-                  <Text
-                    style={[
-                      styles.tonePillText,
-                      isSelected && styles.tonePillTextActive,
-                    ]}
-                  >
-                    {tone}
-                  </Text>
-                </Pressable>
-              );
-            })}
-          </ScrollView>
-
-          {/* 3. SUGGESTED CAPTIONS SECTION */}
-          <View style={styles.suggestedHeaderRow}>
-            <Text style={styles.suggestedTitle}>Suggested Captions</Text>
-            <Pressable onPress={handleRegenerate} hitSlop={8}>
-              <Text style={styles.regenerateLink}>🔄 Regenerate</Text>
-            </Pressable>
-          </View>
-
-          {/* Recommended Caption Card */}
-          <View style={styles.recommendedCard}>
-            <View style={styles.recommendedBadgeRow}>
-              <View style={styles.recommendedBadge}>
-                <Text style={styles.recommendedBadgeText}>⭐ RECOMMENDED</Text>
-              </View>
-            </View>
-
-            <Text style={styles.recommendedCaptionText}>
-              {currentSuggestion.text}
-            </Text>
-
-            {/* Tags Row */}
-            <View style={styles.recommendedTagsRow}>
-              {currentSuggestion.tags.map((tag, idx) => (
-                <View
-                  key={idx}
-                  style={[
-                    styles.recommendedTagPill,
-                    tag === 'Strong CTA' && styles.strongCtaTagPill,
-                  ]}
-                >
-                  <Text
-                    style={[
-                      styles.recommendedTagText,
-                      tag === 'Strong CTA' && styles.strongCtaTagText,
-                    ]}
-                  >
-                    {tag}
-                  </Text>
-                </View>
-              ))}
-            </View>
-          </View>
-
-          {/* 4. QUICK CTA CARD */}
-          <View style={styles.quickCtaCard}>
-            <Text style={styles.microCapLabel}>QUICK CTA</Text>
-            <Text style={styles.quickCtaText}>&ldquo;{currentSuggestion.cta}&rdquo;</Text>
-          </View>
-
-          {/* 5. HASHTAGS CARD */}
-          <View style={styles.hashtagsCard}>
-            <Text style={styles.microCapLabel}>HASHTAGS</Text>
-            <Text style={styles.hashtagsText}>{currentSuggestion.hashtags}</Text>
-          </View>
-
-          {/* 6. DRAFT EDITOR CARD */}
-          <View style={styles.draftEditorCard}>
-            <View style={styles.draftEditorHeaderRow}>
-              <View style={styles.draftEditorBadge}>
-                <Text style={styles.draftEditorBadgeText}>DRAFT EDITOR</Text>
-              </View>
-              <Text style={styles.draftEditorTimeLeft}>⏱ 3 WEEKS LEFT</Text>
-            </View>
-
-            <Text style={styles.draftEditorText}>{draftText}</Text>
-
-            {/* Status Check & Fit Row */}
-            <View style={styles.draftStatusRow}>
-              <View style={styles.statusPill}>
-                <Text style={styles.statusPillCheck}>✓</Text>
-                <Text style={styles.statusPillText}>CTA OK</Text>
-              </View>
-              <View style={styles.fitPill}>
-                <Text style={styles.fitPillText}>📑 High Fit</Text>
-              </View>
-            </View>
-
-            <Text style={styles.charCountText}>{draftText.length} / 2200 CHARS</Text>
-
-            {/* Quick Action Buttons */}
-            <View style={styles.draftActionsRow}>
-              <Pressable
-                style={({ pressed }) => [styles.draftActionBtn, pressed && styles.btnPressed]}
-                onPress={handleMakeShorter}
+              {/* Mascot Logo */}
+              <Animated.View
+                style={[
+                  styles.headerLogoWrapper,
+                  { transform: [{ translateY: flameFloatY }] },
+                ]}
               >
-                <Text style={styles.draftActionBtnText}>Make Shorter</Text>
-              </Pressable>
-
-              <Pressable
-                style={({ pressed }) => [styles.draftActionBtn, pressed && styles.btnPressed]}
-                onPress={handleAddPersonal}
-              >
-                <Text style={styles.draftActionBtnText}>Add Personal</Text>
-              </Pressable>
-            </View>
-
-            <Pressable
-              style={({ pressed }) => [styles.improveHookBtn, pressed && styles.btnPressed]}
-              onPress={handleImproveHook}
-            >
-              <Text style={styles.improveHookBtnText}>Improve Hook</Text>
-            </Pressable>
-          </View>
-
-          {/* 7. JARVIS INSIGHT CARD */}
-          <View style={styles.jarvisCard}>
-            <View style={styles.jarvisCardHeaderRow}>
-              <View style={styles.jarvisFlameBox}>
                 <Image
-                  source={require('../../assets/images/jarvis-core-flame.png')}
-                  style={styles.jarvisFlameImg}
+                  source={require('../../assets/images/jarvis-ghost-clean.png')}
+                  style={styles.headerGhostLogo}
                   resizeMode="contain"
                 />
-              </View>
+              </Animated.View>
+            </View>
 
-              <View style={{ flex: 1 }}>
-                <Text style={styles.jarvisTitle}>Jarvis Insight</Text>
-              </View>
+            {/* Right Icons */}
+            <View style={styles.headerRightGroup}>
+              <Pressable
+                style={({ pressed }) => [styles.headerIconBtn, pressed && styles.btnPressed]}
+                hitSlop={8}
+                onPress={() => {
+                  triggerModalAnim();
+                  setShowChatModal(true);
+                }}
+              >
+                <Svg width={19} height={19} viewBox="0 0 24 24" fill="none">
+                  <Path
+                    d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"
+                    stroke="#171420"
+                    strokeWidth="2.2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </Svg>
+              </Pressable>
 
-              <View style={styles.aiPoweredBadge}>
-                <Text style={styles.aiPoweredBadgeText}>AI-POWERED</Text>
+              <Pressable
+                style={({ pressed }) => [styles.headerIconBtn, pressed && styles.btnPressed]}
+                hitSlop={8}
+                onPress={() => {
+                  triggerModalAnim();
+                  setShowNotificationModal(true);
+                }}
+              >
+                <Svg width={19} height={19} viewBox="0 0 24 24" fill="none">
+                  <Path
+                    d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"
+                    stroke="#171420"
+                    strokeWidth="2.2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                  <Path
+                    d="M13.73 21a2 2 0 0 1-3.46 0"
+                    stroke="#171420"
+                    strokeWidth="2.2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </Svg>
+                {unreadNotifCount > 0 && <View style={styles.notificationDot} />}
+              </Pressable>
+
+              <Pressable
+                style={({ pressed }) => [styles.headerIconBtn, pressed && styles.btnPressed]}
+                hitSlop={8}
+                onPress={() => {
+                  triggerModalAnim();
+                  setShowProfileModal(true);
+                }}
+              >
+                <Svg width={19} height={19} viewBox="0 0 24 24" fill="none">
+                  <Path
+                    d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"
+                    stroke="#171420"
+                    strokeWidth="2.2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                  <Circle cx="12" cy="7" r="4" stroke="#171420" strokeWidth="2.2" />
+                </Svg>
+              </Pressable>
+            </View>
+          </View>
+
+          {/* 2. MAIN SCROLLABLE CONTENT */}
+          <ScrollView
+            contentContainerStyle={styles.scrollContent}
+            showsVerticalScrollIndicator={false}
+            bounces={true}
+            keyboardShouldPersistTaps="handled"
+          >
+            {/* Top Pill Badges */}
+            <View style={styles.topBadgesRow}>
+              <View style={styles.captionWriterPill}>
+                <Text style={styles.captionWriterPillText}>CAPTION WRITER</Text>
+              </View>
+              <View style={styles.freeCaptionPill}>
+                <Text style={styles.freeCaptionPillText}>Free Caption Tool</Text>
               </View>
             </View>
 
-            <Text style={styles.jarvisBodyText}>
-              This caption works best when the <Text style={{ fontWeight: '800' }}>first line</Text> is specific. Mention one realisation that changed how you create.
+            {/* Main Title & Subtitle */}
+            <Text style={styles.mainTitle}>Write a caption that fits your post.</Text>
+            <Text style={styles.mainSubtitle}>
+              Create captions, CTAs and hashtags that match your content goal and platform.
             </Text>
 
-            <Pressable
-              style={({ pressed }) => [styles.jarvisApplyBtn, pressed && styles.btnPressed]}
-              onPress={handleApplyRecommendation}
-            >
-              <Text style={styles.jarvisApplyBtnText}>Apply Recommendation</Text>
-            </Pressable>
-          </View>
-
-          {/* 8. PRIMARY BOTTOM ACTION: ADD TO POST + BOOKMARK */}
-          <View style={styles.bottomActionRow}>
-            <Pressable
-              style={({ pressed }) => [styles.addToPostMainBtn, pressed && styles.btnPressed]}
-              onPress={handleAddToPost}
-            >
-              <LinearGradient
-                colors={['#7C3AED', '#582CDB']}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 0 }}
-                style={styles.addToPostGradient}
-              >
-                <Text style={styles.addToPostBtnText}>Add to Post</Text>
-              </LinearGradient>
-            </Pressable>
-
-            <Pressable
-              style={({ pressed }) => [
-                styles.bookmarkBtn,
-                isSavedBookmark && styles.bookmarkBtnActive,
-                pressed && styles.btnPressed,
-              ]}
-              onPress={handleToggleBookmark}
-            >
-              <Svg width={20} height={20} viewBox="0 0 24 24" fill={isSavedBookmark ? '#FFFFFF' : 'none'}>
-                <Path
-                  d="M19 21L12 16L5 21V5C5 3.89543 5.89543 3 7 3H17C18.1046 3 19 3.89543 19 5V21Z"
-                  stroke={isSavedBookmark ? '#FFFFFF' : '#582CDB'}
-                  strokeWidth="2.2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </Svg>
-            </Pressable>
-          </View>
-
-          {/* Bottom spacing to clear floating tab bar */}
-          <View style={{ height: 110 }} />
-        </ScrollView>
-
-        {/* UNIFIED SIGNATURE FLOATING TAB BAR */}
-        <FloatingTabBar
-          activeTab={activeTab}
-          onTabPress={handleTabPress}
-        />
-
-        {/* MODAL: CHANGE CONTENT GOAL */}
-        <Modal
-          visible={showGoalModal}
-          transparent={true}
-          animationType="fade"
-          onRequestClose={() => setShowGoalModal(false)}
-        >
-          <View style={styles.modalOverlay}>
-            <Animated.View style={[styles.modalCard, { transform: [{ scale: modalPopScale }] }]}>
-              <View style={styles.modalHeaderRow}>
-                <View>
-                  <Text style={styles.modalTitle}>Select Content Goal</Text>
-                  <Text style={styles.modalSubtitle}>Optimizes caption for algorithm conversion</Text>
-                </View>
-                <Pressable
-                  onPress={() => setShowGoalModal(false)}
-                  style={styles.modalCloseCircle}
-                  hitSlop={8}
-                >
-                  <Text style={styles.modalCloseCross}>✕</Text>
-                </Pressable>
+            {/* 1. "WHAT IS THIS POST ABOUT?" HERO CARD (LIVE-EDITABLE) */}
+            <View style={styles.topicHeroCard}>
+              <View style={styles.topicHeaderRow}>
+                <Text style={styles.topicHeaderIcon}>✍️</Text>
+                <Text style={styles.topicHeaderTitle}>What is this post about?</Text>
+                <Text style={styles.editableHint}>(Tap to edit)</Text>
               </View>
 
-              {[
-                'Get saves and comments',
-                'Protect streak & quick post',
-                'Drive traffic & DM leads',
-                'Viral shares & reach',
-              ].map((goal) => {
-                const isSelected = selectedGoal === goal;
+              {/* Editable Topic Box */}
+              <View style={styles.topicInnerBox}>
+                <TextInput
+                  value={postTopic}
+                  onChangeText={setPostTopic}
+                  placeholder="Type your post topic or idea..."
+                  placeholderTextColor="#94A3B8"
+                  multiline
+                  style={styles.topicInput}
+                />
+              </View>
+
+              {/* Goal Line with Change Button */}
+              <View style={styles.goalRow}>
+                <View style={styles.goalLeftGroup}>
+                  <Text style={styles.goalIcon}>🎯</Text>
+                  <Text style={styles.goalLabel}>
+                    Goal: <Text style={styles.goalValue}>{selectedGoal}</Text>
+                  </Text>
+                </View>
+
+                <Pressable
+                  onPress={() => {
+                    triggerModalAnim();
+                    setShowGoalModal(true);
+                  }}
+                  hitSlop={8}
+                >
+                  <Text style={styles.goalChangeLink}>Change</Text>
+                </Pressable>
+              </View>
+            </View>
+
+            {/* 2. CHOOSE A TONE SECTION */}
+            <Text style={styles.sectionLabel}>Choose A Tone</Text>
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={styles.tonePillsRow}
+            >
+              {TONE_OPTIONS.map((tone) => {
+                const isSelected = selectedTones.includes(tone);
                 return (
                   <Pressable
-                    key={goal}
-                    onPress={() => {
-                      if (Platform.OS !== 'web') {
-                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                      }
-                      setSelectedGoal(goal);
-                      setShowGoalModal(false);
-                    }}
-                    style={[styles.goalModalOption, isSelected && styles.goalModalOptionActive]}
+                    key={tone}
+                    onPress={() => toggleTone(tone)}
+                    style={[
+                      styles.tonePill,
+                      isSelected && styles.tonePillActive,
+                    ]}
                   >
-                    <Text style={[styles.goalModalOptionText, isSelected && styles.goalModalOptionTextActive]}>
-                      {goal}
+                    <Text
+                      style={[
+                        styles.tonePillText,
+                        isSelected && styles.tonePillTextActive,
+                      ]}
+                    >
+                      {tone}
                     </Text>
                   </Pressable>
                 );
               })}
-            </Animated.View>
-          </View>
-        </Modal>
+            </ScrollView>
 
-        {/* MODAL: NOTIFICATIONS CENTER */}
-        <Modal
-          visible={showNotificationModal}
-          transparent={true}
-          animationType="fade"
-          onRequestClose={() => setShowNotificationModal(false)}
-        >
-          <View style={styles.modalOverlay}>
-            <Animated.View style={[styles.modalCard, { transform: [{ scale: modalPopScale }] }]}>
-              <View style={styles.modalHeaderRow}>
-                <View>
-                  <Text style={styles.modalTitle}>Notifications</Text>
-                  <Text style={styles.modalSubtitle}>Streak updates &amp; creator alerts</Text>
+            {/* 3. SUGGESTED CAPTIONS SECTION */}
+            <View style={styles.suggestedHeaderRow}>
+              <Text style={styles.suggestedTitle}>Suggested Captions</Text>
+              <Pressable onPress={handleRegenerate} hitSlop={8}>
+                <Text style={styles.regenerateLink}>🔄 Regenerate</Text>
+              </Pressable>
+            </View>
+
+            {/* Recommended Caption Card (Tap to Copy to Draft) */}
+            <Pressable
+              style={styles.recommendedCard}
+              onPress={() => {
+                if (Platform.OS !== 'web') {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                }
+                setDraftText(currentSuggestion.text);
+              }}
+            >
+              <View style={styles.recommendedBadgeRow}>
+                <View style={styles.recommendedBadge}>
+                  <Text style={styles.recommendedBadgeText}>⭐ RECOMMENDED</Text>
                 </View>
-                <Pressable
-                  onPress={() => setShowNotificationModal(false)}
-                  style={styles.modalCloseCircle}
-                  hitSlop={8}
-                >
-                  <Text style={styles.modalCloseCross}>✕</Text>
-                </Pressable>
               </View>
 
-              <ScrollView style={{ maxHeight: 260 }} showsVerticalScrollIndicator={false}>
-                {notificationsList.map((notif) => (
-                  <View key={notif.id} style={[styles.notifCard, notif.unread && styles.notifCardUnread]}>
-                    <View style={[styles.notifBadge, { backgroundColor: notif.badgeBg, borderColor: notif.badgeBorder }]}>
-                      <Text style={{ fontSize: 16 }}>{notif.iconEmoji}</Text>
-                    </View>
-                    <View style={{ flex: 1 }}>
-                      <Text style={styles.notifTitle}>{notif.title}</Text>
-                      <Text style={styles.notifBody}>{notif.body}</Text>
-                      <Text style={styles.notifTime}>{notif.time}</Text>
-                    </View>
+              <Text style={styles.recommendedCaptionText}>
+                {currentSuggestion.text}
+              </Text>
+
+              {/* Tags Row */}
+              <View style={styles.recommendedTagsRow}>
+                {currentSuggestion.tags.map((tag, idx) => (
+                  <View
+                    key={idx}
+                    style={[
+                      styles.recommendedTagPill,
+                      tag === 'Strong CTA' && styles.strongCtaTagPill,
+                    ]}
+                  >
+                    <Text
+                      style={[
+                        styles.recommendedTagText,
+                        tag === 'Strong CTA' && styles.strongCtaTagText,
+                      ]}
+                    >
+                      {tag}
+                    </Text>
                   </View>
                 ))}
-              </ScrollView>
+              </View>
+            </Pressable>
+
+            {/* 4. QUICK CTA CARD (EDITABLE) */}
+            <View style={styles.quickCtaCard}>
+              <View style={styles.cardHeaderFlex}>
+                <Text style={styles.microCapLabel}>QUICK CTA</Text>
+                <Text style={styles.editableHintMicro}>Editable</Text>
+              </View>
+              <TextInput
+                value={quickCta}
+                onChangeText={setQuickCta}
+                placeholder="Type custom CTA..."
+                placeholderTextColor="#94A3B8"
+                style={styles.quickCtaInput}
+              />
+            </View>
+
+            {/* 5. HASHTAGS CARD (EDITABLE) */}
+            <View style={styles.hashtagsCard}>
+              <View style={styles.cardHeaderFlex}>
+                <Text style={styles.microCapLabel}>HASHTAGS</Text>
+                <Text style={styles.editableHintMicro}>Editable</Text>
+              </View>
+              <TextInput
+                value={hashtagsText}
+                onChangeText={setHashtagsText}
+                placeholder="Type hashtags..."
+                placeholderTextColor="#94A3B8"
+                style={styles.hashtagsInput}
+              />
+            </View>
+
+            {/* 6. DRAFT EDITOR CARD (LIVE-EDITABLE MULTILINE) */}
+            <View style={styles.draftEditorCard}>
+              <View style={styles.draftEditorHeaderRow}>
+                <View style={styles.draftEditorBadge}>
+                  <Text style={styles.draftEditorBadgeText}>DRAFT EDITOR</Text>
+                </View>
+                <Text style={styles.draftEditorTimeLeft}>⏱ 3 WEEKS LEFT</Text>
+              </View>
+
+              {/* Live Editable Text Input */}
+              <View style={styles.draftInputContainer}>
+                <TextInput
+                  value={draftText}
+                  onChangeText={setDraftText}
+                  placeholder="Write or refine your caption..."
+                  placeholderTextColor="#94A3B8"
+                  multiline
+                  style={styles.draftEditorInput}
+                />
+              </View>
+
+              {/* Status Check & Fit Row */}
+              <View style={styles.draftStatusRow}>
+                <View style={styles.statusPill}>
+                  <Text style={styles.statusPillCheck}>✓</Text>
+                  <Text style={styles.statusPillText}>CTA OK</Text>
+                </View>
+                <View style={styles.fitPill}>
+                  <Text style={styles.fitPillText}>📑 High Fit</Text>
+                </View>
+              </View>
+
+              <Text style={styles.charCountText}>{draftText.length} / 2200 CHARS</Text>
+
+              {/* Quick Action Buttons */}
+              <View style={styles.draftActionsRow}>
+                <Pressable
+                  style={({ pressed }) => [styles.draftActionBtn, pressed && styles.btnPressed]}
+                  onPress={handleMakeShorter}
+                >
+                  <Text style={styles.draftActionBtnText}>Make Shorter</Text>
+                </Pressable>
+
+                <Pressable
+                  style={({ pressed }) => [styles.draftActionBtn, pressed && styles.btnPressed]}
+                  onPress={handleAddPersonal}
+                >
+                  <Text style={styles.draftActionBtnText}>Add Personal</Text>
+                </Pressable>
+              </View>
 
               <Pressable
-                style={styles.modalFullBtn}
-                onPress={() => {
-                  setNotificationsList(notificationsList.map((n) => ({ ...n, unread: false })));
-                  setShowNotificationModal(false);
-                }}
+                style={({ pressed }) => [styles.improveHookBtn, pressed && styles.btnPressed]}
+                onPress={handleImproveHook}
               >
-                <Text style={styles.modalFullBtnText}>Mark All Read &amp; Close</Text>
+                <Text style={styles.improveHookBtnText}>Improve Hook</Text>
               </Pressable>
-            </Animated.View>
-          </View>
-        </Modal>
+            </View>
 
-        {/* MODAL: CREATOR PROFILE PASSPORT */}
-        <Modal
-          visible={showProfileModal}
-          transparent={true}
-          animationType="fade"
-          onRequestClose={() => setShowProfileModal(false)}
-        >
-          <View style={styles.modalOverlay}>
-            <Animated.View style={[styles.modalCard, { transform: [{ scale: modalPopScale }] }]}>
-              <View style={styles.modalHeaderRow}>
-                <View>
-                  <Text style={styles.modalTitle}>Creator Passport</Text>
-                  <Text style={styles.modalSubtitle}>Your verified consistency record</Text>
+            {/* 7. JARVIS INSIGHT CARD */}
+            <View style={styles.jarvisCard}>
+              <View style={styles.jarvisCardHeaderRow}>
+                <View style={styles.jarvisFlameBox}>
+                  <Image
+                    source={require('../../assets/images/jarvis-core-flame.png')}
+                    style={styles.jarvisFlameImg}
+                    resizeMode="contain"
+                  />
                 </View>
+
+                <View style={{ flex: 1 }}>
+                  <Text style={styles.jarvisTitle}>Jarvis Insight</Text>
+                </View>
+
+                <View style={styles.aiPoweredBadge}>
+                  <Text style={styles.aiPoweredBadgeText}>AI-POWERED</Text>
+                </View>
+              </View>
+
+              <Text style={styles.jarvisBodyText}>
+                This caption works best when the <Text style={{ fontWeight: '800' }}>first line</Text> is specific. Mention one realisation that changed how you create.
+              </Text>
+
+              <Pressable
+                style={({ pressed }) => [styles.jarvisApplyBtn, pressed && styles.btnPressed]}
+                onPress={handleApplyRecommendation}
+              >
+                <Text style={styles.jarvisApplyBtnText}>Apply Recommendation</Text>
+              </Pressable>
+            </View>
+
+            {/* 8. PRIMARY BOTTOM ACTION: ADD TO POST + BOOKMARK */}
+            <View style={styles.bottomActionRow}>
+              <Pressable
+                style={({ pressed }) => [styles.addToPostMainBtn, pressed && styles.btnPressed]}
+                onPress={handleAddToPost}
+              >
+                <LinearGradient
+                  colors={['#7C3AED', '#582CDB']}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 0 }}
+                  style={styles.addToPostGradient}
+                >
+                  <Text style={styles.addToPostBtnText}>Add to Post</Text>
+                </LinearGradient>
+              </Pressable>
+
+              <Pressable
+                style={({ pressed }) => [
+                  styles.bookmarkBtn,
+                  isSavedBookmark && styles.bookmarkBtnActive,
+                  pressed && styles.btnPressed,
+                ]}
+                onPress={handleToggleBookmark}
+              >
+                <Svg width={20} height={20} viewBox="0 0 24 24" fill={isSavedBookmark ? '#FFFFFF' : 'none'}>
+                  <Path
+                    d="M19 21L12 16L5 21V5C5 3.89543 5.89543 3 7 3H17C18.1046 3 19 3.89543 19 5V21Z"
+                    stroke={isSavedBookmark ? '#FFFFFF' : '#582CDB'}
+                    strokeWidth="2.2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </Svg>
+              </Pressable>
+            </View>
+
+            {/* Bottom spacing to clear floating tab bar */}
+            <View style={{ height: 110 }} />
+          </ScrollView>
+
+          {/* UNIFIED SIGNATURE FLOATING TAB BAR */}
+          <FloatingTabBar
+            activeTab={activeTab}
+            onTabPress={handleTabPress}
+          />
+
+          {/* MODAL: CHANGE CONTENT GOAL */}
+          <Modal
+            visible={showGoalModal}
+            transparent={true}
+            animationType="fade"
+            onRequestClose={() => setShowGoalModal(false)}
+          >
+            <View style={styles.modalOverlay}>
+              <Animated.View style={[styles.modalCard, { transform: [{ scale: modalPopScale }] }]}>
+                <View style={styles.modalHeaderRow}>
+                  <View>
+                    <Text style={styles.modalTitle}>Select Content Goal</Text>
+                    <Text style={styles.modalSubtitle}>Optimizes caption for algorithm conversion</Text>
+                  </View>
+                  <Pressable
+                    onPress={() => setShowGoalModal(false)}
+                    style={styles.modalCloseCircle}
+                    hitSlop={8}
+                  >
+                    <Text style={styles.modalCloseCross}>✕</Text>
+                  </Pressable>
+                </View>
+
+                {[
+                  'Get saves and comments',
+                  'Protect streak & quick post',
+                  'Drive traffic & DM leads',
+                  'Viral shares & reach',
+                ].map((goal) => {
+                  const isSelected = selectedGoal === goal;
+                  return (
+                    <Pressable
+                      key={goal}
+                      onPress={() => {
+                        if (Platform.OS !== 'web') {
+                          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                        }
+                        setSelectedGoal(goal);
+                        setShowGoalModal(false);
+                      }}
+                      style={[styles.goalModalOption, isSelected && styles.goalModalOptionActive]}
+                    >
+                      <Text style={[styles.goalModalOptionText, isSelected && styles.goalModalOptionTextActive]}>
+                        {goal}
+                      </Text>
+                    </Pressable>
+                  );
+                })}
+              </Animated.View>
+            </View>
+          </Modal>
+
+          {/* MODAL: NOTIFICATIONS CENTER */}
+          <Modal
+            visible={showNotificationModal}
+            transparent={true}
+            animationType="fade"
+            onRequestClose={() => setShowNotificationModal(false)}
+          >
+            <View style={styles.modalOverlay}>
+              <Animated.View style={[styles.modalCard, { transform: [{ scale: modalPopScale }] }]}>
+                <View style={styles.modalHeaderRow}>
+                  <View>
+                    <Text style={styles.modalTitle}>Notifications</Text>
+                    <Text style={styles.modalSubtitle}>Streak updates &amp; creator alerts</Text>
+                  </View>
+                  <Pressable
+                    onPress={() => setShowNotificationModal(false)}
+                    style={styles.modalCloseCircle}
+                    hitSlop={8}
+                  >
+                    <Text style={styles.modalCloseCross}>✕</Text>
+                  </Pressable>
+                </View>
+
+                <ScrollView style={{ maxHeight: 260 }} showsVerticalScrollIndicator={false}>
+                  {notificationsList.map((notif) => (
+                    <View key={notif.id} style={[styles.notifCard, notif.unread && styles.notifCardUnread]}>
+                      <View style={[styles.notifBadge, { backgroundColor: notif.badgeBg, borderColor: notif.badgeBorder }]}>
+                        <Text style={{ fontSize: 16 }}>{notif.iconEmoji}</Text>
+                      </View>
+                      <View style={{ flex: 1 }}>
+                        <Text style={styles.notifTitle}>{notif.title}</Text>
+                        <Text style={styles.notifBody}>{notif.body}</Text>
+                        <Text style={styles.notifTime}>{notif.time}</Text>
+                      </View>
+                    </View>
+                  ))}
+                </ScrollView>
+
                 <Pressable
+                  style={styles.modalFullBtn}
+                  onPress={() => {
+                    setNotificationsList(notificationsList.map((n) => ({ ...n, unread: false })));
+                    setShowNotificationModal(false);
+                  }}
+                >
+                  <Text style={styles.modalFullBtnText}>Mark All Read &amp; Close</Text>
+                </Pressable>
+              </Animated.View>
+            </View>
+          </Modal>
+
+          {/* MODAL: CREATOR PROFILE PASSPORT */}
+          <Modal
+            visible={showProfileModal}
+            transparent={true}
+            animationType="fade"
+            onRequestClose={() => setShowProfileModal(false)}
+          >
+            <View style={styles.modalOverlay}>
+              <Animated.View style={[styles.modalCard, { transform: [{ scale: modalPopScale }] }]}>
+                <View style={styles.modalHeaderRow}>
+                  <View>
+                    <Text style={styles.modalTitle}>Creator Passport</Text>
+                    <Text style={styles.modalSubtitle}>Your verified consistency record</Text>
+                  </View>
+                  <Pressable
+                    onPress={() => setShowProfileModal(false)}
+                    style={styles.modalCloseCircle}
+                    hitSlop={8}
+                  >
+                    <Text style={styles.modalCloseCross}>✕</Text>
+                  </Pressable>
+                </View>
+
+                <View style={styles.profileModalCardInner}>
+                  <View style={styles.profileModalIconRing}>
+                    <Svg width={28} height={28} viewBox="0 0 24 24" fill="none">
+                      <Path
+                        d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"
+                        stroke="#582CDB"
+                        strokeWidth="2.2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                      <Circle cx="12" cy="7" r="4" stroke="#582CDB" strokeWidth="2.2" />
+                    </Svg>
+                  </View>
+                  <Text style={styles.profileModalName}>Amara Okafor</Text>
+                  <Text style={styles.profileModalNiche}>Lifestyle &amp; Tech Creator</Text>
+                  <View style={styles.profileModalLevelPill}>
+                    <Text style={styles.profileModalLevelText}>⚡ Level 4 Storyteller • 47-Day Streak</Text>
+                  </View>
+                </View>
+
+                <Pressable
+                  style={styles.modalFullBtn}
                   onPress={() => setShowProfileModal(false)}
-                  style={styles.modalCloseCircle}
-                  hitSlop={8}
                 >
-                  <Text style={styles.modalCloseCross}>✕</Text>
+                  <Text style={styles.modalFullBtnText}>Done</Text>
                 </Pressable>
-              </View>
+              </Animated.View>
+            </View>
+          </Modal>
 
-              <View style={styles.profileModalCardInner}>
-                <View style={styles.profileModalIconRing}>
-                  <Svg width={28} height={28} viewBox="0 0 24 24" fill="none">
-                    <Path
-                      d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"
-                      stroke="#582CDB"
-                      strokeWidth="2.2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                    <Circle cx="12" cy="7" r="4" stroke="#582CDB" strokeWidth="2.2" />
-                  </Svg>
+          {/* MODAL: CREATOR CHAT */}
+          <Modal
+            visible={showChatModal}
+            transparent={true}
+            animationType="fade"
+            onRequestClose={() => setShowChatModal(false)}
+          >
+            <View style={styles.modalOverlay}>
+              <Animated.View style={[styles.modalCard, { transform: [{ scale: modalPopScale }] }]}>
+                <View style={styles.modalHeaderRow}>
+                  <View>
+                    <Text style={styles.modalTitle}>Jarvis AI Chat</Text>
+                    <Text style={styles.modalSubtitle}>Real-time creative assistant</Text>
+                  </View>
+                  <Pressable
+                    onPress={() => setShowChatModal(false)}
+                    style={styles.modalCloseCircle}
+                    hitSlop={8}
+                  >
+                    <Text style={styles.modalCloseCross}>✕</Text>
+                  </Pressable>
                 </View>
-                <Text style={styles.profileModalName}>Amara Okafor</Text>
-                <Text style={styles.profileModalNiche}>Lifestyle &amp; Tech Creator</Text>
-                <View style={styles.profileModalLevelPill}>
-                  <Text style={styles.profileModalLevelText}>⚡ Level 4 Storyteller • 47-Day Streak</Text>
-                </View>
-              </View>
 
-              <Pressable
-                style={styles.modalFullBtn}
-                onPress={() => setShowProfileModal(false)}
-              >
-                <Text style={styles.modalFullBtnText}>Done</Text>
-              </Pressable>
-            </Animated.View>
-          </View>
-        </Modal>
-
-        {/* MODAL: CREATOR CHAT */}
-        <Modal
-          visible={showChatModal}
-          transparent={true}
-          animationType="fade"
-          onRequestClose={() => setShowChatModal(false)}
-        >
-          <View style={styles.modalOverlay}>
-            <Animated.View style={[styles.modalCard, { transform: [{ scale: modalPopScale }] }]}>
-              <View style={styles.modalHeaderRow}>
-                <View>
-                  <Text style={styles.modalTitle}>Jarvis AI Chat</Text>
-                  <Text style={styles.modalSubtitle}>Real-time creative assistant</Text>
+                <View style={styles.chatCard}>
+                  <Text style={styles.chatSpeaker}>Jarvis AI</Text>
+                  <Text style={styles.chatMsg}>
+                    I crafted these captions to maximize saves and comment discussions! The first 2 lines stop the scroll.
+                  </Text>
                 </View>
+
                 <Pressable
+                  style={styles.modalFullBtn}
                   onPress={() => setShowChatModal(false)}
-                  style={styles.modalCloseCircle}
-                  hitSlop={8}
                 >
-                  <Text style={styles.modalCloseCross}>✕</Text>
+                  <Text style={styles.modalFullBtnText}>Close Chat</Text>
                 </Pressable>
-              </View>
+              </Animated.View>
+            </View>
+          </Modal>
 
-              <View style={styles.chatCard}>
-                <Text style={styles.chatSpeaker}>Jarvis AI</Text>
-                <Text style={styles.chatMsg}>
-                  I crafted these captions to maximize saves and comment discussions! The first 2 lines stop the scroll.
-                </Text>
-              </View>
-
-              <Pressable
-                style={styles.modalFullBtn}
-                onPress={() => setShowChatModal(false)}
-              >
-                <Text style={styles.modalFullBtnText}>Close Chat</Text>
-              </Pressable>
-            </Animated.View>
-          </View>
-        </Modal>
-
-        {/* SIGNATURE ANIMATED GHOST CELEBRATION MODAL */}
-        <AnimatedCompletionModal
-          visible={showCelebrationModal}
-          title={celebrationTitle}
-          subtitle={celebrationSubtitle}
-          speechBubble={celebrationSpeech}
-          badgeText={celebrationBadge}
-          xpEarned={35}
-          streakCount={47}
-          actionText="Keep Editing ➔"
-          onDismiss={() => {
-            setShowCelebrationModal(false);
-          }}
-        />
-      </View>
+          {/* SIGNATURE ANIMATED GHOST CELEBRATION MODAL */}
+          <AnimatedCompletionModal
+            visible={showCelebrationModal}
+            title={celebrationTitle}
+            subtitle={celebrationSubtitle}
+            speechBubble={celebrationSpeech}
+            badgeText={celebrationBadge}
+            xpEarned={35}
+            streakCount={47}
+            actionText="Keep Editing ➔"
+            onDismiss={() => {
+              setShowCelebrationModal(false);
+            }}
+          />
+        </View>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 };
@@ -1025,19 +1081,37 @@ const styles = StyleSheet.create({
     fontWeight: '800',
     color: '#171420',
   },
+  editableHint: {
+    fontSize: 10.5,
+    color: '#94A3B8',
+    fontWeight: '700',
+    marginLeft: 'auto',
+  },
+  editableHintMicro: {
+    fontSize: 9.5,
+    color: '#94A3B8',
+    fontWeight: '700',
+  },
+  cardHeaderFlex: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 4,
+  },
   topicInnerBox: {
     backgroundColor: '#F8FAFC',
     borderRadius: 14,
     borderWidth: 1,
     borderColor: '#E2E8F0',
-    padding: 14,
+    padding: 12,
     marginBottom: 12,
   },
-  topicInnerText: {
+  topicInput: {
     fontSize: 13.5,
-    color: '#334155',
+    color: '#171420',
     lineHeight: 19,
     fontWeight: '600',
+    minHeight: 40,
   },
   goalRow: {
     flexDirection: 'row',
@@ -1192,33 +1266,34 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     borderWidth: 1,
     borderColor: '#E2E8F0',
-    padding: 14,
+    padding: 12,
     marginBottom: 10,
+  },
+  quickCtaInput: {
+    fontSize: 13,
+    color: '#171420',
+    fontWeight: '600',
+    paddingVertical: 4,
   },
   hashtagsCard: {
     backgroundColor: '#F8FAFC',
     borderRadius: 16,
     borderWidth: 1,
     borderColor: '#E2E8F0',
-    padding: 14,
+    padding: 12,
     marginBottom: 14,
+  },
+  hashtagsInput: {
+    fontSize: 12.5,
+    color: '#582CDB',
+    fontWeight: '700',
+    paddingVertical: 4,
   },
   microCapLabel: {
     fontSize: 9.5,
     fontWeight: '900',
     color: '#64748B',
     letterSpacing: 0.6,
-    marginBottom: 4,
-  },
-  quickCtaText: {
-    fontSize: 13,
-    color: '#171420',
-    fontWeight: '600',
-  },
-  hashtagsText: {
-    fontSize: 12.5,
-    color: '#582CDB',
-    fontWeight: '700',
   },
 
   // Draft Editor Card
@@ -1258,12 +1333,20 @@ const styles = StyleSheet.create({
     fontWeight: '800',
     color: '#64748B',
   },
-  draftEditorText: {
+  draftInputContainer: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: '#EDE9FE',
+    padding: 12,
+    marginBottom: 12,
+  },
+  draftEditorInput: {
     fontSize: 13.5,
     color: '#171420',
     lineHeight: 20,
-    marginBottom: 12,
     fontWeight: '500',
+    minHeight: 80,
   },
   draftStatusRow: {
     flexDirection: 'row',
