@@ -92,6 +92,52 @@ export const PlatformGrowthScreen: React.FC<PlatformGrowthScreenProps> = ({
   const [showConnectModal, setShowConnectModal] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
+  // Platform Accounts State
+  const [platformsList, setPlatformsList] = useState([
+    { id: 'tiktok', name: 'TikTok', handle: '@your_creator', followers: '+840', impressions: '12.4K', engage: '920', connected: true, top: true },
+    { id: 'instagram', name: 'Instagram', handle: '@your_handle', followers: '+390', impressions: '7.8K', engage: '560', connected: true, top: false },
+    { id: 'youtube', name: 'YouTube', handle: 'Your Channel', followers: '+170', impressions: '3.9K', engage: '240', connected: true, top: false },
+    { id: 'x', name: 'X (Twitter)', handle: '@not_connected', followers: '0', impressions: '0', engage: '0', connected: false, top: false },
+    { id: 'threads', name: 'Threads', handle: '@not_connected', followers: '0', impressions: '0', engage: '0', connected: false, top: false },
+    { id: 'linkedin', name: 'LinkedIn', handle: 'Not Connected', followers: '0', impressions: '0', engage: '0', connected: false, top: false },
+  ]);
+  const [customHandleInput, setCustomHandleInput] = useState('');
+  const [selectedPlatformToAdd, setSelectedPlatformToAdd] = useState('x');
+
+  const handleTogglePlatformConnect = (id: string) => {
+    if (Platform.OS !== 'web') {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    }
+    setPlatformsList(prev => prev.map(p => {
+      if (p.id === id) {
+        const nextState = !p.connected;
+        showToast(nextState ? `✓ ${p.name} connected & synced!` : `Removed ${p.name}`);
+        return { ...p, connected: nextState };
+      }
+      return p;
+    }));
+  };
+
+  const handleAddPlatformWithHandle = () => {
+    if (!customHandleInput.trim()) {
+      showToast('Please enter your username/handle');
+      return;
+    }
+    if (Platform.OS !== 'web') {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    }
+    setPlatformsList(prev => prev.map(p => {
+      if (p.id === selectedPlatformToAdd) {
+        return { ...p, connected: true, handle: customHandleInput.trim() };
+      }
+      return p;
+    }));
+    const target = platformsList.find(p => p.id === selectedPlatformToAdd);
+    showToast(`✓ ${target?.name || 'Platform'} linked to ${customHandleInput.trim()}!`);
+    setCustomHandleInput('');
+    setShowConnectModal(false);
+  };
+
   // Selected bar highlight in Weekly Comparison
   const [selectedBar, setSelectedBar] = useState<'TT' | 'IG' | 'YT' | 'X' | null>(null);
 
@@ -752,7 +798,7 @@ export const PlatformGrowthScreen: React.FC<PlatformGrowthScreenProps> = ({
               </View>
             </View>
 
-            {/* X (Twitter) Unconnected Row */}
+            {/* X (Twitter) Unconnected Row (Purple Connect Button) */}
             <View style={[styles.platformCardItem, styles.platformCardItemUnconnected]}>
               <View style={styles.platformItemHeader}>
                 <View style={styles.platformItemIdentity}>
@@ -771,6 +817,7 @@ export const PlatformGrowthScreen: React.FC<PlatformGrowthScreenProps> = ({
                     if (Platform.OS !== 'web') {
                       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
                     }
+                    triggerModalPop();
                     setShowConnectModal(true);
                   }}
                 >
@@ -944,7 +991,7 @@ export const PlatformGrowthScreen: React.FC<PlatformGrowthScreenProps> = ({
           </View>
         </Modal>
 
-        {/* CONNECT MODAL */}
+        {/* COMPREHENSIVE ALL SOCIAL MEDIA CONNECT HUB POPUP MODAL */}
         <Modal
           visible={showConnectModal}
           transparent={true}
@@ -952,37 +999,143 @@ export const PlatformGrowthScreen: React.FC<PlatformGrowthScreenProps> = ({
           onRequestClose={() => setShowConnectModal(false)}
         >
           <View style={styles.modalOverlay}>
-            <View style={styles.modalCard}>
+            <Animated.View style={[styles.modalCardLarge, { transform: [{ scale: modalPopScale }] }]}>
+              {/* Modal Top Header */}
               <View style={styles.modalHeaderRow}>
-                <View>
-                  <Text style={styles.modalTitle}>Connect X (Twitter)</Text>
-                  <Text style={styles.modalSubtitle}>Link your creator profile to sync analytics</Text>
+                <View style={{ flex: 1 }}>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                    <Text style={styles.modalTitle}>Connected Platforms</Text>
+                    <View style={styles.activePlatformsCountBadge}>
+                      <Text style={styles.activePlatformsCountText}>
+                        {platformsList.filter((p) => p.connected).length} Connected
+                      </Text>
+                    </View>
+                  </View>
+                  <Text style={styles.modalSubtitle}>
+                    Manage connected channels or add more platforms to sync your audience.
+                  </Text>
                 </View>
-                <Pressable onPress={() => setShowConnectModal(false)} style={styles.modalCloseCircle} hitSlop={8}>
+                <Pressable
+                  onPress={() => setShowConnectModal(false)}
+                  style={styles.modalCloseCircle}
+                  hitSlop={8}
+                >
                   <Text style={styles.modalCloseCross}>✕</Text>
                 </Pressable>
               </View>
 
-              <View style={styles.customInputBox}>
-                <Text style={styles.customInputLabel}>ENTER YOUR X HANDLE</Text>
-                <TextInput
-                  placeholder="@your_handle"
-                  placeholderTextColor="#94A3B8"
-                  style={styles.customTextInput}
-                  autoCapitalize="none"
-                />
-              </View>
-
-              <Pressable
-                style={styles.modalFullBtn}
-                onPress={() => {
-                  showToast('✓ X (Twitter) linked! Syncing metrics...');
-                  setShowConnectModal(false);
-                }}
+              <ScrollView
+                style={{ maxHeight: Dimensions.get('window').height * 0.58 }}
+                showsVerticalScrollIndicator={false}
               >
-                <Text style={styles.modalFullBtnText}>Connect &amp; Sync ✓</Text>
-              </Pressable>
-            </View>
+                {/* 1. ACTIVE CONNECTED ACCOUNTS */}
+                <Text style={styles.modalSectionTitle}>ACTIVE CONNECTED PLATFORMS</Text>
+
+                <View style={{ gap: 8, marginBottom: 16 }}>
+                  {platformsList
+                    .filter((p) => p.connected)
+                    .map((plat) => (
+                      <View key={plat.id} style={styles.connectedPlatformRow}>
+                        <View style={styles.platformRowIdentity}>
+                          <View style={styles.platformLogoCircle}>
+                            {plat.id === 'tiktok' && <TikTokSvg size={20} />}
+                            {plat.id === 'instagram' && <InstagramSvg size={20} />}
+                            {plat.id === 'youtube' && <YouTubeSvg size={20} />}
+                            {plat.id === 'x' && <XSvg size={18} />}
+                            {plat.id === 'threads' && <Text style={{ fontSize: 16 }}>🧵</Text>}
+                            {plat.id === 'linkedin' && <Text style={{ fontSize: 16 }}>💼</Text>}
+                          </View>
+                          <View>
+                            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                              <Text style={styles.connectedPlatformName}>{plat.name}</Text>
+                              {plat.top && (
+                                <View style={styles.topPlatformTag}>
+                                  <Text style={styles.topPlatformTagText}>TOP GROWTH</Text>
+                                </View>
+                              )}
+                            </View>
+                            <Text style={styles.connectedPlatformHandle}>{plat.handle}</Text>
+                          </View>
+                        </View>
+
+                        <Pressable
+                          style={({ pressed }) => [styles.disconnectBtn, pressed && styles.btnPressed]}
+                          onPress={() => handleTogglePlatformConnect(plat.id)}
+                          hitSlop={6}
+                        >
+                          <Text style={styles.disconnectBtnText}>Remove</Text>
+                        </Pressable>
+                      </View>
+                    ))}
+                </View>
+
+                {/* 2. AVAILABLE CHANNELS TO CONNECT */}
+                <Text style={styles.modalSectionTitle}>ADD MORE SOCIAL PLATFORMS</Text>
+                <View style={{ gap: 8, marginBottom: 16 }}>
+                  {platformsList
+                    .filter((p) => !p.connected)
+                    .map((plat) => (
+                      <View key={plat.id} style={styles.unconnectedPlatformRow}>
+                        <View style={styles.platformRowIdentity}>
+                          <View style={[styles.platformLogoCircle, { backgroundColor: '#FAF8F5' }]}>
+                            {plat.id === 'tiktok' && <TikTokSvg size={20} />}
+                            {plat.id === 'instagram' && <InstagramSvg size={20} />}
+                            {plat.id === 'youtube' && <YouTubeSvg size={20} />}
+                            {plat.id === 'x' && <XSvg size={18} />}
+                            {plat.id === 'threads' && <Text style={{ fontSize: 16 }}>🧵</Text>}
+                            {plat.id === 'linkedin' && <Text style={{ fontSize: 16 }}>💼</Text>}
+                          </View>
+                          <View>
+                            <Text style={styles.connectedPlatformName}>{plat.name}</Text>
+                            <Text style={styles.unconnectedPlatformSub}>Tap to connect &amp; sync</Text>
+                          </View>
+                        </View>
+
+                        <Pressable
+                          style={({ pressed }) => [styles.quickConnectBtn, pressed && styles.btnPressed]}
+                          onPress={() => {
+                            setSelectedPlatformToAdd(plat.id);
+                            handleTogglePlatformConnect(plat.id);
+                          }}
+                          hitSlop={6}
+                        >
+                          <Text style={styles.quickConnectBtnText}>+ Connect</Text>
+                        </Pressable>
+                      </View>
+                    ))}
+                </View>
+
+                {/* 3. LINK SPECIFIC SOCIAL HANDLE */}
+                <View style={styles.customHandleCard}>
+                  <Text style={styles.customHandleLabel}>LINK SOCIAL HANDLE DIRECTLY</Text>
+                  <View style={styles.handleInputRow}>
+                    <TextInput
+                      style={styles.handleInput}
+                      placeholder="@username or channel URL"
+                      placeholderTextColor="#94A3B8"
+                      value={customHandleInput}
+                      onChangeText={setCustomHandleInput}
+                      autoCapitalize="none"
+                      autoCorrect={false}
+                    />
+                    <Pressable
+                      style={({ pressed }) => [styles.handleSaveBtn, pressed && styles.btnPressed]}
+                      onPress={handleAddPlatformWithHandle}
+                    >
+                      <Text style={styles.handleSaveBtnText}>Link ✓</Text>
+                    </Pressable>
+                  </View>
+                </View>
+
+                {/* Modal Done Button */}
+                <Pressable
+                  style={styles.modalDoneBtn}
+                  onPress={() => setShowConnectModal(false)}
+                >
+                  <Text style={styles.modalDoneBtnText}>Done</Text>
+                </Pressable>
+              </ScrollView>
+            </Animated.View>
           </View>
         </Modal>
       </View>
@@ -1570,13 +1723,192 @@ const styles = StyleSheet.create({
     color: '#B45309',
   },
   connectPillActionBtn: {
-    backgroundColor: '#171420',
+    backgroundColor: '#582CDB',
     paddingVertical: 6,
-    paddingHorizontal: 12,
+    paddingHorizontal: 14,
     borderRadius: 100,
+    shadowColor: '#582CDB',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 2,
   },
   connectPillActionBtnText: {
+    fontSize: 11,
+    fontWeight: '900',
+    color: '#FFFFFF',
+    letterSpacing: 0.2,
+  },
+  modalCardLarge: {
+    width: '100%',
+    maxWidth: 420,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 24,
+    padding: 20,
+    shadowColor: '#171420',
+    shadowOffset: { width: 0, height: 16 },
+    shadowOpacity: 0.2,
+    shadowRadius: 28,
+    elevation: 8,
+  },
+  activePlatformsCountBadge: {
+    backgroundColor: '#DCFCE7',
+    paddingVertical: 2,
+    paddingHorizontal: 8,
+    borderRadius: 6,
+  },
+  activePlatformsCountText: {
+    fontSize: 10,
+    fontWeight: '900',
+    color: '#15803D',
+  },
+  modalSectionTitle: {
+    fontSize: 9.5,
+    fontWeight: '900',
+    color: '#64748B',
+    letterSpacing: 0.6,
+    marginBottom: 8,
+    marginTop: 4,
+  },
+  connectedPlatformRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: '#FAF8F5',
+    borderRadius: 14,
+    padding: 12,
+    borderWidth: 1,
+    borderColor: '#EDE8E1',
+  },
+  unconnectedPlatformRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: '#FFFFFF',
+    borderRadius: 14,
+    padding: 12,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+  },
+  platformRowIdentity: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    flex: 1,
+  },
+  platformLogoCircle: {
+    width: 36,
+    height: 36,
+    borderRadius: 12,
+    backgroundColor: '#FFFFFF',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#EDE8E1',
+  },
+  connectedPlatformName: {
+    fontSize: 13,
+    fontWeight: '900',
+    color: '#171420',
+  },
+  connectedPlatformHandle: {
+    fontSize: 11,
+    color: '#64748B',
+    fontWeight: '700',
+  },
+  unconnectedPlatformSub: {
+    fontSize: 11,
+    color: '#94A3B8',
+    fontWeight: '600',
+  },
+  topPlatformTag: {
+    backgroundColor: '#FEF3C7',
+    paddingVertical: 1,
+    paddingHorizontal: 5,
+    borderRadius: 4,
+  },
+  topPlatformTagText: {
+    fontSize: 7.5,
+    fontWeight: '900',
+    color: '#B45309',
+  },
+  disconnectBtn: {
+    paddingVertical: 5,
+    paddingHorizontal: 10,
+    borderRadius: 8,
+    backgroundColor: '#FEE2E2',
+  },
+  disconnectBtnText: {
     fontSize: 10.5,
+    fontWeight: '800',
+    color: '#DC2626',
+  },
+  quickConnectBtn: {
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    borderRadius: 8,
+    backgroundColor: '#582CDB',
+  },
+  quickConnectBtnText: {
+    fontSize: 11,
+    fontWeight: '900',
+    color: '#FFFFFF',
+  },
+  customHandleCard: {
+    backgroundColor: '#FAF8F5',
+    borderRadius: 16,
+    padding: 12,
+    borderWidth: 1,
+    borderColor: '#EDE8E1',
+    marginTop: 4,
+    marginBottom: 12,
+  },
+  customHandleLabel: {
+    fontSize: 9,
+    fontWeight: '900',
+    color: '#582CDB',
+    letterSpacing: 0.5,
+    marginBottom: 6,
+  },
+  handleInputRow: {
+    flexDirection: 'row',
+    gap: 8,
+  },
+  handleInput: {
+    flex: 1,
+    height: 40,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: '#CBD5E1',
+    paddingHorizontal: 10,
+    fontSize: 12.5,
+    color: '#171420',
+    fontWeight: '700',
+  },
+  handleSaveBtn: {
+    height: 40,
+    paddingHorizontal: 14,
+    backgroundColor: '#582CDB',
+    borderRadius: 10,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  handleSaveBtnText: {
+    fontSize: 12,
+    fontWeight: '900',
+    color: '#FFFFFF',
+  },
+  modalDoneBtn: {
+    height: 44,
+    borderRadius: 14,
+    backgroundColor: '#582CDB',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 6,
+  },
+  modalDoneBtnText: {
+    fontSize: 13.5,
     fontWeight: '900',
     color: '#FFFFFF',
   },
