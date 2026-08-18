@@ -614,6 +614,7 @@ export default function App() {
             onOpenSchedule={() => navigateTo('schedule')}
             onOpenJarvisPro={() => navigateTo('jarvis-pro')}
             onOpenCreate={() => navigateTo('create')}
+            onOpenMatch={() => navigateTo('match')}
             onOpenPostComposer={(prefillTitle) => {
               if (prefillTitle) setComposerIdeaTitle(prefillTitle);
               navigateTo('composer');

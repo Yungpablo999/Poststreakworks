@@ -31,6 +31,7 @@ interface MessagesScreenProps {
   onNavigateTab?: (tab: TabType) => void;
   onOpenPostComposer?: (prefillTitle?: string) => void;
   onOpenCreate?: () => void;
+  onOpenMatch?: () => void;
 }
 
 interface StorySlide {
@@ -395,6 +396,7 @@ export const MessagesScreen: React.FC<MessagesScreenProps> = ({
   onNavigateTab,
   onOpenPostComposer,
   onOpenCreate,
+  onOpenMatch,
 }) => {
   const [activeTab, setActiveTab] = useState<TabType>('match');
   const [searchQuery, setSearchQuery] = useState('');
@@ -1454,15 +1456,15 @@ export const MessagesScreen: React.FC<MessagesScreenProps> = ({
                 ))}
               </ScrollView>
 
-              {/* Connect Button Navigates directly to the Create page */}
+              {/* Connect Button Navigates directly to the Main Match page */}
               <Pressable
                 style={styles.connectToCreateBtn}
                 onPress={() => {
                   setShowConnectModal(false);
-                  if (onOpenCreate) {
-                    onOpenCreate();
+                  if (onOpenMatch) {
+                    onOpenMatch();
                   } else if (onNavigateTab) {
-                    onNavigateTab('create');
+                    onNavigateTab('match');
                   }
                 }}
               >
@@ -1472,7 +1474,7 @@ export const MessagesScreen: React.FC<MessagesScreenProps> = ({
                   end={{ x: 1, y: 0 }}
                   style={styles.connectGradient}
                 >
-                  <Text style={styles.connectBtnText}>Connect &amp; Create Ideas ➔</Text>
+                  <Text style={styles.connectBtnText}>Find More Creators (Match Hub) ➔</Text>
                 </LinearGradient>
               </Pressable>
             </Animated.View>
