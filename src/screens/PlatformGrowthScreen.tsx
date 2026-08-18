@@ -58,6 +58,59 @@ const XSvg = ({ size = 18 }: { size?: number }) => (
   </Svg>
 );
 
+const LinkedInSvg = ({ size = 20 }: { size?: number }) => (
+  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+    <Rect x="2" y="2" width="20" height="20" rx="4" fill="#0A66C2" />
+    <Circle cx="7" cy="7.5" r="1.5" fill="#FFFFFF" />
+    <Rect x="5.5" y="10" width="3" height="9" fill="#FFFFFF" />
+    <Path
+      d="M11 10h2.8v1.3h.1c.4-.8 1.4-1.6 2.9-1.6 3.1 0 3.7 2 3.7 4.7V19h-3v-4.1c0-1-.1-2.3-1.4-2.3-1.4 0-1.6 1.1-1.6 2.2V19h-3V10z"
+      fill="#FFFFFF"
+    />
+  </Svg>
+);
+
+const ThreadsSvg = ({ size = 20 }: { size?: number }) => (
+  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+    <Path
+      d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm3.84 12.3c-.45 2.1-2.03 3.32-4.14 3.32-2.58 0-4.4-1.84-4.4-4.47 0-2.67 1.88-4.57 4.54-4.57 2.45 0 4.1 1.62 4.17 3.86h-1.87c-.07-1.26-.98-2.14-2.3-2.14-1.62 0-2.65 1.25-2.65 2.85 0 1.63 1.05 2.8 2.58 2.8 1.15 0 1.97-.62 2.22-1.65h1.85z"
+      fill="#000000"
+    />
+  </Svg>
+);
+
+const SnapchatSvg = ({ size = 20 }: { size?: number }) => (
+  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+    <Rect x="2" y="2" width="20" height="20" rx="5" fill="#FFFC00" />
+    <Path
+      d="M12 5.5c-2.4 0-3.8 1.8-3.8 3.5 0 .8.3 1.5.3 1.5s-.6.2-.8.5c-.2.3 0 .7.3.7.6.1 1.1-.3 1.1-.3s.5 1.5 1.5 1.7c.3.1.5.3.5.5s-.8.6-1.7.9c-.8.3-1.2.9-.6 1.3.6.4 1.8.3 2.5-.2.4-.3.7-.3.7-.3s.3 0 .7.3c.7.5 1.9.6 2.5.2.6-.4.2-1-.6-1.3-.9-.3-1.7-.7-1.7-.9s.2-.4.5-.5c1-.2 1.5-1.7 1.5-1.7s.5.4 1.1.3c.3 0 .5-.4.3-.7-.2-.3-.8-.5-.8-.5s.3-.7.3-1.5c0-1.7-1.4-3.5-3.8-3.5z"
+      fill="#000000"
+    />
+  </Svg>
+);
+
+const renderPlatformBrandIcon = (id: string, size = 20) => {
+  switch (id) {
+    case 'tiktok':
+      return <TikTokSvg size={size} />;
+    case 'instagram':
+      return <InstagramSvg size={size} />;
+    case 'youtube':
+      return <YouTubeSvg size={size} />;
+    case 'linkedin':
+      return <LinkedInSvg size={size} />;
+    case 'x':
+    case 'x_twitter':
+      return <XSvg size={size} />;
+    case 'snapchat':
+      return <SnapchatSvg size={size} />;
+    case 'threads':
+      return <ThreadsSvg size={size} />;
+    default:
+      return <TikTokSvg size={size} />;
+  }
+};
+
 interface PlatformGrowthScreenProps {
   onBack: () => void;
   onNavigateTab?: (tab: TabType) => void;
@@ -1038,12 +1091,7 @@ export const PlatformGrowthScreen: React.FC<PlatformGrowthScreenProps> = ({
                       <View key={plat.id} style={styles.connectedPlatformRow}>
                         <View style={styles.platformRowIdentity}>
                           <View style={styles.platformLogoCircle}>
-                            {plat.id === 'tiktok' && <TikTokSvg size={20} />}
-                            {plat.id === 'instagram' && <InstagramSvg size={20} />}
-                            {plat.id === 'youtube' && <YouTubeSvg size={20} />}
-                            {plat.id === 'x' && <XSvg size={18} />}
-                            {plat.id === 'threads' && <Text style={{ fontSize: 16 }}>🧵</Text>}
-                            {plat.id === 'linkedin' && <Text style={{ fontSize: 16 }}>💼</Text>}
+                            {renderPlatformBrandIcon(plat.id, 20)}
                           </View>
                           <View>
                             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
@@ -1078,12 +1126,7 @@ export const PlatformGrowthScreen: React.FC<PlatformGrowthScreenProps> = ({
                       <View key={plat.id} style={styles.unconnectedPlatformRow}>
                         <View style={styles.platformRowIdentity}>
                           <View style={[styles.platformLogoCircle, { backgroundColor: '#FAF8F5' }]}>
-                            {plat.id === 'tiktok' && <TikTokSvg size={20} />}
-                            {plat.id === 'instagram' && <InstagramSvg size={20} />}
-                            {plat.id === 'youtube' && <YouTubeSvg size={20} />}
-                            {plat.id === 'x' && <XSvg size={18} />}
-                            {plat.id === 'threads' && <Text style={{ fontSize: 16 }}>🧵</Text>}
-                            {plat.id === 'linkedin' && <Text style={{ fontSize: 16 }}>💼</Text>}
+                            {renderPlatformBrandIcon(plat.id, 20)}
                           </View>
                           <View>
                             <Text style={styles.connectedPlatformName}>{plat.name}</Text>
