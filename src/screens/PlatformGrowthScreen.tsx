@@ -200,11 +200,6 @@ export const PlatformGrowthScreen: React.FC<PlatformGrowthScreenProps> = ({
             </Animated.View>
           </View>
 
-          <View style={styles.headerCenter}>
-            <Text style={styles.headerTitleText}>Platform Growth</Text>
-            <Text style={styles.headerSubtitleText}>CROSS-NETWORK ANALYTICS</Text>
-          </View>
-
           <View style={styles.headerRight}>
             {/* Message Bubble Icon */}
             <Pressable
