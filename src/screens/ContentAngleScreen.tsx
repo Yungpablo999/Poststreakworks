@@ -115,6 +115,7 @@ export const ContentAngleScreen: React.FC<ContentAngleScreenProps> = ({
   const [selectedGoals, setSelectedGoals] = useState<string[]>(['Grow engagement', 'Protect streak']);
 
   // Idea items state
+  const [isHeroSaved, setIsHeroSaved] = useState(false);
   const [moreIdeas, setMoreIdeas] = useState<IdeaCardItem[]>(INITIAL_MORE_IDEAS);
   const [savedIdeasCount, setSavedIdeasCount] = useState(2);
   const [quotaUsed, setQuotaUsed] = useState(3);
@@ -219,20 +220,48 @@ export const ContentAngleScreen: React.FC<ContentAngleScreenProps> = ({
     }
   };
 
+  const handleToggleHeroSave = () => {
+    if (Platform.OS !== 'web') {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    }
+    const nextSaved = !isHeroSaved;
+    setIsHeroSaved(nextSaved);
+    setSavedIdeasCount((c) => (nextSaved ? c + 1 : Math.max(0, c - 1)));
+
+    if (nextSaved) {
+      setCelebrationTitle('Idea Saved!');
+      setCelebrationSubtitle('"One thing I wish I knew before I started creating" has been saved to your vault.');
+      setCelebrationSpeech('47-day streak protected! Idea ready to turn into a post anytime.');
+      setShowCelebrationModal(true);
+    }
+  };
+
   const toggleBookmark = (id: string) => {
     if (Platform.OS !== 'web') {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     }
+    let savedTitle = '';
+    let becameSaved = false;
+
     setMoreIdeas((prev) =>
       prev.map((item) => {
         if (item.id === id) {
           const next = !item.bookmarked;
+          becameSaved = next;
+          savedTitle = item.title;
           setSavedIdeasCount((c) => (next ? c + 1 : Math.max(0, c - 1)));
           return { ...item, bookmarked: next };
         }
         return item;
       })
     );
+
+    if (becameSaved) {
+      setCelebrationTitle('Idea Saved!');
+      setCelebrationSubtitle(`"${savedTitle}" has been saved to your vault.`);
+      setCelebrationSpeech('47-day streak protected! Idea ready in your vault.');
+      setShowCelebrationModal(true);
+    }
   };
 
   const handleSelectIdea = (ideaTitle: string) => {
@@ -518,18 +547,17 @@ export const ContentAngleScreen: React.FC<ContentAngleScreenProps> = ({
               </Pressable>
 
               <Pressable
-                style={({ pressed }) => [styles.bookmarkIconBtn, pressed && styles.btnPressed]}
-                onPress={() => {
-                  if (Platform.OS !== 'web') {
-                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                  }
-                  setSavedIdeasCount((c) => c + 1);
-                }}
+                style={({ pressed }) => [
+                  styles.bookmarkIconBtn,
+                  isHeroSaved && styles.bookmarkIconBtnActive,
+                  pressed && styles.btnPressed,
+                ]}
+                onPress={handleToggleHeroSave}
               >
-                <Svg width={20} height={20} viewBox="0 0 24 24" fill="none">
+                <Svg width={20} height={20} viewBox="0 0 24 24" fill={isHeroSaved ? '#FFFFFF' : 'none'}>
                   <Path
                     d="M19 21L12 16L5 21V5C5 3.89543 5.89543 3 7 3H17C18.1046 3 19 3.89543 19 5V21Z"
-                    stroke="#582CDB"
+                    stroke={isHeroSaved ? '#FFFFFF' : '#582CDB'}
                     strokeWidth="2.2"
                     strokeLinecap="round"
                     strokeLinejoin="round"
@@ -601,13 +629,16 @@ export const ContentAngleScreen: React.FC<ContentAngleScreenProps> = ({
                 </Pressable>
 
                 <Pressable
-                  style={styles.moreIdeaBookmarkBtn}
+                  style={[
+                    styles.moreIdeaBookmarkBtn,
+                    item.bookmarked && styles.moreIdeaBookmarkBtnActive,
+                  ]}
                   onPress={() => toggleBookmark(item.id)}
                 >
-                  <Svg width={17} height={17} viewBox="0 0 24 24" fill={item.bookmarked ? '#582CDB' : 'none'}>
+                  <Svg width={17} height={17} viewBox="0 0 24 24" fill={item.bookmarked ? '#FFFFFF' : 'none'}>
                     <Path
                       d="M19 21L12 16L5 21V5C5 3.89543 5.89543 3 7 3H17C18.1046 3 19 3.89543 19 5V21Z"
-                      stroke="#582CDB"
+                      stroke={item.bookmarked ? '#FFFFFF' : '#582CDB'}
                       strokeWidth="2.2"
                       strokeLinecap="round"
                       strokeLinejoin="round"
@@ -1214,6 +1245,20 @@ const styles = StyleSheet.create({
     borderColor: '#EDE9FE',
     justifyContent: 'center',
     alignItems: 'center',
+    shadowColor: '#582CDB',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 1,
+  },
+  bookmarkIconBtnActive: {
+    backgroundColor: '#582CDB',
+    borderColor: '#582CDB',
+    shadowColor: '#582CDB',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 4,
   },
 
   // 4. More Ideas Section
@@ -1331,6 +1376,10 @@ const styles = StyleSheet.create({
     borderColor: '#EDE9FE',
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  moreIdeaBookmarkBtnActive: {
+    backgroundColor: '#582CDB',
+    borderColor: '#582CDB',
   },
 
   // 5. Daily Quota
