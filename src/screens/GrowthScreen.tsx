@@ -198,6 +198,7 @@ const INITIAL_GROWTH_PLATFORMS: GrowthPlatformAccount[] = [
 interface GrowthScreenProps {
   onBackToDashboard?: () => void;
   onOpenPostPerformance?: () => void;
+  onOpenPlatformGrowth?: () => void;
   onLogout?: () => void;
   onNavigateTab?: (tab: TabType) => void;
   onOpenJarvisPro?: () => void;
@@ -210,6 +211,7 @@ interface GrowthScreenProps {
 export const GrowthScreen: React.FC<GrowthScreenProps> = ({
   onBackToDashboard,
   onOpenPostPerformance,
+  onOpenPlatformGrowth,
   onLogout,
   onNavigateTab,
   onOpenJarvisPro,
@@ -795,10 +797,17 @@ export const GrowthScreen: React.FC<GrowthScreenProps> = ({
             </View>
 
             <Pressable
-              style={styles.seeAllReachLink}
+              style={({ pressed }) => [styles.seeAllReachLink, pressed && styles.btnPressed]}
               onPress={() => {
-                triggerModalPop();
-                setShowAudienceModal(true);
+                if (Platform.OS !== 'web') {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                }
+                if (onOpenPlatformGrowth) {
+                  onOpenPlatformGrowth();
+                } else {
+                  triggerModalPop();
+                  setShowAudienceModal(true);
+                }
               }}
               hitSlop={6}
             >

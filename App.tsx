@@ -28,6 +28,7 @@ import { MessagesScreen } from './src/screens/MessagesScreen';
 import { CollabIdeaScreen } from './src/screens/CollabIdeaScreen';
 import { AudienceBreakdownScreen } from './src/screens/AudienceBreakdownScreen';
 import { PostPerformanceScreen } from './src/screens/PostPerformanceScreen';
+import { PlatformGrowthScreen } from './src/screens/PlatformGrowthScreen';
 import { GhostLoadingScreen } from './src/components/GhostLoadingScreen';
 import { TabType } from './src/components/FloatingTabBar';
 import { UserProfileData } from './src/components/UserProfileModal';
@@ -57,7 +58,8 @@ type Screen =
   | 'collab-idea'
   | 'jarvis-pro'
   | 'audience-breakdown'
-  | 'post-performance';
+  | 'post-performance'
+  | 'platform-growth';
 
 export default function App() {
   const [showSplash, setShowSplash] = useState(true);
@@ -447,6 +449,7 @@ export default function App() {
             onOpenJarvisPro={() => navigateTo('jarvis-pro')}
             onOpenAudienceBreakdown={() => navigateTo('audience-breakdown')}
             onOpenPostPerformance={() => navigateTo('post-performance')}
+            onOpenPlatformGrowth={() => navigateTo('platform-growth')}
             onNavigateTab={(tab: TabType) => {
               if (tab === 'home') {
                 navigateTo('dashboard');
@@ -716,6 +719,41 @@ export default function App() {
         )}
 
                 
+        
+        {currentScreen === 'platform-growth' && (
+          <PlatformGrowthScreen
+            onBack={() => navigateTo('growth')}
+            onLogout={handleLogout}
+            onOpenMessages={() => navigateTo('messages')}
+            onOpenSchedule={() => navigateTo('schedule')}
+            onOpenJarvisPro={() => navigateTo('jarvis-pro')}
+            onOpenComposer={(prefillTitle) => {
+              if (prefillTitle) setComposerIdeaTitle(prefillTitle);
+              navigateTo('composer');
+            }}
+            onOpenScript={(prefillTitle) => {
+              if (prefillTitle) setSelectedIdeaTitle(prefillTitle);
+              navigateTo('script');
+            }}
+            onOpenContentAngle={() => navigateTo('content-angle')}
+            onNavigateTab={(tab: TabType) => {
+              if (tab === 'home') {
+                navigateTo('dashboard');
+              } else if (tab === 'create') {
+                navigateTo('create');
+              } else if (tab === 'match') {
+                navigateTo('match');
+              } else if (tab === 'quests') {
+                navigateTo('quests');
+              } else if (tab === 'growth') {
+                navigateTo('growth');
+              }
+            }}
+            userProfile={userProfile}
+            onSaveProfile={(updated) => setUserProfile(updated)}
+          />
+        )}
+
         {currentScreen === 'post-performance' && (
           <PostPerformanceScreen
             onBack={() => navigateTo('growth')}
@@ -760,6 +798,7 @@ export default function App() {
             onOpenMessages={() => navigateTo('messages')}
             onOpenPlatformConnect={() => navigateTo('platforms')}
             onOpenPostPerformance={() => navigateTo('post-performance')}
+            onOpenPlatformGrowth={() => navigateTo('platform-growth')}
             onOpenCreate={(prefillTopic) => {
               if (prefillTopic) setComposerIdeaTitle(prefillTopic);
               navigateTo('create');
