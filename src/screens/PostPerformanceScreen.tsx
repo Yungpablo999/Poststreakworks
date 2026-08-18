@@ -277,31 +277,6 @@ export const PostPerformanceScreen: React.FC<PostPerformanceScreenProps> = ({
           contentContainerStyle={{ paddingBottom: 120 }}
           showsVerticalScrollIndicator={false}
         >
-          {/* SECTION SWITCH CHIPS */}
-          <View style={styles.sectionSwitchRow}>
-            <Pressable
-              style={({ pressed }) => [styles.sectionSwitchChip, pressed && styles.btnPressed]}
-              onPress={() => {
-                if (Platform.OS !== 'web') {
-                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                }
-                if (onOpenAudienceBreakdown) {
-                  onOpenAudienceBreakdown();
-                } else {
-                  onBack();
-                }
-              }}
-            >
-              <Text style={styles.sectionSwitchChipText}>AUDIENCE BREAKDOWN</Text>
-            </Pressable>
-
-            <Pressable style={[styles.sectionSwitchChip, styles.sectionSwitchChipActive]}>
-              <Text style={[styles.sectionSwitchChipText, styles.sectionSwitchChipTextActive]}>
-                POST ANALYTICS ✓
-              </Text>
-            </Pressable>
-          </View>
-
           {/* HERO SECTION TITLE */}
           <View style={styles.badgePillRow}>
             <View style={styles.deepDivePill}>
