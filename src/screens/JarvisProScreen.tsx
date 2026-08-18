@@ -22,6 +22,7 @@ interface JarvisProScreenProps {
   onLogout?: () => void;
   onNavigateTab?: (tab: TabType) => void;
   onOpenMessages?: () => void;
+  onBack?: () => void;
 }
 
 interface FaqItem {
@@ -61,6 +62,7 @@ export const JarvisProScreen: React.FC<JarvisProScreenProps> = ({
   onLogout,
   onNavigateTab,
   onOpenMessages,
+  onBack,
 }) => {
   const [activeTab, setActiveTab] = useState<TabType>('growth');
   const [expandedBriefStep, setExpandedBriefStep] = useState<string | null>(null);
@@ -155,6 +157,17 @@ export const JarvisProScreen: React.FC<JarvisProScreenProps> = ({
         {/* 1. TOP HEADER APP BAR */}
         <View style={styles.headerBar}>
           <View style={styles.headerLeftGroup}>
+            {onBack && (
+              <Pressable
+                onPress={onBack}
+                style={({ pressed }) => [{ marginRight: 8, padding: 4 }, pressed && styles.btnPressed]}
+                hitSlop={10}
+              >
+                <Svg width={22} height={22} viewBox="0 0 24 24" fill="none">
+                  <Path d="M15 18l-6-6 6-6" stroke="#171420" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" />
+                </Svg>
+              </Pressable>
+            )}
             <Animated.View
               style={[
                 styles.headerLogoWrapper,

@@ -18,6 +18,7 @@ import { CreateScreen } from './src/screens/CreateScreen';
 import { ScheduleScreen } from './src/screens/ScheduleScreen';
 import { MatchScreen } from './src/screens/MatchScreen';
 import { JarvisProScreen } from './src/screens/JarvisProScreen';
+import { GrowthScreen } from './src/screens/GrowthScreen';
 import { GhostLoadingScreen } from './src/components/GhostLoadingScreen';
 import { TabType } from './src/components/FloatingTabBar';
 
@@ -36,7 +37,8 @@ type Screen =
   | 'growth'
   | 'quests'
   | 'schedule'
-  | 'challenge-detail';
+  | 'challenge-detail'
+  | 'jarvis-pro';
 
 export default function App() {
   const [showSplash, setShowSplash] = useState(true);
@@ -61,6 +63,8 @@ export default function App() {
           : nextScreen === 'quests'
           ? 'Entering Quests Hub'
           : nextScreen === 'growth'
+          ? 'Opening Growth Analytics'
+          : nextScreen === 'jarvis-pro'
           ? 'Entering Jarvis Pro Suite'
           : nextScreen === 'schedule'
           ? 'Loading Content Timeline'
@@ -334,7 +338,27 @@ export default function App() {
         )}
 
         {currentScreen === 'growth' && (
+          <GrowthScreen
+            onBackToDashboard={() => navigateTo('dashboard')}
+            onLogout={handleLogout}
+            onOpenJarvisPro={() => navigateTo('jarvis-pro')}
+            onNavigateTab={(tab: TabType) => {
+              if (tab === 'home') {
+                navigateTo('dashboard');
+              } else if (tab === 'create') {
+                navigateTo('create');
+              } else if (tab === 'match') {
+                navigateTo('match');
+              } else if (tab === 'quests') {
+                navigateTo('quests');
+              }
+            }}
+          />
+        )}
+
+        {currentScreen === 'jarvis-pro' && (
           <JarvisProScreen
+            onBack={() => navigateTo('growth')}
             onLogout={handleLogout}
             onNavigateTab={(tab: TabType) => {
               if (tab === 'home') {
@@ -345,6 +369,8 @@ export default function App() {
                 navigateTo('match');
               } else if (tab === 'quests') {
                 navigateTo('quests');
+              } else if (tab === 'growth') {
+                navigateTo('growth');
               }
             }}
           />
