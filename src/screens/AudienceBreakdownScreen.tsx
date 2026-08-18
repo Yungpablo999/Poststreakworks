@@ -939,28 +939,46 @@ export const AudienceBreakdownScreen: React.FC<AudienceBreakdownScreenProps> = (
             </View>
           </View>
 
-          {/* CARD 3: FASTEST GROWING PLATFORM SPOTLIGHT (WARM AMBER AESTHETIC) */}
+          {/* CARD 3: FASTEST GROWING PLATFORM SPOTLIGHT (PREMIUM PURPLE/IVORY STYLING) */}
           <View style={styles.spotlightCard}>
             <View style={styles.spotlightHeaderRow}>
               <View style={styles.fastestBadge}>
+                <Text style={{ fontSize: 12 }}>⚡</Text>
                 <Text style={styles.fastestBadgeText}>FASTEST GROWING PLATFORM</Text>
               </View>
-              <Text style={{ fontSize: 18 }}>⚡</Text>
+              <View style={styles.spotlightSurgePill}>
+                <Text style={styles.spotlightSurgePillText}>📈 +22% VELOCITY</Text>
+              </View>
             </View>
 
-            <Text style={styles.spotlightPlatformTitle}>TikTok</Text>
-            <Text style={styles.spotlightPlatformSubtitle}>+840 (+22% this week)</Text>
+            <View style={styles.spotlightPlatformRow}>
+              <View style={styles.spotlightIconBadge}>
+                <TikTokSvg size={22} />
+              </View>
+              <View>
+                <Text style={styles.spotlightPlatformTitle}>TikTok</Text>
+                <Text style={styles.spotlightPlatformSubtitle}>+840 new followers this week</Text>
+              </View>
+            </View>
 
             <View style={styles.bestContentBox}>
-              <Text style={styles.bestContentLabel}>BEST CONTENT TYPE</Text>
-              <Text style={styles.bestContentTitle}>Creator advice videos</Text>
+              <Text style={styles.bestContentLabel}>TOP PERFORMING NICHE &amp; ANGLE</Text>
+              <Text style={styles.bestContentTitle}>Creator advice &amp; educational breakdowns</Text>
+              <Text style={styles.bestContentSub}>Drives 3.4x more saves &amp; 68% longer average retention</Text>
             </View>
 
             <Pressable
               style={({ pressed }) => [styles.createSimilarBtn, pressed && styles.btnPressed]}
               onPress={handleCreateSimilarPost}
             >
-              <Text style={styles.createSimilarBtnText}>CREATE SIMILAR POST</Text>
+              <LinearGradient
+                colors={['#582CDB', '#4318FF']}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 0 }}
+                style={styles.createSimilarGradient}
+              >
+                <Text style={styles.createSimilarBtnText}>✨ CREATE SIMILAR POST ➔</Text>
+              </LinearGradient>
             </Pressable>
           </View>
 
@@ -2081,75 +2099,131 @@ const styles = StyleSheet.create({
     borderRadius: 4,
   },
 
-  // Card 3: Spotlight Card (Warm Amber)
+  // Card 3: Spotlight Card (Premium Purple & Soft Ivory)
   spotlightCard: {
-    backgroundColor: '#FEF3C7',
-    borderRadius: 20,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 24,
     borderWidth: 1,
-    borderColor: '#FDE68A',
+    borderColor: '#EDE9FE',
     padding: 18,
-    marginBottom: 16,
+    marginBottom: 18,
+    shadowColor: '#582CDB',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.08,
+    shadowRadius: 16,
+    elevation: 3,
   },
   spotlightHeaderRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 10,
+    marginBottom: 14,
   },
   fastestBadge: {
-    backgroundColor: '#171420',
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+    backgroundColor: '#FAF5FF',
+    paddingVertical: 4,
+    paddingHorizontal: 9,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#E9D5FF',
+  },
+  fastestBadgeText: {
+    fontSize: 9.5,
+    fontWeight: '900',
+    color: '#582CDB',
+    letterSpacing: 0.4,
+  },
+  spotlightSurgePill: {
+    backgroundColor: '#ECFDF5',
     paddingVertical: 3,
     paddingHorizontal: 8,
     borderRadius: 6,
   },
-  fastestBadgeText: {
+  spotlightSurgePillText: {
     fontSize: 9,
     fontWeight: '900',
-    color: '#FFFFFF',
-    letterSpacing: 0.4,
+    color: '#059669',
+    letterSpacing: 0.3,
+  },
+  spotlightPlatformRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    marginBottom: 14,
+  },
+  spotlightIconBadge: {
+    width: 44,
+    height: 44,
+    borderRadius: 14,
+    backgroundColor: '#F1F5F9',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
   },
   spotlightPlatformTitle: {
-    fontSize: 20,
+    fontSize: 18,
     fontWeight: '900',
     color: '#171420',
+    letterSpacing: -0.3,
   },
   spotlightPlatformSubtitle: {
     fontSize: 12,
     fontWeight: '700',
-    color: '#92400E',
-    marginTop: 2,
-    marginBottom: 12,
+    color: '#64748B',
+    marginTop: 1,
   },
   bestContentBox: {
-    backgroundColor: 'rgba(255, 255, 255, 0.65)',
-    borderRadius: 14,
-    padding: 12,
-    marginBottom: 12,
+    backgroundColor: '#FAF8F5',
+    borderRadius: 16,
+    padding: 14,
+    marginBottom: 14,
+    borderLeftWidth: 3.5,
+    borderLeftColor: '#582CDB',
+    borderWidth: 1,
+    borderColor: '#F1EFEA',
   },
   bestContentLabel: {
-    fontSize: 9.5,
+    fontSize: 9,
     fontWeight: '900',
-    color: '#78350F',
-    letterSpacing: 0.5,
+    color: '#582CDB',
+    letterSpacing: 0.6,
     marginBottom: 3,
   },
   bestContentTitle: {
-    fontSize: 14,
+    fontSize: 13.5,
     fontWeight: '900',
     color: '#171420',
+    marginBottom: 3,
+  },
+  bestContentSub: {
+    fontSize: 11,
+    color: '#64748B',
+    lineHeight: 15,
   },
   createSimilarBtn: {
-    height: 42,
-    borderRadius: 12,
-    backgroundColor: '#171420',
+    height: 46,
+    borderRadius: 14,
+    overflow: 'hidden',
+    shadowColor: '#582CDB',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.2,
+    shadowRadius: 6,
+    elevation: 3,
+  },
+  createSimilarGradient: {
+    flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
   },
   createSimilarBtnText: {
-    fontSize: 11.5,
+    fontSize: 12.5,
     fontWeight: '900',
     color: '#FFFFFF',
-    letterSpacing: 0.5,
+    letterSpacing: 0.4,
   },
 
   // 4 Platform Stats Grid (2x2)
