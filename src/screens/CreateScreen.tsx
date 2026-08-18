@@ -24,6 +24,7 @@ interface CreateScreenProps {
   onNavigateTab?: (tab: TabType) => void;
   onOpenSchedule?: () => void;
   onOpenJarvisPro?: () => void;
+  onOpenIdeaDetail?: (ideaTitle?: string) => void;
 }
 
 interface DraftItem {
@@ -238,6 +239,7 @@ export const CreateScreen: React.FC<CreateScreenProps> = ({
   onNavigateTab,
   onOpenSchedule,
   onOpenJarvisPro,
+  onOpenIdeaDetail,
 }) => {
   const [activeTab, setActiveTab] = useState<TabType>('create');
   const [drafts, setDrafts] = useState<DraftItem[]>(INITIAL_DRAFTS);
@@ -583,7 +585,16 @@ export const CreateScreen: React.FC<CreateScreenProps> = ({
             {/* Primary Action Button: Use This Idea */}
             <Pressable
               style={({ pressed }) => [styles.useIdeaBtn, pressed && styles.btnPressed]}
-              onPress={() => openNewPost('One thing I wish I knew before I started creating', 'instagram')}
+              onPress={() => {
+                if (Platform.OS !== 'web') {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                }
+                if (onOpenIdeaDetail) {
+                  onOpenIdeaDetail('One thing I wish I knew before I started creating');
+                } else {
+                  openNewPost('One thing I wish I knew before I started creating', 'instagram');
+                }
+              }}
             >
               <LinearGradient
                 colors={['#6366F1', '#582CDB']}

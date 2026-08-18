@@ -19,6 +19,7 @@ import { ScheduleScreen } from './src/screens/ScheduleScreen';
 import { MatchScreen } from './src/screens/MatchScreen';
 import { JarvisProScreen } from './src/screens/JarvisProScreen';
 import { GrowthScreen } from './src/screens/GrowthScreen';
+import { IdeaDetailScreen } from './src/screens/IdeaDetailScreen';
 import { GhostLoadingScreen } from './src/components/GhostLoadingScreen';
 import { TabType } from './src/components/FloatingTabBar';
 
@@ -38,6 +39,7 @@ type Screen =
   | 'quests'
   | 'schedule'
   | 'challenge-detail'
+  | 'idea-detail'
   | 'jarvis-pro';
 
 export default function App() {
@@ -50,13 +52,16 @@ export default function App() {
   // Creator Onboarding Data State
   const [selectedNiches, setSelectedNiches] = useState<string[]>(['lifestyle', 'comedy']);
   const [connectedPlatforms, setConnectedPlatforms] = useState<string[]>(['tiktok', 'instagram', 'youtube']);
+  const [selectedIdeaTitle, setSelectedIdeaTitle] = useState('One thing I wish I knew before I started creating');
 
   // Animated page transition handler
   const navigateTo = (nextScreen: Screen, customMessage?: string) => {
     if (nextScreen !== currentScreen) {
       const msg =
         customMessage ||
-        (nextScreen === 'challenge-detail'
+        (nextScreen === 'idea-detail'
+          ? 'Crafting Viral Idea...'
+          : nextScreen === 'challenge-detail'
           ? 'Entering Community Challenge'
           : nextScreen === 'mission-detail'
           ? "Entering Today's Mission"
@@ -289,6 +294,10 @@ export default function App() {
             onLogout={handleLogout}
             onOpenSchedule={() => navigateTo('schedule')}
             onOpenJarvisPro={() => navigateTo('jarvis-pro')}
+            onOpenIdeaDetail={(title) => {
+              if (title) setSelectedIdeaTitle(title);
+              navigateTo('idea-detail');
+            }}
             onNavigateTab={(tab: TabType) => {
               if (tab === 'home') {
                 navigateTo('dashboard');
@@ -410,6 +419,29 @@ export default function App() {
           <ChallengeDetailScreen
             onBackToDashboard={() => navigateTo('quests')}
             onLogout={handleLogout}
+            onNavigateTab={(tab: TabType) => {
+              if (tab === 'home') {
+                navigateTo('dashboard');
+              } else if (tab === 'create') {
+                navigateTo('create');
+              } else if (tab === 'match') {
+                navigateTo('match');
+              } else if (tab === 'quests') {
+                navigateTo('quests');
+              } else if (tab === 'growth') {
+                navigateTo('growth');
+              }
+            }}
+          />
+        )}
+
+        {currentScreen === 'idea-detail' && (
+          <IdeaDetailScreen
+            ideaTitle={selectedIdeaTitle}
+            onBack={() => navigateTo(previousScreen ? previousScreen : 'create')}
+            onLogout={handleLogout}
+            onOpenSchedule={() => navigateTo('schedule')}
+            onOpenJarvisPro={() => navigateTo('jarvis-pro')}
             onNavigateTab={(tab: TabType) => {
               if (tab === 'home') {
                 navigateTo('dashboard');
