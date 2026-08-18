@@ -678,43 +678,80 @@ export const PostPerformanceScreen: React.FC<PostPerformanceScreenProps> = ({
             </Text>
           </View>
 
-          {/* CARD 10: REPURPOSE PREVIEW (PRO FEATURE) */}
+          {/* CARD 10: REPURPOSE PREVIEW (SNEAK PEEK • LOCKED TO PRO) */}
           <View style={styles.sectionHeaderRow}>
             <Text style={styles.sectionTitle}>Repurpose Preview</Text>
             <View style={styles.proPillBadge}>
-              <Text style={styles.proPillBadgeText}>PRO FEATURE</Text>
+              <Text style={styles.proPillBadgeText}>🔒 SNEAK PEEK • LOCKED TO PRO</Text>
             </View>
           </View>
 
           <View style={styles.repurposeCard}>
             <View style={styles.repurposeGrid}>
               <View style={styles.repurposeGridItem}>
-                <Text style={styles.repurposeItemTitle}>📸 Instagram Reels</Text>
-                <Text style={styles.repurposeFitBadge}>HIGH FIT</Text>
+                <View style={styles.repurposeItemHeader}>
+                  <Text style={styles.repurposeItemTitle}>📸 Instagram Reels</Text>
+                  <Text style={styles.repurposeFitBadge}>HIGH FIT</Text>
+                </View>
+                <Text style={styles.repurposeSnippetText}>"Hook adapted for 9:16 reels format..."</Text>
+                <Text style={styles.repurposeLockTag}>🔒 PRO PREVIEW</Text>
               </View>
+
               <View style={styles.repurposeGridItem}>
-                <Text style={styles.repurposeItemTitle}>▶️ YouTube Shorts</Text>
-                <Text style={styles.repurposeFitBadge}>HIGH FIT</Text>
+                <View style={styles.repurposeItemHeader}>
+                  <Text style={styles.repurposeItemTitle}>▶️ YouTube Shorts</Text>
+                  <Text style={styles.repurposeFitBadge}>HIGH FIT</Text>
+                </View>
+                <Text style={styles.repurposeSnippetText}>"Loop pacing &amp; retention hook tuned..."</Text>
+                <Text style={styles.repurposeLockTag}>🔒 PRO PREVIEW</Text>
               </View>
+
               <View style={styles.repurposeGridItem}>
-                <Text style={styles.repurposeItemTitle}>💼 LinkedIn Post</Text>
-                <Text style={styles.repurposeFitBadgeMedium}>MEDIUM FIT</Text>
+                <View style={styles.repurposeItemHeader}>
+                  <Text style={styles.repurposeItemTitle}>💼 LinkedIn Post</Text>
+                  <Text style={styles.repurposeFitBadgeMedium}>MEDIUM FIT</Text>
+                </View>
+                <Text style={styles.repurposeSnippetText}>"Executive text breakdown with takeaways..."</Text>
+                <Text style={styles.repurposeLockTag}>🔒 PRO PREVIEW</Text>
               </View>
+
               <View style={styles.repurposeGridItem}>
-                <Text style={styles.repurposeItemTitle}>🧵 Threads Carousel</Text>
-                <Text style={styles.repurposeFitBadge}>HIGH FIT</Text>
+                <View style={styles.repurposeItemHeader}>
+                  <Text style={styles.repurposeItemTitle}>🧵 Threads Carousel</Text>
+                  <Text style={styles.repurposeFitBadge}>HIGH FIT</Text>
+                </View>
+                <Text style={styles.repurposeSnippetText}>"5-slide swipeable text hook..."</Text>
+                <Text style={styles.repurposeLockTag}>🔒 PRO PREVIEW</Text>
               </View>
             </View>
 
             <Text style={styles.repurposeSubtext}>
-              Auto-convert this TikTok script into 4 optimized multi-platform assets.
+              Auto-convert this TikTok script into 4 optimized multi-platform assets with 1 click.
             </Text>
 
             <Pressable
-              style={({ pressed }) => [styles.repurposeActionBtn, pressed && styles.btnPressed]}
-              onPress={handleRepurposePost}
+              style={({ pressed }) => [styles.repurposeUnlockBtn, pressed && styles.btnPressed]}
+              onPress={() => {
+                if (Platform.OS !== 'web') {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                }
+                if (onOpenJarvisPro) {
+                  onOpenJarvisPro();
+                } else {
+                  handleRepurposePost();
+                }
+              }}
             >
-              <Text style={styles.repurposeActionBtnText}>Repurpose to All Platforms ➔</Text>
+              <LinearGradient
+                colors={['#FDE047', '#EAB308', '#CA8A04', '#A16207']}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                style={styles.repurposeUnlockGradient}
+              >
+                <Text style={styles.repurposeUnlockBtnText}>
+                  Unlock 1-Click Repurposing (Pro) ➔
+                </Text>
+              </LinearGradient>
             </Pressable>
           </View>
 
@@ -1717,27 +1754,33 @@ const styles = StyleSheet.create({
     lineHeight: 16,
   },
 
-  // CARD 10: REPURPOSE PREVIEW
+  // CARD 10: REPURPOSE PREVIEW (LOCKED TO PRO)
   proPillBadge: {
     backgroundColor: '#FEF9C3',
-    paddingVertical: 2,
-    paddingHorizontal: 7,
-    borderRadius: 4,
+    paddingVertical: 3,
+    paddingHorizontal: 8,
+    borderRadius: 6,
     borderWidth: 1,
     borderColor: '#FDE047',
   },
   proPillBadgeText: {
-    fontSize: 8.5,
+    fontSize: 9,
     fontWeight: '900',
     color: '#A16207',
+    letterSpacing: 0.3,
   },
   repurposeCard: {
     backgroundColor: '#FFFFFF',
-    borderRadius: 20,
+    borderRadius: 22,
     borderWidth: 1,
-    borderColor: '#EDE8E1',
+    borderColor: '#FEF08A',
     padding: 16,
     marginBottom: 18,
+    shadowColor: '#FDE047',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 14,
+    elevation: 3,
   },
   repurposeGrid: {
     flexDirection: 'row',
@@ -1748,36 +1791,52 @@ const styles = StyleSheet.create({
   repurposeGridItem: {
     width: '48.5%',
     backgroundColor: '#FAF8F5',
-    borderRadius: 12,
+    borderRadius: 14,
     padding: 10,
     borderWidth: 1,
     borderColor: '#E2E8F0',
+  },
+  repurposeItemHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+    marginBottom: 4,
   },
   repurposeItemTitle: {
-    fontSize: 11,
+    fontSize: 10.5,
     fontWeight: '800',
     color: '#171420',
   },
   repurposeFitBadge: {
-    fontSize: 8,
+    fontSize: 7.5,
     fontWeight: '900',
     color: '#059669',
     backgroundColor: '#ECFDF5',
-    paddingVertical: 2,
+    paddingVertical: 1.5,
     paddingHorizontal: 4,
     borderRadius: 4,
   },
   repurposeFitBadgeMedium: {
-    fontSize: 8,
+    fontSize: 7.5,
     fontWeight: '900',
     color: '#B45309',
     backgroundColor: '#FEF3C7',
-    paddingVertical: 2,
+    paddingVertical: 1.5,
     paddingHorizontal: 4,
     borderRadius: 4,
+  },
+  repurposeSnippetText: {
+    fontSize: 10,
+    color: '#64748B',
+    fontStyle: 'italic',
+    lineHeight: 14,
+    marginVertical: 4,
+  },
+  repurposeLockTag: {
+    fontSize: 8.5,
+    fontWeight: '900',
+    color: '#A16207',
+    marginTop: 2,
   },
   repurposeSubtext: {
     fontSize: 11.5,
@@ -1785,19 +1844,26 @@ const styles = StyleSheet.create({
     marginBottom: 12,
     lineHeight: 16,
   },
-  repurposeActionBtn: {
-    height: 42,
-    borderRadius: 12,
-    backgroundColor: '#FAF5FF',
-    borderWidth: 1,
-    borderColor: '#DDD6FE',
+  repurposeUnlockBtn: {
+    height: 46,
+    borderRadius: 14,
+    overflow: 'hidden',
+    shadowColor: '#FDE047',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.35,
+    shadowRadius: 8,
+    elevation: 3,
+  },
+  repurposeUnlockGradient: {
+    flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
   },
-  repurposeActionBtnText: {
-    fontSize: 12,
+  repurposeUnlockBtnText: {
+    fontSize: 12.5,
     fontWeight: '900',
-    color: '#582CDB',
+    color: '#171420',
+    letterSpacing: -0.2,
   },
 
   // CARD 11: AUDIENCE DEMOGRAPHICS FOR THIS POST
