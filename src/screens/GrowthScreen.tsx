@@ -25,6 +25,7 @@ interface GrowthScreenProps {
   onNavigateTab?: (tab: TabType) => void;
   onOpenJarvisPro?: () => void;
   onOpenMessages?: () => void;
+  onOpenAudienceBreakdown?: () => void;
   userProfile?: UserProfileData;
   onSaveProfile?: (updated: UserProfileData) => void;
 }
@@ -35,9 +36,10 @@ export const GrowthScreen: React.FC<GrowthScreenProps> = ({
   onNavigateTab,
   onOpenJarvisPro,
   onOpenMessages,
-
+  onOpenAudienceBreakdown,
   userProfile,
-  onSaveProfile,}) => {
+  onSaveProfile,
+}) => {
   const isDark = false;
   const [activeTab, setActiveTab] = useState<TabType>('growth');
 
@@ -311,8 +313,15 @@ export const GrowthScreen: React.FC<GrowthScreenProps> = ({
             <Pressable
               style={styles.viewFullAudienceLink}
               onPress={() => {
-                triggerModalPop();
-                setShowAudienceModal(true);
+                if (Platform.OS !== 'web') {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                }
+                if (onOpenAudienceBreakdown) {
+                  onOpenAudienceBreakdown();
+                } else {
+                  triggerModalPop();
+                  setShowAudienceModal(true);
+                }
               }}
               hitSlop={8}
             >

@@ -26,6 +26,7 @@ import { ScriptScreen } from './src/screens/ScriptScreen';
 import { CaptionScreen } from './src/screens/CaptionScreen';
 import { MessagesScreen } from './src/screens/MessagesScreen';
 import { CollabIdeaScreen } from './src/screens/CollabIdeaScreen';
+import { AudienceBreakdownScreen } from './src/screens/AudienceBreakdownScreen';
 import { GhostLoadingScreen } from './src/components/GhostLoadingScreen';
 import { TabType } from './src/components/FloatingTabBar';
 import { UserProfileData } from './src/components/UserProfileModal';
@@ -53,7 +54,8 @@ type Screen =
   | 'caption'
   | 'messages'
   | 'collab-idea'
-  | 'jarvis-pro';
+  | 'jarvis-pro'
+  | 'audience-breakdown';
 
 export default function App() {
   const [showSplash, setShowSplash] = useState(true);
@@ -245,8 +247,8 @@ export default function App() {
 
   return (
     <SafeAreaProvider>
-      <View style={[styles.container, userProfile.isDarkMode && styles.containerDark]}>
-        <StatusBar style={userProfile.isDarkMode ? 'light' : 'dark'} />
+      <View style={styles.container}>
+        <StatusBar style="dark" />
 
         {currentScreen === 'welcome' && (
           <WelcomeScreen
@@ -441,6 +443,7 @@ export default function App() {
             onLogout={handleLogout}
             onOpenMessages={() => navigateTo('messages')}
             onOpenJarvisPro={() => navigateTo('jarvis-pro')}
+            onOpenAudienceBreakdown={() => navigateTo('audience-breakdown')}
             onNavigateTab={(tab: TabType) => {
               if (tab === 'home') {
                 navigateTo('dashboard');
@@ -709,6 +712,40 @@ export default function App() {
           />
         )}
 
+                {currentScreen === 'audience-breakdown' && (
+          <AudienceBreakdownScreen
+            onBack={() => navigateTo('growth')}
+            onLogout={handleLogout}
+            onOpenSchedule={() => navigateTo('schedule')}
+            onOpenJarvisPro={() => navigateTo('jarvis-pro')}
+            onOpenMessages={() => navigateTo('messages')}
+            onOpenPlatformConnect={() => navigateTo('platforms')}
+            onOpenCreate={(prefillTopic) => {
+              if (prefillTopic) setComposerIdeaTitle(prefillTopic);
+              navigateTo('create');
+            }}
+            onOpenPostComposer={(prefillTitle) => {
+              if (prefillTitle) setComposerIdeaTitle(prefillTitle);
+              navigateTo('composer');
+            }}
+            onNavigateTab={(tab: TabType) => {
+              if (tab === 'home') {
+                navigateTo('dashboard');
+              } else if (tab === 'create') {
+                navigateTo('create');
+              } else if (tab === 'match') {
+                navigateTo('match');
+              } else if (tab === 'quests') {
+                navigateTo('quests');
+              } else if (tab === 'growth') {
+                navigateTo('growth');
+              }
+            }}
+            userProfile={userProfile}
+            onSaveProfile={(updated) => setUserProfile(updated)}
+          />
+        )}
+
         {currentScreen === 'collab-idea' && (
           <CollabIdeaScreen
             partnerName={collabPartnerData.name}
@@ -758,8 +795,5 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#FAF8F5',
-  },
-  containerDark: {
-    backgroundColor: '#0F0D15',
   },
 });
