@@ -14,6 +14,10 @@ import { contentStudioRouter } from "./routers/content-studio";
 import { referralsRouter } from "./routers/referrals";
 import { autopilotRouter } from "./routers/autopilot";
 import { agentRouter } from "./routers/agent";
+import { notificationsRouter } from "./routers/notifications";
+import { passportRouter } from "./routers/passport";
+import { earningsRouter } from "./routers/earnings";
+import { questsRouter } from "./routers/quests";
 
 export const appRouter = createTRPCRouter({
   accounts: accountsRouter,
@@ -32,6 +36,12 @@ export const appRouter = createTRPCRouter({
   referrals: referralsRouter,
   autopilot: autopilotRouter,
   agent: agentRouter,
+  // Reverse-engineered from the built frontend — see supabase/migrations/
+  // 20260814000014_notifications_quests_creator_economy.sql
+  notifications: notificationsRouter,
+  passport: passportRouter,
+  earnings: earningsRouter,
+  quests: questsRouter,
 });
 
 export type AppRouter = typeof appRouter;

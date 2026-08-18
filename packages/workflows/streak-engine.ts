@@ -60,6 +60,48 @@ export function calculateJarvisEmotion(
   return "neutral";
 }
 
+// ─── XP / Leveling ──────────────────────────────────────────────────────────
+// The frontend (30 Expo screens) shows level/xp/nextLevelXp pervasively —
+// touched by Dashboard, Quests, ChallengeDetail, CollabIdea, Messages, Match,
+// JarvisPro. Rather than a parallel XP ledger, this reuses the existing
+// `credits` table (already an append-only earn/redeem ledger for streak
+// milestones) as the single source of truth: xp = sum(earn) - sum(redeem).
+// Every gamified action that awards XP inserts a `credits` row.
+
+const XP_PER_LEVEL = 250;
+
+export function levelForXp(xp: number): { level: number; nextLevelXp: number } {
+  const level = Math.max(1, Math.floor(xp / XP_PER_LEVEL) + 1);
+  return { level, nextLevelXp: level * XP_PER_LEVEL };
+}
+
+export async function awardXp(
+  supabase: SupabaseClient,
+  userId: string,
+  amount: number,
+  source: string,
+  description?: string,
+): Promise<void> {
+  if (amount <= 0) return;
+  await supabase.from("credits").insert({
+    user_id: userId,
+    type: "earn",
+    amount,
+    source,
+    description: description ?? source,
+  });
+}
+
+export async function getXpBalance(supabase: SupabaseClient, userId: string): Promise<number> {
+  const [earns, redeems] = await Promise.all([
+    supabase.from("credits").select("amount").eq("user_id", userId).eq("type", "earn"),
+    supabase.from("credits").select("amount").eq("user_id", userId).eq("type", "redeem"),
+  ]);
+  const earned = (earns.data ?? []).reduce((sum: number, r: { amount: number }) => sum + r.amount, 0);
+  const redeemed = (redeems.data ?? []).reduce((sum: number, r: { amount: number }) => sum + r.amount, 0);
+  return earned - redeemed;
+}
+
 export type StreakEventType = "publish" | "mission_completion" | "collaboration_completion";
 
 export type RecordStreakEventResult =

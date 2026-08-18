@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "../context";
 import { TRPCError } from "@trpc/server";
+import type { SupabaseClient } from "@supabase/supabase-js";
 import {
   generateIdeas,
   generateHooks,
@@ -10,6 +11,42 @@ import {
   type ScriptOutput,
   type CaptionOutput,
 } from "@poststreak/ai/content-studio";
+
+// Daily per-tool generation quotas — reverse-engineered from the built
+// frontend, which enforces these client-side only today (ContentAngleScreen:
+// "5 AI generations/day", confirmed exact; the others weren't shown with an
+// explicit number in the screens studied, so these are reasonable defaults
+// pending product confirmation, not ported facts). Enforced here so the
+// limit can't be bypassed by calling the API directly instead of the UI.
+const DAILY_QUOTAS = {
+  ai_idea_builder_used: 5,
+  ai_hook_lab_used: 10,
+  ai_script_builder_used: 10,
+  ai_caption_studio_used: 15,
+} as const;
+
+async function checkAndConsumeQuota(
+  supabase: SupabaseClient,
+  userId: string,
+  eventName: keyof typeof DAILY_QUOTAS,
+): Promise<void> {
+  const todayStart = new Date();
+  todayStart.setUTCHours(0, 0, 0, 0);
+
+  const { count } = await supabase
+    .from("analytics_events")
+    .select("id", { count: "exact", head: true })
+    .eq("user_id", userId)
+    .eq("event_name", eventName)
+    .gte("created_at", todayStart.toISOString());
+
+  if ((count ?? 0) >= DAILY_QUOTAS[eventName]) {
+    throw new TRPCError({
+      code: "TOO_MANY_REQUESTS",
+      message: `Daily generation limit reached (${DAILY_QUOTAS[eventName]}/day). Try again tomorrow.`,
+    });
+  }
+}
 
 const ideaBuilderInput = z.object({
   niche: z.string().min(1).max(200),
@@ -46,6 +83,7 @@ export const contentStudioRouter = createTRPCRouter({
   generateIdeas: protectedProcedure
     .input(ideaBuilderInput)
     .mutation(async ({ ctx, input }) => {
+      await checkAndConsumeQuota(ctx.supabase, ctx.user.id, "ai_idea_builder_used");
       try {
         const ideas = await generateIdeas(input);
 
@@ -71,6 +109,7 @@ export const contentStudioRouter = createTRPCRouter({
   generateHooks: protectedProcedure
     .input(hookLabInput)
     .mutation(async ({ ctx, input }) => {
+      await checkAndConsumeQuota(ctx.supabase, ctx.user.id, "ai_hook_lab_used");
       try {
         const hooks = await generateHooks(input);
 
@@ -95,6 +134,7 @@ export const contentStudioRouter = createTRPCRouter({
   generateScript: protectedProcedure
     .input(scriptBuilderInput)
     .mutation(async ({ ctx, input }) => {
+      await checkAndConsumeQuota(ctx.supabase, ctx.user.id, "ai_script_builder_used");
       try {
         const script = await generateScript(input);
 
@@ -119,6 +159,7 @@ export const contentStudioRouter = createTRPCRouter({
   generateCaption: protectedProcedure
     .input(captionStudioInput)
     .mutation(async ({ ctx, input }) => {
+      await checkAndConsumeQuota(ctx.supabase, ctx.user.id, "ai_caption_studio_used");
       try {
         const caption = await generateCaption(input);
 

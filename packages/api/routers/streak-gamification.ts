@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "../context";
 import { TRPCError } from "@trpc/server";
-import { recordStreakEvent, calculateJarvisEmotion, todayWAT, yesterdayWAT } from "@poststreak/workflows";
+import { recordStreakEvent, calculateJarvisEmotion, todayWAT, yesterdayWAT, levelForXp, getXpBalance } from "@poststreak/workflows";
 
 // Jarvis emotion calc and WAT date math live in packages/workflows/streak-engine.ts
 // (ported from v1's src/lib/streak.ts) — shared with the cron dispatch job,
@@ -60,7 +60,19 @@ export const streakGamificationRouter = createTRPCRouter({
       data!.jarvis_emotion = emotion;
     }
 
-    return data;
+    // Simplified 3-state status the frontend actually renders (active/at_risk/
+    // frozen) vs. the 9-state jarvis_emotion enum it doesn't directly consume.
+    const streakStatus =
+      emotion === "thriving" || emotion === "happy" || emotion === "content" || emotion === "neutral"
+        ? "active"
+        : emotion === "concerned" || emotion === "worried"
+          ? "at_risk"
+          : "frozen";
+
+    const xp = await getXpBalance(ctx.supabase, ctx.user.id);
+    const { level, nextLevelXp } = levelForXp(xp);
+
+    return { ...data, streakStatus, xp, level, nextLevelXp };
   }),
 
   /**
