@@ -256,7 +256,7 @@ export const CreateScreen: React.FC<CreateScreenProps> = ({
 
   userProfile,
   onSaveProfile,}) => {
-  const isDark = userProfile?.isDarkMode ?? false;
+  const isDark = false;
   const [activeTab, setActiveTab] = useState<TabType>('create');
   const [drafts, setDrafts] = useState<DraftItem[]>(INITIAL_DRAFTS);
   const [notificationsList, setNotificationsList] = useState<NotificationItem[]>(NOTIFICATIONS);
@@ -830,7 +830,7 @@ export const CreateScreen: React.FC<CreateScreenProps> = ({
         </ScrollView>
 
         {/* FLOATING LIQUID GLASS TAB BAR */}
-        <FloatingTabBar activeTab={activeTab} onTabPress={handleTabPress} isDarkMode={isDark} />
+        <FloatingTabBar activeTab={activeTab} onTabPress={handleTabPress} />
 
         {/* ============================================================ */}
         {/* FROSTED LIQUID GLASS MODALS (POSTSTREAK LUXURY STYLE) */}

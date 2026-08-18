@@ -69,7 +69,7 @@ export const JarvisProScreen: React.FC<JarvisProScreenProps> = ({
 
   userProfile,
   onSaveProfile,}) => {
-  const isDark = userProfile?.isDarkMode ?? false;
+  const isDark = false;
   const [activeTab, setActiveTab] = useState<TabType>('growth');
   const [expandedBriefStep, setExpandedBriefStep] = useState<string | null>(null);
   const [expandedFaqId, setExpandedFaqId] = useState<string | null>(null);

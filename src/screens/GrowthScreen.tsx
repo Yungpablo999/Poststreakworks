@@ -38,7 +38,7 @@ export const GrowthScreen: React.FC<GrowthScreenProps> = ({
 
   userProfile,
   onSaveProfile,}) => {
-  const isDark = userProfile?.isDarkMode ?? false;
+  const isDark = false;
   const [activeTab, setActiveTab] = useState<TabType>('growth');
 
   // Modal States
@@ -785,7 +785,7 @@ export const GrowthScreen: React.FC<GrowthScreenProps> = ({
         </ScrollView>
 
         {/* FLOATING LIQUID GLASS TAB BAR */}
-        <FloatingTabBar activeTab={activeTab} onTabPress={handleTabPress} isDarkMode={isDark} />
+        <FloatingTabBar activeTab={activeTab} onTabPress={handleTabPress} />
 
         {/* SIGNATURE ANIMATED GHOST CELEBRATION MODAL */}
         <AnimatedCompletionModal

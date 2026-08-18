@@ -387,7 +387,7 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
 
   userProfile,
   onSaveProfile,}) => {
-  const isDark = userProfile?.isDarkMode ?? false;
+  const isDark = false;
   const [activeTab, setActiveTab] = useState<TabType>('home');
   const [matchConnected, setMatchConnected] = useState(false);
   const [showProModal, setShowProModal] = useState(false);
@@ -1257,7 +1257,7 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
         </ScrollView>
 
         {/* 10. FLOATING LIQUID GLASS BOTTOM NAVIGATION BAR */}
-        <FloatingTabBar activeTab={activeTab} onTabPress={handleTabPress} isDarkMode={isDark} />
+        <FloatingTabBar activeTab={activeTab} onTabPress={handleTabPress} />
 
         {/* 11. NOTIFICATION CENTER POP-UP MODAL */}
         <Modal

@@ -94,7 +94,7 @@ export const IdeaDetailScreen: React.FC<IdeaDetailScreenProps> = ({
 
   userProfile,
   onSaveProfile,}) => {
-  const isDark = userProfile?.isDarkMode ?? false;
+  const isDark = false;
   const [activeTab, setActiveTab] = useState<TabType>('create');
   const [selectedHookIndex, setSelectedHookIndex] = useState(0);
   const [selectedPlatforms, setSelectedPlatforms] = useState<string[]>(['tiktok', 'instagram']);
@@ -794,7 +794,7 @@ export const IdeaDetailScreen: React.FC<IdeaDetailScreenProps> = ({
         </ScrollView>
 
         {/* UNIFIED SIGNATURE FLOATING TAB BAR */}
-        <FloatingTabBar activeTab={activeTab} onTabPress={handleTabPress} isDarkMode={isDark} />
+        <FloatingTabBar activeTab={activeTab} onTabPress={handleTabPress} />
 
         {/* MODAL 1: SCRIPT EDITOR */}
         <Modal

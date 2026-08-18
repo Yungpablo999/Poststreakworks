@@ -37,7 +37,7 @@ export const MissionDetailScreen: React.FC<MissionDetailScreenProps> = ({
 
   userProfile,
   onSaveProfile,}) => {
-  const isDark = userProfile?.isDarkMode ?? false;
+  const isDark = false;
   const [activeTab, setActiveTab] = useState<TabType>('quests');
   const [isCompleted, setIsCompleted] = useState(false);
   const [step1Done, setStep1Done] = useState(true);
@@ -447,7 +447,7 @@ export const MissionDetailScreen: React.FC<MissionDetailScreenProps> = ({
         </ScrollView>
 
         {/* FLOATING LIQUID GLASS TAB BAR */}
-        <FloatingTabBar activeTab={activeTab} onTabPress={handleTabPress} isDarkMode={isDark} />
+        <FloatingTabBar activeTab={activeTab} onTabPress={handleTabPress} />
 
         {/* SIGNATURE ANIMATED GHOST CELEBRATION MODAL */}
         <AnimatedCompletionModal

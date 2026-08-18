@@ -93,7 +93,7 @@ export const ChallengeDetailScreen: React.FC<ChallengeDetailScreenProps> = ({
   userProfile,
   onSaveProfile,
 }) => {
-  const isDark = userProfile?.isDarkMode ?? false;
+  const isDark = false;
   const [activeTab, setActiveTab] = useState<TabType>('quests');
   const [requirements, setRequirements] = useState<QuestRequirement[]>(INITIAL_REQUIREMENTS);
   const [isQuestFinished, setIsQuestFinished] = useState(false);
@@ -782,7 +782,7 @@ export const ChallengeDetailScreen: React.FC<ChallengeDetailScreenProps> = ({
         </ScrollView>
 
         {/* 3. LIQUID GLASS FLOATING TAB BAR */}
-        <FloatingTabBar activeTab={activeTab} onTabPress={handleTabPress} isDarkMode={isDark} />
+        <FloatingTabBar activeTab={activeTab} onTabPress={handleTabPress} />
 
         {/* MODAL 1: CREATE POST & SCHEDULE */}
         <Modal

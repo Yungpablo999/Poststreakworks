@@ -342,7 +342,7 @@ export const CollabIdeaScreen: React.FC<CollabIdeaScreenProps> = ({
 
   userProfile,
   onSaveProfile,}) => {
-  const isDark = userProfile?.isDarkMode ?? false;
+  const isDark = false;
   const [activeTab, setActiveTab] = useState<TabType>('match');
 
   // Dynamic Collab Plan Index
@@ -1157,7 +1157,7 @@ export const CollabIdeaScreen: React.FC<CollabIdeaScreenProps> = ({
           </ScrollView>
 
           {/* UNIFIED SIGNATURE FLOATING TAB BAR */}
-          <FloatingTabBar activeTab={activeTab} onTabPress={handleTabPress} isDarkMode={isDark} />
+          <FloatingTabBar activeTab={activeTab} onTabPress={handleTabPress} />
 
           {/* ========================================================================= */}
           {/* MODAL: INTERACTIVE SCHEDULE ADJUSTER & REAL-TIME VIRAL RATE METER */}

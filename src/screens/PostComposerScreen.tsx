@@ -315,7 +315,7 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
 
   userProfile,
   onSaveProfile,}) => {
-  const isDark = userProfile?.isDarkMode ?? false;
+  const isDark = false;
   const [activeTab, setActiveTab] = useState<TabType>('create');
   const [currentIdea, setCurrentIdea] = useState(ideaTitle);
   const [selectedPlatforms, setSelectedPlatforms] = useState<string[]>(['tiktok', 'instagram']);
@@ -1231,7 +1231,7 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
         </ScrollView>
 
         {/* UNIFIED SIGNATURE FLOATING TAB BAR */}
-        <FloatingTabBar activeTab={activeTab} onTabPress={handleTabPress} isDarkMode={isDark} />
+        <FloatingTabBar activeTab={activeTab} onTabPress={handleTabPress} />
 
         {/* MODAL 0: CHOOSE MORE SOCIAL PLATFORMS */}
         <Modal

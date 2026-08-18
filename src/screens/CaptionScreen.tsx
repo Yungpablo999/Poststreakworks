@@ -106,7 +106,7 @@ export const CaptionScreen: React.FC<CaptionScreenProps> = ({
 
   userProfile,
   onSaveProfile,}) => {
-  const isDark = userProfile?.isDarkMode ?? false;
+  const isDark = false;
   const [activeTab, setActiveTab] = useState<TabType>('create');
 
   // Live-Editable Screen State
@@ -705,7 +705,7 @@ export const CaptionScreen: React.FC<CaptionScreenProps> = ({
           </ScrollView>
 
           {/* UNIFIED SIGNATURE FLOATING TAB BAR */}
-          <FloatingTabBar activeTab={activeTab} onTabPress={handleTabPress} isDarkMode={isDark} />
+          <FloatingTabBar activeTab={activeTab} onTabPress={handleTabPress} />
 
           {/* MODAL: CHANGE CONTENT GOAL */}
           <Modal

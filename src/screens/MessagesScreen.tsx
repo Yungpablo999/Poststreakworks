@@ -406,7 +406,7 @@ export const MessagesScreen: React.FC<MessagesScreenProps> = ({
 
   userProfile,
   onSaveProfile,}) => {
-  const isDark = userProfile?.isDarkMode ?? false;
+  const isDark = false;
   const [activeTab, setActiveTab] = useState<TabType>('match');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<'all' | 'buddies' | 'collabs' | 'jarvis'>('all');
@@ -1351,7 +1351,7 @@ export const MessagesScreen: React.FC<MessagesScreenProps> = ({
         )}
 
         {/* UNIFIED SIGNATURE FLOATING TAB BAR */}
-        <FloatingTabBar activeTab={activeTab} onTabPress={handleTabPress} isDarkMode={isDark} />
+        <FloatingTabBar activeTab={activeTab} onTabPress={handleTabPress} />
 
         {/* ========================================================================= */}
         {/* SNAPCHAT / INSTAGRAM STYLE IMMERSIVE STORY & HIGHLIGHTS VIEWER MODAL */}

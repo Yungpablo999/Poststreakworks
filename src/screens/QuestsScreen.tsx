@@ -44,7 +44,7 @@ export const QuestsScreen: React.FC<QuestsScreenProps> = ({
 
   userProfile,
   onSaveProfile,}) => {
-  const isDark = userProfile?.isDarkMode ?? false;
+  const isDark = false;
   const [activeTab, setActiveTab] = useState<TabType>('quests');
   const [completedQuests, setCompletedQuests] = useState<string[]>([]);
 
@@ -671,7 +671,7 @@ export const QuestsScreen: React.FC<QuestsScreenProps> = ({
         </ScrollView>
 
         {/* FLOATING LIQUID GLASS TAB BAR */}
-        <FloatingTabBar activeTab={activeTab} onTabPress={handleTabPress} isDarkMode={isDark} />
+        <FloatingTabBar activeTab={activeTab} onTabPress={handleTabPress} />
 
         {/* SIGNATURE ANIMATED GHOST CELEBRATION MODAL */}
         <AnimatedCompletionModal

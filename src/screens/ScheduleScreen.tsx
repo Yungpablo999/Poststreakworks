@@ -122,7 +122,7 @@ export const ScheduleScreen: React.FC<ScheduleScreenProps> = ({
 
   userProfile,
   onSaveProfile,}) => {
-  const isDark = userProfile?.isDarkMode ?? false;
+  const isDark = false;
   const [activeTab, setActiveTab] = useState<TabType>('create');
   const [selectedDay, setSelectedDay] = useState<number>(15);
   const [calendarSelectedDay, setCalendarSelectedDay] = useState<number>(15);
@@ -670,7 +670,7 @@ export const ScheduleScreen: React.FC<ScheduleScreenProps> = ({
         </ScrollView>
 
         {/* FLOATING LIQUID GLASS TAB BAR */}
-        <FloatingTabBar activeTab={activeTab} onTabPress={handleTabPress} isDarkMode={isDark} />
+        <FloatingTabBar activeTab={activeTab} onTabPress={handleTabPress} />
 
         {/* SIGNATURE ANIMATED GHOST CELEBRATION MODAL */}
         <AnimatedCompletionModal

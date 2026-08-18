@@ -195,7 +195,7 @@ export const ScriptScreen: React.FC<ScriptScreenProps> = ({
 
   userProfile,
   onSaveProfile,}) => {
-  const isDark = userProfile?.isDarkMode ?? false;
+  const isDark = false;
   const [activeTab, setActiveTab] = useState<TabType>('create');
 
   // Live-Editable Script Components State
@@ -911,7 +911,7 @@ ${selectedCtaText}`;
           </ScrollView>
 
           {/* UNIFIED SIGNATURE FLOATING TAB BAR */}
-          <FloatingTabBar activeTab={activeTab} onTabPress={handleTabPress} isDarkMode={isDark} />
+          <FloatingTabBar activeTab={activeTab} onTabPress={handleTabPress} />
 
           {/* ========================================================================= */}
           {/* MODAL 1: FULL HOOK STUDIO POP-UP MODAL */}

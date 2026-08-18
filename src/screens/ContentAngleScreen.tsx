@@ -145,7 +145,7 @@ export const ContentAngleScreen: React.FC<ContentAngleScreenProps> = ({
 
   userProfile,
   onSaveProfile,}) => {
-  const isDark = userProfile?.isDarkMode ?? false;
+  const isDark = false;
   const [activeTab, setActiveTab] = useState<TabType>('create');
 
   // Niche & Goal Filters (Select & Unselect)
@@ -824,7 +824,7 @@ export const ContentAngleScreen: React.FC<ContentAngleScreenProps> = ({
         </ScrollView>
 
         {/* UNIFIED SIGNATURE FLOATING TAB BAR */}
-        <FloatingTabBar activeTab={activeTab} onTabPress={handleTabPress} isDarkMode={isDark} />
+        <FloatingTabBar activeTab={activeTab} onTabPress={handleTabPress} />
 
         {/* MODAL: NOTIFICATIONS CENTER */}
         <Modal
