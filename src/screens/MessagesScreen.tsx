@@ -438,6 +438,7 @@ export const MessagesScreen: React.FC<MessagesScreenProps> = ({
 
   // Plus Icon (+) "Connect with More Creators" Modal
   const [showConnectModal, setShowConnectModal] = useState(false);
+  const [showProfileModal, setShowProfileModal] = useState(false);
 
   // Celebration & Feedback Modal
   const [showCelebrationModal, setShowCelebrationModal] = useState(false);
@@ -754,7 +755,7 @@ export const MessagesScreen: React.FC<MessagesScreenProps> = ({
             </Text>
           </View>
 
-          {/* Right Action: Plus Button (+) Opens "Connect with More Creators" Modal */}
+          {/* Right Action: Plus Button (+) & Profile Icon */}
           <View style={styles.headerRightGroup}>
             <Pressable
               style={({ pressed }) => [styles.newChatBtn, pressed && styles.btnPressed]}
@@ -772,6 +773,44 @@ export const MessagesScreen: React.FC<MessagesScreenProps> = ({
                   <Path d="M12 5V19M5 12H19" stroke="#FFFFFF" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" />
                 </Svg>
               </LinearGradient>
+            </Pressable>
+
+            {/* Top-Right: Profile Icon after Plus button */}
+            <Pressable
+              style={({ pressed }) => [styles.headerIconBtn, pressed && styles.btnPressed]}
+              hitSlop={8}
+              onPress={() => {
+                if (Platform.OS !== 'web') {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                }
+                triggerModalAnim();
+                setShowProfileModal(true);
+              }}
+            >
+              {activeChatThread ? (
+                <Image
+                  source={activeChatThread.avatar}
+                  style={styles.headerPartnerMiniAvatar}
+                  resizeMode="cover"
+                />
+              ) : (
+                <Svg width={19} height={19} viewBox="0 0 24 24" fill="none">
+                  <Path
+                    d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"
+                    stroke="#171420"
+                    strokeWidth="2.2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                  <Circle
+                    cx="12"
+                    cy="7"
+                    r="4"
+                    stroke="#171420"
+                    strokeWidth="2.2"
+                  />
+                </Svg>
+              )}
             </Pressable>
           </View>
         </View>
@@ -1721,6 +1760,99 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  headerIconBtn: {
+    width: 36,
+    height: 36,
+    borderRadius: 12,
+    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+    borderWidth: 1,
+    borderColor: 'rgba(235, 230, 248, 0.9)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: '#582CDB',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.06,
+    shadowRadius: 6,
+    elevation: 2,
+  },
+  headerPartnerMiniAvatar: {
+    width: 30,
+    height: 30,
+    borderRadius: 15,
+  },
+  profileModalInner: {
+    alignItems: 'center',
+    paddingVertical: 12,
+  },
+  profileModalAvatar: {
+    width: 68,
+    height: 68,
+    borderRadius: 34,
+    borderWidth: 2.5,
+    borderColor: '#582CDB',
+    marginBottom: 10,
+  },
+  profileModalName: {
+    fontSize: 18,
+    fontWeight: '800',
+    color: '#171420',
+  },
+  profileModalHandle: {
+    fontSize: 12.5,
+    color: '#64748B',
+    marginTop: 2,
+  },
+  profileModalNiche: {
+    fontSize: 12,
+    color: '#582CDB',
+    fontWeight: '700',
+    marginTop: 4,
+  },
+  profileStreakBadge: {
+    backgroundColor: '#FEF3C7',
+    paddingVertical: 4.5,
+    paddingHorizontal: 12,
+    borderRadius: 100,
+    marginTop: 10,
+    marginBottom: 14,
+  },
+  profileStreakBadgeText: {
+    fontSize: 11,
+    fontWeight: '900',
+    color: '#B45309',
+  },
+  profileStatsRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#F8FAFC',
+    borderRadius: 14,
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    width: '100%',
+    justifyContent: 'space-around',
+    marginBottom: 8,
+  },
+  profileStatItem: {
+    alignItems: 'center',
+  },
+  profileStatVal: {
+    fontSize: 15,
+    fontWeight: '900',
+    color: '#171420',
+  },
+  profileStatLabel: {
+    fontSize: 10.5,
+    color: '#64748B',
+    fontWeight: '700',
+    marginTop: 2,
+  },
+  profileStatDivider: {
+    width: 1,
+    height: 24,
+    backgroundColor: '#CBD5E1',
   },
 
   // Top Badges
