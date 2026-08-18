@@ -1111,54 +1111,74 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
             </View>
           </View>
 
-          {/* 9. JARVIS WRITING INSIGHT */}
+          {/* 9. JARVIS WRITING INSIGHT (LUXURY LAVENDER-CREAM DESIGN) */}
           <LinearGradient
-            colors={['#7C3AED', '#582CDB']}
+            colors={['#FFFFFF', '#F8F5FE']}
             start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
+            end={{ x: 0, y: 1 }}
             style={styles.jarvisWritingCard}
           >
             <View style={styles.jarvisWritingHeaderRow}>
-              <View style={styles.jarvisWritingAvatarCircle}>
-                <Image
-                  source={require('../../assets/images/jarvis-core-flame.png')}
-                  style={styles.jarvisWritingFlame}
-                  resizeMode="contain"
-                />
+              <View style={styles.jarvisWritingHeaderLeft}>
+                <Animated.View
+                  style={[
+                    styles.jarvisWritingFlameIconBox,
+                    { transform: [{ translateY: flameFloatY }] },
+                  ]}
+                >
+                  <Image
+                    source={require('../../assets/images/jarvis-core-flame.png')}
+                    style={styles.jarvisWritingFlame}
+                    resizeMode="contain"
+                  />
+                </Animated.View>
+                <View style={styles.jarvisInsightBadge}>
+                  <Text style={styles.jarvisInsightTag}>⚡ JARVIS WRITING INSIGHT</Text>
+                </View>
               </View>
-              <Text style={styles.jarvisWritingTitle}>Jarvis Writing Insight</Text>
+
+              <View style={styles.jarvisScorePill}>
+                <Text style={styles.jarvisScoreText}>95% Retention</Text>
+              </View>
             </View>
 
+            <Text style={styles.jarvisWritingTitle}>Hook Polish &amp; Audience Retention</Text>
             <Text style={styles.jarvisWritingBody}>
-              This caption is stronger when it stays specific. Mention the exact mistake, what changed, and one lesson other creators can use.
+              This caption is stronger when it stays specific. Mention the exact mistake, what changed, and one actionable lesson other creators can bookmark.
             </Text>
 
+            {/* Interactive Quick Filter Chips */}
             <View style={styles.jarvisChipsRow}>
-              <Pressable
-                onPress={() => handleAiAction('rewrite')}
-                style={styles.jarvisChip}
-              >
-                <Text style={styles.jarvisChipText}>IMPROVE HOOK</Text>
-              </Pressable>
-              <Pressable
-                onPress={() => handleAiAction('cta')}
-                style={styles.jarvisChip}
-              >
-                <Text style={styles.jarvisChipText}>ADD CTA</Text>
-              </Pressable>
-              <Pressable
-                onPress={() => handleAiAction('shorter')}
-                style={styles.jarvisChip}
-              >
-                <Text style={styles.jarvisChipText}>MAKE SHORTER</Text>
-              </Pressable>
+              {[
+                { id: 'rewrite', label: '🔥 Stronger Hook' },
+                { id: 'cta', label: '🎯 Add Viral CTA' },
+                { id: 'shorter', label: '⚡ Make Shorter' },
+              ].map((chip) => (
+                <Pressable
+                  key={chip.id}
+                  onPress={() => handleAiAction(chip.id as 'rewrite' | 'cta' | 'shorter')}
+                  style={styles.jarvisChip}
+                >
+                  <Text style={styles.jarvisChipText}>{chip.label}</Text>
+                </Pressable>
+              ))}
             </View>
 
             <Pressable
               style={({ pressed }) => [styles.improveWithJarvisBtn, pressed && styles.btnPressed]}
               onPress={() => handleAiAction('rewrite')}
+              disabled={isAiProcessing}
             >
-              <Text style={styles.improveWithJarvisBtnText}>IMPROVE WITH JARVIS</Text>
+              <LinearGradient
+                colors={['#7C3AED', '#582CDB']}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 0 }}
+                style={styles.improveWithJarvisGradient}
+              >
+                <Text style={styles.improveWithJarvisBtnText}>
+                  {isAiProcessing ? 'Refining with AI...' : '🪄 Improve Caption with Jarvis AI'}
+                </Text>
+              </LinearGradient>
             </Pressable>
           </LinearGradient>
 
@@ -2488,44 +2508,83 @@ const styles = StyleSheet.create({
     letterSpacing: 0.4,
   },
 
-  // 9. Jarvis Writing Insight
+  // 9. Jarvis Writing Insight (Elevated Harmonious Studio Card)
   jarvisWritingCard: {
+    backgroundColor: '#FFFFFF',
     borderRadius: 22,
+    borderWidth: 1.5,
+    borderColor: '#E8E1F7',
     padding: 18,
     marginBottom: 18,
     shadowColor: '#582CDB',
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.25,
-    shadowRadius: 20,
-    elevation: 6,
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.08,
+    shadowRadius: 16,
+    elevation: 4,
   },
   jarvisWritingHeaderRow: {
     flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  jarvisWritingHeaderLeft: {
+    flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
-    marginBottom: 10,
   },
-  jarvisWritingAvatarCircle: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+  jarvisWritingFlameIconBox: {
+    width: 32,
+    height: 32,
+    borderRadius: 10,
+    backgroundColor: '#EDE9FE',
+    borderWidth: 1,
+    borderColor: '#DDD6FE',
     justifyContent: 'center',
     alignItems: 'center',
   },
   jarvisWritingFlame: {
-    width: 18,
-    height: 18,
+    width: 20,
+    height: 20,
+  },
+  jarvisInsightBadge: {
+    backgroundColor: '#FAF5FF',
+    paddingVertical: 3.5,
+    paddingHorizontal: 8,
+    borderRadius: 6,
+    borderWidth: 1,
+    borderColor: '#EDE9FE',
+  },
+  jarvisInsightTag: {
+    fontSize: 9.5,
+    fontWeight: '900',
+    color: '#6D28D9',
+    letterSpacing: 0.6,
+  },
+  jarvisScorePill: {
+    backgroundColor: '#FEF3C7',
+    paddingVertical: 3.5,
+    paddingHorizontal: 9,
+    borderRadius: 100,
+    borderWidth: 1,
+    borderColor: '#FDE68A',
+  },
+  jarvisScoreText: {
+    fontSize: 10,
+    fontWeight: '900',
+    color: '#B45309',
+    letterSpacing: 0.4,
   },
   jarvisWritingTitle: {
-    fontSize: 13,
-    fontWeight: '900',
-    color: '#FFFFFF',
-    letterSpacing: 0.4,
+    fontSize: 15,
+    fontWeight: '800',
+    color: '#171420',
+    marginBottom: 6,
+    letterSpacing: -0.2,
   },
   jarvisWritingBody: {
     fontSize: 12.5,
-    color: '#F3E8FF',
+    color: '#475569',
     lineHeight: 18,
     marginBottom: 14,
   },
@@ -2536,30 +2595,38 @@ const styles = StyleSheet.create({
     marginBottom: 14,
   },
   jarvisChip: {
-    backgroundColor: 'rgba(255, 255, 255, 0.15)',
-    paddingVertical: 4.5,
-    paddingHorizontal: 10,
-    borderRadius: 8,
+    backgroundColor: '#F8FAFC',
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    borderRadius: 10,
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.25)',
+    borderColor: '#E2E8F0',
   },
   jarvisChipText: {
-    fontSize: 10,
-    fontWeight: '900',
-    color: '#FFFFFF',
-    letterSpacing: 0.5,
+    fontSize: 11,
+    fontWeight: '800',
+    color: '#475569',
+    letterSpacing: 0.3,
   },
   improveWithJarvisBtn: {
-    height: 42,
-    borderRadius: 12,
-    backgroundColor: '#FFFFFF',
+    height: 44,
+    borderRadius: 14,
+    overflow: 'hidden',
+    shadowColor: '#582CDB',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 3,
+  },
+  improveWithJarvisGradient: {
+    flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
   },
   improveWithJarvisBtnText: {
-    fontSize: 12.5,
+    fontSize: 13,
     fontWeight: '900',
-    color: '#582CDB',
+    color: '#FFFFFF',
     letterSpacing: 0.5,
   },
 
