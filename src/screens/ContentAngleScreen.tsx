@@ -9,6 +9,7 @@ import {
   Animated,
   Modal,
   Image,
+  TextInput,
   Dimensions,
   SafeAreaView,
   StatusBar,
@@ -42,6 +43,11 @@ interface NotificationItem {
 interface IdeaCardItem {
   id: string;
   title: string;
+  category?: string;
+  categoryBadge?: string;
+  categoryColor?: string;
+  categoryBg?: string;
+  categoryBorder?: string;
   desc?: string;
   whyItWorks?: string;
   tags: string[];
@@ -73,32 +79,122 @@ const NOTIFICATIONS: NotificationItem[] = [
   },
 ];
 
-const INITIAL_MORE_IDEAS: IdeaCardItem[] = [
+const ALL_AVAILABLE_IDEAS: IdeaCardItem[] = [
   {
-    id: 'idea_1',
+    id: 'vault_1',
+    title: 'One thing I wish I knew before I started creating',
+    category: 'Streak Saver',
+    categoryBadge: '⭐ STREAK SAVER PICK',
+    categoryColor: '#78350F',
+    categoryBg: '#FEF3C7',
+    categoryBorder: '#FDE68A',
+    format: '30-sec Reel',
+    goal: 'Build consistency',
+    whyItWorks: 'Personal lessons are fast to create and easy for audiences to save.',
+    tags: ['Personal Lesson', 'High Save Potential'],
+    bookmarked: false,
+  },
+  {
+    id: 'vault_2',
     title: '3 creator habits that made posting easier',
+    category: 'Viral Hooks',
+    categoryBadge: '🔥 HIGH RETENTION',
+    categoryColor: '#6D28D9',
+    categoryBg: '#EDE9FE',
+    categoryBorder: '#DDD6FE',
     format: 'Short Reel',
     goal: 'Build consistency',
+    whyItWorks: 'Numbered lists set instant clarity and keep watch time high.',
     tags: ['Reel', 'Habits'],
     bookmarked: false,
   },
   {
-    id: 'idea_2',
+    id: 'vault_3',
     title: 'My simple content planning routine',
+    category: 'Carousels',
+    categoryBadge: '📑 HIGH SAVES',
+    categoryColor: '#047857',
+    categoryBg: '#D1FAE5',
+    categoryBorder: '#A7F3D0',
     format: 'Carousel',
     goal: 'Get saves',
+    whyItWorks: 'Behind-the-scenes systems get bookmarked for future reference.',
     tags: ['Carousel', 'Planning'],
     bookmarked: true,
   },
   {
-    id: 'idea_3',
+    id: 'vault_4',
     title: 'The exact gear I use to film in 10 minutes',
+    category: 'Tech & Setup',
+    categoryBadge: '🎥 TECH & GEAR',
+    categoryColor: '#1D4ED8',
+    categoryBg: '#DBEAFE',
+    categoryBorder: '#BFDBFE',
     format: 'TikTok / Short',
     goal: 'Gear review',
+    whyItWorks: 'Creators are always looking to simplify their filming workflow.',
     tags: ['Short', 'Gear'],
     bookmarked: false,
   },
+  {
+    id: 'vault_5',
+    title: 'How I turn 1 idea into 4 different posts across platforms',
+    category: 'Growth Hacks',
+    categoryBadge: '🚀 GROWTH HACK',
+    categoryColor: '#7C2D12',
+    categoryBg: '#FFEDD5',
+    categoryBorder: '#FED7AA',
+    format: 'Carousel / Reel',
+    goal: 'Content Repurposing',
+    whyItWorks: 'Repurposing workflows give creators immense leverage.',
+    tags: ['Growth', 'Repurposing'],
+    bookmarked: false,
+  },
+  {
+    id: 'vault_6',
+    title: 'The #1 mistake that cost me 3 months of momentum',
+    category: 'Storytelling',
+    categoryBadge: '💡 MISTAKE & LESSON',
+    categoryColor: '#B91C1C',
+    categoryBg: '#FEE2E2',
+    categoryBorder: '#FECACA',
+    format: 'Talking Head',
+    goal: 'Relatable Story',
+    whyItWorks: 'Vulnerability hooks attention in the first 2 seconds.',
+    tags: ['Story', 'Retention'],
+    bookmarked: false,
+  },
+  {
+    id: 'vault_7',
+    title: 'My 15-minute morning batch-filming routine',
+    category: 'Streak Saver',
+    categoryBadge: '⚡ QUICK SYSTEM',
+    categoryColor: '#78350F',
+    categoryBg: '#FEF3C7',
+    categoryBorder: '#FDE68A',
+    format: 'Mini Vlog',
+    goal: 'Protect streak',
+    whyItWorks: 'Actionable routines inspire instant implementation.',
+    tags: ['Routine', 'Vlog'],
+    bookmarked: false,
+  },
+  {
+    id: 'vault_8',
+    title: 'Stop doing this if you want your posts to get shared',
+    category: 'Viral Hooks',
+    categoryBadge: '🔥 VIRAL HOOK',
+    categoryColor: '#6D28D9',
+    categoryBg: '#EDE9FE',
+    categoryBorder: '#DDD6FE',
+    format: 'Short Reel',
+    goal: 'High shares',
+    whyItWorks: 'Pattern interrupts create urgency and curiosity.',
+    tags: ['Viral Hook', 'Shares'],
+    bookmarked: false,
+  },
 ];
+
+const INITIAL_MORE_IDEAS: IdeaCardItem[] = ALL_AVAILABLE_IDEAS.slice(1, 4);
 
 export const ContentAngleScreen: React.FC<ContentAngleScreenProps> = ({
   onBack,
@@ -117,12 +213,16 @@ export const ContentAngleScreen: React.FC<ContentAngleScreenProps> = ({
   // Idea items state
   const [isHeroSaved, setIsHeroSaved] = useState(false);
   const [moreIdeas, setMoreIdeas] = useState<IdeaCardItem[]>(INITIAL_MORE_IDEAS);
+  const [vaultIdeas, setVaultIdeas] = useState<IdeaCardItem[]>(ALL_AVAILABLE_IDEAS);
   const [savedIdeasCount, setSavedIdeasCount] = useState(2);
   const [quotaUsed, setQuotaUsed] = useState(3);
   const [selectedAngleFilters, setSelectedAngleFilters] = useState<string[]>(['faster']);
   const [selectedJarvisChips, setSelectedJarvisChips] = useState<string[]>([]);
+  const [vaultCategoryFilter, setVaultCategoryFilter] = useState<string>('All');
+  const [vaultSearchQuery, setVaultSearchQuery] = useState<string>('');
 
   // Modals
+  const [showAllIdeasModal, setShowAllIdeasModal] = useState(false);
   const [showNotificationModal, setShowNotificationModal] = useState(false);
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [showChatModal, setShowChatModal] = useState(false);
@@ -256,6 +356,16 @@ export const ContentAngleScreen: React.FC<ContentAngleScreenProps> = ({
       })
     );
 
+    setVaultIdeas((prev) =>
+      prev.map((item) => {
+        if (item.id === id) {
+          const next = !item.bookmarked;
+          return { ...item, bookmarked: next };
+        }
+        return item;
+      })
+    );
+
     if (becameSaved) {
       setCelebrationTitle('Idea Saved!');
       setCelebrationSubtitle(`"${savedTitle}" has been saved to your vault.`);
@@ -267,6 +377,9 @@ export const ContentAngleScreen: React.FC<ContentAngleScreenProps> = ({
   const handleSelectIdea = (ideaTitle: string) => {
     if (Platform.OS !== 'web') {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    }
+    if (showAllIdeasModal) {
+      setShowAllIdeasModal(false);
     }
     if (onUseIdea) {
       onUseIdea(ideaTitle);
@@ -298,6 +411,16 @@ export const ContentAngleScreen: React.FC<ContentAngleScreenProps> = ({
   };
 
   const unreadNotifCount = notificationsList.filter((n) => n.unread).length;
+
+  const filteredVaultIdeas = vaultIdeas.filter((item) => {
+    const matchesCategory =
+      vaultCategoryFilter === 'All' || item.category === vaultCategoryFilter;
+    const matchesSearch =
+      vaultSearchQuery.trim() === '' ||
+      item.title.toLowerCase().includes(vaultSearchQuery.toLowerCase()) ||
+      item.tags.some((t) => t.toLowerCase().includes(vaultSearchQuery.toLowerCase()));
+    return matchesCategory && matchesSearch;
+  });
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -426,7 +549,7 @@ export const ContentAngleScreen: React.FC<ContentAngleScreenProps> = ({
             Choose your niche and goal, then generate ideas you can turn into posts.
           </Text>
 
-          {/* 1. NICHE PILLS ROW */}
+          {/* 1. NICHE PILLS ROW (SELECT & UNSELECT) */}
           <ScrollView
             horizontal
             showsHorizontalScrollIndicator={false}
@@ -456,7 +579,7 @@ export const ContentAngleScreen: React.FC<ContentAngleScreenProps> = ({
             })}
           </ScrollView>
 
-          {/* 2. GOAL PILLS ROW */}
+          {/* 2. GOAL PILLS ROW (SELECT & UNSELECT) */}
           <ScrollView
             horizontal
             showsHorizontalScrollIndicator={false}
@@ -570,8 +693,17 @@ export const ContentAngleScreen: React.FC<ContentAngleScreenProps> = ({
           {/* 4. MORE IDEAS SECTION */}
           <View style={styles.moreIdeasHeaderRow}>
             <Text style={styles.moreIdeasTitle}>More Ideas</Text>
-            <Pressable hitSlop={8}>
-              <Text style={styles.viewAllLink}>View All</Text>
+            <Pressable
+              onPress={() => {
+                if (Platform.OS !== 'web') {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                }
+                triggerModalAnim();
+                setShowAllIdeasModal(true);
+              }}
+              hitSlop={8}
+            >
+              <Text style={styles.viewAllLink}>View All ({vaultIdeas.length})</Text>
             </Pressable>
           </View>
 
@@ -682,7 +814,7 @@ export const ContentAngleScreen: React.FC<ContentAngleScreenProps> = ({
           <LinearGradient
             colors={['#FFFFFF', '#F8F5FE']}
             start={{ x: 0, y: 0 }}
-            end={{ x: 0, y: 1 }}
+            end={{ x: 1, y: 1 }}
             style={styles.jarvisCard}
           >
             <View style={styles.jarvisHeaderRow}>
@@ -772,6 +904,188 @@ export const ContentAngleScreen: React.FC<ContentAngleScreenProps> = ({
           activeTab={activeTab}
           onTabPress={handleTabPress}
         />
+
+        {/* FULL-SCREEN MODAL: ALL AVAILABLE IDEAS VAULT */}
+        <Modal
+          visible={showAllIdeasModal}
+          transparent={true}
+          animationType="slide"
+          onRequestClose={() => setShowAllIdeasModal(false)}
+        >
+          <View style={styles.vaultModalOverlay}>
+            <SafeAreaView style={styles.vaultModalContainer}>
+              {/* Modal Header */}
+              <View style={styles.vaultModalHeader}>
+                <View>
+                  <Text style={styles.vaultModalTitle}>All Available Ideas</Text>
+                  <Text style={styles.vaultModalSubtitle}>
+                    {filteredVaultIdeas.length} viral angles ready for your streak
+                  </Text>
+                </View>
+                <Pressable
+                  onPress={() => setShowAllIdeasModal(false)}
+                  style={styles.vaultModalCloseCircle}
+                  hitSlop={8}
+                >
+                  <Text style={styles.modalCloseCross}>✕</Text>
+                </Pressable>
+              </View>
+
+              {/* Search Bar */}
+              <View style={styles.vaultSearchRow}>
+                <Svg width={16} height={16} viewBox="0 0 24 24" fill="none">
+                  <Path
+                    d="M11 19C15.4183 19 19 15.4183 19 11C19 6.58172 15.4183 3 11 3C6.58172 3 3 6.58172 3 11C3 15.4183 6.58172 19 11 19Z"
+                    stroke="#94A3B8"
+                    strokeWidth="2.2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                  <Path d="M21 21L16.65 16.65" stroke="#94A3B8" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
+                </Svg>
+                <TextInput
+                  style={styles.vaultSearchInput}
+                  placeholder="Search angles, hooks, or formats..."
+                  placeholderTextColor="#94A3B8"
+                  value={vaultSearchQuery}
+                  onChangeText={setVaultSearchQuery}
+                />
+                {vaultSearchQuery.length > 0 && (
+                  <Pressable onPress={() => setVaultSearchQuery('')} hitSlop={6}>
+                    <Text style={{ color: '#94A3B8', fontSize: 13, fontWeight: '700' }}>✕</Text>
+                  </Pressable>
+                )}
+              </View>
+
+              {/* Category Filter Pills */}
+              <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={styles.vaultCategoriesRow}
+              >
+                {['All', 'Streak Saver', 'Viral Hooks', 'Carousels', 'Growth Hacks', 'Storytelling'].map((cat) => {
+                  const isActive = vaultCategoryFilter === cat;
+                  return (
+                    <Pressable
+                      key={cat}
+                      onPress={() => {
+                        if (Platform.OS !== 'web') {
+                          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                        }
+                        setVaultCategoryFilter(cat);
+                      }}
+                      style={[
+                        styles.vaultCatPill,
+                        isActive && styles.vaultCatPillActive,
+                      ]}
+                    >
+                      <Text
+                        style={[
+                          styles.vaultCatPillText,
+                          isActive && styles.vaultCatPillTextActive,
+                        ]}
+                      >
+                        {cat}
+                      </Text>
+                    </Pressable>
+                  );
+                })}
+              </ScrollView>
+
+              {/* Scrollable Idea List */}
+              <ScrollView
+                style={styles.vaultIdeasScrollView}
+                contentContainerStyle={{ paddingBottom: 30 }}
+                showsVerticalScrollIndicator={false}
+              >
+                {filteredVaultIdeas.map((idea) => (
+                  <View key={idea.id} style={styles.vaultIdeaCard}>
+                    {/* Badge */}
+                    {idea.categoryBadge && (
+                      <View
+                        style={[
+                          styles.vaultIdeaBadge,
+                          {
+                            backgroundColor: idea.categoryBg || '#EDE9FE',
+                            borderColor: idea.categoryBorder || '#DDD6FE',
+                          },
+                        ]}
+                      >
+                        <Text style={[styles.vaultIdeaBadgeText, { color: idea.categoryColor || '#6D28D9' }]}>
+                          {idea.categoryBadge}
+                        </Text>
+                      </View>
+                    )}
+
+                    {/* Title */}
+                    <Text style={styles.vaultIdeaTitle}>&ldquo;{idea.title}&rdquo;</Text>
+
+                    {/* Why it works */}
+                    {idea.whyItWorks && (
+                      <View style={styles.vaultWhyBox}>
+                        <Text style={styles.vaultWhyLabel}>WHY IT WORKS</Text>
+                        <Text style={styles.vaultWhyText}>{idea.whyItWorks}</Text>
+                      </View>
+                    )}
+
+                    {/* Meta tags */}
+                    <View style={styles.vaultMetaRow}>
+                      <View style={styles.vaultMetaPill}>
+                        <Text style={styles.vaultMetaPillText}>🎬 {idea.format}</Text>
+                      </View>
+                      <View style={styles.vaultMetaPill}>
+                        <Text style={styles.vaultMetaPillText}>📈 {idea.goal}</Text>
+                      </View>
+                    </View>
+
+                    {/* Actions */}
+                    <View style={styles.vaultActionRow}>
+                      <Pressable
+                        style={({ pressed }) => [styles.vaultUseBtn, pressed && styles.btnPressed]}
+                        onPress={() => handleSelectIdea(idea.title)}
+                      >
+                        <LinearGradient
+                          colors={['#7C3AED', '#582CDB']}
+                          start={{ x: 0, y: 0 }}
+                          end={{ x: 1, y: 0 }}
+                          style={styles.vaultUseGradient}
+                        >
+                          <Text style={styles.vaultUseBtnText}>Use Idea ➔</Text>
+                        </LinearGradient>
+                      </Pressable>
+
+                      <Pressable
+                        style={[
+                          styles.vaultBookmarkBtn,
+                          idea.bookmarked && styles.vaultBookmarkBtnActive,
+                        ]}
+                        onPress={() => toggleBookmark(idea.id)}
+                      >
+                        <Svg width={18} height={18} viewBox="0 0 24 24" fill={idea.bookmarked ? '#FFFFFF' : 'none'}>
+                          <Path
+                            d="M19 21L12 16L5 21V5C5 3.89543 5.89543 3 7 3H17C18.1046 3 19 3.89543 19 5V21Z"
+                            stroke={idea.bookmarked ? '#FFFFFF' : '#582CDB'}
+                            strokeWidth="2.2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          />
+                        </Svg>
+                      </Pressable>
+                    </View>
+                  </View>
+                ))}
+              </ScrollView>
+
+              {/* Done button */}
+              <Pressable
+                style={styles.vaultDoneBtn}
+                onPress={() => setShowAllIdeasModal(false)}
+              >
+                <Text style={styles.vaultDoneBtnText}>Done</Text>
+              </Pressable>
+            </SafeAreaView>
+          </View>
+        </Modal>
 
         {/* MODAL: NOTIFICATIONS CENTER */}
         <Modal
@@ -1573,6 +1887,218 @@ const styles = StyleSheet.create({
     fontWeight: '900',
     color: '#FFFFFF',
     letterSpacing: 0.4,
+  },
+
+  // Full Screen Vault Modal
+  vaultModalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(23, 20, 32, 0.75)',
+    justifyContent: 'flex-end',
+  },
+  vaultModalContainer: {
+    height: Dimensions.get('window').height * 0.88,
+    backgroundColor: '#FAF8F5',
+    borderTopLeftRadius: 28,
+    borderTopRightRadius: 28,
+    paddingHorizontal: 20,
+    paddingTop: 16,
+    paddingBottom: 10,
+  },
+  vaultModalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    marginBottom: 12,
+  },
+  vaultModalTitle: {
+    fontSize: 20,
+    fontWeight: '800',
+    color: '#171420',
+  },
+  vaultModalSubtitle: {
+    fontSize: 12.5,
+    color: '#64748B',
+    marginTop: 2,
+  },
+  vaultModalCloseCircle: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: '#F1F5F9',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  vaultSearchRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#FFFFFF',
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    paddingHorizontal: 12,
+    height: 44,
+    gap: 8,
+    marginBottom: 12,
+  },
+  vaultSearchInput: {
+    flex: 1,
+    fontSize: 13,
+    color: '#171420',
+  },
+  vaultCategoriesRow: {
+    flexDirection: 'row',
+    gap: 8,
+    marginBottom: 14,
+  },
+  vaultCatPill: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 100,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    paddingVertical: 6,
+    paddingHorizontal: 13,
+  },
+  vaultCatPillActive: {
+    backgroundColor: '#582CDB',
+    borderColor: '#582CDB',
+  },
+  vaultCatPillText: {
+    fontSize: 11.5,
+    fontWeight: '700',
+    color: '#64748B',
+  },
+  vaultCatPillTextActive: {
+    color: '#FFFFFF',
+    fontWeight: '800',
+  },
+  vaultIdeasScrollView: {
+    flex: 1,
+  },
+  vaultIdeaCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: '#EFEBF8',
+    padding: 16,
+    marginBottom: 14,
+    shadowColor: '#582CDB',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.04,
+    shadowRadius: 8,
+    elevation: 2,
+  },
+  vaultIdeaBadge: {
+    alignSelf: 'flex-start',
+    paddingVertical: 3.5,
+    paddingHorizontal: 9,
+    borderRadius: 8,
+    borderWidth: 1,
+    marginBottom: 8,
+  },
+  vaultIdeaBadgeText: {
+    fontSize: 9.5,
+    fontWeight: '900',
+    letterSpacing: 0.5,
+  },
+  vaultIdeaTitle: {
+    fontSize: 15,
+    fontWeight: '800',
+    color: '#171420',
+    lineHeight: 21,
+    marginBottom: 8,
+  },
+  vaultWhyBox: {
+    backgroundColor: '#FAF8FE',
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#EDE9FE',
+    padding: 10,
+    marginBottom: 10,
+  },
+  vaultWhyLabel: {
+    fontSize: 9,
+    fontWeight: '900',
+    color: '#6D28D9',
+    letterSpacing: 0.5,
+    marginBottom: 2,
+  },
+  vaultWhyText: {
+    fontSize: 11.5,
+    color: '#475569',
+    lineHeight: 16,
+  },
+  vaultMetaRow: {
+    flexDirection: 'row',
+    gap: 8,
+    marginBottom: 14,
+  },
+  vaultMetaPill: {
+    backgroundColor: '#F8FAFC',
+    paddingVertical: 4,
+    paddingHorizontal: 9,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#F1F5F9',
+  },
+  vaultMetaPillText: {
+    fontSize: 11,
+    color: '#64748B',
+    fontWeight: '600',
+  },
+  vaultActionRow: {
+    flexDirection: 'row',
+    gap: 10,
+    alignItems: 'center',
+  },
+  vaultUseBtn: {
+    flex: 1,
+    height: 42,
+    borderRadius: 12,
+    overflow: 'hidden',
+    shadowColor: '#582CDB',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.2,
+    shadowRadius: 6,
+    elevation: 3,
+  },
+  vaultUseGradient: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  vaultUseBtnText: {
+    fontSize: 13,
+    fontWeight: '800',
+    color: '#FFFFFF',
+    letterSpacing: 0.3,
+  },
+  vaultBookmarkBtn: {
+    width: 42,
+    height: 42,
+    borderRadius: 12,
+    backgroundColor: '#FAF5FF',
+    borderWidth: 1,
+    borderColor: '#EDE9FE',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  vaultBookmarkBtnActive: {
+    backgroundColor: '#582CDB',
+    borderColor: '#582CDB',
+  },
+  vaultDoneBtn: {
+    backgroundColor: '#582CDB',
+    height: 48,
+    borderRadius: 14,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 8,
+    marginBottom: Platform.OS === 'ios' ? 10 : 16,
+  },
+  vaultDoneBtnText: {
+    fontSize: 15,
+    fontWeight: '800',
+    color: '#FFFFFF',
   },
 
   // Modals
