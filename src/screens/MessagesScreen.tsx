@@ -13,12 +13,15 @@ import {
   StatusBar,
   TextInput,
   KeyboardAvoidingView,
+  Dimensions,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as Haptics from 'expo-haptics';
 import Svg, { Path, Circle, Rect } from 'react-native-svg';
 import { FloatingTabBar, TabType } from '../components/FloatingTabBar';
 import { AnimatedCompletionModal } from '../components/AnimatedCompletionModal';
+
+const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
 interface MessagesScreenProps {
   onBack: () => void;
@@ -27,25 +30,50 @@ interface MessagesScreenProps {
   onOpenJarvisPro?: () => void;
   onNavigateTab?: (tab: TabType) => void;
   onOpenPostComposer?: (prefillTitle?: string) => void;
+  onOpenCreate?: () => void;
+}
+
+interface StorySlide {
+  id: string;
+  type: 'daily_story' | 'highlights' | 'milestone';
+  title: string;
+  subtitle: string;
+  timeAgo: string;
+  quote?: string;
+  badge?: string;
+  highlights?: {
+    title: string;
+    platform: string;
+    views: string;
+    saves: string;
+  }[];
+  milestoneTitle?: string;
+  milestoneXp?: string;
 }
 
 interface CreatorStory {
   id: string;
   name: string;
+  handle: string;
+  niche: string;
   avatar: any;
   streak: number;
   isOnline: boolean;
   statusText: string;
   isUser?: boolean;
+  slides: StorySlide[];
 }
 
 interface ChatMessage {
   id: string;
   senderId: string;
-  text: string;
+  text?: string;
   time: string;
   isUser: boolean;
   sharedScriptTitle?: string;
+  isAudioNote?: boolean;
+  audioDuration?: string;
+  reactionEmoji?: string;
 }
 
 interface ConversationThread {
@@ -69,43 +97,163 @@ const CREATOR_STORIES: CreatorStory[] = [
   {
     id: 'user',
     name: 'You',
+    handle: '@amara.creates',
+    niche: 'Lifestyle & Tech',
     avatar: require('../../assets/images/amara-avatar.jpg'),
     streak: 47,
     isOnline: true,
     statusText: 'Filming Reel 🎬',
     isUser: true,
+    slides: [
+      {
+        id: 's_user_1',
+        type: 'daily_story',
+        title: 'Today\'s Filming Session',
+        subtitle: 'Behind the scenes with PostStreak',
+        timeAgo: 'Just now',
+        quote: 'Filming day 47! Testing a 3-part curiosity hook on batch productivity.',
+        badge: '⚡ 47-DAY STREAK ACTIVE',
+      },
+      {
+        id: 's_user_2',
+        type: 'highlights',
+        title: 'Your Top Viral Hooks This Week',
+        subtitle: 'High retention performances',
+        timeAgo: '1d ago',
+        highlights: [
+          { title: 'One thing I wish I knew before creating', platform: 'TikTok', views: '42.8k', saves: '3.9k' },
+          { title: 'Why 90% of creators quit by month 2', platform: 'Reels', views: '58.1k', saves: '6.4k' },
+          { title: 'My 15-minute daily batching routine', platform: 'Shorts', views: '29.3k', saves: '2.8k' },
+        ],
+      },
+    ],
   },
   {
     id: 'c1',
-    name: 'Elena R.',
+    name: 'Elena Rostova',
+    handle: '@elenacreates',
+    niche: 'Tech & Productivity',
     avatar: require('../../assets/images/elena-avatar.jpg'),
     streak: 52,
     isOnline: true,
     statusText: 'Editing week 3 batch',
+    slides: [
+      {
+        id: 's_elena_1',
+        type: 'daily_story',
+        title: 'Daily Studio Flow 🎬',
+        subtitle: 'Batch recording 4 video hooks',
+        timeAgo: '2h ago',
+        quote: 'Consistency feels 10x easier when you have an accountability partner. Finished today\'s script in 8 mins!',
+        badge: '⚡ 52-DAY STREAK',
+      },
+      {
+        id: 's_elena_2',
+        type: 'highlights',
+        title: 'Recent Viral Posts & Hooks',
+        subtitle: 'Top performing content lately',
+        timeAgo: '1d ago',
+        highlights: [
+          { title: 'The secret to never running out of video ideas', platform: 'TikTok', views: '84.2k', saves: '9.3k' },
+          { title: 'How I script 30-second shorts in 5 minutes', platform: 'Reels', views: '61.5k', saves: '7.1k' },
+          { title: 'Stop overthinking your camera setup', platform: 'TikTok', views: '39.0k', saves: '4.5k' },
+        ],
+      },
+      {
+        id: 's_elena_3',
+        type: 'milestone',
+        title: 'Streak Milestone Unlocked!',
+        subtitle: 'Level 5 Master Creator',
+        timeAgo: '3d ago',
+        milestoneTitle: '🏆 50-Day Consistency Club',
+        milestoneXp: '+250 XP Earned with Duo Partner',
+      },
+    ],
   },
   {
     id: 'c2',
-    name: 'Marcus C.',
+    name: 'Marcus Chen',
+    handle: '@marcustech',
+    niche: 'AI & Workflow',
     avatar: require('../../assets/images/marcus-avatar.jpg'),
     streak: 38,
     isOnline: true,
     statusText: 'Writing 5 hooks',
+    slides: [
+      {
+        id: 's_marcus_1',
+        type: 'daily_story',
+        title: 'Coding & Content Sprint ⚡',
+        subtitle: 'Morning routine done',
+        timeAgo: '4h ago',
+        quote: 'Tested 3 new hooks with Jarvis AI this morning. Script 2 had the strongest retention!',
+        badge: '🔥 38-DAY STREAK',
+      },
+      {
+        id: 's_marcus_2',
+        type: 'highlights',
+        title: 'Recent Post Highlights',
+        subtitle: 'Tech & creator tool reviews',
+        timeAgo: '2d ago',
+        highlights: [
+          { title: '3 AI tools I use every single day to post', platform: 'TikTok', views: '92.1k', saves: '12.4k' },
+          { title: 'How to automate your content schedule', platform: 'LinkedIn', views: '45.7k', saves: '5.2k' },
+        ],
+      },
+    ],
   },
   {
     id: 'c3',
-    name: 'Sophia T.',
+    name: 'Sophia Taylor',
+    handle: '@sophiastyle',
+    niche: 'Lifestyle & Fashion',
     avatar: require('../../assets/images/zainab-avatar.jpg'),
     streak: 41,
     isOnline: false,
     statusText: 'Studio day!',
+    slides: [
+      {
+        id: 's_sophia_1',
+        type: 'daily_story',
+        title: 'Outfit & Studio Lighting ✨',
+        subtitle: 'Prepping week 4 visuals',
+        timeAgo: '6h ago',
+        quote: 'Scheduled all posts for the 7:30 PM peak reach window. Loving this streak challenge!',
+        badge: '⚡ 41-DAY STREAK',
+      },
+      {
+        id: 's_sophia_2',
+        type: 'highlights',
+        title: 'Top Creator Highlights',
+        subtitle: 'Lifestyle & storytelling shorts',
+        timeAgo: '3d ago',
+        highlights: [
+          { title: 'My morning creator routine in 30 seconds', platform: 'Reels', views: '110k', saves: '14.2k' },
+          { title: '3 aesthetic filming spots in my apartment', platform: 'TikTok', views: '73.4k', saves: '8.6k' },
+        ],
+      },
+    ],
   },
   {
     id: 'c4',
-    name: 'David K.',
+    name: 'David Kim',
+    handle: '@davidbuilds',
+    niche: 'Fitness & Mindset',
     avatar: require('../../assets/images/david-avatar.jpg'),
     streak: 29,
     isOnline: true,
     statusText: 'Posted today! ⚡',
+    slides: [
+      {
+        id: 's_david_1',
+        type: 'daily_story',
+        title: 'Workout & Mindset Reel 🏋️‍♂️',
+        subtitle: 'Streak day 29 complete',
+        timeAgo: '1h ago',
+        quote: 'Showing up even when you don\'t feel like it is the whole game.',
+        badge: '🔥 29-DAY STREAK',
+      },
+    ],
   },
 ];
 
@@ -146,6 +294,14 @@ const INITIAL_CONVERSATIONS: ConversationThread[] = [
         time: '10:18 AM',
         isUser: false,
         sharedScriptTitle: 'One thing I wish I knew before I started creating',
+      },
+      {
+        id: 'm4',
+        senderId: 'c1',
+        isAudioNote: true,
+        audioDuration: '0:18',
+        time: '10:20 AM',
+        isUser: false,
       },
     ],
   },
@@ -238,29 +394,39 @@ export const MessagesScreen: React.FC<MessagesScreenProps> = ({
   onOpenJarvisPro,
   onNavigateTab,
   onOpenPostComposer,
+  onOpenCreate,
 }) => {
   const [activeTab, setActiveTab] = useState<TabType>('match');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<'all' | 'buddies' | 'collabs' | 'jarvis'>('all');
   const [threads, setThreads] = useState<ConversationThread[]>(INITIAL_CONVERSATIONS);
 
-  // Active Chat Room State
+  // Active 1-on-1 Chat State
   const [activeChatThread, setActiveChatThread] = useState<ConversationThread | null>(null);
   const [inputMessage, setInputMessage] = useState('');
 
-  // Discover Creators Modal
-  const [showDiscoverModal, setShowDiscoverModal] = useState(false);
+  // Snapchat / Social-Style Story & Highlights Player State
+  const [activeStoryCreator, setActiveStoryCreator] = useState<CreatorStory | null>(null);
+  const [activeSlideIndex, setActiveSlideIndex] = useState(0);
+  const [storyReplyText, setStoryReplyText] = useState('');
 
-  // Celebrations & Feedback
+  // Plus Icon (+) "Connect with More Creators" Modal
+  const [showConnectModal, setShowConnectModal] = useState(false);
+
+  // Celebration & Feedback Modal
   const [showCelebrationModal, setShowCelebrationModal] = useState(false);
   const [celebrationTitle, setCelebrationTitle] = useState('Message Sent!');
-  const [celebrationSubtitle, setCelebrationSubtitle] = useState('Your streak partner received your message & script.');
-  const [celebrationSpeech, setCelebrationSpeech] = useState('Creator connection strengthened! +15 XP.');
+  const [celebrationSubtitle, setCelebrationSubtitle] = useState('Your streak partner received your message.');
+  const [celebrationSpeech, setCelebrationSpeech] = useState('Accountability connection strengthened! +15 XP.');
   const [celebrationBadge, setCelebrationBadge] = useState('COLLAB ACTIVE');
+
+  // Floating Emoji Animations
+  const [floatingEmojis, setFloatingEmojis] = useState<{ id: string; emoji: string; x: number }[]>([]);
 
   // Animations
   const flameFloatY = useRef(new Animated.Value(0)).current;
   const modalPopScale = useRef(new Animated.Value(0.9)).current;
+  const storyFadeAnim = useRef(new Animated.Value(0)).current;
   const chatScrollRef = useRef<ScrollView>(null);
 
   useEffect(() => {
@@ -302,19 +468,124 @@ export const MessagesScreen: React.FC<MessagesScreenProps> = ({
     }
   };
 
+  // Open Story & Highlights Viewer
+  const handleOpenStory = (story: CreatorStory) => {
+    if (Platform.OS !== 'web') {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    }
+    setActiveStoryCreator(story);
+    setActiveSlideIndex(0);
+    setStoryReplyText('');
+    storyFadeAnim.setValue(0);
+    Animated.timing(storyFadeAnim, {
+      toValue: 1,
+      duration: 250,
+      useNativeDriver: true,
+    }).start();
+  };
+
+  const handleNextSlide = () => {
+    if (!activeStoryCreator) return;
+    if (activeSlideIndex < activeStoryCreator.slides.length - 1) {
+      if (Platform.OS !== 'web') {
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+      }
+      setActiveSlideIndex(activeSlideIndex + 1);
+    } else {
+      setActiveStoryCreator(null);
+    }
+  };
+
+  const handlePrevSlide = () => {
+    if (!activeStoryCreator) return;
+    if (activeSlideIndex > 0) {
+      if (Platform.OS !== 'web') {
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+      }
+      setActiveSlideIndex(activeSlideIndex - 1);
+    }
+  };
+
+  const handleSendStoryReaction = (emoji: string) => {
+    if (!activeStoryCreator) return;
+    if (Platform.OS !== 'web') {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    }
+
+    // Add floating emoji animation
+    const emojiId = `e_${Date.now()}`;
+    setFloatingEmojis((prev) => [...prev, { id: emojiId, emoji, x: Math.random() * (SCREEN_WIDTH - 80) + 40 }]);
+    setTimeout(() => {
+      setFloatingEmojis((prev) => prev.filter((e) => e.id !== emojiId));
+    }, 1800);
+
+    // Also send reaction to their message thread
+    const matchedThread = threads.find((t) => t.creatorId === activeStoryCreator.id);
+    if (matchedThread) {
+      const reactionMsg: ChatMessage = {
+        id: `msg_react_${Date.now()}`,
+        senderId: 'user',
+        text: `Reacted ${emoji} to your story "${activeStoryCreator.slides[activeSlideIndex].title}"`,
+        reactionEmoji: emoji,
+        time: 'Just now',
+        isUser: true,
+      };
+      setThreads((prev) =>
+        prev.map((t) =>
+          t.id === matchedThread.id
+            ? { ...t, lastMessage: `Reacted ${emoji}`, time: 'Just now', messages: [...t.messages, reactionMsg] }
+            : t
+        )
+      );
+    }
+  };
+
+  const handleSendStoryReply = () => {
+    if (!storyReplyText.trim() || !activeStoryCreator) return;
+    if (Platform.OS !== 'web') {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    }
+
+    const matchedThread = threads.find((t) => t.creatorId === activeStoryCreator.id);
+    const replyMsg: ChatMessage = {
+      id: `msg_reply_${Date.now()}`,
+      senderId: 'user',
+      text: storyReplyText.trim(),
+      time: 'Just now',
+      isUser: true,
+    };
+
+    if (matchedThread) {
+      setThreads((prev) =>
+        prev.map((t) =>
+          t.id === matchedThread.id
+            ? { ...t, lastMessage: replyMsg.text || '', time: 'Just now', messages: [...t.messages, replyMsg] }
+            : t
+        )
+      );
+    }
+
+    setActiveStoryCreator(null);
+    setCelebrationTitle('Reply Sent!');
+    setCelebrationSubtitle(`Your message was sent to ${activeStoryCreator.name}'s inbox.`);
+    setCelebrationSpeech('Story conversation started! +15 XP.');
+    setCelebrationBadge('REPLY SENT');
+    setShowCelebrationModal(true);
+  };
+
   const handleOpenChat = (thread: ConversationThread) => {
     if (Platform.OS !== 'web') {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     }
-    // Mark as read
     setThreads((prev) =>
       prev.map((t) => (t.id === thread.id ? { ...t, unread: false } : t))
     );
     setActiveChatThread({ ...thread, unread: false });
   };
 
-  const handleSendMessage = () => {
-    if (!inputMessage.trim() || !activeChatThread) return;
+  const handleSendMessage = (customText?: string) => {
+    const messageToSend = (customText || inputMessage).trim();
+    if (!messageToSend || !activeChatThread) return;
 
     if (Platform.OS !== 'web') {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
@@ -323,7 +594,7 @@ export const MessagesScreen: React.FC<MessagesScreenProps> = ({
     const newMessage: ChatMessage = {
       id: `msg_${Date.now()}`,
       senderId: 'user',
-      text: inputMessage.trim(),
+      text: messageToSend,
       time: 'Just now',
       isUser: true,
     };
@@ -331,7 +602,7 @@ export const MessagesScreen: React.FC<MessagesScreenProps> = ({
     const updatedMessages = [...activeChatThread.messages, newMessage];
     const updatedThread = {
       ...activeChatThread,
-      lastMessage: newMessage.text,
+      lastMessage: newMessage.text || '',
       time: 'Just now',
       messages: updatedMessages,
     };
@@ -341,6 +612,39 @@ export const MessagesScreen: React.FC<MessagesScreenProps> = ({
       prev.map((t) => (t.id === activeChatThread.id ? updatedThread : t))
     );
     setInputMessage('');
+
+    setTimeout(() => {
+      chatScrollRef.current?.scrollToEnd({ animated: true });
+    }, 100);
+  };
+
+  const handleSendVoiceNote = () => {
+    if (!activeChatThread) return;
+    if (Platform.OS !== 'web') {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    }
+
+    const audioMsg: ChatMessage = {
+      id: `msg_audio_${Date.now()}`,
+      senderId: 'user',
+      isAudioNote: true,
+      audioDuration: '0:14',
+      time: 'Just now',
+      isUser: true,
+    };
+
+    const updatedMessages = [...activeChatThread.messages, audioMsg];
+    const updatedThread = {
+      ...activeChatThread,
+      lastMessage: '🎙️ Voice note (0:14)',
+      time: 'Just now',
+      messages: updatedMessages,
+    };
+
+    setActiveChatThread(updatedThread);
+    setThreads((prev) =>
+      prev.map((t) => (t.id === activeChatThread.id ? updatedThread : t))
+    );
 
     setTimeout(() => {
       chatScrollRef.current?.scrollToEnd({ animated: true });
@@ -368,8 +672,6 @@ export const MessagesScreen: React.FC<MessagesScreenProps> = ({
       thread.lastMessage.toLowerCase().includes(searchQuery.toLowerCase());
     return matchesCategory && matchesSearch;
   });
-
-  const totalUnreadCount = threads.filter((t) => t.unread).length;
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -418,28 +720,37 @@ export const MessagesScreen: React.FC<MessagesScreenProps> = ({
               {activeChatThread ? activeChatThread.name : 'Creator Messages'}
             </Text>
             <Text style={styles.headerSubtitleText}>
-              {activeChatThread ? (activeChatThread.isOnline ? '🟢 Active now' : '⚡ 52-Day Streak Partner') : '12 Connected Creators'}
+              {activeChatThread
+                ? activeChatThread.isOnline
+                  ? '🟢 Active now • ⚡ 52d streak'
+                  : '⚡ Streak Partner'
+                : '12 Connected Creators'}
             </Text>
           </View>
 
-          {/* Right Action: Discover New Creators */}
+          {/* Right Action: Plus Button (+) Opens "Connect with More Creators" Modal */}
           <View style={styles.headerRightGroup}>
             <Pressable
               style={({ pressed }) => [styles.newChatBtn, pressed && styles.btnPressed]}
               hitSlop={8}
               onPress={() => {
                 triggerModalAnim();
-                setShowDiscoverModal(true);
+                setShowConnectModal(true);
               }}
             >
-              <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
-                <Path d="M12 5V19M5 12H19" stroke="#582CDB" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" />
-              </Svg>
+              <LinearGradient
+                colors={['#7C3AED', '#582CDB']}
+                style={styles.plusIconGradient}
+              >
+                <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
+                  <Path d="M12 5V19M5 12H19" stroke="#FFFFFF" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" />
+                </Svg>
+              </LinearGradient>
             </Pressable>
           </View>
         </View>
 
-        {/* 2. MAIN CONTENT: THREADS INBOX OR ACTIVE 1-ON-1 CHAT */}
+        {/* 2. MAIN CONTENT: INBOX OR ACTIVE CHAT */}
         {!activeChatThread ? (
           <ScrollView
             contentContainerStyle={styles.scrollContent}
@@ -470,7 +781,7 @@ export const MessagesScreen: React.FC<MessagesScreenProps> = ({
               <TextInput
                 value={searchQuery}
                 onChangeText={setSearchQuery}
-                placeholder="Search creators, handles, or scripts..."
+                placeholder="Search creators, stories, or posts..."
                 placeholderTextColor="#94A3B8"
                 style={styles.searchInput}
               />
@@ -481,8 +792,12 @@ export const MessagesScreen: React.FC<MessagesScreenProps> = ({
               )}
             </View>
 
-            {/* ACTIVE CREATOR STORIES / STREAK BUDDIES ROW */}
-            <Text style={styles.sectionHeaderTitle}>Streak Buddies Active Today</Text>
+            {/* SNAPCHAT-STYLE STORIES & HIGHLIGHTS ROW */}
+            <View style={styles.storiesHeaderRow}>
+              <Text style={styles.sectionHeaderTitle}>Stories &amp; Post Highlights</Text>
+              <Text style={styles.storiesSubHint}>Tap to view daily posts</Text>
+            </View>
+
             <ScrollView
               horizontal
               showsHorizontalScrollIndicator={false}
@@ -492,26 +807,24 @@ export const MessagesScreen: React.FC<MessagesScreenProps> = ({
                 <Pressable
                   key={story.id}
                   style={styles.storyItem}
-                  onPress={() => {
-                    const matchedThread = threads.find((t) => t.creatorId === story.id);
-                    if (matchedThread) {
-                      handleOpenChat(matchedThread);
-                    } else if (story.isUser) {
-                      handleSendHighFive('yourself');
-                    } else {
-                      handleSendHighFive(story.name);
-                    }
-                  }}
+                  onPress={() => handleOpenStory(story)}
                 >
-                  <View style={[styles.storyAvatarRing, story.isOnline && styles.storyAvatarRingActive]}>
-                    <Image source={story.avatar} style={styles.storyAvatar} resizeMode="cover" />
-                    {story.isOnline && <View style={styles.onlineDot} />}
-                    {story.isUser && (
-                      <View style={styles.userAddStatusBadge}>
-                        <Text style={styles.userAddStatusText}>+</Text>
-                      </View>
-                    )}
-                  </View>
+                  <LinearGradient
+                    colors={story.isOnline ? ['#EC4899', '#8B5CF6', '#F59E0B'] : ['#CBD5E1', '#E2E8F0']}
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 1, y: 1 }}
+                    style={styles.storyAvatarRingGradient}
+                  >
+                    <View style={styles.storyAvatarInnerWhite}>
+                      <Image source={story.avatar} style={styles.storyAvatar} resizeMode="cover" />
+                      {story.isOnline && <View style={styles.onlineDot} />}
+                      {story.isUser && (
+                        <View style={styles.userAddStatusBadge}>
+                          <Text style={styles.userAddStatusText}>+</Text>
+                        </View>
+                      )}
+                    </View>
+                  </LinearGradient>
                   <Text style={styles.storyName} numberOfLines={1}>
                     {story.name}
                   </Text>
@@ -574,13 +887,27 @@ export const MessagesScreen: React.FC<MessagesScreenProps> = ({
                   ]}
                   onPress={() => handleOpenChat(thread)}
                 >
-                  {/* Creator Avatar with Online Status */}
-                  <View style={styles.threadAvatarWrapper}>
-                    <Image source={thread.avatar} style={styles.threadAvatar} resizeMode="cover" />
-                    {thread.isOnline && <View style={styles.threadOnlineDot} />}
-                  </View>
+                  {/* Creator Avatar with Story Border */}
+                  <Pressable
+                    onPress={() => {
+                      const matchedStory = CREATOR_STORIES.find((s) => s.id === thread.creatorId);
+                      if (matchedStory) {
+                        handleOpenStory(matchedStory);
+                      } else {
+                        handleOpenChat(thread);
+                      }
+                    }}
+                  >
+                    <LinearGradient
+                      colors={thread.isOnline ? ['#EC4899', '#8B5CF6'] : ['#E2E8F0', '#CBD5E1']}
+                      style={styles.threadAvatarRing}
+                    >
+                      <Image source={thread.avatar} style={styles.threadAvatar} resizeMode="cover" />
+                      {thread.isOnline && <View style={styles.threadOnlineDot} />}
+                    </LinearGradient>
+                  </Pressable>
 
-                  {/* Thread Details */}
+                  {/* Thread Content */}
                   <View style={styles.threadContentCol}>
                     <View style={styles.threadTopRow}>
                       <Text style={styles.threadCreatorName} numberOfLines={1}>
@@ -620,7 +947,7 @@ export const MessagesScreen: React.FC<MessagesScreenProps> = ({
             <View style={{ height: 110 }} />
           </ScrollView>
         ) : (
-          /* 3. ACTIVE 1-ON-1 CHAT CONVERSATION ROOM */
+          /* 3. PREMIUM INTERACTIVE 1-ON-1 CHAT ROOM */
           <KeyboardAvoidingView
             style={{ flex: 1 }}
             behavior={Platform.OS === 'ios' ? 'padding' : undefined}
@@ -664,17 +991,23 @@ export const MessagesScreen: React.FC<MessagesScreenProps> = ({
                       msg.isUser ? styles.msgWrapperUser : styles.msgWrapperPartner,
                     ]}
                   >
-                    {/* Partner Avatar */}
                     {!msg.isUser && (
-                      <Image
-                        source={activeChatThread.avatar}
-                        style={styles.msgAvatar}
-                        resizeMode="cover"
-                      />
+                      <Pressable
+                        onPress={() => {
+                          const matchedStory = CREATOR_STORIES.find((s) => s.id === activeChatThread.creatorId);
+                          if (matchedStory) handleOpenStory(matchedStory);
+                        }}
+                      >
+                        <Image
+                          source={activeChatThread.avatar}
+                          style={styles.msgAvatar}
+                          resizeMode="cover"
+                        />
+                      </Pressable>
                     )}
 
                     <View style={{ maxWidth: '78%' }}>
-                      {/* Shared Script / Post Preview Card */}
+                      {/* Shared Script / Post Draft Card */}
                       {msg.sharedScriptTitle && (
                         <Pressable
                           style={styles.sharedScriptCard}
@@ -692,22 +1025,57 @@ export const MessagesScreen: React.FC<MessagesScreenProps> = ({
                         </Pressable>
                       )}
 
-                      {/* Text Bubble */}
-                      <View
-                        style={[
-                          styles.messageBubble,
-                          msg.isUser ? styles.msgBubbleUser : styles.msgBubblePartner,
-                        ]}
-                      >
-                        <Text
+                      {/* Audio Note Bubble */}
+                      {msg.isAudioNote ? (
+                        <View
                           style={[
-                            styles.messageText,
-                            msg.isUser ? styles.msgTextUser : styles.msgTextPartner,
+                            styles.audioNoteBubble,
+                            msg.isUser ? styles.msgBubbleUser : styles.msgBubblePartner,
                           ]}
                         >
-                          {msg.text}
-                        </Text>
-                      </View>
+                          <Pressable
+                            style={styles.audioPlayCircle}
+                            onPress={() => {
+                              if (Platform.OS !== 'web') {
+                                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                              }
+                            }}
+                          >
+                            <Text style={styles.audioPlayIcon}>▶</Text>
+                          </Pressable>
+                          <View style={styles.waveformContainer}>
+                            <View style={[styles.waveBar, { height: 12 }]} />
+                            <View style={[styles.waveBar, { height: 20 }]} />
+                            <View style={[styles.waveBar, { height: 16 }]} />
+                            <View style={[styles.waveBar, { height: 24 }]} />
+                            <View style={[styles.waveBar, { height: 18 }]} />
+                            <View style={[styles.waveBar, { height: 10 }]} />
+                            <View style={[styles.waveBar, { height: 22 }]} />
+                            <View style={[styles.waveBar, { height: 14 }]} />
+                          </View>
+                          <Text style={[styles.audioDurationText, msg.isUser && { color: '#FFFFFF' }]}>
+                            {msg.audioDuration}
+                          </Text>
+                        </View>
+                      ) : (
+                        /* Text Bubble */
+                        <View
+                          style={[
+                            styles.messageBubble,
+                            msg.isUser ? styles.msgBubbleUser : styles.msgBubblePartner,
+                          ]}
+                        >
+                          <Text
+                            style={[
+                              styles.messageText,
+                              msg.isUser ? styles.msgTextUser : styles.msgTextPartner,
+                            ]}
+                          >
+                            {msg.text}
+                          </Text>
+                        </View>
+                      )}
+
                       <Text
                         style={[
                           styles.messageTime,
@@ -721,7 +1089,20 @@ export const MessagesScreen: React.FC<MessagesScreenProps> = ({
                 ))}
               </ScrollView>
 
-              {/* Chat Input Bar */}
+              {/* QUICK REACTION FLOATING BAR */}
+              <View style={styles.quickReactionsRow}>
+                {['🔥', '⚡', '👏', '🚀', '🎯', '❤️'].map((emoji) => (
+                  <Pressable
+                    key={emoji}
+                    onPress={() => handleSendMessage(emoji)}
+                    style={styles.reactionPillBtn}
+                  >
+                    <Text style={{ fontSize: 16 }}>{emoji}</Text>
+                  </Pressable>
+                ))}
+              </View>
+
+              {/* CHAT INPUT BAR */}
               <View style={styles.chatInputBar}>
                 {/* Share Script Quick Action */}
                 <Pressable
@@ -733,7 +1114,7 @@ export const MessagesScreen: React.FC<MessagesScreenProps> = ({
                   }}
                   hitSlop={8}
                 >
-                  <Svg width={20} height={20} viewBox="0 0 24 24" fill="none">
+                  <Svg width={19} height={19} viewBox="0 0 24 24" fill="none">
                     <Path
                       d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"
                       stroke="#582CDB"
@@ -752,28 +1133,47 @@ export const MessagesScreen: React.FC<MessagesScreenProps> = ({
                   placeholder={`Message ${activeChatThread.name}...`}
                   placeholderTextColor="#94A3B8"
                   style={styles.chatTextInput}
-                  onSubmitEditing={handleSendMessage}
+                  onSubmitEditing={() => handleSendMessage()}
                 />
 
-                {/* Send Button */}
-                <Pressable
-                  style={({ pressed }) => [
-                    styles.sendMsgBtn,
-                    inputMessage.trim().length > 0 && styles.sendMsgBtnActive,
-                    pressed && styles.btnPressed,
-                  ]}
-                  onPress={handleSendMessage}
-                >
-                  <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
-                    <Path
-                      d="M22 2L11 13M22 2L15 22L11 13L2 9L22 2Z"
-                      stroke="#FFFFFF"
-                      strokeWidth="2.4"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                  </Svg>
-                </Pressable>
+                {/* Voice Note or Send Button */}
+                {inputMessage.trim().length === 0 ? (
+                  <Pressable
+                    style={styles.voiceNoteBtn}
+                    onPress={handleSendVoiceNote}
+                    hitSlop={8}
+                  >
+                    <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
+                      <Path
+                        d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"
+                        stroke="#582CDB"
+                        strokeWidth="2.2"
+                      />
+                      <Path
+                        d="M19 10v2a7 7 0 0 1-14 0v-2M12 19v4M8 23h8"
+                        stroke="#582CDB"
+                        strokeWidth="2.2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                    </Svg>
+                  </Pressable>
+                ) : (
+                  <Pressable
+                    style={styles.sendMsgBtnActive}
+                    onPress={() => handleSendMessage()}
+                  >
+                    <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
+                      <Path
+                        d="M22 2L11 13M22 2L15 22L11 13L2 9L22 2Z"
+                        stroke="#FFFFFF"
+                        strokeWidth="2.4"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                    </Svg>
+                  </Pressable>
+                )}
               </View>
             </View>
           </KeyboardAvoidingView>
@@ -785,22 +1185,224 @@ export const MessagesScreen: React.FC<MessagesScreenProps> = ({
           onTabPress={handleTabPress}
         />
 
-        {/* MODAL: DISCOVER & MATCH CREATORS */}
+        {/* ========================================================================= */}
+        {/* SNAPCHAT / INSTAGRAM STYLE IMMERSIVE STORY & HIGHLIGHTS VIEWER MODAL */}
+        {/* ========================================================================= */}
         <Modal
-          visible={showDiscoverModal}
+          visible={activeStoryCreator !== null}
           transparent={true}
           animationType="fade"
-          onRequestClose={() => setShowDiscoverModal(false)}
+          onRequestClose={() => setActiveStoryCreator(null)}
+        >
+          {activeStoryCreator && (
+            <View style={styles.storyViewerContainer}>
+              <StatusBar barStyle="light-content" />
+
+              {/* Top Segmented Story Progress Bars */}
+              <View style={styles.storyProgressBarContainer}>
+                {activeStoryCreator.slides.map((_, idx) => (
+                  <View key={idx} style={styles.storyProgressBarTrack}>
+                    <View
+                      style={[
+                        styles.storyProgressBarFill,
+                        idx < activeSlideIndex && { width: '100%' },
+                        idx === activeSlideIndex && { width: '100%' },
+                        idx > activeSlideIndex && { width: '0%' },
+                      ]}
+                    />
+                  </View>
+                ))}
+              </View>
+
+              {/* Creator Profile Top Bar */}
+              <View style={styles.storyTopProfileBar}>
+                <View style={styles.storyProfileLeft}>
+                  <Image source={activeStoryCreator.avatar} style={styles.storyTopAvatar} resizeMode="cover" />
+                  <View>
+                    <Text style={styles.storyTopCreatorName}>{activeStoryCreator.name}</Text>
+                    <Text style={styles.storyTopTimeAgo}>
+                      {activeStoryCreator.slides[activeSlideIndex]?.timeAgo || 'Just now'} • {activeStoryCreator.niche}
+                    </Text>
+                  </View>
+                  <View style={styles.storyTopStreakBadge}>
+                    <Text style={styles.storyTopStreakText}>⚡ {activeStoryCreator.streak}d</Text>
+                  </View>
+                </View>
+
+                <Pressable
+                  onPress={() => setActiveStoryCreator(null)}
+                  style={styles.storyCloseBtn}
+                  hitSlop={12}
+                >
+                  <Text style={styles.storyCloseBtnText}>✕</Text>
+                </Pressable>
+              </View>
+
+              {/* Main Immersive Story Content Area */}
+              <View style={styles.storyMainBody}>
+                {/* Left and Right Tap Zones for Navigation */}
+                <Pressable style={styles.storyTapZoneLeft} onPress={handlePrevSlide} />
+                <Pressable style={styles.storyTapZoneRight} onPress={handleNextSlide} />
+
+                {/* Slide Type 1: Daily Creation Story */}
+                {activeStoryCreator.slides[activeSlideIndex]?.type === 'daily_story' && (
+                  <View style={styles.storyCardContent}>
+                    {activeStoryCreator.slides[activeSlideIndex].badge && (
+                      <View style={styles.storySlidePillBadge}>
+                        <Text style={styles.storySlidePillText}>
+                          {activeStoryCreator.slides[activeSlideIndex].badge}
+                        </Text>
+                      </View>
+                    )}
+
+                    <Text style={styles.storySlideTitle}>
+                      {activeStoryCreator.slides[activeSlideIndex].title}
+                    </Text>
+                    <Text style={styles.storySlideSubtitle}>
+                      {activeStoryCreator.slides[activeSlideIndex].subtitle}
+                    </Text>
+
+                    <View style={styles.storyQuoteCard}>
+                      <Text style={styles.storyQuoteIcon}>“</Text>
+                      <Text style={styles.storyQuoteText}>
+                        {activeStoryCreator.slides[activeSlideIndex].quote}
+                      </Text>
+                    </View>
+
+                    <View style={styles.storyStatsRow}>
+                      <View style={styles.storyStatBox}>
+                        <Text style={styles.storyStatVal}>30s</Text>
+                        <Text style={styles.storyStatLabel}>Length</Text>
+                      </View>
+                      <View style={styles.storyStatBox}>
+                        <Text style={styles.storyStatVal}>TikTok + Reels</Text>
+                        <Text style={styles.storyStatLabel}>Format</Text>
+                      </View>
+                      <View style={styles.storyStatBox}>
+                        <Text style={styles.storyStatVal}>+40 XP</Text>
+                        <Text style={styles.storyStatLabel}>Impact</Text>
+                      </View>
+                    </View>
+                  </View>
+                )}
+
+                {/* Slide Type 2: Recent Highlights Carousel */}
+                {activeStoryCreator.slides[activeSlideIndex]?.type === 'highlights' && (
+                  <View style={styles.storyCardContent}>
+                    <View style={styles.storySlidePillBadge}>
+                      <Text style={styles.storySlidePillText}>⭐ TOP RECENT HIGHLIGHTS</Text>
+                    </View>
+
+                    <Text style={styles.storySlideTitle}>
+                      {activeStoryCreator.slides[activeSlideIndex].title}
+                    </Text>
+                    <Text style={styles.storySlideSubtitle}>
+                      {activeStoryCreator.slides[activeSlideIndex].subtitle}
+                    </Text>
+
+                    <View style={styles.highlightsList}>
+                      {activeStoryCreator.slides[activeSlideIndex].highlights?.map((post, idx) => (
+                        <View key={idx} style={styles.highlightItemCard}>
+                          <View style={styles.highlightItemTop}>
+                            <Text style={styles.highlightItemPlatform}>{post.platform === 'TikTok' ? '♪' : '📷'} {post.platform}</Text>
+                            <Text style={styles.highlightItemViews}>👁 {post.views} • 💾 {post.saves}</Text>
+                          </View>
+                          <Text style={styles.highlightItemTitle}>&ldquo;{post.title}&rdquo;</Text>
+                        </View>
+                      ))}
+                    </View>
+                  </View>
+                )}
+
+                {/* Slide Type 3: Milestone Achievement */}
+                {activeStoryCreator.slides[activeSlideIndex]?.type === 'milestone' && (
+                  <View style={styles.storyCardContent}>
+                    <View style={styles.milestoneTrophyCircle}>
+                      <Text style={{ fontSize: 40 }}>🏆</Text>
+                    </View>
+                    <Text style={styles.storySlideTitle}>
+                      {activeStoryCreator.slides[activeSlideIndex].milestoneTitle}
+                    </Text>
+                    <Text style={styles.storySlideSubtitle}>
+                      {activeStoryCreator.slides[activeSlideIndex].subtitle}
+                    </Text>
+                    <View style={styles.milestoneXpPill}>
+                      <Text style={styles.milestoneXpText}>
+                        {activeStoryCreator.slides[activeSlideIndex].milestoneXp}
+                      </Text>
+                    </View>
+                  </View>
+                )}
+              </View>
+
+              {/* Story Bottom Reaction & Reply Bar */}
+              <View style={styles.storyBottomBar}>
+                {/* Floating Emojis */}
+                {floatingEmojis.map((e) => (
+                  <Animated.Text
+                    key={e.id}
+                    style={[
+                      styles.floatingEmojiText,
+                      { left: e.x },
+                    ]}
+                  >
+                    {e.emoji}
+                  </Animated.Text>
+                ))}
+
+                {/* Quick Emoji Reaction Pills */}
+                <View style={styles.storyReactionPillsRow}>
+                  {['🔥', '⚡', '👏', '❤️', '🚀'].map((emoji) => (
+                    <Pressable
+                      key={emoji}
+                      onPress={() => handleSendStoryReaction(emoji)}
+                      style={styles.storyReactionCircle}
+                    >
+                      <Text style={{ fontSize: 18 }}>{emoji}</Text>
+                    </Pressable>
+                  ))}
+                </View>
+
+                {/* Send a Direct Reply Input */}
+                <View style={styles.storyReplyInputRow}>
+                  <TextInput
+                    value={storyReplyText}
+                    onChangeText={setStoryReplyText}
+                    placeholder={`Reply to ${activeStoryCreator.name}...`}
+                    placeholderTextColor="rgba(255, 255, 255, 0.6)"
+                    style={styles.storyReplyInput}
+                    onSubmitEditing={handleSendStoryReply}
+                  />
+                  <Pressable
+                    style={styles.storyReplySendBtn}
+                    onPress={handleSendStoryReply}
+                  >
+                    <Text style={styles.storyReplySendBtnText}>Send</Text>
+                  </Pressable>
+                </View>
+              </View>
+            </View>
+          )}
+        </Modal>
+
+        {/* ========================================================================= */}
+        {/* MODAL: TOP RIGHT PLUS (+) "CONNECT WITH MORE CREATORS" */}
+        {/* ========================================================================= */}
+        <Modal
+          visible={showConnectModal}
+          transparent={true}
+          animationType="fade"
+          onRequestClose={() => setShowConnectModal(false)}
         >
           <View style={styles.modalOverlay}>
             <Animated.View style={[styles.modalCard, { transform: [{ scale: modalPopScale }] }]}>
               <View style={styles.modalHeaderRow}>
                 <View>
-                  <Text style={styles.modalTitle}>Find Streak Partners</Text>
-                  <Text style={styles.modalSubtitle}>Creators matched with your niche &amp; schedule</Text>
+                  <Text style={styles.modalTitle}>Connect with More Creators</Text>
+                  <Text style={styles.modalSubtitle}>Build 2x longer streaks with accountability partners</Text>
                 </View>
                 <Pressable
-                  onPress={() => setShowDiscoverModal(false)}
+                  onPress={() => setShowConnectModal(false)}
                   style={styles.modalCloseCircle}
                   hitSlop={8}
                 >
@@ -808,7 +1410,8 @@ export const MessagesScreen: React.FC<MessagesScreenProps> = ({
                 </Pressable>
               </View>
 
-              <ScrollView style={{ maxHeight: 300 }} showsVerticalScrollIndicator={false}>
+              {/* Matched Creator Previews */}
+              <ScrollView style={{ maxHeight: 260 }} showsVerticalScrollIndicator={false}>
                 {[
                   {
                     name: 'Zoe Martinez',
@@ -824,32 +1427,53 @@ export const MessagesScreen: React.FC<MessagesScreenProps> = ({
                     streak: 33,
                     avatar: require('../../assets/images/david-avatar.jpg'),
                   },
+                  {
+                    name: 'Kemi Adebayo',
+                    handle: '@kemistories',
+                    niche: 'Creator Education',
+                    streak: 58,
+                    avatar: require('../../assets/images/zainab-avatar.jpg'),
+                  },
                 ].map((c, i) => (
                   <View key={i} style={styles.discoverCreatorCard}>
                     <Image source={c.avatar} style={styles.discoverAvatar} resizeMode="cover" />
                     <View style={{ flex: 1 }}>
                       <Text style={styles.discoverName}>{c.name}</Text>
-                      <Text style={styles.discoverHandle}>{c.handle} • ⚡ {c.streak}d</Text>
+                      <Text style={styles.discoverHandle}>{c.handle} • ⚡ {c.streak}d streak</Text>
                       <Text style={styles.discoverNiche}>{c.niche}</Text>
                     </View>
                     <Pressable
                       style={styles.discoverConnectBtn}
                       onPress={() => {
-                        setShowDiscoverModal(false);
                         handleSendHighFive(c.name);
                       }}
                     >
-                      <Text style={styles.discoverConnectBtnText}>Connect</Text>
+                      <Text style={styles.discoverConnectBtnText}>Boost ⚡</Text>
                     </Pressable>
                   </View>
                 ))}
               </ScrollView>
 
+              {/* Connect Button Navigates directly to the Create page */}
               <Pressable
-                style={styles.modalFullBtn}
-                onPress={() => setShowDiscoverModal(false)}
+                style={styles.connectToCreateBtn}
+                onPress={() => {
+                  setShowConnectModal(false);
+                  if (onOpenCreate) {
+                    onOpenCreate();
+                  } else if (onNavigateTab) {
+                    onNavigateTab('create');
+                  }
+                }}
               >
-                <Text style={styles.modalFullBtnText}>Done</Text>
+                <LinearGradient
+                  colors={['#7C3AED', '#582CDB']}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 0 }}
+                  style={styles.connectGradient}
+                >
+                  <Text style={styles.connectBtnText}>Connect &amp; Create Ideas ➔</Text>
+                </LinearGradient>
               </Pressable>
             </Animated.View>
           </View>
@@ -864,7 +1488,7 @@ export const MessagesScreen: React.FC<MessagesScreenProps> = ({
           badgeText={celebrationBadge}
           xpEarned={15}
           streakCount={47}
-          actionText="Back to Messages ➔"
+          actionText="Keep Chatting ➔"
           onDismiss={() => {
             setShowCelebrationModal(false);
           }}
@@ -960,9 +1584,15 @@ const styles = StyleSheet.create({
     width: 36,
     height: 36,
     borderRadius: 12,
-    backgroundColor: '#FAF5FF',
-    borderWidth: 1,
-    borderColor: '#EDE9FE',
+    overflow: 'hidden',
+    shadowColor: '#582CDB',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.2,
+    shadowRadius: 6,
+    elevation: 3,
+  },
+  plusIconGradient: {
+    flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -1031,13 +1661,25 @@ const styles = StyleSheet.create({
     fontWeight: '800',
   },
 
-  // Stories / Streak Buddies
-  sectionHeaderTitle: {
-    fontSize: 13,
-    fontWeight: '800',
-    color: '#171420',
+  // Stories Header
+  storiesHeaderRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
     marginBottom: 10,
   },
+  sectionHeaderTitle: {
+    fontSize: 13.5,
+    fontWeight: '800',
+    color: '#171420',
+  },
+  storiesSubHint: {
+    fontSize: 11,
+    color: '#6D28D9',
+    fontWeight: '700',
+  },
+
+  // Stories Row
   storiesRow: {
     flexDirection: 'row',
     gap: 14,
@@ -1046,33 +1688,36 @@ const styles = StyleSheet.create({
   },
   storyItem: {
     alignItems: 'center',
-    width: 68,
+    width: 72,
   },
-  storyAvatarRing: {
-    position: 'relative',
-    width: 58,
-    height: 58,
-    borderRadius: 29,
+  storyAvatarRingGradient: {
+    width: 62,
+    height: 62,
+    borderRadius: 31,
     padding: 2.5,
-    backgroundColor: '#FFFFFF',
-    borderWidth: 2,
-    borderColor: '#EDE9FE',
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 4,
   },
-  storyAvatarRingActive: {
-    borderColor: '#582CDB',
+  storyAvatarInnerWhite: {
+    position: 'relative',
+    width: '100%',
+    height: '100%',
+    borderRadius: 29,
+    backgroundColor: '#FAF8F5',
+    padding: 2,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   storyAvatar: {
     width: '100%',
     height: '100%',
-    borderRadius: 26,
+    borderRadius: 27,
   },
   onlineDot: {
     position: 'absolute',
-    bottom: 2,
-    right: 2,
+    bottom: 0,
+    right: 0,
     width: 12,
     height: 12,
     borderRadius: 6,
@@ -1082,11 +1727,11 @@ const styles = StyleSheet.create({
   },
   userAddStatusBadge: {
     position: 'absolute',
-    bottom: 1,
-    right: 1,
-    width: 16,
-    height: 16,
-    borderRadius: 8,
+    bottom: 0,
+    right: 0,
+    width: 17,
+    height: 17,
+    borderRadius: 8.5,
     backgroundColor: '#582CDB',
     borderWidth: 1.5,
     borderColor: '#FFFFFF',
@@ -1094,10 +1739,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   userAddStatusText: {
-    fontSize: 11,
+    fontSize: 12,
     fontWeight: '900',
     color: '#FFFFFF',
-    lineHeight: 12,
+    lineHeight: 13,
   },
   storyName: {
     fontSize: 11.5,
@@ -1169,14 +1814,17 @@ const styles = StyleSheet.create({
     backgroundColor: '#FDFAFF',
     borderColor: '#DDD6FE',
   },
-  threadAvatarWrapper: {
-    position: 'relative',
-    width: 48,
-    height: 48,
+  threadAvatarRing: {
+    width: 52,
+    height: 52,
+    borderRadius: 26,
+    padding: 2,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   threadAvatar: {
-    width: 48,
-    height: 48,
+    width: '100%',
+    height: '100%',
     borderRadius: 24,
   },
   threadOnlineDot: {
@@ -1320,9 +1968,9 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-start',
   },
   msgAvatar: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
+    width: 34,
+    height: 34,
+    borderRadius: 17,
     marginBottom: 16,
   },
   messageBubble: {
@@ -1397,6 +2045,71 @@ const styles = StyleSheet.create({
     fontWeight: '900',
     color: '#582CDB',
   },
+
+  // Audio Note Styles
+  audioNoteBubble: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderRadius: 18,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    gap: 8,
+    minWidth: 160,
+  },
+  audioPlayCircle: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: 'rgba(255, 255, 255, 0.3)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  audioPlayIcon: {
+    fontSize: 12,
+    color: '#FFFFFF',
+    marginLeft: 2,
+  },
+  waveformContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 3,
+  },
+  waveBar: {
+    width: 3,
+    backgroundColor: '#DDD6FE',
+    borderRadius: 2,
+  },
+  audioDurationText: {
+    fontSize: 11,
+    color: '#64748B',
+    fontWeight: '700',
+  },
+
+  // Quick Reactions Row
+  quickReactionsRow: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    gap: 8,
+    paddingVertical: 6,
+    backgroundColor: 'rgba(250, 248, 245, 0.95)',
+  },
+  reactionPillBtn: {
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1,
+    borderColor: '#EDE9FE',
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: '#582CDB',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 3,
+    elevation: 1,
+  },
+
+  // Chat Input Bar
   chatInputBar: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -1430,19 +2143,316 @@ const styles = StyleSheet.create({
     color: '#171420',
     fontWeight: '500',
   },
-  sendMsgBtn: {
+  voiceNoteBtn: {
     width: 42,
     height: 42,
     borderRadius: 14,
-    backgroundColor: '#CBD5E1',
+    backgroundColor: '#FAF5FF',
+    borderWidth: 1,
+    borderColor: '#EDE9FE',
     justifyContent: 'center',
     alignItems: 'center',
   },
   sendMsgBtnActive: {
+    width: 42,
+    height: 42,
+    borderRadius: 14,
     backgroundColor: '#582CDB',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 
-  // Modals
+  // =========================================================================
+  // SNAPCHAT / IMMERSIVE STORY VIEWER STYLES
+  // =========================================================================
+  storyViewerContainer: {
+    flex: 1,
+    backgroundColor: '#0F0E17',
+    paddingTop: Platform.OS === 'ios' ? 44 : 20,
+    paddingBottom: 20,
+  },
+  storyProgressBarContainer: {
+    flexDirection: 'row',
+    gap: 4,
+    paddingHorizontal: 16,
+    marginBottom: 12,
+  },
+  storyProgressBarTrack: {
+    flex: 1,
+    height: 3,
+    backgroundColor: 'rgba(255, 255, 255, 0.3)',
+    borderRadius: 2,
+    overflow: 'hidden',
+  },
+  storyProgressBarFill: {
+    height: '100%',
+    backgroundColor: '#FFFFFF',
+    borderRadius: 2,
+  },
+  storyTopProfileBar: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    marginBottom: 16,
+  },
+  storyProfileLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+  },
+  storyTopAvatar: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    borderWidth: 1.5,
+    borderColor: '#FFFFFF',
+  },
+  storyTopCreatorName: {
+    fontSize: 14,
+    fontWeight: '800',
+    color: '#FFFFFF',
+  },
+  storyTopTimeAgo: {
+    fontSize: 11,
+    color: 'rgba(255, 255, 255, 0.7)',
+  },
+  storyTopStreakBadge: {
+    backgroundColor: '#FEF3C7',
+    paddingVertical: 2,
+    paddingHorizontal: 8,
+    borderRadius: 6,
+  },
+  storyTopStreakText: {
+    fontSize: 10,
+    fontWeight: '900',
+    color: '#B45309',
+  },
+  storyCloseBtn: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  storyCloseBtnText: {
+    fontSize: 14,
+    fontWeight: '800',
+    color: '#FFFFFF',
+  },
+  storyMainBody: {
+    flex: 1,
+    position: 'relative',
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+  },
+  storyTapZoneLeft: {
+    position: 'absolute',
+    left: 0,
+    top: 0,
+    bottom: 0,
+    width: '35%',
+    zIndex: 10,
+  },
+  storyTapZoneRight: {
+    position: 'absolute',
+    right: 0,
+    top: 0,
+    bottom: 0,
+    width: '65%',
+    zIndex: 10,
+  },
+  storyCardContent: {
+    width: '100%',
+    backgroundColor: 'rgba(255, 255, 255, 0.08)',
+    borderRadius: 24,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.15)',
+    padding: 20,
+    alignItems: 'center',
+  },
+  storySlidePillBadge: {
+    backgroundColor: '#582CDB',
+    paddingVertical: 5,
+    paddingHorizontal: 12,
+    borderRadius: 100,
+    marginBottom: 14,
+  },
+  storySlidePillText: {
+    fontSize: 10.5,
+    fontWeight: '900',
+    color: '#FFFFFF',
+    letterSpacing: 0.6,
+  },
+  storySlideTitle: {
+    fontSize: 20,
+    fontWeight: '900',
+    color: '#FFFFFF',
+    textAlign: 'center',
+    marginBottom: 4,
+  },
+  storySlideSubtitle: {
+    fontSize: 13,
+    color: 'rgba(255, 255, 255, 0.7)',
+    textAlign: 'center',
+    marginBottom: 16,
+  },
+  storyQuoteCard: {
+    backgroundColor: 'rgba(255, 255, 255, 0.12)',
+    borderRadius: 18,
+    padding: 16,
+    width: '100%',
+    marginBottom: 16,
+  },
+  storyQuoteIcon: {
+    fontSize: 28,
+    color: '#A78BFA',
+    lineHeight: 28,
+  },
+  storyQuoteText: {
+    fontSize: 14.5,
+    color: '#FFFFFF',
+    lineHeight: 22,
+    fontWeight: '500',
+  },
+  storyStatsRow: {
+    flexDirection: 'row',
+    gap: 8,
+    width: '100%',
+  },
+  storyStatBox: {
+    flex: 1,
+    backgroundColor: 'rgba(255, 255, 255, 0.06)',
+    borderRadius: 12,
+    paddingVertical: 10,
+    alignItems: 'center',
+  },
+  storyStatVal: {
+    fontSize: 13,
+    fontWeight: '800',
+    color: '#FFFFFF',
+  },
+  storyStatLabel: {
+    fontSize: 9.5,
+    color: 'rgba(255, 255, 255, 0.6)',
+    marginTop: 2,
+  },
+
+  // Highlights in Story
+  highlightsList: {
+    width: '100%',
+    gap: 8,
+  },
+  highlightItemCard: {
+    backgroundColor: 'rgba(255, 255, 255, 0.12)',
+    borderRadius: 14,
+    padding: 12,
+  },
+  highlightItemTop: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 4,
+  },
+  highlightItemPlatform: {
+    fontSize: 11,
+    fontWeight: '800',
+    color: '#DDD6FE',
+  },
+  highlightItemViews: {
+    fontSize: 10.5,
+    fontWeight: '700',
+    color: '#FDE68A',
+  },
+  highlightItemTitle: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: '#FFFFFF',
+    lineHeight: 18,
+  },
+
+  // Milestone in Story
+  milestoneTrophyCircle: {
+    width: 76,
+    height: 76,
+    borderRadius: 38,
+    backgroundColor: 'rgba(255, 255, 255, 0.15)',
+    borderWidth: 2,
+    borderColor: '#F59E0B',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 14,
+  },
+  milestoneXpPill: {
+    backgroundColor: '#FEF3C7',
+    paddingVertical: 6,
+    paddingHorizontal: 14,
+    borderRadius: 100,
+    marginTop: 10,
+  },
+  milestoneXpText: {
+    fontSize: 12,
+    fontWeight: '900',
+    color: '#B45309',
+  },
+
+  // Story Bottom Bar
+  storyBottomBar: {
+    paddingHorizontal: 16,
+    paddingTop: 10,
+  },
+  floatingEmojiText: {
+    position: 'absolute',
+    bottom: 80,
+    fontSize: 32,
+    zIndex: 100,
+  },
+  storyReactionPillsRow: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    gap: 12,
+    marginBottom: 12,
+  },
+  storyReactionCircle: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: 'rgba(255, 255, 255, 0.18)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  storyReplyInputRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  storyReplyInput: {
+    flex: 1,
+    height: 44,
+    backgroundColor: 'rgba(255, 255, 255, 0.15)',
+    borderRadius: 22,
+    paddingHorizontal: 16,
+    fontSize: 13.5,
+    color: '#FFFFFF',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.2)',
+  },
+  storyReplySendBtn: {
+    backgroundColor: '#582CDB',
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    borderRadius: 20,
+  },
+  storyReplySendBtnText: {
+    fontSize: 13,
+    fontWeight: '800',
+    color: '#FFFFFF',
+  },
+
+  // =========================================================================
+  // MODAL STYLES (PLUS BUTTON: CONNECT WITH MORE CREATORS)
+  // =========================================================================
   modalOverlay: {
     flex: 1,
     backgroundColor: 'rgba(23, 20, 32, 0.65)',
@@ -1525,7 +2535,7 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
   discoverConnectBtn: {
-    backgroundColor: '#582CDB',
+    backgroundColor: '#EDE9FE',
     paddingVertical: 6,
     paddingHorizontal: 12,
     borderRadius: 10,
@@ -1533,19 +2543,28 @@ const styles = StyleSheet.create({
   discoverConnectBtnText: {
     fontSize: 11.5,
     fontWeight: '900',
-    color: '#FFFFFF',
+    color: '#582CDB',
   },
-  modalFullBtn: {
-    backgroundColor: '#582CDB',
-    height: 44,
-    borderRadius: 12,
+  connectToCreateBtn: {
+    height: 48,
+    borderRadius: 14,
+    overflow: 'hidden',
+    marginTop: 12,
+    shadowColor: '#582CDB',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.25,
+    shadowRadius: 10,
+    elevation: 4,
+  },
+  connectGradient: {
+    flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    marginTop: 10,
   },
-  modalFullBtnText: {
-    fontSize: 13.5,
-    fontWeight: '800',
+  connectBtnText: {
+    fontSize: 14,
+    fontWeight: '900',
     color: '#FFFFFF',
+    letterSpacing: 0.4,
   },
 });

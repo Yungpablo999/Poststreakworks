@@ -613,6 +613,7 @@ export default function App() {
             onLogout={handleLogout}
             onOpenSchedule={() => navigateTo('schedule')}
             onOpenJarvisPro={() => navigateTo('jarvis-pro')}
+            onOpenCreate={() => navigateTo('create')}
             onOpenPostComposer={(prefillTitle) => {
               if (prefillTitle) setComposerIdeaTitle(prefillTitle);
               navigateTo('composer');
