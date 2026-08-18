@@ -1715,18 +1715,19 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
                   ))}
                 </View>
 
-                {/* Swipeable ScrollView with Real-Time Instant Scroll Tracking */}
+                {/* Swipeable ScrollView with Real-Time Instant Natural Swipe Tracking */}
                 <ScrollView
                   ref={monthPagerRef}
                   horizontal
-                  pagingEnabled
+                  pagingEnabled={true}
+                  directionalLockEnabled={true}
+                  nestedScrollEnabled={true}
                   showsHorizontalScrollIndicator={false}
                   onScroll={handleScroll}
+                  onMomentumScrollEnd={handleScroll}
                   scrollEventThrottle={16}
-                  decelerationRate="fast"
-                  snapToInterval={pagerWidth}
-                  snapToAlignment="center"
-                  bounces={false}
+                  bounces={true}
+                  keyboardShouldPersistTaps="handled"
                   style={{ width: pagerWidth, overflow: 'hidden' }}
                   contentContainerStyle={styles.pagerContent}
                 >
