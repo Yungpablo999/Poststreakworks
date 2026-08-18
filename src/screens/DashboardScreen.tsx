@@ -1569,12 +1569,7 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
                 styles.calendarModalCard,
                 { transform: [{ scale: calendarModalScale }] },
               ]}
-              onLayout={(e) => {
-                const width = e.nativeEvent.layout.width - 36;
-                if (width > 0 && width !== pagerWidth) {
-                  setPagerWidth(width);
-                }
-              }}
+
             >
               {/* Modal Header */}
               <View style={styles.calendarModalHeader}>
@@ -1658,7 +1653,15 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
               )}
 
               {/* SWIPEABLE HORIZONTAL PAGER FOR ALL MONTHS */}
-              <View style={styles.pagerOuterContainer}>
+              <View
+                style={styles.pagerOuterContainer}
+                onLayout={(e) => {
+                  const measuredWidth = Math.floor(e.nativeEvent.layout.width - 16);
+                  if (measuredWidth > 0 && Math.abs(measuredWidth - pagerWidth) > 1) {
+                    setPagerWidth(measuredWidth);
+                  }
+                }}
+              >
                 {/* Month Navigator Header with ‹ and › buttons */}
                 <View style={styles.monthNavHeader}>
                   <Pressable
@@ -1704,7 +1707,7 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
                 </View>
 
                 {/* Day of Week Headers */}
-                <View style={styles.calendarDayNamesRow}>
+                <View style={[styles.calendarDayNamesRow, { width: pagerWidth }]}>
                   {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((dayName, dIdx) => (
                     <Text key={`dn_${dIdx}`} style={styles.calendarDayNameText}>
                       {dayName}
@@ -1720,6 +1723,11 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
                   showsHorizontalScrollIndicator={false}
                   onScroll={handleScroll}
                   scrollEventThrottle={16}
+                  decelerationRate="fast"
+                  snapToInterval={pagerWidth}
+                  snapToAlignment="center"
+                  bounces={false}
+                  style={{ width: pagerWidth, overflow: 'hidden' }}
                   contentContainerStyle={styles.pagerContent}
                 >
                   {CALENDAR_DATA_CHRONOLOGICAL.map((month) => {
@@ -3432,6 +3440,7 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     paddingHorizontal: 8,
     marginBottom: 10,
+    overflow: 'hidden',
   },
   monthNavHeader: {
     flexDirection: 'row',
@@ -3479,29 +3488,30 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     marginBottom: 8,
-    paddingHorizontal: 4,
+    paddingHorizontal: 0,
   },
   calendarDayNameText: {
     fontSize: 11,
     fontWeight: '700',
     color: '#9E97AA',
-    width: 36,
+    width: '14.28%',
     textAlign: 'center',
   },
   pagerContent: {
     flexDirection: 'row',
   },
   monthPageCard: {
-    paddingHorizontal: 2,
+    paddingHorizontal: 0,
+    overflow: 'hidden',
   },
   calendarMonthGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    justifyContent: 'space-between',
+    justifyContent: 'flex-start',
     rowGap: 6,
   },
   calendarCell: {
-    width: 38,
+    width: '13.4%',
     height: 42,
     borderRadius: 10,
     backgroundColor: 'rgba(250, 248, 255, 0.8)',
@@ -3509,10 +3519,12 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(237, 232, 252, 0.85)',
     justifyContent: 'center',
     alignItems: 'center',
+    marginHorizontal: '0.44%',
   },
   calendarCellEmpty: {
-    width: 38,
+    width: '13.4%',
     height: 42,
+    marginHorizontal: '0.44%',
   },
   calendarCellCompleted: {
     backgroundColor: '#582CDB',
