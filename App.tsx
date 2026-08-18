@@ -501,6 +501,7 @@ export default function App() {
             onOpenSchedule={() => navigateTo('schedule')}
             onOpenMessages={() => navigateTo('messages')}
             onOpenJarvisPro={() => navigateTo('jarvis-pro')}
+            onOpenEarnings={() => navigateTo('earnings')}
             onNavigateTab={(tab: TabType) => {
               if (tab === 'home') {
                 navigateTo('dashboard');
@@ -726,7 +727,7 @@ export default function App() {
         
         {currentScreen === 'earnings' && (
           <EarningsScreen
-            onBack={() => navigateTo('growth')}
+            onBack={() => navigateTo(previousScreen ? previousScreen : 'growth')}
             onLogout={handleLogout}
             onOpenMessages={() => navigateTo('messages')}
             onOpenSchedule={() => navigateTo('schedule')}
