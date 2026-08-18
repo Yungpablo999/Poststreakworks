@@ -387,6 +387,12 @@ export const CollabIdeaScreen: React.FC<CollabIdeaScreenProps> = ({
   const modalPopScale = useRef(new Animated.Value(0.9)).current;
   const rateMeterWidthAnim = useRef(new Animated.Value(98)).current;
   const planShuffleAnim = useRef(new Animated.Value(1)).current;
+  const reloadSpinAnim = useRef(new Animated.Value(0)).current;
+
+  const reloadSpinInterpolate = reloadSpinAnim.interpolate({
+    inputRange: [0, 1],
+    outputRange: ['0deg', '360deg'],
+  });
 
   const currentPublishingSlot =
     PUBLISHING_SLOTS.find((s) => s.id === selectedPublishingSlotId) || PUBLISHING_SLOTS[4];
@@ -427,7 +433,13 @@ export const CollabIdeaScreen: React.FC<CollabIdeaScreenProps> = ({
     if (Platform.OS !== 'web') {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     }
-    // Animate transition
+    reloadSpinAnim.setValue(0);
+    Animated.timing(reloadSpinAnim, {
+      toValue: 1,
+      duration: 350,
+      useNativeDriver: true,
+    }).start();
+
     Animated.sequence([
       Animated.timing(planShuffleAnim, {
         toValue: 0.94,
@@ -691,10 +703,11 @@ export const CollabIdeaScreen: React.FC<CollabIdeaScreenProps> = ({
                 </View>
               </View>
 
-              {/* PRIMARY 'DO ANOTHER PLAN' SHUFFLE BUTTON */}
+              {/* PRIMARY RELOAD PLAN BUTTON */}
               <Pressable
                 style={({ pressed }) => [styles.doAnotherPlanTopBtn, pressed && styles.btnPressed]}
                 onPress={handleShuffleAnotherPlan}
+                hitSlop={8}
               >
                 <LinearGradient
                   colors={['#7C3AED', '#582CDB']}
@@ -702,7 +715,38 @@ export const CollabIdeaScreen: React.FC<CollabIdeaScreenProps> = ({
                   end={{ x: 1, y: 0 }}
                   style={styles.doAnotherPlanGradient}
                 >
-                  <Text style={styles.doAnotherPlanTopText}>🎲 Another Plan</Text>
+                  <Animated.View style={{ transform: [{ rotate: reloadSpinInterpolate }] }}>
+                    <Svg width={15} height={15} viewBox="0 0 24 24" fill="none">
+                      <Path
+                        d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"
+                        stroke="#FFFFFF"
+                        strokeWidth="2.5"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                      <Path
+                        d="M3 3v5h5"
+                        stroke="#FFFFFF"
+                        strokeWidth="2.5"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                      <Path
+                        d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"
+                        stroke="#FFFFFF"
+                        strokeWidth="2.5"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                      <Path
+                        d="M16 21h5v-5"
+                        stroke="#FFFFFF"
+                        strokeWidth="2.5"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                    </Svg>
+                  </Animated.View>
                 </LinearGradient>
               </Pressable>
             </View>
@@ -724,7 +768,38 @@ export const CollabIdeaScreen: React.FC<CollabIdeaScreenProps> = ({
                     onPress={handleShuffleAnotherPlan}
                     hitSlop={8}
                   >
-                    <Text style={styles.cardCycleBtnText}>🔄 Next Plan</Text>
+                    <Animated.View style={{ transform: [{ rotate: reloadSpinInterpolate }] }}>
+                      <Svg width={14} height={14} viewBox="0 0 24 24" fill="none">
+                        <Path
+                          d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"
+                          stroke="#582CDB"
+                          strokeWidth="2.5"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                        <Path
+                          d="M3 3v5h5"
+                          stroke="#582CDB"
+                          strokeWidth="2.5"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                        <Path
+                          d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"
+                          stroke="#582CDB"
+                          strokeWidth="2.5"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                        <Path
+                          d="M16 21h5v-5"
+                          stroke="#582CDB"
+                          strokeWidth="2.5"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                      </Svg>
+                    </Animated.View>
                   </Pressable>
                 </View>
                 <Text style={styles.overviewDesc}>{collabDesc}</Text>
@@ -1539,7 +1614,9 @@ const styles = StyleSheet.create({
     letterSpacing: 0.5,
   },
   doAnotherPlanTopBtn: {
-    borderRadius: 100,
+    width: 30,
+    height: 30,
+    borderRadius: 15,
     overflow: 'hidden',
     shadowColor: '#582CDB',
     shadowOffset: { width: 0, height: 2 },
@@ -1548,16 +1625,9 @@ const styles = StyleSheet.create({
     elevation: 2,
   },
   doAnotherPlanGradient: {
-    paddingVertical: 5.5,
-    paddingHorizontal: 12,
+    flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-  },
-  doAnotherPlanTopText: {
-    fontSize: 11,
-    fontWeight: '900',
-    color: '#FFFFFF',
-    letterSpacing: 0.3,
   },
 
   mainTitle: {
@@ -1603,17 +1673,14 @@ const styles = StyleSheet.create({
     color: '#171420',
   },
   cardCycleBtn: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
     backgroundColor: '#FAF5FF',
     borderWidth: 1,
     borderColor: '#DDD6FE',
-    paddingVertical: 3.5,
-    paddingHorizontal: 8,
-    borderRadius: 8,
-  },
-  cardCycleBtnText: {
-    fontSize: 10.5,
-    fontWeight: '800',
-    color: '#582CDB',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   overviewDesc: {
     fontSize: 13,

@@ -406,12 +406,23 @@ export const MessagesScreen: React.FC<MessagesScreenProps> = ({
   const [selectedCategory, setSelectedCategory] = useState<'all' | 'buddies' | 'collabs' | 'jarvis'>('all');
   const [threads, setThreads] = useState<ConversationThread[]>(INITIAL_CONVERSATIONS);
   const [chatPlanIndex, setChatPlanIndex] = useState(0);
+  const reloadSpinAnim = useRef(new Animated.Value(0)).current;
   const currentChatPlan = COLLAB_PLANS[chatPlanIndex];
+  const reloadSpinInterpolate = reloadSpinAnim.interpolate({
+    inputRange: [0, 1],
+    outputRange: ['0deg', '360deg'],
+  });
 
   const handleShuffleChatPlan = () => {
     if (Platform.OS !== 'web') {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     }
+    reloadSpinAnim.setValue(0);
+    Animated.timing(reloadSpinAnim, {
+      toValue: 1,
+      duration: 350,
+      useNativeDriver: true,
+    }).start();
     const nextIdx = (chatPlanIndex + 1) % COLLAB_PLANS.length;
     setChatPlanIndex(nextIdx);
   };
@@ -1028,13 +1039,44 @@ export const MessagesScreen: React.FC<MessagesScreenProps> = ({
                 </Pressable>
 
                 <View style={styles.collabIdeaActionsRight}>
-                  {/* DO ANOTHER PLAN BUTTON */}
+                  {/* RELOAD ICON BUTTON */}
                   <Pressable
-                    style={({ pressed }) => [styles.collabIdeaShuffleBtn, pressed && styles.btnPressed]}
+                    style={({ pressed }) => [styles.collabIdeaReloadBtn, pressed && styles.btnPressed]}
                     onPress={handleShuffleChatPlan}
-                    hitSlop={6}
+                    hitSlop={8}
                   >
-                    <Text style={styles.collabIdeaShuffleBtnText}>🎲 Another Plan</Text>
+                    <Animated.View style={{ transform: [{ rotate: reloadSpinInterpolate }] }}>
+                      <Svg width={15} height={15} viewBox="0 0 24 24" fill="none">
+                        <Path
+                          d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"
+                          stroke="#6D28D9"
+                          strokeWidth="2.5"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                        <Path
+                          d="M3 3v5h5"
+                          stroke="#6D28D9"
+                          strokeWidth="2.5"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                        <Path
+                          d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"
+                          stroke="#6D28D9"
+                          strokeWidth="2.5"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                        <Path
+                          d="M16 21h5v-5"
+                          stroke="#6D28D9"
+                          strokeWidth="2.5"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                      </Svg>
+                    </Animated.View>
                   </Pressable>
 
                   {/* OPEN IDEA BUTTON */}
@@ -2087,18 +2129,15 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 6,
   },
-  collabIdeaShuffleBtn: {
+  collabIdeaReloadBtn: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
     backgroundColor: '#EDE9FE',
     borderWidth: 1,
     borderColor: '#DDD6FE',
-    paddingVertical: 5,
-    paddingHorizontal: 8,
-    borderRadius: 8,
-  },
-  collabIdeaShuffleBtnText: {
-    fontSize: 10.5,
-    fontWeight: '800',
-    color: '#6D28D9',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   collabIdeaOpenBtn: {
     backgroundColor: '#FAF5FF',
