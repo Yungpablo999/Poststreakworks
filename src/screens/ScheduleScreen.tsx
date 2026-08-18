@@ -25,6 +25,7 @@ interface ScheduleScreenProps {
   onLogout?: () => void;
   onNavigateTab?: (tab: TabType) => void;
   onOpenJarvisPro?: () => void;
+  onOpenCreateIdea?: () => void;
 }
 
 interface ScheduledPost {
@@ -73,6 +74,7 @@ export const ScheduleScreen: React.FC<ScheduleScreenProps> = ({
   onLogout,
   onNavigateTab,
   onOpenJarvisPro,
+  onOpenCreateIdea,
 }) => {
   const [activeTab, setActiveTab] = useState<TabType>('create');
   const [selectedDay, setSelectedDay] = useState<number>(15);
@@ -374,8 +376,14 @@ export const ScheduleScreen: React.FC<ScheduleScreenProps> = ({
               <Pressable
                 style={({ pressed }) => [styles.createFromIdeaBtn, pressed && styles.btnPressed]}
                 onPress={() => {
-                  triggerModalPop();
-                  setShowIdeaModal(true);
+                  if (Platform.OS !== 'web') {
+                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                  }
+                  if (onOpenCreateIdea) {
+                    onOpenCreateIdea();
+                  } else if (onNavigateTab) {
+                    onNavigateTab('create');
+                  }
                 }}
               >
                 <Text style={styles.createFromIdeaBtnText}>Create From Idea</Text>

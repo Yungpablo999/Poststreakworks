@@ -308,6 +308,7 @@ export default function App() {
             onBack={() => navigateTo(previousScreen ? previousScreen : 'dashboard')}
             onLogout={handleLogout}
             onOpenJarvisPro={() => navigateTo('jarvis-pro')}
+            onOpenCreateIdea={() => navigateTo('create')}
             onNavigateTab={(tab: TabType) => {
               if (tab === 'home') {
                 navigateTo('dashboard');
