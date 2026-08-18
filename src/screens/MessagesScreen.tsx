@@ -261,6 +261,39 @@ const CREATOR_STORIES: CreatorStory[] = [
       },
     ],
   },
+  {
+    id: 'jarvis_story',
+    name: 'Jarvis AI',
+    handle: '@jarvis.ai',
+    niche: 'AI Assistant',
+    avatar: require('../../assets/images/jarvis-core-flame.png'),
+    streak: 100,
+    isOnline: true,
+    statusText: 'AI Active ⚡',
+    slides: [
+      {
+        id: 's_jarvis_1',
+        type: 'daily_story',
+        title: 'Jarvis Daily Creator Intel ⚡',
+        subtitle: 'Algorithm analysis for today',
+        timeAgo: 'Just now',
+        quote: 'Today\'s top retention pattern: 3-part curiosity hooks with instant payoff retain 78% more viewers at 15 seconds.',
+        badge: '⚡ JARVIS CREATOR ASSISTANT',
+      },
+      {
+        id: 's_jarvis_2',
+        type: 'highlights',
+        title: 'Top AI Viral Blueprints',
+        subtitle: 'High retention collab formats',
+        timeAgo: '1h ago',
+        highlights: [
+          { title: 'The 3-Second Retention Hook Formula', platform: 'TikTok', views: '142k', saves: '18.4k' },
+          { title: 'Behind-the-Scenes Creator Setup Swap', platform: 'Reels', views: '98.5k', saves: '12.1k' },
+          { title: '14-Day Accountability Duo Challenge', platform: 'Shorts', views: '76.8k', saves: '9.3k' },
+        ],
+      },
+    ],
+  },
 ];
 
 const INITIAL_CONVERSATIONS: ConversationThread[] = [
@@ -373,7 +406,7 @@ const INITIAL_CONVERSATIONS: ConversationThread[] = [
     name: 'Jarvis Creative Assistant',
     handle: '@jarvis.ai',
     niche: 'AI Co-Pilot',
-    avatar: require('../../assets/images/jarvis-ghost-clean.png'),
+    avatar: require('../../assets/images/jarvis-core-flame.png'),
     streak: 100,
     isOnline: true,
     lastMessage: 'Streak Alert: 1 post needed today to protect your 47-day streak and earn +50 XP.',
