@@ -245,8 +245,8 @@ export default function App() {
 
   return (
     <SafeAreaProvider>
-      <View style={styles.container}>
-        <StatusBar style="dark" />
+      <View style={[styles.container, userProfile.isDarkMode && styles.containerDark]}>
+        <StatusBar style={userProfile.isDarkMode ? 'light' : 'dark'} />
 
         {currentScreen === 'welcome' && (
           <WelcomeScreen
@@ -758,5 +758,8 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#FAF8F5',
+  },
+  containerDark: {
+    backgroundColor: '#0F0D15',
   },
 });

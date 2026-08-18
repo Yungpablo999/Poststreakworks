@@ -11,7 +11,6 @@ import {
   Image,
   TextInput,
   Dimensions,
-  Switch,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as Haptics from 'expo-haptics';
@@ -155,6 +154,93 @@ export const XTwitterRealIcon = ({ size = 18 }: { size?: number }) => (
   </Svg>
 );
 
+// CUSTOM SIGNATURE PURPLE & GOLD TOGGLE SWITCH
+interface PurpleGoldSwitchProps {
+  value: boolean;
+  onValueChange: (val: boolean) => void;
+}
+
+export const PurpleGoldSwitch: React.FC<PurpleGoldSwitchProps> = ({
+  value,
+  onValueChange,
+}) => {
+  const switchTranslate = useRef(new Animated.Value(value ? 20 : 2)).current;
+
+  useEffect(() => {
+    Animated.spring(switchTranslate, {
+      toValue: value ? 20 : 2,
+      tension: 65,
+      friction: 8,
+      useNativeDriver: true,
+    }).start();
+  }, [value]);
+
+  const handleToggle = () => {
+    if (Platform.OS !== 'web') {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    }
+    onValueChange(!value);
+  };
+
+  return (
+    <Pressable
+      onPress={handleToggle}
+      style={[
+        switchStyles.switchTrack,
+        value ? switchStyles.switchTrackActive : switchStyles.switchTrackInactive,
+      ]}
+      hitSlop={8}
+    >
+      <Animated.View
+        style={[
+          switchStyles.switchThumb,
+          value ? switchStyles.switchThumbActive : switchStyles.switchThumbInactive,
+          { transform: [{ translateX: switchTranslate }] },
+        ]}
+      />
+    </Pressable>
+  );
+};
+
+const switchStyles = StyleSheet.create({
+  switchTrack: {
+    width: 48,
+    height: 28,
+    borderRadius: 14,
+    justifyContent: 'center',
+  },
+  switchTrackActive: {
+    backgroundColor: '#582CDB', // Royal Purple
+    borderWidth: 1.5,
+    borderColor: '#7C3AED',
+  },
+  switchTrackInactive: {
+    backgroundColor: '#E2E8F0', // Neutral Slate
+    borderWidth: 1.5,
+    borderColor: '#CBD5E1',
+  },
+  switchThumb: {
+    width: 22,
+    height: 22,
+    borderRadius: 11,
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.18,
+    shadowRadius: 3,
+    elevation: 3,
+  },
+  switchThumbActive: {
+    backgroundColor: '#F59E0B', // Glowing Amber Gold
+    borderWidth: 1.5,
+    borderColor: '#FEF08A',
+  },
+  switchThumbInactive: {
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+  },
+});
+
 export interface UserProfileModalProps {
   visible: boolean;
   onClose: () => void;
@@ -217,6 +303,13 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
     }
   }, [visible]);
 
+  // Sync if initialProfile changes
+  useEffect(() => {
+    if (initialProfile?.isDarkMode !== undefined) {
+      setIsDarkMode(initialProfile.isDarkMode);
+    }
+  }, [initialProfile?.isDarkMode]);
+
   const showToast = (msg: string) => {
     setToastMessage(msg);
     toastFade.setValue(0);
@@ -262,7 +355,6 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
       };
       input.click();
     } else {
-      // Toggle to high-res creator portrait as uploaded photo
       const sampleAvatars = [
         require('../../assets/images/elena-avatar.jpg'),
         require('../../assets/images/amara-avatar.jpg'),
@@ -286,6 +378,43 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
       }
     } else {
       setSelectedNiches([...selectedNiches, item]);
+    }
+  };
+
+  const handleToggleDarkMode = (val: boolean) => {
+    setIsDarkMode(val);
+    showToast(val ? '🌙 Dark Mode Activated' : '☀️ Light Mode Activated');
+
+    // Instantly sync theme globally
+    const currentAvatar =
+      CREATOR_AVATARS.find((a) => a.id === selectedAvatarId) || CREATOR_AVATARS[0];
+
+    const sourceToSave = customAvatarUri
+      ? customAvatarUri.startsWith('data:') || customAvatarUri.startsWith('http')
+        ? { uri: customAvatarUri }
+        : currentAvatar.source
+      : currentAvatar.source;
+
+    if (onSaveProfile) {
+      onSaveProfile({
+        name: name.trim() || 'Pablo',
+        handle: handle.startsWith('@') ? handle.trim() : `@${handle.trim()}`,
+        bio: bio.trim(),
+        niche: niche.trim(),
+        avatarId: selectedAvatarId,
+        avatarSource: sourceToSave,
+        customAvatarUri: customAvatarUri || undefined,
+        streakCount: initialProfile?.streakCount || 47,
+        level: initialProfile?.level || 5,
+        xp: initialProfile?.xp || 3450,
+        partnersCount: initialProfile?.partnersCount || 12,
+        tiktokHandle: tiktokHandle.trim(),
+        instagramHandle: instagramHandle.trim(),
+        youtubeHandle: youtubeHandle.trim(),
+        xHandle: xHandle.trim(),
+        niches: selectedNiches,
+        isDarkMode: val,
+      });
     }
   };
 
@@ -346,19 +475,25 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
     >
       <View style={styles.overlay}>
         <Animated.View
-          style={[styles.modalCard, { transform: [{ scale: modalScale }] }]}
+          style={[
+            styles.modalCard,
+            isDarkMode && styles.modalCardDark,
+            { transform: [{ scale: modalScale }] },
+          ]}
         >
           {/* TOP MODAL HEADER: FREE BADGE */}
           <View style={styles.modalHeaderRow}>
             <View style={{ flex: 1 }}>
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-                <Text style={styles.modalTitle}>Creator Passport</Text>
+                <Text style={[styles.modalTitle, isDarkMode && styles.textWhite]}>
+                  Creator Passport
+                </Text>
                 {/* USER SPECIFIED: FREE BADGE (NOT PRO) */}
                 <View style={styles.freeBadgePill}>
                   <Text style={styles.freeBadgeText}>FREE</Text>
                 </View>
               </View>
-              <Text style={styles.modalSubtitle}>
+              <Text style={[styles.modalSubtitle, isDarkMode && styles.textMutedDark]}>
                 Manage your free creator profile, picture &amp; socials
               </Text>
             </View>
@@ -370,17 +505,21 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
                 }
                 onClose();
               }}
-              style={styles.closeBtn}
+              style={[styles.closeBtn, isDarkMode && styles.closeBtnDark]}
               hitSlop={8}
             >
-              <Text style={styles.closeBtnCross}>✕</Text>
+              <Text style={[styles.closeBtnCross, isDarkMode && styles.textWhite]}>✕</Text>
             </Pressable>
           </View>
 
           {/* SUB TABS NAVIGATION */}
-          <View style={styles.subTabsRow}>
+          <View style={[styles.subTabsRow, isDarkMode && styles.subTabsRowDark]}>
             <Pressable
-              style={[styles.subTabItem, activeSubTab === 'profile' && styles.subTabItemActive]}
+              style={[
+                styles.subTabItem,
+                activeSubTab === 'profile' &&
+                  (isDarkMode ? styles.subTabItemActiveDark : styles.subTabItemActive),
+              ]}
               onPress={() => {
                 if (Platform.OS !== 'web') {
                   Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -391,6 +530,7 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
               <Text
                 style={[
                   styles.subTabText,
+                  isDarkMode && styles.textMutedDark,
                   activeSubTab === 'profile' && styles.subTabTextActive,
                 ]}
               >
@@ -399,7 +539,11 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
             </Pressable>
 
             <Pressable
-              style={[styles.subTabItem, activeSubTab === 'socials' && styles.subTabItemActive]}
+              style={[
+                styles.subTabItem,
+                activeSubTab === 'socials' &&
+                  (isDarkMode ? styles.subTabItemActiveDark : styles.subTabItemActive),
+              ]}
               onPress={() => {
                 if (Platform.OS !== 'web') {
                   Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -410,6 +554,7 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
               <Text
                 style={[
                   styles.subTabText,
+                  isDarkMode && styles.textMutedDark,
                   activeSubTab === 'socials' && styles.subTabTextActive,
                 ]}
               >
@@ -418,7 +563,11 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
             </Pressable>
 
             <Pressable
-              style={[styles.subTabItem, activeSubTab === 'settings' && styles.subTabItemActive]}
+              style={[
+                styles.subTabItem,
+                activeSubTab === 'settings' &&
+                  (isDarkMode ? styles.subTabItemActiveDark : styles.subTabItemActive),
+              ]}
               onPress={() => {
                 if (Platform.OS !== 'web') {
                   Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -429,6 +578,7 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
               <Text
                 style={[
                   styles.subTabText,
+                  isDarkMode && styles.textMutedDark,
                   activeSubTab === 'settings' && styles.subTabTextActive,
                 ]}
               >
@@ -470,8 +620,12 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
                     </View>
                   </Pressable>
 
-                  <Text style={styles.heroNameText}>{name || 'Pablo'}</Text>
-                  <Text style={styles.heroHandleText}>{handle || '@pablocreates'}</Text>
+                  <Text style={[styles.heroNameText, isDarkMode && styles.textWhite]}>
+                    {name || 'Pablo'}
+                  </Text>
+                  <Text style={[styles.heroHandleText, isDarkMode && styles.textMutedDark]}>
+                    {handle || '@pablocreates'}
+                  </Text>
 
                   {/* USER SPECIFIED: FREE CREATOR LABEL */}
                   <View style={styles.heroStreakPill}>
@@ -484,43 +638,51 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
                 {/* 2. UPLOAD PHOTO FROM DEVICE ACTION */}
                 <View style={styles.uploadButtonsRow}>
                   <Pressable
-                    style={({ pressed }) => [styles.uploadDeviceBtn, pressed && styles.btnPressed]}
+                    style={({ pressed }) => [
+                      styles.uploadDeviceBtn,
+                      isDarkMode && styles.uploadDeviceBtnDark,
+                      pressed && styles.btnPressed,
+                    ]}
                     onPress={handleUploadPhoto}
                   >
                     <Svg width={16} height={16} viewBox="0 0 24 24" fill="none">
-                      <Rect x="3" y="3" width="18" height="18" rx="2" stroke="#582CDB" strokeWidth="2.2" />
-                      <Circle cx="8.5" cy="8.5" r="1.5" fill="#582CDB" />
-                      <Path d="M21 15L16 10L5 21" stroke="#582CDB" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
+                      <Rect x="3" y="3" width="18" height="18" rx="2" stroke={isDarkMode ? '#A78BFA' : '#582CDB'} strokeWidth="2.2" />
+                      <Circle cx="8.5" cy="8.5" r="1.5" fill={isDarkMode ? '#A78BFA' : '#582CDB'} />
+                      <Path d="M21 15L16 10L5 21" stroke={isDarkMode ? '#A78BFA' : '#582CDB'} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
                     </Svg>
-                    <Text style={styles.uploadDeviceBtnText}>Upload Photo from Device</Text>
+                    <Text style={[styles.uploadDeviceBtnText, isDarkMode && { color: '#DDD6FE' }]}>
+                      Upload Photo from Device
+                    </Text>
                   </Pressable>
                 </View>
 
                 {/* 3. STATS STRIP */}
-                <View style={styles.statsStrip}>
+                <View style={[styles.statsStrip, isDarkMode && styles.cardDarkSurface]}>
                   <View style={styles.statBox}>
-                    <Text style={styles.statVal}>47d</Text>
-                    <Text style={styles.statLabel}>Streak</Text>
+                    <Text style={[styles.statVal, isDarkMode && styles.textWhite]}>47d</Text>
+                    <Text style={[styles.statLabel, isDarkMode && styles.textMutedDark]}>Streak</Text>
                   </View>
-                  <View style={styles.statDivider} />
+                  <View style={[styles.statDivider, isDarkMode && styles.dividerDark]} />
                   <View style={styles.statBox}>
-                    <Text style={styles.statVal}>12</Text>
-                    <Text style={styles.statLabel}>Partners</Text>
+                    <Text style={[styles.statVal, isDarkMode && styles.textWhite]}>12</Text>
+                    <Text style={[styles.statLabel, isDarkMode && styles.textMutedDark]}>Partners</Text>
                   </View>
-                  <View style={styles.statDivider} />
+                  <View style={[styles.statDivider, isDarkMode && styles.dividerDark]} />
                   <View style={styles.statBox}>
-                    <Text style={styles.statVal}>3.4k</Text>
-                    <Text style={styles.statLabel}>Collab XP</Text>
+                    <Text style={[styles.statVal, isDarkMode && styles.textWhite]}>3.4k</Text>
+                    <Text style={[styles.statLabel, isDarkMode && styles.textMutedDark]}>Collab XP</Text>
                   </View>
-                  <View style={styles.statDivider} />
+                  <View style={[styles.statDivider, isDarkMode && styles.dividerDark]} />
                   <View style={styles.statBox}>
-                    <Text style={styles.statVal}>98%</Text>
-                    <Text style={styles.statLabel}>Consistency</Text>
+                    <Text style={[styles.statVal, isDarkMode && styles.textWhite]}>98%</Text>
+                    <Text style={[styles.statLabel, isDarkMode && styles.textMutedDark]}>Consistency</Text>
                   </View>
                 </View>
 
                 {/* 4. CHOOSE CREATOR AVATAR */}
-                <Text style={styles.sectionHeaderTitle}>OR SELECT A CREATOR AVATAR</Text>
+                <Text style={[styles.sectionHeaderTitle, isDarkMode && styles.textMutedDark]}>
+                  OR SELECT A CREATOR AVATAR
+                </Text>
                 <ScrollView
                   horizontal
                   showsHorizontalScrollIndicator={false}
@@ -533,6 +695,7 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
                         key={av.id}
                         style={[
                           styles.avatarItemCard,
+                          isDarkMode && styles.avatarItemCardDark,
                           isSelected && styles.avatarItemCardSelected,
                         ]}
                         onPress={() => handleSelectAvatar(av.id)}
@@ -545,6 +708,7 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
                         <Text
                           style={[
                             styles.avatarItemName,
+                            isDarkMode && styles.textMutedDark,
                             isSelected && styles.avatarItemNameSelected,
                           ]}
                           numberOfLines={1}
@@ -563,61 +727,67 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
 
                 {/* 5. EDIT DISPLAY NAME & USERNAME */}
                 <View style={styles.inputGroup}>
-                  <Text style={styles.inputLabel}>DISPLAY NAME</Text>
-                  <View style={styles.textInputBox}>
+                  <Text style={[styles.inputLabel, isDarkMode && styles.textMutedDark]}>DISPLAY NAME</Text>
+                  <View style={[styles.textInputBox, isDarkMode && styles.inputDark]}>
                     <TextInput
                       value={name}
                       onChangeText={setName}
                       placeholder="Your creator name"
-                      placeholderTextColor="#94A3B8"
-                      style={styles.textInputField}
+                      placeholderTextColor={isDarkMode ? '#64748B' : '#94A3B8'}
+                      style={[styles.textInputField, isDarkMode && styles.textWhite]}
                     />
                   </View>
                 </View>
 
                 <View style={styles.inputGroup}>
-                  <Text style={styles.inputLabel}>USERNAME / HANDLE</Text>
-                  <View style={styles.textInputBox}>
+                  <Text style={[styles.inputLabel, isDarkMode && styles.textMutedDark]}>USERNAME / HANDLE</Text>
+                  <View style={[styles.textInputBox, isDarkMode && styles.inputDark]}>
                     <TextInput
                       value={handle}
                       onChangeText={setHandle}
                       placeholder="@handle"
-                      placeholderTextColor="#94A3B8"
+                      placeholderTextColor={isDarkMode ? '#64748B' : '#94A3B8'}
                       autoCapitalize="none"
-                      style={styles.textInputField}
+                      style={[styles.textInputField, isDarkMode && styles.textWhite]}
                     />
                   </View>
                 </View>
 
                 <View style={styles.inputGroup}>
-                  <Text style={styles.inputLabel}>NICHE &amp; LOCATION</Text>
-                  <View style={styles.textInputBox}>
+                  <Text style={[styles.inputLabel, isDarkMode && styles.textMutedDark]}>NICHE &amp; LOCATION</Text>
+                  <View style={[styles.textInputBox, isDarkMode && styles.inputDark]}>
                     <TextInput
                       value={niche}
                       onChangeText={setNiche}
                       placeholder="e.g. Tech & Lifestyle Creator • Lagos"
-                      placeholderTextColor="#94A3B8"
-                      style={styles.textInputField}
+                      placeholderTextColor={isDarkMode ? '#64748B' : '#94A3B8'}
+                      style={[styles.textInputField, isDarkMode && styles.textWhite]}
                     />
                   </View>
                 </View>
 
                 <View style={styles.inputGroup}>
-                  <Text style={styles.inputLabel}>CREATOR BIO / MOTTO</Text>
-                  <View style={[styles.textInputBox, { height: 72 }]}>
+                  <Text style={[styles.inputLabel, isDarkMode && styles.textMutedDark]}>CREATOR BIO / MOTTO</Text>
+                  <View style={[styles.textInputBox, isDarkMode && styles.inputDark, { height: 72 }]}>
                     <TextInput
                       value={bio}
                       onChangeText={setBio}
                       placeholder="Share what you create..."
-                      placeholderTextColor="#94A3B8"
+                      placeholderTextColor={isDarkMode ? '#64748B' : '#94A3B8'}
                       multiline
-                      style={[styles.textInputField, { height: 60, textAlignVertical: 'top' }]}
+                      style={[
+                        styles.textInputField,
+                        isDarkMode && styles.textWhite,
+                        { height: 60, textAlignVertical: 'top' },
+                      ]}
                     />
                   </View>
                 </View>
 
                 {/* 6. TOP CREATOR NICHES */}
-                <Text style={styles.sectionHeaderTitle}>CREATOR CATEGORIES &amp; NICHES</Text>
+                <Text style={[styles.sectionHeaderTitle, isDarkMode && styles.textMutedDark]}>
+                  CREATOR CATEGORIES &amp; NICHES
+                </Text>
                 <View style={styles.nichesWrapRow}>
                   {ALL_NICHES.map((n) => {
                     const isChecked = selectedNiches.includes(n);
@@ -627,12 +797,14 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
                         onPress={() => handleToggleNiche(n)}
                         style={[
                           styles.nicheChip,
+                          isDarkMode && styles.nicheChipDark,
                           isChecked && styles.nicheChipActive,
                         ]}
                       >
                         <Text
                           style={[
                             styles.nicheChipText,
+                            isDarkMode && styles.textMutedDark,
                             isChecked && styles.nicheChipTextActive,
                           ]}
                         >
@@ -648,223 +820,208 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
             {/* TAB 2: CONNECTED SOCIALS (WITH AUTHENTIC REAL BRAND ICONS) */}
             {activeSubTab === 'socials' && (
               <View>
-                <Text style={styles.sectionHeaderTitle}>CONNECTED PLATFORMS</Text>
-                <Text style={styles.tabSubDescription}>
+                <Text style={[styles.sectionHeaderTitle, isDarkMode && styles.textMutedDark]}>
+                  CONNECTED PLATFORMS
+                </Text>
+                <Text style={[styles.tabSubDescription, isDarkMode && styles.textMutedDark]}>
                   Link your creator handles to verify stats for collaborations and challenges.
                 </Text>
 
                 {/* 1. TikTok (Official Icon) */}
-                <View style={styles.socialCard}>
+                <View style={[styles.socialCard, isDarkMode && styles.cardDarkSurface]}>
                   <View style={styles.socialHeaderRow}>
                     <View style={[styles.socialPlatformBadge, { backgroundColor: '#F1F5F9' }]}>
                       <TikTokRealIcon size={20} />
                     </View>
                     <View style={{ flex: 1 }}>
-                      <Text style={styles.socialPlatformTitle}>TikTok</Text>
-                      <Text style={styles.socialPlatformSub}>Sync video hooks &amp; viral reach</Text>
+                      <Text style={[styles.socialPlatformTitle, isDarkMode && styles.textWhite]}>
+                        TikTok
+                      </Text>
+                      <Text style={[styles.socialPlatformSub, isDarkMode && styles.textMutedDark]}>
+                        Sync video hooks &amp; viral reach
+                      </Text>
                     </View>
                     <View style={styles.connectedPill}>
                       <Text style={styles.connectedPillText}>CONNECTED</Text>
                     </View>
                   </View>
-                  <View style={styles.socialInputBox}>
+                  <View style={[styles.socialInputBox, isDarkMode && styles.inputDark]}>
                     <TextInput
                       value={tiktokHandle}
                       onChangeText={setTiktokHandle}
                       placeholder="@tiktok_handle"
-                      placeholderTextColor="#94A3B8"
+                      placeholderTextColor={isDarkMode ? '#64748B' : '#94A3B8'}
                       autoCapitalize="none"
-                      style={styles.textInputField}
+                      style={[styles.textInputField, isDarkMode && styles.textWhite]}
                     />
                   </View>
                 </View>
 
                 {/* 2. Instagram (Official Gradient Icon) */}
-                <View style={styles.socialCard}>
+                <View style={[styles.socialCard, isDarkMode && styles.cardDarkSurface]}>
                   <View style={styles.socialHeaderRow}>
                     <View style={[styles.socialPlatformBadge, { backgroundColor: '#FDF2F8' }]}>
                       <InstagramRealIcon size={20} />
                     </View>
                     <View style={{ flex: 1 }}>
-                      <Text style={styles.socialPlatformTitle}>Instagram Reels</Text>
-                      <Text style={styles.socialPlatformSub}>Co-authoring &amp; collaboration tags</Text>
+                      <Text style={[styles.socialPlatformTitle, isDarkMode && styles.textWhite]}>
+                        Instagram Reels
+                      </Text>
+                      <Text style={[styles.socialPlatformSub, isDarkMode && styles.textMutedDark]}>
+                        Co-authoring &amp; collaboration tags
+                      </Text>
                     </View>
                     <View style={styles.connectedPill}>
                       <Text style={styles.connectedPillText}>CONNECTED</Text>
                     </View>
                   </View>
-                  <View style={styles.socialInputBox}>
+                  <View style={[styles.socialInputBox, isDarkMode && styles.inputDark]}>
                     <TextInput
                       value={instagramHandle}
                       onChangeText={setInstagramHandle}
                       placeholder="@ig_handle"
-                      placeholderTextColor="#94A3B8"
+                      placeholderTextColor={isDarkMode ? '#64748B' : '#94A3B8'}
                       autoCapitalize="none"
-                      style={styles.textInputField}
+                      style={[styles.textInputField, isDarkMode && styles.textWhite]}
                     />
                   </View>
                 </View>
 
                 {/* 3. YouTube Shorts (Official Red Play Icon) */}
-                <View style={styles.socialCard}>
+                <View style={[styles.socialCard, isDarkMode && styles.cardDarkSurface]}>
                   <View style={styles.socialHeaderRow}>
                     <View style={[styles.socialPlatformBadge, { backgroundColor: '#FEF2F2' }]}>
                       <YouTubeRealIcon size={20} />
                     </View>
                     <View style={{ flex: 1 }}>
-                      <Text style={styles.socialPlatformTitle}>YouTube Shorts</Text>
-                      <Text style={styles.socialPlatformSub}>Watch time &amp; subscriber growth</Text>
+                      <Text style={[styles.socialPlatformTitle, isDarkMode && styles.textWhite]}>
+                        YouTube Shorts
+                      </Text>
+                      <Text style={[styles.socialPlatformSub, isDarkMode && styles.textMutedDark]}>
+                        Watch time &amp; subscriber growth
+                      </Text>
                     </View>
                     <View style={styles.connectedPill}>
                       <Text style={styles.connectedPillText}>CONNECTED</Text>
                     </View>
                   </View>
-                  <View style={styles.socialInputBox}>
+                  <View style={[styles.socialInputBox, isDarkMode && styles.inputDark]}>
                     <TextInput
                       value={youtubeHandle}
                       onChangeText={setYoutubeHandle}
                       placeholder="Channel Name"
-                      placeholderTextColor="#94A3B8"
-                      style={styles.textInputField}
+                      placeholderTextColor={isDarkMode ? '#64748B' : '#94A3B8'}
+                      style={[styles.textInputField, isDarkMode && styles.textWhite]}
                     />
                   </View>
                 </View>
 
                 {/* 4. X / Twitter (Official Brand Icon) */}
-                <View style={styles.socialCard}>
-                  <View style={styles.socialHeaderRow}>
-                    <View style={[styles.socialPlatformBadge, { backgroundColor: '#F8FAFC' }]}>
+                <View style={[styles.socialCard, isDarkMode && styles.cardDarkSurface]}>
+                  <View style={[styles.socialPlatformBadge, { backgroundColor: '#F8FAFC' }]}>
                       <XTwitterRealIcon size={18} />
-                    </View>
-                    <View style={{ flex: 1 }}>
-                      <Text style={styles.socialPlatformTitle}>X (Twitter)</Text>
-                      <Text style={styles.socialPlatformSub}>Creator thoughts &amp; daily updates</Text>
-                    </View>
-                    <View style={styles.connectedPill}>
-                      <Text style={styles.connectedPillText}>CONNECTED</Text>
-                    </View>
                   </View>
-                  <View style={styles.socialInputBox}>
-                    <TextInput
-                      value={xHandle}
-                      onChangeText={setXHandle}
-                      placeholder="@x_handle"
-                      placeholderTextColor="#94A3B8"
-                      autoCapitalize="none"
-                      style={styles.textInputField}
-                    />
+                  <View style={{ flex: 1 }}>
+                    <Text style={[styles.socialPlatformTitle, isDarkMode && styles.textWhite]}>
+                      X (Twitter)
+                    </Text>
+                    <Text style={[styles.socialPlatformSub, isDarkMode && styles.textMutedDark]}>
+                      Creator thoughts &amp; daily updates
+                    </Text>
                   </View>
+                  <View style={styles.connectedPill}>
+                    <Text style={styles.connectedPillText}>CONNECTED</Text>
+                  </View>
+                </View>
+                <View style={[styles.socialInputBox, isDarkMode && styles.inputDark]}>
+                  <TextInput
+                    value={xHandle}
+                    onChangeText={setXHandle}
+                    placeholder="@x_handle"
+                    placeholderTextColor={isDarkMode ? '#64748B' : '#94A3B8'}
+                    autoCapitalize="none"
+                    style={[styles.textInputField, isDarkMode && styles.textWhite]}
+                  />
                 </View>
               </View>
             )}
 
-            {/* TAB 3: ACCOUNT & PREFERENCES (LIGHT/DARK MODE & HARMONIOUS SWITCH COLORS) */}
+            {/* TAB 3: ACCOUNT & PREFERENCES (PURPLE & GOLD SWITCHES) */}
             {activeSubTab === 'settings' && (
               <View>
                 {/* 1. THEME APPEARANCE (LIGHT & DARK MODE TOGGLE) */}
-                <Text style={styles.sectionHeaderTitle}>THEME &amp; APPEARANCE</Text>
+                <Text style={[styles.sectionHeaderTitle, isDarkMode && styles.textMutedDark]}>
+                  THEME &amp; APPEARANCE
+                </Text>
 
-                <View style={styles.preferenceRow}>
+                <View style={[styles.preferenceRow, isDarkMode && styles.prefRowDark]}>
                   <View style={{ flex: 1 }}>
                     <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
                       <Text style={{ fontSize: 15 }}>{isDarkMode ? '🌙' : '☀️'}</Text>
-                      <Text style={styles.prefTitle}>
-                        {isDarkMode ? 'Dark Mode' : 'Light Mode'}
+                      <Text style={[styles.prefTitle, isDarkMode && styles.textWhite]}>
+                        {isDarkMode ? 'Dark Mode (Active)' : 'Light Mode (Active)'}
                       </Text>
                     </View>
-                    <Text style={styles.prefSub}>
+                    <Text style={[styles.prefSub, isDarkMode && styles.textMutedDark]}>
                       {isDarkMode
-                        ? 'Deep slate dark theme enabled'
+                        ? 'Deep velvet slate dark theme enabled'
                         : 'Clean warm ivory light theme enabled'}
                     </Text>
                   </View>
-                  {/* HARMONIOUS PALETTE SWITCH: OFF=#E2E8F0, ON=#7C3AED, THUMB=#FFFFFF */}
-                  <Switch
+                  {/* SIGNATURE PURPLE & GOLD TOGGLE SWITCH */}
+                  <PurpleGoldSwitch
                     value={isDarkMode}
-                    onValueChange={(val) => {
-                      if (Platform.OS !== 'web') {
-                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                      }
-                      setIsDarkMode(val);
-                      showToast(val ? 'Dark mode enabled' : 'Light mode enabled');
-                    }}
-                    trackColor={{ false: '#E2E8F0', true: '#7C3AED' }}
-                    thumbColor="#FFFFFF"
-                    ios_backgroundColor="#E2E8F0"
+                    onValueChange={handleToggleDarkMode}
                   />
                 </View>
 
-                <View style={styles.preferenceDivider} />
+                <View style={[styles.preferenceDivider, isDarkMode && styles.dividerDark]} />
 
                 {/* 2. ACCOUNTABILITY & NOTIFICATIONS */}
-                <Text style={[styles.sectionHeaderTitle, { marginTop: 14 }]}>
+                <Text style={[styles.sectionHeaderTitle, isDarkMode && styles.textMutedDark, { marginTop: 14 }]}>
                   ACCOUNTABILITY &amp; NOTIFICATIONS
                 </Text>
 
-                <View style={styles.preferenceRow}>
+                <View style={[styles.preferenceRow, isDarkMode && styles.prefRowDark]}>
                   <View style={{ flex: 1 }}>
-                    <Text style={styles.prefTitle}>Daily Streak Reminders</Text>
-                    <Text style={styles.prefSub}>
+                    <Text style={[styles.prefTitle, isDarkMode && styles.textWhite]}>Daily Streak Reminders</Text>
+                    <Text style={[styles.prefSub, isDarkMode && styles.textMutedDark]}>
                       Alerts 2 hours before daily streak cutoff (10:00 PM)
                     </Text>
                   </View>
-                  <Switch
+                  <PurpleGoldSwitch
                     value={streakReminders}
-                    onValueChange={(val) => {
-                      if (Platform.OS !== 'web') {
-                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                      }
-                      setStreakReminders(val);
-                    }}
-                    trackColor={{ false: '#E2E8F0', true: '#7C3AED' }}
-                    thumbColor="#FFFFFF"
-                    ios_backgroundColor="#E2E8F0"
+                    onValueChange={setStreakReminders}
                   />
                 </View>
 
-                <View style={styles.preferenceDivider} />
+                <View style={[styles.preferenceDivider, isDarkMode && styles.dividerDark]} />
 
-                <View style={styles.preferenceRow}>
+                <View style={[styles.preferenceRow, isDarkMode && styles.prefRowDark]}>
                   <View style={{ flex: 1 }}>
-                    <Text style={styles.prefTitle}>Creator Collab Invitations</Text>
-                    <Text style={styles.prefSub}>
+                    <Text style={[styles.prefTitle, isDarkMode && styles.textWhite]}>Creator Collab Invitations</Text>
+                    <Text style={[styles.prefSub, isDarkMode && styles.textMutedDark]}>
                       Allow verified partners to pitch duo challenges &amp; Reels
                     </Text>
                   </View>
-                  <Switch
+                  <PurpleGoldSwitch
                     value={collabInvites}
-                    onValueChange={(val) => {
-                      if (Platform.OS !== 'web') {
-                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                      }
-                      setCollabInvites(val);
-                    }}
-                    trackColor={{ false: '#E2E8F0', true: '#7C3AED' }}
-                    thumbColor="#FFFFFF"
-                    ios_backgroundColor="#E2E8F0"
+                    onValueChange={setCollabInvites}
                   />
                 </View>
 
-                <View style={styles.preferenceDivider} />
+                <View style={[styles.preferenceDivider, isDarkMode && styles.dividerDark]} />
 
-                <View style={styles.preferenceRow}>
+                <View style={[styles.preferenceRow, isDarkMode && styles.prefRowDark]}>
                   <View style={{ flex: 1 }}>
-                    <Text style={styles.prefTitle}>Haptic &amp; Sound Feedback</Text>
-                    <Text style={styles.prefSub}>
+                    <Text style={[styles.prefTitle, isDarkMode && styles.textWhite]}>Haptic &amp; Sound Feedback</Text>
+                    <Text style={[styles.prefSub, isDarkMode && styles.textMutedDark]}>
                       Feel tactile clicks on buttons, streak meters &amp; quests
                     </Text>
                   </View>
-                  <Switch
+                  <PurpleGoldSwitch
                     value={hapticFeedback}
-                    onValueChange={(val) => {
-                      if (Platform.OS !== 'web') {
-                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                      }
-                      setHapticFeedback(val);
-                    }}
-                    trackColor={{ false: '#E2E8F0', true: '#7C3AED' }}
-                    thumbColor="#FFFFFF"
-                    ios_backgroundColor="#E2E8F0"
+                    onValueChange={setHapticFeedback}
                   />
                 </View>
 
@@ -890,7 +1047,7 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
           </ScrollView>
 
           {/* PRIMARY SAVE & UPDATE BUTTON */}
-          <View style={styles.modalFooter}>
+          <View style={[styles.modalFooter, isDarkMode && styles.footerDark]}>
             <Pressable
               style={({ pressed }) => [styles.saveBtn, pressed && styles.btnPressed]}
               onPress={handleSave}
@@ -914,7 +1071,7 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
 const styles = StyleSheet.create({
   overlay: {
     flex: 1,
-    backgroundColor: 'rgba(23, 20, 32, 0.72)',
+    backgroundColor: 'rgba(23, 20, 32, 0.76)',
     justifyContent: 'center',
     alignItems: 'center',
     paddingHorizontal: 16,
@@ -934,6 +1091,55 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.25,
     shadowRadius: 28,
     elevation: 10,
+  },
+  modalCardDark: {
+    backgroundColor: '#16131F',
+    borderColor: '#2D2542',
+    shadowColor: '#000000',
+  },
+  textWhite: {
+    color: '#F8FAFC',
+  },
+  textMutedDark: {
+    color: '#94A3B8',
+  },
+  cardDarkSurface: {
+    backgroundColor: '#201A2F',
+    borderColor: '#2E2644',
+  },
+  inputDark: {
+    backgroundColor: '#201A2F',
+    borderColor: '#362D4E',
+  },
+  dividerDark: {
+    backgroundColor: '#2E2644',
+  },
+  footerDark: {
+    borderTopColor: '#2A223E',
+  },
+  closeBtnDark: {
+    backgroundColor: '#262037',
+  },
+  subTabsRowDark: {
+    backgroundColor: '#201A2F',
+    borderColor: '#2E2644',
+  },
+  subTabItemActiveDark: {
+    backgroundColor: '#2D2542',
+  },
+  uploadDeviceBtnDark: {
+    backgroundColor: '#261F38',
+    borderColor: '#433660',
+  },
+  avatarItemCardDark: {
+    borderColor: '#2E2644',
+  },
+  nicheChipDark: {
+    backgroundColor: '#201A2F',
+    borderColor: '#2E2644',
+  },
+  prefRowDark: {
+    borderBottomColor: '#2E2644',
   },
   btnPressed: {
     opacity: 0.8,
@@ -1329,7 +1535,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
 
-  // Preferences Tab (Harmonious Theme & Switch Colors)
+  // Preferences Tab
   preferenceRow: {
     flexDirection: 'row',
     alignItems: 'center',
