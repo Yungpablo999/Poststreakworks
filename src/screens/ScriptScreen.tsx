@@ -62,18 +62,119 @@ const NOTIFICATIONS: NotificationItem[] = [
   },
 ];
 
-const ALTERNATIVE_HOOKS = [
-  'Stop making this mistake if you want to stay consistent as a creator.',
-  "If you're struggling to post daily, read this.",
-  'The truth about consistency that nobody tells you.',
-  'Why 90% of creators quit before month 2 (and how to avoid it).',
+const HOOK_PRESETS = [
+  {
+    type: '🔥 Negative Hook',
+    text: 'Stop making this mistake if you want to stay consistent as a creator.',
+    desc: 'Triggers loss aversion & immediate scroll stopping.',
+  },
+  {
+    type: '❓ Curiosity Gap',
+    text: "If you're struggling to post daily, read this.",
+    desc: 'Creates an open loop that viewers need to resolve.',
+  },
+  {
+    type: '💡 Unpopular Truth',
+    text: 'The truth about consistency that nobody tells you.',
+    desc: 'Positions you as a candid, trusted insider.',
+  },
+  {
+    type: '⚡ High Urgency',
+    text: 'Why 90% of creators quit before month 2 (and how to avoid it).',
+    desc: 'High retention stat hook for talking-head videos.',
+  },
+  {
+    type: '🎯 Relatable Story',
+    text: 'I almost gave up posting until I discovered this 1 simple rule.',
+    desc: 'Builds empathy and vulnerability right away.',
+  },
 ];
 
-const CTA_OPTIONS = [
-  'What is one creator habit that helped you stay consistent?',
-  'Comment "GROWTH" and I will send you my daily batch-filming checklist!',
-  'Which of these 3 tips are you trying first this week?',
-  'Save this post so you have it ready for your next filming session.',
+const BODY_PRESETS = [
+  {
+    id: 'original',
+    title: 'Standard Pacing (30s)',
+    tag: 'Balanced',
+    text: "We always think we need a massive content plan to start. But in reality, all you need is a lesson you learned yesterday. Most creators overthink the 'Big Idea' and miss the daily progress...",
+  },
+  {
+    id: 'shorter',
+    title: 'Short & Punchy (15-20s)',
+    tag: '⚡ High Retention',
+    text: 'Stop overthinking massive content plans. All you need is one small lesson you learned yesterday. Consistency comes from daily sharing, not waiting for perfection.',
+  },
+  {
+    id: 'personal',
+    title: 'Personal Story (35-45s)',
+    tag: '🎙 Relatable',
+    text: "When I first started, I used to wait days for the 'perfect idea'. That held me back for months. Once I switched to sharing raw lessons from my daily work, everything unlocked.",
+  },
+  {
+    id: 'energetic',
+    title: 'High Energy (25-30s)',
+    tag: '🔥 Inspiring',
+    text: 'Here is the secret top creators do not tell you: massive content plans are a trap! Share the real lesson you figured out yesterday. Speed beats perfection every single time!',
+  },
+  {
+    id: 'stepbystep',
+    title: '3-Step Framework (45s)',
+    tag: '📑 High Saves',
+    text: 'Step 1: Document what worked today. Step 2: Extract the single most useful takeaway. Step 3: Record in one raw take. That is how you never run out of ideas.',
+  },
+];
+
+const LESSON_PRESETS = [
+  {
+    id: 'lesson_1',
+    title: 'Actionable Rule',
+    tag: '⭐ Recommended',
+    text: 'Consistency gets easier when you stop waiting for perfect ideas and start sharing useful lessons.',
+  },
+  {
+    id: 'lesson_2',
+    title: 'Mindset Shift',
+    tag: '🧠 Perspective',
+    text: "You don't need 100k followers to give value—you just need to share what helped you yesterday.",
+  },
+  {
+    id: 'lesson_3',
+    title: 'Execution Golden Rule',
+    tag: '⚡ Speed First',
+    text: 'Done and posted beats perfect and unpublished every single day.',
+  },
+];
+
+const CTA_PRESETS = [
+  {
+    id: 'cta_1',
+    type: '💬 Conversation Starter',
+    text: 'What is one creator habit that helped you stay consistent?',
+    goal: 'Boosts comments & algorithm rank',
+  },
+  {
+    id: 'cta_2',
+    type: '💾 High Saves Prompt',
+    text: 'Save this post so you have it ready for your next filming session.',
+    goal: 'Maximizes saves & bookmarks',
+  },
+  {
+    id: 'cta_3',
+    type: '📥 Lead Magnet / DM',
+    text: 'Comment "GROWTH" and I will send you my daily batch-filming checklist!',
+    goal: 'Drives direct inbound leads',
+  },
+  {
+    id: 'cta_4',
+    type: '🔥 Quick Choice',
+    text: 'Which of these 3 tips are you trying first this week?',
+    goal: 'Low friction comment barrier',
+  },
+  {
+    id: 'cta_5',
+    type: '👥 Share Trigger',
+    text: 'Send this to a creator friend who needs to hear this today.',
+    goal: 'Expands virality via DMs',
+  },
 ];
 
 export const ScriptScreen: React.FC<ScriptScreenProps> = ({
@@ -86,22 +187,24 @@ export const ScriptScreen: React.FC<ScriptScreenProps> = ({
   onUseAsPost,
 }) => {
   const [activeTab, setActiveTab] = useState<TabType>('create');
-  const [selectedPhaseTab, setSelectedPhaseTab] = useState<'hook' | 'body' | 'lesson' | 'cta'>('hook');
 
   // Script Components State
-  const [selectedHook, setSelectedHook] = useState(ALTERNATIVE_HOOKS[0]);
+  const [selectedHook, setSelectedHook] = useState(HOOK_PRESETS[0].text);
   const [generationsLeft, setGenerationsLeft] = useState(2);
-  const [bodyText, setBodyText] = useState(
-    'We always think we need a massive content plan to start. But in reality, all you need is a lesson you learned yesterday. Most creators overthink the \'Big Idea\' and miss the daily progress...'
-  );
-  const [bodyFilter, setBodyFilter] = useState<'shorter' | 'personal' | 'energetic' | null>(null);
-  const [takeawayText, setTakeawayText] = useState(
-    'Consistency gets easier when you stop waiting for perfect ideas and start sharing useful lessons.'
-  );
+  const [bodyText, setBodyText] = useState(BODY_PRESETS[0].text);
+  const [selectedBodyPresetId, setSelectedBodyPresetId] = useState('original');
+  const [takeawayText, setTakeawayText] = useState(LESSON_PRESETS[0].text);
+  const [selectedLessonId, setSelectedLessonId] = useState('lesson_1');
   const [ctaIndex, setCtaIndex] = useState(0);
-  const [isCtaSelected, setIsCtaSelected] = useState(true);
+  const [selectedCtaText, setSelectedCtaText] = useState(CTA_PRESETS[0].text);
 
-  // Modals & Celebrations
+  // Popups for each of the 4 Phase Buttons
+  const [showHookModal, setShowHookModal] = useState(false);
+  const [showBodyModal, setShowBodyModal] = useState(false);
+  const [showLessonModal, setShowLessonModal] = useState(false);
+  const [showCtaModal, setShowCtaModal] = useState(false);
+
+  // General App Modals & Celebrations
   const [showNotificationModal, setShowNotificationModal] = useState(false);
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [showChatModal, setShowChatModal] = useState(false);
@@ -156,6 +259,18 @@ export const ScriptScreen: React.FC<ScriptScreenProps> = ({
     }
   };
 
+  // Phase Button Click Handlers -> Open Dedicated Full Popups
+  const handleOpenPhaseModal = (phase: 'hook' | 'body' | 'lesson' | 'cta') => {
+    if (Platform.OS !== 'web') {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    }
+    triggerModalAnim();
+    if (phase === 'hook') setShowHookModal(true);
+    else if (phase === 'body') setShowBodyModal(true);
+    else if (phase === 'lesson') setShowLessonModal(true);
+    else if (phase === 'cta') setShowCtaModal(true);
+  };
+
   const handleSelectHook = (hook: string) => {
     if (Platform.OS !== 'web') {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
@@ -163,32 +278,69 @@ export const ScriptScreen: React.FC<ScriptScreenProps> = ({
     setSelectedHook(hook);
   };
 
-  const handleBodyFilter = (filter: 'shorter' | 'personal' | 'energetic') => {
+  const handleApplyHookFromModal = (hook: string) => {
     if (Platform.OS !== 'web') {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     }
-    setBodyFilter(bodyFilter === filter ? null : filter);
+    setSelectedHook(hook);
+    setShowHookModal(false);
+    setCelebrationTitle('Hook Applied!');
+    setCelebrationSubtitle(`"${hook}" is now set as your video opener.`);
+    setCelebrationSpeech('First 3 seconds optimized for max retention!');
+    setCelebrationBadge('HOOK READY');
+    setShowCelebrationModal(true);
+  };
 
-    if (filter === 'shorter') {
-      setBodyText(
-        'Stop overthinking massive content plans. All you need is one small lesson you learned yesterday. Consistency comes from daily sharing, not perfect ideas.'
-      );
-    } else if (filter === 'personal') {
-      setBodyText(
-        'When I first started, I used to wait days for the \'perfect idea\'. That held me back for months. Once I switched to sharing raw lessons from my daily work, everything unlocked.'
-      );
-    } else if (filter === 'energetic') {
-      setBodyText(
-        'Here is the secret top creators do not tell you: massive content plans are a trap! Share the real lesson you figured out yesterday. Speed beats perfection every single time!'
-      );
+  const handleApplyBodyFromModal = (preset: typeof BODY_PRESETS[0]) => {
+    if (Platform.OS !== 'web') {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     }
+    setSelectedBodyPresetId(preset.id);
+    setBodyText(preset.text);
+    setShowBodyModal(false);
+    setCelebrationTitle('Script Body Updated!');
+    setCelebrationSubtitle(`Applied ${preset.title} style to your script.`);
+    setCelebrationSpeech('Structure formatted for smooth delivery!');
+    setCelebrationBadge('BODY FORMATTED');
+    setShowCelebrationModal(true);
+  };
+
+  const handleApplyLessonFromModal = (lesson: typeof LESSON_PRESETS[0]) => {
+    if (Platform.OS !== 'web') {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    }
+    setSelectedLessonId(lesson.id);
+    setTakeawayText(lesson.text);
+    setShowLessonModal(false);
+    setCelebrationTitle('Takeaway Applied!');
+    setCelebrationSubtitle(`"${lesson.text}" will make your post memorable.`);
+    setCelebrationSpeech('Core value locked in for high saves!');
+    setCelebrationBadge('TAKEAWAY SET');
+    setShowCelebrationModal(true);
+  };
+
+  const handleApplyCtaFromModal = (cta: typeof CTA_PRESETS[0]) => {
+    if (Platform.OS !== 'web') {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    }
+    setSelectedCtaText(cta.text);
+    const idx = CTA_PRESETS.findIndex((c) => c.text === c.text);
+    if (idx !== -1) setCtaIndex(idx);
+    setShowCtaModal(false);
+    setCelebrationTitle('Call to Action Set!');
+    setCelebrationSubtitle(`"${cta.text}" ready to drive engagement.`);
+    setCelebrationSpeech('Viewer conversion trigger activated!');
+    setCelebrationBadge('CTA ACTIVE');
+    setShowCelebrationModal(true);
   };
 
   const handleShuffleCta = () => {
     if (Platform.OS !== 'web') {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     }
-    setCtaIndex((prev) => (prev + 1) % CTA_OPTIONS.length);
+    const nextIdx = (ctaIndex + 1) % CTA_PRESETS.length;
+    setCtaIndex(nextIdx);
+    setSelectedCtaText(CTA_PRESETS[nextIdx].text);
   };
 
   const handleCopyFullScript = async () => {
@@ -205,7 +357,8 @@ TAKEAWAY:
 ${takeawayText}
 
 CTA:
-${CTA_OPTIONS[ctaIndex]}`;
+${selectedCtaText}`;
+
     try {
       if (Platform.OS === 'web' && typeof navigator !== 'undefined' && navigator.clipboard) {
         await navigator.clipboard.writeText(fullScript);
@@ -230,7 +383,7 @@ ${CTA_OPTIONS[ctaIndex]}`;
         hook: selectedHook,
         body: bodyText,
         takeaway: takeawayText,
-        cta: CTA_OPTIONS[ctaIndex],
+        cta: selectedCtaText,
       });
     }
   };
@@ -393,40 +546,33 @@ ${CTA_OPTIONS[ctaIndex]}`;
             </View>
           </View>
 
-          {/* 2. SCRIPT PHASE TABS (4 TABS) */}
+          {/* 2. SCRIPT PHASE BUTTONS (EACH OPENS A FULL DEDICATED POP-UP MODAL) */}
           <View style={styles.phaseTabsRow}>
             {[
               { id: 'hook', label: '⚓ HOOK' },
               { id: 'body', label: '📑 BODY' },
               { id: 'lesson', label: '💡 LESSON' },
               { id: 'cta', label: '📢 CTA' },
-            ].map((tab) => {
-              const isActive = selectedPhaseTab === tab.id;
-              return (
-                <Pressable
-                  key={tab.id}
-                  onPress={() => {
-                    if (Platform.OS !== 'web') {
-                      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                    }
-                    setSelectedPhaseTab(tab.id as 'hook' | 'body' | 'lesson' | 'cta');
-                  }}
+            ].map((tab) => (
+              <Pressable
+                key={tab.id}
+                onPress={() => handleOpenPhaseModal(tab.id as 'hook' | 'body' | 'lesson' | 'cta')}
+                style={({ pressed }) => [
+                  styles.phaseTabBtn,
+                  tab.id === 'hook' && styles.phaseTabBtnPrimary,
+                  pressed && styles.btnPressed,
+                ]}
+              >
+                <Text
                   style={[
-                    styles.phaseTabBtn,
-                    isActive && styles.phaseTabBtnActive,
+                    styles.phaseTabBtnText,
+                    tab.id === 'hook' && styles.phaseTabBtnTextPrimary,
                   ]}
                 >
-                  <Text
-                    style={[
-                      styles.phaseTabBtnText,
-                      isActive && styles.phaseTabBtnTextActive,
-                    ]}
-                  >
-                    {tab.label}
-                  </Text>
-                </Pressable>
-              );
-            })}
+                  {tab.label}
+                </Text>
+              </Pressable>
+            ))}
           </View>
 
           {/* 3. HOOK CARD */}
@@ -436,26 +582,35 @@ ${CTA_OPTIONS[ctaIndex]}`;
                 <Text style={styles.sectionIcon}>⚓</Text>
                 <Text style={styles.sectionTitle}>Hook</Text>
               </View>
-              <View style={styles.generationsBadge}>
-                <Text style={styles.generationsBadgeText}>{generationsLeft} generations left</Text>
-              </View>
+              <Pressable
+                onPress={() => handleOpenPhaseModal('hook')}
+                hitSlop={8}
+              >
+                <View style={styles.generationsBadge}>
+                  <Text style={styles.generationsBadgeText}>{generationsLeft} generations left ⚡</Text>
+                </View>
+              </Pressable>
             </View>
 
             {/* Active Selected Hook Box */}
-            <View style={styles.activeHookBox}>
+            <Pressable
+              style={styles.activeHookBox}
+              onPress={() => handleOpenPhaseModal('hook')}
+            >
               <Text style={styles.activeHookText}>&ldquo;{selectedHook}&rdquo;</Text>
-            </View>
+            </Pressable>
 
-            <Text style={styles.alternativeHooksLabel}>ALTERNATIVE HOOKS</Text>
+            <Text style={styles.alternativeHooksLabel}>ALTERNATIVE HOOKS (TAP TO SWAP)</Text>
 
             {/* Alternative Hooks List */}
-            {ALTERNATIVE_HOOKS.filter((h) => h !== selectedHook).slice(0, 2).map((hook, i) => (
+            {HOOK_PRESETS.filter((h) => h.text !== selectedHook).slice(0, 2).map((hookItem, i) => (
               <Pressable
                 key={i}
-                onPress={() => handleSelectHook(hook)}
+                onPress={() => handleSelectHook(hookItem.text)}
                 style={styles.altHookBox}
               >
-                <Text style={styles.altHookText}>&ldquo;{hook}&rdquo;</Text>
+                <Text style={styles.altHookType}>{hookItem.type}</Text>
+                <Text style={styles.altHookText}>&ldquo;{hookItem.text}&rdquo;</Text>
               </Pressable>
             ))}
           </View>
@@ -467,12 +622,18 @@ ${CTA_OPTIONS[ctaIndex]}`;
                 <Text style={styles.sectionIcon}>📑</Text>
                 <Text style={styles.sectionTitle}>Body</Text>
               </View>
+              <Pressable onPress={() => handleOpenPhaseModal('body')} hitSlop={8}>
+                <Text style={styles.editSectionLink}>Edit in Studio ➔</Text>
+              </Pressable>
             </View>
 
             {/* Body Content Box */}
-            <View style={styles.bodyContentBox}>
+            <Pressable
+              style={styles.bodyContentBox}
+              onPress={() => handleOpenPhaseModal('body')}
+            >
               <Text style={styles.bodyContentText}>{bodyText}</Text>
-            </View>
+            </Pressable>
 
             {/* Body Refinement Chips */}
             <View style={styles.bodyChipsRow}>
@@ -481,11 +642,16 @@ ${CTA_OPTIONS[ctaIndex]}`;
                 { id: 'personal', label: 'More Personal' },
                 { id: 'energetic', label: 'More Energetic' },
               ].map((chip) => {
-                const isActive = bodyFilter === chip.id;
+                const isActive = selectedBodyPresetId === chip.id;
                 return (
                   <Pressable
                     key={chip.id}
-                    onPress={() => handleBodyFilter(chip.id as 'shorter' | 'personal' | 'energetic')}
+                    onPress={() => {
+                      const found = BODY_PRESETS.find((p) => p.id === chip.id);
+                      if (found) {
+                        handleApplyBodyFromModal(found);
+                      }
+                    }}
                     style={[
                       styles.bodyFilterChip,
                       isActive && styles.bodyFilterChipActive,
@@ -528,13 +694,13 @@ ${CTA_OPTIONS[ctaIndex]}`;
             <View style={styles.jarvisBannerChipsRow}>
               <Pressable
                 style={styles.jarvisBannerChip}
-                onPress={() => handleBodyFilter('energetic')}
+                onPress={() => handleOpenPhaseModal('hook')}
               >
                 <Text style={styles.jarvisBannerChipText}>Improve Hook</Text>
               </Pressable>
               <Pressable
                 style={styles.jarvisBannerChip}
-                onPress={() => handleBodyFilter('personal')}
+                onPress={() => handleOpenPhaseModal('body')}
               >
                 <Text style={styles.jarvisBannerChipText}>Make More Personal</Text>
               </Pressable>
@@ -553,14 +719,7 @@ ${CTA_OPTIONS[ctaIndex]}`;
             <Text style={styles.takeawayBodyText}>&ldquo;{takeawayText}&rdquo;</Text>
 
             <Pressable
-              onPress={() => {
-                if (Platform.OS !== 'web') {
-                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                }
-                setTakeawayText(
-                  'Consistency creates momentum. Focus on sharing 1 useful lesson every day.'
-                );
-              }}
+              onPress={() => handleOpenPhaseModal('lesson')}
               hitSlop={8}
             >
               <Text style={styles.improveTakeawayLink}>IMPROVE TAKEAWAY ➔</Text>
@@ -574,21 +733,19 @@ ${CTA_OPTIONS[ctaIndex]}`;
                 <Text style={styles.sectionIcon}>📢</Text>
                 <Text style={styles.sectionTitle}>Call to Action</Text>
               </View>
+              <Pressable onPress={() => handleOpenPhaseModal('cta')} hitSlop={8}>
+                <Text style={styles.editSectionLink}>Browse All ➔</Text>
+              </Pressable>
             </View>
 
             <View style={styles.ctaContentBox}>
-              <Text style={styles.ctaContentText}>&ldquo;{CTA_OPTIONS[ctaIndex]}&rdquo;</Text>
+              <Text style={styles.ctaContentText}>&ldquo;{selectedCtaText}&rdquo;</Text>
             </View>
 
             <View style={styles.ctaActionRow}>
               <Pressable
                 style={({ pressed }) => [styles.useCtaBtn, pressed && styles.btnPressed]}
-                onPress={() => {
-                  if (Platform.OS !== 'web') {
-                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                  }
-                  setIsCtaSelected(!isCtaSelected);
-                }}
+                onPress={() => handleOpenPhaseModal('cta')}
               >
                 <Text style={styles.useCtaBtnText}>USE CTA</Text>
               </Pressable>
@@ -646,6 +803,14 @@ ${CTA_OPTIONS[ctaIndex]}`;
                 <Text style={styles.previewLineBold}>Body: </Text>
                 {bodyText}
               </Text>
+              <Text style={[styles.previewLineText, { marginTop: 8 }]}>
+                <Text style={styles.previewLineBold}>Takeaway: </Text>
+                {takeawayText}
+              </Text>
+              <Text style={[styles.previewLineText, { marginTop: 8 }]}>
+                <Text style={styles.previewLineBold}>CTA: </Text>
+                {selectedCtaText}
+              </Text>
             </View>
 
             {/* Dashed Copy Full Script Button */}
@@ -679,12 +844,7 @@ ${CTA_OPTIONS[ctaIndex]}`;
           <View style={styles.secondaryActionsRow}>
             <Pressable
               style={({ pressed }) => [styles.secondaryBtn, pressed && styles.btnPressed]}
-              onPress={() => {
-                if (Platform.OS !== 'web') {
-                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                }
-                handleBodyFilter('energetic');
-              }}
+              onPress={() => handleOpenPhaseModal('body')}
             >
               <Text style={styles.secondaryBtnText}>IMPROVE SCRIPT</Text>
             </Pressable>
@@ -706,6 +866,265 @@ ${CTA_OPTIONS[ctaIndex]}`;
           activeTab={activeTab}
           onTabPress={handleTabPress}
         />
+
+        {/* ========================================================================= */}
+        {/* MODAL 1: FULL HOOK STUDIO POP-UP MODAL */}
+        {/* ========================================================================= */}
+        <Modal
+          visible={showHookModal}
+          transparent={true}
+          animationType="fade"
+          onRequestClose={() => setShowHookModal(false)}
+        >
+          <View style={styles.modalOverlay}>
+            <Animated.View style={[styles.modalCardLarge, { transform: [{ scale: modalPopScale }] }]}>
+              <View style={styles.modalHeaderRow}>
+                <View>
+                  <Text style={styles.modalTitle}>⚓ Viral Hook Studio</Text>
+                  <Text style={styles.modalSubtitle}>First 3 seconds that stop the scroll</Text>
+                </View>
+                <Pressable
+                  onPress={() => setShowHookModal(false)}
+                  style={styles.modalCloseCircle}
+                  hitSlop={8}
+                >
+                  <Text style={styles.modalCloseCross}>✕</Text>
+                </Pressable>
+              </View>
+
+              <ScrollView style={{ maxHeight: 380 }} showsVerticalScrollIndicator={false}>
+                {HOOK_PRESETS.map((preset, index) => {
+                  const isSelected = selectedHook === preset.text;
+                  return (
+                    <Pressable
+                      key={index}
+                      onPress={() => handleSelectHook(preset.text)}
+                      style={[
+                        styles.hookModalItemCard,
+                        isSelected && styles.hookModalItemCardActive,
+                      ]}
+                    >
+                      <View style={styles.hookModalItemHeader}>
+                        <Text style={[styles.hookModalItemType, isSelected && styles.hookModalItemTypeActive]}>
+                          {preset.type}
+                        </Text>
+                        {isSelected && (
+                          <View style={styles.selectedCheckBadge}>
+                            <Text style={styles.selectedCheckText}>✓ ACTIVE</Text>
+                          </View>
+                        )}
+                      </View>
+                      <Text style={styles.hookModalItemText}>&ldquo;{preset.text}&rdquo;</Text>
+                      <Text style={styles.hookModalItemDesc}>{preset.desc}</Text>
+                    </Pressable>
+                  );
+                })}
+              </ScrollView>
+
+              <Pressable
+                style={styles.modalFullBtn}
+                onPress={() => handleApplyHookFromModal(selectedHook)}
+              >
+                <Text style={styles.modalFullBtnText}>Apply Hook to Script ➔</Text>
+              </Pressable>
+            </Animated.View>
+          </View>
+        </Modal>
+
+        {/* ========================================================================= */}
+        {/* MODAL 2: FULL SCRIPT BODY STUDIO POP-UP MODAL */}
+        {/* ========================================================================= */}
+        <Modal
+          visible={showBodyModal}
+          transparent={true}
+          animationType="fade"
+          onRequestClose={() => setShowBodyModal(false)}
+        >
+          <View style={styles.modalOverlay}>
+            <Animated.View style={[styles.modalCardLarge, { transform: [{ scale: modalPopScale }] }]}>
+              <View style={styles.modalHeaderRow}>
+                <View>
+                  <Text style={styles.modalTitle}>📑 Script Body Studio</Text>
+                  <Text style={styles.modalSubtitle}>Pacing, storytelling &amp; high retention</Text>
+                </View>
+                <Pressable
+                  onPress={() => setShowBodyModal(false)}
+                  style={styles.modalCloseCircle}
+                  hitSlop={8}
+                >
+                  <Text style={styles.modalCloseCross}>✕</Text>
+                </Pressable>
+              </View>
+
+              <ScrollView style={{ maxHeight: 380 }} showsVerticalScrollIndicator={false}>
+                {BODY_PRESETS.map((preset) => {
+                  const isSelected = selectedBodyPresetId === preset.id;
+                  return (
+                    <Pressable
+                      key={preset.id}
+                      onPress={() => {
+                        setSelectedBodyPresetId(preset.id);
+                        setBodyText(preset.text);
+                      }}
+                      style={[
+                        styles.bodyModalItemCard,
+                        isSelected && styles.bodyModalItemCardActive,
+                      ]}
+                    >
+                      <View style={styles.bodyModalItemHeader}>
+                        <Text style={styles.bodyModalItemTitle}>{preset.title}</Text>
+                        <View style={styles.bodyModalTagPill}>
+                          <Text style={styles.bodyModalTagText}>{preset.tag}</Text>
+                        </View>
+                      </View>
+                      <Text style={styles.bodyModalItemText}>{preset.text}</Text>
+                    </Pressable>
+                  );
+                })}
+              </ScrollView>
+
+              <Pressable
+                style={styles.modalFullBtn}
+                onPress={() => {
+                  const found = BODY_PRESETS.find((p) => p.id === selectedBodyPresetId) || BODY_PRESETS[0];
+                  handleApplyBodyFromModal(found);
+                }}
+              >
+                <Text style={styles.modalFullBtnText}>Apply Body to Script ➔</Text>
+              </Pressable>
+            </Animated.View>
+          </View>
+        </Modal>
+
+        {/* ========================================================================= */}
+        {/* MODAL 3: FULL LESSON / TAKEAWAY POP-UP MODAL */}
+        {/* ========================================================================= */}
+        <Modal
+          visible={showLessonModal}
+          transparent={true}
+          animationType="fade"
+          onRequestClose={() => setShowLessonModal(false)}
+        >
+          <View style={styles.modalOverlay}>
+            <Animated.View style={[styles.modalCardLarge, { transform: [{ scale: modalPopScale }] }]}>
+              <View style={styles.modalHeaderRow}>
+                <View>
+                  <Text style={styles.modalTitle}>💡 Core Lesson Studio</Text>
+                  <Text style={styles.modalSubtitle}>The memorable takeaway that gets saved</Text>
+                </View>
+                <Pressable
+                  onPress={() => setShowLessonModal(false)}
+                  style={styles.modalCloseCircle}
+                  hitSlop={8}
+                >
+                  <Text style={styles.modalCloseCross}>✕</Text>
+                </Pressable>
+              </View>
+
+              <ScrollView style={{ maxHeight: 380 }} showsVerticalScrollIndicator={false}>
+                {LESSON_PRESETS.map((lesson) => {
+                  const isSelected = selectedLessonId === lesson.id;
+                  return (
+                    <Pressable
+                      key={lesson.id}
+                      onPress={() => {
+                        setSelectedLessonId(lesson.id);
+                        setTakeawayText(lesson.text);
+                      }}
+                      style={[
+                        styles.lessonModalItemCard,
+                        isSelected && styles.lessonModalItemCardActive,
+                      ]}
+                    >
+                      <View style={styles.lessonModalItemHeader}>
+                        <Text style={styles.lessonModalItemTitle}>{lesson.title}</Text>
+                        <View style={styles.lessonModalTagPill}>
+                          <Text style={styles.lessonModalTagText}>{lesson.tag}</Text>
+                        </View>
+                      </View>
+                      <Text style={styles.lessonModalItemText}>&ldquo;{lesson.text}&rdquo;</Text>
+                    </Pressable>
+                  );
+                })}
+              </ScrollView>
+
+              <Pressable
+                style={styles.modalFullBtn}
+                onPress={() => {
+                  const found = LESSON_PRESETS.find((l) => l.id === selectedLessonId) || LESSON_PRESETS[0];
+                  handleApplyLessonFromModal(found);
+                }}
+              >
+                <Text style={styles.modalFullBtnText}>Apply Takeaway ➔</Text>
+              </Pressable>
+            </Animated.View>
+          </View>
+        </Modal>
+
+        {/* ========================================================================= */}
+        {/* MODAL 4: FULL CALL TO ACTION (CTA) POP-UP MODAL */}
+        {/* ========================================================================= */}
+        <Modal
+          visible={showCtaModal}
+          transparent={true}
+          animationType="fade"
+          onRequestClose={() => setShowCtaModal(false)}
+        >
+          <View style={styles.modalOverlay}>
+            <Animated.View style={[styles.modalCardLarge, { transform: [{ scale: modalPopScale }] }]}>
+              <View style={styles.modalHeaderRow}>
+                <View>
+                  <Text style={styles.modalTitle}>📢 Call to Action Studio</Text>
+                  <Text style={styles.modalSubtitle}>Drive comments, saves &amp; viral shares</Text>
+                </View>
+                <Pressable
+                  onPress={() => setShowCtaModal(false)}
+                  style={styles.modalCloseCircle}
+                  hitSlop={8}
+                >
+                  <Text style={styles.modalCloseCross}>✕</Text>
+                </Pressable>
+              </View>
+
+              <ScrollView style={{ maxHeight: 380 }} showsVerticalScrollIndicator={false}>
+                {CTA_PRESETS.map((cta, index) => {
+                  const isSelected = selectedCtaText === cta.text;
+                  return (
+                    <Pressable
+                      key={cta.id}
+                      onPress={() => {
+                        setSelectedCtaText(cta.text);
+                        setCtaIndex(index);
+                      }}
+                      style={[
+                        styles.ctaModalItemCard,
+                        isSelected && styles.ctaModalItemCardActive,
+                      ]}
+                    >
+                      <View style={styles.ctaModalItemHeader}>
+                        <Text style={[styles.ctaModalItemType, isSelected && styles.ctaModalItemTypeActive]}>
+                          {cta.type}
+                        </Text>
+                        <Text style={styles.ctaModalGoal}>{cta.goal}</Text>
+                      </View>
+                      <Text style={styles.ctaModalItemText}>&ldquo;{cta.text}&rdquo;</Text>
+                    </Pressable>
+                  );
+                })}
+              </ScrollView>
+
+              <Pressable
+                style={styles.modalFullBtn}
+                onPress={() => {
+                  const found = CTA_PRESETS.find((c) => c.text === selectedCtaText) || CTA_PRESETS[0];
+                  handleApplyCtaFromModal(found);
+                }}
+              >
+                <Text style={styles.modalFullBtnText}>Apply CTA to Script ➔</Text>
+              </Pressable>
+            </Animated.View>
+          </View>
+        </Modal>
 
         {/* MODAL: NOTIFICATIONS CENTER */}
         <Modal
@@ -1060,7 +1479,7 @@ const styles = StyleSheet.create({
     color: '#6D28D9',
   },
 
-  // 2. Phase Tabs Row (4 Tabs)
+  // 2. Phase Buttons Row (4 Buttons)
   phaseTabsRow: {
     flexDirection: 'row',
     gap: 6,
@@ -1072,21 +1491,26 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     backgroundColor: '#FFFFFF',
     borderWidth: 1,
-    borderColor: '#E2E8F0',
+    borderColor: '#EDE9FE',
     justifyContent: 'center',
     alignItems: 'center',
+    shadowColor: '#582CDB',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.04,
+    shadowRadius: 4,
+    elevation: 1,
   },
-  phaseTabBtnActive: {
+  phaseTabBtnPrimary: {
     backgroundColor: '#582CDB',
     borderColor: '#582CDB',
   },
   phaseTabBtnText: {
     fontSize: 11,
     fontWeight: '800',
-    color: '#64748B',
+    color: '#582CDB',
     letterSpacing: 0.3,
   },
-  phaseTabBtnTextActive: {
+  phaseTabBtnTextPrimary: {
     color: '#FFFFFF',
   },
 
@@ -1136,6 +1560,11 @@ const styles = StyleSheet.create({
     fontWeight: '900',
     color: '#B45309',
   },
+  editSectionLink: {
+    fontSize: 11.5,
+    fontWeight: '800',
+    color: '#582CDB',
+  },
 
   // Hook Boxes
   activeHookBox: {
@@ -1168,6 +1597,12 @@ const styles = StyleSheet.create({
     borderColor: '#E2E8F0',
     padding: 12,
     marginBottom: 8,
+  },
+  altHookType: {
+    fontSize: 10,
+    fontWeight: '800',
+    color: '#6D28D9',
+    marginBottom: 2,
   },
   altHookText: {
     fontSize: 13,
@@ -1479,17 +1914,31 @@ const styles = StyleSheet.create({
     letterSpacing: 0.4,
   },
 
-  // Modals
+  // Large Modal Containers
   modalOverlay: {
     flex: 1,
     backgroundColor: 'rgba(23, 20, 32, 0.65)',
     justifyContent: 'center',
     alignItems: 'center',
-    paddingHorizontal: 20,
+    paddingHorizontal: 18,
   },
   modalCard: {
     width: '100%',
     maxWidth: 380,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 24,
+    borderWidth: 1,
+    borderColor: '#EFEBF8',
+    padding: 20,
+    shadowColor: '#582CDB',
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.2,
+    shadowRadius: 24,
+    elevation: 8,
+  },
+  modalCardLarge: {
+    width: '100%',
+    maxWidth: 400,
     backgroundColor: '#FFFFFF',
     borderRadius: 24,
     borderWidth: 1,
@@ -1530,6 +1979,216 @@ const styles = StyleSheet.create({
     fontWeight: '800',
     color: '#64748B',
   },
+
+  // Hook Modal Item Cards
+  hookModalItemCard: {
+    backgroundColor: '#FAF8FE',
+    borderRadius: 16,
+    borderWidth: 1.5,
+    borderColor: '#EDE9FE',
+    padding: 14,
+    marginBottom: 10,
+  },
+  hookModalItemCardActive: {
+    backgroundColor: '#FFFFFF',
+    borderColor: '#582CDB',
+    shadowColor: '#582CDB',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 3,
+  },
+  hookModalItemHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 6,
+  },
+  hookModalItemType: {
+    fontSize: 11.5,
+    fontWeight: '900',
+    color: '#6D28D9',
+  },
+  hookModalItemTypeActive: {
+    color: '#582CDB',
+  },
+  selectedCheckBadge: {
+    backgroundColor: '#EDE9FE',
+    paddingVertical: 2,
+    paddingHorizontal: 8,
+    borderRadius: 6,
+  },
+  selectedCheckText: {
+    fontSize: 9.5,
+    fontWeight: '900',
+    color: '#582CDB',
+  },
+  hookModalItemText: {
+    fontSize: 13.5,
+    fontWeight: '700',
+    color: '#171420',
+    lineHeight: 19,
+    marginBottom: 4,
+  },
+  hookModalItemDesc: {
+    fontSize: 11,
+    color: '#64748B',
+  },
+
+  // Body Modal Item Cards
+  bodyModalItemCard: {
+    backgroundColor: '#FAF8FE',
+    borderRadius: 16,
+    borderWidth: 1.5,
+    borderColor: '#EDE9FE',
+    padding: 14,
+    marginBottom: 10,
+  },
+  bodyModalItemCardActive: {
+    backgroundColor: '#FFFFFF',
+    borderColor: '#582CDB',
+    shadowColor: '#582CDB',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 3,
+  },
+  bodyModalItemHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 6,
+  },
+  bodyModalItemTitle: {
+    fontSize: 13,
+    fontWeight: '800',
+    color: '#171420',
+  },
+  bodyModalTagPill: {
+    backgroundColor: '#EDE9FE',
+    paddingVertical: 3,
+    paddingHorizontal: 8,
+    borderRadius: 6,
+  },
+  bodyModalTagText: {
+    fontSize: 10,
+    fontWeight: '800',
+    color: '#6D28D9',
+  },
+  bodyModalItemText: {
+    fontSize: 12.5,
+    color: '#334155',
+    lineHeight: 18,
+  },
+
+  // Lesson Modal Item Cards
+  lessonModalItemCard: {
+    backgroundColor: '#FAF8FE',
+    borderRadius: 16,
+    borderWidth: 1.5,
+    borderColor: '#EDE9FE',
+    padding: 14,
+    marginBottom: 10,
+  },
+  lessonModalItemCardActive: {
+    backgroundColor: '#FFFFFF',
+    borderColor: '#582CDB',
+    shadowColor: '#582CDB',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 3,
+  },
+  lessonModalItemHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 6,
+  },
+  lessonModalItemTitle: {
+    fontSize: 13,
+    fontWeight: '800',
+    color: '#171420',
+  },
+  lessonModalTagPill: {
+    backgroundColor: '#EDE9FE',
+    paddingVertical: 3,
+    paddingHorizontal: 8,
+    borderRadius: 6,
+  },
+  lessonModalTagText: {
+    fontSize: 10,
+    fontWeight: '800',
+    color: '#6D28D9',
+  },
+  lessonModalItemText: {
+    fontSize: 13,
+    color: '#334155',
+    lineHeight: 18,
+  },
+
+  // CTA Modal Item Cards
+  ctaModalItemCard: {
+    backgroundColor: '#FAF8FE',
+    borderRadius: 16,
+    borderWidth: 1.5,
+    borderColor: '#EDE9FE',
+    padding: 14,
+    marginBottom: 10,
+  },
+  ctaModalItemCardActive: {
+    backgroundColor: '#FFFFFF',
+    borderColor: '#582CDB',
+    shadowColor: '#582CDB',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 3,
+  },
+  ctaModalItemHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 6,
+  },
+  ctaModalItemType: {
+    fontSize: 12,
+    fontWeight: '900',
+    color: '#6D28D9',
+  },
+  ctaModalItemTypeActive: {
+    color: '#582CDB',
+  },
+  ctaModalGoal: {
+    fontSize: 10.5,
+    color: '#64748B',
+  },
+  ctaModalItemText: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: '#171420',
+    lineHeight: 18,
+  },
+
+  modalFullBtn: {
+    backgroundColor: '#582CDB',
+    height: 46,
+    borderRadius: 14,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 10,
+    shadowColor: '#582CDB',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.25,
+    shadowRadius: 10,
+    elevation: 4,
+  },
+  modalFullBtnText: {
+    fontSize: 14,
+    fontWeight: '800',
+    color: '#FFFFFF',
+  },
+
   notifCard: {
     flexDirection: 'row',
     gap: 10,
@@ -1567,19 +2226,6 @@ const styles = StyleSheet.create({
     fontSize: 9.5,
     color: '#94A3B8',
     marginTop: 4,
-  },
-  modalFullBtn: {
-    backgroundColor: '#582CDB',
-    height: 44,
-    borderRadius: 12,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginTop: 10,
-  },
-  modalFullBtnText: {
-    fontSize: 13.5,
-    fontWeight: '800',
-    color: '#FFFFFF',
   },
   profileModalCardInner: {
     alignItems: 'center',
