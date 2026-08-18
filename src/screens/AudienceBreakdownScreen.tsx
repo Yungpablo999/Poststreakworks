@@ -1112,7 +1112,7 @@ export const AudienceBreakdownScreen: React.FC<AudienceBreakdownScreenProps> = (
               </View>
             </View>
 
-            {/* UNLOCK PRO BUTTON (SAME COLOR AS UNLOCK PRO & NAVIGATES TO PRO PAGE) */}
+            {/* LUXURY GOLD UNLOCK PRO BUTTON */}
             <Pressable
               style={({ pressed }) => [styles.unlockAnalyticsBtn, pressed && styles.btnPressed]}
               onPress={() => {
@@ -1126,9 +1126,16 @@ export const AudienceBreakdownScreen: React.FC<AudienceBreakdownScreenProps> = (
                 }
               }}
             >
-              <Text style={styles.unlockAnalyticsBtnText}>
-                Unlock Audience Analytics (Pro) ➔
-              </Text>
+              <LinearGradient
+                colors={['#F59E0B', '#D97706']}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 0 }}
+                style={styles.unlockGradient}
+              >
+                <Text style={styles.unlockAnalyticsBtnText}>
+                  Unlock Audience Analytics (Pro) ➔
+                </Text>
+              </LinearGradient>
             </Pressable>
           </View>
 
@@ -2477,16 +2484,22 @@ const styles = StyleSheet.create({
   unlockAnalyticsBtn: {
     height: 46,
     borderRadius: 14,
-    backgroundColor: '#EDE9FE',
-    borderWidth: 1,
-    borderColor: '#DDD6FE',
+    overflow: 'hidden',
+    shadowColor: '#D97706',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.25,
+    shadowRadius: 8,
+    elevation: 3,
+  },
+  unlockGradient: {
+    flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
   },
   unlockAnalyticsBtnText: {
-    fontSize: 12.5,
+    fontSize: 13,
     fontWeight: '900',
-    color: '#582CDB',
+    color: '#FFFFFF',
     letterSpacing: 0.4,
   },
 
