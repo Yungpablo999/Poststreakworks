@@ -41,6 +41,17 @@ interface NotificationItem {
   badgeBorder: string;
 }
 
+interface PlatformOption {
+  id: string;
+  name: string;
+  shortName: string;
+  format: string;
+  multiplier: string;
+  bgColor: string;
+  gradient?: string[];
+  iconType: 'tiktok' | 'instagram' | 'youtube' | 'linkedin' | 'x' | 'threads' | 'pinterest' | 'snapchat' | 'facebook';
+}
+
 const NOTIFICATIONS: NotificationItem[] = [
   {
     id: 'n1',
@@ -70,6 +81,158 @@ const SAMPLE_IDEAS = [
   '3 mistakes almost every beginner creator makes',
   'How I batch-film 10 videos in 2 hours',
 ];
+
+const ALL_AVAILABLE_PLATFORMS: PlatformOption[] = [
+  {
+    id: 'tiktok',
+    name: 'TikTok',
+    shortName: 'TikTok',
+    format: '9:16 Video / Reels',
+    multiplier: '1.2x Reach',
+    bgColor: '#111827',
+    iconType: 'tiktok',
+  },
+  {
+    id: 'instagram',
+    name: 'Instagram',
+    shortName: 'IG',
+    format: 'Reels & Carousel',
+    multiplier: '1.4x Reach',
+    bgColor: '#833AB4',
+    gradient: ['#833AB4', '#FD1D1D', '#FCAF45'],
+    iconType: 'instagram',
+  },
+  {
+    id: 'youtube',
+    name: 'YouTube',
+    shortName: 'YT',
+    format: 'Shorts & Longform',
+    multiplier: '1.1x Reach',
+    bgColor: '#EF4444',
+    iconType: 'youtube',
+  },
+  {
+    id: 'linkedin',
+    name: 'LinkedIn',
+    shortName: 'LinkedIn',
+    format: 'Carousels & Posts',
+    multiplier: '1.6x Reach',
+    bgColor: '#0A66C2',
+    iconType: 'linkedin',
+  },
+  {
+    id: 'x',
+    name: 'X (Twitter)',
+    shortName: 'X',
+    format: 'Threads & Takes',
+    multiplier: '1.0x Reach',
+    bgColor: '#000000',
+    iconType: 'x',
+  },
+  {
+    id: 'threads',
+    name: 'Threads',
+    shortName: 'Threads',
+    format: 'Quotes & Insights',
+    multiplier: '1.3x Reach',
+    bgColor: '#18181B',
+    iconType: 'threads',
+  },
+  {
+    id: 'pinterest',
+    name: 'Pinterest',
+    shortName: 'Pinterest',
+    format: 'Idea Pins & Saves',
+    multiplier: '1.5x Saves',
+    bgColor: '#E60023',
+    iconType: 'pinterest',
+  },
+  {
+    id: 'snapchat',
+    name: 'Snapchat',
+    shortName: 'Snap',
+    format: 'Spotlight & Stories',
+    multiplier: '0.9x Reach',
+    bgColor: '#EAB308',
+    iconType: 'snapchat',
+  },
+  {
+    id: 'facebook',
+    name: 'Facebook',
+    shortName: 'FB',
+    format: 'Reels & Groups',
+    multiplier: '0.8x Reach',
+    bgColor: '#1877F2',
+    iconType: 'facebook',
+  },
+];
+
+// Helper to render authentic platform SVGs
+const PlatformIcon = ({ iconType, size = 20 }: { iconType: string; size?: number }) => {
+  if (iconType === 'tiktok') {
+    return (
+      <Svg width={size} height={size} viewBox="0 0 24 24" fill="#FFFFFF">
+        <Path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.89 2.89 2.89 0 0 1-2.89-2.89 2.89 2.89 0 0 1 2.89-2.89c.28 0 .54.04.79.1v-3.5a6.37 6.37 0 0 0-.79-.05A6.34 6.34 0 0 0 3 15.67 6.34 6.34 0 0 0 9.34 22a6.34 6.34 0 0 0 6.34-6.33V9.05a8.16 8.16 0 0 0 4.91 1.64v-3.5a4.8 4.8 0 0 1-1-.5z" />
+      </Svg>
+    );
+  }
+  if (iconType === 'instagram') {
+    return (
+      <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+        <Rect x="2" y="2" width="20" height="20" rx="5" stroke="#FFFFFF" strokeWidth="2.2" />
+        <Circle cx="12" cy="12" r="4" stroke="#FFFFFF" strokeWidth="2.2" />
+        <Circle cx="18" cy="6" r="1.2" fill="#FFFFFF" />
+      </Svg>
+    );
+  }
+  if (iconType === 'youtube') {
+    return (
+      <Svg width={size} height={size} viewBox="0 0 24 24" fill="#FFFFFF">
+        <Path d="M21.58 7.19a2.5 2.5 0 0 0-1.76-1.77C18.26 5 12 5 12 5s-6.26 0-7.82.42A2.5 2.5 0 0 0 2.42 7.2 26.3 26.3 0 0 0 2 12a26.3 26.3 0 0 0 .42 4.81 2.5 2.5 0 0 0 1.76 1.77C5.74 19 12 19 12 19s6.26 0 7.82-.42a2.5 2.5 0 0 0 1.76-1.77A26.3 26.3 0 0 0 22 12a26.3 26.3 0 0 0-.42-4.81zM10 15V9l5.2 3-5.2 3z" />
+      </Svg>
+    );
+  }
+  if (iconType === 'linkedin') {
+    return (
+      <Svg width={size} height={size} viewBox="0 0 24 24" fill="#FFFFFF">
+        <Path d="M19 3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14m-.5 15.5v-5.3a3.26 3.26 0 0 0-3.26-3.26c-.85 0-1.84.52-2.28 1.3v-1.11h-2.79v8.37h2.79v-4.93c0-.77.62-1.4 1.39-1.4a1.4 1.4 0 0 1 1.4 1.4v4.93h2.75M6.46 8.76a1.64 1.64 0 1 0-.02-3.28 1.64 1.64 0 0 0 .02 3.28m1.4 9.74v-8.37H5.06v8.37h2.8z" />
+      </Svg>
+    );
+  }
+  if (iconType === 'x') {
+    return (
+      <Svg width={size} height={size} viewBox="0 0 24 24" fill="#FFFFFF">
+        <Path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+      </Svg>
+    );
+  }
+  if (iconType === 'threads') {
+    return (
+      <Svg width={size} height={size} viewBox="0 0 24 24" fill="#FFFFFF">
+        <Path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm4-9.5c0 2.21-1.79 4-4 4s-4-1.79-4-4 1.79-4 4-4c.73 0 1.41.2 2 .54V6.26c-.63-.17-1.3-.26-2-.26-3.31 0-6 2.69-6 6s2.69 6 6 6 6-2.69 6-6v-1.5h-2z" />
+      </Svg>
+    );
+  }
+  if (iconType === 'pinterest') {
+    return (
+      <Svg width={size} height={size} viewBox="0 0 24 24" fill="#FFFFFF">
+        <Path d="M12 2a10 10 0 0 0-3.66 19.31c-.05-.82-.09-2.09.02-2.99l.86-3.67s-.22-.44-.22-1.09c0-1.02.59-1.78 1.33-1.78.63 0 .93.47.93 1.04 0 .63-.4 1.58-.61 2.45-.17.74.37 1.34 1.1 1.34 1.32 0 2.34-1.39 2.34-3.4 0-1.78-1.28-3.02-3.11-3.02-2.27 0-3.6 1.7-3.6 3.46 0 .69.26 1.42.59 1.82.07.08.08.15.06.23l-.22.92c-.04.14-.12.17-.28.1-1.04-.48-1.69-2-1.69-3.22 0-2.62 1.9-5.03 5.49-5.03 2.88 0 5.12 2.05 5.12 4.8 0 2.86-1.8 5.16-4.3 5.16-.84 0-1.63-.44-1.9-.95l-.52 1.98c-.19.73-.7 1.64-1.04 2.2A10 10 0 1 0 12 2z" />
+      </Svg>
+    );
+  }
+  if (iconType === 'snapchat') {
+    return (
+      <Svg width={size} height={size} viewBox="0 0 24 24" fill="#111827">
+        <Path d="M12 2.5c-3.5 0-5.5 2.5-5.5 5.5 0 .5.1 1.2.2 1.5-.6.2-1.2.6-1.4 1.1-.3.6-.1 1.2.2 1.5.4.4 1 .6 1.6.6-.1.3-.2.7-.2 1 0 1.2.9 2 2.3 2.3-.6.6-1.4 1-2.4 1.2-.5.1-.8.5-.8.9 0 .6.7 1 1.6 1.2 1.4.3 2.9.2 4.4 1.2 1.5-1 3-0.9 4.4-1.2.9-.2 1.6-.6 1.6-1.2 0-.4-.3-.8-.8-.9-1-.2-1.8-.6-2.4-1.2 1.4-.3 2.3-1.1 2.3-2.3 0-.3-.1-.7-.2-1 .6 0 1.2-.2 1.6-.6.3-.3.5-.9.2-1.5-.2-.5-.8-.9-1.4-1.1.1-.3.2-1 .2-1.5 0-3-2-5.5-5.5-5.5z" />
+      </Svg>
+    );
+  }
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill="#FFFFFF">
+      <Path d="M22 12c0-5.52-4.48-10-10-10S2 6.48 2 12c0 4.84 3.44 8.87 8 9.8V15H8v-3h2V9.5C10 7.57 11.57 6 13.5 6H16v3h-2c-.55 0-1 .45-1 1v2h3v3h-3v6.95c5.05-.5 9-4.76 9-9.95z" />
+    </Svg>
+  );
+};
 
 export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
   ideaTitle = 'One thing I wish I knew before I started creating',
@@ -112,6 +275,7 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
   const [scheduledTime, setScheduledTime] = useState('Today, 7:30 PM');
 
   // Modals
+  const [showPlatformsModal, setShowPlatformsModal] = useState(false);
   const [showChangeIdeaModal, setShowChangeIdeaModal] = useState(false);
   const [showTimePickerModal, setShowTimePickerModal] = useState(false);
   const [showNotificationModal, setShowNotificationModal] = useState(false);
@@ -272,6 +436,10 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
   const readinessPercent = hasMedia ? 100 : 75;
 
   const unreadNotifCount = notificationsList.filter((n) => n.unread).length;
+
+  // Filter the display platforms: all selected ones + common ones
+  const displayedPlatformIds = Array.from(new Set([...selectedPlatforms, 'tiktok', 'instagram', 'youtube']));
+  const displayedPlatforms = ALL_AVAILABLE_PLATFORMS.filter((p) => displayedPlatformIds.includes(p.id));
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -441,85 +609,92 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
             </View>
           </View>
 
-          {/* 2. CHOOSE PLATFORMS */}
-          <Text style={styles.sectionLabel}>CHOOSE PLATFORMS</Text>
-          <View style={styles.platformsRow}>
-            {/* TikTok Card */}
+          {/* 2. CHOOSE PLATFORMS WITH MORE PLATFORMS TRIGGER */}
+          <View style={styles.sectionLabelRow}>
+            <Text style={styles.sectionLabel}>CHOOSE PLATFORMS</Text>
             <Pressable
-              style={[
-                styles.platformCard,
-                selectedPlatforms.includes('tiktok') && styles.platformCardActive,
-              ]}
-              onPress={() => togglePlatform('tiktok')}
-            >
-              <View style={[styles.platformIconCircle, { backgroundColor: '#111827' }]}>
-                <Svg width={20} height={20} viewBox="0 0 24 24" fill="#FFFFFF">
-                  <Path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.89 2.89 2.89 0 0 1-2.89-2.89 2.89 2.89 0 0 1 2.89-2.89c.28 0 .54.04.79.1v-3.5a6.37 6.37 0 0 0-.79-.05A6.34 6.34 0 0 0 3 15.67 6.34 6.34 0 0 0 9.34 22a6.34 6.34 0 0 0 6.34-6.33V9.05a8.16 8.16 0 0 0 4.91 1.64v-3.5a4.8 4.8 0 0 1-1-.5z" />
-                </Svg>
-              </View>
-              <Text style={styles.platformCardName}>TikTok</Text>
-              {selectedPlatforms.includes('tiktok') ? (
-                <View style={styles.platformActiveBadge}>
-                  <Text style={{ fontSize: 10, color: '#FFFFFF', fontWeight: '900' }}>✓</Text>
-                </View>
-              ) : (
-                <View style={styles.platformInactiveBadge} />
-              )}
-            </Pressable>
-
-            {/* Instagram Card */}
-            <Pressable
-              style={[
-                styles.platformCard,
-                selectedPlatforms.includes('instagram') && styles.platformCardActive,
-              ]}
-              onPress={() => togglePlatform('instagram')}
+              style={({ pressed }) => [styles.morePlatformsHeaderBtn, pressed && styles.btnPressed]}
+              onPress={() => {
+                triggerModalAnim();
+                setShowPlatformsModal(true);
+              }}
+              hitSlop={8}
             >
               <LinearGradient
-                colors={['#833AB4', '#FD1D1D', '#FCAF45']}
+                colors={['#7C3AED', '#582CDB']}
                 start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 1 }}
-                style={styles.platformIconCircle}
+                end={{ x: 1, y: 0 }}
+                style={styles.morePlatformsHeaderGradient}
               >
-                <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
-                  <Rect x="2" y="2" width="20" height="20" rx="5" stroke="#FFFFFF" strokeWidth="2.2" />
-                  <Circle cx="12" cy="12" r="4" stroke="#FFFFFF" strokeWidth="2.2" />
-                  <Circle cx="18" cy="6" r="1.2" fill="#FFFFFF" />
+                <Svg width={13} height={13} viewBox="0 0 24 24" fill="none">
+                  <Path d="M12 5V19M5 12H19" stroke="#FFFFFF" strokeWidth="2.8" strokeLinecap="round" />
                 </Svg>
+                <Text style={styles.morePlatformsHeaderText}>More Platforms</Text>
               </LinearGradient>
-              <Text style={styles.platformCardName}>Instagram</Text>
-              {selectedPlatforms.includes('instagram') ? (
-                <View style={styles.platformActiveBadge}>
-                  <Text style={{ fontSize: 10, color: '#FFFFFF', fontWeight: '900' }}>✓</Text>
-                </View>
-              ) : (
-                <View style={styles.platformInactiveBadge} />
-              )}
-            </Pressable>
-
-            {/* YouTube Card */}
-            <Pressable
-              style={[
-                styles.platformCard,
-                selectedPlatforms.includes('youtube') && styles.platformCardActive,
-              ]}
-              onPress={() => togglePlatform('youtube')}
-            >
-              <View style={[styles.platformIconCircle, { backgroundColor: '#EF4444' }]}>
-                <Svg width={20} height={20} viewBox="0 0 24 24" fill="#FFFFFF">
-                  <Path d="M21.58 7.19a2.5 2.5 0 0 0-1.76-1.77C18.26 5 12 5 12 5s-6.26 0-7.82.42A2.5 2.5 0 0 0 2.42 7.2 26.3 26.3 0 0 0 2 12a26.3 26.3 0 0 0 .42 4.81 2.5 2.5 0 0 0 1.76 1.77C5.74 19 12 19 12 19s6.26 0 7.82-.42a2.5 2.5 0 0 0 1.76-1.77A26.3 26.3 0 0 0 22 12a26.3 26.3 0 0 0-.42-4.81zM10 15V9l5.2 3-5.2 3z" />
-                </Svg>
-              </View>
-              <Text style={styles.platformCardName}>YouTube</Text>
-              {selectedPlatforms.includes('youtube') ? (
-                <View style={styles.platformActiveBadge}>
-                  <Text style={{ fontSize: 10, color: '#FFFFFF', fontWeight: '900' }}>✓</Text>
-                </View>
-              ) : (
-                <View style={styles.platformInactiveBadge} />
-              )}
             </Pressable>
           </View>
+
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.platformsScrollContainer}
+          >
+            {displayedPlatforms.map((plat) => {
+              const isSelected = selectedPlatforms.includes(plat.id);
+              return (
+                <Pressable
+                  key={plat.id}
+                  style={[
+                    styles.platformCard,
+                    isSelected && styles.platformCardActive,
+                  ]}
+                  onPress={() => togglePlatform(plat.id)}
+                >
+                  {plat.gradient ? (
+                    <LinearGradient
+                      colors={plat.gradient as [string, string, ...string[]]}
+                      start={{ x: 0, y: 0 }}
+                      end={{ x: 1, y: 1 }}
+                      style={styles.platformIconCircle}
+                    >
+                      <PlatformIcon iconType={plat.iconType} size={18} />
+                    </LinearGradient>
+                  ) : (
+                    <View style={[styles.platformIconCircle, { backgroundColor: plat.bgColor }]}>
+                      <PlatformIcon iconType={plat.iconType} size={18} />
+                    </View>
+                  )}
+                  <Text style={styles.platformCardName} numberOfLines={1}>{plat.name}</Text>
+                  {isSelected ? (
+                    <View style={styles.platformActiveBadge}>
+                      <Text style={{ fontSize: 10, color: '#FFFFFF', fontWeight: '900' }}>✓</Text>
+                    </View>
+                  ) : (
+                    <View style={styles.platformInactiveBadge} />
+                  )}
+                </Pressable>
+              );
+            })}
+
+            {/* + More Button Card */}
+            <Pressable
+              style={styles.platformMoreCard}
+              onPress={() => {
+                triggerModalAnim();
+                setShowPlatformsModal(true);
+              }}
+            >
+              <View style={styles.platformMoreIconCircle}>
+                <Svg width={20} height={20} viewBox="0 0 24 24" fill="none">
+                  <Path d="M12 5V19M5 12H19" stroke="#582CDB" strokeWidth="2.4" strokeLinecap="round" />
+                </Svg>
+              </View>
+              <Text style={styles.platformMoreCardName}>+ More</Text>
+              <View style={styles.platformMoreTag}>
+                <Text style={styles.platformMoreTagText}>9 Channels</Text>
+              </View>
+            </Pressable>
+          </ScrollView>
 
           <Text style={styles.platformsDisclaimer}>
             Free users can prepare posts for selected platforms. Some auto-publishing options may require <Text style={{ color: '#D97706', fontWeight: '800' }}>Pro</Text> or platform approval.
@@ -796,7 +971,10 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
                 <Text style={styles.checkMarkWhite}>✓</Text>
               </View>
               <Text style={styles.checklistText}>
-                Platforms selected ({selectedPlatforms.map((p) => p === 'tiktok' ? 'TikTok' : p === 'instagram' ? 'IG' : 'YT').join(', ')})
+                Platforms selected ({selectedPlatforms.map((p) => {
+                  const match = ALL_AVAILABLE_PLATFORMS.find((item) => item.id === p);
+                  return match ? match.shortName : p;
+                }).join(', ')})
               </Text>
             </View>
 
@@ -928,6 +1106,94 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
           activeTab={activeTab}
           onTabPress={handleTabPress}
         />
+
+        {/* MODAL 0: CHOOSE MORE SOCIAL PLATFORMS */}
+        <Modal
+          visible={showPlatformsModal}
+          transparent={true}
+          animationType="fade"
+          onRequestClose={() => setShowPlatformsModal(false)}
+        >
+          <View style={styles.modalOverlay}>
+            <Animated.View style={[styles.modalCard, { transform: [{ scale: modalPopScale }] }]}>
+              <View style={styles.modalHeaderRow}>
+                <View>
+                  <Text style={styles.modalTitle}>Choose Social Platforms</Text>
+                  <Text style={styles.modalSubtitle}>Auto-format &amp; publish across all channels</Text>
+                </View>
+                <Pressable onPress={() => setShowPlatformsModal(false)} style={styles.modalCloseCircle} hitSlop={8}>
+                  <Text style={styles.modalCloseCross}>✕</Text>
+                </Pressable>
+              </View>
+
+              <ScrollView style={{ maxHeight: 340 }} showsVerticalScrollIndicator={false}>
+                {ALL_AVAILABLE_PLATFORMS.map((plat) => {
+                  const isSelected = selectedPlatforms.includes(plat.id);
+                  return (
+                    <Pressable
+                      key={plat.id}
+                      onPress={() => togglePlatform(plat.id)}
+                      style={[
+                        styles.platformModalRow,
+                        isSelected && styles.platformModalRowActive,
+                      ]}
+                    >
+                      {plat.gradient ? (
+                        <LinearGradient
+                          colors={plat.gradient as [string, string, ...string[]]}
+                          start={{ x: 0, y: 0 }}
+                          end={{ x: 1, y: 1 }}
+                          style={styles.modalPlatformIconCircle}
+                        >
+                          <PlatformIcon iconType={plat.iconType} size={18} />
+                        </LinearGradient>
+                      ) : (
+                        <View style={[styles.modalPlatformIconCircle, { backgroundColor: plat.bgColor }]}>
+                          <PlatformIcon iconType={plat.iconType} size={18} />
+                        </View>
+                      )}
+
+                      <View style={{ flex: 1 }}>
+                        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                          <Text style={styles.modalPlatformName}>{plat.name}</Text>
+                          <View style={styles.modalMultiplierPill}>
+                            <Text style={styles.modalMultiplierText}>{plat.multiplier}</Text>
+                          </View>
+                        </View>
+                        <Text style={styles.modalPlatformFormat}>{plat.format}</Text>
+                      </View>
+
+                      <View style={[styles.modalCheckbox, isSelected && styles.modalCheckboxActive]}>
+                        {isSelected && <Text style={{ color: '#FFFFFF', fontSize: 11, fontWeight: '900' }}>✓</Text>}
+                      </View>
+                    </Pressable>
+                  );
+                })}
+              </ScrollView>
+
+              <Pressable
+                style={styles.modalPrimaryActionBtn}
+                onPress={() => {
+                  if (Platform.OS !== 'web') {
+                    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+                  }
+                  setShowPlatformsModal(false);
+                }}
+              >
+                <LinearGradient
+                  colors={['#7C3AED', '#582CDB']}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 0 }}
+                  style={styles.modalPrimaryGradient}
+                >
+                  <Text style={styles.modalPrimaryActionText}>
+                    Apply Channels ({selectedPlatforms.length} Selected) ✓
+                  </Text>
+                </LinearGradient>
+              </Pressable>
+            </Animated.View>
+          </View>
+        </Modal>
 
         {/* MODAL 1: CHANGE IDEA */}
         <Modal
@@ -1417,7 +1683,6 @@ const styles = StyleSheet.create({
     fontWeight: '800',
     color: '#7F7894',
     letterSpacing: 0.6,
-    marginBottom: 8,
   },
   sectionLabelRow: {
     flexDirection: 'row',
@@ -1425,20 +1690,37 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 8,
   },
+  morePlatformsHeaderBtn: {
+    borderRadius: 100,
+    overflow: 'hidden',
+  },
+  morePlatformsHeaderGradient: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    paddingVertical: 3.5,
+    paddingHorizontal: 10,
+  },
+  morePlatformsHeaderText: {
+    fontSize: 10.5,
+    fontWeight: '800',
+    color: '#FFFFFF',
+  },
 
   // 2. Platforms
-  platformsRow: {
+  platformsScrollContainer: {
     flexDirection: 'row',
     gap: 10,
-    marginBottom: 8,
+    paddingBottom: 8,
   },
   platformCard: {
-    flex: 1,
+    width: 100,
     backgroundColor: '#FFFFFF',
     borderRadius: 16,
     borderWidth: 1.5,
     borderColor: '#E2E8F0',
     paddingVertical: 14,
+    paddingHorizontal: 6,
     alignItems: 'center',
     position: 'relative',
     shadowColor: '#582CDB',
@@ -1463,7 +1745,8 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: '700',
     color: '#171420',
-    marginBottom: 4,
+    marginBottom: 6,
+    textAlign: 'center',
   },
   platformActiveBadge: {
     width: 16,
@@ -1479,6 +1762,44 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     borderWidth: 1.5,
     borderColor: '#CBD5E1',
+  },
+  platformMoreCard: {
+    width: 90,
+    backgroundColor: '#FAF8FE',
+    borderRadius: 16,
+    borderWidth: 1.5,
+    borderColor: '#DDD6FE',
+    borderStyle: 'dashed',
+    paddingVertical: 14,
+    paddingHorizontal: 6,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  platformMoreIconCircle: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: '#EDE9FE',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 6,
+  },
+  platformMoreCardName: {
+    fontSize: 11.5,
+    fontWeight: '800',
+    color: '#582CDB',
+    marginBottom: 2,
+  },
+  platformMoreTag: {
+    backgroundColor: '#EDE9FE',
+    paddingVertical: 2,
+    paddingHorizontal: 6,
+    borderRadius: 4,
+  },
+  platformMoreTagText: {
+    fontSize: 8.5,
+    fontWeight: '800',
+    color: '#6D28D9',
   },
   platformsDisclaimer: {
     fontSize: 11,
@@ -2149,6 +2470,86 @@ const styles = StyleSheet.create({
     fontWeight: '800',
     color: '#64748B',
   },
+
+  // Platform Modal Rows
+  platformModalRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    backgroundColor: '#F8FAFC',
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    padding: 12,
+    marginBottom: 8,
+  },
+  platformModalRowActive: {
+    backgroundColor: '#FAF5FF',
+    borderColor: '#7C3AED',
+  },
+  modalPlatformIconCircle: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalPlatformName: {
+    fontSize: 13.5,
+    fontWeight: '800',
+    color: '#171420',
+  },
+  modalMultiplierPill: {
+    backgroundColor: '#EDE9FE',
+    paddingVertical: 1.5,
+    paddingHorizontal: 6,
+    borderRadius: 6,
+  },
+  modalMultiplierText: {
+    fontSize: 9.5,
+    fontWeight: '800',
+    color: '#6D28D9',
+  },
+  modalPlatformFormat: {
+    fontSize: 11,
+    color: '#64748B',
+    marginTop: 2,
+  },
+  modalCheckbox: {
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    borderWidth: 1.5,
+    borderColor: '#CBD5E1',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalCheckboxActive: {
+    backgroundColor: '#582CDB',
+    borderColor: '#582CDB',
+  },
+  modalPrimaryActionBtn: {
+    height: 46,
+    borderRadius: 14,
+    overflow: 'hidden',
+    marginTop: 10,
+    shadowColor: '#582CDB',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 3,
+  },
+  modalPrimaryGradient: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalPrimaryActionText: {
+    fontSize: 13.5,
+    fontWeight: '800',
+    color: '#FFFFFF',
+  },
+
   ideaChoiceItem: {
     backgroundColor: '#F8FAFC',
     borderRadius: 12,
