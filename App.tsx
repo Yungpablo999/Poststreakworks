@@ -25,6 +25,7 @@ import { ContentAngleScreen } from './src/screens/ContentAngleScreen';
 import { ScriptScreen } from './src/screens/ScriptScreen';
 import { CaptionScreen } from './src/screens/CaptionScreen';
 import { MessagesScreen } from './src/screens/MessagesScreen';
+import { CollabIdeaScreen } from './src/screens/CollabIdeaScreen';
 import { GhostLoadingScreen } from './src/components/GhostLoadingScreen';
 import { TabType } from './src/components/FloatingTabBar';
 
@@ -50,6 +51,7 @@ type Screen =
   | 'script'
   | 'caption'
   | 'messages'
+  | 'collab-idea'
   | 'jarvis-pro';
 
 export default function App() {
@@ -64,13 +66,21 @@ export default function App() {
   const [connectedPlatforms, setConnectedPlatforms] = useState<string[]>(['tiktok', 'instagram', 'youtube']);
   const [selectedIdeaTitle, setSelectedIdeaTitle] = useState('One thing I wish I knew before I started creating');
   const [composerIdeaTitle, setComposerIdeaTitle] = useState('One thing I wish I knew before I started creating');
+  const [collabPartnerData, setCollabPartnerData] = useState({
+    name: 'Elena Rostova',
+    handle: '@elenacreates',
+    niche: 'Tech & Lifestyle, Lagos',
+    avatar: require('./assets/images/elena-avatar.jpg'),
+  });
 
   // Animated page transition handler
   const navigateTo = (nextScreen: Screen, customMessage?: string) => {
     if (nextScreen !== currentScreen) {
       const msg =
         customMessage ||
-        (nextScreen === 'messages'
+        (nextScreen === 'collab-idea'
+          ? 'Opening Collab Blueprint...'
+          : nextScreen === 'messages'
           ? 'Opening Creator Messages...'
           : nextScreen === 'caption'
           ? 'Writing Caption & Hashtags...'
@@ -615,8 +625,42 @@ export default function App() {
             onOpenJarvisPro={() => navigateTo('jarvis-pro')}
             onOpenCreate={() => navigateTo('create')}
             onOpenMatch={() => navigateTo('match')}
+            onOpenCollabIdea={(partnerData) => {
+              if (partnerData) setCollabPartnerData(partnerData);
+              navigateTo('collab-idea');
+            }}
             onOpenPostComposer={(prefillTitle) => {
               if (prefillTitle) setComposerIdeaTitle(prefillTitle);
+              navigateTo('composer');
+            }}
+            onNavigateTab={(tab: TabType) => {
+              if (tab === 'home') {
+                navigateTo('dashboard');
+              } else if (tab === 'create') {
+                navigateTo('create');
+              } else if (tab === 'match') {
+                navigateTo('match');
+              } else if (tab === 'quests') {
+                navigateTo('quests');
+              } else if (tab === 'growth') {
+                navigateTo('growth');
+              }
+            }}
+          />
+        )}
+
+        {currentScreen === 'collab-idea' && (
+          <CollabIdeaScreen
+            partnerName={collabPartnerData.name}
+            partnerHandle={collabPartnerData.handle}
+            partnerNiche={collabPartnerData.niche}
+            partnerAvatar={collabPartnerData.avatar}
+            onBack={() => navigateTo(previousScreen ? previousScreen : 'messages')}
+            onLogout={handleLogout}
+            onOpenSchedule={() => navigateTo('schedule')}
+            onOpenJarvisPro={() => navigateTo('jarvis-pro')}
+            onStartCollaboration={(collabData) => {
+              if (collabData?.title) setComposerIdeaTitle(collabData.title);
               navigateTo('composer');
             }}
             onNavigateTab={(tab: TabType) => {

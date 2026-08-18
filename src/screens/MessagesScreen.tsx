@@ -32,6 +32,7 @@ interface MessagesScreenProps {
   onOpenPostComposer?: (prefillTitle?: string) => void;
   onOpenCreate?: () => void;
   onOpenMatch?: () => void;
+  onOpenCollabIdea?: (partnerData: { name: string; handle: string; niche: string; avatar: any }) => void;
 }
 
 interface StorySlide {
@@ -397,6 +398,7 @@ export const MessagesScreen: React.FC<MessagesScreenProps> = ({
   onOpenPostComposer,
   onOpenCreate,
   onOpenMatch,
+  onOpenCollabIdea,
 }) => {
   const [activeTab, setActiveTab] = useState<TabType>('match');
   const [searchQuery, setSearchQuery] = useState('');
@@ -978,6 +980,44 @@ export const MessagesScreen: React.FC<MessagesScreenProps> = ({
                   <Text style={styles.pactBoostBtnText}>⚡ Boost</Text>
                 </Pressable>
               </LinearGradient>
+
+              {/* COLLAB IDEA SECTION BANNER */}
+              <Pressable
+                style={({ pressed }) => [styles.collabIdeaBanner, pressed && styles.btnPressed]}
+                onPress={() => {
+                  if (Platform.OS !== 'web') {
+                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                  }
+                  if (onOpenCollabIdea) {
+                    onOpenCollabIdea({
+                      name: activeChatThread.name,
+                      handle: activeChatThread.handle,
+                      niche: activeChatThread.niche,
+                      avatar: activeChatThread.avatar,
+                    });
+                  }
+                }}
+              >
+                <View style={styles.collabIdeaBannerLeft}>
+                  <View style={styles.collabIdeaIconBox}>
+                    <Text style={{ fontSize: 16 }}>🤝</Text>
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                      <Text style={styles.collabIdeaBannerTitle}>Collab Idea</Text>
+                      <View style={styles.collabIdeaPillMini}>
+                        <Text style={styles.collabIdeaPillMiniText}>Day in Lagos</Text>
+                      </View>
+                    </View>
+                    <Text style={styles.collabIdeaBannerSub} numberOfLines={1}>
+                      Turn a shared creator lesson with {activeChatThread.name.split(' ')[0]} into a post
+                    </Text>
+                  </View>
+                </View>
+                <View style={styles.collabIdeaOpenBtn}>
+                  <Text style={styles.collabIdeaOpenBtnText}>Open Idea ›</Text>
+                </View>
+              </Pressable>
 
               {/* Chat Messages List */}
               <ScrollView
@@ -1951,6 +1991,67 @@ const styles = StyleSheet.create({
     fontSize: 11,
     fontWeight: '900',
     color: '#FFFFFF',
+  },
+  collabIdeaBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: '#FFFFFF',
+    borderBottomWidth: 1,
+    borderBottomColor: '#EDE9FE',
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    gap: 8,
+  },
+  collabIdeaBannerLeft: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+  },
+  collabIdeaIconBox: {
+    width: 32,
+    height: 32,
+    borderRadius: 10,
+    backgroundColor: '#FAF5FF',
+    borderWidth: 1,
+    borderColor: '#EDE9FE',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  collabIdeaBannerTitle: {
+    fontSize: 12.5,
+    fontWeight: '800',
+    color: '#171420',
+  },
+  collabIdeaPillMini: {
+    backgroundColor: '#EDE9FE',
+    paddingVertical: 1.5,
+    paddingHorizontal: 6,
+    borderRadius: 6,
+  },
+  collabIdeaPillMiniText: {
+    fontSize: 9,
+    fontWeight: '900',
+    color: '#582CDB',
+  },
+  collabIdeaBannerSub: {
+    fontSize: 11,
+    color: '#64748B',
+    marginTop: 1,
+  },
+  collabIdeaOpenBtn: {
+    backgroundColor: '#FAF5FF',
+    borderWidth: 1,
+    borderColor: '#DDD6FE',
+    paddingVertical: 5,
+    paddingHorizontal: 10,
+    borderRadius: 8,
+  },
+  collabIdeaOpenBtnText: {
+    fontSize: 11,
+    fontWeight: '800',
+    color: '#582CDB',
   },
   chatMessagesScroll: {
     paddingHorizontal: 16,
