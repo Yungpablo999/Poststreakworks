@@ -25,6 +25,7 @@ interface CreateScreenProps {
   onOpenSchedule?: () => void;
   onOpenJarvisPro?: () => void;
   onOpenIdeaDetail?: (ideaTitle?: string) => void;
+  onOpenPostComposer?: (prefillTitle?: string, prefillPlatform?: string) => void;
 }
 
 interface DraftItem {
@@ -240,6 +241,7 @@ export const CreateScreen: React.FC<CreateScreenProps> = ({
   onOpenSchedule,
   onOpenJarvisPro,
   onOpenIdeaDetail,
+  onOpenPostComposer,
 }) => {
   const [activeTab, setActiveTab] = useState<TabType>('create');
   const [drafts, setDrafts] = useState<DraftItem[]>(INITIAL_DRAFTS);
@@ -318,10 +320,14 @@ export const CreateScreen: React.FC<CreateScreenProps> = ({
   };
 
   const openNewPost = (prefillTitle?: string, prefillPlatform?: 'tiktok' | 'instagram' | 'youtube') => {
-    if (prefillTitle) setPostTitle(prefillTitle);
-    if (prefillPlatform) setPostPlatform(prefillPlatform);
-    triggerModalPop();
-    setShowNewPostModal(true);
+    if (onOpenPostComposer) {
+      onOpenPostComposer(prefillTitle, prefillPlatform);
+    } else {
+      if (prefillTitle) setPostTitle(prefillTitle);
+      if (prefillPlatform) setPostPlatform(prefillPlatform);
+      triggerModalPop();
+      setShowNewPostModal(true);
+    }
   };
 
   const openIdeas = () => {

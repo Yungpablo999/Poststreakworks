@@ -20,6 +20,7 @@ import { MatchScreen } from './src/screens/MatchScreen';
 import { JarvisProScreen } from './src/screens/JarvisProScreen';
 import { GrowthScreen } from './src/screens/GrowthScreen';
 import { IdeaDetailScreen } from './src/screens/IdeaDetailScreen';
+import { PostComposerScreen } from './src/screens/PostComposerScreen';
 import { GhostLoadingScreen } from './src/components/GhostLoadingScreen';
 import { TabType } from './src/components/FloatingTabBar';
 
@@ -40,6 +41,7 @@ type Screen =
   | 'schedule'
   | 'challenge-detail'
   | 'idea-detail'
+  | 'composer'
   | 'jarvis-pro';
 
 export default function App() {
@@ -53,13 +55,16 @@ export default function App() {
   const [selectedNiches, setSelectedNiches] = useState<string[]>(['lifestyle', 'comedy']);
   const [connectedPlatforms, setConnectedPlatforms] = useState<string[]>(['tiktok', 'instagram', 'youtube']);
   const [selectedIdeaTitle, setSelectedIdeaTitle] = useState('One thing I wish I knew before I started creating');
+  const [composerIdeaTitle, setComposerIdeaTitle] = useState('One thing I wish I knew before I started creating');
 
   // Animated page transition handler
   const navigateTo = (nextScreen: Screen, customMessage?: string) => {
     if (nextScreen !== currentScreen) {
       const msg =
         customMessage ||
-        (nextScreen === 'idea-detail'
+        (nextScreen === 'composer'
+          ? 'Opening Post Composer...'
+          : nextScreen === 'idea-detail'
           ? 'Crafting Viral Idea...'
           : nextScreen === 'challenge-detail'
           ? 'Entering Community Challenge'
@@ -298,6 +303,10 @@ export default function App() {
               if (title) setSelectedIdeaTitle(title);
               navigateTo('idea-detail');
             }}
+            onOpenPostComposer={(title, platform) => {
+              if (title) setComposerIdeaTitle(title);
+              navigateTo('composer');
+            }}
             onNavigateTab={(tab: TabType) => {
               if (tab === 'home') {
                 navigateTo('dashboard');
@@ -438,6 +447,33 @@ export default function App() {
         {currentScreen === 'idea-detail' && (
           <IdeaDetailScreen
             ideaTitle={selectedIdeaTitle}
+            onBack={() => navigateTo(previousScreen ? previousScreen : 'create')}
+            onLogout={handleLogout}
+            onOpenSchedule={() => navigateTo('schedule')}
+            onOpenJarvisPro={() => navigateTo('jarvis-pro')}
+            onOpenPostComposer={(title) => {
+              if (title) setComposerIdeaTitle(title);
+              navigateTo('composer');
+            }}
+            onNavigateTab={(tab: TabType) => {
+              if (tab === 'home') {
+                navigateTo('dashboard');
+              } else if (tab === 'create') {
+                navigateTo('create');
+              } else if (tab === 'match') {
+                navigateTo('match');
+              } else if (tab === 'quests') {
+                navigateTo('quests');
+              } else if (tab === 'growth') {
+                navigateTo('growth');
+              }
+            }}
+          />
+        )}
+
+        {currentScreen === 'composer' && (
+          <PostComposerScreen
+            ideaTitle={composerIdeaTitle}
             onBack={() => navigateTo(previousScreen ? previousScreen : 'create')}
             onLogout={handleLogout}
             onOpenSchedule={() => navigateTo('schedule')}

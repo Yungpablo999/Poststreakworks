@@ -27,6 +27,7 @@ interface IdeaDetailScreenProps {
   onOpenSchedule?: () => void;
   onOpenJarvisPro?: () => void;
   onNavigateTab?: (tab: TabType) => void;
+  onOpenPostComposer?: (ideaTitle?: string) => void;
 }
 
 interface NotificationItem {
@@ -84,6 +85,7 @@ export const IdeaDetailScreen: React.FC<IdeaDetailScreenProps> = ({
   onOpenSchedule,
   onOpenJarvisPro,
   onNavigateTab,
+  onOpenPostComposer,
 }) => {
   const [activeTab, setActiveTab] = useState<TabType>('create');
   const [selectedHookIndex, setSelectedHookIndex] = useState(0);
@@ -217,10 +219,14 @@ export const IdeaDetailScreen: React.FC<IdeaDetailScreenProps> = ({
     if (Platform.OS !== 'web') {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     }
-    setCelebrationTitle('Draft Created!');
-    setCelebrationSubtitle(`"${ideaTitle}" is now ready in your drafts queue with full hook & caption.`);
-    setCelebrationSpeech('47-day streak protected! Keep this momentum going.');
-    setShowCelebrationModal(true);
+    if (onOpenPostComposer) {
+      onOpenPostComposer(ideaTitle);
+    } else {
+      setCelebrationTitle('Draft Created!');
+      setCelebrationSubtitle(`"${ideaTitle}" is now ready in your drafts queue with full hook & caption.`);
+      setCelebrationSpeech('47-day streak protected! Keep this momentum going.');
+      setShowCelebrationModal(true);
+    }
   };
 
   const handleOpenScript = () => {
