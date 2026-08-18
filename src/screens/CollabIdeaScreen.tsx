@@ -575,26 +575,39 @@ export const CollabIdeaScreen: React.FC<CollabIdeaScreenProps> = ({
               </View>
             </View>
 
-            {/* CARD 8: SUGGESTED SCHEDULE */}
-            <View style={styles.scheduleCard}>
+            {/* CARD 8: SUGGESTED SCHEDULE (PREMIUM PALETTE) */}
+            <LinearGradient
+              colors={['#FAF8FE', '#F5F0FF']}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={styles.scheduleCard}
+            >
               <View style={styles.scheduleHeaderRow}>
                 <Text style={styles.scheduleHeaderTitle}>SUGGESTED SCHEDULE</Text>
-                <Text style={{ fontSize: 18 }}>📅</Text>
+                <View style={styles.scheduleCalendarIconBadge}>
+                  <Text style={{ fontSize: 13 }}>📅</Text>
+                </View>
               </View>
 
               <View style={styles.scheduleItemRow}>
                 <Text style={styles.scheduleItemLabel}>Planning</Text>
-                <Text style={styles.scheduleItemTime}>11:00-12:00 PM</Text>
+                <Text style={styles.scheduleItemTime}>11:00 - 12:00 PM</Text>
               </View>
+
+              <View style={styles.scheduleItemDivider} />
 
               <View style={styles.scheduleItemRow}>
                 <Text style={styles.scheduleItemLabel}>Filming</Text>
-                <Text style={styles.scheduleItemTime}>2:00-3:30 PM</Text>
+                <Text style={styles.scheduleItemTime}>2:00 - 3:30 PM</Text>
               </View>
 
+              <View style={styles.scheduleItemDivider} />
+
               <View style={styles.scheduleItemRow}>
-                <Text style={styles.scheduleItemLabel}>Publishing</Text>
-                <Text style={styles.scheduleItemTimeHighlight}>Peak 7:30 PM</Text>
+                <Text style={[styles.scheduleItemLabel, { color: '#582CDB', fontWeight: '800' }]}>Publishing</Text>
+                <View style={styles.peakSlotBadge}>
+                  <Text style={styles.peakSlotBadgeText}>⚡ Peak 7:30 PM</Text>
+                </View>
               </View>
 
               <Pressable
@@ -604,9 +617,16 @@ export const CollabIdeaScreen: React.FC<CollabIdeaScreenProps> = ({
                   setShowScheduleModal(true);
                 }}
               >
-                <Text style={styles.adjustScheduleBtnText}>Adjust Schedule ›</Text>
+                <LinearGradient
+                  colors={['#7C3AED', '#582CDB']}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 0 }}
+                  style={styles.adjustScheduleGradient}
+                >
+                  <Text style={styles.adjustScheduleBtnText}>Adjust Schedule ›</Text>
+                </LinearGradient>
               </Pressable>
-            </View>
+            </LinearGradient>
 
             {/* CARD 9: IMPACT SCORE */}
             <View style={styles.impactCard}>
@@ -1368,14 +1388,18 @@ const styles = StyleSheet.create({
     color: '#171420',
   },
 
-  // Suggested Schedule Card
+  // Suggested Schedule Card (Premium Royal Lavender & Purple Palette)
   scheduleCard: {
-    backgroundColor: '#FEF3C7',
     borderRadius: 20,
-    borderWidth: 1,
-    borderColor: '#FDE68A',
+    borderWidth: 1.5,
+    borderColor: '#EDE9FE',
     padding: 16,
     marginBottom: 14,
+    shadowColor: '#582CDB',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.06,
+    shadowRadius: 10,
+    elevation: 2,
   },
   scheduleHeaderRow: {
     flexDirection: 'row',
@@ -1384,20 +1408,35 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   scheduleHeaderTitle: {
-    fontSize: 10,
+    fontSize: 10.5,
     fontWeight: '900',
-    color: '#78350F',
-    letterSpacing: 0.6,
+    color: '#6D28D9',
+    letterSpacing: 0.8,
+  },
+  scheduleCalendarIconBadge: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: '#EDE9FE',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#DDD6FE',
   },
   scheduleItemRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingVertical: 4,
+    paddingVertical: 5,
+  },
+  scheduleItemDivider: {
+    height: 1,
+    backgroundColor: 'rgba(221, 214, 254, 0.4)',
+    marginVertical: 2,
   },
   scheduleItemLabel: {
     fontSize: 12.5,
-    color: '#78350F',
+    color: '#64748B',
     fontWeight: '600',
   },
   scheduleItemTime: {
@@ -1405,23 +1444,40 @@ const styles = StyleSheet.create({
     color: '#171420',
     fontWeight: '700',
   },
-  scheduleItemTimeHighlight: {
-    fontSize: 12.5,
-    color: '#582CDB',
+  peakSlotBadge: {
+    backgroundColor: '#EDE9FE',
+    borderWidth: 1,
+    borderColor: '#DDD6FE',
+    paddingVertical: 2.5,
+    paddingHorizontal: 8,
+    borderRadius: 8,
+  },
+  peakSlotBadgeText: {
+    fontSize: 11,
     fontWeight: '900',
+    color: '#6D28D9',
   },
   adjustScheduleBtn: {
-    height: 38,
-    borderRadius: 12,
-    backgroundColor: '#171420',
+    height: 42,
+    borderRadius: 13,
+    overflow: 'hidden',
+    marginTop: 12,
+    shadowColor: '#582CDB',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.18,
+    shadowRadius: 8,
+    elevation: 3,
+  },
+  adjustScheduleGradient: {
+    flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    marginTop: 10,
   },
   adjustScheduleBtnText: {
-    fontSize: 12,
-    fontWeight: '800',
+    fontSize: 12.5,
+    fontWeight: '900',
     color: '#FFFFFF',
+    letterSpacing: 0.4,
   },
 
   // Impact Score Card
