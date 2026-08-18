@@ -30,6 +30,7 @@ import { AudienceBreakdownScreen } from './src/screens/AudienceBreakdownScreen';
 import { PostPerformanceScreen } from './src/screens/PostPerformanceScreen';
 import { PlatformGrowthScreen } from './src/screens/PlatformGrowthScreen';
 import { EarningsScreen } from './src/screens/EarningsScreen';
+import { OpportunityReadinessScreen } from './src/screens/OpportunityReadinessScreen';
 import { GhostLoadingScreen } from './src/components/GhostLoadingScreen';
 import { TabType } from './src/components/FloatingTabBar';
 import { UserProfileData } from './src/components/UserProfileModal';
@@ -61,7 +62,8 @@ type Screen =
   | 'audience-breakdown'
   | 'post-performance'
   | 'platform-growth'
-  | 'earnings';
+  | 'earnings'
+  | 'opportunity-readiness';
 
 export default function App() {
   const [showSplash, setShowSplash] = useState(true);
@@ -725,6 +727,33 @@ export default function App() {
                 
         
         
+        
+        {currentScreen === 'opportunity-readiness' && (
+          <OpportunityReadinessScreen
+            onBack={() => navigateTo(previousScreen ? previousScreen : 'earnings')}
+            onLogout={handleLogout}
+            onOpenMessages={() => navigateTo('messages')}
+            onOpenSchedule={() => navigateTo('schedule')}
+            onOpenJarvisPro={() => navigateTo('jarvis-pro')}
+            onOpenPlatforms={() => navigateTo('platforms')}
+            onNavigateTab={(tab: TabType) => {
+              if (tab === 'home') {
+                navigateTo('dashboard');
+              } else if (tab === 'create') {
+                navigateTo('create');
+              } else if (tab === 'match') {
+                navigateTo('match');
+              } else if (tab === 'quests') {
+                navigateTo('quests');
+              } else if (tab === 'growth') {
+                navigateTo('growth');
+              }
+            }}
+            userProfile={userProfile}
+            onSaveProfile={(updated) => setUserProfile(updated)}
+          />
+        )}
+
         {currentScreen === 'earnings' && (
           <EarningsScreen
             onBack={() => navigateTo(previousScreen ? previousScreen : 'growth')}
@@ -734,6 +763,7 @@ export default function App() {
             onOpenJarvisPro={() => navigateTo('jarvis-pro')}
             onOpenQuests={() => navigateTo('quests')}
             onOpenPlatforms={() => navigateTo('platforms')}
+            onOpenReadiness={() => navigateTo('opportunity-readiness')}
             onNavigateTab={(tab: TabType) => {
               if (tab === 'home') {
                 navigateTo('dashboard');

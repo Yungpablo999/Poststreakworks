@@ -63,6 +63,7 @@ interface EarningsScreenProps {
   onOpenMessages?: () => void;
   onOpenSchedule?: () => void;
   onOpenQuests?: () => void;
+  onOpenReadiness?: () => void;
   onOpenPlatforms?: () => void;
   userProfile?: UserProfileData;
   onSaveProfile?: (updated: UserProfileData) => void;
@@ -76,6 +77,7 @@ export const EarningsScreen: React.FC<EarningsScreenProps> = ({
   onOpenMessages,
   onOpenSchedule,
   onOpenQuests,
+  onOpenReadiness,
   onOpenPlatforms,
   userProfile,
   onSaveProfile,
@@ -338,7 +340,9 @@ export const EarningsScreen: React.FC<EarningsScreenProps> = ({
                 if (Platform.OS !== 'web') {
                   Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
                 }
-                if (onOpenQuests) {
+                if (onOpenReadiness) {
+                  onOpenReadiness();
+                } else if (onOpenQuests) {
                   onOpenQuests();
                 } else if (onNavigateTab) {
                   onNavigateTab('quests');
