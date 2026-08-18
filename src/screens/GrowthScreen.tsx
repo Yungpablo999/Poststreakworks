@@ -199,6 +199,7 @@ interface GrowthScreenProps {
   onBackToDashboard?: () => void;
   onOpenPostPerformance?: () => void;
   onOpenPlatformGrowth?: () => void;
+  onOpenEarnings?: () => void;
   onLogout?: () => void;
   onNavigateTab?: (tab: TabType) => void;
   onOpenJarvisPro?: () => void;
@@ -212,6 +213,7 @@ export const GrowthScreen: React.FC<GrowthScreenProps> = ({
   onBackToDashboard,
   onOpenPostPerformance,
   onOpenPlatformGrowth,
+  onOpenEarnings,
   onLogout,
   onNavigateTab,
   onOpenJarvisPro,
@@ -753,6 +755,53 @@ export const GrowthScreen: React.FC<GrowthScreenProps> = ({
               >
                 <Text style={styles.analyzeBtnText}>Analyze Why It Worked</Text>
               </LinearGradient>
+            </Pressable>
+          </View>
+
+          
+          {/* CREATOR EARNINGS & MONETIZATION ENTRY CARD */}
+          <View style={styles.earningsHubCard}>
+            <View style={styles.earningsHubHeader}>
+              <View>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                  <Text style={styles.earningsHubTitle}>Creator Earnings</Text>
+                  <View style={styles.readinessTag}>
+                    <Text style={styles.readinessTagText}>35% READINESS</Text>
+                  </View>
+                </View>
+                <Text style={styles.earningsHubSub}>Build your path to paid brand campaigns</Text>
+              </View>
+              <View style={styles.earningsHubIconCircle}>
+                <Text style={{ fontSize: 18 }}>💰</Text>
+              </View>
+            </View>
+
+            <View style={styles.earningsHubStatsRow}>
+              <View style={styles.earningsHubStatCol}>
+                <Text style={styles.earningsHubStatLabel}>CURRENT BALANCE</Text>
+                <Text style={styles.earningsHubStatVal}>$0.00</Text>
+              </View>
+              <View style={styles.earningsHubDivider} />
+              <View style={styles.earningsHubStatCol}>
+                <Text style={styles.earningsHubStatLabel}>EST. TRACKED</Text>
+                <Text style={[styles.earningsHubStatVal, { color: '#582CDB' }]}>$1,420.50</Text>
+              </View>
+            </View>
+
+            <Pressable
+              style={({ pressed }) => [styles.earningsHubBtn, pressed && styles.btnPressed]}
+              onPress={() => {
+                if (Platform.OS !== 'web') {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                }
+                if (onOpenEarnings) {
+                  onOpenEarnings();
+                } else {
+                  showToast('Opening Creator Earnings...');
+                }
+              }}
+            >
+              <Text style={styles.earningsHubBtnText}>View Creator Earnings ➔</Text>
             </Pressable>
           </View>
 
@@ -2548,5 +2597,100 @@ const styles = StyleSheet.create({
     fontWeight: '800',
     color: '#FFFFFF',
     textAlign: 'center',
+  },
+  // CREATOR EARNINGS HUB CARD
+  earningsHubCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 22,
+    borderWidth: 1,
+    borderColor: '#EDE8E1',
+    padding: 16,
+    marginBottom: 18,
+    shadowColor: '#171420',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.04,
+    shadowRadius: 10,
+    elevation: 2,
+  },
+  earningsHubHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  earningsHubTitle: {
+    fontSize: 16,
+    fontWeight: '900',
+    color: '#171420',
+  },
+  readinessTag: {
+    backgroundColor: '#EDE9FE',
+    paddingVertical: 2,
+    paddingHorizontal: 6,
+    borderRadius: 4,
+  },
+  readinessTagText: {
+    fontSize: 8.5,
+    fontWeight: '900',
+    color: '#582CDB',
+  },
+  earningsHubSub: {
+    fontSize: 11.5,
+    color: '#64748B',
+    marginTop: 2,
+  },
+  earningsHubIconCircle: {
+    width: 38,
+    height: 38,
+    borderRadius: 12,
+    backgroundColor: '#FEF9C3',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#FDE047',
+  },
+  earningsHubStatsRow: {
+    flexDirection: 'row',
+    backgroundColor: '#FAF8F5',
+    borderRadius: 12,
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+    borderWidth: 1,
+    borderColor: '#EDE8E1',
+    marginBottom: 12,
+  },
+  earningsHubStatCol: {
+    flex: 1,
+    alignItems: 'center',
+  },
+  earningsHubStatLabel: {
+    fontSize: 8.5,
+    fontWeight: '900',
+    color: '#64748B',
+    letterSpacing: 0.4,
+    marginBottom: 2,
+  },
+  earningsHubStatVal: {
+    fontSize: 16,
+    fontWeight: '900',
+    color: '#171420',
+  },
+  earningsHubDivider: {
+    width: 1,
+    height: '80%',
+    backgroundColor: '#E2E8F0',
+    alignSelf: 'center',
+  },
+  earningsHubBtn: {
+    height: 42,
+    borderRadius: 12,
+    backgroundColor: '#582CDB',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  earningsHubBtnText: {
+    fontSize: 12.5,
+    fontWeight: '900',
+    color: '#FFFFFF',
   },
 });

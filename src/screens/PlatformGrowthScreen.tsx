@@ -117,6 +117,7 @@ interface PlatformGrowthScreenProps {
   onOpenJarvisPro?: () => void;
   onOpenMessages?: () => void;
   onOpenSchedule?: () => void;
+  onOpenEarnings?: () => void;
   onOpenComposer?: (ideaTitle?: string) => void;
   onOpenScript?: (ideaTitle?: string) => void;
   onOpenContentAngle?: () => void;
@@ -131,6 +132,7 @@ export const PlatformGrowthScreen: React.FC<PlatformGrowthScreenProps> = ({
   onOpenJarvisPro,
   onOpenMessages,
   onOpenSchedule,
+  onOpenEarnings,
   onOpenComposer,
   onOpenScript,
   onOpenContentAngle,

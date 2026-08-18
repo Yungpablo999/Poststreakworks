@@ -27,6 +27,7 @@ interface PostPerformanceScreenProps {
   onOpenMessages?: () => void;
   onOpenSchedule?: () => void;
   onOpenAudienceBreakdown?: () => void;
+  onOpenEarnings?: () => void;
   onOpenComposer?: (ideaTitle?: string) => void;
   onOpenScript?: (ideaTitle?: string) => void;
   onOpenContentAngle?: () => void;
@@ -42,6 +43,7 @@ export const PostPerformanceScreen: React.FC<PostPerformanceScreenProps> = ({
   onOpenMessages,
   onOpenSchedule,
   onOpenAudienceBreakdown,
+  onOpenEarnings,
   onOpenComposer,
   onOpenScript,
   onOpenContentAngle,
@@ -350,6 +352,29 @@ export const PostPerformanceScreen: React.FC<PostPerformanceScreenProps> = ({
                 <Text style={styles.postStatValue}>3,420</Text>
               </View>
             </View>
+
+            {/* Estimated Post Earnings Revenue Chip */}
+            <Pressable
+              style={({ pressed }) => [styles.postEarningsChip, pressed && styles.btnPressed]}
+              onPress={() => {
+                if (Platform.OS !== 'web') {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                }
+                if (onOpenEarnings) {
+                  onOpenEarnings();
+                } else {
+                  showToast('Est. Revenue: $142.50 from this viral post');
+                }
+              }}
+            >
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                <Text style={{ fontSize: 13 }}>💰</Text>
+                <Text style={styles.postEarningsChipText}>
+                  Est. Post Revenue: <Text style={{ color: '#582CDB', fontWeight: '900' }}>$142.50</Text>
+                </Text>
+              </View>
+              <Text style={styles.postEarningsChipLink}>View Earnings ➔</Text>
+            </Pressable>
 
             {/* Action Button */}
             <Pressable
@@ -1262,6 +1287,28 @@ const styles = StyleSheet.create({
   // Dual Action Buttons
   postActionsRow: {
     gap: 8,
+  },
+  postEarningsChip: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    backgroundColor: '#FAF5FF',
+    borderRadius: 12,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderWidth: 1,
+    borderColor: '#E9D5FF',
+    marginBottom: 12,
+  },
+  postEarningsChipText: {
+    fontSize: 11.5,
+    fontWeight: '800',
+    color: '#171420',
+  },
+  postEarningsChipLink: {
+    fontSize: 10.5,
+    fontWeight: '900',
+    color: '#582CDB',
   },
   createSimilarBtn: {
     height: 46,

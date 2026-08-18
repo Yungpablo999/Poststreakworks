@@ -236,6 +236,7 @@ interface AudienceBreakdownScreenProps {
   onBack: () => void;
   onOpenPostPerformance?: () => void;
   onOpenPlatformGrowth?: () => void;
+  onOpenEarnings?: () => void;
   onLogout?: () => void;
   onOpenSchedule?: () => void;
   onOpenJarvisPro?: () => void;
@@ -252,6 +253,7 @@ export const AudienceBreakdownScreen: React.FC<AudienceBreakdownScreenProps> = (
   onBack,
   onOpenPostPerformance,
   onOpenPlatformGrowth,
+  onOpenEarnings,
   onLogout,
   onOpenSchedule,
   onOpenJarvisPro,
