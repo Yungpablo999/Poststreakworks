@@ -20,6 +20,7 @@ import * as Haptics from 'expo-haptics';
 import Svg, { Path, Circle, Rect } from 'react-native-svg';
 import { FloatingTabBar, TabType } from '../components/FloatingTabBar';
 import { AnimatedCompletionModal } from '../components/AnimatedCompletionModal';
+import { COLLAB_PLANS } from './CollabIdeaScreen';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
@@ -32,7 +33,7 @@ interface MessagesScreenProps {
   onOpenPostComposer?: (prefillTitle?: string) => void;
   onOpenCreate?: () => void;
   onOpenMatch?: () => void;
-  onOpenCollabIdea?: (partnerData: { name: string; handle: string; niche: string; avatar: any }) => void;
+  onOpenCollabIdea?: (partnerData: { name: string; handle: string; niche: string; avatar: any; planIndex?: number }) => void;
 }
 
 interface StorySlide {
@@ -404,6 +405,16 @@ export const MessagesScreen: React.FC<MessagesScreenProps> = ({
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<'all' | 'buddies' | 'collabs' | 'jarvis'>('all');
   const [threads, setThreads] = useState<ConversationThread[]>(INITIAL_CONVERSATIONS);
+  const [chatPlanIndex, setChatPlanIndex] = useState(0);
+  const currentChatPlan = COLLAB_PLANS[chatPlanIndex];
+
+  const handleShuffleChatPlan = () => {
+    if (Platform.OS !== 'web') {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    }
+    const nextIdx = (chatPlanIndex + 1) % COLLAB_PLANS.length;
+    setChatPlanIndex(nextIdx);
+  };
 
   // Active 1-on-1 Chat State
   const [activeChatThread, setActiveChatThread] = useState<ConversationThread | null>(null);
@@ -982,23 +993,24 @@ export const MessagesScreen: React.FC<MessagesScreenProps> = ({
               </LinearGradient>
 
               {/* COLLAB IDEA SECTION BANNER */}
-              <Pressable
-                style={({ pressed }) => [styles.collabIdeaBanner, pressed && styles.btnPressed]}
-                onPress={() => {
-                  if (Platform.OS !== 'web') {
-                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-                  }
-                  if (onOpenCollabIdea) {
-                    onOpenCollabIdea({
-                      name: activeChatThread.name,
-                      handle: activeChatThread.handle,
-                      niche: activeChatThread.niche,
-                      avatar: activeChatThread.avatar,
-                    });
-                  }
-                }}
-              >
-                <View style={styles.collabIdeaBannerLeft}>
+              <View style={styles.collabIdeaBanner}>
+                <Pressable
+                  style={styles.collabIdeaBannerLeft}
+                  onPress={() => {
+                    if (Platform.OS !== 'web') {
+                      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                    }
+                    if (onOpenCollabIdea) {
+                      onOpenCollabIdea({
+                        name: activeChatThread.name,
+                        handle: activeChatThread.handle,
+                        niche: activeChatThread.niche,
+                        avatar: activeChatThread.avatar,
+                        planIndex: chatPlanIndex,
+                      });
+                    }
+                  }}
+                >
                   <View style={styles.collabIdeaIconBox}>
                     <Text style={{ fontSize: 16 }}>🤝</Text>
                   </View>
@@ -1006,18 +1018,48 @@ export const MessagesScreen: React.FC<MessagesScreenProps> = ({
                     <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
                       <Text style={styles.collabIdeaBannerTitle}>Collab Idea</Text>
                       <View style={styles.collabIdeaPillMini}>
-                        <Text style={styles.collabIdeaPillMiniText}>Day in Lagos</Text>
+                        <Text style={styles.collabIdeaPillMiniText}>{currentChatPlan.pillTag}</Text>
                       </View>
                     </View>
                     <Text style={styles.collabIdeaBannerSub} numberOfLines={1}>
-                      Turn a shared creator lesson with {activeChatThread.name.split(' ')[0]} into a post
+                      {currentChatPlan.title}
                     </Text>
                   </View>
+                </Pressable>
+
+                <View style={styles.collabIdeaActionsRight}>
+                  {/* DO ANOTHER PLAN BUTTON */}
+                  <Pressable
+                    style={({ pressed }) => [styles.collabIdeaShuffleBtn, pressed && styles.btnPressed]}
+                    onPress={handleShuffleChatPlan}
+                    hitSlop={6}
+                  >
+                    <Text style={styles.collabIdeaShuffleBtnText}>🎲 Another Plan</Text>
+                  </Pressable>
+
+                  {/* OPEN IDEA BUTTON */}
+                  <Pressable
+                    style={({ pressed }) => [styles.collabIdeaOpenBtn, pressed && styles.btnPressed]}
+                    onPress={() => {
+                      if (Platform.OS !== 'web') {
+                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                      }
+                      if (onOpenCollabIdea) {
+                        onOpenCollabIdea({
+                          name: activeChatThread.name,
+                          handle: activeChatThread.handle,
+                          niche: activeChatThread.niche,
+                          avatar: activeChatThread.avatar,
+                          planIndex: chatPlanIndex,
+                        });
+                      }
+                    }}
+                    hitSlop={6}
+                  >
+                    <Text style={styles.collabIdeaOpenBtnText}>Open Idea ›</Text>
+                  </Pressable>
                 </View>
-                <View style={styles.collabIdeaOpenBtn}>
-                  <Text style={styles.collabIdeaOpenBtnText}>Open Idea ›</Text>
-                </View>
-              </Pressable>
+              </View>
 
               {/* Chat Messages List */}
               <ScrollView
@@ -2040,12 +2082,30 @@ const styles = StyleSheet.create({
     color: '#64748B',
     marginTop: 1,
   },
+  collabIdeaActionsRight: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  collabIdeaShuffleBtn: {
+    backgroundColor: '#EDE9FE',
+    borderWidth: 1,
+    borderColor: '#DDD6FE',
+    paddingVertical: 5,
+    paddingHorizontal: 8,
+    borderRadius: 8,
+  },
+  collabIdeaShuffleBtnText: {
+    fontSize: 10.5,
+    fontWeight: '800',
+    color: '#6D28D9',
+  },
   collabIdeaOpenBtn: {
     backgroundColor: '#FAF5FF',
     borderWidth: 1,
     borderColor: '#DDD6FE',
     paddingVertical: 5,
-    paddingHorizontal: 10,
+    paddingHorizontal: 9,
     borderRadius: 8,
   },
   collabIdeaOpenBtnText: {

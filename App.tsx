@@ -66,11 +66,18 @@ export default function App() {
   const [connectedPlatforms, setConnectedPlatforms] = useState<string[]>(['tiktok', 'instagram', 'youtube']);
   const [selectedIdeaTitle, setSelectedIdeaTitle] = useState('One thing I wish I knew before I started creating');
   const [composerIdeaTitle, setComposerIdeaTitle] = useState('One thing I wish I knew before I started creating');
-  const [collabPartnerData, setCollabPartnerData] = useState({
+  const [collabPartnerData, setCollabPartnerData] = useState<{
+    name: string;
+    handle: string;
+    niche: string;
+    avatar: any;
+    planIndex?: number;
+  }>({
     name: 'Elena Rostova',
     handle: '@elenacreates',
     niche: 'Tech & Lifestyle, Lagos',
     avatar: require('./assets/images/elena-avatar.jpg'),
+    planIndex: 0,
   });
 
   // Animated page transition handler
@@ -661,6 +668,7 @@ export default function App() {
             partnerHandle={collabPartnerData.handle}
             partnerNiche={collabPartnerData.niche}
             partnerAvatar={collabPartnerData.avatar}
+            initialPlanIndex={collabPartnerData.planIndex ?? 0}
             onBack={() => navigateTo(previousScreen ? previousScreen : 'messages')}
             onLogout={handleLogout}
             onOpenSchedule={() => navigateTo('schedule')}

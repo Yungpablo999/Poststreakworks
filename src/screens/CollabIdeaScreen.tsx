@@ -20,11 +20,196 @@ import Svg, { Path, Circle, Rect } from 'react-native-svg';
 import { FloatingTabBar, TabType } from '../components/FloatingTabBar';
 import { AnimatedCompletionModal } from '../components/AnimatedCompletionModal';
 
+export interface CollabPlan {
+  id: string;
+  title: string;
+  pillTag: string;
+  desc: string;
+  tags: string[];
+  goal: string;
+  outline: string[];
+  yourRoles: string[];
+  partnerRoles: string[];
+  caption: string;
+  jarvisAdvice: string;
+  format: string;
+  formatSub: string;
+}
+
+export const COLLAB_PLANS: CollabPlan[] = [
+  {
+    id: 'plan_1',
+    title: 'Day in Lagos: Creator Edition',
+    pillTag: 'DAY IN LAGOS',
+    desc: 'A short lifestyle collaboration where two creators show how they plan, film and publish content in one day.',
+    tags: ['Lifestyle', 'Behind the Scenes', 'Short-form Video', 'Easy to Film'],
+    goal: 'Create a simple first collab that builds trust and is easy to execute.',
+    outline: [
+      '1. Meet up and greet on camera',
+      '2. Plan the collaborative post',
+      '3. Film both creators together',
+      '4. Share one key creator lesson',
+      '5. Post and tag each other',
+    ],
+    yourRoles: [
+      '• Introduce concept',
+      '• Share creator lesson',
+      '• Edit final footage',
+      '• Write caption copy',
+    ],
+    partnerRoles: [
+      '• Choose locations',
+      '• Film key scenes',
+      '• Add her perspective',
+      '• Share first to story',
+    ],
+    caption:
+      '"Spent the day creating with @{partner}. We realized that the hardest part of growth is not the work, it is the plan. Here is how we filmed 3 hooks in under 30 minutes..."',
+    jarvisAdvice:
+      "Keep this first collaboration simple. A short behind-the-scenes Reel is much easier to finish and publish today, ensuring you do not lose your 47-day momentum while exploring this new partnership.",
+    format: 'Short Reel',
+    formatSub: 'Vertical 9:16, under 45s',
+  },
+  {
+    id: 'plan_2',
+    title: '2 Creators, 1 Viral Hook Challenge',
+    pillTag: 'VIRAL CHALLENGE',
+    desc: 'Two creators compete to write the most unskippable 3-second hook for the same viral topic, then react to each other.',
+    tags: ['Hook Challenge', 'Split-Screen', 'High Retention', 'Interactive'],
+    goal: 'Drive high comment engagement and debate by letting audience vote for best hook.',
+    outline: [
+      '1. State the 3-second hook challenge rule',
+      '2. Film Take A: Your punchy opening hook',
+      '3. Film Take B: Partner unexpected reverse angle',
+      '4. React to each other hooks live on camera',
+      '5. Ask audience in caption: Drop 1 or 2 in comments',
+    ],
+    yourRoles: [
+      '• Present topic constraint',
+      '• Deliver Hook #1 on camera',
+      '• Edit split-screen reaction',
+      '• Pin the top voting comment',
+    ],
+    partnerRoles: [
+      '• Deliver Hook #2 on camera',
+      '• Record surprise reaction',
+      '• Add sound effects & captions',
+      '• Engage with comment votes',
+    ],
+    caption:
+      '"We challenged each other to write the most unskippable hook in 60 seconds with @{partner}. Who delivered the better opening? Drop 1 or 2 in the comments 👇"',
+    jarvisAdvice:
+      'Hook challenges generate 3.2x more comments than standard videos. Pin a comment asking "Who won this round?" within the first 10 minutes of posting.',
+    format: 'Split Reel / Duo',
+    formatSub: 'Vertical 9:16, 30-45s',
+  },
+  {
+    id: 'plan_3',
+    title: 'Creator Tech & Gear Setup Swap',
+    pillTag: 'TECH SWAP',
+    desc: 'Swap one piece of filming equipment or an editing app for 1 hour and test if expensive gear actually makes better content.',
+    tags: ['Tech & Gear', 'Honest Review', 'Studio BTS', 'Budget Tips'],
+    goal: 'Showcase authentic creator workflow and provide budget-friendly production hacks.',
+    outline: [
+      '1. Show our current filming gear side-by-side',
+      '2. Swap primary lighting/mic setup with partner',
+      '3. Film identical test scenes in low and high light',
+      '4. Reveal side-by-side video quality results',
+      '5. Give final honest verdict on budget vs pro gear',
+    ],
+    yourRoles: [
+      '• Demo audio & mic differences',
+      '• Film side-by-side test cut',
+      '• Create comparison overlays',
+      '• Draft tech breakdown caption',
+    ],
+    partnerRoles: [
+      '• Demo lighting & focal length',
+      '• Provide camera settings tips',
+      '• Edit color grade comparison',
+      '• Share gear links on Stories',
+    ],
+    caption:
+      '"I swapped filming gear with @{partner} for 24 hours. The results proved that good lighting beats an expensive camera every single time. Here is what we found..."',
+    jarvisAdvice:
+      'Gear comparisons perform exceptionally well in save-rate metrics. Make sure to list the exact lighting settings in the caption to maximize bookmarks.',
+    format: 'Side-by-Side Video',
+    formatSub: 'Vertical 9:16, 50s',
+  },
+  {
+    id: 'plan_4',
+    title: 'Creator Routine Roast & React',
+    pillTag: 'COMEDIC ROAST',
+    desc: 'A hilarious and relatable breakdown where creators expose each others chaotic filming schedules and fix one bad habit.',
+    tags: ['Humor', 'Relatable BTS', 'Productivity', 'Blooper Reel'],
+    goal: 'Humanize your brand and build deep community rapport through relatable humor.',
+    outline: [
+      '1. Confess your most embarrassing creator habit',
+      '2. Partner reacts with genuine disbelief on camera',
+      '3. Partner shares their 10-minute fix for that habit',
+      '4. Test the new habit live and show bloopers',
+      '5. Tag each other and challenge creators to confess theirs',
+    ],
+    yourRoles: [
+      '• Expose weekly planning chaos',
+      '• Deliver comedic reaction takes',
+      '• Edit funny zoom-ins and sound effects',
+      '• Write lighthearted caption',
+    ],
+    partnerRoles: [
+      '• Critique with tough creator love',
+      '• Demonstrate productivity fix',
+      '• Capture blooper outtakes',
+      '• Reply to relatable comments',
+    ],
+    caption:
+      '"I showed @{partner} how I actually plan my weekly posts and they were horrified 😂 But this one tip they gave me saved 2 hours of editing today..."',
+    jarvisAdvice:
+      'Relatable bloopers retain 88% of viewers past the 15-second mark. Keep the opening candid without an over-polished intro.',
+    format: 'Comedy Short',
+    formatSub: 'Vertical 9:16, 35s',
+  },
+  {
+    id: 'plan_5',
+    title: '14-Day Accountability Duo Pact',
+    pillTag: 'DUO PACT',
+    desc: 'Two creators commit to a joint 14-day posting streak with a friendly forfeit punishment if either creator breaks momentum.',
+    tags: ['Streak Pact', 'Motivation', 'Community Quest', 'High Viral Multiplier'],
+    goal: 'Protect both creators active streaks while giving audience a compelling 14-day narrative to follow.',
+    outline: [
+      '1. Announce official duo accountability challenge on camera',
+      '2. Agree on the hilarious penalty for whoever misses a post',
+      '3. Shake hands / high-five to seal the consistency pact',
+      '4. Show Day 1 consistency proof and streak counter',
+      '5. Invite audience to hold both creators accountable in comments',
+    ],
+    yourRoles: [
+      '• Kick off pact announcement video',
+      '• Track the duo consistency counter',
+      '• Post Day 1 proof to main feed',
+      '• Coordinate daily check-ins',
+    ],
+    partnerRoles: [
+      '• Reveal the forfeit penalty',
+      '• Confirm agreement on camera',
+      '• Tag community for accountability',
+      '• Share daily check-in to story',
+    ],
+    caption:
+      '"Official duo pact: @{partner} and I are posting every single day for 14 days straight. If either of us breaks the streak, we have to film the loser punishment. Hold us accountable!"',
+    jarvisAdvice:
+      'Accountability pacts create a multi-part series effect. Users who follow Day 1 are 60% more likely to watch subsequent videos to see if the streak holds.',
+    format: 'Series Kickoff Reel',
+    formatSub: 'Vertical 9:16, 40s',
+  },
+];
+
 interface CollabIdeaScreenProps {
   partnerName?: string;
   partnerHandle?: string;
   partnerNiche?: string;
   partnerAvatar?: any;
+  initialPlanIndex?: number;
   onBack: () => void;
   onLogout?: () => void;
   onOpenSchedule?: () => void;
@@ -143,6 +328,7 @@ export const CollabIdeaScreen: React.FC<CollabIdeaScreenProps> = ({
   partnerHandle = '@elenacreates',
   partnerNiche = 'Tech & Lifestyle, Lagos',
   partnerAvatar = require('../../assets/images/elena-avatar.jpg'),
+  initialPlanIndex = 0,
   onBack,
   onLogout,
   onOpenSchedule,
@@ -153,16 +339,26 @@ export const CollabIdeaScreen: React.FC<CollabIdeaScreenProps> = ({
 }) => {
   const [activeTab, setActiveTab] = useState<TabType>('match');
 
-  // Interactive Collab State
-  const [collabTitle, setCollabTitle] = useState('Day in Lagos: Creator Edition');
-  const [collabDesc, setCollabDesc] = useState(
-    'A short lifestyle collaboration where two creators show how they plan, film and publish content in one day.'
-  );
+  // Dynamic Collab Plan Index
+  const [planIndex, setPlanIndex] = useState(initialPlanIndex % COLLAB_PLANS.length);
+  const currentPlan = COLLAB_PLANS[planIndex];
+
+  // Interactive Collab State (Loaded from currentPlan)
+  const [collabTitle, setCollabTitle] = useState(currentPlan.title);
+  const [collabDesc, setCollabDesc] = useState(currentPlan.desc);
   const [captionText, setCaptionText] = useState(
-    `"Spent the day creating with @${partnerHandle.replace('@', '')}. We realized that the hardest part of growth isn't the work, it's the plan. Here's how we filmed 3 hooks in under 30 minutes..."`
+    currentPlan.caption.replace('{partner}', partnerHandle.replace('@', ''))
   );
   const [selectedPlatforms, setSelectedPlatforms] = useState<string[]>(['tiktok', 'reels']);
   const [isSaved, setIsSaved] = useState(false);
+
+  // When planIndex changes, sync local form
+  useEffect(() => {
+    const plan = COLLAB_PLANS[planIndex];
+    setCollabTitle(plan.title);
+    setCollabDesc(plan.desc);
+    setCaptionText(plan.caption.replace('{partner}', partnerHandle.replace('@', '')));
+  }, [planIndex, partnerHandle]);
 
   // Dynamic Interactive Schedule State
   const [selectedPlanningTime, setSelectedPlanningTime] = useState(PLANNING_OPTIONS[1]);
@@ -190,6 +386,7 @@ export const CollabIdeaScreen: React.FC<CollabIdeaScreenProps> = ({
   const flameFloatY = useRef(new Animated.Value(0)).current;
   const modalPopScale = useRef(new Animated.Value(0.9)).current;
   const rateMeterWidthAnim = useRef(new Animated.Value(98)).current;
+  const planShuffleAnim = useRef(new Animated.Value(1)).current;
 
   const currentPublishingSlot =
     PUBLISHING_SLOTS.find((s) => s.id === selectedPublishingSlotId) || PUBLISHING_SLOTS[4];
@@ -223,6 +420,30 @@ export const CollabIdeaScreen: React.FC<CollabIdeaScreenProps> = ({
       friction: 8,
       useNativeDriver: true,
     }).start();
+  };
+
+  // Handler to cycle to the next plan!
+  const handleShuffleAnotherPlan = () => {
+    if (Platform.OS !== 'web') {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    }
+    // Animate transition
+    Animated.sequence([
+      Animated.timing(planShuffleAnim, {
+        toValue: 0.94,
+        duration: 120,
+        useNativeDriver: true,
+      }),
+      Animated.spring(planShuffleAnim, {
+        toValue: 1,
+        tension: 80,
+        friction: 8,
+        useNativeDriver: true,
+      }),
+    ]).start();
+
+    const nextIdx = (planIndex + 1) % COLLAB_PLANS.length;
+    setPlanIndex(nextIdx);
   };
 
   const handleOpenScheduleModal = () => {
@@ -459,190 +680,204 @@ export const CollabIdeaScreen: React.FC<CollabIdeaScreenProps> = ({
             bounces={true}
             keyboardShouldPersistTaps="handled"
           >
-            {/* Top Pill Badges */}
+            {/* Top Pill Badges & DO ANOTHER PLAN BUTTON */}
             <View style={styles.topBadgesRow}>
-              <View style={styles.collabIdeaPill}>
-                <Text style={styles.collabIdeaPillText}>COLLAB IDEA</Text>
+              <View style={styles.badgesLeft}>
+                <View style={styles.collabIdeaPill}>
+                  <Text style={styles.collabIdeaPillText}>{currentPlan.pillTag}</Text>
+                </View>
+                <View style={styles.planCounterPill}>
+                  <Text style={styles.planCounterPillText}>Plan {planIndex + 1}/{COLLAB_PLANS.length}</Text>
+                </View>
               </View>
-              <View style={styles.freeCollabPill}>
-                <Text style={styles.freeCollabPillText}>FREE COLLAB IDEA</Text>
-              </View>
+
+              {/* PRIMARY 'DO ANOTHER PLAN' SHUFFLE BUTTON */}
+              <Pressable
+                style={({ pressed }) => [styles.doAnotherPlanTopBtn, pressed && styles.btnPressed]}
+                onPress={handleShuffleAnotherPlan}
+              >
+                <LinearGradient
+                  colors={['#7C3AED', '#582CDB']}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 0 }}
+                  style={styles.doAnotherPlanGradient}
+                >
+                  <Text style={styles.doAnotherPlanTopText}>🎲 Another Plan</Text>
+                </LinearGradient>
+              </Pressable>
             </View>
 
             {/* Main Title & Subtitle */}
             <Text style={styles.mainTitle}>Build a simple creator collaboration.</Text>
             <Text style={styles.mainSubtitle}>
-              Use this idea to create content with a matched creator and turn it into a post.
+              Keep rolling until you find the perfect concept for you and {partnerName.split(' ')[0]}.
             </Text>
 
-            {/* CARD 1: MAIN COLLAB IDEA OVERVIEW */}
-            <View style={styles.overviewCard}>
-              <Text style={styles.overviewTitle}>{collabTitle}</Text>
-              <Text style={styles.overviewDesc}>{collabDesc}</Text>
-
-              {/* Tags Row */}
-              <View style={styles.overviewTagsRow}>
-                <View style={styles.tagChip}>
-                  <Text style={styles.tagChipText}>Lifestyle</Text>
+            {/* ANIMATED WRAPPER FOR CURRENT PLAN */}
+            <Animated.View style={{ transform: [{ scale: planShuffleAnim }] }}>
+              {/* CARD 1: MAIN COLLAB IDEA OVERVIEW */}
+              <View style={styles.overviewCard}>
+                <View style={styles.overviewTopRow}>
+                  <Text style={styles.overviewTitle}>{collabTitle}</Text>
+                  <Pressable
+                    style={styles.cardCycleBtn}
+                    onPress={handleShuffleAnotherPlan}
+                    hitSlop={8}
+                  >
+                    <Text style={styles.cardCycleBtnText}>🔄 Next Plan</Text>
+                  </Pressable>
                 </View>
-                <View style={styles.tagChip}>
-                  <Text style={styles.tagChipText}>Behind the Scenes</Text>
-                </View>
-                <View style={styles.tagChip}>
-                  <Text style={styles.tagChipText}>Short-form Video</Text>
-                </View>
-                <View style={styles.tagChip}>
-                  <Text style={styles.tagChipText}>Easy to Film</Text>
-                </View>
-              </View>
+                <Text style={styles.overviewDesc}>{collabDesc}</Text>
 
-              {/* Purple Goal Highlight Box */}
-              <View style={styles.goalHighlightBox}>
-                <Text style={styles.goalHighlightText}>
-                  Goal: Create a simple first collab that builds trust and is easy to execute.
-                </Text>
-              </View>
-            </View>
-
-            {/* CARD 2: CONTENT OUTLINE */}
-            <View style={styles.sectionCard}>
-              <Text style={styles.sectionCardHeaderTitle}>CONTENT OUTLINE</Text>
-
-              <View style={styles.stepperContainer}>
-                {[
-                  '1. Meet up and greet on camera',
-                  '2. Plan the collaborative post',
-                  '3. Film both creators together',
-                  '4. Share one key creator lesson',
-                  '5. Post and tag each other',
-                ].map((step, idx, arr) => (
-                  <View key={idx} style={styles.stepperRow}>
-                    {/* Stepper Dot and Line */}
-                    <View style={styles.stepperLineCol}>
-                      <View style={styles.stepperDot} />
-                      {idx < arr.length - 1 && <View style={styles.stepperVerticalLine} />}
+                {/* Tags Row */}
+                <View style={styles.overviewTagsRow}>
+                  {currentPlan.tags.map((t, idx) => (
+                    <View key={idx} style={styles.tagChip}>
+                      <Text style={styles.tagChipText}>{t}</Text>
                     </View>
+                  ))}
+                </View>
 
-                    {/* Stepper Text */}
-                    <View style={styles.stepperTextCol}>
-                      <Text style={styles.stepperStepText}>{step}</Text>
+                {/* Purple Goal Highlight Box */}
+                <View style={styles.goalHighlightBox}>
+                  <Text style={styles.goalHighlightText}>
+                    Goal: {currentPlan.goal}
+                  </Text>
+                </View>
+              </View>
+
+              {/* CARD 2: CONTENT OUTLINE */}
+              <View style={styles.sectionCard}>
+                <Text style={styles.sectionCardHeaderTitle}>CONTENT OUTLINE</Text>
+
+                <View style={styles.stepperContainer}>
+                  {currentPlan.outline.map((step, idx, arr) => (
+                    <View key={idx} style={styles.stepperRow}>
+                      {/* Stepper Dot and Line */}
+                      <View style={styles.stepperLineCol}>
+                        <View style={styles.stepperDot} />
+                        {idx < arr.length - 1 && <View style={styles.stepperVerticalLine} />}
+                      </View>
+
+                      {/* Stepper Text */}
+                      <View style={styles.stepperTextCol}>
+                        <Text style={styles.stepperStepText}>{step}</Text>
+                      </View>
                     </View>
-                  </View>
-                ))}
-              </View>
-            </View>
-
-            {/* CARD 3: COLLABORATION ROLES */}
-            <View style={styles.sectionCard}>
-              <Text style={styles.sectionCardHeaderTitle}>COLLABORATION ROLES</Text>
-
-              <View style={styles.rolesGrid}>
-                {/* Column 1: You */}
-                <View style={styles.roleCol}>
-                  <View style={styles.roleColHeader}>
-                    <Text style={styles.roleUserIcon}>👤</Text>
-                    <Text style={styles.roleUserTitle}>You</Text>
-                  </View>
-                  <Text style={styles.roleBulletText}>• Introduce concept</Text>
-                  <Text style={styles.roleBulletText}>• Share creator lesson</Text>
-                  <Text style={styles.roleBulletText}>• Edit final footage</Text>
-                  <Text style={styles.roleBulletText}>• Write caption copy</Text>
-                </View>
-
-                {/* Column 2: Partner */}
-                <View style={styles.roleCol}>
-                  <View style={styles.roleColHeader}>
-                    <Text style={styles.roleUserIcon}>👤</Text>
-                    <Text style={styles.roleUserTitle}>{partnerName.split(' ')[0]}</Text>
-                  </View>
-                  <Text style={styles.roleBulletText}>• Choose locations</Text>
-                  <Text style={styles.roleBulletText}>• Film key scenes</Text>
-                  <Text style={styles.roleBulletText}>• Add her perspective</Text>
-                  <Text style={styles.roleBulletText}>• Share first to story</Text>
+                  ))}
                 </View>
               </View>
-            </View>
 
-            {/* CARD 4: CAPTION STARTER */}
-            <View style={styles.sectionCard}>
-              <View style={styles.captionStarterHeaderRow}>
-                <Text style={styles.sectionCardHeaderTitle}>CAPTION STARTER</Text>
-                <Pressable onPress={handleToggleSave} hitSlop={8}>
-                  <Svg width={16} height={16} viewBox="0 0 24 24" fill={isSaved ? '#582CDB' : 'none'}>
-                    <Path
-                      d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"
-                      stroke="#582CDB"
-                      strokeWidth="2.2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                  </Svg>
+              {/* CARD 3: COLLABORATION ROLES */}
+              <View style={styles.sectionCard}>
+                <Text style={styles.sectionCardHeaderTitle}>COLLABORATION ROLES</Text>
+
+                <View style={styles.rolesGrid}>
+                  {/* Column 1: You */}
+                  <View style={styles.roleCol}>
+                    <View style={styles.roleColHeader}>
+                      <Text style={styles.roleUserIcon}>👤</Text>
+                      <Text style={styles.roleUserTitle}>You</Text>
+                    </View>
+                    {currentPlan.yourRoles.map((r, idx) => (
+                      <Text key={idx} style={styles.roleBulletText}>{r}</Text>
+                    ))}
+                  </View>
+
+                  {/* Column 2: Partner */}
+                  <View style={styles.roleCol}>
+                    <View style={styles.roleColHeader}>
+                      <Text style={styles.roleUserIcon}>👤</Text>
+                      <Text style={styles.roleUserTitle}>{partnerName.split(' ')[0]}</Text>
+                    </View>
+                    {currentPlan.partnerRoles.map((r, idx) => (
+                      <Text key={idx} style={styles.roleBulletText}>{r}</Text>
+                    ))}
+                  </View>
+                </View>
+              </View>
+
+              {/* CARD 4: CAPTION STARTER */}
+              <View style={styles.sectionCard}>
+                <View style={styles.captionStarterHeaderRow}>
+                  <Text style={styles.sectionCardHeaderTitle}>CAPTION STARTER</Text>
+                  <Pressable onPress={handleToggleSave} hitSlop={8}>
+                    <Svg width={16} height={16} viewBox="0 0 24 24" fill={isSaved ? '#582CDB' : 'none'}>
+                      <Path
+                        d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"
+                        stroke="#582CDB"
+                        strokeWidth="2.2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                    </Svg>
+                  </Pressable>
+                </View>
+
+                {/* Editable Caption Box */}
+                <View style={styles.captionQuoteBox}>
+                  <TextInput
+                    value={captionText}
+                    onChangeText={setCaptionText}
+                    multiline
+                    placeholder="Write or customize caption..."
+                    placeholderTextColor="#94A3B8"
+                    style={styles.captionInput}
+                  />
+                </View>
+
+                <Pressable
+                  style={({ pressed }) => [styles.useCaptionBtn, pressed && styles.btnPressed]}
+                  onPress={handleUseCaption}
+                >
+                  <Text style={styles.useCaptionBtnText}>Use Caption</Text>
                 </Pressable>
               </View>
 
-              {/* Editable Caption Box */}
-              <View style={styles.captionQuoteBox}>
-                <TextInput
-                  value={captionText}
-                  onChangeText={setCaptionText}
-                  multiline
-                  placeholder="Write or customize caption..."
-                  placeholderTextColor="#94A3B8"
-                  style={styles.captionInput}
-                />
-              </View>
-
-              <Pressable
-                style={({ pressed }) => [styles.useCaptionBtn, pressed && styles.btnPressed]}
-                onPress={handleUseCaption}
+              {/* CARD 5: JARVIS AI SUGGESTION */}
+              <LinearGradient
+                colors={['#FAF5FF', '#EDE9FE']}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                style={styles.jarvisSuggestionCard}
               >
-                <Text style={styles.useCaptionBtnText}>Use Caption</Text>
-              </Pressable>
-            </View>
+                <View style={styles.jarvisSuggestionHeader}>
+                  <Image
+                    source={require('../../assets/images/jarvis-core-flame.png')}
+                    style={styles.jarvisSuggestionFlame}
+                    resizeMode="contain"
+                  />
+                  <Text style={styles.jarvisSuggestionTitle}>Jarvis AI Suggestion</Text>
+                </View>
 
-            {/* CARD 5: JARVIS AI SUGGESTION */}
-            <LinearGradient
-              colors={['#FAF5FF', '#EDE9FE']}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 1 }}
-              style={styles.jarvisSuggestionCard}
-            >
-              <View style={styles.jarvisSuggestionHeader}>
-                <Image
-                  source={require('../../assets/images/jarvis-core-flame.png')}
-                  style={styles.jarvisSuggestionFlame}
-                  resizeMode="contain"
-                />
-                <Text style={styles.jarvisSuggestionTitle}>Jarvis AI Suggestion</Text>
-              </View>
+                <Text style={styles.jarvisSuggestionBody}>
+                  {currentPlan.jarvisAdvice}
+                </Text>
 
-              <Text style={styles.jarvisSuggestionBody}>
-                Keep this first collaboration simple. A short behind-the-scenes Reel is <Text style={{ fontWeight: '800' }}>much easier</Text> to finish and publish today, ensuring you don\'t lose your 47-day momentum while exploring this new partnership.
-              </Text>
+                <View style={styles.jarvisChipsRow}>
+                  <Pressable
+                    style={styles.jarvisActionChip}
+                    onPress={handleStartCollab}
+                  >
+                    <Text style={styles.jarvisActionChipText}>Turn into Post</Text>
+                  </Pressable>
 
-              <View style={styles.jarvisChipsRow}>
-                <Pressable
-                  style={styles.jarvisActionChip}
-                  onPress={handleStartCollab}
-                >
-                  <Text style={styles.jarvisActionChipText}>Turn into Post</Text>
-                </Pressable>
+                  <Pressable
+                    style={styles.jarvisActionChip}
+                    onPress={handleSendInvite}
+                  >
+                    <Text style={styles.jarvisActionChipText}>Invite Creator</Text>
+                  </Pressable>
 
-                <Pressable
-                  style={styles.jarvisActionChip}
-                  onPress={handleSendInvite}
-                >
-                  <Text style={styles.jarvisActionChipText}>Invite Creator</Text>
-                </Pressable>
-
-                <Pressable
-                  style={styles.jarvisActionChip}
-                  onPress={handleToggleSave}
-                >
-                  <Text style={styles.jarvisActionChipText}>Save Idea</Text>
-                </Pressable>
-              </View>
-            </LinearGradient>
+                  <Pressable
+                    style={styles.jarvisActionChip}
+                    onPress={handleShuffleAnotherPlan}
+                  >
+                    <Text style={styles.jarvisActionChipText}>🎲 Next Plan</Text>
+                  </Pressable>
+                </View>
+              </LinearGradient>
+            </Animated.View>
 
             {/* CARD 6: CREATOR INVOLVED */}
             <View style={styles.sectionCard}>
@@ -681,8 +916,8 @@ export const CollabIdeaScreen: React.FC<CollabIdeaScreenProps> = ({
               {/* Format Box */}
               <View style={styles.halfColBox}>
                 <Text style={styles.halfColLabel}>FORMAT</Text>
-                <Text style={styles.halfColMainText}>Short Reel</Text>
-                <Text style={styles.halfColSubText}>Vertical 9:16, under 45s</Text>
+                <Text style={styles.halfColMainText}>{currentPlan.format}</Text>
+                <Text style={styles.halfColSubText}>{currentPlan.formatSub}</Text>
                 <View style={styles.recommendedPill}>
                   <Text style={styles.recommendedPillText}>RECOMMENDED</Text>
                 </View>
@@ -992,7 +1227,7 @@ export const CollabIdeaScreen: React.FC<CollabIdeaScreenProps> = ({
                     })}
                   </View>
 
-                  {/* 3. FILMING TIME SELECTOR */}
+                  {/* 3. FILMING WINDOW (LAGOS GMT+1) */}
                   <Text style={styles.slotGroupTitle}>3. FILMING WINDOW (LAGOS GMT+1)</Text>
                   <View style={styles.horizontalChipsRow}>
                     {FILMING_OPTIONS.map((time) => {
@@ -1266,52 +1501,78 @@ const styles = StyleSheet.create({
     borderColor: '#FFFFFF',
   },
 
-  // Top Pill Badges
+  // Top Pill Badges & Another Plan Button
   topBadgesRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
+    justifyContent: 'space-between',
     marginBottom: 8,
     marginTop: 4,
+  },
+  badgesLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
   },
   collabIdeaPill: {
     backgroundColor: '#7C3AED',
     paddingVertical: 4.5,
-    paddingHorizontal: 11,
+    paddingHorizontal: 10,
     borderRadius: 100,
   },
   collabIdeaPillText: {
-    fontSize: 10,
+    fontSize: 9.5,
     fontWeight: '900',
     color: '#FFFFFF',
     letterSpacing: 0.5,
   },
-  freeCollabPill: {
-    backgroundColor: '#E2E8F0',
+  planCounterPill: {
+    backgroundColor: '#EDE9FE',
     paddingVertical: 4.5,
-    paddingHorizontal: 11,
+    paddingHorizontal: 9,
     borderRadius: 100,
   },
-  freeCollabPillText: {
-    fontSize: 10,
+  planCounterPillText: {
+    fontSize: 9.5,
     fontWeight: '900',
-    color: '#475569',
+    color: '#582CDB',
     letterSpacing: 0.5,
+  },
+  doAnotherPlanTopBtn: {
+    borderRadius: 100,
+    overflow: 'hidden',
+    shadowColor: '#582CDB',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 6,
+    elevation: 2,
+  },
+  doAnotherPlanGradient: {
+    paddingVertical: 5.5,
+    paddingHorizontal: 12,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  doAnotherPlanTopText: {
+    fontSize: 11,
+    fontWeight: '900',
+    color: '#FFFFFF',
+    letterSpacing: 0.3,
   },
 
   mainTitle: {
-    fontSize: 23,
+    fontSize: 22,
     fontWeight: '900',
     color: '#171420',
     letterSpacing: -0.4,
-    marginBottom: 6,
+    marginBottom: 4,
     marginTop: 4,
   },
   mainSubtitle: {
-    fontSize: 13,
+    fontSize: 12.5,
     color: '#64748B',
-    lineHeight: 18,
-    marginBottom: 16,
+    lineHeight: 17,
+    marginBottom: 14,
   },
 
   // Card 1: Overview Card
@@ -1328,11 +1589,31 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
     elevation: 2,
   },
+  overviewTopRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    gap: 8,
+    marginBottom: 6,
+  },
   overviewTitle: {
-    fontSize: 18,
+    flex: 1,
+    fontSize: 17.5,
     fontWeight: '900',
     color: '#171420',
-    marginBottom: 6,
+  },
+  cardCycleBtn: {
+    backgroundColor: '#FAF5FF',
+    borderWidth: 1,
+    borderColor: '#DDD6FE',
+    paddingVertical: 3.5,
+    paddingHorizontal: 8,
+    borderRadius: 8,
+  },
+  cardCycleBtnText: {
+    fontSize: 10.5,
+    fontWeight: '800',
+    color: '#582CDB',
   },
   overviewDesc: {
     fontSize: 13,
@@ -1907,9 +2188,7 @@ const styles = StyleSheet.create({
     borderColor: '#582CDB',
   },
 
-  // =========================================================================
-  // MODALS & VIRAL RATE METER STYLES
-  // =========================================================================
+  // Modals & Rate Meter
   modalOverlay: {
     flex: 1,
     backgroundColor: 'rgba(23, 20, 32, 0.65)',
@@ -1975,7 +2254,6 @@ const styles = StyleSheet.create({
     color: '#64748B',
   },
 
-  // Rate Meter Card
   rateMeterCard: {
     borderRadius: 18,
     borderWidth: 1.5,
@@ -2047,7 +2325,6 @@ const styles = StyleSheet.create({
     lineHeight: 16,
   },
 
-  // Slots Grid
   slotGroupTitle: {
     fontSize: 10,
     fontWeight: '900',
@@ -2114,7 +2391,6 @@ const styles = StyleSheet.create({
     fontWeight: '700',
   },
 
-  // Horizontal Chips
   horizontalChipsRow: {
     flexDirection: 'row',
     flexWrap: 'wrap',
@@ -2231,7 +2507,6 @@ const styles = StyleSheet.create({
     fontSize: 12.5,
     fontWeight: '800',
     color: '#171420',
-    marginBottom: 2,
   },
   notifBody: {
     fontSize: 11,
