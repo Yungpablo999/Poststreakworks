@@ -563,47 +563,84 @@ export const EarningsScreen: React.FC<EarningsScreenProps> = ({
             ))}
           </View>
 
-          {/* Estimated Tracked Earnings Card with Metallic Gold Unlock Button */}
-          <View style={styles.estimatedCard}>
-            <View style={styles.estimatedHeaderRow}>
-              <Text style={styles.estimatedLabel}>Estimated tracked earnings</Text>
-              <Text style={styles.estimatedAmount}>$1,420.50</Text>
-            </View>
-
-            <View style={styles.estimatedBullets}>
-              <View style={styles.estimatedBulletRow}>
-                <Text style={{ fontSize: 11 }}>🔒</Text>
-                <Text style={styles.estimatedBulletText}>Platform breakdown: Pro feature</Text>
+          {/* Estimated Tracked Earnings Card (DUAL-TIER: FREE SNEAK PEEK vs PRO UNLOCKED) */}
+          {userProfile?.tier === 'pro' || userProfile?.tier === 'founding' ? (
+            <View style={[styles.estimatedCard, { backgroundColor: '#FAF5FF', borderColor: '#C084FC' }]}>
+              <View style={styles.estimatedHeaderRow}>
+                <View>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                    <Text style={styles.estimatedLabel}>Tracked Platform Earnings</Text>
+                    <View style={{ backgroundColor: '#FEF9C3', paddingHorizontal: 6, paddingVertical: 2, borderRadius: 4 }}>
+                      <Text style={{ fontSize: 8.5, fontWeight: '900', color: '#A16207' }}>PRO ACTIVE</Text>
+                    </View>
+                  </View>
+                  <Text style={{ fontSize: 11, color: '#64748B', marginTop: 2 }}>Auto-synced across 4 channels</Text>
+                </View>
+                <Text style={styles.estimatedAmount}>$1,420.50</Text>
               </View>
-              <View style={styles.estimatedBulletRow}>
-                <Text style={{ fontSize: 11 }}>🔒</Text>
-                <Text style={styles.estimatedBulletText}>Monthly platform insights: Pro feature</Text>
+
+              <View style={{ gap: 8, marginVertical: 10 }}>
+                <View style={{ flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 4, borderBottomWidth: 1, borderBottomColor: '#F3E8FF' }}>
+                  <Text style={{ fontSize: 12, fontWeight: '800', color: '#171420' }}>● TikTok Creator Rewards</Text>
+                  <Text style={{ fontSize: 12, fontWeight: '900', color: '#582CDB' }}>$740.00</Text>
+                </View>
+                <View style={{ flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 4, borderBottomWidth: 1, borderBottomColor: '#F3E8FF' }}>
+                  <Text style={{ fontSize: 12, fontWeight: '800', color: '#171420' }}>● Instagram Gifts &amp; Bonus</Text>
+                  <Text style={{ fontSize: 12, fontWeight: '900', color: '#582CDB' }}>$480.50</Text>
+                </View>
+                <View style={{ flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 4 }}>
+                  <Text style={{ fontSize: 12, fontWeight: '800', color: '#171420' }}>● YouTube Shorts Ad Revenue</Text>
+                  <Text style={{ fontSize: 12, fontWeight: '900', color: '#582CDB' }}>$200.00</Text>
+                </View>
+              </View>
+
+              <View style={{ backgroundColor: '#EDE9FE', padding: 10, borderRadius: 10, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+                <Text style={{ fontSize: 11, fontWeight: '800', color: '#582CDB' }}>⚡ Real-time Daily Revenue Sync Active</Text>
+                <Text style={{ fontSize: 11, fontWeight: '900', color: '#582CDB' }}>✓</Text>
               </View>
             </View>
+          ) : (
+            <View style={styles.estimatedCard}>
+              <View style={styles.estimatedHeaderRow}>
+                <Text style={styles.estimatedLabel}>Estimated tracked earnings</Text>
+                <Text style={styles.estimatedAmount}>$1,420.50</Text>
+              </View>
 
-            <Pressable
-              style={({ pressed }) => [styles.unlockTrackingBtn, pressed && styles.btnPressed]}
-              onPress={() => {
-                if (Platform.OS !== 'web') {
-                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-                }
-                if (onOpenJarvisPro) {
-                  onOpenJarvisPro();
-                } else {
-                  showToast('Jarvis Pro tracking enabled!');
-                }
-              }}
-            >
-              <LinearGradient
-                colors={['#FDE047', '#EAB308', '#CA8A04', '#A16207']}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 1 }}
-                style={styles.unlockTrackingGradient}
+              <View style={styles.estimatedBullets}>
+                <View style={styles.estimatedBulletRow}>
+                  <Text style={{ fontSize: 11 }}>🔒</Text>
+                  <Text style={styles.estimatedBulletText}>Platform breakdown: Pro feature</Text>
+                </View>
+                <View style={styles.estimatedBulletRow}>
+                  <Text style={{ fontSize: 11 }}>🔒</Text>
+                  <Text style={styles.estimatedBulletText}>Monthly platform insights: Pro feature</Text>
+                </View>
+              </View>
+
+              <Pressable
+                style={({ pressed }) => [styles.unlockTrackingBtn, pressed && styles.btnPressed]}
+                onPress={() => {
+                  if (Platform.OS !== 'web') {
+                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                  }
+                  if (onOpenJarvisPro) {
+                    onOpenJarvisPro();
+                  } else {
+                    showToast('Jarvis Pro tracking enabled!');
+                  }
+                }}
               >
-                <Text style={styles.unlockTrackingBtnText}>Unlock Tracking ➔</Text>
-              </LinearGradient>
-            </Pressable>
-          </View>
+                <LinearGradient
+                  colors={['#FDE047', '#EAB308', '#CA8A04', '#A16207']}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 1 }}
+                  style={styles.unlockTrackingGradient}
+                >
+                  <Text style={styles.unlockTrackingBtnText}>Unlock Tracking ➔</Text>
+                </LinearGradient>
+              </Pressable>
+            </View>
+          )}
 
           {/* CARD 3: UNLOCK YOUR FIRST OPPORTUNITIES */}
           <View style={styles.sectionHeaderRow}>

@@ -21,6 +21,7 @@ export interface UserProfileData {
   handle: string;
   bio: string;
   niche: string;
+  tier?: 'free' | 'pro' | 'founding';
   avatarId: string;
   avatarSource: any;
   customAvatarUri?: string;
