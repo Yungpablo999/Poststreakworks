@@ -929,18 +929,21 @@ export const PlatformGrowthScreen: React.FC<PlatformGrowthScreenProps> = ({
                 if (Platform.OS !== 'web') {
                   Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
                 }
-                if (onOpenContentAngle) {
+                if (onOpenJarvisPro) {
+                  onOpenJarvisPro();
+                } else if (onOpenContentAngle) {
                   onOpenContentAngle();
-                } else if (onOpenScript) {
-                  onOpenScript('Repurpose TikTok video into Instagram Reel format');
                 } else {
-                  showToast('Repurposing script for Instagram...');
+                  showToast('🔒 Pro Feature: Upgrade to unlock auto-repurposing');
                 }
               }}
             >
               <View style={styles.nextStepLeft}>
                 <Text style={{ fontSize: 16, color: '#582CDB' }}>✨</Text>
                 <Text style={styles.nextStepText}>Repurpose for IG</Text>
+                <View style={styles.nextStepProPill}>
+                  <Text style={styles.nextStepProPillText}>🔒 PRO</Text>
+                </View>
               </View>
               <Text style={styles.nextStepChevron}>›</Text>
             </Pressable>
@@ -2062,6 +2065,19 @@ const styles = StyleSheet.create({
     fontSize: 13.5,
     fontWeight: '900',
     color: '#171420',
+  },
+  nextStepProPill: {
+    backgroundColor: '#FEF9C3',
+    paddingVertical: 2,
+    paddingHorizontal: 6,
+    borderRadius: 4,
+    borderWidth: 1,
+    borderColor: '#FDE047',
+  },
+  nextStepProPillText: {
+    fontSize: 8.5,
+    fontWeight: '900',
+    color: '#A16207',
   },
   nextStepChevron: {
     fontSize: 18,
