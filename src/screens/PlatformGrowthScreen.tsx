@@ -341,11 +341,49 @@ export const PlatformGrowthScreen: React.FC<PlatformGrowthScreenProps> = ({
             </View>
           </View>
 
-          {/* CARD 2: WEEKLY COMPARISON BAR CHART */}
+          {/* CARD 2: REDESIGNED PREMIUM WEEKLY COMPARISON */}
           <View style={styles.weeklyCard}>
-            <Text style={styles.weeklyTitle}>Weekly Comparison</Text>
+            <View style={styles.weeklyHeaderRow}>
+              <View>
+                <Text style={styles.weeklyTitle}>Weekly Comparison</Text>
+                <Text style={styles.weeklySubtitle}>Velocity &amp; share of new audience</Text>
+              </View>
+              <View style={styles.weeklyPillBadge}>
+                <Text style={styles.weeklyPillBadgeText}>⚡ 7-DAY VOLUME</Text>
+              </View>
+            </View>
 
+            {/* Selected Platform Spotlight Banner */}
+            <View style={styles.weeklySpotlightBox}>
+              <View style={styles.spotlightLeft}>
+                <View style={[
+                  styles.spotlightDot,
+                  selectedBar === 'TT' && { backgroundColor: '#582CDB' },
+                  selectedBar === 'IG' && { backgroundColor: '#E1306C' },
+                  selectedBar === 'YT' && { backgroundColor: '#EF4444' },
+                  selectedBar === 'X' && { backgroundColor: '#64748B' },
+                ]} />
+                <Text style={styles.spotlightPlatformName}>
+                  {selectedBar === 'TT' ? 'TikTok' : selectedBar === 'IG' ? 'Instagram' : selectedBar === 'YT' ? 'YouTube' : 'X (Twitter)'}
+                </Text>
+              </View>
+              <View style={styles.spotlightStatsGroup}>
+                <Text style={styles.spotlightGain}>
+                  {selectedBar === 'TT' ? '+840 (70% share)' : selectedBar === 'IG' ? '+390 (22% share)' : selectedBar === 'YT' ? '+170 (8% share)' : '0 (Not connected)'}
+                </Text>
+                <Text style={styles.spotlightRate}>
+                  {selectedBar === 'TT' ? '🔥 120/day' : selectedBar === 'IG' ? '✨ 55/day' : selectedBar === 'YT' ? '▶️ 24/day' : '🔗 Link account'}
+                </Text>
+              </View>
+            </View>
+
+            {/* Visual Chart with Grid Lines & Gradient Bars */}
             <View style={styles.weeklyChartArea}>
+              {/* Background Grid Lines */}
+              <View style={styles.chartGridLineTop} />
+              <View style={styles.chartGridLineMid} />
+              <View style={styles.chartBaseline} />
+
               {/* TikTok Bar */}
               <Pressable
                 style={styles.weeklyBarCol}
@@ -356,19 +394,28 @@ export const PlatformGrowthScreen: React.FC<PlatformGrowthScreenProps> = ({
                   setSelectedBar('TT');
                 }}
               >
+                <View style={styles.barTopBadge}>
+                  <Text style={[styles.barTopBadgeText, selectedBar === 'TT' && styles.barTopBadgeTextActive]}>
+                    +840
+                  </Text>
+                </View>
                 <View style={styles.weeklyBarTrack}>
-                  <View
+                  <LinearGradient
+                    colors={selectedBar === 'TT' ? ['#582CDB', '#7C3AED'] : ['#8B5CF6', '#A78BFA']}
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 0, y: 1 }}
                     style={[
                       styles.weeklyBarFill,
                       { height: 110 },
-                      selectedBar === 'TT'
-                        ? { backgroundColor: '#582CDB' }
-                        : { backgroundColor: '#8B5CF6' },
+                      selectedBar === 'TT' && styles.weeklyBarFillActive,
                     ]}
                   />
                 </View>
+                <View style={[styles.platformIconMini, selectedBar === 'TT' && styles.platformIconMiniActive]}>
+                  <TikTokSvg size={14} />
+                </View>
                 <Text style={[styles.weeklyBarLabel, selectedBar === 'TT' && styles.weeklyBarLabelActive]}>
-                  TT
+                  TikTok
                 </Text>
               </Pressable>
 
@@ -382,19 +429,28 @@ export const PlatformGrowthScreen: React.FC<PlatformGrowthScreenProps> = ({
                   setSelectedBar('IG');
                 }}
               >
+                <View style={styles.barTopBadge}>
+                  <Text style={[styles.barTopBadgeText, selectedBar === 'IG' && styles.barTopBadgeTextActive]}>
+                    +390
+                  </Text>
+                </View>
                 <View style={styles.weeklyBarTrack}>
-                  <View
+                  <LinearGradient
+                    colors={selectedBar === 'IG' ? ['#582CDB', '#7C3AED'] : ['#A78BFA', '#C4B5FD']}
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 0, y: 1 }}
                     style={[
                       styles.weeklyBarFill,
                       { height: 72 },
-                      selectedBar === 'IG'
-                        ? { backgroundColor: '#582CDB' }
-                        : { backgroundColor: '#8B5CF6' },
+                      selectedBar === 'IG' && styles.weeklyBarFillActive,
                     ]}
                   />
                 </View>
+                <View style={[styles.platformIconMini, selectedBar === 'IG' && styles.platformIconMiniActive]}>
+                  <InstagramSvg size={14} />
+                </View>
                 <Text style={[styles.weeklyBarLabel, selectedBar === 'IG' && styles.weeklyBarLabelActive]}>
-                  IG
+                  Instagram
                 </Text>
               </Pressable>
 
@@ -408,19 +464,28 @@ export const PlatformGrowthScreen: React.FC<PlatformGrowthScreenProps> = ({
                   setSelectedBar('YT');
                 }}
               >
+                <View style={styles.barTopBadge}>
+                  <Text style={[styles.barTopBadgeText, selectedBar === 'YT' && styles.barTopBadgeTextActive]}>
+                    +170
+                  </Text>
+                </View>
                 <View style={styles.weeklyBarTrack}>
-                  <View
+                  <LinearGradient
+                    colors={selectedBar === 'YT' ? ['#582CDB', '#7C3AED'] : ['#C4B5FD', '#DDD6FE']}
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 0, y: 1 }}
                     style={[
                       styles.weeklyBarFill,
                       { height: 44 },
-                      selectedBar === 'YT'
-                        ? { backgroundColor: '#582CDB' }
-                        : { backgroundColor: '#C4B5FD' },
+                      selectedBar === 'YT' && styles.weeklyBarFillActive,
                     ]}
                   />
                 </View>
+                <View style={[styles.platformIconMini, selectedBar === 'YT' && styles.platformIconMiniActive]}>
+                  <YouTubeSvg size={14} />
+                </View>
                 <Text style={[styles.weeklyBarLabel, selectedBar === 'YT' && styles.weeklyBarLabelActive]}>
-                  YT
+                  YouTube
                 </Text>
               </Pressable>
 
@@ -434,16 +499,22 @@ export const PlatformGrowthScreen: React.FC<PlatformGrowthScreenProps> = ({
                   setSelectedBar('X');
                 }}
               >
+                <View style={styles.barTopBadge}>
+                  <Text style={[styles.barTopBadgeText, selectedBar === 'X' && styles.barTopBadgeTextActive]}>
+                    0
+                  </Text>
+                </View>
                 <View style={styles.weeklyBarTrack}>
                   <View
                     style={[
                       styles.weeklyBarFill,
-                      { height: 12 },
-                      selectedBar === 'X'
-                        ? { backgroundColor: '#582CDB' }
-                        : { backgroundColor: '#E2E8F0' },
+                      { height: 14, backgroundColor: '#E2E8F0' },
+                      selectedBar === 'X' && { backgroundColor: '#582CDB' },
                     ]}
                   />
+                </View>
+                <View style={[styles.platformIconMini, selectedBar === 'X' && styles.platformIconMiniActive]}>
+                  <XSvg size={13} />
                 </View>
                 <Text style={[styles.weeklyBarLabel, selectedBar === 'X' && styles.weeklyBarLabelActive]}>
                   X
@@ -1082,51 +1153,180 @@ const styles = StyleSheet.create({
     color: '#475569',
   },
 
-  // CARD 2: WEEKLY COMPARISON BAR CHART
+  // CARD 2: REDESIGNED WEEKLY COMPARISON
   weeklyCard: {
     backgroundColor: '#FFFFFF',
-    borderRadius: 22,
+    borderRadius: 24,
     borderWidth: 1,
     borderColor: '#EDE8E1',
     padding: 18,
     marginBottom: 18,
     shadowColor: '#171420',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.04,
-    shadowRadius: 10,
-    elevation: 2,
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.05,
+    shadowRadius: 14,
+    elevation: 3,
+  },
+  weeklyHeaderRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    marginBottom: 12,
   },
   weeklyTitle: {
-    fontSize: 16,
+    fontSize: 17,
     fontWeight: '900',
     color: '#171420',
+    letterSpacing: -0.3,
+  },
+  weeklySubtitle: {
+    fontSize: 11.5,
+    color: '#64748B',
+    marginTop: 2,
+  },
+  weeklyPillBadge: {
+    backgroundColor: '#EDE9FE',
+    paddingVertical: 4,
+    paddingHorizontal: 8,
+    borderRadius: 6,
+  },
+  weeklyPillBadgeText: {
+    fontSize: 8.5,
+    fontWeight: '900',
+    color: '#582CDB',
+    letterSpacing: 0.4,
+  },
+  weeklySpotlightBox: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    backgroundColor: '#FAF8F5',
+    borderRadius: 14,
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+    borderWidth: 1,
+    borderColor: '#EDE8E1',
     marginBottom: 16,
+  },
+  spotlightLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  spotlightDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+  },
+  spotlightPlatformName: {
+    fontSize: 13,
+    fontWeight: '900',
+    color: '#171420',
+  },
+  spotlightStatsGroup: {
+    alignItems: 'flex-end',
+  },
+  spotlightGain: {
+    fontSize: 12.5,
+    fontWeight: '900',
+    color: '#15803D',
+  },
+  spotlightRate: {
+    fontSize: 10.5,
+    color: '#64748B',
+    fontWeight: '700',
+    marginTop: 1,
   },
   weeklyChartArea: {
     flexDirection: 'row',
-    justifyContent: 'space-around',
+    justifyContent: 'space-between',
     alignItems: 'flex-end',
-    height: 130,
-    paddingTop: 10,
+    height: 180,
+    paddingTop: 16,
+    position: 'relative',
+  },
+  chartGridLineTop: {
+    position: 'absolute',
+    top: 24,
+    left: 0,
+    right: 0,
+    height: 1,
+    backgroundColor: '#F1F5F9',
+  },
+  chartGridLineMid: {
+    position: 'absolute',
+    top: 80,
+    left: 0,
+    right: 0,
+    height: 1,
+    backgroundColor: '#F8FAFC',
+  },
+  chartBaseline: {
+    position: 'absolute',
+    bottom: 44,
+    left: 0,
+    right: 0,
+    height: 1.5,
+    backgroundColor: '#E2E8F0',
   },
   weeklyBarCol: {
     alignItems: 'center',
-    width: 60,
+    width: '23%',
+    zIndex: 2,
+  },
+  barTopBadge: {
+    marginBottom: 6,
+    height: 18,
+    justifyContent: 'center',
+  },
+  barTopBadgeText: {
+    fontSize: 10,
+    fontWeight: '800',
+    color: '#94A3B8',
+  },
+  barTopBadgeTextActive: {
+    color: '#582CDB',
+    fontWeight: '900',
+    fontSize: 11,
   },
   weeklyBarTrack: {
     height: 110,
     justifyContent: 'flex-end',
     alignItems: 'center',
+    width: '100%',
   },
   weeklyBarFill: {
-    width: 48,
-    borderRadius: 12,
+    width: '80%',
+    borderRadius: 14,
+    maxWidth: 52,
+  },
+  weeklyBarFillActive: {
+    shadowColor: '#582CDB',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.35,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  platformIconMini: {
+    width: 26,
+    height: 26,
+    borderRadius: 8,
+    backgroundColor: '#FAF8F5',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#EDE8E1',
+    marginTop: 8,
+  },
+  platformIconMiniActive: {
+    borderColor: '#582CDB',
+    backgroundColor: '#EDE9FE',
   },
   weeklyBarLabel: {
-    fontSize: 11,
+    fontSize: 10.5,
     fontWeight: '800',
-    color: '#94A3B8',
-    marginTop: 8,
+    color: '#64748B',
+    marginTop: 4,
   },
   weeklyBarLabelActive: {
     color: '#582CDB',
