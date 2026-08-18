@@ -26,6 +26,7 @@ interface CreateScreenProps {
   onOpenJarvisPro?: () => void;
   onOpenIdeaDetail?: (ideaTitle?: string) => void;
   onOpenPostComposer?: (prefillTitle?: string, prefillPlatform?: string) => void;
+  onOpenIdeaAngle?: () => void;
 }
 
 interface DraftItem {
@@ -242,6 +243,7 @@ export const CreateScreen: React.FC<CreateScreenProps> = ({
   onOpenJarvisPro,
   onOpenIdeaDetail,
   onOpenPostComposer,
+  onOpenIdeaAngle,
 }) => {
   const [activeTab, setActiveTab] = useState<TabType>('create');
   const [drafts, setDrafts] = useState<DraftItem[]>(INITIAL_DRAFTS);
@@ -331,8 +333,12 @@ export const CreateScreen: React.FC<CreateScreenProps> = ({
   };
 
   const openIdeas = () => {
-    triggerModalPop();
-    setShowIdeasModal(true);
+    if (onOpenIdeaAngle) {
+      onOpenIdeaAngle();
+    } else {
+      triggerModalPop();
+      setShowIdeasModal(true);
+    }
   };
 
   const openScript = () => {
