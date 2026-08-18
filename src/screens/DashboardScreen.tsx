@@ -25,6 +25,7 @@ interface DashboardScreenProps {
   onStartMission?: () => void;
   onNavigateTab?: (tab: TabType) => void;
   onOpenJarvisPro?: () => void;
+  onOpenSchedule?: () => void;
 }
 type NotificationFilter = 'all' | 'unread' | 'quests';
 
@@ -377,6 +378,7 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
   onStartMission,
   onNavigateTab,
   onOpenJarvisPro,
+  onOpenSchedule,
 }) => {
   const [activeTab, setActiveTab] = useState<TabType>('home');
   const [matchConnected, setMatchConnected] = useState(false);
@@ -988,11 +990,7 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
           {/* 5. CARD 2: SCHEDULED POSTS VELOCITY */}
           <View style={styles.dashboardCard}>
             <View style={styles.scheduledHeaderRow}>
-              <Pressable
-                onPress={openCalendarModal}
-                style={({ pressed }) => [styles.scheduledLabelGroup, pressed && styles.headerIconBtnPressed]}
-                hitSlop={6}
-              >
+              <View style={styles.scheduledLabelGroup}>
                 <View style={styles.calendarIconBox}>
                   <Svg width={16} height={16} viewBox="0 0 24 24" fill="none">
                     <Rect x="3" y="4" width="18" height="18" rx="2" stroke="#582CDB" strokeWidth="2.2" />
@@ -1000,11 +998,28 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
                   </Svg>
                 </View>
                 <Text style={styles.scheduledTitle}>SCHEDULED</Text>
-              </Pressable>
-
-              <View style={styles.scheduledTimePill}>
-                <Text style={styles.scheduledTimeText}>11:30 AM</Text>
+                <View style={styles.scheduledTimePill}>
+                  <Text style={styles.scheduledTimeText}>11:30 AM</Text>
+                </View>
               </View>
+
+              {/* Info / Open Schedule Details Button */}
+              <Pressable
+                onPress={() => {
+                  if (Platform.OS !== 'web') {
+                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                  }
+                  if (onOpenSchedule) {
+                    onOpenSchedule();
+                  } else if (onNavigateTab) {
+                    onNavigateTab('create');
+                  }
+                }}
+                style={({ pressed }) => [styles.scheduleInfoBtn, pressed && styles.headerIconBtnPressed]}
+                hitSlop={8}
+              >
+                <Text style={styles.scheduleInfoBtnText}>View Schedule ➔</Text>
+              </Pressable>
             </View>
 
             <View style={styles.scheduledMetricsContainer}>
@@ -2300,6 +2315,17 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontSize: 11,
     fontWeight: '700',
+  },
+  scheduleInfoBtn: {
+    backgroundColor: '#EDE9FE',
+    paddingVertical: 5,
+    paddingHorizontal: 10,
+    borderRadius: 8,
+  },
+  scheduleInfoBtnText: {
+    fontSize: 11,
+    fontWeight: '800',
+    color: '#582CDB',
   },
   scheduledMetricsContainer: {
     flexDirection: 'row',

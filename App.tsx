@@ -249,6 +249,7 @@ export default function App() {
             onLogout={handleLogout}
             onStartMission={() => navigateTo('mission-detail')}
             onOpenJarvisPro={() => navigateTo('jarvis-pro')}
+            onOpenSchedule={() => navigateTo('schedule')}
             onNavigateTab={(tab: TabType) => {
               if (tab === 'create') {
                 navigateTo('create');
@@ -304,8 +305,9 @@ export default function App() {
 
         {currentScreen === 'schedule' && (
           <ScheduleScreen
-            onBack={() => navigateTo(previousScreen === 'quests' ? 'quests' : 'create')}
+            onBack={() => navigateTo(previousScreen ? previousScreen : 'dashboard')}
             onLogout={handleLogout}
+            onOpenJarvisPro={() => navigateTo('jarvis-pro')}
             onNavigateTab={(tab: TabType) => {
               if (tab === 'home') {
                 navigateTo('dashboard');
