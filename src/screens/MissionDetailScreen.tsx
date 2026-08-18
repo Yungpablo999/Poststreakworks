@@ -475,29 +475,76 @@ export const MissionDetailScreen: React.FC<MissionDetailScreenProps> = ({
 
               <Text style={styles.modalInputLabel}>CHOOSE PLATFORM</Text>
               <View style={styles.platformSelectRow}>
-                {(['tiktok', 'instagram', 'youtube'] as const).map((plat) => (
-                  <Pressable
-                    key={plat}
-                    onPress={() => setPostPlatform(plat)}
+                {/* TikTok */}
+                <Pressable
+                  onPress={() => setPostPlatform('tiktok')}
+                  style={[
+                    styles.platformSelectBtn,
+                    postPlatform === 'tiktok' && styles.platformSelectBtnActive,
+                  ]}
+                >
+                  <Svg width={14} height={14} viewBox="0 0 24 24">
+                    <Path
+                      d="M17.5 4.5a4.5 4.5 0 0 1-3.5-4h-2.5v13.5a2.5 2.5 0 1 1-2.5-2.5c.3 0 .5.05.7.15V8.5a5.5 5.5 0 1 0 4.8 5.4V7.2a7.5 7.5 0 0 0 4.5 1.3V5.5c-.5 0-1-.3-1.5-1z"
+                      fill={postPlatform === 'tiktok' ? '#FFFFFF' : '#000000'}
+                    />
+                  </Svg>
+                  <Text
                     style={[
-                      styles.platformSelectBtn,
-                      postPlatform === plat && styles.platformSelectBtnActive,
+                      styles.platformSelectBtnText,
+                      postPlatform === 'tiktok' && styles.platformSelectBtnTextActive,
                     ]}
                   >
-                    <Text
-                      style={[
-                        styles.platformSelectBtnText,
-                        postPlatform === plat && styles.platformSelectBtnTextActive,
-                      ]}
-                    >
-                      {plat === 'tiktok'
-                        ? 'TikTok'
-                        : plat === 'instagram'
-                        ? 'Instagram Reel'
-                        : 'YouTube'}
-                    </Text>
-                  </Pressable>
-                ))}
+                    TikTok
+                  </Text>
+                </Pressable>
+
+                {/* Instagram */}
+                <Pressable
+                  onPress={() => setPostPlatform('instagram')}
+                  style={[
+                    styles.platformSelectBtn,
+                    postPlatform === 'instagram' && styles.platformSelectBtnActive,
+                  ]}
+                >
+                  <Svg width={14} height={14} viewBox="0 0 24 24" fill="none">
+                    <Rect x="2" y="2" width="20" height="20" rx="5" stroke={postPlatform === 'instagram' ? '#FFFFFF' : '#E1306C'} strokeWidth="2.2" />
+                    <Circle cx="12" cy="12" r="4" stroke={postPlatform === 'instagram' ? '#FFFFFF' : '#E1306C'} strokeWidth="2.2" />
+                  </Svg>
+                  <Text
+                    style={[
+                      styles.platformSelectBtnText,
+                      postPlatform === 'instagram' && styles.platformSelectBtnTextActive,
+                    ]}
+                  >
+                    Instagram
+                  </Text>
+                </Pressable>
+
+                {/* YouTube */}
+                <Pressable
+                  onPress={() => setPostPlatform('youtube')}
+                  style={[
+                    styles.platformSelectBtn,
+                    postPlatform === 'youtube' && styles.platformSelectBtnActive,
+                  ]}
+                >
+                  <Svg width={14} height={14} viewBox="0 0 24 24" fill="none">
+                    <Path
+                      d="M21.58 7.19a2.5 2.5 0 0 0-1.76-1.77C18.26 5 12 5 12 5s-6.26 0-7.82.42A2.5 2.5 0 0 0 2.42 7.19C2 8.76 2 12 2 12s0 3.24.42 4.81a2.5 2.5 0 0 0 1.76 1.77C5.74 19 12 19 12 19s6.26 0 7.82-.42a2.5 2.5 0 0 0 1.76-1.77C22 15.24 22 12 22 12s0-3.24-.42-4.81z"
+                      fill={postPlatform === 'youtube' ? '#FFFFFF' : '#FF0000'}
+                    />
+                    <Path d="M10 15.5l5.5-3.5L10 8.5v7z" fill={postPlatform === 'youtube' ? '#582CDB' : '#FFFFFF'} />
+                  </Svg>
+                  <Text
+                    style={[
+                      styles.platformSelectBtnText,
+                      postPlatform === 'youtube' && styles.platformSelectBtnTextActive,
+                    ]}
+                  >
+                    YouTube
+                  </Text>
+                </Pressable>
               </View>
 
               <Text style={styles.modalInputLabel}>POST TITLE / HOOK</Text>
@@ -1338,7 +1385,10 @@ const styles = StyleSheet.create({
     backgroundColor: '#FAF8F5',
     borderWidth: 1,
     borderColor: '#EFEBF8',
+    flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
   },
   platformSelectBtnActive: {
     backgroundColor: '#582CDB',
