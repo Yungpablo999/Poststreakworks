@@ -305,6 +305,7 @@ export default function App() {
           <MissionDetailScreen
             onBackToDashboard={() => navigateTo('dashboard')}
             onLogout={handleLogout}
+            onOpenMessages={() => navigateTo('messages')}
             onNavigateTab={(tab: TabType) => {
               if (tab === 'home') {
                 navigateTo('dashboard');
@@ -362,6 +363,7 @@ export default function App() {
           <ScheduleScreen
             onBack={() => navigateTo(previousScreen ? previousScreen : 'dashboard')}
             onLogout={handleLogout}
+            onOpenMessages={() => navigateTo('messages')}
             onOpenJarvisPro={() => navigateTo('jarvis-pro')}
             onOpenCreateIdea={() => navigateTo('create')}
             onNavigateTab={(tab: TabType) => {
@@ -383,6 +385,7 @@ export default function App() {
         {currentScreen === 'match' && (
           <MatchScreen
             onLogout={handleLogout}
+            onOpenMessages={() => navigateTo('messages')}
             onOpenJarvisPro={() => navigateTo('jarvis-pro')}
             onNavigateTab={(tab: TabType) => {
               if (tab === 'home') {
@@ -402,6 +405,7 @@ export default function App() {
           <GrowthScreen
             onBackToDashboard={() => navigateTo('dashboard')}
             onLogout={handleLogout}
+            onOpenMessages={() => navigateTo('messages')}
             onOpenJarvisPro={() => navigateTo('jarvis-pro')}
             onNavigateTab={(tab: TabType) => {
               if (tab === 'home') {
@@ -421,6 +425,7 @@ export default function App() {
           <JarvisProScreen
             onBack={() => navigateTo('growth')}
             onLogout={handleLogout}
+            onOpenMessages={() => navigateTo('messages')}
             onNavigateTab={(tab: TabType) => {
               if (tab === 'home') {
                 navigateTo('dashboard');
@@ -466,6 +471,7 @@ export default function App() {
           <ChallengeDetailScreen
             onBackToDashboard={() => navigateTo('quests')}
             onLogout={handleLogout}
+            onOpenMessages={() => navigateTo('messages')}
             onNavigateTab={(tab: TabType) => {
               if (tab === 'home') {
                 navigateTo('dashboard');
@@ -659,6 +665,7 @@ export default function App() {
             onLogout={handleLogout}
             onOpenSchedule={() => navigateTo('schedule')}
             onOpenJarvisPro={() => navigateTo('jarvis-pro')}
+            onOpenMessages={() => navigateTo('messages')}
             onStartCollaboration={(collabData) => {
               if (collabData?.title) setComposerIdeaTitle(collabData.title);
               navigateTo('composer');

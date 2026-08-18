@@ -191,7 +191,16 @@ export const JarvisProScreen: React.FC<JarvisProScreenProps> = ({
             <Pressable
               style={({ pressed }) => [styles.headerIconBtn, pressed && styles.btnPressed]}
               hitSlop={8}
-              onPress={() => showToast('💬 Jarvis Pro Assistant')}
+              onPress={() => {
+                if (Platform.OS !== 'web') {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                }
+                if (onOpenMessages) {
+                  onOpenMessages();
+                } else {
+                  showToast('💬 Jarvis Pro Assistant');
+                }
+              }}
             >
               <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
                 <Path

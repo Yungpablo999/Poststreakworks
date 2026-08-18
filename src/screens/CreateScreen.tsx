@@ -391,8 +391,12 @@ export const CreateScreen: React.FC<CreateScreenProps> = ({
   };
 
   const openChat = () => {
-    triggerModalPop();
-    setShowChatModal(true);
+    if (onOpenMessages) {
+      onOpenMessages();
+    } else {
+      triggerModalPop();
+      setShowChatModal(true);
+    }
   };
 
   const handleTabPress = (tab: TabType) => {

@@ -31,6 +31,7 @@ interface CollabIdeaScreenProps {
   onOpenJarvisPro?: () => void;
   onNavigateTab?: (tab: TabType) => void;
   onStartCollaboration?: (collabData: { title: string; caption: string; partnerName: string }) => void;
+  onOpenMessages?: () => void;
 }
 
 interface NotificationItem {
@@ -148,6 +149,7 @@ export const CollabIdeaScreen: React.FC<CollabIdeaScreenProps> = ({
   onOpenJarvisPro,
   onNavigateTab,
   onStartCollaboration,
+  onOpenMessages,
 }) => {
   const [activeTab, setActiveTab] = useState<TabType>('match');
 
@@ -384,7 +386,16 @@ export const CollabIdeaScreen: React.FC<CollabIdeaScreenProps> = ({
               <Pressable
                 style={({ pressed }) => [styles.headerIconBtn, pressed && styles.btnPressed]}
                 hitSlop={8}
-                onPress={onBack}
+                onPress={() => {
+                  if (Platform.OS !== 'web') {
+                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                  }
+                  if (onOpenMessages) {
+                    onOpenMessages();
+                  } else {
+                    onBack();
+                  }
+                }}
               >
                 <Svg width={19} height={19} viewBox="0 0 24 24" fill="none">
                   <Path

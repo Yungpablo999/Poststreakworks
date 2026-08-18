@@ -23,12 +23,7 @@ interface ChallengeDetailScreenProps {
   onBackToDashboard?: () => void;
   onNavigateTab?: (tab: TabType) => void;
   onLogout?: () => void;
-}
-
-interface MissionDetailScreenProps {
-  onBackToDashboard: () => void;
-  onNavigateTab?: (tab: TabType) => void;
-  onLogout?: () => void;
+  onOpenMessages?: () => void;
 }
 
 interface QuestRequirement {
@@ -87,9 +82,10 @@ const AI_GENERATED_SCRIPTS = [
   },
 ];
 
-export const ChallengeDetailScreen: React.FC<MissionDetailScreenProps> = ({
+export const ChallengeDetailScreen: React.FC<ChallengeDetailScreenProps> = ({
   onBackToDashboard,
   onNavigateTab,
+  onOpenMessages,
 }) => {
   const [activeTab, setActiveTab] = useState<TabType>('quests');
   const [requirements, setRequirements] = useState<QuestRequirement[]>(INITIAL_REQUIREMENTS);
@@ -178,7 +174,7 @@ export const ChallengeDetailScreen: React.FC<MissionDetailScreenProps> = ({
     }
     setActiveTab(tab);
     if (tab === 'home') {
-      onBackToDashboard();
+      if (onBackToDashboard) onBackToDashboard();
     } else if (onNavigateTab) {
       onNavigateTab(tab);
     }
@@ -301,7 +297,16 @@ export const ChallengeDetailScreen: React.FC<MissionDetailScreenProps> = ({
             <Pressable
               style={({ pressed }) => [styles.headerIconBtn, pressed && styles.btnPressed]}
               hitSlop={8}
-              onPress={() => showToast('💬 Creator Chat: 2 unread collab messages')}
+              onPress={() => {
+                if (Platform.OS !== 'web') {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                }
+                if (onOpenMessages) {
+                  onOpenMessages();
+                } else {
+                  showToast('💬 Creator Chat: 2 unread collab messages');
+                }
+              }}
             >
               <Svg width={20} height={20} viewBox="0 0 24 24" fill="none">
                 <Path
@@ -990,7 +995,7 @@ export const ChallengeDetailScreen: React.FC<MissionDetailScreenProps> = ({
           actionText="Back to Dashboard 🚀"
           onDismiss={() => {
             setShowCelebrationModal(false);
-            onBackToDashboard();
+            if (onBackToDashboard) onBackToDashboard();
           }}
         />
       </View>

@@ -23,6 +23,7 @@ interface GrowthScreenProps {
   onLogout?: () => void;
   onNavigateTab?: (tab: TabType) => void;
   onOpenJarvisPro?: () => void;
+  onOpenMessages?: () => void;
 }
 
 export const GrowthScreen: React.FC<GrowthScreenProps> = ({
@@ -30,6 +31,7 @@ export const GrowthScreen: React.FC<GrowthScreenProps> = ({
   onLogout,
   onNavigateTab,
   onOpenJarvisPro,
+  onOpenMessages,
 }) => {
   const [activeTab, setActiveTab] = useState<TabType>('growth');
 
@@ -135,14 +137,21 @@ export const GrowthScreen: React.FC<GrowthScreenProps> = ({
 
           {/* Right Icons: Messages, Notification Bell, Profile */}
           <View style={styles.headerRightGroup}>
-            <Pressable
-              style={({ pressed }) => [styles.headerIconBtn, pressed && styles.btnPressed]}
-              hitSlop={8}
-              onPress={() => {
-                triggerModalPop();
-                setShowChatModal(true);
-              }}
-            >
+              <Pressable
+                style={({ pressed }) => [styles.headerIconBtn, pressed && styles.btnPressed]}
+                hitSlop={8}
+                onPress={() => {
+                  if (Platform.OS !== 'web') {
+                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                  }
+                  if (onOpenMessages) {
+                    onOpenMessages();
+                  } else {
+                    triggerModalPop();
+                    setShowChatModal(true);
+                  }
+                }}
+              >
               <Svg width={19} height={19} viewBox="0 0 24 24" fill="none">
                 <Path
                   d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"

@@ -718,7 +718,16 @@ export const MatchScreen: React.FC<MatchScreenProps> = ({
             <Pressable
               style={({ pressed }) => [styles.headerIconBtn, pressed && styles.btnPressed]}
               hitSlop={8}
-              onPress={() => showToast('💬 Match Messages')}
+              onPress={() => {
+                if (Platform.OS !== 'web') {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                }
+                if (onOpenMessages) {
+                  onOpenMessages();
+                } else {
+                  showToast('💬 Match Messages');
+                }
+              }}
             >
               <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
                 <Path

@@ -208,8 +208,15 @@ export const QuestsScreen: React.FC<QuestsScreenProps> = ({
               style={({ pressed }) => [styles.headerIconBtn, pressed && styles.btnPressed]}
               hitSlop={8}
               onPress={() => {
-                triggerModalPop();
-                setShowChatModal(true);
+                if (Platform.OS !== 'web') {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                }
+                if (onOpenMessages) {
+                  onOpenMessages();
+                } else {
+                  triggerModalPop();
+                  setShowChatModal(true);
+                }
               }}
             >
               <Svg width={19} height={19} viewBox="0 0 24 24" fill="none">
