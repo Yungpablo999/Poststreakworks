@@ -19,6 +19,7 @@ import * as Haptics from 'expo-haptics';
 import { LinearGradient } from 'expo-linear-gradient';
 import { FloatingTabBar, TabType } from '../components/FloatingTabBar';
 import { UserProfileModal, UserProfileData } from '../components/UserProfileModal';
+import { AnimatedCompletionModal } from '../components/AnimatedCompletionModal';
 
 // AUTHENTIC BRAND SVG ICONS
 const TikTokSvg = ({ size = 18 }: { size?: number }) => (
@@ -222,6 +223,16 @@ export const EarningsScreen: React.FC<EarningsScreenProps> = ({
   const [showMilestoneModal, setShowMilestoneModal] = useState(false);
   const [showCampaignModal, setShowCampaignModal] = useState(false);
   const [showConnectPlatformModal, setShowConnectPlatformModal] = useState(false);
+  // Celebration Modal States
+  const [showCelebrationModal, setShowCelebrationModal] = useState(false);
+  const [celebrationTitle, setCelebrationTitle] = useState('Income Goal Set!');
+  const [celebrationSubtitle, setCelebrationSubtitle] = useState('Your path to your first creator payout is now locked in.');
+  const [celebrationSpeech, setCelebrationSpeech] = useState('Ghost says: Let\'s get that bag Amara! 💰');
+  const [celebrationBadge, setCelebrationBadge] = useState('MILESTONE ACTIVE');
+  const [celebrationXp, setCelebrationXp] = useState(100);
+  const [selectedGoal, setSelectedGoal] = useState('First $50 Goal');
+  const [selectedGoalIndex, setSelectedGoalIndex] = useState(0);
+
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   // Platform Management State
@@ -748,7 +759,7 @@ export const EarningsScreen: React.FC<EarningsScreenProps> = ({
             <View style={styles.goalHeaderRow}>
               <View>
                 <Text style={styles.goalTitle}>Starter Goal</Text>
-                <Text style={styles.goalTarget}>First $50 Goal</Text>
+                <Text style={styles.goalTarget}>{selectedGoal}</Text>
               </View>
               <View style={styles.trophyCircle}>
                 <Text style={{ fontSize: 18 }}>🏆</Text>
@@ -1083,28 +1094,64 @@ export const EarningsScreen: React.FC<EarningsScreenProps> = ({
               </View>
 
               <View style={styles.milestoneGrid}>
-                {['$50 Starter Goal', '$250 Micro Creator', '$1,000 Pro Tier'].map((goal, idx) => (
-                  <Pressable
-                    key={idx}
-                    style={[styles.milestoneOption, idx === 0 && styles.milestoneOptionActive]}
-                    onPress={() => {
-                      showToast(`Milestone updated to ${goal}!`);
-                      setShowMilestoneModal(false);
-                    }}
-                  >
-                    <Text style={[styles.milestoneOptionText, idx === 0 && styles.milestoneOptionTextActive]}>
-                      {goal}
-                    </Text>
-                  </Pressable>
-                ))}
+                {['First $50 Goal', '$250 Micro Creator', '$1,000 Pro Tier'].map((goal, idx) => {
+                  const isSelected = selectedGoalIndex === idx;
+                  return (
+                    <Pressable
+                      key={idx}
+                      style={[styles.milestoneOption, isSelected && styles.milestoneOptionActive]}
+                      onPress={() => {
+                        if (Platform.OS !== 'web') {
+                          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                        }
+                        setSelectedGoalIndex(idx);
+                        setSelectedGoal(goal);
+                      }}
+                    >
+                      <Text style={[styles.milestoneOptionText, isSelected && styles.milestoneOptionTextActive]}>
+                        {goal}
+                      </Text>
+                    </Pressable>
+                  );
+                })}
               </View>
 
-              <Pressable style={styles.modalFullBtn} onPress={() => setShowMilestoneModal(false)}>
+              <Pressable
+                style={styles.modalFullBtn}
+                onPress={() => {
+                  if (Platform.OS !== 'web') {
+                    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+                  }
+                  setShowMilestoneModal(false);
+                  setCelebrationTitle('Income Goal Set!');
+                  setCelebrationSubtitle(`Targeting ${selectedGoal}. Your creator monetization roadmap is now active.`);
+                  setCelebrationSpeech(`Ghost says: You're on track for ${selectedGoal}! 🚀`);
+                  setCelebrationBadge('GOAL LOCKED IN');
+                  setCelebrationXp(100);
+                  setTimeout(() => {
+                    setShowCelebrationModal(true);
+                  }, 250);
+                }}
+              >
                 <Text style={styles.modalFullBtnText}>Save Goal</Text>
               </Pressable>
             </Animated.View>
           </View>
         </Modal>
+
+        
+        {/* SIGNATURE ANIMATED GHOST CELEBRATION MODAL */}
+        <AnimatedCompletionModal
+          visible={showCelebrationModal}
+          title={celebrationTitle}
+          subtitle={celebrationSubtitle}
+          speechBubble={celebrationSpeech}
+          badgeText={celebrationBadge}
+          xpEarned={celebrationXp}
+          streakCount={47}
+          actionText="Let's Build ➔"
+          onDismiss={() => setShowCelebrationModal(false)}
+        />
 
         {/* CAMPAIGN REQUIREMENTS MODAL */}
         <Modal
