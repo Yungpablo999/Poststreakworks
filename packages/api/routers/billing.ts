@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { createTRPCRouter, protectedProcedure, staffProcedure } from "../context";
 import { TRPCError } from "@trpc/server";
+import { initiatePaystackTransaction, createStripeCheckoutSession } from "@poststreak/integrations";
 
 export const billingRouter = createTRPCRouter({
   /**
@@ -111,12 +112,29 @@ export const billingRouter = createTRPCRouter({
         });
       }
 
-      // TODO: Integrate with Paystack/Stripe checkout
-      // For now, return a placeholder response
-      const checkoutUrl =
-        input.processor === "paystack"
-          ? `https://checkout.paystack.com/${plan.slug}`
-          : `https://checkout.stripe.com/${plan.slug}`;
+      const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://poststreak.app";
+      let checkoutUrl: string;
+
+      if (input.processor === "paystack") {
+        const result = await initiatePaystackTransaction({
+          email: ctx.user.email,
+          amountKobo: amount * 100,
+          currency: "NGN",
+          callbackUrl: `${appUrl}/billing?payment=success`,
+          metadata: { user_id: ctx.user.id, plan_id: plan.id, plan_slug: plan.slug },
+        });
+        checkoutUrl = result.url;
+      } else {
+        const result = await createStripeCheckoutSession({
+          customerEmail: ctx.user.email,
+          amountUsdCents: amount * 100,
+          productName: plan.name,
+          successUrl: `${appUrl}/billing?payment=success`,
+          cancelUrl: `${appUrl}/billing?payment=cancelled`,
+          metadata: { user_id: ctx.user.id, plan_id: plan.id, plan_slug: plan.slug },
+        });
+        checkoutUrl = result.url;
+      }
 
       // Track analytics
       await ctx.supabase.from("analytics_events").insert({

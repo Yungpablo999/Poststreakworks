@@ -11,6 +11,9 @@ import { missionsRouter } from "./routers/missions";
 import { duelsRouter } from "./routers/duels";
 import { adminRouter } from "./routers/admin";
 import { contentStudioRouter } from "./routers/content-studio";
+import { referralsRouter } from "./routers/referrals";
+import { autopilotRouter } from "./routers/autopilot";
+import { agentRouter } from "./routers/agent";
 
 export const appRouter = createTRPCRouter({
   accounts: accountsRouter,
@@ -25,6 +28,10 @@ export const appRouter = createTRPCRouter({
   duels: duelsRouter,
   admin: adminRouter,
   contentStudio: contentStudioRouter,
+  // Carried-over v1 domains — see supabase/migrations/20260814000013
+  referrals: referralsRouter,
+  autopilot: autopilotRouter,
+  agent: agentRouter,
 });
 
 export type AppRouter = typeof appRouter;

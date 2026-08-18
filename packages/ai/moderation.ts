@@ -26,7 +26,7 @@ export async function flagContent(params: {
   contentOwnerId: string;
   reporterId?: string;
 }): Promise<ModerationResult> {
-  const { contentType, content, contentOwnerId, reporterId } = params;
+  const { supabase, contentType, content, contentOwnerId, reporterId } = params;
 
   // Skip empty or very short content
   if (!content || content.length < 5) {

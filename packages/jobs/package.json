@@ -9,6 +9,8 @@
     "lint": "eslint . --max-warnings 0"
   },
   "dependencies": {
+    "@poststreak/workflows": "workspace:*",
+    "@poststreak/integrations": "workspace:*",
     "@supabase/supabase-js": "^2.47.12"
   },
   "devDependencies": {

@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "../context";
 import { TRPCError } from "@trpc/server";
+import { recordStreakEvent } from "@poststreak/workflows";
 
 const connectPlatformSchema = z.object({
   platform: z.enum(["linkedin", "twitter", "meta", "tiktok"]),
@@ -321,6 +322,71 @@ export const socialSchedulingRouter = createTRPCRouter({
       }
 
       return data;
+    }),
+
+  /**
+   * Confirm a manually-posted item on an assisted platform (X). v1's Copy &
+   * Post flow: the app never auto-posts to X (the API tier that allows it
+   * costs $100/mo), so the cron dispatch leaves posts targeting an
+   * 'assisted' connection in 'pending_confirmation' and the user confirms
+   * here once they've actually posted it, pasting back the live URL.
+   */
+  confirmManual: protectedProcedure
+    .input(
+      z.object({
+        postId: z.string().uuid(),
+        platform: z.enum(["linkedin", "twitter", "meta", "tiktok"]),
+        postUrl: z.string().url(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const { data: post } = await ctx.supabase
+        .from("scheduled_posts")
+        .select("id, platform_post_ids, target_platforms")
+        .eq("id", input.postId)
+        .eq("user_id", ctx.user.id)
+        .eq("status", "pending_confirmation")
+        .single();
+
+      if (!post) {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "Post not found or not eligible for confirmation",
+        });
+      }
+
+      const results = { ...(post.platform_post_ids ?? {}) };
+      results[input.platform] = { status: "published", id: input.postUrl };
+
+      const allPublished = (post.target_platforms as string[]).every(
+        (p) => results[p]?.status === "published",
+      );
+
+      const { error: updateError } = await ctx.supabase
+        .from("scheduled_posts")
+        .update({
+          platform_post_ids: results,
+          status: allPublished ? "published" : "pending_confirmation",
+          published_at: allPublished ? new Date().toISOString() : null,
+        })
+        .eq("id", post.id);
+
+      if (updateError) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Failed to confirm post",
+        });
+      }
+
+      if (allPublished) {
+        await recordStreakEvent(ctx.supabase, ctx.user.id, "publish", {
+          post_id: post.id,
+          platform: input.platform,
+          source: "confirm_manual",
+        });
+      }
+
+      return { success: true, allPublished };
     }),
 
   /**

@@ -42,7 +42,14 @@ export async function generatePreview(params: {
     return { success: false, error: "Project not found" };
   }
 
-  const voice = project.voice as { fish_audio_voice_id: string } | null;
+  // Supabase's nested embed shape (object vs. array) depends on FK
+  // direction and isn't statically known without generated DB types —
+  // handle both rather than assert one and risk a runtime mismatch.
+  const voiceEmbed = project.voice as
+    | { fish_audio_voice_id: string }
+    | { fish_audio_voice_id: string }[]
+    | null;
+  const voice = Array.isArray(voiceEmbed) ? (voiceEmbed[0] ?? null) : voiceEmbed;
   if (!voice) {
     return { success: false, error: "No voice selected" };
   }
@@ -85,7 +92,14 @@ export async function enqueueFullRender(params: {
     return { success: false, error: "Project not found" };
   }
 
-  const voice = project.voice as { fish_audio_voice_id: string } | null;
+  // Supabase's nested embed shape (object vs. array) depends on FK
+  // direction and isn't statically known without generated DB types —
+  // handle both rather than assert one and risk a runtime mismatch.
+  const voiceEmbed = project.voice as
+    | { fish_audio_voice_id: string }
+    | { fish_audio_voice_id: string }[]
+    | null;
+  const voice = Array.isArray(voiceEmbed) ? (voiceEmbed[0] ?? null) : voiceEmbed;
   if (!voice) {
     return { success: false, error: "No voice selected" };
   }
@@ -177,15 +191,11 @@ export async function completeRender(params: {
     return { success: false, error: "Failed to debit wallet" };
   }
 
-  // Update wallet used_minutes
-  await supabase
-    .from("voice_minutes_wallet")
-    .update({
-      used_minutes: supabase.rpc
-        ? undefined // Will use a database function for atomic increment
-        : undefined,
-    })
-    .eq("user_id", userId);
+  // No wallet.used_minutes update here on purpose — the voice_minutes_wallet
+  // migration's own doc comment is explicit that balance is derived from
+  // voice_minutes_ledger, never mutated directly. The debit insert above is
+  // the whole operation; a denormalized used_minutes column would just be a
+  // second source of truth that can drift from the ledger.
 
   // Update project status
   const { error: updateErr } = await supabase

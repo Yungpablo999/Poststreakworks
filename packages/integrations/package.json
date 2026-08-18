@@ -9,6 +9,7 @@
     "lint": "eslint . --max-warnings 0"
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.47.12",
     "zod": "^3.24.1"
   },
   "devDependencies": {
