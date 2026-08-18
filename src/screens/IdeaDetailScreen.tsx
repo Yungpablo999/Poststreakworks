@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import {
   StyleSheet,
   View,
@@ -11,12 +11,14 @@ import {
   TextInput,
   Image,
   Dimensions,
+  SafeAreaView,
+  StatusBar,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as Haptics from 'expo-haptics';
 import Svg, { Path, Circle } from 'react-native-svg';
-
-export type TabType = 'home' | 'create' | 'match' | 'quests' | 'growth';
+import { FloatingTabBar, TabType } from '../components/FloatingTabBar';
+import { AnimatedCompletionModal } from '../components/AnimatedCompletionModal';
 
 interface IdeaDetailScreenProps {
   ideaTitle?: string;
@@ -26,6 +28,40 @@ interface IdeaDetailScreenProps {
   onOpenJarvisPro?: () => void;
   onNavigateTab?: (tab: TabType) => void;
 }
+
+interface NotificationItem {
+  id: string;
+  title: string;
+  body: string;
+  time: string;
+  unread: boolean;
+  iconEmoji: string;
+  badgeBg: string;
+  badgeBorder: string;
+}
+
+const NOTIFICATIONS: NotificationItem[] = [
+  {
+    id: 'n1',
+    title: 'Peak Reach Window Active',
+    body: '7:30 PM is your optimal viral slot on TikTok & Instagram.',
+    time: '5m ago',
+    unread: true,
+    iconEmoji: '⚡',
+    badgeBg: '#EDE9FE',
+    badgeBorder: '#DDD6FE',
+  },
+  {
+    id: 'n2',
+    title: 'Streak Saver Ready',
+    body: "Convert today's idea into a post to keep your 47-day streak.",
+    time: '2h ago',
+    unread: true,
+    iconEmoji: '🔥',
+    badgeBg: '#FEF3C7',
+    badgeBorder: '#FDE68A',
+  },
+];
 
 const HOOK_OPTIONS = [
   'Stop making this mistake if you want to stay consistent as a creator.',
@@ -57,23 +93,49 @@ export const IdeaDetailScreen: React.FC<IdeaDetailScreenProps> = ({
   const [generatedCaption, setGeneratedCaption] = useState<string | null>(null);
   const [isGeneratingCaption, setIsGeneratingCaption] = useState(false);
   const [selectedInsightFilter, setSelectedInsightFilter] = useState<'shorter' | 'stronger' | 'script'>('stronger');
+  const [notificationsList, setNotificationsList] = useState<NotificationItem[]>(NOTIFICATIONS);
 
   // Modals
   const [showScriptModal, setShowScriptModal] = useState(false);
   const [showScheduleModal, setShowScheduleModal] = useState(false);
-  const [showSuccessModal, setShowSuccessModal] = useState(false);
-  const [successMessage, setSuccessMessage] = useState('');
+  const [showNotificationModal, setShowNotificationModal] = useState(false);
+  const [showProfileModal, setShowProfileModal] = useState(false);
+  const [showChatModal, setShowChatModal] = useState(false);
+  const [showCelebrationModal, setShowCelebrationModal] = useState(false);
+  const [celebrationTitle, setCelebrationTitle] = useState('Idea Ready!');
+  const [celebrationSubtitle, setCelebrationSubtitle] = useState('Your post draft has been saved & added to your queue.');
+  const [celebrationSpeech, setCelebrationSpeech] = useState('Great work converting this idea into content!');
 
   // Script text state
   const [scriptDraft, setScriptDraft] = useState(
-    `[HOOK - 0:00-0:03]\n"${HOOK_OPTIONS[0]}"\n\n[STORY - 0:03-0:15]\nFor the first 6 months, I waited until every video had perfect lighting and editing before posting. That caused me to post once every 3 weeks instead of building consistency.\n\n[LESSON - 0:15-0:25]\nThe moment I switched to daily raw value-first videos, my views 10xed and my community grew by 40k creators.\n\n[CTA - 0:25-0:30]\nWhat\'s one thing you\'re overthinking right now? Drop it below and let\'s fix it!`
+    `[HOOK - 0:00-0:03]\n"${HOOK_OPTIONS[0]}"\n\n[STORY - 0:03-0:15]\nFor the first 6 months, I waited until every video had perfect lighting and editing before posting. That caused me to post once every 3 weeks instead of building consistency.\n\n[LESSON - 0:15-0:25]\nThe moment I switched to daily raw value-first videos, my views 10xed and my community grew by 40k creators.\n\n[CTA - 0:25-0:30]\nWhat's one thing you're overthinking right now? Drop it below and let's fix it!`
   );
 
   // Animations
-  const modalPopScale = useRef(new Animated.Value(0.92)).current;
+  const flameFloatY = useRef(new Animated.Value(0)).current;
+  const modalPopScale = useRef(new Animated.Value(0.9)).current;
+
+  useEffect(() => {
+    const floatAnim = Animated.loop(
+      Animated.sequence([
+        Animated.timing(flameFloatY, {
+          toValue: -4,
+          duration: 1800,
+          useNativeDriver: true,
+        }),
+        Animated.timing(flameFloatY, {
+          toValue: 0,
+          duration: 1800,
+          useNativeDriver: true,
+        }),
+      ])
+    );
+    floatAnim.start();
+    return () => floatAnim.stop();
+  }, [flameFloatY]);
 
   const triggerModalAnim = () => {
-    modalPopScale.setValue(0.92);
+    modalPopScale.setValue(0.9);
     Animated.spring(modalPopScale, {
       toValue: 1,
       tension: 65,
@@ -155,9 +217,10 @@ export const IdeaDetailScreen: React.FC<IdeaDetailScreenProps> = ({
     if (Platform.OS !== 'web') {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     }
-    setSuccessMessage(`Post "${ideaTitle}" has been converted and added to your creator drafts queue!`);
-    triggerModalAnim();
-    setShowSuccessModal(true);
+    setCelebrationTitle('Draft Created!');
+    setCelebrationSubtitle(`"${ideaTitle}" is now ready in your drafts queue with full hook & caption.`);
+    setCelebrationSpeech('47-day streak protected! Keep this momentum going.');
+    setShowCelebrationModal(true);
   };
 
   const handleOpenScript = () => {
@@ -180,670 +243,784 @@ export const IdeaDetailScreen: React.FC<IdeaDetailScreenProps> = ({
     }
   };
 
-  return (
-    <View style={styles.safeArea}>
-      {/* Top Header Bar */}
-      <View style={styles.headerBar}>
-        <Pressable
-          onPress={() => {
-            if (Platform.OS !== 'web') {
-              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-            }
-            onBack();
-          }}
-          style={({ pressed }) => [styles.backCircleBtn, pressed && styles.btnPressed]}
-          hitSlop={8}
-        >
-          <Svg width={20} height={20} viewBox="0 0 24 24" fill="none">
-            <Path d="M15 18L9 12L15 6" stroke="#171420" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" />
-          </Svg>
-        </Pressable>
+  const unreadNotifCount = notificationsList.filter((n) => n.unread).length;
 
-        <View style={styles.headerPillsGroup}>
-          <View style={styles.selectedIdeaHeaderPill}>
-            <Text style={styles.selectedIdeaHeaderPillText}>SELECTED IDEA</Text>
+  return (
+    <SafeAreaView style={styles.safeArea}>
+      <StatusBar barStyle="dark-content" backgroundColor="#FAF8F5" />
+      <View style={styles.container}>
+        {/* 1. TOP AIRY HEADER BAR (UNIFIED APP-WIDE) */}
+        <View style={styles.headerBar}>
+          <View style={styles.headerLeftGroup}>
+            <Pressable
+              onPress={() => {
+                if (Platform.OS !== 'web') {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                }
+                onBack();
+              }}
+              style={({ pressed }) => [styles.backCircleBtn, pressed && styles.btnPressed]}
+              hitSlop={8}
+            >
+              <Svg width={20} height={20} viewBox="0 0 24 24" fill="none">
+                <Path d="M15 18L9 12L15 6" stroke="#171420" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" />
+              </Svg>
+            </Pressable>
+
+            {/* Mascot Logo with Floating Animation */}
+            <Animated.View
+              style={[
+                styles.headerLogoWrapper,
+                { transform: [{ translateY: flameFloatY }] },
+              ]}
+            >
+              <Image
+                source={require('../../assets/images/jarvis-ghost-clean.png')}
+                style={styles.headerGhostLogo}
+                resizeMode="contain"
+              />
+            </Animated.View>
           </View>
-          <View style={styles.freeCreatorToolPill}>
-            <Text style={styles.freeCreatorToolPillText}>Free Creator Tool</Text>
+
+          {/* Right Icons: Messages, Notification Bell, Profile */}
+          <View style={styles.headerRightGroup}>
+            <Pressable
+              style={({ pressed }) => [styles.headerIconBtn, pressed && styles.btnPressed]}
+              hitSlop={8}
+              onPress={() => {
+                triggerModalAnim();
+                setShowChatModal(true);
+              }}
+            >
+              <Svg width={19} height={19} viewBox="0 0 24 24" fill="none">
+                <Path
+                  d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"
+                  stroke="#171420"
+                  strokeWidth="2.2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </Svg>
+            </Pressable>
+
+            <Pressable
+              style={({ pressed }) => [styles.headerIconBtn, pressed && styles.btnPressed]}
+              hitSlop={8}
+              onPress={() => {
+                triggerModalAnim();
+                setShowNotificationModal(true);
+              }}
+            >
+              <Svg width={19} height={19} viewBox="0 0 24 24" fill="none">
+                <Path
+                  d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"
+                  stroke="#171420"
+                  strokeWidth="2.2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+                <Path
+                  d="M13.73 21a2 2 0 0 1-3.46 0"
+                  stroke="#171420"
+                  strokeWidth="2.2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </Svg>
+              {unreadNotifCount > 0 && <View style={styles.notificationDot} />}
+            </Pressable>
+
+            <Pressable
+              style={({ pressed }) => [styles.headerIconBtn, pressed && styles.btnPressed]}
+              hitSlop={8}
+              onPress={() => {
+                triggerModalAnim();
+                setShowProfileModal(true);
+              }}
+            >
+              <Svg width={19} height={19} viewBox="0 0 24 24" fill="none">
+                <Path
+                  d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"
+                  stroke="#171420"
+                  strokeWidth="2.2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+                <Circle cx="12" cy="7" r="4" stroke="#171420" strokeWidth="2.2" />
+              </Svg>
+            </Pressable>
           </View>
         </View>
 
-        <Pressable
-          onPress={() => {
-            if (onOpenJarvisPro) onOpenJarvisPro();
-          }}
-          style={({ pressed }) => [styles.proCrownBtn, pressed && styles.btnPressed]}
-          hitSlop={8}
+        {/* 2. MAIN SCROLLABLE CONTENT */}
+        <ScrollView
+          contentContainerStyle={styles.scrollContent}
+          showsVerticalScrollIndicator={false}
+          bounces={true}
         >
-          <Text style={{ fontSize: 16 }}>⚡</Text>
-        </Pressable>
-      </View>
+          {/* Top Pill Badges (Royal Purple & Metallic Silver) */}
+          <View style={styles.topBadgesRow}>
+            <LinearGradient
+              colors={['#7C3AED', '#582CDB']}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 0 }}
+              style={styles.selectedIdeaPill}
+            >
+              <Text style={styles.selectedIdeaPillText}>SELECTED IDEA</Text>
+            </LinearGradient>
 
-      <ScrollView
-        style={styles.container}
-        contentContainerStyle={styles.scrollContent}
-        showsVerticalScrollIndicator={false}
-      >
-        {/* Main Title & Subtitle */}
-        <Text style={styles.mainTitle}>Turn this idea into your next post.</Text>
-        <Text style={styles.mainSubtitle}>
-          Use this streak-saving idea to create content your audience can connect with.
-        </Text>
-
-        {/* 1. SELECTED IDEA SHOWCASE CARD */}
-        <View style={styles.selectedIdeaCard}>
-          <View style={styles.ideaCardHeaderRow}>
-            <Text style={styles.ideaCardTag}>SELECTED IDEA</Text>
-            <View style={styles.lightbulbCircle}>
-              <Text style={{ fontSize: 15 }}>💡</Text>
+            <View style={styles.freeCreatorToolPill}>
+              <Text style={styles.freeCreatorToolPillText}>✨ FREE CREATOR TOOL</Text>
             </View>
           </View>
 
-          <Text style={styles.ideaCardTitle}>&ldquo;{ideaTitle}&rdquo;</Text>
-          <Text style={styles.ideaCardDescription}>
-            Share one honest lesson that would help another creator avoid a mistake or stay consistent.
+          {/* Main Title & Subtitle */}
+          <Text style={styles.mainTitle}>Turn this idea into your next post.</Text>
+          <Text style={styles.mainSubtitle}>
+            Use this streak-saving idea to create content your audience can connect with.
           </Text>
 
-          {/* Goal Callout Box */}
-          <View style={styles.goalCalloutBox}>
-            <Text style={styles.goalCalloutText}>
-              <Text style={styles.goalCalloutBold}>Goal: </Text>
-              Protect your streak and create useful content your audience can save.
-            </Text>
-          </View>
-
-          {/* Tags Row */}
-          <View style={styles.ideaTagsRow}>
-            <View style={styles.ideaTagPill}>
-              <Text style={styles.ideaTagPillText}>Personal Lesson</Text>
-            </View>
-            <View style={styles.ideaTagPill}>
-              <Text style={styles.ideaTagPillText}>Creator Advice</Text>
-            </View>
-            <View style={styles.ideaTagPill}>
-              <Text style={styles.ideaTagPillText}>High Save Potential</Text>
-            </View>
-          </View>
-
-          {/* Streak Protection Ribbon */}
-          <View style={styles.streakRibbonBanner}>
-            <Text style={styles.streakRibbonIcon}>🎖</Text>
-            <Text style={styles.streakRibbonText}>
-              Completing this today helps protect your <Text style={{ fontWeight: '800' }}>47-day streak</Text>.
-            </Text>
-          </View>
-        </View>
-
-        {/* 2. SUGGESTED FORMAT */}
-        <Text style={styles.sectionLabel}>SUGGESTED FORMAT</Text>
-        <Pressable
-          style={({ pressed }) => [styles.formatCard, pressed && styles.btnPressed]}
-          onPress={handleOpenScript}
-        >
-          <View style={styles.formatLeftGroup}>
-            <View style={styles.formatIconBox}>
-              <Text style={{ fontSize: 18 }}>📹</Text>
-            </View>
-            <View>
-              <View style={styles.formatTitleRow}>
-                <Text style={styles.formatTitle}>30s Reel / TikTok</Text>
-                <View style={styles.recBadge}>
-                  <Text style={styles.recBadgeText}>REC</Text>
-                </View>
+          {/* 1. SELECTED IDEA SHOWCASE CARD */}
+          <View style={styles.selectedIdeaCard}>
+            <View style={styles.ideaCardHeaderRow}>
+              <Text style={styles.ideaCardTag}>SELECTED IDEA</Text>
+              <View style={styles.lightbulbCircle}>
+                <Text style={{ fontSize: 15 }}>💡</Text>
               </View>
-              <Text style={styles.formatSubtitle}>Talking head / POV</Text>
+            </View>
+
+            <Text style={styles.ideaCardTitle}>&ldquo;{ideaTitle}&rdquo;</Text>
+            <Text style={styles.ideaCardDescription}>
+              Share one honest lesson that would help another creator avoid a mistake or stay consistent.
+            </Text>
+
+            {/* Goal Callout Box */}
+            <View style={styles.goalCalloutBox}>
+              <Text style={styles.goalCalloutText}>
+                <Text style={styles.goalCalloutBold}>Goal: </Text>
+                Protect your streak and create useful content your audience can save.
+              </Text>
+            </View>
+
+            {/* Tags Row */}
+            <View style={styles.ideaTagsRow}>
+              <View style={styles.ideaTagPill}>
+                <Text style={styles.ideaTagPillText}>Personal Lesson</Text>
+              </View>
+              <View style={styles.ideaTagPill}>
+                <Text style={styles.ideaTagPillText}>Creator Advice</Text>
+              </View>
+              <View style={styles.ideaTagPill}>
+                <Text style={styles.ideaTagPillText}>High Save Potential</Text>
+              </View>
+            </View>
+
+            {/* Streak Protection Ribbon */}
+            <View style={styles.streakRibbonBanner}>
+              <Text style={styles.streakRibbonIcon}>🎖</Text>
+              <Text style={styles.streakRibbonText}>
+                Completing this today helps protect your <Text style={{ fontWeight: '800' }}>47-day streak</Text>.
+              </Text>
             </View>
           </View>
-          <Text style={styles.formatChevron}>›</Text>
-        </Pressable>
 
-        {/* 3. PLATFORMS */}
-        <Text style={styles.sectionLabel}>PLATFORMS</Text>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.platformsScrollRow}>
-          {PLATFORM_OPTIONS.map((plat) => {
-            const isSelected = selectedPlatforms.includes(plat.id);
-            return (
-              <Pressable
-                key={plat.id}
-                onPress={() => togglePlatform(plat.id)}
-                style={({ pressed }) => [
-                  styles.platformPill,
-                  isSelected && styles.platformPillActive,
-                  pressed && styles.btnPressed,
-                ]}
-              >
-                <Text style={{ fontSize: 12 }}>{plat.icon}</Text>
-                <Text style={[styles.platformPillText, isSelected && styles.platformPillTextActive]}>
-                  {plat.name}
-                </Text>
-                <View style={[styles.platformMultiplierBadge, isSelected && styles.platformMultiplierBadgeActive]}>
-                  <Text style={[styles.platformMultiplierText, isSelected && styles.platformMultiplierTextActive]}>
-                    {plat.multiplier}
-                  </Text>
+          {/* 2. SUGGESTED FORMAT */}
+          <Text style={styles.sectionLabel}>SUGGESTED FORMAT</Text>
+          <Pressable
+            style={({ pressed }) => [styles.formatCard, pressed && styles.btnPressed]}
+            onPress={handleOpenScript}
+          >
+            <View style={styles.formatLeftGroup}>
+              <View style={styles.formatIconBox}>
+                <Text style={{ fontSize: 18 }}>📹</Text>
+              </View>
+              <View>
+                <View style={styles.formatTitleRow}>
+                  <Text style={styles.formatTitle}>30s Reel / TikTok</Text>
+                  <View style={styles.recBadge}>
+                    <Text style={styles.recBadgeText}>REC</Text>
+                  </View>
                 </View>
-              </Pressable>
-            );
-          })}
-        </ScrollView>
+                <Text style={styles.formatSubtitle}>Talking head / POV</Text>
+              </View>
+            </View>
+            <Text style={styles.formatChevron}>›</Text>
+          </Pressable>
 
-        {/* 4. SUGGESTED HOOK */}
-        <View style={styles.sectionLabelRow}>
-          <Text style={styles.sectionLabel}>SUGGESTED HOOK</Text>
-          <View style={styles.hookCounterBadge}>
-            <Text style={styles.hookCounterBadgeText}>2 left today</Text>
+          {/* 3. PLATFORMS */}
+          <Text style={styles.sectionLabel}>PLATFORMS</Text>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.platformsScrollRow}>
+            {PLATFORM_OPTIONS.map((plat) => {
+              const isSelected = selectedPlatforms.includes(plat.id);
+              return (
+                <Pressable
+                  key={plat.id}
+                  onPress={() => togglePlatform(plat.id)}
+                  style={({ pressed }) => [
+                    styles.platformPill,
+                    isSelected && styles.platformPillActive,
+                    pressed && styles.btnPressed,
+                  ]}
+                >
+                  <Text style={{ fontSize: 12 }}>{plat.icon}</Text>
+                  <Text style={[styles.platformPillText, isSelected && styles.platformPillTextActive]}>
+                    {plat.name}
+                  </Text>
+                  <View style={[styles.platformMultiplierBadge, isSelected && styles.platformMultiplierBadgeActive]}>
+                    <Text style={[styles.platformMultiplierText, isSelected && styles.platformMultiplierTextActive]}>
+                      {plat.multiplier}
+                    </Text>
+                  </View>
+                </Pressable>
+              );
+            })}
+          </ScrollView>
+
+          {/* 4. SUGGESTED HOOK */}
+          <View style={styles.sectionLabelRow}>
+            <Text style={styles.sectionLabel}>SUGGESTED HOOK</Text>
+            <View style={styles.hookCounterBadge}>
+              <Text style={styles.hookCounterBadgeText}>2 left today</Text>
+            </View>
           </View>
-        </View>
 
-        <View style={styles.hookCardContainer}>
-          {hooksList.map((hook, hIdx) => {
-            const isSelected = selectedHookIndex === hIdx;
-            return (
+          <View style={styles.hookCardContainer}>
+            {hooksList.map((hook, hIdx) => {
+              const isSelected = selectedHookIndex === hIdx;
+              return (
+                <Pressable
+                  key={`hook_${hIdx}`}
+                  onPress={() => handleSelectHook(hIdx)}
+                  style={[
+                    styles.hookOptionBox,
+                    isSelected && styles.hookOptionBoxSelected,
+                  ]}
+                >
+                  {isSelected && <View style={styles.hookActiveBar} />}
+                  <Text style={[styles.hookOptionText, isSelected && styles.hookOptionTextSelected]}>
+                    &ldquo;{hook}&rdquo;
+                  </Text>
+                </Pressable>
+              );
+            })}
+
+            <View style={styles.hookBtnRow}>
               <Pressable
-                key={`hook_${hIdx}`}
-                onPress={() => handleSelectHook(hIdx)}
-                style={[
-                  styles.hookOptionBox,
-                  isSelected && styles.hookOptionBoxSelected,
-                ]}
+                style={({ pressed }) => [styles.useHookBtn, pressed && styles.btnPressed]}
+                onPress={() => {
+                  if (Platform.OS !== 'web') {
+                    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+                  }
+                  handleOpenScript();
+                }}
               >
-                {isSelected && <View style={styles.hookActiveBar} />}
-                <Text style={[styles.hookOptionText, isSelected && styles.hookOptionTextSelected]}>
-                  &ldquo;{hook}&rdquo;
+                <Text style={styles.useHookBtnText}>Use Hook</Text>
+              </Pressable>
+
+              <Pressable
+                style={({ pressed }) => [styles.generateMoreBtn, pressed && styles.btnPressed]}
+                onPress={handleGenerateMoreHooks}
+                disabled={isGeneratingHooks}
+              >
+                <Text style={styles.generateMoreBtnText}>
+                  {isGeneratingHooks ? 'Generating...' : 'Generate More'}
                 </Text>
               </Pressable>
-            );
-          })}
+            </View>
+          </View>
 
-          <View style={styles.hookBtnRow}>
+          {/* 5. CAPTION DIRECTION */}
+          <Text style={styles.sectionLabel}>CAPTION DIRECTION</Text>
+          <View style={styles.captionCard}>
+            <Text style={styles.captionAngleBold}>Angle:</Text>
+            <Text style={styles.captionAngleDesc}>
+              Be honest, helpful and specific. Share the mistake, what changed, and one takeaway other creators can use.
+            </Text>
+
+            <View style={styles.starterTextBox}>
+              <Text style={styles.starterTextLabel}>STARTER TEXT</Text>
+              <Text style={styles.starterTextContent}>
+                &ldquo;I used to wait until everything was perfect before posting. That slowed me down more than anything...&rdquo;
+              </Text>
+            </View>
+
+            {/* Hint Chips */}
+            <View style={styles.captionHintPillsRow}>
+              <View style={styles.captionHintPill}>
+                <Text style={styles.captionHintPillText}>• Mistake</Text>
+              </View>
+              <View style={styles.captionHintPill}>
+                <Text style={styles.captionHintPillText}>• Lesson</Text>
+              </View>
+              <View style={styles.captionHintPill}>
+                <Text style={styles.captionHintPillText}>• Takeaway</Text>
+              </View>
+              <View style={styles.captionHintPill}>
+                <Text style={styles.captionHintPillText}>• Question</Text>
+              </View>
+            </View>
+
+            {generatedCaption && (
+              <View style={styles.generatedCaptionOutputBox}>
+                <Text style={styles.generatedCaptionOutputText}>{generatedCaption}</Text>
+              </View>
+            )}
+
             <Pressable
-              style={({ pressed }) => [styles.useHookBtn, pressed && styles.btnPressed]}
+              style={({ pressed }) => [styles.generateCaptionBtn, pressed && styles.btnPressed]}
+              onPress={handleGenerateCaption}
+              disabled={isGeneratingCaption}
+            >
+              <Text style={styles.generateCaptionBtnText}>
+                {isGeneratingCaption ? '✨ Refining Caption...' : '✨ Generate Caption'}
+              </Text>
+            </Pressable>
+          </View>
+
+          {/* 6. POST STRUCTURE (2x2 Grid) */}
+          <Text style={styles.sectionLabel}>POST STRUCTURE</Text>
+          <View style={styles.structureGrid}>
+            <View style={styles.structureCard}>
+              <Text style={styles.structureNumber}>1.</Text>
+              <Text style={styles.structureTitle}>Hook</Text>
+              <Text style={styles.structureSub}>First 3 seconds</Text>
+            </View>
+
+            <View style={styles.structureCard}>
+              <Text style={styles.structureNumber}>2.</Text>
+              <Text style={styles.structureTitle}>Story</Text>
+              <Text style={styles.structureSub}>Explain mistake</Text>
+            </View>
+
+            <View style={styles.structureCard}>
+              <Text style={styles.structureNumber}>3.</Text>
+              <Text style={styles.structureTitle}>Lesson</Text>
+              <Text style={styles.structureSub}>Share change</Text>
+            </View>
+
+            <View style={styles.structureCard}>
+              <Text style={styles.structureNumber}>4.</Text>
+              <Text style={styles.structureTitle}>CTA</Text>
+              <Text style={styles.structureSub}>Ask audience</Text>
+            </View>
+          </View>
+
+          {/* 7. JARVIS INSIGHT CARD */}
+          <LinearGradient
+            colors={['#7C3AED', '#582CDB']}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={styles.jarvisCard}
+          >
+            <View style={styles.jarvisHeaderRow}>
+              <View style={styles.jarvisFlameIconBox}>
+                <Image
+                  source={require('../../assets/images/jarvis-core-flame.png')}
+                  style={styles.jarvisFlameImage}
+                  resizeMode="contain"
+                />
+              </View>
+              <Text style={styles.jarvisInsightTag}>JARVIS INSIGHT</Text>
+            </View>
+
+            <Text style={styles.jarvisBodyText}>
+              This idea works because it is personal, useful, and easy for other creators to save. Keep the lesson specific.
+            </Text>
+
+            {/* Quick Filter Chips */}
+            <View style={styles.jarvisChipsRow}>
+              <Pressable
+                onPress={() => setSelectedInsightFilter('shorter')}
+                style={[
+                  styles.jarvisChip,
+                  selectedInsightFilter === 'shorter' && styles.jarvisChipActive,
+                ]}
+              >
+                <Text style={styles.jarvisChipText}>Shorter</Text>
+              </Pressable>
+              <Pressable
+                onPress={() => setSelectedInsightFilter('stronger')}
+                style={[
+                  styles.jarvisChip,
+                  selectedInsightFilter === 'stronger' && styles.jarvisChipActive,
+                ]}
+              >
+                <Text style={styles.jarvisChipText}>Stronger Hook</Text>
+              </Pressable>
+              <Pressable
+                onPress={() => setSelectedInsightFilter('script')}
+                style={[
+                  styles.jarvisChip,
+                  selectedInsightFilter === 'script' && styles.jarvisChipActive,
+                ]}
+              >
+                <Text style={styles.jarvisChipText}>Script</Text>
+              </Pressable>
+            </View>
+
+            <Pressable
+              style={({ pressed }) => [styles.improveIdeaBtn, pressed && styles.btnPressed]}
               onPress={() => {
                 if (Platform.OS !== 'web') {
                   Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
                 }
-                handleOpenScript();
+                handleGenerateMoreHooks();
               }}
             >
-              <Text style={styles.useHookBtnText}>Use Hook</Text>
+              <Text style={styles.improveIdeaBtnText}>🪄 Improve Idea</Text>
             </Pressable>
-
-            <Pressable
-              style={({ pressed }) => [styles.generateMoreBtn, pressed && styles.btnPressed]}
-              onPress={handleGenerateMoreHooks}
-              disabled={isGeneratingHooks}
-            >
-              <Text style={styles.generateMoreBtnText}>
-                {isGeneratingHooks ? 'Generating...' : 'Generate More'}
-              </Text>
-            </Pressable>
-          </View>
-        </View>
-
-        {/* 5. CAPTION DIRECTION */}
-        <Text style={styles.sectionLabel}>CAPTION DIRECTION</Text>
-        <View style={styles.captionCard}>
-          <Text style={styles.captionAngleBold}>Angle:</Text>
-          <Text style={styles.captionAngleDesc}>
-            Be honest, helpful and specific. Share the mistake, what changed, and one takeaway other creators can use.
-          </Text>
-
-          <View style={styles.starterTextBox}>
-            <Text style={styles.starterTextLabel}>STARTER TEXT</Text>
-            <Text style={styles.starterTextContent}>
-              &ldquo;I used to wait until everything was perfect before posting. That slowed me down more than anything...&rdquo;
-            </Text>
-          </View>
-
-          {/* Hint Chips */}
-          <View style={styles.captionHintPillsRow}>
-            <View style={styles.captionHintPill}>
-              <Text style={styles.captionHintPillText}>• Mistake</Text>
-            </View>
-            <View style={styles.captionHintPill}>
-              <Text style={styles.captionHintPillText}>• Lesson</Text>
-            </View>
-            <View style={styles.captionHintPill}>
-              <Text style={styles.captionHintPillText}>• Takeaway</Text>
-            </View>
-            <View style={styles.captionHintPill}>
-              <Text style={styles.captionHintPillText}>• Question</Text>
-            </View>
-          </View>
-
-          {generatedCaption && (
-            <View style={styles.generatedCaptionOutputBox}>
-              <Text style={styles.generatedCaptionOutputText}>{generatedCaption}</Text>
-            </View>
-          )}
-
-          <Pressable
-            style={({ pressed }) => [styles.generateCaptionBtn, pressed && styles.btnPressed]}
-            onPress={handleGenerateCaption}
-            disabled={isGeneratingCaption}
-          >
-            <Text style={styles.generateCaptionBtnText}>
-              {isGeneratingCaption ? '✨ Refining Caption...' : '✨ Generate Caption'}
-            </Text>
-          </Pressable>
-        </View>
-
-        {/* 6. POST STRUCTURE (2x2 Grid) */}
-        <Text style={styles.sectionLabel}>POST STRUCTURE</Text>
-        <View style={styles.structureGrid}>
-          <View style={styles.structureCard}>
-            <Text style={styles.structureNumber}>1.</Text>
-            <Text style={styles.structureTitle}>Hook</Text>
-            <Text style={styles.structureSub}>First 3 seconds</Text>
-          </View>
-
-          <View style={styles.structureCard}>
-            <Text style={styles.structureNumber}>2.</Text>
-            <Text style={styles.structureTitle}>Story</Text>
-            <Text style={styles.structureSub}>Explain mistake</Text>
-          </View>
-
-          <View style={styles.structureCard}>
-            <Text style={styles.structureNumber}>3.</Text>
-            <Text style={styles.structureTitle}>Lesson</Text>
-            <Text style={styles.structureSub}>Share change</Text>
-          </View>
-
-          <View style={styles.structureCard}>
-            <Text style={styles.structureNumber}>4.</Text>
-            <Text style={styles.structureTitle}>CTA</Text>
-            <Text style={styles.structureSub}>Ask audience</Text>
-          </View>
-        </View>
-
-        {/* 7. JARVIS INSIGHT CARD */}
-        <LinearGradient
-          colors={['#7C3AED', '#582CDB']}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 1 }}
-          style={styles.jarvisCard}
-        >
-          <View style={styles.jarvisHeaderRow}>
-            <View style={styles.jarvisFlameIconBox}>
-              <Image
-                source={require('../../assets/images/jarvis-core-flame.png')}
-                style={styles.jarvisFlameImage}
-                resizeMode="contain"
-              />
-            </View>
-            <Text style={styles.jarvisInsightTag}>JARVIS INSIGHT</Text>
-          </View>
-
-          <Text style={styles.jarvisBodyText}>
-            This idea works because it is personal, useful, and easy for other creators to save. Keep the lesson specific.
-          </Text>
-
-          {/* Quick Filter Chips */}
-          <View style={styles.jarvisChipsRow}>
-            <Pressable
-              onPress={() => setSelectedInsightFilter('shorter')}
-              style={[
-                styles.jarvisChip,
-                selectedInsightFilter === 'shorter' && styles.jarvisChipActive,
-              ]}
-            >
-              <Text style={styles.jarvisChipText}>Shorter</Text>
-            </Pressable>
-            <Pressable
-              onPress={() => setSelectedInsightFilter('stronger')}
-              style={[
-                styles.jarvisChip,
-                selectedInsightFilter === 'stronger' && styles.jarvisChipActive,
-              ]}
-            >
-              <Text style={styles.jarvisChipText}>Stronger Hook</Text>
-            </Pressable>
-            <Pressable
-              onPress={() => setSelectedInsightFilter('script')}
-              style={[
-                styles.jarvisChip,
-                selectedInsightFilter === 'script' && styles.jarvisChipActive,
-              ]}
-            >
-              <Text style={styles.jarvisChipText}>Script</Text>
-            </Pressable>
-          </View>
-
-          <Pressable
-            style={({ pressed }) => [styles.improveIdeaBtn, pressed && styles.btnPressed]}
-            onPress={() => {
-              if (Platform.OS !== 'web') {
-                Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-              }
-              handleGenerateMoreHooks();
-            }}
-          >
-            <Text style={styles.improveIdeaBtnText}>🪄 Improve Idea</Text>
-          </Pressable>
-        </LinearGradient>
-
-        {/* 8. STREAK IMPACT CARD */}
-        <Text style={styles.sectionLabel}>STREAK IMPACT</Text>
-        <View style={styles.streakImpactCard}>
-          <View style={styles.streakImpactItemRow}>
-            <View style={styles.impactCheckCircle}>
-              <Text style={{ fontSize: 12, color: '#582CDB' }}>✓</Text>
-            </View>
-            <Text style={styles.streakImpactText}>47-day streak protected</Text>
-          </View>
-
-          <View style={styles.streakImpactItemRow}>
-            <View style={styles.impactGrowthCircle}>
-              <Text style={{ fontSize: 12, color: '#582CDB' }}>📈</Text>
-            </View>
-            <Text style={styles.streakImpactText}>+40 Creator XP</Text>
-          </View>
-
-          {/* Mission Progress */}
-          <View style={styles.missionProgressContainer}>
-            <View style={styles.missionProgressHeader}>
-              <Text style={styles.missionProgressTitle}>MISSION: POST 1 CONTENT</Text>
-              <Text style={styles.missionProgressCount}>0/1</Text>
-            </View>
-            <View style={styles.missionProgressBarTrack}>
-              <View style={[styles.missionProgressBarFill, { width: '25%' }]} />
-            </View>
-          </View>
-        </View>
-
-        <View style={{ height: 140 }} />
-      </ScrollView>
-
-      {/* Sticky Bottom Actions Bar */}
-      <View style={styles.stickyBottomBar}>
-        <Pressable
-          style={({ pressed }) => [styles.turnIntoPostBtn, pressed && styles.btnPressed]}
-          onPress={handleTurnIntoPost}
-        >
-          <LinearGradient
-            colors={['#7C3AED', '#582CDB']}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 0 }}
-            style={styles.turnIntoPostGradient}
-          >
-            <Text style={styles.turnIntoPostBtnText}>Turn Into Post</Text>
           </LinearGradient>
-        </Pressable>
 
-        <View style={styles.bottomSubBtnRow}>
-          <Pressable
-            style={({ pressed }) => [styles.subActionBtn, pressed && styles.btnPressed]}
-            onPress={handleOpenScript}
-          >
-            <Text style={styles.subActionBtnText}>📝 Script</Text>
-          </Pressable>
-
-          <Pressable
-            style={({ pressed }) => [styles.subActionBtn, pressed && styles.btnPressed]}
-            onPress={handleOpenSchedule}
-          >
-            <Text style={styles.subActionBtnText}>📅 Schedule</Text>
-          </Pressable>
-        </View>
-
-        <Text style={styles.bottomDisclaimer}>Save as draft or schedule for later.</Text>
-      </View>
-
-      {/* MODAL 1: SCRIPT EDITOR */}
-      <Modal
-        visible={showScriptModal}
-        transparent={true}
-        animationType="fade"
-        onRequestClose={() => setShowScriptModal(false)}
-      >
-        <View style={styles.modalOverlay}>
-          <Animated.View style={[styles.modalCard, { transform: [{ scale: modalPopScale }] }]}>
-            <View style={styles.modalHeaderRow}>
-              <View>
-                <Text style={styles.modalTitle}>Creator Script</Text>
-                <Text style={styles.modalSubtitle}>30s Video Script for &ldquo;{ideaTitle}&rdquo;</Text>
+          {/* 8. STREAK IMPACT CARD */}
+          <Text style={styles.sectionLabel}>STREAK IMPACT</Text>
+          <View style={styles.streakImpactCard}>
+            <View style={styles.streakImpactItemRow}>
+              <View style={styles.impactCheckCircle}>
+                <Text style={{ fontSize: 12, color: '#582CDB' }}>✓</Text>
               </View>
-              <Pressable onPress={() => setShowScriptModal(false)} style={styles.modalCloseCircle} hitSlop={8}>
-                <Text style={styles.modalCloseCross}>✕</Text>
-              </Pressable>
+              <Text style={styles.streakImpactText}>47-day streak protected</Text>
             </View>
 
-            <TextInput
-              style={styles.scriptTextInput}
-              multiline
-              value={scriptDraft}
-              onChangeText={setScriptDraft}
-              textAlignVertical="top"
-              placeholderTextColor="#94A3B8"
-            />
-
-            <View style={styles.modalBtnRow}>
-              <Pressable
-                style={styles.modalSecondaryBtn}
-                onPress={() => setShowScriptModal(false)}
-              >
-                <Text style={styles.modalSecondaryBtnText}>Close</Text>
-              </Pressable>
-              <Pressable
-                style={styles.modalPrimaryBtn}
-                onPress={() => {
-                  if (Platform.OS !== 'web') {
-                    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-                  }
-                  setShowScriptModal(false);
-                  setSuccessMessage('Script copied to your post drafts queue!');
-                  setShowSuccessModal(true);
-                }}
-              >
-                <LinearGradient
-                  colors={['#7C3AED', '#582CDB']}
-                  style={styles.modalBtnGradient}
-                >
-                  <Text style={styles.modalPrimaryBtnText}>Save Script ✓</Text>
-                </LinearGradient>
-              </Pressable>
-            </View>
-          </Animated.View>
-        </View>
-      </Modal>
-
-      {/* MODAL 2: SCHEDULE POST */}
-      <Modal
-        visible={showScheduleModal}
-        transparent={true}
-        animationType="fade"
-        onRequestClose={() => setShowScheduleModal(false)}
-      >
-        <View style={styles.modalOverlay}>
-          <Animated.View style={[styles.modalCard, { transform: [{ scale: modalPopScale }] }]}>
-            <View style={styles.modalHeaderRow}>
-              <View>
-                <Text style={styles.modalTitle}>Schedule Idea</Text>
-                <Text style={styles.modalSubtitle}>Queued for your highest viral reach window</Text>
+            <View style={styles.streakImpactItemRow}>
+              <View style={styles.impactGrowthCircle}>
+                <Text style={{ fontSize: 12, color: '#582CDB' }}>📈</Text>
               </View>
-              <Pressable onPress={() => setShowScheduleModal(false)} style={styles.modalCloseCircle} hitSlop={8}>
-                <Text style={styles.modalCloseCross}>✕</Text>
-              </Pressable>
+              <Text style={styles.streakImpactText}>+40 Creator XP</Text>
             </View>
 
-            <View style={styles.schedulePeakBox}>
-              <Text style={styles.schedulePeakLabel}>RECOMMENDED SLOT</Text>
-              <Text style={styles.schedulePeakTime}>Today • 7:30 PM</Text>
-              <Text style={styles.schedulePeakReason}>⚡ Peak 94 Viral Score on TikTok & Instagram</Text>
+            {/* Mission Progress */}
+            <View style={styles.missionProgressContainer}>
+              <View style={styles.missionProgressHeader}>
+                <Text style={styles.missionProgressTitle}>MISSION: POST 1 CONTENT</Text>
+                <Text style={styles.missionProgressCount}>0/1</Text>
+              </View>
+              <View style={styles.missionProgressBarTrack}>
+                <View style={[styles.missionProgressBarFill, { width: '25%' }]} />
+              </View>
             </View>
+          </View>
 
-            <View style={styles.modalBtnRow}>
-              <Pressable
-                style={styles.modalSecondaryBtn}
-                onPress={() => setShowScheduleModal(false)}
-              >
-                <Text style={styles.modalSecondaryBtnText}>Cancel</Text>
-              </Pressable>
-              <Pressable
-                style={styles.modalPrimaryBtn}
-                onPress={() => {
-                  if (Platform.OS !== 'web') {
-                    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-                  }
-                  setShowScheduleModal(false);
-                  setSuccessMessage('Post successfully scheduled for Today at 7:30 PM!');
-                  setShowSuccessModal(true);
-                }}
-              >
-                <LinearGradient
-                  colors={['#7C3AED', '#582CDB']}
-                  style={styles.modalBtnGradient}
-                >
-                  <Text style={styles.modalPrimaryBtnText}>Confirm Slot ➔</Text>
-                </LinearGradient>
-              </Pressable>
-            </View>
-          </Animated.View>
-        </View>
-      </Modal>
-
-      {/* MODAL 3: SUCCESS CELEBRATION */}
-      <Modal
-        visible={showSuccessModal}
-        transparent={true}
-        animationType="fade"
-        onRequestClose={() => setShowSuccessModal(false)}
-      >
-        <View style={styles.modalOverlay}>
-          <Animated.View style={[styles.modalCard, { transform: [{ scale: modalPopScale }], alignItems: 'center' }]}>
-            <View style={styles.successCelebrationCircle}>
-              <Text style={{ fontSize: 32 }}>🎉</Text>
-            </View>
-            <Text style={styles.successTitle}>Idea Ready!</Text>
-            <Text style={styles.successDesc}>{successMessage}</Text>
-
+          {/* 9. CALL TO ACTION SECTION INSIDE SCROLL VIEW */}
+          <View style={styles.ctaSectionBox}>
             <Pressable
-              style={styles.successFullBtn}
-              onPress={() => {
-                setShowSuccessModal(false);
-                onBack();
-              }}
+              style={({ pressed }) => [styles.turnIntoPostBtn, pressed && styles.btnPressed]}
+              onPress={handleTurnIntoPost}
             >
               <LinearGradient
                 colors={['#7C3AED', '#582CDB']}
-                style={styles.modalBtnGradient}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 0 }}
+                style={styles.turnIntoPostGradient}
               >
-                <Text style={styles.modalPrimaryBtnText}>Done ✓</Text>
+                <Text style={styles.turnIntoPostBtnText}>Turn Into Post ➔</Text>
               </LinearGradient>
             </Pressable>
-          </Animated.View>
-        </View>
-      </Modal>
 
-      {/* BOTTOM TAB BAR */}
-      <View style={styles.bottomNavContainer}>
-        <View style={styles.bottomTabBar}>
-          <Pressable
-            style={styles.tabItem}
-            onPress={() => handleTabPress('home')}
-            hitSlop={6}
-          >
-            <Svg width={22} height={22} viewBox="0 0 24 24" fill="none">
-              <Path
-                d="M3 9.5L12 3L21 9.5V20C21 20.5523 20.5523 21 20 21H4C3.44772 21 3 20.5523 3 20V9.5Z"
-                stroke={activeTab === 'home' ? '#582CDB' : '#9E97AA'}
-                strokeWidth="2.2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </Svg>
-            <Text style={[styles.tabLabel, activeTab === 'home' && styles.tabLabelActive]}>
-              Home
-            </Text>
-          </Pressable>
+            <View style={styles.bottomSubBtnRow}>
+              <Pressable
+                style={({ pressed }) => [styles.subActionBtn, pressed && styles.btnPressed]}
+                onPress={handleOpenScript}
+              >
+                <Text style={styles.subActionBtnText}>📝 Script</Text>
+              </Pressable>
 
-          <Pressable
-            style={styles.tabItem}
-            onPress={() => handleTabPress('create')}
-            hitSlop={6}
-          >
-            <Svg width={22} height={22} viewBox="0 0 24 24" fill="none">
-              <Path
-                d="M12 5V19M5 12H19"
-                stroke={activeTab === 'create' ? '#582CDB' : '#9E97AA'}
-                strokeWidth="2.4"
-                strokeLinecap="round"
-              />
-            </Svg>
-            <Text style={[styles.tabLabel, activeTab === 'create' && styles.tabLabelActive]}>
-              Create
-            </Text>
-          </Pressable>
+              <Pressable
+                style={({ pressed }) => [styles.subActionBtn, pressed && styles.btnPressed]}
+                onPress={handleOpenSchedule}
+              >
+                <Text style={styles.subActionBtnText}>📅 Schedule</Text>
+              </Pressable>
+            </View>
 
-          <Pressable
-            style={styles.tabItem}
-            onPress={() => handleTabPress('match')}
-            hitSlop={6}
-          >
-            <Svg width={22} height={22} viewBox="0 0 24 24" fill="none">
-              <Path
-                d="M17 21V19C17 17.9 16.1 17 15 17H9C7.9 17 7 17.9 7 19V21"
-                stroke={activeTab === 'match' ? '#582CDB' : '#9E97AA'}
-                strokeWidth="2.2"
-                strokeLinecap="round"
-              />
-              <Circle
-                cx="12"
-                cy="7"
-                r="4"
-                stroke={activeTab === 'match' ? '#582CDB' : '#9E97AA'}
-                strokeWidth="2.2"
-              />
-            </Svg>
-            <Text style={[styles.tabLabel, activeTab === 'match' && styles.tabLabelActive]}>
-              Match
-            </Text>
-          </Pressable>
+            <Text style={styles.bottomDisclaimer}>Save as draft or schedule for later.</Text>
+          </View>
 
-          <Pressable
-            style={styles.tabItem}
-            onPress={() => handleTabPress('quests')}
-            hitSlop={6}
-          >
-            <Svg width={22} height={22} viewBox="0 0 24 24" fill="none">
-              <Circle
-                cx="12"
-                cy="12"
-                r="9"
-                stroke={activeTab === 'quests' ? '#582CDB' : '#9E97AA'}
-                strokeWidth="2.2"
-              />
-              <Path
-                d="M12 7V12L15 15"
-                stroke={activeTab === 'quests' ? '#582CDB' : '#9E97AA'}
-                strokeWidth="2.2"
-                strokeLinecap="round"
-              />
-            </Svg>
-            <Text style={[styles.tabLabel, activeTab === 'quests' && styles.tabLabelActive]}>
-              Quests
-            </Text>
-          </Pressable>
+          {/* Bottom spacing to clear floating tab bar */}
+          <View style={{ height: 110 }} />
+        </ScrollView>
 
-          <Pressable
-            style={styles.tabItem}
-            onPress={() => handleTabPress('growth')}
-            hitSlop={6}
-          >
-            <Svg width={22} height={22} viewBox="0 0 24 24" fill="none">
-              <Path
-                d="M18 20V10M12 20V4M6 20V14"
-                stroke={activeTab === 'growth' ? '#582CDB' : '#9E97AA'}
-                strokeWidth="2.2"
-                strokeLinecap="round"
+        {/* UNIFIED SIGNATURE FLOATING TAB BAR */}
+        <FloatingTabBar
+          activeTab={activeTab}
+          onTabPress={handleTabPress}
+        />
+
+        {/* MODAL 1: SCRIPT EDITOR */}
+        <Modal
+          visible={showScriptModal}
+          transparent={true}
+          animationType="fade"
+          onRequestClose={() => setShowScriptModal(false)}
+        >
+          <View style={styles.modalOverlay}>
+            <Animated.View style={[styles.modalCard, { transform: [{ scale: modalPopScale }] }]}>
+              <View style={styles.modalHeaderRow}>
+                <View>
+                  <Text style={styles.modalTitle}>Creator Script</Text>
+                  <Text style={styles.modalSubtitle}>30s Video Script for &ldquo;{ideaTitle}&rdquo;</Text>
+                </View>
+                <Pressable onPress={() => setShowScriptModal(false)} style={styles.modalCloseCircle} hitSlop={8}>
+                  <Text style={styles.modalCloseCross}>✕</Text>
+                </Pressable>
+              </View>
+
+              <TextInput
+                style={styles.scriptTextInput}
+                multiline
+                value={scriptDraft}
+                onChangeText={setScriptDraft}
+                textAlignVertical="top"
+                placeholderTextColor="#94A3B8"
               />
-            </Svg>
-            <Text style={[styles.tabLabel, activeTab === 'growth' && styles.tabLabelActive]}>
-              Growth
-            </Text>
-          </Pressable>
-        </View>
+
+              <View style={styles.modalBtnRow}>
+                <Pressable
+                  style={styles.modalSecondaryBtn}
+                  onPress={() => setShowScriptModal(false)}
+                >
+                  <Text style={styles.modalSecondaryBtnText}>Close</Text>
+                </Pressable>
+                <Pressable
+                  style={styles.modalPrimaryBtn}
+                  onPress={() => {
+                    if (Platform.OS !== 'web') {
+                      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+                    }
+                    setShowScriptModal(false);
+                    setCelebrationTitle('Script Saved!');
+                    setCelebrationSubtitle('Your 30-second video script is saved in drafts.');
+                    setShowCelebrationModal(true);
+                  }}
+                >
+                  <LinearGradient
+                    colors={['#7C3AED', '#582CDB']}
+                    style={styles.modalBtnGradient}
+                  >
+                    <Text style={styles.modalPrimaryBtnText}>Save Script ✓</Text>
+                  </LinearGradient>
+                </Pressable>
+              </View>
+            </Animated.View>
+          </View>
+        </Modal>
+
+        {/* MODAL 2: SCHEDULE POST */}
+        <Modal
+          visible={showScheduleModal}
+          transparent={true}
+          animationType="fade"
+          onRequestClose={() => setShowScheduleModal(false)}
+        >
+          <View style={styles.modalOverlay}>
+            <Animated.View style={[styles.modalCard, { transform: [{ scale: modalPopScale }] }]}>
+              <View style={styles.modalHeaderRow}>
+                <View>
+                  <Text style={styles.modalTitle}>Schedule Idea</Text>
+                  <Text style={styles.modalSubtitle}>Queued for your highest viral reach window</Text>
+                </View>
+                <Pressable onPress={() => setShowScheduleModal(false)} style={styles.modalCloseCircle} hitSlop={8}>
+                  <Text style={styles.modalCloseCross}>✕</Text>
+                </Pressable>
+              </View>
+
+              <View style={styles.schedulePeakBox}>
+                <Text style={styles.schedulePeakLabel}>RECOMMENDED SLOT</Text>
+                <Text style={styles.schedulePeakTime}>Today • 7:30 PM</Text>
+                <Text style={styles.schedulePeakReason}>⚡ Peak 94 Viral Score on TikTok & Instagram</Text>
+              </View>
+
+              <View style={styles.modalBtnRow}>
+                <Pressable
+                  style={styles.modalSecondaryBtn}
+                  onPress={() => setShowScheduleModal(false)}
+                >
+                  <Text style={styles.modalSecondaryBtnText}>Cancel</Text>
+                </Pressable>
+                <Pressable
+                  style={styles.modalPrimaryBtn}
+                  onPress={() => {
+                    if (Platform.OS !== 'web') {
+                      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+                    }
+                    setShowScheduleModal(false);
+                    setCelebrationTitle('Post Scheduled!');
+                    setCelebrationSubtitle('Your idea is scheduled for Today at 7:30 PM.');
+                    setShowCelebrationModal(true);
+                  }}
+                >
+                  <LinearGradient
+                    colors={['#7C3AED', '#582CDB']}
+                    style={styles.modalBtnGradient}
+                  >
+                    <Text style={styles.modalPrimaryBtnText}>Confirm Slot ➔</Text>
+                  </LinearGradient>
+                </Pressable>
+              </View>
+            </Animated.View>
+          </View>
+        </Modal>
+
+        {/* MODAL 3: NOTIFICATIONS CENTER */}
+        <Modal
+          visible={showNotificationModal}
+          transparent={true}
+          animationType="fade"
+          onRequestClose={() => setShowNotificationModal(false)}
+        >
+          <View style={styles.modalOverlay}>
+            <Animated.View style={[styles.modalCard, { transform: [{ scale: modalPopScale }] }]}>
+              <View style={styles.modalHeaderRow}>
+                <View>
+                  <Text style={styles.modalTitle}>Notifications</Text>
+                  <Text style={styles.modalSubtitle}>Streak updates &amp; creator alerts</Text>
+                </View>
+                <Pressable
+                  onPress={() => setShowNotificationModal(false)}
+                  style={styles.modalCloseCircle}
+                  hitSlop={8}
+                >
+                  <Text style={styles.modalCloseCross}>✕</Text>
+                </Pressable>
+              </View>
+
+              <ScrollView style={{ maxHeight: 260 }} showsVerticalScrollIndicator={false}>
+                {notificationsList.map((notif) => (
+                  <View key={notif.id} style={[styles.notifCard, notif.unread && styles.notifCardUnread]}>
+                    <View style={[styles.notifBadge, { backgroundColor: notif.badgeBg, borderColor: notif.badgeBorder }]}>
+                      <Text style={{ fontSize: 16 }}>{notif.iconEmoji}</Text>
+                    </View>
+                    <View style={{ flex: 1 }}>
+                      <Text style={styles.notifTitle}>{notif.title}</Text>
+                      <Text style={styles.notifBody}>{notif.body}</Text>
+                      <Text style={styles.notifTime}>{notif.time}</Text>
+                    </View>
+                  </View>
+                ))}
+              </ScrollView>
+
+              <Pressable
+                style={styles.modalFullBtn}
+                onPress={() => {
+                  setNotificationsList(notificationsList.map((n) => ({ ...n, unread: false })));
+                  setShowNotificationModal(false);
+                }}
+              >
+                <Text style={styles.modalFullBtnText}>Mark All Read &amp; Close</Text>
+              </Pressable>
+            </Animated.View>
+          </View>
+        </Modal>
+
+        {/* MODAL 4: CREATOR PROFILE PASSPORT */}
+        <Modal
+          visible={showProfileModal}
+          transparent={true}
+          animationType="fade"
+          onRequestClose={() => setShowProfileModal(false)}
+        >
+          <View style={styles.modalOverlay}>
+            <Animated.View style={[styles.modalCard, { transform: [{ scale: modalPopScale }] }]}>
+              <View style={styles.modalHeaderRow}>
+                <View>
+                  <Text style={styles.modalTitle}>Creator Passport</Text>
+                  <Text style={styles.modalSubtitle}>Your verified consistency record</Text>
+                </View>
+                <Pressable
+                  onPress={() => setShowProfileModal(false)}
+                  style={styles.modalCloseCircle}
+                  hitSlop={8}
+                >
+                  <Text style={styles.modalCloseCross}>✕</Text>
+                </Pressable>
+              </View>
+
+              <View style={styles.profileModalCardInner}>
+                <View style={styles.profileModalIconRing}>
+                  <Svg width={28} height={28} viewBox="0 0 24 24" fill="none">
+                    <Path
+                      d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"
+                      stroke="#582CDB"
+                      strokeWidth="2.2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                    <Circle cx="12" cy="7" r="4" stroke="#582CDB" strokeWidth="2.2" />
+                  </Svg>
+                </View>
+                <Text style={styles.profileModalName}>Amara Okafor</Text>
+                <Text style={styles.profileModalNiche}>Lifestyle &amp; Tech Creator</Text>
+                <View style={styles.profileModalLevelPill}>
+                  <Text style={styles.profileModalLevelText}>⚡ Level 4 Storyteller • 47-Day Streak</Text>
+                </View>
+              </View>
+
+              <Pressable
+                style={styles.modalFullBtn}
+                onPress={() => setShowProfileModal(false)}
+              >
+                <Text style={styles.modalFullBtnText}>Done</Text>
+              </Pressable>
+            </Animated.View>
+          </View>
+        </Modal>
+
+        {/* MODAL 5: CREATOR CHAT */}
+        <Modal
+          visible={showChatModal}
+          transparent={true}
+          animationType="fade"
+          onRequestClose={() => setShowChatModal(false)}
+        >
+          <View style={styles.modalOverlay}>
+            <Animated.View style={[styles.modalCard, { transform: [{ scale: modalPopScale }] }]}>
+              <View style={styles.modalHeaderRow}>
+                <View>
+                  <Text style={styles.modalTitle}>Jarvis AI Chat</Text>
+                  <Text style={styles.modalSubtitle}>Real-time creative assistant</Text>
+                </View>
+                <Pressable
+                  onPress={() => setShowChatModal(false)}
+                  style={styles.modalCloseCircle}
+                  hitSlop={8}
+                >
+                  <Text style={styles.modalCloseCross}>✕</Text>
+                </Pressable>
+              </View>
+
+              <View style={styles.chatCard}>
+                <Text style={styles.chatSpeaker}>Jarvis AI</Text>
+                <Text style={styles.chatMsg}>
+                  I analyzed your niche reach. This idea &ldquo;{ideaTitle}&rdquo; has strong viral retention potential on TikTok &amp; Reels!
+                </Text>
+              </View>
+
+              <Pressable
+                style={styles.modalFullBtn}
+                onPress={() => setShowChatModal(false)}
+              >
+                <Text style={styles.modalFullBtnText}>Close Chat</Text>
+              </Pressable>
+            </Animated.View>
+          </View>
+        </Modal>
+
+        {/* SIGNATURE ANIMATED GHOST CELEBRATION MODAL */}
+        <AnimatedCompletionModal
+          visible={showCelebrationModal}
+          title={celebrationTitle}
+          subtitle={celebrationSubtitle}
+          speechBubble={celebrationSpeech}
+          badgeText="IDEA CRAFTED"
+          xpEarned={40}
+          streakCount={47}
+          actionText="Done ✓"
+          onDismiss={() => {
+            setShowCelebrationModal(false);
+            onBack();
+          }}
+        />
       </View>
-    </View>
+    </SafeAreaView>
   );
 };
 
@@ -854,28 +1031,32 @@ const styles = StyleSheet.create({
   },
   container: {
     flex: 1,
+    backgroundColor: '#FAF8F5',
   },
   scrollContent: {
     paddingHorizontal: 20,
-    paddingTop: 12,
+    paddingTop: 8,
     paddingBottom: 24,
   },
   btnPressed: {
-    opacity: 0.85,
-    transform: [{ scale: 0.98 }],
+    opacity: 0.78,
+    transform: [{ scale: 0.97 }],
   },
 
-  // Header Bar
+  // 1. TOP AIRY HEADER BAR (UNIFIED)
   headerBar: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: 18,
-    paddingTop: Platform.OS === 'ios' ? 48 : 16,
-    paddingBottom: 10,
+    paddingHorizontal: 20,
+    paddingTop: Platform.OS === 'ios' ? 8 : 12,
+    paddingBottom: 12,
     backgroundColor: '#FAF8F5',
-    borderBottomWidth: 1,
-    borderBottomColor: '#F1EBFB',
+  },
+  headerLeftGroup: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
   },
   backCircleBtn: {
     width: 36,
@@ -886,60 +1067,108 @@ const styles = StyleSheet.create({
     borderColor: '#EFEBF8',
     justifyContent: 'center',
     alignItems: 'center',
+    shadowColor: '#582CDB',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.06,
+    shadowRadius: 6,
+    elevation: 2,
   },
-  headerPillsGroup: {
+  headerLogoWrapper: {
+    width: 44,
+    height: 44,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  headerGhostLogo: {
+    width: 40,
+    height: 40,
+  },
+  headerRightGroup: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
   },
-  selectedIdeaHeaderPill: {
-    backgroundColor: '#EDE9FE',
-    paddingVertical: 3.5,
-    paddingHorizontal: 8.5,
-    borderRadius: 100,
+  headerIconBtn: {
+    position: 'relative',
+    width: 38,
+    height: 38,
+    borderRadius: 12,
+    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+    borderWidth: 1,
+    borderColor: 'rgba(235, 230, 248, 0.9)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: '#582CDB',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.06,
+    shadowRadius: 6,
+    elevation: 2,
   },
-  selectedIdeaHeaderPillText: {
-    fontSize: 9.5,
-    fontWeight: '800',
-    color: '#6D28D9',
-    letterSpacing: 0.5,
+  notificationDot: {
+    position: 'absolute',
+    top: 7,
+    right: 8,
+    width: 7,
+    height: 7,
+    borderRadius: 3.5,
+    backgroundColor: '#EF4444',
+    borderWidth: 1.2,
+    borderColor: '#FFFFFF',
+  },
+
+  // Top Pill Badges
+  topBadgesRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginBottom: 8,
+    marginTop: 4,
+  },
+  selectedIdeaPill: {
+    paddingVertical: 4.5,
+    paddingHorizontal: 12,
+    borderRadius: 100,
+    shadowColor: '#582CDB',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 6,
+    elevation: 2,
+  },
+  selectedIdeaPillText: {
+    fontSize: 10.5,
+    fontWeight: '900',
+    color: '#FFFFFF',
+    letterSpacing: 0.6,
   },
   freeCreatorToolPill: {
-    backgroundColor: '#F1F5F9',
-    paddingVertical: 3.5,
-    paddingHorizontal: 8.5,
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1,
+    borderColor: 'rgba(235, 230, 248, 0.9)',
+    paddingVertical: 4,
+    paddingHorizontal: 10,
     borderRadius: 100,
   },
   freeCreatorToolPillText: {
-    fontSize: 9.5,
-    fontWeight: '700',
-    color: '#64748B',
-  },
-  proCrownBtn: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: '#FEF3C7',
-    borderWidth: 1,
-    borderColor: '#FDE68A',
-    justifyContent: 'center',
-    alignItems: 'center',
+    fontSize: 10,
+    fontWeight: '800',
+    color: '#7F7894',
+    letterSpacing: 0.4,
   },
 
   // Main Heading
   mainTitle: {
-    fontSize: 24,
+    fontSize: 23,
     fontWeight: '800',
     color: '#171420',
-    letterSpacing: -0.5,
-    marginBottom: 6,
-    marginTop: 8,
+    letterSpacing: -0.4,
+    marginBottom: 4,
+    marginTop: 4,
   },
   mainSubtitle: {
     fontSize: 13,
     color: '#64748B',
     lineHeight: 18,
-    marginBottom: 18,
+    marginBottom: 16,
   },
 
   // 1. Selected Idea Showcase Card
@@ -1071,6 +1300,11 @@ const styles = StyleSheet.create({
     borderColor: '#EFEBF8',
     padding: 14,
     marginBottom: 18,
+    shadowColor: '#582CDB',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 2,
   },
   formatLeftGroup: {
     flexDirection: 'row',
@@ -1188,6 +1422,11 @@ const styles = StyleSheet.create({
     borderColor: '#EFEBF8',
     padding: 14,
     marginBottom: 18,
+    shadowColor: '#582CDB',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.06,
+    shadowRadius: 10,
+    elevation: 3,
   },
   hookOptionBox: {
     position: 'relative',
@@ -1265,6 +1504,11 @@ const styles = StyleSheet.create({
     borderColor: '#EFEBF8',
     padding: 16,
     marginBottom: 18,
+    shadowColor: '#582CDB',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.06,
+    shadowRadius: 10,
+    elevation: 3,
   },
   captionAngleBold: {
     fontSize: 13.5,
@@ -1460,6 +1704,11 @@ const styles = StyleSheet.create({
     borderColor: '#EFEBF8',
     padding: 16,
     marginBottom: 18,
+    shadowColor: '#582CDB',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.06,
+    shadowRadius: 10,
+    elevation: 3,
   },
   streakImpactItemRow: {
     flexDirection: 'row',
@@ -1525,24 +1774,24 @@ const styles = StyleSheet.create({
     borderRadius: 3,
   },
 
-  // Sticky Bottom Actions
-  stickyBottomBar: {
-    position: 'absolute',
-    bottom: 60,
-    left: 0,
-    right: 0,
-    backgroundColor: '#FAF8F5',
-    borderTopWidth: 1,
-    borderTopColor: '#EFEBF8',
-    paddingHorizontal: 20,
-    paddingTop: 10,
-    paddingBottom: 8,
+  // 9. CTA Section inside ScrollView
+  ctaSectionBox: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 22,
+    borderWidth: 1,
+    borderColor: '#EFEBF8',
+    padding: 16,
+    shadowColor: '#582CDB',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.08,
+    shadowRadius: 14,
+    elevation: 4,
   },
   turnIntoPostBtn: {
-    height: 46,
+    height: 48,
     borderRadius: 14,
     overflow: 'hidden',
-    marginBottom: 8,
+    marginBottom: 10,
     shadowColor: '#582CDB',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.25,
@@ -1555,32 +1804,32 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   turnIntoPostBtnText: {
-    fontSize: 14.5,
+    fontSize: 15,
     fontWeight: '800',
     color: '#FFFFFF',
   },
   bottomSubBtnRow: {
     flexDirection: 'row',
     gap: 10,
-    marginBottom: 6,
+    marginBottom: 8,
   },
   subActionBtn: {
     flex: 1,
-    height: 38,
-    borderRadius: 10,
-    backgroundColor: '#FFFFFF',
+    height: 42,
+    borderRadius: 12,
+    backgroundColor: '#FAF8F5',
     borderWidth: 1,
     borderColor: '#EDE9FE',
     justifyContent: 'center',
     alignItems: 'center',
   },
   subActionBtnText: {
-    fontSize: 12.5,
+    fontSize: 13,
     fontWeight: '800',
     color: '#582CDB',
   },
   bottomDisclaimer: {
-    fontSize: 10.5,
+    fontSize: 11,
     color: '#94A3B8',
     textAlign: 'center',
   },
@@ -1707,76 +1956,114 @@ const styles = StyleSheet.create({
     color: '#582CDB',
     fontWeight: '600',
   },
-  successCelebrationCircle: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
+  notifCard: {
+    flexDirection: 'row',
+    gap: 10,
+    backgroundColor: '#F8FAFC',
+    borderRadius: 14,
+    padding: 10,
+    marginBottom: 8,
+    borderWidth: 1,
+    borderColor: '#F1F5F9',
+  },
+  notifCardUnread: {
+    backgroundColor: '#F5F3FF',
+    borderColor: '#DDD6FE',
+  },
+  notifBadge: {
+    width: 34,
+    height: 34,
+    borderRadius: 10,
+    borderWidth: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  notifTitle: {
+    fontSize: 12.5,
+    fontWeight: '800',
+    color: '#171420',
+    marginBottom: 2,
+  },
+  notifBody: {
+    fontSize: 11,
+    color: '#64748B',
+    lineHeight: 15,
+  },
+  notifTime: {
+    fontSize: 9.5,
+    color: '#94A3B8',
+    marginTop: 4,
+  },
+  modalFullBtn: {
+    backgroundColor: '#582CDB',
+    height: 44,
+    borderRadius: 12,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 10,
+  },
+  modalFullBtnText: {
+    fontSize: 13.5,
+    fontWeight: '800',
+    color: '#FFFFFF',
+  },
+  profileModalCardInner: {
+    alignItems: 'center',
+    paddingVertical: 14,
+  },
+  profileModalIconRing: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
     backgroundColor: '#EDE9FE',
     borderWidth: 2,
     borderColor: '#582CDB',
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 12,
+    marginBottom: 10,
   },
-  successTitle: {
+  profileModalName: {
     fontSize: 18,
     fontWeight: '800',
     color: '#171420',
-    marginBottom: 6,
   },
-  successDesc: {
+  profileModalNiche: {
     fontSize: 12.5,
     color: '#64748B',
-    textAlign: 'center',
-    lineHeight: 18,
-    marginBottom: 16,
+    marginTop: 2,
+    marginBottom: 8,
   },
-  successFullBtn: {
-    width: '100%',
-    height: 44,
-    borderRadius: 12,
-    overflow: 'hidden',
+  profileModalLevelPill: {
+    backgroundColor: '#FEF3C7',
+    paddingVertical: 4,
+    paddingHorizontal: 10,
+    borderRadius: 100,
+    borderWidth: 1,
+    borderColor: '#FDE68A',
   },
-
-  // Bottom Tab Bar
-  bottomNavContainer: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    backgroundColor: '#FAF8F5',
-  },
-  bottomTabBar: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    alignItems: 'center',
-    backgroundColor: 'rgba(255, 255, 255, 0.98)',
-    borderTopWidth: 1,
-    borderTopColor: 'rgba(235, 230, 248, 0.9)',
-    paddingTop: 8,
-    paddingBottom: Platform.OS === 'ios' ? 24 : 10,
-    borderTopLeftRadius: 22,
-    borderTopRightRadius: 22,
-    shadowColor: '#582CDB',
-    shadowOffset: { width: 0, height: -4 },
-    shadowOpacity: 0.08,
-    shadowRadius: 16,
-    elevation: 8,
-  },
-  tabItem: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 2,
-    paddingHorizontal: 12,
-  },
-  tabLabel: {
-    fontSize: 10,
-    fontWeight: '600',
-    color: '#9E97AA',
-    marginTop: 3,
-  },
-  tabLabelActive: {
-    color: '#582CDB',
+  profileModalLevelText: {
+    fontSize: 10.5,
     fontWeight: '800',
+    color: '#B45309',
+  },
+  chatCard: {
+    backgroundColor: '#FAF8F5',
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: '#EFEBF8',
+    padding: 12,
+    marginBottom: 10,
+  },
+  chatSpeaker: {
+    fontSize: 10,
+    fontWeight: '900',
+    color: '#582CDB',
+    letterSpacing: 0.5,
+    marginBottom: 4,
+  },
+  chatMsg: {
+    fontSize: 12.5,
+    color: '#171420',
+    lineHeight: 18,
   },
 });
