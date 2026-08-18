@@ -28,6 +28,7 @@ interface CreateScreenProps {
   onOpenPostComposer?: (prefillTitle?: string, prefillPlatform?: string) => void;
   onOpenIdeaAngle?: () => void;
   onOpenScript?: (ideaTitle?: string) => void;
+  onOpenCaption?: (ideaTitle?: string) => void;
 }
 
 interface DraftItem {
@@ -246,6 +247,7 @@ export const CreateScreen: React.FC<CreateScreenProps> = ({
   onOpenPostComposer,
   onOpenIdeaAngle,
   onOpenScript,
+  onOpenCaption,
 }) => {
   const [activeTab, setActiveTab] = useState<TabType>('create');
   const [drafts, setDrafts] = useState<DraftItem[]>(INITIAL_DRAFTS);
@@ -353,8 +355,12 @@ export const CreateScreen: React.FC<CreateScreenProps> = ({
   };
 
   const openCaption = () => {
-    triggerModalPop();
-    setShowCaptionModal(true);
+    if (onOpenCaption) {
+      onOpenCaption('One thing I wish I knew before I started creating');
+    } else {
+      triggerModalPop();
+      setShowCaptionModal(true);
+    }
   };
 
   const openDraft = (draft: DraftItem) => {
