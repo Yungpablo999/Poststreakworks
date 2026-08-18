@@ -93,7 +93,14 @@ export const PlatformGrowthScreen: React.FC<PlatformGrowthScreenProps> = ({
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   // Selected bar highlight in Weekly Comparison
-  const [selectedBar, setSelectedBar] = useState<'TT' | 'IG' | 'YT' | 'X'>('TT');
+  const [selectedBar, setSelectedBar] = useState<'TT' | 'IG' | 'YT' | 'X' | null>(null);
+
+  const handleToggleBar = (bar: 'TT' | 'IG' | 'YT' | 'X') => {
+    if (Platform.OS !== 'web') {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    }
+    setSelectedBar((prev) => (prev === bar ? null : bar));
+  };
 
   // Animations
   const modalPopScale = useRef(new Animated.Value(0.88)).current;
@@ -353,31 +360,69 @@ export const PlatformGrowthScreen: React.FC<PlatformGrowthScreenProps> = ({
               </View>
             </View>
 
-            {/* Selected Platform Spotlight Banner */}
-            <View style={styles.weeklySpotlightBox}>
+            {/* Selected Platform Spotlight Banner (Click & Unclick Toggle) */}
+            <Pressable
+              style={({ pressed }) => [styles.weeklySpotlightBox, pressed && styles.btnPressed]}
+              onPress={() => {
+                if (selectedBar) {
+                  handleToggleBar(selectedBar);
+                }
+              }}
+            >
               <View style={styles.spotlightLeft}>
                 <View style={[
                   styles.spotlightDot,
+                  !selectedBar && { backgroundColor: '#582CDB' },
                   selectedBar === 'TT' && { backgroundColor: '#582CDB' },
                   selectedBar === 'IG' && { backgroundColor: '#E1306C' },
                   selectedBar === 'YT' && { backgroundColor: '#EF4444' },
                   selectedBar === 'X' && { backgroundColor: '#64748B' },
                 ]} />
-                <Text style={styles.spotlightPlatformName}>
-                  {selectedBar === 'TT' ? 'TikTok' : selectedBar === 'IG' ? 'Instagram' : selectedBar === 'YT' ? 'YouTube' : 'X (Twitter)'}
-                </Text>
+                <View>
+                  <Text style={styles.spotlightPlatformName}>
+                    {!selectedBar
+                      ? 'All Channels Overview'
+                      : selectedBar === 'TT'
+                      ? 'TikTok'
+                      : selectedBar === 'IG'
+                      ? 'Instagram'
+                      : selectedBar === 'YT'
+                      ? 'YouTube'
+                      : 'X (Twitter)'}
+                  </Text>
+                  <Text style={styles.spotlightHint}>
+                    {!selectedBar ? 'Tap any bar to inspect' : 'Tap again to unclick'}
+                  </Text>
+                </View>
               </View>
+
               <View style={styles.spotlightStatsGroup}>
                 <Text style={styles.spotlightGain}>
-                  {selectedBar === 'TT' ? '+840 (70% share)' : selectedBar === 'IG' ? '+390 (22% share)' : selectedBar === 'YT' ? '+170 (8% share)' : '0 (Not connected)'}
+                  {!selectedBar
+                    ? '+1,400 New Followers'
+                    : selectedBar === 'TT'
+                    ? '+840 (70% share)'
+                    : selectedBar === 'IG'
+                    ? '+390 (22% share)'
+                    : selectedBar === 'YT'
+                    ? '+170 (8% share)'
+                    : '0 (Not connected)'}
                 </Text>
                 <Text style={styles.spotlightRate}>
-                  {selectedBar === 'TT' ? '🔥 120/day' : selectedBar === 'IG' ? '✨ 55/day' : selectedBar === 'YT' ? '▶️ 24/day' : '🔗 Link account'}
+                  {!selectedBar
+                    ? '⚡ 3 active networks'
+                    : selectedBar === 'TT'
+                    ? '🔥 120/day avg'
+                    : selectedBar === 'IG'
+                    ? '✨ 55/day avg'
+                    : selectedBar === 'YT'
+                    ? '▶️ 24/day avg'
+                    : '🔗 Link account'}
                 </Text>
               </View>
-            </View>
+            </Pressable>
 
-            {/* Visual Chart with Grid Lines & Gradient Bars */}
+            {/* Visual Chart with Grid Lines & Click/Unclick Bars */}
             <View style={styles.weeklyChartArea}>
               {/* Background Grid Lines */}
               <View style={styles.chartGridLineTop} />
@@ -386,22 +431,28 @@ export const PlatformGrowthScreen: React.FC<PlatformGrowthScreenProps> = ({
 
               {/* TikTok Bar */}
               <Pressable
-                style={styles.weeklyBarCol}
-                onPress={() => {
-                  if (Platform.OS !== 'web') {
-                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                  }
-                  setSelectedBar('TT');
-                }}
+                style={[
+                  styles.weeklyBarCol,
+                  selectedBar && selectedBar !== 'TT' && styles.weeklyBarColDimmed,
+                ]}
+                onPress={() => handleToggleBar('TT')}
+                hitSlop={6}
               >
                 <View style={styles.barTopBadge}>
-                  <Text style={[styles.barTopBadgeText, selectedBar === 'TT' && styles.barTopBadgeTextActive]}>
+                  <Text style={[
+                    styles.barTopBadgeText,
+                    (!selectedBar || selectedBar === 'TT') && styles.barTopBadgeTextActive,
+                  ]}>
                     +840
                   </Text>
                 </View>
                 <View style={styles.weeklyBarTrack}>
                   <LinearGradient
-                    colors={selectedBar === 'TT' ? ['#582CDB', '#7C3AED'] : ['#8B5CF6', '#A78BFA']}
+                    colors={
+                      selectedBar === 'TT'
+                        ? ['#582CDB', '#3B1A82']
+                        : ['#582CDB', '#7C3AED']
+                    }
                     start={{ x: 0, y: 0 }}
                     end={{ x: 0, y: 1 }}
                     style={[
@@ -411,32 +462,44 @@ export const PlatformGrowthScreen: React.FC<PlatformGrowthScreenProps> = ({
                     ]}
                   />
                 </View>
-                <View style={[styles.platformIconMini, selectedBar === 'TT' && styles.platformIconMiniActive]}>
+                <View style={[
+                  styles.platformIconMini,
+                  selectedBar === 'TT' && styles.platformIconMiniActive,
+                ]}>
                   <TikTokSvg size={14} />
                 </View>
-                <Text style={[styles.weeklyBarLabel, selectedBar === 'TT' && styles.weeklyBarLabelActive]}>
+                <Text style={[
+                  styles.weeklyBarLabel,
+                  selectedBar === 'TT' && styles.weeklyBarLabelActive,
+                ]}>
                   TikTok
                 </Text>
               </Pressable>
 
               {/* Instagram Bar */}
               <Pressable
-                style={styles.weeklyBarCol}
-                onPress={() => {
-                  if (Platform.OS !== 'web') {
-                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                  }
-                  setSelectedBar('IG');
-                }}
+                style={[
+                  styles.weeklyBarCol,
+                  selectedBar && selectedBar !== 'IG' && styles.weeklyBarColDimmed,
+                ]}
+                onPress={() => handleToggleBar('IG')}
+                hitSlop={6}
               >
                 <View style={styles.barTopBadge}>
-                  <Text style={[styles.barTopBadgeText, selectedBar === 'IG' && styles.barTopBadgeTextActive]}>
+                  <Text style={[
+                    styles.barTopBadgeText,
+                    (!selectedBar || selectedBar === 'IG') && styles.barTopBadgeTextActive,
+                  ]}>
                     +390
                   </Text>
                 </View>
                 <View style={styles.weeklyBarTrack}>
                   <LinearGradient
-                    colors={selectedBar === 'IG' ? ['#582CDB', '#7C3AED'] : ['#A78BFA', '#C4B5FD']}
+                    colors={
+                      selectedBar === 'IG'
+                        ? ['#582CDB', '#3B1A82']
+                        : ['#8B5CF6', '#A78BFA']
+                    }
                     start={{ x: 0, y: 0 }}
                     end={{ x: 0, y: 1 }}
                     style={[
@@ -446,32 +509,44 @@ export const PlatformGrowthScreen: React.FC<PlatformGrowthScreenProps> = ({
                     ]}
                   />
                 </View>
-                <View style={[styles.platformIconMini, selectedBar === 'IG' && styles.platformIconMiniActive]}>
+                <View style={[
+                  styles.platformIconMini,
+                  selectedBar === 'IG' && styles.platformIconMiniActive,
+                ]}>
                   <InstagramSvg size={14} />
                 </View>
-                <Text style={[styles.weeklyBarLabel, selectedBar === 'IG' && styles.weeklyBarLabelActive]}>
+                <Text style={[
+                  styles.weeklyBarLabel,
+                  selectedBar === 'IG' && styles.weeklyBarLabelActive,
+                ]}>
                   Instagram
                 </Text>
               </Pressable>
 
               {/* YouTube Bar */}
               <Pressable
-                style={styles.weeklyBarCol}
-                onPress={() => {
-                  if (Platform.OS !== 'web') {
-                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                  }
-                  setSelectedBar('YT');
-                }}
+                style={[
+                  styles.weeklyBarCol,
+                  selectedBar && selectedBar !== 'YT' && styles.weeklyBarColDimmed,
+                ]}
+                onPress={() => handleToggleBar('YT')}
+                hitSlop={6}
               >
                 <View style={styles.barTopBadge}>
-                  <Text style={[styles.barTopBadgeText, selectedBar === 'YT' && styles.barTopBadgeTextActive]}>
+                  <Text style={[
+                    styles.barTopBadgeText,
+                    (!selectedBar || selectedBar === 'YT') && styles.barTopBadgeTextActive,
+                  ]}>
                     +170
                   </Text>
                 </View>
                 <View style={styles.weeklyBarTrack}>
                   <LinearGradient
-                    colors={selectedBar === 'YT' ? ['#582CDB', '#7C3AED'] : ['#C4B5FD', '#DDD6FE']}
+                    colors={
+                      selectedBar === 'YT'
+                        ? ['#582CDB', '#3B1A82']
+                        : ['#C4B5FD', '#DDD6FE']
+                    }
                     start={{ x: 0, y: 0 }}
                     end={{ x: 0, y: 1 }}
                     style={[
@@ -481,26 +556,34 @@ export const PlatformGrowthScreen: React.FC<PlatformGrowthScreenProps> = ({
                     ]}
                   />
                 </View>
-                <View style={[styles.platformIconMini, selectedBar === 'YT' && styles.platformIconMiniActive]}>
+                <View style={[
+                  styles.platformIconMini,
+                  selectedBar === 'YT' && styles.platformIconMiniActive,
+                ]}>
                   <YouTubeSvg size={14} />
                 </View>
-                <Text style={[styles.weeklyBarLabel, selectedBar === 'YT' && styles.weeklyBarLabelActive]}>
+                <Text style={[
+                  styles.weeklyBarLabel,
+                  selectedBar === 'YT' && styles.weeklyBarLabelActive,
+                ]}>
                   YouTube
                 </Text>
               </Pressable>
 
               {/* X Bar */}
               <Pressable
-                style={styles.weeklyBarCol}
-                onPress={() => {
-                  if (Platform.OS !== 'web') {
-                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                  }
-                  setSelectedBar('X');
-                }}
+                style={[
+                  styles.weeklyBarCol,
+                  selectedBar && selectedBar !== 'X' && styles.weeklyBarColDimmed,
+                ]}
+                onPress={() => handleToggleBar('X')}
+                hitSlop={6}
               >
                 <View style={styles.barTopBadge}>
-                  <Text style={[styles.barTopBadgeText, selectedBar === 'X' && styles.barTopBadgeTextActive]}>
+                  <Text style={[
+                    styles.barTopBadgeText,
+                    selectedBar === 'X' && styles.barTopBadgeTextActive,
+                  ]}>
                     0
                   </Text>
                 </View>
@@ -509,14 +592,20 @@ export const PlatformGrowthScreen: React.FC<PlatformGrowthScreenProps> = ({
                     style={[
                       styles.weeklyBarFill,
                       { height: 14, backgroundColor: '#E2E8F0' },
-                      selectedBar === 'X' && { backgroundColor: '#582CDB' },
+                      selectedBar === 'X' && { backgroundColor: '#582CDB', shadowColor: '#582CDB', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.35, shadowRadius: 8, elevation: 4 },
                     ]}
                   />
                 </View>
-                <View style={[styles.platformIconMini, selectedBar === 'X' && styles.platformIconMiniActive]}>
+                <View style={[
+                  styles.platformIconMini,
+                  selectedBar === 'X' && styles.platformIconMiniActive,
+                ]}>
                   <XSvg size={13} />
                 </View>
-                <Text style={[styles.weeklyBarLabel, selectedBar === 'X' && styles.weeklyBarLabelActive]}>
+                <Text style={[
+                  styles.weeklyBarLabel,
+                  selectedBar === 'X' && styles.weeklyBarLabelActive,
+                ]}>
                   X
                 </Text>
               </Pressable>
@@ -1273,6 +1362,15 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     width: '23%',
     zIndex: 2,
+  },
+  weeklyBarColDimmed: {
+    opacity: 0.45,
+  },
+  spotlightHint: {
+    fontSize: 9,
+    color: '#94A3B8',
+    fontWeight: '700',
+    marginTop: 1,
   },
   barTopBadge: {
     marginBottom: 6,
