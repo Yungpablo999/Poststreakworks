@@ -1161,77 +1161,10 @@ export const AudienceBreakdownScreen: React.FC<AudienceBreakdownScreenProps> = (
               >
                 <Text style={styles.jarvisLinkText}>How did you calculate this?</Text>
               </Pressable>
-              <Pressable
-                onPress={() => {
-                  showToast('Jarvis generating 3 more audience insights...');
-                }}
-                hitSlop={6}
-              >
-                <Text style={styles.jarvisLinkText}>Draw more like this</Text>
-              </Pressable>
             </View>
           </View>
 
-          {/* 3. BOTTOM ACTION STACK */}
-          <View style={styles.bottomActionsContainer}>
-            {/* 1. Connect Platform */}
-            <Pressable
-              style={({ pressed }) => [styles.bottomActionPrimary, pressed && styles.btnPressed]}
-              onPress={handleOpenConnectPlatforms}
-            >
-              <LinearGradient
-                colors={['#582CDB', '#4318FF']}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 0 }}
-                style={styles.bottomGradient}
-              >
-                <Text style={styles.bottomPrimaryText}>
-                  CONNECT PLATFORM ({connectedCount} ACTIVE)
-                </Text>
-              </LinearGradient>
-            </Pressable>
-
-            {/* 2. Create Post */}
-            <Pressable
-              style={({ pressed }) => [styles.bottomActionSecondary, pressed && styles.btnPressed]}
-              onPress={handleCreateSimilarPost}
-            >
-              <Text style={styles.bottomSecondaryText}>CREATE POST</Text>
-            </Pressable>
-
-            {/* 3. Upgrade Plan */}
-            <Pressable
-              style={({ pressed }) => [styles.bottomActionUpgrade, pressed && styles.btnPressed]}
-              onPress={() => {
-                if (Platform.OS !== 'web') {
-                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-                }
-                if (onOpenJarvisPro) {
-                  onOpenJarvisPro();
-                } else {
-                  handleUnlockPro();
-                }
-              }}
-            >
-              <Text style={styles.bottomUpgradeText}>UPGRADE PLAN</Text>
-            </Pressable>
-
-            {/* 4. Back to Growth Center */}
-            <Pressable
-              style={({ pressed }) => [styles.backToGrowthBtn, pressed && styles.btnPressed]}
-              onPress={() => {
-                if (Platform.OS !== 'web') {
-                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                }
-                onBack();
-              }}
-              hitSlop={8}
-            >
-              <Text style={styles.backToGrowthText}>BACK TO GROWTH CENTER</Text>
-            </Pressable>
-          </View>
-
-          <View style={{ height: 40 }} />
+          <View style={{ height: 100 }} />
         </ScrollView>
 
         {/* FLOATING TAB BAR */}
