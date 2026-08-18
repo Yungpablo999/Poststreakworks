@@ -12,6 +12,7 @@ import {
   Animated,
   Modal,
   Dimensions,
+  TextInput,
 } from 'react-native';
 import Svg, { Path, Circle, Rect } from 'react-native-svg';
 import * as Haptics from 'expo-haptics';
@@ -56,6 +57,136 @@ const XSvg = ({ size = 16 }: { size?: number }) => (
   </Svg>
 );
 
+const LinkedInSvg = ({ size = 18 }: { size?: number }) => (
+  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+    <Rect x="2" y="2" width="20" height="20" rx="4" fill="#0A66C2" />
+    <Circle cx="7" cy="7.5" r="1.5" fill="#FFFFFF" />
+    <Rect x="5.5" y="10" width="3" height="9" fill="#FFFFFF" />
+    <Path
+      d="M11 10h2.8v1.3h.1c.4-.8 1.4-1.6 2.9-1.6 3.1 0 3.7 2 3.7 4.7V19h-3v-4.1c0-1-.1-2.3-1.4-2.3-1.4 0-1.6 1.1-1.6 2.2V19h-3V10z"
+      fill="#FFFFFF"
+    />
+  </Svg>
+);
+
+const ThreadsSvg = ({ size = 18 }: { size?: number }) => (
+  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+    <Path
+      d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 12.8c-.52 2.1-2.24 3.4-4.64 3.4-3.1 0-5.2-2.3-5.2-5.7 0-3.5 2.3-5.8 5.6-5.8 2.9 0 4.9 1.8 5.1 4.5h-2c-.2-1.6-1.3-2.6-3.1-2.6-2 0-3.3 1.5-3.3 3.9 0 2.3 1.2 3.8 3.1 3.8 1.4 0 2.5-.8 2.8-2.2h-2.8v-1.8h4.8v2.5z"
+      fill="#000000"
+    />
+  </Svg>
+);
+
+const SnapchatSvg = ({ size = 18 }: { size?: number }) => (
+  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+    <Path
+      d="M12.002 2c-3.57 0-5.76 2.65-5.76 5.28 0 1.2.47 2.37.89 3.09-.3.12-.76.35-1.12.78-.45.54-.34 1.15-.22 1.46.3.77 1.14.93 1.7.97.23.63.78 1.85 2.1 2.23-.97.35-2.62.96-3.4 2.19-.34.54-.15 1.14.34 1.45.62.39 1.63.38 2.76.2 1.34-.21 2.3-.85 2.71-1.15.41.3 1.37.94 2.71 1.15 1.13.18 2.14.19 2.76-.2.49-.31.68-.91.34-1.45-.78-1.23-2.43-1.84-3.4-2.19 1.32-.38 1.87-1.6 2.1-2.23.56-.04 1.4-.2 1.7-.97.12-.31.23-.92-.22-1.46-.36-.43-.82-.66-1.12-.78.42-.72.89-1.89.89-3.09 0-2.63-2.19-5.28-5.76-5.28z"
+      fill="#FFFC00"
+      stroke="#000000"
+      strokeWidth="1.2"
+    />
+  </Svg>
+);
+
+const renderBrandIcon = (id: string, size = 18) => {
+  switch (id) {
+    case 'tiktok':
+      return <TikTokSvg size={size} />;
+    case 'instagram':
+      return <InstagramSvg size={size} />;
+    case 'youtube':
+      return <YouTubeSvg size={size} />;
+    case 'linkedin':
+      return <LinkedInSvg size={size} />;
+    case 'x':
+    case 'x_twitter':
+      return <XSvg size={size} />;
+    case 'snapchat':
+      return <SnapchatSvg size={size} />;
+    case 'threads':
+      return <ThreadsSvg size={size} />;
+    default:
+      return <TikTokSvg size={size} />;
+  }
+};
+
+interface PlatformAccount {
+  id: string;
+  name: string;
+  handle: string;
+  followers: string;
+  connected: boolean;
+  color: string;
+  bgTint: string;
+}
+
+const INITIAL_PLATFORMS: PlatformAccount[] = [
+  {
+    id: 'tiktok',
+    name: 'TikTok',
+    handle: '@amaracreates',
+    followers: '28.4K',
+    connected: true,
+    color: '#000000',
+    bgTint: '#F1F5F9',
+  },
+  {
+    id: 'instagram',
+    name: 'Instagram',
+    handle: '@amara.pulse',
+    followers: '14.2K',
+    connected: true,
+    color: '#E1306C',
+    bgTint: '#FDF2F8',
+  },
+  {
+    id: 'youtube',
+    name: 'YouTube Shorts',
+    handle: '@amarashorts',
+    followers: '8.9K',
+    connected: true,
+    color: '#FF0000',
+    bgTint: '#FEF2F2',
+  },
+  {
+    id: 'x',
+    name: 'X (Twitter)',
+    handle: '@amara_builder',
+    followers: '4.5K',
+    connected: true,
+    color: '#000000',
+    bgTint: '#F8FAFC',
+  },
+  {
+    id: 'linkedin',
+    name: 'LinkedIn',
+    handle: 'amara-okafor',
+    followers: '6.1K',
+    connected: false,
+    color: '#0A66C2',
+    bgTint: '#EFF6FF',
+  },
+  {
+    id: 'threads',
+    name: 'Threads',
+    handle: '@amara.threads',
+    followers: '3.2K',
+    connected: false,
+    color: '#000000',
+    bgTint: '#F8FAFC',
+  },
+  {
+    id: 'snapchat',
+    name: 'Snapchat',
+    handle: '@amarasnaps',
+    followers: '5.8K',
+    connected: false,
+    color: '#EAB308',
+    bgTint: '#FEFCE8',
+  },
+];
+
 interface EarningsScreenProps {
   onBack: () => void;
   onNavigateTab?: (tab: TabType) => void;
@@ -86,9 +217,15 @@ export const EarningsScreen: React.FC<EarningsScreenProps> = ({
   const [activeTab, setActiveTab] = useState<TabType>('growth');
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [showNotificationModal, setShowNotificationModal] = useState(false);
-  const [showGoalModal, setShowGoalModal] = useState(false);
-  const [showRequirementsModal, setShowRequirementsModal] = useState(false);
+  const [showMilestoneModal, setShowMilestoneModal] = useState(false);
+  const [showCampaignModal, setShowCampaignModal] = useState(false);
+  const [showConnectPlatformModal, setShowConnectPlatformModal] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+
+  // Platform Management State
+  const [platformsList, setPlatformsList] = useState<PlatformAccount[]>(INITIAL_PLATFORMS);
+  const [selectedPlatformToAdd, setSelectedPlatformToAdd] = useState<string>('linkedin');
+  const [customHandleInput, setCustomHandleInput] = useState<string>('');
 
   // Animations
   const modalPopScale = useRef(new Animated.Value(0.88)).current;
@@ -144,6 +281,50 @@ export const EarningsScreen: React.FC<EarningsScreenProps> = ({
     if (onNavigateTab) {
       onNavigateTab(tab);
     }
+  };
+
+  // Platform Connect/Disconnect Handlers
+  const handleConnectSinglePlatform = (id: string) => {
+    if (Platform.OS !== 'web') {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    }
+    setPlatformsList((prev) =>
+      prev.map((p) => (p.id === id ? { ...p, connected: true } : p))
+    );
+    const target = platformsList.find((p) => p.id === id);
+    showToast(`✓ ${target?.name || 'Platform'} connected & auto-synced!`);
+  };
+
+  const handleRemoveSinglePlatform = (id: string) => {
+    if (Platform.OS !== 'web') {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    }
+    setPlatformsList((prev) =>
+      prev.map((p) => (p.id === id ? { ...p, connected: false } : p))
+    );
+    const target = platformsList.find((p) => p.id === id);
+    showToast(`Removed ${target?.name || 'Platform'}`);
+  };
+
+  const handleAddCustomPlatform = () => {
+    if (!customHandleInput.trim()) {
+      showToast('Please enter a creator username');
+      return;
+    }
+    if (Platform.OS !== 'web') {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    }
+    const formatted = customHandleInput.startsWith('@') ? customHandleInput : `@${customHandleInput}`;
+    setPlatformsList((prev) =>
+      prev.map((p) =>
+        p.id === selectedPlatformToAdd
+          ? { ...p, connected: true, handle: formatted }
+          : p
+      )
+    );
+    const target = platformsList.find((p) => p.id === selectedPlatformToAdd);
+    setCustomHandleInput('');
+    showToast(`✓ Linked ${target?.name} account (${formatted})!`);
   };
 
   return (
@@ -283,27 +464,21 @@ export const EarningsScreen: React.FC<EarningsScreenProps> = ({
           {/* HERO SECTION TITLE */}
           <View style={styles.badgePillRow}>
             <View style={styles.heroPill}>
-              <Text style={styles.heroPillText}>EARNINGS</Text>
-            </View>
-            <View style={styles.freeTierPill}>
-              <Text style={styles.freeTierPillText}>Free Tier</Text>
+              <Text style={styles.heroPillText}>CREATOR EARNINGS</Text>
             </View>
           </View>
 
-          <Text style={styles.mainTitle}>Build your creator income path.</Text>
-          <Text style={styles.mainSubtitle}>
-            Track your readiness, grow your creator profile, and unlock future opportunities.
-          </Text>
+          <Text style={styles.mainTitle}>Build your path to paid brand campaigns.</Text>
 
           {/* CARD 1: CURRENT BALANCE & READINESS */}
           <View style={styles.balanceCard}>
             <View style={styles.balanceTopRow}>
               <View>
                 <Text style={styles.balanceLabel}>CURRENT BALANCE</Text>
-                <Text style={styles.balanceNumber}>$0.00</Text>
+                <Text style={styles.balanceAmount}>$0.00</Text>
               </View>
               <View style={styles.walletIconCircle}>
-                <Text style={{ fontSize: 20 }}>💰</Text>
+                <Text style={{ fontSize: 18 }}>💰</Text>
               </View>
             </View>
 
@@ -312,24 +487,23 @@ export const EarningsScreen: React.FC<EarningsScreenProps> = ({
               <Text style={styles.readinessLabel}>Opportunity Readiness</Text>
               <Text style={styles.readinessPercent}>35%</Text>
             </View>
-
             <View style={styles.readinessTrack}>
               <View style={[styles.readinessFill, { width: '35%' }]} />
             </View>
 
-            {/* Readiness Checklist */}
+            {/* Checklist */}
             <View style={styles.readinessChecklist}>
-              <View style={styles.checkItem}>
-                <Text style={styles.checkIconActive}>✓</Text>
+              <View style={styles.checklistRow}>
+                <Text style={{ color: '#15803D', fontSize: 13, fontWeight: '900' }}>✓</Text>
                 <Text style={styles.checkTextActive}>Creator profile added</Text>
               </View>
-              <View style={styles.checkItem}>
-                <Text style={styles.checkIconActive}>✓</Text>
+              <View style={styles.checklistRow}>
+                <Text style={{ color: '#15803D', fontSize: 13, fontWeight: '900' }}>✓</Text>
                 <Text style={styles.checkTextActive}>47-day streak active 🔥</Text>
               </View>
-              <View style={styles.checkItem}>
-                <Text style={styles.checkIconPending}>○</Text>
-                <Text style={styles.checkTextPending}>1 of 3 starter quests completed</Text>
+              <View style={styles.checklistRow}>
+                <Text style={{ color: '#94A3B8', fontSize: 13 }}>○</Text>
+                <Text style={styles.checkText}>1 of 3 starter quests completed</Text>
               </View>
             </View>
 
@@ -353,39 +527,27 @@ export const EarningsScreen: React.FC<EarningsScreenProps> = ({
             </Pressable>
           </View>
 
-          {/* CARD 2: CONNECTED PLATFORMS PREVIEW */}
+          {/* CARD 2: CONNECTED PLATFORMS PREVIEW & PRO TRACKING */}
           <View style={styles.sectionHeaderRow}>
-            <Text style={styles.sectionTitle}>Connected Platforms Preview</Text>
-            <View style={styles.previewOnlyPill}>
-              <Text style={styles.previewOnlyPillText}>PREVIEW ONLY</Text>
-            </View>
+            <Text style={styles.sectionTitle}>Connected Platforms</Text>
           </View>
-          <Text style={styles.sectionSubtext}>
-            Connect platforms to prepare for future earnings tracking.
-          </Text>
 
-          {/* Platform Pills Grid */}
-          <View style={styles.platformsPillGrid}>
-            <View style={styles.platformPillItem}>
-              <TikTokSvg size={14} />
-              <Text style={styles.platformPillText}>TikTok</Text>
-              <View style={styles.activeDot} />
-            </View>
-            <View style={styles.platformPillItem}>
-              <InstagramSvg size={14} />
-              <Text style={styles.platformPillText}>Instagram</Text>
-              <View style={styles.activeDot} />
-            </View>
-            <View style={styles.platformPillItem}>
-              <YouTubeSvg size={14} />
-              <Text style={styles.platformPillText}>YouTube</Text>
-              <View style={styles.activeDot} />
-            </View>
-            <View style={styles.platformPillItem}>
-              <XSvg size={13} />
-              <Text style={styles.platformPillText}>X</Text>
-              <View style={styles.activeDot} />
-            </View>
+          {/* 4 Active Brand Pills */}
+          <View style={styles.platformPillsRow}>
+            {platformsList.filter((p) => p.connected).slice(0, 4).map((plat) => (
+              <Pressable
+                key={plat.id}
+                style={styles.platformPillItem}
+                onPress={() => {
+                  triggerModalPop();
+                  setShowConnectPlatformModal(true);
+                }}
+              >
+                {renderBrandIcon(plat.id, 14)}
+                <Text style={styles.platformPillText}>{plat.name.split(' ')[0]}</Text>
+                <View style={styles.activeDot} />
+              </Pressable>
+            ))}
           </View>
 
           {/* Estimated Tracked Earnings Card with Metallic Gold Unlock Button */}
@@ -475,17 +637,15 @@ export const EarningsScreen: React.FC<EarningsScreenProps> = ({
               <Text style={styles.oppTitle}>Connect one extra account</Text>
               <Text style={styles.oppSub}>Improve matching score</Text>
 
+              {/* CONNECT NOW BUTTON POPPING UP SOCIAL MEDIA MODAL */}
               <Pressable
                 style={({ pressed }) => [styles.oppPurpleBtn, pressed && styles.btnPressed]}
                 onPress={() => {
                   if (Platform.OS !== 'web') {
-                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
                   }
-                  if (onOpenPlatforms) {
-                    onOpenPlatforms();
-                  } else {
-                    showToast('Opening social platforms sync...');
-                  }
+                  triggerModalPop();
+                  setShowConnectPlatformModal(true);
                 }}
               >
                 <Text style={styles.oppPurpleBtnText}>Connect Now</Text>
@@ -494,196 +654,141 @@ export const EarningsScreen: React.FC<EarningsScreenProps> = ({
           </View>
 
           {/* CARD 4: CREATOR PASSPORT */}
-          <View style={styles.sectionHeaderRow}>
-            <Text style={styles.sectionTitle}>Creator Passport</Text>
-            <View style={styles.unlockedPill}>
-              <Text style={styles.unlockedPillText}>UNLOCKED</Text>
-            </View>
-          </View>
-
           <View style={styles.passportCard}>
+            <View style={styles.passportHeaderRow}>
+              <Text style={styles.passportTitle}>Creator Passport</Text>
+              <View style={styles.passportBadge}>
+                <Text style={styles.passportBadgeText}>FOUNDING CREATOR</Text>
+              </View>
+            </View>
+            <Text style={styles.passportSub}>Your verified creator credentials for brand campaigns</Text>
+
+            {/* 2x2 Grid */}
             <View style={styles.passportGrid}>
-              {/* Profile Completion */}
               <View style={styles.passportGridItem}>
-                <View style={styles.passportItemTop}>
-                  <Text style={styles.passportItemLabel}>PROFILE COMPLETION</Text>
-                  <Text style={{ fontSize: 13 }}>👤</Text>
-                </View>
-                <Text style={styles.passportItemValue}>70%</Text>
-                <View style={styles.miniTrack}>
-                  <View style={[styles.miniFill, { width: '70%' }]} />
-                </View>
+                <Text style={styles.passportGridLabel}>PROFILE COMPLETION</Text>
+                <Text style={styles.passportGridValue}>70%</Text>
               </View>
-
-              {/* Consistency */}
               <View style={styles.passportGridItem}>
-                <View style={styles.passportItemTop}>
-                  <Text style={styles.passportItemLabel}>CONSISTENCY</Text>
-                  <Text style={{ fontSize: 13 }}>🗓️</Text>
-                </View>
-                <Text style={[styles.passportItemValue, { color: '#582CDB' }]}>Strong</Text>
-                <View style={styles.miniSegmentBar}>
-                  <View style={[styles.segmentUnit, { backgroundColor: '#582CDB' }]} />
-                  <View style={[styles.segmentUnit, { backgroundColor: '#582CDB' }]} />
-                  <View style={[styles.segmentUnit, { backgroundColor: '#582CDB' }]} />
-                  <View style={[styles.segmentUnit, { backgroundColor: '#E2E8F0' }]} />
-                </View>
+                <Text style={styles.passportGridLabel}>CONSISTENCY</Text>
+                <Text style={[styles.passportGridValue, { color: '#582CDB' }]}>Strong</Text>
               </View>
-
-              {/* Collaboration */}
               <View style={styles.passportGridItem}>
-                <View style={styles.passportItemTop}>
-                  <Text style={styles.passportItemLabel}>COLLABORATION</Text>
-                  <Text style={{ fontSize: 13 }}>🤝</Text>
-                </View>
-                <Text style={styles.passportItemValue}>Beginner</Text>
-                <View style={styles.miniTrack}>
-                  <View style={[styles.miniFill, { width: '30%' }]} />
-                </View>
+                <Text style={styles.passportGridLabel}>COLLABORATION</Text>
+                <Text style={styles.passportGridValue}>Beginner</Text>
               </View>
-
-              {/* Quests */}
               <View style={styles.passportGridItem}>
-                <View style={styles.passportItemTop}>
-                  <Text style={styles.passportItemLabel}>QUESTS</Text>
-                  <Text style={{ fontSize: 13 }}>✨</Text>
-                </View>
-                <Text style={styles.passportItemValue}>1/3</Text>
-                <View style={styles.miniTrack}>
-                  <View style={[styles.miniFill, { width: '33%' }]} />
-                </View>
+                <Text style={styles.passportGridLabel}>QUESTS</Text>
+                <Text style={styles.passportGridValue}>1/3</Text>
               </View>
             </View>
 
             <Pressable
-              style={({ pressed }) => [styles.passportViewBtn, pressed && styles.btnPressed]}
+              style={({ pressed }) => [styles.passportBtn, pressed && styles.btnPressed]}
               onPress={() => {
-                if (Platform.OS !== 'web') {
-                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                }
+                triggerModalPop();
                 setShowProfileModal(true);
               }}
             >
-              <Text style={styles.passportViewBtnText}>View Passport</Text>
+              <Text style={styles.passportBtnText}>View Passport</Text>
             </Pressable>
           </View>
 
           {/* CARD 5: STARTER CREATOR CAMPAIGNS */}
-          <View style={styles.campaignsCard}>
-            <View style={styles.campaignsHeaderRow}>
-              <View style={{ flex: 1 }}>
-                <Text style={styles.campaignsTitle}>Starter Creator Campaigns</Text>
-                <Text style={styles.campaignsSub}>
-                  Build your Creator Passport to qualify for future paid opportunities.
-                </Text>
-              </View>
-              <View style={styles.lockBadgeCircle}>
-                <Text style={{ fontSize: 16 }}>🔒</Text>
+          <View style={styles.campaignCard}>
+            <View style={styles.campaignHeaderRow}>
+              <Text style={styles.campaignTitle}>Starter Creator Campaigns</Text>
+              <View style={styles.lockPill}>
+                <Text style={styles.lockPillText}>🔒 LOCKED</Text>
               </View>
             </View>
+            <Text style={styles.campaignSub}>Complete requirements to unlock incoming brand deals.</Text>
 
-            <View style={styles.campaignRequirementsGrid}>
-              <View style={styles.reqCol}>
-                <View style={styles.reqItem}>
-                  <Text style={styles.reqCheckActive}>✓</Text>
-                  <Text style={styles.reqTextActive}>7-day streak</Text>
-                </View>
-                <View style={styles.reqItem}>
-                  <Text style={styles.reqCheckActive}>✓</Text>
-                  <Text style={styles.reqTextActive}>Complete Passport</Text>
-                </View>
+            <View style={styles.campaignChecklist}>
+              <View style={styles.campaignCheckItem}>
+                <Text style={{ color: '#15803D', fontSize: 13, fontWeight: '900' }}>✓</Text>
+                <Text style={styles.campCheckActive}>7-day streak</Text>
               </View>
-
-              <View style={styles.reqCol}>
-                <View style={styles.reqItem}>
-                  <Text style={styles.reqCheckPending}>🕒</Text>
-                  <Text style={styles.reqTextPending}>Add social account</Text>
-                </View>
-                <View style={styles.reqItem}>
-                  <Text style={styles.reqCheckPending}>🕒</Text>
-                  <Text style={styles.reqTextPending}>Finish 3 quests</Text>
-                </View>
+              <View style={styles.campaignCheckItem}>
+                <Text style={{ color: '#15803D', fontSize: 13, fontWeight: '900' }}>✓</Text>
+                <Text style={styles.campCheckActive}>Complete Passport</Text>
               </View>
-            </View>
-
-            <View style={styles.campaignStatusRow}>
-              <Text style={styles.campaignStatusText}>○ Status: Not unlocked yet</Text>
+              <View style={styles.campaignCheckItem}>
+                <Text style={{ color: '#94A3B8', fontSize: 13 }}>🕒</Text>
+                <Text style={styles.campCheckText}>Add social account</Text>
+              </View>
+              <View style={styles.campaignCheckItem}>
+                <Text style={{ color: '#94A3B8', fontSize: 13 }}>🕒</Text>
+                <Text style={styles.campCheckText}>Finish 3 quests</Text>
+              </View>
             </View>
 
             <Pressable
-              style={({ pressed }) => [styles.viewRequirementsBtn, pressed && styles.btnPressed]}
+              style={({ pressed }) => [styles.campaignBtn, pressed && styles.btnPressed]}
               onPress={() => {
-                if (Platform.OS !== 'web') {
-                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-                }
-                setShowRequirementsModal(true);
+                triggerModalPop();
+                setShowCampaignModal(true);
               }}
             >
-              <Text style={styles.viewRequirementsBtnText}>View Requirements</Text>
+              <Text style={styles.campaignBtnText}>View Requirements</Text>
             </Pressable>
           </View>
 
-          {/* CARD 6: STARTER GOAL ($50 GOAL) */}
+          {/* CARD 6: STARTER GOAL */}
           <View style={styles.goalCard}>
-            <Text style={styles.goalTag}>STARTER GOAL</Text>
-            <Text style={styles.goalTitle}>First $50 Goal</Text>
-
-            <View style={styles.goalTrack}>
-              <View style={[styles.goalFill, { width: '8%' }]} />
+            <View style={styles.goalHeaderRow}>
+              <View>
+                <Text style={styles.goalTitle}>Starter Goal</Text>
+                <Text style={styles.goalTarget}>First $50 Goal</Text>
+              </View>
+              <View style={styles.trophyCircle}>
+                <Text style={{ fontSize: 18 }}>🏆</Text>
+              </View>
             </View>
-            <Text style={styles.goalPercent}>0%</Text>
 
-            <Text style={styles.goalStepsFlow}>
-              PROFILE • STREAK • QUESTS • APPLY
-            </Text>
+            <View style={styles.goalTrackLabels}>
+              <Text style={styles.goalStepActive}>PROFILE</Text>
+              <Text style={styles.goalStepActive}>STREAK</Text>
+              <Text style={styles.goalStepActive}>QUESTS</Text>
+              <Text style={styles.goalStepMuted}>APPLY</Text>
+            </View>
+            <View style={styles.goalTrack}>
+              <View style={[styles.goalFill, { width: '75%' }]} />
+            </View>
 
             <Pressable
-              style={({ pressed }) => [styles.setGoalBtn, pressed && styles.btnPressed]}
+              style={({ pressed }) => [styles.goalBtn, pressed && styles.btnPressed]}
               onPress={() => {
-                if (Platform.OS !== 'web') {
-                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-                }
-                setShowGoalModal(true);
+                triggerModalPop();
+                setShowMilestoneModal(true);
               }}
             >
-              <Text style={styles.setGoalBtnText}>Set Goal</Text>
+              <Text style={styles.goalBtnText}>Set Goal</Text>
             </Pressable>
           </View>
 
-          {/* CARD 7: PRO EARNINGS TOOLS (SIGNATURE METALLIC GOLD) */}
-          <View style={styles.proToolsCard}>
-            <View style={styles.proToolsHeaderRow}>
-              <Text style={styles.proToolsTitle}>Pro Earnings Tools</Text>
-              <Text style={{ fontSize: 22 }}>🚀</Text>
+          {/* CARD 7: PRO EARNINGS TOOLS (METALLIC GOLD) */}
+          <View style={styles.proCard}>
+            <View style={styles.proHeaderRow}>
+              <Text style={styles.proTitle}>Pro Earnings Tools</Text>
+              <View style={styles.goldProBadge}>
+                <Text style={styles.goldProBadgeText}>PRO</Text>
+              </View>
             </View>
-            <Text style={styles.proToolsSub}>
-              Scale your business with professional utilities.
-            </Text>
+            <Text style={styles.proSub}>Advanced monetization features for high-growth creators.</Text>
 
             <View style={styles.proFeaturesList}>
               <View style={styles.proFeatureRow}>
-                <Text style={{ fontSize: 13 }}>📈</Text>
-                <Text style={styles.proFeatureText}>Platform earnings tracking</Text>
+                <Text style={{ color: '#D97706', fontSize: 12 }}>⚡</Text>
+                <Text style={styles.proFeatureText}>Auto platform earnings tracking</Text>
               </View>
               <View style={styles.proFeatureRow}>
-                <Text style={{ fontSize: 13 }}>📊</Text>
-                <Text style={styles.proFeatureText}>Earnings breakdown by app</Text>
+                <Text style={{ color: '#D97706', fontSize: 12 }}>⚡</Text>
+                <Text style={styles.proFeatureText}>Custom Media Kit builder</Text>
               </View>
               <View style={styles.proFeatureRow}>
-                <Text style={{ fontSize: 13 }}>📄</Text>
-                <Text style={styles.proFeatureText}>Media Kit Builder</Text>
-              </View>
-              <View style={styles.proFeatureRow}>
-                <Text style={{ fontSize: 13 }}>💳</Text>
-                <Text style={styles.proFeatureText}>Rate Card Generator</Text>
-              </View>
-              <View style={styles.proFeatureRow}>
-                <Text style={{ fontSize: 13 }}>🛡️</Text>
-                <Text style={styles.proFeatureText}>Advanced Creator Passport</Text>
-              </View>
-              <View style={styles.proFeatureRow}>
-                <Text style={{ fontSize: 13 }}>🔍</Text>
-                <Text style={styles.proFeatureText}>Opportunity matching insights</Text>
+                <Text style={{ color: '#D97706', fontSize: 12 }}>⚡</Text>
+                <Text style={styles.proFeatureText}>Dynamic brand deal rate card</Text>
               </View>
             </View>
 
@@ -696,7 +801,7 @@ export const EarningsScreen: React.FC<EarningsScreenProps> = ({
                 if (onOpenJarvisPro) {
                   onOpenJarvisPro();
                 } else {
-                  showToast('Exploring Jarvis Pro features...');
+                  showToast('Opening Jarvis Pro...');
                 }
               }}
             >
@@ -706,13 +811,13 @@ export const EarningsScreen: React.FC<EarningsScreenProps> = ({
                 end={{ x: 1, y: 1 }}
                 style={styles.exploreProGradient}
               >
-                <Text style={styles.exploreProBtnText}>Explore Pro</Text>
+                <Text style={styles.exploreProBtnText}>Explore Pro ➔</Text>
               </LinearGradient>
             </Pressable>
           </View>
 
-          {/* CARD 8: JARVIS CORE INSIGHT */}
-          <View style={styles.jarvisInsightCard}>
+          {/* CARD 8: JARVIS INSIGHT */}
+          <View style={styles.jarvisCard}>
             <View style={styles.jarvisAvatarCircle}>
               <Image
                 source={require('../../assets/images/jarvis-core-flame.png')}
@@ -723,7 +828,7 @@ export const EarningsScreen: React.FC<EarningsScreenProps> = ({
             <View style={{ flex: 1 }}>
               <Text style={styles.jarvisTag}>JARVIS CORE INSIGHT</Text>
               <Text style={styles.jarvisText}>
-                Your streak is strong, but your passport needs campaign proof before bigger opportunities unlock.
+                &ldquo;Your streak is strong, but your passport needs campaign proof before bigger opportunities unlock.&rdquo;
               </Text>
             </View>
           </View>
@@ -732,7 +837,181 @@ export const EarningsScreen: React.FC<EarningsScreenProps> = ({
         {/* FLOATING LIQUID GLASS TAB BAR */}
         <FloatingTabBar activeTab={activeTab} onTabPress={handleTabPress} />
 
-        {/* PROFILE MODAL */}
+        {/* 🌐 CONNECTED PLATFORMS & SYNC HUB MODAL */}
+        <Modal
+          visible={showConnectPlatformModal}
+          transparent={true}
+          animationType="fade"
+          onRequestClose={() => setShowConnectPlatformModal(false)}
+        >
+          <View style={styles.modalOverlay}>
+            <Animated.View style={[styles.modalCardLarge, { transform: [{ scale: modalPopScale }] }]}>
+              {/* Modal Top Header */}
+              <View style={styles.modalHeaderRow}>
+                <View style={{ flex: 1 }}>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                    <Text style={styles.modalTitle}>Connected Platforms</Text>
+                    <View style={styles.activePlatformsCountBadge}>
+                      <Text style={styles.activePlatformsCountText}>
+                        {platformsList.filter((p) => p.connected).length} Connected
+                      </Text>
+                    </View>
+                  </View>
+                  <Text style={styles.modalSubtitle}>
+                    Manage connected channels or add more platforms to sync your earnings.
+                  </Text>
+                </View>
+                <Pressable
+                  onPress={() => setShowConnectPlatformModal(false)}
+                  style={styles.modalCloseCircle}
+                  hitSlop={8}
+                >
+                  <Text style={styles.modalCloseCross}>✕</Text>
+                </Pressable>
+              </View>
+
+              <ScrollView
+                style={{ maxHeight: Dimensions.get('window').height * 0.58 }}
+                showsVerticalScrollIndicator={false}
+              >
+                {/* 1. ACTIVE CONNECTED ACCOUNTS */}
+                <Text style={styles.modalSectionTitle}>ACTIVE CONNECTED PLATFORMS</Text>
+
+                <View style={{ gap: 8, marginBottom: 16 }}>
+                  {platformsList
+                    .filter((p) => p.connected)
+                    .map((plat) => (
+                      <View key={plat.id} style={styles.connectedPlatformRow}>
+                        <View style={[styles.platformIconCircle, { backgroundColor: plat.bgTint }]}>
+                          {renderBrandIcon(plat.id, 20)}
+                        </View>
+                        <View style={{ flex: 1 }}>
+                          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                            <Text style={styles.platformNameText}>{plat.name}</Text>
+                            <View style={styles.autoSyncBadge}>
+                              <Text style={styles.autoSyncText}>🟢 Auto-Sync</Text>
+                            </View>
+                          </View>
+                          <Text style={styles.platformSubText}>
+                            {plat.handle} • ⚡ {plat.followers}
+                          </Text>
+                        </View>
+                        {/* REMOVE BUTTON */}
+                        <Pressable
+                          style={styles.removePlatformBtn}
+                          onPress={() => handleRemoveSinglePlatform(plat.id)}
+                          hitSlop={6}
+                        >
+                          <Text style={styles.removePlatformBtnText}>Remove</Text>
+                        </Pressable>
+                      </View>
+                    ))}
+                </View>
+
+                {/* 2. AVAILABLE PLATFORMS TO ADD MORE */}
+                <Text style={styles.modalSectionTitle}>
+                  AVAILABLE PLATFORMS TO ADD ({platformsList.filter((p) => !p.connected).length})
+                </Text>
+                <Text style={styles.modalSubDescription}>
+                  Connect more platforms to aggregate your cross-channel creator earnings:
+                </Text>
+
+                <View style={{ gap: 8, marginBottom: 16 }}>
+                  {platformsList
+                    .filter((p) => !p.connected)
+                    .map((plat) => (
+                      <View key={plat.id} style={styles.availablePlatformRow}>
+                        <View style={[styles.platformIconCircle, { backgroundColor: plat.bgTint }]}>
+                          {renderBrandIcon(plat.id, 20)}
+                        </View>
+                        <View style={{ flex: 1 }}>
+                          <Text style={styles.platformNameText}>{plat.name}</Text>
+                          <Text style={styles.platformSubText}>
+                            Sync video metrics &amp; audience velocity
+                          </Text>
+                        </View>
+                        <Pressable
+                          style={styles.addPlatformActionBtn}
+                          onPress={() => handleConnectSinglePlatform(plat.id)}
+                        >
+                          <Text style={styles.addPlatformActionBtnText}>+ Connect</Text>
+                        </Pressable>
+                      </View>
+                    ))}
+                </View>
+
+                {/* 3. CUSTOM ACCOUNT LINKER BOX */}
+                <View style={styles.customAddAccountBox}>
+                  <Text style={styles.customAddTitle}>LINK CUSTOM ACCOUNT HANDLE</Text>
+                  <Text style={styles.customAddSub}>
+                    Select channel and enter your creator username:
+                  </Text>
+
+                  {/* Channel Chips with Real Icons */}
+                  <ScrollView
+                    horizontal
+                    showsHorizontalScrollIndicator={false}
+                    contentContainerStyle={{ gap: 6, marginVertical: 8 }}
+                  >
+                    {platformsList.map((p) => {
+                      const isChosen = selectedPlatformToAdd === p.id;
+                      return (
+                        <Pressable
+                          key={p.id}
+                          style={[
+                            styles.platformSelectChip,
+                            isChosen && styles.platformSelectChipActive,
+                          ]}
+                          onPress={() => setSelectedPlatformToAdd(p.id)}
+                        >
+                          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+                            {renderBrandIcon(p.id, 14)}
+                            <Text
+                              style={[
+                                styles.platformSelectChipText,
+                                isChosen && styles.platformSelectChipTextActive,
+                              ]}
+                            >
+                              {p.name.split(' ')[0]}
+                            </Text>
+                          </View>
+                        </Pressable>
+                      );
+                    })}
+                  </ScrollView>
+
+                  {/* Input and Add Button */}
+                  <View style={styles.customInputRow}>
+                    <TextInput
+                      value={customHandleInput}
+                      onChangeText={setCustomHandleInput}
+                      placeholder="@your_username"
+                      placeholderTextColor="#94A3B8"
+                      autoCapitalize="none"
+                      style={styles.customTextInput}
+                    />
+                    <Pressable
+                      style={styles.linkAccountConfirmBtn}
+                      onPress={handleAddCustomPlatform}
+                    >
+                      <Text style={styles.linkAccountConfirmBtnText}>Link Account ➔</Text>
+                    </Pressable>
+                  </View>
+                </View>
+              </ScrollView>
+
+              {/* Done Button */}
+              <Pressable
+                style={styles.modalDoneBtn}
+                onPress={() => setShowConnectPlatformModal(false)}
+              >
+                <Text style={styles.modalDoneBtnText}>Save &amp; Close ✓</Text>
+              </Pressable>
+            </Animated.View>
+          </View>
+        </Modal>
+
+        {/* USER PROFILE MODAL */}
         <UserProfileModal
           visible={showProfileModal}
           onClose={() => setShowProfileModal(false)}
@@ -741,7 +1020,7 @@ export const EarningsScreen: React.FC<EarningsScreenProps> = ({
           onSaveProfile={onSaveProfile}
         />
 
-        {/* NOTIFICATION MODAL */}
+        {/* EARNINGS ALERTS MODAL */}
         <Modal
           visible={showNotificationModal}
           transparent={true}
@@ -753,7 +1032,7 @@ export const EarningsScreen: React.FC<EarningsScreenProps> = ({
               <View style={styles.modalHeaderRow}>
                 <View>
                   <Text style={styles.modalTitle}>Earnings Alerts</Text>
-                  <Text style={styles.modalSubtitle}>Monetization readiness updates</Text>
+                  <Text style={styles.modalSubtitle}>Payout and opportunity updates</Text>
                 </View>
                 <Pressable onPress={() => setShowNotificationModal(false)} style={styles.modalCloseCircle} hitSlop={8}>
                   <Text style={styles.modalCloseCross}>✕</Text>
@@ -761,10 +1040,10 @@ export const EarningsScreen: React.FC<EarningsScreenProps> = ({
               </View>
 
               <View style={styles.notifCard}>
-                <Text style={{ fontSize: 18 }}>💰</Text>
+                <Text style={{ fontSize: 18 }}>🎉</Text>
                 <View style={{ flex: 1 }}>
-                  <Text style={styles.notifTitle}>Passport Readiness: 35%</Text>
-                  <Text style={styles.notifBody}>Complete your next starter quest to unlock $50 campaign matching.</Text>
+                  <Text style={styles.notifTitle}>Campaign Readiness: 35%</Text>
+                  <Text style={styles.notifBody}>Finish 2 more starter quests to qualify for micro-sponsorships.</Text>
                 </View>
               </View>
 
@@ -775,101 +1054,79 @@ export const EarningsScreen: React.FC<EarningsScreenProps> = ({
           </View>
         </Modal>
 
-        {/* GOAL MODAL */}
+        {/* SET GOAL MODAL */}
         <Modal
-          visible={showGoalModal}
+          visible={showMilestoneModal}
           transparent={true}
           animationType="fade"
-          onRequestClose={() => setShowGoalModal(false)}
+          onRequestClose={() => setShowMilestoneModal(false)}
         >
           <View style={styles.modalOverlay}>
-            <View style={styles.modalCard}>
+            <Animated.View style={[styles.modalCard, { transform: [{ scale: modalPopScale }] }]}>
               <View style={styles.modalHeaderRow}>
                 <View>
                   <Text style={styles.modalTitle}>Set Income Milestone</Text>
-                  <Text style={styles.modalSubtitle}>Target: First $50 Creator Earnings</Text>
+                  <Text style={styles.modalSubtitle}>Target your next creator milestone</Text>
                 </View>
-                <Pressable onPress={() => setShowGoalModal(false)} style={styles.modalCloseCircle} hitSlop={8}>
+                <Pressable onPress={() => setShowMilestoneModal(false)} style={styles.modalCloseCircle} hitSlop={8}>
                   <Text style={styles.modalCloseCross}>✕</Text>
                 </Pressable>
               </View>
 
-              <View style={styles.goalCheckRow}>
-                <Text style={styles.checkIconActive}>✓</Text>
-                <Text style={styles.goalCheckText}>Maintain daily posting streak (47 days)</Text>
-              </View>
-              <View style={styles.goalCheckRow}>
-                <Text style={styles.checkIconActive}>✓</Text>
-                <Text style={styles.goalCheckText}>Verify Creator Passport details</Text>
-              </View>
-              <View style={styles.goalCheckRow}>
-                <Text style={styles.checkIconPending}>○</Text>
-                <Text style={styles.goalCheckText}>Complete 2 remaining starter quests</Text>
+              <View style={styles.milestoneGrid}>
+                {['$50 Starter Goal', '$250 Micro Creator', '$1,000 Pro Tier'].map((goal, idx) => (
+                  <Pressable
+                    key={idx}
+                    style={[styles.milestoneOption, idx === 0 && styles.milestoneOptionActive]}
+                    onPress={() => {
+                      showToast(`Milestone updated to ${goal}!`);
+                      setShowMilestoneModal(false);
+                    }}
+                  >
+                    <Text style={[styles.milestoneOptionText, idx === 0 && styles.milestoneOptionTextActive]}>
+                      {goal}
+                    </Text>
+                  </Pressable>
+                ))}
               </View>
 
-              <Pressable
-                style={styles.modalFullBtn}
-                onPress={() => {
-                  showToast('✓ Income Milestone Activated!');
-                  setShowGoalModal(false);
-                }}
-              >
-                <Text style={styles.modalFullBtnText}>Activate Milestone ✓</Text>
+              <Pressable style={styles.modalFullBtn} onPress={() => setShowMilestoneModal(false)}>
+                <Text style={styles.modalFullBtnText}>Save Goal</Text>
               </Pressable>
-            </View>
+            </Animated.View>
           </View>
         </Modal>
 
         {/* CAMPAIGN REQUIREMENTS MODAL */}
         <Modal
-          visible={showRequirementsModal}
+          visible={showCampaignModal}
           transparent={true}
           animationType="fade"
-          onRequestClose={() => setShowRequirementsModal(false)}
+          onRequestClose={() => setShowCampaignModal(false)}
         >
           <View style={styles.modalOverlay}>
-            <View style={styles.modalCard}>
+            <Animated.View style={[styles.modalCard, { transform: [{ scale: modalPopScale }] }]}>
               <View style={styles.modalHeaderRow}>
                 <View>
                   <Text style={styles.modalTitle}>Campaign Requirements</Text>
-                  <Text style={styles.modalSubtitle}>How to qualify for paid brand deals</Text>
+                  <Text style={styles.modalSubtitle}>Brand sponsor eligibility</Text>
                 </View>
-                <Pressable onPress={() => setShowRequirementsModal(false)} style={styles.modalCloseCircle} hitSlop={8}>
+                <Pressable onPress={() => setShowCampaignModal(false)} style={styles.modalCloseCircle} hitSlop={8}>
                   <Text style={styles.modalCloseCross}>✕</Text>
                 </Pressable>
               </View>
 
               <View style={{ gap: 10, marginVertical: 12 }}>
-                <View style={styles.reqModalItem}>
-                  <Text style={{ fontSize: 16 }}>🔥</Text>
-                  <View style={{ flex: 1 }}>
-                    <Text style={styles.reqModalTitle}>7-Day Streak Active</Text>
-                    <Text style={styles.reqModalSub}>Demonstrates consistency to brand sponsors.</Text>
-                  </View>
-                </View>
-                <View style={styles.reqModalItem}>
-                  <Text style={{ fontSize: 16 }}>📋</Text>
-                  <View style={{ flex: 1 }}>
-                    <Text style={styles.reqModalTitle}>Creator Passport Verification</Text>
-                    <Text style={styles.reqModalSub}>Completes your niche, bio, and target demographic.</Text>
-                  </View>
-                </View>
-                <View style={styles.reqModalItem}>
-                  <Text style={{ fontSize: 16 }}>⚡</Text>
-                  <View style={{ flex: 1 }}>
-                    <Text style={styles.reqModalTitle}>3 Starter Quests Completed</Text>
-                    <Text style={styles.reqModalSub}>Unlocks your verified creator score.</Text>
-                  </View>
-                </View>
+                <Text style={styles.reqDetailLine}>• 7-Day Posting Streak (Active ✓)</Text>
+                <Text style={styles.reqDetailLine}>• Creator Passport Score &gt;= 70%</Text>
+                <Text style={styles.reqDetailLine}>• Minimum 1 linked social account with 10k+ reach</Text>
+                <Text style={styles.reqDetailLine}>• 3 completed community quests</Text>
               </View>
 
-              <Pressable
-                style={styles.modalFullBtn}
-                onPress={() => setShowRequirementsModal(false)}
-              >
+              <Pressable style={styles.modalFullBtn} onPress={() => setShowCampaignModal(false)}>
                 <Text style={styles.modalFullBtnText}>Got It</Text>
               </Pressable>
-            </View>
+            </Animated.View>
           </View>
         </Modal>
       </View>
@@ -979,49 +1236,30 @@ const styles = StyleSheet.create({
 
   // HERO
   badgePillRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
     marginBottom: 6,
   },
   heroPill: {
-    backgroundColor: '#EDE9FE',
+    alignSelf: 'flex-start',
+    backgroundColor: '#582CDB',
     paddingVertical: 4,
     paddingHorizontal: 10,
     borderRadius: 6,
   },
   heroPillText: {
-    fontSize: 10,
+    fontSize: 9.5,
     fontWeight: '900',
-    color: '#582CDB',
-    letterSpacing: 0.5,
-  },
-  freeTierPill: {
-    backgroundColor: '#F1F5F9',
-    paddingVertical: 3,
-    paddingHorizontal: 8,
-    borderRadius: 6,
-  },
-  freeTierPillText: {
-    fontSize: 9,
-    fontWeight: '800',
-    color: '#64748B',
+    color: '#FFFFFF',
+    letterSpacing: 0.6,
   },
   mainTitle: {
     fontSize: 24,
     fontWeight: '900',
     color: '#171420',
     letterSpacing: -0.6,
-    marginBottom: 4,
-  },
-  mainSubtitle: {
-    fontSize: 13,
-    color: '#64748B',
-    lineHeight: 18,
-    marginBottom: 18,
+    marginBottom: 16,
   },
 
-  // CARD 1: BALANCE & READINESS
+  // CARD 1: BALANCE
   balanceCard: {
     backgroundColor: '#FFFFFF',
     borderRadius: 24,
@@ -1038,8 +1276,8 @@ const styles = StyleSheet.create({
   balanceTopRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 16,
+    alignItems: 'flex-start',
+    marginBottom: 14,
   },
   balanceLabel: {
     fontSize: 9.5,
@@ -1048,15 +1286,15 @@ const styles = StyleSheet.create({
     letterSpacing: 0.5,
     marginBottom: 2,
   },
-  balanceNumber: {
+  balanceAmount: {
     fontSize: 34,
     fontWeight: '900',
     color: '#171420',
     letterSpacing: -0.8,
   },
   walletIconCircle: {
-    width: 44,
-    height: 44,
+    width: 40,
+    height: 40,
     borderRadius: 14,
     backgroundColor: '#FEF9C3',
     justifyContent: 'center',
@@ -1081,43 +1319,33 @@ const styles = StyleSheet.create({
     color: '#582CDB',
   },
   readinessTrack: {
-    height: 8,
-    borderRadius: 4,
+    height: 7,
+    borderRadius: 3.5,
     backgroundColor: '#F1F5F9',
     overflow: 'hidden',
-    marginBottom: 14,
+    marginBottom: 12,
   },
   readinessFill: {
     height: '100%',
     backgroundColor: '#582CDB',
-    borderRadius: 4,
+    borderRadius: 3.5,
   },
   readinessChecklist: {
-    gap: 8,
-    marginBottom: 16,
+    gap: 6,
+    marginBottom: 14,
   },
-  checkItem: {
+  checklistRow: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
   },
-  checkIconActive: {
-    fontSize: 13,
-    fontWeight: '900',
-    color: '#582CDB',
-  },
   checkTextActive: {
-    fontSize: 12.5,
+    fontSize: 12,
     fontWeight: '700',
     color: '#171420',
   },
-  checkIconPending: {
-    fontSize: 13,
-    color: '#94A3B8',
-    fontWeight: '800',
-  },
-  checkTextPending: {
-    fontSize: 12.5,
+  checkText: {
+    fontSize: 12,
     fontWeight: '600',
     color: '#64748B',
   },
@@ -1129,47 +1357,29 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   improveBtnText: {
-    fontSize: 13.5,
+    fontSize: 13,
     fontWeight: '900',
     color: '#FFFFFF',
   },
 
-  // CARD 2: CONNECTED PLATFORMS PREVIEW
+  // CARD 2: CONNECTED PLATFORMS
   sectionHeaderRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 4,
-    marginTop: 6,
+    marginBottom: 10,
   },
   sectionTitle: {
-    fontSize: 17,
+    fontSize: 18,
     fontWeight: '900',
     color: '#171420',
     letterSpacing: -0.3,
   },
-  sectionSubtext: {
-    fontSize: 12,
-    color: '#64748B',
-    marginBottom: 12,
-  },
-  previewOnlyPill: {
-    backgroundColor: '#EDE9FE',
-    paddingVertical: 3,
-    paddingHorizontal: 7,
-    borderRadius: 5,
-  },
-  previewOnlyPillText: {
-    fontSize: 8.5,
-    fontWeight: '900',
-    color: '#582CDB',
-    letterSpacing: 0.3,
-  },
-  platformsPillGrid: {
+  platformPillsRow: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: 8,
-    marginBottom: 12,
+    marginBottom: 14,
   },
   platformPillItem: {
     flexDirection: 'row',
@@ -1177,8 +1387,8 @@ const styles = StyleSheet.create({
     gap: 6,
     backgroundColor: '#FFFFFF',
     borderRadius: 10,
-    paddingVertical: 8,
-    paddingHorizontal: 12,
+    paddingVertical: 6,
+    paddingHorizontal: 10,
     borderWidth: 1,
     borderColor: '#EDE8E1',
   },
@@ -1191,15 +1401,14 @@ const styles = StyleSheet.create({
     width: 6,
     height: 6,
     borderRadius: 3,
-    backgroundColor: '#582CDB',
-    marginLeft: 2,
+    backgroundColor: '#10B981',
   },
   estimatedCard: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: '#FAF5FF',
     borderRadius: 20,
-    borderWidth: 1,
-    borderColor: '#EDE8E1',
     padding: 16,
+    borderWidth: 1,
+    borderColor: '#E9D5FF',
     marginBottom: 20,
   },
   estimatedHeaderRow: {
@@ -1214,12 +1423,12 @@ const styles = StyleSheet.create({
     color: '#171420',
   },
   estimatedAmount: {
-    fontSize: 15,
+    fontSize: 18,
     fontWeight: '900',
     color: '#582CDB',
   },
   estimatedBullets: {
-    gap: 6,
+    gap: 4,
     marginBottom: 14,
   },
   estimatedBulletRow: {
@@ -1228,18 +1437,18 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   estimatedBulletText: {
-    fontSize: 11.5,
+    fontSize: 11,
     color: '#64748B',
     fontWeight: '600',
   },
   unlockTrackingBtn: {
     height: 44,
-    borderRadius: 12,
+    borderRadius: 14,
     overflow: 'hidden',
-    shadowColor: '#FDE047',
+    shadowColor: '#CA8A04',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
-    shadowRadius: 6,
+    shadowRadius: 8,
     elevation: 3,
   },
   unlockTrackingGradient: {
@@ -1248,9 +1457,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   unlockTrackingBtnText: {
-    fontSize: 12.5,
+    fontSize: 13,
     fontWeight: '900',
     color: '#171420',
+    letterSpacing: 0.3,
   },
 
   // CARD 3: OPPORTUNITIES
@@ -1263,9 +1473,10 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#FFFFFF',
     borderRadius: 18,
-    padding: 14,
     borderWidth: 1,
     borderColor: '#EDE8E1',
+    padding: 14,
+    justifyContent: 'space-between',
   },
   oppTopRow: {
     flexDirection: 'row',
@@ -1274,7 +1485,7 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   oppXpBadge: {
-    backgroundColor: '#FEF9C3',
+    backgroundColor: '#EDE9FE',
     paddingVertical: 2,
     paddingHorizontal: 6,
     borderRadius: 4,
@@ -1282,33 +1493,30 @@ const styles = StyleSheet.create({
   oppXpBadgeText: {
     fontSize: 8.5,
     fontWeight: '900',
-    color: '#A16207',
+    color: '#582CDB',
   },
   oppTitle: {
     fontSize: 12.5,
-    fontWeight: '900',
+    fontWeight: '800',
     color: '#171420',
     marginBottom: 2,
-    lineHeight: 16,
   },
   oppSub: {
-    fontSize: 11,
+    fontSize: 10.5,
     color: '#64748B',
     marginBottom: 12,
   },
   oppGhostBtn: {
     height: 34,
     borderRadius: 10,
-    backgroundColor: '#FAF5FF',
-    borderWidth: 1,
-    borderColor: '#DDD6FE',
+    backgroundColor: '#F1F5F9',
     justifyContent: 'center',
     alignItems: 'center',
   },
   oppGhostBtnText: {
     fontSize: 11.5,
     fontWeight: '800',
-    color: '#582CDB',
+    color: '#475569',
   },
   oppPurpleBtn: {
     height: 34,
@@ -1324,301 +1532,279 @@ const styles = StyleSheet.create({
   },
 
   // CARD 4: PASSPORT
-  unlockedPill: {
-    backgroundColor: '#DCFCE7',
-    paddingVertical: 3,
-    paddingHorizontal: 7,
-    borderRadius: 5,
-  },
-  unlockedPillText: {
-    fontSize: 8.5,
-    fontWeight: '900',
-    color: '#15803D',
-    letterSpacing: 0.3,
-  },
   passportCard: {
     backgroundColor: '#FFFFFF',
-    borderRadius: 22,
+    borderRadius: 20,
     borderWidth: 1,
     borderColor: '#EDE8E1',
     padding: 16,
     marginBottom: 20,
+  },
+  passportHeaderRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 4,
+  },
+  passportTitle: {
+    fontSize: 15,
+    fontWeight: '900',
+    color: '#171420',
+  },
+  passportBadge: {
+    backgroundColor: '#FEF3C7',
+    paddingVertical: 2,
+    paddingHorizontal: 6,
+    borderRadius: 4,
+  },
+  passportBadgeText: {
+    fontSize: 8.5,
+    fontWeight: '900',
+    color: '#B45309',
+  },
+  passportSub: {
+    fontSize: 11,
+    color: '#64748B',
+    marginBottom: 12,
   },
   passportGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: 8,
-    marginBottom: 14,
+    marginBottom: 12,
   },
   passportGridItem: {
-    width: '48.5%',
+    width: '48%',
     backgroundColor: '#FAF8F5',
-    borderRadius: 14,
+    borderRadius: 10,
     padding: 10,
-    borderWidth: 1,
-    borderColor: '#EDE8E1',
   },
-  passportItemTop: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 4,
-  },
-  passportItemLabel: {
-    fontSize: 8,
-    fontWeight: '900',
+  passportGridLabel: {
+    fontSize: 8.5,
+    fontWeight: '800',
     color: '#64748B',
-    letterSpacing: 0.4,
+    marginBottom: 2,
   },
-  passportItemValue: {
-    fontSize: 15,
+  passportGridValue: {
+    fontSize: 13,
     fontWeight: '900',
     color: '#171420',
-    marginBottom: 6,
   },
-  miniTrack: {
-    height: 4,
-    borderRadius: 2,
-    backgroundColor: '#E2E8F0',
-    overflow: 'hidden',
-  },
-  miniFill: {
-    height: '100%',
-    backgroundColor: '#582CDB',
-    borderRadius: 2,
-  },
-  miniSegmentBar: {
-    flexDirection: 'row',
-    gap: 3,
-    height: 4,
-  },
-  segmentUnit: {
-    flex: 1,
-    borderRadius: 2,
-  },
-  passportViewBtn: {
-    height: 42,
-    borderRadius: 12,
-    backgroundColor: '#FFFFFF',
-    borderWidth: 1,
-    borderColor: '#CBD5E1',
+  passportBtn: {
+    height: 38,
+    borderRadius: 10,
+    backgroundColor: '#F1F5F9',
     justifyContent: 'center',
     alignItems: 'center',
   },
-  passportViewBtnText: {
-    fontSize: 13,
+  passportBtnText: {
+    fontSize: 12,
     fontWeight: '800',
     color: '#171420',
   },
 
   // CARD 5: CAMPAIGNS
-  campaignsCard: {
+  campaignCard: {
     backgroundColor: '#FFFFFF',
-    borderRadius: 22,
-    borderWidth: 1,
-    borderColor: '#EDE8E1',
-    padding: 16,
-    marginBottom: 20,
-  },
-  campaignsHeaderRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    marginBottom: 12,
-  },
-  campaignsTitle: {
-    fontSize: 16,
-    fontWeight: '900',
-    color: '#171420',
-    marginBottom: 2,
-  },
-  campaignsSub: {
-    fontSize: 11.5,
-    color: '#64748B',
-    lineHeight: 16,
-  },
-  lockBadgeCircle: {
-    width: 32,
-    height: 32,
-    borderRadius: 10,
-    backgroundColor: '#FAF8F5',
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: '#E2E8F0',
-  },
-  campaignRequirementsGrid: {
-    flexDirection: 'row',
-    backgroundColor: '#FAF8F5',
-    borderRadius: 14,
-    padding: 12,
-    borderWidth: 1,
-    borderColor: '#EDE8E1',
-    marginBottom: 12,
-  },
-  reqCol: {
-    flex: 1,
-    gap: 6,
-  },
-  reqItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-  },
-  reqCheckActive: {
-    fontSize: 12,
-    fontWeight: '900',
-    color: '#582CDB',
-  },
-  reqTextActive: {
-    fontSize: 11.5,
-    fontWeight: '700',
-    color: '#171420',
-  },
-  reqCheckPending: {
-    fontSize: 12,
-    color: '#94A3B8',
-  },
-  reqTextPending: {
-    fontSize: 11.5,
-    fontWeight: '600',
-    color: '#64748B',
-  },
-  campaignStatusRow: {
-    marginBottom: 12,
-  },
-  campaignStatusText: {
-    fontSize: 11.5,
-    color: '#64748B',
-    fontWeight: '700',
-  },
-  viewRequirementsBtn: {
-    height: 44,
-    borderRadius: 12,
-    backgroundColor: '#582CDB',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  viewRequirementsBtnText: {
-    fontSize: 13,
-    fontWeight: '900',
-    color: '#FFFFFF',
-  },
-
-  // CARD 6: GOAL CARD
-  goalCard: {
-    backgroundColor: '#FAF5FF',
     borderRadius: 20,
     borderWidth: 1,
-    borderColor: '#DDD6FE',
+    borderColor: '#EDE8E1',
     padding: 16,
     marginBottom: 20,
   },
-  goalTag: {
+  campaignHeaderRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 4,
+  },
+  campaignTitle: {
+    fontSize: 15,
+    fontWeight: '900',
+    color: '#171420',
+  },
+  lockPill: {
+    backgroundColor: '#F1F5F9',
+    paddingVertical: 2,
+    paddingHorizontal: 6,
+    borderRadius: 4,
+  },
+  lockPillText: {
     fontSize: 8.5,
     fontWeight: '900',
-    color: '#582CDB',
-    letterSpacing: 0.5,
-    marginBottom: 2,
+    color: '#64748B',
+  },
+  campaignSub: {
+    fontSize: 11,
+    color: '#64748B',
+    marginBottom: 12,
+  },
+  campaignChecklist: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 10,
+    marginBottom: 14,
+  },
+  campaignCheckItem: {
+    width: '46%',
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  campCheckActive: {
+    fontSize: 11.5,
+    fontWeight: '700',
+    color: '#171420',
+  },
+  campCheckText: {
+    fontSize: 11.5,
+    color: '#64748B',
+  },
+  campaignBtn: {
+    height: 38,
+    borderRadius: 10,
+    backgroundColor: '#F1F5F9',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  campaignBtnText: {
+    fontSize: 12,
+    fontWeight: '800',
+    color: '#171420',
+  },
+
+  // CARD 6: GOAL
+  goalCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: '#EDE8E1',
+    padding: 16,
+    marginBottom: 20,
+  },
+  goalHeaderRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 10,
   },
   goalTitle: {
+    fontSize: 11,
+    fontWeight: '800',
+    color: '#64748B',
+    marginBottom: 2,
+  },
+  goalTarget: {
     fontSize: 18,
     fontWeight: '900',
     color: '#171420',
-    marginBottom: 10,
+  },
+  trophyCircle: {
+    width: 36,
+    height: 36,
+    borderRadius: 12,
+    backgroundColor: '#FEF9C3',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#FDE047',
+  },
+  goalTrackLabels: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 4,
+  },
+  goalStepActive: {
+    fontSize: 8.5,
+    fontWeight: '900',
+    color: '#582CDB',
+  },
+  goalStepMuted: {
+    fontSize: 8.5,
+    fontWeight: '900',
+    color: '#94A3B8',
   },
   goalTrack: {
     height: 6,
     borderRadius: 3,
-    backgroundColor: '#E9D5FF',
+    backgroundColor: '#F1F5F9',
     overflow: 'hidden',
-    marginBottom: 4,
+    marginBottom: 12,
   },
   goalFill: {
     height: '100%',
     backgroundColor: '#582CDB',
     borderRadius: 3,
   },
-  goalPercent: {
-    fontSize: 10,
-    fontWeight: '900',
-    color: '#582CDB',
-    alignSelf: 'flex-end',
-    marginBottom: 8,
-  },
-  goalStepsFlow: {
-    fontSize: 9,
-    fontWeight: '800',
-    color: '#64748B',
-    letterSpacing: 0.4,
-    marginBottom: 12,
-  },
-  setGoalBtn: {
-    height: 40,
-    borderRadius: 12,
-    backgroundColor: '#582CDB',
+  goalBtn: {
+    height: 38,
+    borderRadius: 10,
+    backgroundColor: '#F1F5F9',
     justifyContent: 'center',
     alignItems: 'center',
   },
-  setGoalBtnText: {
-    fontSize: 12.5,
-    fontWeight: '900',
-    color: '#FFFFFF',
+  goalBtnText: {
+    fontSize: 12,
+    fontWeight: '800',
+    color: '#171420',
   },
 
   // CARD 7: PRO TOOLS
-  proToolsCard: {
+  proCard: {
     backgroundColor: '#FFFFFF',
-    borderRadius: 24,
+    borderRadius: 20,
     borderWidth: 1,
-    borderColor: '#FEF08A',
-    padding: 18,
+    borderColor: '#EDE8E1',
+    padding: 16,
     marginBottom: 20,
-    shadowColor: '#FDE047',
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.18,
-    shadowRadius: 16,
-    elevation: 3,
   },
-  proToolsHeaderRow: {
+  proHeaderRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 2,
+    marginBottom: 4,
   },
-  proToolsTitle: {
-    fontSize: 18,
+  proTitle: {
+    fontSize: 15,
     fontWeight: '900',
     color: '#171420',
   },
-  proToolsSub: {
-    fontSize: 12,
+  goldProBadge: {
+    backgroundColor: '#FEF9C3',
+    paddingVertical: 2,
+    paddingHorizontal: 6,
+    borderRadius: 4,
+    borderWidth: 1,
+    borderColor: '#FDE047',
+  },
+  goldProBadgeText: {
+    fontSize: 8.5,
+    fontWeight: '900',
+    color: '#A16207',
+  },
+  proSub: {
+    fontSize: 11,
     color: '#64748B',
-    marginBottom: 14,
+    marginBottom: 12,
   },
   proFeaturesList: {
-    gap: 8,
-    marginBottom: 16,
+    gap: 6,
+    marginBottom: 14,
   },
   proFeatureRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
+    gap: 6,
   },
   proFeatureText: {
-    fontSize: 12.5,
-    fontWeight: '700',
-    color: '#334155',
+    fontSize: 11.5,
+    color: '#475569',
+    fontWeight: '600',
   },
   exploreProBtn: {
-    height: 48,
-    borderRadius: 14,
+    height: 42,
+    borderRadius: 12,
     overflow: 'hidden',
-    shadowColor: '#FDE047',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.35,
-    shadowRadius: 8,
-    elevation: 3,
   },
   exploreProGradient: {
     flex: 1,
@@ -1626,14 +1812,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   exploreProBtnText: {
-    fontSize: 13.5,
+    fontSize: 12.5,
     fontWeight: '900',
     color: '#171420',
-    letterSpacing: -0.2,
   },
 
   // CARD 8: JARVIS INSIGHT
-  jarvisInsightCard: {
+  jarvisCard: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 12,
@@ -1662,9 +1847,10 @@ const styles = StyleSheet.create({
     marginBottom: 2,
   },
   jarvisText: {
-    fontSize: 12,
+    fontSize: 11.5,
     color: '#475569',
-    lineHeight: 17,
+    lineHeight: 16,
+    fontStyle: 'italic',
   },
 
   // MODALS
@@ -1673,7 +1859,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(15, 12, 24, 0.65)',
     justifyContent: 'center',
     alignItems: 'center',
-    paddingHorizontal: 20,
+    paddingHorizontal: 16,
   },
   modalCard: {
     width: '100%',
@@ -1687,11 +1873,34 @@ const styles = StyleSheet.create({
     shadowRadius: 28,
     elevation: 8,
   },
+  modalCardLarge: {
+    width: '100%',
+    maxWidth: 420,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 26,
+    padding: 20,
+    shadowColor: '#171420',
+    shadowOffset: { width: 0, height: 12 },
+    shadowOpacity: 0.3,
+    shadowRadius: 30,
+    elevation: 10,
+  },
   modalHeaderRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 12,
+    alignItems: 'flex-start',
+    marginBottom: 14,
+  },
+  activePlatformsCountBadge: {
+    backgroundColor: '#EDE9FE',
+    paddingVertical: 2.5,
+    paddingHorizontal: 8,
+    borderRadius: 6,
+  },
+  activePlatformsCountText: {
+    fontSize: 9.5,
+    fontWeight: '900',
+    color: '#582CDB',
   },
   modalCloseCircle: {
     width: 32,
@@ -1707,15 +1916,184 @@ const styles = StyleSheet.create({
     fontWeight: '800',
   },
   modalTitle: {
-    fontSize: 17,
+    fontSize: 18,
     fontWeight: '900',
     color: '#171420',
+    letterSpacing: -0.3,
   },
   modalSubtitle: {
-    fontSize: 12,
+    fontSize: 11.5,
+    color: '#64748B',
+    marginTop: 3,
+    lineHeight: 16,
+  },
+  modalSectionTitle: {
+    fontSize: 9.5,
+    fontWeight: '900',
+    color: '#64748B',
+    letterSpacing: 0.6,
+    marginBottom: 8,
+  },
+  modalSubDescription: {
+    fontSize: 11,
+    color: '#64748B',
+    marginBottom: 10,
+  },
+  connectedPlatformRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#FAF8F5',
+    borderRadius: 14,
+    padding: 10,
+    borderWidth: 1,
+    borderColor: '#EDE8E1',
+    gap: 10,
+  },
+  availablePlatformRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#FFFFFF',
+    borderRadius: 14,
+    padding: 10,
+    borderWidth: 1,
+    borderColor: '#EDE8E1',
+    gap: 10,
+  },
+  platformIconCircle: {
+    width: 38,
+    height: 38,
+    borderRadius: 12,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  platformNameText: {
+    fontSize: 13,
+    fontWeight: '800',
+    color: '#171420',
+  },
+  autoSyncBadge: {
+    backgroundColor: '#DCFCE7',
+    paddingVertical: 1.5,
+    paddingHorizontal: 6,
+    borderRadius: 4,
+  },
+  autoSyncText: {
+    fontSize: 8.5,
+    fontWeight: '800',
+    color: '#15803D',
+  },
+  platformSubText: {
+    fontSize: 10.5,
     color: '#64748B',
     marginTop: 1,
   },
+  removePlatformBtn: {
+    paddingVertical: 5,
+    paddingHorizontal: 10,
+    borderRadius: 8,
+    backgroundColor: '#FEE2E2',
+  },
+  removePlatformBtnText: {
+    fontSize: 10,
+    fontWeight: '800',
+    color: '#DC2626',
+  },
+  addPlatformActionBtn: {
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    borderRadius: 10,
+    backgroundColor: '#582CDB',
+  },
+  addPlatformActionBtnText: {
+    fontSize: 11,
+    fontWeight: '900',
+    color: '#FFFFFF',
+  },
+  customAddAccountBox: {
+    backgroundColor: '#FAF8F5',
+    borderRadius: 16,
+    padding: 12,
+    borderWidth: 1,
+    borderColor: '#EDE8E1',
+    marginTop: 6,
+    marginBottom: 10,
+  },
+  customAddTitle: {
+    fontSize: 9.5,
+    fontWeight: '900',
+    color: '#582CDB',
+    letterSpacing: 0.6,
+  },
+  customAddSub: {
+    fontSize: 11,
+    color: '#64748B',
+    marginTop: 2,
+  },
+  platformSelectChip: {
+    paddingVertical: 5,
+    paddingHorizontal: 10,
+    borderRadius: 8,
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+  },
+  platformSelectChipActive: {
+    backgroundColor: '#EDE9FE',
+    borderColor: '#582CDB',
+  },
+  platformSelectChipText: {
+    fontSize: 10.5,
+    fontWeight: '700',
+    color: '#475569',
+  },
+  platformSelectChipTextActive: {
+    color: '#582CDB',
+    fontWeight: '900',
+  },
+  customInputRow: {
+    flexDirection: 'row',
+    gap: 8,
+    marginTop: 6,
+  },
+  customTextInput: {
+    flex: 1,
+    height: 40,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: '#CBD5E1',
+    paddingHorizontal: 10,
+    fontSize: 12.5,
+    color: '#171420',
+    fontWeight: '600',
+  },
+  linkAccountConfirmBtn: {
+    backgroundColor: '#582CDB',
+    borderRadius: 10,
+    paddingHorizontal: 12,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  linkAccountConfirmBtnText: {
+    fontSize: 11,
+    fontWeight: '900',
+    color: '#FFFFFF',
+  },
+  modalDoneBtn: {
+    height: 46,
+    borderRadius: 14,
+    backgroundColor: '#582CDB',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 10,
+  },
+  modalDoneBtnText: {
+    fontSize: 13.5,
+    fontWeight: '900',
+    color: '#FFFFFF',
+    letterSpacing: 0.3,
+  },
+
   notifCard: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -1737,35 +2115,34 @@ const styles = StyleSheet.create({
     fontSize: 11.5,
     color: '#64748B',
   },
-  goalCheckRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
+  milestoneGrid: {
     gap: 8,
-    marginVertical: 4,
+    marginVertical: 12,
   },
-  goalCheckText: {
-    fontSize: 12.5,
-    fontWeight: '700',
-    color: '#334155',
-  },
-  reqModalItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
+  milestoneOption: {
     backgroundColor: '#FAF8F5',
     borderRadius: 12,
-    padding: 10,
+    padding: 12,
     borderWidth: 1,
     borderColor: '#EDE8E1',
   },
-  reqModalTitle: {
-    fontSize: 12.5,
-    fontWeight: '800',
-    color: '#171420',
+  milestoneOptionActive: {
+    backgroundColor: '#EDE9FE',
+    borderColor: '#582CDB',
   },
-  reqModalSub: {
-    fontSize: 11,
-    color: '#64748B',
+  milestoneOptionText: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: '#475569',
+  },
+  milestoneOptionTextActive: {
+    color: '#582CDB',
+    fontWeight: '900',
+  },
+  reqDetailLine: {
+    fontSize: 12.5,
+    color: '#475569',
+    lineHeight: 18,
   },
   modalFullBtn: {
     height: 44,
