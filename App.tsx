@@ -24,6 +24,7 @@ import { PostComposerScreen } from './src/screens/PostComposerScreen';
 import { ContentAngleScreen } from './src/screens/ContentAngleScreen';
 import { ScriptScreen } from './src/screens/ScriptScreen';
 import { CaptionScreen } from './src/screens/CaptionScreen';
+import { MessagesScreen } from './src/screens/MessagesScreen';
 import { GhostLoadingScreen } from './src/components/GhostLoadingScreen';
 import { TabType } from './src/components/FloatingTabBar';
 
@@ -48,6 +49,7 @@ type Screen =
   | 'content-angle'
   | 'script'
   | 'caption'
+  | 'messages'
   | 'jarvis-pro';
 
 export default function App() {
@@ -68,7 +70,9 @@ export default function App() {
     if (nextScreen !== currentScreen) {
       const msg =
         customMessage ||
-        (nextScreen === 'caption'
+        (nextScreen === 'messages'
+          ? 'Opening Creator Messages...'
+          : nextScreen === 'caption'
           ? 'Writing Caption & Hashtags...'
           : nextScreen === 'script'
           ? 'Crafting Video Script...'
@@ -272,6 +276,7 @@ export default function App() {
             onStartMission={() => navigateTo('mission-detail')}
             onOpenJarvisPro={() => navigateTo('jarvis-pro')}
             onOpenSchedule={() => navigateTo('schedule')}
+            onOpenMessages={() => navigateTo('messages')}
             onNavigateTab={(tab: TabType) => {
               if (tab === 'create') {
                 navigateTo('create');
@@ -310,6 +315,7 @@ export default function App() {
           <CreateScreen
             onLogout={handleLogout}
             onOpenSchedule={() => navigateTo('schedule')}
+            onOpenMessages={() => navigateTo('messages')}
             onOpenJarvisPro={() => navigateTo('jarvis-pro')}
             onOpenIdeaDetail={(title) => {
               if (title) setSelectedIdeaTitle(title);
@@ -428,6 +434,7 @@ export default function App() {
             onOpenMissionDetail={() => navigateTo('mission-detail')}
             onOpenCommunityChallenge={() => navigateTo('challenge-detail')}
             onOpenSchedule={() => navigateTo('schedule')}
+            onOpenMessages={() => navigateTo('messages')}
             onOpenJarvisPro={() => navigateTo('jarvis-pro')}
             onNavigateTab={(tab: TabType) => {
               if (tab === 'home') {
@@ -471,6 +478,7 @@ export default function App() {
             onBack={() => navigateTo(previousScreen ? previousScreen : 'create')}
             onLogout={handleLogout}
             onOpenSchedule={() => navigateTo('schedule')}
+            onOpenMessages={() => navigateTo('messages')}
             onOpenJarvisPro={() => navigateTo('jarvis-pro')}
             onOpenPostComposer={(title) => {
               if (title) setComposerIdeaTitle(title);
@@ -498,6 +506,7 @@ export default function App() {
             onBack={() => navigateTo(previousScreen ? previousScreen : 'create')}
             onLogout={handleLogout}
             onOpenSchedule={() => navigateTo('schedule')}
+            onOpenMessages={() => navigateTo('messages')}
             onOpenJarvisPro={() => navigateTo('jarvis-pro')}
             onNavigateTab={(tab: TabType) => {
               if (tab === 'home') {
@@ -520,6 +529,7 @@ export default function App() {
             onBack={() => navigateTo(previousScreen ? previousScreen : 'create')}
             onLogout={handleLogout}
             onOpenSchedule={() => navigateTo('schedule')}
+            onOpenMessages={() => navigateTo('messages')}
             onOpenJarvisPro={() => navigateTo('jarvis-pro')}
             onUseIdea={(title) => {
               if (title) setComposerIdeaTitle(title);
@@ -547,6 +557,7 @@ export default function App() {
             onBack={() => navigateTo(previousScreen ? previousScreen : 'create')}
             onLogout={handleLogout}
             onOpenSchedule={() => navigateTo('schedule')}
+            onOpenMessages={() => navigateTo('messages')}
             onOpenJarvisPro={() => navigateTo('jarvis-pro')}
             onUseAsPost={(scriptData) => {
               if (scriptData.hook) setComposerIdeaTitle(scriptData.hook);
@@ -574,9 +585,36 @@ export default function App() {
             onBack={() => navigateTo(previousScreen ? previousScreen : 'create')}
             onLogout={handleLogout}
             onOpenSchedule={() => navigateTo('schedule')}
+            onOpenMessages={() => navigateTo('messages')}
             onOpenJarvisPro={() => navigateTo('jarvis-pro')}
             onAddToPost={(captionText) => {
               if (captionText) setComposerIdeaTitle(captionText);
+              navigateTo('composer');
+            }}
+            onNavigateTab={(tab: TabType) => {
+              if (tab === 'home') {
+                navigateTo('dashboard');
+              } else if (tab === 'create') {
+                navigateTo('create');
+              } else if (tab === 'match') {
+                navigateTo('match');
+              } else if (tab === 'quests') {
+                navigateTo('quests');
+              } else if (tab === 'growth') {
+                navigateTo('growth');
+              }
+            }}
+          />
+        )}
+
+        {currentScreen === 'messages' && (
+          <MessagesScreen
+            onBack={() => navigateTo(previousScreen ? previousScreen : 'dashboard')}
+            onLogout={handleLogout}
+            onOpenSchedule={() => navigateTo('schedule')}
+            onOpenJarvisPro={() => navigateTo('jarvis-pro')}
+            onOpenPostComposer={(prefillTitle) => {
+              if (prefillTitle) setComposerIdeaTitle(prefillTitle);
               navigateTo('composer');
             }}
             onNavigateTab={(tab: TabType) => {

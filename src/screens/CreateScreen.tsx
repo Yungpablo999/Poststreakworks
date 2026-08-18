@@ -29,6 +29,7 @@ interface CreateScreenProps {
   onOpenIdeaAngle?: () => void;
   onOpenScript?: (ideaTitle?: string) => void;
   onOpenCaption?: (ideaTitle?: string) => void;
+  onOpenMessages?: () => void;
 }
 
 interface DraftItem {
@@ -248,6 +249,7 @@ export const CreateScreen: React.FC<CreateScreenProps> = ({
   onOpenIdeaAngle,
   onOpenScript,
   onOpenCaption,
+  onOpenMessages,
 }) => {
   const [activeTab, setActiveTab] = useState<TabType>('create');
   const [drafts, setDrafts] = useState<DraftItem[]>(INITIAL_DRAFTS);

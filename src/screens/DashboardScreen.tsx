@@ -26,6 +26,7 @@ interface DashboardScreenProps {
   onNavigateTab?: (tab: TabType) => void;
   onOpenJarvisPro?: () => void;
   onOpenSchedule?: () => void;
+  onOpenMessages?: () => void;
 }
 type NotificationFilter = 'all' | 'unread' | 'quests';
 
@@ -379,6 +380,7 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
   onNavigateTab,
   onOpenJarvisPro,
   onOpenSchedule,
+  onOpenMessages,
 }) => {
   const [activeTab, setActiveTab] = useState<TabType>('home');
   const [matchConnected, setMatchConnected] = useState(false);
@@ -763,6 +765,14 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
             <Pressable
               style={({ pressed }) => [styles.headerIconBtn, pressed && styles.headerIconBtnPressed]}
               hitSlop={8}
+              onPress={() => {
+                if (Platform.OS !== 'web') {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                }
+                if (onOpenMessages) {
+                  onOpenMessages();
+                }
+              }}
             >
               <Svg width={20} height={20} viewBox="0 0 24 24" fill="none">
                 <Path

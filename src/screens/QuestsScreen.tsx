@@ -25,6 +25,7 @@ interface QuestsScreenProps {
   onOpenMissionDetail?: () => void;
   onOpenCommunityChallenge?: () => void;
   onOpenSchedule?: () => void;
+  onOpenMessages?: () => void;
   onOpenJarvisPro?: () => void;
 }
 
@@ -35,6 +36,7 @@ export const QuestsScreen: React.FC<QuestsScreenProps> = ({
   onOpenMissionDetail,
   onOpenCommunityChallenge,
   onOpenSchedule,
+  onOpenMessages,
   onOpenJarvisPro,
 }) => {
   const [activeTab, setActiveTab] = useState<TabType>('quests');

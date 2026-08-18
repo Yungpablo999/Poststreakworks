@@ -26,6 +26,7 @@ interface PostComposerScreenProps {
   onBack: () => void;
   onLogout?: () => void;
   onOpenSchedule?: () => void;
+  onOpenMessages?: () => void;
   onOpenJarvisPro?: () => void;
   onNavigateTab?: (tab: TabType) => void;
 }
@@ -305,6 +306,7 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
   onBack,
   onLogout,
   onOpenSchedule,
+  onOpenMessages,
   onOpenJarvisPro,
   onNavigateTab,
 }) => {
@@ -613,8 +615,15 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
               style={({ pressed }) => [styles.headerIconBtn, pressed && styles.btnPressed]}
               hitSlop={8}
               onPress={() => {
-                triggerModalAnim();
-                setShowChatModal(true);
+                if (Platform.OS !== "web") {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                }
+                if (onOpenMessages) {
+                  onOpenMessages();
+                } else {
+                  triggerModalAnim();
+                  setShowChatModal(true);
+                }
               }}
             >
               <Svg width={19} height={19} viewBox="0 0 24 24" fill="none">

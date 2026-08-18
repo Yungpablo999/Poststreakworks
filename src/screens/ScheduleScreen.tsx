@@ -25,6 +25,7 @@ interface ScheduleScreenProps {
   onLogout?: () => void;
   onNavigateTab?: (tab: TabType) => void;
   onOpenJarvisPro?: () => void;
+  onOpenMessages?: () => void;
   onOpenCreateIdea?: () => void;
 }
 
@@ -113,6 +114,7 @@ export const ScheduleScreen: React.FC<ScheduleScreenProps> = ({
   onLogout,
   onNavigateTab,
   onOpenJarvisPro,
+  onOpenMessages,
   onOpenCreateIdea,
 }) => {
   const [activeTab, setActiveTab] = useState<TabType>('create');

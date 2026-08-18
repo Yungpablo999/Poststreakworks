@@ -28,6 +28,7 @@ interface ScriptScreenProps {
   onOpenJarvisPro?: () => void;
   onNavigateTab?: (tab: TabType) => void;
   onUseAsPost?: (scriptData: { hook: string; body: string; takeaway: string; cta: string }) => void;
+  onOpenMessages?: () => void;
 }
 
 interface NotificationItem {
@@ -187,6 +188,7 @@ export const ScriptScreen: React.FC<ScriptScreenProps> = ({
   onOpenJarvisPro,
   onNavigateTab,
   onUseAsPost,
+  onOpenMessages,
 }) => {
   const [activeTab, setActiveTab] = useState<TabType>('create');
 

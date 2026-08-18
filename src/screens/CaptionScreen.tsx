@@ -28,6 +28,7 @@ interface CaptionScreenProps {
   onOpenJarvisPro?: () => void;
   onNavigateTab?: (tab: TabType) => void;
   onAddToPost?: (captionText: string, hashtags: string) => void;
+  onOpenMessages?: () => void;
 }
 
 interface NotificationItem {
@@ -98,6 +99,7 @@ export const CaptionScreen: React.FC<CaptionScreenProps> = ({
   onOpenJarvisPro,
   onNavigateTab,
   onAddToPost,
+  onOpenMessages,
 }) => {
   const [activeTab, setActiveTab] = useState<TabType>('create');
 
