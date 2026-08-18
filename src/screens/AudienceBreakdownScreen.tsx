@@ -12,6 +12,7 @@ import {
   Image,
   Dimensions,
   Modal,
+  TextInput,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as Haptics from 'expo-haptics';
@@ -21,6 +22,135 @@ import { UserProfileModal, UserProfileData } from '../components/UserProfileModa
 import { AnimatedCompletionModal } from '../components/AnimatedCompletionModal';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
+
+// Authentic Social SVG Icons
+const TikTokSvg = ({ size = 20 }: { size?: number }) => (
+  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+    <Path
+      d="M19.321 5.562a5.122 5.122 0 0 1-3.585-1.446 5.14 5.14 0 0 1-1.486-3.616H10.5v15.025a3.25 3.25 0 1 1-3.25-3.25 3.2 3.2 0 0 1 1.25.253V8.75a6.975 6.975 0 0 0-1.25-.113 7 7 0 1 0 7 7V9.22a8.775 8.775 0 0 0 5.071 1.595V7.065a5.16 5.16 0 0 1-2.45-.653 5.13 5.13 0 0 1-1.3-.85z"
+      fill="#000000"
+    />
+  </Svg>
+);
+
+const InstagramSvg = ({ size = 20 }: { size?: number }) => (
+  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+    <Rect x="2.5" y="2.5" width="19" height="19" rx="5" stroke="#E1306C" strokeWidth="2.2" />
+    <Circle cx="12" cy="12" r="4.5" stroke="#E1306C" strokeWidth="2.2" />
+    <Circle cx="17.5" cy="6.5" r="1.2" fill="#E1306C" />
+  </Svg>
+);
+
+const YouTubeSvg = ({ size = 20 }: { size?: number }) => (
+  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+    <Path
+      d="M21.582 6.186a2.75 2.75 0 0 0-1.934-1.946C17.942 3.75 12 3.75 12 3.75s-5.942 0-7.648.49a2.75 2.75 0 0 0-1.934 1.946C1.928 7.892 1.928 12 1.928 12s0 4.108.49 5.814a2.75 2.75 0 0 0 1.934 1.946c1.706.49 7.648.49 7.648.49s5.942 0 7.648-.49a2.75 2.75 0 0 0 1.934-1.946c.49-1.706.49-5.814.49-5.814s0-4.108-.49-5.814z"
+      fill="#FF0000"
+    />
+    <Path d="M9.75 15.02V8.98L15 12l-5.25 3.02z" fill="#FFFFFF" />
+  </Svg>
+);
+
+const XSvg = ({ size = 18 }: { size?: number }) => (
+  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+    <Path
+      d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"
+      fill="#000000"
+    />
+  </Svg>
+);
+
+interface PlatformAccount {
+  id: string;
+  name: string;
+  handle: string;
+  followers: string;
+  countNumeric: number;
+  iconEmoji: string;
+  bgTint: string;
+  connected: boolean;
+  canAdd: boolean;
+}
+
+const INITIAL_PLATFORMS: PlatformAccount[] = [
+  {
+    id: 'tiktok',
+    name: 'TikTok',
+    handle: '@pablo.creates',
+    followers: '12.4K',
+    countNumeric: 12400,
+    iconEmoji: '🎬',
+    bgTint: '#EDE9FE',
+    connected: true,
+    canAdd: false,
+  },
+  {
+    id: 'instagram',
+    name: 'Instagram Reels',
+    handle: '@pablocreates',
+    followers: '7.8K',
+    countNumeric: 7800,
+    iconEmoji: '📷',
+    bgTint: '#FDF2F8',
+    connected: true,
+    canAdd: false,
+  },
+  {
+    id: 'youtube',
+    name: 'YouTube Shorts',
+    handle: 'Pablo Creates',
+    followers: '4.6K',
+    countNumeric: 4600,
+    iconEmoji: '📺',
+    bgTint: '#FEF2F2',
+    connected: false,
+    canAdd: true,
+  },
+  {
+    id: 'linkedin',
+    name: 'LinkedIn',
+    handle: 'Pablo (Tech & Creator)',
+    followers: '1.2K',
+    countNumeric: 1200,
+    iconEmoji: '💼',
+    bgTint: '#F0FDF4',
+    connected: false,
+    canAdd: true,
+  },
+  {
+    id: 'x_twitter',
+    name: 'X (Twitter)',
+    handle: '@pablocreates',
+    followers: '3.1K',
+    countNumeric: 3100,
+    iconEmoji: '🐦',
+    bgTint: '#F8FAFC',
+    connected: false,
+    canAdd: true,
+  },
+  {
+    id: 'snapchat',
+    name: 'Snapchat',
+    handle: 'pablo.snaps',
+    followers: '1.8K',
+    countNumeric: 1800,
+    iconEmoji: '👻',
+    bgTint: '#FEF9C3',
+    connected: false,
+    canAdd: true,
+  },
+  {
+    id: 'threads',
+    name: 'Threads',
+    handle: '@pablocreates',
+    followers: '2.2K',
+    countNumeric: 2200,
+    iconEmoji: '🧵',
+    bgTint: '#F5F3FF',
+    connected: false,
+    canAdd: true,
+  },
+];
 
 interface AudienceBreakdownScreenProps {
   onBack: () => void;
@@ -53,18 +183,20 @@ export const AudienceBreakdownScreen: React.FC<AudienceBreakdownScreenProps> = (
   const [activeSegmentTab, setActiveSegmentTab] = useState<'overview' | 'posts'>('overview');
   const [activeTab, setActiveTab] = useState<TabType>('growth');
 
+  // Platform state list
+  const [platformsList, setPlatformsList] = useState<PlatformAccount[]>(INITIAL_PLATFORMS);
+  const [customHandleInput, setCustomHandleInput] = useState('');
+  const [selectedPlatformToAdd, setSelectedPlatformToAdd] = useState('youtube');
+
   // Modals
   const [showProfileModal, setShowProfileModal] = useState(false);
-  const [showNotificationsModal, setShowNotificationsModal] = useState(false);
   const [showCelebrationModal, setShowCelebrationModal] = useState(false);
   const [showJarvisExplanationModal, setShowJarvisExplanationModal] = useState(false);
   const [showConnectPlatformModal, setShowConnectPlatformModal] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
-  // Dynamic States
+  // Dynamic Pro Unlock
   const [isProUnlocked, setIsProUnlocked] = useState(false);
-  const [connectedYoutube, setConnectedYoutube] = useState(false);
-  const [connectedLinkedin, setConnectedLinkedin] = useState(false);
 
   // Animations
   const flameFloatY = useRef(new Animated.Value(0)).current;
@@ -73,6 +205,13 @@ export const AudienceBreakdownScreen: React.FC<AudienceBreakdownScreenProps> = (
   const barAnim1 = useRef(new Animated.Value(0)).current;
   const barAnim2 = useRef(new Animated.Value(0)).current;
   const barAnim3 = useRef(new Animated.Value(0)).current;
+
+  // Calculate live dynamic total audience based on connected platforms
+  const totalAudienceCount = platformsList
+    .filter((p) => p.connected)
+    .reduce((acc, curr) => acc + curr.countNumeric, 4600); // 4.6k other base
+
+  const formattedTotalAudience = (totalAudienceCount / 1000).toFixed(1) + 'K';
 
   useEffect(() => {
     // Floating jarvis icon animation
@@ -122,6 +261,56 @@ export const AudienceBreakdownScreen: React.FC<AudienceBreakdownScreenProps> = (
     ]).start(() => setToastMessage(null));
   };
 
+  const handleOpenConnectPlatforms = () => {
+    if (Platform.OS !== 'web') {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    }
+    triggerModalAnim();
+    setShowConnectPlatformModal(true);
+  };
+
+  const handleConnectSinglePlatform = (platformId: string) => {
+    if (Platform.OS !== 'web') {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    }
+    setPlatformsList((prev) =>
+      prev.map((p) => (p.id === platformId ? { ...p, connected: true } : p))
+    );
+    const targetPlat = platformsList.find((p) => p.id === platformId);
+    showToast(`✓ ${targetPlat?.name || 'Platform'} connected! +${targetPlat?.followers} synced.`);
+  };
+
+  const handleDisconnectSinglePlatform = (platformId: string) => {
+    if (Platform.OS !== 'web') {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    }
+    setPlatformsList((prev) =>
+      prev.map((p) => (p.id === platformId ? { ...p, connected: false } : p))
+    );
+    const targetPlat = platformsList.find((p) => p.id === platformId);
+    showToast(`Disconnected ${targetPlat?.name}`);
+  };
+
+  const handleAddCustomPlatform = () => {
+    if (!customHandleInput.trim()) {
+      showToast('Please enter your handle');
+      return;
+    }
+    if (Platform.OS !== 'web') {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    }
+    setPlatformsList((prev) =>
+      prev.map((p) =>
+        p.id === selectedPlatformToAdd
+          ? { ...p, connected: true, handle: customHandleInput.trim() }
+          : p
+      )
+    );
+    const targetPlat = platformsList.find((p) => p.id === selectedPlatformToAdd);
+    showToast(`✓ ${targetPlat?.name} linked to ${customHandleInput.trim()}!`);
+    setCustomHandleInput('');
+  };
+
   const handleCreateSimilarPost = () => {
     if (Platform.OS !== 'web') {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
@@ -144,21 +333,8 @@ export const AudienceBreakdownScreen: React.FC<AudienceBreakdownScreenProps> = (
     setShowCelebrationModal(true);
   };
 
-  const handleConnectYoutube = () => {
-    if (Platform.OS !== 'web') {
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-    }
-    setConnectedYoutube(true);
-    showToast('✓ YouTube Shorts connected (+4.6k synced)');
-  };
-
-  const handleConnectLinkedin = () => {
-    if (Platform.OS !== 'web') {
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-    }
-    setConnectedLinkedin(true);
-    showToast('✓ LinkedIn creator profile connected');
-  };
+  const connectedCount = platformsList.filter((p) => p.connected).length;
+  const availableToAdd = platformsList.filter((p) => !p.connected);
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -330,7 +506,7 @@ export const AudienceBreakdownScreen: React.FC<AudienceBreakdownScreenProps> = (
             See your total audience, weekly growth, platform split and fastest growing channel.
           </Text>
 
-          {/* CARD 1: TOTAL AUDIENCE HERO CARD */}
+          {/* CARD 1: TOTAL AUDIENCE HERO CARD (UNLOCK PRO REMOVED AS REQUESTED) */}
           <View style={styles.audienceCard}>
             <View style={styles.audienceCardTopRow}>
               <Text style={styles.cardHeaderLabel}>TOTAL AUDIENCE</Text>
@@ -340,7 +516,7 @@ export const AudienceBreakdownScreen: React.FC<AudienceBreakdownScreenProps> = (
               </View>
             </View>
 
-            <Text style={styles.totalAudienceBigNumber}>24.8K</Text>
+            <Text style={styles.totalAudienceBigNumber}>{formattedTotalAudience}</Text>
 
             {/* MULTI-SEGMENT PLATFORM DISTRIBUTION BAR */}
             <View style={styles.multiSegmentBar}>
@@ -370,20 +546,11 @@ export const AudienceBreakdownScreen: React.FC<AudienceBreakdownScreenProps> = (
               </View>
             </View>
 
-            {/* ACTION BUTTONS INSIDE CARD */}
+            {/* ACTION BUTTON INSIDE CARD: CONNECT PLATFORM (POPS UP FULL CONNECTOR) */}
             <View style={styles.cardActionsCol}>
               <Pressable
                 style={({ pressed }) => [styles.purpleActionBtn, pressed && styles.btnPressed]}
-                onPress={() => {
-                  if (Platform.OS !== 'web') {
-                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-                  }
-                  if (onOpenPlatformConnect) {
-                    onOpenPlatformConnect();
-                  } else {
-                    setShowConnectPlatformModal(true);
-                  }
-                }}
+                onPress={handleOpenConnectPlatforms}
               >
                 <LinearGradient
                   colors={['#582CDB', '#4318FF']}
@@ -391,15 +558,10 @@ export const AudienceBreakdownScreen: React.FC<AudienceBreakdownScreenProps> = (
                   end={{ x: 1, y: 0 }}
                   style={styles.purpleActionGradient}
                 >
-                  <Text style={styles.purpleActionBtnText}>CONNECT PLATFORM</Text>
+                  <Text style={styles.purpleActionBtnText}>
+                    CONNECT PLATFORM ({connectedCount} ACTIVE)
+                  </Text>
                 </LinearGradient>
-              </Pressable>
-
-              <Pressable
-                style={({ pressed }) => [styles.unlockProSoftBtn, pressed && styles.btnPressed]}
-                onPress={handleUnlockPro}
-              >
-                <Text style={styles.unlockProSoftBtnText}>UNLOCK PRO</Text>
               </Pressable>
             </View>
           </View>
@@ -496,77 +658,31 @@ export const AudienceBreakdownScreen: React.FC<AudienceBreakdownScreenProps> = (
 
           {/* 4 PLATFORM STATS GRID (2x2) */}
           <View style={styles.platformGrid2x2}>
-            {/* 1. TikTok */}
-            <View style={styles.platformGridBox}>
-              <View style={styles.platformGridHeader}>
-                <View style={[styles.platformMiniIconBadge, { backgroundColor: '#EDE9FE' }]}>
-                  <Text style={{ fontSize: 14 }}>🎬</Text>
-                </View>
-                <View style={styles.connectedTag}>
-                  <Text style={styles.connectedTagText}>CONNECTED</Text>
-                </View>
-              </View>
-              <Text style={styles.platformGridLabel}>TikTok</Text>
-              <Text style={styles.platformGridMetric}>12.4K</Text>
-            </View>
-
-            {/* 2. Instagram */}
-            <View style={styles.platformGridBox}>
-              <View style={styles.platformGridHeader}>
-                <View style={[styles.platformMiniIconBadge, { backgroundColor: '#FDF2F8' }]}>
-                  <Text style={{ fontSize: 14 }}>📷</Text>
-                </View>
-                <View style={styles.connectedTag}>
-                  <Text style={styles.connectedTagText}>CONNECTED</Text>
-                </View>
-              </View>
-              <Text style={styles.platformGridLabel}>Instagram</Text>
-              <Text style={styles.platformGridMetric}>7.8K</Text>
-            </View>
-
-            {/* 3. YouTube */}
-            <View style={styles.platformGridBox}>
-              <View style={styles.platformGridHeader}>
-                <View style={[styles.platformMiniIconBadge, { backgroundColor: '#FEF2F2' }]}>
-                  <Text style={{ fontSize: 14 }}>📺</Text>
-                </View>
-                {connectedYoutube ? (
-                  <View style={styles.connectedTag}>
-                    <Text style={styles.connectedTagText}>CONNECTED</Text>
+            {platformsList.slice(0, 4).map((plat) => (
+              <View key={plat.id} style={styles.platformGridBox}>
+                <View style={styles.platformGridHeader}>
+                  <View style={[styles.platformMiniIconBadge, { backgroundColor: plat.bgTint }]}>
+                    <Text style={{ fontSize: 14 }}>{plat.iconEmoji}</Text>
                   </View>
-                ) : (
-                  <Pressable onPress={handleConnectYoutube} hitSlop={6}>
-                    <Text style={styles.connectLinkText}>CONNECT</Text>
-                  </Pressable>
-                )}
-              </View>
-              <Text style={styles.platformGridLabel}>YouTube</Text>
-              <Text style={styles.platformGridMetric}>
-                {connectedYoutube ? '4.6K' : '—'}
-              </Text>
-            </View>
-
-            {/* 4. LinkedIn */}
-            <View style={styles.platformGridBox}>
-              <View style={styles.platformGridHeader}>
-                <View style={[styles.platformMiniIconBadge, { backgroundColor: '#F0FDF4' }]}>
-                  <Text style={{ fontSize: 14 }}>💼</Text>
+                  {plat.connected ? (
+                    <View style={styles.connectedTag}>
+                      <Text style={styles.connectedTagText}>CONNECTED</Text>
+                    </View>
+                  ) : (
+                    <Pressable
+                      onPress={() => handleConnectSinglePlatform(plat.id)}
+                      hitSlop={6}
+                    >
+                      <Text style={styles.connectLinkText}>+ CONNECT</Text>
+                    </Pressable>
+                  )}
                 </View>
-                {connectedLinkedin ? (
-                  <View style={styles.connectedTag}>
-                    <Text style={styles.connectedTagText}>CONNECTED</Text>
-                  </View>
-                ) : (
-                  <Pressable onPress={handleConnectLinkedin} hitSlop={6}>
-                    <Text style={styles.connectLinkText}>CONNECT</Text>
-                  </Pressable>
-                )}
+                <Text style={styles.platformGridLabel}>{plat.name.split(' ')[0]}</Text>
+                <Text style={styles.platformGridMetric}>
+                  {plat.connected ? plat.followers : '—'}
+                </Text>
               </View>
-              <Text style={styles.platformGridLabel}>LinkedIn</Text>
-              <Text style={styles.platformGridMetric}>
-                {connectedLinkedin ? '1.2K' : '—'}
-              </Text>
-            </View>
+            ))}
           </View>
 
           {/* CARD 5: AUDIENCE INSIGHT CALLOUT */}
@@ -720,17 +836,12 @@ export const AudienceBreakdownScreen: React.FC<AudienceBreakdownScreenProps> = (
             </View>
           </View>
 
-          {/* 3. BOTTOM ACTION STACK (EXACT AS SCREENSHOT) */}
+          {/* 3. BOTTOM ACTION STACK */}
           <View style={styles.bottomActionsContainer}>
             {/* 1. Connect Platform */}
             <Pressable
               style={({ pressed }) => [styles.bottomActionPrimary, pressed && styles.btnPressed]}
-              onPress={() => {
-                if (Platform.OS !== 'web') {
-                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-                }
-                setShowConnectPlatformModal(true);
-              }}
+              onPress={handleOpenConnectPlatforms}
             >
               <LinearGradient
                 colors={['#582CDB', '#4318FF']}
@@ -738,7 +849,9 @@ export const AudienceBreakdownScreen: React.FC<AudienceBreakdownScreenProps> = (
                 end={{ x: 1, y: 0 }}
                 style={styles.bottomGradient}
               >
-                <Text style={styles.bottomPrimaryText}>CONNECT PLATFORM</Text>
+                <Text style={styles.bottomPrimaryText}>
+                  CONNECT PLATFORM ({connectedCount} ACTIVE)
+                </Text>
               </LinearGradient>
             </Pressable>
 
@@ -795,6 +908,176 @@ export const AudienceBreakdownScreen: React.FC<AudienceBreakdownScreenProps> = (
           }}
         />
 
+        {/* ========================================================================= */}
+        {/* COMPREHENSIVE CONNECT PLATFORMS & SYNC HUB POPUP MODAL                     */}
+        {/* ========================================================================= */}
+        <Modal
+          visible={showConnectPlatformModal}
+          transparent={true}
+          animationType="fade"
+          onRequestClose={() => setShowConnectPlatformModal(false)}
+        >
+          <View style={styles.modalOverlay}>
+            <View style={styles.modalCardLarge}>
+              {/* Modal Top Header */}
+              <View style={styles.modalHeaderRow}>
+                <View style={{ flex: 1 }}>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                    <Text style={styles.modalTitle}>Connected Platforms</Text>
+                    <View style={styles.activePlatformsCountBadge}>
+                      <Text style={styles.activePlatformsCountText}>
+                        {connectedCount} Connected
+                      </Text>
+                    </View>
+                  </View>
+                  <Text style={styles.modalSubtitle}>
+                    Manage connected channels or add more platforms to sync your audience.
+                  </Text>
+                </View>
+                <Pressable
+                  onPress={() => setShowConnectPlatformModal(false)}
+                  style={styles.modalCloseCircle}
+                  hitSlop={8}
+                >
+                  <Text style={styles.modalCloseCross}>✕</Text>
+                </Pressable>
+              </View>
+
+              <ScrollView
+                style={{ maxHeight: Dimensions.get('window').height * 0.58 }}
+                showsVerticalScrollIndicator={false}
+              >
+                {/* 1. ACTIVE CONNECTED ACCOUNTS */}
+                <Text style={styles.modalSectionTitle}>ACTIVE CONNECTED PLATFORMS</Text>
+
+                <View style={{ gap: 8, marginBottom: 16 }}>
+                  {platformsList
+                    .filter((p) => p.connected)
+                    .map((plat) => (
+                      <View key={plat.id} style={styles.connectedPlatformRow}>
+                        <View style={[styles.platformIconCircle, { backgroundColor: plat.bgTint }]}>
+                          <Text style={{ fontSize: 18 }}>{plat.iconEmoji}</Text>
+                        </View>
+                        <View style={{ flex: 1 }}>
+                          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                            <Text style={styles.platformNameText}>{plat.name}</Text>
+                            <View style={styles.autoSyncBadge}>
+                              <Text style={styles.autoSyncText}>🟢 Auto-Sync</Text>
+                            </View>
+                          </View>
+                          <Text style={styles.platformSubText}>
+                            {plat.handle} • ⚡ {plat.followers} Followers
+                          </Text>
+                        </View>
+                        <Pressable
+                          style={styles.disconnectBtn}
+                          onPress={() => handleDisconnectSinglePlatform(plat.id)}
+                          hitSlop={6}
+                        >
+                          <Text style={styles.disconnectBtnText}>Manage</Text>
+                        </Pressable>
+                      </View>
+                    ))}
+                </View>
+
+                {/* 2. AVAILABLE PLATFORMS TO ADD MORE */}
+                <Text style={styles.modalSectionTitle}>
+                  AVAILABLE PLATFORMS TO ADD ({availableToAdd.length})
+                </Text>
+                <Text style={styles.modalSubDescription}>
+                  Connect more platforms to aggregate your cross-channel creator reach:
+                </Text>
+
+                <View style={{ gap: 8, marginBottom: 16 }}>
+                  {availableToAdd.map((plat) => (
+                    <View key={plat.id} style={styles.availablePlatformRow}>
+                      <View style={[styles.platformIconCircle, { backgroundColor: plat.bgTint }]}>
+                        <Text style={{ fontSize: 18 }}>{plat.iconEmoji}</Text>
+                      </View>
+                      <View style={{ flex: 1 }}>
+                        <Text style={styles.platformNameText}>{plat.name}</Text>
+                        <Text style={styles.platformSubText}>
+                          Sync video metrics &amp; audience velocity
+                        </Text>
+                      </View>
+                      <Pressable
+                        style={styles.addPlatformActionBtn}
+                        onPress={() => handleConnectSinglePlatform(plat.id)}
+                      >
+                        <Text style={styles.addPlatformActionBtnText}>+ Connect</Text>
+                      </Pressable>
+                    </View>
+                  ))}
+                </View>
+
+                {/* 3. CUSTOM ACCOUNT LINKER BOX */}
+                <View style={styles.customAddAccountBox}>
+                  <Text style={styles.customAddTitle}>LINK CUSTOM ACCOUNT HANDLE</Text>
+                  <Text style={styles.customAddSub}>
+                    Select channel and enter your creator username:
+                  </Text>
+
+                  {/* Channel Chips */}
+                  <ScrollView
+                    horizontal
+                    showsHorizontalScrollIndicator={false}
+                    contentContainerStyle={{ gap: 6, marginVertical: 8 }}
+                  >
+                    {platformsList.map((p) => {
+                      const isChosen = selectedPlatformToAdd === p.id;
+                      return (
+                        <Pressable
+                          key={p.id}
+                          style={[
+                            styles.platformSelectChip,
+                            isChosen && styles.platformSelectChipActive,
+                          ]}
+                          onPress={() => setSelectedPlatformToAdd(p.id)}
+                        >
+                          <Text
+                            style={[
+                              styles.platformSelectChipText,
+                              isChosen && styles.platformSelectChipTextActive,
+                            ]}
+                          >
+                            {p.iconEmoji} {p.name.split(' ')[0]}
+                          </Text>
+                        </Pressable>
+                      );
+                    })}
+                  </ScrollView>
+
+                  {/* Input and Add Button */}
+                  <View style={styles.customInputRow}>
+                    <TextInput
+                      value={customHandleInput}
+                      onChangeText={setCustomHandleInput}
+                      placeholder="@your_username"
+                      placeholderTextColor="#94A3B8"
+                      autoCapitalize="none"
+                      style={styles.customTextInput}
+                    />
+                    <Pressable
+                      style={styles.linkAccountConfirmBtn}
+                      onPress={handleAddCustomPlatform}
+                    >
+                      <Text style={styles.linkAccountConfirmBtnText}>Link Account ➔</Text>
+                    </Pressable>
+                  </View>
+                </View>
+              </ScrollView>
+
+              {/* Done Button */}
+              <Pressable
+                style={styles.modalDoneBtn}
+                onPress={() => setShowConnectPlatformModal(false)}
+              >
+                <Text style={styles.modalDoneBtnText}>Save &amp; Close ✓</Text>
+              </Pressable>
+            </View>
+          </View>
+        </Modal>
+
         {/* MODAL: JARVIS CALCULATION EXPLANATION */}
         <Modal
           visible={showJarvisExplanationModal}
@@ -844,86 +1127,6 @@ export const AudienceBreakdownScreen: React.FC<AudienceBreakdownScreenProps> = (
                 onPress={() => setShowJarvisExplanationModal(false)}
               >
                 <Text style={styles.modalDoneBtnText}>Got it, thanks! 🚀</Text>
-              </Pressable>
-            </View>
-          </View>
-        </Modal>
-
-        {/* MODAL: CONNECT PLATFORM */}
-        <Modal
-          visible={showConnectPlatformModal}
-          transparent={true}
-          animationType="fade"
-          onRequestClose={() => setShowConnectPlatformModal(false)}
-        >
-          <View style={styles.modalOverlay}>
-            <View style={styles.modalCardLarge}>
-              <View style={styles.modalHeaderRow}>
-                <View>
-                  <Text style={styles.modalTitle}>Connect Platforms</Text>
-                  <Text style={styles.modalSubtitle}>Sync follower velocity and viral reach</Text>
-                </View>
-                <Pressable
-                  onPress={() => setShowConnectPlatformModal(false)}
-                  style={styles.modalCloseCircle}
-                  hitSlop={8}
-                >
-                  <Text style={styles.modalCloseCross}>✕</Text>
-                </Pressable>
-              </View>
-
-              <View style={{ gap: 10, marginVertical: 14 }}>
-                <View style={styles.connectPlatformRow}>
-                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
-                    <Text style={{ fontSize: 20 }}>🎬</Text>
-                    <View>
-                      <Text style={styles.platformNameText}>TikTok</Text>
-                      <Text style={styles.platformSubText}>@pablo.creates • 12.4K</Text>
-                    </View>
-                  </View>
-                  <View style={styles.connectedBadgePill}>
-                    <Text style={styles.connectedBadgePillText}>CONNECTED</Text>
-                  </View>
-                </View>
-
-                <View style={styles.connectPlatformRow}>
-                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
-                    <Text style={{ fontSize: 20 }}>📷</Text>
-                    <View>
-                      <Text style={styles.platformNameText}>Instagram Reels</Text>
-                      <Text style={styles.platformSubText}>@pablocreates • 7.8K</Text>
-                    </View>
-                  </View>
-                  <View style={styles.connectedBadgePill}>
-                    <Text style={styles.connectedBadgePillText}>CONNECTED</Text>
-                  </View>
-                </View>
-
-                <View style={styles.connectPlatformRow}>
-                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
-                    <Text style={{ fontSize: 20 }}>📺</Text>
-                    <View>
-                      <Text style={styles.platformNameText}>YouTube Shorts</Text>
-                      <Text style={styles.platformSubText}>Pablo Creates</Text>
-                    </View>
-                  </View>
-                  <Pressable
-                    style={styles.connectActionPill}
-                    onPress={() => {
-                      handleConnectYoutube();
-                      setShowConnectPlatformModal(false);
-                    }}
-                  >
-                    <Text style={styles.connectActionPillText}>Connect ➔</Text>
-                  </Pressable>
-                </View>
-              </View>
-
-              <Pressable
-                style={styles.modalDoneBtn}
-                onPress={() => setShowConnectPlatformModal(false)}
-              >
-                <Text style={styles.modalDoneBtnText}>Done</Text>
               </Pressable>
             </View>
           </View>
@@ -1136,7 +1339,7 @@ const styles = StyleSheet.create({
     marginBottom: 18,
   },
 
-  // Card 1: Total Audience Card
+  // Card 1: Total Audience Card (Clean without Unlock Pro)
   audienceCard: {
     backgroundColor: '#FFFFFF',
     borderRadius: 20,
@@ -1219,9 +1422,14 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   purpleActionBtn: {
-    height: 44,
-    borderRadius: 12,
+    height: 46,
+    borderRadius: 14,
     overflow: 'hidden',
+    shadowColor: '#582CDB',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.2,
+    shadowRadius: 6,
+    elevation: 3,
   },
   purpleActionGradient: {
     flex: 1,
@@ -1229,22 +1437,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   purpleActionBtnText: {
-    fontSize: 12,
+    fontSize: 12.5,
     fontWeight: '900',
     color: '#FFFFFF',
-    letterSpacing: 0.5,
-  },
-  unlockProSoftBtn: {
-    height: 44,
-    borderRadius: 12,
-    backgroundColor: '#EDE9FE',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  unlockProSoftBtnText: {
-    fontSize: 12,
-    fontWeight: '900',
-    color: '#582CDB',
     letterSpacing: 0.5,
   },
 
@@ -1785,27 +1980,49 @@ const styles = StyleSheet.create({
   // Modals
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(23, 20, 32, 0.7)',
+    backgroundColor: 'rgba(23, 20, 32, 0.72)',
     justifyContent: 'center',
     alignItems: 'center',
-    paddingHorizontal: 20,
+    paddingHorizontal: 16,
+    paddingVertical: Platform.OS === 'ios' ? 40 : 20,
   },
   modalCardLarge: {
     width: '100%',
-    maxWidth: 400,
+    maxWidth: 420,
+    maxHeight: '92%',
     backgroundColor: '#FFFFFF',
-    borderRadius: 24,
+    borderRadius: 28,
+    borderWidth: 1,
+    borderColor: '#EFEBF8',
     padding: 20,
+    shadowColor: '#582CDB',
+    shadowOffset: { width: 0, height: 12 },
+    shadowOpacity: 0.25,
+    shadowRadius: 28,
+    elevation: 10,
   },
   modalHeaderRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'flex-start',
+    marginBottom: 12,
   },
   modalTitle: {
-    fontSize: 17,
+    fontSize: 18,
     fontWeight: '900',
     color: '#171420',
+    letterSpacing: -0.3,
+  },
+  activePlatformsCountBadge: {
+    backgroundColor: '#EDE9FE',
+    paddingVertical: 2,
+    paddingHorizontal: 7,
+    borderRadius: 6,
+  },
+  activePlatformsCountText: {
+    fontSize: 9.5,
+    fontWeight: '900',
+    color: '#582CDB',
   },
   modalSubtitle: {
     fontSize: 12,
@@ -1813,9 +2030,9 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
   modalCloseCircle: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
+    width: 30,
+    height: 30,
+    borderRadius: 15,
     backgroundColor: '#F1F5F9',
     justifyContent: 'center',
     alignItems: 'center',
@@ -1825,6 +2042,161 @@ const styles = StyleSheet.create({
     fontWeight: '800',
     color: '#64748B',
   },
+  modalSectionTitle: {
+    fontSize: 10.5,
+    fontWeight: '900',
+    color: '#64748B',
+    letterSpacing: 0.6,
+    marginBottom: 8,
+    marginTop: 6,
+  },
+  modalSubDescription: {
+    fontSize: 11.5,
+    color: '#64748B',
+    marginBottom: 8,
+  },
+  connectedPlatformRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    backgroundColor: '#FAF8F5',
+    borderRadius: 16,
+    padding: 12,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+  },
+  availablePlatformRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 16,
+    padding: 12,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+  },
+  platformIconCircle: {
+    width: 38,
+    height: 38,
+    borderRadius: 12,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  platformNameText: {
+    fontSize: 13,
+    fontWeight: '800',
+    color: '#171420',
+  },
+  autoSyncBadge: {
+    backgroundColor: '#ECFDF5',
+    paddingVertical: 1,
+    paddingHorizontal: 5,
+    borderRadius: 4,
+  },
+  autoSyncText: {
+    fontSize: 8.5,
+    fontWeight: '900',
+    color: '#059669',
+  },
+  platformSubText: {
+    fontSize: 11,
+    color: '#64748B',
+    marginTop: 1,
+  },
+  disconnectBtn: {
+    paddingVertical: 5,
+    paddingHorizontal: 10,
+    borderRadius: 8,
+    backgroundColor: '#F1F5F9',
+  },
+  disconnectBtnText: {
+    fontSize: 10.5,
+    fontWeight: '800',
+    color: '#64748B',
+  },
+  addPlatformActionBtn: {
+    backgroundColor: '#EDE9FE',
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    borderRadius: 9,
+  },
+  addPlatformActionBtnText: {
+    fontSize: 11,
+    fontWeight: '900',
+    color: '#582CDB',
+  },
+
+  // Custom Account Linker
+  customAddAccountBox: {
+    backgroundColor: '#F8FAFC',
+    borderRadius: 18,
+    padding: 14,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    marginBottom: 10,
+  },
+  customAddTitle: {
+    fontSize: 10,
+    fontWeight: '900',
+    color: '#582CDB',
+    letterSpacing: 0.6,
+  },
+  customAddSub: {
+    fontSize: 11,
+    color: '#64748B',
+    marginTop: 2,
+  },
+  platformSelectChip: {
+    paddingVertical: 4,
+    paddingHorizontal: 10,
+    borderRadius: 8,
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+  },
+  platformSelectChipActive: {
+    backgroundColor: '#EDE9FE',
+    borderColor: '#582CDB',
+  },
+  platformSelectChipText: {
+    fontSize: 10.5,
+    fontWeight: '700',
+    color: '#475569',
+  },
+  platformSelectChipTextActive: {
+    color: '#582CDB',
+    fontWeight: '900',
+  },
+  customInputRow: {
+    flexDirection: 'row',
+    gap: 8,
+    marginTop: 6,
+  },
+  customTextInput: {
+    flex: 1,
+    height: 40,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: '#CBD5E1',
+    paddingHorizontal: 10,
+    fontSize: 12.5,
+    color: '#171420',
+    fontWeight: '600',
+  },
+  linkAccountConfirmBtn: {
+    backgroundColor: '#582CDB',
+    borderRadius: 10,
+    paddingHorizontal: 12,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  linkAccountConfirmBtnText: {
+    fontSize: 11,
+    fontWeight: '900',
+    color: '#FFFFFF',
+  },
+
   modalCalcCard: {
     backgroundColor: '#F8FAFC',
     borderRadius: 12,
@@ -1845,57 +2217,17 @@ const styles = StyleSheet.create({
     lineHeight: 17,
   },
   modalDoneBtn: {
-    height: 44,
-    borderRadius: 12,
+    height: 46,
+    borderRadius: 14,
     backgroundColor: '#582CDB',
     justifyContent: 'center',
     alignItems: 'center',
     marginTop: 10,
   },
   modalDoneBtnText: {
-    fontSize: 13,
+    fontSize: 13.5,
     fontWeight: '900',
     color: '#FFFFFF',
-  },
-  connectPlatformRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    backgroundColor: '#F8FAFC',
-    borderRadius: 14,
-    padding: 12,
-    borderWidth: 1,
-    borderColor: '#E2E8F0',
-  },
-  platformNameText: {
-    fontSize: 13,
-    fontWeight: '800',
-    color: '#171420',
-  },
-  platformSubText: {
-    fontSize: 11,
-    color: '#64748B',
-  },
-  connectedBadgePill: {
-    backgroundColor: '#DCFCE7',
-    paddingVertical: 3,
-    paddingHorizontal: 8,
-    borderRadius: 6,
-  },
-  connectedBadgePillText: {
-    fontSize: 9,
-    fontWeight: '900',
-    color: '#15803D',
-  },
-  connectActionPill: {
-    backgroundColor: '#EDE9FE',
-    paddingVertical: 4,
-    paddingHorizontal: 10,
-    borderRadius: 8,
-  },
-  connectActionPillText: {
-    fontSize: 11,
-    fontWeight: '800',
-    color: '#582CDB',
+    letterSpacing: 0.3,
   },
 });
