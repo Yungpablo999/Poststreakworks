@@ -571,9 +571,16 @@ export const IdeaDetailScreen: React.FC<IdeaDetailScreenProps> = ({
               onPress={handleGenerateCaption}
               disabled={isGeneratingCaption}
             >
-              <Text style={styles.generateCaptionBtnText}>
-                {isGeneratingCaption ? '✨ Refining Caption...' : '✨ Generate Caption'}
-              </Text>
+              <LinearGradient
+                colors={['#7C3AED', '#582CDB']}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 0 }}
+                style={styles.generateCaptionGradient}
+              >
+                <Text style={styles.generateCaptionBtnText}>
+                  {isGeneratingCaption ? '✨ Refining Caption...' : '✨ Generate Caption'}
+                </Text>
+              </LinearGradient>
             </Pressable>
           </View>
 
@@ -1549,42 +1556,52 @@ const styles = StyleSheet.create({
     marginBottom: 14,
   },
   captionHintPill: {
-    backgroundColor: '#F1F5F9',
-    paddingVertical: 3.5,
-    paddingHorizontal: 8,
-    borderRadius: 6,
+    backgroundColor: '#F5F3FF',
+    paddingVertical: 4.5,
+    paddingHorizontal: 10,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#EDE9FE',
   },
   captionHintPillText: {
     fontSize: 11,
     fontWeight: '700',
-    color: '#475569',
+    color: '#6D28D9',
   },
   generatedCaptionOutputBox: {
     backgroundColor: '#FAF5FF',
-    borderRadius: 12,
+    borderRadius: 14,
     borderWidth: 1,
     borderColor: '#E9D5FF',
-    padding: 12,
-    marginBottom: 12,
+    padding: 14,
+    marginBottom: 14,
   },
   generatedCaptionOutputText: {
-    fontSize: 12,
+    fontSize: 12.5,
     color: '#4C1D95',
-    lineHeight: 18,
+    lineHeight: 19,
   },
   generateCaptionBtn: {
-    height: 42,
-    borderRadius: 12,
-    backgroundColor: '#F1F5F9',
-    borderWidth: 1,
-    borderColor: '#E2E8F0',
+    height: 44,
+    borderRadius: 14,
+    overflow: 'hidden',
+    shadowColor: '#582CDB',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.25,
+    shadowRadius: 8,
+    elevation: 3,
+  },
+  generateCaptionGradient: {
+    flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    paddingHorizontal: 16,
   },
   generateCaptionBtnText: {
-    fontSize: 12.5,
+    fontSize: 13,
     fontWeight: '800',
-    color: '#171420',
+    color: '#FFFFFF',
+    letterSpacing: 0.3,
   },
 
   // 6. Post Structure (2x2 Grid)
