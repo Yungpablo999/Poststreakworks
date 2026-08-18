@@ -1,27 +1,38 @@
 -- ============================================================================
 -- Migration: Duels
--- STUB — structural placeholder only. No implementation SQL yet.
 -- Governed by: supabase/DATA_MODEL.md
 -- ============================================================================
---
--- ADDED DURING STAGE 5 (WORKFLOWS) — not one of the four Creator Network
--- pillars confirmed in Stage 1 (Matching, Collaboration Workspace, Squads,
--- Passport). Founders confirmed separately it's in scope. Same pattern as
--- the missions.sql addition in Stage 3 — flagging plainly rather than
--- rewriting Stage 1's history.
---
--- Intended scope:
---   - `duels`: paired user_a_id/user_b_id, start/end date, status (active |
---     completed | cancelled), reward definition. No "failed" status —
---     RESOLVED Stage 8: a missed shared-completion day skips only that
---     day's reward, it doesn't end the duel. A duel only ends via window
---     expiry (completed) or explicit cancellation.
---
--- Deliberately NO separate progress-tracking table: whether each partner
--- had a qualifying action on a given day is read from their own
--- streak_events rows (streak_jarvis_gamification.sql) — a duel is a lens
--- over existing streak data, not a parallel tracking system.
---
--- Relationships:
---   - duels.user_a_id / duels.user_b_id -> users.id
--- ============================================================================
+
+create type duel_status as enum ('active', 'completed', 'cancelled');
+
+-- Duels: paired two-person streak accountability
+-- No "failed" status — missed shared-completion day skips that day's reward only.
+-- No separate progress table: reads streak_events directly.
+create table duels (
+  id            uuid primary key default gen_random_uuid(),
+  user_a_id     uuid not null references users(id) on delete cascade,
+  user_b_id     uuid not null references users(id) on delete cascade,
+  start_date    date not null,
+  end_date      date not null,
+  status        duel_status not null default 'active',
+  reward_type   text default 'credits',
+  reward_amount integer default 10,
+  created_at    timestamptz not null default now()
+);
+
+-- Indexes
+create index idx_duels_user_a on duels(user_a_id);
+create index idx_duels_user_b on duels(user_b_id);
+create index idx_duels_status on duels(status);
+create index idx_duels_dates on duels(start_date, end_date);
+
+-- RLS
+alter table duels enable row level security;
+
+-- Both participants can read their duels
+create policy "duels_select_own" on duels
+  for select using (user_a_id = auth.uid() or user_b_id = auth.uid());
+create policy "duels_insert_own" on duels
+  for insert with check (user_a_id = auth.uid() or user_b_id = auth.uid());
+create policy "duels_update_own" on duels
+  for update using (user_a_id = auth.uid() or user_b_id = auth.uid());

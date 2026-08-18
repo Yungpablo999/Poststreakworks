@@ -1,16 +1,27 @@
 -- ============================================================================
 -- Migration: Analytics Events
--- STUB — structural placeholder only. No implementation SQL yet.
 -- Governed by: supabase/DATA_MODEL.md
 -- ============================================================================
---
--- Intended scope:
---   - `analytics_events`: generic append-only event log — user_id,
---     event_name, properties (jsonb), created_at. Event taxonomy drafted in
---     Post_Streak_App 2.md §33 (acquisition, activation, mission, content,
---     discovery, collaboration, safety, retention).
---
--- Deliberately one generic table rather than one table per event type —
--- keeps this migration stable as the event taxonomy grows across every
--- other domain in this migration set.
--- ============================================================================
+
+-- Generic append-only event log
+create table analytics_events (
+  id          uuid primary key default gen_random_uuid(),
+  user_id     uuid references users(id) on delete set null,
+  event_name  text not null,
+  properties  jsonb default '{}',
+  created_at  timestamptz not null default now()
+);
+
+-- Indexes
+create index idx_analytics_events_user_id on analytics_events(user_id);
+create index idx_analytics_events_event_name on analytics_events(event_name);
+create index idx_analytics_events_created_at on analytics_events(created_at);
+create index idx_analytics_events_user_event on analytics_events(user_id, event_name);
+
+-- RLS: owner-only read, service role can write
+alter table analytics_events enable row level security;
+
+create policy "analytics_events_select_own" on analytics_events
+  for select using (user_id = auth.uid());
+
+-- No insert policy for clients — analytics writes go through service role only

@@ -1,12 +1,29 @@
-// ============================================================================
-// Shared client hooks
-// STUB — structural placeholder only. No implementation yet.
-// Governed by: apps/web/FRONTEND_ARCHITECTURE.md
-// ============================================================================
-//
-// Intended contents: one hook module per domain, wrapping packages/api's
-// tRPC procedures in React Query — useStreakState, useDiscoveryFeed,
-// useMissionToday, useVoiceWallet, etc. Imported by both apps/web and
-// apps/mobile; this is the "logic shared" half of the UI-sharing decision
-// (Stage 3) — the components that call these hooks are NOT shared.
-// ============================================================================
+export function useStreakState() {
+  // TODO: wrap tRPC streak-gamification.getState
+  return { data: null, isLoading: true };
+}
+
+export function useMissionToday() {
+  // TODO: wrap tRPC missions.getToday
+  return { data: null, isLoading: true };
+}
+
+export function useDiscoveryFeed() {
+  // TODO: wrap tRPC creator-network discovery
+  return { data: null, isLoading: true };
+}
+
+export function useVoiceWallet() {
+  // TODO: wrap tRPC voice-studio.getWallet
+  return { data: null, isLoading: true };
+}
+
+export function useSubscription() {
+  // TODO: wrap tRPC billing.getSubscription
+  return { data: null, isLoading: true };
+}
+
+export function useMyGrowth() {
+  // TODO: wrap tRPC analytics.getMyGrowth
+  return { data: null, isLoading: true };
+}
