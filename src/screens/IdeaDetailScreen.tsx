@@ -614,55 +614,74 @@ export const IdeaDetailScreen: React.FC<IdeaDetailScreenProps> = ({
 
           {/* 7. JARVIS INSIGHT CARD */}
           <LinearGradient
-            colors={['#7C3AED', '#582CDB']}
+            colors={['#FFFFFF', '#F8F5FE']}
             start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
+            end={{ x: 0, y: 1 }}
             style={styles.jarvisCard}
           >
             <View style={styles.jarvisHeaderRow}>
-              <View style={styles.jarvisFlameIconBox}>
-                <Image
-                  source={require('../../assets/images/jarvis-core-flame.png')}
-                  style={styles.jarvisFlameImage}
-                  resizeMode="contain"
-                />
+              <View style={styles.jarvisHeaderLeft}>
+                <Animated.View
+                  style={[
+                    styles.jarvisFlameIconBox,
+                    { transform: [{ translateY: flameFloatY }] },
+                  ]}
+                >
+                  <Image
+                    source={require('../../assets/images/jarvis-core-flame.png')}
+                    style={styles.jarvisFlameImage}
+                    resizeMode="contain"
+                  />
+                </Animated.View>
+                <View style={styles.jarvisInsightBadge}>
+                  <Text style={styles.jarvisInsightTag}>⚡ JARVIS INSIGHT</Text>
+                </View>
               </View>
-              <Text style={styles.jarvisInsightTag}>JARVIS INSIGHT</Text>
+
+              <View style={styles.jarvisScorePill}>
+                <Text style={styles.jarvisScoreText}>96 Retention</Text>
+              </View>
             </View>
 
             <Text style={styles.jarvisBodyText}>
-              This idea works because it is personal, useful, and easy for other creators to save. Keep the lesson specific.
+              This idea works because it is personal, actionable, and easy for other creators to save. Keep the takeaway specific and under 30 seconds.
             </Text>
 
             {/* Quick Filter Chips */}
             <View style={styles.jarvisChipsRow}>
-              <Pressable
-                onPress={() => setSelectedInsightFilter('shorter')}
-                style={[
-                  styles.jarvisChip,
-                  selectedInsightFilter === 'shorter' && styles.jarvisChipActive,
-                ]}
-              >
-                <Text style={styles.jarvisChipText}>Shorter</Text>
-              </Pressable>
-              <Pressable
-                onPress={() => setSelectedInsightFilter('stronger')}
-                style={[
-                  styles.jarvisChip,
-                  selectedInsightFilter === 'stronger' && styles.jarvisChipActive,
-                ]}
-              >
-                <Text style={styles.jarvisChipText}>Stronger Hook</Text>
-              </Pressable>
-              <Pressable
-                onPress={() => setSelectedInsightFilter('script')}
-                style={[
-                  styles.jarvisChip,
-                  selectedInsightFilter === 'script' && styles.jarvisChipActive,
-                ]}
-              >
-                <Text style={styles.jarvisChipText}>Script</Text>
-              </Pressable>
+              {(
+                [
+                  { id: 'shorter', label: '⚡ Shorter' },
+                  { id: 'stronger', label: '🔥 Stronger Hook' },
+                  { id: 'script', label: '📝 Script' },
+                ] as const
+              ).map((chip) => {
+                const isActive = selectedInsightFilter === chip.id;
+                return (
+                  <Pressable
+                    key={chip.id}
+                    onPress={() => {
+                      if (Platform.OS !== 'web') {
+                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                      }
+                      setSelectedInsightFilter(chip.id);
+                    }}
+                    style={[
+                      styles.jarvisChip,
+                      isActive && styles.jarvisChipActive,
+                    ]}
+                  >
+                    <Text
+                      style={[
+                        styles.jarvisChipText,
+                        isActive && styles.jarvisChipTextActive,
+                      ]}
+                    >
+                      {chip.label}
+                    </Text>
+                  </Pressable>
+                );
+              })}
             </View>
 
             <Pressable
@@ -674,7 +693,14 @@ export const IdeaDetailScreen: React.FC<IdeaDetailScreenProps> = ({
                 handleGenerateMoreHooks();
               }}
             >
-              <Text style={styles.improveIdeaBtnText}>🪄 Improve Idea</Text>
+              <LinearGradient
+                colors={['#7C3AED', '#582CDB']}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 0 }}
+                style={styles.improveIdeaGradient}
+              >
+                <Text style={styles.improveIdeaBtnText}>🪄 Improve Idea with AI</Text>
+              </LinearGradient>
             </Pressable>
           </LinearGradient>
 
@@ -1639,26 +1665,35 @@ const styles = StyleSheet.create({
 
   // 7. Jarvis Insight Card
   jarvisCard: {
-    borderRadius: 24,
+    borderRadius: 22,
+    borderWidth: 1,
+    borderColor: '#E8E1F7',
     padding: 18,
     marginBottom: 18,
     shadowColor: '#582CDB',
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.25,
-    shadowRadius: 20,
-    elevation: 6,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.08,
+    shadowRadius: 14,
+    elevation: 3,
   },
   jarvisHeaderRow: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 12,
+  },
+  jarvisHeaderLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
     gap: 8,
-    marginBottom: 10,
   },
   jarvisFlameIconBox: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: '#EDE9FE',
+    borderWidth: 1,
+    borderColor: '#DDD6FE',
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -1666,15 +1701,34 @@ const styles = StyleSheet.create({
     width: 18,
     height: 18,
   },
+  jarvisInsightBadge: {
+    backgroundColor: '#EDE9FE',
+    paddingVertical: 4,
+    paddingHorizontal: 10,
+    borderRadius: 100,
+  },
   jarvisInsightTag: {
     fontSize: 10.5,
     fontWeight: '900',
-    color: '#FFFFFF',
-    letterSpacing: 0.6,
+    color: '#6D28D9',
+    letterSpacing: 0.5,
+  },
+  jarvisScorePill: {
+    backgroundColor: '#FEF3C7',
+    paddingVertical: 3.5,
+    paddingHorizontal: 8,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#FDE68A',
+  },
+  jarvisScoreText: {
+    fontSize: 10.5,
+    fontWeight: '800',
+    color: '#B45309',
   },
   jarvisBodyText: {
     fontSize: 13,
-    color: '#F3E8FF',
+    color: '#334155',
     lineHeight: 19,
     marginBottom: 14,
   },
@@ -1684,32 +1738,46 @@ const styles = StyleSheet.create({
     marginBottom: 14,
   },
   jarvisChip: {
-    backgroundColor: 'rgba(255, 255, 255, 0.15)',
-    paddingVertical: 5,
+    backgroundColor: '#F8FAFC',
+    paddingVertical: 6,
     paddingHorizontal: 12,
     borderRadius: 100,
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.25)',
+    borderColor: '#E2E8F0',
   },
   jarvisChipActive: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: '#EDE9FE',
+    borderColor: '#7C3AED',
   },
   jarvisChipText: {
     fontSize: 11.5,
+    fontWeight: '700',
+    color: '#475569',
+  },
+  jarvisChipTextActive: {
+    color: '#6D28D9',
     fontWeight: '800',
-    color: '#FFFFFF',
   },
   improveIdeaBtn: {
-    height: 42,
-    borderRadius: 12,
-    backgroundColor: '#FFFFFF',
+    height: 44,
+    borderRadius: 14,
+    overflow: 'hidden',
+    shadowColor: '#582CDB',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.22,
+    shadowRadius: 8,
+    elevation: 3,
+  },
+  improveIdeaGradient: {
+    flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
   },
   improveIdeaBtnText: {
     fontSize: 13,
     fontWeight: '800',
-    color: '#582CDB',
+    color: '#FFFFFF',
+    letterSpacing: 0.2,
   },
 
   // 8. Streak Impact Card
