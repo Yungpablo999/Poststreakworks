@@ -676,12 +676,8 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
             </Pressable>
           </View>
 
-          {/* Clean Horizontal Platforms Row (Only Active/Selected Platforms) */}
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={styles.platformsScrollContainer}
-          >
+          {/* Clean Evenly Distributed Platforms Row (Full Width Fitting) */}
+          <View style={styles.platformsRow}>
             {displayedPlatforms.map((plat) => {
               const isSelected = selectedPlatforms.includes(plat.id);
               return (
@@ -705,7 +701,7 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
                 </Pressable>
               );
             })}
-          </ScrollView>
+          </View>
 
           <Text style={styles.platformsDisclaimer}>
             Free users can prepare posts for selected platforms. Some auto-publishing options may require <Text style={{ color: '#D97706', fontWeight: '800' }}>Pro</Text> or platform approval.
@@ -1707,20 +1703,24 @@ const styles = StyleSheet.create({
   },
 
   // 2. Platforms
-  platformsScrollContainer: {
+  platformsRow: {
     flexDirection: 'row',
+    flexWrap: 'wrap',
     gap: 10,
-    paddingBottom: 8,
+    marginBottom: 8,
   },
   platformCard: {
-    width: 100,
+    flex: 1,
+    minWidth: 95,
+    minHeight: 116,
     backgroundColor: '#FFFFFF',
-    borderRadius: 16,
+    borderRadius: 18,
     borderWidth: 1.5,
     borderColor: '#E2E8F0',
     paddingVertical: 14,
     paddingHorizontal: 6,
     alignItems: 'center',
+    justifyContent: 'space-between',
     position: 'relative',
     shadowColor: '#582CDB',
     shadowOffset: { width: 0, height: 2 },
