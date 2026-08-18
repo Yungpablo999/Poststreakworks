@@ -24,6 +24,8 @@ interface PostPerformanceScreenProps {
   onBack: () => void;
   onNavigateTab?: (tab: TabType) => void;
   onOpenJarvisPro?: () => void;
+  onOpenMessages?: () => void;
+  onOpenSchedule?: () => void;
   onOpenAudienceBreakdown?: () => void;
   onOpenComposer?: (ideaTitle?: string) => void;
   onOpenScript?: (ideaTitle?: string) => void;
@@ -37,6 +39,8 @@ export const PostPerformanceScreen: React.FC<PostPerformanceScreenProps> = ({
   onBack,
   onNavigateTab,
   onOpenJarvisPro,
+  onOpenMessages,
+  onOpenSchedule,
   onOpenAudienceBreakdown,
   onOpenComposer,
   onOpenScript,
@@ -45,6 +49,7 @@ export const PostPerformanceScreen: React.FC<PostPerformanceScreenProps> = ({
   onSaveProfile,
   onLogout,
 }) => {
+  const [showNotificationModal, setShowNotificationModal] = useState(false);
   const [activeTab, setActiveTab] = useState<TabType>('growth');
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [showJarvisExplanationModal, setShowJarvisExplanationModal] = useState(false);
@@ -144,7 +149,7 @@ export const PostPerformanceScreen: React.FC<PostPerformanceScreenProps> = ({
           </View>
         )}
 
-        {/* 1. TOP HEADER BAR */}
+        {/* 1. TOP HEADER BAR (EXACT ICONS & BEHAVIOR AS ALL OTHER PAGES) */}
         <View style={styles.header}>
           <View style={styles.headerLeft}>
             <Pressable
@@ -157,16 +162,29 @@ export const PostPerformanceScreen: React.FC<PostPerformanceScreenProps> = ({
               }}
               hitSlop={8}
             >
-              <Text style={{ fontSize: 18, color: '#171420', fontWeight: '900' }}>←</Text>
+              <Svg width={20} height={20} viewBox="0 0 24 24" fill="none">
+                <Path
+                  d="M19 12H5M12 19l-7-7 7-7"
+                  stroke="#171420"
+                  strokeWidth="2.2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </Svg>
             </Pressable>
 
-            <View style={styles.headerLogoWrapper}>
+            <Animated.View
+              style={[
+                styles.headerLogoWrapper,
+                { transform: [{ translateY: flameFloatY }] },
+              ]}
+            >
               <Image
                 source={require('../../assets/images/jarvis-ghost-clean.png')}
                 style={styles.headerGhostLogo}
                 resizeMode="contain"
               />
-            </View>
+            </Animated.View>
           </View>
 
           <View style={styles.headerCenter}>
@@ -175,23 +193,71 @@ export const PostPerformanceScreen: React.FC<PostPerformanceScreenProps> = ({
           </View>
 
           <View style={styles.headerRight}>
+            {/* 1. Message Bubble Icon */}
             <Pressable
               style={({ pressed }) => [styles.headerIconBtn, pressed && styles.btnPressed]}
-              onPress={() => {
-                showToast('2 new post insights available from Jarvis');
-              }}
               hitSlop={8}
+              onPress={() => {
+                if (Platform.OS !== 'web') {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                }
+                if (onOpenMessages) {
+                  onOpenMessages();
+                } else if (onNavigateTab) {
+                  onNavigateTab('match');
+                }
+              }}
             >
-              <Text style={{ fontSize: 16 }}>🔔</Text>
+              <Svg width={19} height={19} viewBox="0 0 24 24" fill="none">
+                <Path
+                  d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"
+                  stroke="#171420"
+                  strokeWidth="2.2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </Svg>
+            </Pressable>
+
+            {/* 2. Notification Bell Icon */}
+            <Pressable
+              style={({ pressed }) => [styles.headerIconBtn, pressed && styles.btnPressed]}
+              hitSlop={8}
+              onPress={() => {
+                if (Platform.OS !== 'web') {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                }
+                triggerModalPop();
+                setShowNotificationModal(true);
+              }}
+            >
+              <Svg width={19} height={19} viewBox="0 0 24 24" fill="none">
+                <Path
+                  d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"
+                  stroke="#171420"
+                  strokeWidth="2.2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+                <Path
+                  d="M13.73 21a2 2 0 0 1-3.46 0"
+                  stroke="#171420"
+                  strokeWidth="2.2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </Svg>
               <View style={styles.notificationDot} />
             </Pressable>
 
+            {/* 3. User Profile Avatar */}
             <Pressable
               style={({ pressed }) => [styles.headerProfileBtn, pressed && styles.btnPressed]}
               onPress={() => {
                 if (Platform.OS !== 'web') {
                   Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                 }
+                triggerModalPop();
                 setShowProfileModal(true);
               }}
               hitSlop={8}
@@ -741,6 +807,49 @@ export const PostPerformanceScreen: React.FC<PostPerformanceScreenProps> = ({
 
         {/* FLOATING LIQUID GLASS TAB BAR */}
         <FloatingTabBar activeTab={activeTab} onTabPress={handleTabPress} />
+
+        
+        {/* NOTIFICATION MODAL */}
+        <Modal
+          visible={showNotificationModal}
+          transparent={true}
+          animationType="fade"
+          onRequestClose={() => setShowNotificationModal(false)}
+        >
+          <View style={styles.modalOverlay}>
+            <Animated.View style={[styles.modalCard, { transform: [{ scale: modalPopScale }] }]}>
+              <View style={styles.modalHeaderRow}>
+                <View>
+                  <Text style={styles.modalTitle}>Notifications</Text>
+                  <Text style={styles.modalSubtitle}>Recent updates &amp; creator milestones</Text>
+                </View>
+                <Pressable onPress={() => setShowNotificationModal(false)} style={styles.modalCloseCircle} hitSlop={8}>
+                  <Text style={styles.modalCloseCross}>✕</Text>
+                </Pressable>
+              </View>
+
+              <View style={styles.notifCard}>
+                <Text style={{ fontSize: 18 }}>🔥</Text>
+                <View style={{ flex: 1 }}>
+                  <Text style={styles.notifTitle}>Viral Post Milestone!</Text>
+                  <Text style={styles.notifBody}>Your TikTok post crossed 24.5K views with 71.6% retention.</Text>
+                </View>
+              </View>
+
+              <View style={[styles.notifCard, { marginTop: 8 }]}>
+                <Text style={{ fontSize: 18 }}>📈</Text>
+                <View style={{ flex: 1 }}>
+                  <Text style={styles.notifTitle}>+910 Followers Gained</Text>
+                  <Text style={styles.notifBody}>Single-post all-time high pace recorded by Jarvis.</Text>
+                </View>
+              </View>
+
+              <Pressable style={styles.modalFullBtn} onPress={() => setShowNotificationModal(false)}>
+                <Text style={styles.modalFullBtnText}>Close</Text>
+              </Pressable>
+            </Animated.View>
+          </View>
+        </Modal>
 
         {/* PROFILE MODAL */}
         <UserProfileModal
@@ -1872,6 +1981,45 @@ const styles = StyleSheet.create({
   },
   modalDoneBtnText: {
     fontSize: 13,
+    fontWeight: '900',
+    color: '#FFFFFF',
+  },
+
+  notifCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    backgroundColor: '#FAF8F5',
+    borderRadius: 14,
+    padding: 12,
+    borderWidth: 1,
+    borderColor: '#EFEBF8',
+  },
+  notifTitle: {
+    fontSize: 13,
+    fontWeight: '800',
+    color: '#171420',
+    marginBottom: 2,
+  },
+  notifBody: {
+    fontSize: 11.5,
+    color: '#64748B',
+  },
+  modalSubtitle: {
+    fontSize: 12,
+    color: '#64748B',
+    marginTop: 1,
+  },
+  modalFullBtn: {
+    height: 44,
+    borderRadius: 14,
+    backgroundColor: '#582CDB',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 14,
+  },
+  modalFullBtnText: {
+    fontSize: 13.5,
     fontWeight: '900',
     color: '#FFFFFF',
   },

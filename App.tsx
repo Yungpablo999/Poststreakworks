@@ -720,6 +720,8 @@ export default function App() {
           <PostPerformanceScreen
             onBack={() => navigateTo('growth')}
             onLogout={handleLogout}
+            onOpenMessages={() => navigateTo('messages')}
+            onOpenSchedule={() => navigateTo('schedule')}
             onOpenAudienceBreakdown={() => navigateTo('audience-breakdown')}
             onOpenJarvisPro={() => navigateTo('jarvis-pro')}
             onOpenComposer={(prefillTitle) => {
