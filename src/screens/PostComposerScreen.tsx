@@ -16,7 +16,7 @@ import {
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as Haptics from 'expo-haptics';
-import Svg, { Path, Circle, Rect } from 'react-native-svg';
+import Svg, { Path, Circle, Rect, Defs, Stop } from 'react-native-svg';
 import { FloatingTabBar, TabType } from '../components/FloatingTabBar';
 import { AnimatedCompletionModal } from '../components/AnimatedCompletionModal';
 
@@ -89,7 +89,7 @@ const ALL_AVAILABLE_PLATFORMS: PlatformOption[] = [
     shortName: 'TikTok',
     format: '9:16 Video / Reels',
     multiplier: '1.2x Reach',
-    bgColor: '#111827',
+    bgColor: '#000000',
     iconType: 'tiktok',
   },
   {
@@ -108,7 +108,7 @@ const ALL_AVAILABLE_PLATFORMS: PlatformOption[] = [
     shortName: 'YT',
     format: 'Shorts & Longform',
     multiplier: '1.1x Reach',
-    bgColor: '#EF4444',
+    bgColor: '#FF0000',
     iconType: 'youtube',
   },
   {
@@ -135,7 +135,7 @@ const ALL_AVAILABLE_PLATFORMS: PlatformOption[] = [
     shortName: 'Threads',
     format: 'Quotes & Insights',
     multiplier: '1.3x Reach',
-    bgColor: '#18181B',
+    bgColor: '#000000',
     iconType: 'threads',
   },
   {
@@ -153,7 +153,7 @@ const ALL_AVAILABLE_PLATFORMS: PlatformOption[] = [
     shortName: 'Snap',
     format: 'Spotlight & Stories',
     multiplier: '0.9x Reach',
-    bgColor: '#EAB308',
+    bgColor: '#FFFC00',
     iconType: 'snapchat',
   },
   {
@@ -167,70 +167,112 @@ const ALL_AVAILABLE_PLATFORMS: PlatformOption[] = [
   },
 ];
 
-// Helper to render authentic platform SVGs
-const PlatformIcon = ({ iconType, size = 20 }: { iconType: string; size?: number }) => {
+// Official Real Social Media SVG Logos
+const PlatformIcon = ({ iconType, size = 38 }: { iconType: string; size?: number }) => {
   if (iconType === 'tiktok') {
     return (
-      <Svg width={size} height={size} viewBox="0 0 24 24" fill="#FFFFFF">
-        <Path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.89 2.89 2.89 0 0 1-2.89-2.89 2.89 2.89 0 0 1 2.89-2.89c.28 0 .54.04.79.1v-3.5a6.37 6.37 0 0 0-.79-.05A6.34 6.34 0 0 0 3 15.67 6.34 6.34 0 0 0 9.34 22a6.34 6.34 0 0 0 6.34-6.33V9.05a8.16 8.16 0 0 0 4.91 1.64v-3.5a4.8 4.8 0 0 1-1-.5z" />
-      </Svg>
+      <View style={[styles.officialIconContainer, { width: size, height: size, backgroundColor: '#000000' }]}>
+        <Svg width={size * 0.58} height={size * 0.58} viewBox="0 0 24 24">
+          <Path
+            d="M17.5 4.5a4.5 4.5 0 0 1-3.5-4h-2.5v13.5a2.5 2.5 0 1 1-2.5-2.5c.3 0 .5.05.7.15V8.5a5.5 5.5 0 1 0 4.8 5.4V7.2a7.5 7.5 0 0 0 4.5 1.3V5.5c-.5 0-1-.3-1.5-1z"
+            fill="#25F4EE"
+            transform="translate(-0.7, -0.7)"
+          />
+          <Path
+            d="M17.5 4.5a4.5 4.5 0 0 1-3.5-4h-2.5v13.5a2.5 2.5 0 1 1-2.5-2.5c.3 0 .5.05.7.15V8.5a5.5 5.5 0 1 0 4.8 5.4V7.2a7.5 7.5 0 0 0 4.5 1.3V5.5c-.5 0-1-.3-1.5-1z"
+            fill="#FE2C55"
+            transform="translate(0.7, 0.7)"
+          />
+          <Path
+            d="M17.5 4.5a4.5 4.5 0 0 1-3.5-4h-2.5v13.5a2.5 2.5 0 1 1-2.5-2.5c.3 0 .5.05.7.15V8.5a5.5 5.5 0 1 0 4.8 5.4V7.2a7.5 7.5 0 0 0 4.5 1.3V5.5c-.5 0-1-.3-1.5-1z"
+            fill="#FFFFFF"
+          />
+        </Svg>
+      </View>
     );
   }
   if (iconType === 'instagram') {
     return (
-      <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
-        <Rect x="2" y="2" width="20" height="20" rx="5" stroke="#FFFFFF" strokeWidth="2.2" />
-        <Circle cx="12" cy="12" r="4" stroke="#FFFFFF" strokeWidth="2.2" />
-        <Circle cx="18" cy="6" r="1.2" fill="#FFFFFF" />
-      </Svg>
+      <View style={[styles.officialIconContainer, { width: size, height: size, overflow: 'hidden' }]}>
+        <LinearGradient
+          colors={['#833AB4', '#FD1D1D', '#FCAF45']}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={styles.gradientFillContainer}
+        >
+          <Svg width={size * 0.58} height={size * 0.58} viewBox="0 0 24 24" fill="none">
+            <Rect x="2" y="2" width="20" height="20" rx="5.5" stroke="#FFFFFF" strokeWidth="2.2" />
+            <Circle cx="12" cy="12" r="4.2" stroke="#FFFFFF" strokeWidth="2.2" />
+            <Circle cx="17.5" cy="6.5" r="1.3" fill="#FFFFFF" />
+          </Svg>
+        </LinearGradient>
+      </View>
     );
   }
   if (iconType === 'youtube') {
     return (
-      <Svg width={size} height={size} viewBox="0 0 24 24" fill="#FFFFFF">
-        <Path d="M21.58 7.19a2.5 2.5 0 0 0-1.76-1.77C18.26 5 12 5 12 5s-6.26 0-7.82.42A2.5 2.5 0 0 0 2.42 7.2 26.3 26.3 0 0 0 2 12a26.3 26.3 0 0 0 .42 4.81 2.5 2.5 0 0 0 1.76 1.77C5.74 19 12 19 12 19s6.26 0 7.82-.42a2.5 2.5 0 0 0 1.76-1.77A26.3 26.3 0 0 0 22 12a26.3 26.3 0 0 0-.42-4.81zM10 15V9l5.2 3-5.2 3z" />
-      </Svg>
+      <View style={[styles.officialIconContainer, { width: size, height: size, backgroundColor: '#FF0000' }]}>
+        <Svg width={size * 0.62} height={size * 0.44} viewBox="0 0 28 20">
+          <Path
+            d="M27.4 3.1a3.5 3.5 0 0 0-2.5-2.5C22.7 0 14 0 14 0S5.3 0 3.1.6A3.5 3.5 0 0 0 .6 3.1 36.6 36.6 0 0 0 0 10a36.6 36.6 0 0 0 .6 6.9 3.5 3.5 0 0 0 2.5 2.5C5.3 20 14 20 14 20s8.7 0 10.9-.6a3.5 3.5 0 0 0 2.5-2.5 36.6 36.6 0 0 0 .6-6.9 36.6 36.6 0 0 0-.6-6.9z"
+            fill="#FF0000"
+          />
+          <Path d="M11.2 14.3l7.3-4.3-7.3-4.3v8.6z" fill="#FFFFFF" />
+        </Svg>
+      </View>
     );
   }
   if (iconType === 'linkedin') {
     return (
-      <Svg width={size} height={size} viewBox="0 0 24 24" fill="#FFFFFF">
-        <Path d="M19 3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14m-.5 15.5v-5.3a3.26 3.26 0 0 0-3.26-3.26c-.85 0-1.84.52-2.28 1.3v-1.11h-2.79v8.37h2.79v-4.93c0-.77.62-1.4 1.39-1.4a1.4 1.4 0 0 1 1.4 1.4v4.93h2.75M6.46 8.76a1.64 1.64 0 1 0-.02-3.28 1.64 1.64 0 0 0 .02 3.28m1.4 9.74v-8.37H5.06v8.37h2.8z" />
-      </Svg>
+      <View style={[styles.officialIconContainer, { width: size, height: size, backgroundColor: '#0A66C2' }]}>
+        <Svg width={size * 0.55} height={size * 0.55} viewBox="0 0 24 24" fill="#FFFFFF">
+          <Path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z" />
+        </Svg>
+      </View>
     );
   }
   if (iconType === 'x') {
     return (
-      <Svg width={size} height={size} viewBox="0 0 24 24" fill="#FFFFFF">
-        <Path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
-      </Svg>
+      <View style={[styles.officialIconContainer, { width: size, height: size, backgroundColor: '#000000' }]}>
+        <Svg width={size * 0.52} height={size * 0.52} viewBox="0 0 24 24" fill="#FFFFFF">
+          <Path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+        </Svg>
+      </View>
     );
   }
   if (iconType === 'threads') {
     return (
-      <Svg width={size} height={size} viewBox="0 0 24 24" fill="#FFFFFF">
-        <Path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm4-9.5c0 2.21-1.79 4-4 4s-4-1.79-4-4 1.79-4 4-4c.73 0 1.41.2 2 .54V6.26c-.63-.17-1.3-.26-2-.26-3.31 0-6 2.69-6 6s2.69 6 6 6 6-2.69 6-6v-1.5h-2z" />
-      </Svg>
+      <View style={[styles.officialIconContainer, { width: size, height: size, backgroundColor: '#000000' }]}>
+        <Svg width={size * 0.52} height={size * 0.52} viewBox="0 0 24 24" fill="#FFFFFF">
+          <Path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10c2.83 0 5.39-1.18 7.21-3.08l-1.47-1.37C16.27 19.06 14.25 20 12 20c-4.41 0-8-3.59-8-8s3.59-8 8-8c4.32 0 7.85 3.43 7.99 7.72H18c-.28-3.23-2.95-5.72-6-5.72-3.31 0-6 2.69-6 6s2.69 6 6 6c1.86 0 3.52-.85 4.63-2.19.46-.55.77-1.2.92-1.91-.71-.24-1.52-.38-2.38-.38-2.6 0-4.71 1.79-4.71 4 0 2.21 2.11 4 4.71 4 3.01 0 5.48-2.22 5.8-5.18.02-.27.03-.54.03-.82 0-5.52-4.48-10-10-10z" />
+        </Svg>
+      </View>
     );
   }
   if (iconType === 'pinterest') {
     return (
-      <Svg width={size} height={size} viewBox="0 0 24 24" fill="#FFFFFF">
-        <Path d="M12 2a10 10 0 0 0-3.66 19.31c-.05-.82-.09-2.09.02-2.99l.86-3.67s-.22-.44-.22-1.09c0-1.02.59-1.78 1.33-1.78.63 0 .93.47.93 1.04 0 .63-.4 1.58-.61 2.45-.17.74.37 1.34 1.1 1.34 1.32 0 2.34-1.39 2.34-3.4 0-1.78-1.28-3.02-3.11-3.02-2.27 0-3.6 1.7-3.6 3.46 0 .69.26 1.42.59 1.82.07.08.08.15.06.23l-.22.92c-.04.14-.12.17-.28.1-1.04-.48-1.69-2-1.69-3.22 0-2.62 1.9-5.03 5.49-5.03 2.88 0 5.12 2.05 5.12 4.8 0 2.86-1.8 5.16-4.3 5.16-.84 0-1.63-.44-1.9-.95l-.52 1.98c-.19.73-.7 1.64-1.04 2.2A10 10 0 1 0 12 2z" />
-      </Svg>
+      <View style={[styles.officialIconContainer, { width: size, height: size, backgroundColor: '#E60023' }]}>
+        <Svg width={size * 0.55} height={size * 0.55} viewBox="0 0 24 24" fill="#FFFFFF">
+          <Path d="M12 2a10 10 0 0 0-3.66 19.31c-.05-.82-.09-2.09.02-2.99l.86-3.67s-.22-.44-.22-1.09c0-1.02.59-1.78 1.33-1.78.63 0 .93.47.93 1.04 0 .63-.4 1.58-.61 2.45-.17.74.37 1.34 1.1 1.34 1.32 0 2.34-1.39 2.34-3.4 0-1.78-1.28-3.02-3.11-3.02-2.27 0-3.6 1.7-3.6 3.46 0 .69.26 1.42.59 1.82.07.08.08.15.06.23l-.22.92c-.04.14-.12.17-.28.1-1.04-.48-1.69-2-1.69-3.22 0-2.62 1.9-5.03 5.49-5.03 2.88 0 5.12 2.05 5.12 4.8 0 2.86-1.8 5.16-4.3 5.16-.84 0-1.63-.44-1.9-.95l-.52 1.98c-.19.73-.7 1.64-1.04 2.2A10 10 0 1 0 12 2z" />
+        </Svg>
+      </View>
     );
   }
   if (iconType === 'snapchat') {
     return (
-      <Svg width={size} height={size} viewBox="0 0 24 24" fill="#111827">
-        <Path d="M12 2.5c-3.5 0-5.5 2.5-5.5 5.5 0 .5.1 1.2.2 1.5-.6.2-1.2.6-1.4 1.1-.3.6-.1 1.2.2 1.5.4.4 1 .6 1.6.6-.1.3-.2.7-.2 1 0 1.2.9 2 2.3 2.3-.6.6-1.4 1-2.4 1.2-.5.1-.8.5-.8.9 0 .6.7 1 1.6 1.2 1.4.3 2.9.2 4.4 1.2 1.5-1 3-0.9 4.4-1.2.9-.2 1.6-.6 1.6-1.2 0-.4-.3-.8-.8-.9-1-.2-1.8-.6-2.4-1.2 1.4-.3 2.3-1.1 2.3-2.3 0-.3-.1-.7-.2-1 .6 0 1.2-.2 1.6-.6.3-.3.5-.9.2-1.5-.2-.5-.8-.9-1.4-1.1.1-.3.2-1 .2-1.5 0-3-2-5.5-5.5-5.5z" />
-      </Svg>
+      <View style={[styles.officialIconContainer, { width: size, height: size, backgroundColor: '#FFFC00' }]}>
+        <Svg width={size * 0.55} height={size * 0.55} viewBox="0 0 24 24" fill="#000000">
+          <Path d="M12.001 2c-3.8 0-6.2 2.7-6.2 6.2 0 1.2.3 2.6 1 3.5-.1.4-.4.8-.8 1.1-.3.2-.6.4-.9.5-.3.1-.4.3-.4.5 0 .3.3.5.7.6.8.2 1.8.1 2.5-.2.6.8 1.4 1.2 2.2 1.4.3.5.7.8 1.3.8h1.2c.6 0 1-.3 1.3-.8.8-.2 1.6-.6 2.2-1.4.7.3 1.7.4 2.5.2.4-.1.7-.3.7-.6 0-.2-.1-.4-.4-.5-.3-.1-.6-.3-.9-.5-.4-.3-.7-.7-.8-1.1.7-.9 1-2.3 1-3.5 0-3.5-2.4-6.2-6.2-6.2z" />
+        </Svg>
+      </View>
     );
   }
   return (
-    <Svg width={size} height={size} viewBox="0 0 24 24" fill="#FFFFFF">
-      <Path d="M22 12c0-5.52-4.48-10-10-10S2 6.48 2 12c0 4.84 3.44 8.87 8 9.8V15H8v-3h2V9.5C10 7.57 11.57 6 13.5 6H16v3h-2c-.55 0-1 .45-1 1v2h3v3h-3v6.95c5.05-.5 9-4.76 9-9.95z" />
-    </Svg>
+    <View style={[styles.officialIconContainer, { width: size, height: size, backgroundColor: '#1877F2' }]}>
+      <Svg width={size * 0.55} height={size * 0.55} viewBox="0 0 24 24" fill="#FFFFFF">
+        <Path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
+      </Svg>
+    </View>
   );
 };
 
@@ -437,7 +479,7 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
 
   const unreadNotifCount = notificationsList.filter((n) => n.unread).length;
 
-  // Filter the display platforms: all selected ones + common ones
+  // Filter the display platforms: all selected ones + TikTok, Instagram, YouTube
   const displayedPlatformIds = Array.from(new Set([...selectedPlatforms, 'tiktok', 'instagram', 'youtube']));
   const displayedPlatforms = ALL_AVAILABLE_PLATFORMS.filter((p) => displayedPlatformIds.includes(p.id));
 
@@ -634,6 +676,7 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
             </Pressable>
           </View>
 
+          {/* Clean Horizontal Platforms Row (Only Active/Selected Platforms) */}
           <ScrollView
             horizontal
             showsHorizontalScrollIndicator={false}
@@ -650,20 +693,7 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
                   ]}
                   onPress={() => togglePlatform(plat.id)}
                 >
-                  {plat.gradient ? (
-                    <LinearGradient
-                      colors={plat.gradient as [string, string, ...string[]]}
-                      start={{ x: 0, y: 0 }}
-                      end={{ x: 1, y: 1 }}
-                      style={styles.platformIconCircle}
-                    >
-                      <PlatformIcon iconType={plat.iconType} size={18} />
-                    </LinearGradient>
-                  ) : (
-                    <View style={[styles.platformIconCircle, { backgroundColor: plat.bgColor }]}>
-                      <PlatformIcon iconType={plat.iconType} size={18} />
-                    </View>
-                  )}
+                  <PlatformIcon iconType={plat.iconType} size={38} />
                   <Text style={styles.platformCardName} numberOfLines={1}>{plat.name}</Text>
                   {isSelected ? (
                     <View style={styles.platformActiveBadge}>
@@ -675,25 +705,6 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
                 </Pressable>
               );
             })}
-
-            {/* + More Button Card */}
-            <Pressable
-              style={styles.platformMoreCard}
-              onPress={() => {
-                triggerModalAnim();
-                setShowPlatformsModal(true);
-              }}
-            >
-              <View style={styles.platformMoreIconCircle}>
-                <Svg width={20} height={20} viewBox="0 0 24 24" fill="none">
-                  <Path d="M12 5V19M5 12H19" stroke="#582CDB" strokeWidth="2.4" strokeLinecap="round" />
-                </Svg>
-              </View>
-              <Text style={styles.platformMoreCardName}>+ More</Text>
-              <View style={styles.platformMoreTag}>
-                <Text style={styles.platformMoreTagText}>9 Channels</Text>
-              </View>
-            </Pressable>
           </ScrollView>
 
           <Text style={styles.platformsDisclaimer}>
@@ -1138,20 +1149,7 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
                         isSelected && styles.platformModalRowActive,
                       ]}
                     >
-                      {plat.gradient ? (
-                        <LinearGradient
-                          colors={plat.gradient as [string, string, ...string[]]}
-                          start={{ x: 0, y: 0 }}
-                          end={{ x: 1, y: 1 }}
-                          style={styles.modalPlatformIconCircle}
-                        >
-                          <PlatformIcon iconType={plat.iconType} size={18} />
-                        </LinearGradient>
-                      ) : (
-                        <View style={[styles.modalPlatformIconCircle, { backgroundColor: plat.bgColor }]}>
-                          <PlatformIcon iconType={plat.iconType} size={18} />
-                        </View>
-                      )}
+                      <PlatformIcon iconType={plat.iconType} size={36} />
 
                       <View style={{ flex: 1 }}>
                         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
@@ -1683,6 +1681,7 @@ const styles = StyleSheet.create({
     fontWeight: '800',
     color: '#7F7894',
     letterSpacing: 0.6,
+    marginBottom: 8,
   },
   sectionLabelRow: {
     flexDirection: 'row',
@@ -1733,13 +1732,18 @@ const styles = StyleSheet.create({
     borderColor: '#582CDB',
     backgroundColor: '#FAF8FE',
   },
-  platformIconCircle: {
-    width: 38,
-    height: 38,
-    borderRadius: 19,
+  officialIconContainer: {
+    borderRadius: 12,
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 6,
+    overflow: 'hidden',
+  },
+  gradientFillContainer: {
+    width: '100%',
+    height: '100%',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   platformCardName: {
     fontSize: 12,
@@ -1762,44 +1766,6 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     borderWidth: 1.5,
     borderColor: '#CBD5E1',
-  },
-  platformMoreCard: {
-    width: 90,
-    backgroundColor: '#FAF8FE',
-    borderRadius: 16,
-    borderWidth: 1.5,
-    borderColor: '#DDD6FE',
-    borderStyle: 'dashed',
-    paddingVertical: 14,
-    paddingHorizontal: 6,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  platformMoreIconCircle: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: '#EDE9FE',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 6,
-  },
-  platformMoreCardName: {
-    fontSize: 11.5,
-    fontWeight: '800',
-    color: '#582CDB',
-    marginBottom: 2,
-  },
-  platformMoreTag: {
-    backgroundColor: '#EDE9FE',
-    paddingVertical: 2,
-    paddingHorizontal: 6,
-    borderRadius: 4,
-  },
-  platformMoreTagText: {
-    fontSize: 8.5,
-    fontWeight: '800',
-    color: '#6D28D9',
   },
   platformsDisclaimer: {
     fontSize: 11,
@@ -2486,13 +2452,6 @@ const styles = StyleSheet.create({
   platformModalRowActive: {
     backgroundColor: '#FAF5FF',
     borderColor: '#7C3AED',
-  },
-  modalPlatformIconCircle: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    justifyContent: 'center',
-    alignItems: 'center',
   },
   modalPlatformName: {
     fontSize: 13.5,
