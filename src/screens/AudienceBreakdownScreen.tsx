@@ -196,8 +196,10 @@ const INITIAL_PLATFORMS: PlatformAccount[] = [
   },
 ];
 
-// Velocity Chart Data for 5 Weeks
-interface VelocityWeek {
+// TIMEFRAME DATASETS FOR 7D, 1M, 3M
+export type TimeframeMode = '7d' | '1m' | '3m';
+
+export interface VelocityItem {
   id: string;
   label: string;
   fullDate: string;
@@ -207,13 +209,28 @@ interface VelocityWeek {
   highlightText: string;
 }
 
-const VELOCITY_WEEKS: VelocityWeek[] = [
-  { id: 'w1', label: 'W1', fullDate: 'Jul 21 - Jul 27', gain: 340, displayGain: '+340', barHeightRatio: 0.35, highlightText: 'Baseline launch week' },
-  { id: 'w2', label: 'W2', fullDate: 'Jul 28 - Aug 03', gain: 520, displayGain: '+520', barHeightRatio: 0.50, highlightText: 'First viral reel surge' },
-  { id: 'w3', label: 'W3', fullDate: 'Aug 04 - Aug 10', gain: 680, displayGain: '+680', barHeightRatio: 0.62, highlightText: 'Educational tips trend' },
-  { id: 'w4', label: 'W4', fullDate: 'Aug 11 - Aug 17', gain: 890, displayGain: '+890', barHeightRatio: 0.76, highlightText: 'Cross-platform syndication' },
-  { id: 'w5', label: 'W5 (Now)', fullDate: 'Aug 18 - Current', gain: 1280, displayGain: '+1,280', barHeightRatio: 1.0, highlightText: '⚡ All-time record velocity!' },
-];
+const TIMEFRAME_DATA: Record<TimeframeMode, VelocityItem[]> = {
+  '7d': [
+    { id: 'mon', label: 'Mon', fullDate: 'Monday, Aug 12', gain: 120, displayGain: '+120', barHeightRatio: 0.35, highlightText: 'Routine morning story post' },
+    { id: 'tue', label: 'Tue', fullDate: 'Tuesday, Aug 13', gain: 160, displayGain: '+160', barHeightRatio: 0.47, highlightText: 'Reel carousel reach boost' },
+    { id: 'wed', label: 'Wed', fullDate: 'Wednesday, Aug 14', gain: 140, displayGain: '+140', barHeightRatio: 0.41, highlightText: 'Collab comment exchange' },
+    { id: 'thu', label: 'Thu', fullDate: 'Thursday, Aug 15', gain: 340, displayGain: '+340', barHeightRatio: 1.0, highlightText: '⚡ Viral TikTok educational breakdown' },
+    { id: 'fri', label: 'Fri', fullDate: 'Friday, Aug 16', gain: 210, displayGain: '+210', barHeightRatio: 0.62, highlightText: 'High saves from Thursday surge' },
+    { id: 'sat', label: 'Sat', fullDate: 'Saturday, Aug 17', gain: 180, displayGain: '+180', barHeightRatio: 0.53, highlightText: 'Weekend creator Q&A' },
+    { id: 'sun', label: 'Sun', fullDate: 'Sunday, Aug 18', gain: 130, displayGain: '+130', barHeightRatio: 0.38, highlightText: 'Weekly summary reel' },
+  ],
+  '1m': [
+    { id: 'w1', label: 'W1', fullDate: 'Jul 21 - Jul 27', gain: 680, displayGain: '+680', barHeightRatio: 0.53, highlightText: 'Initial hook optimization experiment' },
+    { id: 'w2', label: 'W2', fullDate: 'Jul 28 - Aug 03', gain: 840, displayGain: '+840', barHeightRatio: 0.65, highlightText: 'Instagram Reels reach expanded' },
+    { id: 'w3', label: 'W3', fullDate: 'Aug 04 - Aug 10', gain: 1060, displayGain: '+1,060', barHeightRatio: 0.83, highlightText: 'Double posting schedule initiated' },
+    { id: 'w4', label: 'W4 (Now)', fullDate: 'Aug 11 - Aug 18', gain: 1280, displayGain: '+1,280', barHeightRatio: 1.0, highlightText: '⚡ Best month week recorded!' },
+  ],
+  '3m': [
+    { id: 'm1', label: 'Jun', fullDate: 'June 2026', gain: 2840, displayGain: '+2.8K', barHeightRatio: 0.54, highlightText: 'Foundational audience establishment' },
+    { id: 'm2', label: 'Jul', fullDate: 'July 2026', gain: 3950, displayGain: '+3.9K', barHeightRatio: 0.76, highlightText: 'Viral education series started' },
+    { id: 'm3', label: 'Aug (MTD)', fullDate: 'August 2026', gain: 5210, displayGain: '+5.2K', barHeightRatio: 1.0, highlightText: '⚡ Record multi-channel surge (+32%)' },
+  ],
+};
 
 interface AudienceBreakdownScreenProps {
   onBack: () => void;
@@ -246,9 +263,9 @@ export const AudienceBreakdownScreen: React.FC<AudienceBreakdownScreenProps> = (
   const [activeSegmentTab, setActiveSegmentTab] = useState<'overview' | 'posts'>('overview');
   const [activeTab, setActiveTab] = useState<TabType>('growth');
 
-  // Velocity State
-  const [velocityTimeframe, setVelocityTimeframe] = useState<'5w' | '7d' | '30d'>('5w');
-  const [selectedVelocityWeek, setSelectedVelocityWeek] = useState<VelocityWeek>(VELOCITY_WEEKS[4]);
+  // Timeline mode (7d, 1m, 3m)
+  const [selectedTimeframe, setSelectedTimeframe] = useState<TimeframeMode>('7d');
+  const [selectedItemId, setSelectedItemId] = useState<string>('thu'); // default peak Thursday
 
   // Platform state list
   const [platformsList, setPlatformsList] = useState<PlatformAccount[]>(INITIAL_PLATFORMS);
@@ -270,10 +287,14 @@ export const AudienceBreakdownScreen: React.FC<AudienceBreakdownScreenProps> = (
   const modalPopScale = useRef(new Animated.Value(0.9)).current;
   const toastFade = useRef(new Animated.Value(0)).current;
 
+  // Active dataset
+  const currentDataset = TIMEFRAME_DATA[selectedTimeframe];
+  const activeItem = currentDataset.find((i) => i.id === selectedItemId) || currentDataset[currentDataset.length - 1];
+
   // Calculate live dynamic total audience based on connected platforms
   const totalAudienceCount = platformsList
     .filter((p) => p.connected)
-    .reduce((acc, curr) => acc + curr.countNumeric, 4600); // 4.6k other base
+    .reduce((acc, curr) => acc + curr.countNumeric, 4600);
 
   const formattedTotalAudience = (totalAudienceCount / 1000).toFixed(1) + 'K';
 
@@ -316,6 +337,25 @@ export const AudienceBreakdownScreen: React.FC<AudienceBreakdownScreenProps> = (
       Animated.delay(2200),
       Animated.timing(toastFade, { toValue: 0, duration: 250, useNativeDriver: true }),
     ]).start(() => setToastMessage(null));
+  };
+
+  const handleTimeframeChange = (mode: TimeframeMode) => {
+    if (Platform.OS !== 'web') {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    }
+    setSelectedTimeframe(mode);
+    const newDataset = TIMEFRAME_DATA[mode];
+    // Select peak or latest in that timeframe
+    if (mode === '7d') {
+      setSelectedItemId('thu');
+      showToast('Showing 7-day daily traffic breakdown');
+    } else if (mode === '1m') {
+      setSelectedItemId('w4');
+      showToast('Showing 1-month weekly velocity trend');
+    } else {
+      setSelectedItemId('m3');
+      showToast('Showing 3-month growth trajectory');
+    }
   };
 
   const handleOpenConnectPlatforms = () => {
@@ -624,124 +664,108 @@ export const AudienceBreakdownScreen: React.FC<AudienceBreakdownScreenProps> = (
           </View>
 
           {/* ========================================================================= */}
-          {/* CARD 2: ELEVATED BEAUTIFUL & INTERACTIVE WEEKLY VELOCITY CARD             */}
+          {/* CARD 2: ELEVATED TIMELINE GRAPH (7D, 1M, 3M) WITH SINGLE-SELECT PURPLE    */}
           {/* ========================================================================= */}
           <View style={styles.velocityCard}>
-            {/* Top Bar with Live Indicator & Timeframe Toggle */}
+            {/* Top Bar with Live Indicator & Timeframe Toggle: 7d | 1m | 3m */}
             <View style={styles.velocityCardTopRow}>
               <View style={styles.velocityTitleGroup}>
                 <View style={styles.velocityPulseDot} />
-                <Text style={styles.cardHeaderLabel}>WEEKLY VELOCITY &amp; PACE</Text>
+                <Text style={styles.cardHeaderLabel}>AUDIENCE VELOCITY &amp; TRAFFIC</Text>
               </View>
 
-              {/* Timeframe Chips */}
+              {/* TIMEFRAME TOGGLE CHIPS: 7D | 1M | 3M */}
               <View style={styles.timeframeChipsRow}>
                 <Pressable
                   style={[
                     styles.timeframeChip,
-                    velocityTimeframe === '5w' && styles.timeframeChipActive,
+                    selectedTimeframe === '7d' && styles.timeframeChipActive,
                   ]}
-                  onPress={() => {
-                    if (Platform.OS !== 'web') {
-                      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                    }
-                    setVelocityTimeframe('5w');
-                  }}
+                  onPress={() => handleTimeframeChange('7d')}
                 >
                   <Text
                     style={[
                       styles.timeframeChipText,
-                      velocityTimeframe === '5w' && styles.timeframeChipTextActive,
+                      selectedTimeframe === '7d' && styles.timeframeChipTextActive,
                     ]}
                   >
-                    5W
+                    7d
                   </Text>
                 </Pressable>
                 <Pressable
                   style={[
                     styles.timeframeChip,
-                    velocityTimeframe === '7d' && styles.timeframeChipActive,
+                    selectedTimeframe === '1m' && styles.timeframeChipActive,
                   ]}
-                  onPress={() => {
-                    if (Platform.OS !== 'web') {
-                      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                    }
-                    setVelocityTimeframe('7d');
-                    showToast('Viewing last 7 days velocity breakdown');
-                  }}
+                  onPress={() => handleTimeframeChange('1m')}
                 >
                   <Text
                     style={[
                       styles.timeframeChipText,
-                      velocityTimeframe === '7d' && styles.timeframeChipTextActive,
+                      selectedTimeframe === '1m' && styles.timeframeChipTextActive,
                     ]}
                   >
-                    7D
+                    1m
                   </Text>
                 </Pressable>
                 <Pressable
                   style={[
                     styles.timeframeChip,
-                    velocityTimeframe === '30d' && styles.timeframeChipActive,
+                    selectedTimeframe === '3m' && styles.timeframeChipActive,
                   ]}
-                  onPress={() => {
-                    if (Platform.OS !== 'web') {
-                      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                    }
-                    setVelocityTimeframe('30d');
-                    showToast('Viewing last 30 days velocity breakdown');
-                  }}
+                  onPress={() => handleTimeframeChange('3m')}
                 >
                   <Text
                     style={[
                       styles.timeframeChipText,
-                      velocityTimeframe === '30d' && styles.timeframeChipTextActive,
+                      selectedTimeframe === '3m' && styles.timeframeChipTextActive,
                     ]}
                   >
-                    30D
+                    3m
                   </Text>
                 </Pressable>
               </View>
             </View>
 
-            {/* Big Metric Display */}
+            {/* Big Metric Display for Selected Bar */}
             <View style={styles.velocityHeroBlock}>
               <View style={styles.velocityMetricRow}>
-                <Text style={styles.velocityNumber}>{selectedVelocityWeek.displayGain}</Text>
-                <Text style={styles.velocitySubtext}>NEW FOLLOWERS</Text>
+                <Text style={styles.velocityNumber}>{activeItem.displayGain}</Text>
+                <Text style={styles.velocitySubtext}>
+                  {selectedTimeframe === '7d' ? 'DAILY GAIN' : selectedTimeframe === '1m' ? 'WEEKLY GAIN' : 'MONTHLY GAIN'}
+                </Text>
               </View>
 
               {/* Surge Badge */}
               <View style={styles.velocitySurgeBadge}>
-                <Text style={styles.velocitySurgeText}>🔥 +43.8% vs previous cycle</Text>
+                <Text style={styles.velocitySurgeText}>
+                  {selectedTimeframe === '7d' ? '🔥 Top Surge Day' : selectedTimeframe === '1m' ? '⚡ +43.8% vs W1' : '🚀 +83.4% QoQ'}
+                </Text>
               </View>
             </View>
 
-            {/* Interactive Selected Week Detail Pill */}
+            {/* Interactive Selected Detail Row */}
             <View style={styles.velocityContextRow}>
-              <Text style={styles.velocityContextDate}>{selectedVelocityWeek.fullDate}</Text>
-              <Text style={styles.velocityContextHighlight}>
-                {selectedVelocityWeek.highlightText}
-              </Text>
+              <Text style={styles.velocityContextDate}>{activeItem.fullDate}</Text>
+              <Text style={styles.velocityContextHighlight}>{activeItem.highlightText}</Text>
             </View>
 
-            {/* INTERACTIVE 5-BAR VELOCITY VISUALIZER */}
+            {/* INTERACTIVE TIMELINE BARS (SINGLE-SELECT PURPLE GRADIENT) */}
             <View style={styles.velocityBarsVisualizerContainer}>
               <View style={styles.velocityBarsGrid}>
-                {VELOCITY_WEEKS.map((w) => {
-                  const isSelected = selectedVelocityWeek.id === w.id;
-                  const isCurrentPeak = w.id === 'w5';
-                  const heightPx = Math.max(34, w.barHeightRatio * 96);
+                {currentDataset.map((item) => {
+                  const isSelected = selectedItemId === item.id;
+                  const heightPx = Math.max(32, item.barHeightRatio * 96);
 
                   return (
                     <Pressable
-                      key={w.id}
+                      key={item.id}
                       style={styles.velocityBarColumn}
                       onPress={() => {
                         if (Platform.OS !== 'web') {
                           Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                         }
-                        setSelectedVelocityWeek(w);
+                        setSelectedItemId(item.id);
                       }}
                     >
                       {/* Gain Number Above Bar */}
@@ -757,11 +781,11 @@ export const AudienceBreakdownScreen: React.FC<AudienceBreakdownScreenProps> = (
                             isSelected && styles.barGainBadgeTextActive,
                           ]}
                         >
-                          {w.displayGain}
+                          {item.displayGain}
                         </Text>
                       </View>
 
-                      {/* Bar Track & Fill */}
+                      {/* Bar Track & Fill: PURPLE IF AND ONLY IF SELECTED */}
                       <View style={styles.barPillTrack}>
                         <View
                           style={[
@@ -772,7 +796,7 @@ export const AudienceBreakdownScreen: React.FC<AudienceBreakdownScreenProps> = (
                               : styles.barPillFillInactive,
                           ]}
                         >
-                          {isCurrentPeak && (
+                          {isSelected && (
                             <LinearGradient
                               colors={['#8B5CF6', '#582CDB', '#4318FF']}
                               start={{ x: 0, y: 0 }}
@@ -783,14 +807,14 @@ export const AudienceBreakdownScreen: React.FC<AudienceBreakdownScreenProps> = (
                         </View>
                       </View>
 
-                      {/* Week Label Below Bar */}
+                      {/* Timeframe Label Below Bar */}
                       <Text
                         style={[
                           styles.barWeekLabel,
                           isSelected && styles.barWeekLabelActive,
                         ]}
                       >
-                        {w.label}
+                        {item.label}
                       </Text>
                     </Pressable>
                   );
@@ -803,9 +827,13 @@ export const AudienceBreakdownScreen: React.FC<AudienceBreakdownScreenProps> = (
               <View style={styles.velocityGoalTopRow}>
                 <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
                   <Text style={{ fontSize: 13 }}>🎯</Text>
-                  <Text style={styles.velocityGoalTitle}>Weekly Creator Goal</Text>
+                  <Text style={styles.velocityGoalTitle}>
+                    {selectedTimeframe === '7d' ? '7-Day Target' : selectedTimeframe === '1m' ? 'Monthly Creator Target' : 'Quarterly Milestone'}
+                  </Text>
                 </View>
-                <Text style={styles.velocityGoalScore}>1,280 / 1,500 (85.3%)</Text>
+                <Text style={styles.velocityGoalScore}>
+                  {selectedTimeframe === '7d' ? '1,280 / 1,500 (85.3%)' : selectedTimeframe === '1m' ? '3,860 / 4,000 (96.5%)' : '12.0K / 15.0K (80.0%)'}
+                </Text>
               </View>
 
               {/* Progress Line */}
@@ -814,31 +842,51 @@ export const AudienceBreakdownScreen: React.FC<AudienceBreakdownScreenProps> = (
                   colors={['#582CDB', '#10B981']}
                   start={{ x: 0, y: 0 }}
                   end={{ x: 1, y: 0 }}
-                  style={[styles.velocityGoalFill, { width: '85.3%' }]}
+                  style={[
+                    styles.velocityGoalFill,
+                    {
+                      width:
+                        selectedTimeframe === '7d'
+                          ? '85.3%'
+                          : selectedTimeframe === '1m'
+                          ? '96.5%'
+                          : '80.0%',
+                    },
+                  ]}
                 />
               </View>
               <Text style={styles.velocityGoalSub}>
-                ⚡ Only 220 followers to reach your weekly streak record!
+                {selectedTimeframe === '7d'
+                  ? '⚡ Only 220 followers to reach your 7-day streak target!'
+                  : selectedTimeframe === '1m'
+                  ? '🚀 140 followers away from achieving your monthly creator record!'
+                  : '👑 On track to exceed your Q3 creator milestone!'}
               </Text>
             </View>
 
             {/* 3 QUICK VELOCITY INSIGHT PILLS */}
             <View style={styles.velocityStatsGrid}>
               <View style={styles.velocityMiniStatBox}>
-                <Text style={styles.velocityMiniLabel}>AVG DAILY GAIN</Text>
-                <Text style={styles.velocityMiniValue}>+183 / day</Text>
+                <Text style={styles.velocityMiniLabel}>AVG RUN-RATE</Text>
+                <Text style={styles.velocityMiniValue}>
+                  {selectedTimeframe === '7d' ? '+183 / day' : selectedTimeframe === '1m' ? '+965 / wk' : '+4.0K / mo'}
+                </Text>
                 <Text style={styles.velocityMiniSub}>📈 +34% pace</Text>
               </View>
 
               <View style={styles.velocityMiniStatBox}>
-                <Text style={styles.velocityMiniLabel}>PEAK SURGE DAY</Text>
-                <Text style={styles.velocityMiniValue}>Thu (+340)</Text>
-                <Text style={styles.velocityMiniSub}>🎬 TikTok Post</Text>
+                <Text style={styles.velocityMiniLabel}>PEAK MOMENTUM</Text>
+                <Text style={styles.velocityMiniValue}>
+                  {selectedTimeframe === '7d' ? 'Thu (+340)' : selectedTimeframe === '1m' ? 'W4 (+1.28K)' : 'Aug (+5.2K)'}
+                </Text>
+                <Text style={styles.velocityMiniSub}>🎬 Viral Series</Text>
               </View>
 
               <View style={styles.velocityMiniStatBox}>
                 <Text style={styles.velocityMiniLabel}>ENGAGEMENT</Text>
-                <Text style={styles.velocityMiniValue}>8.4%</Text>
+                <Text style={styles.velocityMiniValue}>
+                  {selectedTimeframe === '7d' ? '8.4%' : selectedTimeframe === '1m' ? '9.1%' : '11.3%'}
+                </Text>
                 <Text style={styles.velocityMiniSub}>🟢 Top 5%</Text>
               </View>
             </View>
@@ -1229,6 +1277,7 @@ export const AudienceBreakdownScreen: React.FC<AudienceBreakdownScreenProps> = (
                             {plat.handle} • ⚡ {plat.followers}
                           </Text>
                         </View>
+                        {/* REMOVE BUTTON */}
                         <Pressable
                           style={styles.removePlatformBtn}
                           onPress={() => handleRemoveSinglePlatform(plat.id)}
@@ -1707,7 +1756,7 @@ const styles = StyleSheet.create({
   },
 
   // =========================================================================
-  // CARD 2: ELEVATED BEAUTIFUL WEEKLY VELOCITY STYLES
+  // CARD 2: ELEVATED TIMELINE GRAPH STYLES (7D, 1M, 3M)
   // =========================================================================
   velocityCard: {
     backgroundColor: '#FFFFFF',
@@ -1748,7 +1797,7 @@ const styles = StyleSheet.create({
   },
   timeframeChip: {
     paddingVertical: 3,
-    paddingHorizontal: 8,
+    paddingHorizontal: 9,
     borderRadius: 8,
   },
   timeframeChipActive: {
@@ -1824,12 +1873,12 @@ const styles = StyleSheet.create({
     color: '#582CDB',
   },
 
-  // Velocity 5-Bar Graph Visualizer
+  // Velocity Bars Visualizer Container
   velocityBarsVisualizerContainer: {
     backgroundColor: '#F8FAFC',
     borderRadius: 18,
     paddingVertical: 14,
-    paddingHorizontal: 12,
+    paddingHorizontal: 8,
     marginBottom: 16,
     borderWidth: 1,
     borderColor: '#EEF2F6',
@@ -1837,7 +1886,7 @@ const styles = StyleSheet.create({
   velocityBarsGrid: {
     flexDirection: 'row',
     alignItems: 'flex-end',
-    justifyContent: 'space-between',
+    justifyContent: 'space-around',
     height: 140,
   },
   velocityBarColumn: {
@@ -1845,12 +1894,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'flex-end',
     height: '100%',
-    paddingHorizontal: 3,
+    paddingHorizontal: 2,
   },
   barGainBadge: {
     backgroundColor: '#FFFFFF',
     paddingVertical: 2,
-    paddingHorizontal: 5,
+    paddingHorizontal: 4,
     borderRadius: 6,
     borderWidth: 1,
     borderColor: '#E2E8F0',
@@ -1861,7 +1910,7 @@ const styles = StyleSheet.create({
     borderColor: '#582CDB',
   },
   barGainBadgeText: {
-    fontSize: 9,
+    fontSize: 8.5,
     fontWeight: '800',
     color: '#64748B',
   },
@@ -1893,7 +1942,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#CBD5E1',
   },
   barWeekLabel: {
-    fontSize: 10,
+    fontSize: 9.5,
     fontWeight: '700',
     color: '#94A3B8',
     marginTop: 6,
