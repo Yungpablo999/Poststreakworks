@@ -1109,7 +1109,7 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
             </Pressable>
           </View>
 
-          {/* 7. CARD 4: ACTIVE BRAND QUEST ("Lagos Food Festival") */}
+          {/* 7. CARD 3: ACTIVE BRAND QUEST ("Lagos Food Festival") */}
           <View style={styles.questCard}>
             <View style={styles.questTargetIconBox}>
               <Svg width={20} height={20} viewBox="0 0 24 24" fill="none">
@@ -1131,8 +1131,16 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
             </View>
           </View>
 
-          {/* 8. CARD 5: SUGGESTED MATCH ("Amara Okafor") */}
-          <View style={styles.dashboardCard}>
+          {/* 8. CARD 4: CREATOR MATCH VELOCITY */}
+          <Pressable
+            style={styles.dashboardCard}
+            onPress={() => {
+              if (Platform.OS !== 'web') {
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+              }
+              if (onNavigateTab) onNavigateTab('match');
+            }}
+          >
             <View style={styles.matchHeaderRow}>
               <Text style={styles.matchSectionTitle}>Suggested Match</Text>
               <View style={styles.growthActionPill}>
@@ -1143,26 +1151,15 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
             {/* Creator Profile Row */}
             <View style={styles.creatorProfileRow}>
               <View style={styles.creatorAvatarBox}>
-                <Svg width={22} height={22} viewBox="0 0 24 24" fill="none">
-                  <Path
-                    d="M20 21V19C20 17.9 19.5 16.9 18.7 16.2C17.9 15.5 16.9 15 15.8 15H8.2C7.1 15 6.1 15.5 5.3 16.2C4.5 16.9 4 17.9 4 19V21"
-                    stroke="#582CDB"
-                    strokeWidth="2.2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                  <Circle
-                    cx="12"
-                    cy="7"
-                    r="4"
-                    stroke="#582CDB"
-                    strokeWidth="2.2"
-                  />
-                </Svg>
+                <Image
+                  source={{ uri: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80' }}
+                  style={styles.creatorAvatarImage}
+                  resizeMode="cover"
+                />
               </View>
               <View style={styles.creatorDetails}>
-                <Text style={styles.creatorName}>Amara Okafor</Text>
-                <Text style={styles.creatorFollowers}>Travel Vlogger • 85k Followers</Text>
+                <Text style={styles.creatorName}>Elena Rostova</Text>
+                <Text style={styles.creatorFollowers}>Tech &amp; Design • 42.8k Followers</Text>
               </View>
             </View>
 
@@ -1171,29 +1168,35 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
               <Text style={styles.whyMatchSparkle}>✨</Text>
               <Text style={styles.whyMatchText}>
                 <Text style={styles.whyMatchBold}>Why this match? </Text>
-                Similar niche, strong activity, and open to collaboration.
+                94% Niche Synergy, matching daily posting pace, and open for squads.
               </Text>
             </View>
 
-            {/* Connect Button */}
+            {/* Connect & View Match Button */}
             <Pressable
-              onPress={handleToggleMatch}
+              onPress={() => {
+                if (Platform.OS !== 'web') {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                }
+                if (onNavigateTab) {
+                  onNavigateTab('match');
+                }
+              }}
               style={({ pressed }) => [
-                styles.connectMatchButton,
-                matchConnected && styles.connectMatchButtonActive,
+                styles.connectMatchGradientWrap,
                 pressed && styles.connectMatchButtonPressed,
               ]}
             >
-              <Text
-                style={[
-                  styles.connectMatchButtonText,
-                  matchConnected && styles.connectMatchButtonTextActive,
-                ]}
+              <LinearGradient
+                colors={['#7C3AED', '#582CDB']}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 0 }}
+                style={styles.connectMatchGradient}
               >
-                {matchConnected ? '✓ Connection Sent' : 'Connect'}
-              </Text>
+                <Text style={styles.connectMatchButtonText}>Connect &amp; View Creator Card ➔</Text>
+              </LinearGradient>
             </Pressable>
-          </View>
+          </Pressable>
 
           {/* 9. CARD 6: UNLOCK JARVIS PRO */}
           <View style={styles.proCard}>
@@ -2683,29 +2686,31 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     color: '#582CDB',
   },
-  connectMatchButton: {
-    backgroundColor: 'rgba(255, 255, 255, 0.9)',
-    height: 44,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: 'rgba(226, 220, 242, 0.9)',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  connectMatchButtonActive: {
-    backgroundColor: 'rgba(237, 232, 252, 0.9)',
-    borderColor: '#582CDB',
-  },
   connectMatchButtonPressed: {
     transform: [{ scale: 0.98 }],
+    opacity: 0.9,
+  },
+  connectMatchGradientWrap: {
+    height: 44,
+    borderRadius: 12,
+    overflow: 'hidden',
+    shadowColor: '#582CDB',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.22,
+    shadowRadius: 6,
+    elevation: 3,
+  },
+  connectMatchGradient: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 16,
   },
   connectMatchButtonText: {
-    fontSize: 14,
-    fontWeight: '700',
-    color: '#171420',
-  },
-  connectMatchButtonTextActive: {
-    color: '#582CDB',
+    fontSize: 13.5,
+    fontWeight: '800',
+    color: '#FFFFFF',
+    letterSpacing: 0.2,
   },
 
   // 9. PRO UPGRADE CARD
