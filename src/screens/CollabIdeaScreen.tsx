@@ -44,6 +44,76 @@ interface NotificationItem {
   badgeBorder: string;
 }
 
+interface PublishingSlot {
+  id: string;
+  time: string;
+  score: number;
+  level: string;
+  multiplier: string;
+  tag: string;
+  desc: string;
+}
+
+const PUBLISHING_SLOTS: PublishingSlot[] = [
+  {
+    id: 's1',
+    time: '9:00 AM',
+    score: 62,
+    level: 'Moderate',
+    multiplier: '1.0x',
+    tag: 'Morning Scroll',
+    desc: 'Audience is commuting. Good for short educational tips.',
+  },
+  {
+    id: 's2',
+    time: '12:30 PM',
+    score: 78,
+    level: 'Good Spurt',
+    multiplier: '1.4x',
+    tag: 'Lunch Spike',
+    desc: 'Strong midday break traffic across Instagram & TikTok.',
+  },
+  {
+    id: 's3',
+    time: '3:30 PM',
+    score: 70,
+    level: 'Moderate',
+    multiplier: '1.2x',
+    tag: 'Afternoon Wave',
+    desc: 'Steady baseline engagement before evening surge.',
+  },
+  {
+    id: 's4',
+    time: '5:30 PM',
+    score: 86,
+    level: 'High Reach',
+    multiplier: '1.8x',
+    tag: 'Evening Prime',
+    desc: 'Creators & followers finishing work. High comment velocity.',
+  },
+  {
+    id: 's5',
+    time: '7:30 PM',
+    score: 98,
+    level: '🔥 Viral Window',
+    multiplier: '2.5x',
+    tag: 'Peak Viral Slot',
+    desc: 'Highest algorithm retention and watch time in Lagos & Global.',
+  },
+  {
+    id: 's6',
+    time: '9:30 PM',
+    score: 82,
+    level: 'High Engagement',
+    multiplier: '1.6x',
+    tag: 'Night Wind-Down',
+    desc: 'Great for casual storytelling and relatable lifestyle Reels.',
+  },
+];
+
+const PLANNING_OPTIONS = ['10:00 - 11:00 AM', '11:00 - 12:00 PM', '1:00 - 2:00 PM'];
+const FILMING_OPTIONS = ['1:00 - 2:30 PM', '2:00 - 3:30 PM', '4:00 - 5:30 PM'];
+
 const NOTIFICATIONS: NotificationItem[] = [
   {
     id: 'n1',
@@ -92,6 +162,16 @@ export const CollabIdeaScreen: React.FC<CollabIdeaScreenProps> = ({
   const [selectedPlatforms, setSelectedPlatforms] = useState<string[]>(['tiktok', 'reels']);
   const [isSaved, setIsSaved] = useState(false);
 
+  // Dynamic Interactive Schedule State
+  const [selectedPlanningTime, setSelectedPlanningTime] = useState(PLANNING_OPTIONS[1]);
+  const [selectedFilmingTime, setSelectedFilmingTime] = useState(FILMING_OPTIONS[1]);
+  const [selectedPublishingSlotId, setSelectedPublishingSlotId] = useState('s5'); // default 7:30 PM (98%)
+
+  // Temporary state inside the modal before confirming
+  const [modalPlanningTime, setModalPlanningTime] = useState(PLANNING_OPTIONS[1]);
+  const [modalFilmingTime, setModalFilmingTime] = useState(FILMING_OPTIONS[1]);
+  const [modalSlotId, setModalSlotId] = useState('s5');
+
   // Modals
   const [showScheduleModal, setShowScheduleModal] = useState(false);
   const [showProfileModal, setShowProfileModal] = useState(false);
@@ -107,6 +187,12 @@ export const CollabIdeaScreen: React.FC<CollabIdeaScreenProps> = ({
   // Animations
   const flameFloatY = useRef(new Animated.Value(0)).current;
   const modalPopScale = useRef(new Animated.Value(0.9)).current;
+  const rateMeterWidthAnim = useRef(new Animated.Value(98)).current;
+
+  const currentPublishingSlot =
+    PUBLISHING_SLOTS.find((s) => s.id === selectedPublishingSlotId) || PUBLISHING_SLOTS[4];
+  const activeModalSlot =
+    PUBLISHING_SLOTS.find((s) => s.id === modalSlotId) || PUBLISHING_SLOTS[4];
 
   useEffect(() => {
     const floatAnim = Animated.loop(
@@ -135,6 +221,47 @@ export const CollabIdeaScreen: React.FC<CollabIdeaScreenProps> = ({
       friction: 8,
       useNativeDriver: true,
     }).start();
+  };
+
+  const handleOpenScheduleModal = () => {
+    if (Platform.OS !== 'web') {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    }
+    setModalPlanningTime(selectedPlanningTime);
+    setModalFilmingTime(selectedFilmingTime);
+    setModalSlotId(selectedPublishingSlotId);
+    rateMeterWidthAnim.setValue(activeModalSlot.score);
+    triggerModalAnim();
+    setShowScheduleModal(true);
+  };
+
+  const handleSelectModalSlot = (slot: PublishingSlot) => {
+    if (Platform.OS !== 'web') {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    }
+    setModalSlotId(slot.id);
+    Animated.spring(rateMeterWidthAnim, {
+      toValue: slot.score,
+      tension: 50,
+      friction: 7,
+      useNativeDriver: false,
+    }).start();
+  };
+
+  const handleConfirmSchedule = () => {
+    if (Platform.OS !== 'web') {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    }
+    setSelectedPlanningTime(modalPlanningTime);
+    setSelectedFilmingTime(modalFilmingTime);
+    setSelectedPublishingSlotId(modalSlotId);
+    setShowScheduleModal(false);
+
+    setCelebrationTitle('Schedule Updated!');
+    setCelebrationSubtitle(`Publishing set to ${activeModalSlot.time} (${activeModalSlot.multiplier} viral reach).`);
+    setCelebrationSpeech('Optimal posting slot locked in! Syncing with partner.');
+    setCelebrationBadge('SCHEDULE SYNCED');
+    setShowCelebrationModal(true);
   };
 
   const handleTabPress = (tab: TabType) => {
@@ -575,7 +702,7 @@ export const CollabIdeaScreen: React.FC<CollabIdeaScreenProps> = ({
               </View>
             </View>
 
-            {/* CARD 8: SUGGESTED SCHEDULE (PREMIUM PALETTE) */}
+            {/* CARD 8: SUGGESTED SCHEDULE (DYNAMIC PALETTE & SYNCED TIMES) */}
             <LinearGradient
               colors={['#FAF8FE', '#F5F0FF']}
               start={{ x: 0, y: 0 }}
@@ -591,14 +718,14 @@ export const CollabIdeaScreen: React.FC<CollabIdeaScreenProps> = ({
 
               <View style={styles.scheduleItemRow}>
                 <Text style={styles.scheduleItemLabel}>Planning</Text>
-                <Text style={styles.scheduleItemTime}>11:00 - 12:00 PM</Text>
+                <Text style={styles.scheduleItemTime}>{selectedPlanningTime}</Text>
               </View>
 
               <View style={styles.scheduleItemDivider} />
 
               <View style={styles.scheduleItemRow}>
                 <Text style={styles.scheduleItemLabel}>Filming</Text>
-                <Text style={styles.scheduleItemTime}>2:00 - 3:30 PM</Text>
+                <Text style={styles.scheduleItemTime}>{selectedFilmingTime}</Text>
               </View>
 
               <View style={styles.scheduleItemDivider} />
@@ -606,16 +733,15 @@ export const CollabIdeaScreen: React.FC<CollabIdeaScreenProps> = ({
               <View style={styles.scheduleItemRow}>
                 <Text style={[styles.scheduleItemLabel, { color: '#582CDB', fontWeight: '800' }]}>Publishing</Text>
                 <View style={styles.peakSlotBadge}>
-                  <Text style={styles.peakSlotBadgeText}>⚡ Peak 7:30 PM</Text>
+                  <Text style={styles.peakSlotBadgeText}>
+                    ⚡ {currentPublishingSlot.time} ({currentPublishingSlot.multiplier} Peak)
+                  </Text>
                 </View>
               </View>
 
               <Pressable
                 style={({ pressed }) => [styles.adjustScheduleBtn, pressed && styles.btnPressed]}
-                onPress={() => {
-                  triggerModalAnim();
-                  setShowScheduleModal(true);
-                }}
+                onPress={handleOpenScheduleModal}
               >
                 <LinearGradient
                   colors={['#7C3AED', '#582CDB']}
@@ -623,7 +749,7 @@ export const CollabIdeaScreen: React.FC<CollabIdeaScreenProps> = ({
                   end={{ x: 1, y: 0 }}
                   style={styles.adjustScheduleGradient}
                 >
-                  <Text style={styles.adjustScheduleBtnText}>Adjust Schedule ›</Text>
+                  <Text style={styles.adjustScheduleBtnText}>Adjust Schedule &amp; Rate Meter ›</Text>
                 </LinearGradient>
               </Pressable>
             </LinearGradient>
@@ -709,7 +835,9 @@ export const CollabIdeaScreen: React.FC<CollabIdeaScreenProps> = ({
             onTabPress={handleTabPress}
           />
 
-          {/* MODAL: ADJUST SCHEDULE */}
+          {/* ========================================================================= */}
+          {/* MODAL: INTERACTIVE SCHEDULE ADJUSTER & REAL-TIME VIRAL RATE METER */}
+          {/* ========================================================================= */}
           <Modal
             visible={showScheduleModal}
             transparent={true}
@@ -717,11 +845,11 @@ export const CollabIdeaScreen: React.FC<CollabIdeaScreenProps> = ({
             onRequestClose={() => setShowScheduleModal(false)}
           >
             <View style={styles.modalOverlay}>
-              <Animated.View style={[styles.modalCard, { transform: [{ scale: modalPopScale }] }]}>
+              <Animated.View style={[styles.modalCardLarge, { transform: [{ scale: modalPopScale }] }]}>
                 <View style={styles.modalHeaderRow}>
                   <View>
-                    <Text style={styles.modalTitle}>Collab Schedule</Text>
-                    <Text style={styles.modalSubtitle}>Sync optimal hours with {partnerName}</Text>
+                    <Text style={styles.modalTitle}>Collab Schedule &amp; Rate Meter</Text>
+                    <Text style={styles.modalSubtitle}>Adjust filming &amp; find your optimal viral window</Text>
                   </View>
                   <Pressable
                     onPress={() => setShowScheduleModal(false)}
@@ -732,28 +860,175 @@ export const CollabIdeaScreen: React.FC<CollabIdeaScreenProps> = ({
                   </Pressable>
                 </View>
 
-                <View style={styles.scheduleSlotBox}>
-                  <Text style={styles.scheduleSlotLabel}>📅 Filming Window</Text>
-                  <Text style={styles.scheduleSlotTime}>Today • 2:00 PM - 3:30 PM (Lagos GMT+1)</Text>
-                </View>
+                <ScrollView style={{ maxHeight: 440 }} showsVerticalScrollIndicator={false}>
+                  {/* REAL-TIME VIRAL REACH RATE METER */}
+                  <LinearGradient
+                    colors={['#FAF5FF', '#EDE9FE']}
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 1, y: 1 }}
+                    style={styles.rateMeterCard}
+                  >
+                    <View style={styles.rateMeterHeader}>
+                      <View>
+                        <Text style={styles.rateMeterLabel}>AUDIENCE VIRAL RATE</Text>
+                        <Text style={styles.rateMeterLevelText}>{activeModalSlot.level}</Text>
+                      </View>
+                      <View style={styles.rateScoreBadge}>
+                        <Text style={styles.rateScoreNum}>{activeModalSlot.score}%</Text>
+                        <Text style={styles.rateMultiplierText}>{activeModalSlot.multiplier} Reach</Text>
+                      </View>
+                    </View>
 
-                <View style={styles.scheduleSlotBox}>
-                  <Text style={styles.scheduleSlotLabel}>⚡ Optimal Viral Publishing</Text>
-                  <Text style={styles.scheduleSlotTime}>Today • 7:30 PM (Peak Audience Activity)</Text>
-                </View>
+                    {/* Animated Progress Gauge Bar */}
+                    <View style={styles.gaugeTrack}>
+                      <View
+                        style={[
+                          styles.gaugeFill,
+                          {
+                            width: `${activeModalSlot.score}%`,
+                            backgroundColor:
+                              activeModalSlot.score >= 90
+                                ? '#7C3AED'
+                                : activeModalSlot.score >= 75
+                                ? '#3B82F6'
+                                : '#F59E0B',
+                          },
+                        ]}
+                      />
+                    </View>
 
+                    <View style={styles.gaugeLabelsRow}>
+                      <Text style={styles.gaugeMicroLabel}>50% Quiet</Text>
+                      <Text style={styles.gaugeMicroLabel}>75% Active</Text>
+                      <Text style={[styles.gaugeMicroLabel, { color: '#6D28D9', fontWeight: '800' }]}>
+                        98% Viral Peak 🔥
+                      </Text>
+                    </View>
+
+                    <Text style={styles.gaugeInsightText}>
+                      💡 {activeModalSlot.desc}
+                    </Text>
+                  </LinearGradient>
+
+                  {/* 1. SELECT PUBLISHING TIME (AFFECTS RATE METER) */}
+                  <Text style={styles.slotGroupTitle}>1. CHOOSE CO-POST PUBLISHING TIME</Text>
+                  <View style={styles.slotsGrid}>
+                    {PUBLISHING_SLOTS.map((slot) => {
+                      const isSelected = modalSlotId === slot.id;
+                      const isPeak = slot.score >= 90;
+                      return (
+                        <Pressable
+                          key={slot.id}
+                          onPress={() => handleSelectModalSlot(slot)}
+                          style={[
+                            styles.slotItemBox,
+                            isSelected && styles.slotItemBoxSelected,
+                            isPeak && !isSelected && styles.slotItemBoxPeak,
+                          ]}
+                        >
+                          <View style={styles.slotItemTop}>
+                            <Text
+                              style={[
+                                styles.slotItemTimeText,
+                                isSelected && styles.slotItemTimeTextSelected,
+                              ]}
+                            >
+                              {slot.time}
+                            </Text>
+                            {isPeak && (
+                              <View style={styles.peakFireBadge}>
+                                <Text style={styles.peakFireBadgeText}>🔥 PEAK</Text>
+                              </View>
+                            )}
+                          </View>
+                          <Text style={[styles.slotItemTagText, isSelected && { color: '#FFFFFF' }]}>
+                            {slot.score}% • {slot.multiplier}
+                          </Text>
+                        </Pressable>
+                      );
+                    })}
+                  </View>
+
+                  {/* 2. PLANNING TIME SELECTOR */}
+                  <Text style={styles.slotGroupTitle}>2. PLANNING SLOT (TODAY)</Text>
+                  <View style={styles.horizontalChipsRow}>
+                    {PLANNING_OPTIONS.map((time) => {
+                      const isSelected = modalPlanningTime === time;
+                      return (
+                        <Pressable
+                          key={time}
+                          onPress={() => {
+                            if (Platform.OS !== 'web') {
+                              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                            }
+                            setModalPlanningTime(time);
+                          }}
+                          style={[
+                            styles.scheduleSelectChip,
+                            isSelected && styles.scheduleSelectChipActive,
+                          ]}
+                        >
+                          <Text
+                            style={[
+                              styles.scheduleSelectChipText,
+                              isSelected && styles.scheduleSelectChipTextActive,
+                            ]}
+                          >
+                            {time}
+                          </Text>
+                        </Pressable>
+                      );
+                    })}
+                  </View>
+
+                  {/* 3. FILMING TIME SELECTOR */}
+                  <Text style={styles.slotGroupTitle}>3. FILMING WINDOW (LAGOS GMT+1)</Text>
+                  <View style={styles.horizontalChipsRow}>
+                    {FILMING_OPTIONS.map((time) => {
+                      const isSelected = modalFilmingTime === time;
+                      return (
+                        <Pressable
+                          key={time}
+                          onPress={() => {
+                            if (Platform.OS !== 'web') {
+                              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                            }
+                            setModalFilmingTime(time);
+                          }}
+                          style={[
+                            styles.scheduleSelectChip,
+                            isSelected && styles.scheduleSelectChipActive,
+                          ]}
+                        >
+                          <Text
+                            style={[
+                              styles.scheduleSelectChipText,
+                              isSelected && styles.scheduleSelectChipTextActive,
+                            ]}
+                          >
+                            {time}
+                          </Text>
+                        </Pressable>
+                      );
+                    })}
+                  </View>
+                </ScrollView>
+
+                {/* Confirm Button */}
                 <Pressable
                   style={styles.modalFullBtn}
-                  onPress={() => {
-                    setShowScheduleModal(false);
-                    setCelebrationTitle('Schedule Synced!');
-                    setCelebrationSubtitle(`Collab timeline set for 7:30 PM with ${partnerName}.`);
-                    setCelebrationSpeech('Calendar reminder created! You are ready to film.');
-                    setCelebrationBadge('SCHEDULED');
-                    setShowCelebrationModal(true);
-                  }}
+                  onPress={handleConfirmSchedule}
                 >
-                  <Text style={styles.modalFullBtnText}>Confirm Schedule ➔</Text>
+                  <LinearGradient
+                    colors={['#7C3AED', '#582CDB']}
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 1, y: 0 }}
+                    style={styles.modalFullBtnGradient}
+                  >
+                    <Text style={styles.modalFullBtnText}>
+                      Apply {activeModalSlot.time} Schedule ({activeModalSlot.multiplier}) ➔
+                    </Text>
+                  </LinearGradient>
                 </Pressable>
               </Animated.View>
             </View>
@@ -796,7 +1071,12 @@ export const CollabIdeaScreen: React.FC<CollabIdeaScreenProps> = ({
                   style={styles.modalFullBtn}
                   onPress={() => setShowProfileModal(false)}
                 >
-                  <Text style={styles.modalFullBtnText}>Done</Text>
+                  <LinearGradient
+                    colors={['#7C3AED', '#582CDB']}
+                    style={styles.modalFullBtnGradient}
+                  >
+                    <Text style={styles.modalFullBtnText}>Done</Text>
+                  </LinearGradient>
                 </Pressable>
               </Animated.View>
             </View>
@@ -847,7 +1127,12 @@ export const CollabIdeaScreen: React.FC<CollabIdeaScreenProps> = ({
                     setShowNotificationModal(false);
                   }}
                 >
-                  <Text style={styles.modalFullBtnText}>Mark All Read &amp; Close</Text>
+                  <LinearGradient
+                    colors={['#7C3AED', '#582CDB']}
+                    style={styles.modalFullBtnGradient}
+                  >
+                    <Text style={styles.modalFullBtnText}>Mark All Read &amp; Close</Text>
+                  </LinearGradient>
                 </Pressable>
               </Animated.View>
             </View>
@@ -1611,17 +1896,33 @@ const styles = StyleSheet.create({
     borderColor: '#582CDB',
   },
 
-  // Modals
+  // =========================================================================
+  // MODALS & VIRAL RATE METER STYLES
+  // =========================================================================
   modalOverlay: {
     flex: 1,
     backgroundColor: 'rgba(23, 20, 32, 0.65)',
     justifyContent: 'center',
     alignItems: 'center',
-    paddingHorizontal: 20,
+    paddingHorizontal: 18,
   },
   modalCard: {
     width: '100%',
     maxWidth: 380,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 24,
+    borderWidth: 1,
+    borderColor: '#EFEBF8',
+    padding: 20,
+    shadowColor: '#582CDB',
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.2,
+    shadowRadius: 24,
+    elevation: 8,
+  },
+  modalCardLarge: {
+    width: '100%',
+    maxWidth: 400,
     backgroundColor: '#FFFFFF',
     borderRadius: 24,
     borderWidth: 1,
@@ -1640,7 +1941,7 @@ const styles = StyleSheet.create({
     marginBottom: 14,
   },
   modalTitle: {
-    fontSize: 17,
+    fontSize: 16.5,
     fontWeight: '800',
     color: '#171420',
   },
@@ -1662,37 +1963,197 @@ const styles = StyleSheet.create({
     fontWeight: '800',
     color: '#64748B',
   },
-  scheduleSlotBox: {
-    backgroundColor: '#F8FAFC',
-    borderRadius: 14,
-    borderWidth: 1,
-    borderColor: '#E2E8F0',
-    padding: 12,
+
+  // Rate Meter Card
+  rateMeterCard: {
+    borderRadius: 18,
+    borderWidth: 1.5,
+    borderColor: '#DDD6FE',
+    padding: 14,
+    marginBottom: 16,
+  },
+  rateMeterHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
     marginBottom: 10,
   },
-  scheduleSlotLabel: {
-    fontSize: 12,
-    fontWeight: '800',
+  rateMeterLabel: {
+    fontSize: 9.5,
+    fontWeight: '900',
+    color: '#6D28D9',
+    letterSpacing: 0.6,
+  },
+  rateMeterLevelText: {
+    fontSize: 14,
+    fontWeight: '900',
+    color: '#171420',
+    marginTop: 2,
+  },
+  rateScoreBadge: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 12,
+    paddingVertical: 4,
+    paddingHorizontal: 10,
+    borderWidth: 1,
+    borderColor: '#DDD6FE',
+    alignItems: 'flex-end',
+  },
+  rateScoreNum: {
+    fontSize: 17,
+    fontWeight: '900',
     color: '#582CDB',
-    marginBottom: 2,
   },
-  scheduleSlotTime: {
-    fontSize: 12.5,
-    color: '#334155',
+  rateMultiplierText: {
+    fontSize: 10,
+    fontWeight: '800',
+    color: '#D97706',
   },
-  modalFullBtn: {
+  gaugeTrack: {
+    height: 8,
+    backgroundColor: 'rgba(255, 255, 255, 0.8)',
+    borderRadius: 4,
+    overflow: 'hidden',
+    marginBottom: 6,
+  },
+  gaugeFill: {
+    height: '100%',
+    borderRadius: 4,
+  },
+  gaugeLabelsRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 8,
+  },
+  gaugeMicroLabel: {
+    fontSize: 9.5,
+    color: '#64748B',
+    fontWeight: '600',
+  },
+  gaugeInsightText: {
+    fontSize: 11.5,
+    color: '#475569',
+    lineHeight: 16,
+  },
+
+  // Slots Grid
+  slotGroupTitle: {
+    fontSize: 10,
+    fontWeight: '900',
+    color: '#64748B',
+    letterSpacing: 0.6,
+    marginBottom: 8,
+    marginTop: 2,
+  },
+  slotsGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+    marginBottom: 14,
+  },
+  slotItemBox: {
+    width: '48%',
+    backgroundColor: '#F8FAFC',
+    borderRadius: 14,
+    borderWidth: 1.5,
+    borderColor: '#E2E8F0',
+    padding: 10,
+  },
+  slotItemBoxSelected: {
     backgroundColor: '#582CDB',
+    borderColor: '#582CDB',
+    shadowColor: '#582CDB',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.2,
+    shadowRadius: 6,
+    elevation: 3,
+  },
+  slotItemBoxPeak: {
+    backgroundColor: '#FAF5FF',
+    borderColor: '#DDD6FE',
+  },
+  slotItemTop: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 4,
+  },
+  slotItemTimeText: {
+    fontSize: 13,
+    fontWeight: '800',
+    color: '#171420',
+  },
+  slotItemTimeTextSelected: {
+    color: '#FFFFFF',
+  },
+  peakFireBadge: {
+    backgroundColor: '#FEF3C7',
+    paddingVertical: 1.5,
+    paddingHorizontal: 5,
+    borderRadius: 4,
+  },
+  peakFireBadgeText: {
+    fontSize: 8.5,
+    fontWeight: '900',
+    color: '#B45309',
+  },
+  slotItemTagText: {
+    fontSize: 10.5,
+    color: '#64748B',
+    fontWeight: '700',
+  },
+
+  // Horizontal Chips
+  horizontalChipsRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 6,
+    marginBottom: 14,
+  },
+  scheduleSelectChip: {
+    backgroundColor: '#F8FAFC',
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    paddingVertical: 6,
+    paddingHorizontal: 11,
+    borderRadius: 10,
+  },
+  scheduleSelectChipActive: {
+    backgroundColor: '#EDE9FE',
+    borderColor: '#582CDB',
+  },
+  scheduleSelectChipText: {
+    fontSize: 11.5,
+    fontWeight: '700',
+    color: '#475569',
+  },
+  scheduleSelectChipTextActive: {
+    color: '#582CDB',
+    fontWeight: '800',
+  },
+
+  modalFullBtn: {
     height: 46,
     borderRadius: 14,
+    overflow: 'hidden',
+    marginTop: 8,
+    shadowColor: '#582CDB',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.25,
+    shadowRadius: 10,
+    elevation: 4,
+  },
+  modalFullBtnGradient: {
+    flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    marginTop: 10,
   },
   modalFullBtnText: {
-    fontSize: 14,
+    fontSize: 13.5,
     fontWeight: '800',
     color: '#FFFFFF',
   },
+
   profileModalInner: {
     alignItems: 'center',
     paddingVertical: 12,
