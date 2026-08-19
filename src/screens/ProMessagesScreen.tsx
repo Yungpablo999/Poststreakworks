@@ -594,23 +594,50 @@ export const ProMessagesScreen: React.FC<ProMessagesScreenProps> = ({
             </Pressable>
           </View>
 
-          {/* User Profile Avatar with Tiny Gold Check Badge */}
-          <Pressable
-            onPress={() => {
-              setShowProfileModal(true);
-            }}
-            style={styles.profileAvatarWrapper}
-            hitSlop={8}
-          >
-            <Image
-              source={userProfile?.avatarSource || require('../../assets/images/jarvis-ghost-clean.png')}
-              style={styles.headerUserAvatar}
-              resizeMode="cover"
-            />
-            <View style={styles.avatarTinyGoldCheckPos}>
-              <TinyGoldCheck size={14} />
-            </View>
-          </Pressable>
+          {/* Right Action: Plus Button (+) & Profile Icon with Tiny Gold Check */}
+          <View style={styles.headerRightGroup}>
+            <Pressable
+              style={({ pressed }) => [styles.newChatBtn, pressed && styles.btnPressed]}
+              hitSlop={8}
+              onPress={() => {
+                if (Platform.OS !== 'web') {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                }
+                if (onOpenMatch) {
+                  onOpenMatch();
+                } else if (onNavigateTab) {
+                  onNavigateTab('match');
+                }
+              }}
+            >
+              <LinearGradient
+                colors={['#7C3AED', '#582CDB']}
+                style={styles.plusIconGradient}
+              >
+                <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
+                  <Path d="M12 5V19M5 12H19" stroke="#FFFFFF" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" />
+                </Svg>
+              </LinearGradient>
+            </Pressable>
+
+            {/* User Profile Avatar with Tiny Gold Check Badge */}
+            <Pressable
+              onPress={() => {
+                setShowProfileModal(true);
+              }}
+              style={styles.profileAvatarWrapper}
+              hitSlop={8}
+            >
+              <Image
+                source={userProfile?.avatarSource || require('../../assets/images/jarvis-ghost-clean.png')}
+                style={styles.headerUserAvatar}
+                resizeMode="cover"
+              />
+              <View style={styles.avatarTinyGoldCheckPos}>
+                <TinyGoldCheck size={14} />
+              </View>
+            </Pressable>
+          </View>
         </View>
 
         {/* 2. MAIN SCROLLABLE MESSAGES INBOX */}
@@ -1122,6 +1149,27 @@ const styles = StyleSheet.create({
     fontWeight: '900',
     color: '#78350F',
     letterSpacing: 0.3,
+  },
+  headerRightGroup: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  newChatBtn: {
+    width: 36,
+    height: 36,
+    borderRadius: 12,
+    overflow: 'hidden',
+    shadowColor: '#582CDB',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.2,
+    shadowRadius: 6,
+    elevation: 3,
+  },
+  plusIconGradient: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   profileAvatarWrapper: {
     position: 'relative',
