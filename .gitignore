@@ -41,3 +41,9 @@ yarn-error.*
 
 # TypeScript
 *.tsbuildinfo
+
+# Turborepo
+.turbo/
+
+# Next.js
+.next/
