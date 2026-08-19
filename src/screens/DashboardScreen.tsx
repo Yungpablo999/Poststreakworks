@@ -395,6 +395,7 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
   const [showCalendarModal, setShowCalendarModal] = useState(false);
   const [showPhotoModal, setShowPhotoModal] = useState(false);
   const [showNotificationModal, setShowNotificationModal] = useState(false);
+  const [showCreatorLevelModal, setShowCreatorLevelModal] = useState(false);
 
   // Notification State
   const [notifications, setNotifications] = useState<NotificationItem[]>(INITIAL_NOTIFICATIONS);

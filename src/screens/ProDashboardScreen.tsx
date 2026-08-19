@@ -277,6 +277,7 @@ export const ProDashboardScreen: React.FC<ProDashboardScreenProps> = ({
   const [showCalendarModal, setShowCalendarModal] = useState(false);
   const [showVoiceStudioModal, setShowVoiceStudioModal] = useState(false);
   const [showBrandQuestModal, setShowBrandQuestModal] = useState(false);
+  const [showCreatorLevelModal, setShowCreatorLevelModal] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [selectedStoryData, setSelectedStoryData] = useState<CreatorStoryData | null>(null);
 
@@ -799,11 +800,11 @@ export const ProDashboardScreen: React.FC<ProDashboardScreenProps> = ({
           {/* CARD 5: CREATOR LEVEL & XP PROGRESS */}
           <Pressable
             onPress={() => {
-              if (onStartMission) {
-                onStartMission();
-              } else if (onOpenQuests) {
-                onOpenQuests();
+              if (Platform.OS !== 'web') {
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
               }
+              triggerModalPop();
+              setShowCreatorLevelModal(true);
             }}
             style={({ pressed }) => [styles.dashboardCard, pressed && styles.cardPressed]}
           >
@@ -1396,6 +1397,172 @@ export const ProDashboardScreen: React.FC<ProDashboardScreenProps> = ({
               >
                 <Text style={styles.modalFullBtnText}>Apply for $450 Bounty ➔</Text>
               </Pressable>
+            </Animated.View>
+          </View>
+        </Modal>
+
+                {/* ============================================================ */}
+        {/* MODAL: CREATOR LEVEL & XP MILESTONE BADGES MODAL             */}
+        {/* ============================================================ */}
+        <Modal
+          visible={showCreatorLevelModal}
+          transparent={true}
+          animationType="fade"
+          onRequestClose={() => setShowCreatorLevelModal(false)}
+        >
+          <View style={styles.modalOverlay}>
+            <Animated.View style={[styles.modalCard, { transform: [{ scale: modalPopScale }], maxHeight: '90%' }]}>
+              <ScrollView showsVerticalScrollIndicator={false} bounces={false}>
+                {/* Header */}
+                <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+                  <View style={styles.proPriorityPill}>
+                    <Text style={styles.proPriorityText}>👑 LEVEL &amp; BADGE PROGRESSION</Text>
+                  </View>
+                  <Pressable onPress={() => setShowCreatorLevelModal(false)} hitSlop={8}>
+                    <Text style={{ fontSize: 18, color: '#94A3B8', fontWeight: '900' }}>✕</Text>
+                  </Pressable>
+                </View>
+
+                {/* Hero Level & Rank Card */}
+                <LinearGradient
+                  colors={['#3B14A7', '#582CDB', '#7C3AED']}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 1 }}
+                  style={styles.levelHeroRankCard}
+                >
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 14 }}>
+                    <View style={styles.heroLevelNumberCircle}>
+                      <Text style={styles.heroLevelNumberText}>42</Text>
+                    </View>
+                    <View style={{ flex: 1 }}>
+                      <Text style={styles.heroLevelTitle}>Elite Storyteller</Text>
+                      <Text style={styles.heroLevelSub}>Master Tier Creator • Top 3% Consistency</Text>
+                    </View>
+                  </View>
+
+                  {/* XP Progress Bar */}
+                  <View style={{ marginTop: 14 }}>
+                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 6 }}>
+                      <Text style={styles.heroXpCurrentText}>2,450 XP</Text>
+                      <Text style={styles.heroXpTargetText}>3,000 XP (Level 43)</Text>
+                    </View>
+                    <View style={styles.heroXpTrackBg}>
+                      <LinearGradient
+                        colors={['#FDE68A', '#F59E0B', '#D97706']}
+                        start={{ x: 0, y: 0 }}
+                        end={{ x: 1, y: 0 }}
+                        style={[styles.heroXpTrackFill, { width: '81.7%' }]}
+                      />
+                    </View>
+                    <Text style={styles.heroXpRemainingSub}>
+                      🔥 Only 550 XP needed to unlock <Text style={{ fontWeight: '900', color: '#FDE68A' }}>Level 43 Master Storyteller</Text>
+                    </Text>
+                  </View>
+                </LinearGradient>
+
+                {/* BADGE SHOWCASE GRID */}
+                <Text style={[styles.modalSubheadingTitle, { marginTop: 16 }]}>EARNED CREATOR BADGES (4/8)</Text>
+                <View style={styles.badgeShowcaseGrid}>
+                  {/* Badge 1 */}
+                  <View style={styles.badgeShowcaseItem}>
+                    <Text style={{ fontSize: 24, marginBottom: 4 }}>🏆</Text>
+                    <Text style={styles.badgeShowcaseName}>Elite Storyteller</Text>
+                    <Text style={styles.badgeShowcaseDesc}>40+ high-retention narrative videos</Text>
+                  </View>
+
+                  {/* Badge 2 */}
+                  <View style={styles.badgeShowcaseItem}>
+                    <Text style={{ fontSize: 24, marginBottom: 4 }}>🔥</Text>
+                    <Text style={styles.badgeShowcaseName}>52-Day Streak</Text>
+                    <Text style={styles.badgeShowcaseDesc}>Unbroken daily publishing momentum</Text>
+                  </View>
+
+                  {/* Badge 3 */}
+                  <View style={styles.badgeShowcaseItem}>
+                    <Text style={{ fontSize: 24, marginBottom: 4 }}>🎙️</Text>
+                    <Text style={styles.badgeShowcaseName}>Voice Studio Pro</Text>
+                    <Text style={styles.badgeShowcaseDesc}>10+ batches voiced with Jarvis AI</Text>
+                  </View>
+
+                  {/* Badge 4 */}
+                  <View style={styles.badgeShowcaseItem}>
+                    <Text style={{ fontSize: 24, marginBottom: 4 }}>👑</Text>
+                    <Text style={styles.badgeShowcaseName}>Multi-Sync Pioneer</Text>
+                    <Text style={styles.badgeShowcaseDesc}>4-channel automatic distribution</Text>
+                  </View>
+                </View>
+
+                {/* RECENT XP GAINS */}
+                <Text style={[styles.modalSubheadingTitle, { marginTop: 16 }]}>RECENT XP ACTIVITY</Text>
+                <View style={{ gap: 8, marginTop: 6 }}>
+                  {[
+                    { title: 'Daily 7:30 PM Video Published', time: 'Today', xp: '+50 XP' },
+                    { title: 'Multi-Platform Sync Configured', time: 'Yesterday', xp: '+25 XP' },
+                    { title: 'Squad Live Duel Victory with Elena', time: '2 days ago', xp: '+75 XP' },
+                    { title: '50-Day Consistency Milestone Trophy', time: '3 days ago', xp: '+250 XP' },
+                  ].map((item, idx) => (
+                    <View key={idx} style={styles.xpActivityRow}>
+                      <View style={{ flex: 1 }}>
+                        <Text style={styles.xpActivityTitle}>{item.title}</Text>
+                        <Text style={styles.xpActivityTime}>{item.time}</Text>
+                      </View>
+                      <View style={styles.xpActivityBadge}>
+                        <Text style={styles.xpActivityBadgeText}>{item.xp}</Text>
+                      </View>
+                    </View>
+                  ))}
+                </View>
+
+                {/* NEXT LEVEL UNLOCKS (LEVEL 43 PREVIEW) */}
+                <View style={styles.nextLevelPreviewBox}>
+                  <Text style={styles.nextLevelPreviewTitle}>🌟 LEVEL 43 MILESTONE UNLOCKS</Text>
+                  <Text style={styles.nextLevelPreviewBody}>
+                    • Master Storyteller Gold Profile Badge{"\n"}
+                    • Priority Brand Deal &amp; Sponsor Matching ($500+ brief pool){"\n"}
+                    • +500 Squad XP Multiplier Boost
+                  </Text>
+                </View>
+
+                {/* Action Buttons */}
+                <Pressable
+                  style={({ pressed }) => [styles.modalGoldActionBtnWrapper, { marginTop: 12 }, pressed && styles.btnPressed]}
+                  onPress={() => {
+                    setShowCreatorLevelModal(false);
+                    if (onStartMission) onStartMission();
+                    else if (onOpenQuests) onOpenQuests();
+                  }}
+                >
+                  <LinearGradient
+                    colors={['#FDE68A', '#F59E0B', '#D97706']}
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 1, y: 1 }}
+                    style={styles.modalGoldBtnGradient}
+                  >
+                    <Text style={styles.modalGoldActionBtnText}>
+                      ⚡ Earn More XP on Today&apos;s Mission (+150 XP) ➔
+                    </Text>
+                  </LinearGradient>
+                </Pressable>
+
+                <Pressable
+                  style={styles.modalSecondaryOutlineBtn}
+                  onPress={() => {
+                    setShowCreatorLevelModal(false);
+                    if (onOpenQuests) onOpenQuests();
+                  }}
+                >
+                  <Text style={styles.modalSecondaryOutlineBtnText}>
+                    📜 View Complete Creator Passport ➔
+                  </Text>
+                </Pressable>
+
+                <Pressable
+                  style={styles.modalCancelBtn}
+                  onPress={() => setShowCreatorLevelModal(false)}
+                >
+                  <Text style={styles.modalCancelBtnText}>Close Level Overview</Text>
+                </Pressable>
+              </ScrollView>
             </Animated.View>
           </View>
         </Modal>
@@ -2563,6 +2730,194 @@ const styles = StyleSheet.create({
     color: '#64748B',
     marginTop: 2,
     lineHeight: 16,
+  },
+  // LEVEL MODAL STYLES
+  levelHeroRankCard: {
+    borderRadius: 20,
+    padding: 18,
+    marginVertical: 6,
+  },
+  heroLevelNumberCircle: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    borderWidth: 1.5,
+    borderColor: '#FDE68A',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  heroLevelNumberText: {
+    fontSize: 20,
+    fontWeight: '900',
+    color: '#FFFFFF',
+  },
+  heroLevelTitle: {
+    fontSize: 18,
+    fontWeight: '900',
+    color: '#FFFFFF',
+  },
+  heroLevelSub: {
+    fontSize: 11,
+    color: '#E9D5FF',
+    marginTop: 2,
+    fontWeight: '700',
+  },
+  heroXpCurrentText: {
+    fontSize: 12,
+    fontWeight: '900',
+    color: '#FDE68A',
+  },
+  heroXpTargetText: {
+    fontSize: 11,
+    color: '#EDE9FE',
+    fontWeight: '700',
+  },
+  heroXpTrackBg: {
+    height: 8,
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    borderRadius: 4,
+    overflow: 'hidden',
+  },
+  heroXpTrackFill: {
+    height: '100%',
+    borderRadius: 4,
+  },
+  heroXpRemainingSub: {
+    fontSize: 10.5,
+    color: '#E9D5FF',
+    marginTop: 6,
+    fontWeight: '600',
+  },
+  modalSubheadingTitle: {
+    fontSize: 11,
+    fontWeight: '900',
+    color: '#64748B',
+    letterSpacing: 0.5,
+  },
+  badgeShowcaseGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+    marginTop: 8,
+  },
+  badgeShowcaseItem: {
+    width: '48%',
+    backgroundColor: '#FAF8F5',
+    borderRadius: 14,
+    padding: 12,
+    borderWidth: 1,
+    borderColor: '#EFECE6',
+    alignItems: 'center',
+  },
+  badgeShowcaseName: {
+    fontSize: 12,
+    fontWeight: '900',
+    color: '#171420',
+    textAlign: 'center',
+  },
+  badgeShowcaseDesc: {
+    fontSize: 10,
+    color: '#64748B',
+    textAlign: 'center',
+    marginTop: 2,
+  },
+  xpActivityRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: '#FAF8F5',
+    borderRadius: 12,
+    padding: 10,
+    borderWidth: 1,
+    borderColor: '#EFECE6',
+  },
+  xpActivityTitle: {
+    fontSize: 12,
+    fontWeight: '800',
+    color: '#171420',
+  },
+  xpActivityTime: {
+    fontSize: 10,
+    color: '#94A3B8',
+    marginTop: 1,
+  },
+  xpActivityBadge: {
+    backgroundColor: '#EDE9FE',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 8,
+  },
+  xpActivityBadgeText: {
+    fontSize: 11,
+    fontWeight: '900',
+    color: '#582CDB',
+  },
+  nextLevelPreviewBox: {
+    backgroundColor: '#FFFBEB',
+    borderRadius: 14,
+    padding: 12,
+    borderWidth: 1,
+    borderColor: '#FDE68A',
+    marginTop: 12,
+  },
+  nextLevelPreviewTitle: {
+    fontSize: 11,
+    fontWeight: '900',
+    color: '#92400E',
+    marginBottom: 4,
+  },
+  nextLevelPreviewBody: {
+    fontSize: 11,
+    color: '#78350F',
+    lineHeight: 16,
+    fontWeight: '600',
+  },
+  modalGoldActionBtnWrapper: {
+    borderRadius: 14,
+    overflow: 'hidden',
+    marginTop: 8,
+    shadowColor: '#F59E0B',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.35,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  modalGoldBtnGradient: {
+    paddingVertical: 13,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: '#FDE68A',
+  },
+  modalGoldActionBtnText: {
+    color: '#0C0A12',
+    fontSize: 13.5,
+    fontWeight: '900',
+  },
+  modalSecondaryOutlineBtn: {
+    backgroundColor: '#FAF8F5',
+    borderWidth: 1.5,
+    borderColor: '#DDD6FE',
+    paddingVertical: 12,
+    borderRadius: 14,
+    alignItems: 'center',
+    marginTop: 8,
+  },
+  modalSecondaryOutlineBtnText: {
+    color: '#582CDB',
+    fontSize: 13,
+    fontWeight: '900',
+  },
+  modalCancelBtn: {
+    paddingVertical: 10,
+    alignItems: 'center',
+  },
+  modalCancelBtnText: {
+    color: '#64748B',
+    fontSize: 12,
+    fontWeight: '800',
   },
   toastContainer: {
     position: 'absolute',
