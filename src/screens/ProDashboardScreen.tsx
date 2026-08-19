@@ -13,6 +13,8 @@ import {
   Modal,
   Dimensions,
   TextInput,
+  NativeSyntheticEvent,
+  NativeScrollEvent,
 } from 'react-native';
 import Svg, { Path, Circle, Rect } from 'react-native-svg';
 import * as Haptics from 'expo-haptics';
@@ -36,6 +38,142 @@ interface ProDashboardScreenProps {
   userProfile?: UserProfileData;
   onSaveProfile?: (updated: UserProfileData) => void;
 }
+
+interface MonthData {
+  id: string;
+  monthName: string;
+  year: number;
+  daysCount: number;
+  startOffset: number; // 0 for Mon, 1 for Tue, etc.
+  completedDays: number[];
+  scheduledDays: number[];
+  freezeDays: number[];
+  isCurrent?: boolean;
+}
+
+const FULL_YEAR_CALENDAR: MonthData[] = [
+  {
+    id: 'jan',
+    monthName: 'January',
+    year: 2024,
+    daysCount: 31,
+    startOffset: 0,
+    completedDays: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31],
+    scheduledDays: [],
+    freezeDays: [],
+  },
+  {
+    id: 'feb',
+    monthName: 'February',
+    year: 2024,
+    daysCount: 29,
+    startOffset: 3,
+    completedDays: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29],
+    scheduledDays: [],
+    freezeDays: [14],
+  },
+  {
+    id: 'mar',
+    monthName: 'March',
+    year: 2024,
+    daysCount: 31,
+    startOffset: 4,
+    completedDays: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31],
+    scheduledDays: [],
+    freezeDays: [],
+  },
+  {
+    id: 'apr',
+    monthName: 'April',
+    year: 2024,
+    daysCount: 30,
+    startOffset: 0,
+    completedDays: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30],
+    scheduledDays: [],
+    freezeDays: [8],
+  },
+  {
+    id: 'may',
+    monthName: 'May',
+    year: 2024,
+    daysCount: 31,
+    startOffset: 2,
+    completedDays: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19],
+    scheduledDays: [20, 22, 24, 26, 28, 30],
+    freezeDays: [11],
+    isCurrent: true,
+  },
+  {
+    id: 'jun',
+    monthName: 'June',
+    year: 2024,
+    daysCount: 30,
+    startOffset: 5,
+    completedDays: [],
+    scheduledDays: [1, 3, 5, 8, 12, 15, 19, 22, 26, 29],
+    freezeDays: [],
+  },
+  {
+    id: 'jul',
+    monthName: 'July',
+    year: 2024,
+    daysCount: 31,
+    startOffset: 0,
+    completedDays: [],
+    scheduledDays: [2, 6, 9, 14, 18, 21, 25, 28],
+    freezeDays: [],
+  },
+  {
+    id: 'aug',
+    monthName: 'August',
+    year: 2024,
+    daysCount: 31,
+    startOffset: 3,
+    completedDays: [],
+    scheduledDays: [1, 5, 10, 15, 20, 25, 30],
+    freezeDays: [],
+  },
+  {
+    id: 'sep',
+    monthName: 'September',
+    year: 2024,
+    daysCount: 30,
+    startOffset: 6,
+    completedDays: [],
+    scheduledDays: [],
+    freezeDays: [],
+  },
+  {
+    id: 'oct',
+    monthName: 'October',
+    year: 2024,
+    daysCount: 31,
+    startOffset: 1,
+    completedDays: [],
+    scheduledDays: [],
+    freezeDays: [],
+  },
+  {
+    id: 'nov',
+    monthName: 'November',
+    year: 2024,
+    daysCount: 30,
+    startOffset: 4,
+    completedDays: [],
+    scheduledDays: [],
+    freezeDays: [],
+  },
+  {
+    id: 'dec',
+    monthName: 'December',
+    year: 2024,
+    daysCount: 31,
+    startOffset: 6,
+    completedDays: [],
+    scheduledDays: [],
+    freezeDays: [],
+  },
+];
 
 interface NotificationItem {
   id: string;
@@ -104,9 +242,17 @@ export const ProDashboardScreen: React.FC<ProDashboardScreenProps> = ({
   const [activeTab, setActiveTab] = useState<TabType>('home');
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [showNotificationModal, setShowNotificationModal] = useState(false);
+  const [showCalendarModal, setShowCalendarModal] = useState(false);
   const [showVoiceStudioModal, setShowVoiceStudioModal] = useState(false);
   const [showBrandQuestModal, setShowBrandQuestModal] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+
+  // Calendar State
+  const [selectedMonthIndex, setSelectedMonthIndex] = useState(4); // May
+  const [selectedDayInfo, setSelectedDayInfo] = useState<string | null>(null);
+  const [pagerWidth, setPagerWidth] = useState(Dimensions.get('window').width - 68);
+  const calendarScrollRef = useRef<ScrollView>(null);
+  const monthChipsScrollRef = useRef<ScrollView>(null);
 
   // Notifications
   const [notifications, setNotifications] = useState<NotificationItem[]>(INITIAL_NOTIFICATIONS);
@@ -197,6 +343,81 @@ export const ProDashboardScreen: React.FC<ProDashboardScreenProps> = ({
     }
   };
 
+  const scrollToMonth = (index: number) => {
+    setSelectedMonthIndex(index);
+    if (calendarScrollRef.current) {
+      calendarScrollRef.current.scrollTo({
+        x: index * pagerWidth,
+        animated: true,
+      });
+    }
+    if (monthChipsScrollRef.current) {
+      monthChipsScrollRef.current.scrollTo({
+        x: Math.max(0, index * 68 - 100),
+        animated: true,
+      });
+    }
+  };
+
+  const handleCalendarScrollEnd = (e: NativeSyntheticEvent<NativeScrollEvent>) => {
+    const offsetX = e.nativeEvent.contentOffset.x;
+    const index = Math.round(offsetX / pagerWidth);
+    if (index >= 0 && index < FULL_YEAR_CALENDAR.length && index !== selectedMonthIndex) {
+      if (Platform.OS !== 'web') {
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+      }
+      setSelectedMonthIndex(index);
+      if (monthChipsScrollRef.current) {
+        monthChipsScrollRef.current.scrollTo({
+          x: Math.max(0, index * 68 - 100),
+          animated: true,
+        });
+      }
+    }
+  };
+
+  const handlePrevMonth = () => {
+    if (selectedMonthIndex > 0) {
+      if (Platform.OS !== 'web') {
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+      }
+      scrollToMonth(selectedMonthIndex - 1);
+    }
+  };
+
+  const handleNextMonth = () => {
+    if (selectedMonthIndex < FULL_YEAR_CALENDAR.length - 1) {
+      if (Platform.OS !== 'web') {
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+      }
+      scrollToMonth(selectedMonthIndex + 1);
+    }
+  };
+
+  const handleDayPress = (day: number, month: MonthData) => {
+    if (Platform.OS !== 'web') {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    }
+    const isCompleted = month.completedDays.includes(day);
+    const isScheduled = month.scheduledDays.includes(day);
+    const isFreeze = month.freezeDays.includes(day);
+    const isToday = month.isCurrent && day === 19;
+
+    let info = '';
+    if (isToday) {
+      info = `⚡ Today, May 19: 🔥 Day 47 Locked In! Scheduled Reel: 11:30 AM`;
+    } else if (isCompleted) {
+      info = `🔥 ${month.monthName} ${day}: Posted 2 Reels • 94% Retention • +1,420 Views`;
+    } else if (isScheduled) {
+      info = `⚡ ${month.monthName} ${day}: Autopilot Post Queued (Instagram & TikTok)`;
+    } else if (isFreeze) {
+      info = `🛡️ ${month.monthName} ${day}: Pro Streak Shield Used • Streak Protected!`;
+    } else {
+      info = `🗓️ ${month.monthName} ${day}, 2024 • Target: 1 Reel to advance Streak`;
+    }
+    setSelectedDayInfo(info);
+  };
+
   const unreadCount = notifications.filter((n) => n.unread).length;
 
   return (
@@ -205,7 +426,7 @@ export const ProDashboardScreen: React.FC<ProDashboardScreenProps> = ({
       <View style={styles.container}>
         {/* 1. TOP HEADER BAR */}
         <View style={styles.headerBar}>
-          {/* Top-Left: Ghost Logo Mascot + Tap to Switch to Free Mode */}
+          {/* Top-Left: Ghost Logo Mascot + Mode Switcher */}
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
             <Animated.View
               style={[
@@ -373,10 +594,19 @@ export const ProDashboardScreen: React.FC<ProDashboardScreenProps> = ({
             </View>
           </View>
 
-          {/* CARD 2: YOUR STREAK HEATMAP */}
-          <View style={styles.dashboardCard}>
+          {/* CARD 2: YOUR STREAK HEATMAP (TAP FOR PREMIUM PRO CALENDAR) */}
+          <Pressable
+            onPress={() => {
+              if (Platform.OS !== 'web') {
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              }
+              triggerModalPop();
+              setShowCalendarModal(true);
+            }}
+            style={({ pressed }) => [styles.dashboardCard, pressed && styles.cardPressed]}
+          >
             <View style={styles.streakCardHeader}>
-              <Text style={styles.streakLabel}>YOUR STREAK</Text>
+              <Text style={styles.streakLabel}>YOUR STREAK (TAP TO EXPAND)</Text>
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 2 }}>
                 <Text style={styles.streakBigCount}>47-Day Streak</Text>
                 <Animated.Text style={{ fontSize: 20, transform: [{ scale: flamePulse }] }}>
@@ -386,7 +616,7 @@ export const ProDashboardScreen: React.FC<ProDashboardScreenProps> = ({
             </View>
 
             <View style={styles.monthHeaderRow}>
-              <Text style={styles.monthLabelText}>MAY 2024</Text>
+              <Text style={styles.monthLabelText}>MAY 2024  ›</Text>
             </View>
 
             <View style={styles.daysHeaderRow}>
@@ -425,7 +655,7 @@ export const ProDashboardScreen: React.FC<ProDashboardScreenProps> = ({
               />
               <Text style={styles.topCreatorText}>Top 1% of creators this month.</Text>
             </View>
-          </View>
+          </Pressable>
 
           {/* CARD 3: POSTS SCHEDULED & AUTOPILOT */}
           <Pressable
@@ -708,6 +938,266 @@ export const ProDashboardScreen: React.FC<ProDashboardScreenProps> = ({
 
         {/* 10. FLOATING LIQUID GLASS BOTTOM NAVIGATION BAR */}
         <FloatingTabBar activeTab={activeTab} onTabPress={handleTabPress} />
+
+        {/* ============================================================ */}
+        {/* MODAL: ULTRA-PREMIUM SWIPEABLE PRO STREAK CALENDAR MODAL     */}
+        {/* ============================================================ */}
+        <Modal
+          visible={showCalendarModal}
+          transparent={true}
+          animationType="fade"
+          onRequestClose={() => setShowCalendarModal(false)}
+        >
+          <View style={styles.calendarModalOverlay}>
+            <Animated.View
+              style={[
+                styles.calendarModalCard,
+                { transform: [{ scale: modalPopScale }] },
+              ]}
+            >
+              {/* Pro Modal Header */}
+              <View style={styles.calendarModalHeader}>
+                <View style={styles.calendarModalTitleGroup}>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                    <Text style={styles.calendarModalMainTitle}>Streak Calendar 2024</Text>
+                    <LinearGradient
+                      colors={['#FDE047', '#EAB308', '#CA8A04']}
+                      start={{ x: 0, y: 0 }}
+                      end={{ x: 1, y: 0 }}
+                      style={styles.proBadgePill}
+                    >
+                      <Text style={styles.proBadgeText}>👑 PRO</Text>
+                    </LinearGradient>
+                  </View>
+                  <Text style={styles.calendarModalSubtitle}>Swipe across months • Autopilot Shield Active</Text>
+                </View>
+
+                <Pressable
+                  onPress={() => setShowCalendarModal(false)}
+                  style={styles.calendarCloseButton}
+                  hitSlop={8}
+                >
+                  <Text style={styles.modalCloseCross}>✕</Text>
+                </Pressable>
+              </View>
+
+              {/* Pro Quick Stats Banner */}
+              <View style={styles.calendarStatsRow}>
+                <View style={styles.calendarStatCard}>
+                  <Text style={styles.calendarStatValue}>47 Days 🔥</Text>
+                  <Text style={styles.calendarStatLabel}>Current</Text>
+                </View>
+                <View style={[styles.calendarStatCard, { backgroundColor: '#FEF9C3', borderColor: '#FDE047' }]}>
+                  <Text style={[styles.calendarStatValue, { color: '#854D0E' }]}>Top 1% 👑</Text>
+                  <Text style={[styles.calendarStatLabel, { color: '#A16207' }]}>Worldwide</Text>
+                </View>
+                <View style={styles.calendarStatCard}>
+                  <Text style={styles.calendarStatValue}>99.2% ⚡</Text>
+                  <Text style={styles.calendarStatLabel}>Consistency</Text>
+                </View>
+                <View style={[styles.calendarStatCard, { backgroundColor: '#EDE9FE', borderColor: '#C4B5FD' }]}>
+                  <Text style={[styles.calendarStatValue, { color: '#582CDB' }]}>2 Freezes 🛡️</Text>
+                  <Text style={[styles.calendarStatLabel, { color: '#6D28D9' }]}>Pro Shield</Text>
+                </View>
+              </View>
+
+              {/* Horizontal Month Chips (Jan -> Dec) */}
+              <ScrollView
+                ref={monthChipsScrollRef}
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={styles.monthChipsContainer}
+              >
+                {FULL_YEAR_CALENDAR.map((m, idx) => {
+                  const isSelected = selectedMonthIndex === idx;
+                  return (
+                    <Pressable
+                      key={`chip_${m.id}`}
+                      onPress={() => {
+                        if (Platform.OS !== 'web') {
+                          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                        }
+                        scrollToMonth(idx);
+                      }}
+                      style={[
+                        styles.monthChipPill,
+                        isSelected && styles.monthChipPillActive,
+                      ]}
+                    >
+                      <Text
+                        style={[
+                          styles.monthChipText,
+                          isSelected && styles.monthChipTextActive,
+                        ]}
+                      >
+                        {m.monthName.slice(0, 3)}
+                      </Text>
+                      {m.isCurrent && (
+                        <View style={[styles.monthChipCurrentDot, isSelected && styles.monthChipCurrentDotActive]} />
+                      )}
+                    </Pressable>
+                  );
+                })}
+              </ScrollView>
+
+              {/* Selected Day Toast/Info Banner */}
+              {selectedDayInfo && (
+                <View style={styles.selectedDayBanner}>
+                  <Text style={styles.selectedDayText}>{selectedDayInfo}</Text>
+                </View>
+              )}
+
+              {/* SWIPEABLE HORIZONTAL PAGER FOR ALL MONTHS */}
+              <View
+                style={styles.pagerOuterContainer}
+                onLayout={(e) => {
+                  const measuredWidth = Math.floor(e.nativeEvent.layout.width - 16);
+                  if (measuredWidth > 0 && Math.abs(measuredWidth - pagerWidth) > 1) {
+                    setPagerWidth(measuredWidth);
+                  }
+                }}
+              >
+                {/* Month Navigator Header with ‹ and › */}
+                <View style={styles.monthNavHeader}>
+                  <Pressable
+                    onPress={handlePrevMonth}
+                    disabled={selectedMonthIndex === 0}
+                    style={[
+                      styles.monthNavChevronBtn,
+                      selectedMonthIndex === 0 && styles.monthNavChevronDisabled,
+                    ]}
+                    hitSlop={8}
+                  >
+                    <Text style={{ fontSize: 18, color: selectedMonthIndex === 0 ? '#CBD5E1' : '#582CDB', fontWeight: '900' }}>‹</Text>
+                  </Pressable>
+
+                  <View style={styles.monthNameTitleGroup}>
+                    <Text style={styles.focusedMonthTitle}>
+                      {FULL_YEAR_CALENDAR[selectedMonthIndex].monthName} 2024
+                    </Text>
+                    {FULL_YEAR_CALENDAR[selectedMonthIndex].isCurrent && (
+                      <View style={styles.currentMonthBadge}>
+                        <Text style={styles.currentMonthBadgeText}>CURRENT 🔥</Text>
+                      </View>
+                    )}
+                  </View>
+
+                  <Pressable
+                    onPress={handleNextMonth}
+                    disabled={selectedMonthIndex === FULL_YEAR_CALENDAR.length - 1}
+                    style={[
+                      styles.monthNavChevronBtn,
+                      selectedMonthIndex === FULL_YEAR_CALENDAR.length - 1 && styles.monthNavChevronDisabled,
+                    ]}
+                    hitSlop={8}
+                  >
+                    <Text style={{ fontSize: 18, color: selectedMonthIndex === FULL_YEAR_CALENDAR.length - 1 ? '#CBD5E1' : '#582CDB', fontWeight: '900' }}>›</Text>
+                  </Pressable>
+                </View>
+
+                {/* Day-of-Week Column Headers */}
+                <View style={styles.dayColHeadersRow}>
+                  {['M', 'T', 'W', 'T', 'F', 'S', 'S'].map((dayHeader, dIdx) => (
+                    <Text key={`pro_cal_col_${dIdx}`} style={styles.dayColHeaderLabel}>
+                      {dayHeader}
+                    </Text>
+                  ))}
+                </View>
+
+                {/* Horizontal Paging ScrollView */}
+                <ScrollView
+                  ref={calendarScrollRef}
+                  horizontal
+                  pagingEnabled
+                  showsHorizontalScrollIndicator={false}
+                  onMomentumScrollEnd={handleCalendarScrollEnd}
+                  contentContainerStyle={{ width: pagerWidth * FULL_YEAR_CALENDAR.length }}
+                  decelerationRate="fast"
+                >
+                  {FULL_YEAR_CALENDAR.map((month) => {
+                    const totalGridCells = Math.ceil((month.daysCount + month.startOffset) / 7) * 7;
+                    const cells = Array.from({ length: totalGridCells });
+
+                    return (
+                      <View key={`month_page_${month.id}`} style={[styles.singleMonthPage, { width: pagerWidth }]}>
+                        <View style={styles.monthGridWrap}>
+                          {cells.map((_, cIdx) => {
+                            const dayNumber = cIdx - month.startOffset + 1;
+                            const isDayInMonth = dayNumber >= 1 && dayNumber <= month.daysCount;
+                            const isCompleted = isDayInMonth && month.completedDays.includes(dayNumber);
+                            const isScheduled = isDayInMonth && month.scheduledDays.includes(dayNumber);
+                            const isFreeze = isDayInMonth && month.freezeDays.includes(dayNumber);
+                            const isToday = month.isCurrent && dayNumber === 19;
+
+                            if (!isDayInMonth) {
+                              return <View key={`pro_empty_${month.id}_${cIdx}`} style={styles.dayCellEmpty} />;
+                            }
+
+                            return (
+                              <Pressable
+                                key={`pro_day_${month.id}_${dayNumber}`}
+                                onPress={() => handleDayPress(dayNumber, month)}
+                                style={[
+                                  styles.dayCellBase,
+                                  isCompleted && styles.dayCellCompleted,
+                                  isScheduled && styles.dayCellScheduled,
+                                  isFreeze && styles.dayCellFreeze,
+                                  isToday && styles.dayCellTodayPro,
+                                ]}
+                              >
+                                <Text
+                                  style={[
+                                    styles.dayCellNumber,
+                                    (isCompleted || isToday) && styles.dayCellNumberCompleted,
+                                    isScheduled && styles.dayCellNumberScheduled,
+                                    isFreeze && styles.dayCellNumberFreeze,
+                                  ]}
+                                >
+                                  {dayNumber}
+                                </Text>
+
+                                {isCompleted && <Text style={styles.dayCellCheckIcon}>✓</Text>}
+                                {isScheduled && <Text style={styles.dayCellScheduledIcon}>⚡</Text>}
+                                {isFreeze && <Text style={styles.dayCellFreezeIcon}>🛡️</Text>}
+                              </Pressable>
+                            );
+                          })}
+                        </View>
+                      </View>
+                    );
+                  })}
+                </ScrollView>
+              </View>
+
+              {/* Legend & Pro Autopilot Shield Footer */}
+              <View style={styles.legendContainer}>
+                <View style={styles.legendItem}>
+                  <View style={[styles.legendDot, { backgroundColor: '#582CDB' }]} />
+                  <Text style={styles.legendLabel}>Completed (✓)</Text>
+                </View>
+                <View style={styles.legendItem}>
+                  <View style={[styles.legendDot, { backgroundColor: '#EAB308' }]} />
+                  <Text style={styles.legendLabel}>Autopilot (⚡)</Text>
+                </View>
+                <View style={styles.legendItem}>
+                  <View style={[styles.legendDot, { backgroundColor: '#38BDF8' }]} />
+                  <Text style={styles.legendLabel}>Pro Shield (🛡️)</Text>
+                </View>
+                <View style={styles.legendItem}>
+                  <View style={[styles.legendDot, { backgroundColor: '#EF4444' }]} />
+                  <Text style={styles.legendLabel}>Today</Text>
+                </View>
+              </View>
+
+              <Pressable
+                style={styles.modalFullBtn}
+                onPress={() => setShowCalendarModal(false)}
+              >
+                <Text style={styles.modalFullBtnText}>Done</Text>
+              </Pressable>
+            </Animated.View>
+          </View>
+        </Modal>
 
         {/* MODAL: VOICE STUDIO PRO */}
         <Modal
@@ -1552,6 +2042,305 @@ const styles = StyleSheet.create({
     opacity: 0.85,
     transform: [{ scale: 0.98 }],
   },
+
+  // ULTRA-PREMIUM PRO CALENDAR MODAL STYLES
+  calendarModalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(15, 10, 30, 0.75)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 16,
+  },
+  calendarModalCard: {
+    width: '100%',
+    maxWidth: 420,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 26,
+    padding: 20,
+    shadowColor: '#582CDB',
+    shadowOffset: { width: 0, height: 12 },
+    shadowOpacity: 0.2,
+    shadowRadius: 24,
+    elevation: 10,
+  },
+  calendarModalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    marginBottom: 14,
+  },
+  calendarModalTitleGroup: {
+    flex: 1,
+  },
+  calendarModalMainTitle: {
+    fontSize: 18,
+    fontWeight: '900',
+    color: '#171420',
+  },
+  proBadgePill: {
+    paddingVertical: 2,
+    paddingHorizontal: 7,
+    borderRadius: 6,
+    borderWidth: 1,
+    borderColor: '#FEF08A',
+  },
+  proBadgeText: {
+    fontSize: 9,
+    fontWeight: '900',
+    color: '#78350F',
+    letterSpacing: 0.5,
+  },
+  calendarModalSubtitle: {
+    fontSize: 11.5,
+    color: '#64748B',
+    marginTop: 2,
+  },
+  calendarCloseButton: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: '#F1F5F9',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  calendarStatsRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    gap: 6,
+    marginBottom: 12,
+  },
+  calendarStatCard: {
+    flex: 1,
+    backgroundColor: '#F8FAFC',
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    borderRadius: 12,
+    paddingVertical: 8,
+    paddingHorizontal: 4,
+    alignItems: 'center',
+  },
+  calendarStatValue: {
+    fontSize: 12,
+    fontWeight: '900',
+    color: '#171420',
+  },
+  calendarStatLabel: {
+    fontSize: 9.5,
+    fontWeight: '700',
+    color: '#64748B',
+    marginTop: 2,
+  },
+  monthChipsContainer: {
+    flexDirection: 'row',
+    gap: 6,
+    paddingBottom: 10,
+  },
+  monthChipPill: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 16,
+    backgroundColor: '#F1F5F9',
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+  monthChipPillActive: {
+    backgroundColor: '#582CDB',
+  },
+  monthChipText: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: '#475569',
+  },
+  monthChipTextActive: {
+    color: '#FFFFFF',
+    fontWeight: '900',
+  },
+  monthChipCurrentDot: {
+    width: 5,
+    height: 5,
+    borderRadius: 2.5,
+    backgroundColor: '#EAB308',
+  },
+  monthChipCurrentDotActive: {
+    backgroundColor: '#FDE047',
+  },
+  selectedDayBanner: {
+    backgroundColor: '#FEF9C3',
+    borderWidth: 1,
+    borderColor: '#FDE047',
+    borderRadius: 12,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    marginBottom: 10,
+  },
+  selectedDayText: {
+    fontSize: 11.5,
+    fontWeight: '800',
+    color: '#78350F',
+    textAlign: 'center',
+  },
+  pagerOuterContainer: {
+    backgroundColor: '#FAF8F5',
+    borderRadius: 18,
+    borderWidth: 1,
+    borderColor: '#EFECE6',
+    paddingVertical: 10,
+    paddingHorizontal: 8,
+    marginBottom: 12,
+  },
+  monthNavHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 8,
+    marginBottom: 8,
+  },
+  monthNavChevronBtn: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: '#FFFFFF',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+  },
+  monthNavChevronDisabled: {
+    opacity: 0.4,
+  },
+  monthNameTitleGroup: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  focusedMonthTitle: {
+    fontSize: 14,
+    fontWeight: '900',
+    color: '#171420',
+  },
+  currentMonthBadge: {
+    backgroundColor: '#FEF3C7',
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 4,
+  },
+  currentMonthBadgeText: {
+    fontSize: 8.5,
+    fontWeight: '900',
+    color: '#B45309',
+  },
+  dayColHeadersRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    marginBottom: 6,
+    paddingHorizontal: 4,
+  },
+  dayColHeaderLabel: {
+    width: 32,
+    textAlign: 'center',
+    fontSize: 10,
+    fontWeight: '800',
+    color: '#94A3B8',
+  },
+  singleMonthPage: {
+    alignItems: 'center',
+  },
+  monthGridWrap: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-around',
+    width: '100%',
+    rowGap: 6,
+  },
+  dayCellEmpty: {
+    width: 34,
+    height: 34,
+  },
+  dayCellBase: {
+    width: 34,
+    height: 34,
+    borderRadius: 8,
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  dayCellCompleted: {
+    backgroundColor: '#582CDB',
+    borderColor: '#4C1D95',
+  },
+  dayCellScheduled: {
+    backgroundColor: '#FEF9C3',
+    borderColor: '#FDE047',
+  },
+  dayCellFreeze: {
+    backgroundColor: '#E0F2FE',
+    borderColor: '#7DD3FC',
+  },
+  dayCellTodayPro: {
+    borderWidth: 2,
+    borderColor: '#EAB308',
+    backgroundColor: '#582CDB',
+  },
+  dayCellNumber: {
+    fontSize: 10,
+    fontWeight: '700',
+    color: '#334155',
+  },
+  dayCellNumberCompleted: {
+    color: '#FFFFFF',
+    fontWeight: '900',
+  },
+  dayCellNumberScheduled: {
+    color: '#854D0E',
+    fontWeight: '900',
+  },
+  dayCellNumberFreeze: {
+    color: '#0369A1',
+    fontWeight: '900',
+  },
+  dayCellCheckIcon: {
+    fontSize: 8,
+    color: '#FFFFFF',
+    fontWeight: '900',
+    position: 'absolute',
+    bottom: 2,
+  },
+  dayCellScheduledIcon: {
+    fontSize: 7.5,
+    position: 'absolute',
+    bottom: 2,
+  },
+  dayCellFreezeIcon: {
+    fontSize: 7,
+    position: 'absolute',
+    bottom: 2,
+  },
+  legendContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingHorizontal: 6,
+    marginBottom: 12,
+  },
+  legendItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+  legendDot: {
+    width: 7,
+    height: 7,
+    borderRadius: 3.5,
+  },
+  legendLabel: {
+    fontSize: 9.5,
+    color: '#64748B',
+    fontWeight: '700',
+  },
+
+  // COMMON MODALS
   modalOverlay: {
     flex: 1,
     backgroundColor: 'rgba(15, 10, 30, 0.7)',
@@ -1605,7 +2394,7 @@ const styles = StyleSheet.create({
     paddingVertical: 13,
     borderRadius: 14,
     alignItems: 'center',
-    marginTop: 14,
+    marginTop: 6,
   },
   modalFullBtnText: {
     color: '#FFFFFF',
