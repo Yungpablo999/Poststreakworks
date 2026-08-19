@@ -26,7 +26,7 @@ export const TinyGoldCheck = ({ size = 13 }: { size?: number }) => (
       width: size,
       height: size,
       borderRadius: size / 2,
-      backgroundColor: '#C59B27',
+      backgroundColor: '#F59E0B',
       borderWidth: 1.5,
       borderColor: '#FFFFFF',
       justifyContent: 'center',
@@ -1096,12 +1096,12 @@ const styles = StyleSheet.create({
     paddingVertical: 2,
     borderRadius: 6,
     borderWidth: 1,
-    borderColor: '#DFB758',
+    borderColor: '#FBBF24',
   },
   proHeaderBadgeText: {
     fontSize: 8.5,
     fontWeight: '900',
-    color: '#8A5A00',
+    color: '#92400E',
     letterSpacing: 0.3,
   },
   headerRightGroup: {
@@ -1151,7 +1151,7 @@ const styles = StyleSheet.create({
     position: 'relative',
   },
   profilePhotoBtnPro: {
-    borderColor: '#C59B27',
+    borderColor: '#F59E0B',
     borderWidth: 2,
   },
   headerCustomAvatarImage: {
@@ -1203,7 +1203,7 @@ const styles = StyleSheet.create({
     letterSpacing: 0.5,
   },
   proAccessPill: {
-    backgroundColor: '#F5E6C4',
+    backgroundColor: '#FEF3C7',
     paddingHorizontal: 8,
     paddingVertical: 3.5,
     borderRadius: 6,
@@ -1211,7 +1211,7 @@ const styles = StyleSheet.create({
   proAccessPillText: {
     fontSize: 9.5,
     fontWeight: '900',
-    color: '#8A5A00',
+    color: '#92400E',
   },
   mainTitleText: {
     fontSize: 22,
@@ -1327,7 +1327,7 @@ const styles = StyleSheet.create({
     color: '#475569',
   },
   projectTagGold: {
-    backgroundColor: '#F5E6C4',
+    backgroundColor: '#FEF3C7',
     paddingHorizontal: 8,
     paddingVertical: 3,
     borderRadius: 6,
@@ -1335,7 +1335,7 @@ const styles = StyleSheet.create({
   projectTagGoldText: {
     fontSize: 10,
     fontWeight: '900',
-    color: '#8A5A00',
+    color: '#92400E',
   },
   workflowActionsRow: {
     flexDirection: 'row',
@@ -1378,7 +1378,7 @@ const styles = StyleSheet.create({
     color: '#171420',
   },
   powerPillBadge: {
-    backgroundColor: '#F5E6C4',
+    backgroundColor: '#FEF3C7',
     paddingHorizontal: 6,
     paddingVertical: 2,
     borderRadius: 4,
@@ -1386,7 +1386,7 @@ const styles = StyleSheet.create({
   powerPillText: {
     fontSize: 9,
     fontWeight: '900',
-    color: '#8A5A00',
+    color: '#92400E',
   },
   proToolsGrid: {
     flexDirection: 'row',

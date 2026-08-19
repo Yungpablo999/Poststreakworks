@@ -350,7 +350,7 @@ export const ProScheduleScreen: React.FC<ProScheduleScreenProps> = ({
               hitSlop={8}
             >
               <LinearGradient
-                colors={['#E5C158', '#C59B27', '#9E7418']}
+                colors={['#FDE68A', '#F59E0B', '#D97706']}
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 1 }}
                 style={styles.proHeaderBadge}
@@ -820,7 +820,7 @@ export const ProScheduleScreen: React.FC<ProScheduleScreenProps> = ({
                 }}
               >
                 <LinearGradient
-                  colors={['#E5C158', '#C59B27', '#9E7418']}
+                  colors={['#FDE68A', '#F59E0B', '#D97706']}
                   start={{ x: 0, y: 0 }}
                   end={{ x: 1, y: 1 }}
                   style={styles.goldBtnGradient}
@@ -1128,7 +1128,7 @@ export const ProScheduleScreen: React.FC<ProScheduleScreenProps> = ({
                   onPress={handleConfirmFillGap}
                 >
                   <LinearGradient
-                    colors={['#E5C158', '#C59B27', '#9E7418']}
+                    colors={['#FDE68A', '#F59E0B', '#D97706']}
                     start={{ x: 0, y: 0 }}
                     end={{ x: 1, y: 1 }}
                     style={styles.modalGoldBtnGradient}
@@ -1290,7 +1290,7 @@ const styles = StyleSheet.create({
     paddingVertical: 2,
     borderRadius: 6,
     borderWidth: 1,
-    borderColor: '#DFB758',
+    borderColor: '#FBBF24',
   },
   proHeaderBadgeText: {
     fontSize: 8.5,
@@ -1327,7 +1327,7 @@ const styles = StyleSheet.create({
     height: 38,
     borderRadius: 19,
     borderWidth: 2,
-    borderColor: '#C59B27',
+    borderColor: '#F59E0B',
   },
   avatarTinyGoldCheckPos: {
     position: 'absolute',
@@ -1346,9 +1346,9 @@ const styles = StyleSheet.create({
   },
   contentScheduleTagBox: {
     alignSelf: 'flex-start',
-    backgroundColor: '#F5E6C4',
+    backgroundColor: '#FEF3C7',
     borderWidth: 1,
-    borderColor: '#C59B27',
+    borderColor: '#F59E0B',
     paddingHorizontal: 8,
     paddingVertical: 3.5,
     borderRadius: 6,
@@ -1357,7 +1357,7 @@ const styles = StyleSheet.create({
   contentScheduleTagText: {
     fontSize: 9.5,
     fontWeight: '900',
-    color: '#8A5A00',
+    color: '#92400E',
     letterSpacing: 0.6,
   },
   mainTitleText: {
@@ -1427,7 +1427,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   fillGapsOutlineBtnText: {
-    color: '#8A5A00',
+    color: '#92400E',
     fontSize: 13,
     fontWeight: '900',
   },
@@ -1552,7 +1552,7 @@ const styles = StyleSheet.create({
     width: 5,
     height: 5,
     borderRadius: 2.5,
-    backgroundColor: '#C59B27',
+    backgroundColor: '#F59E0B',
   },
 
   // SECTION 3: TODAY'S SCHEDULE
@@ -1584,7 +1584,7 @@ const styles = StyleSheet.create({
   },
   scheduleItemCardGoldBorder: {
     borderLeftWidth: 3,
-    borderLeftColor: '#C59B27',
+    borderLeftColor: '#F59E0B',
   },
   timeBoxPurple: {
     width: 52,
@@ -1608,21 +1608,21 @@ const styles = StyleSheet.create({
     width: 52,
     height: 48,
     borderRadius: 12,
-    backgroundColor: '#F5E6C4',
+    backgroundColor: '#FEF3C7',
     borderWidth: 1,
-    borderColor: '#DFB758',
+    borderColor: '#FBBF24',
     justifyContent: 'center',
     alignItems: 'center',
   },
   timeBoxGoldText: {
     fontSize: 12,
     fontWeight: '900',
-    color: '#8A5A00',
+    color: '#92400E',
   },
   timeBoxGoldSub: {
     fontSize: 9,
     fontWeight: '800',
-    color: '#9E7418',
+    color: '#B45309',
   },
   scheduleItemTitle: {
     fontSize: 14,
@@ -1647,9 +1647,9 @@ const styles = StyleSheet.create({
     color: '#582CDB',
   },
   recommendedPillBadge: {
-    backgroundColor: '#F5E6C4',
+    backgroundColor: '#FEF3C7',
     borderWidth: 1,
-    borderColor: '#DFB758',
+    borderColor: '#FBBF24',
     paddingHorizontal: 8,
     paddingVertical: 3.5,
     borderRadius: 6,
@@ -1657,7 +1657,7 @@ const styles = StyleSheet.create({
   recommendedPillBadgeText: {
     fontSize: 9,
     fontWeight: '900',
-    color: '#8A5A00',
+    color: '#92400E',
   },
   emptyScheduleBox: {
     backgroundColor: '#FFFFFF',
@@ -1890,7 +1890,7 @@ const styles = StyleSheet.create({
   gapWarningSub: {
     fontSize: 9.5,
     fontWeight: '800',
-    color: '#8A5A00',
+    color: '#92400E',
     letterSpacing: 0.5,
   },
   gapWarningTitle: {
@@ -1903,7 +1903,7 @@ const styles = StyleSheet.create({
     flex: 1,
     borderRadius: 12,
     overflow: 'hidden',
-    shadowColor: '#9E7418',
+    shadowColor: '#F59E0B',
     shadowOffset: { width: 0, height: 3 },
     shadowOpacity: 0.35,
     shadowRadius: 8,
@@ -1915,7 +1915,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: '#E5C158',
+    borderColor: '#FCD34D',
     borderRadius: 12,
   },
   fillSlotGoldBtnText: {
@@ -1997,9 +1997,9 @@ const styles = StyleSheet.create({
     letterSpacing: 0.5,
   },
   modalGoldTagBadge: {
-    backgroundColor: '#F5E6C4',
+    backgroundColor: '#FEF3C7',
     borderWidth: 1,
-    borderColor: '#C59B27',
+    borderColor: '#F59E0B',
     paddingHorizontal: 8,
     paddingVertical: 3.5,
     borderRadius: 6,
@@ -2007,7 +2007,7 @@ const styles = StyleSheet.create({
   modalGoldTagBadgeText: {
     fontSize: 9,
     fontWeight: '900',
-    color: '#8A5A00',
+    color: '#92400E',
     letterSpacing: 0.5,
   },
   modalTagBadge: {
@@ -2152,7 +2152,7 @@ const styles = StyleSheet.create({
     borderRadius: 14,
     overflow: 'hidden',
     marginTop: 8,
-    shadowColor: '#9E7418',
+    shadowColor: '#F59E0B',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.4,
     shadowRadius: 10,
@@ -2163,7 +2163,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 1,
-    borderColor: '#E5C158',
+    borderColor: '#FCD34D',
     borderRadius: 14,
   },
   modalGoldActionBtnText: {
@@ -2184,9 +2184,9 @@ const styles = StyleSheet.create({
 
   // GAP MODAL SPECIFIC
   gapSlotDetectedBanner: {
-    backgroundColor: '#FAF3E0',
+    backgroundColor: '#FFFBEB',
     borderWidth: 1,
-    borderColor: '#DFB758',
+    borderColor: '#FBBF24',
     borderRadius: 12,
     padding: 12,
     marginBottom: 12,
@@ -2194,11 +2194,11 @@ const styles = StyleSheet.create({
   gapSlotDetectedTitle: {
     fontSize: 11,
     fontWeight: '900',
-    color: '#8A5A00',
+    color: '#92400E',
   },
   gapSlotDetectedSub: {
     fontSize: 10.5,
-    color: '#9E7418',
+    color: '#B45309',
     marginTop: 2,
   },
   gapSuggestionCard: {

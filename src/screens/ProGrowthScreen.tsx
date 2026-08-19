@@ -25,7 +25,7 @@ export const TinyGoldCheck = ({ size = 13 }: { size?: number }) => (
       width: size,
       height: size,
       borderRadius: size / 2,
-      backgroundColor: '#C59B27',
+      backgroundColor: '#F59E0B',
       borderWidth: 1.5,
       borderColor: '#FFFFFF',
       justifyContent: 'center',
@@ -934,12 +934,12 @@ const styles = StyleSheet.create({
     paddingVertical: 2,
     borderRadius: 6,
     borderWidth: 1,
-    borderColor: '#DFB758',
+    borderColor: '#FBBF24',
   },
   proHeaderBadgeText: {
     fontSize: 8.5,
     fontWeight: '900',
-    color: '#8A5A00',
+    color: '#92400E',
     letterSpacing: 0.3,
   },
   headerRightGroup: {
@@ -989,7 +989,7 @@ const styles = StyleSheet.create({
     position: 'relative',
   },
   profilePhotoBtnPro: {
-    borderColor: '#C59B27',
+    borderColor: '#F59E0B',
     borderWidth: 2,
   },
   headerCustomAvatarImage: {
@@ -1049,7 +1049,7 @@ const styles = StyleSheet.create({
   },
   proAnalyticsActivePill: {
     alignSelf: 'flex-start',
-    backgroundColor: '#F5E6C4',
+    backgroundColor: '#FEF3C7',
     paddingHorizontal: 8,
     paddingVertical: 3,
     borderRadius: 6,
@@ -1058,7 +1058,7 @@ const styles = StyleSheet.create({
   proAnalyticsActiveText: {
     fontSize: 9.5,
     fontWeight: '900',
-    color: '#8A5A00',
+    color: '#92400E',
   },
   mainSubtitleText: {
     fontSize: 13,
@@ -1147,7 +1147,7 @@ const styles = StyleSheet.create({
     color: '#171420',
   },
   platformSyncPill: {
-    backgroundColor: '#F5E6C4',
+    backgroundColor: '#FEF3C7',
     paddingHorizontal: 7,
     paddingVertical: 3,
     borderRadius: 6,
@@ -1155,7 +1155,7 @@ const styles = StyleSheet.create({
   platformSyncText: {
     fontSize: 9,
     fontWeight: '900',
-    color: '#8A5A00',
+    color: '#92400E',
   },
   platformsContainerCard: {
     backgroundColor: '#FFFFFF',
