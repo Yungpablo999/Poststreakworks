@@ -27,6 +27,7 @@ const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
 interface MessagesScreenProps {
   onBack: () => void;
+  initialConversationId?: string;
   onLogout?: () => void;
   onOpenSchedule?: () => void;
   onOpenJarvisPro?: () => void;
@@ -95,6 +96,7 @@ interface ConversationThread {
   lastMessage: string;
   time: string;
   unread: boolean;
+  unreadCount?: number;
   category: 'buddies' | 'collabs' | 'jarvis';
   collabBadge?: string;
   messages: ChatMessage[];
@@ -299,6 +301,38 @@ const CREATOR_STORIES: CreatorStory[] = [
 
 const INITIAL_CONVERSATIONS: ConversationThread[] = [
   {
+    id: 'conv_jarvis',
+    creatorId: 'jarvis',
+    name: 'Jarvis AI Co-Pilot',
+    handle: '@jarvis.ai',
+    niche: 'AI Content Director & Strategist',
+    avatar: require('../../assets/images/jarvis-ghost-clean.png'),
+    streak: 99,
+    isOnline: true,
+    lastMessage: 'Hey Pablo! I analyzed your schedule gaps. Want me to draft a high-retention 7:30 PM Reel?',
+    time: 'Just now',
+    unread: true,
+    unreadCount: 1,
+    category: 'jarvis',
+    collabBadge: '⚡ AI Content Director Active',
+    messages: [
+      {
+        id: 'jm1',
+        senderId: 'jarvis',
+        text: 'Hey Pablo! ⚡ I noticed an opening in your schedule for today at 7:30 PM.',
+        time: '11:25 AM',
+        isUser: false,
+      },
+      {
+        id: 'jm2',
+        senderId: 'jarvis',
+        text: 'I can help you write a viral hook, draft a 45-second script, or generate high-CTR thumbnail ideas right now. What would you like to build?',
+        time: '11:26 AM',
+        isUser: false,
+      },
+    ],
+  },
+  {
     id: 't1',
     creatorId: 'c1',
     name: 'Elena Rostova',
@@ -429,6 +463,7 @@ const INITIAL_CONVERSATIONS: ConversationThread[] = [
 
 export const MessagesScreen: React.FC<MessagesScreenProps> = ({
   onBack,
+  initialConversationId,
   onLogout,
   onOpenSchedule,
   onOpenJarvisPro,
@@ -469,7 +504,21 @@ export const MessagesScreen: React.FC<MessagesScreenProps> = ({
   };
 
   // Active 1-on-1 Chat State
-  const [activeChatThread, setActiveChatThread] = useState<ConversationThread | null>(null);
+  const [activeChatThread, setActiveChatThread] = useState<ConversationThread | null>(() => {
+    if (initialConversationId) {
+      return INITIAL_CONVERSATIONS.find((c) => c.id === initialConversationId) || null;
+    }
+    return null;
+  });
+
+  useEffect(() => {
+    if (initialConversationId) {
+      const found = INITIAL_CONVERSATIONS.find((c) => c.id === initialConversationId);
+      if (found) {
+        setActiveChatThread(found);
+      }
+    }
+  }, [initialConversationId]);
   const [inputMessage, setInputMessage] = useState('');
 
   // Snapchat / Social-Style Story & Highlights Player State

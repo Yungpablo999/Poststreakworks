@@ -409,7 +409,21 @@ export const ProMessagesScreen: React.FC<ProMessagesScreenProps> = ({
   const [selectedFilter, setSelectedFilter] = useState<'all' | 'collabs' | 'squad' | 'deals' | 'jarvis'>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [conversations, setConversations] = useState<ConversationThread[]>(INITIAL_CONVERSATIONS);
-  const [activeChatThread, setActiveChatThread] = useState<ConversationThread | null>(null);
+  const [activeChatThread, setActiveChatThread] = useState<ConversationThread | null>(() => {
+    if (initialConversationId) {
+      return INITIAL_CONVERSATIONS.find((c) => c.id === initialConversationId) || null;
+    }
+    return null;
+  });
+
+  useEffect(() => {
+    if (initialConversationId) {
+      const found = INITIAL_CONVERSATIONS.find((c) => c.id === initialConversationId);
+      if (found) {
+        setActiveChatThread(found);
+      }
+    }
+  }, [initialConversationId]);
   const [chatInputText, setChatInputText] = useState('');
   const [selectedStoryData, setSelectedStoryData] = useState<CreatorStoryData | null>(null);
   const [showProfileModal, setShowProfileModal] = useState(false);

@@ -1083,7 +1083,11 @@ export default function App() {
             />
           ) : (
             <MessagesScreen
-              onBack={() => navigateTo(previousScreen ? previousScreen : 'dashboard')}
+              initialConversationId={activeMessageThreadId}
+              onBack={() => {
+                setActiveMessageThreadId(undefined);
+                navigateTo(previousScreen ? previousScreen : 'dashboard');
+              }}
               onLogout={handleLogout}
               onOpenSchedule={() => navigateTo('schedule')}
               onOpenJarvisPro={() => navigateTo('jarvis-pro')}
