@@ -13,6 +13,8 @@ import {
   Modal,
   Dimensions,
   TextInput,
+  NativeSyntheticEvent,
+  NativeScrollEvent,
 } from 'react-native';
 import Svg, { Path, Circle, Rect } from 'react-native-svg';
 import * as Haptics from 'expo-haptics';
@@ -38,6 +40,18 @@ interface DashboardScreenProps {
 
 type NotificationFilter = 'all' | 'unread' | 'quests';
 
+interface MonthData {
+  id: string;
+  monthName: string;
+  year: number;
+  daysCount: number;
+  startOffset: number;
+  completedDays: number[];
+  scheduledDays: number[];
+  freezeDays: number[];
+  isCurrent?: boolean;
+}
+
 interface NotificationItem {
   id: string;
   type: 'streak' | 'collab' | 'quest' | 'level' | 'growth';
@@ -50,6 +64,70 @@ interface NotificationItem {
   badgeBorder: string;
   actionText?: string;
 }
+
+const FULL_YEAR_CALENDAR: MonthData[] = [
+  {
+    id: 'jan',
+    monthName: 'January',
+    year: 2024,
+    daysCount: 31,
+    startOffset: 0,
+    completedDays: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31],
+    scheduledDays: [],
+    freezeDays: [],
+  },
+  {
+    id: 'feb',
+    monthName: 'February',
+    year: 2024,
+    daysCount: 29,
+    startOffset: 3,
+    completedDays: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29],
+    scheduledDays: [],
+    freezeDays: [14],
+  },
+  {
+    id: 'mar',
+    monthName: 'March',
+    year: 2024,
+    daysCount: 31,
+    startOffset: 4,
+    completedDays: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31],
+    scheduledDays: [],
+    freezeDays: [],
+  },
+  {
+    id: 'apr',
+    monthName: 'April',
+    year: 2024,
+    daysCount: 30,
+    startOffset: 0,
+    completedDays: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30],
+    scheduledDays: [],
+    freezeDays: [8],
+  },
+  {
+    id: 'may',
+    monthName: 'May',
+    year: 2024,
+    daysCount: 31,
+    startOffset: 2,
+    completedDays: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19],
+    scheduledDays: [20, 22, 24, 26, 28, 30],
+    freezeDays: [11],
+    isCurrent: true,
+  },
+  {
+    id: 'jun',
+    monthName: 'June',
+    year: 2024,
+    daysCount: 30,
+    startOffset: 5,
+    completedDays: [],
+    scheduledDays: [1, 3, 5, 8, 12, 15, 19, 22, 26, 29],
+    freezeDays: [],
+  },
+];
 
 const INITIAL_NOTIFICATIONS: NotificationItem[] = [
   {
@@ -105,16 +183,22 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
   userProfile,
   onSaveProfile,
 }) => {
-  // Correct reactive isPro flag
+  // Reactive isPro state
   const isPro = userProfile?.tier === 'pro' || userProfile?.tier === 'founding';
 
   const [activeTab, setActiveTab] = useState<TabType>('home');
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [showNotificationModal, setShowNotificationModal] = useState(false);
   const [showCalendarModal, setShowCalendarModal] = useState(false);
+  const [showMissionModal, setShowMissionModal] = useState(false);
   const [showVoiceStudioModal, setShowVoiceStudioModal] = useState(false);
   const [showBrandQuestModal, setShowBrandQuestModal] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+
+  // Calendar State for Free Mode Heatmap Modal
+  const [selectedMonthIndex, setSelectedMonthIndex] = useState(4);
+  const [pagerWidth, setPagerWidth] = useState(Dimensions.get('window').width - 68);
+  const calendarScrollRef = useRef<ScrollView>(null);
 
   // Notification State
   const [notifications, setNotifications] = useState<NotificationItem[]>(INITIAL_NOTIFICATIONS);
@@ -131,8 +215,15 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
   const waveformAnim = useRef(new Animated.Value(0.4)).current;
   const modalPopScale = useRef(new Animated.Value(0.92)).current;
 
+  // Free mode heatmap grid
+  const streakGrid = [
+    [false, false, true, true, true, true],
+    [true, true, true, true, true, true],
+    [true, true, true, true, true, true],
+    [true, true, true, true, true, true],
+  ];
+
   useEffect(() => {
-    // Pulse animation for flame
     Animated.loop(
       Animated.sequence([
         Animated.timing(flamePulse, {
@@ -148,7 +239,6 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
       ])
     ).start();
 
-    // Floating animation for Mascot
     Animated.loop(
       Animated.sequence([
         Animated.timing(ghostFloatY, {
@@ -164,7 +254,6 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
       ])
     ).start();
 
-    // Waveform audio pulse
     Animated.loop(
       Animated.sequence([
         Animated.timing(waveformAnim, {
@@ -208,14 +297,14 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
     }
   };
 
-  const handleToggleTier = () => {
+  const handleToggleTier = (forcedTier?: 'free' | 'pro') => {
     if (Platform.OS !== 'web') {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     }
-    const nextTier = isPro ? 'free' : 'pro';
+    const nextTier = forcedTier || (isPro ? 'free' : 'pro');
     if (onSaveProfile && userProfile) {
       onSaveProfile({ ...userProfile, tier: nextTier });
-      showToast(nextTier === 'pro' ? '👑 Switched to PRO MODE!' : '🔒 Switched to FREE MODE!');
+      showToast(nextTier === 'pro' ? '👑 Switched to PRO INTERFACE!' : '🔒 Switched to FREE INTERFACE!');
     }
   };
 
@@ -225,9 +314,10 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
     <SafeAreaView style={styles.safeArea}>
       <StatusBar barStyle="dark-content" backgroundColor="#FAF8F5" />
       <View style={styles.container}>
-        {/* 1. TOP HEADER BAR */}
+        {/* ============================================================ */}
+        {/* 1. TOP HEADER BAR WITH 1-TAP MODE TOGGLE                     */}
+        {/* ============================================================ */}
         <View style={styles.headerBar}>
-          {/* Top-Left: Ghost Logo Mascot + Live 1-Tap Tier Toggle Pill */}
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
             <Animated.View
               style={[
@@ -247,7 +337,8 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
               />
             </Animated.View>
 
-            <Pressable onPress={handleToggleTier} hitSlop={8}>
+            {/* 1-Tap Toggle Pill to switch between Free and Pro Interface */}
+            <Pressable onPress={() => handleToggleTier()} hitSlop={8}>
               {isPro ? (
                 <LinearGradient
                   colors={['#FDE047', '#EAB308', '#CA8A04']}
@@ -255,19 +346,19 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
                   end={{ x: 1, y: 0 }}
                   style={styles.proHeaderBadge}
                 >
-                  <Text style={styles.proHeaderBadgeText}>👑 PRO (TAP TO FREE)</Text>
+                  <Text style={styles.proHeaderBadgeText}>👑 PRO (TAP FOR FREE)</Text>
                 </LinearGradient>
               ) : (
                 <View style={[styles.proHeaderBadge, { backgroundColor: '#EDE9FE', borderColor: '#C4B5FD' }]}>
-                  <Text style={[styles.proHeaderBadgeText, { color: '#582CDB' }]}>🔒 FREE (TAP TO PRO)</Text>
+                  <Text style={[styles.proHeaderBadgeText, { color: '#582CDB' }]}>🔒 FREE (TAP FOR PRO)</Text>
                 </View>
               )}
             </Pressable>
           </View>
 
-          {/* Right Action Icons: Messages, Notification Bell & Profile Avatar */}
+          {/* Right Action Icons */}
           <View style={styles.headerRightGroup}>
-            {/* Chat Bubble Button */}
+            {/* Chat Messages */}
             <Pressable
               style={({ pressed }) => [styles.headerIconBtn, pressed && styles.headerIconBtnPressed]}
               hitSlop={8}
@@ -293,7 +384,7 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
               </Svg>
             </Pressable>
 
-            {/* Notification Bell with Badge */}
+            {/* Notification Bell */}
             <Pressable
               style={({ pressed }) => [styles.headerIconBtn, pressed && styles.headerIconBtnPressed]}
               hitSlop={8}
@@ -324,7 +415,7 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
               {unreadCount > 0 && <View style={styles.notificationDot} />}
             </Pressable>
 
-            {/* Profile Avatar Button */}
+            {/* Profile Avatar */}
             <Pressable
               onPress={() => {
                 if (Platform.OS !== 'web') {
@@ -346,7 +437,7 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
                 resizeMode="cover"
               />
               <View style={styles.addPhotoPlusBadge}>
-                <Text style={styles.addPhotoPlusText}>✓</Text>
+                <Text style={styles.addPhotoPlusText}>{isPro ? '👑' : '✓'}</Text>
               </View>
             </Pressable>
           </View>
@@ -360,9 +451,9 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
         >
           {isPro ? (
             /* ============================================================ */
-            /* 👑 PRO HOME DASHBOARD (Exact Screenshot Design)             */
+            /* 👑 PRO INTERFACE (Matches Design Screenshot Exactly)         */
             /* ============================================================ */
-            <View>
+            <View key="pro_interface">
               {/* CARD 1: TODAY'S PRO PLAN HERO */}
               <View style={styles.proPlanHeroCard}>
                 <View style={styles.proPlanHeaderRow}>
@@ -375,7 +466,6 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
                   Publish your Reel, then turn your next script into a voiceover.
                 </Text>
 
-                {/* Badges Row */}
                 <View style={styles.proPlanBadgesRow}>
                   <View style={styles.proPillPurple}>
                     <Text style={styles.proPillPurpleText}>Level 42</Text>
@@ -422,7 +512,7 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
 
                 <View style={styles.daysHeaderRow}>
                   {['M', 'T', 'W', 'T', 'F', 'S', 'S'].map((d, idx) => (
-                    <Text key={`day_col_${idx}`} style={styles.dayColHeaderText}>
+                    <Text key={`pro_day_col_${idx}`} style={styles.dayColHeaderText}>
                       {d}
                     </Text>
                   ))}
@@ -433,7 +523,7 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
                     <View style={styles.heatmapCellInactive} />
                     <View style={styles.heatmapCellInactive} />
                     {[1, 2, 3, 4, 5].map((_, i) => (
-                      <View key={`r1_${i}`} style={styles.heatmapCellActive}>
+                      <View key={`pro_r1_${i}`} style={styles.heatmapCellActive}>
                         <Text style={styles.checkMarkText}>✓</Text>
                       </View>
                     ))}
@@ -441,7 +531,7 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
 
                   <View style={styles.heatmapRow}>
                     {[1, 2, 3, 4, 5, 6, 7].map((_, i) => (
-                      <View key={`r2_${i}`} style={styles.heatmapCellActive}>
+                      <View key={`pro_r2_${i}`} style={styles.heatmapCellActive}>
                         <Text style={styles.checkMarkText}>✓</Text>
                       </View>
                     ))}
@@ -738,77 +828,349 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
             </View>
           ) : (
             /* ============================================================ */
-            /* 🔒 FREE HOME DASHBOARD (Standard Edition with Upsell Banner) */
+            /* 🔒 ORIGINAL FREE INTERFACE (Complete Original Dashboard)    */
             /* ============================================================ */
-            <View>
-              {/* CARD 1: FREE FOCUS HERO */}
-              <View style={styles.freeFocusHero}>
-                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 8 }}>
-                  <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: '#EF4444' }} />
-                  <Text style={{ fontSize: 10, fontWeight: '900', color: '#64748B', letterSpacing: 0.5 }}>TODAY&apos;S FOCUS</Text>
+            <View key="free_interface">
+              {/* FREE FOCUS HERO BANNER */}
+              <View style={styles.freeFocusHeroSection}>
+                <View style={styles.focusPillRow}>
+                  <View style={styles.focusTag}>
+                    <View style={styles.focusLiveDot} />
+                    <Text style={styles.focusTagText}>TODAY&apos;S FOCUS</Text>
+                  </View>
+                  <Text style={styles.nextPostCountdown}>Next post in 2h 45m</Text>
                 </View>
 
-                <Text style={{ fontSize: 16, fontWeight: '800', color: '#171420', marginBottom: 12 }}>
-                  Post 1 Reel before 9 PM to protect your 47-day streak
-                </Text>
+                <Text style={styles.focusHeadline}>Post 1 Reel to protect your streak</Text>
 
-                <View style={{ flexDirection: 'row', gap: 6, flexWrap: 'wrap' }}>
-                  <View style={styles.freeTag}><Text style={styles.freeTagText}>Level 42</Text></View>
-                  <View style={[styles.freeTag, { backgroundColor: '#FEF3C7' }]}><Text style={[styles.freeTagText, { color: '#B45309' }]}>🔥 47-Day Streak</Text></View>
-                  <View style={styles.freeTag}><Text style={styles.freeTagText}>Next: 11:30 AM</Text></View>
+                <View style={styles.statusPillsRow}>
+                  <View style={styles.levelPillBadge}>
+                    <Text style={styles.levelPillBadgeText}>Level 42</Text>
+                  </View>
+
+                  <View style={styles.streakPillBadge}>
+                    <Animated.Text
+                      style={[
+                        styles.streakPillFire,
+                        { transform: [{ scale: flamePulse }] },
+                      ]}
+                    >
+                      🔥
+                    </Animated.Text>
+                    <Text style={styles.streakPillBadgeText}>47-Day Streak</Text>
+                  </View>
+
+                  <View style={styles.nextPostPillBadge}>
+                    <Svg width={12} height={12} viewBox="0 0 24 24" fill="none">
+                      <Circle cx="12" cy="12" r="10" stroke="#6B7280" strokeWidth="2.2" />
+                      <Path d="M12 6V12L16 14" stroke="#6B7280" strokeWidth="2.2" strokeLinecap="round" />
+                    </Svg>
+                    <Text style={styles.nextPostPillBadgeText}>11:30 AM</Text>
+                  </View>
                 </View>
               </View>
 
-              {/* CARD 2: STREAK CARD */}
-              <View style={styles.dashboardCard}>
-                <Text style={styles.streakLabel}>YOUR STREAK</Text>
-                <Text style={[styles.streakBigCount, { marginBottom: 12 }]}>47-Day Streak 🔥</Text>
-                <Text style={{ fontSize: 13, color: '#64748B', lineHeight: 18 }}>
-                  Keep posting consistently to build your Creator Passport credibility and unlock higher brand deal tiers.
-                </Text>
-              </View>
+              {/* CARD 1: STREAK HEATMAP WITH MONTH PAGER & JARVIS INSIGHT */}
+              <Pressable
+                onPress={() => {
+                  if (Platform.OS !== 'web') {
+                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                  }
+                  triggerModalPop();
+                  setShowCalendarModal(true);
+                }}
+                style={({ pressed }) => [styles.dashboardCard, pressed && styles.cardPressed]}
+              >
+                <View style={styles.cardHeaderRow}>
+                  <View style={styles.cardTitleGroup}>
+                    <Text style={styles.cardSectionTitle}>Your Streak</Text>
+                    <Text style={styles.streakSubtext}>Consistency is key 🔗 (Tap for full calendar)</Text>
+                  </View>
 
-              {/* CARD 3: CREATOR LEVEL */}
-              <View style={styles.dashboardCard}>
-                <Text style={{ fontSize: 16, fontWeight: '900', color: '#171420' }}>🏆 Elite Storyteller (Level 42)</Text>
-                <Text style={{ fontSize: 12, color: '#64748B', marginTop: 4, marginBottom: 12 }}>
-                  2,450 / 3,000 XP • Complete daily quests to level up.
-                </Text>
-                <Pressable
-                  style={({ pressed }) => [styles.freeActionBtn, pressed && styles.btnPressed]}
-                  onPress={() => {
-                    if (onStartMission) onStartMission();
-                  }}
-                >
-                  <Text style={styles.freeActionBtnText}>Start Daily Mission 🚀</Text>
-                </Pressable>
-              </View>
-
-              {/* CARD 4: UPGRADE TO JARVIS PRO BANNER */}
-              <View style={[styles.dashboardCard, { borderColor: '#EAB308', backgroundColor: '#FEFCE8', marginBottom: 120 }]}>
-                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 8 }}>
-                  <Text style={{ fontSize: 20 }}>⚡</Text>
-                  <Text style={{ fontSize: 16, fontWeight: '900', color: '#171420' }}>Unlock Jarvis Pro</Text>
-                  <View style={styles.proPriorityPill}>
-                    <Text style={styles.proPriorityText}>PRO SUITE</Text>
+                  <View style={styles.streakCountBadge}>
+                    <Text style={styles.streakCountNumber}>47-Day Streak</Text>
+                    <Animated.Text
+                      style={[
+                        styles.streakFireEmoji,
+                        { transform: [{ scale: flamePulse }] },
+                      ]}
+                    >
+                      🔥
+                    </Animated.Text>
                   </View>
                 </View>
 
-                <Text style={{ fontSize: 13, color: '#64748B', lineHeight: 19, marginBottom: 14 }}>
+                <View style={styles.calendarMetaRow}>
+                  <Text style={styles.monthLabel}>MAY 2024  ›</Text>
+                  <Text style={styles.streakStatusHighlight}>96% Consistent</Text>
+                </View>
+
+                <View style={styles.daysHeaderRow}>
+                  {['M', '·', 'W', 'T', 'F', '·'].map((d, idx) => (
+                    <Text key={`free_day_${idx}`} style={styles.dayColHeader}>
+                      {d}
+                    </Text>
+                  ))}
+                </View>
+
+                <View style={styles.heatmapGrid}>
+                  {streakGrid.map((row, rIdx) => (
+                    <View key={`free_row_${rIdx}`} style={styles.heatmapRowFree}>
+                      {row.map((active, cIdx) => (
+                        <View
+                          key={`free_cell_${rIdx}_${cIdx}`}
+                          style={[
+                            styles.heatmapCellFree,
+                            active && styles.heatmapCellActiveFree,
+                          ]}
+                        >
+                          {active && (
+                            <Svg width={14} height={14} viewBox="0 0 24 24" fill="none">
+                              <Path
+                                d="M20 6L9 17L4 12"
+                                stroke="#FFFFFF"
+                                strokeWidth="3.2"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                              />
+                            </Svg>
+                          )}
+                        </View>
+                      ))}
+                    </View>
+                  ))}
+                </View>
+
+                <View style={styles.jarvisStreakInsight}>
+                  <Animated.View
+                    style={[
+                      styles.jarvisFlameWrapper,
+                      {
+                        transform: [
+                          { translateY: ghostFloatY },
+                          { scale: ghostScale },
+                        ],
+                      },
+                    ]}
+                  >
+                    <Image
+                      source={require('../../assets/images/jarvis-core-flame.png')}
+                      style={styles.jarvisFlameImage}
+                      resizeMode="contain"
+                    />
+                  </Animated.View>
+                  <Text style={styles.jarvisInsightText}>
+                    <Text style={styles.jarvisInsightBold}>Jarvis Insight: </Text>
+                    You post most consistently at 11:30 AM. Locking in your Reel now will boost Day 48 completion!
+                  </Text>
+                </View>
+              </Pressable>
+
+              {/* CARD 2: SCHEDULED POSTS VELOCITY */}
+              <View style={styles.dashboardCard}>
+                <View style={styles.scheduledHeaderRow}>
+                  <View>
+                    <Text style={styles.scheduledSectionTitle}>Scheduled Posts</Text>
+                    <Text style={styles.scheduledSubtext}>Your automated pipeline</Text>
+                  </View>
+                  <View style={styles.scheduledCountPill}>
+                    <Text style={styles.scheduledCountNumber}>3 Queued</Text>
+                  </View>
+                </View>
+
+                <View style={{ gap: 8, marginVertical: 10 }}>
+                  <View style={styles.scheduledPostItem}>
+                    <View style={styles.postPlatformDot} />
+                    <View style={{ flex: 1 }}>
+                      <Text style={styles.postTitleText}>5 AI Tools Every Creator Needs</Text>
+                      <Text style={styles.postTimeText}>Today, 11:30 AM • Instagram Reel</Text>
+                    </View>
+                  </View>
+
+                  <View style={styles.scheduledPostItem}>
+                    <View style={[styles.postPlatformDot, { backgroundColor: '#000000' }]} />
+                    <View style={{ flex: 1 }}>
+                      <Text style={styles.postTitleText}>How I Edit 10 TikToks in 1 Hour</Text>
+                      <Text style={styles.postTimeText}>Tomorrow, 4:00 PM • TikTok</Text>
+                    </View>
+                  </View>
+                </View>
+
+                <Pressable
+                  style={({ pressed }) => [styles.scheduleActionBtn, pressed && styles.btnPressed]}
+                  onPress={() => {
+                    if (onOpenSchedule) onOpenSchedule();
+                  }}
+                >
+                  <Text style={styles.scheduleActionBtnText}>+ Schedule New Post</Text>
+                </Pressable>
+              </View>
+
+              {/* CARD 3: CREATOR LEVEL & QUEST ("Elite Storyteller") */}
+              <View style={styles.dashboardCard}>
+                <View style={styles.levelCardHeader}>
+                  <View style={styles.levelBadgeGroup}>
+                    <View style={styles.levelGoldPill}>
+                      <Text style={styles.levelGoldPillText}>LEVEL 42</Text>
+                    </View>
+                    <Text style={styles.levelNameHeading}>Elite Storyteller</Text>
+                  </View>
+                  <View style={styles.trophyIconBox}>
+                    <Text style={styles.trophyEmoji}>🏆</Text>
+                  </View>
+                </View>
+
+                <Text style={styles.levelDescription}>
+                  Publish 1 high impact Reel today to unlock <Text style={styles.goldTextBold}>Level 43</Text> rewards.
+                </Text>
+
+                <View style={styles.xpLabelsRow}>
+                  <Text style={styles.xpCurrent}>2,450 XP</Text>
+                  <Text style={styles.xpTarget}>3,000 XP</Text>
+                </View>
+
+                <View style={styles.xpProgressBarBg}>
+                  <View style={[styles.xpProgressBarFill, { width: '82%' }]} />
+                </View>
+
+                <Pressable
+                  onPress={() => {
+                    if (onStartMission) {
+                      onStartMission();
+                    } else {
+                      triggerModalPop();
+                      setShowMissionModal(true);
+                    }
+                  }}
+                  style={({ pressed }) => [
+                    styles.missionButton,
+                    pressed && styles.missionButtonPressed,
+                  ]}
+                >
+                  <Text style={styles.missionButtonText}>Start First Mission  🚀</Text>
+                </Pressable>
+              </View>
+
+              {/* CARD 4: ACTIVE BRAND QUEST ("Lagos Food Festival") */}
+              <Pressable
+                onPress={() => {
+                  triggerModalPop();
+                  setShowBrandQuestModal(true);
+                }}
+                style={({ pressed }) => [styles.questCard, pressed && styles.cardPressed]}
+              >
+                <View style={styles.questTargetIconBox}>
+                  <Svg width={20} height={20} viewBox="0 0 24 24" fill="none">
+                    <Circle cx="12" cy="12" r="10" stroke="#582CDB" strokeWidth="2.2" />
+                    <Circle cx="12" cy="4.5" fill="#582CDB" />
+                  </Svg>
+                </View>
+
+                <View style={styles.questContentGroup}>
+                  <View style={styles.activeQuestTag}>
+                    <Text style={styles.activeQuestTagText}>ACTIVE QUEST</Text>
+                  </View>
+                  <Text style={styles.questTitle}>Lagos Food Festival</Text>
+                  <Text style={styles.questSubtext}>Review &amp; Vlog</Text>
+                </View>
+
+                <View style={styles.bountyPill}>
+                  <Text style={styles.bountyText}>$450 Bounty</Text>
+                </View>
+              </Pressable>
+
+              {/* CARD 5: CREATOR MATCH VELOCITY ("Elena Rostova") */}
+              <View style={styles.dashboardCard}>
+                <View style={styles.matchHeaderRow}>
+                  <Text style={styles.matchSectionTitle}>Suggested Match</Text>
+                  <View style={styles.growthActionPill}>
+                    <Text style={styles.growthActionText}>GROWTH ACTION</Text>
+                  </View>
+                </View>
+
+                <View style={styles.creatorProfileRow}>
+                  <View style={styles.creatorAvatarBox}>
+                    <Image
+                      source={require('../../assets/images/elena-avatar.jpg')}
+                      style={styles.creatorAvatarImage}
+                      resizeMode="cover"
+                    />
+                  </View>
+                  <View style={styles.creatorDetails}>
+                    <Text style={styles.creatorName}>Elena Rostova</Text>
+                    <Text style={styles.creatorFollowers}>Tech &amp; Design • 42.8k Followers</Text>
+                  </View>
+                </View>
+
+                <View style={styles.whyMatchBox}>
+                  <Text style={styles.whyMatchSparkle}>✨</Text>
+                  <Text style={styles.whyMatchText}>
+                    <Text style={styles.whyMatchBold}>Why this match? </Text>
+                    94% Niche Synergy, matching daily posting pace, and open for squads.
+                  </Text>
+                </View>
+
+                <Pressable
+                  onPress={() => {
+                    if (Platform.OS !== 'web') {
+                      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                    }
+                    if (onNavigateTab) {
+                      onNavigateTab('match');
+                    }
+                  }}
+                  style={({ pressed }) => [
+                    styles.connectMatchGradientWrap,
+                    pressed && styles.connectMatchButtonPressed,
+                  ]}
+                >
+                  <LinearGradient
+                    colors={['#7C3AED', '#582CDB']}
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 1, y: 0 }}
+                    style={styles.connectMatchGradient}
+                  >
+                    <Text style={styles.connectMatchButtonText}>Connect &amp; View Creator Card ➔</Text>
+                  </LinearGradient>
+                </Pressable>
+              </View>
+
+              {/* CARD 6: UNLOCK JARVIS PRO (METALLIC GOLD UPSELL CARD) */}
+              <View style={[styles.proCard, { marginBottom: 120 }]}>
+                <View style={styles.proHeaderRow}>
+                  <View style={styles.proIconBox}>
+                    <Image
+                      source={require('../../assets/images/jarvis-core-flame.png')}
+                      style={styles.proIconImage}
+                      resizeMode="contain"
+                    />
+                  </View>
+                  <View style={styles.proTitleGroup}>
+                    <Text style={styles.proTitle}>Unlock Jarvis Pro</Text>
+                    <View style={styles.goldProPillBadge}>
+                      <Text style={styles.goldProPillText}>⚡ PRO SUITE</Text>
+                    </View>
+                  </View>
+                </View>
+
+                <Text style={styles.proDescription}>
                   Get AI Voice Studio, 1-Click Repurposing, Autopilot Scheduling, and Verified Brand Sponsorships ($4,250/mo potential).
                 </Text>
 
                 <Pressable
-                  style={({ pressed }) => [styles.viewEarningsBtn, pressed && styles.btnPressed]}
-                  onPress={handleToggleTier}
+                  onPress={() => handleToggleTier('pro')}
+                  style={({ pressed }) => [
+                    styles.metallicGoldUpgradeBtn,
+                    pressed && styles.upgradeButtonPressed,
+                  ]}
                 >
                   <LinearGradient
-                    colors={['#FDE047', '#EAB308', '#CA8A04']}
+                    colors={['#FDE047', '#EAB308', '#CA8A04', '#A16207']}
                     start={{ x: 0, y: 0 }}
-                    end={{ x: 1, y: 0 }}
-                    style={{ width: '100%', paddingVertical: 13, borderRadius: 14, alignItems: 'center' }}
+                    end={{ x: 1, y: 1 }}
+                    style={styles.metallicGoldGradient}
                   >
-                    <Text style={{ color: '#000000', fontSize: 14, fontWeight: '900' }}>Upgrade to Pro (Tap to Test) ➔</Text>
+                    <Text style={styles.metallicGoldUpgradeBtnText}>Upgrade to Pro (Tap for Pro Interface) ➔</Text>
                   </LinearGradient>
                 </Pressable>
               </View>
@@ -818,6 +1180,43 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
 
         {/* 10. FLOATING LIQUID GLASS BOTTOM NAVIGATION BAR */}
         <FloatingTabBar activeTab={activeTab} onTabPress={handleTabPress} />
+
+        {/* ============================================================ */}
+        {/* MODAL: SWIPEABLE STREAK CALENDAR MODAL (Full Year)           */}
+        {/* ============================================================ */}
+        <Modal
+          visible={showCalendarModal}
+          transparent={true}
+          animationType="fade"
+          onRequestClose={() => setShowCalendarModal(false)}
+        >
+          <View style={styles.modalOverlay}>
+            <Animated.View style={[styles.modalCard, { transform: [{ scale: modalPopScale }] }]}>
+              <View style={styles.modalHeaderRow}>
+                <View>
+                  <Text style={styles.modalTitle}>Streak Calendar 2024</Text>
+                  <Text style={styles.modalSubtitle}>47 Active Days • 96% Consistent</Text>
+                </View>
+                <Pressable onPress={() => setShowCalendarModal(false)} style={styles.modalCloseCircle} hitSlop={8}>
+                  <Text style={styles.modalCloseCross}>✕</Text>
+                </Pressable>
+              </View>
+
+              <View style={styles.calendarMonthGrid}>
+                {FULL_YEAR_CALENDAR[selectedMonthIndex].completedDays.slice(0, 14).map((d) => (
+                  <View key={`cal_d_${d}`} style={styles.calendarDayBadge}>
+                    <Text style={styles.calendarDayNum}>{d}</Text>
+                    <Text style={styles.calendarCheck}>✓</Text>
+                  </View>
+                ))}
+              </View>
+
+              <Pressable style={styles.modalFullBtn} onPress={() => setShowCalendarModal(false)}>
+                <Text style={styles.modalFullBtnText}>Close Calendar</Text>
+              </Pressable>
+            </Animated.View>
+          </View>
+        </Modal>
 
         {/* ============================================================ */}
         {/* MODAL: VOICE STUDIO PRO                                      */}
@@ -933,7 +1332,7 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
                 style={styles.modalFullBtn}
                 onPress={() => {
                   setShowBrandQuestModal(false);
-                  showToast('Application submitted directly to GlowUp brand team!');
+                  showToast('Application submitted directly to brand team!');
                 }}
               >
                 <Text style={styles.modalFullBtnText}>Apply for $450 Bounty ➔</Text>
@@ -955,7 +1354,7 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
             <Animated.View style={[styles.modalCard, { transform: [{ scale: modalPopScale }] }]}>
               <View style={styles.modalHeaderRow}>
                 <View>
-                  <Text style={styles.modalTitle}>Pro Activity &amp; Alerts</Text>
+                  <Text style={styles.modalTitle}>Activity &amp; Alerts</Text>
                   <Text style={styles.modalSubtitle}>Autonomous co-pilot notifications</Text>
                 </View>
                 <Pressable onPress={() => setShowNotificationModal(false)} style={styles.modalCloseCircle} hitSlop={8}>
@@ -1135,7 +1534,9 @@ const styles = StyleSheet.create({
     paddingBottom: 40,
   },
 
-  // CARD 1: TODAY'S PRO PLAN HERO
+  // ----------------------------------------------------------------
+  // PRO INTERFACE STYLES (Screenshot Match)
+  // ----------------------------------------------------------------
   proPlanHeroCard: {
     backgroundColor: '#FFFFFF',
     borderWidth: 1,
@@ -1242,7 +1643,7 @@ const styles = StyleSheet.create({
     opacity: 0.95,
   },
 
-  // CARD 2: STREAK HEATMAP
+  // PRO STREAK HEATMAP
   streakCardHeader: {
     marginBottom: 12,
   },
@@ -1320,7 +1721,7 @@ const styles = StyleSheet.create({
     color: '#171420',
   },
 
-  // CARD 3: POSTS SCHEDULED
+  // PRO POSTS SCHEDULED
   scheduledLabel: {
     fontSize: 11,
     fontWeight: '800',
@@ -1366,7 +1767,7 @@ const styles = StyleSheet.create({
     color: '#15803D',
   },
 
-  // CARD 4: PERFORMANCE INSIGHT
+  // PRO PERFORMANCE INSIGHT
   insightHeaderRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -1404,7 +1805,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
 
-  // CARD 5: LEVEL & XP PROGRESS
+  // PRO LEVEL & XP PROGRESS
   levelCircleBadge: {
     width: 44,
     height: 44,
@@ -1444,7 +1845,7 @@ const styles = StyleSheet.create({
     borderRadius: 4,
   },
 
-  // CARD 6: BRAND QUEST
+  // PRO BRAND QUEST
   brandIconSquare: {
     width: 42,
     height: 42,
@@ -1482,7 +1883,7 @@ const styles = StyleSheet.create({
     fontWeight: '400',
   },
 
-  // CARD 7: MONTHLY EARNINGS
+  // PRO MONTHLY EARNINGS
   earningsCardLabel: {
     fontSize: 11,
     fontWeight: '800',
@@ -1535,7 +1936,7 @@ const styles = StyleSheet.create({
     fontWeight: '900',
   },
 
-  // CARD 8: VOICE STUDIO PRO
+  // PRO VOICE STUDIO
   voiceStudioLabel: {
     fontSize: 11,
     fontWeight: '800',
@@ -1632,7 +2033,7 @@ const styles = StyleSheet.create({
     fontWeight: '800',
   },
 
-  // CARD 9: CREATOR MATCH
+  // PRO CREATOR MATCH
   matchAvatarImage: {
     width: 44,
     height: 44,
@@ -1689,39 +2090,614 @@ const styles = StyleSheet.create({
     fontWeight: '900',
   },
 
-  // FREE TIER STYLES
-  freeFocusHero: {
-    backgroundColor: '#FFFFFF',
+  // ----------------------------------------------------------------
+  // ORIGINAL FREE INTERFACE STYLES (Complete Original)
+  // ----------------------------------------------------------------
+  freeFocusHeroSection: {
+    backgroundColor: 'rgba(255, 255, 255, 0.88)',
+    borderRadius: 28,
     borderWidth: 1,
-    borderColor: '#EFECE6',
-    borderRadius: 24,
-    padding: 20,
-    marginBottom: 16,
+    borderColor: 'rgba(235, 230, 248, 0.9)',
+    paddingHorizontal: 22,
+    paddingTop: 20,
+    paddingBottom: 22,
+    marginBottom: 20,
+    shadowColor: '#171420',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.04,
+    shadowRadius: 20,
+    elevation: 3,
   },
-  freeTag: {
-    backgroundColor: '#F1F5F9',
+  focusPillRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 12,
+  },
+  focusTag: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#EDE8FC',
     paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 8,
+    paddingVertical: 4.5,
+    borderRadius: 20,
+    gap: 6,
   },
-  freeTagText: {
+  focusLiveDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: '#582CDB',
+  },
+  focusTagText: {
+    color: '#582CDB',
     fontSize: 11,
     fontWeight: '800',
-    color: '#475569',
+    letterSpacing: 0.6,
   },
-  freeActionBtn: {
-    backgroundColor: '#582CDB',
-    paddingVertical: 12,
-    borderRadius: 12,
+  nextPostCountdown: {
+    color: '#6B7280',
+    fontSize: 12.5,
+    fontWeight: '500',
+  },
+  focusHeadline: {
+    fontSize: 22,
+    fontWeight: '800',
+    color: '#171420',
+    letterSpacing: -0.5,
+    marginBottom: 16,
+    lineHeight: 28,
+  },
+  statusPillsRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    flexWrap: 'wrap',
+  },
+  levelPillBadge: {
+    backgroundColor: '#EDE8FC',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 20,
+  },
+  levelPillBadgeText: {
+    color: '#582CDB',
+    fontSize: 12,
+    fontWeight: '700',
+  },
+  streakPillBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#FEF3C7',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 20,
+    gap: 4,
+  },
+  streakPillFire: {
+    fontSize: 13,
+  },
+  streakPillBadgeText: {
+    color: '#92400E',
+    fontSize: 12,
+    fontWeight: '700',
+  },
+  nextPostPillBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#F3F4F6',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 20,
+    gap: 5,
+  },
+  nextPostPillBadgeText: {
+    color: '#4B5563',
+    fontSize: 12,
+    fontWeight: '600',
+  },
+
+  // FREE STREAK HEATMAP CARD
+  cardHeaderRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    marginBottom: 14,
+  },
+  cardTitleGroup: {
+    flex: 1,
+  },
+  cardSectionTitle: {
+    fontSize: 18,
+    fontWeight: '800',
+    color: '#171420',
+    letterSpacing: -0.3,
+  },
+  streakSubtext: {
+    fontSize: 12.5,
+    color: '#6B7280',
+    marginTop: 2,
+  },
+  streakCountBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#FEF3C7',
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 20,
+    gap: 3,
+  },
+  streakCountNumber: {
+    color: '#92400E',
+    fontSize: 12,
+    fontWeight: '800',
+  },
+  streakFireEmoji: {
+    fontSize: 13,
+  },
+  calendarMetaRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 12,
+    paddingHorizontal: 2,
+  },
+  monthLabel: {
+    fontSize: 13,
+    fontWeight: '800',
+    color: '#171420',
+    letterSpacing: 0.5,
+  },
+  streakStatusHighlight: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#10B981',
+  },
+  dayColHeader: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: '#9CA3AF',
+    width: 32,
+    textAlign: 'center',
+  },
+  heatmapGrid: {
+    gap: 6,
+    marginBottom: 16,
+  },
+  heatmapRowFree: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  heatmapCellFree: {
+    width: 36,
+    height: 36,
+    borderRadius: 10,
+    backgroundColor: '#F3F4F6',
+    justifyContent: 'center',
     alignItems: 'center',
   },
-  freeActionBtnText: {
-    color: '#FFFFFF',
+  heatmapCellActiveFree: {
+    backgroundColor: '#582CDB',
+  },
+  jarvisStreakInsight: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#FAF5FF',
+    borderWidth: 1,
+    borderColor: '#E9D5FF',
+    borderRadius: 16,
+    padding: 12,
+    gap: 10,
+  },
+  jarvisFlameWrapper: {
+    width: 26,
+    height: 26,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  jarvisFlameImage: {
+    width: 22,
+    height: 22,
+  },
+  jarvisInsightText: {
+    flex: 1,
+    fontSize: 12,
+    color: '#4C1D95',
+    lineHeight: 17,
+  },
+  jarvisInsightBold: {
+    fontWeight: '800',
+    color: '#582CDB',
+  },
+
+  // FREE SCHEDULED POSTS
+  scheduledHeaderRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 10,
+  },
+  scheduledSectionTitle: {
+    fontSize: 18,
+    fontWeight: '800',
+    color: '#171420',
+  },
+  scheduledSubtext: {
+    fontSize: 12,
+    color: '#6B7280',
+    marginTop: 1,
+  },
+  scheduledCountPill: {
+    backgroundColor: '#EDE8FC',
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 12,
+  },
+  scheduledCountNumber: {
+    fontSize: 11,
+    fontWeight: '800',
+    color: '#582CDB',
+  },
+  scheduledPostItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    backgroundColor: '#FAF8F5',
+    padding: 12,
+    borderRadius: 12,
+  },
+  postPlatformDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: '#E1306C',
+  },
+  postTitleText: {
     fontSize: 13,
+    fontWeight: '700',
+    color: '#171420',
+  },
+  postTimeText: {
+    fontSize: 11,
+    color: '#64748B',
+    marginTop: 2,
+  },
+  scheduleActionBtn: {
+    backgroundColor: '#FAF8F5',
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    paddingVertical: 11,
+    borderRadius: 12,
+    alignItems: 'center',
+    marginTop: 4,
+  },
+  scheduleActionBtnText: {
+    fontSize: 12.5,
+    fontWeight: '800',
+    color: '#582CDB',
+  },
+
+  // FREE LEVEL & QUEST
+  levelCardHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 10,
+  },
+  levelBadgeGroup: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  levelGoldPill: {
+    backgroundColor: '#FEF3C7',
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 6,
+  },
+  levelGoldPillText: {
+    fontSize: 10,
+    fontWeight: '900',
+    color: '#92400E',
+  },
+  levelNameHeading: {
+    fontSize: 16,
+    fontWeight: '800',
+    color: '#171420',
+  },
+  trophyIconBox: {
+    width: 34,
+    height: 34,
+    borderRadius: 17,
+    backgroundColor: '#FEF3C7',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  trophyEmoji: {
+    fontSize: 16,
+  },
+  levelDescription: {
+    fontSize: 13,
+    color: '#4B5563',
+    lineHeight: 18,
+    marginBottom: 12,
+  },
+  goldTextBold: {
+    fontWeight: '800',
+    color: '#D97706',
+  },
+  xpLabelsRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 6,
+  },
+  xpCurrent: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#582CDB',
+  },
+  xpTarget: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#9CA3AF',
+  },
+  xpProgressBarBg: {
+    height: 8,
+    backgroundColor: '#E5E7EB',
+    borderRadius: 4,
+    overflow: 'hidden',
+    marginBottom: 16,
+  },
+  xpProgressBarFill: {
+    height: '100%',
+    backgroundColor: '#582CDB',
+    borderRadius: 4,
+  },
+  missionButton: {
+    backgroundColor: '#582CDB',
+    paddingVertical: 13,
+    borderRadius: 14,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  missionButtonPressed: {
+    opacity: 0.9,
+    transform: [{ scale: 0.98 }],
+  },
+  missionButtonText: {
+    color: '#FFFFFF',
+    fontSize: 14,
     fontWeight: '800',
   },
 
-  // GENERAL BUTTON STATES & MODALS
+  // FREE BRAND QUEST
+  questCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#FFFFFF',
+    borderRadius: 24,
+    borderWidth: 1,
+    borderColor: '#EFECE6',
+    padding: 18,
+    marginBottom: 16,
+    gap: 12,
+  },
+  questTargetIconBox: {
+    width: 42,
+    height: 42,
+    borderRadius: 21,
+    backgroundColor: '#EDE8FC',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  questContentGroup: {
+    flex: 1,
+  },
+  activeQuestTag: {
+    alignSelf: 'flex-start',
+    backgroundColor: '#EDE8FC',
+    paddingHorizontal: 7,
+    paddingVertical: 2,
+    borderRadius: 6,
+    marginBottom: 4,
+  },
+  activeQuestTagText: {
+    fontSize: 9,
+    fontWeight: '800',
+    color: '#582CDB',
+  },
+  questTitle: {
+    fontSize: 15,
+    fontWeight: '800',
+    color: '#171420',
+  },
+  questSubtext: {
+    fontSize: 12,
+    color: '#6B7280',
+  },
+  bountyPill: {
+    backgroundColor: '#DCFCE7',
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 12,
+  },
+  bountyText: {
+    fontSize: 12,
+    fontWeight: '800',
+    color: '#15803D',
+  },
+
+  // FREE CREATOR MATCH VELOCITY
+  matchHeaderRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 14,
+  },
+  matchSectionTitle: {
+    fontSize: 18,
+    fontWeight: '800',
+    color: '#171420',
+  },
+  growthActionPill: {
+    backgroundColor: '#DCFCE7',
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 6,
+  },
+  growthActionText: {
+    fontSize: 9.5,
+    fontWeight: '800',
+    color: '#15803D',
+  },
+  creatorProfileRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    marginBottom: 12,
+  },
+  creatorAvatarBox: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    overflow: 'hidden',
+  },
+  creatorAvatarImage: {
+    width: '100%',
+    height: '100%',
+  },
+  creatorDetails: {
+    flex: 1,
+  },
+  creatorName: {
+    fontSize: 15,
+    fontWeight: '800',
+    color: '#171420',
+  },
+  creatorFollowers: {
+    fontSize: 12,
+    color: '#6B7280',
+    marginTop: 1,
+  },
+  whyMatchBox: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#FAF5FF',
+    padding: 10,
+    borderRadius: 12,
+    marginBottom: 14,
+    gap: 6,
+  },
+  whyMatchSparkle: {
+    fontSize: 13,
+  },
+  whyMatchText: {
+    flex: 1,
+    fontSize: 11.5,
+    color: '#4C1D95',
+    lineHeight: 16,
+  },
+  whyMatchBold: {
+    fontWeight: '800',
+    color: '#582CDB',
+  },
+  connectMatchGradientWrap: {
+    borderRadius: 14,
+    overflow: 'hidden',
+  },
+  connectMatchGradient: {
+    paddingVertical: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  connectMatchButtonPressed: {
+    opacity: 0.9,
+    transform: [{ scale: 0.98 }],
+  },
+  connectMatchButtonText: {
+    color: '#FFFFFF',
+    fontSize: 13.5,
+    fontWeight: '800',
+  },
+
+  // FREE UNLOCK JARVIS PRO CARD
+  proCard: {
+    backgroundColor: '#FFFDF5',
+    borderRadius: 24,
+    borderWidth: 1.5,
+    borderColor: '#FDE047',
+    padding: 20,
+    marginBottom: 16,
+  },
+  proHeaderRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    marginBottom: 10,
+  },
+  proIconBox: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: '#FEF3C7',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  proIconImage: {
+    width: 22,
+    height: 22,
+  },
+  proTitleGroup: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  proTitle: {
+    fontSize: 17,
+    fontWeight: '800',
+    color: '#171420',
+  },
+  goldProPillBadge: {
+    backgroundColor: '#FEF3C7',
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 6,
+  },
+  goldProPillText: {
+    fontSize: 9.5,
+    fontWeight: '900',
+    color: '#92400E',
+  },
+  proDescription: {
+    fontSize: 12.5,
+    color: '#6B7280',
+    lineHeight: 18,
+    marginBottom: 14,
+  },
+  metallicGoldUpgradeBtn: {
+    borderRadius: 14,
+    overflow: 'hidden',
+  },
+  metallicGoldGradient: {
+    paddingVertical: 13,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  upgradeButtonPressed: {
+    opacity: 0.9,
+    transform: [{ scale: 0.98 }],
+  },
+  metallicGoldUpgradeBtnText: {
+    color: '#000000',
+    fontSize: 13.5,
+    fontWeight: '900',
+    letterSpacing: 0.3,
+  },
+
+  // ----------------------------------------------------------------
+  // MODALS & GENERAL COMPONENTS
+  // ----------------------------------------------------------------
   btnPressed: {
     opacity: 0.85,
     transform: [{ scale: 0.98 }],
@@ -1785,6 +2761,31 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontSize: 14,
     fontWeight: '900',
+  },
+  calendarMonthGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+    marginVertical: 10,
+    justifyContent: 'center',
+  },
+  calendarDayBadge: {
+    width: 44,
+    height: 44,
+    borderRadius: 12,
+    backgroundColor: '#EDE8FC',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  calendarDayNum: {
+    fontSize: 11,
+    fontWeight: '800',
+    color: '#582CDB',
+  },
+  calendarCheck: {
+    fontSize: 10,
+    fontWeight: '900',
+    color: '#15803D',
   },
   inputSectionHeader: {
     fontSize: 10,
