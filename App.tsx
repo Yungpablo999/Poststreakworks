@@ -14,6 +14,7 @@ import { DashboardScreen } from './src/screens/DashboardScreen';
 import { ProDashboardScreen } from './src/screens/ProDashboardScreen';
 import { MissionDetailScreen } from './src/screens/MissionDetailScreen';
 import { QuestsScreen } from './src/screens/QuestsScreen';
+import { ProQuestsScreen } from './src/screens/ProQuestsScreen';
 import { ChallengeDetailScreen } from './src/screens/ChallengeDetailScreen';
 import { CreateScreen } from './src/screens/CreateScreen';
 import { ProCreateScreen } from './src/screens/ProCreateScreen';
@@ -600,31 +601,68 @@ export default function App() {
         )}
 
         {currentScreen === 'quests' && (
-          <QuestsScreen
-            onBackToDashboard={() => navigateTo('dashboard')}
-            onLogout={handleLogout}
-            onOpenMissionDetail={() => navigateTo('mission-detail')}
-            onOpenCommunityChallenge={() => navigateTo('challenge-detail')}
-            onOpenSchedule={() => navigateTo('schedule')}
-            onOpenMessages={() => navigateTo('messages')}
-            onOpenJarvisPro={() => navigateTo('jarvis-pro')}
-            onOpenEarnings={() => navigateTo('earnings')}
-            onNavigateTab={(tab: TabType) => {
-              if (tab === 'home') {
-                navigateTo('dashboard');
-              } else if (tab === 'create') {
-                navigateTo('create');
-              } else if (tab === 'match') {
-                navigateTo('match');
-              } else if (tab === 'growth') {
-                navigateTo('growth');
-              } else if ((tab as string) === 'schedule') {
-                navigateTo('schedule');
-              }
-            }}
-            userProfile={userProfile}
-            onSaveProfile={(updated) => setUserProfile(updated)}
-          />
+          (userProfile?.tier === 'pro' || userProfile?.tier === 'founding') ? (
+            <ProQuestsScreen
+              onBackToDashboard={() => navigateTo('dashboard')}
+              onLogout={handleLogout}
+              onOpenMissionDetail={() => navigateTo('mission-detail')}
+              onOpenCommunityChallenge={() => navigateTo('challenge-detail')}
+              onOpenSchedule={() => navigateTo('schedule')}
+              onOpenMessages={() => navigateTo('messages')}
+              onOpenJarvisPro={() => navigateTo('jarvis-pro')}
+              onOpenEarnings={() => navigateTo('earnings')}
+              onOpenPostComposer={(title, platform) => {
+                if (title) setComposerIdeaTitle(title);
+                navigateTo('composer');
+              }}
+              onOpenPassport={() => navigateTo('growth')}
+              onOpenOpportunities={() => navigateTo('growth')}
+              onSwitchToFree={() => {
+                setUserProfile(prev => ({ ...prev, tier: 'free' }));
+              }}
+              onNavigateTab={(tab: TabType) => {
+                if (tab === 'home') {
+                  navigateTo('dashboard');
+                } else if (tab === 'create') {
+                  navigateTo('create');
+                } else if (tab === 'match') {
+                  navigateTo('match');
+                } else if (tab === 'growth') {
+                  navigateTo('growth');
+                } else if ((tab as string) === 'schedule') {
+                  navigateTo('schedule');
+                }
+              }}
+              userProfile={userProfile}
+              onSaveProfile={(updated) => setUserProfile(updated)}
+            />
+          ) : (
+            <QuestsScreen
+              onBackToDashboard={() => navigateTo('dashboard')}
+              onLogout={handleLogout}
+              onOpenMissionDetail={() => navigateTo('mission-detail')}
+              onOpenCommunityChallenge={() => navigateTo('challenge-detail')}
+              onOpenSchedule={() => navigateTo('schedule')}
+              onOpenMessages={() => navigateTo('messages')}
+              onOpenJarvisPro={() => navigateTo('jarvis-pro')}
+              onOpenEarnings={() => navigateTo('earnings')}
+              onNavigateTab={(tab: TabType) => {
+                if (tab === 'home') {
+                  navigateTo('dashboard');
+                } else if (tab === 'create') {
+                  navigateTo('create');
+                } else if (tab === 'match') {
+                  navigateTo('match');
+                } else if (tab === 'growth') {
+                  navigateTo('growth');
+                } else if ((tab as string) === 'schedule') {
+                  navigateTo('schedule');
+                }
+              }}
+              userProfile={userProfile}
+              onSaveProfile={(updated) => setUserProfile(updated)}
+            />
+          )
         )}
 
         {currentScreen === 'challenge-detail' && (
