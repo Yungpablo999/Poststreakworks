@@ -1,10 +1,20 @@
-name: CI
+name: Backend CI
 
 on:
   push:
     branches: [main]
+    paths:
+      - "backend/**"
+      - ".github/workflows/ci.yml"
   pull_request:
     branches: [main]
+    paths:
+      - "backend/**"
+      - ".github/workflows/ci.yml"
+
+defaults:
+  run:
+    working-directory: backend
 
 jobs:
   typecheck:
@@ -19,6 +29,7 @@ jobs:
         with:
           node-version: 20
           cache: pnpm
+          cache-dependency-path: backend/pnpm-lock.yaml
       - run: pnpm install --frozen-lockfile
       - run: pnpm typecheck
 
@@ -34,5 +45,6 @@ jobs:
         with:
           node-version: 20
           cache: pnpm
+          cache-dependency-path: backend/pnpm-lock.yaml
       - run: pnpm install --frozen-lockfile
       - run: pnpm lint

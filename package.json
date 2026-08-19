@@ -1,21 +1,34 @@
 {
-  "name": "poststreak",
-  "private": true,
-  "scripts": {
-    "dev": "turbo dev",
-    "build": "turbo build",
-    "lint": "turbo lint",
-    "typecheck": "turbo typecheck",
-    "format": "prettier --write \"**/*.{ts,tsx,md,json}\"",
-    "format:check": "prettier --check \"**/*.{ts,tsx,md,json}\""
+  "name": "poststreak-app",
+  "version": "1.0.0",
+  "main": "index.ts",
+  "dependencies": {
+    "@expo/metro-runtime": "^57.0.10",
+    "expo": "~57.0.13",
+    "expo-blur": "^57.0.2",
+    "expo-dev-client": "^57.0.12",
+    "expo-haptics": "^57.0.1",
+    "expo-linear-gradient": "^57.0.1",
+    "expo-status-bar": "~57.0.1",
+    "lucide-react-native": "^1.31.0",
+    "react": "19.2.3",
+    "react-dom": "^19.2.3",
+    "react-native": "0.86.2",
+    "react-native-reanimated": "4.5.1",
+    "react-native-safe-area-context": "~5.7.0",
+    "react-native-svg": "15.15.4",
+    "react-native-web": "^0.21.2"
   },
   "devDependencies": {
-    "prettier": "^3.4.2",
-    "turbo": "^2.3.3",
-    "typescript": "^5.7.2"
+    "@expo/ngrok": "^4.1.3",
+    "@types/react": "~19.2.2",
+    "typescript": "~6.0.3"
   },
-  "packageManager": "pnpm@9.15.4",
-  "engines": {
-    "node": ">=20"
-  }
+  "scripts": {
+    "start": "expo start",
+    "android": "expo run:android",
+    "ios": "expo run:ios",
+    "web": "expo start --web"
+  },
+  "private": true
 }
