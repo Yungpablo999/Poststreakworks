@@ -359,7 +359,7 @@ export const ProMatchScreen: React.FC<ProMatchScreenProps> = ({
               ]}
             >
               <Image
-                source={require('../../assets/images/jarvis-ghost-clean.png')}
+                source={require('../../assets/images/jarvis-core-flame.png')}
                 style={styles.headerGhostLogo}
                 resizeMode="contain"
               />
@@ -463,7 +463,7 @@ export const ProMatchScreen: React.FC<ProMatchScreenProps> = ({
               hitSlop={8}
             >
               <Image
-                source={userProfile?.avatarSource || require('../../assets/images/jarvis-ghost-clean.png')}
+                source={userProfile?.avatarSource || require('../../assets/images/jarvis-core-flame.png')}
                 style={styles.headerCustomAvatarImage}
                 resizeMode="cover"
               />

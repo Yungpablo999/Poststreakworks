@@ -309,7 +309,7 @@ const INITIAL_CONVERSATIONS: ConversationThread[] = [
     name: 'Jarvis AI Co-Pilot',
     handle: '@jarvis.ai',
     niche: 'AI Content Director',
-    avatar: require('../../assets/images/jarvis-ghost-clean.png'),
+    avatar: require('../../assets/images/jarvis-core-flame.png'),
     streak: 99,
     isOnline: true,
     isPro: true,
@@ -521,7 +521,7 @@ export const MessagesScreen: React.FC<MessagesScreenProps> = ({
             hitSlop={8}
           >
             <Image
-              source={userProfile?.avatarSource || require('../../assets/images/jarvis-ghost-clean.png')}
+              source={userProfile?.avatarSource || require('../../assets/images/jarvis-core-flame.png')}
               style={styles.headerUserAvatar}
               resizeMode="cover"
             />
