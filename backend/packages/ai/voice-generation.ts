@@ -1,4 +1,4 @@
-import { fishAudioPreview, fishAudioFullRender } from "@poststreak/integrations/fish-audio";
+import { fishAudioPreview } from "@poststreak/integrations/fish-audio";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 // ============================================================================

@@ -18,11 +18,12 @@ export const streakGamificationRouter = createTRPCRouter({
    * Creates a default row if none exists.
    */
   getState: protectedProcedure.query(async ({ ctx }) => {
-    let { data, error } = await ctx.supabase
+    const { data: initialData, error } = await ctx.supabase
       .from("streak_states")
       .select("*")
       .eq("user_id", ctx.user.id)
       .single();
+    let data = initialData;
 
     // Auto-create on first access
     if (error?.code === "PGRST116") {

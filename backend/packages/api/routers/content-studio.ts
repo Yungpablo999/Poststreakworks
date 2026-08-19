@@ -7,9 +7,6 @@ import {
   generateHooks,
   generateScript,
   generateCaption,
-  type ContentIdea,
-  type ScriptOutput,
-  type CaptionOutput,
 } from "@poststreak/ai/content-studio";
 
 const AI_EVENT_NAMES = [

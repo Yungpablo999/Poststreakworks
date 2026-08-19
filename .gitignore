@@ -44,3 +44,6 @@ yarn-error.*
 
 # Turborepo
 .turbo/
+
+# Next.js
+.next/

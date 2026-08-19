@@ -2,7 +2,7 @@ import { createServerClient, type CookieOptions } from "@supabase/ssr";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { initTRPC, TRPCError } from "@trpc/server";
 import superjson from "superjson";
-import { type NextRequest, type NextResponse } from "next/server";
+import { type NextRequest } from "next/server";
 
 // ============================================================================
 // Types
