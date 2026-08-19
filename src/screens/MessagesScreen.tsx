@@ -74,6 +74,40 @@ interface ConversationThread {
 
 const CREATOR_STORIES_DATA: CreatorStoryData[] = [
   {
+    id: 'jarvis',
+    name: 'Jarvis AI Co-Pilot',
+    handle: '@jarvis.ai',
+    niche: 'AI Content Director',
+    avatar: require('../../assets/images/jarvis-core-flame.png'),
+    streak: 99,
+    isOnline: true,
+    isPro: true,
+    statusText: 'Autopilot Active ⚡',
+    slides: [
+      {
+        id: 's_jarvis_1',
+        type: 'daily_story',
+        title: 'Jarvis Daily Intelligence ⚡',
+        subtitle: 'Optimal reach & content pacing algorithm',
+        timeAgo: 'Just now',
+        quote: 'Peak posting window calculated for 7:30 PM today. Voice Studio draft has 32% higher estimated retention!',
+        badge: '🪄 JARVIS CO-PILOT 2.0',
+      },
+      {
+        id: 's_jarvis_2',
+        type: 'highlights',
+        title: 'Real-Time Content Insights',
+        subtitle: 'AI strategy recommendations',
+        timeAgo: '1h ago',
+        highlights: [
+          { title: 'Scale storytelling format by +25%', platform: 'Reels', views: '94% fit', saves: 'Peak slot' },
+          { title: 'Duo collab match: Amara Okafor', platform: 'Lagos BTS', views: '94% overlap', saves: 'High growth' },
+        ],
+      },
+    ],
+  },
+
+  {
     id: 'amara',
     name: 'Amara Okafor',
     handle: '@amara.creates',
@@ -309,7 +343,7 @@ const INITIAL_CONVERSATIONS: ConversationThread[] = [
     name: 'Jarvis AI Co-Pilot',
     handle: '@jarvis.ai',
     niche: 'AI Content Director',
-    avatar: require('../../assets/images/jarvis-ghost-clean.png'),
+    avatar: require('../../assets/images/jarvis-core-flame.png'),
     streak: 99,
     isOnline: true,
     isPro: true,
