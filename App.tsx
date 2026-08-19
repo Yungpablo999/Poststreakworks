@@ -11,6 +11,7 @@ import { NicheSelectionScreen } from './src/screens/NicheSelectionScreen';
 import { PlatformConnectScreen } from './src/screens/PlatformConnectScreen';
 import { OnboardingCompleteScreen } from './src/screens/OnboardingCompleteScreen';
 import { DashboardScreen } from './src/screens/DashboardScreen';
+import { ProDashboardScreen } from './src/screens/ProDashboardScreen';
 import { MissionDetailScreen } from './src/screens/MissionDetailScreen';
 import { QuestsScreen } from './src/screens/QuestsScreen';
 import { ChallengeDetailScreen } from './src/screens/ChallengeDetailScreen';
@@ -318,31 +319,59 @@ export default function App() {
         )}
 
         {currentScreen === 'dashboard' && (
-          <DashboardScreen
-            onLogout={handleLogout}
-            onStartMission={() => navigateTo('mission-detail')}
-            onOpenJarvisPro={() => navigateTo('jarvis-pro')}
-            onOpenSchedule={() => navigateTo('schedule')}
-            onOpenMessages={() => navigateTo('messages')}
-            onOpenEarnings={() => navigateTo('earnings')}
-            onOpenQuests={() => navigateTo('quests')}
-            onOpenGrowth={() => navigateTo('growth')}
-            onOpenMatch={() => navigateTo('match')}
-            onOpenCreate={() => navigateTo('create')}
-            onNavigateTab={(tab: TabType) => {
-              if (tab === 'create') {
-                navigateTo('create');
-              } else if (tab === 'match') {
-                navigateTo('match');
-              } else if (tab === 'quests') {
-                navigateTo('quests');
-              } else if (tab === 'growth') {
-                navigateTo('growth');
-              }
-            }}
-            userProfile={userProfile}
-            onSaveProfile={(updated) => setUserProfile(updated)}
-          />
+          (userProfile?.tier === 'pro' || userProfile?.tier === 'founding') ? (
+            <ProDashboardScreen
+              onLogout={handleLogout}
+              onStartMission={() => navigateTo('mission-detail')}
+              onOpenJarvisPro={() => navigateTo('jarvis-pro')}
+              onOpenSchedule={() => navigateTo('schedule')}
+              onOpenMessages={() => navigateTo('messages')}
+              onOpenEarnings={() => navigateTo('earnings')}
+              onOpenQuests={() => navigateTo('quests')}
+              onOpenGrowth={() => navigateTo('growth')}
+              onOpenMatch={() => navigateTo('match')}
+              onOpenCreate={() => navigateTo('create')}
+              onSwitchToFree={() => {
+                setUserProfile(prev => ({ ...prev, tier: 'free' }));
+              }}
+              onNavigateTab={(tab: TabType) => {
+                if (tab === 'create') {
+                  navigateTo('create');
+                } else if (tab === 'match') {
+                  navigateTo('match');
+                } else if (tab === 'quests') {
+                  navigateTo('quests');
+                } else if (tab === 'growth') {
+                  navigateTo('growth');
+                }
+              }}
+              userProfile={userProfile}
+              onSaveProfile={(updated) => setUserProfile(updated)}
+            />
+          ) : (
+            <DashboardScreen
+              onLogout={handleLogout}
+              onStartMission={() => navigateTo('mission-detail')}
+              onOpenJarvisPro={() => {
+                setUserProfile(prev => ({ ...prev, tier: 'pro' }));
+              }}
+              onOpenSchedule={() => navigateTo('schedule')}
+              onOpenMessages={() => navigateTo('messages')}
+              onNavigateTab={(tab: TabType) => {
+                if (tab === 'create') {
+                  navigateTo('create');
+                } else if (tab === 'match') {
+                  navigateTo('match');
+                } else if (tab === 'quests') {
+                  navigateTo('quests');
+                } else if (tab === 'growth') {
+                  navigateTo('growth');
+                }
+              }}
+              userProfile={userProfile}
+              onSaveProfile={(updated) => setUserProfile(updated)}
+            />
+          )
         )}
 
         {currentScreen === 'mission-detail' && (
