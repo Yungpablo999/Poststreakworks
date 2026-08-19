@@ -452,7 +452,7 @@ export const PlatformConnectScreen: React.FC<PlatformConnectScreenProps> = ({
               ]}
             >
               <Image
-                source={require('../../assets/images/ghost-alone.png')}
+                source={require('../../assets/images/jarvis-ghost-clean.png')}
                 style={styles.jarvisFlameImage}
                 resizeMode="contain"
               />
@@ -543,7 +543,7 @@ export const PlatformConnectScreen: React.FC<PlatformConnectScreenProps> = ({
               ]}
             >
               <Image
-                source={require('../../assets/images/ghost-alone.png')}
+                source={require('../../assets/images/jarvis-ghost-clean.png')}
                 style={styles.modalPureStarImage}
                 resizeMode="contain"
               />

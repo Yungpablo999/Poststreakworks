@@ -513,7 +513,7 @@ export const ProDashboardScreen: React.FC<ProDashboardScreenProps> = ({
               ]}
             >
               <Image
-                source={require('../../assets/images/ghost-alone.png')}
+                source={require('../../assets/images/jarvis-ghost-clean.png')}
                 style={styles.headerGhostLogo}
                 resizeMode="contain"
               />
@@ -619,7 +619,7 @@ export const ProDashboardScreen: React.FC<ProDashboardScreenProps> = ({
               hitSlop={8}
             >
               <Image
-                source={userProfile?.avatarSource || require('../../assets/images/ghost-alone.png')}
+                source={userProfile?.avatarSource || require('../../assets/images/jarvis-ghost-clean.png')}
                 style={styles.headerCustomAvatarImage}
                 resizeMode="cover"
               />
@@ -722,7 +722,7 @@ export const ProDashboardScreen: React.FC<ProDashboardScreenProps> = ({
 
             <View style={styles.topCreatorCalloutBanner}>
               <Image
-                source={require('../../assets/images/ghost-alone.png')}
+                source={require('../../assets/images/jarvis-ghost-clean.png')}
                 style={{ width: 22, height: 22 }}
                 resizeMode="contain"
               />

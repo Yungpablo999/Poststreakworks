@@ -649,7 +649,7 @@ export const IdeaDetailScreen: React.FC<IdeaDetailScreenProps> = ({
                   ]}
                 >
                   <Image
-                    source={require('../../assets/images/ghost-alone.png')}
+                    source={require('../../assets/images/jarvis-ghost-clean.png')}
                     style={styles.jarvisFlameImage}
                     resizeMode="contain"
                   />

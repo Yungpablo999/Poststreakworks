@@ -705,7 +705,7 @@ export const SignInScreen: React.FC<SignInScreenProps> = ({
                 ]}
               >
                 <Image
-                  source={require('../../assets/images/ghost-alone.png')}
+                  source={require('../../assets/images/jarvis-ghost-clean.png')}
                   style={styles.modalPureStarImage}
                   resizeMode="contain"
                 />

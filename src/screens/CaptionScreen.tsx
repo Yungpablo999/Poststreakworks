@@ -637,7 +637,7 @@ export const CaptionScreen: React.FC<CaptionScreenProps> = ({
               <View style={styles.jarvisCardHeaderRow}>
                 <View style={styles.jarvisFlameBox}>
                   <Image
-                    source={require('../../assets/images/ghost-alone.png')}
+                    source={require('../../assets/images/jarvis-ghost-clean.png')}
                     style={styles.jarvisFlameImg}
                     resizeMode="contain"
                   />

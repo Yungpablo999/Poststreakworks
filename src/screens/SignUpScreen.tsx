@@ -683,7 +683,7 @@ export const SignUpScreen: React.FC<SignUpScreenProps> = ({
                 ]}
               >
                 <Image
-                  source={require('../../assets/images/ghost-alone.png')}
+                  source={require('../../assets/images/jarvis-ghost-clean.png')}
                   style={styles.modalPureStarImage}
                   resizeMode="contain"
                 />

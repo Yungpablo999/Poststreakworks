@@ -615,7 +615,7 @@ export const PostPerformanceScreen: React.FC<PostPerformanceScreenProps> = ({
           <View style={styles.jarvisCoreCard}>
             <View style={styles.jarvisCoreAvatarBox}>
               <Image
-                source={require('../../assets/images/ghost-alone.png')}
+                source={require('../../assets/images/jarvis-ghost-clean.png')}
                 style={styles.jarvisCoreFlameImg}
                 resizeMode="contain"
               />

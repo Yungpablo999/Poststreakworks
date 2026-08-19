@@ -634,7 +634,7 @@ export const ScheduleScreen: React.FC<ScheduleScreenProps> = ({
                 ]}
               >
                 <Image
-                  source={require('../../assets/images/ghost-alone.png')}
+                  source={require('../../assets/images/jarvis-ghost-clean.png')}
                   style={styles.jarvisFlameIcon}
                   resizeMode="contain"
                 />

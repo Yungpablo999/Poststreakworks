@@ -386,7 +386,7 @@ export const MissionDetailScreen: React.FC<MissionDetailScreenProps> = ({
                 ]}
               >
                 <Image
-                  source={require('../../assets/images/ghost-alone.png')}
+                  source={require('../../assets/images/jarvis-ghost-clean.png')}
                   style={styles.jarvisFlameIcon}
                   resizeMode="contain"
                 />

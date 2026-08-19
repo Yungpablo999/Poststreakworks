@@ -1142,7 +1142,7 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
                   ]}
                 >
                   <Image
-                    source={require('../../assets/images/ghost-alone.png')}
+                    source={require('../../assets/images/jarvis-ghost-clean.png')}
                     style={styles.jarvisWritingFlame}
                     resizeMode="contain"
                   />

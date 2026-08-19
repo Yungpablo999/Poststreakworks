@@ -46,7 +46,7 @@ export const CREATOR_AVATARS = [
   {
     id: 'flame',
     name: 'Jarvis Flame',
-    source: require('../../assets/images/ghost-alone.png'),
+    source: require('../../assets/images/jarvis-ghost-clean.png'),
     tag: 'AI',
   },
   {

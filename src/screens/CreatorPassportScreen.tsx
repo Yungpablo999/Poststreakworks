@@ -752,7 +752,7 @@ export const CreatorPassportScreen: React.FC<CreatorPassportScreenProps> = ({
           <View style={styles.jarvisCard}>
             <View style={styles.jarvisAvatarCircle}>
               <Image
-                source={require('../../assets/images/ghost-alone.png')}
+                source={require('../../assets/images/jarvis-ghost-clean.png')}
                 style={{ width: 28, height: 28 }}
                 resizeMode="contain"
               />

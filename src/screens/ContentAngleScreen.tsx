@@ -744,7 +744,7 @@ export const ContentAngleScreen: React.FC<ContentAngleScreenProps> = ({
             <View style={styles.jarvisHeaderRow}>
               <View style={styles.jarvisFlameIconBox}>
                 <Image
-                  source={require('../../assets/images/ghost-alone.png')}
+                  source={require('../../assets/images/jarvis-ghost-clean.png')}
                   style={styles.jarvisFlameImage}
                   resizeMode="contain"
                 />

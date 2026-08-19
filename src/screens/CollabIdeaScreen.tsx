@@ -924,7 +924,7 @@ export const CollabIdeaScreen: React.FC<CollabIdeaScreenProps> = ({
               >
                 <View style={styles.jarvisSuggestionHeader}>
                   <Image
-                    source={require('../../assets/images/ghost-alone.png')}
+                    source={require('../../assets/images/jarvis-ghost-clean.png')}
                     style={styles.jarvisSuggestionFlame}
                     resizeMode="contain"
                   />
