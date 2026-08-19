@@ -19,7 +19,6 @@ import * as Haptics from 'expo-haptics';
 import { LinearGradient } from 'expo-linear-gradient';
 import { FloatingTabBar, TabType } from '../components/FloatingTabBar';
 import { UserProfileModal, UserProfileData } from '../components/UserProfileModal';
-import { AnimatedCompletionModal } from '../components/AnimatedCompletionModal';
 
 interface DashboardScreenProps {
   onLogout?: () => void;
@@ -106,19 +105,19 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
   userProfile,
   onSaveProfile,
 }) => {
-  const isPro = userProfile?.tier === 'pro' || userProfile?.tier === 'founding' || true; // Default Pro mode active
+  // Correct reactive isPro flag
+  const isPro = userProfile?.tier === 'pro' || userProfile?.tier === 'founding';
+
   const [activeTab, setActiveTab] = useState<TabType>('home');
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [showNotificationModal, setShowNotificationModal] = useState(false);
   const [showCalendarModal, setShowCalendarModal] = useState(false);
   const [showVoiceStudioModal, setShowVoiceStudioModal] = useState(false);
   const [showBrandQuestModal, setShowBrandQuestModal] = useState(false);
-  const [showCelebrationModal, setShowCelebrationModal] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   // Notification State
   const [notifications, setNotifications] = useState<NotificationItem[]>(INITIAL_NOTIFICATIONS);
-  const [notifFilter, setNotifFilter] = useState<NotificationFilter>('all');
 
   // Voice Studio State
   const [selectedVoiceTone, setSelectedVoiceTone] = useState('Energetic Narrator');
@@ -209,6 +208,17 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
     }
   };
 
+  const handleToggleTier = () => {
+    if (Platform.OS !== 'web') {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    }
+    const nextTier = isPro ? 'free' : 'pro';
+    if (onSaveProfile && userProfile) {
+      onSaveProfile({ ...userProfile, tier: nextTier });
+      showToast(nextTier === 'pro' ? '👑 Switched to PRO MODE!' : '🔒 Switched to FREE MODE!');
+    }
+  };
+
   const unreadCount = notifications.filter((n) => n.unread).length;
 
   return (
@@ -217,7 +227,7 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
       <View style={styles.container}>
         {/* 1. TOP HEADER BAR */}
         <View style={styles.headerBar}>
-          {/* Top-Left: Ghost Logo Mascot + Pro Creator Badge */}
+          {/* Top-Left: Ghost Logo Mascot + Live 1-Tap Tier Toggle Pill */}
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
             <Animated.View
               style={[
@@ -237,27 +247,21 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
               />
             </Animated.View>
 
-            <Pressable
-              onPress={() => {
-                if (Platform.OS !== 'web') {
-                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-                }
-                const nextTier = userProfile?.tier === 'pro' ? 'free' : 'pro';
-                if (onSaveProfile && userProfile) {
-                  onSaveProfile({ ...userProfile, tier: nextTier });
-                  showToast(nextTier === 'pro' ? '👑 Pro Mode Active' : '🔒 Free Mode Active');
-                }
-              }}
-              hitSlop={6}
-            >
-              <LinearGradient
-                colors={['#FDE047', '#EAB308', '#CA8A04']}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 0 }}
-                style={styles.proHeaderBadge}
-              >
-                <Text style={styles.proHeaderBadgeText}>👑 PRO CREATOR</Text>
-              </LinearGradient>
+            <Pressable onPress={handleToggleTier} hitSlop={8}>
+              {isPro ? (
+                <LinearGradient
+                  colors={['#FDE047', '#EAB308', '#CA8A04']}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 0 }}
+                  style={styles.proHeaderBadge}
+                >
+                  <Text style={styles.proHeaderBadgeText}>👑 PRO (TAP TO FREE)</Text>
+                </LinearGradient>
+              ) : (
+                <View style={[styles.proHeaderBadge, { backgroundColor: '#EDE9FE', borderColor: '#C4B5FD' }]}>
+                  <Text style={[styles.proHeaderBadgeText, { color: '#582CDB' }]}>🔒 FREE (TAP TO PRO)</Text>
+                </View>
+              )}
             </Pressable>
           </View>
 
@@ -331,7 +335,7 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
               }}
               style={({ pressed }) => [
                 styles.profilePhotoBtn,
-                styles.profilePhotoBtnPro,
+                isPro && styles.profilePhotoBtnPro,
                 pressed && styles.headerIconBtnPressed,
               ]}
               hitSlop={8}
@@ -354,407 +358,462 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
           showsVerticalScrollIndicator={false}
           bounces={true}
         >
-          {/* ============================================================ */}
-          {/* CARD 1: TODAY'S PRO PLAN HERO CARD                           */}
-          {/* ============================================================ */}
-          <View style={styles.proPlanHeroCard}>
-            <View style={styles.proPlanHeaderRow}>
-              <View style={styles.proPlanTagBox}>
-                <Text style={styles.proPlanTagText}>TODAY&apos;S PRO PLAN</Text>
-              </View>
-            </View>
+          {isPro ? (
+            /* ============================================================ */
+            /* 👑 PRO HOME DASHBOARD (Exact Screenshot Design)             */
+            /* ============================================================ */
+            <View>
+              {/* CARD 1: TODAY'S PRO PLAN HERO */}
+              <View style={styles.proPlanHeroCard}>
+                <View style={styles.proPlanHeaderRow}>
+                  <View style={styles.proPlanTagBox}>
+                    <Text style={styles.proPlanTagText}>TODAY&apos;S PRO PLAN</Text>
+                  </View>
+                </View>
 
-            <Text style={styles.proPlanHeadline}>
-              Publish your Reel, then turn your next script into a voiceover.
-            </Text>
-
-            {/* Badges Row */}
-            <View style={styles.proPlanBadgesRow}>
-              <View style={styles.proPillPurple}>
-                <Text style={styles.proPillPurpleText}>Level 42</Text>
-              </View>
-
-              <View style={styles.proPillGold}>
-                <Text style={styles.proPillGoldText}>47-Day Streak</Text>
-              </View>
-
-              <View style={styles.proPillGray}>
-                <Text style={styles.proPillGrayText}>5 Platforms Connected</Text>
-              </View>
-
-              <View style={styles.proPillActiveGold}>
-                <Text style={styles.proPillActiveGoldText}>✨ Pro Active</Text>
-              </View>
-            </View>
-          </View>
-
-          {/* ============================================================ */}
-          {/* CARD 2: YOUR STREAK HEATMAP                                  */}
-          {/* ============================================================ */}
-          <Pressable
-            onPress={() => {
-              if (Platform.OS !== 'web') {
-                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-              }
-              triggerModalPop();
-              setShowCalendarModal(true);
-            }}
-            style={({ pressed }) => [styles.dashboardCard, pressed && styles.cardPressed]}
-          >
-            <View style={styles.streakCardHeader}>
-              <Text style={styles.streakLabel}>YOUR STREAK</Text>
-              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 2 }}>
-                <Text style={styles.streakBigCount}>47-Day Streak</Text>
-                <Animated.Text style={{ fontSize: 20, transform: [{ scale: flamePulse }] }}>
-                  🔥
-                </Animated.Text>
-              </View>
-            </View>
-
-            {/* Month & Days Header */}
-            <View style={styles.monthHeaderRow}>
-              <Text style={styles.monthLabelText}>MAY 2024</Text>
-            </View>
-
-            <View style={styles.daysHeaderRow}>
-              {['M', 'T', 'W', 'T', 'F', 'S', 'S'].map((d, idx) => (
-                <Text key={`day_col_${idx}`} style={styles.dayColHeaderText}>
-                  {d}
+                <Text style={styles.proPlanHeadline}>
+                  Publish your Reel, then turn your next script into a voiceover.
                 </Text>
-              ))}
-            </View>
 
-            {/* Heatmap 2-Row Grid */}
-            <View style={styles.heatmapGridContainer}>
-              {/* Row 1: 2 Inactive + 5 Active checked boxes */}
-              <View style={styles.heatmapRow}>
-                <View style={styles.heatmapCellInactive} />
-                <View style={styles.heatmapCellInactive} />
-                {[1, 2, 3, 4, 5].map((_, i) => (
-                  <View key={`r1_${i}`} style={styles.heatmapCellActive}>
-                    <Text style={styles.checkMarkText}>✓</Text>
+                {/* Badges Row */}
+                <View style={styles.proPlanBadgesRow}>
+                  <View style={styles.proPillPurple}>
+                    <Text style={styles.proPillPurpleText}>Level 42</Text>
                   </View>
-                ))}
-              </View>
 
-              {/* Row 2: 7 Active checked boxes */}
-              <View style={styles.heatmapRow}>
-                {[1, 2, 3, 4, 5, 6, 7].map((_, i) => (
-                  <View key={`r2_${i}`} style={styles.heatmapCellActive}>
-                    <Text style={styles.checkMarkText}>✓</Text>
+                  <View style={styles.proPillGold}>
+                    <Text style={styles.proPillGoldText}>47-Day Streak</Text>
                   </View>
-                ))}
-              </View>
-            </View>
 
-            {/* Bottom Insight Callout */}
-            <View style={styles.topCreatorCalloutBanner}>
-              <Image
-                source={require('../../assets/images/jarvis-core-flame.png')}
-                style={{ width: 22, height: 22 }}
-                resizeMode="contain"
-              />
-              <Text style={styles.topCreatorText}>Top 1% of creators this month.</Text>
-            </View>
-          </Pressable>
+                  <View style={styles.proPillGray}>
+                    <Text style={styles.proPillGrayText}>5 Platforms Connected</Text>
+                  </View>
 
-          {/* ============================================================ */}
-          {/* CARD 3: POSTS SCHEDULED & AUTOPILOT                          */}
-          {/* ============================================================ */}
-          <Pressable
-            onPress={() => {
-              if (onOpenSchedule) {
-                onOpenSchedule();
-              } else if (onNavigateTab) {
-                onNavigateTab('growth');
-              }
-            }}
-            style={({ pressed }) => [styles.dashboardCard, pressed && styles.cardPressed]}
-          >
-            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-              <View>
-                <Text style={styles.scheduledLabel}>POSTS SCHEDULED</Text>
-                <View style={{ flexDirection: 'row', alignItems: 'baseline', gap: 6, marginTop: 4 }}>
-                  <Text style={styles.scheduledBigNumber}>8</Text>
-                  <Text style={styles.scheduledThisWeek}>+4 this week</Text>
+                  <View style={styles.proPillActiveGold}>
+                    <Text style={styles.proPillActiveGoldText}>✨ Pro Active</Text>
+                  </View>
                 </View>
               </View>
 
-              <View style={styles.calendarIconSquare}>
-                <Text style={{ fontSize: 18 }}>🗓️</Text>
-              </View>
-            </View>
-
-            <View style={styles.scheduledDivider} />
-
-            <View style={styles.scheduledBottomRow}>
-              <Text style={styles.nextPostTimeText}>Next: 11:30 AM</Text>
-              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
-                <Text style={{ fontSize: 12 }}>⚡</Text>
-                <Text style={styles.autopilotActiveText}>Autopilot Active</Text>
-              </View>
-            </View>
-          </Pressable>
-
-          {/* ============================================================ */}
-          {/* CARD 4: PERFORMANCE INSIGHT & HOURLY PEAK CHART              */}
-          {/* ============================================================ */}
-          <Pressable
-            onPress={() => {
-              if (onOpenGrowth) {
-                onOpenGrowth();
-              } else if (onNavigateTab) {
-                onNavigateTab('growth');
-              }
-            }}
-            style={({ pressed }) => [styles.dashboardCard, pressed && styles.cardPressed]}
-          >
-            <View style={styles.insightHeaderRow}>
-              <View style={styles.trendingIconBox}>
-                <Text style={{ fontSize: 14 }}>📈</Text>
-              </View>
-              <Text style={styles.insightBodyText}>
-                Your Reels perform <Text style={styles.highlightGreen}>31% better</Text> between 7:00 PM and 9:00 PM.
-              </Text>
-            </View>
-
-            {/* Rounded Vertical Hourly Bar Chart */}
-            <View style={styles.hourlyChartContainer}>
-              <View style={[styles.hourlyBar, { height: 10, backgroundColor: '#F1F5F9' }]} />
-              <View style={[styles.hourlyBar, { height: 16, backgroundColor: '#E2E8F0' }]} />
-              <View style={[styles.hourlyBar, { height: 38, backgroundColor: '#6366F1' }]} />
-              <View style={[styles.hourlyBar, { height: 44, backgroundColor: '#582CDB' }]} />
-              <View style={[styles.hourlyBar, { height: 34, backgroundColor: '#6366F1' }]} />
-              <View style={[styles.hourlyBar, { height: 12, backgroundColor: '#F1F5F9' }]} />
-            </View>
-          </Pressable>
-
-          {/* ============================================================ */}
-          {/* CARD 5: CREATOR LEVEL & XP PROGRESS                          */}
-          {/* ============================================================ */}
-          <Pressable
-            onPress={() => {
-              if (onStartMission) {
-                onStartMission();
-              } else if (onOpenQuests) {
-                onOpenQuests();
-              }
-            }}
-            style={({ pressed }) => [styles.dashboardCard, pressed && styles.cardPressed]}
-          >
-            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 14, marginBottom: 14 }}>
-              {/* Circular Badge 42 */}
-              <LinearGradient
-                colors={['#8B5CF6', '#7C3AED', '#A855F7']}
-                style={styles.levelCircleBadge}
-              >
-                <Text style={styles.levelCircleNumber}>42</Text>
-              </LinearGradient>
-
-              <View style={{ flex: 1 }}>
-                <Text style={styles.levelTitleText}>Elite Storyteller</Text>
-                <Text style={styles.levelXpText}>2,450 / 3,000 XP</Text>
-              </View>
-            </View>
-
-            {/* Gradient Progress Bar (Purple to Gold) */}
-            <View style={styles.xpTrackBg}>
-              <LinearGradient
-                colors={['#6366F1', '#8B5CF6', '#EAB308', '#FDE047']}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 0 }}
-                style={[styles.xpTrackFill, { width: '82%' }]}
-              />
-            </View>
-          </Pressable>
-
-          {/* ============================================================ */}
-          {/* CARD 6: BRAND QUEST ("GlowUp Skincare Launch")               */}
-          {/* ============================================================ */}
-          <Pressable
-            onPress={() => {
-              if (Platform.OS !== 'web') {
-                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-              }
-              triggerModalPop();
-              setShowBrandQuestModal(true);
-            }}
-            style={({ pressed }) => [styles.dashboardCard, pressed && styles.cardPressed]}
-          >
-            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 14 }}>
-              <View style={styles.brandIconSquare}>
-                <Text style={{ fontSize: 20 }}>🎁</Text>
-              </View>
-
-              <View style={{ flex: 1 }}>
-                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-                  <View style={styles.proPriorityPill}>
-                    <Text style={styles.proPriorityText}>PRO PRIORITY</Text>
-                  </View>
-                  <Text style={styles.brandQuestSubLabel}>BRAND QUEST</Text>
-                </View>
-                <Text style={styles.brandQuestTitle}>GlowUp Skincare Launch</Text>
-              </View>
-
-              <Text style={styles.chevronRight}>›</Text>
-            </View>
-          </Pressable>
-
-          {/* ============================================================ */}
-          {/* CARD 7: MONTHLY EARNINGS ($4,250.00)                         */}
-          {/* ============================================================ */}
-          <View style={styles.dashboardCard}>
-            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-              <Text style={styles.earningsCardLabel}>MONTHLY EARNINGS</Text>
-              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-                <Text style={styles.earningsMonthText}>MAY 2024</Text>
-                <View style={{ flexDirection: 'row', gap: 3 }}>
-                  <View style={[styles.dot, styles.dotActive]} />
-                  <View style={styles.dot} />
-                  <View style={styles.dot} />
-                </View>
-              </View>
-            </View>
-
-            <View style={{ marginVertical: 10 }}>
-              <Text style={styles.earningsBigAmount}>$4,250.00</Text>
-              <Text style={styles.earningsGrowthRate}>+18% vs last month</Text>
-            </View>
-
-            <Pressable
-              style={({ pressed }) => [styles.viewEarningsBtn, pressed && styles.btnPressed]}
-              onPress={() => {
-                if (Platform.OS !== 'web') {
-                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-                }
-                if (onOpenEarnings) {
-                  onOpenEarnings();
-                } else if (onNavigateTab) {
-                  onNavigateTab('growth');
-                }
-              }}
-            >
-              <Text style={styles.viewEarningsBtnText}>View Earnings</Text>
-            </Pressable>
-          </View>
-
-          {/* ============================================================ */}
-          {/* CARD 8: VOICE STUDIO PRO (AI Audio Studio)                   */}
-          {/* ============================================================ */}
-          <View style={styles.dashboardCard}>
-            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-              <Text style={styles.voiceStudioLabel}>VOICE STUDIO PRO</Text>
-              <View style={styles.proUnlockedPill}>
-                <Text style={styles.proUnlockedText}>PRO UNLOCKED</Text>
-              </View>
-            </View>
-
-            {/* Waveform Audio Visualizer Box */}
-            <View style={styles.waveformContainerBox}>
-              <View style={styles.waveformBarsRow}>
-                {[14, 28, 46, 20, 52, 34, 18, 48, 30, 16].map((h, i) => (
-                  <Animated.View
-                    key={`wf_${i}`}
-                    style={[
-                      styles.waveformBarItem,
-                      {
-                        height: h,
-                        opacity: waveformAnim,
-                      },
-                    ]}
-                  />
-                ))}
-              </View>
-            </View>
-
-            {/* Stat and Progress Ring Row */}
-            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginVertical: 14 }}>
-              <View>
-                <Text style={styles.voiceMinsCount}>118 <Text style={styles.voiceMinsTotal}>/ 150 mins</Text></Text>
-                <Text style={styles.savedVoiceSub}>Saved Voice — Energetic Narrator</Text>
-              </View>
-
-              <View style={styles.voiceProgressCircle}>
-                <Text style={styles.voiceProgressText}>78%</Text>
-              </View>
-            </View>
-
-            {/* Dual Buttons */}
-            <View style={{ gap: 8 }}>
+              {/* CARD 2: YOUR STREAK HEATMAP */}
               <Pressable
-                style={({ pressed }) => [styles.createVoiceBtn, pressed && styles.btnPressed]}
-                onPress={() => {
-                  if (Platform.OS !== 'web') {
-                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-                  }
-                  triggerModalPop();
-                  setShowVoiceStudioModal(true);
-                }}
-              >
-                <Text style={styles.createVoiceBtnText}>✨ Create Voice</Text>
-              </Pressable>
-
-              <Pressable
-                style={({ pressed }) => [styles.openStudioOutlineBtn, pressed && styles.btnPressed]}
                 onPress={() => {
                   if (Platform.OS !== 'web') {
                     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                   }
                   triggerModalPop();
-                  setShowVoiceStudioModal(true);
+                  setShowCalendarModal(true);
                 }}
+                style={({ pressed }) => [styles.dashboardCard, pressed && styles.cardPressed]}
               >
-                <Text style={styles.openStudioBtnText}>Open Studio</Text>
-              </Pressable>
-            </View>
-          </View>
+                <View style={styles.streakCardHeader}>
+                  <Text style={styles.streakLabel}>YOUR STREAK</Text>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 2 }}>
+                    <Text style={styles.streakBigCount}>47-Day Streak</Text>
+                    <Animated.Text style={{ fontSize: 20, transform: [{ scale: flamePulse }] }}>
+                      🔥
+                    </Animated.Text>
+                  </View>
+                </View>
 
-          {/* ============================================================ */}
-          {/* CARD 9: CREATOR MATCH (Amara Okafor)                         */}
-          {/* ============================================================ */}
-          <View style={[styles.dashboardCard, { marginBottom: 120 }]}>
-            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, marginBottom: 12 }}>
-              <Image
-                source={require('../../assets/images/amara-avatar.jpg')}
-                style={styles.matchAvatarImage}
-                resizeMode="cover"
-              />
-              <View style={{ flex: 1 }}>
-                <Text style={styles.matchCreatorName}>Amara Okafor</Text>
-                <Text style={styles.matchOverlapTag}>94% Audience overlap</Text>
+                <View style={styles.monthHeaderRow}>
+                  <Text style={styles.monthLabelText}>MAY 2024</Text>
+                </View>
+
+                <View style={styles.daysHeaderRow}>
+                  {['M', 'T', 'W', 'T', 'F', 'S', 'S'].map((d, idx) => (
+                    <Text key={`day_col_${idx}`} style={styles.dayColHeaderText}>
+                      {d}
+                    </Text>
+                  ))}
+                </View>
+
+                <View style={styles.heatmapGridContainer}>
+                  <View style={styles.heatmapRow}>
+                    <View style={styles.heatmapCellInactive} />
+                    <View style={styles.heatmapCellInactive} />
+                    {[1, 2, 3, 4, 5].map((_, i) => (
+                      <View key={`r1_${i}`} style={styles.heatmapCellActive}>
+                        <Text style={styles.checkMarkText}>✓</Text>
+                      </View>
+                    ))}
+                  </View>
+
+                  <View style={styles.heatmapRow}>
+                    {[1, 2, 3, 4, 5, 6, 7].map((_, i) => (
+                      <View key={`r2_${i}`} style={styles.heatmapCellActive}>
+                        <Text style={styles.checkMarkText}>✓</Text>
+                      </View>
+                    ))}
+                  </View>
+                </View>
+
+                <View style={styles.topCreatorCalloutBanner}>
+                  <Image
+                    source={require('../../assets/images/jarvis-core-flame.png')}
+                    style={{ width: 22, height: 22 }}
+                    resizeMode="contain"
+                  />
+                  <Text style={styles.topCreatorText}>Top 1% of creators this month.</Text>
+                </View>
+              </Pressable>
+
+              {/* CARD 3: POSTS SCHEDULED & AUTOPILOT */}
+              <Pressable
+                onPress={() => {
+                  if (onOpenSchedule) {
+                    onOpenSchedule();
+                  } else if (onNavigateTab) {
+                    onNavigateTab('growth');
+                  }
+                }}
+                style={({ pressed }) => [styles.dashboardCard, pressed && styles.cardPressed]}
+              >
+                <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                  <View>
+                    <Text style={styles.scheduledLabel}>POSTS SCHEDULED</Text>
+                    <View style={{ flexDirection: 'row', alignItems: 'baseline', gap: 6, marginTop: 4 }}>
+                      <Text style={styles.scheduledBigNumber}>8</Text>
+                      <Text style={styles.scheduledThisWeek}>+4 this week</Text>
+                    </View>
+                  </View>
+
+                  <View style={styles.calendarIconSquare}>
+                    <Text style={{ fontSize: 18 }}>🗓️</Text>
+                  </View>
+                </View>
+
+                <View style={styles.scheduledDivider} />
+
+                <View style={styles.scheduledBottomRow}>
+                  <Text style={styles.nextPostTimeText}>Next: 11:30 AM</Text>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+                    <Text style={{ fontSize: 12 }}>⚡</Text>
+                    <Text style={styles.autopilotActiveText}>Autopilot Active</Text>
+                  </View>
+                </View>
+              </Pressable>
+
+              {/* CARD 4: PERFORMANCE INSIGHT & HOURLY PEAK CHART */}
+              <Pressable
+                onPress={() => {
+                  if (onOpenGrowth) {
+                    onOpenGrowth();
+                  } else if (onNavigateTab) {
+                    onNavigateTab('growth');
+                  }
+                }}
+                style={({ pressed }) => [styles.dashboardCard, pressed && styles.cardPressed]}
+              >
+                <View style={styles.insightHeaderRow}>
+                  <View style={styles.trendingIconBox}>
+                    <Text style={{ fontSize: 14 }}>📈</Text>
+                  </View>
+                  <Text style={styles.insightBodyText}>
+                    Your Reels perform <Text style={styles.highlightGreen}>31% better</Text> between 7:00 PM and 9:00 PM.
+                  </Text>
+                </View>
+
+                <View style={styles.hourlyChartContainer}>
+                  <View style={[styles.hourlyBar, { height: 10, backgroundColor: '#F1F5F9' }]} />
+                  <View style={[styles.hourlyBar, { height: 16, backgroundColor: '#E2E8F0' }]} />
+                  <View style={[styles.hourlyBar, { height: 38, backgroundColor: '#6366F1' }]} />
+                  <View style={[styles.hourlyBar, { height: 44, backgroundColor: '#582CDB' }]} />
+                  <View style={[styles.hourlyBar, { height: 34, backgroundColor: '#6366F1' }]} />
+                  <View style={[styles.hourlyBar, { height: 12, backgroundColor: '#F1F5F9' }]} />
+                </View>
+              </Pressable>
+
+              {/* CARD 5: CREATOR LEVEL & XP PROGRESS */}
+              <Pressable
+                onPress={() => {
+                  if (onStartMission) {
+                    onStartMission();
+                  } else if (onOpenQuests) {
+                    onOpenQuests();
+                  }
+                }}
+                style={({ pressed }) => [styles.dashboardCard, pressed && styles.cardPressed]}
+              >
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 14, marginBottom: 14 }}>
+                  <LinearGradient
+                    colors={['#8B5CF6', '#7C3AED', '#A855F7']}
+                    style={styles.levelCircleBadge}
+                  >
+                    <Text style={styles.levelCircleNumber}>42</Text>
+                  </LinearGradient>
+
+                  <View style={{ flex: 1 }}>
+                    <Text style={styles.levelTitleText}>Elite Storyteller</Text>
+                    <Text style={styles.levelXpText}>2,450 / 3,000 XP</Text>
+                  </View>
+                </View>
+
+                <View style={styles.xpTrackBg}>
+                  <LinearGradient
+                    colors={['#6366F1', '#8B5CF6', '#EAB308', '#FDE047']}
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 1, y: 0 }}
+                    style={[styles.xpTrackFill, { width: '82%' }]}
+                  />
+                </View>
+              </Pressable>
+
+              {/* CARD 6: BRAND QUEST ("GlowUp Skincare Launch") */}
+              <Pressable
+                onPress={() => {
+                  if (Platform.OS !== 'web') {
+                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                  }
+                  triggerModalPop();
+                  setShowBrandQuestModal(true);
+                }}
+                style={({ pressed }) => [styles.dashboardCard, pressed && styles.cardPressed]}
+              >
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 14 }}>
+                  <View style={styles.brandIconSquare}>
+                    <Text style={{ fontSize: 20 }}>🎁</Text>
+                  </View>
+
+                  <View style={{ flex: 1 }}>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                      <View style={styles.proPriorityPill}>
+                        <Text style={styles.proPriorityText}>PRO PRIORITY</Text>
+                      </View>
+                      <Text style={styles.brandQuestSubLabel}>BRAND QUEST</Text>
+                    </View>
+                    <Text style={styles.brandQuestTitle}>GlowUp Skincare Launch</Text>
+                  </View>
+
+                  <Text style={styles.chevronRight}>›</Text>
+                </View>
+              </Pressable>
+
+              {/* CARD 7: MONTHLY EARNINGS ($4,250.00) */}
+              <View style={styles.dashboardCard}>
+                <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <Text style={styles.earningsCardLabel}>MONTHLY EARNINGS</Text>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                    <Text style={styles.earningsMonthText}>MAY 2024</Text>
+                    <View style={{ flexDirection: 'row', gap: 3 }}>
+                      <View style={[styles.dot, styles.dotActive]} />
+                      <View style={styles.dot} />
+                      <View style={styles.dot} />
+                    </View>
+                  </View>
+                </View>
+
+                <View style={{ marginVertical: 10 }}>
+                  <Text style={styles.earningsBigAmount}>$4,250.00</Text>
+                  <Text style={styles.earningsGrowthRate}>+18% vs last month</Text>
+                </View>
+
+                <Pressable
+                  style={({ pressed }) => [styles.viewEarningsBtn, pressed && styles.btnPressed]}
+                  onPress={() => {
+                    if (Platform.OS !== 'web') {
+                      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                    }
+                    if (onOpenEarnings) {
+                      onOpenEarnings();
+                    } else if (onNavigateTab) {
+                      onNavigateTab('growth');
+                    }
+                  }}
+                >
+                  <Text style={styles.viewEarningsBtnText}>View Earnings</Text>
+                </Pressable>
+              </View>
+
+              {/* CARD 8: VOICE STUDIO PRO */}
+              <View style={styles.dashboardCard}>
+                <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+                  <Text style={styles.voiceStudioLabel}>VOICE STUDIO PRO</Text>
+                  <View style={styles.proUnlockedPill}>
+                    <Text style={styles.proUnlockedText}>PRO UNLOCKED</Text>
+                  </View>
+                </View>
+
+                <View style={styles.waveformContainerBox}>
+                  <View style={styles.waveformBarsRow}>
+                    {[14, 28, 46, 20, 52, 34, 18, 48, 30, 16].map((h, i) => (
+                      <Animated.View
+                        key={`wf_${i}`}
+                        style={[
+                          styles.waveformBarItem,
+                          {
+                            height: h,
+                            opacity: waveformAnim,
+                          },
+                        ]}
+                      />
+                    ))}
+                  </View>
+                </View>
+
+                <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginVertical: 14 }}>
+                  <View>
+                    <Text style={styles.voiceMinsCount}>118 <Text style={styles.voiceMinsTotal}>/ 150 mins</Text></Text>
+                    <Text style={styles.savedVoiceSub}>Saved Voice — Energetic Narrator</Text>
+                  </View>
+
+                  <View style={styles.voiceProgressCircle}>
+                    <Text style={styles.voiceProgressText}>78%</Text>
+                  </View>
+                </View>
+
+                <View style={{ gap: 8 }}>
+                  <Pressable
+                    style={({ pressed }) => [styles.createVoiceBtn, pressed && styles.btnPressed]}
+                    onPress={() => {
+                      if (Platform.OS !== 'web') {
+                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                      }
+                      triggerModalPop();
+                      setShowVoiceStudioModal(true);
+                    }}
+                  >
+                    <Text style={styles.createVoiceBtnText}>✨ Create Voice</Text>
+                  </Pressable>
+
+                  <Pressable
+                    style={({ pressed }) => [styles.openStudioOutlineBtn, pressed && styles.btnPressed]}
+                    onPress={() => {
+                      if (Platform.OS !== 'web') {
+                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                      }
+                      triggerModalPop();
+                      setShowVoiceStudioModal(true);
+                    }}
+                  >
+                    <Text style={styles.openStudioBtnText}>Open Studio</Text>
+                  </Pressable>
+                </View>
+              </View>
+
+              {/* CARD 9: CREATOR MATCH */}
+              <View style={[styles.dashboardCard, { marginBottom: 120 }]}>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, marginBottom: 12 }}>
+                  <Image
+                    source={require('../../assets/images/amara-avatar.jpg')}
+                    style={styles.matchAvatarImage}
+                    resizeMode="cover"
+                  />
+                  <View style={{ flex: 1 }}>
+                    <Text style={styles.matchCreatorName}>Amara Okafor</Text>
+                    <Text style={styles.matchOverlapTag}>94% Audience overlap</Text>
+                  </View>
+                </View>
+
+                <View style={styles.whyMatchCalloutRow}>
+                  <Text style={{ fontSize: 13 }}>✨</Text>
+                  <Text style={styles.whyMatchInlineText}>
+                    <Text style={{ fontWeight: '900', color: '#582CDB' }}>Why this match? </Text>
+                    Similar niche, active streak, open to collab.
+                  </Text>
+                </View>
+
+                <View style={styles.matchRecommendationBox}>
+                  <Text style={styles.matchRecommendationText}>
+                    Recommended for a collaborative &lsquo;Behind the Scenes&rsquo; series based on your audience.
+                  </Text>
+                </View>
+
+                <Pressable
+                  style={({ pressed }) => [styles.connectMatchOutlineBtn, pressed && styles.btnPressed]}
+                  onPress={() => {
+                    if (Platform.OS !== 'web') {
+                      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                    }
+                    if (onOpenMessages) {
+                      onOpenMessages();
+                    } else if (onNavigateTab) {
+                      onNavigateTab('match');
+                    }
+                  }}
+                >
+                  <Text style={styles.connectMatchBtnText}>Connect</Text>
+                </Pressable>
               </View>
             </View>
+          ) : (
+            /* ============================================================ */
+            /* 🔒 FREE HOME DASHBOARD (Standard Edition with Upsell Banner) */
+            /* ============================================================ */
+            <View>
+              {/* CARD 1: FREE FOCUS HERO */}
+              <View style={styles.freeFocusHero}>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 8 }}>
+                  <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: '#EF4444' }} />
+                  <Text style={{ fontSize: 10, fontWeight: '900', color: '#64748B', letterSpacing: 0.5 }}>TODAY&apos;S FOCUS</Text>
+                </View>
 
-            <View style={styles.whyMatchCalloutRow}>
-              <Text style={{ fontSize: 13 }}>✨</Text>
-              <Text style={styles.whyMatchInlineText}>
-                <Text style={{ fontWeight: '900', color: '#582CDB' }}>Why this match? </Text>
-                Similar niche, active streak, open to collab.
-              </Text>
+                <Text style={{ fontSize: 16, fontWeight: '800', color: '#171420', marginBottom: 12 }}>
+                  Post 1 Reel before 9 PM to protect your 47-day streak
+                </Text>
+
+                <View style={{ flexDirection: 'row', gap: 6, flexWrap: 'wrap' }}>
+                  <View style={styles.freeTag}><Text style={styles.freeTagText}>Level 42</Text></View>
+                  <View style={[styles.freeTag, { backgroundColor: '#FEF3C7' }]}><Text style={[styles.freeTagText, { color: '#B45309' }]}>🔥 47-Day Streak</Text></View>
+                  <View style={styles.freeTag}><Text style={styles.freeTagText}>Next: 11:30 AM</Text></View>
+                </View>
+              </View>
+
+              {/* CARD 2: STREAK CARD */}
+              <View style={styles.dashboardCard}>
+                <Text style={styles.streakLabel}>YOUR STREAK</Text>
+                <Text style={[styles.streakBigCount, { marginBottom: 12 }]}>47-Day Streak 🔥</Text>
+                <Text style={{ fontSize: 13, color: '#64748B', lineHeight: 18 }}>
+                  Keep posting consistently to build your Creator Passport credibility and unlock higher brand deal tiers.
+                </Text>
+              </View>
+
+              {/* CARD 3: CREATOR LEVEL */}
+              <View style={styles.dashboardCard}>
+                <Text style={{ fontSize: 16, fontWeight: '900', color: '#171420' }}>🏆 Elite Storyteller (Level 42)</Text>
+                <Text style={{ fontSize: 12, color: '#64748B', marginTop: 4, marginBottom: 12 }}>
+                  2,450 / 3,000 XP • Complete daily quests to level up.
+                </Text>
+                <Pressable
+                  style={({ pressed }) => [styles.freeActionBtn, pressed && styles.btnPressed]}
+                  onPress={() => {
+                    if (onStartMission) onStartMission();
+                  }}
+                >
+                  <Text style={styles.freeActionBtnText}>Start Daily Mission 🚀</Text>
+                </Pressable>
+              </View>
+
+              {/* CARD 4: UPGRADE TO JARVIS PRO BANNER */}
+              <View style={[styles.dashboardCard, { borderColor: '#EAB308', backgroundColor: '#FEFCE8', marginBottom: 120 }]}>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+                  <Text style={{ fontSize: 20 }}>⚡</Text>
+                  <Text style={{ fontSize: 16, fontWeight: '900', color: '#171420' }}>Unlock Jarvis Pro</Text>
+                  <View style={styles.proPriorityPill}>
+                    <Text style={styles.proPriorityText}>PRO SUITE</Text>
+                  </View>
+                </View>
+
+                <Text style={{ fontSize: 13, color: '#64748B', lineHeight: 19, marginBottom: 14 }}>
+                  Get AI Voice Studio, 1-Click Repurposing, Autopilot Scheduling, and Verified Brand Sponsorships ($4,250/mo potential).
+                </Text>
+
+                <Pressable
+                  style={({ pressed }) => [styles.viewEarningsBtn, pressed && styles.btnPressed]}
+                  onPress={handleToggleTier}
+                >
+                  <LinearGradient
+                    colors={['#FDE047', '#EAB308', '#CA8A04']}
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 1, y: 0 }}
+                    style={{ width: '100%', paddingVertical: 13, borderRadius: 14, alignItems: 'center' }}
+                  >
+                    <Text style={{ color: '#000000', fontSize: 14, fontWeight: '900' }}>Upgrade to Pro (Tap to Test) ➔</Text>
+                  </LinearGradient>
+                </Pressable>
+              </View>
             </View>
-
-            <View style={styles.matchRecommendationBox}>
-              <Text style={styles.matchRecommendationText}>
-                Recommended for a collaborative &lsquo;Behind the Scenes&rsquo; series based on your audience.
-              </Text>
-            </View>
-
-            <Pressable
-              style={({ pressed }) => [styles.connectMatchOutlineBtn, pressed && styles.btnPressed]}
-              onPress={() => {
-                if (Platform.OS !== 'web') {
-                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-                }
-                if (onOpenMessages) {
-                  onOpenMessages();
-                } else if (onNavigateTab) {
-                  onNavigateTab('match');
-                }
-              }}
-            >
-              <Text style={styles.connectMatchBtnText}>Connect</Text>
-            </Pressable>
-          </View>
+          )}
         </ScrollView>
 
         {/* 10. FLOATING LIQUID GLASS BOTTOM NAVIGATION BAR */}
@@ -786,7 +845,6 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
                 </Pressable>
               </View>
 
-              {/* Voice Tone Selector */}
               <Text style={styles.inputSectionHeader}>SELECT AI CREATOR VOICE</Text>
               <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8, marginVertical: 8 }}>
                 {['Energetic Narrator', 'Deep Storyteller', 'Tech Explainer', 'Casual Vlogger'].map((voice, idx) => {
@@ -810,7 +868,6 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
                 })}
               </ScrollView>
 
-              {/* Script Input Box */}
               <Text style={styles.inputSectionHeader}>SCRIPT INPUT</Text>
               <TextInput
                 style={styles.voiceTextInput}
@@ -822,7 +879,6 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
                 placeholderTextColor="#94A3B8"
               />
 
-              {/* Action */}
               <Pressable
                 style={styles.modalFullBtn}
                 onPress={() => {
@@ -1631,6 +1687,38 @@ const styles = StyleSheet.create({
     color: '#582CDB',
     fontSize: 13.5,
     fontWeight: '900',
+  },
+
+  // FREE TIER STYLES
+  freeFocusHero: {
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1,
+    borderColor: '#EFECE6',
+    borderRadius: 24,
+    padding: 20,
+    marginBottom: 16,
+  },
+  freeTag: {
+    backgroundColor: '#F1F5F9',
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 8,
+  },
+  freeTagText: {
+    fontSize: 11,
+    fontWeight: '800',
+    color: '#475569',
+  },
+  freeActionBtn: {
+    backgroundColor: '#582CDB',
+    paddingVertical: 12,
+    borderRadius: 12,
+    alignItems: 'center',
+  },
+  freeActionBtnText: {
+    color: '#FFFFFF',
+    fontSize: 13,
+    fontWeight: '800',
   },
 
   // GENERAL BUTTON STATES & MODALS
