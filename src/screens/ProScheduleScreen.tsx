@@ -56,6 +56,87 @@ const CALENDAR_DAYS: CalendarDay[] = [
   { dayName: 'SUN', dayNum: 29, dotsCount: 2 },
 ];
 
+interface FullQueueItem {
+  id: string;
+  title: string;
+  platformLabel: string;
+  time: string;
+  period: string;
+  dayLabel: string;
+  status: 'AUTOPILOT' | 'READY' | 'QUEUED';
+  score: string;
+  iconType: 'tiktok' | 'instagram' | 'youtube' | 'linkedin' | 'x';
+}
+
+const INITIAL_FULL_QUEUE: FullQueueItem[] = [
+  {
+    id: 'q1',
+    title: 'LinkedIn Insight: Why 90% of creators fail by Month 2',
+    platformLabel: 'in LinkedIn',
+    time: '10:00',
+    period: 'AM',
+    dayLabel: 'Tomorrow (Thu)',
+    status: 'AUTOPILOT',
+    score: '96% Match',
+    iconType: 'linkedin',
+  },
+  {
+    id: 'q2',
+    title: 'Instagram Carousel: The 1 iPhone 4K Recording Setup',
+    platformLabel: '📸 IG Reel',
+    time: '06:00',
+    period: 'PM',
+    dayLabel: 'Friday (Oct 27)',
+    status: 'READY',
+    score: '94% Match',
+    iconType: 'instagram',
+  },
+  {
+    id: 'q3',
+    title: 'TikTok Duet: Unpopular truth about the 2026 algorithm',
+    platformLabel: '≈ TikTok',
+    time: '05:30',
+    period: 'PM',
+    dayLabel: 'Saturday (Oct 28)',
+    status: 'AUTOPILOT',
+    score: '98% Match',
+    iconType: 'tiktok',
+  },
+  {
+    id: 'q4',
+    title: 'YouTube Short: How I batch-film 10 videos in 2 hours',
+    platformLabel: '▶ Shorts',
+    time: '02:00',
+    period: 'PM',
+    dayLabel: 'Sunday (Oct 29)',
+    status: 'QUEUED',
+    score: '91% Match',
+    iconType: 'youtube',
+  },
+  {
+    id: 'q5',
+    title: 'X Viral Thread: 5 tools that automate my content pipeline',
+    platformLabel: 'in LinkedIn',
+    time: '09:30',
+    period: 'AM',
+    dayLabel: 'Monday (Oct 30)',
+    status: 'AUTOPILOT',
+    score: '95% Match',
+    iconType: 'linkedin',
+  },
+  {
+    id: 'q6',
+    title: 'Instagram Reel: Behind the scenes of my video workflow',
+    platformLabel: '📸 IG Reel',
+    time: '07:30',
+    period: 'PM',
+    dayLabel: 'Tuesday (Oct 31)',
+    status: 'READY',
+    score: '96% Match',
+    iconType: 'instagram',
+  },
+];
+
 interface ScheduleItem {
   id: string;
   time: string;
@@ -153,6 +234,9 @@ export const ProScheduleScreen: React.FC<ProScheduleScreenProps> = ({
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [showSchedulePostModal, setShowSchedulePostModal] = useState(false);
   const [showExpandViewModal, setShowExpandViewModal] = useState(false);
+  const [showFullQueueModal, setShowFullQueueModal] = useState(false);
+  const [fullQueueList, setFullQueueList] = useState<FullQueueItem[]>(INITIAL_FULL_QUEUE);
+  const [selectedQueueFilter, setSelectedQueueFilter] = useState('ALL');
   const [showFillGapModal, setShowFillGapModal] = useState(false);
   const [selectedPostDetail, setSelectedPostDetail] = useState<ScheduleItem | null>(null);
   // Advanced Edit Modal States
@@ -646,7 +730,13 @@ export const ProScheduleScreen: React.FC<ProScheduleScreenProps> = ({
             <Text style={styles.sectionHeaderTitleBold}>Upcoming Queue</Text>
             <Pressable
               style={styles.viewFullQueuePillBtn}
-              onPress={() => showToast('Displaying full queue')}
+              onPress={() => {
+                if (Platform.OS !== 'web') {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                }
+                triggerModalPop();
+                setShowFullQueueModal(true);
+              }}
               hitSlop={8}
             >
               <Text style={styles.viewFullQueuePillText}>View Full Queue</Text>
@@ -1510,6 +1600,142 @@ export const ProScheduleScreen: React.FC<ProScheduleScreenProps> = ({
                   onPress={() => setShowExpandViewModal(false)}
                 >
                   <Text style={styles.modalCancelBtnText}>Close Timeline</Text>
+                </Pressable>
+              </ScrollView>
+            </Animated.View>
+          </View>
+        </Modal>
+
+                {/* ============================================================ */}
+        {/* MODAL 5: ADVANCED PRO AUTOPILOT QUEUE MODAL                  */}
+        {/* ============================================================ */}
+        <Modal
+          visible={showFullQueueModal}
+          transparent={true}
+          animationType="fade"
+          onRequestClose={() => setShowFullQueueModal(false)}
+        >
+          <View style={styles.modalOverlay}>
+            <Animated.View style={[styles.modalCard, { transform: [{ scale: modalPopScale }], maxHeight: '90%' }]}>
+              <ScrollView showsVerticalScrollIndicator={false} bounces={false}>
+                {/* Header */}
+                <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+                  <View style={styles.modalProTagBadge}>
+                    <Text style={styles.modalProTagBadgeText}>👑 PRO AUTOPILOT QUEUE</Text>
+                  </View>
+                  <Pressable onPress={() => setShowFullQueueModal(false)} hitSlop={8}>
+                    <Text style={{ fontSize: 18, color: '#94A3B8', fontWeight: '900' }}>✕</Text>
+                  </Pressable>
+                </View>
+
+                <Text style={styles.modalTitleText}>All Scheduled Content</Text>
+                <Text style={styles.modalSubText}>
+                  {fullQueueList.length} active queue slots configured across all connected social channels. Tap any slot to view or edit details.
+                </Text>
+
+                {/* Filter Chips */}
+                <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginVertical: 10 }}>
+                  {['ALL', 'IG Reel', 'TikTok', 'Shorts', 'LinkedIn'].map((filter) => (
+                    <Pressable
+                      key={filter}
+                      style={[
+                        styles.queueFilterChip,
+                        selectedQueueFilter === filter && styles.queueFilterChipActive,
+                      ]}
+                      onPress={() => setSelectedQueueFilter(filter)}
+                    >
+                      <Text
+                        style={[
+                          styles.queueFilterChipText,
+                          selectedQueueFilter === filter && styles.queueFilterChipTextActive,
+                        ]}
+                      >
+                        {filter === 'ALL' ? '🌟 All Channels' : filter}
+                      </Text>
+                    </Pressable>
+                  ))}
+                </View>
+
+                {/* Queue Items List */}
+                <View style={{ gap: 10, marginVertical: 6 }}>
+                  {fullQueueList
+                    .filter((q) => selectedQueueFilter === 'ALL' || q.platformLabel.includes(selectedQueueFilter))
+                    .map((item) => (
+                      <Pressable
+                        key={item.id}
+                        style={({ pressed }) => [styles.fullQueueItemCard, pressed && styles.btnPressed]}
+                        onPress={() => {
+                          if (Platform.OS !== 'web') {
+                            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                          }
+                          // Pre-fill Edit Modal with this queue item
+                          setEditingPostTitle(item.title);
+                          setEditingPostPlatform(item.platformLabel);
+                          setEditingPostTime(item.time);
+                          setEditingPostPeriod(item.period);
+                          setShowFullQueueModal(false);
+                          triggerModalPop();
+                          setSelectedPostDetail({
+                            id: item.id,
+                            time: item.time,
+                            period: item.period,
+                            title: item.title,
+                            platform: (item.iconType === 'x' ? 'linkedin' : item.iconType) as any,
+                            platformLabel: item.platformLabel,
+                            badgeType: 'scheduled',
+                            dayIndex: selectedDayIndex,
+                          });
+                        }}
+                      >
+                        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                          <View style={{ flexDirection: 'row', gap: 10, flex: 1 }}>
+                            <View style={styles.timeBoxPurple}>
+                              <Text style={styles.timeBoxPurpleText}>{item.time}</Text>
+                              <Text style={styles.timeBoxPurpleSub}>{item.period}</Text>
+                            </View>
+
+                            <View style={{ flex: 1 }}>
+                              <Text style={styles.scheduleItemTitle} numberOfLines={2}>{item.title}</Text>
+                              <Text style={styles.scheduleItemPlatform}>
+                                {item.dayLabel} • {item.platformLabel} • ⚡ {item.score}
+                              </Text>
+                            </View>
+                          </View>
+
+                          <View style={styles.queueStatusBadge}>
+                            <Text style={styles.queueStatusBadgeText}>{item.status}</Text>
+                          </View>
+                        </View>
+
+                        <View style={styles.queueCardFooterRow}>
+                          <Text style={styles.queueCardActionHint}>✏️ Tap to edit details &amp; peak timing</Text>
+                          <Text style={{ fontSize: 13, color: '#582CDB', fontWeight: '900' }}>➔</Text>
+                        </View>
+                      </Pressable>
+                    ))}
+                </View>
+
+                {/* + Schedule New Post Button */}
+                <Pressable
+                  style={[styles.modalPrimaryActionBtn, { marginTop: 14 }]}
+                  onPress={() => {
+                    setShowFullQueueModal(false);
+                    setTimeout(() => {
+                      triggerModalPop();
+                      setShowSchedulePostModal(true);
+                    }, 200);
+                  }}
+                >
+                  <Text style={styles.modalPrimaryActionBtnText}>
+                    + Add New Post to Queue ➔
+                  </Text>
+                </Pressable>
+
+                <Pressable
+                  style={styles.modalCancelBtn}
+                  onPress={() => setShowFullQueueModal(false)}
+                >
+                  <Text style={styles.modalCancelBtnText}>Close Queue</Text>
                 </Pressable>
               </ScrollView>
             </Animated.View>
@@ -2646,6 +2872,61 @@ const styles = StyleSheet.create({
     color: '#64748B',
     textAlign: 'center',
     marginBottom: 8,
+  },
+
+  // FULL QUEUE MODAL STYLES
+  queueFilterChip: {
+    backgroundColor: '#FAF8F5',
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 8,
+  },
+  queueFilterChipActive: {
+    backgroundColor: '#EDE9FE',
+    borderColor: '#C4B5FD',
+  },
+  queueFilterChipText: {
+    fontSize: 11,
+    fontWeight: '800',
+    color: '#64748B',
+  },
+  queueFilterChipTextActive: {
+    color: '#582CDB',
+  },
+  fullQueueItemCard: {
+    backgroundColor: '#FAF8F5',
+    borderRadius: 16,
+    padding: 14,
+    borderWidth: 1,
+    borderColor: '#EFECE6',
+  },
+  queueStatusBadge: {
+    backgroundColor: '#EDE9FE',
+    paddingHorizontal: 7,
+    paddingVertical: 3,
+    borderRadius: 6,
+  },
+  queueStatusBadgeText: {
+    fontSize: 9,
+    fontWeight: '900',
+    color: '#582CDB',
+    letterSpacing: 0.4,
+  },
+  queueCardFooterRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginTop: 10,
+    paddingTop: 8,
+    borderTopWidth: 1,
+    borderTopColor: '#E2E8F0',
+  },
+  queueCardActionHint: {
+    fontSize: 11,
+    color: '#582CDB',
+    fontWeight: '800',
   },
 
   // COMMON
