@@ -23,6 +23,7 @@ import { UserProfileModal, UserProfileData } from '../components/UserProfileModa
 import { AnimatedCompletionModal } from '../components/AnimatedCompletionModal';
 import { TinyGoldCheck } from '../components/CreatorStoryModal';
 import { SocialBrandIcon } from '../components/SocialBrandIcon';
+import { PurpleGoldSwitch } from '../components/PurpleGoldSwitch';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
@@ -808,17 +809,12 @@ export const ProScheduleScreen: React.FC<ProScheduleScreenProps> = ({
                   Your strongest posting windows are being prioritized.
                 </Text>
               </View>
-              <Switch
+              <PurpleGoldSwitch
                 value={autopilotEnabled}
                 onValueChange={(val) => {
-                  if (Platform.OS !== 'web') {
-                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                  }
                   setAutopilotEnabled(val);
                   showToast(val ? 'Autopilot activated' : 'Autopilot paused');
                 }}
-                trackColor={{ false: '#CBD5E1', true: '#8B5CF6' }}
-                thumbColor={autopilotEnabled ? '#582CDB' : '#F8FAFC'}
               />
             </View>
 
