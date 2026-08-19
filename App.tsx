@@ -88,6 +88,7 @@ export default function App() {
   const [connectedPlatforms, setConnectedPlatforms] = useState<string[]>(['tiktok', 'instagram', 'youtube']);
   const [selectedIdeaTitle, setSelectedIdeaTitle] = useState('One thing I wish I knew before I started creating');
   const [composerIdeaTitle, setComposerIdeaTitle] = useState('One thing I wish I knew before I started creating');
+  const [activeMessageThreadId, setActiveMessageThreadId] = useState<string | undefined>(undefined);
   const [userProfile, setUserProfile] = useState<UserProfileData>({
     name: 'Pablo',
     handle: '@pablocreates',
@@ -333,7 +334,10 @@ export default function App() {
               onStartMission={() => navigateTo('mission-detail')}
               onOpenJarvisPro={() => navigateTo('jarvis-pro')}
               onOpenSchedule={() => navigateTo('schedule')}
-              onOpenMessages={() => navigateTo('messages')}
+              onOpenMessages={(threadId?: string) => {
+                setActiveMessageThreadId(threadId);
+                navigateTo('messages');
+              }}
               onOpenEarnings={() => navigateTo('earnings')}
               onOpenQuests={() => navigateTo('quests')}
               onOpenGrowth={() => navigateTo('growth')}
@@ -364,7 +368,10 @@ export default function App() {
                 setUserProfile(prev => ({ ...prev, tier: 'pro' }));
               }}
               onOpenSchedule={() => navigateTo('schedule')}
-              onOpenMessages={() => navigateTo('messages')}
+              onOpenMessages={(threadId?: string) => {
+                setActiveMessageThreadId(threadId);
+                navigateTo('messages');
+              }}
               onNavigateTab={(tab: TabType) => {
                 if (tab === 'create') {
                   navigateTo('create');
@@ -388,7 +395,10 @@ export default function App() {
               onBack={() => navigateTo(previousScreen ? previousScreen : 'dashboard')}
               onLogout={handleLogout}
               onOpenSchedule={() => navigateTo('schedule')}
-              onOpenMessages={() => navigateTo('messages')}
+              onOpenMessages={(threadId?: string) => {
+                setActiveMessageThreadId(threadId);
+                navigateTo('messages');
+              }}
               onOpenJarvisPro={() => navigateTo('jarvis-pro')}
               onOpenPostComposer={(ideaTitle) => {
                 if (ideaTitle) setComposerIdeaTitle(ideaTitle);
@@ -419,7 +429,10 @@ export default function App() {
             <MissionDetailScreen
               onBackToDashboard={() => navigateTo('dashboard')}
               onLogout={handleLogout}
-              onOpenMessages={() => navigateTo('messages')}
+              onOpenMessages={(threadId?: string) => {
+                setActiveMessageThreadId(threadId);
+                navigateTo('messages');
+              }}
               onNavigateTab={(tab: TabType) => {
                 if (tab === 'home') {
                   navigateTo('dashboard');
@@ -444,7 +457,10 @@ export default function App() {
             <ProCreateScreen
               onLogout={handleLogout}
               onOpenSchedule={() => navigateTo('schedule')}
-              onOpenMessages={() => navigateTo('messages')}
+              onOpenMessages={(threadId?: string) => {
+                setActiveMessageThreadId(threadId);
+                navigateTo('messages');
+              }}
               onOpenJarvisPro={() => navigateTo('jarvis-pro')}
               onOpenIdeaDetail={(title) => {
                 if (title) setSelectedIdeaTitle(title);
@@ -484,7 +500,10 @@ export default function App() {
             <CreateScreen
               onLogout={handleLogout}
               onOpenSchedule={() => navigateTo('schedule')}
-              onOpenMessages={() => navigateTo('messages')}
+              onOpenMessages={(threadId?: string) => {
+                setActiveMessageThreadId(threadId);
+                navigateTo('messages');
+              }}
               onOpenJarvisPro={() => navigateTo('jarvis-pro')}
               onOpenIdeaDetail={(title) => {
                 if (title) setSelectedIdeaTitle(title);
@@ -525,7 +544,10 @@ export default function App() {
             <ProScheduleScreen
               onBack={() => navigateTo(previousScreen ? previousScreen : 'dashboard')}
               onLogout={handleLogout}
-              onOpenMessages={() => navigateTo('messages')}
+              onOpenMessages={(threadId?: string) => {
+                setActiveMessageThreadId(threadId);
+                navigateTo('messages');
+              }}
               onOpenJarvisPro={() => navigateTo('jarvis-pro')}
               onOpenCreateIdea={() => navigateTo('create')}
               onStartMission={() => navigateTo('mission-detail')}
@@ -558,7 +580,10 @@ export default function App() {
             <ScheduleScreen
               onBack={() => navigateTo(previousScreen ? previousScreen : 'dashboard')}
               onLogout={handleLogout}
-              onOpenMessages={() => navigateTo('messages')}
+              onOpenMessages={(threadId?: string) => {
+                setActiveMessageThreadId(threadId);
+                navigateTo('messages');
+              }}
               onOpenJarvisPro={() => navigateTo('jarvis-pro')}
               onOpenCreateIdea={() => navigateTo('create')}
               onNavigateTab={(tab: TabType) => {
@@ -584,7 +609,10 @@ export default function App() {
           (userProfile?.tier === 'pro' || userProfile?.tier === 'founding') ? (
             <ProMatchScreen
               onLogout={handleLogout}
-              onOpenMessages={() => navigateTo('messages')}
+              onOpenMessages={(threadId?: string) => {
+                setActiveMessageThreadId(threadId);
+                navigateTo('messages');
+              }}
               onOpenJarvisPro={() => navigateTo('jarvis-pro')}
               onSwitchToFree={() => {
                 setUserProfile(prev => ({ ...prev, tier: 'free' }));
@@ -606,7 +634,10 @@ export default function App() {
           ) : (
             <MatchScreen
               onLogout={handleLogout}
-              onOpenMessages={() => navigateTo('messages')}
+              onOpenMessages={(threadId?: string) => {
+                setActiveMessageThreadId(threadId);
+                navigateTo('messages');
+              }}
               onOpenJarvisPro={() => navigateTo('jarvis-pro')}
               onNavigateTab={(tab: TabType) => {
                 if (tab === 'home') {
@@ -630,7 +661,10 @@ export default function App() {
             <ProGrowthScreen
               onBackToDashboard={() => navigateTo('dashboard')}
               onLogout={handleLogout}
-              onOpenMessages={() => navigateTo('messages')}
+              onOpenMessages={(threadId?: string) => {
+                setActiveMessageThreadId(threadId);
+                navigateTo('messages');
+              }}
               onOpenJarvisPro={() => navigateTo('jarvis-pro')}
               onOpenAudienceBreakdown={() => navigateTo('audience-breakdown')}
               onOpenPostPerformance={() => navigateTo('post-performance')}
@@ -662,7 +696,10 @@ export default function App() {
             <GrowthScreen
               onBackToDashboard={() => navigateTo('dashboard')}
               onLogout={handleLogout}
-              onOpenMessages={() => navigateTo('messages')}
+              onOpenMessages={(threadId?: string) => {
+                setActiveMessageThreadId(threadId);
+                navigateTo('messages');
+              }}
               onOpenJarvisPro={() => navigateTo('jarvis-pro')}
               onOpenAudienceBreakdown={() => navigateTo('audience-breakdown')}
               onOpenPostPerformance={() => navigateTo('post-performance')}
@@ -689,7 +726,10 @@ export default function App() {
           <JarvisProScreen
             onBack={() => navigateTo('growth')}
             onLogout={handleLogout}
-            onOpenMessages={() => navigateTo('messages')}
+            onOpenMessages={(threadId?: string) => {
+                setActiveMessageThreadId(threadId);
+                navigateTo('messages');
+              }}
             onNavigateTab={(tab: TabType) => {
               if (tab === 'home') {
                 navigateTo('dashboard');
@@ -716,7 +756,10 @@ export default function App() {
               onOpenMissionDetail={() => navigateTo('mission-detail')}
               onOpenCommunityChallenge={() => navigateTo('challenge-detail')}
               onOpenSchedule={() => navigateTo('schedule')}
-              onOpenMessages={() => navigateTo('messages')}
+              onOpenMessages={(threadId?: string) => {
+                setActiveMessageThreadId(threadId);
+                navigateTo('messages');
+              }}
               onOpenJarvisPro={() => navigateTo('jarvis-pro')}
               onOpenEarnings={() => navigateTo('earnings')}
               onOpenPostComposer={(title, platform) => {
@@ -751,7 +794,10 @@ export default function App() {
               onOpenMissionDetail={() => navigateTo('mission-detail')}
               onOpenCommunityChallenge={() => navigateTo('challenge-detail')}
               onOpenSchedule={() => navigateTo('schedule')}
-              onOpenMessages={() => navigateTo('messages')}
+              onOpenMessages={(threadId?: string) => {
+                setActiveMessageThreadId(threadId);
+                navigateTo('messages');
+              }}
               onOpenJarvisPro={() => navigateTo('jarvis-pro')}
               onOpenEarnings={() => navigateTo('earnings')}
               onNavigateTab={(tab: TabType) => {
@@ -777,7 +823,10 @@ export default function App() {
           <ChallengeDetailScreen
             onBackToDashboard={() => navigateTo('quests')}
             onLogout={handleLogout}
-            onOpenMessages={() => navigateTo('messages')}
+            onOpenMessages={(threadId?: string) => {
+                setActiveMessageThreadId(threadId);
+                navigateTo('messages');
+              }}
             onNavigateTab={(tab: TabType) => {
               if (tab === 'home') {
                 navigateTo('dashboard');
@@ -802,7 +851,10 @@ export default function App() {
             onBack={() => navigateTo(previousScreen ? previousScreen : 'create')}
             onLogout={handleLogout}
             onOpenSchedule={() => navigateTo('schedule')}
-            onOpenMessages={() => navigateTo('messages')}
+            onOpenMessages={(threadId?: string) => {
+                setActiveMessageThreadId(threadId);
+                navigateTo('messages');
+              }}
             onOpenJarvisPro={() => navigateTo('jarvis-pro')}
             onOpenPostComposer={(title) => {
               if (title) setComposerIdeaTitle(title);
@@ -833,7 +885,10 @@ export default function App() {
               onBack={() => navigateTo(previousScreen ? previousScreen : 'create')}
               onLogout={handleLogout}
               onOpenSchedule={() => navigateTo('schedule')}
-              onOpenMessages={() => navigateTo('messages')}
+              onOpenMessages={(threadId?: string) => {
+                setActiveMessageThreadId(threadId);
+                navigateTo('messages');
+              }}
               onOpenJarvisPro={() => navigateTo('jarvis-pro')}
               onSwitchToFree={() => {
                 if (userProfile) {
@@ -862,7 +917,10 @@ export default function App() {
               onBack={() => navigateTo(previousScreen ? previousScreen : 'create')}
               onLogout={handleLogout}
               onOpenSchedule={() => navigateTo('schedule')}
-              onOpenMessages={() => navigateTo('messages')}
+              onOpenMessages={(threadId?: string) => {
+                setActiveMessageThreadId(threadId);
+                navigateTo('messages');
+              }}
               onOpenJarvisPro={() => navigateTo('jarvis-pro')}
               onNavigateTab={(tab: TabType) => {
                 if (tab === 'home') {
@@ -888,7 +946,10 @@ export default function App() {
             onBack={() => navigateTo(previousScreen ? previousScreen : 'create')}
             onLogout={handleLogout}
             onOpenSchedule={() => navigateTo('schedule')}
-            onOpenMessages={() => navigateTo('messages')}
+            onOpenMessages={(threadId?: string) => {
+                setActiveMessageThreadId(threadId);
+                navigateTo('messages');
+              }}
             onOpenJarvisPro={() => navigateTo('jarvis-pro')}
             onUseIdea={(title) => {
               if (title) setComposerIdeaTitle(title);
@@ -918,7 +979,10 @@ export default function App() {
             onBack={() => navigateTo(previousScreen ? previousScreen : 'create')}
             onLogout={handleLogout}
             onOpenSchedule={() => navigateTo('schedule')}
-            onOpenMessages={() => navigateTo('messages')}
+            onOpenMessages={(threadId?: string) => {
+                setActiveMessageThreadId(threadId);
+                navigateTo('messages');
+              }}
             onOpenJarvisPro={() => navigateTo('jarvis-pro')}
             onUseAsPost={(scriptData) => {
               if (scriptData.hook) setComposerIdeaTitle(scriptData.hook);
@@ -948,7 +1012,10 @@ export default function App() {
             onBack={() => navigateTo(previousScreen ? previousScreen : 'create')}
             onLogout={handleLogout}
             onOpenSchedule={() => navigateTo('schedule')}
-            onOpenMessages={() => navigateTo('messages')}
+            onOpenMessages={(threadId?: string) => {
+                setActiveMessageThreadId(threadId);
+                navigateTo('messages');
+              }}
             onOpenJarvisPro={() => navigateTo('jarvis-pro')}
             onAddToPost={(captionText) => {
               if (captionText) setComposerIdeaTitle(captionText);
@@ -975,7 +1042,11 @@ export default function App() {
         {currentScreen === 'messages' && (
           (userProfile?.tier === 'pro' || userProfile?.tier === 'founding') ? (
             <ProMessagesScreen
-              onBack={() => navigateTo(previousScreen ? previousScreen : 'dashboard')}
+              initialConversationId={activeMessageThreadId}
+              onBack={() => {
+                setActiveMessageThreadId(undefined);
+                navigateTo(previousScreen ? previousScreen : 'dashboard');
+              }}
               onLogout={handleLogout}
               onOpenSchedule={() => navigateTo('schedule')}
               onOpenJarvisPro={() => navigateTo('jarvis-pro')}
@@ -1059,7 +1130,10 @@ export default function App() {
           <CreatorPassportScreen
             onBack={() => navigateTo(previousScreen ? previousScreen : 'earnings')}
             onLogout={handleLogout}
-            onOpenMessages={() => navigateTo('messages')}
+            onOpenMessages={(threadId?: string) => {
+                setActiveMessageThreadId(threadId);
+                navigateTo('messages');
+              }}
             onOpenSchedule={() => navigateTo('schedule')}
             onOpenJarvisPro={() => navigateTo('jarvis-pro')}
             onOpenQuests={() => navigateTo('quests')}
@@ -1087,7 +1161,10 @@ export default function App() {
           <OpportunityReadinessScreen
             onBack={() => navigateTo(previousScreen ? previousScreen : 'earnings')}
             onLogout={handleLogout}
-            onOpenMessages={() => navigateTo('messages')}
+            onOpenMessages={(threadId?: string) => {
+                setActiveMessageThreadId(threadId);
+                navigateTo('messages');
+              }}
             onOpenSchedule={() => navigateTo('schedule')}
             onOpenJarvisPro={() => navigateTo('jarvis-pro')}
             onOpenPlatforms={() => navigateTo('platforms')}
@@ -1114,7 +1191,10 @@ export default function App() {
           <EarningsScreen
             onBack={() => navigateTo(previousScreen ? previousScreen : 'growth')}
             onLogout={handleLogout}
-            onOpenMessages={() => navigateTo('messages')}
+            onOpenMessages={(threadId?: string) => {
+                setActiveMessageThreadId(threadId);
+                navigateTo('messages');
+              }}
             onOpenSchedule={() => navigateTo('schedule')}
             onOpenJarvisPro={() => navigateTo('jarvis-pro')}
             onOpenQuests={() => navigateTo('quests')}
@@ -1143,7 +1223,10 @@ export default function App() {
           <PlatformGrowthScreen
             onBack={() => navigateTo('growth')}
             onLogout={handleLogout}
-            onOpenMessages={() => navigateTo('messages')}
+            onOpenMessages={(threadId?: string) => {
+                setActiveMessageThreadId(threadId);
+                navigateTo('messages');
+              }}
             onOpenSchedule={() => navigateTo('schedule')}
             onOpenJarvisPro={() => navigateTo('jarvis-pro')}
             onOpenComposer={(prefillTitle) => {
@@ -1178,7 +1261,10 @@ export default function App() {
           <PostPerformanceScreen
             onBack={() => navigateTo('growth')}
             onLogout={handleLogout}
-            onOpenMessages={() => navigateTo('messages')}
+            onOpenMessages={(threadId?: string) => {
+                setActiveMessageThreadId(threadId);
+                navigateTo('messages');
+              }}
             onOpenSchedule={() => navigateTo('schedule')}
             onOpenAudienceBreakdown={() => navigateTo('audience-breakdown')}
             onOpenJarvisPro={() => navigateTo('jarvis-pro')}
@@ -1216,7 +1302,10 @@ export default function App() {
             onLogout={handleLogout}
             onOpenSchedule={() => navigateTo('schedule')}
             onOpenJarvisPro={() => navigateTo('jarvis-pro')}
-            onOpenMessages={() => navigateTo('messages')}
+            onOpenMessages={(threadId?: string) => {
+                setActiveMessageThreadId(threadId);
+                navigateTo('messages');
+              }}
             onOpenPlatformConnect={() => navigateTo('platforms')}
             onOpenPostPerformance={() => navigateTo('post-performance')}
             onOpenPlatformGrowth={() => navigateTo('platform-growth')}
@@ -1258,7 +1347,10 @@ export default function App() {
             onLogout={handleLogout}
             onOpenSchedule={() => navigateTo('schedule')}
             onOpenJarvisPro={() => navigateTo('jarvis-pro')}
-            onOpenMessages={() => navigateTo('messages')}
+            onOpenMessages={(threadId?: string) => {
+                setActiveMessageThreadId(threadId);
+                navigateTo('messages');
+              }}
             onStartCollaboration={(collabData) => {
               if (collabData?.title) setComposerIdeaTitle(collabData.title);
               navigateTo('composer');

@@ -26,6 +26,7 @@ const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
 interface ProMessagesScreenProps {
   onBack: () => void;
+  initialConversationId?: string;
   onLogout?: () => void;
   onOpenSchedule?: () => void;
   onOpenJarvisPro?: () => void;
@@ -392,6 +393,7 @@ const INITIAL_CONVERSATIONS: ConversationThread[] = [
 
 export const ProMessagesScreen: React.FC<ProMessagesScreenProps> = ({
   onBack,
+  initialConversationId,
   onLogout,
   onOpenSchedule,
   onOpenJarvisPro,

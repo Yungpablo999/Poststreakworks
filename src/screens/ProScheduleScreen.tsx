@@ -34,7 +34,7 @@ interface ProScheduleScreenProps {
   onLogout?: () => void;
   onNavigateTab?: (tab: TabType) => void;
   onOpenJarvisPro?: () => void;
-  onOpenMessages?: () => void;
+  onOpenMessages?: (threadId?: string) => void;
   onOpenCreateIdea?: () => void;
   onSwitchToFree?: () => void;
   userProfile?: UserProfileData;
@@ -930,8 +930,13 @@ export const ProScheduleScreen: React.FC<ProScheduleScreenProps> = ({
                   if (Platform.OS !== 'web') {
                     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                   }
-                  if (onOpenJarvisPro) onOpenJarvisPro();
-                  else showToast('Opening Jarvis AI Strategy...');
+                  if (onOpenMessages) {
+                    onOpenMessages('conv_jarvis');
+                  } else if (onOpenJarvisPro) {
+                    onOpenJarvisPro();
+                  } else {
+                    showToast('Opening Jarvis AI Chatbot...');
+                  }
                 }}
               >
                 <Text style={styles.askJarvisOutlineBtnText}>Ask Jarvis</Text>
