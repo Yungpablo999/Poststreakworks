@@ -28,6 +28,7 @@ const { width: SCREEN_WIDTH } = Dimensions.get('window');
 interface ProScheduleScreenProps {
   onBack?: () => void;
   onStartMission?: () => void;
+  onOpenPostComposer?: (title?: string) => void;
   onLogout?: () => void;
   onNavigateTab?: (tab: TabType) => void;
   onOpenJarvisPro?: () => void;
@@ -136,6 +137,7 @@ const GAP_SUGGESTIONS = [
 export const ProScheduleScreen: React.FC<ProScheduleScreenProps> = ({
   onBack,
   onStartMission,
+  onOpenPostComposer,
   onLogout,
   onNavigateTab,
   onOpenJarvisPro,
@@ -1281,10 +1283,12 @@ export const ProScheduleScreen: React.FC<ProScheduleScreenProps> = ({
                                 Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
                               }
                               setShowExpandViewModal(false);
-                              if (onStartMission) {
+                              if (onOpenPostComposer) {
+                                onOpenPostComposer(item.title);
+                              } else if (onStartMission) {
                                 onStartMission();
                               } else {
-                                showToast('Opening Post Now...');
+                                showToast('Opening Post Composer...');
                               }
                             }}
                           >

@@ -529,6 +529,10 @@ export default function App() {
               onOpenJarvisPro={() => navigateTo('jarvis-pro')}
               onOpenCreateIdea={() => navigateTo('create')}
               onStartMission={() => navigateTo('mission-detail')}
+              onOpenPostComposer={(title) => {
+                if (title) setComposerIdeaTitle(title);
+                navigateTo('composer');
+              }}
               onSwitchToFree={() => {
                 if (userProfile) {
                   setUserProfile({ ...userProfile, tier: 'free' });

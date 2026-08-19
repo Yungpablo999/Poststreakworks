@@ -259,23 +259,27 @@ export const ProMissionDetailScreen: React.FC<ProMissionDetailScreenProps> = ({
               Share one honest creator lesson and turn it into a short Reel your audience can save.
             </Text>
 
-            {/* 2x2 Metric Tiles */}
-            <View style={styles.planMetrics2x2Grid}>
-              <View style={styles.planMetricTile}>
-                <Text style={styles.planMetricTileLabel}>⏱️ BEST TIME</Text>
-                <Text style={styles.planMetricTileVal}>7:30 PM</Text>
+            {/* 2x2 Metric Tiles (Explicit 2 Rows) */}
+            <View style={{ gap: 8, marginBottom: 16 }}>
+              <View style={{ flexDirection: 'row', gap: 8 }}>
+                <View style={[styles.planMetricTile, { flex: 1 }]}>
+                  <Text style={styles.planMetricTileLabel}>⏱️ BEST TIME</Text>
+                  <Text style={styles.planMetricTileVal}>7:30 PM</Text>
+                </View>
+                <View style={[styles.planMetricTile, { flex: 1 }]}>
+                  <Text style={styles.planMetricTileLabel}>📹 FORMAT</Text>
+                  <Text style={styles.planMetricTileVal}>Short Reel</Text>
+                </View>
               </View>
-              <View style={styles.planMetricTile}>
-                <Text style={styles.planMetricTileLabel}>📹 FORMAT</Text>
-                <Text style={styles.planMetricTileVal}>Short Reel</Text>
-              </View>
-              <View style={[styles.planMetricTile, { backgroundColor: '#FEF3C7', borderColor: '#FBBF24' }]}>
-                <Text style={[styles.planMetricTileLabel, { color: '#92400E' }]}>🔥 FOCUS</Text>
-                <Text style={[styles.planMetricTileVal, { color: '#78350F' }]}>Streak Lock</Text>
-              </View>
-              <View style={[styles.planMetricTile, { backgroundColor: '#EDE9FE', borderColor: '#DDD6FE' }]}>
-                <Text style={[styles.planMetricTileLabel, { color: '#582CDB' }]}>📈 SIGNAL</Text>
-                <Text style={[styles.planMetricTileVal, { color: '#4C1D95' }]}>High Saves</Text>
+              <View style={{ flexDirection: 'row', gap: 8 }}>
+                <View style={[styles.planMetricTile, { flex: 1, backgroundColor: '#FEF3C7', borderColor: '#FBBF24' }]}>
+                  <Text style={[styles.planMetricTileLabel, { color: '#92400E' }]}>🔥 FOCUS</Text>
+                  <Text style={[styles.planMetricTileVal, { color: '#78350F' }]}>Streak Lock</Text>
+                </View>
+                <View style={[styles.planMetricTile, { flex: 1, backgroundColor: '#EDE9FE', borderColor: '#DDD6FE' }]}>
+                  <Text style={[styles.planMetricTileLabel, { color: '#582CDB' }]}>📈 SIGNAL</Text>
+                  <Text style={[styles.planMetricTileVal, { color: '#4C1D95' }]}>High Saves</Text>
+                </View>
               </View>
             </View>
 
