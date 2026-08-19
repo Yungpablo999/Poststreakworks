@@ -23,6 +23,7 @@ import { MatchScreen } from './src/screens/MatchScreen';
 import { ProMatchScreen } from './src/screens/ProMatchScreen';
 import { JarvisProScreen } from './src/screens/JarvisProScreen';
 import { GrowthScreen } from './src/screens/GrowthScreen';
+import { ProGrowthScreen } from './src/screens/ProGrowthScreen';
 import { IdeaDetailScreen } from './src/screens/IdeaDetailScreen';
 import { PostComposerScreen } from './src/screens/PostComposerScreen';
 import { ContentAngleScreen } from './src/screens/ContentAngleScreen';
@@ -552,29 +553,63 @@ export default function App() {
         )}
 
         {currentScreen === 'growth' && (
-          <GrowthScreen
-            onBackToDashboard={() => navigateTo('dashboard')}
-            onLogout={handleLogout}
-            onOpenMessages={() => navigateTo('messages')}
-            onOpenJarvisPro={() => navigateTo('jarvis-pro')}
-            onOpenAudienceBreakdown={() => navigateTo('audience-breakdown')}
-            onOpenPostPerformance={() => navigateTo('post-performance')}
-            onOpenPlatformGrowth={() => navigateTo('platform-growth')}
-            onOpenEarnings={() => navigateTo('earnings')}
-            onNavigateTab={(tab: TabType) => {
-              if (tab === 'home') {
-                navigateTo('dashboard');
-              } else if (tab === 'create') {
-                navigateTo('create');
-              } else if (tab === 'match') {
-                navigateTo('match');
-              } else if (tab === 'quests') {
-                navigateTo('quests');
-              }
-            }}
-            userProfile={userProfile}
-            onSaveProfile={(updated) => setUserProfile(updated)}
-          />
+          (userProfile?.tier === 'pro' || userProfile?.tier === 'founding') ? (
+            <ProGrowthScreen
+              onBackToDashboard={() => navigateTo('dashboard')}
+              onLogout={handleLogout}
+              onOpenMessages={() => navigateTo('messages')}
+              onOpenJarvisPro={() => navigateTo('jarvis-pro')}
+              onOpenAudienceBreakdown={() => navigateTo('audience-breakdown')}
+              onOpenPostPerformance={() => navigateTo('post-performance')}
+              onOpenPlatformGrowth={() => navigateTo('platform-growth')}
+              onOpenEarnings={() => navigateTo('earnings')}
+              onOpenSchedule={() => navigateTo('schedule')}
+              onOpenPostComposer={(title, platform) => {
+                if (title) setComposerIdeaTitle(title);
+                navigateTo('composer');
+              }}
+              onSwitchToFree={() => {
+                setUserProfile(prev => ({ ...prev, tier: 'free' }));
+              }}
+              onNavigateTab={(tab: TabType) => {
+                if (tab === 'home') {
+                  navigateTo('dashboard');
+                } else if (tab === 'create') {
+                  navigateTo('create');
+                } else if (tab === 'match') {
+                  navigateTo('match');
+                } else if (tab === 'quests') {
+                  navigateTo('quests');
+                }
+              }}
+              userProfile={userProfile}
+              onSaveProfile={(updated) => setUserProfile(updated)}
+            />
+          ) : (
+            <GrowthScreen
+              onBackToDashboard={() => navigateTo('dashboard')}
+              onLogout={handleLogout}
+              onOpenMessages={() => navigateTo('messages')}
+              onOpenJarvisPro={() => navigateTo('jarvis-pro')}
+              onOpenAudienceBreakdown={() => navigateTo('audience-breakdown')}
+              onOpenPostPerformance={() => navigateTo('post-performance')}
+              onOpenPlatformGrowth={() => navigateTo('platform-growth')}
+              onOpenEarnings={() => navigateTo('earnings')}
+              onNavigateTab={(tab: TabType) => {
+                if (tab === 'home') {
+                  navigateTo('dashboard');
+                } else if (tab === 'create') {
+                  navigateTo('create');
+                } else if (tab === 'match') {
+                  navigateTo('match');
+                } else if (tab === 'quests') {
+                  navigateTo('quests');
+                }
+              }}
+              userProfile={userProfile}
+              onSaveProfile={(updated) => setUserProfile(updated)}
+            />
+          )
         )}
 
         {currentScreen === 'jarvis-pro' && (
