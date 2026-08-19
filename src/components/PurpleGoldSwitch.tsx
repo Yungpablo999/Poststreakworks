@@ -1,7 +1,6 @@
 import React, { useRef, useEffect } from 'react';
 import { View, StyleSheet, Pressable, Animated, Platform } from 'react-native';
 import * as Haptics from 'expo-haptics';
-import { LinearGradient } from 'expo-linear-gradient';
 
 interface PurpleGoldSwitchProps {
   value: boolean;
@@ -13,11 +12,11 @@ interface PurpleGoldSwitchProps {
 export const PurpleGoldSwitch: React.FC<PurpleGoldSwitchProps> = ({
   value,
   onValueChange,
-  trackWidth = 50,
+  trackWidth = 48,
   trackHeight = 28,
 }) => {
   const thumbSize = trackHeight - 4; // 24
-  const travelDistance = trackWidth - thumbSize - 4; // 50 - 24 - 4 = 22
+  const travelDistance = trackWidth - thumbSize - 4; // 48 - 24 - 4 = 20
 
   const switchTranslate = useRef(new Animated.Value(value ? travelDistance : 2)).current;
 
@@ -25,8 +24,8 @@ export const PurpleGoldSwitch: React.FC<PurpleGoldSwitchProps> = ({
     Animated.spring(switchTranslate, {
       toValue: value ? travelDistance : 2,
       useNativeDriver: true,
-      bounciness: 8,
-      speed: 20,
+      bounciness: 6,
+      speed: 18,
     }).start();
   }, [value, travelDistance]);
 
@@ -59,15 +58,15 @@ export const PurpleGoldSwitch: React.FC<PurpleGoldSwitchProps> = ({
         ]}
       >
         {value ? (
-          <LinearGradient
-            colors={['#FDE68A', '#F59E0B', '#D97706']}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
+          <View
             style={[
-              styles.goldThumbGradient,
+              styles.goldThumb,
               { width: thumbSize, height: thumbSize, borderRadius: thumbSize / 2 },
             ]}
-          />
+          >
+            {/* Subtle inner gold accent core */}
+            <View style={styles.goldCoreDot} />
+          </View>
         ) : (
           <View
             style={[
@@ -86,30 +85,36 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   trackActive: {
-    backgroundColor: '#582CDB', // Royal Purple
-    borderWidth: 1.5,
-    borderColor: '#F59E0B', // Radiant Gold Border
+    backgroundColor: '#582CDB', // Deep Royal Violet/Purple
   },
   trackInactive: {
-    backgroundColor: '#E2E8F0', // Neutral Slate
-    borderWidth: 1.5,
-    borderColor: '#CBD5E1',
+    backgroundColor: '#E2E8F0', // Minimal Slate
   },
   thumbBase: {
     position: 'absolute',
-    shadowColor: '#000',
+    shadowColor: '#000000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
+    shadowOpacity: 0.18,
     shadowRadius: 3,
     elevation: 3,
   },
-  goldThumbGradient: {
-    borderWidth: 1,
-    borderColor: '#FDE68A',
+  goldThumb: {
+    backgroundColor: '#F59E0B', // Rich Warm 24K Gold
+    borderWidth: 1.5,
+    borderColor: '#FDE68A', // Luminous Light Gold Rim
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  goldCoreDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: '#FFFFFF',
+    opacity: 0.8,
   },
   inactiveThumb: {
     backgroundColor: '#FFFFFF',
     borderWidth: 1,
-    borderColor: '#CBD5E1',
+    borderColor: '#E2E8F0',
   },
 });
