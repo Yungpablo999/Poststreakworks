@@ -276,7 +276,7 @@ export const ProDashboardScreen: React.FC<ProDashboardScreenProps> = ({
   const [showNotificationModal, setShowNotificationModal] = useState(false);
   const [showCalendarModal, setShowCalendarModal] = useState(false);
   const [showVoiceStudioModal, setShowVoiceStudioModal] = useState(false);
-  const [showBrandQuestModal, setShowBrandQuestModal] = useState(false);
+  
   const [showCreatorLevelModal, setShowCreatorLevelModal] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [selectedStoryData, setSelectedStoryData] = useState<CreatorStoryData | null>(null);
@@ -832,35 +832,7 @@ export const ProDashboardScreen: React.FC<ProDashboardScreenProps> = ({
             </View>
           </Pressable>
 
-          {/* CARD 6: BRAND QUEST ("GlowUp Skincare Launch") */}
-          <Pressable
-            onPress={() => {
-              if (Platform.OS !== 'web') {
-                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-              }
-              triggerModalPop();
-              setShowBrandQuestModal(true);
-            }}
-            style={({ pressed }) => [styles.dashboardCard, pressed && styles.cardPressed]}
-          >
-            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 14 }}>
-              <View style={styles.brandIconSquare}>
-                <Text style={{ fontSize: 20 }}>🎁</Text>
-              </View>
 
-              <View style={{ flex: 1 }}>
-                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-                  <View style={styles.proPriorityPill}>
-                    <Text style={styles.proPriorityText}>PRO PRIORITY</Text>
-                  </View>
-                  <Text style={styles.brandQuestSubLabel}>BRAND QUEST</Text>
-                </View>
-                <Text style={styles.brandQuestTitle}>GlowUp Skincare Launch</Text>
-              </View>
-
-              <Text style={styles.chevronRight}>›</Text>
-            </View>
-          </Pressable>
 
           {/* CARD 7: MONTHLY EARNINGS ($4,250.00) */}
           <View style={styles.dashboardCard}>
@@ -1359,47 +1331,7 @@ export const ProDashboardScreen: React.FC<ProDashboardScreenProps> = ({
           </View>
         </Modal>
 
-        {/* MODAL: BRAND QUEST DETAILS */}
-        <Modal
-          visible={showBrandQuestModal}
-          transparent={true}
-          animationType="fade"
-          onRequestClose={() => setShowBrandQuestModal(false)}
-        >
-          <View style={styles.modalOverlay}>
-            <Animated.View style={[styles.modalCard, { transform: [{ scale: modalPopScale }] }]}>
-              <View style={styles.modalHeaderRow}>
-                <View>
-                  <View style={styles.proPriorityPill}>
-                    <Text style={styles.proPriorityText}>PRO PRIORITY MATCH</Text>
-                  </View>
-                  <Text style={[styles.modalTitle, { marginTop: 4 }]}>GlowUp Skincare Launch</Text>
-                  <Text style={styles.modalSubtitle}>Sponsored Campaign Brief • $450 Bounty</Text>
-                </View>
-                <Pressable onPress={() => setShowBrandQuestModal(false)} style={styles.modalCloseCircle} hitSlop={8}>
-                  <Text style={styles.modalCloseCross}>✕</Text>
-                </Pressable>
-              </View>
 
-              <View style={{ gap: 10, marginVertical: 12 }}>
-                <Text style={styles.reqDetailLine}>• Target: 1 Dedicated 45s Reel &amp; TikTok Review</Text>
-                <Text style={styles.reqDetailLine}>• Deliverable: Organic creator testimonial format</Text>
-                <Text style={styles.reqDetailLine}>• Payout: $450 direct bank transfer upon approval</Text>
-                <Text style={styles.reqDetailLine}>• Pro Status: Fast-Track Guaranteed Review (24h)</Text>
-              </View>
-
-              <Pressable
-                style={styles.modalFullBtn}
-                onPress={() => {
-                  setShowBrandQuestModal(false);
-                  showToast('Application submitted directly to brand team!');
-                }}
-              >
-                <Text style={styles.modalFullBtnText}>Apply for $450 Bounty ➔</Text>
-              </Pressable>
-            </Animated.View>
-          </View>
-        </Modal>
 
                 {/* ============================================================ */}
         {/* MODAL: CREATOR LEVEL & XP MILESTONE BADGES MODAL             */}
