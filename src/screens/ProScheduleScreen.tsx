@@ -22,6 +22,7 @@ import { FloatingTabBar, TabType } from '../components/FloatingTabBar';
 import { UserProfileModal, UserProfileData } from '../components/UserProfileModal';
 import { AnimatedCompletionModal } from '../components/AnimatedCompletionModal';
 import { TinyGoldCheck } from '../components/CreatorStoryModal';
+import { SocialBrandIcon } from '../components/SocialBrandIcon';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
@@ -749,12 +750,10 @@ export const ProScheduleScreen: React.FC<ProScheduleScreenProps> = ({
               style={styles.queueItemRow}
               onPress={() => showToast('LinkedIn Insight scheduled for Tomorrow 10:00 AM')}
             >
-              <View style={styles.linkedinSquareIcon}>
-                <Text style={{ color: '#FFFFFF', fontWeight: '900', fontSize: 13 }}>in</Text>
-              </View>
-              <View style={{ flex: 1 }}>
-                <Text style={styles.queueItemTitle}>LinkedIn Insight</Text>
-                <Text style={styles.queueItemTime}>Tomorrow, 10:00 AM</Text>
+              <SocialBrandIcon platform="linkedin" size={28} />
+              <View style={{ flex: 1, marginLeft: 10 }}>
+                <Text style={styles.queueItemTitle}>LinkedIn Insight: Why 90% Fail by Month 2</Text>
+                <Text style={styles.queueItemTime}>Tomorrow, 10:00 AM • ⚡ 96% Match</Text>
               </View>
               <Text style={styles.threeDotsMenu}>⋮</Text>
             </Pressable>
@@ -766,15 +765,10 @@ export const ProScheduleScreen: React.FC<ProScheduleScreenProps> = ({
               style={styles.queueItemRow}
               onPress={() => showToast('Instagram Carousel scheduled for Friday 06:00 PM')}
             >
-              <LinearGradient
-                colors={['#833AB4', '#FD1D1D', '#FCAF45']}
-                style={styles.instagramSquareIcon}
-              >
-                <Text style={{ color: '#FFFFFF', fontWeight: '900', fontSize: 11 }}>📸</Text>
-              </LinearGradient>
-              <View style={{ flex: 1 }}>
-                <Text style={styles.queueItemTitle}>Instagram Carousel</Text>
-                <Text style={styles.queueItemTime}>Friday, 06:00 PM</Text>
+              <SocialBrandIcon platform="instagram" size={28} />
+              <View style={{ flex: 1, marginLeft: 10 }}>
+                <Text style={styles.queueItemTitle}>Instagram Carousel: 4K Recording Setup</Text>
+                <Text style={styles.queueItemTime}>Friday, 06:00 PM • ⚡ 94% Match</Text>
               </View>
               <Text style={styles.threeDotsMenu}>⋮</Text>
             </Pressable>
@@ -786,12 +780,10 @@ export const ProScheduleScreen: React.FC<ProScheduleScreenProps> = ({
               style={styles.queueItemRow}
               onPress={() => showToast('TikTok Duet scheduled for Saturday 05:30 PM')}
             >
-              <View style={styles.tiktokSquareIcon}>
-                <Text style={{ color: '#FFFFFF', fontWeight: '900', fontSize: 13 }}>≈</Text>
-              </View>
-              <View style={{ flex: 1 }}>
-                <Text style={styles.queueItemTitle}>TikTok Duet</Text>
-                <Text style={styles.queueItemTime}>Saturday, 05:30 PM</Text>
+              <SocialBrandIcon platform="tiktok" size={28} />
+              <View style={{ flex: 1, marginLeft: 10 }}>
+                <Text style={styles.queueItemTitle}>TikTok Reel: 2026 Algorithm Truth</Text>
+                <Text style={styles.queueItemTime}>Saturday, 05:30 PM • ⚡ 98% Match</Text>
               </View>
               <Text style={styles.threeDotsMenu}>⋮</Text>
             </Pressable>
@@ -1688,16 +1680,13 @@ export const ProScheduleScreen: React.FC<ProScheduleScreenProps> = ({
                         }}
                       >
                         <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                          <View style={{ flexDirection: 'row', gap: 10, flex: 1 }}>
-                            <View style={styles.timeBoxPurple}>
-                              <Text style={styles.timeBoxPurpleText}>{item.time}</Text>
-                              <Text style={styles.timeBoxPurpleSub}>{item.period}</Text>
-                            </View>
+                          <View style={{ flexDirection: 'row', gap: 10, flex: 1, alignItems: 'center' }}>
+                            <SocialBrandIcon platform={item.iconType} size={32} />
 
                             <View style={{ flex: 1 }}>
                               <Text style={styles.scheduleItemTitle} numberOfLines={2}>{item.title}</Text>
                               <Text style={styles.scheduleItemPlatform}>
-                                {item.dayLabel} • {item.platformLabel} • ⚡ {item.score}
+                                {item.dayLabel} • {item.time} {item.period} • ⚡ {item.score}
                               </Text>
                             </View>
                           </View>
