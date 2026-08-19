@@ -20,8 +20,6 @@ import * as Haptics from 'expo-haptics';
 import Svg, { Path, Circle, Rect } from 'react-native-svg';
 import { FloatingTabBar, TabType } from '../components/FloatingTabBar';
 import { UserProfileModal, UserProfileData } from '../components/UserProfileModal';
-import { AnimatedCompletionModal } from '../components/AnimatedCompletionModal';
-import { COLLAB_PLANS } from './CollabIdeaScreen';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
@@ -39,9 +37,39 @@ interface MessagesScreenProps {
   onSaveProfile?: (updated: UserProfileData) => void;
 }
 
+export const TinyGoldCheck = ({ size = 13 }: { size?: number }) => (
+  <View
+    style={{
+      width: size,
+      height: size,
+      borderRadius: size / 2,
+      backgroundColor: '#EAB308',
+      borderWidth: 1.5,
+      borderColor: '#FFFFFF',
+      justifyContent: 'center',
+      alignItems: 'center',
+      shadowColor: '#CA8A04',
+      shadowOffset: { width: 0, height: 1 },
+      shadowOpacity: 0.35,
+      shadowRadius: 2,
+      elevation: 2,
+    }}
+  >
+    <Svg width={size * 0.65} height={size * 0.65} viewBox="0 0 12 12" fill="none">
+      <Path
+        d="M2.5 6.2L4.8 8.5L9.5 3.5"
+        stroke="#FFFFFF"
+        strokeWidth="2.4"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </Svg>
+  </View>
+);
+
 interface StorySlide {
   id: string;
-  type: 'daily_story' | 'highlights' | 'milestone';
+  type?: 'daily_story' | 'highlights' | 'milestone';
   title: string;
   subtitle: string;
   timeAgo: string;
@@ -53,8 +81,6 @@ interface StorySlide {
     views: string;
     saves: string;
   }[];
-  milestoneTitle?: string;
-  milestoneXp?: string;
 }
 
 interface CreatorStory {
@@ -65,8 +91,8 @@ interface CreatorStory {
   avatar: any;
   streak: number;
   isOnline: boolean;
+  isPro: boolean;
   statusText: string;
-  isUser?: boolean;
   slides: StorySlide[];
 }
 
@@ -76,7 +102,9 @@ interface ChatMessage {
   text?: string;
   time: string;
   isUser: boolean;
-  sharedScriptTitle?: string;
+  isCollabProposal?: boolean;
+  collabTitle?: string;
+  collabBounty?: string;
   isAudioNote?: boolean;
   audioDuration?: string;
   reactionEmoji?: string;
@@ -91,206 +119,98 @@ interface ConversationThread {
   avatar: any;
   streak: number;
   isOnline: boolean;
+  isPro: boolean;
   lastMessage: string;
   time: string;
   unread: boolean;
-  category: 'buddies' | 'collabs' | 'jarvis';
+  unreadCount?: number;
+  category: 'buddies' | 'collabs' | 'squad' | 'deals' | 'jarvis';
   collabBadge?: string;
   messages: ChatMessage[];
 }
 
 const CREATOR_STORIES: CreatorStory[] = [
   {
-    id: 'user',
-    name: 'You',
+    id: 'c_amara',
+    name: 'Amara Okafor',
     handle: '@amara.creates',
-    niche: 'Lifestyle & Tech',
+    niche: 'Travel & Lifestyle',
     avatar: require('../../assets/images/amara-avatar.jpg'),
-    streak: 47,
+    streak: 44,
     isOnline: true,
-    statusText: 'Filming Reel 🎬',
-    isUser: true,
+    isPro: true,
+    statusText: 'Filming in Lagos 🎬',
     slides: [
       {
-        id: 's_user_1',
-        type: 'daily_story',
-        title: 'Today\'s Filming Session',
-        subtitle: 'Behind the scenes with PostStreak',
-        timeAgo: 'Just now',
-        quote: 'Filming day 47! Testing a 3-part curiosity hook on batch productivity.',
-        badge: '⚡ 47-DAY STREAK ACTIVE',
-      },
-      {
-        id: 's_user_2',
-        type: 'highlights',
-        title: 'Your Top Viral Hooks This Week',
-        subtitle: 'High retention performances',
-        timeAgo: '1d ago',
-        highlights: [
-          { title: 'One thing I wish I knew before creating', platform: 'TikTok', views: '42.8k', saves: '3.9k' },
-          { title: 'Why 90% of creators quit by month 2', platform: 'Reels', views: '58.1k', saves: '6.4k' },
-          { title: 'My 15-minute daily batching routine', platform: 'Shorts', views: '29.3k', saves: '2.8k' },
-        ],
+        id: 's_amara_1',
+        title: '24h Lagos Creation Sprint',
+        subtitle: 'Behind the scenes reel shoot',
+        timeAgo: '15m ago',
+        quote: 'Testing the 3-second hook format from Jarvis. Retention already up 35%!',
+        badge: '⚡ 44-DAY STREAK ACTIVE',
       },
     ],
   },
   {
-    id: 'c1',
+    id: 'c_elena',
     name: 'Elena Rostova',
     handle: '@elenacreates',
-    niche: 'Tech & Productivity',
+    niche: 'Design & Visual AI',
     avatar: require('../../assets/images/elena-avatar.jpg'),
     streak: 52,
     isOnline: true,
+    isPro: true,
     statusText: 'Editing week 3 batch',
     slides: [
       {
         id: 's_elena_1',
-        type: 'daily_story',
         title: 'Daily Studio Flow 🎬',
         subtitle: 'Batch recording 4 video hooks',
         timeAgo: '2h ago',
-        quote: 'Consistency feels 10x easier when you have an accountability partner. Finished today\'s script in 8 mins!',
-        badge: '⚡ 52-DAY STREAK',
-      },
-      {
-        id: 's_elena_2',
-        type: 'highlights',
-        title: 'Recent Viral Posts & Hooks',
-        subtitle: 'Top performing content lately',
-        timeAgo: '1d ago',
-        highlights: [
-          { title: 'The secret to never running out of video ideas', platform: 'TikTok', views: '84.2k', saves: '9.3k' },
-          { title: 'How I script 30-second shorts in 5 minutes', platform: 'Reels', views: '61.5k', saves: '7.1k' },
-          { title: 'Stop overthinking your camera setup', platform: 'TikTok', views: '39.0k', saves: '4.5k' },
-        ],
-      },
-      {
-        id: 's_elena_3',
-        type: 'milestone',
-        title: 'Streak Milestone Unlocked!',
-        subtitle: 'Level 5 Master Creator',
-        timeAgo: '3d ago',
-        milestoneTitle: '🏆 50-Day Consistency Club',
-        milestoneXp: '+250 XP Earned with Duo Partner',
+        quote: 'Consistency feels 10x easier when you have an accountability squad!',
+        badge: '👑 52-DAY STREAK',
       },
     ],
   },
   {
-    id: 'c2',
+    id: 'c_david',
+    name: 'David Adebayo',
+    handle: '@davidbuilds',
+    niche: 'Tech & Productivity',
+    avatar: require('../../assets/images/david-avatar.jpg'),
+    streak: 61,
+    isOnline: true,
+    isPro: true,
+    statusText: 'Scripting Reel at 7:30 PM',
+    slides: [
+      {
+        id: 's_david_1',
+        title: 'Morning Batching Habit',
+        subtitle: 'Deep work sprint',
+        timeAgo: '4h ago',
+        quote: 'Locking in day 61 before noon. Let’s crush the squad duel today!',
+        badge: '🔥 61-DAY STREAK',
+      },
+    ],
+  },
+  {
+    id: 'c_marcus',
     name: 'Marcus Chen',
     handle: '@marcustech',
     niche: 'AI & Workflow',
     avatar: require('../../assets/images/marcus-avatar.jpg'),
     streak: 38,
-    isOnline: true,
-    statusText: 'Writing 5 hooks',
+    isOnline: false,
+    isPro: true,
+    statusText: 'Offline • Studio recording',
     slides: [
       {
         id: 's_marcus_1',
-        type: 'daily_story',
-        title: 'Coding & Content Sprint ⚡',
-        subtitle: 'Morning routine done',
-        timeAgo: '4h ago',
-        quote: 'Tested 3 new hooks with Jarvis AI this morning. Script 2 had the strongest retention!',
-        badge: '🔥 38-DAY STREAK',
-      },
-      {
-        id: 's_marcus_2',
-        type: 'highlights',
-        title: 'Recent Post Highlights',
-        subtitle: 'Tech & creator tool reviews',
-        timeAgo: '2d ago',
-        highlights: [
-          { title: '3 AI tools I use every single day to post', platform: 'TikTok', views: '92.1k', saves: '12.4k' },
-          { title: 'How to automate your content schedule', platform: 'LinkedIn', views: '45.7k', saves: '5.2k' },
-        ],
-      },
-    ],
-  },
-  {
-    id: 'c3',
-    name: 'Sophia Taylor',
-    handle: '@sophiastyle',
-    niche: 'Lifestyle & Fashion',
-    avatar: require('../../assets/images/zainab-avatar.jpg'),
-    streak: 41,
-    isOnline: false,
-    statusText: 'Studio day!',
-    slides: [
-      {
-        id: 's_sophia_1',
-        type: 'daily_story',
-        title: 'Outfit & Studio Lighting ✨',
-        subtitle: 'Prepping week 4 visuals',
+        title: '3 AI Tools I Use Daily',
+        subtitle: 'Creator tool stack',
         timeAgo: '6h ago',
-        quote: 'Scheduled all posts for the 7:30 PM peak reach window. Loving this streak challenge!',
-        badge: '⚡ 41-DAY STREAK',
-      },
-      {
-        id: 's_sophia_2',
-        type: 'highlights',
-        title: 'Top Creator Highlights',
-        subtitle: 'Lifestyle & storytelling shorts',
-        timeAgo: '3d ago',
-        highlights: [
-          { title: 'My morning creator routine in 30 seconds', platform: 'Reels', views: '110k', saves: '14.2k' },
-          { title: '3 aesthetic filming spots in my apartment', platform: 'TikTok', views: '73.4k', saves: '8.6k' },
-        ],
-      },
-    ],
-  },
-  {
-    id: 'c4',
-    name: 'David Kim',
-    handle: '@davidbuilds',
-    niche: 'Fitness & Mindset',
-    avatar: require('../../assets/images/david-avatar.jpg'),
-    streak: 29,
-    isOnline: true,
-    statusText: 'Posted today! ⚡',
-    slides: [
-      {
-        id: 's_david_1',
-        type: 'daily_story',
-        title: 'Workout & Mindset Reel 🏋️‍♂️',
-        subtitle: 'Streak day 29 complete',
-        timeAgo: '1h ago',
-        quote: 'Showing up even when you don\'t feel like it is the whole game.',
-        badge: '🔥 29-DAY STREAK',
-      },
-    ],
-  },
-  {
-    id: 'jarvis_story',
-    name: 'Jarvis AI',
-    handle: '@jarvis.ai',
-    niche: 'AI Assistant',
-    avatar: require('../../assets/images/jarvis-core-flame.png'),
-    streak: 100,
-    isOnline: true,
-    statusText: 'AI Active ⚡',
-    slides: [
-      {
-        id: 's_jarvis_1',
-        type: 'daily_story',
-        title: 'Jarvis Daily Creator Intel ⚡',
-        subtitle: 'Algorithm analysis for today',
-        timeAgo: 'Just now',
-        quote: 'Today\'s top retention pattern: 3-part curiosity hooks with instant payoff retain 78% more viewers at 15 seconds.',
-        badge: '⚡ JARVIS CREATOR ASSISTANT',
-      },
-      {
-        id: 's_jarvis_2',
-        type: 'highlights',
-        title: 'Top AI Viral Blueprints',
-        subtitle: 'High retention collab formats',
-        timeAgo: '1h ago',
-        highlights: [
-          { title: 'The 3-Second Retention Hook Formula', platform: 'TikTok', views: '142k', saves: '18.4k' },
-          { title: 'Behind-the-Scenes Creator Setup Swap', platform: 'Reels', views: '98.5k', saves: '12.1k' },
-          { title: '14-Day Accountability Duo Challenge', platform: 'Shorts', views: '76.8k', saves: '9.3k' },
-        ],
+        quote: 'Voice Studio speed is incredible. Saved 2 hours of editing time.',
+        badge: '⚡ 38-DAY STREAK',
       },
     ],
   },
@@ -298,128 +218,159 @@ const CREATOR_STORIES: CreatorStory[] = [
 
 const INITIAL_CONVERSATIONS: ConversationThread[] = [
   {
-    id: 't1',
-    creatorId: 'c1',
-    name: 'Elena Rostova',
-    handle: '@elenacreates',
-    niche: 'Tech & Productivity',
-    avatar: require('../../assets/images/elena-avatar.jpg'),
-    streak: 52,
+    id: 'conv_amara',
+    creatorId: 'amara',
+    name: 'Amara Okafor',
+    handle: '@amara.creates',
+    niche: 'Travel & Lifestyle',
+    avatar: require('../../assets/images/amara-avatar.jpg'),
+    streak: 44,
     isOnline: true,
-    lastMessage: 'Loved your lesson on batch filming! Are you free for the duo challenge tomorrow?',
-    time: '2m ago',
+    isPro: true,
+    lastMessage: 'Hey! Loved your 3 mistakes Reel. Want to film the "24h in Lagos" collab on Saturday?',
+    time: '5m ago',
     unread: true,
-    category: 'buddies',
-    collabBadge: '⚡ 14-Day Pact (Day 8/14)',
+    unreadCount: 2,
+    category: 'collabs',
+    collabBadge: '🤝 Collab Proposal (94% Fit)',
     messages: [
       {
         id: 'm1',
-        senderId: 'c1',
-        text: 'Hey Amara! Just saw your 47-day streak update on the leaderboard, huge congrats!',
-        time: '10:14 AM',
+        senderId: 'amara',
+        text: 'Hey Pablo! Jarvis flagged our channels as a 94% fit for lifestyle storytelling.',
+        time: '11:20 AM',
         isUser: false,
       },
       {
         id: 'm2',
-        senderId: 'user',
-        text: 'Thank you Elena! Your tips on hook pacing really helped my retention on TikTok this week.',
-        time: '10:16 AM',
-        isUser: true,
+        senderId: 'amara',
+        isCollabProposal: true,
+        collabTitle: '24 Hours Creating in Lagos',
+        collabBounty: 'Joint Reel (30–45s) • High Discovery Potential',
+        time: '11:21 AM',
+        isUser: false,
       },
       {
         id: 'm3',
-        senderId: 'c1',
-        text: 'Loved your lesson on batch filming! Are you free for the duo challenge tomorrow?',
-        time: '10:18 AM',
-        isUser: false,
-        sharedScriptTitle: 'One thing I wish I knew before I started creating',
-      },
-      {
-        id: 'm4',
-        senderId: 'c1',
-        isAudioNote: true,
-        audioDuration: '0:18',
-        time: '10:20 AM',
+        senderId: 'amara',
+        text: 'Hey! Loved your 3 mistakes Reel. Want to film the "24h in Lagos" collab on Saturday?',
+        time: '11:22 AM',
         isUser: false,
       },
     ],
   },
   {
-    id: 't2',
-    creatorId: 'c2',
-    name: 'Marcus Chen',
-    handle: '@marcustech',
-    niche: 'AI & Workflow',
-    avatar: require('../../assets/images/marcus-avatar.jpg'),
-    streak: 38,
+    id: 'conv_squad',
+    creatorId: 'squad',
+    name: 'Momentum Makers Squad',
+    handle: '@momentum.squad',
+    niche: 'Level 12 • 78-Day Collective Streak',
+    avatar: require('../../assets/images/elena-avatar.jpg'),
+    streak: 78,
     isOnline: true,
-    lastMessage: 'Sent you my caption hook draft. Let me know what you think!',
-    time: '18m ago',
+    isPro: true,
+    lastMessage: 'Elena: We just took the lead in the Live Duel (62 pts vs 58 pts)! Keep posting! 🔥',
+    time: '22m ago',
     unread: true,
-    category: 'collabs',
-    collabBadge: '📑 Shared Script Draft',
+    unreadCount: 1,
+    category: 'squad',
+    collabBadge: '⚔️ Live Duel Active (+750 XP)',
     messages: [
       {
-        id: 'm2_1',
-        senderId: 'user',
-        text: 'Marcus, how do you structure your 30s talking head scripts?',
-        time: '9:30 AM',
-        isUser: true,
+        id: 'sm1',
+        senderId: 'david',
+        text: 'Just scheduled my 7:30 PM Reel for today!',
+        time: '10:45 AM',
+        isUser: false,
       },
       {
-        id: 'm2_2',
-        senderId: 'c2',
-        text: 'Sent you my caption hook draft. Let me know what you think!',
-        time: '9:45 AM',
+        id: 'sm2',
+        senderId: 'elena',
+        text: 'Elena: We just took the lead in the Live Duel (62 pts vs 58 pts)! Keep posting! 🔥',
+        time: '11:02 AM',
         isUser: false,
-        sharedScriptTitle: '3 creator habits that made posting easier',
       },
     ],
   },
   {
-    id: 't3',
-    creatorId: 'c3',
-    name: 'Sophia Taylor',
-    handle: '@sophiastyle',
-    niche: 'Lifestyle & Content',
+    id: 'conv_glowup',
+    creatorId: 'glowup',
+    name: 'GlowUp Skincare Sponsor',
+    handle: '@glowup.brand',
+    niche: 'Verified Brand Sponsor',
     avatar: require('../../assets/images/zainab-avatar.jpg'),
-    streak: 41,
-    isOnline: false,
-    lastMessage: 'Just scheduled my post for the 7:30 PM peak window! 🚀',
+    streak: 15,
+    isOnline: true,
+    isPro: true,
+    lastMessage: 'Brand Team: Your Creator Passport has been fast-tracked for the $450 campaign brief.',
     time: '1h ago',
     unread: false,
-    category: 'buddies',
-    collabBadge: '🎯 Peak Slot Scheduled',
+    category: 'deals',
+    collabBadge: '💰 $450 Brand Bounty',
     messages: [
       {
-        id: 'm3_1',
-        senderId: 'c3',
-        text: 'Just scheduled my post for the 7:30 PM peak window! 🚀',
-        time: '8:45 AM',
+        id: 'gm1',
+        senderId: 'glowup',
+        text: 'Hi Pablo! We love your engagement consistency on TikTok & Reels.',
+        time: '9:30 AM',
+        isUser: false,
+      },
+      {
+        id: 'gm2',
+        senderId: 'glowup',
+        text: 'Brand Team: Your Creator Passport has been fast-tracked for the $450 campaign brief.',
+        time: '9:31 AM',
         isUser: false,
       },
     ],
   },
   {
-    id: 't4',
+    id: 'conv_jarvis',
     creatorId: 'jarvis',
-    name: 'Jarvis Creative Assistant',
+    name: 'Jarvis AI Co-Pilot',
     handle: '@jarvis.ai',
-    niche: 'AI Co-Pilot',
-    avatar: require('../../assets/images/jarvis-core-flame.png'),
-    streak: 100,
+    niche: 'AI Content Director',
+    avatar: require('../../assets/images/jarvis-ghost-clean.png'),
+    streak: 99,
     isOnline: true,
-    lastMessage: 'Streak Alert: 1 post needed today to protect your 47-day streak and earn +50 XP.',
-    time: '3h ago',
+    isPro: true,
+    lastMessage: '⚡ Best posting window today is 7:30 PM. Your draft script is ready in Voice Studio.',
+    time: '2h ago',
     unread: false,
     category: 'jarvis',
-    collabBadge: '🤖 Streak Guardian',
+    collabBadge: '🪄 Co-Pilot Autopilot Active',
     messages: [
       {
-        id: 'm4_1',
+        id: 'jm1',
         senderId: 'jarvis',
-        text: 'Streak Alert: 1 post needed today to protect your 47-day streak and earn +50 XP.',
-        time: '7:00 AM',
+        text: '⚡ Best posting window today is 7:30 PM. Your draft script is ready in Voice Studio.',
+        time: '8:00 AM',
+        isUser: false,
+      },
+    ],
+  },
+  {
+    id: 'conv_elena',
+    creatorId: 'elena',
+    name: 'Elena Rostova',
+    handle: '@elenacreates',
+    niche: 'Design & Visual AI',
+    avatar: require('../../assets/images/elena-avatar.jpg'),
+    streak: 52,
+    isOnline: true,
+    isPro: true,
+    lastMessage: 'Elena sent a voice note (0:42s): "Let’s test the split-screen idea..."',
+    time: '3h ago',
+    unread: false,
+    category: 'buddies',
+    collabBadge: '🎙️ Voice Note Shared',
+    messages: [
+      {
+        id: 'em1',
+        senderId: 'elena',
+        isAudioNote: true,
+        audioDuration: '0:42s',
+        time: '7:40 AM',
         isUser: false,
       },
     ],
@@ -436,1149 +387,641 @@ export const MessagesScreen: React.FC<MessagesScreenProps> = ({
   onOpenCreate,
   onOpenMatch,
   onOpenCollabIdea,
-
   userProfile,
-  onSaveProfile,}) => {
-  const isDark = false;
+  onSaveProfile,
+}) => {
   const [activeTab, setActiveTab] = useState<TabType>('match');
+  const [selectedFilter, setSelectedFilter] = useState<'all' | 'collabs' | 'squad' | 'deals' | 'jarvis'>('all');
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState<'all' | 'buddies' | 'collabs' | 'jarvis'>('all');
-  const [threads, setThreads] = useState<ConversationThread[]>(INITIAL_CONVERSATIONS);
-  const [chatPlanIndex, setChatPlanIndex] = useState(0);
-  const reloadSpinAnim = useRef(new Animated.Value(0)).current;
-  const currentChatPlan = COLLAB_PLANS[chatPlanIndex];
-  const reloadSpinInterpolate = reloadSpinAnim.interpolate({
-    inputRange: [0, 1],
-    outputRange: ['0deg', '360deg'],
-  });
-
-  const handleShuffleChatPlan = () => {
-    if (Platform.OS !== 'web') {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    }
-    reloadSpinAnim.setValue(0);
-    Animated.timing(reloadSpinAnim, {
-      toValue: 1,
-      duration: 350,
-      useNativeDriver: true,
-    }).start();
-    const nextIdx = (chatPlanIndex + 1) % COLLAB_PLANS.length;
-    setChatPlanIndex(nextIdx);
-  };
-
-  // Active 1-on-1 Chat State
+  const [conversations, setConversations] = useState<ConversationThread[]>(INITIAL_CONVERSATIONS);
   const [activeChatThread, setActiveChatThread] = useState<ConversationThread | null>(null);
-  const [inputMessage, setInputMessage] = useState('');
-
-  // Snapchat / Social-Style Story & Highlights Player State
-  const [activeStoryCreator, setActiveStoryCreator] = useState<CreatorStory | null>(null);
-  const [activeSlideIndex, setActiveSlideIndex] = useState(0);
-  const [storyReplyText, setStoryReplyText] = useState('');
-
-  // Plus Icon (+) "Connect with More Creators" Modal
-  const [showConnectModal, setShowConnectModal] = useState(false);
+  const [chatInputText, setChatInputText] = useState('');
+  const [showStoryModal, setShowStoryModal] = useState(false);
+  const [selectedStory, setSelectedStory] = useState<CreatorStory | null>(null);
   const [showProfileModal, setShowProfileModal] = useState(false);
-
-  // Celebration & Feedback Modal
-  const [showCelebrationModal, setShowCelebrationModal] = useState(false);
-  const [celebrationTitle, setCelebrationTitle] = useState('Message Sent!');
-  const [celebrationSubtitle, setCelebrationSubtitle] = useState('Your streak partner received your message.');
-  const [celebrationSpeech, setCelebrationSpeech] = useState('Accountability connection strengthened! +15 XP.');
-  const [celebrationBadge, setCelebrationBadge] = useState('COLLAB ACTIVE');
-
-  // Floating Emoji Animations
-  const [floatingEmojis, setFloatingEmojis] = useState<{ id: string; emoji: string; x: number }[]>([]);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   // Animations
-  const flameFloatY = useRef(new Animated.Value(0)).current;
-  const modalPopScale = useRef(new Animated.Value(0.9)).current;
-  const storyFadeAnim = useRef(new Animated.Value(0)).current;
-  const chatScrollRef = useRef<ScrollView>(null);
+  const ghostFloatY = useRef(new Animated.Value(0)).current;
+  const modalPopScale = useRef(new Animated.Value(0.92)).current;
+  const audioPulseAnim = useRef(new Animated.Value(1)).current;
 
   useEffect(() => {
-    const floatAnim = Animated.loop(
+    Animated.loop(
       Animated.sequence([
-        Animated.timing(flameFloatY, {
+        Animated.timing(ghostFloatY, {
           toValue: -4,
-          duration: 1800,
+          duration: 1500,
           useNativeDriver: true,
         }),
-        Animated.timing(flameFloatY, {
-          toValue: 0,
-          duration: 1800,
+        Animated.timing(ghostFloatY, {
+          toValue: 2,
+          duration: 1500,
           useNativeDriver: true,
         }),
       ])
-    );
-    floatAnim.start();
-    return () => floatAnim.stop();
-  }, [flameFloatY]);
+    ).start();
 
-  const triggerModalAnim = () => {
-    modalPopScale.setValue(0.9);
+    Animated.loop(
+      Animated.sequence([
+        Animated.timing(audioPulseAnim, {
+          toValue: 1.12,
+          duration: 600,
+          useNativeDriver: true,
+        }),
+        Animated.timing(audioPulseAnim, {
+          toValue: 1,
+          duration: 600,
+          useNativeDriver: true,
+        }),
+      ])
+    ).start();
+  }, []);
+
+  const showToast = (msg: string) => {
+    setToastMessage(msg);
+    setTimeout(() => {
+      setToastMessage(null);
+    }, 2800);
+  };
+
+  const triggerModalPop = () => {
+    modalPopScale.setValue(0.92);
     Animated.spring(modalPopScale, {
       toValue: 1,
-      tension: 65,
-      friction: 8,
+      friction: 6,
+      tension: 60,
       useNativeDriver: true,
     }).start();
   };
 
-  const handleTabPress = (tab: TabType) => {
+  const handleSendMessage = () => {
+    if (!chatInputText.trim() || !activeChatThread) return;
+
     if (Platform.OS !== 'web') {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    }
-    setActiveTab(tab);
-    if (onNavigateTab) {
-      onNavigateTab(tab);
-    }
-  };
-
-  // Open Story & Highlights Viewer
-  const handleOpenStory = (story: CreatorStory) => {
-    if (Platform.OS !== 'web') {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    }
-    setActiveStoryCreator(story);
-    setActiveSlideIndex(0);
-    setStoryReplyText('');
-    storyFadeAnim.setValue(0);
-    Animated.timing(storyFadeAnim, {
-      toValue: 1,
-      duration: 250,
-      useNativeDriver: true,
-    }).start();
-  };
-
-  const handleNextSlide = () => {
-    if (!activeStoryCreator) return;
-    if (activeSlideIndex < activeStoryCreator.slides.length - 1) {
-      if (Platform.OS !== 'web') {
-        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-      }
-      setActiveSlideIndex(activeSlideIndex + 1);
-    } else {
-      setActiveStoryCreator(null);
-    }
-  };
-
-  const handlePrevSlide = () => {
-    if (!activeStoryCreator) return;
-    if (activeSlideIndex > 0) {
-      if (Platform.OS !== 'web') {
-        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-      }
-      setActiveSlideIndex(activeSlideIndex - 1);
-    }
-  };
-
-  const handleSendStoryReaction = (emoji: string) => {
-    if (!activeStoryCreator) return;
-    if (Platform.OS !== 'web') {
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-    }
-
-    // Add floating emoji animation
-    const emojiId = `e_${Date.now()}`;
-    setFloatingEmojis((prev) => [...prev, { id: emojiId, emoji, x: Math.random() * (SCREEN_WIDTH - 80) + 40 }]);
-    setTimeout(() => {
-      setFloatingEmojis((prev) => prev.filter((e) => e.id !== emojiId));
-    }, 1800);
-
-    // Also send reaction to their message thread
-    const matchedThread = threads.find((t) => t.creatorId === activeStoryCreator.id);
-    if (matchedThread) {
-      const reactionMsg: ChatMessage = {
-        id: `msg_react_${Date.now()}`,
-        senderId: 'user',
-        text: `Reacted ${emoji} to your story "${activeStoryCreator.slides[activeSlideIndex].title}"`,
-        reactionEmoji: emoji,
-        time: 'Just now',
-        isUser: true,
-      };
-      setThreads((prev) =>
-        prev.map((t) =>
-          t.id === matchedThread.id
-            ? { ...t, lastMessage: `Reacted ${emoji}`, time: 'Just now', messages: [...t.messages, reactionMsg] }
-            : t
-        )
-      );
-    }
-  };
-
-  const handleSendStoryReply = () => {
-    if (!storyReplyText.trim() || !activeStoryCreator) return;
-    if (Platform.OS !== 'web') {
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-    }
-
-    const matchedThread = threads.find((t) => t.creatorId === activeStoryCreator.id);
-    const replyMsg: ChatMessage = {
-      id: `msg_reply_${Date.now()}`,
-      senderId: 'user',
-      text: storyReplyText.trim(),
-      time: 'Just now',
-      isUser: true,
-    };
-
-    if (matchedThread) {
-      setThreads((prev) =>
-        prev.map((t) =>
-          t.id === matchedThread.id
-            ? { ...t, lastMessage: replyMsg.text || '', time: 'Just now', messages: [...t.messages, replyMsg] }
-            : t
-        )
-      );
-    }
-
-    setActiveStoryCreator(null);
-    setCelebrationTitle('Reply Sent!');
-    setCelebrationSubtitle(`Your message was sent to ${activeStoryCreator.name}'s inbox.`);
-    setCelebrationSpeech('Story conversation started! +15 XP.');
-    setCelebrationBadge('REPLY SENT');
-    setShowCelebrationModal(true);
-  };
-
-  const handleOpenChat = (thread: ConversationThread) => {
-    if (Platform.OS !== 'web') {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    }
-    setThreads((prev) =>
-      prev.map((t) => (t.id === thread.id ? { ...t, unread: false } : t))
-    );
-    setActiveChatThread({ ...thread, unread: false });
-  };
-
-  const handleSendMessage = (customText?: string) => {
-    const messageToSend = (customText || inputMessage).trim();
-    if (!messageToSend || !activeChatThread) return;
-
-    if (Platform.OS !== 'web') {
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     }
 
     const newMessage: ChatMessage = {
-      id: `msg_${Date.now()}`,
+      id: `user_m_${Date.now()}`,
       senderId: 'user',
-      text: messageToSend,
+      text: chatInputText.trim(),
       time: 'Just now',
       isUser: true,
     };
 
-    const updatedMessages = [...activeChatThread.messages, newMessage];
     const updatedThread = {
       ...activeChatThread,
-      lastMessage: newMessage.text || '',
+      lastMessage: `You: ${chatInputText.trim()}`,
       time: 'Just now',
-      messages: updatedMessages,
+      messages: [...activeChatThread.messages, newMessage],
     };
 
     setActiveChatThread(updatedThread);
-    setThreads((prev) =>
-      prev.map((t) => (t.id === activeChatThread.id ? updatedThread : t))
+    setConversations((prev) =>
+      prev.map((c) => (c.id === updatedThread.id ? updatedThread : c))
     );
-    setInputMessage('');
+    setChatInputText('');
 
+    // Simulated quick AI / creator response
     setTimeout(() => {
-      chatScrollRef.current?.scrollToEnd({ animated: true });
-    }, 100);
+      if (Platform.OS !== 'web') {
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      }
+      const replyMessage: ChatMessage = {
+        id: `reply_m_${Date.now()}`,
+        senderId: updatedThread.creatorId,
+        text: 'Sounds perfect! Let’s lock this into our Smart Schedule 🔥',
+        time: 'Just now',
+        isUser: false,
+      };
+
+      const threadWithReply = {
+        ...updatedThread,
+        lastMessage: replyMessage.text!,
+        time: 'Just now',
+        messages: [...updatedThread.messages, replyMessage],
+      };
+
+      setActiveChatThread(threadWithReply);
+      setConversations((prev) =>
+        prev.map((c) => (c.id === threadWithReply.id ? threadWithReply : c))
+      );
+    }, 1400);
   };
 
-  const handleSendVoiceNote = () => {
-    if (!activeChatThread) return;
-    if (Platform.OS !== 'web') {
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-    }
-
-    const audioMsg: ChatMessage = {
-      id: `msg_audio_${Date.now()}`,
-      senderId: 'user',
-      isAudioNote: true,
-      audioDuration: '0:14',
-      time: 'Just now',
-      isUser: true,
-    };
-
-    const updatedMessages = [...activeChatThread.messages, audioMsg];
-    const updatedThread = {
-      ...activeChatThread,
-      lastMessage: '🎙️ Voice note (0:14)',
-      time: 'Just now',
-      messages: updatedMessages,
-    };
-
-    setActiveChatThread(updatedThread);
-    setThreads((prev) =>
-      prev.map((t) => (t.id === activeChatThread.id ? updatedThread : t))
-    );
-
-    setTimeout(() => {
-      chatScrollRef.current?.scrollToEnd({ animated: true });
-    }, 100);
-  };
-
-  const handleSendHighFive = (creatorName: string) => {
-    if (Platform.OS !== 'web') {
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-    }
-    setCelebrationTitle('⚡ Streak Boost Sent!');
-    setCelebrationSubtitle(`You sent +10 Streak Energy to ${creatorName}!`);
-    setCelebrationSpeech('Accountability partner energized! Keep supporting each other.');
-    setCelebrationBadge('ENERGY BOOST');
-    setShowCelebrationModal(true);
-  };
-
-  const filteredThreads = threads.filter((thread) => {
-    const matchesCategory =
-      selectedCategory === 'all' || thread.category === selectedCategory;
+  const filteredConversations = conversations.filter((c) => {
+    const matchesFilter = selectedFilter === 'all' || c.category === selectedFilter;
     const matchesSearch =
-      searchQuery.trim() === '' ||
-      thread.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      thread.handle.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      thread.lastMessage.toLowerCase().includes(searchQuery.toLowerCase());
-    return matchesCategory && matchesSearch;
+      c.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      c.lastMessage.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      c.niche.toLowerCase().includes(searchQuery.toLowerCase());
+    return matchesFilter && matchesSearch;
   });
 
   return (
-    <SafeAreaView style={[styles.safeArea, isDark && { backgroundColor: '#0C0A12' }]}>
-      <StatusBar barStyle={isDark ? "light-content" : "dark-content"} backgroundColor={isDark ? "#0C0A12" : "#FAF8F5"} />
-      <View style={[styles.container, isDark && { backgroundColor: '#0C0A12' }]}>
-        {/* 1. TOP AIRY HEADER BAR */}
+    <SafeAreaView style={styles.safeArea}>
+      <StatusBar barStyle="dark-content" backgroundColor="#FAF8F5" />
+      <View style={styles.container}>
+        {/* ============================================================ */}
+        {/* 1. TOP HEADER BAR                                            */}
+        {/* ============================================================ */}
         <View style={styles.headerBar}>
-          <View style={styles.headerLeftGroup}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
             <Pressable
-              onPress={() => {
-                if (Platform.OS !== 'web') {
-                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                }
-                if (activeChatThread) {
-                  setActiveChatThread(null);
-                } else {
-                  onBack();
-                }
-              }}
-              style={({ pressed }) => [styles.backCircleBtn, pressed && styles.btnPressed]}
+              onPress={onBack}
+              style={({ pressed }) => [styles.backBtnCircle, pressed && styles.btnPressed]}
               hitSlop={8}
             >
-              <Svg width={20} height={20} viewBox="0 0 24 24" fill="none">
-                <Path d="M15 18L9 12L15 6" stroke="#171420" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" />
-              </Svg>
+              <Text style={{ fontSize: 18, color: '#171420', fontWeight: '900' }}>‹</Text>
             </Pressable>
 
-            {/* Mascot Logo */}
-            <Animated.View
-              style={[
-                styles.headerLogoWrapper,
-                { transform: [{ translateY: flameFloatY }] },
-              ]}
-            >
-              <Image
-                source={require('../../assets/images/jarvis-ghost-clean.png')}
-                style={styles.headerGhostLogo}
-                resizeMode="contain"
-              />
-            </Animated.View>
+            <View>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                <Text style={styles.headerTitle}>Creator Inbox</Text>
+                <View style={styles.proGoldBadge}>
+                  <Text style={styles.proGoldBadgeText}>👑 PRO</Text>
+                </View>
+              </View>
+              <Text style={styles.headerSub}>Collab Hub &amp; Live Squad Chats</Text>
+            </View>
           </View>
 
-          {/* Center Title */}
-          <View style={styles.headerCenter}>
-            <Text style={styles.headerTitleText}>
-              {activeChatThread ? activeChatThread.name : 'Creator Messages'}
-            </Text>
-            <Text style={styles.headerSubtitleText}>
-              {activeChatThread
-                ? activeChatThread.isOnline
-                  ? '🟢 Active now • ⚡ 52d streak'
-                  : '⚡ Streak Partner'
-                : '12 Connected Creators'}
-            </Text>
-          </View>
-
-          {/* Right Action: Plus Button (+) & Profile Icon */}
-          <View style={styles.headerRightGroup}>
-            <Pressable
-              style={({ pressed }) => [styles.newChatBtn, pressed && styles.btnPressed]}
-              hitSlop={8}
-              onPress={() => {
-                triggerModalAnim();
-                setShowConnectModal(true);
-              }}
-            >
-              <LinearGradient
-                colors={['#7C3AED', '#582CDB']}
-                style={styles.plusIconGradient}
-              >
-                <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
-                  <Path d="M12 5V19M5 12H19" stroke="#FFFFFF" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" />
-                </Svg>
-              </LinearGradient>
-            </Pressable>
-
-            {/* Top-Right: Profile Icon after Plus button */}
-            <Pressable
-              style={({ pressed }) => [styles.headerIconBtn, isDark && styles.headerIconBtnDark, pressed && styles.btnPressed]}
-              hitSlop={8}
-              onPress={() => {
-                if (Platform.OS !== 'web') {
-                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                }
-                triggerModalAnim();
-                setShowProfileModal(true);
-              }}
-            >
-              {activeChatThread ? (
-                <Image
-                  source={activeChatThread.avatar}
-                  style={styles.headerPartnerMiniAvatar}
-                  resizeMode="cover"
-                />
-              ) : (
-                <Svg width={19} height={19} viewBox="0 0 24 24" fill="none">
-                  <Path
-                    d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"
-                    stroke="#171420"
-                    strokeWidth="2.2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                  <Circle
-                    cx="12"
-                    cy="7"
-                    r="4"
-                    stroke="#171420"
-                    strokeWidth="2.2"
-                  />
-                </Svg>
-              )}
-            </Pressable>
-          </View>
+          {/* User Profile Avatar with Tiny Gold Check Badge */}
+          <Pressable
+            onPress={() => {
+              triggerModalPop();
+              setShowProfileModal(true);
+            }}
+            style={styles.profileAvatarWrapper}
+            hitSlop={8}
+          >
+            <Image
+              source={userProfile?.avatarSource || require('../../assets/images/jarvis-ghost-clean.png')}
+              style={styles.headerUserAvatar}
+              resizeMode="cover"
+            />
+            <View style={styles.avatarTinyGoldCheckPos}>
+              <TinyGoldCheck size={14} />
+            </View>
+          </Pressable>
         </View>
 
-        {/* 2. MAIN CONTENT: INBOX OR ACTIVE CHAT */}
-        {!activeChatThread ? (
-          <ScrollView
-            contentContainerStyle={styles.scrollContent}
-            showsVerticalScrollIndicator={false}
-            bounces={true}
-          >
-            {/* Top Badges Row */}
-            <View style={styles.topBadgesRow}>
-              <View style={styles.socialHubPill}>
-                <Text style={styles.socialHubPillText}>SOCIAL HUB</Text>
-              </View>
-              <View style={styles.activePactPill}>
-                <Text style={styles.activePactPillText}>⚡ 3 Active Accountability Pacts</Text>
-              </View>
-            </View>
+        {/* 2. MAIN SCROLLABLE MESSAGES INBOX */}
+        <ScrollView
+          contentContainerStyle={styles.scrollContent}
+          showsVerticalScrollIndicator={false}
+          bounces={true}
+        >
+          {/* SEARCH BAR */}
+          <View style={styles.searchBarBox}>
+            <Text style={{ fontSize: 14, marginRight: 8 }}>🔍</Text>
+            <TextInput
+              style={styles.searchInput}
+              placeholder="Search creators, collab pitches, squads..."
+              placeholderTextColor="#94A3B8"
+              value={searchQuery}
+              onChangeText={setSearchQuery}
+            />
+            {searchQuery.length > 0 && (
+              <Pressable onPress={() => setSearchQuery('')} hitSlop={8}>
+                <Text style={{ fontSize: 12, color: '#94A3B8', fontWeight: '900' }}>✕</Text>
+              </Pressable>
+            )}
+          </View>
 
-            {/* Search Bar */}
-            <View style={styles.searchBarBox}>
-              <Svg width={17} height={17} viewBox="0 0 24 24" fill="none">
-                <Path
-                  d="M21 21L15.803 15.803M15.803 15.803A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"
-                  stroke="#94A3B8"
-                  strokeWidth="2.2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </Svg>
-              <TextInput
-                value={searchQuery}
-                onChangeText={setSearchQuery}
-                placeholder="Search creators, stories, or posts..."
-                placeholderTextColor="#94A3B8"
-                style={styles.searchInput}
-              />
-              {searchQuery.length > 0 && (
-                <Pressable onPress={() => setSearchQuery('')} hitSlop={8}>
-                  <Text style={styles.clearSearchText}>✕</Text>
-                </Pressable>
-              )}
-            </View>
-
-            {/* SNAPCHAT-STYLE STORIES & HIGHLIGHTS ROW */}
-            <View style={styles.storiesHeaderRow}>
-              <Text style={styles.sectionHeaderTitle}>Stories &amp; Post Highlights</Text>
-              <Text style={styles.storiesSubHint}>Tap to view daily posts</Text>
-            </View>
-
-            <ScrollView
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              contentContainerStyle={styles.storiesRow}
-            >
-              {CREATOR_STORIES.map((story) => (
+          {/* FILTER TABS: All | Collabs | Squad | Brand Deals | Jarvis */}
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.filterTabsScroll}>
+            {[
+              { key: 'all', label: 'All' },
+              { key: 'collabs', label: '🤝 Collabs' },
+              { key: 'squad', label: '🔥 Squad' },
+              { key: 'deals', label: '💰 Brand Deals' },
+              { key: 'jarvis', label: '🪄 Jarvis AI' },
+            ].map((tab) => {
+              const isSelected = selectedFilter === tab.key;
+              return (
                 <Pressable
-                  key={story.id}
-                  style={styles.storyItem}
-                  onPress={() => handleOpenStory(story)}
+                  key={tab.key}
+                  onPress={() => {
+                    if (Platform.OS !== 'web') {
+                      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                    }
+                    setSelectedFilter(tab.key as any);
+                  }}
+                  style={[styles.filterTabPill, isSelected && styles.filterTabPillActive]}
                 >
-                  <LinearGradient
-                    colors={story.isOnline ? ['#EC4899', '#8B5CF6', '#F59E0B'] : ['#CBD5E1', '#E2E8F0']}
-                    start={{ x: 0, y: 0 }}
-                    end={{ x: 1, y: 1 }}
-                    style={styles.storyAvatarRingGradient}
-                  >
-                    <View style={styles.storyAvatarInnerWhite}>
-                      <Image source={story.avatar} style={styles.storyAvatar} resizeMode="cover" />
-                      {story.isOnline && <View style={styles.onlineDot} />}
-                      {story.isUser && (
-                        <View style={styles.userAddStatusBadge}>
-                          <Text style={styles.userAddStatusText}>+</Text>
-                        </View>
-                      )}
-                    </View>
-                  </LinearGradient>
-                  <Text style={styles.storyName} numberOfLines={1}>
-                    {story.name}
+                  <Text style={[styles.filterTabText, isSelected && styles.filterTabTextActive]}>
+                    {tab.label}
                   </Text>
-                  <View style={styles.storyStreakBadge}>
-                    <Text style={styles.storyStreakText}>⚡ {story.streak}d</Text>
+                </Pressable>
+              );
+            })}
+          </ScrollView>
+
+          {/* ============================================================ */}
+          {/* 3. ACTIVE CREATOR STATUSES & STORIES CAROUSEL                */}
+          {/* ============================================================ */}
+          <View style={styles.storiesSectionBox}>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 14, paddingHorizontal: 4 }}>
+              {CREATOR_STORIES.map((creator) => (
+                <Pressable
+                  key={creator.id}
+                  style={styles.storyItemCol}
+                  onPress={() => {
+                    setSelectedStory(creator);
+                    setShowStoryModal(true);
+                  }}
+                >
+                  <View style={styles.storyAvatarOuterRing}>
+                    <Image source={creator.avatar} style={styles.storyAvatarImg} />
+                    {/* TINY GOLD CHECK BADGE FOR PRO CREATORS */}
+                    {creator.isPro && (
+                      <View style={styles.storyTinyGoldCheckPos}>
+                        <TinyGoldCheck size={14} />
+                      </View>
+                    )}
+                    {creator.isOnline && <View style={styles.storyOnlineDot} />}
+                  </View>
+                  <Text style={styles.storyCreatorName} numberOfLines={1}>
+                    {creator.name.split(' ')[0]}
+                  </Text>
+                  <View style={styles.storyStreakPill}>
+                    <Text style={styles.storyStreakText}>🔥 {creator.streak}</Text>
                   </View>
                 </Pressable>
               ))}
             </ScrollView>
+          </View>
 
-            {/* MESSAGE CATEGORY TABS */}
-            <ScrollView
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              contentContainerStyle={styles.categoryTabsRow}
-            >
-              {[
-                { id: 'all', label: `🔥 All Messages (${threads.length})` },
-                { id: 'buddies', label: '🤝 Streak Partners' },
-                { id: 'collabs', label: '⚡ Collabs & Scripts' },
-                { id: 'jarvis', label: '🤖 Jarvis AI' },
-              ].map((tab) => {
-                const isSelected = selectedCategory === tab.id;
-                return (
-                  <Pressable
-                    key={tab.id}
-                    onPress={() => {
-                      if (Platform.OS !== 'web') {
-                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                      }
-                      setSelectedCategory(tab.id as 'all' | 'buddies' | 'collabs' | 'jarvis');
-                    }}
-                    style={[
-                      styles.categoryTabPill,
-                      isSelected && styles.categoryTabPillActive,
-                    ]}
-                  >
-                    <Text
-                      style={[
-                        styles.categoryTabPillText,
-                        isSelected && styles.categoryTabPillTextActive,
-                      ]}
-                    >
-                      {tab.label}
-                    </Text>
-                  </Pressable>
-                );
-              })}
-            </ScrollView>
+          {/* ============================================================ */}
+          {/* 4. PINNED PRO COLLAB BANNER                                  */}
+          {/* ============================================================ */}
+          <Pressable
+            style={({ pressed }) => [styles.pinnedCollabBanner, pressed && styles.btnPressed]}
+            onPress={() => {
+              const amaraConv = conversations.find((c) => c.id === 'conv_amara');
+              if (amaraConv) {
+                setActiveChatThread(amaraConv);
+              }
+            }}
+          >
+            <View style={{ flexDirection: 'row', gap: 12, alignItems: 'center' }}>
+              <View style={styles.bannerIconSquare}>
+                <Text style={{ fontSize: 20 }}>🤝</Text>
+              </View>
+              <View style={{ flex: 1 }}>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                  <Text style={styles.bannerTagText}>PRO COLLAB INVITATION</Text>
+                  <View style={styles.bannerMatchPill}>
+                    <Text style={styles.bannerMatchPillText}>94% FIT</Text>
+                  </View>
+                </View>
+                <Text style={styles.bannerTitleText}>Amara Okafor wants to collaborate</Text>
+                <Text style={styles.bannerSubText}>&ldquo;24 Hours Creating in Lagos&rdquo; • Sat, 2 PM</Text>
+              </View>
+              <Text style={styles.bannerArrowText}>➔</Text>
+            </View>
+          </Pressable>
 
-            {/* CONVERSATION THREADS LIST */}
-            <View style={styles.threadsList}>
-              {filteredThreads.map((thread) => (
+          {/* ============================================================ */}
+          {/* 5. CONVERSATION THREADS LIST                                 */}
+          {/* ============================================================ */}
+          <Text style={styles.conversationsHeaderTitle}>Recent Conversations</Text>
+
+          <View style={{ gap: 10, marginBottom: 120 }}>
+            {filteredConversations.map((thread) => {
+              return (
                 <Pressable
                   key={thread.id}
-                  style={({ pressed }) => [
-                    styles.threadCard,
-                    thread.unread && styles.threadCardUnread,
-                    pressed && styles.btnPressed,
-                  ]}
-                  onPress={() => handleOpenChat(thread)}
+                  style={({ pressed }) => [styles.conversationCard, pressed && styles.btnPressed]}
+                  onPress={() => {
+                    if (Platform.OS !== 'web') {
+                      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                    }
+                    setActiveChatThread(thread);
+                  }}
                 >
-                  {/* Creator Avatar with Story Border */}
-                  <Pressable
-                    onPress={() => {
-                      const matchedStory = CREATOR_STORIES.find((s) => s.id === thread.creatorId);
-                      if (matchedStory) {
-                        handleOpenStory(matchedStory);
-                      } else {
-                        handleOpenChat(thread);
-                      }
-                    }}
-                  >
-                    <LinearGradient
-                      colors={thread.isOnline ? ['#EC4899', '#8B5CF6'] : ['#E2E8F0', '#CBD5E1']}
-                      style={styles.threadAvatarRing}
-                    >
-                      <Image source={thread.avatar} style={styles.threadAvatar} resizeMode="cover" />
-                      {thread.isOnline && <View style={styles.threadOnlineDot} />}
-                    </LinearGradient>
-                  </Pressable>
-
-                  {/* Thread Content */}
-                  <View style={styles.threadContentCol}>
-                    <View style={styles.threadTopRow}>
-                      <Text style={styles.threadCreatorName} numberOfLines={1}>
-                        {thread.name}
-                      </Text>
-                      <Text style={styles.threadTime}>{thread.time}</Text>
-                    </View>
-
-                    <View style={styles.threadMetaRow}>
-                      <Text style={styles.threadHandle}>{thread.handle}</Text>
-                      <View style={styles.threadStreakPill}>
-                        <Text style={styles.threadStreakText}>⚡ {thread.streak}d streak</Text>
+                  {/* Creator Avatar with Tiny Gold Check Badge */}
+                  <View style={styles.convAvatarContainer}>
+                    <Image source={thread.avatar} style={styles.convAvatarImg} />
+                    {thread.isPro && (
+                      <View style={styles.convTinyGoldCheckPos}>
+                        <TinyGoldCheck size={14} />
                       </View>
+                    )}
+                    {thread.isOnline && <View style={styles.convOnlineDot} />}
+                  </View>
+
+                  {/* Middle Content */}
+                  <View style={{ flex: 1 }}>
+                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 2 }}>
+                      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                        <Text style={styles.convCreatorName}>{thread.name}</Text>
+                        {thread.isPro && (
+                          <View style={styles.proMicroPill}>
+                            <Text style={styles.proMicroPillText}>👑 PRO</Text>
+                          </View>
+                        )}
+                      </View>
+                      <Text style={styles.convTimeText}>{thread.time}</Text>
                     </View>
 
+                    {/* Collab / Status Tag */}
                     {thread.collabBadge && (
-                      <View style={styles.collabStatusBadge}>
-                        <Text style={styles.collabStatusText}>{thread.collabBadge}</Text>
+                      <View style={styles.convBadgeBox}>
+                        <Text style={styles.convBadgeText}>{thread.collabBadge}</Text>
                       </View>
                     )}
 
+                    {/* Message Preview */}
                     <Text
-                      style={[styles.threadLastMessage, thread.unread && styles.threadLastMessageUnread]}
+                      style={[styles.convLastMessageText, thread.unread && styles.convLastMessageUnread]}
                       numberOfLines={1}
                     >
                       {thread.lastMessage}
                     </Text>
                   </View>
 
-                  {/* Unread Purple Indicator */}
-                  {thread.unread && <View style={styles.unreadPurpleDot} />}
-                </Pressable>
-              ))}
-            </View>
-
-            {/* Bottom spacing */}
-            <View style={{ height: 110 }} />
-          </ScrollView>
-        ) : (
-          /* 3. PREMIUM INTERACTIVE 1-ON-1 CHAT ROOM */
-          <KeyboardAvoidingView
-            style={{ flex: 1 }}
-            behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-          >
-            <View style={styles.chatRoomContainer}>
-              {/* Pinned Accountability Banner */}
-              <LinearGradient
-                colors={['#FAF5FF', '#EDE9FE']}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 0 }}
-                style={styles.pactBanner}
-              >
-                <View style={styles.pactFlameIconBox}>
-                  <Text style={{ fontSize: 16 }}>⚡</Text>
-                </View>
-                <View style={{ flex: 1 }}>
-                  <Text style={styles.pactTitle}>Accountability Pact Active</Text>
-                  <Text style={styles.pactSub}>
-                    You &amp; {activeChatThread.name} get +50 XP when both post today!
-                  </Text>
-                </View>
-                <Pressable
-                  style={styles.pactBoostBtn}
-                  onPress={() => handleSendHighFive(activeChatThread.name)}
-                >
-                  <Text style={styles.pactBoostBtnText}>⚡ Boost</Text>
-                </Pressable>
-              </LinearGradient>
-
-              {/* COLLAB IDEA SECTION BANNER */}
-              <View style={styles.collabIdeaBanner}>
-                <Pressable
-                  style={styles.collabIdeaBannerLeft}
-                  onPress={() => {
-                    if (Platform.OS !== 'web') {
-                      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-                    }
-                    if (onOpenCollabIdea) {
-                      onOpenCollabIdea({
-                        name: activeChatThread.name,
-                        handle: activeChatThread.handle,
-                        niche: activeChatThread.niche,
-                        avatar: activeChatThread.avatar,
-                        planIndex: chatPlanIndex,
-                      });
-                    }
-                  }}
-                >
-                  <View style={styles.collabIdeaIconBox}>
-                    <Text style={{ fontSize: 16 }}>🤝</Text>
-                  </View>
-                  <View style={{ flex: 1 }}>
-                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-                      <Text style={styles.collabIdeaBannerTitle}>Collab Idea</Text>
-                      <View style={styles.collabIdeaPillMini}>
-                        <Text style={styles.collabIdeaPillMiniText}>{currentChatPlan.pillTag}</Text>
-                      </View>
+                  {/* Unread Bubble */}
+                  {thread.unread && (
+                    <View style={styles.unreadCountBadge}>
+                      <Text style={styles.unreadCountText}>{thread.unreadCount || 1}</Text>
                     </View>
-                    <Text style={styles.collabIdeaBannerSub} numberOfLines={1}>
-                      {currentChatPlan.title}
-                    </Text>
-                  </View>
+                  )}
                 </Pressable>
+              );
+            })}
+          </View>
+        </ScrollView>
 
-                <View style={styles.collabIdeaActionsRight}>
-                  {/* RELOAD ICON BUTTON */}
+        {/* ============================================================ */}
+        {/* 6. INTERACTIVE FULL-SCREEN CHAT THREAD MODAL                 */}
+        {/* ============================================================ */}
+        <Modal
+          visible={activeChatThread !== null}
+          animationType="slide"
+          onRequestClose={() => setActiveChatThread(null)}
+        >
+          {activeChatThread && (
+            <SafeAreaView style={styles.chatModalSafeArea}>
+              <StatusBar barStyle="dark-content" backgroundColor="#FAF8F5" />
+              <KeyboardAvoidingView
+                behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+                style={{ flex: 1 }}
+              >
+                {/* CHAT HEADER */}
+                <View style={styles.chatRoomHeader}>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+                    <Pressable
+                      onPress={() => setActiveChatThread(null)}
+                      style={styles.chatBackBtn}
+                      hitSlop={8}
+                    >
+                      <Text style={{ fontSize: 20, fontWeight: '900', color: '#171420' }}>‹</Text>
+                    </Pressable>
+
+                    {/* Recipient Photo with Tiny Gold Check Badge */}
+                    <View style={styles.chatHeaderAvatarWrapper}>
+                      <Image source={activeChatThread.avatar} style={styles.chatHeaderAvatar} />
+                      {activeChatThread.isPro && (
+                        <View style={styles.chatTinyGoldCheckPos}>
+                          <TinyGoldCheck size={13} />
+                        </View>
+                      )}
+                    </View>
+
+                    <View>
+                      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                        <Text style={styles.chatHeaderName}>{activeChatThread.name}</Text>
+                        <View style={styles.proMicroPill}>
+                          <Text style={styles.proMicroPillText}>PRO</Text>
+                        </View>
+                      </View>
+                      <Text style={styles.chatHeaderStatus}>
+                        {activeChatThread.isOnline ? '● Active now' : 'Offline'} • {activeChatThread.niche}
+                      </Text>
+                    </View>
+                  </View>
+
+                  <View style={{ flexDirection: 'row', gap: 8 }}>
+                    <Pressable
+                      style={styles.chatActionCircle}
+                      onPress={() => showToast(`Starting audio call with ${activeChatThread.name}...`)}
+                    >
+                      <Text style={{ fontSize: 14 }}>📞</Text>
+                    </Pressable>
+                    <Pressable
+                      style={styles.chatActionCircle}
+                      onPress={() => showToast('Opening Collab Blueprint 📑')}
+                    >
+                      <Text style={{ fontSize: 14 }}>📑</Text>
+                    </Pressable>
+                  </View>
+                </View>
+
+                {/* QUICK AI ACTION PILLS */}
+                <View style={styles.quickAiActionsRow}>
                   <Pressable
-                    style={({ pressed }) => [styles.collabIdeaReloadBtn, pressed && styles.btnPressed]}
-                    onPress={handleShuffleChatPlan}
-                    hitSlop={8}
+                    style={styles.quickAiActionPill}
+                    onPress={() => {
+                      setChatInputText('Hey! Let’s lock in our 30s split-screen Reel collaboration for this Saturday at 2 PM 🎬');
+                    }}
                   >
-                    <Animated.View style={{ transform: [{ rotate: reloadSpinInterpolate }] }}>
-                      <Svg width={15} height={15} viewBox="0 0 24 24" fill="none">
-                        <Path
-                          d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"
-                          stroke="#6D28D9"
-                          strokeWidth="2.5"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        />
-                        <Path
-                          d="M3 3v5h5"
-                          stroke="#6D28D9"
-                          strokeWidth="2.5"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        />
-                        <Path
-                          d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"
-                          stroke="#6D28D9"
-                          strokeWidth="2.5"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        />
-                        <Path
-                          d="M16 21h5v-5"
-                          stroke="#6D28D9"
-                          strokeWidth="2.5"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        />
-                      </Svg>
-                    </Animated.View>
+                    <Text style={styles.quickAiActionText}>⚡ 1-Tap Collab Pitch</Text>
                   </Pressable>
 
-                  {/* OPEN IDEA BUTTON */}
                   <Pressable
-                    style={({ pressed }) => [styles.collabIdeaOpenBtn, pressed && styles.btnPressed]}
+                    style={styles.quickAiActionPill}
                     onPress={() => {
-                      if (Platform.OS !== 'web') {
-                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-                      }
-                      if (onOpenCollabIdea) {
-                        onOpenCollabIdea({
-                          name: activeChatThread.name,
-                          handle: activeChatThread.handle,
-                          niche: activeChatThread.niche,
-                          avatar: activeChatThread.avatar,
-                          planIndex: chatPlanIndex,
-                        });
-                      }
+                      setChatInputText('Does 7:30 PM work for our post schedule today? 🗓️');
                     }}
-                    hitSlop={6}
                   >
-                    <Text style={styles.collabIdeaOpenBtnText}>Open Idea ›</Text>
+                    <Text style={styles.quickAiActionText}>🗓️ Propose 7:30 PM Shoot</Text>
+                  </Pressable>
+
+                  <Pressable
+                    style={styles.quickAiActionPill}
+                    onPress={() => {
+                      setChatInputText('Here is my script hook draft: "3 creator mistakes I stopped making" 📄');
+                    }}
+                  >
+                    <Text style={styles.quickAiActionText}>📄 Share Script Draft</Text>
                   </Pressable>
                 </View>
-              </View>
 
-              {/* Chat Messages List */}
-              <ScrollView
-                ref={chatScrollRef}
-                contentContainerStyle={styles.chatMessagesScroll}
-                showsVerticalScrollIndicator={false}
-              >
-                {activeChatThread.messages.map((msg) => (
-                  <View
-                    key={msg.id}
-                    style={[
-                      styles.messageBubbleWrapper,
-                      msg.isUser ? styles.msgWrapperUser : styles.msgWrapperPartner,
-                    ]}
-                  >
-                    {!msg.isUser && (
-                      <Pressable
-                        onPress={() => {
-                          const matchedStory = CREATOR_STORIES.find((s) => s.id === activeChatThread.creatorId);
-                          if (matchedStory) handleOpenStory(matchedStory);
-                        }}
-                      >
-                        <Image
-                          source={activeChatThread.avatar}
-                          style={styles.msgAvatar}
-                          resizeMode="cover"
-                        />
-                      </Pressable>
-                    )}
-
-                    <View style={{ maxWidth: '78%' }}>
-                      {/* Shared Script / Post Draft Card */}
-                      {msg.sharedScriptTitle && (
-                        <Pressable
-                          style={styles.sharedScriptCard}
-                          onPress={() => {
-                            if (onOpenPostComposer) {
-                              onOpenPostComposer(msg.sharedScriptTitle);
-                            }
-                          }}
-                        >
-                          <View style={styles.sharedScriptBadgeRow}>
-                            <Text style={styles.sharedScriptBadgeText}>📑 SHARED SCRIPT DRAFT</Text>
-                          </View>
-                          <Text style={styles.sharedScriptTitle}>&ldquo;{msg.sharedScriptTitle}&rdquo;</Text>
-                          <Text style={styles.sharedScriptAction}>Open in Post Composer ➔</Text>
-                        </Pressable>
-                      )}
-
-                      {/* Audio Note Bubble */}
-                      {msg.isAudioNote ? (
-                        <View
-                          style={[
-                            styles.audioNoteBubble,
-                            msg.isUser ? styles.msgBubbleUser : styles.msgBubblePartner,
-                          ]}
-                        >
-                          <Pressable
-                            style={styles.audioPlayCircle}
-                            onPress={() => {
-                              if (Platform.OS !== 'web') {
-                                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                              }
-                            }}
-                          >
-                            <Text style={styles.audioPlayIcon}>▶</Text>
-                          </Pressable>
-                          <View style={styles.waveformContainer}>
-                            <View style={[styles.waveBar, { height: 12 }]} />
-                            <View style={[styles.waveBar, { height: 20 }]} />
-                            <View style={[styles.waveBar, { height: 16 }]} />
-                            <View style={[styles.waveBar, { height: 24 }]} />
-                            <View style={[styles.waveBar, { height: 18 }]} />
-                            <View style={[styles.waveBar, { height: 10 }]} />
-                            <View style={[styles.waveBar, { height: 22 }]} />
-                            <View style={[styles.waveBar, { height: 14 }]} />
-                          </View>
-                          <Text style={[styles.audioDurationText, msg.isUser && { color: '#FFFFFF' }]}>
-                            {msg.audioDuration}
-                          </Text>
-                        </View>
-                      ) : (
-                        /* Text Bubble */
-                        <View
-                          style={[
-                            styles.messageBubble,
-                            msg.isUser ? styles.msgBubbleUser : styles.msgBubblePartner,
-                          ]}
-                        >
-                          <Text
-                            style={[
-                              styles.messageText,
-                              msg.isUser ? styles.msgTextUser : styles.msgTextPartner,
-                            ]}
-                          >
-                            {msg.text}
-                          </Text>
-                        </View>
-                      )}
-
-                      <Text
+                {/* CHAT MESSAGES SCROLL */}
+                <ScrollView
+                  style={styles.chatMessagesContainer}
+                  contentContainerStyle={{ paddingVertical: 14, gap: 10 }}
+                  showsVerticalScrollIndicator={false}
+                >
+                  {activeChatThread.messages.map((msg) => {
+                    const isMine = msg.isUser;
+                    return (
+                      <View
+                        key={msg.id}
                         style={[
-                          styles.messageTime,
-                          msg.isUser ? styles.msgTimeUser : styles.msgTimePartner,
+                          styles.messageRow,
+                          isMine ? styles.messageRowMine : styles.messageRowTheirs,
                         ]}
                       >
-                        {msg.time}
-                      </Text>
-                    </View>
-                  </View>
-                ))}
-              </ScrollView>
+                        {/* EMBEDDED COLLAB PROPOSAL CARD */}
+                        {msg.isCollabProposal ? (
+                          <View style={styles.collabProposalCardBubble}>
+                            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
+                              <View style={styles.proposalTagBox}>
+                                <Text style={styles.proposalTagText}>PROPOSED COLLABORATION</Text>
+                              </View>
+                              <Text style={{ fontSize: 16 }}>🤝</Text>
+                            </View>
 
-              {/* QUICK REACTION FLOATING BAR */}
-              <View style={styles.quickReactionsRow}>
-                {['🔥', '⚡', '👏', '🚀', '🎯', '❤️'].map((emoji) => (
-                  <Pressable
-                    key={emoji}
-                    onPress={() => handleSendMessage(emoji)}
-                    style={styles.reactionPillBtn}
-                  >
-                    <Text style={{ fontSize: 16 }}>{emoji}</Text>
-                  </Pressable>
-                ))}
-              </View>
+                            <Text style={styles.proposalTitleText}>&ldquo;{msg.collabTitle}&rdquo;</Text>
+                            <Text style={styles.proposalDescText}>{msg.collabBounty}</Text>
 
-              {/* CHAT INPUT BAR */}
-              <View style={styles.chatInputBar}>
-                {/* Share Script Quick Action */}
-                <Pressable
-                  style={styles.attachScriptBtn}
-                  onPress={() => {
-                    setInputMessage(
-                      `Hey ${activeChatThread.name}, here is the hook I'm testing: "One thing I wish I knew before I started creating"`
+                            <Pressable
+                              style={styles.acceptProposalBtn}
+                              onPress={() => {
+                                showToast(`Collab Accepted! Added to both Smart Schedules.`);
+                              }}
+                            >
+                              <Text style={styles.acceptProposalBtnText}>Accept Collab Blueprint ➔</Text>
+                            </Pressable>
+                          </View>
+                        ) : msg.isAudioNote ? (
+                          /* EMBEDDED AUDIO MEMO BUBBLE */
+                          <View style={styles.audioNoteBubble}>
+                            <Pressable
+                              style={styles.audioPlayCircle}
+                              onPress={() => showToast('Playing voice memo (0:42s)...')}
+                            >
+                              <Text style={{ fontSize: 12, color: '#FFFFFF' }}>▶</Text>
+                            </Pressable>
+                            <View style={{ flex: 1 }}>
+                              <View style={styles.audioWaveformMini}>
+                                {[14, 28, 42, 20, 36, 18, 48, 22, 34, 16, 30].map((h, i) => (
+                                  <View key={i} style={[styles.audioBarMini, { height: h / 2 }]} />
+                                ))}
+                              </View>
+                              <Text style={styles.audioDurationText}>Voice Memo • {msg.audioDuration}</Text>
+                            </View>
+                          </View>
+                        ) : (
+                          /* REGULAR TEXT BUBBLE */
+                          <View style={[styles.chatBubble, isMine ? styles.chatBubbleMine : styles.chatBubbleTheirs]}>
+                            <Text style={[styles.chatBubbleText, isMine && styles.chatBubbleTextMine]}>
+                              {msg.text}
+                            </Text>
+                            <Text style={[styles.chatMessageTime, isMine && styles.chatMessageTimeMine]}>
+                              {msg.time} {isMine && '✓✓'}
+                            </Text>
+                          </View>
+                        )}
+                      </View>
                     );
-                  }}
-                  hitSlop={8}
-                >
-                  <Svg width={19} height={19} viewBox="0 0 24 24" fill="none">
-                    <Path
-                      d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"
-                      stroke="#582CDB"
-                      strokeWidth="2.2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                    <Path d="M14 2v6h6M16 13H8M16 17H8M10 9H8" stroke="#582CDB" strokeWidth="2.2" />
-                  </Svg>
-                </Pressable>
+                  })}
+                </ScrollView>
 
-                {/* Text Input */}
-                <TextInput
-                  value={inputMessage}
-                  onChangeText={setInputMessage}
-                  placeholder={`Message ${activeChatThread.name}...`}
-                  placeholderTextColor="#94A3B8"
-                  style={styles.chatTextInput}
-                  onSubmitEditing={() => handleSendMessage()}
-                />
-
-                {/* Voice Note or Send Button */}
-                {inputMessage.trim().length === 0 ? (
+                {/* CHAT INPUT BAR */}
+                <View style={styles.chatInputBar}>
                   <Pressable
-                    style={styles.voiceNoteBtn}
-                    onPress={handleSendVoiceNote}
-                    hitSlop={8}
+                    style={styles.attachBtn}
+                    onPress={() => showToast('Attach Script, Reel draft, or Audio note')}
                   >
-                    <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
-                      <Path
-                        d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"
-                        stroke="#582CDB"
-                        strokeWidth="2.2"
-                      />
-                      <Path
-                        d="M19 10v2a7 7 0 0 1-14 0v-2M12 19v4M8 23h8"
-                        stroke="#582CDB"
-                        strokeWidth="2.2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                    </Svg>
+                    <Text style={{ fontSize: 18, color: '#582CDB', fontWeight: '900' }}>+</Text>
                   </Pressable>
-                ) : (
+
+                  <TextInput
+                    style={styles.chatTextInput}
+                    placeholder="Type a message or AI pitch..."
+                    placeholderTextColor="#94A3B8"
+                    value={chatInputText}
+                    onChangeText={setChatInputText}
+                    onSubmitEditing={handleSendMessage}
+                  />
+
                   <Pressable
-                    style={styles.sendMsgBtnActive}
-                    onPress={() => handleSendMessage()}
+                    style={[
+                      styles.sendBtn,
+                      chatInputText.trim().length > 0 && styles.sendBtnActive,
+                    ]}
+                    onPress={handleSendMessage}
                   >
                     <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
                       <Path
-                        d="M22 2L11 13M22 2L15 22L11 13L2 9L22 2Z"
+                        d="M22 2L11 13M22 2L15 22L11 13M11 13L2 9L22 2"
                         stroke="#FFFFFF"
-                        strokeWidth="2.4"
+                        strokeWidth="2.2"
                         strokeLinecap="round"
                         strokeLinejoin="round"
                       />
                     </Svg>
                   </Pressable>
-                )}
-              </View>
-            </View>
-          </KeyboardAvoidingView>
-        )}
+                </View>
+              </KeyboardAvoidingView>
+            </SafeAreaView>
+          )}
+        </Modal>
 
-        {/* UNIFIED SIGNATURE FLOATING TAB BAR */}
-        <FloatingTabBar activeTab={activeTab} onTabPress={handleTabPress} />
-
-        {/* ========================================================================= */}
-        {/* SNAPCHAT / INSTAGRAM STYLE IMMERSIVE STORY & HIGHLIGHTS VIEWER MODAL */}
-        {/* ========================================================================= */}
+        {/* ============================================================ */}
+        {/* 7. CREATOR STORY VIEWER MODAL                                */}
+        {/* ============================================================ */}
         <Modal
-          visible={activeStoryCreator !== null}
+          visible={showStoryModal}
           transparent={true}
           animationType="fade"
-          onRequestClose={() => setActiveStoryCreator(null)}
+          onRequestClose={() => setShowStoryModal(false)}
         >
-          {activeStoryCreator && (
-            <View style={styles.storyViewerContainer}>
-              <StatusBar barStyle="light-content" />
-
-              {/* Top Segmented Story Progress Bars */}
-              <View style={styles.storyProgressBarContainer}>
-                {activeStoryCreator.slides.map((_, idx) => (
-                  <View key={idx} style={styles.storyProgressBarTrack}>
-                    <View
-                      style={[
-                        styles.storyProgressBarFill,
-                        idx < activeSlideIndex && { width: '100%' },
-                        idx === activeSlideIndex && { width: '100%' },
-                        idx > activeSlideIndex && { width: '0%' },
-                      ]}
-                    />
-                  </View>
-                ))}
-              </View>
-
-              {/* Creator Profile Top Bar */}
-              <View style={styles.storyTopProfileBar}>
-                <View style={styles.storyProfileLeft}>
-                  <Image source={activeStoryCreator.avatar} style={styles.storyTopAvatar} resizeMode="cover" />
-                  <View>
-                    <Text style={styles.storyTopCreatorName}>{activeStoryCreator.name}</Text>
-                    <Text style={styles.storyTopTimeAgo}>
-                      {activeStoryCreator.slides[activeSlideIndex]?.timeAgo || 'Just now'} • {activeStoryCreator.niche}
-                    </Text>
-                  </View>
-                  <View style={styles.storyTopStreakBadge}>
-                    <Text style={styles.storyTopStreakText}>⚡ {activeStoryCreator.streak}d</Text>
-                  </View>
-                </View>
-
-                <Pressable
-                  onPress={() => setActiveStoryCreator(null)}
-                  style={styles.storyCloseBtn}
-                  hitSlop={12}
-                >
-                  <Text style={styles.storyCloseBtnText}>✕</Text>
-                </Pressable>
-              </View>
-
-              {/* Main Immersive Story Content Area */}
-              <View style={styles.storyMainBody}>
-                {/* Left and Right Tap Zones for Navigation */}
-                <Pressable style={styles.storyTapZoneLeft} onPress={handlePrevSlide} />
-                <Pressable style={styles.storyTapZoneRight} onPress={handleNextSlide} />
-
-                {/* Slide Type 1: Daily Creation Story */}
-                {activeStoryCreator.slides[activeSlideIndex]?.type === 'daily_story' && (
-                  <View style={styles.storyCardContent}>
-                    {activeStoryCreator.slides[activeSlideIndex].badge && (
-                      <View style={styles.storySlidePillBadge}>
-                        <Text style={styles.storySlidePillText}>
-                          {activeStoryCreator.slides[activeSlideIndex].badge}
-                        </Text>
-                      </View>
-                    )}
-
-                    <Text style={styles.storySlideTitle}>
-                      {activeStoryCreator.slides[activeSlideIndex].title}
-                    </Text>
-                    <Text style={styles.storySlideSubtitle}>
-                      {activeStoryCreator.slides[activeSlideIndex].subtitle}
-                    </Text>
-
-                    <View style={styles.storyQuoteCard}>
-                      <Text style={styles.storyQuoteIcon}>“</Text>
-                      <Text style={styles.storyQuoteText}>
-                        {activeStoryCreator.slides[activeSlideIndex].quote}
-                      </Text>
-                    </View>
-
-                    <View style={styles.storyStatsRow}>
-                      <View style={styles.storyStatBox}>
-                        <Text style={styles.storyStatVal}>30s</Text>
-                        <Text style={styles.storyStatLabel}>Length</Text>
-                      </View>
-                      <View style={styles.storyStatBox}>
-                        <Text style={styles.storyStatVal}>TikTok + Reels</Text>
-                        <Text style={styles.storyStatLabel}>Format</Text>
-                      </View>
-                      <View style={styles.storyStatBox}>
-                        <Text style={styles.storyStatVal}>+40 XP</Text>
-                        <Text style={styles.storyStatLabel}>Impact</Text>
-                      </View>
-                    </View>
-                  </View>
-                )}
-
-                {/* Slide Type 2: Recent Highlights Carousel */}
-                {activeStoryCreator.slides[activeSlideIndex]?.type === 'highlights' && (
-                  <View style={styles.storyCardContent}>
-                    <View style={styles.storySlidePillBadge}>
-                      <Text style={styles.storySlidePillText}>⭐ TOP RECENT HIGHLIGHTS</Text>
-                    </View>
-
-                    <Text style={styles.storySlideTitle}>
-                      {activeStoryCreator.slides[activeSlideIndex].title}
-                    </Text>
-                    <Text style={styles.storySlideSubtitle}>
-                      {activeStoryCreator.slides[activeSlideIndex].subtitle}
-                    </Text>
-
-                    <View style={styles.highlightsList}>
-                      {activeStoryCreator.slides[activeSlideIndex].highlights?.map((post, idx) => (
-                        <View key={idx} style={styles.highlightItemCard}>
-                          <View style={styles.highlightItemTop}>
-                            <Text style={styles.highlightItemPlatform}>{post.platform === 'TikTok' ? '♪' : '📷'} {post.platform}</Text>
-                            <Text style={styles.highlightItemViews}>👁 {post.views} • 💾 {post.saves}</Text>
-                          </View>
-                          <Text style={styles.highlightItemTitle}>&ldquo;{post.title}&rdquo;</Text>
+          {selectedStory && (
+            <View style={styles.storyModalOverlay}>
+              <View style={styles.storyViewerCard}>
+                {/* Top Story Header */}
+                <View style={styles.storyViewerHeader}>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+                    <View style={styles.storyViewerAvatarWrapper}>
+                      <Image source={selectedStory.avatar} style={styles.storyViewerAvatar} />
+                      {selectedStory.isPro && (
+                        <View style={styles.storyViewerTinyGoldCheckPos}>
+                          <TinyGoldCheck size={13} />
                         </View>
-                      ))}
+                      )}
+                    </View>
+                    <View>
+                      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                        <Text style={styles.storyViewerName}>{selectedStory.name}</Text>
+                        <Text style={styles.storyViewerStreak}>🔥 {selectedStory.streak}</Text>
+                      </View>
+                      <Text style={styles.storyViewerTime}>15m ago • {selectedStory.niche}</Text>
                     </View>
                   </View>
-                )}
 
-                {/* Slide Type 3: Milestone Achievement */}
-                {activeStoryCreator.slides[activeSlideIndex]?.type === 'milestone' && (
-                  <View style={styles.storyCardContent}>
-                    <View style={styles.milestoneTrophyCircle}>
-                      <Text style={{ fontSize: 40 }}>🏆</Text>
-                    </View>
-                    <Text style={styles.storySlideTitle}>
-                      {activeStoryCreator.slides[activeSlideIndex].milestoneTitle}
-                    </Text>
-                    <Text style={styles.storySlideSubtitle}>
-                      {activeStoryCreator.slides[activeSlideIndex].subtitle}
-                    </Text>
-                    <View style={styles.milestoneXpPill}>
-                      <Text style={styles.milestoneXpText}>
-                        {activeStoryCreator.slides[activeSlideIndex].milestoneXp}
-                      </Text>
-                    </View>
-                  </View>
-                )}
-              </View>
-
-              {/* Story Bottom Reaction & Reply Bar */}
-              <View style={styles.storyBottomBar}>
-                {/* Floating Emojis */}
-                {floatingEmojis.map((e) => (
-                  <Animated.Text
-                    key={e.id}
-                    style={[
-                      styles.floatingEmojiText,
-                      { left: e.x },
-                    ]}
-                  >
-                    {e.emoji}
-                  </Animated.Text>
-                ))}
-
-                {/* Quick Emoji Reaction Pills */}
-                <View style={styles.storyReactionPillsRow}>
-                  {['🔥', '⚡', '👏', '❤️', '🚀'].map((emoji) => (
-                    <Pressable
-                      key={emoji}
-                      onPress={() => handleSendStoryReaction(emoji)}
-                      style={styles.storyReactionCircle}
-                    >
-                      <Text style={{ fontSize: 18 }}>{emoji}</Text>
-                    </Pressable>
-                  ))}
+                  <Pressable onPress={() => setShowStoryModal(false)} style={styles.storyCloseCircle} hitSlop={8}>
+                    <Text style={{ color: '#FFFFFF', fontWeight: '900', fontSize: 13 }}>✕</Text>
+                  </Pressable>
                 </View>
 
-                {/* Send a Direct Reply Input */}
-                <View style={styles.storyReplyInputRow}>
-                  <TextInput
-                    value={storyReplyText}
-                    onChangeText={setStoryReplyText}
-                    placeholder={`Reply to ${activeStoryCreator.name}...`}
-                    placeholderTextColor="rgba(255, 255, 255, 0.6)"
-                    style={styles.storyReplyInput}
-                    onSubmitEditing={handleSendStoryReply}
-                  />
+                {/* Story Body */}
+                <View style={styles.storyCardBody}>
+                  <View style={styles.storyBadgePill}>
+                    <Text style={styles.storyBadgePillText}>{selectedStory.slides[0]?.badge || '⚡ PRO STORY'}</Text>
+                  </View>
+
+                  <Text style={styles.storyHeadlineText}>{selectedStory.slides[0]?.title}</Text>
+                  <Text style={styles.storyQuoteText}>&ldquo;{selectedStory.slides[0]?.quote}&rdquo;</Text>
+
                   <Pressable
-                    style={styles.storyReplySendBtn}
-                    onPress={handleSendStoryReply}
+                    style={styles.storyReplyBtn}
+                    onPress={() => {
+                      setShowStoryModal(false);
+                      const matchConv = conversations.find((c) => c.creatorId === selectedStory.id.replace('c_', ''));
+                      if (matchConv) {
+                        setActiveChatThread(matchConv);
+                      } else {
+                        showToast(`Opened chat with ${selectedStory.name}!`);
+                      }
+                    }}
                   >
-                    <Text style={styles.storyReplySendBtnText}>Send</Text>
+                    <Text style={styles.storyReplyBtnText}>Reply with Reel Collab ➔</Text>
                   </Pressable>
                 </View>
               </View>
@@ -1586,123 +1029,23 @@ export const MessagesScreen: React.FC<MessagesScreenProps> = ({
           )}
         </Modal>
 
-        {/* ========================================================================= */}
-        {/* MODAL: TOP RIGHT PLUS (+) "CONNECT WITH MORE CREATORS" */}
-        {/* ========================================================================= */}
-        <Modal
-          visible={showConnectModal}
-          transparent={true}
-          animationType="fade"
-          onRequestClose={() => setShowConnectModal(false)}
-        >
-          <View style={styles.modalOverlay}>
-            <Animated.View style={[styles.modalCard, { transform: [{ scale: modalPopScale }] }]}>
-              <View style={styles.modalHeaderRow}>
-                <View>
-                  <Text style={styles.modalTitle}>Connect with More Creators</Text>
-                  <Text style={styles.modalSubtitle}>Build 2x longer streaks with accountability partners</Text>
-                </View>
-                <Pressable
-                  onPress={() => setShowConnectModal(false)}
-                  style={styles.modalCloseCircle}
-                  hitSlop={8}
-                >
-                  <Text style={styles.modalCloseCross}>✕</Text>
-                </Pressable>
-              </View>
-
-              {/* Matched Creator Previews */}
-              <ScrollView style={{ maxHeight: 260 }} showsVerticalScrollIndicator={false}>
-                {[
-                  {
-                    name: 'Zoe Martinez',
-                    handle: '@zoevlogs',
-                    niche: 'Daily Vlog & Lifestyle',
-                    streak: 64,
-                    avatar: require('../../assets/images/elena-avatar.jpg'),
-                  },
-                  {
-                    name: 'Liam Vance',
-                    handle: '@liamfilms',
-                    niche: 'Shorts & Filmmaking',
-                    streak: 33,
-                    avatar: require('../../assets/images/david-avatar.jpg'),
-                  },
-                  {
-                    name: 'Kemi Adebayo',
-                    handle: '@kemistories',
-                    niche: 'Creator Education',
-                    streak: 58,
-                    avatar: require('../../assets/images/zainab-avatar.jpg'),
-                  },
-                ].map((c, i) => (
-                  <View key={i} style={styles.discoverCreatorCard}>
-                    <Image source={c.avatar} style={styles.discoverAvatar} resizeMode="cover" />
-                    <View style={{ flex: 1 }}>
-                      <Text style={styles.discoverName}>{c.name}</Text>
-                      <Text style={styles.discoverHandle}>{c.handle} • ⚡ {c.streak}d streak</Text>
-                      <Text style={styles.discoverNiche}>{c.niche}</Text>
-                    </View>
-                    <Pressable
-                      style={styles.discoverConnectBtn}
-                      onPress={() => {
-                        handleSendHighFive(c.name);
-                      }}
-                    >
-                      <Text style={styles.discoverConnectBtnText}>Boost ⚡</Text>
-                    </Pressable>
-                  </View>
-                ))}
-              </ScrollView>
-
-              {/* Connect Button Navigates directly to the Main Match page */}
-              <Pressable
-                style={styles.connectToCreateBtn}
-                onPress={() => {
-                  setShowConnectModal(false);
-                  if (onOpenMatch) {
-                    onOpenMatch();
-                  } else if (onNavigateTab) {
-                    onNavigateTab('match');
-                  }
-                }}
-              >
-                <LinearGradient
-                  colors={['#7C3AED', '#582CDB']}
-                  start={{ x: 0, y: 0 }}
-                  end={{ x: 1, y: 0 }}
-                  style={styles.connectGradient}
-                >
-                  <Text style={styles.connectBtnText}>Find More Creators (Match Hub) ➔</Text>
-                </LinearGradient>
-              </Pressable>
-            </Animated.View>
-          </View>
-        </Modal>
-
-        {/* UNIVERSAL CREATOR PASSPORT & PROFILE MODAL */}
+        {/* PROFILE MODAL */}
         <UserProfileModal
           visible={showProfileModal}
           onClose={() => setShowProfileModal(false)}
           onLogout={onLogout}
           initialProfile={userProfile}
-          onSaveProfile={onSaveProfile}
-        />
-
-        {/* SIGNATURE ANIMATED GHOST CELEBRATION MODAL */}
-        <AnimatedCompletionModal
-          visible={showCelebrationModal}
-          title={celebrationTitle}
-          subtitle={celebrationSubtitle}
-          speechBubble={celebrationSpeech}
-          badgeText={celebrationBadge}
-          xpEarned={15}
-          streakCount={47}
-          actionText="Keep Chatting ➔"
-          onDismiss={() => {
-            setShowCelebrationModal(false);
+          onSaveProfile={(updated) => {
+            if (onSaveProfile) onSaveProfile(updated);
           }}
         />
+
+        {/* TOAST */}
+        {toastMessage && (
+          <View style={styles.toastContainer}>
+            <Text style={styles.toastText}>{toastMessage}</Text>
+          </View>
+        )}
       </View>
     </SafeAreaView>
   );
@@ -1717,1253 +1060,684 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#FAF8F5',
   },
-  scrollContent: {
-    paddingHorizontal: 20,
-    paddingTop: 8,
-    paddingBottom: 24,
-  },
-  btnPressed: {
-    opacity: 0.78,
-    transform: [{ scale: 0.97 }],
-  },
-
-  // 1. TOP HEADER
   headerBar: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: 20,
-    paddingTop: Platform.OS === 'ios' ? 8 : 12,
+    paddingTop: 10,
     paddingBottom: 12,
     backgroundColor: '#FAF8F5',
-    borderBottomWidth: 1,
-    borderBottomColor: '#EFEBF8',
   },
-  headerLeftGroup: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  headerCenter: {
-    flex: 1,
-    alignItems: 'center',
-    marginHorizontal: 8,
-  },
-  headerTitleText: {
-    fontSize: 16,
-    fontWeight: '800',
-    color: '#171420',
-  },
-  headerSubtitleText: {
-    fontSize: 11,
-    color: '#64748B',
-    fontWeight: '600',
-    marginTop: 1,
-  },
-  backCircleBtn: {
+  backBtnCircle: {
     width: 36,
     height: 36,
     borderRadius: 18,
     backgroundColor: '#FFFFFF',
     borderWidth: 1,
-    borderColor: '#EFEBF8',
+    borderColor: '#EFECE6',
     justifyContent: 'center',
     alignItems: 'center',
-    shadowColor: '#582CDB',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.06,
-    shadowRadius: 6,
-    elevation: 2,
   },
-  headerLogoWrapper: {
+  headerTitle: {
+    fontSize: 18,
+    fontWeight: '900',
+    color: '#171420',
+  },
+  proGoldBadge: {
+    backgroundColor: '#FEF08A',
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 6,
+  },
+  proGoldBadgeText: {
+    fontSize: 9,
+    fontWeight: '900',
+    color: '#78350F',
+  },
+  headerSub: {
+    fontSize: 11,
+    color: '#64748B',
+  },
+  profileAvatarWrapper: {
+    position: 'relative',
+  },
+  headerUserAvatar: {
     width: 38,
     height: 38,
-    justifyContent: 'center',
-    alignItems: 'center',
+    borderRadius: 19,
+    borderWidth: 2,
+    borderColor: '#EAB308',
   },
-  headerGhostLogo: {
-    width: 34,
-    height: 34,
+  avatarTinyGoldCheckPos: {
+    position: 'absolute',
+    bottom: -2,
+    right: -2,
   },
-  headerRightGroup: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  newChatBtn: {
-    width: 36,
-    height: 36,
-    borderRadius: 12,
-    overflow: 'hidden',
-    shadowColor: '#582CDB',
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.2,
-    shadowRadius: 6,
-    elevation: 3,
-  },
-  plusIconGradient: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  headerIconBtn: {
-    width: 36,
-    height: 36,
-    borderRadius: 12,
-    backgroundColor: 'rgba(255, 255, 255, 0.9)',
-    borderWidth: 1,
-    borderColor: 'rgba(235, 230, 248, 0.9)',
-    justifyContent: 'center',
-    alignItems: 'center',
-    shadowColor: '#582CDB',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.06,
-    shadowRadius: 6,
-    elevation: 2,
-  },
-  headerPartnerMiniAvatar: {
-    width: 30,
-    height: 30,
-    borderRadius: 15,
-  },
-  profileModalInner: {
-    alignItems: 'center',
-    paddingVertical: 12,
-  },
-  profileModalAvatar: {
-    width: 68,
-    height: 68,
-    borderRadius: 34,
-    borderWidth: 2.5,
-    borderColor: '#582CDB',
-    marginBottom: 10,
-  },
-  profileModalName: {
-    fontSize: 18,
-    fontWeight: '800',
-    color: '#171420',
-  },
-  profileModalHandle: {
-    fontSize: 12.5,
-    color: '#64748B',
-    marginTop: 2,
-  },
-  profileModalNiche: {
-    fontSize: 12,
-    color: '#582CDB',
-    fontWeight: '700',
-    marginTop: 4,
-  },
-  profileStreakBadge: {
-    backgroundColor: '#FEF3C7',
-    paddingVertical: 4.5,
-    paddingHorizontal: 12,
-    borderRadius: 100,
-    marginTop: 10,
-    marginBottom: 14,
-  },
-  profileStreakBadgeText: {
-    fontSize: 11,
-    fontWeight: '900',
-    color: '#B45309',
-  },
-  profileStatsRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#F8FAFC',
-    borderRadius: 14,
-    paddingVertical: 10,
-    paddingHorizontal: 16,
-    borderWidth: 1,
-    borderColor: '#E2E8F0',
-    width: '100%',
-    justifyContent: 'space-around',
-    marginBottom: 8,
-  },
-  profileStatItem: {
-    alignItems: 'center',
-  },
-  profileStatVal: {
-    fontSize: 15,
-    fontWeight: '900',
-    color: '#171420',
-  },
-  profileStatLabel: {
-    fontSize: 10.5,
-    color: '#64748B',
-    fontWeight: '700',
-    marginTop: 2,
-  },
-  profileStatDivider: {
-    width: 1,
-    height: 24,
-    backgroundColor: '#CBD5E1',
+  scrollContent: {
+    paddingHorizontal: 20,
+    paddingTop: 4,
+    paddingBottom: 40,
   },
 
-  // Top Badges
-  topBadgesRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    marginBottom: 12,
-    marginTop: 4,
-  },
-  socialHubPill: {
-    backgroundColor: '#582CDB',
-    paddingVertical: 4.5,
-    paddingHorizontal: 11,
-    borderRadius: 100,
-  },
-  socialHubPillText: {
-    fontSize: 10,
-    fontWeight: '900',
-    color: '#FFFFFF',
-    letterSpacing: 0.5,
-  },
-  activePactPill: {
-    backgroundColor: '#FAF8FC',
-    borderWidth: 1,
-    borderColor: '#DDD6FE',
-    paddingVertical: 4.5,
-    paddingHorizontal: 11,
-    borderRadius: 100,
-  },
-  activePactPillText: {
-    fontSize: 10.5,
-    fontWeight: '800',
-    color: '#6D28D9',
-  },
-
-  // Search Box
+  // SEARCH BAR
   searchBarBox: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#FFFFFF',
     borderRadius: 16,
     borderWidth: 1,
-    borderColor: '#E2E8F0',
+    borderColor: '#EFECE6',
     paddingHorizontal: 14,
-    height: 44,
-    marginBottom: 16,
-    gap: 8,
-    shadowColor: '#582CDB',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.03,
-    shadowRadius: 6,
-    elevation: 1,
+    paddingVertical: 10,
+    marginBottom: 12,
   },
   searchInput: {
     flex: 1,
     fontSize: 13,
     color: '#171420',
-    fontWeight: '600',
-  },
-  clearSearchText: {
-    fontSize: 13,
-    color: '#94A3B8',
-    fontWeight: '800',
   },
 
-  // Stories Header
-  storiesHeaderRow: {
+  // FILTER TABS
+  filterTabsScroll: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 10,
+    gap: 8,
+    paddingBottom: 14,
   },
-  sectionHeaderTitle: {
-    fontSize: 13.5,
-    fontWeight: '800',
-    color: '#171420',
+  filterTabPill: {
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 10,
   },
-  storiesSubHint: {
-    fontSize: 11,
-    color: '#6D28D9',
-    fontWeight: '700',
-  },
-
-  // Stories Row
-  storiesRow: {
-    flexDirection: 'row',
-    gap: 14,
-    paddingBottom: 12,
-    marginBottom: 10,
-  },
-  storyItem: {
-    alignItems: 'center',
-    width: 72,
-  },
-  storyAvatarRingGradient: {
-    width: 62,
-    height: 62,
-    borderRadius: 31,
-    padding: 2.5,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 4,
-  },
-  storyAvatarInnerWhite: {
-    position: 'relative',
-    width: '100%',
-    height: '100%',
-    borderRadius: 29,
-    backgroundColor: '#FAF8F5',
-    padding: 2,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  storyAvatar: {
-    width: '100%',
-    height: '100%',
-    borderRadius: 27,
-  },
-  onlineDot: {
-    position: 'absolute',
-    bottom: 0,
-    right: 0,
-    width: 12,
-    height: 12,
-    borderRadius: 6,
-    backgroundColor: '#10B981',
-    borderWidth: 2,
-    borderColor: '#FFFFFF',
-  },
-  userAddStatusBadge: {
-    position: 'absolute',
-    bottom: 0,
-    right: 0,
-    width: 17,
-    height: 17,
-    borderRadius: 8.5,
+  filterTabPillActive: {
     backgroundColor: '#582CDB',
-    borderWidth: 1.5,
-    borderColor: '#FFFFFF',
-    justifyContent: 'center',
-    alignItems: 'center',
+    borderColor: '#582CDB',
   },
-  userAddStatusText: {
-    fontSize: 12,
-    fontWeight: '900',
-    color: '#FFFFFF',
-    lineHeight: 13,
-  },
-  storyName: {
+  filterTabText: {
     fontSize: 11.5,
     fontWeight: '700',
-    color: '#171420',
-    textAlign: 'center',
+    color: '#475569',
   },
-  storyStreakBadge: {
-    marginTop: 2,
-    backgroundColor: '#FEF3C7',
-    paddingVertical: 1.5,
+  filterTabTextActive: {
+    color: '#FFFFFF',
+    fontWeight: '900',
+  },
+
+  // STORIES SECTION
+  storiesSectionBox: {
+    marginBottom: 16,
+  },
+  storyItemCol: {
+    alignItems: 'center',
+    width: 68,
+  },
+  storyAvatarOuterRing: {
+    width: 58,
+    height: 58,
+    borderRadius: 29,
+    borderWidth: 2.5,
+    borderColor: '#8B5CF6',
+    padding: 2,
+    position: 'relative',
+    marginBottom: 4,
+  },
+  storyAvatarImg: {
+    width: '100%',
+    height: '100%',
+    borderRadius: 25,
+  },
+  storyTinyGoldCheckPos: {
+    position: 'absolute',
+    bottom: 0,
+    right: 0,
+  },
+  storyOnlineDot: {
+    position: 'absolute',
+    top: 2,
+    right: 2,
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    backgroundColor: '#10B981',
+    borderWidth: 1.5,
+    borderColor: '#FFFFFF',
+  },
+  storyCreatorName: {
+    fontSize: 11,
+    fontWeight: '800',
+    color: '#171420',
+    marginBottom: 2,
+  },
+  storyStreakPill: {
+    backgroundColor: '#EDE9FE',
     paddingHorizontal: 6,
+    paddingVertical: 1.5,
     borderRadius: 6,
   },
   storyStreakText: {
     fontSize: 9,
     fontWeight: '900',
-    color: '#B45309',
+    color: '#582CDB',
   },
 
-  // Category Tabs
-  categoryTabsRow: {
-    flexDirection: 'row',
-    gap: 8,
-    marginBottom: 14,
-  },
-  categoryTabPill: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 100,
+  // PINNED COLLAB BANNER
+  pinnedCollabBanner: {
+    backgroundColor: '#EDE9FE',
+    borderRadius: 20,
+    padding: 16,
+    marginBottom: 16,
     borderWidth: 1,
-    borderColor: '#E2E8F0',
-    paddingVertical: 6.5,
-    paddingHorizontal: 13,
+    borderColor: '#DDD6FE',
   },
-  categoryTabPillActive: {
+  bannerIconSquare: {
+    width: 44,
+    height: 44,
+    borderRadius: 14,
+    backgroundColor: '#FFFFFF',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  bannerTagText: {
+    fontSize: 9,
+    fontWeight: '900',
+    color: '#582CDB',
+    letterSpacing: 0.5,
+  },
+  bannerMatchPill: {
     backgroundColor: '#582CDB',
-    borderColor: '#582CDB',
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 4,
   },
-  categoryTabPillText: {
-    fontSize: 11.5,
-    fontWeight: '700',
-    color: '#475569',
-  },
-  categoryTabPillTextActive: {
+  bannerMatchPillText: {
+    fontSize: 8,
+    fontWeight: '900',
     color: '#FFFFFF',
-    fontWeight: '800',
+  },
+  bannerTitleText: {
+    fontSize: 14.5,
+    fontWeight: '900',
+    color: '#171420',
+    marginTop: 2,
+  },
+  bannerSubText: {
+    fontSize: 11.5,
+    color: '#4C1D95',
+    marginTop: 1,
+  },
+  bannerArrowText: {
+    fontSize: 16,
+    fontWeight: '900',
+    color: '#582CDB',
   },
 
-  // Threads List
-  threadsList: {
-    gap: 10,
+  // CONVERSATIONS LIST
+  conversationsHeaderTitle: {
+    fontSize: 16,
+    fontWeight: '900',
+    color: '#171420',
+    marginBottom: 10,
   },
-  threadCard: {
+  conversationCard: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#FFFFFF',
     borderRadius: 20,
     borderWidth: 1,
-    borderColor: '#EFEBF8',
+    borderColor: '#EFECE6',
     padding: 14,
     gap: 12,
-    shadowColor: '#582CDB',
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.04,
-    shadowRadius: 8,
-    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.02,
+    shadowRadius: 4,
+    elevation: 1,
   },
-  threadCardUnread: {
-    backgroundColor: '#FDFAFF',
-    borderColor: '#DDD6FE',
+  convAvatarContainer: {
+    position: 'relative',
   },
-  threadAvatarRing: {
-    width: 52,
-    height: 52,
-    borderRadius: 26,
-    padding: 2,
-    justifyContent: 'center',
-    alignItems: 'center',
+  convAvatarImg: {
+    width: 46,
+    height: 46,
+    borderRadius: 23,
   },
-  threadAvatar: {
-    width: '100%',
-    height: '100%',
-    borderRadius: 24,
-  },
-  threadOnlineDot: {
+  convTinyGoldCheckPos: {
     position: 'absolute',
-    bottom: 0,
+    bottom: -1,
+    right: -1,
+  },
+  convOnlineDot: {
+    position: 'absolute',
+    top: 0,
     right: 0,
-    width: 12,
-    height: 12,
-    borderRadius: 6,
+    width: 10,
+    height: 10,
+    borderRadius: 5,
     backgroundColor: '#10B981',
-    borderWidth: 2,
+    borderWidth: 1.5,
     borderColor: '#FFFFFF',
   },
-  threadContentCol: {
-    flex: 1,
-  },
-  threadTopRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 2,
-  },
-  threadCreatorName: {
+  convCreatorName: {
     fontSize: 14.5,
-    fontWeight: '800',
+    fontWeight: '900',
     color: '#171420',
   },
-  threadTime: {
-    fontSize: 11,
-    color: '#94A3B8',
-    fontWeight: '600',
-  },
-  threadMetaRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    marginBottom: 4,
-  },
-  threadHandle: {
-    fontSize: 11.5,
-    color: '#64748B',
-    fontWeight: '600',
-  },
-  threadStreakPill: {
-    backgroundColor: '#EDE9FE',
+  proMicroPill: {
+    backgroundColor: '#FEF08A',
+    paddingHorizontal: 5,
     paddingVertical: 1.5,
-    paddingHorizontal: 6,
-    borderRadius: 6,
+    borderRadius: 4,
   },
-  threadStreakText: {
-    fontSize: 9.5,
-    fontWeight: '800',
-    color: '#582CDB',
-  },
-  collabStatusBadge: {
-    alignSelf: 'flex-start',
-    backgroundColor: '#FEF3C7',
-    paddingVertical: 2,
-    paddingHorizontal: 7,
-    borderRadius: 6,
-    marginBottom: 4,
-  },
-  collabStatusText: {
-    fontSize: 9.5,
+  proMicroPillText: {
+    fontSize: 8,
     fontWeight: '900',
     color: '#78350F',
   },
-  threadLastMessage: {
-    fontSize: 12.5,
-    color: '#64748B',
-    lineHeight: 17,
-  },
-  threadLastMessageUnread: {
-    color: '#171420',
+  convTimeText: {
+    fontSize: 10.5,
+    color: '#94A3B8',
     fontWeight: '700',
   },
-  unreadPurpleDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
+  convBadgeBox: {
+    alignSelf: 'flex-start',
+    backgroundColor: '#FAF5FF',
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 6,
+    marginVertical: 2,
+  },
+  convBadgeText: {
+    fontSize: 9.5,
+    fontWeight: '800',
+    color: '#582CDB',
+  },
+  convLastMessageText: {
+    fontSize: 12,
+    color: '#64748B',
+    marginTop: 2,
+  },
+  convLastMessageUnread: {
+    color: '#171420',
+    fontWeight: '800',
+  },
+  unreadCountBadge: {
+    width: 20,
+    height: 20,
+    borderRadius: 10,
     backgroundColor: '#582CDB',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  unreadCountText: {
+    color: '#FFFFFF',
+    fontSize: 10,
+    fontWeight: '900',
   },
 
-  // 1-on-1 Chat Room Styles
-  chatRoomContainer: {
+  // CHAT ROOM MODAL
+  chatModalSafeArea: {
     flex: 1,
     backgroundColor: '#FAF8F5',
   },
-  pactBanner: {
+  chatRoomHeader: {
     flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: '#E2E8F0',
-    gap: 10,
-  },
-  pactFlameIconBox: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: '#FFFFFF',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  pactTitle: {
-    fontSize: 12,
-    fontWeight: '800',
-    color: '#582CDB',
-  },
-  pactSub: {
-    fontSize: 11,
-    color: '#475569',
-  },
-  pactBoostBtn: {
-    backgroundColor: '#582CDB',
-    paddingVertical: 5,
-    paddingHorizontal: 10,
-    borderRadius: 8,
-  },
-  pactBoostBtnText: {
-    fontSize: 11,
-    fontWeight: '900',
-    color: '#FFFFFF',
-  },
-  collabIdeaBanner: {
-    flexDirection: 'row',
-    alignItems: 'center',
     justifyContent: 'space-between',
-    backgroundColor: '#FFFFFF',
-    borderBottomWidth: 1,
-    borderBottomColor: '#EDE9FE',
+    alignItems: 'center',
     paddingHorizontal: 16,
     paddingVertical: 10,
-    gap: 8,
+    backgroundColor: '#FFFFFF',
+    borderBottomWidth: 1,
+    borderBottomColor: '#EFECE6',
   },
-  collabIdeaBannerLeft: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-  },
-  collabIdeaIconBox: {
+  chatBackBtn: {
     width: 32,
     height: 32,
-    borderRadius: 10,
-    backgroundColor: '#FAF5FF',
-    borderWidth: 1,
-    borderColor: '#EDE9FE',
     justifyContent: 'center',
     alignItems: 'center',
   },
-  collabIdeaBannerTitle: {
-    fontSize: 12.5,
-    fontWeight: '800',
+  chatHeaderAvatarWrapper: {
+    position: 'relative',
+  },
+  chatHeaderAvatar: {
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+  },
+  chatTinyGoldCheckPos: {
+    position: 'absolute',
+    bottom: -1,
+    right: -1,
+  },
+  chatHeaderName: {
+    fontSize: 15,
+    fontWeight: '900',
     color: '#171420',
   },
-  collabIdeaPillMini: {
-    backgroundColor: '#EDE9FE',
-    paddingVertical: 1.5,
-    paddingHorizontal: 6,
-    borderRadius: 6,
-  },
-  collabIdeaPillMiniText: {
-    fontSize: 9,
-    fontWeight: '900',
-    color: '#582CDB',
-  },
-  collabIdeaBannerSub: {
-    fontSize: 11,
+  chatHeaderStatus: {
+    fontSize: 10.5,
     color: '#64748B',
-    marginTop: 1,
   },
-  collabIdeaActionsRight: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-  },
-  collabIdeaReloadBtn: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
-    backgroundColor: '#EDE9FE',
-    borderWidth: 1,
-    borderColor: '#DDD6FE',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  collabIdeaOpenBtn: {
-    backgroundColor: '#FAF5FF',
-    borderWidth: 1,
-    borderColor: '#DDD6FE',
-    paddingVertical: 5,
-    paddingHorizontal: 9,
-    borderRadius: 8,
-  },
-  collabIdeaOpenBtnText: {
-    fontSize: 11,
-    fontWeight: '800',
-    color: '#582CDB',
-  },
-  chatMessagesScroll: {
-    paddingHorizontal: 16,
-    paddingTop: 16,
-    paddingBottom: 24,
-  },
-  messageBubbleWrapper: {
-    flexDirection: 'row',
-    alignItems: 'flex-end',
-    marginBottom: 14,
-    gap: 8,
-  },
-  msgWrapperUser: {
-    justifyContent: 'flex-end',
-  },
-  msgWrapperPartner: {
-    justifyContent: 'flex-start',
-  },
-  msgAvatar: {
+  chatActionCircle: {
     width: 34,
     height: 34,
     borderRadius: 17,
-    marginBottom: 16,
+    backgroundColor: '#F8FAFC',
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
-  messageBubble: {
-    borderRadius: 18,
+  quickAiActionsRow: {
+    flexDirection: 'row',
+    gap: 6,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    backgroundColor: '#FAF8F5',
+  },
+  quickAiActionPill: {
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 8,
+  },
+  quickAiActionText: {
+    fontSize: 10.5,
+    fontWeight: '800',
+    color: '#582CDB',
+  },
+  chatMessagesContainer: {
+    flex: 1,
+    paddingHorizontal: 16,
+    backgroundColor: '#FAF8F5',
+  },
+  messageRow: {
+    flexDirection: 'row',
+    marginVertical: 2,
+  },
+  messageRowMine: {
+    justifyContent: 'flex-end',
+  },
+  messageRowTheirs: {
+    justifyContent: 'flex-start',
+  },
+  chatBubble: {
+    maxWidth: '78%',
     paddingHorizontal: 14,
     paddingVertical: 10,
+    borderRadius: 18,
   },
-  msgBubbleUser: {
+  chatBubbleMine: {
     backgroundColor: '#582CDB',
     borderBottomRightRadius: 4,
   },
-  msgBubblePartner: {
+  chatBubbleTheirs: {
     backgroundColor: '#FFFFFF',
     borderWidth: 1,
-    borderColor: '#EFEBF8',
+    borderColor: '#EFECE6',
     borderBottomLeftRadius: 4,
   },
-  messageText: {
+  chatBubbleText: {
     fontSize: 13.5,
-    lineHeight: 19,
-  },
-  msgTextUser: {
-    color: '#FFFFFF',
-    fontWeight: '500',
-  },
-  msgTextPartner: {
-    color: '#171420',
-    fontWeight: '500',
-  },
-  messageTime: {
-    fontSize: 10,
-    color: '#94A3B8',
-    marginTop: 4,
-  },
-  msgTimeUser: {
-    textAlign: 'right',
-  },
-  msgTimePartner: {
-    textAlign: 'left',
-  },
-  sharedScriptCard: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 16,
-    borderWidth: 1.5,
-    borderColor: '#EDE9FE',
-    padding: 12,
-    marginBottom: 6,
-    shadowColor: '#582CDB',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 6,
-    elevation: 2,
-  },
-  sharedScriptBadgeRow: {
-    marginBottom: 4,
-  },
-  sharedScriptBadgeText: {
-    fontSize: 9,
-    fontWeight: '900',
-    color: '#6D28D9',
-    letterSpacing: 0.5,
-  },
-  sharedScriptTitle: {
-    fontSize: 13,
-    fontWeight: '800',
     color: '#171420',
     lineHeight: 18,
-    marginBottom: 6,
   },
-  sharedScriptAction: {
-    fontSize: 11,
+  chatBubbleTextMine: {
+    color: '#FFFFFF',
+  },
+  chatMessageTime: {
+    fontSize: 9.5,
+    color: '#94A3B8',
+    alignSelf: 'flex-end',
+    marginTop: 4,
+  },
+  chatMessageTimeMine: {
+    color: '#E0E7FF',
+  },
+  collabProposalCardBubble: {
+    width: '85%',
+    backgroundColor: '#EDE9FE',
+    borderRadius: 18,
+    padding: 14,
+    borderWidth: 1,
+    borderColor: '#DDD6FE',
+  },
+  proposalTagBox: {
+    backgroundColor: '#582CDB',
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 4,
+  },
+  proposalTagText: {
+    fontSize: 8.5,
     fontWeight: '900',
-    color: '#582CDB',
+    color: '#FFFFFF',
   },
-
-  // Audio Note Styles
+  proposalTitleText: {
+    fontSize: 14.5,
+    fontWeight: '900',
+    color: '#171420',
+    marginTop: 4,
+  },
+  proposalDescText: {
+    fontSize: 11.5,
+    color: '#4C1D95',
+    marginVertical: 4,
+  },
+  acceptProposalBtn: {
+    backgroundColor: '#582CDB',
+    paddingVertical: 9,
+    borderRadius: 10,
+    alignItems: 'center',
+    marginTop: 6,
+  },
+  acceptProposalBtnText: {
+    color: '#FFFFFF',
+    fontSize: 12,
+    fontWeight: '900',
+  },
   audioNoteBubble: {
     flexDirection: 'row',
     alignItems: 'center',
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1,
+    borderColor: '#EFECE6',
     borderRadius: 18,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    gap: 8,
-    minWidth: 160,
+    padding: 10,
+    gap: 10,
+    width: 220,
   },
   audioPlayCircle: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
-    backgroundColor: 'rgba(255, 255, 255, 0.3)',
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: '#582CDB',
     justifyContent: 'center',
     alignItems: 'center',
   },
-  audioPlayIcon: {
-    fontSize: 12,
-    color: '#FFFFFF',
-    marginLeft: 2,
-  },
-  waveformContainer: {
+  audioWaveformMini: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 3,
+    height: 20,
   },
-  waveBar: {
+  audioBarMini: {
     width: 3,
-    backgroundColor: '#DDD6FE',
-    borderRadius: 2,
+    backgroundColor: '#582CDB',
+    borderRadius: 1.5,
   },
   audioDurationText: {
-    fontSize: 11,
+    fontSize: 9.5,
     color: '#64748B',
     fontWeight: '700',
+    marginTop: 2,
   },
 
-  // Quick Reactions Row
-  quickReactionsRow: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    gap: 8,
-    paddingVertical: 6,
-    backgroundColor: 'rgba(250, 248, 245, 0.95)',
-  },
-  reactionPillBtn: {
-    backgroundColor: '#FFFFFF',
-    borderWidth: 1,
-    borderColor: '#EDE9FE',
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    justifyContent: 'center',
-    alignItems: 'center',
-    shadowColor: '#582CDB',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 3,
-    elevation: 1,
-  },
-
-  // Chat Input Bar
+  // CHAT INPUT
   chatInputBar: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 10,
     backgroundColor: '#FFFFFF',
     borderTopWidth: 1,
-    borderTopColor: '#EFEBF8',
-    gap: 10,
-    marginBottom: 80,
+    borderTopColor: '#EFECE6',
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    gap: 8,
   },
-  attachScriptBtn: {
-    width: 40,
-    height: 40,
-    borderRadius: 12,
-    backgroundColor: '#FAF5FF',
-    borderWidth: 1,
-    borderColor: '#EDE9FE',
+  attachBtn: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: '#EDE9FE',
     justifyContent: 'center',
     alignItems: 'center',
   },
   chatTextInput: {
     flex: 1,
-    height: 42,
     backgroundColor: '#F8FAFC',
-    borderRadius: 14,
     borderWidth: 1,
     borderColor: '#E2E8F0',
+    borderRadius: 18,
     paddingHorizontal: 14,
+    paddingVertical: 8,
     fontSize: 13,
     color: '#171420',
-    fontWeight: '500',
   },
-  voiceNoteBtn: {
-    width: 42,
-    height: 42,
-    borderRadius: 14,
-    backgroundColor: '#FAF5FF',
-    borderWidth: 1,
-    borderColor: '#EDE9FE',
+  sendBtn: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: '#CBD5E1',
     justifyContent: 'center',
     alignItems: 'center',
   },
-  sendMsgBtnActive: {
-    width: 42,
-    height: 42,
-    borderRadius: 14,
+  sendBtnActive: {
     backgroundColor: '#582CDB',
-    justifyContent: 'center',
-    alignItems: 'center',
   },
 
-  // =========================================================================
-  // SNAPCHAT / IMMERSIVE STORY VIEWER STYLES
-  // =========================================================================
-  storyViewerContainer: {
+  // STORY MODAL
+  storyModalOverlay: {
     flex: 1,
-    backgroundColor: '#0F0E17',
-    paddingTop: Platform.OS === 'ios' ? 44 : 20,
-    paddingBottom: 20,
+    backgroundColor: 'rgba(15, 10, 30, 0.85)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
   },
-  storyProgressBarContainer: {
-    flexDirection: 'row',
-    gap: 4,
-    paddingHorizontal: 16,
-    marginBottom: 12,
+  storyViewerCard: {
+    width: '100%',
+    maxWidth: 380,
+    backgroundColor: '#1E1B2E',
+    borderRadius: 24,
+    padding: 20,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.1)',
   },
-  storyProgressBarTrack: {
-    flex: 1,
-    height: 3,
-    backgroundColor: 'rgba(255, 255, 255, 0.3)',
-    borderRadius: 2,
-    overflow: 'hidden',
-  },
-  storyProgressBarFill: {
-    height: '100%',
-    backgroundColor: '#FFFFFF',
-    borderRadius: 2,
-  },
-  storyTopProfileBar: {
+  storyViewerHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: 16,
     marginBottom: 16,
   },
-  storyProfileLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
+  storyViewerAvatarWrapper: {
+    position: 'relative',
   },
-  storyTopAvatar: {
+  storyViewerAvatar: {
     width: 40,
     height: 40,
     borderRadius: 20,
-    borderWidth: 1.5,
-    borderColor: '#FFFFFF',
   },
-  storyTopCreatorName: {
-    fontSize: 14,
-    fontWeight: '800',
-    color: '#FFFFFF',
-  },
-  storyTopTimeAgo: {
-    fontSize: 11,
-    color: 'rgba(255, 255, 255, 0.7)',
-  },
-  storyTopStreakBadge: {
-    backgroundColor: '#FEF3C7',
-    paddingVertical: 2,
-    paddingHorizontal: 8,
-    borderRadius: 6,
-  },
-  storyTopStreakText: {
-    fontSize: 10,
-    fontWeight: '900',
-    color: '#B45309',
-  },
-  storyCloseBtn: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  storyCloseBtnText: {
-    fontSize: 14,
-    fontWeight: '800',
-    color: '#FFFFFF',
-  },
-  storyMainBody: {
-    flex: 1,
-    position: 'relative',
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingHorizontal: 20,
-  },
-  storyTapZoneLeft: {
+  storyViewerTinyGoldCheckPos: {
     position: 'absolute',
-    left: 0,
-    top: 0,
-    bottom: 0,
-    width: '35%',
-    zIndex: 10,
+    bottom: -1,
+    right: -1,
   },
-  storyTapZoneRight: {
-    position: 'absolute',
-    right: 0,
-    top: 0,
-    bottom: 0,
-    width: '65%',
-    zIndex: 10,
-  },
-  storyCardContent: {
-    width: '100%',
-    backgroundColor: 'rgba(255, 255, 255, 0.08)',
-    borderRadius: 24,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.15)',
-    padding: 20,
-    alignItems: 'center',
-  },
-  storySlidePillBadge: {
-    backgroundColor: '#582CDB',
-    paddingVertical: 5,
-    paddingHorizontal: 12,
-    borderRadius: 100,
-    marginBottom: 14,
-  },
-  storySlidePillText: {
-    fontSize: 10.5,
+  storyViewerName: {
+    fontSize: 15,
     fontWeight: '900',
     color: '#FFFFFF',
-    letterSpacing: 0.6,
   },
-  storySlideTitle: {
-    fontSize: 20,
-    fontWeight: '900',
-    color: '#FFFFFF',
-    textAlign: 'center',
-    marginBottom: 4,
-  },
-  storySlideSubtitle: {
-    fontSize: 13,
-    color: 'rgba(255, 255, 255, 0.7)',
-    textAlign: 'center',
-    marginBottom: 16,
-  },
-  storyQuoteCard: {
-    backgroundColor: 'rgba(255, 255, 255, 0.12)',
-    borderRadius: 18,
-    padding: 16,
-    width: '100%',
-    marginBottom: 16,
-  },
-  storyQuoteIcon: {
-    fontSize: 28,
-    color: '#A78BFA',
-    lineHeight: 28,
-  },
-  storyQuoteText: {
-    fontSize: 14.5,
-    color: '#FFFFFF',
-    lineHeight: 22,
-    fontWeight: '500',
-  },
-  storyStatsRow: {
-    flexDirection: 'row',
-    gap: 8,
-    width: '100%',
-  },
-  storyStatBox: {
-    flex: 1,
-    backgroundColor: 'rgba(255, 255, 255, 0.06)',
-    borderRadius: 12,
-    paddingVertical: 10,
-    alignItems: 'center',
-  },
-  storyStatVal: {
-    fontSize: 13,
-    fontWeight: '800',
-    color: '#FFFFFF',
-  },
-  storyStatLabel: {
-    fontSize: 9.5,
-    color: 'rgba(255, 255, 255, 0.6)',
-    marginTop: 2,
-  },
-
-  // Highlights in Story
-  highlightsList: {
-    width: '100%',
-    gap: 8,
-  },
-  highlightItemCard: {
-    backgroundColor: 'rgba(255, 255, 255, 0.12)',
-    borderRadius: 14,
-    padding: 12,
-  },
-  highlightItemTop: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: 4,
-  },
-  highlightItemPlatform: {
-    fontSize: 11,
-    fontWeight: '800',
-    color: '#DDD6FE',
-  },
-  highlightItemViews: {
-    fontSize: 10.5,
-    fontWeight: '700',
-    color: '#FDE68A',
-  },
-  highlightItemTitle: {
-    fontSize: 13,
-    fontWeight: '700',
-    color: '#FFFFFF',
-    lineHeight: 18,
-  },
-
-  // Milestone in Story
-  milestoneTrophyCircle: {
-    width: 76,
-    height: 76,
-    borderRadius: 38,
-    backgroundColor: 'rgba(255, 255, 255, 0.15)',
-    borderWidth: 2,
-    borderColor: '#F59E0B',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 14,
-  },
-  milestoneXpPill: {
-    backgroundColor: '#FEF3C7',
-    paddingVertical: 6,
-    paddingHorizontal: 14,
-    borderRadius: 100,
-    marginTop: 10,
-  },
-  milestoneXpText: {
+  storyViewerStreak: {
     fontSize: 12,
+    color: '#FDE047',
     fontWeight: '900',
-    color: '#B45309',
   },
-
-  // Story Bottom Bar
-  storyBottomBar: {
-    paddingHorizontal: 16,
-    paddingTop: 10,
+  storyViewerTime: {
+    fontSize: 10.5,
+    color: '#94A3B8',
   },
-  floatingEmojiText: {
-    position: 'absolute',
-    bottom: 80,
-    fontSize: 32,
-    zIndex: 100,
-  },
-  storyReactionPillsRow: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    gap: 12,
-    marginBottom: 12,
-  },
-  storyReactionCircle: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: 'rgba(255, 255, 255, 0.18)',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  storyReplyInputRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  storyReplyInput: {
-    flex: 1,
-    height: 44,
-    backgroundColor: 'rgba(255, 255, 255, 0.15)',
-    borderRadius: 22,
-    paddingHorizontal: 16,
-    fontSize: 13.5,
-    color: '#FFFFFF',
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.2)',
-  },
-  storyReplySendBtn: {
-    backgroundColor: '#582CDB',
-    paddingVertical: 10,
-    paddingHorizontal: 16,
-    borderRadius: 20,
-  },
-  storyReplySendBtnText: {
-    fontSize: 13,
-    fontWeight: '800',
-    color: '#FFFFFF',
-  },
-
-  // =========================================================================
-  // MODAL STYLES (PLUS BUTTON: CONNECT WITH MORE CREATORS)
-  // =========================================================================
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(23, 20, 32, 0.65)',
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingHorizontal: 20,
-  },
-  modalCard: {
-    width: '100%',
-    maxWidth: 380,
-    backgroundColor: '#FFFFFF',
-    borderRadius: 24,
-    borderWidth: 1,
-    borderColor: '#EFEBF8',
-    padding: 20,
-    shadowColor: '#582CDB',
-    shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 0.2,
-    shadowRadius: 24,
-    elevation: 8,
-  },
-  modalHeaderRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    marginBottom: 14,
-  },
-  modalTitle: {
-    fontSize: 17,
-    fontWeight: '800',
-    color: '#171420',
-  },
-  modalSubtitle: {
-    fontSize: 11.5,
-    color: '#64748B',
-    marginTop: 2,
-  },
-  modalCloseCircle: {
+  storyCloseCircle: {
     width: 28,
     height: 28,
     borderRadius: 14,
-    backgroundColor: '#F1F5F9',
+    backgroundColor: 'rgba(255, 255, 255, 0.15)',
     justifyContent: 'center',
     alignItems: 'center',
   },
-  modalCloseCross: {
-    fontSize: 12,
-    fontWeight: '800',
-    color: '#64748B',
+  storyCardBody: {
+    gap: 12,
   },
-  discoverCreatorCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#F8FAFC',
-    borderRadius: 16,
-    borderWidth: 1,
-    borderColor: '#E2E8F0',
-    padding: 12,
-    marginBottom: 10,
-    gap: 10,
+  storyBadgePill: {
+    alignSelf: 'flex-start',
+    backgroundColor: '#582CDB',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 6,
   },
-  discoverAvatar: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-  },
-  discoverName: {
-    fontSize: 13.5,
-    fontWeight: '800',
-    color: '#171420',
-  },
-  discoverHandle: {
-    fontSize: 11,
-    color: '#64748B',
-  },
-  discoverNiche: {
-    fontSize: 10.5,
-    color: '#582CDB',
-    fontWeight: '700',
-    marginTop: 2,
-  },
-  discoverConnectBtn: {
-    backgroundColor: '#EDE9FE',
-    paddingVertical: 6,
-    paddingHorizontal: 12,
-    borderRadius: 10,
-  },
-  discoverConnectBtnText: {
-    fontSize: 11.5,
-    fontWeight: '900',
-    color: '#582CDB',
-  },
-  connectToCreateBtn: {
-    height: 48,
-    borderRadius: 14,
-    overflow: 'hidden',
-    marginTop: 12,
-    shadowColor: '#582CDB',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.25,
-    shadowRadius: 10,
-    elevation: 4,
-  },
-  connectGradient: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  connectBtnText: {
-    fontSize: 14,
+  storyBadgePillText: {
+    fontSize: 9.5,
     fontWeight: '900',
     color: '#FFFFFF',
-    letterSpacing: 0.4,
+  },
+  storyHeadlineText: {
+    fontSize: 18,
+    fontWeight: '900',
+    color: '#FFFFFF',
+  },
+  storyQuoteText: {
+    fontSize: 13.5,
+    color: '#CBD5E1',
+    lineHeight: 20,
+    fontStyle: 'italic',
+  },
+  storyReplyBtn: {
+    backgroundColor: '#582CDB',
+    paddingVertical: 12,
+    borderRadius: 12,
+    alignItems: 'center',
+    marginTop: 10,
+  },
+  storyReplyBtnText: {
+    color: '#FFFFFF',
+    fontSize: 13,
+    fontWeight: '900',
   },
 
-  messageCardDark: {
-    backgroundColor: '#161224',
-    borderColor: '#2B2342',
-    shadowColor: '#000000',
+  // COMMON
+  btnPressed: {
+    opacity: 0.85,
+    transform: [{ scale: 0.98 }],
   },
-  headerIconBtnDark: {
-    backgroundColor: '#1C172C',
-    borderColor: '#2B2342',
+  toastContainer: {
+    position: 'absolute',
+    bottom: 90,
+    alignSelf: 'center',
+    backgroundColor: 'rgba(23, 20, 32, 0.94)',
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 8,
+    elevation: 6,
   },
-  searchBarDark: {
-    backgroundColor: '#161224',
-    borderColor: '#2B2342',
-  },
-  textWhite: {
-    color: '#F8FAFC',
-  },
-  textMutedDark: {
-    color: '#94A3B8',
+  toastText: {
+    color: '#FFFFFF',
+    fontSize: 12,
+    fontWeight: '800',
   },
 });

@@ -22,6 +22,37 @@ import { FloatingTabBar, TabType } from '../components/FloatingTabBar';
 import { UserProfileModal, UserProfileData } from '../components/UserProfileModal';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
+
+export const TinyGoldCheck = ({ size = 13 }: { size?: number }) => (
+  <View
+    style={{
+      width: size,
+      height: size,
+      borderRadius: size / 2,
+      backgroundColor: '#EAB308',
+      borderWidth: 1.5,
+      borderColor: '#FFFFFF',
+      justifyContent: 'center',
+      alignItems: 'center',
+      shadowColor: '#CA8A04',
+      shadowOffset: { width: 0, height: 1 },
+      shadowOpacity: 0.35,
+      shadowRadius: 2,
+      elevation: 2,
+    }}
+  >
+    <Svg width={size * 0.65} height={size * 0.65} viewBox="0 0 12 12" fill="none">
+      <Path
+        d="M2.5 6.2L4.8 8.5L9.5 3.5"
+        stroke="#FFFFFF"
+        strokeWidth="2.4"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </Svg>
+  </View>
+);
+
 const SWIPE_THRESHOLD = 95;
 
 interface ProMatchScreenProps {
@@ -436,8 +467,8 @@ export const ProMatchScreen: React.FC<ProMatchScreenProps> = ({
                 style={styles.headerCustomAvatarImage}
                 resizeMode="cover"
               />
-              <View style={styles.addPhotoPlusBadge}>
-                <Text style={styles.addPhotoPlusText}>👑</Text>
+              <View style={{ position: 'absolute', bottom: -2, right: -2 }}>
+                <TinyGoldCheck size={14} />
               </View>
             </Pressable>
           </View>

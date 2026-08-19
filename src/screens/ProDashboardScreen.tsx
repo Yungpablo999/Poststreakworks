@@ -22,6 +22,37 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { FloatingTabBar, TabType } from '../components/FloatingTabBar';
 import { UserProfileModal, UserProfileData } from '../components/UserProfileModal';
 
+export const TinyGoldCheck = ({ size = 13 }: { size?: number }) => (
+  <View
+    style={{
+      width: size,
+      height: size,
+      borderRadius: size / 2,
+      backgroundColor: '#EAB308',
+      borderWidth: 1.5,
+      borderColor: '#FFFFFF',
+      justifyContent: 'center',
+      alignItems: 'center',
+      shadowColor: '#CA8A04',
+      shadowOffset: { width: 0, height: 1 },
+      shadowOpacity: 0.35,
+      shadowRadius: 2,
+      elevation: 2,
+    }}
+  >
+    <Svg width={size * 0.65} height={size * 0.65} viewBox="0 0 12 12" fill="none">
+      <Path
+        d="M2.5 6.2L4.8 8.5L9.5 3.5"
+        stroke="#FFFFFF"
+        strokeWidth="2.4"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </Svg>
+  </View>
+);
+
+
 interface ProDashboardScreenProps {
   onLogout?: () => void;
   onStartMission?: () => void;
@@ -550,8 +581,8 @@ export const ProDashboardScreen: React.FC<ProDashboardScreenProps> = ({
                 style={styles.headerCustomAvatarImage}
                 resizeMode="cover"
               />
-              <View style={styles.addPhotoPlusBadge}>
-                <Text style={styles.addPhotoPlusText}>👑</Text>
+              <View style={{ position: 'absolute', bottom: -2, right: -2 }}>
+                <TinyGoldCheck size={14} />
               </View>
             </Pressable>
           </View>
@@ -893,11 +924,16 @@ export const ProDashboardScreen: React.FC<ProDashboardScreenProps> = ({
           {/* CARD 9: CREATOR MATCH */}
           <View style={[styles.dashboardCard, { marginBottom: 120 }]}>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, marginBottom: 12 }}>
-              <Image
-                source={require('../../assets/images/amara-avatar.jpg')}
-                style={styles.matchAvatarImage}
-                resizeMode="cover"
-              />
+              <View style={{ position: 'relative' }}>
+                <Image
+                  source={require('../../assets/images/amara-avatar.jpg')}
+                  style={styles.matchAvatarImage}
+                  resizeMode="cover"
+                />
+                <View style={{ position: 'absolute', bottom: -1, right: -1 }}>
+                  <TinyGoldCheck size={13} />
+                </View>
+              </View>
               <View style={{ flex: 1 }}>
                 <Text style={styles.matchCreatorName}>Amara Okafor</Text>
                 <Text style={styles.matchOverlapTag}>94% Audience overlap</Text>
