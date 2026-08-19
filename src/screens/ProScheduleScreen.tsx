@@ -810,7 +810,7 @@ export const ProScheduleScreen: React.FC<ProScheduleScreenProps> = ({
             {/* Action Buttons: Fill Slot & Ask Jarvis */}
             <View style={{ flexDirection: 'row', gap: 10 }}>
               <Pressable
-                style={({ pressed }) => [styles.fillSlotDarkBtn, pressed && styles.btnPressed]}
+                style={({ pressed }) => [styles.fillSlotGoldBtn, pressed && styles.btnPressed]}
                 onPress={() => {
                   if (Platform.OS !== 'web') {
                     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
@@ -819,7 +819,14 @@ export const ProScheduleScreen: React.FC<ProScheduleScreenProps> = ({
                   setShowFillGapModal(true);
                 }}
               >
-                <Text style={styles.fillSlotDarkBtnText}>Fill Slot</Text>
+                <LinearGradient
+                  colors={['#FEF08A', '#FDE047', '#EAB308']}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 1 }}
+                  style={styles.goldBtnGradient}
+                >
+                  <Text style={styles.fillSlotGoldBtnText}>✨ Fill Slot</Text>
+                </LinearGradient>
               </Pressable>
 
               <Pressable
@@ -1117,12 +1124,19 @@ export const ProScheduleScreen: React.FC<ProScheduleScreenProps> = ({
 
                 {/* Action Buttons */}
                 <Pressable
-                  style={styles.modalGoldActionBtn}
+                  style={styles.modalGoldActionBtnWrapper}
                   onPress={handleConfirmFillGap}
                 >
-                  <Text style={styles.modalGoldActionBtnText}>
-                    🪄 Accept &amp; Fill Schedule Slot (+75 XP) ➔
-                  </Text>
+                  <LinearGradient
+                    colors={['#FEF08A', '#FDE047', '#EAB308']}
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 1, y: 1 }}
+                    style={styles.modalGoldBtnGradient}
+                  >
+                    <Text style={styles.modalGoldActionBtnText}>
+                      ✨ Accept &amp; Fill Schedule Slot (+75 XP) ➔
+                    </Text>
+                  </LinearGradient>
                 </Pressable>
 
                 <Pressable
@@ -1281,7 +1295,7 @@ const styles = StyleSheet.create({
   proHeaderBadgeText: {
     fontSize: 8.5,
     fontWeight: '900',
-    color: '#78350F',
+    color: '#B45309',
     letterSpacing: 0.3,
   },
   headerRightGroup: {
@@ -1341,7 +1355,7 @@ const styles = StyleSheet.create({
   contentScheduleTagText: {
     fontSize: 9.5,
     fontWeight: '900',
-    color: '#78350F',
+    color: '#B45309',
     letterSpacing: 0.6,
   },
   mainTitleText: {
@@ -1411,7 +1425,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   fillGapsOutlineBtnText: {
-    color: '#78350F',
+    color: '#B45309',
     fontSize: 13,
     fontWeight: '900',
   },
@@ -1599,7 +1613,7 @@ const styles = StyleSheet.create({
   timeBoxGoldText: {
     fontSize: 12,
     fontWeight: '900',
-    color: '#78350F',
+    color: '#B45309',
   },
   timeBoxGoldSub: {
     fontSize: 9,
@@ -1637,7 +1651,7 @@ const styles = StyleSheet.create({
   recommendedPillBadgeText: {
     fontSize: 9,
     fontWeight: '900',
-    color: '#78350F',
+    color: '#B45309',
   },
   emptyScheduleBox: {
     backgroundColor: '#FFFFFF',
@@ -1870,7 +1884,7 @@ const styles = StyleSheet.create({
   gapWarningSub: {
     fontSize: 9.5,
     fontWeight: '800',
-    color: '#78350F',
+    color: '#B45309',
     letterSpacing: 0.5,
   },
   gapWarningTitle: {
@@ -1879,17 +1893,25 @@ const styles = StyleSheet.create({
     color: '#171420',
     marginTop: 2,
   },
-  fillSlotDarkBtn: {
+  fillSlotGoldBtn: {
     flex: 1,
-    backgroundColor: '#78350F',
-    paddingVertical: 10,
-    borderRadius: 10,
+    borderRadius: 12,
+    overflow: 'hidden',
+    shadowColor: '#EAB308',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 6,
+    elevation: 3,
+  },
+  goldBtnGradient: {
+    flex: 1,
+    paddingVertical: 11,
     justifyContent: 'center',
     alignItems: 'center',
   },
-  fillSlotDarkBtnText: {
-    color: '#FFFFFF',
-    fontSize: 12.5,
+  fillSlotGoldBtnText: {
+    color: '#171420',
+    fontSize: 13,
     fontWeight: '900',
   },
   askJarvisOutlineBtn: {
@@ -1973,7 +1995,7 @@ const styles = StyleSheet.create({
   modalGoldTagBadgeText: {
     fontSize: 9,
     fontWeight: '900',
-    color: '#78350F',
+    color: '#B45309',
     letterSpacing: 0.5,
   },
   modalTagBadge: {
@@ -2114,16 +2136,24 @@ const styles = StyleSheet.create({
     fontSize: 13.5,
     fontWeight: '900',
   },
-  modalGoldActionBtn: {
-    backgroundColor: '#78350F',
-    paddingVertical: 13,
+  modalGoldActionBtnWrapper: {
     borderRadius: 14,
-    alignItems: 'center',
+    overflow: 'hidden',
     marginTop: 8,
+    shadowColor: '#EAB308',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.25,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  modalGoldBtnGradient: {
+    paddingVertical: 14,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   modalGoldActionBtnText: {
-    color: '#FFFFFF',
-    fontSize: 13.5,
+    color: '#171420',
+    fontSize: 14,
     fontWeight: '900',
   },
   modalCancelBtn: {
@@ -2148,7 +2178,7 @@ const styles = StyleSheet.create({
   gapSlotDetectedTitle: {
     fontSize: 11,
     fontWeight: '900',
-    color: '#78350F',
+    color: '#B45309',
   },
   gapSlotDetectedSub: {
     fontSize: 10.5,
