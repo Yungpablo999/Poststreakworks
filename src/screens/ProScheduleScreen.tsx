@@ -350,7 +350,7 @@ export const ProScheduleScreen: React.FC<ProScheduleScreenProps> = ({
               hitSlop={8}
             >
               <LinearGradient
-                colors={['#FEF08A', '#FDE047']}
+                colors={['#E5C158', '#C59B27', '#9E7418']}
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 1 }}
                 style={styles.proHeaderBadge}
@@ -507,7 +507,7 @@ export const ProScheduleScreen: React.FC<ProScheduleScreenProps> = ({
             </View>
             <View style={styles.planCompletionProgressBarTrack}>
               <LinearGradient
-                colors={['#582CDB', '#8B5CF6', '#EAB308']}
+                colors={['#582CDB', '#8B5CF6', '#C59B27']}
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 0 }}
                 style={[styles.planCompletionProgressBarFill, { width: '65%' }]}
@@ -820,7 +820,7 @@ export const ProScheduleScreen: React.FC<ProScheduleScreenProps> = ({
                 }}
               >
                 <LinearGradient
-                  colors={['#FEF08A', '#FDE047', '#EAB308']}
+                  colors={['#E5C158', '#C59B27', '#9E7418']}
                   start={{ x: 0, y: 0 }}
                   end={{ x: 1, y: 1 }}
                   style={styles.goldBtnGradient}
@@ -1128,7 +1128,7 @@ export const ProScheduleScreen: React.FC<ProScheduleScreenProps> = ({
                   onPress={handleConfirmFillGap}
                 >
                   <LinearGradient
-                    colors={['#FEF08A', '#FDE047', '#EAB308']}
+                    colors={['#E5C158', '#C59B27', '#9E7418']}
                     start={{ x: 0, y: 0 }}
                     end={{ x: 1, y: 1 }}
                     style={styles.modalGoldBtnGradient}
@@ -1290,12 +1290,12 @@ const styles = StyleSheet.create({
     paddingVertical: 2,
     borderRadius: 6,
     borderWidth: 1,
-    borderColor: '#FEF08A',
+    borderColor: '#DFB758',
   },
   proHeaderBadgeText: {
     fontSize: 8.5,
     fontWeight: '900',
-    color: '#B45309',
+    color: '#171420',
     letterSpacing: 0.3,
   },
   headerRightGroup: {
@@ -1327,7 +1327,7 @@ const styles = StyleSheet.create({
     height: 38,
     borderRadius: 19,
     borderWidth: 2,
-    borderColor: '#EAB308',
+    borderColor: '#C59B27',
   },
   avatarTinyGoldCheckPos: {
     position: 'absolute',
@@ -1346,7 +1346,9 @@ const styles = StyleSheet.create({
   },
   contentScheduleTagBox: {
     alignSelf: 'flex-start',
-    backgroundColor: '#FEF08A',
+    backgroundColor: '#F5E6C4',
+    borderWidth: 1,
+    borderColor: '#C59B27',
     paddingHorizontal: 8,
     paddingVertical: 3.5,
     borderRadius: 6,
@@ -1355,7 +1357,7 @@ const styles = StyleSheet.create({
   contentScheduleTagText: {
     fontSize: 9.5,
     fontWeight: '900',
-    color: '#B45309',
+    color: '#8A5A00',
     letterSpacing: 0.6,
   },
   mainTitleText: {
@@ -1550,7 +1552,7 @@ const styles = StyleSheet.create({
     width: 5,
     height: 5,
     borderRadius: 2.5,
-    backgroundColor: '#EAB308',
+    backgroundColor: '#C59B27',
   },
 
   // SECTION 3: TODAY'S SCHEDULE
@@ -1582,7 +1584,7 @@ const styles = StyleSheet.create({
   },
   scheduleItemCardGoldBorder: {
     borderLeftWidth: 3,
-    borderLeftColor: '#EAB308',
+    borderLeftColor: '#C59B27',
   },
   timeBoxPurple: {
     width: 52,
@@ -1606,19 +1608,21 @@ const styles = StyleSheet.create({
     width: 52,
     height: 48,
     borderRadius: 12,
-    backgroundColor: '#FEF08A',
+    backgroundColor: '#F5E6C4',
+    borderWidth: 1,
+    borderColor: '#DFB758',
     justifyContent: 'center',
     alignItems: 'center',
   },
   timeBoxGoldText: {
     fontSize: 12,
     fontWeight: '900',
-    color: '#B45309',
+    color: '#8A5A00',
   },
   timeBoxGoldSub: {
     fontSize: 9,
     fontWeight: '800',
-    color: '#92400E',
+    color: '#9E7418',
   },
   scheduleItemTitle: {
     fontSize: 14,
@@ -1643,7 +1647,9 @@ const styles = StyleSheet.create({
     color: '#582CDB',
   },
   recommendedPillBadge: {
-    backgroundColor: '#FEF08A',
+    backgroundColor: '#F5E6C4',
+    borderWidth: 1,
+    borderColor: '#DFB758',
     paddingHorizontal: 8,
     paddingVertical: 3.5,
     borderRadius: 6,
@@ -1651,7 +1657,7 @@ const styles = StyleSheet.create({
   recommendedPillBadgeText: {
     fontSize: 9,
     fontWeight: '900',
-    color: '#B45309',
+    color: '#8A5A00',
   },
   emptyScheduleBox: {
     backgroundColor: '#FFFFFF',
@@ -1897,10 +1903,10 @@ const styles = StyleSheet.create({
     flex: 1,
     borderRadius: 12,
     overflow: 'hidden',
-    shadowColor: '#EAB308',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 6,
+    shadowColor: '#9E7418',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.35,
+    shadowRadius: 8,
     elevation: 3,
   },
   goldBtnGradient: {
@@ -1908,11 +1914,15 @@ const styles = StyleSheet.create({
     paddingVertical: 11,
     justifyContent: 'center',
     alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#E5C158',
+    borderRadius: 12,
   },
   fillSlotGoldBtnText: {
-    color: '#171420',
+    color: '#0C0A12',
     fontSize: 13,
     fontWeight: '900',
+    letterSpacing: 0.2,
   },
   askJarvisOutlineBtn: {
     flex: 1,
@@ -1987,7 +1997,9 @@ const styles = StyleSheet.create({
     letterSpacing: 0.5,
   },
   modalGoldTagBadge: {
-    backgroundColor: '#FEF08A',
+    backgroundColor: '#F5E6C4',
+    borderWidth: 1,
+    borderColor: '#C59B27',
     paddingHorizontal: 8,
     paddingVertical: 3.5,
     borderRadius: 6,
@@ -1995,7 +2007,7 @@ const styles = StyleSheet.create({
   modalGoldTagBadgeText: {
     fontSize: 9,
     fontWeight: '900',
-    color: '#B45309',
+    color: '#8A5A00',
     letterSpacing: 0.5,
   },
   modalTagBadge: {
@@ -2140,21 +2152,25 @@ const styles = StyleSheet.create({
     borderRadius: 14,
     overflow: 'hidden',
     marginTop: 8,
-    shadowColor: '#EAB308',
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.25,
-    shadowRadius: 8,
+    shadowColor: '#9E7418',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.4,
+    shadowRadius: 10,
     elevation: 4,
   },
   modalGoldBtnGradient: {
     paddingVertical: 14,
     alignItems: 'center',
     justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: '#E5C158',
+    borderRadius: 14,
   },
   modalGoldActionBtnText: {
-    color: '#171420',
+    color: '#0C0A12',
     fontSize: 14,
     fontWeight: '900',
+    letterSpacing: 0.2,
   },
   modalCancelBtn: {
     paddingVertical: 10,
@@ -2168,9 +2184,9 @@ const styles = StyleSheet.create({
 
   // GAP MODAL SPECIFIC
   gapSlotDetectedBanner: {
-    backgroundColor: '#FEFCE8',
+    backgroundColor: '#FAF3E0',
     borderWidth: 1,
-    borderColor: '#FEF08A',
+    borderColor: '#DFB758',
     borderRadius: 12,
     padding: 12,
     marginBottom: 12,
@@ -2178,11 +2194,11 @@ const styles = StyleSheet.create({
   gapSlotDetectedTitle: {
     fontSize: 11,
     fontWeight: '900',
-    color: '#B45309',
+    color: '#8A5A00',
   },
   gapSlotDetectedSub: {
     fontSize: 10.5,
-    color: '#854D0E',
+    color: '#9E7418',
     marginTop: 2,
   },
   gapSuggestionCard: {
