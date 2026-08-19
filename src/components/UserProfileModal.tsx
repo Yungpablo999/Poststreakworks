@@ -264,6 +264,7 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
   const [hapticFeedback, setHapticFeedback] = useState(true);
 
   // UI tabs inside profile modal
+  const isPro = initialProfile?.tier === 'pro' || initialProfile?.tier === 'founding';
   const [activeSubTab, setActiveSubTab] = useState<'profile' | 'socials' | 'settings'>('profile');
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
@@ -405,18 +406,30 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
         <Animated.View
           style={[styles.modalCard, { transform: [{ scale: modalScale }] }]}
         >
-          {/* TOP MODAL HEADER: FREE BADGE */}
+          {/* TOP MODAL HEADER: PRO / FREE BADGE NEAR CREATOR PASSPORT */}
           <View style={styles.modalHeaderRow}>
             <View style={{ flex: 1 }}>
-              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
                 <Text style={styles.modalTitle}>Creator Passport</Text>
-                {/* FREE BADGE */}
-                <View style={styles.freeBadgePill}>
-                  <Text style={styles.freeBadgeText}>FREE</Text>
-                </View>
+                {isPro ? (
+                  <LinearGradient
+                    colors={['#FDE047', '#EAB308', '#CA8A04']}
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 1, y: 0 }}
+                    style={styles.proBadgePill}
+                  >
+                    <Text style={styles.proBadgeText}>👑 PRO</Text>
+                  </LinearGradient>
+                ) : (
+                  <View style={styles.freeBadgePill}>
+                    <Text style={styles.freeBadgeText}>FREE</Text>
+                  </View>
+                )}
               </View>
               <Text style={styles.modalSubtitle}>
-                Manage your free creator profile, picture &amp; socials
+                {isPro
+                  ? 'Manage your Pro Creator Passport, verified badge & socials'
+                  : 'Manage your free creator profile, picture & socials'}
               </Text>
             </View>
 
@@ -530,10 +543,12 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
                   <Text style={styles.heroNameText}>{name || 'Pablo'}</Text>
                   <Text style={styles.heroHandleText}>{handle || '@pablocreates'}</Text>
 
-                  {/* FREE CREATOR LABEL */}
-                  <View style={styles.heroStreakPill}>
-                    <Text style={styles.heroStreakPillText}>
-                      ⚡ 47-Day Streak • 🆓 Free Creator Passport
+                  {/* CREATOR PASSPORT TIER LABEL */}
+                  <View style={isPro ? styles.heroStreakPillPro : styles.heroStreakPill}>
+                    <Text style={isPro ? styles.heroStreakPillTextPro : styles.heroStreakPillText}>
+                      {isPro
+                        ? '⚡ 47-Day Streak • 👑 Pro Creator Passport'
+                        : '⚡ 47-Day Streak • 🆓 Free Creator Passport'}
                     </Text>
                   </View>
                 </View>
@@ -963,6 +978,33 @@ const styles = StyleSheet.create({
     fontWeight: '900',
     color: '#059669',
     letterSpacing: 0.5,
+  },
+  proBadgePill: {
+    paddingVertical: 2.5,
+    paddingHorizontal: 8,
+    borderRadius: 6,
+    borderWidth: 1,
+    borderColor: '#FEF08A',
+  },
+  proBadgeText: {
+    fontSize: 9.5,
+    fontWeight: '900',
+    color: '#78350F',
+    letterSpacing: 0.5,
+  },
+  heroStreakPillPro: {
+    backgroundColor: '#FEF3C7',
+    borderWidth: 1,
+    borderColor: '#FDE68A',
+    paddingHorizontal: 12,
+    paddingVertical: 5,
+    borderRadius: 16,
+    marginTop: 8,
+  },
+  heroStreakPillTextPro: {
+    fontSize: 12,
+    fontWeight: '800',
+    color: '#92400E',
   },
   modalSubtitle: {
     fontSize: 12,
