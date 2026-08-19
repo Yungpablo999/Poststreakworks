@@ -154,6 +154,7 @@ export const ProPostComposerScreen: React.FC<ProPostComposerScreenProps> = ({
   );
   const [selectedPlatforms, setSelectedPlatforms] = useState<string[]>(['tiktok', 'instagram', 'youtube']);
   const [selectedCategoryChip, setSelectedCategoryChip] = useState('Personal Lesson');
+  const [customIdeaInput, setCustomIdeaInput] = useState('');
   const [selectedHookIndex, setSelectedHookIndex] = useState(0);
   const [selectedTimeSlot, setSelectedTimeSlot] = useState('7:30 PM (Peak Reach)');
   const [autopilotEnabled, setAutopilotEnabled] = useState(true);
@@ -662,7 +663,7 @@ export const ProPostComposerScreen: React.FC<ProPostComposerScreenProps> = ({
           }}
         />
 
-        {/* CHANGE IDEA MODAL */}
+        {/* CHANGE IDEA MODAL (WITH CUSTOM IDEA & GHOST ANIMATION) */}
         <Modal
           visible={showChangeIdeaModal}
           transparent={true}
@@ -670,31 +671,144 @@ export const ProPostComposerScreen: React.FC<ProPostComposerScreenProps> = ({
           onRequestClose={() => setShowChangeIdeaModal(false)}
         >
           <View style={styles.modalOverlay}>
-            <View style={styles.modalCard}>
-              <Text style={styles.modalHeaderTitle}>Select Content Idea</Text>
-              <Text style={styles.modalHeaderSub}>Choose an AI-recommended high retention topic.</Text>
-              <ScrollView style={{ maxHeight: 300, marginVertical: 12 }}>
-                {SAMPLE_IDEAS.map((idea, idx) => (
+            <View style={[styles.modalCard, { maxHeight: '90%' }]}>
+              <ScrollView showsVerticalScrollIndicator={false} bounces={false}>
+                {/* Header */}
+                <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+                  <View style={styles.modalGoldTagBadge}>
+                    <Text style={styles.modalGoldTagBadgeText}>👑 PRO IDEA GENERATOR</Text>
+                  </View>
+                  <Pressable onPress={() => setShowChangeIdeaModal(false)} hitSlop={8}>
+                    <Text style={{ fontSize: 18, color: '#94A3B8', fontWeight: '900' }}>✕</Text>
+                  </Pressable>
+                </View>
+
+                <Text style={styles.modalHeaderTitle}>Select or Create Idea</Text>
+                <Text style={styles.modalHeaderSub}>
+                  Type your custom topic or pick an AI-recommended high retention hook.
+                </Text>
+
+                {/* 1. CUSTOM IDEA INPUT SECTION */}
+                <View style={styles.customIdeaContainer}>
+                  <Text style={styles.customIdeaSectionLabel}>✍️ ENTER CUSTOM IDEA</Text>
+                  <TextInput
+                    style={styles.customIdeaTextInput}
+                    placeholder="Type your own topic, lesson, or viral angle..."
+                    placeholderTextColor="#94A3B8"
+                    value={customIdeaInput}
+                    onChangeText={setCustomIdeaInput}
+                    multiline={true}
+                    numberOfLines={3}
+                  />
+
+                  {/* Quick Angle Chips */}
+                  <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginVertical: 8 }}>
+                    {[
+                      '💡 "Why 90% fail at..."',
+                      '🚀 "The 1 tool every..."',
+                      '🔥 "Stop doing this..."',
+                      '📈 "How I scaled to..."',
+                    ].map((hook, hIdx) => (
+                      <Pressable
+                        key={hIdx}
+                        style={styles.customHookChip}
+                        onPress={() => setCustomIdeaInput(hook.replace(/^[^\w"]+/, '').replace(/"/g, ''))}
+                      >
+                        <Text style={styles.customHookChipText}>{hook}</Text>
+                      </Pressable>
+                    ))}
+                  </View>
+
+                  {/* Apply Custom Idea Button */}
                   <Pressable
-                    key={idx}
-                    style={styles.ideaOptionRow}
+                    style={({ pressed }) => [
+                      styles.applyCustomIdeaBtnWrapper,
+                      (!customIdeaInput.trim()) && { opacity: 0.5 },
+                      pressed && styles.btnPressed,
+                    ]}
+                    disabled={!customIdeaInput.trim()}
                     onPress={() => {
-                      setCurrentIdea(idea);
+                      if (!customIdeaInput.trim()) return;
+                      const newIdea = customIdeaInput.trim();
+                      setCurrentIdea(newIdea);
+                      setCaptionText(`${newIdea}:\n\nShare your key takeaway or breakdown here.\n\nSave this for when you need it! 🚀\n\n#CreatorTips #GrowthStrategy`);
                       setShowChangeIdeaModal(false);
-                      showToast('Content Idea updated!');
+                      setCustomIdeaInput('');
+
+                      if (Platform.OS !== 'web') {
+                        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+                      }
+                      setCompletionData({
+                        title: 'Custom Angle Loaded!',
+                        subtitle: `"${newIdea}" is now active in your Pro Composer.`,
+                        badgeText: '👑 CUSTOM PRO HOOK',
+                        xpEarned: 25,
+                        speechBubble: "Fire idea! Let's craft high-retention content.",
+                      });
+                      setTimeout(() => {
+                        setShowCompletionModal(true);
+                      }, 200);
                     }}
                   >
-                    <Text style={styles.ideaOptionNumber}>{idx + 1}</Text>
-                    <Text style={styles.ideaOptionText}>{idea}</Text>
+                    <LinearGradient
+                      colors={['#FDE68A', '#F59E0B', '#D97706']}
+                      start={{ x: 0, y: 0 }}
+                      end={{ x: 1, y: 1 }}
+                      style={styles.applyCustomIdeaBtnGradient}
+                    >
+                      <Text style={styles.applyCustomIdeaBtnText}>
+                        ✨ Apply Custom Idea (+25 XP) ➔
+                      </Text>
+                    </LinearGradient>
                   </Pressable>
-                ))}
+                </View>
+
+                {/* 2. AI-RECOMMENDED HOOKS */}
+                <Text style={[styles.customIdeaSectionLabel, { marginTop: 14, marginBottom: 8 }]}>
+                  💡 OR PICK AI VIRAL HOOK
+                </Text>
+                <View style={{ gap: 8 }}>
+                  {SAMPLE_IDEAS.map((idea, idx) => (
+                    <Pressable
+                      key={idx}
+                      style={({ pressed }) => [styles.ideaOptionRow, pressed && styles.btnPressed]}
+                      onPress={() => {
+                        setCurrentIdea(idea);
+                        setCaptionText(`${idea}:\n\nStop waiting for the "perfect" idea. Consistency and honest lessons outperform polished perfection every single time.\n\nSave this for when you feel stuck. 🚀\n\n#CreatorTips #ContentStrategy #GrowthHacks`);
+                        setShowChangeIdeaModal(false);
+
+                        if (Platform.OS !== 'web') {
+                          Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+                        }
+                        setCompletionData({
+                          title: 'Viral Idea Selected!',
+                          subtitle: `"${idea}" is now active in your Pro Composer.`,
+                          badgeText: '✨ AI HOOK LOADED',
+                          xpEarned: 25,
+                          speechBubble: "High retention score! Let's craft the post.",
+                        });
+                        setTimeout(() => {
+                          setShowCompletionModal(true);
+                        }, 200);
+                      }}
+                    >
+                      <Text style={styles.ideaOptionNumber}>{idx + 1}</Text>
+                      <View style={{ flex: 1 }}>
+                        <Text style={styles.ideaOptionText}>{idea}</Text>
+                        <Text style={styles.ideaOptionMatchText}>⚡ 94% Retention Probability</Text>
+                      </View>
+                      <Text style={{ fontSize: 16, color: '#582CDB', fontWeight: '900' }}>➔</Text>
+                    </Pressable>
+                  ))}
+                </View>
+
+                <Pressable
+                  style={[styles.modalCancelBtn, { marginTop: 14 }]}
+                  onPress={() => setShowChangeIdeaModal(false)}
+                >
+                  <Text style={styles.modalCancelBtnText}>Dismiss</Text>
+                </Pressable>
               </ScrollView>
-              <Pressable
-                style={styles.modalCancelBtn}
-                onPress={() => setShowChangeIdeaModal(false)}
-              >
-                <Text style={styles.modalCancelBtnText}>Cancel</Text>
-              </Pressable>
             </View>
           </View>
         </Modal>
@@ -759,8 +873,10 @@ export const ProPostComposerScreen: React.FC<ProPostComposerScreenProps> = ({
           actionText="Awesome ➔"
           onDismiss={() => {
             setShowCompletionModal(false);
-            if (onOpenSchedule) onOpenSchedule();
-            else onBack();
+            if (completionData.badgeText.includes('PUBLISHED') || completionData.badgeText.includes('AUTOPILOT')) {
+              if (onOpenSchedule) onOpenSchedule();
+              else onBack();
+            }
           }}
         />
 
@@ -1305,6 +1421,90 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontSize: 13,
     fontWeight: '900',
+  },
+
+  // CUSTOM IDEA SECTION
+  modalGoldTagBadge: {
+    backgroundColor: '#FEF3C7',
+    borderWidth: 1,
+    borderColor: '#F59E0B',
+    paddingHorizontal: 8,
+    paddingVertical: 3.5,
+    borderRadius: 6,
+  },
+  modalGoldTagBadgeText: {
+    fontSize: 9,
+    fontWeight: '900',
+    color: '#92400E',
+    letterSpacing: 0.5,
+  },
+  customIdeaContainer: {
+    backgroundColor: '#FAF8F5',
+    borderRadius: 16,
+    padding: 14,
+    borderWidth: 1,
+    borderColor: '#EFECE6',
+    marginTop: 12,
+  },
+  customIdeaSectionLabel: {
+    fontSize: 10,
+    fontWeight: '900',
+    color: '#64748B',
+    letterSpacing: 0.6,
+    marginBottom: 6,
+  },
+  customIdeaTextInput: {
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    borderRadius: 12,
+    padding: 12,
+    fontSize: 13,
+    color: '#171420',
+    minHeight: 65,
+    textAlignVertical: 'top',
+  },
+  customHookChip: {
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 8,
+  },
+  customHookChipText: {
+    fontSize: 10.5,
+    color: '#582CDB',
+    fontWeight: '700',
+  },
+  applyCustomIdeaBtnWrapper: {
+    borderRadius: 12,
+    overflow: 'hidden',
+    marginTop: 8,
+    shadowColor: '#F59E0B',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 3,
+  },
+  applyCustomIdeaBtnGradient: {
+    paddingVertical: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: '#FCD34D',
+    borderRadius: 12,
+  },
+  applyCustomIdeaBtnText: {
+    color: '#0C0A12',
+    fontSize: 13,
+    fontWeight: '900',
+  },
+  ideaOptionMatchText: {
+    fontSize: 10,
+    fontWeight: '800',
+    color: '#10B981',
+    marginTop: 2,
   },
 
   // COMMON
