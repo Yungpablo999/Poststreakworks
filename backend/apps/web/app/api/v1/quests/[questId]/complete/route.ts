@@ -10,8 +10,17 @@ export async function POST(
   return withErrorHandling(async () => {
     const { questId } = await params;
     const caller = await getCaller(request);
+
+    const before = await caller.streakGamification.getState();
     const result = await caller.quests.complete({ questId });
-    const state = await caller.streakGamification.getState();
-    return { xpGained: result.xpGained, streakCount: state.current_streak };
+    const after = await caller.streakGamification.getState();
+
+    return {
+      xpGained: result.xpGained,
+      totalXp: after.xp,
+      streakCount: after.current_streak,
+      level: after.level,
+      levelUp: after.level > before.level,
+    };
   });
 }

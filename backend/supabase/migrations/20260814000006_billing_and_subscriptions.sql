@@ -13,11 +13,17 @@ create type subscription_status as enum ('active', 'cancelled', 'past_due', 'tri
 create type payment_status as enum ('pending', 'success', 'failed', 'refunded');
 
 -- Subscription plans: tier catalog
--- Do not seed real rows until pricing is resolved (DATA_MODEL.md item A).
+-- Pricing partially resolved by 20260814000015 (Pro tier seeded, matching
+-- what JarvisProScreen already shows in the built UI) — DATA_MODEL.md item A
+-- is no longer fully open, just no longer seeded blind.
 create table subscription_plans (
   id          uuid primary key default gen_random_uuid(),
   name        text not null,
   slug        text not null unique,
+  -- Minor units (kobo / cents) — same convention as payment_transactions.amount
+  -- and earnings_events.amount below. Not whole currency units: an integer
+  -- column can't hold $9.99 precisely, so "store 9 (or 999) and multiply by
+  -- 100 at checkout time" silently corrupts any non-whole-dollar price.
   price_ngn   integer,
   price_usd   integer,
   features    jsonb default '{}',

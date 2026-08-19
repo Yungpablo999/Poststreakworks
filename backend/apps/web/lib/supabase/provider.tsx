@@ -33,17 +33,22 @@ export function SupabaseProvider({ children }: { children: React.ReactNode }) {
       } = await supabase.auth.getUser();
 
       if (authUser) {
-        const { data: psUser } = await supabase
-          .from("users")
-          .select("role, account_status")
-          .eq("id", authUser.id)
-          .single();
+        const [{ data: psUser }, { data: subscription }] = await Promise.all([
+          supabase.from("users").select("role, account_status").eq("id", authUser.id).single(),
+          supabase
+            .from("subscriptions")
+            .select("id")
+            .eq("user_id", authUser.id)
+            .in("status", ["active", "trialing"])
+            .maybeSingle(),
+        ]);
 
         setUser({
           id: authUser.id,
           email: authUser.email!,
           role: (psUser?.role as "creator" | "staff_admin") ?? "creator",
           accountStatus: psUser?.account_status ?? "active",
+          tier: subscription ? "pro" : "free",
         });
       }
       setLoading(false);
@@ -55,17 +60,22 @@ export function SupabaseProvider({ children }: { children: React.ReactNode }) {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (_event, session) => {
       if (session?.user) {
-        const { data: psUser } = await supabase
-          .from("users")
-          .select("role, account_status")
-          .eq("id", session.user.id)
-          .single();
+        const [{ data: psUser }, { data: subscription }] = await Promise.all([
+          supabase.from("users").select("role, account_status").eq("id", session.user.id).single(),
+          supabase
+            .from("subscriptions")
+            .select("id")
+            .eq("user_id", session.user.id)
+            .in("status", ["active", "trialing"])
+            .maybeSingle(),
+        ]);
 
         setUser({
           id: session.user.id,
           email: session.user.email!,
           role: (psUser?.role as "creator" | "staff_admin") ?? "creator",
           accountStatus: psUser?.account_status ?? "active",
+          tier: subscription ? "pro" : "free",
         });
       } else {
         setUser(null);

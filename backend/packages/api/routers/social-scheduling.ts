@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { createTRPCRouter, protectedProcedure } from "../context";
+import { createTRPCRouter, protectedProcedure, TIER_LIMITS } from "../context";
 import { TRPCError } from "@trpc/server";
 import { recordStreakEvent } from "@poststreak/workflows";
 
@@ -74,6 +74,32 @@ export const socialSchedulingRouter = createTRPCRouter({
           code: "CONFLICT",
           message: `Platform ${input.platform} is already connected`,
         });
+      }
+
+      // Free tier: max 2 connected platforms (architecture/
+      // SUBSCRIPTION_AND_DUAL_TIER_ROUTING.md's entitlement matrix).
+      const maxPlatforms = TIER_LIMITS[ctx.user.tier].maxConnectedPlatforms;
+      if (maxPlatforms !== Infinity) {
+        const { count } = await ctx.supabase
+          .from("platform_connections")
+          .select("id", { count: "exact", head: true })
+          .eq("user_id", ctx.user.id)
+          .is("disconnected_at", null);
+
+        if ((count ?? 0) >= maxPlatforms) {
+          throw new TRPCError({
+            code: "FORBIDDEN",
+            message: `Free tier is limited to ${maxPlatforms} connected platforms.`,
+            cause: {
+              upgradeRequired: true,
+              upsell: {
+                title: "Unlock unlimited platform connections",
+                features: ["Unlimited Connected Platforms (TikTok, IG, YT, X, LinkedIn, Threads, Snap)"],
+                upgradeUrl: "/api/v1/billing/checkout",
+              },
+            },
+          });
+        }
       }
 
       const { data, error } = await ctx.supabase

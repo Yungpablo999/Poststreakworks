@@ -37,5 +37,9 @@ export async function POST(request: Request) {
   );
   const user = await assembleUserProfile(serviceClient, data.user.id);
 
-  return NextResponse.json({ token: data.session.access_token, user });
+  return NextResponse.json({
+    token: data.session.access_token,
+    refreshToken: data.session.refresh_token,
+    user,
+  });
 }

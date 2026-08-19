@@ -101,11 +101,18 @@ export const billingRouter = createTRPCRouter({
         });
       }
 
-      const amount =
+      // price_ngn/price_usd are stored in minor units (kobo/cents) — same
+      // convention as payment_transactions.amount and earnings_events.amount
+      // elsewhere in this schema. An integer column can't hold a fractional
+      // dollar amount like $9.99 precisely, so "whole units, multiply by 100
+      // here" (the previous approach) would silently corrupt any
+      // non-whole-dollar price — $9.99 stored as 9 becomes $9.00, or worse,
+      // 999 stored under a whole-unit assumption becomes $999.00.
+      const amountMinorUnits =
         input.processor === "paystack" ? plan.price_ngn : plan.price_usd;
       const currency = input.processor === "paystack" ? "NGN" : "USD";
 
-      if (!amount) {
+      if (!amountMinorUnits) {
         throw new TRPCError({
           code: "BAD_REQUEST",
           message: `No ${currency} price set for this plan`,
@@ -118,7 +125,7 @@ export const billingRouter = createTRPCRouter({
       if (input.processor === "paystack") {
         const result = await initiatePaystackTransaction({
           email: ctx.user.email,
-          amountKobo: amount * 100,
+          amountKobo: amountMinorUnits,
           currency: "NGN",
           callbackUrl: `${appUrl}/billing?payment=success`,
           metadata: { user_id: ctx.user.id, plan_id: plan.id, plan_slug: plan.slug },
@@ -127,7 +134,7 @@ export const billingRouter = createTRPCRouter({
       } else {
         const result = await createStripeCheckoutSession({
           customerEmail: ctx.user.email,
-          amountUsdCents: amount * 100,
+          amountUsdCents: amountMinorUnits,
           productName: plan.name,
           successUrl: `${appUrl}/billing?payment=success`,
           cancelUrl: `${appUrl}/billing?payment=cancelled`,
@@ -143,7 +150,7 @@ export const billingRouter = createTRPCRouter({
         properties: {
           plan: plan.slug,
           processor: input.processor,
-          amount,
+          amount: amountMinorUnits,
           currency,
         },
       });
@@ -152,7 +159,7 @@ export const billingRouter = createTRPCRouter({
         checkoutUrl,
         plan,
         processor: input.processor,
-        amount,
+        amount: amountMinorUnits,
         currency,
       };
     }),

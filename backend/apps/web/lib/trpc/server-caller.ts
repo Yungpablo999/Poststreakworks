@@ -38,6 +38,19 @@ export async function withErrorHandling<T>(fn: () => Promise<T>): Promise<NextRe
       500;
 
     const message = err instanceof Error ? err.message : "Request failed";
+
+    // requirePro() (context.ts) carries an upsell payload on TRPCError.cause —
+    // surface it so a 403 from a Pro-gated route matches
+    // architecture/SUBSCRIPTION_AND_DUAL_TIER_ROUTING.md §3.B's exact shape
+    // instead of just a bare message.
+    const cause = (err as { cause?: { upgradeRequired?: boolean; upsell?: unknown } })?.cause;
+    if (cause?.upgradeRequired) {
+      return NextResponse.json(
+        { message, code: "UPGRADE_REQUIRED", upsell: cause.upsell },
+        { status },
+      );
+    }
+
     return NextResponse.json({ message }, { status });
   }
 }

@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "../context";
 import { TRPCError } from "@trpc/server";
+import { awardXp } from "@poststreak/workflows";
 
 // EarningsScreen's $0.00 / $1,420.50 figures are static strings in the
 // frontend today — no real payment processor is wired to this domain yet
@@ -66,6 +67,16 @@ export const earningsRouter = createTRPCRouter({
   setGoal: protectedProcedure
     .input(z.object({ targetAmount: z.number().int().positive(), label: z.string().min(1).max(100) }))
     .mutation(async ({ ctx, input }) => {
+      // XP only on a user's first-ever goal (matches API_SPECIFICATION.md's
+      // xpAwarded: 100 alongside QUESTS.md's "Set your $50 income goal"
+      // starter quest) — not on every edit, or changing your mind about the
+      // target would farm XP indefinitely.
+      const { count: existingGoalCount } = await ctx.supabase
+        .from("income_goals")
+        .select("id", { count: "exact", head: true })
+        .eq("user_id", ctx.user.id);
+      const isFirstGoal = (existingGoalCount ?? 0) === 0;
+
       // One active goal at a time — deactivate any existing before inserting.
       await ctx.supabase
         .from("income_goals")
@@ -86,7 +97,12 @@ export const earningsRouter = createTRPCRouter({
         });
       }
 
-      return data;
+      const xpAwarded = isFirstGoal ? 100 : 0;
+      if (xpAwarded > 0) {
+        await awardXp(ctx.supabase, ctx.user.id, xpAwarded, "income_goal_set", input.label);
+      }
+
+      return { ...data, xpAwarded };
     }),
 
   requestPayout: protectedProcedure
