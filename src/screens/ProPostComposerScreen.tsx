@@ -74,7 +74,6 @@ const PRO_PLATFORMS: PlatformOption[] = [
     format: 'Reels & Carousels',
     multiplier: 'Highest Saves',
     bgColor: '#E1306C',
-    gradient: ['#833AB4', '#FD1D1D', '#F77737'],
     iconType: 'instagram',
   },
   {
@@ -92,7 +91,7 @@ const PRO_PLATFORMS: PlatformOption[] = [
     shortName: 'LinkedIn',
     format: 'Thought Leadership',
     multiplier: '2.4x B2B Impact',
-    bgColor: '#0077B5',
+    bgColor: '#0A66C2',
     iconType: 'linkedin',
   },
   {
@@ -112,6 +111,33 @@ const PRO_PLATFORMS: PlatformOption[] = [
     multiplier: 'Organic Feed',
     bgColor: '#101010',
     iconType: 'threads',
+  },
+  {
+    id: 'pinterest',
+    name: 'Pinterest',
+    shortName: 'Pinterest',
+    format: 'Idea Pins & Visuals',
+    multiplier: 'High Intent',
+    bgColor: '#E60023',
+    iconType: 'pinterest' as any,
+  },
+  {
+    id: 'snapchat',
+    name: 'Snapchat',
+    shortName: 'Snapchat',
+    format: 'Spotlight 9:16',
+    multiplier: 'Gen-Z Viral',
+    bgColor: '#FFFC00',
+    iconType: 'snapchat' as any,
+  },
+  {
+    id: 'facebook',
+    name: 'Facebook',
+    shortName: 'Facebook',
+    format: 'Reels & Groups',
+    multiplier: 'Broad Demographic',
+    bgColor: '#1877F2',
+    iconType: 'facebook' as any,
   },
 ];
 
@@ -232,37 +258,116 @@ export const ProPostComposerScreen: React.FC<ProPostComposerScreenProps> = ({
     setShowCompletionModal(true);
   };
 
-  const renderPlatformIcon = (iconType: string) => {
+  const renderPlatformIcon = (iconType: string, size = 26) => {
     switch (iconType) {
       case 'tiktok':
         return (
-          <Svg width={22} height={22} viewBox="0 0 24 24" fill="#000000">
-            <Path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.89-2.89 2.89 2.89 0 0 1 2.89-2.89c.28 0 .54.04.79.1V8.98a6.34 6.34 0 0 0-.79-.05 6.34 6.34 0 0 0-6.34 6.34 6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.33-6.34V8.75a8.28 8.28 0 0 0 4.77 1.48v-3.46a4.85 4.85 0 0 1-1-.08z" />
-          </Svg>
+          <View style={{ width: size, height: size, justifyContent: 'center', alignItems: 'center' }}>
+            <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+              {/* Real TikTok 3D Note */}
+              <Path
+                d="M12.5 3v11.8a3.2 3.2 0 1 1-2.3-3.1v-2.3a5.5 5.5 0 1 0 4.6 5.4V7.5a6.8 6.8 0 0 0 4.2 1.5V6.7a4.6 4.6 0 0 1-3.5-3.7h-3z"
+                fill="#000000"
+              />
+              <Path
+                d="M19 6.7a4.6 4.6 0 0 1-3.5-3.7h-1.2v2.3a4.6 4.6 0 0 0 3.5 3.7V6.7z"
+                fill="#00F2FE"
+              />
+              <Path
+                d="M10.2 14.8a3.2 3.2 0 0 1 2.3-3.1V9.4a5.5 5.5 0 0 0-4.6 5.4 5.5 5.5 0 0 0 5.5 5.5v-2.3a3.2 3.2 0 0 1-3.2-3.2z"
+                fill="#FE2C55"
+              />
+            </Svg>
+          </View>
         );
+
       case 'instagram':
         return (
-          <Svg width={22} height={22} viewBox="0 0 24 24" fill="none">
-            <Rect x="2" y="2" width="20" height="20" rx="5" stroke="#E1306C" strokeWidth="2.2" />
-            <Circle cx="12" cy="12" r="4" stroke="#E1306C" strokeWidth="2.2" />
-            <Circle cx="17.5" cy="6.5" r="1.2" fill="#E1306C" />
-          </Svg>
+          <View style={{ width: size, height: size, borderRadius: size * 0.28, overflow: 'hidden' }}>
+            <LinearGradient
+              colors={['#833AB4', '#FD1D1D', '#F77737', '#FFDC80']}
+              start={{ x: 0, y: 1 }}
+              end={{ x: 1, y: 0 }}
+              style={{ width: '100%', height: '100%', justifyContent: 'center', alignItems: 'center' }}
+            >
+              <Svg width={size * 0.72} height={size * 0.72} viewBox="0 0 24 24" fill="none">
+                <Rect x="2" y="2" width="20" height="20" rx="6" stroke="#FFFFFF" strokeWidth="2.2" />
+                <Circle cx="12" cy="12" r="4.5" stroke="#FFFFFF" strokeWidth="2.2" />
+                <Circle cx="17.8" cy="6.2" r="1.3" fill="#FFFFFF" />
+              </Svg>
+            </LinearGradient>
+          </View>
         );
+
       case 'youtube':
         return (
-          <Svg width={22} height={22} viewBox="0 0 24 24" fill="#FF0000">
-            <Path d="M21.58 7.19a2.5 2.5 0 0 0-1.76-1.77C18.26 5 12 5 12 5s-6.26 0-7.82.42A2.5 2.5 0 0 0 2.42 7.19 26.07 26.07 0 0 0 2 12a26.07 26.07 0 0 0 .42 4.81 2.5 2.5 0 0 0 1.76 1.77C5.74 19 12 19 12 19s6.26 0 7.82-.42a2.5 2.5 0 0 0 1.76-1.77A26.07 26.07 0 0 0 22 12a26.07 26.07 0 0 0-.42-4.81zM10 15V9l5.2 3-5.2 3z" />
-          </Svg>
+          <View style={{ width: size, height: size * 0.75, backgroundColor: '#FF0000', borderRadius: size * 0.22, justifyContent: 'center', alignItems: 'center' }}>
+            <Svg width={size * 0.55} height={size * 0.55} viewBox="0 0 24 24" fill="none">
+              <Path d="M9.5 7.5L16.5 12L9.5 16.5V7.5Z" fill="#FFFFFF" />
+            </Svg>
+          </View>
         );
+
       case 'linkedin':
         return (
-          <Svg width={22} height={22} viewBox="0 0 24 24" fill="#0077B5">
-            <Path d="M19 3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14m-.5 15.5v-5.3a3.26 3.26 0 0 0-3.26-3.26c-.85 0-1.84.52-2.28 1.3v-1.11h-2.79v8.37h2.79v-4.93c0-.77.62-1.4 1.39-1.4a1.4 1.4 0 0 1 1.4 1.4v4.93h2.75M6.46 8.76a1.65 1.65 0 1 0-.01-3.3 1.65 1.65 0 0 0 .01 3.3m1.4 9.74v-8.37H5.06v8.37h2.8z" />
-          </Svg>
+          <View style={{ width: size, height: size, backgroundColor: '#0A66C2', borderRadius: size * 0.22, justifyContent: 'center', alignItems: 'center' }}>
+            <Svg width={size * 0.65} height={size * 0.65} viewBox="0 0 24 24" fill="#FFFFFF">
+              <Path d="M19 3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14m-.5 15.5v-5.3a3.26 3.26 0 0 0-3.26-3.26c-.85 0-1.84.52-2.28 1.3v-1.11h-2.79v8.37h2.79v-4.93c0-.77.62-1.4 1.39-1.4a1.4 1.4 0 0 1 1.4 1.4v4.93h2.75M6.46 8.76a1.65 1.65 0 1 0-.01-3.3 1.65 1.65 0 0 0 .01 3.3m1.4 9.74v-8.37H5.06v8.37h2.8z" />
+            </Svg>
+          </View>
         );
+
+      case 'x':
+        return (
+          <View style={{ width: size, height: size, backgroundColor: '#000000', borderRadius: size * 0.22, justifyContent: 'center', alignItems: 'center' }}>
+            <Svg width={size * 0.6} height={size * 0.6} viewBox="0 0 24 24" fill="#FFFFFF">
+              <Path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+            </Svg>
+          </View>
+        );
+
+      case 'threads':
+        return (
+          <View style={{ width: size, height: size, backgroundColor: '#000000', borderRadius: size * 0.22, justifyContent: 'center', alignItems: 'center' }}>
+            <Svg width={size * 0.65} height={size * 0.65} viewBox="0 0 24 24" fill="none">
+              <Path
+                d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm3.8 12.2c-.3 1.6-1.5 2.6-3.2 2.6-2.1 0-3.6-1.6-3.6-3.8 0-2.3 1.6-3.9 3.8-3.9 1.7 0 2.8.9 3.2 2.3h-1.5c-.3-.7-.9-1.1-1.7-1.1-1.3 0-2.2 1-2.2 2.7s.9 2.6 2.1 2.6c.9 0 1.5-.5 1.7-1.4h1.4z"
+                fill="#FFFFFF"
+              />
+            </Svg>
+          </View>
+        );
+
+      case 'pinterest':
+        return (
+          <View style={{ width: size, height: size, backgroundColor: '#E60023', borderRadius: size / 2, justifyContent: 'center', alignItems: 'center' }}>
+            <Svg width={size * 0.65} height={size * 0.65} viewBox="0 0 24 24" fill="#FFFFFF">
+              <Path d="M12 0a12 12 0 0 0-4.37 23.18c-.06-.98-.12-2.5.02-3.58l.74-3.13s-.19-.38-.19-.94c0-.88.51-1.54 1.15-1.54.54 0 .8.41.8.9 0 .55-.35 1.37-.53 2.13-.15.64.32 1.16.95 1.16 1.14 0 2.02-1.2 2.02-2.94 0-1.54-1.1-2.61-2.68-2.61-1.83 0-2.9 1.37-2.9 2.79 0 .55.21 1.14.48 1.46.05.06.06.12.04.18l-.18.74c-.03.12-.1.17-.23.11-1.07-.5-1.74-2.07-1.74-3.33 0-2.71 1.97-5.2 5.68-5.2 2.98 0 5.3 2.12 5.3 4.96 0 2.96-1.87 5.34-4.46 5.34-.87 0-1.69-.45-1.97-.98l-.54 2.05c-.19.75-.72 1.68-1.07 2.25A12 12 0 1 0 12 0z" />
+            </Svg>
+          </View>
+        );
+
+      case 'snapchat':
+        return (
+          <View style={{ width: size, height: size, backgroundColor: '#FFFC00', borderRadius: size * 0.24, justifyContent: 'center', alignItems: 'center' }}>
+            <Svg width={size * 0.7} height={size * 0.7} viewBox="0 0 24 24" fill="#000000">
+              <Path d="M12.003 2c-3.1 0-5.25 2.15-5.25 4.7 0 .6.1 1.25.3 1.8-.75.35-1.5 1-1.5 1.8 0 .55.35 1.05.9 1.35-.1.35-.35 1.15-.35 1.75 0 1.25 1.15 2 2.5 2.1.25.75 1.15 1.3 2.1 1.3.6 0 1.15-.2 1.3-.2.15 0 .7.2 1.3.2.95 0 1.85-.55 2.1-1.3 1.35-.1 2.5-.85 2.5-2.1 0-.6-.25-1.4-.35-1.75.55-.3.9-.8.9-1.35 0-.8-.75-1.45-1.5-1.8.2-.55.3-1.2.3-1.8 0-2.55-2.15-4.7-5.25-4.7z" />
+            </Svg>
+          </View>
+        );
+
+      case 'facebook':
+        return (
+          <View style={{ width: size, height: size, backgroundColor: '#1877F2', borderRadius: size / 2, justifyContent: 'center', alignItems: 'center' }}>
+            <Svg width={size * 0.65} height={size * 0.65} viewBox="0 0 24 24" fill="#FFFFFF">
+              <Path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
+            </Svg>
+          </View>
+        );
+
       default:
         return (
-          <Svg width={22} height={22} viewBox="0 0 24 24" fill="#171420">
+          <Svg width={size} height={size} viewBox="0 0 24 24" fill="#171420">
             <Circle cx="12" cy="12" r="9" stroke="#171420" strokeWidth="2" />
           </Svg>
         );
@@ -813,7 +918,7 @@ export const ProPostComposerScreen: React.FC<ProPostComposerScreenProps> = ({
           </View>
         </Modal>
 
-        {/* ALL PLATFORMS MODAL */}
+        {/* ALL PLATFORMS MODAL (WITH REAL SOCIAL ICONS & GHOST CELEBRATION) */}
         <Modal
           visible={showAllPlatformsModal}
           transparent={true}
@@ -821,23 +926,41 @@ export const ProPostComposerScreen: React.FC<ProPostComposerScreenProps> = ({
           onRequestClose={() => setShowAllPlatformsModal(false)}
         >
           <View style={styles.modalOverlay}>
-            <View style={styles.modalCard}>
-              <Text style={styles.modalHeaderTitle}>All Available Platforms</Text>
-              <Text style={styles.modalHeaderSub}>Select all destinations for multi-sync publishing.</Text>
-              <ScrollView style={{ maxHeight: 340, marginVertical: 12 }}>
+            <View style={[styles.modalCard, { maxHeight: '88%' }]}>
+              {/* Header */}
+              <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+                <View style={styles.modalGoldTagBadge}>
+                  <Text style={styles.modalGoldTagBadgeText}>👑 PRO MULTI-SYNC</Text>
+                </View>
+                <Pressable onPress={() => setShowAllPlatformsModal(false)} hitSlop={8}>
+                  <Text style={{ fontSize: 18, color: '#94A3B8', fontWeight: '900' }}>✕</Text>
+                </Pressable>
+              </View>
+
+              <Text style={styles.modalHeaderTitle}>Connected Social Platforms</Text>
+              <Text style={styles.modalHeaderSub}>
+                Select all destinations for auto-formatted multi-sync distribution.
+              </Text>
+
+              <ScrollView style={{ maxHeight: 360, marginVertical: 12 }} showsVerticalScrollIndicator={false}>
                 {PRO_PLATFORMS.map((platform) => {
                   const isSelected = selectedPlatforms.includes(platform.id);
                   return (
                     <Pressable
                       key={platform.id}
-                      style={[styles.platformRowItem, isSelected && styles.platformRowItemSelected]}
+                      style={[
+                        styles.platformRowItem,
+                        isSelected && styles.platformRowItemSelected,
+                      ]}
                       onPress={() => togglePlatform(platform.id)}
                     >
-                      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
-                        {renderPlatformIcon(platform.iconType)}
-                        <View>
+                      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, flex: 1 }}>
+                        {renderPlatformIcon(platform.iconType, 28)}
+                        <View style={{ flex: 1 }}>
                           <Text style={styles.platformRowItemName}>{platform.name}</Text>
-                          <Text style={styles.platformRowItemSub}>{platform.format} • {platform.multiplier}</Text>
+                          <Text style={styles.platformRowItemSub}>
+                            {platform.format} • <Text style={{ color: '#059669', fontWeight: '800' }}>{platform.multiplier}</Text>
+                          </Text>
                         </View>
                       </View>
                       <View style={[styles.platformCheckCircle, isSelected && styles.platformCheckCircleActive]}>
@@ -851,11 +974,38 @@ export const ProPostComposerScreen: React.FC<ProPostComposerScreenProps> = ({
                   );
                 })}
               </ScrollView>
+
+              {/* Done Selecting with Gold Gradient & Ghost Animation */}
               <Pressable
-                style={styles.modalPrimaryBtn}
-                onPress={() => setShowAllPlatformsModal(false)}
+                style={({ pressed }) => [styles.applyCustomIdeaBtnWrapper, pressed && styles.btnPressed]}
+                onPress={() => {
+                  setShowAllPlatformsModal(false);
+
+                  if (Platform.OS !== 'web') {
+                    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+                  }
+                  setCompletionData({
+                    title: 'Multi-Platform Sync Configured!',
+                    subtitle: `Active on ${selectedPlatforms.map(p => p.toUpperCase()).join(', ')}. Optimal algorithm formatting applied.`,
+                    badgeText: '👑 MULTI-SYNC ACTIVE',
+                    xpEarned: 25,
+                    speechBubble: 'All platform reach engines synchronized!',
+                  });
+                  setTimeout(() => {
+                    setShowCompletionModal(true);
+                  }, 200);
+                }}
               >
-                <Text style={styles.modalPrimaryBtnText}>Done Selecting</Text>
+                <LinearGradient
+                  colors={['#FDE68A', '#F59E0B', '#D97706']}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 1 }}
+                  style={styles.applyCustomIdeaBtnGradient}
+                >
+                  <Text style={styles.applyCustomIdeaBtnText}>
+                    ✨ Confirm {selectedPlatforms.length} Platforms (+25 XP) ➔
+                  </Text>
+                </LinearGradient>
               </Pressable>
             </View>
           </View>
