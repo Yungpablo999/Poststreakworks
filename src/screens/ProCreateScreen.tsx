@@ -1,0 +1,1937 @@
+import React, { useState, useRef, useEffect } from 'react';
+import {
+  StyleSheet,
+  View,
+  Text,
+  Pressable,
+  ScrollView,
+  Platform,
+  Image,
+  SafeAreaView,
+  StatusBar,
+  Animated,
+  Modal,
+  Dimensions,
+  TextInput,
+} from 'react-native';
+import Svg, { Path, Circle, Rect } from 'react-native-svg';
+import * as Haptics from 'expo-haptics';
+import { LinearGradient } from 'expo-linear-gradient';
+import { FloatingTabBar, TabType } from '../components/FloatingTabBar';
+import { UserProfileModal, UserProfileData } from '../components/UserProfileModal';
+
+interface ProCreateScreenProps {
+  onLogout?: () => void;
+  onNavigateTab?: (tab: TabType) => void;
+  onOpenSchedule?: () => void;
+  onOpenJarvisPro?: () => void;
+  onOpenIdeaDetail?: (ideaTitle?: string) => void;
+  onOpenPostComposer?: (prefillTitle?: string, prefillPlatform?: string) => void;
+  onOpenIdeaAngle?: () => void;
+  onOpenScript?: (ideaTitle?: string) => void;
+  onOpenCaption?: (ideaTitle?: string) => void;
+  onOpenMessages?: () => void;
+  onSwitchToFree?: () => void;
+  userProfile?: UserProfileData;
+  onSaveProfile?: (updated: UserProfileData) => void;
+}
+
+interface NotificationItem {
+  id: string;
+  type: 'streak' | 'collab' | 'quest' | 'level' | 'growth';
+  title: string;
+  body: string;
+  time: string;
+  unread: boolean;
+  iconEmoji: string;
+}
+
+const INITIAL_NOTIFICATIONS: NotificationItem[] = [
+  {
+    id: 'n1',
+    type: 'streak',
+    title: 'Optimal Post Time Approaching',
+    body: '7:30 PM is your peak audience window. Autopilot is ready.',
+    time: '25m ago',
+    unread: true,
+    iconEmoji: '⚡',
+  },
+  {
+    id: 'n2',
+    type: 'quest',
+    title: 'Repurpose Queue Ready',
+    body: 'Draft "3 creator mistakes" converted to 4 multi-platform assets.',
+    time: '2h ago',
+    unread: true,
+    iconEmoji: '🔄',
+  },
+];
+
+export const ProCreateScreen: React.FC<ProCreateScreenProps> = ({
+  onLogout,
+  onNavigateTab,
+  onOpenSchedule,
+  onOpenJarvisPro,
+  onOpenIdeaDetail,
+  onOpenPostComposer,
+  onOpenIdeaAngle,
+  onOpenScript,
+  onOpenCaption,
+  onOpenMessages,
+  onSwitchToFree,
+  userProfile,
+  onSaveProfile,
+}) => {
+  const [activeTab, setActiveTab] = useState<TabType>('create');
+  const [showProfileModal, setShowProfileModal] = useState(false);
+  const [showNotificationModal, setShowNotificationModal] = useState(false);
+  const [showVoiceStudioModal, setShowVoiceStudioModal] = useState(false);
+  const [showRepurposeModal, setShowRepurposeModal] = useState(false);
+  const [showHookModal, setShowHookModal] = useState(false);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+
+  // Voice Studio State
+  const [selectedVoiceTone, setSelectedVoiceTone] = useState('Energetic Studio Mix');
+  const [voiceScriptInput, setVoiceScriptInput] = useState(
+    'Here are 3 creator mistakes I stopped making this year that helped me grow 10x faster...'
+  );
+  const [isGeneratingVoice, setIsGeneratingVoice] = useState(false);
+  const [isRepurposing, setIsRepurposing] = useState(false);
+
+  // Notifications
+  const [notifications, setNotifications] = useState<NotificationItem[]>(INITIAL_NOTIFICATIONS);
+
+  // Animations
+  const ghostFloatY = useRef(new Animated.Value(0)).current;
+  const ghostScale = useRef(new Animated.Value(1)).current;
+  const waveformAnim = useRef(new Animated.Value(0.4)).current;
+  const modalPopScale = useRef(new Animated.Value(0.92)).current;
+
+  useEffect(() => {
+    // Mascot floating animation
+    Animated.loop(
+      Animated.sequence([
+        Animated.timing(ghostFloatY, {
+          toValue: -4,
+          duration: 1500,
+          useNativeDriver: true,
+        }),
+        Animated.timing(ghostFloatY, {
+          toValue: 2,
+          duration: 1500,
+          useNativeDriver: true,
+        }),
+      ])
+    ).start();
+
+    // Waveform audio pulse
+    Animated.loop(
+      Animated.sequence([
+        Animated.timing(waveformAnim, {
+          toValue: 1,
+          duration: 600,
+          useNativeDriver: true,
+        }),
+        Animated.timing(waveformAnim, {
+          toValue: 0.35,
+          duration: 600,
+          useNativeDriver: true,
+        }),
+      ])
+    ).start();
+  }, []);
+
+  const showToast = (msg: string) => {
+    setToastMessage(msg);
+    setTimeout(() => {
+      setToastMessage(null);
+    }, 2800);
+  };
+
+  const triggerModalPop = () => {
+    modalPopScale.setValue(0.92);
+    Animated.spring(modalPopScale, {
+      toValue: 1,
+      friction: 6,
+      tension: 60,
+      useNativeDriver: true,
+    }).start();
+  };
+
+  const handleTabPress = (tab: TabType) => {
+    if (Platform.OS !== 'web') {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    }
+    setActiveTab(tab);
+    if (onNavigateTab) {
+      onNavigateTab(tab);
+    }
+  };
+
+  const unreadCount = notifications.filter((n) => n.unread).length;
+
+  return (
+    <SafeAreaView style={styles.safeArea}>
+      <StatusBar barStyle="dark-content" backgroundColor="#FAF8F5" />
+      <View style={styles.container}>
+        {/* ============================================================ */}
+        {/* 1. TOP HEADER BAR                                            */}
+        {/* ============================================================ */}
+        <View style={styles.headerBar}>
+          {/* Top-Left: Mascot + Mode Switcher */}
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+            <Animated.View
+              style={[
+                styles.headerLogoWrapper,
+                {
+                  transform: [
+                    { translateY: ghostFloatY },
+                    { scale: ghostScale },
+                  ],
+                },
+              ]}
+            >
+              <Image
+                source={require('../../assets/images/jarvis-ghost-clean.png')}
+                style={styles.headerGhostLogo}
+                resizeMode="contain"
+              />
+            </Animated.View>
+
+            <Pressable
+              onPress={() => {
+                if (Platform.OS !== 'web') {
+                  Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+                }
+                if (onSwitchToFree) {
+                  onSwitchToFree();
+                } else if (onSaveProfile && userProfile) {
+                  onSaveProfile({ ...userProfile, tier: 'free' });
+                }
+              }}
+              hitSlop={8}
+            >
+              <LinearGradient
+                colors={['#FDE047', '#EAB308', '#CA8A04']}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 0 }}
+                style={styles.proHeaderBadge}
+              >
+                <Text style={styles.proHeaderBadgeText}>👑 PRO (TAP FOR FREE)</Text>
+              </LinearGradient>
+            </Pressable>
+          </View>
+
+          {/* Right Action Icons: Messages, Notification Bell & Profile Avatar */}
+          <View style={styles.headerRightGroup}>
+            {/* Chat Messages */}
+            <Pressable
+              style={({ pressed }) => [styles.headerIconBtn, pressed && styles.headerIconBtnPressed]}
+              hitSlop={8}
+              onPress={() => {
+                if (Platform.OS !== 'web') {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                }
+                if (onOpenMessages) {
+                  onOpenMessages();
+                } else if (onNavigateTab) {
+                  onNavigateTab('match');
+                }
+              }}
+            >
+              <Svg width={20} height={20} viewBox="0 0 24 24" fill="none">
+                <Path
+                  d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"
+                  stroke="#1A1626"
+                  strokeWidth="2.2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </Svg>
+            </Pressable>
+
+            {/* Notification Bell */}
+            <Pressable
+              style={({ pressed }) => [styles.headerIconBtn, pressed && styles.headerIconBtnPressed]}
+              hitSlop={8}
+              onPress={() => {
+                if (Platform.OS !== 'web') {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                }
+                triggerModalPop();
+                setShowNotificationModal(true);
+              }}
+            >
+              <Svg width={20} height={20} viewBox="0 0 24 24" fill="none">
+                <Path
+                  d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"
+                  stroke="#1A1626"
+                  strokeWidth="2.2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+                <Path
+                  d="M13.73 21a2 2 0 0 1-3.46 0"
+                  stroke="#1A1626"
+                  strokeWidth="2.2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </Svg>
+              {unreadCount > 0 && <View style={styles.notificationDot} />}
+            </Pressable>
+
+            {/* Profile Avatar */}
+            <Pressable
+              onPress={() => {
+                if (Platform.OS !== 'web') {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                }
+                triggerModalPop();
+                setShowProfileModal(true);
+              }}
+              style={({ pressed }) => [
+                styles.profilePhotoBtn,
+                styles.profilePhotoBtnPro,
+                pressed && styles.headerIconBtnPressed,
+              ]}
+              hitSlop={8}
+            >
+              <Image
+                source={userProfile?.avatarSource || require('../../assets/images/jarvis-ghost-clean.png')}
+                style={styles.headerCustomAvatarImage}
+                resizeMode="cover"
+              />
+              <View style={styles.addPhotoPlusBadge}>
+                <Text style={styles.addPhotoPlusText}>👑</Text>
+              </View>
+            </Pressable>
+          </View>
+        </View>
+
+        {/* 2. MAIN SCROLLABLE CONTENT */}
+        <ScrollView
+          contentContainerStyle={styles.scrollContent}
+          showsVerticalScrollIndicator={false}
+          bounces={true}
+        >
+          {/* TOP TAGS ROW: CREATE — PRO & PRO ACCESS */}
+          <View style={styles.topTagsRow}>
+            <View style={styles.createProPill}>
+              <Text style={styles.createProPillText}>CREATE — PRO</Text>
+            </View>
+
+            <View style={styles.proAccessPill}>
+              <Text style={styles.proAccessPillText}>🔒 PRO ACCESS</Text>
+            </View>
+          </View>
+
+          {/* MAIN HEADLINE & SUBTITLE */}
+          <Text style={styles.mainTitleText}>Build your next post faster.</Text>
+          <Text style={styles.mainSubtitleText}>
+            From idea to voiceover to schedule, everything starts here.
+          </Text>
+
+          {/* ============================================================ */}
+          {/* CARD 1: YOUR PRO WORKFLOW                                    */}
+          {/* ============================================================ */}
+          <View style={styles.workflowCard}>
+            <View style={styles.workflowHeaderRow}>
+              <Text style={styles.workflowTitle}>Your Pro Workflow</Text>
+              <Text style={{ fontSize: 20 }}>✨</Text>
+            </View>
+
+            <Text style={styles.workflowSub}>
+              Turn one idea into a full content asset in minutes.
+            </Text>
+
+            {/* 4-STEP PIPELINE ROW */}
+            <View style={styles.pipelineStepsRow}>
+              {/* Step 1: Idea */}
+              <Pressable
+                style={styles.pipelineStepItem}
+                onPress={() => {
+                  if (onOpenIdeaDetail) onOpenIdeaDetail('3 creator mistakes I stopped making this year');
+                }}
+              >
+                <View style={styles.pipelineIconBox}>
+                  <Text style={{ fontSize: 16 }}>💡</Text>
+                </View>
+                <Text style={styles.pipelineStepLabel}>Idea</Text>
+              </Pressable>
+
+              <View style={styles.pipelineConnectorLine} />
+
+              {/* Step 2: Script */}
+              <Pressable
+                style={styles.pipelineStepItem}
+                onPress={() => {
+                  if (onOpenScript) onOpenScript('3 creator mistakes I stopped making this year');
+                }}
+              >
+                <View style={styles.pipelineIconBox}>
+                  <Text style={{ fontSize: 16 }}>📄</Text>
+                </View>
+                <Text style={styles.pipelineStepLabel}>Script</Text>
+              </Pressable>
+
+              <View style={styles.pipelineConnectorLine} />
+
+              {/* Step 3: Voice */}
+              <Pressable
+                style={styles.pipelineStepItem}
+                onPress={() => {
+                  triggerModalPop();
+                  setShowVoiceStudioModal(true);
+                }}
+              >
+                <View style={styles.pipelineIconBox}>
+                  <Text style={{ fontSize: 16 }}>🎙️</Text>
+                </View>
+                <Text style={styles.pipelineStepLabel}>Voice</Text>
+              </Pressable>
+
+              <View style={styles.pipelineConnectorLine} />
+
+              {/* Step 4: Done */}
+              <Pressable
+                style={styles.pipelineStepItem}
+                onPress={() => {
+                  if (onOpenSchedule) onOpenSchedule();
+                }}
+              >
+                <View style={styles.pipelineIconBox}>
+                  <Text style={{ fontSize: 16 }}>🗓️</Text>
+                </View>
+                <Text style={styles.pipelineStepLabel}>Done</Text>
+              </Pressable>
+            </View>
+
+            {/* CURRENT PROJECT EMBEDDED BOX */}
+            <View style={styles.currentProjectBox}>
+              <Text style={styles.currentProjectLabel}>CURRENT PROJECT</Text>
+              <Text style={styles.currentProjectTitle}>
+                &ldquo;3 creator mistakes I stopped making this year&rdquo;
+              </Text>
+
+              <View style={styles.projectTagsRow}>
+                <View style={styles.projectTagGray}>
+                  <Text style={styles.projectTagGrayText}>TikTok</Text>
+                </View>
+                <View style={styles.projectTagGray}>
+                  <Text style={styles.projectTagGrayText}>IG Reel</Text>
+                </View>
+                <View style={styles.projectTagGold}>
+                  <Text style={styles.projectTagGoldText}>7:30 PM</Text>
+                </View>
+              </View>
+            </View>
+
+            {/* WORKFLOW ACTION BUTTONS */}
+            <View style={styles.workflowActionsRow}>
+              <Pressable
+                style={({ pressed }) => [styles.startCreatingBtn, pressed && styles.btnPressed]}
+                onPress={() => {
+                  if (Platform.OS !== 'web') {
+                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                  }
+                  if (onOpenPostComposer) {
+                    onOpenPostComposer('3 creator mistakes I stopped making this year', 'Instagram');
+                  }
+                }}
+              >
+                <Text style={styles.startCreatingBtnText}>Start Creating</Text>
+              </Pressable>
+
+              <Pressable
+                style={({ pressed }) => [styles.resumeDraftBtn, pressed && styles.btnPressed]}
+                onPress={() => {
+                  if (Platform.OS !== 'web') {
+                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                  }
+                  if (onOpenScript) {
+                    onOpenScript('3 creator mistakes I stopped making this year');
+                  }
+                }}
+              >
+                <Text style={styles.resumeDraftBtnText}>Resume Draft</Text>
+              </Pressable>
+            </View>
+          </View>
+
+          {/* ============================================================ */}
+          {/* SECTION 2: PRO TOOLS (2x3 Grid)                              */}
+          {/* ============================================================ */}
+          <View style={styles.sectionHeaderRow}>
+            <Text style={styles.proToolsMainTitle}>Pro Tools</Text>
+            <View style={styles.powerPillBadge}>
+              <Text style={styles.powerPillText}>POWER</Text>
+            </View>
+          </View>
+
+          <View style={styles.proToolsGrid}>
+            {/* Tool 1: Idea Engine */}
+            <Pressable
+              style={({ pressed }) => [styles.toolGridCard, pressed && styles.btnPressed]}
+              onPress={() => {
+                if (onOpenIdeaAngle) onOpenIdeaAngle();
+                else if (onOpenIdeaDetail) onOpenIdeaDetail();
+              }}
+            >
+              <View style={styles.toolIconSquare}>
+                <Text style={{ fontSize: 18 }}>💡</Text>
+              </View>
+              <Text style={styles.toolGridTitle}>Idea Engine</Text>
+              <Text style={styles.toolGridSub}>Generate content angles.</Text>
+            </Pressable>
+
+            {/* Tool 2: Script Builder */}
+            <Pressable
+              style={({ pressed }) => [styles.toolGridCard, pressed && styles.btnPressed]}
+              onPress={() => {
+                if (onOpenScript) onOpenScript();
+              }}
+            >
+              <View style={styles.toolIconSquare}>
+                <Text style={{ fontSize: 18 }}>🪄</Text>
+              </View>
+              <Text style={styles.toolGridTitle}>Script Builder</Text>
+              <Text style={styles.toolGridSub}>Write short-form scripts fast.</Text>
+            </Pressable>
+
+            {/* Tool 3: Caption Writer */}
+            <Pressable
+              style={({ pressed }) => [styles.toolGridCard, pressed && styles.btnPressed]}
+              onPress={() => {
+                if (onOpenCaption) onOpenCaption();
+              }}
+            >
+              <View style={styles.toolIconSquare}>
+                <Text style={{ fontSize: 18 }}>📝</Text>
+              </View>
+              <Text style={styles.toolGridTitle}>Caption Writer</Text>
+              <Text style={styles.toolGridSub}>Create high-converting captions.</Text>
+            </Pressable>
+
+            {/* Tool 4: Voice Studio (UNLOCKED) */}
+            <Pressable
+              style={({ pressed }) => [styles.toolGridCard, pressed && styles.btnPressed]}
+              onPress={() => {
+                triggerModalPop();
+                setShowVoiceStudioModal(true);
+              }}
+            >
+              <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                <View style={styles.toolIconSquare}>
+                  <Text style={{ fontSize: 18 }}>🎙️</Text>
+                </View>
+                <View style={styles.unlockedPill}>
+                  <Text style={styles.unlockedPillText}>UNLOCKED</Text>
+                </View>
+              </View>
+              <Text style={styles.toolGridTitle}>Voice Studio</Text>
+              <Text style={styles.toolGridSub}>Turn scripts into narration.</Text>
+            </Pressable>
+
+            {/* Tool 5: Repurpose (PRO TOOL) */}
+            <Pressable
+              style={({ pressed }) => [styles.toolGridCard, pressed && styles.btnPressed]}
+              onPress={() => {
+                triggerModalPop();
+                setShowRepurposeModal(true);
+              }}
+            >
+              <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                <View style={styles.toolIconSquare}>
+                  <Text style={{ fontSize: 18 }}>🔄</Text>
+                </View>
+                <View style={styles.proToolBadgePill}>
+                  <Text style={styles.proToolBadgeText}>PRO TOOL</Text>
+                </View>
+              </View>
+              <Text style={styles.toolGridTitle}>Repurpose</Text>
+              <Text style={styles.toolGridSub}>Turn one asset into multiple formats.</Text>
+            </Pressable>
+
+            {/* Tool 6: Hook Gen */}
+            <Pressable
+              style={({ pressed }) => [styles.toolGridCard, pressed && styles.btnPressed]}
+              onPress={() => {
+                triggerModalPop();
+                setShowHookModal(true);
+              }}
+            >
+              <View style={styles.toolIconSquare}>
+                <Text style={{ fontSize: 18 }}>⚓</Text>
+              </View>
+              <Text style={styles.toolGridTitle}>Hook Gen</Text>
+              <Text style={styles.toolGridSub}>200+ viral video opening hooks.</Text>
+            </Pressable>
+          </View>
+
+          {/* ============================================================ */}
+          {/* CARD 3: REPURPOSE THIS IDEA BANNER                           */}
+          {/* ============================================================ */}
+          <Pressable
+            style={({ pressed }) => [styles.repurposeBannerCard, pressed && styles.btnPressed]}
+            onPress={() => {
+              triggerModalPop();
+              setShowRepurposeModal(true);
+            }}
+          >
+            <View style={{ flexDirection: 'row', gap: 14 }}>
+              <View style={styles.repurposeIconSquare}>
+                <Text style={{ fontSize: 22 }}>📑</Text>
+              </View>
+
+              <View style={{ flex: 1 }}>
+                <Text style={styles.repurposeBannerTitle}>Repurpose This Idea</Text>
+                <Text style={styles.repurposeBannerSub}>
+                  1 long idea becomes: Reel, Carousel, Tweet thread, LinkedIn post, and more.
+                </Text>
+                <Text style={styles.repurposeLinkText}>Repurpose Now →</Text>
+              </View>
+            </View>
+          </Pressable>
+
+          {/* ============================================================ */}
+          {/* CARD 4: VOICE STUDIO INTERACTIVE CARD                        */}
+          {/* ============================================================ */}
+          <View style={styles.voiceStudioMainCard}>
+            <View style={styles.voiceCardHeaderRow}>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+                <View style={styles.voiceStarIconBox}>
+                  <Text style={{ fontSize: 18 }}>🎙️</Text>
+                </View>
+                <View>
+                  <Text style={styles.voiceCardTitle}>Voice Studio</Text>
+                  <Text style={styles.voiceCardSub}>Create AI voice from your script</Text>
+                </View>
+              </View>
+
+              <Pressable
+                style={styles.voicePresetsPillBtn}
+                onPress={() => {
+                  triggerModalPop();
+                  setShowVoiceStudioModal(true);
+                }}
+              >
+                <Text style={{ fontSize: 11 }}>🎚️</Text>
+                <Text style={styles.voicePresetsText}>VOICE PRESETS</Text>
+              </Pressable>
+            </View>
+
+            {/* WAVEFORM VISUALIZER BOX */}
+            <View style={styles.voiceWaveformBox}>
+              <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+                <Text style={styles.voiceWaveformWatermark}>Voice Studio</Text>
+                <Image
+                  source={require('../../assets/images/jarvis-core-flame.png')}
+                  style={{ width: 28, height: 28, opacity: 0.8 }}
+                  resizeMode="contain"
+                />
+              </View>
+
+              <View style={styles.waveformRow}>
+                {[16, 32, 54, 24, 62, 40, 22, 58, 36, 18, 48, 28, 64, 38, 20].map((h, i) => (
+                  <Animated.View
+                    key={`vw_${i}`}
+                    style={[
+                      styles.waveformBarPro,
+                      {
+                        height: h,
+                        opacity: waveformAnim,
+                      },
+                    ]}
+                  />
+                ))}
+              </View>
+
+              <Pressable
+                style={styles.previewVoicePill}
+                onPress={() => {
+                  showToast('Playing preview audio: "Energetic Studio Mix"...');
+                }}
+              >
+                <Text style={styles.previewVoiceText}>▶ Preview Voice</Text>
+              </Pressable>
+            </View>
+
+            {/* SPECS ROW */}
+            <View style={styles.voiceSpecsRow}>
+              <View>
+                <Text style={styles.seriesVoiceLabel}>SERIES VOICE</Text>
+                <Text style={styles.seriesVoiceVal}>{selectedVoiceTone}</Text>
+              </View>
+
+              <View style={{ alignItems: 'flex-end' }}>
+                <Text style={styles.minsCountVal}>118m</Text>
+                <Text style={styles.minsRemainingLabel}>MINS REMAINING</Text>
+              </View>
+            </View>
+
+            {/* DUAL ACTION BUTTONS */}
+            <View style={styles.voiceButtonsRow}>
+              <Pressable
+                style={({ pressed }) => [styles.generateVoiceBtn, pressed && styles.btnPressed]}
+                onPress={() => {
+                  triggerModalPop();
+                  setShowVoiceStudioModal(true);
+                }}
+              >
+                <Text style={styles.generateVoiceBtnText}>⚡ Generate Voice</Text>
+              </Pressable>
+
+              <Pressable
+                style={({ pressed }) => [styles.openStudioOutlineBtn, pressed && styles.btnPressed]}
+                onPress={() => {
+                  triggerModalPop();
+                  setShowVoiceStudioModal(true);
+                }}
+              >
+                <Text style={styles.openStudioOutlineBtnText}>Open Studio</Text>
+              </Pressable>
+            </View>
+          </View>
+
+          {/* ============================================================ */}
+          {/* SECTION 5: ACTIVE DRAFTS                                     */}
+          {/* ============================================================ */}
+          <View style={styles.draftsSectionHeaderRow}>
+            <Text style={styles.activeDraftsTitle}>Active Drafts</Text>
+            <Pressable
+              onPress={() => {
+                showToast('Viewing all 6 creator drafts');
+              }}
+            >
+              <Text style={styles.viewAllText}>View all</Text>
+            </Pressable>
+          </View>
+
+          <View style={{ gap: 8, marginBottom: 16 }}>
+            {/* Draft 1 */}
+            <Pressable
+              style={({ pressed }) => [styles.draftItemCard, pressed && styles.btnPressed]}
+              onPress={() => {
+                if (onOpenScript) onOpenScript('3 mistakes I stopped making...');
+              }}
+            >
+              <View style={styles.draftIconSquare}>
+                <Text style={{ fontSize: 18 }}>📄</Text>
+              </View>
+              <View style={{ flex: 1 }}>
+                <Text style={styles.draftItemTitle}>3 mistakes I stopped making...</Text>
+                <Text style={styles.scriptReadyTag}>SCRIPT READY</Text>
+              </View>
+              <Text style={styles.draftChevron}>›</Text>
+            </Pressable>
+
+            {/* Draft 2 */}
+            <Pressable
+              style={({ pressed }) => [styles.draftItemCard, pressed && styles.btnPressed]}
+              onPress={() => {
+                triggerModalPop();
+                setShowVoiceStudioModal(true);
+              }}
+            >
+              <View style={styles.draftIconSquare}>
+                <Text style={{ fontSize: 18 }}>🎙️</Text>
+              </View>
+              <View style={{ flex: 1 }}>
+                <Text style={styles.draftItemTitle}>Behind the scenes tour</Text>
+                <Text style={styles.voiceDraftTag}>VOICE DRAFT</Text>
+              </View>
+              <Text style={styles.draftChevron}>›</Text>
+            </Pressable>
+          </View>
+
+          {/* ============================================================ */}
+          {/* CARD 6: SMART SCHEDULE                                       */}
+          {/* ============================================================ */}
+          <View style={styles.smartScheduleCard}>
+            <View style={styles.smartScheduleHeaderRow}>
+              <View style={styles.smartSchedulePill}>
+                <Text style={styles.smartSchedulePillText}>SMART SCHEDULE</Text>
+              </View>
+              <Text style={{ fontSize: 18 }}>⚡</Text>
+            </View>
+
+            <Text style={styles.bestWindowSub}>Best window today</Text>
+            <Text style={styles.bestWindowTime}>7:30 <Text style={styles.bestWindowPm}>PM</Text></Text>
+
+            <View style={styles.scheduleDivider} />
+
+            <View style={styles.scheduledStatusRow}>
+              <View>
+                <Text style={styles.scheduledBigStat}>6</Text>
+                <Text style={styles.scheduledStatLabel}>SCHEDULED</Text>
+              </View>
+
+              <View style={{ alignItems: 'flex-end' }}>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                  <View style={styles.greenActiveDot} />
+                  <Text style={styles.autopilotActiveLabel}>Active</Text>
+                </View>
+                <Text style={styles.scheduledStatLabel}>AUTOPILOT</Text>
+              </View>
+            </View>
+
+            <Pressable
+              style={({ pressed }) => [styles.openScheduleFullBtn, pressed && styles.btnPressed]}
+              onPress={() => {
+                if (onOpenSchedule) onOpenSchedule();
+                else if (onNavigateTab) onNavigateTab('growth');
+              }}
+            >
+              <Text style={styles.openScheduleFullBtnText}>Open Schedule</Text>
+            </Pressable>
+          </View>
+
+          {/* ============================================================ */}
+          {/* CARD 7: JARVIS SUGGESTION                                    */}
+          {/* ============================================================ */}
+          <View style={[styles.jarvisSuggestionCard, { marginBottom: 120 }]}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+              <View style={styles.jarvisFlameIconBox}>
+                <Image
+                  source={require('../../assets/images/jarvis-core-flame.png')}
+                  style={{ width: 22, height: 22 }}
+                  resizeMode="contain"
+                />
+              </View>
+
+              <View style={{ flex: 1 }}>
+                <Text style={styles.jarvisSuggestionTag}>JARVIS SUGGESTION</Text>
+                <Text style={styles.jarvisSuggestionText}>
+                  &ldquo;Your Lifestyle Reels perform best with a fast hook in the first 2 seconds.&rdquo;
+                </Text>
+              </View>
+            </View>
+          </View>
+        </ScrollView>
+
+        {/* 10. FLOATING LIQUID GLASS BOTTOM NAVIGATION BAR */}
+        <FloatingTabBar activeTab={activeTab} onTabPress={handleTabPress} />
+
+        {/* ============================================================ */}
+        {/* MODAL: AI VOICE STUDIO PRO                                   */}
+        {/* ============================================================ */}
+        <Modal
+          visible={showVoiceStudioModal}
+          transparent={true}
+          animationType="fade"
+          onRequestClose={() => setShowVoiceStudioModal(false)}
+        >
+          <View style={styles.modalOverlay}>
+            <Animated.View style={[styles.modalCard, { transform: [{ scale: modalPopScale }] }]}>
+              <View style={styles.modalHeaderRow}>
+                <View>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                    <Text style={styles.modalTitle}>AI Voice Studio</Text>
+                    <View style={styles.unlockedPill}>
+                      <Text style={styles.unlockedPillText}>PRO UNLOCKED</Text>
+                    </View>
+                  </View>
+                  <Text style={styles.modalSubtitle}>Generate studio-grade voiceover from your script</Text>
+                </View>
+                <Pressable onPress={() => setShowVoiceStudioModal(false)} style={styles.modalCloseCircle} hitSlop={8}>
+                  <Text style={styles.modalCloseCross}>✕</Text>
+                </Pressable>
+              </View>
+
+              <Text style={styles.inputSectionHeader}>SELECT AI VOICE PRESET</Text>
+              <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8, marginVertical: 8 }}>
+                {['Energetic Studio Mix', 'Deep Storyteller', 'Tech Explainer', 'Casual Vlogger'].map((voice, idx) => {
+                  const isSelected = selectedVoiceTone === voice;
+                  return (
+                    <Pressable
+                      key={idx}
+                      style={[styles.voiceToneChip, isSelected && styles.voiceToneChipActive]}
+                      onPress={() => {
+                        if (Platform.OS !== 'web') {
+                          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                        }
+                        setSelectedVoiceTone(voice);
+                      }}
+                    >
+                      <Text style={[styles.voiceToneChipText, isSelected && styles.voiceToneChipTextActive]}>
+                        🎙️ {voice}
+                      </Text>
+                    </Pressable>
+                  );
+                })}
+              </ScrollView>
+
+              <Text style={styles.inputSectionHeader}>SCRIPT INPUT</Text>
+              <TextInput
+                style={styles.voiceTextInput}
+                multiline
+                numberOfLines={4}
+                value={voiceScriptInput}
+                onChangeText={setVoiceScriptInput}
+                placeholder="Paste or type your video script here..."
+                placeholderTextColor="#94A3B8"
+              />
+
+              <Pressable
+                style={styles.modalFullBtn}
+                onPress={() => {
+                  setIsGeneratingVoice(true);
+                  setTimeout(() => {
+                    setIsGeneratingVoice(false);
+                    setShowVoiceStudioModal(false);
+                    showToast('AI Voice generated & synced with Reel draft!');
+                  }, 1200);
+                }}
+              >
+                <Text style={styles.modalFullBtnText}>
+                  {isGeneratingVoice ? 'Generating AI Audio...' : 'Generate Studio Voiceover ➔'}
+                </Text>
+              </Pressable>
+            </Animated.View>
+          </View>
+        </Modal>
+
+        {/* ============================================================ */}
+        {/* MODAL: 1-CLICK REPURPOSING STUDIO                            */}
+        {/* ============================================================ */}
+        <Modal
+          visible={showRepurposeModal}
+          transparent={true}
+          animationType="fade"
+          onRequestClose={() => setShowRepurposeModal(false)}
+        >
+          <View style={styles.modalOverlay}>
+            <Animated.View style={[styles.modalCard, { transform: [{ scale: modalPopScale }] }]}>
+              <View style={styles.modalHeaderRow}>
+                <View>
+                  <View style={styles.proToolBadgePill}>
+                    <Text style={styles.proToolBadgeText}>PRO REPURPOSING</Text>
+                  </View>
+                  <Text style={[styles.modalTitle, { marginTop: 4 }]}>Repurpose This Idea</Text>
+                  <Text style={styles.modalSubtitle}>1 Script ➔ 4 Formats in 1 Tap</Text>
+                </View>
+                <Pressable onPress={() => setShowRepurposeModal(false)} style={styles.modalCloseCircle} hitSlop={8}>
+                  <Text style={styles.modalCloseCross}>✕</Text>
+                </Pressable>
+              </View>
+
+              <View style={{ gap: 8, marginVertical: 12 }}>
+                <View style={styles.repurposeOptionRow}>
+                  <Text style={{ fontSize: 16 }}>🎬</Text>
+                  <Text style={styles.repurposeOptionText}>Instagram Reel &amp; TikTok (9:16 Video Script)</Text>
+                </View>
+                <View style={styles.repurposeOptionRow}>
+                  <Text style={{ fontSize: 16 }}>📑</Text>
+                  <Text style={styles.repurposeOptionText}>Instagram Carousel (7-Slide Breakdown)</Text>
+                </View>
+                <View style={styles.repurposeOptionRow}>
+                  <Text style={{ fontSize: 16 }}>🐦</Text>
+                  <Text style={styles.repurposeOptionText}>X / Twitter Thread (5 Viral Tweets)</Text>
+                </View>
+                <View style={styles.repurposeOptionRow}>
+                  <Text style={{ fontSize: 16 }}>💼</Text>
+                  <Text style={styles.repurposeOptionText}>LinkedIn Authority Post with Key Insights</Text>
+                </View>
+              </View>
+
+              <Pressable
+                style={styles.modalFullBtn}
+                onPress={() => {
+                  setIsRepurposing(true);
+                  setTimeout(() => {
+                    setIsRepurposing(false);
+                    setShowRepurposeModal(false);
+                    showToast('Generated 4 multi-platform assets from this idea!');
+                  }, 1200);
+                }}
+              >
+                <Text style={styles.modalFullBtnText}>
+                  {isRepurposing ? 'Repurposing Assets...' : 'Repurpose into 4 Assets ➔'}
+                </Text>
+              </Pressable>
+            </Animated.View>
+          </View>
+        </Modal>
+
+        {/* ============================================================ */}
+        {/* MODAL: 200+ HOOK GENERATOR                                   */}
+        {/* ============================================================ */}
+        <Modal
+          visible={showHookModal}
+          transparent={true}
+          animationType="fade"
+          onRequestClose={() => setShowHookModal(false)}
+        >
+          <View style={styles.modalOverlay}>
+            <Animated.View style={[styles.modalCard, { transform: [{ scale: modalPopScale }] }]}>
+              <View style={styles.modalHeaderRow}>
+                <View>
+                  <Text style={styles.modalTitle}>Viral Hook Library</Text>
+                  <Text style={styles.modalSubtitle}>Top-performing openers for first 2 seconds</Text>
+                </View>
+                <Pressable onPress={() => setShowHookModal(false)} style={styles.modalCloseCircle} hitSlop={8}>
+                  <Text style={styles.modalCloseCross}>✕</Text>
+                </Pressable>
+              </View>
+
+              <ScrollView style={{ maxHeight: 260, marginVertical: 8 }}>
+                {[
+                  '“If you create content in 2024, stop scrolling.”',
+                  '“Here is the secret nobody tells you about short-form retention.”',
+                  '“3 mistakes I stopped making that changed everything.”',
+                  '“Watch this before you post your next Reel.”',
+                ].map((hook, idx) => (
+                  <Pressable
+                    key={idx}
+                    style={styles.hookItemBox}
+                    onPress={() => {
+                      setShowHookModal(false);
+                      showToast(`Copied hook: ${hook.slice(0, 30)}...`);
+                    }}
+                  >
+                    <Text style={styles.hookItemText}>{hook}</Text>
+                    <Text style={styles.hookCopyPill}>USE ➔</Text>
+                  </Pressable>
+                ))}
+              </ScrollView>
+
+              <Pressable style={styles.modalFullBtn} onPress={() => setShowHookModal(false)}>
+                <Text style={styles.modalFullBtnText}>Close</Text>
+              </Pressable>
+            </Animated.View>
+          </View>
+        </Modal>
+
+        {/* PROFILE MODAL */}
+        <UserProfileModal
+          visible={showProfileModal}
+          onClose={() => setShowProfileModal(false)}
+          onLogout={onLogout}
+          initialProfile={userProfile}
+          onSaveProfile={(updated) => {
+            if (onSaveProfile) onSaveProfile(updated);
+          }}
+        />
+
+        {/* TOAST */}
+        {toastMessage && (
+          <View style={styles.toastContainer}>
+            <Text style={styles.toastText}>{toastMessage}</Text>
+          </View>
+        )}
+      </View>
+    </SafeAreaView>
+  );
+};
+
+const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+    backgroundColor: '#FAF8F5',
+  },
+  container: {
+    flex: 1,
+    backgroundColor: '#FAF8F5',
+  },
+  headerBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 20,
+    paddingTop: 10,
+    paddingBottom: 12,
+    backgroundColor: '#FAF8F5',
+  },
+  headerLogoWrapper: {
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    backgroundColor: 'rgba(255, 255, 255, 0.95)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.06,
+    shadowRadius: 6,
+    elevation: 2,
+  },
+  headerGhostLogo: {
+    width: 28,
+    height: 28,
+  },
+  proHeaderBadge: {
+    paddingHorizontal: 8,
+    paddingVertical: 3.5,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#FEF08A',
+  },
+  proHeaderBadgeText: {
+    fontSize: 9.5,
+    fontWeight: '900',
+    color: '#78350F',
+    letterSpacing: 0.5,
+  },
+  headerRightGroup: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+  },
+  headerIconBtn: {
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1,
+    borderColor: '#EFECE6',
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.04,
+    shadowRadius: 4,
+    elevation: 1,
+  },
+  headerIconBtnPressed: {
+    transform: [{ scale: 0.94 }],
+    opacity: 0.8,
+  },
+  notificationDot: {
+    position: 'absolute',
+    top: 7,
+    right: 7,
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: '#EF4444',
+    borderWidth: 1.5,
+    borderColor: '#FFFFFF',
+  },
+  profilePhotoBtn: {
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1.5,
+    borderColor: '#EFECE6',
+    justifyContent: 'center',
+    alignItems: 'center',
+    position: 'relative',
+  },
+  profilePhotoBtnPro: {
+    borderColor: '#EAB308',
+    borderWidth: 2,
+  },
+  headerCustomAvatarImage: {
+    width: 34,
+    height: 34,
+    borderRadius: 17,
+  },
+  addPhotoPlusBadge: {
+    position: 'absolute',
+    bottom: -2,
+    right: -2,
+    width: 14,
+    height: 14,
+    borderRadius: 7,
+    backgroundColor: '#582CDB',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 1.5,
+    borderColor: '#FFFFFF',
+  },
+  addPhotoPlusText: {
+    color: '#FFFFFF',
+    fontSize: 8,
+    fontWeight: '900',
+  },
+  scrollContent: {
+    paddingHorizontal: 20,
+    paddingTop: 8,
+    paddingBottom: 40,
+  },
+
+  // TOP TAGS
+  topTagsRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginBottom: 8,
+  },
+  createProPill: {
+    backgroundColor: '#582CDB',
+    paddingHorizontal: 8,
+    paddingVertical: 3.5,
+    borderRadius: 6,
+  },
+  createProPillText: {
+    fontSize: 10,
+    fontWeight: '900',
+    color: '#FFFFFF',
+    letterSpacing: 0.5,
+  },
+  proAccessPill: {
+    backgroundColor: '#FEF08A',
+    paddingHorizontal: 8,
+    paddingVertical: 3.5,
+    borderRadius: 6,
+  },
+  proAccessPillText: {
+    fontSize: 9.5,
+    fontWeight: '900',
+    color: '#78350F',
+  },
+  mainTitleText: {
+    fontSize: 22,
+    fontWeight: '900',
+    color: '#171420',
+    letterSpacing: -0.4,
+    marginBottom: 4,
+  },
+  mainSubtitleText: {
+    fontSize: 13,
+    color: '#64748B',
+    lineHeight: 18,
+    marginBottom: 16,
+  },
+
+  // CARD 1: WORKFLOW
+  workflowCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 24,
+    borderWidth: 1,
+    borderColor: '#EFECE6',
+    padding: 20,
+    marginBottom: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.03,
+    shadowRadius: 8,
+    elevation: 2,
+  },
+  workflowHeaderRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  workflowTitle: {
+    fontSize: 18,
+    fontWeight: '900',
+    color: '#171420',
+  },
+  workflowSub: {
+    fontSize: 12,
+    color: '#64748B',
+    marginTop: 2,
+    marginBottom: 16,
+  },
+  pipelineStepsRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 18,
+    paddingHorizontal: 4,
+  },
+  pipelineStepItem: {
+    alignItems: 'center',
+  },
+  pipelineIconBox: {
+    width: 44,
+    height: 44,
+    borderRadius: 14,
+    backgroundColor: '#F8FAFC',
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 4,
+  },
+  pipelineStepLabel: {
+    fontSize: 11,
+    fontWeight: '800',
+    color: '#171420',
+  },
+  pipelineConnectorLine: {
+    height: 1.5,
+    backgroundColor: '#E2E8F0',
+    flex: 1,
+    marginHorizontal: 4,
+    marginBottom: 18,
+  },
+  currentProjectBox: {
+    backgroundColor: '#FAF8F5',
+    borderRadius: 16,
+    padding: 14,
+    marginBottom: 16,
+  },
+  currentProjectLabel: {
+    fontSize: 9.5,
+    fontWeight: '800',
+    color: '#94A3B8',
+    letterSpacing: 0.5,
+    marginBottom: 4,
+  },
+  currentProjectTitle: {
+    fontSize: 14.5,
+    fontWeight: '800',
+    color: '#171420',
+    marginBottom: 10,
+  },
+  projectTagsRow: {
+    flexDirection: 'row',
+    gap: 6,
+  },
+  projectTagGray: {
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 6,
+  },
+  projectTagGrayText: {
+    fontSize: 10,
+    fontWeight: '700',
+    color: '#475569',
+  },
+  projectTagGold: {
+    backgroundColor: '#FEF08A',
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 6,
+  },
+  projectTagGoldText: {
+    fontSize: 10,
+    fontWeight: '900',
+    color: '#78350F',
+  },
+  workflowActionsRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  startCreatingBtn: {
+    backgroundColor: '#582CDB',
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  startCreatingBtnText: {
+    color: '#FFFFFF',
+    fontSize: 13,
+    fontWeight: '900',
+  },
+  resumeDraftBtn: {
+    paddingVertical: 12,
+    paddingHorizontal: 12,
+  },
+  resumeDraftBtnText: {
+    color: '#582CDB',
+    fontSize: 13,
+    fontWeight: '800',
+  },
+
+  // SECTION 2: PRO TOOLS
+  sectionHeaderRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginBottom: 12,
+  },
+  proToolsMainTitle: {
+    fontSize: 18,
+    fontWeight: '900',
+    color: '#171420',
+  },
+  powerPillBadge: {
+    backgroundColor: '#FEF08A',
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 4,
+  },
+  powerPillText: {
+    fontSize: 9,
+    fontWeight: '900',
+    color: '#78350F',
+  },
+  proToolsGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+    rowGap: 12,
+    marginBottom: 16,
+  },
+  toolGridCard: {
+    width: '48%',
+    backgroundColor: '#FFFFFF',
+    borderRadius: 18,
+    borderWidth: 1,
+    borderColor: '#EFECE6',
+    padding: 14,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.02,
+    shadowRadius: 4,
+    elevation: 1,
+  },
+  toolIconSquare: {
+    width: 36,
+    height: 36,
+    borderRadius: 10,
+    backgroundColor: '#F5F3FF',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  toolGridTitle: {
+    fontSize: 14,
+    fontWeight: '900',
+    color: '#171420',
+    marginBottom: 2,
+  },
+  toolGridSub: {
+    fontSize: 11,
+    color: '#64748B',
+    lineHeight: 15,
+  },
+  unlockedPill: {
+    backgroundColor: '#FEF9C3',
+    paddingHorizontal: 5,
+    paddingVertical: 2,
+    borderRadius: 4,
+  },
+  unlockedPillText: {
+    fontSize: 8,
+    fontWeight: '900',
+    color: '#A16207',
+  },
+  proToolBadgePill: {
+    backgroundColor: '#EDE9FE',
+    paddingHorizontal: 5,
+    paddingVertical: 2,
+    borderRadius: 4,
+  },
+  proToolBadgeText: {
+    fontSize: 8,
+    fontWeight: '900',
+    color: '#6D28D9',
+  },
+
+  // CARD 3: REPURPOSE BANNER
+  repurposeBannerCard: {
+    backgroundColor: '#EDE9FE',
+    borderRadius: 20,
+    padding: 16,
+    marginBottom: 16,
+  },
+  repurposeIconSquare: {
+    width: 44,
+    height: 44,
+    borderRadius: 14,
+    backgroundColor: '#FFFFFF',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  repurposeBannerTitle: {
+    fontSize: 15,
+    fontWeight: '900',
+    color: '#171420',
+    marginBottom: 2,
+  },
+  repurposeBannerSub: {
+    fontSize: 11.5,
+    color: '#4C1D95',
+    lineHeight: 16,
+    marginBottom: 6,
+  },
+  repurposeLinkText: {
+    fontSize: 12.5,
+    fontWeight: '900',
+    color: '#582CDB',
+  },
+
+  // CARD 4: VOICE STUDIO CARD
+  voiceStudioMainCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 24,
+    borderWidth: 1,
+    borderColor: '#EFECE6',
+    padding: 18,
+    marginBottom: 20,
+  },
+  voiceCardHeaderRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  voiceStarIconBox: {
+    width: 36,
+    height: 36,
+    borderRadius: 12,
+    backgroundColor: '#EDE9FE',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  voiceCardTitle: {
+    fontSize: 15,
+    fontWeight: '900',
+    color: '#171420',
+  },
+  voiceCardSub: {
+    fontSize: 11,
+    color: '#64748B',
+  },
+  voicePresetsPillBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    backgroundColor: '#F8FAFC',
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    paddingHorizontal: 8,
+    paddingVertical: 5,
+    borderRadius: 8,
+  },
+  voicePresetsText: {
+    fontSize: 9,
+    fontWeight: '900',
+    color: '#475569',
+  },
+  voiceWaveformBox: {
+    backgroundColor: '#F5F3FF',
+    borderRadius: 16,
+    padding: 14,
+    marginBottom: 12,
+    position: 'relative',
+  },
+  voiceWaveformWatermark: {
+    fontSize: 11,
+    fontWeight: '900',
+    color: '#6D28D9',
+  },
+  waveformRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    height: 64,
+    paddingHorizontal: 8,
+  },
+  waveformBarPro: {
+    width: 3.5,
+    borderRadius: 2,
+    backgroundColor: '#7C3AED',
+  },
+  previewVoicePill: {
+    alignSelf: 'flex-end',
+    backgroundColor: '#171420',
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 12,
+    marginTop: 4,
+  },
+  previewVoiceText: {
+    color: '#FFFFFF',
+    fontSize: 10,
+    fontWeight: '800',
+  },
+  voiceSpecsRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    backgroundColor: '#FAF8F5',
+    padding: 12,
+    borderRadius: 12,
+    marginBottom: 12,
+  },
+  seriesVoiceLabel: {
+    fontSize: 9.5,
+    fontWeight: '800',
+    color: '#582CDB',
+  },
+  seriesVoiceVal: {
+    fontSize: 13,
+    fontWeight: '900',
+    color: '#171420',
+    marginTop: 1,
+  },
+  minsCountVal: {
+    fontSize: 16,
+    fontWeight: '900',
+    color: '#171420',
+  },
+  minsRemainingLabel: {
+    fontSize: 8.5,
+    fontWeight: '800',
+    color: '#94A3B8',
+  },
+  voiceButtonsRow: {
+    flexDirection: 'row',
+    gap: 8,
+  },
+  generateVoiceBtn: {
+    flex: 1,
+    backgroundColor: '#582CDB',
+    paddingVertical: 12,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  generateVoiceBtnText: {
+    color: '#FFFFFF',
+    fontSize: 13,
+    fontWeight: '900',
+  },
+  openStudioOutlineBtn: {
+    flex: 1,
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    paddingVertical: 12,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  openStudioOutlineBtnText: {
+    color: '#171420',
+    fontSize: 13,
+    fontWeight: '800',
+  },
+
+  // SECTION 5: ACTIVE DRAFTS
+  draftsSectionHeaderRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 10,
+  },
+  activeDraftsTitle: {
+    fontSize: 16,
+    fontWeight: '900',
+    color: '#171420',
+  },
+  viewAllText: {
+    fontSize: 12,
+    fontWeight: '800',
+    color: '#582CDB',
+  },
+  draftItemCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#FFFFFF',
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: '#EFECE6',
+    padding: 12,
+    gap: 12,
+  },
+  draftIconSquare: {
+    width: 36,
+    height: 36,
+    borderRadius: 10,
+    backgroundColor: '#F8FAFC',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  draftItemTitle: {
+    fontSize: 13.5,
+    fontWeight: '800',
+    color: '#171420',
+  },
+  scriptReadyTag: {
+    fontSize: 9.5,
+    fontWeight: '900',
+    color: '#2563EB',
+    marginTop: 2,
+  },
+  voiceDraftTag: {
+    fontSize: 9.5,
+    fontWeight: '900',
+    color: '#D97706',
+    marginTop: 2,
+  },
+  draftChevron: {
+    fontSize: 20,
+    color: '#94A3B8',
+  },
+
+  // CARD 6: SMART SCHEDULE
+  smartScheduleCard: {
+    backgroundColor: '#EDE9FE',
+    borderRadius: 24,
+    padding: 20,
+    marginBottom: 16,
+  },
+  smartScheduleHeaderRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  smartSchedulePill: {
+    backgroundColor: '#582CDB',
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 6,
+  },
+  smartSchedulePillText: {
+    fontSize: 9.5,
+    fontWeight: '900',
+    color: '#FFFFFF',
+  },
+  bestWindowSub: {
+    fontSize: 11.5,
+    color: '#4C1D95',
+    fontWeight: '600',
+  },
+  bestWindowTime: {
+    fontSize: 28,
+    fontWeight: '900',
+    color: '#582CDB',
+    marginVertical: 2,
+  },
+  bestWindowPm: {
+    fontSize: 16,
+    fontWeight: '800',
+  },
+  scheduleDivider: {
+    height: 1,
+    backgroundColor: 'rgba(88, 44, 219, 0.15)',
+    marginVertical: 12,
+  },
+  scheduledStatusRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  scheduledBigStat: {
+    fontSize: 20,
+    fontWeight: '900',
+    color: '#171420',
+  },
+  scheduledStatLabel: {
+    fontSize: 9,
+    fontWeight: '800',
+    color: '#64748B',
+    marginTop: 1,
+  },
+  greenActiveDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: '#10B981',
+  },
+  autopilotActiveLabel: {
+    fontSize: 14,
+    fontWeight: '900',
+    color: '#15803D',
+  },
+  openScheduleFullBtn: {
+    backgroundColor: '#582CDB',
+    paddingVertical: 13,
+    borderRadius: 14,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  openScheduleFullBtnText: {
+    color: '#FFFFFF',
+    fontSize: 13.5,
+    fontWeight: '900',
+  },
+
+  // CARD 7: JARVIS SUGGESTION
+  jarvisSuggestionCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 18,
+    borderWidth: 1,
+    borderColor: '#EFECE6',
+    borderLeftWidth: 4,
+    borderLeftColor: '#7C3AED',
+    padding: 14,
+  },
+  jarvisFlameIconBox: {
+    width: 36,
+    height: 36,
+    borderRadius: 12,
+    backgroundColor: '#FAF5FF',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  jarvisSuggestionTag: {
+    fontSize: 9.5,
+    fontWeight: '900',
+    color: '#582CDB',
+    letterSpacing: 0.5,
+    marginBottom: 2,
+  },
+  jarvisSuggestionText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#171420',
+    lineHeight: 17,
+  },
+
+  // MODALS
+  btnPressed: {
+    opacity: 0.85,
+    transform: [{ scale: 0.98 }],
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(15, 10, 30, 0.7)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  modalCard: {
+    width: '100%',
+    maxWidth: 380,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 24,
+    padding: 22,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.15,
+    shadowRadius: 20,
+    elevation: 8,
+  },
+  modalHeaderRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    marginBottom: 14,
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: '900',
+    color: '#171420',
+  },
+  modalSubtitle: {
+    fontSize: 11,
+    color: '#64748B',
+    marginTop: 2,
+  },
+  modalCloseCircle: {
+    width: 30,
+    height: 30,
+    borderRadius: 15,
+    backgroundColor: '#F1F5F9',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalCloseCross: {
+    fontSize: 12,
+    color: '#64748B',
+    fontWeight: '900',
+  },
+  modalFullBtn: {
+    backgroundColor: '#582CDB',
+    paddingVertical: 13,
+    borderRadius: 14,
+    alignItems: 'center',
+    marginTop: 10,
+  },
+  modalFullBtnText: {
+    color: '#FFFFFF',
+    fontSize: 14,
+    fontWeight: '900',
+  },
+  inputSectionHeader: {
+    fontSize: 10,
+    fontWeight: '900',
+    color: '#64748B',
+    letterSpacing: 0.5,
+    marginTop: 8,
+    marginBottom: 4,
+  },
+  voiceToneChip: {
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    backgroundColor: '#F8FAFC',
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+  },
+  voiceToneChipActive: {
+    backgroundColor: '#EDE9FE',
+    borderColor: '#8B5CF6',
+  },
+  voiceToneChipText: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: '#475569',
+  },
+  voiceToneChipTextActive: {
+    color: '#582CDB',
+    fontWeight: '900',
+  },
+  voiceTextInput: {
+    backgroundColor: '#F8FAFC',
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    borderRadius: 12,
+    padding: 12,
+    fontSize: 13,
+    color: '#171420',
+    height: 80,
+    textAlignVertical: 'top',
+  },
+  repurposeOptionRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    backgroundColor: '#FAF8F5',
+    padding: 10,
+    borderRadius: 10,
+  },
+  repurposeOptionText: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#171420',
+    flex: 1,
+  },
+  hookItemBox: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: '#FAF8F5',
+    padding: 12,
+    borderRadius: 12,
+    marginBottom: 8,
+    gap: 8,
+  },
+  hookItemText: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#171420',
+    flex: 1,
+  },
+  hookCopyPill: {
+    fontSize: 10,
+    fontWeight: '900',
+    color: '#582CDB',
+  },
+  toastContainer: {
+    position: 'absolute',
+    bottom: 90,
+    alignSelf: 'center',
+    backgroundColor: 'rgba(23, 20, 32, 0.94)',
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 8,
+    elevation: 6,
+  },
+  toastText: {
+    color: '#FFFFFF',
+    fontSize: 12,
+    fontWeight: '800',
+  },
+});
