@@ -780,36 +780,39 @@ export const MessagesScreen: React.FC<MessagesScreenProps> = ({
                 resizeMode="contain"
               />
             </Animated.View>
-
-            <Pressable
-              onPress={() => {
-                if (Platform.OS !== 'web') {
-                  Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-                }
-                if (onSwitchToPro) {
-                  onSwitchToPro();
-                } else if (onSaveProfile && userProfile) {
-                  onSaveProfile({ ...userProfile, tier: 'pro' });
-                }
-              }}
-              hitSlop={8}
-            >
-              <LinearGradient
-                colors={['#EDE9FE', '#DDD6FE']}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 1 }}
-                style={styles.freeHeaderBadge}
-              >
-                <Text style={styles.freeHeaderBadgeText}>🔒 FREE (TAP FOR PRO)</Text>
-              </LinearGradient>
-            </Pressable>
           </View>
 
-          {/* Center Title */}
+          {/* Center Title with compact Pro pill */}
           <View style={styles.headerCenter}>
-            <Text style={styles.headerTitleText}>
-              {activeChatThread ? activeChatThread.name : 'Creator Messages'}
-            </Text>
+            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
+              <Text style={styles.headerTitleText}>
+                {activeChatThread ? activeChatThread.name : 'Creator Messages'}
+              </Text>
+              {!activeChatThread && (
+                <Pressable
+                  onPress={() => {
+                    if (Platform.OS !== 'web') {
+                      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+                    }
+                    if (onSwitchToPro) {
+                      onSwitchToPro();
+                    } else if (onSaveProfile && userProfile) {
+                      onSaveProfile({ ...userProfile, tier: 'pro' });
+                    }
+                  }}
+                  hitSlop={8}
+                >
+                  <LinearGradient
+                    colors={['#EDE9FE', '#DDD6FE']}
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 1, y: 1 }}
+                    style={styles.freeHeaderBadge}
+                  >
+                    <Text style={styles.freeHeaderBadgeText}>✨ PRO</Text>
+                  </LinearGradient>
+                </Pressable>
+              )}
+            </View>
             <Text style={styles.headerSubtitleText}>
               {activeChatThread
                 ? activeChatThread.isOnline
@@ -1807,17 +1810,17 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   freeHeaderBadge: {
-    paddingHorizontal: 8,
-    paddingVertical: 3.5,
-    borderRadius: 8,
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 6,
     borderWidth: 1,
     borderColor: '#C4B5FD',
   },
   freeHeaderBadgeText: {
-    fontSize: 9.5,
+    fontSize: 8.5,
     fontWeight: '900',
     color: '#582CDB',
-    letterSpacing: 0.5,
+    letterSpacing: 0.3,
   },
   headerGhostLogo: {
     width: 34,

@@ -244,7 +244,7 @@ export const ProQuestsScreen: React.FC<ProQuestsScreenProps> = ({
                 end={{ x: 1, y: 0 }}
                 style={styles.proHeaderBadge}
               >
-                <Text style={styles.proHeaderBadgeText}>👑 PRO (TAP FOR FREE)</Text>
+                <Text style={styles.proHeaderBadgeText}>👑 PRO</Text>
               </LinearGradient>
             </Pressable>
           </View>
@@ -1064,17 +1064,17 @@ const styles = StyleSheet.create({
     height: 28,
   },
   proHeaderBadge: {
-    paddingHorizontal: 8,
-    paddingVertical: 3.5,
-    borderRadius: 8,
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 6,
     borderWidth: 1,
     borderColor: '#FEF08A',
   },
   proHeaderBadgeText: {
-    fontSize: 9.5,
+    fontSize: 8.5,
     fontWeight: '900',
     color: '#78350F',
-    letterSpacing: 0.5,
+    letterSpacing: 0.3,
   },
   headerRightGroup: {
     flexDirection: 'row',
