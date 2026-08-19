@@ -19,6 +19,7 @@ import { CreateScreen } from './src/screens/CreateScreen';
 import { ProCreateScreen } from './src/screens/ProCreateScreen';
 import { ScheduleScreen } from './src/screens/ScheduleScreen';
 import { MatchScreen } from './src/screens/MatchScreen';
+import { ProMatchScreen } from './src/screens/ProMatchScreen';
 import { JarvisProScreen } from './src/screens/JarvisProScreen';
 import { GrowthScreen } from './src/screens/GrowthScreen';
 import { IdeaDetailScreen } from './src/screens/IdeaDetailScreen';
@@ -505,24 +506,48 @@ export default function App() {
         )}
 
         {currentScreen === 'match' && (
-          <MatchScreen
-            onLogout={handleLogout}
-            onOpenMessages={() => navigateTo('messages')}
-            onOpenJarvisPro={() => navigateTo('jarvis-pro')}
-            onNavigateTab={(tab: TabType) => {
-              if (tab === 'home') {
-                navigateTo('dashboard');
-              } else if (tab === 'create') {
-                navigateTo('create');
-              } else if (tab === 'quests') {
-                navigateTo('quests');
-              } else if (tab === 'growth') {
-                navigateTo('growth');
-              }
-            }}
-            userProfile={userProfile}
-            onSaveProfile={(updated) => setUserProfile(updated)}
-          />
+          (userProfile?.tier === 'pro' || userProfile?.tier === 'founding') ? (
+            <ProMatchScreen
+              onLogout={handleLogout}
+              onOpenMessages={() => navigateTo('messages')}
+              onOpenJarvisPro={() => navigateTo('jarvis-pro')}
+              onSwitchToFree={() => {
+                setUserProfile(prev => ({ ...prev, tier: 'free' }));
+              }}
+              onNavigateTab={(tab: TabType) => {
+                if (tab === 'home') {
+                  navigateTo('dashboard');
+                } else if (tab === 'create') {
+                  navigateTo('create');
+                } else if (tab === 'quests') {
+                  navigateTo('quests');
+                } else if (tab === 'growth') {
+                  navigateTo('growth');
+                }
+              }}
+              userProfile={userProfile}
+              onSaveProfile={(updated) => setUserProfile(updated)}
+            />
+          ) : (
+            <MatchScreen
+              onLogout={handleLogout}
+              onOpenMessages={() => navigateTo('messages')}
+              onOpenJarvisPro={() => navigateTo('jarvis-pro')}
+              onNavigateTab={(tab: TabType) => {
+                if (tab === 'home') {
+                  navigateTo('dashboard');
+                } else if (tab === 'create') {
+                  navigateTo('create');
+                } else if (tab === 'quests') {
+                  navigateTo('quests');
+                } else if (tab === 'growth') {
+                  navigateTo('growth');
+                }
+              }}
+              userProfile={userProfile}
+              onSaveProfile={(updated) => setUserProfile(updated)}
+            />
+          )
         )}
 
         {currentScreen === 'growth' && (
