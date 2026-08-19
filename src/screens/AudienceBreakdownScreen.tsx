@@ -845,7 +845,7 @@ export const AudienceBreakdownScreen: React.FC<AudienceBreakdownScreenProps> = (
               {/* Progress Line */}
               <View style={styles.velocityGoalTrack}>
                 <LinearGradient
-                  colors={['#582CDB', '#10B981']}
+                  colors={['#582CDB', '#F59E0B']}
                   start={{ x: 0, y: 0 }}
                   end={{ x: 1, y: 0 }}
                   style={[
@@ -1753,7 +1753,7 @@ const styles = StyleSheet.create({
     width: 7,
     height: 7,
     borderRadius: 3.5,
-    backgroundColor: '#10B981',
+    backgroundColor: '#F59E0B',
   },
   timeframeChipsRow: {
     flexDirection: 'row',

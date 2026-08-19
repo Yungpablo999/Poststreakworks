@@ -204,7 +204,9 @@ const switchStyles = StyleSheet.create({
     justifyContent: 'center',
   },
   switchTrackActive: {
-    backgroundColor: '#7C3AED', // Royal Purple
+    backgroundColor: '#582CDB', // Royal Purple
+    borderWidth: 1.5,
+    borderColor: '#F59E0B', // Radiant 24K Gold
   },
   switchTrackInactive: {
     backgroundColor: '#E2E8F0', // Neutral Slate
@@ -213,7 +215,7 @@ const switchStyles = StyleSheet.create({
     width: 24,
     height: 24,
     borderRadius: 12,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: '#FDE68A', // Radiant Gold Thumb
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.15,

@@ -530,7 +530,7 @@ export const ProMissionDetailScreen: React.FC<ProMissionDetailScreenProps> = ({
                 <Text style={styles.signalProgressScore}>91 SCORE</Text>
               </View>
               <View style={styles.signalProgressTrack}>
-                <View style={[styles.signalProgressFill, { width: '91%', backgroundColor: '#10B981' }]} />
+                <View style={[styles.signalProgressFill, { width: '91%', backgroundColor: '#F59E0B' }]} />
               </View>
             </View>
           </View>
@@ -1118,7 +1118,7 @@ const styles = StyleSheet.create({
   signalValGreen: {
     fontSize: 13,
     fontWeight: '900',
-    color: '#10B981',
+    color: '#F59E0B',
   },
   signalDivider: {
     height: 1,

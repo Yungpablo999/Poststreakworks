@@ -1329,7 +1329,7 @@ const styles = StyleSheet.create({
   },
   strengthFill: {
     height: '100%',
-    backgroundColor: '#10B981',
+    backgroundColor: '#F59E0B',
     borderRadius: 3,
   },
   strengthChecklist: {
