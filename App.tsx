@@ -30,6 +30,7 @@ import { ContentAngleScreen } from './src/screens/ContentAngleScreen';
 import { ScriptScreen } from './src/screens/ScriptScreen';
 import { CaptionScreen } from './src/screens/CaptionScreen';
 import { MessagesScreen } from './src/screens/MessagesScreen';
+import { ProMessagesScreen } from './src/screens/ProMessagesScreen';
 import { CollabIdeaScreen } from './src/screens/CollabIdeaScreen';
 import { AudienceBreakdownScreen } from './src/screens/AudienceBreakdownScreen';
 import { PostPerformanceScreen } from './src/screens/PostPerformanceScreen';
@@ -869,37 +870,81 @@ export default function App() {
         )}
 
         {currentScreen === 'messages' && (
-          <MessagesScreen
-            onBack={() => navigateTo(previousScreen ? previousScreen : 'dashboard')}
-            onLogout={handleLogout}
-            onOpenSchedule={() => navigateTo('schedule')}
-            onOpenJarvisPro={() => navigateTo('jarvis-pro')}
-            onOpenCreate={() => navigateTo('create')}
-            onOpenMatch={() => navigateTo('match')}
-            onOpenCollabIdea={(partnerData) => {
-              if (partnerData) setCollabPartnerData(partnerData);
-              navigateTo('collab-idea');
-            }}
-            onOpenPostComposer={(prefillTitle) => {
-              if (prefillTitle) setComposerIdeaTitle(prefillTitle);
-              navigateTo('composer');
-            }}
-            onNavigateTab={(tab: TabType) => {
-              if (tab === 'home') {
-                navigateTo('dashboard');
-              } else if (tab === 'create') {
-                navigateTo('create');
-              } else if (tab === 'match') {
-                navigateTo('match');
-              } else if (tab === 'quests') {
-                navigateTo('quests');
-              } else if (tab === 'growth') {
-                navigateTo('growth');
-              }
-            }}
-            userProfile={userProfile}
-            onSaveProfile={(updated) => setUserProfile(updated)}
-          />
+          (userProfile?.tier === 'pro' || userProfile?.tier === 'founding') ? (
+            <ProMessagesScreen
+              onBack={() => navigateTo(previousScreen ? previousScreen : 'dashboard')}
+              onLogout={handleLogout}
+              onOpenSchedule={() => navigateTo('schedule')}
+              onOpenJarvisPro={() => navigateTo('jarvis-pro')}
+              onOpenCreate={() => navigateTo('create')}
+              onOpenMatch={() => navigateTo('match')}
+              onOpenCollabIdea={(partnerData) => {
+                if (partnerData) setCollabPartnerData(partnerData);
+                navigateTo('collab-idea');
+              }}
+              onOpenPostComposer={(prefillTitle) => {
+                if (prefillTitle) setComposerIdeaTitle(prefillTitle);
+                navigateTo('composer');
+              }}
+              onSwitchToFree={() => {
+                if (userProfile) {
+                  setUserProfile({ ...userProfile, tier: 'free' });
+                }
+              }}
+              onNavigateTab={(tab: TabType) => {
+                if (tab === 'home') {
+                  navigateTo('dashboard');
+                } else if (tab === 'create') {
+                  navigateTo('create');
+                } else if (tab === 'match') {
+                  navigateTo('match');
+                } else if (tab === 'quests') {
+                  navigateTo('quests');
+                } else if (tab === 'growth') {
+                  navigateTo('growth');
+                }
+              }}
+              userProfile={userProfile}
+              onSaveProfile={(updated) => setUserProfile(updated)}
+            />
+          ) : (
+            <MessagesScreen
+              onBack={() => navigateTo(previousScreen ? previousScreen : 'dashboard')}
+              onLogout={handleLogout}
+              onOpenSchedule={() => navigateTo('schedule')}
+              onOpenJarvisPro={() => navigateTo('jarvis-pro')}
+              onOpenCreate={() => navigateTo('create')}
+              onOpenMatch={() => navigateTo('match')}
+              onOpenCollabIdea={(partnerData) => {
+                if (partnerData) setCollabPartnerData(partnerData);
+                navigateTo('collab-idea');
+              }}
+              onOpenPostComposer={(prefillTitle) => {
+                if (prefillTitle) setComposerIdeaTitle(prefillTitle);
+                navigateTo('composer');
+              }}
+              onSwitchToPro={() => {
+                if (userProfile) {
+                  setUserProfile({ ...userProfile, tier: 'pro' });
+                }
+              }}
+              onNavigateTab={(tab: TabType) => {
+                if (tab === 'home') {
+                  navigateTo('dashboard');
+                } else if (tab === 'create') {
+                  navigateTo('create');
+                } else if (tab === 'match') {
+                  navigateTo('match');
+                } else if (tab === 'quests') {
+                  navigateTo('quests');
+                } else if (tab === 'growth') {
+                  navigateTo('growth');
+                }
+              }}
+              userProfile={userProfile}
+              onSaveProfile={(updated) => setUserProfile(updated)}
+            />
+          )
         )}
 
                 
