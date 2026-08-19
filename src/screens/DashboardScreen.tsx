@@ -388,6 +388,7 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
   userProfile,
   onSaveProfile,}) => {
   const isDark = false;
+  const isPro = userProfile?.tier === 'pro' || userProfile?.tier === 'founding';
   const [activeTab, setActiveTab] = useState<TabType>('home');
   const [matchConnected, setMatchConnected] = useState(false);
   const [showProModal, setShowProModal] = useState(false);
@@ -746,24 +747,37 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
       <View style={[styles.container, isDark && { backgroundColor: '#0C0A12' }]}>
         {/* 1. TOP APP BAR: Ghost Mascot on Left & Notification/Profile on Right */}
         <View style={styles.headerBar}>
-          {/* Top-Left: Ghost Logo Mascot */}
-          <Animated.View
-            style={[
-              styles.headerLogoWrapper,
-              {
-                transform: [
-                  { translateY: ghostFloatY },
-                  { scale: ghostScale },
-                ],
-              },
-            ]}
-          >
-            <Image
-              source={require('../../assets/images/jarvis-ghost-clean.png')}
-              style={styles.headerGhostLogo}
-              resizeMode="contain"
-            />
-          </Animated.View>
+          {/* Top-Left: Ghost Logo Mascot + Pro Pill */}
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+            <Animated.View
+              style={[
+                styles.headerLogoWrapper,
+                {
+                  transform: [
+                    { translateY: ghostFloatY },
+                    { scale: ghostScale },
+                  ],
+                },
+              ]}
+            >
+              <Image
+                source={require('../../assets/images/jarvis-ghost-clean.png')}
+                style={styles.headerGhostLogo}
+                resizeMode="contain"
+              />
+            </Animated.View>
+
+            {isPro && (
+              <LinearGradient
+                colors={['#FDE047', '#EAB308', '#CA8A04']}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 0 }}
+                style={styles.proHeaderBadge}
+              >
+                <Text style={styles.proHeaderBadgeText}>👑 PRO CREATOR</Text>
+              </LinearGradient>
+            )}
+          </View>
 
           {/* Right: Message, Notification & Person Profile Photo Upload */}
           <View style={styles.headerRightGroup}>
@@ -822,6 +836,7 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
               style={({ pressed }) => [
                 styles.profilePhotoBtn,
                 currentSelectedAvatar && styles.profilePhotoBtnActive,
+                isPro && styles.profilePhotoBtnPro,
                 pressed && styles.headerIconBtnPressed,
               ]}
               hitSlop={8}
@@ -867,22 +882,32 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
           showsVerticalScrollIndicator={false}
           bounces={true}
         >
-          {/* 3. TODAY'S FOCUS HERO BANNER */}
-          <View style={styles.focusHeroSection}>
+          {/* 3. TODAY'S FOCUS HERO BANNER (DUAL-TIER: FREE vs PRO EDITION) */}
+          <View style={[styles.focusHeroSection, isPro && styles.focusHeroSectionPro]}>
             <View style={styles.focusPillRow}>
-              <View style={styles.focusTag}>
-                <View style={styles.focusLiveDot} />
-                <Text style={styles.focusTagText}>TODAY&apos;S FOCUS</Text>
+              <View style={[styles.focusTag, isPro && styles.focusTagPro]}>
+                <View style={[styles.focusLiveDot, isPro && { backgroundColor: '#EAB308' }]} />
+                <Text style={[styles.focusTagText, isPro && { color: '#854D0E' }]}>
+                  {isPro ? "✨ PRO FOCUS • 2X XP ACTIVE" : "TODAY'S FOCUS"}
+                </Text>
               </View>
-              <Text style={styles.nextPostCountdown}>Next post in 2h 45m</Text>
+              <Text style={styles.nextPostCountdown}>
+                {isPro ? "Peak window in 2h 45m" : "Next post in 2h 45m"}
+              </Text>
             </View>
 
-            <Text style={[styles.focusHeadline, isDark && styles.textWhite]}>Post 1 Reel to protect your streak</Text>
+            <Text style={[styles.focusHeadline, isDark && styles.textWhite]}>
+              {isPro
+                ? "Post 1 Reel before 11:30 AM to hit peak velocity"
+                : "Post 1 Reel to protect your streak"}
+            </Text>
 
             {/* Status Pills */}
             <View style={styles.statusPillsRow}>
-              <View style={styles.levelPillBadge}>
-                <Text style={styles.levelPillBadgeText}>Level 42</Text>
+              <View style={[styles.levelPillBadge, isPro && styles.levelPillBadgePro]}>
+                <Text style={[styles.levelPillBadgeText, isPro && { color: '#6B21A8' }]}>
+                  {isPro ? "👑 Level 42 (2x XP)" : "Level 42"}
+                </Text>
               </View>
 
               <View style={styles.streakPillBadge}>
@@ -904,6 +929,12 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
                 </Svg>
                 <Text style={styles.nextPostPillBadgeText}>11:30 AM</Text>
               </View>
+
+              {isPro && (
+                <View style={styles.proPipelinePillBadge}>
+                  <Text style={styles.proPipelinePillText}>⚡ 3 in Pipeline</Text>
+                </View>
+              )}
             </View>
           </View>
 
@@ -933,6 +964,24 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
                 </Animated.Text>
               </View>
             </View>
+
+            {/* Pro Cross-Platform Velocity Indicator */}
+            {isPro && (
+              <View style={styles.proCrossPlatformRow}>
+                <View style={styles.proCrossPlatformPill}>
+                  <Text style={styles.proCrossPlatformPillText}>TikTok ✓ (47d)</Text>
+                </View>
+                <View style={styles.proCrossPlatformPill}>
+                  <Text style={styles.proCrossPlatformPillText}>IG Reels ✓ (47d)</Text>
+                </View>
+                <View style={styles.proCrossPlatformPill}>
+                  <Text style={styles.proCrossPlatformPillText}>YouTube ✓ (32d)</Text>
+                </View>
+                <View style={styles.proCrossPlatformPill}>
+                  <Text style={styles.proCrossPlatformPillText}>X ✓ (24d)</Text>
+                </View>
+              </View>
+            )}
 
             {/* Month Header & Days of Week */}
             <View style={styles.calendarMetaRow}>
@@ -1206,54 +1255,156 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
             </Pressable>
           </View>
 
-          {/* 9. CARD 6: UNLOCK JARVIS PRO */}
-          <View style={styles.proCard}>
-            <View style={styles.proHeaderRow}>
-              <View style={styles.proIconBox}>
-                <Image
-                  source={require('../../assets/images/jarvis-core-flame.png')}
-                  style={styles.proIconImage}
-                  resizeMode="contain"
-                />
-              </View>
-              <View style={styles.proTitleGroup}>
-                <Text style={styles.proTitle}>Unlock Jarvis Pro</Text>
-                <View style={styles.goldProPillBadge}>
-                  <Text style={styles.goldProPillText}>⚡ PRO SUITE</Text>
+          {/* 9. CARD 6: DUAL-TIER PRO SUITE (UPGRADE BANNER vs PRO COMMAND CENTER) */}
+          {isPro ? (
+            <View style={styles.proCommandCenterCard}>
+              {/* Header */}
+              <View style={styles.proHeaderRow}>
+                <View style={styles.proIconBox}>
+                  <Image
+                    source={require('../../assets/images/jarvis-core-flame.png')}
+                    style={styles.proIconImage}
+                    resizeMode="contain"
+                  />
+                </View>
+                <View style={styles.proTitleGroup}>
+                  <Text style={styles.proTitle}>Jarvis Pro Command Center</Text>
+                  <View style={[styles.goldProPillBadge, { backgroundColor: '#FEF9C3' }]}>
+                    <Text style={[styles.goldProPillText, { color: '#854D0E' }]}>✨ ACTIVE PRO SUITE</Text>
+                  </View>
                 </View>
               </View>
-            </View>
 
-            <Text style={styles.proDescription}>
-              Get AI autonomous growth strategy, viral script generator, and priority matching.
-            </Text>
+              <Text style={styles.proDescription}>
+                Your autonomous AI co-pilot is actively tracking cross-platform velocity and optimizing monetization.
+              </Text>
 
-            <Pressable
-              onPress={() => {
-                if (Platform.OS !== 'web') {
-                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-                }
-                if (onOpenJarvisPro) {
-                  onOpenJarvisPro();
-                } else {
-                  openProModal();
-                }
-              }}
-              style={({ pressed }) => [
-                styles.metallicGoldUpgradeBtn,
-                pressed && styles.upgradeButtonPressed,
-              ]}
-            >
-              <LinearGradient
-                colors={['#FDE047', '#EAB308', '#CA8A04', '#A16207']}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 1 }}
-                style={styles.metallicGoldGradient}
+              {/* 4-Tool Pro Grid */}
+              <View style={styles.proToolsGrid}>
+                {/* Tool 1 */}
+                <Pressable
+                  style={({ pressed }) => [styles.proToolItem, pressed && styles.btnPressed]}
+                  onPress={() => {
+                    if (onNavigateTab) onNavigateTab('growth');
+                  }}
+                >
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                    <Text style={{ fontSize: 16 }}>🔮</Text>
+                    <Text style={styles.proToolTitle}>1-Click Repurposer</Text>
+                  </View>
+                  <Text style={styles.proToolSub}>Push 1 reel to 4 channels</Text>
+                </Pressable>
+
+                {/* Tool 2 */}
+                <Pressable
+                  style={({ pressed }) => [styles.proToolItem, pressed && styles.btnPressed]}
+                  onPress={() => {
+                    if (onNavigateTab) onNavigateTab('create');
+                  }}
+                >
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                    <Text style={{ fontSize: 16 }}>⚡</Text>
+                    <Text style={styles.proToolTitle}>AI Script Studio</Text>
+                  </View>
+                  <Text style={styles.proToolSub}>Unlimited viral hook tests</Text>
+                </Pressable>
+
+                {/* Tool 3 */}
+                <Pressable
+                  style={({ pressed }) => [styles.proToolItem, pressed && styles.btnPressed]}
+                  onPress={() => {
+                    if (onNavigateTab) onNavigateTab('growth');
+                  }}
+                >
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                    <Text style={{ fontSize: 16 }}>💰</Text>
+                    <Text style={styles.proToolTitle}>Rate Card Builder</Text>
+                  </View>
+                  <Text style={styles.proToolSub}>Verified media kit ready</Text>
+                </Pressable>
+
+                {/* Tool 4 */}
+                <Pressable
+                  style={({ pressed }) => [styles.proToolItem, pressed && styles.btnPressed]}
+                  onPress={() => {
+                    if (onNavigateTab) onNavigateTab('quests');
+                  }}
+                >
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                    <Text style={{ fontSize: 16 }}>🎯</Text>
+                    <Text style={styles.proToolTitle}>Priority Deals</Text>
+                  </View>
+                  <Text style={styles.proToolSub}>$2,500+ active bounties</Text>
+                </Pressable>
+              </View>
+
+              {/* Manage Action */}
+              <Pressable
+                onPress={() => {
+                  if (Platform.OS !== 'web') {
+                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                  }
+                  if (onOpenJarvisPro) {
+                    onOpenJarvisPro();
+                  }
+                }}
+                style={({ pressed }) => [
+                  styles.manageProBtn,
+                  pressed && styles.upgradeButtonPressed,
+                ]}
               >
-                <Text style={styles.metallicGoldUpgradeBtnText}>Upgrade to Pro ➔</Text>
-              </LinearGradient>
-            </Pressable>
-          </View>
+                <Text style={styles.manageProBtnText}>Manage Pro Features &amp; Rate Card ➔</Text>
+              </Pressable>
+            </View>
+          ) : (
+            <View style={styles.proCard}>
+              <View style={styles.proHeaderRow}>
+                <View style={styles.proIconBox}>
+                  <Image
+                    source={require('../../assets/images/jarvis-core-flame.png')}
+                    style={styles.proIconImage}
+                    resizeMode="contain"
+                  />
+                </View>
+                <View style={styles.proTitleGroup}>
+                  <Text style={styles.proTitle}>Unlock Jarvis Pro</Text>
+                  <View style={styles.goldProPillBadge}>
+                    <Text style={styles.goldProPillText}>⚡ PRO SUITE</Text>
+                  </View>
+                </View>
+              </View>
+
+              <Text style={styles.proDescription}>
+                Get AI autonomous growth strategy, viral script generator, and priority matching.
+              </Text>
+
+              <Pressable
+                onPress={() => {
+                  if (Platform.OS !== 'web') {
+                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                  }
+                  if (onOpenJarvisPro) {
+                    onOpenJarvisPro();
+                  } else {
+                    openProModal();
+                  }
+                }}
+                style={({ pressed }) => [
+                  styles.metallicGoldUpgradeBtn,
+                  pressed && styles.upgradeButtonPressed,
+                ]}
+              >
+                <LinearGradient
+                  colors={['#FDE047', '#EAB308', '#CA8A04', '#A16207']}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 1 }}
+                  style={styles.metallicGoldGradient}
+                >
+                  <Text style={styles.metallicGoldUpgradeBtnText}>Upgrade to Pro ➔</Text>
+                </LinearGradient>
+              </Pressable>
+            </View>
+          )}
         </ScrollView>
 
         {/* 10. FLOATING LIQUID GLASS BOTTOM NAVIGATION BAR */}
@@ -1774,6 +1925,140 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
 };
 
 const styles = StyleSheet.create({
+  // PRO DASHBOARD STYLES
+  proHeaderBadge: {
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 6,
+    borderWidth: 1,
+    borderColor: '#FEF08A',
+  },
+  proHeaderBadgeText: {
+    fontSize: 9.5,
+    fontWeight: '900',
+    color: '#78350F',
+    letterSpacing: 0.5,
+  },
+  profilePhotoBtnPro: {
+    borderWidth: 2,
+    borderColor: '#EAB308',
+    shadowColor: '#EAB308',
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.4,
+    shadowRadius: 6,
+  },
+  focusHeroSectionPro: {
+    borderColor: '#E9D5FF',
+    backgroundColor: '#FAF5FF',
+  },
+  focusTagPro: {
+    backgroundColor: '#FEF9C3',
+    borderColor: '#FDE047',
+  },
+  levelPillBadgePro: {
+    backgroundColor: '#F3E8FF',
+    borderColor: '#D8B4FE',
+  },
+  proPipelinePillBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#EDE9FE',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 8,
+  },
+  proPipelinePillText: {
+    fontSize: 11,
+    fontWeight: '800',
+    color: '#582CDB',
+  },
+  proCrossPlatformRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 6,
+    marginBottom: 12,
+    paddingBottom: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: '#F1F5F9',
+  },
+  proCrossPlatformPill: {
+    backgroundColor: '#F8FAFC',
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    paddingHorizontal: 7,
+    paddingVertical: 3,
+    borderRadius: 6,
+  },
+  proCrossPlatformPillText: {
+    fontSize: 10,
+    fontWeight: '800',
+    color: '#475569',
+  },
+  proCommandCenterCard: {
+    backgroundColor: '#FAF5FF',
+    borderWidth: 1.5,
+    borderColor: '#C084FC',
+    borderRadius: 24,
+    padding: 20,
+    marginBottom: 20,
+    shadowColor: '#582CDB',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.08,
+    shadowRadius: 12,
+    elevation: 3,
+  },
+  proToolsGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 10,
+    marginVertical: 14,
+  },
+  proToolItem: {
+    flex: 1,
+    minWidth: '46%',
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1,
+    borderColor: '#E9D5FF',
+    borderRadius: 14,
+    padding: 12,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.03,
+    shadowRadius: 4,
+  },
+  proToolTitle: {
+    fontSize: 12,
+    fontWeight: '900',
+    color: '#171420',
+  },
+  proToolSub: {
+    fontSize: 10,
+    color: '#64748B',
+    marginTop: 2,
+    fontWeight: '600',
+  },
+  manageProBtn: {
+    backgroundColor: '#582CDB',
+    paddingVertical: 13,
+    borderRadius: 14,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#582CDB',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.2,
+    shadowRadius: 6,
+    elevation: 2,
+  },
+  manageProBtnText: {
+    color: '#FFFFFF',
+    fontSize: 13,
+    fontWeight: '900',
+    letterSpacing: 0.3,
+  },
+  btnPressed: {
+    opacity: 0.8,
+    transform: [{ scale: 0.98 }],
+  },
   safeArea: {
     flex: 1,
     backgroundColor: '#FAF8F5',
