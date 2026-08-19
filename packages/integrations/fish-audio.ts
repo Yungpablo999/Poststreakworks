@@ -1,19 +1,69 @@
-// ============================================================================
-// Fish Audio client
-// STUB — structural placeholder only. No implementation yet.
-// Governed by: packages/ai/AI_ORCHESTRATION.md
-// ============================================================================
-//
-// Promoted out of packages/integrations/index.ts during Stage 4.
-//
-// Intended contents: a thin wrapper around the Fish Audio API — auth, a
-// preview request (short, synchronous), and a full-render request (long,
-// invoked only from packages/jobs' async queue per the founder's Stage 4
-// answer, never called synchronously from a tRPC procedure directly).
-//
-// Commercial guardrail carried from Creator Engine Strategy §03: requires
-// a paid Fish API account with written confirmation PostStreak may provide
-// commercially publishable outputs — the public Fish Speech model licence
-// is research/non-commercial otherwise. Not this file's job to enforce,
-// but worth keeping visible near the integration itself.
-// ============================================================================
+const FISH_AUDIO_API_URL = "https://api.fish.audio";
+
+type FishAudioPreviewOptions = {
+  text: string;
+  voiceId: string;
+  referenceId?: string;
+};
+
+type FishAudioFullRenderOptions = FishAudioPreviewOptions & {
+  webhookUrl?: string;
+};
+
+export async function fishAudioPreview(options: FishAudioPreviewOptions) {
+  const apiKey = process.env.FISH_AUDIO_API_KEY;
+  if (!apiKey) throw new Error("FISH_AUDIO_API_KEY is not set");
+
+  const response = await fetch(`${FISH_AUDIO_API_URL}/v1/tts`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${apiKey}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      text: options.text,
+      reference_id: options.voiceId,
+      chunk_length: 200,
+      format: "mp3",
+      mp3_bitrate: 128,
+      normalize: true,
+      latency: "normal",
+    }),
+  });
+
+  if (!response.ok) {
+    const body = await response.text();
+    throw new Error(`Fish Audio API error ${response.status}: ${body}`);
+  }
+
+  return response.blob();
+}
+
+export async function fishAudioFullRender(options: FishAudioFullRenderOptions) {
+  const apiKey = process.env.FISH_AUDIO_API_KEY;
+  if (!apiKey) throw new Error("FISH_AUDIO_API_KEY is not set");
+
+  const response = await fetch(`${FISH_AUDIO_API_URL}/v1/tts`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${apiKey}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      text: options.text,
+      reference_id: options.voiceId,
+      chunk_length: 200,
+      format: "mp3",
+      mp3_bitrate: 128,
+      normalize: true,
+      latency: "normal",
+    }),
+  });
+
+  if (!response.ok) {
+    const body = await response.text();
+    throw new Error(`Fish Audio API error ${response.status}: ${body}`);
+  }
+
+  return response.blob();
+}

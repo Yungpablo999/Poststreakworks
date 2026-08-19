@@ -1,28 +1,38 @@
 -- ============================================================================
 -- Migration: User Sanctions & Account Status
--- STUB — structural placeholder only. No implementation SQL yet.
 -- Governed by: supabase/DATA_MODEL.md
 -- ============================================================================
---
--- ADDED DURING STAGE 6 (ADMIN DASHBOARD LAYER) — Stage 1's users table only
--- had a generic status field. Doc3 requires staff to search/verify/
--- suspend/restrict/warn users and review their history (§23); that needs
--- real states and an audit trail, not a free-text status column.
---
--- Modeled as a NEW migration altering the original table, not an edit to
--- 20260814000001_accounts_and_identity.sql — once a migration is
--- "shipped" (Stage 1 was approved), the honest way to change it is a
--- follow-up migration, the same discipline a real Supabase project needs.
---
--- Intended scope:
---   - ALTER users: status becomes a real enum — active | warned |
---     restricted | suspended | closed.
---   - `user_sanctions`: append-only log — user_id, action, reason,
---     issued_by (staff user_id), issued_at, expires_at (nullable, for
---     time-boxed restrictions). This is the audit trail doc3's security
---     baseline (§65) calls for.
---
--- Relationships:
---   - user_sanctions.user_id -> users.id
---   - user_sanctions.issued_by -> users.id (must hold the staff_admin role)
--- ============================================================================
+
+-- Account status enum: supersedes generic status column on users
+create type account_status as enum ('active', 'warned', 'restricted', 'suspended', 'closed');
+
+-- Add the new column (not renaming — old column stays, new column is the source of truth)
+alter table users add column account_status account_status not null default 'active';
+
+-- User sanctions: append-only audit log
+create table user_sanctions (
+  id          uuid primary key default gen_random_uuid(),
+  user_id     uuid not null references users(id) on delete cascade,
+  action      account_status not null,
+  reason      text not null,
+  issued_by   uuid not null references users(id) on delete cascade,
+  issued_at   timestamptz not null default now(),
+  expires_at  timestamptz
+);
+
+-- Indexes
+create index idx_user_sanctions_user_id on user_sanctions(user_id);
+create index idx_user_sanctions_issued_by on user_sanctions(issued_by);
+
+-- RLS
+alter table user_sanctions enable row level security;
+
+-- Staff-only access
+create policy "user_sanctions_select_staff" on user_sanctions
+  for select using (
+    exists (select 1 from users where id = auth.uid() and role = 'staff_admin')
+  );
+create policy "user_sanctions_insert_staff" on user_sanctions
+  for insert with check (
+    exists (select 1 from users where id = auth.uid() and role = 'staff_admin')
+  );

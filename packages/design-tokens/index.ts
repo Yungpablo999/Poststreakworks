@@ -1,25 +1,55 @@
-// ============================================================================
-// Shared design tokens
-// STUB — structural placeholder only. Values are DATA, not components —
-// sharing this file doesn't conflict with the "UI separate" decision below.
-// Governed by: apps/web/FRONTEND_ARCHITECTURE.md
-// ============================================================================
-//
-// Intended contents: color, spacing, and type-scale tokens consumed by
-// apps/web (via Tailwind theme config) and apps/mobile (via
-// StyleSheet/NativeWind) — same values, platform-native application.
-//
-// KNOWN STATE, NOT GUESSED:
-//   - Jarvis's color is NOT #FF6581 / pink, contrary to the Architecture
-//     Doc (§6, §10). Founder-corrected during Stage 3. Real value not yet
-//     provided — do not fill this in with a guess.
-//   - Whether Jarvis's appearance is one constant color or varies per
-//     emotion state is unresolved — tied to the emotion-state-count
-//     question (DATA_MODEL.md item B, 8 vs 9 states).
-//   - Base palette per the Architecture Doc §10 (unconfirmed hex values):
-//     warm cream (background), electric violet (primary), warm gold
-//     (accent). No hex codes given anywhere in the source docs for these
-//     three — only names.
-//   - DESIGN.md, cited as a live file in the Architecture Doc, does not
-//     exist in this repo. This file is not a substitute for it.
-// ============================================================================
+export const colors = {
+  warmCream: "#FFF8F0",
+  electricViolet: "#7C3AED",
+  warmGold: "#F59E0B",
+  // Jarvis color — NOT #FF6581/pink. Founder-corrected during Stage 3.
+  // Real value pending founder confirmation.
+  jarvis: "#FF6581", // PLACEHOLDER — replace when founder provides correct value
+  white: "#FFFFFF",
+  black: "#000000",
+  gray: {
+    50: "#F9FAFB",
+    100: "#F3F4F6",
+    200: "#E5E7EB",
+    300: "#D1D5DB",
+    400: "#9CA3AF",
+    500: "#6B7280",
+    600: "#4B5563",
+    700: "#374151",
+    800: "#1F2937",
+    900: "#111827",
+  },
+  success: "#10B981",
+  warning: "#F59E0B",
+  error: "#EF4444",
+  info: "#3B82F6",
+} as const;
+
+export const spacing = {
+  xs: "0.25rem",
+  sm: "0.5rem",
+  md: "1rem",
+  lg: "1.5rem",
+  xl: "2rem",
+  "2xl": "3rem",
+  "3xl": "4rem",
+} as const;
+
+export const borderRadius = {
+  sm: "0.25rem",
+  md: "0.5rem",
+  lg: "0.75rem",
+  xl: "1rem",
+  full: "9999px",
+} as const;
+
+export const fontSize = {
+  xs: ["0.75rem", { lineHeight: "1rem" }],
+  sm: ["0.875rem", { lineHeight: "1.25rem" }],
+  base: ["1rem", { lineHeight: "1.5rem" }],
+  lg: ["1.125rem", { lineHeight: "1.75rem" }],
+  xl: ["1.25rem", { lineHeight: "1.75rem" }],
+  "2xl": ["1.5rem", { lineHeight: "2rem" }],
+  "3xl": ["1.875rem", { lineHeight: "2.25rem" }],
+  "4xl": ["2.25rem", { lineHeight: "2.5rem" }],
+} as const;
