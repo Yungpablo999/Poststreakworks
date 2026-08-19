@@ -780,47 +780,49 @@ export const MessagesScreen: React.FC<MessagesScreenProps> = ({
                 resizeMode="contain"
               />
             </Animated.View>
+
+            {/* Switch to Pro mode pill */}
+            {!activeChatThread && (
+              <Pressable
+                onPress={() => {
+                  if (Platform.OS !== 'web') {
+                    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+                  }
+                  if (onSwitchToPro) {
+                    onSwitchToPro();
+                  } else if (onSaveProfile && userProfile) {
+                    onSaveProfile({ ...userProfile, tier: 'pro' });
+                  }
+                }}
+                hitSlop={8}
+              >
+                <LinearGradient
+                  colors={['#EDE9FE', '#DDD6FE']}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 1 }}
+                  style={styles.freeHeaderBadge}
+                >
+                  <Text style={styles.freeHeaderBadgeText}>✨ PRO</Text>
+                </LinearGradient>
+              </Pressable>
+            )}
           </View>
 
-          {/* Center Title with compact Pro pill */}
-          <View style={styles.headerCenter}>
-            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
+          {/* Active Chat Header or Empty Space in Inbox */}
+          {activeChatThread ? (
+            <View style={styles.headerCenter}>
               <Text style={styles.headerTitleText}>
-                {activeChatThread ? activeChatThread.name : 'Creator Messages'}
+                {activeChatThread.name}
               </Text>
-              {!activeChatThread && (
-                <Pressable
-                  onPress={() => {
-                    if (Platform.OS !== 'web') {
-                      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-                    }
-                    if (onSwitchToPro) {
-                      onSwitchToPro();
-                    } else if (onSaveProfile && userProfile) {
-                      onSaveProfile({ ...userProfile, tier: 'pro' });
-                    }
-                  }}
-                  hitSlop={8}
-                >
-                  <LinearGradient
-                    colors={['#EDE9FE', '#DDD6FE']}
-                    start={{ x: 0, y: 0 }}
-                    end={{ x: 1, y: 1 }}
-                    style={styles.freeHeaderBadge}
-                  >
-                    <Text style={styles.freeHeaderBadgeText}>✨ PRO</Text>
-                  </LinearGradient>
-                </Pressable>
-              )}
-            </View>
-            <Text style={styles.headerSubtitleText}>
-              {activeChatThread
-                ? activeChatThread.isOnline
+              <Text style={styles.headerSubtitleText}>
+                {activeChatThread.isOnline
                   ? '🟢 Active now • ⚡ 52d streak'
-                  : '⚡ Streak Partner'
-                : '12 Connected Creators'}
-            </Text>
-          </View>
+                  : '⚡ Streak Partner'}
+              </Text>
+            </View>
+          ) : (
+            <View style={{ flex: 1 }} />
+          )}
 
           {/* Right Action: Plus Button (+) & Profile Icon */}
           <View style={styles.headerRightGroup}>
