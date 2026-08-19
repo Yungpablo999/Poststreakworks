@@ -237,6 +237,7 @@ export const ProScheduleScreen: React.FC<ProScheduleScreenProps> = ({
   const [showSchedulePostModal, setShowSchedulePostModal] = useState(false);
   const [showExpandViewModal, setShowExpandViewModal] = useState(false);
   const [showFullQueueModal, setShowFullQueueModal] = useState(false);
+  const [showStrategyModal, setShowStrategyModal] = useState(false);
   const [fullQueueList, setFullQueueList] = useState<FullQueueItem[]>(INITIAL_FULL_QUEUE);
   const [selectedQueueFilter, setSelectedQueueFilter] = useState('ALL');
   const [showFillGapModal, setShowFillGapModal] = useState(false);
@@ -967,16 +968,25 @@ export const ProScheduleScreen: React.FC<ProScheduleScreenProps> = ({
             </Text>
 
             <Pressable
-              style={({ pressed }) => [styles.moreStrategyBtn, pressed && styles.btnPressed]}
+              style={({ pressed }) => [styles.modalGoldActionBtnWrapper, { marginTop: 12 }, pressed && styles.btnPressed]}
               onPress={() => {
                 if (Platform.OS !== 'web') {
                   Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
                 }
-                if (onOpenJarvisPro) onOpenJarvisPro();
-                else showToast('Opening Jarvis Pro Strategy Roadmap');
+                triggerModalPop();
+                setShowStrategyModal(true);
               }}
             >
-              <Text style={styles.moreStrategyBtnText}>More Strategy</Text>
+              <LinearGradient
+                colors={['#FDE68A', '#F59E0B', '#D97706']}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                style={styles.modalGoldBtnGradient}
+              >
+                <Text style={styles.modalGoldActionBtnText}>
+                  ✨ More Strategy Ideas ➔
+                </Text>
+              </LinearGradient>
             </Pressable>
           </LinearGradient>
         </ScrollView>
@@ -1726,6 +1736,152 @@ export const ProScheduleScreen: React.FC<ProScheduleScreenProps> = ({
                   onPress={() => setShowFullQueueModal(false)}
                 >
                   <Text style={styles.modalCancelBtnText}>Close Queue</Text>
+                </Pressable>
+              </ScrollView>
+            </Animated.View>
+          </View>
+        </Modal>
+
+                {/* ============================================================ */}
+        {/* MODAL 6: JARVIS PRO STRATEGY ROADMAP MODAL                  */}
+        {/* ============================================================ */}
+        <Modal
+          visible={showStrategyModal}
+          transparent={true}
+          animationType="fade"
+          onRequestClose={() => setShowStrategyModal(false)}
+        >
+          <View style={styles.modalOverlay}>
+            <Animated.View style={[styles.modalCard, { transform: [{ scale: modalPopScale }], maxHeight: '90%' }]}>
+              <ScrollView showsVerticalScrollIndicator={false} bounces={false}>
+                {/* Header */}
+                <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+                  <View style={styles.modalProTagBadge}>
+                    <Text style={styles.modalProTagBadgeText}>👑 JARVIS PRO STRATEGY BLUEPRINT</Text>
+                  </View>
+                  <Pressable onPress={() => setShowStrategyModal(false)} hitSlop={8}>
+                    <Text style={{ fontSize: 18, color: '#94A3B8', fontWeight: '900' }}>✕</Text>
+                  </Pressable>
+                </View>
+
+                <Text style={styles.modalTitleText}>Algorithmic Strategy Blueprint</Text>
+                <Text style={styles.modalSubText}>
+                  High-velocity tactics calculated for your 52-day streak momentum and current multi-platform reach.
+                </Text>
+
+                {/* Strategy Cards */}
+                <View style={{ gap: 12, marginVertical: 12 }}>
+                  {/* Strategy 1: Peak Window Velocity */}
+                  <View style={styles.strategyIdeaCard}>
+                    <View style={{ flexDirection: 'row', gap: 10, alignItems: 'center', marginBottom: 6 }}>
+                      <Text style={{ fontSize: 20 }}>⚡</Text>
+                      <View style={{ flex: 1 }}>
+                        <Text style={styles.strategyIdeaTitle}>Peak Velocity Window (7:15 – 7:45 PM)</Text>
+                        <Text style={styles.strategyIdeaTag}>ALGORITHM TIMING • +2.4X REACH</Text>
+                      </View>
+                    </View>
+                    <Text style={styles.strategyIdeaBody}>
+                      Wednesday and Friday evening algorithms favor early watch-time velocity. Schedule your 45-second Reels at 7:30 PM to trigger the discovery explore page.
+                    </Text>
+                  </View>
+
+                  {/* Strategy 2: Contrarian 3-Second Hook */}
+                  <View style={styles.strategyIdeaCard}>
+                    <View style={{ flexDirection: 'row', gap: 10, alignItems: 'center', marginBottom: 6 }}>
+                      <Text style={{ fontSize: 20 }}>🎬</Text>
+                      <View style={{ flex: 1 }}>
+                        <Text style={styles.strategyIdeaTitle}>Contrarian Hook Architecture</Text>
+                        <Text style={styles.strategyIdeaTag}>RETENTION RETENTION • 96% MATCH</Text>
+                      </View>
+                    </View>
+                    <Text style={styles.strategyIdeaBody}>
+                      Start with &ldquo;Why 90% of creators fail by Month 2&rdquo; rather than an intro. Cuts initial 3-second dropoff by 42% on TikTok and Instagram Reels.
+                    </Text>
+                  </View>
+
+                  {/* Strategy 3: Multi-Platform Synergy */}
+                  <View style={styles.strategyIdeaCard}>
+                    <View style={{ flexDirection: 'row', gap: 10, alignItems: 'center', marginBottom: 6 }}>
+                      <Text style={{ fontSize: 20 }}>🚀</Text>
+                      <View style={{ flex: 1 }}>
+                        <Text style={styles.strategyIdeaTitle}>Multi-Sync Cascade Pacing</Text>
+                        <Text style={styles.strategyIdeaTag}>DISTRIBUTION MULTIPLIER</Text>
+                      </View>
+                    </View>
+                    <Text style={styles.strategyIdeaBody}>
+                      Publish your 9:16 video to Instagram and TikTok simultaneously, then release the long-form text breakdown on LinkedIn 2 hours later to maximize B2B authority.
+                    </Text>
+                  </View>
+
+                  {/* Strategy 4: Squad Engagement Loop */}
+                  <View style={styles.strategyIdeaCard}>
+                    <View style={{ flexDirection: 'row', gap: 10, alignItems: 'center', marginBottom: 6 }}>
+                      <Text style={{ fontSize: 20 }}>🤝</Text>
+                      <View style={{ flex: 1 }}>
+                        <Text style={styles.strategyIdeaTitle}>Pre-Release Squad Engagement</Text>
+                        <Text style={styles.strategyIdeaTag}>DUEL BOOST • +750 XP</Text>
+                      </View>
+                    </View>
+                    <Text style={styles.strategyIdeaBody}>
+                      Notify your squad (Elena &amp; Amara) 15 minutes before your post goes live to secure initial high-retention comments and fuel viral reach.
+                    </Text>
+                  </View>
+                </View>
+
+                {/* Primary Action Button: Apply Strategy Blueprint */}
+                <Pressable
+                  style={({ pressed }) => [styles.modalGoldActionBtnWrapper, { marginTop: 6 }, pressed && styles.btnPressed]}
+                  onPress={() => {
+                    setShowStrategyModal(false);
+                    if (Platform.OS !== 'web') {
+                      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+                    }
+                    setCompletionData({
+                      title: 'Jarvis Strategy Applied!',
+                      subtitle: 'Peak windows, viral hook formatting, and squad distribution loop activated.',
+                      badgeText: '👑 STRATEGY BLUEPRINT LIVE',
+                      xpEarned: 50,
+                      speechBubble: 'Algorithmic multiplier active! Pacing optimized for maximum reach.',
+                    });
+                    setTimeout(() => {
+                      setShowCompletionModal(true);
+                    }, 200);
+                  }}
+                >
+                  <LinearGradient
+                    colors={['#FDE68A', '#F59E0B', '#D97706']}
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 1, y: 1 }}
+                    style={styles.modalGoldBtnGradient}
+                  >
+                    <Text style={styles.modalGoldActionBtnText}>
+                      ✨ Apply Strategy Blueprint (+50 XP) ➔
+                    </Text>
+                  </LinearGradient>
+                </Pressable>
+
+                {/* Secondary Action: Chat with Jarvis */}
+                <Pressable
+                  style={({ pressed }) => [styles.modalSecondaryOutlineBtn, { marginTop: 8 }, pressed && styles.btnPressed]}
+                  onPress={() => {
+                    setShowStrategyModal(false);
+                    if (onOpenMessages) {
+                      onOpenMessages('conv_jarvis');
+                    } else if (onOpenJarvisPro) {
+                      onOpenJarvisPro();
+                    }
+                  }}
+                >
+                  <Text style={styles.modalSecondaryOutlineBtnText}>
+                    💬 Chat with Jarvis for Custom Plan ➔
+                  </Text>
+                </Pressable>
+
+                <Pressable
+                  style={styles.modalCancelBtn}
+                  onPress={() => setShowStrategyModal(false)}
+                >
+                  <Text style={styles.modalCancelBtnText}>Dismiss Strategy</Text>
                 </Pressable>
               </ScrollView>
             </Animated.View>
@@ -2917,6 +3073,32 @@ const styles = StyleSheet.create({
     fontSize: 11,
     color: '#582CDB',
     fontWeight: '800',
+  },
+
+  // STRATEGY MODAL STYLES
+  strategyIdeaCard: {
+    backgroundColor: '#FAF8F5',
+    borderRadius: 16,
+    padding: 14,
+    borderWidth: 1,
+    borderColor: '#EFECE6',
+  },
+  strategyIdeaTitle: {
+    fontSize: 13.5,
+    fontWeight: '900',
+    color: '#171420',
+  },
+  strategyIdeaTag: {
+    fontSize: 9,
+    fontWeight: '900',
+    color: '#582CDB',
+    letterSpacing: 0.4,
+    marginTop: 1,
+  },
+  strategyIdeaBody: {
+    fontSize: 12,
+    color: '#64748B',
+    lineHeight: 17,
   },
 
   // COMMON
