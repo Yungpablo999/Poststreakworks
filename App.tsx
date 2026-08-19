@@ -86,6 +86,7 @@ export default function App() {
     niche: 'Tech & Lifestyle Creator • Lagos',
     avatarId: 'ghost',
     avatarSource: require('./assets/images/jarvis-ghost-clean.png'),
+    tier: 'pro',
     streakCount: 47,
     level: 5,
     xp: 3450,

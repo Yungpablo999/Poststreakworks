@@ -747,7 +747,7 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
       <View style={[styles.container, isDark && { backgroundColor: '#0C0A12' }]}>
         {/* 1. TOP APP BAR: Ghost Mascot on Left & Notification/Profile on Right */}
         <View style={styles.headerBar}>
-          {/* Top-Left: Ghost Logo Mascot + Pro Pill */}
+          {/* Top-Left: Ghost Logo Mascot + 1-Tap Pro Mode Switcher Pill */}
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
             <Animated.View
               style={[
@@ -767,16 +767,33 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
               />
             </Animated.View>
 
-            {isPro && (
-              <LinearGradient
-                colors={['#FDE047', '#EAB308', '#CA8A04']}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 0 }}
-                style={styles.proHeaderBadge}
-              >
-                <Text style={styles.proHeaderBadgeText}>👑 PRO CREATOR</Text>
-              </LinearGradient>
-            )}
+            <Pressable
+              onPress={() => {
+                if (Platform.OS !== 'web') {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                }
+                const nextTier = isPro ? 'free' : 'pro';
+                if (onSaveProfile && userProfile) {
+                  onSaveProfile({ ...userProfile, tier: nextTier });
+                }
+              }}
+              hitSlop={8}
+            >
+              {isPro ? (
+                <LinearGradient
+                  colors={['#FDE047', '#EAB308', '#CA8A04']}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 0 }}
+                  style={styles.proHeaderBadge}
+                >
+                  <Text style={styles.proHeaderBadgeText}>👑 PRO CREATOR</Text>
+                </LinearGradient>
+              ) : (
+                <View style={[styles.proHeaderBadge, { backgroundColor: '#EDE9FE', borderColor: '#C4B5FD' }]}>
+                  <Text style={[styles.proHeaderBadgeText, { color: '#582CDB' }]}>⚡ GET PRO</Text>
+                </View>
+              )}
+            </Pressable>
           </View>
 
           {/* Right: Message, Notification & Person Profile Photo Upload */}
