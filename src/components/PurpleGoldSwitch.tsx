@@ -57,24 +57,12 @@ export const PurpleGoldSwitch: React.FC<PurpleGoldSwitchProps> = ({
           },
         ]}
       >
-        {value ? (
-          <View
-            style={[
-              styles.goldThumb,
-              { width: thumbSize, height: thumbSize, borderRadius: thumbSize / 2 },
-            ]}
-          >
-            {/* Subtle inner gold accent core */}
-            <View style={styles.goldCoreDot} />
-          </View>
-        ) : (
-          <View
-            style={[
-              styles.inactiveThumb,
-              { width: thumbSize, height: thumbSize, borderRadius: thumbSize / 2 },
-            ]}
-          />
-        )}
+        <View
+          style={[
+            styles.thumbInner,
+            { width: thumbSize, height: thumbSize, borderRadius: thumbSize / 2 },
+          ]}
+        />
       </Animated.View>
     </Pressable>
   );
@@ -85,7 +73,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   trackActive: {
-    backgroundColor: '#582CDB', // Deep Royal Violet/Purple
+    backgroundColor: '#F59E0B', // Radiant 24K Gold (Clean iOS Apple style)
   },
   trackInactive: {
     backgroundColor: '#E2E8F0', // Minimal Slate
@@ -94,27 +82,11 @@ const styles = StyleSheet.create({
     position: 'absolute',
     shadowColor: '#000000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.18,
-    shadowRadius: 3,
+    shadowOpacity: 0.16,
+    shadowRadius: 3.5,
     elevation: 3,
   },
-  goldThumb: {
-    backgroundColor: '#F59E0B', // Rich Warm 24K Gold
-    borderWidth: 1.5,
-    borderColor: '#FDE68A', // Luminous Light Gold Rim
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  goldCoreDot: {
-    width: 6,
-    height: 6,
-    borderRadius: 3,
-    backgroundColor: '#FFFFFF',
-    opacity: 0.8,
-  },
-  inactiveThumb: {
-    backgroundColor: '#FFFFFF',
-    borderWidth: 1,
-    borderColor: '#E2E8F0',
+  thumbInner: {
+    backgroundColor: '#FFFFFF', // Crisp Pure White
   },
 });
