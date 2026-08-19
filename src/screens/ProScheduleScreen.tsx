@@ -148,6 +148,7 @@ export const ProScheduleScreen: React.FC<ProScheduleScreenProps> = ({
   const [scheduleList, setScheduleList] = useState<ScheduleItem[]>(INITIAL_SCHEDULE_ITEMS);
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [showSchedulePostModal, setShowSchedulePostModal] = useState(false);
+  const [showExpandViewModal, setShowExpandViewModal] = useState(false);
   const [showFillGapModal, setShowFillGapModal] = useState(false);
   const [selectedPostDetail, setSelectedPostDetail] = useState<ScheduleItem | null>(null);
   const [autopilotEnabled, setAutopilotEnabled] = useState<boolean>(true);
@@ -564,7 +565,13 @@ export const ProScheduleScreen: React.FC<ProScheduleScreenProps> = ({
           <View style={styles.sectionHeaderRowWithLink}>
             <Text style={styles.sectionHeaderTitleBold}>Today&apos;s Schedule</Text>
             <Pressable
-              onPress={() => showToast('Opening expanded schedule view')}
+              onPress={() => {
+                if (Platform.OS !== 'web') {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                }
+                triggerModalPop();
+                setShowExpandViewModal(true);
+              }}
               hitSlop={8}
             >
               <Text style={styles.expandViewLink}>Expand View ↗</Text>
@@ -1199,6 +1206,126 @@ export const ProScheduleScreen: React.FC<ProScheduleScreenProps> = ({
                   </View>
                 </>
               )}
+            </Animated.View>
+          </View>
+        </Modal>
+
+                {/* ============================================================ */}
+        {/* MODAL 4: EXPANDED DAY SCHEDULE TIMELINE MODAL               */}
+        {/* ============================================================ */}
+        <Modal
+          visible={showExpandViewModal}
+          transparent={true}
+          animationType="fade"
+          onRequestClose={() => setShowExpandViewModal(false)}
+        >
+          <View style={styles.modalOverlay}>
+            <Animated.View style={[styles.modalCard, { transform: [{ scale: modalPopScale }], maxHeight: '90%' }]}>
+              <ScrollView showsVerticalScrollIndicator={false} bounces={false}>
+                {/* Header */}
+                <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+                  <View style={styles.modalProTagBadge}>
+                    <Text style={styles.modalProTagBadgeText}>
+                      📅 {CALENDAR_DAYS[selectedDayIndex].dayName} {CALENDAR_DAYS[selectedDayIndex].dayNum}TH TIMELINE
+                    </Text>
+                  </View>
+                  <Pressable onPress={() => setShowExpandViewModal(false)} hitSlop={8}>
+                    <Text style={{ fontSize: 18, color: '#94A3B8', fontWeight: '900' }}>✕</Text>
+                  </Pressable>
+                </View>
+
+                <Text style={styles.modalTitleText}>
+                  {CALENDAR_DAYS[selectedDayIndex].dayName} Detailed Schedule
+                </Text>
+                <Text style={styles.modalSubText}>
+                  Complete chronological breakdown of posts, predicted retention windows, and status for this day.
+                </Text>
+
+                {/* Day Posts List */}
+                <View style={{ gap: 10, marginVertical: 10 }}>
+                  {displayedItems.length > 0 ? (
+                    displayedItems.map((item, idx) => (
+                      <View key={item.id} style={styles.expandedPostCard}>
+                        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                          <View style={{ flexDirection: 'row', gap: 10, flex: 1 }}>
+                            <View style={item.badgeType === 'recommended' ? styles.timeBoxGold : styles.timeBoxPurple}>
+                              <Text style={item.badgeType === 'recommended' ? styles.timeBoxGoldText : styles.timeBoxPurpleText}>
+                                {item.time}
+                              </Text>
+                              <Text style={item.badgeType === 'recommended' ? styles.timeBoxGoldSub : styles.timeBoxPurpleSub}>
+                                {item.period}
+                              </Text>
+                            </View>
+
+                            <View style={{ flex: 1 }}>
+                              <Text style={styles.scheduleItemTitle}>{item.title}</Text>
+                              <Text style={styles.scheduleItemPlatform}>{item.platformLabel} • ⚡ 94% Retention</Text>
+                            </View>
+                          </View>
+
+                          <View style={item.badgeType === 'recommended' ? styles.recommendedPillBadge : styles.scheduledPillBadge}>
+                            <Text style={item.badgeType === 'recommended' ? styles.recommendedPillBadgeText : styles.scheduledPillBadgeText}>
+                              {item.badgeType.toUpperCase()}
+                            </Text>
+                          </View>
+                        </View>
+
+                        {/* Actions for this post */}
+                        <View style={styles.expandedPostActionsRow}>
+                          <Pressable
+                            style={styles.expandedPostActionBtn}
+                            onPress={() => {
+                              setShowExpandViewModal(false);
+                              showToast('Publishing post now!');
+                            }}
+                          >
+                            <Text style={styles.expandedPostActionBtnText}>🚀 Post Now</Text>
+                          </Pressable>
+
+                          <Pressable
+                            style={styles.expandedPostActionBtnSecondary}
+                            onPress={() => {
+                              setShowExpandViewModal(false);
+                              setSelectedPostDetail(item);
+                            }}
+                          >
+                            <Text style={styles.expandedPostActionBtnSecondaryText}>✏️ Edit Details</Text>
+                          </Pressable>
+                        </View>
+                      </View>
+                    ))
+                  ) : (
+                    <View style={styles.emptyScheduleBox}>
+                      <Text style={{ fontSize: 24, marginBottom: 4 }}>☕</Text>
+                      <Text style={styles.emptyScheduleTitle}>No posts scheduled for {CALENDAR_DAYS[selectedDayIndex].dayName}</Text>
+                      <Text style={styles.emptyScheduleSub}>Lock in a peak engagement slot to maintain your streak momentum.</Text>
+                    </View>
+                  )}
+                </View>
+
+                {/* Prominent + Schedule Post Button */}
+                <Pressable
+                  style={styles.modalPrimaryActionBtn}
+                  onPress={() => {
+                    setShowExpandViewModal(false);
+                    setTimeout(() => {
+                      triggerModalPop();
+                      setShowSchedulePostModal(true);
+                    }, 200);
+                  }}
+                >
+                  <Text style={styles.modalPrimaryActionBtnText}>
+                    + Schedule New Post for {CALENDAR_DAYS[selectedDayIndex].dayName} ➔
+                  </Text>
+                </Pressable>
+
+                <Pressable
+                  style={styles.modalCancelBtn}
+                  onPress={() => setShowExpandViewModal(false)}
+                >
+                  <Text style={styles.modalCancelBtnText}>Close Timeline</Text>
+                </Pressable>
+              </ScrollView>
             </Animated.View>
           </View>
         </Modal>
@@ -2262,6 +2389,54 @@ const styles = StyleSheet.create({
     color: '#171420',
     fontSize: 13,
     fontWeight: '800',
+  },
+
+  expandedPostCard: {
+    backgroundColor: '#FAF8F5',
+    borderRadius: 16,
+    padding: 14,
+    borderWidth: 1,
+    borderColor: '#EFECE6',
+  },
+  expandedPostActionsRow: {
+    flexDirection: 'row',
+    gap: 8,
+    marginTop: 10,
+    paddingTop: 10,
+    borderTopWidth: 1,
+    borderTopColor: '#E2E8F0',
+  },
+  expandedPostActionBtn: {
+    flex: 1,
+    backgroundColor: '#582CDB',
+    paddingVertical: 8,
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+  expandedPostActionBtnText: {
+    color: '#FFFFFF',
+    fontSize: 11.5,
+    fontWeight: '900',
+  },
+  expandedPostActionBtnSecondary: {
+    flex: 1,
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    paddingVertical: 8,
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+  expandedPostActionBtnSecondaryText: {
+    color: '#171420',
+    fontSize: 11.5,
+    fontWeight: '800',
+  },
+  emptyScheduleSub: {
+    fontSize: 11,
+    color: '#64748B',
+    textAlign: 'center',
+    marginBottom: 8,
   },
 
   // COMMON
