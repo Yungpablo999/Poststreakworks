@@ -324,6 +324,11 @@ export default function App() {
             onOpenJarvisPro={() => navigateTo('jarvis-pro')}
             onOpenSchedule={() => navigateTo('schedule')}
             onOpenMessages={() => navigateTo('messages')}
+            onOpenEarnings={() => navigateTo('earnings')}
+            onOpenQuests={() => navigateTo('quests')}
+            onOpenGrowth={() => navigateTo('growth')}
+            onOpenMatch={() => navigateTo('match')}
+            onOpenCreate={() => navigateTo('create')}
             onNavigateTab={(tab: TabType) => {
               if (tab === 'create') {
                 navigateTo('create');
