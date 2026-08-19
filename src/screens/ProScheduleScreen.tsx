@@ -155,6 +155,12 @@ export const ProScheduleScreen: React.FC<ProScheduleScreenProps> = ({
   const [showExpandViewModal, setShowExpandViewModal] = useState(false);
   const [showFillGapModal, setShowFillGapModal] = useState(false);
   const [selectedPostDetail, setSelectedPostDetail] = useState<ScheduleItem | null>(null);
+  // Advanced Edit Modal States
+  const [editingPostTitle, setEditingPostTitle] = useState('');
+  const [editingPostPlatform, setEditingPostPlatform] = useState('📸 IG Reel');
+  const [editingPostTime, setEditingPostTime] = useState('07:30');
+  const [editingPostPeriod, setEditingPostPeriod] = useState('PM');
+  const [editingPostHashtags, setEditingPostHashtags] = useState('#CreatorGrowth #ViralReels #PostStreak');
   const [autopilotEnabled, setAutopilotEnabled] = useState<boolean>(true);
 
   // Completion Animation State
@@ -1162,7 +1168,7 @@ export const ProScheduleScreen: React.FC<ProScheduleScreenProps> = ({
         </Modal>
 
         {/* ============================================================ */}
-        {/* MODAL 3: POST DETAIL PREVIEW MODAL                           */}
+        {/* MODAL 3: IN-DEPTH ADVANCED PRO POST EDITOR MODAL             */}
         {/* ============================================================ */}
         <Modal
           visible={selectedPostDetail !== null}
@@ -1171,44 +1177,200 @@ export const ProScheduleScreen: React.FC<ProScheduleScreenProps> = ({
           onRequestClose={() => setSelectedPostDetail(null)}
         >
           <View style={styles.modalOverlay}>
-            <Animated.View style={[styles.modalCard, { transform: [{ scale: modalPopScale }] }]}>
+            <Animated.View style={[styles.modalCard, { transform: [{ scale: modalPopScale }], maxHeight: '90%' }]}>
               {selectedPostDetail && (
-                <>
-                  <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
-                    <View style={styles.modalTagBadge}>
-                      <Text style={styles.modalTagBadgeText}>📌 SCHEDULED CONTENT</Text>
+                <ScrollView showsVerticalScrollIndicator={false} bounces={false}>
+                  {/* Header */}
+                  <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+                    <View style={styles.modalProTagBadge}>
+                      <Text style={styles.modalProTagBadgeText}>👑 ADVANCED PRO POST EDITOR</Text>
                     </View>
                     <Pressable onPress={() => setSelectedPostDetail(null)} hitSlop={8}>
                       <Text style={{ fontSize: 18, color: '#94A3B8', fontWeight: '900' }}>✕</Text>
                     </Pressable>
                   </View>
 
-                  <Text style={styles.modalTitleText}>{selectedPostDetail.title}</Text>
+                  <Text style={styles.modalTitleText}>Edit Scheduled Post</Text>
                   <Text style={styles.modalSubText}>
-                    Platform: {selectedPostDetail.platformLabel} • Time: {selectedPostDetail.time} {selectedPostDetail.period}
+                    Refine your content title, change platforms, adjust exact peak timing, and customize AI retention hooks.
                   </Text>
 
-                  <View style={{ flexDirection: 'row', gap: 10, marginTop: 14 }}>
-                    <Pressable
-                      style={styles.postDetailPrimaryBtn}
-                      onPress={() => {
-                        showToast('Publishing post now!');
-                        setSelectedPostDetail(null);
-                      }}
-                    >
-                      <Text style={styles.postDetailPrimaryBtnText}>🚀 Post Now</Text>
-                    </Pressable>
-                    <Pressable
-                      style={styles.postDetailSecondaryBtn}
-                      onPress={() => {
-                        showToast('Post rescheduled to next peak window');
-                        setSelectedPostDetail(null);
-                      }}
-                    >
-                      <Text style={styles.postDetailSecondaryBtnText}>✏️ Edit Time</Text>
-                    </Pressable>
+                  {/* 1. CONTENT TITLE / VIRAL HOOK */}
+                  <Text style={styles.inputLabel}>CONTENT TITLE / VIRAL HOOK</Text>
+                  <TextInput
+                    style={styles.modalTextArea}
+                    placeholder="Enter post hook..."
+                    placeholderTextColor="#94A3B8"
+                    value={editingPostTitle}
+                    onChangeText={setEditingPostTitle}
+                    multiline={true}
+                    numberOfLines={3}
+                  />
+
+                  {/* Quick Hook Suggestions */}
+                  <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginVertical: 8 }}>
+                    {[
+                      '💡 "Why 90% fail at..."',
+                      '🚀 "The 1 tool every..."',
+                      '🔥 "Stop doing this..."',
+                      '📈 "How I scaled to..."',
+                    ].map((hook, hIdx) => (
+                      <Pressable
+                        key={hIdx}
+                        style={styles.hookChip}
+                        onPress={() => setEditingPostTitle(hook.replace(/^[^\w"]+/, '').replace(/"/g, ''))}
+                      >
+                        <Text style={styles.hookChipText}>{hook}</Text>
+                      </Pressable>
+                    ))}
                   </View>
-                </>
+
+                  {/* 2. TARGET PLATFORM */}
+                  <Text style={styles.inputLabel}>TARGET PLATFORM</Text>
+                  <View style={{ flexDirection: 'row', gap: 8, marginBottom: 12 }}>
+                    {['📸 IG Reel', '≈ TikTok', '▶ Shorts', 'in LinkedIn'].map((plat) => (
+                      <Pressable
+                        key={plat}
+                        style={[
+                          styles.platformPillBtn,
+                          editingPostPlatform === plat && styles.platformPillBtnActive,
+                        ]}
+                        onPress={() => setEditingPostPlatform(plat)}
+                      >
+                        <Text
+                          style={[
+                            styles.platformPillText,
+                            editingPostPlatform === plat && styles.platformPillTextActive,
+                          ]}
+                        >
+                          {plat}
+                        </Text>
+                      </Pressable>
+                    ))}
+                  </View>
+
+                  {/* 3. OPTIMAL POSTING TIME */}
+                  <Text style={styles.inputLabel}>PEAK TIME WINDOW</Text>
+                  <View style={{ flexDirection: 'row', gap: 8, marginBottom: 12 }}>
+                    {[
+                      { time: '07:30', period: 'PM', label: '7:30 PM (Peak)' },
+                      { time: '12:00', period: 'PM', label: '12:00 PM (Mid)' },
+                      { time: '08:00', period: 'AM', label: '8:00 AM (Morning)' },
+                    ].map((slot) => {
+                      const isSelected = editingPostTime === slot.time && editingPostPeriod === slot.period;
+                      return (
+                        <Pressable
+                          key={slot.label}
+                          style={[styles.platformPillBtn, isSelected && styles.platformPillBtnActive]}
+                          onPress={() => {
+                            setEditingPostTime(slot.time);
+                            setEditingPostPeriod(slot.period);
+                          }}
+                        >
+                          <Text style={[styles.platformPillText, isSelected && styles.platformPillTextActive]}>
+                            {slot.label}
+                          </Text>
+                        </Pressable>
+                      );
+                    })}
+                  </View>
+
+                  {/* 4. HASHTAGS & CAPTION TAGS */}
+                  <Text style={styles.inputLabel}>HASHTAGS & TAGS</Text>
+                  <TextInput
+                    style={styles.modalInput}
+                    placeholder="Enter hashtags..."
+                    placeholderTextColor="#94A3B8"
+                    value={editingPostHashtags}
+                    onChangeText={setEditingPostHashtags}
+                  />
+
+                  {/* 5. JARVIS INTELLIGENCE RATING */}
+                  <View style={styles.jarvisPredictionBox}>
+                    <Text style={styles.jarvisPredictionTitle}>⚡ JARVIS RETENTION SCORE: 96%</Text>
+                    <Text style={styles.jarvisPredictionSub}>
+                      Optimized for evening algorithm velocity • Expected +2.4K Organic Reach
+                    </Text>
+                  </View>
+
+                  {/* 6. SAVE & ACTIONS */}
+                  <Pressable
+                    style={({ pressed }) => [styles.modalGoldActionBtnWrapper, { marginTop: 12 }, pressed && styles.btnPressed]}
+                    onPress={() => {
+                      const updatedTitle = editingPostTitle.trim() || selectedPostDetail.title;
+                      // Update in scheduleList
+                      setScheduleList((prev) =>
+                        prev.map((item) =>
+                          item.id === selectedPostDetail.id
+                            ? {
+                                ...item,
+                                title: updatedTitle,
+                                platformLabel: editingPostPlatform,
+                                time: editingPostTime,
+                                period: editingPostPeriod,
+                              }
+                            : item
+                        )
+                      );
+                      setSelectedPostDetail(null);
+
+                      if (Platform.OS !== 'web') {
+                        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+                      }
+                      setCompletionData({
+                        title: 'Post Details Updated!',
+                        subtitle: `"${updatedTitle}" scheduled for ${editingPostTime} ${editingPostPeriod} on ${editingPostPlatform}.`,
+                        badgeText: '👑 PRO SCHEDULE UPDATED',
+                        xpEarned: 25,
+                        speechBubble: 'All changes synchronized to your Autopilot queue!',
+                      });
+                      setTimeout(() => {
+                        setShowCompletionModal(true);
+                      }, 200);
+                    }}
+                  >
+                    <LinearGradient
+                      colors={['#FDE68A', '#F59E0B', '#D97706']}
+                      start={{ x: 0, y: 0 }}
+                      end={{ x: 1, y: 1 }}
+                      style={styles.modalGoldBtnGradient}
+                    >
+                      <Text style={styles.modalGoldActionBtnText}>
+                        ✨ Save Changes &amp; Update Schedule (+25 XP) ➔
+                      </Text>
+                    </LinearGradient>
+                  </Pressable>
+
+                  {/* Open in Full Post Composer */}
+                  <Pressable
+                    style={styles.modalPrimaryActionBtn}
+                    onPress={() => {
+                      const titleToOpen = editingPostTitle.trim() || selectedPostDetail.title;
+                      setSelectedPostDetail(null);
+                      if (onOpenPostComposer) {
+                        onOpenPostComposer(titleToOpen);
+                      } else if (onStartMission) {
+                        onStartMission();
+                      }
+                    }}
+                  >
+                    <Text style={styles.modalPrimaryActionBtnText}>
+                      🚀 Open in Full Post Composer ➔
+                    </Text>
+                  </Pressable>
+
+                  {/* Delete Button */}
+                  <Pressable
+                    style={styles.modalCancelBtn}
+                    onPress={() => {
+                      setScheduleList((prev) => prev.filter((item) => item.id !== selectedPostDetail.id));
+                      setSelectedPostDetail(null);
+                      showToast('Post removed from schedule');
+                    }}
+                  >
+                    <Text style={[styles.modalCancelBtnText, { color: '#EF4444' }]}>🗑️ Delete Scheduled Post</Text>
+                  </Pressable>
+                </ScrollView>
               )}
             </Animated.View>
           </View>
@@ -1298,7 +1460,15 @@ export const ProScheduleScreen: React.FC<ProScheduleScreenProps> = ({
                           <Pressable
                             style={styles.expandedPostActionBtnSecondary}
                             onPress={() => {
+                              if (Platform.OS !== 'web') {
+                                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                              }
+                              setEditingPostTitle(item.title);
+                              setEditingPostPlatform(item.platformLabel);
+                              setEditingPostTime(item.time);
+                              setEditingPostPeriod(item.period);
                               setShowExpandViewModal(false);
+                              triggerModalPop();
                               setSelectedPostDetail(item);
                             }}
                           >
