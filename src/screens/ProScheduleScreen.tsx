@@ -1294,82 +1294,85 @@ export const ProScheduleScreen: React.FC<ProScheduleScreenProps> = ({
                   </View>
 
                   {/* 6. SAVE & ACTIONS */}
-                  <Pressable
-                    style={({ pressed }) => [styles.modalGoldActionBtnWrapper, { marginTop: 12 }, pressed && styles.btnPressed]}
-                    onPress={() => {
-                      const updatedTitle = editingPostTitle.trim() || selectedPostDetail.title;
-                      // Update in scheduleList
-                      setScheduleList((prev) =>
-                        prev.map((item) =>
-                          item.id === selectedPostDetail.id
-                            ? {
-                                ...item,
-                                title: updatedTitle,
-                                platformLabel: editingPostPlatform,
-                                time: editingPostTime,
-                                period: editingPostPeriod,
-                              }
-                            : item
-                        )
-                      );
-                      setSelectedPostDetail(null);
+                  <View style={{ gap: 8, marginTop: 14 }}>
+                    {/* Primary Save Button */}
+                    <Pressable
+                      style={({ pressed }) => [styles.modalGoldActionBtnWrapper, pressed && styles.btnPressed]}
+                      onPress={() => {
+                        const updatedTitle = editingPostTitle.trim() || selectedPostDetail.title;
+                        // Update in scheduleList
+                        setScheduleList((prev) =>
+                          prev.map((item) =>
+                            item.id === selectedPostDetail.id
+                              ? {
+                                  ...item,
+                                  title: updatedTitle,
+                                  platformLabel: editingPostPlatform,
+                                  time: editingPostTime,
+                                  period: editingPostPeriod,
+                                }
+                              : item
+                          )
+                        );
+                        setSelectedPostDetail(null);
 
-                      if (Platform.OS !== 'web') {
-                        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-                      }
-                      setCompletionData({
-                        title: 'Post Details Updated!',
-                        subtitle: `"${updatedTitle}" scheduled for ${editingPostTime} ${editingPostPeriod} on ${editingPostPlatform}.`,
-                        badgeText: '👑 PRO SCHEDULE UPDATED',
-                        xpEarned: 25,
-                        speechBubble: 'All changes synchronized to your Autopilot queue!',
-                      });
-                      setTimeout(() => {
-                        setShowCompletionModal(true);
-                      }, 200);
-                    }}
-                  >
-                    <LinearGradient
-                      colors={['#FDE68A', '#F59E0B', '#D97706']}
-                      start={{ x: 0, y: 0 }}
-                      end={{ x: 1, y: 1 }}
-                      style={styles.modalGoldBtnGradient}
+                        if (Platform.OS !== 'web') {
+                          Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+                        }
+                        setCompletionData({
+                          title: 'Post Details Updated!',
+                          subtitle: `"${updatedTitle}" scheduled for ${editingPostTime} ${editingPostPeriod} on ${editingPostPlatform}.`,
+                          badgeText: '👑 PRO SCHEDULE UPDATED',
+                          xpEarned: 25,
+                          speechBubble: 'All changes synchronized to your Autopilot queue!',
+                        });
+                        setTimeout(() => {
+                          setShowCompletionModal(true);
+                        }, 200);
+                      }}
                     >
-                      <Text style={styles.modalGoldActionBtnText}>
-                        ✨ Save Changes &amp; Update Schedule (+25 XP) ➔
+                      <LinearGradient
+                        colors={['#FDE68A', '#F59E0B', '#D97706']}
+                        start={{ x: 0, y: 0 }}
+                        end={{ x: 1, y: 1 }}
+                        style={styles.modalGoldBtnGradient}
+                      >
+                        <Text style={styles.modalGoldActionBtnText}>
+                          ✨ Save Changes (+25 XP) ➔
+                        </Text>
+                      </LinearGradient>
+                    </Pressable>
+
+                    {/* Secondary: Open in Full Post Composer */}
+                    <Pressable
+                      style={({ pressed }) => [styles.modalSecondaryOutlineBtn, pressed && styles.btnPressed]}
+                      onPress={() => {
+                        const titleToOpen = editingPostTitle.trim() || selectedPostDetail.title;
+                        setSelectedPostDetail(null);
+                        if (onOpenPostComposer) {
+                          onOpenPostComposer(titleToOpen);
+                        } else if (onStartMission) {
+                          onStartMission();
+                        }
+                      }}
+                    >
+                      <Text style={styles.modalSecondaryOutlineBtnText}>
+                        🚀 Open in Full Post Composer ➔
                       </Text>
-                    </LinearGradient>
-                  </Pressable>
+                    </Pressable>
 
-                  {/* Open in Full Post Composer */}
-                  <Pressable
-                    style={styles.modalPrimaryActionBtn}
-                    onPress={() => {
-                      const titleToOpen = editingPostTitle.trim() || selectedPostDetail.title;
-                      setSelectedPostDetail(null);
-                      if (onOpenPostComposer) {
-                        onOpenPostComposer(titleToOpen);
-                      } else if (onStartMission) {
-                        onStartMission();
-                      }
-                    }}
-                  >
-                    <Text style={styles.modalPrimaryActionBtnText}>
-                      🚀 Open in Full Post Composer ➔
-                    </Text>
-                  </Pressable>
-
-                  {/* Delete Button */}
-                  <Pressable
-                    style={styles.modalCancelBtn}
-                    onPress={() => {
-                      setScheduleList((prev) => prev.filter((item) => item.id !== selectedPostDetail.id));
-                      setSelectedPostDetail(null);
-                      showToast('Post removed from schedule');
-                    }}
-                  >
-                    <Text style={[styles.modalCancelBtnText, { color: '#EF4444' }]}>🗑️ Delete Scheduled Post</Text>
-                  </Pressable>
+                    {/* Danger / Dismiss: Delete Button */}
+                    <Pressable
+                      style={styles.modalDeleteBtn}
+                      onPress={() => {
+                        setScheduleList((prev) => prev.filter((item) => item.id !== selectedPostDetail.id));
+                        setSelectedPostDetail(null);
+                        showToast('Post removed from schedule');
+                      }}
+                    >
+                      <Text style={styles.modalDeleteBtnText}>🗑️ Remove from Schedule</Text>
+                    </Pressable>
+                  </View>
                 </ScrollView>
               )}
             </Animated.View>
@@ -2482,6 +2485,29 @@ const styles = StyleSheet.create({
     fontWeight: '900',
     letterSpacing: 0.2,
   },
+  modalSecondaryOutlineBtn: {
+    backgroundColor: '#FAF8F5',
+    borderWidth: 1.5,
+    borderColor: '#DDD6FE',
+    paddingVertical: 12,
+    borderRadius: 14,
+    alignItems: 'center',
+  },
+  modalSecondaryOutlineBtnText: {
+    color: '#582CDB',
+    fontSize: 13,
+    fontWeight: '900',
+  },
+  modalDeleteBtn: {
+    paddingVertical: 8,
+    alignItems: 'center',
+  },
+  modalDeleteBtnText: {
+    color: '#EF4444',
+    fontSize: 11.5,
+    fontWeight: '800',
+  },
+
   modalCancelBtn: {
     paddingVertical: 10,
     alignItems: 'center',
