@@ -58,6 +58,45 @@ const CALENDAR_DAYS: CalendarDay[] = [
   { dayName: 'SUN', dayNum: 29, dotsCount: 2 },
 ];
 
+interface StrategyItem {
+  id: string;
+  icon: string;
+  title: string;
+  tag: string;
+  body: string;
+}
+
+const JARVIS_STRATEGIES: StrategyItem[] = [
+  {
+    id: 'strat_1',
+    icon: '⚡',
+    title: 'Peak Velocity Window (7:15 – 7:45 PM)',
+    tag: 'ALGORITHM TIMING • +2.4X REACH',
+    body: 'Wednesday and Friday evening algorithms favor early watch-time velocity. Schedule your 45-second Reels at 7:30 PM to trigger the discovery explore page.',
+  },
+  {
+    id: 'strat_2',
+    icon: '🎬',
+    title: 'Contrarian Hook Architecture',
+    tag: 'RETENTION RETENTION • 96% MATCH',
+    body: 'Start with "Why 90% of creators fail by Month 2" rather than an intro. Cuts initial 3-second dropoff by 42% on TikTok and Instagram Reels.',
+  },
+  {
+    id: 'strat_3',
+    icon: '🚀',
+    title: 'Multi-Sync Cascade Pacing',
+    tag: 'DISTRIBUTION MULTIPLIER',
+    body: 'Publish your 9:16 video to Instagram and TikTok simultaneously, then release the long-form text breakdown on LinkedIn 2 hours later to maximize B2B authority.',
+  },
+  {
+    id: 'strat_4',
+    icon: '🤝',
+    title: 'Pre-Release Squad Engagement',
+    tag: 'DUEL BOOST • +750 XP',
+    body: 'Notify your squad (Elena & Amara) 15 minutes before your post goes live to secure initial high-retention comments and fuel viral reach.',
+  },
+];
+
 interface FullQueueItem {
   id: string;
   title: string;
@@ -238,6 +277,7 @@ export const ProScheduleScreen: React.FC<ProScheduleScreenProps> = ({
   const [showExpandViewModal, setShowExpandViewModal] = useState(false);
   const [showFullQueueModal, setShowFullQueueModal] = useState(false);
   const [showStrategyModal, setShowStrategyModal] = useState(false);
+  const [selectedStrategyIds, setSelectedStrategyIds] = useState<string[]>(['strat_1', 'strat_2']);
   const [fullQueueList, setFullQueueList] = useState<FullQueueItem[]>(INITIAL_FULL_QUEUE);
   const [selectedQueueFilter, setSelectedQueueFilter] = useState('ALL');
   const [showFillGapModal, setShowFillGapModal] = useState(false);
@@ -1769,66 +1809,58 @@ export const ProScheduleScreen: React.FC<ProScheduleScreenProps> = ({
                   High-velocity tactics calculated for your 52-day streak momentum and current multi-platform reach.
                 </Text>
 
-                {/* Strategy Cards */}
-                <View style={{ gap: 12, marginVertical: 12 }}>
-                  {/* Strategy 1: Peak Window Velocity */}
-                  <View style={styles.strategyIdeaCard}>
-                    <View style={{ flexDirection: 'row', gap: 10, alignItems: 'center', marginBottom: 6 }}>
-                      <Text style={{ fontSize: 20 }}>⚡</Text>
-                      <View style={{ flex: 1 }}>
-                        <Text style={styles.strategyIdeaTitle}>Peak Velocity Window (7:15 – 7:45 PM)</Text>
-                        <Text style={styles.strategyIdeaTag}>ALGORITHM TIMING • +2.4X REACH</Text>
-                      </View>
-                    </View>
-                    <Text style={styles.strategyIdeaBody}>
-                      Wednesday and Friday evening algorithms favor early watch-time velocity. Schedule your 45-second Reels at 7:30 PM to trigger the discovery explore page.
-                    </Text>
-                  </View>
+                {/* Selectable Strategy Cards */}
+                <View style={{ gap: 10, marginVertical: 12 }}>
+                  {JARVIS_STRATEGIES.map((strat) => {
+                    const isSelected = selectedStrategyIds.includes(strat.id);
+                    return (
+                      <Pressable
+                        key={strat.id}
+                        style={({ pressed }) => [
+                          styles.strategyIdeaCard,
+                          isSelected && styles.strategyIdeaCardSelected,
+                          pressed && styles.btnPressed,
+                        ]}
+                        onPress={() => {
+                          if (Platform.OS !== 'web') {
+                            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                          }
+                          if (selectedStrategyIds.includes(strat.id)) {
+                            if (selectedStrategyIds.length > 1) {
+                              setSelectedStrategyIds(selectedStrategyIds.filter((s) => s !== strat.id));
+                            } else {
+                              showToast('Select at least 1 strategy');
+                            }
+                          } else {
+                            setSelectedStrategyIds([...selectedStrategyIds, strat.id]);
+                          }
+                        }}
+                      >
+                        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 6 }}>
+                          <View style={{ flexDirection: 'row', gap: 10, alignItems: 'center', flex: 1 }}>
+                            <Text style={{ fontSize: 20 }}>{strat.icon}</Text>
+                            <View style={{ flex: 1 }}>
+                              <Text style={styles.strategyIdeaTitle}>{strat.title}</Text>
+                              <Text style={styles.strategyIdeaTag}>{strat.tag}</Text>
+                            </View>
+                          </View>
 
-                  {/* Strategy 2: Contrarian 3-Second Hook */}
-                  <View style={styles.strategyIdeaCard}>
-                    <View style={{ flexDirection: 'row', gap: 10, alignItems: 'center', marginBottom: 6 }}>
-                      <Text style={{ fontSize: 20 }}>🎬</Text>
-                      <View style={{ flex: 1 }}>
-                        <Text style={styles.strategyIdeaTitle}>Contrarian Hook Architecture</Text>
-                        <Text style={styles.strategyIdeaTag}>RETENTION RETENTION • 96% MATCH</Text>
-                      </View>
-                    </View>
-                    <Text style={styles.strategyIdeaBody}>
-                      Start with &ldquo;Why 90% of creators fail by Month 2&rdquo; rather than an intro. Cuts initial 3-second dropoff by 42% on TikTok and Instagram Reels.
-                    </Text>
-                  </View>
+                          <View style={[styles.strategyCheckCircle, isSelected && styles.strategyCheckCircleActive]}>
+                            {isSelected && (
+                              <Svg width={10} height={10} viewBox="0 0 12 12" fill="none">
+                                <Path d="M2.5 6.2L4.8 8.5L9.5 3.5" stroke="#FFFFFF" strokeWidth="2.5" strokeLinecap="round" />
+                              </Svg>
+                            )}
+                          </View>
+                        </View>
 
-                  {/* Strategy 3: Multi-Platform Synergy */}
-                  <View style={styles.strategyIdeaCard}>
-                    <View style={{ flexDirection: 'row', gap: 10, alignItems: 'center', marginBottom: 6 }}>
-                      <Text style={{ fontSize: 20 }}>🚀</Text>
-                      <View style={{ flex: 1 }}>
-                        <Text style={styles.strategyIdeaTitle}>Multi-Sync Cascade Pacing</Text>
-                        <Text style={styles.strategyIdeaTag}>DISTRIBUTION MULTIPLIER</Text>
-                      </View>
-                    </View>
-                    <Text style={styles.strategyIdeaBody}>
-                      Publish your 9:16 video to Instagram and TikTok simultaneously, then release the long-form text breakdown on LinkedIn 2 hours later to maximize B2B authority.
-                    </Text>
-                  </View>
-
-                  {/* Strategy 4: Squad Engagement Loop */}
-                  <View style={styles.strategyIdeaCard}>
-                    <View style={{ flexDirection: 'row', gap: 10, alignItems: 'center', marginBottom: 6 }}>
-                      <Text style={{ fontSize: 20 }}>🤝</Text>
-                      <View style={{ flex: 1 }}>
-                        <Text style={styles.strategyIdeaTitle}>Pre-Release Squad Engagement</Text>
-                        <Text style={styles.strategyIdeaTag}>DUEL BOOST • +750 XP</Text>
-                      </View>
-                    </View>
-                    <Text style={styles.strategyIdeaBody}>
-                      Notify your squad (Elena &amp; Amara) 15 minutes before your post goes live to secure initial high-retention comments and fuel viral reach.
-                    </Text>
-                  </View>
+                        <Text style={styles.strategyIdeaBody}>{strat.body}</Text>
+                      </Pressable>
+                    );
+                  })}
                 </View>
 
-                {/* Primary Action Button: Apply Strategy Blueprint */}
+                {/* Primary Action Button: Apply Selected Strategies */}
                 <Pressable
                   style={({ pressed }) => [styles.modalGoldActionBtnWrapper, { marginTop: 6 }, pressed && styles.btnPressed]}
                   onPress={() => {
@@ -1836,11 +1868,12 @@ export const ProScheduleScreen: React.FC<ProScheduleScreenProps> = ({
                     if (Platform.OS !== 'web') {
                       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
                     }
+                    const xpCount = selectedStrategyIds.length * 25;
                     setCompletionData({
-                      title: 'Jarvis Strategy Applied!',
-                      subtitle: 'Peak windows, viral hook formatting, and squad distribution loop activated.',
+                      title: `${selectedStrategyIds.length} Strategies Activated!`,
+                      subtitle: 'Pacing, timing windows, and multi-sync cascade rules synchronized to your queue.',
                       badgeText: '👑 STRATEGY BLUEPRINT LIVE',
-                      xpEarned: 50,
+                      xpEarned: xpCount,
                       speechBubble: 'Algorithmic multiplier active! Pacing optimized for maximum reach.',
                     });
                     setTimeout(() => {
@@ -1855,7 +1888,7 @@ export const ProScheduleScreen: React.FC<ProScheduleScreenProps> = ({
                     style={styles.modalGoldBtnGradient}
                   >
                     <Text style={styles.modalGoldActionBtnText}>
-                      ✨ Apply Strategy Blueprint (+50 XP) ➔
+                      ✨ Apply {selectedStrategyIds.length} Strategies (+{selectedStrategyIds.length * 25} XP) ➔
                     </Text>
                   </LinearGradient>
                 </Pressable>
@@ -3080,8 +3113,26 @@ const styles = StyleSheet.create({
     backgroundColor: '#FAF8F5',
     borderRadius: 16,
     padding: 14,
-    borderWidth: 1,
+    borderWidth: 1.5,
     borderColor: '#EFECE6',
+  },
+  strategyCheckCircle: {
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    borderWidth: 1.5,
+    borderColor: '#CBD5E1',
+    backgroundColor: '#FFFFFF',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  strategyCheckCircleActive: {
+    borderColor: '#582CDB',
+    backgroundColor: '#582CDB',
+  },
+  strategyIdeaCardSelected: {
+    backgroundColor: '#F5F3FF',
+    borderColor: '#8B5CF6',
   },
   strategyIdeaTitle: {
     fontSize: 13.5,
