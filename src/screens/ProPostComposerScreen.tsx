@@ -186,7 +186,12 @@ export const ProPostComposerScreen: React.FC<ProPostComposerScreenProps> = ({
   const [autopilotEnabled, setAutopilotEnabled] = useState(true);
   const [showAllPlatformsModal, setShowAllPlatformsModal] = useState(false);
   const [showChangeIdeaModal, setShowChangeIdeaModal] = useState(false);
-  const [hasUploadedMedia, setHasUploadedMedia] = useState(true);
+  const [uploadedMedia, setUploadedMedia] = useState<{
+    uri: string;
+    name: string;
+    size: string;
+    type: 'video' | 'image';
+  } | null>(null);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   const flameFloatY = useRef(new Animated.Value(0)).current;
@@ -207,6 +212,57 @@ export const ProPostComposerScreen: React.FC<ProPostComposerScreenProps> = ({
       ])
     ).start();
   }, [flameFloatY]);
+
+  const openFilePicker = (type: 'media' | 'thumbnail') => {
+    if (Platform.OS !== 'web') {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    }
+    if (Platform.OS === 'web' && typeof document !== 'undefined') {
+      const input = document.createElement('input');
+      input.type = 'file';
+      input.accept = type === 'thumbnail' ? 'image/*' : 'video/*,image/*';
+      input.onchange = (e: any) => {
+        const file = e.target.files?.[0];
+        if (file) {
+          const url = URL.createObjectURL(file);
+          const isVideo = file.type.startsWith('video') || file.name.endsWith('.mp4') || file.name.endsWith('.mov');
+          setUploadedMedia({
+            uri: url,
+            name: file.name,
+            size: `${(file.size / (1024 * 1024)).toFixed(1)} MB`,
+            type: isVideo ? 'video' : 'image',
+          });
+          showToast(`📁 ${file.name} selected!`);
+        }
+      };
+      input.click();
+    } else {
+      // Mobile fallback
+      setUploadedMedia({
+        uri: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=800',
+        name: type === 'thumbnail' ? '4K_Thumbnail_HighCTR.png' : '4K_Reel_Master_60FPS.mp4',
+        size: '18.4 MB',
+        type: type === 'thumbnail' ? 'image' : 'video',
+      });
+      showToast('4K Media attached!');
+    }
+  };
+
+  const handleConfirmMediaDone = () => {
+    if (Platform.OS !== 'web') {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    }
+    setCompletionData({
+      title: '4K Media Attached!',
+      subtitle: `${uploadedMedia?.name || 'Your file'} is optimized for 9:16 multi-platform distribution.`,
+      badgeText: '👑 4K MEDIA READY',
+      xpEarned: 25,
+      speechBubble: 'Stunning visual quality! Retention probability boosted.',
+    });
+    setTimeout(() => {
+      setShowCompletionModal(true);
+    }, 200);
+  };
 
   const showToast = (msg: string) => {
     setToastMessage(msg);
@@ -608,31 +664,95 @@ export const ProPostComposerScreen: React.FC<ProPostComposerScreenProps> = ({
           {/* ============================================================ */}
           {/* CARD 3: MEDIA UPLOAD & ASSET STUDIO                          */}
           {/* ============================================================ */}
-          <Text style={[styles.sectionHeaderTitle, { marginTop: 18, marginBottom: 8 }]}>MEDIA</Text>
+          <View style={styles.sectionHeaderRowWithBtn}>
+            <Text style={[styles.sectionHeaderTitle, { marginTop: 18 }]}>MEDIA</Text>
+            {uploadedMedia && (
+              <Pressable onPress={() => setUploadedMedia(null)} hitSlop={8}>
+                <Text style={{ fontSize: 11, color: '#EF4444', fontWeight: '800' }}>🗑️ Clear Media</Text>
+              </Pressable>
+            )}
+          </View>
+
           <View style={styles.mediaStudioCard}>
-            <View style={styles.mediaDashedBox}>
-              <View style={styles.mediaPlaceholderIconCircle}>
-                <Svg width={24} height={24} viewBox="0 0 24 24" fill="none">
-                  <Rect x="3" y="3" width="18" height="18" rx="4" stroke="#582CDB" strokeWidth="2" />
-                  <Circle cx="8.5" cy="8.5" r="1.5" fill="#582CDB" />
-                  <Path d="M21 15L16 10L5 21" stroke="#582CDB" strokeWidth="2" strokeLinecap="round" />
-                </Svg>
+            {!uploadedMedia ? (
+              /* Empty Upload Box */
+              <Pressable
+                style={({ pressed }) => [styles.mediaDashedBox, pressed && styles.btnPressed]}
+                onPress={() => openFilePicker('media')}
+              >
+                <View style={styles.mediaPlaceholderIconCircle}>
+                  <Svg width={24} height={24} viewBox="0 0 24 24" fill="none">
+                    <Rect x="3" y="3" width="18" height="18" rx="4" stroke="#582CDB" strokeWidth="2" />
+                    <Circle cx="8.5" cy="8.5" r="1.5" fill="#582CDB" />
+                    <Path d="M21 15L16 10L5 21" stroke="#582CDB" strokeWidth="2" strokeLinecap="round" />
+                  </Svg>
+                </View>
+
+                <Text style={styles.mediaMainHeading}>Add video, image or thumbnail</Text>
+                <Text style={styles.mediaSubHeading}>Video • Image • Carousel • 4K 60FPS</Text>
+              </Pressable>
+            ) : (
+              /* Attached Media Preview Box */
+              <View style={styles.mediaAttachedPreviewBox}>
+                <View style={{ flexDirection: 'row', gap: 12, alignItems: 'center' }}>
+                  {uploadedMedia.type === 'image' ? (
+                    <Image
+                      source={{ uri: uploadedMedia.uri }}
+                      style={styles.attachedThumbnailPreview}
+                      resizeMode="cover"
+                    />
+                  ) : (
+                    <View style={styles.attachedVideoIconBox}>
+                      <Text style={{ fontSize: 22 }}>📹</Text>
+                    </View>
+                  )}
+
+                  <View style={{ flex: 1 }}>
+                    <View style={{ flexDirection: 'row', gap: 6, alignItems: 'center', marginBottom: 2 }}>
+                      <View style={styles.mediaProBadge}>
+                        <Text style={styles.mediaProBadgeText}>✓ 4K OPTIMIZED</Text>
+                      </View>
+                      <Text style={styles.mediaSizeText}>{uploadedMedia.size}</Text>
+                    </View>
+                    <Text style={styles.mediaAttachedName} numberOfLines={1}>
+                      {uploadedMedia.name}
+                    </Text>
+                    <Text style={styles.mediaAttachedFormat}>
+                      {uploadedMedia.type === 'video' ? '9:16 Video • 60 FPS • ProRes HDR' : 'High-CTR 9:16 Visual'}
+                    </Text>
+                  </View>
+                </View>
+
+                {/* Confirm Media Done Button with Ghost Celebration */}
+                <Pressable
+                  style={({ pressed }) => [styles.applyCustomIdeaBtnWrapper, { marginTop: 12 }, pressed && styles.btnPressed]}
+                  onPress={handleConfirmMediaDone}
+                >
+                  <LinearGradient
+                    colors={['#FDE68A', '#F59E0B', '#D97706']}
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 1, y: 1 }}
+                    style={styles.applyCustomIdeaBtnGradient}
+                  >
+                    <Text style={styles.applyCustomIdeaBtnText}>
+                      ✨ Done / Confirm 4K Media (+25 XP) ➔
+                    </Text>
+                  </LinearGradient>
+                </Pressable>
               </View>
+            )}
 
-              <Text style={styles.mediaMainHeading}>Add video, image or thumbnail</Text>
-              <Text style={styles.mediaSubHeading}>Video • Image • Carousel • 4K 60FPS</Text>
-            </View>
-
+            {/* Action Buttons: Upload Media & Add Thumbnail */}
             <View style={{ flexDirection: 'row', gap: 10, marginTop: 14 }}>
               <Pressable
-                style={styles.mediaActionBtn}
-                onPress={() => showToast('4K Media Picker opened')}
+                style={({ pressed }) => [styles.mediaActionBtn, pressed && styles.btnPressed]}
+                onPress={() => openFilePicker('media')}
               >
                 <Text style={styles.mediaActionBtnText}>⬆ Upload Media</Text>
               </Pressable>
               <Pressable
-                style={styles.mediaActionBtn}
-                onPress={() => showToast('High-CTR Thumbnail generator opened')}
+                style={({ pressed }) => [styles.mediaActionBtn, pressed && styles.btnPressed]}
+                onPress={() => openFilePicker('thumbnail')}
               >
                 <Text style={styles.mediaActionBtnText}>🖼 Add Thumbnail</Text>
               </Pressable>
@@ -1655,6 +1775,59 @@ const styles = StyleSheet.create({
     fontWeight: '800',
     color: '#10B981',
     marginTop: 2,
+  },
+
+  // ATTACHED MEDIA PREVIEW
+  mediaAttachedPreviewBox: {
+    backgroundColor: '#FAF8F5',
+    borderRadius: 16,
+    padding: 14,
+    borderWidth: 1,
+    borderColor: '#EFECE6',
+  },
+  attachedThumbnailPreview: {
+    width: 54,
+    height: 54,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+  },
+  attachedVideoIconBox: {
+    width: 54,
+    height: 54,
+    borderRadius: 12,
+    backgroundColor: '#EDE9FE',
+    borderWidth: 1,
+    borderColor: '#DDD6FE',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  mediaProBadge: {
+    backgroundColor: '#D1FAE5',
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 4,
+  },
+  mediaProBadgeText: {
+    fontSize: 8.5,
+    fontWeight: '900',
+    color: '#059669',
+    letterSpacing: 0.3,
+  },
+  mediaSizeText: {
+    fontSize: 10,
+    fontWeight: '800',
+    color: '#94A3B8',
+  },
+  mediaAttachedName: {
+    fontSize: 13,
+    fontWeight: '800',
+    color: '#171420',
+  },
+  mediaAttachedFormat: {
+    fontSize: 11,
+    color: '#64748B',
+    marginTop: 1,
   },
 
   // COMMON
