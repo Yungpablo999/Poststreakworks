@@ -104,6 +104,53 @@ export const creatorNetworkRouter = createTRPCRouter({
     }),
 
   /**
+   * Get a swipeable deck of discoverable creator profiles — public
+   * profiles the current user hasn't already acted on (viewed/passed/
+   * saved/interested), excluding their own. MatchScreen's CREATOR_DECK
+   * needed this and nothing in this router produced a browsable feed
+   * before, only per-target action logging.
+   */
+  getDiscoveryFeed: protectedProcedure
+    .input(z.object({ limit: z.number().min(1).max(50).default(10) }))
+    .query(async ({ ctx, input }) => {
+      const { data: profile } = await ctx.supabase
+        .from("creator_profiles")
+        .select("id")
+        .eq("user_id", ctx.user.id)
+        .single();
+
+      if (!profile) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Complete your profile before discovering creators",
+        });
+      }
+
+      const { data: actedOn } = await ctx.supabase
+        .from("discovery_actions")
+        .select("target_id")
+        .eq("actor_id", profile.id);
+
+      const excludeIds = [profile.id, ...(actedOn ?? []).map((a) => a.target_id)];
+
+      const { data, error } = await ctx.supabase
+        .from("creator_profiles")
+        .select("id, user_id, bio, niche, city, languages, platform_links, slug")
+        .eq("is_public", true)
+        .not("id", "in", `(${excludeIds.join(",")})`)
+        .limit(input.limit);
+
+      if (error) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Failed to fetch discovery feed",
+        });
+      }
+
+      return data;
+    }),
+
+  /**
    * Get the user's active matches.
    */
   getMatches: protectedProcedure.query(async ({ ctx }) => {
