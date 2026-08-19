@@ -29,7 +29,7 @@ export const TinyGoldCheck = ({ size = 13 }: { size?: number }) => (
       width: size,
       height: size,
       borderRadius: size / 2,
-      backgroundColor: '#EAB308',
+      backgroundColor: '#C59B27',
       borderWidth: 1.5,
       borderColor: '#FFFFFF',
       justifyContent: 'center',
@@ -1070,7 +1070,7 @@ export const ProDashboardScreen: React.FC<ProDashboardScreenProps> = ({
                   <Text style={styles.calendarStatLabel}>Current</Text>
                 </View>
                 <View style={[styles.calendarStatCard, { backgroundColor: '#FEF9C3', borderColor: '#FDE047' }]}>
-                  <Text style={[styles.calendarStatValue, { color: '#854D0E' }]}>Top 1% 👑</Text>
+                  <Text style={[styles.calendarStatValue, { color: '#9E7418' }]}>Top 1% 👑</Text>
                   <Text style={[styles.calendarStatLabel, { color: '#A16207' }]}>Worldwide</Text>
                 </View>
                 <View style={styles.calendarStatCard}>
@@ -1258,7 +1258,7 @@ export const ProDashboardScreen: React.FC<ProDashboardScreenProps> = ({
                   <Text style={styles.legendLabel}>Completed (✓)</Text>
                 </View>
                 <View style={styles.legendItem}>
-                  <View style={[styles.legendDot, { backgroundColor: '#EAB308' }]} />
+                  <View style={[styles.legendDot, { backgroundColor: '#C59B27' }]} />
                   <Text style={styles.legendLabel}>Autopilot (⚡)</Text>
                 </View>
                 <View style={styles.legendItem}>
@@ -1515,12 +1515,12 @@ const styles = StyleSheet.create({
     paddingVertical: 2,
     borderRadius: 6,
     borderWidth: 1,
-    borderColor: '#FEF08A',
+    borderColor: '#DFB758',
   },
   proHeaderBadgeText: {
     fontSize: 8.5,
     fontWeight: '900',
-    color: '#78350F',
+    color: '#8A5A00',
     letterSpacing: 0.3,
   },
   headerRightGroup: {
@@ -1570,7 +1570,7 @@ const styles = StyleSheet.create({
     position: 'relative',
   },
   profilePhotoBtnPro: {
-    borderColor: '#EAB308',
+    borderColor: '#C59B27',
     borderWidth: 2,
   },
   headerCustomAvatarImage: {
@@ -1620,7 +1620,7 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   proPlanTagBox: {
-    backgroundColor: '#FEF08A',
+    backgroundColor: '#F5E6C4',
     paddingHorizontal: 8,
     paddingVertical: 3,
     borderRadius: 6,
@@ -1663,7 +1663,7 @@ const styles = StyleSheet.create({
   proPillGoldText: {
     fontSize: 11,
     fontWeight: '800',
-    color: '#B45309',
+    color: '#8A5A00',
   },
   proPillGray: {
     backgroundColor: '#F1F5F9',
@@ -1677,7 +1677,7 @@ const styles = StyleSheet.create({
     color: '#475569',
   },
   proPillActiveGold: {
-    backgroundColor: '#EAB308',
+    backgroundColor: '#C59B27',
     paddingHorizontal: 10,
     paddingVertical: 5,
     borderRadius: 10,
@@ -1907,7 +1907,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   proPriorityPill: {
-    backgroundColor: '#FEF08A',
+    backgroundColor: '#F5E6C4',
     paddingHorizontal: 6,
     paddingVertical: 2,
     borderRadius: 4,
@@ -1915,7 +1915,7 @@ const styles = StyleSheet.create({
   proPriorityText: {
     fontSize: 9,
     fontWeight: '900',
-    color: '#78350F',
+    color: '#8A5A00',
   },
   brandQuestSubLabel: {
     fontSize: 10,
@@ -2179,12 +2179,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: 7,
     borderRadius: 6,
     borderWidth: 1,
-    borderColor: '#FEF08A',
+    borderColor: '#DFB758',
   },
   proBadgeText: {
     fontSize: 9,
     fontWeight: '900',
-    color: '#78350F',
+    color: '#8A5A00',
     letterSpacing: 0.5,
   },
   calendarModalSubtitle: {
@@ -2257,7 +2257,7 @@ const styles = StyleSheet.create({
     width: 5,
     height: 5,
     borderRadius: 2.5,
-    backgroundColor: '#EAB308',
+    backgroundColor: '#C59B27',
   },
   monthChipCurrentDotActive: {
     backgroundColor: '#FDE047',
@@ -2274,7 +2274,7 @@ const styles = StyleSheet.create({
   selectedDayText: {
     fontSize: 11.5,
     fontWeight: '800',
-    color: '#78350F',
+    color: '#8A5A00',
     textAlign: 'center',
   },
   pagerOuterContainer: {
@@ -2325,7 +2325,7 @@ const styles = StyleSheet.create({
   currentMonthBadgeText: {
     fontSize: 8.5,
     fontWeight: '900',
-    color: '#B45309',
+    color: '#8A5A00',
   },
   dayColHeadersRow: {
     flexDirection: 'row',
@@ -2378,7 +2378,7 @@ const styles = StyleSheet.create({
   },
   dayCellTodayPro: {
     borderWidth: 2,
-    borderColor: '#EAB308',
+    borderColor: '#C59B27',
     backgroundColor: '#582CDB',
   },
   dayCellNumber: {
@@ -2391,7 +2391,7 @@ const styles = StyleSheet.create({
     fontWeight: '900',
   },
   dayCellNumberScheduled: {
-    color: '#854D0E',
+    color: '#9E7418',
     fontWeight: '900',
   },
   dayCellNumberFreeze: {

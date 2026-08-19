@@ -1427,7 +1427,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   fillGapsOutlineBtnText: {
-    color: '#B45309',
+    color: '#8A5A00',
     fontSize: 13,
     fontWeight: '900',
   },
@@ -1890,7 +1890,7 @@ const styles = StyleSheet.create({
   gapWarningSub: {
     fontSize: 9.5,
     fontWeight: '800',
-    color: '#B45309',
+    color: '#8A5A00',
     letterSpacing: 0.5,
   },
   gapWarningTitle: {

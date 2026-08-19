@@ -25,7 +25,7 @@ export const TinyGoldCheck = ({ size = 13 }: { size?: number }) => (
       width: size,
       height: size,
       borderRadius: size / 2,
-      backgroundColor: '#EAB308',
+      backgroundColor: '#C59B27',
       borderWidth: 1.5,
       borderColor: '#FFFFFF',
       justifyContent: 'center',
@@ -1068,12 +1068,12 @@ const styles = StyleSheet.create({
     paddingVertical: 2,
     borderRadius: 6,
     borderWidth: 1,
-    borderColor: '#FEF08A',
+    borderColor: '#DFB758',
   },
   proHeaderBadgeText: {
     fontSize: 8.5,
     fontWeight: '900',
-    color: '#78350F',
+    color: '#8A5A00',
     letterSpacing: 0.3,
   },
   headerRightGroup: {
@@ -1123,7 +1123,7 @@ const styles = StyleSheet.create({
     position: 'relative',
   },
   profilePhotoBtnPro: {
-    borderColor: '#EAB308',
+    borderColor: '#C59B27',
     borderWidth: 2,
   },
   headerCustomAvatarImage: {
@@ -1231,7 +1231,7 @@ const styles = StyleSheet.create({
   },
   todayQuestTagBox: {
     alignSelf: 'flex-start',
-    backgroundColor: '#FEF08A',
+    backgroundColor: '#F5E6C4',
     paddingHorizontal: 8,
     paddingVertical: 3,
     borderRadius: 6,
@@ -1240,7 +1240,7 @@ const styles = StyleSheet.create({
   todayQuestTagText: {
     fontSize: 9.5,
     fontWeight: '900',
-    color: '#78350F',
+    color: '#8A5A00',
     letterSpacing: 0.5,
   },
   todayQuestTitle: {
@@ -1489,7 +1489,7 @@ const styles = StyleSheet.create({
     color: '#582CDB',
   },
   groupRewardPill: {
-    backgroundColor: '#FEF08A',
+    backgroundColor: '#F5E6C4',
     paddingHorizontal: 8,
     paddingVertical: 3,
     borderRadius: 6,
@@ -1497,7 +1497,7 @@ const styles = StyleSheet.create({
   groupRewardPillText: {
     fontSize: 9.5,
     fontWeight: '900',
-    color: '#78350F',
+    color: '#8A5A00',
   },
   squadQuestTitle: {
     fontSize: 16,
@@ -2053,7 +2053,7 @@ const styles = StyleSheet.create({
     fontWeight: '900',
   },
   proPriorityPillModal: {
-    backgroundColor: '#FEF08A',
+    backgroundColor: '#F5E6C4',
     paddingHorizontal: 8,
     paddingVertical: 3,
     borderRadius: 6,
@@ -2062,7 +2062,7 @@ const styles = StyleSheet.create({
   proPriorityPillModalText: {
     fontSize: 9,
     fontWeight: '900',
-    color: '#78350F',
+    color: '#8A5A00',
   },
   briefDetailLine: {
     fontSize: 12.5,

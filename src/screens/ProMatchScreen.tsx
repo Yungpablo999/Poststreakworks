@@ -29,7 +29,7 @@ export const TinyGoldCheck = ({ size = 13 }: { size?: number }) => (
       width: size,
       height: size,
       borderRadius: size / 2,
-      backgroundColor: '#EAB308',
+      backgroundColor: '#C59B27',
       borderWidth: 1.5,
       borderColor: '#FFFFFF',
       justifyContent: 'center',
@@ -1104,12 +1104,12 @@ const styles = StyleSheet.create({
     paddingVertical: 2,
     borderRadius: 6,
     borderWidth: 1,
-    borderColor: '#FEF08A',
+    borderColor: '#DFB758',
   },
   proHeaderBadgeText: {
     fontSize: 8.5,
     fontWeight: '900',
-    color: '#78350F',
+    color: '#8A5A00',
     letterSpacing: 0.3,
   },
   headerRightGroup: {
@@ -1159,7 +1159,7 @@ const styles = StyleSheet.create({
     position: 'relative',
   },
   profilePhotoBtnPro: {
-    borderColor: '#EAB308',
+    borderColor: '#C59B27',
     borderWidth: 2,
   },
   headerCustomAvatarImage: {
@@ -1211,7 +1211,7 @@ const styles = StyleSheet.create({
     letterSpacing: 0.5,
   },
   proMatchActivePill: {
-    backgroundColor: '#FEF08A',
+    backgroundColor: '#F5E6C4',
     paddingHorizontal: 8,
     paddingVertical: 3.5,
     borderRadius: 6,
@@ -1219,7 +1219,7 @@ const styles = StyleSheet.create({
   proMatchActivePillText: {
     fontSize: 9.5,
     fontWeight: '900',
-    color: '#78350F',
+    color: '#8A5A00',
   },
   mainTitleText: {
     fontSize: 22,
@@ -1450,7 +1450,7 @@ const styles = StyleSheet.create({
     color: '#475569',
   },
   goldAvailPill: {
-    backgroundColor: '#FEF08A',
+    backgroundColor: '#F5E6C4',
     paddingHorizontal: 10,
     paddingVertical: 4.5,
     borderRadius: 8,
@@ -1458,7 +1458,7 @@ const styles = StyleSheet.create({
   goldAvailText: {
     fontSize: 11,
     fontWeight: '900',
-    color: '#78350F',
+    color: '#8A5A00',
   },
   whyMatchContainer: {
     backgroundColor: '#F5F3FF',
@@ -1603,7 +1603,7 @@ const styles = StyleSheet.create({
     color: '#475569',
   },
   formatPillGold: {
-    backgroundColor: '#FEF08A',
+    backgroundColor: '#F5E6C4',
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 8,
@@ -1611,7 +1611,7 @@ const styles = StyleSheet.create({
   formatPillGoldText: {
     fontSize: 10.5,
     fontWeight: '900',
-    color: '#78350F',
+    color: '#8A5A00',
   },
   buildPlanBtn: {
     backgroundColor: '#FFFFFF',
@@ -1732,7 +1732,7 @@ const styles = StyleSheet.create({
   nextUnlockText: {
     fontSize: 10.5,
     fontWeight: '800',
-    color: '#B45309',
+    color: '#8A5A00',
     marginBottom: 14,
   },
   squadActionButtonsRow: {
@@ -1789,7 +1789,7 @@ const styles = StyleSheet.create({
   liveDuelTag: {
     fontSize: 9.5,
     fontWeight: '900',
-    color: '#B45309',
+    color: '#8A5A00',
     letterSpacing: 0.5,
   },
   duelTitleText: {

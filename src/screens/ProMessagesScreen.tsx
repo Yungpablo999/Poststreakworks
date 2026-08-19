@@ -584,7 +584,7 @@ export const ProMessagesScreen: React.FC<ProMessagesScreenProps> = ({
               hitSlop={8}
             >
               <LinearGradient
-                colors={['#FEF08A', '#FDE047']}
+                colors={['#E5C158', '#C59B27', '#9E7418']}
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 1 }}
                 style={styles.proHeaderBadge}
@@ -1142,12 +1142,12 @@ const styles = StyleSheet.create({
     paddingVertical: 2,
     borderRadius: 6,
     borderWidth: 1,
-    borderColor: '#FEF08A',
+    borderColor: '#DFB758',
   },
   proHeaderBadgeText: {
     fontSize: 8.5,
     fontWeight: '900',
-    color: '#78350F',
+    color: '#8A5A00',
     letterSpacing: 0.3,
   },
   headerRightGroup: {
@@ -1179,7 +1179,7 @@ const styles = StyleSheet.create({
     height: 38,
     borderRadius: 19,
     borderWidth: 2,
-    borderColor: '#EAB308',
+    borderColor: '#C59B27',
   },
   avatarTinyGoldCheckPos: {
     position: 'absolute',
@@ -1407,7 +1407,7 @@ const styles = StyleSheet.create({
     color: '#171420',
   },
   proMicroPill: {
-    backgroundColor: '#FEF08A',
+    backgroundColor: '#F5E6C4',
     paddingHorizontal: 5,
     paddingVertical: 1.5,
     borderRadius: 4,
@@ -1415,7 +1415,7 @@ const styles = StyleSheet.create({
   proMicroPillText: {
     fontSize: 8,
     fontWeight: '900',
-    color: '#78350F',
+    color: '#8A5A00',
   },
   convTimeText: {
     fontSize: 10.5,

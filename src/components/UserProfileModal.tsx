@@ -984,12 +984,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
     borderRadius: 6,
     borderWidth: 1,
-    borderColor: '#FEF08A',
+    borderColor: '#DFB758',
   },
   proBadgeText: {
     fontSize: 9.5,
     fontWeight: '900',
-    color: '#78350F',
+    color: '#8A5A00',
     letterSpacing: 0.5,
   },
   heroStreakPillPro: {
@@ -1004,7 +1004,7 @@ const styles = StyleSheet.create({
   heroStreakPillTextPro: {
     fontSize: 12,
     fontWeight: '800',
-    color: '#92400E',
+    color: '#9E7418',
   },
   modalSubtitle: {
     fontSize: 12,
@@ -1134,7 +1134,7 @@ const styles = StyleSheet.create({
   heroStreakPillText: {
     fontSize: 11,
     fontWeight: '900',
-    color: '#B45309',
+    color: '#8A5A00',
   },
 
   // Upload Buttons Row
