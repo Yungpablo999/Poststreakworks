@@ -13,6 +13,7 @@ import { OnboardingCompleteScreen } from './src/screens/OnboardingCompleteScreen
 import { DashboardScreen } from './src/screens/DashboardScreen';
 import { ProDashboardScreen } from './src/screens/ProDashboardScreen';
 import { MissionDetailScreen } from './src/screens/MissionDetailScreen';
+import { ProMissionDetailScreen } from './src/screens/ProMissionDetailScreen';
 import { QuestsScreen } from './src/screens/QuestsScreen';
 import { ProQuestsScreen } from './src/screens/ProQuestsScreen';
 import { ChallengeDetailScreen } from './src/screens/ChallengeDetailScreen';
@@ -381,26 +382,60 @@ export default function App() {
         )}
 
         {currentScreen === 'mission-detail' && (
-          <MissionDetailScreen
-            onBackToDashboard={() => navigateTo('dashboard')}
-            onLogout={handleLogout}
-            onOpenMessages={() => navigateTo('messages')}
-            onNavigateTab={(tab: TabType) => {
-              if (tab === 'home') {
-                navigateTo('dashboard');
-              } else if (tab === 'create') {
-                navigateTo('create');
-              } else if (tab === 'match') {
-                navigateTo('match');
-              } else if (tab === 'quests') {
-                navigateTo('quests');
-              } else if (tab === 'growth') {
-                navigateTo('growth');
-              }
-            }}
-            userProfile={userProfile}
-            onSaveProfile={(updated) => setUserProfile(updated)}
-          />
+          (userProfile?.tier === 'pro' || userProfile?.tier === 'founding') ? (
+            <ProMissionDetailScreen
+              onBack={() => navigateTo(previousScreen ? previousScreen : 'dashboard')}
+              onLogout={handleLogout}
+              onOpenSchedule={() => navigateTo('schedule')}
+              onOpenMessages={() => navigateTo('messages')}
+              onOpenJarvisPro={() => navigateTo('jarvis-pro')}
+              onOpenPostComposer={(ideaTitle) => {
+                if (ideaTitle) setComposerIdeaTitle(ideaTitle);
+                navigateTo('composer');
+              }}
+              onSwitchToFree={() => {
+                if (userProfile) {
+                  setUserProfile({ ...userProfile, tier: 'free' });
+                }
+              }}
+              onNavigateTab={(tab: TabType) => {
+                if (tab === 'home') {
+                  navigateTo('dashboard');
+                } else if (tab === 'create') {
+                  navigateTo('create');
+                } else if (tab === 'match') {
+                  navigateTo('match');
+                } else if (tab === 'quests') {
+                  navigateTo('quests');
+                } else if (tab === 'growth') {
+                  navigateTo('growth');
+                }
+              }}
+              userProfile={userProfile}
+              onSaveProfile={(updated) => setUserProfile(updated)}
+            />
+          ) : (
+            <MissionDetailScreen
+              onBackToDashboard={() => navigateTo('dashboard')}
+              onLogout={handleLogout}
+              onOpenMessages={() => navigateTo('messages')}
+              onNavigateTab={(tab: TabType) => {
+                if (tab === 'home') {
+                  navigateTo('dashboard');
+                } else if (tab === 'create') {
+                  navigateTo('create');
+                } else if (tab === 'match') {
+                  navigateTo('match');
+                } else if (tab === 'quests') {
+                  navigateTo('quests');
+                } else if (tab === 'growth') {
+                  navigateTo('growth');
+                }
+              }}
+              userProfile={userProfile}
+              onSaveProfile={(updated) => setUserProfile(updated)}
+            />
+          )
         )}
 
         {currentScreen === 'create' && (
@@ -492,6 +527,7 @@ export default function App() {
               onOpenMessages={() => navigateTo('messages')}
               onOpenJarvisPro={() => navigateTo('jarvis-pro')}
               onOpenCreateIdea={() => navigateTo('create')}
+              onStartMission={() => navigateTo('mission-detail')}
               onSwitchToFree={() => {
                 if (userProfile) {
                   setUserProfile({ ...userProfile, tier: 'free' });
