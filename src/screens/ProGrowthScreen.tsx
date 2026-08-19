@@ -200,7 +200,7 @@ export const ProGrowthScreen: React.FC<ProGrowthScreenProps> = ({
               ]}
             >
               <Image
-                source={require('../../assets/images/jarvis-core-flame.png')}
+                source={require('../../assets/images/ghost-alone.png')}
                 style={styles.headerGhostLogo}
                 resizeMode="contain"
               />
@@ -304,7 +304,7 @@ export const ProGrowthScreen: React.FC<ProGrowthScreenProps> = ({
               hitSlop={8}
             >
               <Image
-                source={userProfile?.avatarSource || require('../../assets/images/jarvis-core-flame.png')}
+                source={userProfile?.avatarSource || require('../../assets/images/ghost-alone.png')}
                 style={styles.headerCustomAvatarImage}
                 resizeMode="cover"
               />
@@ -649,7 +649,7 @@ export const ProGrowthScreen: React.FC<ProGrowthScreenProps> = ({
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
               <Text style={styles.jarvisIntelligenceTag}>JARVIS INTELLIGENCE</Text>
               <Image
-                source={require('../../assets/images/jarvis-core-flame.png')}
+                source={require('../../assets/images/ghost-alone.png')}
                 style={{ width: 24, height: 24 }}
                 resizeMode="contain"
               />

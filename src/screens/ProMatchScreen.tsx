@@ -359,7 +359,7 @@ export const ProMatchScreen: React.FC<ProMatchScreenProps> = ({
               ]}
             >
               <Image
-                source={require('../../assets/images/jarvis-core-flame.png')}
+                source={require('../../assets/images/ghost-alone.png')}
                 style={styles.headerGhostLogo}
                 resizeMode="contain"
               />
@@ -463,7 +463,7 @@ export const ProMatchScreen: React.FC<ProMatchScreenProps> = ({
               hitSlop={8}
             >
               <Image
-                source={userProfile?.avatarSource || require('../../assets/images/jarvis-core-flame.png')}
+                source={userProfile?.avatarSource || require('../../assets/images/ghost-alone.png')}
                 style={styles.headerCustomAvatarImage}
                 resizeMode="cover"
               />
@@ -676,7 +676,7 @@ export const ProMatchScreen: React.FC<ProMatchScreenProps> = ({
 
                 <View style={styles.sparkleCalloutRow}>
                   <Image
-                    source={require('../../assets/images/jarvis-core-flame.png')}
+                    source={require('../../assets/images/ghost-alone.png')}
                     style={{ width: 18, height: 18 }}
                     resizeMode="contain"
                   />
@@ -894,7 +894,7 @@ export const ProMatchScreen: React.FC<ProMatchScreenProps> = ({
           {/* ============================================================ */}
           <View style={[styles.coopIntelligenceCard, { marginBottom: 120 }]}>
             <Image
-              source={require('../../assets/images/jarvis-core-flame.png')}
+              source={require('../../assets/images/ghost-alone.png')}
               style={{ width: 28, height: 28, alignSelf: 'center', marginBottom: 8 }}
               resizeMode="contain"
             />

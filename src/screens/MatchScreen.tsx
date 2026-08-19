@@ -708,7 +708,7 @@ export const MatchScreen: React.FC<MatchScreenProps> = ({
               ]}
             >
               <Image
-                source={require('../../assets/images/jarvis-core-flame.png')}
+                source={require('../../assets/images/ghost-alone.png')}
                 style={styles.headerGhostLogo}
                 resizeMode="contain"
               />
@@ -1119,7 +1119,7 @@ export const MatchScreen: React.FC<MatchScreenProps> = ({
                 <View style={styles.collabHeaderRow}>
                   <View style={styles.collabHeaderLeft}>
                     <Image
-                      source={require('../../assets/images/jarvis-core-flame.png')}
+                      source={require('../../assets/images/ghost-alone.png')}
                       style={styles.collabGhostIcon}
                       resizeMode="contain"
                     />
@@ -1209,7 +1209,7 @@ export const MatchScreen: React.FC<MatchScreenProps> = ({
                     {/* Jarvis Compatibility Insight */}
                     <View style={styles.requestCompatibilityRow}>
                       <Image
-                        source={require('../../assets/images/jarvis-core-flame.png')}
+                        source={require('../../assets/images/ghost-alone.png')}
                         style={styles.requestGhostMini}
                         resizeMode="contain"
                       />
@@ -1401,7 +1401,7 @@ export const MatchScreen: React.FC<MatchScreenProps> = ({
           {/* SECTION: JARVIS ENGINE WISDOM */}
           <View style={styles.wisdomCard}>
             <Image
-              source={require('../../assets/images/jarvis-core-flame.png')}
+              source={require('../../assets/images/ghost-alone.png')}
               style={styles.wisdomGhostIcon}
               resizeMode="contain"
             />
@@ -1792,7 +1792,7 @@ export const MatchScreen: React.FC<MatchScreenProps> = ({
               {/* CARD 4: JARVIS DEEP INSIGHT FROSTED BOX */}
               <View style={styles.detailJarvisInsightCard}>
                 <Image
-                  source={require('../../assets/images/jarvis-core-flame.png')}
+                  source={require('../../assets/images/ghost-alone.png')}
                   style={styles.detailJarvisGhost}
                   resizeMode="contain"
                 />

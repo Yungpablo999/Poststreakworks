@@ -482,7 +482,7 @@ export const CreateScreen: React.FC<CreateScreenProps> = ({
             ]}
           >
             <Image
-              source={require('../../assets/images/jarvis-core-flame.png')}
+              source={require('../../assets/images/ghost-alone.png')}
               style={styles.headerGhostLogo}
               resizeMode="contain"
             />
@@ -656,7 +656,7 @@ export const CreateScreen: React.FC<CreateScreenProps> = ({
               ]}
             >
               <Image
-                source={require('../../assets/images/jarvis-core-flame.png')}
+                source={require('../../assets/images/ghost-alone.png')}
                 style={styles.jarvisFlameIcon}
                 resizeMode="contain"
               />

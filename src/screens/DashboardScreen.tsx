@@ -247,12 +247,12 @@ const PRESET_AVATARS = [
   {
     id: 'ghost',
     name: 'Ghost Mascot',
-    source: require('../../assets/images/jarvis-core-flame.png'),
+    source: require('../../assets/images/ghost-alone.png'),
   },
   {
     id: 'flame',
     name: 'Jarvis Core',
-    source: require('../../assets/images/jarvis-core-flame.png'),
+    source: require('../../assets/images/ghost-alone.png'),
   },
   {
     id: 'hero',
@@ -760,7 +760,7 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
               ]}
             >
               <Image
-                source={require('../../assets/images/jarvis-core-flame.png')}
+                source={require('../../assets/images/ghost-alone.png')}
                 style={styles.headerGhostLogo}
                 resizeMode="contain"
               />
@@ -1009,7 +1009,7 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
                 ]}
               >
                 <Image
-                  source={require('../../assets/images/jarvis-core-flame.png')}
+                  source={require('../../assets/images/ghost-alone.png')}
                   style={styles.jarvisFlameImage}
                   resizeMode="contain"
                 />
@@ -1229,7 +1229,7 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
             <View style={styles.proHeaderRow}>
               <View style={styles.proIconBox}>
                 <Image
-                  source={require('../../assets/images/jarvis-core-flame.png')}
+                  source={require('../../assets/images/ghost-alone.png')}
                   style={styles.proIconImage}
                   resizeMode="contain"
                 />
@@ -1728,7 +1728,7 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
                 ]}
               >
                 <Image
-                  source={require('../../assets/images/jarvis-core-flame.png')}
+                  source={require('../../assets/images/ghost-alone.png')}
                   style={styles.modalPureStarImage}
                   resizeMode="contain"
                 />

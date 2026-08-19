@@ -223,7 +223,7 @@ export const ProCreateScreen: React.FC<ProCreateScreenProps> = ({
               ]}
             >
               <Image
-                source={require('../../assets/images/jarvis-core-flame.png')}
+                source={require('../../assets/images/ghost-alone.png')}
                 style={styles.headerGhostLogo}
                 resizeMode="contain"
               />
@@ -329,7 +329,7 @@ export const ProCreateScreen: React.FC<ProCreateScreenProps> = ({
               hitSlop={8}
             >
               <Image
-                source={userProfile?.avatarSource || require('../../assets/images/jarvis-core-flame.png')}
+                source={userProfile?.avatarSource || require('../../assets/images/ghost-alone.png')}
                 style={styles.headerCustomAvatarImage}
                 resizeMode="cover"
               />
@@ -657,7 +657,7 @@ export const ProCreateScreen: React.FC<ProCreateScreenProps> = ({
               <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
                 <Text style={styles.voiceWaveformWatermark}>Voice Studio</Text>
                 <Image
-                  source={require('../../assets/images/jarvis-core-flame.png')}
+                  source={require('../../assets/images/ghost-alone.png')}
                   style={{ width: 28, height: 28, opacity: 0.8 }}
                   resizeMode="contain"
                 />
@@ -825,7 +825,7 @@ export const ProCreateScreen: React.FC<ProCreateScreenProps> = ({
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
               <View style={styles.jarvisFlameIconBox}>
                 <Image
-                  source={require('../../assets/images/jarvis-core-flame.png')}
+                  source={require('../../assets/images/ghost-alone.png')}
                   style={{ width: 22, height: 22 }}
                   resizeMode="contain"
                 />

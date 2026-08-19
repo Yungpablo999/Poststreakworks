@@ -877,7 +877,7 @@ export const EarningsScreen: React.FC<EarningsScreenProps> = ({
           <View style={styles.jarvisCard}>
             <View style={styles.jarvisAvatarCircle}>
               <Image
-                source={require('../../assets/images/jarvis-core-flame.png')}
+                source={require('../../assets/images/ghost-alone.png')}
                 style={{ width: 28, height: 28 }}
                 resizeMode="contain"
               />

@@ -712,7 +712,7 @@ ${selectedCtaText}`;
               <View style={styles.jarvisBannerHeaderRow}>
                 <View style={styles.jarvisBannerFlameRing}>
                   <Image
-                    source={require('../../assets/images/jarvis-core-flame.png')}
+                    source={require('../../assets/images/ghost-alone.png')}
                     style={styles.jarvisBannerFlame}
                     resizeMode="contain"
                   />
