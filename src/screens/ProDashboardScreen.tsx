@@ -21,6 +21,7 @@ import * as Haptics from 'expo-haptics';
 import { LinearGradient } from 'expo-linear-gradient';
 import { FloatingTabBar, TabType } from '../components/FloatingTabBar';
 import { UserProfileModal, UserProfileData } from '../components/UserProfileModal';
+import { CreatorStoryModal, CreatorStoryData } from '../components/CreatorStoryModal';
 
 export const TinyGoldCheck = ({ size = 13 }: { size?: number }) => (
   <View
@@ -277,6 +278,47 @@ export const ProDashboardScreen: React.FC<ProDashboardScreenProps> = ({
   const [showVoiceStudioModal, setShowVoiceStudioModal] = useState(false);
   const [showBrandQuestModal, setShowBrandQuestModal] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [selectedStoryData, setSelectedStoryData] = useState<CreatorStoryData | null>(null);
+
+  const openCreatorStory = (creatorId: string) => {
+    if (Platform.OS !== 'web') {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    }
+    if (creatorId === 'amara') {
+      setSelectedStoryData({
+        id: 'amara',
+        name: 'Amara Okafor',
+        handle: '@amara.creates',
+        niche: 'Travel & Lifestyle',
+        avatar: require('../../assets/images/amara-avatar.jpg'),
+        streak: 44,
+        isOnline: true,
+        isPro: true,
+        slides: [
+          {
+            id: 's_amara_1',
+            type: 'daily_story',
+            title: '24h Lagos Creation Sprint 🎬',
+            subtitle: 'Filming behind the scenes in Victoria Island',
+            timeAgo: '15m ago',
+            quote: 'Testing the 3-second hook format from Jarvis. Retention already up 35% across the morning batch!',
+            badge: '⚡ 44-DAY STREAK ACTIVE',
+          },
+          {
+            id: 's_amara_2',
+            type: 'highlights',
+            title: 'Top Performing Reels This Week',
+            subtitle: 'Highest audience retention videos',
+            timeAgo: '1d ago',
+            highlights: [
+              { title: 'Hidden culinary spots in Lagos', platform: 'Instagram', views: '98.4K', saves: '12.1K' },
+              { title: '3 storytelling mistakes creators make', platform: 'TikTok', views: '64.2K', saves: '8.4K' },
+            ],
+          },
+        ],
+      });
+    }
+  };
 
   // Calendar State
   const [selectedMonthIndex, setSelectedMonthIndex] = useState(4); // May
@@ -924,7 +966,11 @@ export const ProDashboardScreen: React.FC<ProDashboardScreenProps> = ({
           {/* CARD 9: CREATOR MATCH */}
           <View style={[styles.dashboardCard, { marginBottom: 120 }]}>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, marginBottom: 12 }}>
-              <View style={{ position: 'relative' }}>
+              <Pressable
+                onPress={() => openCreatorStory('amara')}
+                style={{ position: 'relative' }}
+                hitSlop={8}
+              >
                 <Image
                   source={require('../../assets/images/amara-avatar.jpg')}
                   style={styles.matchAvatarImage}
@@ -933,7 +979,7 @@ export const ProDashboardScreen: React.FC<ProDashboardScreenProps> = ({
                 <View style={{ position: 'absolute', bottom: -1, right: -1 }}>
                   <TinyGoldCheck size={13} />
                 </View>
-              </View>
+              </Pressable>
               <View style={{ flex: 1 }}>
                 <Text style={styles.matchCreatorName}>Amara Okafor</Text>
                 <Text style={styles.matchOverlapTag}>94% Audience overlap</Text>
@@ -1391,6 +1437,21 @@ export const ProDashboardScreen: React.FC<ProDashboardScreenProps> = ({
             </Animated.View>
           </View>
         </Modal>
+
+        {/* CREATOR STORY MODAL */}
+        <CreatorStoryModal
+          visible={selectedStoryData !== null}
+          onClose={() => setSelectedStoryData(null)}
+          storyData={selectedStoryData}
+          onReply={(creator, text) => {
+            setSelectedStoryData(null);
+            showToast(`Replied to ${creator.name}: "${text.slice(0, 25)}..."`);
+          }}
+          onSendCollabPitch={(creator) => {
+            setSelectedStoryData(null);
+            if (onOpenMessages) onOpenMessages();
+          }}
+        />
 
         {/* PROFILE MODAL */}
         <UserProfileModal

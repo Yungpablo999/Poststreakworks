@@ -20,6 +20,7 @@ import * as Haptics from 'expo-haptics';
 import Svg, { Path, Circle, Rect } from 'react-native-svg';
 import { FloatingTabBar, TabType } from '../components/FloatingTabBar';
 import { UserProfileModal, UserProfileData } from '../components/UserProfileModal';
+import { CreatorStoryModal, CreatorStoryData, StorySlide, TinyGoldCheck } from '../components/CreatorStoryModal';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
@@ -35,65 +36,6 @@ interface MessagesScreenProps {
   onOpenCollabIdea?: (partnerData: { name: string; handle: string; niche: string; avatar: any; planIndex?: number }) => void;
   userProfile?: UserProfileData;
   onSaveProfile?: (updated: UserProfileData) => void;
-}
-
-export const TinyGoldCheck = ({ size = 13 }: { size?: number }) => (
-  <View
-    style={{
-      width: size,
-      height: size,
-      borderRadius: size / 2,
-      backgroundColor: '#EAB308',
-      borderWidth: 1.5,
-      borderColor: '#FFFFFF',
-      justifyContent: 'center',
-      alignItems: 'center',
-      shadowColor: '#CA8A04',
-      shadowOffset: { width: 0, height: 1 },
-      shadowOpacity: 0.35,
-      shadowRadius: 2,
-      elevation: 2,
-    }}
-  >
-    <Svg width={size * 0.65} height={size * 0.65} viewBox="0 0 12 12" fill="none">
-      <Path
-        d="M2.5 6.2L4.8 8.5L9.5 3.5"
-        stroke="#FFFFFF"
-        strokeWidth="2.4"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </Svg>
-  </View>
-);
-
-interface StorySlide {
-  id: string;
-  type?: 'daily_story' | 'highlights' | 'milestone';
-  title: string;
-  subtitle: string;
-  timeAgo: string;
-  quote?: string;
-  badge?: string;
-  highlights?: {
-    title: string;
-    platform: string;
-    views: string;
-    saves: string;
-  }[];
-}
-
-interface CreatorStory {
-  id: string;
-  name: string;
-  handle: string;
-  niche: string;
-  avatar: any;
-  streak: number;
-  isOnline: boolean;
-  isPro: boolean;
-  statusText: string;
-  slides: StorySlide[];
 }
 
 interface ChatMessage {
@@ -127,11 +69,12 @@ interface ConversationThread {
   category: 'buddies' | 'collabs' | 'squad' | 'deals' | 'jarvis';
   collabBadge?: string;
   messages: ChatMessage[];
+  storySlides?: StorySlide[];
 }
 
-const CREATOR_STORIES: CreatorStory[] = [
+const CREATOR_STORIES_DATA: CreatorStoryData[] = [
   {
-    id: 'c_amara',
+    id: 'amara',
     name: 'Amara Okafor',
     handle: '@amara.creates',
     niche: 'Travel & Lifestyle',
@@ -143,16 +86,38 @@ const CREATOR_STORIES: CreatorStory[] = [
     slides: [
       {
         id: 's_amara_1',
-        title: '24h Lagos Creation Sprint',
-        subtitle: 'Behind the scenes reel shoot',
+        type: 'daily_story',
+        title: '24h Lagos Creation Sprint 🎬',
+        subtitle: 'Filming behind the scenes in Victoria Island',
         timeAgo: '15m ago',
-        quote: 'Testing the 3-second hook format from Jarvis. Retention already up 35%!',
+        quote: 'Testing the 3-second hook format from Jarvis. Retention already up 35% across the morning batch!',
         badge: '⚡ 44-DAY STREAK ACTIVE',
+      },
+      {
+        id: 's_amara_2',
+        type: 'highlights',
+        title: 'Top Performing Reels This Week',
+        subtitle: 'Highest audience retention videos',
+        timeAgo: '1d ago',
+        highlights: [
+          { title: 'Hidden culinary spots in Lagos', platform: 'Instagram', views: '98.4K', saves: '12.1K' },
+          { title: '3 storytelling mistakes creators make', platform: 'TikTok', views: '64.2K', saves: '8.4K' },
+          { title: 'My 15-minute morning editing setup', platform: 'Reels', views: '41.0K', saves: '5.2K' },
+        ],
+      },
+      {
+        id: 's_amara_3',
+        type: 'milestone',
+        title: 'Streak Milestone Unlocked!',
+        subtitle: 'Level 12 Master Creator',
+        timeAgo: '3d ago',
+        milestoneTitle: '🏆 40-Day Consistency Club',
+        milestoneXp: '+250 XP Earned with Squad',
       },
     ],
   },
   {
-    id: 'c_elena',
+    id: 'elena',
     name: 'Elena Rostova',
     handle: '@elenacreates',
     niche: 'Design & Visual AI',
@@ -164,16 +129,28 @@ const CREATOR_STORIES: CreatorStory[] = [
     slides: [
       {
         id: 's_elena_1',
-        title: 'Daily Studio Flow 🎬',
-        subtitle: 'Batch recording 4 video hooks',
+        type: 'daily_story',
+        title: 'Daily Studio Flow 🎨',
+        subtitle: 'Batch recording 4 UI micro-interaction hooks',
         timeAgo: '2h ago',
-        quote: 'Consistency feels 10x easier when you have an accountability squad!',
-        badge: '👑 52-DAY STREAK',
+        quote: 'Consistency feels 10x easier when you have an accountability squad! Finished today’s script in 8 mins.',
+        badge: '👑 52-DAY STREAK ACTIVE',
+      },
+      {
+        id: 's_elena_2',
+        type: 'highlights',
+        title: 'Top Design & AI Highlights',
+        subtitle: 'High viral save rate tutorials',
+        timeAgo: '2d ago',
+        highlights: [
+          { title: '3 UI interaction tools for 2024', platform: 'TikTok', views: '112.5K', saves: '18.9K' },
+          { title: 'How to design split-screen Reels fast', platform: 'Reels', views: '73.2K', saves: '9.4K' },
+        ],
       },
     ],
   },
   {
-    id: 'c_david',
+    id: 'david',
     name: 'David Adebayo',
     handle: '@davidbuilds',
     niche: 'Tech & Productivity',
@@ -185,16 +162,17 @@ const CREATOR_STORIES: CreatorStory[] = [
     slides: [
       {
         id: 's_david_1',
-        title: 'Morning Batching Habit',
-        subtitle: 'Deep work sprint',
+        type: 'daily_story',
+        title: 'Deep Work & Morning Batching ⚡',
+        subtitle: 'Prepping content for peak 7:30 PM window',
         timeAgo: '4h ago',
-        quote: 'Locking in day 61 before noon. Let’s crush the squad duel today!',
+        quote: 'Locking in day 61 before noon. Let’s crush the squad live duel today!',
         badge: '🔥 61-DAY STREAK',
       },
     ],
   },
   {
-    id: 'c_marcus',
+    id: 'marcus',
     name: 'Marcus Chen',
     handle: '@marcustech',
     niche: 'AI & Workflow',
@@ -202,14 +180,15 @@ const CREATOR_STORIES: CreatorStory[] = [
     streak: 38,
     isOnline: false,
     isPro: true,
-    statusText: 'Offline • Studio recording',
+    statusText: 'Studio recording',
     slides: [
       {
         id: 's_marcus_1',
+        type: 'daily_story',
         title: '3 AI Tools I Use Daily',
-        subtitle: 'Creator tool stack',
+        subtitle: 'Creator tool stack sprint',
         timeAgo: '6h ago',
-        quote: 'Voice Studio speed is incredible. Saved 2 hours of editing time.',
+        quote: 'Voice Studio speed is incredible. Saved 2 hours of editing time this week.',
         badge: '⚡ 38-DAY STREAK',
       },
     ],
@@ -261,7 +240,7 @@ const INITIAL_CONVERSATIONS: ConversationThread[] = [
   },
   {
     id: 'conv_squad',
-    creatorId: 'squad',
+    creatorId: 'elena',
     name: 'Momentum Makers Squad',
     handle: '@momentum.squad',
     niche: 'Level 12 • 78-Day Collective Streak',
@@ -390,53 +369,14 @@ export const MessagesScreen: React.FC<MessagesScreenProps> = ({
   userProfile,
   onSaveProfile,
 }) => {
-  const [activeTab, setActiveTab] = useState<TabType>('match');
   const [selectedFilter, setSelectedFilter] = useState<'all' | 'collabs' | 'squad' | 'deals' | 'jarvis'>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [conversations, setConversations] = useState<ConversationThread[]>(INITIAL_CONVERSATIONS);
   const [activeChatThread, setActiveChatThread] = useState<ConversationThread | null>(null);
   const [chatInputText, setChatInputText] = useState('');
-  const [showStoryModal, setShowStoryModal] = useState(false);
-  const [selectedStory, setSelectedStory] = useState<CreatorStory | null>(null);
+  const [selectedStoryData, setSelectedStoryData] = useState<CreatorStoryData | null>(null);
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
-
-  // Animations
-  const ghostFloatY = useRef(new Animated.Value(0)).current;
-  const modalPopScale = useRef(new Animated.Value(0.92)).current;
-  const audioPulseAnim = useRef(new Animated.Value(1)).current;
-
-  useEffect(() => {
-    Animated.loop(
-      Animated.sequence([
-        Animated.timing(ghostFloatY, {
-          toValue: -4,
-          duration: 1500,
-          useNativeDriver: true,
-        }),
-        Animated.timing(ghostFloatY, {
-          toValue: 2,
-          duration: 1500,
-          useNativeDriver: true,
-        }),
-      ])
-    ).start();
-
-    Animated.loop(
-      Animated.sequence([
-        Animated.timing(audioPulseAnim, {
-          toValue: 1.12,
-          duration: 600,
-          useNativeDriver: true,
-        }),
-        Animated.timing(audioPulseAnim, {
-          toValue: 1,
-          duration: 600,
-          useNativeDriver: true,
-        }),
-      ])
-    ).start();
-  }, []);
 
   const showToast = (msg: string) => {
     setToastMessage(msg);
@@ -445,14 +385,39 @@ export const MessagesScreen: React.FC<MessagesScreenProps> = ({
     }, 2800);
   };
 
-  const triggerModalPop = () => {
-    modalPopScale.setValue(0.92);
-    Animated.spring(modalPopScale, {
-      toValue: 1,
-      friction: 6,
-      tension: 60,
-      useNativeDriver: true,
-    }).start();
+  const openCreatorStory = (creatorId: string) => {
+    if (Platform.OS !== 'web') {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    }
+    const story = CREATOR_STORIES_DATA.find((s) => s.id === creatorId);
+    if (story) {
+      setSelectedStoryData(story);
+    } else {
+      const conv = conversations.find((c) => c.creatorId === creatorId);
+      if (conv) {
+        setSelectedStoryData({
+          id: conv.creatorId,
+          name: conv.name,
+          handle: conv.handle,
+          niche: conv.niche,
+          avatar: conv.avatar,
+          streak: conv.streak,
+          isOnline: conv.isOnline,
+          isPro: conv.isPro,
+          slides: [
+            {
+              id: `s_${conv.creatorId}_1`,
+              type: 'daily_story',
+              title: `${conv.name}'s Daily Story`,
+              subtitle: 'Active creator streak update',
+              timeAgo: '20m ago',
+              quote: 'Consistently posting every day with PostStreak Autopilot!',
+              badge: `🔥 ${conv.streak}-DAY STREAK`,
+            },
+          ],
+        });
+      }
+    }
   };
 
   const handleSendMessage = () => {
@@ -483,7 +448,7 @@ export const MessagesScreen: React.FC<MessagesScreenProps> = ({
     );
     setChatInputText('');
 
-    // Simulated quick AI / creator response
+    // Simulated quick response
     setTimeout(() => {
       if (Platform.OS !== 'web') {
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
@@ -550,7 +515,6 @@ export const MessagesScreen: React.FC<MessagesScreenProps> = ({
           {/* User Profile Avatar with Tiny Gold Check Badge */}
           <Pressable
             onPress={() => {
-              triggerModalPop();
               setShowProfileModal(true);
             }}
             style={styles.profileAvatarWrapper}
@@ -590,7 +554,7 @@ export const MessagesScreen: React.FC<MessagesScreenProps> = ({
             )}
           </View>
 
-          {/* FILTER TABS: All | Collabs | Squad | Brand Deals | Jarvis */}
+          {/* FILTER TABS */}
           <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.filterTabsScroll}>
             {[
               { key: 'all', label: 'All' },
@@ -624,14 +588,11 @@ export const MessagesScreen: React.FC<MessagesScreenProps> = ({
           {/* ============================================================ */}
           <View style={styles.storiesSectionBox}>
             <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 14, paddingHorizontal: 4 }}>
-              {CREATOR_STORIES.map((creator) => (
+              {CREATOR_STORIES_DATA.map((creator) => (
                 <Pressable
                   key={creator.id}
                   style={styles.storyItemCol}
-                  onPress={() => {
-                    setSelectedStory(creator);
-                    setShowStoryModal(true);
-                  }}
+                  onPress={() => openCreatorStory(creator.id)}
                 >
                   <View style={styles.storyAvatarOuterRing}>
                     <Image source={creator.avatar} style={styles.storyAvatarImg} />
@@ -667,9 +628,18 @@ export const MessagesScreen: React.FC<MessagesScreenProps> = ({
             }}
           >
             <View style={{ flexDirection: 'row', gap: 12, alignItems: 'center' }}>
-              <View style={styles.bannerIconSquare}>
-                <Text style={{ fontSize: 20 }}>🤝</Text>
-              </View>
+              <Pressable
+                onPress={() => openCreatorStory('amara')}
+                style={{ position: 'relative' }}
+              >
+                <View style={styles.bannerIconSquare}>
+                  <Image source={require('../../assets/images/amara-avatar.jpg')} style={styles.bannerAvatar} />
+                  <View style={styles.bannerTinyGoldCheckPos}>
+                    <TinyGoldCheck size={12} />
+                  </View>
+                </View>
+              </Pressable>
+
               <View style={{ flex: 1 }}>
                 <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
                   <Text style={styles.bannerTagText}>PRO COLLAB INVITATION</Text>
@@ -702,8 +672,11 @@ export const MessagesScreen: React.FC<MessagesScreenProps> = ({
                     setActiveChatThread(thread);
                   }}
                 >
-                  {/* Creator Avatar with Tiny Gold Check Badge */}
-                  <View style={styles.convAvatarContainer}>
+                  {/* Tapping Creator Avatar opens their Story or Highlights! */}
+                  <Pressable
+                    onPress={() => openCreatorStory(thread.creatorId)}
+                    style={styles.convAvatarContainer}
+                  >
                     <Image source={thread.avatar} style={styles.convAvatarImg} />
                     {thread.isPro && (
                       <View style={styles.convTinyGoldCheckPos}>
@@ -711,7 +684,7 @@ export const MessagesScreen: React.FC<MessagesScreenProps> = ({
                       </View>
                     )}
                     {thread.isOnline && <View style={styles.convOnlineDot} />}
-                  </View>
+                  </Pressable>
 
                   {/* Middle Content */}
                   <View style={{ flex: 1 }}>
@@ -781,15 +754,18 @@ export const MessagesScreen: React.FC<MessagesScreenProps> = ({
                       <Text style={{ fontSize: 20, fontWeight: '900', color: '#171420' }}>‹</Text>
                     </Pressable>
 
-                    {/* Recipient Photo with Tiny Gold Check Badge */}
-                    <View style={styles.chatHeaderAvatarWrapper}>
+                    {/* Tapping Chat Header Avatar opens their Story/Highlight! */}
+                    <Pressable
+                      onPress={() => openCreatorStory(activeChatThread.creatorId)}
+                      style={styles.chatHeaderAvatarWrapper}
+                    >
                       <Image source={activeChatThread.avatar} style={styles.chatHeaderAvatar} />
                       {activeChatThread.isPro && (
                         <View style={styles.chatTinyGoldCheckPos}>
                           <TinyGoldCheck size={13} />
                         </View>
                       )}
-                    </View>
+                    </Pressable>
 
                     <View>
                       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
@@ -813,9 +789,9 @@ export const MessagesScreen: React.FC<MessagesScreenProps> = ({
                     </Pressable>
                     <Pressable
                       style={styles.chatActionCircle}
-                      onPress={() => showToast('Opening Collab Blueprint 📑')}
+                      onPress={() => openCreatorStory(activeChatThread.creatorId)}
                     >
-                      <Text style={{ fontSize: 14 }}>📑</Text>
+                      <Text style={{ fontSize: 14 }}>🌟</Text>
                     </Pressable>
                   </View>
                 </View>
@@ -964,70 +940,26 @@ export const MessagesScreen: React.FC<MessagesScreenProps> = ({
         </Modal>
 
         {/* ============================================================ */}
-        {/* 7. CREATOR STORY VIEWER MODAL                                */}
+        {/* 7. FULL-SCREEN CREATOR STORY & HIGHLIGHT MODAL               */}
         {/* ============================================================ */}
-        <Modal
-          visible={showStoryModal}
-          transparent={true}
-          animationType="fade"
-          onRequestClose={() => setShowStoryModal(false)}
-        >
-          {selectedStory && (
-            <View style={styles.storyModalOverlay}>
-              <View style={styles.storyViewerCard}>
-                {/* Top Story Header */}
-                <View style={styles.storyViewerHeader}>
-                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
-                    <View style={styles.storyViewerAvatarWrapper}>
-                      <Image source={selectedStory.avatar} style={styles.storyViewerAvatar} />
-                      {selectedStory.isPro && (
-                        <View style={styles.storyViewerTinyGoldCheckPos}>
-                          <TinyGoldCheck size={13} />
-                        </View>
-                      )}
-                    </View>
-                    <View>
-                      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-                        <Text style={styles.storyViewerName}>{selectedStory.name}</Text>
-                        <Text style={styles.storyViewerStreak}>🔥 {selectedStory.streak}</Text>
-                      </View>
-                      <Text style={styles.storyViewerTime}>15m ago • {selectedStory.niche}</Text>
-                    </View>
-                  </View>
-
-                  <Pressable onPress={() => setShowStoryModal(false)} style={styles.storyCloseCircle} hitSlop={8}>
-                    <Text style={{ color: '#FFFFFF', fontWeight: '900', fontSize: 13 }}>✕</Text>
-                  </Pressable>
-                </View>
-
-                {/* Story Body */}
-                <View style={styles.storyCardBody}>
-                  <View style={styles.storyBadgePill}>
-                    <Text style={styles.storyBadgePillText}>{selectedStory.slides[0]?.badge || '⚡ PRO STORY'}</Text>
-                  </View>
-
-                  <Text style={styles.storyHeadlineText}>{selectedStory.slides[0]?.title}</Text>
-                  <Text style={styles.storyQuoteText}>&ldquo;{selectedStory.slides[0]?.quote}&rdquo;</Text>
-
-                  <Pressable
-                    style={styles.storyReplyBtn}
-                    onPress={() => {
-                      setShowStoryModal(false);
-                      const matchConv = conversations.find((c) => c.creatorId === selectedStory.id.replace('c_', ''));
-                      if (matchConv) {
-                        setActiveChatThread(matchConv);
-                      } else {
-                        showToast(`Opened chat with ${selectedStory.name}!`);
-                      }
-                    }}
-                  >
-                    <Text style={styles.storyReplyBtnText}>Reply with Reel Collab ➔</Text>
-                  </Pressable>
-                </View>
-              </View>
-            </View>
-          )}
-        </Modal>
+        <CreatorStoryModal
+          visible={selectedStoryData !== null}
+          onClose={() => setSelectedStoryData(null)}
+          storyData={selectedStoryData}
+          onReply={(creator, text) => {
+            setSelectedStoryData(null);
+            showToast(`Replied to ${creator.name}: "${text.slice(0, 25)}..."`);
+          }}
+          onSendCollabPitch={(creator) => {
+            setSelectedStoryData(null);
+            const matchConv = conversations.find((c) => c.creatorId === creator.id);
+            if (matchConv) {
+              setActiveChatThread(matchConv);
+            } else {
+              showToast(`Collab Pitch sent to ${creator.name}!`);
+            }
+          }}
+        />
 
         {/* PROFILE MODAL */}
         <UserProfileModal
@@ -1237,8 +1169,17 @@ const styles = StyleSheet.create({
     height: 44,
     borderRadius: 14,
     backgroundColor: '#FFFFFF',
-    justifyContent: 'center',
-    alignItems: 'center',
+    position: 'relative',
+  },
+  bannerAvatar: {
+    width: '100%',
+    height: '100%',
+    borderRadius: 14,
+  },
+  bannerTinyGoldCheckPos: {
+    position: 'absolute',
+    bottom: -1,
+    right: -1,
   },
   bannerTagText: {
     fontSize: 9,
@@ -1617,103 +1558,6 @@ const styles = StyleSheet.create({
   },
   sendBtnActive: {
     backgroundColor: '#582CDB',
-  },
-
-  // STORY MODAL
-  storyModalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(15, 10, 30, 0.85)',
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 20,
-  },
-  storyViewerCard: {
-    width: '100%',
-    maxWidth: 380,
-    backgroundColor: '#1E1B2E',
-    borderRadius: 24,
-    padding: 20,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.1)',
-  },
-  storyViewerHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 16,
-  },
-  storyViewerAvatarWrapper: {
-    position: 'relative',
-  },
-  storyViewerAvatar: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-  },
-  storyViewerTinyGoldCheckPos: {
-    position: 'absolute',
-    bottom: -1,
-    right: -1,
-  },
-  storyViewerName: {
-    fontSize: 15,
-    fontWeight: '900',
-    color: '#FFFFFF',
-  },
-  storyViewerStreak: {
-    fontSize: 12,
-    color: '#FDE047',
-    fontWeight: '900',
-  },
-  storyViewerTime: {
-    fontSize: 10.5,
-    color: '#94A3B8',
-  },
-  storyCloseCircle: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
-    backgroundColor: 'rgba(255, 255, 255, 0.15)',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  storyCardBody: {
-    gap: 12,
-  },
-  storyBadgePill: {
-    alignSelf: 'flex-start',
-    backgroundColor: '#582CDB',
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 6,
-  },
-  storyBadgePillText: {
-    fontSize: 9.5,
-    fontWeight: '900',
-    color: '#FFFFFF',
-  },
-  storyHeadlineText: {
-    fontSize: 18,
-    fontWeight: '900',
-    color: '#FFFFFF',
-  },
-  storyQuoteText: {
-    fontSize: 13.5,
-    color: '#CBD5E1',
-    lineHeight: 20,
-    fontStyle: 'italic',
-  },
-  storyReplyBtn: {
-    backgroundColor: '#582CDB',
-    paddingVertical: 12,
-    borderRadius: 12,
-    alignItems: 'center',
-    marginTop: 10,
-  },
-  storyReplyBtnText: {
-    color: '#FFFFFF',
-    fontSize: 13,
-    fontWeight: '900',
   },
 
   // COMMON
