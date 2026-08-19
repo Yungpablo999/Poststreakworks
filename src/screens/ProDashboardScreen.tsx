@@ -60,7 +60,8 @@ interface ProDashboardScreenProps {
   onNavigateTab?: (tab: TabType) => void;
   onOpenJarvisPro?: () => void;
   onOpenSchedule?: () => void;
-  onOpenMessages?: () => void;
+  onOpenMessages?: (threadId?: string) => void;
+  onOpenPostComposer?: (prefillTitle?: string) => void;
   onOpenEarnings?: () => void;
   onOpenQuests?: () => void;
   onOpenGrowth?: () => void;
@@ -262,6 +263,7 @@ export const ProDashboardScreen: React.FC<ProDashboardScreenProps> = ({
   onOpenJarvisPro,
   onOpenSchedule,
   onOpenMessages,
+  onOpenPostComposer,
   onOpenEarnings,
   onOpenQuests,
   onOpenGrowth,
@@ -277,6 +279,7 @@ export const ProDashboardScreen: React.FC<ProDashboardScreenProps> = ({
   const [showCalendarModal, setShowCalendarModal] = useState(false);
   const [showVoiceStudioModal, setShowVoiceStudioModal] = useState(false);
   
+  const [showBrandQuestModal, setShowBrandQuestModal] = useState(false);
   const [showCreatorLevelModal, setShowCreatorLevelModal] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [selectedStoryData, setSelectedStoryData] = useState<CreatorStoryData | null>(null);
@@ -832,7 +835,38 @@ export const ProDashboardScreen: React.FC<ProDashboardScreenProps> = ({
             </View>
           </Pressable>
 
+          {/* CARD 6: ACTIVE PRO BRAND QUEST ("GlowUp Skincare Launch") */}
+          <Pressable
+            onPress={() => {
+              if (Platform.OS !== 'web') {
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+              }
+              triggerModalPop();
+              setShowBrandQuestModal(true);
+            }}
+            style={({ pressed }) => [styles.dashboardCard, pressed && styles.cardPressed]}
+          >
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 14 }}>
+              <View style={styles.brandIconSquare}>
+                <Text style={{ fontSize: 22 }}>🎁</Text>
+              </View>
 
+              <View style={{ flex: 1 }}>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 2 }}>
+                  <View style={styles.proPriorityPill}>
+                    <Text style={styles.proPriorityText}>👑 ACTIVE BRAND QUEST</Text>
+                  </View>
+                  <Text style={styles.brandQuestSubLabel}>+$450 BOUNTY</Text>
+                </View>
+                <Text style={styles.brandQuestTitle}>GlowUp Skincare Launch</Text>
+                <Text style={{ fontSize: 11, color: '#64748B', marginTop: 1 }}>
+                  Product Integration Reel • +350 XP &amp; $450 Bounty
+                </Text>
+              </View>
+
+              <Text style={styles.chevronRight}>›</Text>
+            </View>
+          </Pressable>
 
           {/* CARD 7: MONTHLY EARNINGS ($4,250.00) */}
           <View style={styles.dashboardCard}>
@@ -1333,7 +1367,130 @@ export const ProDashboardScreen: React.FC<ProDashboardScreenProps> = ({
 
 
 
-                {/* ============================================================ */}
+                        {/* ============================================================ */}
+        {/* MODAL: ACTIVE PRO BRAND QUEST MODAL                          */}
+        {/* ============================================================ */}
+        <Modal
+          visible={showBrandQuestModal}
+          transparent={true}
+          animationType="fade"
+          onRequestClose={() => setShowBrandQuestModal(false)}
+        >
+          <View style={styles.modalOverlay}>
+            <Animated.View style={[styles.modalCard, { transform: [{ scale: modalPopScale }], maxHeight: '90%' }]}>
+              <ScrollView showsVerticalScrollIndicator={false} bounces={false}>
+                {/* Header */}
+                <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+                  <View style={styles.proPriorityPill}>
+                    <Text style={styles.proPriorityText}>👑 ACTIVE BRAND CAMPAIGN</Text>
+                  </View>
+                  <Pressable onPress={() => setShowBrandQuestModal(false)} hitSlop={8}>
+                    <Text style={{ fontSize: 18, color: '#94A3B8', fontWeight: '900' }}>✕</Text>
+                  </Pressable>
+                </View>
+
+                {/* Hero Quest Banner */}
+                <LinearGradient
+                  colors={['#1E1B4B', '#312E81', '#4338CA']}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 1 }}
+                  style={{ borderRadius: 18, padding: 16, marginBottom: 14 }}
+                >
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+                    <View style={{ width: 44, height: 44, borderRadius: 22, backgroundColor: 'rgba(255, 255, 255, 0.15)', justifyContent: 'center', alignItems: 'center' }}>
+                      <Text style={{ fontSize: 22 }}>🎁</Text>
+                    </View>
+                    <View style={{ flex: 1 }}>
+                      <Text style={{ fontSize: 17, fontWeight: '900', color: '#FFFFFF' }}>GlowUp Skincare Launch</Text>
+                      <Text style={{ fontSize: 11, color: '#C7D2FE', marginTop: 1, fontWeight: '700' }}>Verified Sponsor • 2 Days Remaining</Text>
+                    </View>
+                  </View>
+
+                  <View style={{ flexDirection: 'row', gap: 8, marginTop: 12 }}>
+                    <View style={{ backgroundColor: 'rgba(245, 158, 11, 0.25)', borderWidth: 1, borderColor: '#F59E0B', paddingHorizontal: 10, paddingVertical: 4, borderRadius: 8 }}>
+                      <Text style={{ fontSize: 11, fontWeight: '900', color: '#FDE68A' }}>💰 $450 Guaranteed Bounty</Text>
+                    </View>
+                    <View style={{ backgroundColor: 'rgba(139, 92, 246, 0.25)', borderWidth: 1, borderColor: '#8B5CF6', paddingHorizontal: 10, paddingVertical: 4, borderRadius: 8 }}>
+                      <Text style={{ fontSize: 11, fontWeight: '900', color: '#EDE9FE' }}>⚡ +350 XP Reward</Text>
+                    </View>
+                  </View>
+                </LinearGradient>
+
+                {/* Deliverables & Brief */}
+                <Text style={styles.modalSubheadingTitle}>CAMPAIGN DELIVERABLES</Text>
+                <View style={{ gap: 8, marginTop: 8 }}>
+                  <View style={styles.xpActivityRow}>
+                    <Text style={{ fontSize: 18 }}>🎬</Text>
+                    <View style={{ flex: 1 }}>
+                      <Text style={styles.xpActivityTitle}>1x 9:16 Video Integration Reel</Text>
+                      <Text style={styles.xpActivityTime}>Include 3-second texture hook &amp; routine demo</Text>
+                    </View>
+                  </View>
+                  <View style={styles.xpActivityRow}>
+                    <Text style={{ fontSize: 18 }}>🔗</Text>
+                    <View style={{ flex: 1 }}>
+                      <Text style={styles.xpActivityTitle}>Custom Bio Link &amp; Promo Code</Text>
+                      <Text style={styles.xpActivityTime}>Tag @glowupskin with 15% audience discount</Text>
+                    </View>
+                  </View>
+                </View>
+
+                {/* Jarvis AI Recommendation */}
+                <View style={[styles.nextLevelPreviewBox, { backgroundColor: '#F5F3FF', borderColor: '#C4B5FD', marginTop: 12 }]}>
+                  <Text style={[styles.nextLevelPreviewTitle, { color: '#582CDB' }]}>🪄 JARVIS MATCH INSIGHT</Text>
+                  <Text style={[styles.nextLevelPreviewBody, { color: '#4338CA' }]}>
+                    Your audience has a 94% affinity with aesthetic lifestyle routines. Filming during your 7:30 PM slot gives this brief maximum sponsored reach.
+                  </Text>
+                </View>
+
+                {/* Action Buttons */}
+                <Pressable
+                  style={({ pressed }) => [styles.modalGoldActionBtnWrapper, { marginTop: 14 }, pressed && styles.btnPressed]}
+                  onPress={() => {
+                    setShowBrandQuestModal(false);
+                    if (onOpenPostComposer) {
+                      onOpenPostComposer('My 3-Step Morning Skincare Secret (GlowUp Collab)');
+                    } else if (onStartMission) {
+                      onStartMission();
+                    }
+                  }}
+                >
+                  <LinearGradient
+                    colors={['#FDE68A', '#F59E0B', '#D97706']}
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 1, y: 1 }}
+                    style={styles.modalGoldBtnGradient}
+                  >
+                    <Text style={styles.modalGoldActionBtnText}>
+                      ✨ Start Campaign in Composer (+350 XP) ➔
+                    </Text>
+                  </LinearGradient>
+                </Pressable>
+
+                <Pressable
+                  style={styles.modalSecondaryOutlineBtn}
+                  onPress={() => {
+                    setShowBrandQuestModal(false);
+                    if (onOpenMessages) onOpenMessages('conv_glowup');
+                  }}
+                >
+                  <Text style={styles.modalSecondaryOutlineBtnText}>
+                    💬 Message Brand Sponsor ➔
+                  </Text>
+                </Pressable>
+
+                <Pressable
+                  style={styles.modalCancelBtn}
+                  onPress={() => setShowBrandQuestModal(false)}
+                >
+                  <Text style={styles.modalCancelBtnText}>Close Brief</Text>
+                </Pressable>
+              </ScrollView>
+            </Animated.View>
+          </View>
+        </Modal>
+
+        {/* ============================================================ */}
         {/* MODAL: CREATOR LEVEL & XP MILESTONE BADGES MODAL             */}
         {/* ============================================================ */}
         <Modal

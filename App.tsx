@@ -343,6 +343,10 @@ export default function App() {
               onOpenGrowth={() => navigateTo('growth')}
               onOpenMatch={() => navigateTo('match')}
               onOpenCreate={() => navigateTo('create')}
+              onOpenPostComposer={(ideaTitle) => {
+                if (ideaTitle) setComposerIdeaTitle(ideaTitle);
+                navigateTo('composer');
+              }}
               onSwitchToFree={() => {
                 setUserProfile(prev => ({ ...prev, tier: 'free' }));
               }}
@@ -1051,14 +1055,14 @@ export default function App() {
               onOpenSchedule={() => navigateTo('schedule')}
               onOpenJarvisPro={() => navigateTo('jarvis-pro')}
               onOpenCreate={() => navigateTo('create')}
+              onOpenPostComposer={(ideaTitle) => {
+                if (ideaTitle) setComposerIdeaTitle(ideaTitle);
+                navigateTo('composer');
+              }}
               onOpenMatch={() => navigateTo('match')}
               onOpenCollabIdea={(partnerData) => {
                 if (partnerData) setCollabPartnerData(partnerData);
                 navigateTo('collab-idea');
-              }}
-              onOpenPostComposer={(prefillTitle) => {
-                if (prefillTitle) setComposerIdeaTitle(prefillTitle);
-                navigateTo('composer');
               }}
               onSwitchToFree={() => {
                 if (userProfile) {
@@ -1092,14 +1096,14 @@ export default function App() {
               onOpenSchedule={() => navigateTo('schedule')}
               onOpenJarvisPro={() => navigateTo('jarvis-pro')}
               onOpenCreate={() => navigateTo('create')}
+              onOpenPostComposer={(ideaTitle) => {
+                if (ideaTitle) setComposerIdeaTitle(ideaTitle);
+                navigateTo('composer');
+              }}
               onOpenMatch={() => navigateTo('match')}
               onOpenCollabIdea={(partnerData) => {
                 if (partnerData) setCollabPartnerData(partnerData);
                 navigateTo('collab-idea');
-              }}
-              onOpenPostComposer={(prefillTitle) => {
-                if (prefillTitle) setComposerIdeaTitle(prefillTitle);
-                navigateTo('composer');
               }}
               onSwitchToPro={() => {
                 if (userProfile) {
