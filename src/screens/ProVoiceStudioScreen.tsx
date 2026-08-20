@@ -782,7 +782,19 @@ export const ProVoiceStudioScreen: React.FC<ProVoiceStudioScreenProps> = ({
                 </Pressable>
                 <Pressable
                   style={({ pressed }) => [styles.audioSecondaryBtn, pressed && styles.btnPressed]}
-                  onPress={() => showToast('📥 High-Res 4K Master audio exported (.WAV)')}
+                  onPress={() => {
+                    if (Platform.OS !== 'web') {
+                      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+                    }
+                    setCelebrationData({
+                      title: '4K Audio Master Exported!',
+                      subtitle: `"${scriptTitle}.wav" (48kHz Ultra-HD) downloaded & ready for your video editor.`,
+                      badgeText: '📥 4K AUDIO EXPORTED',
+                      xpEarned: 50,
+                      speechBubble: '4K audio master ready, Pablo! Time to drop some viral magic! 🔥',
+                    });
+                    setShowCelebrationModal(true);
+                  }}
                 >
                   <Text style={styles.audioSecondaryBtnText}>📥 Export (.WAV)</Text>
                 </Pressable>
@@ -803,7 +815,19 @@ export const ProVoiceStudioScreen: React.FC<ProVoiceStudioScreenProps> = ({
               {/* Save to Library Button */}
               <Pressable
                 style={({ pressed }) => [styles.saveLibraryBtn, pressed && styles.btnPressed]}
-                onPress={() => showToast('✓ Voiceover saved to your Studio Library')}
+                onPress={() => {
+                  if (Platform.OS !== 'web') {
+                    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+                  }
+                  setCelebrationData({
+                    title: 'Saved to Studio Vault!',
+                    subtitle: `"${scriptTitle}" is now stored in your Pro Voice Vault for instant re-use across campaigns.`,
+                    badgeText: '📁 SAVED TO STUDIO VAULT',
+                    xpEarned: 25,
+                    speechBubble: 'Locked into your vault! Re-use this audio anytime in one tap! 🎙️',
+                  });
+                  setShowCelebrationModal(true);
+                }}
               >
                 <Text style={styles.saveLibraryBtnText}>Save to Library</Text>
               </Pressable>
