@@ -20,6 +20,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { FloatingTabBar, TabType } from '../components/FloatingTabBar';
 import { BrandToast } from '../components/BrandToast';
 import { UserProfileModal, UserProfileData } from '../components/UserProfileModal';
+import { SocialBrandIcon } from '../components/SocialBrandIcon';
 
 export const TinyGoldCheck = ({ size = 13 }: { size?: number }) => (
   <View
@@ -125,6 +126,81 @@ export const ProCreateScreen: React.FC<ProCreateScreenProps> = ({
   const [showRepurposeModal, setShowRepurposeModal] = useState(false);
   const [showHookModal, setShowHookModal] = useState(false);
   const [showAllDraftsModal, setShowAllDraftsModal] = useState(false);
+  const [draftFilter, setDraftFilter] = useState<'ALL' | 'TIKTOK' | 'INSTAGRAM' | 'YOUTUBE'>('ALL');
+  const [activeDraftsList, setActiveDraftsList] = useState([
+    {
+      id: 'd1',
+      title: '3 mistakes I stopped making as a creator',
+      platform: 'TikTok',
+      platformType: 'tiktok',
+      typeBadge: 'SCRIPT READY',
+      typeColor: '#DCFCE7',
+      typeTextColor: '#15803D',
+      time: 'Edited 2h ago',
+      actionText: 'Continue Script',
+      actionTarget: 'script',
+    },
+    {
+      id: 'd2',
+      title: 'Behind the scenes tour & studio setup',
+      platform: 'Instagram',
+      platformType: 'instagram',
+      typeBadge: 'VOICE DRAFT',
+      typeColor: '#EDE9FE',
+      typeTextColor: '#582CDB',
+      time: 'Edited 4h ago',
+      actionText: 'Open Voice Studio',
+      actionTarget: 'voice-studio',
+    },
+    {
+      id: 'd3',
+      title: 'How I gained 10k followers in 30 days',
+      platform: 'YouTube',
+      platformType: 'youtube',
+      typeBadge: 'IDEA OUTLINE',
+      typeColor: '#FEF3C7',
+      typeTextColor: '#D97706',
+      time: 'Edited yesterday',
+      actionText: 'Open Composer',
+      actionTarget: 'composer',
+    },
+    {
+      id: 'd4',
+      title: 'Stop waiting for the perfect video idea',
+      platform: 'TikTok',
+      platformType: 'tiktok',
+      typeBadge: 'CAPTION READY',
+      typeColor: '#DCFCE7',
+      typeTextColor: '#15803D',
+      time: 'Edited 2 days ago',
+      actionText: 'Open Caption',
+      actionTarget: 'caption',
+    },
+    {
+      id: 'd5',
+      title: '5 tools that 10x your creator workflow',
+      platform: 'Instagram',
+      platformType: 'instagram',
+      typeBadge: 'REPURPOSE READY',
+      typeColor: '#EDE9FE',
+      typeTextColor: '#582CDB',
+      time: 'Edited 3 days ago',
+      actionText: 'Repurpose Now',
+      actionTarget: 'repurpose',
+    },
+    {
+      id: 'd6',
+      title: 'The algorithm secret nobody talks about',
+      platform: 'TikTok',
+      platformType: 'tiktok',
+      typeBadge: 'HOOK DRAFT',
+      typeColor: '#EDE9FE',
+      typeTextColor: '#582CDB',
+      time: 'Edited 4 days ago',
+      actionText: 'Open Script',
+      actionTarget: 'script',
+    },
+  ]);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   // Voice Studio State
@@ -143,6 +219,34 @@ export const ProCreateScreen: React.FC<ProCreateScreenProps> = ({
   const ghostScale = useRef(new Animated.Value(1)).current;
   const waveformAnim = useRef(new Animated.Value(0.4)).current;
   const modalPopScale = useRef(new Animated.Value(0.92)).current;
+
+  const handleOpenDraftItem = (draft: typeof activeDraftsList[0]) => {
+    if (Platform.OS !== 'web') {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    }
+    setShowAllDraftsModal(false);
+    if (draft.actionTarget === 'script' && onOpenScript) {
+      onOpenScript(draft.title);
+    } else if (draft.actionTarget === 'caption' && onOpenCaption) {
+      onOpenCaption(draft.title);
+    } else if (draft.actionTarget === 'voice-studio' && onOpenVoiceStudio) {
+      onOpenVoiceStudio();
+    } else if (draft.actionTarget === 'repurpose' && onOpenRepurpose) {
+      onOpenRepurpose(draft.title);
+    } else if (draft.actionTarget === 'composer' && onOpenPostComposer) {
+      onOpenPostComposer(draft.title, draft.platformType);
+    } else {
+      showToast(`✓ Opened draft: "${draft.title.slice(0, 24)}..."`);
+    }
+  };
+
+  const handleDeleteDraftItem = (draftId: string) => {
+    if (Platform.OS !== 'web') {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    }
+    setActiveDraftsList((prev) => prev.filter((d) => d.id !== draftId));
+    showToast('🗑️ Draft removed from bank');
+  };
 
   useEffect(() => {
     // Mascot floating animation
@@ -755,7 +859,7 @@ export const ProCreateScreen: React.FC<ProCreateScreenProps> = ({
               }}
               hitSlop={8}
             >
-              <Text style={styles.viewAllText}>View all (6) ➔</Text>
+              <Text style={styles.viewAllText}>View all ({activeDraftsList.length}) ➔</Text>
             </Pressable>
           </View>
 
@@ -1007,6 +1111,121 @@ export const ProCreateScreen: React.FC<ProCreateScreenProps> = ({
 
         {/* ============================================================ */}
         {/* MODAL: 200+ HOOK GENERATOR                                   */}
+                {/* ============================================================ */}
+        {/* MODAL 4: ACTIVE SAVED DRAFTS MODAL                           */}
+        {/* ============================================================ */}
+        <Modal
+          visible={showAllDraftsModal}
+          transparent={true}
+          animationType="fade"
+          onRequestClose={() => setShowAllDraftsModal(false)}
+        >
+          <View style={styles.modalOverlay}>
+            <Animated.View style={[styles.modalCard, { transform: [{ scale: modalPopScale }] }]}>
+              <View style={styles.modalHeaderRow}>
+                <View>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                    <Text style={styles.modalTitle}>Active Saved Drafts</Text>
+                    <View style={styles.draftsCountPill}>
+                      <Text style={styles.draftsCountPillText}>{activeDraftsList.length}</Text>
+                    </View>
+                  </View>
+                  <Text style={styles.modalSubtitle}>Tap any draft to continue editing or scheduling</Text>
+                </View>
+                <Pressable onPress={() => setShowAllDraftsModal(false)} style={styles.modalCloseCircle} hitSlop={8}>
+                  <Text style={styles.modalCloseCross}>✕</Text>
+                </Pressable>
+              </View>
+
+              {/* Platform Filter Pills */}
+              <View style={{ flexDirection: 'row', gap: 6, marginVertical: 10 }}>
+                {(['ALL', 'TIKTOK', 'INSTAGRAM', 'YOUTUBE'] as const).map((filterKey) => {
+                  const isActive = draftFilter === filterKey;
+                  return (
+                    <Pressable
+                      key={filterKey}
+                      style={[styles.draftFilterPill, isActive && styles.draftFilterPillActive]}
+                      onPress={() => {
+                        if (Platform.OS !== 'web') {
+                          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                        }
+                        setDraftFilter(filterKey);
+                      }}
+                    >
+                      <Text style={[styles.draftFilterPillText, isActive && styles.draftFilterPillTextActive]}>
+                        {filterKey}
+                      </Text>
+                    </Pressable>
+                  );
+                })}
+              </View>
+
+              {/* Drafts List Scrollable */}
+              <ScrollView style={{ maxHeight: 340 }} showsVerticalScrollIndicator={false}>
+                <View style={{ gap: 8 }}>
+                  {activeDraftsList
+                    .filter((d) => draftFilter === 'ALL' || d.platform.toUpperCase() === draftFilter)
+                    .map((draft) => (
+                      <Pressable
+                        key={draft.id}
+                        style={({ pressed }) => [styles.draftModalCard, pressed && styles.btnPressed]}
+                        onPress={() => handleOpenDraftItem(draft)}
+                      >
+                        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+                          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, flex: 1, paddingRight: 6 }}>
+                            <SocialBrandIcon platform={draft.platformType} size={18} />
+                            <Text style={styles.draftModalTitle} numberOfLines={1}>
+                              {draft.title}
+                            </Text>
+                          </View>
+                          <View style={[styles.draftModalBadge, { backgroundColor: draft.typeColor }]}>
+                            <Text style={[styles.draftModalBadgeText, { color: draft.typeTextColor }]}>
+                              {draft.typeBadge}
+                            </Text>
+                          </View>
+                        </View>
+
+                        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 8 }}>
+                          <Text style={styles.draftModalTimeText}>{draft.time} • {draft.platform}</Text>
+                          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+                            <Pressable
+                              onPress={() => handleDeleteDraftItem(draft.id)}
+                              hitSlop={8}
+                            >
+                              <Text style={{ fontSize: 13, color: '#94A3B8' }}>🗑️</Text>
+                            </Pressable>
+                            <Text style={styles.draftModalActionText}>{draft.actionText} ➔</Text>
+                          </View>
+                        </View>
+                      </Pressable>
+                    ))}
+                </View>
+              </ScrollView>
+
+              {/* Modal Actions */}
+              <View style={{ flexDirection: 'row', gap: 10, marginTop: 14 }}>
+                <Pressable
+                  style={styles.modalCancelBtn}
+                  onPress={() => setShowAllDraftsModal(false)}
+                >
+                  <Text style={styles.modalCancelBtnText}>Close</Text>
+                </Pressable>
+                <Pressable
+                  style={styles.modalSaveBtn}
+                  onPress={() => {
+                    setShowAllDraftsModal(false);
+                    if (onOpenPostComposer) onOpenPostComposer();
+                  }}
+                >
+                  <Text style={styles.modalSaveBtnText}>+ New Draft</Text>
+                </Pressable>
+              </View>
+            </Animated.View>
+          </View>
+        </Modal>
+
+        {/* ============================================================ */}
+        {/* MODAL 3: VIRAL HOOK LIBRARY MODAL                            */}
         {/* ============================================================ */}
         <Modal
           visible={showHookModal}
@@ -1822,6 +2041,98 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#171420',
     lineHeight: 17,
+  },
+
+  // ACTIVE SAVED DRAFTS MODAL
+  draftsCountPill: {
+    backgroundColor: '#EDE9FE',
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 6,
+  },
+  draftsCountPillText: {
+    fontSize: 10,
+    fontWeight: '900',
+    color: '#582CDB',
+  },
+  draftFilterPill: {
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 8,
+    backgroundColor: '#FAF8F5',
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+  },
+  draftFilterPillActive: {
+    backgroundColor: '#582CDB',
+    borderColor: '#582CDB',
+  },
+  draftFilterPillText: {
+    fontSize: 9.5,
+    fontWeight: '800',
+    color: '#64748B',
+  },
+  draftFilterPillTextActive: {
+    color: '#FFFFFF',
+    fontWeight: '900',
+  },
+  draftModalCard: {
+    backgroundColor: '#FAF8F5',
+    borderRadius: 14,
+    padding: 12,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+  },
+  draftModalTitle: {
+    fontSize: 12.5,
+    fontWeight: '800',
+    color: '#171420',
+  },
+  draftModalBadge: {
+    paddingHorizontal: 6,
+    paddingVertical: 2.5,
+    borderRadius: 5,
+  },
+  draftModalBadgeText: {
+    fontSize: 8.5,
+    fontWeight: '900',
+    letterSpacing: 0.3,
+  },
+  draftModalTimeText: {
+    fontSize: 10.5,
+    color: '#64748B',
+    fontWeight: '600',
+  },
+  draftModalActionText: {
+    fontSize: 11,
+    fontWeight: '900',
+    color: '#582CDB',
+  },
+  modalCancelBtn: {
+    flex: 1,
+    backgroundColor: '#FAF8F5',
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    paddingVertical: 11,
+    borderRadius: 12,
+    alignItems: 'center',
+  },
+  modalCancelBtnText: {
+    color: '#64748B',
+    fontSize: 12,
+    fontWeight: '900',
+  },
+  modalSaveBtn: {
+    flex: 2,
+    backgroundColor: '#582CDB',
+    paddingVertical: 11,
+    borderRadius: 12,
+    alignItems: 'center',
+  },
+  modalSaveBtnText: {
+    color: '#FFFFFF',
+    fontSize: 12,
+    fontWeight: '900',
   },
 
   // MODALS
