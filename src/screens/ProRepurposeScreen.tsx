@@ -54,6 +54,8 @@ export const ProRepurposeScreen: React.FC<ProRepurposeScreenProps> = ({
 
   // Edit Modals
   const [showEditIdeaModal, setShowEditIdeaModal] = useState(false);
+  const [showMorePlatformsModal, setShowMorePlatformsModal] = useState(false);
+  const [extraPlatforms, setExtraPlatforms] = useState<string[]>(['threads', 'pinterest']);
   const [editIdeaText, setEditIdeaText] = useState(originalIdea);
   const [editingVersion, setEditingVersion] = useState<{ id: string; title: string; body: string } | null>(null);
 
@@ -115,6 +117,74 @@ export const ProRepurposeScreen: React.FC<ProRepurposeScreenProps> = ({
   const showToast = (msg: string) => {
     setToastMessage(msg);
     setToastKey((k) => k + 1);
+  };
+
+  const handleToggleExtraPlatform = (platformId: string) => {
+    if (Platform.OS !== 'web') {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    }
+    if (extraPlatforms.includes(platformId)) {
+      setExtraPlatforms(extraPlatforms.filter((p) => p !== platformId));
+    } else {
+      setExtraPlatforms([...extraPlatforms, platformId]);
+    }
+  };
+
+  const handleDoneMorePlatforms = () => {
+    if (Platform.OS !== 'web') {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    }
+    setShowMorePlatformsModal(false);
+    
+    // Add extra platforms to selectedFormats
+    const merged = Array.from(new Set([...selectedFormats, ...extraPlatforms]));
+    setSelectedFormats(merged);
+
+    // If Threads selected, add to generated versions if not present
+    if (extraPlatforms.includes('threads') && !versions.some((v) => v.id === 'threads')) {
+      setVersions((prev) => [
+        ...prev,
+        {
+          id: 'threads',
+          platform: 'Threads Note',
+          platformType: 'threads',
+          badge: 'READY',
+          badgeColor: '#DCFCE7',
+          badgeTextColor: '#15803D',
+          title: 'Quick take for creators...',
+          body: 'The fastest way to burn out is pretending you need 4 hours per post. Build a 20-min system instead.',
+        },
+      ]);
+    }
+
+    // If Newsletter selected, add to generated versions
+    if (extraPlatforms.includes('newsletter') && !versions.some((v) => v.id === 'newsletter')) {
+      setVersions((prev) => [
+        ...prev,
+        {
+          id: 'newsletter',
+          platform: 'Newsletter Issue',
+          platformType: 'email',
+          badge: 'OPTIMIZED',
+          badgeColor: '#DCFCE7',
+          badgeTextColor: '#15803D',
+          title: 'Creator Systems Weekly #47',
+          body: 'Deep dive into eliminating creation friction, standardizing hooks, and protecting your streak.',
+        },
+      ]);
+    }
+
+    setCompletionData({
+      title: 'Platforms Added!',
+      subtitle: `${extraPlatforms.length} custom platform engines synchronized for multi-channel reach.`,
+      badgeText: '✨ MULTI-PLATFORM SYNC (+50 XP)',
+      xpEarned: 50,
+      speechBubble: 'Extra platform engines are ready to adapt your idea, Pablo! 🔥',
+    });
+
+    setTimeout(() => {
+      setShowCompletionModal(true);
+    }, 200);
   };
 
   // Format Selection Toggles
@@ -371,7 +441,10 @@ export const ProRepurposeScreen: React.FC<ProRepurposeScreenProps> = ({
                   <Pressable
                     key={fmt.id}
                     style={({ pressed }) => [styles.formatMoreCard, pressed && styles.btnPressed]}
-                    onPress={() => showToast('💡 Custom format creator unlocking soon')}
+                    onPress={() => {
+                      triggerModalPop();
+                      setShowMorePlatformsModal(true);
+                    }}
                   >
                     <Text style={{ fontSize: 18, color: '#64748B', fontWeight: '900' }}>＋</Text>
                     <Text style={styles.formatMoreText}>{fmt.name}</Text>
@@ -831,6 +904,129 @@ export const ProRepurposeScreen: React.FC<ProRepurposeScreenProps> = ({
                 onPress={handleSaveEditedVersion}
               >
                 <Text style={styles.modalSaveBtnText}>Save Changes</Text>
+              </Pressable>
+            </View>
+          </Animated.View>
+        </View>
+      </Modal>
+
+            {/* SELECT MORE PLATFORMS & FORMATS MODAL */}
+      <Modal
+        visible={showMorePlatformsModal}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => setShowMorePlatformsModal(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <Animated.View style={[styles.modalCard, { transform: [{ scale: modalPopScale }] }]}>
+            <View style={styles.modalHeaderBetween}>
+              <View>
+                <Text style={styles.modalTitle}>Add More Platforms</Text>
+                <Text style={styles.modalSubTitle}>Select custom channels to adapt this idea for</Text>
+              </View>
+              <Pressable onPress={() => setShowMorePlatformsModal(false)} hitSlop={8}>
+                <Text style={styles.modalCloseText}>✕</Text>
+              </Pressable>
+            </View>
+
+            <ScrollView style={{ maxHeight: 320 }} contentContainerStyle={{ gap: 8, paddingVertical: 4 }}>
+              {[
+                {
+                  id: 'threads',
+                  name: 'Threads',
+                  platformType: 'threads',
+                  desc: 'Conversation notes & viral micro-thoughts',
+                },
+                {
+                  id: 'pinterest',
+                  name: 'Pinterest',
+                  platformType: 'pinterest',
+                  desc: 'Idea pins & visual infographics',
+                },
+                {
+                  id: 'facebook',
+                  name: 'Facebook',
+                  platformType: 'facebook',
+                  desc: 'Creator pages & community groups',
+                },
+                {
+                  id: 'snapchat',
+                  name: 'Snapchat',
+                  platformType: 'snapchat',
+                  desc: 'Spotlight & short story snaps',
+                },
+                {
+                  id: 'newsletter',
+                  name: 'Newsletter / Substack',
+                  emoji: '✉️',
+                  desc: 'Long-form email breakdown with key takeaways',
+                },
+                {
+                  id: 'podcast',
+                  name: 'Podcast Audio Clip',
+                  emoji: '🎙️',
+                  desc: 'Speaking script & audiogram soundbite',
+                },
+                {
+                  id: 'carousel',
+                  name: 'Carousel Deck',
+                  emoji: '📊',
+                  desc: '5-slide PDF / multi-image swipeable carousel',
+                },
+                {
+                  id: 'article',
+                  name: 'Medium / Blog Article',
+                  emoji: '📝',
+                  desc: 'SEO-ready thought leadership article',
+                },
+              ].map((item) => {
+                const isSelected = extraPlatforms.includes(item.id);
+                return (
+                  <Pressable
+                    key={item.id}
+                    style={[
+                      styles.extraPlatformRow,
+                      isSelected && styles.extraPlatformRowActive,
+                    ]}
+                    onPress={() => handleToggleExtraPlatform(item.id)}
+                  >
+                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, flex: 1 }}>
+                      <View style={styles.extraPlatformIconBox}>
+                        {item.platformType ? (
+                          <SocialBrandIcon platform={item.platformType} size={20} />
+                        ) : (
+                          <Text style={{ fontSize: 18 }}>{item.emoji}</Text>
+                        )}
+                      </View>
+                      <View style={{ flex: 1 }}>
+                        <Text style={styles.extraPlatformName}>{item.name}</Text>
+                        <Text style={styles.extraPlatformDesc}>{item.desc}</Text>
+                      </View>
+                    </View>
+
+                    <View style={[styles.extraPlatformCheckRing, isSelected && styles.extraPlatformCheckRingActive]}>
+                      {isSelected && (
+                        <Text style={{ fontSize: 9, color: '#FFFFFF', fontWeight: '900' }}>✓</Text>
+                      )}
+                    </View>
+                  </Pressable>
+                );
+              })}
+            </ScrollView>
+
+            <View style={{ flexDirection: 'row', gap: 10, marginTop: 16 }}>
+              <Pressable
+                style={styles.modalCancelBtn}
+                onPress={() => setShowMorePlatformsModal(false)}
+              >
+                <Text style={styles.modalCancelBtnText}>Cancel</Text>
+              </Pressable>
+
+              <Pressable
+                style={styles.modalSaveBtn}
+                onPress={handleDoneMorePlatforms}
+              >
+                <Text style={styles.modalSaveBtnText}>Done</Text>
               </Pressable>
             </View>
           </Animated.View>
@@ -1574,6 +1770,62 @@ const styles = StyleSheet.create({
     fontSize: 9.5,
     fontWeight: '900',
     color: '#582CDB',
+  },
+
+  // EXTRA PLATFORMS MODAL
+  modalSubTitle: {
+    fontSize: 11,
+    color: '#64748B',
+    marginTop: 2,
+  },
+  extraPlatformRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: '#FAF8F5',
+    borderRadius: 14,
+    padding: 12,
+    borderWidth: 1.5,
+    borderColor: '#E2E8F0',
+  },
+  extraPlatformRowActive: {
+    borderColor: '#582CDB',
+    backgroundColor: '#F5F3FF',
+  },
+  extraPlatformIconBox: {
+    width: 32,
+    height: 32,
+    borderRadius: 10,
+    backgroundColor: '#FFFFFF',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+  },
+  extraPlatformName: {
+    fontSize: 12.5,
+    fontWeight: '900',
+    color: '#171420',
+  },
+  extraPlatformDesc: {
+    fontSize: 10,
+    color: '#64748B',
+    marginTop: 1,
+  },
+  extraPlatformCheckRing: {
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    borderWidth: 1.5,
+    borderColor: '#CBD5E1',
+    backgroundColor: '#FFFFFF',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginLeft: 8,
+  },
+  extraPlatformCheckRingActive: {
+    backgroundColor: '#582CDB',
+    borderColor: '#582CDB',
   },
 
   // MODALS
