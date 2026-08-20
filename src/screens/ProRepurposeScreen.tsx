@@ -328,12 +328,15 @@ export const ProRepurposeScreen: React.FC<ProRepurposeScreenProps> = ({
             <Pressable
               style={({ pressed }) => [styles.editOriginalIdeaBtn, pressed && styles.btnPressed]}
               onPress={() => {
-                setEditIdeaText(originalIdea);
-                triggerModalPop();
-                setShowEditIdeaModal(true);
+                if (Platform.OS !== 'web') {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                }
+                if (onNavigate) {
+                  onNavigate('idea-detail');
+                }
               }}
             >
-              <Text style={styles.editOriginalIdeaBtnText}>✏️ Edit Original Idea</Text>
+              <Text style={styles.editOriginalIdeaBtnText}>✏️ Edit in Idea Engine</Text>
             </Pressable>
           </View>
         </View>
