@@ -1402,6 +1402,15 @@ export default function App() {
           )
         )}
 
+        {currentScreen === 'repurpose' && (
+          <ProRepurposeScreen
+            userProfile={userProfile}
+            initialIdeaTitle={selectedIdeaTitle}
+            onBack={() => navigateTo(previousScreen ? previousScreen : 'create')}
+            onNavigate={(screen) => navigateTo(screen as Screen)}
+          />
+        )}
+
         {currentScreen === 'voice-studio' && (
           <ProVoiceStudioScreen
             onBack={() => navigateTo(previousScreen ? previousScreen : 'create')}
