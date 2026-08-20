@@ -1116,6 +1116,13 @@ export const ProMessagesScreen: React.FC<ProMessagesScreenProps> = ({
                           isMine ? styles.messageRowMine : styles.messageRowTheirs,
                         ]}
                       >
+                        {!isMine && (
+                          <Image
+                            source={activeChatThread.avatar}
+                            style={styles.chatMessageSenderAvatar}
+                            resizeMode="contain"
+                          />
+                        )}
                         {/* EMBEDDED COLLAB PROPOSAL CARD */}
                         {msg.isCollabProposal ? (
                           <View style={styles.collabProposalCardBubble}>
@@ -1706,6 +1713,14 @@ const styles = StyleSheet.create({
   },
   messageRowTheirs: {
     justifyContent: 'flex-start',
+    alignItems: 'flex-end',
+  },
+  chatMessageSenderAvatar: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    marginRight: 8,
+    marginBottom: 4,
   },
   chatBubble: {
     maxWidth: '78%',
