@@ -1023,8 +1023,8 @@ export const ProDashboardScreen: React.FC<ProDashboardScreenProps> = ({
                 if (Platform.OS !== 'web') {
                   Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
                 }
-                if (onOpenMessages) {
-                  onOpenMessages();
+                if (onOpenMatch) {
+                  onOpenMatch();
                 } else if (onNavigateTab) {
                   onNavigateTab('match');
                 }
