@@ -958,11 +958,11 @@ export const ProVoiceStudioScreen: React.FC<ProVoiceStudioScreenProps> = ({
                             ? Math.max(6, Math.min(54, h * (0.7 + Math.sin(i * 0.4 + playbackSeconds * 2.5) * 0.35)))
                             : Math.max(6, h * 0.75),
                           backgroundColor: isCurrentPlayhead
-                            ? '#F59E0B'
+                            ? '#D97706'
                             : isPlayed
-                            ? (i % 3 === 0 ? '#F59E0B' : '#8B5CF6')
-                            : '#C4B5FD',
-                          opacity: isPlayed ? 1 : 0.45,
+                            ? (i % 3 === 0 ? '#F59E0B' : '#582CDB')
+                            : '#DDD6FE',
+                          opacity: isPlayed ? 1 : 0.65,
                         },
                       ]}
                     />
@@ -2195,17 +2195,17 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
   wavelengthCapsuleCard: {
-    backgroundColor: '#0F0A1E',
+    backgroundColor: '#FAF8F5',
     borderRadius: 16,
     padding: 14,
     marginTop: 14,
     borderWidth: 1,
-    borderColor: '#312E81',
-    shadowColor: '#582CDB',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.25,
-    shadowRadius: 8,
-    elevation: 3,
+    borderColor: '#EFECE6',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.03,
+    shadowRadius: 6,
+    elevation: 1,
   },
   wavelengthHeaderRow: {
     flexDirection: 'row',
@@ -2217,21 +2217,21 @@ const styles = StyleSheet.create({
     width: 6,
     height: 6,
     borderRadius: 3,
-    backgroundColor: '#64748B',
+    backgroundColor: '#94A3B8',
   },
   wavelengthLiveDotActive: {
-    backgroundColor: '#34D399',
+    backgroundColor: '#15803D',
   },
   wavelengthLabelText: {
-    fontSize: 9,
+    fontSize: 9.5,
     fontWeight: '900',
-    color: '#E9D5FF',
+    color: '#171420',
     letterSpacing: 0.5,
   },
   wavelengthHzText: {
-    fontSize: 9,
-    fontWeight: '800',
-    color: '#FDE68A',
+    fontSize: 9.5,
+    fontWeight: '900',
+    color: '#582CDB',
   },
   wavelengthDenseBarsRow: {
     flexDirection: 'row',
@@ -2254,12 +2254,12 @@ const styles = StyleSheet.create({
     marginTop: 10,
     paddingTop: 8,
     borderTopWidth: 1,
-    borderTopColor: 'rgba(255, 255, 255, 0.08)',
+    borderTopColor: '#F1EFE9',
   },
   wavelengthMetricItem: {
-    fontSize: 8,
-    fontWeight: '900',
-    color: '#A5B4FC',
+    fontSize: 8.5,
+    fontWeight: '800',
+    color: '#64748B',
     letterSpacing: 0.4,
   },
   speedSelectorRow: {
