@@ -125,6 +125,7 @@ export const ProQuestsScreen: React.FC<ProQuestsScreenProps> = ({
   const [showNotificationModal, setShowNotificationModal] = useState(false);
   const [showBrandQuestModal, setShowBrandQuestModal] = useState(false);
   const [showSquadQuestModal, setShowSquadQuestModal] = useState(false);
+  const [showDuelTasksModal, setShowDuelTasksModal] = useState(false);
   const [showOpportunityModal, setShowOpportunityModal] = useState(false);
   const [showCelebrationModal, setShowCelebrationModal] = useState(false);
   const [celebrationXp, setCelebrationXp] = useState(350);
@@ -602,7 +603,7 @@ export const ProQuestsScreen: React.FC<ProQuestsScreenProps> = ({
               style={({ pressed }) => [styles.viewDuelTasksBtn, pressed && styles.btnPressed]}
               onPress={() => {
                 triggerModalPop();
-                setShowSquadQuestModal(true);
+                setShowDuelTasksModal(true);
               }}
             >
               <Text style={styles.viewDuelTasksBtnText}>View Duel Tasks</Text>
@@ -1098,6 +1099,209 @@ export const ProQuestsScreen: React.FC<ProQuestsScreenProps> = ({
                     style={styles.sqmSolidGradient}
                   >
                     <Text style={styles.sqmSolidBtnText}>Contribute Reel 🔥</Text>
+                  </LinearGradient>
+                </Pressable>
+              </View>
+            </Animated.View>
+          </View>
+        </Modal>
+
+        {/* ============================================================ */}
+        {/* MODAL: LIVE DUEL ARENA DETAILS & SQUAD TASKS                 */}
+        {/* ============================================================ */}
+        <Modal
+          visible={showDuelTasksModal}
+          transparent={true}
+          animationType="fade"
+          onRequestClose={() => setShowDuelTasksModal(false)}
+        >
+          <View style={styles.duelModalOverlay}>
+            <Pressable style={styles.duelModalBackdrop} onPress={() => setShowDuelTasksModal(false)} />
+            <Animated.View style={[styles.duelModalCard, { transform: [{ scale: modalPopScale }] }]}>
+              {/* Top Header */}
+              <View style={styles.duelModalTopHeader}>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, flex: 1 }}>
+                  <View style={styles.duelModalSwordsBox}>
+                    <Text style={{ fontSize: 16 }}>⚔️</Text>
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                      <View style={styles.duelModalLivePill}>
+                        <View style={styles.duelModalLiveDot} />
+                        <Text style={styles.duelModalLivePillText}>ROUND 2 / 3 LIVE</Text>
+                      </View>
+                      <Text style={styles.duelModalTimerText}>⏳ 03h 45m left</Text>
+                    </View>
+                    <Text style={styles.duelModalTitle}>Momentum Makers vs Lagos Storytellers</Text>
+                  </View>
+                </View>
+
+                <Pressable onPress={() => setShowDuelTasksModal(false)} style={styles.sqmCloseBtn} hitSlop={8}>
+                  <Text style={styles.sqmCloseCross}>✕</Text>
+                </Pressable>
+              </View>
+
+              <ScrollView style={styles.sqmContentScroll} showsVerticalScrollIndicator={false}>
+                {/* Head to Head Scoreboard */}
+                <LinearGradient
+                  colors={['#2A1259', '#1A0C38']}
+                  style={styles.duelScoreboardCard}
+                >
+                  <View style={styles.duelScoreboardRow}>
+                    {/* Your Squad */}
+                    <View style={{ alignItems: 'center', flex: 1 }}>
+                      <Text style={styles.duelScoreTeamMine}>Momentum Makers</Text>
+                      <Text style={styles.duelScoreNumberMine}>62 PTS</Text>
+                      <View style={styles.duelLeadBadge}>
+                        <Text style={styles.duelLeadBadgeText}>👑 IN THE LEAD (+4)</Text>
+                      </View>
+                    </View>
+
+                    {/* Center VS */}
+                    <View style={styles.duelVsCenterCircle}>
+                      <Text style={styles.duelVsCenterText}>VS</Text>
+                    </View>
+
+                    {/* Opponent Squad */}
+                    <View style={{ alignItems: 'center', flex: 1 }}>
+                      <Text style={styles.duelScoreTeamOpp}>Lagos Storytellers</Text>
+                      <Text style={styles.duelScoreNumberOpp}>58 PTS</Text>
+                      <View style={styles.duelTrailingBadge}>
+                        <Text style={styles.duelTrailingBadgeText}>4 PTS BEHIND</Text>
+                      </View>
+                    </View>
+                  </View>
+
+                  {/* Tug of war bar */}
+                  <View style={styles.duelTugBar}>
+                    <View style={[styles.duelTugFillMine, { width: '55%' }]} />
+                    <View style={[styles.duelTugFillOpp, { width: '45%' }]} />
+                  </View>
+                  <Text style={styles.duelTugSubText}>
+                    ⚡ Momentum Makers is leading by <Text style={{ color: '#FDE68A', fontWeight: '900' }}>4 points</Text>. Next Reel post locks the round victory!
+                  </Text>
+                </LinearGradient>
+
+                {/* What's Happening Live Activity Feed */}
+                <View style={styles.duelActivitySection}>
+                  <Text style={styles.sqmSectionTitle}>WHAT'S HAPPENING LIVE (ACTIVITY LOG)</Text>
+                  <View style={styles.duelActivityList}>
+                    <View style={styles.duelActivityItem}>
+                      <View style={styles.duelActivityDotRed} />
+                      <View style={{ flex: 1 }}>
+                        <Text style={styles.duelActivityTitle}>
+                          <Text style={{ fontWeight: '900', color: '#171420' }}>Elena Rostova</Text> published a Reel with #PostStreakDuel
+                        </Text>
+                        <Text style={styles.duelActivityTime}>12 minutes ago • +15 pts awarded to Momentum Makers 🔥</Text>
+                      </View>
+                    </View>
+
+                    <View style={styles.duelActivityItem}>
+                      <View style={styles.duelActivityDotPurple} />
+                      <View style={{ flex: 1 }}>
+                        <Text style={styles.duelActivityTitle}>
+                          <Text style={{ fontWeight: '900', color: '#171420' }}>Amara & Tomi</Text> completed split-screen collaborative duet
+                        </Text>
+                        <Text style={styles.duelActivityTime}>45 minutes ago • +20 pts awarded to Momentum Makers 🎬</Text>
+                      </View>
+                    </View>
+
+                    <View style={styles.duelActivityItem}>
+                      <View style={styles.duelActivityDotAmber} />
+                      <View style={{ flex: 1 }}>
+                        <Text style={styles.duelActivityTitle}>
+                          <Text style={{ fontWeight: '900', color: '#64748B' }}>Chidi (Lagos Storytellers)</Text> dropped 4k Lagos Vlog clip
+                        </Text>
+                        <Text style={styles.duelActivityTime}>1 hour ago • +15 pts awarded to opponents</Text>
+                      </View>
+                    </View>
+                  </View>
+                </View>
+
+                {/* Active Live Duel Tasks */}
+                <View style={styles.duelTasksSection}>
+                  <Text style={styles.sqmSectionTitle}>YOUR LIVE DUEL TASKS</Text>
+                  <View style={styles.duelTasksList}>
+                    {/* Task 1: Your Turn */}
+                    <View style={styles.duelTaskCardActive}>
+                      <View style={{ flexDirection: 'row', alignItems: 'flex-start', gap: 10 }}>
+                        <View style={styles.duelTaskFireBox}>
+                          <Text style={{ fontSize: 15 }}>🔥</Text>
+                        </View>
+                        <View style={{ flex: 1 }}>
+                          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                            <Text style={styles.duelTaskCardTitle}>Post Short-Form Gauntlet Reel</Text>
+                            <View style={styles.duelTaskUrgentPill}>
+                              <Text style={styles.duelTaskUrgentText}>YOUR TURN</Text>
+                            </View>
+                          </View>
+                          <Text style={styles.duelTaskCardSub}>Post with #PostStreakDuel to extend your squad lead.</Text>
+                          <Text style={styles.duelTaskCardReward}>Reward: +15 Duel Pts • +150 XP</Text>
+                        </View>
+                      </View>
+                    </View>
+
+                    {/* Task 2: Collab */}
+                    <View style={styles.duelTaskCardStandard}>
+                      <View style={{ flexDirection: 'row', alignItems: 'flex-start', gap: 10 }}>
+                        <Text style={{ fontSize: 15, marginTop: 2 }}>🎬</Text>
+                        <View style={{ flex: 1 }}>
+                          <Text style={styles.duelTaskCardTitleStandard}>Co-Produce Split-Screen Duet</Text>
+                          <Text style={styles.duelTaskCardSub}>Partner with Elena or Amara on a shared hook.</Text>
+                          <Text style={styles.duelTaskCardRewardStandard}>Reward: +20 Duel Pts • +200 XP</Text>
+                        </View>
+                      </View>
+                    </View>
+
+                    {/* Task 3: Feedback */}
+                    <View style={styles.duelTaskCardStandard}>
+                      <View style={{ flexDirection: 'row', alignItems: 'flex-start', gap: 10 }}>
+                        <Text style={{ fontSize: 15, marginTop: 2 }}>💬</Text>
+                        <View style={{ flex: 1 }}>
+                          <Text style={styles.duelTaskCardTitleStandard}>Review 3 Squad Script Drafts</Text>
+                          <Text style={styles.duelTaskCardSub}>Leave pacing and hook feedback in Squad Chat.</Text>
+                          <Text style={styles.duelTaskCardRewardStandard}>Reward: +10 Duel Pts • +100 XP</Text>
+                        </View>
+                      </View>
+                    </View>
+                  </View>
+                </View>
+
+                {/* Stakes & Vault Reward */}
+                <View style={styles.duelStakesCard}>
+                  <Text style={styles.duelStakesTitle}>🏆 ROUND VICTORY REWARDS</Text>
+                  <Text style={styles.duelStakesSub}>
+                    Winning squad receives <Text style={{ fontWeight: '900', color: '#B45309' }}>+500 XP Shared Bounty</Text>, a 7-Day Streak Shield, and the Live Duel Champion Crown!
+                  </Text>
+                </View>
+              </ScrollView>
+
+              {/* Action Buttons */}
+              <View style={styles.sqmActionsRow}>
+                <Pressable
+                  style={styles.sqmOutlineBtn}
+                  onPress={() => {
+                    setShowDuelTasksModal(false);
+                    if (onOpenSquad) onOpenSquad();
+                  }}
+                >
+                  <Text style={styles.sqmOutlineBtnText}>Squad Room 💬</Text>
+                </Pressable>
+
+                <Pressable
+                  style={styles.sqmSolidBtn}
+                  onPress={() => {
+                    setShowDuelTasksModal(false);
+                    if (onOpenPostComposer) {
+                      onOpenPostComposer('Live Squad Duel Gauntlet Reel');
+                    }
+                  }}
+                >
+                  <LinearGradient
+                    colors={['#784DF0', '#582CDB']}
+                    style={styles.sqmSolidGradient}
+                  >
+                    <Text style={styles.sqmSolidBtnText}>Post to Score +15 pts 🔥</Text>
                   </LinearGradient>
                 </Pressable>
               </View>
@@ -2587,6 +2791,307 @@ const styles = StyleSheet.create({
     fontSize: 12.5,
     fontWeight: '900',
     color: '#FFFFFF',
+  },
+
+  /* DUEL TASKS ULTRA-LUXURY MODAL */
+  duelModalOverlay: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(15, 23, 42, 0.75)',
+    padding: 16,
+  },
+  duelModalBackdrop: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+  },
+  duelModalCard: {
+    width: '100%',
+    maxWidth: 420,
+    maxHeight: '86%',
+    backgroundColor: '#FFFFFF',
+    borderRadius: 24,
+    padding: 20,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.9)',
+    shadowColor: '#582CDB',
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.25,
+    shadowRadius: 24,
+    elevation: 8,
+  },
+  duelModalTopHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  duelModalSwordsBox: {
+    width: 36,
+    height: 36,
+    borderRadius: 12,
+    backgroundColor: '#EDE9FE',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  duelModalLivePill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+    backgroundColor: '#FEE2E2',
+    paddingHorizontal: 6,
+    paddingVertical: 1.5,
+    borderRadius: 4,
+  },
+  duelModalLiveDot: {
+    width: 5,
+    height: 5,
+    borderRadius: 2.5,
+    backgroundColor: '#EF4444',
+  },
+  duelModalLivePillText: {
+    fontSize: 8.5,
+    fontWeight: '900',
+    color: '#B91C1C',
+  },
+  duelModalTimerText: {
+    fontSize: 9.5,
+    fontWeight: '800',
+    color: '#64748B',
+  },
+  duelModalTitle: {
+    fontSize: 15.5,
+    fontWeight: '900',
+    color: '#171420',
+    marginTop: 2,
+  },
+  duelScoreboardCard: {
+    borderRadius: 16,
+    padding: 14,
+    marginBottom: 14,
+  },
+  duelScoreboardRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  duelScoreTeamMine: {
+    fontSize: 11.5,
+    fontWeight: '900',
+    color: '#F3E8FF',
+  },
+  duelScoreNumberMine: {
+    fontSize: 22,
+    fontWeight: '900',
+    color: '#FFFFFF',
+    marginTop: 2,
+  },
+  duelLeadBadge: {
+    backgroundColor: 'rgba(16, 185, 129, 0.25)',
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 4,
+    marginTop: 2,
+  },
+  duelLeadBadgeText: {
+    fontSize: 8,
+    fontWeight: '900',
+    color: '#6EE7B7',
+  },
+  duelVsCenterCircle: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: 'rgba(255, 255, 255, 0.15)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  duelVsCenterText: {
+    fontSize: 10,
+    fontWeight: '900',
+    color: '#FDE68A',
+  },
+  duelScoreTeamOpp: {
+    fontSize: 11.5,
+    fontWeight: '800',
+    color: '#CBD5E1',
+  },
+  duelScoreNumberOpp: {
+    fontSize: 22,
+    fontWeight: '900',
+    color: '#E2E8F0',
+    marginTop: 2,
+  },
+  duelTrailingBadge: {
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 4,
+    marginTop: 2,
+  },
+  duelTrailingBadgeText: {
+    fontSize: 8,
+    fontWeight: '800',
+    color: '#CBD5E1',
+  },
+  duelTugBar: {
+    flexDirection: 'row',
+    height: 6,
+    borderRadius: 3,
+    overflow: 'hidden',
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    marginBottom: 8,
+  },
+  duelTugFillMine: {
+    backgroundColor: '#C084FC',
+    height: '100%',
+  },
+  duelTugFillOpp: {
+    backgroundColor: '#F59E0B',
+    height: '100%',
+  },
+  duelTugSubText: {
+    fontSize: 11,
+    color: '#E2E8F0',
+    lineHeight: 15,
+  },
+  duelActivitySection: {
+    marginBottom: 14,
+  },
+  duelActivityList: {
+    backgroundColor: '#FAF8F5',
+    borderRadius: 14,
+    padding: 10,
+    borderWidth: 1,
+    borderColor: '#EFECE6',
+    gap: 8,
+  },
+  duelActivityItem: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: 8,
+    paddingVertical: 3,
+  },
+  duelActivityDotRed: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: '#EF4444',
+    marginTop: 5,
+  },
+  duelActivityDotPurple: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: '#8B5CF6',
+    marginTop: 5,
+  },
+  duelActivityDotAmber: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: '#F59E0B',
+    marginTop: 5,
+  },
+  duelActivityTitle: {
+    fontSize: 11.5,
+    color: '#171420',
+    lineHeight: 16,
+  },
+  duelActivityTime: {
+    fontSize: 10,
+    color: '#64748B',
+    marginTop: 1,
+  },
+  duelTasksSection: {
+    marginBottom: 14,
+  },
+  duelTasksList: {
+    gap: 8,
+  },
+  duelTaskCardActive: {
+    backgroundColor: '#FAF5FF',
+    borderRadius: 14,
+    padding: 12,
+    borderWidth: 1.5,
+    borderColor: '#C084FC',
+  },
+  duelTaskFireBox: {
+    width: 30,
+    height: 30,
+    borderRadius: 15,
+    backgroundColor: '#FEF3C7',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  duelTaskCardTitle: {
+    fontSize: 12.5,
+    fontWeight: '900',
+    color: '#171420',
+  },
+  duelTaskUrgentPill: {
+    backgroundColor: '#EF4444',
+    paddingHorizontal: 5,
+    paddingVertical: 1,
+    borderRadius: 3,
+  },
+  duelTaskUrgentText: {
+    fontSize: 7.5,
+    fontWeight: '900',
+    color: '#FFFFFF',
+  },
+  duelTaskCardSub: {
+    fontSize: 11,
+    color: '#64748B',
+    marginTop: 2,
+  },
+  duelTaskCardReward: {
+    fontSize: 10.5,
+    fontWeight: '800',
+    color: '#7C3AED',
+    marginTop: 3,
+  },
+  duelTaskCardStandard: {
+    backgroundColor: '#FAF8F5',
+    borderRadius: 12,
+    padding: 10,
+    borderWidth: 1,
+    borderColor: '#EFECE6',
+  },
+  duelTaskCardTitleStandard: {
+    fontSize: 12,
+    fontWeight: '800',
+    color: '#171420',
+  },
+  duelTaskCardRewardStandard: {
+    fontSize: 10,
+    fontWeight: '800',
+    color: '#059669',
+    marginTop: 2,
+  },
+  duelStakesCard: {
+    backgroundColor: '#FEF3C7',
+    borderRadius: 12,
+    padding: 10,
+    borderWidth: 1,
+    borderColor: '#FDE68A',
+    marginBottom: 10,
+  },
+  duelStakesTitle: {
+    fontSize: 9,
+    fontWeight: '900',
+    color: '#92400E',
+    letterSpacing: 0.5,
+    marginBottom: 2,
+  },
+  duelStakesSub: {
+    fontSize: 11,
+    color: '#78350F',
+    lineHeight: 15,
   },
 
   toastContainer: {
