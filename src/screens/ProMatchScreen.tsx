@@ -41,6 +41,7 @@ interface ProMatchScreenProps {
     title: string;
   }) => void;
   onOpenSquad?: () => void;
+  onOpenFindSquad?: () => void;
   onSwitchToFree?: () => void;
   userProfile?: UserProfileData;
   onSaveProfile?: (updated: UserProfileData) => void;
@@ -280,6 +281,7 @@ export const ProMatchScreen: React.FC<ProMatchScreenProps> = ({
   onOpenJarvisPro,
   onOpenCollabIdea,
   onOpenSquad,
+  onOpenFindSquad,
   onSwitchToFree,
   userProfile,
   onSaveProfile,
@@ -1188,7 +1190,13 @@ export const ProMatchScreen: React.FC<ProMatchScreenProps> = ({
 
                         <Pressable
                           style={({ pressed }) => [styles.findSquadBtn, pressed && styles.btnPressed]}
-                          onPress={() => showToast('🔍 Searching creator squads in your niche...')}
+                          onPress={() => {
+                            if (onOpenFindSquad) {
+                              onOpenFindSquad();
+                            } else {
+                              showToast('🔍 Searching creator squads in your niche...');
+                            }
+                          }}
                         >
                           <Text style={styles.findSquadBtnText}>Find a Squad</Text>
                         </Pressable>

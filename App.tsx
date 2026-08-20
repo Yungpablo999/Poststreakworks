@@ -40,6 +40,7 @@ import { MessagesScreen } from './src/screens/MessagesScreen';
 import { ProMessagesScreen } from './src/screens/ProMessagesScreen';
 import { CollabIdeaScreen } from './src/screens/CollabIdeaScreen';
 import { ProSquadScreen } from './src/screens/ProSquadScreen';
+import { FindSquadScreen } from './src/screens/FindSquadScreen';
 import { AudienceBreakdownScreen } from './src/screens/AudienceBreakdownScreen';
 import { PostPerformanceScreen } from './src/screens/PostPerformanceScreen';
 import { PlatformGrowthScreen } from './src/screens/PlatformGrowthScreen';
@@ -65,6 +66,7 @@ type Screen =
   | 'create'
   | 'match'
   | 'squad'
+  | 'find-squad'
   | 'growth'
   | 'quests'
   | 'schedule'
@@ -643,6 +645,7 @@ export default function App() {
                 navigateTo('collab-idea');
               }}
               onOpenSquad={() => navigateTo('squad')}
+              onOpenFindSquad={() => navigateTo('find-squad')}
               onSwitchToFree={() => {
                 setUserProfile(prev => ({ ...prev, tier: 'free' }));
               }}
@@ -1627,6 +1630,45 @@ export default function App() {
             }}
             onOpenMessages={(threadId?: string) => {
               setActiveMessageThreadId(threadId || 'conv_squad');
+              navigateTo('messages');
+            }}
+            onNavigateTab={(tab: TabType) => {
+              if (tab === 'home') {
+                navigateTo('dashboard');
+              } else if (tab === 'create') {
+                navigateTo('create');
+              } else if (tab === 'match') {
+                navigateTo('match');
+              } else if (tab === 'quests') {
+                navigateTo('quests');
+              } else if (tab === 'growth') {
+                navigateTo('growth');
+              }
+            }}
+            userProfile={userProfile}
+            onSaveProfile={(updated) => setUserProfile(updated)}
+          />
+        )}
+
+        {currentScreen === 'find-squad' && (
+          <FindSquadScreen
+            onBack={() => navigateTo(previousScreen ? previousScreen : 'match')}
+            onLogout={handleLogout}
+            onOpenSchedule={() => navigateTo('schedule')}
+            onOpenJarvisPro={() => navigateTo('jarvis-pro')}
+            onOpenCreate={() => navigateTo('create')}
+            onOpenPostComposer={(ideaTitle) => {
+              if (ideaTitle) setComposerIdeaTitle(ideaTitle);
+              navigateTo('composer');
+            }}
+            onOpenMatch={() => navigateTo('match')}
+            onOpenSquad={() => navigateTo('squad')}
+            onOpenCollabIdea={(partnerData) => {
+              if (partnerData) setCollabPartnerData(partnerData);
+              navigateTo('collab-idea');
+            }}
+            onOpenMessages={(threadId?: string) => {
+              setActiveMessageThreadId(threadId);
               navigateTo('messages');
             }}
             onNavigateTab={(tab: TabType) => {
