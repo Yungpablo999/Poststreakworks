@@ -1789,7 +1789,7 @@ export const MatchScreen: React.FC<MatchScreenProps> = ({
               {/* CARD 4: JARVIS DEEP INSIGHT FROSTED BOX */}
               <View style={styles.detailJarvisInsightCard}>
                 <Image
-                  source={require('../../assets/images/jarvis-ghost-clean.png')}
+                  source={require('../../assets/images/jarvis-core-flame.png')}
                   style={styles.detailJarvisGhost}
                   resizeMode="contain"
                 />

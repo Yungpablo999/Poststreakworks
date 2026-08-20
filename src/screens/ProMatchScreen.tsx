@@ -1121,7 +1121,7 @@ export const ProMatchScreen: React.FC<ProMatchScreenProps> = ({
 
                     <View style={styles.potentialBoostRow}>
                       <Image
-                        source={require('../../assets/images/jarvis-ghost-clean.png')}
+                        source={require('../../assets/images/jarvis-core-flame.png')}
                         style={{ width: 14, height: 14 }}
                         resizeMode="contain"
                       />
@@ -1352,7 +1352,7 @@ export const ProMatchScreen: React.FC<ProMatchScreenProps> = ({
                   <View style={styles.jarvisCoreHeroCard}>
                     <View style={styles.jarvisCoreIconCircle}>
                       <Image
-                        source={require('../../assets/images/jarvis-ghost-clean.png')}
+                        source={require('../../assets/images/jarvis-core-flame.png')}
                         style={{ width: 26, height: 26 }}
                         resizeMode="contain"
                       />
@@ -1640,7 +1640,7 @@ export const ProMatchScreen: React.FC<ProMatchScreenProps> = ({
                     >
                       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 6 }}>
                         <Image
-                          source={require('../../assets/images/jarvis-ghost-clean.png')}
+                          source={require('../../assets/images/jarvis-core-flame.png')}
                           style={{ width: 18, height: 18 }}
                           resizeMode="contain"
                         />
