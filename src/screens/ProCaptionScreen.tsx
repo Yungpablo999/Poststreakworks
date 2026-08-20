@@ -957,28 +957,51 @@ export const ProCaptionScreen: React.FC<ProCaptionScreenProps> = ({
           </View>
 
           {/* ============================================================ */}
-          {/* CARD 9: JARVIS INSIGHT (Hero Deep Lavender Card)             */}
+          {/* CARD 9: JARVIS INSIGHT (Hero Deep Royal Violet Studio)       */}
           {/* ============================================================ */}
           <LinearGradient
-            colors={['#3B1F8E', '#2D1574']}
+            colors={['#2A1454', '#1E0C3E', '#14072C']}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
             style={styles.jarvisInsightHeroCard}
           >
-            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
-              <View style={styles.jarvisHeroIconBox}>
-                <Image
-                  source={require('../../assets/images/jarvis-ghost-clean.png')}
-                  style={{ width: 24, height: 24 }}
-                  resizeMode="contain"
-                />
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+                <View style={styles.jarvisHeroIconBox}>
+                  <Image
+                    source={require('../../assets/images/jarvis-core-flame.png')}
+                    style={{ width: 26, height: 26 }}
+                    resizeMode="contain"
+                  />
+                </View>
+                <View>
+                  <Text style={styles.jarvisHeroTitle}>Jarvis Insight</Text>
+                  <Text style={styles.jarvisHeroSub}>PRO AI COACH</Text>
+                </View>
               </View>
-              <Text style={styles.jarvisHeroTitle}>Jarvis Insight</Text>
+              <View style={styles.jarvisActiveEnginePill}>
+                <Text style={styles.jarvisActiveEnginePillText}>⚡ ACTIVE</Text>
+              </View>
             </View>
 
-            <Text style={styles.jarvisHeroQuote}>
-              This caption is strongest when the first line directly names the mistake. Keep the CTA simple so people can reply quickly.
-            </Text>
+            <View style={styles.jarvisQuoteGlassBox}>
+              <Text style={styles.jarvisHeroQuote}>
+                &ldquo;This caption is strongest when the first line directly names the mistake. Keep the CTA simple so people can reply quickly.&rdquo;
+              </Text>
+            </View>
+
+            {/* Quick Strategy Pills */}
+            <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginBottom: 12 }}>
+              {['DIRECT HOOK', 'COMMENT CTA', 'SAVEABLE BULLETS'].map((chip) => (
+                <Pressable
+                  key={chip}
+                  style={styles.jarvisStrategyChip}
+                  onPress={() => showToast(`✓ Applied ${chip}`)}
+                >
+                  <Text style={styles.jarvisStrategyChipText}>{chip}</Text>
+                </Pressable>
+              ))}
+            </View>
 
             <Pressable
               style={({ pressed }) => [styles.applyJarvisHeroBtn, pressed && styles.btnPressed]}
@@ -2016,38 +2039,90 @@ const styles = StyleSheet.create({
     borderRadius: 22,
     padding: 18,
     marginTop: 18,
+    borderWidth: 1.5,
+    borderColor: 'rgba(139, 92, 246, 0.45)',
+    shadowColor: '#7C3AED',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.35,
+    shadowRadius: 10,
+    elevation: 4,
   },
   jarvisHeroIconBox: {
-    width: 34,
-    height: 34,
-    borderRadius: 10,
-    backgroundColor: 'rgba(255, 255, 255, 0.15)',
+    width: 38,
+    height: 38,
+    borderRadius: 12,
+    backgroundColor: 'rgba(88, 44, 219, 0.4)',
+    borderWidth: 1,
+    borderColor: 'rgba(167, 139, 250, 0.4)',
     justifyContent: 'center',
     alignItems: 'center',
   },
   jarvisHeroTitle: {
-    fontSize: 14,
+    fontSize: 14.5,
     fontWeight: '900',
     color: '#FFFFFF',
+    letterSpacing: 0.2,
+  },
+  jarvisHeroSub: {
+    fontSize: 8.5,
+    fontWeight: '900',
+    color: '#A78BFA',
+    letterSpacing: 0.5,
+    marginTop: 1,
+  },
+  jarvisActiveEnginePill: {
+    backgroundColor: 'rgba(255, 255, 255, 0.12)',
+    paddingHorizontal: 7,
+    paddingVertical: 3,
+    borderRadius: 6,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.18)',
+  },
+  jarvisActiveEnginePillText: {
+    fontSize: 8.5,
+    fontWeight: '900',
+    color: '#34D399',
+    letterSpacing: 0.3,
+  },
+  jarvisQuoteGlassBox: {
+    backgroundColor: 'rgba(255, 255, 255, 0.08)',
+    borderRadius: 14,
+    padding: 12,
+    marginVertical: 12,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.12)',
   },
   jarvisHeroQuote: {
     fontSize: 12,
-    color: '#FFFFFF',
+    color: '#F1F5F9',
     lineHeight: 18,
-    marginVertical: 12,
-    opacity: 0.95,
+    fontWeight: '600',
+  },
+  jarvisStrategyChip: {
+    backgroundColor: 'rgba(255, 255, 255, 0.12)',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 6,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.15)',
+  },
+  jarvisStrategyChipText: {
+    fontSize: 9,
+    fontWeight: '900',
+    color: '#E2E8F0',
+    letterSpacing: 0.3,
   },
   applyJarvisHeroBtn: {
     backgroundColor: '#582CDB',
-    paddingVertical: 11,
+    paddingVertical: 12,
     borderRadius: 12,
     alignItems: 'center',
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.2)',
+    borderWidth: 1.2,
+    borderColor: 'rgba(255, 255, 255, 0.25)',
   },
   applyJarvisHeroBtnText: {
     color: '#FFFFFF',
-    fontSize: 11.5,
+    fontSize: 12,
     fontWeight: '900',
   },
 
