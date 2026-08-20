@@ -61,6 +61,7 @@ interface ProCreateScreenProps {
   onOpenIdeaAngle?: () => void;
   onOpenScript?: (ideaTitle?: string) => void;
   onOpenCaption?: (ideaTitle?: string) => void;
+  onOpenVoiceStudio?: () => void;
   onOpenMessages?: () => void;
   onSwitchToFree?: () => void;
   userProfile?: UserProfileData;
@@ -108,6 +109,7 @@ export const ProCreateScreen: React.FC<ProCreateScreenProps> = ({
   onOpenIdeaAngle,
   onOpenScript,
   onOpenCaption,
+  onOpenVoiceStudio,
   onOpenMessages,
   onSwitchToFree,
   userProfile,
@@ -706,8 +708,15 @@ export const ProCreateScreen: React.FC<ProCreateScreenProps> = ({
               <Pressable
                 style={({ pressed }) => [styles.generateVoiceBtn, pressed && styles.btnPressed]}
                 onPress={() => {
-                  triggerModalPop();
-                  setShowVoiceStudioModal(true);
+                  if (Platform.OS !== 'web') {
+                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                  }
+                  if (onOpenVoiceStudio) {
+                    onOpenVoiceStudio();
+                  } else {
+                    triggerModalPop();
+                    setShowVoiceStudioModal(true);
+                  }
                 }}
               >
                 <Text style={styles.generateVoiceBtnText}>⚡ Generate Voice</Text>
@@ -716,8 +725,15 @@ export const ProCreateScreen: React.FC<ProCreateScreenProps> = ({
               <Pressable
                 style={({ pressed }) => [styles.openStudioOutlineBtn, pressed && styles.btnPressed]}
                 onPress={() => {
-                  triggerModalPop();
-                  setShowVoiceStudioModal(true);
+                  if (Platform.OS !== 'web') {
+                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                  }
+                  if (onOpenVoiceStudio) {
+                    onOpenVoiceStudio();
+                  } else {
+                    triggerModalPop();
+                    setShowVoiceStudioModal(true);
+                  }
                 }}
               >
                 <Text style={styles.openStudioOutlineBtnText}>Open Studio</Text>

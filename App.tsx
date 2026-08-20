@@ -478,6 +478,7 @@ export default function App() {
                 navigateTo('composer');
               }}
               onOpenIdeaAngle={() => navigateTo('content-angle')}
+              onOpenVoiceStudio={() => navigateTo('voice-studio')}
               onOpenScript={(title) => {
                 if (title) setSelectedIdeaTitle(title);
                 navigateTo('script');
