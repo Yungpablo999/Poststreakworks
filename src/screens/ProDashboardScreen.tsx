@@ -67,6 +67,7 @@ interface ProDashboardScreenProps {
   onOpenGrowth?: () => void;
   onOpenMatch?: () => void;
   onOpenCreate?: () => void;
+  onOpenVoiceStudio?: () => void;
   onSwitchToFree?: () => void;
   userProfile?: UserProfileData;
   onSaveProfile?: (updated: UserProfileData) => void;
@@ -269,6 +270,7 @@ export const ProDashboardScreen: React.FC<ProDashboardScreenProps> = ({
   onOpenGrowth,
   onOpenMatch,
   onOpenCreate,
+  onOpenVoiceStudio,
   onSwitchToFree,
   userProfile,
   onSaveProfile,
@@ -948,8 +950,12 @@ export const ProDashboardScreen: React.FC<ProDashboardScreenProps> = ({
                   if (Platform.OS !== 'web') {
                     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
                   }
-                  triggerModalPop();
-                  setShowVoiceStudioModal(true);
+                  if (onOpenVoiceStudio) {
+                    onOpenVoiceStudio();
+                  } else {
+                    triggerModalPop();
+                    setShowVoiceStudioModal(true);
+                  }
                 }}
               >
                 <Text style={styles.createVoiceBtnText}>✨ Create Voice</Text>
@@ -961,8 +967,12 @@ export const ProDashboardScreen: React.FC<ProDashboardScreenProps> = ({
                   if (Platform.OS !== 'web') {
                     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                   }
-                  triggerModalPop();
-                  setShowVoiceStudioModal(true);
+                  if (onOpenVoiceStudio) {
+                    onOpenVoiceStudio();
+                  } else {
+                    triggerModalPop();
+                    setShowVoiceStudioModal(true);
+                  }
                 }}
               >
                 <Text style={styles.openStudioBtnText}>Open Studio</Text>

@@ -40,6 +40,7 @@ import { PostPerformanceScreen } from './src/screens/PostPerformanceScreen';
 import { PlatformGrowthScreen } from './src/screens/PlatformGrowthScreen';
 import { EarningsScreen } from './src/screens/EarningsScreen';
 import { ProEarningsScreen } from './src/screens/ProEarningsScreen';
+import { ProVoiceStudioScreen } from './src/screens/ProVoiceStudioScreen';
 import { OpportunityReadinessScreen } from './src/screens/OpportunityReadinessScreen';
 import { CreatorPassportScreen } from './src/screens/CreatorPassportScreen';
 import { GhostLoadingScreen } from './src/components/GhostLoadingScreen';
@@ -75,7 +76,8 @@ type Screen =
   | 'platform-growth'
   | 'earnings'
   | 'opportunity-readiness'
-  | 'creator-passport';
+  | 'creator-passport'
+  | 'voice-studio';
 
 export default function App() {
   const [showSplash, setShowSplash] = useState(true);
@@ -1264,6 +1266,43 @@ export default function App() {
               onSaveProfile={(updated) => setUserProfile(updated)}
             />
           )
+        )}
+
+        {currentScreen === 'voice-studio' && (
+          <ProVoiceStudioScreen
+            onBack={() => navigateTo(previousScreen ? previousScreen : 'create')}
+            onLogout={handleLogout}
+            onOpenMessages={(threadId?: string) => {
+              setActiveMessageThreadId(threadId);
+              navigateTo('messages');
+            }}
+            onOpenSchedule={() => navigateTo('schedule')}
+            onOpenJarvisPro={() => navigateTo('jarvis-pro')}
+            onOpenPostComposer={(prefillTitle) => {
+              if (prefillTitle) setComposerIdeaTitle(prefillTitle);
+              navigateTo('composer');
+            }}
+            onSwitchToFree={() => {
+              if (userProfile) {
+                setUserProfile({ ...userProfile, tier: 'free' });
+              }
+            }}
+            onNavigateTab={(tab: TabType) => {
+              if (tab === 'home') {
+                navigateTo('dashboard');
+              } else if (tab === 'create') {
+                navigateTo('create');
+              } else if (tab === 'match') {
+                navigateTo('match');
+              } else if (tab === 'quests') {
+                navigateTo('quests');
+              } else if (tab === 'growth') {
+                navigateTo('growth');
+              }
+            }}
+            userProfile={userProfile}
+            onSaveProfile={(updated) => setUserProfile(updated)}
+          />
         )}
 
         {currentScreen === 'platform-growth' && (
