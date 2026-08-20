@@ -39,6 +39,7 @@ import { AudienceBreakdownScreen } from './src/screens/AudienceBreakdownScreen';
 import { PostPerformanceScreen } from './src/screens/PostPerformanceScreen';
 import { PlatformGrowthScreen } from './src/screens/PlatformGrowthScreen';
 import { EarningsScreen } from './src/screens/EarningsScreen';
+import { ProEarningsScreen } from './src/screens/ProEarningsScreen';
 import { OpportunityReadinessScreen } from './src/screens/OpportunityReadinessScreen';
 import { CreatorPassportScreen } from './src/screens/CreatorPassportScreen';
 import { GhostLoadingScreen } from './src/components/GhostLoadingScreen';
@@ -1196,35 +1197,73 @@ export default function App() {
         )}
 
         {currentScreen === 'earnings' && (
-          <EarningsScreen
-            onBack={() => navigateTo(previousScreen ? previousScreen : 'growth')}
-            onLogout={handleLogout}
-            onOpenMessages={(threadId?: string) => {
+          (userProfile?.tier === 'pro' || userProfile?.tier === 'founding') ? (
+            <ProEarningsScreen
+              onBack={() => navigateTo(previousScreen ? previousScreen : 'growth')}
+              onLogout={handleLogout}
+              onOpenMessages={(threadId?: string) => {
                 setActiveMessageThreadId(threadId);
                 navigateTo('messages');
               }}
-            onOpenSchedule={() => navigateTo('schedule')}
-            onOpenJarvisPro={() => navigateTo('jarvis-pro')}
-            onOpenQuests={() => navigateTo('quests')}
-            onOpenPlatforms={() => navigateTo('platforms')}
-            onOpenReadiness={() => navigateTo('opportunity-readiness')}
-            onOpenCreatorPassport={() => navigateTo('creator-passport')}
-            onNavigateTab={(tab: TabType) => {
-              if (tab === 'home') {
-                navigateTo('dashboard');
-              } else if (tab === 'create') {
-                navigateTo('create');
-              } else if (tab === 'match') {
-                navigateTo('match');
-              } else if (tab === 'quests') {
-                navigateTo('quests');
-              } else if (tab === 'growth') {
-                navigateTo('growth');
-              }
-            }}
-            userProfile={userProfile}
-            onSaveProfile={(updated) => setUserProfile(updated)}
-          />
+              onOpenSchedule={() => navigateTo('schedule')}
+              onOpenJarvisPro={() => navigateTo('jarvis-pro')}
+              onOpenQuests={() => navigateTo('quests')}
+              onOpenPlatforms={() => navigateTo('platforms')}
+              onOpenReadiness={() => navigateTo('opportunity-readiness')}
+              onOpenCreatorPassport={() => navigateTo('creator-passport')}
+              onSwitchToFree={() => {
+                if (userProfile) {
+                  setUserProfile({ ...userProfile, tier: 'free' });
+                }
+              }}
+              onNavigateTab={(tab: TabType) => {
+                if (tab === 'home') {
+                  navigateTo('dashboard');
+                } else if (tab === 'create') {
+                  navigateTo('create');
+                } else if (tab === 'match') {
+                  navigateTo('match');
+                } else if (tab === 'quests') {
+                  navigateTo('quests');
+                } else if (tab === 'growth') {
+                  navigateTo('growth');
+                }
+              }}
+              userProfile={userProfile}
+              onSaveProfile={(updated) => setUserProfile(updated)}
+            />
+          ) : (
+            <EarningsScreen
+              onBack={() => navigateTo(previousScreen ? previousScreen : 'growth')}
+              onLogout={handleLogout}
+              onOpenMessages={() => navigateTo('messages')}
+              onOpenSchedule={() => navigateTo('schedule')}
+              onOpenJarvisPro={() => {
+                if (userProfile) {
+                  setUserProfile({ ...userProfile, tier: 'pro' });
+                }
+              }}
+              onOpenQuests={() => navigateTo('quests')}
+              onOpenPlatforms={() => navigateTo('platforms')}
+              onOpenReadiness={() => navigateTo('opportunity-readiness')}
+              onOpenCreatorPassport={() => navigateTo('creator-passport')}
+              onNavigateTab={(tab: TabType) => {
+                if (tab === 'home') {
+                  navigateTo('dashboard');
+                } else if (tab === 'create') {
+                  navigateTo('create');
+                } else if (tab === 'match') {
+                  navigateTo('match');
+                } else if (tab === 'quests') {
+                  navigateTo('quests');
+                } else if (tab === 'growth') {
+                  navigateTo('growth');
+                }
+              }}
+              userProfile={userProfile}
+              onSaveProfile={(updated) => setUserProfile(updated)}
+            />
+          )
         )}
 
         {currentScreen === 'platform-growth' && (
