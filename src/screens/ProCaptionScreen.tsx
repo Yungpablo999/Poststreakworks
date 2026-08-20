@@ -59,6 +59,15 @@ export const ProCaptionScreen: React.FC<ProCaptionScreenProps> = ({
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [showNotificationModal, setShowNotificationModal] = useState(false);
   const [showCompletionModal, setShowCompletionModal] = useState(false);
+  const [showHashtagModal, setShowHashtagModal] = useState(false);
+  const [newHashtagInput, setNewHashtagInput] = useState('');
+  const [hashtagList, setHashtagList] = useState<string[]>([
+    'creatorhabits',
+    'contentstrategy',
+    'growthhack',
+    'shortformcreator',
+    'socialmediamarketing',
+  ]);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   // Caption State
@@ -151,6 +160,43 @@ export const ProCaptionScreen: React.FC<ProCaptionScreenProps> = ({
       captionInputRef.current?.focus();
     }, 280);
     showToast(`✏️ Editing ${platformName} caption in editor above`);
+  };
+
+  const handleAddHashtag = (tagToAdd?: string) => {
+    const raw = (tagToAdd || newHashtagInput).trim().replace(/^#/, '');
+    if (!raw) return;
+    if (hashtagList.includes(raw)) {
+      showToast('Hashtag already in list');
+      return;
+    }
+    if (Platform.OS !== 'web') {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    }
+    const updated = [...hashtagList, raw];
+    setHashtagList(updated);
+    setHashtags(updated.map((t) => `#${t}`).join(' '));
+    setNewHashtagInput('');
+    showToast(`✓ Added #${raw}`);
+  };
+
+  const handleRemoveHashtag = (tagToRemove: string) => {
+    if (Platform.OS !== 'web') {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    }
+    const updated = hashtagList.filter((t) => t !== tagToRemove);
+    setHashtagList(updated);
+    setHashtags(updated.map((t) => `#${t}`).join(' '));
+    showToast(`Removed #${tagToRemove}`);
+  };
+
+  const handleResetDefaultHashtags = () => {
+    if (Platform.OS !== 'web') {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    }
+    const defaults = ['creatorhabits', 'contentstrategy', 'growthhack', 'shortformcreator', 'socialmediamarketing'];
+    setHashtagList(defaults);
+    setHashtags(defaults.map((t) => `#${t}`).join(' '));
+    showToast('✓ Reset to default hashtag set');
   };
 
   const handleToggleTone = (tone: string) => {
@@ -839,17 +885,45 @@ export const ProCaptionScreen: React.FC<ProCaptionScreenProps> = ({
           </View>
 
           {/* ============================================================ */}
-          {/* CARD 7: HASHTAG SETS                                         */}
+          {/* CARD 7: HASHTAG SETS (Tap to Edit & Manage Modal)            */}
           {/* ============================================================ */}
           <View style={{ marginTop: 22 }}>
-            <Text style={styles.sectionHeaderTitle}>Hashtag Sets</Text>
-
-            <View style={styles.hashtagsCard}>
-              <View style={styles.hashtagCategoryBadge}>
-                <Text style={styles.hashtagCategoryBadgeText}>CREATOR GROWTH</Text>
-              </View>
-              <Text style={styles.hashtagsStringText}>{hashtags}</Text>
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+              <Text style={styles.sectionHeaderTitle}>Hashtag Sets</Text>
+              <Pressable
+                onPress={() => {
+                  triggerModalPop();
+                  setShowHashtagModal(true);
+                }}
+                hitSlop={8}
+              >
+                <Text style={styles.editHashtagsLink}>✏️ Edit Hashtags</Text>
+              </Pressable>
             </View>
+
+            <Pressable
+              style={({ pressed }) => [styles.hashtagsCard, pressed && styles.btnPressed]}
+              onPress={() => {
+                triggerModalPop();
+                setShowHashtagModal(true);
+              }}
+            >
+              <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+                <View style={styles.hashtagCategoryBadge}>
+                  <Text style={styles.hashtagCategoryBadgeText}>CREATOR GROWTH</Text>
+                </View>
+                <Text style={styles.hashtagsCountBadge}>{hashtagList.length} TAGS</Text>
+              </View>
+
+              {/* Hashtag Chips Grid Preview */}
+              <View style={styles.hashtagPreviewGrid}>
+                {hashtagList.map((tag) => (
+                  <View key={tag} style={styles.hashtagChipPreview}>
+                    <Text style={styles.hashtagChipPreviewText}>#{tag}</Text>
+                  </View>
+                ))}
+              </View>
+            </Pressable>
           </View>
 
           {/* ============================================================ */}
@@ -998,6 +1072,97 @@ export const ProCaptionScreen: React.FC<ProCaptionScreenProps> = ({
               <Pressable style={styles.modalCancelBtn} onPress={() => setShowNotificationModal(false)}>
                 <Text style={styles.modalCancelBtnText}>Close</Text>
               </Pressable>
+            </Animated.View>
+          </View>
+        </Modal>
+
+                {/* HASHTAG MANAGER MODAL */}
+        <Modal
+          visible={showHashtagModal}
+          transparent={true}
+          animationType="fade"
+          onRequestClose={() => setShowHashtagModal(false)}
+        >
+          <View style={styles.modalOverlay}>
+            <Animated.View style={[styles.modalCard, { transform: [{ scale: modalPopScale }] }]}>
+              <View style={styles.modalHeaderBetween}>
+                <View>
+                  <Text style={styles.modalTitle}>Hashtag Manager</Text>
+                  <Text style={styles.modalSubTitle}>Add, remove, or customize hashtags</Text>
+                </View>
+                <Pressable onPress={() => setShowHashtagModal(false)} hitSlop={8}>
+                  <Text style={styles.modalCloseText}>✕</Text>
+                </Pressable>
+              </View>
+
+              {/* Add New Hashtag Input Bar */}
+              <View style={styles.addHashtagBarRow}>
+                <TextInput
+                  style={styles.addHashtagInput}
+                  value={newHashtagInput}
+                  onChangeText={setNewHashtagInput}
+                  placeholder="Type hashtag (e.g. dailyreels)..."
+                  placeholderTextColor="#94A3B8"
+                  onSubmitEditing={() => handleAddHashtag()}
+                  returnKeyType="done"
+                />
+                <Pressable
+                  style={({ pressed }) => [styles.addHashtagBtn, pressed && styles.btnPressed]}
+                  onPress={() => handleAddHashtag()}
+                >
+                  <Text style={styles.addHashtagBtnText}>Add +</Text>
+                </Pressable>
+              </View>
+
+              {/* Active Removable Hashtags */}
+              <Text style={styles.modalSectionSubHeader}>ACTIVE HASHTAGS ({hashtagList.length})</Text>
+              <ScrollView style={{ maxHeight: 150 }} contentContainerStyle={styles.removableHashtagsGrid}>
+                {hashtagList.map((tag) => (
+                  <Pressable
+                    key={tag}
+                    style={styles.removableHashtagChip}
+                    onPress={() => handleRemoveHashtag(tag)}
+                  >
+                    <Text style={styles.removableHashtagText}>#{tag}</Text>
+                    <View style={styles.removeTagCrossCircle}>
+                      <Text style={styles.removeTagCrossText}>✕</Text>
+                    </View>
+                  </Pressable>
+                ))}
+              </ScrollView>
+
+              {/* Quick Suggestions Row */}
+              <Text style={[styles.modalSectionSubHeader, { marginTop: 14 }]}>TRENDING SUGGESTIONS</Text>
+              <View style={styles.quickSuggestionsRow}>
+                {['creatoreconomy', 'growontiktok', 'reeltips', 'dailycontent', 'viralpost'].map((sug) => (
+                  <Pressable
+                    key={sug}
+                    style={styles.suggestionPill}
+                    onPress={() => handleAddHashtag(sug)}
+                  >
+                    <Text style={styles.suggestionPillText}>+ #{sug}</Text>
+                  </Pressable>
+                ))}
+              </View>
+
+              {/* Modal Action Buttons */}
+              <View style={{ flexDirection: 'row', gap: 10, marginTop: 18 }}>
+                <Pressable
+                  style={styles.resetHashtagsBtn}
+                  onPress={handleResetDefaultHashtags}
+                >
+                  <Text style={styles.resetHashtagsBtnText}>Reset</Text>
+                </Pressable>
+                <Pressable
+                  style={styles.saveHashtagsBtn}
+                  onPress={() => {
+                    setShowHashtagModal(false);
+                    showToast('✨ Hashtags updated!');
+                  }}
+                >
+                  <Text style={styles.saveHashtagsBtnText}>Done</Text>
+                </Pressable>
+              </View>
             </Animated.View>
           </View>
         </Modal>
@@ -1605,12 +1770,21 @@ const styles = StyleSheet.create({
   },
 
   // CARD 7: HASHTAG SETS
+  editHashtagsLink: {
+    fontSize: 11,
+    fontWeight: '900',
+    color: '#582CDB',
+  },
   hashtagsCard: {
     backgroundColor: '#FFFFFF',
-    borderRadius: 18,
+    borderRadius: 20,
     padding: 16,
     borderWidth: 1,
     borderColor: '#EFECE6',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.03,
+    shadowRadius: 6,
   },
   hashtagCategoryBadge: {
     backgroundColor: '#EDE9FE',
@@ -1618,7 +1792,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 7,
     paddingVertical: 3,
     borderRadius: 6,
-    marginBottom: 8,
   },
   hashtagCategoryBadgeText: {
     fontSize: 8.5,
@@ -1626,11 +1799,150 @@ const styles = StyleSheet.create({
     color: '#582CDB',
     letterSpacing: 0.3,
   },
-  hashtagsStringText: {
-    fontSize: 11.5,
+  hashtagsCountBadge: {
+    fontSize: 9,
+    fontWeight: '900',
+    color: '#94A3B8',
+  },
+  hashtagPreviewGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 6,
+    marginTop: 8,
+  },
+  hashtagChipPreview: {
+    backgroundColor: '#FAF8F5',
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 6,
+  },
+  hashtagChipPreviewText: {
+    fontSize: 11,
+    fontWeight: '800',
     color: '#475569',
-    lineHeight: 18,
-    fontWeight: '600',
+  },
+
+  // HASHTAG MANAGER MODAL
+  modalSubTitle: {
+    fontSize: 11,
+    color: '#64748B',
+    marginTop: 2,
+  },
+  addHashtagBarRow: {
+    flexDirection: 'row',
+    gap: 8,
+    marginVertical: 12,
+  },
+  addHashtagInput: {
+    flex: 1,
+    backgroundColor: '#FAF8F5',
+    borderRadius: 12,
+    paddingHorizontal: 12,
+    paddingVertical: 9,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    fontSize: 12.5,
+    color: '#171420',
+  },
+  addHashtagBtn: {
+    backgroundColor: '#582CDB',
+    paddingHorizontal: 14,
+    borderRadius: 12,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  addHashtagBtnText: {
+    color: '#FFFFFF',
+    fontSize: 12,
+    fontWeight: '900',
+  },
+  modalSectionSubHeader: {
+    fontSize: 9,
+    fontWeight: '900',
+    color: '#94A3B8',
+    letterSpacing: 0.4,
+    marginBottom: 6,
+  },
+  removableHashtagsGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 6,
+  },
+  removableHashtagChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#FAF8F5',
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    paddingLeft: 10,
+    paddingRight: 6,
+    paddingVertical: 5,
+    borderRadius: 16,
+    gap: 6,
+  },
+  removableHashtagText: {
+    fontSize: 11.5,
+    fontWeight: '800',
+    color: '#171420',
+  },
+  removeTagCrossCircle: {
+    width: 16,
+    height: 16,
+    borderRadius: 8,
+    backgroundColor: '#E2E8F0',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  removeTagCrossText: {
+    fontSize: 8.5,
+    fontWeight: '900',
+    color: '#64748B',
+  },
+  quickSuggestionsRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 6,
+  },
+  suggestionPill: {
+    backgroundColor: '#FAF8F5',
+    borderWidth: 1,
+    borderColor: '#DDD6FE',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 6,
+  },
+  suggestionPillText: {
+    fontSize: 10.5,
+    fontWeight: '800',
+    color: '#582CDB',
+  },
+  resetHashtagsBtn: {
+    flex: 1,
+    backgroundColor: '#FAF8F5',
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    paddingVertical: 11,
+    borderRadius: 12,
+    alignItems: 'center',
+  },
+  resetHashtagsBtnText: {
+    color: '#64748B',
+    fontSize: 12,
+    fontWeight: '900',
+  },
+  saveHashtagsBtn: {
+    flex: 2,
+    backgroundColor: '#582CDB',
+    paddingVertical: 11,
+    borderRadius: 12,
+    alignItems: 'center',
+  },
+  saveHashtagsBtnText: {
+    color: '#FFFFFF',
+    fontSize: 12,
+    fontWeight: '900',
   },
 
   // CARD 8: STATUS & STREAK
