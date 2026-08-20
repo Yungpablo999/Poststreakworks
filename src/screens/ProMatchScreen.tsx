@@ -483,6 +483,8 @@ export const ProMatchScreen: React.FC<ProMatchScreenProps> = ({
         ...prev,
       ]);
 
+      const creatorKey = `conv_${creator.name.split(' ')[0].toLowerCase()}`;
+
       setCompletionData({
         title: 'Collab Match Made!',
         subtitle: `You and ${creator.name} are matched to build together.`,
@@ -492,7 +494,7 @@ export const ProMatchScreen: React.FC<ProMatchScreenProps> = ({
         actionText: `Chat with ${creator.name.split(' ')[0]} 💬`,
         onAction: () => {
           setShowCompletionModal(false);
-          if (onOpenMessages) onOpenMessages();
+          if (onOpenMessages) onOpenMessages(creatorKey);
         },
       });
 
@@ -554,6 +556,12 @@ export const ProMatchScreen: React.FC<ProMatchScreenProps> = ({
       ...prev,
     ]);
 
+    const creatorKey = req.name.toLowerCase().includes('kemi')
+      ? 'conv_kemi'
+      : req.name.toLowerCase().includes('tomi')
+      ? 'conv_tomi'
+      : `conv_${req.name.split(' ')[0].toLowerCase()}`;
+
     setCompletionData({
       title: 'Collaboration Accepted!',
       subtitle: `You and ${req.name} are now connected to collaborate.`,
@@ -564,7 +572,7 @@ export const ProMatchScreen: React.FC<ProMatchScreenProps> = ({
       onAction: () => {
         setShowCompletionModal(false);
         if (onOpenMessages) {
-          onOpenMessages(req.id);
+          onOpenMessages(creatorKey);
         }
       },
     });
@@ -1330,7 +1338,7 @@ export const ProMatchScreen: React.FC<ProMatchScreenProps> = ({
                         </View>
                         <Pressable
                           style={styles.messageGreyBtn}
-                          onPress={() => onOpenMessages && onOpenMessages()}
+                          onPress={() => onOpenMessages && onOpenMessages('conv_zainab')}
                         >
                           <Text style={styles.messageGreyBtnText}>Message</Text>
                         </Pressable>
@@ -1530,7 +1538,14 @@ export const ProMatchScreen: React.FC<ProMatchScreenProps> = ({
                     <View style={{ flexDirection: 'row', gap: 10, marginTop: 12 }}>
                       <Pressable
                         style={styles.connectedMessageBtn}
-                        onPress={() => onOpenMessages && onOpenMessages()}
+                        onPress={() => {
+                          const threadKey = conn.name.toLowerCase().includes('kemi')
+                            ? 'conv_kemi'
+                            : conn.name.toLowerCase().includes('tomi')
+                            ? 'conv_tomi'
+                            : `conv_${conn.name.split(' ')[0].toLowerCase()}`;
+                          if (onOpenMessages) onOpenMessages(threadKey);
+                        }}
                       >
                         <Text style={styles.connectedMessageBtnText}>Message 💬</Text>
                       </Pressable>
@@ -1660,7 +1675,12 @@ export const ProMatchScreen: React.FC<ProMatchScreenProps> = ({
                       style={styles.modalMessageBtn}
                       onPress={() => {
                         setShowDeepDiveModal(false);
-                        if (onOpenMessages) onOpenMessages();
+                        const threadKey = selectedCreator.name.toLowerCase().includes('kemi')
+                          ? 'conv_kemi'
+                          : selectedCreator.name.toLowerCase().includes('tomi')
+                          ? 'conv_tomi'
+                          : `conv_${selectedCreator.name.split(' ')[0].toLowerCase()}`;
+                        if (onOpenMessages) onOpenMessages(threadKey);
                       }}
                     >
                       <Text style={styles.modalMessageBtnText}>Message 💬</Text>
