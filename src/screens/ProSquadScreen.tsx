@@ -77,7 +77,7 @@ const INITIAL_MEMBERS: SquadMember[] = [
     id: 'user',
     name: 'You',
     role: 'Action Strategist',
-    avatar: require('../../assets/images/user-avatar.jpg'),
+    avatar: require('../../assets/images/elena-avatar.jpg'),
     streak: 47,
     isHost: true,
     isPro: true,
@@ -156,7 +156,7 @@ const INITIAL_SQUAD_CHAT: SquadChatMessage[] = [
   {
     id: 'msg_3',
     senderName: 'You',
-    senderAvatar: require('../../assets/images/user-avatar.jpg'),
+    senderAvatar: require('../../assets/images/elena-avatar.jpg'),
     text: "Looks great team. I'm finishing the caption strategy. ⚡",
     time: '11:28 AM',
     isUser: true,
@@ -241,7 +241,7 @@ export const ProSquadScreen: React.FC<ProSquadScreenProps> = ({
     const newMsg: SquadChatMessage = {
       id: `msg_${Date.now()}`,
       senderName: 'You',
-      senderAvatar: require('../../assets/images/user-avatar.jpg'),
+      senderAvatar: require('../../assets/images/elena-avatar.jpg'),
       text: chatInputText.trim(),
       time: 'Just now',
       isUser: true,
@@ -380,7 +380,7 @@ export const ProSquadScreen: React.FC<ProSquadScreenProps> = ({
               hitSlop={6}
             >
               <Image
-                source={require('../../assets/images/user-avatar.jpg')}
+                source={require('../../assets/images/elena-avatar.jpg')}
                 style={styles.profileAvatarImg}
               />
               <View style={styles.avatarGoldBorderRing} />
@@ -424,7 +424,7 @@ export const ProSquadScreen: React.FC<ProSquadScreenProps> = ({
               <View style={styles.metricCol}>
                 <Text style={styles.metricLabel}>Members</Text>
                 <View style={styles.avatarStackRow}>
-                  <Image source={require('../../assets/images/user-avatar.jpg')} style={[styles.miniAvatar, { zIndex: 4 }]} />
+                  <Image source={require('../../assets/images/elena-avatar.jpg')} style={[styles.miniAvatar, { zIndex: 4 }]} />
                   <Image source={require('../../assets/images/amara-avatar.jpg')} style={[styles.miniAvatar, { marginLeft: -8, zIndex: 3 }]} />
                   <Image source={require('../../assets/images/tomi-avatar.jpg')} style={[styles.miniAvatar, { marginLeft: -8, zIndex: 2 }]} />
                   <View style={[styles.miniAvatarPlus, { marginLeft: -8, zIndex: 1 }]}>
