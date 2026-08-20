@@ -50,7 +50,9 @@ interface CollabConcept {
   title: string;
   hook: string;
   format: string;
-  expectedReach: string;
+  timing: string;
+  potentialBadge: string;
+  description: string;
 }
 
 interface CreatorCardData {
@@ -63,15 +65,18 @@ interface CreatorCardData {
   coverImage: any;
   bio: string;
   tags: string[];
+  categoryTags: string[];
   streak: number;
+  platformsText: string;
   matchScore: number;
   activeStatus: string;
   isTracked: boolean;
   audienceFit: number;
   formatSynergy: number;
   reliability: number;
-  jarvisRationale: string;
-  collabConcepts: CollabConcept[];
+  whyMatchDesc: string;
+  potentialBoostText: string;
+  proposedConcept: CollabConcept;
 }
 
 const DECK_CREATORS: CreatorCardData[] = [
@@ -85,38 +90,28 @@ const DECK_CREATORS: CreatorCardData[] = [
     coverImage: require('../../assets/images/amara-avatar.jpg'),
     bio: 'Filming authentic travel routines & luxury getaways across West Africa. Looking for lifestyle co-creators for dynamic storytelling.',
     tags: ['🌿 Travel', '✨ Lifestyle', '🎥 4K Vlogs'],
+    categoryTags: ['Lifestyle', 'Travel', 'Storytelling', 'Available This Week'],
     streak: 44,
+    platformsText: '📷 + ▶️',
     matchScore: 96,
     activeStatus: 'Active today (Posted 2h ago)',
     isTracked: true,
     audienceFit: 94,
     formatSynergy: 98,
     reliability: 92,
-    jarvisRationale:
+    whyMatchDesc:
       'Your audiences overlap in lifestyle, travel and personality-led storytelling. A joint Reel could help both creators reach new viewers with strong short-form chemistry.',
-    collabConcepts: [
-      {
-        id: 'c1',
-        title: 'The 24-Hour Creator Swap & Lagos Hidden Gems',
-        hook: 'We traded content workflows for 24 hours in Lagos. Here is what broke first...',
-        format: '9:16 Instagram Reel & TikTok (Joint Collab)',
-        expectedReach: '140K+ combined impressions',
-      },
-      {
-        id: 'c2',
-        title: 'Luxury Getaway vs Street Routine: The Contrast Experiment',
-        hook: 'Why high-production travel content is shifting to raw handheld storytelling in 2024.',
-        format: 'YouTube Shorts + Carousel Deck',
-        expectedReach: '95K+ impressions',
-      },
-      {
-        id: 'c3',
-        title: 'Creator Habits Breakdown: Maintaining 40+ Day Streaks',
-        hook: 'How 2 full-time creators film, edit, and post daily without burning out.',
-        format: 'Podcast Audio Clip & X Thread',
-        expectedReach: '80K+ views',
-      },
-    ],
+    potentialBoostText: 'Potential boost: high discovery crossover for Reels.',
+    proposedConcept: {
+      id: 'c1',
+      title: '24 Hours Creating in Lagos',
+      hook: 'We traded content workflows for 24 hours in Lagos. Here is what broke first...',
+      format: 'Reel (30–45 sec)',
+      timing: 'Sat, 2 PM',
+      potentialBadge: 'High discovery potential',
+      description:
+        'A fast-moving lifestyle collaboration showing how two creators work, explore and create in the city.',
+    },
   },
   {
     id: 'david',
@@ -128,31 +123,28 @@ const DECK_CREATORS: CreatorCardData[] = [
     coverImage: require('../../assets/images/david-avatar.jpg'),
     bio: 'Breaking down creator tools, AI automation workflows, and desk setups that maximize high-output focus.',
     tags: ['⚡ AI Systems', '💻 Tech Reviews', '📈 Productivity'],
+    categoryTags: ['Tech', 'AI Systems', 'Productivity', 'Available This Week'],
     streak: 52,
+    platformsText: '𝕏 + ▶️',
     matchScore: 94,
     activeStatus: 'Active today (Posted 4h ago)',
     isTracked: false,
     audienceFit: 92,
     formatSynergy: 96,
     reliability: 95,
-    jarvisRationale:
+    whyMatchDesc:
       'David has an exceptionally high tech retention rate. Co-producing an AI workflow review will drive cross-pollination from high-value tech enthusiasts.',
-    collabConcepts: [
-      {
-        id: 'cd1',
-        title: 'The 3-App Stack That Replaced an Entire Production Team',
-        hook: 'We tested 12 AI tools so you don’t have to. These 3 run our entire workflow.',
-        format: 'TikTok & Reel Carousel (Multi-slide)',
-        expectedReach: '180K+ impressions',
-      },
-      {
-        id: 'cd2',
-        title: 'Tech Showdown: Automated Publishing vs Organic Posting',
-        hook: 'Does posting manually actually boost algorithm reach? We ran a 14-day test.',
-        format: 'Joint 60s Reel',
-        expectedReach: '110K+ impressions',
-      },
-    ],
+    potentialBoostText: 'Potential boost: strong authority elevation in tech & creator tools.',
+    proposedConcept: {
+      id: 'cd1',
+      title: 'The 3-App Stack That Replaced an Entire Production Team',
+      hook: 'We tested 12 AI tools so you don’t have to. These 3 run our entire workflow.',
+      format: 'Reel (45–60 sec)',
+      timing: 'Sun, 6 PM',
+      potentialBadge: 'High viral potential',
+      description:
+        'A structured breakdown of modern production tools that allow solo creators to produce like a 5-person agency.',
+    },
   },
   {
     id: 'elena',
@@ -164,24 +156,28 @@ const DECK_CREATORS: CreatorCardData[] = [
     coverImage: require('../../assets/images/elena-avatar.jpg'),
     bio: 'Daily morning routines, disciplined training, and nutrition for creators who want boundless energy.',
     tags: ['💪 Fitness', '🥑 Wellness', '⏰ Routine'],
+    categoryTags: ['Fitness', 'Wellness', 'Daily Routine', 'Available This Week'],
     streak: 39,
+    platformsText: '📷 + 🎵',
     matchScore: 91,
     activeStatus: 'Active today (Posted 1h ago)',
     isTracked: false,
     audienceFit: 88,
     formatSynergy: 94,
     reliability: 96,
-    jarvisRationale:
+    whyMatchDesc:
       'Elena provides a perfect lifestyle-wellness hook angle. A routine swap or energy management breakdown aligns seamlessly with creator sustainability.',
-    collabConcepts: [
-      {
-        id: 'ce1',
-        title: 'The 5 AM Creator Energy Challenge',
-        hook: 'Can a non-morning creator survive an Olympic morning routine for 7 days?',
-        format: 'Mini-Doc Vlog (9:16 Video Series)',
-        expectedReach: '125K+ impressions',
-      },
-    ],
+    potentialBoostText: 'Potential boost: cross-niche audience expansion into lifestyle & health.',
+    proposedConcept: {
+      id: 'ce1',
+      title: 'The 5 AM Creator Energy Routine',
+      hook: 'Can a non-morning creator survive an Olympic morning routine for 7 days?',
+      format: 'Shorts / Reel',
+      timing: 'Mon, 7 AM',
+      potentialBadge: 'High engagement potential',
+      description:
+        'A high-energy routine challenge showing practical habit adjustments for creators building daily streaks.',
+    },
   },
   {
     id: 'marcus',
@@ -193,53 +189,28 @@ const DECK_CREATORS: CreatorCardData[] = [
     coverImage: require('../../assets/images/marcus-avatar.jpg'),
     bio: 'Building in public. Sharing organic growth systems that convert followers into monthly recurring revenue.',
     tags: ['🚀 Monetization', '📊 Case Studies', '💡 SaaS'],
+    categoryTags: ['Business', 'Monetization', 'Growth', 'Available This Week'],
     streak: 61,
+    platformsText: '💼 + 𝕏',
     matchScore: 95,
     activeStatus: 'Active today (Posted 5h ago)',
     isTracked: false,
     audienceFit: 96,
     formatSynergy: 95,
     reliability: 98,
-    jarvisRationale:
+    whyMatchDesc:
       'Marcus specializes in high-converting monetization hooks. Collaborating with him will elevate your authority in business and monetization spaces.',
-    collabConcepts: [
-      {
-        id: 'cm1',
-        title: 'How to Turn 1,000 Views into $1,000 Monthly Revenue',
-        hook: 'Most creators monetize completely backwards. Here is the low-friction playbook.',
-        format: 'LinkedIn Carousel & X Thread',
-        expectedReach: '210K+ impressions',
-      },
-    ],
-  },
-  {
-    id: 'zainab',
-    name: 'Zainab Al-Hassan',
-    handle: '@zainab_eats',
-    role: 'Culinary & Culture Explorer',
-    followers: '72K',
-    location: 'Dubai, UAE',
-    coverImage: require('../../assets/images/zainab-avatar.jpg'),
-    bio: 'Street food journeys, Middle Eastern fusion recipes, and visual food aesthetic guides.',
-    tags: ['🍳 Culinary', '🌍 Culture', '📸 Aesthetic'],
-    streak: 48,
-    matchScore: 93,
-    activeStatus: 'Active today (Posted 3h ago)',
-    isTracked: false,
-    audienceFit: 91,
-    formatSynergy: 94,
-    reliability: 94,
-    jarvisRationale:
-      'Zainab has top-tier visual food aesthetic production. Cross-niche collaboration creates unmatched visual engagement.',
-    collabConcepts: [
-      {
-        id: 'cz1',
-        title: 'Rating the Best Creator Cafes in the World',
-        hook: 'We visited the top 5 creator-friendly cafes. Number 3 shocked us.',
-        format: '9:16 Cinematic Food Reel',
-        expectedReach: '130K+ impressions',
-      },
-    ],
+    potentialBoostText: 'Potential boost: unlocks high-ticket creator sponsorships & revenue.',
+    proposedConcept: {
+      id: 'cm1',
+      title: 'Turn 1,000 Views into $1,000 Monthly Revenue',
+      hook: 'Most creators monetize completely backwards. Here is the low-friction playbook.',
+      format: 'Carousel & Thread',
+      timing: 'Wed, 11 AM',
+      potentialBadge: 'High conversion potential',
+      description:
+        'A concrete step-by-step case study demonstrating how micro-creators generate predictable creator income.',
+    },
   },
 ];
 
@@ -323,6 +294,9 @@ export const ProMatchScreen: React.FC<ProMatchScreenProps> = ({
   const [connected, setConnected] = useState(CONNECTED_CREATORS_INITIAL);
   const [trackedIds, setTrackedIds] = useState<string[]>(['amara']);
 
+  // Touch isolation state (disables outer ScrollView while dragging cards)
+  const [isSwipingCard, setIsSwipingCard] = useState(false);
+
   // Modals & Feedback
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [showNotificationModal, setShowNotificationModal] = useState(false);
@@ -362,11 +336,15 @@ export const ProMatchScreen: React.FC<ProMatchScreenProps> = ({
     PanResponder.create({
       onStartShouldSetPanResponder: () => true,
       onMoveShouldSetPanResponder: (_, gesture) =>
-        Math.abs(gesture.dx) > 10 || Math.abs(gesture.dy) > 10,
+        Math.abs(gesture.dx) > 6 || Math.abs(gesture.dy) > 6,
+      onPanResponderGrant: () => {
+        setIsSwipingCard(true);
+      },
       onPanResponderMove: (_, gesture) => {
         position.setValue({ x: gesture.dx, y: gesture.dy });
       },
       onPanResponderRelease: (_, gesture) => {
+        setIsSwipingCard(false);
         if (gesture.dx > SWIPE_THRESHOLD) {
           swipeRight();
         } else if (gesture.dx < -SWIPE_THRESHOLD) {
@@ -376,6 +354,10 @@ export const ProMatchScreen: React.FC<ProMatchScreenProps> = ({
         } else {
           resetPosition();
         }
+      },
+      onPanResponderTerminate: () => {
+        setIsSwipingCard(false);
+        resetPosition();
       },
     })
   ).current;
@@ -457,7 +439,7 @@ export const ProMatchScreen: React.FC<ProMatchScreenProps> = ({
           avatar: creator.coverImage,
           streak: creator.streak,
           status: 'Matched just now',
-          activeCollab: creator.collabConcepts[0]?.title || 'Joint Content Series',
+          activeCollab: creator.proposedConcept.title,
         },
         ...prev,
       ]);
@@ -546,8 +528,7 @@ export const ProMatchScreen: React.FC<ProMatchScreenProps> = ({
     showToast('Declined collab request');
   };
 
-  const handleLaunchCollabConcept = (creator: CreatorCardData, concept: CollabConcept) => {
-    setShowDeepDiveModal(false);
+  const handleLaunchCollabPlan = (creator: CreatorCardData) => {
     if (onOpenCollabIdea) {
       onOpenCollabIdea({
         name: creator.name,
@@ -555,7 +536,7 @@ export const ProMatchScreen: React.FC<ProMatchScreenProps> = ({
         niche: creator.role,
         avatar: creator.coverImage,
         planIndex: 0,
-        title: concept.title,
+        title: creator.proposedConcept.title,
       });
     } else if (onOpenMessages) {
       onOpenMessages();
@@ -642,11 +623,12 @@ export const ProMatchScreen: React.FC<ProMatchScreenProps> = ({
           </View>
         </View>
 
-        {/* Scrollable Container */}
+        {/* Scrollable Container with Swipe Isolation */}
         <ScrollView
           style={{ flex: 1 }}
-          contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 120 }}
+          contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 130 }}
           showsVerticalScrollIndicator={false}
+          scrollEnabled={!isSwipingCard}
         >
           {/* ============================================================ */}
           {/* 2. PILL BADGES ROW                                           */}
@@ -754,179 +736,488 @@ export const ProMatchScreen: React.FC<ProMatchScreenProps> = ({
           </View>
 
           {/* ============================================================ */}
-          {/* 6. FILTER PILLS ROW (Visible on Deck)                        */}
-          {/* ============================================================ */}
-          {segmentTab === 'deck' && (
-            <View style={styles.filterPillsRow}>
-              {[
-                { id: 'niche', label: 'Same Niche' },
-                { id: 'streak', label: 'Similar Streak' },
-                { id: 'nearby', label: 'Nearby' },
-                { id: 'ai', label: 'AI Pick' },
-              ].map((f) => {
-                const isActive = activeFilter === f.id;
-                return (
-                  <Pressable
-                    key={f.id}
-                    style={[styles.filterPill, isActive && styles.filterPillActive]}
-                    onPress={() => {
-                      if (Platform.OS !== 'web') {
-                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                      }
-                      setActiveFilter(f.id as any);
-                    }}
-                  >
-                    <Text style={[styles.filterPillText, isActive && styles.filterPillTextActive]}>
-                      {f.label}
-                    </Text>
-                  </Pressable>
-                );
-              })}
-            </View>
-          )}
-
-          {/* ============================================================ */}
           {/* TAB 1: SWIPING MATCH DECK                                    */}
           {/* ============================================================ */}
           {segmentTab === 'deck' && (
-            <View style={{ marginTop: 14 }}>
+            <View style={{ marginTop: 4 }}>
+              {/* FILTER PILLS ROW */}
+              <View style={styles.filterPillsRow}>
+                {[
+                  { id: 'niche', label: 'Same Niche' },
+                  { id: 'streak', label: 'Similar Streak' },
+                  { id: 'nearby', label: 'Nearby' },
+                  { id: 'ai', label: 'AI Pick' },
+                ].map((f) => {
+                  const isActive = activeFilter === f.id;
+                  return (
+                    <Pressable
+                      key={f.id}
+                      style={[styles.filterPill, isActive && styles.filterPillActive]}
+                      onPress={() => {
+                        if (Platform.OS !== 'web') {
+                          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                        }
+                        setActiveFilter(f.id as any);
+                      }}
+                    >
+                      <Text style={[styles.filterPillText, isActive && styles.filterPillTextActive]}>
+                        {f.label}
+                      </Text>
+                    </Pressable>
+                  );
+                })}
+              </View>
+
               {currentCreator ? (
-                <View style={styles.deckContainer}>
-                  {/* Underneath Card (3D Stack Depth) */}
-                  {nextCreator && (
-                    <View style={[styles.cardWrapper, styles.underneathCard]}>
-                      <Image source={nextCreator.coverImage} style={styles.cardImage} resizeMode="cover" />
+                <>
+                  {/* TINDER SWIPEABLE CARD CONTAINER */}
+                  <View style={styles.deckContainer}>
+                    {/* Underneath Card (3D Stack Depth) */}
+                    {nextCreator && (
+                      <View style={[styles.cardWrapper, styles.underneathCard]}>
+                        <Image source={nextCreator.coverImage} style={styles.cardImage} resizeMode="cover" />
+                        <LinearGradient
+                          colors={['transparent', 'rgba(0,0,0,0.4)', 'rgba(0,0,0,0.92)']}
+                          style={styles.cardGradientOverlay}
+                        />
+                        <View style={styles.cardBottomContent}>
+                          <Text style={styles.creatorNameText}>{nextCreator.name}</Text>
+                          <Text style={styles.creatorRoleLocationText}>{nextCreator.role}</Text>
+                        </View>
+                      </View>
+                    )}
+
+                    {/* Top Swiping Card */}
+                    <Animated.View
+                      {...panResponder.panHandlers}
+                      style={[
+                        styles.cardWrapper,
+                        {
+                          transform: [
+                            { translateX: position.x },
+                            { translateY: position.y },
+                            { rotate: rotate },
+                          ],
+                        },
+                      ]}
+                    >
+                      <Image source={currentCreator.coverImage} style={styles.cardImage} resizeMode="cover" />
+
+                      {/* Gradient Overlay */}
                       <LinearGradient
-                        colors={['transparent', 'rgba(0,0,0,0.4)', 'rgba(0,0,0,0.92)']}
+                        colors={['transparent', 'rgba(0,0,0,0.3)', 'rgba(0,0,0,0.85)', 'rgba(0,0,0,0.96)']}
                         style={styles.cardGradientOverlay}
                       />
-                      <View style={styles.cardBottomContent}>
-                        <Text style={styles.creatorNameText}>{nextCreator.name}</Text>
-                        <Text style={styles.creatorRoleLocationText}>{nextCreator.role}</Text>
-                      </View>
-                    </View>
-                  )}
 
-                  {/* Top Swiping Card */}
-                  <Animated.View
-                    {...panResponder.panHandlers}
-                    style={[
-                      styles.cardWrapper,
-                      {
-                        transform: [
-                          { translateX: position.x },
-                          { translateY: position.y },
-                          { rotate: rotate },
-                        ],
-                      },
-                    ]}
-                  >
-                    <Image source={currentCreator.coverImage} style={styles.cardImage} resizeMode="cover" />
+                      {/* Stamp Overlays */}
+                      <Animated.View style={[styles.stampBox, styles.stampMatch, { opacity: likeOpacity }]}>
+                        <Text style={styles.stampMatchText}>COLLAB MATCH</Text>
+                      </Animated.View>
 
-                    {/* Gradient Overlay */}
-                    <LinearGradient
-                      colors={['transparent', 'rgba(0,0,0,0.3)', 'rgba(0,0,0,0.85)', 'rgba(0,0,0,0.96)']}
-                      style={styles.cardGradientOverlay}
-                    />
+                      <Animated.View style={[styles.stampBox, styles.stampPass, { opacity: nopeOpacity }]}>
+                        <Text style={styles.stampPassText}>PASS</Text>
+                      </Animated.View>
 
-                    {/* Stamp Overlays */}
-                    <Animated.View style={[styles.stampBox, styles.stampMatch, { opacity: likeOpacity }]}>
-                      <Text style={styles.stampMatchText}>COLLAB MATCH</Text>
-                    </Animated.View>
+                      <Animated.View style={[styles.stampBox, styles.stampTrack, { opacity: trackOpacity }]}>
+                        <Text style={styles.stampTrackText}>TRACKED</Text>
+                      </Animated.View>
 
-                    <Animated.View style={[styles.stampBox, styles.stampPass, { opacity: nopeOpacity }]}>
-                      <Text style={styles.stampPassText}>PASS</Text>
-                    </Animated.View>
-
-                    <Animated.View style={[styles.stampBox, styles.stampTrack, { opacity: trackOpacity }]}>
-                      <Text style={styles.stampTrackText}>TRACKED</Text>
-                    </Animated.View>
-
-                    {/* Top Badges Overlay */}
-                    <View style={styles.cardTopOverlay}>
-                      {/* Left: Active Today */}
-                      <View style={styles.activeTodayPill}>
-                        <View style={styles.greenPulseDot} />
-                        <Text style={styles.activeTodayText}>🟢 {currentCreator.activeStatus}</Text>
-                      </View>
-
-                      {/* Right: Track + Info Buttons */}
-                      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-                        <Pressable
-                          style={[
-                            styles.trackingBadgeBtn,
-                            trackedIds.includes(currentCreator.id) && styles.trackingBadgeBtnActive,
-                          ]}
-                          onPress={() => handleToggleTrackCurrent(currentCreator)}
-                        >
-                          <Text
-                            style={[
-                              styles.trackingBadgeText,
-                              trackedIds.includes(currentCreator.id) && styles.trackingBadgeTextActive,
-                            ]}
-                          >
-                            ⭐ {trackedIds.includes(currentCreator.id) ? 'Tracking' : '+ Track'}
-                          </Text>
-                        </Pressable>
-
-                        <Pressable
-                          style={styles.infoRoundBtn}
-                          onPress={() => handleOpenDeepDive(currentCreator)}
-                          hitSlop={8}
-                        >
-                          <Text style={styles.infoRoundBtnText}>ⓘ</Text>
-                        </Pressable>
-                      </View>
-                    </View>
-
-                    {/* Bottom Content Overlay */}
-                    <View style={styles.cardBottomContent}>
-                      {/* Name & Streak Row */}
-                      <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
-                        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, flex: 1 }}>
-                          <Text style={styles.creatorNameText}>{currentCreator.name}</Text>
-                          <View style={styles.verifiedCheckCircle}>
-                            <Text style={{ fontSize: 10, color: '#FFFFFF', fontWeight: '900' }}>✓</Text>
-                          </View>
+                      {/* Top Badges Overlay */}
+                      <View style={styles.cardTopOverlay}>
+                        {/* Left: Active Today */}
+                        <View style={styles.activeTodayPill}>
+                          <View style={styles.greenPulseDot} />
+                          <Text style={styles.activeTodayText}>🟢 {currentCreator.activeStatus}</Text>
                         </View>
 
+                        {/* Right: Track + Info Buttons */}
                         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-                          {/* Streak Pill */}
-                          <View style={styles.streakPill}>
-                            <Text style={styles.streakPillText}>🔥 {currentCreator.streak}d</Text>
-                          </View>
-
-                          {/* Deep Dive Button */}
                           <Pressable
-                            style={styles.deepDivePillBtn}
-                            onPress={() => handleOpenDeepDive(currentCreator)}
+                            style={[
+                              styles.trackingBadgeBtn,
+                              trackedIds.includes(currentCreator.id) && styles.trackingBadgeBtnActive,
+                            ]}
+                            onPress={() => handleToggleTrackCurrent(currentCreator)}
                           >
-                            <Text style={styles.deepDivePillBtnText}>Deep Dive ➔</Text>
+                            <Text
+                              style={[
+                                styles.trackingBadgeText,
+                                trackedIds.includes(currentCreator.id) && styles.trackingBadgeTextActive,
+                              ]}
+                            >
+                              ⭐ {trackedIds.includes(currentCreator.id) ? 'Tracking' : '+ Track'}
+                            </Text>
+                          </Pressable>
+
+                          <Pressable
+                            style={styles.infoRoundBtn}
+                            onPress={() => handleOpenDeepDive(currentCreator)}
+                            hitSlop={8}
+                          >
+                            <Text style={styles.infoRoundBtnText}>ⓘ</Text>
                           </Pressable>
                         </View>
                       </View>
 
-                      {/* Role & Location */}
-                      <Text style={styles.creatorRoleLocationText}>
-                        {currentCreator.role} • {currentCreator.followers} • 📍 {currentCreator.location}
-                      </Text>
-
-                      {/* Bio */}
-                      <Text style={styles.creatorBioText} numberOfLines={2}>
-                        {currentCreator.bio}
-                      </Text>
-
-                      {/* Tags */}
-                      <View style={styles.creatorTagsRow}>
-                        {currentCreator.tags.map((tag, tIdx) => (
-                          <View key={tIdx} style={styles.creatorTagPill}>
-                            <Text style={styles.creatorTagPillText}>{tag}</Text>
+                      {/* Bottom Content Overlay */}
+                      <View style={styles.cardBottomContent}>
+                        {/* Name & Streak Row */}
+                        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
+                          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, flex: 1 }}>
+                            <Text style={styles.creatorNameText}>{currentCreator.name}</Text>
+                            <View style={styles.verifiedCheckCircle}>
+                              <Text style={{ fontSize: 10, color: '#FFFFFF', fontWeight: '900' }}>✓</Text>
+                            </View>
                           </View>
-                        ))}
+
+                          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                            {/* Streak Pill */}
+                            <View style={styles.streakPill}>
+                              <Text style={styles.streakPillText}>🔥 {currentCreator.streak}d</Text>
+                            </View>
+
+                            {/* Deep Dive Button */}
+                            <Pressable
+                              style={styles.deepDivePillBtn}
+                              onPress={() => handleOpenDeepDive(currentCreator)}
+                            >
+                              <Text style={styles.deepDivePillBtnText}>Deep Dive ➔</Text>
+                            </Pressable>
+                          </View>
+                        </View>
+
+                        {/* Role & Location */}
+                        <Text style={styles.creatorRoleLocationText}>
+                          {currentCreator.role} • {currentCreator.followers} • 📍 {currentCreator.location}
+                        </Text>
+
+                        {/* Bio */}
+                        <Text style={styles.creatorBioText} numberOfLines={2}>
+                          {currentCreator.bio}
+                        </Text>
+
+                        {/* Tags */}
+                        <View style={styles.creatorTagsRow}>
+                          {currentCreator.tags.map((tag, tIdx) => (
+                            <View key={tIdx} style={styles.creatorTagPill}>
+                              <Text style={styles.creatorTagPillText}>{tag}</Text>
+                            </View>
+                          ))}
+                        </View>
+                      </View>
+                    </Animated.View>
+                  </View>
+
+                  {/* Gesture Guide Bar */}
+                  <View style={styles.gestureGuideBar}>
+                    <Text style={styles.gestureGuideText}>
+                      👈 Swipe left to decline  •  👆 Up to track  •  Right to accept 👉
+                    </Text>
+                  </View>
+
+                  {/* ============================================================ */}
+                  {/* SECTION 6: METRICS ROW (FOLLOWERS, STREAK, PLATFORMS)        */}
+                  {/* ============================================================ */}
+                  <View style={styles.creatorMetricsCard}>
+                    <View style={styles.creatorMetricItem}>
+                      <Text style={styles.creatorMetricLabel}>FOLLOWERS</Text>
+                      <Text style={styles.creatorMetricVal}>{currentCreator.followers}</Text>
+                    </View>
+
+                    <View style={styles.creatorMetricDivider} />
+
+                    <View style={styles.creatorMetricItem}>
+                      <Text style={styles.creatorMetricLabel}>STREAK</Text>
+                      <Text style={[styles.creatorMetricVal, { color: '#582CDB' }]}>
+                        {currentCreator.streak} 🔥
+                      </Text>
+                    </View>
+
+                    <View style={styles.creatorMetricDivider} />
+
+                    <View style={styles.creatorMetricItem}>
+                      <Text style={styles.creatorMetricLabel}>PLATFORM</Text>
+                      <Text style={styles.creatorMetricVal}>{currentCreator.platformsText}</Text>
+                    </View>
+                  </View>
+
+                  {/* CATEGORY TAGS ROW */}
+                  <View style={styles.categoryTagsRow}>
+                    {currentCreator.categoryTags.map((cat, cIdx) => {
+                      const isAvail = cat.includes('Available');
+                      return (
+                        <View
+                          key={cIdx}
+                          style={[styles.categoryTagPill, isAvail && styles.availableTagPill]}
+                        >
+                          <Text
+                            style={[
+                              styles.categoryTagPillText,
+                              isAvail && styles.availableTagPillText,
+                            ]}
+                          >
+                            {cat}
+                          </Text>
+                        </View>
+                      );
+                    })}
+                  </View>
+
+                  {/* ============================================================ */}
+                  {/* SECTION 7: WHY THIS MATCH? CARD                             */}
+                  {/* ============================================================ */}
+                  <View style={styles.whyMatchCard}>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 8 }}>
+                      <Text style={{ fontSize: 13, color: '#582CDB' }}>🔮</Text>
+                      <Text style={styles.whyMatchHeaderTitle}>WHY THIS MATCH?</Text>
+                    </View>
+
+                    <Text style={styles.whyMatchBodyText}>{currentCreator.whyMatchDesc}</Text>
+
+                    <View style={styles.potentialBoostRow}>
+                      <Image
+                        source={require('../../assets/images/jarvis-core-flame.png')}
+                        style={{ width: 14, height: 14 }}
+                        resizeMode="contain"
+                      />
+                      <Text style={styles.potentialBoostText}>{currentCreator.potentialBoostText}</Text>
+                    </View>
+                  </View>
+
+                  {/* ============================================================ */}
+                  {/* SECTION 8: 3 ACTION BUTTONS (PASS, SAVE, CONNECT)           */}
+                  {/* ============================================================ */}
+                  <View style={styles.threeActionBtnRow}>
+                    <Pressable
+                      style={({ pressed }) => [styles.passOutlineBtn, pressed && styles.btnPressed]}
+                      onPress={() => swipeLeft(currentCreator)}
+                    >
+                      <Text style={styles.passOutlineBtnText}>Pass</Text>
+                    </Pressable>
+
+                    <Pressable
+                      style={({ pressed }) => [styles.saveOutlineBtn, pressed && styles.btnPressed]}
+                      onPress={() => swipeUp(currentCreator)}
+                    >
+                      <Text style={styles.saveOutlineBtnText}>Save</Text>
+                    </Pressable>
+
+                    <Pressable
+                      style={({ pressed }) => [styles.connectPurpleBtn, pressed && styles.btnPressed]}
+                      onPress={() => swipeRight(currentCreator)}
+                    >
+                      <Text style={styles.connectPurpleBtnText}>⚡ Connect</Text>
+                    </Pressable>
+                  </View>
+
+                  {/* ============================================================ */}
+                  {/* SECTION 9: AI COLLABORATION PLAN CARD                        */}
+                  {/* ============================================================ */}
+                  <View style={{ marginTop: 22 }}>
+                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+                      <Text style={styles.sectionTitle}>AI Collaboration Plan</Text>
+                      <View style={styles.proAiMatchPill}>
+                        <Text style={styles.proAiMatchPillText}>PRO AI MATCH INSIGHT</Text>
                       </View>
                     </View>
-                  </Animated.View>
-                </View>
+
+                    <View style={styles.aiCollabPlanCard}>
+                      <Text style={styles.proposedConceptSub}>PROPOSED CONCEPT</Text>
+                      <Text style={styles.proposedConceptTitle}>
+                        &ldquo;{currentCreator.proposedConcept.title}&rdquo;
+                      </Text>
+                      <Text style={styles.proposedConceptDesc}>
+                        {currentCreator.proposedConcept.description}
+                      </Text>
+
+                      {/* Meta Chips */}
+                      <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginVertical: 12 }}>
+                        <View style={styles.conceptMetaChip}>
+                          <Text style={styles.conceptMetaChipText}>
+                            🎬 {currentCreator.proposedConcept.format}
+                          </Text>
+                        </View>
+                        <View style={styles.conceptMetaChip}>
+                          <Text style={styles.conceptMetaChipText}>
+                            📅 {currentCreator.proposedConcept.timing}
+                          </Text>
+                        </View>
+                        <View style={styles.goldenMetaChip}>
+                          <Text style={styles.goldenMetaChipText}>
+                            📈 {currentCreator.proposedConcept.potentialBadge}
+                          </Text>
+                        </View>
+                      </View>
+
+                      {/* Build Collaboration Plan Button */}
+                      <Pressable
+                        style={({ pressed }) => [styles.buildCollabPlanBtn, pressed && styles.btnPressed]}
+                        onPress={() => handleLaunchCollabPlan(currentCreator)}
+                      >
+                        <Text style={styles.buildCollabPlanBtnText}>Build Collaboration Plan</Text>
+                      </Pressable>
+                    </View>
+                  </View>
+
+                  {/* ============================================================ */}
+                  {/* SECTION 10: YOUR CREATOR SQUAD                               */}
+                  {/* ============================================================ */}
+                  <View style={{ marginTop: 22 }}>
+                    <Text style={[styles.sectionTitle, { marginBottom: 10 }]}>Your Creator Squad</Text>
+                    <View style={styles.squadCard}>
+                      <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <View>
+                          <Text style={styles.squadNameText}>Momentum Makers</Text>
+                          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 3 }}>
+                            <View style={styles.squadLevelPill}>
+                              <Text style={styles.squadLevelPillText}>LEVEL 12</Text>
+                            </View>
+                            <Text style={styles.squadStreakText}>18-Day Streak</Text>
+                          </View>
+                        </View>
+
+                        {/* Overlapping Avatar Stack */}
+                        <View style={styles.avatarStackRow}>
+                          <Image source={require('../../assets/images/elena-avatar.jpg')} style={[styles.stackAvatar, { zIndex: 3 }]} />
+                          <Image source={require('../../assets/images/marcus-avatar.jpg')} style={[styles.stackAvatar, { marginLeft: -10, zIndex: 2 }]} />
+                          <Image source={require('../../assets/images/david-avatar.jpg')} style={[styles.stackAvatar, { marginLeft: -10, zIndex: 1 }]} />
+                          <View style={[styles.stackAvatarPlus, { marginLeft: -10 }]}>
+                            <Text style={styles.stackAvatarPlusText}>+1</Text>
+                          </View>
+                        </View>
+                      </View>
+
+                      {/* Goals Row */}
+                      <View style={{ flexDirection: 'row', gap: 12, marginTop: 12, marginBottom: 10 }}>
+                        <Text style={styles.squadGoalText}>✓ Goal: 5 posts this week</Text>
+                        <Text style={styles.squadGoalText}>⚡ 3 of 4 active today</Text>
+                      </View>
+
+                      {/* XP Progress Bar */}
+                      <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 4 }}>
+                        <Text style={styles.squadXpLabel}>8,450 XP</Text>
+                        <Text style={styles.squadXpLabel}>LEVEL 13</Text>
+                      </View>
+                      <View style={styles.squadTrack}>
+                        <View style={[styles.squadFill, { width: '75%' }]} />
+                      </View>
+
+                      <Text style={styles.nextUnlockText}>✨ Next unlock: Priority Match Boost</Text>
+
+                      {/* Squad Action Buttons */}
+                      <View style={{ flexDirection: 'row', gap: 10, marginTop: 14 }}>
+                        <Pressable
+                          style={({ pressed }) => [styles.openSquadBtn, pressed && styles.btnPressed]}
+                          onPress={() => showToast('🛡️ Opened Momentum Makers squad room')}
+                        >
+                          <Text style={styles.openSquadBtnText}>Open Squad</Text>
+                        </Pressable>
+
+                        <Pressable
+                          style={({ pressed }) => [styles.findSquadBtn, pressed && styles.btnPressed]}
+                          onPress={() => showToast('🔍 Searching creator squads in your niche...')}
+                        >
+                          <Text style={styles.findSquadBtnText}>Find a Squad</Text>
+                        </Pressable>
+                      </View>
+                    </View>
+                  </View>
+
+                  {/* ============================================================ */}
+                  {/* SECTION 11: LIVE DUEL BANNER                                 */}
+                  {/* ============================================================ */}
+                  <View style={styles.liveDuelBanner}>
+                    <View style={styles.liveDuelLeftGroup}>
+                      <View style={styles.duelIconSquare}>
+                        <Text style={{ fontSize: 18 }}>⚔️</Text>
+                      </View>
+                      <View>
+                        <Text style={styles.liveDuelTag}>LIVE DUEL</Text>
+                        <Text style={styles.liveDuelVsText}>Momentum Makers vs Lagos Storytellers</Text>
+                      </View>
+                    </View>
+
+                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                      <Text style={styles.duelScoreText}>62 pts - 58 pts</Text>
+                      <Pressable
+                        style={styles.viewDuelBtn}
+                        onPress={() => showToast('⚔️ Viewing Squad Live Duel details')}
+                      >
+                        <Text style={styles.viewDuelBtnText}>View Duel</Text>
+                      </Pressable>
+                    </View>
+                  </View>
+
+                  {/* ============================================================ */}
+                  {/* SECTION 12: QUICK ACTIONS                                    */}
+                  {/* ============================================================ */}
+                  <View style={{ marginTop: 22 }}>
+                    <Text style={[styles.sectionTitle, { marginBottom: 10 }]}>Quick Actions</Text>
+                    <View style={{ gap: 8 }}>
+                      {/* Row 1: Tomi Adebayo */}
+                      <View style={styles.quickActionRow}>
+                        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, flex: 1 }}>
+                          <Image source={require('../../assets/images/tomi-avatar.jpg')} style={styles.quickActionAvatar} />
+                          <View>
+                            <Text style={styles.quickActionName}>Tomi Adebayo</Text>
+                            <Text style={styles.quickActionSub}>Idea waiting • 2h ago</Text>
+                          </View>
+                        </View>
+                        <Pressable
+                          style={styles.openPlanBtn}
+                          onPress={() => {
+                            if (onOpenCollabIdea) {
+                              onOpenCollabIdea({
+                                name: 'Tomi Adebayo',
+                                handle: '@tomi_tech',
+                                niche: 'Tech & Gadgets',
+                                avatar: require('../../assets/images/tomi-avatar.jpg'),
+                                planIndex: 0,
+                                title: 'Extreme Creator Studio Upgrades Under $100',
+                              });
+                            }
+                          }}
+                        >
+                          <Text style={styles.openPlanBtnText}>Open Plan</Text>
+                        </Pressable>
+                      </View>
+
+                      {/* Row 2: Zainab Okafor */}
+                      <View style={styles.quickActionRow}>
+                        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, flex: 1 }}>
+                          <Image source={require('../../assets/images/zainab-avatar.jpg')} style={styles.quickActionAvatar} />
+                          <View>
+                            <Text style={styles.quickActionName}>Zainab Okafor</Text>
+                            <Text style={styles.quickActionSub}>Mutual Match</Text>
+                          </View>
+                        </View>
+                        <Pressable
+                          style={styles.messageGreyBtn}
+                          onPress={() => onOpenMessages && onOpenMessages()}
+                        >
+                          <Text style={styles.messageGreyBtnText}>Message</Text>
+                        </Pressable>
+                      </View>
+                    </View>
+                  </View>
+
+                  {/* ============================================================ */}
+                  {/* SECTION 13: JARVIS CORE INTELLIGENCE HERO CARD               */}
+                  {/* ============================================================ */}
+                  <View style={styles.jarvisCoreHeroCard}>
+                    <View style={styles.jarvisCoreIconCircle}>
+                      <Image
+                        source={require('../../assets/images/jarvis-core-flame.png')}
+                        style={{ width: 26, height: 26 }}
+                        resizeMode="contain"
+                      />
+                    </View>
+                    <Text style={styles.jarvisCoreQuote}>
+                      &ldquo;Creators who publish on a similar rhythm are more likely to complete collaborations successfully.&rdquo;
+                    </Text>
+                    <Text style={styles.jarvisCoreTag}>JARVIS CORE INTELLIGENCE</Text>
+                  </View>
+                </>
               ) : (
                 <View style={styles.emptyDeckCard}>
                   <Text style={{ fontSize: 36, marginBottom: 8 }}>🎉</Text>
@@ -945,53 +1236,6 @@ export const ProMatchScreen: React.FC<ProMatchScreenProps> = ({
                   </Pressable>
                 </View>
               )}
-
-              {/* Gesture Guide Bar */}
-              <View style={styles.gestureGuideBar}>
-                <Text style={styles.gestureGuideText}>
-                  👈 Swipe left to decline  •  👆 Up to track  •  Right to accept 👉
-                </Text>
-              </View>
-
-              {/* Fast Action Buttons Bar */}
-              <View style={styles.fastActionRow}>
-                {/* Pass Button */}
-                <Pressable
-                  style={({ pressed }) => [styles.actionCircleBtn, styles.passActionBtn, pressed && styles.btnPressed]}
-                  onPress={() => currentCreator && swipeLeft(currentCreator)}
-                >
-                  <Text style={{ fontSize: 20 }}>✕</Text>
-                </Pressable>
-
-                {/* Track Button */}
-                <Pressable
-                  style={({ pressed }) => [styles.actionCircleBtn, styles.trackActionBtn, pressed && styles.btnPressed]}
-                  onPress={() => currentCreator && swipeUp(currentCreator)}
-                >
-                  <Text style={{ fontSize: 18 }}>📡</Text>
-                </Pressable>
-
-                {/* Jarvis Super Match */}
-                <Pressable
-                  style={({ pressed }) => [styles.actionCircleBtn, styles.superActionBtn, pressed && styles.btnPressed]}
-                  onPress={() => {
-                    if (currentCreator) {
-                      showToast('⚡ Jarvis Super Match activated (+50% synergy)');
-                      swipeRight(currentCreator);
-                    }
-                  }}
-                >
-                  <Text style={{ fontSize: 20 }}>⚡</Text>
-                </Pressable>
-
-                {/* Collab Match Button */}
-                <Pressable
-                  style={({ pressed }) => [styles.actionCircleBtn, styles.matchActionBtn, pressed && styles.btnPressed]}
-                  onPress={() => currentCreator && swipeRight(currentCreator)}
-                >
-                  <Text style={{ fontSize: 22 }}>💜</Text>
-                </Pressable>
-              </View>
             </View>
           )}
 
@@ -1260,27 +1504,26 @@ export const ProMatchScreen: React.FC<ProMatchScreenProps> = ({
                         />
                         <Text style={styles.modalJarvisTitle}>Jarvis Match Intelligence</Text>
                       </View>
-                      <Text style={styles.modalJarvisText}>&ldquo;{selectedCreator.jarvisRationale}&rdquo;</Text>
+                      <Text style={styles.modalJarvisText}>&ldquo;{selectedCreator.whyMatchDesc}&rdquo;</Text>
                     </LinearGradient>
 
-                    {/* 3 AI Collab Concepts */}
-                    <Text style={styles.modalSectionHeader}>PROPOSED COLLAB CONCEPTS</Text>
-                    <View style={{ gap: 8, marginTop: 6 }}>
-                      {selectedCreator.collabConcepts.map((concept) => (
-                        <View key={concept.id} style={styles.conceptCard}>
-                          <Text style={styles.conceptCardTitle}>{concept.title}</Text>
-                          <Text style={styles.conceptCardHook}>Hook: &ldquo;{concept.hook}&rdquo;</Text>
-                          <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 8 }}>
-                            <Text style={styles.conceptCardFormat}>{concept.format}</Text>
-                            <Pressable
-                              style={styles.proposeConceptBtn}
-                              onPress={() => handleLaunchCollabConcept(selectedCreator, concept)}
-                            >
-                              <Text style={styles.proposeConceptBtnText}>Propose ➔</Text>
-                            </Pressable>
-                          </View>
-                        </View>
-                      ))}
+                    {/* Collab Concept */}
+                    <Text style={styles.modalSectionHeader}>PROPOSED COLLAB CONCEPT</Text>
+                    <View style={styles.conceptCard}>
+                      <Text style={styles.conceptCardTitle}>{selectedCreator.proposedConcept.title}</Text>
+                      <Text style={styles.conceptCardHook}>Hook: &ldquo;{selectedCreator.proposedConcept.hook}&rdquo;</Text>
+                      <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 8 }}>
+                        <Text style={styles.conceptCardFormat}>{selectedCreator.proposedConcept.format}</Text>
+                        <Pressable
+                          style={styles.proposeConceptBtn}
+                          onPress={() => {
+                            setShowDeepDiveModal(false);
+                            handleLaunchCollabPlan(selectedCreator);
+                          }}
+                        >
+                          <Text style={styles.proposeConceptBtnText}>Propose ➔</Text>
+                        </Pressable>
+                      </View>
                     </View>
                   </ScrollView>
 
@@ -1353,6 +1596,12 @@ const styles = StyleSheet.create({
   btnPressed: {
     transform: [{ scale: 0.96 }],
     opacity: 0.85,
+  },
+  sectionTitle: {
+    fontSize: 15.5,
+    fontWeight: '900',
+    color: '#171420',
+    letterSpacing: -0.2,
   },
 
   // 1. TOP HEADER
@@ -1566,7 +1815,7 @@ const styles = StyleSheet.create({
   filterPillsRow: {
     flexDirection: 'row',
     gap: 6,
-    marginBottom: 6,
+    marginBottom: 12,
   },
   filterPill: {
     paddingHorizontal: 11,
@@ -1592,7 +1841,7 @@ const styles = StyleSheet.create({
 
   // 7. SWIPING DECK & HERO CARD
   deckContainer: {
-    height: SCREEN_HEIGHT * 0.58,
+    height: SCREEN_HEIGHT * 0.54,
     position: 'relative',
     justifyContent: 'center',
     alignItems: 'center',
@@ -1824,6 +2073,514 @@ const styles = StyleSheet.create({
     fontWeight: '800',
   },
 
+  // GESTURE GUIDE
+  gestureGuideBar: {
+    backgroundColor: '#FAF8F5',
+    paddingVertical: 9,
+    borderRadius: 14,
+    alignItems: 'center',
+    marginTop: 10,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+  },
+  gestureGuideText: {
+    fontSize: 10.5,
+    fontWeight: '800',
+    color: '#64748B',
+  },
+
+  // METRICS ROW (FOLLOWERS, STREAK, PLATFORM)
+  creatorMetricsCard: {
+    flexDirection: 'row',
+    backgroundColor: '#FFFFFF',
+    borderRadius: 16,
+    paddingVertical: 14,
+    paddingHorizontal: 12,
+    borderWidth: 1,
+    borderColor: '#EFECE6',
+    marginTop: 12,
+  },
+  creatorMetricItem: {
+    flex: 1,
+    alignItems: 'center',
+  },
+  creatorMetricLabel: {
+    fontSize: 8.5,
+    fontWeight: '900',
+    color: '#94A3B8',
+    letterSpacing: 0.4,
+  },
+  creatorMetricVal: {
+    fontSize: 15,
+    fontWeight: '900',
+    color: '#171420',
+    marginTop: 3,
+  },
+  creatorMetricDivider: {
+    width: 1,
+    height: '70%',
+    backgroundColor: '#E2E8F0',
+    alignSelf: 'center',
+  },
+
+  // CATEGORY TAGS
+  categoryTagsRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 6,
+    marginTop: 10,
+  },
+  categoryTagPill: {
+    backgroundColor: '#FFFFFF',
+    paddingHorizontal: 11,
+    paddingVertical: 5.5,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+  },
+  categoryTagPillText: {
+    fontSize: 11,
+    fontWeight: '800',
+    color: '#475569',
+  },
+  availableTagPill: {
+    backgroundColor: '#FEF3C7',
+    borderColor: '#FDE68A',
+  },
+  availableTagPillText: {
+    color: '#92400E',
+    fontWeight: '900',
+  },
+
+  // WHY THIS MATCH? CARD
+  whyMatchCard: {
+    backgroundColor: '#F8F7FF',
+    borderRadius: 18,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: '#EDE9FE',
+    marginTop: 12,
+  },
+  whyMatchHeaderTitle: {
+    fontSize: 10,
+    fontWeight: '900',
+    color: '#582CDB',
+    letterSpacing: 0.5,
+  },
+  whyMatchBodyText: {
+    fontSize: 12,
+    color: '#334155',
+    lineHeight: 18,
+  },
+  potentialBoostRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    marginTop: 12,
+    paddingTop: 10,
+    borderTopWidth: 1,
+    borderTopColor: '#EDE9FE',
+  },
+  potentialBoostText: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: '#64748B',
+  },
+
+  // 3 ACTION BUTTONS (PASS, SAVE, CONNECT)
+  threeActionBtnRow: {
+    flexDirection: 'row',
+    gap: 10,
+    marginTop: 14,
+  },
+  passOutlineBtn: {
+    flex: 1,
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1.5,
+    borderColor: '#E2E8F0',
+    paddingVertical: 12,
+    borderRadius: 14,
+    alignItems: 'center',
+  },
+  passOutlineBtnText: {
+    color: '#475569',
+    fontSize: 13,
+    fontWeight: '900',
+  },
+  saveOutlineBtn: {
+    flex: 1,
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1.5,
+    borderColor: '#E2E8F0',
+    paddingVertical: 12,
+    borderRadius: 14,
+    alignItems: 'center',
+  },
+  saveOutlineBtnText: {
+    color: '#475569',
+    fontSize: 13,
+    fontWeight: '900',
+  },
+  connectPurpleBtn: {
+    flex: 2,
+    backgroundColor: '#582CDB',
+    paddingVertical: 12,
+    borderRadius: 14,
+    alignItems: 'center',
+    shadowColor: '#582CDB',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.25,
+    shadowRadius: 8,
+    elevation: 3,
+  },
+  connectPurpleBtnText: {
+    color: '#FFFFFF',
+    fontSize: 13.5,
+    fontWeight: '900',
+  },
+
+  // AI COLLABORATION PLAN
+  proAiMatchPill: {
+    backgroundColor: '#EDE9FE',
+    paddingHorizontal: 8,
+    paddingVertical: 3.5,
+    borderRadius: 6,
+  },
+  proAiMatchPillText: {
+    color: '#582CDB',
+    fontSize: 8.5,
+    fontWeight: '900',
+    letterSpacing: 0.3,
+  },
+  aiCollabPlanCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 20,
+    padding: 18,
+    borderWidth: 1,
+    borderColor: '#EFECE6',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.04,
+    shadowRadius: 6,
+    elevation: 2,
+  },
+  proposedConceptSub: {
+    fontSize: 9,
+    fontWeight: '900',
+    color: '#94A3B8',
+    letterSpacing: 0.5,
+  },
+  proposedConceptTitle: {
+    fontSize: 16,
+    fontWeight: '900',
+    color: '#171420',
+    marginTop: 3,
+    marginBottom: 6,
+  },
+  proposedConceptDesc: {
+    fontSize: 12,
+    color: '#475569',
+    lineHeight: 17,
+  },
+  conceptMetaChip: {
+    backgroundColor: '#FAF8F5',
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    paddingHorizontal: 9,
+    paddingVertical: 4,
+    borderRadius: 8,
+  },
+  conceptMetaChipText: {
+    fontSize: 10.5,
+    fontWeight: '800',
+    color: '#475569',
+  },
+  goldenMetaChip: {
+    backgroundColor: '#FEF3C7',
+    borderWidth: 1,
+    borderColor: '#FDE68A',
+    paddingHorizontal: 9,
+    paddingVertical: 4,
+    borderRadius: 8,
+  },
+  goldenMetaChipText: {
+    fontSize: 10.5,
+    fontWeight: '900',
+    color: '#92400E',
+  },
+  buildCollabPlanBtn: {
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1.5,
+    borderColor: '#582CDB',
+    paddingVertical: 12,
+    borderRadius: 14,
+    alignItems: 'center',
+  },
+  buildCollabPlanBtnText: {
+    color: '#582CDB',
+    fontSize: 12.5,
+    fontWeight: '900',
+  },
+
+  // YOUR CREATOR SQUAD
+  squadCard: {
+    backgroundColor: '#F7F4EE',
+    borderRadius: 20,
+    padding: 18,
+    borderWidth: 1,
+    borderColor: '#E8E4DA',
+  },
+  squadNameText: {
+    fontSize: 16,
+    fontWeight: '900',
+    color: '#171420',
+  },
+  squadLevelPill: {
+    backgroundColor: '#582CDB',
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 5,
+  },
+  squadLevelPillText: {
+    color: '#FFFFFF',
+    fontSize: 8.5,
+    fontWeight: '900',
+  },
+  squadStreakText: {
+    fontSize: 11,
+    fontWeight: '800',
+    color: '#64748B',
+  },
+  avatarStackRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  stackAvatar: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    borderWidth: 2,
+    borderColor: '#F7F4EE',
+  },
+  stackAvatarPlus: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: '#E2E8F0',
+    borderWidth: 2,
+    borderColor: '#F7F4EE',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  stackAvatarPlusText: {
+    fontSize: 10,
+    fontWeight: '900',
+    color: '#475569',
+  },
+  squadGoalText: {
+    fontSize: 10.5,
+    fontWeight: '800',
+    color: '#475569',
+  },
+  squadXpLabel: {
+    fontSize: 9.5,
+    fontWeight: '900',
+    color: '#64748B',
+  },
+  squadTrack: {
+    height: 6,
+    backgroundColor: '#E2E8F0',
+    borderRadius: 3,
+    overflow: 'hidden',
+  },
+  squadFill: {
+    height: '100%',
+    backgroundColor: '#582CDB',
+    borderRadius: 3,
+  },
+  nextUnlockText: {
+    fontSize: 10,
+    fontWeight: '800',
+    color: '#92400E',
+    marginTop: 8,
+    fontStyle: 'italic',
+  },
+  openSquadBtn: {
+    flex: 1,
+    backgroundColor: '#582CDB',
+    paddingVertical: 11,
+    borderRadius: 12,
+    alignItems: 'center',
+  },
+  openSquadBtnText: {
+    color: '#FFFFFF',
+    fontSize: 12,
+    fontWeight: '900',
+  },
+  findSquadBtn: {
+    flex: 1,
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1.5,
+    borderColor: '#CBD5E1',
+    paddingVertical: 11,
+    borderRadius: 12,
+    alignItems: 'center',
+  },
+  findSquadBtnText: {
+    color: '#171420',
+    fontSize: 12,
+    fontWeight: '900',
+  },
+
+  // LIVE DUEL BANNER
+  liveDuelBanner: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    backgroundColor: '#F1E5C8',
+    borderRadius: 16,
+    padding: 12,
+    marginTop: 12,
+    borderWidth: 1,
+    borderColor: '#E6D3A3',
+  },
+  liveDuelLeftGroup: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    flex: 1,
+    paddingRight: 6,
+  },
+  duelIconSquare: {
+    width: 34,
+    height: 34,
+    borderRadius: 10,
+    backgroundColor: '#D97706',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  liveDuelTag: {
+    fontSize: 8.5,
+    fontWeight: '900',
+    color: '#92400E',
+    letterSpacing: 0.4,
+  },
+  liveDuelVsText: {
+    fontSize: 10.5,
+    fontWeight: '800',
+    color: '#171420',
+    marginTop: 1,
+  },
+  duelScoreText: {
+    fontSize: 10.5,
+    fontWeight: '900',
+    color: '#582CDB',
+  },
+  viewDuelBtn: {
+    backgroundColor: '#FFFFFF',
+    paddingHorizontal: 9,
+    paddingVertical: 5,
+    borderRadius: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
+  },
+  viewDuelBtnText: {
+    fontSize: 10,
+    fontWeight: '900',
+    color: '#171420',
+  },
+
+  // QUICK ACTIONS
+  quickActionRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    backgroundColor: '#FFFFFF',
+    borderRadius: 16,
+    padding: 12,
+    borderWidth: 1,
+    borderColor: '#EFECE6',
+  },
+  quickActionAvatar: {
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+  },
+  quickActionName: {
+    fontSize: 13,
+    fontWeight: '900',
+    color: '#171420',
+  },
+  quickActionSub: {
+    fontSize: 10.5,
+    color: '#64748B',
+    marginTop: 1,
+  },
+  openPlanBtn: {
+    backgroundColor: '#EDE9FE',
+    paddingHorizontal: 12,
+    paddingVertical: 7,
+    borderRadius: 10,
+  },
+  openPlanBtnText: {
+    color: '#582CDB',
+    fontSize: 11,
+    fontWeight: '900',
+  },
+  messageGreyBtn: {
+    backgroundColor: '#F1F5F9',
+    paddingHorizontal: 12,
+    paddingVertical: 7,
+    borderRadius: 10,
+  },
+  messageGreyBtnText: {
+    color: '#475569',
+    fontSize: 11,
+    fontWeight: '800',
+  },
+
+  // JARVIS CORE HERO CARD
+  jarvisCoreHeroCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 22,
+    padding: 24,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#EFECE6',
+    marginTop: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.03,
+    shadowRadius: 6,
+    elevation: 2,
+  },
+  jarvisCoreIconCircle: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: '#F5F3FF',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  jarvisCoreQuote: {
+    fontSize: 13,
+    fontWeight: '800',
+    color: '#171420',
+    textAlign: 'center',
+    lineHeight: 19,
+    marginBottom: 10,
+    paddingHorizontal: 10,
+  },
+  jarvisCoreTag: {
+    fontSize: 9,
+    fontWeight: '900',
+    color: '#582CDB',
+    letterSpacing: 0.6,
+  },
+
   // EMPTY DECK
   emptyDeckCard: {
     backgroundColor: '#FFFFFF',
@@ -1857,62 +2614,6 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontSize: 12,
     fontWeight: '900',
-  },
-
-  // GESTURE GUIDE
-  gestureGuideBar: {
-    backgroundColor: '#FAF8F5',
-    paddingVertical: 9,
-    borderRadius: 14,
-    alignItems: 'center',
-    marginTop: 12,
-    borderWidth: 1,
-    borderColor: '#E2E8F0',
-  },
-  gestureGuideText: {
-    fontSize: 10.5,
-    fontWeight: '800',
-    color: '#64748B',
-  },
-
-  // FAST ACTION BUTTONS ROW
-  fastActionRow: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    gap: 16,
-    marginTop: 14,
-  },
-  actionCircleBtn: {
-    width: 52,
-    height: 52,
-    borderRadius: 26,
-    backgroundColor: '#FFFFFF',
-    justifyContent: 'center',
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.08,
-    shadowRadius: 6,
-    elevation: 3,
-    borderWidth: 1.5,
-  },
-  passActionBtn: {
-    borderColor: '#FCA5A5',
-  },
-  trackActionBtn: {
-    borderColor: '#FDE68A',
-  },
-  superActionBtn: {
-    borderColor: '#A78BFA',
-    backgroundColor: '#F5F3FF',
-  },
-  matchActionBtn: {
-    borderColor: '#C084FC',
-    backgroundColor: '#FAF5FF',
-    width: 58,
-    height: 58,
-    borderRadius: 29,
   },
 
   // TAB CONTENT STYLES
