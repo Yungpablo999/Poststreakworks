@@ -1020,19 +1020,14 @@ export const ProCaptionScreen: React.FC<ProCaptionScreenProps> = ({
             </View>
 
             {/* Quick Strategy Pills */}
-            <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 14 }}>
-              {[
-                { id: 'DIRECT HOOK', label: 'DIRECT HOOK', emoji: '⚡' },
-                { id: 'COMMENT CTA', label: 'COMMENT CTA', emoji: '💬' },
-                { id: 'SAVEABLE BULLETS', label: 'SAVEABLE BULLETS', emoji: '📌' },
-              ].map((chip) => (
+            <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginBottom: 14 }}>
+              {['DIRECT HOOK', 'COMMENT CTA', 'SAVEABLE BULLETS'].map((chip) => (
                 <Pressable
-                  key={chip.id}
+                  key={chip}
                   style={({ pressed }) => [styles.jarvisStrategyChip, pressed && styles.btnPressed]}
-                  onPress={() => handleApplyJarvisChip(chip.id)}
+                  onPress={() => handleApplyJarvisChip(chip)}
                 >
-                  <Text style={{ fontSize: 11 }}>{chip.emoji}</Text>
-                  <Text style={styles.jarvisStrategyChipText}>{chip.label}</Text>
+                  <Text style={styles.jarvisStrategyChipText}>{chip}</Text>
                 </Pressable>
               ))}
             </View>
@@ -2133,26 +2128,21 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   jarvisStrategyChip: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#582CDB',
-    paddingHorizontal: 11,
-    paddingVertical: 7,
-    borderRadius: 14,
-    borderWidth: 1.5,
-    borderColor: '#A78BFA',
-    shadowColor: '#582CDB',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.35,
-    shadowRadius: 5,
-    elevation: 3,
-    gap: 5,
+    backgroundColor: '#FFFFFF',
+    paddingHorizontal: 9,
+    paddingVertical: 5,
+    borderRadius: 6,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.08,
+    shadowRadius: 3,
+    elevation: 1,
   },
   jarvisStrategyChipText: {
-    fontSize: 10,
+    fontSize: 9.5,
     fontWeight: '900',
-    color: '#FFFFFF',
-    letterSpacing: 0.4,
+    color: '#582CDB',
+    letterSpacing: 0.3,
   },
   applyJarvisHeroBtn: {
     backgroundColor: '#582CDB',
