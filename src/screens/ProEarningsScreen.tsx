@@ -629,7 +629,14 @@ export const ProEarningsScreen: React.FC<ProEarningsScreenProps> = ({
               if (Platform.OS !== 'web') {
                 Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
               }
-              showToast('📥 July Summary Report (PDF) exported successfully!');
+              setCelebrationData({
+                title: 'Monthly Summary Exported!',
+                subtitle: 'Your July 2024 Revenue Breakdown & Payout Audit PDF is ready.',
+                badgeText: '📄 PDF REPORT DOWNLOADED',
+                xpEarned: 50,
+                speechBubble: 'Monthly summary ready! Keep stacking those creator wins! 📈',
+              });
+              setShowCelebrationModal(true);
             }}
           >
             <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
