@@ -715,8 +715,17 @@ export const ProIdeaStrategyScreen: React.FC<ProIdeaStrategyScreenProps> = ({
             </Pressable>
 
             <Pressable
-              style={styles.backToCreateLinkBtn}
-              onPress={() => onBack()}
+              style={({ pressed }) => [styles.backToCreateLinkBtn, pressed && styles.btnPressed]}
+              onPress={() => {
+                if (Platform.OS !== 'web') {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                }
+                if (onNavigateTab) {
+                  onNavigateTab('create');
+                } else {
+                  onBack();
+                }
+              }}
               hitSlop={8}
             >
               <Text style={styles.backToCreateLinkText}>BACK TO CREATE HUB</Text>
