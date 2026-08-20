@@ -740,20 +740,43 @@ export const FindSquadScreen: React.FC<FindSquadScreenProps> = ({
         <View style={{ height: 130 }} />
       </ScrollView>
 
-      {/* SQUAD PREVIEW BOTTOM SHEET MODAL */}
+      {/* SQUAD PREVIEW CENTERED LUXURY DIALOG MODAL */}
       <Modal
         visible={previewModalSquad !== null}
         transparent
-        animationType="slide"
+        animationType="fade"
         onRequestClose={() => setPreviewModalSquad(null)}
       >
         <View style={styles.modalOverlay}>
           <Pressable style={styles.modalBackdrop} onPress={() => setPreviewModalSquad(null)} />
           {previewModalSquad && (
             <View style={styles.modalContentCard}>
-              <View style={styles.modalDragHandle} />
+              {/* Top Modal Header with Close Button */}
+              <View style={styles.modalTopHeaderRow}>
+                <View style={styles.modalHostProfileRow}>
+                  <Image source={previewModalSquad.hostAvatar} style={styles.modalHostAvatar} />
+                  <View>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>
+                      <Text style={styles.modalHostName}>{previewModalSquad.hostName}</Text>
+                      <View style={styles.modalHostCrownPill}>
+                        <Text style={styles.modalHostCrownText}>👑 HOST</Text>
+                      </View>
+                    </View>
+                    <Text style={styles.modalHostSub}>Verified Squad Creator</Text>
+                  </View>
+                </View>
 
-              <View style={styles.squadCardTopRow}>
+                <Pressable
+                  style={styles.modalCloseCircleBtn}
+                  onPress={() => setPreviewModalSquad(null)}
+                  hitSlop={8}
+                >
+                  <Text style={styles.modalCloseCircleText}>✕</Text>
+                </Pressable>
+              </View>
+
+              {/* Squad Badge & Fit Score */}
+              <View style={styles.modalSquadMetaRow}>
                 <View style={[styles.squadCatPill, styles.squadCatGrowth]}>
                   <Text style={[styles.squadCatText, styles.squadCatTextGrowth]}>
                     {previewModalSquad.category}
@@ -765,41 +788,68 @@ export const FindSquadScreen: React.FC<FindSquadScreenProps> = ({
                 </View>
               </View>
 
+              {/* Title & Description */}
               <Text style={styles.modalSquadTitle}>{previewModalSquad.name}</Text>
               <Text style={styles.modalSquadDesc}>{previewModalSquad.description}</Text>
 
+              {/* Info Details Grid */}
               <View style={styles.modalInfoBox}>
-                <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 8 }}>
+                <View style={styles.modalInfoRowItem}>
                   <Text style={styles.modalInfoLabel}>🎯 Squad Goal</Text>
                   <Text style={styles.modalInfoVal}>{previewModalSquad.squadGoal}</Text>
                 </View>
-                <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 8 }}>
+                <View style={styles.modalInfoRowItem}>
                   <Text style={styles.modalInfoLabel}>⚡ Streak Record</Text>
                   <Text style={styles.modalInfoVal}>🔥 {previewModalSquad.streak} Days Streak Avg</Text>
                 </View>
-                <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 8 }}>
+                <View style={styles.modalInfoRowItem}>
                   <Text style={styles.modalInfoLabel}>🏆 Weekly Quest</Text>
-                  <Text style={[styles.modalInfoVal, { color: '#582CDB' }]}>{previewModalSquad.weeklyQuest}</Text>
+                  <Text style={[styles.modalInfoVal, { color: '#582CDB', fontWeight: '900' }]}>
+                    {previewModalSquad.weeklyQuest}
+                  </Text>
                 </View>
-                <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-                  <Text style={styles.modalInfoLabel}>📋 Requirements</Text>
+                <View style={[styles.modalInfoRowItem, { borderBottomWidth: 0, paddingBottom: 0 }]}>
+                  <Text style={styles.modalInfoLabel}>📋 Requirement</Text>
                   <Text style={styles.modalInfoVal}>{previewModalSquad.requirements}</Text>
                 </View>
               </View>
 
-              <View style={{ flexDirection: 'row', gap: 10, marginTop: 20 }}>
+              {/* Member Capacity & Avatars */}
+              <View style={styles.modalMembersPreviewRow}>
+                <View style={styles.avatarStackRow}>
+                  {previewModalSquad.avatars.map((av, i) => (
+                    <Image
+                      key={i}
+                      source={av}
+                      style={[
+                        styles.stackAvatarImg,
+                        { marginLeft: i === 0 ? 0 : -8, zIndex: 3 - i },
+                      ]}
+                    />
+                  ))}
+                  <View style={[styles.stackAvatarPlus, { marginLeft: -8, zIndex: 0 }]}>
+                    <Text style={styles.stackAvatarPlusText}>+2</Text>
+                  </View>
+                </View>
+                <Text style={styles.modalCapacityText}>
+                  {previewModalSquad.memberCount}/{previewModalSquad.maxMembers} Members • <Text style={{ color: '#059669', fontWeight: '800' }}>2 Spots Left</Text>
+                </Text>
+              </View>
+
+              {/* Action Buttons */}
+              <View style={styles.modalActionsRow}>
                 <Pressable
-                  style={styles.modalOutlineBtn}
+                  style={({ pressed }) => [styles.modalOutlineBtn, pressed && styles.btnPressed]}
                   onPress={() => {
                     setPreviewModalSquad(null);
                     if (onOpenSquad) onOpenSquad();
                   }}
                 >
-                  <Text style={styles.modalOutlineBtnText}>Open Squad Room</Text>
+                  <Text style={styles.modalOutlineBtnText}>Open Room</Text>
                 </Pressable>
 
                 <Pressable
-                  style={styles.modalSolidBtn}
+                  style={({ pressed }) => [styles.modalSolidBtn, pressed && styles.btnPressed]}
                   onPress={() => handleRequestToJoin(previewModalSquad)}
                 >
                   <LinearGradient
@@ -1458,11 +1508,14 @@ const styles = StyleSheet.create({
     color: '#582CDB',
   },
 
-  /* SQUAD PREVIEW MODAL */
+  /* SQUAD PREVIEW CENTERED MODAL */
   modalOverlay: {
     flex: 1,
-    justifyContent: 'flex-end',
-    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(15, 23, 42, 0.7)',
+    paddingHorizontal: 20,
+    paddingVertical: 40,
   },
   modalBackdrop: {
     position: 'absolute',
@@ -1472,53 +1525,131 @@ const styles = StyleSheet.create({
     bottom: 0,
   },
   modalContentCard: {
+    width: '100%',
+    maxWidth: 420,
     backgroundColor: '#FFFFFF',
-    borderTopLeftRadius: 24,
-    borderTopRightRadius: 24,
+    borderRadius: 24,
     padding: 20,
-    paddingBottom: 36,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: -4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 16,
-    elevation: 5,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.9)',
+    shadowColor: '#582CDB',
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.22,
+    shadowRadius: 24,
+    elevation: 8,
   },
-  modalDragHandle: {
-    width: 36,
-    height: 4,
-    borderRadius: 2,
-    backgroundColor: '#CBD5E1',
-    alignSelf: 'center',
-    marginBottom: 16,
+  modalTopHeaderRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 12,
   },
-  modalSquadTitle: {
-    fontSize: 21,
+  modalHostProfileRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+  },
+  modalHostAvatar: {
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    borderWidth: 1.5,
+    borderColor: '#F59E0B',
+  },
+  modalHostName: {
+    fontSize: 13.5,
     fontWeight: '900',
     color: '#171420',
-    marginBottom: 6,
+  },
+  modalHostCrownPill: {
+    backgroundColor: '#FEF3C7',
+    paddingHorizontal: 5,
+    paddingVertical: 1.5,
+    borderRadius: 4,
+  },
+  modalHostCrownText: {
+    fontSize: 8.5,
+    fontWeight: '900',
+    color: '#B45309',
+  },
+  modalHostSub: {
+    fontSize: 10.5,
+    color: '#64748B',
+  },
+  modalCloseCircleBtn: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: '#F1F5F9',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  modalCloseCircleText: {
+    fontSize: 13,
+    fontWeight: '900',
+    color: '#475569',
+  },
+  modalSquadMetaRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  modalSquadTitle: {
+    fontSize: 20,
+    fontWeight: '900',
+    color: '#171420',
+    marginBottom: 4,
   },
   modalSquadDesc: {
-    fontSize: 13,
+    fontSize: 12.5,
     color: '#64748B',
-    lineHeight: 19,
-    marginBottom: 16,
+    lineHeight: 18,
+    marginBottom: 14,
   },
   modalInfoBox: {
     backgroundColor: '#FAF8F5',
     borderRadius: 16,
-    padding: 14,
+    padding: 12,
     borderWidth: 1,
     borderColor: '#EFECE6',
+    marginBottom: 12,
+  },
+  modalInfoRowItem: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 6,
+    borderBottomWidth: 1,
+    borderBottomColor: '#F1EFE9',
   },
   modalInfoLabel: {
-    fontSize: 12,
+    fontSize: 11.5,
     color: '#64748B',
     fontWeight: '700',
   },
   modalInfoVal: {
-    fontSize: 12,
+    fontSize: 11.5,
     color: '#171420',
     fontWeight: '800',
+    maxWidth: '62%',
+    textAlign: 'right',
+  },
+  modalMembersPreviewRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 4,
+    marginBottom: 16,
+  },
+  modalCapacityText: {
+    fontSize: 11,
+    color: '#64748B',
+    fontWeight: '700',
+  },
+  modalActionsRow: {
+    flexDirection: 'row',
+    gap: 10,
   },
   modalOutlineBtn: {
     flex: 1,
@@ -1526,7 +1657,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#E2E8F0',
     paddingVertical: 12,
-    borderRadius: 12,
+    borderRadius: 14,
     alignItems: 'center',
   },
   modalOutlineBtnText: {
@@ -1535,8 +1666,8 @@ const styles = StyleSheet.create({
     color: '#475569',
   },
   modalSolidBtn: {
-    flex: 1,
-    borderRadius: 12,
+    flex: 1.3,
+    borderRadius: 14,
     overflow: 'hidden',
   },
   modalSolidGradient: {
