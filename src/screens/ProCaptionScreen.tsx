@@ -430,44 +430,61 @@ export const ProCaptionScreen: React.FC<ProCaptionScreenProps> = ({
           </View>
 
           {/* ============================================================ */}
-          {/* CARD 2: CAPTION TONE (Interactive Multi-Select)              */}
+          {/* CARD 2: CAPTION TONE STUDIO (Interactive Multi-Select)       */}
           {/* ============================================================ */}
-          <View style={styles.toneSectionWrapper}>
-            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 10 }}>
-              <Text style={{ fontSize: 13 }}>🎭</Text>
-              <Text style={styles.sectionHeaderTitle}>Caption Tone</Text>
+          <View style={styles.toneSectionCard}>
+            <View style={styles.toneCardHeaderRow}>
+              <View>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                  <Text style={{ fontSize: 14 }}>🎭</Text>
+                  <Text style={styles.sectionHeaderTitle}>Caption Tone</Text>
+                </View>
+                <Text style={styles.toneSubHint}>Select voice style for AI phrasing &amp; cadence</Text>
+              </View>
+              <View style={styles.toneActiveCounterBadge}>
+                <Text style={styles.toneActiveCounterText}>{selectedTones.length} SELECTED</Text>
+              </View>
             </View>
 
             <View style={styles.toneChipsFlexGrid}>
               {[
-                'Helpful',
-                'Direct',
-                'Confident',
-                'Honest',
-                'Motivational',
-                'Professional',
-                'Bold',
-                'Casual',
-                'Story-driven',
-              ].map((tone) => {
-                const isSelected = selectedTones.includes(tone);
+                { name: 'Helpful', emoji: '🤝' },
+                { name: 'Direct', emoji: '🎯' },
+                { name: 'Confident', emoji: '⚡' },
+                { name: 'Honest', emoji: '💡' },
+                { name: 'Motivational', emoji: '🔥' },
+                { name: 'Professional', emoji: '💼' },
+                { name: 'Bold', emoji: '💥' },
+                { name: 'Casual', emoji: '☕' },
+                { name: 'Story-driven', emoji: '📖' },
+              ].map((toneObj) => {
+                const isSelected = selectedTones.includes(toneObj.name);
                 return (
                   <Pressable
-                    key={tone}
-                    style={[
+                    key={toneObj.name}
+                    style={({ pressed }) => [
                       styles.toneChipPill,
                       isSelected && styles.toneChipPillActive,
+                      pressed && styles.btnPressed,
                     ]}
-                    onPress={() => handleToggleTone(tone)}
+                    onPress={() => handleToggleTone(toneObj.name)}
                   >
+                    <Text style={{ fontSize: 12, marginRight: 4 }}>{toneObj.emoji}</Text>
                     <Text
                       style={[
                         styles.toneChipText,
                         isSelected && styles.toneChipTextActive,
                       ]}
                     >
-                      {tone}
+                      {toneObj.name}
                     </Text>
+                    {isSelected && (
+                      <View style={styles.toneCheckMarkDot}>
+                        <Svg width={7} height={7} viewBox="0 0 12 12" fill="none">
+                          <Path d="M2.5 6.2L4.8 8.5L9.5 3.5" stroke="#FFFFFF" strokeWidth="2.8" strokeLinecap="round" />
+                        </Svg>
+                      </View>
+                    )}
                   </Pressable>
                 );
               })}
@@ -1149,41 +1166,88 @@ const styles = StyleSheet.create({
   },
 
   // CARD 2: TONE SECTION
-  toneSectionWrapper: {
-    marginTop: 4,
-    marginBottom: 8,
+  toneSectionCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 20,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: '#EFECE6',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.03,
+    shadowRadius: 6,
+    marginBottom: 16,
+  },
+  toneCardHeaderRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 12,
   },
   sectionHeaderTitle: {
-    fontSize: 12.5,
+    fontSize: 13,
     fontWeight: '900',
     color: '#171420',
     letterSpacing: 0.2,
   },
+  toneSubHint: {
+    fontSize: 10.5,
+    color: '#64748B',
+    marginTop: 2,
+  },
+  toneActiveCounterBadge: {
+    backgroundColor: '#EDE9FE',
+    paddingHorizontal: 8,
+    paddingVertical: 3.5,
+    borderRadius: 6,
+  },
+  toneActiveCounterText: {
+    fontSize: 9,
+    fontWeight: '900',
+    color: '#582CDB',
+    letterSpacing: 0.3,
+  },
   toneChipsFlexGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 6,
+    gap: 7,
   },
   toneChipPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
     backgroundColor: '#FAF8F5',
     borderWidth: 1.5,
-    borderColor: '#EFECE6',
+    borderColor: '#E2E8F0',
     paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 16,
+    paddingVertical: 8,
+    borderRadius: 20,
   },
   toneChipPillActive: {
     backgroundColor: '#582CDB',
     borderColor: '#582CDB',
+    shadowColor: '#582CDB',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.28,
+    shadowRadius: 4,
+    elevation: 2,
   },
   toneChipText: {
-    fontSize: 11,
+    fontSize: 11.5,
     fontWeight: '800',
     color: '#475569',
   },
   toneChipTextActive: {
     color: '#FFFFFF',
     fontWeight: '900',
+  },
+  toneCheckMarkDot: {
+    width: 14,
+    height: 14,
+    borderRadius: 7,
+    backgroundColor: 'rgba(255, 255, 255, 0.25)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginLeft: 6,
   },
 
   // CARD 3: SELECTED CAPTION EDITOR
