@@ -2101,9 +2101,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   toastText: {
-    fontSize: 12.5,
-    fontWeight: '800',
     color: '#FFFFFF',
-    textAlign: 'center',
+    fontSize: 12.5,
+    fontWeight: '900',
+    letterSpacing: 0.2,
   },
 });

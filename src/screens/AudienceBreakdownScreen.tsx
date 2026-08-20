@@ -1573,9 +1573,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   toastText: {
-    fontSize: 12,
-    fontWeight: '800',
-    color: '#6D28D9',
+    color: '#FFFFFF',
+    fontSize: 12.5,
+    fontWeight: '900',
+    letterSpacing: 0.2,
   },
 
   // Segment Tabs Pills

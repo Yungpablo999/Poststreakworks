@@ -2619,8 +2619,9 @@ const styles = StyleSheet.create({
   },
   toastText: {
     color: '#FFFFFF',
-    fontSize: 12,
-    fontWeight: '800',
+    fontSize: 12.5,
+    fontWeight: '900',
+    letterSpacing: 0.2,
   },
   expandedProjectCard: {
     backgroundColor: '#FAF8F5',
