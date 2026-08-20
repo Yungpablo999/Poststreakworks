@@ -385,7 +385,8 @@ export const ProCreateScreen: React.FC<ProCreateScreenProps> = ({
               <Pressable
                 style={styles.pipelineStepItem}
                 onPress={() => {
-                  if (onOpenIdeaDetail) onOpenIdeaDetail('3 creator mistakes I stopped making this year');
+                  if (onOpenIdeaAngle) onOpenIdeaAngle();
+                  else if (onOpenIdeaDetail) onOpenIdeaDetail('3 creator mistakes I stopped making this year');
                 }}
               >
                 <View style={styles.pipelineIconBox}>
