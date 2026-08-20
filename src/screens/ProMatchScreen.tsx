@@ -456,8 +456,7 @@ export const ProMatchScreen: React.FC<ProMatchScreenProps> = ({
     setCurrentIndex((prev) => prev + 1);
 
     if (direction === 'right') {
-      // MATCH
-      setMatchesLeft((prev) => Math.max(0, prev - 1));
+      // MATCH (Unlimited for Pro)
       setConnected((prev) => [
         {
           id: `conn_${creator.id}`,
@@ -774,8 +773,8 @@ export const ProMatchScreen: React.FC<ProMatchScreenProps> = ({
               style={styles.summaryCol}
               onPress={() => setSegmentTab('deck')}
             >
-              <Text style={styles.summaryItemText}>⭐ {matchesLeft}/5</Text>
-              <Text style={styles.summaryItemSub}>Matches Left</Text>
+              <Text style={styles.summaryItemText}>⭐ Unlimited</Text>
+              <Text style={styles.summaryItemSub}>Pro Matches</Text>
             </Pressable>
 
             <View style={styles.summaryDivider} />
