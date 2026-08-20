@@ -1124,28 +1124,7 @@ export const ProMatchScreen: React.FC<ProMatchScreenProps> = ({
                   </View>
 
                   {/* ============================================================ */}
-                  {/* SECTION 7: WHY THIS MATCH? CARD                             */}
-                  {/* ============================================================ */}
-                  <View style={styles.whyMatchCard}>
-                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 8 }}>
-                      <Text style={{ fontSize: 13, color: '#582CDB' }}>🔮</Text>
-                      <Text style={styles.whyMatchHeaderTitle}>WHY THIS MATCH?</Text>
-                    </View>
-
-                    <Text style={styles.whyMatchBodyText}>{currentCreator.whyMatchDesc}</Text>
-
-                    <View style={styles.potentialBoostRow}>
-                      <Image
-                        source={require('../../assets/images/jarvis-core-flame.png')}
-                        style={{ width: 14, height: 14 }}
-                        resizeMode="contain"
-                      />
-                      <Text style={styles.potentialBoostText}>{currentCreator.potentialBoostText}</Text>
-                    </View>
-                  </View>
-
-                  {/* ============================================================ */}
-                  {/* SECTION 8: 3 ACTION BUTTONS (PASS, SAVE, CONNECT)           */}
+                  {/* SECTION 7: 3 ACTION BUTTONS (PASS, SAVE, CONNECT)           */}
                   {/* ============================================================ */}
                   <View style={styles.threeActionBtnRow}>
                     <Pressable
