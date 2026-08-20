@@ -1842,7 +1842,7 @@ export const ProMatchScreen: React.FC<ProMatchScreenProps> = ({
                     colors={['#784DF0', '#582CDB']}
                     style={styles.arenaScoreGradient}
                   >
-                    <Text style={styles.arenaScoreBtnText}>Shape Post to Score 🔥</Text>
+                    <Text style={styles.arenaScoreBtnText}>Post to Score 🔥</Text>
                   </LinearGradient>
                 </Pressable>
               </View>
