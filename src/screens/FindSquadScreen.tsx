@@ -39,7 +39,18 @@ export interface FindSquadScreenProps {
   onSaveProfile?: (updated: UserProfileData) => void;
 }
 
-interface SquadItem {
+export interface SquadMember {
+  id: string;
+  name: string;
+  avatar: any;
+  role: string;
+  isHost?: boolean;
+  streak: number;
+  niche: string;
+  threadId?: string;
+}
+
+export interface SquadItem {
   id: string;
   category: string;
   categoryType: 'growth' | 'education' | 'lifestyle' | 'brand';
@@ -58,6 +69,7 @@ interface SquadItem {
   weeklyQuest: string;
   xpReward: number;
   requirements: string;
+  members: SquadMember[];
 }
 
 const ALL_SQUADS: SquadItem[] = [
@@ -84,6 +96,13 @@ const ALL_SQUADS: SquadItem[] = [
     weeklyQuest: '3 Duo Reel Collaborations & 14-Day Streak',
     xpReward: 250,
     requirements: 'Post at least 5x/week • 7+ Day Streak',
+    members: [
+      { id: 'm1', name: 'Elena Rostova', avatar: require('../../assets/images/elena-avatar.jpg'), role: 'Host & Lead', isHost: true, streak: 47, niche: 'Tech & Product', threadId: 'conv_elena' },
+      { id: 'm2', name: 'Amara Okafor', avatar: require('../../assets/images/amara-avatar.jpg'), role: 'Member', streak: 31, niche: 'Visual Storytelling', threadId: 'conv_amara' },
+      { id: 'm3', name: 'Tomi Adebayo', avatar: require('../../assets/images/tomi-avatar.jpg'), role: 'Member', streak: 22, niche: 'Growth & Short-Form', threadId: 'conv_tomi' },
+      { id: 'm4', name: 'David Kim', avatar: require('../../assets/images/david-avatar.jpg'), role: 'Member', streak: 19, niche: 'Systems & Code', threadId: 'conv_david' },
+      { id: 'm5', name: 'Kemi Adeleke', avatar: require('../../assets/images/kemi-avatar.jpg'), role: 'Member', streak: 15, niche: 'Brand & UGC', threadId: 'conv_kemi' },
+    ],
   },
   {
     id: 'sq_2',
@@ -108,6 +127,14 @@ const ALL_SQUADS: SquadItem[] = [
     weeklyQuest: 'Batch 5 Script Drafts in Jarvis Voice Studio',
     xpReward: 300,
     requirements: 'Share weekly script drafts • 14+ Day Streak',
+    members: [
+      { id: 'm1', name: 'David Kim', avatar: require('../../assets/images/david-avatar.jpg'), role: 'Host & Lead', isHost: true, streak: 38, niche: 'Systems & Code', threadId: 'conv_david' },
+      { id: 'm2', name: 'Marcus Vance', avatar: require('../../assets/images/marcus-avatar.jpg'), role: 'Member', streak: 33, niche: 'Analytics & Scaling', threadId: 'conv_marcus' },
+      { id: 'm3', name: 'Kemi Adeleke', avatar: require('../../assets/images/kemi-avatar.jpg'), role: 'Member', streak: 24, niche: 'Creator Economy', threadId: 'conv_kemi' },
+      { id: 'm4', name: 'Elena Rostova', avatar: require('../../assets/images/elena-avatar.jpg'), role: 'Member', streak: 47, niche: 'Design Systems', threadId: 'conv_elena' },
+      { id: 'm5', name: 'Tomi Adebayo', avatar: require('../../assets/images/tomi-avatar.jpg'), role: 'Member', streak: 18, niche: 'Production', threadId: 'conv_tomi' },
+      { id: 'm6', name: 'Amara Okafor', avatar: require('../../assets/images/amara-avatar.jpg'), role: 'Member', streak: 14, niche: 'Audio & Voice', threadId: 'conv_amara' },
+    ],
   },
   {
     id: 'sq_3',
@@ -132,6 +159,12 @@ const ALL_SQUADS: SquadItem[] = [
     weeklyQuest: '4 Cross-Platform Story Posts & B-Roll Swap',
     xpReward: 200,
     requirements: 'Lifestyle/Visual creators • 5+ Day Streak',
+    members: [
+      { id: 'm1', name: 'Amara Okafor', avatar: require('../../assets/images/amara-avatar.jpg'), role: 'Host & Lead', isHost: true, streak: 31, niche: 'Lifestyle & Vlogs', threadId: 'conv_amara' },
+      { id: 'm2', name: 'Elena Rostova', avatar: require('../../assets/images/elena-avatar.jpg'), role: 'Member', streak: 47, niche: 'Aesthetic B-Roll', threadId: 'conv_elena' },
+      { id: 'm3', name: 'Zainab Balogun', avatar: require('../../assets/images/zainab-avatar.jpg'), role: 'Member', streak: 16, niche: 'Fashion & Culture', threadId: 'conv_zainab' },
+      { id: 'm4', name: 'Kemi Adeleke', avatar: require('../../assets/images/kemi-avatar.jpg'), role: 'Member', streak: 12, niche: 'Short Stories', threadId: 'conv_kemi' },
+    ],
   },
   {
     id: 'sq_4',
@@ -141,7 +174,7 @@ const ALL_SQUADS: SquadItem[] = [
     name: 'UGC Starter Circle',
     hostName: 'Kemi Adeleke',
     hostAvatar: require('../../assets/images/kemi-avatar.jpg'),
-    memberCount: 7,
+    memberCount: 5,
     maxMembers: 8,
     streak: 15,
     avatars: [
@@ -149,13 +182,20 @@ const ALL_SQUADS: SquadItem[] = [
       require('../../assets/images/tomi-avatar.jpg'),
       require('../../assets/images/david-avatar.jpg'),
     ],
-    statusText: '1 spot remaining • Fast filling',
+    statusText: '3 spots remaining • Fast filling',
     statusType: 'limited',
     description: 'Brand deal pitch feedback, media kit rate audits, and sponsor video blueprint reviews.',
     squadGoal: 'Land first 3 paid brand partnerships',
     weeklyQuest: 'Pitch 5 Verified Brands with UGC Blueprints',
     xpReward: 350,
     requirements: 'Active UGC portfolio • Media kit ready',
+    members: [
+      { id: 'm1', name: 'Kemi Adeleke', avatar: require('../../assets/images/kemi-avatar.jpg'), role: 'Host & Lead', isHost: true, streak: 28, niche: 'UGC & Brands', threadId: 'conv_kemi' },
+      { id: 'm2', name: 'Tomi Adebayo', avatar: require('../../assets/images/tomi-avatar.jpg'), role: 'Member', streak: 22, niche: 'Tech Sponsorships', threadId: 'conv_tomi' },
+      { id: 'm3', name: 'David Kim', avatar: require('../../assets/images/david-avatar.jpg'), role: 'Member', streak: 19, niche: 'SaaS Affiliates', threadId: 'conv_david' },
+      { id: 'm4', name: 'Elena Rostova', avatar: require('../../assets/images/elena-avatar.jpg'), role: 'Member', streak: 47, niche: 'Design Retainers', threadId: 'conv_elena' },
+      { id: 'm5', name: 'Marcus Vance', avatar: require('../../assets/images/marcus-avatar.jpg'), role: 'Member', streak: 15, niche: 'Paid Ads Creator', threadId: 'conv_marcus' },
+    ],
   },
   {
     id: 'sq_5',
@@ -180,6 +220,11 @@ const ALL_SQUADS: SquadItem[] = [
     weeklyQuest: 'Complete 14 Consecutive Day Posting Gauntlet',
     xpReward: 400,
     requirements: '20+ Day Streak required to apply',
+    members: [
+      { id: 'm1', name: 'Marcus Vance', avatar: require('../../assets/images/marcus-avatar.jpg'), role: 'Host & Lead', isHost: true, streak: 55, niche: 'High-Volume Pacing', threadId: 'conv_marcus' },
+      { id: 'm2', name: 'Elena Rostova', avatar: require('../../assets/images/elena-avatar.jpg'), role: 'Member', streak: 47, niche: 'Hooks & Audio', threadId: 'conv_elena' },
+      { id: 'm3', name: 'Amara Okafor', avatar: require('../../assets/images/amara-avatar.jpg'), role: 'Member', streak: 31, niche: 'Story Reels', threadId: 'conv_amara' },
+    ],
   },
 ];
 
@@ -205,6 +250,7 @@ export const FindSquadScreen: React.FC<FindSquadScreenProps> = ({
   const [selectedNiche, setSelectedNiche] = useState<string>('all');
   const [selectedSquad, setSelectedSquad] = useState<SquadItem>(ALL_SQUADS[0]);
   const [previewModalSquad, setPreviewModalSquad] = useState<SquadItem | null>(null);
+  const [modalTab, setModalTab] = useState<'details' | 'members'>('details');
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [appliedSquadIds, setAppliedSquadIds] = useState<string[]>([]);
 
@@ -521,9 +567,16 @@ export const FindSquadScreen: React.FC<FindSquadScreenProps> = ({
                 </Text>
               </View>
 
-              {/* Stats & Avatars Row */}
-              <View style={styles.featuredStatsRow}>
-                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+              {/* Stats & Avatars Row (Clickable) */}
+              <Pressable
+                style={styles.featuredStatsRow}
+                onPress={() => {
+                  setSelectedSquad(featuredSquad);
+                  setModalTab('members');
+                  setPreviewModalSquad(featuredSquad);
+                }}
+              >
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
                   <View style={styles.avatarStackRow}>
                     {featuredSquad.avatars.map((av, i) => (
                       <Image
@@ -540,21 +593,27 @@ export const FindSquadScreen: React.FC<FindSquadScreenProps> = ({
                     </View>
                   </View>
 
-                  <Text style={styles.featuredMemberCount}>5/8 Creators</Text>
+                  <Text style={styles.featuredMemberCount}>
+                    5/8 Creators <Text style={{ color: '#C084FC', fontSize: 11 }}>➔</Text>
+                  </Text>
                 </View>
 
                 <View style={styles.streakPillGold}>
                   <Text style={styles.streakPillGoldText}>🔥 12d Streak</Text>
                 </View>
-              </View>
+              </Pressable>
 
-              {/* Dual Action Buttons */}
+              {/* Action Buttons */}
               <View style={styles.featuredActionsRow}>
                 <Pressable
                   style={({ pressed }) => [styles.featuredPreviewBtn, pressed && styles.btnPressed]}
-                  onPress={() => setPreviewModalSquad(featuredSquad)}
+                  onPress={() => {
+                    setSelectedSquad(featuredSquad);
+                    setModalTab('details');
+                    setPreviewModalSquad(featuredSquad);
+                  }}
                 >
-                  <Text style={styles.featuredPreviewBtnText}>Preview Room</Text>
+                  <Text style={styles.featuredPreviewBtnText}>View Details</Text>
                 </Pressable>
 
                 <Pressable
@@ -649,6 +708,7 @@ export const FindSquadScreen: React.FC<FindSquadScreenProps> = ({
                       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                     }
                     setSelectedSquad(squad);
+                    setModalTab('details');
                     setPreviewModalSquad(squad);
                   }}
                 >
@@ -689,7 +749,7 @@ export const FindSquadScreen: React.FC<FindSquadScreenProps> = ({
                   <Text style={styles.squadName}>{squad.name}</Text>
                   <Text style={styles.squadGoalLine}>🎯 {squad.squadGoal}</Text>
 
-                  {/* Meta Bar */}
+                  {/* Meta Bar (Clickable Members) */}
                   <View style={styles.squadMetaRow}>
                     <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
                       <Text style={{ fontSize: 13 }}>🔥</Text>
@@ -697,21 +757,33 @@ export const FindSquadScreen: React.FC<FindSquadScreenProps> = ({
                     </View>
 
                     {/* Member Avatars */}
-                    <View style={styles.avatarStackRow}>
-                      {squad.avatars.map((av, i) => (
-                        <Image
-                          key={i}
-                          source={av}
-                          style={[
-                            styles.stackAvatarImg,
-                            { marginLeft: i === 0 ? 0 : -8, zIndex: 3 - i },
-                          ]}
-                        />
-                      ))}
-                      <View style={[styles.stackAvatarPlus, { marginLeft: -8, zIndex: 0 }]}>
-                        <Text style={styles.stackAvatarPlusText}>+{squad.memberCount - 3 > 0 ? squad.memberCount - 3 : 2}</Text>
+                    <Pressable
+                      style={styles.avatarStackTouch}
+                      onPress={(e) => {
+                        e.stopPropagation();
+                        setSelectedSquad(squad);
+                        setModalTab('members');
+                        setPreviewModalSquad(squad);
+                      }}
+                      hitSlop={6}
+                    >
+                      <View style={styles.avatarStackRow}>
+                        {squad.avatars.map((av, i) => (
+                          <Image
+                            key={i}
+                            source={av}
+                            style={[
+                              styles.stackAvatarImg,
+                              { marginLeft: i === 0 ? 0 : -8, zIndex: 3 - i },
+                            ]}
+                          />
+                        ))}
+                        <View style={[styles.stackAvatarPlus, { marginLeft: -8, zIndex: 0 }]}>
+                          <Text style={styles.stackAvatarPlusText}>+{squad.memberCount - 3 > 0 ? squad.memberCount - 3 : 2}</Text>
+                        </View>
                       </View>
-                    </View>
+                      <Text style={styles.tapRosterHint}>Roster ➔</Text>
+                    </Pressable>
                   </View>
 
                   {/* Status & CTA Row */}
@@ -762,7 +834,7 @@ export const FindSquadScreen: React.FC<FindSquadScreenProps> = ({
         <View style={{ height: 130 }} />
       </ScrollView>
 
-      {/* SQUAD PREVIEW CENTERED LUXURY DIALOG MODAL */}
+      {/* SQUAD PREVIEW CENTERED LUXURY DIALOG MODAL (WITH TABS FOR DETAILS VS ROSTER) */}
       <Modal
         visible={previewModalSquad !== null}
         transparent
@@ -773,19 +845,26 @@ export const FindSquadScreen: React.FC<FindSquadScreenProps> = ({
           <Pressable style={styles.modalBackdrop} onPress={() => setPreviewModalSquad(null)} />
           {previewModalSquad && (
             <View style={styles.modalContentCard}>
-              {/* Top Modal Header with Close Button */}
+              {/* Top Modal Header with Close Button & Segment Switcher */}
               <View style={styles.modalTopHeaderRow}>
-                <View style={styles.modalHostProfileRow}>
-                  <Image source={previewModalSquad.hostAvatar} style={styles.modalHostAvatar} />
-                  <View>
-                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>
-                      <Text style={styles.modalHostName}>{previewModalSquad.hostName}</Text>
-                      <View style={styles.modalHostCrownPill}>
-                        <Text style={styles.modalHostCrownText}>👑 HOST</Text>
-                      </View>
-                    </View>
-                    <Text style={styles.modalHostSub}>Verified Squad Creator</Text>
-                  </View>
+                <View style={styles.modalSegmentToggle}>
+                  <Pressable
+                    style={[styles.modalSegmentBtn, modalTab === 'details' && styles.modalSegmentBtnActive]}
+                    onPress={() => setModalTab('details')}
+                  >
+                    <Text style={[styles.modalSegmentText, modalTab === 'details' && styles.modalSegmentTextActive]}>
+                      Overview
+                    </Text>
+                  </Pressable>
+
+                  <Pressable
+                    style={[styles.modalSegmentBtn, modalTab === 'members' && styles.modalSegmentBtnActive]}
+                    onPress={() => setModalTab('members')}
+                  >
+                    <Text style={[styles.modalSegmentText, modalTab === 'members' && styles.modalSegmentTextActive]}>
+                      Roster ({previewModalSquad.memberCount}/{previewModalSquad.maxMembers})
+                    </Text>
+                  </Pressable>
                 </View>
 
                 <Pressable
@@ -797,66 +876,147 @@ export const FindSquadScreen: React.FC<FindSquadScreenProps> = ({
                 </Pressable>
               </View>
 
-              {/* Squad Badge & Fit Score */}
-              <View style={styles.modalSquadMetaRow}>
-                <View style={[styles.squadCatPill, styles.squadCatGrowth]}>
-                  <Text style={[styles.squadCatText, styles.squadCatTextGrowth]}>
-                    {previewModalSquad.category}
-                  </Text>
-                </View>
-                <View style={styles.fitScorePill}>
-                  <Text style={styles.fitScoreNumber}>{previewModalSquad.fitScore}%</Text>
-                  <Text style={styles.fitScoreLabel}>FIT SCORE</Text>
-                </View>
-              </View>
-
-              {/* Title & Description */}
-              <Text style={styles.modalSquadTitle}>{previewModalSquad.name}</Text>
-              <Text style={styles.modalSquadDesc}>{previewModalSquad.description}</Text>
-
-              {/* Info Details Grid */}
-              <View style={styles.modalInfoBox}>
-                <View style={styles.modalInfoRowItem}>
-                  <Text style={styles.modalInfoLabel}>🎯 Squad Goal</Text>
-                  <Text style={styles.modalInfoVal}>{previewModalSquad.squadGoal}</Text>
-                </View>
-                <View style={styles.modalInfoRowItem}>
-                  <Text style={styles.modalInfoLabel}>⚡ Streak Record</Text>
-                  <Text style={styles.modalInfoVal}>🔥 {previewModalSquad.streak} Days Streak Avg</Text>
-                </View>
-                <View style={styles.modalInfoRowItem}>
-                  <Text style={styles.modalInfoLabel}>🏆 Weekly Quest</Text>
-                  <Text style={[styles.modalInfoVal, { color: '#582CDB', fontWeight: '900' }]}>
-                    {previewModalSquad.weeklyQuest}
-                  </Text>
-                </View>
-                <View style={[styles.modalInfoRowItem, { borderBottomWidth: 0, paddingBottom: 0 }]}>
-                  <Text style={styles.modalInfoLabel}>📋 Requirement</Text>
-                  <Text style={styles.modalInfoVal}>{previewModalSquad.requirements}</Text>
-                </View>
-              </View>
-
-              {/* Member Capacity & Avatars */}
-              <View style={styles.modalMembersPreviewRow}>
-                <View style={styles.avatarStackRow}>
-                  {previewModalSquad.avatars.map((av, i) => (
-                    <Image
-                      key={i}
-                      source={av}
-                      style={[
-                        styles.stackAvatarImg,
-                        { marginLeft: i === 0 ? 0 : -8, zIndex: 3 - i },
-                      ]}
-                    />
-                  ))}
-                  <View style={[styles.stackAvatarPlus, { marginLeft: -8, zIndex: 0 }]}>
-                    <Text style={styles.stackAvatarPlusText}>+2</Text>
+              {/* ---------------- DETAILS VIEW ---------------- */}
+              {modalTab === 'details' ? (
+                <View>
+                  {/* Host Profile Bar */}
+                  <View style={styles.modalHostProfileRow}>
+                    <Image source={previewModalSquad.hostAvatar} style={styles.modalHostAvatar} />
+                    <View>
+                      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>
+                        <Text style={styles.modalHostName}>{previewModalSquad.hostName}</Text>
+                        <View style={styles.modalHostCrownPill}>
+                          <Text style={styles.modalHostCrownText}>👑 HOST</Text>
+                        </View>
+                      </View>
+                      <Text style={styles.modalHostSub}>Verified Squad Creator</Text>
+                    </View>
                   </View>
+
+                  {/* Squad Badge & Fit Score */}
+                  <View style={styles.modalSquadMetaRow}>
+                    <View style={[styles.squadCatPill, styles.squadCatGrowth]}>
+                      <Text style={[styles.squadCatText, styles.squadCatTextGrowth]}>
+                        {previewModalSquad.category}
+                      </Text>
+                    </View>
+                    <View style={styles.fitScorePill}>
+                      <Text style={styles.fitScoreNumber}>{previewModalSquad.fitScore}%</Text>
+                      <Text style={styles.fitScoreLabel}>FIT SCORE</Text>
+                    </View>
+                  </View>
+
+                  {/* Title & Description */}
+                  <Text style={styles.modalSquadTitle}>{previewModalSquad.name}</Text>
+                  <Text style={styles.modalSquadDesc}>{previewModalSquad.description}</Text>
+
+                  {/* Info Details Grid */}
+                  <View style={styles.modalInfoBox}>
+                    <View style={styles.modalInfoRowItem}>
+                      <Text style={styles.modalInfoLabel}>🎯 Squad Goal</Text>
+                      <Text style={styles.modalInfoVal}>{previewModalSquad.squadGoal}</Text>
+                    </View>
+                    <View style={styles.modalInfoRowItem}>
+                      <Text style={styles.modalInfoLabel}>⚡ Streak Record</Text>
+                      <Text style={styles.modalInfoVal}>🔥 {previewModalSquad.streak} Days Streak Avg</Text>
+                    </View>
+                    <View style={styles.modalInfoRowItem}>
+                      <Text style={styles.modalInfoLabel}>🏆 Weekly Quest</Text>
+                      <Text style={[styles.modalInfoVal, { color: '#582CDB', fontWeight: '900' }]}>
+                        {previewModalSquad.weeklyQuest}
+                      </Text>
+                    </View>
+                    <View style={[styles.modalInfoRowItem, { borderBottomWidth: 0, paddingBottom: 0 }]}>
+                      <Text style={styles.modalInfoLabel}>📋 Requirement</Text>
+                      <Text style={styles.modalInfoVal}>{previewModalSquad.requirements}</Text>
+                    </View>
+                  </View>
+
+                  {/* Member Capacity & Interactive Avatars Trigger */}
+                  <Pressable
+                    style={styles.modalMembersPreviewRow}
+                    onPress={() => setModalTab('members')}
+                  >
+                    <View style={styles.avatarStackRow}>
+                      {previewModalSquad.avatars.map((av, i) => (
+                        <Image
+                          key={i}
+                          source={av}
+                          style={[
+                            styles.stackAvatarImg,
+                            { marginLeft: i === 0 ? 0 : -8, zIndex: 3 - i },
+                          ]}
+                        />
+                      ))}
+                      <View style={[styles.stackAvatarPlus, { marginLeft: -8, zIndex: 0 }]}>
+                        <Text style={styles.stackAvatarPlusText}>+2</Text>
+                      </View>
+                    </View>
+
+                    <Text style={styles.modalCapacityText}>
+                      {previewModalSquad.memberCount}/{previewModalSquad.maxMembers} Members • <Text style={{ color: '#582CDB', fontWeight: '800' }}>View Roster ➔</Text>
+                    </Text>
+                  </Pressable>
                 </View>
-                <Text style={styles.modalCapacityText}>
-                  {previewModalSquad.memberCount}/{previewModalSquad.maxMembers} Members • <Text style={{ color: '#059669', fontWeight: '800' }}>2 Spots Left</Text>
-                </Text>
-              </View>
+              ) : (
+                /* ---------------- ROSTER VIEW ---------------- */
+                <View>
+                  <View style={{ marginBottom: 12 }}>
+                    <Text style={styles.rosterHeaderTitle}>Squad Creator Roster</Text>
+                    <Text style={styles.rosterHeaderSub}>
+                      {previewModalSquad.members.length} creators collaborating in {previewModalSquad.name}
+                    </Text>
+                  </View>
+
+                  <ScrollView style={styles.rosterListScroll} showsVerticalScrollIndicator={false}>
+                    {previewModalSquad.members.map((member) => (
+                      <View key={member.id} style={styles.rosterMemberRow}>
+                        <Image source={member.avatar} style={styles.rosterMemberAvatar} />
+
+                        <View style={{ flex: 1 }}>
+                          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                            <Text style={styles.rosterMemberName}>{member.name}</Text>
+                            {member.isHost && (
+                              <View style={styles.modalHostCrownPill}>
+                                <Text style={styles.modalHostCrownText}>👑 HOST</Text>
+                              </View>
+                            )}
+                          </View>
+                          <Text style={styles.rosterMemberNiche}>{member.niche} • 🔥 {member.streak}d streak</Text>
+                        </View>
+
+                        <Pressable
+                          style={styles.rosterChatBtn}
+                          onPress={() => {
+                            setPreviewModalSquad(null);
+                            if (onOpenMessages && member.threadId) {
+                              onOpenMessages(member.threadId);
+                            } else if (onOpenMessages) {
+                              onOpenMessages();
+                            }
+                          }}
+                          hitSlop={6}
+                        >
+                          <Text style={{ fontSize: 13 }}>💬</Text>
+                        </Pressable>
+                      </View>
+                    ))}
+
+                    {/* Open Slots */}
+                    {Array.from({ length: previewModalSquad.maxMembers - previewModalSquad.memberCount }).map((_, idx) => (
+                      <View key={`slot_${idx}`} style={styles.rosterOpenSlotRow}>
+                        <View style={styles.rosterOpenSlotCircle}>
+                          <Text style={{ fontSize: 13, color: '#10B981', fontWeight: '900' }}>+</Text>
+                        </View>
+                        <View style={{ flex: 1 }}>
+                          <Text style={styles.rosterOpenSlotTitle}>Open Member Slot {previewModalSquad.memberCount + idx + 1}</Text>
+                          <Text style={styles.rosterOpenSlotSub}>Available for new verified applicants</Text>
+                        </View>
+                      </View>
+                    ))}
+                  </ScrollView>
+                </View>
+              )}
 
               {/* Action Button */}
               <View style={styles.modalActionsRow}>
@@ -1241,6 +1401,9 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     marginTop: 14,
+    backgroundColor: 'rgba(255, 255, 255, 0.06)',
+    padding: 8,
+    borderRadius: 12,
   },
   featuredMemberCount: {
     fontSize: 12,
@@ -1441,6 +1604,11 @@ const styles = StyleSheet.create({
     fontWeight: '800',
     color: '#171420',
   },
+  avatarStackTouch: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
   avatarStackRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -1466,6 +1634,11 @@ const styles = StyleSheet.create({
     fontSize: 9,
     fontWeight: '800',
     color: '#475569',
+  },
+  tapRosterHint: {
+    fontSize: 11,
+    fontWeight: '800',
+    color: '#582CDB',
   },
   featuredAvatarImg: {
     width: 26,
@@ -1520,10 +1693,16 @@ const styles = StyleSheet.create({
     paddingVertical: 5,
     borderRadius: 8,
   },
+  cardQuickJoinBtnPending: {
+    backgroundColor: '#FEF3C7',
+  },
   cardQuickJoinBtnText: {
     fontSize: 11.5,
     fontWeight: '900',
     color: '#582CDB',
+  },
+  cardQuickJoinBtnTextPending: {
+    color: '#92400E',
   },
 
   /* SQUAD PREVIEW CENTERED MODAL */
@@ -1560,12 +1739,42 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 12,
+    marginBottom: 14,
+  },
+  modalSegmentToggle: {
+    flexDirection: 'row',
+    backgroundColor: '#F1F5F9',
+    borderRadius: 12,
+    padding: 3,
+    gap: 4,
+  },
+  modalSegmentBtn: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 10,
+  },
+  modalSegmentBtnActive: {
+    backgroundColor: '#FFFFFF',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.06,
+    shadowRadius: 2,
+    elevation: 1,
+  },
+  modalSegmentText: {
+    fontSize: 11.5,
+    fontWeight: '700',
+    color: '#64748B',
+  },
+  modalSegmentTextActive: {
+    color: '#582CDB',
+    fontWeight: '900',
   },
   modalHostProfileRow: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 10,
+    marginBottom: 10,
   },
   modalHostAvatar: {
     width: 38,
@@ -1657,7 +1866,12 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: 4,
+    paddingHorizontal: 10,
+    paddingVertical: 8,
+    backgroundColor: '#F8FAFC',
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
     marginBottom: 16,
   },
   modalCapacityText: {
@@ -1665,28 +1879,86 @@ const styles = StyleSheet.create({
     color: '#64748B',
     fontWeight: '700',
   },
-  modalActionsRow: {
+
+  /* ROSTER VIEW */
+  rosterHeaderTitle: {
+    fontSize: 16,
+    fontWeight: '900',
+    color: '#171420',
+  },
+  rosterHeaderSub: {
+    fontSize: 11.5,
+    color: '#64748B',
+    marginTop: 2,
+  },
+  rosterListScroll: {
+    maxHeight: 230,
+    marginBottom: 16,
+  },
+  rosterMemberRow: {
     flexDirection: 'row',
-    gap: 10,
-  },
-  modalOutlineBtn: {
-    flex: 1,
-    backgroundColor: '#FAF8F5',
-    borderWidth: 1,
-    borderColor: '#E2E8F0',
-    paddingVertical: 12,
-    borderRadius: 14,
     alignItems: 'center',
+    gap: 10,
+    paddingVertical: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: '#F1F5F9',
   },
-  modalOutlineBtnText: {
+  rosterMemberAvatar: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+  },
+  rosterMemberName: {
     fontSize: 13,
     fontWeight: '800',
-    color: '#475569',
+    color: '#171420',
   },
-  modalSolidBtn: {
-    flex: 1.3,
-    borderRadius: 14,
-    overflow: 'hidden',
+  rosterMemberNiche: {
+    fontSize: 11,
+    color: '#64748B',
+    marginTop: 1,
+  },
+  rosterChatBtn: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: '#EDE9FE',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  rosterOpenSlotRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    paddingVertical: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: '#F8FAFC',
+    opacity: 0.8,
+  },
+  rosterOpenSlotCircle: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    borderWidth: 1.5,
+    borderStyle: 'dashed',
+    borderColor: '#10B981',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#ECFDF5',
+  },
+  rosterOpenSlotTitle: {
+    fontSize: 12,
+    fontWeight: '800',
+    color: '#059669',
+  },
+  rosterOpenSlotSub: {
+    fontSize: 10.5,
+    color: '#64748B',
+  },
+
+  /* ACTIONS */
+  modalActionsRow: {
+    flexDirection: 'row',
   },
   modalSolidBtnFull: {
     flex: 1,
@@ -1697,6 +1969,15 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.25,
     shadowRadius: 8,
     elevation: 3,
+  },
+  modalSolidGradient: {
+    paddingVertical: 12,
+    alignItems: 'center',
+  },
+  modalSolidBtnText: {
+    fontSize: 13,
+    fontWeight: '900',
+    color: '#FFFFFF',
   },
   modalPendingBox: {
     flex: 1,
@@ -1711,21 +1992,6 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontWeight: '900',
     color: '#92400E',
-  },
-  cardQuickJoinBtnPending: {
-    backgroundColor: '#FEF3C7',
-  },
-  cardQuickJoinBtnTextPending: {
-    color: '#92400E',
-  },
-  modalSolidGradient: {
-    paddingVertical: 12,
-    alignItems: 'center',
-  },
-  modalSolidBtnText: {
-    fontSize: 13,
-    fontWeight: '900',
-    color: '#FFFFFF',
   },
 
   /* TOAST */
