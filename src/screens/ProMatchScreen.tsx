@@ -303,12 +303,22 @@ export const ProMatchScreen: React.FC<ProMatchScreenProps> = ({
   const [showDeepDiveModal, setShowDeepDiveModal] = useState(false);
   const [selectedCreator, setSelectedCreator] = useState<CreatorCardData | null>(DECK_CREATORS[0]);
   const [showCompletionModal, setShowCompletionModal] = useState(false);
-  const [completionData, setCompletionData] = useState({
+  const [completionData, setCompletionData] = useState<{
+    title: string;
+    subtitle: string;
+    badgeText: string;
+    xpEarned: number;
+    speechBubble: string;
+    actionText?: string;
+    onAction?: () => void;
+  }>({
     title: 'Collab Match Made!',
     subtitle: 'You and Amara Okafor are matched to build together.',
     badgeText: '✨ COLLAB UNLOCKED (+150 XP)',
     xpEarned: 150,
     speechBubble: 'Boom! High-synergy match secured. Time to build viral content, Pablo! 🔥',
+    actionText: 'Continue',
+    onAction: undefined,
   });
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
@@ -478,7 +488,12 @@ export const ProMatchScreen: React.FC<ProMatchScreenProps> = ({
         subtitle: `You and ${creator.name} are matched to build together.`,
         badgeText: '✨ COLLAB UNLOCKED (+150 XP)',
         xpEarned: 150,
-        speechBubble: `High-synergy match secured with ${creator.name}! Time to build viral content, Pablo! 🔥`,
+        speechBubble: `High-synergy match secured with ${creator.name}! Tap below to open chat and start filming! 🔥`,
+        actionText: `Chat with ${creator.name.split(' ')[0]} 💬`,
+        onAction: () => {
+          setShowCompletionModal(false);
+          if (onOpenMessages) onOpenMessages();
+        },
       });
 
       setTimeout(() => {
@@ -541,10 +556,17 @@ export const ProMatchScreen: React.FC<ProMatchScreenProps> = ({
 
     setCompletionData({
       title: 'Collaboration Accepted!',
-      subtitle: `You accepted ${req.name}'s collab request.`,
+      subtitle: `You and ${req.name} are now connected to collaborate.`,
       badgeText: '🤝 CREATOR TEAM UNLOCKED (+100 XP)',
       xpEarned: 100,
-      speechBubble: `${req.name} is ready to create with you! Check your messages to start filming! 🔥`,
+      speechBubble: `${req.name} is waiting in your inbox! Tap below to open chat and plan your collab! 🔥`,
+      actionText: `Chat with ${req.name.split(' ')[0]} 💬`,
+      onAction: () => {
+        setShowCompletionModal(false);
+        if (onOpenMessages) {
+          onOpenMessages(req.id);
+        }
+      },
     });
     setShowCompletionModal(true);
   };
@@ -1391,19 +1413,12 @@ export const ProMatchScreen: React.FC<ProMatchScreenProps> = ({
                       </View>
                     </View>
 
-                    <View style={{ flexDirection: 'row', gap: 8, marginTop: 12 }}>
+                    <View style={{ flexDirection: 'row', gap: 10, marginTop: 12 }}>
                       <Pressable
                         style={styles.requestDeclineBtn}
                         onPress={() => handleDeclineRequest(req.id)}
                       >
                         <Text style={styles.requestDeclineBtnText}>Decline</Text>
-                      </Pressable>
-
-                      <Pressable
-                        style={styles.requestMessageBtn}
-                        onPress={() => onOpenMessages && onOpenMessages()}
-                      >
-                        <Text style={styles.requestMessageBtnText}>Chat 💬</Text>
                       </Pressable>
 
                       <Pressable
@@ -1686,6 +1701,8 @@ export const ProMatchScreen: React.FC<ProMatchScreenProps> = ({
           badgeText={completionData.badgeText}
           xpEarned={completionData.xpEarned}
           speechBubble={completionData.speechBubble}
+          actionText={completionData.actionText || 'Continue'}
+          onAction={completionData.onAction}
           onDismiss={() => setShowCompletionModal(false)}
         />
 
@@ -2844,40 +2861,31 @@ const styles = StyleSheet.create({
   requestDeclineBtn: {
     flex: 1,
     backgroundColor: '#FAF8F5',
-    borderWidth: 1,
+    borderWidth: 1.5,
     borderColor: '#E2E8F0',
-    paddingVertical: 9,
-    borderRadius: 10,
+    paddingVertical: 11,
+    borderRadius: 12,
     alignItems: 'center',
   },
   requestDeclineBtnText: {
-    fontSize: 11,
+    fontSize: 12,
     fontWeight: '800',
     color: '#64748B',
   },
-  requestMessageBtn: {
-    flex: 1,
-    backgroundColor: '#FAF8F5',
-    borderWidth: 1,
-    borderColor: '#E2E8F0',
-    paddingVertical: 9,
-    borderRadius: 10,
-    alignItems: 'center',
-  },
-  requestMessageBtnText: {
-    fontSize: 11,
-    fontWeight: '800',
-    color: '#171420',
-  },
   requestAcceptBtn: {
-    flex: 1.2,
+    flex: 1.5,
     backgroundColor: '#582CDB',
-    paddingVertical: 9,
-    borderRadius: 10,
+    paddingVertical: 11,
+    borderRadius: 12,
     alignItems: 'center',
+    shadowColor: '#582CDB',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 2,
   },
   requestAcceptBtnText: {
-    fontSize: 11,
+    fontSize: 12,
     fontWeight: '900',
     color: '#FFFFFF',
   },

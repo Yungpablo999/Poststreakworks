@@ -23,6 +23,7 @@ export interface AnimatedCompletionModalProps {
   streakCount?: number;
   speechBubble?: string;
   actionText?: string;
+  onAction?: () => void;
   onDismiss: () => void;
 }
 
@@ -35,6 +36,7 @@ export const AnimatedCompletionModal: React.FC<AnimatedCompletionModalProps> = (
   streakCount = 48,
   speechBubble,
   actionText = 'Continue',
+  onAction,
   onDismiss,
 }) => {
   // Animation values
@@ -297,14 +299,18 @@ export const AnimatedCompletionModal: React.FC<AnimatedCompletionModalProps> = (
             ) : null}
           </View>
 
-          {/* Continue Button */}
+          {/* Continue / Action Button */}
           <Pressable
             style={({ pressed }) => [styles.continueBtn, pressed && styles.btnPressed]}
             onPress={() => {
               if (Platform.OS !== 'web') {
                 Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
               }
-              onDismiss();
+              if (onAction) {
+                onAction();
+              } else {
+                onDismiss();
+              }
             }}
           >
             <LinearGradient
