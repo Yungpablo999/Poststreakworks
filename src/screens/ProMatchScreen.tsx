@@ -588,18 +588,33 @@ export const ProMatchScreen: React.FC<ProMatchScreenProps> = ({
   };
 
   const handleLaunchCollabPlan = (creator: CreatorCardData) => {
-    if (onOpenCollabIdea) {
-      onOpenCollabIdea({
-        name: creator.name,
-        handle: creator.handle,
-        niche: creator.role,
-        avatar: creator.coverImage,
-        planIndex: 0,
-        title: creator.proposedConcept.title,
-      });
-    } else if (onOpenMessages) {
-      onOpenMessages();
+    if (Platform.OS !== 'web') {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     }
+    setCompletionData({
+      title: 'Collab Proposal Dispatched!',
+      subtitle: `Your "${creator.proposedConcept.title}" plan was pitched to ${creator.name}.`,
+      badgeText: '⚡ PROPOSAL DISPATCHED (+75 XP)',
+      xpEarned: 75,
+      speechBubble: `Awesome proposal, Pablo! ${creator.name.split(' ')[0]} will be notified. Tap below to review the full production plan! 🔥`,
+      actionText: 'View Collaboration Plan ➔',
+      onAction: () => {
+        setShowCompletionModal(false);
+        if (onOpenCollabIdea) {
+          onOpenCollabIdea({
+            name: creator.name,
+            handle: creator.handle,
+            niche: creator.role,
+            avatar: creator.coverImage,
+            planIndex: 0,
+            title: creator.proposedConcept.title,
+          });
+        } else if (onOpenMessages) {
+          onOpenMessages(`conv_${creator.name.split(' ')[0].toLowerCase()}`);
+        }
+      },
+    });
+    setShowCompletionModal(true);
   };
 
   // Interpolated Swiping Transforms
@@ -1660,7 +1675,9 @@ export const ProMatchScreen: React.FC<ProMatchScreenProps> = ({
                           style={styles.proposeConceptBtn}
                           onPress={() => {
                             setShowDeepDiveModal(false);
-                            handleLaunchCollabPlan(selectedCreator);
+                            setTimeout(() => {
+                              handleLaunchCollabPlan(selectedCreator);
+                            }, 150);
                           }}
                         >
                           <Text style={styles.proposeConceptBtnText}>Propose ➔</Text>
