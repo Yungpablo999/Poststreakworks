@@ -1,0 +1,1719 @@
+import React, { useState, useRef, useEffect } from 'react';
+import {
+  StyleSheet,
+  View,
+  Text,
+  ScrollView,
+  Pressable,
+  Platform,
+  Animated,
+  Modal,
+  Image,
+  Dimensions,
+  SafeAreaView,
+  StatusBar,
+  TextInput,
+} from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
+import * as Haptics from 'expo-haptics';
+import Svg, { Path, Circle, Rect } from 'react-native-svg';
+import { FloatingTabBar, TabType } from '../components/FloatingTabBar';
+import { UserProfileModal, UserProfileData } from '../components/UserProfileModal';
+import { AnimatedCompletionModal } from '../components/AnimatedCompletionModal';
+import { TinyGoldCheck } from '../components/CreatorStoryModal';
+import { SocialBrandIcon } from '../components/SocialBrandIcon';
+
+const { width: SCREEN_WIDTH } = Dimensions.get('window');
+
+interface ProScriptScreenProps {
+  ideaTitle?: string;
+  onBack: () => void;
+  onLogout?: () => void;
+  onOpenSchedule?: () => void;
+  onOpenMessages?: () => void;
+  onOpenJarvisPro?: () => void;
+  onNavigateTab?: (tab: TabType) => void;
+  onOpenVoiceStudio?: (scriptText?: string, scriptTitle?: string) => void;
+  onOpenPostComposer?: (scriptTitle?: string, platform?: string) => void;
+  onOpenIdeaAngle?: () => void;
+  onSwitchToFree?: () => void;
+  userProfile?: UserProfileData;
+  onSaveProfile?: (updated: UserProfileData) => void;
+}
+
+export const ProScriptScreen: React.FC<ProScriptScreenProps> = ({
+  ideaTitle,
+  onBack,
+  onLogout,
+  onOpenSchedule,
+  onOpenMessages,
+  onOpenJarvisPro,
+  onNavigateTab,
+  onOpenVoiceStudio,
+  onOpenPostComposer,
+  onOpenIdeaAngle,
+  onSwitchToFree,
+  userProfile,
+  onSaveProfile,
+}) => {
+  const [activeTab, setActiveTab] = useState<TabType>('create');
+  const [showProfileModal, setShowProfileModal] = useState(false);
+  const [showNotificationModal, setShowNotificationModal] = useState(false);
+  const [showCompletionModal, setShowCompletionModal] = useState(false);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+
+  // Script State
+  const [currentIdeaTitle, setCurrentIdeaTitle] = useState(
+    ideaTitle || '3 mistakes that slow down new creators'
+  );
+
+  const [selectedHookIndex, setSelectedHookIndex] = useState(0);
+  const [hookOptions, setHookOptions] = useState([
+    {
+      badge: 'BEST PERFORMING',
+      text: 'Most new creators do not fail because they lack ideas. They fail because they wait too long to post.',
+      type: 'Direct • High Retention',
+    },
+    {
+      badge: 'CURIOSITY GAP',
+      text: 'Stop making these 3 mistakes if you want to grow consistently.',
+      type: 'Curiosity • Loss Aversion',
+    },
+    {
+      badge: 'AUTHORITY',
+      text: 'Your problem is not the algorithm, it’s your posting system.',
+      type: 'Contrarian • High Authority',
+    },
+  ]);
+
+  const [scriptBody, setScriptBody] = useState(
+    `[Hook] Most new creators do not fail because they lack ideas. They fail because they wait too long to post.\n\nLook, I get it. You want it to be perfect. But perfectionism is just procrastination in a fancy suit.\n\nMistake one: Waiting for the "Perfect Idea". It doesn't exist. Good ideas come from the data of bad ones.\n\nMistake two: Editing for 6 hours. If it takes you that long, your audience's attention span is over in 3 seconds anyway.\n\nMistake three: Not having a repeatable workflow. You're starting from scratch every single time.\n\n[CTA] Which of these three is slowing you down the most? Let me know in the comments.`
+  );
+
+  const [isPlayingPreview, setIsPlayingPreview] = useState(false);
+  const [completionData, setCompletionData] = useState({
+    title: 'Script Saved to Drafts!',
+    subtitle: `"${currentIdeaTitle}" is ready for Voice Studio or immediate posting.`,
+    badgeText: '✨ SCRIPT READY (+50 XP)',
+    xpEarned: 50,
+    speechBubble: 'Script polished to perfection, Pablo! Ready to record! 🎙️',
+  });
+
+  const flameFloatY = useRef(new Animated.Value(0)).current;
+  const modalPopScale = useRef(new Animated.Value(0.88)).current;
+
+  useEffect(() => {
+    Animated.loop(
+      Animated.sequence([
+        Animated.timing(flameFloatY, {
+          toValue: -4,
+          duration: 1600,
+          useNativeDriver: true,
+        }),
+        Animated.timing(flameFloatY, {
+          toValue: 0,
+          duration: 1600,
+          useNativeDriver: true,
+        }),
+      ])
+    ).start();
+  }, [flameFloatY]);
+
+  const showToast = (msg: string) => {
+    if (Platform.OS !== 'web') {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    }
+    setToastMessage(msg);
+    setTimeout(() => {
+      setToastMessage(null);
+    }, 2500);
+  };
+
+  const triggerModalPop = () => {
+    if (Platform.OS !== 'web') {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    }
+    modalPopScale.setValue(0.88);
+    Animated.spring(modalPopScale, {
+      toValue: 1,
+      useNativeDriver: true,
+      speed: 26,
+      bounciness: 12,
+    }).start();
+  };
+
+  const handleApplyHook = (index: number) => {
+    if (Platform.OS !== 'web') {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    }
+    setSelectedHookIndex(index);
+    const chosenHook = hookOptions[index].text;
+    const bodyLines = scriptBody.split('\n\n');
+    bodyLines[0] = `[Hook] ${chosenHook}`;
+    setScriptBody(bodyLines.join('\n\n'));
+    showToast(`✓ Applied Hook #${index + 1}`);
+  };
+
+  const handleGenerateMoreHooks = () => {
+    if (Platform.OS !== 'web') {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    }
+    setHookOptions([
+      {
+        badge: 'VIRAL HOOK',
+        text: 'The #1 reason creator accounts stay stuck under 1,000 views is this single mistake.',
+        type: 'High Urgency • Retention Spikes',
+      },
+      {
+        badge: 'STORY HOOK',
+        text: 'I used to spend 5 hours editing one reel until I learned this 10-minute rule.',
+        type: 'Relatable • Case Study',
+      },
+      {
+        badge: 'CONTRARIAN',
+        text: 'Consistency isn’t about posting daily. It’s about not letting 3 days pass without data.',
+        type: 'Thought Leadership',
+      },
+    ]);
+    showToast('✨ Jarvis generated 3 new viral hooks!');
+  };
+
+  const handlePolishWithJarvis = () => {
+    if (Platform.OS !== 'web') {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    }
+    setScriptBody(
+      `[Hook] Most new creators don't fail from lack of talent. They fail because they wait too long to post.\n\nPerfectionism is just fear in disguise.\n\nMistake 1: Waiting for the "Perfect Idea". It doesn't exist. Great content comes from publishing through the average ones.\n\nMistake 2: Over-editing. A 6-hour edit won't save a boring first 3 seconds.\n\nMistake 3: Zero system. Re-inventing the wheel every morning leads directly to burnout.\n\n[CTA] Which one are you guilty of right now? Drop 1, 2, or 3 below.`
+    );
+    showToast('🪄 Script polished with Jarvis AI!');
+  };
+
+  const handleSaveDraft = () => {
+    if (Platform.OS !== 'web') {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    }
+    setCompletionData({
+      title: 'Script Saved to Drafts!',
+      subtitle: `"${currentIdeaTitle}" is secured in your production pipeline.`,
+      badgeText: '✨ SCRIPT SECURED (+50 XP)',
+      xpEarned: 50,
+      speechBubble: 'Draft locked in, Pablo! Ready to record whenever you are! 🎙️',
+    });
+    setShowCompletionModal(true);
+  };
+
+  const handleSendToVoiceStudio = () => {
+    if (Platform.OS !== 'web') {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    }
+    if (onOpenVoiceStudio) {
+      onOpenVoiceStudio(scriptBody, currentIdeaTitle);
+    } else {
+      showToast('🎙️ Loaded script into Pro Voice Studio');
+    }
+  };
+
+  const handleUseAsPost = () => {
+    if (Platform.OS !== 'web') {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    }
+    if (onOpenPostComposer) {
+      onOpenPostComposer(currentIdeaTitle, 'Instagram');
+    } else {
+      showToast('✨ Opened in Post Composer');
+    }
+  };
+
+  return (
+    <SafeAreaView style={styles.safeArea}>
+      <StatusBar barStyle="dark-content" backgroundColor="#FAF8F5" />
+      <View style={styles.container}>
+        {/* TOAST BANNER */}
+        {toastMessage && (
+          <View style={styles.toastContainer}>
+            <Text style={styles.toastText}>{toastMessage}</Text>
+          </View>
+        )}
+
+        {/* 1. TOP HEADER BAR */}
+        <View style={styles.headerBar}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+            <Pressable
+              onPress={() => {
+                if (Platform.OS !== 'web') {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                }
+                onBack();
+              }}
+              style={({ pressed }) => [styles.backBtnCircle, pressed && styles.btnPressed]}
+              hitSlop={8}
+            >
+              <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
+                <Path
+                  d="M15 18L9 12L15 6"
+                  stroke="#171420"
+                  strokeWidth="2.4"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </Svg>
+            </Pressable>
+
+            {/* Mascot */}
+            <Animated.View
+              style={[
+                styles.headerLogoWrapper,
+                { transform: [{ translateY: flameFloatY }] },
+              ]}
+            >
+              <Image
+                source={require('../../assets/images/jarvis-ghost-clean.png')}
+                style={styles.headerGhostLogo}
+                resizeMode="contain"
+              />
+            </Animated.View>
+
+            {/* Pro Badge Pill */}
+            <Pressable
+              onPress={() => {
+                if (Platform.OS !== 'web') {
+                  Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+                }
+                if (onSwitchToFree) {
+                  onSwitchToFree();
+                } else if (onSaveProfile && userProfile) {
+                  onSaveProfile({ ...userProfile, tier: 'free' });
+                }
+              }}
+              hitSlop={8}
+            >
+              <LinearGradient
+                colors={['#FDE68A', '#F59E0B', '#D97706']}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                style={styles.proHeaderBadge}
+              >
+                <Text style={styles.proHeaderBadgeText}>🔥 PRO</Text>
+              </LinearGradient>
+            </Pressable>
+          </View>
+
+          {/* Right Header */}
+          <View style={styles.headerRightGroup}>
+            <Pressable
+              style={({ pressed }) => [styles.headerIconBtn, pressed && styles.btnPressed]}
+              hitSlop={8}
+              onPress={() => {
+                if (onOpenMessages) onOpenMessages();
+                else if (onNavigateTab) onNavigateTab('match');
+              }}
+            >
+              <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
+                <Path
+                  d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"
+                  stroke="#171420"
+                  strokeWidth="2.2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </Svg>
+            </Pressable>
+
+            <Pressable
+              style={({ pressed }) => [styles.headerIconBtn, pressed && styles.btnPressed]}
+              hitSlop={8}
+              onPress={() => {
+                triggerModalPop();
+                setShowNotificationModal(true);
+              }}
+            >
+              <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
+                <Path
+                  d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"
+                  stroke="#171420"
+                  strokeWidth="2.2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+                <Path
+                  d="M13.73 21a2 2 0 0 1-3.46 0"
+                  stroke="#171420"
+                  strokeWidth="2.2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </Svg>
+              <View style={styles.notificationDot} />
+            </Pressable>
+
+            {/* Profile Avatar */}
+            <Pressable
+              onPress={() => {
+                triggerModalPop();
+                setShowProfileModal(true);
+              }}
+              style={styles.profileAvatarWrapper}
+              hitSlop={8}
+            >
+              <Image
+                source={userProfile?.avatarSource || require('../../assets/images/jarvis-ghost-clean.png')}
+                style={styles.headerUserAvatar}
+                resizeMode="cover"
+              />
+              <View style={styles.avatarTinyGoldCheckPos}>
+                <TinyGoldCheck size={14} />
+              </View>
+            </Pressable>
+          </View>
+        </View>
+
+        {/* 2. SCROLLABLE CONTENT */}
+        <ScrollView
+          contentContainerStyle={styles.scrollContent}
+          showsVerticalScrollIndicator={false}
+          bounces={true}
+        >
+          {/* HERO TITLES & BADGES */}
+          <View style={styles.topTitlesSection}>
+            <View style={styles.goldScriptBadge}>
+              <Text style={styles.goldScriptBadgeText}>PRO SCRIPT ENGINE</Text>
+            </View>
+
+            <Text style={styles.mainTitleText}>Build a script that holds attention.</Text>
+            <Text style={styles.mainSubText}>
+              Shape your Hook, Body and CTA with AI support, visual pacing and regarding cadence.
+            </Text>
+
+            <View style={{ flexDirection: 'row', gap: 8, marginTop: 10 }}>
+              <View style={styles.purplePill}>
+                <Text style={styles.purplePillText}>Pro Script Generator</Text>
+              </View>
+              <View style={styles.goldPill}>
+                <Text style={styles.goldPillText}>Pacing Ready</Text>
+              </View>
+            </View>
+          </View>
+
+          {/* ============================================================ */}
+          {/* CARD 1: SELECTED IDEA                                        */}
+          {/* ============================================================ */}
+          <View style={styles.selectedIdeaCard}>
+            <Text style={styles.selectedIdeaTag}>SELECTED IDEA</Text>
+            <Text style={styles.selectedIdeaTitle}>&ldquo;{currentIdeaTitle}&rdquo;</Text>
+            <Text style={styles.selectedIdeaSub}>
+              A short-form creator advice post explaining common mistakes that stop creators from posting consistently.
+            </Text>
+
+            <View style={styles.tagsPillsRow}>
+              {['Creator Advice', 'Viral Reel', 'Short-form Video', 'Category: 7-Step'].map((tag) => (
+                <View key={tag} style={styles.ideaTagPill}>
+                  <Text style={styles.ideaTagPillText}>{tag}</Text>
+                </View>
+              ))}
+            </View>
+
+            <View style={styles.ideaBottomActionRow}>
+              <Pressable
+                onPress={() => {
+                  if (onOpenIdeaAngle) onOpenIdeaAngle();
+                  else showToast('Re-selecting idea...');
+                }}
+                hitSlop={8}
+              >
+                <Text style={styles.reSelectIdeaText}>RE-SELECT IDEA</Text>
+              </Pressable>
+
+              <Pressable
+                style={({ pressed }) => [styles.proAccelerateBtn, pressed && styles.btnPressed]}
+                onPress={() => showToast('⚡ Pro Acceleration Active')}
+              >
+                <Text style={styles.proAccelerateBtnText}>PRO ACCELERATE</Text>
+              </Pressable>
+            </View>
+          </View>
+
+          {/* ============================================================ */}
+          {/* CARD 2: SCRIPT QUALITY SCORE                                 */}
+          {/* ============================================================ */}
+          <View style={styles.scoreHighlightCard}>
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+              <Text style={styles.scoreCardLabel}>SCRIPT QUALITY SCORE</Text>
+              <View style={styles.aiEvaluatedBadge}>
+                <Text style={styles.aiEvaluatedBadgeText}>AI EVALUATED</Text>
+              </View>
+            </View>
+
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 16, marginTop: 12 }}>
+              {/* Circular Gauge */}
+              <View style={styles.scoreGaugeCircle}>
+                <Text style={styles.scoreGaugeNum}>88</Text>
+                <Text style={styles.scoreGaugeDenom}>/100</Text>
+              </View>
+
+              {/* Dual Meters */}
+              <View style={{ flex: 1, gap: 10 }}>
+                <View>
+                  <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 3 }}>
+                    <Text style={styles.meterLabel}>HOOK RETENTION</Text>
+                    <Text style={styles.meterVal}>92%</Text>
+                  </View>
+                  <View style={styles.meterTrack}>
+                    <View style={[styles.meterFill, { width: '92%', backgroundColor: '#582CDB' }]} />
+                  </View>
+                </View>
+
+                <View>
+                  <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 3 }}>
+                    <Text style={styles.meterLabel}>PACING SCORE</Text>
+                    <Text style={styles.meterVal}>84%</Text>
+                  </View>
+                  <View style={styles.meterTrack}>
+                    <View style={[styles.meterFill, { width: '84%', backgroundColor: '#582CDB' }]} />
+                  </View>
+                </View>
+              </View>
+            </View>
+
+            <View style={styles.insightCalloutBox}>
+              <Text style={{ fontSize: 13, marginRight: 6 }}>📍</Text>
+              <Text style={styles.insightCalloutText}>
+                &ldquo;First hook is strong, but the CTA can be sharper to drive more comments.&rdquo;
+              </Text>
+            </View>
+          </View>
+
+          {/* ============================================================ */}
+          {/* CARD 3: HOOK OPTIONS                                         */}
+          {/* ============================================================ */}
+          <View style={[styles.sectionHeaderRowBetween, { marginTop: 20 }]}>
+            <Text style={styles.sectionHeaderTitle}>HOOK OPTIONS</Text>
+          </View>
+
+          <View style={{ gap: 8, marginTop: 6 }}>
+            {hookOptions.map((hook, index) => {
+              const isSelected = selectedHookIndex === index;
+              return (
+                <Pressable
+                  key={index}
+                  style={[
+                    styles.hookOptionCard,
+                    isSelected && styles.hookOptionCardSelected,
+                  ]}
+                  onPress={() => handleApplyHook(index)}
+                >
+                  {isSelected && (
+                    <View style={styles.bestPerformingBadge}>
+                      <Text style={styles.bestPerformingBadgeText}>{hook.badge}</Text>
+                    </View>
+                  )}
+                  <Text style={[styles.hookOptionText, isSelected && styles.hookOptionTextSelected]}>
+                    &ldquo;{hook.text}&rdquo;
+                  </Text>
+                  <Text style={styles.hookOptionType}>{hook.type}</Text>
+                </Pressable>
+              );
+            })}
+
+            <Pressable
+              style={({ pressed }) => [styles.generateMoreHooksBtn, pressed && styles.btnPressed]}
+              onPress={handleGenerateMoreHooks}
+            >
+              <Text style={styles.generateMoreHooksBtnText}>GENERATE MORE</Text>
+            </Pressable>
+          </View>
+
+          {/* ============================================================ */}
+          {/* CARD 4: SCRIPT STRUCTURE TIMELINE                            */}
+          {/* ============================================================ */}
+          <View style={[styles.sectionHeaderRowBetween, { marginTop: 22 }]}>
+            <Text style={styles.sectionHeaderTitle}>SCRIPT STRUCTURE</Text>
+            <View style={styles.durationOptimalPill}>
+              <Text style={styles.durationOptimalPillText}>⏱ 42 SECONDS (OPTIMAL)</Text>
+            </View>
+          </View>
+
+          <View style={styles.structureTimelineCard}>
+            {[
+              { step: 1, title: 'Hook', timing: '0-3s | 3-sec thumbstopper', icon: '✔', active: true },
+              { step: 2, title: 'Mistake 1', timing: '4-14s | Problem #1 reveal', icon: '➔', active: false },
+              { step: 3, title: 'Mistake 2', timing: '15-25s | Friction point', icon: '◆', active: false },
+              { step: 4, title: 'Mistake 3', timing: '26-36s | Systems bottleneck', icon: '☰', active: false },
+              { step: 5, title: 'CTA', timing: '37-42s | Engagement question', icon: '💬', active: false },
+            ].map((item, idx) => (
+              <View key={idx} style={styles.timelineRowItem}>
+                <View style={[styles.timelineNumCircle, item.active && styles.timelineNumCircleActive]}>
+                  <Text style={[styles.timelineNumText, item.active && styles.timelineNumTextActive]}>
+                    {item.step}
+                  </Text>
+                </View>
+                <View style={{ flex: 1 }}>
+                  <Text style={styles.timelineItemTitle}>{item.title}</Text>
+                  <Text style={styles.timelineItemTiming}>{item.timing}</Text>
+                </View>
+                <Text style={{ fontSize: 13, color: item.active ? '#15803D' : '#64748B' }}>
+                  {item.icon}
+                </Text>
+              </View>
+            ))}
+          </View>
+
+          {/* ============================================================ */}
+          {/* CARD 5: SCRIPT BODY (Interactive Text Editor)                */}
+          {/* ============================================================ */}
+          <View style={[styles.sectionHeaderRowBetween, { marginTop: 22 }]}>
+            <Text style={styles.sectionHeaderTitle}>SCRIPT BODY</Text>
+            <Text style={{ fontSize: 13 }}>✏️</Text>
+          </View>
+
+          <View style={styles.scriptBodyCard}>
+            <TextInput
+              style={styles.scriptBodyTextInput}
+              multiline
+              value={scriptBody}
+              onChangeText={setScriptBody}
+              placeholder="Your script body..."
+              placeholderTextColor="#94A3B8"
+            />
+
+            {/* AI Rewriters */}
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={{ gap: 6, marginTop: 12, paddingTop: 10, borderTopWidth: 1, borderTopColor: '#F1EFE9' }}
+            >
+              {[
+                { label: 'Make Shorter', action: () => showToast('✂️ Trimmed script duration to 30s') },
+                { label: 'Make Punchier', action: () => showToast('💥 Boosted hook and delivery cadence') },
+                { label: 'Add Humor', action: () => showToast('😄 Injected relatable creator punchline') },
+                { label: 'Improve Flow', action: () => showToast('🌊 Smoothed transitions between scenes') },
+              ].map((pill, idx) => (
+                <Pressable
+                  key={idx}
+                  style={styles.quickRewritePill}
+                  onPress={pill.action}
+                >
+                  <Text style={styles.quickRewritePillText}>{pill.label}</Text>
+                </Pressable>
+              ))}
+
+              <Pressable
+                style={styles.aiPolishPillBtn}
+                onPress={handlePolishWithJarvis}
+              >
+                <Text style={styles.aiPolishPillBtnText}>🪄 AI Polish with Jarvis</Text>
+              </Pressable>
+            </ScrollView>
+          </View>
+
+          {/* ============================================================ */}
+          {/* CARD 6: ESTIMATE METRICS                                     */}
+          {/* ============================================================ */}
+          <View style={styles.estimateCard}>
+            <Text style={styles.estimateCardHeaderLabel}>ESTIMATE</Text>
+            <View style={{ flexDirection: 'row', alignItems: 'baseline', marginTop: 2 }}>
+              <Text style={styles.estimateBigNum}>42s</Text>
+              <Text style={styles.estimateUnitText}> Est. Duration</Text>
+            </View>
+            <Text style={styles.estimateSubText}>124 WORDS • 2.9 W/S</Text>
+
+            <View style={styles.estimateMetricsRow}>
+              <Text style={styles.estimateMetricLabel}>Pacing: <Text style={styles.estimateMetricVal}>91%</Text></Text>
+              <Text style={styles.estimateMetricLabel}>Clarity: <Text style={styles.estimateMetricVal}>High</Text></Text>
+              <Text style={styles.estimateMetricLabel}>CTA: <Text style={styles.estimateMetricVal}>87%</Text></Text>
+            </View>
+          </View>
+
+          {/* ============================================================ */}
+          {/* CARD 7: FORMAT ADAPT                                         */}
+          {/* ============================================================ */}
+          <View style={styles.formatAdaptCard}>
+            <Text style={styles.formatAdaptHeaderLabel}>FORMAT</Text>
+            <View style={{ flexDirection: 'row', gap: 10, alignItems: 'center', marginVertical: 10 }}>
+              <SocialBrandIcon platform="tiktok" size={24} />
+              <SocialBrandIcon platform="instagram" size={24} />
+              <SocialBrandIcon platform="youtube" size={24} />
+            </View>
+
+            <Pressable
+              style={styles.adaptBtn}
+              onPress={() => showToast('✓ Formatted for 9:16 Short-Form')}
+            >
+              <Text style={styles.adaptBtnText}>ADAPT</Text>
+            </Pressable>
+          </View>
+
+          {/* ============================================================ */}
+          {/* CARD 8: RETENTION NOTES                                      */}
+          {/* ============================================================ */}
+          <View style={styles.retentionNotesCard}>
+            <Text style={styles.retentionNotesHeaderLabel}>RETENTION NOTES</Text>
+            <View style={{ gap: 8, marginTop: 10 }}>
+              <Text style={styles.retentionNoteLine}>✓ First 3 sec strongest for TikTok &amp; Reels</Text>
+              <Text style={styles.retentionNoteLine}>⚡ Pattern interrupt at 12s and 24s</Text>
+              <Text style={styles.retentionNoteLine}>💡 Total duration optimal for Reel loop</Text>
+              <Text style={styles.retentionNoteLine}>💬 Question-based CTA for comments upside</Text>
+            </View>
+          </View>
+
+          {/* ============================================================ */}
+          {/* CARD 9: VOICE PREVIEW (WAVELENGTH VISUALIZER)                */}
+          {/* ============================================================ */}
+          <View style={styles.voicePreviewCard}>
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+              <Text style={styles.voicePreviewHeaderLabel}>VOICE PREVIEW</Text>
+              <Text style={styles.voicePreviewSubLabel}>124 WORDS • 42s</Text>
+            </View>
+            <Text style={styles.voicePreviewSubDetail}>READY FOR ONE-CLICK SYNTHESIS</Text>
+
+            <View style={styles.voicePreviewBox}>
+              <Text style={styles.voicePreviewBoxTitle}>Energetic Studio Voice • 1.0x</Text>
+
+              {/* Continuous Acoustic Sound Wavelength */}
+              <View style={styles.previewWavelengthRow}>
+                {[
+                  8, 14, 24, 18, 32, 44, 36, 22, 48, 58, 46, 30, 62, 50, 34, 56,
+                  42, 26, 48, 60, 46, 32, 52, 42, 28, 46, 56, 44, 30, 42, 50, 36,
+                  24, 40, 52, 38, 24, 34, 26, 16, 28, 18, 12, 18, 12, 8,
+                ].map((h, i) => (
+                  <View
+                    key={i}
+                    style={[
+                      styles.previewWavelengthBar,
+                      {
+                        height: isPlayingPreview
+                          ? Math.max(6, Math.min(42, h * (0.6 + Math.sin(i * 0.4) * 0.4)))
+                          : Math.max(6, h * 0.6),
+                        backgroundColor: i % 3 === 0 ? '#F59E0B' : '#582CDB',
+                      },
+                    ]}
+                  />
+                ))}
+              </View>
+            </View>
+
+            <Pressable
+              style={styles.applyVoiceStudioBtn}
+              onPress={handleSendToVoiceStudio}
+            >
+              <Text style={styles.applyVoiceStudioBtnText}>APPLY TO VOICE STUDIO</Text>
+            </Pressable>
+          </View>
+
+          {/* ============================================================ */}
+          {/* CARD 10: STREAK & XP IMPACT                                  */}
+          {/* ============================================================ */}
+          <View style={styles.streakCard}>
+            <Text style={styles.streakCardHeaderLabel}>STREAK &amp; XP IMPACT</Text>
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 8 }}>
+              <Text style={styles.streakValText}>🔥 47 Days Streak</Text>
+              <Text style={styles.xpValText}>⚡ +50 XP Creator Level</Text>
+            </View>
+
+            <View style={{ marginTop: 10 }}>
+              <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 4 }}>
+                <Text style={styles.postProgressLabel}>POST PROGRESS</Text>
+                <Text style={styles.postProgressVal}>75%</Text>
+              </View>
+              <View style={styles.meterTrack}>
+                <View style={[styles.meterFill, { width: '75%', backgroundColor: '#F59E0B' }]} />
+              </View>
+            </View>
+          </View>
+
+          {/* ============================================================ */}
+          {/* CARD 11: JARVIS CREATOR COACH CARD                           */}
+          {/* ============================================================ */}
+          <LinearGradient
+            colors={['#EDE9FE', '#DDD6FE']}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={styles.jarvisCoachCard}
+          >
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+              <View style={styles.jarvisCoachIconBox}>
+                <Image
+                  source={require('../../assets/images/jarvis-ghost-clean.png')}
+                  style={{ width: 28, height: 28 }}
+                  resizeMode="contain"
+                />
+              </View>
+              <Text style={styles.jarvisCoachTitle}>JARVIS CREATOR COACH</Text>
+            </View>
+
+            <Text style={styles.jarvisCoachQuote}>
+              &ldquo;The script is strong, but the CTA should be sharper. Ask a question to encourage viewers to comment exactly how to respond.&rdquo;
+            </Text>
+
+            <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginBottom: 14 }}>
+              {['SHORTEN CTA', 'CHANGE HOOK', 'ALTERNATIVE SCENE'].map((chip) => (
+                <Pressable
+                  key={chip}
+                  style={styles.coachChip}
+                  onPress={() => showToast(`✓ Applied: ${chip}`)}
+                >
+                  <Text style={styles.coachChipText}>{chip}</Text>
+                </Pressable>
+              ))}
+            </View>
+
+            <Pressable
+              style={({ pressed }) => [styles.improveScriptBtn, pressed && styles.btnPressed]}
+              onPress={handlePolishWithJarvis}
+            >
+              <Text style={styles.improveScriptBtnText}>IMPROVE SCRIPT</Text>
+            </Pressable>
+          </LinearGradient>
+
+          {/* ============================================================ */}
+          {/* BOTTOM ACTION BUTTONS                                        */}
+          {/* ============================================================ */}
+          <View style={{ gap: 10, marginTop: 20 }}>
+            {/* Primary: SEND TO VOICE STUDIO */}
+            <Pressable
+              style={({ pressed }) => [styles.sendToVoiceBtn, pressed && styles.btnPressed]}
+              onPress={handleSendToVoiceStudio}
+            >
+              <Text style={styles.sendToVoiceBtnText}>🎙️ SEND TO VOICE STUDIO</Text>
+            </Pressable>
+
+            {/* Dual Row: USE AS POST & SAVE DRAFT */}
+            <View style={{ flexDirection: 'row', gap: 10 }}>
+              <Pressable
+                style={({ pressed }) => [styles.secondaryDeckBtn, pressed && styles.btnPressed]}
+                onPress={handleUseAsPost}
+              >
+                <Text style={styles.secondaryDeckBtnText}>USE AS POST</Text>
+              </Pressable>
+
+              <Pressable
+                style={({ pressed }) => [styles.secondaryDeckBtn, pressed && styles.btnPressed]}
+                onPress={handleSaveDraft}
+              >
+                <Text style={styles.secondaryDeckBtnText}>SAVE DRAFT</Text>
+              </Pressable>
+            </View>
+          </View>
+        </ScrollView>
+
+        {/* 3. FLOATING TAB BAR */}
+        <FloatingTabBar
+          activeTab={activeTab}
+          onTabPress={(tab) => {
+            if (Platform.OS !== 'web') {
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+            }
+            setActiveTab(tab);
+            if (onNavigateTab) onNavigateTab(tab);
+          }}
+        />
+
+        {/* USER PROFILE MODAL */}
+        <UserProfileModal
+          visible={showProfileModal}
+          onClose={() => setShowProfileModal(false)}
+          onLogout={onLogout}
+          initialProfile={userProfile}
+          onSaveProfile={(updated) => {
+            if (onSaveProfile) onSaveProfile(updated);
+          }}
+        />
+
+        {/* NOTIFICATIONS MODAL */}
+        <Modal
+          visible={showNotificationModal}
+          transparent={true}
+          animationType="fade"
+          onRequestClose={() => setShowNotificationModal(false)}
+        >
+          <View style={styles.modalOverlay}>
+            <Animated.View style={[styles.modalCard, { transform: [{ scale: modalPopScale }] }]}>
+              <View style={styles.modalHeaderBetween}>
+                <Text style={styles.modalTitle}>Script Alerts</Text>
+                <Pressable onPress={() => setShowNotificationModal(false)} hitSlop={8}>
+                  <Text style={styles.modalCloseText}>✕</Text>
+                </Pressable>
+              </View>
+              <View style={{ gap: 8, marginVertical: 12 }}>
+                <View style={styles.modalAlertItem}>
+                  <Text style={{ fontSize: 13, fontWeight: '800', color: '#171420' }}>
+                    ⚡ 3-Second Hook Retention Spike
+                  </Text>
+                  <Text style={{ fontSize: 11, color: '#64748B', marginTop: 2 }}>
+                    Your first line is optimized for 90%+ TikTok completion.
+                  </Text>
+                </View>
+              </View>
+              <Pressable style={styles.modalCancelBtn} onPress={() => setShowNotificationModal(false)}>
+                <Text style={styles.modalCancelBtnText}>Close</Text>
+              </Pressable>
+            </Animated.View>
+          </View>
+        </Modal>
+
+        {/* 3D GHOST CELEBRATION MODAL */}
+        <AnimatedCompletionModal
+          visible={showCompletionModal}
+          onDismiss={() => setShowCompletionModal(false)}
+          title={completionData.title}
+          subtitle={completionData.subtitle}
+          badgeText={completionData.badgeText}
+          xpEarned={completionData.xpEarned}
+          speechBubble={completionData.speechBubble}
+        />
+      </View>
+    </SafeAreaView>
+  );
+};
+
+const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+    backgroundColor: '#FAF8F5',
+  },
+  container: {
+    flex: 1,
+    backgroundColor: '#FAF8F5',
+  },
+  headerBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 20,
+    paddingTop: 10,
+    paddingBottom: 12,
+    backgroundColor: '#FAF8F5',
+  },
+  backBtnCircle: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1,
+    borderColor: '#EFECE6',
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.04,
+    shadowRadius: 4,
+    elevation: 1,
+  },
+  headerLogoWrapper: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: 'rgba(255, 255, 255, 0.95)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.06,
+    shadowRadius: 6,
+    elevation: 2,
+  },
+  headerGhostLogo: {
+    width: 26,
+    height: 26,
+  },
+  proHeaderBadge: {
+    paddingHorizontal: 9,
+    paddingVertical: 3.5,
+    borderRadius: 6,
+  },
+  proHeaderBadgeText: {
+    fontSize: 9.5,
+    fontWeight: '900',
+    color: '#0C0A12',
+    letterSpacing: 0.3,
+  },
+  headerRightGroup: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+  },
+  headerIconBtn: {
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1,
+    borderColor: '#EFECE6',
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.04,
+    shadowRadius: 4,
+    elevation: 1,
+  },
+  notificationDot: {
+    position: 'absolute',
+    top: 9,
+    right: 9,
+    width: 7,
+    height: 7,
+    borderRadius: 3.5,
+    backgroundColor: '#EF4444',
+    borderWidth: 1.5,
+    borderColor: '#FFFFFF',
+  },
+  profileAvatarWrapper: {
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    borderWidth: 1.5,
+    borderColor: '#F59E0B',
+    position: 'relative',
+  },
+  headerUserAvatar: {
+    width: '100%',
+    height: '100%',
+    borderRadius: 19,
+  },
+  avatarTinyGoldCheckPos: {
+    position: 'absolute',
+    bottom: -2,
+    right: -2,
+  },
+  scrollContent: {
+    paddingHorizontal: 20,
+    paddingBottom: 140,
+  },
+  topTitlesSection: {
+    marginTop: 8,
+    marginBottom: 16,
+  },
+  goldScriptBadge: {
+    backgroundColor: '#FEF3C7',
+    alignSelf: 'flex-start',
+    paddingHorizontal: 9,
+    paddingVertical: 3.5,
+    borderRadius: 6,
+    marginBottom: 8,
+  },
+  goldScriptBadgeText: {
+    fontSize: 9.5,
+    fontWeight: '900',
+    color: '#D97706',
+    letterSpacing: 0.3,
+  },
+  mainTitleText: {
+    fontSize: 23,
+    fontWeight: '900',
+    color: '#171420',
+    letterSpacing: -0.5,
+  },
+  mainSubText: {
+    fontSize: 12.5,
+    color: '#64748B',
+    lineHeight: 18,
+    marginTop: 4,
+  },
+  purplePill: {
+    backgroundColor: '#EDE9FE',
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 6,
+  },
+  purplePillText: {
+    fontSize: 10.5,
+    fontWeight: '900',
+    color: '#582CDB',
+  },
+  goldPill: {
+    backgroundColor: '#FEF3C7',
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 6,
+  },
+  goldPillText: {
+    fontSize: 10.5,
+    fontWeight: '900',
+    color: '#D97706',
+  },
+
+  // CARD 1: SELECTED IDEA
+  selectedIdeaCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 20,
+    padding: 18,
+    borderLeftWidth: 4,
+    borderLeftColor: '#582CDB',
+    borderWidth: 1,
+    borderColor: '#EFECE6',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.03,
+    shadowRadius: 6,
+    marginBottom: 16,
+  },
+  selectedIdeaTag: {
+    fontSize: 9.5,
+    fontWeight: '900',
+    color: '#582CDB',
+    letterSpacing: 0.5,
+  },
+  selectedIdeaTitle: {
+    fontSize: 16,
+    fontWeight: '900',
+    color: '#171420',
+    marginVertical: 4,
+    lineHeight: 22,
+  },
+  selectedIdeaSub: {
+    fontSize: 11.5,
+    color: '#64748B',
+    lineHeight: 16,
+  },
+  tagsPillsRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 6,
+    marginVertical: 10,
+  },
+  ideaTagPill: {
+    backgroundColor: '#FAF8F5',
+    borderWidth: 1,
+    borderColor: '#EFECE6',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 6,
+  },
+  ideaTagPillText: {
+    fontSize: 10.5,
+    fontWeight: '800',
+    color: '#475569',
+  },
+  ideaBottomActionRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginTop: 6,
+    paddingTop: 8,
+    borderTopWidth: 1,
+    borderTopColor: '#F1EFE9',
+  },
+  reSelectIdeaText: {
+    fontSize: 10.5,
+    fontWeight: '900',
+    color: '#64748B',
+    letterSpacing: 0.4,
+  },
+  proAccelerateBtn: {
+    backgroundColor: '#EDE9FE',
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 8,
+  },
+  proAccelerateBtnText: {
+    fontSize: 10,
+    fontWeight: '900',
+    color: '#582CDB',
+  },
+
+  // CARD 2: SCRIPT QUALITY SCORE
+  scoreHighlightCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 20,
+    padding: 18,
+    borderWidth: 1,
+    borderColor: '#EFECE6',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.03,
+    shadowRadius: 6,
+    marginBottom: 16,
+  },
+  scoreCardLabel: {
+    fontSize: 10.5,
+    fontWeight: '900',
+    color: '#64748B',
+    letterSpacing: 0.4,
+  },
+  aiEvaluatedBadge: {
+    backgroundColor: '#EDE9FE',
+    paddingHorizontal: 7,
+    paddingVertical: 2.5,
+    borderRadius: 6,
+  },
+  aiEvaluatedBadgeText: {
+    fontSize: 8.5,
+    fontWeight: '900',
+    color: '#582CDB',
+  },
+  scoreGaugeCircle: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    borderWidth: 4,
+    borderColor: '#582CDB',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  scoreGaugeNum: {
+    fontSize: 22,
+    fontWeight: '900',
+    color: '#171420',
+    lineHeight: 24,
+  },
+  scoreGaugeDenom: {
+    fontSize: 9,
+    fontWeight: '800',
+    color: '#94A3B8',
+  },
+  meterLabel: {
+    fontSize: 9.5,
+    fontWeight: '900',
+    color: '#64748B',
+  },
+  meterVal: {
+    fontSize: 10,
+    fontWeight: '900',
+    color: '#171420',
+  },
+  meterTrack: {
+    height: 6,
+    backgroundColor: '#F1EFE9',
+    borderRadius: 3,
+    overflow: 'hidden',
+  },
+  meterFill: {
+    height: '100%',
+    borderRadius: 3,
+  },
+  insightCalloutBox: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#FAF8F5',
+    borderRadius: 12,
+    padding: 10,
+    marginTop: 14,
+    borderWidth: 1,
+    borderColor: '#EFECE6',
+  },
+  insightCalloutText: {
+    fontSize: 11,
+    color: '#475569',
+    lineHeight: 16,
+    flex: 1,
+    fontStyle: 'italic',
+  },
+
+  // CARD 3: HOOK OPTIONS
+  sectionHeaderRowBetween: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  sectionHeaderTitle: {
+    fontSize: 11.5,
+    fontWeight: '900',
+    color: '#64748B',
+    letterSpacing: 0.5,
+  },
+  hookOptionCard: {
+    backgroundColor: '#FAF8F5',
+    borderRadius: 14,
+    padding: 14,
+    borderWidth: 1.5,
+    borderColor: '#EFECE6',
+  },
+  hookOptionCardSelected: {
+    backgroundColor: '#FEFCE8',
+    borderColor: '#F59E0B',
+  },
+  bestPerformingBadge: {
+    backgroundColor: '#FEF3C7',
+    alignSelf: 'flex-start',
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 4,
+    marginBottom: 6,
+  },
+  bestPerformingBadgeText: {
+    fontSize: 8.5,
+    fontWeight: '900',
+    color: '#D97706',
+  },
+  hookOptionText: {
+    fontSize: 13,
+    fontWeight: '800',
+    color: '#171420',
+    lineHeight: 18,
+  },
+  hookOptionTextSelected: {
+    fontWeight: '900',
+  },
+  hookOptionType: {
+    fontSize: 10.5,
+    color: '#64748B',
+    marginTop: 6,
+  },
+  generateMoreHooksBtn: {
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1,
+    borderColor: '#DDD6FE',
+    paddingVertical: 10,
+    borderRadius: 12,
+    alignItems: 'center',
+    marginTop: 4,
+  },
+  generateMoreHooksBtnText: {
+    fontSize: 11,
+    fontWeight: '900',
+    color: '#582CDB',
+  },
+
+  // CARD 4: SCRIPT STRUCTURE TIMELINE
+  durationOptimalPill: {
+    backgroundColor: '#DCFCE7',
+    paddingHorizontal: 7,
+    paddingVertical: 2.5,
+    borderRadius: 6,
+  },
+  durationOptimalPillText: {
+    fontSize: 9,
+    fontWeight: '900',
+    color: '#15803D',
+  },
+  structureTimelineCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 18,
+    padding: 14,
+    borderWidth: 1,
+    borderColor: '#EFECE6',
+  },
+  timelineRowItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    paddingVertical: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: '#FAF8F5',
+  },
+  timelineNumCircle: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    backgroundColor: '#E2E8F0',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  timelineNumCircleActive: {
+    backgroundColor: '#582CDB',
+  },
+  timelineNumText: {
+    fontSize: 11,
+    fontWeight: '900',
+    color: '#475569',
+  },
+  timelineNumTextActive: {
+    color: '#FFFFFF',
+  },
+  timelineItemTitle: {
+    fontSize: 12.5,
+    fontWeight: '900',
+    color: '#171420',
+  },
+  timelineItemTiming: {
+    fontSize: 10.5,
+    color: '#64748B',
+  },
+
+  // CARD 5: SCRIPT BODY
+  scriptBodyCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 18,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: '#EFECE6',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.03,
+    shadowRadius: 6,
+  },
+  scriptBodyTextInput: {
+    fontSize: 12.5,
+    lineHeight: 20,
+    color: '#171420',
+    minHeight: 180,
+    textAlignVertical: 'top',
+  },
+  quickRewritePill: {
+    backgroundColor: '#FAF8F5',
+    borderWidth: 1,
+    borderColor: '#EFECE6',
+    paddingHorizontal: 9,
+    paddingVertical: 5,
+    borderRadius: 6,
+  },
+  quickRewritePillText: {
+    fontSize: 10.5,
+    fontWeight: '800',
+    color: '#475569',
+  },
+  aiPolishPillBtn: {
+    backgroundColor: '#EDE9FE',
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 6,
+  },
+  aiPolishPillBtnText: {
+    fontSize: 10.5,
+    fontWeight: '900',
+    color: '#582CDB',
+  },
+
+  // CARD 6: ESTIMATE
+  estimateCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 18,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: '#EFECE6',
+    marginTop: 16,
+  },
+  estimateCardHeaderLabel: {
+    fontSize: 9.5,
+    fontWeight: '900',
+    color: '#94A3B8',
+    letterSpacing: 0.4,
+  },
+  estimateBigNum: {
+    fontSize: 26,
+    fontWeight: '900',
+    color: '#171420',
+  },
+  estimateUnitText: {
+    fontSize: 12,
+    fontWeight: '800',
+    color: '#64748B',
+  },
+  estimateSubText: {
+    fontSize: 10.5,
+    color: '#64748B',
+    marginTop: 1,
+  },
+  estimateMetricsRow: {
+    flexDirection: 'row',
+    gap: 16,
+    marginTop: 10,
+    paddingTop: 8,
+    borderTopWidth: 1,
+    borderTopColor: '#F1EFE9',
+  },
+  estimateMetricLabel: {
+    fontSize: 11,
+    color: '#64748B',
+  },
+  estimateMetricVal: {
+    fontWeight: '900',
+    color: '#171420',
+  },
+
+  // CARD 7: FORMAT ADAPT
+  formatAdaptCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 18,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: '#EFECE6',
+    marginTop: 12,
+  },
+  formatAdaptHeaderLabel: {
+    fontSize: 9.5,
+    fontWeight: '900',
+    color: '#94A3B8',
+    letterSpacing: 0.4,
+  },
+  adaptBtn: {
+    backgroundColor: '#FAF8F5',
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    paddingVertical: 8,
+    borderRadius: 10,
+    alignItems: 'center',
+  },
+  adaptBtnText: {
+    fontSize: 11,
+    fontWeight: '900',
+    color: '#171420',
+  },
+
+  // CARD 8: RETENTION NOTES
+  retentionNotesCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 18,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: '#EFECE6',
+    marginTop: 12,
+  },
+  retentionNotesHeaderLabel: {
+    fontSize: 9.5,
+    fontWeight: '900',
+    color: '#94A3B8',
+    letterSpacing: 0.4,
+  },
+  retentionNoteLine: {
+    fontSize: 11.5,
+    fontWeight: '700',
+    color: '#171420',
+  },
+
+  // CARD 9: VOICE PREVIEW
+  voicePreviewCard: {
+    backgroundColor: '#FAF8F5',
+    borderRadius: 18,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: '#EFECE6',
+    marginTop: 14,
+  },
+  voicePreviewHeaderLabel: {
+    fontSize: 9.5,
+    fontWeight: '900',
+    color: '#171420',
+    letterSpacing: 0.4,
+  },
+  voicePreviewSubLabel: {
+    fontSize: 9.5,
+    fontWeight: '800',
+    color: '#64748B',
+  },
+  voicePreviewSubDetail: {
+    fontSize: 8.5,
+    fontWeight: '900',
+    color: '#15803D',
+    marginTop: 1,
+  },
+  voicePreviewBox: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 14,
+    padding: 12,
+    marginTop: 10,
+    borderWidth: 1,
+    borderColor: '#EFECE6',
+  },
+  voicePreviewBoxTitle: {
+    fontSize: 11,
+    fontWeight: '800',
+    color: '#171420',
+    marginBottom: 8,
+  },
+  previewWavelengthRow: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    height: 44,
+    gap: 2,
+  },
+  previewWavelengthBar: {
+    flex: 1,
+    maxWidth: 3.5,
+    minWidth: 2,
+    borderRadius: 1.5,
+  },
+  applyVoiceStudioBtn: {
+    backgroundColor: '#582CDB',
+    paddingVertical: 10,
+    borderRadius: 10,
+    alignItems: 'center',
+    marginTop: 10,
+  },
+  applyVoiceStudioBtnText: {
+    color: '#FFFFFF',
+    fontSize: 11,
+    fontWeight: '900',
+  },
+
+  // CARD 10: STREAK & XP IMPACT
+  streakCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 18,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: '#EFECE6',
+    marginTop: 14,
+  },
+  streakCardHeaderLabel: {
+    fontSize: 9.5,
+    fontWeight: '900',
+    color: '#94A3B8',
+    letterSpacing: 0.4,
+  },
+  streakValText: {
+    fontSize: 12.5,
+    fontWeight: '900',
+    color: '#171420',
+  },
+  xpValText: {
+    fontSize: 12,
+    fontWeight: '900',
+    color: '#582CDB',
+  },
+  postProgressLabel: {
+    fontSize: 9,
+    fontWeight: '900',
+    color: '#64748B',
+  },
+  postProgressVal: {
+    fontSize: 9.5,
+    fontWeight: '900',
+    color: '#171420',
+  },
+
+  // CARD 11: JARVIS CREATOR COACH
+  jarvisCoachCard: {
+    borderRadius: 22,
+    padding: 18,
+    marginTop: 18,
+  },
+  jarvisCoachIconBox: {
+    width: 36,
+    height: 36,
+    borderRadius: 12,
+    backgroundColor: '#582CDB',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  jarvisCoachTitle: {
+    fontSize: 14.5,
+    fontWeight: '900',
+    color: '#171420',
+  },
+  jarvisCoachQuote: {
+    fontSize: 12,
+    color: '#171420',
+    lineHeight: 18,
+    marginVertical: 12,
+  },
+  coachChip: {
+    backgroundColor: '#FFFFFF',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 6,
+  },
+  coachChipText: {
+    fontSize: 9.5,
+    fontWeight: '900',
+    color: '#582CDB',
+  },
+  improveScriptBtn: {
+    backgroundColor: '#582CDB',
+    paddingVertical: 12,
+    borderRadius: 12,
+    alignItems: 'center',
+  },
+  improveScriptBtnText: {
+    color: '#FFFFFF',
+    fontSize: 12,
+    fontWeight: '900',
+  },
+
+  // BOTTOM ACTION BUTTONS
+  sendToVoiceBtn: {
+    backgroundColor: '#582CDB',
+    paddingVertical: 14,
+    borderRadius: 14,
+    alignItems: 'center',
+    shadowColor: '#582CDB',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.25,
+    shadowRadius: 8,
+    elevation: 3,
+  },
+  sendToVoiceBtnText: {
+    color: '#FFFFFF',
+    fontSize: 13.5,
+    fontWeight: '900',
+  },
+  secondaryDeckBtn: {
+    flex: 1,
+    backgroundColor: '#FAF8F5',
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    paddingVertical: 12,
+    borderRadius: 14,
+    alignItems: 'center',
+  },
+  secondaryDeckBtnText: {
+    color: '#171420',
+    fontSize: 12,
+    fontWeight: '900',
+  },
+
+  // MODALS
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(15, 10, 30, 0.75)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  modalCard: {
+    width: '100%',
+    maxWidth: 400,
+    maxHeight: '88%',
+    backgroundColor: '#FFFFFF',
+    borderRadius: 24,
+    padding: 22,
+  },
+  modalHeaderBetween: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 10,
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: '900',
+    color: '#171420',
+  },
+  modalCloseText: {
+    fontSize: 18,
+    color: '#94A3B8',
+    fontWeight: '900',
+  },
+  modalAlertItem: {
+    backgroundColor: '#FAF8F5',
+    borderRadius: 12,
+    padding: 12,
+    borderWidth: 1,
+    borderColor: '#EFECE6',
+  },
+  modalCancelBtn: {
+    paddingVertical: 10,
+    alignItems: 'center',
+  },
+  modalCancelBtnText: {
+    color: '#64748B',
+    fontSize: 12,
+    fontWeight: '800',
+  },
+  toastContainer: {
+    position: 'absolute',
+    bottom: 90,
+    alignSelf: 'center',
+    backgroundColor: 'rgba(23, 20, 32, 0.94)',
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 8,
+    elevation: 6,
+    zIndex: 999,
+  },
+  toastText: {
+    color: '#FFFFFF',
+    fontSize: 12,
+    fontWeight: '800',
+  },
+  btnPressed: {
+    transform: [{ scale: 0.96 }],
+    opacity: 0.85,
+  },
+});
