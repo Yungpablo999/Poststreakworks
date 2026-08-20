@@ -425,7 +425,19 @@ export const ProScriptScreen: React.FC<ProScriptScreenProps> = ({
 
               <Pressable
                 style={({ pressed }) => [styles.proAccelerateBtn, pressed && styles.btnPressed]}
-                onPress={() => showToast('⚡ Pro Acceleration Active')}
+                onPress={() => {
+                  if (Platform.OS !== 'web') {
+                    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+                  }
+                  setCompletionData({
+                    title: 'Pro Script Accelerated!',
+                    subtitle: `"${currentIdeaTitle}" optimized with AI retention pacing & viral hook multiplier.`,
+                    badgeText: '⚡ PRO SCRIPT ACCELERATED',
+                    xpEarned: 50,
+                    speechBubble: 'Maximum velocity unlocked, Pablo! Pacing & retention boosted to 94%! 🔥',
+                  });
+                  setShowCompletionModal(true);
+                }}
               >
                 <Text style={styles.proAccelerateBtnText}>PRO ACCELERATE</Text>
               </Pressable>
