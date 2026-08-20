@@ -321,6 +321,16 @@ export const ProMatchScreen: React.FC<ProMatchScreenProps> = ({
     setTimeout(() => setToastMessage(null), 2500);
   };
 
+  const handleTabPress = (tab: TabType) => {
+    if (Platform.OS !== 'web') {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    }
+    setActiveTab(tab);
+    if (onNavigateTab) {
+      onNavigateTab(tab);
+    }
+  };
+
   const triggerModalPop = () => {
     modalPopScale.setValue(0.92);
     Animated.spring(modalPopScale, {
@@ -1433,10 +1443,7 @@ export const ProMatchScreen: React.FC<ProMatchScreenProps> = ({
         </ScrollView>
 
         {/* 10. FLOATING LIQUID GLASS BOTTOM NAVIGATION BAR */}
-        <FloatingTabBar activeTab={activeTab} onTabPress={(tab) => {
-          setActiveTab(tab);
-          if (onNavigateTab) onNavigateTab(tab);
-        }} />
+        <FloatingTabBar activeTab={activeTab} onTabPress={handleTabPress} />
 
         {/* ============================================================ */}
         {/* MODAL 1: COLLAB DEEP DIVE INTELLIGENCE                       */}
