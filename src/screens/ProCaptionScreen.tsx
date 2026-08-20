@@ -1061,15 +1061,17 @@ export const ProCaptionScreen: React.FC<ProCaptionScreenProps> = ({
               </Pressable>
             </View>
 
-            {/* Sub Links: Use Caption & Save Draft */}
-            <View style={{ flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: 6, marginTop: 4 }}>
-              <Pressable onPress={handleAddToPost} hitSlop={8}>
-                <Text style={styles.bottomSubLink}>Use Caption</Text>
-              </Pressable>
-              <Pressable onPress={handleSaveDraft} hitSlop={8}>
-                <Text style={styles.bottomSubLink}>Save Draft</Text>
-              </Pressable>
-            </View>
+            {/* Redesigned Luxury Save Draft Button */}
+            <Pressable
+              style={({ pressed }) => [styles.saveDraftFullBtn, pressed && styles.btnPressed]}
+              onPress={handleSaveDraft}
+            >
+              <Text style={{ fontSize: 13, marginRight: 6 }}>💾</Text>
+              <Text style={styles.saveDraftFullBtnText}>Save Draft</Text>
+              <View style={styles.saveDraftXpPill}>
+                <Text style={styles.saveDraftXpPillText}>+120 XP</Text>
+              </View>
+            </Pressable>
           </View>
         </ScrollView>
 
@@ -2192,8 +2194,37 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontWeight: '900',
   },
-  bottomSubLink: {
-    fontSize: 11,
+  saveDraftFullBtn: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#FAF8F5',
+    borderWidth: 1.5,
+    borderColor: '#E2E8F0',
+    paddingVertical: 12,
+    borderRadius: 14,
+    marginTop: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.03,
+    shadowRadius: 4,
+    elevation: 1,
+  },
+  saveDraftFullBtnText: {
+    color: '#171420',
+    fontSize: 12.5,
+    fontWeight: '900',
+    letterSpacing: 0.2,
+  },
+  saveDraftXpPill: {
+    backgroundColor: '#EDE9FE',
+    paddingHorizontal: 7,
+    paddingVertical: 2.5,
+    borderRadius: 6,
+    marginLeft: 8,
+  },
+  saveDraftXpPillText: {
+    fontSize: 9.5,
     fontWeight: '900',
     color: '#582CDB',
   },
