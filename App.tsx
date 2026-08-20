@@ -640,6 +640,10 @@ export default function App() {
                 navigateTo('messages');
               }}
               onOpenJarvisPro={() => navigateTo('jarvis-pro')}
+              onOpenPostComposer={(ideaTitle) => {
+                if (ideaTitle) setComposerIdeaTitle(ideaTitle);
+                navigateTo('composer');
+              }}
               onOpenCollabIdea={(partnerData) => {
                 if (partnerData) setCollabPartnerData(partnerData);
                 navigateTo('collab-idea');

@@ -32,6 +32,7 @@ interface ProMatchScreenProps {
   onNavigateTab?: (tab: TabType) => void;
   onOpenMessages?: (threadId?: string) => void;
   onOpenJarvisPro?: () => void;
+  onOpenPostComposer?: (ideaTitle?: string) => void;
   onOpenCollabIdea?: (partnerData: {
     name: string;
     handle: string;
@@ -279,6 +280,7 @@ export const ProMatchScreen: React.FC<ProMatchScreenProps> = ({
   onNavigateTab,
   onOpenMessages,
   onOpenJarvisPro,
+  onOpenPostComposer,
   onOpenCollabIdea,
   onOpenSquad,
   onOpenFindSquad,
@@ -1798,7 +1800,9 @@ export const ProMatchScreen: React.FC<ProMatchScreenProps> = ({
                       style={styles.arenaQuickSubmitBtn}
                       onPress={() => {
                         setShowDuelArenaModal(false);
-                        showToast('🔥 Post logged! +15 pts awarded to Momentum Makers!');
+                        if (onOpenPostComposer) {
+                          onOpenPostComposer('Live Squad Duel Gauntlet Reel');
+                        }
                       }}
                     >
                       <Text style={styles.arenaQuickSubmitText}>Log +15</Text>
@@ -1829,14 +1833,16 @@ export const ProMatchScreen: React.FC<ProMatchScreenProps> = ({
                   style={styles.arenaScoreBtn}
                   onPress={() => {
                     setShowDuelArenaModal(false);
-                    showToast('🚀 Launching Post Composer for Live Duel gauntlet!');
+                    if (onOpenPostComposer) {
+                      onOpenPostComposer('Live Squad Duel Gauntlet Post');
+                    }
                   }}
                 >
                   <LinearGradient
                     colors={['#784DF0', '#582CDB']}
                     style={styles.arenaScoreGradient}
                   >
-                    <Text style={styles.arenaScoreBtnText}>Post to Score 🔥</Text>
+                    <Text style={styles.arenaScoreBtnText}>Shape Post to Score 🔥</Text>
                   </LinearGradient>
                 </Pressable>
               </View>
