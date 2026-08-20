@@ -1154,10 +1154,22 @@ export const ProCaptionScreen: React.FC<ProCaptionScreenProps> = ({
                   <Text style={styles.resetHashtagsBtnText}>Reset</Text>
                 </Pressable>
                 <Pressable
-                  style={styles.saveHashtagsBtn}
+                  style={({ pressed }) => [styles.saveHashtagsBtn, pressed && styles.btnPressed]}
                   onPress={() => {
+                    if (Platform.OS !== 'web') {
+                      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+                    }
                     setShowHashtagModal(false);
-                    showToast('✨ Hashtags updated!');
+                    setCompletionData({
+                      title: 'Hashtags Optimized!',
+                      subtitle: `${hashtagList.length} creator tags calibrated for peak reach & discoverability.`,
+                      badgeText: '✨ HASHTAGS LOCKED IN (+25 XP)',
+                      xpEarned: 25,
+                      speechBubble: 'Hashtag cluster is optimized for algorithm discoverability, Pablo! 🔥',
+                    });
+                    setTimeout(() => {
+                      setShowCompletionModal(true);
+                    }, 200);
                   }}
                 >
                   <Text style={styles.saveHashtagsBtnText}>Done</Text>
