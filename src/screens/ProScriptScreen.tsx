@@ -93,6 +93,8 @@ export const ProScriptScreen: React.FC<ProScriptScreenProps> = ({
 
   const [isPlayingPreview, setIsPlayingPreview] = useState(false);
   const [isAccelerated, setIsAccelerated] = useState(false);
+  const [selectedFormat, setSelectedFormat] = useState('9:16 Video (42s)');
+  const [selectedPlatforms, setSelectedPlatforms] = useState<string[]>(['tiktok', 'instagram', 'youtube']);
   const [completionData, setCompletionData] = useState({
     title: 'Script Saved to Drafts!',
     subtitle: `"${currentIdeaTitle}" is ready for Voice Studio or immediate posting.`,
@@ -651,21 +653,105 @@ export const ProScriptScreen: React.FC<ProScriptScreenProps> = ({
           </View>
 
           {/* ============================================================ */}
-          {/* CARD 7: FORMAT ADAPT                                         */}
+          {/* CARD 7: FORMAT & MULTI-PLATFORM ADAPT STUDIO                 */}
           {/* ============================================================ */}
           <View style={styles.formatAdaptCard}>
-            <Text style={styles.formatAdaptHeaderLabel}>FORMAT</Text>
-            <View style={{ flexDirection: 'row', gap: 10, alignItems: 'center', marginVertical: 10 }}>
-              <SocialBrandIcon platform="tiktok" size={24} />
-              <SocialBrandIcon platform="instagram" size={24} />
-              <SocialBrandIcon platform="youtube" size={24} />
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+              <Text style={styles.formatAdaptHeaderLabel}>FORMAT &amp; MULTI-PLATFORM SYNC</Text>
+              <View style={styles.formatActiveBadge}>
+                <Text style={styles.formatActiveBadgeText}>👑 9:16 VERTICAL HD</Text>
+              </View>
             </View>
 
+            {/* Platform Selection Row */}
+            <View style={{ flexDirection: 'row', gap: 8, marginBottom: 12 }}>
+              {[
+                { id: 'tiktok', name: 'TikTok', format: '9:16 Reel', icon: 'tiktok' as const },
+                { id: 'instagram', name: 'Instagram', format: 'Reels / IGTV', icon: 'instagram' as const },
+                { id: 'youtube', name: 'YouTube', format: 'Shorts 60s', icon: 'youtube' as const },
+              ].map((plat) => {
+                const isSelected = selectedPlatforms.includes(plat.id);
+                return (
+                  <Pressable
+                    key={plat.id}
+                    style={[
+                      styles.platformFormatPillCard,
+                      isSelected && styles.platformFormatPillCardSelected,
+                    ]}
+                    onPress={() => {
+                      if (Platform.OS !== 'web') {
+                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                      }
+                      if (isSelected) {
+                        if (selectedPlatforms.length > 1) {
+                          setSelectedPlatforms(selectedPlatforms.filter((p) => p !== plat.id));
+                        } else {
+                          showToast('At least 1 platform must remain active');
+                        }
+                      } else {
+                        setSelectedPlatforms([...selectedPlatforms, plat.id]);
+                        showToast(`✓ Added ${plat.name} to sync`);
+                      }
+                    }}
+                  >
+                    <SocialBrandIcon platform={plat.icon} size={20} />
+                    <View style={{ flex: 1 }}>
+                      <Text style={styles.platFormatName}>{plat.name}</Text>
+                      <Text style={styles.platFormatSub}>{plat.format}</Text>
+                    </View>
+                    <View style={[styles.platCheckCircle, isSelected && styles.platCheckCircleActive]}>
+                      {isSelected && (
+                        <Svg width={9} height={9} viewBox="0 0 12 12" fill="none">
+                          <Path d="M2.5 6.2L4.8 8.5L9.5 3.5" stroke="#FFFFFF" strokeWidth="2.5" strokeLinecap="round" />
+                        </Svg>
+                      )}
+                    </View>
+                  </Pressable>
+                );
+              })}
+            </View>
+
+            {/* Format Style Selector Chips */}
+            <Text style={styles.formatPresetsLabel}>SCRIPT PACING PRESET</Text>
+            <View style={{ flexDirection: 'row', gap: 6, marginTop: 6, marginBottom: 12 }}>
+              {['9:16 Video (42s)', 'Carousel Slides (6p)', 'Viral X Thread'].map((fmt) => (
+                <Pressable
+                  key={fmt}
+                  style={[
+                    styles.formatPresetChip,
+                    selectedFormat === fmt && styles.formatPresetChipActive,
+                  ]}
+                  onPress={() => {
+                    if (Platform.OS !== 'web') {
+                      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                    }
+                    setSelectedFormat(fmt);
+                    showToast(`✓ Switched preset: ${fmt}`);
+                  }}
+                >
+                  <Text
+                    style={[
+                      styles.formatPresetChipText,
+                      selectedFormat === fmt && styles.formatPresetChipTextActive,
+                    ]}
+                  >
+                    {fmt}
+                  </Text>
+                </Pressable>
+              ))}
+            </View>
+
+            {/* Dynamic Adapt Action Button */}
             <Pressable
-              style={styles.adaptBtn}
-              onPress={() => showToast('✓ Formatted for 9:16 Short-Form')}
+              style={({ pressed }) => [styles.adaptBtn, pressed && styles.btnPressed]}
+              onPress={() => {
+                if (Platform.OS !== 'web') {
+                  Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+                }
+                showToast(`✨ Script adapted for ${selectedPlatforms.map(p => p.toUpperCase()).join(' + ')}!`);
+              }}
             >
-              <Text style={styles.adaptBtnText}>ADAPT</Text>
+              <Text style={styles.adaptBtnText}>✨ Adapt &amp; Optimize Format ➔</Text>
             </Pressable>
           </View>
 
@@ -1453,30 +1539,109 @@ const styles = StyleSheet.create({
   // CARD 7: FORMAT ADAPT
   formatAdaptCard: {
     backgroundColor: '#FFFFFF',
-    borderRadius: 18,
+    borderRadius: 20,
     padding: 16,
     borderWidth: 1,
     borderColor: '#EFECE6',
-    marginTop: 12,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.03,
+    shadowRadius: 6,
+    marginTop: 14,
   },
   formatAdaptHeaderLabel: {
-    fontSize: 9.5,
+    fontSize: 10,
+    fontWeight: '900',
+    color: '#64748B',
+    letterSpacing: 0.4,
+  },
+  formatActiveBadge: {
+    backgroundColor: '#DCFCE7',
+    paddingHorizontal: 7,
+    paddingVertical: 2.5,
+    borderRadius: 6,
+  },
+  formatActiveBadgeText: {
+    fontSize: 8.5,
+    fontWeight: '900',
+    color: '#15803D',
+  },
+  platformFormatPillCard: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#FAF8F5',
+    borderRadius: 12,
+    padding: 8,
+    borderWidth: 1.5,
+    borderColor: '#EFECE6',
+    gap: 6,
+  },
+  platformFormatPillCardSelected: {
+    backgroundColor: '#F5F3FF',
+    borderColor: '#582CDB',
+  },
+  platFormatName: {
+    fontSize: 10.5,
+    fontWeight: '900',
+    color: '#171420',
+  },
+  platFormatSub: {
+    fontSize: 8,
+    color: '#64748B',
+    marginTop: 1,
+  },
+  platCheckCircle: {
+    width: 14,
+    height: 14,
+    borderRadius: 7,
+    backgroundColor: '#E2E8F0',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  platCheckCircleActive: {
+    backgroundColor: '#582CDB',
+  },
+  formatPresetsLabel: {
+    fontSize: 9,
     fontWeight: '900',
     color: '#94A3B8',
     letterSpacing: 0.4,
   },
-  adaptBtn: {
+  formatPresetChip: {
     backgroundColor: '#FAF8F5',
     borderWidth: 1,
-    borderColor: '#E2E8F0',
-    paddingVertical: 8,
-    borderRadius: 10,
+    borderColor: '#EFECE6',
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 6,
+  },
+  formatPresetChipActive: {
+    backgroundColor: '#EDE9FE',
+    borderColor: '#DDD6FE',
+  },
+  formatPresetChipText: {
+    fontSize: 10,
+    fontWeight: '800',
+    color: '#475569',
+  },
+  formatPresetChipTextActive: {
+    color: '#582CDB',
+    fontWeight: '900',
+  },
+  adaptBtn: {
+    backgroundColor: '#EDE9FE',
+    borderWidth: 1,
+    borderColor: '#DDD6FE',
+    paddingVertical: 11,
+    borderRadius: 12,
     alignItems: 'center',
+    marginTop: 4,
   },
   adaptBtnText: {
-    fontSize: 11,
+    fontSize: 11.5,
     fontWeight: '900',
-    color: '#171420',
+    color: '#582CDB',
   },
 
   // CARD 8: RETENTION NOTES
