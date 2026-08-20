@@ -121,6 +121,7 @@ export const ProCreateScreen: React.FC<ProCreateScreenProps> = ({
   const [showVoiceStudioModal, setShowVoiceStudioModal] = useState(false);
   const [showRepurposeModal, setShowRepurposeModal] = useState(false);
   const [showHookModal, setShowHookModal] = useState(false);
+  const [showAllDraftsModal, setShowAllDraftsModal] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   // Voice Studio State
@@ -756,10 +757,12 @@ export const ProCreateScreen: React.FC<ProCreateScreenProps> = ({
             <Text style={styles.activeDraftsTitle}>Active Drafts</Text>
             <Pressable
               onPress={() => {
-                showToast('Viewing all 6 creator drafts');
+                triggerModalPop();
+                setShowAllDraftsModal(true);
               }}
+              hitSlop={8}
             >
-              <Text style={styles.viewAllText}>View all</Text>
+              <Text style={styles.viewAllText}>View all (6) ➔</Text>
             </Pressable>
           </View>
 

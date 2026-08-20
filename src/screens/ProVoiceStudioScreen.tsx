@@ -140,6 +140,7 @@ export const ProVoiceStudioScreen: React.FC<ProVoiceStudioScreenProps> = ({
   const [showVoiceStyleModal, setShowVoiceStyleModal] = useState(false);
   const [showRefillMinutesModal, setShowRefillMinutesModal] = useState(false);
   const [showHookOptimizerModal, setShowHookOptimizerModal] = useState(false);
+  const [showAllProjectsModal, setShowAllProjectsModal] = useState(false);
 
   // Script & Audio State
   const [scriptTitle, setScriptTitle] = useState('Creator Mistake Reel Voiceover');
@@ -156,6 +157,9 @@ export const ProVoiceStudioScreen: React.FC<ProVoiceStudioScreenProps> = ({
     { id: 'rp1', name: 'Creator Mistake Reel', duration: '0:42', status: 'Exported', platform: 'Reels / TikTok', text: PRESET_SCRIPTS[0].text },
     { id: 'rp2', name: 'Morning Routine Mini', duration: '0:58', status: 'Saved', platform: 'YouTube Shorts', text: PRESET_SCRIPTS[1].text },
     { id: 'rp3', name: 'Streak Engine Breakdown', duration: '0:35', status: 'Exported', platform: 'Instagram Reel', text: PRESET_SCRIPTS[2].text },
+    { id: 'rp4', name: '3 Habits For 50K Followers', duration: '0:48', status: 'Saved', platform: 'TikTok Master', text: "3 daily reps that changed everything: 1 script every morning, batch record on Tuesdays, and ruthlessly trim the fluff." },
+    { id: 'rp5', name: 'Batch Filming System', duration: '1:02', status: 'Exported', platform: 'Long-Form Reel', text: "How I shoot 10 reels in 2 hours: write the 3-second hook first, record 2 takes max, and let AI audio handle the voiceover polish." },
+    { id: 'rp6', name: 'Viral Hook Framework', duration: '0:28', status: 'Exported', platform: 'YouTube Shorts', text: "Stop opening videos with hello everyone. Start with the tension or the contrarian belief that forces them to keep watching." },
   ]);
 
   // 3D Ghost Celebration Modal State
@@ -839,8 +843,14 @@ export const ProVoiceStudioScreen: React.FC<ProVoiceStudioScreenProps> = ({
           {/* ============================================================ */}
           <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 22, marginBottom: 10 }}>
             <Text style={styles.sectionHeaderTitle}>Recent Voice Projects</Text>
-            <Pressable onPress={() => showToast('Showing all creator voiceover masters')}>
-              <Text style={styles.viewAllLink}>View All (3)</Text>
+            <Pressable
+              onPress={() => {
+                triggerModalPop();
+                setShowAllProjectsModal(true);
+              }}
+              hitSlop={8}
+            >
+              <Text style={styles.viewAllLink}>View All ({recentProjects.length}) ➔</Text>
             </Pressable>
           </View>
 
@@ -1331,6 +1341,122 @@ export const ProVoiceStudioScreen: React.FC<ProVoiceStudioScreenProps> = ({
               >
                 <Text style={styles.modalCancelBtnText}>Close</Text>
               </Pressable>
+            </Animated.View>
+          </View>
+        </Modal>
+
+        {/* ============================================================ */}
+        {/* MODAL 5: EXPANDED VIEW ALL VOICE PROJECTS MODAL              */}
+        {/* ============================================================ */}
+        <Modal
+          visible={showAllProjectsModal}
+          transparent={true}
+          animationType="fade"
+          onRequestClose={() => setShowAllProjectsModal(false)}
+        >
+          <View style={styles.modalOverlay}>
+            <Animated.View style={[styles.modalCard, { transform: [{ scale: modalPopScale }] }]}>
+              <ScrollView showsVerticalScrollIndicator={false} bounces={false}>
+                <View style={styles.modalHeaderBetween}>
+                  <View style={styles.heroPillPurple}>
+                    <Text style={styles.heroPillPurpleText}>🗂️ VOICE MASTER VAULT</Text>
+                  </View>
+                  <Pressable onPress={() => setShowAllProjectsModal(false)} hitSlop={8}>
+                    <Text style={styles.modalCloseText}>✕</Text>
+                  </Pressable>
+                </View>
+
+                <Text style={styles.modalTitle}>All Voice Projects ({recentProjects.length})</Text>
+                <Text style={styles.modalSub}>
+                  Browse, play, export, or reload your previous AI voiceover masters into the editor.
+                </Text>
+
+                <View style={{ gap: 10, marginVertical: 14 }}>
+                  {recentProjects.map((proj) => (
+                    <View key={proj.id} style={styles.expandedProjectCard}>
+                      <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, flex: 1 }}>
+                          <Pressable
+                            style={styles.projectPlayBtn}
+                            onPress={() => {
+                              setScriptTitle(proj.name);
+                              setScriptText(proj.text);
+                              setTotalAudioDuration(Math.round(proj.text.split(' ').length / 2.6));
+                              setPlaybackSeconds(0);
+                              setIsPlayingAudio(true);
+                              setShowAllProjectsModal(false);
+                              showToast(`▶ Playing "${proj.name}"`);
+                            }}
+                          >
+                            <Svg width={14} height={14} viewBox="0 0 24 24" fill="none">
+                              <Path d="M8 5v14l11-7L8 5z" fill="#582CDB" />
+                            </Svg>
+                          </Pressable>
+                          <View style={{ flex: 1 }}>
+                            <Text style={styles.projectNameText}>{proj.name}</Text>
+                            <Text style={styles.projectSubText}>
+                              {proj.duration} • {proj.platform}
+                            </Text>
+                          </View>
+                        </View>
+
+                        <View style={[styles.statusTagPill, proj.status === 'Exported' && styles.statusTagExported]}>
+                          <Text style={[styles.statusTagText, proj.status === 'Exported' && styles.statusTagTextExported]}>
+                            {proj.status.toUpperCase()}
+                          </Text>
+                        </View>
+                      </View>
+
+                      {/* Script Preview Snippet */}
+                      <Text style={styles.expandedProjectSnippet} numberOfLines={2}>
+                        &ldquo;{proj.text}&rdquo;
+                      </Text>
+
+                      {/* Action Row */}
+                      <View style={{ flexDirection: 'row', gap: 8, marginTop: 10 }}>
+                        <Pressable
+                          style={styles.expandedActionReuseBtn}
+                          onPress={() => {
+                            setScriptTitle(proj.name);
+                            setScriptText(proj.text);
+                            setShowAllProjectsModal(false);
+                            showToast(`✓ Loaded "${proj.name}" into editor`);
+                          }}
+                        >
+                          <Text style={styles.expandedActionReuseText}>✏️ Load in Editor</Text>
+                        </Pressable>
+
+                        <Pressable
+                          style={styles.expandedActionExportBtn}
+                          onPress={() => {
+                            if (Platform.OS !== 'web') {
+                              Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+                            }
+                            setShowAllProjectsModal(false);
+                            setCelebrationData({
+                              title: '4K Audio Master Exported!',
+                              subtitle: `"${proj.name}.wav" downloaded to your device storage.`,
+                              badgeText: '📥 4K AUDIO EXPORTED',
+                              xpEarned: 50,
+                              speechBubble: '4K master ready! Time to drop some viral magic! 🔥',
+                            });
+                            setShowCelebrationModal(true);
+                          }}
+                        >
+                          <Text style={styles.expandedActionExportText}>📥 Export WAV</Text>
+                        </Pressable>
+                      </View>
+                    </View>
+                  ))}
+                </View>
+
+                <Pressable
+                  style={styles.modalCancelBtn}
+                  onPress={() => setShowAllProjectsModal(false)}
+                >
+                  <Text style={styles.modalCancelBtnText}>Close Vault</Text>
+                </Pressable>
+              </ScrollView>
             </Animated.View>
           </View>
         </Modal>
@@ -2409,6 +2535,63 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontSize: 12,
     fontWeight: '800',
+  },
+  expandedProjectCard: {
+    backgroundColor: '#FAF8F5',
+    borderRadius: 16,
+    padding: 14,
+    borderWidth: 1,
+    borderColor: '#EFECE6',
+  },
+  statusTagPill: {
+    backgroundColor: '#EDE9FE',
+    paddingHorizontal: 7,
+    paddingVertical: 2.5,
+    borderRadius: 6,
+  },
+  statusTagExported: {
+    backgroundColor: '#DCFCE7',
+  },
+  statusTagText: {
+    fontSize: 8.5,
+    fontWeight: '900',
+    color: '#582CDB',
+  },
+  statusTagTextExported: {
+    color: '#15803D',
+  },
+  expandedProjectSnippet: {
+    fontSize: 11.5,
+    color: '#475569',
+    lineHeight: 16,
+    marginTop: 8,
+    fontStyle: 'italic',
+  },
+  expandedActionReuseBtn: {
+    flex: 1,
+    backgroundColor: '#EDE9FE',
+    paddingVertical: 8,
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+  expandedActionReuseText: {
+    fontSize: 11,
+    fontWeight: '900',
+    color: '#582CDB',
+  },
+  expandedActionExportBtn: {
+    flex: 1,
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    paddingVertical: 8,
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+  expandedActionExportText: {
+    fontSize: 11,
+    fontWeight: '800',
+    color: '#171420',
   },
   btnPressed: {
     transform: [{ scale: 0.96 }],
