@@ -701,62 +701,153 @@ export const ProSquadScreen: React.FC<ProSquadScreenProps> = ({
           </View>
 
           {/* ============================================================ */}
-          {/* 6. SQUAD CHAT PREVIEW                                        */}
+          {/* 6. SQUAD CHAT SECTION (PREMIUM REDESIGN)                     */}
           {/* ============================================================ */}
-          <View style={{ marginTop: 20 }}>
+          <View style={{ marginTop: 22 }}>
             <View style={styles.sectionHeaderRow}>
-              <Text style={styles.sectionTitle}>Squad Chat</Text>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                <Text style={styles.sectionTitle}>Squad Live Chat</Text>
+                <View style={styles.liveOnlinePill}>
+                  <View style={styles.pulsingGreenDot} />
+                  <Text style={styles.liveOnlinePillText}>3 Online</Text>
+                </View>
+              </View>
+
               <Pressable
                 onPress={() => onOpenMessages && onOpenMessages('conv_squad')}
                 hitSlop={8}
+                style={styles.viewAllChatBtn}
               >
-                <Text style={styles.sectionActionLink}>View All</Text>
+                <Text style={styles.sectionActionLink}>Full Channel ➔</Text>
               </Pressable>
             </View>
 
             <View style={styles.squadChatContainer}>
-              <View style={{ gap: 10 }}>
+              {/* Squad Channel Header Ribbon */}
+              <View style={styles.chatChannelRibbon}>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                  <Text style={{ fontSize: 13 }}>🛡️</Text>
+                  <Text style={styles.chatChannelName}>#momentum-creators</Text>
+                </View>
+                <Text style={styles.chatChannelTopic}>⚡ 78-Day Streak Active</Text>
+              </View>
+
+              {/* Quick AI & Squad Action Prompts */}
+              <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={styles.quickPromptScroll}
+              >
+                <Pressable
+                  style={styles.quickPromptChip}
+                  onPress={() => setChatInputText('Just scheduled my 7:30 PM Reel! Momentum high today team! 🔥')}
+                >
+                  <Text style={styles.quickPromptChipText}>🔥 Post Milestone</Text>
+                </Pressable>
+                <Pressable
+                  style={styles.quickPromptChip}
+                  onPress={() => setChatInputText('Who wants to film a 30s split-screen duet on creator tech stacks? 🎥')}
+                >
+                  <Text style={styles.quickPromptChipText}>🎬 Pitch Collab</Text>
+                </Pressable>
+                <Pressable
+                  style={styles.quickPromptChip}
+                  onPress={() => setChatInputText('Drafting the 3-second hook format from Jarvis. Reviewing now! 📄')}
+                >
+                  <Text style={styles.quickPromptChipText}>📄 Share Draft</Text>
+                </Pressable>
+              </ScrollView>
+
+              {/* Message Feed */}
+              <View style={{ gap: 12, paddingHorizontal: 12, paddingTop: 10, paddingBottom: 6 }}>
                 {chatMessages.map((msg) => {
                   if (msg.isUser) {
                     return (
                       <View key={msg.id} style={styles.chatRowRight}>
-                        <View style={styles.chatBubbleRight}>
-                          <Text style={styles.chatBubbleRightText}>{msg.text}</Text>
+                        <View style={{ alignItems: 'flex-end', flex: 1, maxWidth: '84%' }}>
+                          <LinearGradient
+                            colors={['#784DF0', '#582CDB']}
+                            start={{ x: 0, y: 0 }}
+                            end={{ x: 1, y: 1 }}
+                            style={styles.chatBubbleRight}
+                          >
+                            <Text style={styles.chatBubbleRightText}>{msg.text}</Text>
+                          </LinearGradient>
+                          <Text style={styles.chatTimeRight}>{msg.time} • ✓✓ Sent</Text>
                         </View>
-                        <Image source={msg.senderAvatar} style={styles.chatMiniAvatar} />
+                        <View style={styles.chatUserAvatarWrapper}>
+                          <Image source={msg.senderAvatar} style={styles.chatMiniAvatar} />
+                          <View style={styles.chatAvatarGoldRing} />
+                        </View>
                       </View>
                     );
                   }
                   return (
                     <View key={msg.id} style={styles.chatRowLeft}>
                       <Image source={msg.senderAvatar} style={styles.chatMiniAvatar} />
-                      <View style={styles.chatBubbleLeft}>
-                        <Text style={styles.chatAuthorName}>{msg.senderName}</Text>
-                        <Text style={styles.chatBubbleLeftText}>{msg.text}</Text>
+                      <View style={{ flex: 1, maxWidth: '84%' }}>
+                        <View style={styles.chatBubbleLeft}>
+                          <View style={styles.chatAuthorHeaderRow}>
+                            <Text style={styles.chatAuthorName}>{msg.senderName}</Text>
+                            <Text style={styles.chatAuthorRole}>
+                              {msg.senderName.includes('Tomi') ? 'Video Specialist' : 'Visual Designer'}
+                            </Text>
+                            <Text style={styles.chatTimeLeft}>{msg.time}</Text>
+                          </View>
+                          <Text style={styles.chatBubbleLeftText}>{msg.text}</Text>
+                        </View>
                       </View>
                     </View>
                   );
                 })}
               </View>
 
-              {/* Chat Input Bar */}
+              {/* Ergonomic Input Capsule */}
               <View style={styles.chatInputBar}>
+                <Pressable
+                  style={styles.chatAttachBtn}
+                  onPress={() => showToast('📎 Attach script, audio note, or video draft')}
+                  hitSlop={6}
+                >
+                  <Text style={styles.chatAttachBtnText}>+</Text>
+                </Pressable>
+
                 <TextInput
                   style={styles.chatTextInput}
-                  placeholder="Message Squad..."
+                  placeholder="Message Momentum Makers..."
                   placeholderTextColor="#94A3B8"
                   value={chatInputText}
                   onChangeText={setChatInputText}
                   onSubmitEditing={handleSendMessage}
                   returnKeyType="send"
                 />
+
                 <Pressable
-                  style={({ pressed }) => [styles.chatSendBtn, pressed && styles.btnPressed]}
+                  style={({ pressed }) => [
+                    styles.chatSendBtn,
+                    chatInputText.trim().length > 0 && styles.chatSendBtnActive,
+                    pressed && styles.btnPressed,
+                  ]}
                   onPress={handleSendMessage}
                 >
-                  <Svg width={15} height={15} viewBox="0 0 24 24" fill="none">
-                    <Path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z" stroke="#582CDB" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
-                  </Svg>
+                  <LinearGradient
+                    colors={
+                      chatInputText.trim().length > 0
+                        ? ['#784DF0', '#582CDB']
+                        : ['#E2E8F0', '#CBD5E1']
+                    }
+                    style={styles.chatSendGradient}
+                  >
+                    <Svg width={14} height={14} viewBox="0 0 24 24" fill="none">
+                      <Path
+                        d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"
+                        stroke="#FFFFFF"
+                        strokeWidth="2.4"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                    </Svg>
+                  </LinearGradient>
                 </Pressable>
               </View>
             </View>
@@ -1440,86 +1531,234 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
   },
 
-  /* SQUAD CHAT PREVIEW */
+  /* SQUAD CHAT PREVIEW (PREMIUM STYLING) */
+  liveOnlinePill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+    backgroundColor: '#ECFDF5',
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#A7F3D0',
+  },
+  pulsingGreenDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: '#10B981',
+  },
+  liveOnlinePillText: {
+    fontSize: 10,
+    fontWeight: '800',
+    color: '#059669',
+  },
+  viewAllChatBtn: {
+    paddingVertical: 2,
+  },
   squadChatContainer: {
     backgroundColor: '#FFFFFF',
-    borderRadius: 16,
-    padding: 14,
+    borderRadius: 20,
+    paddingVertical: 12,
     marginTop: 10,
     borderWidth: 1,
     borderColor: '#EFECE6',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.04,
+    shadowRadius: 10,
+    elevation: 2,
+    overflow: 'hidden',
+  },
+  chatChannelRibbon: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 14,
+    paddingBottom: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: '#F1F5F9',
+  },
+  chatChannelName: {
+    fontSize: 12,
+    fontWeight: '800',
+    color: '#171420',
+  },
+  chatChannelTopic: {
+    fontSize: 10.5,
+    fontWeight: '700',
+    color: '#582CDB',
+  },
+  quickPromptScroll: {
+    gap: 6,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: '#FAF8F5',
+  },
+  quickPromptChip: {
+    backgroundColor: '#FAF8F5',
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    paddingHorizontal: 9,
+    paddingVertical: 4,
+    borderRadius: 10,
+  },
+  quickPromptChipText: {
+    fontSize: 10.5,
+    fontWeight: '700',
+    color: '#475569',
   },
   chatRowLeft: {
     flexDirection: 'row',
     gap: 8,
     alignItems: 'flex-end',
-    maxWidth: '85%',
+    maxWidth: '100%',
   },
   chatRowRight: {
     flexDirection: 'row',
     gap: 8,
     alignItems: 'flex-end',
-    alignSelf: 'flex-end',
-    maxWidth: '85%',
+    justifyContent: 'flex-end',
+    maxWidth: '100%',
   },
   chatMiniAvatar: {
-    width: 22,
-    height: 22,
-    borderRadius: 11,
-    marginBottom: 2,
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    marginBottom: 4,
+  },
+  chatUserAvatarWrapper: {
+    position: 'relative',
+    marginBottom: 4,
+  },
+  chatAvatarGoldRing: {
+    position: 'absolute',
+    top: -1,
+    left: -1,
+    right: -1,
+    bottom: -1,
+    borderRadius: 15,
+    borderWidth: 1.2,
+    borderColor: '#F59E0B',
   },
   chatBubbleLeft: {
     backgroundColor: '#F8FAFC',
-    borderRadius: 12,
-    borderBottomLeftRadius: 3,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
+    borderRadius: 16,
+    borderBottomLeftRadius: 4,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
     borderWidth: 1,
     borderColor: '#F1F5F9',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.02,
+    shadowRadius: 3,
+    elevation: 1,
+  },
+  chatAuthorHeaderRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    marginBottom: 4,
   },
   chatAuthorName: {
-    fontSize: 10.5,
+    fontSize: 11,
     fontWeight: '800',
     color: '#582CDB',
-    marginBottom: 2,
+  },
+  chatAuthorRole: {
+    fontSize: 9.5,
+    fontWeight: '600',
+    color: '#64748B',
+    flex: 1,
+  },
+  chatTimeLeft: {
+    fontSize: 9.5,
+    color: '#94A3B8',
   },
   chatBubbleLeftText: {
-    fontSize: 12,
-    lineHeight: 16,
+    fontSize: 12.5,
+    lineHeight: 17,
     color: '#1E293B',
   },
   chatBubbleRight: {
-    backgroundColor: '#582CDB',
-    borderRadius: 12,
-    borderBottomRightRadius: 3,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
+    borderRadius: 16,
+    borderBottomRightRadius: 4,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    shadowColor: '#582CDB',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.18,
+    shadowRadius: 4,
+    elevation: 2,
   },
   chatBubbleRightText: {
-    fontSize: 12,
-    lineHeight: 16,
+    fontSize: 12.5,
+    lineHeight: 17,
     color: '#FFFFFF',
     fontWeight: '500',
+  },
+  chatTimeRight: {
+    fontSize: 9.5,
+    color: '#94A3B8',
+    marginTop: 3,
+    marginRight: 4,
   },
   chatInputBar: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#FAF8F5',
-    borderRadius: 12,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    marginTop: 14,
+    borderRadius: 24,
+    paddingHorizontal: 8,
+    paddingVertical: 5,
+    marginTop: 10,
+    marginHorizontal: 10,
     borderWidth: 1,
     borderColor: '#E2E8F0',
+  },
+  chatAttachBtn: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: '#EDE9FE',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 6,
+  },
+  chatAttachBtnText: {
+    fontSize: 16,
+    fontWeight: '900',
+    color: '#582CDB',
+    lineHeight: 18,
   },
   chatTextInput: {
     flex: 1,
     fontSize: 12.5,
     color: '#171420',
-    paddingVertical: 2,
+    paddingVertical: 4,
+    paddingHorizontal: 4,
   },
   chatSendBtn: {
-    padding: 4,
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    overflow: 'hidden',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginLeft: 4,
+  },
+  chatSendBtnActive: {
+    shadowColor: '#582CDB',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  chatSendGradient: {
+    width: '100%',
+    height: '100%',
     alignItems: 'center',
     justifyContent: 'center',
   },
