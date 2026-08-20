@@ -306,6 +306,7 @@ export const ProMatchScreen: React.FC<ProMatchScreenProps> = ({
   const [showNotificationModal, setShowNotificationModal] = useState(false);
   const [showDeepDiveModal, setShowDeepDiveModal] = useState(false);
   const [selectedCreator, setSelectedCreator] = useState<CreatorCardData | null>(DECK_CREATORS[0]);
+  const [showDuelArenaModal, setShowDuelArenaModal] = useState(false);
   const [showCompletionModal, setShowCompletionModal] = useState(false);
   const [completionData, setCompletionData] = useState<{
     title: string;
@@ -1209,28 +1210,80 @@ export const ProMatchScreen: React.FC<ProMatchScreenProps> = ({
                   </View>
 
                   {/* ============================================================ */}
-                  {/* SECTION 11: LIVE DUEL BANNER                                 */}
+                  {/* SECTION 11: LUXURY LIVE SQUAD DUEL ARENA BANNER             */}
                   {/* ============================================================ */}
                   <View style={styles.liveDuelBanner}>
-                    <View style={styles.liveDuelLeftGroup}>
-                      <View style={styles.duelIconSquare}>
-                        <Text style={{ fontSize: 18 }}>⚔️</Text>
+                    {/* Top Ribbon */}
+                    <View style={styles.duelTopRibbon}>
+                      <View style={styles.duelLivePill}>
+                        <View style={styles.duelLivePulseDot} />
+                        <Text style={styles.duelLivePillText}>SQUAD LIVE DUEL</Text>
                       </View>
-                      <View>
-                        <Text style={styles.liveDuelTag}>LIVE DUEL</Text>
-                        <Text style={styles.liveDuelVsText}>Momentum Makers vs Lagos Storytellers</Text>
+                      <View style={styles.duelTimerBadge}>
+                        <Text style={styles.duelTimerText}>⏳ Ends in 03h 45m</Text>
                       </View>
                     </View>
 
-                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-                      <Text style={styles.duelScoreText}>62 pts - 58 pts</Text>
-                      <Pressable
-                        style={styles.viewDuelBtn}
-                        onPress={() => showToast('⚔️ Viewing Squad Live Duel details')}
-                      >
-                        <Text style={styles.viewDuelBtnText}>View Duel</Text>
-                      </Pressable>
+                    {/* Matchup VS Showcase */}
+                    <View style={styles.duelMatchupRow}>
+                      {/* Left Team: You */}
+                      <View style={styles.duelTeamColLeft}>
+                        <View style={styles.duelAvatarStackMini}>
+                          <Image source={require('../../assets/images/elena-avatar.jpg')} style={[styles.duelStackImg, { zIndex: 2 }]} />
+                          <Image source={require('../../assets/images/amara-avatar.jpg')} style={[styles.duelStackImg, { marginLeft: -8, zIndex: 1 }]} />
+                        </View>
+                        <Text style={styles.duelTeamNameMine} numberOfLines={1}>Momentum Makers</Text>
+                        <View style={styles.duelScoreMinePill}>
+                          <Text style={styles.duelScoreMineText}>62 PTS</Text>
+                          <Text style={styles.duelLeadText}>👑 Leading</Text>
+                        </View>
+                      </View>
+
+                      {/* Center VS Emblem */}
+                      <View style={styles.duelVsCenterEmblem}>
+                        <Text style={styles.duelVsCenterText}>VS</Text>
+                      </View>
+
+                      {/* Right Team: Opponent */}
+                      <View style={styles.duelTeamColRight}>
+                        <View style={styles.duelAvatarStackMiniRight}>
+                          <Image source={require('../../assets/images/david-avatar.jpg')} style={[styles.duelStackImg, { zIndex: 2 }]} />
+                          <Image source={require('../../assets/images/kemi-avatar.jpg')} style={[styles.duelStackImg, { marginLeft: -8, zIndex: 1 }]} />
+                        </View>
+                        <Text style={styles.duelTeamNameOpp} numberOfLines={1}>Lagos Storytellers</Text>
+                        <View style={styles.duelScoreOppPill}>
+                          <Text style={styles.duelScoreOppText}>58 PTS</Text>
+                          <Text style={styles.duelTrailingText}>-4 pts</Text>
+                        </View>
+                      </View>
                     </View>
+
+                    {/* Tug of War Progress Track */}
+                    <View style={styles.duelTugTrackContainer}>
+                      <View style={[styles.duelTugFillMine, { width: '55%' }]} />
+                      <View style={[styles.duelTugFillOpp, { width: '45%' }]} />
+                    </View>
+
+                    {/* Gauntlet Mission */}
+                    <View style={styles.duelMissionBox}>
+                      <Text style={styles.duelMissionLabel}>🎯 ACTIVE GAUNTLET</Text>
+                      <Text style={styles.duelMissionDesc}>Post 3 Collab Reels with #PostStreak • 500 XP Bounty</Text>
+                    </View>
+
+                    {/* View Duel CTA Button */}
+                    <Pressable
+                      style={({ pressed }) => [styles.viewDuelBtn, pressed && styles.btnPressed]}
+                      onPress={() => setShowDuelArenaModal(true)}
+                    >
+                      <LinearGradient
+                        colors={['#784DF0', '#582CDB']}
+                        start={{ x: 0, y: 0 }}
+                        end={{ x: 1, y: 0 }}
+                        style={styles.viewDuelGradient}
+                      >
+                        <Text style={styles.viewDuelBtnText}>⚔️ Enter Live Duel Arena</Text>
+                      </LinearGradient>
+                    </Pressable>
                   </View>
 
                   {/* ============================================================ */}
@@ -1641,6 +1694,153 @@ export const ProMatchScreen: React.FC<ProMatchScreenProps> = ({
                 </>
               )}
             </Animated.View>
+          </View>
+        </Modal>
+
+        {/* ============================================================ */}
+        {/* SQUAD LIVE DUEL ARENA CENTERED DIALOG MODAL                  */}
+        {/* ============================================================ */}
+        <Modal
+          visible={showDuelArenaModal}
+          transparent
+          animationType="fade"
+          onRequestClose={() => setShowDuelArenaModal(false)}
+        >
+          <View style={styles.arenaModalOverlay}>
+            <Pressable style={styles.arenaModalBackdrop} onPress={() => setShowDuelArenaModal(false)} />
+            <View style={styles.arenaModalCard}>
+              {/* Top Modal Header */}
+              <View style={styles.arenaTopHeader}>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                  <View style={styles.arenaSwordsIconBox}>
+                    <Text style={{ fontSize: 16 }}>⚔️</Text>
+                  </View>
+                  <View>
+                    <Text style={styles.arenaTitle}>Live Squad Duel Arena</Text>
+                    <Text style={styles.arenaSubtitle}>Round 2 of 3 • Ends in 03h 45m</Text>
+                  </View>
+                </View>
+
+                <Pressable
+                  style={styles.arenaCloseBtn}
+                  onPress={() => setShowDuelArenaModal(false)}
+                  hitSlop={8}
+                >
+                  <Text style={styles.arenaCloseText}>✕</Text>
+                </Pressable>
+              </View>
+
+              {/* Matchup Comparison Card */}
+              <LinearGradient
+                colors={['#2A1259', '#1A0C38']}
+                style={styles.arenaMatchupCard}
+              >
+                <View style={styles.arenaTeamsRow}>
+                  <View style={{ alignItems: 'center' }}>
+                    <Text style={styles.arenaTeamTitleMine}>Momentum Makers</Text>
+                    <Text style={styles.arenaTeamScoreMine}>62 PTS</Text>
+                    <View style={styles.arenaLeadBadge}>
+                      <Text style={styles.arenaLeadBadgeText}>👑 IN THE LEAD</Text>
+                    </View>
+                  </View>
+
+                  <View style={styles.arenaVsCircle}>
+                    <Text style={styles.arenaVsText}>VS</Text>
+                  </View>
+
+                  <View style={{ alignItems: 'center' }}>
+                    <Text style={styles.arenaTeamTitleOpp}>Lagos Storytellers</Text>
+                    <Text style={styles.arenaTeamScoreOpp}>58 PTS</Text>
+                    <View style={styles.arenaTrailingBadge}>
+                      <Text style={styles.arenaTrailingBadgeText}>4 PTS BEHIND</Text>
+                    </View>
+                  </View>
+                </View>
+
+                <View style={styles.arenaTugBar}>
+                  <View style={[styles.arenaTugMine, { width: '55%' }]} />
+                  <View style={[styles.arenaTugOpp, { width: '45%' }]} />
+                </View>
+              </LinearGradient>
+
+              {/* Duel Objectives & Tasks */}
+              <View style={styles.arenaObjectivesSection}>
+                <Text style={styles.arenaSectionHeading}>LIVE OBJECTIVES</Text>
+
+                <View style={styles.arenaTasksList}>
+                  <View style={styles.arenaTaskRow}>
+                    <Text style={styles.arenaCheckGreen}>✓</Text>
+                    <View style={{ flex: 1 }}>
+                      <Text style={styles.arenaTaskTitle}>Elena Rostova: Posted Reel</Text>
+                      <Text style={styles.arenaTaskSub}>Earned +15 pts for squad</Text>
+                    </View>
+                    <Text style={styles.arenaTaskPts}>+15 pts</Text>
+                  </View>
+
+                  <View style={styles.arenaTaskRow}>
+                    <Text style={styles.arenaCheckGreen}>✓</Text>
+                    <View style={{ flex: 1 }}>
+                      <Text style={styles.arenaTaskTitle}>Amara & Tomi: Duet Reel Collab</Text>
+                      <Text style={styles.arenaTaskSub}>Earned +20 pts for squad</Text>
+                    </View>
+                    <Text style={styles.arenaTaskPts}>+20 pts</Text>
+                  </View>
+
+                  <View style={styles.arenaTaskRowPending}>
+                    <Text style={{ fontSize: 13, color: '#F59E0B' }}>⚡</Text>
+                    <View style={{ flex: 1 }}>
+                      <Text style={[styles.arenaTaskTitle, { color: '#171420', fontWeight: '900' }]}>
+                        Pablo: Post Short-Form Draft
+                      </Text>
+                      <Text style={styles.arenaTaskSub}>Score +15 pts to extend your lead!</Text>
+                    </View>
+                    <Pressable
+                      style={styles.arenaQuickSubmitBtn}
+                      onPress={() => {
+                        setShowDuelArenaModal(false);
+                        showToast('🔥 Post logged! +15 pts awarded to Momentum Makers!');
+                      }}
+                    >
+                      <Text style={styles.arenaQuickSubmitText}>Log +15</Text>
+                    </Pressable>
+                  </View>
+                </View>
+              </View>
+
+              {/* Bounty Reward Box */}
+              <View style={styles.arenaBountyBox}>
+                <Text style={styles.arenaBountyTitle}>🏆 SQUAD BOUNTY PRIZE POOL</Text>
+                <Text style={styles.arenaBountyDesc}>+500 XP Shared Bounty • 7-Day Streak Shield • Arena Champion Crown</Text>
+              </View>
+
+              {/* Action Buttons */}
+              <View style={styles.arenaActionsRow}>
+                <Pressable
+                  style={styles.arenaChatBtn}
+                  onPress={() => {
+                    setShowDuelArenaModal(false);
+                    if (onOpenSquad) onOpenSquad();
+                  }}
+                >
+                  <Text style={styles.arenaChatBtnText}>Squad Live Room</Text>
+                </Pressable>
+
+                <Pressable
+                  style={styles.arenaScoreBtn}
+                  onPress={() => {
+                    setShowDuelArenaModal(false);
+                    showToast('🚀 Launching Post Composer for Live Duel gauntlet!');
+                  }}
+                >
+                  <LinearGradient
+                    colors={['#784DF0', '#582CDB']}
+                    style={styles.arenaScoreGradient}
+                  >
+                    <Text style={styles.arenaScoreBtnText}>Post to Score 🔥</Text>
+                  </LinearGradient>
+                </Pressable>
+              </View>
+            </View>
           </View>
         </Modal>
 
@@ -2544,64 +2744,479 @@ const styles = StyleSheet.create({
     fontWeight: '900',
   },
 
-  // LIVE DUEL BANNER
+  // LUXURY LIVE SQUAD DUEL ARENA BANNER
   liveDuelBanner: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 20,
+    padding: 16,
+    marginTop: 14,
+    borderWidth: 1.5,
+    borderColor: '#EDE9FE',
+    shadowColor: '#582CDB',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.08,
+    shadowRadius: 12,
+    elevation: 3,
+  },
+  duelTopRibbon: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    backgroundColor: '#F1E5C8',
-    borderRadius: 16,
-    padding: 12,
-    marginTop: 12,
-    borderWidth: 1,
-    borderColor: '#E6D3A3',
+    marginBottom: 12,
   },
-  liveDuelLeftGroup: {
+  duelLivePill: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 10,
-    flex: 1,
-    paddingRight: 6,
+    gap: 6,
+    backgroundColor: '#FEE2E2',
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 6,
   },
-  duelIconSquare: {
-    width: 34,
-    height: 34,
-    borderRadius: 10,
-    backgroundColor: '#D97706',
-    justifyContent: 'center',
-    alignItems: 'center',
+  duelLivePulseDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: '#EF4444',
   },
-  liveDuelTag: {
-    fontSize: 8.5,
+  duelLivePillText: {
+    fontSize: 9.5,
     fontWeight: '900',
-    color: '#92400E',
-    letterSpacing: 0.4,
+    color: '#B91C1C',
+    letterSpacing: 0.5,
   },
-  liveDuelVsText: {
-    fontSize: 10.5,
+  duelTimerBadge: {
+    backgroundColor: '#FEF3C7',
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 6,
+  },
+  duelTimerText: {
+    fontSize: 10,
     fontWeight: '800',
-    color: '#171420',
-    marginTop: 1,
+    color: '#92400E',
   },
-  duelScoreText: {
-    fontSize: 10.5,
+  duelMatchupRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: '#FAF8F5',
+    borderRadius: 14,
+    padding: 12,
+    marginBottom: 10,
+    borderWidth: 1,
+    borderColor: '#F1EFE9',
+  },
+  duelTeamColLeft: {
+    flex: 1,
+    alignItems: 'flex-start',
+  },
+  duelTeamColRight: {
+    flex: 1,
+    alignItems: 'flex-end',
+  },
+  duelAvatarStackMini: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 4,
+  },
+  duelAvatarStackMiniRight: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'flex-end',
+    marginBottom: 4,
+  },
+  duelStackImg: {
+    width: 22,
+    height: 22,
+    borderRadius: 11,
+    borderWidth: 1.5,
+    borderColor: '#FFFFFF',
+  },
+  duelTeamNameMine: {
+    fontSize: 12,
+    fontWeight: '900',
+    color: '#171420',
+  },
+  duelTeamNameOpp: {
+    fontSize: 12,
+    fontWeight: '800',
+    color: '#64748B',
+    textAlign: 'right',
+  },
+  duelScoreMinePill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    marginTop: 3,
+  },
+  duelScoreMineText: {
+    fontSize: 13,
     fontWeight: '900',
     color: '#582CDB',
   },
-  viewDuelBtn: {
+  duelLeadText: {
+    fontSize: 9,
+    fontWeight: '800',
+    color: '#10B981',
+  },
+  duelScoreOppPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    marginTop: 3,
+  },
+  duelScoreOppText: {
+    fontSize: 13,
+    fontWeight: '900',
+    color: '#64748B',
+  },
+  duelTrailingText: {
+    fontSize: 9,
+    fontWeight: '700',
+    color: '#94A3B8',
+  },
+  duelVsCenterEmblem: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
     backgroundColor: '#FFFFFF',
-    paddingHorizontal: 9,
-    paddingVertical: 5,
-    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginHorizontal: 6,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.05,
-    shadowRadius: 2,
+    shadowRadius: 3,
   },
-  viewDuelBtnText: {
+  duelVsCenterText: {
     fontSize: 10,
     fontWeight: '900',
+    color: '#582CDB',
+  },
+  duelTugTrackContainer: {
+    flexDirection: 'row',
+    height: 6,
+    borderRadius: 3,
+    overflow: 'hidden',
+    marginBottom: 10,
+    backgroundColor: '#E2E8F0',
+  },
+  duelTugFillMine: {
+    backgroundColor: '#582CDB',
+    height: '100%',
+  },
+  duelTugFillOpp: {
+    backgroundColor: '#F59E0B',
+    height: '100%',
+  },
+  duelMissionBox: {
+    backgroundColor: '#FAF8F5',
+    borderRadius: 10,
+    padding: 9,
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: '#F1EFE9',
+  },
+  duelMissionLabel: {
+    fontSize: 8.5,
+    fontWeight: '900',
+    color: '#64748B',
+    letterSpacing: 0.5,
+    marginBottom: 2,
+  },
+  duelMissionDesc: {
+    fontSize: 11,
     color: '#171420',
+    fontWeight: '700',
+  },
+  viewDuelBtn: {
+    borderRadius: 12,
+    overflow: 'hidden',
+    shadowColor: '#582CDB',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 6,
+    elevation: 2,
+  },
+  viewDuelGradient: {
+    paddingVertical: 11,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  viewDuelBtnText: {
+    fontSize: 12.5,
+    fontWeight: '900',
+    color: '#FFFFFF',
+    letterSpacing: 0.3,
+  },
+
+  /* ARENA CENTERED MODAL */
+  arenaModalOverlay: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(15, 23, 42, 0.75)',
+    padding: 18,
+  },
+  arenaModalBackdrop: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+  },
+  arenaModalCard: {
+    width: '100%',
+    maxWidth: 420,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 24,
+    padding: 20,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.9)',
+    shadowColor: '#582CDB',
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.25,
+    shadowRadius: 24,
+    elevation: 8,
+  },
+  arenaTopHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 14,
+  },
+  arenaSwordsIconBox: {
+    width: 36,
+    height: 36,
+    borderRadius: 12,
+    backgroundColor: '#EDE9FE',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  arenaTitle: {
+    fontSize: 17,
+    fontWeight: '900',
+    color: '#171420',
+  },
+  arenaSubtitle: {
+    fontSize: 11,
+    color: '#64748B',
+  },
+  arenaCloseBtn: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: '#F1F5F9',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  arenaCloseText: {
+    fontSize: 13,
+    fontWeight: '900',
+    color: '#475569',
+  },
+  arenaMatchupCard: {
+    borderRadius: 16,
+    padding: 14,
+    marginBottom: 14,
+  },
+  arenaTeamsRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  arenaTeamTitleMine: {
+    fontSize: 12,
+    fontWeight: '900',
+    color: '#F3E8FF',
+  },
+  arenaTeamScoreMine: {
+    fontSize: 20,
+    fontWeight: '900',
+    color: '#FFFFFF',
+    marginTop: 2,
+  },
+  arenaLeadBadge: {
+    backgroundColor: 'rgba(16, 185, 129, 0.25)',
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 4,
+    marginTop: 3,
+  },
+  arenaLeadBadgeText: {
+    fontSize: 8,
+    fontWeight: '900',
+    color: '#6EE7B7',
+  },
+  arenaVsCircle: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: 'rgba(255, 255, 255, 0.15)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  arenaVsText: {
+    fontSize: 10,
+    fontWeight: '900',
+    color: '#FDE68A',
+  },
+  arenaTeamTitleOpp: {
+    fontSize: 12,
+    fontWeight: '800',
+    color: '#CBD5E1',
+  },
+  arenaTeamScoreOpp: {
+    fontSize: 20,
+    fontWeight: '900',
+    color: '#E2E8F0',
+    marginTop: 2,
+  },
+  arenaTrailingBadge: {
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 4,
+    marginTop: 3,
+  },
+  arenaTrailingBadgeText: {
+    fontSize: 8,
+    fontWeight: '800',
+    color: '#CBD5E1',
+  },
+  arenaTugBar: {
+    flexDirection: 'row',
+    height: 6,
+    borderRadius: 3,
+    overflow: 'hidden',
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+  },
+  arenaTugMine: {
+    backgroundColor: '#C084FC',
+    height: '100%',
+  },
+  arenaTugOpp: {
+    backgroundColor: '#F59E0B',
+    height: '100%',
+  },
+  arenaObjectivesSection: {
+    marginBottom: 12,
+  },
+  arenaSectionHeading: {
+    fontSize: 10,
+    fontWeight: '900',
+    color: '#64748B',
+    letterSpacing: 0.6,
+    marginBottom: 8,
+  },
+  arenaTasksList: {
+    gap: 8,
+  },
+  arenaTaskRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    backgroundColor: '#F8FAFC',
+    padding: 10,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#F1F5F9',
+  },
+  arenaTaskRowPending: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    backgroundColor: '#FEF3C7',
+    padding: 10,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#FDE68A',
+  },
+  arenaCheckGreen: {
+    fontSize: 13,
+    fontWeight: '900',
+    color: '#10B981',
+  },
+  arenaTaskTitle: {
+    fontSize: 12,
+    fontWeight: '800',
+    color: '#334155',
+  },
+  arenaTaskSub: {
+    fontSize: 10.5,
+    color: '#64748B',
+  },
+  arenaTaskPts: {
+    fontSize: 11.5,
+    fontWeight: '900',
+    color: '#059669',
+  },
+  arenaQuickSubmitBtn: {
+    backgroundColor: '#D97706',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 6,
+  },
+  arenaQuickSubmitText: {
+    fontSize: 10.5,
+    fontWeight: '900',
+    color: '#FFFFFF',
+  },
+  arenaBountyBox: {
+    backgroundColor: '#FAF8F5',
+    borderRadius: 12,
+    padding: 10,
+    marginBottom: 16,
+    borderWidth: 1,
+    borderColor: '#EFECE6',
+  },
+  arenaBountyTitle: {
+    fontSize: 9,
+    fontWeight: '900',
+    color: '#D97706',
+    letterSpacing: 0.5,
+    marginBottom: 2,
+  },
+  arenaBountyDesc: {
+    fontSize: 11,
+    color: '#171420',
+    fontWeight: '700',
+  },
+  arenaActionsRow: {
+    flexDirection: 'row',
+    gap: 10,
+  },
+  arenaChatBtn: {
+    flex: 1,
+    backgroundColor: '#FAF8F5',
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    borderRadius: 14,
+    paddingVertical: 12,
+    alignItems: 'center',
+  },
+  arenaChatBtnText: {
+    fontSize: 12.5,
+    fontWeight: '800',
+    color: '#475569',
+  },
+  arenaScoreBtn: {
+    flex: 1.2,
+    borderRadius: 14,
+    overflow: 'hidden',
+  },
+  arenaScoreGradient: {
+    paddingVertical: 12,
+    alignItems: 'center',
+  },
+  arenaScoreBtnText: {
+    fontSize: 12.5,
+    fontWeight: '900',
+    color: '#FFFFFF',
   },
 
   // QUICK ACTIONS
