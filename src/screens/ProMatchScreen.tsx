@@ -10,7 +10,6 @@ import {
   Animated,
   PanResponder,
   Modal,
-  TextInput,
   Image,
   Platform,
   Dimensions,
@@ -21,54 +20,43 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { FloatingTabBar, TabType } from '../components/FloatingTabBar';
 import { BrandToast } from '../components/BrandToast';
 import { UserProfileModal, UserProfileData } from '../components/UserProfileModal';
+import { AnimatedCompletionModal } from '../components/AnimatedCompletionModal';
+import { TinyGoldCheck } from '../components/CreatorStoryModal';
 
-const { width: SCREEN_WIDTH } = Dimensions.get('window');
-
-export const TinyGoldCheck = ({ size = 13 }: { size?: number }) => (
-  <View
-    style={{
-      width: size,
-      height: size,
-      borderRadius: size / 2,
-      backgroundColor: '#F59E0B',
-      borderWidth: 1.5,
-      borderColor: '#FFFFFF',
-      justifyContent: 'center',
-      alignItems: 'center',
-      shadowColor: '#CA8A04',
-      shadowOffset: { width: 0, height: 1 },
-      shadowOpacity: 0.35,
-      shadowRadius: 2,
-      elevation: 2,
-    }}
-  >
-    <Svg width={size * 0.65} height={size * 0.65} viewBox="0 0 12 12" fill="none">
-      <Path
-        d="M2.5 6.2L4.8 8.5L9.5 3.5"
-        stroke="#FFFFFF"
-        strokeWidth="2.4"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </Svg>
-  </View>
-);
-
+const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 const SWIPE_THRESHOLD = 95;
+const SWIPE_UP_THRESHOLD = 85;
 
 interface ProMatchScreenProps {
   onLogout?: () => void;
   onNavigateTab?: (tab: TabType) => void;
-  onOpenMessages?: () => void;
+  onOpenMessages?: (threadId?: string) => void;
   onOpenJarvisPro?: () => void;
+  onOpenCollabIdea?: (partnerData: {
+    name: string;
+    handle: string;
+    niche: string;
+    avatar: any;
+    planIndex: number;
+    title: string;
+  }) => void;
   onSwitchToFree?: () => void;
   userProfile?: UserProfileData;
   onSaveProfile?: (updated: UserProfileData) => void;
 }
 
-interface CreatorProfile {
+interface CollabConcept {
+  id: string;
+  title: string;
+  hook: string;
+  format: string;
+  expectedReach: string;
+}
+
+interface CreatorCardData {
   id: string;
   name: string;
+  handle: string;
   role: string;
   followers: string;
   location: string;
@@ -77,97 +65,239 @@ interface CreatorProfile {
   tags: string[];
   streak: number;
   matchScore: number;
-  whyMatch: string;
-  platforms: string[];
-  proposedConcept: string;
-  conceptDesc: string;
+  activeStatus: string;
+  isTracked: boolean;
+  audienceFit: number;
+  formatSynergy: number;
+  reliability: number;
+  jarvisRationale: string;
+  collabConcepts: CollabConcept[];
 }
 
-const PRO_CREATORS: CreatorProfile[] = [
+const DECK_CREATORS: CreatorCardData[] = [
   {
     id: 'amara',
     name: 'Amara Okafor',
-    role: 'Travel & Lifestyle Creator',
+    handle: '@amara_travels',
+    role: 'Travel & Lifestyle Vlogger',
     followers: '85K',
-    location: 'Lagos, Nigeria',
+    location: 'Lagos, NG',
     coverImage: require('../../assets/images/amara-avatar.jpg'),
-    bio: 'Documenting hidden gems, culture, and high-energy street stories across West Africa.',
-    tags: ['Lifestyle', 'Travel', 'Storytelling', 'Available This Week'],
+    bio: 'Filming authentic travel routines & luxury getaways across West Africa. Looking for lifestyle co-creators for dynamic storytelling.',
+    tags: ['🌿 Travel', '✨ Lifestyle', '🎥 4K Vlogs'],
     streak: 44,
-    matchScore: 94,
-    whyMatch:
+    matchScore: 96,
+    activeStatus: 'Active today (Posted 2h ago)',
+    isTracked: true,
+    audienceFit: 94,
+    formatSynergy: 98,
+    reliability: 92,
+    jarvisRationale:
       'Your audiences overlap in lifestyle, travel and personality-led storytelling. A joint Reel could help both creators reach new viewers with strong short-form chemistry.',
-    platforms: ['Instagram', 'TikTok'],
-    proposedConcept: '24 Hours Creating in Lagos',
-    conceptDesc:
-      'A fast-moving lifestyle collaboration showing how two creators work, explore and create in the city.',
+    collabConcepts: [
+      {
+        id: 'c1',
+        title: 'The 24-Hour Creator Swap & Lagos Hidden Gems',
+        hook: 'We traded content workflows for 24 hours in Lagos. Here is what broke first...',
+        format: '9:16 Instagram Reel & TikTok (Joint Collab)',
+        expectedReach: '140K+ combined impressions',
+      },
+      {
+        id: 'c2',
+        title: 'Luxury Getaway vs Street Routine: The Contrast Experiment',
+        hook: 'Why high-production travel content is shifting to raw handheld storytelling in 2024.',
+        format: 'YouTube Shorts + Carousel Deck',
+        expectedReach: '95K+ impressions',
+      },
+      {
+        id: 'c3',
+        title: 'Creator Habits Breakdown: Maintaining 40+ Day Streaks',
+        hook: 'How 2 full-time creators film, edit, and post daily without burning out.',
+        format: 'Podcast Audio Clip & X Thread',
+        expectedReach: '80K+ views',
+      },
+    ],
+  },
+  {
+    id: 'david',
+    name: 'David Kim',
+    handle: '@davidkim_tech',
+    role: 'Tech & Productivity Systems',
+    followers: '120K',
+    location: 'San Francisco, CA',
+    coverImage: require('../../assets/images/david-avatar.jpg'),
+    bio: 'Breaking down creator tools, AI automation workflows, and desk setups that maximize high-output focus.',
+    tags: ['⚡ AI Systems', '💻 Tech Reviews', '📈 Productivity'],
+    streak: 52,
+    matchScore: 94,
+    activeStatus: 'Active today (Posted 4h ago)',
+    isTracked: false,
+    audienceFit: 92,
+    formatSynergy: 96,
+    reliability: 95,
+    jarvisRationale:
+      'David has an exceptionally high tech retention rate. Co-producing an AI workflow review will drive cross-pollination from high-value tech enthusiasts.',
+    collabConcepts: [
+      {
+        id: 'cd1',
+        title: 'The 3-App Stack That Replaced an Entire Production Team',
+        hook: 'We tested 12 AI tools so you don’t have to. These 3 run our entire workflow.',
+        format: 'TikTok & Reel Carousel (Multi-slide)',
+        expectedReach: '180K+ impressions',
+      },
+      {
+        id: 'cd2',
+        title: 'Tech Showdown: Automated Publishing vs Organic Posting',
+        hook: 'Does posting manually actually boost algorithm reach? We ran a 14-day test.',
+        format: 'Joint 60s Reel',
+        expectedReach: '110K+ impressions',
+      },
+    ],
   },
   {
     id: 'elena',
     name: 'Elena Rostova',
-    role: 'Design & Visual AI',
-    followers: '42.8K',
-    location: 'Berlin / Remote',
+    handle: '@elena_fit',
+    role: 'High-Performance & Fitness',
+    followers: '64K',
+    location: 'London, UK',
     coverImage: require('../../assets/images/elena-avatar.jpg'),
-    bio: 'Sharing UI/UX micro-interactions, generative visual art, and creative workflow hacks.',
-    tags: ['Tech & AI', 'Design', 'Storytelling', 'Open to Squads'],
-    streak: 52,
-    matchScore: 96,
-    whyMatch:
-      'Elena posts at the exact same 11:30 AM cadence. Her audience values high production aesthetics and creative tools.',
-    platforms: ['Instagram', 'YouTube'],
-    proposedConcept: 'The 3 AI Tools I Use to 10x Editing Speed',
-    conceptDesc:
-      'A side-by-side split screen comparing manual workflows vs autonomous AI co-piloting.',
+    bio: 'Daily morning routines, disciplined training, and nutrition for creators who want boundless energy.',
+    tags: ['💪 Fitness', '🥑 Wellness', '⏰ Routine'],
+    streak: 39,
+    matchScore: 91,
+    activeStatus: 'Active today (Posted 1h ago)',
+    isTracked: false,
+    audienceFit: 88,
+    formatSynergy: 94,
+    reliability: 96,
+    jarvisRationale:
+      'Elena provides a perfect lifestyle-wellness hook angle. A routine swap or energy management breakdown aligns seamlessly with creator sustainability.',
+    collabConcepts: [
+      {
+        id: 'ce1',
+        title: 'The 5 AM Creator Energy Challenge',
+        hook: 'Can a non-morning creator survive an Olympic morning routine for 7 days?',
+        format: 'Mini-Doc Vlog (9:16 Video Series)',
+        expectedReach: '125K+ impressions',
+      },
+    ],
   },
   {
-    id: 'david',
-    name: 'David Adebayo',
-    role: 'Tech & Productivity',
-    followers: '112K',
-    location: 'London, UK',
-    coverImage: require('../../assets/images/david-avatar.jpg'),
-    bio: 'Obsessed with deep work, creator economy monetization, and high-performance habits.',
-    tags: ['Business & Wealth', 'Tech', 'Available This Week'],
+    id: 'marcus',
+    name: 'Marcus Vance',
+    handle: '@marcus_vance',
+    role: 'B2B SaaS & Growth Hacker',
+    followers: '98K',
+    location: 'Austin, TX',
+    coverImage: require('../../assets/images/marcus-avatar.jpg'),
+    bio: 'Building in public. Sharing organic growth systems that convert followers into monthly recurring revenue.',
+    tags: ['🚀 Monetization', '📊 Case Studies', '💡 SaaS'],
     streak: 61,
-    matchScore: 91,
-    whyMatch:
-      'High affinity with your business and streak consistency followers. Perfect for an accountability challenge.',
-    platforms: ['YouTube', 'TikTok'],
-    proposedConcept: '7-Day Zero-Distraction Challenge',
-    conceptDesc:
-      'A co-hosted challenge tracking daily posting streaks and focus routines across both channels.',
+    matchScore: 95,
+    activeStatus: 'Active today (Posted 5h ago)',
+    isTracked: false,
+    audienceFit: 96,
+    formatSynergy: 95,
+    reliability: 98,
+    jarvisRationale:
+      'Marcus specializes in high-converting monetization hooks. Collaborating with him will elevate your authority in business and monetization spaces.',
+    collabConcepts: [
+      {
+        id: 'cm1',
+        title: 'How to Turn 1,000 Views into $1,000 Monthly Revenue',
+        hook: 'Most creators monetize completely backwards. Here is the low-friction playbook.',
+        format: 'LinkedIn Carousel & X Thread',
+        expectedReach: '210K+ impressions',
+      },
+    ],
+  },
+  {
+    id: 'zainab',
+    name: 'Zainab Al-Hassan',
+    handle: '@zainab_eats',
+    role: 'Culinary & Culture Explorer',
+    followers: '72K',
+    location: 'Dubai, UAE',
+    coverImage: require('../../assets/images/zainab-avatar.jpg'),
+    bio: 'Street food journeys, Middle Eastern fusion recipes, and visual food aesthetic guides.',
+    tags: ['🍳 Culinary', '🌍 Culture', '📸 Aesthetic'],
+    streak: 48,
+    matchScore: 93,
+    activeStatus: 'Active today (Posted 3h ago)',
+    isTracked: false,
+    audienceFit: 91,
+    formatSynergy: 94,
+    reliability: 94,
+    jarvisRationale:
+      'Zainab has top-tier visual food aesthetic production. Cross-niche collaboration creates unmatched visual engagement.',
+    collabConcepts: [
+      {
+        id: 'cz1',
+        title: 'Rating the Best Creator Cafes in the World',
+        hook: 'We visited the top 5 creator-friendly cafes. Number 3 shocked us.',
+        format: '9:16 Cinematic Food Reel',
+        expectedReach: '130K+ impressions',
+      },
+    ],
   },
 ];
 
-interface NotificationItem {
-  id: string;
-  type: 'streak' | 'collab' | 'quest' | 'level' | 'growth';
-  title: string;
-  body: string;
-  time: string;
-  unread: boolean;
-  iconEmoji: string;
-}
-
-const INITIAL_NOTIFICATIONS: NotificationItem[] = [
+const INCOMING_REQUESTS_INITIAL = [
   {
-    id: 'n1',
-    type: 'collab',
-    title: 'New Priority Match Found',
-    body: 'Amara Okafor (94% Fit) is available for collab this week in Lagos.',
-    time: '10m ago',
-    unread: true,
-    iconEmoji: '🤝',
+    id: 'req_1',
+    name: 'Kemi Adeleke',
+    handle: '@kemi_designs',
+    role: 'UI/UX & Brand Designer',
+    followers: '68K',
+    location: 'London, UK',
+    avatar: require('../../assets/images/kemi-avatar.jpg'),
+    streak: 42,
+    matchScore: 95,
+    pitch: 'Hey! Loved your recent breakdown on creator systems. I drafted a joint design concept for an interactive carousel swap!',
+    conceptTitle: 'The Anatomy of a High-Converting Carousel Slide',
+    timeAgo: '2h ago',
   },
   {
-    id: 'n2',
-    type: 'streak',
-    title: 'Squad Duel Leading by 4 Pts',
-    body: 'Momentum Makers leads Lagos Storytellers (62 pts vs 58 pts).',
-    time: '1h ago',
-    unread: true,
-    iconEmoji: '🏆',
+    id: 'req_2',
+    name: 'Tomi Adebayo',
+    handle: '@tomi_tech',
+    role: 'Tech & Gadget Reviewer',
+    followers: '115K',
+    location: 'Toronto, CA',
+    avatar: require('../../assets/images/tomi-avatar.jpg'),
+    streak: 55,
+    matchScore: 92,
+    pitch: 'Would love to do a 60s creator desk setup critique video with you! Let me know if you are open to filming next Tuesday.',
+    conceptTitle: 'Extreme Creator Studio Upgrades Under $100',
+    timeAgo: '5h ago',
+  },
+];
+
+const CONNECTED_CREATORS_INITIAL = [
+  {
+    id: 'conn_1',
+    name: 'Elena Rostova',
+    handle: '@elena_fit',
+    role: 'Fitness & Wellness',
+    followers: '64K',
+    location: 'London, UK',
+    avatar: require('../../assets/images/elena-avatar.jpg'),
+    streak: 39,
+    status: 'Matched 2 days ago',
+    activeCollab: 'The 5 AM Creator Energy Routine',
+  },
+  {
+    id: 'conn_2',
+    name: 'Marcus Vance',
+    handle: '@marcus_vance',
+    role: 'B2B SaaS Growth',
+    followers: '98K',
+    location: 'Austin, TX',
+    avatar: require('../../assets/images/marcus-avatar.jpg'),
+    streak: 61,
+    status: 'Matched 4 days ago',
+    activeCollab: 'Monetizing Short-Form Content Playbook',
   },
 ];
 
@@ -176,46 +306,73 @@ export const ProMatchScreen: React.FC<ProMatchScreenProps> = ({
   onNavigateTab,
   onOpenMessages,
   onOpenJarvisPro,
+  onOpenCollabIdea,
   onSwitchToFree,
   userProfile,
   onSaveProfile,
 }) => {
   const [activeTab, setActiveTab] = useState<TabType>('match');
+  const [segmentTab, setSegmentTab] = useState<'deck' | 'requests' | 'tracked' | 'connected'>('deck');
+  const [activeFilter, setActiveFilter] = useState<'all' | 'niche' | 'streak' | 'nearby' | 'ai'>('niche');
+  const [matchesLeft, setMatchesLeft] = useState(5);
+
+  // Deck & Lists
+  const [deck, setDeck] = useState<CreatorCardData[]>(DECK_CREATORS);
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [selectedFilter, setSelectedFilter] = useState('High Fit');
+  const [requests, setRequests] = useState(INCOMING_REQUESTS_INITIAL);
+  const [connected, setConnected] = useState(CONNECTED_CREATORS_INITIAL);
+  const [trackedIds, setTrackedIds] = useState<string[]>(['amara']);
+
+  // Modals & Feedback
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [showNotificationModal, setShowNotificationModal] = useState(false);
-  const [showCollabPlanModal, setShowCollabPlanModal] = useState(false);
-  const [showSquadModal, setShowSquadModal] = useState(false);
-  const [showCreatorDetailModal, setShowCreatorDetailModal] = useState(false);
-  const [showCelebrationModal, setShowCelebrationModal] = useState(false);
+  const [showDeepDiveModal, setShowDeepDiveModal] = useState(false);
+  const [selectedCreator, setSelectedCreator] = useState<CreatorCardData | null>(DECK_CREATORS[0]);
+  const [showCompletionModal, setShowCompletionModal] = useState(false);
+  const [completionData, setCompletionData] = useState({
+    title: 'Collab Match Made!',
+    subtitle: 'You and Amara Okafor are matched to build together.',
+    badgeText: '✨ COLLAB UNLOCKED (+150 XP)',
+    xpEarned: 150,
+    speechBubble: 'Boom! High-synergy match secured. Time to build viral content, Pablo! 🔥',
+  });
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
-  // Notifications
-  const [notifications, setNotifications] = useState<NotificationItem[]>(INITIAL_NOTIFICATIONS);
-
-  // Animations
-  const ghostFloatY = useRef(new Animated.Value(0)).current;
-  const ghostScale = useRef(new Animated.Value(1)).current;
+  // Card Swiping Animations
+  const position = useRef(new Animated.ValueXY()).current;
   const modalPopScale = useRef(new Animated.Value(0.92)).current;
 
-  // Swipe Animation Ref
-  const position = useRef(new Animated.ValueXY()).current;
+  const showToast = (msg: string) => {
+    setToastMessage(msg);
+    setTimeout(() => setToastMessage(null), 2500);
+  };
 
-  const currentCreator = PRO_CREATORS[currentIndex % PRO_CREATORS.length];
+  const triggerModalPop = () => {
+    modalPopScale.setValue(0.92);
+    Animated.spring(modalPopScale, {
+      toValue: 1,
+      friction: 6,
+      tension: 100,
+      useNativeDriver: true,
+    }).start();
+  };
 
-  // PanResponder for Interactive Swipe Cards
+  // PanResponder for Interactive Deck Swiping
   const panResponder = useRef(
     PanResponder.create({
       onStartShouldSetPanResponder: () => true,
-      onPanResponderMove: (_, gestureState) => {
-        position.setValue({ x: gestureState.dx, y: gestureState.dy });
+      onMoveShouldSetPanResponder: (_, gesture) =>
+        Math.abs(gesture.dx) > 10 || Math.abs(gesture.dy) > 10,
+      onPanResponderMove: (_, gesture) => {
+        position.setValue({ x: gesture.dx, y: gesture.dy });
       },
-      onPanResponderRelease: (_, gestureState) => {
-        if (gestureState.dx > SWIPE_THRESHOLD) {
+      onPanResponderRelease: (_, gesture) => {
+        if (gesture.dx > SWIPE_THRESHOLD) {
           swipeRight();
-        } else if (gestureState.dx < -SWIPE_THRESHOLD) {
+        } else if (gesture.dx < -SWIPE_THRESHOLD) {
           swipeLeft();
+        } else if (gesture.dy < -SWIPE_UP_THRESHOLD) {
+          swipeUp();
         } else {
           resetPosition();
         }
@@ -227,818 +384,930 @@ export const ProMatchScreen: React.FC<ProMatchScreenProps> = ({
     Animated.spring(position, {
       toValue: { x: 0, y: 0 },
       friction: 5,
-      useNativeDriver: false,
-    }).start();
-  };
-
-  const swipeRight = () => {
-    if (Platform.OS !== 'web') {
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-    }
-    Animated.timing(position, {
-      toValue: { x: SCREEN_WIDTH + 100, y: 0 },
-      duration: 250,
-      useNativeDriver: false,
-    }).start(() => {
-      position.setValue({ x: 0, y: 0 });
-      setCurrentIndex((prev) => prev + 1);
-      triggerModalPop();
-      setShowCelebrationModal(true);
-    });
-  };
-
-  const swipeLeft = () => {
-    if (Platform.OS !== 'web') {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    }
-    Animated.timing(position, {
-      toValue: { x: -SCREEN_WIDTH - 100, y: 0 },
-      duration: 250,
-      useNativeDriver: false,
-    }).start(() => {
-      position.setValue({ x: 0, y: 0 });
-      setCurrentIndex((prev) => prev + 1);
-      showToast('Passed. Showing next high-fit creator...');
-    });
-  };
-
-  const swipeUp = () => {
-    if (Platform.OS !== 'web') {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    }
-    Animated.timing(position, {
-      toValue: { x: 0, y: -SCREEN_WIDTH },
-      duration: 250,
-      useNativeDriver: false,
-    }).start(() => {
-      position.setValue({ x: 0, y: 0 });
-      setCurrentIndex((prev) => prev + 1);
-      showToast(`Saved ${currentCreator.name} to your Collab Vault!`);
-    });
-  };
-
-  // Card Rotation on Drag
-  const rotate = position.x.interpolate({
-    inputRange: [-SCREEN_WIDTH / 2, 0, SCREEN_WIDTH / 2],
-    outputRange: ['-8deg', '0deg', '8deg'],
-    extrapolate: 'clamp',
-  });
-
-  const rotateAndTranslate = {
-    transform: [
-      { rotate: rotate },
-      ...position.getTranslateTransform(),
-    ],
-  };
-
-  useEffect(() => {
-    // Mascot floating animation
-    Animated.loop(
-      Animated.sequence([
-        Animated.timing(ghostFloatY, {
-          toValue: -4,
-          duration: 1500,
-          useNativeDriver: true,
-        }),
-        Animated.timing(ghostFloatY, {
-          toValue: 2,
-          duration: 1500,
-          useNativeDriver: true,
-        }),
-      ])
-    ).start();
-  }, []);
-
-  const showToast = (msg: string) => {
-    setToastMessage(msg);
-    setTimeout(() => {
-      setToastMessage(null);
-    }, 2800);
-  };
-
-  const triggerModalPop = () => {
-    modalPopScale.setValue(0.92);
-    Animated.spring(modalPopScale, {
-      toValue: 1,
-      friction: 6,
-      tension: 60,
       useNativeDriver: true,
     }).start();
   };
 
-  const handleTabPress = (tab: TabType) => {
+  const swipeRight = (creatorParam?: CreatorCardData) => {
+    const creator = creatorParam || deck[currentIndex];
+    if (!creator) return;
+
     if (Platform.OS !== 'web') {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     }
-    setActiveTab(tab);
-    if (onNavigateTab) {
-      onNavigateTab(tab);
+
+    Animated.timing(position, {
+      toValue: { x: SCREEN_WIDTH + 150, y: 0 },
+      duration: 250,
+      useNativeDriver: true,
+    }).start(() => {
+      onSwipeComplete('right', creator);
+    });
+  };
+
+  const swipeLeft = (creatorParam?: CreatorCardData) => {
+    const creator = creatorParam || deck[currentIndex];
+    if (!creator) return;
+
+    if (Platform.OS !== 'web') {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    }
+
+    Animated.timing(position, {
+      toValue: { x: -SCREEN_WIDTH - 150, y: 0 },
+      duration: 250,
+      useNativeDriver: true,
+    }).start(() => {
+      onSwipeComplete('left', creator);
+    });
+  };
+
+  const swipeUp = (creatorParam?: CreatorCardData) => {
+    const creator = creatorParam || deck[currentIndex];
+    if (!creator) return;
+
+    if (Platform.OS !== 'web') {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    }
+
+    Animated.timing(position, {
+      toValue: { x: 0, y: -SCREEN_HEIGHT },
+      duration: 250,
+      useNativeDriver: true,
+    }).start(() => {
+      onSwipeComplete('up', creator);
+    });
+  };
+
+  const onSwipeComplete = (direction: 'right' | 'left' | 'up', creator: CreatorCardData) => {
+    position.setValue({ x: 0, y: 0 });
+    setCurrentIndex((prev) => prev + 1);
+
+    if (direction === 'right') {
+      // MATCH
+      setMatchesLeft((prev) => Math.max(0, prev - 1));
+      setConnected((prev) => [
+        {
+          id: `conn_${creator.id}`,
+          name: creator.name,
+          handle: creator.handle,
+          role: creator.role,
+          followers: creator.followers,
+          location: creator.location,
+          avatar: creator.coverImage,
+          streak: creator.streak,
+          status: 'Matched just now',
+          activeCollab: creator.collabConcepts[0]?.title || 'Joint Content Series',
+        },
+        ...prev,
+      ]);
+
+      setCompletionData({
+        title: 'Collab Match Made!',
+        subtitle: `You and ${creator.name} are matched to build together.`,
+        badgeText: '✨ COLLAB UNLOCKED (+150 XP)',
+        xpEarned: 150,
+        speechBubble: `High-synergy match secured with ${creator.name}! Time to build viral content, Pablo! 🔥`,
+      });
+
+      setTimeout(() => {
+        setShowCompletionModal(true);
+      }, 150);
+    } else if (direction === 'up') {
+      // TRACK
+      if (!trackedIds.includes(creator.id)) {
+        setTrackedIds((prev) => [...prev, creator.id]);
+      }
+      showToast(`📡 Added ${creator.name} to Tracked radar!`);
+    } else {
+      // PASS
+      showToast(`Passed on ${creator.name}`);
     }
   };
 
-  const unreadCount = notifications.filter((n) => n.unread).length;
+  const handleToggleTrackCurrent = (creator: CreatorCardData) => {
+    if (Platform.OS !== 'web') {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    }
+    if (trackedIds.includes(creator.id)) {
+      setTrackedIds((prev) => prev.filter((id) => id !== creator.id));
+      showToast(`Untracked ${creator.name}`);
+    } else {
+      setTrackedIds((prev) => [...prev, creator.id]);
+      showToast(`⭐ Tracking ${creator.name}`);
+    }
+  };
+
+  const handleOpenDeepDive = (creator: CreatorCardData) => {
+    if (Platform.OS !== 'web') {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    }
+    setSelectedCreator(creator);
+    triggerModalPop();
+    setShowDeepDiveModal(true);
+  };
+
+  const handleAcceptRequest = (req: typeof requests[0]) => {
+    if (Platform.OS !== 'web') {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    }
+    setRequests((prev) => prev.filter((r) => r.id !== req.id));
+    setConnected((prev) => [
+      {
+        id: `conn_${req.id}`,
+        name: req.name,
+        handle: req.handle,
+        role: req.role,
+        followers: req.followers,
+        location: req.location,
+        avatar: req.avatar,
+        streak: req.streak,
+        status: 'Accepted request',
+        activeCollab: req.conceptTitle,
+      },
+      ...prev,
+    ]);
+
+    setCompletionData({
+      title: 'Collaboration Accepted!',
+      subtitle: `You accepted ${req.name}'s collab request.`,
+      badgeText: '🤝 CREATOR TEAM UNLOCKED (+100 XP)',
+      xpEarned: 100,
+      speechBubble: `${req.name} is ready to create with you! Check your messages to start filming! 🔥`,
+    });
+    setShowCompletionModal(true);
+  };
+
+  const handleDeclineRequest = (reqId: string) => {
+    if (Platform.OS !== 'web') {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    }
+    setRequests((prev) => prev.filter((r) => r.id !== reqId));
+    showToast('Declined collab request');
+  };
+
+  const handleLaunchCollabConcept = (creator: CreatorCardData, concept: CollabConcept) => {
+    setShowDeepDiveModal(false);
+    if (onOpenCollabIdea) {
+      onOpenCollabIdea({
+        name: creator.name,
+        handle: creator.handle,
+        niche: creator.role,
+        avatar: creator.coverImage,
+        planIndex: 0,
+        title: concept.title,
+      });
+    } else if (onOpenMessages) {
+      onOpenMessages();
+    }
+  };
+
+  // Interpolated Swiping Transforms
+  const rotate = position.x.interpolate({
+    inputRange: [-SCREEN_WIDTH * 1.5, 0, SCREEN_WIDTH * 1.5],
+    outputRange: ['-14deg', '0deg', '14deg'],
+  });
+
+  const likeOpacity = position.x.interpolate({
+    inputRange: [20, SWIPE_THRESHOLD],
+    outputRange: [0, 1],
+    extrapolate: 'clamp',
+  });
+
+  const nopeOpacity = position.x.interpolate({
+    inputRange: [-SWIPE_THRESHOLD, -20],
+    outputRange: [1, 0],
+    extrapolate: 'clamp',
+  });
+
+  const trackOpacity = position.y.interpolate({
+    inputRange: [-SWIPE_UP_THRESHOLD, -20],
+    outputRange: [1, 0],
+    extrapolate: 'clamp',
+  });
+
+  const currentCreator = deck[currentIndex];
+  const nextCreator = deck[currentIndex + 1];
 
   return (
     <SafeAreaView style={styles.safeArea}>
       <StatusBar barStyle="dark-content" backgroundColor="#FAF8F5" />
       <View style={styles.container}>
         {/* ============================================================ */}
-        {/* 1. TOP HEADER BAR                                            */}
+        {/* 1. TOP APP HEADER                                            */}
         {/* ============================================================ */}
-        <View style={styles.headerBar}>
-          {/* Top-Left: Mascot + Mode Switcher */}
-          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-            <Animated.View
-              style={[
-                styles.headerLogoWrapper,
-                {
-                  transform: [
-                    { translateY: ghostFloatY },
-                    { scale: ghostScale },
-                  ],
-                },
-              ]}
-            >
+        <View style={styles.header}>
+          <View style={styles.headerLeftGroup}>
+            <View style={styles.flameHaloBox}>
               <Image
                 source={require('../../assets/images/jarvis-core-flame.png')}
-                style={styles.headerGhostLogo}
+                style={{ width: 22, height: 22 }}
                 resizeMode="contain"
               />
-            </Animated.View>
-
-            <Pressable
-              onPress={() => {
-                if (Platform.OS !== 'web') {
-                  Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-                }
-                if (onSwitchToFree) {
-                  onSwitchToFree();
-                } else if (onSaveProfile && userProfile) {
-                  onSaveProfile({ ...userProfile, tier: 'free' });
-                }
-              }}
-              hitSlop={8}
-            >
-              <LinearGradient
-                colors={['#FDE047', '#EAB308', '#CA8A04']}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 0 }}
-                style={styles.proHeaderBadge}
-              >
-                <Text style={styles.proHeaderBadgeText}>👑 PRO</Text>
-              </LinearGradient>
-            </Pressable>
+            </View>
+            <View>
+              <Text style={styles.headerTitle}>Match Radar</Text>
+              <Text style={styles.headerStreakText}>47-Day Streak Active</Text>
+            </View>
           </View>
 
-          {/* Right Action Icons: Messages, Notification Bell & Profile Avatar */}
           <View style={styles.headerRightGroup}>
-            {/* Chat Messages */}
+            {/* Messages */}
             <Pressable
-              style={({ pressed }) => [styles.headerIconBtn, pressed && styles.headerIconBtnPressed]}
-              hitSlop={8}
-              onPress={() => {
-                if (Platform.OS !== 'web') {
-                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                }
-                if (onOpenMessages) {
-                  onOpenMessages();
-                }
-              }}
+              style={({ pressed }) => [styles.headerRoundBtn, pressed && styles.btnPressed]}
+              onPress={() => onOpenMessages && onOpenMessages()}
             >
-              <Svg width={20} height={20} viewBox="0 0 24 24" fill="none">
-                <Path
-                  d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"
-                  stroke="#1A1626"
-                  strokeWidth="2.2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </Svg>
+              <Text style={{ fontSize: 16 }}>💬</Text>
             </Pressable>
 
-            {/* Notification Bell */}
+            {/* Notifications */}
             <Pressable
-              style={({ pressed }) => [styles.headerIconBtn, pressed && styles.headerIconBtnPressed]}
-              hitSlop={8}
-              onPress={() => {
-                if (Platform.OS !== 'web') {
-                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                }
-                triggerModalPop();
-                setShowNotificationModal(true);
-              }}
+              style={({ pressed }) => [styles.headerRoundBtn, pressed && styles.btnPressed]}
+              onPress={() => setShowNotificationModal(true)}
             >
-              <Svg width={20} height={20} viewBox="0 0 24 24" fill="none">
-                <Path
-                  d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"
-                  stroke="#1A1626"
-                  strokeWidth="2.2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-                <Path
-                  d="M13.73 21a2 2 0 0 1-3.46 0"
-                  stroke="#1A1626"
-                  strokeWidth="2.2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </Svg>
-              {unreadCount > 0 && <View style={styles.notificationDot} />}
+              <Text style={{ fontSize: 16 }}>🔔</Text>
+              {requests.length > 0 && <View style={styles.unreadDot} />}
             </Pressable>
 
-            {/* Profile Avatar */}
+            {/* Profile */}
             <Pressable
-              onPress={() => {
-                if (Platform.OS !== 'web') {
-                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                }
-                triggerModalPop();
-                setShowProfileModal(true);
-              }}
-              style={({ pressed }) => [
-                styles.profilePhotoBtn,
-                styles.profilePhotoBtnPro,
-                pressed && styles.headerIconBtnPressed,
-              ]}
-              hitSlop={8}
+              style={({ pressed }) => [styles.profileAvatarBtn, pressed && styles.btnPressed]}
+              onPress={() => setShowProfileModal(true)}
             >
               <Image
-                source={userProfile?.avatarSource || require('../../assets/images/jarvis-ghost-clean.png')}
-                style={styles.headerCustomAvatarImage}
-                resizeMode="cover"
+                source={userProfile?.avatarSource || require('../../assets/images/amara-avatar.jpg')}
+                style={styles.profileAvatarImg}
               />
-              <View style={{ position: 'absolute', bottom: -2, right: -2 }}>
-                <TinyGoldCheck size={14} />
-              </View>
             </Pressable>
           </View>
         </View>
 
-        {/* 2. MAIN SCROLLABLE CONTENT */}
+        {/* Scrollable Container */}
         <ScrollView
-          contentContainerStyle={styles.scrollContent}
+          style={{ flex: 1 }}
+          contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 120 }}
           showsVerticalScrollIndicator={false}
-          bounces={true}
         >
-          {/* TOP TAGS ROW: MATCH — PRO & PRO MATCH ACTIVE */}
-          <View style={styles.topTagsRow}>
-            <View style={styles.matchProPill}>
-              <Text style={styles.matchProPillText}>MATCH — PRO</Text>
+          {/* ============================================================ */}
+          {/* 2. PILL BADGES ROW                                           */}
+          {/* ============================================================ */}
+          <View style={styles.badgesRow}>
+            <View style={styles.creatorRadarBadge}>
+              <Text style={styles.creatorRadarBadgeText}>CREATOR RADAR</Text>
             </View>
-
-            <View style={styles.proMatchActivePill}>
-              <Text style={styles.proMatchActivePillText}>👑 PRO MATCH ACTIVE</Text>
+            <View style={styles.swipeToMatchBadge}>
+              <Text style={styles.swipeToMatchBadgeText}>Swipe to Match</Text>
             </View>
           </View>
 
-          {/* MAIN HEADLINE & SUBTITLE */}
-          <Text style={styles.mainTitleText}>Welcome to the Creator Arena.</Text>
-          <Text style={styles.mainSubtitleText}>
-            Discover high-fit creators, build smarter collaborations and level up with your squad.
+          {/* ============================================================ */}
+          {/* 3. HEADLINE & SUBTITLE                                       */}
+          {/* ============================================================ */}
+          <Text style={styles.mainHeadline}>Find creators worth building with.</Text>
+          <Text style={styles.subHeadline}>
+            Swipe right to accept, left to decline, or tap ⓘ for deep-dive match intelligence.
           </Text>
 
           {/* ============================================================ */}
-          {/* CARD 1: 2x2 DISCOVERY HUB & FILTER CHIPS                     */}
+          {/* 4. SUMMARY STATS DECK                                        */}
           {/* ============================================================ */}
-          <View style={styles.discoveryHubCard}>
-            <View style={styles.metricsGrid2x2}>
-              {/* 1. Discovery */}
-              <Pressable
-                style={styles.metricHubItem}
-                onPress={() => showToast('Unlimited Discovery active on Pro!')}
-              >
-                <Text style={styles.metricHubLabel}>DISCOVERY</Text>
-                <Text style={styles.metricHubValPurple}>Unlimited ›</Text>
-              </Pressable>
+          <View style={styles.summaryStatsDeck}>
+            <Pressable
+              style={styles.summaryCol}
+              onPress={() => setSegmentTab('deck')}
+            >
+              <Text style={styles.summaryItemText}>⭐ {matchesLeft}/5</Text>
+              <Text style={styles.summaryItemSub}>Matches Left</Text>
+            </Pressable>
 
-              {/* 2. Priority */}
-              <Pressable
-                style={styles.metricHubItem}
-                onPress={() => showToast('4 AI Priority matches ready in queue')}
-              >
-                <Text style={styles.metricHubLabel}>PRIORITY</Text>
-                <Text style={styles.metricHubValPurple}>4 Matches ›</Text>
-              </Pressable>
+            <View style={styles.summaryDivider} />
 
-              {/* 3. Mutual */}
-              <Pressable
-                style={styles.metricHubItem}
-                onPress={() => showToast('3 Creators mutually matched with you!')}
-              >
-                <Text style={styles.metricHubLabel}>MUTUAL</Text>
-                <Text style={styles.metricHubValPurple}>3 Matches ›</Text>
-              </Pressable>
+            <Pressable
+              style={styles.summaryCol}
+              onPress={() => setSegmentTab('requests')}
+            >
+              <Text style={styles.summaryItemText}>📩 {requests.length}</Text>
+              <Text style={styles.summaryItemSub}>Requests</Text>
+            </Pressable>
 
-              {/* 4. Squad */}
-              <Pressable
-                style={styles.metricHubItem}
-                onPress={() => {
-                  triggerModalPop();
-                  setShowSquadModal(true);
-                }}
-              >
-                <Text style={styles.metricHubLabel}>SQUAD</Text>
-                <Text style={styles.metricHubValPurple}>1 Invitation ›</Text>
-              </Pressable>
-            </View>
+            <View style={styles.summaryDivider} />
 
-            {/* QUICK FILTERS ROW */}
-            <View style={styles.quickFiltersRow}>
-              {['Same Niche', 'Nearby', 'High Fit', 'Available This Week'].map((f, idx) => {
-                const isSelected = f === selectedFilter;
+            <Pressable
+              style={styles.summaryCol}
+              onPress={() => setSegmentTab('tracked')}
+            >
+              <Text style={styles.summaryItemText}>📡 {trackedIds.length}</Text>
+              <Text style={styles.summaryItemSub}>Tracked</Text>
+            </Pressable>
+
+            <View style={styles.summaryDivider} />
+
+            <Pressable
+              style={styles.summaryCol}
+              onPress={() => setSegmentTab('connected')}
+            >
+              <Text style={styles.summaryItemText}>💜 {connected.length}</Text>
+              <Text style={styles.summaryItemSub}>Connected</Text>
+            </Pressable>
+          </View>
+
+          {/* ============================================================ */}
+          {/* 5. SEGMENTED TABS BAR                                        */}
+          {/* ============================================================ */}
+          <View style={styles.segmentedTabBar}>
+            <Pressable
+              style={[styles.segmentBtn, segmentTab === 'deck' && styles.segmentBtnActive]}
+              onPress={() => setSegmentTab('deck')}
+            >
+              <Text style={[styles.segmentBtnText, segmentTab === 'deck' && styles.segmentBtnTextActive]}>
+                Deck
+              </Text>
+            </Pressable>
+
+            <Pressable
+              style={[styles.segmentBtn, segmentTab === 'requests' && styles.segmentBtnActive]}
+              onPress={() => setSegmentTab('requests')}
+            >
+              <Text style={[styles.segmentBtnText, segmentTab === 'requests' && styles.segmentBtnTextActive]}>
+                Requests ({requests.length})
+              </Text>
+              {requests.length > 0 && <View style={styles.segmentRedDot} />}
+            </Pressable>
+
+            <Pressable
+              style={[styles.segmentBtn, segmentTab === 'tracked' && styles.segmentBtnActive]}
+              onPress={() => setSegmentTab('tracked')}
+            >
+              <Text style={[styles.segmentBtnText, segmentTab === 'tracked' && styles.segmentBtnTextActive]}>
+                Tracked ({trackedIds.length})
+              </Text>
+            </Pressable>
+
+            <Pressable
+              style={[styles.segmentBtn, segmentTab === 'connected' && styles.segmentBtnActive]}
+              onPress={() => setSegmentTab('connected')}
+            >
+              <Text style={[styles.segmentBtnText, segmentTab === 'connected' && styles.segmentBtnTextActive]}>
+                Connected ({connected.length})
+              </Text>
+            </Pressable>
+          </View>
+
+          {/* ============================================================ */}
+          {/* 6. FILTER PILLS ROW (Visible on Deck)                        */}
+          {/* ============================================================ */}
+          {segmentTab === 'deck' && (
+            <View style={styles.filterPillsRow}>
+              {[
+                { id: 'niche', label: 'Same Niche' },
+                { id: 'streak', label: 'Similar Streak' },
+                { id: 'nearby', label: 'Nearby' },
+                { id: 'ai', label: 'AI Pick' },
+              ].map((f) => {
+                const isActive = activeFilter === f.id;
                 return (
                   <Pressable
-                    key={idx}
+                    key={f.id}
+                    style={[styles.filterPill, isActive && styles.filterPillActive]}
                     onPress={() => {
                       if (Platform.OS !== 'web') {
                         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                       }
-                      setSelectedFilter(f);
+                      setActiveFilter(f.id as any);
                     }}
-                    style={[styles.quickFilterChip, isSelected && styles.quickFilterChipActive]}
                   >
-                    <Text style={[styles.quickFilterChipText, isSelected && styles.quickFilterChipTextActive]}>
-                      {f}
+                    <Text style={[styles.filterPillText, isActive && styles.filterPillTextActive]}>
+                      {f.label}
                     </Text>
                   </Pressable>
                 );
               })}
             </View>
-          </View>
+          )}
 
           {/* ============================================================ */}
-          {/* SECTION 2: SMART FILTERS                                     */}
+          {/* TAB 1: SWIPING MATCH DECK                                    */}
           {/* ============================================================ */}
-          <View style={styles.sectionHeaderRow}>
-            <Text style={styles.smartFiltersTitle}>SMART FILTERS</Text>
-            <Pressable
-              style={styles.proFiltersPill}
-              onPress={() => showToast('Advanced AI Filter Presets Unlocked!')}
-            >
-              <Text style={styles.proFiltersText}>✨ Pro Filters</Text>
-            </Pressable>
-          </View>
-
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.filterPillsScroll}>
-            {['Same Niche', 'High Fit', 'Content Style', 'Follower Range', 'Location'].map((filter, i) => {
-              const isSelected = filter === selectedFilter;
-              return (
-                <Pressable
-                  key={i}
-                  onPress={() => setSelectedFilter(filter)}
-                  style={[styles.smartFilterPill, isSelected && styles.smartFilterPillActive]}
-                >
-                  <Text style={[styles.smartFilterPillText, isSelected && styles.smartFilterPillTextActive]}>
-                    {filter}
-                  </Text>
-                </Pressable>
-              );
-            })}
-          </ScrollView>
-
-          {/* ============================================================ */}
-          {/* CARD 3: SWIPEABLE CREATOR CARD STACK                         */}
-          {/* ============================================================ */}
-          <View style={styles.cardStackWrapper}>
-            <Animated.View
-              {...panResponder.panHandlers}
-              style={[styles.featuredCreatorCard, rotateAndTranslate]}
-            >
-              {/* Photo & Collaboration Fit Badge */}
-              <View style={styles.creatorImageContainer}>
-                <Image
-                  source={currentCreator.coverImage}
-                  style={styles.creatorCoverImage}
-                  resizeMode="cover"
-                />
-                <LinearGradient
-                  colors={['transparent', 'rgba(15, 10, 30, 0.85)']}
-                  style={styles.photoGradientOverlay}
-                />
-
-                <View style={styles.collabFitBadge}>
-                  <Text style={styles.collabFitBadgeText}>{currentCreator.matchScore}% Collaboration Fit</Text>
-                </View>
-
-                <View style={styles.creatorNameLocationBox}>
-                  <Text style={styles.creatorHeroName}>{currentCreator.name}</Text>
-                  <Text style={styles.creatorHeroLocation}>📍 {currentCreator.location}</Text>
-                </View>
-              </View>
-
-              {/* Metrics Strip */}
-              <View style={styles.creatorMetricsStrip}>
-                <View style={styles.metricItemBox}>
-                  <Text style={styles.metricSmallLabel}>FOLLOWERS</Text>
-                  <Text style={styles.metricBoldVal}>{currentCreator.followers}</Text>
-                </View>
-
-                <View style={styles.metricDividerLine} />
-
-                <View style={styles.metricItemBox}>
-                  <Text style={styles.metricSmallLabel}>STREAK</Text>
-                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
-                    <Text style={[styles.metricBoldVal, { color: '#582CDB' }]}>{currentCreator.streak} 🔥</Text>
-                    <Text style={{ fontSize: 12, color: '#582CDB', fontWeight: '900' }}>↗</Text>
-                  </View>
-                </View>
-
-                <View style={styles.metricDividerLine} />
-
-                <View style={styles.metricItemBox}>
-                  <Text style={styles.metricSmallLabel}>PLATFORM</Text>
-                  <View style={{ flexDirection: 'row', gap: 6, marginTop: 2 }}>
-                    <Text style={{ fontSize: 16 }}>📷</Text>
-                    <Text style={{ fontSize: 16 }}>🎵</Text>
-                  </View>
-                </View>
-              </View>
-
-              {/* Tags & Availability */}
-              <View style={styles.creatorTagsRow}>
-                {currentCreator.tags.map((tag, idx) => {
-                  const isGold = tag === 'Available This Week';
-                  return (
-                    <View key={idx} style={isGold ? styles.goldAvailPill : styles.grayNichePill}>
-                      <Text style={isGold ? styles.goldAvailText : styles.grayNicheText}>{tag}</Text>
+          {segmentTab === 'deck' && (
+            <View style={{ marginTop: 14 }}>
+              {currentCreator ? (
+                <View style={styles.deckContainer}>
+                  {/* Underneath Card (3D Stack Depth) */}
+                  {nextCreator && (
+                    <View style={[styles.cardWrapper, styles.underneathCard]}>
+                      <Image source={nextCreator.coverImage} style={styles.cardImage} resizeMode="cover" />
+                      <LinearGradient
+                        colors={['transparent', 'rgba(0,0,0,0.4)', 'rgba(0,0,0,0.92)']}
+                        style={styles.cardGradientOverlay}
+                      />
+                      <View style={styles.cardBottomContent}>
+                        <Text style={styles.creatorNameText}>{nextCreator.name}</Text>
+                        <Text style={styles.creatorRoleLocationText}>{nextCreator.role}</Text>
+                      </View>
                     </View>
-                  );
-                })}
-              </View>
+                  )}
 
-              {/* WHY THIS MATCH CALLOUT */}
-              <View style={styles.whyMatchContainer}>
-                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 4 }}>
-                  <Text style={{ fontSize: 14 }}>💡</Text>
-                  <Text style={styles.whyMatchHeading}>WHY THIS MATCH?</Text>
+                  {/* Top Swiping Card */}
+                  <Animated.View
+                    {...panResponder.panHandlers}
+                    style={[
+                      styles.cardWrapper,
+                      {
+                        transform: [
+                          { translateX: position.x },
+                          { translateY: position.y },
+                          { rotate: rotate },
+                        ],
+                      },
+                    ]}
+                  >
+                    <Image source={currentCreator.coverImage} style={styles.cardImage} resizeMode="cover" />
+
+                    {/* Gradient Overlay */}
+                    <LinearGradient
+                      colors={['transparent', 'rgba(0,0,0,0.3)', 'rgba(0,0,0,0.85)', 'rgba(0,0,0,0.96)']}
+                      style={styles.cardGradientOverlay}
+                    />
+
+                    {/* Stamp Overlays */}
+                    <Animated.View style={[styles.stampBox, styles.stampMatch, { opacity: likeOpacity }]}>
+                      <Text style={styles.stampMatchText}>COLLAB MATCH</Text>
+                    </Animated.View>
+
+                    <Animated.View style={[styles.stampBox, styles.stampPass, { opacity: nopeOpacity }]}>
+                      <Text style={styles.stampPassText}>PASS</Text>
+                    </Animated.View>
+
+                    <Animated.View style={[styles.stampBox, styles.stampTrack, { opacity: trackOpacity }]}>
+                      <Text style={styles.stampTrackText}>TRACKED</Text>
+                    </Animated.View>
+
+                    {/* Top Badges Overlay */}
+                    <View style={styles.cardTopOverlay}>
+                      {/* Left: Active Today */}
+                      <View style={styles.activeTodayPill}>
+                        <View style={styles.greenPulseDot} />
+                        <Text style={styles.activeTodayText}>🟢 {currentCreator.activeStatus}</Text>
+                      </View>
+
+                      {/* Right: Track + Info Buttons */}
+                      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                        <Pressable
+                          style={[
+                            styles.trackingBadgeBtn,
+                            trackedIds.includes(currentCreator.id) && styles.trackingBadgeBtnActive,
+                          ]}
+                          onPress={() => handleToggleTrackCurrent(currentCreator)}
+                        >
+                          <Text
+                            style={[
+                              styles.trackingBadgeText,
+                              trackedIds.includes(currentCreator.id) && styles.trackingBadgeTextActive,
+                            ]}
+                          >
+                            ⭐ {trackedIds.includes(currentCreator.id) ? 'Tracking' : '+ Track'}
+                          </Text>
+                        </Pressable>
+
+                        <Pressable
+                          style={styles.infoRoundBtn}
+                          onPress={() => handleOpenDeepDive(currentCreator)}
+                          hitSlop={8}
+                        >
+                          <Text style={styles.infoRoundBtnText}>ⓘ</Text>
+                        </Pressable>
+                      </View>
+                    </View>
+
+                    {/* Bottom Content Overlay */}
+                    <View style={styles.cardBottomContent}>
+                      {/* Name & Streak Row */}
+                      <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
+                        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, flex: 1 }}>
+                          <Text style={styles.creatorNameText}>{currentCreator.name}</Text>
+                          <View style={styles.verifiedCheckCircle}>
+                            <Text style={{ fontSize: 10, color: '#FFFFFF', fontWeight: '900' }}>✓</Text>
+                          </View>
+                        </View>
+
+                        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                          {/* Streak Pill */}
+                          <View style={styles.streakPill}>
+                            <Text style={styles.streakPillText}>🔥 {currentCreator.streak}d</Text>
+                          </View>
+
+                          {/* Deep Dive Button */}
+                          <Pressable
+                            style={styles.deepDivePillBtn}
+                            onPress={() => handleOpenDeepDive(currentCreator)}
+                          >
+                            <Text style={styles.deepDivePillBtnText}>Deep Dive ➔</Text>
+                          </Pressable>
+                        </View>
+                      </View>
+
+                      {/* Role & Location */}
+                      <Text style={styles.creatorRoleLocationText}>
+                        {currentCreator.role} • {currentCreator.followers} • 📍 {currentCreator.location}
+                      </Text>
+
+                      {/* Bio */}
+                      <Text style={styles.creatorBioText} numberOfLines={2}>
+                        {currentCreator.bio}
+                      </Text>
+
+                      {/* Tags */}
+                      <View style={styles.creatorTagsRow}>
+                        {currentCreator.tags.map((tag, tIdx) => (
+                          <View key={tIdx} style={styles.creatorTagPill}>
+                            <Text style={styles.creatorTagPillText}>{tag}</Text>
+                          </View>
+                        ))}
+                      </View>
+                    </View>
+                  </Animated.View>
                 </View>
-                <Text style={styles.whyMatchBodyText}>{currentCreator.whyMatch}</Text>
-
-                <View style={styles.sparkleCalloutRow}>
-                  <Image
-                    source={require('../../assets/images/jarvis-core-flame.png')}
-                    style={{ width: 18, height: 18 }}
-                    resizeMode="contain"
-                  />
-                  <Text style={styles.sparkleCalloutText}>
-                    Potential reach: high discovery exposure for both.
+              ) : (
+                <View style={styles.emptyDeckCard}>
+                  <Text style={{ fontSize: 36, marginBottom: 8 }}>🎉</Text>
+                  <Text style={styles.emptyDeckTitle}>You’ve cleared your Radar!</Text>
+                  <Text style={styles.emptyDeckSub}>
+                    Check back tomorrow or refresh to discover new creators in your niche.
                   </Text>
+                  <Pressable
+                    style={styles.reloadDeckBtn}
+                    onPress={() => {
+                      setCurrentIndex(0);
+                      showToast('🔄 Refreshed Creator Radar deck!');
+                    }}
+                  >
+                    <Text style={styles.reloadDeckBtnText}>🔄 Refresh Radar</Text>
+                  </Pressable>
                 </View>
+              )}
+
+              {/* Gesture Guide Bar */}
+              <View style={styles.gestureGuideBar}>
+                <Text style={styles.gestureGuideText}>
+                  👈 Swipe left to decline  •  👆 Up to track  •  Right to accept 👉
+                </Text>
               </View>
 
-              {/* 3-BUTTON ACTION BAR */}
-              <View style={styles.actionButtonsRow}>
+              {/* Fast Action Buttons Bar */}
+              <View style={styles.fastActionRow}>
+                {/* Pass Button */}
                 <Pressable
-                  style={({ pressed }) => [styles.passOutlineBtn, pressed && styles.btnPressed]}
-                  onPress={swipeLeft}
+                  style={({ pressed }) => [styles.actionCircleBtn, styles.passActionBtn, pressed && styles.btnPressed]}
+                  onPress={() => currentCreator && swipeLeft(currentCreator)}
                 >
-                  <Text style={styles.passBtnText}>Pass</Text>
+                  <Text style={{ fontSize: 20 }}>✕</Text>
                 </Pressable>
 
+                {/* Track Button */}
                 <Pressable
-                  style={({ pressed }) => [styles.saveOutlineBtn, pressed && styles.btnPressed]}
-                  onPress={swipeUp}
+                  style={({ pressed }) => [styles.actionCircleBtn, styles.trackActionBtn, pressed && styles.btnPressed]}
+                  onPress={() => currentCreator && swipeUp(currentCreator)}
                 >
-                  <Text style={styles.saveBtnText}>Save</Text>
+                  <Text style={{ fontSize: 18 }}>📡</Text>
                 </Pressable>
 
+                {/* Jarvis Super Match */}
                 <Pressable
-                  style={({ pressed }) => [styles.connectSolidBtn, pressed && styles.btnPressed]}
-                  onPress={swipeRight}
+                  style={({ pressed }) => [styles.actionCircleBtn, styles.superActionBtn, pressed && styles.btnPressed]}
+                  onPress={() => {
+                    if (currentCreator) {
+                      showToast('⚡ Jarvis Super Match activated (+50% synergy)');
+                      swipeRight(currentCreator);
+                    }
+                  }}
                 >
-                  <Text style={styles.connectBtnText}>⚡ Connect</Text>
+                  <Text style={{ fontSize: 20 }}>⚡</Text>
                 </Pressable>
-              </View>
-            </Animated.View>
-          </View>
 
-          {/* ============================================================ */}
-          {/* SECTION 4: AI COLLABORATION PLAN                             */}
-          {/* ============================================================ */}
-          <View style={styles.sectionHeaderRow}>
-            <Text style={styles.collabSectionTitle}>AI Collaboration Plan</Text>
-            <View style={styles.proMatchInsightPill}>
-              <Text style={styles.proMatchInsightText}>PRO MATCH INSIGHT</Text>
-            </View>
-          </View>
-
-          <View style={styles.collabPlanCard}>
-            <Text style={styles.proposedConceptLabel}>PROPOSED CONCEPT</Text>
-            <Text style={styles.proposedConceptTitle}>&ldquo;{currentCreator.proposedConcept}&rdquo;</Text>
-            <Text style={styles.proposedConceptDesc}>{currentCreator.conceptDesc}</Text>
-
-            <View style={styles.formatPillsRow}>
-              <View style={styles.formatPillGray}>
-                <Text style={styles.formatPillGrayText}>🎬 Reel (30–45 sec)</Text>
-              </View>
-              <View style={styles.formatPillGray}>
-                <Text style={styles.formatPillGrayText}>🗓️ Sat, 2 PM</Text>
-              </View>
-              <View style={styles.formatPillGold}>
-                <Text style={styles.formatPillGoldText}>📈 High discovery potential</Text>
+                {/* Collab Match Button */}
+                <Pressable
+                  style={({ pressed }) => [styles.actionCircleBtn, styles.matchActionBtn, pressed && styles.btnPressed]}
+                  onPress={() => currentCreator && swipeRight(currentCreator)}
+                >
+                  <Text style={{ fontSize: 22 }}>💜</Text>
+                </Pressable>
               </View>
             </View>
-
-            <Pressable
-              style={({ pressed }) => [styles.buildPlanBtn, pressed && styles.btnPressed]}
-              onPress={() => {
-                triggerModalPop();
-                setShowCollabPlanModal(true);
-              }}
-            >
-              <Text style={styles.buildPlanBtnText}>Build Collaboration Plan</Text>
-            </Pressable>
-          </View>
+          )}
 
           {/* ============================================================ */}
-          {/* SECTION 5: YOUR CREATOR SQUAD                                */}
+          {/* TAB 2: REQUESTS VIEW                                         */}
           {/* ============================================================ */}
-          <Text style={styles.squadSectionHeaderTitle}>Your Creator Squad</Text>
+          {segmentTab === 'requests' && (
+            <View style={{ gap: 12, marginTop: 14 }}>
+              {requests.length === 0 ? (
+                <View style={styles.emptyTabCard}>
+                  <Text style={{ fontSize: 32, marginBottom: 8 }}>📬</Text>
+                  <Text style={styles.emptyTabTitle}>No pending collab requests</Text>
+                  <Text style={styles.emptyTabSub}>New collaboration requests from creators will appear here.</Text>
+                </View>
+              ) : (
+                requests.map((req) => (
+                  <View key={req.id} style={styles.requestCard}>
+                    <View style={{ flexDirection: 'row', gap: 12 }}>
+                      <Image source={req.avatar} style={styles.requestAvatar} />
+                      <View style={{ flex: 1 }}>
+                        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+                          <Text style={styles.requestName}>{req.name}</Text>
+                          <View style={styles.requestScorePill}>
+                            <Text style={styles.requestScoreText}>{req.matchScore}% Match</Text>
+                          </View>
+                        </View>
+                        <Text style={styles.requestRoleLocation}>
+                          {req.role} • {req.followers} • {req.location}
+                        </Text>
+                        <Text style={styles.requestTimeText}>{req.timeAgo}</Text>
+                      </View>
+                    </View>
 
-          <View style={styles.squadMainCard}>
-            <View style={styles.squadHeaderRow}>
-              <View>
-                <Text style={styles.squadNameText}>Momentum Makers</Text>
-                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 3 }}>
-                  <View style={styles.squadLevelPill}>
-                    <Text style={styles.squadLevelText}>LEVEL 12</Text>
+                    <View style={styles.requestPitchBox}>
+                      <Text style={styles.requestPitchText}>&ldquo;{req.pitch}&rdquo;</Text>
+                      <View style={styles.requestConceptPill}>
+                        <Text style={styles.requestConceptPillText}>💡 Proposed: {req.conceptTitle}</Text>
+                      </View>
+                    </View>
+
+                    <View style={{ flexDirection: 'row', gap: 8, marginTop: 12 }}>
+                      <Pressable
+                        style={styles.requestDeclineBtn}
+                        onPress={() => handleDeclineRequest(req.id)}
+                      >
+                        <Text style={styles.requestDeclineBtnText}>Decline</Text>
+                      </Pressable>
+
+                      <Pressable
+                        style={styles.requestMessageBtn}
+                        onPress={() => onOpenMessages && onOpenMessages()}
+                      >
+                        <Text style={styles.requestMessageBtnText}>Chat 💬</Text>
+                      </Pressable>
+
+                      <Pressable
+                        style={styles.requestAcceptBtn}
+                        onPress={() => handleAcceptRequest(req)}
+                      >
+                        <Text style={styles.requestAcceptBtnText}>Accept 💜</Text>
+                      </Pressable>
+                    </View>
                   </View>
-                  <Text style={styles.squadStreakText}>78-Day Streak</Text>
+                ))
+              )}
+            </View>
+          )}
+
+          {/* ============================================================ */}
+          {/* TAB 3: TRACKED RADAR VIEW                                    */}
+          {/* ============================================================ */}
+          {segmentTab === 'tracked' && (
+            <View style={{ gap: 12, marginTop: 14 }}>
+              {trackedIds.length === 0 ? (
+                <View style={styles.emptyTabCard}>
+                  <Text style={{ fontSize: 32, marginBottom: 8 }}>📡</Text>
+                  <Text style={styles.emptyTabTitle}>No tracked creators yet</Text>
+                  <Text style={styles.emptyTabSub}>Swipe UP on any card in the deck to track their posting pace.</Text>
                 </View>
-              </View>
+              ) : (
+                DECK_CREATORS.filter((c) => trackedIds.includes(c.id)).map((cr) => (
+                  <View key={cr.id} style={styles.trackedCard}>
+                    <View style={{ flexDirection: 'row', gap: 12, alignItems: 'center' }}>
+                      <Image source={cr.coverImage} style={styles.trackedAvatar} />
+                      <View style={{ flex: 1 }}>
+                        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+                          <Text style={styles.trackedName}>{cr.name}</Text>
+                          <Text style={styles.trackedStreakText}>🔥 {cr.streak}d streak</Text>
+                        </View>
+                        <Text style={styles.trackedRoleText}>{cr.role} • {cr.followers}</Text>
+                        <Text style={styles.trackedStatusText}>🟢 {cr.activeStatus}</Text>
+                      </View>
+                    </View>
 
-              {/* Stacked Avatar Group */}
-              <View style={styles.stackedAvatarsRow}>
-                <Image source={require('../../assets/images/elena-avatar.jpg')} style={[styles.squadMiniAvatar, { zIndex: 3 }]} />
-                <Image source={require('../../assets/images/amara-avatar.jpg')} style={[styles.squadMiniAvatar, { marginLeft: -10, zIndex: 2 }]} />
-                <Image source={require('../../assets/images/david-avatar.jpg')} style={[styles.squadMiniAvatar, { marginLeft: -10, zIndex: 1 }]} />
-                <View style={styles.squadPlusBadge}>
-                  <Text style={styles.squadPlusText}>+1</Text>
+                    <View style={styles.trackedMetricsRow}>
+                      <View style={styles.trackedMetricCol}>
+                        <Text style={styles.trackedMetricVal}>{cr.audienceFit}%</Text>
+                        <Text style={styles.trackedMetricLabel}>Audience Fit</Text>
+                      </View>
+                      <View style={styles.trackedMetricCol}>
+                        <Text style={styles.trackedMetricVal}>{cr.formatSynergy}%</Text>
+                        <Text style={styles.trackedMetricLabel}>Synergy</Text>
+                      </View>
+                      <View style={styles.trackedMetricCol}>
+                        <Text style={styles.trackedMetricVal}>{cr.reliability}%</Text>
+                        <Text style={styles.trackedMetricLabel}>Reliability</Text>
+                      </View>
+                    </View>
+
+                    <View style={{ flexDirection: 'row', gap: 10, marginTop: 12 }}>
+                      <Pressable
+                        style={styles.trackedDeepDiveBtn}
+                        onPress={() => handleOpenDeepDive(cr)}
+                      >
+                        <Text style={styles.trackedDeepDiveBtnText}>Deep Dive ➔</Text>
+                      </Pressable>
+
+                      <Pressable
+                        style={styles.trackedMatchBtn}
+                        onPress={() => {
+                          swipeRight(cr);
+                          setSegmentTab('deck');
+                        }}
+                      >
+                        <Text style={styles.trackedMatchBtnText}>Match Now 💜</Text>
+                      </Pressable>
+                    </View>
+                  </View>
+                ))
+              )}
+            </View>
+          )}
+
+          {/* ============================================================ */}
+          {/* TAB 4: CONNECTED NETWORK                                      */}
+          {/* ============================================================ */}
+          {segmentTab === 'connected' && (
+            <View style={{ gap: 12, marginTop: 14 }}>
+              {connected.length === 0 ? (
+                <View style={styles.emptyTabCard}>
+                  <Text style={{ fontSize: 32, marginBottom: 8 }}>💜</Text>
+                  <Text style={styles.emptyTabTitle}>No connected creators yet</Text>
+                  <Text style={styles.emptyTabSub}>Swipe right on cards to connect with creators and start collaborating.</Text>
                 </View>
-              </View>
+              ) : (
+                connected.map((conn) => (
+                  <View key={conn.id} style={styles.connectedCard}>
+                    <View style={{ flexDirection: 'row', gap: 12, alignItems: 'center' }}>
+                      <Image source={conn.avatar} style={styles.connectedAvatar} />
+                      <View style={{ flex: 1 }}>
+                        <Text style={styles.connectedName}>{conn.name}</Text>
+                        <Text style={styles.connectedRole}>{conn.role} • {conn.followers}</Text>
+                        <Text style={styles.connectedStatusText}>✨ {conn.status}</Text>
+                      </View>
+                    </View>
+
+                    <View style={styles.connectedCollabBox}>
+                      <Text style={styles.connectedCollabLabel}>ACTIVE COLLAB CONCEPT</Text>
+                      <Text style={styles.connectedCollabTitle}>{conn.activeCollab}</Text>
+                    </View>
+
+                    <View style={{ flexDirection: 'row', gap: 10, marginTop: 12 }}>
+                      <Pressable
+                        style={styles.connectedMessageBtn}
+                        onPress={() => onOpenMessages && onOpenMessages()}
+                      >
+                        <Text style={styles.connectedMessageBtnText}>Message 💬</Text>
+                      </Pressable>
+
+                      <Pressable
+                        style={styles.connectedStartCollabBtn}
+                        onPress={() => {
+                          if (onOpenCollabIdea) {
+                            onOpenCollabIdea({
+                              name: conn.name,
+                              handle: conn.handle,
+                              niche: conn.role,
+                              avatar: conn.avatar,
+                              planIndex: 0,
+                              title: conn.activeCollab,
+                            });
+                          } else if (onOpenMessages) {
+                            onOpenMessages();
+                          }
+                        }}
+                      >
+                        <Text style={styles.connectedStartCollabBtnText}>Start Collab 🚀</Text>
+                      </Pressable>
+                    </View>
+                  </View>
+                ))
+              )}
             </View>
-
-            <View style={styles.squadMetricsRow}>
-              <Text style={styles.squadGoalText}>🎯 Goal: 8 posts this week</Text>
-              <Text style={styles.squadActiveText}>⚡ 3 of 4 active today</Text>
-            </View>
-
-            {/* XP PROGRESS BAR */}
-            <View style={{ marginTop: 10, marginBottom: 6 }}>
-              <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 4 }}>
-                <Text style={styles.squadXpLabel}>8,450 XP</Text>
-                <Text style={styles.squadLevelNextLabel}>LEVEL 13</Text>
-              </View>
-              <View style={styles.squadXpTrackBg}>
-                <LinearGradient
-                  colors={['#582CDB', '#8B5CF6']}
-                  start={{ x: 0, y: 0 }}
-                  end={{ x: 1, y: 0 }}
-                  style={[styles.squadXpTrackFill, { width: '84%' }]}
-                />
-              </View>
-            </View>
-
-            <Text style={styles.nextUnlockText}>Next unlock: Priority Match Boost</Text>
-
-            <View style={styles.squadActionButtonsRow}>
-              <Pressable
-                style={({ pressed }) => [styles.openSquadSolidBtn, pressed && styles.btnPressed]}
-                onPress={() => {
-                  triggerModalPop();
-                  setShowSquadModal(true);
-                }}
-              >
-                <Text style={styles.openSquadSolidBtnText}>Open Squad</Text>
-              </Pressable>
-
-              <Pressable
-                style={({ pressed }) => [styles.findSquadOutlineBtn, pressed && styles.btnPressed]}
-                onPress={() => showToast('Searching for verified public squads...')}
-              >
-                <Text style={styles.findSquadOutlineBtnText}>Find a Squad</Text>
-              </Pressable>
-            </View>
-          </View>
-
-          {/* ============================================================ */}
-          {/* CARD 6: LIVE DUEL BANNER                                     */}
-          {/* ============================================================ */}
-          <View style={styles.liveDuelBannerCard}>
-            <View style={styles.duelTrophyBox}>
-              <Text style={{ fontSize: 20 }}>🏆</Text>
-            </View>
-
-            <View style={{ flex: 1 }}>
-              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-                <Text style={styles.liveDuelTag}>LIVE DUEL</Text>
-              </View>
-              <Text style={styles.duelTitleText}>Momentum Makers vs Lagos Storytellers</Text>
-            </View>
-
-            <View style={{ alignItems: 'flex-end', gap: 4 }}>
-              <Text style={styles.duelScoreText}>62 pts • 58 pts</Text>
-              <Pressable
-                style={styles.viewDuelPillBtn}
-                onPress={() => showToast('Momentum Makers leads by 4 points!')}
-              >
-                <Text style={styles.viewDuelPillText}>View Duel</Text>
-              </Pressable>
-            </View>
-          </View>
-
-          {/* ============================================================ */}
-          {/* SECTION 7: QUICK ACTIONS                                     */}
-          {/* ============================================================ */}
-          <Text style={styles.quickActionsSectionTitle}>Quick Actions</Text>
-
-          <View style={{ gap: 8, marginBottom: 16 }}>
-            {/* Quick Action 1 */}
-            <View style={styles.quickActionItemCard}>
-              <Image source={require('../../assets/images/tomi-avatar.jpg')} style={styles.quickActionAvatar} />
-              <View style={{ flex: 1 }}>
-                <Text style={styles.quickActionName}>Tomi Adebayo</Text>
-                <Text style={styles.quickActionSub}>Idea waiting • 2h ago</Text>
-              </View>
-              <Pressable
-                style={styles.openPlanPillBtn}
-                onPress={() => {
-                  triggerModalPop();
-                  setShowCollabPlanModal(true);
-                }}
-              >
-                <Text style={styles.openPlanPillText}>Open Plan</Text>
-              </Pressable>
-            </View>
-
-            {/* Quick Action 2 */}
-            <View style={styles.quickActionItemCard}>
-              <Image source={require('../../assets/images/zainab-avatar.jpg')} style={styles.quickActionAvatar} />
-              <View style={{ flex: 1 }}>
-                <Text style={styles.quickActionName}>Zainab Okafor</Text>
-                <Text style={styles.quickActionSub}>Mutual Match</Text>
-              </View>
-              <Pressable
-                style={styles.messageOutlinePillBtn}
-                onPress={() => {
-                  if (onOpenMessages) onOpenMessages();
-                }}
-              >
-                <Text style={styles.messageOutlinePillText}>Message</Text>
-              </Pressable>
-            </View>
-          </View>
-
-          {/* ============================================================ */}
-          {/* CARD 8: JARVIS CO-OP INTELLIGENCE                            */}
-          {/* ============================================================ */}
-          <View style={[styles.coopIntelligenceCard, { marginBottom: 120 }]}>
-            <Image
-              source={require('../../assets/images/jarvis-core-flame.png')}
-              style={{ width: 28, height: 28, alignSelf: 'center', marginBottom: 8 }}
-              resizeMode="contain"
-            />
-            <Text style={styles.coopIntelligenceQuote}>
-              &ldquo;Creators who publish on a similar rhythm are more likely to complete collaborations successfully.&rdquo;
-            </Text>
-            <Text style={styles.coopIntelligenceTag}>JARVIS CO-OP INTELLIGENCE</Text>
-          </View>
+          )}
         </ScrollView>
 
         {/* 10. FLOATING LIQUID GLASS BOTTOM NAVIGATION BAR */}
-        <FloatingTabBar activeTab={activeTab} onTabPress={handleTabPress} />
+        <FloatingTabBar activeTab={activeTab} onTabPress={(tab) => {
+          setActiveTab(tab);
+          if (onNavigateTab) onNavigateTab(tab);
+        }} />
 
         {/* ============================================================ */}
-        {/* MODAL: AI COLLABORATION PLAN                                 */}
+        {/* MODAL 1: COLLAB DEEP DIVE INTELLIGENCE                       */}
         {/* ============================================================ */}
         <Modal
-          visible={showCollabPlanModal}
+          visible={showDeepDiveModal}
           transparent={true}
           animationType="fade"
-          onRequestClose={() => setShowCollabPlanModal(false)}
+          onRequestClose={() => setShowDeepDiveModal(false)}
         >
           <View style={styles.modalOverlay}>
             <Animated.View style={[styles.modalCard, { transform: [{ scale: modalPopScale }] }]}>
-              <View style={styles.modalHeaderRow}>
-                <View>
-                  <View style={styles.proMatchInsightPill}>
-                    <Text style={styles.proMatchInsightText}>AI COLLAB BLUEPRINT</Text>
+              {selectedCreator && (
+                <>
+                  <View style={styles.modalHeaderBetween}>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+                      <Image source={selectedCreator.coverImage} style={styles.modalHeaderAvatar} />
+                      <View>
+                        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+                          <Text style={styles.modalTitle}>{selectedCreator.name}</Text>
+                          <TinyGoldCheck size={14} />
+                        </View>
+                        <Text style={styles.modalSubTitle}>{selectedCreator.role} • 🔥 {selectedCreator.streak}d</Text>
+                      </View>
+                    </View>
+                    <Pressable onPress={() => setShowDeepDiveModal(false)} hitSlop={8}>
+                      <Text style={styles.modalCloseText}>✕</Text>
+                    </Pressable>
                   </View>
-                  <Text style={[styles.modalTitle, { marginTop: 4 }]}>&ldquo;{currentCreator.proposedConcept}&rdquo;</Text>
-                  <Text style={styles.modalSubtitle}>Co-created for {userProfile?.name || 'Pablo'} &amp; {currentCreator.name}</Text>
-                </View>
-                <Pressable onPress={() => setShowCollabPlanModal(false)} style={styles.modalCloseCircle} hitSlop={8}>
-                  <Text style={styles.modalCloseCross}>✕</Text>
-                </Pressable>
-              </View>
 
-              <ScrollView style={{ maxHeight: 280, marginVertical: 10 }}>
-                <Text style={styles.planStepTitle}>🎬 PART 1: THE DUAL HOOK (0-5s)</Text>
-                <Text style={styles.planStepBody}>
-                  &ldquo;We run creator channels in two completely different ways — here is what happens when we swap workflows for 24 hours.&rdquo;
-                </Text>
+                  <ScrollView style={{ maxHeight: 380 }} showsVerticalScrollIndicator={false}>
+                    {/* Match Compatibility Gauge */}
+                    <View style={styles.modalGaugeBox}>
+                      <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+                        <Text style={styles.modalGaugeTitle}>MATCH COMPATIBILITY</Text>
+                        <Text style={styles.modalGaugeScore}>{selectedCreator.matchScore}%</Text>
+                      </View>
 
-                <Text style={styles.planStepTitle}>🔥 PART 2: THE CHALLENGE (5-30s)</Text>
-                <Text style={styles.planStepBody}>
-                  Show rapid-fire B-roll of editing shortcuts, script hooks, and audience engagement tests.
-                </Text>
+                      <View style={styles.gaugeMetricsRow}>
+                        <View style={styles.gaugeCol}>
+                          <Text style={styles.gaugeVal}>{selectedCreator.audienceFit}%</Text>
+                          <Text style={styles.gaugeLabel}>Audience Fit</Text>
+                        </View>
+                        <View style={styles.gaugeCol}>
+                          <Text style={styles.gaugeVal}>{selectedCreator.formatSynergy}%</Text>
+                          <Text style={styles.gaugeLabel}>Format Harmony</Text>
+                        </View>
+                        <View style={styles.gaugeCol}>
+                          <Text style={styles.gaugeVal}>{selectedCreator.reliability}%</Text>
+                          <Text style={styles.gaugeLabel}>Reliability</Text>
+                        </View>
+                      </View>
+                    </View>
 
-                <Text style={styles.planStepTitle}>🎯 PART 3: THE SQUAD CTA (30-45s)</Text>
-                <Text style={styles.planStepBody}>
-                  &ldquo;Drop a comment below on whose workflow you would try!&rdquo;
-                </Text>
-              </ScrollView>
+                    {/* Jarvis AI Rationale */}
+                    <LinearGradient
+                      colors={['#2A1454', '#1E0C3E', '#14072C']}
+                      style={styles.modalJarvisCard}
+                    >
+                      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 6 }}>
+                        <Image
+                          source={require('../../assets/images/jarvis-core-flame.png')}
+                          style={{ width: 18, height: 18 }}
+                          resizeMode="contain"
+                        />
+                        <Text style={styles.modalJarvisTitle}>Jarvis Match Intelligence</Text>
+                      </View>
+                      <Text style={styles.modalJarvisText}>&ldquo;{selectedCreator.jarvisRationale}&rdquo;</Text>
+                    </LinearGradient>
 
-              <Pressable
-                style={styles.modalFullBtn}
-                onPress={() => {
-                  setShowCollabPlanModal(false);
-                  showToast(`Collab Blueprint sent to ${currentCreator.name}!`);
-                }}
-              >
-                <Text style={styles.modalFullBtnText}>Send Collab Pitch ➔</Text>
-              </Pressable>
-            </Animated.View>
-          </View>
-        </Modal>
+                    {/* 3 AI Collab Concepts */}
+                    <Text style={styles.modalSectionHeader}>PROPOSED COLLAB CONCEPTS</Text>
+                    <View style={{ gap: 8, marginTop: 6 }}>
+                      {selectedCreator.collabConcepts.map((concept) => (
+                        <View key={concept.id} style={styles.conceptCard}>
+                          <Text style={styles.conceptCardTitle}>{concept.title}</Text>
+                          <Text style={styles.conceptCardHook}>Hook: &ldquo;{concept.hook}&rdquo;</Text>
+                          <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 8 }}>
+                            <Text style={styles.conceptCardFormat}>{concept.format}</Text>
+                            <Pressable
+                              style={styles.proposeConceptBtn}
+                              onPress={() => handleLaunchCollabConcept(selectedCreator, concept)}
+                            >
+                              <Text style={styles.proposeConceptBtnText}>Propose ➔</Text>
+                            </Pressable>
+                          </View>
+                        </View>
+                      ))}
+                    </View>
+                  </ScrollView>
 
-        {/* ============================================================ */}
-        {/* MODAL: SQUAD DASHBOARD                                       */}
-        {/* ============================================================ */}
-        <Modal
-          visible={showSquadModal}
-          transparent={true}
-          animationType="fade"
-          onRequestClose={() => setShowSquadModal(false)}
-        >
-          <View style={styles.modalOverlay}>
-            <Animated.View style={[styles.modalCard, { transform: [{ scale: modalPopScale }] }]}>
-              <View style={styles.modalHeaderRow}>
-                <View>
-                  <Text style={styles.modalTitle}>Momentum Makers</Text>
-                  <Text style={styles.modalSubtitle}>Squad Level 12 • 78-Day Collective Streak</Text>
-                </View>
-                <Pressable onPress={() => setShowSquadModal(false)} style={styles.modalCloseCircle} hitSlop={8}>
-                  <Text style={styles.modalCloseCross}>✕</Text>
-                </Pressable>
-              </View>
+                  {/* Modal Footer Actions */}
+                  <View style={{ flexDirection: 'row', gap: 10, marginTop: 14 }}>
+                    <Pressable
+                      style={styles.modalMessageBtn}
+                      onPress={() => {
+                        setShowDeepDiveModal(false);
+                        if (onOpenMessages) onOpenMessages();
+                      }}
+                    >
+                      <Text style={styles.modalMessageBtnText}>Message 💬</Text>
+                    </Pressable>
 
-              <View style={{ gap: 8, marginVertical: 10 }}>
-                <Text style={styles.squadMemberRow}>• {userProfile?.name || 'Pablo'} (You) — 47-Day Streak (Active 🔥)</Text>
-                <Text style={styles.squadMemberRow}>• Amara Okafor — 44-Day Streak (Active 🔥)</Text>
-                <Text style={styles.squadMemberRow}>• Elena Rostova — 52-Day Streak (Active 🔥)</Text>
-                <Text style={styles.squadMemberRow}>• David Adebayo — 61-Day Streak (Queued ⚡)</Text>
-              </View>
-
-              <Pressable
-                style={styles.modalFullBtn}
-                onPress={() => {
-                  setShowSquadModal(false);
-                  showToast('Squad Daily Boost activated! +200 Squad XP');
-                }}
-              >
-                <Text style={styles.modalFullBtnText}>Boost Squad (+200 XP) 🚀</Text>
-              </Pressable>
-            </Animated.View>
-          </View>
-        </Modal>
-
-        {/* ============================================================ */}
-        {/* MODAL: MATCH CELEBRATION                                     */}
-        {/* ============================================================ */}
-        <Modal
-          visible={showCelebrationModal}
-          transparent={true}
-          animationType="fade"
-          onRequestClose={() => setShowCelebrationModal(false)}
-        >
-          <View style={styles.modalOverlay}>
-            <Animated.View style={[styles.modalCard, { transform: [{ scale: modalPopScale }] }]}>
-              <Text style={{ fontSize: 44, textAlign: 'center', marginBottom: 8 }}>🤝🔥</Text>
-              <Text style={[styles.modalTitle, { textAlign: 'center' }]}>It&apos;s a Collab Match!</Text>
-              <Text style={[styles.modalSubtitle, { textAlign: 'center', marginVertical: 6 }]}>
-                You and {currentCreator.name} both want to collaborate.
-              </Text>
-
-              <View style={{ flexDirection: 'row', gap: 10, marginTop: 14 }}>
-                <Pressable
-                  style={[styles.modalFullBtn, { flex: 1, backgroundColor: '#FFFFFF', borderWidth: 1, borderColor: '#E2E8F0' }]}
-                  onPress={() => setShowCelebrationModal(false)}
-                >
-                  <Text style={[styles.modalFullBtnText, { color: '#171420' }]}>Keep Swiping</Text>
-                </Pressable>
-
-                <Pressable
-                  style={[styles.modalFullBtn, { flex: 1 }]}
-                  onPress={() => {
-                    setShowCelebrationModal(false);
-                    if (onOpenMessages) onOpenMessages();
-                  }}
-                >
-                  <Text style={styles.modalFullBtnText}>Message Now ➔</Text>
-                </Pressable>
-              </View>
+                    <Pressable
+                      style={styles.modalMatchBtn}
+                      onPress={() => {
+                        setShowDeepDiveModal(false);
+                        swipeRight(selectedCreator);
+                      }}
+                    >
+                      <Text style={styles.modalMatchBtnText}>Collab Match 💜</Text>
+                    </Pressable>
+                  </View>
+                </>
+              )}
             </Animated.View>
           </View>
         </Modal>
@@ -1052,6 +1321,17 @@ export const ProMatchScreen: React.FC<ProMatchScreenProps> = ({
           onSaveProfile={(updated) => {
             if (onSaveProfile) onSaveProfile(updated);
           }}
+        />
+
+        {/* 3D GHOST CELEBRATION MODAL */}
+        <AnimatedCompletionModal
+          visible={showCompletionModal}
+          title={completionData.title}
+          subtitle={completionData.subtitle}
+          badgeText={completionData.badgeText}
+          xpEarned={completionData.xpEarned}
+          speechBubble={completionData.speechBubble}
+          onDismiss={() => setShowCompletionModal(false)}
         />
 
         {/* TOAST */}
@@ -1070,837 +1350,867 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#FAF8F5',
   },
-  headerBar: {
+  btnPressed: {
+    transform: [{ scale: 0.96 }],
+    opacity: 0.85,
+  },
+
+  // 1. TOP HEADER
+  header: {
     flexDirection: 'row',
-    alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: 20,
-    paddingTop: 10,
-    paddingBottom: 12,
-    backgroundColor: '#FAF8F5',
-  },
-  headerLogoWrapper: {
-    width: 38,
-    height: 38,
-    borderRadius: 19,
-    backgroundColor: 'rgba(255, 255, 255, 0.95)',
-    justifyContent: 'center',
     alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.06,
-    shadowRadius: 6,
-    elevation: 2,
+    paddingHorizontal: 20,
+    paddingTop: Platform.OS === 'android' ? 12 : 8,
+    paddingBottom: 12,
   },
-  headerGhostLogo: {
-    width: 28,
-    height: 28,
-  },
-  proHeaderBadge: {
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-    borderRadius: 6,
-    borderWidth: 1,
-    borderColor: '#FBBF24',
-  },
-  proHeaderBadgeText: {
-    fontSize: 8.5,
-    fontWeight: '900',
-    color: '#92400E',
-    letterSpacing: 0.3,
-  },
-  headerRightGroup: {
+  headerLeftGroup: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 10,
   },
-  headerIconBtn: {
-    width: 38,
-    height: 38,
-    borderRadius: 19,
+  flameHaloBox: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
     backgroundColor: '#FFFFFF',
-    borderWidth: 1,
-    borderColor: '#EFECE6',
     justifyContent: 'center',
     alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#EFECE6',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.04,
     shadowRadius: 4,
     elevation: 1,
   },
-  headerIconBtnPressed: {
-    transform: [{ scale: 0.94 }],
-    opacity: 0.8,
+  headerTitle: {
+    fontSize: 16,
+    fontWeight: '900',
+    color: '#171420',
+    letterSpacing: -0.2,
   },
-  notificationDot: {
-    position: 'absolute',
-    top: 7,
-    right: 7,
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: '#EF4444',
-    borderWidth: 1.5,
-    borderColor: '#FFFFFF',
+  headerStreakText: {
+    fontSize: 11,
+    fontWeight: '800',
+    color: '#582CDB',
   },
-  profilePhotoBtn: {
-    width: 38,
-    height: 38,
-    borderRadius: 19,
+  headerRightGroup: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  headerRoundBtn: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
     backgroundColor: '#FFFFFF',
-    borderWidth: 1.5,
-    borderColor: '#EFECE6',
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
     justifyContent: 'center',
     alignItems: 'center',
     position: 'relative',
   },
-  profilePhotoBtnPro: {
-    borderColor: '#F59E0B',
-    borderWidth: 2,
-  },
-  headerCustomAvatarImage: {
-    width: 34,
-    height: 34,
-    borderRadius: 17,
-  },
-  addPhotoPlusBadge: {
+  unreadDot: {
     position: 'absolute',
-    bottom: -2,
-    right: -2,
-    width: 14,
-    height: 14,
-    borderRadius: 7,
-    backgroundColor: '#582CDB',
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderWidth: 1.5,
+    top: 6,
+    right: 6,
+    width: 7,
+    height: 7,
+    borderRadius: 3.5,
+    backgroundColor: '#EF4444',
+    borderWidth: 1,
     borderColor: '#FFFFFF',
   },
-  addPhotoPlusText: {
-    color: '#FFFFFF',
-    fontSize: 8,
-    fontWeight: '900',
+  profileAvatarBtn: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    borderWidth: 1.5,
+    borderColor: '#F59E0B',
+    overflow: 'hidden',
   },
-  scrollContent: {
-    paddingHorizontal: 20,
-    paddingTop: 8,
-    paddingBottom: 40,
-  },
-
-  // HERO TAGS & HEADLINE
-  topTagsRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    marginBottom: 8,
-  },
-  matchProPill: {
-    backgroundColor: '#582CDB',
-    paddingHorizontal: 8,
-    paddingVertical: 3.5,
-    borderRadius: 6,
-  },
-  matchProPillText: {
-    fontSize: 10,
-    fontWeight: '900',
-    color: '#FFFFFF',
-    letterSpacing: 0.5,
-  },
-  proMatchActivePill: {
-    backgroundColor: '#FEF3C7',
-    paddingHorizontal: 8,
-    paddingVertical: 3.5,
-    borderRadius: 6,
-  },
-  proMatchActivePillText: {
-    fontSize: 9.5,
-    fontWeight: '900',
-    color: '#92400E',
-  },
-  mainTitleText: {
-    fontSize: 22,
-    fontWeight: '900',
-    color: '#171420',
-    letterSpacing: -0.4,
-    marginBottom: 4,
-  },
-  mainSubtitleText: {
-    fontSize: 13,
-    color: '#64748B',
-    lineHeight: 18,
-    marginBottom: 16,
+  profileAvatarImg: {
+    width: '100%',
+    height: '100%',
   },
 
-  // CARD 1: DISCOVERY HUB
-  discoveryHubCard: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 24,
-    borderWidth: 1,
-    borderColor: '#EFECE6',
-    padding: 16,
-    marginBottom: 16,
-  },
-  metricsGrid2x2: {
+  // 2. PILL BADGES ROW
+  badgesRow: {
     flexDirection: 'row',
-    flexWrap: 'wrap',
     justifyContent: 'space-between',
-    rowGap: 10,
-    marginBottom: 12,
+    alignItems: 'center',
+    marginTop: 4,
+    marginBottom: 10,
   },
-  metricHubItem: {
-    width: '48%',
-    backgroundColor: '#FAF8F5',
-    borderRadius: 14,
-    padding: 12,
-  },
-  metricHubLabel: {
-    fontSize: 9.5,
-    fontWeight: '800',
-    color: '#64748B',
-    letterSpacing: 0.5,
-    marginBottom: 2,
-  },
-  metricHubValPurple: {
-    fontSize: 13.5,
-    fontWeight: '900',
-    color: '#582CDB',
-  },
-  quickFiltersRow: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 6,
-  },
-  quickFilterChip: {
-    backgroundColor: '#F1F5F9',
+  creatorRadarBadge: {
+    backgroundColor: '#582CDB',
     paddingHorizontal: 10,
     paddingVertical: 4.5,
     borderRadius: 8,
   },
-  quickFilterChipActive: {
-    backgroundColor: '#582CDB',
-  },
-  quickFilterChipText: {
-    fontSize: 11,
-    fontWeight: '700',
-    color: '#475569',
-  },
-  quickFilterChipTextActive: {
+  creatorRadarBadgeText: {
     color: '#FFFFFF',
+    fontSize: 10,
     fontWeight: '900',
+    letterSpacing: 0.4,
+  },
+  swipeToMatchBadge: {
+    backgroundColor: '#EDE9FE',
+    paddingHorizontal: 10,
+    paddingVertical: 4.5,
+    borderRadius: 8,
+  },
+  swipeToMatchBadgeText: {
+    color: '#582CDB',
+    fontSize: 10.5,
+    fontWeight: '800',
   },
 
-  // SECTION 2: SMART FILTERS
-  sectionHeaderRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 10,
+  // 3. HEADLINE
+  mainHeadline: {
+    fontSize: 26,
+    fontWeight: '900',
+    color: '#171420',
+    letterSpacing: -0.5,
+    lineHeight: 32,
+    marginBottom: 6,
   },
-  smartFiltersTitle: {
+  subHeadline: {
+    fontSize: 12.5,
+    color: '#64748B',
+    lineHeight: 18,
+    marginBottom: 14,
+  },
+
+  // 4. SUMMARY STATS DECK
+  summaryStatsDeck: {
+    flexDirection: 'row',
+    backgroundColor: '#FFFFFF',
+    borderRadius: 16,
+    paddingVertical: 12,
+    paddingHorizontal: 8,
+    borderWidth: 1,
+    borderColor: '#EFECE6',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.03,
+    shadowRadius: 4,
+    elevation: 1,
+    marginBottom: 12,
+  },
+  summaryCol: {
+    flex: 1,
+    alignItems: 'center',
+  },
+  summaryItemText: {
+    fontSize: 13,
+    fontWeight: '900',
+    color: '#171420',
+  },
+  summaryItemSub: {
+    fontSize: 9.5,
+    fontWeight: '700',
+    color: '#64748B',
+    marginTop: 2,
+  },
+  summaryDivider: {
+    width: 1,
+    height: '70%',
+    backgroundColor: '#E2E8F0',
+    alignSelf: 'center',
+  },
+
+  // 5. SEGMENTED TABS BAR
+  segmentedTabBar: {
+    flexDirection: 'row',
+    backgroundColor: '#EFECE6',
+    borderRadius: 14,
+    padding: 3,
+    marginBottom: 12,
+  },
+  segmentBtn: {
+    flex: 1,
+    paddingVertical: 8,
+    alignItems: 'center',
+    borderRadius: 11,
+    flexDirection: 'row',
+    justifyContent: 'center',
+    gap: 4,
+  },
+  segmentBtnActive: {
+    backgroundColor: '#FFFFFF',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.06,
+    shadowRadius: 3,
+    elevation: 2,
+  },
+  segmentBtnText: {
     fontSize: 11,
     fontWeight: '800',
     color: '#64748B',
-    letterSpacing: 0.5,
   },
-  proFiltersPill: {
-    backgroundColor: '#EDE9FE',
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: 6,
-  },
-  proFiltersText: {
-    fontSize: 10,
+  segmentBtnTextActive: {
+    color: '#171420',
     fontWeight: '900',
-    color: '#582CDB',
   },
-  filterPillsScroll: {
+  segmentRedDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: '#EF4444',
+  },
+
+  // 6. FILTER PILLS ROW
+  filterPillsRow: {
     flexDirection: 'row',
     gap: 6,
-    paddingBottom: 16,
+    marginBottom: 6,
   },
-  smartFilterPill: {
+  filterPill: {
+    paddingHorizontal: 11,
+    paddingVertical: 6,
+    borderRadius: 10,
     backgroundColor: '#FFFFFF',
     borderWidth: 1,
     borderColor: '#E2E8F0',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 10,
   },
-  smartFilterPillActive: {
+  filterPillActive: {
     backgroundColor: '#582CDB',
     borderColor: '#582CDB',
   },
-  smartFilterPillText: {
-    fontSize: 11.5,
-    fontWeight: '700',
-    color: '#475569',
+  filterPillText: {
+    fontSize: 10.5,
+    fontWeight: '800',
+    color: '#64748B',
   },
-  smartFilterPillTextActive: {
+  filterPillTextActive: {
     color: '#FFFFFF',
     fontWeight: '900',
   },
 
-  // CARD 3: CREATOR SWIPE CARD
-  cardStackWrapper: {
-    marginBottom: 20,
-  },
-  featuredCreatorCard: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 26,
-    borderWidth: 1,
-    borderColor: '#EFECE6',
-    overflow: 'hidden',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.06,
-    shadowRadius: 12,
-    elevation: 4,
-  },
-  creatorImageContainer: {
-    height: 280,
+  // 7. SWIPING DECK & HERO CARD
+  deckContainer: {
+    height: SCREEN_HEIGHT * 0.58,
     position: 'relative',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
-  creatorCoverImage: {
+  cardWrapper: {
+    position: 'absolute',
+    width: '100%',
+    height: '100%',
+    borderRadius: 26,
+    overflow: 'hidden',
+    backgroundColor: '#0F172A',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.2,
+    shadowRadius: 16,
+    elevation: 6,
+  },
+  underneathCard: {
+    transform: [{ scale: 0.95 }, { translateY: 10 }],
+    opacity: 0.85,
+  },
+  cardImage: {
     width: '100%',
     height: '100%',
   },
-  photoGradientOverlay: {
+  cardGradientOverlay: {
     position: 'absolute',
+    top: 0,
     left: 0,
     right: 0,
     bottom: 0,
-    height: 120,
   },
-  collabFitBadge: {
+
+  // STAMPS
+  stampBox: {
+    position: 'absolute',
+    top: 60,
+    paddingHorizontal: 16,
+    paddingVertical: 6,
+    borderRadius: 12,
+    borderWidth: 3,
+    zIndex: 10,
+  },
+  stampMatch: {
+    right: 30,
+    borderColor: '#22C55E',
+    backgroundColor: 'rgba(34, 197, 94, 0.2)',
+    transform: [{ rotate: '15deg' }],
+  },
+  stampMatchText: {
+    color: '#22C55E',
+    fontSize: 22,
+    fontWeight: '900',
+    letterSpacing: 1,
+  },
+  stampPass: {
+    left: 30,
+    borderColor: '#EF4444',
+    backgroundColor: 'rgba(239, 68, 68, 0.2)',
+    transform: [{ rotate: '-15deg' }],
+  },
+  stampPassText: {
+    color: '#EF4444',
+    fontSize: 22,
+    fontWeight: '900',
+    letterSpacing: 1,
+  },
+  stampTrack: {
+    alignSelf: 'center',
+    top: '40%',
+    borderColor: '#F59E0B',
+    backgroundColor: 'rgba(245, 158, 11, 0.25)',
+  },
+  stampTrackText: {
+    color: '#F59E0B',
+    fontSize: 24,
+    fontWeight: '900',
+    letterSpacing: 1.5,
+  },
+
+  // TOP CARD OVERLAY
+  cardTopOverlay: {
     position: 'absolute',
     top: 14,
     left: 14,
-    backgroundColor: '#582CDB',
+    right: 14,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    zIndex: 5,
+  },
+  activeTodayPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.65)',
     paddingHorizontal: 10,
     paddingVertical: 5,
-    borderRadius: 10,
+    borderRadius: 16,
+    gap: 5,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.15)',
   },
-  collabFitBadgeText: {
+  greenPulseDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: '#22C55E',
+  },
+  activeTodayText: {
+    color: '#4ADE80',
+    fontSize: 10,
+    fontWeight: '800',
+  },
+  trackingBadgeBtn: {
+    backgroundColor: '#FEF3C7',
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: '#FDE68A',
+  },
+  trackingBadgeBtnActive: {
+    backgroundColor: '#F59E0B',
+    borderColor: '#D97706',
+  },
+  trackingBadgeText: {
+    fontSize: 10.5,
+    fontWeight: '900',
+    color: '#92400E',
+  },
+  trackingBadgeTextActive: {
     color: '#FFFFFF',
+  },
+  infoRoundBtn: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+  },
+  infoRoundBtnText: {
+    fontSize: 13,
+    fontWeight: '900',
+    color: '#582CDB',
+  },
+
+  // BOTTOM CARD OVERLAY
+  cardBottomContent: {
+    position: 'absolute',
+    bottom: 16,
+    left: 16,
+    right: 16,
+    zIndex: 5,
+  },
+  creatorNameText: {
+    fontSize: 23,
+    fontWeight: '900',
+    color: '#FFFFFF',
+    letterSpacing: -0.3,
+  },
+  verifiedCheckCircle: {
+    width: 17,
+    height: 17,
+    borderRadius: 8.5,
+    backgroundColor: '#3B82F6',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  streakPill: {
+    backgroundColor: 'rgba(245, 158, 11, 0.25)',
+    borderWidth: 1,
+    borderColor: '#F59E0B',
+    paddingHorizontal: 7,
+    paddingVertical: 3,
+    borderRadius: 8,
+  },
+  streakPillText: {
     fontSize: 11,
     fontWeight: '900',
+    color: '#FDE68A',
   },
-  creatorNameLocationBox: {
-    position: 'absolute',
-    bottom: 14,
-    left: 16,
+  deepDivePillBtn: {
+    backgroundColor: 'rgba(255, 255, 255, 0.22)',
+    paddingHorizontal: 9,
+    paddingVertical: 3.5,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.35)',
   },
-  creatorHeroName: {
-    fontSize: 22,
-    fontWeight: '900',
+  deepDivePillBtnText: {
     color: '#FFFFFF',
+    fontSize: 10.5,
+    fontWeight: '900',
   },
-  creatorHeroLocation: {
+  creatorRoleLocationText: {
     fontSize: 12,
     fontWeight: '700',
     color: '#E2E8F0',
     marginTop: 2,
+    marginBottom: 6,
   },
-  creatorMetricsStrip: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    alignItems: 'center',
-    paddingVertical: 14,
-    borderBottomWidth: 1,
-    borderBottomColor: '#F1F5F9',
-  },
-  metricItemBox: {
-    alignItems: 'center',
-  },
-  metricSmallLabel: {
-    fontSize: 9,
-    fontWeight: '800',
-    color: '#94A3B8',
-    marginBottom: 2,
-  },
-  metricBoldVal: {
-    fontSize: 16,
-    fontWeight: '900',
-    color: '#171420',
-  },
-  metricDividerLine: {
-    width: 1,
-    height: 24,
-    backgroundColor: '#F1F5F9',
+  creatorBioText: {
+    fontSize: 11.5,
+    color: '#CBD5E1',
+    lineHeight: 16,
+    marginBottom: 10,
   },
   creatorTagsRow: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: 6,
-    padding: 14,
   },
-  grayNichePill: {
-    backgroundColor: '#F1F5F9',
-    paddingHorizontal: 10,
-    paddingVertical: 4.5,
+  creatorTagPill: {
+    backgroundColor: 'rgba(255, 255, 255, 0.18)',
+    paddingHorizontal: 9,
+    paddingVertical: 3.5,
     borderRadius: 8,
-  },
-  grayNicheText: {
-    fontSize: 11,
-    fontWeight: '700',
-    color: '#475569',
-  },
-  goldAvailPill: {
-    backgroundColor: '#FEF3C7',
-    paddingHorizontal: 10,
-    paddingVertical: 4.5,
-    borderRadius: 8,
-  },
-  goldAvailText: {
-    fontSize: 11,
-    fontWeight: '900',
-    color: '#92400E',
-  },
-  whyMatchContainer: {
-    backgroundColor: '#F5F3FF',
-    marginHorizontal: 14,
-    marginBottom: 16,
-    borderRadius: 16,
-    padding: 14,
-  },
-  whyMatchHeading: {
-    fontSize: 11,
-    fontWeight: '900',
-    color: '#582CDB',
-    letterSpacing: 0.5,
-  },
-  whyMatchBodyText: {
-    fontSize: 12.5,
-    color: '#4C1D95',
-    lineHeight: 18,
-    marginBottom: 10,
-  },
-  sparkleCalloutRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-  },
-  sparkleCalloutText: {
-    fontSize: 11,
-    color: '#6D28D9',
-    fontWeight: '700',
-    flex: 1,
-  },
-  actionButtonsRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    paddingHorizontal: 14,
-    paddingBottom: 16,
-  },
-  passOutlineBtn: {
-    flex: 1,
-    backgroundColor: '#FFFFFF',
     borderWidth: 1,
-    borderColor: '#E2E8F0',
-    paddingVertical: 12,
+    borderColor: 'rgba(255, 255, 255, 0.25)',
+  },
+  creatorTagPillText: {
+    color: '#FFFFFF',
+    fontSize: 10.5,
+    fontWeight: '800',
+  },
+
+  // EMPTY DECK
+  emptyDeckCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 22,
+    padding: 30,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#EFECE6',
+    marginVertical: 20,
+  },
+  emptyDeckTitle: {
+    fontSize: 16,
+    fontWeight: '900',
+    color: '#171420',
+  },
+  emptyDeckSub: {
+    fontSize: 12,
+    color: '#64748B',
+    textAlign: 'center',
+    marginTop: 4,
+    lineHeight: 17,
+  },
+  reloadDeckBtn: {
+    backgroundColor: '#582CDB',
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: 12,
+    marginTop: 14,
+  },
+  reloadDeckBtnText: {
+    color: '#FFFFFF',
+    fontSize: 12,
+    fontWeight: '900',
+  },
+
+  // GESTURE GUIDE
+  gestureGuideBar: {
+    backgroundColor: '#FAF8F5',
+    paddingVertical: 9,
     borderRadius: 14,
     alignItems: 'center',
+    marginTop: 12,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
   },
-  passBtnText: {
-    fontSize: 13,
+  gestureGuideText: {
+    fontSize: 10.5,
     fontWeight: '800',
     color: '#64748B',
   },
-  saveOutlineBtn: {
-    flex: 1,
-    backgroundColor: '#FFFFFF',
-    borderWidth: 1,
-    borderColor: '#E2E8F0',
-    paddingVertical: 12,
-    borderRadius: 14,
-    alignItems: 'center',
-  },
-  saveBtnText: {
-    fontSize: 13,
-    fontWeight: '800',
-    color: '#171420',
-  },
-  connectSolidBtn: {
-    flex: 2,
-    backgroundColor: '#582CDB',
-    paddingVertical: 12,
-    borderRadius: 14,
-    alignItems: 'center',
+
+  // FAST ACTION BUTTONS ROW
+  fastActionRow: {
+    flexDirection: 'row',
     justifyContent: 'center',
+    alignItems: 'center',
+    gap: 16,
+    marginTop: 14,
   },
-  connectBtnText: {
-    fontSize: 13.5,
-    fontWeight: '900',
-    color: '#FFFFFF',
+  actionCircleBtn: {
+    width: 52,
+    height: 52,
+    borderRadius: 26,
+    backgroundColor: '#FFFFFF',
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.08,
+    shadowRadius: 6,
+    elevation: 3,
+    borderWidth: 1.5,
+  },
+  passActionBtn: {
+    borderColor: '#FCA5A5',
+  },
+  trackActionBtn: {
+    borderColor: '#FDE68A',
+  },
+  superActionBtn: {
+    borderColor: '#A78BFA',
+    backgroundColor: '#F5F3FF',
+  },
+  matchActionBtn: {
+    borderColor: '#C084FC',
+    backgroundColor: '#FAF5FF',
+    width: 58,
+    height: 58,
+    borderRadius: 29,
   },
 
-  // SECTION 4: AI COLLABORATION PLAN
-  collabSectionTitle: {
-    fontSize: 18,
+  // TAB CONTENT STYLES
+  emptyTabCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 18,
+    padding: 24,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#EFECE6',
+  },
+  emptyTabTitle: {
+    fontSize: 14.5,
     fontWeight: '900',
     color: '#171420',
   },
-  proMatchInsightPill: {
+  emptyTabSub: {
+    fontSize: 11.5,
+    color: '#64748B',
+    textAlign: 'center',
+    marginTop: 3,
+  },
+
+  // REQUESTS CARD
+  requestCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 18,
+    padding: 14,
+    borderWidth: 1,
+    borderColor: '#EFECE6',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.03,
+    shadowRadius: 4,
+    elevation: 1,
+  },
+  requestAvatar: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+  },
+  requestName: {
+    fontSize: 14,
+    fontWeight: '900',
+    color: '#171420',
+  },
+  requestScorePill: {
+    backgroundColor: '#EDE9FE',
+    paddingHorizontal: 7,
+    paddingVertical: 2.5,
+    borderRadius: 6,
+  },
+  requestScoreText: {
+    fontSize: 9.5,
+    fontWeight: '900',
+    color: '#582CDB',
+  },
+  requestRoleLocation: {
+    fontSize: 11,
+    color: '#64748B',
+    marginTop: 1,
+  },
+  requestTimeText: {
+    fontSize: 9.5,
+    color: '#94A3B8',
+    marginTop: 2,
+  },
+  requestPitchBox: {
+    backgroundColor: '#FAF8F5',
+    borderRadius: 12,
+    padding: 10,
+    marginTop: 10,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+  },
+  requestPitchText: {
+    fontSize: 11.5,
+    color: '#334155',
+    fontStyle: 'italic',
+    lineHeight: 16,
+  },
+  requestConceptPill: {
     backgroundColor: '#EDE9FE',
     paddingHorizontal: 7,
     paddingVertical: 3,
     borderRadius: 6,
+    marginTop: 6,
+    alignSelf: 'flex-start',
   },
-  proMatchInsightText: {
-    fontSize: 9,
-    fontWeight: '900',
-    color: '#582CDB',
-  },
-  collabPlanCard: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 24,
-    borderWidth: 1,
-    borderColor: '#EFECE6',
-    padding: 18,
-    marginBottom: 20,
-  },
-  proposedConceptLabel: {
+  requestConceptPillText: {
     fontSize: 9.5,
     fontWeight: '800',
-    color: '#94A3B8',
-    letterSpacing: 0.5,
-    marginBottom: 4,
-  },
-  proposedConceptTitle: {
-    fontSize: 16.5,
-    fontWeight: '900',
-    color: '#171420',
-    marginBottom: 6,
-  },
-  proposedConceptDesc: {
-    fontSize: 12.5,
-    color: '#64748B',
-    lineHeight: 18,
-    marginBottom: 12,
-  },
-  formatPillsRow: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 6,
-    marginBottom: 14,
-  },
-  formatPillGray: {
-    backgroundColor: '#F8FAFC',
-    borderWidth: 1,
-    borderColor: '#E2E8F0',
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 8,
-  },
-  formatPillGrayText: {
-    fontSize: 10.5,
-    fontWeight: '700',
-    color: '#475569',
-  },
-  formatPillGold: {
-    backgroundColor: '#FEF3C7',
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 8,
-  },
-  formatPillGoldText: {
-    fontSize: 10.5,
-    fontWeight: '900',
-    color: '#92400E',
-  },
-  buildPlanBtn: {
-    backgroundColor: '#FFFFFF',
-    borderWidth: 1.5,
-    borderColor: '#582CDB',
-    paddingVertical: 12,
-    borderRadius: 14,
-    alignItems: 'center',
-  },
-  buildPlanBtnText: {
-    fontSize: 13,
-    fontWeight: '900',
     color: '#582CDB',
   },
-
-  // SECTION 5: CREATOR SQUAD
-  squadSectionHeaderTitle: {
-    fontSize: 18,
-    fontWeight: '900',
-    color: '#171420',
-    marginBottom: 10,
-  },
-  squadMainCard: {
+  requestDeclineBtn: {
+    flex: 1,
     backgroundColor: '#FAF8F5',
-    borderRadius: 24,
     borderWidth: 1,
-    borderColor: '#EFECE6',
-    padding: 18,
-    marginBottom: 16,
-  },
-  squadHeaderRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+    borderColor: '#E2E8F0',
+    paddingVertical: 9,
+    borderRadius: 10,
     alignItems: 'center',
-    marginBottom: 12,
   },
-  squadNameText: {
-    fontSize: 16,
-    fontWeight: '900',
+  requestDeclineBtnText: {
+    fontSize: 11,
+    fontWeight: '800',
+    color: '#64748B',
+  },
+  requestMessageBtn: {
+    flex: 1,
+    backgroundColor: '#FAF8F5',
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    paddingVertical: 9,
+    borderRadius: 10,
+    alignItems: 'center',
+  },
+  requestMessageBtnText: {
+    fontSize: 11,
+    fontWeight: '800',
     color: '#171420',
   },
-  squadLevelPill: {
+  requestAcceptBtn: {
+    flex: 1.2,
     backgroundColor: '#582CDB',
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-    borderRadius: 4,
+    paddingVertical: 9,
+    borderRadius: 10,
+    alignItems: 'center',
   },
-  squadLevelText: {
-    fontSize: 9,
+  requestAcceptBtnText: {
+    fontSize: 11,
     fontWeight: '900',
     color: '#FFFFFF',
   },
-  squadStreakText: {
+
+  // TRACKED CARD
+  trackedCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 18,
+    padding: 14,
+    borderWidth: 1,
+    borderColor: '#EFECE6',
+  },
+  trackedAvatar: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+  },
+  trackedName: {
+    fontSize: 13.5,
+    fontWeight: '900',
+    color: '#171420',
+  },
+  trackedStreakText: {
+    fontSize: 10.5,
+    fontWeight: '800',
+    color: '#D97706',
+  },
+  trackedRoleText: {
     fontSize: 11,
-    fontWeight: '700',
     color: '#64748B',
   },
-  stackedAvatarsRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  squadMiniAvatar: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    borderWidth: 2,
-    borderColor: '#FFFFFF',
-  },
-  squadPlusBadge: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
-    backgroundColor: '#E2E8F0',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginLeft: -8,
-  },
-  squadPlusText: {
+  trackedStatusText: {
     fontSize: 10,
-    fontWeight: '800',
-    color: '#475569',
-  },
-  squadMetricsRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: 8,
-  },
-  squadGoalText: {
-    fontSize: 11.5,
-    fontWeight: '700',
-    color: '#475569',
-  },
-  squadActiveText: {
-    fontSize: 11.5,
     fontWeight: '800',
     color: '#15803D',
+    marginTop: 2,
   },
-  squadXpLabel: {
-    fontSize: 10,
-    fontWeight: '800',
-    color: '#582CDB',
-  },
-  squadLevelNextLabel: {
-    fontSize: 10,
-    fontWeight: '800',
-    color: '#94A3B8',
-  },
-  squadXpTrackBg: {
-    height: 6,
-    backgroundColor: '#E2E8F0',
-    borderRadius: 3,
-    overflow: 'hidden',
-  },
-  squadXpTrackFill: {
-    height: '100%',
-    borderRadius: 3,
-  },
-  nextUnlockText: {
-    fontSize: 10.5,
-    fontWeight: '800',
-    color: '#92400E',
-    marginBottom: 14,
-  },
-  squadActionButtonsRow: {
+  trackedMetricsRow: {
     flexDirection: 'row',
-    gap: 8,
-  },
-  openSquadSolidBtn: {
-    flex: 1,
-    backgroundColor: '#582CDB',
-    paddingVertical: 12,
+    backgroundColor: '#FAF8F5',
     borderRadius: 12,
-    alignItems: 'center',
-  },
-  openSquadSolidBtnText: {
-    color: '#FFFFFF',
-    fontSize: 13,
-    fontWeight: '900',
-  },
-  findSquadOutlineBtn: {
-    flex: 1,
-    backgroundColor: '#FFFFFF',
+    padding: 10,
+    marginTop: 10,
     borderWidth: 1,
     borderColor: '#E2E8F0',
-    paddingVertical: 12,
-    borderRadius: 12,
+  },
+  trackedMetricCol: {
+    flex: 1,
     alignItems: 'center',
   },
-  findSquadOutlineBtnText: {
-    color: '#171420',
+  trackedMetricVal: {
     fontSize: 13,
-    fontWeight: '800',
-  },
-
-  // CARD 6: LIVE DUEL
-  liveDuelBannerCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#FEF3C7',
-    borderRadius: 18,
-    borderWidth: 1,
-    borderColor: '#FDE68A',
-    padding: 14,
-    marginBottom: 20,
-    gap: 10,
-  },
-  duelTrophyBox: {
-    width: 36,
-    height: 36,
-    borderRadius: 10,
-    backgroundColor: '#FFFFFF',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  liveDuelTag: {
-    fontSize: 9.5,
-    fontWeight: '900',
-    color: '#92400E',
-    letterSpacing: 0.5,
-  },
-  duelTitleText: {
-    fontSize: 12,
-    fontWeight: '800',
-    color: '#171420',
-    marginTop: 1,
-  },
-  duelScoreText: {
-    fontSize: 11,
     fontWeight: '900',
     color: '#582CDB',
   },
-  viewDuelPillBtn: {
-    backgroundColor: '#FFFFFF',
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: 6,
-  },
-  viewDuelPillText: {
-    fontSize: 9.5,
-    fontWeight: '800',
-    color: '#171420',
-  },
-
-  // SECTION 7: QUICK ACTIONS
-  quickActionsSectionTitle: {
-    fontSize: 16,
-    fontWeight: '900',
-    color: '#171420',
-    marginBottom: 10,
-  },
-  quickActionItemCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#FFFFFF',
-    borderRadius: 16,
-    borderWidth: 1,
-    borderColor: '#EFECE6',
-    padding: 12,
-    gap: 12,
-  },
-  quickActionAvatar: {
-    width: 38,
-    height: 38,
-    borderRadius: 19,
-  },
-  quickActionName: {
-    fontSize: 13.5,
-    fontWeight: '800',
-    color: '#171420',
-  },
-  quickActionSub: {
-    fontSize: 11,
+  trackedMetricLabel: {
+    fontSize: 8.5,
+    fontWeight: '700',
     color: '#64748B',
     marginTop: 1,
   },
-  openPlanPillBtn: {
-    backgroundColor: '#EDE9FE',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 10,
-  },
-  openPlanPillText: {
-    fontSize: 11.5,
-    fontWeight: '800',
-    color: '#582CDB',
-  },
-  messageOutlinePillBtn: {
-    backgroundColor: '#FFFFFF',
+  trackedDeepDiveBtn: {
+    flex: 1,
+    backgroundColor: '#FAF8F5',
     borderWidth: 1,
     borderColor: '#E2E8F0',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
+    paddingVertical: 9,
     borderRadius: 10,
+    alignItems: 'center',
   },
-  messageOutlinePillText: {
+  trackedDeepDiveBtnText: {
+    fontSize: 11,
+    fontWeight: '800',
+    color: '#64748B',
+  },
+  trackedMatchBtn: {
+    flex: 1,
+    backgroundColor: '#582CDB',
+    paddingVertical: 9,
+    borderRadius: 10,
+    alignItems: 'center',
+  },
+  trackedMatchBtnText: {
+    fontSize: 11,
+    fontWeight: '900',
+    color: '#FFFFFF',
+  },
+
+  // CONNECTED CARD
+  connectedCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 18,
+    padding: 14,
+    borderWidth: 1,
+    borderColor: '#EFECE6',
+  },
+  connectedAvatar: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+  },
+  connectedName: {
+    fontSize: 13.5,
+    fontWeight: '900',
+    color: '#171420',
+  },
+  connectedRole: {
+    fontSize: 11,
+    color: '#64748B',
+  },
+  connectedStatusText: {
+    fontSize: 10,
+    fontWeight: '800',
+    color: '#582CDB',
+    marginTop: 2,
+  },
+  connectedCollabBox: {
+    backgroundColor: '#FAF8F5',
+    borderRadius: 12,
+    padding: 10,
+    marginTop: 10,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+  },
+  connectedCollabLabel: {
+    fontSize: 8.5,
+    fontWeight: '900',
+    color: '#94A3B8',
+    letterSpacing: 0.4,
+  },
+  connectedCollabTitle: {
     fontSize: 11.5,
     fontWeight: '800',
     color: '#171420',
+    marginTop: 2,
   },
-
-  // CARD 8: COOP INTELLIGENCE
-  coopIntelligenceCard: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 20,
+  connectedMessageBtn: {
+    flex: 1,
+    backgroundColor: '#FAF8F5',
     borderWidth: 1,
-    borderColor: '#EFECE6',
-    padding: 18,
+    borderColor: '#E2E8F0',
+    paddingVertical: 9,
+    borderRadius: 10,
     alignItems: 'center',
   },
-  coopIntelligenceQuote: {
-    fontSize: 13,
-    fontWeight: '600',
+  connectedMessageBtnText: {
+    fontSize: 11,
+    fontWeight: '800',
     color: '#171420',
-    textAlign: 'center',
-    lineHeight: 18,
-    marginBottom: 8,
   },
-  coopIntelligenceTag: {
-    fontSize: 9.5,
+  connectedStartCollabBtn: {
+    flex: 1.2,
+    backgroundColor: '#582CDB',
+    paddingVertical: 9,
+    borderRadius: 10,
+    alignItems: 'center',
+  },
+  connectedStartCollabBtnText: {
+    fontSize: 11,
     fontWeight: '900',
-    color: '#582CDB',
-    letterSpacing: 0.5,
+    color: '#FFFFFF',
   },
 
   // MODALS
-  btnPressed: {
-    opacity: 0.85,
-    transform: [{ scale: 0.98 }],
-  },
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(15, 10, 30, 0.7)',
+    backgroundColor: 'rgba(0, 0, 0, 0.55)',
     justifyContent: 'center',
     alignItems: 'center',
     padding: 20,
@@ -1910,90 +2220,162 @@ const styles = StyleSheet.create({
     maxWidth: 380,
     backgroundColor: '#FFFFFF',
     borderRadius: 24,
-    padding: 22,
+    padding: 20,
+    borderWidth: 1,
+    borderColor: '#EFECE6',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 0.15,
+    shadowOpacity: 0.25,
     shadowRadius: 20,
     elevation: 8,
   },
-  modalHeaderRow: {
+  modalHeaderBetween: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'flex-start',
+    alignItems: 'center',
     marginBottom: 14,
   },
+  modalHeaderAvatar: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+  },
   modalTitle: {
-    fontSize: 18,
+    fontSize: 15,
     fontWeight: '900',
     color: '#171420',
   },
-  modalSubtitle: {
-    fontSize: 11,
-    color: '#64748B',
-    marginTop: 2,
-  },
-  modalCloseCircle: {
-    width: 30,
-    height: 30,
-    borderRadius: 15,
-    backgroundColor: '#F1F5F9',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  modalCloseCross: {
-    fontSize: 12,
-    color: '#64748B',
-    fontWeight: '900',
-  },
-  modalFullBtn: {
-    backgroundColor: '#582CDB',
-    paddingVertical: 13,
-    borderRadius: 14,
-    alignItems: 'center',
-    marginTop: 10,
-  },
-  modalFullBtnText: {
-    color: '#FFFFFF',
-    fontSize: 14,
-    fontWeight: '900',
-  },
-  planStepTitle: {
+  modalSubTitle: {
     fontSize: 10.5,
+    color: '#64748B',
+    marginTop: 1,
+  },
+  modalCloseText: {
+    fontSize: 16,
+    fontWeight: '900',
+    color: '#94A3B8',
+  },
+  modalGaugeBox: {
+    backgroundColor: '#FAF8F5',
+    borderRadius: 16,
+    padding: 12,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    marginBottom: 10,
+  },
+  modalGaugeTitle: {
+    fontSize: 9,
+    fontWeight: '900',
+    color: '#64748B',
+    letterSpacing: 0.5,
+  },
+  modalGaugeScore: {
+    fontSize: 16,
     fontWeight: '900',
     color: '#582CDB',
-    marginTop: 10,
-    marginBottom: 3,
   },
-  planStepBody: {
-    fontSize: 12.5,
-    color: '#334155',
-    lineHeight: 18,
+  gaugeMetricsRow: {
+    flexDirection: 'row',
   },
-  squadMemberRow: {
-    fontSize: 12.5,
-    color: '#171420',
-    fontWeight: '700',
-    lineHeight: 20,
+  gaugeCol: {
+    flex: 1,
+    alignItems: 'center',
   },
-  toastContainer: {
-    position: 'absolute',
-    bottom: 90,
-    alignSelf: 'center',
-    backgroundColor: 'rgba(23, 20, 32, 0.94)',
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    borderRadius: 20,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.15,
-    shadowRadius: 8,
-    elevation: 6,
-  },
-  toastText: {
-    color: '#FFFFFF',
+  gaugeVal: {
     fontSize: 12.5,
     fontWeight: '900',
-    letterSpacing: 0.2,
+    color: '#171420',
+  },
+  gaugeLabel: {
+    fontSize: 8.5,
+    color: '#64748B',
+    marginTop: 1,
+  },
+  modalJarvisCard: {
+    borderRadius: 16,
+    padding: 14,
+    marginBottom: 12,
+  },
+  modalJarvisTitle: {
+    color: '#A78BFA',
+    fontSize: 10.5,
+    fontWeight: '900',
+    letterSpacing: 0.3,
+  },
+  modalJarvisText: {
+    color: '#F1F5F9',
+    fontSize: 11,
+    lineHeight: 16,
+    fontStyle: 'italic',
+  },
+  modalSectionHeader: {
+    fontSize: 9,
+    fontWeight: '900',
+    color: '#94A3B8',
+    letterSpacing: 0.4,
+    marginBottom: 4,
+  },
+  conceptCard: {
+    backgroundColor: '#FAF8F5',
+    borderRadius: 14,
+    padding: 12,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+  },
+  conceptCardTitle: {
+    fontSize: 12,
+    fontWeight: '900',
+    color: '#171420',
+  },
+  conceptCardHook: {
+    fontSize: 10.5,
+    color: '#475569',
+    fontStyle: 'italic',
+    marginTop: 3,
+    lineHeight: 14,
+  },
+  conceptCardFormat: {
+    fontSize: 9,
+    fontWeight: '700',
+    color: '#64748B',
+    flex: 1,
+    paddingRight: 6,
+  },
+  proposeConceptBtn: {
+    backgroundColor: '#EDE9FE',
+    paddingHorizontal: 8,
+    paddingVertical: 3.5,
+    borderRadius: 6,
+  },
+  proposeConceptBtnText: {
+    fontSize: 9.5,
+    fontWeight: '900',
+    color: '#582CDB',
+  },
+  modalMessageBtn: {
+    flex: 1,
+    backgroundColor: '#FAF8F5',
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    paddingVertical: 11,
+    borderRadius: 12,
+    alignItems: 'center',
+  },
+  modalMessageBtnText: {
+    color: '#171420',
+    fontSize: 12,
+    fontWeight: '800',
+  },
+  modalMatchBtn: {
+    flex: 1.5,
+    backgroundColor: '#582CDB',
+    paddingVertical: 11,
+    borderRadius: 12,
+    alignItems: 'center',
+  },
+  modalMatchBtnText: {
+    color: '#FFFFFF',
+    fontSize: 12,
+    fontWeight: '900',
   },
 });

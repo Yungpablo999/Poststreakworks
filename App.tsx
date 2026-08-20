@@ -636,6 +636,10 @@ export default function App() {
                 navigateTo('messages');
               }}
               onOpenJarvisPro={() => navigateTo('jarvis-pro')}
+              onOpenCollabIdea={(partnerData) => {
+                if (partnerData) setCollabPartnerData(partnerData);
+                navigateTo('collab-idea');
+              }}
               onSwitchToFree={() => {
                 setUserProfile(prev => ({ ...prev, tier: 'free' }));
               }}
