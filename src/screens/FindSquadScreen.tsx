@@ -391,67 +391,91 @@ export const FindSquadScreen: React.FC<FindSquadScreenProps> = ({
         showsVerticalScrollIndicator={false}
       >
         {/* ============================================================ */}
-        {/* 2. SEARCH & DISCOVERY BAR                                    */}
+        {/* 2. HERO TITLE & SQUAD DISCOVERY BADGES                       */}
         {/* ============================================================ */}
-        <View style={styles.searchBarContainer}>
-          <Svg width={16} height={16} viewBox="0 0 24 24" fill="none">
-            <Circle cx="11" cy="11" r="7" stroke="#64748B" strokeWidth="2.2" />
-            <Path d="M20 20L16.5 16.5" stroke="#64748B" strokeWidth="2.2" strokeLinecap="round" />
-          </Svg>
+        <View style={styles.heroSection}>
+          <LinearGradient
+            colors={['#784DF0', '#582CDB']}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 0 }}
+            style={styles.discoveryPillGradient}
+          >
+            <View style={styles.sparkleWhiteDot} />
+            <Text style={styles.discoveryPillText}>SQUAD DISCOVERY</Text>
+          </LinearGradient>
 
-          <TextInput
-            style={styles.searchInput}
-            placeholder="Search squads by name, niche or goal..."
-            placeholderTextColor="#94A3B8"
-            value={searchQuery}
-            onChangeText={setSearchQuery}
-            returnKeyType="search"
-          />
+          <Text style={styles.heroTitle}>Find creators to build with.</Text>
+          <Text style={styles.heroSubtitle}>
+            Discover squads based on niche, streak level, activity and shared creator goals.
+          </Text>
 
-          {searchQuery.length > 0 && (
-            <Pressable onPress={() => setSearchQuery('')} hitSlop={6}>
-              <Text style={styles.clearSearchText}>✕</Text>
-            </Pressable>
-          )}
+          {/* Search Input Bar */}
+          <View style={styles.searchBarContainer}>
+            <Svg width={16} height={16} viewBox="0 0 24 24" fill="none">
+              <Circle cx="11" cy="11" r="7" stroke="#64748B" strokeWidth="2.2" />
+              <Path d="M20 20L16.5 16.5" stroke="#64748B" strokeWidth="2.2" strokeLinecap="round" />
+            </Svg>
+
+            <TextInput
+              style={styles.searchInput}
+              placeholder="Search squads by name, niche or goal..."
+              placeholderTextColor="#94A3B8"
+              value={searchQuery}
+              onChangeText={setSearchQuery}
+              returnKeyType="search"
+            />
+
+            {searchQuery.length > 0 && (
+              <Pressable onPress={() => setSearchQuery('')} hitSlop={6}>
+                <Text style={styles.clearSearchText}>✕</Text>
+              </Pressable>
+            )}
+          </View>
         </View>
 
         {/* ============================================================ */}
-        {/* 3. DISCOVERY SEGMENT TABS                                    */}
+        {/* 3. SPACIOUS DISCOVERY TABS (SMOOTH HORIZONTAL SCROLL)        */}
         {/* ============================================================ */}
-        <View style={styles.segmentTabsContainer}>
-          {[
-            { id: 'for_you', label: '✨ For You' },
-            { id: 'top_streaks', label: '🔥 Top Streaks' },
-            { id: 'collabs', label: '🎬 Active Collabs' },
-            { id: 'pro', label: '👑 Pro Squads' },
-          ].map((tab) => {
-            const isSelected = selectedCategoryTab === tab.id;
-            return (
-              <Pressable
-                key={tab.id}
-                style={({ pressed }) => [
-                  styles.segmentTabBtn,
-                  isSelected && styles.segmentTabBtnActive,
-                  pressed && styles.btnPressed,
-                ]}
-                onPress={() => {
-                  if (Platform.OS !== 'web') {
-                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                  }
-                  setSelectedCategoryTab(tab.id as any);
-                }}
-              >
-                <Text
-                  style={[
-                    styles.segmentTabText,
-                    isSelected && styles.segmentTabTextActive,
+        <View style={{ marginBottom: 14 }}>
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.segmentTabsScroll}
+          >
+            {[
+              { id: 'for_you', label: '✨ For You' },
+              { id: 'top_streaks', label: '🔥 Top Streaks' },
+              { id: 'collabs', label: '🎬 Active Collabs' },
+              { id: 'pro', label: '👑 Pro Squads' },
+            ].map((tab) => {
+              const isSelected = selectedCategoryTab === tab.id;
+              return (
+                <Pressable
+                  key={tab.id}
+                  style={({ pressed }) => [
+                    styles.segmentTabBtn,
+                    isSelected && styles.segmentTabBtnActive,
+                    pressed && styles.btnPressed,
                   ]}
+                  onPress={() => {
+                    if (Platform.OS !== 'web') {
+                      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                    }
+                    setSelectedCategoryTab(tab.id as any);
+                  }}
                 >
-                  {tab.label}
-                </Text>
-              </Pressable>
-            );
-          })}
+                  <Text
+                    style={[
+                      styles.segmentTabText,
+                      isSelected && styles.segmentTabTextActive,
+                    ]}
+                  >
+                    {tab.label}
+                  </Text>
+                </Pressable>
+              );
+            })}
+          </ScrollView>
         </View>
 
         {/* ============================================================ */}
@@ -960,6 +984,47 @@ const styles = StyleSheet.create({
     paddingTop: 14,
   },
 
+  /* HERO SECTION */
+  heroSection: {
+    marginBottom: 12,
+  },
+  discoveryPillGradient: {
+    alignSelf: 'flex-start',
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 8,
+    marginBottom: 8,
+  },
+  sparkleWhiteDot: {
+    width: 5,
+    height: 5,
+    borderRadius: 2.5,
+    backgroundColor: '#FFFFFF',
+  },
+  discoveryPillText: {
+    fontSize: 10,
+    fontWeight: '900',
+    color: '#FFFFFF',
+    letterSpacing: 0.8,
+  },
+  heroTitle: {
+    fontSize: 25,
+    fontWeight: '900',
+    color: '#171420',
+    letterSpacing: -0.4,
+    lineHeight: 31,
+    marginBottom: 4,
+  },
+  heroSubtitle: {
+    fontSize: 12.5,
+    color: '#64748B',
+    lineHeight: 18,
+    marginBottom: 12,
+  },
+
   /* SEARCH BAR */
   searchBarContainer: {
     flexDirection: 'row',
@@ -989,27 +1054,38 @@ const styles = StyleSheet.create({
     fontWeight: '800',
   },
 
-  /* SEGMENT TABS */
-  segmentTabsContainer: {
-    flexDirection: 'row',
-    gap: 8,
-    marginTop: 12,
+  /* SPACIOUS SEGMENT TABS */
+  segmentTabsScroll: {
+    gap: 10,
+    paddingVertical: 4,
+    paddingHorizontal: 2,
   },
   segmentTabBtn: {
-    flex: 1,
-    paddingVertical: 8,
-    borderRadius: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 9,
+    borderRadius: 16,
     backgroundColor: '#FFFFFF',
     borderWidth: 1,
-    borderColor: '#EFECE6',
+    borderColor: '#E2E8F0',
     alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.02,
+    shadowRadius: 3,
+    elevation: 1,
   },
   segmentTabBtnActive: {
     backgroundColor: '#582CDB',
     borderColor: '#582CDB',
+    shadowColor: '#582CDB',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 2,
   },
   segmentTabText: {
-    fontSize: 11,
+    fontSize: 12.5,
     fontWeight: '800',
     color: '#475569',
   },
