@@ -73,6 +73,9 @@ export const ProCaptionScreen: React.FC<ProCaptionScreenProps> = ({
   ]);
 
   const [activePlatformCaptionIndex, setActivePlatformCaptionIndex] = useState(0);
+  const [activeEditingPlatform, setActiveEditingPlatform] = useState('Instagram Reel');
+  const scrollViewRef = useRef<ScrollView>(null);
+  const captionInputRef = useRef<TextInput>(null);
 
   const [mainCaption, setMainCaption] = useState(
     '3 mistakes that slow down new creators: waiting for perfect ideas, posting too late, and ignoring what your audience already responds to. Start small, stay consistent, and improve as you go.'
@@ -135,6 +138,19 @@ export const ProCaptionScreen: React.FC<ProCaptionScreenProps> = ({
       speed: 26,
       bounciness: 12,
     }).start();
+  };
+
+  const handleEditPlatformCaption = (platformName: string, captionText: string) => {
+    if (Platform.OS !== 'web') {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    }
+    setMainCaption(captionText);
+    setActiveEditingPlatform(platformName);
+    scrollViewRef.current?.scrollTo({ y: 360, animated: true });
+    setTimeout(() => {
+      captionInputRef.current?.focus();
+    }, 280);
+    showToast(`✏️ Editing ${platformName} caption in editor above`);
   };
 
   const handleToggleTone = (tone: string) => {
@@ -376,6 +392,7 @@ export const ProCaptionScreen: React.FC<ProCaptionScreenProps> = ({
 
         {/* 2. SCROLLABLE CONTENT */}
         <ScrollView
+          ref={scrollViewRef}
           contentContainerStyle={styles.scrollContent}
           showsVerticalScrollIndicator={false}
           bounces={true}
@@ -497,12 +514,13 @@ export const ProCaptionScreen: React.FC<ProCaptionScreenProps> = ({
           <View style={{ marginTop: 22 }}>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 8 }}>
               <Text style={{ fontSize: 13 }}>📝</Text>
-              <Text style={styles.sectionHeaderTitle}>Selected Caption (Instagram Reel)</Text>
+              <Text style={styles.sectionHeaderTitle}>Selected Caption ({activeEditingPlatform})</Text>
             </View>
 
             <View style={styles.selectedCaptionEditorCard}>
               <View style={styles.captionInputContainer}>
                 <TextInput
+                  ref={captionInputRef}
                   style={styles.captionTextInput}
                   multiline
                   value={mainCaption}
@@ -588,8 +606,8 @@ export const ProCaptionScreen: React.FC<ProCaptionScreenProps> = ({
 
                 <View style={styles.platDeckBtnRow}>
                   <Pressable
-                    style={styles.platDeckEditBtn}
-                    onPress={() => showToast('Editing TikTok caption...')}
+                    style={({ pressed }) => [styles.platDeckEditBtn, pressed && styles.btnPressed]}
+                    onPress={() => handleEditPlatformCaption('TikTok', '3 creator mistakes slowing you down. System > Ideas. Which one is yours? 👇')}
                   >
                     <Text style={styles.platDeckEditBtnText}>Edit</Text>
                   </Pressable>
@@ -623,8 +641,8 @@ export const ProCaptionScreen: React.FC<ProCaptionScreenProps> = ({
 
                 <View style={styles.platDeckBtnRow}>
                   <Pressable
-                    style={styles.platDeckEditBtn}
-                    onPress={() => showToast('Editing Instagram caption...')}
+                    style={({ pressed }) => [styles.platDeckEditBtn, pressed && styles.btnPressed]}
+                    onPress={() => handleEditPlatformCaption('Instagram Reel', '3 mistakes that stop creators from scaling. Save this for when you need a reminder to keep posting.')}
                   >
                     <Text style={styles.platDeckEditBtnText}>Edit</Text>
                   </Pressable>
@@ -658,8 +676,8 @@ export const ProCaptionScreen: React.FC<ProCaptionScreenProps> = ({
 
                 <View style={styles.platDeckBtnRow}>
                   <Pressable
-                    style={styles.platDeckEditBtn}
-                    onPress={() => showToast('Editing YouTube caption...')}
+                    style={({ pressed }) => [styles.platDeckEditBtn, pressed && styles.btnPressed]}
+                    onPress={() => handleEditPlatformCaption('YouTube Shorts', 'Why 90% of creators stay stuck (and the 3 habits that fix it). Full breakdown in comments.')}
                   >
                     <Text style={styles.platDeckEditBtnText}>Edit</Text>
                   </Pressable>
