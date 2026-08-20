@@ -555,7 +555,9 @@ export const ProQuestsScreen: React.FC<ProQuestsScreenProps> = ({
               <Pressable
                 style={({ pressed }) => [styles.contributeSolidBtn, pressed && styles.btnPressed]}
                 onPress={() => {
-                  showToast('Added your Reel draft to the Momentum Makers weekly target (+250 XP)!');
+                  if (onOpenPostComposer) {
+                    onOpenPostComposer('Momentum Makers Squad Gauntlet Reel');
+                  }
                 }}
               >
                 <Text style={styles.contributeBtnText}>Contribute</Text>
