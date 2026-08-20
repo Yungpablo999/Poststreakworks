@@ -62,6 +62,7 @@ interface ProQuestsScreenProps {
   onOpenJarvisPro?: () => void;
   onOpenEarnings?: () => void;
   onOpenPostComposer?: (prefillTitle?: string, prefillPlatform?: string) => void;
+  onOpenSquad?: () => void;
   onOpenPassport?: () => void;
   onOpenOpportunities?: () => void;
   onSwitchToFree?: () => void;
@@ -111,6 +112,7 @@ export const ProQuestsScreen: React.FC<ProQuestsScreenProps> = ({
   onOpenJarvisPro,
   onOpenEarnings,
   onOpenPostComposer,
+  onOpenSquad,
   onOpenPassport,
   onOpenOpportunities,
   onSwitchToFree,
@@ -894,7 +896,7 @@ export const ProQuestsScreen: React.FC<ProQuestsScreenProps> = ({
         </Modal>
 
         {/* ============================================================ */}
-        {/* MODAL: SQUAD QUEST & DUEL TASKS                              */}
+        {/* MODAL: ULTRA-LUXURY SQUAD QUEST GAUNTLET DETAILS             */}
         {/* ============================================================ */}
         <Modal
           visible={showSquadQuestModal}
@@ -902,34 +904,201 @@ export const ProQuestsScreen: React.FC<ProQuestsScreenProps> = ({
           animationType="fade"
           onRequestClose={() => setShowSquadQuestModal(false)}
         >
-          <View style={styles.modalOverlay}>
-            <Animated.View style={[styles.modalCard, { transform: [{ scale: modalPopScale }] }]}>
-              <View style={styles.modalHeaderRow}>
-                <View>
-                  <Text style={styles.modalTitle}>Momentum Makers Weekly Tasks</Text>
-                  <Text style={styles.modalSubtitle}>Squad Target: 8 Reels • Live Duel Active</Text>
+          <View style={styles.squadQuestModalOverlay}>
+            <Pressable style={styles.squadQuestModalBackdrop} onPress={() => setShowSquadQuestModal(false)} />
+            <Animated.View style={[styles.squadQuestModalCard, { transform: [{ scale: modalPopScale }] }]}>
+              {/* Top Header Row */}
+              <View style={styles.sqmHeaderRow}>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, flex: 1 }}>
+                  <View style={styles.sqmCrownBox}>
+                    <Text style={{ fontSize: 16 }}>🏆</Text>
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                      <Text style={styles.sqmCategoryTag}>WEEKLY SQUAD GAUNTLET</Text>
+                      <View style={styles.sqmTierPill}>
+                        <Text style={styles.sqmTierPillText}>👑 PRO TIER</Text>
+                      </View>
+                    </View>
+                    <Text style={styles.sqmMainTitle}>Momentum Makers Weekly Push</Text>
+                  </View>
                 </View>
-                <Pressable onPress={() => setShowSquadQuestModal(false)} style={styles.modalCloseCircle} hitSlop={8}>
-                  <Text style={styles.modalCloseCross}>✕</Text>
+
+                <Pressable onPress={() => setShowSquadQuestModal(false)} style={styles.sqmCloseBtn} hitSlop={8}>
+                  <Text style={styles.sqmCloseCross}>✕</Text>
                 </Pressable>
               </View>
 
-              <View style={{ gap: 8, marginVertical: 10 }}>
-                <Text style={styles.squadTaskItem}>• {userProfile?.name || 'Pablo'} — Published 2 Reels (Active 🔥)</Text>
-                <Text style={styles.squadTaskItem}>• Amara Okafor — Published 1 Reel (Active 🔥)</Text>
-                <Text style={styles.squadTaskItem}>• Elena Rostova — Published 1 Reel (Active 🔥)</Text>
-                <Text style={styles.squadTaskItem}>• David Adebayo — 1 Reel Scheduled for 7:30 PM</Text>
-              </View>
+              <ScrollView style={styles.sqmContentScroll} showsVerticalScrollIndicator={false}>
+                {/* Progress Overview Card */}
+                <LinearGradient
+                  colors={['#2A1259', '#1A0C38']}
+                  style={styles.sqmProgressBanner}
+                >
+                  <View style={styles.sqmProgressTopRow}>
+                    <View>
+                      <Text style={styles.sqmProgressLabel}>TOTAL SQUAD COMPLETION</Text>
+                      <Text style={styles.sqmProgressBigText}>5 / 8 Reels (62%)</Text>
+                    </View>
+                    <View style={styles.sqmTimerPill}>
+                      <Text style={styles.sqmTimerText}>⏳ 3d 14h Left</Text>
+                    </View>
+                  </View>
 
-              <Pressable
-                style={styles.modalFullBtn}
-                onPress={() => {
-                  setShowSquadQuestModal(false);
-                  showToast('Contributed to squad weekly score!');
-                }}
-              >
-                <Text style={styles.modalFullBtnText}>Contribute Reel (+100 XP)</Text>
-              </Pressable>
+                  <View style={styles.sqmTrackBg}>
+                    <View style={[styles.sqmTrackFill, { width: '62%' }]} />
+                  </View>
+
+                  <Text style={styles.sqmRemainingHint}>
+                    🔥 <Text style={{ fontWeight: '900', color: '#FDE68A' }}>3 Reels remaining</Text> to unlock the shared vault and claim the Creator Crown!
+                  </Text>
+                </LinearGradient>
+
+                {/* Rewards Vault Grid */}
+                <View style={styles.sqmRewardsSection}>
+                  <Text style={styles.sqmSectionTitle}>UNLOCKED AT 100% COMPLETION</Text>
+                  <View style={styles.sqmRewardsGrid}>
+                    <View style={styles.sqmRewardCard}>
+                      <Text style={styles.sqmRewardIcon}>✨</Text>
+                      <Text style={styles.sqmRewardValue}>+750 XP</Text>
+                      <Text style={styles.sqmRewardLabel}>Shared Bounty</Text>
+                    </View>
+
+                    <View style={styles.sqmRewardCard}>
+                      <Text style={styles.sqmRewardIcon}>🛡️</Text>
+                      <Text style={styles.sqmRewardValue}>7-Day</Text>
+                      <Text style={styles.sqmRewardLabel}>Streak Shield</Text>
+                    </View>
+
+                    <View style={styles.sqmRewardCard}>
+                      <Text style={styles.sqmRewardIcon}>👑</Text>
+                      <Text style={styles.sqmRewardValue}>Squad Crown</Text>
+                      <Text style={styles.sqmRewardLabel}>Profile Trophy</Text>
+                    </View>
+
+                    <View style={styles.sqmRewardCard}>
+                      <Text style={styles.sqmRewardIcon}>⚡</Text>
+                      <Text style={styles.sqmRewardValue}>1.5x Boost</Text>
+                      <Text style={styles.sqmRewardLabel}>14-Day Velocity</Text>
+                    </View>
+                  </View>
+                </View>
+
+                {/* Detailed Member Contributions */}
+                <View style={styles.sqmMembersSection}>
+                  <Text style={styles.sqmSectionTitle}>CREATOR CONTRIBUTIONS (4/4 ACTIVE)</Text>
+                  <View style={styles.sqmMembersList}>
+                    {/* Elena */}
+                    <View style={styles.sqmMemberRow}>
+                      <Image source={require('../../assets/images/elena-avatar.jpg')} style={styles.sqmMemberAvatar} />
+                      <View style={{ flex: 1 }}>
+                        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>
+                          <Text style={styles.sqmMemberName}>Elena Rostova</Text>
+                          <View style={styles.sqmHostBadge}>
+                            <Text style={styles.sqmHostBadgeText}>👑 HOST</Text>
+                          </View>
+                        </View>
+                        <Text style={styles.sqmMemberSub}>Tech & Product • 🔥 47d streak</Text>
+                      </View>
+                      <View style={styles.sqmScoreBadgeCompleted}>
+                        <Text style={styles.sqmScoreBadgeCompletedText}>2/2 Reels ✓</Text>
+                      </View>
+                    </View>
+
+                    {/* Pablo (You) */}
+                    <View style={[styles.sqmMemberRow, styles.sqmMemberRowMine]}>
+                      <Image source={require('../../assets/images/elena-avatar.jpg')} style={styles.sqmMemberAvatar} />
+                      <View style={{ flex: 1 }}>
+                        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>
+                          <Text style={styles.sqmMemberName}>{userProfile?.name || 'Pablo'} (You)</Text>
+                          <View style={styles.sqmTopBadge}>
+                            <Text style={styles.sqmTopBadgeText}>⭐ TOP</Text>
+                          </View>
+                        </View>
+                        <Text style={styles.sqmMemberSub}>Creator Growth • 🔥 47d streak</Text>
+                      </View>
+                      <View style={styles.sqmScoreBadgeCompleted}>
+                        <Text style={styles.sqmScoreBadgeCompletedText}>2/2 Reels ✓</Text>
+                      </View>
+                    </View>
+
+                    {/* Amara */}
+                    <View style={styles.sqmMemberRow}>
+                      <Image source={require('../../assets/images/amara-avatar.jpg')} style={styles.sqmMemberAvatar} />
+                      <View style={{ flex: 1 }}>
+                        <Text style={styles.sqmMemberName}>Amara Okafor</Text>
+                        <Text style={styles.sqmMemberSub}>Storytelling • 🔥 31d streak</Text>
+                      </View>
+                      <View style={styles.sqmScoreBadgePending}>
+                        <Text style={styles.sqmScoreBadgePendingText}>1/2 Reels (Filming)</Text>
+                      </View>
+                    </View>
+
+                    {/* David */}
+                    <View style={styles.sqmMemberRow}>
+                      <Image source={require('../../assets/images/david-avatar.jpg')} style={styles.sqmMemberAvatar} />
+                      <View style={{ flex: 1 }}>
+                        <Text style={styles.sqmMemberName}>David Kim</Text>
+                        <Text style={styles.sqmMemberSub}>Systems • 🔥 19d streak</Text>
+                      </View>
+                      <View style={styles.sqmScoreBadgeScheduled}>
+                        <Text style={styles.sqmScoreBadgeScheduledText}>📅 7:30 PM</Text>
+                      </View>
+                    </View>
+                  </View>
+                </View>
+
+                {/* Quest Milestones */}
+                <View style={styles.sqmMilestonesSection}>
+                  <Text style={styles.sqmSectionTitle}>QUEST MILESTONES</Text>
+                  <View style={styles.sqmMilestoneCard}>
+                    <View style={styles.sqmMilestoneRow}>
+                      <Text style={styles.sqmGreenCheck}>✓</Text>
+                      <Text style={styles.sqmMilestoneText}>Phase 1: Publish 4 Squad Reels (+250 XP Unlocked)</Text>
+                    </View>
+                    <View style={styles.sqmMilestoneRow}>
+                      <Text style={styles.sqmGreenCheck}>✓</Text>
+                      <Text style={styles.sqmMilestoneText}>Phase 2: Complete 1 Duo Split-Screen Duet (+250 XP Unlocked)</Text>
+                    </View>
+                    <View style={styles.sqmMilestoneRow}>
+                      <Text style={{ fontSize: 13, color: '#F59E0B' }}>⚡</Text>
+                      <Text style={[styles.sqmMilestoneText, { color: '#171420', fontWeight: '800' }]}>
+                        Phase 3: Reach 8 Total Reels (3 remaining to claim +750 XP Crown!)
+                      </Text>
+                    </View>
+                  </View>
+                </View>
+              </ScrollView>
+
+              {/* Action Buttons */}
+              <View style={styles.sqmActionsRow}>
+                <Pressable
+                  style={styles.sqmOutlineBtn}
+                  onPress={() => {
+                    setShowSquadQuestModal(false);
+                    if (onOpenSquad) onOpenSquad();
+                  }}
+                >
+                  <Text style={styles.sqmOutlineBtnText}>Squad Room 💬</Text>
+                </Pressable>
+
+                <Pressable
+                  style={styles.sqmSolidBtn}
+                  onPress={() => {
+                    setShowSquadQuestModal(false);
+                    if (onOpenPostComposer) {
+                      onOpenPostComposer('Momentum Makers Squad Gauntlet Reel');
+                    }
+                  }}
+                >
+                  <LinearGradient
+                    colors={['#784DF0', '#582CDB']}
+                    style={styles.sqmSolidGradient}
+                  >
+                    <Text style={styles.sqmSolidBtnText}>Contribute Reel 🔥</Text>
+                  </LinearGradient>
+                </Pressable>
+              </View>
             </Animated.View>
           </View>
         </Modal>
@@ -2091,6 +2260,333 @@ const styles = StyleSheet.create({
     fontWeight: '900',
     color: '#D97706',
   },
+  /* SQUAD QUEST ULTRA-LUXURY MODAL */
+  squadQuestModalOverlay: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(15, 23, 42, 0.75)',
+    padding: 16,
+  },
+  squadQuestModalBackdrop: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+  },
+  squadQuestModalCard: {
+    width: '100%',
+    maxWidth: 420,
+    maxHeight: '85%',
+    backgroundColor: '#FFFFFF',
+    borderRadius: 24,
+    padding: 20,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.9)',
+    shadowColor: '#582CDB',
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.25,
+    shadowRadius: 24,
+    elevation: 8,
+  },
+  sqmHeaderRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  sqmCrownBox: {
+    width: 36,
+    height: 36,
+    borderRadius: 12,
+    backgroundColor: '#FEF3C7',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  sqmCategoryTag: {
+    fontSize: 9,
+    fontWeight: '900',
+    color: '#64748B',
+    letterSpacing: 0.6,
+  },
+  sqmTierPill: {
+    backgroundColor: '#EDE9FE',
+    paddingHorizontal: 5,
+    paddingVertical: 1.5,
+    borderRadius: 4,
+  },
+  sqmTierPillText: {
+    fontSize: 8.5,
+    fontWeight: '900',
+    color: '#6D28D9',
+  },
+  sqmMainTitle: {
+    fontSize: 16.5,
+    fontWeight: '900',
+    color: '#171420',
+  },
+  sqmCloseBtn: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: '#F1F5F9',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  sqmCloseCross: {
+    fontSize: 13,
+    fontWeight: '900',
+    color: '#475569',
+  },
+  sqmContentScroll: {
+    marginBottom: 12,
+  },
+  sqmProgressBanner: {
+    borderRadius: 16,
+    padding: 14,
+    marginBottom: 14,
+  },
+  sqmProgressTopRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    marginBottom: 10,
+  },
+  sqmProgressLabel: {
+    fontSize: 9,
+    fontWeight: '900',
+    color: '#C084FC',
+    letterSpacing: 0.5,
+  },
+  sqmProgressBigText: {
+    fontSize: 18,
+    fontWeight: '900',
+    color: '#FFFFFF',
+    marginTop: 2,
+  },
+  sqmTimerPill: {
+    backgroundColor: 'rgba(253, 230, 138, 0.2)',
+    paddingHorizontal: 7,
+    paddingVertical: 3,
+    borderRadius: 6,
+    borderWidth: 1,
+    borderColor: 'rgba(253, 230, 138, 0.3)',
+  },
+  sqmTimerText: {
+    fontSize: 10,
+    fontWeight: '900',
+    color: '#FDE68A',
+  },
+  sqmTrackBg: {
+    height: 7,
+    borderRadius: 3.5,
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    overflow: 'hidden',
+    marginBottom: 8,
+  },
+  sqmTrackFill: {
+    height: '100%',
+    backgroundColor: '#C084FC',
+  },
+  sqmRemainingHint: {
+    fontSize: 11,
+    color: '#E2E8F0',
+    lineHeight: 16,
+  },
+  sqmRewardsSection: {
+    marginBottom: 14,
+  },
+  sqmSectionTitle: {
+    fontSize: 9.5,
+    fontWeight: '900',
+    color: '#64748B',
+    letterSpacing: 0.6,
+    marginBottom: 8,
+  },
+  sqmRewardsGrid: {
+    flexDirection: 'row',
+    gap: 8,
+  },
+  sqmRewardCard: {
+    flex: 1,
+    backgroundColor: '#FAF8F5',
+    borderRadius: 12,
+    padding: 8,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#EFECE6',
+  },
+  sqmRewardIcon: {
+    fontSize: 15,
+    marginBottom: 2,
+  },
+  sqmRewardValue: {
+    fontSize: 11,
+    fontWeight: '900',
+    color: '#171420',
+  },
+  sqmRewardLabel: {
+    fontSize: 8.5,
+    color: '#64748B',
+    fontWeight: '700',
+    marginTop: 1,
+  },
+  sqmMembersSection: {
+    marginBottom: 14,
+  },
+  sqmMembersList: {
+    backgroundColor: '#FAF8F5',
+    borderRadius: 14,
+    padding: 10,
+    borderWidth: 1,
+    borderColor: '#EFECE6',
+    gap: 8,
+  },
+  sqmMemberRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    paddingVertical: 4,
+    borderBottomWidth: 1,
+    borderBottomColor: '#F1EFE9',
+  },
+  sqmMemberRowMine: {
+    backgroundColor: '#EDE9FE',
+    borderRadius: 10,
+    paddingHorizontal: 8,
+    paddingVertical: 6,
+    borderBottomWidth: 0,
+  },
+  sqmMemberAvatar: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+  },
+  sqmMemberName: {
+    fontSize: 12,
+    fontWeight: '900',
+    color: '#171420',
+  },
+  sqmMemberSub: {
+    fontSize: 10,
+    color: '#64748B',
+  },
+  sqmHostBadge: {
+    backgroundColor: '#FEF3C7',
+    paddingHorizontal: 4,
+    paddingVertical: 1,
+    borderRadius: 3,
+  },
+  sqmHostBadgeText: {
+    fontSize: 7.5,
+    fontWeight: '900',
+    color: '#B45309',
+  },
+  sqmTopBadge: {
+    backgroundColor: '#582CDB',
+    paddingHorizontal: 4,
+    paddingVertical: 1,
+    borderRadius: 3,
+  },
+  sqmTopBadgeText: {
+    fontSize: 7.5,
+    fontWeight: '900',
+    color: '#FFFFFF',
+  },
+  sqmScoreBadgeCompleted: {
+    backgroundColor: '#DCFCE7',
+    paddingHorizontal: 6,
+    paddingVertical: 3,
+    borderRadius: 6,
+  },
+  sqmScoreBadgeCompletedText: {
+    fontSize: 10,
+    fontWeight: '900',
+    color: '#15803D',
+  },
+  sqmScoreBadgePending: {
+    backgroundColor: '#FEF3C7',
+    paddingHorizontal: 6,
+    paddingVertical: 3,
+    borderRadius: 6,
+  },
+  sqmScoreBadgePendingText: {
+    fontSize: 9.5,
+    fontWeight: '800',
+    color: '#92400E',
+  },
+  sqmScoreBadgeScheduled: {
+    backgroundColor: '#EDE9FE',
+    paddingHorizontal: 6,
+    paddingVertical: 3,
+    borderRadius: 6,
+  },
+  sqmScoreBadgeScheduledText: {
+    fontSize: 9.5,
+    fontWeight: '800',
+    color: '#6D28D9',
+  },
+  sqmMilestonesSection: {
+    marginBottom: 10,
+  },
+  sqmMilestoneCard: {
+    backgroundColor: '#FAF8F5',
+    borderRadius: 12,
+    padding: 10,
+    borderWidth: 1,
+    borderColor: '#EFECE6',
+    gap: 6,
+  },
+  sqmMilestoneRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  sqmGreenCheck: {
+    fontSize: 12,
+    fontWeight: '900',
+    color: '#10B981',
+  },
+  sqmMilestoneText: {
+    fontSize: 11,
+    color: '#475569',
+    flex: 1,
+    lineHeight: 15,
+  },
+  sqmActionsRow: {
+    flexDirection: 'row',
+    gap: 10,
+  },
+  sqmOutlineBtn: {
+    flex: 1,
+    backgroundColor: '#FAF8F5',
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    borderRadius: 14,
+    paddingVertical: 12,
+    alignItems: 'center',
+  },
+  sqmOutlineBtnText: {
+    fontSize: 12.5,
+    fontWeight: '800',
+    color: '#475569',
+  },
+  sqmSolidBtn: {
+    flex: 1.3,
+    borderRadius: 14,
+    overflow: 'hidden',
+  },
+  sqmSolidGradient: {
+    paddingVertical: 12,
+    alignItems: 'center',
+  },
+  sqmSolidBtnText: {
+    fontSize: 12.5,
+    fontWeight: '900',
+    color: '#FFFFFF',
+  },
+
   toastContainer: {
     position: 'absolute',
     bottom: 90,

@@ -802,6 +802,7 @@ export default function App() {
                 if (title) setComposerIdeaTitle(title);
                 navigateTo('composer');
               }}
+              onOpenSquad={() => navigateTo('squad')}
               onOpenPassport={() => navigateTo('growth')}
               onOpenOpportunities={() => navigateTo('growth')}
               onSwitchToFree={() => {
