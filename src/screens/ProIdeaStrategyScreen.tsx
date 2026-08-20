@@ -775,10 +775,22 @@ export const ProIdeaStrategyScreen: React.FC<ProIdeaStrategyScreenProps> = ({
               />
 
               <Pressable
-                style={styles.modalSaveBtn}
+                style={({ pressed }) => [styles.modalSaveBtn, pressed && styles.btnPressed]}
                 onPress={() => {
+                  if (Platform.OS !== 'web') {
+                    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+                  }
                   setShowEditStrategyModal(false);
-                  showToast('✓ Strategy parameters updated');
+                  setCompletionData({
+                    title: 'Strategy Saved & Re-scored!',
+                    subtitle: `AI calibrated your new prompt: "${audiencePrompt.slice(0, 45)}..."`,
+                    badgeText: '✨ 94 QUALITY SCORE RE-CALIBRATED',
+                    xpEarned: 50,
+                    speechBubble: 'Strategy locked and re-scored, Pablo! Fresh viral angles ready! 🔥',
+                  });
+                  setTimeout(() => {
+                    setShowCompletionModal(true);
+                  }, 200);
                 }}
               >
                 <Text style={styles.modalSaveBtnText}>Save &amp; Re-score Ideas</Text>
