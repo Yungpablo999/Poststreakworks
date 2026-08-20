@@ -928,23 +928,53 @@ export const ProVoiceStudioScreen: React.FC<ProVoiceStudioScreenProps> = ({
               </View>
             </View>
 
-            {/* DYNAMIC 24-BAR FREQUENCY WAVEFORM */}
-            <View style={styles.waveformContainerRow}>
-              {[
-                14, 28, 48, 22, 60, 34, 18, 52, 28, 16, 42, 24, 62, 38, 20, 56,
-                30, 16, 44, 26, 12, 36, 20, 48,
-              ].map((h, i) => (
-                <View
-                  key={i}
-                  style={[
-                    styles.waveformBar,
-                    {
-                      height: isPlayingAudio ? (i % 2 === 0 ? h * 0.9 : h * 1.1) : h * 0.6,
-                      backgroundColor: i % 2 === 0 ? '#582CDB' : '#F59E0B',
-                    },
-                  ]}
-                />
-              ))}
+            {/* HIGH-DENSITY ACOUSTIC WAVELENGTH VISUALIZER */}
+            <View style={styles.wavelengthCapsuleCard}>
+              <View style={styles.wavelengthHeaderRow}>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                  <View style={[styles.wavelengthLiveDot, isPlayingAudio && styles.wavelengthLiveDotActive]} />
+                  <Text style={styles.wavelengthLabelText}>
+                    {isPlayingAudio ? 'LIVE MASTER AUDIO FREQUENCY' : 'STUDIO ACOUSTIC WAVELENGTH'}
+                  </Text>
+                </View>
+                <Text style={styles.wavelengthHzText}>48.0 kHz • 24-bit Lossless</Text>
+              </View>
+
+              <View style={styles.wavelengthDenseBarsRow}>
+                {[
+                  6, 10, 16, 12, 22, 32, 26, 18, 38, 48, 36, 24, 52, 42, 28, 46,
+                  34, 20, 40, 50, 38, 26, 48, 38, 22, 44, 54, 40, 26, 36, 46, 32,
+                  20, 38, 48, 34, 22, 32, 24, 16, 26, 18, 12, 16, 10, 6,
+                ].map((h, i) => {
+                  const isCurrentPlayhead = isPlayingAudio && Math.floor(scrubberProgress * 46) === i;
+                  const isPlayed = scrubberProgress * 46 >= i;
+                  return (
+                    <View
+                      key={i}
+                      style={[
+                        styles.wavelengthDenseBar,
+                        {
+                          height: isPlayingAudio
+                            ? Math.max(6, Math.min(54, h * (0.7 + Math.sin(i * 0.4 + playbackSeconds * 2.5) * 0.35)))
+                            : Math.max(6, h * 0.75),
+                          backgroundColor: isCurrentPlayhead
+                            ? '#F59E0B'
+                            : isPlayed
+                            ? (i % 3 === 0 ? '#F59E0B' : '#8B5CF6')
+                            : '#C4B5FD',
+                          opacity: isPlayed ? 1 : 0.45,
+                        },
+                      ]}
+                    />
+                  );
+                })}
+              </View>
+
+              <View style={styles.wavelengthBottomMetrics}>
+                <Text style={styles.wavelengthMetricItem}>DYNAMIC RANGE: 98dB</Text>
+                <Text style={styles.wavelengthMetricItem}>STEREO SYNCED</Text>
+                <Text style={styles.wavelengthMetricItem}>NEURAL ENHANCED</Text>
+              </View>
             </View>
 
             {/* Speed Selector Chips */}
@@ -2164,17 +2194,73 @@ const styles = StyleSheet.create({
     color: '#171420',
     marginTop: 2,
   },
-  waveformContainerRow: {
+  wavelengthCapsuleCard: {
+    backgroundColor: '#0F0A1E',
+    borderRadius: 16,
+    padding: 14,
+    marginTop: 14,
+    borderWidth: 1,
+    borderColor: '#312E81',
+    shadowColor: '#582CDB',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.25,
+    shadowRadius: 8,
+    elevation: 3,
+  },
+  wavelengthHeaderRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    height: 46,
-    marginTop: 14,
-    paddingHorizontal: 6,
+    marginBottom: 10,
   },
-  waveformBar: {
-    width: 3.5,
+  wavelengthLiveDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: '#64748B',
+  },
+  wavelengthLiveDotActive: {
+    backgroundColor: '#34D399',
+  },
+  wavelengthLabelText: {
+    fontSize: 9,
+    fontWeight: '900',
+    color: '#E9D5FF',
+    letterSpacing: 0.5,
+  },
+  wavelengthHzText: {
+    fontSize: 9,
+    fontWeight: '800',
+    color: '#FDE68A',
+  },
+  wavelengthDenseBarsRow: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    height: 56,
+    gap: 2,
+    paddingHorizontal: 2,
+  },
+  wavelengthDenseBar: {
+    flex: 1,
+    maxWidth: 3.8,
+    minWidth: 2.2,
     borderRadius: 2,
+  },
+  wavelengthBottomMetrics: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginTop: 10,
+    paddingTop: 8,
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(255, 255, 255, 0.08)',
+  },
+  wavelengthMetricItem: {
+    fontSize: 8,
+    fontWeight: '900',
+    color: '#A5B4FC',
+    letterSpacing: 0.4,
   },
   speedSelectorRow: {
     flexDirection: 'row',

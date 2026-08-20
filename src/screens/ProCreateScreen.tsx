@@ -674,15 +674,20 @@ export const ProCreateScreen: React.FC<ProCreateScreenProps> = ({
                 />
               </View>
 
-              <View style={styles.waveformRow}>
-                {[16, 32, 54, 24, 62, 40, 22, 58, 36, 18, 48, 28, 64, 38, 20].map((h, i) => (
-                  <Animated.View
+              {/* HIGH DENSITY CONTINUOUS WAVELENGTH */}
+              <View style={styles.wavelengthDenseRowCreate}>
+                {[
+                  8, 14, 24, 18, 32, 44, 36, 22, 48, 58, 46, 30, 62, 50, 34, 56,
+                  42, 26, 48, 60, 46, 32, 52, 42, 28, 46, 56, 44, 30, 42, 50, 36,
+                  24, 40, 52, 38, 24, 34, 26, 16, 28, 18, 12, 18, 12, 8,
+                ].map((h, i) => (
+                  <View
                     key={`vw_${i}`}
                     style={[
-                      styles.waveformBarPro,
+                      styles.wavelengthBarDenseCreate,
                       {
-                        height: h,
-                        opacity: waveformAnim,
+                        height: h * 0.85,
+                        backgroundColor: i % 3 === 0 ? '#F59E0B' : '#8B5CF6',
                       },
                     ]}
                   />
@@ -1571,17 +1576,19 @@ const styles = StyleSheet.create({
     fontWeight: '900',
     color: '#6D28D9',
   },
-  waveformRow: {
+  wavelengthDenseRowCreate: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
+    justifyContent: 'center',
     alignItems: 'center',
     height: 64,
-    paddingHorizontal: 8,
+    gap: 2,
+    paddingHorizontal: 4,
   },
-  waveformBarPro: {
-    width: 3.5,
-    borderRadius: 2,
-    backgroundColor: '#7C3AED',
+  wavelengthBarDenseCreate: {
+    flex: 1,
+    maxWidth: 3.5,
+    minWidth: 2,
+    borderRadius: 1.8,
   },
   previewVoicePill: {
     alignSelf: 'flex-end',
