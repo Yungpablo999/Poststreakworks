@@ -81,7 +81,7 @@ export const ProCaptionScreen: React.FC<ProCaptionScreenProps> = ({
     '3 mistakes that slow down new creators: waiting for perfect ideas, posting too late, and ignoring what your audience already responds to. Start small, stay consistent, and improve as you go.'
   );
 
-  const [selectedCTA, setSelectedCTA] = useState(
+  const [selectedCTA, setSelectedCTA] = useState<string | null>(
     'Which mistake slows you down the most?'
   );
 
@@ -198,12 +198,17 @@ export const ProCaptionScreen: React.FC<ProCaptionScreenProps> = ({
     }
   };
 
-  const handleSelectCTA = (ctaText: string) => {
+  const handleToggleCTA = (ctaText: string) => {
     if (Platform.OS !== 'web') {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     }
-    setSelectedCTA(ctaText);
-    showToast('✓ Applied CTA to caption');
+    if (selectedCTA === ctaText) {
+      setSelectedCTA(null);
+      showToast('Unselected CTA');
+    } else {
+      setSelectedCTA(ctaText);
+      showToast(`✓ Applied CTA: "${ctaText.slice(0, 28)}..."`);
+    }
   };
 
   const handleApplyJarvisRecommendation = () => {
@@ -751,53 +756,85 @@ export const ProCaptionScreen: React.FC<ProCaptionScreenProps> = ({
           </View>
 
           {/* ============================================================ */}
-          {/* CARD 6: CTA STRATEGY                                         */}
+          {/* CARD 6: CTA STRATEGY (Select & Unselect Support)              */}
           {/* ============================================================ */}
           <View style={{ marginTop: 22 }}>
-            <Text style={styles.sectionHeaderTitle}>CTA Strategy</Text>
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+              <Text style={styles.sectionHeaderTitle}>CTA Strategy</Text>
+              <Text style={styles.ctaHeaderSubHint}>Tap to select or unselect</Text>
+            </View>
 
-            <View style={{ gap: 8, marginTop: 8 }}>
-              {/* Recommended CTA */}
-              <Pressable
-                style={[
-                  styles.ctaRecommendedCard,
-                  selectedCTA === 'Which mistake slows you down the most?' && styles.ctaCardActive,
-                ]}
-                onPress={() => handleSelectCTA('Which mistake slows you down the most?')}
-              >
-                <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <View style={styles.recommendedBadge}>
-                    <Text style={styles.recommendedBadgeText}>RECOMMENDED</Text>
-                  </View>
-                  <Text style={{ fontSize: 14, color: '#D97706' }}>⭐</Text>
-                </View>
-                <Text style={styles.ctaCardTitle}>&ldquo;Which mistake slows you down the most?&rdquo;</Text>
-                <Text style={styles.ctaCardSub}>Best for comment volume &amp; algorithm conversation spikes.</Text>
-              </Pressable>
+            <View style={{ gap: 8 }}>
+              {[
+                {
+                  id: 'recommended',
+                  type: 'COMMENT SPIKE',
+                  text: 'Which mistake slows you down the most?',
+                  desc: 'Best for comment volume & algorithm conversation spikes.',
+                  isRecommended: true,
+                },
+                {
+                  id: 'save',
+                  type: 'SAVE',
+                  text: 'Save this for your next planning session.',
+                  desc: 'Drives bookmarks for long-term algorithmic recall.',
+                  isRecommended: false,
+                },
+                {
+                  id: 'share',
+                  type: 'SHARE',
+                  text: 'Send this to a creator starting out.',
+                  desc: 'Boosts DM shares & viral loop expansion.',
+                  isRecommended: false,
+                },
+                {
+                  id: 'follow',
+                  type: 'FOLLOW',
+                  text: 'Follow for daily creator systems & growth breakdowns.',
+                  desc: 'Direct acquisition hook for new followers.',
+                  isRecommended: false,
+                },
+              ].map((cta) => {
+                const isSelected = selectedCTA === cta.text;
+                return (
+                  <Pressable
+                    key={cta.id}
+                    style={({ pressed }) => [
+                      cta.isRecommended ? styles.ctaRecommendedCard : styles.ctaAltCard,
+                      isSelected && styles.ctaCardActive,
+                      pressed && styles.btnPressed,
+                    ]}
+                    onPress={() => handleToggleCTA(cta.text)}
+                  >
+                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                        {cta.isRecommended ? (
+                          <View style={styles.recommendedBadge}>
+                            <Text style={styles.recommendedBadgeText}>RECOMMENDED</Text>
+                          </View>
+                        ) : (
+                          <Text style={styles.ctaAltType}>{cta.type}</Text>
+                        )}
+                        {cta.isRecommended && <Text style={{ fontSize: 13 }}>⭐</Text>}
+                      </View>
 
-              {/* Alt 1: SAVE */}
-              <Pressable
-                style={[
-                  styles.ctaAltCard,
-                  selectedCTA === 'Save this for your next planning session.' && styles.ctaCardActive,
-                ]}
-                onPress={() => handleSelectCTA('Save this for your next planning session.')}
-              >
-                <Text style={styles.ctaAltType}>SAVE</Text>
-                <Text style={styles.ctaAltTitle}>&ldquo;Save this for your next planning session.&rdquo;</Text>
-              </Pressable>
+                      {/* Interactive Selection Checkbox Circle */}
+                      <View style={[styles.ctaCheckCircle, isSelected && styles.ctaCheckCircleActive]}>
+                        {isSelected && (
+                          <Svg width={8} height={8} viewBox="0 0 12 12" fill="none">
+                            <Path d="M2.5 6.2L4.8 8.5L9.5 3.5" stroke="#FFFFFF" strokeWidth="2.8" strokeLinecap="round" />
+                          </Svg>
+                        )}
+                      </View>
+                    </View>
 
-              {/* Alt 2: SHARE */}
-              <Pressable
-                style={[
-                  styles.ctaAltCard,
-                  selectedCTA === 'Send this to a creator starting out.' && styles.ctaCardActive,
-                ]}
-                onPress={() => handleSelectCTA('Send this to a creator starting out.')}
-              >
-                <Text style={styles.ctaAltType}>SHARE</Text>
-                <Text style={styles.ctaAltTitle}>&ldquo;Send this to a creator starting out.&rdquo;</Text>
-              </Pressable>
+                    <Text style={[styles.ctaCardTitle, isSelected && styles.ctaCardTitleActive]}>
+                      &ldquo;{cta.text}&rdquo;
+                    </Text>
+                    <Text style={styles.ctaCardSub}>{cta.desc}</Text>
+                  </Pressable>
+                );
+              })}
             </View>
           </View>
 
@@ -1492,56 +1529,86 @@ const styles = StyleSheet.create({
   },
 
   // CARD 6: CTA STRATEGY
+  ctaHeaderSubHint: {
+    fontSize: 10,
+    color: '#94A3B8',
+    fontWeight: '800',
+  },
   ctaRecommendedCard: {
     backgroundColor: '#FEFCE8',
-    borderRadius: 14,
+    borderRadius: 16,
     padding: 14,
     borderWidth: 1.5,
     borderColor: '#F59E0B',
   },
+  ctaAltCard: {
+    backgroundColor: '#FAF8F5',
+    borderRadius: 16,
+    padding: 14,
+    borderWidth: 1.5,
+    borderColor: '#EFECE6',
+  },
   ctaCardActive: {
     borderColor: '#582CDB',
+    backgroundColor: '#F5F3FF',
+    shadowColor: '#582CDB',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 6,
+    elevation: 2,
   },
   recommendedBadge: {
     backgroundColor: '#FEF3C7',
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-    borderRadius: 4,
+    paddingHorizontal: 7,
+    paddingVertical: 2.5,
+    borderRadius: 5,
   },
   recommendedBadgeText: {
-    fontSize: 8.5,
+    fontSize: 9,
     fontWeight: '900',
     color: '#D97706',
+    letterSpacing: 0.3,
   },
   ctaCardTitle: {
     fontSize: 13,
-    fontWeight: '900',
+    fontWeight: '800',
     color: '#171420',
     marginTop: 8,
-    marginBottom: 2,
+    marginBottom: 3,
+    lineHeight: 18,
+  },
+  ctaCardTitleActive: {
+    fontWeight: '900',
+    color: '#171420',
   },
   ctaCardSub: {
     fontSize: 10.5,
     color: '#64748B',
-  },
-  ctaAltCard: {
-    backgroundColor: '#FAF8F5',
-    borderRadius: 14,
-    padding: 12,
-    borderWidth: 1,
-    borderColor: '#EFECE6',
+    lineHeight: 15,
   },
   ctaAltType: {
-    fontSize: 8.5,
+    fontSize: 9,
     fontWeight: '900',
-    color: '#64748B',
-    letterSpacing: 0.4,
+    color: '#582CDB',
+    backgroundColor: '#EDE9FE',
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 4,
+    letterSpacing: 0.3,
   },
-  ctaAltTitle: {
-    fontSize: 11.5,
-    fontWeight: '800',
-    color: '#171420',
-    marginTop: 4,
+  ctaCheckCircle: {
+    width: 18,
+    height: 18,
+    borderRadius: 9,
+    borderWidth: 1.5,
+    borderColor: '#CBD5E1',
+    backgroundColor: '#FFFFFF',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  ctaCheckCircleActive: {
+    backgroundColor: '#582CDB',
+    borderColor: '#582CDB',
   },
 
   // CARD 7: HASHTAG SETS
