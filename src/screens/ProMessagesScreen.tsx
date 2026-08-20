@@ -869,7 +869,14 @@ export const ProMessagesScreen: React.FC<ProMessagesScreenProps> = ({
                   onPress={() => openCreatorStory(creator.id)}
                 >
                   <View style={styles.storyAvatarOuterRing}>
-                    <Image source={creator.avatar} style={styles.storyAvatarImg} />
+                    <Image
+                      source={creator.avatar}
+                      style={[
+                        styles.storyAvatarImg,
+                        creator.id === 'jarvis' && { backgroundColor: '#EDE9FE', padding: 4 },
+                      ]}
+                      resizeMode={creator.id === 'jarvis' ? 'contain' : 'cover'}
+                    />
                     {/* TINY GOLD CHECK BADGE FOR PRO CREATORS */}
                     {creator.isPro && (
                       <View style={styles.storyTinyGoldCheckPos}>
@@ -951,7 +958,14 @@ export const ProMessagesScreen: React.FC<ProMessagesScreenProps> = ({
                     onPress={() => openCreatorStory(thread.creatorId)}
                     style={styles.convAvatarContainer}
                   >
-                    <Image source={thread.avatar} style={styles.convAvatarImg} />
+                    <Image
+                      source={thread.avatar}
+                      style={[
+                        styles.convAvatarImg,
+                        thread.creatorId === 'jarvis' && { backgroundColor: '#EDE9FE', padding: 4 },
+                      ]}
+                      resizeMode={thread.creatorId === 'jarvis' ? 'contain' : 'cover'}
+                    />
                     {thread.isPro && (
                       <View style={styles.convTinyGoldCheckPos}>
                         <TinyGoldCheck size={14} />
@@ -1033,7 +1047,14 @@ export const ProMessagesScreen: React.FC<ProMessagesScreenProps> = ({
                       onPress={() => openCreatorStory(activeChatThread.creatorId)}
                       style={styles.chatHeaderAvatarWrapper}
                     >
-                      <Image source={activeChatThread.avatar} style={styles.chatHeaderAvatar} />
+                      <Image
+                        source={activeChatThread.avatar}
+                        style={[
+                          styles.chatHeaderAvatar,
+                          activeChatThread.creatorId === 'jarvis' && { backgroundColor: '#EDE9FE', padding: 4 },
+                        ]}
+                        resizeMode={activeChatThread.creatorId === 'jarvis' ? 'contain' : 'cover'}
+                      />
                       {activeChatThread.isPro && (
                         <View style={styles.chatTinyGoldCheckPos}>
                           <TinyGoldCheck size={13} />
