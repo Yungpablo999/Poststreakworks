@@ -30,6 +30,7 @@ interface CreateScreenProps {
   onOpenIdeaAngle?: () => void;
   onOpenScript?: (ideaTitle?: string) => void;
   onOpenCaption?: (ideaTitle?: string) => void;
+  onOpenRepurpose?: (ideaTitle?: string) => void;
   onOpenMessages?: () => void;
   userProfile?: UserProfileData;
   onSaveProfile?: (updated: UserProfileData) => void;

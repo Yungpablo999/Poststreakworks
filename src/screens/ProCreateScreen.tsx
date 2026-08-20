@@ -62,6 +62,7 @@ interface ProCreateScreenProps {
   onOpenIdeaAngle?: () => void;
   onOpenScript?: (ideaTitle?: string) => void;
   onOpenCaption?: (ideaTitle?: string) => void;
+  onOpenRepurpose?: (ideaTitle?: string) => void;
   onOpenVoiceStudio?: () => void;
   onOpenMessages?: () => void;
   onSwitchToFree?: () => void;
@@ -110,6 +111,7 @@ export const ProCreateScreen: React.FC<ProCreateScreenProps> = ({
   onOpenIdeaAngle,
   onOpenScript,
   onOpenCaption,
+  onOpenRepurpose,
   onOpenVoiceStudio,
   onOpenMessages,
   onSwitchToFree,
@@ -619,8 +621,12 @@ export const ProCreateScreen: React.FC<ProCreateScreenProps> = ({
           <Pressable
             style={({ pressed }) => [styles.repurposeBannerCard, pressed && styles.btnPressed]}
             onPress={() => {
-              triggerModalPop();
-              setShowRepurposeModal(true);
+              if (onOpenRepurpose) {
+                onOpenRepurpose('3 mistakes that slow down new creators');
+              } else {
+                triggerModalPop();
+                setShowRepurposeModal(true);
+              }
             }}
           >
             <View style={{ flexDirection: 'row', gap: 14 }}>

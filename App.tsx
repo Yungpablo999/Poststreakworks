@@ -32,6 +32,7 @@ import { ProPostComposerScreen } from './src/screens/ProPostComposerScreen';
 import { ProIdeaStrategyScreen } from './src/screens/ProIdeaStrategyScreen';
 import { ProScriptScreen } from './src/screens/ProScriptScreen';
 import { ProCaptionScreen } from './src/screens/ProCaptionScreen';
+import { ProRepurposeScreen } from './src/screens/ProRepurposeScreen';
 import { ContentAngleScreen } from './src/screens/ContentAngleScreen';
 import { ScriptScreen } from './src/screens/ScriptScreen';
 import { CaptionScreen } from './src/screens/CaptionScreen';
@@ -71,6 +72,7 @@ type Screen =
   | 'content-angle'
   | 'script'
   | 'caption'
+  | 'repurpose'
   | 'messages'
   | 'collab-idea'
   | 'jarvis-pro'
@@ -491,6 +493,10 @@ export default function App() {
                 if (title) setSelectedIdeaTitle(title);
                 navigateTo('caption');
               }}
+              onOpenRepurpose={(title?: string) => {
+                if (title) setSelectedIdeaTitle(title);
+                navigateTo('repurpose');
+              }}
               onSwitchToFree={() => {
                 setUserProfile(prev => ({ ...prev, tier: 'free' }));
               }}
@@ -533,6 +539,10 @@ export default function App() {
               onOpenCaption={(title) => {
                 if (title) setSelectedIdeaTitle(title);
                 navigateTo('caption');
+              }}
+              onOpenRepurpose={(title?: string) => {
+                if (title) setSelectedIdeaTitle(title);
+                navigateTo('repurpose');
               }}
               onNavigateTab={(tab: TabType) => {
                 if (tab === 'home') {
