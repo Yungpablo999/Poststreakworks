@@ -307,7 +307,7 @@ export const ProRepurposeScreen: React.FC<ProRepurposeScreenProps> = ({
           hitSlop={8}
         >
           <Image
-            source={require('../../assets/images/jarvis-ghost-clean.png')}
+            source={require('../../assets/images/jarvis-core-flame.png')}
             style={styles.topGhostLogo}
             resizeMode="contain"
           />

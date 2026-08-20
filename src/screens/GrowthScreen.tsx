@@ -383,7 +383,7 @@ export const GrowthScreen: React.FC<GrowthScreenProps> = ({
             ]}
           >
             <Image
-              source={require('../../assets/images/jarvis-ghost-clean.png')}
+              source={require('../../assets/images/jarvis-core-flame.png')}
               style={styles.headerGhostLogo}
               resizeMode="contain"
             />
@@ -913,7 +913,7 @@ export const GrowthScreen: React.FC<GrowthScreenProps> = ({
                 ]}
               >
                 <Image
-                  source={require('../../assets/images/jarvis-ghost-clean.png')}
+                  source={require('../../assets/images/jarvis-core-flame.png')}
                   style={styles.jarvisFlameIcon}
                   resizeMode="contain"
                 />
