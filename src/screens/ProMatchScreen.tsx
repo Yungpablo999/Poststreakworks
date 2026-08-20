@@ -40,6 +40,7 @@ interface ProMatchScreenProps {
     planIndex: number;
     title: string;
   }) => void;
+  onOpenSquad?: () => void;
   onSwitchToFree?: () => void;
   userProfile?: UserProfileData;
   onSaveProfile?: (updated: UserProfileData) => void;
@@ -278,6 +279,7 @@ export const ProMatchScreen: React.FC<ProMatchScreenProps> = ({
   onOpenMessages,
   onOpenJarvisPro,
   onOpenCollabIdea,
+  onOpenSquad,
   onSwitchToFree,
   userProfile,
   onSaveProfile,
@@ -1173,7 +1175,13 @@ export const ProMatchScreen: React.FC<ProMatchScreenProps> = ({
                       <View style={{ flexDirection: 'row', gap: 10, marginTop: 14 }}>
                         <Pressable
                           style={({ pressed }) => [styles.openSquadBtn, pressed && styles.btnPressed]}
-                          onPress={() => showToast('🛡️ Opened Momentum Makers squad room')}
+                          onPress={() => {
+                            if (onOpenSquad) {
+                              onOpenSquad();
+                            } else {
+                              showToast('🛡️ Opened Momentum Makers squad room');
+                            }
+                          }}
                         >
                           <Text style={styles.openSquadBtnText}>Open Squad</Text>
                         </Pressable>
