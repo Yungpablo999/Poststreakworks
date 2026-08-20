@@ -18,6 +18,7 @@ import Svg, { Path, Circle, Rect } from 'react-native-svg';
 import * as Haptics from 'expo-haptics';
 import { LinearGradient } from 'expo-linear-gradient';
 import { FloatingTabBar, TabType } from '../components/FloatingTabBar';
+import { BrandToast } from '../components/BrandToast';
 import { UserProfileModal, UserProfileData } from '../components/UserProfileModal';
 
 // AUTHENTIC BRAND SVG ICONS
@@ -330,11 +331,7 @@ export const OpportunityReadinessScreen: React.FC<OpportunityReadinessScreenProp
       <StatusBar barStyle="dark-content" backgroundColor="#FAF8F5" />
       <View style={styles.container}>
         {/* TOAST BANNER */}
-        {toastMessage && (
-          <View style={styles.toastContainer}>
-            <Text style={styles.toastText}>{toastMessage}</Text>
-          </View>
-        )}
+        <BrandToast message={toastMessage} />
 
         {/* 1. TOP AIRY HEADER BAR */}
         <View style={styles.header}>

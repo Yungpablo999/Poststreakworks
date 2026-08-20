@@ -18,6 +18,7 @@ import Svg, { Path, Circle, Rect } from 'react-native-svg';
 import * as Haptics from 'expo-haptics';
 import { LinearGradient } from 'expo-linear-gradient';
 import { FloatingTabBar, TabType } from '../components/FloatingTabBar';
+import { BrandToast } from '../components/BrandToast';
 import { UserProfileModal, UserProfileData } from '../components/UserProfileModal';
 
 export const TinyGoldCheck = ({ size = 13 }: { size?: number }) => (
@@ -1079,11 +1080,7 @@ export const ProCreateScreen: React.FC<ProCreateScreenProps> = ({
         />
 
         {/* TOAST */}
-        {toastMessage && (
-          <View style={styles.toastContainer}>
-            <Text style={styles.toastText}>{toastMessage}</Text>
-          </View>
-        )}
+        <BrandToast message={toastMessage} />
       </View>
     </SafeAreaView>
   );

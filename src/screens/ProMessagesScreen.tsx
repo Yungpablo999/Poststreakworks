@@ -19,6 +19,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import * as Haptics from 'expo-haptics';
 import Svg, { Path, Circle, Rect } from 'react-native-svg';
 import { FloatingTabBar, TabType } from '../components/FloatingTabBar';
+import { BrandToast } from '../components/BrandToast';
 import { UserProfileModal, UserProfileData } from '../components/UserProfileModal';
 import { CreatorStoryModal, CreatorStoryData, StorySlide, TinyGoldCheck } from '../components/CreatorStoryModal';
 
@@ -1098,11 +1099,7 @@ export const ProMessagesScreen: React.FC<ProMessagesScreenProps> = ({
         />
 
         {/* TOAST */}
-        {toastMessage && (
-          <View style={styles.toastContainer}>
-            <Text style={styles.toastText}>{toastMessage}</Text>
-          </View>
-        )}
+        <BrandToast message={toastMessage} />
       </View>
     </SafeAreaView>
   );

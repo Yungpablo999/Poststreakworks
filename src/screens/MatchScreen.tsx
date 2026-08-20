@@ -19,6 +19,7 @@ import Svg, { Path, Circle, Defs, RadialGradient, Stop } from 'react-native-svg'
 import * as Haptics from 'expo-haptics';
 import { LinearGradient } from 'expo-linear-gradient';
 import { FloatingTabBar, TabType } from '../components/FloatingTabBar';
+import { BrandToast } from '../components/BrandToast';
 import { UserProfileModal, UserProfileData } from '../components/UserProfileModal';
 import { AnimatedCompletionModal } from '../components/AnimatedCompletionModal';
 
@@ -1415,11 +1416,7 @@ export const MatchScreen: React.FC<MatchScreenProps> = ({
         </ScrollView>
 
         {/* 3. TOAST OVERLAY */}
-        {toastMessage && (
-          <Animated.View style={[styles.toastContainer, { opacity: toastOpacity }]}>
-            <Text style={styles.toastText}>{toastMessage}</Text>
-          </Animated.View>
-        )}
+        <BrandToast message={toastMessage} />
 
         {/* 4. FLOATING LIQUID GLASS BOTTOM NAVIGATION BAR */}
         <FloatingTabBar

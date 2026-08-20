@@ -18,6 +18,7 @@ import Svg, { Path, Circle, Rect } from 'react-native-svg';
 import * as Haptics from 'expo-haptics';
 import { LinearGradient } from 'expo-linear-gradient';
 import { FloatingTabBar, TabType } from '../components/FloatingTabBar';
+import { BrandToast } from '../components/BrandToast';
 import { UserProfileModal, UserProfileData } from '../components/UserProfileModal';
 import { AnimatedCompletionModal } from '../components/AnimatedCompletionModal';
 
@@ -264,11 +265,7 @@ export const PlatformGrowthScreen: React.FC<PlatformGrowthScreenProps> = ({
       <StatusBar barStyle="dark-content" backgroundColor="#FAF8F5" />
       <View style={styles.container}>
         {/* TOAST BANNER */}
-        {toastMessage && (
-          <View style={styles.toastContainer}>
-            <Text style={styles.toastText}>{toastMessage}</Text>
-          </View>
-        )}
+        <BrandToast message={toastMessage} />
 
         {/* 1. TOP HEADER BAR (EXACT ICONS & BEHAVIORS AS ALL OTHER PAGES) */}
         <View style={styles.header}>
