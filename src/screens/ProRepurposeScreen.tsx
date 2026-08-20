@@ -19,6 +19,7 @@ import { UserProfileData } from '../components/UserProfileModal';
 import { AnimatedCompletionModal } from '../components/AnimatedCompletionModal';
 import { BrandToast } from '../components/BrandToast';
 import { FloatingTabBar, TabType } from '../components/FloatingTabBar';
+import { SocialBrandIcon } from '../components/SocialBrandIcon';
 
 interface ProRepurposeScreenProps {
   userProfile?: UserProfileData;
@@ -61,7 +62,7 @@ export const ProRepurposeScreen: React.FC<ProRepurposeScreenProps> = ({
     {
       id: 'tiktok',
       platform: 'TikTok Version',
-      icon: '📺',
+      platformType: 'tiktok',
       badge: 'READY',
       badgeColor: '#DCFCE7',
       badgeTextColor: '#15803D',
@@ -71,7 +72,7 @@ export const ProRepurposeScreen: React.FC<ProRepurposeScreenProps> = ({
     {
       id: 'linkedin',
       platform: 'LinkedIn Insight',
-      icon: '💼',
+      platformType: 'linkedin',
       badge: 'OPTIMIZED',
       badgeColor: '#DCFCE7',
       badgeTextColor: '#15803D',
@@ -81,7 +82,7 @@ export const ProRepurposeScreen: React.FC<ProRepurposeScreenProps> = ({
     {
       id: 'x_post',
       platform: 'X Thread Starter',
-      icon: '💬',
+      platformType: 'x',
       badge: 'READY',
       badgeColor: '#DCFCE7',
       badgeTextColor: '#15803D',
@@ -357,12 +358,12 @@ export const ProRepurposeScreen: React.FC<ProRepurposeScreenProps> = ({
           {/* Formats Grid */}
           <View style={styles.formatsGrid}>
             {[
-              { id: 'tiktok', name: 'TikTok', icon: '📺' },
-              { id: 'ig_reel', name: 'IG Reel', icon: '📸' },
-              { id: 'linkedin', name: 'LinkedIn', icon: '💼' },
-              { id: 'x_post', name: 'X Post', icon: '𝕏' },
-              { id: 'shorts', name: 'Shorts', icon: '▶️' },
-              { id: 'more', name: 'More', icon: '➕', isMore: true },
+              { id: 'tiktok', name: 'TikTok', platformType: 'tiktok' },
+              { id: 'ig_reel', name: 'IG Reel', platformType: 'instagram' },
+              { id: 'linkedin', name: 'LinkedIn', platformType: 'linkedin' },
+              { id: 'x_post', name: 'X Post', platformType: 'x' },
+              { id: 'shorts', name: 'Shorts', platformType: 'youtube' },
+              { id: 'more', name: 'More', isMore: true },
             ].map((fmt) => {
               const isSelected = selectedFormats.includes(fmt.id);
               if (fmt.isMore) {
@@ -372,7 +373,7 @@ export const ProRepurposeScreen: React.FC<ProRepurposeScreenProps> = ({
                     style={({ pressed }) => [styles.formatMoreCard, pressed && styles.btnPressed]}
                     onPress={() => showToast('💡 Custom format creator unlocking soon')}
                   >
-                    <Text style={{ fontSize: 15 }}>{fmt.icon}</Text>
+                    <Text style={{ fontSize: 18, color: '#64748B', fontWeight: '900' }}>＋</Text>
                     <Text style={styles.formatMoreText}>{fmt.name}</Text>
                   </Pressable>
                 );
@@ -387,7 +388,9 @@ export const ProRepurposeScreen: React.FC<ProRepurposeScreenProps> = ({
                   ]}
                   onPress={() => handleToggleFormat(fmt.id)}
                 >
-                  <Text style={{ fontSize: 16 }}>{fmt.icon}</Text>
+                  <View style={{ height: 22, justifyContent: 'center', alignItems: 'center' }}>
+                    <SocialBrandIcon platform={fmt.platformType!} size={20} />
+                  </View>
                   <Text style={[styles.formatCardName, isSelected && styles.formatCardNameActive]}>
                     {fmt.name}
                   </Text>
@@ -429,8 +432,8 @@ export const ProRepurposeScreen: React.FC<ProRepurposeScreenProps> = ({
             {versions.map((ver) => (
               <View key={ver.id} style={styles.versionCard}>
                 <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-                    <Text style={{ fontSize: 14 }}>{ver.icon}</Text>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 7 }}>
+                    <SocialBrandIcon platform={ver.platformType} size={18} />
                     <Text style={styles.versionPlatformText}>{ver.platform}</Text>
                   </View>
                   <View style={[styles.versionBadge, { backgroundColor: ver.badgeColor }]}>
@@ -630,7 +633,7 @@ export const ProRepurposeScreen: React.FC<ProRepurposeScreenProps> = ({
           <View style={{ gap: 8, marginTop: 10 }}>
             <View style={styles.scheduleSlotRow}>
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-                <Text style={{ fontSize: 15 }}>📺</Text>
+                <SocialBrandIcon platform="tiktok" size={18} />
                 <Text style={styles.scheduleSlotName}>TikTok</Text>
               </View>
               <View style={styles.scheduleTimePill}>
@@ -640,7 +643,7 @@ export const ProRepurposeScreen: React.FC<ProRepurposeScreenProps> = ({
 
             <View style={styles.scheduleSlotRow}>
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-                <Text style={{ fontSize: 15 }}>📸</Text>
+                <SocialBrandIcon platform="instagram" size={18} />
                 <Text style={styles.scheduleSlotName}>Instagram</Text>
               </View>
               <View style={styles.scheduleTimePill}>
