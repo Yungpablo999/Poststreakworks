@@ -346,6 +346,7 @@ export default function App() {
               onOpenGrowth={() => navigateTo('growth')}
               onOpenMatch={() => navigateTo('match')}
               onOpenCreate={() => navigateTo('create')}
+              onOpenVoiceStudio={() => navigateTo('voice-studio')}
               onOpenPostComposer={(ideaTitle) => {
                 if (ideaTitle) setComposerIdeaTitle(ideaTitle);
                 navigateTo('composer');

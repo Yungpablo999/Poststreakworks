@@ -414,8 +414,12 @@ export const ProCreateScreen: React.FC<ProCreateScreenProps> = ({
               <Pressable
                 style={styles.pipelineStepItem}
                 onPress={() => {
-                  triggerModalPop();
-                  setShowVoiceStudioModal(true);
+                  if (onOpenVoiceStudio) {
+                    onOpenVoiceStudio();
+                  } else {
+                    triggerModalPop();
+                    setShowVoiceStudioModal(true);
+                  }
                 }}
               >
                 <View style={styles.pipelineIconBox}>
@@ -550,8 +554,12 @@ export const ProCreateScreen: React.FC<ProCreateScreenProps> = ({
             <Pressable
               style={({ pressed }) => [styles.toolGridCard, pressed && styles.btnPressed]}
               onPress={() => {
-                triggerModalPop();
-                setShowVoiceStudioModal(true);
+                if (onOpenVoiceStudio) {
+                  onOpenVoiceStudio();
+                } else {
+                  triggerModalPop();
+                  setShowVoiceStudioModal(true);
+                }
               }}
             >
               <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' }}>
