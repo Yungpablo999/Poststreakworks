@@ -757,53 +757,20 @@ export const ProRepurposeScreen: React.FC<ProRepurposeScreenProps> = ({
         </View>
 
         {/* ============================================================ */}
-        {/* BOTTOM ACTION BUTTONS                                        */}
+        {/* BOTTOM ACTION BUTTON: REGENERATE                             */}
         {/* ============================================================ */}
-        <View style={{ gap: 10, marginTop: 20 }}>
-          <View style={{ flexDirection: 'row', gap: 10 }}>
-            <Pressable
-              style={({ pressed }) => [styles.bottomScheduleBtn, pressed && styles.btnPressed]}
-              onPress={handleScheduleAll}
-            >
-              <Text style={styles.bottomScheduleBtnText}>Schedule 📅</Text>
-            </Pressable>
-
-            <Pressable
-              style={({ pressed }) => [styles.bottomRegenerateBtn, pressed && styles.btnPressed]}
-              onPress={() => {
-                if (Platform.OS !== 'web') {
-                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-                }
-                showToast('🔄 Regenerating all platform versions...');
-                handleGenerateVersions();
-              }}
-            >
-              <Text style={styles.bottomRegenerateBtnText}>Regenerate</Text>
-            </Pressable>
-          </View>
-
-          {/* Redesigned Luxury Save Draft Button */}
+        <View style={{ marginTop: 20 }}>
           <Pressable
-            style={({ pressed }) => [styles.saveDraftFullBtn, pressed && styles.btnPressed]}
+            style={({ pressed }) => [styles.bottomRegenerateFullBtn, pressed && styles.btnPressed]}
             onPress={() => {
               if (Platform.OS !== 'web') {
-                Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
               }
-              setCompletionData({
-                title: 'Repurpose Draft Saved!',
-                subtitle: 'All 5 tailored platform posts saved to your draft bank.',
-                badgeText: '💾 DRAFT SECURED (+120 XP)',
-                xpEarned: 120,
-                speechBubble: 'Your multi-channel repurpose draft is safe and ready to schedule anytime! 🔥',
-              });
-              setShowCompletionModal(true);
+              showToast('🔄 Regenerating all platform versions...');
+              handleGenerateVersions();
             }}
           >
-            <Text style={{ fontSize: 13, marginRight: 6 }}>💾</Text>
-            <Text style={styles.saveDraftFullBtnText}>Save Draft</Text>
-            <View style={styles.saveDraftXpPill}>
-              <Text style={styles.saveDraftXpPillText}>+120 XP</Text>
-            </View>
+            <Text style={styles.bottomRegenerateFullBtnText}>🔄  Regenerate All Formats</Text>
           </Pressable>
         </View>
       </ScrollView>
@@ -1705,71 +1672,25 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
 
-  // BOTTOM ACTION BUTTONS
-  bottomScheduleBtn: {
-    flex: 1,
-    backgroundColor: '#582CDB',
-    paddingVertical: 13,
-    borderRadius: 14,
-    alignItems: 'center',
-    shadowColor: '#582CDB',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.25,
-    shadowRadius: 8,
-    elevation: 3,
-  },
-  bottomScheduleBtnText: {
-    color: '#FFFFFF',
-    fontSize: 13,
-    fontWeight: '900',
-  },
-  bottomRegenerateBtn: {
-    flex: 1,
-    backgroundColor: '#FAF8F5',
-    borderWidth: 1,
-    borderColor: '#E2E8F0',
-    paddingVertical: 13,
-    borderRadius: 14,
-    alignItems: 'center',
-  },
-  bottomRegenerateBtnText: {
-    color: '#171420',
-    fontSize: 13,
-    fontWeight: '900',
-  },
-  saveDraftFullBtn: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#FAF8F5',
+  // BOTTOM ACTION BUTTON
+  bottomRegenerateFullBtn: {
+    backgroundColor: '#FFFFFF',
     borderWidth: 1.5,
     borderColor: '#E2E8F0',
-    paddingVertical: 12,
-    borderRadius: 14,
-    marginTop: 2,
+    paddingVertical: 14,
+    borderRadius: 16,
+    alignItems: 'center',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.03,
+    shadowOpacity: 0.04,
     shadowRadius: 4,
     elevation: 1,
   },
-  saveDraftFullBtnText: {
+  bottomRegenerateFullBtnText: {
     color: '#171420',
-    fontSize: 12.5,
+    fontSize: 13,
     fontWeight: '900',
     letterSpacing: 0.2,
-  },
-  saveDraftXpPill: {
-    backgroundColor: '#EDE9FE',
-    paddingHorizontal: 7,
-    paddingVertical: 2.5,
-    borderRadius: 6,
-    marginLeft: 8,
-  },
-  saveDraftXpPillText: {
-    fontSize: 9.5,
-    fontWeight: '900',
-    color: '#582CDB',
   },
 
   // EXTRA PLATFORMS MODAL
