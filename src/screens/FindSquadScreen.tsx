@@ -206,6 +206,7 @@ export const FindSquadScreen: React.FC<FindSquadScreenProps> = ({
   const [selectedSquad, setSelectedSquad] = useState<SquadItem>(ALL_SQUADS[0]);
   const [previewModalSquad, setPreviewModalSquad] = useState<SquadItem | null>(null);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [appliedSquadIds, setAppliedSquadIds] = useState<string[]>([]);
 
   // Celebration pop-up state
   const [celebrationState, setCelebrationState] = useState<{
@@ -257,16 +258,18 @@ export const FindSquadScreen: React.FC<FindSquadScreenProps> = ({
     if (Platform.OS !== 'web') {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     }
+    if (!appliedSquadIds.includes(squad.id)) {
+      setAppliedSquadIds((prev) => [...prev, squad.id]);
+    }
     setPreviewModalSquad(null);
     setCelebrationState({
       visible: true,
-      title: 'Squad Application Dispatched!',
-      description: `Your verified creator profile, 47-day streak badge, and portfolio were sent to the hosts of ${squad.name}.`,
-      xpAmount: squad.xpReward || 100,
-      actionLabel: 'Enter Squad Room ➔',
+      title: 'Application Submitted!',
+      description: `Your verified creator profile and 47-day streak record were sent to the hosts of ${squad.name}. Applications are reviewed within 2 hours. You\'ll get a notification once accepted!`,
+      xpAmount: 50,
+      actionLabel: 'Explore More Squads 👍',
       onAction: () => {
         setCelebrationState((prev) => ({ ...prev, visible: false }));
-        if (onOpenSquad) onOpenSquad();
       },
     });
   };
@@ -559,10 +562,12 @@ export const FindSquadScreen: React.FC<FindSquadScreenProps> = ({
                   onPress={() => handleRequestToJoin(featuredSquad)}
                 >
                   <LinearGradient
-                    colors={['#9333EA', '#7E22CE']}
+                    colors={appliedSquadIds.includes(featuredSquad.id) ? ['#D97706', '#B45309'] : ['#9333EA', '#7E22CE']}
                     style={styles.featuredJoinGradient}
                   >
-                    <Text style={styles.featuredJoinBtnText}>Join Squad 🚀</Text>
+                    <Text style={styles.featuredJoinBtnText}>
+                      {appliedSquadIds.includes(featuredSquad.id) ? '⏳ Pending Review' : 'Apply to Join 🚀'}
+                    </Text>
                   </LinearGradient>
                 </Pressable>
               </View>
@@ -724,10 +729,27 @@ export const FindSquadScreen: React.FC<FindSquadScreenProps> = ({
                     </View>
 
                     <Pressable
-                      style={({ pressed }) => [styles.cardQuickJoinBtn, pressed && styles.btnPressed]}
-                      onPress={() => handleRequestToJoin(squad)}
+                      style={({ pressed }) => [
+                        styles.cardQuickJoinBtn,
+                        appliedSquadIds.includes(squad.id) && styles.cardQuickJoinBtnPending,
+                        pressed && styles.btnPressed,
+                      ]}
+                      onPress={() => {
+                        if (appliedSquadIds.includes(squad.id)) {
+                          showToast(`Your application for ${squad.name} is currently under review.`);
+                        } else {
+                          handleRequestToJoin(squad);
+                        }
+                      }}
                     >
-                      <Text style={styles.cardQuickJoinBtnText}>Join ➔</Text>
+                      <Text
+                        style={[
+                          styles.cardQuickJoinBtnText,
+                          appliedSquadIds.includes(squad.id) && styles.cardQuickJoinBtnTextPending,
+                        ]}
+                      >
+                        {appliedSquadIds.includes(squad.id) ? '⏳ Pending' : 'Apply ➔'}
+                      </Text>
                     </Pressable>
                   </View>
                 </Pressable>
@@ -838,17 +860,23 @@ export const FindSquadScreen: React.FC<FindSquadScreenProps> = ({
 
               {/* Action Button */}
               <View style={styles.modalActionsRow}>
-                <Pressable
-                  style={({ pressed }) => [styles.modalSolidBtnFull, pressed && styles.btnPressed]}
-                  onPress={() => handleRequestToJoin(previewModalSquad)}
-                >
-                  <LinearGradient
-                    colors={['#784DF0', '#582CDB']}
-                    style={styles.modalSolidGradient}
+                {appliedSquadIds.includes(previewModalSquad.id) ? (
+                  <View style={styles.modalPendingBox}>
+                    <Text style={styles.modalPendingText}>⏳ Application Under Review</Text>
+                  </View>
+                ) : (
+                  <Pressable
+                    style={({ pressed }) => [styles.modalSolidBtnFull, pressed && styles.btnPressed]}
+                    onPress={() => handleRequestToJoin(previewModalSquad)}
                   >
-                    <Text style={styles.modalSolidBtnText}>Apply to Join {previewModalSquad.name} 🚀</Text>
-                  </LinearGradient>
-                </Pressable>
+                    <LinearGradient
+                      colors={['#784DF0', '#582CDB']}
+                      style={styles.modalSolidGradient}
+                    >
+                      <Text style={styles.modalSolidBtnText}>Apply to Join {previewModalSquad.name} 🚀</Text>
+                    </LinearGradient>
+                  </Pressable>
+                )}
               </View>
             </View>
           )}
@@ -1669,6 +1697,26 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.25,
     shadowRadius: 8,
     elevation: 3,
+  },
+  modalPendingBox: {
+    flex: 1,
+    backgroundColor: '#FEF3C7',
+    borderWidth: 1,
+    borderColor: '#FDE68A',
+    borderRadius: 14,
+    paddingVertical: 12,
+    alignItems: 'center',
+  },
+  modalPendingText: {
+    fontSize: 13,
+    fontWeight: '900',
+    color: '#92400E',
+  },
+  cardQuickJoinBtnPending: {
+    backgroundColor: '#FEF3C7',
+  },
+  cardQuickJoinBtnTextPending: {
+    color: '#92400E',
   },
   modalSolidGradient: {
     paddingVertical: 12,
