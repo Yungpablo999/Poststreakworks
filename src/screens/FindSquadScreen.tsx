@@ -15,7 +15,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as Haptics from 'expo-haptics';
-import Svg, { Path, Circle } from 'react-native-svg';
+import Svg, { Path, Circle, Rect } from 'react-native-svg';
 import { FloatingTabBar, TabType } from '../components/FloatingTabBar';
 import { UserProfileData, UserProfileModal } from '../components/UserProfileModal';
 import { AnimatedCompletionModal } from '../components/AnimatedCompletionModal';
@@ -51,13 +51,14 @@ interface SquadItem {
   statusType: 'open' | 'request' | 'limited';
   description: string;
   squadGoal: string;
+  weeklyQuest: string;
   isSaved?: boolean;
 }
 
 const INITIAL_RECOMMENDED_SQUADS: SquadItem[] = [
   {
     id: 'sq_1',
-    category: 'GROWTH',
+    category: 'GROWTH SQUAD',
     categoryType: 'growth',
     fitScore: 94,
     name: 'Momentum Makers',
@@ -68,14 +69,15 @@ const INITIAL_RECOMMENDED_SQUADS: SquadItem[] = [
       require('../../assets/images/amara-avatar.jpg'),
       require('../../assets/images/tomi-avatar.jpg'),
     ],
-    statusText: 'Open this week',
+    statusText: 'Open this week (2 slots left)',
     statusType: 'open',
     description: 'Daily accountability sprints, split-screen Reel duets, and viral hook breakdown workshops.',
     squadGoal: 'Grow short-form reach & post daily',
+    weeklyQuest: '3 Duo Reel Collaborations & 14-Day Streak',
   },
   {
     id: 'sq_2',
-    category: 'EDUCATION',
+    category: 'EDUCATION SQUAD',
     categoryType: 'education',
     fitScore: 89,
     name: 'Creator Systems Club',
@@ -86,14 +88,15 @@ const INITIAL_RECOMMENDED_SQUADS: SquadItem[] = [
       require('../../assets/images/marcus-avatar.jpg'),
       require('../../assets/images/kemi-avatar.jpg'),
     ],
-    statusText: 'Request required',
+    statusText: 'Request required (review < 2h)',
     statusType: 'request',
     description: 'High-leverage batch scripting workflows, voice studios, and YouTube Shorts pacing analysis.',
     squadGoal: 'Systematize weekly content batches',
+    weeklyQuest: 'Batch 5 Script Drafts in Jarvis Voice Studio',
   },
   {
     id: 'sq_3',
-    category: 'LIFESTYLE',
+    category: 'LIFESTYLE SQUAD',
     categoryType: 'lifestyle',
     fitScore: 86,
     name: 'Lifestyle Builders',
@@ -104,10 +107,11 @@ const INITIAL_RECOMMENDED_SQUADS: SquadItem[] = [
       require('../../assets/images/elena-avatar.jpg'),
       require('../../assets/images/zainab-avatar.jpg'),
     ],
-    statusText: 'Open Now',
+    statusText: 'Open Now (Instant entry)',
     statusType: 'open',
     description: 'Aesthetic B-roll exchanges, Lagos creator meetups, and cross-platform storytelling format experiments.',
     squadGoal: 'Weekly collaborative challenges',
+    weeklyQuest: '4 Cross-Platform Story Posts & B-Roll Swap',
   },
   {
     id: 'sq_4',
@@ -122,14 +126,15 @@ const INITIAL_RECOMMENDED_SQUADS: SquadItem[] = [
       require('../../assets/images/tomi-avatar.jpg'),
       require('../../assets/images/david-avatar.jpg'),
     ],
-    statusText: 'Limited spots',
+    statusText: 'Limited spots (1 remaining)',
     statusType: 'limited',
     description: 'Brand deal pitch feedback, media kit rate audits, and sponsor video blueprint reviews.',
     squadGoal: 'Land first 3 paid brand partnerships',
+    weeklyQuest: 'Pitch 5 Verified Brands with UGC Blueprints',
   },
   {
     id: 'sq_5',
-    category: 'GROWTH',
+    category: 'GROWTH SQUAD',
     categoryType: 'growth',
     fitScore: 80,
     name: 'Peak Systems',
@@ -142,8 +147,9 @@ const INITIAL_RECOMMENDED_SQUADS: SquadItem[] = [
     ],
     statusText: 'Open this week',
     statusType: 'open',
-    description: 'Hyper-focused 14-day posting gauntlets with live analytics check-ins.',
+    description: 'Hyper-focused 14-day posting gauntlets with live analytics check-ins and script sprints.',
     squadGoal: 'Unlock 100k views milestone',
+    weeklyQuest: 'Complete 14 Consecutive Day Posting Gauntlet',
   },
 ];
 
@@ -171,7 +177,7 @@ export const FindSquadScreen: React.FC<FindSquadScreenProps> = ({
   // Filter States
   const [selectedNiche, setSelectedNiche] = useState<string>('all');
   const [selectedTypeFilter, setSelectedTypeFilter] = useState<string>('growth');
-  const [activeGoals, setActiveGoals] = useState<string[]>(['Grow short-form']);
+  const [activeGoals, setActiveGoals] = useState<string[]>(['Grow short-form', 'Weekly collabs']);
   const [selectedStreakLevel, setSelectedStreakLevel] = useState<string>('similar');
   const [proFilterOnly, setProFilterOnly] = useState<boolean>(true);
   const [aiRecommendedOnly, setAiRecommendedOnly] = useState<boolean>(true);
@@ -248,7 +254,7 @@ export const FindSquadScreen: React.FC<FindSquadScreenProps> = ({
     setCelebrationState({
       visible: true,
       title: 'Squad Application Dispatched!',
-      description: `Your profile, 47-day streak proof, and creator portfolio were sent to the hosts of ${squad.name}.`,
+      description: `Your verified creator profile, 47-day streak record, and portfolio were sent to the hosts of ${squad.name}.`,
       xpAmount: 100,
       actionLabel: 'Enter Squad Room ➔',
       onAction: () => {
@@ -271,6 +277,7 @@ export const FindSquadScreen: React.FC<FindSquadScreenProps> = ({
       if (selectedNiche === 'growth' && sq.categoryType !== 'growth') return false;
       if (selectedNiche === 'education' && sq.categoryType !== 'education') return false;
       if (selectedNiche === 'lifestyle' && sq.categoryType !== 'lifestyle') return false;
+      if (selectedNiche === 'ugc' && sq.categoryType !== 'brand') return false;
     }
     return true;
   });
@@ -279,13 +286,13 @@ export const FindSquadScreen: React.FC<FindSquadScreenProps> = ({
     <SafeAreaView style={styles.safeArea} edges={['top', 'left', 'right']}>
       {/* BACKGROUND GRADIENTS */}
       <LinearGradient
-        colors={['#FAF8F5', '#F5F2EB', '#FAF8F5']}
+        colors={['#FAF8F5', '#F5F0E8', '#FAF8F5']}
         style={StyleSheet.absoluteFill}
       />
       <View style={styles.bgGlowPurple} pointerEvents="none" />
       <View style={styles.bgGlowGold} pointerEvents="none" />
 
-      {/* TOP APP HEADER */}
+      {/* TOP LUXURY APP HEADER */}
       <View style={styles.topHeaderBar}>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
           <Pressable
@@ -332,7 +339,7 @@ export const FindSquadScreen: React.FC<FindSquadScreenProps> = ({
 
           <Pressable
             style={({ pressed }) => [styles.headerIconCircle, pressed && styles.btnPressed]}
-            onPress={() => showToast('🔔 1 notification: Momentum Makers opened a new collab slot!')}
+            onPress={() => showToast('🔔 1 notification: Momentum Makers opened 2 new collab slots!')}
             hitSlop={6}
           >
             <Svg width={17} height={17} viewBox="0 0 24 24" fill="none">
@@ -370,12 +377,18 @@ export const FindSquadScreen: React.FC<FindSquadScreenProps> = ({
         showsVerticalScrollIndicator={false}
       >
         {/* ============================================================ */}
-        {/* 1. HERO TITLE & DISCOVERY BADGE                              */}
+        {/* 1. HERO TITLE & DISCOVERY BADGES                             */}
         {/* ============================================================ */}
         <View style={styles.heroSection}>
-          <View style={styles.discoveryPill}>
+          <LinearGradient
+            colors={['#784DF0', '#582CDB']}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 0 }}
+            style={styles.discoveryPillGradient}
+          >
+            <View style={styles.sparkleWhiteDot} />
             <Text style={styles.discoveryPillText}>SQUAD DISCOVERY</Text>
-          </View>
+          </LinearGradient>
 
           <Text style={styles.heroTitle}>Find creators to build with.</Text>
           <Text style={styles.heroSubtitle}>
@@ -409,10 +422,15 @@ export const FindSquadScreen: React.FC<FindSquadScreenProps> = ({
         </View>
 
         {/* ============================================================ */}
-        {/* 2. RECOMMENDED FOR YOU METRIC CARD                           */}
+        {/* 2. RECOMMENDED FOR YOU METRIC CARD (LUXURY GRID)             */}
         {/* ============================================================ */}
         <View style={styles.recommendedMetricsCard}>
-          <Text style={styles.recommendedCardTitle}>RECOMMENDED FOR YOU</Text>
+          <View style={styles.recommendedCardTopRow}>
+            <Text style={styles.recommendedCardTitle}>RECOMMENDED FOR YOU</Text>
+            <View style={styles.aiVerifiedBadge}>
+              <Text style={styles.aiVerifiedBadgeText}>⚡ 94% SYNC</Text>
+            </View>
+          </View>
 
           <View style={styles.metricsGrid}>
             <View style={styles.metricItem}>
@@ -446,11 +464,11 @@ export const FindSquadScreen: React.FC<FindSquadScreenProps> = ({
           contentContainerStyle={styles.nicheFilterScroll}
         >
           {[
-            { id: 'all', label: 'Creator Education' },
-            { id: 'growth', label: 'Growth' },
-            { id: 'lifestyle', label: 'Lifestyle' },
-            { id: 'tech', label: 'Tech' },
-            { id: 'ugc', label: 'Brand & UGC' },
+            { id: 'all', label: '🎓 Creator Education' },
+            { id: 'growth', label: '📈 Growth' },
+            { id: 'lifestyle', label: '🌿 Lifestyle' },
+            { id: 'tech', label: '💻 Tech' },
+            { id: 'ugc', label: '✨ Brand & UGC' },
           ].map((item) => {
             const isSelected = selectedNiche === item.id;
             return (
@@ -494,8 +512,11 @@ export const FindSquadScreen: React.FC<FindSquadScreenProps> = ({
             ]}
             onPress={() => setSelectedTypeFilter('growth')}
           >
-            <Text style={{ fontSize: 20, marginBottom: 12 }}>📈</Text>
+            <View style={styles.squadTypeIconBubbleGold}>
+              <Text style={{ fontSize: 18 }}>📈</Text>
+            </View>
             <Text style={styles.growthTypeCardTitle}>Growth Squads</Text>
+            <Text style={styles.squadTypeCardSubtitle}>Accelerate reach & streaks</Text>
           </Pressable>
 
           <Pressable
@@ -507,8 +528,11 @@ export const FindSquadScreen: React.FC<FindSquadScreenProps> = ({
             ]}
             onPress={() => setSelectedTypeFilter('collab')}
           >
-            <Text style={{ fontSize: 20, marginBottom: 12 }}>💎</Text>
+            <View style={styles.squadTypeIconBubblePurple}>
+              <Text style={{ fontSize: 18 }}>💎</Text>
+            </View>
             <Text style={styles.collabTypeCardTitle}>Collab Squads</Text>
+            <Text style={styles.squadTypeCardSubtitle}>Duets, splits & joint scripts</Text>
           </Pressable>
         </View>
 
@@ -519,59 +543,29 @@ export const FindSquadScreen: React.FC<FindSquadScreenProps> = ({
           <Text style={styles.sectionHeading}>Squad Goals</Text>
 
           <View style={styles.goalsWrapRow}>
-            <Pressable
-              style={({ pressed }) => [
-                styles.goalPill,
-                activeGoals.includes('Post consistently') && styles.goalPillActive,
-                pressed && styles.btnPressed,
-              ]}
-              onPress={() => handleToggleGoal('Post consistently')}
-            >
-              <Text
-                style={[
-                  styles.goalPillText,
-                  activeGoals.includes('Post consistently') && styles.goalPillTextActive,
-                ]}
-              >
-                Post consistently
-              </Text>
-            </Pressable>
-
-            <Pressable
-              style={({ pressed }) => [
-                styles.goalPill,
-                activeGoals.includes('Weekly collabs') && styles.goalPillActive,
-                pressed && styles.btnPressed,
-              ]}
-              onPress={() => handleToggleGoal('Weekly collabs')}
-            >
-              <Text
-                style={[
-                  styles.goalPillText,
-                  activeGoals.includes('Weekly collabs') && styles.goalPillTextActive,
-                ]}
-              >
-                Weekly collabs
-              </Text>
-            </Pressable>
-
-            <Pressable
-              style={({ pressed }) => [
-                styles.goalPill,
-                activeGoals.includes('Grow short-form') && styles.goalPillActive,
-                pressed && styles.btnPressed,
-              ]}
-              onPress={() => handleToggleGoal('Grow short-form')}
-            >
-              <Text
-                style={[
-                  styles.goalPillText,
-                  activeGoals.includes('Grow short-form') && styles.goalPillTextActive,
-                ]}
-              >
-                Grow short-form {activeGoals.includes('Grow short-form') ? '✕' : ''}
-              </Text>
-            </Pressable>
+            {['Post consistently', 'Weekly collabs', 'Grow short-form', 'Cross-platform reach'].map((goal) => {
+              const isGoalActive = activeGoals.includes(goal);
+              return (
+                <Pressable
+                  key={goal}
+                  style={({ pressed }) => [
+                    styles.goalPill,
+                    isGoalActive && styles.goalPillActive,
+                    pressed && styles.btnPressed,
+                  ]}
+                  onPress={() => handleToggleGoal(goal)}
+                >
+                  <Text
+                    style={[
+                      styles.goalPillText,
+                      isGoalActive && styles.goalPillTextActive,
+                    ]}
+                  >
+                    {goal} {isGoalActive ? '✕' : '+'}
+                  </Text>
+                </Pressable>
+              );
+            })}
           </View>
         </View>
 
@@ -582,82 +576,39 @@ export const FindSquadScreen: React.FC<FindSquadScreenProps> = ({
           <View style={styles.streakHeaderRow}>
             <Text style={styles.sectionHeading}>Streak Level</Text>
             <View style={styles.userStreakBadge}>
-              <Text style={styles.userStreakBadgeText}>Your streak: 47 days</Text>
+              <Text style={styles.userStreakBadgeText}>🔥 Your streak: 47 days</Text>
             </View>
           </View>
 
           <View style={styles.streakGrid}>
-            <Pressable
-              style={({ pressed }) => [
-                styles.streakOptionBtn,
-                selectedStreakLevel === 'any' && styles.streakOptionBtnActive,
-                pressed && styles.btnPressed,
-              ]}
-              onPress={() => setSelectedStreakLevel('any')}
-            >
-              <Text
-                style={[
-                  styles.streakOptionText,
-                  selectedStreakLevel === 'any' && styles.streakOptionTextActive,
-                ]}
-              >
-                Any Squad
-              </Text>
-            </Pressable>
-
-            <Pressable
-              style={({ pressed }) => [
-                styles.streakOptionBtn,
-                selectedStreakLevel === 'similar' && styles.streakOptionBtnActive,
-                pressed && styles.btnPressed,
-              ]}
-              onPress={() => setSelectedStreakLevel('similar')}
-            >
-              <Text
-                style={[
-                  styles.streakOptionText,
-                  selectedStreakLevel === 'similar' && styles.streakOptionTextActive,
-                ]}
-              >
-                Similar streak 🗹
-              </Text>
-            </Pressable>
-
-            <Pressable
-              style={({ pressed }) => [
-                styles.streakOptionBtn,
-                selectedStreakLevel === 'strong' && styles.streakOptionBtnActive,
-                pressed && styles.btnPressed,
-              ]}
-              onPress={() => setSelectedStreakLevel('strong')}
-            >
-              <Text
-                style={[
-                  styles.streakOptionText,
-                  selectedStreakLevel === 'strong' && styles.streakOptionTextActive,
-                ]}
-              >
-                Strong Streak
-              </Text>
-            </Pressable>
-
-            <Pressable
-              style={({ pressed }) => [
-                styles.streakOptionBtn,
-                selectedStreakLevel === 'elite' && styles.streakOptionBtnActive,
-                pressed && styles.btnPressed,
-              ]}
-              onPress={() => setSelectedStreakLevel('elite')}
-            >
-              <Text
-                style={[
-                  styles.streakOptionText,
-                  selectedStreakLevel === 'elite' && styles.streakOptionTextActive,
-                ]}
-              >
-                Elite Streak
-              </Text>
-            </Pressable>
+            {[
+              { id: 'any', label: 'Any Squad' },
+              { id: 'similar', label: 'Similar streak 🗹' },
+              { id: 'strong', label: 'Strong Streak 🔥' },
+              { id: 'elite', label: 'Elite Streak ⚡' },
+            ].map((st) => {
+              const isSelected = selectedStreakLevel === st.id;
+              return (
+                <Pressable
+                  key={st.id}
+                  style={({ pressed }) => [
+                    styles.streakOptionBtn,
+                    isSelected && styles.streakOptionBtnActive,
+                    pressed && styles.btnPressed,
+                  ]}
+                  onPress={() => setSelectedStreakLevel(st.id)}
+                >
+                  <Text
+                    style={[
+                      styles.streakOptionText,
+                      isSelected && styles.streakOptionTextActive,
+                    ]}
+                  >
+                    {st.label}
+                  </Text>
+                </Pressable>
+              );
+            })}
           </View>
         </View>
 
@@ -671,11 +622,11 @@ export const FindSquadScreen: React.FC<FindSquadScreenProps> = ({
               onPress={() => showToast('Showing all 14 active creator squads')}
               hitSlop={8}
             >
-              <Text style={styles.viewAllText}>VIEW ALL</Text>
+              <Text style={styles.viewAllText}>VIEW ALL ➔</Text>
             </Pressable>
           </View>
 
-          <View style={{ gap: 12, marginTop: 12 }}>
+          <View style={{ gap: 14, marginTop: 12 }}>
             {filteredSquads.map((squad) => {
               const isSelected = selectedSquad.id === squad.id;
 
@@ -719,22 +670,28 @@ export const FindSquadScreen: React.FC<FindSquadScreenProps> = ({
                       </Text>
                     </View>
 
-                    <View style={{ alignItems: 'flex-end' }}>
+                    <LinearGradient
+                      colors={['#EDE9FE', '#DDD6FE']}
+                      style={styles.fitScorePill}
+                    >
                       <Text style={styles.fitScoreNumber}>{squad.fitScore}%</Text>
-                      <Text style={styles.fitScoreLabel}>FIT SCORE</Text>
-                    </View>
+                      <Text style={styles.fitScoreLabel}>FIT</Text>
+                    </LinearGradient>
                   </View>
 
-                  {/* Title */}
+                  {/* Title & Goal */}
                   <Text style={styles.squadName}>{squad.name}</Text>
+                  <Text style={styles.squadDescText} numberOfLines={2}>
+                    {squad.description}
+                  </Text>
 
                   {/* Members & Streak info */}
                   <View style={styles.squadMetaRow}>
                     <View>
                       <Text style={styles.metaMembersText}>{squad.memberCount} Members</Text>
                       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 2 }}>
-                        <Text style={{ fontSize: 11 }}>⚡</Text>
-                        <Text style={styles.metaStreakText}>{squad.streak}-day streak</Text>
+                        <Text style={{ fontSize: 12 }}>⚡</Text>
+                        <Text style={styles.metaStreakText}>{squad.streak}-day streak avg</Text>
                       </View>
                     </View>
 
@@ -746,17 +703,17 @@ export const FindSquadScreen: React.FC<FindSquadScreenProps> = ({
                           source={av}
                           style={[
                             styles.stackAvatarImg,
-                            { marginLeft: i === 0 ? 0 : -8, zIndex: 3 - i },
+                            { marginLeft: i === 0 ? 0 : -10, zIndex: 3 - i },
                           ]}
                         />
                       ))}
-                      <View style={[styles.stackAvatarPlus, { marginLeft: -8, zIndex: 0 }]}>
+                      <View style={[styles.stackAvatarPlus, { marginLeft: -10, zIndex: 0 }]}>
                         <Text style={styles.stackAvatarPlusText}>+2</Text>
                       </View>
                     </View>
                   </View>
 
-                  {/* Status Footer */}
+                  {/* Status Footer & Action Link */}
                   <View style={styles.squadStatusFooter}>
                     <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
                       {squad.statusType === 'open' ? (
@@ -777,7 +734,10 @@ export const FindSquadScreen: React.FC<FindSquadScreenProps> = ({
                       </Text>
                     </View>
 
-                    <Text style={styles.cardArrow}>➔</Text>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+                      <Text style={styles.cardPreviewLink}>View Details</Text>
+                      <Text style={styles.cardArrow}>➔</Text>
+                    </View>
                   </View>
                 </Pressable>
               );
@@ -798,16 +758,21 @@ export const FindSquadScreen: React.FC<FindSquadScreenProps> = ({
                 style={({ pressed }) => [styles.savedSquadPill, pressed && styles.btnPressed]}
                 onPress={() => showToast(`Opening saved squad: ${name}`)}
               >
-                <Text style={styles.savedSquadPillText}>{name}</Text>
+                <Text style={styles.savedSquadPillText}>📌 {name}</Text>
               </Pressable>
             ))}
           </View>
         </View>
 
         {/* ============================================================ */}
-        {/* 9. JARVIS CORE AI STRATEGIC RECOMMENDATION CARD             */}
+        {/* 9. JARVIS CORE AI STRATEGIC RECOMMENDATION CARD (DARK PURPLE) */}
         {/* ============================================================ */}
-        <View style={styles.jarvisRecCard}>
+        <LinearGradient
+          colors={['#2A1259', '#1A0C38']}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={styles.jarvisRecCard}
+        >
           <View style={styles.jarvisRecHeaderRow}>
             <View style={styles.jarvisIconBox}>
               <Image
@@ -817,13 +782,18 @@ export const FindSquadScreen: React.FC<FindSquadScreenProps> = ({
               />
             </View>
             <View style={{ flex: 1 }}>
-              <Text style={styles.jarvisRecTag}>JARVIS CORE AI</Text>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                <Text style={styles.jarvisRecTag}>JARVIS CORE AI</Text>
+                <View style={styles.matchScoreAiPill}>
+                  <Text style={styles.matchScoreAiPillText}>94% FIT</Text>
+                </View>
+              </View>
               <Text style={styles.jarvisRecTitle}>Strategic Recommendation</Text>
             </View>
           </View>
 
           <Text style={styles.jarvisRecBodyText}>
-            <Text style={{ fontWeight: '800', color: '#582CDB' }}>Momentum Makers</Text> is your strongest squad fit based on your streak level, niche and weekly collaboration goals.
+            <Text style={{ fontWeight: '900', color: '#C084FC' }}>Momentum Makers</Text> is your strongest squad fit based on your 47-day streak level, creator niche and weekly short-form collaboration goals.
           </Text>
 
           <View style={styles.jarvisRecActionsRow}>
@@ -833,17 +803,22 @@ export const FindSquadScreen: React.FC<FindSquadScreenProps> = ({
                 if (onOpenSquad) onOpenSquad();
               }}
             >
-              <Text style={styles.jarvisOutlineBtnText}>View Squad</Text>
+              <Text style={styles.jarvisOutlineBtnText}>View Squad Room</Text>
             </Pressable>
 
             <Pressable
               style={({ pressed }) => [styles.jarvisJoinBtn, pressed && styles.btnPressed]}
               onPress={() => handleRequestToJoin(selectedSquad)}
             >
-              <Text style={styles.jarvisJoinBtnText}>Request to Join</Text>
+              <LinearGradient
+                colors={['#9333EA', '#7E22CE']}
+                style={styles.jarvisJoinGradient}
+              >
+                <Text style={styles.jarvisJoinBtnText}>Request to Join ⚡</Text>
+              </LinearGradient>
             </Pressable>
           </View>
-        </View>
+        </LinearGradient>
 
         {/* ============================================================ */}
         {/* 10. PRIMARY STICKY CTA BUTTON                                */}
@@ -854,18 +829,18 @@ export const FindSquadScreen: React.FC<FindSquadScreenProps> = ({
             onPress={() => handleRequestToJoin(selectedSquad)}
           >
             <LinearGradient
-              colors={['#6366F1', '#4F46E5']}
+              colors={['#784DF0', '#582CDB']}
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 0 }}
               style={styles.primaryCtaGradient}
             >
-              <Text style={styles.primaryCtaBtnText}>Request to Join</Text>
+              <Text style={styles.primaryCtaBtnText}>Request to Join {selectedSquad.name} 🚀</Text>
             </LinearGradient>
           </Pressable>
         </View>
       </ScrollView>
 
-      {/* SQUAD PREVIEW MODAL */}
+      {/* SQUAD PREVIEW BOTTOM SHEET MODAL */}
       <Modal
         visible={previewModalSquad !== null}
         transparent
@@ -884,7 +859,10 @@ export const FindSquadScreen: React.FC<FindSquadScreenProps> = ({
                     {previewModalSquad.category}
                   </Text>
                 </View>
-                <Text style={styles.fitScoreNumber}>{previewModalSquad.fitScore}% FIT</Text>
+                <View style={styles.fitScorePill}>
+                  <Text style={styles.fitScoreNumber}>{previewModalSquad.fitScore}%</Text>
+                  <Text style={styles.fitScoreLabel}>FIT SCORE</Text>
+                </View>
               </View>
 
               <Text style={styles.modalSquadTitle}>{previewModalSquad.name}</Text>
@@ -892,16 +870,20 @@ export const FindSquadScreen: React.FC<FindSquadScreenProps> = ({
 
               <View style={styles.modalInfoBox}>
                 <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 8 }}>
-                  <Text style={styles.modalInfoLabel}>Squad Goal</Text>
+                  <Text style={styles.modalInfoLabel}>🎯 Squad Goal</Text>
                   <Text style={styles.modalInfoVal}>{previewModalSquad.squadGoal}</Text>
                 </View>
+                <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 8 }}>
+                  <Text style={styles.modalInfoLabel}>⚡ Streak Level</Text>
+                  <Text style={styles.modalInfoVal}>{previewModalSquad.streak} Days Streak Avg</Text>
+                </View>
                 <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-                  <Text style={styles.modalInfoLabel}>Streak Level</Text>
-                  <Text style={styles.modalInfoVal}>⚡ {previewModalSquad.streak} Days</Text>
+                  <Text style={styles.modalInfoLabel}>🏆 Weekly Quest</Text>
+                  <Text style={[styles.modalInfoVal, { color: '#582CDB' }]}>{previewModalSquad.weeklyQuest}</Text>
                 </View>
               </View>
 
-              <View style={{ flexDirection: 'row', gap: 10, marginTop: 18 }}>
+              <View style={{ flexDirection: 'row', gap: 10, marginTop: 20 }}>
                 <Pressable
                   style={styles.modalOutlineBtn}
                   onPress={() => {
@@ -916,7 +898,12 @@ export const FindSquadScreen: React.FC<FindSquadScreenProps> = ({
                   style={styles.modalSolidBtn}
                   onPress={() => handleRequestToJoin(previewModalSquad)}
                 >
-                  <Text style={styles.modalSolidBtnText}>Apply Now 🚀</Text>
+                  <LinearGradient
+                    colors={['#784DF0', '#582CDB']}
+                    style={styles.modalSolidGradient}
+                  >
+                    <Text style={styles.modalSolidBtnText}>Apply Now 🚀</Text>
+                  </LinearGradient>
                 </Pressable>
               </View>
             </View>
@@ -971,19 +958,19 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 60,
     right: -40,
-    width: 200,
-    height: 200,
-    borderRadius: 100,
-    backgroundColor: 'rgba(147, 51, 234, 0.05)',
-  },
-  bgGlowGold: {
-    position: 'absolute',
-    top: 300,
-    left: -40,
     width: 220,
     height: 220,
     borderRadius: 110,
-    backgroundColor: 'rgba(245, 158, 11, 0.04)',
+    backgroundColor: 'rgba(147, 51, 234, 0.06)',
+  },
+  bgGlowGold: {
+    position: 'absolute',
+    top: 320,
+    left: -50,
+    width: 240,
+    height: 240,
+    borderRadius: 120,
+    backgroundColor: 'rgba(245, 158, 11, 0.05)',
   },
 
   /* HEADER */
@@ -1006,6 +993,11 @@ const styles = StyleSheet.create({
     borderColor: '#EFECE6',
     alignItems: 'center',
     justifyContent: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.04,
+    shadowRadius: 3,
+    elevation: 1,
   },
   backBtnArrow: {
     fontSize: 22,
@@ -1017,8 +1009,8 @@ const styles = StyleSheet.create({
     padding: 2,
   },
   headerGhostMascot: {
-    width: 32,
-    height: 32,
+    width: 34,
+    height: 34,
   },
   headerRightGroup: {
     flexDirection: 'row',
@@ -1035,6 +1027,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     position: 'relative',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.04,
+    shadowRadius: 3,
+    elevation: 1,
   },
   activeMsgDot: {
     position: 'absolute',
@@ -1091,28 +1088,36 @@ const styles = StyleSheet.create({
 
   /* HERO SECTION */
   heroSection: {
-    marginBottom: 16,
+    marginBottom: 18,
   },
-  discoveryPill: {
+  discoveryPillGradient: {
     alignSelf: 'flex-start',
-    backgroundColor: '#582CDB',
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
     paddingHorizontal: 10,
     paddingVertical: 4,
-    borderRadius: 6,
+    borderRadius: 8,
     marginBottom: 10,
+  },
+  sparkleWhiteDot: {
+    width: 5,
+    height: 5,
+    borderRadius: 2.5,
+    backgroundColor: '#FFFFFF',
   },
   discoveryPillText: {
     fontSize: 10,
     fontWeight: '900',
     color: '#FFFFFF',
-    letterSpacing: 0.6,
+    letterSpacing: 0.8,
   },
   heroTitle: {
-    fontSize: 26,
+    fontSize: 27,
     fontWeight: '900',
     color: '#171420',
     letterSpacing: -0.5,
-    lineHeight: 32,
+    lineHeight: 33,
     marginBottom: 6,
   },
   heroSubtitle: {
@@ -1168,18 +1173,34 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#EFECE6',
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.03,
-    shadowRadius: 8,
-    elevation: 1,
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.04,
+    shadowRadius: 10,
+    elevation: 2,
     marginBottom: 16,
+  },
+  recommendedCardTopRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 14,
   },
   recommendedCardTitle: {
     fontSize: 10.5,
     fontWeight: '900',
     color: '#64748B',
     letterSpacing: 0.6,
-    marginBottom: 14,
+  },
+  aiVerifiedBadge: {
+    backgroundColor: '#EDE9FE',
+    paddingHorizontal: 7,
+    paddingVertical: 2.5,
+    borderRadius: 6,
+  },
+  aiVerifiedBadgeText: {
+    fontSize: 9.5,
+    fontWeight: '900',
+    color: '#6D28D9',
   },
   metricsGrid: {
     flexDirection: 'row',
@@ -1215,9 +1236,17 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     paddingVertical: 7,
     borderRadius: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.02,
+    shadowRadius: 3,
+    elevation: 1,
   },
   nicheFilterPillActive: {
     backgroundColor: '#582CDB',
+    borderColor: '#582CDB',
+    shadowColor: '#582CDB',
+    shadowOpacity: 0.2,
   },
   nicheFilterPillText: {
     fontSize: 12,
@@ -1236,12 +1265,35 @@ const styles = StyleSheet.create({
   },
   squadTypeCard: {
     flex: 1,
-    borderRadius: 16,
+    borderRadius: 18,
     padding: 14,
     borderWidth: 1,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.03,
+    shadowRadius: 6,
+    elevation: 1,
+  },
+  squadTypeIconBubbleGold: {
+    width: 34,
+    height: 34,
+    borderRadius: 17,
+    backgroundColor: 'rgba(255, 255, 255, 0.8)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 10,
+  },
+  squadTypeIconBubblePurple: {
+    width: 34,
+    height: 34,
+    borderRadius: 17,
+    backgroundColor: '#EDE9FE',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 10,
   },
   growthTypeCard: {
-    backgroundColor: '#FDE68A',
+    backgroundColor: '#FEF3C7',
     borderColor: '#FCD34D',
   },
   typeCardSelectedGrowth: {
@@ -1249,7 +1301,7 @@ const styles = StyleSheet.create({
     borderColor: '#D97706',
   },
   growthTypeCardTitle: {
-    fontSize: 12.5,
+    fontSize: 13,
     fontWeight: '900',
     color: '#78350F',
   },
@@ -1259,12 +1311,17 @@ const styles = StyleSheet.create({
   },
   typeCardSelectedCollab: {
     borderColor: '#582CDB',
-    borderWidth: 1.5,
+    borderWidth: 2,
   },
   collabTypeCardTitle: {
-    fontSize: 12.5,
+    fontSize: 13,
     fontWeight: '900',
     color: '#171420',
+  },
+  squadTypeCardSubtitle: {
+    fontSize: 10.5,
+    color: '#64748B',
+    marginTop: 2,
   },
 
   /* SQUAD GOALS */
@@ -1312,6 +1369,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
     paddingVertical: 3,
     borderRadius: 6,
+    borderWidth: 1,
+    borderColor: '#FDE68A',
   },
   userStreakBadgeText: {
     fontSize: 10.5,
@@ -1328,15 +1387,22 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
     borderWidth: 1,
     borderColor: '#DDD6FE',
-    borderRadius: 12,
+    borderRadius: 14,
     paddingVertical: 12,
     paddingHorizontal: 10,
     alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.02,
+    shadowRadius: 3,
+    elevation: 1,
   },
   streakOptionBtnActive: {
     borderColor: '#582CDB',
     borderWidth: 1.5,
     backgroundColor: '#F5F3FF',
+    shadowColor: '#582CDB',
+    shadowOpacity: 0.15,
   },
   streakOptionText: {
     fontSize: 12,
@@ -1354,22 +1420,22 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   viewAllText: {
-    fontSize: 11,
+    fontSize: 11.5,
     fontWeight: '900',
     color: '#582CDB',
     letterSpacing: 0.5,
   },
   squadCard: {
     backgroundColor: '#FFFFFF',
-    borderRadius: 18,
+    borderRadius: 20,
     padding: 16,
     borderWidth: 1,
     borderColor: '#EFECE6',
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.03,
-    shadowRadius: 8,
-    elevation: 1,
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.04,
+    shadowRadius: 10,
+    elevation: 2,
   },
   squadCardSelected: {
     borderColor: '#582CDB',
@@ -1393,7 +1459,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#EDE9FE',
   },
   squadCatLife: {
-    backgroundColor: '#F1F5F9',
+    backgroundColor: '#ECFDF5',
   },
   squadCatBrand: {
     backgroundColor: '#FEE2E2',
@@ -1409,33 +1475,49 @@ const styles = StyleSheet.create({
     color: '#6D28D9',
   },
   squadCatTextLife: {
-    color: '#475569',
+    color: '#059669',
   },
   squadCatTextBrand: {
     color: '#B91C1C',
   },
+  fitScorePill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 8,
+  },
   fitScoreNumber: {
-    fontSize: 18,
+    fontSize: 14,
     fontWeight: '900',
     color: '#582CDB',
   },
   fitScoreLabel: {
-    fontSize: 8.5,
+    fontSize: 9,
     fontWeight: '800',
-    color: '#64748B',
-    letterSpacing: 0.5,
+    color: '#6D28D9',
   },
   squadName: {
-    fontSize: 16.5,
+    fontSize: 17,
     fontWeight: '900',
     color: '#171420',
-    marginBottom: 10,
+    marginBottom: 4,
+  },
+  squadDescText: {
+    fontSize: 12,
+    color: '#64748B',
+    lineHeight: 17,
+    marginBottom: 12,
   },
   squadMetaRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: 12,
+    backgroundColor: '#FAF8F5',
+    padding: 10,
+    borderRadius: 12,
   },
   metaMembersText: {
     fontSize: 12,
@@ -1504,8 +1586,13 @@ const styles = StyleSheet.create({
   statusTextLimited: {
     color: '#DC2626',
   },
+  cardPreviewLink: {
+    fontSize: 11.5,
+    fontWeight: '800',
+    color: '#582CDB',
+  },
   cardArrow: {
-    fontSize: 13,
+    fontSize: 12,
     color: '#582CDB',
     fontWeight: '900',
   },
@@ -1527,59 +1614,82 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
     borderWidth: 1,
     borderColor: '#EFECE6',
-    borderRadius: 10,
+    borderRadius: 12,
     paddingHorizontal: 12,
     paddingVertical: 7,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.02,
+    shadowRadius: 3,
+    elevation: 1,
   },
   savedSquadPillText: {
-    fontSize: 11,
+    fontSize: 11.5,
     fontWeight: '700',
     color: '#171420',
   },
 
-  /* JARVIS REC CARD */
+  /* JARVIS REC CARD (DARK PURPLE) */
   jarvisRecCard: {
-    marginTop: 22,
-    backgroundColor: '#FAF5FF',
-    borderRadius: 20,
-    padding: 16,
+    marginTop: 24,
+    borderRadius: 22,
+    padding: 18,
     borderWidth: 1,
-    borderColor: '#E9D5FF',
+    borderColor: 'rgba(192, 132, 252, 0.3)',
+    shadowColor: '#582CDB',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.25,
+    shadowRadius: 12,
+    elevation: 4,
   },
   jarvisRecHeaderRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 10,
-    marginBottom: 10,
+    gap: 12,
+    marginBottom: 12,
   },
   jarvisIconBox: {
-    width: 36,
-    height: 36,
-    borderRadius: 10,
-    backgroundColor: '#582CDB',
+    width: 40,
+    height: 40,
+    borderRadius: 12,
+    backgroundColor: 'rgba(255, 255, 255, 0.12)',
     alignItems: 'center',
     justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.2)',
   },
   jarvisFlameImg: {
-    width: 22,
-    height: 22,
+    width: 24,
+    height: 24,
   },
   jarvisRecTag: {
     fontSize: 9.5,
     fontWeight: '900',
-    color: '#7E22CE',
-    letterSpacing: 0.6,
+    color: '#E9D5FF',
+    letterSpacing: 0.8,
+  },
+  matchScoreAiPill: {
+    backgroundColor: 'rgba(192, 132, 252, 0.25)',
+    paddingHorizontal: 6,
+    paddingVertical: 1.5,
+    borderRadius: 4,
+  },
+  matchScoreAiPillText: {
+    fontSize: 9,
+    fontWeight: '900',
+    color: '#F3E8FF',
   },
   jarvisRecTitle: {
-    fontSize: 14,
+    fontSize: 15,
     fontWeight: '900',
-    color: '#171420',
+    color: '#FFFFFF',
+    marginTop: 1,
   },
   jarvisRecBodyText: {
     fontSize: 13,
-    color: '#334155',
-    lineHeight: 18,
-    marginBottom: 14,
+    color: '#E2E8F0',
+    lineHeight: 19,
+    marginBottom: 16,
   },
   jarvisRecActionsRow: {
     flexDirection: 'row',
@@ -1587,23 +1697,25 @@ const styles = StyleSheet.create({
   },
   jarvisOutlineBtn: {
     flex: 1,
-    backgroundColor: '#EDE9FE',
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
     borderWidth: 1,
-    borderColor: '#DDD6FE',
-    borderRadius: 10,
-    paddingVertical: 8,
+    borderColor: 'rgba(255, 255, 255, 0.2)',
+    borderRadius: 12,
+    paddingVertical: 10,
     alignItems: 'center',
   },
   jarvisOutlineBtnText: {
     fontSize: 12,
     fontWeight: '800',
-    color: '#582CDB',
+    color: '#FFFFFF',
   },
   jarvisJoinBtn: {
     flex: 1,
-    backgroundColor: '#582CDB',
-    borderRadius: 10,
-    paddingVertical: 8,
+    borderRadius: 12,
+    overflow: 'hidden',
+  },
+  jarvisJoinGradient: {
+    paddingVertical: 10,
     alignItems: 'center',
   },
   jarvisJoinBtnText: {
@@ -1616,7 +1728,7 @@ const styles = StyleSheet.create({
   primaryCtaBtn: {
     borderRadius: 16,
     overflow: 'hidden',
-    shadowColor: '#4F46E5',
+    shadowColor: '#582CDB',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.25,
     shadowRadius: 10,
@@ -1638,7 +1750,7 @@ const styles = StyleSheet.create({
   modalOverlay: {
     flex: 1,
     justifyContent: 'flex-end',
-    backgroundColor: 'rgba(0,0,0,0.4)',
+    backgroundColor: 'rgba(0,0,0,0.5)',
   },
   modalBackdrop: {
     position: 'absolute',
@@ -1652,7 +1764,12 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
     padding: 20,
-    paddingBottom: 34,
+    paddingBottom: 36,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: -4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 16,
+    elevation: 5,
   },
   modalDragHandle: {
     width: 36,
@@ -1663,7 +1780,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   modalSquadTitle: {
-    fontSize: 20,
+    fontSize: 21,
     fontWeight: '900',
     color: '#171420',
     marginBottom: 6,
@@ -1671,23 +1788,23 @@ const styles = StyleSheet.create({
   modalSquadDesc: {
     fontSize: 13,
     color: '#64748B',
-    lineHeight: 18,
+    lineHeight: 19,
     marginBottom: 16,
   },
   modalInfoBox: {
     backgroundColor: '#FAF8F5',
-    borderRadius: 14,
-    padding: 12,
+    borderRadius: 16,
+    padding: 14,
     borderWidth: 1,
     borderColor: '#EFECE6',
   },
   modalInfoLabel: {
-    fontSize: 11.5,
+    fontSize: 12,
     color: '#64748B',
-    fontWeight: '600',
+    fontWeight: '700',
   },
   modalInfoVal: {
-    fontSize: 11.5,
+    fontSize: 12,
     color: '#171420',
     fontWeight: '800',
   },
@@ -1707,9 +1824,11 @@ const styles = StyleSheet.create({
   },
   modalSolidBtn: {
     flex: 1,
-    backgroundColor: '#582CDB',
-    paddingVertical: 12,
     borderRadius: 12,
+    overflow: 'hidden',
+  },
+  modalSolidGradient: {
+    paddingVertical: 12,
     alignItems: 'center',
   },
   modalSolidBtnText: {
