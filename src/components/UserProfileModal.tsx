@@ -204,7 +204,9 @@ const switchStyles = StyleSheet.create({
     justifyContent: 'center',
   },
   switchTrackActive: {
-    backgroundColor: '#7C3AED', // Royal Purple
+    backgroundColor: '#582CDB', // Royal Purple
+    borderWidth: 1.5,
+    borderColor: '#F59E0B', // Radiant 24K Gold
   },
   switchTrackInactive: {
     backgroundColor: '#E2E8F0', // Neutral Slate
@@ -213,7 +215,7 @@ const switchStyles = StyleSheet.create({
     width: 24,
     height: 24,
     borderRadius: 12,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: '#FDE68A', // Radiant Gold Thumb
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.15,
@@ -984,12 +986,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
     borderRadius: 6,
     borderWidth: 1,
-    borderColor: '#FEF08A',
+    borderColor: '#FBBF24',
   },
   proBadgeText: {
     fontSize: 9.5,
     fontWeight: '900',
-    color: '#78350F',
+    color: '#92400E',
     letterSpacing: 0.5,
   },
   heroStreakPillPro: {
@@ -1004,7 +1006,7 @@ const styles = StyleSheet.create({
   heroStreakPillTextPro: {
     fontSize: 12,
     fontWeight: '800',
-    color: '#92400E',
+    color: '#B45309',
   },
   modalSubtitle: {
     fontSize: 12,
@@ -1134,7 +1136,7 @@ const styles = StyleSheet.create({
   heroStreakPillText: {
     fontSize: 11,
     fontWeight: '900',
-    color: '#B45309',
+    color: '#92400E',
   },
 
   // Upload Buttons Row

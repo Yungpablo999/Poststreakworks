@@ -23,7 +23,7 @@ export const TinyGoldCheck = ({ size = 13 }: { size?: number }) => (
       width: size,
       height: size,
       borderRadius: size / 2,
-      backgroundColor: '#EAB308',
+      backgroundColor: '#F59E0B',
       borderWidth: 1.5,
       borderColor: '#FFFFFF',
       justifyContent: 'center',
@@ -572,7 +572,7 @@ const styles = StyleSheet.create({
   },
   milestoneBadgePill: {
     alignSelf: 'center',
-    backgroundColor: '#FEF08A',
+    backgroundColor: '#FEF3C7',
     paddingHorizontal: 10,
     paddingVertical: 5,
     borderRadius: 8,
@@ -581,7 +581,7 @@ const styles = StyleSheet.create({
   milestoneBadgePillText: {
     fontSize: 10,
     fontWeight: '900',
-    color: '#78350F',
+    color: '#92400E',
   },
 
   // BOTTOM BAR

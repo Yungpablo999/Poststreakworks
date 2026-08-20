@@ -25,7 +25,7 @@ export const TinyGoldCheck = ({ size = 13 }: { size?: number }) => (
       width: size,
       height: size,
       borderRadius: size / 2,
-      backgroundColor: '#EAB308',
+      backgroundColor: '#F59E0B',
       borderWidth: 1.5,
       borderColor: '#FFFFFF',
       justifyContent: 'center',
@@ -82,7 +82,7 @@ const INITIAL_NOTIFICATIONS: NotificationItem[] = [
   {
     id: 'n1',
     type: 'quest',
-    title: 'GlowUp Skincare Launch Unlocked',
+    title: '60-Day Consistency Milestone Unlocked',
     body: 'Pro Priority sponsor application ready ($450 bounty).',
     time: '15m ago',
     unread: true,
@@ -129,7 +129,7 @@ export const ProQuestsScreen: React.FC<ProQuestsScreenProps> = ({
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   // Selected Brand Quest details
-  const [selectedBrandName, setSelectedBrandName] = useState('GlowUp Skincare Launch');
+  const [selectedBrandName, setSelectedBrandName] = useState('60-Day Consistency Milestone');
   const [selectedBrandBounty, setSelectedBrandBounty] = useState('$450');
 
   // Notifications
@@ -610,11 +610,11 @@ export const ProQuestsScreen: React.FC<ProQuestsScreenProps> = ({
           <Text style={styles.premiumQuestsSectionHeader}>Premium Quests</Text>
 
           <View style={{ gap: 8, marginBottom: 16 }}>
-            {/* Quest 1: GlowUp */}
+            {/* Quest 1: Milestone */}
             <Pressable
               style={({ pressed }) => [styles.premiumQuestItemCard, pressed && styles.btnPressed]}
               onPress={() => {
-                setSelectedBrandName('GlowUp Skincare Launch');
+                setSelectedBrandName('60-Day Consistency Milestone');
                 setSelectedBrandBounty('$450');
                 triggerModalPop();
                 setShowBrandQuestModal(true);
@@ -624,7 +624,7 @@ export const ProQuestsScreen: React.FC<ProQuestsScreenProps> = ({
                 <Text style={{ fontSize: 18 }}>🎁</Text>
               </View>
               <View style={{ flex: 1 }}>
-                <Text style={styles.brandQuestItemTitle}>GlowUp Skincare Launch</Text>
+                <Text style={styles.brandQuestItemTitle}>60-Day Consistency Milestone</Text>
                 <Text style={styles.proPriorityBadgeText}>PRO PRIORITY</Text>
               </View>
               <View style={{ alignItems: 'flex-end' }}>
@@ -956,7 +956,7 @@ export const ProQuestsScreen: React.FC<ProQuestsScreenProps> = ({
 
               <View style={{ gap: 10, marginVertical: 10 }}>
                 <View style={styles.oppItemRow}>
-                  <Text style={styles.oppTitle}>GlowUp Skincare</Text>
+                  <Text style={styles.oppTitle}>60-Day Milestone</Text>
                   <Text style={styles.oppBounty}>$450 Bounty</Text>
                 </View>
                 <View style={styles.oppItemRow}>
@@ -1068,12 +1068,12 @@ const styles = StyleSheet.create({
     paddingVertical: 2,
     borderRadius: 6,
     borderWidth: 1,
-    borderColor: '#FEF08A',
+    borderColor: '#FBBF24',
   },
   proHeaderBadgeText: {
     fontSize: 8.5,
     fontWeight: '900',
-    color: '#78350F',
+    color: '#92400E',
     letterSpacing: 0.3,
   },
   headerRightGroup: {
@@ -1123,7 +1123,7 @@ const styles = StyleSheet.create({
     position: 'relative',
   },
   profilePhotoBtnPro: {
-    borderColor: '#EAB308',
+    borderColor: '#F59E0B',
     borderWidth: 2,
   },
   headerCustomAvatarImage: {
@@ -1231,7 +1231,7 @@ const styles = StyleSheet.create({
   },
   todayQuestTagBox: {
     alignSelf: 'flex-start',
-    backgroundColor: '#FEF08A',
+    backgroundColor: '#FEF3C7',
     paddingHorizontal: 8,
     paddingVertical: 3,
     borderRadius: 6,
@@ -1240,7 +1240,7 @@ const styles = StyleSheet.create({
   todayQuestTagText: {
     fontSize: 9.5,
     fontWeight: '900',
-    color: '#78350F',
+    color: '#92400E',
     letterSpacing: 0.5,
   },
   todayQuestTitle: {
@@ -1489,7 +1489,7 @@ const styles = StyleSheet.create({
     color: '#582CDB',
   },
   groupRewardPill: {
-    backgroundColor: '#FEF08A',
+    backgroundColor: '#FEF3C7',
     paddingHorizontal: 8,
     paddingVertical: 3,
     borderRadius: 6,
@@ -1497,7 +1497,7 @@ const styles = StyleSheet.create({
   groupRewardPillText: {
     fontSize: 9.5,
     fontWeight: '900',
-    color: '#78350F',
+    color: '#92400E',
   },
   squadQuestTitle: {
     fontSize: 16,
@@ -2053,7 +2053,7 @@ const styles = StyleSheet.create({
     fontWeight: '900',
   },
   proPriorityPillModal: {
-    backgroundColor: '#FEF08A',
+    backgroundColor: '#FEF3C7',
     paddingHorizontal: 8,
     paddingVertical: 3,
     borderRadius: 6,
@@ -2062,7 +2062,7 @@ const styles = StyleSheet.create({
   proPriorityPillModalText: {
     fontSize: 9,
     fontWeight: '900',
-    color: '#78350F',
+    color: '#92400E',
   },
   briefDetailLine: {
     fontSize: 12.5,

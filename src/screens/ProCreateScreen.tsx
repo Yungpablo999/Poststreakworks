@@ -26,7 +26,7 @@ export const TinyGoldCheck = ({ size = 13 }: { size?: number }) => (
       width: size,
       height: size,
       borderRadius: size / 2,
-      backgroundColor: '#EAB308',
+      backgroundColor: '#F59E0B',
       borderWidth: 1.5,
       borderColor: '#FFFFFF',
       justifyContent: 'center',
@@ -61,6 +61,7 @@ interface ProCreateScreenProps {
   onOpenIdeaAngle?: () => void;
   onOpenScript?: (ideaTitle?: string) => void;
   onOpenCaption?: (ideaTitle?: string) => void;
+  onOpenVoiceStudio?: () => void;
   onOpenMessages?: () => void;
   onSwitchToFree?: () => void;
   userProfile?: UserProfileData;
@@ -108,6 +109,7 @@ export const ProCreateScreen: React.FC<ProCreateScreenProps> = ({
   onOpenIdeaAngle,
   onOpenScript,
   onOpenCaption,
+  onOpenVoiceStudio,
   onOpenMessages,
   onSwitchToFree,
   userProfile,
@@ -412,8 +414,12 @@ export const ProCreateScreen: React.FC<ProCreateScreenProps> = ({
               <Pressable
                 style={styles.pipelineStepItem}
                 onPress={() => {
-                  triggerModalPop();
-                  setShowVoiceStudioModal(true);
+                  if (onOpenVoiceStudio) {
+                    onOpenVoiceStudio();
+                  } else {
+                    triggerModalPop();
+                    setShowVoiceStudioModal(true);
+                  }
                 }}
               >
                 <View style={styles.pipelineIconBox}>
@@ -548,8 +554,12 @@ export const ProCreateScreen: React.FC<ProCreateScreenProps> = ({
             <Pressable
               style={({ pressed }) => [styles.toolGridCard, pressed && styles.btnPressed]}
               onPress={() => {
-                triggerModalPop();
-                setShowVoiceStudioModal(true);
+                if (onOpenVoiceStudio) {
+                  onOpenVoiceStudio();
+                } else {
+                  triggerModalPop();
+                  setShowVoiceStudioModal(true);
+                }
               }}
             >
               <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' }}>
@@ -706,8 +716,15 @@ export const ProCreateScreen: React.FC<ProCreateScreenProps> = ({
               <Pressable
                 style={({ pressed }) => [styles.generateVoiceBtn, pressed && styles.btnPressed]}
                 onPress={() => {
-                  triggerModalPop();
-                  setShowVoiceStudioModal(true);
+                  if (Platform.OS !== 'web') {
+                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                  }
+                  if (onOpenVoiceStudio) {
+                    onOpenVoiceStudio();
+                  } else {
+                    triggerModalPop();
+                    setShowVoiceStudioModal(true);
+                  }
                 }}
               >
                 <Text style={styles.generateVoiceBtnText}>⚡ Generate Voice</Text>
@@ -716,8 +733,15 @@ export const ProCreateScreen: React.FC<ProCreateScreenProps> = ({
               <Pressable
                 style={({ pressed }) => [styles.openStudioOutlineBtn, pressed && styles.btnPressed]}
                 onPress={() => {
-                  triggerModalPop();
-                  setShowVoiceStudioModal(true);
+                  if (Platform.OS !== 'web') {
+                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                  }
+                  if (onOpenVoiceStudio) {
+                    onOpenVoiceStudio();
+                  } else {
+                    triggerModalPop();
+                    setShowVoiceStudioModal(true);
+                  }
                 }}
               >
                 <Text style={styles.openStudioOutlineBtnText}>Open Studio</Text>
@@ -1096,12 +1120,12 @@ const styles = StyleSheet.create({
     paddingVertical: 2,
     borderRadius: 6,
     borderWidth: 1,
-    borderColor: '#FEF08A',
+    borderColor: '#FBBF24',
   },
   proHeaderBadgeText: {
     fontSize: 8.5,
     fontWeight: '900',
-    color: '#78350F',
+    color: '#92400E',
     letterSpacing: 0.3,
   },
   headerRightGroup: {
@@ -1151,7 +1175,7 @@ const styles = StyleSheet.create({
     position: 'relative',
   },
   profilePhotoBtnPro: {
-    borderColor: '#EAB308',
+    borderColor: '#F59E0B',
     borderWidth: 2,
   },
   headerCustomAvatarImage: {
@@ -1203,7 +1227,7 @@ const styles = StyleSheet.create({
     letterSpacing: 0.5,
   },
   proAccessPill: {
-    backgroundColor: '#FEF08A',
+    backgroundColor: '#FEF3C7',
     paddingHorizontal: 8,
     paddingVertical: 3.5,
     borderRadius: 6,
@@ -1211,7 +1235,7 @@ const styles = StyleSheet.create({
   proAccessPillText: {
     fontSize: 9.5,
     fontWeight: '900',
-    color: '#78350F',
+    color: '#92400E',
   },
   mainTitleText: {
     fontSize: 22,
@@ -1327,7 +1351,7 @@ const styles = StyleSheet.create({
     color: '#475569',
   },
   projectTagGold: {
-    backgroundColor: '#FEF08A',
+    backgroundColor: '#FEF3C7',
     paddingHorizontal: 8,
     paddingVertical: 3,
     borderRadius: 6,
@@ -1335,7 +1359,7 @@ const styles = StyleSheet.create({
   projectTagGoldText: {
     fontSize: 10,
     fontWeight: '900',
-    color: '#78350F',
+    color: '#92400E',
   },
   workflowActionsRow: {
     flexDirection: 'row',
@@ -1378,7 +1402,7 @@ const styles = StyleSheet.create({
     color: '#171420',
   },
   powerPillBadge: {
-    backgroundColor: '#FEF08A',
+    backgroundColor: '#FEF3C7',
     paddingHorizontal: 6,
     paddingVertical: 2,
     borderRadius: 4,
@@ -1386,7 +1410,7 @@ const styles = StyleSheet.create({
   powerPillText: {
     fontSize: 9,
     fontWeight: '900',
-    color: '#78350F',
+    color: '#92400E',
   },
   proToolsGrid: {
     flexDirection: 'row',

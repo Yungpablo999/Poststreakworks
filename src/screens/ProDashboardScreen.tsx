@@ -29,7 +29,7 @@ export const TinyGoldCheck = ({ size = 13 }: { size?: number }) => (
       width: size,
       height: size,
       borderRadius: size / 2,
-      backgroundColor: '#EAB308',
+      backgroundColor: '#F59E0B',
       borderWidth: 1.5,
       borderColor: '#FFFFFF',
       justifyContent: 'center',
@@ -60,12 +60,14 @@ interface ProDashboardScreenProps {
   onNavigateTab?: (tab: TabType) => void;
   onOpenJarvisPro?: () => void;
   onOpenSchedule?: () => void;
-  onOpenMessages?: () => void;
+  onOpenMessages?: (threadId?: string) => void;
+  onOpenPostComposer?: (prefillTitle?: string) => void;
   onOpenEarnings?: () => void;
   onOpenQuests?: () => void;
   onOpenGrowth?: () => void;
   onOpenMatch?: () => void;
   onOpenCreate?: () => void;
+  onOpenVoiceStudio?: () => void;
   onSwitchToFree?: () => void;
   userProfile?: UserProfileData;
   onSaveProfile?: (updated: UserProfileData) => void;
@@ -262,11 +264,13 @@ export const ProDashboardScreen: React.FC<ProDashboardScreenProps> = ({
   onOpenJarvisPro,
   onOpenSchedule,
   onOpenMessages,
+  onOpenPostComposer,
   onOpenEarnings,
   onOpenQuests,
   onOpenGrowth,
   onOpenMatch,
   onOpenCreate,
+  onOpenVoiceStudio,
   onSwitchToFree,
   userProfile,
   onSaveProfile,
@@ -276,7 +280,9 @@ export const ProDashboardScreen: React.FC<ProDashboardScreenProps> = ({
   const [showNotificationModal, setShowNotificationModal] = useState(false);
   const [showCalendarModal, setShowCalendarModal] = useState(false);
   const [showVoiceStudioModal, setShowVoiceStudioModal] = useState(false);
+  
   const [showBrandQuestModal, setShowBrandQuestModal] = useState(false);
+  const [showCreatorLevelModal, setShowCreatorLevelModal] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [selectedStoryData, setSelectedStoryData] = useState<CreatorStoryData | null>(null);
 
@@ -799,11 +805,11 @@ export const ProDashboardScreen: React.FC<ProDashboardScreenProps> = ({
           {/* CARD 5: CREATOR LEVEL & XP PROGRESS */}
           <Pressable
             onPress={() => {
-              if (onStartMission) {
-                onStartMission();
-              } else if (onOpenQuests) {
-                onOpenQuests();
+              if (Platform.OS !== 'web') {
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
               }
+              triggerModalPop();
+              setShowCreatorLevelModal(true);
             }}
             style={({ pressed }) => [styles.dashboardCard, pressed && styles.cardPressed]}
           >
@@ -831,11 +837,11 @@ export const ProDashboardScreen: React.FC<ProDashboardScreenProps> = ({
             </View>
           </Pressable>
 
-          {/* CARD 6: BRAND QUEST ("GlowUp Skincare Launch") */}
+          {/* CARD 6: ACTIVE PRO BRAND QUEST ("GlowUp Skincare Launch") */}
           <Pressable
             onPress={() => {
               if (Platform.OS !== 'web') {
-                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
               }
               triggerModalPop();
               setShowBrandQuestModal(true);
@@ -844,17 +850,20 @@ export const ProDashboardScreen: React.FC<ProDashboardScreenProps> = ({
           >
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 14 }}>
               <View style={styles.brandIconSquare}>
-                <Text style={{ fontSize: 20 }}>🎁</Text>
+                <Text style={{ fontSize: 22 }}>🎁</Text>
               </View>
 
               <View style={{ flex: 1 }}>
-                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 2 }}>
                   <View style={styles.proPriorityPill}>
-                    <Text style={styles.proPriorityText}>PRO PRIORITY</Text>
+                    <Text style={styles.proPriorityText}>👑 ACTIVE BRAND QUEST</Text>
                   </View>
-                  <Text style={styles.brandQuestSubLabel}>BRAND QUEST</Text>
+                  <Text style={styles.brandQuestSubLabel}>+$450 BOUNTY</Text>
                 </View>
                 <Text style={styles.brandQuestTitle}>GlowUp Skincare Launch</Text>
+                <Text style={{ fontSize: 11, color: '#64748B', marginTop: 1 }}>
+                  Product Integration Reel • +350 XP &amp; $450 Bounty
+                </Text>
               </View>
 
               <Text style={styles.chevronRight}>›</Text>
@@ -941,8 +950,12 @@ export const ProDashboardScreen: React.FC<ProDashboardScreenProps> = ({
                   if (Platform.OS !== 'web') {
                     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
                   }
-                  triggerModalPop();
-                  setShowVoiceStudioModal(true);
+                  if (onOpenVoiceStudio) {
+                    onOpenVoiceStudio();
+                  } else {
+                    triggerModalPop();
+                    setShowVoiceStudioModal(true);
+                  }
                 }}
               >
                 <Text style={styles.createVoiceBtnText}>✨ Create Voice</Text>
@@ -954,8 +967,12 @@ export const ProDashboardScreen: React.FC<ProDashboardScreenProps> = ({
                   if (Platform.OS !== 'web') {
                     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                   }
-                  triggerModalPop();
-                  setShowVoiceStudioModal(true);
+                  if (onOpenVoiceStudio) {
+                    onOpenVoiceStudio();
+                  } else {
+                    triggerModalPop();
+                    setShowVoiceStudioModal(true);
+                  }
                 }}
               >
                 <Text style={styles.openStudioBtnText}>Open Studio</Text>
@@ -1070,7 +1087,7 @@ export const ProDashboardScreen: React.FC<ProDashboardScreenProps> = ({
                   <Text style={styles.calendarStatLabel}>Current</Text>
                 </View>
                 <View style={[styles.calendarStatCard, { backgroundColor: '#FEF9C3', borderColor: '#FDE047' }]}>
-                  <Text style={[styles.calendarStatValue, { color: '#854D0E' }]}>Top 1% 👑</Text>
+                  <Text style={[styles.calendarStatValue, { color: '#B45309' }]}>Top 1% 👑</Text>
                   <Text style={[styles.calendarStatLabel, { color: '#A16207' }]}>Worldwide</Text>
                 </View>
                 <View style={styles.calendarStatCard}>
@@ -1258,7 +1275,7 @@ export const ProDashboardScreen: React.FC<ProDashboardScreenProps> = ({
                   <Text style={styles.legendLabel}>Completed (✓)</Text>
                 </View>
                 <View style={styles.legendItem}>
-                  <View style={[styles.legendDot, { backgroundColor: '#EAB308' }]} />
+                  <View style={[styles.legendDot, { backgroundColor: '#F59E0B' }]} />
                   <Text style={styles.legendLabel}>Autopilot (⚡)</Text>
                 </View>
                 <View style={styles.legendItem}>
@@ -1358,7 +1375,11 @@ export const ProDashboardScreen: React.FC<ProDashboardScreenProps> = ({
           </View>
         </Modal>
 
-        {/* MODAL: BRAND QUEST DETAILS */}
+
+
+                        {/* ============================================================ */}
+        {/* MODAL: ACTIVE PRO BRAND QUEST MODAL                          */}
+        {/* ============================================================ */}
         <Modal
           visible={showBrandQuestModal}
           transparent={true}
@@ -1366,36 +1387,281 @@ export const ProDashboardScreen: React.FC<ProDashboardScreenProps> = ({
           onRequestClose={() => setShowBrandQuestModal(false)}
         >
           <View style={styles.modalOverlay}>
-            <Animated.View style={[styles.modalCard, { transform: [{ scale: modalPopScale }] }]}>
-              <View style={styles.modalHeaderRow}>
-                <View>
+            <Animated.View style={[styles.modalCard, { transform: [{ scale: modalPopScale }], maxHeight: '90%' }]}>
+              <ScrollView showsVerticalScrollIndicator={false} bounces={false}>
+                {/* Header */}
+                <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
                   <View style={styles.proPriorityPill}>
-                    <Text style={styles.proPriorityText}>PRO PRIORITY MATCH</Text>
+                    <Text style={styles.proPriorityText}>👑 ACTIVE BRAND CAMPAIGN</Text>
                   </View>
-                  <Text style={[styles.modalTitle, { marginTop: 4 }]}>GlowUp Skincare Launch</Text>
-                  <Text style={styles.modalSubtitle}>Sponsored Campaign Brief • $450 Bounty</Text>
+                  <Pressable onPress={() => setShowBrandQuestModal(false)} hitSlop={8}>
+                    <Text style={{ fontSize: 18, color: '#94A3B8', fontWeight: '900' }}>✕</Text>
+                  </Pressable>
                 </View>
-                <Pressable onPress={() => setShowBrandQuestModal(false)} style={styles.modalCloseCircle} hitSlop={8}>
-                  <Text style={styles.modalCloseCross}>✕</Text>
+
+                {/* Hero Quest Banner */}
+                <LinearGradient
+                  colors={['#1E1B4B', '#312E81', '#4338CA']}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 1 }}
+                  style={{ borderRadius: 18, padding: 16, marginBottom: 14 }}
+                >
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+                    <View style={{ width: 44, height: 44, borderRadius: 22, backgroundColor: 'rgba(255, 255, 255, 0.15)', justifyContent: 'center', alignItems: 'center' }}>
+                      <Text style={{ fontSize: 22 }}>🎁</Text>
+                    </View>
+                    <View style={{ flex: 1 }}>
+                      <Text style={{ fontSize: 17, fontWeight: '900', color: '#FFFFFF' }}>GlowUp Skincare Launch</Text>
+                      <Text style={{ fontSize: 11, color: '#C7D2FE', marginTop: 1, fontWeight: '700' }}>Verified Sponsor • 2 Days Remaining</Text>
+                    </View>
+                  </View>
+
+                  <View style={{ flexDirection: 'row', gap: 8, marginTop: 12 }}>
+                    <View style={{ backgroundColor: 'rgba(245, 158, 11, 0.25)', borderWidth: 1, borderColor: '#F59E0B', paddingHorizontal: 10, paddingVertical: 4, borderRadius: 8 }}>
+                      <Text style={{ fontSize: 11, fontWeight: '900', color: '#FDE68A' }}>💰 $450 Guaranteed Bounty</Text>
+                    </View>
+                    <View style={{ backgroundColor: 'rgba(139, 92, 246, 0.25)', borderWidth: 1, borderColor: '#8B5CF6', paddingHorizontal: 10, paddingVertical: 4, borderRadius: 8 }}>
+                      <Text style={{ fontSize: 11, fontWeight: '900', color: '#EDE9FE' }}>⚡ +350 XP Reward</Text>
+                    </View>
+                  </View>
+                </LinearGradient>
+
+                {/* Deliverables & Brief */}
+                <Text style={styles.modalSubheadingTitle}>CAMPAIGN DELIVERABLES</Text>
+                <View style={{ gap: 8, marginTop: 8 }}>
+                  <View style={styles.xpActivityRow}>
+                    <Text style={{ fontSize: 18 }}>🎬</Text>
+                    <View style={{ flex: 1 }}>
+                      <Text style={styles.xpActivityTitle}>1x 9:16 Video Integration Reel</Text>
+                      <Text style={styles.xpActivityTime}>Include 3-second texture hook &amp; routine demo</Text>
+                    </View>
+                  </View>
+                  <View style={styles.xpActivityRow}>
+                    <Text style={{ fontSize: 18 }}>🔗</Text>
+                    <View style={{ flex: 1 }}>
+                      <Text style={styles.xpActivityTitle}>Custom Bio Link &amp; Promo Code</Text>
+                      <Text style={styles.xpActivityTime}>Tag @glowupskin with 15% audience discount</Text>
+                    </View>
+                  </View>
+                </View>
+
+                {/* Jarvis AI Recommendation */}
+                <View style={[styles.nextLevelPreviewBox, { backgroundColor: '#F5F3FF', borderColor: '#C4B5FD', marginTop: 12 }]}>
+                  <Text style={[styles.nextLevelPreviewTitle, { color: '#582CDB' }]}>🪄 JARVIS MATCH INSIGHT</Text>
+                  <Text style={[styles.nextLevelPreviewBody, { color: '#4338CA' }]}>
+                    Your audience has a 94% affinity with aesthetic lifestyle routines. Filming during your 7:30 PM slot gives this brief maximum sponsored reach.
+                  </Text>
+                </View>
+
+                {/* Action Buttons */}
+                <Pressable
+                  style={({ pressed }) => [styles.modalGoldActionBtnWrapper, { marginTop: 14 }, pressed && styles.btnPressed]}
+                  onPress={() => {
+                    setShowBrandQuestModal(false);
+                    if (onOpenPostComposer) {
+                      onOpenPostComposer('My 3-Step Morning Skincare Secret (GlowUp Collab)');
+                    } else if (onStartMission) {
+                      onStartMission();
+                    }
+                  }}
+                >
+                  <LinearGradient
+                    colors={['#FDE68A', '#F59E0B', '#D97706']}
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 1, y: 1 }}
+                    style={styles.modalGoldBtnGradient}
+                  >
+                    <Text style={styles.modalGoldActionBtnText}>
+                      ✨ Start Campaign in Composer (+350 XP) ➔
+                    </Text>
+                  </LinearGradient>
                 </Pressable>
-              </View>
 
-              <View style={{ gap: 10, marginVertical: 12 }}>
-                <Text style={styles.reqDetailLine}>• Target: 1 Dedicated 45s Reel &amp; TikTok Review</Text>
-                <Text style={styles.reqDetailLine}>• Deliverable: Organic creator testimonial format</Text>
-                <Text style={styles.reqDetailLine}>• Payout: $450 direct bank transfer upon approval</Text>
-                <Text style={styles.reqDetailLine}>• Pro Status: Fast-Track Guaranteed Review (24h)</Text>
-              </View>
+                <Pressable
+                  style={styles.modalSecondaryOutlineBtn}
+                  onPress={() => {
+                    setShowBrandQuestModal(false);
+                    if (onOpenMessages) onOpenMessages('conv_glowup');
+                  }}
+                >
+                  <Text style={styles.modalSecondaryOutlineBtnText}>
+                    💬 Message Brand Sponsor ➔
+                  </Text>
+                </Pressable>
 
-              <Pressable
-                style={styles.modalFullBtn}
-                onPress={() => {
-                  setShowBrandQuestModal(false);
-                  showToast('Application submitted directly to brand team!');
-                }}
-              >
-                <Text style={styles.modalFullBtnText}>Apply for $450 Bounty ➔</Text>
-              </Pressable>
+                <Pressable
+                  style={styles.modalCancelBtn}
+                  onPress={() => setShowBrandQuestModal(false)}
+                >
+                  <Text style={styles.modalCancelBtnText}>Close Brief</Text>
+                </Pressable>
+              </ScrollView>
+            </Animated.View>
+          </View>
+        </Modal>
+
+        {/* ============================================================ */}
+        {/* MODAL: CREATOR LEVEL & XP MILESTONE BADGES MODAL             */}
+        {/* ============================================================ */}
+        <Modal
+          visible={showCreatorLevelModal}
+          transparent={true}
+          animationType="fade"
+          onRequestClose={() => setShowCreatorLevelModal(false)}
+        >
+          <View style={styles.modalOverlay}>
+            <Animated.View style={[styles.modalCard, { transform: [{ scale: modalPopScale }], maxHeight: '90%' }]}>
+              <ScrollView showsVerticalScrollIndicator={false} bounces={false}>
+                {/* Header */}
+                <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+                  <View style={styles.proPriorityPill}>
+                    <Text style={styles.proPriorityText}>👑 LEVEL &amp; BADGE PROGRESSION</Text>
+                  </View>
+                  <Pressable onPress={() => setShowCreatorLevelModal(false)} hitSlop={8}>
+                    <Text style={{ fontSize: 18, color: '#94A3B8', fontWeight: '900' }}>✕</Text>
+                  </Pressable>
+                </View>
+
+                {/* Hero Level & Rank Card */}
+                <LinearGradient
+                  colors={['#3B14A7', '#582CDB', '#7C3AED']}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 1 }}
+                  style={styles.levelHeroRankCard}
+                >
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 14 }}>
+                    <View style={styles.heroLevelNumberCircle}>
+                      <Text style={styles.heroLevelNumberText}>42</Text>
+                    </View>
+                    <View style={{ flex: 1 }}>
+                      <Text style={styles.heroLevelTitle}>Elite Storyteller</Text>
+                      <Text style={styles.heroLevelSub}>Master Tier Creator • Top 3% Consistency</Text>
+                    </View>
+                  </View>
+
+                  {/* XP Progress Bar */}
+                  <View style={{ marginTop: 14 }}>
+                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 6 }}>
+                      <Text style={styles.heroXpCurrentText}>2,450 XP</Text>
+                      <Text style={styles.heroXpTargetText}>3,000 XP (Level 43)</Text>
+                    </View>
+                    <View style={styles.heroXpTrackBg}>
+                      <LinearGradient
+                        colors={['#FDE68A', '#F59E0B', '#D97706']}
+                        start={{ x: 0, y: 0 }}
+                        end={{ x: 1, y: 0 }}
+                        style={[styles.heroXpTrackFill, { width: '81.7%' }]}
+                      />
+                    </View>
+                    <Text style={styles.heroXpRemainingSub}>
+                      🔥 Only 550 XP needed to unlock <Text style={{ fontWeight: '900', color: '#FDE68A' }}>Level 43 Master Storyteller</Text>
+                    </Text>
+                  </View>
+                </LinearGradient>
+
+                {/* BADGE SHOWCASE GRID */}
+                <Text style={[styles.modalSubheadingTitle, { marginTop: 16 }]}>EARNED CREATOR BADGES (4/8)</Text>
+                <View style={styles.badgeShowcaseGrid}>
+                  {/* Badge 1 */}
+                  <View style={styles.badgeShowcaseItem}>
+                    <Text style={{ fontSize: 24, marginBottom: 4 }}>🏆</Text>
+                    <Text style={styles.badgeShowcaseName}>Elite Storyteller</Text>
+                    <Text style={styles.badgeShowcaseDesc}>40+ high-retention narrative videos</Text>
+                  </View>
+
+                  {/* Badge 2 */}
+                  <View style={styles.badgeShowcaseItem}>
+                    <Text style={{ fontSize: 24, marginBottom: 4 }}>🔥</Text>
+                    <Text style={styles.badgeShowcaseName}>52-Day Streak</Text>
+                    <Text style={styles.badgeShowcaseDesc}>Unbroken daily publishing momentum</Text>
+                  </View>
+
+                  {/* Badge 3 */}
+                  <View style={styles.badgeShowcaseItem}>
+                    <Text style={{ fontSize: 24, marginBottom: 4 }}>🎙️</Text>
+                    <Text style={styles.badgeShowcaseName}>Voice Studio Pro</Text>
+                    <Text style={styles.badgeShowcaseDesc}>10+ batches voiced with Jarvis AI</Text>
+                  </View>
+
+                  {/* Badge 4 */}
+                  <View style={styles.badgeShowcaseItem}>
+                    <Text style={{ fontSize: 24, marginBottom: 4 }}>👑</Text>
+                    <Text style={styles.badgeShowcaseName}>Multi-Sync Pioneer</Text>
+                    <Text style={styles.badgeShowcaseDesc}>4-channel automatic distribution</Text>
+                  </View>
+                </View>
+
+                {/* RECENT XP GAINS */}
+                <Text style={[styles.modalSubheadingTitle, { marginTop: 16 }]}>RECENT XP ACTIVITY</Text>
+                <View style={{ gap: 8, marginTop: 6 }}>
+                  {[
+                    { title: 'Daily 7:30 PM Video Published', time: 'Today', xp: '+50 XP' },
+                    { title: 'Multi-Platform Sync Configured', time: 'Yesterday', xp: '+25 XP' },
+                    { title: 'Squad Live Duel Victory with Elena', time: '2 days ago', xp: '+75 XP' },
+                    { title: '50-Day Consistency Milestone Trophy', time: '3 days ago', xp: '+250 XP' },
+                  ].map((item, idx) => (
+                    <View key={idx} style={styles.xpActivityRow}>
+                      <View style={{ flex: 1 }}>
+                        <Text style={styles.xpActivityTitle}>{item.title}</Text>
+                        <Text style={styles.xpActivityTime}>{item.time}</Text>
+                      </View>
+                      <View style={styles.xpActivityBadge}>
+                        <Text style={styles.xpActivityBadgeText}>{item.xp}</Text>
+                      </View>
+                    </View>
+                  ))}
+                </View>
+
+                {/* NEXT LEVEL UNLOCKS (LEVEL 43 PREVIEW) */}
+                <View style={styles.nextLevelPreviewBox}>
+                  <Text style={styles.nextLevelPreviewTitle}>🌟 LEVEL 43 MILESTONE UNLOCKS</Text>
+                  <Text style={styles.nextLevelPreviewBody}>
+                    • Master Storyteller Gold Profile Badge{"\n"}
+                    • Priority Brand Deal &amp; Sponsor Matching ($500+ brief pool){"\n"}
+                    • +500 Squad XP Multiplier Boost
+                  </Text>
+                </View>
+
+                {/* Action Buttons */}
+                <Pressable
+                  style={({ pressed }) => [styles.modalGoldActionBtnWrapper, { marginTop: 12 }, pressed && styles.btnPressed]}
+                  onPress={() => {
+                    setShowCreatorLevelModal(false);
+                    if (onStartMission) onStartMission();
+                    else if (onOpenQuests) onOpenQuests();
+                  }}
+                >
+                  <LinearGradient
+                    colors={['#FDE68A', '#F59E0B', '#D97706']}
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 1, y: 1 }}
+                    style={styles.modalGoldBtnGradient}
+                  >
+                    <Text style={styles.modalGoldActionBtnText}>
+                      ⚡ Earn More XP on Today&apos;s Mission (+150 XP) ➔
+                    </Text>
+                  </LinearGradient>
+                </Pressable>
+
+                <Pressable
+                  style={styles.modalSecondaryOutlineBtn}
+                  onPress={() => {
+                    setShowCreatorLevelModal(false);
+                    if (onOpenQuests) onOpenQuests();
+                  }}
+                >
+                  <Text style={styles.modalSecondaryOutlineBtnText}>
+                    📜 View Complete Creator Passport ➔
+                  </Text>
+                </Pressable>
+
+                <Pressable
+                  style={styles.modalCancelBtn}
+                  onPress={() => setShowCreatorLevelModal(false)}
+                >
+                  <Text style={styles.modalCancelBtnText}>Close Level Overview</Text>
+                </Pressable>
+              </ScrollView>
             </Animated.View>
           </View>
         </Modal>
@@ -1515,12 +1781,12 @@ const styles = StyleSheet.create({
     paddingVertical: 2,
     borderRadius: 6,
     borderWidth: 1,
-    borderColor: '#FEF08A',
+    borderColor: '#FBBF24',
   },
   proHeaderBadgeText: {
     fontSize: 8.5,
     fontWeight: '900',
-    color: '#78350F',
+    color: '#92400E',
     letterSpacing: 0.3,
   },
   headerRightGroup: {
@@ -1570,7 +1836,7 @@ const styles = StyleSheet.create({
     position: 'relative',
   },
   profilePhotoBtnPro: {
-    borderColor: '#EAB308',
+    borderColor: '#F59E0B',
     borderWidth: 2,
   },
   headerCustomAvatarImage: {
@@ -1620,7 +1886,7 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   proPlanTagBox: {
-    backgroundColor: '#FEF08A',
+    backgroundColor: '#FEF3C7',
     paddingHorizontal: 8,
     paddingVertical: 3,
     borderRadius: 6,
@@ -1663,7 +1929,7 @@ const styles = StyleSheet.create({
   proPillGoldText: {
     fontSize: 11,
     fontWeight: '800',
-    color: '#B45309',
+    color: '#92400E',
   },
   proPillGray: {
     backgroundColor: '#F1F5F9',
@@ -1677,7 +1943,7 @@ const styles = StyleSheet.create({
     color: '#475569',
   },
   proPillActiveGold: {
-    backgroundColor: '#EAB308',
+    backgroundColor: '#F59E0B',
     paddingHorizontal: 10,
     paddingVertical: 5,
     borderRadius: 10,
@@ -1907,7 +2173,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   proPriorityPill: {
-    backgroundColor: '#FEF08A',
+    backgroundColor: '#FEF3C7',
     paddingHorizontal: 6,
     paddingVertical: 2,
     borderRadius: 4,
@@ -1915,7 +2181,7 @@ const styles = StyleSheet.create({
   proPriorityText: {
     fontSize: 9,
     fontWeight: '900',
-    color: '#78350F',
+    color: '#92400E',
   },
   brandQuestSubLabel: {
     fontSize: 10,
@@ -2179,12 +2445,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: 7,
     borderRadius: 6,
     borderWidth: 1,
-    borderColor: '#FEF08A',
+    borderColor: '#FBBF24',
   },
   proBadgeText: {
     fontSize: 9,
     fontWeight: '900',
-    color: '#78350F',
+    color: '#92400E',
     letterSpacing: 0.5,
   },
   calendarModalSubtitle: {
@@ -2257,7 +2523,7 @@ const styles = StyleSheet.create({
     width: 5,
     height: 5,
     borderRadius: 2.5,
-    backgroundColor: '#EAB308',
+    backgroundColor: '#F59E0B',
   },
   monthChipCurrentDotActive: {
     backgroundColor: '#FDE047',
@@ -2274,7 +2540,7 @@ const styles = StyleSheet.create({
   selectedDayText: {
     fontSize: 11.5,
     fontWeight: '800',
-    color: '#78350F',
+    color: '#92400E',
     textAlign: 'center',
   },
   pagerOuterContainer: {
@@ -2325,7 +2591,7 @@ const styles = StyleSheet.create({
   currentMonthBadgeText: {
     fontSize: 8.5,
     fontWeight: '900',
-    color: '#B45309',
+    color: '#92400E',
   },
   dayColHeadersRow: {
     flexDirection: 'row',
@@ -2378,7 +2644,7 @@ const styles = StyleSheet.create({
   },
   dayCellTodayPro: {
     borderWidth: 2,
-    borderColor: '#EAB308',
+    borderColor: '#F59E0B',
     backgroundColor: '#582CDB',
   },
   dayCellNumber: {
@@ -2391,7 +2657,7 @@ const styles = StyleSheet.create({
     fontWeight: '900',
   },
   dayCellNumberScheduled: {
-    color: '#854D0E',
+    color: '#B45309',
     fontWeight: '900',
   },
   dayCellNumberFreeze: {
@@ -2563,6 +2829,194 @@ const styles = StyleSheet.create({
     color: '#64748B',
     marginTop: 2,
     lineHeight: 16,
+  },
+  // LEVEL MODAL STYLES
+  levelHeroRankCard: {
+    borderRadius: 20,
+    padding: 18,
+    marginVertical: 6,
+  },
+  heroLevelNumberCircle: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    borderWidth: 1.5,
+    borderColor: '#FDE68A',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  heroLevelNumberText: {
+    fontSize: 20,
+    fontWeight: '900',
+    color: '#FFFFFF',
+  },
+  heroLevelTitle: {
+    fontSize: 18,
+    fontWeight: '900',
+    color: '#FFFFFF',
+  },
+  heroLevelSub: {
+    fontSize: 11,
+    color: '#E9D5FF',
+    marginTop: 2,
+    fontWeight: '700',
+  },
+  heroXpCurrentText: {
+    fontSize: 12,
+    fontWeight: '900',
+    color: '#FDE68A',
+  },
+  heroXpTargetText: {
+    fontSize: 11,
+    color: '#EDE9FE',
+    fontWeight: '700',
+  },
+  heroXpTrackBg: {
+    height: 8,
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    borderRadius: 4,
+    overflow: 'hidden',
+  },
+  heroXpTrackFill: {
+    height: '100%',
+    borderRadius: 4,
+  },
+  heroXpRemainingSub: {
+    fontSize: 10.5,
+    color: '#E9D5FF',
+    marginTop: 6,
+    fontWeight: '600',
+  },
+  modalSubheadingTitle: {
+    fontSize: 11,
+    fontWeight: '900',
+    color: '#64748B',
+    letterSpacing: 0.5,
+  },
+  badgeShowcaseGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+    marginTop: 8,
+  },
+  badgeShowcaseItem: {
+    width: '48%',
+    backgroundColor: '#FAF8F5',
+    borderRadius: 14,
+    padding: 12,
+    borderWidth: 1,
+    borderColor: '#EFECE6',
+    alignItems: 'center',
+  },
+  badgeShowcaseName: {
+    fontSize: 12,
+    fontWeight: '900',
+    color: '#171420',
+    textAlign: 'center',
+  },
+  badgeShowcaseDesc: {
+    fontSize: 10,
+    color: '#64748B',
+    textAlign: 'center',
+    marginTop: 2,
+  },
+  xpActivityRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: '#FAF8F5',
+    borderRadius: 12,
+    padding: 10,
+    borderWidth: 1,
+    borderColor: '#EFECE6',
+  },
+  xpActivityTitle: {
+    fontSize: 12,
+    fontWeight: '800',
+    color: '#171420',
+  },
+  xpActivityTime: {
+    fontSize: 10,
+    color: '#94A3B8',
+    marginTop: 1,
+  },
+  xpActivityBadge: {
+    backgroundColor: '#EDE9FE',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 8,
+  },
+  xpActivityBadgeText: {
+    fontSize: 11,
+    fontWeight: '900',
+    color: '#582CDB',
+  },
+  nextLevelPreviewBox: {
+    backgroundColor: '#FFFBEB',
+    borderRadius: 14,
+    padding: 12,
+    borderWidth: 1,
+    borderColor: '#FDE68A',
+    marginTop: 12,
+  },
+  nextLevelPreviewTitle: {
+    fontSize: 11,
+    fontWeight: '900',
+    color: '#92400E',
+    marginBottom: 4,
+  },
+  nextLevelPreviewBody: {
+    fontSize: 11,
+    color: '#78350F',
+    lineHeight: 16,
+    fontWeight: '600',
+  },
+  modalGoldActionBtnWrapper: {
+    borderRadius: 14,
+    overflow: 'hidden',
+    marginTop: 8,
+    shadowColor: '#F59E0B',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.35,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  modalGoldBtnGradient: {
+    paddingVertical: 13,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: '#FDE68A',
+  },
+  modalGoldActionBtnText: {
+    color: '#0C0A12',
+    fontSize: 13.5,
+    fontWeight: '900',
+  },
+  modalSecondaryOutlineBtn: {
+    backgroundColor: '#FAF8F5',
+    borderWidth: 1.5,
+    borderColor: '#DDD6FE',
+    paddingVertical: 12,
+    borderRadius: 14,
+    alignItems: 'center',
+    marginTop: 8,
+  },
+  modalSecondaryOutlineBtnText: {
+    color: '#582CDB',
+    fontSize: 13,
+    fontWeight: '900',
+  },
+  modalCancelBtn: {
+    paddingVertical: 10,
+    alignItems: 'center',
+  },
+  modalCancelBtnText: {
+    color: '#64748B',
+    fontSize: 12,
+    fontWeight: '800',
   },
   toastContainer: {
     position: 'absolute',

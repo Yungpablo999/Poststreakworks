@@ -26,6 +26,7 @@ const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
 interface ProMessagesScreenProps {
   onBack: () => void;
+  initialConversationId?: string;
   onLogout?: () => void;
   onOpenSchedule?: () => void;
   onOpenJarvisPro?: () => void;
@@ -392,6 +393,7 @@ const INITIAL_CONVERSATIONS: ConversationThread[] = [
 
 export const ProMessagesScreen: React.FC<ProMessagesScreenProps> = ({
   onBack,
+  initialConversationId,
   onLogout,
   onOpenSchedule,
   onOpenJarvisPro,
@@ -407,7 +409,21 @@ export const ProMessagesScreen: React.FC<ProMessagesScreenProps> = ({
   const [selectedFilter, setSelectedFilter] = useState<'all' | 'collabs' | 'squad' | 'deals' | 'jarvis'>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [conversations, setConversations] = useState<ConversationThread[]>(INITIAL_CONVERSATIONS);
-  const [activeChatThread, setActiveChatThread] = useState<ConversationThread | null>(null);
+  const [activeChatThread, setActiveChatThread] = useState<ConversationThread | null>(() => {
+    if (initialConversationId) {
+      return INITIAL_CONVERSATIONS.find((c) => c.id === initialConversationId) || null;
+    }
+    return null;
+  });
+
+  useEffect(() => {
+    if (initialConversationId) {
+      const found = INITIAL_CONVERSATIONS.find((c) => c.id === initialConversationId);
+      if (found) {
+        setActiveChatThread(found);
+      }
+    }
+  }, [initialConversationId]);
   const [chatInputText, setChatInputText] = useState('');
   const [selectedStoryData, setSelectedStoryData] = useState<CreatorStoryData | null>(null);
   const [showProfileModal, setShowProfileModal] = useState(false);
@@ -584,7 +600,7 @@ export const ProMessagesScreen: React.FC<ProMessagesScreenProps> = ({
               hitSlop={8}
             >
               <LinearGradient
-                colors={['#FEF08A', '#FDE047']}
+                colors={['#FDE68A', '#F59E0B', '#D97706']}
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 1 }}
                 style={styles.proHeaderBadge}
@@ -594,23 +610,50 @@ export const ProMessagesScreen: React.FC<ProMessagesScreenProps> = ({
             </Pressable>
           </View>
 
-          {/* User Profile Avatar with Tiny Gold Check Badge */}
-          <Pressable
-            onPress={() => {
-              setShowProfileModal(true);
-            }}
-            style={styles.profileAvatarWrapper}
-            hitSlop={8}
-          >
-            <Image
-              source={userProfile?.avatarSource || require('../../assets/images/jarvis-ghost-clean.png')}
-              style={styles.headerUserAvatar}
-              resizeMode="cover"
-            />
-            <View style={styles.avatarTinyGoldCheckPos}>
-              <TinyGoldCheck size={14} />
-            </View>
-          </Pressable>
+          {/* Right Action: Plus Button (+) & Profile Icon with Tiny Gold Check */}
+          <View style={styles.headerRightGroup}>
+            <Pressable
+              style={({ pressed }) => [styles.newChatBtn, pressed && styles.btnPressed]}
+              hitSlop={8}
+              onPress={() => {
+                if (Platform.OS !== 'web') {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                }
+                if (onOpenMatch) {
+                  onOpenMatch();
+                } else if (onNavigateTab) {
+                  onNavigateTab('match');
+                }
+              }}
+            >
+              <LinearGradient
+                colors={['#7C3AED', '#582CDB']}
+                style={styles.plusIconGradient}
+              >
+                <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
+                  <Path d="M12 5V19M5 12H19" stroke="#FFFFFF" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" />
+                </Svg>
+              </LinearGradient>
+            </Pressable>
+
+            {/* User Profile Avatar with Tiny Gold Check Badge */}
+            <Pressable
+              onPress={() => {
+                setShowProfileModal(true);
+              }}
+              style={styles.profileAvatarWrapper}
+              hitSlop={8}
+            >
+              <Image
+                source={userProfile?.avatarSource || require('../../assets/images/jarvis-ghost-clean.png')}
+                style={styles.headerUserAvatar}
+                resizeMode="cover"
+              />
+              <View style={styles.avatarTinyGoldCheckPos}>
+                <TinyGoldCheck size={14} />
+              </View>
+            </Pressable>
+          </View>
         </View>
 
         {/* 2. MAIN SCROLLABLE MESSAGES INBOX */}
@@ -1115,13 +1158,34 @@ const styles = StyleSheet.create({
     paddingVertical: 2,
     borderRadius: 6,
     borderWidth: 1,
-    borderColor: '#FEF08A',
+    borderColor: '#FBBF24',
   },
   proHeaderBadgeText: {
     fontSize: 8.5,
     fontWeight: '900',
-    color: '#78350F',
+    color: '#92400E',
     letterSpacing: 0.3,
+  },
+  headerRightGroup: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  newChatBtn: {
+    width: 36,
+    height: 36,
+    borderRadius: 12,
+    overflow: 'hidden',
+    shadowColor: '#582CDB',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.2,
+    shadowRadius: 6,
+    elevation: 3,
+  },
+  plusIconGradient: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   profileAvatarWrapper: {
     position: 'relative',
@@ -1131,7 +1195,7 @@ const styles = StyleSheet.create({
     height: 38,
     borderRadius: 19,
     borderWidth: 2,
-    borderColor: '#EAB308',
+    borderColor: '#F59E0B',
   },
   avatarTinyGoldCheckPos: {
     position: 'absolute',
@@ -1359,7 +1423,7 @@ const styles = StyleSheet.create({
     color: '#171420',
   },
   proMicroPill: {
-    backgroundColor: '#FEF08A',
+    backgroundColor: '#FEF3C7',
     paddingHorizontal: 5,
     paddingVertical: 1.5,
     borderRadius: 4,
@@ -1367,7 +1431,7 @@ const styles = StyleSheet.create({
   proMicroPillText: {
     fontSize: 8,
     fontWeight: '900',
-    color: '#78350F',
+    color: '#92400E',
   },
   convTimeText: {
     fontSize: 10.5,
