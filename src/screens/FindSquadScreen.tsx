@@ -836,27 +836,17 @@ export const FindSquadScreen: React.FC<FindSquadScreenProps> = ({
                 </Text>
               </View>
 
-              {/* Action Buttons */}
+              {/* Action Button */}
               <View style={styles.modalActionsRow}>
                 <Pressable
-                  style={({ pressed }) => [styles.modalOutlineBtn, pressed && styles.btnPressed]}
-                  onPress={() => {
-                    setPreviewModalSquad(null);
-                    if (onOpenSquad) onOpenSquad();
-                  }}
-                >
-                  <Text style={styles.modalOutlineBtnText}>Open Room</Text>
-                </Pressable>
-
-                <Pressable
-                  style={({ pressed }) => [styles.modalSolidBtn, pressed && styles.btnPressed]}
+                  style={({ pressed }) => [styles.modalSolidBtnFull, pressed && styles.btnPressed]}
                   onPress={() => handleRequestToJoin(previewModalSquad)}
                 >
                   <LinearGradient
                     colors={['#784DF0', '#582CDB']}
                     style={styles.modalSolidGradient}
                   >
-                    <Text style={styles.modalSolidBtnText}>Apply to Join 🚀</Text>
+                    <Text style={styles.modalSolidBtnText}>Apply to Join {previewModalSquad.name} 🚀</Text>
                   </LinearGradient>
                 </Pressable>
               </View>
@@ -1669,6 +1659,16 @@ const styles = StyleSheet.create({
     flex: 1.3,
     borderRadius: 14,
     overflow: 'hidden',
+  },
+  modalSolidBtnFull: {
+    flex: 1,
+    borderRadius: 14,
+    overflow: 'hidden',
+    shadowColor: '#582CDB',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.25,
+    shadowRadius: 8,
+    elevation: 3,
   },
   modalSolidGradient: {
     paddingVertical: 12,
