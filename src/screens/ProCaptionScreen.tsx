@@ -264,7 +264,36 @@ export const ProCaptionScreen: React.FC<ProCaptionScreenProps> = ({
     setMainCaption(
       'Stop making these 3 mistakes if you want to grow as a creator:\n\n1. Waiting for the "perfect" idea\n2. Over-editing for 6 hours\n3. Zero repeatable workflow\n\nWhich one is slowing you down the most? Let me know below.'
     );
-    showToast('✨ Applied Jarvis AI recommendations!');
+    setCompletionData({
+      title: 'Jarvis Recommendation Applied!',
+      subtitle: `Caption hook, high-converting CTA & structure calibrated for 94% retention.`,
+      badgeText: '✨ JARVIS AI OPTIMIZED (+50 XP)',
+      xpEarned: 50,
+      speechBubble: 'AI calibration complete, Pablo! First 80 characters fit above the fold perfectly! 🚀',
+    });
+    setShowCompletionModal(true);
+  };
+
+  const handleApplyJarvisChip = (chipType: string) => {
+    if (Platform.OS !== 'web') {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    }
+    if (chipType === 'DIRECT HOOK') {
+      setMainCaption(
+        'Stop waiting for perfect ideas—it is costing you 10,000 views. Here are the 3 mistakes slowing you down and how to fix them today.'
+      );
+      showToast('⚡ Injected Direct Problem Hook');
+    } else if (chipType === 'COMMENT CTA') {
+      setMainCaption(
+        `${mainCaption}\n\n👉 Which of these 3 is your biggest roadblock today? Drop 1, 2, or 3 below.`
+      );
+      showToast('💬 Injected High-Conversion Comment CTA');
+    } else if (chipType === 'SAVEABLE BULLETS') {
+      setMainCaption(
+        '3 creator mistakes to avoid:\n\n• Waiting for the "perfect" idea\n• Over-editing for 6 hours\n• Zero repeatable workflow\n\nSave this for your next filming day.'
+      );
+      showToast('📌 Injected Saveable Bullet Structure');
+    }
   };
 
   const handleAddToPost = () => {
@@ -991,14 +1020,19 @@ export const ProCaptionScreen: React.FC<ProCaptionScreenProps> = ({
             </View>
 
             {/* Quick Strategy Pills */}
-            <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginBottom: 12 }}>
-              {['DIRECT HOOK', 'COMMENT CTA', 'SAVEABLE BULLETS'].map((chip) => (
+            <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 14 }}>
+              {[
+                { id: 'DIRECT HOOK', label: 'DIRECT HOOK', emoji: '⚡' },
+                { id: 'COMMENT CTA', label: 'COMMENT CTA', emoji: '💬' },
+                { id: 'SAVEABLE BULLETS', label: 'SAVEABLE BULLETS', emoji: '📌' },
+              ].map((chip) => (
                 <Pressable
-                  key={chip}
-                  style={styles.jarvisStrategyChip}
-                  onPress={() => showToast(`✓ Applied ${chip}`)}
+                  key={chip.id}
+                  style={({ pressed }) => [styles.jarvisStrategyChip, pressed && styles.btnPressed]}
+                  onPress={() => handleApplyJarvisChip(chip.id)}
                 >
-                  <Text style={styles.jarvisStrategyChipText}>{chip}</Text>
+                  <Text style={{ fontSize: 11 }}>{chip.emoji}</Text>
+                  <Text style={styles.jarvisStrategyChipText}>{chip.label}</Text>
                 </Pressable>
               ))}
             </View>
@@ -2099,18 +2133,26 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   jarvisStrategyChip: {
-    backgroundColor: 'rgba(255, 255, 255, 0.12)',
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 6,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.15)',
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#582CDB',
+    paddingHorizontal: 11,
+    paddingVertical: 7,
+    borderRadius: 14,
+    borderWidth: 1.5,
+    borderColor: '#A78BFA',
+    shadowColor: '#582CDB',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.35,
+    shadowRadius: 5,
+    elevation: 3,
+    gap: 5,
   },
   jarvisStrategyChipText: {
-    fontSize: 9,
+    fontSize: 10,
     fontWeight: '900',
-    color: '#E2E8F0',
-    letterSpacing: 0.3,
+    color: '#FFFFFF',
+    letterSpacing: 0.4,
   },
   applyJarvisHeroBtn: {
     backgroundColor: '#582CDB',
