@@ -91,6 +91,7 @@ export const ProScriptScreen: React.FC<ProScriptScreenProps> = ({
   );
 
   const [isPlayingPreview, setIsPlayingPreview] = useState(false);
+  const [isAccelerated, setIsAccelerated] = useState(false);
   const [completionData, setCompletionData] = useState({
     title: 'Script Saved to Drafts!',
     subtitle: `"${currentIdeaTitle}" is ready for Voice Studio or immediate posting.`,
@@ -424,22 +425,39 @@ export const ProScriptScreen: React.FC<ProScriptScreenProps> = ({
               </Pressable>
 
               <Pressable
-                style={({ pressed }) => [styles.proAccelerateBtn, pressed && styles.btnPressed]}
+                style={({ pressed }) => [
+                  styles.proAccelerateBtn,
+                  isAccelerated && styles.proAccelerateBtnActive,
+                  pressed && styles.btnPressed,
+                ]}
                 onPress={() => {
                   if (Platform.OS !== 'web') {
                     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
                   }
-                  setCompletionData({
-                    title: 'Pro Script Accelerated!',
-                    subtitle: `"${currentIdeaTitle}" optimized with AI retention pacing & viral hook multiplier.`,
-                    badgeText: '⚡ PRO SCRIPT ACCELERATED',
-                    xpEarned: 50,
-                    speechBubble: 'Maximum velocity unlocked, Pablo! Pacing & retention boosted to 94%! 🔥',
-                  });
-                  setShowCompletionModal(true);
+                  const nextState = !isAccelerated;
+                  setIsAccelerated(nextState);
+                  if (nextState) {
+                    setCompletionData({
+                      title: 'Pro Script Accelerated!',
+                      subtitle: `"${currentIdeaTitle}" optimized with AI retention pacing & viral hook multiplier.`,
+                      badgeText: '⚡ PRO SCRIPT ACCELERATED',
+                      xpEarned: 50,
+                      speechBubble: 'Maximum velocity unlocked, Pablo! Pacing & retention boosted to 94%! 🔥',
+                    });
+                    setShowCompletionModal(true);
+                  } else {
+                    showToast('Pro Acceleration paused');
+                  }
                 }}
               >
-                <Text style={styles.proAccelerateBtnText}>PRO ACCELERATE</Text>
+                <Text
+                  style={[
+                    styles.proAccelerateBtnText,
+                    isAccelerated && styles.proAccelerateBtnTextActive,
+                  ]}
+                >
+                  {isAccelerated ? '⚡ ACCELERATED ✓' : 'PRO ACCELERATE'}
+                </Text>
               </Pressable>
             </View>
           </View>
@@ -1117,10 +1135,21 @@ const styles = StyleSheet.create({
     paddingVertical: 5,
     borderRadius: 8,
   },
+  proAccelerateBtnActive: {
+    backgroundColor: '#582CDB',
+    shadowColor: '#582CDB',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.35,
+    shadowRadius: 4,
+    elevation: 2,
+  },
   proAccelerateBtnText: {
     fontSize: 10,
     fontWeight: '900',
     color: '#582CDB',
+  },
+  proAccelerateBtnTextActive: {
+    color: '#FFFFFF',
   },
 
   // CARD 2: SCRIPT QUALITY SCORE
