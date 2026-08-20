@@ -307,7 +307,7 @@ export const ProRepurposeScreen: React.FC<ProRepurposeScreenProps> = ({
           hitSlop={8}
         >
           <Image
-            source={require('../../assets/images/jarvis-core-flame.png')}
+            source={require('../../assets/images/jarvis-ghost-clean.png')}
             style={styles.topGhostLogo}
             resizeMode="contain"
           />
@@ -655,7 +655,7 @@ export const ProRepurposeScreen: React.FC<ProRepurposeScreenProps> = ({
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
               <View style={styles.jarvisIconHaloBox}>
                 <Image
-                  source={require('../../assets/images/jarvis-core-flame.png')}
+                  source={require('../../assets/images/jarvis-ghost-clean.png')}
                   style={{ width: 26, height: 26 }}
                   resizeMode="contain"
                 />

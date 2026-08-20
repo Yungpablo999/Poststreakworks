@@ -269,7 +269,7 @@ const CREATOR_STORIES: CreatorStory[] = [
     name: 'Jarvis AI',
     handle: '@jarvis.ai',
     niche: 'AI Assistant',
-    avatar: require('../../assets/images/jarvis-core-flame.png'),
+    avatar: require('../../assets/images/jarvis-ghost-clean.png'),
     streak: 100,
     isOnline: true,
     statusText: 'AI Active ⚡',
@@ -441,7 +441,7 @@ const INITIAL_CONVERSATIONS: ConversationThread[] = [
     name: 'Jarvis Creative Assistant',
     handle: '@jarvis.ai',
     niche: 'AI Co-Pilot',
-    avatar: require('../../assets/images/jarvis-core-flame.png'),
+    avatar: require('../../assets/images/jarvis-ghost-clean.png'),
     streak: 100,
     isOnline: true,
     lastMessage: 'Streak Alert: 1 post needed today to protect your 47-day streak and earn +50 XP.',
@@ -824,7 +824,7 @@ export const MessagesScreen: React.FC<MessagesScreenProps> = ({
               ]}
             >
               <Image
-                source={require('../../assets/images/jarvis-core-flame.png')}
+                source={require('../../assets/images/jarvis-ghost-clean.png')}
                 style={styles.headerGhostLogo}
                 resizeMode="contain"
               />

@@ -289,7 +289,7 @@ export const IdeaDetailScreen: React.FC<IdeaDetailScreenProps> = ({
               ]}
             >
               <Image
-                source={require('../../assets/images/jarvis-core-flame.png')}
+                source={require('../../assets/images/jarvis-ghost-clean.png')}
                 style={styles.headerGhostLogo}
                 resizeMode="contain"
               />
@@ -649,7 +649,7 @@ export const IdeaDetailScreen: React.FC<IdeaDetailScreenProps> = ({
                   ]}
                 >
                   <Image
-                    source={require('../../assets/images/jarvis-core-flame.png')}
+                    source={require('../../assets/images/jarvis-ghost-clean.png')}
                     style={styles.jarvisFlameImage}
                     resizeMode="contain"
                   />

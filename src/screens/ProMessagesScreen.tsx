@@ -81,7 +81,7 @@ const CREATOR_STORIES_DATA: CreatorStoryData[] = [
     name: 'Jarvis AI Co-Pilot',
     handle: '@jarvis.ai',
     niche: 'AI Content Director',
-    avatar: require('../../assets/images/jarvis-core-flame.png'),
+    avatar: require('../../assets/images/jarvis-ghost-clean.png'),
     streak: 99,
     isOnline: true,
     isPro: true,
@@ -345,7 +345,7 @@ const INITIAL_CONVERSATIONS: ConversationThread[] = [
     name: 'Jarvis AI Co-Pilot',
     handle: '@jarvis.ai',
     niche: 'AI Content Director',
-    avatar: require('../../assets/images/jarvis-core-flame.png'),
+    avatar: require('../../assets/images/jarvis-ghost-clean.png'),
     streak: 99,
     isOnline: true,
     isPro: true,
@@ -580,7 +580,7 @@ export const ProMessagesScreen: React.FC<ProMessagesScreenProps> = ({
               ]}
             >
               <Image
-                source={require('../../assets/images/jarvis-core-flame.png')}
+                source={require('../../assets/images/jarvis-ghost-clean.png')}
                 style={styles.headerGhostLogo}
                 resizeMode="contain"
               />

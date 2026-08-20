@@ -267,7 +267,7 @@ export const ProScriptScreen: React.FC<ProScriptScreenProps> = ({
               ]}
             >
               <Image
-                source={require('../../assets/images/jarvis-core-flame.png')}
+                source={require('../../assets/images/jarvis-ghost-clean.png')}
                 style={styles.headerGhostLogo}
                 resizeMode="contain"
               />
@@ -845,7 +845,7 @@ export const ProScriptScreen: React.FC<ProScriptScreenProps> = ({
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
               <View style={styles.jarvisCoachIconBox}>
                 <Image
-                  source={require('../../assets/images/jarvis-core-flame.png')}
+                  source={require('../../assets/images/jarvis-ghost-clean.png')}
                   style={{ width: 28, height: 28 }}
                   resizeMode="contain"
                 />

@@ -200,7 +200,7 @@ export const ProEarningsScreen: React.FC<ProEarningsScreenProps> = ({
               ]}
             >
               <Image
-                source={require('../../assets/images/jarvis-core-flame.png')}
+                source={require('../../assets/images/jarvis-ghost-clean.png')}
                 style={styles.headerGhostLogo}
                 resizeMode="contain"
               />
@@ -589,7 +589,7 @@ export const ProEarningsScreen: React.FC<ProEarningsScreenProps> = ({
           <View style={styles.jarvisStrategyCard}>
             <Animated.View style={{ transform: [{ translateY: flameFloatY }], alignItems: 'center' }}>
               <Image
-                source={require('../../assets/images/jarvis-core-flame.png')}
+                source={require('../../assets/images/jarvis-ghost-clean.png')}
                 style={styles.jarvisFlameImg}
                 resizeMode="contain"
               />

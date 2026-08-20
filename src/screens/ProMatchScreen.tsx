@@ -312,30 +312,9 @@ export const ProMatchScreen: React.FC<ProMatchScreenProps> = ({
   });
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
-  // Card Swiping & Header Animations
+  // Card Swiping Animations
   const position = useRef(new Animated.ValueXY()).current;
   const modalPopScale = useRef(new Animated.Value(0.92)).current;
-  const ghostFloatY = useRef(new Animated.Value(0)).current;
-  const ghostScale = useRef(new Animated.Value(1)).current;
-
-  useEffect(() => {
-    const loop = Animated.loop(
-      Animated.sequence([
-        Animated.timing(ghostFloatY, {
-          toValue: -3.5,
-          duration: 1800,
-          useNativeDriver: true,
-        }),
-        Animated.timing(ghostFloatY, {
-          toValue: 0,
-          duration: 1800,
-          useNativeDriver: true,
-        }),
-      ])
-    );
-    loop.start();
-    return () => loop.stop();
-  }, []);
 
   const showToast = (msg: string) => {
     setToastMessage(msg);
@@ -606,135 +585,50 @@ export const ProMatchScreen: React.FC<ProMatchScreenProps> = ({
       <StatusBar barStyle="dark-content" backgroundColor="#FAF8F5" />
       <View style={styles.container}>
         {/* ============================================================ */}
-        {/* 1. TOP APP HEADER (EXACT STANDARD PRO HEADER)                */}
+        {/* 1. TOP APP HEADER                                            */}
         {/* ============================================================ */}
-        <View style={styles.headerBar}>
+        <View style={styles.header}>
           <View style={styles.headerLeftGroup}>
-            <Animated.View
-              style={[
-                styles.headerLogoWrapper,
-                {
-                  transform: [
-                    { translateY: ghostFloatY },
-                    { scale: ghostScale },
-                  ],
-                },
-              ]}
-            >
+            <View style={styles.flameHaloBox}>
               <Image
                 source={require('../../assets/images/jarvis-ghost-clean.png')}
-                style={styles.headerGhostLogo}
+                style={{ width: 22, height: 22 }}
                 resizeMode="contain"
               />
-            </Animated.View>
-
-            <Pressable
-              onPress={() => {
-                if (Platform.OS !== 'web') {
-                  Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-                }
-                if (onSwitchToFree) {
-                  onSwitchToFree();
-                } else if (onSaveProfile && userProfile) {
-                  onSaveProfile({ ...userProfile, tier: 'free' });
-                }
-              }}
-              hitSlop={8}
-            >
-              <LinearGradient
-                colors={['#FDE047', '#EAB308', '#CA8A04']}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 0 }}
-                style={styles.proHeaderBadge}
-              >
-                <Text style={styles.proHeaderBadgeText}>👑 PRO</Text>
-              </LinearGradient>
-            </Pressable>
+            </View>
+            <View>
+              <Text style={styles.headerTitle}>Match Radar</Text>
+              <Text style={styles.headerStreakText}>47-Day Streak Active</Text>
+            </View>
           </View>
 
-          {/* Right Action Icons: Messages, Notification Bell & Profile Avatar */}
           <View style={styles.headerRightGroup}>
-            {/* Chat Messages */}
+            {/* Messages */}
             <Pressable
-              style={({ pressed }) => [styles.headerIconBtn, pressed && styles.headerIconBtnPressed]}
-              hitSlop={8}
-              onPress={() => {
-                if (Platform.OS !== 'web') {
-                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                }
-                if (onOpenMessages) {
-                  onOpenMessages();
-                } else if (onNavigateTab) {
-                  onNavigateTab('match');
-                }
-              }}
+              style={({ pressed }) => [styles.headerRoundBtn, pressed && styles.btnPressed]}
+              onPress={() => onOpenMessages && onOpenMessages()}
             >
-              <Svg width={20} height={20} viewBox="0 0 24 24" fill="none">
-                <Path
-                  d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"
-                  stroke="#1A1626"
-                  strokeWidth="2.2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </Svg>
+              <Text style={{ fontSize: 16 }}>💬</Text>
             </Pressable>
 
-            {/* Notification Bell */}
+            {/* Notifications */}
             <Pressable
-              style={({ pressed }) => [styles.headerIconBtn, pressed && styles.headerIconBtnPressed]}
-              hitSlop={8}
-              onPress={() => {
-                if (Platform.OS !== 'web') {
-                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                }
-                triggerModalPop();
-                setShowNotificationModal(true);
-              }}
+              style={({ pressed }) => [styles.headerRoundBtn, pressed && styles.btnPressed]}
+              onPress={() => setShowNotificationModal(true)}
             >
-              <Svg width={20} height={20} viewBox="0 0 24 24" fill="none">
-                <Path
-                  d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"
-                  stroke="#1A1626"
-                  strokeWidth="2.2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-                <Path
-                  d="M13.73 21a2 2 0 0 1-3.46 0"
-                  stroke="#1A1626"
-                  strokeWidth="2.2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </Svg>
-              {requests.length > 0 && <View style={styles.notificationDot} />}
+              <Text style={{ fontSize: 16 }}>🔔</Text>
+              {requests.length > 0 && <View style={styles.unreadDot} />}
             </Pressable>
 
-            {/* Profile Avatar */}
+            {/* Profile */}
             <Pressable
-              onPress={() => {
-                if (Platform.OS !== 'web') {
-                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                }
-                triggerModalPop();
-                setShowProfileModal(true);
-              }}
-              style={({ pressed }) => [
-                styles.profilePhotoBtn,
-                styles.profilePhotoBtnPro,
-                pressed && styles.headerIconBtnPressed,
-              ]}
-              hitSlop={8}
+              style={({ pressed }) => [styles.profileAvatarBtn, pressed && styles.btnPressed]}
+              onPress={() => setShowProfileModal(true)}
             >
               <Image
                 source={userProfile?.avatarSource || require('../../assets/images/amara-avatar.jpg')}
-                style={styles.headerCustomAvatarImage}
-                resizeMode="cover"
+                style={styles.profileAvatarImg}
               />
-              <View style={{ position: 'absolute', bottom: -2, right: -2 }}>
-                <TinyGoldCheck size={14} />
-              </View>
             </Pressable>
           </View>
         </View>
@@ -1092,7 +986,7 @@ export const ProMatchScreen: React.FC<ProMatchScreenProps> = ({
 
                     <View style={styles.potentialBoostRow}>
                       <Image
-                        source={require('../../assets/images/jarvis-core-flame.png')}
+                        source={require('../../assets/images/jarvis-ghost-clean.png')}
                         style={{ width: 14, height: 14 }}
                         resizeMode="contain"
                       />
@@ -1323,7 +1217,7 @@ export const ProMatchScreen: React.FC<ProMatchScreenProps> = ({
                   <View style={styles.jarvisCoreHeroCard}>
                     <View style={styles.jarvisCoreIconCircle}>
                       <Image
-                        source={require('../../assets/images/jarvis-core-flame.png')}
+                        source={require('../../assets/images/jarvis-ghost-clean.png')}
                         style={{ width: 26, height: 26 }}
                         resizeMode="contain"
                       />
@@ -1611,7 +1505,7 @@ export const ProMatchScreen: React.FC<ProMatchScreenProps> = ({
                     >
                       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 6 }}>
                         <Image
-                          source={require('../../assets/images/jarvis-core-flame.png')}
+                          source={require('../../assets/images/jarvis-ghost-clean.png')}
                           style={{ width: 18, height: 18 }}
                           resizeMode="contain"
                         />
@@ -1717,105 +1611,84 @@ const styles = StyleSheet.create({
     letterSpacing: -0.2,
   },
 
-  // 1. TOP APP HEADER (EXACT STANDARD PRO HEADER)
-  headerBar: {
+  // 1. TOP HEADER
+  header: {
     flexDirection: 'row',
-    alignItems: 'center',
     justifyContent: 'space-between',
+    alignItems: 'center',
     paddingHorizontal: 20,
     paddingTop: Platform.OS === 'android' ? 12 : 8,
     paddingBottom: 12,
-    backgroundColor: '#FAF8F5',
   },
   headerLeftGroup: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
-  },
-  headerLogoWrapper: {
-    width: 38,
-    height: 38,
-    borderRadius: 19,
-    backgroundColor: 'rgba(255, 255, 255, 0.95)',
-    justifyContent: 'center',
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.06,
-    shadowRadius: 6,
-    elevation: 2,
-  },
-  headerGhostLogo: {
-    width: 28,
-    height: 28,
-  },
-  proHeaderBadge: {
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-    borderRadius: 6,
-    borderWidth: 1,
-    borderColor: '#FBBF24',
-  },
-  proHeaderBadgeText: {
-    fontSize: 8.5,
-    fontWeight: '900',
-    color: '#92400E',
-    letterSpacing: 0.3,
-  },
-  headerRightGroup: {
-    flexDirection: 'row',
-    alignItems: 'center',
     gap: 10,
   },
-  headerIconBtn: {
-    width: 38,
-    height: 38,
-    borderRadius: 19,
+  flameHaloBox: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
     backgroundColor: '#FFFFFF',
-    borderWidth: 1,
-    borderColor: '#EFECE6',
     justifyContent: 'center',
     alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#EFECE6',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.04,
     shadowRadius: 4,
     elevation: 1,
   },
-  headerIconBtnPressed: {
-    transform: [{ scale: 0.94 }],
-    opacity: 0.8,
+  headerTitle: {
+    fontSize: 16,
+    fontWeight: '900',
+    color: '#171420',
+    letterSpacing: -0.2,
   },
-  notificationDot: {
-    position: 'absolute',
-    top: 7,
-    right: 7,
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: '#EF4444',
-    borderWidth: 1.5,
-    borderColor: '#FFFFFF',
+  headerStreakText: {
+    fontSize: 11,
+    fontWeight: '800',
+    color: '#582CDB',
   },
-  profilePhotoBtn: {
-    width: 38,
-    height: 38,
-    borderRadius: 19,
+  headerRightGroup: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  headerRoundBtn: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
     backgroundColor: '#FFFFFF',
-    borderWidth: 1.5,
-    borderColor: '#EFECE6',
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
     justifyContent: 'center',
     alignItems: 'center',
     position: 'relative',
   },
-  profilePhotoBtnPro: {
-    borderColor: '#F59E0B',
-    borderWidth: 2,
+  unreadDot: {
+    position: 'absolute',
+    top: 6,
+    right: 6,
+    width: 7,
+    height: 7,
+    borderRadius: 3.5,
+    backgroundColor: '#EF4444',
+    borderWidth: 1,
+    borderColor: '#FFFFFF',
   },
-  headerCustomAvatarImage: {
-    width: 34,
-    height: 34,
-    borderRadius: 17,
+  profileAvatarBtn: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    borderWidth: 1.5,
+    borderColor: '#F59E0B',
+    overflow: 'hidden',
+  },
+  profileAvatarImg: {
+    width: '100%',
+    height: '100%',
   },
 
   // 2. PILL BADGES ROW

@@ -477,7 +477,7 @@ export const AudienceBreakdownScreen: React.FC<AudienceBreakdownScreenProps> = (
               ]}
             >
               <Image
-                source={require('../../assets/images/jarvis-core-flame.png')}
+                source={require('../../assets/images/jarvis-ghost-clean.png')}
                 style={styles.headerGhostLogo}
                 resizeMode="contain"
               />
@@ -534,7 +534,7 @@ export const AudienceBreakdownScreen: React.FC<AudienceBreakdownScreenProps> = (
               <Image
                 source={
                   userProfile?.avatarSource ||
-                  require('../../assets/images/jarvis-core-flame.png')
+                  require('../../assets/images/jarvis-ghost-clean.png')
                 }
                 style={styles.headerPartnerMiniAvatar}
                 resizeMode="cover"
@@ -1150,7 +1150,7 @@ export const AudienceBreakdownScreen: React.FC<AudienceBreakdownScreenProps> = (
           <View style={styles.jarvisCoreCard}>
             <View style={styles.jarvisCoreAvatarBox}>
               <Image
-                source={require('../../assets/images/jarvis-core-flame.png')}
+                source={require('../../assets/images/jarvis-ghost-clean.png')}
                 style={styles.jarvisCoreFlameImg}
                 resizeMode="contain"
               />

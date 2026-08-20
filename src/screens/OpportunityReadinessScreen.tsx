@@ -364,7 +364,7 @@ export const OpportunityReadinessScreen: React.FC<OpportunityReadinessScreenProp
               ]}
             >
               <Image
-                source={require('../../assets/images/jarvis-core-flame.png')}
+                source={require('../../assets/images/jarvis-ghost-clean.png')}
                 style={styles.headerGhostLogo}
                 resizeMode="contain"
               />
@@ -698,7 +698,7 @@ export const OpportunityReadinessScreen: React.FC<OpportunityReadinessScreenProp
           <View style={styles.jarvisCard}>
             <View style={styles.jarvisAvatarCircle}>
               <Image
-                source={require('../../assets/images/jarvis-core-flame.png')}
+                source={require('../../assets/images/jarvis-ghost-clean.png')}
                 style={{ width: 28, height: 28 }}
                 resizeMode="contain"
               />

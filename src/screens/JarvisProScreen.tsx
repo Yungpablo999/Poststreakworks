@@ -182,7 +182,7 @@ export const JarvisProScreen: React.FC<JarvisProScreenProps> = ({
               ]}
             >
               <Image
-                source={require('../../assets/images/jarvis-core-flame.png')}
+                source={require('../../assets/images/jarvis-ghost-clean.png')}
                 style={styles.headerFlameLogo}
                 resizeMode="contain"
               />
@@ -339,7 +339,7 @@ export const JarvisProScreen: React.FC<JarvisProScreenProps> = ({
             <View style={styles.briefTopRow}>
               <View style={styles.briefFlameWrapper}>
                 <Image
-                  source={require('../../assets/images/jarvis-core-flame.png')}
+                  source={require('../../assets/images/jarvis-ghost-clean.png')}
                   style={styles.briefFlameImage}
                   resizeMode="contain"
                 />
