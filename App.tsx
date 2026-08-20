@@ -1704,5 +1704,18 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#FAF8F5',
+    ...Platform.select({
+      web: {
+        height: '100vh' as any,
+        width: '100%',
+        maxWidth: 480,
+        marginHorizontal: 'auto',
+        overflow: 'hidden' as any,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.1,
+        shadowRadius: 20,
+      },
+    }),
   },
 });

@@ -375,17 +375,22 @@ export const ProMatchScreen: React.FC<ProMatchScreenProps> = ({
     }).start();
   };
 
-  // PanResponder for Interactive Deck Swiping
+  // PanResponder for Interactive Deck Swiping (Horizontal Only with Vertical Scroll Passthrough)
   const panResponder = useRef(
     PanResponder.create({
-      onStartShouldSetPanResponder: () => true,
-      onMoveShouldSetPanResponder: (_, gesture) =>
-        Math.abs(gesture.dx) > 6 || Math.abs(gesture.dy) > 6,
+      onStartShouldSetPanResponder: () => false,
+      onStartShouldSetPanResponderCapture: () => false,
+      onMoveShouldSetPanResponder: (_, gesture) => {
+        return Math.abs(gesture.dx) > 12 && Math.abs(gesture.dx) > Math.abs(gesture.dy) * 1.4;
+      },
+      onMoveShouldSetPanResponderCapture: (_, gesture) => {
+        return Math.abs(gesture.dx) > 12 && Math.abs(gesture.dx) > Math.abs(gesture.dy) * 1.4;
+      },
       onPanResponderGrant: () => {
         setIsSwipingCard(true);
       },
       onPanResponderMove: (_, gesture) => {
-        position.setValue({ x: gesture.dx, y: gesture.dy });
+        position.setValue({ x: gesture.dx, y: gesture.dy * 0.2 });
       },
       onPanResponderRelease: (_, gesture) => {
         setIsSwipingCard(false);
@@ -393,8 +398,6 @@ export const ProMatchScreen: React.FC<ProMatchScreenProps> = ({
           swipeRight();
         } else if (gesture.dx < -SWIPE_THRESHOLD) {
           swipeLeft();
-        } else if (gesture.dy < -SWIPE_UP_THRESHOLD) {
-          swipeUp();
         } else {
           resetPosition();
         }
@@ -403,6 +406,7 @@ export const ProMatchScreen: React.FC<ProMatchScreenProps> = ({
         setIsSwipingCard(false);
         resetPosition();
       },
+      onPanResponderTerminationRequest: () => true,
     })
   ).current;
 

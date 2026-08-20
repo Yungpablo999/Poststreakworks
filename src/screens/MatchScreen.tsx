@@ -404,15 +404,19 @@ export const MatchScreen: React.FC<MatchScreenProps> = ({
   // Ultra-smooth Tinder PanResponder with scroll locking
   const panResponder = useRef(
     PanResponder.create({
-      onStartShouldSetPanResponder: () => true,
+      onStartShouldSetPanResponder: () => false,
+      onStartShouldSetPanResponderCapture: () => false,
       onMoveShouldSetPanResponder: (_, gesture) => {
-        return Math.abs(gesture.dx) > 4 || Math.abs(gesture.dy) > 4;
+        return Math.abs(gesture.dx) > 12 && Math.abs(gesture.dx) > Math.abs(gesture.dy) * 1.4;
+      },
+      onMoveShouldSetPanResponderCapture: (_, gesture) => {
+        return Math.abs(gesture.dx) > 12 && Math.abs(gesture.dx) > Math.abs(gesture.dy) * 1.4;
       },
       onPanResponderGrant: () => {
         setIsSwipingCard(true);
       },
       onPanResponderMove: (_, gesture) => {
-        position.setValue({ x: gesture.dx, y: gesture.dy });
+        position.setValue({ x: gesture.dx, y: gesture.dy * 0.2 });
       },
       onPanResponderRelease: (_, gesture) => {
         setIsSwipingCard(false);
@@ -420,8 +424,6 @@ export const MatchScreen: React.FC<MatchScreenProps> = ({
           swipeCard('right');
         } else if (gesture.dx < -SWIPE_THRESHOLD || gesture.vx < -0.6) {
           swipeCard('left');
-        } else if (gesture.dy < -SWIPE_UP_THRESHOLD || gesture.vy < -0.6) {
-          swipeCard('up');
         } else {
           resetCardPosition();
         }
@@ -430,6 +432,7 @@ export const MatchScreen: React.FC<MatchScreenProps> = ({
         setIsSwipingCard(false);
         resetCardPosition();
       },
+      onPanResponderTerminationRequest: () => true,
     })
   ).current;
 
