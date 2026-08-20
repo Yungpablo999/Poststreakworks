@@ -800,7 +800,7 @@ export const ProCaptionScreen: React.FC<ProCaptionScreenProps> = ({
                   <Pressable
                     key={cta.id}
                     style={({ pressed }) => [
-                      cta.isRecommended ? styles.ctaRecommendedCard : styles.ctaAltCard,
+                      styles.ctaCard,
                       isSelected && styles.ctaCardActive,
                       pressed && styles.btnPressed,
                     ]}
@@ -1534,14 +1534,7 @@ const styles = StyleSheet.create({
     color: '#94A3B8',
     fontWeight: '800',
   },
-  ctaRecommendedCard: {
-    backgroundColor: '#FEFCE8',
-    borderRadius: 16,
-    padding: 14,
-    borderWidth: 1.5,
-    borderColor: '#F59E0B',
-  },
-  ctaAltCard: {
+  ctaCard: {
     backgroundColor: '#FAF8F5',
     borderRadius: 16,
     padding: 14,
