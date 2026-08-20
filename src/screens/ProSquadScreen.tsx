@@ -531,37 +531,73 @@ export const ProSquadScreen: React.FC<ProSquadScreenProps> = ({
             </View>
 
             <View style={{ gap: 8, marginTop: 10 }}>
-              {members.map((member) => (
-                <View key={member.id} style={styles.memberRowCard}>
-                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, flex: 1 }}>
-                    <View style={styles.memberAvatarContainer}>
-                      <Image source={member.avatar} style={styles.memberAvatar} />
-                      {member.isHost && (
-                        <View style={styles.hostVerifiedDot}>
-                          <Text style={{ fontSize: 8 }}>👑</Text>
-                        </View>
-                      )}
-                    </View>
+              {members.map((member) => {
+                const threadId =
+                  member.id === 'amara'
+                    ? 'conv_amara'
+                    : member.id === 'tomi'
+                    ? 'conv_tomi'
+                    : `conv_${member.id}`;
 
-                    <View>
-                      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-                        <Text style={styles.memberName}>{member.name}</Text>
+                return (
+                  <View key={member.id} style={styles.memberRowCard}>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, flex: 1 }}>
+                      <View style={styles.memberAvatarContainer}>
+                        <Image source={member.avatar} style={styles.memberAvatar} />
                         {member.isHost && (
-                          <View style={styles.hostPill}>
-                            <Text style={styles.hostPillText}>HOST</Text>
+                          <View style={styles.hostVerifiedDot}>
+                            <Text style={{ fontSize: 8 }}>👑</Text>
                           </View>
                         )}
                       </View>
-                      <Text style={styles.memberRole}>{member.role}</Text>
+
+                      <View>
+                        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                          <Text style={styles.memberName}>{member.name}</Text>
+                          {member.isHost && (
+                            <View style={styles.hostPill}>
+                              <Text style={styles.hostPillText}>HOST</Text>
+                            </View>
+                          )}
+                        </View>
+                        <Text style={styles.memberRole}>{member.role}</Text>
+                      </View>
+                    </View>
+
+                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                      <View style={styles.memberStreakPill}>
+                        <Text style={{ fontSize: 13 }}>🔥</Text>
+                        <Text style={styles.memberStreakText}>{member.streak}</Text>
+                      </View>
+
+                      {member.id !== 'user' && (
+                        <Pressable
+                          style={({ pressed }) => [styles.memberChatIconBtn, pressed && styles.btnPressed]}
+                          onPress={() => {
+                            if (Platform.OS !== 'web') {
+                              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                            }
+                            if (onOpenMessages) {
+                              onOpenMessages(threadId);
+                            }
+                          }}
+                          hitSlop={6}
+                        >
+                          <Svg width={16} height={16} viewBox="0 0 24 24" fill="none">
+                            <Path
+                              d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z"
+                              stroke="#582CDB"
+                              strokeWidth="2.2"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                            />
+                          </Svg>
+                        </Pressable>
+                      )}
                     </View>
                   </View>
-
-                  <View style={styles.memberStreakPill}>
-                    <Text style={{ fontSize: 13 }}>🔥</Text>
-                    <Text style={styles.memberStreakText}>{member.streak}</Text>
-                  </View>
-                </View>
-              ))}
+                );
+              })}
             </View>
           </View>
 
@@ -1277,6 +1313,21 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: '900',
     color: '#171420',
+  },
+  memberChatIconBtn: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: '#EDE9FE',
+    borderWidth: 1,
+    borderColor: '#DDD6FE',
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#582CDB',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 1,
   },
 
   /* OPEN COLLABS */
