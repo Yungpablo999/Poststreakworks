@@ -1203,21 +1203,12 @@ export const ProCreateScreen: React.FC<ProCreateScreenProps> = ({
               </ScrollView>
 
               {/* Modal Actions */}
-              <View style={{ flexDirection: 'row', gap: 10, marginTop: 14 }}>
+              <View style={{ marginTop: 14 }}>
                 <Pressable
-                  style={styles.modalCancelBtn}
+                  style={styles.modalFullBtn}
                   onPress={() => setShowAllDraftsModal(false)}
                 >
-                  <Text style={styles.modalCancelBtnText}>Close</Text>
-                </Pressable>
-                <Pressable
-                  style={styles.modalSaveBtn}
-                  onPress={() => {
-                    setShowAllDraftsModal(false);
-                    if (onOpenPostComposer) onOpenPostComposer();
-                  }}
-                >
-                  <Text style={styles.modalSaveBtnText}>+ New Draft</Text>
+                  <Text style={styles.modalFullBtnText}>Close</Text>
                 </Pressable>
               </View>
             </Animated.View>
