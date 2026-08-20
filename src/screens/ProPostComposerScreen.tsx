@@ -21,6 +21,7 @@ import { FloatingTabBar, TabType } from '../components/FloatingTabBar';
 import { UserProfileModal, UserProfileData } from '../components/UserProfileModal';
 import { AnimatedCompletionModal } from '../components/AnimatedCompletionModal';
 import { TinyGoldCheck } from '../components/CreatorStoryModal';
+import { SocialBrandIcon } from '../components/SocialBrandIcon';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
@@ -43,19 +44,8 @@ interface PlatformOption {
   name: string;
   shortName: string;
   format: string;
-  multiplier: string;
-  bgColor: string;
-  gradient?: string[];
-  iconType: 'tiktok' | 'instagram' | 'youtube' | 'linkedin' | 'x' | 'threads';
+  platformType: 'tiktok' | 'instagram' | 'youtube' | 'linkedin' | 'x' | 'threads';
 }
-
-const SAMPLE_IDEAS = [
-  'One thing I wish I knew before I started creating',
-  'The #1 habit that doubled my views in 30 days',
-  '3 mistakes almost every beginner creator makes',
-  'How I batch-film 10 videos in 2 hours',
-  'The exact iPhone camera settings I use for 4K Reels',
-];
 
 const PRO_PLATFORMS: PlatformOption[] = [
   {
@@ -63,82 +53,51 @@ const PRO_PLATFORMS: PlatformOption[] = [
     name: 'TikTok',
     shortName: 'TikTok',
     format: '9:16 Video / Reels',
-    multiplier: '1.4x Viral Reach',
-    bgColor: '#000000',
-    iconType: 'tiktok',
+    platformType: 'tiktok',
   },
   {
     id: 'instagram',
     name: 'Instagram',
     shortName: 'Instagram',
     format: 'Reels & Carousels',
-    multiplier: 'Highest Saves',
-    bgColor: '#E1306C',
-    iconType: 'instagram',
+    platformType: 'instagram',
   },
   {
     id: 'youtube',
     name: 'YouTube',
     shortName: 'YouTube',
     format: 'Shorts & Community',
-    multiplier: '1.8x Evergreen',
-    bgColor: '#FF0000',
-    iconType: 'youtube',
-  },
-  {
-    id: 'linkedin',
-    name: 'LinkedIn',
-    shortName: 'LinkedIn',
-    format: 'Thought Leadership',
-    multiplier: '2.4x B2B Impact',
-    bgColor: '#0A66C2',
-    iconType: 'linkedin',
+    platformType: 'youtube',
   },
   {
     id: 'x',
     name: 'X (Twitter)',
     shortName: 'X',
     format: 'Viral Thread',
-    multiplier: 'High Discussion',
-    bgColor: '#000000',
-    iconType: 'x',
+    platformType: 'x',
+  },
+  {
+    id: 'linkedin',
+    name: 'LinkedIn',
+    shortName: 'LinkedIn',
+    format: 'Thought Leadership',
+    platformType: 'linkedin',
   },
   {
     id: 'threads',
     name: 'Threads',
     shortName: 'Threads',
     format: 'Text & Visuals',
-    multiplier: 'Organic Feed',
-    bgColor: '#101010',
-    iconType: 'threads',
+    platformType: 'threads',
   },
-  {
-    id: 'pinterest',
-    name: 'Pinterest',
-    shortName: 'Pinterest',
-    format: 'Idea Pins & Visuals',
-    multiplier: 'High Intent',
-    bgColor: '#E60023',
-    iconType: 'pinterest' as any,
-  },
-  {
-    id: 'snapchat',
-    name: 'Snapchat',
-    shortName: 'Snapchat',
-    format: 'Spotlight 9:16',
-    multiplier: 'Gen-Z Viral',
-    bgColor: '#FFFC00',
-    iconType: 'snapchat' as any,
-  },
-  {
-    id: 'facebook',
-    name: 'Facebook',
-    shortName: 'Facebook',
-    format: 'Reels & Groups',
-    multiplier: 'Broad Demographic',
-    bgColor: '#1877F2',
-    iconType: 'facebook' as any,
-  },
+];
+
+const SAMPLE_IDEAS = [
+  '3 creator mistakes I stopped making this year',
+  'How I batch-film 10 videos in 2 hours without burn out',
+  'The exact iPhone camera settings I use for 4K Reels',
+  'Why consistency beats motivation every single time',
+  '3 habits that took me from 0 to 50K followers',
 ];
 
 export const ProPostComposerScreen: React.FC<ProPostComposerScreenProps> = ({
@@ -156,6 +115,7 @@ export const ProPostComposerScreen: React.FC<ProPostComposerScreenProps> = ({
 }) => {
   const [activeTab, setActiveTab] = useState<TabType>('create');
   const [showProfileModal, setShowProfileModal] = useState(false);
+  const [showNotificationModal, setShowNotificationModal] = useState(false);
   const [showCompletionModal, setShowCompletionModal] = useState(false);
   const [completionData, setCompletionData] = useState<{
     title: string;
@@ -168,22 +128,19 @@ export const ProPostComposerScreen: React.FC<ProPostComposerScreenProps> = ({
     subtitle: 'Your 4K content has been synced and pushed to all active platforms.',
     badgeText: '👑 PRO POST PUBLISHED',
     xpEarned: 50,
-    speechBubble: 'Boom! Algorithmic distribution triggered!',
+    speechBubble: 'Boom! Algorithmic distribution triggered! 🚀',
   });
 
-  // State
+  // Main State
   const [currentIdea, setCurrentIdea] = useState(
-    ideaTitle || 'One thing I wish I knew before I started creating'
+    ideaTitle || '3 creator mistakes I stopped making this year'
   );
   const [captionText, setCaptionText] = useState(
-    'One thing I wish I knew before I started creating:\n\nStop waiting for the "perfect" idea. Consistency and honest lessons outperform polished perfection every single time.\n\nSave this for when you feel stuck. 🚀\n\n#CreatorTips #ContentStrategy #GrowthHacks'
+    'Stop waiting for the "perfect" idea. Consistency and honest lessons outperform polished perfection every single time.\n\nSave this for when you feel stuck. 🚀\n\n#CreatorTips #ContentStrategy #GrowthHacks'
   );
   const [selectedPlatforms, setSelectedPlatforms] = useState<string[]>(['tiktok', 'instagram', 'youtube']);
   const [selectedCategoryChip, setSelectedCategoryChip] = useState('Personal Lesson');
-  const [customIdeaInput, setCustomIdeaInput] = useState('');
-  const [selectedHookIndex, setSelectedHookIndex] = useState(0);
   const [selectedTimeSlot, setSelectedTimeSlot] = useState('7:30 PM (Peak Reach)');
-  const [autopilotEnabled, setAutopilotEnabled] = useState(true);
   const [showAllPlatformsModal, setShowAllPlatformsModal] = useState(false);
   const [showChangeIdeaModal, setShowChangeIdeaModal] = useState(false);
   const [uploadedMedia, setUploadedMedia] = useState<{
@@ -195,6 +152,7 @@ export const ProPostComposerScreen: React.FC<ProPostComposerScreenProps> = ({
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   const flameFloatY = useRef(new Animated.Value(0)).current;
+  const modalPopScale = useRef(new Animated.Value(0.88)).current;
 
   useEffect(() => {
     Animated.loop(
@@ -212,6 +170,44 @@ export const ProPostComposerScreen: React.FC<ProPostComposerScreenProps> = ({
       ])
     ).start();
   }, [flameFloatY]);
+
+  const showToast = (msg: string) => {
+    if (Platform.OS !== 'web') {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    }
+    setToastMessage(msg);
+    setTimeout(() => {
+      setToastMessage(null);
+    }, 2500);
+  };
+
+  const triggerModalPop = () => {
+    if (Platform.OS !== 'web') {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    }
+    modalPopScale.setValue(0.88);
+    Animated.spring(modalPopScale, {
+      toValue: 1,
+      useNativeDriver: true,
+      speed: 26,
+      bounciness: 12,
+    }).start();
+  };
+
+  const togglePlatform = (id: string) => {
+    if (Platform.OS !== 'web') {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    }
+    if (selectedPlatforms.includes(id)) {
+      if (selectedPlatforms.length > 1) {
+        setSelectedPlatforms(selectedPlatforms.filter((p) => p !== id));
+      } else {
+        showToast('At least 1 platform must remain selected');
+      }
+    } else {
+      setSelectedPlatforms([...selectedPlatforms, id]);
+    }
+  };
 
   const openFilePicker = (type: 'media' | 'thumbnail') => {
     if (Platform.OS !== 'web') {
@@ -232,12 +228,11 @@ export const ProPostComposerScreen: React.FC<ProPostComposerScreenProps> = ({
             size: `${(file.size / (1024 * 1024)).toFixed(1)} MB`,
             type: isVideo ? 'video' : 'image',
           });
-          showToast(`📁 ${file.name} selected!`);
+          showToast(`📁 ${file.name} attached!`);
         }
       };
       input.click();
     } else {
-      // Mobile fallback
       setUploadedMedia({
         uri: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=800',
         name: type === 'thumbnail' ? '4K_Thumbnail_HighCTR.png' : '4K_Reel_Master_60FPS.mp4',
@@ -248,54 +243,16 @@ export const ProPostComposerScreen: React.FC<ProPostComposerScreenProps> = ({
     }
   };
 
-  const handleConfirmMediaDone = () => {
-    if (Platform.OS !== 'web') {
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-    }
-    setCompletionData({
-      title: '4K Media Attached!',
-      subtitle: `${uploadedMedia?.name || 'Your file'} is optimized for 9:16 multi-platform distribution.`,
-      badgeText: '👑 4K MEDIA READY',
-      xpEarned: 25,
-      speechBubble: 'Stunning visual quality! Retention probability boosted.',
-    });
-    setTimeout(() => {
-      setShowCompletionModal(true);
-    }, 200);
-  };
-
-  const showToast = (msg: string) => {
-    setToastMessage(msg);
-    setTimeout(() => {
-      setToastMessage(null);
-    }, 2800);
-  };
-
-  const togglePlatform = (id: string) => {
-    if (Platform.OS !== 'web') {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    }
-    if (selectedPlatforms.includes(id)) {
-      if (selectedPlatforms.length > 1) {
-        setSelectedPlatforms(selectedPlatforms.filter((p) => p !== id));
-      } else {
-        showToast('At least 1 platform must remain active');
-      }
-    } else {
-      setSelectedPlatforms([...selectedPlatforms, id]);
-    }
-  };
-
   const handlePublishNow = () => {
     if (Platform.OS !== 'web') {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     }
     setCompletionData({
       title: 'Post Published Successfully!',
-      subtitle: `Your content is live on ${selectedPlatforms.map(p => p.toUpperCase()).join(', ')}.`,
+      subtitle: `Your content is live on ${selectedPlatforms.map((p) => p.toUpperCase()).join(', ')}.`,
       badgeText: '👑 PRO INSTANT PUBLISH',
       xpEarned: 50,
-      speechBubble: 'Boom! Reach multiplier engaged!',
+      speechBubble: 'Boom! Algorithmic reach multiplier engaged! 🚀',
     });
     setShowCompletionModal(true);
   };
@@ -309,136 +266,26 @@ export const ProPostComposerScreen: React.FC<ProPostComposerScreenProps> = ({
       subtitle: `Scheduled for ${selectedTimeSlot} across ${selectedPlatforms.length} platforms.`,
       badgeText: '✨ AUTOPILOT SECURED',
       xpEarned: 75,
-      speechBubble: 'Peak window locked! Relax while Jarvis distributes.',
+      speechBubble: 'Peak window locked! Relax while Jarvis distributes. 🗓️',
     });
     setShowCompletionModal(true);
-  };
-
-  const renderPlatformIcon = (iconType: string, size = 26) => {
-    switch (iconType) {
-      case 'tiktok':
-        return (
-          <View style={{ width: size, height: size, justifyContent: 'center', alignItems: 'center' }}>
-            <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
-              {/* Real TikTok 3D Note */}
-              <Path
-                d="M12.5 3v11.8a3.2 3.2 0 1 1-2.3-3.1v-2.3a5.5 5.5 0 1 0 4.6 5.4V7.5a6.8 6.8 0 0 0 4.2 1.5V6.7a4.6 4.6 0 0 1-3.5-3.7h-3z"
-                fill="#000000"
-              />
-              <Path
-                d="M19 6.7a4.6 4.6 0 0 1-3.5-3.7h-1.2v2.3a4.6 4.6 0 0 0 3.5 3.7V6.7z"
-                fill="#00F2FE"
-              />
-              <Path
-                d="M10.2 14.8a3.2 3.2 0 0 1 2.3-3.1V9.4a5.5 5.5 0 0 0-4.6 5.4 5.5 5.5 0 0 0 5.5 5.5v-2.3a3.2 3.2 0 0 1-3.2-3.2z"
-                fill="#FE2C55"
-              />
-            </Svg>
-          </View>
-        );
-
-      case 'instagram':
-        return (
-          <View style={{ width: size, height: size, borderRadius: size * 0.28, overflow: 'hidden' }}>
-            <LinearGradient
-              colors={['#833AB4', '#FD1D1D', '#F77737', '#FFDC80']}
-              start={{ x: 0, y: 1 }}
-              end={{ x: 1, y: 0 }}
-              style={{ width: '100%', height: '100%', justifyContent: 'center', alignItems: 'center' }}
-            >
-              <Svg width={size * 0.72} height={size * 0.72} viewBox="0 0 24 24" fill="none">
-                <Rect x="2" y="2" width="20" height="20" rx="6" stroke="#FFFFFF" strokeWidth="2.2" />
-                <Circle cx="12" cy="12" r="4.5" stroke="#FFFFFF" strokeWidth="2.2" />
-                <Circle cx="17.8" cy="6.2" r="1.3" fill="#FFFFFF" />
-              </Svg>
-            </LinearGradient>
-          </View>
-        );
-
-      case 'youtube':
-        return (
-          <View style={{ width: size, height: size * 0.75, backgroundColor: '#FF0000', borderRadius: size * 0.22, justifyContent: 'center', alignItems: 'center' }}>
-            <Svg width={size * 0.55} height={size * 0.55} viewBox="0 0 24 24" fill="none">
-              <Path d="M9.5 7.5L16.5 12L9.5 16.5V7.5Z" fill="#FFFFFF" />
-            </Svg>
-          </View>
-        );
-
-      case 'linkedin':
-        return (
-          <View style={{ width: size, height: size, backgroundColor: '#0A66C2', borderRadius: size * 0.22, justifyContent: 'center', alignItems: 'center' }}>
-            <Svg width={size * 0.65} height={size * 0.65} viewBox="0 0 24 24" fill="#FFFFFF">
-              <Path d="M19 3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14m-.5 15.5v-5.3a3.26 3.26 0 0 0-3.26-3.26c-.85 0-1.84.52-2.28 1.3v-1.11h-2.79v8.37h2.79v-4.93c0-.77.62-1.4 1.39-1.4a1.4 1.4 0 0 1 1.4 1.4v4.93h2.75M6.46 8.76a1.65 1.65 0 1 0-.01-3.3 1.65 1.65 0 0 0 .01 3.3m1.4 9.74v-8.37H5.06v8.37h2.8z" />
-            </Svg>
-          </View>
-        );
-
-      case 'x':
-        return (
-          <View style={{ width: size, height: size, backgroundColor: '#000000', borderRadius: size * 0.22, justifyContent: 'center', alignItems: 'center' }}>
-            <Svg width={size * 0.6} height={size * 0.6} viewBox="0 0 24 24" fill="#FFFFFF">
-              <Path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
-            </Svg>
-          </View>
-        );
-
-      case 'threads':
-        return (
-          <View style={{ width: size, height: size, backgroundColor: '#000000', borderRadius: size * 0.22, justifyContent: 'center', alignItems: 'center' }}>
-            <Svg width={size * 0.65} height={size * 0.65} viewBox="0 0 24 24" fill="none">
-              <Path
-                d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm3.8 12.2c-.3 1.6-1.5 2.6-3.2 2.6-2.1 0-3.6-1.6-3.6-3.8 0-2.3 1.6-3.9 3.8-3.9 1.7 0 2.8.9 3.2 2.3h-1.5c-.3-.7-.9-1.1-1.7-1.1-1.3 0-2.2 1-2.2 2.7s.9 2.6 2.1 2.6c.9 0 1.5-.5 1.7-1.4h1.4z"
-                fill="#FFFFFF"
-              />
-            </Svg>
-          </View>
-        );
-
-      case 'pinterest':
-        return (
-          <View style={{ width: size, height: size, backgroundColor: '#E60023', borderRadius: size / 2, justifyContent: 'center', alignItems: 'center' }}>
-            <Svg width={size * 0.65} height={size * 0.65} viewBox="0 0 24 24" fill="#FFFFFF">
-              <Path d="M12 0a12 12 0 0 0-4.37 23.18c-.06-.98-.12-2.5.02-3.58l.74-3.13s-.19-.38-.19-.94c0-.88.51-1.54 1.15-1.54.54 0 .8.41.8.9 0 .55-.35 1.37-.53 2.13-.15.64.32 1.16.95 1.16 1.14 0 2.02-1.2 2.02-2.94 0-1.54-1.1-2.61-2.68-2.61-1.83 0-2.9 1.37-2.9 2.79 0 .55.21 1.14.48 1.46.05.06.06.12.04.18l-.18.74c-.03.12-.1.17-.23.11-1.07-.5-1.74-2.07-1.74-3.33 0-2.71 1.97-5.2 5.68-5.2 2.98 0 5.3 2.12 5.3 4.96 0 2.96-1.87 5.34-4.46 5.34-.87 0-1.69-.45-1.97-.98l-.54 2.05c-.19.75-.72 1.68-1.07 2.25A12 12 0 1 0 12 0z" />
-            </Svg>
-          </View>
-        );
-
-      case 'snapchat':
-        return (
-          <View style={{ width: size, height: size, backgroundColor: '#FFFC00', borderRadius: size * 0.24, justifyContent: 'center', alignItems: 'center' }}>
-            <Svg width={size * 0.7} height={size * 0.7} viewBox="0 0 24 24" fill="#000000">
-              <Path d="M12.003 2c-3.1 0-5.25 2.15-5.25 4.7 0 .6.1 1.25.3 1.8-.75.35-1.5 1-1.5 1.8 0 .55.35 1.05.9 1.35-.1.35-.35 1.15-.35 1.75 0 1.25 1.15 2 2.5 2.1.25.75 1.15 1.3 2.1 1.3.6 0 1.15-.2 1.3-.2.15 0 .7.2 1.3.2.95 0 1.85-.55 2.1-1.3 1.35-.1 2.5-.85 2.5-2.1 0-.6-.25-1.4-.35-1.75.55-.3.9-.8.9-1.35 0-.8-.75-1.45-1.5-1.8.2-.55.3-1.2.3-1.8 0-2.55-2.15-4.7-5.25-4.7z" />
-            </Svg>
-          </View>
-        );
-
-      case 'facebook':
-        return (
-          <View style={{ width: size, height: size, backgroundColor: '#1877F2', borderRadius: size / 2, justifyContent: 'center', alignItems: 'center' }}>
-            <Svg width={size * 0.65} height={size * 0.65} viewBox="0 0 24 24" fill="#FFFFFF">
-              <Path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
-            </Svg>
-          </View>
-        );
-
-      default:
-        return (
-          <Svg width={size} height={size} viewBox="0 0 24 24" fill="#171420">
-            <Circle cx="12" cy="12" r="9" stroke="#171420" strokeWidth="2" />
-          </Svg>
-        );
-    }
   };
 
   return (
     <SafeAreaView style={styles.safeArea}>
       <StatusBar barStyle="dark-content" backgroundColor="#FAF8F5" />
       <View style={styles.container}>
-        {/* ============================================================ */}
-        {/* TOP HEADER BAR                                               */}
-        {/* ============================================================ */}
+        {/* TOAST BANNER */}
+        {toastMessage && (
+          <View style={styles.toastContainer}>
+            <Text style={styles.toastText}>{toastMessage}</Text>
+          </View>
+        )}
+
+        {/* 1. TOP HEADER BAR */}
         <View style={styles.headerBar}>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+            {/* Back Button */}
             <Pressable
               onPress={() => {
                 if (Platform.OS !== 'web') {
@@ -450,7 +297,13 @@ export const ProPostComposerScreen: React.FC<ProPostComposerScreenProps> = ({
               hitSlop={8}
             >
               <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
-                <Path d="M15 18L9 12L15 6" stroke="#171420" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" />
+                <Path
+                  d="M15 18L9 12L15 6"
+                  stroke="#171420"
+                  strokeWidth="2.4"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
               </Svg>
             </Pressable>
 
@@ -468,7 +321,7 @@ export const ProPostComposerScreen: React.FC<ProPostComposerScreenProps> = ({
               />
             </Animated.View>
 
-            {/* Mode Switcher */}
+            {/* Mode Switcher Pill */}
             <Pressable
               onPress={() => {
                 if (Platform.OS !== 'web') {
@@ -488,7 +341,7 @@ export const ProPostComposerScreen: React.FC<ProPostComposerScreenProps> = ({
                 end={{ x: 1, y: 1 }}
                 style={styles.proHeaderBadge}
               >
-                <Text style={styles.proHeaderBadgeText}>👑 PRO</Text>
+                <Text style={styles.proHeaderBadgeText}>🔥 PRO</Text>
               </LinearGradient>
             </Pressable>
           </View>
@@ -507,7 +360,7 @@ export const ProPostComposerScreen: React.FC<ProPostComposerScreenProps> = ({
                 <Path
                   d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"
                   stroke="#171420"
-                  strokeWidth="2"
+                  strokeWidth="2.2"
                   strokeLinecap="round"
                   strokeLinejoin="round"
                 />
@@ -517,22 +370,36 @@ export const ProPostComposerScreen: React.FC<ProPostComposerScreenProps> = ({
             <Pressable
               style={({ pressed }) => [styles.headerIconBtn, pressed && styles.btnPressed]}
               hitSlop={8}
-              onPress={() => showToast('No new notifications')}
+              onPress={() => {
+                triggerModalPop();
+                setShowNotificationModal(true);
+              }}
             >
               <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
                 <Path
-                  d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 0 1-3.46 0"
+                  d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"
                   stroke="#171420"
-                  strokeWidth="2"
+                  strokeWidth="2.2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+                <Path
+                  d="M13.73 21a2 2 0 0 1-3.46 0"
+                  stroke="#171420"
+                  strokeWidth="2.2"
                   strokeLinecap="round"
                   strokeLinejoin="round"
                 />
               </Svg>
+              <View style={styles.notificationDot} />
             </Pressable>
 
-            {/* Profile Avatar */}
+            {/* Profile Avatar with Verified Ring */}
             <Pressable
-              onPress={() => setShowProfileModal(true)}
+              onPress={() => {
+                triggerModalPop();
+                setShowProfileModal(true);
+              }}
               style={styles.profileAvatarWrapper}
               hitSlop={8}
             >
@@ -548,9 +415,7 @@ export const ProPostComposerScreen: React.FC<ProPostComposerScreenProps> = ({
           </View>
         </View>
 
-        {/* ============================================================ */}
-        {/* MAIN SCROLLABLE CONTENT                                      */}
-        {/* ============================================================ */}
+        {/* 2. SCROLLABLE CONTENT */}
         <ScrollView
           contentContainerStyle={styles.scrollContent}
           showsVerticalScrollIndicator={false}
@@ -580,7 +445,10 @@ export const ProPostComposerScreen: React.FC<ProPostComposerScreenProps> = ({
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
               <Text style={styles.postIdeaTag}>Post Idea</Text>
               <Pressable
-                onPress={() => setShowChangeIdeaModal(true)}
+                onPress={() => {
+                  triggerModalPop();
+                  setShowChangeIdeaModal(true);
+                }}
                 hitSlop={8}
               >
                 <Text style={styles.changeIdeaLink}>CHANGE IDEA ➔</Text>
@@ -601,7 +469,12 @@ export const ProPostComposerScreen: React.FC<ProPostComposerScreenProps> = ({
                     styles.ideaChipPill,
                     selectedCategoryChip === chip && styles.ideaChipPillActive,
                   ]}
-                  onPress={() => setSelectedCategoryChip(chip)}
+                  onPress={() => {
+                    if (Platform.OS !== 'web') {
+                      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                    }
+                    setSelectedCategoryChip(chip);
+                  }}
                 >
                   <Text
                     style={[
@@ -623,7 +496,10 @@ export const ProPostComposerScreen: React.FC<ProPostComposerScreenProps> = ({
             <Text style={styles.sectionHeaderTitle}>CHOOSE PLATFORMS</Text>
             <Pressable
               style={styles.morePlatformsBtn}
-              onPress={() => setShowAllPlatformsModal(true)}
+              onPress={() => {
+                triggerModalPop();
+                setShowAllPlatformsModal(true);
+              }}
             >
               <Text style={styles.morePlatformsBtnText}>+ More Platforms</Text>
             </Pressable>
@@ -642,7 +518,7 @@ export const ProPostComposerScreen: React.FC<ProPostComposerScreenProps> = ({
                   onPress={() => togglePlatform(platform.id)}
                 >
                   <View style={styles.platformIconWrapper}>
-                    {renderPlatformIcon(platform.iconType)}
+                    <SocialBrandIcon platform={platform.platformType} size={24} />
                   </View>
                   <Text style={styles.platformCardName}>{platform.name}</Text>
                   <View style={[styles.platformCheckCircle, isSelected && styles.platformCheckCircleActive]}>
@@ -675,7 +551,7 @@ export const ProPostComposerScreen: React.FC<ProPostComposerScreenProps> = ({
 
           <View style={styles.mediaStudioCard}>
             {!uploadedMedia ? (
-              /* Empty Upload Box */
+              /* Empty Dashed Upload Box */
               <Pressable
                 style={({ pressed }) => [styles.mediaDashedBox, pressed && styles.btnPressed]}
                 onPress={() => openFilePicker('media')}
@@ -722,23 +598,6 @@ export const ProPostComposerScreen: React.FC<ProPostComposerScreenProps> = ({
                     </Text>
                   </View>
                 </View>
-
-                {/* Confirm Media Done Button with Ghost Celebration */}
-                <Pressable
-                  style={({ pressed }) => [styles.applyCustomIdeaBtnWrapper, { marginTop: 12 }, pressed && styles.btnPressed]}
-                  onPress={handleConfirmMediaDone}
-                >
-                  <LinearGradient
-                    colors={['#FDE68A', '#F59E0B', '#D97706']}
-                    start={{ x: 0, y: 0 }}
-                    end={{ x: 1, y: 1 }}
-                    style={styles.applyCustomIdeaBtnGradient}
-                  >
-                    <Text style={styles.applyCustomIdeaBtnText}>
-                      ✨ Done / Confirm 4K Media (+25 XP) ➔
-                    </Text>
-                  </LinearGradient>
-                </Pressable>
               </View>
             )}
 
@@ -748,120 +607,74 @@ export const ProPostComposerScreen: React.FC<ProPostComposerScreenProps> = ({
                 style={({ pressed }) => [styles.mediaActionBtn, pressed && styles.btnPressed]}
                 onPress={() => openFilePicker('media')}
               >
-                <Text style={styles.mediaActionBtnText}>⬆ Upload Media</Text>
+                <Svg width={16} height={16} viewBox="0 0 24 24" fill="none">
+                  <Path d="M12 19V5M5 12l7-7 7 7" stroke="#171420" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
+                </Svg>
+                <Text style={styles.mediaActionBtnText}>Upload Media</Text>
               </Pressable>
+
               <Pressable
                 style={({ pressed }) => [styles.mediaActionBtn, pressed && styles.btnPressed]}
                 onPress={() => openFilePicker('thumbnail')}
               >
-                <Text style={styles.mediaActionBtnText}>🖼 Add Thumbnail</Text>
+                <Text style={{ fontSize: 14 }}>🖼️</Text>
+                <Text style={styles.mediaActionBtnText}>Add Thumbnail</Text>
               </Pressable>
             </View>
           </View>
 
           {/* ============================================================ */}
-          {/* CARD 4: CAPTION WRITING & VIRAL HOOK                         */}
+          {/* CARD 4: CAPTION WRITING                                      */}
           {/* ============================================================ */}
           <View style={styles.sectionHeaderRowWithBtn}>
             <Text style={[styles.sectionHeaderTitle, { marginTop: 18 }]}>CAPTION WRITING</Text>
             <Pressable
-              onPress={() => showToast('Jarvis AI generated new high-retention caption')}
-              hitSlop={8}
+              style={styles.polishJarvisBtn}
+              onPress={() => {
+                setCaptionText(
+                  'Stop waiting for the "perfect" idea.\n\nConsistency and honest execution outperform polished perfection every single time. Here are 3 habits that changed everything.\n\nSave this for your next creative sprint. 🚀\n\n#CreatorTips #ViralReels #PoststreakPro'
+                );
+                showToast('🪄 Polished with Jarvis AI!');
+              }}
             >
-              <Text style={styles.polishLink}>🪄 Polish with Jarvis</Text>
+              <Text style={styles.polishJarvisBtnText}>🪄 Polish with Jarvis</Text>
             </Pressable>
           </View>
 
-          <View style={styles.captionCard}>
+          <View style={styles.captionBoxCard}>
             <TextInput
-              style={styles.captionInput}
-              multiline={true}
-              numberOfLines={6}
+              style={styles.captionTextInput}
+              multiline
               value={captionText}
               onChangeText={setCaptionText}
-              placeholder="Write your high-impact caption here..."
+              placeholder="Write your high-converting caption..."
               placeholderTextColor="#94A3B8"
             />
-
-            <View style={styles.captionFooterRow}>
-              <Text style={styles.captionCharCount}>{captionText.length} / 2,200 chars</Text>
-              <View style={{ flexDirection: 'row', gap: 8 }}>
-                <Pressable
-                  style={styles.captionQuickTag}
-                  onPress={() => setCaptionText(prev => prev + ' #ViralTips')}
-                >
-                  <Text style={styles.captionQuickTagText}>+ #ViralTips</Text>
-                </Pressable>
-                <Pressable
-                  style={styles.captionQuickTag}
-                  onPress={() => setCaptionText(prev => prev + ' #StreakGuard')}
-                >
-                  <Text style={styles.captionQuickTagText}>+ #StreakGuard</Text>
-                </Pressable>
-              </View>
-            </View>
           </View>
 
           {/* ============================================================ */}
-          {/* CARD 5: TIMING & PEAK WINDOW SELECTOR                        */}
+          {/* ACTION BUTTONS: AUTOPILOT & PUBLISH                          */}
           {/* ============================================================ */}
-          <Text style={[styles.sectionHeaderTitle, { marginTop: 18, marginBottom: 8 }]}>PEAK TIMING</Text>
-          <View style={styles.timingCard}>
-            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
-              <Text style={styles.timingCardTitle}>Optimal Posting Window</Text>
-              <View style={styles.peakScoreBadge}>
-                <Text style={styles.peakScoreBadgeText}>🔥 96% Match</Text>
-              </View>
-            </View>
-
-            <View style={{ flexDirection: 'row', gap: 8 }}>
-              {['7:30 PM (Peak)', '12:00 PM (Mid)', '8:00 AM (Morning)'].map((slot) => (
-                <Pressable
-                  key={slot}
-                  style={[
-                    styles.timeSlotPill,
-                    selectedTimeSlot.startsWith(slot.slice(0, 7)) && styles.timeSlotPillActive,
-                  ]}
-                  onPress={() => setSelectedTimeSlot(slot)}
-                >
-                  <Text
-                    style={[
-                      styles.timeSlotPillText,
-                      selectedTimeSlot.startsWith(slot.slice(0, 7)) && styles.timeSlotPillTextActive,
-                    ]}
-                  >
-                    {slot}
-                  </Text>
-                </Pressable>
-              ))}
-            </View>
-          </View>
-
-          {/* ============================================================ */}
-          {/* PRIMARY ACTION BUTTONS                                       */}
-          {/* ============================================================ */}
-          <View style={{ gap: 10, marginTop: 24, marginBottom: 140 }}>
-            {/* Publish Now */}
+          <View style={{ gap: 10, marginTop: 18 }}>
             <Pressable
-              style={({ pressed }) => [styles.publishNowBtn, pressed && styles.btnPressed]}
-              onPress={handlePublishNow}
+              style={({ pressed }) => [styles.autopilotBtn, pressed && styles.btnPressed]}
+              onPress={handleScheduleAutopilot}
             >
-              <Text style={styles.publishNowBtnText}>🚀 Publish to {selectedPlatforms.length} Platforms Now (+50 XP) ➔</Text>
+              <Text style={styles.autopilotBtnText}>⚡ Schedule on Autopilot (7:30 PM)</Text>
             </Pressable>
 
-            {/* Schedule on Autopilot */}
             <Pressable
-              style={({ pressed }) => [styles.scheduleAutopilotBtnWrapper, pressed && styles.btnPressed]}
-              onPress={handleScheduleAutopilot}
+              style={({ pressed }) => [styles.publishGoldBtn, pressed && styles.btnPressed]}
+              onPress={handlePublishNow}
             >
               <LinearGradient
                 colors={['#FDE68A', '#F59E0B', '#D97706']}
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 1 }}
-                style={styles.scheduleAutopilotBtnGradient}
+                style={styles.publishGoldBtnGradient}
               >
-                <Text style={styles.scheduleAutopilotBtnText}>
-                  ✨ Autopilot Schedule for {selectedTimeSlot.slice(0, 7)} (+75 XP) ➔
+                <Text style={styles.publishGoldBtnText}>
+                  ✨ Publish to All Platforms Now ➔
                 </Text>
               </LinearGradient>
             </Pressable>
@@ -872,23 +685,15 @@ export const ProPostComposerScreen: React.FC<ProPostComposerScreenProps> = ({
         <FloatingTabBar
           activeTab={activeTab}
           onTabPress={(tab) => {
+            if (Platform.OS !== 'web') {
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+            }
             setActiveTab(tab);
             if (onNavigateTab) onNavigateTab(tab);
           }}
         />
 
-        {/* PROFILE MODAL */}
-        <UserProfileModal
-          visible={showProfileModal}
-          onClose={() => setShowProfileModal(false)}
-          onLogout={onLogout}
-          initialProfile={userProfile}
-          onSaveProfile={(updated) => {
-            if (onSaveProfile) onSaveProfile(updated);
-          }}
-        />
-
-        {/* CHANGE IDEA MODAL (WITH CUSTOM IDEA & GHOST ANIMATION) */}
+        {/* CHANGE IDEA MODAL */}
         <Modal
           visible={showChangeIdeaModal}
           transparent={true}
@@ -896,149 +701,38 @@ export const ProPostComposerScreen: React.FC<ProPostComposerScreenProps> = ({
           onRequestClose={() => setShowChangeIdeaModal(false)}
         >
           <View style={styles.modalOverlay}>
-            <View style={[styles.modalCard, { maxHeight: '90%' }]}>
-              <ScrollView showsVerticalScrollIndicator={false} bounces={false}>
-                {/* Header */}
-                <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-                  <View style={styles.modalGoldTagBadge}>
-                    <Text style={styles.modalGoldTagBadgeText}>👑 PRO IDEA GENERATOR</Text>
-                  </View>
-                  <Pressable onPress={() => setShowChangeIdeaModal(false)} hitSlop={8}>
-                    <Text style={{ fontSize: 18, color: '#94A3B8', fontWeight: '900' }}>✕</Text>
-                  </Pressable>
-                </View>
+            <Animated.View style={[styles.modalCard, { transform: [{ scale: modalPopScale }] }]}>
+              <View style={styles.modalHeaderBetween}>
+                <Text style={styles.modalTitle}>Choose Post Idea</Text>
+                <Pressable onPress={() => setShowChangeIdeaModal(false)} hitSlop={8}>
+                  <Text style={styles.modalCloseText}>✕</Text>
+                </Pressable>
+              </View>
 
-                <Text style={styles.modalHeaderTitle}>Select or Create Idea</Text>
-                <Text style={styles.modalHeaderSub}>
-                  Type your custom topic or pick an AI-recommended high retention hook.
-                </Text>
-
-                {/* 1. CUSTOM IDEA INPUT SECTION */}
-                <View style={styles.customIdeaContainer}>
-                  <Text style={styles.customIdeaSectionLabel}>✍️ ENTER CUSTOM IDEA</Text>
-                  <TextInput
-                    style={styles.customIdeaTextInput}
-                    placeholder="Type your own topic, lesson, or viral angle..."
-                    placeholderTextColor="#94A3B8"
-                    value={customIdeaInput}
-                    onChangeText={setCustomIdeaInput}
-                    multiline={true}
-                    numberOfLines={3}
-                  />
-
-                  {/* Quick Angle Chips */}
-                  <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginVertical: 8 }}>
-                    {[
-                      '💡 "Why 90% fail at..."',
-                      '🚀 "The 1 tool every..."',
-                      '🔥 "Stop doing this..."',
-                      '📈 "How I scaled to..."',
-                    ].map((hook, hIdx) => (
-                      <Pressable
-                        key={hIdx}
-                        style={styles.customHookChip}
-                        onPress={() => setCustomIdeaInput(hook.replace(/^[^\w"]+/, '').replace(/"/g, ''))}
-                      >
-                        <Text style={styles.customHookChipText}>{hook}</Text>
-                      </Pressable>
-                    ))}
-                  </View>
-
-                  {/* Apply Custom Idea Button */}
+              <View style={{ gap: 8, marginVertical: 12 }}>
+                {SAMPLE_IDEAS.map((idea, idx) => (
                   <Pressable
-                    style={({ pressed }) => [
-                      styles.applyCustomIdeaBtnWrapper,
-                      (!customIdeaInput.trim()) && { opacity: 0.5 },
-                      pressed && styles.btnPressed,
-                    ]}
-                    disabled={!customIdeaInput.trim()}
+                    key={idx}
+                    style={styles.ideaOptionCard}
                     onPress={() => {
-                      if (!customIdeaInput.trim()) return;
-                      const newIdea = customIdeaInput.trim();
-                      setCurrentIdea(newIdea);
-                      setCaptionText(`${newIdea}:\n\nShare your key takeaway or breakdown here.\n\nSave this for when you need it! 🚀\n\n#CreatorTips #GrowthStrategy`);
+                      setCurrentIdea(idea);
                       setShowChangeIdeaModal(false);
-                      setCustomIdeaInput('');
-
-                      if (Platform.OS !== 'web') {
-                        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-                      }
-                      setCompletionData({
-                        title: 'Custom Angle Loaded!',
-                        subtitle: `"${newIdea}" is now active in your Pro Composer.`,
-                        badgeText: '👑 CUSTOM PRO HOOK',
-                        xpEarned: 25,
-                        speechBubble: "Fire idea! Let's craft high-retention content.",
-                      });
-                      setTimeout(() => {
-                        setShowCompletionModal(true);
-                      }, 200);
+                      showToast(`✓ Selected: "${idea}"`);
                     }}
                   >
-                    <LinearGradient
-                      colors={['#FDE68A', '#F59E0B', '#D97706']}
-                      start={{ x: 0, y: 0 }}
-                      end={{ x: 1, y: 1 }}
-                      style={styles.applyCustomIdeaBtnGradient}
-                    >
-                      <Text style={styles.applyCustomIdeaBtnText}>
-                        ✨ Apply Custom Idea (+25 XP) ➔
-                      </Text>
-                    </LinearGradient>
+                    <Text style={styles.ideaOptionText}>&ldquo;{idea}&rdquo;</Text>
                   </Pressable>
-                </View>
+                ))}
+              </View>
 
-                {/* 2. AI-RECOMMENDED HOOKS */}
-                <Text style={[styles.customIdeaSectionLabel, { marginTop: 14, marginBottom: 8 }]}>
-                  💡 OR PICK AI VIRAL HOOK
-                </Text>
-                <View style={{ gap: 8 }}>
-                  {SAMPLE_IDEAS.map((idea, idx) => (
-                    <Pressable
-                      key={idx}
-                      style={({ pressed }) => [styles.ideaOptionRow, pressed && styles.btnPressed]}
-                      onPress={() => {
-                        setCurrentIdea(idea);
-                        setCaptionText(`${idea}:\n\nStop waiting for the "perfect" idea. Consistency and honest lessons outperform polished perfection every single time.\n\nSave this for when you feel stuck. 🚀\n\n#CreatorTips #ContentStrategy #GrowthHacks`);
-                        setShowChangeIdeaModal(false);
-
-                        if (Platform.OS !== 'web') {
-                          Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-                        }
-                        setCompletionData({
-                          title: 'Viral Idea Selected!',
-                          subtitle: `"${idea}" is now active in your Pro Composer.`,
-                          badgeText: '✨ AI HOOK LOADED',
-                          xpEarned: 25,
-                          speechBubble: "High retention score! Let's craft the post.",
-                        });
-                        setTimeout(() => {
-                          setShowCompletionModal(true);
-                        }, 200);
-                      }}
-                    >
-                      <Text style={styles.ideaOptionNumber}>{idx + 1}</Text>
-                      <View style={{ flex: 1 }}>
-                        <Text style={styles.ideaOptionText}>{idea}</Text>
-                        <Text style={styles.ideaOptionMatchText}>⚡ 94% Retention Probability</Text>
-                      </View>
-                      <Text style={{ fontSize: 16, color: '#582CDB', fontWeight: '900' }}>➔</Text>
-                    </Pressable>
-                  ))}
-                </View>
-
-                <Pressable
-                  style={[styles.modalCancelBtn, { marginTop: 14 }]}
-                  onPress={() => setShowChangeIdeaModal(false)}
-                >
-                  <Text style={styles.modalCancelBtnText}>Dismiss</Text>
-                </Pressable>
-              </ScrollView>
-            </View>
+              <Pressable style={styles.modalCancelBtn} onPress={() => setShowChangeIdeaModal(false)}>
+                <Text style={styles.modalCancelBtnText}>Close</Text>
+              </Pressable>
+            </Animated.View>
           </View>
         </Modal>
 
-        {/* ALL PLATFORMS MODAL (WITH REAL SOCIAL ICONS & GHOST CELEBRATION) */}
+        {/* ALL PLATFORMS MODAL */}
         <Modal
           visible={showAllPlatformsModal}
           transparent={true}
@@ -1046,41 +740,28 @@ export const ProPostComposerScreen: React.FC<ProPostComposerScreenProps> = ({
           onRequestClose={() => setShowAllPlatformsModal(false)}
         >
           <View style={styles.modalOverlay}>
-            <View style={[styles.modalCard, { maxHeight: '88%' }]}>
-              {/* Header */}
-              <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-                <View style={styles.modalGoldTagBadge}>
-                  <Text style={styles.modalGoldTagBadgeText}>👑 PRO MULTI-SYNC</Text>
-                </View>
+            <Animated.View style={[styles.modalCard, { transform: [{ scale: modalPopScale }] }]}>
+              <View style={styles.modalHeaderBetween}>
+                <Text style={styles.modalTitle}>Select Active Platforms</Text>
                 <Pressable onPress={() => setShowAllPlatformsModal(false)} hitSlop={8}>
-                  <Text style={{ fontSize: 18, color: '#94A3B8', fontWeight: '900' }}>✕</Text>
+                  <Text style={styles.modalCloseText}>✕</Text>
                 </Pressable>
               </View>
 
-              <Text style={styles.modalHeaderTitle}>Connected Social Platforms</Text>
-              <Text style={styles.modalHeaderSub}>
-                Select all destinations for auto-formatted multi-sync distribution.
-              </Text>
-
-              <ScrollView style={{ maxHeight: 360, marginVertical: 12 }} showsVerticalScrollIndicator={false}>
-                {PRO_PLATFORMS.map((platform) => {
-                  const isSelected = selectedPlatforms.includes(platform.id);
+              <View style={{ gap: 8, marginVertical: 12 }}>
+                {PRO_PLATFORMS.map((plat) => {
+                  const isSelected = selectedPlatforms.includes(plat.id);
                   return (
                     <Pressable
-                      key={platform.id}
-                      style={[
-                        styles.platformRowItem,
-                        isSelected && styles.platformRowItemSelected,
-                      ]}
-                      onPress={() => togglePlatform(platform.id)}
+                      key={plat.id}
+                      style={[styles.platformModalRow, isSelected && styles.platformModalRowSelected]}
+                      onPress={() => togglePlatform(plat.id)}
                     >
-                      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, flex: 1 }}>
-                        {renderPlatformIcon(platform.iconType, 28)}
-                        <View style={{ flex: 1 }}>
-                          <Text style={styles.platformRowItemName}>{platform.name}</Text>
-                          <Text style={styles.platformRowItemSub}>
-                            {platform.format} • <Text style={{ color: '#059669', fontWeight: '800' }}>{platform.multiplier}</Text>
-                          </Text>
+                      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+                        <SocialBrandIcon platform={plat.platformType} size={22} />
+                        <View>
+                          <Text style={styles.platformModalName}>{plat.name}</Text>
+                          <Text style={styles.platformModalFormat}>{plat.format}</Text>
                         </View>
                       </View>
                       <View style={[styles.platformCheckCircle, isSelected && styles.platformCheckCircleActive]}>
@@ -1093,69 +774,68 @@ export const ProPostComposerScreen: React.FC<ProPostComposerScreenProps> = ({
                     </Pressable>
                   );
                 })}
-              </ScrollView>
+              </View>
 
-              {/* Done Selecting with Gold Gradient & Ghost Animation */}
-              <Pressable
-                style={({ pressed }) => [styles.applyCustomIdeaBtnWrapper, pressed && styles.btnPressed]}
-                onPress={() => {
-                  setShowAllPlatformsModal(false);
-
-                  if (Platform.OS !== 'web') {
-                    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-                  }
-                  setCompletionData({
-                    title: 'Multi-Platform Sync Configured!',
-                    subtitle: `Active on ${selectedPlatforms.map(p => p.toUpperCase()).join(', ')}. Optimal algorithm formatting applied.`,
-                    badgeText: '👑 MULTI-SYNC ACTIVE',
-                    xpEarned: 25,
-                    speechBubble: 'All platform reach engines synchronized!',
-                  });
-                  setTimeout(() => {
-                    setShowCompletionModal(true);
-                  }, 200);
-                }}
-              >
-                <LinearGradient
-                  colors={['#FDE68A', '#F59E0B', '#D97706']}
-                  start={{ x: 0, y: 0 }}
-                  end={{ x: 1, y: 1 }}
-                  style={styles.applyCustomIdeaBtnGradient}
-                >
-                  <Text style={styles.applyCustomIdeaBtnText}>
-                    ✨ Confirm {selectedPlatforms.length} Platforms (+25 XP) ➔
-                  </Text>
-                </LinearGradient>
+              <Pressable style={styles.modalCancelBtn} onPress={() => setShowAllPlatformsModal(false)}>
+                <Text style={styles.modalCancelBtnText}>Done</Text>
               </Pressable>
-            </View>
+            </Animated.View>
           </View>
         </Modal>
 
-        {/* GHOST CELEBRATION MODAL */}
+        {/* USER PROFILE MODAL */}
+        <UserProfileModal
+          visible={showProfileModal}
+          onClose={() => setShowProfileModal(false)}
+          onLogout={onLogout}
+          initialProfile={userProfile}
+          onSaveProfile={(updated) => {
+            if (onSaveProfile) onSaveProfile(updated);
+          }}
+        />
+
+        {/* NOTIFICATIONS MODAL */}
+        <Modal
+          visible={showNotificationModal}
+          transparent={true}
+          animationType="fade"
+          onRequestClose={() => setShowNotificationModal(false)}
+        >
+          <View style={styles.modalOverlay}>
+            <Animated.View style={[styles.modalCard, { transform: [{ scale: modalPopScale }] }]}>
+              <View style={styles.modalHeaderBetween}>
+                <Text style={styles.modalTitle}>Composer Alerts</Text>
+                <Pressable onPress={() => setShowNotificationModal(false)} hitSlop={8}>
+                  <Text style={styles.modalCloseText}>✕</Text>
+                </Pressable>
+              </View>
+              <View style={{ gap: 8, marginVertical: 12 }}>
+                <View style={styles.ideaOptionCard}>
+                  <Text style={{ fontSize: 13, fontWeight: '800', color: '#171420' }}>
+                    ⚡ Peak Reach Approaching (7:30 PM)
+                  </Text>
+                  <Text style={{ fontSize: 11, color: '#64748B', marginTop: 2 }}>
+                    Your TikTok and Instagram audiences are active.
+                  </Text>
+                </View>
+              </View>
+              <Pressable style={styles.modalCancelBtn} onPress={() => setShowNotificationModal(false)}>
+                <Text style={styles.modalCancelBtnText}>Close</Text>
+              </Pressable>
+            </Animated.View>
+          </View>
+        </Modal>
+
+        {/* 3D GHOST CELEBRATION MODAL */}
         <AnimatedCompletionModal
           visible={showCompletionModal}
+          onDismiss={() => setShowCompletionModal(false)}
           title={completionData.title}
           subtitle={completionData.subtitle}
           badgeText={completionData.badgeText}
           xpEarned={completionData.xpEarned}
-          streakCount={52}
           speechBubble={completionData.speechBubble}
-          actionText="Awesome ➔"
-          onDismiss={() => {
-            setShowCompletionModal(false);
-            if (completionData.badgeText.includes('PUBLISHED') || completionData.badgeText.includes('AUTOPILOT')) {
-              if (onOpenSchedule) onOpenSchedule();
-              else onBack();
-            }
-          }}
         />
-
-        {/* TOAST */}
-        {toastMessage && (
-          <View style={styles.toastContainer}>
-            <Text style={styles.toastText}>{toastMessage}</Text>
-          </View>
-        )}
       </View>
     </SafeAreaView>
   );
@@ -1188,11 +868,16 @@ const styles = StyleSheet.create({
     borderColor: '#EFECE6',
     justifyContent: 'center',
     alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.04,
+    shadowRadius: 4,
+    elevation: 1,
   },
   headerLogoWrapper: {
-    width: 38,
-    height: 38,
-    borderRadius: 19,
+    width: 36,
+    height: 36,
+    borderRadius: 18,
     backgroundColor: 'rgba(255, 255, 255, 0.95)',
     justifyContent: 'center',
     alignItems: 'center',
@@ -1203,46 +888,63 @@ const styles = StyleSheet.create({
     elevation: 2,
   },
   headerGhostLogo: {
-    width: 34,
-    height: 34,
+    width: 26,
+    height: 26,
   },
   proHeaderBadge: {
-    paddingHorizontal: 6,
-    paddingVertical: 2,
+    paddingHorizontal: 9,
+    paddingVertical: 3.5,
     borderRadius: 6,
-    borderWidth: 1,
-    borderColor: '#FBBF24',
   },
   proHeaderBadgeText: {
-    fontSize: 8.5,
+    fontSize: 9.5,
     fontWeight: '900',
-    color: '#171420',
+    color: '#0C0A12',
     letterSpacing: 0.3,
   },
   headerRightGroup: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
+    gap: 10,
   },
   headerIconBtn: {
-    width: 36,
-    height: 36,
-    borderRadius: 12,
+    width: 38,
+    height: 38,
+    borderRadius: 19,
     backgroundColor: '#FFFFFF',
     borderWidth: 1,
     borderColor: '#EFECE6',
     justifyContent: 'center',
     alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.04,
+    shadowRadius: 4,
+    elevation: 1,
+  },
+  notificationDot: {
+    position: 'absolute',
+    top: 9,
+    right: 9,
+    width: 7,
+    height: 7,
+    borderRadius: 3.5,
+    backgroundColor: '#EF4444',
+    borderWidth: 1.5,
+    borderColor: '#FFFFFF',
   },
   profileAvatarWrapper: {
-    position: 'relative',
-  },
-  headerUserAvatar: {
     width: 38,
     height: 38,
     borderRadius: 19,
-    borderWidth: 2,
+    borderWidth: 1.5,
     borderColor: '#F59E0B',
+    position: 'relative',
+  },
+  headerUserAvatar: {
+    width: '100%',
+    height: '100%',
+    borderRadius: 19,
   },
   avatarTinyGoldCheckPos: {
     position: 'absolute',
@@ -1251,29 +953,27 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     paddingHorizontal: 20,
-    paddingTop: 4,
-    paddingBottom: 40,
+    paddingBottom: 140,
   },
-
-  // TITLES
   topTitlesSection: {
+    marginTop: 8,
     marginBottom: 16,
   },
   createPostTagBox: {
-    backgroundColor: '#F59E0B',
-    paddingHorizontal: 8,
+    backgroundColor: '#FEF3C7',
+    paddingHorizontal: 9,
     paddingVertical: 3.5,
     borderRadius: 6,
   },
   createPostTagText: {
     fontSize: 9.5,
     fontWeight: '900',
-    color: '#FFFFFF',
-    letterSpacing: 0.6,
+    color: '#D97706',
+    letterSpacing: 0.3,
   },
   draftPill: {
     backgroundColor: '#EDE9FE',
-    paddingHorizontal: 8,
+    paddingHorizontal: 9,
     paddingVertical: 3.5,
     borderRadius: 6,
   },
@@ -1281,71 +981,82 @@ const styles = StyleSheet.create({
     fontSize: 9.5,
     fontWeight: '900',
     color: '#582CDB',
+    letterSpacing: 0.3,
   },
   mainTitleText: {
-    fontSize: 24,
+    fontSize: 23,
     fontWeight: '900',
     color: '#171420',
-    letterSpacing: -0.4,
-    marginBottom: 4,
+    letterSpacing: -0.5,
   },
   mainSubText: {
     fontSize: 12.5,
     color: '#64748B',
     lineHeight: 18,
+    marginTop: 4,
   },
 
-  // POST IDEA CARD
+  // CARD 1: POST IDEA CARD
   postIdeaCard: {
     backgroundColor: '#FFFFFF',
-    borderRadius: 24,
-    padding: 20,
+    borderRadius: 20,
+    padding: 18,
     borderWidth: 1,
     borderColor: '#EFECE6',
-    marginBottom: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.03,
+    shadowRadius: 8,
+    elevation: 2,
+    marginBottom: 16,
   },
   postIdeaTag: {
     fontSize: 11,
     fontWeight: '900',
-    color: '#64748B',
+    color: '#94A3B8',
+    letterSpacing: 0.5,
   },
   changeIdeaLink: {
     fontSize: 11,
     fontWeight: '900',
     color: '#582CDB',
+    letterSpacing: 0.3,
   },
   postIdeaMainTitle: {
     fontSize: 17,
     fontWeight: '900',
     color: '#171420',
     marginVertical: 4,
+    lineHeight: 23,
   },
   postIdeaSub: {
     fontSize: 12,
     color: '#64748B',
+    lineHeight: 17,
   },
   ideaChipPill: {
     backgroundColor: '#FAF8F5',
     borderWidth: 1,
-    borderColor: '#E2E8F0',
+    borderColor: '#EFECE6',
     paddingHorizontal: 10,
     paddingVertical: 5,
     borderRadius: 8,
   },
   ideaChipPillActive: {
     backgroundColor: '#EDE9FE',
-    borderColor: '#C4B5FD',
+    borderColor: '#DDD6FE',
   },
   ideaChipPillText: {
     fontSize: 11,
     fontWeight: '800',
-    color: '#64748B',
+    color: '#475569',
   },
   ideaChipPillTextActive: {
     color: '#582CDB',
+    fontWeight: '900',
   },
 
-  // PLATFORMS
+  // SECTION 2: CHOOSE PLATFORMS
   sectionHeaderRowWithBtn: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -1353,7 +1064,7 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   sectionHeaderTitle: {
-    fontSize: 11,
+    fontSize: 12.5,
     fontWeight: '900',
     color: '#64748B',
     letterSpacing: 0.5,
@@ -1365,9 +1076,9 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   morePlatformsBtnText: {
+    color: '#FFFFFF',
     fontSize: 10.5,
     fontWeight: '900',
-    color: '#FFFFFF',
   },
   platformsGridRow: {
     flexDirection: 'row',
@@ -1376,63 +1087,74 @@ const styles = StyleSheet.create({
   platformCard: {
     flex: 1,
     backgroundColor: '#FFFFFF',
-    borderRadius: 18,
+    borderRadius: 16,
     padding: 14,
     borderWidth: 1.5,
-    borderColor: '#E2E8F0',
+    borderColor: '#EFECE6',
     alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.02,
+    shadowRadius: 6,
   },
   platformCardSelected: {
     borderColor: '#582CDB',
-    backgroundColor: '#FBF9FF',
+    backgroundColor: '#FFFFFF',
   },
   platformIconWrapper: {
-    height: 28,
+    width: 32,
+    height: 32,
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 6,
   },
   platformCardName: {
-    fontSize: 12,
-    fontWeight: '800',
+    fontSize: 12.5,
+    fontWeight: '900',
     color: '#171420',
-    marginBottom: 8,
   },
   platformCheckCircle: {
-    width: 16,
-    height: 16,
-    borderRadius: 8,
-    borderWidth: 1.5,
-    borderColor: '#CBD5E1',
+    width: 18,
+    height: 18,
+    borderRadius: 9,
+    backgroundColor: '#E2E8F0',
     justifyContent: 'center',
     alignItems: 'center',
   },
   platformCheckCircleActive: {
     backgroundColor: '#582CDB',
-    borderColor: '#582CDB',
   },
   platformDisclaimerText: {
     fontSize: 11,
-    color: '#94A3B8',
-    marginTop: 8,
+    color: '#64748B',
     lineHeight: 16,
+    marginTop: 8,
+    marginBottom: 6,
   },
 
-  // MEDIA STUDIO
+  // SECTION 3: MEDIA
   mediaStudioCard: {
     backgroundColor: '#FFFFFF',
-    borderRadius: 24,
-    padding: 18,
+    borderRadius: 20,
+    padding: 16,
     borderWidth: 1,
     borderColor: '#EFECE6',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.03,
+    shadowRadius: 8,
+    elevation: 2,
   },
   mediaDashedBox: {
     borderWidth: 1.5,
     borderColor: '#CBD5E1',
     borderStyle: 'dashed',
     borderRadius: 16,
-    padding: 24,
+    paddingVertical: 24,
+    paddingHorizontal: 16,
     alignItems: 'center',
+    justifyContent: 'center',
   },
   mediaPlaceholderIconCircle: {
     width: 44,
@@ -1447,363 +1169,34 @@ const styles = StyleSheet.create({
     fontSize: 13.5,
     fontWeight: '900',
     color: '#171420',
-    marginBottom: 2,
   },
   mediaSubHeading: {
     fontSize: 11,
     color: '#64748B',
-  },
-  mediaActionBtn: {
-    flex: 1,
-    backgroundColor: '#FAF8F5',
-    borderWidth: 1,
-    borderColor: '#E2E8F0',
-    paddingVertical: 10,
-    borderRadius: 10,
-    alignItems: 'center',
-  },
-  mediaActionBtnText: {
-    fontSize: 12,
-    fontWeight: '800',
-    color: '#171420',
-  },
-
-  // CAPTION
-  polishLink: {
-    fontSize: 11,
-    fontWeight: '900',
-    color: '#582CDB',
-  },
-  captionCard: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 24,
-    padding: 16,
-    borderWidth: 1,
-    borderColor: '#EFECE6',
-  },
-  captionInput: {
-    fontSize: 13,
-    color: '#171420',
-    lineHeight: 20,
-    textAlignVertical: 'top',
-    minHeight: 110,
-  },
-  captionFooterRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingTop: 10,
-    borderTopWidth: 1,
-    borderTopColor: '#F1EFE9',
-    marginTop: 6,
-  },
-  captionCharCount: {
-    fontSize: 10.5,
-    color: '#94A3B8',
-    fontWeight: '700',
-  },
-  captionQuickTag: {
-    backgroundColor: '#EDE9FE',
-    paddingHorizontal: 8,
-    paddingVertical: 3.5,
-    borderRadius: 6,
-  },
-  captionQuickTagText: {
-    fontSize: 10,
-    fontWeight: '800',
-    color: '#582CDB',
-  },
-
-  // TIMING
-  timingCard: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 20,
-    padding: 16,
-    borderWidth: 1,
-    borderColor: '#EFECE6',
-  },
-  timingCardTitle: {
-    fontSize: 13,
-    fontWeight: '900',
-    color: '#171420',
-  },
-  peakScoreBadge: {
-    backgroundColor: '#FEF3C7',
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: 6,
-  },
-  peakScoreBadgeText: {
-    fontSize: 9.5,
-    fontWeight: '900',
-    color: '#92400E',
-  },
-  timeSlotPill: {
-    flex: 1,
-    backgroundColor: '#FAF8F5',
-    borderWidth: 1,
-    borderColor: '#E2E8F0',
-    paddingVertical: 8,
-    borderRadius: 10,
-    alignItems: 'center',
-  },
-  timeSlotPillActive: {
-    backgroundColor: '#EDE9FE',
-    borderColor: '#C4B5FD',
-  },
-  timeSlotPillText: {
-    fontSize: 10,
-    fontWeight: '800',
-    color: '#64748B',
-  },
-  timeSlotPillTextActive: {
-    color: '#582CDB',
-  },
-
-  // PRIMARY ACTIONS
-  publishNowBtn: {
-    backgroundColor: '#582CDB',
-    paddingVertical: 14,
-    borderRadius: 14,
-    alignItems: 'center',
-  },
-  publishNowBtnText: {
-    color: '#FFFFFF',
-    fontSize: 13.5,
-    fontWeight: '900',
-  },
-  scheduleAutopilotBtnWrapper: {
-    borderRadius: 14,
-    overflow: 'hidden',
-    shadowColor: '#F59E0B',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.35,
-    shadowRadius: 10,
-    elevation: 4,
-  },
-  scheduleAutopilotBtnGradient: {
-    paddingVertical: 14,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 1,
-    borderColor: '#FCD34D',
-    borderRadius: 14,
-  },
-  scheduleAutopilotBtnText: {
-    color: '#0C0A12',
-    fontSize: 13.5,
-    fontWeight: '900',
-  },
-
-  // MODALS
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(15, 23, 42, 0.65)',
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 20,
-  },
-  modalCard: {
-    width: '100%',
-    backgroundColor: '#FFFFFF',
-    borderRadius: 24,
-    padding: 20,
-  },
-  modalHeaderTitle: {
-    fontSize: 18,
-    fontWeight: '900',
-    color: '#171420',
-  },
-  modalHeaderSub: {
-    fontSize: 12,
-    color: '#64748B',
     marginTop: 2,
   },
-  ideaOptionRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-    paddingVertical: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: '#F1EFE9',
-  },
-  ideaOptionNumber: {
-    width: 22,
-    height: 22,
-    borderRadius: 11,
-    backgroundColor: '#EDE9FE',
-    color: '#582CDB',
-    fontSize: 11,
-    fontWeight: '900',
-    textAlign: 'center',
-    lineHeight: 22,
-  },
-  ideaOptionText: {
-    flex: 1,
-    fontSize: 13,
-    fontWeight: '700',
-    color: '#171420',
-  },
-  platformRowItem: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingVertical: 10,
-    paddingHorizontal: 12,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: '#E2E8F0',
-    marginBottom: 8,
-  },
-  platformRowItemSelected: {
-    borderColor: '#582CDB',
-    backgroundColor: '#FBF9FF',
-  },
-  platformRowItemName: {
-    fontSize: 13,
-    fontWeight: '800',
-    color: '#171420',
-  },
-  platformRowItemSub: {
-    fontSize: 10.5,
-    color: '#64748B',
-  },
-  modalCancelBtn: {
-    backgroundColor: '#FAF8F5',
-    paddingVertical: 12,
-    borderRadius: 12,
-    alignItems: 'center',
-    marginTop: 6,
-  },
-  modalCancelBtnText: {
-    color: '#64748B',
-    fontSize: 13,
-    fontWeight: '800',
-  },
-  modalPrimaryBtn: {
-    backgroundColor: '#582CDB',
-    paddingVertical: 12,
-    borderRadius: 12,
-    alignItems: 'center',
-    marginTop: 6,
-  },
-  modalPrimaryBtnText: {
-    color: '#FFFFFF',
-    fontSize: 13,
-    fontWeight: '900',
-  },
-
-  // CUSTOM IDEA SECTION
-  modalGoldTagBadge: {
-    backgroundColor: '#FEF3C7',
-    borderWidth: 1,
-    borderColor: '#F59E0B',
-    paddingHorizontal: 8,
-    paddingVertical: 3.5,
-    borderRadius: 6,
-  },
-  modalGoldTagBadgeText: {
-    fontSize: 9,
-    fontWeight: '900',
-    color: '#92400E',
-    letterSpacing: 0.5,
-  },
-  customIdeaContainer: {
-    backgroundColor: '#FAF8F5',
-    borderRadius: 16,
-    padding: 14,
-    borderWidth: 1,
-    borderColor: '#EFECE6',
-    marginTop: 12,
-  },
-  customIdeaSectionLabel: {
-    fontSize: 10,
-    fontWeight: '900',
-    color: '#64748B',
-    letterSpacing: 0.6,
-    marginBottom: 6,
-  },
-  customIdeaTextInput: {
-    backgroundColor: '#FFFFFF',
-    borderWidth: 1,
-    borderColor: '#E2E8F0',
-    borderRadius: 12,
-    padding: 12,
-    fontSize: 13,
-    color: '#171420',
-    minHeight: 65,
-    textAlignVertical: 'top',
-  },
-  customHookChip: {
-    backgroundColor: '#FFFFFF',
-    borderWidth: 1,
-    borderColor: '#E2E8F0',
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 8,
-  },
-  customHookChipText: {
-    fontSize: 10.5,
-    color: '#582CDB',
-    fontWeight: '700',
-  },
-  applyCustomIdeaBtnWrapper: {
-    borderRadius: 12,
-    overflow: 'hidden',
-    marginTop: 8,
-    shadowColor: '#F59E0B',
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 3,
-  },
-  applyCustomIdeaBtnGradient: {
-    paddingVertical: 12,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 1,
-    borderColor: '#FCD34D',
-    borderRadius: 12,
-  },
-  applyCustomIdeaBtnText: {
-    color: '#0C0A12',
-    fontSize: 13,
-    fontWeight: '900',
-  },
-  ideaOptionMatchText: {
-    fontSize: 10,
-    fontWeight: '800',
-    color: '#10B981',
-    marginTop: 2,
-  },
-
-  // ATTACHED MEDIA PREVIEW
   mediaAttachedPreviewBox: {
     backgroundColor: '#FAF8F5',
-    borderRadius: 16,
-    padding: 14,
+    borderRadius: 14,
+    padding: 12,
     borderWidth: 1,
     borderColor: '#EFECE6',
   },
   attachedThumbnailPreview: {
-    width: 54,
-    height: 54,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: '#E2E8F0',
+    width: 52,
+    height: 52,
+    borderRadius: 8,
   },
   attachedVideoIconBox: {
-    width: 54,
-    height: 54,
-    borderRadius: 12,
+    width: 52,
+    height: 52,
+    borderRadius: 8,
     backgroundColor: '#EDE9FE',
-    borderWidth: 1,
-    borderColor: '#DDD6FE',
     justifyContent: 'center',
     alignItems: 'center',
   },
   mediaProBadge: {
-    backgroundColor: '#D1FAE5',
+    backgroundColor: '#DCFCE7',
     paddingHorizontal: 6,
     paddingVertical: 2,
     borderRadius: 4,
@@ -1811,29 +1204,184 @@ const styles = StyleSheet.create({
   mediaProBadgeText: {
     fontSize: 8.5,
     fontWeight: '900',
-    color: '#059669',
-    letterSpacing: 0.3,
+    color: '#15803D',
   },
   mediaSizeText: {
-    fontSize: 10,
-    fontWeight: '800',
-    color: '#94A3B8',
+    fontSize: 11,
+    color: '#64748B',
+    fontWeight: '700',
   },
   mediaAttachedName: {
+    fontSize: 12.5,
+    fontWeight: '900',
+    color: '#171420',
+  },
+  mediaAttachedFormat: {
+    fontSize: 10.5,
+    color: '#64748B',
+    marginTop: 1,
+  },
+  mediaActionBtn: {
+    flex: 1,
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: 6,
+    backgroundColor: '#FAF8F5',
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    paddingVertical: 10,
+    borderRadius: 12,
+  },
+  mediaActionBtnText: {
+    fontSize: 12,
+    fontWeight: '900',
+    color: '#171420',
+  },
+
+  // SECTION 4: CAPTION WRITING
+  polishJarvisBtn: {
+    backgroundColor: '#EDE9FE',
+    paddingHorizontal: 8,
+    paddingVertical: 3.5,
+    borderRadius: 6,
+  },
+  polishJarvisBtnText: {
+    fontSize: 10.5,
+    fontWeight: '900',
+    color: '#582CDB',
+  },
+  captionBoxCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 18,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: '#EFECE6',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.03,
+    shadowRadius: 6,
+  },
+  captionTextInput: {
+    fontSize: 13,
+    lineHeight: 20,
+    color: '#171420',
+    minHeight: 80,
+    textAlignVertical: 'top',
+  },
+
+  // ACTIONS
+  autopilotBtn: {
+    backgroundColor: '#EDE9FE',
+    borderWidth: 1,
+    borderColor: '#DDD6FE',
+    paddingVertical: 13,
+    borderRadius: 14,
+    alignItems: 'center',
+  },
+  autopilotBtnText: {
+    color: '#582CDB',
+    fontSize: 13,
+    fontWeight: '900',
+  },
+  publishGoldBtn: {
+    borderRadius: 14,
+    overflow: 'hidden',
+    shadowColor: '#F59E0B',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.35,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  publishGoldBtnGradient: {
+    paddingVertical: 14,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 14,
+  },
+  publishGoldBtnText: {
+    color: '#0C0A12',
+    fontSize: 13.5,
+    fontWeight: '900',
+    letterSpacing: 0.3,
+  },
+
+  // MODALS
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(15, 10, 30, 0.75)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  modalCard: {
+    width: '100%',
+    maxWidth: 400,
+    maxHeight: '88%',
+    backgroundColor: '#FFFFFF',
+    borderRadius: 24,
+    padding: 22,
+  },
+  modalHeaderBetween: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  modalCloseText: {
+    fontSize: 18,
+    color: '#94A3B8',
+    fontWeight: '900',
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: '900',
+    color: '#171420',
+    letterSpacing: -0.3,
+  },
+  ideaOptionCard: {
+    backgroundColor: '#FAF8F5',
+    borderRadius: 12,
+    padding: 12,
+    borderWidth: 1,
+    borderColor: '#EFECE6',
+  },
+  ideaOptionText: {
     fontSize: 13,
     fontWeight: '800',
     color: '#171420',
   },
-  mediaAttachedFormat: {
+  platformModalRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    backgroundColor: '#FAF8F5',
+    borderRadius: 14,
+    padding: 12,
+    borderWidth: 1.5,
+    borderColor: '#EFECE6',
+  },
+  platformModalRowSelected: {
+    borderColor: '#582CDB',
+    backgroundColor: '#F5F3FF',
+  },
+  platformModalName: {
+    fontSize: 13,
+    fontWeight: '900',
+    color: '#171420',
+  },
+  platformModalFormat: {
     fontSize: 11,
     color: '#64748B',
-    marginTop: 1,
   },
-
-  // COMMON
-  btnPressed: {
-    opacity: 0.85,
-    transform: [{ scale: 0.98 }],
+  modalCancelBtn: {
+    paddingVertical: 10,
+    alignItems: 'center',
+  },
+  modalCancelBtnText: {
+    color: '#64748B',
+    fontSize: 12,
+    fontWeight: '800',
   },
   toastContainer: {
     position: 'absolute',
@@ -1848,10 +1396,15 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.15,
     shadowRadius: 8,
     elevation: 6,
+    zIndex: 999,
   },
   toastText: {
     color: '#FFFFFF',
     fontSize: 12,
     fontWeight: '800',
+  },
+  btnPressed: {
+    transform: [{ scale: 0.96 }],
+    opacity: 0.85,
   },
 });
