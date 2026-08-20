@@ -583,8 +583,15 @@ export const ProCreateScreen: React.FC<ProCreateScreenProps> = ({
             <Pressable
               style={({ pressed }) => [styles.toolGridCard, pressed && styles.btnPressed]}
               onPress={() => {
-                triggerModalPop();
-                setShowRepurposeModal(true);
+                if (Platform.OS !== 'web') {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                }
+                if (onOpenRepurpose) {
+                  onOpenRepurpose('3 mistakes that slow down new creators');
+                } else {
+                  triggerModalPop();
+                  setShowRepurposeModal(true);
+                }
               }}
             >
               <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' }}>
@@ -615,34 +622,7 @@ export const ProCreateScreen: React.FC<ProCreateScreenProps> = ({
             </Pressable>
           </View>
 
-          {/* ============================================================ */}
-          {/* CARD 3: REPURPOSE THIS IDEA BANNER                           */}
-          {/* ============================================================ */}
-          <Pressable
-            style={({ pressed }) => [styles.repurposeBannerCard, pressed && styles.btnPressed]}
-            onPress={() => {
-              if (onOpenRepurpose) {
-                onOpenRepurpose('3 mistakes that slow down new creators');
-              } else {
-                triggerModalPop();
-                setShowRepurposeModal(true);
-              }
-            }}
-          >
-            <View style={{ flexDirection: 'row', gap: 14 }}>
-              <View style={styles.repurposeIconSquare}>
-                <Text style={{ fontSize: 22 }}>📑</Text>
-              </View>
 
-              <View style={{ flex: 1 }}>
-                <Text style={styles.repurposeBannerTitle}>Repurpose This Idea</Text>
-                <Text style={styles.repurposeBannerSub}>
-                  1 long idea becomes: Reel, Carousel, Tweet thread, LinkedIn post, and more.
-                </Text>
-                <Text style={styles.repurposeLinkText}>Repurpose Now →</Text>
-              </View>
-            </View>
-          </Pressable>
 
           {/* ============================================================ */}
           {/* CARD 4: VOICE STUDIO INTERACTIVE CARD                        */}
