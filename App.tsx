@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { View, StyleSheet, Platform } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, StyleSheet, Platform, Alert } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { SplashScreen } from './src/screens/SplashScreen';
@@ -52,6 +52,8 @@ import { CreatorPassportScreen } from './src/screens/CreatorPassportScreen';
 import { GhostLoadingScreen } from './src/components/GhostLoadingScreen';
 import { TabType } from './src/components/FloatingTabBar';
 import { UserProfileData } from './src/components/UserProfileModal';
+import { AuthProvider, useAuth } from './src/context/AuthContext';
+import { QuestsService } from './src/api/services';
 
 type Screen =
   | 'welcome'
@@ -88,7 +90,8 @@ type Screen =
   | 'creator-passport'
   | 'voice-studio';
 
-export default function App() {
+function AppContent() {
+  const { user: authUser, signIn, signUp } = useAuth();
   const [showSplash, setShowSplash] = useState(true);
   const [currentScreen, setCurrentScreen] = useState<Screen>('welcome');
   const [previousScreen, setPreviousScreen] = useState<Screen>('welcome');
@@ -118,6 +121,45 @@ export default function App() {
     youtubeHandle: 'Pablo Creates',
     niches: ['Lifestyle', 'Tech & AI', 'Storytelling'],
   });
+
+  // Sync the fields that have a real backend equivalent once signed in.
+  // Deliberately partial: avatarSource must stay a valid local asset
+  // reference (require(...)), not a remote URL, so it — and a few other
+  // purely-cosmetic mock fields — are left as placeholders rather than
+  // wired to nothing real.
+  useEffect(() => {
+    if (!authUser) return;
+    setUserProfile((prev) => ({
+      ...prev,
+      name: authUser.name || prev.name,
+      niche: authUser.niche || prev.niche,
+      tier: authUser.tier,
+      streakCount: authUser.streakCount,
+      level: authUser.level,
+      xp: authUser.xp,
+    }));
+  }, [authUser]);
+
+  // Refresh streak/XP/level on arrival at the dashboard — the sign-in sync
+  // above only captures a snapshot from the moment of login, and this can
+  // change mid-session from quest completions elsewhere in the app.
+  useEffect(() => {
+    if (currentScreen !== 'dashboard' || !authUser) return;
+    let cancelled = false;
+    QuestsService.getStreakStatus().then((res) => {
+      if (cancelled || !res.success || !res.data) return;
+      setUserProfile((prev) => ({
+        ...prev,
+        streakCount: res.data!.current_streak,
+        level: res.data!.level,
+        xp: res.data!.xp,
+      }));
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [currentScreen, authUser]);
+
   const [collabPartnerData, setCollabPartnerData] = useState<{
     name: string;
     handle: string;
@@ -200,7 +242,28 @@ export default function App() {
     navigateTo('signin');
   };
 
-  const handleSignUpSubmit = (_username: string, _email: string) => {
+  const handleSignUpSubmit = async (username: string, email: string) => {
+    setIsPageLoading(true);
+    setLoadingMessage('Creating your account...');
+    const result = await signUp(username, email, selectedNiches[0] ?? 'general');
+    setIsPageLoading(false);
+
+    if (!result.success) {
+      const msg = result.error ?? 'Sign up failed. Please try again.';
+      Platform.OS === 'web' ? window.alert(msg) : Alert.alert('Sign Up Failed', msg);
+      return;
+    }
+    if (result.requiresVerification) {
+      // SignUpScreen collects no password field yet, so the backend can
+      // only offer a passwordless flow — and there's no code-verification
+      // step in the UI to send the user to. Real, named gap: see
+      // AuthContext.signUp and the PR description, not silently hidden
+      // behind a fake "success."
+      const msg =
+        "Account created, but sign-up currently has no password field, so we can't finish creating a session yet. This needs either a password field or a verification-code step added to Sign Up.";
+      Platform.OS === 'web' ? window.alert(msg) : Alert.alert('Almost there', msg);
+      return;
+    }
     // Advance to Step 2: Niche Selection
     navigateTo('niche');
   };
@@ -218,7 +281,17 @@ export default function App() {
     navigateTo('reset-password');
   };
 
-  const handleSignInSubmit = (_email: string) => {
+  const handleSignInSubmit = async (email: string, password: string) => {
+    setIsPageLoading(true);
+    setLoadingMessage('Signing you in...');
+    const result = await signIn(email, password);
+    setIsPageLoading(false);
+
+    if (!result.success) {
+      const msg = result.error ?? 'Invalid email or password.';
+      Platform.OS === 'web' ? window.alert(msg) : Alert.alert('Sign In Failed', msg);
+      return;
+    }
     // Direct sign in straight to the creator dashboard
     navigateTo('dashboard');
   };
@@ -1702,6 +1775,14 @@ export default function App() {
         <GhostLoadingScreen visible={isPageLoading} message={loadingMessage} />
       </View>
     </SafeAreaProvider>
+  );
+}
+
+export default function App() {
+  return (
+    <AuthProvider>
+      <AppContent />
+    </AuthProvider>
   );
 }
 

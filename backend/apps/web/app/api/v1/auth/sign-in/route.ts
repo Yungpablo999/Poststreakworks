@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { assembleUserProfile } from "@/lib/trpc/assemble-profile";
+import { enforceRateLimit, getClientIp, RateLimitError } from "@poststreak/api/rate-limit";
 
 export const runtime = "nodejs";
 
@@ -18,6 +19,20 @@ export async function POST(request: Request) {
 
   if (!email || !password) {
     return NextResponse.json({ message: "email and password are required" }, { status: 400 });
+  }
+
+  // Two layers: per-IP (10/15min) catches a single attacker hammering many
+  // accounts; per-email (5/15min) catches credential stuffing against one
+  // account spread across many IPs. Checked before calling Supabase Auth at
+  // all — brute force protection, not just abuse protection.
+  try {
+    await enforceRateLimit(`auth:signin:ip:${getClientIp(request)}`, 10, 900);
+    await enforceRateLimit(`auth:signin:email:${email.toLowerCase()}`, 5, 900);
+  } catch (err) {
+    if (err instanceof RateLimitError) {
+      return NextResponse.json({ message: err.message }, { status: 429 });
+    }
+    throw err;
   }
 
   const supabase = createClient(

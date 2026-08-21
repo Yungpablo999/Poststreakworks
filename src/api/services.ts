@@ -10,8 +10,13 @@ import {
 } from '../types/models';
 
 export const AuthService = {
-  signIn: (email: string, passwordHash: string) =>
-    apiClient.post<{ token: string; user: UserProfile }>(API_ROUTES.AUTH.SIGN_IN, { email, passwordHash }),
+  // Was `passwordHash` — misleading, since the backend expects the real
+  // password over HTTPS (Supabase Auth hashes it server-side). A
+  // client-computed hash would just become the effective password, which
+  // looks safer than it is. Renamed, not re-architected — this is still a
+  // plain string sent as JSON like everything else here.
+  signIn: (email: string, password: string) =>
+    apiClient.post<{ token: string; user: UserProfile }>(API_ROUTES.AUTH.SIGN_IN, { email, password }),
   signUp: (data: { name: string; email: string; niche: string }) =>
     apiClient.post<{ token: string; user: UserProfile }>(API_ROUTES.AUTH.SIGN_UP, data),
   getMe: () => apiClient.get<UserProfile>(API_ROUTES.AUTH.ME),
@@ -25,8 +30,21 @@ export const GrowthAnalyticsService = {
 
 export const QuestsService = {
   getDailyMissions: () => apiClient.get<Quest[]>(API_ROUTES.QUESTS.DAILY_MISSIONS),
-  completeQuest: (questId: string) => apiClient.post<{ xpGained: number; streakCount: number }>(API_ROUTES.QUESTS.COMPLETE(questId)),
+  completeQuest: (questId: string) =>
+    apiClient.post<{ xpGained: number; totalXp: number; streakCount: number; level: number; levelUp: boolean }>(
+      API_ROUTES.QUESTS.COMPLETE(questId),
+    ),
   joinChallenge: (challengeId: string) => apiClient.post(API_ROUTES.QUESTS.JOIN_CHALLENGE(challengeId)),
+  getStreakStatus: () =>
+    apiClient.get<{
+      current_streak: number;
+      longest_streak: number;
+      jarvis_emotion: string;
+      streakStatus: 'active' | 'at_risk' | 'frozen';
+      xp: number;
+      level: number;
+      nextLevelXp: number;
+    }>(API_ROUTES.QUESTS.STREAK_STATUS),
 };
 
 export const EarningsService = {

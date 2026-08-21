@@ -22,7 +22,7 @@ interface SignInScreenProps {
   onBack: () => void;
   onCreateAccount: () => void;
   onForgotPassword?: () => void;
-  onSubmit?: (email: string) => void;
+  onSubmit?: (email: string, password: string) => void;
 }
 
 export const SignInScreen: React.FC<SignInScreenProps> = ({
@@ -331,7 +331,7 @@ export const SignInScreen: React.FC<SignInScreenProps> = ({
     if (Platform.OS !== 'web') {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     }
-    onSubmit(trimmedEmail);
+    onSubmit(trimmedEmail, trimmedPassword);
   };
 
   const handleForgotPassword = () => {

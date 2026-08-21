@@ -3,6 +3,7 @@ import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { initTRPC, TRPCError } from "@trpc/server";
 import superjson from "superjson";
 import { type NextRequest } from "next/server";
+import { enforceRateLimit } from "./rate-limit";
 
 // ============================================================================
 // Types
@@ -179,10 +180,15 @@ export const createTRPCRouter = t.router;
 export const publicProcedure = t.procedure;
 
 /**
- * Requires authenticated user with active account status.
+ * Requires authenticated user with active account status. Also enforces a
+ * generous general-abuse rate limit (300 req / 5 min per user) — high
+ * enough to never bother a real client, low enough to catch a runaway
+ * script or a compromised token being hammered. Per-endpoint limits (AI
+ * generation quota, etc.) are separate and stricter, layered on top of
+ * this, not a replacement for it.
  */
 export const protectedProcedure = t.procedure.use(
-  t.middleware(({ ctx, next }) => {
+  t.middleware(async ({ ctx, next }) => {
     if (!ctx.user) {
       throw new TRPCError({ code: "UNAUTHORIZED" });
     }
@@ -192,6 +198,7 @@ export const protectedProcedure = t.procedure.use(
         message: "Account is not active",
       });
     }
+    await enforceRateLimit(`api:${ctx.user.id}`, 300, 300);
     return next({ ctx: { ...ctx, user: ctx.user } });
   }),
 );

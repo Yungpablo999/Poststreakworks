@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
+import { enforceRateLimit, getClientIp, RateLimitError } from "@poststreak/api/rate-limit";
 
 export const runtime = "nodejs";
 
@@ -11,6 +12,7 @@ export const runtime = "nodejs";
 export async function POST(request: Request) {
   const body = await request.json();
   const step = body.step as "send" | "verify" | "update" | undefined;
+  const ip = getClientIp(request);
 
   const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -21,6 +23,18 @@ export async function POST(request: Request) {
     const { email, otp } = body;
     if (!email || !otp) {
       return NextResponse.json({ message: "email and otp are required" }, { status: 400 });
+    }
+    // The tightest limit in this file on purpose — a 6-digit OTP is only
+    // 1,000,000 possibilities, and without a strict attempt cap it's
+    // brute-forceable well within a plausible attack window.
+    try {
+      await enforceRateLimit(`auth:reset:verify:ip:${ip}`, 5, 900);
+      await enforceRateLimit(`auth:reset:verify:email:${email.toLowerCase()}`, 5, 900);
+    } catch (err) {
+      if (err instanceof RateLimitError) {
+        return NextResponse.json({ message: err.message }, { status: 429 });
+      }
+      throw err;
     }
     const { data, error } = await supabase.auth.verifyOtp({ email, token: otp, type: "recovery" });
     if (error || !data.session) {
@@ -51,6 +65,16 @@ export async function POST(request: Request) {
   const { email } = body;
   if (!email) {
     return NextResponse.json({ message: "email is required" }, { status: 400 });
+  }
+  // Per-IP only — protects against email-bombing a victim's inbox, not
+  // targeting one account (that's the "verify" step's job).
+  try {
+    await enforceRateLimit(`auth:reset:send:ip:${ip}`, 3, 3600);
+  } catch (err) {
+    if (err instanceof RateLimitError) {
+      return NextResponse.json({ message: err.message }, { status: 429 });
+    }
+    throw err;
   }
   const { error } = await supabase.auth.resetPasswordForEmail(email);
   if (error) {
