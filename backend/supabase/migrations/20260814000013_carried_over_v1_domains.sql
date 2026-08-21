@@ -15,12 +15,20 @@
 -- src/app/api/agent/memory/route.ts — logic ports 1:1, table shape updated
 -- to key off `users.id` (this schema's identity table) rather than
 -- `auth.users.id` directly, consistent with every other migration here.
+--
+-- `if not exists` / `drop ... if exists` guards throughout referrals and
+-- autopilot_configs (not agent_memory, which is genuinely new): when this
+-- runs against v1's live Supabase project rather than a fresh one, those two
+-- tables already exist with this exact shape — this migration should adopt
+-- them in place, not fail trying to recreate them. See
+-- 20260814000000_v1_legacy_collision_guard.sql for the analogous streak_events
+-- case, where the shapes differ and reuse isn't viable.
 -- ============================================================================
 
 -- Referrals: one row per referral relationship. A referrer's own code is a
 -- row with referred_user_id null (v1's pattern — "get or create" on first
 -- read rather than provisioning a code at signup).
-create table referrals (
+create table if not exists referrals (
   id                  uuid primary key default gen_random_uuid(),
   referrer_user_id    uuid not null references users(id) on delete cascade,
   referred_user_id    uuid references users(id) on delete cascade,
@@ -30,14 +38,16 @@ create table referrals (
   created_at          timestamptz not null default now()
 );
 
-create index idx_referrals_referrer on referrals(referrer_user_id);
-create index idx_referrals_referred on referrals(referred_user_id);
-create index idx_referrals_code on referrals(referral_code);
+create index if not exists idx_referrals_referrer on referrals(referrer_user_id);
+create index if not exists idx_referrals_referred on referrals(referred_user_id);
+create index if not exists idx_referrals_code on referrals(referral_code);
 
 alter table referrals enable row level security;
 
+drop policy if exists "referrals_select_own" on referrals;
 create policy "referrals_select_own" on referrals
   for select using (referrer_user_id = auth.uid() or referred_user_id = auth.uid());
+drop policy if exists "referrals_insert_own" on referrals;
 create policy "referrals_insert_own" on referrals
   for insert with check (referrer_user_id = auth.uid());
 
@@ -45,7 +55,7 @@ create policy "referrals_insert_own" on referrals
 -- rather than platform_type[] — v1's dispatch reads this generically per
 -- platform string, and coupling it to the enum would force a migration
 -- every time a new platform is added here before scheduling supports it.
-create table autopilot_configs (
+create table if not exists autopilot_configs (
   id            uuid primary key default gen_random_uuid(),
   user_id       uuid not null unique references users(id) on delete cascade,
   topics        text[] not null default '{}',
@@ -58,13 +68,15 @@ create table autopilot_configs (
   updated_at    timestamptz not null default now()
 );
 
-create index idx_autopilot_configs_enabled on autopilot_configs(enabled) where enabled = true;
+create index if not exists idx_autopilot_configs_enabled on autopilot_configs(enabled) where enabled = true;
 
 alter table autopilot_configs enable row level security;
 
+drop policy if exists "autopilot_configs_all_own" on autopilot_configs;
 create policy "autopilot_configs_all_own" on autopilot_configs
   for all using (user_id = auth.uid()) with check (user_id = auth.uid());
 
+drop trigger if exists set_autopilot_configs_updated_at on autopilot_configs;
 create trigger set_autopilot_configs_updated_at
   before update on autopilot_configs
   for each row execute function public.set_updated_at();

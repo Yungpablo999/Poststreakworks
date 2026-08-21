@@ -1,0 +1,23 @@
+-- ============================================================================
+-- Migration: v1 legacy collision guard
+-- ============================================================================
+--
+-- Runs first (timestamp before every other migration in this set) because
+-- this backend is being pointed at PostIT-web's (v1) live Supabase project,
+-- not an empty one — founder decision: keep every existing user, streak,
+-- token and post rather than start fresh (see
+-- 20260814000017_backfill_v1_legacy_data.sql for the data side of this).
+--
+-- v1's `streak_events` table has the same name as, but a different shape
+-- than, the one 20260814000003_streak_jarvis_gamification.sql creates
+-- (free-text event_type/reason/old-new-streak audit row vs. a typed enum +
+-- event_date log). Reusing it in place isn't viable the way referrals/
+-- autopilot_configs are (see the idempotent guards added directly in
+-- 20260814000013_carried_over_v1_domains.sql for those two, which — unlike
+-- this one — already match the new shape). Renaming it out of the way here
+-- keeps all 12 existing rows intact under a clearly-legacy name and leaves
+-- the `streak_events` name free for migration 3 to create its real table.
+-- No-op on a fresh project (`if exists`).
+-- ============================================================================
+
+alter table if exists streak_events rename to streak_events_v1_legacy;
