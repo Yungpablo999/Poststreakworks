@@ -131,7 +131,19 @@ export const creatorNetworkRouter = createTRPCRouter({
         .select("target_id")
         .eq("actor_id", profile.id);
 
-      const excludeIds = [profile.id, ...(actedOn ?? []).map((a) => a.target_id)];
+      // PostgREST's `in` filter takes a raw "(v1,v2,...)" string, not a
+      // parameterized array — that's inherent to the API, not a shortcut
+      // taken here. Every value in this list is already a UUID we generated
+      // ourselves (profile.id, or target_id from rows this same procedure's
+      // own Zod-validated `discover` mutation inserted), so this isn't
+      // reachable with attacker-controlled content today — but asserting
+      // the UUID shape before interpolating is a one-line defense against
+      // this pattern becoming unsafe later if it's ever reused with a less
+      // trusted source.
+      const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+      const excludeIds = [profile.id, ...(actedOn ?? []).map((a) => a.target_id)].filter((id) =>
+        uuidPattern.test(id),
+      );
 
       const { data, error } = await ctx.supabase
         .from("creator_profiles")

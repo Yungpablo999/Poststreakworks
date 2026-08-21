@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { assembleUserProfile } from "@/lib/trpc/assemble-profile";
+import { enforceRateLimit, getClientIp, RateLimitError } from "@poststreak/api/rate-limit";
 
 export const runtime = "nodejs";
 
@@ -21,6 +22,18 @@ export async function POST(request: Request) {
 
   if (!email) {
     return NextResponse.json({ message: "email is required" }, { status: 400 });
+  }
+
+  // Per-IP only (not per-email like sign-in) — sign-up spam is the threat
+  // here, not credential stuffing against a known account. 5 accounts per
+  // IP per hour is generous for a real user, tight for a spam script.
+  try {
+    await enforceRateLimit(`auth:signup:ip:${getClientIp(request)}`, 5, 3600);
+  } catch (err) {
+    if (err instanceof RateLimitError) {
+      return NextResponse.json({ message: err.message }, { status: 429 });
+    }
+    throw err;
   }
 
   const supabase = createClient(

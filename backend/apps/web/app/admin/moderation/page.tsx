@@ -1,12 +1,11 @@
-// ============================================================================
-// Moderation queue
-// STUB — structural placeholder only. No implementation yet.
-// Governed by: apps/web/app/admin/ADMIN_DASHBOARD.md
-// ============================================================================
-//
-// The queue packages/workflows/moderation-flow.ts (Stage 5) said would
-// land here — AI-flagged content (packages/ai/moderation.ts) and
-// user-submitted reports (safety_and_moderation.sql), triaged by
-// severity. No automated enforcement anywhere upstream — every
-// resolution here is a human decision.
-// ============================================================================
+export default function AdminModerationPage() {
+  return (
+    <div style={{ padding: 24, fontFamily: "system-ui" }}>
+      <h1>Moderation Queue</h1>
+      <p>
+        packages/api/routers/safety-moderation.ts has real report-handling
+        procedures already — this page just doesn&apos;t call them yet.
+      </p>
+    </div>
+  );
+}
