@@ -733,11 +733,8 @@ export const ProQuestsScreen: React.FC<ProQuestsScreenProps> = ({
             <Pressable
               style={({ pressed }) => [styles.viewOpportunitiesSolidBtn, pressed && styles.btnPressed]}
               onPress={() => {
-                if (onOpenOpportunities) onOpenOpportunities();
-                else {
-                  triggerModalPop();
-                  setShowOpportunityModal(true);
-                }
+                triggerModalPop();
+                setShowOpportunityModal(true);
               }}
             >
               <Text style={styles.viewOpportunitiesBtnText}>View Matching Opportunities</Text>
