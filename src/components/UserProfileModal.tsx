@@ -34,6 +34,8 @@ export interface UserProfileData {
   youtubeHandle?: string;
   xHandle?: string;
   niches: string[];
+  isVerified?: boolean;
+  portfolioUrl?: string;
 }
 
 export const CREATOR_AVATARS = [
@@ -229,6 +231,7 @@ export interface UserProfileModalProps {
   onClose: () => void;
   onLogout?: () => void;
   initialProfile?: Partial<UserProfileData>;
+  initialSubTab?: 'profile' | 'socials' | 'verification' | 'settings';
   onSaveProfile?: (updatedProfile: UserProfileData) => void;
 }
 
@@ -237,6 +240,7 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
   onClose,
   onLogout,
   initialProfile,
+  initialSubTab,
   onSaveProfile,
 }) => {
   // Form State
@@ -265,9 +269,19 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
   const [collabInvites, setCollabInvites] = useState(true);
   const [hapticFeedback, setHapticFeedback] = useState(true);
 
+  // Verification state
+  const [isVerified, setIsVerified] = useState(
+    initialProfile?.isVerified !== undefined ? initialProfile.isVerified : true
+  );
+  const [portfolioUrl, setPortfolioUrl] = useState(
+    initialProfile?.portfolioUrl || 'https://instagram.com/reel/pablo_viral_1'
+  );
+
   // UI tabs inside profile modal
   const isPro = initialProfile?.tier === 'pro' || initialProfile?.tier === 'founding';
-  const [activeSubTab, setActiveSubTab] = useState<'profile' | 'socials' | 'settings'>('profile');
+  const [activeSubTab, setActiveSubTab] = useState<'profile' | 'socials' | 'verification' | 'settings'>(
+    initialSubTab || 'profile'
+  );
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   // Animations
@@ -276,6 +290,9 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
 
   useEffect(() => {
     if (visible) {
+      if (initialSubTab) {
+        setActiveSubTab(initialSubTab);
+      }
       modalScale.setValue(0.9);
       Animated.spring(modalScale, {
         toValue: 1,
@@ -284,7 +301,7 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
         useNativeDriver: true,
       }).start();
     }
-  }, [visible]);
+  }, [visible, initialSubTab]);
 
   const showToast = (msg: string) => {
     setToastMessage(msg);
@@ -380,6 +397,8 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
       youtubeHandle: youtubeHandle.trim(),
       xHandle: xHandle.trim(),
       niches: selectedNiches,
+      isVerified,
+      portfolioUrl: portfolioUrl.trim(),
     };
 
     if (onSaveProfile) {
@@ -486,6 +505,25 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
                 ]}
               >
                 🔗 Socials
+              </Text>
+            </Pressable>
+
+            <Pressable
+              style={[styles.subTabItem, activeSubTab === 'verification' && styles.subTabItemActive]}
+              onPress={() => {
+                if (Platform.OS !== 'web') {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                }
+                setActiveSubTab('verification');
+              }}
+            >
+              <Text
+                style={[
+                  styles.subTabText,
+                  activeSubTab === 'verification' && styles.subTabTextActive,
+                ]}
+              >
+                🪪 Verify
               </Text>
             </Pressable>
 
@@ -829,6 +867,200 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
                     />
                   </View>
                 </View>
+              </View>
+            )}
+
+            {/* TAB 4: CREATOR PASSPORT & INSTANT VERIFICATION */}
+            {activeSubTab === 'verification' && (
+              <View>
+                {/* 1. HERO VERIFICATION PASSPORT BANNER */}
+                <LinearGradient
+                  colors={['#2A1259', '#1A0C38']}
+                  style={styles.verifHeroCard}
+                >
+                  <View style={styles.verifHeroTopRow}>
+                    <View style={styles.verifAvatarWrap}>
+                      <Image source={currentDisplayAvatarSource} style={styles.verifAvatarImg} />
+                      <View style={styles.verifBadgeGold}>
+                        <Text style={{ fontSize: 10, color: '#FFFFFF', fontWeight: '900' }}>✓</Text>
+                      </View>
+                    </View>
+
+                    <View style={{ flex: 1 }}>
+                      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                        <Text style={styles.verifHeroName}>{name || 'Pablo'}</Text>
+                        <View style={styles.verifStatusPill}>
+                          <Text style={styles.verifStatusPillText}>
+                            {isVerified ? '🟢 100% VERIFIED' : '⚡ 95% READY'}
+                          </Text>
+                        </View>
+                      </View>
+                      <Text style={styles.verifHeroSub}>
+                        👑 Pro Creator Passport • Level {initialProfile?.level || 5}
+                      </Text>
+                    </View>
+                  </View>
+
+                  {/* Verification Strength Progress Bar */}
+                  <View style={{ marginTop: 12 }}>
+                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 4 }}>
+                      <Text style={styles.verifMeterLabel}>PASSPORT VERIFICATION SCORE</Text>
+                      <Text style={styles.verifMeterVal}>{isVerified ? '100% / 100%' : '95% / 100%'}</Text>
+                    </View>
+                    <View style={styles.verifMeterTrack}>
+                      <View style={[styles.verifMeterFill, { width: isVerified ? '100%' : '95%' }]} />
+                    </View>
+                  </View>
+                </LinearGradient>
+
+                {/* 2. CREATOR VERIFICATION CHECKLIST (5/5 ITEMS) */}
+                <Text style={styles.sectionHeaderTitle}>VERIFICATION CHECKLIST (5 OF 5 COMPLETE)</Text>
+                <View style={styles.verifChecklistCard}>
+                  {/* Item 1: Socials */}
+                  <View style={styles.verifCheckItem}>
+                    <View style={styles.verifCheckIconCircle}>
+                      <Text style={styles.verifCheckMark}>✓</Text>
+                    </View>
+                    <View style={{ flex: 1 }}>
+                      <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+                        <Text style={styles.verifCheckTitle}>Connected Creator Platforms</Text>
+                        <Pressable onPress={() => setActiveSubTab('socials')}>
+                          <Text style={styles.verifEditLink}>Edit ➔</Text>
+                        </Pressable>
+                      </View>
+                      <Text style={styles.verifCheckSub}>
+                        TikTok ({tiktokHandle || '@pablo.creates'}), IG ({instagramHandle || '@pablocreates'}), YT, X
+                      </Text>
+                    </View>
+                  </View>
+
+                  <View style={styles.verifCheckDivider} />
+
+                  {/* Item 2: Streak */}
+                  <View style={styles.verifCheckItem}>
+                    <View style={styles.verifCheckIconCircle}>
+                      <Text style={styles.verifCheckMark}>✓</Text>
+                    </View>
+                    <View style={{ flex: 1 }}>
+                      <Text style={styles.verifCheckTitle}>7-Day Consistency Threshold</Text>
+                      <Text style={styles.verifCheckSub}>
+                        Active {initialProfile?.streakCount || 47}-Day Posting Streak • Verified by Jarvis AI 🔥
+                      </Text>
+                    </View>
+                  </View>
+
+                  <View style={styles.verifCheckDivider} />
+
+                  {/* Item 3: Bio & Niche */}
+                  <View style={styles.verifCheckItem}>
+                    <View style={styles.verifCheckIconCircle}>
+                      <Text style={styles.verifCheckMark}>✓</Text>
+                    </View>
+                    <View style={{ flex: 1 }}>
+                      <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+                        <Text style={styles.verifCheckTitle}>Niche &amp; Bio Authenticity</Text>
+                        <Pressable onPress={() => setActiveSubTab('profile')}>
+                          <Text style={styles.verifEditLink}>Edit ➔</Text>
+                        </Pressable>
+                      </View>
+                      <Text style={styles.verifCheckSub}>
+                        {niche || 'Tech & Lifestyle Creator • Lagos'} • 3 Target Niches
+                      </Text>
+                    </View>
+                  </View>
+
+                  <View style={styles.verifCheckDivider} />
+
+                  {/* Item 4: Verified Portfolio Link */}
+                  <View style={styles.verifCheckItem}>
+                    <View style={styles.verifCheckIconCircle}>
+                      <Text style={styles.verifCheckMark}>✓</Text>
+                    </View>
+                    <View style={{ flex: 1 }}>
+                      <Text style={styles.verifCheckTitle}>Verified Portfolio Reel Link</Text>
+                      <View style={styles.portfolioInputRow}>
+                        <TextInput
+                          value={portfolioUrl}
+                          onChangeText={setPortfolioUrl}
+                          placeholder="https://instagram.com/reel/your_reel"
+                          placeholderTextColor="#94A3B8"
+                          style={styles.portfolioInput}
+                          autoCapitalize="none"
+                        />
+                        <Pressable
+                          style={styles.portfolioSavePill}
+                          onPress={() => showToast('✓ Portfolio link updated & verified!')}
+                        >
+                          <Text style={styles.portfolioSavePillText}>Saved</Text>
+                        </Pressable>
+                      </View>
+                    </View>
+                  </View>
+
+                  <View style={styles.verifCheckDivider} />
+
+                  {/* Item 5: Squad Standing */}
+                  <View style={styles.verifCheckItem}>
+                    <View style={styles.verifCheckIconCircle}>
+                      <Text style={styles.verifCheckMark}>✓</Text>
+                    </View>
+                    <View style={{ flex: 1 }}>
+                      <Text style={styles.verifCheckTitle}>Squad Reputation Score</Text>
+                      <Text style={styles.verifCheckSub}>
+                        Momentum Makers • High Trust Collaborator Rating (⭐ 4.9)
+                      </Text>
+                    </View>
+                  </View>
+                </View>
+
+                {/* 3. WHAT VERIFICATION UNLOCKS (4 VALUE CARDS) */}
+                <Text style={styles.sectionHeaderTitle}>WHAT YOUR VERIFIED PASSPORT UNLOCKS</Text>
+                <View style={styles.verifPerksGrid}>
+                  <View style={styles.verifPerkCard}>
+                    <Text style={styles.verifPerkIcon}>💰</Text>
+                    <Text style={styles.verifPerkTitle}>Brand Bounties</Text>
+                    <Text style={styles.verifPerkSub}>$450 - $1,200 priority sponsorship deals</Text>
+                  </View>
+
+                  <View style={styles.verifPerkCard}>
+                    <Text style={styles.verifPerkIcon}>🚀</Text>
+                    <Text style={styles.verifPerkTitle}>2x Discovery</Text>
+                    <Text style={styles.verifPerkSub}>Top 2% ranking in Pro Match deck</Text>
+                  </View>
+
+                  <View style={styles.verifPerkCard}>
+                    <Text style={styles.verifPerkIcon}>🛡️</Text>
+                    <Text style={styles.verifPerkTitle}>Streak Shield</Text>
+                    <Text style={styles.verifPerkSub}>Automatic 7-day missed day protection</Text>
+                  </View>
+
+                  <View style={styles.verifPerkCard}>
+                    <Text style={styles.verifPerkIcon}>👑</Text>
+                    <Text style={styles.verifPerkTitle}>Gold Badge</Text>
+                    <Text style={styles.verifPerkSub}>Official verified checkmark on profile</Text>
+                  </View>
+                </View>
+
+                {/* 4. INSTANT VERIFICATION ACTION BUTTON */}
+                <Pressable
+                  style={styles.verifActionBtn}
+                  onPress={() => {
+                    if (Platform.OS !== 'web') {
+                      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+                    }
+                    setIsVerified(true);
+                    showToast('🎉 Creator Passport 100% Verified! Priority brand matching unlocked!');
+                  }}
+                >
+                  <LinearGradient
+                    colors={['#784DF0', '#582CDB']}
+                    style={styles.verifActionGradient}
+                  >
+                    <Text style={styles.verifActionBtnText}>
+                      {isVerified ? '✓ Creator Passport Verified (Active)' : '✨ Claim Verified Creator Passport ✦'}
+                    </Text>
+                  </LinearGradient>
+                </Pressable>
               </View>
             )}
 
@@ -1406,6 +1638,207 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontWeight: '800',
     color: '#DC2626',
+  },
+
+  // Verification Tab Styles
+  verifHeroCard: {
+    borderRadius: 18,
+    padding: 16,
+    marginBottom: 16,
+  },
+  verifHeroTopRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  verifAvatarWrap: {
+    position: 'relative',
+  },
+  verifAvatarImg: {
+    width: 46,
+    height: 46,
+    borderRadius: 23,
+    borderWidth: 2,
+    borderColor: '#F59E0B',
+  },
+  verifBadgeGold: {
+    position: 'absolute',
+    bottom: -2,
+    right: -2,
+    width: 18,
+    height: 18,
+    borderRadius: 9,
+    backgroundColor: '#F59E0B',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1.5,
+    borderColor: '#1A0C38',
+  },
+  verifHeroName: {
+    fontSize: 16,
+    fontWeight: '900',
+    color: '#FFFFFF',
+  },
+  verifStatusPill: {
+    backgroundColor: 'rgba(16, 185, 129, 0.2)',
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 4,
+    borderWidth: 1,
+    borderColor: 'rgba(16, 185, 129, 0.4)',
+  },
+  verifStatusPillText: {
+    fontSize: 8.5,
+    fontWeight: '900',
+    color: '#6EE7B7',
+  },
+  verifHeroSub: {
+    fontSize: 11,
+    color: '#D8B4FE',
+    marginTop: 2,
+  },
+  verifMeterLabel: {
+    fontSize: 9,
+    fontWeight: '900',
+    color: '#C084FC',
+    letterSpacing: 0.5,
+  },
+  verifMeterVal: {
+    fontSize: 10,
+    fontWeight: '900',
+    color: '#FDE68A',
+  },
+  verifMeterTrack: {
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    overflow: 'hidden',
+  },
+  verifMeterFill: {
+    height: '100%',
+    backgroundColor: '#F59E0B',
+  },
+  verifChecklistCard: {
+    backgroundColor: '#FAF8F5',
+    borderRadius: 16,
+    padding: 14,
+    borderWidth: 1,
+    borderColor: '#EFECE6',
+    marginBottom: 16,
+  },
+  verifCheckItem: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: 10,
+    paddingVertical: 4,
+  },
+  verifCheckIconCircle: {
+    width: 22,
+    height: 22,
+    borderRadius: 11,
+    backgroundColor: '#DCFCE7',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 1,
+  },
+  verifCheckMark: {
+    fontSize: 11,
+    fontWeight: '900',
+    color: '#15803D',
+  },
+  verifCheckTitle: {
+    fontSize: 12.5,
+    fontWeight: '900',
+    color: '#171420',
+  },
+  verifEditLink: {
+    fontSize: 10.5,
+    fontWeight: '800',
+    color: '#582CDB',
+  },
+  verifCheckSub: {
+    fontSize: 10.5,
+    color: '#64748B',
+    marginTop: 2,
+    lineHeight: 14,
+  },
+  verifCheckDivider: {
+    height: 1,
+    backgroundColor: '#F1EFE9',
+    marginVertical: 8,
+  },
+  portfolioInputRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginTop: 6,
+  },
+  portfolioInput: {
+    flex: 1,
+    height: 32,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    paddingHorizontal: 8,
+    fontSize: 11,
+    color: '#171420',
+  },
+  portfolioSavePill: {
+    backgroundColor: '#582CDB',
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 8,
+  },
+  portfolioSavePillText: {
+    fontSize: 10,
+    fontWeight: '900',
+    color: '#FFFFFF',
+  },
+  verifPerksGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+    marginBottom: 16,
+  },
+  verifPerkCard: {
+    width: '48%',
+    backgroundColor: '#FAF8F5',
+    borderRadius: 12,
+    padding: 10,
+    borderWidth: 1,
+    borderColor: '#EFECE6',
+  },
+  verifPerkIcon: {
+    fontSize: 16,
+    marginBottom: 2,
+  },
+  verifPerkTitle: {
+    fontSize: 11.5,
+    fontWeight: '900',
+    color: '#171420',
+  },
+  verifPerkSub: {
+    fontSize: 9.5,
+    color: '#64748B',
+    marginTop: 2,
+    lineHeight: 13,
+  },
+  verifActionBtn: {
+    borderRadius: 14,
+    overflow: 'hidden',
+    marginBottom: 10,
+  },
+  verifActionGradient: {
+    paddingVertical: 13,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  verifActionBtnText: {
+    fontSize: 13.5,
+    fontWeight: '900',
+    color: '#FFFFFF',
+    letterSpacing: 0.3,
   },
 
   // Footer Save Button

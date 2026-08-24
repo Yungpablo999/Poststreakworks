@@ -122,6 +122,7 @@ export const ProQuestsScreen: React.FC<ProQuestsScreenProps> = ({
   const [activeTab, setActiveTab] = useState<TabType>('quests');
   const [selectedQuestFilter, setSelectedQuestFilter] = useState<'all' | 'squad' | 'brand'>('all');
   const [showProfileModal, setShowProfileModal] = useState(false);
+  const [profileModalSubTab, setProfileModalSubTab] = useState<'profile' | 'socials' | 'verification' | 'settings'>('profile');
   const [showNotificationModal, setShowNotificationModal] = useState(false);
   const [showBrandQuestModal, setShowBrandQuestModal] = useState(false);
   const [showSquadQuestModal, setShowSquadQuestModal] = useState(false);
@@ -316,6 +317,7 @@ export const ProQuestsScreen: React.FC<ProQuestsScreenProps> = ({
                 if (Platform.OS !== 'web') {
                   Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                 }
+                setProfileModalSubTab('profile');
                 triggerModalPop();
                 setShowProfileModal(true);
               }}
@@ -668,11 +670,9 @@ export const ProQuestsScreen: React.FC<ProQuestsScreenProps> = ({
             <Pressable
               style={({ pressed }) => [styles.premiumQuestItemCard, pressed && styles.btnPressed]}
               onPress={() => {
-                if (onOpenPassport) onOpenPassport();
-                else {
-                  triggerModalPop();
-                  setShowProfileModal(true);
-                }
+                setProfileModalSubTab('verification');
+                triggerModalPop();
+                setShowProfileModal(true);
               }}
             >
               <View style={styles.brandIconCircleGray}>
@@ -1388,6 +1388,7 @@ export const ProQuestsScreen: React.FC<ProQuestsScreenProps> = ({
           onClose={() => setShowProfileModal(false)}
           onLogout={onLogout}
           initialProfile={userProfile}
+          initialSubTab={profileModalSubTab}
           onSaveProfile={(updated) => {
             if (onSaveProfile) onSaveProfile(updated);
           }}
