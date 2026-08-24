@@ -1063,7 +1063,10 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
 
                 {/* 4. PRO-GATED ACTION BUTTON */}
                 <Pressable
-                  style={styles.verifActionBtn}
+                  style={({ pressed }) => [
+                    styles.verifActionBtn,
+                    pressed && { opacity: 0.9, transform: [{ scale: 0.98 }] },
+                  ]}
                   onPress={() => {
                     if (Platform.OS !== 'web') {
                       Haptics.notificationAsync(
@@ -1080,12 +1083,12 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
                 >
                   <LinearGradient
                     colors={isPro ? ['#784DF0', '#582CDB'] : ['#F59E0B', '#D97706']}
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 1, y: 0 }}
                     style={styles.verifActionGradient}
                   >
-                    <Text style={styles.verifActionBtnText}>
-                      {isPro
-                        ? '✓ Creator Passport Verified (Active)'
-                        : '🔒 Unlock Verified Creator Passport (Upgrade to Pro ✦)'}
+                    <Text style={styles.verifActionBtnText} numberOfLines={1}>
+                      {isPro ? '✓ Verified Creator Passport (Active)' : '👑 Unlock Verification (Upgrade to Pro)'}
                     </Text>
                   </LinearGradient>
                 </Pressable>
@@ -1853,20 +1856,29 @@ const styles = StyleSheet.create({
     lineHeight: 13,
   },
   verifActionBtn: {
-    borderRadius: 14,
+    borderRadius: 16,
     overflow: 'hidden',
-    marginBottom: 10,
+    marginTop: 4,
+    marginBottom: 16,
+    shadowColor: '#D97706',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.18,
+    shadowRadius: 8,
+    elevation: 3,
   },
   verifActionGradient: {
-    paddingVertical: 13,
+    paddingVertical: 14,
+    paddingHorizontal: 16,
     alignItems: 'center',
     justifyContent: 'center',
+    flexDirection: 'row',
   },
   verifActionBtnText: {
     fontSize: 13.5,
     fontWeight: '900',
     color: '#FFFFFF',
-    letterSpacing: 0.3,
+    letterSpacing: 0.4,
+    textAlign: 'center',
   },
 
   // Footer Save Button
