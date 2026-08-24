@@ -1176,9 +1176,71 @@ export const ProEarningsScreen: React.FC<ProEarningsScreenProps> = ({
                   );
                 })()}
 
-                {/* HORIZONTAL SCROLLABLE LIVE GRAPH VIEWPORT */}
+                {/* CUSTOM VIEWPORT: DEDICATED PLATFORM COMPARISON BARS OR LIVE WAVE GRAPH */}
                 {(() => {
                   const curCfg = (EARNINGS_TIMEFRAME_CONFIGS as any)[earningsTimeframe] || (EARNINGS_TIMEFRAME_CONFIGS as any)['30D'];
+
+                  // 🌟 DEDICATED PLATFORM COMPARISON MULTI-BAR CHART VIEW
+                  if (expandedEarningsType === 'platformComp') {
+                    const maxPlatAmt = Math.max(...curCfg.platformSummary.map((p: any) => parseInt(p.amount.replace(/[^0-9]/g, '')) || 100));
+
+                    return (
+                      <View style={styles.platformCompChartContainer}>
+                        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+                          <Text style={styles.platformChartHeaderTitle}>REVENUE BY PLATFORM ({earningsTimeframe})</Text>
+                          <Text style={styles.platformChartHeaderSub}>Tap bar to inspect yield</Text>
+                        </View>
+
+                        {/* 4 Comparative Vertical Platform Columns */}
+                        <View style={styles.platformBarsRow}>
+                          {curCfg.platformSummary.map((plat: any, pIdx: number) => {
+                            const isSelected = selectedPlatformIndex === pIdx;
+                            const amtNum = parseInt(plat.amount.replace(/[^0-9]/g, '')) || 100;
+                            const barHeight = Math.max(36, Math.min(130, (amtNum / maxPlatAmt) * 125));
+
+                            return (
+                              <Pressable
+                                key={pIdx}
+                                style={[styles.platformBarCol, isSelected && styles.platformBarColSelected]}
+                                onPress={() => {
+                                  if (Platform.OS !== 'web') {
+                                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                                  }
+                                  setSelectedPlatformIndex(pIdx);
+                                }}
+                              >
+                                <Text style={[styles.platformBarAmtText, isSelected && { color: '#582CDB', fontWeight: '900' }]}>
+                                  {plat.amount}
+                                </Text>
+
+                                <View style={styles.platformBarTrack}>
+                                  <View
+                                    style={[
+                                      styles.platformBarFill,
+                                      {
+                                        height: barHeight,
+                                        backgroundColor: isSelected ? '#582CDB' : '#C4B5FD',
+                                      },
+                                    ]}
+                                  />
+                                </View>
+
+                                <View style={{ alignItems: 'center', marginTop: 8 }}>
+                                  <SocialBrandIcon platform={plat.icon} size={18} />
+                                  <Text style={[styles.platformBarLabel, isSelected && styles.platformBarLabelActive]}>
+                                    {plat.name.split(' ')[0]}
+                                  </Text>
+                                  <Text style={styles.platformBarPctText}>{plat.pct}</Text>
+                                </View>
+                              </Pressable>
+                            );
+                          })}
+                        </View>
+                      </View>
+                    );
+                  }
+
+                  // DEFAULT SCROLLABLE WAVE GRAPH FOR NET RATE, INCOME SOURCES & MONTHLY TREND
                   const vWidth = curCfg.viewportWidth;
                   const safeIdx = Math.min(selectedEarningsDayIndex, curCfg.daysCount - 1);
 
@@ -1267,6 +1329,84 @@ export const ProEarningsScreen: React.FC<ProEarningsScreenProps> = ({
                 {(() => {
                   const curCfg = (EARNINGS_TIMEFRAME_CONFIGS as any)[earningsTimeframe] || (EARNINGS_TIMEFRAME_CONFIGS as any)['30D'];
 
+                  // 🌟 PLATFORM COMPARISON DEDICATED BOTTOM BREAKDOWN
+                  if (expandedEarningsType === 'platformComp') {
+                    const selectedPlat = curCfg.platformSummary[selectedPlatformIndex] || curCfg.platformSummary[0];
+
+                    return (
+                      <View style={styles.audienceCleanBottomContainer}>
+                        {/* 2-Card Platform Vitals */}
+                        <View style={styles.audienceStatsDuoRow}>
+                          <View style={styles.audienceStatDuoCard}>
+                            <Text style={styles.audienceStatDuoLabel}>{selectedPlat.name.toUpperCase()} REVENUE</Text>
+                            <Text style={[styles.audienceStatDuoVal, { color: '#582CDB' }]}>
+                              {selectedPlat.amount}
+                            </Text>
+                            <Text style={styles.audienceStatDuoSub}>{selectedPlat.pct} of all income</Text>
+                          </View>
+                          <View style={styles.audienceStatDuoCard}>
+                            <Text style={styles.audienceStatDuoLabel}>MONETIZATION YIELD</Text>
+                            <Text style={[styles.audienceStatDuoVal, { color: '#10B981' }]}>
+                              {selectedPlat.rpm}
+                            </Text>
+                            <Text style={styles.audienceStatDuoSub}>{selectedPlat.deals}</Text>
+                          </View>
+                        </View>
+
+                        {/* All 4 Platforms Detailed List */}
+                        <View style={styles.audienceChannelsCard}>
+                          <Text style={styles.audienceChannelsTitle}>PLATFORM EARNINGS BREAKDOWN ({earningsTimeframe})</Text>
+
+                          {curCfg.platformSummary.map((plat: any, pIdx: number) => {
+                            const isSelected = selectedPlatformIndex === pIdx;
+                            return (
+                              <Pressable
+                                key={pIdx}
+                                style={[
+                                  styles.audienceChannelRow,
+                                  { paddingVertical: 8, paddingHorizontal: 6, borderRadius: 10 },
+                                  isSelected && { backgroundColor: '#F5F3FF' },
+                                ]}
+                                onPress={() => {
+                                  if (Platform.OS !== 'web') Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                                  setSelectedPlatformIndex(pIdx);
+                                }}
+                              >
+                                <SocialBrandIcon platform={plat.icon} size={22} />
+                                <View style={{ flex: 1, marginLeft: 10 }}>
+                                  <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 4 }}>
+                                    <Text style={[styles.audienceChannelName, isSelected && { color: '#582CDB', fontWeight: '900' }]}>
+                                      {plat.name}
+                                    </Text>
+                                    <Text style={styles.audienceChannelVal}>
+                                      {plat.amount} <Text style={styles.audienceChannelPct}>({plat.pct})</Text>
+                                    </Text>
+                                  </View>
+                                  <View style={styles.audienceChannelTrackBg}>
+                                    <View
+                                      style={[
+                                        styles.audienceChannelTrackFill,
+                                        { width: plat.pct, backgroundColor: isSelected ? '#582CDB' : '#A78BFA' },
+                                      ]}
+                                    />
+                                  </View>
+                                </View>
+                              </Pressable>
+                            );
+                          })}
+                        </View>
+
+                        {/* Jarvis Platform Arbitrage Insight */}
+                        <View style={styles.audienceInsightCallout}>
+                          <Text style={styles.audienceInsightCalloutText}>
+                            🎯 <Text style={{ fontWeight: '800', color: '#582CDB' }}>Platform Arbitrage Insight ({earningsTimeframe}):</Text> Instagram delivers your highest rate per viewer ($8.90 RPM). Re-allocating 1 short-form slot to an Instagram carousel package can lift monthly revenue by +$420.
+                          </Text>
+                        </View>
+                      </View>
+                    );
+                  }
+
+                  // DEFAULT BREAKDOWN (Net Rate, Income Sources, Monthly Trend)
                   return (
                     <View style={styles.audienceCleanBottomContainer}>
                       {/* Key Stats Duo */}
@@ -2004,6 +2144,82 @@ const styles = StyleSheet.create({
     borderRadius: 3.5,
     backgroundColor: '#10B981',
   },
+  /* PLATFORM COMPARISON DEDICATED BAR CHART */
+  platformCompChartContainer: {
+    backgroundColor: '#FAF8F5',
+    borderRadius: 20,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: '#EFECE6',
+    marginBottom: 12,
+  },
+  platformChartHeaderTitle: {
+    fontSize: 10,
+    fontWeight: '900',
+    color: '#64748B',
+    letterSpacing: 0.5,
+  },
+  platformChartHeaderSub: {
+    fontSize: 10,
+    fontWeight: '700',
+    color: '#582CDB',
+  },
+  platformBarsRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-end',
+    justifyContent: 'space-around',
+    height: 180,
+    paddingTop: 10,
+  },
+  platformBarCol: {
+    flex: 1,
+    alignItems: 'center',
+    paddingVertical: 6,
+    borderRadius: 14,
+  },
+  platformBarColSelected: {
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1,
+    borderColor: '#E9D5FF',
+    shadowColor: '#582CDB',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 6,
+  },
+  platformBarAmtText: {
+    fontSize: 12,
+    fontWeight: '800',
+    color: '#171420',
+    marginBottom: 6,
+  },
+  platformBarTrack: {
+    width: 24,
+    height: 120,
+    backgroundColor: '#EDE9FE',
+    borderRadius: 12,
+    justifyContent: 'flex-end',
+    overflow: 'hidden',
+  },
+  platformBarFill: {
+    width: '100%',
+    borderRadius: 12,
+  },
+  platformBarLabel: {
+    fontSize: 10.5,
+    fontWeight: '700',
+    color: '#64748B',
+    marginTop: 4,
+  },
+  platformBarLabelActive: {
+    color: '#582CDB',
+    fontWeight: '900',
+  },
+  platformBarPctText: {
+    fontSize: 9.5,
+    fontWeight: '700',
+    color: '#94A3B8',
+  },
+
   modalCardLarge: {
     width: '92%',
     maxWidth: 480,
