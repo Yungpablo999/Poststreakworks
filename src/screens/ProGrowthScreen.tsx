@@ -940,54 +940,6 @@ export const ProGrowthScreen: React.FC<ProGrowthScreenProps> = ({
           </Text>
 
           {/* ============================================================ */}
-          {/* CREATOR EARNINGS & MONETIZATION ENTRY CARD                   */}
-          {/* ============================================================ */}
-          <View style={styles.earningsHubCard}>
-            <View style={styles.earningsHubHeader}>
-              <View>
-                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-                  <Text style={styles.earningsHubTitle}>Creator Earnings</Text>
-                  <View style={styles.readinessTag}>
-                    <Text style={styles.readinessTagText}>94% SPONSOR READY</Text>
-                  </View>
-                </View>
-                <Text style={styles.earningsHubSub}>Build your path to paid brand campaigns</Text>
-              </View>
-              <View style={styles.earningsHubIconCircle}>
-                <Text style={{ fontSize: 18 }}>💰</Text>
-              </View>
-            </View>
-
-            <View style={styles.earningsHubStatsRow}>
-              <View style={styles.earningsHubStatCol}>
-                <Text style={styles.earningsHubStatLabel}>CURRENT BALANCE</Text>
-                <Text style={styles.earningsHubStatVal}>$2,450.00</Text>
-              </View>
-              <View style={styles.earningsHubDivider} />
-              <View style={styles.earningsHubStatCol}>
-                <Text style={styles.earningsHubStatLabel}>EST. TRACKED</Text>
-                <Text style={[styles.earningsHubStatVal, { color: '#582CDB' }]}>$5,800.00</Text>
-              </View>
-            </View>
-
-            <Pressable
-              style={({ pressed }) => [styles.earningsHubBtn, pressed && styles.btnPressed]}
-              onPress={() => {
-                if (Platform.OS !== 'web') {
-                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-                }
-                if (onOpenEarnings) {
-                  onOpenEarnings();
-                } else {
-                  showToast('Opening Creator Earnings...');
-                }
-              }}
-            >
-              <Text style={styles.earningsHubBtnText}>View Creator Earnings ➔</Text>
-            </Pressable>
-          </View>
-
-          {/* ============================================================ */}
           {/* CARD 1: GROWTH THIS 30D (Hero Analytics Card with Wave Graph)*/}
           {/* ============================================================ */}
           <Pressable
@@ -1274,6 +1226,54 @@ export const ProGrowthScreen: React.FC<ProGrowthScreenProps> = ({
                 </View>
               </Pressable>
             ))}
+          </View>
+
+          {/* ============================================================ */}
+          {/* CREATOR EARNINGS & MONETIZATION ENTRY CARD                   */}
+          {/* ============================================================ */}
+          <View style={styles.earningsHubCard}>
+            <View style={styles.earningsHubHeader}>
+              <View>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                  <Text style={styles.earningsHubTitle}>Creator Earnings</Text>
+                  <View style={styles.readinessTag}>
+                    <Text style={styles.readinessTagText}>94% SPONSOR READY</Text>
+                  </View>
+                </View>
+                <Text style={styles.earningsHubSub}>Build your path to paid brand campaigns</Text>
+              </View>
+              <View style={styles.earningsHubIconCircle}>
+                <Text style={{ fontSize: 18 }}>💰</Text>
+              </View>
+            </View>
+
+            <View style={styles.earningsHubStatsRow}>
+              <View style={styles.earningsHubStatCol}>
+                <Text style={styles.earningsHubStatLabel}>CURRENT BALANCE</Text>
+                <Text style={styles.earningsHubStatVal}>$2,450.00</Text>
+              </View>
+              <View style={styles.earningsHubDivider} />
+              <View style={styles.earningsHubStatCol}>
+                <Text style={styles.earningsHubStatLabel}>EST. TRACKED</Text>
+                <Text style={[styles.earningsHubStatVal, { color: '#582CDB' }]}>$5,800.00</Text>
+              </View>
+            </View>
+
+            <Pressable
+              style={({ pressed }) => [styles.earningsHubBtn, pressed && styles.btnPressed]}
+              onPress={() => {
+                if (Platform.OS !== 'web') {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                }
+                if (onOpenEarnings) {
+                  onOpenEarnings();
+                } else {
+                  showToast('Opening Creator Earnings...');
+                }
+              }}
+            >
+              <Text style={styles.earningsHubBtnText}>View Creator Earnings ➔</Text>
+            </Pressable>
           </View>
 
           {/* ============================================================ */}
