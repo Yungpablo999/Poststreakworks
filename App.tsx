@@ -98,6 +98,7 @@ export default function App() {
   // Creator Onboarding Data State
   const [selectedNiches, setSelectedNiches] = useState<string[]>(['lifestyle', 'comedy']);
   const [connectedPlatforms, setConnectedPlatforms] = useState<string[]>(['tiktok', 'instagram', 'youtube']);
+  const [matchInitialFilter, setMatchInitialFilter] = useState<'all' | 'priority' | 'niche' | 'streak' | 'nearby' | 'ai'>('priority');
   const [selectedIdeaTitle, setSelectedIdeaTitle] = useState('One thing I wish I knew before I started creating');
   const [composerIdeaTitle, setComposerIdeaTitle] = useState('One thing I wish I knew before I started creating');
   const [activeMessageThreadId, setActiveMessageThreadId] = useState<string | undefined>(undefined);
@@ -634,6 +635,7 @@ export default function App() {
         {currentScreen === 'match' && (
           (userProfile?.tier === 'pro' || userProfile?.tier === 'founding') ? (
             <ProMatchScreen
+              initialFilter={matchInitialFilter}
               onLogout={handleLogout}
               onOpenMessages={(threadId?: string) => {
                 setActiveMessageThreadId(threadId);
@@ -804,7 +806,10 @@ export default function App() {
               }}
               onOpenSquad={() => navigateTo('squad')}
               onOpenPassport={() => navigateTo('growth')}
-              onOpenOpportunities={() => navigateTo('growth')}
+              onOpenOpportunities={() => {
+                setMatchInitialFilter('priority');
+                navigateTo('match');
+              }}
               onSwitchToFree={() => {
                 setUserProfile(prev => ({ ...prev, tier: 'free' }));
               }}

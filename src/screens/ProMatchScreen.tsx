@@ -44,6 +44,7 @@ interface ProMatchScreenProps {
   onOpenSquad?: () => void;
   onOpenFindSquad?: () => void;
   onSwitchToFree?: () => void;
+  initialFilter?: 'all' | 'priority' | 'niche' | 'streak' | 'nearby' | 'ai';
   userProfile?: UserProfileData;
   onSaveProfile?: (updated: UserProfileData) => void;
 }
@@ -80,6 +81,8 @@ interface CreatorCardData {
   whyMatchDesc: string;
   potentialBoostText: string;
   proposedConcept: CollabConcept;
+  isPriorityCrown?: boolean;
+  crownBadgeText?: string;
 }
 
 const DECK_CREATORS: CreatorCardData[] = [
@@ -99,6 +102,8 @@ const DECK_CREATORS: CreatorCardData[] = [
     matchScore: 96,
     activeStatus: 'Active today (Posted 2h ago)',
     isTracked: true,
+    isPriorityCrown: true,
+    crownBadgeText: '👑 TOP 2% PRIORITY MATCH',
     audienceFit: 94,
     formatSynergy: 98,
     reliability: 92,
@@ -132,6 +137,8 @@ const DECK_CREATORS: CreatorCardData[] = [
     matchScore: 94,
     activeStatus: 'Active today (Posted 4h ago)',
     isTracked: false,
+    isPriorityCrown: true,
+    crownBadgeText: '👑 TOP 2% PRIORITY MATCH',
     audienceFit: 92,
     formatSynergy: 96,
     reliability: 95,
@@ -165,6 +172,8 @@ const DECK_CREATORS: CreatorCardData[] = [
     matchScore: 91,
     activeStatus: 'Active today (Posted 1h ago)',
     isTracked: false,
+    isPriorityCrown: true,
+    crownBadgeText: '👑 PRIORITY MATCH',
     audienceFit: 88,
     formatSynergy: 94,
     reliability: 96,
@@ -198,6 +207,8 @@ const DECK_CREATORS: CreatorCardData[] = [
     matchScore: 95,
     activeStatus: 'Active today (Posted 5h ago)',
     isTracked: false,
+    isPriorityCrown: true,
+    crownBadgeText: '👑 TOP 2% PRIORITY MATCH',
     audienceFit: 96,
     formatSynergy: 95,
     reliability: 98,
@@ -285,12 +296,21 @@ export const ProMatchScreen: React.FC<ProMatchScreenProps> = ({
   onOpenSquad,
   onOpenFindSquad,
   onSwitchToFree,
+  initialFilter = 'priority',
   userProfile,
   onSaveProfile,
 }) => {
   const [activeTab, setActiveTab] = useState<TabType>('match');
   const [segmentTab, setSegmentTab] = useState<'deck' | 'requests' | 'tracked' | 'connected'>('deck');
-  const [activeFilter, setActiveFilter] = useState<'all' | 'niche' | 'streak' | 'nearby' | 'ai'>('niche');
+  const [activeFilter, setActiveFilter] = useState<'all' | 'priority' | 'niche' | 'streak' | 'nearby' | 'ai'>(
+    initialFilter || 'priority'
+  );
+
+  useEffect(() => {
+    if (initialFilter) {
+      setActiveFilter(initialFilter);
+    }
+  }, [initialFilter]);
   const [matchesLeft, setMatchesLeft] = useState(5);
 
   // Deck & Lists
@@ -914,6 +934,7 @@ export const ProMatchScreen: React.FC<ProMatchScreenProps> = ({
               {/* FILTER PILLS ROW */}
               <View style={styles.filterPillsRow}>
                 {[
+                  { id: 'priority', label: '👑 Priority Matches' },
                   { id: 'niche', label: 'Same Niche' },
                   { id: 'streak', label: 'Similar Streak' },
                   { id: 'nearby', label: 'Nearby' },
@@ -995,10 +1016,19 @@ export const ProMatchScreen: React.FC<ProMatchScreenProps> = ({
 
                       {/* Top Badges Overlay */}
                       <View style={styles.cardTopOverlay}>
-                        {/* Left: Active Today */}
-                        <View style={styles.activeTodayPill}>
-                          <View style={styles.greenPulseDot} />
-                          <Text style={styles.activeTodayText}>🟢 {currentCreator.activeStatus}</Text>
+                        {/* Left: Active Today & Priority Crown Pill */}
+                        <View style={{ flexDirection: 'column', gap: 4, alignItems: 'flex-start' }}>
+                          {currentCreator.isPriorityCrown && (
+                            <View style={styles.priorityCrownCardPill}>
+                              <Text style={styles.priorityCrownCardPillText}>
+                                {currentCreator.crownBadgeText || '👑 TOP 2% PRIORITY MATCH'}
+                              </Text>
+                            </View>
+                          )}
+                          <View style={styles.activeTodayPill}>
+                            <View style={styles.greenPulseDot} />
+                            <Text style={styles.activeTodayText}>🟢 {currentCreator.activeStatus}</Text>
+                          </View>
                         </View>
 
                         {/* Right: Track + Info Buttons */}
@@ -1032,10 +1062,15 @@ export const ProMatchScreen: React.FC<ProMatchScreenProps> = ({
 
                       {/* Bottom Content Overlay */}
                       <View style={styles.cardBottomContent}>
-                        {/* Name & Streak Row */}
+                        {/* Name & Streak Row with Priority Crown */}
                         <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
                           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, flex: 1 }}>
                             <Text style={styles.creatorNameText}>{currentCreator.name}</Text>
+                            {currentCreator.isPriorityCrown && (
+                              <View style={styles.crownEmblemBox}>
+                                <Text style={{ fontSize: 14 }}>👑</Text>
+                              </View>
+                            )}
                             <View style={styles.verifiedCheckCircle}>
                               <Text style={{ fontSize: 10, color: '#FFFFFF', fontWeight: '900' }}>✓</Text>
                             </View>
@@ -2250,6 +2285,47 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     zIndex: 5,
+  },
+  crownEmblemBox: {
+    backgroundColor: '#FEF3C7',
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: '#FDE68A',
+  },
+  priorityCrownCardPill: {
+    backgroundColor: 'rgba(245, 158, 11, 0.95)',
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 6,
+    shadowColor: '#F59E0B',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.4,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  priorityCrownCardPillText: {
+    fontSize: 9,
+    fontWeight: '900',
+    color: '#FFFFFF',
+    letterSpacing: 0.4,
+  },
+  priorityBannerRibbon: {
+    backgroundColor: '#FEF3C7',
+    borderRadius: 10,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    marginBottom: 8,
+    borderWidth: 1,
+    borderColor: '#FDE68A',
+  },
+  priorityBannerText: {
+    fontSize: 11,
+    color: '#78350F',
+    fontWeight: '700',
   },
   activeTodayPill: {
     flexDirection: 'row',
