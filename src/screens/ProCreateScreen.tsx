@@ -333,7 +333,7 @@ export const ProCreateScreen: React.FC<ProCreateScreenProps> = ({
               ]}
             >
               <Image
-                source={require('../../assets/images/jarvis-core-flame.png')}
+                source={require('../../assets/images/jarvis-ghost-clean.png')}
                 style={styles.headerGhostLogo}
                 resizeMode="contain"
               />

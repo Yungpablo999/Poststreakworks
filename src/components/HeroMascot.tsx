@@ -261,7 +261,7 @@ export const HeroMascot: React.FC = () => {
         >
           {/* PROMINENT STANDALONE 3D GHOST FLAME MASCOT */}
           <Image
-            source={require('../../assets/images/jarvis-core-flame.png')}
+            source={require('../../assets/images/jarvis-ghost-clean.png')}
             style={{
               width: ghostSize,
               height: ghostSize,

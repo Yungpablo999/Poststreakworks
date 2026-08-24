@@ -477,7 +477,7 @@ export const AudienceBreakdownScreen: React.FC<AudienceBreakdownScreenProps> = (
               ]}
             >
               <Image
-                source={require('../../assets/images/jarvis-core-flame.png')}
+                source={require('../../assets/images/jarvis-ghost-clean.png')}
                 style={styles.headerGhostLogo}
                 resizeMode="contain"
               />

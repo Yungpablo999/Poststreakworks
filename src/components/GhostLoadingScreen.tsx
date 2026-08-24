@@ -156,7 +156,7 @@ export const GhostLoadingScreen: React.FC<GhostLoadingScreenProps> = ({
             ]}
           >
             <Image
-              source={require('../../assets/images/jarvis-core-flame.png')}
+              source={require('../../assets/images/jarvis-ghost-clean.png')}
               style={styles.ghostLogoImage}
               resizeMode="contain"
             />

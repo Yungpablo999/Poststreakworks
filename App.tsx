@@ -108,7 +108,7 @@ export default function App() {
     bio: 'Consistency is my superpower. Building a 100-day creator streak with Jarvis AI.',
     niche: 'Tech & Lifestyle Creator • Lagos',
     avatarId: 'ghost',
-    avatarSource: require('./assets/images/jarvis-core-flame.png'),
+    avatarSource: require('./assets/images/jarvis-ghost-clean.png'),
     tier: 'pro',
     streakCount: 47,
     level: 5,
