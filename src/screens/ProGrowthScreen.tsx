@@ -195,6 +195,18 @@ const TIMEFRAME_CONFIGS = {
       { text: 'Sun (May 30)', x: 380 },
     ],
     stepSpacing: 65,
+    formatSummary: {
+      topFormat: 'Talking Reels (48% Reach)',
+      topConversion: 'Carousels (8.4% Saves)',
+      avgEngagement: '8.6%',
+      insight: 'This week, 7-slide Carousels outperformed static posts by 3.8x in bookmarks.',
+      formats: [
+        { name: 'Talking Reels', icon: '🎥', reach: '18.4K', barHeight: 85, color: '#582CDB', retention: '74%', saveRate: '4.8%', delta: '+280 Fans' },
+        { name: 'Carousels', icon: '📑', reach: '14.2K', barHeight: 70, color: '#7C3AED', retention: '82%', saveRate: '8.4% (Top Saves 🔥)', delta: '+210 Fans' },
+        { name: 'Shorts', icon: '▶️', reach: '11.8K', barHeight: 55, color: '#CA8A04', retention: '70%', saveRate: '3.6%', delta: '+120 Fans' },
+        { name: 'Text / X', icon: '💬', reach: '8.5K', barHeight: 40, color: '#64748B', retention: '65%', saveRate: '4.2%', delta: '+70 Fans' },
+      ],
+    },
     reachSummary: {
       total: '34.8K',
       delta: '+12.4% vs last week',
@@ -271,6 +283,18 @@ const TIMEFRAME_CONFIGS = {
       { text: 'May 30', x: 570 },
     ],
     stepSpacing: 44,
+    formatSummary: {
+      topFormat: 'Talking Reels (50% Reach)',
+      topConversion: 'Carousels (8.6% Saves)',
+      avgEngagement: '9.1%',
+      insight: 'Two-week sprint shows talking storytelling clips have 91% 3-second hook retention.',
+      formats: [
+        { name: 'Talking Reels', icon: '🎥', reach: '22.6K', barHeight: 90, color: '#582CDB', retention: '76%', saveRate: '5.1%', delta: '+560 Fans' },
+        { name: 'Carousels', icon: '📑', reach: '16.8K', barHeight: 75, color: '#7C3AED', retention: '85%', saveRate: '8.6% (Top Saves 🔥)', delta: '+430 Fans' },
+        { name: 'Shorts', icon: '▶️', reach: '13.4K', barHeight: 58, color: '#CA8A04', retention: '72%', saveRate: '3.8%', delta: '+240 Fans' },
+        { name: 'Text / X', icon: '💬', reach: '9.8K', barHeight: 42, color: '#64748B', retention: '68%', saveRate: '4.5%', delta: '+120 Fans' },
+      ],
+    },
     reachSummary: {
       total: '68.4K',
       delta: '+18.6% vs last 14d',
@@ -348,6 +372,18 @@ const TIMEFRAME_CONFIGS = {
       { text: 'May 30', x: 890 },
     ],
     stepSpacing: 31.5,
+    formatSummary: {
+      topFormat: 'Talking Reels (54% Reach)',
+      topConversion: 'Carousels (9.2% Saves)',
+      avgEngagement: '9.8%',
+      insight: 'Storytelling Reels + Carousel breakdowns produced 82% of all inbound brand inquiries.',
+      formats: [
+        { name: 'Talking Reels', icon: '🎥', reach: '28.4K', barHeight: 95, color: '#582CDB', retention: '78%', saveRate: '5.4%', delta: '+1,120 Fans' },
+        { name: 'Carousels', icon: '📑', reach: '19.2K', barHeight: 80, color: '#7C3AED', retention: '88%', saveRate: '9.2% (Top Saves 🔥)', delta: '+840 Fans' },
+        { name: 'Shorts', icon: '▶️', reach: '15.8K', barHeight: 62, color: '#CA8A04', retention: '75%', saveRate: '4.1%', delta: '+360 Fans' },
+        { name: 'Text / X', icon: '💬', reach: '11.2K', barHeight: 45, color: '#64748B', retention: '72%', saveRate: '4.9%', delta: '+160 Fans' },
+      ],
+    },
     reachSummary: {
       total: '131.0K',
       delta: '+28.4% vs last month',
@@ -424,6 +460,18 @@ const TIMEFRAME_CONFIGS = {
       { text: 'May W4', x: 740 },
     ],
     stepSpacing: 65,
+    formatSummary: {
+      topFormat: 'Talking Reels (58% Reach)',
+      topConversion: 'Carousels (9.6% Saves)',
+      avgEngagement: '10.4%',
+      insight: 'Quarterly macro review shows video-first portfolio generates 4.2x higher algorithm momentum.',
+      formats: [
+        { name: 'Talking Reels', icon: '🎥', reach: '34.8K', barHeight: 100, color: '#582CDB', retention: '82%', saveRate: '5.8%', delta: '+3,240 Fans' },
+        { name: 'Carousels', icon: '📑', reach: '24.6K', barHeight: 85, color: '#7C3AED', retention: '92%', saveRate: '9.6% (Top Saves 🔥)', delta: '+2,380 Fans' },
+        { name: 'Shorts', icon: '▶️', reach: '19.4K', barHeight: 68, color: '#CA8A04', retention: '78%', saveRate: '4.4%', delta: '+820 Fans' },
+        { name: 'Text / X', icon: '💬', reach: '14.8K', barHeight: 48, color: '#64748B', retention: '76%', saveRate: '5.2%', delta: '+400 Fans' },
+      ],
+    },
     reachSummary: {
       total: '368.0K',
       delta: '+42.1% quarterly growth',
@@ -518,7 +566,8 @@ export const ProGrowthScreen: React.FC<ProGrowthScreenProps> = ({
   const [showPostDetailModal, setShowPostDetailModal] = useState(false);
   const [selectedPostTitle, setSelectedPostTitle] = useState('3 creator mistakes to avoid...');
   const [showExpandedGraphModal, setShowExpandedGraphModal] = useState(false);
-  const [expandedGraphType, setExpandedGraphType] = useState<'growth30d' | 'audience'>('growth30d');
+  const [expandedGraphType, setExpandedGraphType] = useState<'growth30d' | 'audience' | 'contentFormat'>('growth30d');
+  const [selectedFormatIndex, setSelectedFormatIndex] = useState<number>(0);
   const [selectedGraphDayIndex, setSelectedGraphDayIndex] = useState(29);
   const [graphTimeframe, setGraphTimeframe] = useState<'7D' | '14D' | '30D' | '90D'>('30D');
   const [toastMessage, setToastMessage] = useState<string | null>(null);
@@ -961,10 +1010,25 @@ export const ProGrowthScreen: React.FC<ProGrowthScreenProps> = ({
           </Pressable>
 
           {/* ============================================================ */}
-          {/* CARD 4: CONTENT FORMAT PERFORMANCE                           */}
+          {/* CARD 4: CONTENT FORMAT PERFORMANCE (TAP TO EXPAND)            */}
           {/* ============================================================ */}
-          <View style={styles.contentFormatCard}>
-            <Text style={styles.contentFormatTitle}>Content Format Performance</Text>
+          <Pressable
+            style={({ pressed }) => [styles.contentFormatCard, pressed && styles.btnPressed]}
+            onPress={() => {
+              if (Platform.OS !== 'web') {
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              }
+              setExpandedGraphType('contentFormat');
+              triggerModalPop();
+              setShowExpandedGraphModal(true);
+            }}
+          >
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+              <Text style={styles.contentFormatTitle}>Content Format Performance</Text>
+              <View style={styles.expandHintBadge}>
+                <Text style={styles.expandHintBadgeText}>Compare Formats 🔍</Text>
+              </View>
+            </View>
 
             {/* 4-Column Bar Chart */}
             <View style={styles.barsGroupRow}>
@@ -1001,7 +1065,7 @@ export const ProGrowthScreen: React.FC<ProGrowthScreenProps> = ({
                 </Text>
               </View>
             </View>
-          </View>
+          </Pressable>
 
           {/* ============================================================ */}
           {/* SECTION 5: TOP POSTS ANALYSIS                                */}
@@ -1228,13 +1292,19 @@ export const ProGrowthScreen: React.FC<ProGrowthScreenProps> = ({
                   <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 2 }}>
                     <View style={styles.liveGreenPulseDot} />
                     <Text style={styles.modalTitle}>
-                      {expandedGraphType === 'growth30d' ? '30-Day Growth Velocity & Reach' : '144.3K Total Audience Surge'}
+                      {expandedGraphType === 'growth30d'
+                        ? '30-Day Growth Velocity & Reach'
+                        : expandedGraphType === 'audience'
+                        ? '144.3K Total Audience Surge'
+                        : 'Content Format ROI & Conversion'}
                     </Text>
                   </View>
                   <Text style={styles.modalSubtitle}>
                     {expandedGraphType === 'growth30d'
                       ? 'Live multi-point analytics stream • May 2024'
-                      : 'Cross-platform audience expansion & subscriber velocity'}
+                      : expandedGraphType === 'audience'
+                      ? 'Cross-platform audience expansion & subscriber velocity'
+                      : 'Retention, viral reach, saves & follower conversion benchmarks'}
                   </Text>
                 </View>
                 <Pressable onPress={() => setShowExpandedGraphModal(false)} style={styles.modalCloseCircle} hitSlop={8}>
@@ -1267,7 +1337,34 @@ export const ProGrowthScreen: React.FC<ProGrowthScreenProps> = ({
 
               {/* Active Point Live Inspection Banner */}
               {(() => {
-                const curCfg = TIMEFRAME_CONFIGS[graphTimeframe] || TIMEFRAME_CONFIGS['30D'];
+                const curCfg = (TIMEFRAME_CONFIGS as any)[graphTimeframe] || (TIMEFRAME_CONFIGS as any)['30D'];
+
+                if (expandedGraphType === 'contentFormat') {
+                  const fmt = curCfg.formatSummary.formats[selectedFormatIndex] || curCfg.formatSummary.formats[0];
+                  return (
+                    <View style={styles.graphActivePointCard}>
+                      <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', gap: 10 }}>
+                        <View style={{ flex: 1, minWidth: 0 }}>
+                          <Text style={styles.graphActivePointDate} numberOfLines={1} ellipsizeMode="tail">
+                            {fmt.icon} {fmt.name}
+                          </Text>
+                          <Text style={styles.graphActivePointSub} numberOfLines={1} ellipsizeMode="tail">
+                            Save Rate: {fmt.saveRate} • Ret: {fmt.retention}
+                          </Text>
+                        </View>
+                        <View style={{ alignItems: 'flex-end', flexShrink: 0 }}>
+                          <Text style={styles.graphActivePointValue} numberOfLines={1}>
+                            {fmt.reach} Avg Reach
+                          </Text>
+                          <Text style={styles.graphActivePointDelta} numberOfLines={1}>
+                            {fmt.delta} ({graphTimeframe})
+                          </Text>
+                        </View>
+                      </View>
+                    </View>
+                  );
+                }
+
                 const safeIdx = Math.min(selectedGraphDayIndex, curCfg.daysCount - 1);
                 const activePt = curCfg.getPoint(safeIdx, expandedGraphType);
 
@@ -1302,9 +1399,61 @@ export const ProGrowthScreen: React.FC<ProGrowthScreenProps> = ({
                 </Text>
               </View>
 
-              {/* HORIZONTAL SCROLLABLE LIVE GRAPH */}
+              {/* HORIZONTAL SCROLLABLE LIVE GRAPH / BAR COMPARISON VIEWPORT */}
               {(() => {
-                const curCfg = TIMEFRAME_CONFIGS[graphTimeframe] || TIMEFRAME_CONFIGS['30D'];
+                const curCfg = (TIMEFRAME_CONFIGS as any)[graphTimeframe] || (TIMEFRAME_CONFIGS as any)['30D'];
+
+                if (expandedGraphType === 'contentFormat') {
+                  const fmts = curCfg.formatSummary.formats;
+                  return (
+                    <View style={styles.horizontalGraphViewport}>
+                      <View style={{ width: '100%', paddingVertical: 8, paddingHorizontal: 4 }}>
+                        <Text style={{ fontSize: 10, fontWeight: '800', color: '#94A3B8', textAlign: 'center', marginBottom: 12 }}>
+                          📊 Tap any format bar to inspect retention &amp; reach benchmarks
+                        </Text>
+                        <View style={{ flexDirection: 'row', justifyContent: 'space-around', alignItems: 'flex-end', height: 130, paddingBottom: 6 }}>
+                          {fmts.map((f: any, fIdx: number) => {
+                            const isChosen = selectedFormatIndex === fIdx;
+                            return (
+                              <Pressable
+                                key={fIdx}
+                                style={{ alignItems: 'center', flex: 1 }}
+                                onPress={() => {
+                                  if (Platform.OS !== 'web') {
+                                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                                  }
+                                  setSelectedFormatIndex(fIdx);
+                                }}
+                              >
+                                <Text style={{ fontSize: 10, fontWeight: '800', color: isChosen ? f.color : '#64748B', marginBottom: 4 }}>
+                                  {f.reach}
+                                </Text>
+                                <View
+                                  style={{
+                                    width: 38,
+                                    height: f.barHeight,
+                                    backgroundColor: isChosen ? f.color : '#E2E8F0',
+                                    borderRadius: 10,
+                                    borderWidth: isChosen ? 2 : 0,
+                                    borderColor: '#FFFFFF',
+                                    shadowColor: isChosen ? f.color : 'transparent',
+                                    shadowOffset: { width: 0, height: 2 },
+                                    shadowOpacity: 0.3,
+                                    shadowRadius: 4,
+                                  }}
+                                />
+                                <Text style={{ fontSize: 10.5, fontWeight: isChosen ? '900' : '700', color: isChosen ? '#171420' : '#64748B', marginTop: 8 }}>
+                                  {f.name.split(' ')[0]}
+                                </Text>
+                              </Pressable>
+                            );
+                          })}
+                        </View>
+                      </View>
+                    </View>
+                  );
+                }
+
                 const vWidth = curCfg.viewportWidth;
                 const safeIdx = Math.min(selectedGraphDayIndex, curCfg.daysCount - 1);
 
@@ -1398,7 +1547,7 @@ export const ProGrowthScreen: React.FC<ProGrowthScreenProps> = ({
 
                         {/* X-Axis Date Labels */}
                         <View style={styles.xAxisLabelsRow}>
-                          {curCfg.labels.map((lbl, lIdx) => (
+                          {curCfg.labels.map((lbl: any, lIdx: number) => (
                             <Text key={lIdx} style={[styles.xAxisLabelText, { left: lbl.x }]}>
                               {lbl.text}
                             </Text>
@@ -1412,9 +1561,61 @@ export const ProGrowthScreen: React.FC<ProGrowthScreenProps> = ({
 
               {/* DEDICATED CLEAN AREA UNDER GRAPH (DYNAMICALLY UPDATING BY TIMEFRAME) */}
               {(() => {
-                const curCfg = TIMEFRAME_CONFIGS[graphTimeframe] || TIMEFRAME_CONFIGS['30D'];
+                const curCfg = (TIMEFRAME_CONFIGS as any)[graphTimeframe] || (TIMEFRAME_CONFIGS as any)['30D'];
 
-                if (expandedGraphType === 'audience') {
+                if (expandedGraphType === 'contentFormat') {
+                  const fmtSum = curCfg.formatSummary;
+                  return (
+                    <View style={styles.audienceCleanBottomContainer}>
+                      {/* 2 Key Stats Duo */}
+                      <View style={styles.audienceStatsDuoRow}>
+                        <View style={styles.audienceStatDuoCard}>
+                          <Text style={styles.audienceStatDuoLabel}>TOP REACH FORMAT</Text>
+                          <Text style={[styles.audienceStatDuoVal, { color: '#582CDB' }]}>
+                            {fmtSum.topFormat.split(' ')[0]}
+                          </Text>
+                          <Text style={styles.audienceStatDuoSub}>{fmtSum.topFormat}</Text>
+                        </View>
+                        <View style={styles.audienceStatDuoCard}>
+                          <Text style={styles.audienceStatDuoLabel}>TOP SAVES &amp; BOOKMARKS</Text>
+                          <Text style={[styles.audienceStatDuoVal, { color: '#10B981' }]}>
+                            {fmtSum.topConversion.split(' ')[0]}
+                          </Text>
+                          <Text style={styles.audienceStatDuoSub}>{fmtSum.topConversion}</Text>
+                        </View>
+                      </View>
+
+                      {/* Format Detail Rows */}
+                      <View style={styles.audienceChannelsCard}>
+                        <Text style={styles.audienceChannelsTitle}>FORMAT CONVERSION BREAKDOWN ({graphTimeframe})</Text>
+
+                        {fmtSum.formats.map((f: any, fIdx: number) => (
+                          <View key={fIdx} style={styles.audienceChannelRow}>
+                            <View style={{ width: 28, height: 28, borderRadius: 8, backgroundColor: '#FAF8F5', justifyContent: 'center', alignItems: 'center' }}>
+                              <Text style={{ fontSize: 16 }}>{f.icon}</Text>
+                            </View>
+                            <View style={{ flex: 1, marginLeft: 10 }}>
+                              <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 4 }}>
+                                <Text style={styles.audienceChannelName}>{f.name}</Text>
+                                <Text style={styles.audienceChannelVal}>{f.reach} <Text style={styles.audienceChannelPct}>({f.retention} Ret)</Text></Text>
+                              </View>
+                              <View style={styles.audienceChannelTrackBg}>
+                                <View style={[styles.audienceChannelTrackFill, { width: `${f.barHeight}%`, backgroundColor: f.color }]} />
+                              </View>
+                            </View>
+                          </View>
+                        ))}
+                      </View>
+
+                      {/* Clean Insight Callout */}
+                      <View style={styles.audienceInsightCallout}>
+                        <Text style={styles.audienceInsightCalloutText}>
+                          ⚡ <Text style={{ fontWeight: '800', color: '#582CDB' }}>Format Strategy ({graphTimeframe}):</Text> {fmtSum.insight}
+                        </Text>
+                      </View>
+                    </View>
+                  );
+                } else if (expandedGraphType === 'audience') {
                   const aud = curCfg.audienceSummary;
                   return (
                     /* LUXURY CLEAN AUDIENCE EXPANSION VIEW (TIMEFRAME DYNAMIC) */
