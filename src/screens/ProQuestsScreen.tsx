@@ -358,40 +358,58 @@ export const ProQuestsScreen: React.FC<ProQuestsScreenProps> = ({
             Complete Pro missions to level up your Creator Passport, unlock brand deals, and lead your squad.
           </Text>
 
-          {/* FILTER PILLS: All Quests | Squad | Brand */}
+          {/* FILTER PILLS: All Quests | Squad (2) | Brand (4) */}
           <View style={styles.questFilterRow}>
             <Pressable
-              onPress={() => setSelectedQuestFilter('all')}
+              onPress={() => {
+                if (Platform.OS !== 'web') {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                }
+                setSelectedQuestFilter('all');
+              }}
               style={[styles.questFilterPill, selectedQuestFilter === 'all' && styles.questFilterPillActive]}
             >
               <Text style={[styles.questFilterText, selectedQuestFilter === 'all' && styles.questFilterTextActive]}>
-                All Quests
+                ✨ All Quests
               </Text>
             </Pressable>
 
             <Pressable
-              onPress={() => setSelectedQuestFilter('squad')}
+              onPress={() => {
+                if (Platform.OS !== 'web') {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                }
+                setSelectedQuestFilter('squad');
+              }}
               style={[styles.questFilterPill, selectedQuestFilter === 'squad' && styles.questFilterPillActive]}
             >
               <Text style={[styles.questFilterText, selectedQuestFilter === 'squad' && styles.questFilterTextActive]}>
-                Squad
+                🛡️ Squad (2)
               </Text>
             </Pressable>
 
             <Pressable
-              onPress={() => setSelectedQuestFilter('brand')}
+              onPress={() => {
+                if (Platform.OS !== 'web') {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                }
+                setSelectedQuestFilter('brand');
+              }}
               style={[styles.questFilterPill, selectedQuestFilter === 'brand' && styles.questFilterPillActive]}
             >
               <Text style={[styles.questFilterText, selectedQuestFilter === 'brand' && styles.questFilterTextActive]}>
-                Brand
+                💼 Brand (4)
               </Text>
             </Pressable>
           </View>
 
           {/* ============================================================ */}
-          {/* CARD 1: TODAY'S PRO QUEST                                    */}
+          {/* ALL QUESTS EXCLUSIVE SECTIONS                                 */}
           {/* ============================================================ */}
-          <View style={styles.todayProQuestCard}>
+          {selectedQuestFilter === 'all' && (
+            <>
+              {/* CARD 1: TODAY'S PRO QUEST */}
+              <View style={styles.todayProQuestCard}>
             <View style={styles.todayQuestTagBox}>
               <Text style={styles.todayQuestTagText}>TODAY&apos;S PRO QUEST</Text>
             </View>
@@ -515,9 +533,24 @@ export const ProQuestsScreen: React.FC<ProQuestsScreenProps> = ({
             </View>
           </View>
 
+            </>
+          )}
+
           {/* ============================================================ */}
-          {/* CARD 4: SQUAD QUEST                                          */}
+          {/* SQUAD QUESTS SECTION                                         */}
           {/* ============================================================ */}
+          {(selectedQuestFilter === 'all' || selectedQuestFilter === 'squad') && (
+            <>
+              {/* SQUAD FILTER BANNER */}
+              {selectedQuestFilter === 'squad' && (
+                <View style={styles.filterActiveBanner}>
+                  <Text style={styles.filterActiveBannerText}>
+                    🛡️ <Text style={{ fontWeight: '900', color: '#582CDB' }}>SQUAD QUESTS & LIVE DUELS</Text> • 2 Active Challenges
+                  </Text>
+                </View>
+              )}
+
+              {/* CARD 4: SQUAD QUEST */}
           <View style={styles.squadQuestCard}>
             <View style={styles.squadQuestHeaderRow}>
               <View style={styles.squadQuestPill}>
@@ -612,10 +645,27 @@ export const ProQuestsScreen: React.FC<ProQuestsScreenProps> = ({
             </Pressable>
           </View>
 
+            </>
+          )}
+
           {/* ============================================================ */}
-          {/* SECTION 6: PREMIUM QUESTS                                    */}
+          {/* BRAND OPPORTUNITIES & SPONSORSHIPS SECTION                   */}
           {/* ============================================================ */}
-          <Text style={styles.premiumQuestsSectionHeader}>Premium Quests</Text>
+          {(selectedQuestFilter === 'all' || selectedQuestFilter === 'brand') && (
+            <>
+              {/* BRAND FILTER BANNER */}
+              {selectedQuestFilter === 'brand' && (
+                <View style={styles.filterActiveBanner}>
+                  <Text style={styles.filterActiveBannerText}>
+                    💼 <Text style={{ fontWeight: '900', color: '#B45309' }}>VERIFIED BRAND BOUNTIES</Text> • 4 Active Opportunities
+                  </Text>
+                </View>
+              )}
+
+              {/* SECTION 6: PREMIUM BRAND QUESTS */}
+              <Text style={styles.premiumQuestsSectionHeader}>
+                {selectedQuestFilter === 'brand' ? 'Active Brand Campaigns & Quests' : 'Premium Quests'}
+              </Text>
 
           <View style={{ gap: 8, marginBottom: 16 }}>
             {/* Quest 1: Milestone */}
@@ -744,10 +794,16 @@ export const ProQuestsScreen: React.FC<ProQuestsScreenProps> = ({
             </Pressable>
           </View>
 
+            </>
+          )}
+
           {/* ============================================================ */}
-          {/* CARD 8: CREATOR REPUTATION TIER (Milestone Step Track)       */}
+          {/* GENERAL PROGRESS & REPUTATION (ALL QUESTS TAB ONLY)          */}
           {/* ============================================================ */}
-          <View style={styles.reputationTierCard}>
+          {selectedQuestFilter === 'all' && (
+            <>
+              {/* CARD 8: CREATOR REPUTATION TIER */}
+              <View style={styles.reputationTierCard}>
             <Text style={styles.reputationHeaderTitle}>CREATOR REPUTATION TIER</Text>
 
             <View style={styles.stepTrackRow}>
@@ -849,6 +905,46 @@ export const ProQuestsScreen: React.FC<ProQuestsScreenProps> = ({
               <Text style={styles.completedXpBadge}>+100 XP</Text>
             </View>
           </View>
+        </>
+      )}
+
+          {/* SQUAD EMPTY / COMING SOON STATE (IF NO SQUAD QUESTS) */}
+          {selectedQuestFilter === 'squad' && false && (
+            <View style={styles.emptyQuestCard}>
+              <View style={styles.emptyQuestIconBox}>
+                <Text style={{ fontSize: 24 }}>🛡️</Text>
+              </View>
+              <Text style={styles.emptyQuestTitle}>Squad Quests Coming Soon</Text>
+              <Text style={styles.emptyQuestDesc}>
+                Check back soon! Your squad is currently between weekly sprints. New squad gauntlets unlock every Monday at 9 AM.
+              </Text>
+              <Pressable
+                style={styles.emptyQuestBtn}
+                onPress={() => setSelectedQuestFilter('all')}
+              >
+                <Text style={styles.emptyQuestBtnText}>Explore All Quests ➔</Text>
+              </Pressable>
+            </View>
+          )}
+
+          {/* BRAND EMPTY / COMING SOON STATE (IF NO BRAND QUESTS) */}
+          {selectedQuestFilter === 'brand' && false && (
+            <View style={styles.emptyQuestCard}>
+              <View style={styles.emptyQuestIconBoxGold}>
+                <Text style={{ fontSize: 24 }}>💼</Text>
+              </View>
+              <Text style={styles.emptyQuestTitle}>Brand Quests Coming Soon</Text>
+              <Text style={styles.emptyQuestDesc}>
+                Check back soon! Jarvis AI is matching fresh high-bounty brand sponsorships for your verified Creator Passport.
+              </Text>
+              <Pressable
+                style={styles.emptyQuestBtn}
+                onPress={() => setSelectedQuestFilter('all')}
+              >
+                <Text style={styles.emptyQuestBtnText}>Explore All Quests ➔</Text>
+              </Pressable>
+            </View>
+          )}
         </ScrollView>
 
         {/* 10. FLOATING LIQUID GLASS BOTTOM NAVIGATION BAR */}
@@ -2467,6 +2563,80 @@ const styles = StyleSheet.create({
     fontWeight: '900',
     color: '#D97706',
   },
+  /* ACTIVE FILTER BANNER */
+  filterActiveBanner: {
+    backgroundColor: '#FAF5FF',
+    borderRadius: 12,
+    paddingHorizontal: 14,
+    paddingVertical: 9,
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: '#E9D5FF',
+  },
+  filterActiveBannerText: {
+    fontSize: 11.5,
+    color: '#4C1D95',
+    fontWeight: '700',
+  },
+
+  /* EMPTY QUEST / COMING SOON CARD */
+  emptyQuestCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 20,
+    padding: 24,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#EFECE6',
+    marginVertical: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.05,
+    shadowRadius: 10,
+    elevation: 2,
+  },
+  emptyQuestIconBox: {
+    width: 52,
+    height: 52,
+    borderRadius: 26,
+    backgroundColor: '#EDE9FE',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 12,
+  },
+  emptyQuestIconBoxGold: {
+    width: 52,
+    height: 52,
+    borderRadius: 26,
+    backgroundColor: '#FEF3C7',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 12,
+  },
+  emptyQuestTitle: {
+    fontSize: 16,
+    fontWeight: '900',
+    color: '#171420',
+    marginBottom: 6,
+  },
+  emptyQuestDesc: {
+    fontSize: 12,
+    color: '#64748B',
+    textAlign: 'center',
+    lineHeight: 18,
+    marginBottom: 16,
+  },
+  emptyQuestBtn: {
+    backgroundColor: '#582CDB',
+    paddingHorizontal: 18,
+    paddingVertical: 10,
+    borderRadius: 12,
+  },
+  emptyQuestBtnText: {
+    fontSize: 12.5,
+    fontWeight: '900',
+    color: '#FFFFFF',
+  },
+
   /* SQUAD QUEST ULTRA-LUXURY MODAL */
   squadQuestModalOverlay: {
     flex: 1,
