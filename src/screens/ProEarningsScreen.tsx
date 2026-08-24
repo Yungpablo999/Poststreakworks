@@ -1657,7 +1657,7 @@ export const ProEarningsScreen: React.FC<ProEarningsScreenProps> = ({
         </Modal>
 
         {/* ============================================================ */}
-        {/* MODAL 3: EXPANDED EXECUTIVE REVENUE & COLLAB LEDGER AUDIT     */}
+        {/* MODAL 3: CLEAN UNCLUTTERED EARNINGS BREAKDOWN LEDGER         */}
         {/* ============================================================ */}
         <Modal
           visible={showBreakdownModal}
@@ -1666,17 +1666,17 @@ export const ProEarningsScreen: React.FC<ProEarningsScreenProps> = ({
           onRequestClose={() => setShowBreakdownModal(false)}
         >
           <View style={styles.modalOverlay}>
-            <Animated.View style={[styles.modalCardLarge, { maxHeight: '90%', padding: 20, transform: [{ scale: modalPopScale }] }]}>
-              <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 16 }}>
+            <Animated.View style={[styles.modalCardLarge, { maxHeight: '88%', padding: 22, transform: [{ scale: modalPopScale }] }]}>
+              <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 10 }}>
                 {/* Header */}
                 <View style={styles.modalHeaderRow}>
                   <View style={{ flex: 1, paddingRight: 10 }}>
-                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 2 }}>
-                      <View style={styles.liveGreenPulseDot} />
-                      <Text style={styles.modalTitle}>Revenue &amp; Campaign Ledger</Text>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 4 }}>
+                      <Text style={{ fontSize: 16 }}>💰</Text>
+                      <Text style={styles.modalTitle}>Earnings Breakdown</Text>
                     </View>
                     <Text style={styles.modalSubtitle}>
-                      Complete itemized audit of brand contracts, squad bounties, and collab payouts.
+                      Itemized payouts across brand deals, collabs, and creator bounties.
                     </Text>
                   </View>
                   <Pressable onPress={() => setShowBreakdownModal(false)} style={styles.modalCloseCircle} hitSlop={8}>
@@ -1684,27 +1684,27 @@ export const ProEarningsScreen: React.FC<ProEarningsScreenProps> = ({
                   </Pressable>
                 </View>
 
-                {/* 2-Card Ledger Summary Duo */}
-                <View style={styles.audienceStatsDuoRow}>
+                {/* 2-Stat Summary Duo */}
+                <View style={[styles.audienceStatsDuoRow, { marginVertical: 12 }]}>
                   <View style={styles.audienceStatDuoCard}>
-                    <Text style={styles.audienceStatDuoLabel}>SETTLED REVENUE</Text>
-                    <Text style={[styles.audienceStatDuoVal, { color: '#582CDB' }]}>$2,450.00</Text>
-                    <Text style={styles.audienceStatDuoSub}>100% Verified Payouts</Text>
+                    <Text style={styles.audienceStatDuoLabel}>TOTAL SETTLED</Text>
+                    <Text style={[styles.audienceStatDuoVal, { color: '#582CDB', fontSize: 18 }]}>$2,450.00</Text>
+                    <Text style={styles.audienceStatDuoSub}>May 2024 Net</Text>
                   </View>
                   <View style={styles.audienceStatDuoCard}>
-                    <Text style={styles.audienceStatDuoLabel}>INVOICE PIPELINE</Text>
-                    <Text style={[styles.audienceStatDuoVal, { color: '#10B981' }]}>$1,200.00</Text>
-                    <Text style={styles.audienceStatDuoSub}>3 In Review / Processing</Text>
+                    <Text style={styles.audienceStatDuoLabel}>PENDING PAYOUTS</Text>
+                    <Text style={[styles.audienceStatDuoVal, { color: '#10B981', fontSize: 18 }]}>$1,200.00</Text>
+                    <Text style={styles.audienceStatDuoSub}>3 In Review</Text>
                   </View>
                 </View>
 
-                {/* Category Filter Pills */}
-                <View style={styles.timeframePillRow}>
+                {/* Concise Category Filter Pills */}
+                <View style={[styles.timeframePillRow, { marginVertical: 8 }]}>
                   {[
-                    { id: 'all', label: 'All ($2.45K)' },
-                    { id: 'collabs', label: 'Collabs ($540)' },
-                    { id: 'brands', label: 'Brands ($1.2K)' },
-                    { id: 'affiliate', label: 'Affiliates ($710)' },
+                    { id: 'all', label: 'All' },
+                    { id: 'brands', label: 'Brand Deals' },
+                    { id: 'collabs', label: 'Collabs' },
+                    { id: 'affiliate', label: 'Affiliates' },
                   ].map((filter) => {
                     const isActive = ledgerCategoryFilter === filter.id;
                     return (
@@ -1721,10 +1721,8 @@ export const ProEarningsScreen: React.FC<ProEarningsScreenProps> = ({
                         <Text
                           style={[
                             styles.timeframePillText,
-                            { fontSize: 11 },
                             isActive && styles.timeframePillTextActive,
                           ]}
-                          numberOfLines={1}
                         >
                           {filter.label}
                         </Text>
@@ -1733,206 +1731,157 @@ export const ProEarningsScreen: React.FC<ProEarningsScreenProps> = ({
                   })}
                 </View>
 
-                {/* Itemized Transaction Ledger Cards */}
-                <View style={{ gap: 10, marginVertical: 8 }}>
+                {/* Clean Itemized Transaction List */}
+                <View style={styles.cleanTransactionsCard}>
                   {[
                     {
                       id: 't1',
                       category: 'collabs',
-                      source: 'Amara Okafor Collab Sprint',
-                      platform: 'tiktok',
-                      type: 'Joint Storytelling Reel (45s)',
+                      title: 'Amara Okafor Collab',
+                      subtitle: 'TikTok Reel (45s) • May 28',
                       amount: '+$220.00',
                       status: 'PAID',
-                      date: 'May 28, 2024',
                       icon: '🤝',
                       color: '#582CDB',
                     },
                     {
                       id: 't2',
                       category: 'brands',
-                      source: 'GlowUp Skincare Campaign',
-                      platform: 'instagram',
-                      type: 'Sponsored Carousel + 2 Stories',
+                      title: 'GlowUp Skincare',
+                      subtitle: 'Instagram Carousel • May 24',
                       amount: '+$450.00',
                       status: 'PAID',
-                      date: 'May 24, 2024',
                       icon: '💼',
                       color: '#F59E0B',
                     },
                     {
                       id: 't3',
                       category: 'collabs',
-                      source: 'Momentum Squad Live Challenge',
-                      platform: 'youtube',
-                      type: 'Leaderboard #1 Speed Bounty',
+                      title: 'Momentum Squad Bounty',
+                      subtitle: 'YouTube Short • May 20',
                       amount: '+$180.00',
                       status: 'PAID',
-                      date: 'May 20, 2024',
                       icon: '🏆',
                       color: '#582CDB',
                     },
                     {
                       id: 't4',
                       category: 'brands',
-                      source: 'Lagos Food Fest Brand Review',
-                      platform: 'tiktok',
-                      type: 'Dedicated Taste Test Video',
+                      title: 'Lagos Food Festival',
+                      subtitle: 'TikTok Review • May 16',
                       amount: '+$360.00',
                       status: 'PAID',
-                      date: 'May 16, 2024',
-                      icon: '🍔',
+                      icon: '🍽️',
                       color: '#F59E0B',
                     },
                     {
                       id: 't5',
                       category: 'affiliate',
-                      source: 'Notion Creator Affiliate Partner',
-                      platform: 'x',
-                      type: '39 Inbound Referral Signups',
+                      title: 'Notion Creator Affiliate',
+                      subtitle: '39 Referral Signups • May 12',
                       amount: '+$320.00',
-                      status: 'SETTLED',
-                      date: 'May 12, 2024',
+                      status: 'PAID',
                       icon: '🔗',
                       color: '#A78BFA',
                     },
                     {
                       id: 't6',
                       category: 'brands',
-                      source: 'Momentum Boost Brand Package',
-                      platform: 'instagram',
-                      type: 'Integrated Brand Sponsor Segment',
+                      title: 'Momentum Boost Sponsor',
+                      subtitle: 'Instagram Story • May 06',
                       amount: '+$390.00',
                       status: 'PAID',
-                      date: 'May 06, 2024',
                       icon: '📱',
                       color: '#7C3AED',
                     },
                     {
                       id: 't7',
                       category: 'collabs',
-                      source: 'Creator Growth Peer Referral',
-                      platform: 'x',
-                      type: '3 Verified Creator Onboardings',
+                      title: 'Peer Creator Referral',
+                      subtitle: 'X / Twitter Onboardings • May 02',
                       amount: '+$140.00',
-                      status: 'SETTLED',
-                      date: 'May 02, 2024',
+                      status: 'PAID',
                       icon: '⚡',
                       color: '#582CDB',
                     },
                     {
                       id: 't8',
                       category: 'brands',
-                      source: 'TechGear Sprint Bounty',
-                      platform: 'youtube',
-                      type: 'Short-form Unboxing Reel',
+                      title: 'TechGear Sprint Bounty',
+                      subtitle: 'YouTube Unboxing • Processing',
                       amount: '$350.00',
                       status: 'PENDING',
-                      date: 'Estimated Jun 02',
                       icon: '📦',
-                      color: '#64748B',
+                      color: '#94A3B8',
                     },
                   ]
                     .filter(
                       (item) =>
                         ledgerCategoryFilter === 'all' || item.category === ledgerCategoryFilter
                     )
-                    .map((item) => (
-                      <View key={item.id} style={styles.ledgerItemCard}>
-                        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
-                          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-                            <View style={[styles.ledgerIconCircle, { backgroundColor: item.color + '15' }]}>
-                              <Text style={{ fontSize: 16 }}>{item.icon}</Text>
-                            </View>
-                            <View>
-                              <Text style={styles.ledgerSourceName}>{item.source}</Text>
-                              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 2 }}>
-                                <SocialBrandIcon platform={item.platform as any} size={13} />
-                                <Text style={styles.ledgerSubText}>{item.type}</Text>
-                              </View>
-                            </View>
+                    .map((item, idx, arr) => (
+                      <View
+                        key={item.id}
+                        style={[
+                          styles.cleanTransactionRow,
+                          idx !== arr.length - 1 && styles.cleanTransactionBorder,
+                        ]}
+                      >
+                        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, flex: 1 }}>
+                          <View style={[styles.cleanIconSquare, { backgroundColor: item.color + '15' }]}>
+                            <Text style={{ fontSize: 16 }}>{item.icon}</Text>
                           </View>
-                          <View style={{ alignItems: 'flex-end' }}>
-                            <Text style={[styles.ledgerAmountText, { color: item.status === 'PENDING' ? '#64748B' : '#582CDB' }]}>
-                              {item.amount}
-                            </Text>
-                            <View style={[styles.ledgerStatusPill, item.status === 'PENDING' ? styles.ledgerStatusPending : styles.ledgerStatusPaid]}>
-                              <Text style={[styles.ledgerStatusText, item.status === 'PENDING' ? styles.ledgerStatusTextPending : styles.ledgerStatusTextPaid]}>
-                                {item.status}
-                              </Text>
-                            </View>
+                          <View style={{ flex: 1 }}>
+                            <Text style={styles.cleanTxTitle} numberOfLines={1}>{item.title}</Text>
+                            <Text style={styles.cleanTxSub} numberOfLines={1}>{item.subtitle}</Text>
                           </View>
                         </View>
-                        <View style={styles.ledgerCardFooter}>
-                          <Text style={styles.ledgerDateText}>📅 Date: {item.date}</Text>
-                          <Text style={styles.ledgerIdText}>ID: pstk_{item.id}_rev</Text>
+
+                        <View style={{ alignItems: 'flex-end', marginLeft: 10 }}>
+                          <Text style={[styles.cleanTxAmt, { color: item.status === 'PENDING' ? '#64748B' : '#582CDB' }]}>
+                            {item.amount}
+                          </Text>
+                          <Text style={[styles.cleanTxStatus, item.status === 'PENDING' ? { color: '#D97706' } : { color: '#15803D' }]}>
+                            {item.status === 'PENDING' ? '• Pending' : '✓ Paid'}
+                          </Text>
                         </View>
                       </View>
                     ))}
                 </View>
 
-                {/* Tax & Net Margin Audit Box */}
-                <View style={styles.ledgerTaxCard}>
-                  <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
-                    <Text style={styles.ledgerTaxTitle}>PRO MONETIZATION AUDIT</Text>
-                    <Text style={styles.ledgerTaxId}>Stripe Connect: acct_14x98B</Text>
-                  </View>
-                  <View style={{ flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 2 }}>
-                    <Text style={styles.ledgerTaxLabel}>Gross Campaign Value</Text>
-                    <Text style={styles.ledgerTaxVal}>$2,600.00</Text>
-                  </View>
-                  <View style={{ flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 2 }}>
-                    <Text style={styles.ledgerTaxLabel}>Platform Commission (Pro 0% Rate)</Text>
-                    <Text style={[styles.ledgerTaxVal, { color: '#10B981' }]}>$0.00 (Waived)</Text>
-                  </View>
-                  <View style={{ flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 2, borderTopWidth: 1, borderTopColor: '#E2E8F0', marginTop: 4, paddingTop: 4 }}>
-                    <Text style={[styles.ledgerTaxLabel, { fontWeight: '800', color: '#171420' }]}>Creator Net Disbursed</Text>
-                    <Text style={[styles.ledgerTaxVal, { fontWeight: '900', color: '#582CDB' }]}>$2,450.00</Text>
-                  </View>
-                </View>
-
-                {/* Jarvis Collab Arbitrage Insight */}
-                <View style={[styles.audienceInsightCallout, { marginTop: 10 }]}>
-                  <Text style={styles.audienceInsightCalloutText}>
-                    ⚡ <Text style={{ fontWeight: '800', color: '#582CDB' }}>Jarvis Collab Audit:</Text> Peer collaborations (like your joint Reel with Amara Okafor) generated a 42% higher retention rate than solo brand posts, resulting in 2 inbound sponsor inquiries.
+                {/* Single Summary Strip */}
+                <View style={styles.cleanSummaryStrip}>
+                  <Text style={styles.cleanSummaryStripText}>
+                    Gross $2,600 • 0% Platform Fee • <Text style={{ color: '#582CDB', fontWeight: '800' }}>Net $2,450</Text>
                   </Text>
                 </View>
 
-                {/* Action Buttons Duo */}
-                <View style={{ gap: 8, marginTop: 14 }}>
-                  <Pressable
-                    style={({ pressed }) => [styles.modalFullBtn, pressed && styles.btnPressed]}
-                    onPress={() => {
-                      if (Platform.OS !== 'web') {
-                        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-                      }
-                      setShowBreakdownModal(false);
-                      setCelebrationData({
-                        title: 'Ledger Audit Exported!',
-                        subtitle: 'Your complete itemized revenue & collab transaction statement has been downloaded.',
-                        badgeText: '📄 STATEMENT DOWNLOADED',
-                        xpEarned: 50,
-                        speechBubble: 'Complete ledger exported! All sponsor contracts verified! 💰',
-                      });
-                      setShowCelebrationModal(true);
-                    }}
-                  >
-                    <Text style={styles.modalFullBtnText}>📥 Export Itemized Statement (CSV/PDF)</Text>
-                  </Pressable>
-
-                  <Pressable
-                    style={[styles.modalFullBtn, { backgroundColor: '#FAF8F5', borderWidth: 1, borderColor: '#E2E8F0' }]}
-                    onPress={() => setShowBreakdownModal(false)}
-                  >
-                    <Text style={[styles.modalFullBtnText, { color: '#64748B' }]}>Close Breakdown</Text>
-                  </Pressable>
-                </View>
+                {/* Primary Export Button */}
+                <Pressable
+                  style={({ pressed }) => [styles.modalFullBtn, { marginTop: 14 }, pressed && styles.btnPressed]}
+                  onPress={() => {
+                    if (Platform.OS !== 'web') {
+                      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+                    }
+                    setShowBreakdownModal(false);
+                    setCelebrationData({
+                      title: 'Statement Downloaded!',
+                      subtitle: 'Your complete itemized earnings ledger has been exported to PDF.',
+                      badgeText: '📄 PDF STATEMENT SAVED',
+                      xpEarned: 50,
+                      speechBubble: 'Itemized earnings summary exported successfully! 📈',
+                    });
+                    setShowCelebrationModal(true);
+                  }}
+                >
+                  <Text style={styles.modalFullBtnText}>📥 Download PDF Statement</Text>
+                </Pressable>
               </ScrollView>
             </Animated.View>
           </View>
         </Modal>
 
-        {/* NOTIFICATIONS MODAL */}
+                {/* NOTIFICATIONS MODAL */}
         <Modal
           visible={showNotificationModal}
           transparent={true}
@@ -2556,6 +2505,69 @@ const styles = StyleSheet.create({
     fontSize: 11,
     fontWeight: '700',
     color: '#171420',
+  },
+
+  /* CLEAN TRANSACTION LEDGER STYLES */
+  cleanTransactionsCard: {
+    backgroundColor: '#FAF8F5',
+    borderRadius: 18,
+    paddingHorizontal: 14,
+    paddingVertical: 4,
+    borderWidth: 1,
+    borderColor: '#EFECE6',
+    marginVertical: 6,
+  },
+  cleanTransactionRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: 12,
+  },
+  cleanTransactionBorder: {
+    borderBottomWidth: 1,
+    borderBottomColor: '#EFECE6',
+  },
+  cleanIconSquare: {
+    width: 38,
+    height: 38,
+    borderRadius: 10,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  cleanTxTitle: {
+    fontSize: 13,
+    fontWeight: '800',
+    color: '#171420',
+  },
+  cleanTxSub: {
+    fontSize: 11,
+    color: '#64748B',
+    marginTop: 2,
+  },
+  cleanTxAmt: {
+    fontSize: 13.5,
+    fontWeight: '900',
+  },
+  cleanTxStatus: {
+    fontSize: 10,
+    fontWeight: '700',
+    marginTop: 2,
+  },
+  cleanSummaryStrip: {
+    backgroundColor: '#FAF5FF',
+    borderRadius: 12,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: '#E9D5FF',
+    marginTop: 8,
+  },
+  cleanSummaryStripText: {
+    fontSize: 11,
+    color: '#64748B',
+    fontWeight: '600',
   },
 
   modalCardLarge: {
