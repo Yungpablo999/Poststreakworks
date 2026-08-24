@@ -43,13 +43,13 @@ export const CREATOR_AVATARS = [
   {
     id: 'ghost',
     name: 'Ghost Mascot',
-    source: require('../../assets/images/jarvis-ghost-clean.png'),
+    source: require('../../assets/images/jarvis-core-flame.png'),
     tag: 'MASCOT',
   },
   {
     id: 'flame',
     name: 'Jarvis Flame',
-    source: require('../../assets/images/jarvis-ghost-clean.png'),
+    source: require('../../assets/images/jarvis-core-flame.png'),
     tag: 'AI',
   },
   {

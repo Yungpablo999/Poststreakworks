@@ -341,7 +341,7 @@ export const ResetPasswordScreen: React.FC<ResetPasswordScreenProps> = ({
               ]}
             >
               <Image
-                source={require('../../assets/images/jarvis-ghost-clean.png')}
+                source={require('../../assets/images/jarvis-core-flame.png')}
                 style={styles.pureStarImage}
                 resizeMode="contain"
               />
@@ -708,7 +708,7 @@ export const ResetPasswordScreen: React.FC<ResetPasswordScreenProps> = ({
                 ]}
               >
                 <Image
-                  source={require('../../assets/images/jarvis-ghost-clean.png')}
+                  source={require('../../assets/images/jarvis-core-flame.png')}
                   style={styles.modalPureStarImage}
                   resizeMode="contain"
                 />

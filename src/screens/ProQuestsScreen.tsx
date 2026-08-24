@@ -224,7 +224,7 @@ export const ProQuestsScreen: React.FC<ProQuestsScreenProps> = ({
               ]}
             >
               <Image
-                source={require('../../assets/images/jarvis-ghost-clean.png')}
+                source={require('../../assets/images/jarvis-core-flame.png')}
                 style={styles.headerGhostLogo}
                 resizeMode="contain"
               />
@@ -329,7 +329,7 @@ export const ProQuestsScreen: React.FC<ProQuestsScreenProps> = ({
               hitSlop={8}
             >
               <Image
-                source={userProfile?.avatarSource || require('../../assets/images/jarvis-ghost-clean.png')}
+                source={userProfile?.avatarSource || require('../../assets/images/jarvis-core-flame.png')}
                 style={styles.headerCustomAvatarImage}
                 resizeMode="cover"
               />
@@ -899,7 +899,7 @@ export const ProQuestsScreen: React.FC<ProQuestsScreenProps> = ({
           {/* ============================================================ */}
           <View style={styles.jarvisRepCard}>
             <Image
-              source={require('../../assets/images/jarvis-ghost-clean.png')}
+              source={require('../../assets/images/jarvis-core-flame.png')}
               style={{ width: 32, height: 32, alignSelf: 'center', marginBottom: 10 }}
               resizeMode="contain"
             />

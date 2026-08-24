@@ -370,7 +370,7 @@ export const ProCaptionScreen: React.FC<ProCaptionScreenProps> = ({
               ]}
             >
               <Image
-                source={require('../../assets/images/jarvis-ghost-clean.png')}
+                source={require('../../assets/images/jarvis-core-flame.png')}
                 style={styles.headerGhostLogo}
                 resizeMode="contain"
               />
@@ -459,7 +459,7 @@ export const ProCaptionScreen: React.FC<ProCaptionScreenProps> = ({
               hitSlop={8}
             >
               <Image
-                source={userProfile?.avatarSource || require('../../assets/images/jarvis-ghost-clean.png')}
+                source={userProfile?.avatarSource || require('../../assets/images/jarvis-core-flame.png')}
                 style={styles.headerUserAvatar}
                 resizeMode="cover"
               />
@@ -998,7 +998,7 @@ export const ProCaptionScreen: React.FC<ProCaptionScreenProps> = ({
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
                 <View style={styles.jarvisHeroIconBox}>
                   <Image
-                    source={require('../../assets/images/jarvis-ghost-clean.png')}
+                    source={require('../../assets/images/jarvis-core-flame.png')}
                     style={{ width: 26, height: 26 }}
                     resizeMode="contain"
                   />

@@ -293,7 +293,7 @@ export const ChallengeDetailScreen: React.FC<ChallengeDetailScreenProps> = ({
               ]}
             >
               <Image
-                source={require('../../assets/images/jarvis-ghost-clean.png')}
+                source={require('../../assets/images/jarvis-core-flame.png')}
                 style={styles.headerGhostLogo}
                 resizeMode="contain"
               />
@@ -738,7 +738,7 @@ export const ChallengeDetailScreen: React.FC<ChallengeDetailScreenProps> = ({
             <View style={styles.jarvisHeaderRow}>
               <View style={styles.jarvisFlameIconBox}>
                 <Image
-                  source={require('../../assets/images/jarvis-ghost-clean.png')}
+                  source={require('../../assets/images/jarvis-core-flame.png')}
                   style={styles.jarvisFlameIconImg}
                   resizeMode="contain"
                 />

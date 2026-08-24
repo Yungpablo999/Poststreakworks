@@ -608,7 +608,7 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
               ]}
             >
               <Image
-                source={require('../../assets/images/jarvis-ghost-clean.png')}
+                source={require('../../assets/images/jarvis-core-flame.png')}
                 style={styles.headerGhostLogo}
                 resizeMode="contain"
               />
@@ -1142,7 +1142,7 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
                   ]}
                 >
                   <Image
-                    source={require('../../assets/images/jarvis-ghost-clean.png')}
+                    source={require('../../assets/images/jarvis-core-flame.png')}
                     style={styles.jarvisWritingFlame}
                     resizeMode="contain"
                   />

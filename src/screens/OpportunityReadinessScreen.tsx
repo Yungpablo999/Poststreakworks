@@ -364,7 +364,7 @@ export const OpportunityReadinessScreen: React.FC<OpportunityReadinessScreenProp
               ]}
             >
               <Image
-                source={require('../../assets/images/jarvis-ghost-clean.png')}
+                source={require('../../assets/images/jarvis-core-flame.png')}
                 style={styles.headerGhostLogo}
                 resizeMode="contain"
               />
@@ -442,7 +442,7 @@ export const OpportunityReadinessScreen: React.FC<OpportunityReadinessScreenProp
               hitSlop={8}
             >
               <Image
-                source={userProfile?.avatarSource || require('../../assets/images/jarvis-ghost-clean.png')}
+                source={userProfile?.avatarSource || require('../../assets/images/jarvis-core-flame.png')}
                 style={styles.headerProfileImg}
                 resizeMode="cover"
               />
@@ -698,7 +698,7 @@ export const OpportunityReadinessScreen: React.FC<OpportunityReadinessScreenProp
           <View style={styles.jarvisCard}>
             <View style={styles.jarvisAvatarCircle}>
               <Image
-                source={require('../../assets/images/jarvis-ghost-clean.png')}
+                source={require('../../assets/images/jarvis-core-flame.png')}
                 style={{ width: 28, height: 28 }}
                 resizeMode="contain"
               />

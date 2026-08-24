@@ -179,7 +179,7 @@ export const PostPerformanceScreen: React.FC<PostPerformanceScreenProps> = ({
               ]}
             >
               <Image
-                source={require('../../assets/images/jarvis-ghost-clean.png')}
+                source={require('../../assets/images/jarvis-core-flame.png')}
                 style={styles.headerGhostLogo}
                 resizeMode="contain"
               />
@@ -262,7 +262,7 @@ export const PostPerformanceScreen: React.FC<PostPerformanceScreenProps> = ({
               hitSlop={8}
             >
               <Image
-                source={userProfile?.avatarSource || require('../../assets/images/jarvis-ghost-clean.png')}
+                source={userProfile?.avatarSource || require('../../assets/images/jarvis-core-flame.png')}
                 style={styles.headerProfileImg}
                 resizeMode="cover"
               />
@@ -319,7 +319,7 @@ export const PostPerformanceScreen: React.FC<PostPerformanceScreenProps> = ({
               <View style={styles.videoMetaContainer}>
                 <View style={styles.videoAuthorRow}>
                   <Image
-                    source={userProfile?.avatarSource || require('../../assets/images/jarvis-ghost-clean.png')}
+                    source={userProfile?.avatarSource || require('../../assets/images/jarvis-core-flame.png')}
                     style={styles.videoAuthorAvatar}
                   />
                   <Text style={styles.videoAuthorName}>
@@ -612,7 +612,7 @@ export const PostPerformanceScreen: React.FC<PostPerformanceScreenProps> = ({
           <View style={styles.jarvisCoreCard}>
             <View style={styles.jarvisCoreAvatarBox}>
               <Image
-                source={require('../../assets/images/jarvis-ghost-clean.png')}
+                source={require('../../assets/images/jarvis-core-flame.png')}
                 style={styles.jarvisCoreFlameImg}
                 resizeMode="contain"
               />

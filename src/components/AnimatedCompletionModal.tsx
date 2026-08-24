@@ -246,7 +246,7 @@ export const AnimatedCompletionModal: React.FC<AnimatedCompletionModalProps> = (
               ]}
             >
               <Image
-                source={require('../../assets/images/jarvis-ghost-clean.png')}
+                source={require('../../assets/images/jarvis-core-flame.png')}
                 style={styles.ghostLogoImg}
                 resizeMode="contain"
               />

@@ -425,7 +425,7 @@ export const SignUpScreen: React.FC<SignUpScreenProps> = ({
                   }}
                 >
                   <Image
-                    source={require('../../assets/images/jarvis-ghost-clean.png')}
+                    source={require('../../assets/images/jarvis-core-flame.png')}
                     style={styles.mascotImage}
                     resizeMode="contain"
                   />
@@ -683,7 +683,7 @@ export const SignUpScreen: React.FC<SignUpScreenProps> = ({
                 ]}
               >
                 <Image
-                  source={require('../../assets/images/jarvis-ghost-clean.png')}
+                  source={require('../../assets/images/jarvis-core-flame.png')}
                   style={styles.modalPureStarImage}
                   resizeMode="contain"
                 />

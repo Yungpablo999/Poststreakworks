@@ -468,7 +468,7 @@ export const ProScheduleScreen: React.FC<ProScheduleScreenProps> = ({
               ]}
             >
               <Image
-                source={require('../../assets/images/jarvis-ghost-clean.png')}
+                source={require('../../assets/images/jarvis-core-flame.png')}
                 style={styles.headerGhostLogo}
                 resizeMode="contain"
               />
@@ -531,7 +531,7 @@ export const ProScheduleScreen: React.FC<ProScheduleScreenProps> = ({
               hitSlop={8}
             >
               <Image
-                source={userProfile?.avatarSource || require('../../assets/images/jarvis-ghost-clean.png')}
+                source={userProfile?.avatarSource || require('../../assets/images/jarvis-core-flame.png')}
                 style={styles.headerUserAvatar}
                 resizeMode="cover"
               />
@@ -997,7 +997,7 @@ export const ProScheduleScreen: React.FC<ProScheduleScreenProps> = ({
           >
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 8 }}>
               <Image
-                source={require('../../assets/images/jarvis-ghost-clean.png')}
+                source={require('../../assets/images/jarvis-core-flame.png')}
                 style={{ width: 28, height: 28 }}
                 resizeMode="contain"
               />

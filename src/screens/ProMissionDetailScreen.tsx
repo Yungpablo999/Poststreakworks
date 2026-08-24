@@ -139,7 +139,7 @@ export const ProMissionDetailScreen: React.FC<ProMissionDetailScreenProps> = ({
               ]}
             >
               <Image
-                source={require('../../assets/images/jarvis-ghost-clean.png')}
+                source={require('../../assets/images/jarvis-core-flame.png')}
                 style={styles.headerGhostLogo}
                 resizeMode="contain"
               />
@@ -214,7 +214,7 @@ export const ProMissionDetailScreen: React.FC<ProMissionDetailScreenProps> = ({
               hitSlop={8}
             >
               <Image
-                source={userProfile?.avatarSource || require('../../assets/images/jarvis-ghost-clean.png')}
+                source={userProfile?.avatarSource || require('../../assets/images/jarvis-core-flame.png')}
                 style={styles.headerUserAvatar}
                 resizeMode="cover"
               />
@@ -547,7 +547,7 @@ export const ProMissionDetailScreen: React.FC<ProMissionDetailScreenProps> = ({
           >
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 8 }}>
               <Image
-                source={require('../../assets/images/jarvis-ghost-clean.png')}
+                source={require('../../assets/images/jarvis-core-flame.png')}
                 style={{ width: 30, height: 30 }}
                 resizeMode="contain"
               />

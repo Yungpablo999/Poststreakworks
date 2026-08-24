@@ -323,7 +323,7 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onFinish = () => {} 
           ]}
         >
           <Image
-            source={require('../../assets/images/jarvis-ghost-clean.png')}
+            source={require('../../assets/images/jarvis-core-flame.png')}
             style={{ width: ghostSize, height: ghostSize }}
             resizeMode="contain"
           />
