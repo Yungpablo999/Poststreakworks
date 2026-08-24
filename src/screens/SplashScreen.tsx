@@ -419,7 +419,7 @@ const styles = StyleSheet.create({
   },
   solidBrandTitle: {
     fontSize: 50,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#491ECC', // Deep Solid Royal Purple with ultra contrast
     letterSpacing: -1.8,
     textShadowColor: 'rgba(73, 30, 204, 0.18)',
@@ -464,7 +464,7 @@ const styles = StyleSheet.create({
   },
   jarvisCore: {
     fontSize: 22,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#491ECC',
     letterSpacing: -0.4,
   },

@@ -690,7 +690,7 @@ export const PlatformGrowthScreen: React.FC<PlatformGrowthScreenProps> = ({
                     style={[
                       styles.weeklyBarFill,
                       { height: 14, backgroundColor: '#E2E8F0' },
-                      selectedBar === 'X' && { backgroundColor: '#582CDB', shadowColor: '#582CDB', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.35, shadowRadius: 8, elevation: 4 },
+                      selectedBar === 'X' && { backgroundColor: '#582CDB', shadowColor: '#582CDB', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.12, shadowRadius: 8, elevation: 4 },
                     ]}
                   />
                 </View>
@@ -1248,7 +1248,7 @@ const styles = StyleSheet.create({
   },
   headerTitleText: {
     fontSize: 16,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
     letterSpacing: -0.3,
   },
@@ -1316,13 +1316,13 @@ const styles = StyleSheet.create({
   },
   heroPillText: {
     fontSize: 10,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#582CDB',
     letterSpacing: 0.5,
   },
   mainTitle: {
     fontSize: 24,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
     letterSpacing: -0.6,
     marginBottom: 4,
@@ -1360,7 +1360,7 @@ const styles = StyleSheet.create({
   },
   aggregateLabel: {
     fontSize: 10,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#64748B',
     letterSpacing: 0.5,
     marginBottom: 2,
@@ -1372,7 +1372,7 @@ const styles = StyleSheet.create({
   },
   aggregateNumber: {
     fontSize: 32,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
     letterSpacing: -0.8,
   },
@@ -1389,7 +1389,7 @@ const styles = StyleSheet.create({
   },
   topPlatformPillText: {
     fontSize: 10,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#582CDB',
   },
   distributionHeaderRow: {
@@ -1400,13 +1400,13 @@ const styles = StyleSheet.create({
   },
   distLabel: {
     fontSize: 9,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#64748B',
     letterSpacing: 0.4,
   },
   distValue: {
     fontSize: 10,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
   },
   distBarTrack: {
@@ -1462,7 +1462,7 @@ const styles = StyleSheet.create({
   },
   weeklyTitle: {
     fontSize: 17,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
     letterSpacing: -0.3,
   },
@@ -1479,7 +1479,7 @@ const styles = StyleSheet.create({
   },
   weeklyPillBadgeText: {
     fontSize: 9,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#582CDB',
     letterSpacing: 0.4,
   },
@@ -1507,7 +1507,7 @@ const styles = StyleSheet.create({
   },
   spotlightPlatformName: {
     fontSize: 13,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
   },
   spotlightStatsGroup: {
@@ -1515,7 +1515,7 @@ const styles = StyleSheet.create({
   },
   spotlightGain: {
     fontSize: 12.5,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#15803D',
   },
   spotlightRate: {
@@ -1582,7 +1582,7 @@ const styles = StyleSheet.create({
   },
   barTopBadgeTextActive: {
     color: '#582CDB',
-    fontWeight: '900',
+    fontWeight: '700',
     fontSize: 11,
   },
   weeklyBarTrack: {
@@ -1599,7 +1599,7 @@ const styles = StyleSheet.create({
   weeklyBarFillActive: {
     shadowColor: '#582CDB',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.35,
+    shadowOpacity: 0.12,
     shadowRadius: 8,
     elevation: 4,
   },
@@ -1626,7 +1626,7 @@ const styles = StyleSheet.create({
   },
   weeklyBarLabelActive: {
     color: '#582CDB',
-    fontWeight: '900',
+    fontWeight: '700',
   },
 
   // CARD 3: GROWTH ENGINE IDENTIFIED
@@ -1636,7 +1636,7 @@ const styles = StyleSheet.create({
     marginBottom: 18,
     shadowColor: '#582CDB',
     shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.25,
+    shadowOpacity: 0.08,
     shadowRadius: 16,
     elevation: 4,
   },
@@ -1648,13 +1648,13 @@ const styles = StyleSheet.create({
   },
   growthEngineTag: {
     fontSize: 10,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#DDD6FE',
     letterSpacing: 0.5,
   },
   growthEngineTitle: {
     fontSize: 20,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#FFFFFF',
     marginBottom: 4,
     letterSpacing: -0.3,
@@ -1674,7 +1674,7 @@ const styles = StyleSheet.create({
   },
   recommendedActionLabel: {
     fontSize: 9,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#DDD6FE',
     letterSpacing: 0.5,
     marginBottom: 4,
@@ -1697,7 +1697,7 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontSize: 18,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
     letterSpacing: -0.3,
   },
@@ -1743,7 +1743,7 @@ const styles = StyleSheet.create({
   },
   platformItemName: {
     fontSize: 14,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
   },
   platformConnectedStatus: {
@@ -1764,7 +1764,7 @@ const styles = StyleSheet.create({
   },
   topGrowthBadgeText: {
     fontSize: 9,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#B45309',
   },
   connectPillActionBtn: {
@@ -1774,13 +1774,13 @@ const styles = StyleSheet.create({
     borderRadius: 100,
     shadowColor: '#582CDB',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
+    shadowOpacity: 0.12,
     shadowRadius: 4,
     elevation: 2,
   },
   connectPillActionBtnText: {
     fontSize: 11,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#FFFFFF',
     letterSpacing: 0.2,
   },
@@ -1792,7 +1792,7 @@ const styles = StyleSheet.create({
     padding: 20,
     shadowColor: '#171420',
     shadowOffset: { width: 0, height: 16 },
-    shadowOpacity: 0.2,
+    shadowOpacity: 0.08,
     shadowRadius: 28,
     elevation: 8,
   },
@@ -1804,12 +1804,12 @@ const styles = StyleSheet.create({
   },
   activePlatformsCountText: {
     fontSize: 10,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#15803D',
   },
   modalSectionTitle: {
     fontSize: 10,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#64748B',
     letterSpacing: 0.6,
     marginBottom: 8,
@@ -1853,7 +1853,7 @@ const styles = StyleSheet.create({
   },
   connectedPlatformName: {
     fontSize: 13,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
   },
   connectedPlatformHandle: {
@@ -1874,7 +1874,7 @@ const styles = StyleSheet.create({
   },
   topPlatformTagText: {
     fontSize: 7.5,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#B45309',
   },
   disconnectBtn: {
@@ -1896,7 +1896,7 @@ const styles = StyleSheet.create({
   },
   quickConnectBtnText: {
     fontSize: 11,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#FFFFFF',
   },
   customHandleCard: {
@@ -1910,7 +1910,7 @@ const styles = StyleSheet.create({
   },
   customHandleLabel: {
     fontSize: 9,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#582CDB',
     letterSpacing: 0.5,
     marginBottom: 6,
@@ -1941,7 +1941,7 @@ const styles = StyleSheet.create({
   },
   handleSaveBtnText: {
     fontSize: 12,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#FFFFFF',
   },
   modalDoneBtn: {
@@ -1954,7 +1954,7 @@ const styles = StyleSheet.create({
   },
   modalDoneBtnText: {
     fontSize: 14,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#FFFFFF',
   },
   platformItemStatsRow: {
@@ -1972,14 +1972,14 @@ const styles = StyleSheet.create({
   },
   platformStatLabel: {
     fontSize: 9,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#64748B',
     letterSpacing: 0.4,
     marginBottom: 2,
   },
   platformStatValue: {
     fontSize: 13,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
   },
   platformStatGain: {
@@ -2018,7 +2018,7 @@ const styles = StyleSheet.create({
   },
   jarvisTitle: {
     fontSize: 14,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
     marginBottom: 2,
   },
@@ -2031,7 +2031,7 @@ const styles = StyleSheet.create({
   // CARD 6: NEXT STEPS
   nextStepsHeading: {
     fontSize: 11,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#64748B',
     letterSpacing: 0.6,
   },
@@ -2062,7 +2062,7 @@ const styles = StyleSheet.create({
   },
   nextStepText: {
     fontSize: 14,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
   },
   nextStepProPill: {
@@ -2075,13 +2075,13 @@ const styles = StyleSheet.create({
   },
   nextStepProPillText: {
     fontSize: 9,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#A16207',
   },
   nextStepChevron: {
     fontSize: 18,
     color: '#582CDB',
-    fontWeight: '900',
+    fontWeight: '700',
   },
 
   // CARD 7: PLAN INSIGHTS PRO CARD
@@ -2106,7 +2106,7 @@ const styles = StyleSheet.create({
   },
   planInsightsTitle: {
     fontSize: 16,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
   },
   freeBadge: {
@@ -2117,7 +2117,7 @@ const styles = StyleSheet.create({
   },
   freeBadgeText: {
     fontSize: 9,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#475569',
   },
   planFeaturesList: {
@@ -2131,7 +2131,7 @@ const styles = StyleSheet.create({
   },
   checkGreen: {
     fontSize: 13,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#15803D',
   },
   planFeatureText: {
@@ -2150,7 +2150,7 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     shadowColor: '#FDE047',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.35,
+    shadowOpacity: 0.12,
     shadowRadius: 8,
     elevation: 3,
   },
@@ -2161,7 +2161,7 @@ const styles = StyleSheet.create({
   },
   unlockProBtnText: {
     fontSize: 14,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
     letterSpacing: -0.2,
   },
@@ -2182,7 +2182,7 @@ const styles = StyleSheet.create({
     padding: 20,
     shadowColor: '#171420',
     shadowOffset: { width: 0, height: 12 },
-    shadowOpacity: 0.25,
+    shadowOpacity: 0.08,
     shadowRadius: 28,
     elevation: 8,
   },
@@ -2207,7 +2207,7 @@ const styles = StyleSheet.create({
   },
   modalTitle: {
     fontSize: 17,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
   },
   modalSubtitle: {
@@ -2241,7 +2241,7 @@ const styles = StyleSheet.create({
   },
   customInputLabel: {
     fontSize: 10,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#582CDB',
     letterSpacing: 0.5,
     marginBottom: 6,
@@ -2267,7 +2267,7 @@ const styles = StyleSheet.create({
   },
   modalFullBtnText: {
     fontSize: 14,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#FFFFFF',
   },
 
@@ -2284,7 +2284,7 @@ const styles = StyleSheet.create({
     zIndex: 9999,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.25,
+    shadowOpacity: 0.08,
     shadowRadius: 10,
     elevation: 8,
     alignItems: 'center',
@@ -2292,7 +2292,7 @@ const styles = StyleSheet.create({
   toastText: {
     color: '#FFFFFF',
     fontSize: 12.5,
-    fontWeight: '900',
+    fontWeight: '700',
     letterSpacing: 0.2,
   },
 });

@@ -397,7 +397,7 @@ export const ScheduleScreen: React.FC<ScheduleScreenProps> = ({
             </View>
 
             <Text style={styles.postsPlannedBig}>
-              <Text style={{ color: '#582CDB', fontWeight: '900' }}>3 </Text>
+              <Text style={{ color: '#582CDB', fontWeight: '700' }}>3 </Text>
               posts planned
             </Text>
             <Text style={styles.nextPostSub}>Next post: 11:30 AM</Text>
@@ -1375,7 +1375,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     shadowColor: '#582CDB',
     shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.25,
+    shadowOpacity: 0.08,
     shadowRadius: 8,
   },
   scheduleNewPostBtnText: {
@@ -1445,7 +1445,7 @@ const styles = StyleSheet.create({
   },
   calendarDayNum: {
     fontSize: 15,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
   },
   calendarDayNumActive: {
@@ -1554,7 +1554,7 @@ const styles = StyleSheet.create({
   },
   finishDraftBtnText: {
     fontSize: 12,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#FFFFFF',
   },
 
@@ -2000,7 +2000,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#582CDB',
     shadowColor: '#582CDB',
     shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.35,
+    shadowOpacity: 0.12,
     shadowRadius: 6,
   },
   calCellText: {
@@ -2014,7 +2014,7 @@ const styles = StyleSheet.create({
   },
   calCellTextSelected: {
     color: '#FFFFFF',
-    fontWeight: '900',
+    fontWeight: '700',
   },
   calCellDotsRow: {
     flexDirection: 'row',

@@ -1049,13 +1049,13 @@ const styles = StyleSheet.create({
   },
   heroPillText: {
     fontSize: 10,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#FFFFFF',
     letterSpacing: 0.6,
   },
   mainTitle: {
     fontSize: 24,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
     letterSpacing: -0.6,
     marginBottom: 6,
@@ -1107,7 +1107,7 @@ const styles = StyleSheet.create({
   },
   scoreLabel: {
     fontSize: 10,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#64748B',
     letterSpacing: 0.5,
     marginBottom: 2,
@@ -1119,13 +1119,13 @@ const styles = StyleSheet.create({
   },
   scoreNumber: {
     fontSize: 34,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
     letterSpacing: -0.8,
   },
   scoreStatusText: {
     fontSize: 13,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#B45309',
   },
   starCircle: {
@@ -1166,14 +1166,14 @@ const styles = StyleSheet.create({
   },
   metricItemLabel: {
     fontSize: 9,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#64748B',
     letterSpacing: 0.4,
     marginBottom: 4,
   },
   metricItemValue: {
     fontSize: 14,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
   },
   insightBox: {
@@ -1198,7 +1198,7 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontSize: 18,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
     letterSpacing: -0.3,
   },
@@ -1242,7 +1242,7 @@ const styles = StyleSheet.create({
   },
   inProgressBadgeText: {
     fontSize: 9,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#B45309',
     letterSpacing: 0.3,
   },
@@ -1258,7 +1258,7 @@ const styles = StyleSheet.create({
   },
   greenCheckText: {
     fontSize: 11,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#15803D',
   },
 
@@ -1279,7 +1279,7 @@ const styles = StyleSheet.create({
   },
   profileDetailsTitle: {
     fontSize: 16,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
   },
   profileDetailsSub: {
@@ -1298,7 +1298,7 @@ const styles = StyleSheet.create({
   },
   percentCircleText: {
     fontSize: 10,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#582CDB',
   },
   tagsRow: {
@@ -1343,7 +1343,7 @@ const styles = StyleSheet.create({
   },
   profileOutlineBtnText: {
     fontSize: 13,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#582CDB',
   },
 
@@ -1358,7 +1358,7 @@ const styles = StyleSheet.create({
   },
   platformsCardTitle: {
     fontSize: 16,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
     marginBottom: 14,
   },
@@ -1397,7 +1397,7 @@ const styles = StyleSheet.create({
   },
   connectPlatformBtnText: {
     fontSize: 13,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#582CDB',
   },
 
@@ -1425,7 +1425,7 @@ const styles = StyleSheet.create({
   },
   jarvisTag: {
     fontSize: 9,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#582CDB',
     letterSpacing: 0.5,
     marginBottom: 2,
@@ -1446,14 +1446,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     shadowColor: '#582CDB',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.35,
+    shadowOpacity: 0.12,
     shadowRadius: 8,
     elevation: 4,
     marginBottom: 10,
   },
   primaryBottomBtnText: {
     fontSize: 14,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#FFFFFF',
   },
 
@@ -1473,7 +1473,7 @@ const styles = StyleSheet.create({
     padding: 20,
     shadowColor: '#171420',
     shadowOffset: { width: 0, height: 12 },
-    shadowOpacity: 0.25,
+    shadowOpacity: 0.08,
     shadowRadius: 28,
     elevation: 8,
   },
@@ -1485,7 +1485,7 @@ const styles = StyleSheet.create({
     padding: 20,
     shadowColor: '#171420',
     shadowOffset: { width: 0, height: 12 },
-    shadowOpacity: 0.3,
+    shadowOpacity: 0.12,
     shadowRadius: 30,
     elevation: 10,
   },
@@ -1503,7 +1503,7 @@ const styles = StyleSheet.create({
   },
   activePlatformsCountText: {
     fontSize: 10,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#582CDB',
   },
   modalCloseCircle: {
@@ -1521,7 +1521,7 @@ const styles = StyleSheet.create({
   },
   modalTitle: {
     fontSize: 18,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
     letterSpacing: -0.3,
   },
@@ -1533,7 +1533,7 @@ const styles = StyleSheet.create({
   },
   modalSectionTitle: {
     fontSize: 10,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#64748B',
     letterSpacing: 0.6,
     marginBottom: 8,
@@ -1610,7 +1610,7 @@ const styles = StyleSheet.create({
   },
   addPlatformActionBtnText: {
     fontSize: 11,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#FFFFFF',
   },
   customAddAccountBox: {
@@ -1624,7 +1624,7 @@ const styles = StyleSheet.create({
   },
   customAddTitle: {
     fontSize: 10,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#582CDB',
     letterSpacing: 0.6,
   },
@@ -1652,7 +1652,7 @@ const styles = StyleSheet.create({
   },
   platformSelectChipTextActive: {
     color: '#582CDB',
-    fontWeight: '900',
+    fontWeight: '700',
   },
   customInputRow: {
     flexDirection: 'row',
@@ -1680,7 +1680,7 @@ const styles = StyleSheet.create({
   },
   linkAccountConfirmBtnText: {
     fontSize: 11,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#FFFFFF',
   },
   modalDoneBtn: {
@@ -1693,7 +1693,7 @@ const styles = StyleSheet.create({
   },
   modalDoneBtnText: {
     fontSize: 14,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#FFFFFF',
     letterSpacing: 0.3,
   },
@@ -1729,7 +1729,7 @@ const styles = StyleSheet.create({
   },
   modalFullBtnText: {
     fontSize: 14,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#FFFFFF',
   },
 
@@ -1746,7 +1746,7 @@ const styles = StyleSheet.create({
     zIndex: 9999,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.25,
+    shadowOpacity: 0.08,
     shadowRadius: 10,
     elevation: 8,
     alignItems: 'center',
@@ -1754,7 +1754,7 @@ const styles = StyleSheet.create({
   toastText: {
     color: '#FFFFFF',
     fontSize: 12.5,
-    fontWeight: '900',
+    fontWeight: '700',
     letterSpacing: 0.2,
   },
 });

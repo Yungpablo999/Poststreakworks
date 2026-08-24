@@ -1087,7 +1087,7 @@ const styles = StyleSheet.create({
   },
   squadHeroTitle: {
     fontSize: 20,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
     letterSpacing: -0.3,
   },
@@ -1099,7 +1099,7 @@ const styles = StyleSheet.create({
   },
   proSquadPillText: {
     fontSize: 10,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#FFFFFF',
     letterSpacing: 0.5,
   },
@@ -1161,7 +1161,7 @@ const styles = StyleSheet.create({
   },
   metricValBold: {
     fontSize: 15,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
   },
   metricDivider: {
@@ -1229,7 +1229,7 @@ const styles = StyleSheet.create({
   },
   jarvisStrategyTitle: {
     fontSize: 14,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#582CDB',
     marginBottom: 4,
   },
@@ -1261,7 +1261,7 @@ const styles = StyleSheet.create({
   },
   weeklyChallengeTitle: {
     fontSize: 15,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
     marginBottom: 2,
   },
@@ -1280,7 +1280,7 @@ const styles = StyleSheet.create({
   },
   xpBountyBadgeText: {
     fontSize: 11,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#B45309',
   },
   progressLabelRow: {
@@ -1295,12 +1295,12 @@ const styles = StyleSheet.create({
   },
   progressValuePurple: {
     fontSize: 12,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#582CDB',
   },
   progressValueGold: {
     fontSize: 12,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#B45309',
   },
   progressTrack: {
@@ -1328,7 +1328,7 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontSize: 15.5,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
     letterSpacing: -0.2,
   },
@@ -1381,7 +1381,7 @@ const styles = StyleSheet.create({
   },
   hostPillText: {
     fontSize: 9,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#582CDB',
   },
   memberRole: {
@@ -1402,7 +1402,7 @@ const styles = StyleSheet.create({
   },
   memberStreakText: {
     fontSize: 12,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
   },
   memberChatIconBtn: {
@@ -1518,7 +1518,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     shadowColor: '#582CDB',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
+    shadowOpacity: 0.08,
     shadowRadius: 3,
     elevation: 2,
   },
@@ -1527,7 +1527,7 @@ const styles = StyleSheet.create({
   },
   collabJoinBtnText: {
     fontSize: 12,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#FFFFFF',
   },
 
@@ -1729,7 +1729,7 @@ const styles = StyleSheet.create({
   },
   chatAttachBtnText: {
     fontSize: 16,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#582CDB',
     lineHeight: 18,
   },
@@ -1752,7 +1752,7 @@ const styles = StyleSheet.create({
   chatSendBtnActive: {
     shadowColor: '#582CDB',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
+    shadowOpacity: 0.12,
     shadowRadius: 4,
     elevation: 2,
   },
@@ -1769,7 +1769,7 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     shadowColor: '#582CDB',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.28,
+    shadowOpacity: 0.08,
     shadowRadius: 10,
     elevation: 4,
   },
@@ -1780,7 +1780,7 @@ const styles = StyleSheet.create({
   },
   startQuestBtnText: {
     fontSize: 14.5,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#FFFFFF',
     letterSpacing: 0.3,
   },
@@ -1813,7 +1813,7 @@ const styles = StyleSheet.create({
   },
   manageModalTitle: {
     fontSize: 17,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
   },
   modalCloseText: {
@@ -1849,7 +1849,7 @@ const styles = StyleSheet.create({
   },
   manageDoneBtnText: {
     fontSize: 14,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#FFFFFF',
   },
 });

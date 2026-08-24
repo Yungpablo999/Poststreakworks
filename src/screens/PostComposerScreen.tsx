@@ -795,7 +795,7 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
                   <Text style={styles.platformCardName} numberOfLines={1}>{plat.name}</Text>
                   {isSelected ? (
                     <View style={styles.platformActiveBadge}>
-                      <Text style={{ fontSize: 10, color: '#FFFFFF', fontWeight: '900' }}>✓</Text>
+                      <Text style={{ fontSize: 10, color: '#FFFFFF', fontWeight: '700' }}>✓</Text>
                     </View>
                   ) : (
                     <View style={styles.platformInactiveBadge} />
@@ -1115,7 +1115,7 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
             </View>
             <View style={{ flex: 1 }}>
               <Text style={styles.streakBannerTitle}>
-                Scheduling this post today protects your <Text style={{ fontWeight: '900' }}>47-day streak</Text>.
+                Scheduling this post today protects your <Text style={{ fontWeight: '700' }}>47-day streak</Text>.
               </Text>
               <View style={styles.streakBannerBadgesRow}>
                 <View style={styles.streakXpPill}>
@@ -1277,7 +1277,7 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
                       </View>
 
                       <View style={[styles.modalCheckbox, isSelected && styles.modalCheckboxActive]}>
-                        {isSelected && <Text style={{ color: '#FFFFFF', fontSize: 11, fontWeight: '900' }}>✓</Text>}
+                        {isSelected && <Text style={{ color: '#FFFFFF', fontSize: 11, fontWeight: '700' }}>✓</Text>}
                       </View>
                     </Pressable>
                   );
@@ -1770,13 +1770,13 @@ const styles = StyleSheet.create({
     borderRadius: 100,
     shadowColor: '#F59E0B',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
+    shadowOpacity: 0.08,
     shadowRadius: 6,
     elevation: 2,
   },
   createPostPillText: {
     fontSize: 11,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#FFFFFF',
     letterSpacing: 0.6,
   },
@@ -2092,7 +2092,7 @@ const styles = StyleSheet.create({
   },
   aiBadgeText: {
     fontSize: 10,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#6D28D9',
     letterSpacing: 0.5,
   },
@@ -2143,7 +2143,7 @@ const styles = StyleSheet.create({
   },
   toneLabel: {
     fontSize: 9,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#94A3B8',
   },
   toneValue: {
@@ -2214,7 +2214,7 @@ const styles = StyleSheet.create({
   tagPillCross: {
     fontSize: 10,
     color: '#7C3AED',
-    fontWeight: '900',
+    fontWeight: '700',
   },
   addTagInputRow: {
     flexDirection: 'row',
@@ -2336,7 +2336,7 @@ const styles = StyleSheet.create({
   },
   scheduledLabel: {
     fontSize: 10,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#6D28D9',
     letterSpacing: 0.5,
     marginBottom: 2,
@@ -2381,7 +2381,7 @@ const styles = StyleSheet.create({
   },
   readinessPercent: {
     fontSize: 14,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#582CDB',
   },
   readinessProgressBarTrack: {
@@ -2412,7 +2412,7 @@ const styles = StyleSheet.create({
   checkMarkWhite: {
     fontSize: 10,
     color: '#FFFFFF',
-    fontWeight: '900',
+    fontWeight: '700',
   },
   checkIconEmpty: {
     width: 18,
@@ -2466,7 +2466,7 @@ const styles = StyleSheet.create({
   },
   streakXpText: {
     fontSize: 10,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#78350F',
     letterSpacing: 0.4,
   },
@@ -2526,7 +2526,7 @@ const styles = StyleSheet.create({
   },
   jarvisInsightTag: {
     fontSize: 10,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#6D28D9',
     letterSpacing: 0.6,
   },
@@ -2540,7 +2540,7 @@ const styles = StyleSheet.create({
   },
   jarvisScoreText: {
     fontSize: 10,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#B45309',
     letterSpacing: 0.4,
   },
@@ -2583,7 +2583,7 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     shadowColor: '#582CDB',
     shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.2,
+    shadowOpacity: 0.08,
     shadowRadius: 8,
     elevation: 3,
   },
@@ -2594,7 +2594,7 @@ const styles = StyleSheet.create({
   },
   improveWithJarvisBtnText: {
     fontSize: 13,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#FFFFFF',
     letterSpacing: 0.5,
   },
@@ -2612,7 +2612,7 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     shadowColor: '#582CDB',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.25,
+    shadowOpacity: 0.08,
     shadowRadius: 10,
     elevation: 4,
   },
@@ -2660,7 +2660,7 @@ const styles = StyleSheet.create({
     padding: 20,
     shadowColor: '#582CDB',
     shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 0.2,
+    shadowOpacity: 0.08,
     shadowRadius: 24,
     elevation: 8,
   },
@@ -2674,7 +2674,7 @@ const styles = StyleSheet.create({
     padding: 20,
     shadowColor: '#582CDB',
     shadowOffset: { width: 0, height: 12 },
-    shadowOpacity: 0.22,
+    shadowOpacity: 0.08,
     shadowRadius: 28,
     elevation: 10,
   },
@@ -2765,7 +2765,7 @@ const styles = StyleSheet.create({
     marginTop: 14,
     shadowColor: '#582CDB',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.25,
+    shadowOpacity: 0.08,
     shadowRadius: 10,
     elevation: 4,
   },
@@ -2810,7 +2810,7 @@ const styles = StyleSheet.create({
   },
   calMonthNavBadge: {
     fontSize: 9,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#582CDB',
     letterSpacing: 0.6,
     marginTop: 2,
@@ -2847,7 +2847,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#582CDB',
     shadowColor: '#582CDB',
     shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.3,
+    shadowOpacity: 0.12,
     shadowRadius: 6,
     elevation: 3,
   },
@@ -2858,11 +2858,11 @@ const styles = StyleSheet.create({
   },
   calDayNumTextSelected: {
     color: '#FFFFFF',
-    fontWeight: '900',
+    fontWeight: '700',
   },
   calDayNumTextToday: {
     color: '#582CDB',
-    fontWeight: '900',
+    fontWeight: '700',
   },
   calTodayDot: {
     position: 'absolute',
@@ -3077,7 +3077,7 @@ const styles = StyleSheet.create({
   },
   chatSpeaker: {
     fontSize: 10,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#582CDB',
     letterSpacing: 0.5,
     marginBottom: 4,

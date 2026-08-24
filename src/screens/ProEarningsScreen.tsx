@@ -1212,7 +1212,7 @@ export const ProEarningsScreen: React.FC<ProEarningsScreenProps> = ({
                                   setSelectedPlatformIndex(pIdx);
                                 }}
                               >
-                                <Text style={[styles.platformBarAmtText, isSelected && { color: '#582CDB', fontWeight: '900' }]}>
+                                <Text style={[styles.platformBarAmtText, isSelected && { color: '#582CDB', fontWeight: '700' }]}>
                                   {plat.amount}
                                 </Text>
 
@@ -1378,7 +1378,7 @@ export const ProEarningsScreen: React.FC<ProEarningsScreenProps> = ({
                                 <SocialBrandIcon platform={plat.icon} size={22} />
                                 <View style={{ flex: 1, marginLeft: 10 }}>
                                   <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 4 }}>
-                                    <Text style={[styles.audienceChannelName, isSelected && { color: '#582CDB', fontWeight: '900' }]}>
+                                    <Text style={[styles.audienceChannelName, isSelected && { color: '#582CDB', fontWeight: '700' }]}>
                                       {plat.name}
                                     </Text>
                                     <Text style={styles.audienceChannelVal}>
@@ -2008,7 +2008,7 @@ const styles = StyleSheet.create({
   },
   proPillBadgeText: {
     fontSize: 9,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#92400E',
     letterSpacing: 0.3,
   },
@@ -2067,13 +2067,13 @@ const styles = StyleSheet.create({
   },
   heroPillText: {
     fontSize: 10,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#D97706',
     letterSpacing: 0.3,
   },
   mainTitle: {
     fontSize: 23,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
     letterSpacing: -0.5,
   },
@@ -2121,7 +2121,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#582CDB',
     shadowColor: '#582CDB',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
+    shadowOpacity: 0.12,
     shadowRadius: 4,
   },
   timeframePillText: {
@@ -2131,7 +2131,7 @@ const styles = StyleSheet.create({
   },
   timeframePillTextActive: {
     color: '#FFFFFF',
-    fontWeight: '900',
+    fontWeight: '700',
   },
   graphActivePointCard: {
     backgroundColor: '#FAF8F5',
@@ -2143,7 +2143,7 @@ const styles = StyleSheet.create({
   },
   graphActivePointDate: {
     fontSize: 12,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
   },
   graphActivePointSub: {
@@ -2153,7 +2153,7 @@ const styles = StyleSheet.create({
   },
   graphActivePointValue: {
     fontSize: 14,
-    fontWeight: '900',
+    fontWeight: '700',
   },
   graphActivePointDelta: {
     fontSize: 10,
@@ -2248,7 +2248,7 @@ const styles = StyleSheet.create({
   },
   audienceStatDuoVal: {
     fontSize: 17,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
   },
   audienceStatDuoSub: {
@@ -2266,7 +2266,7 @@ const styles = StyleSheet.create({
   },
   audienceChannelsTitle: {
     fontSize: 10,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#64748B',
     letterSpacing: 0.5,
     marginBottom: 10,
@@ -2336,7 +2336,7 @@ const styles = StyleSheet.create({
   },
   platformChartHeaderTitle: {
     fontSize: 10,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#64748B',
     letterSpacing: 0.5,
   },
@@ -2402,7 +2402,7 @@ const styles = StyleSheet.create({
   },
   platformBarLabelActive: {
     color: '#582CDB',
-    fontWeight: '900',
+    fontWeight: '700',
   },
   platformBarPctText: {
     fontSize: 10,
@@ -2436,7 +2436,7 @@ const styles = StyleSheet.create({
   },
   ledgerAmountText: {
     fontSize: 14,
-    fontWeight: '900',
+    fontWeight: '700',
   },
   ledgerStatusPill: {
     paddingHorizontal: 6,
@@ -2452,7 +2452,7 @@ const styles = StyleSheet.create({
   },
   ledgerStatusText: {
     fontSize: 9,
-    fontWeight: '900',
+    fontWeight: '700',
   },
   ledgerStatusTextPaid: {
     color: '#15803D',
@@ -2489,7 +2489,7 @@ const styles = StyleSheet.create({
   },
   ledgerTaxTitle: {
     fontSize: 10,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#64748B',
     letterSpacing: 0.5,
   },
@@ -2546,7 +2546,7 @@ const styles = StyleSheet.create({
   },
   cleanTxAmt: {
     fontSize: 14,
-    fontWeight: '900',
+    fontWeight: '700',
   },
   cleanTxStatus: {
     fontSize: 10,
@@ -2600,7 +2600,7 @@ const styles = StyleSheet.create({
   },
   modalCloseCross: {
     fontSize: 14,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#64748B',
   },
   modalFullBtn: {
@@ -2636,7 +2636,7 @@ const styles = StyleSheet.create({
   },
   heroCardLabel: {
     fontSize: 11,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#94A3B8',
     letterSpacing: 0.5,
   },
@@ -2648,12 +2648,12 @@ const styles = StyleSheet.create({
   },
   growthBadgeText: {
     fontSize: 10,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#582CDB',
   },
   heroBigAmount: {
     fontSize: 38,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#F59E0B',
     marginVertical: 8,
     letterSpacing: -0.5,
@@ -2681,7 +2681,7 @@ const styles = StyleSheet.create({
   },
   metricChipValue: {
     fontSize: 14.5,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
   },
   goalRow: {
@@ -2692,12 +2692,12 @@ const styles = StyleSheet.create({
   },
   goalLabel: {
     fontSize: 10,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#64748B',
   },
   goalPercent: {
     fontSize: 10,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#582CDB',
   },
   goalTrackBg: {
@@ -2717,14 +2717,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     shadowColor: '#582CDB',
     shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.25,
+    shadowOpacity: 0.08,
     shadowRadius: 6,
     elevation: 3,
   },
   viewPayoutsBtnText: {
     color: '#FFFFFF',
     fontSize: 13,
-    fontWeight: '900',
+    fontWeight: '700',
     letterSpacing: 0.4,
   },
   openPassBtn: {
@@ -2738,7 +2738,7 @@ const styles = StyleSheet.create({
   openPassBtnText: {
     color: '#171420',
     fontSize: 12.5,
-    fontWeight: '900',
+    fontWeight: '700',
     letterSpacing: 0.4,
   },
 
@@ -2763,7 +2763,7 @@ const styles = StyleSheet.create({
   },
   cardHeaderTitle: {
     fontSize: 14,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
   },
   syncStatusPill: {
@@ -2774,7 +2774,7 @@ const styles = StyleSheet.create({
   },
   syncStatusText: {
     fontSize: 10,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#582CDB',
   },
 
@@ -2809,7 +2809,7 @@ const styles = StyleSheet.create({
   },
   sourceItemAmount: {
     fontSize: 14,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
   },
   sourceItemPercent: {
@@ -2827,7 +2827,7 @@ const styles = StyleSheet.create({
   },
   platformNameText: {
     fontSize: 13,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
   },
   platBadgePill: {
@@ -2839,14 +2839,14 @@ const styles = StyleSheet.create({
   platBadgePurple: { backgroundColor: '#EDE9FE' },
   platBadgeGray: { backgroundColor: '#F1F5F9' },
   platBadgeRed: { backgroundColor: '#FEE2E2' },
-  platBadgeText: { fontSize: 9, fontWeight: '900' },
+  platBadgeText: { fontSize: 9, fontWeight: '700' },
   platBadgeTextGold: { color: '#B45309' },
   platBadgeTextPurple: { color: '#582CDB' },
   platBadgeTextGray: { color: '#64748B' },
   platBadgeTextRed: { color: '#DC2626' },
   platformAmountText: {
     fontSize: 14,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
   },
   platTrackBg: {
@@ -2879,7 +2879,7 @@ const styles = StyleSheet.create({
   },
   payoutRowValBold: {
     fontSize: 13,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
   },
   payoutRowValDim: {
@@ -2895,7 +2895,7 @@ const styles = StyleSheet.create({
   },
   processingBadgeText: {
     fontSize: 9,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#D97706',
     letterSpacing: 0.3,
   },
@@ -2920,7 +2920,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
     shadowColor: '#582CDB',
     shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.3,
+    shadowOpacity: 0.12,
     shadowRadius: 12,
     elevation: 4,
   },
@@ -2932,7 +2932,7 @@ const styles = StyleSheet.create({
   },
   trendTitleText: {
     fontSize: 15,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#FFFFFF',
   },
   trendSubText: {
@@ -2948,7 +2948,7 @@ const styles = StyleSheet.create({
   },
   trendYtdPillText: {
     fontSize: 10,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#FDE68A',
   },
   barChartContainer: {
@@ -2967,7 +2967,7 @@ const styles = StyleSheet.create({
   },
   barAmountTop: {
     fontSize: 10,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#E9D5FF',
     marginBottom: 4,
   },
@@ -2995,7 +2995,7 @@ const styles = StyleSheet.create({
   },
   barMonthLabelCurrent: {
     color: '#FDE68A',
-    fontWeight: '900',
+    fontWeight: '700',
   },
   trendFooterNote: {
     fontSize: 12,
@@ -3025,7 +3025,7 @@ const styles = StyleSheet.create({
   },
   jarvisStrategyTitle: {
     fontSize: 15,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
     marginBottom: 6,
   },
@@ -3047,7 +3047,7 @@ const styles = StyleSheet.create({
   askJarvisIncomeBtnText: {
     color: '#FFFFFF',
     fontSize: 12.5,
-    fontWeight: '900',
+    fontWeight: '700',
     letterSpacing: 0.3,
   },
 
@@ -3066,7 +3066,7 @@ const styles = StyleSheet.create({
   },
   downloadPdfBtnText: {
     fontSize: 12,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
     letterSpacing: 0.4,
   },
@@ -3074,7 +3074,7 @@ const styles = StyleSheet.create({
   // RECENT BRAND EARNINGS
   totalGoldHeader: {
     fontSize: 15,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#F59E0B',
   },
   brandEarningRow: {
@@ -3099,7 +3099,7 @@ const styles = StyleSheet.create({
   },
   brandNameText: {
     fontSize: 13,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
   },
   brandStatusPill: {
@@ -3115,7 +3115,7 @@ const styles = StyleSheet.create({
   },
   brandStatusText: {
     fontSize: 9,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#15803D',
   },
   brandStatusTextPending: {
@@ -3123,14 +3123,14 @@ const styles = StyleSheet.create({
   },
   brandEarnedAmount: {
     fontSize: 14,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
   },
 
   // COLLAB REVENUE
   totalPurpleHeader: {
     fontSize: 15,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#582CDB',
   },
   collabRow: {
@@ -3148,7 +3148,7 @@ const styles = StyleSheet.create({
   },
   collabAmountText: {
     fontSize: 14,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
   },
   outlineActionBtn: {
@@ -3196,17 +3196,17 @@ const styles = StyleSheet.create({
   },
   proTagPillText: {
     fontSize: 10,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#582CDB',
   },
   modalCloseText: {
     fontSize: 18,
     color: '#94A3B8',
-    fontWeight: '900',
+    fontWeight: '700',
   },
   modalTitle: {
     fontSize: 18,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
     letterSpacing: -0.3,
   },
@@ -3224,18 +3224,18 @@ const styles = StyleSheet.create({
   },
   bankCardType: {
     fontSize: 10,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#94A3B8',
     letterSpacing: 0.5,
   },
   bankVerifiedTag: {
     fontSize: 10,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#34D399',
   },
   bankCardNumber: {
     fontSize: 16,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#FFFFFF',
     letterSpacing: 2,
     marginVertical: 14,
@@ -3248,11 +3248,11 @@ const styles = StyleSheet.create({
   bankCurrencyTag: {
     fontSize: 11,
     color: '#FDE68A',
-    fontWeight: '900',
+    fontWeight: '700',
   },
   inputLabel: {
     fontSize: 10,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#94A3B8',
     letterSpacing: 0.5,
   },
@@ -3279,7 +3279,7 @@ const styles = StyleSheet.create({
   },
   transferAmount: {
     fontSize: 13,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
   },
   rateCardBox: {
@@ -3292,7 +3292,7 @@ const styles = StyleSheet.create({
   },
   rateCardHeader: {
     fontSize: 10,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#582CDB',
     letterSpacing: 0.5,
   },
@@ -3312,7 +3312,7 @@ const styles = StyleSheet.create({
   },
   ratePrice: {
     fontSize: 13,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#F59E0B',
   },
   modalPrimaryActionBtn: {
@@ -3320,7 +3320,7 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     shadowColor: '#F59E0B',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.35,
+    shadowOpacity: 0.12,
     shadowRadius: 8,
     elevation: 4,
   },
@@ -3335,7 +3335,7 @@ const styles = StyleSheet.create({
   modalGoldActionBtnText: {
     color: '#0C0A12',
     fontSize: 14,
-    fontWeight: '900',
+    fontWeight: '700',
   },
   modalCancelBtn: {
     paddingVertical: 10,
@@ -3364,7 +3364,7 @@ const styles = StyleSheet.create({
   toastText: {
     color: '#FFFFFF',
     fontSize: 12.5,
-    fontWeight: '900',
+    fontWeight: '700',
     letterSpacing: 0.2,
   },
   btnPressed: {

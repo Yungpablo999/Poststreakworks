@@ -947,7 +947,7 @@ const styles = StyleSheet.create({
     width: '100%',
     shadowColor: '#582CDB',
     shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.25,
+    shadowOpacity: 0.08,
     shadowRadius: 12,
     elevation: 4,
   },
@@ -986,7 +986,7 @@ const styles = StyleSheet.create({
   },
   successCheckEmoji: {
     fontSize: 32,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#582CDB',
   },
   successTitle: {
@@ -1093,7 +1093,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     shadowColor: '#582CDB',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.25,
+    shadowOpacity: 0.08,
     shadowRadius: 10,
     elevation: 4,
   },

@@ -895,7 +895,7 @@ const styles = StyleSheet.create({
   },
   proHeaderBadgeText: {
     fontSize: 10,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#0C0A12',
     letterSpacing: 0.3,
   },
@@ -964,7 +964,7 @@ const styles = StyleSheet.create({
   },
   createPostTagText: {
     fontSize: 10,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#D97706',
     letterSpacing: 0.3,
   },
@@ -976,13 +976,13 @@ const styles = StyleSheet.create({
   },
   draftPillText: {
     fontSize: 10,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#582CDB',
     letterSpacing: 0.3,
   },
   mainTitleText: {
     fontSize: 23,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
     letterSpacing: -0.5,
   },
@@ -1009,19 +1009,19 @@ const styles = StyleSheet.create({
   },
   postIdeaTag: {
     fontSize: 11,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#94A3B8',
     letterSpacing: 0.5,
   },
   changeIdeaLink: {
     fontSize: 11,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#582CDB',
     letterSpacing: 0.3,
   },
   postIdeaMainTitle: {
     fontSize: 17,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
     marginVertical: 4,
     lineHeight: 23,
@@ -1050,7 +1050,7 @@ const styles = StyleSheet.create({
   },
   ideaChipPillTextActive: {
     color: '#582CDB',
-    fontWeight: '900',
+    fontWeight: '700',
   },
 
   // SECTION 2: CHOOSE PLATFORMS
@@ -1062,7 +1062,7 @@ const styles = StyleSheet.create({
   },
   sectionHeaderTitle: {
     fontSize: 12.5,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#64748B',
     letterSpacing: 0.5,
   },
@@ -1075,7 +1075,7 @@ const styles = StyleSheet.create({
   morePlatformsBtnText: {
     color: '#FFFFFF',
     fontSize: 11,
-    fontWeight: '900',
+    fontWeight: '700',
   },
   platformsGridRow: {
     flexDirection: 'row',
@@ -1108,7 +1108,7 @@ const styles = StyleSheet.create({
   },
   platformCardName: {
     fontSize: 12.5,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
   },
   platformCheckCircle: {
@@ -1164,7 +1164,7 @@ const styles = StyleSheet.create({
   },
   mediaMainHeading: {
     fontSize: 14,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
   },
   mediaSubHeading: {
@@ -1200,7 +1200,7 @@ const styles = StyleSheet.create({
   },
   mediaProBadgeText: {
     fontSize: 9,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#15803D',
   },
   mediaSizeText: {
@@ -1210,7 +1210,7 @@ const styles = StyleSheet.create({
   },
   mediaAttachedName: {
     fontSize: 12.5,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
   },
   mediaAttachedFormat: {
@@ -1232,7 +1232,7 @@ const styles = StyleSheet.create({
   },
   mediaActionBtnText: {
     fontSize: 12,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
   },
 
@@ -1245,7 +1245,7 @@ const styles = StyleSheet.create({
   },
   polishJarvisBtnText: {
     fontSize: 11,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#582CDB',
   },
   captionBoxCard: {
@@ -1279,14 +1279,14 @@ const styles = StyleSheet.create({
   autopilotBtnText: {
     color: '#582CDB',
     fontSize: 13,
-    fontWeight: '900',
+    fontWeight: '700',
   },
   publishGoldBtn: {
     borderRadius: 14,
     overflow: 'hidden',
     shadowColor: '#F59E0B',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.35,
+    shadowOpacity: 0.12,
     shadowRadius: 8,
     elevation: 4,
   },
@@ -1299,7 +1299,7 @@ const styles = StyleSheet.create({
   publishGoldBtnText: {
     color: '#0C0A12',
     fontSize: 14,
-    fontWeight: '900',
+    fontWeight: '700',
     letterSpacing: 0.3,
   },
 
@@ -1328,11 +1328,11 @@ const styles = StyleSheet.create({
   modalCloseText: {
     fontSize: 18,
     color: '#94A3B8',
-    fontWeight: '900',
+    fontWeight: '700',
   },
   modalTitle: {
     fontSize: 18,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
     letterSpacing: -0.3,
   },
@@ -1364,7 +1364,7 @@ const styles = StyleSheet.create({
   },
   platformModalName: {
     fontSize: 13,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
   },
   platformModalFormat: {
@@ -1398,7 +1398,7 @@ const styles = StyleSheet.create({
   toastText: {
     color: '#FFFFFF',
     fontSize: 12.5,
-    fontWeight: '900',
+    fontWeight: '700',
     letterSpacing: 0.2,
   },
   btnPressed: {

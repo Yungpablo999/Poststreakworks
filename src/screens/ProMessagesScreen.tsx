@@ -717,7 +717,7 @@ export const ProMessagesScreen: React.FC<ProMessagesScreenProps> = ({
               style={({ pressed }) => [styles.backBtnCircle, pressed && styles.btnPressed]}
               hitSlop={8}
             >
-              <Text style={{ fontSize: 18, color: '#171420', fontWeight: '900' }}>‹</Text>
+              <Text style={{ fontSize: 18, color: '#171420', fontWeight: '700' }}>‹</Text>
             </Pressable>
 
             {/* PostStreak 3D Ghost Mascot */}
@@ -823,7 +823,7 @@ export const ProMessagesScreen: React.FC<ProMessagesScreenProps> = ({
             />
             {searchQuery.length > 0 && (
               <Pressable onPress={() => setSearchQuery('')} hitSlop={8}>
-                <Text style={{ fontSize: 12, color: '#94A3B8', fontWeight: '900' }}>✕</Text>
+                <Text style={{ fontSize: 12, color: '#94A3B8', fontWeight: '700' }}>✕</Text>
               </Pressable>
             )}
           </View>
@@ -1039,7 +1039,7 @@ export const ProMessagesScreen: React.FC<ProMessagesScreenProps> = ({
                       style={styles.chatBackBtn}
                       hitSlop={8}
                     >
-                      <Text style={{ fontSize: 20, fontWeight: '900', color: '#171420' }}>‹</Text>
+                      <Text style={{ fontSize: 20, fontWeight: '700', color: '#171420' }}>‹</Text>
                     </Pressable>
 
                     {/* Tapping Chat Header Avatar opens their Story/Highlight! */}
@@ -1206,7 +1206,7 @@ export const ProMessagesScreen: React.FC<ProMessagesScreenProps> = ({
                     style={styles.attachBtn}
                     onPress={() => showToast('Attach Script, Reel draft, or Audio note')}
                   >
-                    <Text style={{ fontSize: 18, color: '#582CDB', fontWeight: '900' }}>+</Text>
+                    <Text style={{ fontSize: 18, color: '#582CDB', fontWeight: '700' }}>+</Text>
                   </Pressable>
 
                   <TextInput
@@ -1335,7 +1335,7 @@ const styles = StyleSheet.create({
   },
   proHeaderBadgeText: {
     fontSize: 9,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#92400E',
     letterSpacing: 0.3,
   },
@@ -1351,7 +1351,7 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     shadowColor: '#582CDB',
     shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.2,
+    shadowOpacity: 0.08,
     shadowRadius: 6,
     elevation: 3,
   },
@@ -1424,7 +1424,7 @@ const styles = StyleSheet.create({
   },
   filterTabTextActive: {
     color: '#FFFFFF',
-    fontWeight: '900',
+    fontWeight: '700',
   },
 
   // STORIES SECTION
@@ -1480,7 +1480,7 @@ const styles = StyleSheet.create({
   },
   storyStreakText: {
     fontSize: 9,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#582CDB',
   },
 
@@ -1512,7 +1512,7 @@ const styles = StyleSheet.create({
   },
   bannerTagText: {
     fontSize: 9,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#582CDB',
     letterSpacing: 0.5,
   },
@@ -1524,12 +1524,12 @@ const styles = StyleSheet.create({
   },
   bannerMatchPillText: {
     fontSize: 8,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#FFFFFF',
   },
   bannerTitleText: {
     fontSize: 14.5,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
     marginTop: 2,
   },
@@ -1540,14 +1540,14 @@ const styles = StyleSheet.create({
   },
   bannerArrowText: {
     fontSize: 16,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#582CDB',
   },
 
   // CONVERSATIONS LIST
   conversationsHeaderTitle: {
     fontSize: 16,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
     marginBottom: 10,
   },
@@ -1592,7 +1592,7 @@ const styles = StyleSheet.create({
   },
   convCreatorName: {
     fontSize: 14.5,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
   },
   proMicroPill: {
@@ -1603,7 +1603,7 @@ const styles = StyleSheet.create({
   },
   proMicroPillText: {
     fontSize: 8,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#92400E',
   },
   convTimeText: {
@@ -1644,7 +1644,7 @@ const styles = StyleSheet.create({
   unreadCountText: {
     color: '#FFFFFF',
     fontSize: 10,
-    fontWeight: '900',
+    fontWeight: '700',
   },
 
   // CHAT ROOM MODAL
@@ -1683,7 +1683,7 @@ const styles = StyleSheet.create({
   },
   chatHeaderName: {
     fontSize: 15,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
   },
   chatHeaderStatus: {
@@ -1792,12 +1792,12 @@ const styles = StyleSheet.create({
   },
   proposalTagText: {
     fontSize: 9,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#FFFFFF',
   },
   proposalTitleText: {
     fontSize: 14.5,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
     marginTop: 4,
   },
@@ -1816,7 +1816,7 @@ const styles = StyleSheet.create({
   acceptProposalBtnText: {
     color: '#FFFFFF',
     fontSize: 12,
-    fontWeight: '900',
+    fontWeight: '700',
   },
   audioNoteBubble: {
     flexDirection: 'row',
@@ -1919,7 +1919,7 @@ const styles = StyleSheet.create({
   toastText: {
     color: '#FFFFFF',
     fontSize: 12.5,
-    fontWeight: '900',
+    fontWeight: '700',
     letterSpacing: 0.2,
   },
 });

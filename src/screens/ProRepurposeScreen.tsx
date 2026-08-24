@@ -446,7 +446,7 @@ export const ProRepurposeScreen: React.FC<ProRepurposeScreenProps> = ({
                       setShowMorePlatformsModal(true);
                     }}
                   >
-                    <Text style={{ fontSize: 18, color: '#64748B', fontWeight: '900' }}>＋</Text>
+                    <Text style={{ fontSize: 18, color: '#64748B', fontWeight: '700' }}>＋</Text>
                     <Text style={styles.formatMoreText}>{fmt.name}</Text>
                   </Pressable>
                 );
@@ -469,7 +469,7 @@ export const ProRepurposeScreen: React.FC<ProRepurposeScreenProps> = ({
                   </Text>
                   {isSelected && (
                     <View style={styles.formatCheckDot}>
-                      <Text style={{ fontSize: 8, color: '#FFFFFF', fontWeight: '900' }}>✓</Text>
+                      <Text style={{ fontSize: 8, color: '#FFFFFF', fontWeight: '700' }}>✓</Text>
                     </View>
                   )}
                 </Pressable>
@@ -973,7 +973,7 @@ export const ProRepurposeScreen: React.FC<ProRepurposeScreenProps> = ({
 
                     <View style={[styles.extraPlatformCheckRing, isSelected && styles.extraPlatformCheckRingActive]}>
                       {isSelected && (
-                        <Text style={{ fontSize: 9, color: '#FFFFFF', fontWeight: '900' }}>✓</Text>
+                        <Text style={{ fontSize: 9, color: '#FFFFFF', fontWeight: '700' }}>✓</Text>
                       )}
                     </View>
                   </Pressable>
@@ -1135,13 +1135,13 @@ const styles = StyleSheet.create({
   },
   repurposeStudioBadgeText: {
     fontSize: 9,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#D97706',
     letterSpacing: 0.4,
   },
   heroTitle: {
     fontSize: 22,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
     letterSpacing: -0.5,
     lineHeight: 28,
@@ -1159,7 +1159,7 @@ const styles = StyleSheet.create({
   },
   sectionHeaderTitle: {
     fontSize: 14,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
   },
 
@@ -1177,7 +1177,7 @@ const styles = StyleSheet.create({
   },
   originalIdeaTitle: {
     fontSize: 14.5,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
     flex: 1,
     lineHeight: 20,
@@ -1191,7 +1191,7 @@ const styles = StyleSheet.create({
   },
   shortVideoBadgeText: {
     fontSize: 9,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#FFFFFF',
     letterSpacing: 0.3,
   },
@@ -1214,7 +1214,7 @@ const styles = StyleSheet.create({
   },
   retentionBadgeText: {
     fontSize: 9,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#15803D',
     letterSpacing: 0.3,
   },
@@ -1226,7 +1226,7 @@ const styles = StyleSheet.create({
   },
   savePotentialBadgeText: {
     fontSize: 9,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#D97706',
     letterSpacing: 0.3,
   },
@@ -1241,13 +1241,13 @@ const styles = StyleSheet.create({
   editOriginalIdeaBtnText: {
     color: '#582CDB',
     fontSize: 12,
-    fontWeight: '900',
+    fontWeight: '700',
   },
 
   // CARD 2: SELECT FORMATS
   selectAllLinkText: {
     fontSize: 11,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#582CDB',
   },
   formatsGrid: {
@@ -1277,7 +1277,7 @@ const styles = StyleSheet.create({
     color: '#64748B',
   },
   formatCardNameActive: {
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
   },
   formatCheckDot: {
@@ -1314,7 +1314,7 @@ const styles = StyleSheet.create({
     marginTop: 12,
     shadowColor: '#582CDB',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.25,
+    shadowOpacity: 0.08,
     shadowRadius: 8,
     elevation: 3,
   },
@@ -1325,7 +1325,7 @@ const styles = StyleSheet.create({
   generateVersionsBtnText: {
     color: '#FFFFFF',
     fontSize: 13,
-    fontWeight: '900',
+    fontWeight: '700',
     letterSpacing: 0.3,
   },
 
@@ -1339,7 +1339,7 @@ const styles = StyleSheet.create({
   },
   versionPlatformText: {
     fontSize: 12,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
   },
   versionBadge: {
@@ -1349,12 +1349,12 @@ const styles = StyleSheet.create({
   },
   versionBadgeText: {
     fontSize: 9,
-    fontWeight: '900',
+    fontWeight: '700',
     letterSpacing: 0.3,
   },
   versionTitle: {
     fontSize: 13,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
     marginTop: 8,
     marginBottom: 4,
@@ -1380,7 +1380,7 @@ const styles = StyleSheet.create({
   },
   versionEditBtnText: {
     fontSize: 12,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
   },
   versionUseBtn: {
@@ -1392,7 +1392,7 @@ const styles = StyleSheet.create({
   },
   versionUseBtnText: {
     fontSize: 12,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#FFFFFF',
   },
 
@@ -1424,7 +1424,7 @@ const styles = StyleSheet.create({
   },
   captionVarTypeBadgeText: {
     fontSize: 9,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#582CDB',
     letterSpacing: 0.3,
   },
@@ -1446,7 +1446,7 @@ const styles = StyleSheet.create({
   },
   repurposeScoreTitle: {
     fontSize: 14,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
   },
   repurposeScoreSub: {
@@ -1466,18 +1466,18 @@ const styles = StyleSheet.create({
   },
   gaugeScoreVal: {
     fontSize: 16,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
   },
   metricBarLabel: {
     fontSize: 9,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#64748B',
     letterSpacing: 0.4,
   },
   metricBarVal: {
     fontSize: 10,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
   },
   metricBarTrack: {
@@ -1500,7 +1500,7 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(139, 92, 246, 0.45)',
     shadowColor: '#7C3AED',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.35,
+    shadowOpacity: 0.12,
     shadowRadius: 10,
     elevation: 4,
   },
@@ -1516,13 +1516,13 @@ const styles = StyleSheet.create({
   },
   jarvisHeroTitle: {
     fontSize: 14.5,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#FFFFFF',
     letterSpacing: 0.2,
   },
   jarvisHeroSub: {
     fontSize: 9,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#A78BFA',
     letterSpacing: 0.5,
     marginTop: 1,
@@ -1537,7 +1537,7 @@ const styles = StyleSheet.create({
   },
   jarvisActivePillText: {
     fontSize: 9,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#34D399',
     letterSpacing: 0.3,
   },
@@ -1564,13 +1564,13 @@ const styles = StyleSheet.create({
     borderColor: '#FDE68A',
     shadowColor: '#F59E0B',
     shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.2,
+    shadowOpacity: 0.08,
     shadowRadius: 3,
     elevation: 2,
   },
   jarvisGoldStrategyPillText: {
     fontSize: 9,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#92400E',
     letterSpacing: 0.3,
   },
@@ -1585,7 +1585,7 @@ const styles = StyleSheet.create({
   jarvisScheduleBtnText: {
     color: '#FFFFFF',
     fontSize: 12,
-    fontWeight: '900',
+    fontWeight: '700',
   },
 
   // CARD 7: STRATEGIC SCHEDULE
@@ -1599,7 +1599,7 @@ const styles = StyleSheet.create({
   },
   scheduleHeaderTitle: {
     fontSize: 14,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
   },
   scheduleSlotRow: {
@@ -1626,7 +1626,7 @@ const styles = StyleSheet.create({
   },
   scheduleTimePillText: {
     fontSize: 10,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#582CDB',
   },
   amberScheduleAllBtn: {
@@ -1641,7 +1641,7 @@ const styles = StyleSheet.create({
   amberScheduleAllBtnText: {
     color: '#FFFFFF',
     fontSize: 13,
-    fontWeight: '900',
+    fontWeight: '700',
     letterSpacing: 0.3,
   },
 
@@ -1661,13 +1661,13 @@ const styles = StyleSheet.create({
   },
   metricCardLabel: {
     fontSize: 9,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#94A3B8',
     letterSpacing: 0.4,
   },
   metricCardValue: {
     fontSize: 18,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#582CDB',
     marginTop: 4,
   },
@@ -1689,7 +1689,7 @@ const styles = StyleSheet.create({
   bottomRegenerateFullBtnText: {
     color: '#171420',
     fontSize: 13,
-    fontWeight: '900',
+    fontWeight: '700',
     letterSpacing: 0.2,
   },
 
@@ -1725,7 +1725,7 @@ const styles = StyleSheet.create({
   },
   extraPlatformName: {
     fontSize: 12.5,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
   },
   extraPlatformDesc: {
@@ -1767,7 +1767,7 @@ const styles = StyleSheet.create({
     borderColor: '#EFECE6',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 0.2,
+    shadowOpacity: 0.08,
     shadowRadius: 20,
     elevation: 8,
   },
@@ -1779,18 +1779,18 @@ const styles = StyleSheet.create({
   },
   modalTitle: {
     fontSize: 16,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
   },
   modalCloseText: {
     fontSize: 16,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#64748B',
     padding: 4,
   },
   modalInputLabel: {
     fontSize: 9,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#94A3B8',
     letterSpacing: 0.4,
     marginBottom: 4,
@@ -1817,7 +1817,7 @@ const styles = StyleSheet.create({
   modalCancelBtnText: {
     color: '#64748B',
     fontSize: 12,
-    fontWeight: '900',
+    fontWeight: '700',
   },
   modalSaveBtn: {
     flex: 2,
@@ -1829,6 +1829,6 @@ const styles = StyleSheet.create({
   modalSaveBtnText: {
     color: '#FFFFFF',
     fontSize: 12,
-    fontWeight: '900',
+    fontWeight: '700',
   },
 });

@@ -640,7 +640,7 @@ export const ProIdeaStrategyScreen: React.FC<ProIdeaStrategyScreenProps> = ({
             </View>
 
             <Text style={styles.jarvisIntelQuote}>
-              &ldquo;Start with the <Text style={{ fontWeight: '900', color: '#582CDB' }}>Growth Idea</Text> if you want stronger saves and authority. Choose the <Text style={{ fontWeight: '900', color: '#D97706' }}>Streak-Saver Idea</Text> if your main goal is to protect today&apos;s streak quickly.&rdquo;
+              &ldquo;Start with the <Text style={{ fontWeight: '700', color: '#582CDB' }}>Growth Idea</Text> if you want stronger saves and authority. Choose the <Text style={{ fontWeight: '700', color: '#D97706' }}>Streak-Saver Idea</Text> if your main goal is to protect today&apos;s streak quickly.&rdquo;
             </Text>
 
             <Pressable
@@ -823,7 +823,7 @@ export const ProIdeaStrategyScreen: React.FC<ProIdeaStrategyScreenProps> = ({
                     }}
                   >
                     <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <Text style={{ fontSize: 13, fontWeight: '900', color: '#171420', flex: 1, marginRight: 8 }}>
+                      <Text style={{ fontSize: 13, fontWeight: '700', color: '#171420', flex: 1, marginRight: 8 }}>
                         {idea.title}
                       </Text>
                       <View style={styles.savedScorePill}>
@@ -956,7 +956,7 @@ const styles = StyleSheet.create({
   },
   proHeaderBadgeText: {
     fontSize: 10,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#0C0A12',
     letterSpacing: 0.3,
   },
@@ -1027,13 +1027,13 @@ const styles = StyleSheet.create({
   },
   goldStrategyBadgeText: {
     fontSize: 10,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#D97706',
     letterSpacing: 0.3,
   },
   mainTitleText: {
     fontSize: 23,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
     letterSpacing: -0.5,
   },
@@ -1051,7 +1051,7 @@ const styles = StyleSheet.create({
   },
   purplePillText: {
     fontSize: 11,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#582CDB',
   },
   goldPill: {
@@ -1062,7 +1062,7 @@ const styles = StyleSheet.create({
   },
   goldPillText: {
     fontSize: 11,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#D97706',
   },
 
@@ -1075,13 +1075,13 @@ const styles = StyleSheet.create({
   },
   sectionHeaderTitle: {
     fontSize: 12,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#64748B',
     letterSpacing: 0.5,
   },
   editAllLink: {
     fontSize: 11,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#582CDB',
     letterSpacing: 0.3,
   },
@@ -1099,7 +1099,7 @@ const styles = StyleSheet.create({
   },
   setupFieldLabel: {
     fontSize: 10,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#94A3B8',
     letterSpacing: 0.4,
     marginBottom: 6,
@@ -1128,7 +1128,7 @@ const styles = StyleSheet.create({
   },
   setupOptionTextActive: {
     color: '#FFFFFF',
-    fontWeight: '900',
+    fontWeight: '700',
   },
   promptBubbleBox: {
     backgroundColor: '#FAF8F5',
@@ -1160,13 +1160,13 @@ const styles = StyleSheet.create({
   },
   scoreCardLabel: {
     fontSize: 10,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#94A3B8',
     letterSpacing: 0.4,
   },
   scoreBigNumber: {
     fontSize: 36,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
     letterSpacing: -1,
   },
@@ -1180,7 +1180,7 @@ const styles = StyleSheet.create({
   },
   proPickBadgeText: {
     fontSize: 11,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#D97706',
   },
   sparkleCircle: {
@@ -1193,12 +1193,12 @@ const styles = StyleSheet.create({
   },
   meterLabel: {
     fontSize: 10,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#64748B',
   },
   meterValText: {
     fontSize: 11,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
   },
   meterTrack: {
@@ -1259,7 +1259,7 @@ const styles = StyleSheet.create({
   },
   categoryTagText: {
     fontSize: 10,
-    fontWeight: '900',
+    fontWeight: '700',
     letterSpacing: 0.3,
   },
   tagTextStreakSaver: {
@@ -1270,12 +1270,12 @@ const styles = StyleSheet.create({
   },
   ideaScoreVal: {
     fontSize: 15,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
   },
   ideaMainHeadline: {
     fontSize: 15,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
     lineHeight: 21,
     marginTop: 8,
@@ -1319,7 +1319,7 @@ const styles = StyleSheet.create({
   },
   tableHeadCol: {
     fontSize: 10,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#94A3B8',
     letterSpacing: 0.4,
   },
@@ -1343,7 +1343,7 @@ const styles = StyleSheet.create({
   },
   tableTagGoldText: {
     fontSize: 9,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#D97706',
   },
   tableTagPurple: {
@@ -1354,12 +1354,12 @@ const styles = StyleSheet.create({
   },
   tableTagPurpleText: {
     fontSize: 9,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#582CDB',
   },
   tableScoreVal: {
     fontSize: 12.5,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#582CDB',
   },
 
@@ -1379,12 +1379,12 @@ const styles = StyleSheet.create({
   },
   jarvisIntelTitle: {
     fontSize: 16,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
   },
   jarvisIntelSub: {
     fontSize: 9,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#582CDB',
     letterSpacing: 0.4,
   },
@@ -1403,7 +1403,7 @@ const styles = StyleSheet.create({
   jarvisBuildWorkflowBtnText: {
     color: '#FFFFFF',
     fontSize: 12.5,
-    fontWeight: '900',
+    fontWeight: '700',
   },
 
   // SECTION 6: SAVED PRO IDEAS
@@ -1417,7 +1417,7 @@ const styles = StyleSheet.create({
   },
   savedIdeaTitle: {
     fontSize: 12,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
     lineHeight: 17,
   },
@@ -1429,7 +1429,7 @@ const styles = StyleSheet.create({
   },
   savedScorePillText: {
     fontSize: 9,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#D97706',
   },
 
@@ -1441,14 +1441,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     shadowColor: '#582CDB',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.25,
+    shadowOpacity: 0.08,
     shadowRadius: 8,
     elevation: 3,
   },
   buildCompleteWorkflowBtnText: {
     color: '#FFFFFF',
     fontSize: 14,
-    fontWeight: '900',
+    fontWeight: '700',
   },
   generateMoreBtn: {
     backgroundColor: '#FAF8F5',
@@ -1461,7 +1461,7 @@ const styles = StyleSheet.create({
   generateMoreBtnText: {
     color: '#171420',
     fontSize: 13,
-    fontWeight: '900',
+    fontWeight: '700',
   },
   backToCreateLinkBtn: {
     alignItems: 'center',
@@ -1470,7 +1470,7 @@ const styles = StyleSheet.create({
   backToCreateLinkText: {
     color: '#582CDB',
     fontSize: 11,
-    fontWeight: '900',
+    fontWeight: '700',
     letterSpacing: 0.5,
   },
 
@@ -1498,13 +1498,13 @@ const styles = StyleSheet.create({
   },
   modalTitle: {
     fontSize: 18,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
   },
   modalCloseText: {
     fontSize: 18,
     color: '#94A3B8',
-    fontWeight: '900',
+    fontWeight: '700',
   },
   modalTextInput: {
     backgroundColor: '#FAF8F5',
@@ -1528,7 +1528,7 @@ const styles = StyleSheet.create({
   modalSaveBtnText: {
     color: '#FFFFFF',
     fontSize: 12.5,
-    fontWeight: '900',
+    fontWeight: '700',
   },
   savedModalItem: {
     backgroundColor: '#FAF8F5',
@@ -1564,7 +1564,7 @@ const styles = StyleSheet.create({
   toastText: {
     color: '#FFFFFF',
     fontSize: 12.5,
-    fontWeight: '900',
+    fontWeight: '700',
     letterSpacing: 0.2,
   },
   btnPressed: {

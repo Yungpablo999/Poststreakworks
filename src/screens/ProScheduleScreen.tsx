@@ -1063,7 +1063,7 @@ export const ProScheduleScreen: React.FC<ProScheduleScreenProps> = ({
                     <Text style={styles.modalProTagBadgeText}>👑 PRO AUTOPILOT SCHEDULER</Text>
                   </View>
                   <Pressable onPress={() => setShowSchedulePostModal(false)} hitSlop={8}>
-                    <Text style={{ fontSize: 18, color: '#94A3B8', fontWeight: '900' }}>✕</Text>
+                    <Text style={{ fontSize: 18, color: '#94A3B8', fontWeight: '700' }}>✕</Text>
                   </Pressable>
                 </View>
 
@@ -1199,7 +1199,7 @@ export const ProScheduleScreen: React.FC<ProScheduleScreenProps> = ({
                     <Text style={styles.modalGoldTagBadgeText}>🪄 JARVIS GAP RESOLVER — PRO</Text>
                   </View>
                   <Pressable onPress={() => setShowFillGapModal(false)} hitSlop={8}>
-                    <Text style={{ fontSize: 18, color: '#94A3B8', fontWeight: '900' }}>✕</Text>
+                    <Text style={{ fontSize: 18, color: '#94A3B8', fontWeight: '700' }}>✕</Text>
                   </Pressable>
                 </View>
 
@@ -1320,7 +1320,7 @@ export const ProScheduleScreen: React.FC<ProScheduleScreenProps> = ({
                       <Text style={styles.modalProTagBadgeText}>👑 ADVANCED PRO POST EDITOR</Text>
                     </View>
                     <Pressable onPress={() => setSelectedPostDetail(null)} hitSlop={8}>
-                      <Text style={{ fontSize: 18, color: '#94A3B8', fontWeight: '900' }}>✕</Text>
+                      <Text style={{ fontSize: 18, color: '#94A3B8', fontWeight: '700' }}>✕</Text>
                     </Pressable>
                   </View>
 
@@ -1533,7 +1533,7 @@ export const ProScheduleScreen: React.FC<ProScheduleScreenProps> = ({
                     </Text>
                   </View>
                   <Pressable onPress={() => setShowExpandViewModal(false)} hitSlop={8}>
-                    <Text style={{ fontSize: 18, color: '#94A3B8', fontWeight: '900' }}>✕</Text>
+                    <Text style={{ fontSize: 18, color: '#94A3B8', fontWeight: '700' }}>✕</Text>
                   </Pressable>
                 </View>
 
@@ -1668,7 +1668,7 @@ export const ProScheduleScreen: React.FC<ProScheduleScreenProps> = ({
                     <Text style={styles.modalProTagBadgeText}>👑 PRO AUTOPILOT QUEUE</Text>
                   </View>
                   <Pressable onPress={() => setShowFullQueueModal(false)} hitSlop={8}>
-                    <Text style={{ fontSize: 18, color: '#94A3B8', fontWeight: '900' }}>✕</Text>
+                    <Text style={{ fontSize: 18, color: '#94A3B8', fontWeight: '700' }}>✕</Text>
                   </Pressable>
                 </View>
 
@@ -1750,7 +1750,7 @@ export const ProScheduleScreen: React.FC<ProScheduleScreenProps> = ({
 
                         <View style={styles.queueCardFooterRow}>
                           <Text style={styles.queueCardActionHint}>✏️ Tap to edit details &amp; peak timing</Text>
-                          <Text style={{ fontSize: 13, color: '#582CDB', fontWeight: '900' }}>➔</Text>
+                          <Text style={{ fontSize: 13, color: '#582CDB', fontWeight: '700' }}>➔</Text>
                         </View>
                       </Pressable>
                     ))}
@@ -1801,7 +1801,7 @@ export const ProScheduleScreen: React.FC<ProScheduleScreenProps> = ({
                     <Text style={styles.modalProTagBadgeText}>👑 JARVIS PRO STRATEGY BLUEPRINT</Text>
                   </View>
                   <Pressable onPress={() => setShowStrategyModal(false)} hitSlop={8}>
-                    <Text style={{ fontSize: 18, color: '#94A3B8', fontWeight: '900' }}>✕</Text>
+                    <Text style={{ fontSize: 18, color: '#94A3B8', fontWeight: '700' }}>✕</Text>
                   </Pressable>
                 </View>
 
@@ -2009,7 +2009,7 @@ const styles = StyleSheet.create({
   },
   proHeaderBadgeText: {
     fontSize: 9,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
     letterSpacing: 0.3,
   },
@@ -2025,7 +2025,7 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     shadowColor: '#582CDB',
     shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.2,
+    shadowOpacity: 0.08,
     shadowRadius: 6,
     elevation: 3,
   },
@@ -2071,13 +2071,13 @@ const styles = StyleSheet.create({
   },
   contentScheduleTagText: {
     fontSize: 10,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#92400E',
     letterSpacing: 0.6,
   },
   mainTitleText: {
     fontSize: 22,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
     letterSpacing: -0.4,
     marginBottom: 6,
@@ -2104,7 +2104,7 @@ const styles = StyleSheet.create({
   },
   weeklyOutlookTitle: {
     fontSize: 16,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
   },
   weeklyOutlookRange: {
@@ -2129,7 +2129,7 @@ const styles = StyleSheet.create({
   schedulePostPrimaryBtnText: {
     color: '#FFFFFF',
     fontSize: 13,
-    fontWeight: '900',
+    fontWeight: '700',
   },
   fillGapsOutlineBtn: {
     flex: 1,
@@ -2144,7 +2144,7 @@ const styles = StyleSheet.create({
   fillGapsOutlineBtnText: {
     color: '#92400E',
     fontSize: 13,
-    fontWeight: '900',
+    fontWeight: '700',
   },
 
   // 2X2 METRICS GRID: 2 ROWS
@@ -2173,7 +2173,7 @@ const styles = StyleSheet.create({
   },
   metricGridVal: {
     fontSize: 20,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
   },
   planCompletionHeaderRow: {
@@ -2190,7 +2190,7 @@ const styles = StyleSheet.create({
   },
   planCompletionReadyText: {
     fontSize: 11,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#582CDB',
   },
   planCompletionProgressBarTrack: {
@@ -2207,7 +2207,7 @@ const styles = StyleSheet.create({
   // SECTION 2: CALENDAR VIEW STRIP
   sectionSmallHeading: {
     fontSize: 11,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#64748B',
     letterSpacing: 0.6,
     marginBottom: 10,
@@ -2240,11 +2240,11 @@ const styles = StyleSheet.create({
   },
   dayNameTextSelected: {
     color: '#582CDB',
-    fontWeight: '900',
+    fontWeight: '700',
   },
   dayNumText: {
     fontSize: 14,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
     marginBottom: 4,
   },
@@ -2279,7 +2279,7 @@ const styles = StyleSheet.create({
   },
   sectionHeaderTitleBold: {
     fontSize: 16,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
   },
   expandViewLink: {
@@ -2311,7 +2311,7 @@ const styles = StyleSheet.create({
   },
   timeBoxPurpleText: {
     fontSize: 12,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#582CDB',
   },
   timeBoxPurpleSub: {
@@ -2331,7 +2331,7 @@ const styles = StyleSheet.create({
   },
   timeBoxGoldText: {
     fontSize: 12,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#92400E',
   },
   timeBoxGoldSub: {
@@ -2341,7 +2341,7 @@ const styles = StyleSheet.create({
   },
   scheduleItemTitle: {
     fontSize: 14,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
   },
   scheduleItemPlatform: {
@@ -2358,7 +2358,7 @@ const styles = StyleSheet.create({
   },
   scheduledPillBadgeText: {
     fontSize: 9,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#582CDB',
   },
   recommendedPillBadge: {
@@ -2371,7 +2371,7 @@ const styles = StyleSheet.create({
   },
   recommendedPillBadgeText: {
     fontSize: 9,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#92400E',
   },
   emptyScheduleBox: {
@@ -2398,7 +2398,7 @@ const styles = StyleSheet.create({
   emptyAddPostBtnText: {
     color: '#582CDB',
     fontSize: 12,
-    fontWeight: '900',
+    fontWeight: '700',
   },
 
   // SECTION 4: UPCOMING QUEUE
@@ -2410,7 +2410,7 @@ const styles = StyleSheet.create({
   },
   viewFullQueuePillText: {
     fontSize: 11,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#582CDB',
   },
   queueContainerCard: {
@@ -2456,7 +2456,7 @@ const styles = StyleSheet.create({
   },
   queueItemTitle: {
     fontSize: 14,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
   },
   queueItemTime: {
@@ -2467,7 +2467,7 @@ const styles = StyleSheet.create({
   threeDotsMenu: {
     fontSize: 18,
     color: '#94A3B8',
-    fontWeight: '900',
+    fontWeight: '700',
   },
 
   // SECTION 5: AUTOPILOT ACTIVE BANNER
@@ -2489,7 +2489,7 @@ const styles = StyleSheet.create({
   },
   autopilotTitleText: {
     fontSize: 15,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
   },
   autopilotSubText: {
@@ -2511,7 +2511,7 @@ const styles = StyleSheet.create({
   },
   autopilotSubTileVal: {
     fontSize: 14,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
   },
 
@@ -2526,7 +2526,7 @@ const styles = StyleSheet.create({
   },
   analyticsSectionTitle: {
     fontSize: 15,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
   },
   windowDayLabel: {
@@ -2537,7 +2537,7 @@ const styles = StyleSheet.create({
   },
   windowPeakLabel: {
     fontSize: 11,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#582CDB',
   },
   timelineBarTrack: {
@@ -2558,7 +2558,7 @@ const styles = StyleSheet.create({
   },
   platformMixTitle: {
     fontSize: 14,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
     marginBottom: 8,
   },
@@ -2610,7 +2610,7 @@ const styles = StyleSheet.create({
   },
   gapWarningTitle: {
     fontSize: 14,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
     marginTop: 2,
   },
@@ -2620,7 +2620,7 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     shadowColor: '#F59E0B',
     shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.35,
+    shadowOpacity: 0.12,
     shadowRadius: 8,
     elevation: 3,
   },
@@ -2636,7 +2636,7 @@ const styles = StyleSheet.create({
   fillSlotGoldBtnText: {
     color: '#0C0A12',
     fontSize: 13,
-    fontWeight: '900',
+    fontWeight: '700',
     letterSpacing: 0.2,
   },
   askJarvisOutlineBtn: {
@@ -2652,7 +2652,7 @@ const styles = StyleSheet.create({
   askJarvisOutlineBtnText: {
     color: '#582CDB',
     fontSize: 12.5,
-    fontWeight: '900',
+    fontWeight: '700',
   },
 
   // SECTION 8: JARVIS INSIGHT
@@ -2662,7 +2662,7 @@ const styles = StyleSheet.create({
   },
   jarvisInsightHeader: {
     fontSize: 16,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#FFFFFF',
   },
   jarvisInsightBody: {
@@ -2680,7 +2680,7 @@ const styles = StyleSheet.create({
   moreStrategyBtnText: {
     color: '#FFFFFF',
     fontSize: 13,
-    fontWeight: '900',
+    fontWeight: '700',
   },
 
   // MODALS
@@ -2707,7 +2707,7 @@ const styles = StyleSheet.create({
   },
   modalProTagBadgeText: {
     fontSize: 9,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#582CDB',
     letterSpacing: 0.5,
   },
@@ -2721,7 +2721,7 @@ const styles = StyleSheet.create({
   },
   modalGoldTagBadgeText: {
     fontSize: 9,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#92400E',
     letterSpacing: 0.5,
   },
@@ -2733,12 +2733,12 @@ const styles = StyleSheet.create({
   },
   modalTagBadgeText: {
     fontSize: 9,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#582CDB',
   },
   modalTitleText: {
     fontSize: 18,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
     marginBottom: 4,
   },
@@ -2809,7 +2809,7 @@ const styles = StyleSheet.create({
   },
   platformPillTextActive: {
     color: '#FFFFFF',
-    fontWeight: '900',
+    fontWeight: '700',
   },
   timeChipBtn: {
     backgroundColor: '#FAF8F5',
@@ -2830,7 +2830,7 @@ const styles = StyleSheet.create({
   },
   timeChipTextActive: {
     color: '#582CDB',
-    fontWeight: '900',
+    fontWeight: '700',
   },
   jarvisPredictionBox: {
     backgroundColor: '#FAF8F5',
@@ -2842,7 +2842,7 @@ const styles = StyleSheet.create({
   },
   jarvisPredictionTitle: {
     fontSize: 12,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
     marginBottom: 2,
   },
@@ -2861,7 +2861,7 @@ const styles = StyleSheet.create({
   modalPrimaryActionBtnText: {
     color: '#FFFFFF',
     fontSize: 14,
-    fontWeight: '900',
+    fontWeight: '700',
   },
   modalGoldActionBtnWrapper: {
     borderRadius: 14,
@@ -2869,7 +2869,7 @@ const styles = StyleSheet.create({
     marginTop: 8,
     shadowColor: '#F59E0B',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.4,
+    shadowOpacity: 0.12,
     shadowRadius: 10,
     elevation: 4,
   },
@@ -2884,7 +2884,7 @@ const styles = StyleSheet.create({
   modalGoldActionBtnText: {
     color: '#0C0A12',
     fontSize: 14,
-    fontWeight: '900',
+    fontWeight: '700',
     letterSpacing: 0.2,
   },
   modalSecondaryOutlineBtn: {
@@ -2898,7 +2898,7 @@ const styles = StyleSheet.create({
   modalSecondaryOutlineBtnText: {
     color: '#582CDB',
     fontSize: 13,
-    fontWeight: '900',
+    fontWeight: '700',
   },
   modalDeleteBtn: {
     paddingVertical: 8,
@@ -2931,7 +2931,7 @@ const styles = StyleSheet.create({
   },
   gapSlotDetectedTitle: {
     fontSize: 11,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#92400E',
   },
   gapSlotDetectedSub: {
@@ -2965,7 +2965,7 @@ const styles = StyleSheet.create({
   },
   gapSugScoreText: {
     fontSize: 9,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#15803D',
   },
   gapSugTitleText: {
@@ -2985,7 +2985,7 @@ const styles = StyleSheet.create({
   postDetailPrimaryBtnText: {
     color: '#FFFFFF',
     fontSize: 13,
-    fontWeight: '900',
+    fontWeight: '700',
   },
   postDetailSecondaryBtn: {
     flex: 1,
@@ -3027,7 +3027,7 @@ const styles = StyleSheet.create({
   expandedPostActionBtnText: {
     color: '#FFFFFF',
     fontSize: 12,
-    fontWeight: '900',
+    fontWeight: '700',
   },
   expandedPostActionBtnSecondary: {
     flex: 1,
@@ -3086,7 +3086,7 @@ const styles = StyleSheet.create({
   },
   queueStatusBadgeText: {
     fontSize: 9,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#582CDB',
     letterSpacing: 0.4,
   },
@@ -3133,12 +3133,12 @@ const styles = StyleSheet.create({
   },
   strategyIdeaTitle: {
     fontSize: 14,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
   },
   strategyIdeaTag: {
     fontSize: 9,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#582CDB',
     letterSpacing: 0.4,
     marginTop: 1,
@@ -3171,7 +3171,7 @@ const styles = StyleSheet.create({
   toastText: {
     color: '#FFFFFF',
     fontSize: 12.5,
-    fontWeight: '900',
+    fontWeight: '700',
     letterSpacing: 0.2,
   },
 });

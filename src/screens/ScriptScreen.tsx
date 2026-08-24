@@ -1438,7 +1438,7 @@ const styles = StyleSheet.create({
   },
   selectedIdeaLabel: {
     fontSize: 10,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#6D28D9',
     letterSpacing: 0.6,
   },
@@ -1566,7 +1566,7 @@ const styles = StyleSheet.create({
   },
   generationsBadgeText: {
     fontSize: 10,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#B45309',
   },
   editSectionLink: {
@@ -1595,7 +1595,7 @@ const styles = StyleSheet.create({
   },
   alternativeHooksLabel: {
     fontSize: 10,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#64748B',
     letterSpacing: 0.6,
     marginBottom: 8,
@@ -1730,7 +1730,7 @@ const styles = StyleSheet.create({
   },
   improveTakeawayLink: {
     fontSize: 12,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#582CDB',
     letterSpacing: 0.4,
   },
@@ -1797,7 +1797,7 @@ const styles = StyleSheet.create({
   },
   streakImpactLabel: {
     fontSize: 10,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#78350F',
     letterSpacing: 0.6,
   },
@@ -1809,7 +1809,7 @@ const styles = StyleSheet.create({
   },
   streakImpactXp: {
     fontSize: 16,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#D97706',
   },
   streakProgressBarTrack: {
@@ -1840,7 +1840,7 @@ const styles = StyleSheet.create({
   },
   scriptPreviewLabel: {
     fontSize: 10,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#64748B',
     letterSpacing: 0.6,
   },
@@ -1884,7 +1884,7 @@ const styles = StyleSheet.create({
   },
   copyScriptBtnText: {
     fontSize: 12,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#582CDB',
     letterSpacing: 0.5,
   },
@@ -1896,7 +1896,7 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     shadowColor: '#582CDB',
     shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.25,
+    shadowOpacity: 0.08,
     shadowRadius: 14,
     elevation: 5,
     marginBottom: 10,
@@ -1908,7 +1908,7 @@ const styles = StyleSheet.create({
   },
   useAsPostBtnText: {
     fontSize: 15,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#FFFFFF',
     letterSpacing: 0.5,
   },
@@ -1952,7 +1952,7 @@ const styles = StyleSheet.create({
     padding: 20,
     shadowColor: '#582CDB',
     shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 0.2,
+    shadowOpacity: 0.08,
     shadowRadius: 24,
     elevation: 8,
   },
@@ -1966,7 +1966,7 @@ const styles = StyleSheet.create({
     padding: 20,
     shadowColor: '#582CDB',
     shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 0.2,
+    shadowOpacity: 0.08,
     shadowRadius: 24,
     elevation: 8,
   },
@@ -2026,7 +2026,7 @@ const styles = StyleSheet.create({
   },
   hookModalItemType: {
     fontSize: 12,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#6D28D9',
   },
   hookModalItemTypeActive: {
@@ -2040,7 +2040,7 @@ const styles = StyleSheet.create({
   },
   selectedCheckText: {
     fontSize: 10,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#582CDB',
   },
   hookModalItemText: {
@@ -2173,7 +2173,7 @@ const styles = StyleSheet.create({
   },
   ctaModalItemType: {
     fontSize: 12,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#6D28D9',
   },
   ctaModalItemTypeActive: {
@@ -2199,7 +2199,7 @@ const styles = StyleSheet.create({
     marginTop: 10,
     shadowColor: '#582CDB',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.25,
+    shadowOpacity: 0.08,
     shadowRadius: 10,
     elevation: 4,
   },
@@ -2296,7 +2296,7 @@ const styles = StyleSheet.create({
   },
   chatSpeaker: {
     fontSize: 10,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#582CDB',
     letterSpacing: 0.5,
     marginBottom: 4,

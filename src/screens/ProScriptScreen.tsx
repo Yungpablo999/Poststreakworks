@@ -1035,7 +1035,7 @@ const styles = StyleSheet.create({
   },
   proHeaderBadgeText: {
     fontSize: 10,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#0C0A12',
     letterSpacing: 0.3,
   },
@@ -1106,13 +1106,13 @@ const styles = StyleSheet.create({
   },
   goldScriptBadgeText: {
     fontSize: 10,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#D97706',
     letterSpacing: 0.3,
   },
   mainTitleText: {
     fontSize: 23,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
     letterSpacing: -0.5,
   },
@@ -1130,7 +1130,7 @@ const styles = StyleSheet.create({
   },
   purplePillText: {
     fontSize: 11,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#582CDB',
   },
   goldPill: {
@@ -1141,7 +1141,7 @@ const styles = StyleSheet.create({
   },
   goldPillText: {
     fontSize: 11,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#D97706',
   },
 
@@ -1162,13 +1162,13 @@ const styles = StyleSheet.create({
   },
   selectedIdeaTag: {
     fontSize: 10,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#582CDB',
     letterSpacing: 0.5,
   },
   selectedIdeaTitle: {
     fontSize: 16,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
     marginVertical: 4,
     lineHeight: 22,
@@ -1208,7 +1208,7 @@ const styles = StyleSheet.create({
   },
   reSelectIdeaText: {
     fontSize: 11,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#64748B',
     letterSpacing: 0.4,
   },
@@ -1222,13 +1222,13 @@ const styles = StyleSheet.create({
     backgroundColor: '#582CDB',
     shadowColor: '#582CDB',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.35,
+    shadowOpacity: 0.12,
     shadowRadius: 4,
     elevation: 2,
   },
   proAccelerateBtnText: {
     fontSize: 10,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#582CDB',
   },
   proAccelerateBtnTextActive: {
@@ -1250,7 +1250,7 @@ const styles = StyleSheet.create({
   },
   scoreCardLabel: {
     fontSize: 11,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#64748B',
     letterSpacing: 0.4,
   },
@@ -1262,7 +1262,7 @@ const styles = StyleSheet.create({
   },
   aiEvaluatedBadgeText: {
     fontSize: 9,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#582CDB',
   },
   scoreGaugeCircle: {
@@ -1276,7 +1276,7 @@ const styles = StyleSheet.create({
   },
   scoreGaugeNum: {
     fontSize: 22,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
     lineHeight: 24,
   },
@@ -1287,12 +1287,12 @@ const styles = StyleSheet.create({
   },
   meterLabel: {
     fontSize: 10,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#64748B',
   },
   meterVal: {
     fontSize: 10,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
   },
   meterTrack: {
@@ -1332,7 +1332,7 @@ const styles = StyleSheet.create({
   },
   sectionHeaderTitle: {
     fontSize: 12,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#64748B',
     letterSpacing: 0.5,
   },
@@ -1357,7 +1357,7 @@ const styles = StyleSheet.create({
   },
   bestPerformingBadgeText: {
     fontSize: 9,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#D97706',
   },
   hookOptionText: {
@@ -1367,7 +1367,7 @@ const styles = StyleSheet.create({
     lineHeight: 18,
   },
   hookOptionTextSelected: {
-    fontWeight: '900',
+    fontWeight: '700',
   },
   hookOptionType: {
     fontSize: 11,
@@ -1385,7 +1385,7 @@ const styles = StyleSheet.create({
   },
   generateMoreHooksBtnText: {
     fontSize: 11,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#582CDB',
   },
 
@@ -1398,7 +1398,7 @@ const styles = StyleSheet.create({
   },
   durationOptimalPillText: {
     fontSize: 9,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#15803D',
   },
   structureTimelineCard: {
@@ -1429,7 +1429,7 @@ const styles = StyleSheet.create({
   },
   timelineNumText: {
     fontSize: 11,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#475569',
   },
   timelineNumTextActive: {
@@ -1437,7 +1437,7 @@ const styles = StyleSheet.create({
   },
   timelineItemTitle: {
     fontSize: 12.5,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
   },
   timelineItemTiming: {
@@ -1485,7 +1485,7 @@ const styles = StyleSheet.create({
   },
   aiPolishPillBtnText: {
     fontSize: 11,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#582CDB',
   },
 
@@ -1500,13 +1500,13 @@ const styles = StyleSheet.create({
   },
   estimateCardHeaderLabel: {
     fontSize: 10,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#94A3B8',
     letterSpacing: 0.4,
   },
   estimateBigNum: {
     fontSize: 26,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
   },
   estimateUnitText: {
@@ -1532,7 +1532,7 @@ const styles = StyleSheet.create({
     color: '#64748B',
   },
   estimateMetricVal: {
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
   },
 
@@ -1551,7 +1551,7 @@ const styles = StyleSheet.create({
   },
   formatAdaptHeaderLabel: {
     fontSize: 10,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#64748B',
     letterSpacing: 0.4,
   },
@@ -1563,7 +1563,7 @@ const styles = StyleSheet.create({
   },
   formatActiveBadgeText: {
     fontSize: 9,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#15803D',
   },
   platformFormatPillCard: {
@@ -1583,7 +1583,7 @@ const styles = StyleSheet.create({
   },
   platFormatName: {
     fontSize: 11,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
   },
   platFormatSub: {
@@ -1604,7 +1604,7 @@ const styles = StyleSheet.create({
   },
   formatPresetsLabel: {
     fontSize: 9,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#94A3B8',
     letterSpacing: 0.4,
   },
@@ -1627,7 +1627,7 @@ const styles = StyleSheet.create({
   },
   formatPresetChipTextActive: {
     color: '#582CDB',
-    fontWeight: '900',
+    fontWeight: '700',
   },
   adaptBtn: {
     backgroundColor: '#EDE9FE',
@@ -1640,7 +1640,7 @@ const styles = StyleSheet.create({
   },
   adaptBtnText: {
     fontSize: 12,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#582CDB',
   },
 
@@ -1655,7 +1655,7 @@ const styles = StyleSheet.create({
   },
   retentionNotesHeaderLabel: {
     fontSize: 10,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#94A3B8',
     letterSpacing: 0.4,
   },
@@ -1676,7 +1676,7 @@ const styles = StyleSheet.create({
   },
   voicePreviewHeaderLabel: {
     fontSize: 10,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
     letterSpacing: 0.4,
   },
@@ -1687,7 +1687,7 @@ const styles = StyleSheet.create({
   },
   voicePreviewSubDetail: {
     fontSize: 9,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#15803D',
     marginTop: 1,
   },
@@ -1728,7 +1728,7 @@ const styles = StyleSheet.create({
   applyVoiceStudioBtnText: {
     color: '#FFFFFF',
     fontSize: 11,
-    fontWeight: '900',
+    fontWeight: '700',
   },
 
   // CARD 10: STREAK & XP IMPACT
@@ -1742,28 +1742,28 @@ const styles = StyleSheet.create({
   },
   streakCardHeaderLabel: {
     fontSize: 10,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#94A3B8',
     letterSpacing: 0.4,
   },
   streakValText: {
     fontSize: 12.5,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
   },
   xpValText: {
     fontSize: 12,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#582CDB',
   },
   postProgressLabel: {
     fontSize: 9,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#64748B',
   },
   postProgressVal: {
     fontSize: 10,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
   },
 
@@ -1783,7 +1783,7 @@ const styles = StyleSheet.create({
   },
   jarvisCoachTitle: {
     fontSize: 14.5,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
   },
   jarvisCoachQuote: {
@@ -1800,7 +1800,7 @@ const styles = StyleSheet.create({
   },
   coachChipText: {
     fontSize: 10,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#582CDB',
   },
   improveScriptBtn: {
@@ -1812,7 +1812,7 @@ const styles = StyleSheet.create({
   improveScriptBtnText: {
     color: '#FFFFFF',
     fontSize: 12,
-    fontWeight: '900',
+    fontWeight: '700',
   },
 
   // BOTTOM ACTION BUTTONS
@@ -1823,14 +1823,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     shadowColor: '#582CDB',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.25,
+    shadowOpacity: 0.08,
     shadowRadius: 8,
     elevation: 3,
   },
   sendToVoiceBtnText: {
     color: '#FFFFFF',
     fontSize: 14,
-    fontWeight: '900',
+    fontWeight: '700',
   },
   secondaryDeckBtn: {
     flex: 1,
@@ -1844,7 +1844,7 @@ const styles = StyleSheet.create({
   secondaryDeckBtnText: {
     color: '#171420',
     fontSize: 12,
-    fontWeight: '900',
+    fontWeight: '700',
   },
 
   // MODALS
@@ -1871,13 +1871,13 @@ const styles = StyleSheet.create({
   },
   modalTitle: {
     fontSize: 18,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
   },
   modalCloseText: {
     fontSize: 18,
     color: '#94A3B8',
-    fontWeight: '900',
+    fontWeight: '700',
   },
   modalAlertItem: {
     backgroundColor: '#FAF8F5',
@@ -1913,7 +1913,7 @@ const styles = StyleSheet.create({
   toastText: {
     color: '#FFFFFF',
     fontSize: 12.5,
-    fontWeight: '900',
+    fontWeight: '700',
     letterSpacing: 0.2,
   },
   btnPressed: {

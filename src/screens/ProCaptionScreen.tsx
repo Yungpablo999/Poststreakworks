@@ -1305,7 +1305,7 @@ const styles = StyleSheet.create({
   },
   proHeaderBadgeText: {
     fontSize: 10,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#0C0A12',
     letterSpacing: 0.3,
   },
@@ -1376,13 +1376,13 @@ const styles = StyleSheet.create({
   },
   goldScriptBadgeText: {
     fontSize: 10,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#D97706',
     letterSpacing: 0.3,
   },
   mainTitleText: {
     fontSize: 23,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
     letterSpacing: -0.5,
   },
@@ -1400,7 +1400,7 @@ const styles = StyleSheet.create({
   },
   purplePillText: {
     fontSize: 11,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#582CDB',
   },
   goldPill: {
@@ -1411,7 +1411,7 @@ const styles = StyleSheet.create({
   },
   goldPillText: {
     fontSize: 11,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#D97706',
   },
 
@@ -1430,17 +1430,17 @@ const styles = StyleSheet.create({
   },
   sourceCardLabel: {
     fontSize: 12,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
   },
   changeIdeaLink: {
     fontSize: 12,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#582CDB',
   },
   sourceIdeaHeadline: {
     fontSize: 14.5,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
     marginTop: 10,
     marginBottom: 4,
@@ -1472,7 +1472,7 @@ const styles = StyleSheet.create({
   },
   sectionHeaderTitle: {
     fontSize: 13,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
     letterSpacing: 0.2,
   },
@@ -1489,7 +1489,7 @@ const styles = StyleSheet.create({
   },
   toneActiveCounterText: {
     fontSize: 9,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#582CDB',
     letterSpacing: 0.3,
   },
@@ -1513,7 +1513,7 @@ const styles = StyleSheet.create({
     borderColor: '#582CDB',
     shadowColor: '#582CDB',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.28,
+    shadowOpacity: 0.08,
     shadowRadius: 4,
     elevation: 2,
   },
@@ -1524,7 +1524,7 @@ const styles = StyleSheet.create({
   },
   toneChipTextActive: {
     color: '#FFFFFF',
-    fontWeight: '900',
+    fontWeight: '700',
   },
   toneCheckMarkDot: {
     width: 14,
@@ -1593,13 +1593,13 @@ const styles = StyleSheet.create({
   },
   captionMetricHeader: {
     fontSize: 9,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#94A3B8',
     letterSpacing: 0.3,
   },
   captionMetricVal: {
     fontSize: 11,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
     marginTop: 2,
   },
@@ -1637,7 +1637,7 @@ const styles = StyleSheet.create({
   },
   platDeckTitle: {
     fontSize: 12,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
   },
   platDeckBadge: {
@@ -1650,7 +1650,7 @@ const styles = StyleSheet.create({
   },
   platDeckBadgeText: {
     fontSize: 8,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#64748B',
   },
   platDeckBodyText: {
@@ -1686,7 +1686,7 @@ const styles = StyleSheet.create({
   },
   platDeckUseBtnText: {
     fontSize: 11,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#FFFFFF',
   },
 
@@ -1703,12 +1703,12 @@ const styles = StyleSheet.create({
   },
   engagementCardTitle: {
     fontSize: 12.5,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
   },
   engagementBigNum: {
     fontSize: 20,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
   },
   engagementDenom: {
@@ -1718,18 +1718,18 @@ const styles = StyleSheet.create({
   },
   strongCaptionTag: {
     fontSize: 9,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#582CDB',
     letterSpacing: 0.4,
   },
   scoreBarLabel: {
     fontSize: 10,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#64748B',
   },
   scoreBarVal: {
     fontSize: 10,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
   },
   meterTrack: {
@@ -1789,7 +1789,7 @@ const styles = StyleSheet.create({
   },
   recommendedBadgeText: {
     fontSize: 9,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#D97706',
     letterSpacing: 0.3,
   },
@@ -1802,7 +1802,7 @@ const styles = StyleSheet.create({
     lineHeight: 18,
   },
   ctaCardTitleActive: {
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
   },
   ctaCardSub: {
@@ -1812,7 +1812,7 @@ const styles = StyleSheet.create({
   },
   ctaAltType: {
     fontSize: 9,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#582CDB',
     backgroundColor: '#EDE9FE',
     paddingHorizontal: 6,
@@ -1838,7 +1838,7 @@ const styles = StyleSheet.create({
   // CARD 7: HASHTAG SETS
   editHashtagsLink: {
     fontSize: 11,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#582CDB',
   },
   hashtagsCard: {
@@ -1861,13 +1861,13 @@ const styles = StyleSheet.create({
   },
   hashtagCategoryBadgeText: {
     fontSize: 9,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#582CDB',
     letterSpacing: 0.3,
   },
   hashtagsCountBadge: {
     fontSize: 9,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#94A3B8',
   },
   hashtagPreviewGrid: {
@@ -1922,11 +1922,11 @@ const styles = StyleSheet.create({
   addHashtagBtnText: {
     color: '#FFFFFF',
     fontSize: 12,
-    fontWeight: '900',
+    fontWeight: '700',
   },
   modalSectionSubHeader: {
     fontSize: 9,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#94A3B8',
     letterSpacing: 0.4,
     marginBottom: 6,
@@ -1963,7 +1963,7 @@ const styles = StyleSheet.create({
   },
   removeTagCrossText: {
     fontSize: 9,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#64748B',
   },
   quickSuggestionsRow: {
@@ -1996,7 +1996,7 @@ const styles = StyleSheet.create({
   resetHashtagsBtnText: {
     color: '#64748B',
     fontSize: 12,
-    fontWeight: '900',
+    fontWeight: '700',
   },
   saveHashtagsBtn: {
     flex: 2,
@@ -2008,7 +2008,7 @@ const styles = StyleSheet.create({
   saveHashtagsBtnText: {
     color: '#FFFFFF',
     fontSize: 12,
-    fontWeight: '900',
+    fontWeight: '700',
   },
 
   // CARD 8: STATUS & STREAK
@@ -2022,35 +2022,35 @@ const styles = StyleSheet.create({
   },
   statusLabel: {
     fontSize: 9,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#94A3B8',
     letterSpacing: 0.4,
   },
   statusVal: {
     fontSize: 12,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
   },
   xpLabel: {
     fontSize: 9,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#94A3B8',
     letterSpacing: 0.4,
   },
   xpVal: {
     fontSize: 14,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#582CDB',
   },
   streakLabel: {
     fontSize: 9,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#94A3B8',
     letterSpacing: 0.4,
   },
   streakVal: {
     fontSize: 12.5,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
   },
   streakProtectedBadge: {
@@ -2061,7 +2061,7 @@ const styles = StyleSheet.create({
   },
   streakProtectedBadgeText: {
     fontSize: 9,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#582CDB',
   },
 
@@ -2074,7 +2074,7 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(139, 92, 246, 0.45)',
     shadowColor: '#7C3AED',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.35,
+    shadowOpacity: 0.12,
     shadowRadius: 10,
     elevation: 4,
   },
@@ -2090,13 +2090,13 @@ const styles = StyleSheet.create({
   },
   jarvisHeroTitle: {
     fontSize: 14.5,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#FFFFFF',
     letterSpacing: 0.2,
   },
   jarvisHeroSub: {
     fontSize: 9,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#A78BFA',
     letterSpacing: 0.5,
     marginTop: 1,
@@ -2111,7 +2111,7 @@ const styles = StyleSheet.create({
   },
   jarvisActiveEnginePillText: {
     fontSize: 9,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#34D399',
     letterSpacing: 0.3,
   },
@@ -2138,13 +2138,13 @@ const styles = StyleSheet.create({
     borderColor: '#FDE68A',
     shadowColor: '#F59E0B',
     shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.2,
+    shadowOpacity: 0.08,
     shadowRadius: 3,
     elevation: 2,
   },
   jarvisStrategyChipText: {
     fontSize: 10,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#92400E',
     letterSpacing: 0.3,
   },
@@ -2159,7 +2159,7 @@ const styles = StyleSheet.create({
   applyJarvisHeroBtnText: {
     color: '#FFFFFF',
     fontSize: 12,
-    fontWeight: '900',
+    fontWeight: '700',
   },
 
   // BOTTOM ACTION BUTTONS
@@ -2171,14 +2171,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     shadowColor: '#582CDB',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.25,
+    shadowOpacity: 0.08,
     shadowRadius: 8,
     elevation: 3,
   },
   addToPostBtnText: {
     color: '#FFFFFF',
     fontSize: 13,
-    fontWeight: '900',
+    fontWeight: '700',
   },
   regenerateBtn: {
     flex: 1,
@@ -2192,7 +2192,7 @@ const styles = StyleSheet.create({
   regenerateBtnText: {
     color: '#171420',
     fontSize: 13,
-    fontWeight: '900',
+    fontWeight: '700',
   },
   saveDraftFullBtn: {
     flexDirection: 'row',
@@ -2213,7 +2213,7 @@ const styles = StyleSheet.create({
   saveDraftFullBtnText: {
     color: '#171420',
     fontSize: 12.5,
-    fontWeight: '900',
+    fontWeight: '700',
     letterSpacing: 0.2,
   },
   saveDraftXpPill: {
@@ -2225,7 +2225,7 @@ const styles = StyleSheet.create({
   },
   saveDraftXpPillText: {
     fontSize: 10,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#582CDB',
   },
 
@@ -2253,13 +2253,13 @@ const styles = StyleSheet.create({
   },
   modalTitle: {
     fontSize: 18,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
   },
   modalCloseText: {
     fontSize: 18,
     color: '#94A3B8',
-    fontWeight: '900',
+    fontWeight: '700',
   },
   modalAlertItem: {
     backgroundColor: '#FAF8F5',

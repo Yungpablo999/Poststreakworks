@@ -1107,7 +1107,7 @@ const styles = StyleSheet.create({
     borderRadius: 100,
     shadowColor: '#582CDB',
     shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.25,
+    shadowOpacity: 0.08,
     shadowRadius: 6,
   },
   startQuestBtnText: {
@@ -1244,7 +1244,7 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     shadowColor: '#582CDB',
     shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.3,
+    shadowOpacity: 0.12,
     shadowRadius: 14,
     elevation: 4,
   },
@@ -1339,7 +1339,7 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     shadowColor: '#FDE047',
     shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.35,
+    shadowOpacity: 0.12,
     shadowRadius: 6,
     elevation: 3,
   },
@@ -1352,7 +1352,7 @@ const styles = StyleSheet.create({
   },
   joinChallengeBtnText: {
     fontSize: 12.5,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
     letterSpacing: -0.2,
   },
@@ -1458,7 +1458,7 @@ const styles = StyleSheet.create({
   },
   earningsHubTitle: {
     fontSize: 16,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
   },
   readinessTag: {
@@ -1469,7 +1469,7 @@ const styles = StyleSheet.create({
   },
   readinessTagText: {
     fontSize: 9,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#582CDB',
   },
   earningsHubSub: {
@@ -1503,14 +1503,14 @@ const styles = StyleSheet.create({
   },
   earningsHubStatLabel: {
     fontSize: 9,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#64748B',
     letterSpacing: 0.4,
     marginBottom: 2,
   },
   earningsHubStatVal: {
     fontSize: 16,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
   },
   earningsHubDivider: {
@@ -1528,7 +1528,7 @@ const styles = StyleSheet.create({
   },
   earningsHubBtnText: {
     fontSize: 12.5,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#FFFFFF',
   },
 
@@ -1639,7 +1639,7 @@ const styles = StyleSheet.create({
   },
   proGoldBadgeText: {
     fontSize: 10,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
   },
   unlockProSubtitle: {
@@ -1663,7 +1663,7 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     shadowColor: '#F59E0B',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
+    shadowOpacity: 0.12,
     shadowRadius: 8,
   },
   exploreProGradient: {
@@ -1673,7 +1673,7 @@ const styles = StyleSheet.create({
   },
   exploreProBtnText: {
     fontSize: 14,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
     letterSpacing: -0.2,
   },

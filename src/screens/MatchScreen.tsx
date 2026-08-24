@@ -2097,7 +2097,7 @@ const styles = StyleSheet.create({
   },
   pageHeadline: {
     fontSize: 24,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
     letterSpacing: -0.5,
     lineHeight: 30,
@@ -2253,7 +2253,7 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(255, 255, 255, 0.9)',
     shadowColor: '#582CDB',
     shadowOffset: { width: 0, height: 12 },
-    shadowOpacity: 0.2,
+    shadowOpacity: 0.08,
     shadowRadius: 24,
     elevation: 8,
     position: 'relative',
@@ -2282,7 +2282,7 @@ const styles = StyleSheet.create({
   },
   acceptStampText: {
     fontSize: 18,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#10B981',
     letterSpacing: 1,
   },
@@ -2294,7 +2294,7 @@ const styles = StyleSheet.create({
   },
   declineStampText: {
     fontSize: 18,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#EF4444',
     letterSpacing: 1,
   },
@@ -2305,7 +2305,7 @@ const styles = StyleSheet.create({
   },
   saveStampText: {
     fontSize: 18,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#F59E0B',
     letterSpacing: 1,
   },
@@ -2385,7 +2385,7 @@ const styles = StyleSheet.create({
   },
   onCardInfoBtnText: {
     fontSize: 14.5,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#582CDB',
   },
   cardBottomInfoPill: {
@@ -2426,7 +2426,7 @@ const styles = StyleSheet.create({
   },
   tinderCreatorName: {
     fontSize: 22,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#FFFFFF',
     letterSpacing: -0.3,
     textShadowColor: 'rgba(0, 0, 0, 0.6)',
@@ -2443,7 +2443,7 @@ const styles = StyleSheet.create({
   },
   verifiedCheckText: {
     fontSize: 11,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#FFFFFF',
   },
   tinderStreakBadge: {
@@ -2566,7 +2566,7 @@ const styles = StyleSheet.create({
   },
   collabHeadline: {
     fontSize: 17,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
     letterSpacing: -0.2,
     marginBottom: 8,
@@ -3017,7 +3017,7 @@ const styles = StyleSheet.create({
   },
   squadsTitleText: {
     fontSize: 18,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#FFFFFF',
     letterSpacing: -0.2,
   },
@@ -3043,7 +3043,7 @@ const styles = StyleSheet.create({
   },
   squadsProPillText: {
     fontSize: 10,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#B45309',
     letterSpacing: 0.6,
   },
@@ -3057,7 +3057,7 @@ const styles = StyleSheet.create({
   },
   unlockSquadsBtnText: {
     fontSize: 12,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
   },
 
@@ -3200,13 +3200,13 @@ const styles = StyleSheet.create({
   },
   detailStatValGold: {
     fontSize: 20,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#EAB308',
     letterSpacing: -0.3,
   },
   detailStatValPurple: {
     fontSize: 20,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#582CDB',
     letterSpacing: -0.3,
   },
@@ -3329,7 +3329,7 @@ const styles = StyleSheet.create({
   },
   collabIdeaName: {
     fontSize: 16.5,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
     marginBottom: 12,
   },
@@ -3419,12 +3419,12 @@ const styles = StyleSheet.create({
   },
   metricCardBigValue: {
     fontSize: 17.5,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
   },
   metricCardGoldValue: {
     fontSize: 17.5,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#D97706',
   },
 
@@ -3465,7 +3465,7 @@ const styles = StyleSheet.create({
   },
   vennLabelTextPurple: {
     fontSize: 12,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#7C3AED',
   },
   vennCenterBadge: {
@@ -3486,7 +3486,7 @@ const styles = StyleSheet.create({
   },
   vennCenterPercent: {
     fontSize: 14,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#582CDB',
   },
   vennLabelRight: {
@@ -3496,7 +3496,7 @@ const styles = StyleSheet.create({
   },
   vennLabelTextGold: {
     fontSize: 11,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#B45309',
   },
   correlationIndicatorsRow: {
@@ -3734,7 +3734,7 @@ const styles = StyleSheet.create({
   },
   modalTitle: {
     fontSize: 18,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
     letterSpacing: -0.2,
     marginBottom: 4,
@@ -3874,7 +3874,7 @@ const styles = StyleSheet.create({
     borderColor: '#7C3AED',
     shadowColor: '#582CDB',
     shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.38,
+    shadowOpacity: 0.12,
     shadowRadius: 12,
     elevation: 8,
     zIndex: 9999,
@@ -3882,7 +3882,7 @@ const styles = StyleSheet.create({
   toastText: {
     color: '#FFFFFF',
     fontSize: 12.5,
-    fontWeight: '900',
+    fontWeight: '700',
     letterSpacing: 0.2,
   },
   btnPressed: {

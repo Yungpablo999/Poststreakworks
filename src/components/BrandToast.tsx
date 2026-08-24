@@ -85,7 +85,7 @@ const styles = StyleSheet.create({
     zIndex: 99999,
     shadowColor: '#582CDB',
     shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.45,
+    shadowOpacity: 0.12,
     shadowRadius: 14,
     elevation: 12,
   },
@@ -101,7 +101,7 @@ const styles = StyleSheet.create({
   toastText: {
     color: '#FFFFFF',
     fontSize: 12.5,
-    fontWeight: '900',
+    fontWeight: '700',
     letterSpacing: 0.2,
     textAlign: 'center',
   },

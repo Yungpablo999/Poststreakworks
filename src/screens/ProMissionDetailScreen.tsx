@@ -691,7 +691,7 @@ const styles = StyleSheet.create({
   },
   proHeaderBadgeText: {
     fontSize: 9,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
     letterSpacing: 0.3,
   },
@@ -747,13 +747,13 @@ const styles = StyleSheet.create({
   },
   proIntelligenceTagText: {
     fontSize: 10,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#92400E',
     letterSpacing: 0.6,
   },
   mainTitleText: {
     fontSize: 22,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
     letterSpacing: -0.4,
     marginBottom: 6,
@@ -780,7 +780,7 @@ const styles = StyleSheet.create({
   },
   heroPlanTag: {
     fontSize: 11,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#92400E',
     letterSpacing: 0.6,
   },
@@ -792,12 +792,12 @@ const styles = StyleSheet.create({
   },
   optimizedBadgeText: {
     fontSize: 10,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#582CDB',
   },
   heroPlanTitle: {
     fontSize: 18,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
     marginTop: 4,
     marginBottom: 6,
@@ -831,7 +831,7 @@ const styles = StyleSheet.create({
   },
   planMetricTileVal: {
     fontSize: 14.5,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
   },
   planSuccessHeaderRow: {
@@ -847,7 +847,7 @@ const styles = StyleSheet.create({
   },
   planSuccessVal: {
     fontSize: 11,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#582CDB',
   },
   planSuccessProgressBarTrack: {
@@ -870,7 +870,7 @@ const styles = StyleSheet.create({
   startCreatingBtnText: {
     color: '#FFFFFF',
     fontSize: 13,
-    fontWeight: '900',
+    fontWeight: '700',
   },
   scheduleOutlineBtn: {
     flex: 1,
@@ -896,7 +896,7 @@ const styles = StyleSheet.create({
   },
   sectionHeaderTitleBold: {
     fontSize: 16,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
   },
   durationBadge: {
@@ -907,7 +907,7 @@ const styles = StyleSheet.create({
   },
   durationBadgeText: {
     fontSize: 10,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#582CDB',
   },
   blueprintCard: {
@@ -920,14 +920,14 @@ const styles = StyleSheet.create({
   },
   blueprintHookTag: {
     fontSize: 10,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#582CDB',
     letterSpacing: 0.6,
     marginBottom: 4,
   },
   blueprintMainTitle: {
     fontSize: 16,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
     marginBottom: 14,
   },
@@ -950,7 +950,7 @@ const styles = StyleSheet.create({
   },
   stepNumText: {
     fontSize: 11,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#582CDB',
   },
   stepLabelText: {
@@ -988,7 +988,7 @@ const styles = StyleSheet.create({
   useBlueprintBtnText: {
     color: '#582CDB',
     fontSize: 13,
-    fontWeight: '900',
+    fontWeight: '700',
   },
 
   // WHY THIS PLAN
@@ -1002,7 +1002,7 @@ const styles = StyleSheet.create({
   },
   whyThisPlanTitle: {
     fontSize: 15,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
     marginBottom: 6,
   },
@@ -1042,7 +1042,7 @@ const styles = StyleSheet.create({
   },
   bestTimeHighlightText: {
     fontSize: 18,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#92400E',
     marginBottom: 2,
   },
@@ -1114,7 +1114,7 @@ const styles = StyleSheet.create({
   },
   signalValGreen: {
     fontSize: 13,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#F59E0B',
   },
   signalDivider: {
@@ -1134,7 +1134,7 @@ const styles = StyleSheet.create({
   },
   signalProgressScore: {
     fontSize: 10,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#582CDB',
   },
   signalProgressTrack: {
@@ -1157,7 +1157,7 @@ const styles = StyleSheet.create({
   },
   jarvisBriefHeader: {
     fontSize: 16,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#FFFFFF',
   },
   jarvisBriefBody: {
@@ -1182,7 +1182,7 @@ const styles = StyleSheet.create({
     marginTop: 6,
     shadowColor: '#F59E0B',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.35,
+    shadowOpacity: 0.12,
     shadowRadius: 10,
     elevation: 4,
   },
@@ -1197,7 +1197,7 @@ const styles = StyleSheet.create({
   useAiStrategyBtnText: {
     color: '#0C0A12',
     fontSize: 14,
-    fontWeight: '900',
+    fontWeight: '700',
   },
 
   // WHAT THIS UNLOCKS
@@ -1222,7 +1222,7 @@ const styles = StyleSheet.create({
   unlockArrow: {
     fontSize: 14,
     color: '#94A3B8',
-    fontWeight: '900',
+    fontWeight: '700',
   },
   unlockDivider: {
     height: 1,
@@ -1252,7 +1252,7 @@ const styles = StyleSheet.create({
   toastText: {
     color: '#FFFFFF',
     fontSize: 12.5,
-    fontWeight: '900',
+    fontWeight: '700',
     letterSpacing: 0.2,
   },
 });

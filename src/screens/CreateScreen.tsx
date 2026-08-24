@@ -1649,7 +1649,7 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     shadowColor: '#582CDB',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
+    shadowOpacity: 0.12,
     shadowRadius: 10,
     elevation: 4,
   },
@@ -1737,7 +1737,7 @@ const styles = StyleSheet.create({
   },
   quoteIconText: {
     fontSize: 16,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#582CDB',
   },
   toolTitle: {
@@ -1918,7 +1918,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(234, 179, 8, 0.18)',
     shadowColor: '#EAB308',
     shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.7,
+    shadowOpacity: 0.12,
     shadowRadius: 22,
   },
   waveformContainer: {
@@ -1940,7 +1940,7 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     shadowColor: '#F59E0B',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
+    shadowOpacity: 0.12,
     shadowRadius: 8,
     elevation: 3,
   },
@@ -1951,7 +1951,7 @@ const styles = StyleSheet.create({
   },
   unlockVoiceBtnText: {
     fontSize: 14,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
     letterSpacing: -0.2,
   },

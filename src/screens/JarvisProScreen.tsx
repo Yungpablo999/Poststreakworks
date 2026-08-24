@@ -902,7 +902,7 @@ const styles = StyleSheet.create({
     marginBottom: 24,
     shadowColor: '#582CDB',
     shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 0.22,
+    shadowOpacity: 0.08,
     shadowRadius: 24,
     elevation: 8,
   },
@@ -921,13 +921,13 @@ const styles = StyleSheet.create({
   },
   proAccessText: {
     fontSize: 11,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
     letterSpacing: 0.8,
   },
   heroHeadline: {
     fontSize: 34,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#FFFFFF',
     textAlign: 'center',
     letterSpacing: -0.6,
@@ -969,7 +969,7 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     shadowColor: '#F59E0B',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.35,
+    shadowOpacity: 0.12,
     shadowRadius: 12,
     elevation: 4,
   },
@@ -980,7 +980,7 @@ const styles = StyleSheet.create({
   },
   unlockProBtnText: {
     fontSize: 15,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
     letterSpacing: -0.2,
   },
@@ -991,7 +991,7 @@ const styles = StyleSheet.create({
   },
   sectionHeading: {
     fontSize: 19,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
     letterSpacing: -0.3,
   },
@@ -1105,7 +1105,7 @@ const styles = StyleSheet.create({
   },
   usePlanBtnText: {
     fontSize: 14.5,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
   },
 
@@ -1181,7 +1181,7 @@ const styles = StyleSheet.create({
   },
   priceBigText: {
     fontSize: 32,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
     letterSpacing: -0.5,
   },
@@ -1202,7 +1202,7 @@ const styles = StyleSheet.create({
   },
   pricingCheckIcon: {
     fontSize: 12,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#582CDB',
   },
   pricingCheckText: {
@@ -1218,7 +1218,7 @@ const styles = StyleSheet.create({
     marginBottom: 12,
     shadowColor: '#CA8A04',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
+    shadowOpacity: 0.12,
     shadowRadius: 10,
     elevation: 3,
   },
@@ -1229,7 +1229,7 @@ const styles = StyleSheet.create({
   },
   startProBtnText: {
     fontSize: 15,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
     letterSpacing: -0.2,
   },
@@ -1374,7 +1374,7 @@ const styles = StyleSheet.create({
   },
   modalTitle: {
     fontSize: 18,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
     letterSpacing: -0.2,
     marginBottom: 4,
@@ -1449,7 +1449,7 @@ const styles = StyleSheet.create({
     borderColor: '#7C3AED',
     shadowColor: '#582CDB',
     shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.38,
+    shadowOpacity: 0.12,
     shadowRadius: 12,
     elevation: 8,
     zIndex: 9999,
@@ -1457,7 +1457,7 @@ const styles = StyleSheet.create({
   toastText: {
     color: '#FFFFFF',
     fontSize: 12.5,
-    fontWeight: '900',
+    fontWeight: '700',
     letterSpacing: 0.2,
   },
   btnPressed: {

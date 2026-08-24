@@ -988,7 +988,7 @@ const styles = StyleSheet.create({
   },
   captionWriterPillText: {
     fontSize: 11,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#FFFFFF',
     letterSpacing: 0.5,
   },
@@ -1192,7 +1192,7 @@ const styles = StyleSheet.create({
   },
   recommendedBadgeText: {
     fontSize: 10,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#FFFFFF',
     letterSpacing: 0.5,
   },
@@ -1260,7 +1260,7 @@ const styles = StyleSheet.create({
   },
   microCapLabel: {
     fontSize: 10,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#64748B',
     letterSpacing: 0.6,
   },
@@ -1293,7 +1293,7 @@ const styles = StyleSheet.create({
   },
   draftEditorBadgeText: {
     fontSize: 10,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#FFFFFF',
     letterSpacing: 0.5,
   },
@@ -1334,11 +1334,11 @@ const styles = StyleSheet.create({
   statusPillCheck: {
     fontSize: 10,
     color: '#16A34A',
-    fontWeight: '900',
+    fontWeight: '700',
   },
   statusPillText: {
     fontSize: 10,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#166534',
   },
   fitPill: {
@@ -1440,7 +1440,7 @@ const styles = StyleSheet.create({
   },
   aiPoweredBadgeText: {
     fontSize: 10,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#582CDB',
   },
   jarvisBodyText: {
@@ -1476,7 +1476,7 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     shadowColor: '#582CDB',
     shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.25,
+    shadowOpacity: 0.08,
     shadowRadius: 14,
     elevation: 5,
   },
@@ -1487,7 +1487,7 @@ const styles = StyleSheet.create({
   },
   addToPostBtnText: {
     fontSize: 15,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#FFFFFF',
     letterSpacing: 0.4,
   },
@@ -1511,7 +1511,7 @@ const styles = StyleSheet.create({
     borderColor: '#582CDB',
     shadowColor: '#582CDB',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
+    shadowOpacity: 0.12,
     shadowRadius: 8,
     elevation: 4,
   },
@@ -1534,7 +1534,7 @@ const styles = StyleSheet.create({
     padding: 20,
     shadowColor: '#582CDB',
     shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 0.2,
+    shadowOpacity: 0.08,
     shadowRadius: 24,
     elevation: 8,
   },
@@ -1689,7 +1689,7 @@ const styles = StyleSheet.create({
   },
   chatSpeaker: {
     fontSize: 10,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#582CDB',
     letterSpacing: 0.5,
     marginBottom: 4,

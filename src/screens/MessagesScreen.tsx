@@ -1869,7 +1869,7 @@ const styles = StyleSheet.create({
   },
   freeHeaderBadgeText: {
     fontSize: 9,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#582CDB',
     letterSpacing: 0.3,
   },
@@ -1889,7 +1889,7 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     shadowColor: '#582CDB',
     shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.2,
+    shadowOpacity: 0.08,
     shadowRadius: 6,
     elevation: 3,
   },
@@ -1956,7 +1956,7 @@ const styles = StyleSheet.create({
   },
   profileStreakBadgeText: {
     fontSize: 11,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#B45309',
   },
   profileStatsRow: {
@@ -1977,7 +1977,7 @@ const styles = StyleSheet.create({
   },
   profileStatVal: {
     fontSize: 15,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
   },
   profileStatLabel: {
@@ -2008,7 +2008,7 @@ const styles = StyleSheet.create({
   },
   socialHubPillText: {
     fontSize: 10,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#FFFFFF',
     letterSpacing: 0.5,
   },
@@ -2135,7 +2135,7 @@ const styles = StyleSheet.create({
   },
   userAddStatusText: {
     fontSize: 12,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#FFFFFF',
     lineHeight: 13,
   },
@@ -2154,7 +2154,7 @@ const styles = StyleSheet.create({
   },
   storyStreakText: {
     fontSize: 9,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#B45309',
   },
 
@@ -2284,7 +2284,7 @@ const styles = StyleSheet.create({
   },
   collabStatusText: {
     fontSize: 10,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#78350F',
   },
   threadLastMessage: {
@@ -2342,7 +2342,7 @@ const styles = StyleSheet.create({
   },
   pactBoostBtnText: {
     fontSize: 11,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#FFFFFF',
   },
   collabIdeaBanner: {
@@ -2385,7 +2385,7 @@ const styles = StyleSheet.create({
   },
   collabIdeaPillMiniText: {
     fontSize: 9,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#582CDB',
   },
   collabIdeaBannerSub: {
@@ -2500,7 +2500,7 @@ const styles = StyleSheet.create({
   },
   sharedScriptBadgeText: {
     fontSize: 9,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#6D28D9',
     letterSpacing: 0.5,
   },
@@ -2513,7 +2513,7 @@ const styles = StyleSheet.create({
   },
   sharedScriptAction: {
     fontSize: 11,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#582CDB',
   },
 
@@ -2696,7 +2696,7 @@ const styles = StyleSheet.create({
   },
   storyTopStreakText: {
     fontSize: 10,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#B45309',
   },
   storyCloseBtn: {
@@ -2753,13 +2753,13 @@ const styles = StyleSheet.create({
   },
   storySlidePillText: {
     fontSize: 11,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#FFFFFF',
     letterSpacing: 0.6,
   },
   storySlideTitle: {
     fontSize: 20,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#FFFFFF',
     textAlign: 'center',
     marginBottom: 4,
@@ -2864,7 +2864,7 @@ const styles = StyleSheet.create({
   },
   milestoneXpText: {
     fontSize: 12,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#B45309',
   },
 
@@ -2941,7 +2941,7 @@ const styles = StyleSheet.create({
     padding: 20,
     shadowColor: '#582CDB',
     shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 0.2,
+    shadowOpacity: 0.08,
     shadowRadius: 24,
     elevation: 8,
   },
@@ -3013,7 +3013,7 @@ const styles = StyleSheet.create({
   },
   discoverConnectBtnText: {
     fontSize: 12,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#582CDB',
   },
   connectToCreateBtn: {
@@ -3023,7 +3023,7 @@ const styles = StyleSheet.create({
     marginTop: 12,
     shadowColor: '#582CDB',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.25,
+    shadowOpacity: 0.08,
     shadowRadius: 10,
     elevation: 4,
   },
@@ -3034,7 +3034,7 @@ const styles = StyleSheet.create({
   },
   connectBtnText: {
     fontSize: 14,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#FFFFFF',
     letterSpacing: 0.4,
   },

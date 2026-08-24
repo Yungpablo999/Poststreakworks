@@ -1101,7 +1101,7 @@ const styles = StyleSheet.create({
   },
   activeQuestTagText: {
     fontSize: 11,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#FFFFFF',
     letterSpacing: 0.6,
   },
@@ -1162,7 +1162,7 @@ const styles = StyleSheet.create({
   },
   inProgressPillText: {
     fontSize: 10,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#582CDB',
     letterSpacing: 0.5,
   },
@@ -1235,7 +1235,7 @@ const styles = StyleSheet.create({
   },
   xpRewardPillText: {
     fontSize: 11,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#B45309',
   },
   badgeRewardPill: {
@@ -1275,7 +1275,7 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     shadowColor: '#582CDB',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.25,
+    shadowOpacity: 0.08,
     shadowRadius: 10,
     elevation: 3,
   },
@@ -1397,7 +1397,7 @@ const styles = StyleSheet.create({
     marginBottom: 26,
     shadowColor: '#582CDB',
     shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.3,
+    shadowOpacity: 0.12,
     shadowRadius: 18,
     elevation: 4,
   },
@@ -1414,7 +1414,7 @@ const styles = StyleSheet.create({
   },
   suggestedAngleTagText: {
     fontSize: 10,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#FFFFFF',
     letterSpacing: 0.6,
   },
@@ -1469,7 +1469,7 @@ const styles = StyleSheet.create({
   },
   useIdeaWhiteBtnText: {
     fontSize: 14,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#582CDB',
     letterSpacing: -0.2,
   },
@@ -1504,7 +1504,7 @@ const styles = StyleSheet.create({
   },
   gaugePercentText: {
     fontSize: 24,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
   },
   gaugeHeading: {
@@ -1587,19 +1587,19 @@ const styles = StyleSheet.create({
   },
   reputationTileValuePurple: {
     fontSize: 22,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#582CDB',
     letterSpacing: -0.5,
   },
   reputationTileValueDark: {
     fontSize: 22,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
     letterSpacing: -0.5,
   },
   reputationTileValueGold: {
     fontSize: 20,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#B45309',
     letterSpacing: -0.5,
   },
@@ -1737,7 +1737,7 @@ const styles = StyleSheet.create({
     padding: 22,
     shadowColor: '#000000',
     shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 0.25,
+    shadowOpacity: 0.08,
     shadowRadius: 20,
     elevation: 8,
   },

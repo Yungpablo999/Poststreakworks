@@ -1628,7 +1628,7 @@ const styles = StyleSheet.create({
   },
   audiencePercentText: {
     fontSize: 32,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
     letterSpacing: -0.8,
   },
@@ -1837,7 +1837,7 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     shadowColor: '#582CDB',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.2,
+    shadowOpacity: 0.08,
     shadowRadius: 8,
   },
   analyzeGradient: {
@@ -1875,7 +1875,7 @@ const styles = StyleSheet.create({
   },
   reachNumber: {
     fontSize: 28,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
   },
   reachPercentPill: {
@@ -2163,7 +2163,7 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     shadowColor: '#582CDB',
     shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.3,
+    shadowOpacity: 0.12,
     shadowRadius: 14,
     elevation: 4,
   },
@@ -2221,7 +2221,7 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     shadowColor: '#FDE047',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.35,
+    shadowOpacity: 0.12,
     shadowRadius: 8,
   },
   exploreProGradient: {
@@ -2231,7 +2231,7 @@ const styles = StyleSheet.create({
   },
   exploreProBtnText: {
     fontSize: 14,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
     letterSpacing: -0.2,
   },
@@ -2372,7 +2372,7 @@ const styles = StyleSheet.create({
     padding: 20,
     shadowColor: '#582CDB',
     shadowOffset: { width: 0, height: 12 },
-    shadowOpacity: 0.25,
+    shadowOpacity: 0.08,
     shadowRadius: 28,
     elevation: 10,
   },
@@ -2384,12 +2384,12 @@ const styles = StyleSheet.create({
   },
   activePlatformsCountText: {
     fontSize: 10,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#582CDB',
   },
   modalSectionTitle: {
     fontSize: 11,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#64748B',
     letterSpacing: 0.6,
     marginBottom: 8,
@@ -2442,7 +2442,7 @@ const styles = StyleSheet.create({
   },
   autoSyncText: {
     fontSize: 9,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#059669',
   },
   platformSubText: {
@@ -2471,7 +2471,7 @@ const styles = StyleSheet.create({
   },
   addPlatformActionBtnText: {
     fontSize: 11,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#582CDB',
   },
   customAddAccountBox: {
@@ -2484,7 +2484,7 @@ const styles = StyleSheet.create({
   },
   customAddTitle: {
     fontSize: 10,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#582CDB',
     letterSpacing: 0.6,
   },
@@ -2512,7 +2512,7 @@ const styles = StyleSheet.create({
   },
   platformSelectChipTextActive: {
     color: '#582CDB',
-    fontWeight: '900',
+    fontWeight: '700',
   },
   customInputRow: {
     flexDirection: 'row',
@@ -2540,7 +2540,7 @@ const styles = StyleSheet.create({
   },
   linkAccountConfirmBtnText: {
     fontSize: 11,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#FFFFFF',
   },
   modalDoneBtn: {
@@ -2553,7 +2553,7 @@ const styles = StyleSheet.create({
   },
   modalDoneBtnText: {
     fontSize: 14,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#FFFFFF',
     letterSpacing: 0.3,
   },
@@ -2569,7 +2569,7 @@ const styles = StyleSheet.create({
     zIndex: 9999,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.25,
+    shadowOpacity: 0.08,
     shadowRadius: 10,
     elevation: 8,
     alignItems: 'center',
@@ -2577,7 +2577,7 @@ const styles = StyleSheet.create({
   toastText: {
     color: '#FFFFFF',
     fontSize: 12.5,
-    fontWeight: '900',
+    fontWeight: '700',
     letterSpacing: 0.2,
   },
   // CREATOR EARNINGS HUB CARD
@@ -2602,7 +2602,7 @@ const styles = StyleSheet.create({
   },
   earningsHubTitle: {
     fontSize: 16,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
   },
   readinessTag: {
@@ -2613,7 +2613,7 @@ const styles = StyleSheet.create({
   },
   readinessTagText: {
     fontSize: 9,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#582CDB',
   },
   earningsHubSub: {
@@ -2647,14 +2647,14 @@ const styles = StyleSheet.create({
   },
   earningsHubStatLabel: {
     fontSize: 9,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#64748B',
     letterSpacing: 0.4,
     marginBottom: 2,
   },
   earningsHubStatVal: {
     fontSize: 16,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
   },
   earningsHubDivider: {
@@ -2672,7 +2672,7 @@ const styles = StyleSheet.create({
   },
   earningsHubBtnText: {
     fontSize: 12.5,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#FFFFFF',
   },
 });

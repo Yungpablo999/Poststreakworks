@@ -882,7 +882,7 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
                     <View style={styles.verifAvatarWrap}>
                       <Image source={currentDisplayAvatarSource} style={styles.verifAvatarImg} />
                       <View style={isPro ? styles.verifBadgeGold : [styles.verifBadgeGold, { backgroundColor: '#F59E0B' }]}>
-                        <Text style={{ fontSize: 10, color: '#FFFFFF', fontWeight: '900' }}>
+                        <Text style={{ fontSize: 10, color: '#FFFFFF', fontWeight: '700' }}>
                           {isPro ? '✓' : '🔒'}
                         </Text>
                       </View>
@@ -1206,7 +1206,7 @@ const styles = StyleSheet.create({
     padding: 20,
     shadowColor: '#582CDB',
     shadowOffset: { width: 0, height: 12 },
-    shadowOpacity: 0.25,
+    shadowOpacity: 0.08,
     shadowRadius: 28,
     elevation: 10,
   },
@@ -1224,7 +1224,7 @@ const styles = StyleSheet.create({
   },
   modalTitle: {
     fontSize: 18,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
     letterSpacing: -0.3,
   },
@@ -1238,7 +1238,7 @@ const styles = StyleSheet.create({
   },
   freeBadgeText: {
     fontSize: 9,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#059669',
     letterSpacing: 0.5,
   },
@@ -1251,7 +1251,7 @@ const styles = StyleSheet.create({
   },
   proBadgeText: {
     fontSize: 9.5,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#92400E',
     letterSpacing: 0.5,
   },
@@ -1320,7 +1320,7 @@ const styles = StyleSheet.create({
   },
   subTabTextActive: {
     color: '#7C3AED',
-    fontWeight: '900',
+    fontWeight: '700',
   },
 
   scrollBody: {
@@ -1379,7 +1379,7 @@ const styles = StyleSheet.create({
   },
   heroNameText: {
     fontSize: 18,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
   },
   heroHandleText: {
@@ -1396,7 +1396,7 @@ const styles = StyleSheet.create({
   },
   heroStreakPillText: {
     fontSize: 11,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#92400E',
   },
 
@@ -1440,7 +1440,7 @@ const styles = StyleSheet.create({
   },
   statVal: {
     fontSize: 14.5,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
   },
   statLabel: {
@@ -1457,7 +1457,7 @@ const styles = StyleSheet.create({
 
   sectionHeaderTitle: {
     fontSize: 10,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#64748B',
     letterSpacing: 0.6,
     marginBottom: 8,
@@ -1497,7 +1497,7 @@ const styles = StyleSheet.create({
   },
   avatarItemNameSelected: {
     color: '#7C3AED',
-    fontWeight: '900',
+    fontWeight: '700',
   },
   avatarCheckDot: {
     position: 'absolute',
@@ -1512,7 +1512,7 @@ const styles = StyleSheet.create({
   },
   avatarCheckDotText: {
     fontSize: 9.5,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#FFFFFF',
   },
 
@@ -1618,7 +1618,7 @@ const styles = StyleSheet.create({
   },
   connectedPillText: {
     fontSize: 8.5,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#15803D',
   },
   socialInputBox: {
@@ -1705,7 +1705,7 @@ const styles = StyleSheet.create({
   },
   verifHeroName: {
     fontSize: 16,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#FFFFFF',
   },
   verifStatusPill: {
@@ -1718,7 +1718,7 @@ const styles = StyleSheet.create({
   },
   verifStatusPillText: {
     fontSize: 8.5,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#6EE7B7',
   },
   verifHeroSub: {
@@ -1728,13 +1728,13 @@ const styles = StyleSheet.create({
   },
   verifMeterLabel: {
     fontSize: 9,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#C084FC',
     letterSpacing: 0.5,
   },
   verifMeterVal: {
     fontSize: 10,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#FDE68A',
   },
   verifMeterTrack: {
@@ -1772,12 +1772,12 @@ const styles = StyleSheet.create({
   },
   verifCheckMark: {
     fontSize: 11,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#15803D',
   },
   verifCheckTitle: {
     fontSize: 12.5,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
   },
   verifEditLink: {
@@ -1821,7 +1821,7 @@ const styles = StyleSheet.create({
   },
   portfolioSavePillText: {
     fontSize: 10,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#FFFFFF',
   },
   verifPerksGrid: {
@@ -1844,7 +1844,7 @@ const styles = StyleSheet.create({
   },
   verifPerkTitle: {
     fontSize: 11.5,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
   },
   verifPerkSub: {
@@ -1873,7 +1873,7 @@ const styles = StyleSheet.create({
   },
   verifActionBtnText: {
     fontSize: 13.5,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#FFFFFF',
     letterSpacing: 0.4,
     textAlign: 'center',
@@ -1891,7 +1891,7 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     shadowColor: '#7C3AED',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.25,
+    shadowOpacity: 0.08,
     shadowRadius: 10,
     elevation: 4,
   },
@@ -1902,7 +1902,7 @@ const styles = StyleSheet.create({
   },
   saveBtnText: {
     fontSize: 14,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#FFFFFF',
     letterSpacing: 0.4,
   },

@@ -1615,7 +1615,7 @@ const styles = StyleSheet.create({
   },
   proPillBadgeText: {
     fontSize: 9,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#92400E',
     letterSpacing: 0.3,
   },
@@ -1677,7 +1677,7 @@ const styles = StyleSheet.create({
   },
   heroPillGoldText: {
     fontSize: 10,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#D97706',
     letterSpacing: 0.3,
   },
@@ -1700,13 +1700,13 @@ const styles = StyleSheet.create({
   },
   heroPillPurpleText: {
     fontSize: 10,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#582CDB',
     letterSpacing: 0.3,
   },
   mainTitle: {
     fontSize: 23,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
     letterSpacing: -0.5,
   },
@@ -1734,7 +1734,7 @@ const styles = StyleSheet.create({
   },
   minutesCardLabel: {
     fontSize: 15.5,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
   },
   ultraHdPill: {
@@ -1745,12 +1745,12 @@ const styles = StyleSheet.create({
   },
   ultraHdPillText: {
     fontSize: 9,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#582CDB',
   },
   minutesBigNumber: {
     fontSize: 28,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#582CDB',
     letterSpacing: -0.5,
   },
@@ -1773,7 +1773,7 @@ const styles = StyleSheet.create({
   },
   minuteTagTextPro: {
     fontSize: 9,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#582CDB',
     letterSpacing: 0.3,
   },
@@ -1785,7 +1785,7 @@ const styles = StyleSheet.create({
   },
   minuteTagTextReady: {
     fontSize: 9,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#15803D',
     letterSpacing: 0.3,
   },
@@ -1812,7 +1812,7 @@ const styles = StyleSheet.create({
   },
   manageMinutesBtnText: {
     fontSize: 12,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
   },
 
@@ -1825,7 +1825,7 @@ const styles = StyleSheet.create({
   },
   sectionHeaderTitle: {
     fontSize: 16,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
   },
   wordCounterPill: {
@@ -1864,7 +1864,7 @@ const styles = StyleSheet.create({
   },
   presetChipTextActive: {
     color: '#582CDB',
-    fontWeight: '900',
+    fontWeight: '700',
   },
   scriptEditorCard: {
     backgroundColor: '#FFFFFF',
@@ -1896,13 +1896,13 @@ const styles = StyleSheet.create({
   },
   metaKeyLabel: {
     fontSize: 9,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#94A3B8',
     letterSpacing: 0.3,
   },
   metaValText: {
     fontSize: 12,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#582CDB',
     marginTop: 1,
   },
@@ -1922,7 +1922,7 @@ const styles = StyleSheet.create({
     marginTop: 12,
     shadowColor: '#582CDB',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
+    shadowOpacity: 0.12,
     shadowRadius: 8,
     elevation: 3,
   },
@@ -1937,7 +1937,7 @@ const styles = StyleSheet.create({
   generateVoiceBtnText: {
     color: '#FFFFFF',
     fontSize: 14,
-    fontWeight: '900',
+    fontWeight: '700',
     letterSpacing: 0.4,
   },
 
@@ -1953,7 +1953,7 @@ const styles = StyleSheet.create({
   },
   readyBadgeText: {
     fontSize: 9,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#15803D',
     letterSpacing: 0.3,
   },
@@ -1971,7 +1971,7 @@ const styles = StyleSheet.create({
   },
   audioTrackTitle: {
     fontSize: 14,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
   },
   audioTrackVoiceModel: {
@@ -1982,7 +1982,7 @@ const styles = StyleSheet.create({
   },
   audioTrackDuration: {
     fontSize: 12,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#582CDB',
   },
   playPauseCircle: {
@@ -1994,7 +1994,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     shadowColor: '#582CDB',
     shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.35,
+    shadowOpacity: 0.12,
     shadowRadius: 6,
     elevation: 3,
   },
@@ -2022,7 +2022,7 @@ const styles = StyleSheet.create({
     marginLeft: -7,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.2,
+    shadowOpacity: 0.08,
     shadowRadius: 2,
     elevation: 2,
   },
@@ -2048,14 +2048,14 @@ const styles = StyleSheet.create({
     marginBottom: 8,
     shadowColor: '#582CDB',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
+    shadowOpacity: 0.08,
     shadowRadius: 4,
     elevation: 2,
   },
   useInPostBtnText: {
     color: '#FFFFFF',
     fontSize: 13,
-    fontWeight: '900',
+    fontWeight: '700',
     letterSpacing: 0.3,
   },
   saveLibraryBtn: {
@@ -2069,13 +2069,13 @@ const styles = StyleSheet.create({
   saveLibraryBtnText: {
     color: '#171420',
     fontSize: 12,
-    fontWeight: '900',
+    fontWeight: '700',
   },
 
   // RECENT PROJECTS
   viewAllLink: {
     fontSize: 12,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#582CDB',
   },
   projectItemCard: {
@@ -2102,7 +2102,7 @@ const styles = StyleSheet.create({
   },
   projectNameText: {
     fontSize: 13,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
   },
   projectSubText: {
@@ -2118,7 +2118,7 @@ const styles = StyleSheet.create({
   },
   projectReuseBtnText: {
     fontSize: 11,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#582CDB',
   },
 
@@ -2138,7 +2138,7 @@ const styles = StyleSheet.create({
   },
   savedVoiceHeaderLabel: {
     fontSize: 10,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#94A3B8',
     letterSpacing: 0.5,
   },
@@ -2150,7 +2150,7 @@ const styles = StyleSheet.create({
   },
   activeStyleTagText: {
     fontSize: 9,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#582CDB',
   },
   voiceAvatarBox: {
@@ -2163,7 +2163,7 @@ const styles = StyleSheet.create({
   },
   voiceStyleNameText: {
     fontSize: 14.5,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
   },
   voiceStyleDescText: {
@@ -2182,12 +2182,12 @@ const styles = StyleSheet.create({
   },
   toneChipLabel: {
     fontSize: 9,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#94A3B8',
   },
   toneChipValue: {
     fontSize: 12,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
     marginTop: 2,
   },
@@ -2221,13 +2221,13 @@ const styles = StyleSheet.create({
   },
   wavelengthLabelText: {
     fontSize: 10,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
     letterSpacing: 0.5,
   },
   wavelengthHzText: {
     fontSize: 10,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#582CDB',
   },
   wavelengthDenseBarsRow: {
@@ -2270,7 +2270,7 @@ const styles = StyleSheet.create({
   },
   speedLabel: {
     fontSize: 10,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#94A3B8',
     letterSpacing: 0.4,
   },
@@ -2293,7 +2293,7 @@ const styles = StyleSheet.create({
   },
   speedPillTextActive: {
     color: '#FFFFFF',
-    fontWeight: '900',
+    fontWeight: '700',
   },
   voicePreviewBtn: {
     flex: 1,
@@ -2304,7 +2304,7 @@ const styles = StyleSheet.create({
   },
   voicePreviewBtnText: {
     fontSize: 12,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#582CDB',
   },
   voiceChangeBtn: {
@@ -2318,7 +2318,7 @@ const styles = StyleSheet.create({
   },
   voiceChangeBtnText: {
     fontSize: 12,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
   },
 
@@ -2337,7 +2337,7 @@ const styles = StyleSheet.create({
   },
   jarvisInsightTitle: {
     fontSize: 14,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
   },
   jarvisInsightBody: {
@@ -2355,7 +2355,7 @@ const styles = StyleSheet.create({
   jarvisAdviceBtnText: {
     color: '#FFFFFF',
     fontSize: 12,
-    fontWeight: '900',
+    fontWeight: '700',
   },
 
   // NEED MINUTES CARD
@@ -2368,7 +2368,7 @@ const styles = StyleSheet.create({
   },
   needMinutesTitle: {
     fontSize: 14.5,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#92400E',
   },
   needMinutesSub: {
@@ -2387,7 +2387,7 @@ const styles = StyleSheet.create({
   buyMoreBtnText: {
     color: '#FFFFFF',
     fontSize: 12.5,
-    fontWeight: '900',
+    fontWeight: '700',
   },
 
   // MODALS
@@ -2415,11 +2415,11 @@ const styles = StyleSheet.create({
   modalCloseText: {
     fontSize: 18,
     color: '#94A3B8',
-    fontWeight: '900',
+    fontWeight: '700',
   },
   modalTitle: {
     fontSize: 18,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
     letterSpacing: -0.3,
   },
@@ -2442,12 +2442,12 @@ const styles = StyleSheet.create({
   },
   voiceOptionName: {
     fontSize: 14,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
   },
   voiceOptionCheck: {
     fontSize: 10,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#582CDB',
   },
   voiceOptionDesc: {
@@ -2464,7 +2464,7 @@ const styles = StyleSheet.create({
   },
   tagPillMiniText: {
     fontSize: 8,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#B45309',
   },
   minuteTagPill: {
@@ -2495,7 +2495,7 @@ const styles = StyleSheet.create({
   },
   quotaBarRemaining: {
     fontSize: 11,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#582CDB',
   },
   quotaTrackBg: {
@@ -2532,7 +2532,7 @@ const styles = StyleSheet.create({
   },
   transferAmount: {
     fontSize: 13,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#582CDB',
   },
   modalGoldRefillBtn: {
@@ -2544,7 +2544,7 @@ const styles = StyleSheet.create({
   modalGoldRefillBtnText: {
     color: '#FFFFFF',
     fontSize: 13,
-    fontWeight: '900',
+    fontWeight: '700',
   },
   refillPackCard: {
     flexDirection: 'row',
@@ -2558,7 +2558,7 @@ const styles = StyleSheet.create({
   },
   refillPackName: {
     fontSize: 13,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
   },
   refillPackSub: {
@@ -2568,7 +2568,7 @@ const styles = StyleSheet.create({
   },
   refillPackPrice: {
     fontSize: 15,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#582CDB',
   },
   hookOptionCard: {
@@ -2580,7 +2580,7 @@ const styles = StyleSheet.create({
   },
   hookOptionType: {
     fontSize: 12,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#582CDB',
     marginBottom: 4,
   },
@@ -2617,7 +2617,7 @@ const styles = StyleSheet.create({
   toastText: {
     color: '#FFFFFF',
     fontSize: 12.5,
-    fontWeight: '900',
+    fontWeight: '700',
     letterSpacing: 0.2,
   },
   expandedProjectCard: {
@@ -2638,7 +2638,7 @@ const styles = StyleSheet.create({
   },
   statusTagText: {
     fontSize: 9,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#582CDB',
   },
   statusTagTextExported: {
@@ -2660,7 +2660,7 @@ const styles = StyleSheet.create({
   },
   expandedActionReuseText: {
     fontSize: 11,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#582CDB',
   },
   expandedActionExportBtn: {

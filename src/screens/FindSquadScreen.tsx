@@ -922,7 +922,7 @@ export const FindSquadScreen: React.FC<FindSquadScreenProps> = ({
                     </View>
                     <View style={styles.modalInfoRowItem}>
                       <Text style={styles.modalInfoLabel}>🏆 Weekly Quest</Text>
-                      <Text style={[styles.modalInfoVal, { color: '#582CDB', fontWeight: '900' }]}>
+                      <Text style={[styles.modalInfoVal, { color: '#582CDB', fontWeight: '700' }]}>
                         {previewModalSquad.weeklyQuest}
                       </Text>
                     </View>
@@ -1006,7 +1006,7 @@ export const FindSquadScreen: React.FC<FindSquadScreenProps> = ({
                     {Array.from({ length: previewModalSquad.maxMembers - previewModalSquad.memberCount }).map((_, idx) => (
                       <View key={`slot_${idx}`} style={styles.rosterOpenSlotRow}>
                         <View style={styles.rosterOpenSlotCircle}>
-                          <Text style={{ fontSize: 13, color: '#10B981', fontWeight: '900' }}>+</Text>
+                          <Text style={{ fontSize: 13, color: '#10B981', fontWeight: '700' }}>+</Text>
                         </View>
                         <View style={{ flex: 1 }}>
                           <Text style={styles.rosterOpenSlotTitle}>Open Member Slot {previewModalSquad.memberCount + idx + 1}</Text>
@@ -1139,7 +1139,7 @@ const styles = StyleSheet.create({
   },
   headerTitle: {
     fontSize: 18,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
   },
   headerSubtitle: {
@@ -1234,13 +1234,13 @@ const styles = StyleSheet.create({
   },
   discoveryPillText: {
     fontSize: 10,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#FFFFFF',
     letterSpacing: 0.8,
   },
   heroTitle: {
     fontSize: 25,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
     letterSpacing: -0.4,
     lineHeight: 31,
@@ -1308,7 +1308,7 @@ const styles = StyleSheet.create({
     borderColor: '#582CDB',
     shadowColor: '#582CDB',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
+    shadowOpacity: 0.08,
     shadowRadius: 4,
     elevation: 2,
   },
@@ -1328,7 +1328,7 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     shadowColor: '#582CDB',
     shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.2,
+    shadowOpacity: 0.08,
     shadowRadius: 14,
     elevation: 4,
   },
@@ -1350,7 +1350,7 @@ const styles = StyleSheet.create({
   },
   spotlightBadgeText: {
     fontSize: 10,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#FDE68A',
     letterSpacing: 0.5,
   },
@@ -1362,12 +1362,12 @@ const styles = StyleSheet.create({
   },
   matchScoreAiPillText: {
     fontSize: 10,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#F3E8FF',
   },
   featuredTitle: {
     fontSize: 20,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#FFFFFF',
   },
   featuredGoalText: {
@@ -1420,7 +1420,7 @@ const styles = StyleSheet.create({
   },
   streakPillGoldText: {
     fontSize: 11,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#FDE68A',
   },
   featuredActionsRow: {
@@ -1453,14 +1453,14 @@ const styles = StyleSheet.create({
   },
   featuredJoinBtnText: {
     fontSize: 12.5,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#FFFFFF',
   },
 
   /* NICHE FILTER */
   sectionHeading: {
     fontSize: 16,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
   },
   nicheFilterScroll: {
@@ -1507,7 +1507,7 @@ const styles = StyleSheet.create({
   },
   verifiedCountText: {
     fontSize: 10,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#6D28D9',
   },
   squadCard: {
@@ -1547,7 +1547,7 @@ const styles = StyleSheet.create({
   },
   squadCatText: {
     fontSize: 10,
-    fontWeight: '900',
+    fontWeight: '700',
   },
   squadCatTextGrowth: {
     color: '#B45309',
@@ -1571,7 +1571,7 @@ const styles = StyleSheet.create({
   },
   fitScoreNumber: {
     fontSize: 14,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#582CDB',
   },
   fitScoreLabel: {
@@ -1581,7 +1581,7 @@ const styles = StyleSheet.create({
   },
   squadName: {
     fontSize: 16.5,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
   },
   squadGoalLine: {
@@ -1698,7 +1698,7 @@ const styles = StyleSheet.create({
   },
   cardQuickJoinBtnText: {
     fontSize: 12,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#582CDB',
   },
   cardQuickJoinBtnTextPending: {
@@ -1731,7 +1731,7 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(255, 255, 255, 0.9)',
     shadowColor: '#582CDB',
     shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 0.22,
+    shadowOpacity: 0.08,
     shadowRadius: 24,
     elevation: 8,
   },
@@ -1768,7 +1768,7 @@ const styles = StyleSheet.create({
   },
   modalSegmentTextActive: {
     color: '#582CDB',
-    fontWeight: '900',
+    fontWeight: '700',
   },
   modalHostProfileRow: {
     flexDirection: 'row',
@@ -1785,7 +1785,7 @@ const styles = StyleSheet.create({
   },
   modalHostName: {
     fontSize: 14,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
   },
   modalHostCrownPill: {
@@ -1796,7 +1796,7 @@ const styles = StyleSheet.create({
   },
   modalHostCrownText: {
     fontSize: 9,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#B45309',
   },
   modalHostSub: {
@@ -1813,7 +1813,7 @@ const styles = StyleSheet.create({
   },
   modalCloseCircleText: {
     fontSize: 13,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#475569',
   },
   modalSquadMetaRow: {
@@ -1824,7 +1824,7 @@ const styles = StyleSheet.create({
   },
   modalSquadTitle: {
     fontSize: 20,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
     marginBottom: 4,
   },
@@ -1883,7 +1883,7 @@ const styles = StyleSheet.create({
   /* ROSTER VIEW */
   rosterHeaderTitle: {
     fontSize: 16,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
   },
   rosterHeaderSub: {
@@ -1966,7 +1966,7 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     shadowColor: '#582CDB',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.25,
+    shadowOpacity: 0.08,
     shadowRadius: 8,
     elevation: 3,
   },
@@ -1976,7 +1976,7 @@ const styles = StyleSheet.create({
   },
   modalSolidBtnText: {
     fontSize: 13,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#FFFFFF',
   },
   modalPendingBox: {
@@ -1990,7 +1990,7 @@ const styles = StyleSheet.create({
   },
   modalPendingText: {
     fontSize: 13,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#92400E',
   },
 
@@ -2005,7 +2005,7 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.2,
+    shadowOpacity: 0.08,
     shadowRadius: 6,
     elevation: 4,
     zIndex: 999,

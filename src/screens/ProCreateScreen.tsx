@@ -35,7 +35,7 @@ export const TinyGoldCheck = ({ size = 13 }: { size?: number }) => (
       alignItems: 'center',
       shadowColor: '#CA8A04',
       shadowOffset: { width: 0, height: 1 },
-      shadowOpacity: 0.35,
+      shadowOpacity: 0.12,
       shadowRadius: 2,
       elevation: 2,
     }}
@@ -1326,7 +1326,7 @@ const styles = StyleSheet.create({
   },
   proHeaderBadgeText: {
     fontSize: 9,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#92400E',
     letterSpacing: 0.3,
   },
@@ -1401,7 +1401,7 @@ const styles = StyleSheet.create({
   addPhotoPlusText: {
     color: '#FFFFFF',
     fontSize: 8,
-    fontWeight: '900',
+    fontWeight: '700',
   },
   scrollContent: {
     paddingHorizontal: 20,
@@ -1424,7 +1424,7 @@ const styles = StyleSheet.create({
   },
   createProPillText: {
     fontSize: 10,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#FFFFFF',
     letterSpacing: 0.5,
   },
@@ -1436,12 +1436,12 @@ const styles = StyleSheet.create({
   },
   proAccessPillText: {
     fontSize: 10,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#92400E',
   },
   mainTitleText: {
     fontSize: 22,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
     letterSpacing: -0.4,
     marginBottom: 4,
@@ -1474,7 +1474,7 @@ const styles = StyleSheet.create({
   },
   workflowTitle: {
     fontSize: 18,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
   },
   workflowSub: {
@@ -1560,7 +1560,7 @@ const styles = StyleSheet.create({
   },
   projectTagGoldText: {
     fontSize: 10,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#92400E',
   },
   workflowActionsRow: {
@@ -1579,7 +1579,7 @@ const styles = StyleSheet.create({
   startCreatingBtnText: {
     color: '#FFFFFF',
     fontSize: 13,
-    fontWeight: '900',
+    fontWeight: '700',
   },
   resumeDraftBtn: {
     paddingVertical: 12,
@@ -1600,7 +1600,7 @@ const styles = StyleSheet.create({
   },
   proToolsMainTitle: {
     fontSize: 18,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
   },
   powerPillBadge: {
@@ -1611,7 +1611,7 @@ const styles = StyleSheet.create({
   },
   powerPillText: {
     fontSize: 9,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#92400E',
   },
   proToolsGrid: {
@@ -1645,7 +1645,7 @@ const styles = StyleSheet.create({
   },
   toolGridTitle: {
     fontSize: 14,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
     marginBottom: 2,
   },
@@ -1662,7 +1662,7 @@ const styles = StyleSheet.create({
   },
   unlockedPillText: {
     fontSize: 8,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#A16207',
   },
   proToolBadgePill: {
@@ -1673,7 +1673,7 @@ const styles = StyleSheet.create({
   },
   proToolBadgeText: {
     fontSize: 8,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#6D28D9',
   },
 
@@ -1694,7 +1694,7 @@ const styles = StyleSheet.create({
   },
   repurposeBannerTitle: {
     fontSize: 15,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
     marginBottom: 2,
   },
@@ -1706,7 +1706,7 @@ const styles = StyleSheet.create({
   },
   repurposeLinkText: {
     fontSize: 12.5,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#582CDB',
   },
 
@@ -1735,7 +1735,7 @@ const styles = StyleSheet.create({
   },
   voiceCardTitle: {
     fontSize: 15,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
   },
   voiceCardSub: {
@@ -1755,7 +1755,7 @@ const styles = StyleSheet.create({
   },
   voicePresetsText: {
     fontSize: 9,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#475569',
   },
   voiceWaveformBox: {
@@ -1767,7 +1767,7 @@ const styles = StyleSheet.create({
   },
   voiceWaveformWatermark: {
     fontSize: 11,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#6D28D9',
   },
   wavelengthDenseRowCreate: {
@@ -1813,13 +1813,13 @@ const styles = StyleSheet.create({
   },
   seriesVoiceVal: {
     fontSize: 13,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
     marginTop: 1,
   },
   minsCountVal: {
     fontSize: 16,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
   },
   minsRemainingLabel: {
@@ -1842,7 +1842,7 @@ const styles = StyleSheet.create({
   generateVoiceBtnText: {
     color: '#FFFFFF',
     fontSize: 13,
-    fontWeight: '900',
+    fontWeight: '700',
   },
   openStudioOutlineBtn: {
     flex: 1,
@@ -1869,7 +1869,7 @@ const styles = StyleSheet.create({
   },
   activeDraftsTitle: {
     fontSize: 16,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
   },
   viewAllText: {
@@ -1902,13 +1902,13 @@ const styles = StyleSheet.create({
   },
   scriptReadyTag: {
     fontSize: 10,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#2563EB',
     marginTop: 2,
   },
   voiceDraftTag: {
     fontSize: 10,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#D97706',
     marginTop: 2,
   },
@@ -1938,7 +1938,7 @@ const styles = StyleSheet.create({
   },
   smartSchedulePillText: {
     fontSize: 10,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#FFFFFF',
   },
   bestWindowSub: {
@@ -1948,7 +1948,7 @@ const styles = StyleSheet.create({
   },
   bestWindowTime: {
     fontSize: 28,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#582CDB',
     marginVertical: 2,
   },
@@ -1969,7 +1969,7 @@ const styles = StyleSheet.create({
   },
   scheduledBigStat: {
     fontSize: 20,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
   },
   scheduledStatLabel: {
@@ -1986,7 +1986,7 @@ const styles = StyleSheet.create({
   },
   autopilotActiveLabel: {
     fontSize: 14,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#15803D',
   },
   openScheduleFullBtn: {
@@ -1999,7 +1999,7 @@ const styles = StyleSheet.create({
   openScheduleFullBtnText: {
     color: '#FFFFFF',
     fontSize: 14,
-    fontWeight: '900',
+    fontWeight: '700',
   },
 
   // CARD 7: JARVIS SUGGESTION
@@ -2022,7 +2022,7 @@ const styles = StyleSheet.create({
   },
   jarvisSuggestionTag: {
     fontSize: 10,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#582CDB',
     letterSpacing: 0.5,
     marginBottom: 2,
@@ -2043,7 +2043,7 @@ const styles = StyleSheet.create({
   },
   draftsCountPillText: {
     fontSize: 10,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#582CDB',
   },
   draftFilterPill: {
@@ -2065,7 +2065,7 @@ const styles = StyleSheet.create({
   },
   draftFilterPillTextActive: {
     color: '#FFFFFF',
-    fontWeight: '900',
+    fontWeight: '700',
   },
   draftModalCard: {
     backgroundColor: '#FAF8F5',
@@ -2086,7 +2086,7 @@ const styles = StyleSheet.create({
   },
   draftModalBadgeText: {
     fontSize: 9,
-    fontWeight: '900',
+    fontWeight: '700',
     letterSpacing: 0.3,
   },
   draftModalTimeText: {
@@ -2096,7 +2096,7 @@ const styles = StyleSheet.create({
   },
   draftModalActionText: {
     fontSize: 11,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#582CDB',
   },
   modalCancelBtn: {
@@ -2111,7 +2111,7 @@ const styles = StyleSheet.create({
   modalCancelBtnText: {
     color: '#64748B',
     fontSize: 12,
-    fontWeight: '900',
+    fontWeight: '700',
   },
   modalSaveBtn: {
     flex: 2,
@@ -2123,7 +2123,7 @@ const styles = StyleSheet.create({
   modalSaveBtnText: {
     color: '#FFFFFF',
     fontSize: 12,
-    fontWeight: '900',
+    fontWeight: '700',
   },
 
   // MODALS
@@ -2158,7 +2158,7 @@ const styles = StyleSheet.create({
   },
   modalTitle: {
     fontSize: 18,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
   },
   modalSubtitle: {
@@ -2177,7 +2177,7 @@ const styles = StyleSheet.create({
   modalCloseCross: {
     fontSize: 12,
     color: '#64748B',
-    fontWeight: '900',
+    fontWeight: '700',
   },
   modalFullBtn: {
     backgroundColor: '#582CDB',
@@ -2189,11 +2189,11 @@ const styles = StyleSheet.create({
   modalFullBtnText: {
     color: '#FFFFFF',
     fontSize: 14,
-    fontWeight: '900',
+    fontWeight: '700',
   },
   inputSectionHeader: {
     fontSize: 10,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#64748B',
     letterSpacing: 0.5,
     marginTop: 8,
@@ -2218,7 +2218,7 @@ const styles = StyleSheet.create({
   },
   voiceToneChipTextActive: {
     color: '#582CDB',
-    fontWeight: '900',
+    fontWeight: '700',
   },
   voiceTextInput: {
     backgroundColor: '#F8FAFC',
@@ -2263,7 +2263,7 @@ const styles = StyleSheet.create({
   },
   hookCopyPill: {
     fontSize: 10,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#582CDB',
   },
   toastContainer: {
@@ -2283,7 +2283,7 @@ const styles = StyleSheet.create({
   toastText: {
     color: '#FFFFFF',
     fontSize: 12.5,
-    fontWeight: '900',
+    fontWeight: '700',
     letterSpacing: 0.2,
   },
 });

@@ -37,7 +37,7 @@ export const TinyGoldCheck = ({ size = 13 }: { size?: number }) => (
       alignItems: 'center',
       shadowColor: '#CA8A04',
       shadowOffset: { width: 0, height: 1 },
-      shadowOpacity: 0.35,
+      shadowOpacity: 0.12,
       shadowRadius: 2,
       elevation: 2,
     }}
@@ -1007,7 +1007,7 @@ export const ProDashboardScreen: React.FC<ProDashboardScreenProps> = ({
             <View style={styles.whyMatchCalloutRow}>
               <Text style={{ fontSize: 13 }}>✨</Text>
               <Text style={styles.whyMatchInlineText}>
-                <Text style={{ fontWeight: '900', color: '#582CDB' }}>Why this match? </Text>
+                <Text style={{ fontWeight: '700', color: '#582CDB' }}>Why this match? </Text>
                 Similar niche, active streak, open to collab.
               </Text>
             </View>
@@ -1168,7 +1168,7 @@ export const ProDashboardScreen: React.FC<ProDashboardScreenProps> = ({
                     ]}
                     hitSlop={8}
                   >
-                    <Text style={{ fontSize: 18, color: selectedMonthIndex === 0 ? '#CBD5E1' : '#582CDB', fontWeight: '900' }}>‹</Text>
+                    <Text style={{ fontSize: 18, color: selectedMonthIndex === 0 ? '#CBD5E1' : '#582CDB', fontWeight: '700' }}>‹</Text>
                   </Pressable>
 
                   <View style={styles.monthNameTitleGroup}>
@@ -1191,7 +1191,7 @@ export const ProDashboardScreen: React.FC<ProDashboardScreenProps> = ({
                     ]}
                     hitSlop={8}
                   >
-                    <Text style={{ fontSize: 18, color: selectedMonthIndex === FULL_YEAR_CALENDAR.length - 1 ? '#CBD5E1' : '#582CDB', fontWeight: '900' }}>›</Text>
+                    <Text style={{ fontSize: 18, color: selectedMonthIndex === FULL_YEAR_CALENDAR.length - 1 ? '#CBD5E1' : '#582CDB', fontWeight: '700' }}>›</Text>
                   </Pressable>
                 </View>
 
@@ -1396,7 +1396,7 @@ export const ProDashboardScreen: React.FC<ProDashboardScreenProps> = ({
                     <Text style={styles.proPriorityText}>👑 ACTIVE BRAND CAMPAIGN</Text>
                   </View>
                   <Pressable onPress={() => setShowBrandQuestModal(false)} hitSlop={8}>
-                    <Text style={{ fontSize: 18, color: '#94A3B8', fontWeight: '900' }}>✕</Text>
+                    <Text style={{ fontSize: 18, color: '#94A3B8', fontWeight: '700' }}>✕</Text>
                   </Pressable>
                 </View>
 
@@ -1412,17 +1412,17 @@ export const ProDashboardScreen: React.FC<ProDashboardScreenProps> = ({
                       <Text style={{ fontSize: 22 }}>🎁</Text>
                     </View>
                     <View style={{ flex: 1 }}>
-                      <Text style={{ fontSize: 17, fontWeight: '900', color: '#FFFFFF' }}>GlowUp Skincare Launch</Text>
+                      <Text style={{ fontSize: 17, fontWeight: '700', color: '#FFFFFF' }}>GlowUp Skincare Launch</Text>
                       <Text style={{ fontSize: 11, color: '#C7D2FE', marginTop: 1, fontWeight: '700' }}>Verified Sponsor • 2 Days Remaining</Text>
                     </View>
                   </View>
 
                   <View style={{ flexDirection: 'row', gap: 8, marginTop: 12 }}>
                     <View style={{ backgroundColor: 'rgba(245, 158, 11, 0.25)', borderWidth: 1, borderColor: '#F59E0B', paddingHorizontal: 10, paddingVertical: 4, borderRadius: 8 }}>
-                      <Text style={{ fontSize: 11, fontWeight: '900', color: '#FDE68A' }}>💰 $450 Guaranteed Bounty</Text>
+                      <Text style={{ fontSize: 11, fontWeight: '700', color: '#FDE68A' }}>💰 $450 Guaranteed Bounty</Text>
                     </View>
                     <View style={{ backgroundColor: 'rgba(139, 92, 246, 0.25)', borderWidth: 1, borderColor: '#8B5CF6', paddingHorizontal: 10, paddingVertical: 4, borderRadius: 8 }}>
-                      <Text style={{ fontSize: 11, fontWeight: '900', color: '#EDE9FE' }}>⚡ +350 XP Reward</Text>
+                      <Text style={{ fontSize: 11, fontWeight: '700', color: '#EDE9FE' }}>⚡ +350 XP Reward</Text>
                     </View>
                   </View>
                 </LinearGradient>
@@ -1519,7 +1519,7 @@ export const ProDashboardScreen: React.FC<ProDashboardScreenProps> = ({
                     <Text style={styles.proPriorityText}>👑 LEVEL &amp; BADGE PROGRESSION</Text>
                   </View>
                   <Pressable onPress={() => setShowCreatorLevelModal(false)} hitSlop={8}>
-                    <Text style={{ fontSize: 18, color: '#94A3B8', fontWeight: '900' }}>✕</Text>
+                    <Text style={{ fontSize: 18, color: '#94A3B8', fontWeight: '700' }}>✕</Text>
                   </Pressable>
                 </View>
 
@@ -1555,7 +1555,7 @@ export const ProDashboardScreen: React.FC<ProDashboardScreenProps> = ({
                       />
                     </View>
                     <Text style={styles.heroXpRemainingSub}>
-                      🔥 Only 550 XP needed to unlock <Text style={{ fontWeight: '900', color: '#FDE68A' }}>Level 43 Master Storyteller</Text>
+                      🔥 Only 550 XP needed to unlock <Text style={{ fontWeight: '700', color: '#FDE68A' }}>Level 43 Master Storyteller</Text>
                     </Text>
                   </View>
                 </LinearGradient>
@@ -1782,7 +1782,7 @@ const styles = StyleSheet.create({
   },
   proHeaderBadgeText: {
     fontSize: 9,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#92400E',
     letterSpacing: 0.3,
   },
@@ -1857,7 +1857,7 @@ const styles = StyleSheet.create({
   addPhotoPlusText: {
     color: '#FFFFFF',
     fontSize: 8,
-    fontWeight: '900',
+    fontWeight: '700',
   },
   scrollContent: {
     paddingHorizontal: 20,
@@ -1890,7 +1890,7 @@ const styles = StyleSheet.create({
   },
   proPlanTagText: {
     fontSize: 10,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#000000',
     letterSpacing: 0.4,
   },
@@ -1947,7 +1947,7 @@ const styles = StyleSheet.create({
   },
   proPillActiveGoldText: {
     fontSize: 11,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#FFFFFF',
   },
   dashboardCard: {
@@ -1978,7 +1978,7 @@ const styles = StyleSheet.create({
   },
   streakBigCount: {
     fontSize: 22,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
   },
   monthHeaderRow: {
@@ -2028,7 +2028,7 @@ const styles = StyleSheet.create({
   checkMarkText: {
     color: '#FFFFFF',
     fontSize: 14,
-    fontWeight: '900',
+    fontWeight: '700',
   },
   topCreatorCalloutBanner: {
     flexDirection: 'row',
@@ -2051,7 +2051,7 @@ const styles = StyleSheet.create({
   },
   scheduledBigNumber: {
     fontSize: 28,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#582CDB',
   },
   scheduledThisWeek: {
@@ -2110,7 +2110,7 @@ const styles = StyleSheet.create({
   },
   highlightGreen: {
     color: '#15803D',
-    fontWeight: '900',
+    fontWeight: '700',
   },
   hourlyChartContainer: {
     flexDirection: 'row',
@@ -2131,18 +2131,18 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     shadowColor: '#7C3AED',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
+    shadowOpacity: 0.12,
     shadowRadius: 6,
     elevation: 3,
   },
   levelCircleNumber: {
     color: '#FFFFFF',
     fontSize: 16,
-    fontWeight: '900',
+    fontWeight: '700',
   },
   levelTitleText: {
     fontSize: 16,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
   },
   levelXpText: {
@@ -2177,7 +2177,7 @@ const styles = StyleSheet.create({
   },
   proPriorityText: {
     fontSize: 9,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#92400E',
   },
   brandQuestSubLabel: {
@@ -2188,7 +2188,7 @@ const styles = StyleSheet.create({
   },
   brandQuestTitle: {
     fontSize: 17,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
     marginTop: 4,
   },
@@ -2222,7 +2222,7 @@ const styles = StyleSheet.create({
   },
   earningsBigAmount: {
     fontSize: 32,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
   },
   earningsGrowthRate: {
@@ -2239,14 +2239,14 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     shadowColor: '#582CDB',
     shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.2,
+    shadowOpacity: 0.08,
     shadowRadius: 8,
     elevation: 3,
   },
   viewEarningsBtnText: {
     color: '#FFFFFF',
     fontSize: 14,
-    fontWeight: '900',
+    fontWeight: '700',
   },
   voiceStudioLabel: {
     fontSize: 11,
@@ -2262,7 +2262,7 @@ const styles = StyleSheet.create({
   },
   proUnlockedText: {
     fontSize: 9,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#A16207',
   },
   waveformContainerBox: {
@@ -2284,7 +2284,7 @@ const styles = StyleSheet.create({
   },
   voiceMinsCount: {
     fontSize: 18,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
   },
   voiceMinsTotal: {
@@ -2309,7 +2309,7 @@ const styles = StyleSheet.create({
   },
   voiceProgressText: {
     fontSize: 11,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
   },
   createVoiceBtn: {
@@ -2327,7 +2327,7 @@ const styles = StyleSheet.create({
   createVoiceBtnText: {
     color: '#FFFFFF',
     fontSize: 14,
-    fontWeight: '900',
+    fontWeight: '700',
   },
   openStudioOutlineBtn: {
     backgroundColor: '#FFFFFF',
@@ -2352,7 +2352,7 @@ const styles = StyleSheet.create({
   },
   matchCreatorName: {
     fontSize: 16,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
   },
   matchOverlapTag: {
@@ -2396,7 +2396,7 @@ const styles = StyleSheet.create({
   connectMatchBtnText: {
     color: '#582CDB',
     fontSize: 14,
-    fontWeight: '900',
+    fontWeight: '700',
   },
   btnPressed: {
     opacity: 0.9,
@@ -2419,7 +2419,7 @@ const styles = StyleSheet.create({
     padding: 20,
     shadowColor: '#582CDB',
     shadowOffset: { width: 0, height: 12 },
-    shadowOpacity: 0.2,
+    shadowOpacity: 0.08,
     shadowRadius: 24,
     elevation: 10,
   },
@@ -2434,7 +2434,7 @@ const styles = StyleSheet.create({
   },
   calendarModalMainTitle: {
     fontSize: 18,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
   },
   proBadgePill: {
@@ -2446,7 +2446,7 @@ const styles = StyleSheet.create({
   },
   proBadgeText: {
     fontSize: 9,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#92400E',
     letterSpacing: 0.5,
   },
@@ -2481,7 +2481,7 @@ const styles = StyleSheet.create({
   },
   calendarStatValue: {
     fontSize: 12,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
   },
   calendarStatLabel: {
@@ -2514,7 +2514,7 @@ const styles = StyleSheet.create({
   },
   monthChipTextActive: {
     color: '#FFFFFF',
-    fontWeight: '900',
+    fontWeight: '700',
   },
   monthChipCurrentDot: {
     width: 5,
@@ -2576,7 +2576,7 @@ const styles = StyleSheet.create({
   },
   focusedMonthTitle: {
     fontSize: 14,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
   },
   currentMonthBadge: {
@@ -2587,7 +2587,7 @@ const styles = StyleSheet.create({
   },
   currentMonthBadgeText: {
     fontSize: 9,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#92400E',
   },
   dayColHeadersRow: {
@@ -2651,20 +2651,20 @@ const styles = StyleSheet.create({
   },
   dayCellNumberCompleted: {
     color: '#FFFFFF',
-    fontWeight: '900',
+    fontWeight: '700',
   },
   dayCellNumberScheduled: {
     color: '#B45309',
-    fontWeight: '900',
+    fontWeight: '700',
   },
   dayCellNumberFreeze: {
     color: '#0369A1',
-    fontWeight: '900',
+    fontWeight: '700',
   },
   dayCellCheckIcon: {
     fontSize: 8,
     color: '#FFFFFF',
-    fontWeight: '900',
+    fontWeight: '700',
     position: 'absolute',
     bottom: 2,
   },
@@ -2728,7 +2728,7 @@ const styles = StyleSheet.create({
   },
   modalTitle: {
     fontSize: 18,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
   },
   modalSubtitle: {
@@ -2747,7 +2747,7 @@ const styles = StyleSheet.create({
   modalCloseCross: {
     fontSize: 12,
     color: '#64748B',
-    fontWeight: '900',
+    fontWeight: '700',
   },
   modalFullBtn: {
     backgroundColor: '#582CDB',
@@ -2759,11 +2759,11 @@ const styles = StyleSheet.create({
   modalFullBtnText: {
     color: '#FFFFFF',
     fontSize: 14,
-    fontWeight: '900',
+    fontWeight: '700',
   },
   inputSectionHeader: {
     fontSize: 10,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#64748B',
     letterSpacing: 0.5,
     marginTop: 8,
@@ -2788,7 +2788,7 @@ const styles = StyleSheet.create({
   },
   voiceToneChipTextActive: {
     color: '#582CDB',
-    fontWeight: '900',
+    fontWeight: '700',
   },
   voiceTextInput: {
     backgroundColor: '#F8FAFC',
@@ -2845,12 +2845,12 @@ const styles = StyleSheet.create({
   },
   heroLevelNumberText: {
     fontSize: 20,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#FFFFFF',
   },
   heroLevelTitle: {
     fontSize: 18,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#FFFFFF',
   },
   heroLevelSub: {
@@ -2861,7 +2861,7 @@ const styles = StyleSheet.create({
   },
   heroXpCurrentText: {
     fontSize: 12,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#FDE68A',
   },
   heroXpTargetText: {
@@ -2887,7 +2887,7 @@ const styles = StyleSheet.create({
   },
   modalSubheadingTitle: {
     fontSize: 11,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#64748B',
     letterSpacing: 0.5,
   },
@@ -2908,7 +2908,7 @@ const styles = StyleSheet.create({
   },
   badgeShowcaseName: {
     fontSize: 12,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
     textAlign: 'center',
   },
@@ -2946,7 +2946,7 @@ const styles = StyleSheet.create({
   },
   xpActivityBadgeText: {
     fontSize: 11,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#582CDB',
   },
   nextLevelPreviewBox: {
@@ -2959,7 +2959,7 @@ const styles = StyleSheet.create({
   },
   nextLevelPreviewTitle: {
     fontSize: 11,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#92400E',
     marginBottom: 4,
   },
@@ -2975,7 +2975,7 @@ const styles = StyleSheet.create({
     marginTop: 8,
     shadowColor: '#F59E0B',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.35,
+    shadowOpacity: 0.12,
     shadowRadius: 8,
     elevation: 4,
   },
@@ -2990,7 +2990,7 @@ const styles = StyleSheet.create({
   modalGoldActionBtnText: {
     color: '#0C0A12',
     fontSize: 14,
-    fontWeight: '900',
+    fontWeight: '700',
   },
   modalSecondaryOutlineBtn: {
     backgroundColor: '#FAF8F5',
@@ -3004,7 +3004,7 @@ const styles = StyleSheet.create({
   modalSecondaryOutlineBtnText: {
     color: '#582CDB',
     fontSize: 13,
-    fontWeight: '900',
+    fontWeight: '700',
   },
   modalCancelBtn: {
     paddingVertical: 10,
@@ -3032,7 +3032,7 @@ const styles = StyleSheet.create({
   toastText: {
     color: '#FFFFFF',
     fontSize: 12.5,
-    fontWeight: '900',
+    fontWeight: '700',
     letterSpacing: 0.2,
   },
 });

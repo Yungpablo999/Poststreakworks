@@ -779,7 +779,7 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
               hitSlop={8}
             >
               <View style={{ backgroundColor: '#EDE9FE', borderColor: '#C4B5FD', borderWidth: 1, paddingHorizontal: 8, paddingVertical: 3.5, borderRadius: 8 }}>
-                <Text style={{ fontSize: 10, fontWeight: '900', color: '#582CDB', letterSpacing: 0.5 }}>🔒 FREE (TAP FOR PRO)</Text>
+                <Text style={{ fontSize: 10, fontWeight: '700', color: '#582CDB', letterSpacing: 0.5 }}>🔒 FREE (TAP FOR PRO)</Text>
               </View>
             </Pressable>
           </View>
@@ -2128,7 +2128,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#582CDB',
     shadowColor: '#582CDB',
     shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.22,
+    shadowOpacity: 0.08,
     shadowRadius: 6,
     elevation: 3,
   },
@@ -2396,7 +2396,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     shadowColor: '#582CDB',
     shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.25,
+    shadowOpacity: 0.08,
     shadowRadius: 14,
     elevation: 4,
   },
@@ -2568,7 +2568,7 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     shadowColor: '#582CDB',
     shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.22,
+    shadowOpacity: 0.08,
     shadowRadius: 6,
     elevation: 3,
   },
@@ -2598,7 +2598,7 @@ const styles = StyleSheet.create({
   },
   goldProPillText: {
     fontSize: 10,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#B45309',
     letterSpacing: 0.6,
   },
@@ -2608,7 +2608,7 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     shadowColor: '#F59E0B',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.35,
+    shadowOpacity: 0.12,
     shadowRadius: 10,
     elevation: 4,
   },
@@ -2619,7 +2619,7 @@ const styles = StyleSheet.create({
   },
   metallicGoldUpgradeBtnText: {
     fontSize: 14.5,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
     letterSpacing: -0.2,
   },
@@ -2646,7 +2646,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     shadowColor: '#582CDB',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.25,
+    shadowOpacity: 0.08,
     shadowRadius: 8,
     elevation: 3,
   },
@@ -2682,7 +2682,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     shadowColor: '#D4A038',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.25,
+    shadowOpacity: 0.08,
     shadowRadius: 8,
     elevation: 3,
   },
@@ -3140,7 +3140,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     shadowColor: '#582CDB',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.25,
+    shadowOpacity: 0.08,
     shadowRadius: 8,
     elevation: 4,
   },
@@ -3264,7 +3264,7 @@ const styles = StyleSheet.create({
     borderColor: '#582CDB',
     shadowColor: '#582CDB',
     shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.25,
+    shadowOpacity: 0.08,
     shadowRadius: 6,
     elevation: 3,
   },
@@ -3409,7 +3409,7 @@ const styles = StyleSheet.create({
     borderColor: '#582CDB',
     shadowColor: '#582CDB',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
+    shadowOpacity: 0.08,
     shadowRadius: 4,
     elevation: 2,
   },
@@ -3489,7 +3489,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     shadowColor: '#582CDB',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.25,
+    shadowOpacity: 0.08,
     shadowRadius: 8,
     elevation: 4,
   },

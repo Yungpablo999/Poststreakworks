@@ -1561,7 +1561,7 @@ const styles = StyleSheet.create({
   },
   collabIdeaPillText: {
     fontSize: 10,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#FFFFFF',
     letterSpacing: 0.5,
   },
@@ -1573,7 +1573,7 @@ const styles = StyleSheet.create({
   },
   planCounterPillText: {
     fontSize: 10,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#582CDB',
     letterSpacing: 0.5,
   },
@@ -1584,7 +1584,7 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     shadowColor: '#582CDB',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
+    shadowOpacity: 0.08,
     shadowRadius: 6,
     elevation: 2,
   },
@@ -1596,7 +1596,7 @@ const styles = StyleSheet.create({
 
   mainTitle: {
     fontSize: 22,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
     letterSpacing: -0.4,
     marginBottom: 4,
@@ -1633,7 +1633,7 @@ const styles = StyleSheet.create({
   overviewTitle: {
     flex: 1,
     fontSize: 17.5,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
   },
   cardCycleBtn: {
@@ -1701,7 +1701,7 @@ const styles = StyleSheet.create({
   },
   sectionCardHeaderTitle: {
     fontSize: 10,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#64748B',
     letterSpacing: 0.6,
     marginBottom: 12,
@@ -1768,7 +1768,7 @@ const styles = StyleSheet.create({
   },
   roleUserTitle: {
     fontSize: 13,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#582CDB',
   },
   roleBulletText: {
@@ -1835,7 +1835,7 @@ const styles = StyleSheet.create({
   },
   jarvisSuggestionTitle: {
     fontSize: 14,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#582CDB',
   },
   jarvisSuggestionBody: {
@@ -1876,7 +1876,7 @@ const styles = StyleSheet.create({
   },
   creatorInvolvedName: {
     fontSize: 15,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
   },
   verifiedCheckPill: {
@@ -1889,7 +1889,7 @@ const styles = StyleSheet.create({
   },
   verifiedCheckText: {
     fontSize: 10,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#FFFFFF',
   },
   creatorInvolvedNiche: {
@@ -1939,14 +1939,14 @@ const styles = StyleSheet.create({
   },
   halfColLabel: {
     fontSize: 10,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#64748B',
     letterSpacing: 0.6,
     marginBottom: 4,
   },
   halfColMainText: {
     fontSize: 14.5,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
   },
   halfColSubText: {
@@ -1963,7 +1963,7 @@ const styles = StyleSheet.create({
   },
   recommendedPillText: {
     fontSize: 9,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#15803D',
   },
   platCheckboxRow: {
@@ -2017,7 +2017,7 @@ const styles = StyleSheet.create({
   },
   scheduleHeaderTitle: {
     fontSize: 11,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#6D28D9',
     letterSpacing: 0.8,
   },
@@ -2062,7 +2062,7 @@ const styles = StyleSheet.create({
   },
   peakSlotBadgeText: {
     fontSize: 11,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#6D28D9',
   },
   adjustScheduleBtn: {
@@ -2083,7 +2083,7 @@ const styles = StyleSheet.create({
   },
   adjustScheduleBtnText: {
     fontSize: 12.5,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#FFFFFF',
     letterSpacing: 0.4,
   },
@@ -2105,13 +2105,13 @@ const styles = StyleSheet.create({
   },
   impactHeaderTitle: {
     fontSize: 10,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#64748B',
     letterSpacing: 0.6,
   },
   impactHighBadge: {
     fontSize: 11,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#059669',
   },
   impactItemRow: {
@@ -2145,7 +2145,7 @@ const styles = StyleSheet.create({
   },
   impactProgressVal: {
     fontSize: 12,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#D97706',
   },
   impactProgressTrack: {
@@ -2174,7 +2174,7 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     shadowColor: '#582CDB',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.25,
+    shadowOpacity: 0.08,
     shadowRadius: 10,
     elevation: 4,
   },
@@ -2185,7 +2185,7 @@ const styles = StyleSheet.create({
   },
   startCollabBtnText: {
     fontSize: 14,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#FFFFFF',
     letterSpacing: 0.4,
   },
@@ -2237,7 +2237,7 @@ const styles = StyleSheet.create({
     padding: 20,
     shadowColor: '#582CDB',
     shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 0.2,
+    shadowOpacity: 0.08,
     shadowRadius: 24,
     elevation: 8,
   },
@@ -2251,7 +2251,7 @@ const styles = StyleSheet.create({
     padding: 20,
     shadowColor: '#582CDB',
     shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 0.2,
+    shadowOpacity: 0.08,
     shadowRadius: 24,
     elevation: 8,
   },
@@ -2300,13 +2300,13 @@ const styles = StyleSheet.create({
   },
   rateMeterLabel: {
     fontSize: 10,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#6D28D9',
     letterSpacing: 0.6,
   },
   rateMeterLevelText: {
     fontSize: 14,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
     marginTop: 2,
   },
@@ -2321,7 +2321,7 @@ const styles = StyleSheet.create({
   },
   rateScoreNum: {
     fontSize: 17,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#582CDB',
   },
   rateMultiplierText: {
@@ -2358,7 +2358,7 @@ const styles = StyleSheet.create({
 
   slotGroupTitle: {
     fontSize: 10,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#64748B',
     letterSpacing: 0.6,
     marginBottom: 8,
@@ -2383,7 +2383,7 @@ const styles = StyleSheet.create({
     borderColor: '#582CDB',
     shadowColor: '#582CDB',
     shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.2,
+    shadowOpacity: 0.08,
     shadowRadius: 6,
     elevation: 3,
   },
@@ -2413,7 +2413,7 @@ const styles = StyleSheet.create({
   },
   peakFireBadgeText: {
     fontSize: 9,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#B45309',
   },
   slotItemTagText: {
@@ -2457,7 +2457,7 @@ const styles = StyleSheet.create({
     marginTop: 8,
     shadowColor: '#582CDB',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.25,
+    shadowOpacity: 0.08,
     shadowRadius: 10,
     elevation: 4,
   },
@@ -2509,7 +2509,7 @@ const styles = StyleSheet.create({
   },
   profileStreakBadgeText: {
     fontSize: 11,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#B45309',
   },
   notifCard: {

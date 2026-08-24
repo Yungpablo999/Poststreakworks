@@ -504,11 +504,11 @@ export const EarningsScreen: React.FC<EarningsScreenProps> = ({
             {/* Checklist */}
             <View style={styles.readinessChecklist}>
               <View style={styles.checklistRow}>
-                <Text style={{ color: '#15803D', fontSize: 13, fontWeight: '900' }}>✓</Text>
+                <Text style={{ color: '#15803D', fontSize: 13, fontWeight: '700' }}>✓</Text>
                 <Text style={styles.checkTextActive}>Creator profile added</Text>
               </View>
               <View style={styles.checklistRow}>
-                <Text style={{ color: '#15803D', fontSize: 13, fontWeight: '900' }}>✓</Text>
+                <Text style={{ color: '#15803D', fontSize: 13, fontWeight: '700' }}>✓</Text>
                 <Text style={styles.checkTextActive}>47-day streak active 🔥</Text>
               </View>
               <View style={styles.checklistRow}>
@@ -568,7 +568,7 @@ export const EarningsScreen: React.FC<EarningsScreenProps> = ({
                   <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
                     <Text style={styles.estimatedLabel}>Tracked Platform Earnings</Text>
                     <View style={{ backgroundColor: '#FEF9C3', paddingHorizontal: 6, paddingVertical: 2, borderRadius: 4 }}>
-                      <Text style={{ fontSize: 9, fontWeight: '900', color: '#A16207' }}>PRO ACTIVE</Text>
+                      <Text style={{ fontSize: 9, fontWeight: '700', color: '#A16207' }}>PRO ACTIVE</Text>
                     </View>
                   </View>
                   <Text style={{ fontSize: 11, color: '#64748B', marginTop: 2 }}>Auto-synced across 4 channels</Text>
@@ -579,21 +579,21 @@ export const EarningsScreen: React.FC<EarningsScreenProps> = ({
               <View style={{ gap: 8, marginVertical: 10 }}>
                 <View style={{ flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 4, borderBottomWidth: 1, borderBottomColor: '#F3E8FF' }}>
                   <Text style={{ fontSize: 12, fontWeight: '800', color: '#171420' }}>● TikTok Creator Rewards</Text>
-                  <Text style={{ fontSize: 12, fontWeight: '900', color: '#582CDB' }}>$740.00</Text>
+                  <Text style={{ fontSize: 12, fontWeight: '700', color: '#582CDB' }}>$740.00</Text>
                 </View>
                 <View style={{ flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 4, borderBottomWidth: 1, borderBottomColor: '#F3E8FF' }}>
                   <Text style={{ fontSize: 12, fontWeight: '800', color: '#171420' }}>● Instagram Gifts &amp; Bonus</Text>
-                  <Text style={{ fontSize: 12, fontWeight: '900', color: '#582CDB' }}>$480.50</Text>
+                  <Text style={{ fontSize: 12, fontWeight: '700', color: '#582CDB' }}>$480.50</Text>
                 </View>
                 <View style={{ flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 4 }}>
                   <Text style={{ fontSize: 12, fontWeight: '800', color: '#171420' }}>● YouTube Shorts Ad Revenue</Text>
-                  <Text style={{ fontSize: 12, fontWeight: '900', color: '#582CDB' }}>$200.00</Text>
+                  <Text style={{ fontSize: 12, fontWeight: '700', color: '#582CDB' }}>$200.00</Text>
                 </View>
               </View>
 
               <View style={{ backgroundColor: '#EDE9FE', padding: 10, borderRadius: 10, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
                 <Text style={{ fontSize: 11, fontWeight: '800', color: '#582CDB' }}>⚡ Real-time Daily Revenue Sync Active</Text>
-                <Text style={{ fontSize: 11, fontWeight: '900', color: '#582CDB' }}>✓</Text>
+                <Text style={{ fontSize: 11, fontWeight: '700', color: '#582CDB' }}>✓</Text>
               </View>
             </View>
           ) : (
@@ -760,11 +760,11 @@ export const EarningsScreen: React.FC<EarningsScreenProps> = ({
 
             <View style={styles.campaignChecklist}>
               <View style={styles.campaignCheckItem}>
-                <Text style={{ color: '#15803D', fontSize: 13, fontWeight: '900' }}>✓</Text>
+                <Text style={{ color: '#15803D', fontSize: 13, fontWeight: '700' }}>✓</Text>
                 <Text style={styles.campCheckActive}>7-day streak</Text>
               </View>
               <View style={styles.campaignCheckItem}>
-                <Text style={{ color: '#15803D', fontSize: 13, fontWeight: '900' }}>✓</Text>
+                <Text style={{ color: '#15803D', fontSize: 13, fontWeight: '700' }}>✓</Text>
                 <Text style={styles.campCheckActive}>Complete Passport</Text>
               </View>
               <View style={styles.campaignCheckItem}>
@@ -1337,13 +1337,13 @@ const styles = StyleSheet.create({
   },
   heroPillText: {
     fontSize: 10,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#FFFFFF',
     letterSpacing: 0.6,
   },
   mainTitle: {
     fontSize: 24,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
     letterSpacing: -0.6,
     marginBottom: 16,
@@ -1371,14 +1371,14 @@ const styles = StyleSheet.create({
   },
   balanceLabel: {
     fontSize: 10,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#64748B',
     letterSpacing: 0.5,
     marginBottom: 2,
   },
   balanceAmount: {
     fontSize: 34,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
     letterSpacing: -0.8,
   },
@@ -1405,7 +1405,7 @@ const styles = StyleSheet.create({
   },
   readinessPercent: {
     fontSize: 12.5,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#582CDB',
   },
   readinessTrack: {
@@ -1448,7 +1448,7 @@ const styles = StyleSheet.create({
   },
   improveBtnText: {
     fontSize: 13,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#FFFFFF',
   },
 
@@ -1461,7 +1461,7 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontSize: 18,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
     letterSpacing: -0.3,
   },
@@ -1514,7 +1514,7 @@ const styles = StyleSheet.create({
   },
   estimatedAmount: {
     fontSize: 18,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#582CDB',
   },
   estimatedBullets: {
@@ -1537,7 +1537,7 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     shadowColor: '#CA8A04',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
+    shadowOpacity: 0.12,
     shadowRadius: 8,
     elevation: 3,
   },
@@ -1548,7 +1548,7 @@ const styles = StyleSheet.create({
   },
   unlockTrackingBtnText: {
     fontSize: 13,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
     letterSpacing: 0.3,
   },
@@ -1582,7 +1582,7 @@ const styles = StyleSheet.create({
   },
   oppXpBadgeText: {
     fontSize: 9,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#582CDB',
   },
   oppTitle: {
@@ -1617,7 +1617,7 @@ const styles = StyleSheet.create({
   },
   oppPurpleBtnText: {
     fontSize: 12,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#FFFFFF',
   },
 
@@ -1638,7 +1638,7 @@ const styles = StyleSheet.create({
   },
   passportTitle: {
     fontSize: 15,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
   },
   passportBadge: {
@@ -1649,7 +1649,7 @@ const styles = StyleSheet.create({
   },
   passportBadgeText: {
     fontSize: 9,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#B45309',
   },
   passportSub: {
@@ -1677,7 +1677,7 @@ const styles = StyleSheet.create({
   },
   passportGridValue: {
     fontSize: 13,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
   },
   passportBtn: {
@@ -1710,7 +1710,7 @@ const styles = StyleSheet.create({
   },
   campaignTitle: {
     fontSize: 15,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
   },
   lockPill: {
@@ -1721,7 +1721,7 @@ const styles = StyleSheet.create({
   },
   lockPillText: {
     fontSize: 9,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#64748B',
   },
   campaignSub: {
@@ -1786,7 +1786,7 @@ const styles = StyleSheet.create({
   },
   goalTarget: {
     fontSize: 18,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
   },
   trophyCircle: {
@@ -1806,12 +1806,12 @@ const styles = StyleSheet.create({
   },
   goalStepActive: {
     fontSize: 9,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#582CDB',
   },
   goalStepMuted: {
     fontSize: 9,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#94A3B8',
   },
   goalTrack: {
@@ -1856,7 +1856,7 @@ const styles = StyleSheet.create({
   },
   proTitle: {
     fontSize: 15,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
   },
   goldProBadge: {
@@ -1869,7 +1869,7 @@ const styles = StyleSheet.create({
   },
   goldProBadgeText: {
     fontSize: 9,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#A16207',
   },
   proSub: {
@@ -1903,7 +1903,7 @@ const styles = StyleSheet.create({
   },
   exploreProBtnText: {
     fontSize: 12.5,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
   },
 
@@ -1931,7 +1931,7 @@ const styles = StyleSheet.create({
   },
   jarvisTag: {
     fontSize: 9,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#582CDB',
     letterSpacing: 0.5,
     marginBottom: 2,
@@ -1959,7 +1959,7 @@ const styles = StyleSheet.create({
     padding: 20,
     shadowColor: '#171420',
     shadowOffset: { width: 0, height: 12 },
-    shadowOpacity: 0.25,
+    shadowOpacity: 0.08,
     shadowRadius: 28,
     elevation: 8,
   },
@@ -1971,7 +1971,7 @@ const styles = StyleSheet.create({
     padding: 20,
     shadowColor: '#171420',
     shadowOffset: { width: 0, height: 12 },
-    shadowOpacity: 0.3,
+    shadowOpacity: 0.12,
     shadowRadius: 30,
     elevation: 10,
   },
@@ -1989,7 +1989,7 @@ const styles = StyleSheet.create({
   },
   activePlatformsCountText: {
     fontSize: 10,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#582CDB',
   },
   modalCloseCircle: {
@@ -2007,7 +2007,7 @@ const styles = StyleSheet.create({
   },
   modalTitle: {
     fontSize: 18,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
     letterSpacing: -0.3,
   },
@@ -2019,7 +2019,7 @@ const styles = StyleSheet.create({
   },
   modalSectionTitle: {
     fontSize: 10,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#64748B',
     letterSpacing: 0.6,
     marginBottom: 8,
@@ -2096,7 +2096,7 @@ const styles = StyleSheet.create({
   },
   addPlatformActionBtnText: {
     fontSize: 11,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#FFFFFF',
   },
   customAddAccountBox: {
@@ -2110,7 +2110,7 @@ const styles = StyleSheet.create({
   },
   customAddTitle: {
     fontSize: 10,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#582CDB',
     letterSpacing: 0.6,
   },
@@ -2138,7 +2138,7 @@ const styles = StyleSheet.create({
   },
   platformSelectChipTextActive: {
     color: '#582CDB',
-    fontWeight: '900',
+    fontWeight: '700',
   },
   customInputRow: {
     flexDirection: 'row',
@@ -2166,7 +2166,7 @@ const styles = StyleSheet.create({
   },
   linkAccountConfirmBtnText: {
     fontSize: 11,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#FFFFFF',
   },
   modalDoneBtn: {
@@ -2179,7 +2179,7 @@ const styles = StyleSheet.create({
   },
   modalDoneBtnText: {
     fontSize: 14,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#FFFFFF',
     letterSpacing: 0.3,
   },
@@ -2227,7 +2227,7 @@ const styles = StyleSheet.create({
   },
   milestoneOptionTextActive: {
     color: '#582CDB',
-    fontWeight: '900',
+    fontWeight: '700',
   },
   reqDetailLine: {
     fontSize: 12.5,
@@ -2244,7 +2244,7 @@ const styles = StyleSheet.create({
   },
   modalFullBtnText: {
     fontSize: 14,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#FFFFFF',
   },
 
@@ -2261,7 +2261,7 @@ const styles = StyleSheet.create({
     zIndex: 9999,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.25,
+    shadowOpacity: 0.08,
     shadowRadius: 10,
     elevation: 8,
     alignItems: 'center',
@@ -2269,7 +2269,7 @@ const styles = StyleSheet.create({
   toastText: {
     color: '#FFFFFF',
     fontSize: 12.5,
-    fontWeight: '900',
+    fontWeight: '700',
     letterSpacing: 0.2,
   },
 });

@@ -168,7 +168,7 @@ const styles = StyleSheet.create({
   },
   mainHeadline: {
     fontSize: 38,
-    fontWeight: '900',
+    fontWeight: '700',
     color: colors.textPrimary,
     textAlign: 'center',
     letterSpacing: -1.6,
@@ -249,7 +249,7 @@ const styles = StyleSheet.create({
   },
   jarvisCore: {
     fontSize: 19,
-    fontWeight: '900',
+    fontWeight: '700',
     color: colors.primary,
     letterSpacing: -0.4,
   },
