@@ -690,7 +690,7 @@ const styles = StyleSheet.create({
     borderColor: '#FBBF24',
   },
   proHeaderBadgeText: {
-    fontSize: 8.5,
+    fontSize: 9,
     fontWeight: '900',
     color: '#171420',
     letterSpacing: 0.3,
@@ -728,7 +728,7 @@ const styles = StyleSheet.create({
   scrollContent: {
     paddingHorizontal: 20,
     paddingTop: 4,
-    paddingBottom: 40,
+    paddingBottom: 96,
   },
 
   // TITLES SECTION
@@ -746,7 +746,7 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   proIntelligenceTagText: {
-    fontSize: 9.5,
+    fontSize: 10,
     fontWeight: '900',
     color: '#92400E',
     letterSpacing: 0.6,
@@ -791,7 +791,7 @@ const styles = StyleSheet.create({
     borderRadius: 6,
   },
   optimizedBadgeText: {
-    fontSize: 9.5,
+    fontSize: 10,
     fontWeight: '900',
     color: '#582CDB',
   },
@@ -823,7 +823,7 @@ const styles = StyleSheet.create({
     borderColor: '#F1EFE9',
   },
   planMetricTileLabel: {
-    fontSize: 9.5,
+    fontSize: 10,
     fontWeight: '800',
     color: '#94A3B8',
     letterSpacing: 0.4,
@@ -919,7 +919,7 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   blueprintHookTag: {
-    fontSize: 9.5,
+    fontSize: 10,
     fontWeight: '900',
     color: '#582CDB',
     letterSpacing: 0.6,
@@ -954,7 +954,7 @@ const styles = StyleSheet.create({
     color: '#582CDB',
   },
   stepLabelText: {
-    fontSize: 9.5,
+    fontSize: 10,
     fontWeight: '800',
     color: '#94A3B8',
     letterSpacing: 0.5,
@@ -975,7 +975,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   blueprintMiniChipText: {
-    fontSize: 10.5,
+    fontSize: 11,
     fontWeight: '800',
     color: '#582CDB',
   },
@@ -1020,7 +1020,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   traitBadgeText: {
-    fontSize: 10.5,
+    fontSize: 11,
     fontWeight: '800',
     color: '#171420',
   },
@@ -1098,7 +1098,7 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   viewDetailsLink: {
-    fontSize: 11.5,
+    fontSize: 12,
     fontWeight: '800',
     color: '#582CDB',
   },
@@ -1128,7 +1128,7 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   signalProgressLabel: {
-    fontSize: 9.5,
+    fontSize: 10,
     fontWeight: '800',
     color: '#64748B',
   },
@@ -1232,7 +1232,7 @@ const styles = StyleSheet.create({
 
   // COMMON
   btnPressed: {
-    opacity: 0.85,
+    opacity: 0.9,
     transform: [{ scale: 0.98 }],
   },
   toastContainer: {

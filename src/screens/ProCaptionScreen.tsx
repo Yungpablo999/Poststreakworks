@@ -1304,7 +1304,7 @@ const styles = StyleSheet.create({
     borderRadius: 6,
   },
   proHeaderBadgeText: {
-    fontSize: 9.5,
+    fontSize: 10,
     fontWeight: '900',
     color: '#0C0A12',
     letterSpacing: 0.3,
@@ -1375,7 +1375,7 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   goldScriptBadgeText: {
-    fontSize: 9.5,
+    fontSize: 10,
     fontWeight: '900',
     color: '#D97706',
     letterSpacing: 0.3,
@@ -1399,7 +1399,7 @@ const styles = StyleSheet.create({
     borderRadius: 6,
   },
   purplePillText: {
-    fontSize: 10.5,
+    fontSize: 11,
     fontWeight: '900',
     color: '#582CDB',
   },
@@ -1410,7 +1410,7 @@ const styles = StyleSheet.create({
     borderRadius: 6,
   },
   goldPillText: {
-    fontSize: 10.5,
+    fontSize: 11,
     fontWeight: '900',
     color: '#D97706',
   },
@@ -1434,7 +1434,7 @@ const styles = StyleSheet.create({
     color: '#171420',
   },
   changeIdeaLink: {
-    fontSize: 11.5,
+    fontSize: 12,
     fontWeight: '900',
     color: '#582CDB',
   },
@@ -1446,7 +1446,7 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   sourceIdeaDesc: {
-    fontSize: 11.5,
+    fontSize: 12,
     color: '#64748B',
     lineHeight: 16,
   },
@@ -1477,7 +1477,7 @@ const styles = StyleSheet.create({
     letterSpacing: 0.2,
   },
   toneSubHint: {
-    fontSize: 10.5,
+    fontSize: 11,
     color: '#64748B',
     marginTop: 2,
   },
@@ -1518,7 +1518,7 @@ const styles = StyleSheet.create({
     elevation: 2,
   },
   toneChipText: {
-    fontSize: 11.5,
+    fontSize: 12,
     fontWeight: '800',
     color: '#475569',
   },
@@ -1592,7 +1592,7 @@ const styles = StyleSheet.create({
     borderColor: '#EFECE6',
   },
   captionMetricHeader: {
-    fontSize: 8.5,
+    fontSize: 9,
     fontWeight: '900',
     color: '#94A3B8',
     letterSpacing: 0.3,
@@ -1673,7 +1673,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   platDeckEditBtnText: {
-    fontSize: 10.5,
+    fontSize: 11,
     fontWeight: '800',
     color: '#171420',
   },
@@ -1685,7 +1685,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   platDeckUseBtnText: {
-    fontSize: 10.5,
+    fontSize: 11,
     fontWeight: '900',
     color: '#FFFFFF',
   },
@@ -1723,7 +1723,7 @@ const styles = StyleSheet.create({
     letterSpacing: 0.4,
   },
   scoreBarLabel: {
-    fontSize: 9.5,
+    fontSize: 10,
     fontWeight: '900',
     color: '#64748B',
   },
@@ -1806,7 +1806,7 @@ const styles = StyleSheet.create({
     color: '#171420',
   },
   ctaCardSub: {
-    fontSize: 10.5,
+    fontSize: 11,
     color: '#64748B',
     lineHeight: 15,
   },
@@ -1860,7 +1860,7 @@ const styles = StyleSheet.create({
     borderRadius: 6,
   },
   hashtagCategoryBadgeText: {
-    fontSize: 8.5,
+    fontSize: 9,
     fontWeight: '900',
     color: '#582CDB',
     letterSpacing: 0.3,
@@ -1949,7 +1949,7 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   removableHashtagText: {
-    fontSize: 11.5,
+    fontSize: 12,
     fontWeight: '800',
     color: '#171420',
   },
@@ -1962,7 +1962,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   removeTagCrossText: {
-    fontSize: 8.5,
+    fontSize: 9,
     fontWeight: '900',
     color: '#64748B',
   },
@@ -1980,7 +1980,7 @@ const styles = StyleSheet.create({
     borderRadius: 6,
   },
   suggestionPillText: {
-    fontSize: 10.5,
+    fontSize: 11,
     fontWeight: '800',
     color: '#582CDB',
   },
@@ -2027,7 +2027,7 @@ const styles = StyleSheet.create({
     letterSpacing: 0.4,
   },
   statusVal: {
-    fontSize: 11.5,
+    fontSize: 12,
     fontWeight: '900',
     color: '#171420',
   },
@@ -2060,7 +2060,7 @@ const styles = StyleSheet.create({
     borderRadius: 4,
   },
   streakProtectedBadgeText: {
-    fontSize: 8.5,
+    fontSize: 9,
     fontWeight: '900',
     color: '#582CDB',
   },
@@ -2095,7 +2095,7 @@ const styles = StyleSheet.create({
     letterSpacing: 0.2,
   },
   jarvisHeroSub: {
-    fontSize: 8.5,
+    fontSize: 9,
     fontWeight: '900',
     color: '#A78BFA',
     letterSpacing: 0.5,
@@ -2110,7 +2110,7 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(255, 255, 255, 0.18)',
   },
   jarvisActiveEnginePillText: {
-    fontSize: 8.5,
+    fontSize: 9,
     fontWeight: '900',
     color: '#34D399',
     letterSpacing: 0.3,
@@ -2143,7 +2143,7 @@ const styles = StyleSheet.create({
     elevation: 2,
   },
   jarvisStrategyChipText: {
-    fontSize: 9.5,
+    fontSize: 10,
     fontWeight: '900',
     color: '#92400E',
     letterSpacing: 0.3,
@@ -2224,7 +2224,7 @@ const styles = StyleSheet.create({
     marginLeft: 8,
   },
   saveDraftXpPillText: {
-    fontSize: 9.5,
+    fontSize: 10,
     fontWeight: '900',
     color: '#582CDB',
   },
@@ -2278,7 +2278,7 @@ const styles = StyleSheet.create({
     fontWeight: '800',
   },
   btnPressed: {
-    transform: [{ scale: 0.96 }],
-    opacity: 0.85,
+    opacity: 0.9,
+    transform: [{ scale: 0.98 }],
   },
 });

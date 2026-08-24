@@ -1198,7 +1198,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#FAF8F5',
   },
   btnPressed: {
-    opacity: 0.78,
+    opacity: 0.9,
     transform: [{ scale: 0.98 }],
   },
 
@@ -1359,7 +1359,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   aggregateLabel: {
-    fontSize: 9.5,
+    fontSize: 10,
     fontWeight: '900',
     color: '#64748B',
     letterSpacing: 0.5,
@@ -1405,7 +1405,7 @@ const styles = StyleSheet.create({
     letterSpacing: 0.4,
   },
   distValue: {
-    fontSize: 9.5,
+    fontSize: 10,
     fontWeight: '900',
     color: '#171420',
   },
@@ -1435,7 +1435,7 @@ const styles = StyleSheet.create({
     borderRadius: 3,
   },
   distLegendText: {
-    fontSize: 10.5,
+    fontSize: 11,
     fontWeight: '700',
     color: '#475569',
   },
@@ -1467,7 +1467,7 @@ const styles = StyleSheet.create({
     letterSpacing: -0.3,
   },
   weeklySubtitle: {
-    fontSize: 11.5,
+    fontSize: 12,
     color: '#64748B',
     marginTop: 2,
   },
@@ -1478,7 +1478,7 @@ const styles = StyleSheet.create({
     borderRadius: 6,
   },
   weeklyPillBadgeText: {
-    fontSize: 8.5,
+    fontSize: 9,
     fontWeight: '900',
     color: '#582CDB',
     letterSpacing: 0.4,
@@ -1519,7 +1519,7 @@ const styles = StyleSheet.create({
     color: '#15803D',
   },
   spotlightRate: {
-    fontSize: 10.5,
+    fontSize: 11,
     color: '#64748B',
     fontWeight: '700',
     marginTop: 1,
@@ -1619,7 +1619,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#EDE9FE',
   },
   weeklyBarLabel: {
-    fontSize: 10.5,
+    fontSize: 11,
     fontWeight: '800',
     color: '#64748B',
     marginTop: 4,
@@ -1647,7 +1647,7 @@ const styles = StyleSheet.create({
     marginBottom: 6,
   },
   growthEngineTag: {
-    fontSize: 9.5,
+    fontSize: 10,
     fontWeight: '900',
     color: '#DDD6FE',
     letterSpacing: 0.5,
@@ -1673,7 +1673,7 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(255, 255, 255, 0.25)',
   },
   recommendedActionLabel: {
-    fontSize: 8.5,
+    fontSize: 9,
     fontWeight: '900',
     color: '#DDD6FE',
     letterSpacing: 0.5,
@@ -1747,12 +1747,12 @@ const styles = StyleSheet.create({
     color: '#171420',
   },
   platformConnectedStatus: {
-    fontSize: 10.5,
+    fontSize: 11,
     fontWeight: '800',
     color: '#15803D',
   },
   platformUnconnectedStatus: {
-    fontSize: 10.5,
+    fontSize: 11,
     color: '#94A3B8',
     fontWeight: '700',
   },
@@ -1808,7 +1808,7 @@ const styles = StyleSheet.create({
     color: '#15803D',
   },
   modalSectionTitle: {
-    fontSize: 9.5,
+    fontSize: 10,
     fontWeight: '900',
     color: '#64748B',
     letterSpacing: 0.6,
@@ -1884,7 +1884,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#FEE2E2',
   },
   disconnectBtnText: {
-    fontSize: 10.5,
+    fontSize: 11,
     fontWeight: '800',
     color: '#DC2626',
   },
@@ -1953,7 +1953,7 @@ const styles = StyleSheet.create({
     marginTop: 6,
   },
   modalDoneBtnText: {
-    fontSize: 13.5,
+    fontSize: 14,
     fontWeight: '900',
     color: '#FFFFFF',
   },
@@ -1971,7 +1971,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   platformStatLabel: {
-    fontSize: 8.5,
+    fontSize: 9,
     fontWeight: '900',
     color: '#64748B',
     letterSpacing: 0.4,
@@ -2017,7 +2017,7 @@ const styles = StyleSheet.create({
     borderColor: '#E9D5FF',
   },
   jarvisTitle: {
-    fontSize: 13.5,
+    fontSize: 14,
     fontWeight: '900',
     color: '#171420',
     marginBottom: 2,
@@ -2030,7 +2030,7 @@ const styles = StyleSheet.create({
 
   // CARD 6: NEXT STEPS
   nextStepsHeading: {
-    fontSize: 10.5,
+    fontSize: 11,
     fontWeight: '900',
     color: '#64748B',
     letterSpacing: 0.6,
@@ -2061,7 +2061,7 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   nextStepText: {
-    fontSize: 13.5,
+    fontSize: 14,
     fontWeight: '900',
     color: '#171420',
   },
@@ -2074,7 +2074,7 @@ const styles = StyleSheet.create({
     borderColor: '#FDE047',
   },
   nextStepProPillText: {
-    fontSize: 8.5,
+    fontSize: 9,
     fontWeight: '900',
     color: '#A16207',
   },
@@ -2160,7 +2160,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   unlockProBtnText: {
-    fontSize: 13.5,
+    fontSize: 14,
     fontWeight: '900',
     color: '#171420',
     letterSpacing: -0.2,
@@ -2233,14 +2233,14 @@ const styles = StyleSheet.create({
     marginBottom: 2,
   },
   notifBody: {
-    fontSize: 11.5,
+    fontSize: 12,
     color: '#64748B',
   },
   customInputBox: {
     marginVertical: 12,
   },
   customInputLabel: {
-    fontSize: 9.5,
+    fontSize: 10,
     fontWeight: '900',
     color: '#582CDB',
     letterSpacing: 0.5,
@@ -2266,7 +2266,7 @@ const styles = StyleSheet.create({
     marginTop: 14,
   },
   modalFullBtnText: {
-    fontSize: 13.5,
+    fontSize: 14,
     fontWeight: '900',
     color: '#FFFFFF',
   },

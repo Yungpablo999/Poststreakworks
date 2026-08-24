@@ -586,7 +586,7 @@ const styles = StyleSheet.create({
   scrollContent: {
     paddingHorizontal: 22,
     paddingTop: 8,
-    paddingBottom: 24,
+    paddingBottom: 96,
   },
   topBar: {
     flexDirection: 'row',
@@ -652,7 +652,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   instructionBadgeText: {
-    fontSize: 10.5,
+    fontSize: 11,
     fontWeight: '800',
     color: '#524C62',
     letterSpacing: 0.8,
@@ -721,7 +721,7 @@ const styles = StyleSheet.create({
     transform: [{ scale: 0.96 }],
   },
   connectButtonText: {
-    fontSize: 13.5,
+    fontSize: 14,
     fontWeight: '700',
     color: '#582CDB',
   },
@@ -733,7 +733,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
   },
   connectedText: {
-    fontSize: 13.5,
+    fontSize: 14,
     fontWeight: '800',
     color: '#582CDB',
   },
@@ -742,7 +742,7 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   morePlatformsHeading: {
-    fontSize: 10.5,
+    fontSize: 11,
     fontWeight: '800',
     color: '#9E97AA',
     letterSpacing: 1.0,
@@ -903,12 +903,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   statusLabelText: {
-    fontSize: 13.5,
+    fontSize: 14,
     fontWeight: '700',
     color: '#171420',
   },
   statusPercentageText: {
-    fontSize: 13.5,
+    fontSize: 14,
     fontWeight: '700',
     color: '#582CDB',
   },
@@ -973,7 +973,7 @@ const styles = StyleSheet.create({
     letterSpacing: -0.4,
   },
   modalText: {
-    fontSize: 13.5,
+    fontSize: 14,
     color: '#524C62',
     textAlign: 'center',
     lineHeight: 20,

@@ -2077,7 +2077,7 @@ const styles = StyleSheet.create({
     borderRadius: 100,
   },
   matchPillText: {
-    fontSize: 10.5,
+    fontSize: 11,
     fontWeight: '800',
     color: '#FFFFFF',
     letterSpacing: 0.8,
@@ -2133,7 +2133,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   trackingStatVal: {
-    fontSize: 13.5,
+    fontSize: 14,
     fontWeight: '800',
     color: '#171420',
     marginBottom: 2,
@@ -2172,7 +2172,7 @@ const styles = StyleSheet.create({
     elevation: 2,
   },
   sectionTabText: {
-    fontSize: 11.5,
+    fontSize: 12,
     fontWeight: '700',
     color: '#7F7894',
   },
@@ -2212,7 +2212,7 @@ const styles = StyleSheet.create({
     borderColor: '#582CDB',
   },
   filterPillText: {
-    fontSize: 11.5,
+    fontSize: 12,
     fontWeight: '600',
     color: '#7F7894',
   },
@@ -2442,7 +2442,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   verifiedCheckText: {
-    fontSize: 10.5,
+    fontSize: 11,
     fontWeight: '900',
     color: '#FFFFFF',
   },
@@ -2548,7 +2548,7 @@ const styles = StyleSheet.create({
     height: 16,
   },
   collabHeaderTitle: {
-    fontSize: 10.5,
+    fontSize: 11,
     fontWeight: '800',
     color: '#7F7894',
     letterSpacing: 0.6,
@@ -2560,7 +2560,7 @@ const styles = StyleSheet.create({
     borderRadius: 100,
   },
   potencyBadgeText: {
-    fontSize: 10.5,
+    fontSize: 11,
     fontWeight: '700',
     color: '#582CDB',
   },
@@ -2601,7 +2601,7 @@ const styles = StyleSheet.create({
   },
   buildIdeaBtnText: {
     color: '#FFFFFF',
-    fontSize: 13.5,
+    fontSize: 14,
     fontWeight: '800',
   },
 
@@ -2632,12 +2632,12 @@ const styles = StyleSheet.create({
     borderRadius: 100,
   },
   requestsCountPillText: {
-    fontSize: 10.5,
+    fontSize: 11,
     fontWeight: '800',
     color: '#FFFFFF',
   },
   requestsHeaderSubtitle: {
-    fontSize: 11.5,
+    fontSize: 12,
     color: '#881337',
     lineHeight: 16,
   },
@@ -2805,7 +2805,7 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   radarHeaderSubtitle: {
-    fontSize: 11.5,
+    fontSize: 12,
     color: '#524C62',
     lineHeight: 16,
   },
@@ -2860,7 +2860,7 @@ const styles = StyleSheet.create({
     color: '#D97706',
   },
   trackedMetaText: {
-    fontSize: 11.5,
+    fontSize: 12,
     color: '#7F7894',
     fontWeight: '500',
   },
@@ -2878,12 +2878,12 @@ const styles = StyleSheet.create({
     marginBottom: 6,
   },
   trackingMetricLabel: {
-    fontSize: 11.5,
+    fontSize: 12,
     fontWeight: '600',
     color: '#7F7894',
   },
   trackingMetricValue: {
-    fontSize: 11.5,
+    fontSize: 12,
     fontWeight: '800',
     color: '#171420',
   },
@@ -2966,7 +2966,7 @@ const styles = StyleSheet.create({
     marginBottom: 2,
   },
   matchMetaText: {
-    fontSize: 11.5,
+    fontSize: 12,
     color: '#7F7894',
     fontWeight: '500',
   },
@@ -3080,14 +3080,14 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   wisdomQuote: {
-    fontSize: 11.5,
+    fontSize: 12,
     color: '#4B4360',
     fontStyle: 'italic',
     lineHeight: 16,
     marginBottom: 3,
   },
   wisdomAuthor: {
-    fontSize: 10.5,
+    fontSize: 11,
     fontWeight: '800',
     color: '#582CDB',
   },
@@ -3211,7 +3211,7 @@ const styles = StyleSheet.create({
     letterSpacing: -0.3,
   },
   detailStatLbl: {
-    fontSize: 10.5,
+    fontSize: 11,
     fontWeight: '600',
     color: '#7F7894',
     marginTop: 2,
@@ -3239,7 +3239,7 @@ const styles = StyleSheet.create({
     borderColor: '#E8E3FA',
   },
   detailCategoryPillText: {
-    fontSize: 11.5,
+    fontSize: 12,
     fontWeight: '700',
     color: '#582CDB',
   },
@@ -3411,7 +3411,7 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   metricCardLabel: {
-    fontSize: 9.5,
+    fontSize: 10,
     fontWeight: '800',
     color: '#7F7894',
     letterSpacing: 0.6,
@@ -3464,7 +3464,7 @@ const styles = StyleSheet.create({
     top: 54,
   },
   vennLabelTextPurple: {
-    fontSize: 11.5,
+    fontSize: 12,
     fontWeight: '900',
     color: '#7C3AED',
   },
@@ -3485,7 +3485,7 @@ const styles = StyleSheet.create({
     borderColor: '#EDE8FC',
   },
   vennCenterPercent: {
-    fontSize: 13.5,
+    fontSize: 14,
     fontWeight: '900',
     color: '#582CDB',
   },
@@ -3515,7 +3515,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   indicatorName: {
-    fontSize: 9.5,
+    fontSize: 10,
     fontWeight: '800',
     color: '#7F7894',
     letterSpacing: 0.6,
@@ -3543,7 +3543,7 @@ const styles = StyleSheet.create({
     marginBottom: 6,
   },
   detailJarvisInsightLabel: {
-    fontSize: 10.5,
+    fontSize: 11,
     fontWeight: '800',
     color: '#582CDB',
     letterSpacing: 0.8,
@@ -3672,7 +3672,7 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   pitchIdeaPreviewTitle: {
-    fontSize: 13.5,
+    fontSize: 14,
     fontWeight: '800',
     color: '#582CDB',
     marginBottom: 2,
@@ -3728,7 +3728,7 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   modalBadgeText: {
-    fontSize: 10.5,
+    fontSize: 11,
     fontWeight: '800',
     color: '#582CDB',
   },
@@ -3788,7 +3788,7 @@ const styles = StyleSheet.create({
     borderColor: '#582CDB',
   },
   platformPillText: {
-    fontSize: 11.5,
+    fontSize: 12,
     fontWeight: '700',
     color: '#7F7894',
   },
@@ -3803,7 +3803,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     paddingHorizontal: 12,
     paddingVertical: 10,
-    fontSize: 13.5,
+    fontSize: 14,
     color: '#171420',
     backgroundColor: 'rgba(250, 248, 255, 0.8)',
     marginBottom: 14,
@@ -3886,7 +3886,7 @@ const styles = StyleSheet.create({
     letterSpacing: 0.2,
   },
   btnPressed: {
-    opacity: 0.88,
+    opacity: 0.9,
     transform: [{ scale: 0.98 }],
   },
 });

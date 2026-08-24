@@ -982,11 +982,11 @@ const styles = StyleSheet.create({
   scrollContent: {
     paddingHorizontal: 16,
     paddingTop: 8,
-    paddingBottom: 40,
+    paddingBottom: 96,
   },
   btnPressed: {
-    transform: [{ scale: 0.97 }],
-    opacity: 0.85,
+    opacity: 0.9,
+    transform: [{ scale: 0.98 }],
   },
 
   /* HEADER */
@@ -1266,7 +1266,7 @@ const styles = StyleSheet.create({
     marginBottom: 2,
   },
   weeklyChallengeDeadline: {
-    fontSize: 11.5,
+    fontSize: 12,
     color: '#64748B',
     fontWeight: '500',
   },
@@ -1369,7 +1369,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   memberName: {
-    fontSize: 13.5,
+    fontSize: 14,
     fontWeight: '800',
     color: '#171420',
   },
@@ -1385,7 +1385,7 @@ const styles = StyleSheet.create({
     color: '#582CDB',
   },
   memberRole: {
-    fontSize: 11.5,
+    fontSize: 12,
     color: '#64748B',
     marginTop: 2,
   },
@@ -1475,19 +1475,19 @@ const styles = StyleSheet.create({
     color: '#B45309',
   },
   collabSlotText: {
-    fontSize: 10.5,
+    fontSize: 11,
     color: '#94A3B8',
     fontWeight: '600',
   },
   collabCardTitle: {
-    fontSize: 13.5,
+    fontSize: 14,
     fontWeight: '800',
     color: '#171420',
     marginBottom: 4,
     lineHeight: 18,
   },
   collabCardDesc: {
-    fontSize: 11.5,
+    fontSize: 12,
     lineHeight: 16,
     color: '#64748B',
     marginBottom: 12,
@@ -1506,7 +1506,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   collabPlanOutlineBtnText: {
-    fontSize: 11.5,
+    fontSize: 12,
     fontWeight: '800',
     color: '#475569',
   },
@@ -1526,7 +1526,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#059669',
   },
   collabJoinBtnText: {
-    fontSize: 11.5,
+    fontSize: 12,
     fontWeight: '900',
     color: '#FFFFFF',
   },
@@ -1586,7 +1586,7 @@ const styles = StyleSheet.create({
     color: '#171420',
   },
   chatChannelTopic: {
-    fontSize: 10.5,
+    fontSize: 11,
     fontWeight: '700',
     color: '#582CDB',
   },
@@ -1606,7 +1606,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
   },
   quickPromptChipText: {
-    fontSize: 10.5,
+    fontSize: 11,
     fontWeight: '700',
     color: '#475569',
   },
@@ -1669,13 +1669,13 @@ const styles = StyleSheet.create({
     color: '#582CDB',
   },
   chatAuthorRole: {
-    fontSize: 9.5,
+    fontSize: 10,
     fontWeight: '600',
     color: '#64748B',
     flex: 1,
   },
   chatTimeLeft: {
-    fontSize: 9.5,
+    fontSize: 10,
     color: '#94A3B8',
   },
   chatBubbleLeftText: {
@@ -1701,7 +1701,7 @@ const styles = StyleSheet.create({
     fontWeight: '500',
   },
   chatTimeRight: {
-    fontSize: 9.5,
+    fontSize: 10,
     color: '#94A3B8',
     marginTop: 3,
     marginRight: 4,
@@ -1848,7 +1848,7 @@ const styles = StyleSheet.create({
     marginTop: 6,
   },
   manageDoneBtnText: {
-    fontSize: 13.5,
+    fontSize: 14,
     fontWeight: '900',
     color: '#FFFFFF',
   },

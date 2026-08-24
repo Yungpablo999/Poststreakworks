@@ -958,11 +958,11 @@ const styles = StyleSheet.create({
   scrollContent: {
     paddingHorizontal: 20,
     paddingTop: 8,
-    paddingBottom: 24,
+    paddingBottom: 96,
   },
   btnPressed: {
-    opacity: 0.78,
-    transform: [{ scale: 0.97 }],
+    opacity: 0.9,
+    transform: [{ scale: 0.98 }],
   },
 
   // 1. TOP HEADER
@@ -1063,7 +1063,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#F59E0B',
   },
   freeIdeasPillText: {
-    fontSize: 10.5,
+    fontSize: 11,
     fontWeight: '800',
     color: '#6D28D9',
     letterSpacing: 0.4,
@@ -1178,7 +1178,7 @@ const styles = StyleSheet.create({
     marginBottom: 14,
   },
   whyItWorksLabel: {
-    fontSize: 9.5,
+    fontSize: 10,
     fontWeight: '900',
     color: '#6D28D9',
     letterSpacing: 0.6,
@@ -1353,7 +1353,7 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   moreIdeaMetaText: {
-    fontSize: 11.5,
+    fontSize: 12,
     color: '#64748B',
     fontWeight: '600',
   },
@@ -1407,13 +1407,13 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   quotaLabel: {
-    fontSize: 9.5,
+    fontSize: 10,
     fontWeight: '900',
     color: '#64748B',
     letterSpacing: 0.6,
   },
   quotaUpgradeLink: {
-    fontSize: 11.5,
+    fontSize: 12,
     fontWeight: '800',
     color: '#582CDB',
   },
@@ -1510,7 +1510,7 @@ const styles = StyleSheet.create({
     borderColor: '#DDD6FE',
   },
   jarvisChipText: {
-    fontSize: 10.5,
+    fontSize: 11,
     fontWeight: '800',
     color: '#64748B',
   },
@@ -1521,7 +1521,7 @@ const styles = StyleSheet.create({
 
   // 7. Saved Ideas Section
   sectionHeaderLabel: {
-    fontSize: 10.5,
+    fontSize: 11,
     fontWeight: '800',
     color: '#7F7894',
     letterSpacing: 0.6,
@@ -1619,7 +1619,7 @@ const styles = StyleSheet.create({
     color: '#171420',
   },
   modalSubtitle: {
-    fontSize: 11.5,
+    fontSize: 12,
     color: '#64748B',
     marginTop: 2,
   },
@@ -1670,7 +1670,7 @@ const styles = StyleSheet.create({
     lineHeight: 15,
   },
   notifTime: {
-    fontSize: 9.5,
+    fontSize: 10,
     color: '#94A3B8',
     marginTop: 4,
   },
@@ -1683,7 +1683,7 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
   modalFullBtnText: {
-    fontSize: 13.5,
+    fontSize: 14,
     fontWeight: '800',
     color: '#FFFFFF',
   },
@@ -1722,7 +1722,7 @@ const styles = StyleSheet.create({
     borderColor: '#FDE68A',
   },
   profileModalLevelText: {
-    fontSize: 10.5,
+    fontSize: 11,
     fontWeight: '800',
     color: '#B45309',
   },

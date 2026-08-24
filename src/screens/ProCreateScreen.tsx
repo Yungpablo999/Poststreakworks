@@ -1325,7 +1325,7 @@ const styles = StyleSheet.create({
     borderColor: '#FBBF24',
   },
   proHeaderBadgeText: {
-    fontSize: 8.5,
+    fontSize: 9,
     fontWeight: '900',
     color: '#92400E',
     letterSpacing: 0.3,
@@ -1406,7 +1406,7 @@ const styles = StyleSheet.create({
   scrollContent: {
     paddingHorizontal: 20,
     paddingTop: 8,
-    paddingBottom: 40,
+    paddingBottom: 96,
   },
 
   // TOP TAGS
@@ -1435,7 +1435,7 @@ const styles = StyleSheet.create({
     borderRadius: 6,
   },
   proAccessPillText: {
-    fontSize: 9.5,
+    fontSize: 10,
     fontWeight: '900',
     color: '#92400E',
   },
@@ -1523,7 +1523,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   currentProjectLabel: {
-    fontSize: 9.5,
+    fontSize: 10,
     fontWeight: '800',
     color: '#94A3B8',
     letterSpacing: 0.5,
@@ -1699,7 +1699,7 @@ const styles = StyleSheet.create({
     marginBottom: 2,
   },
   repurposeBannerSub: {
-    fontSize: 11.5,
+    fontSize: 12,
     color: '#4C1D95',
     lineHeight: 16,
     marginBottom: 6,
@@ -1807,7 +1807,7 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   seriesVoiceLabel: {
-    fontSize: 9.5,
+    fontSize: 10,
     fontWeight: '800',
     color: '#582CDB',
   },
@@ -1823,7 +1823,7 @@ const styles = StyleSheet.create({
     color: '#171420',
   },
   minsRemainingLabel: {
-    fontSize: 8.5,
+    fontSize: 9,
     fontWeight: '800',
     color: '#94A3B8',
   },
@@ -1896,18 +1896,18 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   draftItemTitle: {
-    fontSize: 13.5,
+    fontSize: 14,
     fontWeight: '800',
     color: '#171420',
   },
   scriptReadyTag: {
-    fontSize: 9.5,
+    fontSize: 10,
     fontWeight: '900',
     color: '#2563EB',
     marginTop: 2,
   },
   voiceDraftTag: {
-    fontSize: 9.5,
+    fontSize: 10,
     fontWeight: '900',
     color: '#D97706',
     marginTop: 2,
@@ -1937,12 +1937,12 @@ const styles = StyleSheet.create({
     borderRadius: 6,
   },
   smartSchedulePillText: {
-    fontSize: 9.5,
+    fontSize: 10,
     fontWeight: '900',
     color: '#FFFFFF',
   },
   bestWindowSub: {
-    fontSize: 11.5,
+    fontSize: 12,
     color: '#4C1D95',
     fontWeight: '600',
   },
@@ -1998,7 +1998,7 @@ const styles = StyleSheet.create({
   },
   openScheduleFullBtnText: {
     color: '#FFFFFF',
-    fontSize: 13.5,
+    fontSize: 14,
     fontWeight: '900',
   },
 
@@ -2021,7 +2021,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   jarvisSuggestionTag: {
-    fontSize: 9.5,
+    fontSize: 10,
     fontWeight: '900',
     color: '#582CDB',
     letterSpacing: 0.5,
@@ -2059,7 +2059,7 @@ const styles = StyleSheet.create({
     borderColor: '#582CDB',
   },
   draftFilterPillText: {
-    fontSize: 9.5,
+    fontSize: 10,
     fontWeight: '800',
     color: '#64748B',
   },
@@ -2085,12 +2085,12 @@ const styles = StyleSheet.create({
     borderRadius: 5,
   },
   draftModalBadgeText: {
-    fontSize: 8.5,
+    fontSize: 9,
     fontWeight: '900',
     letterSpacing: 0.3,
   },
   draftModalTimeText: {
-    fontSize: 10.5,
+    fontSize: 11,
     color: '#64748B',
     fontWeight: '600',
   },
@@ -2128,7 +2128,7 @@ const styles = StyleSheet.create({
 
   // MODALS
   btnPressed: {
-    opacity: 0.85,
+    opacity: 0.9,
     transform: [{ scale: 0.98 }],
   },
   modalOverlay: {

@@ -1,135 +1,92 @@
-import React, { useRef } from 'react';
+import React from 'react';
 import {
   StyleSheet,
   Text,
-  Animated,
   Pressable,
-  ViewStyle,
   Platform,
+  ViewStyle,
+  TextStyle,
   View,
 } from 'react-native';
-import { BlurView } from 'expo-blur';
-import { LinearGradient } from 'expo-linear-gradient';
 import * as Haptics from 'expo-haptics';
-import { colors } from '../theme/colors';
-import { glassmorphism } from '../theme/glassmorphism';
 
-interface SecondaryButtonProps {
+export interface SecondaryButtonProps {
   title: string;
   onPress: () => void;
+  icon?: React.ReactNode;
+  disabled?: boolean;
   style?: ViewStyle;
+  textStyle?: TextStyle;
 }
 
 export const SecondaryButton: React.FC<SecondaryButtonProps> = ({
   title,
   onPress,
+  icon,
+  disabled = false,
   style,
+  textStyle,
 }) => {
-  const scaleAnim = useRef(new Animated.Value(1)).current;
-
-  const handlePressIn = () => {
+  const handlePress = () => {
+    if (disabled) return;
     if (Platform.OS !== 'web') {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     }
-    Animated.spring(scaleAnim, {
-      toValue: 0.96,
-      useNativeDriver: true,
-      speed: 25,
-      bounciness: 4,
-    }).start();
-  };
-
-  const handlePressOut = () => {
-    Animated.spring(scaleAnim, {
-      toValue: 1,
-      useNativeDriver: true,
-      speed: 25,
-      bounciness: 6,
-    }).start();
+    onPress();
   };
 
   return (
-    <Animated.View
-      style={[
-        styles.container,
-        glassmorphism.shadowBadge,
-        { transform: [{ scale: scaleAnim }] },
+    <Pressable
+      onPress={handlePress}
+      disabled={disabled}
+      style={({ pressed }) => [
+        styles.button,
+        disabled && styles.disabled,
+        pressed && !disabled && styles.pressed,
         style,
       ]}
     >
-      <Pressable
-        onPress={onPress}
-        onPressIn={handlePressIn}
-        onPressOut={handlePressOut}
-        style={styles.pressable}
-      >
-        <BlurView
-          intensity={30}
-          tint="light"
-          style={styles.blurView}
-        >
-          {/* Frosted Translucent Surface */}
-          <LinearGradient
-            colors={[
-              'rgba(255, 255, 255, 0.92)',
-              'rgba(255, 255, 255, 0.78)',
-              'rgba(245, 240, 255, 0.65)',
-            ]}
-            start={{ x: 0.1, y: 0.05 }}
-            end={{ x: 0.9, y: 0.95 }}
-            style={styles.surfaceGradient}
-          />
-
-          {/* Specular Top Rim Shine */}
-          <View style={styles.topShine} />
-
-          <Text style={styles.text}>{title}</Text>
-        </BlurView>
-      </Pressable>
-    </Animated.View>
+      <View style={styles.contentRow}>
+        {icon && <View style={styles.iconBox}>{icon}</View>}
+        <Text style={[styles.title, textStyle]}>{title}</Text>
+      </View>
+    </Pressable>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
-    width: '100%',
-    maxWidth: 270,
-    height: 56,
+  button: {
     borderRadius: 16,
-    overflow: 'hidden',
-    borderWidth: 1.2,
-    borderColor: 'rgba(255, 255, 255, 0.95)',
-    backgroundColor: 'rgba(255, 255, 255, 0.75)',
+    paddingVertical: 13,
+    paddingHorizontal: 18,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#FAF8F5',
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
   },
-  pressable: {
-    width: '100%',
-    height: '100%',
+  disabled: {
+    opacity: 0.5,
   },
-  blurView: {
-    width: '100%',
-    height: '100%',
+  pressed: {
+    backgroundColor: '#F1F5F9',
+    transform: [{ scale: 0.98 }],
+  },
+  contentRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+  },
+  iconBox: {
     justifyContent: 'center',
     alignItems: 'center',
   },
-  surfaceGradient: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-  },
-  topShine: {
-    position: 'absolute',
-    top: 0,
-    left: 10,
-    right: 10,
-    height: 1.5,
-    backgroundColor: 'rgba(255, 255, 255, 0.95)',
-  },
-  text: {
-    color: colors.primary,
-    fontSize: 19.5,
+  title: {
+    fontSize: 13.5,
     fontWeight: '700',
-    letterSpacing: -0.3,
+    color: '#171420',
+    letterSpacing: 0.2,
+    textAlign: 'center',
   },
 });

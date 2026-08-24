@@ -779,7 +779,7 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
               hitSlop={8}
             >
               <View style={{ backgroundColor: '#EDE9FE', borderColor: '#C4B5FD', borderWidth: 1, paddingHorizontal: 8, paddingVertical: 3.5, borderRadius: 8 }}>
-                <Text style={{ fontSize: 9.5, fontWeight: '900', color: '#582CDB', letterSpacing: 0.5 }}>🔒 FREE (TAP FOR PRO)</Text>
+                <Text style={{ fontSize: 10, fontWeight: '900', color: '#582CDB', letterSpacing: 0.5 }}>🔒 FREE (TAP FOR PRO)</Text>
               </View>
             </Pressable>
           </View>
@@ -1906,7 +1906,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   addPhotoPlusText: {
-    fontSize: 9.5,
+    fontSize: 10,
     fontWeight: '800',
     color: '#FFFFFF',
     lineHeight: 11,
@@ -1945,7 +1945,7 @@ const styles = StyleSheet.create({
   },
   focusTagText: {
     color: '#FFFFFF',
-    fontSize: 10.5,
+    fontSize: 11,
     fontWeight: '800',
     letterSpacing: 0.6,
   },
@@ -2085,13 +2085,13 @@ const styles = StyleSheet.create({
     paddingHorizontal: 2,
   },
   monthLabel: {
-    fontSize: 11.5,
+    fontSize: 12,
     fontWeight: '800',
     color: '#582CDB',
     letterSpacing: 0.8,
   },
   streakStatusHighlight: {
-    fontSize: 11.5,
+    fontSize: 12,
     fontWeight: '700',
     color: '#582CDB',
   },
@@ -2102,7 +2102,7 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   dayColHeader: {
-    fontSize: 11.5,
+    fontSize: 12,
     fontWeight: '600',
     color: '#9E97AA',
     width: 42,
@@ -2184,7 +2184,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   scheduledTitle: {
-    fontSize: 11.5,
+    fontSize: 12,
     fontWeight: '800',
     color: '#171420',
     letterSpacing: 0.8,
@@ -2243,7 +2243,7 @@ const styles = StyleSheet.create({
     gap: 5,
   },
   weekIncreaseText: {
-    fontSize: 11.5,
+    fontSize: 12,
     fontWeight: '700',
     color: '#582CDB',
   },
@@ -2257,7 +2257,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   nextUpLabel: {
-    fontSize: 9.5,
+    fontSize: 10,
     fontWeight: '800',
     color: '#9E97AA',
     letterSpacing: 0.8,
@@ -2449,7 +2449,7 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(253, 230, 138, 0.8)',
   },
   activeQuestTagText: {
-    fontSize: 9.5,
+    fontSize: 10,
     fontWeight: '800',
     color: '#92400E',
   },
@@ -2471,7 +2471,7 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(253, 230, 138, 0.8)',
   },
   bountyText: {
-    fontSize: 13.5,
+    fontSize: 14,
     fontWeight: '800',
     color: '#B45309',
   },
@@ -2579,7 +2579,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
   },
   connectMatchButtonText: {
-    fontSize: 13.5,
+    fontSize: 14,
     fontWeight: '800',
     color: '#FFFFFF',
     letterSpacing: 0.2,
@@ -2597,7 +2597,7 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
   goldProPillText: {
-    fontSize: 9.5,
+    fontSize: 10,
     fontWeight: '900',
     color: '#B45309',
     letterSpacing: 0.6,
@@ -2663,7 +2663,7 @@ const styles = StyleSheet.create({
     color: '#171420',
   },
   proSubtitle: {
-    fontSize: 10.5,
+    fontSize: 11,
     fontWeight: '800',
     color: '#582CDB',
     letterSpacing: 0.6,
@@ -2780,7 +2780,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 6,
   },
   unreadCountBadgeText: {
-    fontSize: 9.5,
+    fontSize: 10,
     fontWeight: '800',
     color: '#FFFFFF',
     letterSpacing: 0.5,
@@ -2891,14 +2891,14 @@ const styles = StyleSheet.create({
     marginBottom: 2,
   },
   notifTitle: {
-    fontSize: 13.5,
+    fontSize: 14,
     fontWeight: '700',
     color: '#171420',
     flex: 1,
     marginRight: 6,
   },
   notifTime: {
-    fontSize: 10.5,
+    fontSize: 11,
     color: '#9E97AA',
     fontWeight: '500',
   },
@@ -2912,7 +2912,7 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
   notifActionLink: {
-    fontSize: 11.5,
+    fontSize: 12,
     fontWeight: '700',
     color: '#582CDB',
   },
@@ -3065,7 +3065,7 @@ const styles = StyleSheet.create({
     marginBottom: 2,
   },
   uploadActionCardSubtext: {
-    fontSize: 10.5,
+    fontSize: 11,
     color: '#7F7894',
     textAlign: 'center',
   },
@@ -3073,7 +3073,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   presetSectionHeader: {
-    fontSize: 9.5,
+    fontSize: 10,
     fontWeight: '800',
     color: '#9E97AA',
     letterSpacing: 0.8,
@@ -3240,7 +3240,7 @@ const styles = StyleSheet.create({
     marginBottom: 2,
   },
   calendarStatLabel: {
-    fontSize: 9.5,
+    fontSize: 10,
     fontWeight: '700',
     color: '#582CDB',
   },
@@ -3357,7 +3357,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 6,
   },
   currentMonthBadgeText: {
-    fontSize: 9.5,
+    fontSize: 10,
     fontWeight: '800',
     color: '#FFFFFF',
     letterSpacing: 0.5,

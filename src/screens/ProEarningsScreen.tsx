@@ -1011,7 +1011,7 @@ export const ProEarningsScreen: React.FC<ProEarningsScreenProps> = ({
         >
           <View style={styles.modalOverlay}>
             <Animated.View style={[styles.modalCardLarge, { maxHeight: '90%', padding: 20, transform: [{ scale: modalPopScale }] }]}>
-              <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 16 }}>
+              <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 96 }}>
                 {/* Header */}
                 <View style={styles.modalHeaderRow}>
                   <View style={{ flex: 1, paddingRight: 10 }}>
@@ -1667,7 +1667,7 @@ export const ProEarningsScreen: React.FC<ProEarningsScreenProps> = ({
         >
           <View style={styles.modalOverlay}>
             <Animated.View style={[styles.modalCardLarge, { maxHeight: '88%', padding: 22, transform: [{ scale: modalPopScale }] }]}>
-              <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 10 }}>
+              <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 96 }}>
                 {/* Header */}
                 <View style={styles.modalHeaderRow}>
                   <View style={{ flex: 1, paddingRight: 10 }}>
@@ -2066,7 +2066,7 @@ const styles = StyleSheet.create({
     borderRadius: 6,
   },
   heroPillText: {
-    fontSize: 9.5,
+    fontSize: 10,
     fontWeight: '900',
     color: '#D97706',
     letterSpacing: 0.3,
@@ -2096,7 +2096,7 @@ const styles = StyleSheet.create({
     borderColor: '#E9D5FF',
   },
   expandHintBadgeText: {
-    fontSize: 9.5,
+    fontSize: 10,
     fontWeight: '800',
     color: '#582CDB',
   },
@@ -2219,7 +2219,7 @@ const styles = StyleSheet.create({
   },
   xAxisLabelText: {
     position: 'absolute',
-    fontSize: 9.5,
+    fontSize: 10,
     fontWeight: '700',
     color: '#94A3B8',
   },
@@ -2265,7 +2265,7 @@ const styles = StyleSheet.create({
     borderColor: '#EFECE6',
   },
   audienceChannelsTitle: {
-    fontSize: 9.5,
+    fontSize: 10,
     fontWeight: '900',
     color: '#64748B',
     letterSpacing: 0.5,
@@ -2277,7 +2277,7 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   audienceChannelName: {
-    fontSize: 11.5,
+    fontSize: 12,
     fontWeight: '800',
     color: '#171420',
   },
@@ -2287,7 +2287,7 @@ const styles = StyleSheet.create({
     color: '#171420',
   },
   audienceChannelPct: {
-    fontSize: 9.5,
+    fontSize: 10,
     fontWeight: '700',
     color: '#64748B',
   },
@@ -2335,7 +2335,7 @@ const styles = StyleSheet.create({
     marginBottom: 18,
   },
   platformChartHeaderTitle: {
-    fontSize: 9.5,
+    fontSize: 10,
     fontWeight: '900',
     color: '#64748B',
     letterSpacing: 0.5,
@@ -2349,7 +2349,7 @@ const styles = StyleSheet.create({
     borderColor: '#E9D5FF',
   },
   platformChartHeaderSub: {
-    fontSize: 9.5,
+    fontSize: 10,
     fontWeight: '800',
     color: '#582CDB',
   },
@@ -2377,7 +2377,7 @@ const styles = StyleSheet.create({
     shadowRadius: 6,
   },
   platformBarAmtText: {
-    fontSize: 11.5,
+    fontSize: 12,
     fontWeight: '800',
     color: '#171420',
     marginBottom: 8,
@@ -2395,7 +2395,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
   },
   platformBarLabel: {
-    fontSize: 10.5,
+    fontSize: 11,
     fontWeight: '700',
     color: '#64748B',
     marginTop: 4,
@@ -2405,7 +2405,7 @@ const styles = StyleSheet.create({
     fontWeight: '900',
   },
   platformBarPctText: {
-    fontSize: 9.5,
+    fontSize: 10,
     fontWeight: '700',
     color: '#94A3B8',
   },
@@ -2431,7 +2431,7 @@ const styles = StyleSheet.create({
     color: '#171420',
   },
   ledgerSubText: {
-    fontSize: 10.5,
+    fontSize: 11,
     color: '#64748B',
   },
   ledgerAmountText: {
@@ -2451,7 +2451,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#FEF3C7',
   },
   ledgerStatusText: {
-    fontSize: 8.5,
+    fontSize: 9,
     fontWeight: '900',
   },
   ledgerStatusTextPaid: {
@@ -2470,7 +2470,7 @@ const styles = StyleSheet.create({
     paddingTop: 6,
   },
   ledgerDateText: {
-    fontSize: 9.5,
+    fontSize: 10,
     color: '#64748B',
     fontWeight: '600',
   },
@@ -2488,7 +2488,7 @@ const styles = StyleSheet.create({
     marginTop: 6,
   },
   ledgerTaxTitle: {
-    fontSize: 9.5,
+    fontSize: 10,
     fontWeight: '900',
     color: '#64748B',
     letterSpacing: 0.5,
@@ -2545,7 +2545,7 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
   cleanTxAmt: {
-    fontSize: 13.5,
+    fontSize: 14,
     fontWeight: '900',
   },
   cleanTxStatus: {
@@ -2635,7 +2635,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   heroCardLabel: {
-    fontSize: 10.5,
+    fontSize: 11,
     fontWeight: '900',
     color: '#94A3B8',
     letterSpacing: 0.5,
@@ -2773,7 +2773,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   syncStatusText: {
-    fontSize: 9.5,
+    fontSize: 10,
     fontWeight: '900',
     color: '#582CDB',
   },
@@ -2808,7 +2808,7 @@ const styles = StyleSheet.create({
     color: '#334155',
   },
   sourceItemAmount: {
-    fontSize: 13.5,
+    fontSize: 14,
     fontWeight: '900',
     color: '#171420',
   },
@@ -2839,13 +2839,13 @@ const styles = StyleSheet.create({
   platBadgePurple: { backgroundColor: '#EDE9FE' },
   platBadgeGray: { backgroundColor: '#F1F5F9' },
   platBadgeRed: { backgroundColor: '#FEE2E2' },
-  platBadgeText: { fontSize: 8.5, fontWeight: '900' },
+  platBadgeText: { fontSize: 9, fontWeight: '900' },
   platBadgeTextGold: { color: '#B45309' },
   platBadgeTextPurple: { color: '#582CDB' },
   platBadgeTextGray: { color: '#64748B' },
   platBadgeTextRed: { color: '#DC2626' },
   platformAmountText: {
-    fontSize: 13.5,
+    fontSize: 14,
     fontWeight: '900',
     color: '#171420',
   },
@@ -2947,7 +2947,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   trendYtdPillText: {
-    fontSize: 9.5,
+    fontSize: 10,
     fontWeight: '900',
     color: '#FDE68A',
   },
@@ -2966,7 +2966,7 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-end',
   },
   barAmountTop: {
-    fontSize: 9.5,
+    fontSize: 10,
     fontWeight: '900',
     color: '#E9D5FF',
     marginBottom: 4,
@@ -2998,7 +2998,7 @@ const styles = StyleSheet.create({
     fontWeight: '900',
   },
   trendFooterNote: {
-    fontSize: 11.5,
+    fontSize: 12,
     color: '#EDE9FE',
     lineHeight: 17,
   },
@@ -3114,7 +3114,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#FEF3C7',
   },
   brandStatusText: {
-    fontSize: 8.5,
+    fontSize: 9,
     fontWeight: '900',
     color: '#15803D',
   },
@@ -3147,7 +3147,7 @@ const styles = StyleSheet.create({
     color: '#334155',
   },
   collabAmountText: {
-    fontSize: 13.5,
+    fontSize: 14,
     fontWeight: '900',
     color: '#171420',
   },
@@ -3195,7 +3195,7 @@ const styles = StyleSheet.create({
     borderRadius: 6,
   },
   proTagPillText: {
-    fontSize: 9.5,
+    fontSize: 10,
     fontWeight: '900',
     color: '#582CDB',
   },
@@ -3229,7 +3229,7 @@ const styles = StyleSheet.create({
     letterSpacing: 0.5,
   },
   bankVerifiedTag: {
-    fontSize: 9.5,
+    fontSize: 10,
     fontWeight: '900',
     color: '#34D399',
   },
@@ -3272,7 +3272,7 @@ const styles = StyleSheet.create({
     color: '#171420',
   },
   transferStatus: {
-    fontSize: 9.5,
+    fontSize: 10,
     color: '#15803D',
     fontWeight: '800',
     marginTop: 1,
@@ -3305,7 +3305,7 @@ const styles = StyleSheet.create({
     borderBottomColor: '#EFECE6',
   },
   rateItem: {
-    fontSize: 11.5,
+    fontSize: 12,
     color: '#334155',
     fontWeight: '700',
     flex: 1,
@@ -3334,7 +3334,7 @@ const styles = StyleSheet.create({
   },
   modalGoldActionBtnText: {
     color: '#0C0A12',
-    fontSize: 13.5,
+    fontSize: 14,
     fontWeight: '900',
   },
   modalCancelBtn: {
@@ -3368,7 +3368,7 @@ const styles = StyleSheet.create({
     letterSpacing: 0.2,
   },
   btnPressed: {
-    transform: [{ scale: 0.96 }],
-    opacity: 0.85,
+    opacity: 0.9,
+    transform: [{ scale: 0.98 }],
   },
 });

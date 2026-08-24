@@ -1455,11 +1455,11 @@ const styles = StyleSheet.create({
   scrollContent: {
     paddingHorizontal: 20,
     paddingTop: 8,
-    paddingBottom: 24,
+    paddingBottom: 96,
   },
   btnPressed: {
-    opacity: 0.78,
-    transform: [{ scale: 0.97 }],
+    opacity: 0.9,
+    transform: [{ scale: 0.98 }],
   },
 
   // 1. TOP HEADER
@@ -1560,7 +1560,7 @@ const styles = StyleSheet.create({
     borderRadius: 100,
   },
   collabIdeaPillText: {
-    fontSize: 9.5,
+    fontSize: 10,
     fontWeight: '900',
     color: '#FFFFFF',
     letterSpacing: 0.5,
@@ -1572,7 +1572,7 @@ const styles = StyleSheet.create({
     borderRadius: 100,
   },
   planCounterPillText: {
-    fontSize: 9.5,
+    fontSize: 10,
     fontWeight: '900',
     color: '#582CDB',
     letterSpacing: 0.5,
@@ -1772,7 +1772,7 @@ const styles = StyleSheet.create({
     color: '#582CDB',
   },
   roleBulletText: {
-    fontSize: 11.5,
+    fontSize: 12,
     color: '#475569',
     lineHeight: 17,
     marginBottom: 3,
@@ -1888,12 +1888,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   verifiedCheckText: {
-    fontSize: 9.5,
+    fontSize: 10,
     fontWeight: '900',
     color: '#FFFFFF',
   },
   creatorInvolvedNiche: {
-    fontSize: 11.5,
+    fontSize: 12,
     color: '#64748B',
     marginTop: 1,
   },
@@ -1903,7 +1903,7 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   creatorInvolvedBadgeText: {
-    fontSize: 10.5,
+    fontSize: 11,
     fontWeight: '800',
     color: '#D97706',
   },
@@ -1938,7 +1938,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   halfColLabel: {
-    fontSize: 9.5,
+    fontSize: 10,
     fontWeight: '900',
     color: '#64748B',
     letterSpacing: 0.6,
@@ -1950,7 +1950,7 @@ const styles = StyleSheet.create({
     color: '#171420',
   },
   halfColSubText: {
-    fontSize: 10.5,
+    fontSize: 11,
     color: '#64748B',
     marginBottom: 8,
   },
@@ -1962,7 +1962,7 @@ const styles = StyleSheet.create({
     alignSelf: 'flex-start',
   },
   recommendedPillText: {
-    fontSize: 8.5,
+    fontSize: 9,
     fontWeight: '900',
     color: '#15803D',
   },
@@ -1991,7 +1991,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#582CDB',
   },
   platLabelText: {
-    fontSize: 11.5,
+    fontSize: 12,
     fontWeight: '700',
     color: '#171420',
   },
@@ -2016,7 +2016,7 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   scheduleHeaderTitle: {
-    fontSize: 10.5,
+    fontSize: 11,
     fontWeight: '900',
     color: '#6D28D9',
     letterSpacing: 0.8,
@@ -2144,7 +2144,7 @@ const styles = StyleSheet.create({
     fontWeight: '700',
   },
   impactProgressVal: {
-    fontSize: 11.5,
+    fontSize: 12,
     fontWeight: '900',
     color: '#D97706',
   },
@@ -2200,7 +2200,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   inviteBtnText: {
-    fontSize: 13.5,
+    fontSize: 14,
     fontWeight: '800',
     color: '#582CDB',
   },
@@ -2267,7 +2267,7 @@ const styles = StyleSheet.create({
     color: '#171420',
   },
   modalSubtitle: {
-    fontSize: 11.5,
+    fontSize: 12,
     color: '#64748B',
     marginTop: 2,
   },
@@ -2299,7 +2299,7 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   rateMeterLabel: {
-    fontSize: 9.5,
+    fontSize: 10,
     fontWeight: '900',
     color: '#6D28D9',
     letterSpacing: 0.6,
@@ -2346,12 +2346,12 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   gaugeMicroLabel: {
-    fontSize: 9.5,
+    fontSize: 10,
     color: '#64748B',
     fontWeight: '600',
   },
   gaugeInsightText: {
-    fontSize: 11.5,
+    fontSize: 12,
     color: '#475569',
     lineHeight: 16,
   },
@@ -2412,12 +2412,12 @@ const styles = StyleSheet.create({
     borderRadius: 4,
   },
   peakFireBadgeText: {
-    fontSize: 8.5,
+    fontSize: 9,
     fontWeight: '900',
     color: '#B45309',
   },
   slotItemTagText: {
-    fontSize: 10.5,
+    fontSize: 11,
     color: '#64748B',
     fontWeight: '700',
   },
@@ -2441,7 +2441,7 @@ const styles = StyleSheet.create({
     borderColor: '#582CDB',
   },
   scheduleSelectChipText: {
-    fontSize: 11.5,
+    fontSize: 12,
     fontWeight: '700',
     color: '#475569',
   },
@@ -2467,7 +2467,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   modalFullBtnText: {
-    fontSize: 13.5,
+    fontSize: 14,
     fontWeight: '800',
     color: '#FFFFFF',
   },
@@ -2545,7 +2545,7 @@ const styles = StyleSheet.create({
     lineHeight: 15,
   },
   notifTime: {
-    fontSize: 9.5,
+    fontSize: 10,
     color: '#94A3B8',
     marginTop: 4,
   },

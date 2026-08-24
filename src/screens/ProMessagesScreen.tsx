@@ -1334,7 +1334,7 @@ const styles = StyleSheet.create({
     borderColor: '#FBBF24',
   },
   proHeaderBadgeText: {
-    fontSize: 8.5,
+    fontSize: 9,
     fontWeight: '900',
     color: '#92400E',
     letterSpacing: 0.3,
@@ -1378,7 +1378,7 @@ const styles = StyleSheet.create({
   scrollContent: {
     paddingHorizontal: 20,
     paddingTop: 4,
-    paddingBottom: 40,
+    paddingBottom: 96,
   },
 
   // SEARCH BAR
@@ -1418,7 +1418,7 @@ const styles = StyleSheet.create({
     borderColor: '#582CDB',
   },
   filterTabText: {
-    fontSize: 11.5,
+    fontSize: 12,
     fontWeight: '700',
     color: '#475569',
   },
@@ -1534,7 +1534,7 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
   bannerSubText: {
-    fontSize: 11.5,
+    fontSize: 12,
     color: '#4C1D95',
     marginTop: 1,
   },
@@ -1607,7 +1607,7 @@ const styles = StyleSheet.create({
     color: '#92400E',
   },
   convTimeText: {
-    fontSize: 10.5,
+    fontSize: 11,
     color: '#94A3B8',
     fontWeight: '700',
   },
@@ -1620,7 +1620,7 @@ const styles = StyleSheet.create({
     marginVertical: 2,
   },
   convBadgeText: {
-    fontSize: 9.5,
+    fontSize: 10,
     fontWeight: '800',
     color: '#582CDB',
   },
@@ -1687,7 +1687,7 @@ const styles = StyleSheet.create({
     color: '#171420',
   },
   chatHeaderStatus: {
-    fontSize: 10.5,
+    fontSize: 11,
     color: '#64748B',
   },
   chatActionCircle: {
@@ -1716,7 +1716,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   quickAiActionText: {
-    fontSize: 10.5,
+    fontSize: 11,
     fontWeight: '800',
     color: '#582CDB',
   },
@@ -1760,7 +1760,7 @@ const styles = StyleSheet.create({
     borderBottomLeftRadius: 4,
   },
   chatBubbleText: {
-    fontSize: 13.5,
+    fontSize: 14,
     color: '#171420',
     lineHeight: 18,
   },
@@ -1768,7 +1768,7 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
   },
   chatMessageTime: {
-    fontSize: 9.5,
+    fontSize: 10,
     color: '#94A3B8',
     alignSelf: 'flex-end',
     marginTop: 4,
@@ -1791,7 +1791,7 @@ const styles = StyleSheet.create({
     borderRadius: 4,
   },
   proposalTagText: {
-    fontSize: 8.5,
+    fontSize: 9,
     fontWeight: '900',
     color: '#FFFFFF',
   },
@@ -1802,7 +1802,7 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   proposalDescText: {
-    fontSize: 11.5,
+    fontSize: 12,
     color: '#4C1D95',
     marginVertical: 4,
   },
@@ -1849,7 +1849,7 @@ const styles = StyleSheet.create({
     borderRadius: 1.5,
   },
   audioDurationText: {
-    fontSize: 9.5,
+    fontSize: 10,
     color: '#64748B',
     fontWeight: '700',
     marginTop: 2,
@@ -1899,7 +1899,7 @@ const styles = StyleSheet.create({
 
   // COMMON
   btnPressed: {
-    opacity: 0.85,
+    opacity: 0.9,
     transform: [{ scale: 0.98 }],
   },
   toastContainer: {

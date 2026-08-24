@@ -1781,7 +1781,7 @@ const styles = StyleSheet.create({
     borderColor: '#FBBF24',
   },
   proHeaderBadgeText: {
-    fontSize: 8.5,
+    fontSize: 9,
     fontWeight: '900',
     color: '#92400E',
     letterSpacing: 0.3,
@@ -1862,7 +1862,7 @@ const styles = StyleSheet.create({
   scrollContent: {
     paddingHorizontal: 20,
     paddingTop: 8,
-    paddingBottom: 40,
+    paddingBottom: 96,
   },
   proPlanHeroCard: {
     backgroundColor: '#FFFFFF',
@@ -2326,7 +2326,7 @@ const styles = StyleSheet.create({
   },
   createVoiceBtnText: {
     color: '#FFFFFF',
-    fontSize: 13.5,
+    fontSize: 14,
     fontWeight: '900',
   },
   openStudioOutlineBtn: {
@@ -2395,11 +2395,11 @@ const styles = StyleSheet.create({
   },
   connectMatchBtnText: {
     color: '#582CDB',
-    fontSize: 13.5,
+    fontSize: 14,
     fontWeight: '900',
   },
   btnPressed: {
-    opacity: 0.85,
+    opacity: 0.9,
     transform: [{ scale: 0.98 }],
   },
 
@@ -2451,7 +2451,7 @@ const styles = StyleSheet.create({
     letterSpacing: 0.5,
   },
   calendarModalSubtitle: {
-    fontSize: 11.5,
+    fontSize: 12,
     color: '#64748B',
     marginTop: 2,
   },
@@ -2485,7 +2485,7 @@ const styles = StyleSheet.create({
     color: '#171420',
   },
   calendarStatLabel: {
-    fontSize: 9.5,
+    fontSize: 10,
     fontWeight: '700',
     color: '#64748B',
     marginTop: 2,
@@ -2535,7 +2535,7 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   selectedDayText: {
-    fontSize: 11.5,
+    fontSize: 12,
     fontWeight: '800',
     color: '#92400E',
     textAlign: 'center',
@@ -2586,7 +2586,7 @@ const styles = StyleSheet.create({
     borderRadius: 4,
   },
   currentMonthBadgeText: {
-    fontSize: 8.5,
+    fontSize: 9,
     fontWeight: '900',
     color: '#92400E',
   },
@@ -2695,7 +2695,7 @@ const styles = StyleSheet.create({
     borderRadius: 3.5,
   },
   legendLabel: {
-    fontSize: 9.5,
+    fontSize: 10,
     color: '#64748B',
     fontWeight: '700',
   },
@@ -2880,7 +2880,7 @@ const styles = StyleSheet.create({
     borderRadius: 4,
   },
   heroXpRemainingSub: {
-    fontSize: 10.5,
+    fontSize: 11,
     color: '#E9D5FF',
     marginTop: 6,
     fontWeight: '600',
@@ -2989,7 +2989,7 @@ const styles = StyleSheet.create({
   },
   modalGoldActionBtnText: {
     color: '#0C0A12',
-    fontSize: 13.5,
+    fontSize: 14,
     fontWeight: '900',
   },
   modalSecondaryOutlineBtn: {

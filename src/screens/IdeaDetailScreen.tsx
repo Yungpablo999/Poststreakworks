@@ -1043,11 +1043,11 @@ const styles = StyleSheet.create({
   scrollContent: {
     paddingHorizontal: 20,
     paddingTop: 8,
-    paddingBottom: 24,
+    paddingBottom: 96,
   },
   btnPressed: {
-    opacity: 0.78,
-    transform: [{ scale: 0.97 }],
+    opacity: 0.9,
+    transform: [{ scale: 0.98 }],
   },
 
   // 1. TOP AIRY HEADER BAR (UNIFIED)
@@ -1142,7 +1142,7 @@ const styles = StyleSheet.create({
     elevation: 2,
   },
   selectedIdeaPillText: {
-    fontSize: 10.5,
+    fontSize: 11,
     fontWeight: '900',
     color: '#FFFFFF',
     letterSpacing: 0.6,
@@ -1199,7 +1199,7 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   ideaCardTag: {
-    fontSize: 10.5,
+    fontSize: 11,
     fontWeight: '800',
     color: '#6D28D9',
     letterSpacing: 0.6,
@@ -1257,7 +1257,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   ideaTagPillText: {
-    fontSize: 10.5,
+    fontSize: 11,
     fontWeight: '700',
     color: '#6D28D9',
   },
@@ -1283,7 +1283,7 @@ const styles = StyleSheet.create({
 
   // Section Labels
   sectionLabel: {
-    fontSize: 10.5,
+    fontSize: 11,
     fontWeight: '800',
     color: '#7F7894',
     letterSpacing: 0.6,
@@ -1348,12 +1348,12 @@ const styles = StyleSheet.create({
     borderColor: '#FDE68A',
   },
   recBadgeText: {
-    fontSize: 8.5,
+    fontSize: 9,
     fontWeight: '900',
     color: '#B45309',
   },
   formatSubtitle: {
-    fontSize: 11.5,
+    fontSize: 12,
     color: '#64748B',
   },
   formatChevron: {
@@ -1402,7 +1402,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#6D28D9',
   },
   platformMultiplierText: {
-    fontSize: 9.5,
+    fontSize: 10,
     fontWeight: '800',
     color: '#64748B',
   },
@@ -1418,7 +1418,7 @@ const styles = StyleSheet.create({
     borderRadius: 6,
   },
   hookCounterBadgeText: {
-    fontSize: 9.5,
+    fontSize: 10,
     fontWeight: '700',
     color: '#64748B',
   },
@@ -1518,7 +1518,7 @@ const styles = StyleSheet.create({
     elevation: 3,
   },
   captionAngleBold: {
-    fontSize: 13.5,
+    fontSize: 14,
     fontWeight: '800',
     color: '#171420',
     marginBottom: 4,
@@ -1538,7 +1538,7 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   starterTextLabel: {
-    fontSize: 9.5,
+    fontSize: 10,
     fontWeight: '800',
     color: '#64748B',
     letterSpacing: 0.5,
@@ -1683,7 +1683,7 @@ const styles = StyleSheet.create({
     borderRadius: 100,
   },
   jarvisInsightTag: {
-    fontSize: 10.5,
+    fontSize: 11,
     fontWeight: '900',
     color: '#6D28D9',
     letterSpacing: 0.5,
@@ -1697,7 +1697,7 @@ const styles = StyleSheet.create({
     borderColor: '#FDE68A',
   },
   jarvisScoreText: {
-    fontSize: 10.5,
+    fontSize: 11,
     fontWeight: '800',
     color: '#B45309',
   },
@@ -1725,7 +1725,7 @@ const styles = StyleSheet.create({
     borderColor: '#7C3AED',
   },
   jarvisChipText: {
-    fontSize: 11.5,
+    fontSize: 12,
     fontWeight: '700',
     color: '#475569',
   },
@@ -1811,13 +1811,13 @@ const styles = StyleSheet.create({
     marginBottom: 6,
   },
   missionProgressTitle: {
-    fontSize: 9.5,
+    fontSize: 10,
     fontWeight: '800',
     color: '#64748B',
     letterSpacing: 0.5,
   },
   missionProgressCount: {
-    fontSize: 10.5,
+    fontSize: 11,
     fontWeight: '800',
     color: '#582CDB',
   },
@@ -1927,7 +1927,7 @@ const styles = StyleSheet.create({
     color: '#171420',
   },
   modalSubtitle: {
-    fontSize: 11.5,
+    fontSize: 12,
     color: '#64748B',
     marginTop: 2,
   },
@@ -1998,7 +1998,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   schedulePeakLabel: {
-    fontSize: 9.5,
+    fontSize: 10,
     fontWeight: '800',
     color: '#6D28D9',
     letterSpacing: 0.5,
@@ -2011,7 +2011,7 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   schedulePeakReason: {
-    fontSize: 11.5,
+    fontSize: 12,
     color: '#582CDB',
     fontWeight: '600',
   },
@@ -2049,7 +2049,7 @@ const styles = StyleSheet.create({
     lineHeight: 15,
   },
   notifTime: {
-    fontSize: 9.5,
+    fontSize: 10,
     color: '#94A3B8',
     marginTop: 4,
   },
@@ -2062,7 +2062,7 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
   modalFullBtnText: {
-    fontSize: 13.5,
+    fontSize: 14,
     fontWeight: '800',
     color: '#FFFFFF',
   },
@@ -2101,7 +2101,7 @@ const styles = StyleSheet.create({
     borderColor: '#FDE68A',
   },
   profileModalLevelText: {
-    fontSize: 10.5,
+    fontSize: 11,
     fontWeight: '800',
     color: '#B45309',
   },

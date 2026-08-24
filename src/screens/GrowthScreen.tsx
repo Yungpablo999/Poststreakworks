@@ -1480,8 +1480,8 @@ const styles = StyleSheet.create({
     backgroundColor: '#FAF8F5',
   },
   btnPressed: {
-    opacity: 0.78,
-    transform: [{ scale: 0.97 }],
+    opacity: 0.9,
+    transform: [{ scale: 0.98 }],
   },
 
   // 1. TOP HEADER BAR
@@ -1565,7 +1565,7 @@ const styles = StyleSheet.create({
     borderRadius: 100,
   },
   growthPillText: {
-    fontSize: 10.5,
+    fontSize: 11,
     fontWeight: '800',
     color: '#FFFFFF',
     letterSpacing: 0.4,
@@ -1577,7 +1577,7 @@ const styles = StyleSheet.create({
     borderRadius: 100,
   },
   analyticsPillText: {
-    fontSize: 10.5,
+    fontSize: 11,
     fontWeight: '800',
     color: '#475569',
     letterSpacing: 0.4,
@@ -1592,7 +1592,7 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   mainSubtitle: {
-    fontSize: 13.5,
+    fontSize: 14,
     color: '#524C62',
     lineHeight: 19,
     marginBottom: 20,
@@ -1620,7 +1620,7 @@ const styles = StyleSheet.create({
     marginBottom: 14,
   },
   audienceLabel: {
-    fontSize: 10.5,
+    fontSize: 11,
     fontWeight: '800',
     color: '#6B7280',
     letterSpacing: 0.6,
@@ -1660,7 +1660,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   statLabel: {
-    fontSize: 8.5,
+    fontSize: 9,
     fontWeight: '800',
     color: '#6B7280',
     letterSpacing: 0.4,
@@ -1736,12 +1736,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   platformName: {
-    fontSize: 13.5,
+    fontSize: 14,
     fontWeight: '800',
     color: '#171420',
   },
   platformFollowers: {
-    fontSize: 11.5,
+    fontSize: 12,
     color: '#64748B',
   },
   platformGrowthGreen: {
@@ -1756,7 +1756,7 @@ const styles = StyleSheet.create({
     borderRadius: 100,
   },
   connectPillBtnText: {
-    fontSize: 11.5,
+    fontSize: 12,
     fontWeight: '800',
     color: '#FFFFFF',
   },
@@ -1797,7 +1797,7 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   bestPostStatsMeta: {
-    fontSize: 11.5,
+    fontSize: 12,
     color: '#64748B',
   },
   perfBarsList: {
@@ -1811,7 +1811,7 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   perfBarLabel: {
-    fontSize: 9.5,
+    fontSize: 10,
     fontWeight: '800',
     color: '#6B7280',
     letterSpacing: 0.5,
@@ -1846,7 +1846,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   analyzeBtnText: {
-    fontSize: 13.5,
+    fontSize: 14,
     fontWeight: '800',
     color: '#FFFFFF',
   },
@@ -1867,7 +1867,7 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   reachHeaderLabel: {
-    fontSize: 10.5,
+    fontSize: 11,
     fontWeight: '800',
     color: '#6B7280',
     letterSpacing: 0.6,
@@ -1916,11 +1916,11 @@ const styles = StyleSheet.create({
     borderRadius: 3.5,
   },
   legendText: {
-    fontSize: 11.5,
+    fontSize: 12,
     color: '#64748B',
   },
   legendValue: {
-    fontSize: 11.5,
+    fontSize: 12,
     fontWeight: '800',
     color: '#171420',
   },
@@ -2020,7 +2020,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   jarvisTagText: {
-    fontSize: 9.5,
+    fontSize: 10,
     fontWeight: '800',
     color: '#E0E7FF',
     letterSpacing: 0.6,
@@ -2077,12 +2077,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   milestoneTitle: {
-    fontSize: 13.5,
+    fontSize: 14,
     fontWeight: '800',
     color: '#171420',
   },
   milestoneSub: {
-    fontSize: 11.5,
+    fontSize: 12,
     color: '#64748B',
   },
   milestoneBadgePurple: {
@@ -2108,7 +2108,7 @@ const styles = StyleSheet.create({
     borderRadius: 100,
   },
   postNowBtnText: {
-    fontSize: 11.5,
+    fontSize: 12,
     fontWeight: '800',
     color: '#FFFFFF',
   },
@@ -2297,7 +2297,7 @@ const styles = StyleSheet.create({
     borderColor: '#EFEBF8',
   },
   modalDetailTitle: {
-    fontSize: 13.5,
+    fontSize: 14,
     fontWeight: '800',
     color: '#171420',
     marginBottom: 2,
@@ -2337,7 +2337,7 @@ const styles = StyleSheet.create({
     marginBottom: 2,
   },
   notifBody: {
-    fontSize: 11.5,
+    fontSize: 12,
     color: '#64748B',
   },
   profileRing: {
@@ -2383,12 +2383,12 @@ const styles = StyleSheet.create({
     borderRadius: 6,
   },
   activePlatformsCountText: {
-    fontSize: 9.5,
+    fontSize: 10,
     fontWeight: '900',
     color: '#582CDB',
   },
   modalSectionTitle: {
-    fontSize: 10.5,
+    fontSize: 11,
     fontWeight: '900',
     color: '#64748B',
     letterSpacing: 0.6,
@@ -2396,7 +2396,7 @@ const styles = StyleSheet.create({
     marginTop: 6,
   },
   modalSubDescription: {
-    fontSize: 11.5,
+    fontSize: 12,
     color: '#64748B',
     marginBottom: 8,
   },
@@ -2441,7 +2441,7 @@ const styles = StyleSheet.create({
     borderRadius: 4,
   },
   autoSyncText: {
-    fontSize: 8.5,
+    fontSize: 9,
     fontWeight: '900',
     color: '#059669',
   },
@@ -2459,7 +2459,7 @@ const styles = StyleSheet.create({
     borderColor: '#FECACA',
   },
   removePlatformBtnText: {
-    fontSize: 10.5,
+    fontSize: 11,
     fontWeight: '800',
     color: '#DC2626',
   },
@@ -2506,7 +2506,7 @@ const styles = StyleSheet.create({
     borderColor: '#582CDB',
   },
   platformSelectChipText: {
-    fontSize: 10.5,
+    fontSize: 11,
     fontWeight: '700',
     color: '#475569',
   },
@@ -2552,7 +2552,7 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
   modalDoneBtnText: {
-    fontSize: 13.5,
+    fontSize: 14,
     fontWeight: '900',
     color: '#FFFFFF',
     letterSpacing: 0.3,
@@ -2612,12 +2612,12 @@ const styles = StyleSheet.create({
     borderRadius: 4,
   },
   readinessTagText: {
-    fontSize: 8.5,
+    fontSize: 9,
     fontWeight: '900',
     color: '#582CDB',
   },
   earningsHubSub: {
-    fontSize: 11.5,
+    fontSize: 12,
     color: '#64748B',
     marginTop: 2,
   },
@@ -2646,7 +2646,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   earningsHubStatLabel: {
-    fontSize: 8.5,
+    fontSize: 9,
     fontWeight: '900',
     color: '#64748B',
     letterSpacing: 0.4,

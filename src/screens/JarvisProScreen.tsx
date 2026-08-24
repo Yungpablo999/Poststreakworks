@@ -920,7 +920,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
   },
   proAccessText: {
-    fontSize: 10.5,
+    fontSize: 11,
     fontWeight: '900',
     color: '#171420',
     letterSpacing: 0.8,
@@ -958,7 +958,7 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(255, 255, 255, 0.2)',
   },
   heroChipText: {
-    fontSize: 11.5,
+    fontSize: 12,
     fontWeight: '700',
     color: '#FFFFFF',
   },
@@ -1147,7 +1147,7 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   featureDescription: {
-    fontSize: 11.5,
+    fontSize: 12,
     color: '#7F7894',
     lineHeight: 16,
     fontWeight: '500',
@@ -1234,7 +1234,7 @@ const styles = StyleSheet.create({
     letterSpacing: -0.2,
   },
   pricingGuaranteeText: {
-    fontSize: 10.5,
+    fontSize: 11,
     fontWeight: '800',
     color: '#7F7894',
     letterSpacing: 0.8,
@@ -1260,7 +1260,7 @@ const styles = StyleSheet.create({
     borderBottomColor: '#E8E3FA',
   },
   withoutProHeader: {
-    fontSize: 13.5,
+    fontSize: 14,
     fontWeight: '800',
     color: '#6B7280',
     marginBottom: 10,
@@ -1276,7 +1276,7 @@ const styles = StyleSheet.create({
     padding: 18,
   },
   withProHeader: {
-    fontSize: 13.5,
+    fontSize: 14,
     fontWeight: '800',
     color: '#FFFFFF',
     marginBottom: 10,
@@ -1298,7 +1298,7 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
   faqPreHeading: {
-    fontSize: 10.5,
+    fontSize: 11,
     fontWeight: '800',
     color: '#7F7894',
     letterSpacing: 0.8,
@@ -1329,7 +1329,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   faqQuestionText: {
-    fontSize: 13.5,
+    fontSize: 14,
     fontWeight: '700',
     color: '#171420',
     flex: 1,
@@ -1461,7 +1461,7 @@ const styles = StyleSheet.create({
     letterSpacing: 0.2,
   },
   btnPressed: {
-    opacity: 0.88,
+    opacity: 0.9,
     transform: [{ scale: 0.98 }],
   },
 });

@@ -1799,11 +1799,11 @@ const styles = StyleSheet.create({
   scrollContent: {
     paddingHorizontal: 20,
     paddingTop: 8,
-    paddingBottom: 24,
+    paddingBottom: 96,
   },
   btnPressed: {
-    opacity: 0.78,
-    transform: [{ scale: 0.97 }],
+    opacity: 0.9,
+    transform: [{ scale: 0.98 }],
   },
 
   // 1. TOP HEADER
@@ -1868,7 +1868,7 @@ const styles = StyleSheet.create({
     borderColor: '#C4B5FD',
   },
   freeHeaderBadgeText: {
-    fontSize: 8.5,
+    fontSize: 9,
     fontWeight: '900',
     color: '#582CDB',
     letterSpacing: 0.3,
@@ -1981,7 +1981,7 @@ const styles = StyleSheet.create({
     color: '#171420',
   },
   profileStatLabel: {
-    fontSize: 10.5,
+    fontSize: 11,
     color: '#64748B',
     fontWeight: '700',
     marginTop: 2,
@@ -2021,7 +2021,7 @@ const styles = StyleSheet.create({
     borderRadius: 100,
   },
   activePactPillText: {
-    fontSize: 10.5,
+    fontSize: 11,
     fontWeight: '800',
     color: '#6D28D9',
   },
@@ -2064,7 +2064,7 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   sectionHeaderTitle: {
-    fontSize: 13.5,
+    fontSize: 14,
     fontWeight: '800',
     color: '#171420',
   },
@@ -2140,7 +2140,7 @@ const styles = StyleSheet.create({
     lineHeight: 13,
   },
   storyName: {
-    fontSize: 11.5,
+    fontSize: 12,
     fontWeight: '700',
     color: '#171420',
     textAlign: 'center',
@@ -2177,7 +2177,7 @@ const styles = StyleSheet.create({
     borderColor: '#582CDB',
   },
   categoryTabPillText: {
-    fontSize: 11.5,
+    fontSize: 12,
     fontWeight: '700',
     color: '#475569',
   },
@@ -2259,7 +2259,7 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   threadHandle: {
-    fontSize: 11.5,
+    fontSize: 12,
     color: '#64748B',
     fontWeight: '600',
   },
@@ -2270,7 +2270,7 @@ const styles = StyleSheet.create({
     borderRadius: 6,
   },
   threadStreakText: {
-    fontSize: 9.5,
+    fontSize: 10,
     fontWeight: '800',
     color: '#582CDB',
   },
@@ -2283,7 +2283,7 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   collabStatusText: {
-    fontSize: 9.5,
+    fontSize: 10,
     fontWeight: '900',
     color: '#78350F',
   },
@@ -2460,7 +2460,7 @@ const styles = StyleSheet.create({
     borderBottomLeftRadius: 4,
   },
   messageText: {
-    fontSize: 13.5,
+    fontSize: 14,
     lineHeight: 19,
   },
   msgTextUser: {
@@ -2752,7 +2752,7 @@ const styles = StyleSheet.create({
     marginBottom: 14,
   },
   storySlidePillText: {
-    fontSize: 10.5,
+    fontSize: 11,
     fontWeight: '900',
     color: '#FFFFFF',
     letterSpacing: 0.6,
@@ -2806,7 +2806,7 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
   },
   storyStatLabel: {
-    fontSize: 9.5,
+    fontSize: 10,
     color: 'rgba(255, 255, 255, 0.6)',
     marginTop: 2,
   },
@@ -2832,7 +2832,7 @@ const styles = StyleSheet.create({
     color: '#DDD6FE',
   },
   highlightItemViews: {
-    fontSize: 10.5,
+    fontSize: 11,
     fontWeight: '700',
     color: '#FDE68A',
   },
@@ -2904,7 +2904,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(255, 255, 255, 0.15)',
     borderRadius: 22,
     paddingHorizontal: 16,
-    fontSize: 13.5,
+    fontSize: 14,
     color: '#FFFFFF',
     borderWidth: 1,
     borderColor: 'rgba(255, 255, 255, 0.2)',
@@ -2957,7 +2957,7 @@ const styles = StyleSheet.create({
     color: '#171420',
   },
   modalSubtitle: {
-    fontSize: 11.5,
+    fontSize: 12,
     color: '#64748B',
     marginTop: 2,
   },
@@ -2991,7 +2991,7 @@ const styles = StyleSheet.create({
     borderRadius: 22,
   },
   discoverName: {
-    fontSize: 13.5,
+    fontSize: 14,
     fontWeight: '800',
     color: '#171420',
   },
@@ -3000,7 +3000,7 @@ const styles = StyleSheet.create({
     color: '#64748B',
   },
   discoverNiche: {
-    fontSize: 10.5,
+    fontSize: 11,
     color: '#582CDB',
     fontWeight: '700',
     marginTop: 2,
@@ -3012,7 +3012,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
   },
   discoverConnectBtnText: {
-    fontSize: 11.5,
+    fontSize: 12,
     fontWeight: '900',
     color: '#582CDB',
   },

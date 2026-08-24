@@ -755,8 +755,8 @@ const styles = StyleSheet.create({
     backgroundColor: '#FAF8F5',
   },
   btnPressed: {
-    opacity: 0.78,
-    transform: [{ scale: 0.97 }],
+    opacity: 0.9,
+    transform: [{ scale: 0.98 }],
   },
 
   // 1. TOP HEADER BAR
@@ -840,7 +840,7 @@ const styles = StyleSheet.create({
     borderRadius: 100,
   },
   todayMissionPillText: {
-    fontSize: 10.5,
+    fontSize: 11,
     fontWeight: '800',
     color: '#FFFFFF',
     letterSpacing: 0.4,
@@ -852,7 +852,7 @@ const styles = StyleSheet.create({
     borderRadius: 100,
   },
   freeMissionPillText: {
-    fontSize: 10.5,
+    fontSize: 11,
     fontWeight: '800',
     color: '#475569',
     letterSpacing: 0.4,
@@ -942,7 +942,7 @@ const styles = StyleSheet.create({
     marginBottom: 2,
   },
   metricLabel: {
-    fontSize: 9.5,
+    fontSize: 10,
     fontWeight: '800',
     color: '#6B7280',
     letterSpacing: 0.5,
@@ -1045,7 +1045,7 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   suggestedIdeaTag: {
-    fontSize: 10.5,
+    fontSize: 11,
     fontWeight: '800',
     color: '#E0E7FF',
     letterSpacing: 0.6,
@@ -1181,7 +1181,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   momentumBadgeText: {
-    fontSize: 10.5,
+    fontSize: 11,
     fontWeight: '800',
     color: '#785928',
     letterSpacing: 0.6,
@@ -1342,7 +1342,7 @@ const styles = StyleSheet.create({
     lineHeight: 18,
   },
   modalInputLabel: {
-    fontSize: 10.5,
+    fontSize: 11,
     fontWeight: '800',
     color: '#582CDB',
     letterSpacing: 0.6,
@@ -1384,7 +1384,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     paddingHorizontal: 14,
     paddingVertical: 10,
-    fontSize: 13.5,
+    fontSize: 14,
     color: '#171420',
     marginBottom: 14,
   },
@@ -1404,7 +1404,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   modalSecondaryBtnText: {
-    fontSize: 13.5,
+    fontSize: 14,
     fontWeight: '700',
     color: '#524C62',
   },
@@ -1420,7 +1420,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   modalPrimaryBtnText: {
-    fontSize: 13.5,
+    fontSize: 14,
     fontWeight: '800',
     color: '#FFFFFF',
   },
@@ -1446,7 +1446,7 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   sparkText: {
-    fontSize: 13.5,
+    fontSize: 14,
     fontWeight: '700',
     color: '#171420',
     marginBottom: 4,
@@ -1473,7 +1473,7 @@ const styles = StyleSheet.create({
     marginBottom: 2,
   },
   notifBody: {
-    fontSize: 11.5,
+    fontSize: 12,
     color: '#64748B',
   },
   profileRing: {

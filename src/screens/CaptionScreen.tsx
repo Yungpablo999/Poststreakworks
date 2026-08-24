@@ -892,11 +892,11 @@ const styles = StyleSheet.create({
   scrollContent: {
     paddingHorizontal: 20,
     paddingTop: 8,
-    paddingBottom: 24,
+    paddingBottom: 96,
   },
   btnPressed: {
-    opacity: 0.78,
-    transform: [{ scale: 0.97 }],
+    opacity: 0.9,
+    transform: [{ scale: 0.98 }],
   },
 
   // 1. TOP HEADER
@@ -987,7 +987,7 @@ const styles = StyleSheet.create({
     borderRadius: 100,
   },
   captionWriterPillText: {
-    fontSize: 10.5,
+    fontSize: 11,
     fontWeight: '900',
     color: '#FFFFFF',
     letterSpacing: 0.5,
@@ -1001,7 +1001,7 @@ const styles = StyleSheet.create({
     borderRadius: 100,
   },
   freeCaptionPillText: {
-    fontSize: 10.5,
+    fontSize: 11,
     fontWeight: '800',
     color: '#6D28D9',
     letterSpacing: 0.4,
@@ -1046,18 +1046,18 @@ const styles = StyleSheet.create({
     fontSize: 15,
   },
   topicHeaderTitle: {
-    fontSize: 13.5,
+    fontSize: 14,
     fontWeight: '800',
     color: '#171420',
   },
   editableHint: {
-    fontSize: 10.5,
+    fontSize: 11,
     color: '#94A3B8',
     fontWeight: '700',
     marginLeft: 'auto',
   },
   editableHintMicro: {
-    fontSize: 9.5,
+    fontSize: 10,
     color: '#94A3B8',
     fontWeight: '700',
   },
@@ -1076,7 +1076,7 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   topicInput: {
-    fontSize: 13.5,
+    fontSize: 14,
     color: '#171420',
     lineHeight: 19,
     fontWeight: '600',
@@ -1112,7 +1112,7 @@ const styles = StyleSheet.create({
 
   // Choose a Tone Section
   sectionLabel: {
-    fontSize: 13.5,
+    fontSize: 14,
     fontWeight: '800',
     color: '#171420',
     marginBottom: 8,
@@ -1191,13 +1191,13 @@ const styles = StyleSheet.create({
     borderRadius: 6,
   },
   recommendedBadgeText: {
-    fontSize: 9.5,
+    fontSize: 10,
     fontWeight: '900',
     color: '#FFFFFF',
     letterSpacing: 0.5,
   },
   recommendedCaptionText: {
-    fontSize: 13.5,
+    fontSize: 14,
     color: '#171420',
     lineHeight: 20,
     marginBottom: 12,
@@ -1259,7 +1259,7 @@ const styles = StyleSheet.create({
     paddingVertical: 4,
   },
   microCapLabel: {
-    fontSize: 9.5,
+    fontSize: 10,
     fontWeight: '900',
     color: '#64748B',
     letterSpacing: 0.6,
@@ -1292,7 +1292,7 @@ const styles = StyleSheet.create({
     borderRadius: 6,
   },
   draftEditorBadgeText: {
-    fontSize: 9.5,
+    fontSize: 10,
     fontWeight: '900',
     color: '#FFFFFF',
     letterSpacing: 0.5,
@@ -1311,7 +1311,7 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   draftEditorInput: {
-    fontSize: 13.5,
+    fontSize: 14,
     color: '#171420',
     lineHeight: 20,
     fontWeight: '500',
@@ -1353,7 +1353,7 @@ const styles = StyleSheet.create({
     color: '#6D28D9',
   },
   charCountText: {
-    fontSize: 10.5,
+    fontSize: 11,
     fontWeight: '800',
     color: '#94A3B8',
     marginBottom: 12,
@@ -1439,7 +1439,7 @@ const styles = StyleSheet.create({
     borderRadius: 6,
   },
   aiPoweredBadgeText: {
-    fontSize: 9.5,
+    fontSize: 10,
     fontWeight: '900',
     color: '#582CDB',
   },
@@ -1550,7 +1550,7 @@ const styles = StyleSheet.create({
     color: '#171420',
   },
   modalSubtitle: {
-    fontSize: 11.5,
+    fontSize: 12,
     color: '#64748B',
     marginTop: 2,
   },
@@ -1598,7 +1598,7 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
   modalFullBtnText: {
-    fontSize: 13.5,
+    fontSize: 14,
     fontWeight: '800',
     color: '#FFFFFF',
   },
@@ -1636,7 +1636,7 @@ const styles = StyleSheet.create({
     lineHeight: 15,
   },
   notifTime: {
-    fontSize: 9.5,
+    fontSize: 10,
     color: '#94A3B8',
     marginTop: 4,
   },
@@ -1675,7 +1675,7 @@ const styles = StyleSheet.create({
     borderColor: '#FDE68A',
   },
   profileModalLevelText: {
-    fontSize: 10.5,
+    fontSize: 11,
     fontWeight: '800',
     color: '#B45309',
   },

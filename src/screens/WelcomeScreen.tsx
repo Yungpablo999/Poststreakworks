@@ -198,7 +198,7 @@ const styles = StyleSheet.create({
     maxWidth: 310,
   },
   subtitleSmall: {
-    fontSize: 13.5,
+    fontSize: 14,
     lineHeight: 20,
     maxWidth: 275,
   },
@@ -241,7 +241,7 @@ const styles = StyleSheet.create({
     alignItems: 'flex-end',
   },
   poweredBy: {
-    fontSize: 10.5,
+    fontSize: 11,
     fontWeight: '700',
     color: colors.textMuted,
     letterSpacing: 1.5,

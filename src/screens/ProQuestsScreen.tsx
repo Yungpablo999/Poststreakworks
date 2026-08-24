@@ -1671,7 +1671,7 @@ const styles = StyleSheet.create({
     borderColor: '#FBBF24',
   },
   proHeaderBadgeText: {
-    fontSize: 8.5,
+    fontSize: 9,
     fontWeight: '900',
     color: '#92400E',
     letterSpacing: 0.3,
@@ -1752,7 +1752,7 @@ const styles = StyleSheet.create({
   scrollContent: {
     paddingHorizontal: 20,
     paddingTop: 8,
-    paddingBottom: 40,
+    paddingBottom: 96,
   },
 
   // HERO TAGS & HEADLINE
@@ -1804,7 +1804,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#582CDB',
   },
   questFilterText: {
-    fontSize: 11.5,
+    fontSize: 12,
     fontWeight: '700',
     color: '#475569',
   },
@@ -1838,7 +1838,7 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   todayQuestTagText: {
-    fontSize: 9.5,
+    fontSize: 10,
     fontWeight: '900',
     color: '#92400E',
     letterSpacing: 0.5,
@@ -1865,7 +1865,7 @@ const styles = StyleSheet.create({
     marginBottom: 14,
   },
   timeLeftLabel: {
-    fontSize: 8.5,
+    fontSize: 9,
     fontWeight: '900',
     color: '#DC2626',
     letterSpacing: 0.5,
@@ -1889,7 +1889,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   rewardSmallLabel: {
-    fontSize: 8.5,
+    fontSize: 9,
     fontWeight: '800',
     color: '#94A3B8',
     marginBottom: 2,
@@ -1921,7 +1921,7 @@ const styles = StyleSheet.create({
     marginBottom: 14,
   },
   questSparkleText: {
-    fontSize: 11.5,
+    fontSize: 12,
     fontWeight: '700',
     color: '#582CDB',
     textAlign: 'center',
@@ -1954,7 +1954,7 @@ const styles = StyleSheet.create({
   },
   startReelBtnText: {
     color: '#FFFFFF',
-    fontSize: 13.5,
+    fontSize: 14,
     fontWeight: '900',
   },
 
@@ -1998,7 +1998,7 @@ const styles = StyleSheet.create({
     marginBottom: 2,
   },
   metricSquareLabel: {
-    fontSize: 8.5,
+    fontSize: 9,
     fontWeight: '800',
     color: '#64748B',
     letterSpacing: 0.5,
@@ -2052,12 +2052,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   levelTotalXpText: {
-    fontSize: 11.5,
+    fontSize: 12,
     fontWeight: '700',
     color: '#64748B',
   },
   unlockNextRewardsLink: {
-    fontSize: 11.5,
+    fontSize: 12,
     fontWeight: '800',
     color: '#582CDB',
   },
@@ -2084,7 +2084,7 @@ const styles = StyleSheet.create({
     borderRadius: 6,
   },
   squadQuestPillText: {
-    fontSize: 9.5,
+    fontSize: 10,
     fontWeight: '900',
     color: '#582CDB',
   },
@@ -2095,7 +2095,7 @@ const styles = StyleSheet.create({
     borderRadius: 6,
   },
   groupRewardPillText: {
-    fontSize: 9.5,
+    fontSize: 10,
     fontWeight: '900',
     color: '#92400E',
   },
@@ -2136,7 +2136,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   activeMembersText: {
-    fontSize: 10.5,
+    fontSize: 11,
     fontWeight: '800',
     color: '#15803D',
   },
@@ -2193,12 +2193,12 @@ const styles = StyleSheet.create({
     borderRadius: 6,
   },
   liveDuelTagPillText: {
-    fontSize: 9.5,
+    fontSize: 10,
     fontWeight: '900',
     color: '#DC2626',
   },
   duelEndsInText: {
-    fontSize: 10.5,
+    fontSize: 11,
     fontWeight: '800',
     color: '#94A3B8',
   },
@@ -2217,22 +2217,22 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   duelSquadNameMine: {
-    fontSize: 11.5,
+    fontSize: 12,
     fontWeight: '800',
     color: '#582CDB',
   },
   duelScoreMine: {
-    fontSize: 11.5,
+    fontSize: 12,
     fontWeight: '900',
     color: '#582CDB',
   },
   duelSquadNameOpp: {
-    fontSize: 11.5,
+    fontSize: 12,
     fontWeight: '700',
     color: '#64748B',
   },
   duelScoreOpp: {
-    fontSize: 11.5,
+    fontSize: 12,
     fontWeight: '800',
     color: '#64748B',
   },
@@ -2309,40 +2309,40 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   brandQuestItemTitle: {
-    fontSize: 13.5,
+    fontSize: 14,
     fontWeight: '800',
     color: '#171420',
   },
   proPriorityBadgeText: {
-    fontSize: 9.5,
+    fontSize: 10,
     fontWeight: '900',
     color: '#582CDB',
     marginTop: 1,
   },
   brandQuestBadgeText: {
-    fontSize: 9.5,
+    fontSize: 10,
     fontWeight: '900',
     color: '#D97706',
     marginTop: 1,
   },
   profileProgressText: {
-    fontSize: 9.5,
+    fontSize: 10,
     fontWeight: '800',
     color: '#64748B',
     marginTop: 1,
   },
   bountyAmountGold: {
-    fontSize: 13.5,
+    fontSize: 14,
     fontWeight: '900',
     color: '#D97706',
   },
   bountyLabelSmall: {
-    fontSize: 8.5,
+    fontSize: 9,
     fontWeight: '800',
     color: '#94A3B8',
   },
   passportBoostLinkText: {
-    fontSize: 11.5,
+    fontSize: 12,
     fontWeight: '800',
     color: '#582CDB',
   },
@@ -2494,7 +2494,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   darkMetricLabel: {
-    fontSize: 9.5,
+    fontSize: 10,
     fontWeight: '800',
     color: '#CBD5E1',
   },
@@ -2521,7 +2521,7 @@ const styles = StyleSheet.create({
   },
   viewOpportunitiesBtnText: {
     color: '#FFFFFF',
-    fontSize: 13.5,
+    fontSize: 14,
     fontWeight: '900',
   },
 
@@ -2590,7 +2590,7 @@ const styles = StyleSheet.create({
     color: '#64748B',
   },
   stepBadgeName: {
-    fontSize: 8.5,
+    fontSize: 9,
     fontWeight: '700',
     color: '#94A3B8',
     marginTop: 1,
@@ -2674,7 +2674,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   completedXpBadge: {
-    fontSize: 11.5,
+    fontSize: 12,
     fontWeight: '900',
     color: '#D97706',
   },
@@ -2686,7 +2686,7 @@ const styles = StyleSheet.create({
 
   // MODALS
   btnPressed: {
-    opacity: 0.85,
+    opacity: 0.9,
     transform: [{ scale: 0.98 }],
   },
   modalOverlay: {
@@ -2883,13 +2883,13 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
   oppChoiceMetaPurple: {
-    fontSize: 10.5,
+    fontSize: 11,
     fontWeight: '700',
     color: '#582CDB',
     marginTop: 4,
   },
   oppChoiceMetaGreen: {
-    fontSize: 10.5,
+    fontSize: 11,
     fontWeight: '700',
     color: '#16A34A',
     marginTop: 4,
@@ -2924,7 +2924,7 @@ const styles = StyleSheet.create({
     borderColor: '#E9D5FF',
   },
   filterActiveBannerText: {
-    fontSize: 11.5,
+    fontSize: 12,
     color: '#4C1D95',
     fontWeight: '700',
   },
@@ -3044,7 +3044,7 @@ const styles = StyleSheet.create({
     borderRadius: 4,
   },
   sqmTierPillText: {
-    fontSize: 8.5,
+    fontSize: 9,
     fontWeight: '900',
     color: '#6D28D9',
   },
@@ -3125,7 +3125,7 @@ const styles = StyleSheet.create({
     marginBottom: 14,
   },
   sqmSectionTitle: {
-    fontSize: 9.5,
+    fontSize: 10,
     fontWeight: '900',
     color: '#64748B',
     letterSpacing: 0.6,
@@ -3154,7 +3154,7 @@ const styles = StyleSheet.create({
     color: '#171420',
   },
   sqmRewardLabel: {
-    fontSize: 8.5,
+    fontSize: 9,
     color: '#64748B',
     fontWeight: '700',
     marginTop: 1,
@@ -3239,7 +3239,7 @@ const styles = StyleSheet.create({
     borderRadius: 6,
   },
   sqmScoreBadgePendingText: {
-    fontSize: 9.5,
+    fontSize: 10,
     fontWeight: '800',
     color: '#92400E',
   },
@@ -3250,7 +3250,7 @@ const styles = StyleSheet.create({
     borderRadius: 6,
   },
   sqmScoreBadgeScheduledText: {
-    fontSize: 9.5,
+    fontSize: 10,
     fontWeight: '800',
     color: '#6D28D9',
   },
@@ -3374,12 +3374,12 @@ const styles = StyleSheet.create({
     backgroundColor: '#EF4444',
   },
   duelModalLivePillText: {
-    fontSize: 8.5,
+    fontSize: 9,
     fontWeight: '900',
     color: '#B91C1C',
   },
   duelModalTimerText: {
-    fontSize: 9.5,
+    fontSize: 10,
     fontWeight: '800',
     color: '#64748B',
   },
@@ -3401,7 +3401,7 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   duelScoreTeamMine: {
-    fontSize: 11.5,
+    fontSize: 12,
     fontWeight: '900',
     color: '#F3E8FF',
   },
@@ -3437,7 +3437,7 @@ const styles = StyleSheet.create({
     color: '#FDE68A',
   },
   duelScoreTeamOpp: {
-    fontSize: 11.5,
+    fontSize: 12,
     fontWeight: '800',
     color: '#CBD5E1',
   },
@@ -3519,7 +3519,7 @@ const styles = StyleSheet.create({
     marginTop: 5,
   },
   duelActivityTitle: {
-    fontSize: 11.5,
+    fontSize: 12,
     color: '#171420',
     lineHeight: 16,
   },
@@ -3571,7 +3571,7 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
   duelTaskCardReward: {
-    fontSize: 10.5,
+    fontSize: 11,
     fontWeight: '800',
     color: '#7C3AED',
     marginTop: 3,

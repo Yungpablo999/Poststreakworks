@@ -894,7 +894,7 @@ const styles = StyleSheet.create({
     borderRadius: 6,
   },
   proHeaderBadgeText: {
-    fontSize: 9.5,
+    fontSize: 10,
     fontWeight: '900',
     color: '#0C0A12',
     letterSpacing: 0.3,
@@ -963,7 +963,7 @@ const styles = StyleSheet.create({
     borderRadius: 6,
   },
   createPostTagText: {
-    fontSize: 9.5,
+    fontSize: 10,
     fontWeight: '900',
     color: '#D97706',
     letterSpacing: 0.3,
@@ -975,7 +975,7 @@ const styles = StyleSheet.create({
     borderRadius: 6,
   },
   draftPillText: {
-    fontSize: 9.5,
+    fontSize: 10,
     fontWeight: '900',
     color: '#582CDB',
     letterSpacing: 0.3,
@@ -1074,7 +1074,7 @@ const styles = StyleSheet.create({
   },
   morePlatformsBtnText: {
     color: '#FFFFFF',
-    fontSize: 10.5,
+    fontSize: 11,
     fontWeight: '900',
   },
   platformsGridRow: {
@@ -1163,7 +1163,7 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   mediaMainHeading: {
-    fontSize: 13.5,
+    fontSize: 14,
     fontWeight: '900',
     color: '#171420',
   },
@@ -1199,7 +1199,7 @@ const styles = StyleSheet.create({
     borderRadius: 4,
   },
   mediaProBadgeText: {
-    fontSize: 8.5,
+    fontSize: 9,
     fontWeight: '900',
     color: '#15803D',
   },
@@ -1214,7 +1214,7 @@ const styles = StyleSheet.create({
     color: '#171420',
   },
   mediaAttachedFormat: {
-    fontSize: 10.5,
+    fontSize: 11,
     color: '#64748B',
     marginTop: 1,
   },
@@ -1244,7 +1244,7 @@ const styles = StyleSheet.create({
     borderRadius: 6,
   },
   polishJarvisBtnText: {
-    fontSize: 10.5,
+    fontSize: 11,
     fontWeight: '900',
     color: '#582CDB',
   },
@@ -1298,7 +1298,7 @@ const styles = StyleSheet.create({
   },
   publishGoldBtnText: {
     color: '#0C0A12',
-    fontSize: 13.5,
+    fontSize: 14,
     fontWeight: '900',
     letterSpacing: 0.3,
   },
@@ -1402,7 +1402,7 @@ const styles = StyleSheet.create({
     letterSpacing: 0.2,
   },
   btnPressed: {
-    transform: [{ scale: 0.96 }],
-    opacity: 0.85,
+    opacity: 0.9,
+    transform: [{ scale: 0.98 }],
   },
 });

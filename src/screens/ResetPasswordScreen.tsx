@@ -752,7 +752,7 @@ const styles = StyleSheet.create({
   scrollContent: {
     paddingHorizontal: 22,
     paddingTop: 8,
-    paddingBottom: 24,
+    paddingBottom: 96,
   },
   topBar: {
     flexDirection: 'row',
@@ -855,7 +855,7 @@ const styles = StyleSheet.create({
     width: '100%',
   },
   inputLabel: {
-    fontSize: 11.5,
+    fontSize: 12,
     fontWeight: '700',
     color: '#524C62',
     letterSpacing: 0.6,
@@ -925,7 +925,7 @@ const styles = StyleSheet.create({
     marginTop: 16,
   },
   resendActiveText: {
-    fontSize: 13.5,
+    fontSize: 14,
     fontWeight: '700',
     color: '#582CDB',
   },
@@ -1074,7 +1074,7 @@ const styles = StyleSheet.create({
     letterSpacing: -0.4,
   },
   modalText: {
-    fontSize: 13.5,
+    fontSize: 14,
     color: '#524C62',
     textAlign: 'center',
     lineHeight: 20,

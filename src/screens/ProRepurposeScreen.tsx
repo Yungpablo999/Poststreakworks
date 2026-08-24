@@ -1034,7 +1034,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#F7F5F0',
   },
   btnPressed: {
-    opacity: 0.88,
+    opacity: 0.9,
     transform: [{ scale: 0.98 }],
   },
 
@@ -1190,13 +1190,13 @@ const styles = StyleSheet.create({
     borderRadius: 5,
   },
   shortVideoBadgeText: {
-    fontSize: 8.5,
+    fontSize: 9,
     fontWeight: '900',
     color: '#FFFFFF',
     letterSpacing: 0.3,
   },
   originalIdeaGoal: {
-    fontSize: 11.5,
+    fontSize: 12,
     color: '#64748B',
     marginTop: 8,
     fontWeight: '600',
@@ -1213,7 +1213,7 @@ const styles = StyleSheet.create({
     borderRadius: 5,
   },
   retentionBadgeText: {
-    fontSize: 8.5,
+    fontSize: 9,
     fontWeight: '900',
     color: '#15803D',
     letterSpacing: 0.3,
@@ -1225,7 +1225,7 @@ const styles = StyleSheet.create({
     borderRadius: 5,
   },
   savePotentialBadgeText: {
-    fontSize: 8.5,
+    fontSize: 9,
     fontWeight: '900',
     color: '#D97706',
     letterSpacing: 0.3,
@@ -1348,7 +1348,7 @@ const styles = StyleSheet.create({
     borderRadius: 5,
   },
   versionBadgeText: {
-    fontSize: 8.5,
+    fontSize: 9,
     fontWeight: '900',
     letterSpacing: 0.3,
   },
@@ -1360,7 +1360,7 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   versionBodyText: {
-    fontSize: 11.5,
+    fontSize: 12,
     color: '#475569',
     lineHeight: 17,
   },
@@ -1379,7 +1379,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   versionEditBtnText: {
-    fontSize: 11.5,
+    fontSize: 12,
     fontWeight: '900',
     color: '#171420',
   },
@@ -1391,7 +1391,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   versionUseBtnText: {
-    fontSize: 11.5,
+    fontSize: 12,
     fontWeight: '900',
     color: '#FFFFFF',
   },
@@ -1423,7 +1423,7 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   captionVarTypeBadgeText: {
-    fontSize: 8.5,
+    fontSize: 9,
     fontWeight: '900',
     color: '#582CDB',
     letterSpacing: 0.3,
@@ -1450,7 +1450,7 @@ const styles = StyleSheet.create({
     color: '#171420',
   },
   repurposeScoreSub: {
-    fontSize: 10.5,
+    fontSize: 11,
     color: '#64748B',
     marginTop: 2,
   },
@@ -1521,7 +1521,7 @@ const styles = StyleSheet.create({
     letterSpacing: 0.2,
   },
   jarvisHeroSub: {
-    fontSize: 8.5,
+    fontSize: 9,
     fontWeight: '900',
     color: '#A78BFA',
     letterSpacing: 0.5,
@@ -1536,7 +1536,7 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(255, 255, 255, 0.18)',
   },
   jarvisActivePillText: {
-    fontSize: 8.5,
+    fontSize: 9,
     fontWeight: '900',
     color: '#34D399',
     letterSpacing: 0.3,

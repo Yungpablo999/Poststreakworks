@@ -955,7 +955,7 @@ const styles = StyleSheet.create({
     borderRadius: 6,
   },
   proHeaderBadgeText: {
-    fontSize: 9.5,
+    fontSize: 10,
     fontWeight: '900',
     color: '#0C0A12',
     letterSpacing: 0.3,
@@ -1026,7 +1026,7 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   goldStrategyBadgeText: {
-    fontSize: 9.5,
+    fontSize: 10,
     fontWeight: '900',
     color: '#D97706',
     letterSpacing: 0.3,
@@ -1050,7 +1050,7 @@ const styles = StyleSheet.create({
     borderRadius: 6,
   },
   purplePillText: {
-    fontSize: 10.5,
+    fontSize: 11,
     fontWeight: '900',
     color: '#582CDB',
   },
@@ -1061,7 +1061,7 @@ const styles = StyleSheet.create({
     borderRadius: 6,
   },
   goldPillText: {
-    fontSize: 10.5,
+    fontSize: 11,
     fontWeight: '900',
     color: '#D97706',
   },
@@ -1074,7 +1074,7 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   sectionHeaderTitle: {
-    fontSize: 11.5,
+    fontSize: 12,
     fontWeight: '900',
     color: '#64748B',
     letterSpacing: 0.5,
@@ -1098,7 +1098,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   setupFieldLabel: {
-    fontSize: 9.5,
+    fontSize: 10,
     fontWeight: '900',
     color: '#94A3B8',
     letterSpacing: 0.4,
@@ -1122,7 +1122,7 @@ const styles = StyleSheet.create({
     borderColor: '#582CDB',
   },
   setupOptionText: {
-    fontSize: 11.5,
+    fontSize: 12,
     fontWeight: '800',
     color: '#475569',
   },
@@ -1192,12 +1192,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   meterLabel: {
-    fontSize: 9.5,
+    fontSize: 10,
     fontWeight: '900',
     color: '#64748B',
   },
   meterValText: {
-    fontSize: 10.5,
+    fontSize: 11,
     fontWeight: '900',
     color: '#171420',
   },
@@ -1258,7 +1258,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#EDE9FE',
   },
   categoryTagText: {
-    fontSize: 9.5,
+    fontSize: 10,
     fontWeight: '900',
     letterSpacing: 0.3,
   },
@@ -1289,7 +1289,7 @@ const styles = StyleSheet.create({
     borderColor: '#EFECE6',
   },
   bestForText: {
-    fontSize: 10.5,
+    fontSize: 11,
     fontWeight: '800',
     color: '#64748B',
   },
@@ -1318,7 +1318,7 @@ const styles = StyleSheet.create({
     borderBottomColor: '#F1EFE9',
   },
   tableHeadCol: {
-    fontSize: 9.5,
+    fontSize: 10,
     fontWeight: '900',
     color: '#94A3B8',
     letterSpacing: 0.4,
@@ -1428,7 +1428,7 @@ const styles = StyleSheet.create({
     borderRadius: 4,
   },
   savedScorePillText: {
-    fontSize: 8.5,
+    fontSize: 9,
     fontWeight: '900',
     color: '#D97706',
   },
@@ -1447,7 +1447,7 @@ const styles = StyleSheet.create({
   },
   buildCompleteWorkflowBtnText: {
     color: '#FFFFFF',
-    fontSize: 13.5,
+    fontSize: 14,
     fontWeight: '900',
   },
   generateMoreBtn: {
@@ -1469,7 +1469,7 @@ const styles = StyleSheet.create({
   },
   backToCreateLinkText: {
     color: '#582CDB',
-    fontSize: 10.5,
+    fontSize: 11,
     fontWeight: '900',
     letterSpacing: 0.5,
   },
@@ -1568,7 +1568,7 @@ const styles = StyleSheet.create({
     letterSpacing: 0.2,
   },
   btnPressed: {
-    transform: [{ scale: 0.96 }],
-    opacity: 0.85,
+    opacity: 0.9,
+    transform: [{ scale: 0.98 }],
   },
 });

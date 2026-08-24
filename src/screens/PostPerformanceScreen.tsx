@@ -971,7 +971,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#FAF8F5',
   },
   btnPressed: {
-    opacity: 0.78,
+    opacity: 0.9,
     transform: [{ scale: 0.98 }],
   },
 
@@ -1189,7 +1189,7 @@ const styles = StyleSheet.create({
     borderRadius: 6,
   },
   topPostBadgeText: {
-    fontSize: 9.5,
+    fontSize: 10,
     fontWeight: '900',
     color: '#171420',
     letterSpacing: 0.4,
@@ -1298,12 +1298,12 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   postEarningsChipText: {
-    fontSize: 11.5,
+    fontSize: 12,
     fontWeight: '800',
     color: '#171420',
   },
   postEarningsChipLink: {
-    fontSize: 10.5,
+    fontSize: 11,
     fontWeight: '900',
     color: '#582CDB',
   },
@@ -1364,7 +1364,7 @@ const styles = StyleSheet.create({
     elevation: 1,
   },
   perfMetricLabel: {
-    fontSize: 9.5,
+    fontSize: 10,
     fontWeight: '900',
     color: '#64748B',
     letterSpacing: 0.4,
@@ -1385,7 +1385,7 @@ const styles = StyleSheet.create({
     alignSelf: 'flex-start',
   },
   perfSurgeTextGreen: {
-    fontSize: 9.5,
+    fontSize: 10,
     fontWeight: '900',
     color: '#059669',
   },
@@ -1397,7 +1397,7 @@ const styles = StyleSheet.create({
     alignSelf: 'flex-start',
   },
   perfSurgeTextNeutral: {
-    fontSize: 9.5,
+    fontSize: 10,
     fontWeight: '800',
     color: '#475569',
   },
@@ -1409,7 +1409,7 @@ const styles = StyleSheet.create({
     alignSelf: 'flex-start',
   },
   perfSurgeTextPurple: {
-    fontSize: 9.5,
+    fontSize: 10,
     fontWeight: '900',
     color: '#582CDB',
   },
@@ -1421,7 +1421,7 @@ const styles = StyleSheet.create({
     alignSelf: 'flex-start',
   },
   perfSurgeTextGold: {
-    fontSize: 9.5,
+    fontSize: 10,
     fontWeight: '900',
     color: '#B45309',
   },
@@ -1486,7 +1486,7 @@ const styles = StyleSheet.create({
     marginBottom: 2,
   },
   whyItemBody: {
-    fontSize: 11.5,
+    fontSize: 12,
     color: '#64748B',
     lineHeight: 16,
   },
@@ -1553,7 +1553,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   metaLabel: {
-    fontSize: 8.5,
+    fontSize: 9,
     fontWeight: '900',
     color: '#64748B',
     letterSpacing: 0.4,
@@ -1700,7 +1700,7 @@ const styles = StyleSheet.create({
     gap: 16,
   },
   jarvisLinkText: {
-    fontSize: 11.5,
+    fontSize: 12,
     fontWeight: '800',
     color: '#582CDB',
     textDecorationLine: 'underline',
@@ -1729,7 +1729,7 @@ const styles = StyleSheet.create({
     marginBottom: 2,
   },
   patternValue: {
-    fontSize: 11.5,
+    fontSize: 12,
     fontWeight: '900',
     color: '#171420',
     textAlign: 'center',
@@ -1758,7 +1758,7 @@ const styles = StyleSheet.create({
     borderLeftColor: '#582CDB',
   },
   hookQuoteText: {
-    fontSize: 13.5,
+    fontSize: 14,
     fontWeight: '800',
     color: '#171420',
     lineHeight: 19,
@@ -1792,7 +1792,7 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   captionHashtags: {
-    fontSize: 11.5,
+    fontSize: 12,
     fontWeight: '700',
     color: '#582CDB',
     lineHeight: 16,
@@ -1847,7 +1847,7 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   repurposeItemTitle: {
-    fontSize: 10.5,
+    fontSize: 11,
     fontWeight: '800',
     color: '#171420',
   },
@@ -1877,13 +1877,13 @@ const styles = StyleSheet.create({
     marginVertical: 4,
   },
   repurposeLockTag: {
-    fontSize: 8.5,
+    fontSize: 9,
     fontWeight: '900',
     color: '#A16207',
     marginTop: 2,
   },
   repurposeSubtext: {
-    fontSize: 11.5,
+    fontSize: 12,
     color: '#64748B',
     marginBottom: 12,
     lineHeight: 16,
@@ -1938,7 +1938,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   demoLabel: {
-    fontSize: 8.5,
+    fontSize: 9,
     fontWeight: '900',
     color: '#64748B',
     letterSpacing: 0.4,
@@ -1950,7 +1950,7 @@ const styles = StyleSheet.create({
     color: '#171420',
   },
   demoSub: {
-    fontSize: 10.5,
+    fontSize: 11,
     color: '#64748B',
     marginTop: 2,
   },
@@ -2078,7 +2078,7 @@ const styles = StyleSheet.create({
     marginBottom: 2,
   },
   notifBody: {
-    fontSize: 11.5,
+    fontSize: 12,
     color: '#64748B',
   },
   modalSubtitle: {
@@ -2095,7 +2095,7 @@ const styles = StyleSheet.create({
     marginTop: 14,
   },
   modalFullBtnText: {
-    fontSize: 13.5,
+    fontSize: 14,
     fontWeight: '900',
     color: '#FFFFFF',
   },

@@ -1941,8 +1941,8 @@ const styles = StyleSheet.create({
     backgroundColor: '#FAF8F5',
   },
   btnPressed: {
-    transform: [{ scale: 0.96 }],
-    opacity: 0.85,
+    opacity: 0.9,
+    transform: [{ scale: 0.98 }],
   },
   sectionTitle: {
     fontSize: 15.5,
@@ -1991,7 +1991,7 @@ const styles = StyleSheet.create({
     borderColor: '#FBBF24',
   },
   proHeaderBadgeText: {
-    fontSize: 8.5,
+    fontSize: 9,
     fontWeight: '900',
     color: '#92400E',
     letterSpacing: 0.3,
@@ -2080,7 +2080,7 @@ const styles = StyleSheet.create({
   },
   swipeToMatchBadgeText: {
     color: '#582CDB',
-    fontSize: 10.5,
+    fontSize: 11,
     fontWeight: '800',
   },
 
@@ -2126,7 +2126,7 @@ const styles = StyleSheet.create({
     color: '#171420',
   },
   summaryItemSub: {
-    fontSize: 9.5,
+    fontSize: 10,
     fontWeight: '700',
     color: '#64748B',
     marginTop: 2,
@@ -2198,7 +2198,7 @@ const styles = StyleSheet.create({
     borderColor: '#582CDB',
   },
   filterPillText: {
-    fontSize: 10.5,
+    fontSize: 11,
     fontWeight: '800',
     color: '#64748B',
   },
@@ -2377,7 +2377,7 @@ const styles = StyleSheet.create({
     borderColor: '#D97706',
   },
   trackingBadgeText: {
-    fontSize: 10.5,
+    fontSize: 11,
     fontWeight: '900',
     color: '#92400E',
   },
@@ -2447,7 +2447,7 @@ const styles = StyleSheet.create({
   },
   deepDivePillBtnText: {
     color: '#FFFFFF',
-    fontSize: 10.5,
+    fontSize: 11,
     fontWeight: '900',
   },
   creatorRoleLocationText: {
@@ -2458,7 +2458,7 @@ const styles = StyleSheet.create({
     marginBottom: 6,
   },
   creatorBioText: {
-    fontSize: 11.5,
+    fontSize: 12,
     color: '#CBD5E1',
     lineHeight: 16,
     marginBottom: 10,
@@ -2478,7 +2478,7 @@ const styles = StyleSheet.create({
   },
   creatorTagPillText: {
     color: '#FFFFFF',
-    fontSize: 10.5,
+    fontSize: 11,
     fontWeight: '800',
   },
 
@@ -2493,7 +2493,7 @@ const styles = StyleSheet.create({
     borderColor: '#E2E8F0',
   },
   gestureGuideText: {
-    fontSize: 10.5,
+    fontSize: 11,
     fontWeight: '800',
     color: '#64748B',
   },
@@ -2514,7 +2514,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   creatorMetricLabel: {
-    fontSize: 8.5,
+    fontSize: 9,
     fontWeight: '900',
     color: '#94A3B8',
     letterSpacing: 0.4,
@@ -2644,7 +2644,7 @@ const styles = StyleSheet.create({
   },
   connectPurpleBtnText: {
     color: '#FFFFFF',
-    fontSize: 13.5,
+    fontSize: 14,
     fontWeight: '900',
   },
 
@@ -2657,7 +2657,7 @@ const styles = StyleSheet.create({
   },
   proAiMatchPillText: {
     color: '#582CDB',
-    fontSize: 8.5,
+    fontSize: 9,
     fontWeight: '900',
     letterSpacing: 0.3,
   },
@@ -2700,7 +2700,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   conceptMetaChipText: {
-    fontSize: 10.5,
+    fontSize: 11,
     fontWeight: '800',
     color: '#475569',
   },
@@ -2713,7 +2713,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   goldenMetaChipText: {
-    fontSize: 10.5,
+    fontSize: 11,
     fontWeight: '900',
     color: '#92400E',
   },
@@ -2752,7 +2752,7 @@ const styles = StyleSheet.create({
   },
   squadLevelPillText: {
     color: '#FFFFFF',
-    fontSize: 8.5,
+    fontSize: 9,
     fontWeight: '900',
   },
   squadStreakText: {
@@ -2787,12 +2787,12 @@ const styles = StyleSheet.create({
     color: '#475569',
   },
   squadGoalText: {
-    fontSize: 10.5,
+    fontSize: 11,
     fontWeight: '800',
     color: '#475569',
   },
   squadXpLabel: {
-    fontSize: 9.5,
+    fontSize: 10,
     fontWeight: '900',
     color: '#64748B',
   },
@@ -2877,7 +2877,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#EF4444',
   },
   duelLivePillText: {
-    fontSize: 9.5,
+    fontSize: 10,
     fontWeight: '900',
     color: '#B91C1C',
     letterSpacing: 0.5,
@@ -3018,7 +3018,7 @@ const styles = StyleSheet.create({
     borderColor: '#F1EFE9',
   },
   duelMissionLabel: {
-    fontSize: 8.5,
+    fontSize: 9,
     fontWeight: '900',
     color: '#64748B',
     letterSpacing: 0.5,
@@ -3244,11 +3244,11 @@ const styles = StyleSheet.create({
     color: '#334155',
   },
   arenaTaskSub: {
-    fontSize: 10.5,
+    fontSize: 11,
     color: '#64748B',
   },
   arenaTaskPts: {
-    fontSize: 11.5,
+    fontSize: 12,
     fontWeight: '900',
     color: '#059669',
   },
@@ -3259,7 +3259,7 @@ const styles = StyleSheet.create({
     borderRadius: 6,
   },
   arenaQuickSubmitText: {
-    fontSize: 10.5,
+    fontSize: 11,
     fontWeight: '900',
     color: '#FFFFFF',
   },
@@ -3338,7 +3338,7 @@ const styles = StyleSheet.create({
     color: '#171420',
   },
   quickActionSub: {
-    fontSize: 10.5,
+    fontSize: 11,
     color: '#64748B',
     marginTop: 1,
   },
@@ -3455,7 +3455,7 @@ const styles = StyleSheet.create({
     color: '#171420',
   },
   emptyTabSub: {
-    fontSize: 11.5,
+    fontSize: 12,
     color: '#64748B',
     textAlign: 'center',
     marginTop: 3,
@@ -3491,7 +3491,7 @@ const styles = StyleSheet.create({
     borderRadius: 6,
   },
   requestScoreText: {
-    fontSize: 9.5,
+    fontSize: 10,
     fontWeight: '900',
     color: '#582CDB',
   },
@@ -3501,7 +3501,7 @@ const styles = StyleSheet.create({
     marginTop: 1,
   },
   requestTimeText: {
-    fontSize: 9.5,
+    fontSize: 10,
     color: '#94A3B8',
     marginTop: 2,
   },
@@ -3514,7 +3514,7 @@ const styles = StyleSheet.create({
     borderColor: '#E2E8F0',
   },
   requestPitchText: {
-    fontSize: 11.5,
+    fontSize: 12,
     color: '#334155',
     fontStyle: 'italic',
     lineHeight: 16,
@@ -3528,7 +3528,7 @@ const styles = StyleSheet.create({
     alignSelf: 'flex-start',
   },
   requestConceptPillText: {
-    fontSize: 9.5,
+    fontSize: 10,
     fontWeight: '800',
     color: '#582CDB',
   },
@@ -3578,12 +3578,12 @@ const styles = StyleSheet.create({
     borderRadius: 22,
   },
   trackedName: {
-    fontSize: 13.5,
+    fontSize: 14,
     fontWeight: '900',
     color: '#171420',
   },
   trackedStreakText: {
-    fontSize: 10.5,
+    fontSize: 11,
     fontWeight: '800',
     color: '#D97706',
   },
@@ -3616,7 +3616,7 @@ const styles = StyleSheet.create({
     color: '#582CDB',
   },
   trackedMetricLabel: {
-    fontSize: 8.5,
+    fontSize: 9,
     fontWeight: '700',
     color: '#64748B',
     marginTop: 1,
@@ -3662,7 +3662,7 @@ const styles = StyleSheet.create({
     borderRadius: 22,
   },
   connectedName: {
-    fontSize: 13.5,
+    fontSize: 14,
     fontWeight: '900',
     color: '#171420',
   },
@@ -3685,13 +3685,13 @@ const styles = StyleSheet.create({
     borderColor: '#E2E8F0',
   },
   connectedCollabLabel: {
-    fontSize: 8.5,
+    fontSize: 9,
     fontWeight: '900',
     color: '#94A3B8',
     letterSpacing: 0.4,
   },
   connectedCollabTitle: {
-    fontSize: 11.5,
+    fontSize: 12,
     fontWeight: '800',
     color: '#171420',
     marginTop: 2,
@@ -3762,7 +3762,7 @@ const styles = StyleSheet.create({
     color: '#171420',
   },
   modalSubTitle: {
-    fontSize: 10.5,
+    fontSize: 11,
     color: '#64748B',
     marginTop: 1,
   },
@@ -3803,7 +3803,7 @@ const styles = StyleSheet.create({
     color: '#171420',
   },
   gaugeLabel: {
-    fontSize: 8.5,
+    fontSize: 9,
     color: '#64748B',
     marginTop: 1,
   },
@@ -3814,7 +3814,7 @@ const styles = StyleSheet.create({
   },
   modalJarvisTitle: {
     color: '#A78BFA',
-    fontSize: 10.5,
+    fontSize: 11,
     fontWeight: '900',
     letterSpacing: 0.3,
   },
@@ -3844,7 +3844,7 @@ const styles = StyleSheet.create({
     color: '#171420',
   },
   conceptCardHook: {
-    fontSize: 10.5,
+    fontSize: 11,
     color: '#475569',
     fontStyle: 'italic',
     marginTop: 3,
@@ -3864,7 +3864,7 @@ const styles = StyleSheet.create({
     borderRadius: 6,
   },
   proposeConceptBtnText: {
-    fontSize: 9.5,
+    fontSize: 10,
     fontWeight: '900',
     color: '#582CDB',
   },

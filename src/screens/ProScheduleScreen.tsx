@@ -2008,7 +2008,7 @@ const styles = StyleSheet.create({
     borderColor: '#FBBF24',
   },
   proHeaderBadgeText: {
-    fontSize: 8.5,
+    fontSize: 9,
     fontWeight: '900',
     color: '#171420',
     letterSpacing: 0.3,
@@ -2052,7 +2052,7 @@ const styles = StyleSheet.create({
   scrollContent: {
     paddingHorizontal: 20,
     paddingTop: 4,
-    paddingBottom: 40,
+    paddingBottom: 96,
   },
 
   // TITLES SECTION
@@ -2070,7 +2070,7 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   contentScheduleTagText: {
-    fontSize: 9.5,
+    fontSize: 10,
     fontWeight: '900',
     color: '#92400E',
     letterSpacing: 0.6,
@@ -2108,7 +2108,7 @@ const styles = StyleSheet.create({
     color: '#171420',
   },
   weeklyOutlookRange: {
-    fontSize: 11.5,
+    fontSize: 12,
     color: '#64748B',
     marginTop: 2,
     marginBottom: 14,
@@ -2165,7 +2165,7 @@ const styles = StyleSheet.create({
     borderColor: '#F1EFE9',
   },
   metricGridLabel: {
-    fontSize: 9.5,
+    fontSize: 10,
     fontWeight: '800',
     color: '#94A3B8',
     letterSpacing: 0.5,
@@ -2183,13 +2183,13 @@ const styles = StyleSheet.create({
     marginBottom: 6,
   },
   planCompletionLabel: {
-    fontSize: 9.5,
+    fontSize: 10,
     fontWeight: '800',
     color: '#64748B',
     letterSpacing: 0.5,
   },
   planCompletionReadyText: {
-    fontSize: 10.5,
+    fontSize: 11,
     fontWeight: '900',
     color: '#582CDB',
   },
@@ -2233,7 +2233,7 @@ const styles = StyleSheet.create({
     borderWidth: 1.5,
   },
   dayNameText: {
-    fontSize: 9.5,
+    fontSize: 10,
     fontWeight: '800',
     color: '#64748B',
     marginBottom: 2,
@@ -2283,7 +2283,7 @@ const styles = StyleSheet.create({
     color: '#171420',
   },
   expandViewLink: {
-    fontSize: 11.5,
+    fontSize: 12,
     fontWeight: '800',
     color: '#582CDB',
   },
@@ -2384,7 +2384,7 @@ const styles = StyleSheet.create({
     borderStyle: 'dashed',
   },
   emptyScheduleTitle: {
-    fontSize: 13.5,
+    fontSize: 14,
     fontWeight: '800',
     color: '#64748B',
     marginBottom: 8,
@@ -2409,7 +2409,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   viewFullQueuePillText: {
-    fontSize: 10.5,
+    fontSize: 11,
     fontWeight: '900',
     color: '#582CDB',
   },
@@ -2493,7 +2493,7 @@ const styles = StyleSheet.create({
     color: '#171420',
   },
   autopilotSubText: {
-    fontSize: 11.5,
+    fontSize: 12,
     color: '#4C1D95',
     marginTop: 1,
   },
@@ -2536,7 +2536,7 @@ const styles = StyleSheet.create({
     letterSpacing: 0.5,
   },
   windowPeakLabel: {
-    fontSize: 10.5,
+    fontSize: 11,
     fontWeight: '900',
     color: '#582CDB',
   },
@@ -2557,7 +2557,7 @@ const styles = StyleSheet.create({
     borderRadius: 4,
   },
   platformMixTitle: {
-    fontSize: 13.5,
+    fontSize: 14,
     fontWeight: '900',
     color: '#171420',
     marginBottom: 8,
@@ -2587,7 +2587,7 @@ const styles = StyleSheet.create({
     borderRadius: 3,
   },
   legendText: {
-    fontSize: 9.5,
+    fontSize: 10,
     fontWeight: '800',
     color: '#64748B',
   },
@@ -2603,7 +2603,7 @@ const styles = StyleSheet.create({
     marginTop: 8,
   },
   gapWarningSub: {
-    fontSize: 9.5,
+    fontSize: 10,
     fontWeight: '800',
     color: '#92400E',
     letterSpacing: 0.5,
@@ -2749,7 +2749,7 @@ const styles = StyleSheet.create({
     lineHeight: 17,
   },
   inputLabel: {
-    fontSize: 9.5,
+    fontSize: 10,
     fontWeight: '800',
     color: '#64748B',
     letterSpacing: 0.5,
@@ -2841,13 +2841,13 @@ const styles = StyleSheet.create({
     marginVertical: 12,
   },
   jarvisPredictionTitle: {
-    fontSize: 11.5,
+    fontSize: 12,
     fontWeight: '900',
     color: '#171420',
     marginBottom: 2,
   },
   jarvisPredictionSub: {
-    fontSize: 10.5,
+    fontSize: 11,
     color: '#64748B',
     lineHeight: 15,
   },
@@ -2860,7 +2860,7 @@ const styles = StyleSheet.create({
   },
   modalPrimaryActionBtnText: {
     color: '#FFFFFF',
-    fontSize: 13.5,
+    fontSize: 14,
     fontWeight: '900',
   },
   modalGoldActionBtnWrapper: {
@@ -2906,7 +2906,7 @@ const styles = StyleSheet.create({
   },
   modalDeleteBtnText: {
     color: '#EF4444',
-    fontSize: 11.5,
+    fontSize: 12,
     fontWeight: '800',
   },
 
@@ -2935,7 +2935,7 @@ const styles = StyleSheet.create({
     color: '#92400E',
   },
   gapSlotDetectedSub: {
-    fontSize: 10.5,
+    fontSize: 11,
     color: '#B45309',
     marginTop: 2,
   },
@@ -2964,7 +2964,7 @@ const styles = StyleSheet.create({
     borderRadius: 4,
   },
   gapSugScoreText: {
-    fontSize: 8.5,
+    fontSize: 9,
     fontWeight: '900',
     color: '#15803D',
   },
@@ -3026,7 +3026,7 @@ const styles = StyleSheet.create({
   },
   expandedPostActionBtnText: {
     color: '#FFFFFF',
-    fontSize: 11.5,
+    fontSize: 12,
     fontWeight: '900',
   },
   expandedPostActionBtnSecondary: {
@@ -3040,7 +3040,7 @@ const styles = StyleSheet.create({
   },
   expandedPostActionBtnSecondaryText: {
     color: '#171420',
-    fontSize: 11.5,
+    fontSize: 12,
     fontWeight: '800',
   },
   emptyScheduleSub: {
@@ -3132,7 +3132,7 @@ const styles = StyleSheet.create({
     borderColor: '#8B5CF6',
   },
   strategyIdeaTitle: {
-    fontSize: 13.5,
+    fontSize: 14,
     fontWeight: '900',
     color: '#171420',
   },
@@ -3151,7 +3151,7 @@ const styles = StyleSheet.create({
 
   // COMMON
   btnPressed: {
-    opacity: 0.85,
+    opacity: 0.9,
     transform: [{ scale: 0.98 }],
   },
   toastContainer: {

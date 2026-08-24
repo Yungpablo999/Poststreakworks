@@ -1676,7 +1676,7 @@ const styles = StyleSheet.create({
     borderRadius: 6,
   },
   heroPillGoldText: {
-    fontSize: 9.5,
+    fontSize: 10,
     fontWeight: '900',
     color: '#D97706',
     letterSpacing: 0.3,
@@ -1699,7 +1699,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#582CDB',
   },
   heroPillPurpleText: {
-    fontSize: 9.5,
+    fontSize: 10,
     fontWeight: '900',
     color: '#582CDB',
     letterSpacing: 0.3,
@@ -1744,7 +1744,7 @@ const styles = StyleSheet.create({
     borderRadius: 4,
   },
   ultraHdPillText: {
-    fontSize: 8.5,
+    fontSize: 9,
     fontWeight: '900',
     color: '#582CDB',
   },
@@ -1858,7 +1858,7 @@ const styles = StyleSheet.create({
     borderColor: '#8B5CF6',
   },
   presetChipText: {
-    fontSize: 11.5,
+    fontSize: 12,
     fontWeight: '800',
     color: '#475569',
   },
@@ -1879,7 +1879,7 @@ const styles = StyleSheet.create({
     elevation: 1,
   },
   scriptTextInput: {
-    fontSize: 13.5,
+    fontSize: 14,
     lineHeight: 21,
     color: '#171420',
     minHeight: 120,
@@ -1895,7 +1895,7 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
   metaKeyLabel: {
-    fontSize: 8.5,
+    fontSize: 9,
     fontWeight: '900',
     color: '#94A3B8',
     letterSpacing: 0.3,
@@ -1970,7 +1970,7 @@ const styles = StyleSheet.create({
     elevation: 1,
   },
   audioTrackTitle: {
-    fontSize: 13.5,
+    fontSize: 14,
     fontWeight: '900',
     color: '#171420',
   },
@@ -2036,7 +2036,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   audioSecondaryBtnText: {
-    fontSize: 11.5,
+    fontSize: 12,
     fontWeight: '800',
     color: '#475569',
   },
@@ -2106,7 +2106,7 @@ const styles = StyleSheet.create({
     color: '#171420',
   },
   projectSubText: {
-    fontSize: 10.5,
+    fontSize: 11,
     color: '#64748B',
     marginTop: 1,
   },
@@ -2149,7 +2149,7 @@ const styles = StyleSheet.create({
     borderRadius: 4,
   },
   activeStyleTagText: {
-    fontSize: 8.5,
+    fontSize: 9,
     fontWeight: '900',
     color: '#582CDB',
   },
@@ -2220,13 +2220,13 @@ const styles = StyleSheet.create({
     backgroundColor: '#15803D',
   },
   wavelengthLabelText: {
-    fontSize: 9.5,
+    fontSize: 10,
     fontWeight: '900',
     color: '#171420',
     letterSpacing: 0.5,
   },
   wavelengthHzText: {
-    fontSize: 9.5,
+    fontSize: 10,
     fontWeight: '900',
     color: '#582CDB',
   },
@@ -2254,7 +2254,7 @@ const styles = StyleSheet.create({
     borderTopColor: '#F1EFE9',
   },
   wavelengthMetricItem: {
-    fontSize: 8.5,
+    fontSize: 9,
     fontWeight: '800',
     color: '#64748B',
     letterSpacing: 0.4,
@@ -2269,7 +2269,7 @@ const styles = StyleSheet.create({
     borderTopColor: '#F1EFE9',
   },
   speedLabel: {
-    fontSize: 9.5,
+    fontSize: 10,
     fontWeight: '900',
     color: '#94A3B8',
     letterSpacing: 0.4,
@@ -2287,7 +2287,7 @@ const styles = StyleSheet.create({
     borderColor: '#582CDB',
   },
   speedPillText: {
-    fontSize: 10.5,
+    fontSize: 11,
     fontWeight: '800',
     color: '#64748B',
   },
@@ -2372,7 +2372,7 @@ const styles = StyleSheet.create({
     color: '#92400E',
   },
   needMinutesSub: {
-    fontSize: 11.5,
+    fontSize: 12,
     color: '#B45309',
     marginTop: 3,
     lineHeight: 16,
@@ -2441,12 +2441,12 @@ const styles = StyleSheet.create({
     borderColor: '#8B5CF6',
   },
   voiceOptionName: {
-    fontSize: 13.5,
+    fontSize: 14,
     fontWeight: '900',
     color: '#171420',
   },
   voiceOptionCheck: {
-    fontSize: 9.5,
+    fontSize: 10,
     fontWeight: '900',
     color: '#582CDB',
   },
@@ -2525,7 +2525,7 @@ const styles = StyleSheet.create({
     color: '#171420',
   },
   transferStatus: {
-    fontSize: 9.5,
+    fontSize: 10,
     color: '#64748B',
     fontWeight: '700',
     marginTop: 1,
@@ -2562,7 +2562,7 @@ const styles = StyleSheet.create({
     color: '#171420',
   },
   refillPackSub: {
-    fontSize: 10.5,
+    fontSize: 11,
     color: '#64748B',
     marginTop: 2,
   },
@@ -2585,7 +2585,7 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   hookOptionText: {
-    fontSize: 11.5,
+    fontSize: 12,
     color: '#334155',
     lineHeight: 16,
     fontStyle: 'italic',
@@ -2637,7 +2637,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#DCFCE7',
   },
   statusTagText: {
-    fontSize: 8.5,
+    fontSize: 9,
     fontWeight: '900',
     color: '#582CDB',
   },
@@ -2645,7 +2645,7 @@ const styles = StyleSheet.create({
     color: '#15803D',
   },
   expandedProjectSnippet: {
-    fontSize: 11.5,
+    fontSize: 12,
     color: '#475569',
     lineHeight: 16,
     marginTop: 8,
@@ -2678,7 +2678,7 @@ const styles = StyleSheet.create({
     color: '#171420',
   },
   btnPressed: {
-    transform: [{ scale: 0.96 }],
-    opacity: 0.85,
+    opacity: 0.9,
+    transform: [{ scale: 0.98 }],
   },
 });

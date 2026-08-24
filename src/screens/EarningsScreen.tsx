@@ -568,7 +568,7 @@ export const EarningsScreen: React.FC<EarningsScreenProps> = ({
                   <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
                     <Text style={styles.estimatedLabel}>Tracked Platform Earnings</Text>
                     <View style={{ backgroundColor: '#FEF9C3', paddingHorizontal: 6, paddingVertical: 2, borderRadius: 4 }}>
-                      <Text style={{ fontSize: 8.5, fontWeight: '900', color: '#A16207' }}>PRO ACTIVE</Text>
+                      <Text style={{ fontSize: 9, fontWeight: '900', color: '#A16207' }}>PRO ACTIVE</Text>
                     </View>
                   </View>
                   <Text style={{ fontSize: 11, color: '#64748B', marginTop: 2 }}>Auto-synced across 4 channels</Text>
@@ -1234,7 +1234,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#FAF8F5',
   },
   btnPressed: {
-    opacity: 0.78,
+    opacity: 0.9,
     transform: [{ scale: 0.98 }],
   },
 
@@ -1336,7 +1336,7 @@ const styles = StyleSheet.create({
     borderRadius: 6,
   },
   heroPillText: {
-    fontSize: 9.5,
+    fontSize: 10,
     fontWeight: '900',
     color: '#FFFFFF',
     letterSpacing: 0.6,
@@ -1370,7 +1370,7 @@ const styles = StyleSheet.create({
     marginBottom: 14,
   },
   balanceLabel: {
-    fontSize: 9.5,
+    fontSize: 10,
     fontWeight: '900',
     color: '#64748B',
     letterSpacing: 0.5,
@@ -1483,7 +1483,7 @@ const styles = StyleSheet.create({
     borderColor: '#EDE8E1',
   },
   platformPillText: {
-    fontSize: 11.5,
+    fontSize: 12,
     fontWeight: '800',
     color: '#171420',
   },
@@ -1581,7 +1581,7 @@ const styles = StyleSheet.create({
     borderRadius: 4,
   },
   oppXpBadgeText: {
-    fontSize: 8.5,
+    fontSize: 9,
     fontWeight: '900',
     color: '#582CDB',
   },
@@ -1592,7 +1592,7 @@ const styles = StyleSheet.create({
     marginBottom: 2,
   },
   oppSub: {
-    fontSize: 10.5,
+    fontSize: 11,
     color: '#64748B',
     marginBottom: 12,
   },
@@ -1604,7 +1604,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   oppGhostBtnText: {
-    fontSize: 11.5,
+    fontSize: 12,
     fontWeight: '800',
     color: '#475569',
   },
@@ -1616,7 +1616,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   oppPurpleBtnText: {
-    fontSize: 11.5,
+    fontSize: 12,
     fontWeight: '900',
     color: '#FFFFFF',
   },
@@ -1648,7 +1648,7 @@ const styles = StyleSheet.create({
     borderRadius: 4,
   },
   passportBadgeText: {
-    fontSize: 8.5,
+    fontSize: 9,
     fontWeight: '900',
     color: '#B45309',
   },
@@ -1670,7 +1670,7 @@ const styles = StyleSheet.create({
     padding: 10,
   },
   passportGridLabel: {
-    fontSize: 8.5,
+    fontSize: 9,
     fontWeight: '800',
     color: '#64748B',
     marginBottom: 2,
@@ -1720,7 +1720,7 @@ const styles = StyleSheet.create({
     borderRadius: 4,
   },
   lockPillText: {
-    fontSize: 8.5,
+    fontSize: 9,
     fontWeight: '900',
     color: '#64748B',
   },
@@ -1742,12 +1742,12 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   campCheckActive: {
-    fontSize: 11.5,
+    fontSize: 12,
     fontWeight: '700',
     color: '#171420',
   },
   campCheckText: {
-    fontSize: 11.5,
+    fontSize: 12,
     color: '#64748B',
   },
   campaignBtn: {
@@ -1805,12 +1805,12 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   goalStepActive: {
-    fontSize: 8.5,
+    fontSize: 9,
     fontWeight: '900',
     color: '#582CDB',
   },
   goalStepMuted: {
-    fontSize: 8.5,
+    fontSize: 9,
     fontWeight: '900',
     color: '#94A3B8',
   },
@@ -1868,7 +1868,7 @@ const styles = StyleSheet.create({
     borderColor: '#FDE047',
   },
   goldProBadgeText: {
-    fontSize: 8.5,
+    fontSize: 9,
     fontWeight: '900',
     color: '#A16207',
   },
@@ -1887,7 +1887,7 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   proFeatureText: {
-    fontSize: 11.5,
+    fontSize: 12,
     color: '#475569',
     fontWeight: '600',
   },
@@ -1930,14 +1930,14 @@ const styles = StyleSheet.create({
     borderColor: '#E9D5FF',
   },
   jarvisTag: {
-    fontSize: 8.5,
+    fontSize: 9,
     fontWeight: '900',
     color: '#582CDB',
     letterSpacing: 0.5,
     marginBottom: 2,
   },
   jarvisText: {
-    fontSize: 11.5,
+    fontSize: 12,
     color: '#475569',
     lineHeight: 16,
     fontStyle: 'italic',
@@ -1988,7 +1988,7 @@ const styles = StyleSheet.create({
     borderRadius: 6,
   },
   activePlatformsCountText: {
-    fontSize: 9.5,
+    fontSize: 10,
     fontWeight: '900',
     color: '#582CDB',
   },
@@ -2012,13 +2012,13 @@ const styles = StyleSheet.create({
     letterSpacing: -0.3,
   },
   modalSubtitle: {
-    fontSize: 11.5,
+    fontSize: 12,
     color: '#64748B',
     marginTop: 3,
     lineHeight: 16,
   },
   modalSectionTitle: {
-    fontSize: 9.5,
+    fontSize: 10,
     fontWeight: '900',
     color: '#64748B',
     letterSpacing: 0.6,
@@ -2068,12 +2068,12 @@ const styles = StyleSheet.create({
     borderRadius: 4,
   },
   autoSyncText: {
-    fontSize: 8.5,
+    fontSize: 9,
     fontWeight: '800',
     color: '#15803D',
   },
   platformSubText: {
-    fontSize: 10.5,
+    fontSize: 11,
     color: '#64748B',
     marginTop: 1,
   },
@@ -2109,7 +2109,7 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   customAddTitle: {
-    fontSize: 9.5,
+    fontSize: 10,
     fontWeight: '900',
     color: '#582CDB',
     letterSpacing: 0.6,
@@ -2132,7 +2132,7 @@ const styles = StyleSheet.create({
     borderColor: '#582CDB',
   },
   platformSelectChipText: {
-    fontSize: 10.5,
+    fontSize: 11,
     fontWeight: '700',
     color: '#475569',
   },
@@ -2178,7 +2178,7 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
   modalDoneBtnText: {
-    fontSize: 13.5,
+    fontSize: 14,
     fontWeight: '900',
     color: '#FFFFFF',
     letterSpacing: 0.3,
@@ -2202,7 +2202,7 @@ const styles = StyleSheet.create({
     marginBottom: 2,
   },
   notifBody: {
-    fontSize: 11.5,
+    fontSize: 12,
     color: '#64748B',
   },
   milestoneGrid: {
@@ -2243,7 +2243,7 @@ const styles = StyleSheet.create({
     marginTop: 14,
   },
   modalFullBtnText: {
-    fontSize: 13.5,
+    fontSize: 14,
     fontWeight: '900',
     color: '#FFFFFF',
   },

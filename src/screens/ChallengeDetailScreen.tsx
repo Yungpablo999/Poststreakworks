@@ -1063,8 +1063,8 @@ const styles = StyleSheet.create({
     height: '100%',
   },
   btnPressed: {
-    opacity: 0.78,
-    transform: [{ scale: 0.97 }],
+    opacity: 0.9,
+    transform: [{ scale: 0.98 }],
   },
 
   // 2. SCROLL CONTENT
@@ -1100,7 +1100,7 @@ const styles = StyleSheet.create({
     borderRadius: 100,
   },
   activeQuestTagText: {
-    fontSize: 10.5,
+    fontSize: 11,
     fontWeight: '900',
     color: '#FFFFFF',
     letterSpacing: 0.6,
@@ -1114,7 +1114,7 @@ const styles = StyleSheet.create({
     borderRadius: 100,
   },
   freeQuestTagText: {
-    fontSize: 10.5,
+    fontSize: 11,
     fontWeight: '800',
     color: '#B45309',
     letterSpacing: 0.5,
@@ -1127,7 +1127,7 @@ const styles = StyleSheet.create({
     marginBottom: 6,
   },
   pageSubtitle: {
-    fontSize: 13.5,
+    fontSize: 14,
     color: '#6B637B',
     lineHeight: 20,
     marginBottom: 20,
@@ -1180,7 +1180,7 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   heroQuestDesc: {
-    fontSize: 13.5,
+    fontSize: 14,
     color: '#524C62',
     lineHeight: 20,
     marginBottom: 16,
@@ -1358,7 +1358,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#ECE8F9',
   },
   requirementTitle: {
-    fontSize: 13.5,
+    fontSize: 14,
     fontWeight: '700',
     color: '#171420',
     flex: 1,
@@ -1413,7 +1413,7 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   suggestedAngleTagText: {
-    fontSize: 9.5,
+    fontSize: 10,
     fontWeight: '900',
     color: '#FFFFFF',
     letterSpacing: 0.6,
@@ -1537,7 +1537,7 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
   },
   whyMattersText: {
-    fontSize: 13.5,
+    fontSize: 14,
     color: '#524C62',
     lineHeight: 20,
     marginBottom: 14,
@@ -1554,7 +1554,7 @@ const styles = StyleSheet.create({
     borderRadius: 100,
   },
   whyMattersPillText: {
-    fontSize: 11.5,
+    fontSize: 12,
     fontWeight: '700',
     color: '#582CDB',
   },
@@ -1580,7 +1580,7 @@ const styles = StyleSheet.create({
     shadowRadius: 6,
   },
   reputationTileLabel: {
-    fontSize: 11.5,
+    fontSize: 12,
     color: '#6B637B',
     fontWeight: '600',
     marginBottom: 6,
@@ -1619,7 +1619,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
   },
   reputationCalloutText: {
-    fontSize: 11.5,
+    fontSize: 12,
     fontWeight: '600',
     color: '#92400E',
     flex: 1,
@@ -1673,7 +1673,7 @@ const styles = StyleSheet.create({
     letterSpacing: 0.6,
   },
   jarvisInsightQuoteText: {
-    fontSize: 13.5,
+    fontSize: 14,
     color: '#524C62',
     lineHeight: 20,
     marginBottom: 16,
@@ -1682,7 +1682,7 @@ const styles = StyleSheet.create({
     alignSelf: 'flex-start',
   },
   generateDraftBtnText: {
-    fontSize: 13.5,
+    fontSize: 14,
     fontWeight: '800',
     color: '#582CDB',
   },
@@ -1706,7 +1706,7 @@ const styles = StyleSheet.create({
     borderBottomColor: '#F4F2FA',
   },
   rewardPreviewLabel: {
-    fontSize: 13.5,
+    fontSize: 14,
     fontWeight: '600',
     color: '#524C62',
   },
@@ -1767,7 +1767,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   modalInputLabel: {
-    fontSize: 10.5,
+    fontSize: 11,
     fontWeight: '800',
     color: '#582CDB',
     letterSpacing: 0.6,
@@ -1806,7 +1806,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     paddingHorizontal: 14,
     paddingVertical: 10,
-    fontSize: 13.5,
+    fontSize: 14,
     color: '#171420',
     marginBottom: 14,
   },
@@ -1826,7 +1826,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   modalSecondaryBtnText: {
-    fontSize: 13.5,
+    fontSize: 14,
     fontWeight: '700',
     color: '#524C62',
   },
@@ -1842,7 +1842,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   modalPrimaryBtnText: {
-    fontSize: 13.5,
+    fontSize: 14,
     fontWeight: '800',
     color: '#FFFFFF',
   },
@@ -1863,7 +1863,7 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   scriptSectionLabel: {
-    fontSize: 10.5,
+    fontSize: 11,
     fontWeight: '800',
     color: '#582CDB',
     marginTop: 6,
@@ -1913,7 +1913,7 @@ const styles = StyleSheet.create({
     marginTop: 12,
   },
   modalCloseBtnText: {
-    fontSize: 13.5,
+    fontSize: 14,
     fontWeight: '800',
     color: '#FFFFFF',
   },

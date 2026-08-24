@@ -648,7 +648,7 @@ const styles = StyleSheet.create({
   scrollContent: {
     paddingHorizontal: 22,
     paddingTop: 8,
-    paddingBottom: 24,
+    paddingBottom: 96,
   },
   topBar: {
     flexDirection: 'row',
@@ -709,7 +709,7 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   helperText: {
-    fontSize: 13.5,
+    fontSize: 14,
     fontWeight: '700',
     color: '#582CDB',
     textAlign: 'center',
@@ -917,12 +917,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   statusLabelText: {
-    fontSize: 13.5,
+    fontSize: 14,
     fontWeight: '700',
     color: '#171420',
   },
   statusPercentageText: {
-    fontSize: 13.5,
+    fontSize: 14,
     fontWeight: '700',
     color: '#582CDB',
   },
@@ -987,7 +987,7 @@ const styles = StyleSheet.create({
     letterSpacing: -0.4,
   },
   limitModalText: {
-    fontSize: 13.5,
+    fontSize: 14,
     color: '#524C62',
     textAlign: 'center',
     lineHeight: 20,

@@ -1349,7 +1349,7 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(253, 230, 138, 0.4)',
   },
   spotlightBadgeText: {
-    fontSize: 9.5,
+    fontSize: 10,
     fontWeight: '900',
     color: '#FDE68A',
     letterSpacing: 0.5,
@@ -1391,7 +1391,7 @@ const styles = StyleSheet.create({
     height: 18,
   },
   jarvisSyncText: {
-    fontSize: 11.5,
+    fontSize: 12,
     color: '#F1F5F9',
     flex: 1,
     lineHeight: 16,
@@ -1506,7 +1506,7 @@ const styles = StyleSheet.create({
     borderRadius: 6,
   },
   verifiedCountText: {
-    fontSize: 9.5,
+    fontSize: 10,
     fontWeight: '900',
     color: '#6D28D9',
   },
@@ -1546,7 +1546,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#FEE2E2',
   },
   squadCatText: {
-    fontSize: 9.5,
+    fontSize: 10,
     fontWeight: '900',
   },
   squadCatTextGrowth: {
@@ -1570,12 +1570,12 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   fitScoreNumber: {
-    fontSize: 13.5,
+    fontSize: 14,
     fontWeight: '900',
     color: '#582CDB',
   },
   fitScoreLabel: {
-    fontSize: 8.5,
+    fontSize: 9,
     fontWeight: '800',
     color: '#6D28D9',
   },
@@ -1600,7 +1600,7 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   metaStreakText: {
-    fontSize: 11.5,
+    fontSize: 12,
     fontWeight: '800',
     color: '#171420',
   },
@@ -1658,7 +1658,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   featuredAvatarPlusText: {
-    fontSize: 9.5,
+    fontSize: 10,
     fontWeight: '800',
     color: '#FFFFFF',
   },
@@ -1697,7 +1697,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#FEF3C7',
   },
   cardQuickJoinBtnText: {
-    fontSize: 11.5,
+    fontSize: 12,
     fontWeight: '900',
     color: '#582CDB',
   },
@@ -1762,7 +1762,7 @@ const styles = StyleSheet.create({
     elevation: 1,
   },
   modalSegmentText: {
-    fontSize: 11.5,
+    fontSize: 12,
     fontWeight: '700',
     color: '#64748B',
   },
@@ -1784,7 +1784,7 @@ const styles = StyleSheet.create({
     borderColor: '#F59E0B',
   },
   modalHostName: {
-    fontSize: 13.5,
+    fontSize: 14,
     fontWeight: '900',
     color: '#171420',
   },
@@ -1795,12 +1795,12 @@ const styles = StyleSheet.create({
     borderRadius: 4,
   },
   modalHostCrownText: {
-    fontSize: 8.5,
+    fontSize: 9,
     fontWeight: '900',
     color: '#B45309',
   },
   modalHostSub: {
-    fontSize: 10.5,
+    fontSize: 11,
     color: '#64748B',
   },
   modalCloseCircleBtn: {
@@ -1851,12 +1851,12 @@ const styles = StyleSheet.create({
     borderBottomColor: '#F1EFE9',
   },
   modalInfoLabel: {
-    fontSize: 11.5,
+    fontSize: 12,
     color: '#64748B',
     fontWeight: '700',
   },
   modalInfoVal: {
-    fontSize: 11.5,
+    fontSize: 12,
     color: '#171420',
     fontWeight: '800',
     maxWidth: '62%',
@@ -1887,7 +1887,7 @@ const styles = StyleSheet.create({
     color: '#171420',
   },
   rosterHeaderSub: {
-    fontSize: 11.5,
+    fontSize: 12,
     color: '#64748B',
     marginTop: 2,
   },
@@ -1952,7 +1952,7 @@ const styles = StyleSheet.create({
     color: '#059669',
   },
   rosterOpenSlotSub: {
-    fontSize: 10.5,
+    fontSize: 11,
     color: '#64748B',
   },
 
@@ -2016,7 +2016,7 @@ const styles = StyleSheet.create({
     fontWeight: '800',
   },
   btnPressed: {
-    opacity: 0.85,
+    opacity: 0.9,
     transform: [{ scale: 0.98 }],
   },
 });

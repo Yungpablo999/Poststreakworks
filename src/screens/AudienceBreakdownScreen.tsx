@@ -1449,7 +1449,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#FAF8F5',
   },
   btnPressed: {
-    opacity: 0.78,
+    opacity: 0.9,
     transform: [{ scale: 0.98 }],
   },
 
@@ -1641,7 +1641,7 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   cardHeaderLabel: {
-    fontSize: 10.5,
+    fontSize: 11,
     fontWeight: '900',
     color: '#64748B',
     letterSpacing: 0.6,
@@ -1819,7 +1819,7 @@ const styles = StyleSheet.create({
     borderColor: '#A7F3D0',
   },
   velocitySurgeText: {
-    fontSize: 10.5,
+    fontSize: 11,
     fontWeight: '900',
     color: '#059669',
   },
@@ -1879,7 +1879,7 @@ const styles = StyleSheet.create({
     borderColor: '#582CDB',
   },
   barGainBadgeText: {
-    fontSize: 8.5,
+    fontSize: 9,
     fontWeight: '800',
     color: '#64748B',
   },
@@ -1911,7 +1911,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#CBD5E1',
   },
   barWeekLabel: {
-    fontSize: 9.5,
+    fontSize: 10,
     fontWeight: '700',
     color: '#94A3B8',
     marginTop: 6,
@@ -1942,7 +1942,7 @@ const styles = StyleSheet.create({
     color: '#582CDB',
   },
   velocityGoalScore: {
-    fontSize: 11.5,
+    fontSize: 12,
     fontWeight: '800',
     color: '#171420',
   },
@@ -1958,7 +1958,7 @@ const styles = StyleSheet.create({
     borderRadius: 3.5,
   },
   velocityGoalSub: {
-    fontSize: 10.5,
+    fontSize: 11,
     fontWeight: '700',
     color: '#6B21A8',
   },
@@ -1977,7 +1977,7 @@ const styles = StyleSheet.create({
     borderColor: '#E2E8F0',
   },
   velocityMiniLabel: {
-    fontSize: 8.5,
+    fontSize: 9,
     fontWeight: '900',
     color: '#64748B',
     letterSpacing: 0.4,
@@ -1989,7 +1989,7 @@ const styles = StyleSheet.create({
     color: '#171420',
   },
   velocityMiniSub: {
-    fontSize: 9.5,
+    fontSize: 10,
     fontWeight: '700',
     color: '#582CDB',
     marginTop: 2,
@@ -2082,7 +2082,7 @@ const styles = StyleSheet.create({
     borderColor: '#E9D5FF',
   },
   fastestBadgeText: {
-    fontSize: 9.5,
+    fontSize: 10,
     fontWeight: '900',
     color: '#582CDB',
     letterSpacing: 0.4,
@@ -2145,7 +2145,7 @@ const styles = StyleSheet.create({
     marginBottom: 3,
   },
   bestContentTitle: {
-    fontSize: 13.5,
+    fontSize: 14,
     fontWeight: '900',
     color: '#171420',
     marginBottom: 3,
@@ -2219,7 +2219,7 @@ const styles = StyleSheet.create({
     color: '#15803D',
   },
   connectLinkText: {
-    fontSize: 9.5,
+    fontSize: 10,
     fontWeight: '900',
     color: '#582CDB',
   },
@@ -2310,7 +2310,7 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   qualityName: {
-    fontSize: 13.5,
+    fontSize: 14,
     fontWeight: '800',
     color: '#171420',
   },
@@ -2379,7 +2379,7 @@ const styles = StyleSheet.create({
     borderColor: '#FDE047',
   },
   lockedPillText: {
-    fontSize: 9.5,
+    fontSize: 10,
     fontWeight: '900',
     color: '#A16207',
     letterSpacing: 0.5,
@@ -2438,7 +2438,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   unlockAnalyticsBtnText: {
-    fontSize: 13.5,
+    fontSize: 14,
     fontWeight: '900',
     color: '#171420',
     letterSpacing: -0.2,
@@ -2469,7 +2469,7 @@ const styles = StyleSheet.create({
     height: 32,
   },
   jarvisCoreLabel: {
-    fontSize: 9.5,
+    fontSize: 10,
     fontWeight: '900',
     color: '#582CDB',
     letterSpacing: 0.6,
@@ -2600,7 +2600,7 @@ const styles = StyleSheet.create({
     borderRadius: 6,
   },
   activePlatformsCountText: {
-    fontSize: 9.5,
+    fontSize: 10,
     fontWeight: '900',
     color: '#582CDB',
   },
@@ -2623,7 +2623,7 @@ const styles = StyleSheet.create({
     color: '#64748B',
   },
   modalSectionTitle: {
-    fontSize: 10.5,
+    fontSize: 11,
     fontWeight: '900',
     color: '#64748B',
     letterSpacing: 0.6,
@@ -2631,7 +2631,7 @@ const styles = StyleSheet.create({
     marginTop: 6,
   },
   modalSubDescription: {
-    fontSize: 11.5,
+    fontSize: 12,
     color: '#64748B',
     marginBottom: 8,
   },
@@ -2676,7 +2676,7 @@ const styles = StyleSheet.create({
     borderRadius: 4,
   },
   autoSyncText: {
-    fontSize: 8.5,
+    fontSize: 9,
     fontWeight: '900',
     color: '#059669',
   },
@@ -2694,7 +2694,7 @@ const styles = StyleSheet.create({
     borderColor: '#FECACA',
   },
   removePlatformBtnText: {
-    fontSize: 10.5,
+    fontSize: 11,
     fontWeight: '800',
     color: '#DC2626',
   },
@@ -2743,7 +2743,7 @@ const styles = StyleSheet.create({
     borderColor: '#582CDB',
   },
   platformSelectChipText: {
-    fontSize: 10.5,
+    fontSize: 11,
     fontWeight: '700',
     color: '#475569',
   },
@@ -2809,7 +2809,7 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
   modalDoneBtnText: {
-    fontSize: 13.5,
+    fontSize: 14,
     fontWeight: '900',
     color: '#FFFFFF',
     letterSpacing: 0.3,

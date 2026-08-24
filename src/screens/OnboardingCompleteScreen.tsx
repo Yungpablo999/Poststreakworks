@@ -519,7 +519,7 @@ const styles = StyleSheet.create({
   scrollContent: {
     paddingHorizontal: 22,
     paddingTop: 6,
-    paddingBottom: 24,
+    paddingBottom: 96,
   },
   topBar: {
     flexDirection: 'row',
@@ -604,7 +604,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#10B981',
   },
   syncActiveText: {
-    fontSize: 10.5,
+    fontSize: 11,
     fontWeight: '700',
     color: '#171420',
   },
@@ -671,7 +671,7 @@ const styles = StyleSheet.create({
     fontWeight: '800',
   },
   levelNameText: {
-    fontSize: 13.5,
+    fontSize: 14,
     fontWeight: '700',
     color: '#171420',
   },
@@ -684,7 +684,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 7,
   },
   streakBadgeText: {
-    fontSize: 10.5,
+    fontSize: 11,
     fontWeight: '800',
     color: '#C2410C',
   },
@@ -741,7 +741,7 @@ const styles = StyleSheet.create({
     marginBottom: 5,
   },
   tileTitle: {
-    fontSize: 11.5,
+    fontSize: 12,
     fontWeight: '700',
     color: '#171420',
     marginBottom: 2,
@@ -779,7 +779,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   jarvisTagText: {
-    fontSize: 9.5,
+    fontSize: 10,
     fontWeight: '800',
     color: '#582CDB',
     letterSpacing: 0.8,
@@ -815,7 +815,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   launchpadBadgeText: {
-    fontSize: 10.5,
+    fontSize: 11,
     fontWeight: '800',
     color: '#582CDB',
     letterSpacing: 0.8,
@@ -867,12 +867,12 @@ const styles = StyleSheet.create({
     fontSize: 15,
   },
   roadmapStepDay: {
-    fontSize: 9.5,
+    fontSize: 10,
     fontWeight: '800',
     color: '#7F7894',
   },
   roadmapStepLabel: {
-    fontSize: 10.5,
+    fontSize: 11,
     fontWeight: '700',
     color: '#171420',
   },
@@ -906,7 +906,7 @@ const styles = StyleSheet.create({
   },
   insightText: {
     flex: 1,
-    fontSize: 11.5,
+    fontSize: 12,
     color: '#524C62',
     lineHeight: 16,
   },
@@ -982,12 +982,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   statusLabelText: {
-    fontSize: 13.5,
+    fontSize: 14,
     fontWeight: '700',
     color: '#171420',
   },
   statusPercentageText: {
-    fontSize: 13.5,
+    fontSize: 14,
     fontWeight: '700',
     color: '#582CDB',
   },

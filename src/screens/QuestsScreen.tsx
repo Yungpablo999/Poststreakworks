@@ -895,8 +895,8 @@ const styles = StyleSheet.create({
     backgroundColor: '#FAF8F5',
   },
   btnPressed: {
-    opacity: 0.78,
-    transform: [{ scale: 0.97 }],
+    opacity: 0.9,
+    transform: [{ scale: 0.98 }],
   },
 
   // 1. TOP HEADER BAR
@@ -980,7 +980,7 @@ const styles = StyleSheet.create({
     borderRadius: 100,
   },
   questsPillText: {
-    fontSize: 10.5,
+    fontSize: 11,
     fontWeight: '800',
     color: '#FFFFFF',
     letterSpacing: 0.4,
@@ -992,7 +992,7 @@ const styles = StyleSheet.create({
     borderRadius: 100,
   },
   earnRankPillText: {
-    fontSize: 10.5,
+    fontSize: 11,
     fontWeight: '800',
     color: '#D97706',
     letterSpacing: 0.4,
@@ -1007,7 +1007,7 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   mainSubtitle: {
-    fontSize: 13.5,
+    fontSize: 14,
     color: '#524C62',
     lineHeight: 19,
     marginBottom: 20,
@@ -1035,7 +1035,7 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   todayQuestTag: {
-    fontSize: 10.5,
+    fontSize: 11,
     fontWeight: '800',
     color: '#6B7280',
     letterSpacing: 0.6,
@@ -1136,7 +1136,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   statColLabel: {
-    fontSize: 9.5,
+    fontSize: 10,
     fontWeight: '800',
     color: '#6B7280',
     letterSpacing: 0.5,
@@ -1212,12 +1212,12 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   xpPillGold: {
-    fontSize: 10.5,
+    fontSize: 11,
     fontWeight: '800',
     color: '#D97706',
   },
   typePill: {
-    fontSize: 10.5,
+    fontSize: 11,
     fontWeight: '700',
     color: '#64748B',
   },
@@ -1320,7 +1320,7 @@ const styles = StyleSheet.create({
     borderColor: '#FFFFFF',
   },
   socialProofText: {
-    fontSize: 11.5,
+    fontSize: 12,
     fontWeight: '700',
     color: '#FFFFFF',
   },
@@ -1468,12 +1468,12 @@ const styles = StyleSheet.create({
     borderRadius: 4,
   },
   readinessTagText: {
-    fontSize: 8.5,
+    fontSize: 9,
     fontWeight: '900',
     color: '#582CDB',
   },
   earningsHubSub: {
-    fontSize: 11.5,
+    fontSize: 12,
     color: '#64748B',
     marginTop: 2,
   },
@@ -1502,7 +1502,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   earningsHubStatLabel: {
-    fontSize: 8.5,
+    fontSize: 9,
     fontWeight: '900',
     color: '#64748B',
     letterSpacing: 0.4,
@@ -1552,7 +1552,7 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   brandQuestTag: {
-    fontSize: 10.5,
+    fontSize: 11,
     fontWeight: '800',
     color: '#D97706',
     letterSpacing: 0.6,
@@ -1599,7 +1599,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   unlocksAtLvlText: {
-    fontSize: 11.5,
+    fontSize: 12,
     fontWeight: '700',
     color: '#DC2626',
   },
@@ -1638,7 +1638,7 @@ const styles = StyleSheet.create({
     borderRadius: 6,
   },
   proGoldBadgeText: {
-    fontSize: 9.5,
+    fontSize: 10,
     fontWeight: '900',
     color: '#171420',
   },
@@ -1653,7 +1653,7 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   proFeatureItem: {
-    fontSize: 13.5,
+    fontSize: 14,
     fontWeight: '700',
     color: '#E5E1EE',
   },
@@ -1672,7 +1672,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   exploreProBtnText: {
-    fontSize: 13.5,
+    fontSize: 14,
     fontWeight: '900',
     color: '#171420',
     letterSpacing: -0.2,
@@ -1786,7 +1786,7 @@ const styles = StyleSheet.create({
     borderColor: '#EFEBF8',
   },
   repDetailTitle: {
-    fontSize: 13.5,
+    fontSize: 14,
     fontWeight: '800',
     color: '#171420',
     marginBottom: 2,
@@ -1812,7 +1812,7 @@ const styles = StyleSheet.create({
     marginBottom: 2,
   },
   notifBody: {
-    fontSize: 11.5,
+    fontSize: 12,
     color: '#64748B',
   },
   profileRing: {

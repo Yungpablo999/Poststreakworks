@@ -456,7 +456,7 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   poweredBy: {
-    fontSize: 11.5,
+    fontSize: 12,
     fontWeight: '800',
     color: '#8E859E',
     letterSpacing: 2,

@@ -1034,7 +1034,7 @@ const styles = StyleSheet.create({
     borderRadius: 6,
   },
   proHeaderBadgeText: {
-    fontSize: 9.5,
+    fontSize: 10,
     fontWeight: '900',
     color: '#0C0A12',
     letterSpacing: 0.3,
@@ -1105,7 +1105,7 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   goldScriptBadgeText: {
-    fontSize: 9.5,
+    fontSize: 10,
     fontWeight: '900',
     color: '#D97706',
     letterSpacing: 0.3,
@@ -1129,7 +1129,7 @@ const styles = StyleSheet.create({
     borderRadius: 6,
   },
   purplePillText: {
-    fontSize: 10.5,
+    fontSize: 11,
     fontWeight: '900',
     color: '#582CDB',
   },
@@ -1140,7 +1140,7 @@ const styles = StyleSheet.create({
     borderRadius: 6,
   },
   goldPillText: {
-    fontSize: 10.5,
+    fontSize: 11,
     fontWeight: '900',
     color: '#D97706',
   },
@@ -1161,7 +1161,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   selectedIdeaTag: {
-    fontSize: 9.5,
+    fontSize: 10,
     fontWeight: '900',
     color: '#582CDB',
     letterSpacing: 0.5,
@@ -1174,7 +1174,7 @@ const styles = StyleSheet.create({
     lineHeight: 22,
   },
   selectedIdeaSub: {
-    fontSize: 11.5,
+    fontSize: 12,
     color: '#64748B',
     lineHeight: 16,
   },
@@ -1193,7 +1193,7 @@ const styles = StyleSheet.create({
     borderRadius: 6,
   },
   ideaTagPillText: {
-    fontSize: 10.5,
+    fontSize: 11,
     fontWeight: '800',
     color: '#475569',
   },
@@ -1207,7 +1207,7 @@ const styles = StyleSheet.create({
     borderTopColor: '#F1EFE9',
   },
   reSelectIdeaText: {
-    fontSize: 10.5,
+    fontSize: 11,
     fontWeight: '900',
     color: '#64748B',
     letterSpacing: 0.4,
@@ -1249,7 +1249,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   scoreCardLabel: {
-    fontSize: 10.5,
+    fontSize: 11,
     fontWeight: '900',
     color: '#64748B',
     letterSpacing: 0.4,
@@ -1261,7 +1261,7 @@ const styles = StyleSheet.create({
     borderRadius: 6,
   },
   aiEvaluatedBadgeText: {
-    fontSize: 8.5,
+    fontSize: 9,
     fontWeight: '900',
     color: '#582CDB',
   },
@@ -1286,7 +1286,7 @@ const styles = StyleSheet.create({
     color: '#94A3B8',
   },
   meterLabel: {
-    fontSize: 9.5,
+    fontSize: 10,
     fontWeight: '900',
     color: '#64748B',
   },
@@ -1331,7 +1331,7 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   sectionHeaderTitle: {
-    fontSize: 11.5,
+    fontSize: 12,
     fontWeight: '900',
     color: '#64748B',
     letterSpacing: 0.5,
@@ -1356,7 +1356,7 @@ const styles = StyleSheet.create({
     marginBottom: 6,
   },
   bestPerformingBadgeText: {
-    fontSize: 8.5,
+    fontSize: 9,
     fontWeight: '900',
     color: '#D97706',
   },
@@ -1370,7 +1370,7 @@ const styles = StyleSheet.create({
     fontWeight: '900',
   },
   hookOptionType: {
-    fontSize: 10.5,
+    fontSize: 11,
     color: '#64748B',
     marginTop: 6,
   },
@@ -1441,7 +1441,7 @@ const styles = StyleSheet.create({
     color: '#171420',
   },
   timelineItemTiming: {
-    fontSize: 10.5,
+    fontSize: 11,
     color: '#64748B',
   },
 
@@ -1473,7 +1473,7 @@ const styles = StyleSheet.create({
     borderRadius: 6,
   },
   quickRewritePillText: {
-    fontSize: 10.5,
+    fontSize: 11,
     fontWeight: '800',
     color: '#475569',
   },
@@ -1484,7 +1484,7 @@ const styles = StyleSheet.create({
     borderRadius: 6,
   },
   aiPolishPillBtnText: {
-    fontSize: 10.5,
+    fontSize: 11,
     fontWeight: '900',
     color: '#582CDB',
   },
@@ -1499,7 +1499,7 @@ const styles = StyleSheet.create({
     marginTop: 16,
   },
   estimateCardHeaderLabel: {
-    fontSize: 9.5,
+    fontSize: 10,
     fontWeight: '900',
     color: '#94A3B8',
     letterSpacing: 0.4,
@@ -1515,7 +1515,7 @@ const styles = StyleSheet.create({
     color: '#64748B',
   },
   estimateSubText: {
-    fontSize: 10.5,
+    fontSize: 11,
     color: '#64748B',
     marginTop: 1,
   },
@@ -1562,7 +1562,7 @@ const styles = StyleSheet.create({
     borderRadius: 6,
   },
   formatActiveBadgeText: {
-    fontSize: 8.5,
+    fontSize: 9,
     fontWeight: '900',
     color: '#15803D',
   },
@@ -1582,7 +1582,7 @@ const styles = StyleSheet.create({
     borderColor: '#582CDB',
   },
   platFormatName: {
-    fontSize: 10.5,
+    fontSize: 11,
     fontWeight: '900',
     color: '#171420',
   },
@@ -1639,7 +1639,7 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   adaptBtnText: {
-    fontSize: 11.5,
+    fontSize: 12,
     fontWeight: '900',
     color: '#582CDB',
   },
@@ -1654,13 +1654,13 @@ const styles = StyleSheet.create({
     marginTop: 12,
   },
   retentionNotesHeaderLabel: {
-    fontSize: 9.5,
+    fontSize: 10,
     fontWeight: '900',
     color: '#94A3B8',
     letterSpacing: 0.4,
   },
   retentionNoteLine: {
-    fontSize: 11.5,
+    fontSize: 12,
     fontWeight: '700',
     color: '#171420',
   },
@@ -1675,18 +1675,18 @@ const styles = StyleSheet.create({
     marginTop: 14,
   },
   voicePreviewHeaderLabel: {
-    fontSize: 9.5,
+    fontSize: 10,
     fontWeight: '900',
     color: '#171420',
     letterSpacing: 0.4,
   },
   voicePreviewSubLabel: {
-    fontSize: 9.5,
+    fontSize: 10,
     fontWeight: '800',
     color: '#64748B',
   },
   voicePreviewSubDetail: {
-    fontSize: 8.5,
+    fontSize: 9,
     fontWeight: '900',
     color: '#15803D',
     marginTop: 1,
@@ -1741,7 +1741,7 @@ const styles = StyleSheet.create({
     marginTop: 14,
   },
   streakCardHeaderLabel: {
-    fontSize: 9.5,
+    fontSize: 10,
     fontWeight: '900',
     color: '#94A3B8',
     letterSpacing: 0.4,
@@ -1762,7 +1762,7 @@ const styles = StyleSheet.create({
     color: '#64748B',
   },
   postProgressVal: {
-    fontSize: 9.5,
+    fontSize: 10,
     fontWeight: '900',
     color: '#171420',
   },
@@ -1799,7 +1799,7 @@ const styles = StyleSheet.create({
     borderRadius: 6,
   },
   coachChipText: {
-    fontSize: 9.5,
+    fontSize: 10,
     fontWeight: '900',
     color: '#582CDB',
   },
@@ -1829,7 +1829,7 @@ const styles = StyleSheet.create({
   },
   sendToVoiceBtnText: {
     color: '#FFFFFF',
-    fontSize: 13.5,
+    fontSize: 14,
     fontWeight: '900',
   },
   secondaryDeckBtn: {
@@ -1917,7 +1917,7 @@ const styles = StyleSheet.create({
     letterSpacing: 0.2,
   },
   btnPressed: {
-    transform: [{ scale: 0.96 }],
-    opacity: 0.85,
+    opacity: 0.9,
+    transform: [{ scale: 0.98 }],
   },
 });

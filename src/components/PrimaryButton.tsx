@@ -1,117 +1,114 @@
-import React, { useRef } from 'react';
+import React from 'react';
 import {
   StyleSheet,
   Text,
-  Animated,
   Pressable,
-  ViewStyle,
   Platform,
+  ViewStyle,
+  TextStyle,
+  ActivityIndicator,
   View,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as Haptics from 'expo-haptics';
-import { colors } from '../theme/colors';
-import { shadows } from '../theme/shadows';
 
-interface PrimaryButtonProps {
+export interface PrimaryButtonProps {
   title: string;
   onPress: () => void;
+  icon?: React.ReactNode;
+  disabled?: boolean;
+  loading?: boolean;
   style?: ViewStyle;
+  textStyle?: TextStyle;
 }
 
 export const PrimaryButton: React.FC<PrimaryButtonProps> = ({
   title,
   onPress,
+  icon,
+  disabled = false,
+  loading = false,
   style,
+  textStyle,
 }) => {
-  const scaleAnim = useRef(new Animated.Value(1)).current;
-
-  const handlePressIn = () => {
+  const handlePress = () => {
+    if (disabled || loading) return;
     if (Platform.OS !== 'web') {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     }
-    Animated.spring(scaleAnim, {
-      toValue: 0.96,
-      useNativeDriver: true,
-      speed: 25,
-      bounciness: 4,
-    }).start();
-  };
-
-  const handlePressOut = () => {
-    Animated.spring(scaleAnim, {
-      toValue: 1,
-      useNativeDriver: true,
-      speed: 25,
-      bounciness: 6,
-    }).start();
+    onPress();
   };
 
   return (
-    <Animated.View
-      style={[
-        styles.container,
-        shadows.primaryButton,
-        { transform: [{ scale: scaleAnim }] },
+    <Pressable
+      onPress={handlePress}
+      disabled={disabled || loading}
+      style={({ pressed }) => [
+        styles.buttonWrapper,
+        disabled && styles.disabledWrapper,
+        pressed && !disabled && styles.pressedWrapper,
         style,
       ]}
     >
-      <Pressable
-        onPress={onPress}
-        onPressIn={handlePressIn}
-        onPressOut={handlePressOut}
-        style={styles.pressable}
+      <LinearGradient
+        colors={disabled ? ['#94A3B8', '#64748B'] : ['#784DF0', '#582CDB']}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        style={styles.gradient}
       >
-        <LinearGradient
-          colors={['#7048EC', '#522DC7', '#461CC2']}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 1 }}
-          style={styles.gradient}
-        >
-          {/* Glass Specular Top Highlight */}
-          <View style={styles.glassTopShine} />
-
-          <Text style={styles.text}>{title}</Text>
-        </LinearGradient>
-      </Pressable>
-    </Animated.View>
+        {loading ? (
+          <ActivityIndicator color="#FFFFFF" size="small" />
+        ) : (
+          <View style={styles.contentRow}>
+            {icon && <View style={styles.iconBox}>{icon}</View>}
+            <Text style={[styles.title, textStyle]}>{title}</Text>
+          </View>
+        )}
+      </LinearGradient>
+    </Pressable>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
-    width: '100%',
-    maxWidth: 270,
-    height: 56,
+  buttonWrapper: {
     borderRadius: 16,
     overflow: 'hidden',
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.35)',
+    shadowColor: '#582CDB',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.25,
+    shadowRadius: 14,
+    elevation: 4,
   },
-  pressable: {
-    width: '100%',
-    height: '100%',
+  disabledWrapper: {
+    shadowOpacity: 0,
+    elevation: 0,
+    opacity: 0.65,
+  },
+  pressedWrapper: {
+    transform: [{ scale: 0.98 }],
+    opacity: 0.92,
   },
   gradient: {
-    width: '100%',
-    height: '100%',
+    paddingVertical: 14,
+    paddingHorizontal: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  contentRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+  },
+  iconBox: {
     justifyContent: 'center',
     alignItems: 'center',
-    borderRadius: 16,
   },
-  glassTopShine: {
-    position: 'absolute',
-    top: 0,
-    left: 12,
-    right: 12,
-    height: 1.5,
-    backgroundColor: 'rgba(255, 255, 255, 0.45)',
-    borderRadius: 1,
-  },
-  text: {
-    color: colors.textWhite,
-    fontSize: 19.5,
-    fontWeight: '700',
-    letterSpacing: -0.3,
+  title: {
+    fontSize: 14,
+    fontWeight: '800',
+    color: '#FFFFFF',
+    letterSpacing: 0.4,
+    textAlign: 'center',
   },
 });

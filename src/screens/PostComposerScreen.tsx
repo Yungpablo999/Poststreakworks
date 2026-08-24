@@ -1676,11 +1676,11 @@ const styles = StyleSheet.create({
   scrollContent: {
     paddingHorizontal: 20,
     paddingTop: 8,
-    paddingBottom: 24,
+    paddingBottom: 96,
   },
   btnPressed: {
-    opacity: 0.78,
-    transform: [{ scale: 0.97 }],
+    opacity: 0.9,
+    transform: [{ scale: 0.98 }],
   },
 
   // 1. TOP HEADER
@@ -1775,7 +1775,7 @@ const styles = StyleSheet.create({
     elevation: 2,
   },
   createPostPillText: {
-    fontSize: 10.5,
+    fontSize: 11,
     fontWeight: '900',
     color: '#FFFFFF',
     letterSpacing: 0.6,
@@ -1865,7 +1865,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   ideaTagPillText: {
-    fontSize: 10.5,
+    fontSize: 11,
     fontWeight: '700',
     color: '#6D28D9',
   },
@@ -1876,14 +1876,14 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   streakSaverPillText: {
-    fontSize: 10.5,
+    fontSize: 11,
     fontWeight: '800',
     color: '#FFFFFF',
   },
 
   // Section Labels
   sectionLabel: {
-    fontSize: 10.5,
+    fontSize: 11,
     fontWeight: '800',
     color: '#7F7894',
     letterSpacing: 0.6,
@@ -1907,7 +1907,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
   },
   morePlatformsHeaderText: {
-    fontSize: 10.5,
+    fontSize: 11,
     fontWeight: '800',
     color: '#FFFFFF',
   },
@@ -2025,7 +2025,7 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   mediaDropzoneSubtitle: {
-    fontSize: 11.5,
+    fontSize: 12,
     color: '#64748B',
   },
   mediaPreviewContainer: {
@@ -2042,7 +2042,7 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   mediaPreviewTitle: {
-    fontSize: 13.5,
+    fontSize: 14,
     fontWeight: '800',
     color: '#171420',
     marginTop: 6,
@@ -2091,7 +2091,7 @@ const styles = StyleSheet.create({
     borderRadius: 6,
   },
   aiBadgeText: {
-    fontSize: 9.5,
+    fontSize: 10,
     fontWeight: '900',
     color: '#6D28D9',
     letterSpacing: 0.5,
@@ -2111,7 +2111,7 @@ const styles = StyleSheet.create({
   },
   captionInput: {
     minHeight: 100,
-    fontSize: 13.5,
+    fontSize: 14,
     color: '#1E293B',
     lineHeight: 20,
     textAlignVertical: 'top',
@@ -2142,7 +2142,7 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   toneLabel: {
-    fontSize: 8.5,
+    fontSize: 9,
     fontWeight: '900',
     color: '#94A3B8',
   },
@@ -2207,7 +2207,7 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   tagPillText: {
-    fontSize: 11.5,
+    fontSize: 12,
     fontWeight: '700',
     color: '#6D28D9',
   },
@@ -2294,7 +2294,7 @@ const styles = StyleSheet.create({
     marginBottom: 2,
   },
   timingSuggestedSub: {
-    fontSize: 11.5,
+    fontSize: 12,
     color: '#64748B',
   },
   timingTabsRow: {
@@ -2335,7 +2335,7 @@ const styles = StyleSheet.create({
     padding: 12,
   },
   scheduledLabel: {
-    fontSize: 9.5,
+    fontSize: 10,
     fontWeight: '900',
     color: '#6D28D9',
     letterSpacing: 0.5,
@@ -2347,7 +2347,7 @@ const styles = StyleSheet.create({
     color: '#171420',
   },
   scheduledChangeLink: {
-    fontSize: 11.5,
+    fontSize: 12,
     fontWeight: '800',
     color: '#582CDB',
     letterSpacing: 0.5,
@@ -2465,13 +2465,13 @@ const styles = StyleSheet.create({
     borderRadius: 6,
   },
   streakXpText: {
-    fontSize: 9.5,
+    fontSize: 10,
     fontWeight: '900',
     color: '#78350F',
     letterSpacing: 0.4,
   },
   streakMissionFraction: {
-    fontSize: 9.5,
+    fontSize: 10,
     fontWeight: '800',
     color: '#B45309',
     letterSpacing: 0.4,
@@ -2525,7 +2525,7 @@ const styles = StyleSheet.create({
     borderColor: '#EDE9FE',
   },
   jarvisInsightTag: {
-    fontSize: 9.5,
+    fontSize: 10,
     fontWeight: '900',
     color: '#6D28D9',
     letterSpacing: 0.6,
@@ -2690,7 +2690,7 @@ const styles = StyleSheet.create({
     color: '#171420',
   },
   modalSubtitle: {
-    fontSize: 11.5,
+    fontSize: 12,
     color: '#64748B',
     marginTop: 2,
   },
@@ -2725,7 +2725,7 @@ const styles = StyleSheet.create({
     borderColor: '#7C3AED',
   },
   modalPlatformName: {
-    fontSize: 13.5,
+    fontSize: 14,
     fontWeight: '800',
     color: '#171420',
   },
@@ -2736,7 +2736,7 @@ const styles = StyleSheet.create({
     borderRadius: 6,
   },
   modalMultiplierText: {
-    fontSize: 9.5,
+    fontSize: 10,
     fontWeight: '800',
     color: '#6D28D9',
   },
@@ -2809,7 +2809,7 @@ const styles = StyleSheet.create({
     color: '#171420',
   },
   calMonthNavBadge: {
-    fontSize: 8.5,
+    fontSize: 9,
     fontWeight: '900',
     color: '#582CDB',
     letterSpacing: 0.6,
@@ -2881,7 +2881,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#F59E0B',
   },
   calSectionHeader: {
-    fontSize: 10.5,
+    fontSize: 11,
     fontWeight: '800',
     color: '#7F7894',
     letterSpacing: 0.6,
@@ -2951,7 +2951,7 @@ const styles = StyleSheet.create({
     marginBottom: 2,
   },
   calPreviewSub: {
-    fontSize: 10.5,
+    fontSize: 11,
     color: '#64748B',
     lineHeight: 14,
   },
@@ -3011,7 +3011,7 @@ const styles = StyleSheet.create({
     lineHeight: 15,
   },
   notifTime: {
-    fontSize: 9.5,
+    fontSize: 10,
     color: '#94A3B8',
     marginTop: 4,
   },
@@ -3024,7 +3024,7 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
   modalFullBtnText: {
-    fontSize: 13.5,
+    fontSize: 14,
     fontWeight: '800',
     color: '#FFFFFF',
   },
@@ -3063,7 +3063,7 @@ const styles = StyleSheet.create({
     borderColor: '#FDE68A',
   },
   profileModalLevelText: {
-    fontSize: 10.5,
+    fontSize: 11,
     fontWeight: '800',
     color: '#B45309',
   },

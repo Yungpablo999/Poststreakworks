@@ -754,7 +754,7 @@ const styles = StyleSheet.create({
   scrollContent: {
     paddingHorizontal: 22,
     paddingTop: 8,
-    paddingBottom: 24,
+    paddingBottom: 96,
   },
   topBar: {
     flexDirection: 'row',
@@ -858,7 +858,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   inputLabel: {
-    fontSize: 11.5,
+    fontSize: 12,
     fontWeight: '700',
     color: '#524C62',
     letterSpacing: 0.6,
@@ -938,7 +938,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(234, 229, 246, 0.8)',
   },
   dividerText: {
-    fontSize: 10.5,
+    fontSize: 11,
     fontWeight: '700',
     color: '#9E97AA',
     letterSpacing: 1.0,
@@ -1001,7 +1001,7 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   legalText: {
-    fontSize: 10.5,
+    fontSize: 11,
     fontWeight: '600',
     color: '#9E97AA',
     letterSpacing: 1.0,
@@ -1070,7 +1070,7 @@ const styles = StyleSheet.create({
     letterSpacing: -0.4,
   },
   modalText: {
-    fontSize: 13.5,
+    fontSize: 14,
     color: '#524C62',
     textAlign: 'center',
     lineHeight: 20,

@@ -1137,8 +1137,8 @@ const styles = StyleSheet.create({
     backgroundColor: '#FAF8F5',
   },
   btnPressed: {
-    opacity: 0.78,
-    transform: [{ scale: 0.97 }],
+    opacity: 0.9,
+    transform: [{ scale: 0.98 }],
   },
 
   // 1. TOP HEADER BAR
@@ -1232,7 +1232,7 @@ const styles = StyleSheet.create({
     borderRadius: 100,
   },
   contentSchedulePillText: {
-    fontSize: 10.5,
+    fontSize: 11,
     fontWeight: '800',
     color: '#FFFFFF',
     letterSpacing: 0.4,
@@ -1244,7 +1244,7 @@ const styles = StyleSheet.create({
     borderRadius: 100,
   },
   freeSchedulePillText: {
-    fontSize: 10.5,
+    fontSize: 11,
     fontWeight: '800',
     color: '#475569',
     letterSpacing: 0.4,
@@ -1259,7 +1259,7 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   mainSubtitle: {
-    fontSize: 13.5,
+    fontSize: 14,
     color: '#524C62',
     lineHeight: 19,
     marginBottom: 20,
@@ -1302,7 +1302,7 @@ const styles = StyleSheet.create({
     borderRadius: 100,
   },
   scheduledStatusPillText: {
-    fontSize: 10.5,
+    fontSize: 11,
     fontWeight: '800',
     color: '#6D28D9',
   },
@@ -1313,7 +1313,7 @@ const styles = StyleSheet.create({
     borderRadius: 100,
   },
   draftStatusPillText: {
-    fontSize: 10.5,
+    fontSize: 11,
     fontWeight: '800',
     color: '#D97706',
   },
@@ -1435,7 +1435,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#582CDB',
   },
   calendarDayLetter: {
-    fontSize: 9.5,
+    fontSize: 10,
     fontWeight: '800',
     color: '#64748B',
     marginBottom: 4,
@@ -1517,7 +1517,7 @@ const styles = StyleSheet.create({
     alignSelf: 'flex-start',
   },
   postStatusTagPurpleText: {
-    fontSize: 10.5,
+    fontSize: 11,
     fontWeight: '800',
     color: '#6D28D9',
   },
@@ -1529,7 +1529,7 @@ const styles = StyleSheet.create({
     alignSelf: 'flex-start',
   },
   postStatusTagYellowText: {
-    fontSize: 10.5,
+    fontSize: 11,
     fontWeight: '800',
     color: '#D97706',
   },
@@ -1587,7 +1587,7 @@ const styles = StyleSheet.create({
     color: '#171420',
   },
   loadCountText: {
-    fontSize: 11.5,
+    fontSize: 12,
     color: '#64748B',
   },
   loadTrack: {
@@ -1601,7 +1601,7 @@ const styles = StyleSheet.create({
     borderRadius: 3,
   },
   loadFooterNote: {
-    fontSize: 11.5,
+    fontSize: 12,
     color: '#64748B',
     fontStyle: 'italic',
     marginTop: 6,
@@ -1675,7 +1675,7 @@ const styles = StyleSheet.create({
     height: 22,
   },
   jarvisRecTag: {
-    fontSize: 9.5,
+    fontSize: 10,
     fontWeight: '800',
     color: '#6D28D9',
     letterSpacing: 0.6,
@@ -1699,13 +1699,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   useSuggestionBtnText: {
-    fontSize: 13.5,
+    fontSize: 14,
     fontWeight: '800',
     color: '#FFFFFF',
   },
 
   footerProNote: {
-    fontSize: 11.5,
+    fontSize: 12,
     color: '#64748B',
     textAlign: 'center',
     lineHeight: 16,
@@ -1767,7 +1767,7 @@ const styles = StyleSheet.create({
     lineHeight: 18,
   },
   modalInputLabel: {
-    fontSize: 10.5,
+    fontSize: 11,
     fontWeight: '800',
     color: '#582CDB',
     letterSpacing: 0.6,
@@ -1806,7 +1806,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     paddingHorizontal: 14,
     paddingVertical: 10,
-    fontSize: 13.5,
+    fontSize: 14,
     color: '#171420',
     marginBottom: 14,
   },
@@ -1826,7 +1826,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   modalSecondaryBtnText: {
-    fontSize: 13.5,
+    fontSize: 14,
     fontWeight: '700',
     color: '#524C62',
   },
@@ -1842,7 +1842,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   modalPrimaryBtnText: {
-    fontSize: 13.5,
+    fontSize: 14,
     fontWeight: '800',
     color: '#FFFFFF',
   },
@@ -1905,7 +1905,7 @@ const styles = StyleSheet.create({
     marginBottom: 2,
   },
   notifBody: {
-    fontSize: 11.5,
+    fontSize: 12,
     color: '#64748B',
   },
   profileRing: {
@@ -1950,7 +1950,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   calMonthBadgeText: {
-    fontSize: 9.5,
+    fontSize: 10,
     fontWeight: '800',
     color: '#6D28D9',
     letterSpacing: 0.4,
@@ -1964,7 +1964,7 @@ const styles = StyleSheet.create({
   calGridHeaderText: {
     width: 40,
     textAlign: 'center',
-    fontSize: 11.5,
+    fontSize: 12,
     fontWeight: '800',
     color: '#64748B',
   },
@@ -2079,12 +2079,12 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   selectedDayTitle: {
-    fontSize: 13.5,
+    fontSize: 14,
     fontWeight: '800',
     color: '#171420',
   },
   selectedDayCount: {
-    fontSize: 11.5,
+    fontSize: 12,
     fontWeight: '700',
     color: '#582CDB',
   },
@@ -2122,7 +2122,7 @@ const styles = StyleSheet.create({
     borderRadius: 4,
   },
   calPostStatusBadgeText: {
-    fontSize: 8.5,
+    fontSize: 9,
     fontWeight: '800',
   },
   emptyDayBox: {
@@ -2141,7 +2141,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   planDayBtnText: {
-    fontSize: 11.5,
+    fontSize: 12,
     fontWeight: '800',
     color: '#582CDB',
   },

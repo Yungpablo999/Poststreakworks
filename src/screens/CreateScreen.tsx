@@ -1403,8 +1403,8 @@ const styles = StyleSheet.create({
     backgroundColor: '#FAF8F5',
   },
   btnPressed: {
-    opacity: 0.78,
-    transform: [{ scale: 0.97 }],
+    opacity: 0.9,
+    transform: [{ scale: 0.98 }],
   },
 
   // 1. TOP HEADER BAR
@@ -1502,7 +1502,7 @@ const styles = StyleSheet.create({
     borderRadius: 100,
   },
   freeToolsPillText: {
-    fontSize: 10.5,
+    fontSize: 11,
     fontWeight: '800',
     color: '#B45309',
     letterSpacing: 0.5,
@@ -1563,7 +1563,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
   },
   streakSaverTag: {
-    fontSize: 10.5,
+    fontSize: 11,
     fontWeight: '800',
     color: '#B45309',
     letterSpacing: 0.6,
@@ -1605,7 +1605,7 @@ const styles = StyleSheet.create({
     marginBottom: 14,
   },
   promptText: {
-    fontSize: 13.5,
+    fontSize: 14,
     color: '#1E1B4B',
     lineHeight: 20,
     fontStyle: 'italic',
@@ -1695,7 +1695,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   jarvisSuggestionTitle: {
-    fontSize: 13.5,
+    fontSize: 14,
     fontWeight: '800',
     color: '#582CDB',
     marginBottom: 2,
@@ -1747,7 +1747,7 @@ const styles = StyleSheet.create({
     marginBottom: 2,
   },
   toolSubtitle: {
-    fontSize: 11.5,
+    fontSize: 12,
     color: '#6B7280',
     fontWeight: '500',
   },
@@ -1793,7 +1793,7 @@ const styles = StyleSheet.create({
     fontWeight: '500',
   },
   scheduledOpenLink: {
-    fontSize: 13.5,
+    fontSize: 14,
     fontWeight: '800',
     color: '#582CDB',
   },
@@ -1844,13 +1844,13 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   draftTitle: {
-    fontSize: 13.5,
+    fontSize: 14,
     fontWeight: '700',
     color: '#171420',
     marginBottom: 3,
   },
   draftMeta: {
-    fontSize: 11.5,
+    fontSize: 12,
     color: '#6D28D9',
     fontWeight: '500',
   },
@@ -1950,7 +1950,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   unlockVoiceBtnText: {
-    fontSize: 13.5,
+    fontSize: 14,
     fontWeight: '900',
     color: '#171420',
     letterSpacing: -0.2,
@@ -2046,7 +2046,7 @@ const styles = StyleSheet.create({
     lineHeight: 18,
   },
   modalInputLabel: {
-    fontSize: 10.5,
+    fontSize: 11,
     fontWeight: '800',
     color: '#582CDB',
     letterSpacing: 0.6,
@@ -2088,7 +2088,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     paddingHorizontal: 14,
     paddingVertical: 10,
-    fontSize: 13.5,
+    fontSize: 14,
     color: '#171420',
     marginBottom: 14,
   },
@@ -2108,7 +2108,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   modalSecondaryBtnText: {
-    fontSize: 13.5,
+    fontSize: 14,
     fontWeight: '700',
     color: '#524C62',
   },
@@ -2124,7 +2124,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   modalPrimaryBtnText: {
-    fontSize: 13.5,
+    fontSize: 14,
     fontWeight: '800',
     color: '#FFFFFF',
   },
@@ -2151,7 +2151,7 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   ideaItemText: {
-    fontSize: 13.5,
+    fontSize: 14,
     fontWeight: '700',
     color: '#171420',
     marginBottom: 4,
@@ -2193,12 +2193,12 @@ const styles = StyleSheet.create({
     marginBottom: 2,
   },
   notifBody: {
-    fontSize: 11.5,
+    fontSize: 12,
     color: '#64748B',
     lineHeight: 16,
   },
   notifTime: {
-    fontSize: 10.5,
+    fontSize: 11,
     color: '#94A3B8',
     marginTop: 2,
   },
@@ -2237,7 +2237,7 @@ const styles = StyleSheet.create({
     borderRadius: 100,
   },
   profileModalLevelText: {
-    fontSize: 11.5,
+    fontSize: 12,
     fontWeight: '700',
     color: '#6D28D9',
   },
