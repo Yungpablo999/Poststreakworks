@@ -46,16 +46,16 @@ export const LiquidGlassBackground: React.FC<LiquidGlassProps> = ({
         ];
       case 'crystal':
         return [
-          'rgba(255, 255, 255, 0.65)',
-          'rgba(240, 245, 255, 0.42)',
-          'rgba(255, 255, 255, 0.55)',
+          'rgba(255, 255, 255, 0.35)',
+          'rgba(245, 250, 255, 0.18)',
+          'rgba(255, 255, 255, 0.25)',
         ];
       case 'purple-gold':
       default:
         return [
-          'rgba(255, 255, 255, 0.68)',
-          'rgba(248, 244, 255, 0.45)',
-          'rgba(255, 252, 248, 0.58)',
+          'rgba(255, 255, 255, 0.38)',
+          'rgba(250, 248, 255, 0.20)',
+          'rgba(255, 255, 255, 0.28)',
         ];
     }
   };
@@ -84,14 +84,14 @@ export const LiquidGlassBackground: React.FC<LiquidGlassProps> = ({
       >
         {/* Layer 1: Native Optical Blur Backdrop */}
         <BlurView
-          intensity={Platform.OS === 'ios' ? 75 : 85}
+          intensity={Platform.OS === 'ios' ? 45 : 55}
           tint={tint === 'dark' ? 'dark' : 'light'}
           style={[
             styles.blurView,
             { borderRadius },
             Platform.OS === 'web' && {
-              backdropFilter: 'blur(30px) saturate(190%)',
-              WebkitBackdropFilter: 'blur(30px) saturate(190%)',
+              backdropFilter: 'blur(16px) saturate(160%)',
+              WebkitBackdropFilter: 'blur(16px) saturate(160%)',
             } as any,
           ]}
         >
