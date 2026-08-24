@@ -1186,9 +1186,11 @@ export const ProEarningsScreen: React.FC<ProEarningsScreenProps> = ({
 
                     return (
                       <View style={styles.platformCompChartContainer}>
-                        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+                        <View style={styles.platformChartHeaderRow}>
                           <Text style={styles.platformChartHeaderTitle}>REVENUE BY PLATFORM ({earningsTimeframe})</Text>
-                          <Text style={styles.platformChartHeaderSub}>Tap bar to inspect yield</Text>
+                          <View style={styles.platformTapBadgePill}>
+                            <Text style={styles.platformChartHeaderSub}>Tap bar to inspect 🔍</Text>
+                          </View>
                         </View>
 
                         {/* 4 Comparative Vertical Platform Columns */}
@@ -1196,7 +1198,7 @@ export const ProEarningsScreen: React.FC<ProEarningsScreenProps> = ({
                           {curCfg.platformSummary.map((plat: any, pIdx: number) => {
                             const isSelected = selectedPlatformIndex === pIdx;
                             const amtNum = parseInt(plat.amount.replace(/[^0-9]/g, '')) || 100;
-                            const barHeight = Math.max(36, Math.min(130, (amtNum / maxPlatAmt) * 125));
+                            const barHeight = Math.max(26, Math.min(100, (amtNum / maxPlatAmt) * 96));
 
                             return (
                               <Pressable
@@ -2151,30 +2153,45 @@ const styles = StyleSheet.create({
     padding: 16,
     borderWidth: 1,
     borderColor: '#EFECE6',
-    marginBottom: 12,
+    marginBottom: 14,
+  },
+  platformChartHeaderRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 18,
   },
   platformChartHeaderTitle: {
-    fontSize: 10,
+    fontSize: 9.5,
     fontWeight: '900',
     color: '#64748B',
     letterSpacing: 0.5,
   },
+  platformTapBadgePill: {
+    backgroundColor: '#FAF5FF',
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#E9D5FF',
+  },
   platformChartHeaderSub: {
-    fontSize: 10,
-    fontWeight: '700',
+    fontSize: 9.5,
+    fontWeight: '800',
     color: '#582CDB',
   },
   platformBarsRow: {
     flexDirection: 'row',
     alignItems: 'flex-end',
     justifyContent: 'space-around',
-    height: 180,
-    paddingTop: 10,
+    paddingTop: 4,
+    paddingBottom: 6,
   },
   platformBarCol: {
     flex: 1,
     alignItems: 'center',
-    paddingVertical: 6,
+    paddingVertical: 8,
+    paddingHorizontal: 4,
     borderRadius: 14,
   },
   platformBarColSelected: {
@@ -2187,16 +2204,16 @@ const styles = StyleSheet.create({
     shadowRadius: 6,
   },
   platformBarAmtText: {
-    fontSize: 12,
+    fontSize: 11.5,
     fontWeight: '800',
     color: '#171420',
-    marginBottom: 6,
+    marginBottom: 8,
   },
   platformBarTrack: {
-    width: 24,
-    height: 120,
+    width: 26,
+    height: 100,
     backgroundColor: '#EDE9FE',
-    borderRadius: 12,
+    borderRadius: 13,
     justifyContent: 'flex-end',
     overflow: 'hidden',
   },
