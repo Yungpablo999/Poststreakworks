@@ -1296,41 +1296,74 @@ export const ProGrowthScreen: React.FC<ProGrowthScreenProps> = ({
           {/* ROW 8: 2x2 QUICK ACTION TILES                                */}
           {/* ============================================================ */}
           <View style={styles.quickActionTilesGrid}>
+            {/* Tile 1: Repeat best format -> Post Composer */}
             <Pressable
               style={({ pressed }) => [styles.quickActionTile, pressed && styles.btnPressed]}
-              onPress={() => showToast('Preset loaded: 45s Short Reel format')}
+              onPress={() => {
+                if (Platform.OS !== 'web') {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                }
+                if (onOpenPostComposer) {
+                  onOpenPostComposer('3 creator mistakes to avoid (Short Reel formula)', 'TikTok');
+                } else if (onNavigateTab) {
+                  onNavigateTab('create');
+                } else {
+                  showToast('Opened Post Composer with 45s Short Reel formula!');
+                }
+              }}
             >
               <Text style={{ fontSize: 18, marginBottom: 6 }}>🔄</Text>
               <Text style={styles.tileTitleText}>Repeat best format{'\n'}(Short Reel)</Text>
             </Pressable>
 
+            {/* Tile 2: Set 7:30 PM slot in calendar -> Animated Popup */}
             <Pressable
               style={({ pressed }) => [styles.quickActionTile, pressed && styles.btnPressed]}
               onPress={() => {
-                if (onOpenSchedule) onOpenSchedule();
-                else showToast('7:30 PM slot booked in Smart Schedule!');
+                if (Platform.OS !== 'web') {
+                  Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+                }
+                triggerModalPop();
+                setShowSlotSetModal(true);
               }}
             >
               <Text style={{ fontSize: 18, marginBottom: 6 }}>🗓️</Text>
               <Text style={styles.tileTitleText}>Set 7:30 PM slot in{'\n'}calendar</Text>
             </Pressable>
 
-            <Pressable
-              style={({ pressed }) => [styles.quickActionTile, pressed && styles.btnPressed]}
-              onPress={() => showToast('Streak Autopilot Shield & Momentum Guard Active!')}
-            >
-              <Text style={{ fontSize: 18, marginBottom: 6 }}>📊</Text>
-              <Text style={styles.tileTitleText}>Protect growth{'\n'}momentum</Text>
-            </Pressable>
-
+            {/* Tile 3: Protect growth momentum -> Options Modal */}
             <Pressable
               style={({ pressed }) => [styles.quickActionTile, pressed && styles.btnPressed]}
               onPress={() => {
-                if (onNavigateTab) onNavigateTab('create');
+                if (Platform.OS !== 'web') {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                }
+                triggerModalPop();
+                setShowProtectMomentumModal(true);
+              }}
+            >
+              <Text style={{ fontSize: 18, marginBottom: 6 }}>🛡️</Text>
+              <Text style={styles.tileTitleText}>Protect growth{'\n'}momentum</Text>
+            </Pressable>
+
+            {/* Tile 4: Generate script -> Script Page */}
+            <Pressable
+              style={({ pressed }) => [styles.quickActionTile, pressed && styles.btnPressed]}
+              onPress={() => {
+                if (Platform.OS !== 'web') {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                }
+                if (onOpenScript) {
+                  onOpenScript();
+                } else if (onNavigateTab) {
+                  onNavigateTab('create');
+                } else {
+                  showToast('Navigating to Script Studio...');
+                }
               }}
             >
               <Text style={{ fontSize: 18, marginBottom: 6 }}>🪄</Text>
-              <Text style={styles.tileTitleText}>Generate AI script</Text>
+              <Text style={styles.tileTitleText}>Generate script</Text>
             </Pressable>
           </View>
 
