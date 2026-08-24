@@ -1094,7 +1094,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
     borderRadius: 100,
     borderWidth: 1,
-    borderColor: '#E2E8F0',
+    borderColor: '#EFECE6',
     paddingVertical: 7,
     paddingHorizontal: 14,
     shadowColor: '#582CDB',
@@ -1644,7 +1644,7 @@ const styles = StyleSheet.create({
     padding: 10,
     marginBottom: 8,
     borderWidth: 1,
-    borderColor: '#F1F5F9',
+    borderColor: '#F5F2EC',
   },
   notifCardUnread: {
     backgroundColor: '#F5F3FF',

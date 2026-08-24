@@ -907,7 +907,7 @@ const styles = StyleSheet.create({
   headerIconBtn: {
     width: 38,
     height: 38,
-    borderRadius: 19,
+    borderRadius: 20,
     backgroundColor: '#FFFFFF',
     borderWidth: 1,
     borderColor: '#EFECE6',
@@ -933,7 +933,7 @@ const styles = StyleSheet.create({
   profileAvatarWrapper: {
     width: 38,
     height: 38,
-    borderRadius: 19,
+    borderRadius: 20,
     borderWidth: 1.5,
     borderColor: '#F59E0B',
     position: 'relative',
@@ -941,7 +941,7 @@ const styles = StyleSheet.create({
   headerUserAvatar: {
     width: '100%',
     height: '100%',
-    borderRadius: 19,
+    borderRadius: 20,
   },
   avatarTinyGoldCheckPos: {
     position: 'absolute',
@@ -1226,7 +1226,7 @@ const styles = StyleSheet.create({
     gap: 6,
     backgroundColor: '#FAF8F5',
     borderWidth: 1,
-    borderColor: '#E2E8F0',
+    borderColor: '#EFECE6',
     paddingVertical: 10,
     borderRadius: 12,
   },

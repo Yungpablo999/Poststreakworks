@@ -63,7 +63,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     backgroundColor: '#FAF8F5',
     borderWidth: 1,
-    borderColor: '#E2E8F0',
+    borderColor: '#EFECE6',
   },
   disabled: {
     opacity: 0.5,

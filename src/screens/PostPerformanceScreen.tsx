@@ -1333,7 +1333,7 @@ const styles = StyleSheet.create({
     borderRadius: 14,
     backgroundColor: '#FAF8F5',
     borderWidth: 1,
-    borderColor: '#E2E8F0',
+    borderColor: '#EFECE6',
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -1838,7 +1838,7 @@ const styles = StyleSheet.create({
     borderRadius: 14,
     padding: 10,
     borderWidth: 1,
-    borderColor: '#E2E8F0',
+    borderColor: '#EFECE6',
   },
   repurposeItemHeader: {
     flexDirection: 'row',
@@ -1931,7 +1931,7 @@ const styles = StyleSheet.create({
     padding: 12,
     marginBottom: 14,
     borderWidth: 1,
-    borderColor: '#E2E8F0',
+    borderColor: '#EFECE6',
   },
   demographicCol: {
     flex: 1,

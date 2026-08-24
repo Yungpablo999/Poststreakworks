@@ -810,7 +810,7 @@ const styles = StyleSheet.create({
   headerLogoWrapper: {
     width: 38,
     height: 38,
-    borderRadius: 19,
+    borderRadius: 20,
     backgroundColor: 'rgba(255, 255, 255, 0.95)',
     justifyContent: 'center',
     alignItems: 'center',
@@ -845,7 +845,7 @@ const styles = StyleSheet.create({
   headerIconBtn: {
     width: 38,
     height: 38,
-    borderRadius: 19,
+    borderRadius: 20,
     backgroundColor: 'rgba(255, 255, 255, 0.92)',
     borderWidth: 1,
     borderColor: 'rgba(235, 230, 248, 0.9)',
@@ -861,7 +861,7 @@ const styles = StyleSheet.create({
   headerProfileBtn: {
     width: 38,
     height: 38,
-    borderRadius: 19,
+    borderRadius: 20,
     backgroundColor: 'rgba(237, 232, 252, 0.95)',
     borderWidth: 1.2,
     borderColor: 'rgba(221, 214, 254, 0.9)',

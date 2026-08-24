@@ -1119,7 +1119,7 @@ const styles = StyleSheet.create({
   backBtnCircle: {
     width: 38,
     height: 38,
-    borderRadius: 19,
+    borderRadius: 20,
     backgroundColor: '#FFFFFF',
     borderWidth: 1,
     borderColor: '#EFECE6',
@@ -1162,7 +1162,7 @@ const styles = StyleSheet.create({
   headerIconCircle: {
     width: 38,
     height: 38,
-    borderRadius: 19,
+    borderRadius: 20,
     backgroundColor: '#FFFFFF',
     borderWidth: 1,
     borderColor: '#EFECE6',
@@ -1190,7 +1190,7 @@ const styles = StyleSheet.create({
   headerProfileAvatar: {
     width: 38,
     height: 38,
-    borderRadius: 19,
+    borderRadius: 20,
   },
   headerProfileGoldRing: {
     position: 'absolute',
@@ -1294,7 +1294,7 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     backgroundColor: '#FFFFFF',
     borderWidth: 1,
-    borderColor: '#E2E8F0',
+    borderColor: '#EFECE6',
     alignItems: 'center',
     justifyContent: 'center',
     shadowColor: '#000',
@@ -1470,7 +1470,7 @@ const styles = StyleSheet.create({
   nicheFilterPill: {
     backgroundColor: '#FFFFFF',
     borderWidth: 1,
-    borderColor: '#E2E8F0',
+    borderColor: '#EFECE6',
     paddingHorizontal: 13,
     paddingVertical: 7,
     borderRadius: 20,
@@ -1779,7 +1779,7 @@ const styles = StyleSheet.create({
   modalHostAvatar: {
     width: 38,
     height: 38,
-    borderRadius: 19,
+    borderRadius: 20,
     borderWidth: 1.5,
     borderColor: '#F59E0B',
   },
@@ -1871,7 +1871,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#F8FAFC',
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: '#E2E8F0',
+    borderColor: '#EFECE6',
     marginBottom: 16,
   },
   modalCapacityText: {

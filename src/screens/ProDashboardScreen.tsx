@@ -1759,7 +1759,7 @@ const styles = StyleSheet.create({
   headerLogoWrapper: {
     width: 38,
     height: 38,
-    borderRadius: 19,
+    borderRadius: 20,
     backgroundColor: 'rgba(255, 255, 255, 0.95)',
     justifyContent: 'center',
     alignItems: 'center',
@@ -1794,7 +1794,7 @@ const styles = StyleSheet.create({
   headerIconBtn: {
     width: 38,
     height: 38,
-    borderRadius: 19,
+    borderRadius: 20,
     backgroundColor: '#FFFFFF',
     borderWidth: 1,
     borderColor: '#EFECE6',
@@ -1824,7 +1824,7 @@ const styles = StyleSheet.create({
   profilePhotoBtn: {
     width: 38,
     height: 38,
-    borderRadius: 19,
+    borderRadius: 20,
     backgroundColor: '#FFFFFF',
     borderWidth: 1.5,
     borderColor: '#EFECE6',
@@ -2301,9 +2301,9 @@ const styles = StyleSheet.create({
   voiceProgressCircle: {
     width: 42,
     height: 42,
-    borderRadius: 21,
+    borderRadius: 20,
     borderWidth: 2,
-    borderColor: '#E2E8F0',
+    borderColor: '#EFECE6',
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -2332,7 +2332,7 @@ const styles = StyleSheet.create({
   openStudioOutlineBtn: {
     backgroundColor: '#FFFFFF',
     borderWidth: 1,
-    borderColor: '#E2E8F0',
+    borderColor: '#EFECE6',
     paddingVertical: 12,
     borderRadius: 14,
     alignItems: 'center',
@@ -2473,7 +2473,7 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#F8FAFC',
     borderWidth: 1,
-    borderColor: '#E2E8F0',
+    borderColor: '#EFECE6',
     borderRadius: 12,
     paddingVertical: 8,
     paddingHorizontal: 4,
@@ -2564,7 +2564,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: '#E2E8F0',
+    borderColor: '#EFECE6',
   },
   monthNavChevronDisabled: {
     opacity: 0.4,
@@ -2623,7 +2623,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     backgroundColor: '#FFFFFF',
     borderWidth: 1,
-    borderColor: '#E2E8F0',
+    borderColor: '#EFECE6',
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -2775,7 +2775,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#F8FAFC',
     borderRadius: 10,
     borderWidth: 1,
-    borderColor: '#E2E8F0',
+    borderColor: '#EFECE6',
   },
   voiceToneChipActive: {
     backgroundColor: '#EDE9FE',
@@ -2793,7 +2793,7 @@ const styles = StyleSheet.create({
   voiceTextInput: {
     backgroundColor: '#F8FAFC',
     borderWidth: 1,
-    borderColor: '#E2E8F0',
+    borderColor: '#EFECE6',
     borderRadius: 12,
     padding: 12,
     fontSize: 13,

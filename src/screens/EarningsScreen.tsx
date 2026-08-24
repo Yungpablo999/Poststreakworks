@@ -2125,7 +2125,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     backgroundColor: '#FFFFFF',
     borderWidth: 1,
-    borderColor: '#E2E8F0',
+    borderColor: '#EFECE6',
   },
   platformSelectChipActive: {
     backgroundColor: '#EDE9FE',

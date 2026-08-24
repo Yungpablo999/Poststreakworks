@@ -1117,7 +1117,7 @@ const styles = StyleSheet.create({
   openWeekPill: {
     backgroundColor: '#FFFFFF',
     borderWidth: 1,
-    borderColor: '#E2E8F0',
+    borderColor: '#EFECE6',
     paddingHorizontal: 10,
     paddingVertical: 5,
     borderRadius: 8,
@@ -1222,7 +1222,7 @@ const styles = StyleSheet.create({
   jarvisIconCircle: {
     width: 38,
     height: 38,
-    borderRadius: 19,
+    borderRadius: 20,
     backgroundColor: '#EDE9FE',
     alignItems: 'center',
     justifyContent: 'center',
@@ -1353,7 +1353,7 @@ const styles = StyleSheet.create({
   memberAvatar: {
     width: 42,
     height: 42,
-    borderRadius: 21,
+    borderRadius: 20,
   },
   hostVerifiedDot: {
     position: 'absolute',
@@ -1398,7 +1398,7 @@ const styles = StyleSheet.create({
     paddingVertical: 4,
     borderRadius: 8,
     borderWidth: 1,
-    borderColor: '#E2E8F0',
+    borderColor: '#EFECE6',
   },
   memberStreakText: {
     fontSize: 12,
@@ -1428,7 +1428,7 @@ const styles = StyleSheet.create({
     borderRadius: 13,
     backgroundColor: '#FFFFFF',
     borderWidth: 1.5,
-    borderColor: '#E2E8F0',
+    borderColor: '#EFECE6',
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -1500,7 +1500,7 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#FAF8F5',
     borderWidth: 1,
-    borderColor: '#E2E8F0',
+    borderColor: '#EFECE6',
     paddingVertical: 7,
     borderRadius: 8,
     alignItems: 'center',
@@ -1600,7 +1600,7 @@ const styles = StyleSheet.create({
   quickPromptChip: {
     backgroundColor: '#FAF8F5',
     borderWidth: 1,
-    borderColor: '#E2E8F0',
+    borderColor: '#EFECE6',
     paddingHorizontal: 9,
     paddingVertical: 4,
     borderRadius: 10,
@@ -1650,7 +1650,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     paddingVertical: 10,
     borderWidth: 1,
-    borderColor: '#F1F5F9',
+    borderColor: '#F5F2EC',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.02,
@@ -1716,7 +1716,7 @@ const styles = StyleSheet.create({
     marginTop: 10,
     marginHorizontal: 10,
     borderWidth: 1,
-    borderColor: '#E2E8F0',
+    borderColor: '#EFECE6',
   },
   chatAttachBtn: {
     width: 28,
@@ -1830,7 +1830,7 @@ const styles = StyleSheet.create({
   manageOptionRow: {
     backgroundColor: '#FAF8F5',
     borderWidth: 1,
-    borderColor: '#E2E8F0',
+    borderColor: '#EFECE6',
     borderRadius: 12,
     paddingVertical: 12,
     paddingHorizontal: 14,

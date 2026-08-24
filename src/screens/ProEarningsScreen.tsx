@@ -1471,7 +1471,7 @@ export const ProEarningsScreen: React.FC<ProEarningsScreenProps> = ({
 
                 {/* Close Button */}
                 <Pressable
-                  style={[styles.modalFullBtn, { marginTop: 12, backgroundColor: '#FAF8F5', borderWidth: 1, borderColor: '#E2E8F0' }]}
+                  style={[styles.modalFullBtn, { marginTop: 12, backgroundColor: '#FAF8F5', borderWidth: 1, borderColor: '#EFECE6' }]}
                   onPress={() => setShowExpandedEarningsModal(false)}
                 >
                   <Text style={[styles.modalFullBtnText, { color: '#64748B' }]}>Close Expanded View</Text>
@@ -2015,7 +2015,7 @@ const styles = StyleSheet.create({
   headerIconBtn: {
     width: 38,
     height: 38,
-    borderRadius: 19,
+    borderRadius: 20,
     backgroundColor: '#FFFFFF',
     borderWidth: 1,
     borderColor: '#EFECE6',
@@ -2041,7 +2041,7 @@ const styles = StyleSheet.create({
   headerProfileBtn: {
     width: 38,
     height: 38,
-    borderRadius: 19,
+    borderRadius: 20,
     borderWidth: 1.5,
     borderColor: '#F59E0B',
     overflow: 'hidden',
@@ -2484,7 +2484,7 @@ const styles = StyleSheet.create({
     borderRadius: 14,
     padding: 12,
     borderWidth: 1,
-    borderColor: '#E2E8F0',
+    borderColor: '#EFECE6',
     marginTop: 6,
   },
   ledgerTaxTitle: {
@@ -2730,7 +2730,7 @@ const styles = StyleSheet.create({
   openPassBtn: {
     backgroundColor: '#FFFFFF',
     borderWidth: 1.5,
-    borderColor: '#E2E8F0',
+    borderColor: '#EFECE6',
     paddingVertical: 12,
     borderRadius: 14,
     alignItems: 'center',
@@ -3059,7 +3059,7 @@ const styles = StyleSheet.create({
     gap: 8,
     backgroundColor: '#FFFFFF',
     borderWidth: 1.5,
-    borderColor: '#E2E8F0',
+    borderColor: '#EFECE6',
     paddingVertical: 13,
     borderRadius: 14,
     marginBottom: 16,
@@ -3093,7 +3093,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     backgroundColor: '#FFFFFF',
     borderWidth: 1,
-    borderColor: '#E2E8F0',
+    borderColor: '#EFECE6',
     justifyContent: 'center',
     alignItems: 'center',
   },

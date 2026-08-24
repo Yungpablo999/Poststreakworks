@@ -2093,7 +2093,7 @@ export const ProGrowthScreen: React.FC<ProGrowthScreenProps> = ({
 
                 {/* Close Button */}
                 <Pressable
-                  style={[styles.modalFullBtn, { marginTop: 8, backgroundColor: '#FAF8F5', borderWidth: 1, borderColor: '#E2E8F0' }]}
+                  style={[styles.modalFullBtn, { marginTop: 8, backgroundColor: '#FAF8F5', borderWidth: 1, borderColor: '#EFECE6' }]}
                   onPress={() => setShowReportModal(false)}
                 >
                   <Text style={[styles.modalFullBtnText, { color: '#64748B' }]}>Close</Text>
@@ -2429,7 +2429,7 @@ export const ProGrowthScreen: React.FC<ProGrowthScreenProps> = ({
 
                 {/* Close Button */}
                 <Pressable
-                  style={[styles.modalFullBtn, { marginTop: 8, backgroundColor: '#FAF8F5', borderWidth: 1, borderColor: '#E2E8F0' }]}
+                  style={[styles.modalFullBtn, { marginTop: 8, backgroundColor: '#FAF8F5', borderWidth: 1, borderColor: '#EFECE6' }]}
                   onPress={() => setShowPostDetailModal(false)}
                 >
                   <Text style={[styles.modalFullBtnText, { color: '#64748B' }]}>Close Overview</Text>
@@ -2478,7 +2478,7 @@ export const ProGrowthScreen: React.FC<ProGrowthScreenProps> = ({
                 </Pressable>
 
                 <Pressable
-                  style={[styles.modalFullBtn, { backgroundColor: '#FAF8F5', borderWidth: 1, borderColor: '#E2E8F0' }]}
+                  style={[styles.modalFullBtn, { backgroundColor: '#FAF8F5', borderWidth: 1, borderColor: '#EFECE6' }]}
                   onPress={() => setShowSlotSetModal(false)}
                 >
                   <Text style={[styles.modalFullBtnText, { color: '#64748B' }]}>Done</Text>
@@ -2669,7 +2669,7 @@ const styles = StyleSheet.create({
   headerLogoWrapper: {
     width: 38,
     height: 38,
-    borderRadius: 19,
+    borderRadius: 20,
     backgroundColor: 'rgba(255, 255, 255, 0.95)',
     justifyContent: 'center',
     alignItems: 'center',
@@ -2704,7 +2704,7 @@ const styles = StyleSheet.create({
   headerIconBtn: {
     width: 38,
     height: 38,
-    borderRadius: 19,
+    borderRadius: 20,
     backgroundColor: '#FFFFFF',
     borderWidth: 1,
     borderColor: '#EFECE6',
@@ -2734,7 +2734,7 @@ const styles = StyleSheet.create({
   profilePhotoBtn: {
     width: 38,
     height: 38,
-    borderRadius: 19,
+    borderRadius: 20,
     backgroundColor: '#FFFFFF',
     borderWidth: 1.5,
     borderColor: '#EFECE6',
@@ -2877,7 +2877,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     backgroundColor: '#F1F5F9',
     borderWidth: 1,
-    borderColor: '#E2E8F0',
+    borderColor: '#EFECE6',
   },
   graphTimeframePillActive: {
     backgroundColor: '#582CDB',
@@ -2937,7 +2937,7 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     paddingHorizontal: 6,
     borderWidth: 1,
-    borderColor: '#E2E8F0',
+    borderColor: '#EFECE6',
     marginBottom: 12,
   },
   horizontalGraphScrollContent: {
@@ -3238,7 +3238,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     backgroundColor: '#F8FAFC',
     borderWidth: 1,
-    borderColor: '#E2E8F0',
+    borderColor: '#EFECE6',
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -3266,7 +3266,7 @@ const styles = StyleSheet.create({
   addPlatformOutlineBtn: {
     backgroundColor: '#FFFFFF',
     borderWidth: 1,
-    borderColor: '#E2E8F0',
+    borderColor: '#EFECE6',
     paddingVertical: 11,
     borderRadius: 12,
     alignItems: 'center',
@@ -3544,7 +3544,7 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     marginTop: 10,
     borderWidth: 1,
-    borderColor: '#E2E8F0',
+    borderColor: '#EFECE6',
   },
   slotConfirmedBadgeText: {
     fontSize: 10,
@@ -4151,7 +4151,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     backgroundColor: '#FFFFFF',
     borderWidth: 1,
-    borderColor: '#E2E8F0',
+    borderColor: '#EFECE6',
   },
   platformSelectChipActive: {
     backgroundColor: '#EDE9FE',

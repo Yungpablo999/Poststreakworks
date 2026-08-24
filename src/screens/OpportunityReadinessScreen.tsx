@@ -1290,7 +1290,7 @@ const styles = StyleSheet.create({
   percentCircleBadge: {
     width: 38,
     height: 38,
-    borderRadius: 19,
+    borderRadius: 20,
     borderWidth: 2.5,
     borderColor: '#582CDB',
     justifyContent: 'center',
@@ -1325,7 +1325,7 @@ const styles = StyleSheet.create({
     paddingVertical: 5,
     paddingHorizontal: 10,
     borderWidth: 1,
-    borderColor: '#E2E8F0',
+    borderColor: '#EFECE6',
   },
   tagGreyText: {
     fontSize: 11,
@@ -1379,7 +1379,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: '#E2E8F0',
+    borderColor: '#EFECE6',
   },
   platformBadgeLabel: {
     fontSize: 9,
@@ -1639,7 +1639,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     backgroundColor: '#FFFFFF',
     borderWidth: 1,
-    borderColor: '#E2E8F0',
+    borderColor: '#EFECE6',
   },
   platformSelectChipActive: {
     backgroundColor: '#EDE9FE',

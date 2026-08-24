@@ -1661,7 +1661,7 @@ const styles = StyleSheet.create({
   tagChip: {
     backgroundColor: '#F8FAFC',
     borderWidth: 1,
-    borderColor: '#E2E8F0',
+    borderColor: '#EFECE6',
     paddingVertical: 4,
     paddingHorizontal: 9,
     borderRadius: 8,
@@ -1755,7 +1755,7 @@ const styles = StyleSheet.create({
     borderRadius: 14,
     padding: 12,
     borderWidth: 1,
-    borderColor: '#E2E8F0',
+    borderColor: '#EFECE6',
   },
   roleColHeader: {
     flexDirection: 'row',
@@ -2093,7 +2093,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#F8FAFC',
     borderRadius: 20,
     borderWidth: 1,
-    borderColor: '#E2E8F0',
+    borderColor: '#EFECE6',
     padding: 16,
     marginBottom: 16,
   },
@@ -2375,7 +2375,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#F8FAFC',
     borderRadius: 14,
     borderWidth: 1.5,
-    borderColor: '#E2E8F0',
+    borderColor: '#EFECE6',
     padding: 10,
   },
   slotItemBoxSelected: {
@@ -2431,7 +2431,7 @@ const styles = StyleSheet.create({
   scheduleSelectChip: {
     backgroundColor: '#F8FAFC',
     borderWidth: 1,
-    borderColor: '#E2E8F0',
+    borderColor: '#EFECE6',
     paddingVertical: 6,
     paddingHorizontal: 11,
     borderRadius: 10,
@@ -2520,7 +2520,7 @@ const styles = StyleSheet.create({
     padding: 10,
     marginBottom: 8,
     borderWidth: 1,
-    borderColor: '#F1F5F9',
+    borderColor: '#F5F2EC',
   },
   notifCardUnread: {
     backgroundColor: '#F5F3FF',

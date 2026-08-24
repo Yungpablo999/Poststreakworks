@@ -1312,7 +1312,7 @@ const styles = StyleSheet.create({
   headerLogoWrapper: {
     width: 38,
     height: 38,
-    borderRadius: 19,
+    borderRadius: 20,
     backgroundColor: 'rgba(255, 255, 255, 0.95)',
     justifyContent: 'center',
     alignItems: 'center',
@@ -1366,7 +1366,7 @@ const styles = StyleSheet.create({
   headerUserAvatar: {
     width: 38,
     height: 38,
-    borderRadius: 19,
+    borderRadius: 20,
     borderWidth: 2,
     borderColor: '#F59E0B',
   },
@@ -1408,7 +1408,7 @@ const styles = StyleSheet.create({
   filterTabPill: {
     backgroundColor: '#FFFFFF',
     borderWidth: 1,
-    borderColor: '#E2E8F0',
+    borderColor: '#EFECE6',
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 10,
@@ -1674,7 +1674,7 @@ const styles = StyleSheet.create({
   chatHeaderAvatar: {
     width: 38,
     height: 38,
-    borderRadius: 19,
+    borderRadius: 20,
   },
   chatTinyGoldCheckPos: {
     position: 'absolute',
@@ -1696,7 +1696,7 @@ const styles = StyleSheet.create({
     borderRadius: 17,
     backgroundColor: '#F8FAFC',
     borderWidth: 1,
-    borderColor: '#E2E8F0',
+    borderColor: '#EFECE6',
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -1710,7 +1710,7 @@ const styles = StyleSheet.create({
   quickAiActionPill: {
     backgroundColor: '#FFFFFF',
     borderWidth: 1,
-    borderColor: '#E2E8F0',
+    borderColor: '#EFECE6',
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 8,
@@ -1878,7 +1878,7 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#F8FAFC',
     borderWidth: 1,
-    borderColor: '#E2E8F0',
+    borderColor: '#EFECE6',
     borderRadius: 18,
     paddingHorizontal: 14,
     paddingVertical: 8,

@@ -429,7 +429,7 @@ const styles = StyleSheet.create({
   headerAvatar: {
     width: 42,
     height: 42,
-    borderRadius: 21,
+    borderRadius: 20,
     borderWidth: 2,
     borderColor: '#FFFFFF',
   },

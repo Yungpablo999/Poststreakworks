@@ -668,7 +668,7 @@ const styles = StyleSheet.create({
   headerLogoWrapper: {
     width: 38,
     height: 38,
-    borderRadius: 19,
+    borderRadius: 20,
     backgroundColor: 'rgba(255, 255, 255, 0.95)',
     justifyContent: 'center',
     alignItems: 'center',
@@ -716,7 +716,7 @@ const styles = StyleSheet.create({
   headerUserAvatar: {
     width: 38,
     height: 38,
-    borderRadius: 19,
+    borderRadius: 20,
     borderWidth: 2,
     borderColor: '#F59E0B',
   },
@@ -876,7 +876,7 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#FFFFFF',
     borderWidth: 1,
-    borderColor: '#E2E8F0',
+    borderColor: '#EFECE6',
     paddingVertical: 12,
     borderRadius: 12,
     alignItems: 'center',
@@ -969,7 +969,7 @@ const styles = StyleSheet.create({
   blueprintMiniChip: {
     backgroundColor: '#FAF8F5',
     borderWidth: 1,
-    borderColor: '#E2E8F0',
+    borderColor: '#EFECE6',
     paddingHorizontal: 10,
     paddingVertical: 6,
     borderRadius: 8,
@@ -1014,7 +1014,7 @@ const styles = StyleSheet.create({
   traitBadge: {
     backgroundColor: '#FFFFFF',
     borderWidth: 1,
-    borderColor: '#E2E8F0',
+    borderColor: '#EFECE6',
     paddingHorizontal: 10,
     paddingVertical: 4,
     borderRadius: 8,
@@ -1077,7 +1077,7 @@ const styles = StyleSheet.create({
   scheduleForTimeBtn: {
     backgroundColor: '#FAF8F5',
     borderWidth: 1,
-    borderColor: '#E2E8F0',
+    borderColor: '#EFECE6',
     paddingVertical: 12,
     borderRadius: 12,
     alignItems: 'center',
