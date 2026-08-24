@@ -1248,13 +1248,13 @@ export const ProGrowthScreen: React.FC<ProGrowthScreenProps> = ({
           {/* CARD 7: JARVIS INTELLIGENCE                                  */}
           {/* ============================================================ */}
           <View style={styles.jarvisIntelligenceCard}>
-            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
-              <Text style={styles.jarvisIntelligenceTag}>JARVIS INTELLIGENCE</Text>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 8 }}>
               <Image
                 source={require('../../assets/images/jarvis-core-flame.png')}
-                style={{ width: 26, height: 26 }}
+                style={{ width: 22, height: 22 }}
                 resizeMode="contain"
               />
+              <Text style={styles.jarvisIntelligenceTag}>JARVIS INTELLIGENCE</Text>
             </View>
 
             <Text style={styles.jarvisIntelligenceTitle}>
