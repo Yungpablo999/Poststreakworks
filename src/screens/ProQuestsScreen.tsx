@@ -736,64 +736,6 @@ export const ProQuestsScreen: React.FC<ProQuestsScreenProps> = ({
               <Text style={styles.chevronGray}>›</Text>
             </Pressable>
           </View>
-
-          {/* ============================================================ */}
-          {/* CARD 7: PRIORITY OPPORTUNITY MATCHING (Dark Pro Card)        */}
-          {/* ============================================================ */}
-          <View style={styles.darkOpportunityCard}>
-            <View style={styles.darkCardHeaderRow}>
-              <Text style={styles.darkCardTag}>PRIORITY OPPORTUNITY MATCHING</Text>
-              <Text style={{ fontSize: 18 }}>👑</Text>
-            </View>
-
-            <Text style={styles.darkCardTitle}>Priority Opportunity Matching</Text>
-            <Text style={styles.darkCardDesc}>
-              Your Creator Passport is ranking in the top 2% for lifestyle brand opportunities in West Africa.
-            </Text>
-
-            <View style={styles.darkMetricsStack}>
-              {/* Metric 1 */}
-              <View style={styles.darkMetricRow}>
-                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-                  <Text style={{ fontSize: 14 }}>🛡️</Text>
-                  <Text style={styles.darkMetricLabel}>MATCH SCORE READINESS</Text>
-                </View>
-                <Text style={styles.darkMetricValPurple}>92%</Text>
-              </View>
-
-              {/* Metric 2 */}
-              <View style={styles.darkMetricRow}>
-                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-                  <Text style={{ fontSize: 14 }}>🤝</Text>
-                  <Text style={styles.darkMetricLabel}>COLLAB MATCHES</Text>
-                </View>
-                <Text style={styles.darkMetricValLight}>4 Available</Text>
-              </View>
-
-              {/* Metric 3 */}
-              <View style={styles.darkMetricRow}>
-                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-                  <Text style={{ fontSize: 14 }}>💰</Text>
-                  <Text style={styles.darkMetricLabel}>AVG. BOUNTY FIT</Text>
-                </View>
-                <Text style={styles.darkMetricValGreen}>$450–$1,200</Text>
-              </View>
-            </View>
-
-            <Pressable
-              style={({ pressed }) => [styles.viewOpportunitiesSolidBtn, pressed && styles.btnPressed]}
-              onPress={() => {
-                if (onOpenOpportunities) {
-                  onOpenOpportunities();
-                } else if (onNavigateTab) {
-                  onNavigateTab('match');
-                }
-              }}
-            >
-              <Text style={styles.viewOpportunitiesBtnText}>View Matching Opportunities 👑 ➔</Text>
-            </Pressable>
-          </View>
-
             </>
           )}
 
