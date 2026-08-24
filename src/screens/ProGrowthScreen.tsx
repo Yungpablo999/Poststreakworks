@@ -100,6 +100,210 @@ const INITIAL_NOTIFICATIONS: NotificationItem[] = [
   },
 ];
 
+// DYNAMIC GRAPH CONFIGURATIONS ACROSS TIMEFRAMES (7D, 14D, 30D, 90D)
+const TIMEFRAME_CONFIGS = {
+  '7D': {
+    daysCount: 7,
+    viewportWidth: 460,
+    labels: [
+      { text: 'Mon (May 24)', x: 10 },
+      { text: 'Wed (May 26)', x: 140 },
+      { text: 'Fri (May 28)', x: 270 },
+      { text: 'Sun (May 30)', x: 380 },
+    ],
+    stepSpacing: 65,
+    getPoint: (i: number, type: 'growth30d' | 'audience') => {
+      const days = ['Mon, May 24', 'Tue, May 25', 'Wed, May 26', 'Thu, May 27', 'Fri, May 28', 'Sat, May 29', 'Sun, May 30'];
+      if (type === 'growth30d') {
+        const reaches = [18.2, 22.4, 28.6, 34.1, 41.5, 48.0, 54.2];
+        const followers = [65, 82, 110, 145, 190, 220, 260];
+        const yCoords = [140, 125, 105, 85, 60, 45, 30];
+        return {
+          date: days[i] || `Day ${i + 1}`,
+          reach: `${reaches[i] || 25}K Reach`,
+          delta: `+${followers[i] || 80} Followers (🔥 7D Peak)`,
+          yPos: yCoords[i] || 90,
+        };
+      } else {
+        const audiences = [143100, 143320, 143580, 143890, 144120, 144240, 144320];
+        const dailyGains = [85, 92, 115, 140, 95, 78, 80];
+        const yCoords = [145, 130, 110, 85, 60, 40, 25];
+        return {
+          date: days[i] || `Day ${i + 1}`,
+          reach: `${(audiences[i] || 144000).toLocaleString()} Audience`,
+          delta: `+${dailyGains[i] || 85} Today (▲ Surge)`,
+          yPos: yCoords[i] || 90,
+        };
+      }
+    },
+    svgPath: (type: 'growth30d' | 'audience') =>
+      type === 'growth30d'
+        ? 'M0,140 C80,130 160,110 240,80 C320,55 390,40 460,30'
+        : 'M0,145 C80,132 160,112 240,82 C320,58 390,36 460,25',
+    areaPath: (type: 'growth30d' | 'audience') =>
+      type === 'growth30d'
+        ? 'M0,140 C80,130 160,110 240,80 C320,55 390,40 460,30 L460,170 L0,170 Z'
+        : 'M0,145 C80,132 160,112 240,82 C320,58 390,36 460,25 L460,170 L0,170 Z',
+    weeklyMetrics: [
+      { title: 'MON-TUE', val: '+147 👤', sub: '40.6k reach' },
+      { title: 'WED-THU', val: '+255 👤', sub: '62.7k reach' },
+      { title: 'FRI-SAT (🔥)', val: '+410 👤', sub: '89.5k peak', isPeak: true },
+      { title: 'SUN', val: '+260 👤', sub: '54.2k reach' },
+    ],
+  },
+  '14D': {
+    daysCount: 14,
+    viewportWidth: 640,
+    labels: [
+      { text: 'May 17', x: 10 },
+      { text: 'May 20', x: 140 },
+      { text: 'May 24', x: 300 },
+      { text: 'May 27', x: 450 },
+      { text: 'May 30', x: 570 },
+    ],
+    stepSpacing: 44,
+    getPoint: (i: number, type: 'growth30d' | 'audience') => {
+      if (type === 'growth30d') {
+        const reachVal = (14.0 + i * 2.8 + Math.sin(i * 0.9) * 3).toFixed(1);
+        const followers = 50 + i * 14 + Math.floor(Math.cos(i) * 10);
+        const yPos = 145 - (i / 13) * 110 + Math.sin(i * 0.8) * 8;
+        return {
+          date: `May ${i + 17}, 2024`,
+          reach: `${reachVal}K Reach`,
+          delta: `+${followers} Followers`,
+          yPos,
+        };
+      } else {
+        const audienceVal = (142800 + i * 115).toLocaleString();
+        const dailyGain = 60 + Math.floor(Math.sin(i * 0.7) * 20 + i * 3);
+        const yPos = 150 - (i / 13) * 120 + Math.sin(i * 0.5) * 5;
+        return {
+          date: `May ${i + 17}, 2024`,
+          reach: `${audienceVal} Audience`,
+          delta: `+${dailyGain} Today (▲ Surge)`,
+          yPos,
+        };
+      }
+    },
+    svgPath: (type: 'growth30d' | 'audience') =>
+      type === 'growth30d'
+        ? 'M0,145 C110,135 220,115 330,90 C440,75 540,48 640,35'
+        : 'M0,150 C110,138 220,118 330,85 C440,65 540,44 640,30',
+    areaPath: (type: 'growth30d' | 'audience') =>
+      type === 'growth30d'
+        ? 'M0,145 C110,135 220,115 330,90 C440,75 540,48 640,35 L640,170 L0,170 Z'
+        : 'M0,150 C110,138 220,118 330,85 C440,65 540,44 640,30 L640,170 L0,170 Z',
+    weeklyMetrics: [
+      { title: 'DAYS 1-4', val: '+290 👤', sub: '18.2k reach' },
+      { title: 'DAYS 5-8', val: '+380 👤', sub: '29.5k reach' },
+      { title: 'DAYS 9-12 (🔥)', val: '+520 👤', sub: '44.8k peak', isPeak: true },
+      { title: 'DAYS 13-14', val: '+320 👤', sub: '38.4k reach' },
+    ],
+  },
+  '30D': {
+    daysCount: 30,
+    viewportWidth: 950,
+    labels: [
+      { text: 'May 1', x: 10 },
+      { text: 'May 5', x: 130 },
+      { text: 'May 10', x: 280 },
+      { text: 'May 15', x: 440 },
+      { text: 'May 20', x: 600 },
+      { text: 'May 25', x: 750 },
+      { text: 'May 30', x: 890 },
+    ],
+    stepSpacing: 31.5,
+    getPoint: (i: number, type: 'growth30d' | 'audience') => {
+      if (type === 'growth30d') {
+        const reachVal = (12.4 + i * 1.1 + Math.sin(i * 0.7) * 2.5).toFixed(1);
+        const followers = 40 + i * 3 + Math.floor(Math.sin(i) * 6);
+        const yPos = 130 - (i / 29) * 75 + Math.sin(i * 0.7) * 18;
+        return {
+          date: `May ${i + 1}, 2024`,
+          reach: `${reachVal}K Reach`,
+          delta: `+${followers} New Followers`,
+          yPos,
+        };
+      } else {
+        const audienceVal = (141840 + i * 85).toLocaleString();
+        const deltaVal = 45 + Math.floor(i * 2.8) + Math.floor(Math.sin(i) * 5);
+        const yPos = 150 - (i / 29) * 125 + Math.sin(i * 0.5) * 6;
+        return {
+          date: `May ${i + 1}, 2024`,
+          reach: `${audienceVal} Audience`,
+          delta: `+${deltaVal} Today (▲ Surge)`,
+          yPos,
+        };
+      }
+    },
+    svgPath: (type: 'growth30d' | 'audience') =>
+      type === 'growth30d'
+        ? 'M0,130 C120,150 220,90 320,110 C420,130 520,70 620,85 C720,100 820,40 950,55'
+        : 'M0,150 C120,135 220,120 320,100 C420,90 520,75 620,60 C720,45 820,35 950,25',
+    areaPath: (type: 'growth30d' | 'audience') =>
+      type === 'growth30d'
+        ? 'M0,130 C120,150 220,90 320,110 C420,130 520,70 620,85 C720,100 820,40 950,55 L950,170 L0,170 Z'
+        : 'M0,150 C120,135 220,120 320,100 C420,90 520,75 620,60 C720,45 820,35 950,25 L950,170 L0,170 Z',
+    weeklyMetrics: [
+      { title: 'WEEK 1', val: '+540 👤', sub: '12.4k reach' },
+      { title: 'WEEK 2', val: '+680 👤', sub: '28.1k reach' },
+      { title: 'WEEK 3 (🔥)', val: '+720 👤', sub: '45.2k peak', isPeak: true },
+      { title: 'WEEK 4', val: '+540 👤', sub: '32.8k reach' },
+    ],
+  },
+  '90D': {
+    daysCount: 12,
+    viewportWidth: 820,
+    labels: [
+      { text: 'Mar W1', x: 10 },
+      { text: 'Mar W3', x: 140 },
+      { text: 'Apr W1', x: 280 },
+      { text: 'Apr W3', x: 420 },
+      { text: 'May W1', x: 560 },
+      { text: 'May W4', x: 740 },
+    ],
+    stepSpacing: 65,
+    getPoint: (i: number, type: 'growth30d' | 'audience') => {
+      const weeks = ['Mar W1', 'Mar W2', 'Mar W3', 'Mar W4', 'Apr W1', 'Apr W2', 'Apr W3', 'Apr W4', 'May W1', 'May W2', 'May W3', 'May W4'];
+      if (type === 'growth30d') {
+        const reaches = [38.2, 45.1, 58.4, 72.0, 84.6, 96.2, 105.0, 114.8, 122.5, 131.0, 142.4, 155.0];
+        const followers = [320, 410, 520, 680, 790, 890, 1020, 1150, 1240, 1380, 1520, 1680];
+        const yPos = 155 - (i / 11) * 125;
+        return {
+          date: `Quarterly ${weeks[i] || `Week ${i + 1}`}`,
+          reach: `${reaches[i] || 80}K Total Reach`,
+          delta: `+${followers[i] || 500} Net Followers`,
+          yPos,
+        };
+      } else {
+        const audiences = [128400, 129800, 131400, 133500, 135800, 138200, 140100, 141900, 142800, 143500, 144100, 144320];
+        const deltas = [350, 420, 510, 640, 720, 810, 930, 1040, 1120, 1250, 1380, 1510];
+        const yPos = 160 - (i / 11) * 135;
+        return {
+          date: `Quarterly ${weeks[i] || `Week ${i + 1}`}`,
+          reach: `${(audiences[i] || 140000).toLocaleString()} Audience`,
+          delta: `+${deltas[i] || 700} Followers This Week`,
+          yPos,
+        };
+      }
+    },
+    svgPath: (type: 'growth30d' | 'audience') =>
+      type === 'growth30d'
+        ? 'M0,155 C200,135 400,95 600,60 C700,45 760,35 820,30'
+        : 'M0,160 C200,140 400,105 600,65 C700,45 760,35 820,25',
+    areaPath: (type: 'growth30d' | 'audience') =>
+      type === 'growth30d'
+        ? 'M0,155 C200,135 400,95 600,60 C700,45 760,35 820,30 L820,170 L0,170 Z'
+        : 'M0,160 C200,140 400,105 600,65 C700,45 760,35 820,25 L820,170 L0,170 Z',
+    weeklyMetrics: [
+      { title: 'MONTH 1 (MAR)', val: '+2,410 👤', sub: '184k reach' },
+      { title: 'MONTH 2 (APR)', val: '+3,820 👤', sub: '312k reach' },
+      { title: 'MONTH 3 (MAY 🔥)', val: '+4,580 👤', sub: '431k peak', isPeak: true },
+      { title: '90D TOTAL', val: '+10.8K 👤', sub: '927k reach' },
+    ],
+  },
+};
+
 export const ProGrowthScreen: React.FC<ProGrowthScreenProps> = ({
   onBackToDashboard,
   onLogout,
@@ -828,9 +1032,12 @@ export const ProGrowthScreen: React.FC<ProGrowthScreenProps> = ({
                     style={[styles.graphTimeframePill, graphTimeframe === tf && styles.graphTimeframePillActive]}
                     onPress={() => {
                       if (Platform.OS !== 'web') {
-                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
                       }
                       setGraphTimeframe(tf);
+                      // Reset selected node to end of range
+                      const maxIndex = TIMEFRAME_CONFIGS[tf].daysCount - 1;
+                      setSelectedGraphDayIndex(maxIndex);
                     }}
                   >
                     <Text style={[styles.graphTimeframeText, graphTimeframe === tf && styles.graphTimeframeTextActive]}>
@@ -841,167 +1048,159 @@ export const ProGrowthScreen: React.FC<ProGrowthScreenProps> = ({
               </View>
 
               {/* Active Point Live Inspection Banner */}
-              <View style={styles.graphActivePointCard}>
-                <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <View>
-                    <Text style={styles.graphActivePointDate}>📅 May {selectedGraphDayIndex + 1}, 2024</Text>
-                    <Text style={styles.graphActivePointSub}>
-                      {expandedGraphType === 'growth30d' ? 'Daily Reach & Engagement Point' : 'Total Audience Baseline'}
-                    </Text>
+              {(() => {
+                const curCfg = TIMEFRAME_CONFIGS[graphTimeframe] || TIMEFRAME_CONFIGS['30D'];
+                const safeIdx = Math.min(selectedGraphDayIndex, curCfg.daysCount - 1);
+                const activePt = curCfg.getPoint(safeIdx, expandedGraphType);
+
+                return (
+                  <View style={styles.graphActivePointCard}>
+                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <View>
+                        <Text style={styles.graphActivePointDate}>📅 {activePt.date}</Text>
+                        <Text style={styles.graphActivePointSub}>
+                          {expandedGraphType === 'growth30d' ? 'Velocity & Engagement Node' : 'Audience Expansion Trend'}
+                        </Text>
+                      </View>
+                      <View style={{ alignItems: 'flex-end' }}>
+                        <Text style={styles.graphActivePointValue}>{activePt.reach}</Text>
+                        <Text style={styles.graphActivePointDelta}>{activePt.delta}</Text>
+                      </View>
+                    </View>
                   </View>
-                  <View style={{ alignItems: 'flex-end' }}>
-                    <Text style={styles.graphActivePointValue}>
-                      {expandedGraphType === 'growth30d'
-                        ? `${(12.4 + (selectedGraphDayIndex * 1.1)).toFixed(1)}K Reach`
-                        : `${(141840 + selectedGraphDayIndex * 85).toLocaleString()} Audience`}
-                    </Text>
-                    <Text style={styles.graphActivePointDelta}>
-                      {expandedGraphType === 'growth30d'
-                        ? `+${40 + selectedGraphDayIndex * 3} New Followers`
-                        : `+${45 + Math.floor(selectedGraphDayIndex * 2.8)} Today (▲ Surge)`}
-                    </Text>
-                  </View>
-                </View>
-              </View>
+                );
+              })()}
 
               {/* Scroll Instruction Hint */}
               <View style={styles.scrollGraphHintRow}>
-                <Text style={styles.scrollGraphHintText}>↔ Swipe graph horizontally to inspect all 30 days & nodes</Text>
+                <Text style={styles.scrollGraphHintText}>
+                  ↔ Swipe {graphTimeframe} graph horizontally to inspect all {TIMEFRAME_CONFIGS[graphTimeframe]?.daysCount || 30} live data points
+                </Text>
               </View>
 
               {/* HORIZONTAL SCROLLABLE LIVE GRAPH */}
-              <View style={styles.horizontalGraphViewport}>
-                <ScrollView
-                  horizontal={true}
-                  showsHorizontalScrollIndicator={true}
-                  bounces={true}
-                  contentContainerStyle={styles.horizontalGraphScrollContent}
-                >
-                  <View style={{ width: 950, height: 210, position: 'relative' }}>
-                    {/* SVG Graphic Wave Lines & Grid */}
-                    <Svg width={950} height={190} viewBox="0 0 950 190">
-                      <Defs>
-                        <SvgLinearGradient id="liveWaveGrad" x1="0" y1="0" x2="0" y2="1">
-                          <Stop
-                            offset="0"
-                            stopColor={expandedGraphType === 'growth30d' ? '#582CDB' : '#7C3AED'}
-                            stopOpacity="0.35"
+              {(() => {
+                const curCfg = TIMEFRAME_CONFIGS[graphTimeframe] || TIMEFRAME_CONFIGS['30D'];
+                const vWidth = curCfg.viewportWidth;
+                const safeIdx = Math.min(selectedGraphDayIndex, curCfg.daysCount - 1);
+
+                return (
+                  <View style={styles.horizontalGraphViewport}>
+                    <ScrollView
+                      horizontal={true}
+                      showsHorizontalScrollIndicator={true}
+                      bounces={true}
+                      contentContainerStyle={styles.horizontalGraphScrollContent}
+                    >
+                      <View style={{ width: vWidth, height: 210, position: 'relative' }}>
+                        {/* SVG Graphic Wave Lines & Grid */}
+                        <Svg width={vWidth} height={190} viewBox={`0 0 ${vWidth} 190`}>
+                          <Defs>
+                            <SvgLinearGradient id="liveWaveGrad" x1="0" y1="0" x2="0" y2="1">
+                              <Stop
+                                offset="0"
+                                stopColor={expandedGraphType === 'growth30d' ? '#582CDB' : '#7C3AED'}
+                                stopOpacity="0.38"
+                              />
+                              <Stop
+                                offset="1"
+                                stopColor={expandedGraphType === 'growth30d' ? '#582CDB' : '#7C3AED'}
+                                stopOpacity="0.0"
+                              />
+                            </SvgLinearGradient>
+                          </Defs>
+
+                          {/* Horizontal Grid lines */}
+                          <Path d={`M0,35 L${vWidth},35`} stroke="#F1F5F9" strokeWidth="1" strokeDasharray="4,4" />
+                          <Path d={`M0,80 L${vWidth},80`} stroke="#F1F5F9" strokeWidth="1" strokeDasharray="4,4" />
+                          <Path d={`M0,125 L${vWidth},125`} stroke="#F1F5F9" strokeWidth="1" strokeDasharray="4,4" />
+                          <Path d={`M0,170 L${vWidth},170`} stroke="#E2E8F0" strokeWidth="1.5" />
+
+                          {/* Area Fill */}
+                          <Path d={curCfg.areaPath(expandedGraphType)} fill="url(#liveWaveGrad)" />
+
+                          {/* Line Curve */}
+                          <Path
+                            d={curCfg.svgPath(expandedGraphType)}
+                            fill="none"
+                            stroke={expandedGraphType === 'growth30d' ? '#582CDB' : '#7C3AED'}
+                            strokeWidth="3.5"
+                            strokeLinecap="round"
                           />
-                          <Stop
-                            offset="1"
-                            stopColor={expandedGraphType === 'growth30d' ? '#582CDB' : '#7C3AED'}
-                            stopOpacity="0.0"
-                          />
-                        </SvgLinearGradient>
-                      </Defs>
+                        </Svg>
 
-                      {/* Horizontal Grid lines */}
-                      <Path d="M0,35 L950,35" stroke="#F1F5F9" strokeWidth="1" strokeDasharray="4,4" />
-                      <Path d="M0,80 L950,80" stroke="#F1F5F9" strokeWidth="1" strokeDasharray="4,4" />
-                      <Path d="M0,125 L950,125" stroke="#F1F5F9" strokeWidth="1" strokeDasharray="4,4" />
-                      <Path d="M0,170 L950,170" stroke="#E2E8F0" strokeWidth="1.5" />
+                        {/* Interactive Node Touchpoints */}
+                        <View style={styles.interactiveNodesOverlay}>
+                          {Array.from({ length: curCfg.daysCount }, (_, i) => {
+                            const isSelected = safeIdx === i;
+                            const pt = curCfg.getPoint(i, expandedGraphType);
 
-                      {/* Area Fill */}
-                      <Path
-                        d={
-                          expandedGraphType === 'growth30d'
-                            ? 'M0,130 C120,150 220,90 320,110 C420,130 520,70 620,85 C720,100 820,40 950,55 L950,170 L0,170 Z'
-                            : 'M0,150 C120,135 220,120 320,100 C420,90 520,75 620,60 C720,45 820,35 950,25 L950,170 L0,170 Z'
-                        }
-                        fill="url(#liveWaveGrad)"
-                      />
+                            return (
+                              <Pressable
+                                key={i}
+                                style={[
+                                  styles.interactiveGraphNode,
+                                  {
+                                    left: i * curCfg.stepSpacing + 6,
+                                    top: pt.yPos - 10,
+                                  },
+                                ]}
+                                onPress={() => {
+                                  if (Platform.OS !== 'web') {
+                                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                                  }
+                                  setSelectedGraphDayIndex(i);
+                                }}
+                                hitSlop={8}
+                              >
+                                <View
+                                  style={[
+                                    styles.nodeCircleDot,
+                                    isSelected && styles.nodeCircleDotSelected,
+                                    {
+                                      backgroundColor: isSelected
+                                        ? '#F59E0B'
+                                        : expandedGraphType === 'growth30d'
+                                        ? '#582CDB'
+                                        : '#7C3AED',
+                                    },
+                                  ]}
+                                />
+                                {isSelected && <View style={styles.nodeSelectedGlowRing} />}
+                              </Pressable>
+                            );
+                          })}
+                        </View>
 
-                      {/* Line Curve */}
-                      <Path
-                        d={
-                          expandedGraphType === 'growth30d'
-                            ? 'M0,130 C120,150 220,90 320,110 C420,130 520,70 620,85 C720,100 820,40 950,55'
-                            : 'M0,150 C120,135 220,120 320,100 C420,90 520,75 620,60 C720,45 820,35 950,25'
-                        }
-                        fill="none"
-                        stroke={expandedGraphType === 'growth30d' ? '#582CDB' : '#7C3AED'}
-                        strokeWidth="3.5"
-                        strokeLinecap="round"
-                      />
-                    </Svg>
-
-                    {/* Interactive 30 Day Node Touchpoints */}
-                    <View style={styles.interactiveNodesOverlay}>
-                      {Array.from({ length: 30 }, (_, i) => {
-                        const isSelected = selectedGraphDayIndex === i;
-                        // Calculate Y coordinate progression
-                        const factor = i / 29;
-                        const yPos =
-                          expandedGraphType === 'growth30d'
-                            ? 130 - factor * 75 + Math.sin(i * 0.7) * 18
-                            : 150 - factor * 125 + Math.sin(i * 0.5) * 6;
-
-                        return (
-                          <Pressable
-                            key={i}
-                            style={[
-                              styles.interactiveGraphNode,
-                              {
-                                left: i * 31.5 + 8,
-                                top: yPos - 10,
-                              },
-                            ]}
-                            onPress={() => {
-                              if (Platform.OS !== 'web') {
-                                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                              }
-                              setSelectedGraphDayIndex(i);
-                            }}
-                            hitSlop={8}
-                          >
-                            <View
-                              style={[
-                                styles.nodeCircleDot,
-                                isSelected && styles.nodeCircleDotSelected,
-                                { backgroundColor: isSelected ? '#F59E0B' : expandedGraphType === 'growth30d' ? '#582CDB' : '#7C3AED' },
-                              ]}
-                            />
-                            {isSelected && <View style={styles.nodeSelectedGlowRing} />}
-                          </Pressable>
-                        );
-                      })}
-                    </View>
-
-                    {/* X-Axis Date Labels */}
-                    <View style={styles.xAxisLabelsRow}>
-                      {[1, 5, 10, 15, 20, 25, 30].map((d) => (
-                        <Text key={d} style={[styles.xAxisLabelText, { left: (d - 1) * 31.5 }]}>
-                          May {d}
-                        </Text>
-                      ))}
-                    </View>
+                        {/* X-Axis Date Labels */}
+                        <View style={styles.xAxisLabelsRow}>
+                          {curCfg.labels.map((lbl, lIdx) => (
+                            <Text key={lIdx} style={[styles.xAxisLabelText, { left: lbl.x }]}>
+                              {lbl.text}
+                            </Text>
+                          ))}
+                        </View>
+                      </View>
+                    </ScrollView>
                   </View>
-                </ScrollView>
-              </View>
+                );
+              })()}
 
-              {/* Bottom 4-Week Milestone Breakdown Grid */}
-              <View style={styles.modalWeeklyBreakdownGrid}>
-                <View style={styles.modalWeekCol}>
-                  <Text style={styles.modalWeekTitle}>WEEK 1</Text>
-                  <Text style={styles.modalWeekVal}>+540 👤</Text>
-                  <Text style={styles.modalWeekSub}>12.4k reach</Text>
-                </View>
-                <View style={styles.modalWeekCol}>
-                  <Text style={styles.modalWeekTitle}>WEEK 2</Text>
-                  <Text style={styles.modalWeekVal}>+680 👤</Text>
-                  <Text style={styles.modalWeekSub}>28.1k reach</Text>
-                </View>
-                <View style={styles.modalWeekCol}>
-                  <Text style={styles.modalWeekTitle}>WEEK 3 (🔥)</Text>
-                  <Text style={[styles.modalWeekVal, { color: '#582CDB' }]}>+720 👤</Text>
-                  <Text style={styles.modalWeekSub}>45.2k peak</Text>
-                </View>
-                <View style={styles.modalWeekCol}>
-                  <Text style={styles.modalWeekTitle}>WEEK 4</Text>
-                  <Text style={styles.modalWeekVal}>+540 👤</Text>
-                  <Text style={styles.modalWeekSub}>32.8k reach</Text>
-                </View>
-              </View>
+              {/* Bottom Milestone Breakdown Grid */}
+              {(() => {
+                const curCfg = TIMEFRAME_CONFIGS[graphTimeframe] || TIMEFRAME_CONFIGS['30D'];
+                return (
+                  <View style={styles.modalWeeklyBreakdownGrid}>
+                    {curCfg.weeklyMetrics.map((wm, wIdx) => (
+                      <View key={wIdx} style={styles.modalWeekCol}>
+                        <Text style={styles.modalWeekTitle}>{wm.title}</Text>
+                        <Text style={[styles.modalWeekVal, wm.isPeak && { color: '#582CDB' }]}>{wm.val}</Text>
+                        <Text style={styles.modalWeekSub}>{wm.sub}</Text>
+                      </View>
+                    ))}
+                  </View>
+                );
+              })()}
 
               {/* Platform Contribution Bar */}
               <View style={styles.modalPlatformContribRow}>
