@@ -416,7 +416,7 @@ export const ProEarningsScreen: React.FC<ProEarningsScreenProps> = ({
               ]}
             >
               <Image
-                source={require('../../assets/images/jarvis-ghost-clean.png')}
+                source={require('../../assets/images/jarvis-core-flame.png')}
                 style={styles.headerGhostLogo}
                 resizeMode="contain"
               />
@@ -860,15 +860,15 @@ export const ProEarningsScreen: React.FC<ProEarningsScreenProps> = ({
           {/* CARD 6: JARVIS STRATEGY INSIGHT                              */}
           {/* ============================================================ */}
           <View style={styles.jarvisStrategyCard}>
-            <Animated.View style={{ transform: [{ translateY: flameFloatY }], alignItems: 'center' }}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 8 }}>
               <Image
-                source={require('../../assets/images/jarvis-ghost-clean.png')}
-                style={styles.jarvisFlameImg}
+                source={require('../../assets/images/jarvis-core-flame.png')}
+                style={{ width: 22, height: 22 }}
                 resizeMode="contain"
               />
-            </Animated.View>
+              <Text style={styles.jarvisStrategyTitle}>JARVIS STRATEGY INSIGHT</Text>
+            </View>
 
-            <Text style={styles.jarvisStrategyTitle}>Jarvis Strategy Insight</Text>
             <Text style={styles.jarvisStrategyBody}>
               &ldquo;Your income is diversifying well. Shifting 15% more effort to TikTok UGC could maximize current platform bonuses.&rdquo;
             </Text>
