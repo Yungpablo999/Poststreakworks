@@ -375,7 +375,7 @@ export default function App() {
                 }
               }}
               userProfile={userProfile}
-              onSaveProfile={(updated) => setUserProfile(updated)}
+              onSaveProfile={(updated) => setUserProfile(prev => ({ ...prev, ...updated, tier: updated.tier || prev.tier || "pro" }))}
             />
           ) : (
             <DashboardScreen
@@ -401,7 +401,7 @@ export default function App() {
                 }
               }}
               userProfile={userProfile}
-              onSaveProfile={(updated) => setUserProfile(updated)}
+              onSaveProfile={(updated) => setUserProfile(prev => ({ ...prev, ...updated, tier: updated.tier || prev.tier || "pro" }))}
             />
           )
         )}
@@ -440,7 +440,7 @@ export default function App() {
                 }
               }}
               userProfile={userProfile}
-              onSaveProfile={(updated) => setUserProfile(updated)}
+              onSaveProfile={(updated) => setUserProfile(prev => ({ ...prev, ...updated, tier: updated.tier || prev.tier || "pro" }))}
             />
           ) : (
             <MissionDetailScreen
@@ -464,7 +464,7 @@ export default function App() {
                 }
               }}
               userProfile={userProfile}
-              onSaveProfile={(updated) => setUserProfile(updated)}
+              onSaveProfile={(updated) => setUserProfile(prev => ({ ...prev, ...updated, tier: updated.tier || prev.tier || "pro" }))}
             />
           )
         )}
@@ -516,7 +516,7 @@ export default function App() {
                 }
               }}
               userProfile={userProfile}
-              onSaveProfile={(updated) => setUserProfile(updated)}
+              onSaveProfile={(updated) => setUserProfile(prev => ({ ...prev, ...updated, tier: updated.tier || prev.tier || "pro" }))}
             />
           ) : (
             <CreateScreen
@@ -560,7 +560,7 @@ export default function App() {
                 }
               }}
               userProfile={userProfile}
-              onSaveProfile={(updated) => setUserProfile(updated)}
+              onSaveProfile={(updated) => setUserProfile(prev => ({ ...prev, ...updated, tier: updated.tier || prev.tier || "pro" }))}
             />
           )
         )}
@@ -600,7 +600,7 @@ export default function App() {
                 }
               }}
               userProfile={userProfile}
-              onSaveProfile={(updated) => setUserProfile(updated)}
+              onSaveProfile={(updated) => setUserProfile(prev => ({ ...prev, ...updated, tier: updated.tier || prev.tier || "pro" }))}
             />
           ) : (
             <ScheduleScreen
@@ -626,7 +626,7 @@ export default function App() {
                 }
               }}
               userProfile={userProfile}
-              onSaveProfile={(updated) => setUserProfile(updated)}
+              onSaveProfile={(updated) => setUserProfile(prev => ({ ...prev, ...updated, tier: updated.tier || prev.tier || "pro" }))}
             />
           )
         )}
@@ -665,7 +665,7 @@ export default function App() {
                 }
               }}
               userProfile={userProfile}
-              onSaveProfile={(updated) => setUserProfile(updated)}
+              onSaveProfile={(updated) => setUserProfile(prev => ({ ...prev, ...updated, tier: updated.tier || prev.tier || "pro" }))}
             />
           ) : (
             <MatchScreen
@@ -687,7 +687,7 @@ export default function App() {
                 }
               }}
               userProfile={userProfile}
-              onSaveProfile={(updated) => setUserProfile(updated)}
+              onSaveProfile={(updated) => setUserProfile(prev => ({ ...prev, ...updated, tier: updated.tier || prev.tier || "pro" }))}
             />
           )
         )}
@@ -726,7 +726,7 @@ export default function App() {
                 }
               }}
               userProfile={userProfile}
-              onSaveProfile={(updated) => setUserProfile(updated)}
+              onSaveProfile={(updated) => setUserProfile(prev => ({ ...prev, ...updated, tier: updated.tier || prev.tier || "pro" }))}
             />
           ) : (
             <GrowthScreen
@@ -753,7 +753,7 @@ export default function App() {
                 }
               }}
               userProfile={userProfile}
-              onSaveProfile={(updated) => setUserProfile(updated)}
+              onSaveProfile={(updated) => setUserProfile(prev => ({ ...prev, ...updated, tier: updated.tier || prev.tier || "pro" }))}
             />
           )
         )}
@@ -780,7 +780,7 @@ export default function App() {
               }
             }}
             userProfile={userProfile}
-            onSaveProfile={(updated) => setUserProfile(updated)}
+            onSaveProfile={(updated) => setUserProfile(prev => ({ ...prev, ...updated, tier: updated.tier || prev.tier || "pro" }))}
           />
         )}
 
@@ -822,7 +822,7 @@ export default function App() {
                 }
               }}
               userProfile={userProfile}
-              onSaveProfile={(updated) => setUserProfile(updated)}
+              onSaveProfile={(updated) => setUserProfile(prev => ({ ...prev, ...updated, tier: updated.tier || prev.tier || "pro" }))}
             />
           ) : (
             <QuestsScreen
@@ -851,7 +851,7 @@ export default function App() {
                 }
               }}
               userProfile={userProfile}
-              onSaveProfile={(updated) => setUserProfile(updated)}
+              onSaveProfile={(updated) => setUserProfile(prev => ({ ...prev, ...updated, tier: updated.tier || prev.tier || "pro" }))}
             />
           )
         )}
@@ -878,7 +878,7 @@ export default function App() {
               }
             }}
             userProfile={userProfile}
-            onSaveProfile={(updated) => setUserProfile(updated)}
+            onSaveProfile={(updated) => setUserProfile(prev => ({ ...prev, ...updated, tier: updated.tier || prev.tier || "pro" }))}
           />
         )}
 
@@ -911,7 +911,7 @@ export default function App() {
               }
             }}
             userProfile={userProfile}
-            onSaveProfile={(updated) => setUserProfile(updated)}
+            onSaveProfile={(updated) => setUserProfile(prev => ({ ...prev, ...updated, tier: updated.tier || prev.tier || "pro" }))}
           />
         )}
 
@@ -946,7 +946,7 @@ export default function App() {
                 }
               }}
               userProfile={userProfile}
-              onSaveProfile={(updated) => setUserProfile(updated)}
+              onSaveProfile={(updated) => setUserProfile(prev => ({ ...prev, ...updated, tier: updated.tier || prev.tier || "pro" }))}
             />
           ) : (
             <PostComposerScreen
@@ -973,7 +973,7 @@ export default function App() {
                 }
               }}
               userProfile={userProfile}
-              onSaveProfile={(updated) => setUserProfile(updated)}
+              onSaveProfile={(updated) => setUserProfile(prev => ({ ...prev, ...updated, tier: updated.tier || prev.tier || "pro" }))}
             />
           )
         )}
@@ -1012,7 +1012,7 @@ export default function App() {
                 }
               }}
               userProfile={userProfile}
-              onSaveProfile={(updated) => setUserProfile(updated)}
+              onSaveProfile={(updated) => setUserProfile(prev => ({ ...prev, ...updated, tier: updated.tier || prev.tier || "pro" }))}
             />
           ) : (
             <ContentAngleScreen
@@ -1042,7 +1042,7 @@ export default function App() {
                 }
               }}
               userProfile={userProfile}
-              onSaveProfile={(updated) => setUserProfile(updated)}
+              onSaveProfile={(updated) => setUserProfile(prev => ({ ...prev, ...updated, tier: updated.tier || prev.tier || "pro" }))}
             />
           )
         )}
@@ -1087,7 +1087,7 @@ export default function App() {
                 }
               }}
               userProfile={userProfile}
-              onSaveProfile={(updated) => setUserProfile(updated)}
+              onSaveProfile={(updated) => setUserProfile(prev => ({ ...prev, ...updated, tier: updated.tier || prev.tier || "pro" }))}
             />
           ) : (
             <ScriptScreen
@@ -1118,7 +1118,7 @@ export default function App() {
                 }
               }}
               userProfile={userProfile}
-              onSaveProfile={(updated) => setUserProfile(updated)}
+              onSaveProfile={(updated) => setUserProfile(prev => ({ ...prev, ...updated, tier: updated.tier || prev.tier || "pro" }))}
             />
           )
         )}
@@ -1159,7 +1159,7 @@ export default function App() {
                 }
               }}
               userProfile={userProfile}
-              onSaveProfile={(updated) => setUserProfile(updated)}
+              onSaveProfile={(updated) => setUserProfile(prev => ({ ...prev, ...updated, tier: updated.tier || prev.tier || "pro" }))}
             />
           ) : (
             <CaptionScreen
@@ -1190,7 +1190,7 @@ export default function App() {
                 }
               }}
               userProfile={userProfile}
-              onSaveProfile={(updated) => setUserProfile(updated)}
+              onSaveProfile={(updated) => setUserProfile(prev => ({ ...prev, ...updated, tier: updated.tier || prev.tier || "pro" }))}
             />
           )
         )}
@@ -1235,7 +1235,7 @@ export default function App() {
                 }
               }}
               userProfile={userProfile}
-              onSaveProfile={(updated) => setUserProfile(updated)}
+              onSaveProfile={(updated) => setUserProfile(prev => ({ ...prev, ...updated, tier: updated.tier || prev.tier || "pro" }))}
             />
           ) : (
             <MessagesScreen
@@ -1276,7 +1276,7 @@ export default function App() {
                 }
               }}
               userProfile={userProfile}
-              onSaveProfile={(updated) => setUserProfile(updated)}
+              onSaveProfile={(updated) => setUserProfile(prev => ({ ...prev, ...updated, tier: updated.tier || prev.tier || "pro" }))}
             />
           )
         )}
@@ -1313,7 +1313,7 @@ export default function App() {
               }
             }}
             userProfile={userProfile}
-            onSaveProfile={(updated) => setUserProfile(updated)}
+            onSaveProfile={(updated) => setUserProfile(prev => ({ ...prev, ...updated, tier: updated.tier || prev.tier || "pro" }))}
           />
         )}
 
@@ -1343,7 +1343,7 @@ export default function App() {
               }
             }}
             userProfile={userProfile}
-            onSaveProfile={(updated) => setUserProfile(updated)}
+            onSaveProfile={(updated) => setUserProfile(prev => ({ ...prev, ...updated, tier: updated.tier || prev.tier || "pro" }))}
           />
         )}
 
@@ -1381,7 +1381,7 @@ export default function App() {
                 }
               }}
               userProfile={userProfile}
-              onSaveProfile={(updated) => setUserProfile(updated)}
+              onSaveProfile={(updated) => setUserProfile(prev => ({ ...prev, ...updated, tier: updated.tier || prev.tier || "pro" }))}
             />
           ) : (
             <EarningsScreen
@@ -1412,7 +1412,7 @@ export default function App() {
                 }
               }}
               userProfile={userProfile}
-              onSaveProfile={(updated) => setUserProfile(updated)}
+              onSaveProfile={(updated) => setUserProfile(prev => ({ ...prev, ...updated, tier: updated.tier || prev.tier || "pro" }))}
             />
           )
         )}
@@ -1459,7 +1459,7 @@ export default function App() {
               }
             }}
             userProfile={userProfile}
-            onSaveProfile={(updated) => setUserProfile(updated)}
+            onSaveProfile={(updated) => setUserProfile(prev => ({ ...prev, ...updated, tier: updated.tier || prev.tier || "pro" }))}
           />
         )}
 
@@ -1497,7 +1497,7 @@ export default function App() {
               }
             }}
             userProfile={userProfile}
-            onSaveProfile={(updated) => setUserProfile(updated)}
+            onSaveProfile={(updated) => setUserProfile(prev => ({ ...prev, ...updated, tier: updated.tier || prev.tier || "pro" }))}
           />
         )}
 
@@ -1536,7 +1536,7 @@ export default function App() {
               }
             }}
             userProfile={userProfile}
-            onSaveProfile={(updated) => setUserProfile(updated)}
+            onSaveProfile={(updated) => setUserProfile(prev => ({ ...prev, ...updated, tier: updated.tier || prev.tier || "pro" }))}
           />
         )}
 
@@ -1576,7 +1576,7 @@ export default function App() {
               }
             }}
             userProfile={userProfile}
-            onSaveProfile={(updated) => setUserProfile(updated)}
+            onSaveProfile={(updated) => setUserProfile(prev => ({ ...prev, ...updated, tier: updated.tier || prev.tier || "pro" }))}
           />
         )}
 
@@ -1613,7 +1613,7 @@ export default function App() {
               }
             }}
             userProfile={userProfile}
-            onSaveProfile={(updated) => setUserProfile(updated)}
+            onSaveProfile={(updated) => setUserProfile(prev => ({ ...prev, ...updated, tier: updated.tier || prev.tier || "pro" }))}
           />
         )}
 
@@ -1651,7 +1651,7 @@ export default function App() {
               }
             }}
             userProfile={userProfile}
-            onSaveProfile={(updated) => setUserProfile(updated)}
+            onSaveProfile={(updated) => setUserProfile(prev => ({ ...prev, ...updated, tier: updated.tier || prev.tier || "pro" }))}
           />
         )}
 
@@ -1690,7 +1690,7 @@ export default function App() {
               }
             }}
             userProfile={userProfile}
-            onSaveProfile={(updated) => setUserProfile(updated)}
+            onSaveProfile={(updated) => setUserProfile(prev => ({ ...prev, ...updated, tier: updated.tier || prev.tier || "pro" }))}
           />
         )}
 

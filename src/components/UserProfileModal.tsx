@@ -385,6 +385,7 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
       handle: handle.startsWith('@') ? handle.trim() : `@${handle.trim()}`,
       bio: bio.trim(),
       niche: niche.trim(),
+      tier: initialProfile?.tier || 'pro',
       avatarId: selectedAvatarId,
       avatarSource: sourceToSave,
       customAvatarUri: customAvatarUri || undefined,
