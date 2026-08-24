@@ -274,8 +274,8 @@ export const ProMissionDetailScreen: React.FC<ProMissionDetailScreenProps> = ({
               </View>
               <View style={{ flexDirection: 'row', gap: 8 }}>
                 <View style={[styles.planMetricTile, { flex: 1, backgroundColor: '#FEF3C7', borderColor: '#FBBF24' }]}>
-                  <Text style={[styles.planMetricTileLabel, { color: '#92400E' }]}>🔥 FOCUS</Text>
-                  <Text style={[styles.planMetricTileVal, { color: '#78350F' }]}>Streak Lock</Text>
+                  <Text style={[styles.planMetricTileLabel, { color: '#B45309' }]}>🔥 FOCUS</Text>
+                  <Text style={[styles.planMetricTileVal, { color: '#B45309' }]}>Streak Lock</Text>
                 </View>
                 <View style={[styles.planMetricTile, { flex: 1, backgroundColor: '#EDE9FE', borderColor: '#DDD6FE' }]}>
                   <Text style={[styles.planMetricTileLabel, { color: '#582CDB' }]}>📈 SIGNAL</Text>
@@ -748,7 +748,7 @@ const styles = StyleSheet.create({
   proIntelligenceTagText: {
     fontSize: 10,
     fontWeight: '700',
-    color: '#92400E',
+    color: '#B45309',
     letterSpacing: 0.6,
   },
   mainTitleText: {
@@ -781,7 +781,7 @@ const styles = StyleSheet.create({
   heroPlanTag: {
     fontSize: 11,
     fontWeight: '700',
-    color: '#92400E',
+    color: '#B45309',
     letterSpacing: 0.6,
   },
   optimizedBadge: {
@@ -1043,7 +1043,7 @@ const styles = StyleSheet.create({
   bestTimeHighlightText: {
     fontSize: 18,
     fontWeight: '700',
-    color: '#92400E',
+    color: '#B45309',
     marginBottom: 2,
   },
   bestTimeSubText: {

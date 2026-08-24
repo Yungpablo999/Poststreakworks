@@ -282,7 +282,7 @@ export const JarvisProScreen: React.FC<JarvisProScreenProps> = ({
               {/* Golden PRO ACCESS Badge */}
               <View style={styles.proAccessBadge}>
                 <LinearGradient
-                  colors={['#FDE047', '#EAB308', '#CA8A04']}
+                  colors={['#F59E0B', '#F59E0B', '#F59E0B']}
                   start={{ x: 0, y: 0 }}
                   end={{ x: 1, y: 1 }}
                   style={styles.proAccessGradient}
@@ -318,7 +318,7 @@ export const JarvisProScreen: React.FC<JarvisProScreenProps> = ({
                 onPress={handleUnlockPro}
               >
                 <LinearGradient
-                  colors={['#FDE047', '#EAB308', '#D97706']}
+                  colors={['#F59E0B', '#F59E0B', '#D97706']}
                   start={{ x: 0, y: 0 }}
                   end={{ x: 1, y: 1 }}
                   style={styles.unlockProGradient}
@@ -433,7 +433,7 @@ export const JarvisProScreen: React.FC<JarvisProScreenProps> = ({
               onPress={handleUnlockPro}
             >
               <LinearGradient
-                colors={['#FDE047', '#EAB308', '#CA8A04', '#A16207']}
+                colors={['#F59E0B', '#F59E0B', '#F59E0B', '#A16207']}
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 1 }}
                 style={styles.usePlanGradient}
@@ -638,7 +638,7 @@ export const JarvisProScreen: React.FC<JarvisProScreenProps> = ({
               onPress={handleUnlockPro}
             >
               <LinearGradient
-                colors={['#FDE047', '#EAB308', '#CA8A04', '#A16207']}
+                colors={['#F59E0B', '#F59E0B', '#F59E0B', '#A16207']}
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 1 }}
                 style={styles.startProGradient}
@@ -1216,7 +1216,7 @@ const styles = StyleSheet.create({
     borderRadius: 14,
     overflow: 'hidden',
     marginBottom: 12,
-    shadowColor: '#CA8A04',
+    shadowColor: '#F59E0B',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.12,
     shadowRadius: 10,

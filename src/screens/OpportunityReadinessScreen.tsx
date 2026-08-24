@@ -183,7 +183,7 @@ const INITIAL_PLATFORMS: PlatformAccount[] = [
     handle: '@amarasnaps',
     followers: '5.8K',
     connected: false,
-    color: '#EAB308',
+    color: '#F59E0B',
     bgTint: '#FEFCE8',
   },
 ];
@@ -1077,7 +1077,7 @@ const styles = StyleSheet.create({
     width: 6,
     height: 6,
     borderRadius: 3,
-    backgroundColor: '#EAB308',
+    backgroundColor: '#F59E0B',
   },
   freePathText: {
     fontSize: 11,
@@ -1136,7 +1136,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: '#FDE047',
+    borderColor: '#F59E0B',
   },
   scoreTrack: {
     height: 8,

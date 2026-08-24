@@ -713,7 +713,7 @@ export const GrowthScreen: React.FC<GrowthScreenProps> = ({
                   <Text style={styles.perfBarValue}>84 (Top 5%)</Text>
                 </View>
                 <View style={styles.perfBarTrack}>
-                  <View style={[styles.perfBarFill, { width: '92%', backgroundColor: '#EAB308' }]} />
+                  <View style={[styles.perfBarFill, { width: '92%', backgroundColor: '#F59E0B' }]} />
                 </View>
               </View>
             </View>
@@ -1066,7 +1066,7 @@ export const GrowthScreen: React.FC<GrowthScreenProps> = ({
               onPress={handleOpenPro}
             >
               <LinearGradient
-                colors={['#FDE047', '#EAB308', '#CA8A04', '#A16207']}
+                colors={['#F59E0B', '#F59E0B', '#F59E0B', '#A16207']}
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 1 }}
                 style={styles.exploreProGradient}
@@ -2219,7 +2219,7 @@ const styles = StyleSheet.create({
     height: 48,
     borderRadius: 100,
     overflow: 'hidden',
-    shadowColor: '#FDE047',
+    shadowColor: '#F59E0B',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.12,
     shadowRadius: 8,
@@ -2629,7 +2629,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: '#FDE047',
+    borderColor: '#F59E0B',
   },
   earningsHubStatsRow: {
     flexDirection: 'row',

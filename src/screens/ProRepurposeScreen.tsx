@@ -1571,7 +1571,7 @@ const styles = StyleSheet.create({
   jarvisGoldStrategyPillText: {
     fontSize: 9,
     fontWeight: '700',
-    color: '#92400E',
+    color: '#B45309',
     letterSpacing: 0.3,
   },
   jarvisScheduleBtn: {

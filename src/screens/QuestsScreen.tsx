@@ -376,7 +376,7 @@ export const QuestsScreen: React.FC<QuestsScreenProps> = ({
               <Text style={styles.levelProgressLabel}>LV 12</Text>
               <View style={styles.levelTrack}>
                 <LinearGradient
-                  colors={['#FDE047', '#EAB308', '#CA8A04']}
+                  colors={['#F59E0B', '#F59E0B', '#F59E0B']}
                   start={{ x: 0, y: 0 }}
                   end={{ x: 1, y: 0 }}
                   style={[styles.levelFill, { width: '65%' }]}
@@ -496,7 +496,7 @@ export const QuestsScreen: React.FC<QuestsScreenProps> = ({
                   onPress={handleJoinCommunityChallenge}
                 >
                   <LinearGradient
-                    colors={['#FDE047', '#EAB308', '#CA8A04']}
+                    colors={['#F59E0B', '#F59E0B', '#F59E0B']}
                     start={{ x: 0, y: 0 }}
                     end={{ x: 1, y: 1 }}
                     style={styles.joinChallengeGradient}
@@ -675,7 +675,7 @@ export const QuestsScreen: React.FC<QuestsScreenProps> = ({
               onPress={handleExplorePro}
             >
               <LinearGradient
-                colors={['#FDE047', '#EAB308', '#CA8A04', '#A16207']}
+                colors={['#F59E0B', '#F59E0B', '#F59E0B', '#A16207']}
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 1 }}
                 style={styles.exploreProGradient}
@@ -1332,12 +1332,12 @@ const styles = StyleSheet.create({
   consistencyBadgeTag: {
     fontSize: 13,
     fontWeight: '800',
-    color: '#FDE047',
+    color: '#F59E0B',
   },
   joinChallengeBtn: {
     borderRadius: 100,
     overflow: 'hidden',
-    shadowColor: '#FDE047',
+    shadowColor: '#F59E0B',
     shadowOffset: { width: 0, height: 3 },
     shadowOpacity: 0.12,
     shadowRadius: 6,
@@ -1485,7 +1485,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: '#FDE047',
+    borderColor: '#F59E0B',
   },
   earningsHubStatsRow: {
     flexDirection: 'row',

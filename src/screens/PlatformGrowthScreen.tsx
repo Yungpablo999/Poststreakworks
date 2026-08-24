@@ -987,7 +987,7 @@ export const PlatformGrowthScreen: React.FC<PlatformGrowthScreenProps> = ({
               }}
             >
               <LinearGradient
-                colors={['#FDE047', '#EAB308', '#CA8A04', '#A16207']}
+                colors={['#F59E0B', '#F59E0B', '#F59E0B', '#A16207']}
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 1 }}
                 style={styles.unlockProGradient}
@@ -2071,7 +2071,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 6,
     borderRadius: 4,
     borderWidth: 1,
-    borderColor: '#FDE047',
+    borderColor: '#F59E0B',
   },
   nextStepProPillText: {
     fontSize: 9,
@@ -2092,7 +2092,7 @@ const styles = StyleSheet.create({
     borderColor: '#FEF08A',
     padding: 18,
     marginBottom: 18,
-    shadowColor: '#FDE047',
+    shadowColor: '#F59E0B',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.15,
     shadowRadius: 14,
@@ -2148,7 +2148,7 @@ const styles = StyleSheet.create({
     height: 48,
     borderRadius: 14,
     overflow: 'hidden',
-    shadowColor: '#FDE047',
+    shadowColor: '#F59E0B',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.12,
     shadowRadius: 8,

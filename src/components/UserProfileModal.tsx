@@ -434,7 +434,7 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
                 <Text style={styles.modalTitle}>Creator Passport</Text>
                 {isPro ? (
                   <LinearGradient
-                    colors={['#FDE047', '#EAB308', '#CA8A04']}
+                    colors={['#F59E0B', '#F59E0B', '#F59E0B']}
                     start={{ x: 0, y: 0 }}
                     end={{ x: 1, y: 0 }}
                     style={styles.proBadgePill}
@@ -1252,7 +1252,7 @@ const styles = StyleSheet.create({
   proBadgeText: {
     fontSize: 9.5,
     fontWeight: '700',
-    color: '#92400E',
+    color: '#B45309',
     letterSpacing: 0.5,
   },
   heroStreakPillPro: {
@@ -1397,7 +1397,7 @@ const styles = StyleSheet.create({
   heroStreakPillText: {
     fontSize: 11,
     fontWeight: '700',
-    color: '#92400E',
+    color: '#B45309',
   },
 
   // Upload Buttons Row

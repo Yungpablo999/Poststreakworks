@@ -2072,7 +2072,7 @@ const styles = StyleSheet.create({
   contentScheduleTagText: {
     fontSize: 10,
     fontWeight: '700',
-    color: '#92400E',
+    color: '#B45309',
     letterSpacing: 0.6,
   },
   mainTitleText: {
@@ -2142,7 +2142,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   fillGapsOutlineBtnText: {
-    color: '#92400E',
+    color: '#B45309',
     fontSize: 13,
     fontWeight: '700',
   },
@@ -2332,7 +2332,7 @@ const styles = StyleSheet.create({
   timeBoxGoldText: {
     fontSize: 12,
     fontWeight: '700',
-    color: '#92400E',
+    color: '#B45309',
   },
   timeBoxGoldSub: {
     fontSize: 9,
@@ -2372,7 +2372,7 @@ const styles = StyleSheet.create({
   recommendedPillBadgeText: {
     fontSize: 9,
     fontWeight: '700',
-    color: '#92400E',
+    color: '#B45309',
   },
   emptyScheduleBox: {
     backgroundColor: '#FFFFFF',
@@ -2605,7 +2605,7 @@ const styles = StyleSheet.create({
   gapWarningSub: {
     fontSize: 10,
     fontWeight: '800',
-    color: '#92400E',
+    color: '#B45309',
     letterSpacing: 0.5,
   },
   gapWarningTitle: {
@@ -2722,7 +2722,7 @@ const styles = StyleSheet.create({
   modalGoldTagBadgeText: {
     fontSize: 9,
     fontWeight: '700',
-    color: '#92400E',
+    color: '#B45309',
     letterSpacing: 0.5,
   },
   modalTagBadge: {
@@ -2922,7 +2922,7 @@ const styles = StyleSheet.create({
 
   // GAP MODAL SPECIFIC
   gapSlotDetectedBanner: {
-    backgroundColor: '#FFFBEB',
+    backgroundColor: '#FEF3C7',
     borderWidth: 1,
     borderColor: '#FBBF24',
     borderRadius: 12,
@@ -2932,7 +2932,7 @@ const styles = StyleSheet.create({
   gapSlotDetectedTitle: {
     fontSize: 11,
     fontWeight: '700',
-    color: '#92400E',
+    color: '#B45309',
   },
   gapSlotDetectedSub: {
     fontSize: 11,

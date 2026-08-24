@@ -1264,7 +1264,7 @@ const styles = StyleSheet.create({
   streakRibbonBanner: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#FFFBEB',
+    backgroundColor: '#FEF3C7',
     borderRadius: 10,
     borderWidth: 1,
     borderColor: '#FDE68A',
@@ -1277,7 +1277,7 @@ const styles = StyleSheet.create({
   },
   streakRibbonText: {
     fontSize: 11,
-    color: '#92400E',
+    color: '#B45309',
     flex: 1,
   },
 

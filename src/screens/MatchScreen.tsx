@@ -1390,7 +1390,7 @@ export const MatchScreen: React.FC<MatchScreenProps> = ({
                   }}
                 >
                   <LinearGradient
-                    colors={['#FDE047', '#EAB308', '#CA8A04']}
+                    colors={['#F59E0B', '#F59E0B', '#F59E0B']}
                     start={{ x: 0, y: 0 }}
                     end={{ x: 1, y: 1 }}
                     style={styles.goldBtnGradient}
@@ -3201,7 +3201,7 @@ const styles = StyleSheet.create({
   detailStatValGold: {
     fontSize: 20,
     fontWeight: '700',
-    color: '#EAB308',
+    color: '#F59E0B',
     letterSpacing: -0.3,
   },
   detailStatValPurple: {

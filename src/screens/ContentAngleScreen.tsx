@@ -1153,7 +1153,7 @@ const styles = StyleSheet.create({
   streakSaverPickText: {
     fontSize: 10,
     fontWeight: '700',
-    color: '#78350F',
+    color: '#B45309',
     letterSpacing: 0.5,
   },
   heroIdeaTitle: {

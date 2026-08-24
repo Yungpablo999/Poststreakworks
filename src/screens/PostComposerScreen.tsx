@@ -2431,7 +2431,7 @@ const styles = StyleSheet.create({
   streakBannerCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#FFFBEB',
+    backgroundColor: '#FEF3C7',
     borderRadius: 18,
     borderWidth: 1,
     borderColor: '#FDE68A',
@@ -2449,7 +2449,7 @@ const styles = StyleSheet.create({
   },
   streakBannerTitle: {
     fontSize: 12.5,
-    color: '#92400E',
+    color: '#B45309',
     lineHeight: 17,
     marginBottom: 6,
   },
@@ -2467,7 +2467,7 @@ const styles = StyleSheet.create({
   streakXpText: {
     fontSize: 10,
     fontWeight: '700',
-    color: '#78350F',
+    color: '#B45309',
     letterSpacing: 0.4,
   },
   streakMissionFraction: {

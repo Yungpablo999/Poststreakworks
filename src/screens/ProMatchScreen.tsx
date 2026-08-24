@@ -723,7 +723,7 @@ export const ProMatchScreen: React.FC<ProMatchScreenProps> = ({
               hitSlop={8}
             >
               <LinearGradient
-                colors={['#FDE047', '#EAB308', '#CA8A04']}
+                colors={['#F59E0B', '#F59E0B', '#F59E0B']}
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 0 }}
                 style={styles.proHeaderBadge}
@@ -1993,7 +1993,7 @@ const styles = StyleSheet.create({
   proHeaderBadgeText: {
     fontSize: 9,
     fontWeight: '700',
-    color: '#92400E',
+    color: '#B45309',
     letterSpacing: 0.3,
   },
   headerRightGroup: {
@@ -2339,7 +2339,7 @@ const styles = StyleSheet.create({
   },
   priorityBannerText: {
     fontSize: 11,
-    color: '#78350F',
+    color: '#B45309',
     fontWeight: '700',
   },
   activeTodayPill: {
@@ -2379,7 +2379,7 @@ const styles = StyleSheet.create({
   trackingBadgeText: {
     fontSize: 11,
     fontWeight: '700',
-    color: '#92400E',
+    color: '#B45309',
   },
   trackingBadgeTextActive: {
     color: '#FFFFFF',
@@ -2557,7 +2557,7 @@ const styles = StyleSheet.create({
     borderColor: '#FDE68A',
   },
   availableTagPillText: {
-    color: '#92400E',
+    color: '#B45309',
     fontWeight: '700',
   },
 
@@ -2715,7 +2715,7 @@ const styles = StyleSheet.create({
   goldenMetaChipText: {
     fontSize: 11,
     fontWeight: '700',
-    color: '#92400E',
+    color: '#B45309',
   },
   buildCollabPlanBtn: {
     backgroundColor: '#FFFFFF',
@@ -2810,7 +2810,7 @@ const styles = StyleSheet.create({
   nextUnlockText: {
     fontSize: 10,
     fontWeight: '800',
-    color: '#92400E',
+    color: '#B45309',
     marginTop: 8,
     fontStyle: 'italic',
   },
@@ -2891,7 +2891,7 @@ const styles = StyleSheet.create({
   duelTimerText: {
     fontSize: 10,
     fontWeight: '800',
-    color: '#92400E',
+    color: '#B45309',
   },
   duelMatchupRow: {
     flexDirection: 'row',

@@ -1134,7 +1134,7 @@ export const AudienceBreakdownScreen: React.FC<AudienceBreakdownScreenProps> = (
               }}
             >
               <LinearGradient
-                colors={['#FDE047', '#EAB308', '#CA8A04', '#A16207']}
+                colors={['#F59E0B', '#F59E0B', '#F59E0B', '#A16207']}
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 1 }}
                 style={styles.unlockGradient}
@@ -2360,7 +2360,7 @@ const styles = StyleSheet.create({
     borderColor: '#FEF08A',
     padding: 18,
     marginBottom: 16,
-    shadowColor: '#FDE047',
+    shadowColor: '#F59E0B',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.15,
     shadowRadius: 14,
@@ -2376,7 +2376,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     borderRadius: 100,
     borderWidth: 1,
-    borderColor: '#FDE047',
+    borderColor: '#F59E0B',
   },
   lockedPillText: {
     fontSize: 10,
@@ -2426,7 +2426,7 @@ const styles = StyleSheet.create({
     height: 48,
     borderRadius: 14,
     overflow: 'hidden',
-    shadowColor: '#FDE047',
+    shadowColor: '#F59E0B',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.12,
     shadowRadius: 8,

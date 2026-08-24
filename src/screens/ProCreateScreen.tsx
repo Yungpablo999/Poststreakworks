@@ -33,7 +33,7 @@ export const TinyGoldCheck = ({ size = 13 }: { size?: number }) => (
       borderColor: '#FFFFFF',
       justifyContent: 'center',
       alignItems: 'center',
-      shadowColor: '#CA8A04',
+      shadowColor: '#F59E0B',
       shadowOffset: { width: 0, height: 1 },
       shadowOpacity: 0.12,
       shadowRadius: 2,
@@ -353,7 +353,7 @@ export const ProCreateScreen: React.FC<ProCreateScreenProps> = ({
               hitSlop={8}
             >
               <LinearGradient
-                colors={['#FDE047', '#EAB308', '#CA8A04']}
+                colors={['#F59E0B', '#F59E0B', '#F59E0B']}
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 0 }}
                 style={styles.proHeaderBadge}
@@ -1327,7 +1327,7 @@ const styles = StyleSheet.create({
   proHeaderBadgeText: {
     fontSize: 9,
     fontWeight: '700',
-    color: '#92400E',
+    color: '#B45309',
     letterSpacing: 0.3,
   },
   headerRightGroup: {
@@ -1437,7 +1437,7 @@ const styles = StyleSheet.create({
   proAccessPillText: {
     fontSize: 10,
     fontWeight: '700',
-    color: '#92400E',
+    color: '#B45309',
   },
   mainTitleText: {
     fontSize: 22,
@@ -1561,7 +1561,7 @@ const styles = StyleSheet.create({
   projectTagGoldText: {
     fontSize: 10,
     fontWeight: '700',
-    color: '#92400E',
+    color: '#B45309',
   },
   workflowActionsRow: {
     flexDirection: 'row',
@@ -1612,7 +1612,7 @@ const styles = StyleSheet.create({
   powerPillText: {
     fontSize: 9,
     fontWeight: '700',
-    color: '#92400E',
+    color: '#B45309',
   },
   proToolsGrid: {
     flexDirection: 'row',

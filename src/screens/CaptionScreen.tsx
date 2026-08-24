@@ -1225,7 +1225,7 @@ const styles = StyleSheet.create({
     borderColor: '#FDE68A',
   },
   strongCtaTagText: {
-    color: '#92400E',
+    color: '#B45309',
     fontWeight: '800',
   },
 

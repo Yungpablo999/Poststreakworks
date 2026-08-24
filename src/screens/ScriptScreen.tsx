@@ -1782,7 +1782,7 @@ const styles = StyleSheet.create({
 
   // Streak Impact Card
   streakImpactCard: {
-    backgroundColor: '#FFFBEB',
+    backgroundColor: '#FEF3C7',
     borderRadius: 18,
     borderWidth: 1,
     borderColor: '#FDE68A',
@@ -1798,12 +1798,12 @@ const styles = StyleSheet.create({
   streakImpactLabel: {
     fontSize: 10,
     fontWeight: '700',
-    color: '#78350F',
+    color: '#B45309',
     letterSpacing: 0.6,
   },
   streakImpactSub: {
     fontSize: 12.5,
-    color: '#92400E',
+    color: '#B45309',
     fontWeight: '600',
     marginTop: 2,
   },

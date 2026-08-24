@@ -1,3 +1,13 @@
+export const goldTokens = {
+  primary: '#F59E0B',       // Radiant Metallic Amber Gold
+  light: '#FEF3C7',         // Soft Cream Gold Surface
+  border: '#FDE68A',        // Crisp Gold Border
+  dark: '#B45309',          // Deep High-Contrast Bronze Gold Text
+  gradient: ['#FBBF24', '#F59E0B', '#D97706'] as [string, string, string],
+  darkSurface: 'rgba(245, 158, 11, 0.15)',
+  darkBorder: 'rgba(245, 158, 11, 0.30)',
+};
+
 export interface ThemeColors {
   isDark: boolean;
   bg: string;

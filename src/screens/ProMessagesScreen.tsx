@@ -1336,7 +1336,7 @@ const styles = StyleSheet.create({
   proHeaderBadgeText: {
     fontSize: 9,
     fontWeight: '700',
-    color: '#92400E',
+    color: '#B45309',
     letterSpacing: 0.3,
   },
   headerRightGroup: {
@@ -1604,7 +1604,7 @@ const styles = StyleSheet.create({
   proMicroPillText: {
     fontSize: 8,
     fontWeight: '700',
-    color: '#92400E',
+    color: '#B45309',
   },
   convTimeText: {
     fontSize: 11,

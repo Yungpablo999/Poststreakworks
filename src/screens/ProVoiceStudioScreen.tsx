@@ -1065,7 +1065,7 @@ export const ProVoiceStudioScreen: React.FC<ProVoiceStudioScreenProps> = ({
           {/* CARD: NEED MORE MINUTES (GOLDEN VIP REFILL CARD)             */}
           {/* ============================================================ */}
           <LinearGradient
-            colors={['#FFFBEB', '#FEF3C7', '#FDE68A']}
+            colors={['#FEF3C7', '#FEF3C7', '#FDE68A']}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
             style={styles.needMinutesCard}
@@ -1616,7 +1616,7 @@ const styles = StyleSheet.create({
   proPillBadgeText: {
     fontSize: 9,
     fontWeight: '700',
-    color: '#92400E',
+    color: '#B45309',
     letterSpacing: 0.3,
   },
   headerIconBtn: {
@@ -2369,7 +2369,7 @@ const styles = StyleSheet.create({
   needMinutesTitle: {
     fontSize: 14.5,
     fontWeight: '700',
-    color: '#92400E',
+    color: '#B45309',
   },
   needMinutesSub: {
     fontSize: 12,

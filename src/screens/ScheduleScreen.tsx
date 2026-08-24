@@ -483,7 +483,7 @@ export const ScheduleScreen: React.FC<ScheduleScreenProps> = ({
                   <Text style={[styles.calendarDayNum, isSelected && styles.calendarDayNumActive]}>
                     {dayItem.date}
                   </Text>
-                  {dayItem.isToday && <View style={[styles.todayIndicatorDot, isSelected && { backgroundColor: '#FDE047' }]} />}
+                  {dayItem.isToday && <View style={[styles.todayIndicatorDot, isSelected && { backgroundColor: '#F59E0B' }]} />}
                 </Pressable>
               );
             })}
@@ -1547,7 +1547,7 @@ const styles = StyleSheet.create({
     color: '#582CDB',
   },
   finishDraftBtn: {
-    backgroundColor: '#EAB308',
+    backgroundColor: '#F59E0B',
     paddingVertical: 8,
     paddingHorizontal: 14,
     borderRadius: 10,

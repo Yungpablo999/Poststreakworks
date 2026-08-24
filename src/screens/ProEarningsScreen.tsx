@@ -2009,7 +2009,7 @@ const styles = StyleSheet.create({
   proPillBadgeText: {
     fontSize: 9,
     fontWeight: '700',
-    color: '#92400E',
+    color: '#B45309',
     letterSpacing: 0.3,
   },
   headerIconBtn: {

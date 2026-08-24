@@ -1264,7 +1264,7 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
               ]}
             >
               <LinearGradient
-                colors={['#FDE047', '#EAB308', '#CA8A04', '#A16207']}
+                colors={['#F59E0B', '#F59E0B', '#F59E0B', '#A16207']}
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 1 }}
                 style={styles.metallicGoldGradient}
@@ -1978,7 +1978,7 @@ const styles = StyleSheet.create({
   levelPillBadgeText: {
     fontSize: 12,
     fontWeight: '700',
-    color: '#92400E',
+    color: '#B45309',
   },
   streakPillBadge: {
     flexDirection: 'row',
@@ -2332,7 +2332,7 @@ const styles = StyleSheet.create({
   levelGoldPillText: {
     fontSize: 10,
     fontWeight: '800',
-    color: '#92400E',
+    color: '#B45309',
     letterSpacing: 0.5,
   },
   levelNameHeading: {
@@ -2451,7 +2451,7 @@ const styles = StyleSheet.create({
   activeQuestTagText: {
     fontSize: 10,
     fontWeight: '800',
-    color: '#92400E',
+    color: '#B45309',
   },
   questTitle: {
     fontSize: 15,

@@ -35,7 +35,7 @@ export const TinyGoldCheck = ({ size = 13 }: { size?: number }) => (
       borderColor: '#FFFFFF',
       justifyContent: 'center',
       alignItems: 'center',
-      shadowColor: '#CA8A04',
+      shadowColor: '#F59E0B',
       shadowOffset: { width: 0, height: 1 },
       shadowOpacity: 0.12,
       shadowRadius: 2,
@@ -540,7 +540,7 @@ export const ProDashboardScreen: React.FC<ProDashboardScreenProps> = ({
               hitSlop={8}
             >
               <LinearGradient
-                colors={['#FDE047', '#EAB308', '#CA8A04']}
+                colors={['#F59E0B', '#F59E0B', '#F59E0B']}
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 0 }}
                 style={styles.proHeaderBadge}
@@ -830,7 +830,7 @@ export const ProDashboardScreen: React.FC<ProDashboardScreenProps> = ({
 
             <View style={styles.xpTrackBg}>
               <LinearGradient
-                colors={['#6366F1', '#8B5CF6', '#EAB308', '#FDE047']}
+                colors={['#6366F1', '#8B5CF6', '#F59E0B', '#F59E0B']}
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 0 }}
                 style={[styles.xpTrackFill, { width: '82%' }]}
@@ -1061,7 +1061,7 @@ export const ProDashboardScreen: React.FC<ProDashboardScreenProps> = ({
                   <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
                     <Text style={styles.calendarModalMainTitle}>Streak Calendar 2024</Text>
                     <LinearGradient
-                      colors={['#FDE047', '#EAB308', '#CA8A04']}
+                      colors={['#F59E0B', '#F59E0B', '#F59E0B']}
                       start={{ x: 0, y: 0 }}
                       end={{ x: 1, y: 0 }}
                       style={styles.proBadgePill}
@@ -1087,7 +1087,7 @@ export const ProDashboardScreen: React.FC<ProDashboardScreenProps> = ({
                   <Text style={styles.calendarStatValue}>47 Days 🔥</Text>
                   <Text style={styles.calendarStatLabel}>Current</Text>
                 </View>
-                <View style={[styles.calendarStatCard, { backgroundColor: '#FEF9C3', borderColor: '#FDE047' }]}>
+                <View style={[styles.calendarStatCard, { backgroundColor: '#FEF9C3', borderColor: '#F59E0B' }]}>
                   <Text style={[styles.calendarStatValue, { color: '#B45309' }]}>Top 1% 👑</Text>
                   <Text style={[styles.calendarStatLabel, { color: '#A16207' }]}>Worldwide</Text>
                 </View>
@@ -1783,7 +1783,7 @@ const styles = StyleSheet.create({
   proHeaderBadgeText: {
     fontSize: 9,
     fontWeight: '700',
-    color: '#92400E',
+    color: '#B45309',
     letterSpacing: 0.3,
   },
   headerRightGroup: {
@@ -1926,7 +1926,7 @@ const styles = StyleSheet.create({
   proPillGoldText: {
     fontSize: 11,
     fontWeight: '800',
-    color: '#92400E',
+    color: '#B45309',
   },
   proPillGray: {
     backgroundColor: '#F1F5F9',
@@ -2178,7 +2178,7 @@ const styles = StyleSheet.create({
   proPriorityText: {
     fontSize: 9,
     fontWeight: '700',
-    color: '#92400E',
+    color: '#B45309',
   },
   brandQuestSubLabel: {
     fontSize: 10,
@@ -2447,7 +2447,7 @@ const styles = StyleSheet.create({
   proBadgeText: {
     fontSize: 9,
     fontWeight: '700',
-    color: '#92400E',
+    color: '#B45309',
     letterSpacing: 0.5,
   },
   calendarModalSubtitle: {
@@ -2523,12 +2523,12 @@ const styles = StyleSheet.create({
     backgroundColor: '#F59E0B',
   },
   monthChipCurrentDotActive: {
-    backgroundColor: '#FDE047',
+    backgroundColor: '#F59E0B',
   },
   selectedDayBanner: {
     backgroundColor: '#FEF9C3',
     borderWidth: 1,
-    borderColor: '#FDE047',
+    borderColor: '#F59E0B',
     borderRadius: 12,
     paddingVertical: 8,
     paddingHorizontal: 12,
@@ -2537,7 +2537,7 @@ const styles = StyleSheet.create({
   selectedDayText: {
     fontSize: 12,
     fontWeight: '800',
-    color: '#92400E',
+    color: '#B45309',
     textAlign: 'center',
   },
   pagerOuterContainer: {
@@ -2588,7 +2588,7 @@ const styles = StyleSheet.create({
   currentMonthBadgeText: {
     fontSize: 9,
     fontWeight: '700',
-    color: '#92400E',
+    color: '#B45309',
   },
   dayColHeadersRow: {
     flexDirection: 'row',
@@ -2633,7 +2633,7 @@ const styles = StyleSheet.create({
   },
   dayCellScheduled: {
     backgroundColor: '#FEF9C3',
-    borderColor: '#FDE047',
+    borderColor: '#F59E0B',
   },
   dayCellFreeze: {
     backgroundColor: '#E0F2FE',
@@ -2950,7 +2950,7 @@ const styles = StyleSheet.create({
     color: '#582CDB',
   },
   nextLevelPreviewBox: {
-    backgroundColor: '#FFFBEB',
+    backgroundColor: '#FEF3C7',
     borderRadius: 14,
     padding: 12,
     borderWidth: 1,
@@ -2960,12 +2960,12 @@ const styles = StyleSheet.create({
   nextLevelPreviewTitle: {
     fontSize: 11,
     fontWeight: '700',
-    color: '#92400E',
+    color: '#B45309',
     marginBottom: 4,
   },
   nextLevelPreviewBody: {
     fontSize: 11,
-    color: '#78350F',
+    color: '#B45309',
     lineHeight: 16,
     fontWeight: '600',
   },

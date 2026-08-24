@@ -31,7 +31,7 @@ export const TinyGoldCheck = ({ size = 13 }: { size?: number }) => (
       borderColor: '#FFFFFF',
       justifyContent: 'center',
       alignItems: 'center',
-      shadowColor: '#CA8A04',
+      shadowColor: '#F59E0B',
       shadowOffset: { width: 0, height: 1 },
       shadowOpacity: 0.12,
       shadowRadius: 2,
@@ -244,7 +244,7 @@ export const ProQuestsScreen: React.FC<ProQuestsScreenProps> = ({
               hitSlop={8}
             >
               <LinearGradient
-                colors={['#FDE047', '#EAB308', '#CA8A04']}
+                colors={['#F59E0B', '#F59E0B', '#F59E0B']}
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 0 }}
                 style={styles.proHeaderBadge}
@@ -1673,7 +1673,7 @@ const styles = StyleSheet.create({
   proHeaderBadgeText: {
     fontSize: 9,
     fontWeight: '700',
-    color: '#92400E',
+    color: '#B45309',
     letterSpacing: 0.3,
   },
   headerRightGroup: {
@@ -1840,7 +1840,7 @@ const styles = StyleSheet.create({
   todayQuestTagText: {
     fontSize: 10,
     fontWeight: '700',
-    color: '#92400E',
+    color: '#B45309',
     letterSpacing: 0.5,
   },
   todayQuestTitle: {
@@ -2097,7 +2097,7 @@ const styles = StyleSheet.create({
   groupRewardPillText: {
     fontSize: 10,
     fontWeight: '700',
-    color: '#92400E',
+    color: '#B45309',
   },
   squadQuestTitle: {
     fontSize: 16,
@@ -2466,7 +2466,7 @@ const styles = StyleSheet.create({
   darkCardTag: {
     fontSize: 9,
     fontWeight: '700',
-    color: '#EAB308',
+    color: '#F59E0B',
     letterSpacing: 0.5,
   },
   darkCardTitle: {
@@ -2759,7 +2759,7 @@ const styles = StyleSheet.create({
   proPriorityPillModalText: {
     fontSize: 9,
     fontWeight: '700',
-    color: '#92400E',
+    color: '#B45309',
   },
   briefDetailLine: {
     fontSize: 12.5,
@@ -2848,7 +2848,7 @@ const styles = StyleSheet.create({
   oppChoiceBadgeGoldText: {
     fontSize: 9,
     fontWeight: '700',
-    color: '#92400E',
+    color: '#B45309',
   },
   oppChoiceBadgePurple: {
     backgroundColor: '#EDE9FE',
@@ -3241,7 +3241,7 @@ const styles = StyleSheet.create({
   sqmScoreBadgePendingText: {
     fontSize: 10,
     fontWeight: '800',
-    color: '#92400E',
+    color: '#B45309',
   },
   sqmScoreBadgeScheduled: {
     backgroundColor: '#EDE9FE',
@@ -3605,13 +3605,13 @@ const styles = StyleSheet.create({
   duelStakesTitle: {
     fontSize: 9,
     fontWeight: '700',
-    color: '#92400E',
+    color: '#B45309',
     letterSpacing: 0.5,
     marginBottom: 2,
   },
   duelStakesSub: {
     fontSize: 11,
-    color: '#78350F',
+    color: '#B45309',
     lineHeight: 15,
   },
 

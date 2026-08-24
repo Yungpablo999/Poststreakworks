@@ -184,7 +184,7 @@ const INITIAL_PLATFORMS: PlatformAccount[] = [
     handle: '@amarasnaps',
     followers: '5.8K',
     connected: false,
-    color: '#EAB308',
+    color: '#F59E0B',
     bgTint: '#FEFCE8',
   },
 ];
@@ -628,7 +628,7 @@ export const EarningsScreen: React.FC<EarningsScreenProps> = ({
                 }}
               >
                 <LinearGradient
-                  colors={['#FDE047', '#EAB308', '#CA8A04', '#A16207']}
+                  colors={['#F59E0B', '#F59E0B', '#F59E0B', '#A16207']}
                   start={{ x: 0, y: 0 }}
                   end={{ x: 1, y: 1 }}
                   style={styles.unlockTrackingGradient}
@@ -860,7 +860,7 @@ export const EarningsScreen: React.FC<EarningsScreenProps> = ({
               }}
             >
               <LinearGradient
-                colors={['#FDE047', '#EAB308', '#CA8A04', '#A16207']}
+                colors={['#F59E0B', '#F59E0B', '#F59E0B', '#A16207']}
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 1 }}
                 style={styles.exploreProGradient}
@@ -1390,7 +1390,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: '#FDE047',
+    borderColor: '#F59E0B',
   },
   readinessHeaderRow: {
     flexDirection: 'row',
@@ -1535,7 +1535,7 @@ const styles = StyleSheet.create({
     height: 44,
     borderRadius: 14,
     overflow: 'hidden',
-    shadowColor: '#CA8A04',
+    shadowColor: '#F59E0B',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.12,
     shadowRadius: 8,
@@ -1797,7 +1797,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: '#FDE047',
+    borderColor: '#F59E0B',
   },
   goalTrackLabels: {
     flexDirection: 'row',
@@ -1865,7 +1865,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 6,
     borderRadius: 4,
     borderWidth: 1,
-    borderColor: '#FDE047',
+    borderColor: '#F59E0B',
   },
   goldProBadgeText: {
     fontSize: 9,

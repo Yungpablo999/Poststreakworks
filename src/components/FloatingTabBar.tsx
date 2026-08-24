@@ -257,6 +257,6 @@ const styles = StyleSheet.create({
     width: 3.5,
     height: 3.5,
     borderRadius: 2,
-    backgroundColor: '#FDE047',
+    backgroundColor: '#F59E0B',
   },
 });

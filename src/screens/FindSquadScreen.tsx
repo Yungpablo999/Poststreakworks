@@ -1702,7 +1702,7 @@ const styles = StyleSheet.create({
     color: '#582CDB',
   },
   cardQuickJoinBtnTextPending: {
-    color: '#92400E',
+    color: '#B45309',
   },
 
   /* SQUAD PREVIEW CENTERED MODAL */
@@ -1991,7 +1991,7 @@ const styles = StyleSheet.create({
   modalPendingText: {
     fontSize: 13,
     fontWeight: '700',
-    color: '#92400E',
+    color: '#B45309',
   },
 
   /* TOAST */

@@ -214,7 +214,7 @@ export const TinyGoldCheck = ({ size = 13 }: { size?: number }) => (
       borderColor: '#FFFFFF',
       justifyContent: 'center',
       alignItems: 'center',
-      shadowColor: '#CA8A04',
+      shadowColor: '#F59E0B',
       shadowOffset: { width: 0, height: 1 },
       shadowOpacity: 0.12,
       shadowRadius: 2,
@@ -304,7 +304,7 @@ const TIMEFRAME_CONFIGS = {
       formats: [
         { name: 'Talking Reels', icon: '🎥', reach: '18.4K', barHeight: 85, color: '#582CDB', retention: '74%', saveRate: '4.8%', delta: '+280 Fans' },
         { name: 'Carousels', icon: '📑', reach: '14.2K', barHeight: 70, color: '#7C3AED', retention: '82%', saveRate: '8.4% (Top Saves 🔥)', delta: '+210 Fans' },
-        { name: 'Shorts', icon: '▶️', reach: '11.8K', barHeight: 55, color: '#CA8A04', retention: '70%', saveRate: '3.6%', delta: '+120 Fans' },
+        { name: 'Shorts', icon: '▶️', reach: '11.8K', barHeight: 55, color: '#F59E0B', retention: '70%', saveRate: '3.6%', delta: '+120 Fans' },
         { name: 'Text / X', icon: '💬', reach: '8.5K', barHeight: 40, color: '#64748B', retention: '65%', saveRate: '4.2%', delta: '+70 Fans' },
       ],
     },
@@ -392,7 +392,7 @@ const TIMEFRAME_CONFIGS = {
       formats: [
         { name: 'Talking Reels', icon: '🎥', reach: '22.6K', barHeight: 90, color: '#582CDB', retention: '76%', saveRate: '5.1%', delta: '+560 Fans' },
         { name: 'Carousels', icon: '📑', reach: '16.8K', barHeight: 75, color: '#7C3AED', retention: '85%', saveRate: '8.6% (Top Saves 🔥)', delta: '+430 Fans' },
-        { name: 'Shorts', icon: '▶️', reach: '13.4K', barHeight: 58, color: '#CA8A04', retention: '72%', saveRate: '3.8%', delta: '+240 Fans' },
+        { name: 'Shorts', icon: '▶️', reach: '13.4K', barHeight: 58, color: '#F59E0B', retention: '72%', saveRate: '3.8%', delta: '+240 Fans' },
         { name: 'Text / X', icon: '💬', reach: '9.8K', barHeight: 42, color: '#64748B', retention: '68%', saveRate: '4.5%', delta: '+120 Fans' },
       ],
     },
@@ -481,7 +481,7 @@ const TIMEFRAME_CONFIGS = {
       formats: [
         { name: 'Talking Reels', icon: '🎥', reach: '28.4K', barHeight: 95, color: '#582CDB', retention: '78%', saveRate: '5.4%', delta: '+1,120 Fans' },
         { name: 'Carousels', icon: '📑', reach: '19.2K', barHeight: 80, color: '#7C3AED', retention: '88%', saveRate: '9.2% (Top Saves 🔥)', delta: '+840 Fans' },
-        { name: 'Shorts', icon: '▶️', reach: '15.8K', barHeight: 62, color: '#CA8A04', retention: '75%', saveRate: '4.1%', delta: '+360 Fans' },
+        { name: 'Shorts', icon: '▶️', reach: '15.8K', barHeight: 62, color: '#F59E0B', retention: '75%', saveRate: '4.1%', delta: '+360 Fans' },
         { name: 'Text / X', icon: '💬', reach: '11.2K', barHeight: 45, color: '#64748B', retention: '72%', saveRate: '4.9%', delta: '+160 Fans' },
       ],
     },
@@ -569,7 +569,7 @@ const TIMEFRAME_CONFIGS = {
       formats: [
         { name: 'Talking Reels', icon: '🎥', reach: '34.8K', barHeight: 100, color: '#582CDB', retention: '82%', saveRate: '5.8%', delta: '+3,240 Fans' },
         { name: 'Carousels', icon: '📑', reach: '24.6K', barHeight: 85, color: '#7C3AED', retention: '92%', saveRate: '9.6% (Top Saves 🔥)', delta: '+2,380 Fans' },
-        { name: 'Shorts', icon: '▶️', reach: '19.4K', barHeight: 68, color: '#CA8A04', retention: '78%', saveRate: '4.4%', delta: '+820 Fans' },
+        { name: 'Shorts', icon: '▶️', reach: '19.4K', barHeight: 68, color: '#F59E0B', retention: '78%', saveRate: '4.4%', delta: '+820 Fans' },
         { name: 'Text / X', icon: '💬', reach: '14.8K', barHeight: 48, color: '#64748B', retention: '76%', saveRate: '5.2%', delta: '+400 Fans' },
       ],
     },
@@ -822,7 +822,7 @@ export const ProGrowthScreen: React.FC<ProGrowthScreenProps> = ({
               hitSlop={8}
             >
               <LinearGradient
-                colors={['#FDE047', '#EAB308', '#CA8A04']}
+                colors={['#F59E0B', '#F59E0B', '#F59E0B']}
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 0 }}
                 style={styles.proHeaderBadge}
@@ -1107,7 +1107,7 @@ export const ProGrowthScreen: React.FC<ProGrowthScreenProps> = ({
                   strokeWidth="2.5"
                   strokeLinecap="round"
                 />
-                <Circle cx={340} cy={35} r={4} fill="#EAB308" />
+                <Circle cx={340} cy={35} r={4} fill="#F59E0B" />
               </Svg>
             </View>
 
@@ -1284,7 +1284,7 @@ export const ProGrowthScreen: React.FC<ProGrowthScreenProps> = ({
 
             {/* 7 Heatmap day blocks */}
             <View style={styles.heatmapRow}>
-              {['#F1F5F9', '#DDD6FE', '#A78BFA', '#8B5CF6', '#CA8A04', '#C4B5FD', '#F1F5F9'].map((bg, idx) => (
+              {['#F1F5F9', '#DDD6FE', '#A78BFA', '#8B5CF6', '#F59E0B', '#C4B5FD', '#F1F5F9'].map((bg, idx) => (
                 <View key={idx} style={[styles.heatmapBlock, { backgroundColor: bg }]} />
               ))}
             </View>
@@ -2000,7 +2000,7 @@ export const ProGrowthScreen: React.FC<ProGrowthScreenProps> = ({
                   </View>
                   <View style={styles.reportVitalCard}>
                     <Text style={styles.reportVitalLabel}>BRAND DEAL VALUATION</Text>
-                    <Text style={[styles.reportVitalVal, { color: '#CA8A04' }]}>$3.8K – $5.2K</Text>
+                    <Text style={[styles.reportVitalVal, { color: '#F59E0B' }]}>$3.8K – $5.2K</Text>
                     <Text style={styles.reportVitalDelta}>Tier-1 Verified Rate</Text>
                   </View>
                 </View>
@@ -2391,7 +2391,7 @@ export const ProGrowthScreen: React.FC<ProGrowthScreenProps> = ({
                       <Text style={styles.trafficSourceVal}>{selectedPost.trafficDirect}</Text>
                     </View>
                     <View style={styles.trafficTrackBg}>
-                      <View style={[styles.trafficTrackFill, { width: selectedPost.trafficDirect as any, backgroundColor: '#CA8A04' }]} />
+                      <View style={[styles.trafficTrackFill, { width: selectedPost.trafficDirect as any, backgroundColor: '#F59E0B' }]} />
                     </View>
                   </View>
                 </View>
@@ -2693,7 +2693,7 @@ const styles = StyleSheet.create({
   proHeaderBadgeText: {
     fontSize: 9,
     fontWeight: '700',
-    color: '#92400E',
+    color: '#B45309',
     letterSpacing: 0.3,
   },
   headerRightGroup: {
@@ -2812,7 +2812,7 @@ const styles = StyleSheet.create({
   proAnalyticsActiveText: {
     fontSize: 10,
     fontWeight: '700',
-    color: '#92400E',
+    color: '#B45309',
   },
   mainSubtitleText: {
     fontSize: 13,
@@ -3216,7 +3216,7 @@ const styles = StyleSheet.create({
   platformSyncText: {
     fontSize: 9,
     fontWeight: '700',
-    color: '#92400E',
+    color: '#B45309',
   },
   platformsContainerCard: {
     backgroundColor: '#FFFFFF',

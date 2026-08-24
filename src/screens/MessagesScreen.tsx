@@ -2285,7 +2285,7 @@ const styles = StyleSheet.create({
   collabStatusText: {
     fontSize: 10,
     fontWeight: '700',
-    color: '#78350F',
+    color: '#B45309',
   },
   threadLastMessage: {
     fontSize: 12.5,

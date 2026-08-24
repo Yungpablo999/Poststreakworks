@@ -816,7 +816,7 @@ export const CreateScreen: React.FC<CreateScreenProps> = ({
               onPress={handleOpenVoiceStudioPro}
             >
               <LinearGradient
-                colors={['#FDE047', '#EAB308', '#CA8A04', '#A16207']}
+                colors={['#F59E0B', '#F59E0B', '#F59E0B', '#A16207']}
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 1 }}
                 style={styles.unlockVoiceGradient}
@@ -1865,12 +1865,12 @@ const styles = StyleSheet.create({
     backgroundColor: '#FAF8F5',
     borderRadius: 24,
     borderWidth: 1.5,
-    borderColor: '#EAB308',
+    borderColor: '#F59E0B',
     borderStyle: 'dashed',
     padding: 22,
     alignItems: 'center',
     marginBottom: 10,
-    shadowColor: '#CA8A04',
+    shadowColor: '#F59E0B',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.08,
     shadowRadius: 12,
@@ -1916,7 +1916,7 @@ const styles = StyleSheet.create({
     height: 42,
     borderRadius: 22,
     backgroundColor: 'rgba(234, 179, 8, 0.18)',
-    shadowColor: '#EAB308',
+    shadowColor: '#F59E0B',
     shadowOffset: { width: 0, height: 0 },
     shadowOpacity: 0.12,
     shadowRadius: 22,

@@ -1249,7 +1249,7 @@ const styles = StyleSheet.create({
   badgeRewardPillText: {
     fontSize: 11,
     fontWeight: '800',
-    color: '#92400E',
+    color: '#B45309',
   },
   passportRewardPill: {
     backgroundColor: '#F3E8FF',
@@ -1621,7 +1621,7 @@ const styles = StyleSheet.create({
   reputationCalloutText: {
     fontSize: 12,
     fontWeight: '600',
-    color: '#92400E',
+    color: '#B45309',
     flex: 1,
     lineHeight: 16,
   },
