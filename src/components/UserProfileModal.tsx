@@ -43,7 +43,7 @@ export const CREATOR_AVATARS = [
   {
     id: 'ghost',
     name: 'Ghost Mascot',
-    source: require('../../assets/images/jarvis-core-flame.png'),
+    source: require('../../assets/images/jarvis-ghost-clean.png'),
     tag: 'MASCOT',
   },
   {
@@ -877,28 +877,32 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
               <View>
                 {/* 1. HERO VERIFICATION PASSPORT BANNER */}
                 <LinearGradient
-                  colors={['#2A1259', '#1A0C38']}
+                  colors={isPro ? ['#2A1259', '#1A0C38'] : ['#2D1B4E', '#1A0B2E']}
                   style={styles.verifHeroCard}
                 >
                   <View style={styles.verifHeroTopRow}>
                     <View style={styles.verifAvatarWrap}>
                       <Image source={currentDisplayAvatarSource} style={styles.verifAvatarImg} />
-                      <View style={styles.verifBadgeGold}>
-                        <Text style={{ fontSize: 10, color: '#FFFFFF', fontWeight: '900' }}>✓</Text>
+                      <View style={isPro ? styles.verifBadgeGold : [styles.verifBadgeGold, { backgroundColor: '#F59E0B' }]}>
+                        <Text style={{ fontSize: 10, color: '#FFFFFF', fontWeight: '900' }}>
+                          {isPro ? '✓' : '🔒'}
+                        </Text>
                       </View>
                     </View>
 
                     <View style={{ flex: 1 }}>
                       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
                         <Text style={styles.verifHeroName}>{name || 'Pablo'}</Text>
-                        <View style={styles.verifStatusPill}>
-                          <Text style={styles.verifStatusPillText}>
-                            {isVerified ? '🟢 100% VERIFIED' : '⚡ 95% READY'}
+                        <View style={[styles.verifStatusPill, !isPro && { backgroundColor: 'rgba(245, 158, 11, 0.2)' }]}>
+                          <Text style={[styles.verifStatusPillText, !isPro && { color: '#F59E0B' }]}>
+                            {isPro ? '🟢 100% VERIFIED' : '🔒 PRO EXCLUSIVE'}
                           </Text>
                         </View>
                       </View>
                       <Text style={styles.verifHeroSub}>
-                        👑 Pro Creator Passport • Level {initialProfile?.level || 5}
+                        {isPro
+                          ? `👑 Pro Creator Passport • Level ${initialProfile?.level || 5}`
+                          : `⚡ Free Creator Passport • Level ${initialProfile?.level || 5}`}
                       </Text>
                     </View>
                   </View>
@@ -907,16 +911,26 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
                   <View style={{ marginTop: 12 }}>
                     <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 4 }}>
                       <Text style={styles.verifMeterLabel}>PASSPORT VERIFICATION SCORE</Text>
-                      <Text style={styles.verifMeterVal}>{isVerified ? '100% / 100%' : '95% / 100%'}</Text>
+                      <Text style={[styles.verifMeterVal, !isPro && { color: '#F59E0B' }]}>
+                        {isPro ? '100% / 100%' : '95% / 100% (Pro Locked)'}
+                      </Text>
                     </View>
                     <View style={styles.verifMeterTrack}>
-                      <View style={[styles.verifMeterFill, { width: isVerified ? '100%' : '95%' }]} />
+                      <View
+                        style={[
+                          styles.verifMeterFill,
+                          { width: isPro ? '100%' : '95%' },
+                          !isPro && { backgroundColor: '#F59E0B' },
+                        ]}
+                      />
                     </View>
                   </View>
                 </LinearGradient>
 
-                {/* 2. CREATOR VERIFICATION CHECKLIST (5/5 ITEMS) */}
-                <Text style={styles.sectionHeaderTitle}>VERIFICATION CHECKLIST (5 OF 5 COMPLETE)</Text>
+                {/* 2. CREATOR VERIFICATION CHECKLIST (5 ITEMS) */}
+                <Text style={styles.sectionHeaderTitle}>
+                  {isPro ? 'VERIFICATION CHECKLIST (5 OF 5 COMPLETE)' : 'VERIFICATION CHECKLIST (4 OF 5 COMPLETE)'}
+                </Text>
                 <View style={styles.verifChecklistCard}>
                   {/* Item 1: Socials */}
                   <View style={styles.verifCheckItem}>
@@ -1001,15 +1015,19 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
 
                   <View style={styles.verifCheckDivider} />
 
-                  {/* Item 5: Squad Standing */}
+                  {/* Item 5: Pro Membership (LOCKED ON FREE) */}
                   <View style={styles.verifCheckItem}>
-                    <View style={styles.verifCheckIconCircle}>
-                      <Text style={styles.verifCheckMark}>✓</Text>
+                    <View style={[styles.verifCheckIconCircle, !isPro && { backgroundColor: '#FEF3C7' }]}>
+                      <Text style={[styles.verifCheckMark, !isPro && { color: '#D97706' }]}>
+                        {isPro ? '✓' : '🔒'}
+                      </Text>
                     </View>
                     <View style={{ flex: 1 }}>
-                      <Text style={styles.verifCheckTitle}>Squad Reputation Score</Text>
-                      <Text style={styles.verifCheckSub}>
-                        Momentum Makers • High Trust Collaborator Rating (⭐ 4.9)
+                      <Text style={styles.verifCheckTitle}>Pro Creator Membership</Text>
+                      <Text style={[styles.verifCheckSub, !isPro && { color: '#D97706', fontWeight: '700' }]}>
+                        {isPro
+                          ? 'Active Pro Creator • Verified Passport & Deal Escrow Active 👑'
+                          : 'Pro Membership Required • Upgrade to claim verified badge 🔒'}
                       </Text>
                     </View>
                   </View>
@@ -1043,23 +1061,31 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
                   </View>
                 </View>
 
-                {/* 4. INSTANT VERIFICATION ACTION BUTTON */}
+                {/* 4. PRO-GATED ACTION BUTTON */}
                 <Pressable
                   style={styles.verifActionBtn}
                   onPress={() => {
                     if (Platform.OS !== 'web') {
-                      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+                      Haptics.notificationAsync(
+                        isPro ? Haptics.NotificationFeedbackType.Success : Haptics.NotificationFeedbackType.Warning
+                      );
                     }
-                    setIsVerified(true);
-                    showToast('🎉 Creator Passport 100% Verified! Priority brand matching unlocked!');
+                    if (isPro) {
+                      setIsVerified(true);
+                      showToast('🎉 Creator Passport 100% Verified! Priority brand matching active!');
+                    } else {
+                      showToast('👑 Verification is exclusive to Pro! Upgrade to claim your Verified Gold Badge & $450+ brand bounties.');
+                    }
                   }}
                 >
                   <LinearGradient
-                    colors={['#784DF0', '#582CDB']}
+                    colors={isPro ? ['#784DF0', '#582CDB'] : ['#F59E0B', '#D97706']}
                     style={styles.verifActionGradient}
                   >
                     <Text style={styles.verifActionBtnText}>
-                      {isVerified ? '✓ Creator Passport Verified (Active)' : '✨ Claim Verified Creator Passport ✦'}
+                      {isPro
+                        ? '✓ Creator Passport Verified (Active)'
+                        : '🔒 Unlock Verified Creator Passport (Upgrade to Pro ✦)'}
                     </Text>
                   </LinearGradient>
                 </Pressable>
