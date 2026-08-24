@@ -246,6 +246,7 @@ interface ProGrowthScreenProps {
   onOpenEarnings?: () => void;
   onOpenSchedule?: () => void;
   onOpenPostComposer?: (prefillTitle?: string, prefillPlatform?: string) => void;
+  onOpenScript?: () => void;
   onSwitchToFree?: () => void;
   userProfile?: UserProfileData;
   onSaveProfile?: (updated: UserProfileData) => void;
@@ -651,6 +652,7 @@ export const ProGrowthScreen: React.FC<ProGrowthScreenProps> = ({
   onOpenEarnings,
   onOpenSchedule,
   onOpenPostComposer,
+  onOpenScript,
   onSwitchToFree,
   userProfile,
   onSaveProfile,
@@ -672,6 +674,12 @@ export const ProGrowthScreen: React.FC<ProGrowthScreenProps> = ({
   const [selectedGraphDayIndex, setSelectedGraphDayIndex] = useState(29);
   const [graphTimeframe, setGraphTimeframe] = useState<'7D' | '14D' | '30D' | '90D'>('30D');
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [showSlotSetModal, setShowSlotSetModal] = useState(false);
+  const [showProtectMomentumModal, setShowProtectMomentumModal] = useState(false);
+  const [streakShieldActive, setStreakShieldActive] = useState(true);
+  const [bufferActive, setBufferActive] = useState(true);
+  const [peakAlertsActive, setPeakAlertsActive] = useState(true);
+  const [squadBoostActive, setSquadBoostActive] = useState(false);
 
   // Notifications
   const [notifications, setNotifications] = useState<NotificationItem[]>(INITIAL_NOTIFICATIONS);
@@ -2241,6 +2249,197 @@ export const ProGrowthScreen: React.FC<ProGrowthScreenProps> = ({
           </View>
         </Modal>
 
+        {/* ============================================================ */}
+        {/* MODAL: 7:30 PM SLOT SET CONFIRMATION ANIMATION               */}
+        {/* ============================================================ */}
+        <Modal
+          visible={showSlotSetModal}
+          transparent={true}
+          animationType="fade"
+          onRequestClose={() => setShowSlotSetModal(false)}
+        >
+          <View style={styles.modalOverlay}>
+            <Animated.View style={[styles.modalCard, { transform: [{ scale: modalPopScale }], alignItems: 'center', padding: 24 }]}>
+              <View style={styles.slotCheckCircleBig}>
+                <Text style={{ fontSize: 28 }}>✓</Text>
+              </View>
+
+              <Text style={[styles.modalTitle, { fontSize: 19, textAlign: 'center', marginTop: 12 }]}>
+                7:30 PM Slot Locked! 🗓️
+              </Text>
+              <Text style={[styles.modalSubtitle, { textAlign: 'center', marginTop: 4, marginHorizontal: 8 }]}>
+                Your optimal engagement window for tomorrow is now booked and synced to your creator schedule.
+              </Text>
+
+              <View style={styles.slotConfirmedBadgeRow}>
+                <View style={styles.liveGreenPulseDot} />
+                <Text style={styles.slotConfirmedBadgeText}>SET &amp; SYNCED IN CALENDAR</Text>
+              </View>
+
+              <View style={{ width: '100%', gap: 10, marginTop: 16 }}>
+                <Pressable
+                  style={styles.modalRepurposeBtn}
+                  onPress={() => {
+                    setShowSlotSetModal(false);
+                    if (onOpenSchedule) onOpenSchedule();
+                  }}
+                >
+                  <Text style={styles.modalRepurposeBtnText}>🗓️ View Smart Schedule</Text>
+                </Pressable>
+
+                <Pressable
+                  style={[styles.modalFullBtn, { backgroundColor: '#FAF8F5', borderWidth: 1, borderColor: '#E2E8F0' }]}
+                  onPress={() => setShowSlotSetModal(false)}
+                >
+                  <Text style={[styles.modalFullBtnText, { color: '#64748B' }]}>Done</Text>
+                </Pressable>
+              </View>
+            </Animated.View>
+          </View>
+        </Modal>
+
+        {/* ============================================================ */}
+        {/* MODAL: PROTECT GROWTH MOMENTUM SAFEGUARDS                    */}
+        {/* ============================================================ */}
+        <Modal
+          visible={showProtectMomentumModal}
+          transparent={true}
+          animationType="fade"
+          onRequestClose={() => setShowProtectMomentumModal(false)}
+        >
+          <View style={styles.modalOverlay}>
+            <Animated.View style={[styles.modalCardLarge, { maxHeight: '88%', padding: 20, transform: [{ scale: modalPopScale }] }]}>
+              <ScrollView showsVerticalScrollIndicator={false}>
+                <View style={styles.modalHeaderRow}>
+                  <View style={{ flex: 1, paddingRight: 10 }}>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 2 }}>
+                      <Text style={{ fontSize: 18 }}>🛡️</Text>
+                      <Text style={styles.modalTitle}>Protect Growth Momentum</Text>
+                    </View>
+                    <Text style={styles.modalSubtitle}>
+                      Configure autonomous safeguards to protect your streak &amp; algorithm reach
+                    </Text>
+                  </View>
+                  <Pressable onPress={() => setShowProtectMomentumModal(false)} style={styles.modalCloseCircle} hitSlop={8}>
+                    <Text style={styles.modalCloseCross}>✕</Text>
+                  </Pressable>
+                </View>
+
+                {/* Options List */}
+                <View style={{ gap: 10, marginVertical: 14 }}>
+                  {/* Option 1 */}
+                  <Pressable
+                    style={[styles.protectOptionCard, streakShieldActive && styles.protectOptionCardActive]}
+                    onPress={() => {
+                      if (Platform.OS !== 'web') Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                      setStreakShieldActive(!streakShieldActive);
+                    }}
+                  >
+                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, flex: 1 }}>
+                        <Text style={{ fontSize: 20 }}>🛡️</Text>
+                        <View style={{ flex: 1 }}>
+                          <Text style={styles.protectOptionTitle}>Streak Autopilot Shield</Text>
+                          <Text style={styles.protectOptionDesc}>
+                            Auto-queues an emergency evergreen draft if unposted by 9:00 PM.
+                          </Text>
+                        </View>
+                      </View>
+                      <View style={[styles.protectToggleCircle, streakShieldActive && styles.protectToggleCircleActive]}>
+                        <Text style={styles.protectToggleText}>{streakShieldActive ? 'ON' : 'OFF'}</Text>
+                      </View>
+                    </View>
+                  </Pressable>
+
+                  {/* Option 2 */}
+                  <Pressable
+                    style={[styles.protectOptionCard, bufferActive && styles.protectOptionCardActive]}
+                    onPress={() => {
+                      if (Platform.OS !== 'web') Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                      setBufferActive(!bufferActive);
+                    }}
+                  >
+                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, flex: 1 }}>
+                        <Text style={{ fontSize: 20 }}>⚡</Text>
+                        <View style={{ flex: 1 }}>
+                          <Text style={styles.protectOptionTitle}>Algorithmic Safety Buffer</Text>
+                          <Text style={styles.protectOptionDesc}>
+                            Maintains 3 pre-rendered drafts to prevent posting velocity drops.
+                          </Text>
+                        </View>
+                      </View>
+                      <View style={[styles.protectToggleCircle, bufferActive && styles.protectToggleCircleActive]}>
+                        <Text style={styles.protectToggleText}>{bufferActive ? 'ON' : 'OFF'}</Text>
+                      </View>
+                    </View>
+                  </Pressable>
+
+                  {/* Option 3 */}
+                  <Pressable
+                    style={[styles.protectOptionCard, peakAlertsActive && styles.protectOptionCardActive]}
+                    onPress={() => {
+                      if (Platform.OS !== 'web') Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                      setPeakAlertsActive(!peakAlertsActive);
+                    }}
+                  >
+                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, flex: 1 }}>
+                        <Text style={{ fontSize: 20 }}>🔔</Text>
+                        <View style={{ flex: 1 }}>
+                          <Text style={styles.protectOptionTitle}>Peak Window Push Reminders</Text>
+                          <Text style={styles.protectOptionDesc}>
+                            Sends 30-min priority notifications before optimal 7:30 PM slot.
+                          </Text>
+                        </View>
+                      </View>
+                      <View style={[styles.protectToggleCircle, peakAlertsActive && styles.protectToggleCircleActive]}>
+                        <Text style={styles.protectToggleText}>{peakAlertsActive ? 'ON' : 'OFF'}</Text>
+                      </View>
+                    </View>
+                  </Pressable>
+
+                  {/* Option 4 */}
+                  <Pressable
+                    style={[styles.protectOptionCard, squadBoostActive && styles.protectOptionCardActive]}
+                    onPress={() => {
+                      if (Platform.OS !== 'web') Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                      setSquadBoostActive(!squadBoostActive);
+                    }}
+                  >
+                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, flex: 1 }}>
+                        <Text style={{ fontSize: 20 }}>👥</Text>
+                        <View style={{ flex: 1 }}>
+                          <Text style={styles.protectOptionTitle}>Squad Engagement Alert</Text>
+                          <Text style={styles.protectOptionDesc}>
+                            Pings squad members to like &amp; comment in first 15 mins.
+                          </Text>
+                        </View>
+                      </View>
+                      <View style={[styles.protectToggleCircle, squadBoostActive && styles.protectToggleCircleActive]}>
+                        <Text style={styles.protectToggleText}>{squadBoostActive ? 'ON' : 'OFF'}</Text>
+                      </View>
+                    </View>
+                  </Pressable>
+                </View>
+
+                {/* Save Button */}
+                <Pressable
+                  style={styles.modalRepurposeBtn}
+                  onPress={() => {
+                    if (Platform.OS !== 'web') Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+                    setShowProtectMomentumModal(false);
+                    showToast('✓ Growth Momentum Safeguards updated & active!');
+                  }}
+                >
+                  <Text style={styles.modalRepurposeBtnText}>Save &amp; Activate Safeguards</Text>
+                </Pressable>
+              </ScrollView>
+            </Animated.View>
+          </View>
+        </Modal>
+
         {/* PROFILE MODAL */}
         <UserProfileModal
           visible={showProfileModal}
@@ -3132,6 +3331,72 @@ const styles = StyleSheet.create({
     fontWeight: '900',
     color: '#FFFFFF',
     letterSpacing: 0.3,
+  },
+
+  /* 7:30 PM & PROTECT MOMENTUM MODAL STYLES */
+  slotCheckCircleBig: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    backgroundColor: '#ECFDF5',
+    borderWidth: 2,
+    borderColor: '#10B981',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  slotConfirmedBadgeRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    backgroundColor: '#FAF8F5',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 20,
+    marginTop: 10,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+  },
+  slotConfirmedBadgeText: {
+    fontSize: 10,
+    fontWeight: '900',
+    color: '#10B981',
+    letterSpacing: 0.5,
+  },
+  protectOptionCard: {
+    backgroundColor: '#FAF8F5',
+    borderRadius: 14,
+    padding: 12,
+    borderWidth: 1.5,
+    borderColor: '#EFECE6',
+  },
+  protectOptionCardActive: {
+    backgroundColor: '#F5F3FF',
+    borderColor: '#582CDB',
+  },
+  protectOptionTitle: {
+    fontSize: 13,
+    fontWeight: '800',
+    color: '#171420',
+    marginBottom: 2,
+  },
+  protectOptionDesc: {
+    fontSize: 10.5,
+    color: '#64748B',
+    lineHeight: 15,
+  },
+  protectToggleCircle: {
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 12,
+    backgroundColor: '#E2E8F0',
+  },
+  protectToggleCircleActive: {
+    backgroundColor: '#582CDB',
+  },
+  protectToggleText: {
+    fontSize: 9.5,
+    fontWeight: '900',
+    color: '#FFFFFF',
   },
 
   postAnalysisCard: {

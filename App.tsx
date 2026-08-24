@@ -713,6 +713,7 @@ export default function App() {
                 if (title) setComposerIdeaTitle(title);
                 navigateTo('composer');
               }}
+              onOpenScript={() => navigateTo('script')}
               onSwitchToFree={() => {
                 setUserProfile(prev => ({ ...prev, tier: 'free' }));
               }}
