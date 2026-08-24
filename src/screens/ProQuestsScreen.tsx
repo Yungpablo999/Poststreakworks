@@ -398,7 +398,7 @@ export const ProQuestsScreen: React.FC<ProQuestsScreenProps> = ({
               style={[styles.questFilterPill, selectedQuestFilter === 'brand' && styles.questFilterPillActive]}
             >
               <Text style={[styles.questFilterText, selectedQuestFilter === 'brand' && styles.questFilterTextActive]}>
-                💼 Brand (4)
+                💼 Brand (3)
               </Text>
             </Pressable>
           </View>
@@ -657,7 +657,7 @@ export const ProQuestsScreen: React.FC<ProQuestsScreenProps> = ({
               {selectedQuestFilter === 'brand' && (
                 <View style={styles.filterActiveBanner}>
                   <Text style={styles.filterActiveBannerText}>
-                    💼 <Text style={{ fontWeight: '900', color: '#B45309' }}>VERIFIED BRAND BOUNTIES</Text> • 4 Active Opportunities
+                    💼 <Text style={{ fontWeight: '900', color: '#B45309' }}>VERIFIED BRAND BOUNTIES</Text> • 3 Active Campaigns
                   </Text>
                 </View>
               )}
@@ -798,10 +798,65 @@ export const ProQuestsScreen: React.FC<ProQuestsScreenProps> = ({
           )}
 
           {/* ============================================================ */}
-          {/* GENERAL PROGRESS & REPUTATION (ALL QUESTS TAB ONLY)          */}
+          {/* GENERAL PROGRESS, MATCHING & REPUTATION (ALL QUESTS TAB)     */}
           {/* ============================================================ */}
           {selectedQuestFilter === 'all' && (
             <>
+              {/* CARD 7: PRIORITY OPPORTUNITY MATCHING (Dark Pro Card) */}
+              <View style={styles.darkOpportunityCard}>
+                <View style={styles.darkCardHeaderRow}>
+                  <Text style={styles.darkCardTag}>PRIORITY COLLAB & OPPORTUNITY MATCHING</Text>
+                  <Text style={{ fontSize: 18 }}>👑</Text>
+                </View>
+
+                <Text style={styles.darkCardTitle}>Priority Opportunity Matching</Text>
+                <Text style={styles.darkCardDesc}>
+                  Your Creator Passport is ranking in the top 2% for priority creator collabs and sponsorship opportunities.
+                </Text>
+
+                <View style={styles.darkMetricsStack}>
+                  {/* Metric 1 */}
+                  <View style={styles.darkMetricRow}>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                      <Text style={{ fontSize: 14 }}>🛡️</Text>
+                      <Text style={styles.darkMetricLabel}>MATCH SCORE READINESS</Text>
+                    </View>
+                    <Text style={styles.darkMetricValPurple}>92%</Text>
+                  </View>
+
+                  {/* Metric 2 */}
+                  <View style={styles.darkMetricRow}>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                      <Text style={{ fontSize: 14 }}>🤝</Text>
+                      <Text style={styles.darkMetricLabel}>PRIORITY CREATOR MATCHES</Text>
+                    </View>
+                    <Text style={styles.darkMetricValLight}>4 Crowned Available</Text>
+                  </View>
+
+                  {/* Metric 3 */}
+                  <View style={styles.darkMetricRow}>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                      <Text style={{ fontSize: 14 }}>💰</Text>
+                      <Text style={styles.darkMetricLabel}>AVG. BOUNTY FIT</Text>
+                    </View>
+                    <Text style={styles.darkMetricValGreen}>$450–$1,200</Text>
+                  </View>
+                </View>
+
+                <Pressable
+                  style={({ pressed }) => [styles.viewOpportunitiesSolidBtn, pressed && styles.btnPressed]}
+                  onPress={() => {
+                    if (onOpenOpportunities) {
+                      onOpenOpportunities();
+                    } else if (onNavigateTab) {
+                      onNavigateTab('match');
+                    }
+                  }}
+                >
+                  <Text style={styles.viewOpportunitiesBtnText}>View Matching Opportunities 👑 ➔</Text>
+                </Pressable>
+              </View>
+
               {/* CARD 8: CREATOR REPUTATION TIER */}
               <View style={styles.reputationTierCard}>
             <Text style={styles.reputationHeaderTitle}>CREATOR REPUTATION TIER</Text>
