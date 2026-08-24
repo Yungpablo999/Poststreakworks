@@ -1,3 +1,4 @@
+import { SocialBrandIcon } from '../components/SocialBrandIcon';
 import React, { useState, useRef, useEffect } from 'react';
 import {
   StyleSheet,
@@ -92,24 +93,8 @@ const ThreadsSvg = ({ size = 20 }: { size?: number }) => (
 );
 
 const renderGrowthPlatformBrandIcon = (id: string, size = 20) => {
-  switch (id) {
-    case 'tiktok':
-      return <TikTokSvg size={size} />;
-    case 'instagram':
-      return <InstagramSvg size={size} />;
-    case 'youtube':
-      return <YouTubeSvg size={size} />;
-    case 'linkedin':
-      return <LinkedInSvg size={size} />;
-    case 'x_twitter':
-      return <XSvg size={size} />;
-    case 'snapchat':
-      return <SnapchatSvg size={size} />;
-    case 'threads':
-      return <ThreadsSvg size={size} />;
-    default:
-      return <TikTokSvg size={size} />;
-  }
+  const platKey = id === 'x_twitter' ? 'x' : id;
+  return <SocialBrandIcon platform={platKey} size={size} />;
 };
 
 interface GrowthPlatformAccount {

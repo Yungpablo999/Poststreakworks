@@ -1,3 +1,4 @@
+import { SocialBrandIcon } from '../components/SocialBrandIcon';
 import React, { useState, useRef, useEffect } from 'react';
 import {
   StyleSheet,
@@ -413,10 +414,8 @@ export const ProGrowthScreen: React.FC<ProGrowthScreenProps> = ({
           <View style={styles.platformsContainerCard}>
             {/* TikTok */}
             <View style={styles.platformItemRow}>
-              <View style={styles.platformIconSquare}>
-                <Text style={{ fontSize: 18 }}>🎵</Text>
-              </View>
-              <View style={{ flex: 1 }}>
+              <SocialBrandIcon platform="tiktok" size={28} />
+              <View style={{ flex: 1, marginLeft: 10 }}>
                 <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 4 }}>
                   <Text style={styles.platformName}>TikTok</Text>
                   <Text style={styles.platformGrowthPurple}>+12.4% <Text style={{ color: '#64748B', fontSize: 11 }}>14.2k</Text></Text>
@@ -429,12 +428,10 @@ export const ProGrowthScreen: React.FC<ProGrowthScreenProps> = ({
 
             {/* Instagram */}
             <View style={styles.platformItemRow}>
-              <View style={styles.platformIconSquare}>
-                <Text style={{ fontSize: 18 }}>📷</Text>
-              </View>
-              <View style={{ flex: 1 }}>
+              <SocialBrandIcon platform="instagram" size={28} />
+              <View style={{ flex: 1, marginLeft: 10 }}>
                 <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 4 }}>
-                  <Text style={styles.platformName}>Instagram</Text>
+                  <Text style={styles.platformName}>Instagram Reels</Text>
                   <Text style={styles.platformGrowthPurple}>+8.1% <Text style={{ color: '#64748B', fontSize: 11 }}>25.6k</Text></Text>
                 </View>
                 <View style={styles.platformTrackBg}>
@@ -443,14 +440,12 @@ export const ProGrowthScreen: React.FC<ProGrowthScreenProps> = ({
               </View>
             </View>
 
-            {/* Shorts */}
+            {/* YouTube Shorts */}
             <View style={styles.platformItemRow}>
-              <View style={styles.platformIconSquare}>
-                <Text style={{ fontSize: 18 }}>▶️</Text>
-              </View>
-              <View style={{ flex: 1 }}>
+              <SocialBrandIcon platform="youtube" size={28} />
+              <View style={{ flex: 1, marginLeft: 10 }}>
                 <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 4 }}>
-                  <Text style={styles.platformName}>Shorts</Text>
+                  <Text style={styles.platformName}>YouTube Shorts</Text>
                   <Text style={styles.platformGrowthPurple}>+4.2% <Text style={{ color: '#64748B', fontSize: 11 }}>22.4k</Text></Text>
                 </View>
                 <View style={styles.platformTrackBg}>
@@ -583,7 +578,10 @@ export const ProGrowthScreen: React.FC<ProGrowthScreenProps> = ({
                   <View style={styles.postTypePill}>
                     <Text style={styles.postTypePillText}>REEL</Text>
                   </View>
-                  <Text style={styles.postPlatformLabel}>TIKTOK</Text>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+                    <SocialBrandIcon platform="tiktok" size={14} />
+                    <Text style={styles.postPlatformLabel}>TIKTOK</Text>
+                  </View>
                 </View>
 
                 <Text style={styles.postAnalysisTitle}>3 creator mistakes to avoid...</Text>
@@ -610,7 +608,10 @@ export const ProGrowthScreen: React.FC<ProGrowthScreenProps> = ({
                   <View style={styles.postTypePillGray}>
                     <Text style={styles.postTypePillGrayText}>CAROUSEL</Text>
                   </View>
-                  <Text style={styles.postPlatformLabel}>IG</Text>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+                    <SocialBrandIcon platform="instagram" size={14} />
+                    <Text style={styles.postPlatformLabel}>INSTAGRAM</Text>
+                  </View>
                 </View>
 
                 <Text style={styles.postAnalysisTitle}>Daily planning workflow...</Text>
@@ -817,16 +818,25 @@ export const ProGrowthScreen: React.FC<ProGrowthScreenProps> = ({
               </View>
 
               <View style={{ gap: 10, marginVertical: 10 }}>
-                {['YouTube Shorts (Connected ✓)', 'Instagram Reels (Connected ✓)', 'TikTok (Connected ✓)', 'LinkedIn Articles', 'X / Twitter'].map((p, idx) => (
+                {[
+                  { name: 'YouTube Shorts (Connected ✓)', platform: 'youtube' },
+                  { name: 'Instagram Reels (Connected ✓)', platform: 'instagram' },
+                  { name: 'TikTok (Connected ✓)', platform: 'tiktok' },
+                  { name: 'LinkedIn Articles', platform: 'linkedin' },
+                  { name: 'X / Twitter', platform: 'x' },
+                ].map((item, idx) => (
                   <Pressable
                     key={idx}
                     style={styles.platformSelectRow}
                     onPress={() => {
                       setShowAddPlatformModal(false);
-                      showToast(`Synced ${p.split(' ')[0]} with Pro Analytics!`);
+                      showToast(`Synced ${item.name.split(' ')[0]} with Pro Analytics!`);
                     }}
                   >
-                    <Text style={styles.platformSelectText}>{p}</Text>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, flex: 1 }}>
+                      <SocialBrandIcon platform={item.platform} size={22} />
+                      <Text style={styles.platformSelectText}>{item.name}</Text>
+                    </View>
                     <Text style={styles.platformSyncArrow}>➔</Text>
                   </Pressable>
                 ))}
