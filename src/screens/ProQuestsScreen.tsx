@@ -846,11 +846,11 @@ export const ProQuestsScreen: React.FC<ProQuestsScreenProps> = ({
                 <Pressable
                   style={({ pressed }) => [styles.viewOpportunitiesSolidBtn, pressed && styles.btnPressed]}
                   onPress={() => {
-                    if (onOpenOpportunities) {
-                      onOpenOpportunities();
-                    } else if (onNavigateTab) {
-                      onNavigateTab('match');
+                    if (Platform.OS !== 'web') {
+                      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
                     }
+                    triggerModalPop();
+                    setShowOpportunityModal(true);
                   }}
                 >
                   <Text style={styles.viewOpportunitiesBtnText}>View Matching Opportunities 👑 ➔</Text>
@@ -1461,7 +1461,7 @@ export const ProQuestsScreen: React.FC<ProQuestsScreenProps> = ({
         </Modal>
 
         {/* ============================================================ */}
-        {/* MODAL: OPPORTUNITY MATCHING READINESS                        */}
+        {/* MODAL: OPPORTUNITY MATCHING SELECTION (CREATORS / SQUADS / BRANDS) */}
         {/* ============================================================ */}
         <Modal
           visible={showOpportunityModal}
@@ -1470,37 +1470,125 @@ export const ProQuestsScreen: React.FC<ProQuestsScreenProps> = ({
           onRequestClose={() => setShowOpportunityModal(false)}
         >
           <View style={styles.modalOverlay}>
-            <Animated.View style={[styles.modalCard, { transform: [{ scale: modalPopScale }] }]}>
+            <Animated.View style={[styles.modalCard, { transform: [{ scale: modalPopScale }], maxWidth: 440, padding: 22 }]}>
+              {/* Modal Header */}
               <View style={styles.modalHeaderRow}>
-                <View>
-                  <Text style={styles.modalTitle}>Top 2% Brand Match Catalog</Text>
-                  <Text style={styles.modalSubtitle}>Verified sponsorship pipeline</Text>
+                <View style={{ flex: 1, paddingRight: 10 }}>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 2 }}>
+                    <Text style={{ fontSize: 16 }}>👑</Text>
+                    <Text style={styles.modalTitle}>Choose Opportunity Type</Text>
+                  </View>
+                  <Text style={styles.modalSubtitle}>Where would you like to explore priority matches?</Text>
                 </View>
                 <Pressable onPress={() => setShowOpportunityModal(false)} style={styles.modalCloseCircle} hitSlop={8}>
                   <Text style={styles.modalCloseCross}>✕</Text>
                 </Pressable>
               </View>
 
-              <View style={{ gap: 10, marginVertical: 10 }}>
-                <View style={styles.oppItemRow}>
-                  <Text style={styles.oppTitle}>60-Day Milestone</Text>
-                  <Text style={styles.oppBounty}>$450 Bounty</Text>
-                </View>
-                <View style={styles.oppItemRow}>
-                  <Text style={styles.oppTitle}>Lagos Food Festival</Text>
-                  <Text style={styles.oppBounty}>$350 Bounty</Text>
-                </View>
-                <View style={styles.oppItemRow}>
-                  <Text style={styles.oppTitle}>Creator Tech Summit</Text>
-                  <Text style={styles.oppBounty}>$1,200 Bounty</Text>
-                </View>
+              {/* 3 Selectable Opportunity Cards */}
+              <View style={{ gap: 12, marginVertical: 14 }}>
+                {/* OPTION 1: CREATOR COLLAB MATCHING */}
+                <Pressable
+                  style={({ pressed }) => [styles.oppChoiceCard, pressed && styles.btnPressed]}
+                  onPress={() => {
+                    if (Platform.OS !== 'web') {
+                      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                    }
+                    setShowOpportunityModal(false);
+                    if (onOpenOpportunities) {
+                      onOpenOpportunities();
+                    } else if (onNavigateTab) {
+                      onNavigateTab('match');
+                    }
+                  }}
+                >
+                  <View style={styles.oppChoiceIconBoxGold}>
+                    <Text style={{ fontSize: 22 }}>👥</Text>
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 2 }}>
+                      <Text style={styles.oppChoiceTitle}>Creator Collabs</Text>
+                      <View style={styles.oppChoiceBadgeGold}>
+                        <Text style={styles.oppChoiceBadgeGoldText}>👑 TOP 2%</Text>
+                      </View>
+                    </View>
+                    <Text style={styles.oppChoiceDesc}>
+                      Match with crowned verified creators for joint Reels, series & split-screen duets.
+                    </Text>
+                    <Text style={styles.oppChoiceMetaPurple}>4 Crowned Matches • 96% Synergy</Text>
+                  </View>
+                  <Text style={styles.oppChoiceChevron}>›</Text>
+                </Pressable>
+
+                {/* OPTION 2: SQUAD RECRUITMENT & DUELS */}
+                <Pressable
+                  style={({ pressed }) => [styles.oppChoiceCard, pressed && styles.btnPressed]}
+                  onPress={() => {
+                    if (Platform.OS !== 'web') {
+                      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                    }
+                    setShowOpportunityModal(false);
+                    if (onOpenSquad) {
+                      onOpenSquad();
+                    } else {
+                      setSelectedQuestFilter('squad');
+                    }
+                  }}
+                >
+                  <View style={styles.oppChoiceIconBoxPurple}>
+                    <Text style={{ fontSize: 22 }}>🛡️</Text>
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 2 }}>
+                      <Text style={styles.oppChoiceTitle}>Squad Sprints & Duels</Text>
+                      <View style={styles.oppChoiceBadgePurple}>
+                        <Text style={styles.oppChoiceBadgePurpleText}>⚡ ACTIVE</Text>
+                      </View>
+                    </View>
+                    <Text style={styles.oppChoiceDesc}>
+                      Join creator squads, contribute to 8-Reel goals, and battle live in squad duels.
+                    </Text>
+                    <Text style={styles.oppChoiceMetaPurple}>Momentum Makers (Round 2 Live) • +750 XP</Text>
+                  </View>
+                  <Text style={styles.oppChoiceChevron}>›</Text>
+                </Pressable>
+
+                {/* OPTION 3: BRAND SPONSORSHIP DEALS */}
+                <Pressable
+                  style={({ pressed }) => [styles.oppChoiceCard, pressed && styles.btnPressed]}
+                  onPress={() => {
+                    if (Platform.OS !== 'web') {
+                      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                    }
+                    setShowOpportunityModal(false);
+                    setSelectedQuestFilter('brand');
+                  }}
+                >
+                  <View style={styles.oppChoiceIconBoxGreen}>
+                    <Text style={{ fontSize: 22 }}>💼</Text>
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 2 }}>
+                      <Text style={styles.oppChoiceTitle}>Brand Sponsorship Deals</Text>
+                      <View style={styles.oppChoiceBadgeGreen}>
+                        <Text style={styles.oppChoiceBadgeGreenText}>💰 $450–$1,200</Text>
+                      </View>
+                    </View>
+                    <Text style={styles.oppChoiceDesc}>
+                      Explore verified brand campaigns, food festival reviews & milestone bounties.
+                    </Text>
+                    <Text style={styles.oppChoiceMetaGreen}>3 Active Brand Quests Available</Text>
+                  </View>
+                  <Text style={styles.oppChoiceChevron}>›</Text>
+                </Pressable>
               </View>
 
+              {/* Close Button */}
               <Pressable
-                style={styles.modalFullBtn}
+                style={styles.modalOutlineCloseBtn}
                 onPress={() => setShowOpportunityModal(false)}
               >
-                <Text style={styles.modalFullBtnText}>Close</Text>
+                <Text style={styles.modalOutlineCloseBtnText}>Cancel</Text>
               </Pressable>
             </Animated.View>
           </View>
@@ -2618,6 +2706,128 @@ const styles = StyleSheet.create({
     fontWeight: '900',
     color: '#D97706',
   },
+  /* OPPORTUNITY MODAL SELECTION STYLES */
+  oppChoiceCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    backgroundColor: '#FAF8F5',
+    borderRadius: 16,
+    padding: 14,
+    borderWidth: 1.5,
+    borderColor: '#EFECE6',
+  },
+  oppChoiceIconBoxGold: {
+    width: 46,
+    height: 46,
+    borderRadius: 23,
+    backgroundColor: '#FEF3C7',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: '#FDE68A',
+  },
+  oppChoiceIconBoxPurple: {
+    width: 46,
+    height: 46,
+    borderRadius: 23,
+    backgroundColor: '#EDE9FE',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: '#DDD6FE',
+  },
+  oppChoiceIconBoxGreen: {
+    width: 46,
+    height: 46,
+    borderRadius: 23,
+    backgroundColor: '#DCFCE7',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: '#BBF7D0',
+  },
+  oppChoiceTitle: {
+    fontSize: 14,
+    fontWeight: '900',
+    color: '#171420',
+  },
+  oppChoiceBadgeGold: {
+    backgroundColor: '#FEF3C7',
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 6,
+    borderWidth: 1,
+    borderColor: '#FDE68A',
+  },
+  oppChoiceBadgeGoldText: {
+    fontSize: 9,
+    fontWeight: '900',
+    color: '#92400E',
+  },
+  oppChoiceBadgePurple: {
+    backgroundColor: '#EDE9FE',
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 6,
+    borderWidth: 1,
+    borderColor: '#DDD6FE',
+  },
+  oppChoiceBadgePurpleText: {
+    fontSize: 9,
+    fontWeight: '900',
+    color: '#582CDB',
+  },
+  oppChoiceBadgeGreen: {
+    backgroundColor: '#DCFCE7',
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 6,
+    borderWidth: 1,
+    borderColor: '#BBF7D0',
+  },
+  oppChoiceBadgeGreenText: {
+    fontSize: 9,
+    fontWeight: '900',
+    color: '#166534',
+  },
+  oppChoiceDesc: {
+    fontSize: 11,
+    color: '#64748B',
+    lineHeight: 15,
+    marginTop: 2,
+  },
+  oppChoiceMetaPurple: {
+    fontSize: 10.5,
+    fontWeight: '700',
+    color: '#582CDB',
+    marginTop: 4,
+  },
+  oppChoiceMetaGreen: {
+    fontSize: 10.5,
+    fontWeight: '700',
+    color: '#16A34A',
+    marginTop: 4,
+  },
+  oppChoiceChevron: {
+    fontSize: 22,
+    fontWeight: '700',
+    color: '#94A3B8',
+    marginLeft: 4,
+  },
+  modalOutlineCloseBtn: {
+    backgroundColor: '#F1F5F9',
+    borderRadius: 12,
+    paddingVertical: 10,
+    alignItems: 'center',
+    marginTop: 4,
+  },
+  modalOutlineCloseBtnText: {
+    fontSize: 12.5,
+    fontWeight: '800',
+    color: '#475569',
+  },
+
   /* ACTIVE FILTER BANNER */
   filterActiveBanner: {
     backgroundColor: '#FAF5FF',
