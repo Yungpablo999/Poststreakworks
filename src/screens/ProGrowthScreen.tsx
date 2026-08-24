@@ -122,7 +122,7 @@ const TIMEFRAME_CONFIGS = {
         return {
           date: days[i] || `Day ${i + 1}`,
           reach: `${dailyReaches[i]}K Daily Reach`,
-          delta: `+${dailyFollowers[i]} Followers Today (▲ 34.8K 7D Total)`,
+          delta: `+${dailyFollowers[i]} Followers (34.8K 7D)`,
           yPos: yCoords[i],
         };
       } else {
@@ -171,7 +171,7 @@ const TIMEFRAME_CONFIGS = {
         return {
           date: `May ${i + 17}, 2024`,
           reach: `${dailyReaches[i] || 4.5}K Daily Reach`,
-          delta: `+${dailyFollowers[i] || 85} Followers (68.4K 14D Total)`,
+          delta: `+${dailyFollowers[i] || 85} Followers (68.4K 14D)`,
           yPos,
         };
       } else {
@@ -223,7 +223,7 @@ const TIMEFRAME_CONFIGS = {
         return {
           date: `May ${i + 1}, 2024`,
           reach: `${reachVal}K Daily Reach`,
-          delta: `+${followers} Followers (131.0K Total Reach)`,
+          delta: `+${followers} Followers (131.0K 30D)`,
           yPos,
         };
       } else {
@@ -274,7 +274,7 @@ const TIMEFRAME_CONFIGS = {
         return {
           date: `Quarterly ${weeks[i] || `Week ${i + 1}`}`,
           reach: `${weeklyReaches[i]}K Weekly Reach`,
-          delta: `+${weeklyFollowers[i]} Followers (368.0K Total Reach)`,
+          delta: `+${weeklyFollowers[i]} Followers (368K 90D)`,
           yPos,
         };
       } else {
@@ -1006,6 +1006,12 @@ export const ProGrowthScreen: React.FC<ProGrowthScreenProps> = ({
         >
           <View style={styles.modalOverlay}>
             <Animated.View style={[styles.modalCard, styles.expandedGraphModalCard, { transform: [{ scale: modalPopScale }] }]}>
+              <ScrollView
+                style={{ width: '100%' }}
+                contentContainerStyle={{ paddingBottom: 10 }}
+                showsVerticalScrollIndicator={false}
+                bounces={false}
+              >
               {/* Header */}
               <View style={styles.modalHeaderRow}>
                 <View style={{ flex: 1, paddingRight: 10 }}>
@@ -1057,16 +1063,22 @@ export const ProGrowthScreen: React.FC<ProGrowthScreenProps> = ({
 
                 return (
                   <View style={styles.graphActivePointCard}>
-                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <View>
-                        <Text style={styles.graphActivePointDate}>📅 {activePt.date}</Text>
-                        <Text style={styles.graphActivePointSub}>
-                          {expandedGraphType === 'growth30d' ? 'Velocity & Engagement Node' : 'Audience Expansion Trend'}
+                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', gap: 10 }}>
+                      <View style={{ flex: 1, minWidth: 0 }}>
+                        <Text style={styles.graphActivePointDate} numberOfLines={1} ellipsizeMode="tail">
+                          📅 {activePt.date}
+                        </Text>
+                        <Text style={styles.graphActivePointSub} numberOfLines={1} ellipsizeMode="tail">
+                          {expandedGraphType === 'growth30d' ? 'Daily Velocity & Reach' : 'Audience Growth Trend'}
                         </Text>
                       </View>
-                      <View style={{ alignItems: 'flex-end' }}>
-                        <Text style={styles.graphActivePointValue}>{activePt.reach}</Text>
-                        <Text style={styles.graphActivePointDelta}>{activePt.delta}</Text>
+                      <View style={{ alignItems: 'flex-end', flexShrink: 0 }}>
+                        <Text style={styles.graphActivePointValue} numberOfLines={1}>
+                          {activePt.reach}
+                        </Text>
+                        <Text style={styles.graphActivePointDelta} numberOfLines={1}>
+                          {activePt.delta}
+                        </Text>
                       </View>
                     </View>
                   </View>
@@ -1222,11 +1234,12 @@ export const ProGrowthScreen: React.FC<ProGrowthScreenProps> = ({
 
               {/* Close / Action Button */}
               <Pressable
-                style={styles.modalFullBtn}
+                style={[styles.modalFullBtn, { marginTop: 6 }]}
                 onPress={() => setShowExpandedGraphModal(false)}
               >
                 <Text style={styles.modalFullBtnText}>Close Expanded View</Text>
               </Pressable>
+              </ScrollView>
             </Animated.View>
           </View>
         </Modal>
@@ -1579,9 +1592,13 @@ const styles = StyleSheet.create({
     color: '#7C3AED',
   },
   expandedGraphModalCard: {
-    maxWidth: 520,
-    padding: 20,
+    width: '92%',
+    maxWidth: 480,
+    maxHeight: '88%',
+    padding: 18,
     borderRadius: 24,
+    backgroundColor: '#FFFFFF',
+    overflow: 'hidden',
   },
   liveGreenPulseDot: {
     width: 8,
@@ -1620,10 +1637,12 @@ const styles = StyleSheet.create({
   graphActivePointCard: {
     backgroundColor: '#FAF8F5',
     borderRadius: 14,
-    padding: 12,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
     borderWidth: 1.5,
     borderColor: '#EFECE6',
     marginBottom: 8,
+    width: '100%',
   },
   graphActivePointDate: {
     fontSize: 13,
