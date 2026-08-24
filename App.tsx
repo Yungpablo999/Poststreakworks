@@ -382,9 +382,7 @@ export default function App() {
             <DashboardScreen
               onLogout={handleLogout}
               onStartMission={() => navigateTo('mission-detail')}
-              onOpenJarvisPro={() => {
-                setUserProfile(prev => ({ ...prev, tier: 'pro' }));
-              }}
+              onOpenJarvisPro={() => navigateTo('jarvis-pro')}
               onOpenSchedule={() => navigateTo('schedule')}
               onOpenMessages={(threadId?: string) => {
                 setActiveMessageThreadId(threadId);
@@ -1395,11 +1393,7 @@ export default function App() {
               onLogout={handleLogout}
               onOpenMessages={() => navigateTo('messages')}
               onOpenSchedule={() => navigateTo('schedule')}
-              onOpenJarvisPro={() => {
-                if (userProfile) {
-                  setUserProfile({ ...userProfile, tier: 'pro' });
-                }
-              }}
+              onOpenJarvisPro={() => navigateTo('jarvis-pro')}
               onOpenQuests={() => navigateTo('quests')}
               onOpenPlatforms={() => navigateTo('platforms')}
               onOpenReadiness={() => navigateTo('opportunity-readiness')}
