@@ -1380,36 +1380,82 @@ export const ProGrowthScreen: React.FC<ProGrowthScreenProps> = ({
                   </View>
                 </View>
               ) : (
-                /* CLEAN 30D GROWTH VELOCITY VIEW */
-                <View style={{ gap: 10, marginVertical: 4 }}>
-                  {(() => {
-                    const curCfg = TIMEFRAME_CONFIGS[graphTimeframe] || TIMEFRAME_CONFIGS['30D'];
-                    return (
-                      <View style={styles.modalWeeklyBreakdownGrid}>
-                        {curCfg.weeklyMetrics.map((wm, wIdx) => (
-                          <View key={wIdx} style={styles.modalWeekCol}>
-                            <Text style={styles.modalWeekTitle}>{wm.title}</Text>
-                            <Text style={[styles.modalWeekVal, wm.isPeak && { color: '#582CDB' }]}>{wm.val}</Text>
-                            <Text style={styles.modalWeekSub}>{wm.sub}</Text>
-                          </View>
-                        ))}
-                      </View>
-                    );
-                  })()}
+                /* LUXURY CLEAN 30D GROWTH & REACH VIEW */
+                <View style={styles.audienceCleanBottomContainer}>
+                  {/* 2 Key Stats Duo */}
+                  <View style={styles.audienceStatsDuoRow}>
+                    <View style={styles.audienceStatDuoCard}>
+                      <Text style={styles.audienceStatDuoLabel}>TOTAL REACH</Text>
+                      <Text style={[styles.audienceStatDuoVal, { color: '#582CDB' }]}>
+                        {graphTimeframe === '7D'
+                          ? '34.8K'
+                          : graphTimeframe === '14D'
+                          ? '68.4K'
+                          : graphTimeframe === '90D'
+                          ? '368.0K'
+                          : '131.0K'}
+                      </Text>
+                      <Text style={styles.audienceStatDuoSub}>+28.4% vs last period</Text>
+                    </View>
+                    <View style={styles.audienceStatDuoCard}>
+                      <Text style={styles.audienceStatDuoLabel}>ENGAGEMENT</Text>
+                      <Text style={[styles.audienceStatDuoVal, { color: '#10B981' }]}>18.0K</Text>
+                      <Text style={styles.audienceStatDuoSub}>0:42s avg retention</Text>
+                    </View>
+                  </View>
 
-                  <View style={styles.modalPlatformContribRow}>
-                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-                      <SocialBrandIcon platform="tiktok" size={16} />
-                      <Text style={styles.modalPlatContribText}>TikTok 34%</Text>
+                  {/* Channel Reach Share Breakdown */}
+                  <View style={styles.audienceChannelsCard}>
+                    <Text style={styles.audienceChannelsTitle}>REACH SHARE BY PLATFORM</Text>
+
+                    {/* Instagram */}
+                    <View style={styles.audienceChannelRow}>
+                      <SocialBrandIcon platform="instagram" size={20} />
+                      <View style={{ flex: 1, marginLeft: 10 }}>
+                        <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 4 }}>
+                          <Text style={styles.audienceChannelName}>Instagram Reels</Text>
+                          <Text style={styles.audienceChannelVal}>52.4K <Text style={styles.audienceChannelPct}>40%</Text></Text>
+                        </View>
+                        <View style={styles.audienceChannelTrackBg}>
+                          <View style={[styles.audienceChannelTrackFill, { width: '40%', backgroundColor: '#E1306C' }]} />
+                        </View>
+                      </View>
                     </View>
-                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-                      <SocialBrandIcon platform="instagram" size={16} />
-                      <Text style={styles.modalPlatContribText}>Instagram 37%</Text>
+
+                    {/* TikTok */}
+                    <View style={styles.audienceChannelRow}>
+                      <SocialBrandIcon platform="tiktok" size={20} />
+                      <View style={{ flex: 1, marginLeft: 10 }}>
+                        <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 4 }}>
+                          <Text style={styles.audienceChannelName}>TikTok</Text>
+                          <Text style={styles.audienceChannelVal}>47.2K <Text style={styles.audienceChannelPct}>36%</Text></Text>
+                        </View>
+                        <View style={styles.audienceChannelTrackBg}>
+                          <View style={[styles.audienceChannelTrackFill, { width: '36%', backgroundColor: '#000000' }]} />
+                        </View>
+                      </View>
                     </View>
-                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-                      <SocialBrandIcon platform="youtube" size={16} />
-                      <Text style={styles.modalPlatContribText}>YouTube 29%</Text>
+
+                    {/* YouTube */}
+                    <View style={styles.audienceChannelRow}>
+                      <SocialBrandIcon platform="youtube" size={20} />
+                      <View style={{ flex: 1, marginLeft: 10 }}>
+                        <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 4 }}>
+                          <Text style={styles.audienceChannelName}>YouTube Shorts</Text>
+                          <Text style={styles.audienceChannelVal}>31.4K <Text style={styles.audienceChannelPct}>24%</Text></Text>
+                        </View>
+                        <View style={styles.audienceChannelTrackBg}>
+                          <View style={[styles.audienceChannelTrackFill, { width: '24%', backgroundColor: '#FF0000' }]} />
+                        </View>
+                      </View>
                     </View>
+                  </View>
+
+                  {/* Clean Insight Callout */}
+                  <View style={styles.audienceInsightCallout}>
+                    <Text style={styles.audienceInsightCalloutText}>
+                      ⚡ <Text style={{ fontWeight: '800', color: '#582CDB' }}>Reach Velocity:</Text> Consistent daily posting generated a 3.4x spike in Explore page recommendations.
+                    </Text>
                   </View>
                 </View>
               )}
