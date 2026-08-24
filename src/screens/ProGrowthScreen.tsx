@@ -1906,7 +1906,7 @@ export const ProGrowthScreen: React.FC<ProGrowthScreenProps> = ({
         </Modal>
 
         {/* ============================================================ */}
-        {/* MODAL: MONTHLY REPORT EXPORT                                 */}
+        {/* MODAL: EXECUTIVE MONTHLY GROWTH REPORT & HIGHLIGHTS           */}
         {/* ============================================================ */}
         <Modal
           visible={showReportModal}
@@ -1915,33 +1915,142 @@ export const ProGrowthScreen: React.FC<ProGrowthScreenProps> = ({
           onRequestClose={() => setShowReportModal(false)}
         >
           <View style={styles.modalOverlay}>
-            <Animated.View style={[styles.modalCard, { transform: [{ scale: modalPopScale }] }]}>
-              <View style={styles.modalHeaderRow}>
-                <View>
-                  <Text style={styles.modalTitle}>May 2024 Growth Audit</Text>
-                  <Text style={styles.modalSubtitle}>Exporting Verified Pro PDF</Text>
+            <Animated.View style={[styles.modalCardLarge, { maxHeight: '90%', padding: 20, transform: [{ scale: modalPopScale }] }]}>
+              <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 12 }}>
+                {/* Header */}
+                <View style={styles.modalHeaderRow}>
+                  <View style={{ flex: 1, paddingRight: 10 }}>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 4 }}>
+                      <View style={styles.liveGreenPulseDot} />
+                      <Text style={styles.reportVerifiedBadge}>VERIFIED CREATOR AUDIT</Text>
+                      <Text style={styles.reportDateBadge}>MAY 2024</Text>
+                    </View>
+                    <Text style={[styles.modalTitle, { fontSize: 17 }]}>May Executive Growth Report</Text>
+                    <Text style={styles.modalSubtitle}>Comprehensive multi-platform analytics &amp; brand deal valuation</Text>
+                  </View>
+                  <Pressable onPress={() => setShowReportModal(false)} style={styles.modalCloseCircle} hitSlop={8}>
+                    <Text style={styles.modalCloseCross}>✕</Text>
+                  </Pressable>
                 </View>
-                <Pressable onPress={() => setShowReportModal(false)} style={styles.modalCloseCircle} hitSlop={8}>
-                  <Text style={styles.modalCloseCross}>✕</Text>
+
+                {/* 4-Grid Key Highlight Cards */}
+                <View style={styles.reportVitalsGrid}>
+                  <View style={styles.reportVitalCard}>
+                    <Text style={styles.reportVitalLabel}>TOTAL 30D REACH</Text>
+                    <Text style={[styles.reportVitalVal, { color: '#582CDB' }]}>131.0K</Text>
+                    <Text style={styles.reportVitalDelta}>▲ +28.4% vs April</Text>
+                  </View>
+                  <View style={styles.reportVitalCard}>
+                    <Text style={styles.reportVitalLabel}>NET AUDIENCE GAIN</Text>
+                    <Text style={[styles.reportVitalVal, { color: '#10B981' }]}>+2,480</Text>
+                    <Text style={styles.reportVitalDelta}>144.3K Total Fans</Text>
+                  </View>
+                  <View style={styles.reportVitalCard}>
+                    <Text style={styles.reportVitalLabel}>ENGAGEMENT VOLUME</Text>
+                    <Text style={styles.reportVitalVal}>18.0K</Text>
+                    <Text style={styles.reportVitalDelta}>96.8% Tier-1 Quality</Text>
+                  </View>
+                  <View style={styles.reportVitalCard}>
+                    <Text style={styles.reportVitalLabel}>BRAND DEAL VALUATION</Text>
+                    <Text style={[styles.reportVitalVal, { color: '#CA8A04' }]}>$3.8K – $5.2K</Text>
+                    <Text style={styles.reportVitalDelta}>Tier-1 Verified Rate</Text>
+                  </View>
+                </View>
+
+                {/* MAIN THINGS THAT HAPPENED SECTION */}
+                <Text style={styles.reportSectionHeading}>MAIN MILESTONES &amp; BREAKTHROUGHS</Text>
+
+                <View style={{ gap: 10, marginBottom: 14 }}>
+                  {/* Highlight 1: Viral Breakthrough */}
+                  <View style={styles.reportHighlightItem}>
+                    <View style={styles.reportHighlightIconCircle}>
+                      <Text style={{ fontSize: 16 }}>🚀</Text>
+                    </View>
+                    <View style={{ flex: 1 }}>
+                      <Text style={styles.reportHighlightTitle}>Top Viral Breakout Reel</Text>
+                      <Text style={styles.reportHighlightDesc}>
+                        <Text style={{ fontWeight: '700', color: '#171420' }}>"3 creator mistakes to avoid"</Text> hit 45.2K views and 924 saves with a top 1% hook retention rate (91%).
+                      </Text>
+                    </View>
+                  </View>
+
+                  {/* Highlight 2: Carousel Saves */}
+                  <View style={styles.reportHighlightItem}>
+                    <View style={[styles.reportHighlightIconCircle, { backgroundColor: '#EDE9FE' }]}>
+                      <Text style={{ fontSize: 16 }}>📑</Text>
+                    </View>
+                    <View style={{ flex: 1 }}>
+                      <Text style={styles.reportHighlightTitle}>Carousel High-Intent Save Spike</Text>
+                      <Text style={styles.reportHighlightDesc}>
+                        Educational 7-slide Carousels outperformed static posts by 3.8x in bookmarks, converting +920 new dedicated subscribers.
+                      </Text>
+                    </View>
+                  </View>
+
+                  {/* Highlight 3: Peak Publishing Window */}
+                  <View style={styles.reportHighlightItem}>
+                    <View style={[styles.reportHighlightIconCircle, { backgroundColor: '#FEF3C7' }]}>
+                      <Text style={{ fontSize: 16 }}>⚡</Text>
+                    </View>
+                    <View style={{ flex: 1 }}>
+                      <Text style={styles.reportHighlightTitle}>14-Day Consistency &amp; 7:30 PM Peak</Text>
+                      <Text style={styles.reportHighlightDesc}>
+                        Posting at exactly 7:30 PM triggered high algorithm distribution, resulting in 82% of all traffic coming from the Explore &amp; For You pages.
+                      </Text>
+                    </View>
+                  </View>
+
+                  {/* Highlight 4: Multi-Platform Synergy */}
+                  <View style={styles.reportHighlightItem}>
+                    <View style={[styles.reportHighlightIconCircle, { backgroundColor: '#DCFCE7' }]}>
+                      <Text style={{ fontSize: 16 }}>🌐</Text>
+                    </View>
+                    <View style={{ flex: 1 }}>
+                      <Text style={styles.reportHighlightTitle}>Multi-Platform Inbound Velocity</Text>
+                      <Text style={styles.reportHighlightDesc}>
+                        Active distribution across TikTok (40%), Instagram (36%), and YouTube (24%) generated 4 new brand sponsorship inquiries.
+                      </Text>
+                    </View>
+                  </View>
+                </View>
+
+                {/* AUDIENCE & BRAND READINESS CALLOUT */}
+                <View style={styles.reportJarvisSummaryCard}>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 4 }}>
+                    <Image
+                      source={require('../../assets/images/jarvis-core-flame.png')}
+                      style={{ width: 18, height: 18 }}
+                      resizeMode="contain"
+                    />
+                    <Text style={styles.reportJarvisTag}>JARVIS AUDIT VERDICT</Text>
+                  </View>
+                  <Text style={styles.reportJarvisText}>
+                    You rank in the <Text style={{ fontWeight: '800', color: '#7C3AED' }}>Top 2.4% of creators in your niche</Text> this month. Your average watch time of 0:42s gives you maximum negotiating leverage for upcoming brand campaigns.
+                  </Text>
+                </View>
+
+                {/* DOWNLOAD REPORT BUTTON */}
+                <Pressable
+                  style={styles.modalDownloadSolidBtn}
+                  onPress={() => {
+                    if (Platform.OS !== 'web') {
+                      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+                    }
+                    setShowReportModal(false);
+                    showToast('✓ May 2024 Executive PDF Report downloaded!');
+                  }}
+                >
+                  <Text style={styles.modalDownloadSolidBtnText}>📥 Download Report (Verified PDF)</Text>
                 </Pressable>
-              </View>
 
-              <View style={{ gap: 8, marginVertical: 12 }}>
-                <Text style={styles.reportSummaryLine}>• Overall Follower Growth: +28.4% (+2,480 new)</Text>
-                <Text style={styles.reportSummaryLine}>• Total Reach: 131,000 across 3 connected platforms</Text>
-                <Text style={styles.reportSummaryLine}>• Top Converting Format: Talking Storytelling Reels</Text>
-                <Text style={styles.reportSummaryLine}>• Sponsorship Readiness: Tier-1 Verified (92%)</Text>
-              </View>
-
-              <Pressable
-                style={styles.modalFullBtn}
-                onPress={() => {
-                  setShowReportModal(false);
-                  showToast('Monthly PDF report saved and ready for download!');
-                }}
-              >
-                <Text style={styles.modalFullBtnText}>Download PDF Export 📥</Text>
-              </Pressable>
+                {/* Close Button */}
+                <Pressable
+                  style={[styles.modalFullBtn, { marginTop: 8, backgroundColor: '#FAF8F5', borderWidth: 1, borderColor: '#E2E8F0' }]}
+                  onPress={() => setShowReportModal(false)}
+                >
+                  <Text style={[styles.modalFullBtnText, { color: '#64748B' }]}>Close</Text>
+                </Pressable>
+              </ScrollView>
             </Animated.View>
           </View>
         </Modal>
@@ -3430,6 +3539,130 @@ const styles = StyleSheet.create({
     fontSize: 9.5,
     fontWeight: '900',
     color: '#FFFFFF',
+  },
+
+  /* EXECUTIVE MONTHLY REPORT MODAL STYLES */
+  reportVerifiedBadge: {
+    fontSize: 9,
+    fontWeight: '900',
+    color: '#10B981',
+    letterSpacing: 0.5,
+  },
+  reportDateBadge: {
+    fontSize: 9,
+    fontWeight: '800',
+    color: '#64748B',
+    backgroundColor: '#F1F5F9',
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 4,
+  },
+  reportVitalsGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+    marginVertical: 12,
+  },
+  reportVitalCard: {
+    flex: 1,
+    minWidth: '47%',
+    backgroundColor: '#FAF8F5',
+    borderRadius: 14,
+    padding: 10,
+    borderWidth: 1,
+    borderColor: '#EFECE6',
+  },
+  reportVitalLabel: {
+    fontSize: 8.5,
+    fontWeight: '800',
+    color: '#64748B',
+    marginBottom: 2,
+    letterSpacing: 0.4,
+  },
+  reportVitalVal: {
+    fontSize: 15,
+    fontWeight: '900',
+    color: '#171420',
+  },
+  reportVitalDelta: {
+    fontSize: 9.5,
+    color: '#64748B',
+    marginTop: 2,
+    fontWeight: '600',
+  },
+  reportSectionHeading: {
+    fontSize: 10,
+    fontWeight: '900',
+    color: '#64748B',
+    letterSpacing: 0.6,
+    marginBottom: 8,
+    marginTop: 4,
+  },
+  reportHighlightItem: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: 10,
+    backgroundColor: '#FAF8F5',
+    borderRadius: 14,
+    padding: 11,
+    borderWidth: 1,
+    borderColor: '#EFECE6',
+  },
+  reportHighlightIconCircle: {
+    width: 32,
+    height: 32,
+    borderRadius: 10,
+    backgroundColor: '#F3E8FF',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  reportHighlightTitle: {
+    fontSize: 12,
+    fontWeight: '800',
+    color: '#171420',
+    marginBottom: 2,
+  },
+  reportHighlightDesc: {
+    fontSize: 10.5,
+    color: '#475569',
+    lineHeight: 15,
+  },
+  reportJarvisSummaryCard: {
+    backgroundColor: '#FAF5FF',
+    borderRadius: 14,
+    padding: 12,
+    borderWidth: 1,
+    borderColor: '#E9D5FF',
+    marginBottom: 14,
+  },
+  reportJarvisTag: {
+    fontSize: 9.5,
+    fontWeight: '900',
+    color: '#7C3AED',
+    letterSpacing: 0.5,
+  },
+  reportJarvisText: {
+    fontSize: 11,
+    lineHeight: 16,
+    color: '#4B5563',
+    marginTop: 2,
+  },
+  modalDownloadSolidBtn: {
+    height: 46,
+    borderRadius: 12,
+    backgroundColor: '#582CDB',
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: '#582CDB',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.3,
+    shadowRadius: 6,
+  },
+  modalDownloadSolidBtnText: {
+    fontSize: 13,
+    fontWeight: '900',
+    color: '#FFFFFF',
+    letterSpacing: 0.4,
   },
 
   postAnalysisCard: {
