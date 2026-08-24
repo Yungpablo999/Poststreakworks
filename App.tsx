@@ -383,6 +383,9 @@ export default function App() {
               onLogout={handleLogout}
               onStartMission={() => navigateTo('mission-detail')}
               onOpenJarvisPro={() => navigateTo('jarvis-pro')}
+              onSwitchToPro={() => {
+                setUserProfile(prev => ({ ...prev, tier: 'pro' }));
+              }}
               onOpenSchedule={() => navigateTo('schedule')}
               onOpenMessages={(threadId?: string) => {
                 setActiveMessageThreadId(threadId);

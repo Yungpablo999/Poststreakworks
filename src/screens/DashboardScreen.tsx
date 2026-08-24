@@ -26,6 +26,7 @@ interface DashboardScreenProps {
   onStartMission?: () => void;
   onNavigateTab?: (tab: TabType) => void;
   onOpenJarvisPro?: () => void;
+  onSwitchToPro?: () => void;
   onOpenSchedule?: () => void;
   onOpenMessages?: () => void;
   userProfile?: UserProfileData;
@@ -382,11 +383,12 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
   onStartMission,
   onNavigateTab,
   onOpenJarvisPro,
+  onSwitchToPro,
   onOpenSchedule,
   onOpenMessages,
-
   userProfile,
-  onSaveProfile,}) => {
+  onSaveProfile,
+}) => {
   const isDark = false;
   const [activeTab, setActiveTab] = useState<TabType>('home');
   const [matchConnected, setMatchConnected] = useState(false);
@@ -772,7 +774,9 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
                 if (Platform.OS !== 'web') {
                   Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
                 }
-                if (onOpenJarvisPro) {
+                if (onSwitchToPro) {
+                  onSwitchToPro();
+                } else if (onOpenJarvisPro) {
                   onOpenJarvisPro();
                 }
               }}
