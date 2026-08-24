@@ -1307,37 +1307,112 @@ export const ProGrowthScreen: React.FC<ProGrowthScreenProps> = ({
                 );
               })()}
 
-              {/* Bottom Milestone Breakdown Grid */}
-              {(() => {
-                const curCfg = TIMEFRAME_CONFIGS[graphTimeframe] || TIMEFRAME_CONFIGS['30D'];
-                return (
-                  <View style={styles.modalWeeklyBreakdownGrid}>
-                    {curCfg.weeklyMetrics.map((wm, wIdx) => (
-                      <View key={wIdx} style={styles.modalWeekCol}>
-                        <Text style={styles.modalWeekTitle}>{wm.title}</Text>
-                        <Text style={[styles.modalWeekVal, wm.isPeak && { color: '#582CDB' }]}>{wm.val}</Text>
-                        <Text style={styles.modalWeekSub}>{wm.sub}</Text>
-                      </View>
-                    ))}
+              {/* DEDICATED CLEAN AREA UNDER GRAPH */}
+              {expandedGraphType === 'audience' ? (
+                /* LUXURY CLEAN AUDIENCE EXPANSION VIEW */
+                <View style={styles.audienceCleanBottomContainer}>
+                  {/* 2 Key Stats Duo */}
+                  <View style={styles.audienceStatsDuoRow}>
+                    <View style={styles.audienceStatDuoCard}>
+                      <Text style={styles.audienceStatDuoLabel}>TOTAL AUDIENCE</Text>
+                      <Text style={styles.audienceStatDuoVal}>144,320</Text>
+                      <Text style={styles.audienceStatDuoSub}>+2,480 net this month</Text>
+                    </View>
+                    <View style={styles.audienceStatDuoCard}>
+                      <Text style={styles.audienceStatDuoLabel}>AUDIENCE QUALITY</Text>
+                      <Text style={[styles.audienceStatDuoVal, { color: '#10B981' }]}>96.8%</Text>
+                      <Text style={styles.audienceStatDuoSub}>Tier-1 verified fans</Text>
+                    </View>
                   </View>
-                );
-              })()}
 
-              {/* Platform Contribution Bar */}
-              <View style={styles.modalPlatformContribRow}>
-                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-                  <SocialBrandIcon platform="tiktok" size={16} />
-                  <Text style={styles.modalPlatContribText}>TikTok +840 (34%)</Text>
+                  {/* Channel Follower Share Breakdown */}
+                  <View style={styles.audienceChannelsCard}>
+                    <Text style={styles.audienceChannelsTitle}>FOLLOWER SHARE BY PLATFORM</Text>
+
+                    {/* Instagram */}
+                    <View style={styles.audienceChannelRow}>
+                      <SocialBrandIcon platform="instagram" size={20} />
+                      <View style={{ flex: 1, marginLeft: 10 }}>
+                        <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 4 }}>
+                          <Text style={styles.audienceChannelName}>Instagram Reels</Text>
+                          <Text style={styles.audienceChannelVal}>+920 <Text style={styles.audienceChannelPct}>37%</Text></Text>
+                        </View>
+                        <View style={styles.audienceChannelTrackBg}>
+                          <View style={[styles.audienceChannelTrackFill, { width: '37%', backgroundColor: '#E1306C' }]} />
+                        </View>
+                      </View>
+                    </View>
+
+                    {/* TikTok */}
+                    <View style={styles.audienceChannelRow}>
+                      <SocialBrandIcon platform="tiktok" size={20} />
+                      <View style={{ flex: 1, marginLeft: 10 }}>
+                        <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 4 }}>
+                          <Text style={styles.audienceChannelName}>TikTok</Text>
+                          <Text style={styles.audienceChannelVal}>+840 <Text style={styles.audienceChannelPct}>34%</Text></Text>
+                        </View>
+                        <View style={styles.audienceChannelTrackBg}>
+                          <View style={[styles.audienceChannelTrackFill, { width: '34%', backgroundColor: '#000000' }]} />
+                        </View>
+                      </View>
+                    </View>
+
+                    {/* YouTube */}
+                    <View style={styles.audienceChannelRow}>
+                      <SocialBrandIcon platform="youtube" size={20} />
+                      <View style={{ flex: 1, marginLeft: 10 }}>
+                        <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 4 }}>
+                          <Text style={styles.audienceChannelName}>YouTube Shorts</Text>
+                          <Text style={styles.audienceChannelVal}>+720 <Text style={styles.audienceChannelPct}>29%</Text></Text>
+                        </View>
+                        <View style={styles.audienceChannelTrackBg}>
+                          <View style={[styles.audienceChannelTrackFill, { width: '29%', backgroundColor: '#FF0000' }]} />
+                        </View>
+                      </View>
+                    </View>
+                  </View>
+
+                  {/* Clean Insight Callout */}
+                  <View style={styles.audienceInsightCallout}>
+                    <Text style={styles.audienceInsightCalloutText}>
+                      ⚡ <Text style={{ fontWeight: '800', color: '#7C3AED' }}>Growth Insight:</Text> Short-form video posted between 7:00 PM – 9:00 PM drove 68% of your new followers.
+                    </Text>
+                  </View>
                 </View>
-                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-                  <SocialBrandIcon platform="instagram" size={16} />
-                  <Text style={styles.modalPlatContribText}>IG +920 (37%)</Text>
+              ) : (
+                /* CLEAN 30D GROWTH VELOCITY VIEW */
+                <View style={{ gap: 10, marginVertical: 4 }}>
+                  {(() => {
+                    const curCfg = TIMEFRAME_CONFIGS[graphTimeframe] || TIMEFRAME_CONFIGS['30D'];
+                    return (
+                      <View style={styles.modalWeeklyBreakdownGrid}>
+                        {curCfg.weeklyMetrics.map((wm, wIdx) => (
+                          <View key={wIdx} style={styles.modalWeekCol}>
+                            <Text style={styles.modalWeekTitle}>{wm.title}</Text>
+                            <Text style={[styles.modalWeekVal, wm.isPeak && { color: '#582CDB' }]}>{wm.val}</Text>
+                            <Text style={styles.modalWeekSub}>{wm.sub}</Text>
+                          </View>
+                        ))}
+                      </View>
+                    );
+                  })()}
+
+                  <View style={styles.modalPlatformContribRow}>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                      <SocialBrandIcon platform="tiktok" size={16} />
+                      <Text style={styles.modalPlatContribText}>TikTok 34%</Text>
+                    </View>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                      <SocialBrandIcon platform="instagram" size={16} />
+                      <Text style={styles.modalPlatContribText}>Instagram 37%</Text>
+                    </View>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                      <SocialBrandIcon platform="youtube" size={16} />
+                      <Text style={styles.modalPlatContribText}>YouTube 29%</Text>
+                    </View>
+                  </View>
                 </View>
-                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-                  <SocialBrandIcon platform="youtube" size={16} />
-                  <Text style={styles.modalPlatContribText}>YT +720 (29%)</Text>
-                </View>
-              </View>
+              )}
 
               {/* Close / Action Button */}
               <Pressable
@@ -1956,6 +2031,100 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     color: '#94A3B8',
   },
+  /* CLEAN AUDIENCE BOTTOM AREA STYLES */
+  audienceCleanBottomContainer: {
+    gap: 10,
+    marginVertical: 4,
+  },
+  audienceStatsDuoRow: {
+    flexDirection: 'row',
+    gap: 10,
+  },
+  audienceStatDuoCard: {
+    flex: 1,
+    backgroundColor: '#FAF8F5',
+    borderRadius: 14,
+    padding: 12,
+    borderWidth: 1,
+    borderColor: '#EFECE6',
+  },
+  audienceStatDuoLabel: {
+    fontSize: 9.5,
+    fontWeight: '800',
+    color: '#64748B',
+    marginBottom: 2,
+    letterSpacing: 0.4,
+  },
+  audienceStatDuoVal: {
+    fontSize: 18,
+    fontWeight: '900',
+    color: '#171420',
+    marginBottom: 2,
+  },
+  audienceStatDuoSub: {
+    fontSize: 10,
+    color: '#94A3B8',
+    fontWeight: '600',
+  },
+  audienceChannelsCard: {
+    backgroundColor: '#FAF8F5',
+    borderRadius: 16,
+    padding: 14,
+    borderWidth: 1,
+    borderColor: '#EFECE6',
+    gap: 10,
+  },
+  audienceChannelsTitle: {
+    fontSize: 9.5,
+    fontWeight: '900',
+    color: '#7C3AED',
+    letterSpacing: 0.6,
+    marginBottom: 2,
+  },
+  audienceChannelRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  audienceChannelName: {
+    fontSize: 12,
+    fontWeight: '800',
+    color: '#171420',
+  },
+  audienceChannelVal: {
+    fontSize: 11.5,
+    fontWeight: '800',
+    color: '#171420',
+  },
+  audienceChannelPct: {
+    fontSize: 10.5,
+    color: '#64748B',
+    fontWeight: '600',
+  },
+  audienceChannelTrackBg: {
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: '#E2E8F0',
+    overflow: 'hidden',
+  },
+  audienceChannelTrackFill: {
+    height: '100%',
+    borderRadius: 3,
+  },
+  audienceInsightCallout: {
+    backgroundColor: '#FAF5FF',
+    borderRadius: 12,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    borderWidth: 1,
+    borderColor: '#E9D5FF',
+  },
+  audienceInsightCalloutText: {
+    fontSize: 11,
+    lineHeight: 16,
+    color: '#4B5563',
+    fontWeight: '500',
+  },
+
   modalWeeklyBreakdownGrid: {
     flexDirection: 'row',
     alignItems: 'center',
