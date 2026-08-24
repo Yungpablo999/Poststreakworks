@@ -113,18 +113,11 @@ export const FloatingTabBar: React.FC<FloatingTabBarProps> = ({
 
   return (
     <View style={[styles.floatingWrapper, style]}>
-      {/* Apple Liquid Glass Background with SVG Displacement & Chromatic Dispersion */}
+      {/* Authentic Frosted Glassmorphism Container */}
       <LiquidGlassBackground
-        borderRadius={38}
-        light={0.9}
-        refraction={32}
-        depth={0.7}
-        dispersion={0.85}
-        frost={55}
-        splay={0.85}
+        borderRadius={36}
         tint="purple-gold"
         accentColor="#582CDB"
-        goldAccentColor="#F59E0B"
         hasShadow={true}
         style={styles.tabsRow}
       >
@@ -139,7 +132,7 @@ export const FloatingTabBar: React.FC<FloatingTabBarProps> = ({
                 style={styles.activePillTouchable}
                 hitSlop={6}
               >
-                {/* Liquid Droplet Capsule in Royal Purple with Gold Accent Dot */}
+                {/* Active Royal Purple Capsule */}
                 <LinearGradient
                   colors={['#784DF0', '#582CDB']}
                   start={{ x: 0, y: 0 }}
@@ -170,7 +163,7 @@ export const FloatingTabBar: React.FC<FloatingTabBarProps> = ({
               hitSlop={6}
             >
               <View style={styles.iconWrapper}>
-                {tab.icon('#605874')}
+                {tab.icon('#4A4458')}
               </View>
               <Text style={styles.tabLabelInactive} numberOfLines={1}>
                 {tab.label}
@@ -196,7 +189,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingVertical: 5.5,
+    paddingVertical: 6,
     paddingHorizontal: 6,
   },
   inactiveTabItem: {
@@ -204,17 +197,17 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     paddingVertical: 6,
-    paddingHorizontal: 3,
+    paddingHorizontal: 2,
     borderRadius: 22,
   },
   inactiveTabPressed: {
-    backgroundColor: 'rgba(235, 228, 255, 0.45)',
+    backgroundColor: 'rgba(255, 255, 255, 0.4)',
     transform: [{ scale: 0.96 }],
   },
   tabLabelInactive: {
     fontSize: 9,
     fontWeight: '700',
-    color: '#655D79',
+    color: '#4A4458',
     letterSpacing: 0.5,
     textAlign: 'center',
   },
@@ -225,14 +218,14 @@ const styles = StyleSheet.create({
     position: 'relative',
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 6.5,
+    paddingVertical: 7,
     paddingHorizontal: 4,
     borderRadius: 24,
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.38)',
+    borderColor: 'rgba(255, 255, 255, 0.45)',
     shadowColor: '#582CDB',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.32,
+    shadowOpacity: 0.28,
     shadowRadius: 10,
     elevation: 5,
   },
@@ -242,7 +235,7 @@ const styles = StyleSheet.create({
     left: 8,
     right: 8,
     height: 1.2,
-    backgroundColor: 'rgba(255, 255, 255, 0.42)',
+    backgroundColor: 'rgba(255, 255, 255, 0.5)',
     borderRadius: 1,
   },
   iconWrapper: {
