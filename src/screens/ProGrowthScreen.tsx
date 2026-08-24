@@ -103,6 +103,106 @@ const INITIAL_GROWTH_PLATFORMS: GrowthPlatformAccount[] = [
   },
 ];
 
+interface TopPostData {
+  id: string;
+  title: string;
+  thumbnail: any;
+  platform: 'tiktok' | 'instagram' | 'youtube' | 'x';
+  format: 'REEL' | 'CAROUSEL' | 'SHORTS' | 'THREAD';
+  date: string;
+  views: string;
+  viewsNumeric: number;
+  likes: string;
+  comments: string;
+  shares: string;
+  saves: string;
+  reach: string;
+  newFollowers: string;
+  hookRetention: string;
+  completionRate: string;
+  avgWatchTime: string;
+  trafficExplore: string;
+  trafficFeed: string;
+  trafficDirect: string;
+  jarvisAudit: string;
+  repurposeIdea: string;
+}
+
+const TOP_POSTS_DATA: TopPostData[] = [
+  {
+    id: 'tp1',
+    title: '3 creator mistakes to avoid when scaling from 10k to 50k...',
+    thumbnail: require('../../assets/images/elena-avatar.jpg'),
+    platform: 'tiktok',
+    format: 'REEL',
+    date: 'May 18, 2024 • 7:30 PM',
+    views: '45.2K',
+    viewsNumeric: 45200,
+    likes: '3,840',
+    comments: '318',
+    shares: '642',
+    saves: '924',
+    reach: '58.4K',
+    newFollowers: '+340',
+    hookRetention: '91% (Top 1%)',
+    completionRate: '68%',
+    avgWatchTime: '0:38s / 0:45s',
+    trafficExplore: '82%',
+    trafficFeed: '12%',
+    trafficDirect: '6%',
+    jarvisAudit: 'Your 3-second pattern interrupt hook retained 91% of viewers, driving 3.8x above-average algorithm recommendation on the For You page.',
+    repurposeIdea: 'Convert this 3-mistakes script into a 7-slide Instagram Carousel & X Thread.',
+  },
+  {
+    id: 'tp2',
+    title: 'Daily planning workflow that saved me 15 hours every week...',
+    thumbnail: require('../../assets/images/david-avatar.jpg'),
+    platform: 'instagram',
+    format: 'CAROUSEL',
+    date: 'May 22, 2024 • 8:15 PM',
+    views: '18.4K',
+    viewsNumeric: 18400,
+    likes: '1,920',
+    comments: '142',
+    shares: '380',
+    saves: '1,420',
+    reach: '29.2K',
+    newFollowers: '+185',
+    hookRetention: '88% Slide 1-3',
+    completionRate: '74%',
+    avgWatchTime: '1:12s',
+    trafficExplore: '68%',
+    trafficFeed: '24%',
+    trafficDirect: '8%',
+    jarvisAudit: 'Highest save-to-reach ratio of the month (4.8%). Viewers bookmarked slide 4 & 5 templates for repeat reference.',
+    repurposeIdea: 'Record a 45s talking demo video explaining slide 4 step-by-step.',
+  },
+  {
+    id: 'tp3',
+    title: 'The exact camera setup I used to hit 100k views in 30 days...',
+    thumbnail: require('../../assets/images/marcus-avatar.jpg'),
+    platform: 'youtube',
+    format: 'SHORTS',
+    date: 'May 26, 2024 • 6:45 PM',
+    views: '28.6K',
+    viewsNumeric: 28600,
+    likes: '2,410',
+    comments: '196',
+    shares: '290',
+    saves: '760',
+    reach: '34.8K',
+    newFollowers: '+220',
+    hookRetention: '89% (Top 2%)',
+    completionRate: '71%',
+    avgWatchTime: '0:42s / 0:50s',
+    trafficExplore: '76%',
+    trafficFeed: '16%',
+    trafficDirect: '8%',
+    jarvisAudit: 'Equipment breakdowns with on-screen price callouts achieved 2.8x higher comment engagement and question volume.',
+    repurposeIdea: 'Create a downloadable kit checklist PDF to offer as a lead magnet.',
+  },
+];
+
 export const TinyGoldCheck = ({ size = 13 }: { size?: number }) => (
   <View
     style={{
@@ -564,6 +664,7 @@ export const ProGrowthScreen: React.FC<ProGrowthScreenProps> = ({
   const [selectedPlatformToAdd, setSelectedPlatformToAdd] = useState<string>('x');
   const [customHandleInput, setCustomHandleInput] = useState<string>('');
   const [showPostDetailModal, setShowPostDetailModal] = useState(false);
+  const [selectedPost, setSelectedPost] = useState<TopPostData>(TOP_POSTS_DATA[0]);
   const [selectedPostTitle, setSelectedPostTitle] = useState('3 creator mistakes to avoid...');
   const [showExpandedGraphModal, setShowExpandedGraphModal] = useState(false);
   const [expandedGraphType, setExpandedGraphType] = useState<'growth30d' | 'audience' | 'contentFormat'>('growth30d');
@@ -1068,70 +1169,55 @@ export const ProGrowthScreen: React.FC<ProGrowthScreenProps> = ({
           </Pressable>
 
           {/* ============================================================ */}
-          {/* SECTION 5: TOP POSTS ANALYSIS                                */}
+          {/* SECTION 5: TOP POSTS ANALYSIS (TAP FOR FULL OVERVIEW)        */}
           {/* ============================================================ */}
-          <Text style={styles.topPostsSectionHeader}>Top Posts Analysis</Text>
+          <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 14, marginBottom: 8 }}>
+            <Text style={styles.topPostsSectionHeader}>Top Posts Analysis</Text>
+            <View style={styles.expandHintBadge}>
+              <Text style={styles.expandHintBadgeText}>Tap Post for Deep Dive 🔍</Text>
+            </View>
+          </View>
 
           <View style={{ gap: 12, marginBottom: 20 }}>
-            {/* Post 1 */}
-            <Pressable
-              style={({ pressed }) => [styles.postAnalysisCard, pressed && styles.btnPressed]}
-              onPress={() => {
-                setSelectedPostTitle('3 creator mistakes to avoid...');
-                triggerModalPop();
-                setShowPostDetailModal(true);
-              }}
-            >
-              <Image
-                source={require('../../assets/images/elena-avatar.jpg')}
-                style={styles.postThumbnailImage}
-                resizeMode="cover"
-              />
-              <View style={{ padding: 12 }}>
-                <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
-                  <View style={styles.postTypePill}>
-                    <Text style={styles.postTypePillText}>REEL</Text>
+            {TOP_POSTS_DATA.map((post) => (
+              <Pressable
+                key={post.id}
+                style={({ pressed }) => [styles.postAnalysisCard, pressed && styles.btnPressed]}
+                onPress={() => {
+                  if (Platform.OS !== 'web') {
+                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                  }
+                  setSelectedPost(post);
+                  setSelectedPostTitle(post.title);
+                  triggerModalPop();
+                  setShowPostDetailModal(true);
+                }}
+              >
+                <Image
+                  source={post.thumbnail}
+                  style={styles.postThumbnailImage}
+                  resizeMode="cover"
+                />
+                <View style={{ padding: 12 }}>
+                  <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
+                    <View style={post.format === 'REEL' ? styles.postTypePill : styles.postTypePillGray}>
+                      <Text style={post.format === 'REEL' ? styles.postTypePillText : styles.postTypePillGrayText}>
+                        {post.format}
+                      </Text>
+                    </View>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                      <SocialBrandIcon platform={post.platform} size={15} />
+                      <Text style={styles.postPlatformLabel}>{post.platform.toUpperCase()}</Text>
+                    </View>
                   </View>
-                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
-                    <SocialBrandIcon platform="tiktok" size={14} />
-                    <Text style={styles.postPlatformLabel}>TIKTOK</Text>
-                  </View>
+
+                  <Text style={styles.postAnalysisTitle} numberOfLines={1}>{post.title}</Text>
+                  <Text style={styles.postMetricsText}>
+                    👁️ {post.views} views • 💬 {post.comments} comments • 💾 {post.saves} saves
+                  </Text>
                 </View>
-
-                <Text style={styles.postAnalysisTitle}>3 creator mistakes to avoid...</Text>
-                <Text style={styles.postMetricsText}>👁️ 45.2K views • 💬 318 comments</Text>
-              </View>
-            </Pressable>
-
-            {/* Post 2 */}
-            <Pressable
-              style={({ pressed }) => [styles.postAnalysisCard, pressed && styles.btnPressed]}
-              onPress={() => {
-                setSelectedPostTitle('Daily planning workflow...');
-                triggerModalPop();
-                setShowPostDetailModal(true);
-              }}
-            >
-              <Image
-                source={require('../../assets/images/david-avatar.jpg')}
-                style={styles.postThumbnailImage}
-                resizeMode="cover"
-              />
-              <View style={{ padding: 12 }}>
-                <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
-                  <View style={styles.postTypePillGray}>
-                    <Text style={styles.postTypePillGrayText}>CAROUSEL</Text>
-                  </View>
-                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
-                    <SocialBrandIcon platform="instagram" size={14} />
-                    <Text style={styles.postPlatformLabel}>INSTAGRAM</Text>
-                  </View>
-                </View>
-
-                <Text style={styles.postAnalysisTitle}>Daily planning workflow...</Text>
-                <Text style={styles.postMetricsText}>👁️ 18.4K views • 💬 142 comments</Text>
-              </View>
-            </Pressable>
+              </Pressable>
+            ))}
           </View>
 
           {/* ============================================================ */}
@@ -1983,7 +2069,7 @@ export const ProGrowthScreen: React.FC<ProGrowthScreenProps> = ({
         </Modal>
 
         {/* ============================================================ */}
-        {/* MODAL: POST DEEP DIVE                                        */}
+        {/* MODAL: COMPREHENSIVE POST PERFORMANCE OVERVIEW               */}
         {/* ============================================================ */}
         <Modal
           visible={showPostDetailModal}
@@ -1992,30 +2078,165 @@ export const ProGrowthScreen: React.FC<ProGrowthScreenProps> = ({
           onRequestClose={() => setShowPostDetailModal(false)}
         >
           <View style={styles.modalOverlay}>
-            <Animated.View style={[styles.modalCard, { transform: [{ scale: modalPopScale }] }]}>
-              <View style={styles.modalHeaderRow}>
-                <View>
-                  <Text style={styles.modalTitle}>Post Retention Breakdown</Text>
-                  <Text style={styles.modalSubtitle}>{selectedPostTitle}</Text>
-                </View>
-                <Pressable onPress={() => setShowPostDetailModal(false)} style={styles.modalCloseCircle} hitSlop={8}>
-                  <Text style={styles.modalCloseCross}>✕</Text>
-                </Pressable>
-              </View>
-
-              <View style={{ gap: 8, marginVertical: 12 }}>
-                <Text style={styles.reportSummaryLine}>• Hook Retention (0-3s): 91% (Top 1% Benchmark)</Text>
-                <Text style={styles.reportSummaryLine}>• Full Watch Completion: 68%</Text>
-                <Text style={styles.reportSummaryLine}>• Shares &amp; Saves: 412 shares • 620 saves</Text>
-                <Text style={styles.reportSummaryLine}>• Traffic Source: 82% For You / Explore page</Text>
-              </View>
-
-              <Pressable
-                style={styles.modalFullBtn}
-                onPress={() => setShowPostDetailModal(false)}
+            <Animated.View style={[styles.modalCardLarge, { maxHeight: '90%', padding: 20, transform: [{ scale: modalPopScale }] }]}>
+              <ScrollView
+                style={{ width: '100%' }}
+                showsVerticalScrollIndicator={false}
+                contentContainerStyle={{ paddingBottom: 10 }}
               >
-                <Text style={styles.modalFullBtnText}>Close</Text>
-              </Pressable>
+                {/* Header */}
+                <View style={styles.modalHeaderRow}>
+                  <View style={{ flex: 1, paddingRight: 10 }}>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 4 }}>
+                      <SocialBrandIcon platform={selectedPost.platform} size={18} />
+                      <View style={styles.activePlatformsCountBadge}>
+                        <Text style={styles.activePlatformsCountText}>{selectedPost.format} AUDIT</Text>
+                      </View>
+                    </View>
+                    <Text style={[styles.modalTitle, { fontSize: 16 }]} numberOfLines={2}>
+                      {selectedPost.title}
+                    </Text>
+                    <Text style={styles.modalSubtitle}>{selectedPost.date}</Text>
+                  </View>
+                  <Pressable onPress={() => setShowPostDetailModal(false)} style={styles.modalCloseCircle} hitSlop={8}>
+                    <Text style={styles.modalCloseCross}>✕</Text>
+                  </Pressable>
+                </View>
+
+                {/* 4-Grid Key Vitals */}
+                <View style={styles.postDetailMetricsGrid}>
+                  <View style={styles.postDetailMetricItem}>
+                    <Text style={styles.postDetailMetricLabel}>TOTAL VIEWS</Text>
+                    <Text style={styles.postDetailMetricVal}>👁️ {selectedPost.views}</Text>
+                    <Text style={styles.postDetailMetricSub}>{selectedPost.reach} Reach</Text>
+                  </View>
+                  <View style={styles.postDetailMetricItem}>
+                    <Text style={styles.postDetailMetricLabel}>NEW FOLLOWERS</Text>
+                    <Text style={[styles.postDetailMetricVal, { color: '#582CDB' }]}>👤 {selectedPost.newFollowers}</Text>
+                    <Text style={styles.postDetailMetricSub}>High conversion</Text>
+                  </View>
+                  <View style={styles.postDetailMetricItem}>
+                    <Text style={styles.postDetailMetricLabel}>SAVES / BOOKMARKS</Text>
+                    <Text style={[styles.postDetailMetricVal, { color: '#10B981' }]}>💾 {selectedPost.saves}</Text>
+                    <Text style={styles.postDetailMetricSub}>Top 1% intent</Text>
+                  </View>
+                  <View style={styles.postDetailMetricItem}>
+                    <Text style={styles.postDetailMetricLabel}>SHARES</Text>
+                    <Text style={styles.postDetailMetricVal}>🔁 {selectedPost.shares}</Text>
+                    <Text style={styles.postDetailMetricSub}>{selectedPost.comments} comments</Text>
+                  </View>
+                </View>
+
+                {/* RETENTION TIMELINE GRAPH */}
+                <View style={styles.postRetentionCard}>
+                  <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+                    <Text style={styles.postRetentionTitle}>AUDIENCE RETENTION CURVE</Text>
+                    <Text style={styles.postRetentionBadge}>Hook: {selectedPost.hookRetention}</Text>
+                  </View>
+
+                  <Svg width="100%" height={75} viewBox="0 0 340 75">
+                    <Defs>
+                      <SvgLinearGradient id="retGrad" x1="0" y1="0" x2="0" y2="1">
+                        <Stop offset="0" stopColor="#582CDB" stopOpacity="0.3" />
+                        <Stop offset="1" stopColor="#582CDB" stopOpacity="0.0" />
+                      </SvgLinearGradient>
+                    </Defs>
+                    {/* Horizontal lines */}
+                    <Path d="M0,15 L340,15" stroke="#F1F5F9" strokeWidth="1" strokeDasharray="3,3" />
+                    <Path d="M0,45 L340,45" stroke="#F1F5F9" strokeWidth="1" strokeDasharray="3,3" />
+                    <Path d="M0,65 L340,65" stroke="#E2E8F0" strokeWidth="1" />
+                    {/* Area */}
+                    <Path d="M0,10 C40,12 80,22 140,28 C200,32 260,38 340,42 L340,65 L0,65 Z" fill="url(#retGrad)" />
+                    {/* Line */}
+                    <Path d="M0,10 C40,12 80,22 140,28 C200,32 260,38 340,42" fill="none" stroke="#582CDB" strokeWidth="2.5" />
+                    <Circle cx={0} cy={10} r={4} fill="#10B981" />
+                    <Circle cx={340} cy={42} r={4} fill="#582CDB" />
+                  </Svg>
+
+                  <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 4 }}>
+                    <Text style={{ fontSize: 9.5, color: '#64748B', fontWeight: '700' }}>0s (Start: 100%)</Text>
+                    <Text style={{ fontSize: 9.5, color: '#582CDB', fontWeight: '800' }}>Avg: {selectedPost.avgWatchTime}</Text>
+                    <Text style={{ fontSize: 9.5, color: '#64748B', fontWeight: '700' }}>End: {selectedPost.completionRate}</Text>
+                  </View>
+                </View>
+
+                {/* TRAFFIC SOURCE BREAKDOWN */}
+                <View style={styles.trafficSourceCard}>
+                  <Text style={styles.trafficSourceTitle}>TRAFFIC DISTRIBUTION</Text>
+
+                  {/* Explore */}
+                  <View style={{ marginBottom: 8 }}>
+                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 3 }}>
+                      <Text style={styles.trafficSourceName}>For You / Explore Algorithmic</Text>
+                      <Text style={styles.trafficSourceVal}>{selectedPost.trafficExplore}</Text>
+                    </View>
+                    <View style={styles.trafficTrackBg}>
+                      <View style={[styles.trafficTrackFill, { width: selectedPost.trafficExplore as any, backgroundColor: '#582CDB' }]} />
+                    </View>
+                  </View>
+
+                  {/* Feed */}
+                  <View style={{ marginBottom: 8 }}>
+                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 3 }}>
+                      <Text style={styles.trafficSourceName}>Existing Follower Feed</Text>
+                      <Text style={styles.trafficSourceVal}>{selectedPost.trafficFeed}</Text>
+                    </View>
+                    <View style={styles.trafficTrackBg}>
+                      <View style={[styles.trafficTrackFill, { width: selectedPost.trafficFeed as any, backgroundColor: '#7C3AED' }]} />
+                    </View>
+                  </View>
+
+                  {/* Shares & Direct */}
+                  <View>
+                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 3 }}>
+                      <Text style={styles.trafficSourceName}>Direct DMs &amp; External Shares</Text>
+                      <Text style={styles.trafficSourceVal}>{selectedPost.trafficDirect}</Text>
+                    </View>
+                    <View style={styles.trafficTrackBg}>
+                      <View style={[styles.trafficTrackFill, { width: selectedPost.trafficDirect as any, backgroundColor: '#CA8A04' }]} />
+                    </View>
+                  </View>
+                </View>
+
+                {/* JARVIS STRATEGIC AUDIT */}
+                <View style={styles.postJarvisAuditCard}>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 4 }}>
+                    <Image
+                      source={require('../../assets/images/jarvis-ghost-clean.png')}
+                      style={{ width: 18, height: 18 }}
+                      resizeMode="contain"
+                    />
+                    <Text style={styles.postJarvisAuditTag}>JARVIS RETENTION AUDIT</Text>
+                  </View>
+                  <Text style={styles.postJarvisAuditText}>{selectedPost.jarvisAudit}</Text>
+                  <View style={styles.postRepurposeBox}>
+                    <Text style={styles.postRepurposeText}>💡 <Text style={{ fontWeight: '800' }}>Repurpose Formula:</Text> {selectedPost.repurposeIdea}</Text>
+                  </View>
+                </View>
+
+                {/* ACTION BUTTON: REPURPOSE / CLONE IN COMPOSER */}
+                <Pressable
+                  style={styles.modalRepurposeBtn}
+                  onPress={() => {
+                    setShowPostDetailModal(false);
+                    if (onOpenPostComposer) {
+                      onOpenPostComposer(selectedPost.title, selectedPost.platform === 'tiktok' ? 'TikTok' : selectedPost.platform === 'instagram' ? 'Instagram' : 'YouTube');
+                    } else {
+                      showToast(`Draft template copied for ${selectedPost.platform.toUpperCase()}!`);
+                    }
+                  }}
+                >
+                  <Text style={styles.modalRepurposeBtnText}>🪄 Repurpose &amp; Clone in Composer</Text>
+                </Pressable>
+
+                {/* Close Button */}
+                <Pressable
+                  style={[styles.modalFullBtn, { marginTop: 8, backgroundColor: '#FAF8F5', borderWidth: 1, borderColor: '#E2E8F0' }]}
+                  onPress={() => setShowPostDetailModal(false)}
+                >
+                  <Text style={[styles.modalFullBtnText, { color: '#64748B' }]}>Close Overview</Text>
+                </Pressable>
+              </ScrollView>
             </Animated.View>
           </View>
         </Modal>
@@ -2774,6 +2995,145 @@ const styles = StyleSheet.create({
     color: '#171420',
     marginBottom: 10,
   },
+  /* POST PERFORMANCE INTELLIGENCE MODAL STYLES */
+  postDetailMetricsGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+    marginVertical: 10,
+  },
+  postDetailMetricItem: {
+    flex: 1,
+    minWidth: '47%',
+    backgroundColor: '#FAF8F5',
+    borderRadius: 14,
+    padding: 10,
+    borderWidth: 1,
+    borderColor: '#EFECE6',
+  },
+  postDetailMetricLabel: {
+    fontSize: 9,
+    fontWeight: '800',
+    color: '#64748B',
+    marginBottom: 2,
+    letterSpacing: 0.4,
+  },
+  postDetailMetricVal: {
+    fontSize: 14,
+    fontWeight: '900',
+    color: '#171420',
+  },
+  postDetailMetricSub: {
+    fontSize: 9.5,
+    color: '#94A3B8',
+    marginTop: 1,
+  },
+  postRetentionCard: {
+    backgroundColor: '#FAF8F5',
+    borderRadius: 16,
+    padding: 12,
+    borderWidth: 1,
+    borderColor: '#EFECE6',
+    marginBottom: 10,
+  },
+  postRetentionTitle: {
+    fontSize: 9.5,
+    fontWeight: '900',
+    color: '#171420',
+    letterSpacing: 0.5,
+  },
+  postRetentionBadge: {
+    fontSize: 9.5,
+    fontWeight: '800',
+    color: '#10B981',
+    backgroundColor: '#ECFDF5',
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 4,
+  },
+  trafficSourceCard: {
+    backgroundColor: '#FAF8F5',
+    borderRadius: 16,
+    padding: 12,
+    borderWidth: 1,
+    borderColor: '#EFECE6',
+    marginBottom: 10,
+  },
+  trafficSourceTitle: {
+    fontSize: 9.5,
+    fontWeight: '900',
+    color: '#64748B',
+    letterSpacing: 0.5,
+    marginBottom: 8,
+  },
+  trafficSourceName: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: '#334155',
+  },
+  trafficSourceVal: {
+    fontSize: 11,
+    fontWeight: '800',
+    color: '#171420',
+  },
+  trafficTrackBg: {
+    height: 5,
+    borderRadius: 2.5,
+    backgroundColor: '#E2E8F0',
+    overflow: 'hidden',
+  },
+  trafficTrackFill: {
+    height: '100%',
+    borderRadius: 2.5,
+  },
+  postJarvisAuditCard: {
+    backgroundColor: '#FAF5FF',
+    borderRadius: 16,
+    padding: 12,
+    borderWidth: 1,
+    borderColor: '#E9D5FF',
+    marginBottom: 10,
+  },
+  postJarvisAuditTag: {
+    fontSize: 9.5,
+    fontWeight: '900',
+    color: '#7C3AED',
+    letterSpacing: 0.5,
+  },
+  postJarvisAuditText: {
+    fontSize: 11,
+    lineHeight: 16,
+    color: '#4B5563',
+    marginVertical: 4,
+  },
+  postRepurposeBox: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 10,
+    padding: 8,
+    marginTop: 4,
+    borderWidth: 1,
+    borderColor: '#DDD6FE',
+  },
+  postRepurposeText: {
+    fontSize: 10.5,
+    lineHeight: 15,
+    color: '#582CDB',
+  },
+  modalRepurposeBtn: {
+    height: 44,
+    borderRadius: 12,
+    backgroundColor: '#582CDB',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 4,
+  },
+  modalRepurposeBtnText: {
+    fontSize: 12.5,
+    fontWeight: '900',
+    color: '#FFFFFF',
+    letterSpacing: 0.3,
+  },
+
   postAnalysisCard: {
     backgroundColor: '#FFFFFF',
     borderRadius: 20,
