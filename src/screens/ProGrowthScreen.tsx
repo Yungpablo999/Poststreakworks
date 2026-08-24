@@ -123,6 +123,10 @@ export const ProGrowthScreen: React.FC<ProGrowthScreenProps> = ({
   const [showAddPlatformModal, setShowAddPlatformModal] = useState(false);
   const [showPostDetailModal, setShowPostDetailModal] = useState(false);
   const [selectedPostTitle, setSelectedPostTitle] = useState('3 creator mistakes to avoid...');
+  const [showExpandedGraphModal, setShowExpandedGraphModal] = useState(false);
+  const [expandedGraphType, setExpandedGraphType] = useState<'growth30d' | 'audience'>('growth30d');
+  const [selectedGraphDayIndex, setSelectedGraphDayIndex] = useState(29);
+  const [graphTimeframe, setGraphTimeframe] = useState<'7D' | '14D' | '30D' | '90D'>('30D');
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   // Notifications
@@ -342,8 +346,23 @@ export const ProGrowthScreen: React.FC<ProGrowthScreenProps> = ({
           {/* ============================================================ */}
           {/* CARD 1: GROWTH THIS 30D (Hero Analytics Card with Wave Graph)*/}
           {/* ============================================================ */}
-          <View style={styles.heroAnalyticsCard}>
-            <Text style={styles.growthThisMonthLabel}>GROWTH THIS 30D</Text>
+          <Pressable
+            style={({ pressed }) => [styles.heroAnalyticsCard, pressed && styles.btnPressed]}
+            onPress={() => {
+              if (Platform.OS !== 'web') {
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              }
+              setExpandedGraphType('growth30d');
+              triggerModalPop();
+              setShowExpandedGraphModal(true);
+            }}
+          >
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+              <Text style={styles.growthThisMonthLabel}>GROWTH THIS 30D</Text>
+              <View style={styles.expandHintBadge}>
+                <Text style={styles.expandHintBadgeText}>Tap to Expand 🔍</Text>
+              </View>
+            </View>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, marginVertical: 4 }}>
               <Text style={styles.bigGrowthPercent}>+28.4%</Text>
               <Text style={{ fontSize: 22, color: '#582CDB', fontWeight: '900' }}>↗</Text>
@@ -399,7 +418,7 @@ export const ProGrowthScreen: React.FC<ProGrowthScreenProps> = ({
                 <Text style={styles.gridMetricVal}>0:42s</Text>
               </View>
             </View>
-          </View>
+          </Pressable>
 
           {/* ============================================================ */}
           {/* SECTION 2: PLATFORMS                                         */}
@@ -468,10 +487,25 @@ export const ProGrowthScreen: React.FC<ProGrowthScreenProps> = ({
           {/* ============================================================ */}
           {/* CARD 3: AUDIENCE GROWTH                                      */}
           {/* ============================================================ */}
-          <View style={styles.audienceGrowthCard}>
+          <Pressable
+            style={({ pressed }) => [styles.audienceGrowthCard, pressed && styles.btnPressed]}
+            onPress={() => {
+              if (Platform.OS !== 'web') {
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              }
+              setExpandedGraphType('audience');
+              triggerModalPop();
+              setShowExpandedGraphModal(true);
+            }}
+          >
             <View style={styles.audienceGrowthHeaderRow}>
               <View>
-                <Text style={styles.audienceGrowthTitle}>Audience Growth</Text>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                  <Text style={styles.audienceGrowthTitle}>Audience Growth</Text>
+                  <View style={styles.expandHintBadgePurple}>
+                    <Text style={styles.expandHintBadgePurpleText}>Live Graph 🔍</Text>
+                  </View>
+                </View>
                 <Text style={styles.audienceTotalSub}>144,320 TOTAL AUDIENCE</Text>
               </View>
               <View style={{ alignItems: 'flex-end' }}>
@@ -508,7 +542,7 @@ export const ProGrowthScreen: React.FC<ProGrowthScreenProps> = ({
                 Your audience growth spiked 3x during morning short-form posting windows.
               </Text>
             </View>
-          </View>
+          </Pressable>
 
           {/* ============================================================ */}
           {/* CARD 4: CONTENT FORMAT PERFORMANCE                           */}
@@ -754,6 +788,247 @@ export const ProGrowthScreen: React.FC<ProGrowthScreenProps> = ({
 
         {/* 10. FLOATING LIQUID GLASS BOTTOM NAVIGATION BAR */}
         <FloatingTabBar activeTab={activeTab} onTabPress={handleTabPress} />
+
+        {/* ============================================================ */}
+        {/* MODAL: EXPANDED INTERACTIVE HORIZONTAL LIVE GRAPH             */}
+        {/* ============================================================ */}
+        <Modal
+          visible={showExpandedGraphModal}
+          transparent={true}
+          animationType="fade"
+          onRequestClose={() => setShowExpandedGraphModal(false)}
+        >
+          <View style={styles.modalOverlay}>
+            <Animated.View style={[styles.modalCard, styles.expandedGraphModalCard, { transform: [{ scale: modalPopScale }] }]}>
+              {/* Header */}
+              <View style={styles.modalHeaderRow}>
+                <View style={{ flex: 1, paddingRight: 10 }}>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 2 }}>
+                    <View style={styles.liveGreenPulseDot} />
+                    <Text style={styles.modalTitle}>
+                      {expandedGraphType === 'growth30d' ? '30-Day Growth Velocity & Reach' : '144.3K Total Audience Surge'}
+                    </Text>
+                  </View>
+                  <Text style={styles.modalSubtitle}>
+                    {expandedGraphType === 'growth30d'
+                      ? 'Live multi-point analytics stream • May 2024'
+                      : 'Cross-platform audience expansion & subscriber velocity'}
+                  </Text>
+                </View>
+                <Pressable onPress={() => setShowExpandedGraphModal(false)} style={styles.modalCloseCircle} hitSlop={8}>
+                  <Text style={styles.modalCloseCross}>✕</Text>
+                </Pressable>
+              </View>
+
+              {/* Timeframe Filter Buttons */}
+              <View style={styles.graphTimeframeRow}>
+                {(['7D', '14D', '30D', '90D'] as const).map((tf) => (
+                  <Pressable
+                    key={tf}
+                    style={[styles.graphTimeframePill, graphTimeframe === tf && styles.graphTimeframePillActive]}
+                    onPress={() => {
+                      if (Platform.OS !== 'web') {
+                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                      }
+                      setGraphTimeframe(tf);
+                    }}
+                  >
+                    <Text style={[styles.graphTimeframeText, graphTimeframe === tf && styles.graphTimeframeTextActive]}>
+                      {tf}
+                    </Text>
+                  </Pressable>
+                ))}
+              </View>
+
+              {/* Active Point Live Inspection Banner */}
+              <View style={styles.graphActivePointCard}>
+                <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <View>
+                    <Text style={styles.graphActivePointDate}>📅 May {selectedGraphDayIndex + 1}, 2024</Text>
+                    <Text style={styles.graphActivePointSub}>
+                      {expandedGraphType === 'growth30d' ? 'Daily Reach & Engagement Point' : 'Total Audience Baseline'}
+                    </Text>
+                  </View>
+                  <View style={{ alignItems: 'flex-end' }}>
+                    <Text style={styles.graphActivePointValue}>
+                      {expandedGraphType === 'growth30d'
+                        ? `${(12.4 + (selectedGraphDayIndex * 1.1)).toFixed(1)}K Reach`
+                        : `${(141840 + selectedGraphDayIndex * 85).toLocaleString()} Audience`}
+                    </Text>
+                    <Text style={styles.graphActivePointDelta}>
+                      {expandedGraphType === 'growth30d'
+                        ? `+${40 + selectedGraphDayIndex * 3} New Followers`
+                        : `+${45 + Math.floor(selectedGraphDayIndex * 2.8)} Today (▲ Surge)`}
+                    </Text>
+                  </View>
+                </View>
+              </View>
+
+              {/* Scroll Instruction Hint */}
+              <View style={styles.scrollGraphHintRow}>
+                <Text style={styles.scrollGraphHintText}>↔ Swipe graph horizontally to inspect all 30 days & nodes</Text>
+              </View>
+
+              {/* HORIZONTAL SCROLLABLE LIVE GRAPH */}
+              <View style={styles.horizontalGraphViewport}>
+                <ScrollView
+                  horizontal={true}
+                  showsHorizontalScrollIndicator={true}
+                  bounces={true}
+                  contentContainerStyle={styles.horizontalGraphScrollContent}
+                >
+                  <View style={{ width: 950, height: 210, position: 'relative' }}>
+                    {/* SVG Graphic Wave Lines & Grid */}
+                    <Svg width={950} height={190} viewBox="0 0 950 190">
+                      <Defs>
+                        <SvgLinearGradient id="liveWaveGrad" x1="0" y1="0" x2="0" y2="1">
+                          <Stop
+                            offset="0"
+                            stopColor={expandedGraphType === 'growth30d' ? '#582CDB' : '#7C3AED'}
+                            stopOpacity="0.35"
+                          />
+                          <Stop
+                            offset="1"
+                            stopColor={expandedGraphType === 'growth30d' ? '#582CDB' : '#7C3AED'}
+                            stopOpacity="0.0"
+                          />
+                        </SvgLinearGradient>
+                      </Defs>
+
+                      {/* Horizontal Grid lines */}
+                      <Path d="M0,35 L950,35" stroke="#F1F5F9" strokeWidth="1" strokeDasharray="4,4" />
+                      <Path d="M0,80 L950,80" stroke="#F1F5F9" strokeWidth="1" strokeDasharray="4,4" />
+                      <Path d="M0,125 L950,125" stroke="#F1F5F9" strokeWidth="1" strokeDasharray="4,4" />
+                      <Path d="M0,170 L950,170" stroke="#E2E8F0" strokeWidth="1.5" />
+
+                      {/* Area Fill */}
+                      <Path
+                        d={
+                          expandedGraphType === 'growth30d'
+                            ? 'M0,130 C120,150 220,90 320,110 C420,130 520,70 620,85 C720,100 820,40 950,55 L950,170 L0,170 Z'
+                            : 'M0,150 C120,135 220,120 320,100 C420,90 520,75 620,60 C720,45 820,35 950,25 L950,170 L0,170 Z'
+                        }
+                        fill="url(#liveWaveGrad)"
+                      />
+
+                      {/* Line Curve */}
+                      <Path
+                        d={
+                          expandedGraphType === 'growth30d'
+                            ? 'M0,130 C120,150 220,90 320,110 C420,130 520,70 620,85 C720,100 820,40 950,55'
+                            : 'M0,150 C120,135 220,120 320,100 C420,90 520,75 620,60 C720,45 820,35 950,25'
+                        }
+                        fill="none"
+                        stroke={expandedGraphType === 'growth30d' ? '#582CDB' : '#7C3AED'}
+                        strokeWidth="3.5"
+                        strokeLinecap="round"
+                      />
+                    </Svg>
+
+                    {/* Interactive 30 Day Node Touchpoints */}
+                    <View style={styles.interactiveNodesOverlay}>
+                      {Array.from({ length: 30 }, (_, i) => {
+                        const isSelected = selectedGraphDayIndex === i;
+                        // Calculate Y coordinate progression
+                        const factor = i / 29;
+                        const yPos =
+                          expandedGraphType === 'growth30d'
+                            ? 130 - factor * 75 + Math.sin(i * 0.7) * 18
+                            : 150 - factor * 125 + Math.sin(i * 0.5) * 6;
+
+                        return (
+                          <Pressable
+                            key={i}
+                            style={[
+                              styles.interactiveGraphNode,
+                              {
+                                left: i * 31.5 + 8,
+                                top: yPos - 10,
+                              },
+                            ]}
+                            onPress={() => {
+                              if (Platform.OS !== 'web') {
+                                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                              }
+                              setSelectedGraphDayIndex(i);
+                            }}
+                            hitSlop={8}
+                          >
+                            <View
+                              style={[
+                                styles.nodeCircleDot,
+                                isSelected && styles.nodeCircleDotSelected,
+                                { backgroundColor: isSelected ? '#F59E0B' : expandedGraphType === 'growth30d' ? '#582CDB' : '#7C3AED' },
+                              ]}
+                            />
+                            {isSelected && <View style={styles.nodeSelectedGlowRing} />}
+                          </Pressable>
+                        );
+                      })}
+                    </View>
+
+                    {/* X-Axis Date Labels */}
+                    <View style={styles.xAxisLabelsRow}>
+                      {[1, 5, 10, 15, 20, 25, 30].map((d) => (
+                        <Text key={d} style={[styles.xAxisLabelText, { left: (d - 1) * 31.5 }]}>
+                          May {d}
+                        </Text>
+                      ))}
+                    </View>
+                  </View>
+                </ScrollView>
+              </View>
+
+              {/* Bottom 4-Week Milestone Breakdown Grid */}
+              <View style={styles.modalWeeklyBreakdownGrid}>
+                <View style={styles.modalWeekCol}>
+                  <Text style={styles.modalWeekTitle}>WEEK 1</Text>
+                  <Text style={styles.modalWeekVal}>+540 👤</Text>
+                  <Text style={styles.modalWeekSub}>12.4k reach</Text>
+                </View>
+                <View style={styles.modalWeekCol}>
+                  <Text style={styles.modalWeekTitle}>WEEK 2</Text>
+                  <Text style={styles.modalWeekVal}>+680 👤</Text>
+                  <Text style={styles.modalWeekSub}>28.1k reach</Text>
+                </View>
+                <View style={styles.modalWeekCol}>
+                  <Text style={styles.modalWeekTitle}>WEEK 3 (🔥)</Text>
+                  <Text style={[styles.modalWeekVal, { color: '#582CDB' }]}>+720 👤</Text>
+                  <Text style={styles.modalWeekSub}>45.2k peak</Text>
+                </View>
+                <View style={styles.modalWeekCol}>
+                  <Text style={styles.modalWeekTitle}>WEEK 4</Text>
+                  <Text style={styles.modalWeekVal}>+540 👤</Text>
+                  <Text style={styles.modalWeekSub}>32.8k reach</Text>
+                </View>
+              </View>
+
+              {/* Platform Contribution Bar */}
+              <View style={styles.modalPlatformContribRow}>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                  <SocialBrandIcon platform="tiktok" size={16} />
+                  <Text style={styles.modalPlatContribText}>TikTok +840 (34%)</Text>
+                </View>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                  <SocialBrandIcon platform="instagram" size={16} />
+                  <Text style={styles.modalPlatContribText}>IG +920 (37%)</Text>
+                </View>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                  <SocialBrandIcon platform="youtube" size={16} />
+                  <Text style={styles.modalPlatContribText}>YT +720 (29%)</Text>
+                </View>
+              </View>
+
+              {/* Close / Action Button */}
+              <Pressable
+                style={styles.modalFullBtn}
+                onPress={() => setShowExpandedGraphModal(false)}
+              >
+                <Text style={styles.modalFullBtnText}>Close Expanded View</Text>
+              </Pressable>
+            </Animated.View>
+          </View>
+        </Modal>
 
         {/* ============================================================ */}
         {/* MODAL: MONTHLY REPORT EXPORT                                 */}
@@ -1075,6 +1350,213 @@ const styles = StyleSheet.create({
   },
 
   // CARD 1: HERO ANALYTICS
+  /* EXPANDED GRAPH MODAL STYLES */
+  expandHintBadge: {
+    backgroundColor: '#EDE9FE',
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 6,
+    borderWidth: 1,
+    borderColor: '#DDD6FE',
+  },
+  expandHintBadgeText: {
+    fontSize: 10,
+    fontWeight: '800',
+    color: '#582CDB',
+  },
+  expandHintBadgePurple: {
+    backgroundColor: '#FAF5FF',
+    paddingHorizontal: 7,
+    paddingVertical: 2,
+    borderRadius: 6,
+    borderWidth: 1,
+    borderColor: '#E9D5FF',
+  },
+  expandHintBadgePurpleText: {
+    fontSize: 9.5,
+    fontWeight: '800',
+    color: '#7C3AED',
+  },
+  expandedGraphModalCard: {
+    maxWidth: 520,
+    padding: 20,
+    borderRadius: 24,
+  },
+  liveGreenPulseDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: '#10B981',
+    marginRight: 2,
+  },
+  graphTimeframeRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginBottom: 12,
+  },
+  graphTimeframePill: {
+    paddingHorizontal: 12,
+    paddingVertical: 5,
+    borderRadius: 8,
+    backgroundColor: '#F1F5F9',
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+  },
+  graphTimeframePillActive: {
+    backgroundColor: '#582CDB',
+    borderColor: '#582CDB',
+  },
+  graphTimeframeText: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: '#64748B',
+  },
+  graphTimeframeTextActive: {
+    color: '#FFFFFF',
+    fontWeight: '900',
+  },
+  graphActivePointCard: {
+    backgroundColor: '#FAF8F5',
+    borderRadius: 14,
+    padding: 12,
+    borderWidth: 1.5,
+    borderColor: '#EFECE6',
+    marginBottom: 8,
+  },
+  graphActivePointDate: {
+    fontSize: 13,
+    fontWeight: '900',
+    color: '#171420',
+    marginBottom: 2,
+  },
+  graphActivePointSub: {
+    fontSize: 10.5,
+    color: '#64748B',
+  },
+  graphActivePointValue: {
+    fontSize: 14,
+    fontWeight: '900',
+    color: '#582CDB',
+  },
+  graphActivePointDelta: {
+    fontSize: 11,
+    fontWeight: '800',
+    color: '#10B981',
+  },
+  scrollGraphHintRow: {
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  scrollGraphHintText: {
+    fontSize: 10.5,
+    fontWeight: '700',
+    color: '#94A3B8',
+  },
+  horizontalGraphViewport: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 16,
+    paddingVertical: 10,
+    paddingHorizontal: 6,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    marginBottom: 12,
+  },
+  horizontalGraphScrollContent: {
+    paddingRight: 30,
+    paddingLeft: 10,
+  },
+  interactiveNodesOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+  },
+  interactiveGraphNode: {
+    position: 'absolute',
+    width: 24,
+    height: 24,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  nodeCircleDot: {
+    width: 7,
+    height: 7,
+    borderRadius: 3.5,
+    borderWidth: 1.5,
+    borderColor: '#FFFFFF',
+  },
+  nodeCircleDotSelected: {
+    width: 11,
+    height: 11,
+    borderRadius: 5.5,
+    borderWidth: 2,
+    borderColor: '#FFFFFF',
+  },
+  nodeSelectedGlowRing: {
+    position: 'absolute',
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    borderWidth: 1.5,
+    borderColor: 'rgba(245, 158, 11, 0.4)',
+  },
+  xAxisLabelsRow: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    height: 18,
+  },
+  xAxisLabelText: {
+    position: 'absolute',
+    fontSize: 9.5,
+    fontWeight: '700',
+    color: '#94A3B8',
+  },
+  modalWeeklyBreakdownGrid: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: '#FAF8F5',
+    borderRadius: 12,
+    padding: 10,
+    marginBottom: 10,
+    borderWidth: 1,
+    borderColor: '#EFECE6',
+  },
+  modalWeekCol: {
+    alignItems: 'center',
+    flex: 1,
+  },
+  modalWeekTitle: {
+    fontSize: 9,
+    fontWeight: '800',
+    color: '#64748B',
+    marginBottom: 2,
+  },
+  modalWeekVal: {
+    fontSize: 11.5,
+    fontWeight: '900',
+    color: '#171420',
+  },
+  modalWeekSub: {
+    fontSize: 9,
+    color: '#94A3B8',
+  },
+  modalPlatformContribRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-around',
+    marginBottom: 12,
+  },
+  modalPlatContribText: {
+    fontSize: 10.5,
+    fontWeight: '700',
+    color: '#475569',
+  },
+
   heroAnalyticsCard: {
     backgroundColor: '#FFFFFF',
     borderRadius: 24,
