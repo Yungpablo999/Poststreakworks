@@ -65,6 +65,216 @@ interface PlatformEarning {
   amount: number;
 }
 
+
+// DYNAMIC EARNINGS TIMEFRAME CONFIGURATIONS (7D, 14D, 30D, 90D)
+// Mathematically calibrated to $2,450 Current Month Net Rate
+const EARNINGS_TIMEFRAME_CONFIGS = {
+  '7D': {
+    daysCount: 7,
+    viewportWidth: 460,
+    labels: [
+      { text: 'Mon (May 24)', x: 10 },
+      { text: 'Wed (May 26)', x: 140 },
+      { text: 'Fri (May 28)', x: 270 },
+      { text: 'Sun (May 30)', x: 380 },
+    ],
+    stepSpacing: 65,
+    netRateSummary: {
+      total: '$620',
+      delta: '+$180 vs last week (▲ +40.9%)',
+      gross: '$660',
+      margin: '94.0% Take-home',
+      dailyAvg: '$88.50 / day',
+      topDay: 'Fri, May 28 ($220 Brand Sprint)',
+      insight: 'Weekend sponsored storytelling Reels generated 65% of your 7-day net revenue.',
+    },
+    sourcesSummary: [
+      { name: 'Brand Deals', icon: '💼', amount: '$310', pct: '50%', color: '#F59E0B', avgDeal: '$310 / deal', clients: '2 Brands' },
+      { name: 'Collaborations', icon: '🤝', amount: '$140', pct: '23%', color: '#582CDB', avgDeal: '$140 / split', clients: '1 Squad Collab' },
+      { name: 'Affiliates', icon: '🔗', amount: '$80', pct: '13%', color: '#A78BFA', avgDeal: '$8.00 / conv', clients: '10 Clicks' },
+      { name: 'UGC Content', icon: '📱', amount: '$90', pct: '14%', color: '#7C3AED', avgDeal: '$90 / asset', clients: '1 Video Deliverable' },
+    ],
+    platformSummary: [
+      { name: 'TikTok', icon: 'tiktok', amount: '$240', pct: '39%', rpm: '$4.10 RPM', deals: '2 Campaigns', color: '#000000' },
+      { name: 'Instagram', icon: 'instagram', amount: '$210', pct: '34%', rpm: '$8.80 RPM', deals: '1 Story + Reel', color: '#E1306C' },
+      { name: 'YouTube Shorts', icon: 'youtube', amount: '$110', pct: '18%', rpm: '$3.70 RPM', deals: 'Ad Share', color: '#FF0000' },
+      { name: 'X / Twitter', icon: 'x', amount: '$60', pct: '9%', rpm: '$6.20 RPM', deals: 'Sponsored Thread', color: '#171420' },
+    ],
+    monthlyForecast: {
+      annualRunRate: '$32,240',
+      pacing: '112% of Monthly Target',
+      forecastJun: '$3,100',
+    },
+    getPoint: (i: number) => {
+      const days = ['Mon, May 24', 'Tue, May 25', 'Wed, May 26', 'Thu, May 27', 'Fri, May 28', 'Sat, May 29', 'Sun, May 30'];
+      const dailyEarns = [60, 75, 80, 95, 220, 50, 40];
+      const yCoords = [130, 115, 110, 90, 30, 140, 150];
+      return {
+        date: days[i] || `Day ${i + 1}`,
+        amount: `$${dailyEarns[i]} Net Earned`,
+        sub: `Day ${i + 1} payout volume ($620 7D Total)`,
+        yPos: yCoords[i],
+      };
+    },
+    svgPath: 'M0,130 C80,115 160,110 240,90 C300,50 360,25 460,40',
+    areaPath: 'M0,130 C80,115 160,110 240,90 C300,50 360,25 460,40 L460,170 L0,170 Z',
+  },
+  '14D': {
+    daysCount: 14,
+    viewportWidth: 640,
+    labels: [
+      { text: 'May 17', x: 10 },
+      { text: 'May 20', x: 140 },
+      { text: 'May 24', x: 300 },
+      { text: 'May 27', x: 450 },
+      { text: 'May 30', x: 570 },
+    ],
+    stepSpacing: 44,
+    netRateSummary: {
+      total: '$1,180',
+      delta: '+$340 vs prev 14d (▲ +40.5%)',
+      gross: '$1,250',
+      margin: '94.4% Take-home',
+      dailyAvg: '$84.20 / day',
+      topDay: 'Wed, May 19 ($350 Campaign)',
+      insight: 'Sponsorship sprint across TikTok and Instagram generated 2 repeat brand contract renewals.',
+    },
+    sourcesSummary: [
+      { name: 'Brand Deals', icon: '💼', amount: '$590', pct: '50%', color: '#F59E0B', avgDeal: '$295 / deal', clients: '2 Brands' },
+      { name: 'Collaborations', icon: '🤝', amount: '$260', pct: '22%', color: '#582CDB', avgDeal: '$130 / split', clients: '2 Squad Collabs' },
+      { name: 'Affiliates', icon: '🔗', amount: '$150', pct: '13%', color: '#A78BFA', avgDeal: '$7.50 / conv', clients: '20 Clicks' },
+      { name: 'UGC Content', icon: '📱', amount: '$180', pct: '15%', color: '#7C3AED', avgDeal: '$90 / asset', clients: '2 Video Deliverables' },
+    ],
+    platformSummary: [
+      { name: 'TikTok', icon: 'tiktok', amount: '$450', pct: '38%', rpm: '$4.15 RPM', deals: '3 Campaigns', color: '#000000' },
+      { name: 'Instagram', icon: 'instagram', amount: '$410', pct: '35%', rpm: '$8.90 RPM', deals: '3 Deliverables', color: '#E1306C' },
+      { name: 'YouTube Shorts', icon: 'youtube', amount: '$210', pct: '18%', rpm: '$3.75 RPM', deals: 'Ad Share', color: '#FF0000' },
+      { name: 'X / Twitter', icon: 'x', amount: '$110', pct: '9%', rpm: '$6.30 RPM', deals: 'Sponsored Threads', color: '#171420' },
+    ],
+    monthlyForecast: {
+      annualRunRate: '$30,680',
+      pacing: '108% of Monthly Target',
+      forecastJun: '$3,150',
+    },
+    getPoint: (i: number) => {
+      const dailyEarns = [60, 80, 350, 70, 65, 85, 90, 60, 75, 80, 95, 220, 50, 40];
+      const yPos = 140 - (i / 13) * 90 + Math.sin(i * 0.8) * 8;
+      return {
+        date: `May ${i + 17}, 2024`,
+        amount: `$${dailyEarns[i] || 80} Net Earned`,
+        sub: `Day ${i + 1} sprint volume ($1,180 14D Total)`,
+        yPos,
+      };
+    },
+    svgPath: 'M0,140 C110,120 220,95 330,80 C440,65 540,40 640,30',
+    areaPath: 'M0,140 C110,120 220,95 330,80 C440,65 540,40 640,30 L640,170 L0,170 Z',
+  },
+  '30D': {
+    daysCount: 30,
+    viewportWidth: 950,
+    labels: [
+      { text: 'May 1', x: 10 },
+      { text: 'May 5', x: 130 },
+      { text: 'May 10', x: 280 },
+      { text: 'May 15', x: 440 },
+      { text: 'May 20', x: 600 },
+      { text: 'May 25', x: 750 },
+      { text: 'May 30', x: 890 },
+    ],
+    stepSpacing: 31.5,
+    netRateSummary: {
+      total: '$2,450',
+      delta: '+$540 vs April (▲ +28.3%)',
+      gross: '$2,600',
+      margin: '94.2% Take-home',
+      dailyAvg: '$81.67 / day',
+      topDay: 'May 12 ($450 Brand Package)',
+      insight: 'Consistent daily posting generated a 3.4x spike in inbound brand sponsorship inquiries.',
+    },
+    sourcesSummary: [
+      { name: 'Brand Deals', icon: '💼', amount: '$1,200', pct: '49%', color: '#F59E0B', avgDeal: '$400 / deal', clients: '3 Key Brands' },
+      { name: 'Collaborations', icon: '🤝', amount: '$540', pct: '22%', color: '#582CDB', avgDeal: '$180 / split', clients: '3 Squad Collabs' },
+      { name: 'Affiliates', icon: '🔗', amount: '$320', pct: '13%', color: '#A78BFA', avgDeal: '$8.20 / conv', clients: '39 Clicks' },
+      { name: 'UGC Content', icon: '📱', amount: '$390', pct: '16%', color: '#7C3AED', avgDeal: '$130 / asset', clients: '3 Video Deliverables' },
+    ],
+    platformSummary: [
+      { name: 'TikTok', icon: 'tiktok', amount: '$920', pct: '38%', rpm: '$4.20 RPM', deals: '4 Paid Campaigns', color: '#000000' },
+      { name: 'Instagram', icon: 'instagram', amount: '$840', pct: '34%', rpm: '$8.90 RPM', deals: 'Highest Story/Reel Rate', color: '#E1306C' },
+      { name: 'YouTube Shorts', icon: 'youtube', amount: '$580', pct: '24%', rpm: '$3.80 RPM', deals: 'Long-Tail Ad Share', color: '#FF0000' },
+      { name: 'X / Twitter', icon: 'x', amount: '$330', pct: '14%', rpm: '$6.50 RPM', deals: 'Sponsored Threads', color: '#171420' },
+    ],
+    monthlyForecast: {
+      annualRunRate: '$29,400',
+      pacing: '100% of Milestone Goal',
+      forecastJun: '$3,200',
+    },
+    getPoint: (i: number) => {
+      const dailyEarn = 60 + Math.floor(Math.sin(i * 0.7) * 25 + (i / 29) * 45);
+      const yPos = 135 - (i / 29) * 80 + Math.sin(i * 0.7) * 14;
+      return {
+        date: `May ${i + 1}, 2024`,
+        amount: `$${dailyEarn} Daily Net`,
+        sub: `Day ${i + 1} creator payout volume ($2,450 30D Total)`,
+        yPos,
+      };
+    },
+    svgPath: 'M0,135 C120,150 220,95 320,110 C420,125 520,75 620,85 C720,95 820,45 950,55',
+    areaPath: 'M0,135 C120,150 220,95 320,110 C420,125 520,75 620,85 C720,95 820,45 950,55 L950,170 L0,170 Z',
+  },
+  '90D': {
+    daysCount: 12,
+    viewportWidth: 820,
+    labels: [
+      { text: 'Mar W1', x: 10 },
+      { text: 'Mar W3', x: 140 },
+      { text: 'Apr W1', x: 280 },
+      { text: 'Apr W3', x: 420 },
+      { text: 'May W1', x: 560 },
+      { text: 'May W4', x: 740 },
+    ],
+    stepSpacing: 65,
+    netRateSummary: {
+      total: '$6,840',
+      delta: '+$1,820 quarterly surge (▲ +36.2%)',
+      gross: '$7,250',
+      margin: '94.3% Take-home',
+      dailyAvg: '$76.00 / day',
+      topDay: 'Month 3 ($2,450 May Record 🔥)',
+      insight: 'Quarterly momentum puts you in the top 2.4% tier of creators by monetization velocity.',
+    },
+    sourcesSummary: [
+      { name: 'Brand Deals', icon: '💼', amount: '$3,350', pct: '49%', color: '#F59E0B', avgDeal: '$418 / deal', clients: '8 Brands' },
+      { name: 'Collaborations', icon: '🤝', amount: '$1,500', pct: '22%', color: '#582CDB', avgDeal: '$187 / split', clients: '8 Squad Collabs' },
+      { name: 'Affiliates', icon: '🔗', amount: '$890', pct: '13%', color: '#A78BFA', avgDeal: '$8.40 / conv', clients: '106 Clicks' },
+      { name: 'UGC Content', icon: '📱', amount: '$1,100', pct: '16%', color: '#7C3AED', avgDeal: '$137 / asset', clients: '8 Video Deliverables' },
+    ],
+    platformSummary: [
+      { name: 'TikTok', icon: 'tiktok', amount: '$2,580', pct: '38%', rpm: '$4.22 RPM', deals: '11 Campaigns', color: '#000000' },
+      { name: 'Instagram', icon: 'instagram', amount: '$2,360', pct: '35%', rpm: '$8.95 RPM', deals: 'Premium Retainers', color: '#E1306C' },
+      { name: 'YouTube Shorts', icon: 'youtube', amount: '$1,220', pct: '18%', rpm: '$3.82 RPM', deals: 'Ad Rev Share', color: '#FF0000' },
+      { name: 'X / Twitter', icon: 'x', amount: '$680', pct: '9%', rpm: '$6.40 RPM', deals: 'Newsletter & Thread Sponsors', color: '#171420' },
+    ],
+    monthlyForecast: {
+      annualRunRate: '$27,360',
+      pacing: '124% of Quarterly Benchmark',
+      forecastJun: '$3,300',
+    },
+    getPoint: (i: number) => {
+      const weeks = ['Mar W1', 'Mar W2', 'Mar W3', 'Mar W4', 'Apr W1', 'Apr W2', 'Apr W3', 'Apr W4', 'May W1', 'May W2', 'May W3', 'May W4'];
+      const weeklyEarns = [420, 460, 480, 520, 560, 600, 620, 650, 580, 620, 680, 650];
+      const yPos = 150 - (i / 11) * 110;
+      return {
+        date: `Quarterly ${weeks[i] || `Week ${i + 1}`}`,
+        amount: `$${weeklyEarns[i]} Weekly Net`,
+        sub: `Quarterly pacing ($6,840 90D Total)`,
+        yPos,
+      };
+    },
+    svgPath: 'M0,150 C200,130 400,90 600,55 C700,40 760,32 820,28',
+    areaPath: 'M0,150 C200,130 400,90 600,55 C700,40 760,32 820,28 L820,170 L0,170 Z',
+  },
+};
+
 const PLATFORM_EARNINGS: PlatformEarning[] = [
   { id: 'p_tt', platform: 'tiktok', name: 'TikTok', badgeText: '+14%', badgeType: 'purple', progress: 0.78, amount: 920 },
   { id: 'p_ig', platform: 'instagram', name: 'Instagram', badgeText: 'Top Earner', badgeType: 'gold', progress: 0.71, amount: 840 },
@@ -93,6 +303,12 @@ export const ProEarningsScreen: React.FC<ProEarningsScreenProps> = ({
   const [showPayoutsModal, setShowPayoutsModal] = useState(false);
   const [showEarningsPassModal, setShowEarningsPassModal] = useState(false);
   const [showBreakdownModal, setShowBreakdownModal] = useState(false);
+  const [showExpandedEarningsModal, setShowExpandedEarningsModal] = useState(false);
+  const [expandedEarningsType, setExpandedEarningsType] = useState<'netRate' | 'incomeSource' | 'platformComp' | 'monthlyTrend'>('netRate');
+  const [earningsTimeframe, setEarningsTimeframe] = useState<'7D' | '14D' | '30D' | '90D'>('30D');
+  const [selectedEarningsDayIndex, setSelectedEarningsDayIndex] = useState(29);
+  const [selectedSourceIndex, setSelectedSourceIndex] = useState(0);
+  const [selectedPlatformIndex, setSelectedPlatformIndex] = useState(0);
 
   // Celebration Modal State
   const [showCelebrationModal, setShowCelebrationModal] = useState(false);
@@ -320,13 +536,28 @@ export const ProEarningsScreen: React.FC<ProEarningsScreenProps> = ({
           </Text>
 
           {/* ============================================================ */}
-          {/* CARD 1: CURRENT MONTH NET RATE HERO CARD                     */}
+          {/* CARD 1: CURRENT MONTH NET RATE HERO CARD (TAP TO EXPAND)      */}
           {/* ============================================================ */}
-          <View style={styles.heroIncomeCard}>
+          <Pressable
+            style={({ pressed }) => [styles.heroIncomeCard, pressed && styles.btnPressed]}
+            onPress={() => {
+              if (Platform.OS !== 'web') {
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              }
+              setExpandedEarningsType('netRate');
+              triggerModalPop();
+              setShowExpandedEarningsModal(true);
+            }}
+          >
             <View style={styles.heroTopRow}>
               <Text style={styles.heroCardLabel}>CURRENT MONTH NET RATE</Text>
-              <View style={styles.growthBadgePill}>
-                <Text style={styles.growthBadgeText}>📈 +18% vs last month</Text>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                <View style={styles.growthBadgePill}>
+                  <Text style={styles.growthBadgeText}>📈 +18% vs last month</Text>
+                </View>
+                <View style={styles.expandHintBadgeSmall}>
+                  <Text style={styles.expandHintBadgeText}>Expand 🔍</Text>
+                </View>
               </View>
             </View>
 
@@ -390,16 +621,31 @@ export const ProEarningsScreen: React.FC<ProEarningsScreenProps> = ({
                 <Text style={styles.openPassBtnText}>OPEN EARNINGS PASS</Text>
               </Pressable>
             </View>
-          </View>
+          </Pressable>
 
           {/* ============================================================ */}
-          {/* CARD 2: INCOME SOURCES BREAKDOWN                             */}
+          {/* CARD 2: INCOME SOURCES BREAKDOWN (TAP TO EXPAND)             */}
           {/* ============================================================ */}
-          <View style={styles.dashboardCard}>
+          <Pressable
+            style={({ pressed }) => [styles.dashboardCard, pressed && styles.btnPressed]}
+            onPress={() => {
+              if (Platform.OS !== 'web') {
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              }
+              setExpandedEarningsType('incomeSource');
+              triggerModalPop();
+              setShowExpandedEarningsModal(true);
+            }}
+          >
             <View style={styles.cardHeaderBetween}>
               <Text style={styles.cardHeaderTitle}>Income Sources Breakdown</Text>
-              <View style={styles.syncStatusPill}>
-                <Text style={styles.syncStatusText}>• Multi-Source Sync</Text>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                <View style={styles.syncStatusPill}>
+                  <Text style={styles.syncStatusText}>• Multi-Source Sync</Text>
+                </View>
+                <View style={styles.expandHintBadgeSmall}>
+                  <Text style={styles.expandHintBadgeText}>Expand 🔍</Text>
+                </View>
               </View>
             </View>
 
@@ -426,17 +672,32 @@ export const ProEarningsScreen: React.FC<ProEarningsScreenProps> = ({
                 </View>
               ))}
             </View>
-          </View>
+          </Pressable>
 
           {/* ============================================================ */}
-          {/* CARD 3: PLATFORM COMPARISON                                  */}
+          {/* CARD 3: PLATFORM COMPARISON (TAP TO EXPAND)                  */}
           {/* ============================================================ */}
-          <View style={styles.dashboardCard}>
+          <Pressable
+            style={({ pressed }) => [styles.dashboardCard, pressed && styles.btnPressed]}
+            onPress={() => {
+              if (Platform.OS !== 'web') {
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              }
+              setExpandedEarningsType('platformComp');
+              triggerModalPop();
+              setShowExpandedEarningsModal(true);
+            }}
+          >
             <View style={styles.cardHeaderBetween}>
               <Text style={styles.cardHeaderTitle}>Platform Comparison</Text>
-              <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
-                <Path d="M18 20V10M12 20V4M6 20v-6" stroke="#582CDB" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
-              </Svg>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                <View style={styles.expandHintBadgeSmall}>
+                  <Text style={styles.expandHintBadgeText}>Expand 🔍</Text>
+                </View>
+                <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
+                  <Path d="M18 20V10M12 20V4M6 20v-6" stroke="#582CDB" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
+                </Svg>
+              </View>
             </View>
 
             <View style={{ gap: 14, marginTop: 14 }}>
@@ -483,7 +744,7 @@ export const ProEarningsScreen: React.FC<ProEarningsScreenProps> = ({
                 </View>
               ))}
             </View>
-          </View>
+          </Pressable>
 
           {/* ============================================================ */}
           {/* CARD 4: PAYOUT STATUS                                        */}
@@ -531,14 +792,25 @@ export const ProEarningsScreen: React.FC<ProEarningsScreenProps> = ({
           </View>
 
           {/* ============================================================ */}
-          {/* CARD 5: MONTHLY EARNINGS TREND (ROYAL PURPLE CARD)           */}
+          {/* CARD 5: MONTHLY EARNINGS TREND (TAP TO EXPAND)               */}
           {/* ============================================================ */}
-          <LinearGradient
-            colors={['#3B14A7', '#582CDB', '#6D28D9']}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-            style={styles.trendGradientCard}
+          <Pressable
+            style={({ pressed }) => [styles.trendGradientCard, pressed && styles.btnPressed]}
+            onPress={() => {
+              if (Platform.OS !== 'web') {
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              }
+              setExpandedEarningsType('monthlyTrend');
+              triggerModalPop();
+              setShowExpandedEarningsModal(true);
+            }}
           >
+            <LinearGradient
+              colors={['#3B14A7', '#582CDB', '#6D28D9']}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={{ padding: 18, borderRadius: 20 }}
+            >
             <View style={styles.trendHeaderRow}>
               <View>
                 <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
@@ -582,6 +854,7 @@ export const ProEarningsScreen: React.FC<ProEarningsScreenProps> = ({
               Earnings are trending upward by 18% this month. Brand Deals are now 49% of your total platform income!
             </Text>
           </LinearGradient>
+          </Pressable>
 
           {/* ============================================================ */}
           {/* CARD 6: JARVIS STRATEGY INSIGHT                              */}
@@ -1158,6 +1431,247 @@ const styles = StyleSheet.create({
   },
 
   // CARD 1: HERO INCOME
+  /* EXPANDED EARNINGS MODAL & HINT BADGES */
+  expandHintBadgeSmall: {
+    backgroundColor: '#FAF5FF',
+    paddingHorizontal: 7,
+    paddingVertical: 3,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#E9D5FF',
+  },
+  expandHintBadgeText: {
+    fontSize: 9.5,
+    fontWeight: '800',
+    color: '#582CDB',
+  },
+  timeframePillRow: {
+    flexDirection: 'row',
+    backgroundColor: '#FAF8F5',
+    borderRadius: 14,
+    padding: 4,
+    marginVertical: 10,
+    borderWidth: 1,
+    borderColor: '#EFECE6',
+    gap: 4,
+  },
+  timeframePill: {
+    flex: 1,
+    paddingVertical: 8,
+    borderRadius: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  timeframePillActive: {
+    backgroundColor: '#582CDB',
+    shadowColor: '#582CDB',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+  },
+  timeframePillText: {
+    fontSize: 12,
+    fontWeight: '800',
+    color: '#64748B',
+  },
+  timeframePillTextActive: {
+    color: '#FFFFFF',
+    fontWeight: '900',
+  },
+  graphActivePointCard: {
+    backgroundColor: '#FAF8F5',
+    borderRadius: 14,
+    padding: 12,
+    borderWidth: 1,
+    borderColor: '#EFECE6',
+    marginBottom: 10,
+  },
+  graphActivePointDate: {
+    fontSize: 12,
+    fontWeight: '900',
+    color: '#171420',
+  },
+  graphActivePointSub: {
+    fontSize: 10,
+    color: '#64748B',
+    marginTop: 2,
+  },
+  graphActivePointValue: {
+    fontSize: 14,
+    fontWeight: '900',
+  },
+  graphActivePointDelta: {
+    fontSize: 10,
+    fontWeight: '800',
+    color: '#10B981',
+    marginTop: 2,
+  },
+  horizontalGraphViewport: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 18,
+    padding: 12,
+    borderWidth: 1,
+    borderColor: '#EFECE6',
+    marginBottom: 10,
+    overflow: 'hidden',
+  },
+  horizontalGraphScrollContent: {
+    paddingRight: 30,
+  },
+  interactiveNodesOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+  },
+  interactiveGraphNode: {
+    position: 'absolute',
+    width: 20,
+    height: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  nodeCircleDot: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    borderWidth: 2,
+    borderColor: '#FFFFFF',
+  },
+  nodeCircleDotSelected: {
+    width: 14,
+    height: 14,
+    borderRadius: 7,
+    borderColor: '#FFFFFF',
+    borderWidth: 2.5,
+  },
+  nodeSelectedGlowRing: {
+    position: 'absolute',
+    width: 22,
+    height: 22,
+    borderRadius: 11,
+    borderWidth: 2,
+    borderColor: '#F59E0B',
+    opacity: 0.8,
+  },
+  xAxisLabelsRow: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    height: 20,
+  },
+  xAxisLabelText: {
+    position: 'absolute',
+    fontSize: 9.5,
+    fontWeight: '700',
+    color: '#94A3B8',
+  },
+  audienceCleanBottomContainer: {
+    gap: 10,
+    marginTop: 4,
+  },
+  audienceStatsDuoRow: {
+    flexDirection: 'row',
+    gap: 10,
+  },
+  audienceStatDuoCard: {
+    flex: 1,
+    backgroundColor: '#FAF8F5',
+    borderRadius: 16,
+    padding: 12,
+    borderWidth: 1,
+    borderColor: '#EFECE6',
+  },
+  audienceStatDuoLabel: {
+    fontSize: 9,
+    fontWeight: '800',
+    color: '#64748B',
+    letterSpacing: 0.5,
+    marginBottom: 4,
+  },
+  audienceStatDuoVal: {
+    fontSize: 17,
+    fontWeight: '900',
+    color: '#171420',
+  },
+  audienceStatDuoSub: {
+    fontSize: 10,
+    color: '#64748B',
+    marginTop: 2,
+    fontWeight: '600',
+  },
+  audienceChannelsCard: {
+    backgroundColor: '#FAF8F5',
+    borderRadius: 16,
+    padding: 14,
+    borderWidth: 1,
+    borderColor: '#EFECE6',
+  },
+  audienceChannelsTitle: {
+    fontSize: 9.5,
+    fontWeight: '900',
+    color: '#64748B',
+    letterSpacing: 0.5,
+    marginBottom: 10,
+  },
+  audienceChannelRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  audienceChannelName: {
+    fontSize: 11.5,
+    fontWeight: '800',
+    color: '#171420',
+  },
+  audienceChannelVal: {
+    fontSize: 11,
+    fontWeight: '800',
+    color: '#171420',
+  },
+  audienceChannelPct: {
+    fontSize: 9.5,
+    fontWeight: '700',
+    color: '#64748B',
+  },
+  audienceChannelTrackBg: {
+    height: 5,
+    borderRadius: 2.5,
+    backgroundColor: '#E2E8F0',
+    overflow: 'hidden',
+  },
+  audienceChannelTrackFill: {
+    height: '100%',
+    borderRadius: 2.5,
+  },
+  audienceInsightCallout: {
+    backgroundColor: '#FAF5FF',
+    borderRadius: 14,
+    padding: 12,
+    borderWidth: 1,
+    borderColor: '#E9D5FF',
+  },
+  audienceInsightCalloutText: {
+    fontSize: 11,
+    color: '#4B5563',
+    lineHeight: 16,
+  },
+  liveGreenPulseDot: {
+    width: 7,
+    height: 7,
+    borderRadius: 3.5,
+    backgroundColor: '#10B981',
+  },
+  modalCardLarge: {
+    width: '92%',
+    maxWidth: 480,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 24,
+    overflow: 'hidden',
+  },
+
   heroIncomeCard: {
     backgroundColor: '#FFFFFF',
     borderRadius: 22,
