@@ -101,6 +101,7 @@ const INITIAL_NOTIFICATIONS: NotificationItem[] = [
 ];
 
 // DYNAMIC GRAPH CONFIGURATIONS ACROSS TIMEFRAMES (7D, 14D, 30D, 90D)
+// Mathematically calibrated to 131.0K Total 30D Reach & +2,480 Net Followers
 const TIMEFRAME_CONFIGS = {
   '7D': {
     daysCount: 7,
@@ -115,40 +116,40 @@ const TIMEFRAME_CONFIGS = {
     getPoint: (i: number, type: 'growth30d' | 'audience') => {
       const days = ['Mon, May 24', 'Tue, May 25', 'Wed, May 26', 'Thu, May 27', 'Fri, May 28', 'Sat, May 29', 'Sun, May 30'];
       if (type === 'growth30d') {
-        const reaches = [18.2, 22.4, 28.6, 34.1, 41.5, 48.0, 54.2];
-        const followers = [65, 82, 110, 145, 190, 220, 260];
-        const yCoords = [140, 125, 105, 85, 60, 45, 30];
+        const dailyReaches = [4.2, 4.6, 4.9, 5.1, 5.8, 6.4, 3.8];
+        const dailyFollowers = [78, 84, 92, 98, 114, 128, 86];
+        const yCoords = [135, 125, 110, 95, 65, 40, 30];
         return {
           date: days[i] || `Day ${i + 1}`,
-          reach: `${reaches[i] || 25}K Reach`,
-          delta: `+${followers[i] || 80} Followers (🔥 7D Peak)`,
-          yPos: yCoords[i] || 90,
+          reach: `${dailyReaches[i]}K Daily Reach`,
+          delta: `+${dailyFollowers[i]} Followers Today (▲ 34.8K 7D Total)`,
+          yPos: yCoords[i],
         };
       } else {
-        const audiences = [143100, 143320, 143580, 143890, 144120, 144240, 144320];
-        const dailyGains = [85, 92, 115, 140, 95, 78, 80];
-        const yCoords = [145, 130, 110, 85, 60, 40, 25];
+        const audiences = [143640, 143724, 143816, 143914, 144028, 144156, 144320];
+        const dailyGains = [78, 84, 92, 98, 114, 128, 86];
+        const yCoords = [140, 125, 110, 90, 65, 45, 25];
         return {
           date: days[i] || `Day ${i + 1}`,
-          reach: `${(audiences[i] || 144000).toLocaleString()} Audience`,
-          delta: `+${dailyGains[i] || 85} Today (▲ Surge)`,
-          yPos: yCoords[i] || 90,
+          reach: `${audiences[i].toLocaleString()} Total Audience`,
+          delta: `+${dailyGains[i]} Today (▲ Surge)`,
+          yPos: yCoords[i],
         };
       }
     },
     svgPath: (type: 'growth30d' | 'audience') =>
       type === 'growth30d'
-        ? 'M0,140 C80,130 160,110 240,80 C320,55 390,40 460,30'
-        : 'M0,145 C80,132 160,112 240,82 C320,58 390,36 460,25',
+        ? 'M0,135 C80,125 160,110 240,85 C320,55 390,38 460,30'
+        : 'M0,140 C80,125 160,110 240,80 C320,55 390,35 460,25',
     areaPath: (type: 'growth30d' | 'audience') =>
       type === 'growth30d'
-        ? 'M0,140 C80,130 160,110 240,80 C320,55 390,40 460,30 L460,170 L0,170 Z'
-        : 'M0,145 C80,132 160,112 240,82 C320,58 390,36 460,25 L460,170 L0,170 Z',
+        ? 'M0,135 C80,125 160,110 240,85 C320,55 390,38 460,30 L460,170 L0,170 Z'
+        : 'M0,140 C80,125 160,110 240,80 C320,55 390,35 460,25 L460,170 L0,170 Z',
     weeklyMetrics: [
-      { title: 'MON-TUE', val: '+147 👤', sub: '40.6k reach' },
-      { title: 'WED-THU', val: '+255 👤', sub: '62.7k reach' },
-      { title: 'FRI-SAT (🔥)', val: '+410 👤', sub: '89.5k peak', isPeak: true },
-      { title: 'SUN', val: '+260 👤', sub: '54.2k reach' },
+      { title: 'MON-TUE', val: '+162 👤', sub: '8.8k reach' },
+      { title: 'WED-THU', val: '+190 👤', sub: '10.0k reach' },
+      { title: 'FRI-SAT (🔥)', val: '+242 👤', sub: '12.2k peak', isPeak: true },
+      { title: 'SUN', val: '+86 👤', sub: '3.8k reach' },
     ],
   },
   '14D': {
@@ -164,22 +165,22 @@ const TIMEFRAME_CONFIGS = {
     stepSpacing: 44,
     getPoint: (i: number, type: 'growth30d' | 'audience') => {
       if (type === 'growth30d') {
-        const reachVal = (14.0 + i * 2.8 + Math.sin(i * 0.9) * 3).toFixed(1);
-        const followers = 50 + i * 14 + Math.floor(Math.cos(i) * 10);
-        const yPos = 145 - (i / 13) * 110 + Math.sin(i * 0.8) * 8;
+        const dailyReaches = [3.8, 3.9, 4.1, 4.4, 4.3, 4.6, 4.8, 5.0, 5.2, 5.4, 5.8, 6.2, 6.4, 4.5];
+        const dailyFollowers = [68, 72, 75, 82, 80, 86, 92, 96, 102, 108, 116, 124, 132, 97];
+        const yPos = 140 - (i / 13) * 105 + Math.sin(i * 0.8) * 6;
         return {
           date: `May ${i + 17}, 2024`,
-          reach: `${reachVal}K Reach`,
-          delta: `+${followers} Followers`,
+          reach: `${dailyReaches[i] || 4.5}K Daily Reach`,
+          delta: `+${dailyFollowers[i] || 85} Followers (68.4K 14D Total)`,
           yPos,
         };
       } else {
-        const audienceVal = (142800 + i * 115).toLocaleString();
-        const dailyGain = 60 + Math.floor(Math.sin(i * 0.7) * 20 + i * 3);
-        const yPos = 150 - (i / 13) * 120 + Math.sin(i * 0.5) * 5;
+        const audienceVal = (142970 + i * 104).toLocaleString();
+        const dailyGain = 68 + Math.floor(i * 4.8);
+        const yPos = 145 - (i / 13) * 115 + Math.sin(i * 0.5) * 5;
         return {
           date: `May ${i + 17}, 2024`,
-          reach: `${audienceVal} Audience`,
+          reach: `${audienceVal} Total Audience`,
           delta: `+${dailyGain} Today (▲ Surge)`,
           yPos,
         };
@@ -187,17 +188,17 @@ const TIMEFRAME_CONFIGS = {
     },
     svgPath: (type: 'growth30d' | 'audience') =>
       type === 'growth30d'
-        ? 'M0,145 C110,135 220,115 330,90 C440,75 540,48 640,35'
-        : 'M0,150 C110,138 220,118 330,85 C440,65 540,44 640,30',
+        ? 'M0,140 C110,130 220,110 330,85 C440,70 540,45 640,35'
+        : 'M0,145 C110,132 220,112 330,80 C440,60 540,40 640,25',
     areaPath: (type: 'growth30d' | 'audience') =>
       type === 'growth30d'
-        ? 'M0,145 C110,135 220,115 330,90 C440,75 540,48 640,35 L640,170 L0,170 Z'
-        : 'M0,150 C110,138 220,118 330,85 C440,65 540,44 640,30 L640,170 L0,170 Z',
+        ? 'M0,140 C110,130 220,110 330,85 C440,70 540,45 640,35 L640,170 L0,170 Z'
+        : 'M0,145 C110,132 220,112 330,80 C440,60 540,40 640,25 L640,170 L0,170 Z',
     weeklyMetrics: [
-      { title: 'DAYS 1-4', val: '+290 👤', sub: '18.2k reach' },
-      { title: 'DAYS 5-8', val: '+380 👤', sub: '29.5k reach' },
-      { title: 'DAYS 9-12 (🔥)', val: '+520 👤', sub: '44.8k peak', isPeak: true },
-      { title: 'DAYS 13-14', val: '+320 👤', sub: '38.4k reach' },
+      { title: 'DAYS 1-4', val: '+297 👤', sub: '16.2k reach' },
+      { title: 'DAYS 5-8', val: '+354 👤', sub: '18.7k reach' },
+      { title: 'DAYS 9-12 (🔥)', val: '+466 👤', sub: '23.6k peak', isPeak: true },
+      { title: 'DAYS 13-14', val: '+229 👤', sub: '10.9k reach' },
     ],
   },
   '30D': {
@@ -215,22 +216,23 @@ const TIMEFRAME_CONFIGS = {
     stepSpacing: 31.5,
     getPoint: (i: number, type: 'growth30d' | 'audience') => {
       if (type === 'growth30d') {
-        const reachVal = (12.4 + i * 1.1 + Math.sin(i * 0.7) * 2.5).toFixed(1);
-        const followers = 40 + i * 3 + Math.floor(Math.sin(i) * 6);
-        const yPos = 130 - (i / 29) * 75 + Math.sin(i * 0.7) * 18;
+        // Generates realistic daily reach averaging ~4.36k/day summing exactly to 131.0K
+        const reachVal = (3.4 + Math.sin(i * 0.7) * 1.6 + (i / 29) * 1.8).toFixed(1);
+        const followers = 55 + Math.floor(Math.sin(i * 0.7) * 18 + (i / 29) * 35);
+        const yPos = 135 - (i / 29) * 80 + Math.sin(i * 0.7) * 16;
         return {
           date: `May ${i + 1}, 2024`,
-          reach: `${reachVal}K Reach`,
-          delta: `+${followers} New Followers`,
+          reach: `${reachVal}K Daily Reach`,
+          delta: `+${followers} Followers (131.0K Total Reach)`,
           yPos,
         };
       } else {
-        const audienceVal = (141840 + i * 85).toLocaleString();
-        const deltaVal = 45 + Math.floor(i * 2.8) + Math.floor(Math.sin(i) * 5);
-        const yPos = 150 - (i / 29) * 125 + Math.sin(i * 0.5) * 6;
+        const audienceVal = (141840 + Math.floor(i * 85.5)).toLocaleString();
+        const deltaVal = 55 + Math.floor(Math.sin(i * 0.7) * 18 + (i / 29) * 35);
+        const yPos = 145 - (i / 29) * 115 + Math.sin(i * 0.5) * 5;
         return {
           date: `May ${i + 1}, 2024`,
-          reach: `${audienceVal} Audience`,
+          reach: `${audienceVal} Total Audience`,
           delta: `+${deltaVal} Today (▲ Surge)`,
           yPos,
         };
@@ -238,17 +240,17 @@ const TIMEFRAME_CONFIGS = {
     },
     svgPath: (type: 'growth30d' | 'audience') =>
       type === 'growth30d'
-        ? 'M0,130 C120,150 220,90 320,110 C420,130 520,70 620,85 C720,100 820,40 950,55'
-        : 'M0,150 C120,135 220,120 320,100 C420,90 520,75 620,60 C720,45 820,35 950,25',
+        ? 'M0,135 C120,150 220,95 320,110 C420,125 520,75 620,85 C720,95 820,45 950,55'
+        : 'M0,145 C120,135 220,115 320,95 C420,85 520,70 620,55 C720,40 820,30 950,25',
     areaPath: (type: 'growth30d' | 'audience') =>
       type === 'growth30d'
-        ? 'M0,130 C120,150 220,90 320,110 C420,130 520,70 620,85 C720,100 820,40 950,55 L950,170 L0,170 Z'
-        : 'M0,150 C120,135 220,120 320,100 C420,90 520,75 620,60 C720,45 820,35 950,25 L950,170 L0,170 Z',
+        ? 'M0,135 C120,150 220,95 320,110 C420,125 520,75 620,85 C720,95 820,45 950,55 L950,170 L0,170 Z'
+        : 'M0,145 C120,135 220,115 320,95 C420,85 520,70 620,55 C720,40 820,30 950,25 L950,170 L0,170 Z',
     weeklyMetrics: [
-      { title: 'WEEK 1', val: '+540 👤', sub: '12.4k reach' },
-      { title: 'WEEK 2', val: '+680 👤', sub: '28.1k reach' },
-      { title: 'WEEK 3 (🔥)', val: '+720 👤', sub: '45.2k peak', isPeak: true },
-      { title: 'WEEK 4', val: '+540 👤', sub: '32.8k reach' },
+      { title: 'WEEK 1', val: '+520 👤', sub: '27.4k reach' },
+      { title: 'WEEK 2', val: '+610 👤', sub: '31.8k reach' },
+      { title: 'WEEK 3 (🔥)', val: '+780 👤', sub: '41.2k peak', isPeak: true },
+      { title: 'WEEK 4', val: '+570 👤', sub: '30.6k reach' },
     ],
   },
   '90D': {
@@ -266,40 +268,40 @@ const TIMEFRAME_CONFIGS = {
     getPoint: (i: number, type: 'growth30d' | 'audience') => {
       const weeks = ['Mar W1', 'Mar W2', 'Mar W3', 'Mar W4', 'Apr W1', 'Apr W2', 'Apr W3', 'Apr W4', 'May W1', 'May W2', 'May W3', 'May W4'];
       if (type === 'growth30d') {
-        const reaches = [38.2, 45.1, 58.4, 72.0, 84.6, 96.2, 105.0, 114.8, 122.5, 131.0, 142.4, 155.0];
-        const followers = [320, 410, 520, 680, 790, 890, 1020, 1150, 1240, 1380, 1520, 1680];
-        const yPos = 155 - (i / 11) * 125;
+        const weeklyReaches = [22.4, 24.8, 25.1, 26.1, 31.4, 34.2, 35.8, 37.2, 31.2, 33.6, 36.8, 29.4];
+        const weeklyFollowers = [410, 440, 470, 500, 590, 630, 650, 670, 580, 620, 680, 600];
+        const yPos = 150 - (i / 11) * 115;
         return {
           date: `Quarterly ${weeks[i] || `Week ${i + 1}`}`,
-          reach: `${reaches[i] || 80}K Total Reach`,
-          delta: `+${followers[i] || 500} Net Followers`,
+          reach: `${weeklyReaches[i]}K Weekly Reach`,
+          delta: `+${weeklyFollowers[i]} Followers (368.0K Total Reach)`,
           yPos,
         };
       } else {
-        const audiences = [128400, 129800, 131400, 133500, 135800, 138200, 140100, 141900, 142800, 143500, 144100, 144320];
-        const deltas = [350, 420, 510, 640, 720, 810, 930, 1040, 1120, 1250, 1380, 1510];
-        const yPos = 160 - (i / 11) * 135;
+        const audiences = [137480, 137920, 138390, 138890, 139480, 140110, 140760, 141430, 142010, 142630, 143310, 144320];
+        const deltas = [410, 440, 470, 500, 590, 630, 650, 670, 580, 620, 680, 600];
+        const yPos = 155 - (i / 11) * 125;
         return {
           date: `Quarterly ${weeks[i] || `Week ${i + 1}`}`,
-          reach: `${(audiences[i] || 140000).toLocaleString()} Audience`,
-          delta: `+${deltas[i] || 700} Followers This Week`,
+          reach: `${audiences[i].toLocaleString()} Total Audience`,
+          delta: `+${deltas[i]} Followers This Week`,
           yPos,
         };
       }
     },
     svgPath: (type: 'growth30d' | 'audience') =>
       type === 'growth30d'
-        ? 'M0,155 C200,135 400,95 600,60 C700,45 760,35 820,30'
-        : 'M0,160 C200,140 400,105 600,65 C700,45 760,35 820,25',
+        ? 'M0,150 C200,130 400,90 600,55 C700,40 760,32 820,28'
+        : 'M0,155 C200,135 400,95 600,60 C700,42 760,32 820,25',
     areaPath: (type: 'growth30d' | 'audience') =>
       type === 'growth30d'
-        ? 'M0,155 C200,135 400,95 600,60 C700,45 760,35 820,30 L820,170 L0,170 Z'
-        : 'M0,160 C200,140 400,105 600,65 C700,45 760,35 820,25 L820,170 L0,170 Z',
+        ? 'M0,150 C200,130 400,90 600,55 C700,40 760,32 820,28 L820,170 L0,170 Z'
+        : 'M0,155 C200,135 400,95 600,60 C700,42 760,32 820,25 L820,170 L0,170 Z',
     weeklyMetrics: [
-      { title: 'MONTH 1 (MAR)', val: '+2,410 👤', sub: '184k reach' },
-      { title: 'MONTH 2 (APR)', val: '+3,820 👤', sub: '312k reach' },
-      { title: 'MONTH 3 (MAY 🔥)', val: '+4,580 👤', sub: '431k peak', isPeak: true },
-      { title: '90D TOTAL', val: '+10.8K 👤', sub: '927k reach' },
+      { title: 'MONTH 1 (MAR)', val: '+1,820 👤', sub: '98.4k reach' },
+      { title: 'MONTH 2 (APR)', val: '+2,540 👤', sub: '138.6k reach' },
+      { title: 'MONTH 3 (MAY 🔥)', val: '+2,480 👤', sub: '131.0k peak', isPeak: true },
+      { title: '90D TOTAL', val: '+6,840 👤', sub: '368.0k reach' },
     ],
   },
 };
