@@ -883,7 +883,7 @@ export const PlatformGrowthScreen: React.FC<PlatformGrowthScreenProps> = ({
           <View style={styles.jarvisCard}>
             <View style={styles.jarvisAvatarCircle}>
               <Image
-                source={require('../../assets/images/jarvis-ghost-clean.png')}
+                source={require('../../assets/images/jarvis-core-flame.png')}
                 style={{ width: 28, height: 28 }}
                 resizeMode="contain"
               />

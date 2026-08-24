@@ -1251,8 +1251,8 @@ export const ProGrowthScreen: React.FC<ProGrowthScreenProps> = ({
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
               <Text style={styles.jarvisIntelligenceTag}>JARVIS INTELLIGENCE</Text>
               <Image
-                source={require('../../assets/images/jarvis-ghost-clean.png')}
-                style={{ width: 24, height: 24 }}
+                source={require('../../assets/images/jarvis-core-flame.png')}
+                style={{ width: 26, height: 26 }}
                 resizeMode="contain"
               />
             </View>
@@ -2202,8 +2202,8 @@ export const ProGrowthScreen: React.FC<ProGrowthScreenProps> = ({
                 <View style={styles.postJarvisAuditCard}>
                   <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 4 }}>
                     <Image
-                      source={require('../../assets/images/jarvis-ghost-clean.png')}
-                      style={{ width: 18, height: 18 }}
+                      source={require('../../assets/images/jarvis-core-flame.png')}
+                      style={{ width: 20, height: 20 }}
                       resizeMode="contain"
                     />
                     <Text style={styles.postJarvisAuditTag}>JARVIS RETENTION AUDIT</Text>
