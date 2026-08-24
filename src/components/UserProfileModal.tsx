@@ -157,19 +157,19 @@ export const XTwitterRealIcon = ({ size = 18 }: { size?: number }) => (
   </Svg>
 );
 
-// HARMONIOUS PURPLE TOGGLE SWITCH COMPONENT
+// CLEAN LUXURY PURPLE TOGGLE SWITCH COMPONENT
 const HarmoniousSwitch: React.FC<{
   value: boolean;
   onValueChange: (val: boolean) => void;
 }> = ({ value, onValueChange }) => {
-  const switchTranslate = useRef(new Animated.Value(value ? 20 : 2)).current;
+  const switchTranslate = useRef(new Animated.Value(value ? 22 : 2)).current;
 
   useEffect(() => {
     Animated.spring(switchTranslate, {
-      toValue: value ? 20 : 2,
+      toValue: value ? 22 : 2,
       useNativeDriver: true,
-      bounciness: 6,
-      speed: 18,
+      bounciness: 4,
+      speed: 20,
     }).start();
   }, [value]);
 
@@ -207,23 +207,21 @@ const switchStyles = StyleSheet.create({
     justifyContent: 'center',
   },
   switchTrackActive: {
-    backgroundColor: '#582CDB', // Royal Purple
-    borderWidth: 1.5,
-    borderColor: '#F59E0B', // Radiant 24K Gold
+    backgroundColor: '#582CDB', // Clean Royal Purple (No tacky border)
   },
   switchTrackInactive: {
-    backgroundColor: '#E2E8F0', // Neutral Slate
+    backgroundColor: '#E2E8F0', // Clean Neutral Light Slate
   },
   switchThumb: {
     width: 24,
     height: 24,
     borderRadius: 12,
-    backgroundColor: '#FDE68A', // Radiant Gold Thumb
-    shadowColor: '#000',
+    backgroundColor: '#FFFFFF', // Clean Pure White Thumb
+    shadowColor: '#000000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.15,
+    shadowOpacity: 0.18,
     shadowRadius: 3,
-    elevation: 2,
+    elevation: 3,
   },
 });
 
