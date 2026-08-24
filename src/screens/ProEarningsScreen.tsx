@@ -13,7 +13,7 @@ import {
   Modal,
   Dimensions,
 } from 'react-native';
-import Svg, { Path, Circle, Rect } from 'react-native-svg';
+import Svg, { Path, Circle, Rect, Defs, Stop, LinearGradient as SvgLinearGradient } from 'react-native-svg';
 import * as Haptics from 'expo-haptics';
 import { LinearGradient } from 'expo-linear-gradient';
 import { FloatingTabBar, TabType } from '../components/FloatingTabBar';
@@ -1000,6 +1000,346 @@ export const ProEarningsScreen: React.FC<ProEarningsScreenProps> = ({
         <FloatingTabBar activeTab={activeTab} onTabPress={handleTabPress} />
 
         {/* ============================================================ */}
+        {/* MODAL: EXPANDED LIVE EARNINGS & MONETIZATION INTELLIGENCE     */}
+        {/* ============================================================ */}
+        <Modal
+          visible={showExpandedEarningsModal}
+          transparent={true}
+          animationType="fade"
+          onRequestClose={() => setShowExpandedEarningsModal(false)}
+        >
+          <View style={styles.modalOverlay}>
+            <Animated.View style={[styles.modalCardLarge, { maxHeight: '90%', padding: 20, transform: [{ scale: modalPopScale }] }]}>
+              <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 16 }}>
+                {/* Header */}
+                <View style={styles.modalHeaderRow}>
+                  <View style={{ flex: 1, paddingRight: 10 }}>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 2 }}>
+                      <View style={styles.liveGreenPulseDot} />
+                      <Text style={styles.modalTitle}>
+                        {expandedEarningsType === 'netRate'
+                          ? 'Net Revenue Velocity & Payouts'
+                          : expandedEarningsType === 'incomeSource'
+                          ? 'Income Sources Deep Dive'
+                          : expandedEarningsType === 'platformComp'
+                          ? 'Platform RPM & Monetization'
+                          : 'Monthly Earnings Trend & Forecast'}
+                      </Text>
+                    </View>
+                    <Text style={styles.modalSubtitle}>
+                      {expandedEarningsType === 'netRate'
+                        ? 'Live daily creator payout stream • May 2024'
+                        : expandedEarningsType === 'incomeSource'
+                        ? 'Contract allocation, deal sizes & client volume'
+                        : expandedEarningsType === 'platformComp'
+                        ? 'Monetization yield & deliverable volume by channel'
+                        : 'Historical trajectory & annualized run-rate forecast'}
+                    </Text>
+                  </View>
+                  <Pressable onPress={() => setShowExpandedEarningsModal(false)} style={styles.modalCloseCircle} hitSlop={8}>
+                    <Text style={styles.modalCloseCross}>✕</Text>
+                  </Pressable>
+                </View>
+
+                {/* TIMEFRAME PILL SELECTOR */}
+                <View style={styles.timeframePillRow}>
+                  {(['7D', '14D', '30D', '90D'] as const).map((tf) => {
+                    const isActive = earningsTimeframe === tf;
+                    return (
+                      <Pressable
+                        key={tf}
+                        style={[styles.timeframePill, isActive && styles.timeframePillActive]}
+                        onPress={() => {
+                          if (Platform.OS !== 'web') {
+                            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                          }
+                          setEarningsTimeframe(tf);
+                          setSelectedEarningsDayIndex(
+                            tf === '7D' ? 6 : tf === '14D' ? 13 : tf === '90D' ? 11 : 29
+                          );
+                        }}
+                      >
+                        <Text style={[styles.timeframePillText, isActive && styles.timeframePillTextActive]}>
+                          {tf}
+                        </Text>
+                      </Pressable>
+                    );
+                  })}
+                </View>
+
+                {/* ACTIVE LIVE INSPECTION BANNER */}
+                {(() => {
+                  const curCfg = (EARNINGS_TIMEFRAME_CONFIGS as any)[earningsTimeframe] || (EARNINGS_TIMEFRAME_CONFIGS as any)['30D'];
+
+                  if (expandedEarningsType === 'incomeSource') {
+                    const src = curCfg.sourcesSummary[selectedSourceIndex] || curCfg.sourcesSummary[0];
+                    return (
+                      <View style={styles.graphActivePointCard}>
+                        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', gap: 10 }}>
+                          <View style={{ flex: 1, minWidth: 0 }}>
+                            <Text style={styles.graphActivePointDate} numberOfLines={1}>
+                              {src.icon} {src.name}
+                            </Text>
+                            <Text style={styles.graphActivePointSub} numberOfLines={1}>
+                              {src.avgDeal} • {src.clients}
+                            </Text>
+                          </View>
+                          <View style={{ alignItems: 'flex-end', flexShrink: 0 }}>
+                            <Text style={[styles.graphActivePointValue, { color: src.color }]} numberOfLines={1}>
+                              {src.amount} Net
+                            </Text>
+                            <Text style={styles.graphActivePointDelta} numberOfLines={1}>
+                              {src.pct} of {earningsTimeframe} Revenue
+                            </Text>
+                          </View>
+                        </View>
+                      </View>
+                    );
+                  }
+
+                  if (expandedEarningsType === 'platformComp') {
+                    const plat = curCfg.platformSummary[selectedPlatformIndex] || curCfg.platformSummary[0];
+                    return (
+                      <View style={styles.graphActivePointCard}>
+                        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', gap: 10 }}>
+                          <View style={{ flex: 1, minWidth: 0 }}>
+                            <Text style={styles.graphActivePointDate} numberOfLines={1}>
+                              {plat.name} Yield
+                            </Text>
+                            <Text style={styles.graphActivePointSub} numberOfLines={1}>
+                              {plat.rpm} • {plat.deals}
+                            </Text>
+                          </View>
+                          <View style={{ alignItems: 'flex-end', flexShrink: 0 }}>
+                            <Text style={[styles.graphActivePointValue, { color: '#582CDB' }]} numberOfLines={1}>
+                              {plat.amount} Net
+                            </Text>
+                            <Text style={styles.graphActivePointDelta} numberOfLines={1}>
+                              {plat.pct} Share ({earningsTimeframe})
+                            </Text>
+                          </View>
+                        </View>
+                      </View>
+                    );
+                  }
+
+                  if (expandedEarningsType === 'monthlyTrend') {
+                    return (
+                      <View style={styles.graphActivePointCard}>
+                        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', gap: 10 }}>
+                          <View style={{ flex: 1, minWidth: 0 }}>
+                            <Text style={styles.graphActivePointDate} numberOfLines={1}>
+                              🚀 Trajectory: {curCfg.monthlyForecast.pacing}
+                            </Text>
+                            <Text style={styles.graphActivePointSub} numberOfLines={1}>
+                              Next Month Proj: {curCfg.monthlyForecast.forecastJun}
+                            </Text>
+                          </View>
+                          <View style={{ alignItems: 'flex-end', flexShrink: 0 }}>
+                            <Text style={[styles.graphActivePointValue, { color: '#10B981' }]} numberOfLines={1}>
+                              {curCfg.monthlyForecast.annualRunRate}
+                            </Text>
+                            <Text style={styles.graphActivePointDelta} numberOfLines={1}>
+                              Annualized Run-Rate
+                            </Text>
+                          </View>
+                        </View>
+                      </View>
+                    );
+                  }
+
+                  // Default Net Rate
+                  const safeIdx = Math.min(selectedEarningsDayIndex, curCfg.daysCount - 1);
+                  const activePt = curCfg.getPoint(safeIdx);
+
+                  return (
+                    <View style={styles.graphActivePointCard}>
+                      <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', gap: 10 }}>
+                        <View style={{ flex: 1, minWidth: 0 }}>
+                          <Text style={styles.graphActivePointDate} numberOfLines={1}>
+                            📅 {activePt.date}
+                          </Text>
+                          <Text style={styles.graphActivePointSub} numberOfLines={1}>
+                            {activePt.sub}
+                          </Text>
+                        </View>
+                        <View style={{ alignItems: 'flex-end', flexShrink: 0 }}>
+                          <Text style={[styles.graphActivePointValue, { color: '#582CDB' }]} numberOfLines={1}>
+                            {activePt.amount}
+                          </Text>
+                          <Text style={styles.graphActivePointDelta} numberOfLines={1}>
+                            {curCfg.netRateSummary.margin}
+                          </Text>
+                        </View>
+                      </View>
+                    </View>
+                  );
+                })()}
+
+                {/* HORIZONTAL SCROLLABLE LIVE GRAPH VIEWPORT */}
+                {(() => {
+                  const curCfg = (EARNINGS_TIMEFRAME_CONFIGS as any)[earningsTimeframe] || (EARNINGS_TIMEFRAME_CONFIGS as any)['30D'];
+                  const vWidth = curCfg.viewportWidth;
+                  const safeIdx = Math.min(selectedEarningsDayIndex, curCfg.daysCount - 1);
+
+                  return (
+                    <View style={styles.horizontalGraphViewport}>
+                      <ScrollView
+                        horizontal={true}
+                        showsHorizontalScrollIndicator={true}
+                        bounces={true}
+                        contentContainerStyle={styles.horizontalGraphScrollContent}
+                      >
+                        <View style={{ width: vWidth, height: 210, position: 'relative' }}>
+                          <Svg width={vWidth} height={190} viewBox={`0 0 ${vWidth} 190`}>
+                            <Defs>
+                              <SvgLinearGradient id="earnWaveGrad" x1="0" y1="0" x2="0" y2="1">
+                                <Stop offset="0" stopColor="#582CDB" stopOpacity="0.38" />
+                                <Stop offset="1" stopColor="#582CDB" stopOpacity="0.0" />
+                              </SvgLinearGradient>
+                            </Defs>
+
+                            {/* Grid Lines */}
+                            <Path d={`M0,35 L${vWidth},35`} stroke="#F1F5F9" strokeWidth="1" strokeDasharray="4,4" />
+                            <Path d={`M0,80 L${vWidth},80`} stroke="#F1F5F9" strokeWidth="1" strokeDasharray="4,4" />
+                            <Path d={`M0,125 L${vWidth},125`} stroke="#F1F5F9" strokeWidth="1" strokeDasharray="4,4" />
+                            <Path d={`M0,170 L${vWidth},170`} stroke="#E2E8F0" strokeWidth="1.5" />
+
+                            {/* Area Fill */}
+                            <Path d={curCfg.areaPath} fill="url(#earnWaveGrad)" />
+
+                            {/* Line Curve */}
+                            <Path d={curCfg.svgPath} fill="none" stroke="#582CDB" strokeWidth="3.5" strokeLinecap="round" />
+                          </Svg>
+
+                          {/* Touchpoints */}
+                          <View style={styles.interactiveNodesOverlay}>
+                            {Array.from({ length: curCfg.daysCount }, (_, i) => {
+                              const isSelected = safeIdx === i;
+                              const pt = curCfg.getPoint(i);
+
+                              return (
+                                <Pressable
+                                  key={i}
+                                  style={[
+                                    styles.interactiveGraphNode,
+                                    {
+                                      left: i * curCfg.stepSpacing + 6,
+                                      top: pt.yPos - 10,
+                                    },
+                                  ]}
+                                  onPress={() => {
+                                    if (Platform.OS !== 'web') {
+                                      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                                    }
+                                    setSelectedEarningsDayIndex(i);
+                                  }}
+                                  hitSlop={8}
+                                >
+                                  <View
+                                    style={[
+                                      styles.nodeCircleDot,
+                                      isSelected && styles.nodeCircleDotSelected,
+                                      { backgroundColor: isSelected ? '#F59E0B' : '#582CDB' },
+                                    ]}
+                                  />
+                                  {isSelected && <View style={styles.nodeSelectedGlowRing} />}
+                                </Pressable>
+                              );
+                            })}
+                          </View>
+
+                          {/* X-Axis Date Labels */}
+                          <View style={styles.xAxisLabelsRow}>
+                            {curCfg.labels.map((lbl: any, lIdx: number) => (
+                              <Text key={lIdx} style={[styles.xAxisLabelText, { left: lbl.x }]}>
+                                {lbl.text}
+                              </Text>
+                            ))}
+                          </View>
+                        </View>
+                      </ScrollView>
+                    </View>
+                  );
+                })()}
+
+                {/* DYNAMIC TIMEFRAME-REACTIVE BREAKDOWN UNDER GRAPH */}
+                {(() => {
+                  const curCfg = (EARNINGS_TIMEFRAME_CONFIGS as any)[earningsTimeframe] || (EARNINGS_TIMEFRAME_CONFIGS as any)['30D'];
+
+                  return (
+                    <View style={styles.audienceCleanBottomContainer}>
+                      {/* Key Stats Duo */}
+                      <View style={styles.audienceStatsDuoRow}>
+                        <View style={styles.audienceStatDuoCard}>
+                          <Text style={styles.audienceStatDuoLabel}>TOTAL NET EARNINGS</Text>
+                          <Text style={[styles.audienceStatDuoVal, { color: '#582CDB' }]}>
+                            {curCfg.netRateSummary.total}
+                          </Text>
+                          <Text style={styles.audienceStatDuoSub}>{curCfg.netRateSummary.delta}</Text>
+                        </View>
+                        <View style={styles.audienceStatDuoCard}>
+                          <Text style={styles.audienceStatDuoLabel}>DAILY AVERAGE</Text>
+                          <Text style={[styles.audienceStatDuoVal, { color: '#10B981' }]}>
+                            {curCfg.netRateSummary.dailyAvg}
+                          </Text>
+                          <Text style={styles.audienceStatDuoSub}>{curCfg.netRateSummary.margin}</Text>
+                        </View>
+                      </View>
+
+                      {/* Sources / Platform Rows */}
+                      <View style={styles.audienceChannelsCard}>
+                        <Text style={styles.audienceChannelsTitle}>REVENUE STREAMS ({earningsTimeframe})</Text>
+
+                        {curCfg.sourcesSummary.map((s: any, sIdx: number) => (
+                          <Pressable
+                            key={sIdx}
+                            style={[styles.audienceChannelRow, { paddingVertical: 4 }]}
+                            onPress={() => {
+                              if (Platform.OS !== 'web') Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                              setSelectedSourceIndex(sIdx);
+                            }}
+                          >
+                            <View style={{ width: 28, height: 28, borderRadius: 8, backgroundColor: '#FAF8F5', justifyContent: 'center', alignItems: 'center' }}>
+                              <Text style={{ fontSize: 16 }}>{s.icon}</Text>
+                            </View>
+                            <View style={{ flex: 1, marginLeft: 10 }}>
+                              <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 4 }}>
+                                <Text style={styles.audienceChannelName}>{s.name}</Text>
+                                <Text style={styles.audienceChannelVal}>{s.amount} <Text style={styles.audienceChannelPct}>({s.pct})</Text></Text>
+                              </View>
+                              <View style={styles.audienceChannelTrackBg}>
+                                <View style={[styles.audienceChannelTrackFill, { width: s.pct, backgroundColor: s.color }]} />
+                              </View>
+                            </View>
+                          </Pressable>
+                        ))}
+                      </View>
+
+                      {/* Clean Insight Callout */}
+                      <View style={styles.audienceInsightCallout}>
+                        <Text style={styles.audienceInsightCalloutText}>
+                          ⚡ <Text style={{ fontWeight: '800', color: '#582CDB' }}>Monetization Insight ({earningsTimeframe}):</Text> {curCfg.netRateSummary.insight}
+                        </Text>
+                      </View>
+                    </View>
+                  );
+                })()}
+
+                {/* Close Button */}
+                <Pressable
+                  style={[styles.modalFullBtn, { marginTop: 12, backgroundColor: '#FAF8F5', borderWidth: 1, borderColor: '#E2E8F0' }]}
+                  onPress={() => setShowExpandedEarningsModal(false)}
+                >
+                  <Text style={[styles.modalFullBtnText, { color: '#64748B' }]}>Close Expanded View</Text>
+                </Pressable>
+              </ScrollView>
+            </Animated.View>
+          </View>
+        </Modal>
+
+
+        {/* ============================================================ */}
         {/* MODAL 1: VIEW PAYOUTS MODAL                                  */}
         {/* ============================================================ */}
         <Modal
@@ -1670,6 +2010,44 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
     borderRadius: 24,
     overflow: 'hidden',
+  },
+  modalHeaderRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    marginBottom: 12,
+  },
+  modalSubtitle: {
+    fontSize: 12,
+    color: '#64748B',
+    marginTop: 2,
+  },
+  modalCloseCircle: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: '#FAF8F5',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#EFECE6',
+  },
+  modalCloseCross: {
+    fontSize: 14,
+    fontWeight: '900',
+    color: '#64748B',
+  },
+  modalFullBtn: {
+    height: 44,
+    backgroundColor: '#582CDB',
+    borderRadius: 12,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalFullBtnText: {
+    fontSize: 13,
+    fontWeight: '800',
+    color: '#FFFFFF',
   },
 
   heroIncomeCard: {
