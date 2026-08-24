@@ -1,3 +1,4 @@
+import { SocialBrandIcon } from './SocialBrandIcon';
 import React, { useState, useRef, useEffect } from 'react';
 import {
   StyleSheet,

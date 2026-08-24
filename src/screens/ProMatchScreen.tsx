@@ -1,3 +1,4 @@
+import { SocialBrandIcon } from '../components/SocialBrandIcon';
 import React, { useState, useRef, useEffect } from 'react';
 import {
   StyleSheet,
@@ -72,6 +73,7 @@ interface CreatorCardData {
   categoryTags: string[];
   streak: number;
   platformsText: string;
+  platforms?: string[];
   matchScore: number;
   activeStatus: string;
   isTracked: boolean;
@@ -98,7 +100,8 @@ const DECK_CREATORS: CreatorCardData[] = [
     tags: ['🌿 Travel', '✨ Lifestyle', '🎥 4K Vlogs'],
     categoryTags: ['Lifestyle', 'Travel', 'Storytelling', 'Available This Week'],
     streak: 44,
-    platformsText: '📷 + ▶️',
+    platformsText: 'IG + YT',
+    platforms: ['instagram', 'youtube'],
     matchScore: 96,
     activeStatus: 'Active today (Posted 2h ago)',
     isTracked: true,
@@ -133,7 +136,8 @@ const DECK_CREATORS: CreatorCardData[] = [
     tags: ['⚡ AI Systems', '💻 Tech Reviews', '📈 Productivity'],
     categoryTags: ['Tech', 'AI Systems', 'Productivity', 'Available This Week'],
     streak: 52,
-    platformsText: '𝕏 + ▶️',
+    platformsText: 'X + YT',
+    platforms: ['x', 'youtube'],
     matchScore: 94,
     activeStatus: 'Active today (Posted 4h ago)',
     isTracked: false,
@@ -168,7 +172,8 @@ const DECK_CREATORS: CreatorCardData[] = [
     tags: ['💪 Fitness', '🥑 Wellness', '⏰ Routine'],
     categoryTags: ['Fitness', 'Wellness', 'Daily Routine', 'Available This Week'],
     streak: 39,
-    platformsText: '📷 + 🎵',
+    platformsText: 'IG + TT',
+    platforms: ['instagram', 'tiktok'],
     matchScore: 91,
     activeStatus: 'Active today (Posted 1h ago)',
     isTracked: false,
@@ -203,7 +208,8 @@ const DECK_CREATORS: CreatorCardData[] = [
     tags: ['🚀 Monetization', '📊 Case Studies', '💡 SaaS'],
     categoryTags: ['Business', 'Monetization', 'Growth', 'Available This Week'],
     streak: 61,
-    platformsText: '💼 + 𝕏',
+    platformsText: 'LI + X',
+    platforms: ['linkedin', 'x'],
     matchScore: 95,
     activeStatus: 'Active today (Posted 5h ago)',
     isTracked: false,
@@ -1092,10 +1098,19 @@ export const ProMatchScreen: React.FC<ProMatchScreenProps> = ({
                           </View>
                         </View>
 
-                        {/* Role & Location */}
-                        <Text style={styles.creatorRoleLocationText}>
-                          {currentCreator.role} • {currentCreator.followers} • 📍 {currentCreator.location}
-                        </Text>
+                        {/* Role, Platforms & Location */}
+                        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 2 }}>
+                          <Text style={[styles.creatorRoleLocationText, { flex: 1 }]} numberOfLines={1}>
+                            {currentCreator.role} • {currentCreator.followers} • 📍 {currentCreator.location}
+                          </Text>
+                          {currentCreator.platforms && (
+                            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5, marginLeft: 6 }}>
+                              {currentCreator.platforms.map((p, pIdx) => (
+                                <SocialBrandIcon key={pIdx} platform={p} size={16} />
+                              ))}
+                            </View>
+                          )}
+                        </View>
 
                         {/* Bio */}
                         <Text style={styles.creatorBioText} numberOfLines={2}>
