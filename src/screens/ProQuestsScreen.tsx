@@ -329,7 +329,7 @@ export const ProQuestsScreen: React.FC<ProQuestsScreenProps> = ({
               hitSlop={8}
             >
               <Image
-                source={userProfile?.avatarSource || require('../../assets/images/jarvis-core-flame.png')}
+                source={userProfile?.avatarSource || require('../../assets/images/jarvis-ghost-clean.png')}
                 style={styles.headerCustomAvatarImage}
                 resizeMode="cover"
               />

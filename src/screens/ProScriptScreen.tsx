@@ -356,7 +356,7 @@ export const ProScriptScreen: React.FC<ProScriptScreenProps> = ({
               hitSlop={8}
             >
               <Image
-                source={userProfile?.avatarSource || require('../../assets/images/jarvis-core-flame.png')}
+                source={userProfile?.avatarSource || require('../../assets/images/jarvis-ghost-clean.png')}
                 style={styles.headerUserAvatar}
                 resizeMode="cover"
               />

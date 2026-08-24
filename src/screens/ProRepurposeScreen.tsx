@@ -337,7 +337,7 @@ export const ProRepurposeScreen: React.FC<ProRepurposeScreenProps> = ({
             hitSlop={8}
           >
             <Image
-              source={userProfile?.avatarSource || require('../../assets/images/jarvis-core-flame.png')}
+              source={userProfile?.avatarSource || require('../../assets/images/jarvis-ghost-clean.png')}
               style={styles.topAvatarImg}
               resizeMode="cover"
             />

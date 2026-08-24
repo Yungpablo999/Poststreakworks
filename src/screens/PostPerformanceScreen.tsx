@@ -262,7 +262,7 @@ export const PostPerformanceScreen: React.FC<PostPerformanceScreenProps> = ({
               hitSlop={8}
             >
               <Image
-                source={userProfile?.avatarSource || require('../../assets/images/jarvis-core-flame.png')}
+                source={userProfile?.avatarSource || require('../../assets/images/jarvis-ghost-clean.png')}
                 style={styles.headerProfileImg}
                 resizeMode="cover"
               />
@@ -319,7 +319,7 @@ export const PostPerformanceScreen: React.FC<PostPerformanceScreenProps> = ({
               <View style={styles.videoMetaContainer}>
                 <View style={styles.videoAuthorRow}>
                   <Image
-                    source={userProfile?.avatarSource || require('../../assets/images/jarvis-core-flame.png')}
+                    source={userProfile?.avatarSource || require('../../assets/images/jarvis-ghost-clean.png')}
                     style={styles.videoAuthorAvatar}
                   />
                   <Text style={styles.videoAuthorName}>
