@@ -1070,8 +1070,8 @@ export const ProMatchScreen: React.FC<ProMatchScreenProps> = ({
                       <View style={styles.cardBottomContent}>
                         {/* Name & Streak Row with Priority Crown */}
                         <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
-                          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, flex: 1 }}>
-                            <Text style={styles.creatorNameText}>{currentCreator.name}</Text>
+                          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, flex: 1, marginRight: 8 }}>
+                            <Text style={[styles.creatorNameText, { flexShrink: 1 }]} numberOfLines={1}>{currentCreator.name}</Text>
                             {currentCreator.isPriorityCrown && (
                               <View style={styles.crownEmblemBox}>
                                 <Text style={{ fontSize: 14 }}>👑</Text>
@@ -1082,7 +1082,7 @@ export const ProMatchScreen: React.FC<ProMatchScreenProps> = ({
                             </View>
                           </View>
 
-                          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, flexShrink: 0 }}>
                             {/* Streak Pill */}
                             <View style={styles.streakPill}>
                               <Text style={styles.streakPillText}>🔥 {currentCreator.streak}d</Text>
@@ -1938,6 +1938,7 @@ const styles = StyleSheet.create({
   },
   container: {
     flex: 1,
+    width: '100%',
     backgroundColor: '#FAF8F5',
   },
   btnPressed: {

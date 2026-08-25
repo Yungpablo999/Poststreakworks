@@ -790,6 +790,7 @@ const styles = StyleSheet.create({
   },
   container: {
     flex: 1,
+    width: '100%',
     backgroundColor: '#FAF9F6',
   },
   // 1. TOP HEADER APP BAR
@@ -888,6 +889,7 @@ const styles = StyleSheet.create({
   // 2. MAIN SCROLLABLE CONTENT
   scrollView: {
     flex: 1,
+    width: '100%',
   },
   scrollContent: {
     paddingHorizontal: 20,

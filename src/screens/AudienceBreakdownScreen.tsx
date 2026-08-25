@@ -1446,6 +1446,7 @@ const styles = StyleSheet.create({
   },
   container: {
     flex: 1,
+    width: '100%',
     backgroundColor: '#FAF8F5',
   },
   btnPressed: {
@@ -1555,6 +1556,7 @@ const styles = StyleSheet.create({
   // SCROLL BODY
   scrollView: {
     flex: 1,
+    width: '100%',
   },
   scrollContent: {
     paddingHorizontal: 20,

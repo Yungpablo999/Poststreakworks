@@ -1064,8 +1064,8 @@ export const MatchScreen: React.FC<MatchScreenProps> = ({
                       style={styles.tinderCardGradient}
                     >
                       <View style={styles.tinderCardHeaderRow}>
-                        <View style={styles.nameVerifiedRow}>
-                          <Text style={styles.tinderCreatorName}>{currentCreator.name}</Text>
+                        <View style={[styles.nameVerifiedRow, { flex: 1, marginRight: 8 }]}>
+                          <Text style={[styles.tinderCreatorName, { flexShrink: 1 }]} numberOfLines={1}>{currentCreator.name}</Text>
                           <View style={styles.verifiedCheckBadge}>
                             <Text style={styles.verifiedCheckText}>✓</Text>
                           </View>
@@ -1956,6 +1956,7 @@ const styles = StyleSheet.create({
   },
   container: {
     flex: 1,
+    width: '100%',
     backgroundColor: '#FAF9F6',
   },
   // 1. TOP HEADER APP BAR
@@ -2054,6 +2055,7 @@ const styles = StyleSheet.create({
   // 2. MAIN SCROLLABLE CONTENT
   scrollView: {
     flex: 1,
+    width: '100%',
   },
   scrollContent: {
     paddingHorizontal: 20,

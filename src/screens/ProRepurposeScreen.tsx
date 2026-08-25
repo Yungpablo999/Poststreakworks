@@ -1031,6 +1031,7 @@ export const ProRepurposeScreen: React.FC<ProRepurposeScreenProps> = ({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    width: '100%',
     backgroundColor: '#F7F5F0',
   },
   btnPressed: {
