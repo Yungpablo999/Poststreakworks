@@ -424,7 +424,12 @@ export const IdeaDetailScreen: React.FC<IdeaDetailScreenProps> = ({
             </View>
 
             {/* Tags Row */}
-            <View style={styles.ideaTagsRow}>
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={styles.ideaTagsRow}
+              style={{ flexGrow: 0, marginBottom: 14 }}
+            >
               <View style={styles.ideaTagPill}>
                 <Text style={styles.ideaTagPillText}>Personal Lesson</Text>
               </View>
@@ -434,7 +439,7 @@ export const IdeaDetailScreen: React.FC<IdeaDetailScreenProps> = ({
               <View style={styles.ideaTagPill}>
                 <Text style={styles.ideaTagPillText}>High Save Potential</Text>
               </View>
-            </View>
+            </ScrollView>
 
             {/* Streak Protection Ribbon */}
             <View style={styles.streakRibbonBanner}>
@@ -1252,15 +1257,16 @@ const styles = StyleSheet.create({
   },
   ideaTagsRow: {
     flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 6,
-    marginBottom: 14,
+    alignItems: 'center',
+    gap: 8,
+    paddingHorizontal: 2,
+    paddingVertical: 2,
   },
   ideaTagPill: {
     backgroundColor: '#EDE9FE',
-    paddingVertical: 4,
-    paddingHorizontal: 9,
-    borderRadius: 8,
+    paddingVertical: 4.5,
+    paddingHorizontal: 10,
+    borderRadius: 100,
   },
   ideaTagPillText: {
     fontSize: 11,
