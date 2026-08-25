@@ -740,12 +740,7 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
               Turn this idea into a short-form post for your selected platforms.
             </Text>
 
-            <ScrollView
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              contentContainerStyle={styles.ideaTagsRow}
-              style={{ flexGrow: 0 }}
-            >
+            <View style={styles.ideaTagsRow}>
               <View style={styles.ideaTagPill}>
                 <Text style={styles.ideaTagPillText}>Personal Lesson</Text>
               </View>
@@ -755,7 +750,7 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
               <View style={styles.streakSaverPill}>
                 <Text style={styles.streakSaverPillText}>Streak Saver</Text>
               </View>
-            </ScrollView>
+            </View>
           </View>
 
           {/* 2. CHOOSE PLATFORMS WITH MORE PLATFORMS TRIGGER */}
@@ -1867,29 +1862,27 @@ const styles = StyleSheet.create({
   ideaTagsRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
-    paddingHorizontal: 2,
-    paddingVertical: 2,
+    gap: 5,
   },
   ideaTagPill: {
     backgroundColor: '#EDE9FE',
-    paddingVertical: 4.5,
-    paddingHorizontal: 10,
+    paddingVertical: 3.5,
+    paddingHorizontal: 7,
     borderRadius: 100,
   },
   ideaTagPillText: {
-    fontSize: 11,
+    fontSize: 10,
     fontWeight: '700',
     color: '#6D28D9',
   },
   streakSaverPill: {
     backgroundColor: '#582CDB',
-    paddingVertical: 4.5,
-    paddingHorizontal: 10,
+    paddingVertical: 3.5,
+    paddingHorizontal: 7,
     borderRadius: 100,
   },
   streakSaverPillText: {
-    fontSize: 11,
+    fontSize: 10,
     fontWeight: '800',
     color: '#FFFFFF',
   },

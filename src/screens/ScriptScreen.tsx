@@ -554,12 +554,7 @@ ${selectedCtaText}`;
 
               <Text style={styles.selectedIdeaTitle}>&ldquo;{ideaTitle}&rdquo;</Text>
 
-              <ScrollView
-                horizontal
-                showsHorizontalScrollIndicator={false}
-                contentContainerStyle={styles.selectedIdeaTagsRow}
-                style={{ flexGrow: 0 }}
-              >
+              <View style={styles.selectedIdeaTagsRow}>
                 <View style={styles.ideaTagPill}>
                   <Text style={styles.ideaTagPillText}>Personal Lesson</Text>
                 </View>
@@ -569,7 +564,7 @@ ${selectedCtaText}`;
                 <View style={styles.streakSaverPill}>
                   <Text style={styles.streakSaverPillText}>Streak Saver</Text>
                 </View>
-              </ScrollView>
+              </View>
             </View>
 
             {/* 2. SCRIPT PHASE BUTTONS (EACH OPENS A FULL DEDICATED POP-UP MODAL) */}
@@ -1463,31 +1458,29 @@ const styles = StyleSheet.create({
   selectedIdeaTagsRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
-    paddingHorizontal: 2,
-    paddingVertical: 2,
+    gap: 5,
   },
   ideaTagPill: {
     backgroundColor: '#F8FAFC',
     borderWidth: 1,
     borderColor: '#EFECE6',
-    paddingVertical: 4.5,
-    paddingHorizontal: 10,
+    paddingVertical: 3.5,
+    paddingHorizontal: 7,
     borderRadius: 100,
   },
   ideaTagPillText: {
-    fontSize: 11,
+    fontSize: 10,
     fontWeight: '700',
     color: '#475569',
   },
   streakSaverPill: {
     backgroundColor: '#EDE9FE',
-    paddingVertical: 4.5,
-    paddingHorizontal: 10,
+    paddingVertical: 3.5,
+    paddingHorizontal: 7,
     borderRadius: 100,
   },
   streakSaverPillText: {
-    fontSize: 11,
+    fontSize: 10,
     fontWeight: '800',
     color: '#6D28D9',
   },

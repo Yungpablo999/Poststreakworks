@@ -572,12 +572,7 @@ export const ContentAngleScreen: React.FC<ContentAngleScreenProps> = ({
             </View>
 
             {/* Tags Row */}
-            <ScrollView
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              contentContainerStyle={styles.heroTagsRow}
-              style={{ flexGrow: 0, marginBottom: 16 }}
-            >
+            <View style={styles.heroTagsRow}>
               <View style={styles.heroTagPill}>
                 <Text style={styles.heroTagPillText}>Personal Lesson</Text>
               </View>
@@ -587,7 +582,7 @@ export const ContentAngleScreen: React.FC<ContentAngleScreenProps> = ({
               <View style={styles.heroSaveTagPill}>
                 <Text style={styles.heroSaveTagPillText}>High Save Potential</Text>
               </View>
-            </ScrollView>
+            </View>
 
             {/* Action Row: Use Idea + Bookmark */}
             <View style={styles.heroActionRow}>
@@ -1203,31 +1198,30 @@ const styles = StyleSheet.create({
   heroTagsRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
-    paddingHorizontal: 2,
-    paddingVertical: 2,
+    gap: 5,
+    marginBottom: 16,
   },
   heroTagPill: {
     backgroundColor: '#FFFFFF',
     borderWidth: 1,
     borderColor: '#EDE9FE',
-    paddingVertical: 4.5,
-    paddingHorizontal: 10,
+    paddingVertical: 3.5,
+    paddingHorizontal: 7,
     borderRadius: 100,
   },
   heroTagPillText: {
-    fontSize: 11,
+    fontSize: 10,
     fontWeight: '700',
     color: '#475569',
   },
   heroSaveTagPill: {
     backgroundColor: '#EDE9FE',
-    paddingVertical: 4.5,
-    paddingHorizontal: 10,
+    paddingVertical: 3.5,
+    paddingHorizontal: 7,
     borderRadius: 100,
   },
   heroSaveTagPillText: {
-    fontSize: 11,
+    fontSize: 10,
     fontWeight: '800',
     color: '#6D28D9',
   },
