@@ -943,7 +943,12 @@ export const ProMatchScreen: React.FC<ProMatchScreenProps> = ({
           {segmentTab === 'deck' && (
             <View style={{ marginTop: 4 }}>
               {/* FILTER PILLS ROW */}
-              <View style={styles.filterPillsRow}>
+              <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={styles.filterPillsRow}
+                style={{ flexGrow: 0, marginTop: 2, marginBottom: 12 }}
+              >
                 {[
                   { id: 'priority', label: '👑 Priority Matches' },
                   { id: 'niche', label: 'Same Niche' },
@@ -969,7 +974,7 @@ export const ProMatchScreen: React.FC<ProMatchScreenProps> = ({
                     </Pressable>
                   );
                 })}
-              </View>
+              </ScrollView>
 
               {currentCreator ? (
                 <>
@@ -1136,8 +1141,8 @@ export const ProMatchScreen: React.FC<ProMatchScreenProps> = ({
 
                   {/* Gesture Guide Bar */}
                   <View style={styles.gestureGuideBar}>
-                    <Text style={styles.gestureGuideText}>
-                      👈 Swipe left to decline  •  👆 Up to track  •  Right to accept 👉
+                    <Text style={styles.gestureGuideText} numberOfLines={1}>
+                      👈 Left decline  •  👆 Up track  •  Right match 👉
                     </Text>
                   </View>
 
@@ -2498,17 +2503,21 @@ const styles = StyleSheet.create({
   // GESTURE GUIDE
   gestureGuideBar: {
     backgroundColor: '#FAF8F5',
-    paddingVertical: 9,
-    borderRadius: 14,
+    paddingVertical: 7,
+    paddingHorizontal: 12,
+    borderRadius: 100,
     alignItems: 'center',
+    justifyContent: 'center',
     marginTop: 10,
     borderWidth: 1,
     borderColor: '#EFECE6',
+    width: '100%',
   },
   gestureGuideText: {
-    fontSize: 11,
-    fontWeight: '800',
+    fontSize: 10.5,
+    fontWeight: '700',
     color: '#64748B',
+    textAlign: 'center',
   },
 
   // METRICS ROW (FOLLOWERS, STREAK, PLATFORM)

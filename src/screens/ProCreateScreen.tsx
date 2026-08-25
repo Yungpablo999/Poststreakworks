@@ -733,13 +733,13 @@ export const ProCreateScreen: React.FC<ProCreateScreenProps> = ({
           {/* ============================================================ */}
           <View style={styles.voiceStudioMainCard}>
             <View style={styles.voiceCardHeaderRow}>
-              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, flex: 1, marginRight: 8 }}>
                 <View style={styles.voiceStarIconBox}>
-                  <Text style={{ fontSize: 18 }}>🎙️</Text>
+                  <Text style={{ fontSize: 16 }}>🎙️</Text>
                 </View>
-                <View>
+                <View style={{ flex: 1 }}>
                   <Text style={styles.voiceCardTitle}>Voice Studio</Text>
-                  <Text style={styles.voiceCardSub}>Create AI voice from your script</Text>
+                  <Text style={styles.voiceCardSub} numberOfLines={1}>Create AI voice from script</Text>
                 </View>
               </View>
 
@@ -751,7 +751,7 @@ export const ProCreateScreen: React.FC<ProCreateScreenProps> = ({
                 }}
               >
                 <Text style={{ fontSize: 11 }}>🎚️</Text>
-                <Text style={styles.voicePresetsText}>VOICE PRESETS</Text>
+                <Text style={styles.voicePresetsText}>PRESETS</Text>
               </Pressable>
             </View>
 
@@ -1750,12 +1750,13 @@ const styles = StyleSheet.create({
     backgroundColor: '#F8FAFC',
     borderWidth: 1,
     borderColor: '#EFECE6',
-    paddingHorizontal: 8,
+    paddingHorizontal: 9,
     paddingVertical: 5,
     borderRadius: 8,
+    flexShrink: 0,
   },
   voicePresetsText: {
-    fontSize: 9,
+    fontSize: 9.5,
     fontWeight: '700',
     color: '#475569',
   },

@@ -1909,24 +1909,27 @@ const styles = StyleSheet.create({
   legendRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
+    alignItems: 'center',
+    flexWrap: 'wrap',
+    gap: 8,
     marginBottom: 14,
   },
   legendItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
+    gap: 4,
   },
   legendDot: {
-    width: 7,
-    height: 7,
-    borderRadius: 3.5,
+    width: 6,
+    height: 6,
+    borderRadius: 3,
   },
   legendText: {
-    fontSize: 12,
+    fontSize: 11.5,
     color: '#64748B',
   },
   legendValue: {
-    fontSize: 12,
+    fontSize: 11.5,
     fontWeight: '800',
     color: '#171420',
   },

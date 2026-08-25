@@ -1116,11 +1116,11 @@ export const MatchScreen: React.FC<MatchScreenProps> = ({
 
               {/* GESTURE HINT STRIP */}
               <View style={styles.gestureHintRow}>
-                <Text style={styles.gestureHintText}>👈 Swipe left to decline</Text>
+                <Text style={styles.gestureHintText}>👈 Left decline</Text>
                 <Text style={styles.gestureHintDot}>•</Text>
-                <Text style={styles.gestureHintText}>👆 Up to track</Text>
+                <Text style={styles.gestureHintText}>👆 Up track</Text>
                 <Text style={styles.gestureHintDot}>•</Text>
-                <Text style={styles.gestureHintText}>Right to accept 👉</Text>
+                <Text style={styles.gestureHintText}>Right match 👉</Text>
               </View>
 
               {/* SUGGESTED COLLAB CARD */}
@@ -2517,15 +2517,17 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 8,
     marginBottom: 20,
-    paddingVertical: 8,
-    backgroundColor: 'rgba(255, 255, 255, 0.8)',
+    paddingVertical: 7,
+    paddingHorizontal: 12,
+    backgroundColor: 'rgba(255, 255, 255, 0.85)',
     borderRadius: 100,
     borderWidth: 1,
     borderColor: '#E8E3FA',
+    width: '100%',
   },
   gestureHintText: {
-    fontSize: 11,
-    fontWeight: '600',
+    fontSize: 10.5,
+    fontWeight: '700',
     color: '#7F7894',
   },
   gestureHintDot: {
