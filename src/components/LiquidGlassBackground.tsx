@@ -140,18 +140,20 @@ export const LiquidGlassBackground: React.FC<LiquidGlassProps> = ({
 
 const styles = StyleSheet.create({
   rootContainer: {
+    width: '100%',
     alignItems: 'center',
     justifyContent: 'center',
-    maxWidth: '100%',
   },
   outerShadowWrapper: {
+    width: '100%',
     backgroundColor: 'transparent',
-    maxWidth: '100%',
   },
   blurView: {
+    width: '100%',
     overflow: 'hidden',
   },
   translucentSheen: {
+    width: '100%',
     position: 'relative',
   },
   topGlareArc: {
@@ -173,6 +175,7 @@ const styles = StyleSheet.create({
     zIndex: 3,
   },
   contentLayer: {
+    width: '100%',
     position: 'relative',
     zIndex: 10,
   },

@@ -119,6 +119,7 @@ export const FloatingTabBar: React.FC<FloatingTabBarProps> = ({
         tint="purple-gold"
         accentColor="#582CDB"
         hasShadow={true}
+        containerStyle={{ width: '100%', maxWidth: 520 }}
         style={styles.tabsRow}
       >
         {TABS.map((tab) => {
@@ -180,28 +181,26 @@ const styles = StyleSheet.create({
   floatingWrapper: {
     position: 'absolute',
     bottom: Platform.OS === 'ios' ? 20 : 14,
-    left: 0,
-    right: 0,
+    left: 14,
+    right: 14,
     zIndex: 999,
     alignItems: 'center',
-    paddingHorizontal: 12,
     pointerEvents: 'box-none',
   },
   tabsRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingVertical: 6,
-    paddingHorizontal: 4,
+    justifyContent: 'space-around',
+    paddingVertical: 7,
+    paddingHorizontal: 8,
     width: '100%',
-    maxWidth: 440,
   },
   inactiveTabItem: {
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
     paddingVertical: 6,
-    paddingHorizontal: 2,
+    paddingHorizontal: 4,
     borderRadius: 22,
   },
   inactiveTabPressed: {
@@ -209,10 +208,10 @@ const styles = StyleSheet.create({
     transform: [{ scale: 0.96 }],
   },
   tabLabelInactive: {
-    fontSize: 9,
+    fontSize: 9.5,
     fontWeight: '700',
     color: '#4A4458',
-    letterSpacing: 0.5,
+    letterSpacing: 0.3,
     textAlign: 'center',
   },
   activePillTouchable: {
