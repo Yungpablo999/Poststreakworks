@@ -1457,7 +1457,7 @@ export const ProGrowthScreen: React.FC<ProGrowthScreenProps> = ({
             <Animated.View style={[styles.modalCard, styles.expandedGraphModalCard, { transform: [{ scale: modalPopScale }] }]}>
               <ScrollView
                 style={{ width: '100%' }}
-                contentContainerStyle={{ paddingBottom: 96 }}
+                contentContainerStyle={{ paddingBottom: 135 }}
                 showsVerticalScrollIndicator={false}
                 bounces={false}
               >
@@ -1964,7 +1964,7 @@ export const ProGrowthScreen: React.FC<ProGrowthScreenProps> = ({
         >
           <View style={styles.modalOverlay}>
             <Animated.View style={[styles.modalCardLarge, { maxHeight: '90%', padding: 20, transform: [{ scale: modalPopScale }] }]}>
-              <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 96 }}>
+              <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 135 }}>
                 {/* Header */}
                 <View style={styles.modalHeaderRow}>
                   <View style={{ flex: 1, paddingRight: 10 }}>
@@ -2280,7 +2280,7 @@ export const ProGrowthScreen: React.FC<ProGrowthScreenProps> = ({
               <ScrollView
                 style={{ width: '100%' }}
                 showsVerticalScrollIndicator={false}
-                contentContainerStyle={{ paddingBottom: 96 }}
+                contentContainerStyle={{ paddingBottom: 135 }}
               >
                 {/* Header */}
                 <View style={styles.modalHeaderRow}>
@@ -2772,7 +2772,7 @@ const styles = StyleSheet.create({
   scrollContent: {
     paddingHorizontal: 20,
     paddingTop: 8,
-    paddingBottom: 96,
+    paddingBottom: 135,
   },
 
   // HERO TAGS & HEADLINE

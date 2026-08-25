@@ -1920,7 +1920,7 @@ const styles = StyleSheet.create({
   scrollContent: {
     paddingHorizontal: 20,
     paddingTop: 6,
-    paddingBottom: 120,
+    paddingBottom: 135,
   },
   focusHeroSection: {
     marginBottom: 20,

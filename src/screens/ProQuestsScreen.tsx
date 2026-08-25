@@ -1752,7 +1752,7 @@ const styles = StyleSheet.create({
   scrollContent: {
     paddingHorizontal: 20,
     paddingTop: 8,
-    paddingBottom: 96,
+    paddingBottom: 135,
   },
 
   // HERO TAGS & HEADLINE
@@ -2050,6 +2050,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+    flexWrap: 'wrap',
+    gap: 6,
+    paddingTop: 8,
   },
   levelTotalXpText: {
     fontSize: 12,
@@ -2075,7 +2078,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 10,
+    flexWrap: 'wrap',
+    gap: 6,
+    marginBottom: 12,
   },
   squadQuestPill: {
     backgroundColor: '#EDE9FE',

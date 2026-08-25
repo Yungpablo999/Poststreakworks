@@ -273,7 +273,7 @@ export const PostPerformanceScreen: React.FC<PostPerformanceScreenProps> = ({
         {/* 2. SCROLLABLE CONTENT */}
         <ScrollView
           style={styles.scrollContent}
-          contentContainerStyle={{ paddingBottom: 120 }}
+          contentContainerStyle={{ paddingBottom: 135 }}
           showsVerticalScrollIndicator={false}
         >
           {/* HERO SECTION TITLE */}

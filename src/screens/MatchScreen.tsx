@@ -895,8 +895,8 @@ export const MatchScreen: React.FC<MatchScreenProps> = ({
           {activeSection === 'deck' && (
             <View>
               {/* FILTER PILLS */}
-              <View style={styles.filterPillsRow}>
-                <Pressable
+              <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.filterPillsRow} style={{ flexGrow: 0, marginBottom: 12 }}>
+              <Pressable
                   style={[styles.filterPill, activeFilter === 'niche' && styles.filterPillActive]}
                   onPress={() => setActiveFilter('niche')}
                 >
@@ -931,7 +931,7 @@ export const MatchScreen: React.FC<MatchScreenProps> = ({
                     AI Pick
                   </Text>
                 </Pressable>
-              </View>
+            </ScrollView>
 
               {/* TINDER SWIPEABLE CARD STACK */}
               <View style={styles.cardStackContainer}>
@@ -2129,8 +2129,9 @@ const styles = StyleSheet.create({
     elevation: 2,
   },
   trackingStatItem: {
-    alignItems: 'center',
     flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   trackingStatVal: {
     fontSize: 14,
@@ -2160,8 +2161,10 @@ const styles = StyleSheet.create({
   sectionTab: {
     flex: 1,
     paddingVertical: 8,
-    borderRadius: 11,
+    paddingHorizontal: 4,
+    borderRadius: 10,
     alignItems: 'center',
+    justifyContent: 'center',
   },
   sectionTabActive: {
     backgroundColor: '#FFFFFF',
@@ -2196,8 +2199,10 @@ const styles = StyleSheet.create({
   // FILTER PILLS
   filterPillsRow: {
     flexDirection: 'row',
+    alignItems: 'center',
     gap: 8,
-    marginBottom: 16,
+    paddingHorizontal: 2,
+    paddingVertical: 2,
   },
   filterPill: {
     paddingVertical: 6,

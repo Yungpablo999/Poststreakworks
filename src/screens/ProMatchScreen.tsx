@@ -823,7 +823,7 @@ export const ProMatchScreen: React.FC<ProMatchScreenProps> = ({
         {/* Scrollable Container with Swipe Isolation */}
         <ScrollView
           style={{ flex: 1 }}
-          contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 130 }}
+          contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 135 }}
           showsVerticalScrollIndicator={false}
           scrollEnabled={!isSwipingCard}
         >
@@ -2119,6 +2119,7 @@ const styles = StyleSheet.create({
   summaryCol: {
     flex: 1,
     alignItems: 'center',
+    justifyContent: 'center',
   },
   summaryItemText: {
     fontSize: 13,
@@ -2149,10 +2150,11 @@ const styles = StyleSheet.create({
   segmentBtn: {
     flex: 1,
     paddingVertical: 8,
+    paddingHorizontal: 4,
+    borderRadius: 10,
     alignItems: 'center',
-    borderRadius: 11,
-    flexDirection: 'row',
     justifyContent: 'center',
+    flexDirection: 'row',
     gap: 4,
   },
   segmentBtnActive: {
@@ -2182,8 +2184,10 @@ const styles = StyleSheet.create({
   // 6. FILTER PILLS ROW
   filterPillsRow: {
     flexDirection: 'row',
-    gap: 6,
-    marginBottom: 12,
+    alignItems: 'center',
+    gap: 8,
+    paddingHorizontal: 2,
+    paddingVertical: 2,
   },
   filterPill: {
     paddingHorizontal: 11,
