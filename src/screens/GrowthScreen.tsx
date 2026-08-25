@@ -649,8 +649,8 @@ export const GrowthScreen: React.FC<GrowthScreenProps> = ({
                     />
                   </Svg>
                 </View>
-                <View>
-                  <Text style={styles.platformName}>Unlock multi-platform sync</Text>
+                <View style={{ flex: 1, marginRight: 8 }}>
+                  <Text style={[styles.platformName, { flexShrink: 1 }]} numberOfLines={1}>Unlock multi-platform sync</Text>
                   <Text style={styles.platformFollowers}>Connect YouTube &amp; X</Text>
                 </View>
               </View>
@@ -1727,7 +1727,10 @@ const styles = StyleSheet.create({
   platformLeft: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 12,
+    gap: 10,
+    flex: 1,
+    minWidth: 140,
+    marginRight: 8,
   },
   platformIconBox: {
     width: 32,
@@ -1735,14 +1738,15 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     justifyContent: 'center',
     alignItems: 'center',
+    flexShrink: 0,
   },
   platformName: {
-    fontSize: 14,
+    fontSize: 13.5,
     fontWeight: '800',
     color: '#171420',
   },
   platformFollowers: {
-    fontSize: 12,
+    fontSize: 11.5,
     color: '#64748B',
   },
   platformGrowthGreen: {
@@ -1755,6 +1759,7 @@ const styles = StyleSheet.create({
     paddingVertical: 6,
     paddingHorizontal: 14,
     borderRadius: 100,
+    flexShrink: 0,
   },
   connectPillBtnText: {
     fontSize: 12,
