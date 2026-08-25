@@ -1033,10 +1033,10 @@ export const ProMatchScreen: React.FC<ProMatchScreenProps> = ({
                       {/* Top Badges Overlay */}
                       <View style={styles.cardTopOverlay}>
                         {/* Left: Active Today & Priority Crown Pill */}
-                        <View style={{ flexDirection: 'column', gap: 4, alignItems: 'flex-start' }}>
+                        <View style={{ flexDirection: 'column', gap: 4, alignItems: 'flex-start', flex: 1, marginRight: 8 }}>
                           {currentCreator.isPriorityCrown && (
                             <View style={styles.priorityCrownCardPill}>
-                              <Text style={styles.priorityCrownCardPillText}>
+                              <Text style={styles.priorityCrownCardPillText} numberOfLines={1}>
                                 {currentCreator.crownBadgeText || '👑 TOP 2% PRIORITY MATCH'}
                               </Text>
                             </View>
@@ -1048,7 +1048,7 @@ export const ProMatchScreen: React.FC<ProMatchScreenProps> = ({
                         </View>
 
                         {/* Right: Track + Info Buttons */}
-                        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, flexShrink: 0 }}>
                           <Pressable
                             style={[
                               styles.trackingBadgeBtn,
@@ -2384,9 +2384,9 @@ const styles = StyleSheet.create({
   },
   trackingBadgeBtn: {
     backgroundColor: '#FEF3C7',
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    borderRadius: 14,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 12,
     borderWidth: 1,
     borderColor: '#FDE68A',
   },
@@ -2395,7 +2395,7 @@ const styles = StyleSheet.create({
     borderColor: '#D97706',
   },
   trackingBadgeText: {
-    fontSize: 11,
+    fontSize: 10,
     fontWeight: '700',
     color: '#B45309',
   },
@@ -2403,9 +2403,9 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
   },
   infoRoundBtn: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
+    width: 26,
+    height: 26,
+    borderRadius: 13,
     backgroundColor: 'rgba(255, 255, 255, 0.9)',
     justifyContent: 'center',
     alignItems: 'center',
@@ -2415,7 +2415,7 @@ const styles = StyleSheet.create({
     shadowRadius: 2,
   },
   infoRoundBtnText: {
-    fontSize: 13,
+    fontSize: 12,
     fontWeight: '700',
     color: '#582CDB',
   },

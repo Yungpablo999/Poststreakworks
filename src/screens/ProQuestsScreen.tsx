@@ -747,14 +747,14 @@ export const ProQuestsScreen: React.FC<ProQuestsScreenProps> = ({
                         {/* CREATOR EARNINGS & MONETIZATION ENTRY CARD */}
           <View style={styles.earningsHubCard}>
             <View style={styles.earningsHubHeader}>
-              <View>
-                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+              <View style={{ flex: 1, marginRight: 8 }}>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, flexWrap: 'wrap', marginBottom: 2 }}>
                   <Text style={styles.earningsHubTitle}>Creator Earnings</Text>
                   <View style={styles.readinessTag}>
                     <Text style={styles.readinessTagText}>94% SPONSOR READY</Text>
                   </View>
                 </View>
-                <Text style={styles.earningsHubSub}>Build your path to paid brand campaigns</Text>
+                <Text style={styles.earningsHubSub} numberOfLines={1}>Build your path to paid brand campaigns</Text>
               </View>
               <View style={styles.earningsHubIconCircle}>
                 <Text style={{ fontSize: 18 }}>💰</Text>

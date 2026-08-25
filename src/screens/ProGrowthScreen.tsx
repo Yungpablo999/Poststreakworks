@@ -1179,10 +1179,10 @@ export const ProGrowthScreen: React.FC<ProGrowthScreenProps> = ({
           {/* ============================================================ */}
           {/* SECTION 5: TOP POSTS ANALYSIS (TAP FOR FULL OVERVIEW)        */}
           {/* ============================================================ */}
-          <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 14, marginBottom: 8 }}>
-            <Text style={styles.topPostsSectionHeader}>Top Posts Analysis</Text>
+          <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 14, marginBottom: 8, flexWrap: 'wrap', gap: 6 }}>
+            <Text style={[styles.topPostsSectionHeader, { flex: 1, minWidth: 140 }]}>Top Posts Analysis</Text>
             <View style={styles.expandHintBadge}>
-              <Text style={styles.expandHintBadgeText}>Tap Post for Deep Dive 🔍</Text>
+              <Text style={styles.expandHintBadgeText}>Deep Dive 🔍</Text>
             </View>
           </View>
 
@@ -1233,14 +1233,14 @@ export const ProGrowthScreen: React.FC<ProGrowthScreenProps> = ({
           {/* ============================================================ */}
           <View style={styles.earningsHubCard}>
             <View style={styles.earningsHubHeader}>
-              <View>
-                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+              <View style={{ flex: 1, marginRight: 8 }}>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, flexWrap: 'wrap', marginBottom: 2 }}>
                   <Text style={styles.earningsHubTitle}>Creator Earnings</Text>
                   <View style={styles.readinessTag}>
                     <Text style={styles.readinessTagText}>94% SPONSOR READY</Text>
                   </View>
                 </View>
-                <Text style={styles.earningsHubSub}>Build your path to paid brand campaigns</Text>
+                <Text style={styles.earningsHubSub} numberOfLines={1}>Build your path to paid brand campaigns</Text>
               </View>
               <View style={styles.earningsHubIconCircle}>
                 <Text style={{ fontSize: 18 }}>💰</Text>
