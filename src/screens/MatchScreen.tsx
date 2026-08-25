@@ -1529,7 +1529,7 @@ export const MatchScreen: React.FC<MatchScreenProps> = ({
                   style={styles.modalPrimaryBtn}
                   onPress={handleSendPitchConfirm}
                 >
-                  <Text style={styles.modalPrimaryBtnText}>Send Pitch (+50 XP)</Text>
+                  <Text style={styles.modalPrimaryBtnText} numberOfLines={1}>Send Pitch (+50 XP)</Text>
                 </Pressable>
               </View>
             </View>
@@ -3836,7 +3836,7 @@ const styles = StyleSheet.create({
     width: '100%',
   },
   modalCancelBtn: {
-    flex: 1,
+    paddingHorizontal: 20,
     height: 42,
     borderRadius: 12,
     borderWidth: 1.2,
@@ -3857,11 +3857,13 @@ const styles = StyleSheet.create({
     backgroundColor: '#582CDB',
     justifyContent: 'center',
     alignItems: 'center',
+    paddingHorizontal: 12,
   },
   modalPrimaryBtnText: {
-    fontSize: 13,
+    fontSize: 12.5,
     fontWeight: '800',
     color: '#FFFFFF',
+    textAlign: 'center',
   },
   notifCard: {
     backgroundColor: 'rgba(250, 248, 255, 0.85)',
