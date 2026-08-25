@@ -179,20 +179,22 @@ export const FloatingTabBar: React.FC<FloatingTabBarProps> = ({
 const styles = StyleSheet.create({
   floatingWrapper: {
     position: 'absolute',
-    bottom: Platform.OS === 'ios' ? 22 : 16,
-    left: 14,
-    right: 14,
+    bottom: Platform.OS === 'ios' ? 20 : 14,
+    left: 0,
+    right: 0,
     zIndex: 999,
     alignItems: 'center',
+    paddingHorizontal: 12,
+    pointerEvents: 'box-none',
   },
   tabsRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingVertical: 6,
-    paddingHorizontal: 6,
+    paddingHorizontal: 4,
     width: '100%',
-    maxWidth: 420,
+    maxWidth: 440,
   },
   inactiveTabItem: {
     flex: 1,

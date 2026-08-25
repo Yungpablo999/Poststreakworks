@@ -3374,10 +3374,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: 0,
   },
   calendarDayNameText: {
+    width: '14.28%',
     fontSize: 11,
     fontWeight: '700',
-    color: '#9E97AA',
-    width: '14.28%',
+    color: '#64748B',
     textAlign: 'center',
   },
   pagerContent: {
