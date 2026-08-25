@@ -435,7 +435,7 @@ export const ProQuestsScreen: React.FC<ProQuestsScreenProps> = ({
               <View style={styles.rewardDivider} />
 
               <View style={styles.rewardItem}>
-                <Text style={styles.rewardSmallLabel}>✨ PASSPORT IMPACT</Text>
+                <Text style={styles.rewardSmallLabel}>✨ IMPACT</Text>
                 <Text style={styles.rewardValPurple}>Streak Boost</Text>
               </View>
 
@@ -443,7 +443,7 @@ export const ProQuestsScreen: React.FC<ProQuestsScreenProps> = ({
 
               <View style={styles.rewardItem}>
                 <Text style={styles.rewardSmallLabel}>🎯 GOAL</Text>
-                <Text style={styles.rewardValDark}>1 Long-form Reel</Text>
+                <Text style={styles.rewardValDark}>1 Long Reel</Text>
               </View>
             </View>
 
@@ -1879,14 +1879,16 @@ const styles = StyleSheet.create({
   },
   rewardsStripRow: {
     flexDirection: 'row',
-    justifyContent: 'space-around',
+    justifyContent: 'space-between',
     alignItems: 'center',
     backgroundColor: '#FAF8F5',
     paddingVertical: 10,
+    paddingHorizontal: 8,
     borderRadius: 12,
     marginBottom: 12,
   },
   rewardItem: {
+    flex: 1,
     alignItems: 'center',
   },
   rewardSmallLabel: {
@@ -1894,25 +1896,29 @@ const styles = StyleSheet.create({
     fontWeight: '800',
     color: '#94A3B8',
     marginBottom: 2,
+    textAlign: 'center',
   },
   rewardValGold: {
-    fontSize: 13,
+    fontSize: 12.5,
     fontWeight: '700',
     color: '#D97706',
+    textAlign: 'center',
   },
   rewardValPurple: {
-    fontSize: 13,
+    fontSize: 12.5,
     fontWeight: '700',
     color: '#582CDB',
+    textAlign: 'center',
   },
   rewardValDark: {
-    fontSize: 13,
+    fontSize: 12.5,
     fontWeight: '800',
     color: '#171420',
+    textAlign: 'center',
   },
   rewardDivider: {
     width: 1,
-    height: 20,
+    height: 22,
     backgroundColor: '#E2E8F0',
   },
   questSparkleCallout: {

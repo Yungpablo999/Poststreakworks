@@ -936,8 +936,8 @@ export const GrowthScreen: React.FC<GrowthScreenProps> = ({
                 <View style={[styles.milestoneIconCircle, { backgroundColor: '#EDE9FE' }]}>
                   <Text style={{ fontSize: 14 }}>⚡</Text>
                 </View>
-                <View>
-                  <Text style={styles.milestoneTitle}>Reach 15k TikTok Followers</Text>
+                <View style={{ flex: 1, marginRight: 8 }}>
+                  <Text style={styles.milestoneTitle} numberOfLines={1}>Reach 15k TikTok Followers</Text>
                   <Text style={styles.milestoneSub}>14.2k / 15k</Text>
                 </View>
               </View>
@@ -952,8 +952,8 @@ export const GrowthScreen: React.FC<GrowthScreenProps> = ({
                 <View style={[styles.milestoneIconCircle, { backgroundColor: '#FEF3C7' }]}>
                   <Text style={{ fontSize: 14 }}>🏆</Text>
                 </View>
-                <View>
-                  <Text style={styles.milestoneTitle}>7-Day Consistency Streak</Text>
+                <View style={{ flex: 1, marginRight: 8 }}>
+                  <Text style={styles.milestoneTitle} numberOfLines={1}>7-Day Consistency Streak</Text>
                   <Text style={styles.milestoneSub}>Day 7 of 7</Text>
                 </View>
               </View>
@@ -966,8 +966,8 @@ export const GrowthScreen: React.FC<GrowthScreenProps> = ({
                 <View style={[styles.milestoneIconCircle, { backgroundColor: '#FEE2E2' }]}>
                   <Text style={{ fontSize: 14 }}>🎯</Text>
                 </View>
-                <View>
-                  <Text style={styles.milestoneTitle}>Post 3 Videos This Week</Text>
+                <View style={{ flex: 1, marginRight: 8 }}>
+                  <Text style={styles.milestoneTitle} numberOfLines={1}>Post 3 Videos This Week</Text>
                   <Text style={styles.milestoneSub}>2 / 3 posted</Text>
                 </View>
               </View>
@@ -2076,7 +2076,9 @@ const styles = StyleSheet.create({
   milestoneLeft: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 12,
+    gap: 10,
+    flex: 1,
+    marginRight: 8,
   },
   milestoneIconCircle: {
     width: 32,
@@ -2084,40 +2086,44 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     justifyContent: 'center',
     alignItems: 'center',
+    flexShrink: 0,
   },
   milestoneTitle: {
-    fontSize: 14,
+    fontSize: 13.5,
     fontWeight: '800',
     color: '#171420',
   },
   milestoneSub: {
-    fontSize: 12,
+    fontSize: 11.5,
     color: '#64748B',
   },
   milestoneBadgePurple: {
     backgroundColor: '#EDE9FE',
-    paddingVertical: 5,
-    paddingHorizontal: 10,
+    paddingVertical: 4,
+    paddingHorizontal: 9,
     borderRadius: 100,
+    flexShrink: 0,
   },
   milestoneBadgePurpleText: {
-    fontSize: 11,
+    fontSize: 10.5,
     fontWeight: '800',
     color: '#6D28D9',
   },
   completedGoldText: {
-    fontSize: 12,
+    fontSize: 11.5,
     fontWeight: '800',
     color: '#D97706',
+    flexShrink: 0,
   },
   postNowBtn: {
     backgroundColor: '#DC2626',
-    paddingVertical: 6,
+    paddingVertical: 5,
     paddingHorizontal: 12,
     borderRadius: 100,
+    flexShrink: 0,
   },
   postNowBtnText: {
-    fontSize: 12,
+    fontSize: 11.5,
     fontWeight: '800',
     color: '#FFFFFF',
   },
