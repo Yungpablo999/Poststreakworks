@@ -805,29 +805,29 @@ export const ProQuestsScreen: React.FC<ProQuestsScreenProps> = ({
                 <View style={styles.darkMetricsStack}>
                   {/* Metric 1 */}
                   <View style={styles.darkMetricRow}>
-                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, flex: 1, flexShrink: 1, marginRight: 8 }}>
                       <Text style={{ fontSize: 14 }}>🛡️</Text>
-                      <Text style={styles.darkMetricLabel}>MATCH SCORE READINESS</Text>
+                      <Text style={[styles.darkMetricLabel, { flexShrink: 1 }]} numberOfLines={1}>MATCH SCORE READINESS</Text>
                     </View>
-                    <Text style={styles.darkMetricValPurple}>92%</Text>
+                    <Text style={[styles.darkMetricValPurple, { flexShrink: 0 }]}>92%</Text>
                   </View>
 
                   {/* Metric 2 */}
                   <View style={styles.darkMetricRow}>
-                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, flex: 1, flexShrink: 1, marginRight: 8 }}>
                       <Text style={{ fontSize: 14 }}>🤝</Text>
-                      <Text style={styles.darkMetricLabel}>PRIORITY CREATOR MATCHES</Text>
+                      <Text style={[styles.darkMetricLabel, { flexShrink: 1 }]} numberOfLines={1}>PRIORITY CREATOR MATCHES</Text>
                     </View>
-                    <Text style={styles.darkMetricValLight}>4 Crowned Available</Text>
+                    <Text style={[styles.darkMetricValLight, { flexShrink: 0 }]}>4 Crowned Available</Text>
                   </View>
 
                   {/* Metric 3 */}
                   <View style={styles.darkMetricRow}>
-                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, flex: 1, flexShrink: 1, marginRight: 8 }}>
                       <Text style={{ fontSize: 14 }}>💰</Text>
-                      <Text style={styles.darkMetricLabel}>AVG. BOUNTY FIT</Text>
+                      <Text style={[styles.darkMetricLabel, { flexShrink: 1 }]} numberOfLines={1}>AVG. BOUNTY FIT</Text>
                     </View>
-                    <Text style={styles.darkMetricValGreen}>$450–$1,200</Text>
+                    <Text style={[styles.darkMetricValGreen, { flexShrink: 0 }]}>$450–$1,200</Text>
                   </View>
                 </View>
 

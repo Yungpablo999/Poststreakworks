@@ -1132,8 +1132,8 @@ export const ProGrowthScreen: React.FC<ProGrowthScreenProps> = ({
               setShowExpandedGraphModal(true);
             }}
           >
-            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-              <Text style={styles.contentFormatTitle}>Content Format Performance</Text>
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 6, marginBottom: 12 }}>
+              <Text style={[styles.contentFormatTitle, { marginBottom: 0, flex: 1, minWidth: 150 }]}>Content Format Performance</Text>
               <View style={styles.expandHintBadge}>
                 <Text style={styles.expandHintBadgeText}>Compare Formats 🔍</Text>
               </View>
@@ -3352,10 +3352,12 @@ const styles = StyleSheet.create({
   },
   barColumn: {
     alignItems: 'center',
-    width: 60,
+    flex: 1,
+    maxWidth: 72,
   },
   barVisualBlock: {
-    width: 42,
+    width: '75%',
+    maxWidth: 42,
     borderRadius: 8,
     marginBottom: 8,
   },

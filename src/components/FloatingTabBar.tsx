@@ -191,6 +191,8 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingVertical: 6,
     paddingHorizontal: 6,
+    width: '100%',
+    maxWidth: 420,
   },
   inactiveTabItem: {
     flex: 1,
