@@ -849,7 +849,12 @@ export const MatchScreen: React.FC<MatchScreenProps> = ({
           </View>
 
           {/* VIEW SWITCHER TABS: SWIPE DECK vs INCOMING REQUESTS vs TRACKED RADAR vs CONNECTED */}
-          <View style={styles.sectionTabsRow}>
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.sectionTabsRow}
+            style={{ flexGrow: 0, marginBottom: 14 }}
+          >
             <Pressable
               style={[styles.sectionTab, activeSection === 'deck' && styles.sectionTabActive]}
               onPress={() => setActiveSection('deck')}
@@ -889,7 +894,7 @@ export const MatchScreen: React.FC<MatchScreenProps> = ({
                 Connected ({connectedCreators.length})
               </Text>
             </Pressable>
-          </View>
+          </ScrollView>
 
           {/* TAB 1: PURE GESTURE SWIPE DECK (CLEAN TINDER-STYLE PHOTO CARD WITH ⓘ INFO BUTTON) */}
           {activeSection === 'deck' && (
@@ -2155,34 +2160,37 @@ const styles = StyleSheet.create({
   // SECTION TABS ROW
   sectionTabsRow: {
     flexDirection: 'row',
-    backgroundColor: 'rgba(237, 232, 252, 0.7)',
-    borderRadius: 14,
-    padding: 3,
-    marginBottom: 16,
+    alignItems: 'center',
+    gap: 8,
+    paddingHorizontal: 2,
+    paddingVertical: 2,
   },
   sectionTab: {
-    flex: 1,
     paddingVertical: 8,
-    paddingHorizontal: 4,
-    borderRadius: 10,
+    paddingHorizontal: 16,
+    borderRadius: 14,
+    backgroundColor: 'rgba(237, 232, 252, 0.65)',
     alignItems: 'center',
     justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: 'rgba(221, 214, 254, 0.6)',
   },
   sectionTabActive: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: '#582CDB',
+    borderColor: '#582CDB',
     shadowColor: '#582CDB',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
+    shadowOpacity: 0.12,
     shadowRadius: 6,
     elevation: 2,
   },
   sectionTabText: {
-    fontSize: 12,
+    fontSize: 12.5,
     fontWeight: '700',
-    color: '#7F7894',
+    color: '#6B7280',
   },
   sectionTabTextActive: {
-    color: '#582CDB',
+    color: '#FFFFFF',
     fontWeight: '800',
   },
   tabBadgeWrapper: {
@@ -2543,12 +2551,16 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+    flexWrap: 'wrap',
+    gap: 6,
     marginBottom: 8,
   },
   collabHeaderLeft: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
+    flex: 1,
+    minWidth: 150,
   },
   collabGhostIcon: {
     width: 16,
@@ -2565,6 +2577,7 @@ const styles = StyleSheet.create({
     paddingVertical: 3,
     paddingHorizontal: 8,
     borderRadius: 100,
+    flexShrink: 0,
   },
   potencyBadgeText: {
     fontSize: 11,

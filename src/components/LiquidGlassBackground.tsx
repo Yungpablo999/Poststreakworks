@@ -140,10 +140,13 @@ export const LiquidGlassBackground: React.FC<LiquidGlassProps> = ({
 
 const styles = StyleSheet.create({
   rootContainer: {
-    alignSelf: 'stretch',
+    alignItems: 'center',
+    justifyContent: 'center',
+    maxWidth: '100%',
   },
   outerShadowWrapper: {
     backgroundColor: 'transparent',
+    maxWidth: '100%',
   },
   blurView: {
     overflow: 'hidden',

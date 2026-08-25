@@ -893,7 +893,12 @@ export const ProMatchScreen: React.FC<ProMatchScreenProps> = ({
           {/* ============================================================ */}
           {/* 5. SEGMENTED TABS BAR                                        */}
           {/* ============================================================ */}
-          <View style={styles.segmentedTabBar}>
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.segmentedTabBar}
+            style={{ flexGrow: 0, marginBottom: 14 }}
+          >
             <Pressable
               style={[styles.segmentBtn, segmentTab === 'deck' && styles.segmentBtnActive]}
               onPress={() => setSegmentTab('deck')}
@@ -930,7 +935,7 @@ export const ProMatchScreen: React.FC<ProMatchScreenProps> = ({
                 Connected ({connected.length})
               </Text>
             </Pressable>
-          </View>
+          </ScrollView>
 
           {/* ============================================================ */}
           {/* TAB 1: SWIPING MATCH DECK                                    */}
@@ -2143,37 +2148,40 @@ const styles = StyleSheet.create({
   // 5. SEGMENTED TABS BAR
   segmentedTabBar: {
     flexDirection: 'row',
-    backgroundColor: '#EFECE6',
-    borderRadius: 14,
-    padding: 3,
-    marginBottom: 12,
+    alignItems: 'center',
+    gap: 8,
+    paddingHorizontal: 2,
+    paddingVertical: 2,
   },
   segmentBtn: {
-    flex: 1,
     paddingVertical: 8,
-    paddingHorizontal: 4,
-    borderRadius: 10,
+    paddingHorizontal: 16,
+    borderRadius: 14,
+    backgroundColor: '#EFECE6',
     alignItems: 'center',
     justifyContent: 'center',
     flexDirection: 'row',
     gap: 4,
+    borderWidth: 1,
+    borderColor: '#E2DCD5',
   },
   segmentBtnActive: {
-    backgroundColor: '#FFFFFF',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.06,
-    shadowRadius: 3,
+    backgroundColor: '#582CDB',
+    borderColor: '#582CDB',
+    shadowColor: '#582CDB',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.12,
+    shadowRadius: 6,
     elevation: 2,
   },
   segmentBtnText: {
-    fontSize: 11,
-    fontWeight: '800',
+    fontSize: 12.5,
+    fontWeight: '700',
     color: '#64748B',
   },
   segmentBtnTextActive: {
-    color: '#171420',
-    fontWeight: '700',
+    color: '#FFFFFF',
+    fontWeight: '800',
   },
   segmentRedDot: {
     width: 6,
