@@ -956,7 +956,7 @@ export const ProGrowthScreen: React.FC<ProGrowthScreenProps> = ({
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
               <Text style={styles.growthThisMonthLabel}>GROWTH THIS 30D</Text>
               <View style={styles.expandHintBadge}>
-                <Text style={styles.expandHintBadgeText}>Tap to Expand 🔍</Text>
+                <Text style={styles.expandHintBadgeText}>Expand 🔍</Text>
               </View>
             </View>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, marginVertical: 4 }}>
@@ -1073,16 +1073,16 @@ export const ProGrowthScreen: React.FC<ProGrowthScreenProps> = ({
             }}
           >
             <View style={styles.audienceGrowthHeaderRow}>
-              <View>
-                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+              <View style={{ flex: 1, marginRight: 8 }}>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, flexWrap: 'wrap', marginBottom: 2 }}>
                   <Text style={styles.audienceGrowthTitle}>Audience Growth</Text>
                   <View style={styles.expandHintBadgePurple}>
-                    <Text style={styles.expandHintBadgePurpleText}>Live Graph 🔍</Text>
+                    <Text style={styles.expandHintBadgePurpleText}>Live 🔍</Text>
                   </View>
                 </View>
                 <Text style={styles.audienceTotalSub}>144,320 TOTAL AUDIENCE</Text>
               </View>
-              <View style={{ alignItems: 'flex-end' }}>
+              <View style={{ alignItems: 'flex-end', flexShrink: 0 }}>
                 <Text style={styles.audienceLast30dVal}>+2,480</Text>
                 <Text style={styles.audienceLast30dLabel}>LAST 30 DAYS</Text>
               </View>
@@ -3285,7 +3285,7 @@ const styles = StyleSheet.create({
     borderRadius: 22,
     borderWidth: 1,
     borderColor: '#EFECE6',
-    padding: 18,
+    padding: 16,
     marginBottom: 20,
   },
   audienceGrowthHeaderRow: {
@@ -3295,7 +3295,7 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   audienceGrowthTitle: {
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: '700',
     color: '#171420',
   },
