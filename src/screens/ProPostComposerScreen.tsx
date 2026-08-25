@@ -458,7 +458,12 @@ export const ProPostComposerScreen: React.FC<ProPostComposerScreenProps> = ({
             </Text>
 
             {/* Chips */}
-            <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginTop: 12 }}>
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={{ flexDirection: 'row', gap: 8, paddingHorizontal: 2 }}
+              style={{ flexGrow: 0, marginTop: 12 }}
+            >
               {['Personal Lesson', 'Creator Advice', 'Streak Saver', 'Viral Reel'].map((chip) => (
                 <Pressable
                   key={chip}
@@ -483,7 +488,7 @@ export const ProPostComposerScreen: React.FC<ProPostComposerScreenProps> = ({
                   </Text>
                 </Pressable>
               ))}
-            </View>
+            </ScrollView>
           </View>
 
           {/* ============================================================ */}
@@ -1036,22 +1041,22 @@ const styles = StyleSheet.create({
     backgroundColor: '#FAF8F5',
     borderWidth: 1,
     borderColor: '#EFECE6',
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    borderRadius: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 100,
   },
   ideaChipPillActive: {
     backgroundColor: '#EDE9FE',
     borderColor: '#DDD6FE',
   },
   ideaChipPillText: {
-    fontSize: 11,
-    fontWeight: '800',
+    fontSize: 11.5,
+    fontWeight: '700',
     color: '#475569',
   },
   ideaChipPillTextActive: {
     color: '#582CDB',
-    fontWeight: '700',
+    fontWeight: '800',
   },
 
   // SECTION 2: CHOOSE PLATFORMS

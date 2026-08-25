@@ -905,11 +905,11 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
                   style={styles.tonePill}
                 >
                   <Text style={styles.toneLabel}>CTA</Text>
-                  <Text style={styles.toneValue}>{captionCta}</Text>
+                  <Text style={styles.toneValue}>{captionCta === 'Ask Question' ? 'Question' : captionCta === 'Save Post' ? 'Save' : 'Share'}</Text>
                 </Pressable>
               </View>
 
-              <Text style={styles.charCountText}>{caption.length} Characters</Text>
+              <Text style={styles.charCountText}>{caption.length} chars</Text>
             </View>
 
             {/* 3 AI Action Pills */}
@@ -1148,7 +1148,7 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
                   />
                 </Animated.View>
                 <View style={styles.jarvisInsightBadge}>
-                  <Text style={styles.jarvisInsightTag}>⚡ JARVIS WRITING INSIGHT</Text>
+                  <Text style={styles.jarvisInsightTag}>⚡ WRITING INSIGHT</Text>
                 </View>
               </View>
 
@@ -1163,7 +1163,12 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
             </Text>
 
             {/* Interactive Quick Filter Chips */}
-            <View style={styles.jarvisChipsRow}>
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={styles.jarvisChipsRow}
+              style={{ flexGrow: 0, marginBottom: 14 }}
+            >
               {[
                 { id: 'rewrite', label: '🔥 Stronger Hook' },
                 { id: 'cta', label: '🎯 Add Viral CTA' },
@@ -1177,7 +1182,7 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
                   <Text style={styles.jarvisChipText}>{chip.label}</Text>
                 </Pressable>
               ))}
-            </View>
+            </ScrollView>
 
             <Pressable
               style={({ pressed }) => [styles.improveWithJarvisBtn, pressed && styles.btnPressed]}
@@ -2122,6 +2127,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+    flexWrap: 'wrap',
+    gap: 6,
     borderTopWidth: 1,
     borderTopColor: '#F1F5F9',
     paddingTop: 10,
@@ -2129,7 +2136,11 @@ const styles = StyleSheet.create({
   },
   captionMetaLeft: {
     flexDirection: 'row',
-    gap: 8,
+    alignItems: 'center',
+    gap: 6,
+    flexWrap: 'wrap',
+    flex: 1,
+    minWidth: 160,
   },
   tonePill: {
     flexDirection: 'row',
@@ -2138,24 +2149,25 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#EFECE6',
     paddingVertical: 3,
-    paddingHorizontal: 8,
+    paddingHorizontal: 7,
     borderRadius: 6,
-    gap: 4,
+    gap: 3,
   },
   toneLabel: {
-    fontSize: 9,
+    fontSize: 8.5,
     fontWeight: '700',
     color: '#94A3B8',
   },
   toneValue: {
-    fontSize: 11,
+    fontSize: 10.5,
     fontWeight: '800',
     color: '#334155',
   },
   charCountText: {
-    fontSize: 11,
+    fontSize: 10.5,
     fontWeight: '700',
     color: '#64748B',
+    flexShrink: 0,
   },
   aiButtonsRow: {
     flexDirection: 'row',
@@ -2519,31 +2531,32 @@ const styles = StyleSheet.create({
   },
   jarvisInsightBadge: {
     backgroundColor: '#FAF5FF',
-    paddingVertical: 3.5,
-    paddingHorizontal: 8,
+    paddingVertical: 3,
+    paddingHorizontal: 7,
     borderRadius: 6,
     borderWidth: 1,
     borderColor: '#EDE9FE',
   },
   jarvisInsightTag: {
-    fontSize: 10,
+    fontSize: 9.5,
     fontWeight: '700',
     color: '#6D28D9',
-    letterSpacing: 0.6,
+    letterSpacing: 0.5,
   },
   jarvisScorePill: {
     backgroundColor: '#FEF3C7',
-    paddingVertical: 3.5,
-    paddingHorizontal: 9,
+    paddingVertical: 3,
+    paddingHorizontal: 8,
     borderRadius: 100,
     borderWidth: 1,
     borderColor: '#FDE68A',
+    flexShrink: 0,
   },
   jarvisScoreText: {
-    fontSize: 10,
+    fontSize: 9.5,
     fontWeight: '700',
     color: '#B45309',
-    letterSpacing: 0.4,
+    letterSpacing: 0.3,
   },
   jarvisWritingTitle: {
     fontSize: 15,
@@ -2560,9 +2573,9 @@ const styles = StyleSheet.create({
   },
   jarvisChipsRow: {
     flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 6,
-    marginBottom: 14,
+    gap: 8,
+    paddingHorizontal: 2,
+    paddingVertical: 2,
   },
   jarvisChip: {
     backgroundColor: '#F8FAFC',

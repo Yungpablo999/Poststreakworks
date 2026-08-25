@@ -669,7 +669,12 @@ export const IdeaDetailScreen: React.FC<IdeaDetailScreenProps> = ({
             </Text>
 
             {/* Quick Filter Chips */}
-            <View style={styles.jarvisChipsRow}>
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={styles.jarvisChipsRow}
+              style={{ flexGrow: 0, marginBottom: 14 }}
+            >
               {(
                 [
                   { id: 'shorter', label: '⚡ Shorter' },
@@ -703,7 +708,7 @@ export const IdeaDetailScreen: React.FC<IdeaDetailScreenProps> = ({
                   </Pressable>
                 );
               })}
-            </View>
+            </ScrollView>
 
             <Pressable
               style={({ pressed }) => [styles.improveIdeaBtn, pressed && styles.btnPressed]}
@@ -1711,12 +1716,13 @@ const styles = StyleSheet.create({
   jarvisChipsRow: {
     flexDirection: 'row',
     gap: 8,
-    marginBottom: 14,
+    paddingHorizontal: 2,
+    paddingVertical: 2,
   },
   jarvisChip: {
     backgroundColor: '#F8FAFC',
-    paddingVertical: 6,
-    paddingHorizontal: 12,
+    paddingVertical: 5,
+    paddingHorizontal: 11,
     borderRadius: 100,
     borderWidth: 1,
     borderColor: '#EFECE6',
@@ -1726,7 +1732,7 @@ const styles = StyleSheet.create({
     borderColor: '#7C3AED',
   },
   jarvisChipText: {
-    fontSize: 12,
+    fontSize: 11.5,
     fontWeight: '700',
     color: '#475569',
   },

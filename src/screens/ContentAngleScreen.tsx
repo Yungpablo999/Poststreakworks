@@ -632,7 +632,12 @@ export const ContentAngleScreen: React.FC<ContentAngleScreenProps> = ({
           </View>
 
           {/* Quick Filters (Select & Unselect Support) */}
-          <View style={styles.quickFilterRow}>
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.quickFilterRow}
+            style={{ flexGrow: 0, marginBottom: 14 }}
+          >
             {[
               { id: 'faster', label: 'Faster formats' },
               { id: 'saves', label: 'Higher save potential' },
@@ -659,7 +664,7 @@ export const ContentAngleScreen: React.FC<ContentAngleScreenProps> = ({
                 </Pressable>
               );
             })}
-          </View>
+          </ScrollView>
 
           {/* More Idea Cards (Clean & Compact) */}
           {displayedIdeas.map((item) => (
@@ -1292,13 +1297,14 @@ const styles = StyleSheet.create({
   quickFilterRow: {
     flexDirection: 'row',
     gap: 8,
-    marginBottom: 14,
+    paddingHorizontal: 2,
+    paddingVertical: 2,
   },
   quickFilterPill: {
     backgroundColor: '#F1F5F9',
     borderRadius: 100,
     paddingVertical: 5,
-    paddingHorizontal: 11,
+    paddingHorizontal: 12,
   },
   quickFilterPillActive: {
     backgroundColor: '#EDE9FE',
@@ -1306,7 +1312,7 @@ const styles = StyleSheet.create({
     borderColor: '#DDD6FE',
   },
   quickFilterPillText: {
-    fontSize: 11,
+    fontSize: 11.5,
     fontWeight: '700',
     color: '#64748B',
   },
