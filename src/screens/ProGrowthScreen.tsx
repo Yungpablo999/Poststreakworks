@@ -2852,7 +2852,7 @@ const styles = StyleSheet.create({
   },
   expandedGraphModalCard: {
     width: '92%',
-    maxWidth: 480,
+    
     maxHeight: '88%',
     padding: 18,
     borderRadius: 24,

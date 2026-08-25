@@ -281,8 +281,7 @@ export default function App() {
 
   return (
     <SafeAreaProvider>
-      <View style={styles.rootWrapper}>
-        <View style={styles.container}>
+      <View style={styles.container}>
         <StatusBar style="dark" />
 
         {currentScreen === 'welcome' && (
@@ -1705,32 +1704,15 @@ export default function App() {
         {/* Global Animated Ghost Page Transition Loader */}
         <GhostLoadingScreen visible={isPageLoading} message={loadingMessage} />
       </View>
-      </View>
     </SafeAreaProvider>
   );
 }
 
 const styles = StyleSheet.create({
-  rootWrapper: {
-    flex: 1,
-    width: '100%',
-    height: '100%',
-    backgroundColor: '#0F0C1B',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
   container: {
     flex: 1,
     width: '100%',
-    maxWidth: 480,
+    height: '100%',
     backgroundColor: '#FAF8F5',
-    overflow: 'hidden',
-    alignSelf: 'center',
-    ...Platform.select({
-      web: {
-        height: '100vh' as any,
-        boxShadow: '0 8px 40px rgba(0, 0, 0, 0.25)' as any,
-      },
-    }),
   },
 });

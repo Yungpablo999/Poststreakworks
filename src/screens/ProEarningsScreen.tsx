@@ -2573,7 +2573,7 @@ const styles = StyleSheet.create({
 
   modalCardLarge: {
     width: '92%',
-    maxWidth: 480,
+    
     backgroundColor: '#FFFFFF',
     borderRadius: 24,
     overflow: 'hidden',

@@ -195,7 +195,8 @@ const styles = StyleSheet.create({
     color: colors.textSecondary,
     textAlign: 'center',
     lineHeight: 23,
-    maxWidth: 310,
+    maxWidth: 420,
+    width: '100%',
   },
   subtitleSmall: {
     fontSize: 14,
@@ -213,7 +214,7 @@ const styles = StyleSheet.create({
   },
   actionBtn: {
     width: '100%',
-    maxWidth: 270,
+    maxWidth: 380,
     height: 56,
   },
 
