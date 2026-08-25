@@ -1237,7 +1237,7 @@ export const ProGrowthScreen: React.FC<ProGrowthScreenProps> = ({
                 <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, flexWrap: 'wrap', marginBottom: 2 }}>
                   <Text style={styles.earningsHubTitle}>Creator Earnings</Text>
                   <View style={styles.readinessTag}>
-                    <Text style={styles.readinessTagText}>94% SPONSOR READY</Text>
+                    <Text style={styles.readinessTagText}>94% READY</Text>
                   </View>
                 </View>
                 <Text style={styles.earningsHubSub} numberOfLines={1}>Build your path to paid brand campaigns</Text>
@@ -3748,6 +3748,7 @@ const styles = StyleSheet.create({
     borderRadius: 6,
     borderWidth: 1,
     borderColor: '#E9D5FF',
+    flexShrink: 0,
   },
   readinessTagText: {
     fontSize: 9,
@@ -3760,14 +3761,15 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
   earningsHubIconCircle: {
-    width: 38,
-    height: 38,
-    borderRadius: 12,
+    width: 34,
+    height: 34,
+    borderRadius: 10,
     backgroundColor: '#FAF8F5',
     borderWidth: 1,
     borderColor: '#EFECE6',
     justifyContent: 'center',
     alignItems: 'center',
+    flexShrink: 0,
   },
   earningsHubStatsRow: {
     flexDirection: 'row',
