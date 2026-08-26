@@ -1034,7 +1034,7 @@ export const ProMessagesScreen: React.FC<ProMessagesScreenProps> = ({
               >
                 {/* CHAT HEADER */}
                 <View style={styles.chatRoomHeader}>
-                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, flex: 1, flexShrink: 1, minWidth: 0, marginRight: 8 }}>
                     <Pressable
                       onPress={() => setActiveChatThread(null)}
                       style={styles.chatBackBtn}
@@ -1063,33 +1063,26 @@ export const ProMessagesScreen: React.FC<ProMessagesScreenProps> = ({
                       )}
                     </Pressable>
 
-                    <View>
+                    <View style={{ flex: 1, flexShrink: 1, minWidth: 0 }}>
                       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-                        <Text style={styles.chatHeaderName}>{activeChatThread.name}</Text>
+                        <Text style={styles.chatHeaderName} numberOfLines={1}>{activeChatThread.name}</Text>
                         <View style={styles.proMicroPill}>
                           <Text style={styles.proMicroPillText}>PRO</Text>
                         </View>
                       </View>
-                      <Text style={styles.chatHeaderStatus}>
+                      <Text style={styles.chatHeaderStatus} numberOfLines={1}>
                         {activeChatThread.isOnline ? '● Active now' : 'Offline'} • {activeChatThread.niche}
                       </Text>
                     </View>
                   </View>
 
-                  <View style={{ flexDirection: 'row', gap: 8 }}>
-                    <Pressable
-                      style={styles.chatActionCircle}
-                      onPress={() => showToast(`Starting audio call with ${activeChatThread.name}...`)}
-                    >
-                      <Text style={{ fontSize: 14 }}>📞</Text>
-                    </Pressable>
-                    <Pressable
-                      style={styles.chatActionCircle}
-                      onPress={() => openCreatorStory(activeChatThread.creatorId)}
-                    >
-                      <Text style={{ fontSize: 14 }}>🌟</Text>
-                    </Pressable>
-                  </View>
+                  <Pressable
+                    style={styles.chatActionCircle}
+                    onPress={() => openCreatorStory(activeChatThread.creatorId)}
+                    hitSlop={8}
+                  >
+                    <Text style={{ fontSize: 14 }}>🌟</Text>
+                  </Pressable>
                 </View>
 
                 {/* QUICK AI ACTION PILLS */}
