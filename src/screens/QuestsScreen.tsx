@@ -19,6 +19,7 @@ import { FloatingTabBar, TabType } from '../components/FloatingTabBar';
 import { UserProfileModal, UserProfileData } from '../components/UserProfileModal';
 import { AnimatedCompletionModal } from '../components/AnimatedCompletionModal';
 import { FreeAppHeader } from '../components/FreeAppHeader';
+import { sFont, isNarrowScreen } from '../utils/responsive';
 
 interface QuestsScreenProps {
   onBackToDashboard?: () => void;
@@ -461,7 +462,7 @@ export const QuestsScreen: React.FC<QuestsScreenProps> = ({
 
             {/* Bottom Row: 35% & Improve Reputation */}
             <View style={styles.reputationFooterRow}>
-              <View>
+              <View style={styles.repPercentGroup}>
                 <Text style={styles.repPercentText}>35%</Text>
                 <Text style={styles.repPercentSub}>Passport activity</Text>
               </View>
@@ -1349,27 +1350,35 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+    flexWrap: 'wrap',
+    gap: 12,
+    rowGap: 10,
     marginTop: 14,
   },
+  repPercentGroup: {
+    flexShrink: 1,
+  },
   repPercentText: {
-    fontSize: 20,
+    fontSize: sFont(19),
     fontWeight: '800',
     color: '#582CDB',
   },
   repPercentSub: {
-    fontSize: 11,
+    fontSize: sFont(10.5),
     color: '#64748B',
+    fontWeight: '600',
   },
   improveRepBtn: {
     backgroundColor: '#FFFFFF',
     borderWidth: 1.5,
     borderColor: '#582CDB',
-    paddingVertical: 7,
-    paddingHorizontal: 16,
+    paddingVertical: 6.5,
+    paddingHorizontal: 12,
     borderRadius: 100,
+    flexShrink: 0,
   },
   improveRepBtnText: {
-    fontSize: 12.5,
+    fontSize: sFont(11.5),
     fontWeight: '800',
     color: '#582CDB',
   },
