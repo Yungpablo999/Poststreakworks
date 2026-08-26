@@ -22,6 +22,7 @@ import { FloatingTabBar, TabType } from '../components/FloatingTabBar';
 import { UserProfileModal, UserProfileData } from '../components/UserProfileModal';
 import { AnimatedCompletionModal } from '../components/AnimatedCompletionModal';
 import { COLLAB_PLANS } from './CollabIdeaScreen';
+import { sFont, sPadding, moderateScale, isNarrowScreen } from '../utils/responsive';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
@@ -943,10 +944,10 @@ export const MessagesScreen: React.FC<MessagesScreenProps> = ({
             {/* Top Badges Row */}
             <View style={styles.topBadgesRow}>
               <View style={styles.socialHubPill}>
-                <Text style={styles.socialHubPillText}>SOCIAL HUB</Text>
+                <Text style={styles.socialHubPillText} numberOfLines={1}>SOCIAL HUB</Text>
               </View>
               <View style={styles.activePactPill}>
-                <Text style={styles.activePactPillText}>⚡ 3 Active Accountability Pacts</Text>
+                <Text style={styles.activePactPillText} numberOfLines={1}>⚡ 3 Active Pacts</Text>
               </View>
             </View>
 
@@ -1798,7 +1799,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#FAF8F5',
   },
   scrollContent: {
-    paddingHorizontal: 20,
+    paddingHorizontal: sPadding(20),
     paddingTop: 8,
     paddingBottom: 135,
   },
@@ -1997,32 +1998,34 @@ const styles = StyleSheet.create({
   topBadgesRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
+    gap: 6,
     marginBottom: 12,
     marginTop: 4,
   },
   socialHubPill: {
     backgroundColor: '#582CDB',
-    paddingVertical: 4.5,
-    paddingHorizontal: 11,
+    paddingVertical: 3.5,
+    paddingHorizontal: 9,
     borderRadius: 100,
+    flexShrink: 0,
   },
   socialHubPillText: {
-    fontSize: 10,
-    fontWeight: '700',
+    fontSize: sFont(9.5),
+    fontWeight: '800',
     color: '#FFFFFF',
-    letterSpacing: 0.5,
+    letterSpacing: 0.4,
   },
   activePactPill: {
     backgroundColor: '#FAF8FC',
     borderWidth: 1,
     borderColor: '#DDD6FE',
-    paddingVertical: 4.5,
-    paddingHorizontal: 11,
+    paddingVertical: 3.5,
+    paddingHorizontal: 9,
     borderRadius: 100,
+    flexShrink: 0,
   },
   activePactPillText: {
-    fontSize: 11,
+    fontSize: sFont(10),
     fontWeight: '800',
     color: '#6D28D9',
   },
