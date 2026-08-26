@@ -95,6 +95,22 @@ export default function App() {
   const [isPageLoading, setIsPageLoading] = useState(false);
   const [loadingMessage, setLoadingMessage] = useState('Loading Studio...');
 
+  // Lock horizontal shift/pan on web/mobile browsers to keep layout fixed and centralized
+  React.useEffect(() => {
+    if (Platform.OS === 'web' && typeof document !== 'undefined') {
+      document.documentElement.style.overflowX = 'hidden';
+      document.body.style.overflowX = 'hidden';
+      document.body.style.width = '100%';
+      document.body.style.maxWidth = '100vw';
+      const root = document.getElementById('root');
+      if (root) {
+        root.style.overflowX = 'hidden';
+        root.style.width = '100%';
+        root.style.maxWidth = '100%';
+      }
+    }
+  }, []);
+
   // Creator Onboarding Data State
   const [selectedNiches, setSelectedNiches] = useState<string[]>(['lifestyle', 'comedy']);
   const [connectedPlatforms, setConnectedPlatforms] = useState<string[]>(['tiktok', 'instagram', 'youtube']);
@@ -1712,7 +1728,9 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     width: '100%',
+    maxWidth: '100%',
     height: '100%',
+    overflow: 'hidden',
     backgroundColor: '#FAF8F5',
   },
 });

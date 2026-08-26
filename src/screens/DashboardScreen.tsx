@@ -20,6 +20,7 @@ import * as Haptics from 'expo-haptics';
 import { LinearGradient } from 'expo-linear-gradient';
 import { FloatingTabBar, TabType } from '../components/FloatingTabBar';
 import { UserProfileModal, UserProfileData } from '../components/UserProfileModal';
+import { sFont, sPadding, moderateScale, isNarrowScreen } from '../utils/responsive';
 
 interface DashboardScreenProps {
   onLogout?: () => void;
@@ -750,7 +751,7 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
         {/* 1. TOP APP BAR: Ghost Mascot on Left & Notification/Profile on Right */}
         <View style={styles.headerBar}>
           {/* Top-Left: Ghost Logo Mascot + Mode Switcher */}
-          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+          <View style={styles.headerLeftGroup}>
             <Animated.View
               style={[
                 styles.headerLogoWrapper,
@@ -781,10 +782,11 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
                 }
               }}
               hitSlop={8}
+              style={({ pressed }) => [styles.proPillBtn, pressed && styles.headerIconBtnPressed]}
             >
-              <View style={{ backgroundColor: '#EDE9FE', borderColor: '#C4B5FD', borderWidth: 1, paddingHorizontal: 8, paddingVertical: 3.5, borderRadius: 8 }}>
-                <Text style={{ fontSize: 10, fontWeight: '700', color: '#582CDB', letterSpacing: 0.5 }}>🔒 FREE (TAP FOR PRO)</Text>
-              </View>
+              <Text style={styles.proPillBtnText} numberOfLines={1}>
+                {isNarrowScreen ? '🔒 PRO' : '🔒 FREE (PRO)'}
+              </Text>
             </Pressable>
           </View>
 
@@ -1812,15 +1814,23 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: 14,
+    paddingHorizontal: sPadding(14),
     paddingTop: 8,
     paddingBottom: 10,
     backgroundColor: '#FAF8F5',
+    width: '100%',
+    maxWidth: '100%',
+  },
+  headerLeftGroup: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    flexShrink: 1,
   },
   headerLogoWrapper: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
+    width: 34,
+    height: 34,
+    borderRadius: 17,
     backgroundColor: 'rgba(255, 255, 255, 0.9)',
     borderWidth: 1,
     borderColor: 'rgba(255, 255, 255, 0.95)',
@@ -1831,20 +1841,37 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.04,
     shadowRadius: 10,
     elevation: 2,
+    flexShrink: 0,
   },
   headerGhostLogo: {
-    width: 28,
-    height: 28,
+    width: 24,
+    height: 24,
+  },
+  proPillBtn: {
+    backgroundColor: '#EDE9FE',
+    borderColor: '#C4B5FD',
+    borderWidth: 1,
+    paddingHorizontal: 7,
+    paddingVertical: 3,
+    borderRadius: 8,
+    flexShrink: 1,
+  },
+  proPillBtnText: {
+    fontSize: sFont(9.5),
+    fontWeight: '800',
+    color: '#582CDB',
+    letterSpacing: 0.3,
   },
   headerRightGroup: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
+    gap: 5,
+    flexShrink: 0,
   },
   headerIconBtn: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
+    width: 32,
+    height: 32,
+    borderRadius: 16,
     backgroundColor: 'rgba(255, 255, 255, 0.9)',
     borderWidth: 1,
     borderColor: 'rgba(255, 255, 255, 0.95)',
@@ -1863,8 +1890,8 @@ const styles = StyleSheet.create({
   },
   notificationDot: {
     position: 'absolute',
-    top: 9,
-    right: 9,
+    top: 7,
+    right: 7,
     width: 7,
     height: 7,
     borderRadius: 3.5,
@@ -1873,9 +1900,9 @@ const styles = StyleSheet.create({
     borderColor: '#FFFFFF',
   },
   profilePhotoBtn: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+    width: 34,
+    height: 34,
+    borderRadius: 17,
     backgroundColor: 'rgba(237, 232, 252, 0.9)',
     borderWidth: 1.5,
     borderColor: '#582CDB',
@@ -1893,17 +1920,17 @@ const styles = StyleSheet.create({
     borderColor: '#582CDB',
   },
   headerCustomAvatarImage: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
+    width: 30,
+    height: 30,
+    borderRadius: 15,
   },
   addPhotoPlusBadge: {
     position: 'absolute',
     bottom: -2,
     right: -2,
-    width: 15,
-    height: 15,
-    borderRadius: 7.5,
+    width: 13,
+    height: 13,
+    borderRadius: 6.5,
     backgroundColor: '#582CDB',
     borderWidth: 1.5,
     borderColor: '#FFFFFF',
