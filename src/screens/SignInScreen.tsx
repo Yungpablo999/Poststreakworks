@@ -882,8 +882,10 @@ const styles = StyleSheet.create({
     borderWidth: 1.2,
     borderColor: 'rgba(221, 214, 254, 0.9)',
     borderRadius: 14,
-    paddingHorizontal: 14,
+    paddingHorizontal: 12,
     height: 50,
+    width: '100%',
+    overflow: 'hidden',
   },
   inputFieldFocused: {
     borderColor: '#582CDB',
@@ -891,17 +893,24 @@ const styles = StyleSheet.create({
   },
   inputIconContainer: {
     marginRight: 10,
+    flexShrink: 0,
   },
   eyeIconButton: {
-    padding: 4,
-    marginLeft: 6,
+    padding: 6,
+    marginLeft: 4,
+    flexShrink: 0,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   textInput: {
     flex: 1,
+    minWidth: 0,
     fontSize: 15,
     fontWeight: '500',
     color: '#171420',
     paddingVertical: 0,
+    paddingHorizontal: 0,
+    ...(Platform.OS === 'web' ? { outlineStyle: 'none' as any } : {}),
   },
   submitButton: {
     backgroundColor: '#582CDB',
