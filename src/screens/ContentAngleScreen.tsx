@@ -1423,7 +1423,9 @@ const styles = StyleSheet.create({
   },
   jarvisChipsRow: {
     flexDirection: 'row',
+    flexWrap: 'wrap',
     gap: 8,
+    rowGap: 8,
   },
   jarvisChip: {
     backgroundColor: '#FFFFFF',
@@ -1432,6 +1434,7 @@ const styles = StyleSheet.create({
     borderColor: '#EDE9FE',
     paddingVertical: 5,
     paddingHorizontal: 11,
+    flexShrink: 0,
   },
   jarvisChipActive: {
     backgroundColor: '#EDE9FE',

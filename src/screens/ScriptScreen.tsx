@@ -1561,22 +1561,25 @@ const styles = StyleSheet.create({
   bodyChipsRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 5,
+    flexWrap: 'wrap',
+    gap: 6,
+    rowGap: 6,
   },
   bodyFilterChip: {
     backgroundColor: '#FFFFFF',
     borderWidth: 1,
     borderColor: '#DDD6FE',
-    paddingVertical: 3.5,
-    paddingHorizontal: 7,
+    paddingVertical: 4,
+    paddingHorizontal: 9,
     borderRadius: 100,
+    flexShrink: 0,
   },
   bodyFilterChipActive: {
     backgroundColor: '#EDE9FE',
     borderColor: '#582CDB',
   },
   bodyFilterChipText: {
-    fontSize: 10,
+    fontSize: sFont(11),
     fontWeight: '800',
     color: '#6D28D9',
   },
@@ -1598,15 +1601,17 @@ const styles = StyleSheet.create({
   jarvisBannerHeaderRow: {
     flexDirection: 'row',
     gap: 12,
-    marginBottom: 12,
+    alignItems: 'center',
+    marginBottom: 14,
   },
   jarvisBannerFlameRing: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
+    width: 36,
+    height: 36,
+    borderRadius: 18,
     backgroundColor: 'rgba(255, 255, 255, 0.2)',
     justifyContent: 'center',
     alignItems: 'center',
+    flexShrink: 0,
   },
   jarvisBannerFlame: {
     width: 20,
@@ -1621,7 +1626,9 @@ const styles = StyleSheet.create({
   },
   jarvisBannerChipsRow: {
     flexDirection: 'row',
+    flexWrap: 'wrap',
     gap: 8,
+    rowGap: 8,
   },
   jarvisBannerChip: {
     backgroundColor: 'rgba(255, 255, 255, 0.15)',
