@@ -975,9 +975,14 @@ const styles = StyleSheet.create({
     marginLeft: 'auto',
   },
   editableHintMicro: {
-    fontSize: 10,
-    color: '#94A3B8',
+    fontSize: 9.5,
+    color: '#7F7894',
     fontWeight: '700',
+    backgroundColor: '#F3EEFB',
+    paddingVertical: 2,
+    paddingHorizontal: 6,
+    borderRadius: 5,
+    overflow: 'hidden',
   },
   cardHeaderFlex: {
     flexDirection: 'row',

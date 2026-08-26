@@ -1459,25 +1459,33 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+    gap: 8,
     marginBottom: 12,
   },
   sectionTitleGroup: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
+    gap: 6,
+    flexShrink: 1,
+    flexWrap: 'wrap',
   },
   sectionIcon: {
-    fontSize: 16,
+    fontSize: 15,
   },
   sectionTitle: {
-    fontSize: 16,
+    fontSize: sFont(15),
     fontWeight: '800',
     color: '#171420',
   },
   editableHintMicro: {
-    fontSize: 10,
-    color: '#94A3B8',
+    fontSize: 9.5,
+    color: '#7F7894',
     fontWeight: '700',
+    backgroundColor: '#F3EEFB',
+    paddingVertical: 2,
+    paddingHorizontal: 6,
+    borderRadius: 5,
+    overflow: 'hidden',
   },
   generationsBadge: {
     backgroundColor: '#FEF3C7',
@@ -1486,6 +1494,7 @@ const styles = StyleSheet.create({
     paddingVertical: 3,
     paddingHorizontal: 8,
     borderRadius: 6,
+    flexShrink: 0,
   },
   generationsBadgeText: {
     fontSize: 10,
@@ -1493,9 +1502,11 @@ const styles = StyleSheet.create({
     color: '#B45309',
   },
   editSectionLink: {
-    fontSize: 12,
+    fontSize: sFont(12),
     fontWeight: '800',
     color: '#582CDB',
+    marginLeft: 8,
+    flexShrink: 0,
   },
 
   // Hook Boxes
