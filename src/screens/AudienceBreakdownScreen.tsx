@@ -833,14 +833,14 @@ export const AudienceBreakdownScreen: React.FC<AudienceBreakdownScreenProps> = (
             {/* GOAL TARGET TRACKER */}
             <View style={styles.velocityGoalBox}>
               <View style={styles.velocityGoalTopRow}>
-                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-                  <Text style={{ fontSize: 13 }}>🎯</Text>
-                  <Text style={styles.velocityGoalTitle}>
-                    {selectedTimeframe === '7d' ? '7-Day Target' : selectedTimeframe === '1m' ? 'Monthly Creator Target' : 'Quarterly Milestone'}
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, flex: 1, marginRight: 6 }}>
+                  <Text style={{ fontSize: 12 }}>🎯</Text>
+                  <Text style={styles.velocityGoalTitle} numberOfLines={1}>
+                    {selectedTimeframe === '7d' ? '7-Day Target' : selectedTimeframe === '1m' ? 'Monthly Target' : 'Q3 Milestone'}
                   </Text>
                 </View>
-                <Text style={styles.velocityGoalScore}>
-                  {selectedTimeframe === '7d' ? '1,280 / 1,500 (85.3%)' : selectedTimeframe === '1m' ? '3,860 / 4,000 (96.5%)' : '12.0K / 15.0K (80.0%)'}
+                <Text style={styles.velocityGoalScore} numberOfLines={1}>
+                  {selectedTimeframe === '7d' ? '85.3% • 1.28K/1.5K' : selectedTimeframe === '1m' ? '96.5% • 3.86K/4K' : '80.0% • 12K/15K'}
                 </Text>
               </View>
 
@@ -863,39 +863,39 @@ export const AudienceBreakdownScreen: React.FC<AudienceBreakdownScreenProps> = (
                   ]}
                 />
               </View>
-              <Text style={styles.velocityGoalSub}>
+              <Text style={styles.velocityGoalSub} numberOfLines={1}>
                 {selectedTimeframe === '7d'
-                  ? '⚡ Only 220 followers to reach your 7-day streak target!'
+                  ? '⚡ 220 followers to 7-day target'
                   : selectedTimeframe === '1m'
-                  ? '🚀 140 followers away from achieving your monthly creator record!'
-                  : '👑 On track to exceed your Q3 creator milestone!'}
+                  ? '🚀 140 followers to monthly record'
+                  : '👑 On track for Q3 milestone'}
               </Text>
             </View>
 
             {/* 3 QUICK VELOCITY INSIGHT PILLS */}
             <View style={styles.velocityStatsGrid}>
               <View style={styles.velocityMiniStatBox}>
-                <Text style={styles.velocityMiniLabel}>AVG RUN-RATE</Text>
-                <Text style={styles.velocityMiniValue}>
-                  {selectedTimeframe === '7d' ? '+183 / day' : selectedTimeframe === '1m' ? '+965 / wk' : '+4.0K / mo'}
+                <Text style={styles.velocityMiniLabel} numberOfLines={1}>RUN-RATE</Text>
+                <Text style={styles.velocityMiniValue} numberOfLines={1}>
+                  {selectedTimeframe === '7d' ? '+183/d' : selectedTimeframe === '1m' ? '+965/wk' : '+4K/mo'}
                 </Text>
-                <Text style={styles.velocityMiniSub}>📈 +34% pace</Text>
+                <Text style={styles.velocityMiniSub} numberOfLines={1}>📈 +34%</Text>
               </View>
 
               <View style={styles.velocityMiniStatBox}>
-                <Text style={styles.velocityMiniLabel}>PEAK MOMENTUM</Text>
-                <Text style={styles.velocityMiniValue}>
-                  {selectedTimeframe === '7d' ? 'Thu (+340)' : selectedTimeframe === '1m' ? 'W4 (+1.28K)' : 'Aug (+5.2K)'}
+                <Text style={styles.velocityMiniLabel} numberOfLines={1}>PEAK DAY</Text>
+                <Text style={styles.velocityMiniValue} numberOfLines={1}>
+                  {selectedTimeframe === '7d' ? 'Thu (+340)' : selectedTimeframe === '1m' ? 'W4 (+1.2K)' : 'Aug (+5.2K)'}
                 </Text>
-                <Text style={styles.velocityMiniSub}>🎬 Viral Series</Text>
+                <Text style={styles.velocityMiniSub} numberOfLines={1}>🎬 Viral</Text>
               </View>
 
               <View style={styles.velocityMiniStatBox}>
-                <Text style={styles.velocityMiniLabel}>ENGAGEMENT</Text>
-                <Text style={styles.velocityMiniValue}>
+                <Text style={styles.velocityMiniLabel} numberOfLines={1}>ENGAGE</Text>
+                <Text style={styles.velocityMiniValue} numberOfLines={1}>
                   {selectedTimeframe === '7d' ? '8.4%' : selectedTimeframe === '1m' ? '9.1%' : '11.3%'}
                 </Text>
-                <Text style={styles.velocityMiniSub}>🟢 Top 5%</Text>
+                <Text style={styles.velocityMiniSub} numberOfLines={1}>🟢 Top 5%</Text>
               </View>
             </View>
           </View>
@@ -951,11 +951,11 @@ export const AudienceBreakdownScreen: React.FC<AudienceBreakdownScreenProps> = (
           <View style={styles.spotlightCard}>
             <View style={styles.spotlightHeaderRow}>
               <View style={styles.fastestBadge}>
-                <Text style={{ fontSize: 12 }}>⚡</Text>
-                <Text style={styles.fastestBadgeText}>FASTEST GROWING PLATFORM</Text>
+                <Text style={{ fontSize: 11 }}>⚡</Text>
+                <Text style={styles.fastestBadgeText} numberOfLines={1}>FASTEST GROWING</Text>
               </View>
               <View style={styles.spotlightSurgePill}>
-                <Text style={styles.spotlightSurgePillText}>📈 +22% VELOCITY</Text>
+                <Text style={styles.spotlightSurgePillText}>📈 +22%</Text>
               </View>
             </View>
 
@@ -2006,20 +2006,20 @@ const styles = StyleSheet.create({
     borderColor: '#EFECE6',
   },
   velocityMiniLabel: {
-    fontSize: 9,
-    fontWeight: '700',
+    fontSize: 8.5,
+    fontWeight: '800',
     color: '#64748B',
-    letterSpacing: 0.4,
+    letterSpacing: 0.3,
     marginBottom: 2,
   },
   velocityMiniValue: {
-    fontSize: 13,
-    fontWeight: '700',
+    fontSize: 12,
+    fontWeight: '800',
     color: '#171420',
   },
   velocityMiniSub: {
-    fontSize: 10,
-    fontWeight: '700',
+    fontSize: 9.5,
+    fontWeight: '800',
     color: '#582CDB',
     marginTop: 2,
   },
@@ -2097,34 +2097,38 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+    gap: 8,
     marginBottom: 14,
   },
   fastestBadge: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 5,
+    gap: 4,
     backgroundColor: '#FAF5FF',
-    paddingVertical: 4,
-    paddingHorizontal: 9,
+    paddingVertical: 3.5,
+    paddingHorizontal: 8,
     borderRadius: 8,
     borderWidth: 1,
     borderColor: '#E9D5FF',
+    flex: 1,
+    marginRight: 6,
   },
   fastestBadgeText: {
-    fontSize: 10,
-    fontWeight: '700',
+    fontSize: 9.5,
+    fontWeight: '800',
     color: '#582CDB',
-    letterSpacing: 0.4,
+    letterSpacing: 0.3,
   },
   spotlightSurgePill: {
     backgroundColor: '#ECFDF5',
     paddingVertical: 3,
-    paddingHorizontal: 8,
+    paddingHorizontal: 7,
     borderRadius: 6,
+    flexShrink: 0,
   },
   spotlightSurgePillText: {
     fontSize: 9,
-    fontWeight: '700',
+    fontWeight: '800',
     color: '#059669',
     letterSpacing: 0.3,
   },

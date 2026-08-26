@@ -364,10 +364,10 @@ export const PostPerformanceScreen: React.FC<PostPerformanceScreenProps> = ({
                 }
               }}
             >
-              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, flex: 1, marginRight: 6 }}>
                 <Text style={{ fontSize: 13 }}>💰</Text>
-                <Text style={styles.postEarningsChipText}>
-                  Est. Post Revenue: <Text style={{ color: '#582CDB', fontWeight: '700' }}>$142.50</Text>
+                <Text style={styles.postEarningsChipText} numberOfLines={1}>
+                  Est. Post Revenue: <Text style={{ color: '#582CDB', fontWeight: '800' }}>$142.50</Text>
                 </Text>
               </View>
               <Text style={styles.postEarningsChipLink}>View Earnings ➔</Text>
@@ -1290,6 +1290,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+    gap: 8,
     backgroundColor: '#FAF5FF',
     borderRadius: 12,
     paddingVertical: 8,
@@ -1299,14 +1300,15 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   postEarningsChipText: {
-    fontSize: 12,
-    fontWeight: '800',
+    fontSize: 11.5,
+    fontWeight: '700',
     color: '#171420',
   },
   postEarningsChipLink: {
     fontSize: 11,
-    fontWeight: '700',
+    fontWeight: '800',
     color: '#582CDB',
+    flexShrink: 0,
   },
   createSimilarBtn: {
     height: 46,
