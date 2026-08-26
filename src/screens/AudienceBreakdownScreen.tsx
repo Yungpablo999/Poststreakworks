@@ -833,15 +833,17 @@ export const AudienceBreakdownScreen: React.FC<AudienceBreakdownScreenProps> = (
             {/* GOAL TARGET TRACKER */}
             <View style={styles.velocityGoalBox}>
               <View style={styles.velocityGoalTopRow}>
-                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, flex: 1, marginRight: 6 }}>
-                  <Text style={{ fontSize: 12 }}>🎯</Text>
+                <View style={styles.velocityGoalTitleGroup}>
+                  <Text style={{ fontSize: 13 }}>🎯</Text>
                   <Text style={styles.velocityGoalTitle} numberOfLines={1}>
                     {selectedTimeframe === '7d' ? '7-Day Target' : selectedTimeframe === '1m' ? 'Monthly Target' : 'Q3 Milestone'}
                   </Text>
                 </View>
-                <Text style={styles.velocityGoalScore} numberOfLines={1}>
-                  {selectedTimeframe === '7d' ? '85.3% • 1.28K/1.5K' : selectedTimeframe === '1m' ? '96.5% • 3.86K/4K' : '80.0% • 12K/15K'}
-                </Text>
+                <View style={styles.velocityGoalBadge}>
+                  <Text style={styles.velocityGoalBadgeText}>
+                    {selectedTimeframe === '7d' ? '85.3%' : selectedTimeframe === '1m' ? '96.5%' : '80.0%'}
+                  </Text>
+                </View>
               </View>
 
               {/* Progress Line */}
@@ -863,13 +865,15 @@ export const AudienceBreakdownScreen: React.FC<AudienceBreakdownScreenProps> = (
                   ]}
                 />
               </View>
-              <Text style={styles.velocityGoalSub} numberOfLines={1}>
-                {selectedTimeframe === '7d'
-                  ? '⚡ 220 followers to 7-day target'
-                  : selectedTimeframe === '1m'
-                  ? '🚀 140 followers to monthly record'
-                  : '👑 On track for Q3 milestone'}
-              </Text>
+              <View style={styles.velocityGoalBottomRow}>
+                <Text style={styles.velocityGoalSub} numberOfLines={1}>
+                  {selectedTimeframe === '7d'
+                    ? '⚡ 1,280 / 1,500 followers (220 to goal)'
+                    : selectedTimeframe === '1m'
+                    ? '🚀 3,860 / 4,000 followers (140 to goal)'
+                    : '👑 12.0K / 15.0K followers (3.0K to goal)'}
+                </Text>
+              </View>
             </View>
 
             {/* 3 QUICK VELOCITY INSIGHT PILLS */}
@@ -1954,26 +1958,39 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#E9D5FF',
     marginBottom: 14,
+    overflow: 'hidden',
   },
   velocityGoalTopRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 6,
+    marginBottom: 8,
+    gap: 8,
+  },
+  velocityGoalTitleGroup: {
+    flexDirection: 'row',
+    alignItems: 'center',
     gap: 6,
+    flex: 1,
   },
   velocityGoalTitle: {
-    fontSize: 11.5,
-    fontWeight: '700',
+    fontSize: 12,
+    fontWeight: '800',
     color: '#582CDB',
-    flex: 1,
-    marginRight: 6,
   },
-  velocityGoalScore: {
+  velocityGoalBadge: {
+    backgroundColor: '#EDE9FE',
+    paddingHorizontal: 8,
+    paddingVertical: 2.5,
+    borderRadius: 6,
+    borderWidth: 1,
+    borderColor: '#DDD6FE',
+    flexShrink: 0,
+  },
+  velocityGoalBadgeText: {
     fontSize: 11,
     fontWeight: '800',
-    color: '#171420',
-    flexShrink: 0,
+    color: '#582CDB',
   },
   velocityGoalTrack: {
     height: 7,
@@ -1986,8 +2003,13 @@ const styles = StyleSheet.create({
     height: '100%',
     borderRadius: 3.5,
   },
+  velocityGoalBottomRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
   velocityGoalSub: {
-    fontSize: 10.5,
+    fontSize: 11,
     fontWeight: '700',
     color: '#6B21A8',
   },
