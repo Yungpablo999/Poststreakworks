@@ -364,10 +364,10 @@ export const PostPerformanceScreen: React.FC<PostPerformanceScreenProps> = ({
                 }
               }}
             >
-              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, flex: 1, marginRight: 6 }}>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5, flex: 1, marginRight: 8 }}>
                 <Text style={{ fontSize: 13 }}>💰</Text>
                 <Text style={styles.postEarningsChipText} numberOfLines={1}>
-                  Est. Post Revenue: <Text style={{ color: '#582CDB', fontWeight: '800' }}>$142.50</Text>
+                  Est. Revenue: <Text style={{ color: '#582CDB', fontWeight: '800' }}>$142.50</Text>
                 </Text>
               </View>
               <Text style={styles.postEarningsChipLink}>View Earnings ➔</Text>
@@ -628,7 +628,7 @@ export const PostPerformanceScreen: React.FC<PostPerformanceScreenProps> = ({
                 onPress={() => setShowJarvisExplanationModal(true)}
                 hitSlop={6}
               >
-                <Text style={styles.jarvisLinkText}>How did you calculate this?</Text>
+                <Text style={styles.jarvisLinkText}>💡 How it works</Text>
               </Pressable>
               <Pressable
                 onPress={() => {
@@ -639,7 +639,7 @@ export const PostPerformanceScreen: React.FC<PostPerformanceScreenProps> = ({
                 }}
                 hitSlop={6}
               >
-                <Text style={styles.jarvisLinkText}>Remix this script ➔</Text>
+                <Text style={styles.jarvisLinkText}>Remix script ➔</Text>
               </Pressable>
             </View>
           </View>
@@ -702,9 +702,9 @@ export const PostPerformanceScreen: React.FC<PostPerformanceScreenProps> = ({
 
           {/* CARD 10: REPURPOSE PREVIEW (SNEAK PEEK • LOCKED TO PRO) */}
           <View style={styles.sectionHeaderRow}>
-            <Text style={styles.sectionTitle}>Repurpose Preview</Text>
+            <Text style={styles.sectionTitle} numberOfLines={1}>Repurpose Preview</Text>
             <View style={styles.proPillBadge}>
-              <Text style={styles.proPillBadgeText}>🔒 SNEAK PEEK • LOCKED TO PRO</Text>
+              <Text style={styles.proPillBadgeText}>🔒 PRO PREVIEW</Text>
             </View>
           </View>
 
@@ -712,8 +712,8 @@ export const PostPerformanceScreen: React.FC<PostPerformanceScreenProps> = ({
             <View style={styles.repurposeGrid}>
               <View style={styles.repurposeGridItem}>
                 <View style={styles.repurposeItemHeader}>
-                  <Text style={styles.repurposeItemTitle}>📸 Instagram Reels</Text>
-                  <Text style={styles.repurposeFitBadge}>HIGH FIT</Text>
+                  <Text style={styles.repurposeItemTitle} numberOfLines={1}>📸 Reels</Text>
+                  <Text style={styles.repurposeFitBadge}>HIGH</Text>
                 </View>
                 <Text style={styles.repurposeSnippetText}>"Hook adapted for 9:16 reels format..."</Text>
                 <Text style={styles.repurposeLockTag}>🔒 PRO PREVIEW</Text>
@@ -721,8 +721,8 @@ export const PostPerformanceScreen: React.FC<PostPerformanceScreenProps> = ({
 
               <View style={styles.repurposeGridItem}>
                 <View style={styles.repurposeItemHeader}>
-                  <Text style={styles.repurposeItemTitle}>▶️ YouTube Shorts</Text>
-                  <Text style={styles.repurposeFitBadge}>HIGH FIT</Text>
+                  <Text style={styles.repurposeItemTitle} numberOfLines={1}>▶️ Shorts</Text>
+                  <Text style={styles.repurposeFitBadge}>HIGH</Text>
                 </View>
                 <Text style={styles.repurposeSnippetText}>"Loop pacing &amp; retention hook tuned..."</Text>
                 <Text style={styles.repurposeLockTag}>🔒 PRO PREVIEW</Text>
@@ -730,8 +730,8 @@ export const PostPerformanceScreen: React.FC<PostPerformanceScreenProps> = ({
 
               <View style={styles.repurposeGridItem}>
                 <View style={styles.repurposeItemHeader}>
-                  <Text style={styles.repurposeItemTitle}>💼 LinkedIn Post</Text>
-                  <Text style={styles.repurposeFitBadgeMedium}>MEDIUM FIT</Text>
+                  <Text style={styles.repurposeItemTitle} numberOfLines={1}>💼 LinkedIn</Text>
+                  <Text style={styles.repurposeFitBadgeMedium}>MED</Text>
                 </View>
                 <Text style={styles.repurposeSnippetText}>"Executive text breakdown with takeaways..."</Text>
                 <Text style={styles.repurposeLockTag}>🔒 PRO PREVIEW</Text>
@@ -739,8 +739,8 @@ export const PostPerformanceScreen: React.FC<PostPerformanceScreenProps> = ({
 
               <View style={styles.repurposeGridItem}>
                 <View style={styles.repurposeItemHeader}>
-                  <Text style={styles.repurposeItemTitle}>🧵 Threads Carousel</Text>
-                  <Text style={styles.repurposeFitBadge}>HIGH FIT</Text>
+                  <Text style={styles.repurposeItemTitle} numberOfLines={1}>🧵 Threads</Text>
+                  <Text style={styles.repurposeFitBadge}>HIGH</Text>
                 </View>
                 <Text style={styles.repurposeSnippetText}>"5-slide swipeable text hook..."</Text>
                 <Text style={styles.repurposeLockTag}>🔒 PRO PREVIEW</Text>
@@ -1699,14 +1699,14 @@ const styles = StyleSheet.create({
   },
   jarvisActionLinksRow: {
     flexDirection: 'row',
-    justifyContent: 'center',
-    gap: 16,
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    gap: 12,
   },
   jarvisLinkText: {
-    fontSize: 12,
+    fontSize: 11.5,
     fontWeight: '800',
     color: '#582CDB',
-    textDecorationLine: 'underline',
   },
 
   // CARD 7: WINNING CONTENT PATTERN
@@ -1839,7 +1839,7 @@ const styles = StyleSheet.create({
     width: '48.5%',
     backgroundColor: '#FAF8F5',
     borderRadius: 14,
-    padding: 10,
+    padding: 9,
     borderWidth: 1,
     borderColor: '#EFECE6',
   },
@@ -1848,29 +1848,34 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: 4,
+    gap: 4,
   },
   repurposeItemTitle: {
-    fontSize: 11,
+    fontSize: 10.5,
     fontWeight: '800',
     color: '#171420',
+    flex: 1,
+    marginRight: 4,
   },
   repurposeFitBadge: {
     fontSize: 7.5,
-    fontWeight: '700',
+    fontWeight: '800',
     color: '#059669',
     backgroundColor: '#ECFDF5',
     paddingVertical: 1.5,
     paddingHorizontal: 4,
     borderRadius: 4,
+    flexShrink: 0,
   },
   repurposeFitBadgeMedium: {
     fontSize: 7.5,
-    fontWeight: '700',
+    fontWeight: '800',
     color: '#B45309',
     backgroundColor: '#FEF3C7',
     paddingVertical: 1.5,
     paddingHorizontal: 4,
     borderRadius: 4,
+    flexShrink: 0,
   },
   repurposeSnippetText: {
     fontSize: 10,

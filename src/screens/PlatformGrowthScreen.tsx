@@ -476,10 +476,10 @@ export const PlatformGrowthScreen: React.FC<PlatformGrowthScreenProps> = ({
                   selectedBar === 'YT' && { backgroundColor: '#EF4444' },
                   selectedBar === 'X' && { backgroundColor: '#64748B' },
                 ]} />
-                <View>
-                  <Text style={styles.spotlightPlatformName}>
+                <View style={{ flex: 1, marginRight: 6 }}>
+                  <Text style={styles.spotlightPlatformName} numberOfLines={1}>
                     {!selectedBar
-                      ? 'All Channels Overview'
+                      ? 'All Channels'
                       : selectedBar === 'TT'
                       ? 'TikTok'
                       : selectedBar === 'IG'
@@ -488,25 +488,25 @@ export const PlatformGrowthScreen: React.FC<PlatformGrowthScreenProps> = ({
                       ? 'YouTube'
                       : 'X (Twitter)'}
                   </Text>
-                  <Text style={styles.spotlightHint}>
-                    {!selectedBar ? 'Tap any bar to inspect' : 'Tap again to unclick'}
+                  <Text style={styles.spotlightHint} numberOfLines={1}>
+                    {!selectedBar ? 'Tap bar to inspect' : 'Tap to unclick'}
                   </Text>
                 </View>
               </View>
 
               <View style={styles.spotlightStatsGroup}>
-                <Text style={styles.spotlightGain}>
+                <Text style={styles.spotlightGain} numberOfLines={1}>
                   {!selectedBar
-                    ? '+1,400 New Followers'
+                    ? '+1.4K New Followers'
                     : selectedBar === 'TT'
-                    ? '+840 (70% share)'
+                    ? '+840 (70%)'
                     : selectedBar === 'IG'
-                    ? '+390 (22% share)'
+                    ? '+390 (22%)'
                     : selectedBar === 'YT'
-                    ? '+170 (8% share)'
+                    ? '+170 (8%)'
                     : '0 (Not connected)'}
                 </Text>
-                <Text style={styles.spotlightRate}>
+                <Text style={styles.spotlightRate} numberOfLines={1}>
                   {!selectedBar
                     ? '⚡ 3 active networks'
                     : selectedBar === 'TT'
@@ -1495,32 +1495,36 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#EDE8E1',
     marginBottom: 16,
+    gap: 8,
   },
   spotlightLeft: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
+    gap: 6,
+    flex: 1,
+    marginRight: 6,
   },
   spotlightDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
+    width: 7,
+    height: 7,
+    borderRadius: 3.5,
   },
   spotlightPlatformName: {
-    fontSize: 13,
-    fontWeight: '700',
+    fontSize: 12,
+    fontWeight: '800',
     color: '#171420',
   },
   spotlightStatsGroup: {
     alignItems: 'flex-end',
+    flexShrink: 0,
   },
   spotlightGain: {
-    fontSize: 12.5,
-    fontWeight: '700',
+    fontSize: 12,
+    fontWeight: '800',
     color: '#15803D',
   },
   spotlightRate: {
-    fontSize: 11,
+    fontSize: 10.5,
     color: '#64748B',
     fontWeight: '700',
     marginTop: 1,

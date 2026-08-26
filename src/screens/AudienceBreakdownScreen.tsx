@@ -1171,7 +1171,7 @@ export const AudienceBreakdownScreen: React.FC<AudienceBreakdownScreenProps> = (
                 onPress={() => setShowJarvisExplanationModal(true)}
                 hitSlop={6}
               >
-                <Text style={styles.jarvisLinkText}>How did you calculate this?</Text>
+                <Text style={styles.jarvisLinkText}>💡 How it works</Text>
               </Pressable>
             </View>
           </View>
@@ -2531,10 +2531,9 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   jarvisLinkText: {
-    fontSize: 11,
+    fontSize: 11.5,
     fontWeight: '800',
     color: '#582CDB',
-    textDecorationLine: 'underline',
   },
 
   // Bottom Actions Container
