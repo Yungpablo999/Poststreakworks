@@ -20,6 +20,7 @@ import { FloatingTabBar, TabType } from '../components/FloatingTabBar';
 import { BrandToast } from '../components/BrandToast';
 import { UserProfileModal, UserProfileData } from '../components/UserProfileModal';
 import { AnimatedCompletionModal } from '../components/AnimatedCompletionModal';
+import { sFont, sPadding, moderateScale, isNarrowScreen } from '../utils/responsive';
 
 interface PostPerformanceScreenProps {
   onBack: () => void;
@@ -1073,7 +1074,7 @@ const styles = StyleSheet.create({
   // SCROLL CONTENT
   scrollContent: {
     flex: 1,
-    paddingHorizontal: 20,
+    paddingHorizontal: sPadding(20),
     paddingTop: 12,
   },
 
@@ -1096,7 +1097,7 @@ const styles = StyleSheet.create({
     borderColor: '#582CDB',
   },
   sectionSwitchChipText: {
-    fontSize: 11,
+    fontSize: sFont(11),
     fontWeight: '800',
     color: '#64748B',
     letterSpacing: 0.4,
@@ -1118,20 +1119,20 @@ const styles = StyleSheet.create({
     borderRadius: 6,
   },
   deepDivePillText: {
-    fontSize: 10,
+    fontSize: sFont(10),
     fontWeight: '700',
     color: '#582CDB',
     letterSpacing: 0.5,
   },
   mainTitle: {
-    fontSize: 24,
+    fontSize: sFont(24),
     fontWeight: '700',
     color: '#171420',
     letterSpacing: -0.6,
     marginBottom: 4,
   },
   mainSubtitle: {
-    fontSize: 13,
+    fontSize: sFont(13),
     color: '#64748B',
     lineHeight: 18,
     marginBottom: 18,
@@ -1146,7 +1147,7 @@ const styles = StyleSheet.create({
     marginTop: 6,
   },
   sectionTitle: {
-    fontSize: 18,
+    fontSize: sFont(18),
     fontWeight: '700',
     color: '#171420',
     letterSpacing: -0.3,
@@ -1158,7 +1159,7 @@ const styles = StyleSheet.create({
     borderRadius: 24,
     borderWidth: 1,
     borderColor: '#EDE8E1',
-    padding: 14,
+    padding: sPadding(14),
     marginBottom: 18,
     shadowColor: '#171420',
     shadowOffset: { width: 0, height: 6 },

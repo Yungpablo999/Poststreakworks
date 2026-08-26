@@ -21,6 +21,7 @@ import { FloatingTabBar, TabType } from '../components/FloatingTabBar';
 import { BrandToast } from '../components/BrandToast';
 import { UserProfileModal, UserProfileData } from '../components/UserProfileModal';
 import { AnimatedCompletionModal } from '../components/AnimatedCompletionModal';
+import { sFont, sPadding, moderateScale, isNarrowScreen } from '../utils/responsive';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
@@ -1564,7 +1565,7 @@ const styles = StyleSheet.create({
     width: '100%',
   },
   scrollContent: {
-    paddingHorizontal: 20,
+    paddingHorizontal: sPadding(20),
     paddingTop: 16,
     paddingBottom: 135,
   },
@@ -1603,7 +1604,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#582CDB',
   },
   segmentPillText: {
-    fontSize: 11,
+    fontSize: sFont(11),
     fontWeight: '800',
     color: '#64748B',
     letterSpacing: 0.3,
@@ -1614,14 +1615,14 @@ const styles = StyleSheet.create({
 
   // Main Titles
   mainTitle: {
-    fontSize: 22,
+    fontSize: sFont(22),
     fontWeight: '700',
     color: '#171420',
     letterSpacing: -0.5,
     marginBottom: 6,
   },
   mainSubtitle: {
-    fontSize: 13,
+    fontSize: sFont(13),
     color: '#64748B',
     lineHeight: 18,
     marginBottom: 18,
@@ -1633,7 +1634,7 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     borderWidth: 1,
     borderColor: '#EFEBF8',
-    padding: 18,
+    padding: sPadding(18),
     marginBottom: 16,
     shadowColor: '#582CDB',
     shadowOffset: { width: 0, height: 4 },
@@ -1648,7 +1649,7 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   cardHeaderLabel: {
-    fontSize: 11,
+    fontSize: sFont(11),
     fontWeight: '700',
     color: '#64748B',
     letterSpacing: 0.6,
@@ -1659,17 +1660,17 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   growthBadgeText: {
-    fontSize: 12,
+    fontSize: sFont(12),
     fontWeight: '700',
     color: '#10B981',
   },
   growthBadgeSub: {
-    fontSize: 10,
+    fontSize: sFont(10),
     fontWeight: '700',
     color: '#94A3B8',
   },
   totalAudienceBigNumber: {
-    fontSize: 36,
+    fontSize: sFont(36),
     fontWeight: '700',
     color: '#171420',
     letterSpacing: -1,
@@ -1702,7 +1703,7 @@ const styles = StyleSheet.create({
     borderRadius: 3.5,
   },
   legendLabel: {
-    fontSize: 11,
+    fontSize: sFont(11),
     fontWeight: '700',
     color: '#64748B',
   },
@@ -1725,10 +1726,74 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   purpleActionBtnText: {
-    fontSize: 12.5,
+    fontSize: sFont(12),
     fontWeight: '700',
     color: '#FFFFFF',
     letterSpacing: 0.5,
+  },
+
+  // Card 1 Metrics Row
+  audienceMetricsRow: {
+    flexDirection: 'row',
+    alignItems: 'baseline',
+    gap: 10,
+    marginBottom: 14,
+    flexWrap: 'wrap',
+  },
+  totalAudienceNumber: {
+    fontSize: sFont(30),
+    fontWeight: '700',
+    color: '#171420',
+    letterSpacing: -0.8,
+  },
+  netGrowthBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    backgroundColor: '#ECFDF5',
+    paddingVertical: 3,
+    paddingHorizontal: 8,
+    borderRadius: 6,
+    borderWidth: 1,
+    borderColor: '#A7F3D0',
+  },
+  netGrowthText: {
+    fontSize: sFont(11),
+    fontWeight: '700',
+    color: '#059669',
+  },
+
+  // Card 1 Breakdown Pill Sub-items
+  audiencePillRow: {
+    flexDirection: 'row',
+    gap: 8,
+  },
+  audienceMiniPill: {
+    flex: 1,
+    backgroundColor: '#FAF8F5',
+    borderRadius: 12,
+    paddingVertical: 8,
+    paddingHorizontal: 10,
+    borderWidth: 1,
+    borderColor: '#EDE8E1',
+  },
+  miniPillLabel: {
+    fontSize: sFont(9),
+    fontWeight: '700',
+    color: '#64748B',
+    letterSpacing: 0.4,
+    marginBottom: 2,
+  },
+  miniPillValue: {
+    fontSize: sFont(13),
+    fontWeight: '700',
+    color: '#171420',
+  },
+  miniPillSub: {
+    fontSize: sFont(9.5),
+    fontWeight: '700',
+    color: '#059669',
+    marginTop: 1,
   },
 
   // =========================================================================
@@ -1739,8 +1804,8 @@ const styles = StyleSheet.create({
     borderRadius: 24,
     borderWidth: 1,
     borderColor: '#EFEBF8',
-    paddingVertical: 18,
-    paddingHorizontal: 16,
+    paddingVertical: sPadding(18),
+    paddingHorizontal: sPadding(16),
     marginBottom: 20,
     overflow: 'hidden',
     shadowColor: '#582CDB',
@@ -1793,7 +1858,7 @@ const styles = StyleSheet.create({
     elevation: 1,
   },
   timeframeChipText: {
-    fontSize: 9,
+    fontSize: sFont(9),
     fontWeight: '800',
     color: '#64748B',
   },

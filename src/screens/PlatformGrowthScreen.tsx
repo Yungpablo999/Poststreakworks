@@ -21,6 +21,7 @@ import { FloatingTabBar, TabType } from '../components/FloatingTabBar';
 import { BrandToast } from '../components/BrandToast';
 import { UserProfileModal, UserProfileData } from '../components/UserProfileModal';
 import { AnimatedCompletionModal } from '../components/AnimatedCompletionModal';
+import { sFont, sPadding, moderateScale, isNarrowScreen } from '../utils/responsive';
 
 // AUTHENTIC BRAND SVG ICONS
 const TikTokSvg = ({ size = 20 }: { size?: number }) => (
@@ -1300,7 +1301,7 @@ const styles = StyleSheet.create({
   // SCROLL CONTENT
   scrollContent: {
     flex: 1,
-    paddingHorizontal: 20,
+    paddingHorizontal: sPadding(20),
     paddingTop: 12,
   },
 
@@ -1316,20 +1317,20 @@ const styles = StyleSheet.create({
     borderRadius: 6,
   },
   heroPillText: {
-    fontSize: 10,
+    fontSize: sFont(10),
     fontWeight: '700',
     color: '#582CDB',
     letterSpacing: 0.5,
   },
   mainTitle: {
-    fontSize: 24,
+    fontSize: sFont(24),
     fontWeight: '700',
     color: '#171420',
     letterSpacing: -0.6,
     marginBottom: 4,
   },
   mainSubtitle: {
-    fontSize: 13,
+    fontSize: sFont(13),
     color: '#64748B',
     lineHeight: 18,
     marginBottom: 18,
@@ -1345,7 +1346,7 @@ const styles = StyleSheet.create({
     borderRadius: 24,
     borderWidth: 1,
     borderColor: '#EDE8E1',
-    padding: 18,
+    padding: sPadding(18),
     marginBottom: 18,
     shadowColor: '#171420',
     shadowOffset: { width: 0, height: 6 },
@@ -1360,7 +1361,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   aggregateLabel: {
-    fontSize: 10,
+    fontSize: sFont(10),
     fontWeight: '700',
     color: '#64748B',
     letterSpacing: 0.5,
@@ -1372,13 +1373,13 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   aggregateNumber: {
-    fontSize: 32,
+    fontSize: sFont(32),
     fontWeight: '700',
     color: '#171420',
     letterSpacing: -0.8,
   },
   aggregateTrend: {
-    fontSize: 13,
+    fontSize: sFont(13),
     fontWeight: '800',
     color: '#15803D',
   },
