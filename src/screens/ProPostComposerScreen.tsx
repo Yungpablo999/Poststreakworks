@@ -1087,11 +1087,11 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'space-between',
-    gap: 10,
   },
   platformCard: {
-    width: '48.4%',
+    width: '48%',
     minHeight: 110,
+    marginBottom: 10,
     backgroundColor: '#FFFFFF',
     borderRadius: 16,
     padding: 14,
