@@ -22,6 +22,7 @@ import { BrandToast } from '../components/BrandToast';
 import { UserProfileModal, UserProfileData } from '../components/UserProfileModal';
 import { AnimatedCompletionModal } from '../components/AnimatedCompletionModal';
 import { FreeAppHeader } from '../components/FreeAppHeader';
+import { sFont, isNarrowScreen } from '../utils/responsive';
 
 // AUTHENTIC BRAND SVG ICONS
 const TikTokSvg = ({ size = 18 }: { size?: number }) => (
@@ -845,14 +846,15 @@ export const EarningsScreen: React.FC<EarningsScreenProps> = ({
                         <View style={[styles.platformIconCircle, { backgroundColor: plat.bgTint }]}>
                           {renderBrandIcon(plat.id, 20)}
                         </View>
-                        <View style={{ flex: 1 }}>
-                          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-                            <Text style={styles.platformNameText}>{plat.name}</Text>
+                        <View style={styles.platformMiddleCol}>
+                          <View style={styles.platformNameRow}>
+                            <Text style={styles.platformNameText} numberOfLines={1}>{plat.name}</Text>
                             <View style={styles.autoSyncBadge}>
-                              <Text style={styles.autoSyncText}>🟢 Auto-Sync</Text>
+                              <View style={styles.autoSyncDot} />
+                              <Text style={styles.autoSyncText}>Auto-Sync</Text>
                             </View>
                           </View>
-                          <Text style={styles.platformSubText}>
+                          <Text style={styles.platformSubText} numberOfLines={1}>
                             {plat.handle} • ⚡ {plat.followers}
                           </Text>
                         </View>
@@ -1942,22 +1944,26 @@ const styles = StyleSheet.create({
   connectedPlatformRow: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 8,
     backgroundColor: '#FAF8F5',
     borderRadius: 14,
-    padding: 10,
+    paddingVertical: 10,
+    paddingHorizontal: 10,
     borderWidth: 1,
     borderColor: '#EDE8E1',
-    gap: 10,
   },
   availablePlatformRow: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 8,
     backgroundColor: '#FFFFFF',
     borderRadius: 14,
-    padding: 10,
+    paddingVertical: 10,
+    paddingHorizontal: 10,
     borderWidth: 1,
     borderColor: '#EDE8E1',
-    gap: 10,
   },
   platformIconCircle: {
     width: 38,
@@ -1965,36 +1971,61 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     justifyContent: 'center',
     alignItems: 'center',
+    flexShrink: 0,
+  },
+  platformMiddleCol: {
+    flex: 1,
+    flexShrink: 1,
+    minWidth: 0,
+    marginRight: 4,
+  },
+  platformNameRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flexWrap: 'wrap',
+    gap: 5,
+    rowGap: 2,
   },
   platformNameText: {
-    fontSize: 13,
+    fontSize: sFont(13),
     fontWeight: '800',
     color: '#171420',
   },
   autoSyncBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
     backgroundColor: '#DCFCE7',
     paddingVertical: 1.5,
-    paddingHorizontal: 6,
+    paddingHorizontal: 5,
     borderRadius: 4,
+    flexShrink: 0,
+  },
+  autoSyncDot: {
+    width: 5,
+    height: 5,
+    borderRadius: 2.5,
+    backgroundColor: '#16A34A',
   },
   autoSyncText: {
-    fontSize: 9,
+    fontSize: sFont(8.5),
     fontWeight: '800',
     color: '#15803D',
   },
   platformSubText: {
-    fontSize: 11,
+    fontSize: sFont(11),
     color: '#64748B',
     marginTop: 1,
   },
   removePlatformBtn: {
     paddingVertical: 5,
-    paddingHorizontal: 10,
+    paddingHorizontal: 9,
     borderRadius: 8,
     backgroundColor: '#FEE2E2',
+    flexShrink: 0,
   },
   removePlatformBtnText: {
-    fontSize: 10,
+    fontSize: sFont(10),
     fontWeight: '800',
     color: '#DC2626',
   },
