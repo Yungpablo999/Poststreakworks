@@ -861,8 +861,9 @@ export const CreatorPassportScreen: React.FC<CreatorPassportScreenProps> = ({
                     <Pressable
                       style={styles.linkAccountConfirmBtn}
                       onPress={handleAddCustomPlatform}
+                      hitSlop={6}
                     >
-                      <Text style={styles.linkAccountConfirmBtnText}>Link Account ➔</Text>
+                      <Text style={styles.linkAccountConfirmBtnText} numberOfLines={1}>Link Account ➔</Text>
                     </Pressable>
                   </View>
                 </View>
@@ -1938,18 +1939,21 @@ const styles = StyleSheet.create({
   },
   customInputRow: {
     flexDirection: 'row',
+    alignItems: 'center',
     gap: 8,
     marginTop: 6,
   },
   customTextInput: {
     flex: 1,
+    flexShrink: 1,
+    minWidth: 0,
     height: 40,
     backgroundColor: '#FFFFFF',
     borderRadius: 10,
     borderWidth: 1,
     borderColor: '#CBD5E1',
     paddingHorizontal: 10,
-    fontSize: 12.5,
+    fontSize: sFont(12),
     color: '#171420',
     fontWeight: '600',
   },
@@ -1957,11 +1961,13 @@ const styles = StyleSheet.create({
     backgroundColor: '#582CDB',
     borderRadius: 10,
     paddingHorizontal: 12,
+    height: 40,
     justifyContent: 'center',
     alignItems: 'center',
+    flexShrink: 0,
   },
   linkAccountConfirmBtnText: {
-    fontSize: 11,
+    fontSize: sFont(11),
     fontWeight: '700',
     color: '#FFFFFF',
   },
