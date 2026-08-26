@@ -478,9 +478,9 @@ export const MissionDetailScreen: React.FC<MissionDetailScreenProps> = ({
           <View style={styles.modalOverlay}>
             <Animated.View style={[styles.modalCard, { transform: [{ scale: modalPopScale }] }]}>
               <View style={styles.modalHeaderRow}>
-                <View>
-                  <Text style={styles.modalTitle}>Create Mission Post</Text>
-                  <Text style={styles.modalSubtitle}>Post before 9 PM to protect your streak.</Text>
+                <View style={{ flex: 1, marginRight: 8 }}>
+                  <Text style={styles.modalTitle} numberOfLines={1}>Create Mission Post</Text>
+                  <Text style={styles.modalSubtitle} numberOfLines={1}>Post before 9 PM to protect your streak.</Text>
                 </View>
                 <Pressable
                   onPress={() => setShowCreateModal(false)}
@@ -613,9 +613,9 @@ export const MissionDetailScreen: React.FC<MissionDetailScreenProps> = ({
           <View style={styles.modalOverlay}>
             <Animated.View style={[styles.modalCard, { transform: [{ scale: modalPopScale }] }]}>
               <View style={styles.modalHeaderRow}>
-                <View>
-                  <Text style={styles.modalTitle}>AI Hook Sparks</Text>
-                  <Text style={styles.modalSubtitle}>Angles tailored for your 47-day streak:</Text>
+                <View style={{ flex: 1, marginRight: 8 }}>
+                  <Text style={styles.modalTitle} numberOfLines={1}>AI Hook Sparks</Text>
+                  <Text style={styles.modalSubtitle} numberOfLines={1}>Angles tailored for your 47-day streak:</Text>
                 </View>
                 <Pressable
                   onPress={() => setShowIdeaModal(false)}
@@ -665,9 +665,9 @@ export const MissionDetailScreen: React.FC<MissionDetailScreenProps> = ({
           <View style={styles.modalOverlay}>
             <Animated.View style={[styles.modalCard, { transform: [{ scale: modalPopScale }] }]}>
               <View style={styles.modalHeaderRow}>
-                <View>
-                  <Text style={styles.modalTitle}>Mission Notifications</Text>
-                  <Text style={styles.modalSubtitle}>Today&apos;s streak updates</Text>
+                <View style={{ flex: 1, marginRight: 8 }}>
+                  <Text style={styles.modalTitle} numberOfLines={1}>Mission Notifications</Text>
+                  <Text style={styles.modalSubtitle} numberOfLines={1}>Today&apos;s streak updates</Text>
                 </View>
                 <Pressable
                   onPress={() => setShowNotificationModal(false)}
@@ -716,9 +716,9 @@ export const MissionDetailScreen: React.FC<MissionDetailScreenProps> = ({
           <View style={styles.modalOverlay}>
             <Animated.View style={[styles.modalCard, { transform: [{ scale: modalPopScale }] }]}>
               <View style={styles.modalHeaderRow}>
-                <View>
-                  <Text style={styles.modalTitle}>Squad Chat</Text>
-                  <Text style={styles.modalSubtitle}>Collaborate with your creator squad</Text>
+                <View style={{ flex: 1, marginRight: 8 }}>
+                  <Text style={styles.modalTitle} numberOfLines={1}>Squad Chat</Text>
+                  <Text style={styles.modalSubtitle} numberOfLines={1}>Collaborate with your creator squad</Text>
                 </View>
                 <Pressable
                   onPress={() => setShowChatModal(false)}
@@ -1304,35 +1304,37 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(15, 12, 24, 0.65)',
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 20,
+    padding: sPadding(14),
   },
   modalCard: {
     width: '100%',
     maxWidth: 380,
     backgroundColor: '#FFFFFF',
-    borderRadius: 26,
+    borderRadius: 24,
     borderWidth: 1,
     borderColor: '#EFEBF8',
-    padding: 22,
+    padding: sPadding(16),
     shadowColor: '#582CDB',
     shadowOffset: { width: 0, height: 12 },
     shadowOpacity: 0.18,
     shadowRadius: 28,
     elevation: 10,
+    overflow: 'hidden',
   },
   modalHeaderRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'flex-start',
-    marginBottom: 16,
+    marginBottom: 14,
   },
   modalCloseCircle: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
+    width: 30,
+    height: 30,
+    borderRadius: 15,
     backgroundColor: '#F1F5F9',
     justifyContent: 'center',
     alignItems: 'center',
+    flexShrink: 0,
   },
   modalCloseCross: {
     fontSize: 14,
@@ -1340,16 +1342,16 @@ const styles = StyleSheet.create({
     fontWeight: '800',
   },
   modalTitle: {
-    fontSize: 20,
+    fontSize: sFont(17.5),
     fontWeight: '800',
     color: '#171420',
     letterSpacing: -0.4,
     marginBottom: 3,
   },
   modalSubtitle: {
-    fontSize: 13,
+    fontSize: sFont(11.5),
     color: '#6B637B',
-    lineHeight: 18,
+    lineHeight: 16,
   },
   modalInputLabel: {
     fontSize: 11,
