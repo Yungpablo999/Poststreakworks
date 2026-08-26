@@ -1226,7 +1226,9 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
                 end={{ x: 1, y: 0 }}
                 style={styles.connectMatchGradient}
               >
-                <Text style={styles.connectMatchButtonText}>Connect &amp; View Creator Card ➔</Text>
+                <Text style={styles.connectMatchButtonText} numberOfLines={1}>
+                  {isNarrowScreen ? 'View Creator Card ➔' : 'Connect & View Creator Card ➔'}
+                </Text>
               </LinearGradient>
             </Pressable>
           </View>
@@ -2630,18 +2632,20 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.08,
     shadowRadius: 6,
     elevation: 3,
+    width: '100%',
   },
   connectMatchGradient: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    paddingHorizontal: 16,
+    paddingHorizontal: sPadding(8),
   },
   connectMatchButtonText: {
-    fontSize: 14,
+    fontSize: sFont(13),
     fontWeight: '800',
     color: '#FFFFFF',
     letterSpacing: 0.2,
+    textAlign: 'center',
   },
 
   // 9. PRO UPGRADE CARD
