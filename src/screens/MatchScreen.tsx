@@ -959,19 +959,19 @@ export const MatchScreen: React.FC<MatchScreenProps> = ({
                             { transform: [{ scale: pulseAnim }] },
                           ]}
                         />
-                        <Text style={styles.tinderLiveRadarText}>
+                        <Text style={styles.tinderLiveRadarText} numberOfLines={1}>
                           {currentCreator.tracking.statusText}
                         </Text>
                       </View>
 
                       {/* Top Right Group: Track Button + INFO ⓘ Button */}
-                      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                      <View style={styles.tinderTopRightGroup}>
                         <Pressable
                           style={[styles.onCardSaveBtn, isCurrentSaved && styles.onCardSaveBtnActive]}
                           onPress={() => handleToggleTrack(currentCreator)}
                           hitSlop={8}
                         >
-                          <Text style={{ fontSize: 14 }}>{isCurrentSaved ? '⭐' : '☆'}</Text>
+                          <Text style={{ fontSize: 13 }}>{isCurrentSaved ? '⭐' : '☆'}</Text>
                           <Text style={[styles.onCardSaveText, isCurrentSaved && styles.onCardSaveTextActive]}>
                             {isCurrentSaved ? 'Tracking' : 'Save'}
                           </Text>
@@ -2256,12 +2256,13 @@ const styles = StyleSheet.create({
   // TOP OVERLAYS ON CARD
   tinderTopOverlayRow: {
     position: 'absolute',
-    top: 16,
-    left: 16,
-    right: 16,
+    top: 12,
+    left: 12,
+    right: 12,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+    gap: 6,
     zIndex: 50,
   },
   tinderLiveRadarPill: {
@@ -2274,35 +2275,48 @@ const styles = StyleSheet.create({
     borderRadius: 100,
     borderWidth: 1,
     borderColor: 'rgba(255, 255, 255, 0.25)',
+    flex: 1,
+    flexShrink: 1,
+    maxWidth: '56%',
+    marginRight: 4,
   },
   pulseDotInner: {
     width: 6,
     height: 6,
     borderRadius: 3,
     backgroundColor: '#34D399',
+    flexShrink: 0,
   },
   tinderLiveRadarText: {
-    fontSize: 10.5,
+    fontSize: sFont(10),
     fontWeight: '700',
     color: '#34D399',
+    flexShrink: 1,
+  },
+  tinderTopRightGroup: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+    flexShrink: 0,
   },
   onCardSaveBtn: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
     backgroundColor: 'rgba(255, 255, 255, 0.92)',
-    paddingVertical: 3.5,
-    paddingHorizontal: 7,
+    paddingVertical: 4,
+    paddingHorizontal: 8,
     borderRadius: 100,
     borderWidth: 1,
     borderColor: 'rgba(235, 230, 248, 0.9)',
+    flexShrink: 0,
   },
   onCardSaveBtnActive: {
     backgroundColor: '#FEF3C7',
     borderColor: '#FDE68A',
   },
   onCardSaveText: {
-    fontSize: 10,
+    fontSize: sFont(10),
     fontWeight: '700',
     color: '#582CDB',
   },
@@ -2320,6 +2334,7 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(221, 214, 254, 0.9)',
     justifyContent: 'center',
     alignItems: 'center',
+    flexShrink: 0,
     shadowColor: '#582CDB',
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.1,
