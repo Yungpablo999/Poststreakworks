@@ -22,7 +22,12 @@ create table users (
   updated_at   timestamptz not null default now()
 );
 
--- Trigger: auto-create user row on signup
+-- Trigger: auto-create user row on signup. v1's live project already has an
+-- on_auth_user_created trigger + handle_new_user() function bootstrapping
+-- user_plans/user_streaks/referrals on signup (see
+-- 20260814000017_backfill_v1_legacy_data.sql's header) — replacing the
+-- function wholesale would silently break that for every new signup going
+-- forward. Preserved below, folded into the new schema's own bootstrap.
 create or replace function public.handle_new_user()
 returns trigger as $$
 begin
@@ -32,12 +37,21 @@ begin
     new.email,
     coalesce(new.raw_user_meta_data ->> 'full_name', new.raw_user_meta_data ->> 'name'),
     new.raw_user_meta_data ->> 'avatar_url'
-  );
+  )
+  on conflict (id) do nothing;
+
+  -- v1 bootstrap, preserved — see comment above.
+  insert into public.user_plans (user_id) values (new.id) on conflict do nothing;
+  insert into public.user_streaks (user_id) values (new.id) on conflict do nothing;
+  insert into public.referrals (referrer_user_id, referral_code)
+  values (new.id, lower(substr(md5(new.id::text || extract(epoch from now())::text), 1, 8)))
+  on conflict do nothing;
+
   return new;
 end;
 $$ language plpgsql security definer;
 
-create trigger on_auth_user_created
+create or replace trigger on_auth_user_created
   after insert on auth.users
   for each row execute function public.handle_new_user();
 

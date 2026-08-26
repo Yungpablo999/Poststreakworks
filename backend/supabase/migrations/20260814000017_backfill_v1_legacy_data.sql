@@ -82,7 +82,10 @@ select
   p.user_id,
   p.content,
   array[(case p.platform when 'x' then 'twitter' else p.platform end)::platform_type],
-  p.scheduled_at,
+  -- v1 allowed a null scheduled_at for posts published immediately with no
+  -- pre-scheduling (10 of 66 live rows); scheduled_posts.scheduled_at is
+  -- not null, so fall back to when it actually went out.
+  coalesce(p.scheduled_at, p.posted_at, p.created_at),
   p.status::post_status,
   p.posted_at,
   jsonb_build_object(
