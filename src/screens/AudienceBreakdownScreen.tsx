@@ -787,6 +787,7 @@ export const AudienceBreakdownScreen: React.FC<AudienceBreakdownScreenProps> = (
                             styles.barGainBadgeText,
                             isSelected && styles.barGainBadgeTextActive,
                           ]}
+                          numberOfLines={1}
                         >
                           {item.displayGain}
                         </Text>
@@ -1869,25 +1870,29 @@ const styles = StyleSheet.create({
   },
   barGainBadge: {
     backgroundColor: '#FFFFFF',
-    paddingVertical: 2,
-    paddingHorizontal: 4,
-    borderRadius: 6,
+    paddingVertical: 1.5,
+    paddingHorizontal: 2.5,
+    borderRadius: 4,
     borderWidth: 1,
     borderColor: '#EFECE6',
     marginBottom: 6,
+    alignItems: 'center',
+    justifyContent: 'center',
+    minWidth: 26,
   },
   barGainBadgeActive: {
     backgroundColor: '#582CDB',
     borderColor: '#582CDB',
   },
   barGainBadgeText: {
-    fontSize: 9,
+    fontSize: 8,
     fontWeight: '800',
     color: '#64748B',
+    textAlign: 'center',
   },
   barGainBadgeTextActive: {
     color: '#FFFFFF',
-    fontWeight: '700',
+    fontWeight: '800',
   },
   barPillTrack: {
     width: '100%',

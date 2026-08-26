@@ -819,8 +819,8 @@ export const ChallengeDetailScreen: React.FC<ChallengeDetailScreenProps> = ({
                       {plat === 'tiktok'
                         ? 'TikTok'
                         : plat === 'instagram'
-                        ? 'Instagram Reel'
-                        : 'YouTube Shorts'}
+                        ? 'Instagram'
+                        : 'YouTube'}
                     </Text>
                   </Pressable>
                 ))}
@@ -1343,14 +1343,14 @@ const styles = StyleSheet.create({
   requirementLeft: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 12,
+    gap: 10,
     flex: 1,
-    paddingRight: 10,
+    paddingRight: 6,
   },
   reqIconCircle: {
-    width: 34,
-    height: 34,
-    borderRadius: 17,
+    width: 32,
+    height: 32,
+    borderRadius: 16,
     backgroundColor: '#F7F5FC',
     justifyContent: 'center',
     alignItems: 'center',
@@ -1359,16 +1359,18 @@ const styles = StyleSheet.create({
     backgroundColor: '#ECE8F9',
   },
   requirementTitle: {
-    fontSize: 14,
+    fontSize: 13,
     fontWeight: '700',
     color: '#171420',
     flex: 1,
+    lineHeight: 18,
   },
   reqStatusPill: {
     backgroundColor: '#F3F4F6',
-    paddingVertical: 4,
-    paddingHorizontal: 10,
+    paddingVertical: 3.5,
+    paddingHorizontal: 8,
     borderRadius: 100,
+    flexShrink: 0,
   },
   reqStatusPillProgress: {
     backgroundColor: '#ECE8F9',
@@ -1793,9 +1795,10 @@ const styles = StyleSheet.create({
     borderColor: '#582CDB',
   },
   platformSelectBtnText: {
-    fontSize: 11,
+    fontSize: 11.5,
     fontWeight: '700',
     color: '#524C62',
+    textAlign: 'center',
   },
   platformSelectBtnTextActive: {
     color: '#FFFFFF',

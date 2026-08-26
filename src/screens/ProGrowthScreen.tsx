@@ -2151,14 +2151,14 @@ export const ProGrowthScreen: React.FC<ProGrowthScreenProps> = ({
                         <View style={[styles.platformIconCircle, { backgroundColor: plat.bgTint }]}>
                           <SocialBrandIcon platform={plat.id} size={22} />
                         </View>
-                        <View style={{ flex: 1 }}>
-                          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-                            <Text style={styles.platformNameText}>{plat.name}</Text>
+                        <View style={{ flex: 1, marginRight: 6 }}>
+                          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
+                            <Text style={styles.platformNameText} numberOfLines={1}>{plat.name}</Text>
                             <View style={styles.autoSyncBadge}>
-                              <Text style={styles.autoSyncText}>🟢 Auto-Sync</Text>
+                              <Text style={styles.autoSyncText}>🟢 Sync</Text>
                             </View>
                           </View>
-                          <Text style={styles.platformSubText}>
+                          <Text style={styles.platformSubText} numberOfLines={1}>
                             {plat.handle} • ⚡ {plat.followers}
                           </Text>
                         </View>
@@ -4088,31 +4088,33 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   platformNameText: {
-    fontSize: 13,
+    fontSize: 12.5,
     fontWeight: '800',
     color: '#171420',
   },
   autoSyncBadge: {
     backgroundColor: '#DCFCE7',
     paddingVertical: 1.5,
-    paddingHorizontal: 6,
+    paddingHorizontal: 5,
     borderRadius: 4,
+    flexShrink: 0,
   },
   autoSyncText: {
-    fontSize: 9,
+    fontSize: 8.5,
     fontWeight: '800',
     color: '#15803D',
   },
   platformSubText: {
-    fontSize: 11,
+    fontSize: 10.5,
     color: '#64748B',
     marginTop: 1,
   },
   removePlatformBtn: {
-    paddingVertical: 5,
-    paddingHorizontal: 10,
+    paddingVertical: 4,
+    paddingHorizontal: 8,
     borderRadius: 8,
     backgroundColor: '#FEE2E2',
+    flexShrink: 0,
   },
   removePlatformBtnText: {
     fontSize: 10,
