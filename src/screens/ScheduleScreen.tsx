@@ -20,6 +20,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { FloatingTabBar, TabType } from '../components/FloatingTabBar';
 import { UserProfileModal, UserProfileData } from '../components/UserProfileModal';
 import { AnimatedCompletionModal } from '../components/AnimatedCompletionModal';
+import { sFont, sPadding, moderateScale, isNarrowScreen } from '../utils/responsive';
 
 interface ScheduleScreenProps {
   onBack?: () => void;
@@ -1215,7 +1216,7 @@ const styles = StyleSheet.create({
   },
 
   scrollContent: {
-    paddingHorizontal: 20,
+    paddingHorizontal: sPadding(20),
     paddingTop: 8,
   },
 
@@ -1423,31 +1424,38 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     borderWidth: 1,
     borderColor: '#EFEBF8',
-    padding: 10,
+    paddingHorizontal: 4,
+    paddingVertical: 8,
     marginBottom: 20,
+    width: '100%',
   },
   calendarDayPill: {
-    width: 42,
-    paddingVertical: 10,
-    borderRadius: 14,
+    flex: 1,
+    marginHorizontal: 1.5,
+    paddingVertical: 8,
+    borderRadius: 12,
     alignItems: 'center',
+    justifyContent: 'center',
+    minWidth: 0,
   },
   calendarDayPillActive: {
     backgroundColor: '#582CDB',
   },
   calendarDayLetter: {
-    fontSize: 10,
+    fontSize: sFont(9.5),
     fontWeight: '800',
     color: '#64748B',
-    marginBottom: 4,
+    marginBottom: 2,
+    textAlign: 'center',
   },
   calendarDayLetterActive: {
     color: '#E0E7FF',
   },
   calendarDayNum: {
-    fontSize: 15,
+    fontSize: sFont(13.5),
     fontWeight: '700',
     color: '#171420',
+    textAlign: 'center',
   },
   calendarDayNumActive: {
     color: '#FFFFFF',
@@ -1457,7 +1465,7 @@ const styles = StyleSheet.create({
     height: 4,
     borderRadius: 2,
     backgroundColor: '#582CDB',
-    marginTop: 4,
+    marginTop: 3,
   },
 
   // 3. TODAY'S SCHEDULE
