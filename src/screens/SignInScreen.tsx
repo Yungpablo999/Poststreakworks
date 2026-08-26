@@ -556,7 +556,7 @@ export const SignInScreen: React.FC<SignInScreenProps> = ({
 
                 <TextInput
                   style={styles.textInput}
-                  placeholder="Enter your password"
+                  placeholder="Enter password"
                   placeholderTextColor="#A39BB5"
                   value={password}
                   onChangeText={setPassword}
@@ -892,11 +892,13 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(250, 248, 255, 0.95)',
   },
   inputIconContainer: {
-    marginRight: 10,
+    marginRight: 8,
     flexShrink: 0,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   eyeIconButton: {
-    padding: 6,
+    padding: 4,
     marginLeft: 4,
     flexShrink: 0,
     justifyContent: 'center',
@@ -905,11 +907,12 @@ const styles = StyleSheet.create({
   textInput: {
     flex: 1,
     minWidth: 0,
-    fontSize: 15,
+    fontSize: 14.5,
     fontWeight: '500',
     color: '#171420',
     paddingVertical: 0,
     paddingHorizontal: 0,
+    paddingRight: 6,
     ...(Platform.OS === 'web' ? { outlineStyle: 'none' as any } : {}),
   },
   submitButton: {

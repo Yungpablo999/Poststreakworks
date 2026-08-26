@@ -520,7 +520,7 @@ export const ResetPasswordScreen: React.FC<ResetPasswordScreenProps> = ({
 
                     <TextInput
                       style={styles.textInput}
-                      placeholder="At least 6 characters"
+                      placeholder="Min. 6 characters"
                       placeholderTextColor="#A39BB5"
                       value={newPassword}
                       onChangeText={setNewPassword}
@@ -591,7 +591,7 @@ export const ResetPasswordScreen: React.FC<ResetPasswordScreenProps> = ({
 
                     <TextInput
                       style={styles.textInput}
-                      placeholder="Repeat your password"
+                      placeholder="Confirm password"
                       placeholderTextColor="#A39BB5"
                       value={confirmPassword}
                       onChangeText={setConfirmPassword}
@@ -878,11 +878,13 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(250, 248, 255, 0.95)',
   },
   inputIconContainer: {
-    marginRight: 10,
+    marginRight: 8,
     flexShrink: 0,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   eyeIconButton: {
-    padding: 6,
+    padding: 4,
     marginLeft: 4,
     flexShrink: 0,
     justifyContent: 'center',
@@ -891,11 +893,12 @@ const styles = StyleSheet.create({
   textInput: {
     flex: 1,
     minWidth: 0,
-    fontSize: 15,
+    fontSize: 14.5,
     fontWeight: '500',
     color: '#171420',
     paddingVertical: 0,
     paddingHorizontal: 0,
+    paddingRight: 6,
     ...(Platform.OS === 'web' ? { outlineStyle: 'none' as any } : {}),
   },
   otpRow: {
