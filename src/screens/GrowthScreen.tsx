@@ -1260,8 +1260,8 @@ export const GrowthScreen: React.FC<GrowthScreenProps> = ({
             <View style={styles.modalCardLarge}>
               {/* Modal Top Header */}
               <View style={styles.modalHeaderRow}>
-                <View style={{ flex: 1 }}>
-                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                <View style={{ flex: 1, marginRight: 8 }}>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, flexWrap: 'wrap', marginBottom: 2 }}>
                     <Text style={styles.modalTitle}>Connected Platforms</Text>
                     <View style={styles.activePlatformsCountBadge}>
                       <Text style={styles.activePlatformsCountText}>
@@ -2278,25 +2278,28 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'flex-start',
     marginBottom: 14,
+    gap: 8,
   },
   modalCloseCircle: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
+    width: 28,
+    height: 28,
+    borderRadius: 14,
     backgroundColor: '#F1F5F9',
     justifyContent: 'center',
     alignItems: 'center',
+    flexShrink: 0,
+    marginTop: 2,
   },
   modalCloseCross: {
-    fontSize: 14,
+    fontSize: 13,
     color: '#64748B',
     fontWeight: '800',
   },
   modalTitle: {
-    fontSize: 20,
-    fontWeight: '800',
+    fontSize: 17,
+    fontWeight: '700',
     color: '#171420',
-    letterSpacing: -0.4,
+    letterSpacing: -0.3,
     marginBottom: 3,
   },
   modalSubtitle: {

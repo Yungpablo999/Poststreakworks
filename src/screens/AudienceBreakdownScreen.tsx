@@ -1202,8 +1202,8 @@ export const AudienceBreakdownScreen: React.FC<AudienceBreakdownScreenProps> = (
             <View style={styles.modalCardLarge}>
               {/* Modal Top Header */}
               <View style={styles.modalHeaderRow}>
-                <View style={{ flex: 1 }}>
-                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                <View style={{ flex: 1, marginRight: 8 }}>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, flexWrap: 'wrap', marginBottom: 2 }}>
                     <Text style={styles.modalTitle}>Connected Platforms</Text>
                     <View style={styles.activePlatformsCountBadge}>
                       <Text style={styles.activePlatformsCountText}>
@@ -2631,7 +2631,7 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   modalTitle: {
-    fontSize: 18,
+    fontSize: 17,
     fontWeight: '700',
     color: '#171420',
     letterSpacing: -0.3,
@@ -2653,12 +2653,14 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
   modalCloseCircle: {
-    width: 30,
-    height: 30,
-    borderRadius: 15,
+    width: 28,
+    height: 28,
+    borderRadius: 14,
     backgroundColor: '#F1F5F9',
     justifyContent: 'center',
     alignItems: 'center',
+    flexShrink: 0,
+    marginTop: 2,
   },
   modalCloseCross: {
     fontSize: 13,
