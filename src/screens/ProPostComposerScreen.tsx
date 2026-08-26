@@ -508,7 +508,7 @@ export const ProPostComposerScreen: React.FC<ProPostComposerScreenProps> = ({
           </View>
 
           <View style={styles.platformsGridRow}>
-            {PRO_PLATFORMS.slice(0, 3).map((platform) => {
+            {PRO_PLATFORMS.slice(0, 2).map((platform) => {
               const isSelected = selectedPlatforms.includes(platform.id);
               return (
                 <Pressable
@@ -1085,10 +1085,13 @@ const styles = StyleSheet.create({
   },
   platformsGridRow: {
     flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
     gap: 10,
   },
   platformCard: {
-    flex: 1,
+    width: '48.4%',
+    minHeight: 110,
     backgroundColor: '#FFFFFF',
     borderRadius: 16,
     padding: 14,

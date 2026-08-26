@@ -576,8 +576,8 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
 
   const unreadNotifCount = notificationsList.filter((n) => n.unread).length;
 
-  // Filter the display platforms: all selected ones + TikTok, Instagram, YouTube
-  const displayedPlatformIds = Array.from(new Set([...selectedPlatforms, 'tiktok', 'instagram', 'youtube']));
+  // Filter the display platforms: all selected ones + default top 2 (TikTok, Instagram)
+  const displayedPlatformIds = Array.from(new Set([...selectedPlatforms, 'tiktok', 'instagram']));
   const displayedPlatforms = ALL_AVAILABLE_PLATFORMS.filter((p) => displayedPlatformIds.includes(p.id));
 
   return (
@@ -1843,12 +1843,12 @@ const styles = StyleSheet.create({
   platformsRow: {
     flexDirection: 'row',
     flexWrap: 'wrap',
+    justifyContent: 'space-between',
     gap: 10,
     marginBottom: 8,
   },
   platformCard: {
-    flex: 1,
-    minWidth: 95,
+    width: '48.4%',
     minHeight: 116,
     backgroundColor: '#FFFFFF',
     borderRadius: 18,
