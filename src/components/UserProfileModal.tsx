@@ -16,6 +16,7 @@ import {
 import { LinearGradient } from 'expo-linear-gradient';
 import * as Haptics from 'expo-haptics';
 import Svg, { Path, Circle, Rect } from 'react-native-svg';
+import { sFont, sPadding, moderateScale, isNarrowScreen } from '../utils/responsive';
 
 export interface UserProfileData {
   name: string;
@@ -484,8 +485,9 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
                   styles.subTabText,
                   activeSubTab === 'profile' && styles.subTabTextActive,
                 ]}
+                numberOfLines={1}
               >
-                👤 Identity
+                👤 Profile
               </Text>
             </Pressable>
 
@@ -503,6 +505,7 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
                   styles.subTabText,
                   activeSubTab === 'socials' && styles.subTabTextActive,
                 ]}
+                numberOfLines={1}
               >
                 🔗 Socials
               </Text>
@@ -522,6 +525,7 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
                   styles.subTabText,
                   activeSubTab === 'verification' && styles.subTabTextActive,
                 ]}
+                numberOfLines={1}
               >
                 🪪 Verify
               </Text>
@@ -541,6 +545,7 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
                   styles.subTabText,
                   activeSubTab === 'settings' && styles.subTabTextActive,
                 ]}
+                numberOfLines={1}
               >
                 ⚙️ Settings
               </Text>
@@ -1297,10 +1302,12 @@ const styles = StyleSheet.create({
     marginBottom: 14,
     borderWidth: 1,
     borderColor: '#EFECE6',
+    width: '100%',
   },
   subTabItem: {
     flex: 1,
-    paddingVertical: 7,
+    paddingVertical: 6,
+    paddingHorizontal: 2,
     borderRadius: 9,
     justifyContent: 'center',
     alignItems: 'center',
@@ -1314,13 +1321,13 @@ const styles = StyleSheet.create({
     elevation: 2,
   },
   subTabText: {
-    fontSize: 12,
+    fontSize: sFont(10),
     fontWeight: '700',
     color: '#64748B',
   },
   subTabTextActive: {
     color: '#7C3AED',
-    fontWeight: '700',
+    fontWeight: '800',
   },
 
   scrollBody: {
