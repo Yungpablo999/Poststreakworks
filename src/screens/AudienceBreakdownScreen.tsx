@@ -212,24 +212,24 @@ export interface VelocityItem {
 
 const TIMEFRAME_DATA: Record<TimeframeMode, VelocityItem[]> = {
   '7d': [
-    { id: 'mon', label: 'Mon', fullDate: 'Monday, Aug 12', gain: 120, displayGain: '+120', barHeightRatio: 0.35, highlightText: 'Routine morning story post' },
-    { id: 'tue', label: 'Tue', fullDate: 'Tuesday, Aug 13', gain: 160, displayGain: '+160', barHeightRatio: 0.47, highlightText: 'Reel carousel reach boost' },
-    { id: 'wed', label: 'Wed', fullDate: 'Wednesday, Aug 14', gain: 140, displayGain: '+140', barHeightRatio: 0.41, highlightText: 'Collab comment exchange' },
-    { id: 'thu', label: 'Thu', fullDate: 'Thursday, Aug 15', gain: 340, displayGain: '+340', barHeightRatio: 1.0, highlightText: '⚡ Viral TikTok educational breakdown' },
-    { id: 'fri', label: 'Fri', fullDate: 'Friday, Aug 16', gain: 210, displayGain: '+210', barHeightRatio: 0.62, highlightText: 'High saves from Thursday surge' },
+    { id: 'mon', label: 'Mon', fullDate: 'Monday, Aug 12', gain: 120, displayGain: '+120', barHeightRatio: 0.35, highlightText: 'Morning story post' },
+    { id: 'tue', label: 'Tue', fullDate: 'Tuesday, Aug 13', gain: 160, displayGain: '+160', barHeightRatio: 0.47, highlightText: 'Reel reach boost' },
+    { id: 'wed', label: 'Wed', fullDate: 'Wednesday, Aug 14', gain: 140, displayGain: '+140', barHeightRatio: 0.41, highlightText: 'Collab comments' },
+    { id: 'thu', label: 'Thu', fullDate: 'Thursday, Aug 15', gain: 340, displayGain: '+340', barHeightRatio: 1.0, highlightText: '⚡ Viral TikTok breakdown' },
+    { id: 'fri', label: 'Fri', fullDate: 'Friday, Aug 16', gain: 210, displayGain: '+210', barHeightRatio: 0.62, highlightText: 'Surge saves boost' },
     { id: 'sat', label: 'Sat', fullDate: 'Saturday, Aug 17', gain: 180, displayGain: '+180', barHeightRatio: 0.53, highlightText: 'Weekend creator Q&A' },
     { id: 'sun', label: 'Sun', fullDate: 'Sunday, Aug 18', gain: 130, displayGain: '+130', barHeightRatio: 0.38, highlightText: 'Weekly summary reel' },
   ],
   '1m': [
-    { id: 'w1', label: 'W1', fullDate: 'Jul 21 - Jul 27', gain: 680, displayGain: '+680', barHeightRatio: 0.53, highlightText: 'Initial hook optimization experiment' },
-    { id: 'w2', label: 'W2', fullDate: 'Jul 28 - Aug 03', gain: 840, displayGain: '+840', barHeightRatio: 0.65, highlightText: 'Instagram Reels reach expanded' },
-    { id: 'w3', label: 'W3', fullDate: 'Aug 04 - Aug 10', gain: 1060, displayGain: '+1,060', barHeightRatio: 0.83, highlightText: 'Double posting schedule initiated' },
-    { id: 'w4', label: 'W4 (Now)', fullDate: 'Aug 11 - Aug 18', gain: 1280, displayGain: '+1,280', barHeightRatio: 1.0, highlightText: '⚡ Best month week recorded!' },
+    { id: 'w1', label: 'W1', fullDate: 'Jul 21 - Jul 27', gain: 680, displayGain: '+680', barHeightRatio: 0.53, highlightText: 'Hook experiment' },
+    { id: 'w2', label: 'W2', fullDate: 'Jul 28 - Aug 03', gain: 840, displayGain: '+840', barHeightRatio: 0.65, highlightText: 'Reels reach expanded' },
+    { id: 'w3', label: 'W3', fullDate: 'Aug 04 - Aug 10', gain: 1060, displayGain: '+1,060', barHeightRatio: 0.83, highlightText: 'Double posting schedule' },
+    { id: 'w4', label: 'W4 (Now)', fullDate: 'Aug 11 - Aug 18', gain: 1280, displayGain: '+1,280', barHeightRatio: 1.0, highlightText: '⚡ Best month week!' },
   ],
   '3m': [
-    { id: 'm1', label: 'Jun', fullDate: 'June 2026', gain: 2840, displayGain: '+2.8K', barHeightRatio: 0.54, highlightText: 'Foundational audience establishment' },
-    { id: 'm2', label: 'Jul', fullDate: 'July 2026', gain: 3950, displayGain: '+3.9K', barHeightRatio: 0.76, highlightText: 'Viral education series started' },
-    { id: 'm3', label: 'Aug (MTD)', fullDate: 'August 2026', gain: 5210, displayGain: '+5.2K', barHeightRatio: 1.0, highlightText: '⚡ Record multi-channel surge (+32%)' },
+    { id: 'm1', label: 'Jun', fullDate: 'June 2026', gain: 2840, displayGain: '+2.8K', barHeightRatio: 0.54, highlightText: 'Core audience base' },
+    { id: 'm2', label: 'Jul', fullDate: 'July 2026', gain: 3950, displayGain: '+3.9K', barHeightRatio: 0.76, highlightText: 'Viral series started' },
+    { id: 'm3', label: 'Aug (MTD)', fullDate: 'August 2026', gain: 5210, displayGain: '+5.2K', barHeightRatio: 1.0, highlightText: '⚡ Record multi-surge (+32%)' },
   ],
 };
 
@@ -753,8 +753,8 @@ export const AudienceBreakdownScreen: React.FC<AudienceBreakdownScreenProps> = (
 
             {/* Interactive Selected Detail Row */}
             <View style={styles.velocityContextRow}>
-              <Text style={styles.velocityContextDate}>{activeItem.fullDate}</Text>
-              <Text style={styles.velocityContextHighlight}>{activeItem.highlightText}</Text>
+              <Text style={styles.velocityContextDate} numberOfLines={1}>{activeItem.fullDate}</Text>
+              <Text style={styles.velocityContextHighlight} numberOfLines={1} ellipsizeMode="tail">{activeItem.highlightText}</Text>
             </View>
 
             {/* INTERACTIVE TIMELINE BARS (SINGLE-SELECT PURPLE GRADIENT) */}
@@ -1832,17 +1832,21 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+    gap: 8,
     marginBottom: 16,
   },
   velocityContextDate: {
     fontSize: 11,
     fontWeight: '700',
     color: '#64748B',
+    flexShrink: 0,
   },
   velocityContextHighlight: {
     fontSize: 11,
     fontWeight: '800',
     color: '#582CDB',
+    flex: 1,
+    textAlign: 'right',
   },
 
   // Velocity Bars Visualizer Container
@@ -1850,7 +1854,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#F8FAFC',
     borderRadius: 18,
     paddingVertical: 14,
-    paddingHorizontal: 8,
+    paddingHorizontal: 4,
     marginBottom: 16,
     borderWidth: 1,
     borderColor: '#EEF2F6',
@@ -1866,12 +1870,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'flex-end',
     height: '100%',
-    paddingHorizontal: 2,
+    paddingHorizontal: 0,
   },
   barGainBadge: {
     backgroundColor: '#FFFFFF',
     paddingVertical: 1.5,
-    paddingHorizontal: 2.5,
+    paddingHorizontal: 2,
     borderRadius: 4,
     borderWidth: 1,
     borderColor: '#EFECE6',
@@ -1879,16 +1883,18 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     minWidth: 26,
+    maxWidth: 38,
   },
   barGainBadgeActive: {
     backgroundColor: '#582CDB',
     borderColor: '#582CDB',
   },
   barGainBadgeText: {
-    fontSize: 8,
+    fontSize: 7.5,
     fontWeight: '800',
     color: '#64748B',
     textAlign: 'center',
+    letterSpacing: -0.3,
   },
   barGainBadgeTextActive: {
     color: '#FFFFFF',
