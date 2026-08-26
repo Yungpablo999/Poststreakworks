@@ -19,6 +19,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { FloatingTabBar, TabType } from '../components/FloatingTabBar';
 import { UserProfileModal, UserProfileData } from '../components/UserProfileModal';
 import { AnimatedCompletionModal } from '../components/AnimatedCompletionModal';
+import { sFont, sPadding, moderateScale, isNarrowScreen } from '../utils/responsive';
 
 interface CreateScreenProps {
   onLogout?: () => void;
@@ -591,15 +592,15 @@ export const CreateScreen: React.FC<CreateScreenProps> = ({
                 <View style={styles.flameIconCircle}>
                   <Text style={styles.flameEmoji}>🔥</Text>
                 </View>
-                <View>
-                  <Text style={styles.streakSaverTag}>STREAK SAVER</Text>
-                  <Text style={styles.streakDaysTitle}>47-day streak</Text>
+                <View style={styles.streakTitlesContainer}>
+                  <Text style={styles.streakSaverTag} numberOfLines={1}>STREAK SAVER</Text>
+                  <Text style={styles.streakDaysTitle} numberOfLines={1}>47-day streak</Text>
                 </View>
               </View>
 
               <View style={styles.activePill}>
                 <View style={styles.activeDot} />
-                <Text style={styles.activePillText}>Active</Text>
+                <Text style={styles.activePillText} numberOfLines={1}>Active</Text>
               </View>
             </View>
 
@@ -1471,7 +1472,7 @@ const styles = StyleSheet.create({
   },
 
   scrollContent: {
-    paddingHorizontal: 20,
+    paddingHorizontal: sPadding(20),
     paddingTop: 8,
   },
 
@@ -1528,49 +1529,59 @@ const styles = StyleSheet.create({
   // 1. HERO STREAK SAVER CARD (PURPLE & GOLD ACCENTS)
   streakSaverCard: {
     backgroundColor: '#FFFFFF',
-    borderRadius: 24,
+    borderRadius: 22,
     borderWidth: 1,
     borderColor: '#E9D5FF',
-    padding: 20,
+    padding: sPadding(16),
     marginBottom: 18,
     shadowColor: '#582CDB',
     shadowOffset: { width: 0, height: 6 },
     shadowOpacity: 0.08,
     shadowRadius: 16,
     elevation: 4,
+    overflow: 'hidden',
   },
   streakHeaderRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 14,
+    marginBottom: 12,
+    width: '100%',
   },
   streakLeftGroup: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 12,
+    gap: 8,
+    flex: 1,
+    marginRight: 8,
+    minWidth: 0,
   },
   flameIconCircle: {
-    width: 38,
-    height: 38,
-    borderRadius: 20,
+    width: 34,
+    height: 34,
+    borderRadius: 17,
     backgroundColor: '#FEF3C7',
     borderWidth: 1,
     borderColor: '#FDE68A',
     justifyContent: 'center',
     alignItems: 'center',
+    flexShrink: 0,
   },
   flameEmoji: {
-    fontSize: 18,
+    fontSize: 16,
+  },
+  streakTitlesContainer: {
+    flex: 1,
+    minWidth: 0,
   },
   streakSaverTag: {
-    fontSize: 11,
+    fontSize: sFont(10),
     fontWeight: '800',
     color: '#B45309',
-    letterSpacing: 0.6,
+    letterSpacing: 0.5,
   },
   streakDaysTitle: {
-    fontSize: 19,
+    fontSize: sFont(16.5),
     fontWeight: '800',
     color: '#171420',
     letterSpacing: -0.3,
@@ -1578,22 +1589,23 @@ const styles = StyleSheet.create({
   activePill: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
+    gap: 5,
     backgroundColor: '#F5F3FF',
     borderWidth: 1,
     borderColor: '#DDD6FE',
-    paddingVertical: 4,
-    paddingHorizontal: 10,
+    paddingVertical: 3.5,
+    paddingHorizontal: 8,
     borderRadius: 100,
+    flexShrink: 0,
   },
   activeDot: {
-    width: 6,
-    height: 6,
-    borderRadius: 3,
+    width: 5,
+    height: 5,
+    borderRadius: 2.5,
     backgroundColor: '#582CDB',
   },
   activePillText: {
-    fontSize: 11,
+    fontSize: sFont(10.5),
     fontWeight: '800',
     color: '#582CDB',
   },
