@@ -21,6 +21,7 @@ import { FloatingTabBar, TabType } from '../components/FloatingTabBar';
 import { BrandToast } from '../components/BrandToast';
 import { UserProfileModal, UserProfileData } from '../components/UserProfileModal';
 import { FreeAppHeader } from '../components/FreeAppHeader';
+import { sFont, isNarrowScreen } from '../utils/responsive';
 
 // AUTHENTIC BRAND SVG ICONS
 const TikTokSvg = ({ size = 18 }: { size?: number }) => (
@@ -1060,11 +1061,12 @@ const styles = StyleSheet.create({
   metricsGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 8,
+    justifyContent: 'space-between',
+    rowGap: 10,
     marginBottom: 14,
   },
   metricItem: {
-    width: '48.5%',
+    width: '48%',
     backgroundColor: '#FAF8F5',
     borderRadius: 14,
     padding: 12,
@@ -1072,14 +1074,14 @@ const styles = StyleSheet.create({
     borderColor: '#EDE8E1',
   },
   metricItemLabel: {
-    fontSize: 9,
+    fontSize: sFont(9),
     fontWeight: '700',
     color: '#64748B',
     letterSpacing: 0.4,
     marginBottom: 4,
   },
   metricItemValue: {
-    fontSize: 14,
+    fontSize: sFont(13.5),
     fontWeight: '700',
     color: '#171420',
   },
