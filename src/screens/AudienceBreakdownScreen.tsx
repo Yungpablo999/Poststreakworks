@@ -678,7 +678,7 @@ export const AudienceBreakdownScreen: React.FC<AudienceBreakdownScreenProps> = (
             <View style={styles.velocityCardTopRow}>
               <View style={styles.velocityTitleGroup}>
                 <View style={styles.velocityPulseDot} />
-                <Text style={styles.cardHeaderLabel}>AUDIENCE VELOCITY &amp; TRAFFIC</Text>
+                <Text style={styles.cardHeaderLabel} numberOfLines={1}>AUDIENCE VELOCITY</Text>
               </View>
 
               {/* TIMEFRAME TOGGLE CHIPS: 7D | 1M | 3M */}
@@ -1753,6 +1753,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
+    flex: 1,
+    marginRight: 8,
   },
   velocityPulseDot: {
     width: 7,
@@ -1763,14 +1765,15 @@ const styles = StyleSheet.create({
   timeframeChipsRow: {
     flexDirection: 'row',
     backgroundColor: '#F1F5F9',
-    borderRadius: 10,
+    borderRadius: 8,
     padding: 2,
     gap: 2,
+    flexShrink: 0,
   },
   timeframeChip: {
-    paddingVertical: 3,
-    paddingHorizontal: 9,
-    borderRadius: 8,
+    paddingVertical: 2.5,
+    paddingHorizontal: 7,
+    borderRadius: 6,
   },
   timeframeChipActive: {
     backgroundColor: '#FFFFFF',
@@ -1781,13 +1784,13 @@ const styles = StyleSheet.create({
     elevation: 1,
   },
   timeframeChipText: {
-    fontSize: 10,
+    fontSize: 9.5,
     fontWeight: '800',
     color: '#64748B',
   },
   timeframeChipTextActive: {
     color: '#582CDB',
-    fontWeight: '700',
+    fontWeight: '800',
   },
 
   // Velocity Hero Block
