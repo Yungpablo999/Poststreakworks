@@ -423,13 +423,13 @@ export const PostPerformanceScreen: React.FC<PostPerformanceScreenProps> = ({
 
             <View style={styles.recommendedMetaBox}>
               <View style={styles.recommendedMetaItem}>
-                <Text style={styles.metaLabel}>ESTIMATED REACH</Text>
-                <Text style={styles.metaValue}>18K - 32K Views</Text>
+                <Text style={styles.metaLabel} numberOfLines={1}>ESTIMATED REACH</Text>
+                <Text style={styles.metaValue} numberOfLines={1}>18K - 32K Views</Text>
               </View>
               <View style={styles.metaDivider} />
               <View style={styles.recommendedMetaItem}>
-                <Text style={styles.metaLabel}>BEST POSTING TIME</Text>
-                <Text style={styles.metaValue}>Tomorrow, 6:30 PM</Text>
+                <Text style={styles.metaLabel} numberOfLines={1}>BEST POSTING TIME</Text>
+                <Text style={styles.metaValue} numberOfLines={1}>Tomorrow, 6:30 PM</Text>
               </View>
             </View>
 
@@ -1446,9 +1446,11 @@ const styles = StyleSheet.create({
   },
   recommendedMetaBox: {
     flexDirection: 'row',
+    alignItems: 'center',
     backgroundColor: '#FAF8F5',
     borderRadius: 14,
-    padding: 10,
+    paddingVertical: 10,
+    paddingHorizontal: 8,
     marginBottom: 12,
     borderWidth: 1,
     borderColor: '#EDE8E1',
@@ -1456,22 +1458,26 @@ const styles = StyleSheet.create({
   recommendedMetaItem: {
     flex: 1,
     alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 4,
   },
   metaLabel: {
-    fontSize: 9,
+    fontSize: sFont(8.5),
     fontWeight: '700',
     color: '#64748B',
     letterSpacing: 0.4,
     marginBottom: 2,
+    textAlign: 'center',
   },
   metaValue: {
-    fontSize: 12,
+    fontSize: sFont(11.5),
     fontWeight: '800',
     color: '#171420',
+    textAlign: 'center',
   },
   metaDivider: {
     width: 1,
-    height: '80%',
+    height: 28,
     backgroundColor: '#E2E8F0',
     alignSelf: 'center',
   },
