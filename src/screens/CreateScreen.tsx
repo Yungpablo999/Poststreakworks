@@ -679,12 +679,12 @@ export const CreateScreen: React.FC<CreateScreenProps> = ({
               onPress={() => openNewPost()}
             >
               <View style={[styles.toolIconBox, { backgroundColor: '#582CDB' }]}>
-                <Svg width={20} height={20} viewBox="0 0 24 24" fill="none">
+                <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
                   <Path d="M12 5V19M5 12H19" stroke="#FFFFFF" strokeWidth="2.6" strokeLinecap="round" />
                 </Svg>
               </View>
-              <Text style={styles.toolTitle}>New Post</Text>
-              <Text style={styles.toolSubtitle}>Start from scratch</Text>
+              <Text style={styles.toolTitle} numberOfLines={1}>New Post</Text>
+              <Text style={styles.toolSubtitle} numberOfLines={1}>Start from scratch</Text>
             </Pressable>
 
             {/* Tool 2: Ideas */}
@@ -693,7 +693,7 @@ export const CreateScreen: React.FC<CreateScreenProps> = ({
               onPress={openIdeas}
             >
               <View style={[styles.toolIconBox, { backgroundColor: '#FEF3C7' }]}>
-                <Svg width={20} height={20} viewBox="0 0 24 24" fill="none">
+                <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
                   <Path
                     d="M12 2L14.4 7.6L20 10L14.4 12.4L12 18L9.6 12.4L4 10L9.6 7.6L12 2Z"
                     fill="#D97706"
@@ -704,8 +704,8 @@ export const CreateScreen: React.FC<CreateScreenProps> = ({
                   />
                 </Svg>
               </View>
-              <Text style={styles.toolTitle}>Ideas</Text>
-              <Text style={styles.toolSubtitle}>Find your next angle</Text>
+              <Text style={styles.toolTitle} numberOfLines={1}>Ideas</Text>
+              <Text style={styles.toolSubtitle} numberOfLines={1}>Find your next angle</Text>
             </Pressable>
 
             {/* Tool 3: Script */}
@@ -714,7 +714,7 @@ export const CreateScreen: React.FC<CreateScreenProps> = ({
               onPress={openScript}
             >
               <View style={[styles.toolIconBox, { backgroundColor: '#EDE9FE' }]}>
-                <Svg width={20} height={20} viewBox="0 0 24 24" fill="none">
+                <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
                   <Path
                     d="M19.82 2H4.18C2.97 2 2 2.97 2 4.18v15.64C2 21.03 2.97 22 4.18 22h15.64c1.21 0 2.18-.97 2.18-2.18V4.18C22 2.97 21.03 2 19.82 2z"
                     stroke="#582CDB"
@@ -723,8 +723,8 @@ export const CreateScreen: React.FC<CreateScreenProps> = ({
                   <Path d="M7 2v20M17 2v20M2 12h20M2 7h5M2 17h5M17 7h5M17 17h5" stroke="#582CDB" strokeWidth="2.2" />
                 </Svg>
               </View>
-              <Text style={styles.toolTitle}>Script</Text>
-              <Text style={styles.toolSubtitle}>Build a story</Text>
+              <Text style={styles.toolTitle} numberOfLines={1}>Script</Text>
+              <Text style={styles.toolSubtitle} numberOfLines={1}>Build a story</Text>
             </Pressable>
 
             {/* Tool 4: Caption */}
@@ -735,8 +735,8 @@ export const CreateScreen: React.FC<CreateScreenProps> = ({
               <View style={[styles.toolIconBox, { backgroundColor: '#EDE9FE' }]}>
                 <Text style={[styles.quoteIconText, { color: '#582CDB' }]}>99</Text>
               </View>
-              <Text style={styles.toolTitle}>Caption</Text>
-              <Text style={styles.toolSubtitle}>Write in your voice</Text>
+              <Text style={styles.toolTitle} numberOfLines={1}>Caption</Text>
+              <Text style={styles.toolSubtitle} numberOfLines={1}>Write in your voice</Text>
             </Pressable>
           </View>
 
@@ -1724,16 +1724,18 @@ const styles = StyleSheet.create({
   toolsGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 12,
+    justifyContent: 'space-between',
+    rowGap: 10,
     marginBottom: 18,
+    width: '100%',
   },
   toolGridCard: {
-    width: '48%',
+    width: '48.2%',
     backgroundColor: '#FFFFFF',
-    borderRadius: 20,
+    borderRadius: 18,
     borderWidth: 1,
     borderColor: '#E9D5FF',
-    padding: 16,
+    padding: sPadding(12),
     shadowColor: '#582CDB',
     shadowOffset: { width: 0, height: 3 },
     shadowOpacity: 0.04,
@@ -1741,26 +1743,26 @@ const styles = StyleSheet.create({
     elevation: 2,
   },
   toolIconBox: {
-    width: 38,
-    height: 38,
-    borderRadius: 12,
+    width: 34,
+    height: 34,
+    borderRadius: 10,
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 12,
+    marginBottom: 8,
   },
   quoteIconText: {
-    fontSize: 16,
-    fontWeight: '700',
+    fontSize: 15,
+    fontWeight: '800',
     color: '#582CDB',
   },
   toolTitle: {
-    fontSize: 15,
+    fontSize: sFont(13.5),
     fontWeight: '800',
     color: '#171420',
     marginBottom: 2,
   },
   toolSubtitle: {
-    fontSize: 12,
+    fontSize: sFont(11),
     color: '#6B7280',
     fontWeight: '500',
   },
