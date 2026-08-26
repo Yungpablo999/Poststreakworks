@@ -23,6 +23,7 @@ import { BrandToast } from '../components/BrandToast';
 import { UserProfileModal, UserProfileData } from '../components/UserProfileModal';
 import { AnimatedCompletionModal } from '../components/AnimatedCompletionModal';
 import { FreeAppHeader } from '../components/FreeAppHeader';
+import { sFont, sPadding, isNarrowScreen } from '../utils/responsive';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const SWIPE_THRESHOLD = 95;
@@ -752,22 +753,22 @@ export const MatchScreen: React.FC<MatchScreenProps> = ({
             <View style={styles.trackingStatsBar}>
               <View style={styles.trackingStatItem}>
                 <Text style={styles.trackingStatVal}>⭐ {matchesLeft}/5</Text>
-                <Text style={styles.trackingStatLbl}>Matches Left</Text>
+                <Text style={styles.trackingStatLbl} numberOfLines={1}>Matches</Text>
               </View>
               <View style={styles.trackingStatDivider} />
               <View style={styles.trackingStatItem}>
                 <Text style={styles.trackingStatVal}>📩 {incomingRequests.length}</Text>
-                <Text style={styles.trackingStatLbl}>Requests</Text>
+                <Text style={styles.trackingStatLbl} numberOfLines={1}>Requests</Text>
               </View>
               <View style={styles.trackingStatDivider} />
               <View style={styles.trackingStatItem}>
                 <Text style={styles.trackingStatVal}>📡 {savedCreators.length}</Text>
-                <Text style={styles.trackingStatLbl}>Tracked</Text>
+                <Text style={styles.trackingStatLbl} numberOfLines={1}>Tracked</Text>
               </View>
               <View style={styles.trackingStatDivider} />
               <View style={styles.trackingStatItem}>
                 <Text style={styles.trackingStatVal}>💜 {connectedCreators.length}</Text>
-                <Text style={styles.trackingStatLbl}>Connected</Text>
+                <Text style={styles.trackingStatLbl} numberOfLines={1}>Connected</Text>
               </View>
             </View>
           </View>
@@ -2048,7 +2049,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(255, 255, 255, 0.95)',
     borderRadius: 18,
     paddingVertical: 12,
-    paddingHorizontal: 14,
+    paddingHorizontal: 8,
     borderWidth: 1.2,
     borderColor: 'rgba(235, 230, 248, 0.95)',
     alignItems: 'center',
@@ -2063,17 +2064,20 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
+    paddingHorizontal: 2,
   },
   trackingStatVal: {
-    fontSize: 14,
+    fontSize: sFont(13.5),
     fontWeight: '800',
     color: '#171420',
     marginBottom: 2,
+    textAlign: 'center',
   },
   trackingStatLbl: {
-    fontSize: 10,
+    fontSize: sFont(10),
     fontWeight: '600',
     color: '#7F7894',
+    textAlign: 'center',
   },
   trackingStatDivider: {
     width: 1,
