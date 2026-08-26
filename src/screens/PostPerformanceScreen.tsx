@@ -1740,11 +1740,12 @@ const styles = StyleSheet.create({
   repurposeGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 8,
+    justifyContent: 'space-between',
+    rowGap: 10,
     marginBottom: 12,
   },
   repurposeGridItem: {
-    width: '48.5%',
+    width: '48%',
     backgroundColor: '#FAF8F5',
     borderRadius: 14,
     padding: 9,
@@ -1759,14 +1760,14 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   repurposeItemTitle: {
-    fontSize: 10.5,
+    fontSize: sFont(10.5),
     fontWeight: '800',
     color: '#171420',
     flex: 1,
     marginRight: 4,
   },
   repurposeFitBadge: {
-    fontSize: 7.5,
+    fontSize: sFont(7.5),
     fontWeight: '800',
     color: '#059669',
     backgroundColor: '#ECFDF5',
@@ -1776,7 +1777,7 @@ const styles = StyleSheet.create({
     flexShrink: 0,
   },
   repurposeFitBadgeMedium: {
-    fontSize: 7.5,
+    fontSize: sFont(7.5),
     fontWeight: '800',
     color: '#B45309',
     backgroundColor: '#FEF3C7',
@@ -1786,14 +1787,14 @@ const styles = StyleSheet.create({
     flexShrink: 0,
   },
   repurposeSnippetText: {
-    fontSize: 10,
+    fontSize: sFont(10),
     color: '#64748B',
     fontStyle: 'italic',
     lineHeight: 14,
     marginVertical: 4,
   },
   repurposeLockTag: {
-    fontSize: 9,
+    fontSize: sFont(9),
     fontWeight: '700',
     color: '#A16207',
     marginTop: 2,
