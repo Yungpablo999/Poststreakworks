@@ -19,6 +19,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { FloatingTabBar, TabType } from '../components/FloatingTabBar';
 import { UserProfileModal, UserProfileData } from '../components/UserProfileModal';
 import { AnimatedCompletionModal } from '../components/AnimatedCompletionModal';
+import { sFont, sPadding, moderateScale, isNarrowScreen } from '../utils/responsive';
 
 interface MissionDetailScreenProps {
   onBackToDashboard?: () => void;
@@ -324,7 +325,9 @@ export const MissionDetailScreen: React.FC<MissionDetailScreenProps> = ({
 
             <View style={styles.suggestedFooterRow}>
               <View style={styles.bestTimeRow}>
-                <Text style={styles.bestTimeText}>🕒 Best time: 7:30 PM</Text>
+                <Text style={styles.bestTimeText} numberOfLines={1}>
+                  {isNarrowScreen ? '🕒 7:30 PM' : '🕒 Best time: 7:30 PM'}
+                </Text>
               </View>
 
               <Pressable
@@ -335,7 +338,7 @@ export const MissionDetailScreen: React.FC<MissionDetailScreenProps> = ({
                   setShowCreateModal(true);
                 }}
               >
-                <Text style={styles.useThisIdeaBtnText}>Use This Idea</Text>
+                <Text style={styles.useThisIdeaBtnText} numberOfLines={1}>Use This Idea</Text>
               </Pressable>
             </View>
           </View>
@@ -823,7 +826,7 @@ const styles = StyleSheet.create({
   },
 
   scrollContent: {
-    paddingHorizontal: 20,
+    paddingHorizontal: sPadding(20),
     paddingTop: 8,
   },
 
@@ -1030,14 +1033,15 @@ const styles = StyleSheet.create({
   // 3. SUGGESTED IDEA CARD (ROYAL PURPLE)
   suggestedIdeaCard: {
     backgroundColor: '#582CDB',
-    borderRadius: 24,
-    padding: 20,
+    borderRadius: 22,
+    padding: sPadding(16),
     marginBottom: 18,
     shadowColor: '#582CDB',
     shadowOffset: { width: 0, height: 6 },
     shadowOpacity: 0.12,
     shadowRadius: 14,
     elevation: 4,
+    overflow: 'hidden',
   },
   suggestedHeaderRow: {
     flexDirection: 'row',
@@ -1046,40 +1050,45 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   suggestedIdeaTag: {
-    fontSize: 11,
+    fontSize: sFont(10),
     fontWeight: '800',
     color: '#E0E7FF',
     letterSpacing: 0.6,
   },
   suggestedQuote: {
-    fontSize: 18,
+    fontSize: sFont(15.5),
     fontWeight: '800',
     color: '#FFFFFF',
-    lineHeight: 25,
-    marginBottom: 18,
+    lineHeight: 22,
+    marginBottom: 16,
   },
   suggestedFooterRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+    width: '100%',
+    gap: 8,
   },
   bestTimeRow: {
+    flex: 1,
+    minWidth: 0,
     flexDirection: 'row',
     alignItems: 'center',
   },
   bestTimeText: {
-    fontSize: 12,
+    fontSize: sFont(11),
     fontWeight: '700',
     color: '#E0E7FF',
   },
   useThisIdeaBtn: {
     backgroundColor: '#FFFFFF',
-    paddingVertical: 8,
-    paddingHorizontal: 16,
+    paddingVertical: 7,
+    paddingHorizontal: 12,
     borderRadius: 100,
+    flexShrink: 0,
   },
   useThisIdeaBtnText: {
-    fontSize: 12.5,
+    fontSize: sFont(11.5),
     fontWeight: '800',
     color: '#582CDB',
   },
