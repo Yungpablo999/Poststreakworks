@@ -19,6 +19,7 @@ import { FloatingTabBar, TabType } from '../components/FloatingTabBar';
 import { BrandToast } from '../components/BrandToast';
 import { UserProfileModal, UserProfileData } from '../components/UserProfileModal';
 import { AnimatedCompletionModal } from '../components/AnimatedCompletionModal';
+import { sFont, sPadding, moderateScale, isNarrowScreen } from '../utils/responsive';
 
 interface JarvisProScreenProps {
   onLogout?: () => void;
@@ -452,7 +453,7 @@ export const JarvisProScreen: React.FC<JarvisProScreenProps> = ({
             {/* Feature 1: AI Strategy */}
             <View style={styles.featureGridCard}>
               <View style={styles.featureIconContainer}>
-                <Svg width={20} height={20} viewBox="0 0 24 24" fill="none">
+                <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
                   <Path
                     d="M12 2L14.4 7.6L20 10L14.4 12.4L12 18L9.6 12.4L4 10L9.6 7.6L12 2Z"
                     stroke="#582CDB"
@@ -469,8 +470,8 @@ export const JarvisProScreen: React.FC<JarvisProScreenProps> = ({
                   />
                 </Svg>
               </View>
-              <Text style={styles.featureTitle}>AI Strategy</Text>
-              <Text style={styles.featureDescription}>
+              <Text style={styles.featureTitle} numberOfLines={1}>AI Strategy</Text>
+              <Text style={styles.featureDescription} numberOfLines={3}>
                 Custom roadmap based on your niche.
               </Text>
             </View>
@@ -478,7 +479,7 @@ export const JarvisProScreen: React.FC<JarvisProScreenProps> = ({
             {/* Feature 2: Script Generator */}
             <View style={styles.featureGridCard}>
               <View style={styles.featureIconContainer}>
-                <Svg width={20} height={20} viewBox="0 0 24 24" fill="none">
+                <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
                   <Path
                     d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"
                     stroke="#582CDB"
@@ -491,8 +492,8 @@ export const JarvisProScreen: React.FC<JarvisProScreenProps> = ({
                   <Path d="M16 17H8" stroke="#784DF0" strokeWidth="2" strokeLinecap="round" />
                 </Svg>
               </View>
-              <Text style={styles.featureTitle}>Script Generator</Text>
-              <Text style={styles.featureDescription}>
+              <Text style={styles.featureTitle} numberOfLines={1}>Script Generator</Text>
+              <Text style={styles.featureDescription} numberOfLines={3}>
                 Viral hooks generated in your style.
               </Text>
             </View>
@@ -500,7 +501,7 @@ export const JarvisProScreen: React.FC<JarvisProScreenProps> = ({
             {/* Feature 3: Growth Radar */}
             <View style={styles.featureGridCard}>
               <View style={styles.featureIconContainer}>
-                <Svg width={20} height={20} viewBox="0 0 24 24" fill="none">
+                <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
                   <Path
                     d="M3 3v18h18"
                     stroke="#582CDB"
@@ -517,8 +518,8 @@ export const JarvisProScreen: React.FC<JarvisProScreenProps> = ({
                   />
                 </Svg>
               </View>
-              <Text style={styles.featureTitle}>Growth Radar</Text>
-              <Text style={styles.featureDescription}>
+              <Text style={styles.featureTitle} numberOfLines={1}>Growth Radar</Text>
+              <Text style={styles.featureDescription} numberOfLines={3}>
                 Competitor analysis and trend alerts.
               </Text>
             </View>
@@ -526,7 +527,7 @@ export const JarvisProScreen: React.FC<JarvisProScreenProps> = ({
             {/* Feature 4: Match Tier */}
             <View style={styles.featureGridCard}>
               <View style={styles.featureIconContainer}>
-                <Svg width={20} height={20} viewBox="0 0 24 24" fill="none">
+                <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
                   <Circle cx="9" cy="7" r="4" stroke="#582CDB" strokeWidth="2" />
                   <Path
                     d="M3 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2"
@@ -541,8 +542,8 @@ export const JarvisProScreen: React.FC<JarvisProScreenProps> = ({
                   />
                 </Svg>
               </View>
-              <Text style={styles.featureTitle}>Match Tier</Text>
-              <Text style={styles.featureDescription}>
+              <Text style={styles.featureTitle} numberOfLines={1}>Match Tier</Text>
+              <Text style={styles.featureDescription} numberOfLines={3}>
                 Deep affinity scores for collaborations.
               </Text>
             </View>
@@ -550,7 +551,7 @@ export const JarvisProScreen: React.FC<JarvisProScreenProps> = ({
             {/* Feature 5: Squad Missions */}
             <View style={styles.featureGridCard}>
               <View style={styles.featureIconContainer}>
-                <Svg width={20} height={20} viewBox="0 0 24 24" fill="none">
+                <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
                   <Path
                     d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"
                     stroke="#582CDB"
@@ -563,8 +564,8 @@ export const JarvisProScreen: React.FC<JarvisProScreenProps> = ({
                   />
                 </Svg>
               </View>
-              <Text style={styles.featureTitle}>Squad Missions</Text>
-              <Text style={styles.featureDescription}>
+              <Text style={styles.featureTitle} numberOfLines={1}>Squad Missions</Text>
+              <Text style={styles.featureDescription} numberOfLines={3}>
                 Exclusive high-stakes missions.
               </Text>
             </View>
@@ -572,7 +573,7 @@ export const JarvisProScreen: React.FC<JarvisProScreenProps> = ({
             {/* Feature 6: Accountability */}
             <View style={styles.featureGridCard}>
               <View style={styles.featureIconContainer}>
-                <Svg width={20} height={20} viewBox="0 0 24 24" fill="none">
+                <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
                   <Path
                     d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"
                     stroke="#582CDB"
@@ -589,8 +590,8 @@ export const JarvisProScreen: React.FC<JarvisProScreenProps> = ({
                   />
                 </Svg>
               </View>
-              <Text style={styles.featureTitle}>Accountability</Text>
-              <Text style={styles.featureDescription}>
+              <Text style={styles.featureTitle} numberOfLines={1}>Accountability</Text>
+              <Text style={styles.featureDescription} numberOfLines={3}>
                 Readiness audits and streak protection.
               </Text>
             </View>
@@ -892,7 +893,7 @@ const styles = StyleSheet.create({
     width: '100%',
   },
   scrollContent: {
-    paddingHorizontal: 20,
+    paddingHorizontal: sPadding(20),
     paddingTop: 10,
     paddingBottom: 130,
   },
@@ -1115,14 +1116,16 @@ const styles = StyleSheet.create({
   featuresGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 12,
+    justifyContent: 'space-between',
+    rowGap: 10,
     marginBottom: 24,
+    width: '100%',
   },
   featureGridCard: {
-    width: '48%',
+    width: '48.2%',
     backgroundColor: '#FFFFFF',
-    borderRadius: 20,
-    padding: 16,
+    borderRadius: 18,
+    padding: sPadding(12),
     borderWidth: 1.2,
     borderColor: '#E8E3FA',
     shadowColor: '#582CDB',
@@ -1130,28 +1133,29 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.05,
     shadowRadius: 10,
     elevation: 2,
+    overflow: 'hidden',
   },
   featureIconContainer: {
-    width: 36,
-    height: 36,
+    width: 34,
+    height: 34,
     borderRadius: 10,
     backgroundColor: '#FAF8FF',
     justifyContent: 'center',
     alignItems: 'center',
     borderWidth: 1,
     borderColor: '#EDE8FC',
-    marginBottom: 10,
+    marginBottom: 8,
   },
   featureTitle: {
-    fontSize: 14,
+    fontSize: sFont(12.5),
     fontWeight: '800',
     color: '#171420',
-    marginBottom: 4,
+    marginBottom: 3,
   },
   featureDescription: {
-    fontSize: 12,
+    fontSize: sFont(10.5),
     color: '#7F7894',
-    lineHeight: 16,
+    lineHeight: 14.5,
     fontWeight: '500',
   },
 
