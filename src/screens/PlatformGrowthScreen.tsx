@@ -449,12 +449,12 @@ export const PlatformGrowthScreen: React.FC<PlatformGrowthScreenProps> = ({
           {/* CARD 2: REDESIGNED PREMIUM WEEKLY COMPARISON */}
           <View style={styles.weeklyCard}>
             <View style={styles.weeklyHeaderRow}>
-              <View>
-                <Text style={styles.weeklyTitle}>Weekly Comparison</Text>
-                <Text style={styles.weeklySubtitle}>Velocity &amp; share of new audience</Text>
+              <View style={{ flex: 1, marginRight: 8 }}>
+                <Text style={styles.weeklyTitle} numberOfLines={1}>Weekly Comparison</Text>
+                <Text style={styles.weeklySubtitle} numberOfLines={1}>Velocity &amp; share of new audience</Text>
               </View>
               <View style={styles.weeklyPillBadge}>
-                <Text style={styles.weeklyPillBadgeText}>⚡ 7-DAY VOLUME</Text>
+                <Text style={styles.weeklyPillBadgeText}>⚡ 7D VOLUME</Text>
               </View>
             </View>
 
@@ -1447,8 +1447,10 @@ const styles = StyleSheet.create({
     borderRadius: 24,
     borderWidth: 1,
     borderColor: '#EDE8E1',
-    padding: 18,
+    paddingVertical: 18,
+    paddingHorizontal: 16,
     marginBottom: 18,
+    overflow: 'hidden',
     shadowColor: '#171420',
     shadowOffset: { width: 0, height: 6 },
     shadowOpacity: 0.05,
@@ -1460,29 +1462,33 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'flex-start',
     marginBottom: 12,
+    gap: 8,
+    paddingRight: 6,
   },
   weeklyTitle: {
-    fontSize: 17,
-    fontWeight: '700',
+    fontSize: 16.5,
+    fontWeight: '800',
     color: '#171420',
     letterSpacing: -0.3,
   },
   weeklySubtitle: {
-    fontSize: 12,
+    fontSize: 11.5,
     color: '#64748B',
     marginTop: 2,
   },
   weeklyPillBadge: {
     backgroundColor: '#EDE9FE',
-    paddingVertical: 4,
-    paddingHorizontal: 8,
+    paddingVertical: 3,
+    paddingHorizontal: 7,
     borderRadius: 6,
+    flexShrink: 0,
+    marginTop: 2,
   },
   weeklyPillBadgeText: {
-    fontSize: 9,
-    fontWeight: '700',
+    fontSize: 8.5,
+    fontWeight: '800',
     color: '#582CDB',
-    letterSpacing: 0.4,
+    letterSpacing: 0.3,
   },
   weeklySpotlightBox: {
     flexDirection: 'row',
