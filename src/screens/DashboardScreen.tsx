@@ -1327,7 +1327,7 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
                     onPress={() => setNotifFilter('all')}
                     style={[styles.notifFilterPill, notifFilter === 'all' && styles.notifFilterPillActive]}
                   >
-                    <Text style={[styles.notifFilterText, notifFilter === 'all' && styles.notifFilterTextActive]}>
+                    <Text style={[styles.notifFilterText, notifFilter === 'all' && styles.notifFilterTextActive]} numberOfLines={1}>
                       All ({notifications.length})
                     </Text>
                   </Pressable>
@@ -1336,7 +1336,7 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
                     onPress={() => setNotifFilter('unread')}
                     style={[styles.notifFilterPill, notifFilter === 'unread' && styles.notifFilterPillActive]}
                   >
-                    <Text style={[styles.notifFilterText, notifFilter === 'unread' && styles.notifFilterTextActive]}>
+                    <Text style={[styles.notifFilterText, notifFilter === 'unread' && styles.notifFilterTextActive]} numberOfLines={1}>
                       Unread ({unreadCount})
                     </Text>
                   </Pressable>
@@ -1345,7 +1345,7 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
                     onPress={() => setNotifFilter('quests')}
                     style={[styles.notifFilterPill, notifFilter === 'quests' && styles.notifFilterPillActive]}
                   >
-                    <Text style={[styles.notifFilterText, notifFilter === 'quests' && styles.notifFilterTextActive]}>
+                    <Text style={[styles.notifFilterText, notifFilter === 'quests' && styles.notifFilterTextActive]} numberOfLines={1}>
                       Quests
                     </Text>
                   </Pressable>
@@ -1353,7 +1353,9 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
 
                 {unreadCount > 0 && (
                   <Pressable onPress={handleMarkAllNotifsRead} hitSlop={6}>
-                    <Text style={styles.markAllReadText}>Mark all read</Text>
+                    <Text style={styles.markAllReadText} numberOfLines={1}>
+                      {isNarrowScreen ? 'Mark all' : 'Mark all read'}
+                    </Text>
                   </Pressable>
                 )}
               </View>
@@ -2789,9 +2791,9 @@ const styles = StyleSheet.create({
     maxHeight: '85%',
     backgroundColor: 'rgba(255, 255, 255, 0.96)',
     borderRadius: 28,
-    paddingTop: 22,
-    paddingHorizontal: 18,
-    paddingBottom: 18,
+    paddingTop: sPadding(18),
+    paddingHorizontal: sPadding(14),
+    paddingBottom: sPadding(14),
     shadowColor: '#171420',
     shadowOffset: { width: 0, height: 16 },
     shadowOpacity: 0.15,
@@ -2812,7 +2814,7 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   notifModalMainTitle: {
-    fontSize: 20,
+    fontSize: sFont(18),
     fontWeight: '700',
     color: '#171420',
     letterSpacing: -0.4,
@@ -2837,25 +2839,29 @@ const styles = StyleSheet.create({
     paddingBottom: 8,
     borderBottomWidth: 1,
     borderBottomColor: 'rgba(243, 238, 251, 0.8)',
+    width: '100%',
   },
   notifFiltersRow: {
     flexDirection: 'row',
-    gap: 6,
+    gap: 4,
+    alignItems: 'center',
+    flexShrink: 1,
   },
   notifFilterPill: {
-    paddingVertical: 4.5,
-    paddingHorizontal: 10,
+    paddingVertical: 3.5,
+    paddingHorizontal: 7,
     borderRadius: 100,
     backgroundColor: 'rgba(250, 248, 255, 0.8)',
     borderWidth: 1,
     borderColor: 'rgba(237, 232, 252, 0.9)',
+    flexShrink: 0,
   },
   notifFilterPillActive: {
     backgroundColor: 'rgba(237, 232, 252, 0.95)',
     borderColor: '#582CDB',
   },
   notifFilterText: {
-    fontSize: 11,
+    fontSize: sFont(10),
     fontWeight: '600',
     color: '#7F7894',
   },
@@ -2864,9 +2870,10 @@ const styles = StyleSheet.create({
     fontWeight: '700',
   },
   markAllReadText: {
-    fontSize: 11,
+    fontSize: sFont(10),
     fontWeight: '700',
     color: '#582CDB',
+    flexShrink: 0,
   },
   notifScrollView: {
     maxHeight: 360,
