@@ -20,6 +20,7 @@ import { FloatingTabBar, TabType } from '../components/FloatingTabBar';
 import { BrandToast } from '../components/BrandToast';
 import { UserProfileModal, UserProfileData } from '../components/UserProfileModal';
 import { AnimatedCompletionModal } from '../components/AnimatedCompletionModal';
+import { FreeAppHeader } from '../components/FreeAppHeader';
 import { sFont, sPadding, moderateScale, isNarrowScreen } from '../utils/responsive';
 
 interface PostPerformanceScreenProps {
@@ -149,127 +150,27 @@ export const PostPerformanceScreen: React.FC<PostPerformanceScreenProps> = ({
         {/* TOAST BANNER */}
         <BrandToast message={toastMessage} />
 
-        {/* 1. TOP HEADER BAR (EXACT ICONS & BEHAVIOR AS ALL OTHER PAGES) */}
-        <View style={styles.header}>
-          <View style={styles.headerLeft}>
-            <Pressable
-              style={({ pressed }) => [styles.backBtn, pressed && styles.btnPressed]}
-              onPress={() => {
-                if (Platform.OS !== 'web') {
-                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                }
-                onBack();
-              }}
-              hitSlop={8}
-            >
-              <Svg width={20} height={20} viewBox="0 0 24 24" fill="none">
-                <Path
-                  d="M19 12H5M12 19l-7-7 7-7"
-                  stroke="#171420"
-                  strokeWidth="2.2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </Svg>
-            </Pressable>
-
-            <Animated.View
-              style={[
-                styles.headerLogoWrapper,
-                { transform: [{ translateY: flameFloatY }] },
-              ]}
-            >
-              <Image
-                source={require('../../assets/images/jarvis-ghost-clean.png')}
-                style={styles.headerGhostLogo}
-                resizeMode="contain"
-              />
-            </Animated.View>
-          </View>
-
-          <View style={styles.headerCenter}>
-            <Text style={styles.headerTitleText}>Post Performance</Text>
-            <Text style={styles.headerSubtitleText}>DEEP DIVE ANALYTICS</Text>
-          </View>
-
-          <View style={styles.headerRight}>
-            {/* 1. Message Bubble Icon */}
-            <Pressable
-              style={({ pressed }) => [styles.headerIconBtn, pressed && styles.btnPressed]}
-              hitSlop={8}
-              onPress={() => {
-                if (Platform.OS !== 'web') {
-                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                }
-                if (onOpenMessages) {
-                  onOpenMessages();
-                } else if (onNavigateTab) {
-                  onNavigateTab('match');
-                }
-              }}
-            >
-              <Svg width={19} height={19} viewBox="0 0 24 24" fill="none">
-                <Path
-                  d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"
-                  stroke="#171420"
-                  strokeWidth="2.2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </Svg>
-            </Pressable>
-
-            {/* 2. Notification Bell Icon */}
-            <Pressable
-              style={({ pressed }) => [styles.headerIconBtn, pressed && styles.btnPressed]}
-              hitSlop={8}
-              onPress={() => {
-                if (Platform.OS !== 'web') {
-                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                }
-                triggerModalPop();
-                setShowNotificationModal(true);
-              }}
-            >
-              <Svg width={19} height={19} viewBox="0 0 24 24" fill="none">
-                <Path
-                  d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"
-                  stroke="#171420"
-                  strokeWidth="2.2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-                <Path
-                  d="M13.73 21a2 2 0 0 1-3.46 0"
-                  stroke="#171420"
-                  strokeWidth="2.2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </Svg>
-              <View style={styles.notificationDot} />
-            </Pressable>
-
-            {/* 3. User Profile Avatar */}
-            <Pressable
-              style={({ pressed }) => [styles.headerProfileBtn, pressed && styles.btnPressed]}
-              onPress={() => {
-                if (Platform.OS !== 'web') {
-                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                }
-                triggerModalPop();
-                setShowProfileModal(true);
-              }}
-              hitSlop={8}
-            >
-              <Image
-                source={userProfile?.avatarSource || require('../../assets/images/jarvis-ghost-clean.png')}
-                style={styles.headerProfileImg}
-                resizeMode="cover"
-              />
-            </Pressable>
-          </View>
-        </View>
+        {/* 1. TOP HEADER BAR */}
+        <FreeAppHeader
+          onBack={onBack}
+          onOpenJarvisPro={onOpenJarvisPro}
+          onOpenMessages={() => {
+            if (onOpenMessages) {
+              onOpenMessages();
+            } else if (onNavigateTab) {
+              onNavigateTab('match');
+            }
+          }}
+          onOpenNotifications={() => {
+            triggerModalPop();
+            setShowNotificationModal(true);
+          }}
+          onOpenProfile={() => {
+            triggerModalPop();
+            setShowProfileModal(true);
+          }}
+          userProfile={userProfile}
+        />
 
         {/* 2. SCROLLABLE CONTENT */}
         <ScrollView

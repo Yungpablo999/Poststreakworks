@@ -21,6 +21,7 @@ import { FloatingTabBar, TabType } from '../components/FloatingTabBar';
 import { BrandToast } from '../components/BrandToast';
 import { UserProfileModal, UserProfileData } from '../components/UserProfileModal';
 import { AnimatedCompletionModal } from '../components/AnimatedCompletionModal';
+import { FreeAppHeader } from '../components/FreeAppHeader';
 import { sFont, sPadding, moderateScale, isNarrowScreen } from '../utils/responsive';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
@@ -446,103 +447,23 @@ export const AudienceBreakdownScreen: React.FC<AudienceBreakdownScreenProps> = (
       <StatusBar barStyle="dark-content" backgroundColor="#FAF8F5" />
       <View style={styles.container}>
         {/* 1. TOP HEADER */}
-        <View style={styles.header}>
-          {/* Back Button */}
-          <View style={styles.headerLeft}>
-            <Pressable
-              style={({ pressed }) => [styles.backBtn, pressed && styles.btnPressed]}
-              onPress={() => {
-                if (Platform.OS !== 'web') {
-                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                }
-                onBack();
-              }}
-              hitSlop={8}
-            >
-              <Svg width={20} height={20} viewBox="0 0 24 24" fill="none">
-                <Path
-                  d="M15 18L9 12L15 6"
-                  stroke="#171420"
-                  strokeWidth="2.4"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </Svg>
-            </Pressable>
-
-            {/* Mascot */}
-            <Animated.View
-              style={[
-                styles.headerLogoWrapper,
-                { transform: [{ translateY: flameFloatY }] },
-              ]}
-            >
-              <Image
-                source={require('../../assets/images/jarvis-ghost-clean.png')}
-                style={styles.headerGhostLogo}
-                resizeMode="contain"
-              />
-            </Animated.View>
-          </View>
-
-          {/* Center Title */}
-          <View style={styles.headerCenter}>
-            <Text style={styles.headerTitleText}>Audience Growth</Text>
-            <Text style={styles.headerSubtitleText}>⚡ +1,280 Weekly Velocity</Text>
-          </View>
-
-          {/* Right Header Icons: Messages & Profile */}
-          <View style={styles.headerRight}>
-            {/* Messages Icon */}
-            <Pressable
-              style={({ pressed }) => [styles.headerIconBtn, pressed && styles.btnPressed]}
-              onPress={() => {
-                if (Platform.OS !== 'web') {
-                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                }
-                if (onOpenMessages) {
-                  onOpenMessages();
-                } else if (onNavigateTab) {
-                  onNavigateTab('match');
-                }
-              }}
-              hitSlop={8}
-            >
-              <Svg width={20} height={20} viewBox="0 0 24 24" fill="none">
-                <Path
-                  d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"
-                  stroke="#171420"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </Svg>
-              <View style={styles.headerNotifDot} />
-            </Pressable>
-
-            {/* Profile Avatar Icon */}
-            <Pressable
-              style={({ pressed }) => [styles.headerProfileBtn, pressed && styles.btnPressed]}
-              onPress={() => {
-                if (Platform.OS !== 'web') {
-                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                }
-                triggerModalAnim();
-                setShowProfileModal(true);
-              }}
-              hitSlop={8}
-            >
-              <Image
-                source={
-                  userProfile?.avatarSource ||
-                  require('../../assets/images/jarvis-core-flame.png')
-                }
-                style={styles.headerPartnerMiniAvatar}
-                resizeMode="cover"
-              />
-            </Pressable>
-          </View>
-        </View>
+        {/* 1. TOP HEADER */}
+        <FreeAppHeader
+          onBack={onBack}
+          onOpenJarvisPro={onOpenJarvisPro}
+          onOpenMessages={() => {
+            if (onOpenMessages) {
+              onOpenMessages();
+            } else if (onNavigateTab) {
+              onNavigateTab('match');
+            }
+          }}
+          onOpenProfile={() => {
+            triggerModalAnim();
+            setShowProfileModal(true);
+          }}
+          userProfile={userProfile}
+        />
 
         {/* 2. SCROLLABLE CONTENT */}
         <ScrollView

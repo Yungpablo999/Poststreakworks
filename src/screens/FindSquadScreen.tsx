@@ -20,6 +20,7 @@ import Svg, { Path, Circle, Rect } from 'react-native-svg';
 import { FloatingTabBar, TabType } from '../components/FloatingTabBar';
 import { UserProfileData, UserProfileModal } from '../components/UserProfileModal';
 import { AnimatedCompletionModal } from '../components/AnimatedCompletionModal';
+import { FreeAppHeader } from '../components/FreeAppHeader';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
@@ -370,68 +371,13 @@ export const FindSquadScreen: React.FC<FindSquadScreenProps> = ({
       <View style={styles.bgGlowGold} pointerEvents="none" />
 
       {/* 1. TOP APP HEADER */}
-      <View style={styles.topHeaderBar}>
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
-          <Pressable
-            onPress={onBack}
-            style={({ pressed }) => [styles.backBtnCircle, pressed && styles.btnPressed]}
-            hitSlop={8}
-          >
-            <Text style={styles.backBtnArrow}>‹</Text>
-          </Pressable>
-
-          <View>
-            <Text style={styles.headerTitle}>Find a Squad</Text>
-            <Text style={styles.headerSubtitle}>Discover your creator team</Text>
-          </View>
-        </View>
-
-        {/* Right Header Actions */}
-        <View style={styles.headerRightGroup}>
-          <Pressable
-            onPress={onOpenJarvisPro}
-            style={styles.headerMascotTouch}
-            hitSlop={6}
-          >
-            <Animated.View style={{ transform: [{ translateY: flameFloatY }] }}>
-              <Image
-                source={require('../../assets/images/jarvis-ghost-clean.png')}
-                style={styles.headerGhostMascot}
-                resizeMode="contain"
-              />
-            </Animated.View>
-          </Pressable>
-
-          <Pressable
-            style={({ pressed }) => [styles.headerIconCircle, pressed && styles.btnPressed]}
-            onPress={() => onOpenMessages && onOpenMessages()}
-            hitSlop={6}
-          >
-            <Svg width={17} height={17} viewBox="0 0 24 24" fill="none">
-              <Path
-                d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z"
-                stroke="#171420"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </Svg>
-            <View style={styles.activeMsgDot} />
-          </Pressable>
-
-          <Pressable
-            style={styles.headerProfileBtn}
-            onPress={() => setShowProfileModal(true)}
-            hitSlop={6}
-          >
-            <Image
-              source={require('../../assets/images/elena-avatar.jpg')}
-              style={styles.headerProfileAvatar}
-            />
-            <View style={styles.headerProfileGoldRing} />
-          </Pressable>
-        </View>
-      </View>
+      <FreeAppHeader
+        onBack={onBack}
+        onOpenJarvisPro={onOpenJarvisPro}
+        onOpenMessages={onOpenMessages}
+        onOpenProfile={() => setShowProfileModal(true)}
+        userProfile={userProfile}
+      />
 
       {/* MAIN SCROLL VIEW */}
       <ScrollView

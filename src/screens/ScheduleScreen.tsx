@@ -20,6 +20,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { FloatingTabBar, TabType } from '../components/FloatingTabBar';
 import { UserProfileModal, UserProfileData } from '../components/UserProfileModal';
 import { AnimatedCompletionModal } from '../components/AnimatedCompletionModal';
+import { FreeAppHeader } from '../components/FreeAppHeader';
 import { sFont, sPadding, moderateScale, isNarrowScreen } from '../utils/responsive';
 
 interface ScheduleScreenProps {
@@ -256,109 +257,28 @@ export const ScheduleScreen: React.FC<ScheduleScreenProps> = ({
       <StatusBar barStyle={isDark ? "light-content" : "dark-content"} backgroundColor={isDark ? "#0C0A12" : "#FAF8F5"} />
       <View style={[styles.container, isDark && { backgroundColor: '#0C0A12' }]}>
         {/* 1. TOP AIRY HEADER BAR */}
-        <View style={styles.headerBar}>
-          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-            {onBack && (
-              <Pressable
-                onPress={onBack}
-                style={({ pressed }) => [styles.backChevronBtn, pressed && styles.btnPressed]}
-                hitSlop={10}
-              >
-                <Svg width={22} height={22} viewBox="0 0 24 24" fill="none">
-                  <Path d="M15 18l-6-6 6-6" stroke="#171420" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" />
-                </Svg>
-              </Pressable>
-            )}
-            <Animated.View
-              style={[
-                styles.headerLogoWrapper,
-                { transform: [{ translateY: flameFloatY }] },
-              ]}
-            >
-              <Image
-                source={require('../../assets/images/jarvis-ghost-clean.png')}
-                style={styles.headerGhostLogo}
-                resizeMode="contain"
-              />
-            </Animated.View>
-          </View>
-
-          {/* Right Icons: Messages, Notification Bell, Profile */}
-          <View style={styles.headerRightGroup}>
-            <Pressable
-              style={({ pressed }) => [styles.headerIconBtn, pressed && styles.btnPressed]}
-              hitSlop={8}
-              onPress={() => {
-                if (Platform.OS !== 'web') {
-                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                }
-                if (onOpenMessages) {
-                  onOpenMessages();
-                } else {
-                  triggerModalPop();
-                  setShowChatModal(true);
-                }
-              }}
-            >
-              <Svg width={19} height={19} viewBox="0 0 24 24" fill="none">
-                <Path
-                  d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"
-                  stroke="#171420"
-                  strokeWidth="2.2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </Svg>
-            </Pressable>
-
-            <Pressable
-              style={({ pressed }) => [styles.headerIconBtn, pressed && styles.btnPressed]}
-              hitSlop={8}
-              onPress={() => {
-                triggerModalPop();
-                setShowNotificationModal(true);
-              }}
-            >
-              <Svg width={19} height={19} viewBox="0 0 24 24" fill="none">
-                <Path
-                  d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"
-                  stroke="#171420"
-                  strokeWidth="2.2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-                <Path
-                  d="M13.73 21a2 2 0 0 1-3.46 0"
-                  stroke="#171420"
-                  strokeWidth="2.2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </Svg>
-              <View style={styles.notificationDot} />
-            </Pressable>
-
-            <Pressable
-              style={({ pressed }) => [styles.headerIconBtn, pressed && styles.btnPressed]}
-              hitSlop={8}
-              onPress={() => {
-                triggerModalPop();
-                setShowProfileModal(true);
-              }}
-            >
-              <Svg width={19} height={19} viewBox="0 0 24 24" fill="none">
-                <Path
-                  d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"
-                  stroke="#171420"
-                  strokeWidth="2.2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-                <Circle cx="12" cy="7" r="4" stroke="#171420" strokeWidth="2.2" />
-              </Svg>
-            </Pressable>
-          </View>
-        </View>
+        <FreeAppHeader
+          onBack={onBack}
+          onOpenJarvisPro={onOpenJarvisPro}
+          onOpenMessages={() => {
+            if (onOpenMessages) {
+              onOpenMessages();
+            } else {
+              triggerModalPop();
+              setShowChatModal(true);
+            }
+          }}
+          onOpenNotifications={() => {
+            triggerModalPop();
+            setShowNotificationModal(true);
+          }}
+          onOpenProfile={() => {
+            triggerModalPop();
+            setShowProfileModal(true);
+          }}
+          userProfile={userProfile}
+          isDark={isDark}
+        />
 
         {/* 2. MAIN SCROLLABLE CONTENT */}
         <ScrollView
