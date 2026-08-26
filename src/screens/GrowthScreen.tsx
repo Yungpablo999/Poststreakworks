@@ -23,6 +23,7 @@ import { BrandToast } from '../components/BrandToast';
 import { UserProfileModal, UserProfileData } from '../components/UserProfileModal';
 import { AnimatedCompletionModal } from '../components/AnimatedCompletionModal';
 import { FreeAppHeader } from '../components/FreeAppHeader';
+import { sFont, isNarrowScreen } from '../utils/responsive';
 
 
 // AUTHENTIC BRAND SVG ICONS
@@ -679,14 +680,14 @@ export const GrowthScreen: React.FC<GrowthScreenProps> = ({
           {/* CREATOR EARNINGS & MONETIZATION ENTRY CARD */}
           <View style={styles.earningsHubCard}>
             <View style={styles.earningsHubHeader}>
-              <View>
-                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+              <View style={styles.earningsHubHeaderLeft}>
+                <View style={styles.earningsHubTitleRow}>
                   <Text style={styles.earningsHubTitle}>Creator Earnings</Text>
                   <View style={styles.readinessTag}>
                     <Text style={styles.readinessTagText}>35% READINESS</Text>
                   </View>
                 </View>
-                <Text style={styles.earningsHubSub}>Build your path to paid brand campaigns</Text>
+                <Text style={styles.earningsHubSub} numberOfLines={1}>Build your path to paid brand campaigns</Text>
               </View>
               <View style={styles.earningsHubIconCircle}>
                 <Text style={{ fontSize: 18 }}>💰</Text>
@@ -2547,10 +2548,22 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+    gap: 10,
     marginBottom: 12,
   },
+  earningsHubHeaderLeft: {
+    flex: 1,
+    flexShrink: 1,
+  },
+  earningsHubTitleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flexWrap: 'wrap',
+    gap: 6,
+    rowGap: 4,
+  },
   earningsHubTitle: {
-    fontSize: 16,
+    fontSize: sFont(15.5),
     fontWeight: '700',
     color: '#171420',
   },
@@ -2559,14 +2572,15 @@ const styles = StyleSheet.create({
     paddingVertical: 2,
     paddingHorizontal: 6,
     borderRadius: 4,
+    flexShrink: 0,
   },
   readinessTagText: {
-    fontSize: 9,
+    fontSize: sFont(9),
     fontWeight: '700',
     color: '#582CDB',
   },
   earningsHubSub: {
-    fontSize: 12,
+    fontSize: sFont(11.5),
     color: '#64748B',
     marginTop: 2,
   },
@@ -2579,6 +2593,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderWidth: 1,
     borderColor: '#F59E0B',
+    flexShrink: 0,
   },
   earningsHubStatsRow: {
     flexDirection: 'row',
