@@ -22,6 +22,7 @@ import { FloatingTabBar, TabType } from '../components/FloatingTabBar';
 import { BrandToast } from '../components/BrandToast';
 import { UserProfileModal, UserProfileData } from '../components/UserProfileModal';
 import { CreatorStoryModal, CreatorStoryData, StorySlide, TinyGoldCheck } from '../components/CreatorStoryModal';
+import { sFont, isNarrowScreen } from '../utils/responsive';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
@@ -1092,14 +1093,19 @@ export const ProMessagesScreen: React.FC<ProMessagesScreenProps> = ({
                 </View>
 
                 {/* QUICK AI ACTION PILLS */}
-                <View style={styles.quickAiActionsRow}>
+                <ScrollView
+                  horizontal
+                  showsHorizontalScrollIndicator={false}
+                  contentContainerStyle={styles.quickAiActionsContent}
+                  style={styles.quickAiActionsScroll}
+                >
                   <Pressable
                     style={styles.quickAiActionPill}
                     onPress={() => {
                       setChatInputText('Hey! Let’s lock in our 30s split-screen Reel collaboration for this Saturday at 2 PM 🎬');
                     }}
                   >
-                    <Text style={styles.quickAiActionText}>⚡ 1-Tap Collab Pitch</Text>
+                    <Text style={styles.quickAiActionText} numberOfLines={1}>⚡ 1-Tap Collab Pitch</Text>
                   </Pressable>
 
                   <Pressable
@@ -1108,7 +1114,7 @@ export const ProMessagesScreen: React.FC<ProMessagesScreenProps> = ({
                       setChatInputText('Does 7:30 PM work for our post schedule today? 🗓️');
                     }}
                   >
-                    <Text style={styles.quickAiActionText}>🗓️ Propose 7:30 PM Shoot</Text>
+                    <Text style={styles.quickAiActionText} numberOfLines={1}>🗓️ Propose 7:30 PM Shoot</Text>
                   </Pressable>
 
                   <Pressable
@@ -1117,9 +1123,9 @@ export const ProMessagesScreen: React.FC<ProMessagesScreenProps> = ({
                       setChatInputText('Here is my script hook draft: "3 creator mistakes I stopped making" 📄');
                     }}
                   >
-                    <Text style={styles.quickAiActionText}>📄 Share Script Draft</Text>
+                    <Text style={styles.quickAiActionText} numberOfLines={1}>📄 Share Script Draft</Text>
                   </Pressable>
-                </View>
+                </ScrollView>
 
                 {/* CHAT MESSAGES SCROLL */}
                 <ScrollView
@@ -1701,23 +1707,30 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  quickAiActionsRow: {
+  quickAiActionsScroll: {
+    maxHeight: 46,
+    backgroundColor: '#FAF8F5',
+    borderBottomWidth: 1,
+    borderBottomColor: '#F1EFE9',
+  },
+  quickAiActionsContent: {
     flexDirection: 'row',
-    gap: 6,
+    alignItems: 'center',
+    gap: 8,
     paddingHorizontal: 12,
     paddingVertical: 8,
-    backgroundColor: '#FAF8F5',
   },
   quickAiActionPill: {
     backgroundColor: '#FFFFFF',
     borderWidth: 1,
     borderColor: '#EFECE6',
-    paddingHorizontal: 8,
-    paddingVertical: 4,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
     borderRadius: 8,
+    flexShrink: 0,
   },
   quickAiActionText: {
-    fontSize: 11,
+    fontSize: sFont(11),
     fontWeight: '800',
     color: '#582CDB',
   },
