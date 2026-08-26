@@ -340,9 +340,11 @@ export const CaptionScreen: React.FC<CaptionScreenProps> = ({
             {/* 1. "WHAT IS THIS POST ABOUT?" HERO CARD (LIVE-EDITABLE) */}
             <View style={styles.topicHeroCard}>
               <View style={styles.topicHeaderRow}>
-                <Text style={styles.topicHeaderIcon}>✍️</Text>
-                <Text style={styles.topicHeaderTitle}>What is this post about?</Text>
-                <Text style={styles.editableHint}>(Tap to edit)</Text>
+                <View style={styles.topicTitleGroup}>
+                  <Text style={styles.topicHeaderIcon}>✍️</Text>
+                  <Text style={styles.topicHeaderTitle}>What is this post about?</Text>
+                </View>
+                <Text style={styles.editableHintMicro}>Editable</Text>
               </View>
 
               {/* Editable Topic Box */}
@@ -957,22 +959,24 @@ const styles = StyleSheet.create({
   topicHeaderRow: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'space-between',
     gap: 8,
     marginBottom: 10,
+  },
+  topicTitleGroup: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    flex: 1,
+    flexShrink: 1,
   },
   topicHeaderIcon: {
     fontSize: 15,
   },
   topicHeaderTitle: {
-    fontSize: 14,
+    fontSize: sFont(13.5),
     fontWeight: '800',
     color: '#171420',
-  },
-  editableHint: {
-    fontSize: 11,
-    color: '#94A3B8',
-    fontWeight: '700',
-    marginLeft: 'auto',
   },
   editableHintMicro: {
     fontSize: 9.5,
@@ -983,6 +987,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 6,
     borderRadius: 5,
     overflow: 'hidden',
+    flexShrink: 0,
   },
   cardHeaderFlex: {
     flexDirection: 'row',
