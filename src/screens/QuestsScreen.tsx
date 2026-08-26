@@ -569,7 +569,7 @@ export const QuestsScreen: React.FC<QuestsScreenProps> = ({
 
             {/* Footer */}
             <View style={styles.brandQuestFooter}>
-              <Text style={styles.unlocksAtLvlText}>🔒 Unlocks at lvl 3/4</Text>
+              <Text style={styles.unlocksAtLvlText} numberOfLines={1}>🔒 Unlocks at lvl 3/4</Text>
               <Pressable
                 onPress={() => {
                   triggerModalPop();
@@ -1558,16 +1558,21 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+    flexWrap: 'wrap',
+    gap: 8,
+    rowGap: 4,
   },
   unlocksAtLvlText: {
-    fontSize: 12,
+    fontSize: sFont(11.5),
     fontWeight: '700',
     color: '#DC2626',
+    flexShrink: 1,
   },
   viewReqsLink: {
-    fontSize: 12.5,
+    fontSize: sFont(12),
     fontWeight: '800',
     color: '#582CDB',
+    flexShrink: 0,
   },
 
   // 7. UNLOCK PRO QUESTS CARD
