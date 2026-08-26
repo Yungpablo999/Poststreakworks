@@ -1735,8 +1735,10 @@ const styles = StyleSheet.create({
     borderRadius: 24,
     borderWidth: 1,
     borderColor: '#EFEBF8',
-    padding: 18,
+    paddingVertical: 18,
+    paddingHorizontal: 18,
     marginBottom: 20,
+    overflow: 'hidden',
     shadowColor: '#582CDB',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.07,
@@ -1749,6 +1751,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 12,
     gap: 8,
+    paddingRight: 4,
   },
   velocityTitleGroup: {
     flexDirection: 'row',
@@ -1772,8 +1775,8 @@ const styles = StyleSheet.create({
     flexShrink: 0,
   },
   timeframeChip: {
-    paddingVertical: 2.5,
-    paddingHorizontal: 7,
+    paddingVertical: 2,
+    paddingHorizontal: 6,
     borderRadius: 6,
   },
   timeframeChipActive: {
@@ -1785,7 +1788,7 @@ const styles = StyleSheet.create({
     elevation: 1,
   },
   timeframeChipText: {
-    fontSize: 9.5,
+    fontSize: 9,
     fontWeight: '800',
     color: '#64748B',
   },
