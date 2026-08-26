@@ -19,6 +19,7 @@ import { FloatingTabBar, TabType } from '../components/FloatingTabBar';
 import { UserProfileModal, UserProfileData } from '../components/UserProfileModal';
 import { AnimatedCompletionModal } from '../components/AnimatedCompletionModal';
 import { FreeAppHeader } from '../components/FreeAppHeader';
+import { sFont, sPadding, isNarrowScreen } from '../utils/responsive';
 
 interface ContentAngleScreenProps {
   onBack: () => void;
@@ -1114,30 +1115,34 @@ const styles = StyleSheet.create({
   heroTagsRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 5,
+    flexWrap: 'wrap',
+    gap: 6,
+    rowGap: 6,
     marginBottom: 16,
   },
   heroTagPill: {
     backgroundColor: '#FFFFFF',
     borderWidth: 1,
     borderColor: '#EDE9FE',
-    paddingVertical: 3.5,
-    paddingHorizontal: 7,
+    paddingVertical: 4,
+    paddingHorizontal: 9,
     borderRadius: 100,
+    flexShrink: 0,
   },
   heroTagPillText: {
-    fontSize: 10,
+    fontSize: sFont(11),
     fontWeight: '700',
     color: '#475569',
   },
   heroSaveTagPill: {
     backgroundColor: '#EDE9FE',
-    paddingVertical: 3.5,
-    paddingHorizontal: 7,
+    paddingVertical: 4,
+    paddingHorizontal: 9,
     borderRadius: 100,
+    flexShrink: 0,
   },
   heroSaveTagPillText: {
-    fontSize: 10,
+    fontSize: sFont(11),
     fontWeight: '800',
     color: '#6D28D9',
   },

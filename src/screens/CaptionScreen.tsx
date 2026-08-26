@@ -21,6 +21,7 @@ import { FloatingTabBar, TabType } from '../components/FloatingTabBar';
 import { UserProfileModal, UserProfileData } from '../components/UserProfileModal';
 import { AnimatedCompletionModal } from '../components/AnimatedCompletionModal';
 import { FreeAppHeader } from '../components/FreeAppHeader';
+import { sFont, sPadding, isNarrowScreen } from '../utils/responsive';
 
 interface CaptionScreenProps {
   ideaTitle?: string;
@@ -1122,7 +1123,9 @@ const styles = StyleSheet.create({
   },
   recommendedTagsRow: {
     flexDirection: 'row',
+    flexWrap: 'wrap',
     gap: 6,
+    rowGap: 6,
   },
   recommendedTagPill: {
     backgroundColor: '#FAF5FF',
@@ -1131,17 +1134,23 @@ const styles = StyleSheet.create({
     paddingVertical: 4,
     paddingHorizontal: 9,
     borderRadius: 8,
+    flexShrink: 0,
   },
   recommendedTagText: {
-    fontSize: 11,
+    fontSize: sFont(11),
     fontWeight: '700',
     color: '#6D28D9',
   },
   strongCtaTagPill: {
     backgroundColor: '#FEF3C7',
     borderColor: '#FDE68A',
+    paddingVertical: 4,
+    paddingHorizontal: 9,
+    borderRadius: 8,
+    flexShrink: 0,
   },
   strongCtaTagText: {
+    fontSize: sFont(11),
     color: '#B45309',
     fontWeight: '800',
   },
