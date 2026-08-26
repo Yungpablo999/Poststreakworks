@@ -990,13 +990,17 @@ const styles = StyleSheet.create({
 
   // SECTION HEADERS
   sectionHeaderRow: {
+    alignItems: 'center',
+    justifyContent: 'center',
     marginBottom: 12,
+    width: '100%',
   },
   sectionHeading: {
-    fontSize: 19,
+    fontSize: sFont(18),
     fontWeight: '700',
     color: '#171420',
     letterSpacing: -0.3,
+    textAlign: 'center',
   },
 
   // SECTION 2: TODAY'S JARVIS BRIEF CARD
