@@ -802,7 +802,7 @@ export const ScheduleScreen: React.FC<ScheduleScreenProps> = ({
 
               <View style={styles.modalBtnRow}>
                 <Pressable style={styles.modalSecondaryBtn} onPress={() => setShowFinishDraftModal(false)}>
-                  <Text style={styles.modalSecondaryBtnText}>Keep Draft</Text>
+                  <Text style={styles.modalSecondaryBtnText} numberOfLines={1}>Keep Draft</Text>
                 </Pressable>
 
                 <Pressable style={styles.modalPrimaryBtn} onPress={handleSaveDraft}>
@@ -812,7 +812,7 @@ export const ScheduleScreen: React.FC<ScheduleScreenProps> = ({
                     end={{ x: 1, y: 1 }}
                     style={styles.modalPrimaryGradient}
                   >
-                    <Text style={styles.modalPrimaryBtnText}>Lock &amp; Schedule</Text>
+                    <Text style={styles.modalPrimaryBtnText} numberOfLines={1}>Lock &amp; Schedule</Text>
                   </LinearGradient>
                 </Pressable>
               </View>
@@ -1730,21 +1730,22 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(15, 12, 24, 0.65)',
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 20,
+    padding: sPadding(14),
   },
   modalCard: {
     width: '100%',
     maxWidth: 380,
     backgroundColor: '#FFFFFF',
-    borderRadius: 26,
+    borderRadius: 24,
     borderWidth: 1,
     borderColor: '#EFEBF8',
-    padding: 22,
+    padding: sPadding(16),
     shadowColor: '#582CDB',
     shadowOffset: { width: 0, height: 12 },
     shadowOpacity: 0.18,
     shadowRadius: 28,
     elevation: 10,
+    overflow: 'hidden',
   },
   modalHeaderRow: {
     flexDirection: 'row',
@@ -1823,39 +1824,46 @@ const styles = StyleSheet.create({
   },
   modalBtnRow: {
     flexDirection: 'row',
-    gap: 10,
+    gap: 8,
     marginTop: 6,
+    width: '100%',
   },
   modalSecondaryBtn: {
     flex: 1,
-    height: 48,
-    borderRadius: 14,
+    height: 44,
+    borderRadius: 12,
     borderWidth: 1,
     borderColor: '#EFEBF8',
     backgroundColor: '#FAF8F5',
     justifyContent: 'center',
     alignItems: 'center',
+    paddingHorizontal: 6,
+    minWidth: 0,
   },
   modalSecondaryBtnText: {
-    fontSize: 14,
+    fontSize: sFont(12),
     fontWeight: '700',
     color: '#524C62',
+    textAlign: 'center',
   },
   modalPrimaryBtn: {
-    flex: 2,
-    height: 48,
-    borderRadius: 14,
+    flex: 1.3,
+    height: 44,
+    borderRadius: 12,
     overflow: 'hidden',
+    minWidth: 0,
   },
   modalPrimaryGradient: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    paddingHorizontal: 6,
   },
   modalPrimaryBtnText: {
-    fontSize: 14,
+    fontSize: sFont(12.5),
     fontWeight: '800',
     color: '#FFFFFF',
+    textAlign: 'center',
   },
   modalFullBtn: {
     backgroundColor: '#582CDB',
