@@ -1748,18 +1748,19 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: 12,
+    gap: 8,
   },
   velocityTitleGroup: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
     flex: 1,
-    marginRight: 8,
+    marginRight: 6,
   },
   velocityPulseDot: {
-    width: 7,
-    height: 7,
-    borderRadius: 3.5,
+    width: 6,
+    height: 6,
+    borderRadius: 3,
     backgroundColor: '#F59E0B',
   },
   timeframeChipsRow: {
