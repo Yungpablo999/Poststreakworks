@@ -489,22 +489,12 @@ export const ChallengeDetailScreen: React.FC<ChallengeDetailScreenProps> = ({
           <Text style={styles.sectionHeading}>Quest Requirements</Text>
           <View style={styles.requirementsList}>
             {requirements.map((req) => (
-              <Pressable
+              <View
                 key={req.id}
-                style={({ pressed }) => [
+                style={[
                   styles.requirementCard,
                   req.status === 'completed' && styles.requirementCardCompleted,
-                  pressed && styles.btnPressed,
                 ]}
-                onPress={() => {
-                  if (req.id === 'req_4' && req.status !== 'locked') {
-                    handleCompleteQuest();
-                  } else if (req.id !== 'req_4') {
-                    handleToggleRequirement(req.id);
-                  } else {
-                    showToast('🔒 Complete steps 1-3 first to unlock!');
-                  }
-                }}
               >
                 <View style={styles.requirementLeft}>
                   <View
@@ -595,7 +585,7 @@ export const ChallengeDetailScreen: React.FC<ChallengeDetailScreenProps> = ({
                     {req.status === 'locked' ? '🔒 Locked' : req.statusLabel}
                   </Text>
                 </View>
-              </Pressable>
+              </View>
             ))}
           </View>
 
