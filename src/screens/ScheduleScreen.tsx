@@ -865,14 +865,16 @@ export const ScheduleScreen: React.FC<ScheduleScreenProps> = ({
             <Animated.View style={[styles.fullCalendarModalCard, { transform: [{ scale: modalPopScale }] }]}>
               {/* Header Row */}
               <View style={styles.modalHeaderRow}>
-                <View>
-                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-                    <Text style={styles.modalTitle}>May 2026</Text>
+                <View style={{ flex: 1, marginRight: 8 }}>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                    <Text style={styles.modalTitle} numberOfLines={1}>May 2026</Text>
                     <View style={styles.calMonthBadge}>
-                      <Text style={styles.calMonthBadgeText}>8 POSTS PLANNED</Text>
+                      <Text style={styles.calMonthBadgeText} numberOfLines={1}>
+                        {isNarrowScreen ? '8 POSTS' : '8 POSTS PLANNED'}
+                      </Text>
                     </View>
                   </View>
-                  <Text style={styles.modalSubtitle}>Tap any date to inspect scheduled posts</Text>
+                  <Text style={styles.modalSubtitle} numberOfLines={1}>Tap any date to inspect scheduled posts</Text>
                 </View>
                 <Pressable onPress={() => setShowCalendarModal(false)} style={styles.modalCloseCircle} hitSlop={8}>
                   <Text style={styles.modalCloseCross}>✕</Text>
@@ -1942,24 +1944,26 @@ const styles = StyleSheet.create({
     width: '100%',
     maxWidth: 395,
     backgroundColor: '#FFFFFF',
-    borderRadius: 26,
+    borderRadius: 24,
     borderWidth: 1,
     borderColor: '#EFEBF8',
-    padding: 20,
+    padding: sPadding(16),
     shadowColor: '#582CDB',
     shadowOffset: { width: 0, height: 12 },
     shadowOpacity: 0.18,
     shadowRadius: 28,
     elevation: 10,
+    overflow: 'hidden',
   },
   calMonthBadge: {
     backgroundColor: '#EDE9FE',
-    paddingVertical: 3,
-    paddingHorizontal: 8,
-    borderRadius: 8,
+    paddingVertical: 2.5,
+    paddingHorizontal: 6,
+    borderRadius: 6,
+    flexShrink: 0,
   },
   calMonthBadgeText: {
-    fontSize: 10,
+    fontSize: sFont(9),
     fontWeight: '800',
     color: '#6D28D9',
     letterSpacing: 0.4,
@@ -1967,13 +1971,13 @@ const styles = StyleSheet.create({
   calGridHeaderRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    paddingHorizontal: 6,
+    paddingHorizontal: 4,
     marginBottom: 8,
   },
   calGridHeaderText: {
-    width: 40,
+    width: '13.5%',
     textAlign: 'center',
-    fontSize: 12,
+    fontSize: sFont(11),
     fontWeight: '800',
     color: '#64748B',
   },
