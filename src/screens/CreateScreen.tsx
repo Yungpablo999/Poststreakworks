@@ -747,18 +747,18 @@ export const CreateScreen: React.FC<CreateScreenProps> = ({
           >
             <View style={styles.scheduledLeft}>
               <View style={[styles.calendarIconBox, { backgroundColor: '#EDE9FE' }]}>
-                <Svg width={22} height={22} viewBox="0 0 24 24" fill="none">
+                <Svg width={20} height={20} viewBox="0 0 24 24" fill="none">
                   <Rect x="3" y="4" width="18" height="18" rx="3" stroke="#582CDB" strokeWidth="2.2" />
                   <Path d="M16 2v4M8 2v4M3 10h18" stroke="#582CDB" strokeWidth="2.2" strokeLinecap="round" />
                 </Svg>
               </View>
-              <View>
-                <Text style={styles.scheduledTitle}>3 posts scheduled</Text>
-                <Text style={styles.scheduledSub}>Next: Tomorrow at 11:30 AM</Text>
+              <View style={styles.scheduledTextGroup}>
+                <Text style={styles.scheduledTitle} numberOfLines={1}>3 posts scheduled</Text>
+                <Text style={styles.scheduledSub} numberOfLines={1}>Next: Tomorrow at 11:30 AM</Text>
               </View>
             </View>
 
-            <Pressable onPress={handleOpenScheduleView} hitSlop={10}>
+            <Pressable onPress={handleOpenScheduleView} hitSlop={10} style={styles.scheduledOpenBtn}>
               <Text style={styles.scheduledOpenLink}>Open</Text>
             </Pressable>
           </Pressable>
@@ -1773,42 +1773,55 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     backgroundColor: '#FFFFFF',
-    borderRadius: 20,
+    borderRadius: 18,
     borderWidth: 1,
     borderColor: '#E9D5FF',
-    padding: 16,
+    padding: sPadding(14),
     marginBottom: 24,
     shadowColor: '#582CDB',
     shadowOffset: { width: 0, height: 3 },
     shadowOpacity: 0.04,
     shadowRadius: 8,
+    overflow: 'hidden',
   },
   scheduledLeft: {
+    flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 12,
+    gap: 10,
+    marginRight: 12,
+    minWidth: 0,
   },
   calendarIconBox: {
-    width: 42,
-    height: 42,
-    borderRadius: 12,
+    width: 38,
+    height: 38,
+    borderRadius: 11,
     backgroundColor: '#EDE9FE',
     justifyContent: 'center',
     alignItems: 'center',
+    flexShrink: 0,
+  },
+  scheduledTextGroup: {
+    flex: 1,
+    minWidth: 0,
   },
   scheduledTitle: {
-    fontSize: 15,
+    fontSize: sFont(13.5),
     fontWeight: '800',
     color: '#171420',
   },
   scheduledSub: {
-    fontSize: 12,
+    fontSize: sFont(11),
     color: '#6D28D9',
-    marginTop: 2,
+    marginTop: 1,
     fontWeight: '500',
   },
+  scheduledOpenBtn: {
+    paddingLeft: 8,
+    flexShrink: 0,
+  },
   scheduledOpenLink: {
-    fontSize: 14,
+    fontSize: sFont(13),
     fontWeight: '800',
     color: '#582CDB',
   },
