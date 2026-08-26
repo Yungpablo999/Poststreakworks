@@ -797,9 +797,9 @@ export const PostPerformanceScreen: React.FC<PostPerformanceScreenProps> = ({
           <View style={styles.modalOverlay}>
             <View style={styles.modalCard}>
               <View style={styles.modalHeaderRow}>
-                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-                  <Text style={{ fontSize: 20 }}>🤖</Text>
-                  <Text style={styles.modalTitle}>Jarvis Performance Model</Text>
+                <View style={styles.modalHeaderLeft}>
+                  <Text style={{ fontSize: 18 }}>🤖</Text>
+                  <Text style={styles.modalTitle} numberOfLines={1}>Jarvis Performance Model</Text>
                 </View>
                 <Pressable
                   onPress={() => setShowJarvisExplanationModal(false)}
@@ -1922,7 +1922,17 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+    gap: 8,
     marginBottom: 12,
+  },
+  modalHeaderLeft: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    flexShrink: 1,
+    minWidth: 0,
+    marginRight: 4,
   },
   modalCloseCircle: {
     width: 32,
@@ -1931,6 +1941,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#F1F5F9',
     justifyContent: 'center',
     alignItems: 'center',
+    flexShrink: 0,
   },
   modalCloseCross: {
     fontSize: 14,
@@ -1938,9 +1949,10 @@ const styles = StyleSheet.create({
     fontWeight: '800',
   },
   modalTitle: {
-    fontSize: 17,
+    fontSize: sFont(15.5),
     fontWeight: '700',
     color: '#171420',
+    flexShrink: 1,
   },
   modalBodyText: {
     fontSize: 12.5,
