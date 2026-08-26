@@ -1475,16 +1475,22 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
               {/* Quick Stats Banner */}
               <View style={styles.calendarStatsRow}>
                 <View style={styles.calendarStatCard}>
-                  <Text style={styles.calendarStatValue}>47 Days 🔥</Text>
-                  <Text style={styles.calendarStatLabel}>Current</Text>
+                  <Text style={styles.calendarStatValue} numberOfLines={1}>
+                    {isNarrowScreen ? '47d 🔥' : '47 Days 🔥'}
+                  </Text>
+                  <Text style={styles.calendarStatLabel} numberOfLines={1}>Current</Text>
                 </View>
                 <View style={styles.calendarStatCard}>
-                  <Text style={styles.calendarStatValue}>52 Days 🏆</Text>
-                  <Text style={styles.calendarStatLabel}>Best</Text>
+                  <Text style={styles.calendarStatValue} numberOfLines={1}>
+                    {isNarrowScreen ? '52d 🏆' : '52 Days 🏆'}
+                  </Text>
+                  <Text style={styles.calendarStatLabel} numberOfLines={1}>Best</Text>
                 </View>
                 <View style={styles.calendarStatCard}>
-                  <Text style={styles.calendarStatValue}>96% ⚡</Text>
-                  <Text style={styles.calendarStatLabel}>Consistency</Text>
+                  <Text style={styles.calendarStatValue} numberOfLines={1}>96% ⚡</Text>
+                  <Text style={styles.calendarStatLabel} numberOfLines={1}>
+                    {isNarrowScreen ? 'Rate' : 'Consistency'}
+                  </Text>
                 </View>
               </View>
 
@@ -3271,8 +3277,9 @@ const styles = StyleSheet.create({
   calendarStatsRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    gap: 8,
+    gap: 6,
     marginBottom: 12,
+    width: '100%',
   },
   calendarStatCard: {
     flex: 1,
@@ -3280,20 +3287,23 @@ const styles = StyleSheet.create({
     borderRadius: 14,
     borderWidth: 1,
     borderColor: 'rgba(237, 232, 252, 0.85)',
-    paddingVertical: 8,
-    paddingHorizontal: 6,
+    paddingVertical: 7,
+    paddingHorizontal: 3,
     alignItems: 'center',
+    minWidth: 0,
   },
   calendarStatValue: {
-    fontSize: 13,
+    fontSize: sFont(11.5),
     fontWeight: '800',
     color: '#171420',
     marginBottom: 2,
+    textAlign: 'center',
   },
   calendarStatLabel: {
-    fontSize: 10,
+    fontSize: sFont(9.5),
     fontWeight: '700',
     color: '#582CDB',
+    textAlign: 'center',
   },
   monthChipsContainer: {
     flexDirection: 'row',

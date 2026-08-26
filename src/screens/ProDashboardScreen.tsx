@@ -23,6 +23,7 @@ import { FloatingTabBar, TabType } from '../components/FloatingTabBar';
 import { BrandToast } from '../components/BrandToast';
 import { UserProfileModal, UserProfileData } from '../components/UserProfileModal';
 import { CreatorStoryModal, CreatorStoryData } from '../components/CreatorStoryModal';
+import { sFont, sPadding, moderateScale, isNarrowScreen } from '../utils/responsive';
 
 export const TinyGoldCheck = ({ size = 13 }: { size?: number }) => (
   <View
@@ -1084,20 +1085,32 @@ export const ProDashboardScreen: React.FC<ProDashboardScreenProps> = ({
               {/* Pro Quick Stats Banner */}
               <View style={styles.calendarStatsRow}>
                 <View style={styles.calendarStatCard}>
-                  <Text style={styles.calendarStatValue}>47 Days 🔥</Text>
-                  <Text style={styles.calendarStatLabel}>Current</Text>
+                  <Text style={styles.calendarStatValue} numberOfLines={1}>
+                    {isNarrowScreen ? '47d 🔥' : '47 Days 🔥'}
+                  </Text>
+                  <Text style={styles.calendarStatLabel} numberOfLines={1}>Current</Text>
                 </View>
                 <View style={[styles.calendarStatCard, { backgroundColor: '#FEF9C3', borderColor: '#F59E0B' }]}>
-                  <Text style={[styles.calendarStatValue, { color: '#B45309' }]}>Top 1% 👑</Text>
-                  <Text style={[styles.calendarStatLabel, { color: '#A16207' }]}>Worldwide</Text>
+                  <Text style={[styles.calendarStatValue, { color: '#B45309' }]} numberOfLines={1}>
+                    Top 1% 👑
+                  </Text>
+                  <Text style={[styles.calendarStatLabel, { color: '#A16207' }]} numberOfLines={1}>
+                    {isNarrowScreen ? 'Global' : 'Worldwide'}
+                  </Text>
                 </View>
                 <View style={styles.calendarStatCard}>
-                  <Text style={styles.calendarStatValue}>99.2% ⚡</Text>
-                  <Text style={styles.calendarStatLabel}>Consistency</Text>
+                  <Text style={styles.calendarStatValue} numberOfLines={1}>99.2% ⚡</Text>
+                  <Text style={styles.calendarStatLabel} numberOfLines={1}>
+                    {isNarrowScreen ? 'Rate' : 'Consistency'}
+                  </Text>
                 </View>
                 <View style={[styles.calendarStatCard, { backgroundColor: '#EDE9FE', borderColor: '#C4B5FD' }]}>
-                  <Text style={[styles.calendarStatValue, { color: '#582CDB' }]}>2 Freezes 🛡️</Text>
-                  <Text style={[styles.calendarStatLabel, { color: '#6D28D9' }]}>Pro Shield</Text>
+                  <Text style={[styles.calendarStatValue, { color: '#582CDB' }]} numberOfLines={1}>
+                    {isNarrowScreen ? '2x 🛡️' : '2 Freezes 🛡️'}
+                  </Text>
+                  <Text style={[styles.calendarStatLabel, { color: '#6D28D9' }]} numberOfLines={1}>
+                    Shield
+                  </Text>
                 </View>
               </View>
 
@@ -2467,8 +2480,9 @@ const styles = StyleSheet.create({
   calendarStatsRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    gap: 6,
+    gap: 4,
     marginBottom: 12,
+    width: '100%',
   },
   calendarStatCard: {
     flex: 1,
@@ -2476,20 +2490,23 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#EFECE6',
     borderRadius: 12,
-    paddingVertical: 8,
-    paddingHorizontal: 4,
+    paddingVertical: 7,
+    paddingHorizontal: 2,
     alignItems: 'center',
+    minWidth: 0,
   },
   calendarStatValue: {
-    fontSize: 12,
-    fontWeight: '700',
+    fontSize: sFont(10.5),
+    fontWeight: '800',
     color: '#171420',
+    textAlign: 'center',
   },
   calendarStatLabel: {
-    fontSize: 10,
+    fontSize: sFont(9),
     fontWeight: '700',
     color: '#64748B',
     marginTop: 2,
+    textAlign: 'center',
   },
   monthChipsContainer: {
     flexDirection: 'row',
