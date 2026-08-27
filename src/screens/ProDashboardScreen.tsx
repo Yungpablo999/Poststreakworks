@@ -1286,19 +1286,19 @@ export const ProDashboardScreen: React.FC<ProDashboardScreenProps> = ({
               <View style={styles.legendContainer}>
                 <View style={styles.legendItem}>
                   <View style={[styles.legendDot, { backgroundColor: '#582CDB' }]} />
-                  <Text style={styles.legendLabel}>Completed (✓)</Text>
+                  <Text style={styles.legendLabel} numberOfLines={1}>Completed (✓)</Text>
                 </View>
                 <View style={styles.legendItem}>
                   <View style={[styles.legendDot, { backgroundColor: '#F59E0B' }]} />
-                  <Text style={styles.legendLabel}>Autopilot (⚡)</Text>
+                  <Text style={styles.legendLabel} numberOfLines={1}>Autopilot (⚡)</Text>
                 </View>
                 <View style={styles.legendItem}>
                   <View style={[styles.legendDot, { backgroundColor: '#38BDF8' }]} />
-                  <Text style={styles.legendLabel}>Pro Shield (🛡️)</Text>
+                  <Text style={styles.legendLabel} numberOfLines={1}>Pro Shield (🛡️)</Text>
                 </View>
                 <View style={styles.legendItem}>
                   <View style={[styles.legendDot, { backgroundColor: '#EF4444' }]} />
-                  <Text style={styles.legendLabel}>Today</Text>
+                  <Text style={styles.legendLabel} numberOfLines={1}>Today</Text>
                 </View>
               </View>
 
@@ -2698,24 +2698,34 @@ const styles = StyleSheet.create({
   },
   legendContainer: {
     flexDirection: 'row',
+    flexWrap: 'wrap',
     justifyContent: 'space-between',
-    paddingHorizontal: 6,
-    marginBottom: 12,
+    rowGap: 8,
+    backgroundColor: '#FAF8F5',
+    borderRadius: 12,
+    paddingVertical: 8,
+    paddingHorizontal: 10,
+    borderWidth: 1,
+    borderColor: '#EFECE6',
+    marginBottom: 14,
   },
   legendItem: {
+    width: '48%',
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 4,
+    gap: 6,
   },
   legendDot: {
     width: 7,
     height: 7,
     borderRadius: 3.5,
+    flexShrink: 0,
   },
   legendLabel: {
-    fontSize: 10,
+    fontSize: sFont(10.5),
     color: '#64748B',
     fontWeight: '700',
+    flexShrink: 1,
   },
 
   // COMMON MODALS
