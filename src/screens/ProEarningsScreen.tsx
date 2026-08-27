@@ -1018,17 +1018,17 @@ export const ProEarningsScreen: React.FC<ProEarningsScreenProps> = ({
                   <View style={{ flex: 1, paddingRight: 10 }}>
                     <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 2 }}>
                       <View style={styles.liveGreenPulseDot} />
-                      <Text style={styles.modalTitle}>
+                      <Text style={styles.modalTitle} numberOfLines={1}>
                         {expandedEarningsType === 'netRate'
-                          ? 'Net Revenue Velocity & Payouts'
+                          ? 'Net Revenue & Payouts'
                           : expandedEarningsType === 'incomeSource'
-                          ? 'Income Sources Deep Dive'
+                          ? 'Income Sources Breakdown'
                           : expandedEarningsType === 'platformComp'
-                          ? 'Platform RPM & Monetization'
-                          : 'Monthly Earnings Trend & Forecast'}
+                          ? 'Platform Monetization'
+                          : 'Monthly Trend & Forecast'}
                       </Text>
                     </View>
-                    <Text style={styles.modalSubtitle}>
+                    <Text style={styles.modalSubtitle} numberOfLines={1}>
                       {expandedEarningsType === 'netRate'
                         ? 'Live daily creator payout stream • May 2024'
                         : expandedEarningsType === 'incomeSource'
@@ -2320,6 +2320,7 @@ const styles = StyleSheet.create({
     height: 7,
     borderRadius: 3.5,
     backgroundColor: '#10B981',
+    flexShrink: 0,
   },
   /* PLATFORM COMPARISON DEDICATED BAR CHART */
   platformCompChartContainer: {
@@ -2586,7 +2587,7 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   modalSubtitle: {
-    fontSize: 12,
+    fontSize: sFont(11.5),
     color: '#64748B',
     marginTop: 2,
   },
@@ -3239,7 +3240,7 @@ const styles = StyleSheet.create({
     fontWeight: '700',
   },
   modalTitle: {
-    fontSize: 18,
+    fontSize: sFont(16),
     fontWeight: '700',
     color: '#171420',
     letterSpacing: -0.3,
