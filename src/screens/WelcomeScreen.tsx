@@ -67,6 +67,9 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
               isSmallScreen && styles.mainHeadlineSmall,
               isMediumScreen && styles.mainHeadlineMedium,
             ]}
+            numberOfLines={1}
+            adjustsFontSizeToFit
+            minimumFontScale={0.7}
           >
             Create. Grow. <Text style={styles.streakAccent}>Earn.</Text>
           </Text>
@@ -176,28 +179,30 @@ const styles = StyleSheet.create({
   /* Content & Typography */
   contentSection: {
     alignItems: 'center',
-    paddingHorizontal: 16,
+    paddingHorizontal: 8,
     marginVertical: 4,
+    width: '100%',
   },
   mainHeadline: {
     fontFamily: typography.editorialSerif,
-    fontSize: 38,
+    fontSize: 34,
     fontWeight: '700',
     color: colors.textPrimary,
     textAlign: 'center',
-    letterSpacing: -0.3,
-    lineHeight: 46,
+    letterSpacing: 0.2,
+    lineHeight: 42,
     marginBottom: 4,
+    ...(Platform.OS === 'web' ? { whiteSpace: 'nowrap' } : {}),
   },
   mainHeadlineMedium: {
-    fontSize: 34,
-    lineHeight: 42,
-    letterSpacing: -0.2,
+    fontSize: 30,
+    lineHeight: 38,
+    letterSpacing: 0.1,
   },
   mainHeadlineSmall: {
-    fontSize: 28,
-    lineHeight: 36,
-    letterSpacing: -0.1,
+    fontSize: 25,
+    lineHeight: 32,
+    letterSpacing: 0,
     marginBottom: 3,
   },
   streakAccent: {
