@@ -421,13 +421,16 @@ export const PlatformConnectScreen: React.FC<PlatformConnectScreenProps> = ({
                     ]}
                   >
                     <View style={styles.miniIconWrapper}>
-                      {renderPlatformIcon(item.iconType, 22)}
+                      {renderPlatformIcon(item.iconType, 20)}
                     </View>
                     <Text
                       style={[
                         styles.miniPlatformText,
                         isConnected && styles.miniPlatformTextConnected,
                       ]}
+                      numberOfLines={1}
+                      adjustsFontSizeToFit
+                      minimumFontScale={0.8}
                     >
                       {item.name}
                     </Text>
@@ -750,16 +753,19 @@ const styles = StyleSheet.create({
   },
   morePlatformsRow: {
     flexDirection: 'row',
-    justifyContent: 'center',
-    gap: 14,
+    alignItems: 'center',
+    gap: 8,
     width: '100%',
   },
   miniPlatformBtn: {
+    flex: 1,
+    minWidth: 0,
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 7,
-    paddingVertical: 8,
-    paddingHorizontal: 12,
+    justifyContent: 'center',
+    gap: 6,
+    paddingVertical: 9,
+    paddingHorizontal: 6,
     borderRadius: 14,
     backgroundColor: 'rgba(255, 255, 255, 0.88)',
     borderWidth: 1,
@@ -780,22 +786,25 @@ const styles = StyleSheet.create({
   miniIconWrapper: {
     justifyContent: 'center',
     alignItems: 'center',
+    flexShrink: 0,
   },
   miniBrandIcon: {
-    width: 22,
-    height: 22,
+    width: 20,
+    height: 20,
     borderRadius: 6,
     justifyContent: 'center',
     alignItems: 'center',
   },
   miniPlatformText: {
-    fontSize: 12.5,
-    fontWeight: '600',
+    fontSize: 12,
+    fontWeight: '700',
     color: '#524C62',
+    textAlign: 'center',
+    flexShrink: 1,
   },
   miniPlatformTextConnected: {
     color: '#582CDB',
-    fontWeight: '700',
+    fontWeight: '800',
   },
   jarvisAdviceCard: {
     flexDirection: 'row',
