@@ -1485,8 +1485,8 @@ export const ProDashboardScreen: React.FC<ProDashboardScreenProps> = ({
                     end={{ x: 1, y: 1 }}
                     style={styles.modalGoldBtnGradient}
                   >
-                    <Text style={styles.modalGoldActionBtnText}>
-                      ✨ Start Campaign in Composer (+350 XP) ➔
+                    <Text style={styles.modalGoldActionBtnText} numberOfLines={1}>
+                      ✨ Start Campaign (+350 XP) ➔
                     </Text>
                   </LinearGradient>
                 </Pressable>
@@ -1651,8 +1651,8 @@ export const ProDashboardScreen: React.FC<ProDashboardScreenProps> = ({
                     end={{ x: 1, y: 1 }}
                     style={styles.modalGoldBtnGradient}
                   >
-                    <Text style={styles.modalGoldActionBtnText}>
-                      ⚡ Earn More XP on Today&apos;s Mission (+150 XP) ➔
+                    <Text style={styles.modalGoldActionBtnText} numberOfLines={1}>
+                      ⚡ Start Today&apos;s Mission (+150 XP) ➔
                     </Text>
                   </LinearGradient>
                 </Pressable>
@@ -3009,6 +3009,7 @@ const styles = StyleSheet.create({
   },
   modalGoldBtnGradient: {
     paddingVertical: 13,
+    paddingHorizontal: 12,
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: 14,
@@ -3017,8 +3018,9 @@ const styles = StyleSheet.create({
   },
   modalGoldActionBtnText: {
     color: '#0C0A12',
-    fontSize: 14,
+    fontSize: sFont(13),
     fontWeight: '700',
+    textAlign: 'center',
   },
   modalSecondaryOutlineBtn: {
     backgroundColor: '#FAF8F5',
