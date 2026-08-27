@@ -11,7 +11,6 @@ import {
 } from 'react-native';
 import * as Haptics from 'expo-haptics';
 import { colors } from '../theme/colors';
-import { typography } from '../theme/typography';
 
 interface SplashScreenProps {
   onFinish?: () => void;
@@ -19,36 +18,38 @@ interface SplashScreenProps {
 
 export const SplashScreen: React.FC<SplashScreenProps> = ({ onFinish = () => {} }) => {
   const { width, height } = useWindowDimensions();
+  // Extra-large, majestic hero mascot
   const isCompact = height < 750;
-  const ghostSize = isCompact ? 270 : Math.min(width * 0.82, 330);
+  const ghostSize = isCompact ? 280 : Math.min(width * 0.85, 350);
 
-  // 1. Ghost Mascot Full Character Physics (Leap, Squash & Stretch, 3D Tilt)
+  // 1. Ghost Mascot Animations (Duolingo float, 3D turn, happy leap)
   const ghostScale = useRef(new Animated.Value(0.1)).current;
-  const ghostY = useRef(new Animated.Value(90)).current;
+  const ghostY = useRef(new Animated.Value(100)).current;
   const ghostStretchY = useRef(new Animated.Value(0.6)).current;
   const ghostSquishX = useRef(new Animated.Value(1.4)).current;
   const ghostRotate = useRef(new Animated.Value(-1)).current;
   const ghostOpacity = useRef(new Animated.Value(0)).current;
 
-  // 2. Continuous Living Hover Loop
+  // 2. Continuous Living Hover after Entrance
   const hoverY = useRef(new Animated.Value(0)).current;
   const hoverTilt = useRef(new Animated.Value(0)).current;
 
-  // 3. 0.4s — PostStreak Title: "Zoom & Pop" Snap
+  // 3. PowerPoint-Style Kinetic Text Transitions
+  // A. Title: "Zoom & Pop" Snap with 3D scale spring
   const titleScale = useRef(new Animated.Value(0.2)).current;
-  const titleY = useRef(new Animated.Value(35)).current;
+  const titleY = useRef(new Animated.Value(45)).current;
   const titleOpacity = useRef(new Animated.Value(0)).current;
 
-  // 4. 0.7s — Creator Streak Pill: Smooth Expansion & Pop
-  const pillOpacity = useRef(new Animated.Value(0)).current;
-  const pillScale = useRef(new Animated.Value(0.85)).current;
-  const pillY = useRef(new Animated.Value(12)).current;
+  // B. Tagline: "Fly In from Left" Kinetic Slide with ease-out
+  const taglineX = useRef(new Animated.Value(-80)).current;
+  const taglineOpacity = useRef(new Animated.Value(0)).current;
+  const tagScale = useRef(new Animated.Value(0.9)).current;
 
-  // 5. 1.2s — Footer Companion Intro: Subtle Rise
-  const footerY = useRef(new Animated.Value(20)).current;
+  // C. Footer: Kinetic Rise & Glow
+  const footerY = useRef(new Animated.Value(30)).current;
   const footerOpacity = useRef(new Animated.Value(0)).current;
 
-  // 6. 1.5–1.8s — Seamless Morph Transition to Welcome Screen
+  // 4. Seamless Hero Morph Transition to Welcome Screen
   const splashTextOpacity = useRef(new Animated.Value(1)).current;
   const splashTextY = useRef(new Animated.Value(0)).current;
   const ghostMorphY = useRef(new Animated.Value(0)).current;
@@ -56,16 +57,216 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onFinish = () => {} 
   const splashBgOpacity = useRef(new Animated.Value(1)).current;
 
   useEffect(() => {
+    // Safety auto-dismiss fallback (generous so it never cuts animation prematurely)
     const fallbackTimer = setTimeout(() => {
       onFinish();
-    }, 4500);
+    }, 5500);
+
+    // Grand Duolingo + PowerPoint Cinematic Opening Sequence
+    const playOpeningSequence = () => {
+      Animated.sequence([
+        // Step 1: Ghost Emerges & Floats Upward
+        Animated.parallel([
+          Animated.timing(ghostOpacity, {
+            toValue: 1,
+            duration: 380,
+            useNativeDriver: true,
+          }),
+          Animated.spring(ghostScale, {
+            toValue: 1.22,
+            useNativeDriver: true,
+            speed: 18,
+            bounciness: 12,
+          }),
+          Animated.spring(ghostY, {
+            toValue: -26,
+            useNativeDriver: true,
+            speed: 16,
+            bounciness: 8,
+          }),
+          Animated.spring(ghostStretchY, {
+            toValue: 1.3,
+            useNativeDriver: true,
+            speed: 18,
+            bounciness: 8,
+          }),
+          Animated.spring(ghostSquishX, {
+            toValue: 0.78,
+            useNativeDriver: true,
+            speed: 18,
+            bounciness: 8,
+          }),
+          Animated.timing(ghostRotate, {
+            toValue: 1,
+            duration: 500,
+            useNativeDriver: true,
+          }),
+        ]),
+
+        // Step 2: Ghost Joyful Air Turn & Wobble
+        Animated.parallel([
+          Animated.timing(ghostRotate, {
+            toValue: -0.6,
+            duration: 200,
+            useNativeDriver: true,
+          }),
+          Animated.timing(ghostY, {
+            toValue: 14,
+            duration: 200,
+            useNativeDriver: true,
+          }),
+          Animated.timing(ghostStretchY, {
+            toValue: 0.85,
+            duration: 200,
+            useNativeDriver: true,
+          }),
+          Animated.timing(ghostSquishX, {
+            toValue: 1.2,
+            duration: 200,
+            useNativeDriver: true,
+          }),
+        ]),
+
+        // Step 3: Ghost Happy Cushion Landing
+        Animated.parallel([
+          Animated.spring(ghostScale, {
+            toValue: 1.0,
+            useNativeDriver: true,
+            speed: 22,
+            bounciness: 14,
+          }),
+          Animated.spring(ghostY, {
+            toValue: 0,
+            useNativeDriver: true,
+            speed: 22,
+            bounciness: 12,
+          }),
+          Animated.spring(ghostStretchY, {
+            toValue: 1.0,
+            useNativeDriver: true,
+            speed: 18,
+            bounciness: 8,
+          }),
+          Animated.spring(ghostSquishX, {
+            toValue: 1.0,
+            useNativeDriver: true,
+            speed: 18,
+            bounciness: 8,
+          }),
+          Animated.timing(ghostRotate, {
+            toValue: 0,
+            duration: 180,
+            useNativeDriver: true,
+          }),
+        ]),
+
+        // Step 4: Kinetic Reveal #1 — Title "Zoom & Pop"
+        Animated.parallel([
+          Animated.timing(titleOpacity, {
+            toValue: 1,
+            duration: 320,
+            useNativeDriver: true,
+          }),
+          Animated.spring(titleScale, {
+            toValue: 1.0,
+            useNativeDriver: true,
+            speed: 24,
+            bounciness: 12,
+          }),
+          Animated.spring(titleY, {
+            toValue: 0,
+            useNativeDriver: true,
+            speed: 22,
+            bounciness: 10,
+          }),
+        ]),
+
+        // Step 5: Kinetic Reveal #2 — Tagline "Fly In from Left" & Footer
+        Animated.parallel([
+          Animated.timing(taglineOpacity, {
+            toValue: 1,
+            duration: 320,
+            useNativeDriver: true,
+          }),
+          Animated.spring(taglineX, {
+            toValue: 0,
+            useNativeDriver: true,
+            speed: 20,
+            bounciness: 10,
+          }),
+          Animated.spring(tagScale, {
+            toValue: 1.0,
+            useNativeDriver: true,
+            speed: 20,
+            bounciness: 8,
+          }),
+          Animated.timing(footerOpacity, {
+            toValue: 1,
+            duration: 400,
+            useNativeDriver: true,
+          }),
+          Animated.spring(footerY, {
+            toValue: 0,
+            useNativeDriver: true,
+            speed: 18,
+            bounciness: 8,
+          }),
+        ]),
+
+        // Step 6: Admire pause
+        Animated.delay(950),
+
+        // Step 7: Continuous Ghost Morph — Text sinks away, Ghost gracefully floats UP to Welcome Hero spot
+        Animated.parallel([
+          // Splash texts fade & slide slightly down
+          Animated.timing(splashTextOpacity, {
+            toValue: 0,
+            duration: 300,
+            useNativeDriver: true,
+          }),
+          Animated.timing(splashTextY, {
+            toValue: 24,
+            duration: 300,
+            useNativeDriver: true,
+          }),
+
+          // Ghost smoothly floats UP and scales to Welcome Hero position
+          Animated.timing(ghostMorphY, {
+            toValue: isCompact ? -110 : -135,
+            duration: 650,
+            useNativeDriver: true,
+          }),
+          Animated.timing(ghostMorphScale, {
+            toValue: isCompact ? 0.78 : 0.76,
+            duration: 650,
+            useNativeDriver: true,
+          }),
+
+          // Background softly reveals Welcome Screen underneath
+          Animated.timing(splashBgOpacity, {
+            toValue: 0,
+            duration: 650,
+            useNativeDriver: true,
+          }),
+        ]),
+      ]).start(() => {
+        onFinish();
+      });
+
+      // Trigger Success Haptics on Ghost Landing
+      setTimeout(() => {
+        if (Platform.OS !== 'web') {
+          Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+        }
+      }, 650);
+    };
 
     // Continuous Living Hover Loop
     const hoverLoop = Animated.loop(
       Animated.sequence([
         Animated.parallel([
           Animated.timing(hoverY, {
-            toValue: -10,
+            toValue: -12,
             duration: 1200,
             useNativeDriver: true,
           }),
@@ -77,7 +278,7 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onFinish = () => {} 
         ]),
         Animated.parallel([
           Animated.timing(hoverY, {
-            toValue: 6,
+            toValue: 8,
             duration: 1100,
             useNativeDriver: true,
           }),
@@ -90,194 +291,11 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onFinish = () => {} 
       ])
     );
 
-    // Complete Choreographed Intro Timeline
-    Animated.sequence([
-      // 0.0s: Step 1 — Ghost Emerges & Floats Upward with Squash & Stretch
-      Animated.parallel([
-        Animated.timing(ghostOpacity, {
-          toValue: 1,
-          duration: 340,
-          useNativeDriver: true,
-        }),
-        Animated.spring(ghostScale, {
-          toValue: 1.18,
-          speed: 18,
-          bounciness: 10,
-          useNativeDriver: true,
-        }),
-        Animated.spring(ghostY, {
-          toValue: -20,
-          speed: 16,
-          bounciness: 8,
-          useNativeDriver: true,
-        }),
-        Animated.spring(ghostStretchY, {
-          toValue: 1.25,
-          speed: 18,
-          bounciness: 8,
-          useNativeDriver: true,
-        }),
-        Animated.spring(ghostSquishX, {
-          toValue: 0.82,
-          speed: 18,
-          bounciness: 8,
-          useNativeDriver: true,
-        }),
-        Animated.timing(ghostRotate, {
-          toValue: 0.8,
-          duration: 400,
-          useNativeDriver: true,
-        }),
-      ]),
-
-      // Step 2 — Joyful Cushion Landing & Reset
-      Animated.parallel([
-        Animated.spring(ghostScale, {
-          toValue: 1.0,
-          speed: 22,
-          bounciness: 12,
-          useNativeDriver: true,
-        }),
-        Animated.spring(ghostY, {
-          toValue: 0,
-          speed: 22,
-          bounciness: 10,
-          useNativeDriver: true,
-        }),
-        Animated.spring(ghostStretchY, {
-          toValue: 1.0,
-          speed: 18,
-          bounciness: 8,
-          useNativeDriver: true,
-        }),
-        Animated.spring(ghostSquishX, {
-          toValue: 1.0,
-          speed: 18,
-          bounciness: 8,
-          useNativeDriver: true,
-        }),
-        Animated.timing(ghostRotate, {
-          toValue: 0,
-          duration: 160,
-          useNativeDriver: true,
-        }),
-      ]),
-
-      // 0.4s: Step 3 — PostStreak Logo Text "Zoom & Pop"
-      Animated.parallel([
-        Animated.timing(titleOpacity, {
-          toValue: 1,
-          duration: 260,
-          useNativeDriver: true,
-        }),
-        Animated.spring(titleScale, {
-          toValue: 1.0,
-          speed: 22,
-          bounciness: 10,
-          useNativeDriver: true,
-        }),
-        Animated.spring(titleY, {
-          toValue: 0,
-          speed: 20,
-          bounciness: 8,
-          useNativeDriver: true,
-        }),
-      ]),
-
-      // 0.7s: Step 4 — The Pill Smoothly Expands and Fades In
-      Animated.parallel([
-        Animated.timing(pillOpacity, {
-          toValue: 1,
-          duration: 280,
-          useNativeDriver: true,
-        }),
-        Animated.spring(pillScale, {
-          toValue: 1.0,
-          speed: 18,
-          bounciness: 9,
-          useNativeDriver: true,
-        }),
-        Animated.spring(pillY, {
-          toValue: 0,
-          speed: 18,
-          bounciness: 6,
-          useNativeDriver: true,
-        }),
-      ]),
-
-      // Wait until 1.2s
-      Animated.delay(200),
-
-      // 1.2s: Step 5 — "POWERED BY JARVIS CORE ✦" appears subtly
-      Animated.parallel([
-        Animated.timing(footerOpacity, {
-          toValue: 1,
-          duration: 280,
-          useNativeDriver: true,
-        }),
-        Animated.spring(footerY, {
-          toValue: 0,
-          speed: 16,
-          bounciness: 4,
-          useNativeDriver: true,
-        }),
-      ]),
-
-      // 1.5s–1.8s: Step 6 — Transition directly into Get Started Screen
-      Animated.delay(120),
-      Animated.parallel([
-        // Splash text sinks away
-        Animated.timing(splashTextOpacity, {
-          toValue: 0,
-          duration: 280,
-          useNativeDriver: true,
-        }),
-        Animated.timing(splashTextY, {
-          toValue: 20,
-          duration: 280,
-          useNativeDriver: true,
-        }),
-        // Ghost gracefully floats up and morphs directly into Welcome hero spot
-        Animated.timing(ghostMorphY, {
-          toValue: isCompact ? -95 : -120,
-          duration: 480,
-          useNativeDriver: true,
-        }),
-        Animated.timing(ghostMorphScale, {
-          toValue: isCompact ? 0.82 : 0.80,
-          duration: 480,
-          useNativeDriver: true,
-        }),
-        // Background softly reveals Welcome Screen
-        Animated.timing(splashBgOpacity, {
-          toValue: 0,
-          duration: 480,
-          useNativeDriver: true,
-        }),
-      ]),
-    ]).start(() => {
-      onFinish();
-    });
-
+    playOpeningSequence();
     hoverLoop.start();
-
-    // Haptics milestones
-    const t1 = setTimeout(() => {
-      if (Platform.OS !== 'web') {
-        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-      }
-    }, 450);
-
-    const t2 = setTimeout(() => {
-      if (Platform.OS !== 'web') {
-        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-      }
-    }, 750);
 
     return () => {
       clearTimeout(fallbackTimer);
-      clearTimeout(t1);
-      clearTimeout(t2);
       hoverLoop.stop();
     };
   }, [
@@ -290,9 +308,9 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onFinish = () => {} 
     titleScale,
     titleY,
     titleOpacity,
-    pillOpacity,
-    pillScale,
-    pillY,
+    taglineX,
+    taglineOpacity,
+    tagScale,
     footerY,
     footerOpacity,
     splashTextOpacity,
@@ -308,12 +326,12 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onFinish = () => {} 
 
   const rotation = ghostRotate.interpolate({
     inputRange: [-1, 0, 1],
-    outputRange: ['-16deg', '0deg', '16deg'],
+    outputRange: ['-18deg', '0deg', '18deg'],
   });
 
   const liveTilt = hoverTilt.interpolate({
     inputRange: [-1, 0, 1],
-    outputRange: ['-3.5deg', '0deg', '3.5deg'],
+    outputRange: ['-4deg', '0deg', '4deg'],
   });
 
   return (
@@ -328,9 +346,9 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onFinish = () => {} 
     >
       <StatusBar barStyle="dark-content" backgroundColor={colors.background} />
 
-      {/* Main Center Area: Extra-Large Mascot + Orchestrated Typography */}
+      {/* Main Center Area: Extra-Large Mascot + PowerPoint Animated Typography */}
       <View style={styles.mascotArea}>
-        {/* 1. HERO GHOST MASCOT (0.0s) with Full Squash & Stretch Physics */}
+        {/* 1. BIGGER HERO GHOST MASCOT (Morphs & Floats Up to Welcome Screen) */}
         <Animated.View
           style={[
             styles.ghostWrapper,
@@ -357,7 +375,7 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onFinish = () => {} 
           />
         </Animated.View>
 
-        {/* 2. ORCHESTRATED BRANDING */}
+        {/* 2. POWERPOINT-STYLE ANIMATED BRANDING */}
         <Animated.View
           style={[
             styles.brandContainer,
@@ -367,7 +385,7 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onFinish = () => {} 
             },
           ]}
         >
-          {/* PostStreak Title (0.4s): "Zoom & Pop" in Signature Royal Purple */}
+          {/* Poststreak Title: "Zoom & Pop" Snap in Deep Solid Royal Purple */}
           <Animated.View
             style={[
               styles.titleWrapper,
@@ -383,15 +401,15 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onFinish = () => {} 
             <Text style={styles.solidBrandTitle}>Poststreak</Text>
           </Animated.View>
 
-          {/* Tagline Pill (0.7s): Smoothly Expands and Fades In */}
+          {/* Tagline: "Fly In from Left" in Elegant Violet Frosted Pill Badge */}
           <Animated.View
             style={[
               styles.taglinePill,
               {
-                opacity: pillOpacity,
+                opacity: taglineOpacity,
                 transform: [
-                  { scale: pillScale },
-                  { translateY: pillY },
+                  { translateX: taglineX },
+                  { scale: tagScale },
                 ],
               },
             ]}
@@ -403,7 +421,7 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onFinish = () => {} 
         </Animated.View>
       </View>
 
-      {/* 3. BOTTOM FOOTER (1.2s): Subtle Companion Introduction */}
+      {/* 3. BOTTOM FOOTER: Kinetic Rise */}
       <Animated.View
         style={[
           styles.footer,
@@ -417,10 +435,7 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onFinish = () => {} 
         ]}
       >
         <Text style={styles.poweredBy}>POWERED BY</Text>
-        <View style={styles.jarvisRow}>
-          <Text style={styles.jarvisCore}>JARVIS CORE</Text>
-          <Text style={styles.sparkleGlyph}>✦</Text>
-        </View>
+        <Text style={styles.jarvisCore}>Jarvis Core</Text>
       </Animated.View>
     </Animated.View>
   );
@@ -436,7 +451,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.background,
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingVertical: Platform.OS === 'ios' ? 52 : 44,
+    paddingVertical: 48,
     paddingHorizontal: 20,
     zIndex: 999,
   },
@@ -444,12 +459,11 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    width: '100%',
   },
   ghostWrapper: {
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 14,
+    marginBottom: 16,
   },
   brandContainer: {
     alignItems: 'center',
@@ -458,78 +472,57 @@ const styles = StyleSheet.create({
   titleWrapper: {
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 10,
+    marginBottom: 8,
   },
   solidBrandTitle: {
-    fontSize: 44,
+    fontSize: 50,
     fontWeight: '700',
-    color: '#491ECC', // Deep Signature Royal Purple
-    letterSpacing: -1.2,
-    textAlign: 'center',
-    fontFamily: typography.editorialSerif,
-    textShadowColor: 'rgba(73, 30, 204, 0.12)',
-    textShadowOffset: { width: 0, height: 4 },
-    textShadowRadius: 10,
+    color: '#491ECC', // Deep Solid Royal Purple with ultra contrast
+    letterSpacing: -1.8,
+    textShadowColor: 'rgba(73, 30, 204, 0.18)',
+    textShadowOffset: { width: 0, height: 6 },
+    textShadowRadius: 14,
   },
   taglinePill: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'rgba(88, 44, 219, 0.08)',
-    paddingVertical: 7,
-    paddingHorizontal: 16,
-    borderRadius: 100,
-    borderWidth: 1,
-    borderColor: 'rgba(88, 44, 219, 0.16)',
-    gap: 7,
-    shadowColor: '#582CDB',
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.05,
-    shadowRadius: 8,
-    elevation: 2,
-    marginTop: 2,
-    ...(Platform.OS === 'web'
-      ? ({
-          boxShadow: '0 3px 10px rgba(88, 44, 219, 0.06)',
-        } as any)
-      : {}),
+    backgroundColor: 'rgba(95, 58, 221, 0.08)',
+    paddingVertical: 8,
+    paddingHorizontal: 18,
+    borderRadius: 24,
+    borderWidth: 1.2,
+    borderColor: 'rgba(95, 58, 221, 0.18)',
+    gap: 8,
+    shadowColor: '#491ECC',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.06,
+    shadowRadius: 10,
   },
   taglineEmoji: {
-    fontSize: 13.5,
+    fontSize: 14,
   },
   taglineText: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#582CDB',
-    letterSpacing: -0.1,
+    fontSize: 16,
+    fontWeight: '800',
+    color: '#5F3ADD',
+    letterSpacing: -0.3,
   },
   footer: {
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 8,
+    marginBottom: 12,
   },
   poweredBy: {
-    fontSize: 9.5,
-    fontWeight: '600',
-    color: '#8E869E',
-    letterSpacing: 1.5,
-    marginBottom: 2,
-    textAlign: 'center',
-  },
-  jarvisRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 5,
+    fontSize: 12,
+    fontWeight: '800',
+    color: '#8E859E',
+    letterSpacing: 2,
+    marginBottom: 4,
   },
   jarvisCore: {
-    fontSize: 14.5,
+    fontSize: 22,
     fontWeight: '700',
-    color: colors.primary,
-    letterSpacing: 0.8,
-  },
-  sparkleGlyph: {
-    fontSize: 11,
-    color: '#D97706',
-    marginTop: -1,
+    color: '#491ECC',
+    letterSpacing: -0.4,
   },
 });
