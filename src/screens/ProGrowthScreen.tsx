@@ -2121,7 +2121,14 @@ export const ProGrowthScreen: React.FC<ProGrowthScreenProps> = ({
                     showToast('✓ May 2024 Executive PDF Report downloaded!');
                   }}
                 >
-                  <Text style={styles.modalDownloadSolidBtnText}>📥 Download Report (Verified PDF)</Text>
+                  <Text
+                    style={styles.modalDownloadSolidBtnText}
+                    numberOfLines={1}
+                    adjustsFontSizeToFit
+                    minimumFontScale={0.85}
+                  >
+                    📥 Download PDF Report
+                  </Text>
                 </Pressable>
 
                 {/* Close Button */}
@@ -3734,21 +3741,22 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
   modalDownloadSolidBtn: {
-    height: 46,
-    borderRadius: 12,
+    height: 48,
+    borderRadius: 14,
     backgroundColor: '#582CDB',
     justifyContent: 'center',
     alignItems: 'center',
+    paddingHorizontal: 16,
     shadowColor: '#582CDB',
     shadowOffset: { width: 0, height: 3 },
     shadowOpacity: 0.12,
     shadowRadius: 6,
   },
   modalDownloadSolidBtnText: {
-    fontSize: 13,
-    fontWeight: '700',
+    fontSize: 13.5,
+    fontWeight: '800',
     color: '#FFFFFF',
-    letterSpacing: 0.4,
+    textAlign: 'center',
   },
 
   /* CREATOR EARNINGS HUB CARD */
