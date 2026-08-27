@@ -9,14 +9,15 @@ if (Platform.OS === 'web' && typeof document !== 'undefined') {
   if (!document.getElementById(fontStyleId)) {
     const link = document.createElement('link');
     link.rel = 'stylesheet';
-    link.href = 'https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap';
+    link.href =
+      'https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,600;0,6..96,700;0,6..96,800;1,6..96,600;1,6..96,700&family=Playfair+Display:ital,wght@0,600;0,700;0,800;1,600;1,700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap';
     document.head.appendChild(link);
 
     const style = document.createElement('style');
     style.id = fontStyleId;
     style.textContent = `
-      * {
-        font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, sans-serif !important;
+      body, input, button, select, textarea {
+        font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, sans-serif;
       }
     `;
     document.head.appendChild(style);

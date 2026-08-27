@@ -9,6 +9,7 @@ import {
   Platform,
 } from 'react-native';
 import { colors } from '../theme/colors';
+import { typography } from '../theme/typography';
 import { GlassBadge } from '../components/GlassBadge';
 import { HeroMascot } from '../components/HeroMascot';
 import { PrimaryButton } from '../components/PrimaryButton';
@@ -58,7 +59,7 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
           </View>
         </View>
 
-        {/* CONTENT SECTION: Clean, Minimalist Premium Headline & Social Proof */}
+        {/* CONTENT SECTION: Luxury Editorial Headline & Social Proof */}
         <View style={styles.contentSection}>
           <Text
             style={[
@@ -67,8 +68,7 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
               isMediumScreen && styles.mainHeadlineMedium,
             ]}
           >
-            Create. Grow.{'\n'}
-            <Text style={styles.streakAccent}>Earn.</Text>
+            Create. Grow. <Text style={styles.streakAccent}>Earn.</Text>
           </Text>
 
           {/* Social Proof Pill: Overlapping Creator Badges + 5 Stars + 12k+ Creators */}
@@ -177,29 +177,32 @@ const styles = StyleSheet.create({
   contentSection: {
     alignItems: 'center',
     paddingHorizontal: 16,
-    marginVertical: 2,
+    marginVertical: 4,
   },
   mainHeadline: {
+    fontFamily: typography.editorialSerif,
     fontSize: 38,
     fontWeight: '700',
     color: colors.textPrimary,
     textAlign: 'center',
-    letterSpacing: -1.6,
-    lineHeight: 44,
+    letterSpacing: -0.3,
+    lineHeight: 46,
     marginBottom: 4,
   },
   mainHeadlineMedium: {
-    fontSize: 35,
-    lineHeight: 40,
-    letterSpacing: -1.4,
+    fontSize: 34,
+    lineHeight: 42,
+    letterSpacing: -0.2,
   },
   mainHeadlineSmall: {
-    fontSize: 30,
-    lineHeight: 35,
-    letterSpacing: -1.1,
+    fontSize: 28,
+    lineHeight: 36,
+    letterSpacing: -0.1,
     marginBottom: 3,
   },
   streakAccent: {
+    fontFamily: typography.editorialSerif,
+    fontWeight: '700',
     color: colors.primary,
   },
 

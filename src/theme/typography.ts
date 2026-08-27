@@ -8,6 +8,13 @@ export const typography = {
     default: 'System',
   }),
 
+  editorialSerif: Platform.select({
+    ios: 'Didot',
+    android: 'serif',
+    web: "'Playfair Display', 'Bodoni Moda', 'Didot', 'Bodoni MT', Georgia, serif",
+    default: 'serif',
+  }),
+
   sizes: {
     hero: 36,
     display: 30,
