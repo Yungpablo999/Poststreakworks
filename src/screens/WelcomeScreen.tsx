@@ -39,23 +39,26 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
 
       {/* Main Screen Flex Container */}
       <View style={styles.mainContainer}>
-        {/* TOP ROW: Floating Animated Badges (Fire & Audio Wave) */}
-        <View style={styles.topBadgesRow}>
-          <GlassBadge floatDelay={0} floatDistance={6} size={isSmallScreen ? 54 : 62}>
-            <AnimatedFireIcon size={isSmallScreen ? 24 : 28} color="#FABD32" opacity={0.9} />
-          </GlassBadge>
-
-          <GlassBadge floatDelay={400} floatDistance={7} size={isSmallScreen ? 54 : 62}>
-            <AnimatedAudioWaveIcon size={isSmallScreen ? 23 : 26} color={colors.primary} />
-          </GlassBadge>
-        </View>
-
-        {/* HERO SECTION: Mascot Character with Soft Halo */}
+        {/* HERO SECTION: Mascot Character with Soft Halo & Flanking Ambient Orbit Badges */}
         <View style={styles.heroSection}>
+          {/* Left Orbit Badge */}
+          <View style={styles.heroOrbitBadgeLeft}>
+            <GlassBadge floatDelay={0} floatDistance={5} size={isSmallScreen ? 50 : 58}>
+              <AnimatedFireIcon size={isSmallScreen ? 23 : 26} color="#FABD32" opacity={0.9} />
+            </GlassBadge>
+          </View>
+
           <HeroMascot />
+
+          {/* Right Orbit Badge */}
+          <View style={styles.heroOrbitBadgeRight}>
+            <GlassBadge floatDelay={400} floatDistance={6} size={isSmallScreen ? 50 : 58}>
+              <AnimatedAudioWaveIcon size={isSmallScreen ? 22 : 25} color={colors.primary} />
+            </GlassBadge>
+          </View>
         </View>
 
-        {/* CONTENT SECTION: Clean, Minimalist Premium Headline */}
+        {/* CONTENT SECTION: Clean, Minimalist Premium Headline & Subtitle */}
         <View style={styles.contentSection}>
           <Text
             style={[
@@ -66,6 +69,15 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
           >
             Create. Grow.{'\n'}
             <Text style={styles.streakAccent}>Earn.</Text>
+          </Text>
+
+          <Text
+            style={[
+              styles.subtitle,
+              isSmallScreen && styles.subtitleSmall,
+            ]}
+          >
+            Your AI-powered creator operating system.
           </Text>
         </View>
 
@@ -124,36 +136,32 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
 
-  /* Top Badges Row */
-  topBadgesRow: {
-    width: '100%',
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: 6,
-    marginTop: 2,
-    zIndex: 10,
-  },
-
-  /* Center Hero */
+  /* Center Hero with Flanking Orbit Badges */
   heroSection: {
     alignItems: 'center',
     justifyContent: 'center',
-    marginVertical: 2,
+    marginVertical: 4,
+    width: '100%',
+    position: 'relative',
+  },
+  heroOrbitBadgeLeft: {
+    position: 'absolute',
+    left: 8,
+    top: 14,
+    zIndex: 5,
+  },
+  heroOrbitBadgeRight: {
+    position: 'absolute',
+    right: 8,
+    top: 22,
+    zIndex: 5,
   },
 
   /* Content & Typography */
   contentSection: {
     alignItems: 'center',
-    paddingHorizontal: 8,
-  },
-  brandTag: {
-    fontSize: 15,
-    fontWeight: '800',
-    color: colors.amberDark,
-    letterSpacing: 0.2,
-    marginBottom: 6,
-    textAlign: 'center',
+    paddingHorizontal: 16,
+    marginVertical: 2,
   },
   mainHeadline: {
     fontSize: 38,
@@ -162,7 +170,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     letterSpacing: -1.6,
     lineHeight: 44,
-    marginBottom: 10,
+    marginBottom: 4,
   },
   mainHeadlineMedium: {
     fontSize: 35,
@@ -173,24 +181,24 @@ const styles = StyleSheet.create({
     fontSize: 30,
     lineHeight: 35,
     letterSpacing: -1.1,
-    marginBottom: 6,
+    marginBottom: 3,
   },
   streakAccent: {
     color: colors.primary,
   },
   subtitle: {
-    fontSize: 15.5,
-    fontWeight: '400',
-    color: colors.textSecondary,
+    fontSize: 14.5,
+    fontWeight: '500',
+    color: '#7F7894',
     textAlign: 'center',
-    lineHeight: 23,
-    maxWidth: 420,
-    width: '100%',
+    letterSpacing: 0.1,
+    marginTop: 4,
+    maxWidth: 320,
   },
   subtitleSmall: {
-    fontSize: 14,
-    lineHeight: 20,
-    maxWidth: 275,
+    fontSize: 13,
+    marginTop: 3,
+    maxWidth: 280,
   },
 
   /* Action Buttons */

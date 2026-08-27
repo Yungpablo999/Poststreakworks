@@ -243,6 +243,10 @@ export const HeroMascot: React.FC = () => {
 
   return (
     <View style={styles.container}>
+      {/* Soft Ambient Radial Light Aura */}
+      <View style={styles.ambientAuraOuter} />
+      <View style={styles.ambientAuraInner} />
+
       <Pressable onPress={handleMascotTap} style={styles.pressable}>
         <Animated.View
           style={[
@@ -279,6 +283,29 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     marginVertical: 4,
+    position: 'relative',
+  },
+  ambientAuraOuter: {
+    position: 'absolute',
+    width: 240,
+    height: 240,
+    borderRadius: 120,
+    backgroundColor: 'rgba(88, 44, 219, 0.06)',
+    shadowColor: '#582CDB',
+    shadowOffset: { width: 0, height: 12 },
+    shadowOpacity: 0.1,
+    shadowRadius: 36,
+  },
+  ambientAuraInner: {
+    position: 'absolute',
+    width: 150,
+    height: 150,
+    borderRadius: 75,
+    backgroundColor: 'rgba(251, 191, 36, 0.04)',
+    shadowColor: '#FABD32',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.06,
+    shadowRadius: 20,
   },
   pressable: {
     alignItems: 'center',
