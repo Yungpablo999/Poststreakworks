@@ -814,15 +814,15 @@ export const ProEarningsScreen: React.FC<ProEarningsScreenProps> = ({
               style={{ padding: 18, borderRadius: 20 }}
             >
             <View style={styles.trendHeaderRow}>
-              <View>
-                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-                  <Text style={styles.trendTitleText}>Monthly Earnings Trend</Text>
-                  <Text style={{ fontSize: 16 }}>📈</Text>
+              <View style={{ flex: 1, minWidth: 0, marginRight: 8 }}>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>
+                  <Text style={styles.trendTitleText} numberOfLines={1}>Monthly Earnings Trend</Text>
+                  <Text style={{ fontSize: 14 }}>📈</Text>
                 </View>
-                <Text style={styles.trendSubText}>4-month historical revenue growth</Text>
+                <Text style={styles.trendSubText} numberOfLines={1}>4-month historical revenue growth</Text>
               </View>
               <View style={styles.trendYtdPill}>
-                <Text style={styles.trendYtdPillText}>YTD</Text>
+                <Text style={styles.trendYtdPillText} numberOfLines={1}>YTD</Text>
               </View>
             </View>
 
@@ -2938,15 +2938,16 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'flex-start',
-    marginBottom: 18,
+    marginBottom: 16,
   },
   trendTitleText: {
-    fontSize: 15,
+    fontSize: sFont(14),
     fontWeight: '700',
     color: '#FFFFFF',
+    flexShrink: 1,
   },
   trendSubText: {
-    fontSize: 11,
+    fontSize: sFont(11),
     color: '#E9D5FF',
     marginTop: 2,
   },
@@ -2955,10 +2956,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
     paddingVertical: 3.5,
     borderRadius: 8,
+    flexShrink: 0,
   },
   trendYtdPillText: {
-    fontSize: 10,
-    fontWeight: '700',
+    fontSize: sFont(10),
+    fontWeight: '800',
     color: '#FDE68A',
   },
   barChartContainer: {
