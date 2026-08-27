@@ -976,17 +976,17 @@ export const ProMessagesScreen: React.FC<ProMessagesScreenProps> = ({
                   </Pressable>
 
                   {/* Middle Content */}
-                  <View style={{ flex: 1 }}>
-                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 2 }}>
-                      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-                        <Text style={styles.convCreatorName}>{thread.name}</Text>
+                  <View style={{ flex: 1, minWidth: 0, marginRight: 4 }}>
+                    <View style={styles.convTopRow}>
+                      <View style={styles.convNameGroup}>
+                        <Text style={styles.convCreatorName} numberOfLines={1}>{thread.name}</Text>
                         {thread.isPro && (
                           <View style={styles.proMicroPill}>
-                            <Text style={styles.proMicroPillText}>👑 PRO</Text>
+                            <Text style={styles.proMicroPillText}>PRO</Text>
                           </View>
                         )}
                       </View>
-                      <Text style={styles.convTimeText}>{thread.time}</Text>
+                      <Text style={styles.convTimeText} numberOfLines={1}>{thread.time}</Text>
                     </View>
 
                     {/* Collab / Status Tag */}
@@ -1590,26 +1590,45 @@ const styles = StyleSheet.create({
     borderWidth: 1.5,
     borderColor: '#FFFFFF',
   },
+  convTopRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 2,
+    gap: 8,
+  },
+  convNameGroup: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    flex: 1,
+    flexShrink: 1,
+    minWidth: 0,
+    marginRight: 4,
+  },
   convCreatorName: {
-    fontSize: 14.5,
+    fontSize: sFont(14),
     fontWeight: '700',
     color: '#171420',
+    flexShrink: 1,
   },
   proMicroPill: {
     backgroundColor: '#FEF3C7',
     paddingHorizontal: 5,
     paddingVertical: 1.5,
     borderRadius: 4,
+    flexShrink: 0,
   },
   proMicroPillText: {
-    fontSize: 8,
+    fontSize: sFont(8.5),
     fontWeight: '700',
     color: '#B45309',
   },
   convTimeText: {
-    fontSize: 11,
+    fontSize: sFont(11),
     color: '#94A3B8',
     fontWeight: '700',
+    flexShrink: 0,
   },
   convBadgeBox: {
     alignSelf: 'flex-start',
