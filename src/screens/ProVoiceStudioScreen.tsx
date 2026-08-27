@@ -53,16 +53,16 @@ const VOICE_STYLES: VoiceStyleItem[] = [
     id: 'energetic',
     name: 'Energetic Storyteller',
     tone: 'Confident & Crisp',
-    pace: 'Medium-fast (1.1x)',
+    pace: '1.1x Fast',
     desc: 'Warm, clear and confident — designed for viral TikToks and high-retention Reels.',
     sampleDuration: '0:42',
-    tag: '👑 MOST POPULAR',
+    tag: 'POPULAR',
   },
   {
     id: 'deep',
     name: 'Deep Narrator',
-    tone: 'Authoritative & Rich',
-    pace: 'Steady (1.0x)',
+    tone: 'Rich & Resonant',
+    pace: '1.0x Steady',
     desc: 'Resonant and cinematic — perfect for long-form video essays, documentaries & tutorials.',
     sampleDuration: '0:55',
     tag: 'CINEMATIC',
@@ -70,8 +70,8 @@ const VOICE_STYLES: VoiceStyleItem[] = [
   {
     id: 'casual',
     name: 'Casual Vlogger',
-    tone: 'Conversational & Chill',
-    pace: 'Dynamic (1.05x)',
+    tone: 'Conversational',
+    pace: '1.05x Pace',
     desc: 'Upbeat and relatable — optimal for behind-the-scenes, day-in-the-life & lifestyle vlogs.',
     sampleDuration: '0:38',
     tag: 'LIFESTYLE',
@@ -79,20 +79,20 @@ const VOICE_STYLES: VoiceStyleItem[] = [
   {
     id: 'tech',
     name: 'Tech Explainer',
-    tone: 'Analytical & Precise',
-    pace: 'Snappy (1.15x)',
+    tone: 'Analytical & Crisp',
+    pace: '1.15x Snappy',
     desc: 'Crisp and articulate — engineered for SaaS walkthroughs, product reviews & teardowns.',
     sampleDuration: '0:45',
-    tag: 'SAAS & TECH',
+    tag: 'TECH',
   },
   {
     id: 'bold',
     name: 'Bold Motivator',
     tone: 'Inspiring & Punchy',
-    pace: 'High Energy (1.2x)',
+    pace: '1.2x Energy',
     desc: 'Passionate and commanding — ideal for gym motivation, founder discipline & mindsets.',
     sampleDuration: '0:32',
-    tag: 'MOTIVATION',
+    tag: 'BOLD',
   },
 ];
 
@@ -917,12 +917,12 @@ export const ProVoiceStudioScreen: React.FC<ProVoiceStudioScreenProps> = ({
             {/* Tone & Pace Chips */}
             <View style={{ flexDirection: 'row', gap: 8, marginTop: 12 }}>
               <View style={styles.toneChipBox}>
-                <Text style={styles.toneChipLabel}>TONE</Text>
-                <Text style={styles.toneChipValue}>{selectedVoiceStyle.tone}</Text>
+                <Text style={styles.toneChipLabel} numberOfLines={1}>TONE</Text>
+                <Text style={styles.toneChipValue} numberOfLines={1}>{selectedVoiceStyle.tone}</Text>
               </View>
               <View style={styles.toneChipBox}>
-                <Text style={styles.toneChipLabel}>PACE</Text>
-                <Text style={styles.toneChipValue}>{selectedVoiceStyle.pace}</Text>
+                <Text style={styles.toneChipLabel} numberOfLines={1}>PACE</Text>
+                <Text style={styles.toneChipValue} numberOfLines={1}>{selectedVoiceStyle.pace}</Text>
               </View>
             </View>
 
@@ -1135,22 +1135,22 @@ export const ProVoiceStudioScreen: React.FC<ProVoiceStudioScreenProps> = ({
                           showToast(`✓ Switched voice to "${v.name}"`);
                         }}
                       >
-                        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-                          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-                            <Text style={styles.voiceOptionName}>{v.name}</Text>
+                        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
+                          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, flex: 1, minWidth: 0, marginRight: 8 }}>
+                            <Text style={styles.voiceOptionName} numberOfLines={1}>{v.name}</Text>
                             <View style={styles.tagPillMini}>
-                              <Text style={styles.tagPillMiniText}>{v.tag}</Text>
+                              <Text style={styles.tagPillMiniText} numberOfLines={1}>{v.tag}</Text>
                             </View>
                           </View>
-                          {isSelected && <Text style={styles.voiceOptionCheck}>✓ ACTIVE</Text>}
+                          {isSelected && <Text style={styles.voiceOptionCheck} numberOfLines={1}>✓ ACTIVE</Text>}
                         </View>
-                        <Text style={styles.voiceOptionDesc}>{v.desc}</Text>
-                        <View style={{ flexDirection: 'row', gap: 6, marginTop: 8 }}>
+                        <Text style={styles.voiceOptionDesc} numberOfLines={2}>{v.desc}</Text>
+                        <View style={{ flexDirection: 'row', gap: 6, marginTop: 8, flexWrap: 'wrap' }}>
                           <View style={styles.minuteTagPill}>
-                            <Text style={styles.minuteTagText}>{v.tone}</Text>
+                            <Text style={styles.minuteTagText} numberOfLines={1}>{v.tone}</Text>
                           </View>
                           <View style={styles.minuteTagPill}>
-                            <Text style={styles.minuteTagText}>{v.pace}</Text>
+                            <Text style={styles.minuteTagText} numberOfLines={1}>{v.pace}</Text>
                           </View>
                         </View>
                       </Pressable>
@@ -2177,6 +2177,7 @@ const styles = StyleSheet.create({
   },
   toneChipBox: {
     flex: 1,
+    minWidth: 0,
     backgroundColor: '#FAF8F5',
     borderRadius: 10,
     padding: 10,
@@ -2184,12 +2185,12 @@ const styles = StyleSheet.create({
     borderColor: '#EFECE6',
   },
   toneChipLabel: {
-    fontSize: 9,
-    fontWeight: '700',
+    fontSize: sFont(8.5),
+    fontWeight: '800',
     color: '#94A3B8',
   },
   toneChipValue: {
-    fontSize: 12,
+    fontSize: sFont(11.5),
     fontWeight: '700',
     color: '#171420',
     marginTop: 2,
@@ -2448,19 +2449,21 @@ const styles = StyleSheet.create({
     borderColor: '#8B5CF6',
   },
   voiceOptionName: {
-    fontSize: 14,
+    fontSize: sFont(13),
     fontWeight: '700',
     color: '#171420',
+    flexShrink: 1,
   },
   voiceOptionCheck: {
-    fontSize: 10,
-    fontWeight: '700',
+    fontSize: sFont(9.5),
+    fontWeight: '800',
     color: '#582CDB',
+    flexShrink: 0,
   },
   voiceOptionDesc: {
-    fontSize: 11,
+    fontSize: sFont(11),
     color: '#64748B',
-    marginTop: 3,
+    marginTop: 2,
     lineHeight: 15,
   },
   tagPillMini: {
@@ -2468,22 +2471,24 @@ const styles = StyleSheet.create({
     paddingHorizontal: 5,
     paddingVertical: 1.5,
     borderRadius: 4,
+    flexShrink: 0,
   },
   tagPillMiniText: {
-    fontSize: 8,
-    fontWeight: '700',
+    fontSize: sFont(8),
+    fontWeight: '800',
     color: '#B45309',
   },
   minuteTagPill: {
     backgroundColor: '#FFFFFF',
     borderWidth: 1,
     borderColor: '#EFECE6',
-    paddingHorizontal: 7,
+    paddingHorizontal: 6,
     paddingVertical: 2.5,
     borderRadius: 6,
+    flexShrink: 0,
   },
   minuteTagText: {
-    fontSize: 9,
+    fontSize: sFont(8.5),
     fontWeight: '800',
     color: '#64748B',
   },
