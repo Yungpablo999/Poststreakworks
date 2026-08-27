@@ -244,9 +244,6 @@ export const HeroMascot: React.FC = () => {
 
   return (
     <View style={styles.container}>
-      {/* Soft Ambient Radial Light Lavender Bubble Disc */}
-      <View style={styles.ambientAuraOuter} />
-
       <Pressable onPress={handleMascotTap} style={styles.pressable}>
         <Animated.View
           style={[
@@ -282,38 +279,24 @@ const styles = StyleSheet.create({
   container: {
     alignItems: 'center',
     justifyContent: 'center',
-    marginVertical: 4,
+    marginVertical: 6,
     position: 'relative',
-    width: 256,
-    height: 256,
-  },
-  ambientAuraOuter: {
-    position: 'absolute',
-    width: 246,
-    height: 246,
-    borderRadius: 123,
-    backgroundColor: 'rgba(88, 44, 219, 0.08)',
-    shadowColor: '#582CDB',
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.12,
-    shadowRadius: 36,
-    top: 5,
-    left: 5,
-    ...(Platform.OS === 'web'
-      ? ({
-          boxShadow: '0 8px 36px rgba(88, 44, 219, 0.12)',
-        } as any)
-      : {}),
   },
   pressable: {
     alignItems: 'center',
     justifyContent: 'center',
-    width: '100%',
-    height: '100%',
   },
   mascotTransformWrapper: {
     alignItems: 'center',
     justifyContent: 'center',
-    marginLeft: 8, // Optical centering of the ghost body inside the bubble
+    shadowColor: '#171420',
+    shadowOffset: { width: 0, height: 14 },
+    shadowOpacity: 0.08,
+    shadowRadius: 24,
+    ...(Platform.OS === 'web'
+      ? ({
+          filter: 'drop-shadow(0px 14px 24px rgba(23, 20, 32, 0.08))',
+        } as any)
+      : {}),
   },
 });
