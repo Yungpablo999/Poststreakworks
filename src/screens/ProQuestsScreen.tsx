@@ -585,7 +585,14 @@ export const ProQuestsScreen: React.FC<ProQuestsScreenProps> = ({
                   setShowSquadQuestModal(true);
                 }}
               >
-                <Text style={styles.viewSquadBtnText}>View Squad Quest</Text>
+                <Text
+                  style={styles.viewSquadBtnText}
+                  numberOfLines={1}
+                  adjustsFontSizeToFit
+                  minimumFontScale={0.85}
+                >
+                  View Quest
+                </Text>
               </Pressable>
 
               <Pressable
@@ -596,7 +603,14 @@ export const ProQuestsScreen: React.FC<ProQuestsScreenProps> = ({
                   }
                 }}
               >
-                <Text style={styles.contributeBtnText}>Contribute</Text>
+                <Text
+                  style={styles.contributeBtnText}
+                  numberOfLines={1}
+                  adjustsFontSizeToFit
+                  minimumFontScale={0.85}
+                >
+                  Contribute
+                </Text>
               </Pressable>
             </View>
           </View>
@@ -2156,33 +2170,39 @@ const styles = StyleSheet.create({
   },
   squadActionsRow: {
     flexDirection: 'row',
-    gap: 8,
+    gap: 10,
   },
   viewSquadOutlineBtn: {
     flex: 1,
     backgroundColor: '#FFFFFF',
-    borderWidth: 1,
+    borderWidth: 1.5,
     borderColor: '#EFECE6',
     paddingVertical: 11,
+    paddingHorizontal: 8,
     borderRadius: 12,
     alignItems: 'center',
+    justifyContent: 'center',
   },
   viewSquadBtnText: {
     fontSize: 12.5,
     fontWeight: '800',
     color: '#171420',
+    textAlign: 'center',
   },
   contributeSolidBtn: {
     flex: 1,
     backgroundColor: '#582CDB',
     paddingVertical: 11,
+    paddingHorizontal: 8,
     borderRadius: 12,
     alignItems: 'center',
+    justifyContent: 'center',
   },
   contributeBtnText: {
     color: '#FFFFFF',
     fontSize: 12.5,
     fontWeight: '700',
+    textAlign: 'center',
   },
 
   // CARD 5: LIVE DUEL
