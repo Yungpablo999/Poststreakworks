@@ -89,6 +89,9 @@ const styles = StyleSheet.create({
     opacity: 0.92,
   },
   gradient: {
+    flex: 1,
+    width: '100%',
+    height: '100%',
     paddingVertical: 14,
     paddingHorizontal: 20,
     alignItems: 'center',
