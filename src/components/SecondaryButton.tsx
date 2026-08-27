@@ -6,6 +6,7 @@ import {
   Platform,
   ViewStyle,
   TextStyle,
+  StyleProp,
   View,
 } from 'react-native';
 import * as Haptics from 'expo-haptics';
@@ -15,8 +16,8 @@ export interface SecondaryButtonProps {
   onPress: () => void;
   icon?: React.ReactNode;
   disabled?: boolean;
-  style?: ViewStyle;
-  textStyle?: TextStyle;
+  style?: StyleProp<ViewStyle>;
+  textStyle?: StyleProp<TextStyle>;
 }
 
 export const SecondaryButton: React.FC<SecondaryButtonProps> = ({
@@ -56,32 +57,21 @@ export const SecondaryButton: React.FC<SecondaryButtonProps> = ({
 
 const styles = StyleSheet.create({
   button: {
-    borderRadius: 16,
-    paddingVertical: 14,
+    borderRadius: 100,
+    paddingVertical: 11,
     paddingHorizontal: 20,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#FFFFFF',
-    borderWidth: 1.5,
-    borderColor: 'rgba(88, 44, 219, 0.12)',
-    shadowColor: '#171420',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.06,
-    shadowRadius: 12,
-    elevation: 2,
-    ...(Platform.OS === 'web'
-      ? ({
-          boxShadow: '0 4px 14px rgba(23, 20, 32, 0.06)',
-        } as any)
-      : {}),
+    backgroundColor: 'transparent',
+    borderWidth: 0,
+    borderColor: 'transparent',
   },
   disabled: {
-    opacity: 0.5,
+    opacity: 0.4,
   },
   pressed: {
-    backgroundColor: '#F5F3FF',
-    borderColor: 'rgba(88, 44, 219, 0.25)',
-    transform: [{ scale: 0.98 }],
+    opacity: 0.65,
+    transform: [{ scale: 0.985 }],
   },
   contentRow: {
     flexDirection: 'row',
@@ -94,10 +84,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   title: {
-    fontSize: 15,
-    fontWeight: '700',
-    color: '#171420',
-    letterSpacing: 0.3,
+    fontSize: 14.5,
+    fontWeight: '600',
+    color: '#5E576E',
+    letterSpacing: -0.1,
     textAlign: 'center',
   },
 });
