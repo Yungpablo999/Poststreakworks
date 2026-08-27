@@ -398,8 +398,8 @@ export const SignUpScreen: React.FC<SignUpScreenProps> = ({
 
             <View style={styles.progressContainer}>
               <View style={[styles.progressSegment, styles.progressActive]} />
-              <View style={styles.progressSegment} />
-              <View style={styles.progressSegment} />
+              <View style={[styles.progressSegment, styles.progressActive]} />
+              <View style={[styles.progressSegment, styles.progressActive]} />
               <View style={styles.progressSegment} />
             </View>
 
@@ -626,7 +626,7 @@ export const SignUpScreen: React.FC<SignUpScreenProps> = ({
           </View>
         </ScrollView>
 
-        {/* 9. BOTTOM STATUS BAR (Sign up Step / 25% Complete) */}
+        {/* 9. BOTTOM STATUS BAR (Account Step / 75% Complete) */}
         <View style={styles.bottomStatusBar}>
           <View style={styles.statusLeftGroup}>
             <View style={styles.statusIconBadge}>
@@ -648,10 +648,10 @@ export const SignUpScreen: React.FC<SignUpScreenProps> = ({
                 />
               </Svg>
             </View>
-            <Text style={styles.statusLabelText}>Sign up Step</Text>
+            <Text style={styles.statusLabelText}>Account Step</Text>
           </View>
 
-          <Text style={styles.statusPercentageText}>25% Complete</Text>
+          <Text style={styles.statusPercentageText}>75% Complete</Text>
         </View>
 
         {/* 10. JARVIS CORE VALIDATION POPUP MODAL */}

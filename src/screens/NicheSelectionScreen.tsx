@@ -383,7 +383,7 @@ export const NicheSelectionScreen: React.FC<NicheSelectionScreenProps> = ({
 
             <View style={styles.progressContainer}>
               <View style={[styles.progressSegment, styles.progressActive]} />
-              <View style={[styles.progressSegment, styles.progressActive]} />
+              <View style={styles.progressSegment} />
               <View style={styles.progressSegment} />
               <View style={styles.progressSegment} />
             </View>
@@ -403,10 +403,10 @@ export const NicheSelectionScreen: React.FC<NicheSelectionScreenProps> = ({
             <Text style={styles.helperText}>Select up to 3 niches</Text>
           </View>
 
-          {/* 3. 50% HORIZONTAL PROGRESS BAR */}
+          {/* 3. 25% HORIZONTAL PROGRESS BAR */}
           <View style={styles.horizontalBarContainer}>
-            <View style={styles.horizontalBarActive} />
-            <View style={styles.horizontalBarInactive} />
+            <View style={[styles.horizontalBarActive, { flex: 0.25 }]} />
+            <View style={[styles.horizontalBarInactive, { flex: 0.75 }]} />
           </View>
 
           {/* 4. NICHE SELECTION CARDS */}
@@ -502,7 +502,7 @@ export const NicheSelectionScreen: React.FC<NicheSelectionScreenProps> = ({
           </View>
         </ScrollView>
 
-        {/* 7. BOTTOM STATUS BAR (Identity Step / 50% Complete) */}
+        {/* 7. BOTTOM STATUS BAR (Niche Step / 25% Complete) */}
         <View style={styles.bottomStatusBar}>
           <View style={styles.statusLeftGroup}>
             <View style={styles.statusIconBadge}>
@@ -515,10 +515,10 @@ export const NicheSelectionScreen: React.FC<NicheSelectionScreenProps> = ({
                 />
               </Svg>
             </View>
-            <Text style={styles.statusLabelText}>Identity Step</Text>
+            <Text style={styles.statusLabelText}>Niche Step</Text>
           </View>
 
-          <Text style={styles.statusPercentageText}>50% Complete</Text>
+          <Text style={styles.statusPercentageText}>25% Complete</Text>
         </View>
       </View>
 

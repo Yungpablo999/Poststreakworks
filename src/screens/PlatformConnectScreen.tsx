@@ -326,7 +326,7 @@ export const PlatformConnectScreen: React.FC<PlatformConnectScreenProps> = ({
             <View style={styles.progressContainer}>
               <View style={[styles.progressSegment, styles.progressActive]} />
               <View style={[styles.progressSegment, styles.progressActive]} />
-              <View style={[styles.progressSegment, styles.progressActive]} />
+              <View style={styles.progressSegment} />
               <View style={styles.progressSegment} />
             </View>
 
@@ -495,7 +495,7 @@ export const PlatformConnectScreen: React.FC<PlatformConnectScreenProps> = ({
           </Pressable>
         </ScrollView>
 
-        {/* 8. BOTTOM STATUS BAR (Connection Step / 75% Complete) */}
+        {/* 8. BOTTOM STATUS BAR (Platform Step / 50% Complete) */}
         <View style={styles.bottomStatusBar}>
           <View style={styles.statusLeftGroup}>
             <View style={styles.statusIconBadge}>
@@ -516,10 +516,10 @@ export const PlatformConnectScreen: React.FC<PlatformConnectScreenProps> = ({
                 />
               </Svg>
             </View>
-            <Text style={styles.statusLabelText}>Connection Step</Text>
+            <Text style={styles.statusLabelText}>Platform Step</Text>
           </View>
 
-          <Text style={styles.statusPercentageText}>75% Complete</Text>
+          <Text style={styles.statusPercentageText}>50% Complete</Text>
         </View>
       </View>
 

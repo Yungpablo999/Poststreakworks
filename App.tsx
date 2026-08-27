@@ -222,16 +222,44 @@ export default function App() {
 
   // Welcome Screen actions
   const handleGetStarted = () => {
-    navigateTo('signup');
+    // New flow: Get Started takes user to Onboarding Step 1 (Niche Selection)
+    navigateTo('niche');
   };
 
   const handleOpenSignInFromWelcome = () => {
     navigateTo('signin');
   };
 
-  // Sign Up Screen actions (Step 1)
-  const handleBackFromSignUp = () => {
+  // Niche Selection actions (Step 1 of Onboarding - 25%)
+  const handleBackFromNiche = () => {
     setCurrentScreen('welcome');
+  };
+
+  const handleNicheContinue = (niches: string[]) => {
+    setSelectedNiches(niches);
+    // Advance to Step 2: Platform Connection (50%)
+    navigateTo('platforms');
+  };
+
+  // Platform Connection actions (Step 2 of Onboarding - 50%)
+  const handleBackFromPlatforms = () => {
+    setCurrentScreen('niche');
+  };
+
+  const handlePlatformsContinue = (platforms: string[]) => {
+    setConnectedPlatforms(platforms);
+    // Advance to Step 3: Account Creation (75%)
+    navigateTo('signup');
+  };
+
+  const handlePlatformsSkip = () => {
+    // Advance to Step 3: Account Creation (75%) with default platforms
+    navigateTo('signup');
+  };
+
+  // Sign Up Screen actions (Step 3 of Onboarding - 75%)
+  const handleBackFromSignUp = () => {
+    setCurrentScreen('platforms');
   };
 
   const handleOpenSignInFromSignUp = () => {
@@ -240,8 +268,8 @@ export default function App() {
 
   const handleSignUpSubmit = (_username: string, _email: string) => {
     setUserProfile(prev => ({ ...prev, name: _username || prev.name, tier: 'free' }));
-    // Advance to Step 2: Niche Selection
-    navigateTo('niche');
+    // Advance to Step 4: Onboarding Completion (100%)
+    navigateTo('complete');
   };
 
   // Sign In Screen actions
@@ -273,36 +301,9 @@ export default function App() {
     navigateTo('dashboard');
   };
 
-  // Niche Selection actions (Step 2)
-  const handleBackFromNiche = () => {
-    setCurrentScreen('signup');
-  };
-
-  const handleNicheContinue = (niches: string[]) => {
-    setSelectedNiches(niches);
-    // Advance to Step 3: Platform Connection
-    navigateTo('platforms');
-  };
-
-  // Platform Connection actions (Step 3)
-  const handleBackFromPlatforms = () => {
-    setCurrentScreen('niche');
-  };
-
-  const handlePlatformsContinue = (platforms: string[]) => {
-    setConnectedPlatforms(platforms);
-    // Advance to Step 4: Onboarding Completion
-    navigateTo('complete');
-  };
-
-  const handlePlatformsSkip = () => {
-    // Advance to Step 4: Onboarding Completion with default platforms
-    navigateTo('complete');
-  };
-
-  // Onboarding Complete actions (Step 4)
+  // Onboarding Complete actions (Step 4 of Onboarding - 100%)
   const handleBackFromComplete = () => {
-    setCurrentScreen('platforms');
+    setCurrentScreen('signup');
   };
 
   const handleStartFirstMission = () => {
