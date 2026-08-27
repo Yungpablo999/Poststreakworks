@@ -337,7 +337,7 @@ export const PlatformConnectScreen: React.FC<PlatformConnectScreenProps> = ({
           <View style={styles.headingSection}>
             <Text style={styles.mainHeading}>Connect your creator platforms</Text>
             <Text style={styles.subHeading}>
-              Link the accounts you create on so PostStreak can personalise your schedule, protect your streak, track your growth and unlock better opportunities.
+              Connect your accounts so PostStreak can personalise your experience, track your growth and find better opportunities.
             </Text>
 
             {/* Instruction Badge */}
