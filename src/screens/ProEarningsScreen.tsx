@@ -1566,8 +1566,8 @@ export const ProEarningsScreen: React.FC<ProEarningsScreenProps> = ({
                     end={{ x: 1, y: 1 }}
                     style={styles.modalGoldBtnGradient}
                   >
-                    <Text style={styles.modalGoldActionBtnText}>
-                      ✨ Request Instant Payout ($420.00) ➔
+                    <Text style={styles.modalGoldActionBtnText} numberOfLines={1}>
+                      ✨ Instant Payout ($420.00) ➔
                     </Text>
                   </LinearGradient>
                 </Pressable>
@@ -1640,7 +1640,7 @@ export const ProEarningsScreen: React.FC<ProEarningsScreenProps> = ({
                     end={{ x: 1, y: 1 }}
                     style={styles.modalGoldBtnGradient}
                   >
-                    <Text style={styles.modalGoldActionBtnText}>
+                    <Text style={styles.modalGoldActionBtnText} numberOfLines={1}>
                       🔗 Copy Verified Media Kit Link
                     </Text>
                   </LinearGradient>
@@ -3362,6 +3362,7 @@ const styles = StyleSheet.create({
   },
   modalGoldBtnGradient: {
     paddingVertical: 13,
+    paddingHorizontal: 12,
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: 14,
@@ -3370,8 +3371,9 @@ const styles = StyleSheet.create({
   },
   modalGoldActionBtnText: {
     color: '#0C0A12',
-    fontSize: 14,
+    fontSize: sFont(13),
     fontWeight: '700',
+    textAlign: 'center',
   },
   modalCancelBtn: {
     paddingVertical: 10,
