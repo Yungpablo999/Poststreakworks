@@ -64,8 +64,8 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
               isMediumScreen && styles.mainHeadlineMedium,
             ]}
           >
-            Build your{'\n'}
-            creator <Text style={styles.streakAccent}>streak.</Text>
+            Create. Grow.{'\n'}
+            <Text style={styles.streakAccent}>Earn.</Text>
           </Text>
         </View>
 
