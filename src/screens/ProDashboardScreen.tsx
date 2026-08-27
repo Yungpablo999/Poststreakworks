@@ -1322,8 +1322,8 @@ export const ProDashboardScreen: React.FC<ProDashboardScreenProps> = ({
           <View style={styles.modalOverlay}>
             <Animated.View style={[styles.modalCard, { transform: [{ scale: modalPopScale }] }]}>
               <View style={styles.modalHeaderRow}>
-                <View>
-                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                <View style={{ flex: 1, minWidth: 0, marginRight: 10 }}>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
                     <Text style={styles.modalTitle}>AI Voice Studio Pro</Text>
                     <View style={styles.proUnlockedPill}>
                       <Text style={styles.proUnlockedText}>PRO UNLOCKED</Text>
@@ -1728,7 +1728,7 @@ export const ProDashboardScreen: React.FC<ProDashboardScreenProps> = ({
           <View style={styles.modalOverlay}>
             <Animated.View style={[styles.modalCard, { transform: [{ scale: modalPopScale }] }]}>
               <View style={styles.modalHeaderRow}>
-                <View>
+                <View style={{ flex: 1, minWidth: 0, marginRight: 10 }}>
                   <Text style={styles.modalTitle}>Activity &amp; Alerts</Text>
                   <Text style={styles.modalSubtitle}>Autonomous co-pilot notifications</Text>
                 </View>
@@ -2791,6 +2791,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'flex-start',
     marginBottom: 14,
+    width: '100%',
   },
   modalTitle: {
     fontSize: 18,
@@ -2809,6 +2810,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#F1F5F9',
     justifyContent: 'center',
     alignItems: 'center',
+    flexShrink: 0,
   },
   modalCloseCross: {
     fontSize: 12,

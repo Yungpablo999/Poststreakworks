@@ -980,8 +980,8 @@ export const ProCreateScreen: React.FC<ProCreateScreenProps> = ({
           <View style={styles.modalOverlay}>
             <Animated.View style={[styles.modalCard, { transform: [{ scale: modalPopScale }] }]}>
               <View style={styles.modalHeaderRow}>
-                <View>
-                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                <View style={{ flex: 1, minWidth: 0, marginRight: 10 }}>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
                     <Text style={styles.modalTitle}>AI Voice Studio</Text>
                     <View style={styles.unlockedPill}>
                       <Text style={styles.unlockedPillText}>PRO UNLOCKED</Text>
@@ -1059,7 +1059,7 @@ export const ProCreateScreen: React.FC<ProCreateScreenProps> = ({
           <View style={styles.modalOverlay}>
             <Animated.View style={[styles.modalCard, { transform: [{ scale: modalPopScale }] }]}>
               <View style={styles.modalHeaderRow}>
-                <View>
+                <View style={{ flex: 1, minWidth: 0, marginRight: 10 }}>
                   <View style={styles.proToolBadgePill}>
                     <Text style={styles.proToolBadgeText}>PRO REPURPOSING</Text>
                   </View>
@@ -1123,8 +1123,8 @@ export const ProCreateScreen: React.FC<ProCreateScreenProps> = ({
           <View style={styles.modalOverlay}>
             <Animated.View style={[styles.modalCard, { transform: [{ scale: modalPopScale }] }]}>
               <View style={styles.modalHeaderRow}>
-                <View>
-                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                <View style={{ flex: 1, minWidth: 0, marginRight: 10 }}>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
                     <Text style={styles.modalTitle}>Active Saved Drafts</Text>
                     <View style={styles.draftsCountPill}>
                       <Text style={styles.draftsCountPillText}>{activeDraftsList.length}</Text>
@@ -1227,7 +1227,7 @@ export const ProCreateScreen: React.FC<ProCreateScreenProps> = ({
           <View style={styles.modalOverlay}>
             <Animated.View style={[styles.modalCard, { transform: [{ scale: modalPopScale }] }]}>
               <View style={styles.modalHeaderRow}>
-                <View>
+                <View style={{ flex: 1, minWidth: 0, marginRight: 10 }}>
                   <Text style={styles.modalTitle}>Viral Hook Library</Text>
                   <Text style={styles.modalSubtitle}>Top-performing openers for first 2 seconds</Text>
                 </View>
@@ -2157,6 +2157,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'flex-start',
     marginBottom: 14,
+    width: '100%',
   },
   modalTitle: {
     fontSize: 18,
@@ -2175,6 +2176,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#F1F5F9',
     justifyContent: 'center',
     alignItems: 'center',
+    flexShrink: 0,
   },
   modalCloseCross: {
     fontSize: 12,

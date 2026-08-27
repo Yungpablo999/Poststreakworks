@@ -777,7 +777,7 @@ export const CreateScreen: React.FC<CreateScreenProps> = ({
           <View style={styles.modalOverlay}>
             <Animated.View style={[styles.modalCard, { transform: [{ scale: modalPopScale }] }]}>
               <View style={styles.modalHeaderRow}>
-                <View>
+                <View style={{ flex: 1, minWidth: 0, marginRight: 10 }}>
                   <Text style={styles.modalTitle}>New Post</Text>
                   <Text style={styles.modalSubtitle}>Create from scratch and protect your streak.</Text>
                 </View>
@@ -916,7 +916,7 @@ export const CreateScreen: React.FC<CreateScreenProps> = ({
           <View style={styles.modalOverlay}>
             <Animated.View style={[styles.modalCard, { transform: [{ scale: modalPopScale }] }]}>
               <View style={styles.modalHeaderRow}>
-                <View>
+                <View style={{ flex: 1, minWidth: 0, marginRight: 10 }}>
                   <Text style={styles.modalTitle}>AI Hook Sparks</Text>
                   <Text style={styles.modalSubtitle}>Trending angles customized for your niche:</Text>
                 </View>
@@ -965,7 +965,7 @@ export const CreateScreen: React.FC<CreateScreenProps> = ({
           <View style={styles.modalOverlay}>
             <Animated.View style={[styles.modalCard, { transform: [{ scale: modalPopScale }] }]}>
               <View style={styles.modalHeaderRow}>
-                <View>
+                <View style={{ flex: 1, minWidth: 0, marginRight: 10 }}>
                   <Text style={styles.modalTitle}>Script Builder</Text>
                   <Text style={styles.modalSubtitle}>Hook ➔ Story ➔ Lesson ➔ CTA formula:</Text>
                 </View>
@@ -1035,7 +1035,7 @@ export const CreateScreen: React.FC<CreateScreenProps> = ({
           <View style={styles.modalOverlay}>
             <Animated.View style={[styles.modalCard, { transform: [{ scale: modalPopScale }] }]}>
               <View style={styles.modalHeaderRow}>
-                <View>
+                <View style={{ flex: 1, minWidth: 0, marginRight: 10 }}>
                   <Text style={styles.modalTitle}>Caption Generator</Text>
                   <Text style={styles.modalSubtitle}>Craft high-engagement captions in your voice:</Text>
                 </View>
@@ -1105,7 +1105,7 @@ export const CreateScreen: React.FC<CreateScreenProps> = ({
           <View style={styles.modalOverlay}>
             <Animated.View style={[styles.modalCard, { transform: [{ scale: modalPopScale }] }]}>
               <View style={styles.modalHeaderRow}>
-                <View>
+                <View style={{ flex: 1, minWidth: 0, marginRight: 10 }}>
                   <Text style={styles.modalTitle}>{selectedDraft?.platform} Draft</Text>
                   <Text style={styles.modalSubtitle}>{selectedDraft?.editedTime}</Text>
                 </View>
@@ -1161,7 +1161,7 @@ export const CreateScreen: React.FC<CreateScreenProps> = ({
           <View style={styles.modalOverlay}>
             <Animated.View style={[styles.modalCard, { transform: [{ scale: modalPopScale }] }]}>
               <View style={styles.modalHeaderRow}>
-                <View>
+                <View style={{ flex: 1, minWidth: 0, marginRight: 10 }}>
                   <Text style={styles.modalTitle}>All Creator Drafts</Text>
                   <Text style={styles.modalSubtitle}>Manage your active video concepts</Text>
                 </View>
@@ -1213,7 +1213,7 @@ export const CreateScreen: React.FC<CreateScreenProps> = ({
           <View style={styles.modalOverlay}>
             <Animated.View style={[styles.modalCard, { transform: [{ scale: modalPopScale }] }]}>
               <View style={styles.modalHeaderRow}>
-                <View>
+                <View style={{ flex: 1, minWidth: 0, marginRight: 10 }}>
                   <Text style={styles.modalTitle}>Notifications</Text>
                   <Text style={styles.modalSubtitle}>Streak updates &amp; squad activity</Text>
                 </View>
@@ -1273,7 +1273,7 @@ export const CreateScreen: React.FC<CreateScreenProps> = ({
           <View style={styles.modalOverlay}>
             <Animated.View style={[styles.modalCard, { transform: [{ scale: modalPopScale }] }]}>
               <View style={styles.modalHeaderRow}>
-                <View>
+                <View style={{ flex: 1, minWidth: 0, marginRight: 10 }}>
                   <Text style={styles.modalTitle}>Creator Squad Chat</Text>
                   <Text style={styles.modalSubtitle}>Connect &amp; collaborate with matched creators</Text>
                 </View>
@@ -1976,6 +1976,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'flex-start',
     marginBottom: 16,
+    width: '100%',
   },
   modalCloseCircle: {
     width: 32,
@@ -1984,6 +1985,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#F1F5F9',
     justifyContent: 'center',
     alignItems: 'center',
+    flexShrink: 0,
   },
   modalCloseCross: {
     fontSize: 14,
