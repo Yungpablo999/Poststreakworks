@@ -1138,7 +1138,7 @@ export const ProCreateScreen: React.FC<ProCreateScreenProps> = ({
               </View>
 
               {/* Platform Filter Pills */}
-              <View style={{ flexDirection: 'row', gap: 6, marginVertical: 10 }}>
+              <View style={{ flexDirection: 'row', gap: 6, marginVertical: 10, width: '100%' }}>
                 {(['ALL', 'TIKTOK', 'INSTAGRAM', 'YOUTUBE'] as const).map((filterKey) => {
                   const isActive = draftFilter === filterKey;
                   return (
@@ -1152,7 +1152,10 @@ export const ProCreateScreen: React.FC<ProCreateScreenProps> = ({
                         setDraftFilter(filterKey);
                       }}
                     >
-                      <Text style={[styles.draftFilterPillText, isActive && styles.draftFilterPillTextActive]}>
+                      <Text
+                        numberOfLines={1}
+                        style={[styles.draftFilterPillText, isActive && styles.draftFilterPillTextActive]}
+                      >
                         {filterKey}
                       </Text>
                     </Pressable>
@@ -2049,12 +2052,15 @@ const styles = StyleSheet.create({
     color: '#582CDB',
   },
   draftFilterPill: {
-    paddingHorizontal: 10,
-    paddingVertical: 5,
+    flex: 1,
+    paddingHorizontal: 2,
+    paddingVertical: 7,
     borderRadius: 8,
     backgroundColor: '#FAF8F5',
     borderWidth: 1,
     borderColor: '#EFECE6',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   draftFilterPillActive: {
     backgroundColor: '#582CDB',
@@ -2064,6 +2070,7 @@ const styles = StyleSheet.create({
     fontSize: 10,
     fontWeight: '800',
     color: '#64748B',
+    textAlign: 'center',
   },
   draftFilterPillTextActive: {
     color: '#FFFFFF',
