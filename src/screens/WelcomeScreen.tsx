@@ -59,20 +59,22 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
           </View>
         </View>
 
-        {/* CONTENT SECTION: Luxury Editorial Headline & Social Proof */}
+        {/* CONTENT SECTION: Tall Editorial Luxury Headline & Social Proof */}
         <View style={styles.contentSection}>
-          <Text
-            style={[
-              styles.mainHeadline,
-              isSmallScreen && styles.mainHeadlineSmall,
-              isMediumScreen && styles.mainHeadlineMedium,
-            ]}
-            numberOfLines={1}
-            adjustsFontSizeToFit
-            minimumFontScale={0.7}
-          >
-            Create. Grow. <Text style={styles.streakAccent}>Earn.</Text>
-          </Text>
+          <View style={styles.tallHeadlineContainer}>
+            <Text
+              style={[
+                styles.mainHeadline,
+                isSmallScreen && styles.mainHeadlineSmall,
+                isMediumScreen && styles.mainHeadlineMedium,
+              ]}
+              numberOfLines={1}
+              adjustsFontSizeToFit
+              minimumFontScale={0.7}
+            >
+              Create. Grow. <Text style={styles.streakAccent}>Earn.</Text>
+            </Text>
+          </View>
 
           {/* Social Proof Pill: Overlapping Creator Badges + 5 Stars + 12k+ Creators */}
           <View style={styles.socialProofChip}>
@@ -183,27 +185,31 @@ const styles = StyleSheet.create({
     marginVertical: 4,
     width: '100%',
   },
+  tallHeadlineContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    transform: [{ scaleY: 1.44 }, { scaleX: 0.94 }],
+    marginVertical: 10,
+  },
   mainHeadline: {
     fontFamily: typography.editorialSerif,
     fontSize: 34,
     fontWeight: '700',
     color: colors.textPrimary,
     textAlign: 'center',
-    letterSpacing: 0.2,
-    lineHeight: 42,
-    marginBottom: 4,
+    letterSpacing: 0.3,
+    lineHeight: 40,
     ...(Platform.OS === 'web' ? { whiteSpace: 'nowrap' } : {}),
   },
   mainHeadlineMedium: {
     fontSize: 30,
-    lineHeight: 38,
-    letterSpacing: 0.1,
+    lineHeight: 36,
+    letterSpacing: 0.2,
   },
   mainHeadlineSmall: {
     fontSize: 25,
-    lineHeight: 32,
-    letterSpacing: 0,
-    marginBottom: 3,
+    lineHeight: 30,
+    letterSpacing: 0.1,
   },
   streakAccent: {
     fontFamily: typography.editorialSerif,
