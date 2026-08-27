@@ -96,6 +96,18 @@ export const NicheSelectionScreen: React.FC<NicheSelectionScreenProps> = ({
   const jarvisStarScale = useRef(new Animated.Value(1)).current;
   const modalPopScale = useRef(new Animated.Value(0.85)).current;
 
+  // 2. Responsive Niche Capacity Bar (0 = 0%, 1 = 33%, 2 = 66%, 3 = 100% full)
+  const barWidthAnim = useRef(new Animated.Value(selectedNiches.length / 3)).current;
+
+  useEffect(() => {
+    Animated.spring(barWidthAnim, {
+      toValue: Math.min(selectedNiches.length / 3, 1),
+      useNativeDriver: false,
+      speed: 20,
+      bounciness: 6,
+    }).start();
+  }, [selectedNiches.length, barWidthAnim]);
+
   useEffect(() => {
     // Star Pulsation & Living Celestial Float Loop
     const starLoop = Animated.loop(
@@ -397,16 +409,22 @@ export const NicheSelectionScreen: React.FC<NicheSelectionScreenProps> = ({
             <Text style={styles.mainHeading}>
               What kind of creator are <Text style={styles.headingPurple}>you?</Text>
             </Text>
-            <Text style={styles.subHeading}>
-              Choose your main content niche so PostStreak can personalise your matches, missions and opportunities.
-            </Text>
             <Text style={styles.helperText}>Select up to 3 niches</Text>
           </View>
 
-          {/* 3. 25% HORIZONTAL PROGRESS BAR */}
+          {/* 3. RESPONSIVE NICHE CAPACITY BAR */}
           <View style={styles.horizontalBarContainer}>
-            <View style={[styles.horizontalBarActive, { flex: 0.25 }]} />
-            <View style={[styles.horizontalBarInactive, { flex: 0.75 }]} />
+            <Animated.View
+              style={[
+                styles.horizontalBarActive,
+                {
+                  width: barWidthAnim.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: ['0%', '100%'],
+                  }),
+                },
+              ]}
+            />
           </View>
 
           {/* 4. NICHE SELECTION CARDS */}
@@ -718,18 +736,17 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   horizontalBarContainer: {
-    flexDirection: 'row',
     height: 4,
     borderRadius: 2,
     backgroundColor: 'rgba(23, 20, 32, 0.06)',
     marginVertical: 12,
+    overflow: 'hidden',
+    width: '100%',
   },
   horizontalBarActive: {
+    height: '100%',
     backgroundColor: '#582CDB',
     borderRadius: 2,
-  },
-  horizontalBarInactive: {
-    backgroundColor: 'transparent',
   },
   nicheList: {
     gap: 10,
