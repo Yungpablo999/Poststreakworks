@@ -769,10 +769,21 @@ export const ProScriptScreen: React.FC<ProScriptScreenProps> = ({
           <View style={styles.retentionNotesCard}>
             <Text style={styles.retentionNotesHeaderLabel}>RETENTION NOTES</Text>
             <View style={{ gap: 8, marginTop: 10 }}>
-              <Text style={styles.retentionNoteLine}>✓ First 3 sec strongest for TikTok &amp; Reels</Text>
-              <Text style={styles.retentionNoteLine}>⚡ Pattern interrupt at 12s and 24s</Text>
-              <Text style={styles.retentionNoteLine}>💡 Total duration optimal for Reel loop</Text>
-              <Text style={styles.retentionNoteLine}>💬 Question-based CTA for comments upside</Text>
+              {[
+                { icon: '✓', text: 'First 3s hook optimized for retention' },
+                { icon: '⚡', text: 'Pattern interrupts placed at 12s & 24s' },
+                { icon: '💡', text: 'Duration calibrated for seamless loops' },
+                { icon: '💬', text: 'Question CTA drives comment velocity' },
+              ].map((note, nIdx) => (
+                <View key={nIdx} style={styles.retentionRow}>
+                  <View style={styles.retentionIconBox}>
+                    <Text style={styles.retentionIconText}>{note.icon}</Text>
+                  </View>
+                  <Text style={styles.retentionNoteText} numberOfLines={1}>
+                    {note.text}
+                  </Text>
+                </View>
+              ))}
             </View>
           </View>
 
@@ -1674,15 +1685,38 @@ const styles = StyleSheet.create({
     marginTop: 12,
   },
   retentionNotesHeaderLabel: {
-    fontSize: 10,
-    fontWeight: '700',
+    fontSize: sFont(9.5),
+    fontWeight: '800',
     color: '#94A3B8',
     letterSpacing: 0.4,
   },
-  retentionNoteLine: {
-    fontSize: 12,
+  retentionRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  retentionIconBox: {
+    width: 22,
+    height: 22,
+    borderRadius: 6,
+    backgroundColor: '#FAF8F5',
+    borderWidth: 1,
+    borderColor: '#EFECE6',
+    justifyContent: 'center',
+    alignItems: 'center',
+    flexShrink: 0,
+  },
+  retentionIconText: {
+    fontSize: sFont(11),
+    fontWeight: '800',
+    color: '#582CDB',
+  },
+  retentionNoteText: {
+    fontSize: sFont(11.5),
     fontWeight: '700',
     color: '#171420',
+    flex: 1,
+    minWidth: 0,
   },
 
   // CARD 9: VOICE PREVIEW
