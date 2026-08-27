@@ -25,6 +25,7 @@ import { AnimatedCompletionModal } from '../components/AnimatedCompletionModal';
 import { TinyGoldCheck } from '../components/CreatorStoryModal';
 import { SocialBrandIcon } from '../components/SocialBrandIcon';
 import { PurpleGoldSwitch } from '../components/PurpleGoldSwitch';
+import { sFont, sPadding, isNarrowScreen } from '../utils/responsive';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
@@ -114,7 +115,7 @@ const INITIAL_FULL_QUEUE: FullQueueItem[] = [
   {
     id: 'q1',
     title: 'LinkedIn Insight: Why 90% of creators fail by Month 2',
-    platformLabel: 'in LinkedIn',
+    platformLabel: '💼 LinkedIn',
     time: '10:00',
     period: 'AM',
     dayLabel: 'Tomorrow (Thu)',
@@ -158,7 +159,7 @@ const INITIAL_FULL_QUEUE: FullQueueItem[] = [
   {
     id: 'q5',
     title: 'X Viral Thread: 5 tools that automate my content pipeline',
-    platformLabel: 'in LinkedIn',
+    platformLabel: '💼 LinkedIn',
     time: '09:30',
     period: 'AM',
     dayLabel: 'Monday (Oct 30)',
@@ -217,7 +218,7 @@ const INITIAL_SCHEDULE_ITEMS: ScheduleItem[] = [
     period: 'AM',
     title: '5 retention rules that 10x watch time',
     platform: 'linkedin',
-    platformLabel: 'in LinkedIn',
+    platformLabel: '💼 LinkedIn',
     badgeType: 'scheduled',
     dayIndex: 3, // THU 26
   },
@@ -375,7 +376,7 @@ export const ProScheduleScreen: React.FC<ProScheduleScreenProps> = ({
           ? '≈ TikTok'
           : selectedPlatform === 'youtube'
           ? '▶ Shorts'
-          : 'in LinkedIn',
+          : '💼 LinkedIn',
       badgeType: 'scheduled',
       dayIndex: selectedDayIndex,
     };
@@ -1108,7 +1109,7 @@ export const ProScheduleScreen: React.FC<ProScheduleScreenProps> = ({
                     { id: 'instagram', label: '📸 IG Reel' },
                     { id: 'tiktok', label: '≈ TikTok' },
                     { id: 'youtube', label: '▶ Shorts' },
-                    { id: 'linkedin', label: 'in LinkedIn' },
+                    { id: 'linkedin', label: '💼 LinkedIn' },
                   ].map((p) => {
                     const isSelected = selectedPlatform === p.id;
                     return (
@@ -1117,7 +1118,10 @@ export const ProScheduleScreen: React.FC<ProScheduleScreenProps> = ({
                         style={[styles.platformPillBtn, isSelected && styles.platformPillBtnActive]}
                         onPress={() => setSelectedPlatform(p.id as any)}
                       >
-                        <Text style={[styles.platformPillText, isSelected && styles.platformPillTextActive]}>
+                        <Text
+                          style={[styles.platformPillText, isSelected && styles.platformPillTextActive]}
+                          numberOfLines={1}
+                        >
                           {p.label}
                         </Text>
                       </Pressable>
@@ -1361,8 +1365,8 @@ export const ProScheduleScreen: React.FC<ProScheduleScreenProps> = ({
 
                   {/* 2. TARGET PLATFORM */}
                   <Text style={styles.inputLabel}>TARGET PLATFORM</Text>
-                  <View style={{ flexDirection: 'row', gap: 8, marginBottom: 12 }}>
-                    {['📸 IG Reel', '≈ TikTok', '▶ Shorts', 'in LinkedIn'].map((plat) => (
+                  <View style={{ flexDirection: 'row', gap: 6, marginBottom: 12 }}>
+                    {['📸 IG Reel', '≈ TikTok', '▶ Shorts', '💼 LinkedIn'].map((plat) => (
                       <Pressable
                         key={plat}
                         style={[
@@ -1376,6 +1380,7 @@ export const ProScheduleScreen: React.FC<ProScheduleScreenProps> = ({
                             styles.platformPillText,
                             editingPostPlatform === plat && styles.platformPillTextActive,
                           ]}
+                          numberOfLines={1}
                         >
                           {plat}
                         </Text>
@@ -2795,18 +2800,21 @@ const styles = StyleSheet.create({
     backgroundColor: '#F8FAFC',
     borderWidth: 1,
     borderColor: '#EFECE6',
-    paddingVertical: 8,
+    paddingVertical: 7,
+    paddingHorizontal: 2,
     borderRadius: 10,
     alignItems: 'center',
+    justifyContent: 'center',
   },
   platformPillBtnActive: {
     backgroundColor: '#582CDB',
     borderColor: '#582CDB',
   },
   platformPillText: {
-    fontSize: 10,
+    fontSize: sFont(9.5),
     fontWeight: '700',
     color: '#64748B',
+    textAlign: 'center',
   },
   platformPillTextActive: {
     color: '#FFFFFF',
