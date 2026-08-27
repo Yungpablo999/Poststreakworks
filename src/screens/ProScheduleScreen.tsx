@@ -1495,7 +1495,7 @@ export const ProScheduleScreen: React.FC<ProScheduleScreenProps> = ({
                         }
                       }}
                     >
-                      <Text style={styles.modalSecondaryOutlineBtnText}>
+                      <Text style={styles.modalSecondaryOutlineBtnText} numberOfLines={1}>
                         🚀 Open in Full Post Composer ➔
                       </Text>
                     </Pressable>
@@ -1915,8 +1915,8 @@ export const ProScheduleScreen: React.FC<ProScheduleScreenProps> = ({
                     }
                   }}
                 >
-                  <Text style={styles.modalSecondaryOutlineBtnText}>
-                    💬 Chat with Jarvis for Custom Plan ➔
+                  <Text style={styles.modalSecondaryOutlineBtnText} numberOfLines={1}>
+                    💬 Chat with Jarvis for Plan ➔
                   </Text>
                 </Pressable>
 
@@ -2916,13 +2916,16 @@ const styles = StyleSheet.create({
     borderWidth: 1.5,
     borderColor: '#DDD6FE',
     paddingVertical: 12,
+    paddingHorizontal: 12,
     borderRadius: 14,
     alignItems: 'center',
+    justifyContent: 'center',
   },
   modalSecondaryOutlineBtnText: {
     color: '#582CDB',
-    fontSize: 13,
+    fontSize: sFont(13),
     fontWeight: '700',
+    textAlign: 'center',
   },
   modalDeleteBtn: {
     paddingVertical: 8,

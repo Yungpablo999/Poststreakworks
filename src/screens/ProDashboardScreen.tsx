@@ -1498,7 +1498,7 @@ export const ProDashboardScreen: React.FC<ProDashboardScreenProps> = ({
                     if (onOpenMessages) onOpenMessages('conv_glowup');
                   }}
                 >
-                  <Text style={styles.modalSecondaryOutlineBtnText}>
+                  <Text style={styles.modalSecondaryOutlineBtnText} numberOfLines={1}>
                     💬 Message Brand Sponsor ➔
                   </Text>
                 </Pressable>
@@ -1664,7 +1664,7 @@ export const ProDashboardScreen: React.FC<ProDashboardScreenProps> = ({
                     if (onOpenQuests) onOpenQuests();
                   }}
                 >
-                  <Text style={styles.modalSecondaryOutlineBtnText}>
+                  <Text style={styles.modalSecondaryOutlineBtnText} numberOfLines={1}>
                     📜 View Complete Creator Passport ➔
                   </Text>
                 </Pressable>
@@ -3025,14 +3025,17 @@ const styles = StyleSheet.create({
     borderWidth: 1.5,
     borderColor: '#DDD6FE',
     paddingVertical: 12,
+    paddingHorizontal: 12,
     borderRadius: 14,
     alignItems: 'center',
+    justifyContent: 'center',
     marginTop: 8,
   },
   modalSecondaryOutlineBtnText: {
     color: '#582CDB',
-    fontSize: 13,
+    fontSize: sFont(13),
     fontWeight: '700',
+    textAlign: 'center',
   },
   modalCancelBtn: {
     paddingVertical: 10,
