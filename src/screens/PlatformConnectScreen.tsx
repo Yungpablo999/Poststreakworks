@@ -45,7 +45,7 @@ const PRIMARY_PLATFORMS: PlatformItem[] = [
   {
     id: 'x',
     name: 'X',
-    description: 'Threads, ideas, commentary and community growth.',
+    description: 'Posts, conversations, commentary and community growth.',
     iconType: 'x',
   },
   {
