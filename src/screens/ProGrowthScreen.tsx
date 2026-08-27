@@ -1464,10 +1464,15 @@ export const ProGrowthScreen: React.FC<ProGrowthScreenProps> = ({
               >
               {/* Header */}
               <View style={styles.modalHeaderRow}>
-                <View style={{ flex: 1, paddingRight: 10 }}>
+                <View style={{ flex: 1, minWidth: 0, paddingRight: 10 }}>
                   <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 2 }}>
                     <View style={styles.liveGreenPulseDot} />
-                    <Text style={styles.modalTitle}>
+                    <Text
+                      style={[styles.modalTitle, { flex: 1, minWidth: 0, fontSize: 16 }]}
+                      numberOfLines={1}
+                      adjustsFontSizeToFit
+                      minimumFontScale={0.8}
+                    >
                       {expandedGraphType === 'growth30d'
                         ? '30-Day Growth Velocity & Reach'
                         : expandedGraphType === 'audience'
@@ -1475,12 +1480,17 @@ export const ProGrowthScreen: React.FC<ProGrowthScreenProps> = ({
                         : 'Content Format ROI & Conversion'}
                     </Text>
                   </View>
-                  <Text style={styles.modalSubtitle}>
+                  <Text
+                    style={styles.modalSubtitle}
+                    numberOfLines={1}
+                    adjustsFontSizeToFit
+                    minimumFontScale={0.85}
+                  >
                     {expandedGraphType === 'growth30d'
                       ? 'Live multi-point analytics stream • May 2024'
                       : expandedGraphType === 'audience'
-                      ? 'Cross-platform audience expansion & subscriber velocity'
-                      : 'Retention, viral reach, saves & follower conversion benchmarks'}
+                      ? 'Cross-platform audience expansion & velocity'
+                      : 'Retention, reach, saves & conversion benchmarks'}
                   </Text>
                 </View>
                 <Pressable onPress={() => setShowExpandedGraphModal(false)} style={styles.modalCloseCircle} hitSlop={8}>
@@ -1968,14 +1978,14 @@ export const ProGrowthScreen: React.FC<ProGrowthScreenProps> = ({
               <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 135 }}>
                 {/* Header */}
                 <View style={styles.modalHeaderRow}>
-                  <View style={{ flex: 1, paddingRight: 10 }}>
+                  <View style={{ flex: 1, minWidth: 0, paddingRight: 10 }}>
                     <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 4 }}>
                       <View style={styles.liveGreenPulseDot} />
                       <Text style={styles.reportVerifiedBadge}>VERIFIED CREATOR AUDIT</Text>
                       <Text style={styles.reportDateBadge}>MAY 2024</Text>
                     </View>
-                    <Text style={[styles.modalTitle, { fontSize: 17 }]}>May Executive Growth Report</Text>
-                    <Text style={styles.modalSubtitle}>Comprehensive multi-platform analytics &amp; brand deal valuation</Text>
+                    <Text style={[styles.modalTitle, { fontSize: 17 }]} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.85}>May Executive Growth Report</Text>
+                    <Text style={styles.modalSubtitle} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.85}>Comprehensive multi-platform analytics &amp; brand deal valuation</Text>
                   </View>
                   <Pressable onPress={() => setShowReportModal(false)} style={styles.modalCloseCircle} hitSlop={8}>
                     <Text style={styles.modalCloseCross}>✕</Text>
