@@ -8,7 +8,6 @@ import {
   useWindowDimensions,
   Platform,
 } from 'react-native';
-import Svg, { Defs, RadialGradient, Stop, Circle } from 'react-native-svg';
 import * as Haptics from 'expo-haptics';
 
 export const HeroMascot: React.FC = () => {
@@ -280,7 +279,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     marginVertical: 6,
-    position: 'relative',
   },
   pressable: {
     alignItems: 'center',
@@ -289,14 +287,5 @@ const styles = StyleSheet.create({
   mascotTransformWrapper: {
     alignItems: 'center',
     justifyContent: 'center',
-    shadowColor: '#171420',
-    shadowOffset: { width: 0, height: 14 },
-    shadowOpacity: 0.08,
-    shadowRadius: 24,
-    ...(Platform.OS === 'web'
-      ? ({
-          filter: 'drop-shadow(0px 14px 24px rgba(23, 20, 32, 0.08))',
-        } as any)
-      : {}),
   },
 });
