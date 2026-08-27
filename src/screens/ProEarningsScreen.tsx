@@ -82,10 +82,10 @@ const EARNINGS_TIMEFRAME_CONFIGS = {
     stepSpacing: 65,
     netRateSummary: {
       total: '$620',
-      delta: '+$180 vs last week (▲ +40.9%)',
+      delta: '+$180 (▲ +40.9%)',
       gross: '$660',
       margin: '94.0% Take-home',
-      dailyAvg: '$88.50 / day',
+      dailyAvg: '$88.50/day',
       topDay: 'Fri, May 28 ($220 Brand Sprint)',
       insight: 'Weekend sponsored storytelling Reels generated 65% of your 7-day net revenue.',
     },
@@ -133,10 +133,10 @@ const EARNINGS_TIMEFRAME_CONFIGS = {
     stepSpacing: 44,
     netRateSummary: {
       total: '$1,180',
-      delta: '+$340 vs prev 14d (▲ +40.5%)',
+      delta: '+$340 (▲ +40.5%)',
       gross: '$1,250',
       margin: '94.4% Take-home',
-      dailyAvg: '$84.20 / day',
+      dailyAvg: '$84.20/day',
       topDay: 'Wed, May 19 ($350 Campaign)',
       insight: 'Sponsorship sprint across TikTok and Instagram generated 2 repeat brand contract renewals.',
     },
@@ -185,10 +185,10 @@ const EARNINGS_TIMEFRAME_CONFIGS = {
     stepSpacing: 31.5,
     netRateSummary: {
       total: '$2,450',
-      delta: '+$540 vs April (▲ +28.3%)',
+      delta: '+$540 (▲ +28.3%)',
       gross: '$2,600',
       margin: '94.2% Take-home',
-      dailyAvg: '$81.67 / day',
+      dailyAvg: '$81.67/day',
       topDay: 'May 12 ($450 Brand Package)',
       insight: 'Consistent daily posting generated a 3.4x spike in inbound brand sponsorship inquiries.',
     },
@@ -236,10 +236,10 @@ const EARNINGS_TIMEFRAME_CONFIGS = {
     stepSpacing: 65,
     netRateSummary: {
       total: '$6,840',
-      delta: '+$1,820 quarterly surge (▲ +36.2%)',
+      delta: '+$1,820 (▲ +36.2%)',
       gross: '$7,250',
       margin: '94.3% Take-home',
-      dailyAvg: '$76.00 / day',
+      dailyAvg: '$76.00/day',
       topDay: 'Month 3 ($2,450 May Record 🔥)',
       insight: 'Quarterly momentum puts you in the top 2.4% tier of creators by monetization velocity.',
     },
@@ -1342,18 +1342,18 @@ export const ProEarningsScreen: React.FC<ProEarningsScreenProps> = ({
                         {/* 2-Card Platform Vitals */}
                         <View style={styles.audienceStatsDuoRow}>
                           <View style={styles.audienceStatDuoCard}>
-                            <Text style={styles.audienceStatDuoLabel}>{selectedPlat.name.toUpperCase()} REVENUE</Text>
-                            <Text style={[styles.audienceStatDuoVal, { color: '#582CDB' }]}>
+                            <Text style={styles.audienceStatDuoLabel} numberOfLines={1}>{selectedPlat.name.toUpperCase()} REVENUE</Text>
+                            <Text style={[styles.audienceStatDuoVal, { color: '#582CDB' }]} numberOfLines={1}>
                               {selectedPlat.amount}
                             </Text>
-                            <Text style={styles.audienceStatDuoSub}>{selectedPlat.pct} of all income</Text>
+                            <Text style={styles.audienceStatDuoSub} numberOfLines={1}>{selectedPlat.pct} of all income</Text>
                           </View>
                           <View style={styles.audienceStatDuoCard}>
-                            <Text style={styles.audienceStatDuoLabel}>MONETIZATION YIELD</Text>
-                            <Text style={[styles.audienceStatDuoVal, { color: '#10B981' }]}>
+                            <Text style={styles.audienceStatDuoLabel} numberOfLines={1}>MONETIZATION YIELD</Text>
+                            <Text style={[styles.audienceStatDuoVal, { color: '#10B981' }]} numberOfLines={1}>
                               {selectedPlat.rpm}
                             </Text>
-                            <Text style={styles.audienceStatDuoSub}>{selectedPlat.deals}</Text>
+                            <Text style={styles.audienceStatDuoSub} numberOfLines={1}>{selectedPlat.deals}</Text>
                           </View>
                         </View>
 
@@ -1416,18 +1416,18 @@ export const ProEarningsScreen: React.FC<ProEarningsScreenProps> = ({
                       {/* Key Stats Duo */}
                       <View style={styles.audienceStatsDuoRow}>
                         <View style={styles.audienceStatDuoCard}>
-                          <Text style={styles.audienceStatDuoLabel}>TOTAL NET EARNINGS</Text>
-                          <Text style={[styles.audienceStatDuoVal, { color: '#582CDB' }]}>
+                          <Text style={styles.audienceStatDuoLabel} numberOfLines={1}>NET EARNINGS</Text>
+                          <Text style={[styles.audienceStatDuoVal, { color: '#582CDB' }]} numberOfLines={1}>
                             {curCfg.netRateSummary.total}
                           </Text>
-                          <Text style={styles.audienceStatDuoSub}>{curCfg.netRateSummary.delta}</Text>
+                          <Text style={styles.audienceStatDuoSub} numberOfLines={1}>{curCfg.netRateSummary.delta}</Text>
                         </View>
                         <View style={styles.audienceStatDuoCard}>
-                          <Text style={styles.audienceStatDuoLabel}>DAILY AVERAGE</Text>
-                          <Text style={[styles.audienceStatDuoVal, { color: '#10B981' }]}>
+                          <Text style={styles.audienceStatDuoLabel} numberOfLines={1}>DAILY AVERAGE</Text>
+                          <Text style={[styles.audienceStatDuoVal, { color: '#10B981' }]} numberOfLines={1}>
                             {curCfg.netRateSummary.dailyAvg}
                           </Text>
-                          <Text style={styles.audienceStatDuoSub}>{curCfg.netRateSummary.margin}</Text>
+                          <Text style={styles.audienceStatDuoSub} numberOfLines={1}>{curCfg.netRateSummary.margin}</Text>
                         </View>
                       </View>
 
@@ -1688,14 +1688,14 @@ export const ProEarningsScreen: React.FC<ProEarningsScreenProps> = ({
                 {/* 2-Stat Summary Duo */}
                 <View style={[styles.audienceStatsDuoRow, { marginVertical: 12 }]}>
                   <View style={styles.audienceStatDuoCard}>
-                    <Text style={styles.audienceStatDuoLabel}>TOTAL SETTLED</Text>
-                    <Text style={[styles.audienceStatDuoVal, { color: '#582CDB', fontSize: 18 }]}>$2,450.00</Text>
-                    <Text style={styles.audienceStatDuoSub}>May 2024 Net</Text>
+                    <Text style={styles.audienceStatDuoLabel} numberOfLines={1}>TOTAL SETTLED</Text>
+                    <Text style={[styles.audienceStatDuoVal, { color: '#582CDB', fontSize: sFont(16) }]} numberOfLines={1}>$2,450.00</Text>
+                    <Text style={styles.audienceStatDuoSub} numberOfLines={1}>May 2024 Net</Text>
                   </View>
                   <View style={styles.audienceStatDuoCard}>
-                    <Text style={styles.audienceStatDuoLabel}>PENDING PAYOUTS</Text>
-                    <Text style={[styles.audienceStatDuoVal, { color: '#10B981', fontSize: 18 }]}>$1,200.00</Text>
-                    <Text style={styles.audienceStatDuoSub}>3 In Review</Text>
+                    <Text style={styles.audienceStatDuoLabel} numberOfLines={1}>PENDING PAYOUTS</Text>
+                    <Text style={[styles.audienceStatDuoVal, { color: '#10B981', fontSize: sFont(16) }]} numberOfLines={1}>$1,200.00</Text>
+                    <Text style={styles.audienceStatDuoSub} numberOfLines={1}>3 In Review</Text>
                   </View>
                 </View>
 
@@ -2231,30 +2231,31 @@ const styles = StyleSheet.create({
   },
   audienceStatsDuoRow: {
     flexDirection: 'row',
-    gap: 10,
+    gap: 8,
   },
   audienceStatDuoCard: {
     flex: 1,
+    minWidth: 0,
     backgroundColor: '#FAF8F5',
-    borderRadius: 16,
-    padding: 12,
+    borderRadius: 14,
+    padding: 10,
     borderWidth: 1,
     borderColor: '#EFECE6',
   },
   audienceStatDuoLabel: {
-    fontSize: 9,
+    fontSize: sFont(8.5),
     fontWeight: '800',
     color: '#64748B',
-    letterSpacing: 0.5,
+    letterSpacing: 0.3,
     marginBottom: 4,
   },
   audienceStatDuoVal: {
-    fontSize: 17,
+    fontSize: sFont(15),
     fontWeight: '700',
     color: '#171420',
   },
   audienceStatDuoSub: {
-    fontSize: 10,
+    fontSize: sFont(9.5),
     color: '#64748B',
     marginTop: 2,
     fontWeight: '600',
