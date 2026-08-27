@@ -714,7 +714,7 @@ export const SignInScreen: React.FC<SignInScreenProps> = ({
               {/* Jarvis Core Badge */}
               <View style={styles.jarvisCoreBadge}>
                 <Text style={styles.jarvisBadgeSparkle}>🔥</Text>
-                <Text style={styles.jarvisBadgeText}>JARVIS CORE AI</Text>
+                <Text style={styles.jarvisBadgeText}>JARVIS CORE</Text>
               </View>
 
               {/* Modal Heading */}

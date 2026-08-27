@@ -716,7 +716,7 @@ export const ResetPasswordScreen: React.FC<ResetPasswordScreenProps> = ({
 
               <View style={styles.jarvisCoreBadge}>
                 <Text style={styles.jarvisBadgeSparkle}>🔥</Text>
-                <Text style={styles.jarvisBadgeText}>JARVIS CORE AI</Text>
+                <Text style={styles.jarvisBadgeText}>JARVIS CORE</Text>
               </View>
 
               <Text style={styles.modalTitle}>{jarvisModalTitle}</Text>
