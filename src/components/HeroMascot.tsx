@@ -283,29 +283,36 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginVertical: 4,
     position: 'relative',
+    width: 260,
+    height: 260,
   },
   ambientAuraOuter: {
     position: 'absolute',
-    width: 246,
-    height: 246,
-    borderRadius: 123,
+    width: 250,
+    height: 250,
+    borderRadius: 125,
     backgroundColor: 'rgba(88, 44, 219, 0.08)',
     shadowColor: '#582CDB',
-    shadowOffset: { width: 0, height: 12 },
+    shadowOffset: { width: 0, height: 8 },
     shadowOpacity: 0.12,
-    shadowRadius: 40,
+    shadowRadius: 36,
+    top: 5,
+    left: 5,
     ...(Platform.OS === 'web'
       ? ({
-          boxShadow: '0 12px 48px rgba(88, 44, 219, 0.14)',
+          boxShadow: '0 8px 40px rgba(88, 44, 219, 0.14)',
         } as any)
       : {}),
   },
   pressable: {
     alignItems: 'center',
     justifyContent: 'center',
+    width: '100%',
+    height: '100%',
   },
   mascotTransformWrapper: {
     alignItems: 'center',
     justifyContent: 'center',
+    marginLeft: 8, // Optical centering of the ghost body inside the bubble
   },
 });

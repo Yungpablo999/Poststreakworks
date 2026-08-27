@@ -163,7 +163,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
 
-  /* Center Hero with Flanking Orbit Badges */
+  /* Center Hero with Symmetrically Flanking Orbit Badges */
   heroSection: {
     alignItems: 'center',
     justifyContent: 'center',
@@ -173,14 +173,14 @@ const styles = StyleSheet.create({
   },
   heroOrbitBadgeLeft: {
     position: 'absolute',
-    left: 8,
-    top: 14,
+    left: 12,
+    top: 16,
     zIndex: 5,
   },
   heroOrbitBadgeRight: {
     position: 'absolute',
-    right: 8,
-    top: 22,
+    right: 12,
+    top: 16,
     zIndex: 5,
   },
 
