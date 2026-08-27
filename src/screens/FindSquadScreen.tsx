@@ -859,21 +859,21 @@ export const FindSquadScreen: React.FC<FindSquadScreenProps> = ({
                   {/* Info Details Grid */}
                   <View style={styles.modalInfoBox}>
                     <View style={styles.modalInfoRowItem}>
-                      <Text style={styles.modalInfoLabel}>🎯 Squad Goal</Text>
+                      <Text style={styles.modalInfoLabel} numberOfLines={1}>🎯 Goal</Text>
                       <Text style={styles.modalInfoVal}>{previewModalSquad.squadGoal}</Text>
                     </View>
                     <View style={styles.modalInfoRowItem}>
-                      <Text style={styles.modalInfoLabel}>⚡ Streak Record</Text>
+                      <Text style={styles.modalInfoLabel} numberOfLines={1}>⚡ Streak</Text>
                       <Text style={styles.modalInfoVal}>🔥 {previewModalSquad.streak} Days Streak Avg</Text>
                     </View>
                     <View style={styles.modalInfoRowItem}>
-                      <Text style={styles.modalInfoLabel}>🏆 Weekly Quest</Text>
+                      <Text style={styles.modalInfoLabel} numberOfLines={1}>🏆 Quest</Text>
                       <Text style={[styles.modalInfoVal, { color: '#582CDB', fontWeight: '700' }]}>
                         {previewModalSquad.weeklyQuest}
                       </Text>
                     </View>
                     <View style={[styles.modalInfoRowItem, { borderBottomWidth: 0, paddingBottom: 0 }]}>
-                      <Text style={styles.modalInfoLabel}>📋 Requirement</Text>
+                      <Text style={styles.modalInfoLabel} numberOfLines={1}>📋 Rules</Text>
                       <Text style={styles.modalInfoVal}>{previewModalSquad.requirements}</Text>
                     </View>
                   </View>
@@ -890,16 +890,21 @@ export const FindSquadScreen: React.FC<FindSquadScreenProps> = ({
                           source={av}
                           style={[
                             styles.stackAvatarImg,
-                            { marginLeft: i === 0 ? 0 : -8, zIndex: 3 - i },
+                            { width: 22, height: 22, borderRadius: 11, marginLeft: i === 0 ? 0 : -6, zIndex: 3 - i },
                           ]}
                         />
                       ))}
-                      <View style={[styles.stackAvatarPlus, { marginLeft: -8, zIndex: 0 }]}>
-                        <Text style={styles.stackAvatarPlusText}>+2</Text>
+                      <View style={[styles.stackAvatarPlus, { width: 22, height: 22, borderRadius: 11, marginLeft: -6, zIndex: 0 }]}>
+                        <Text style={[styles.stackAvatarPlusText, { fontSize: 8.5 }]}>+2</Text>
                       </View>
                     </View>
 
-                    <Text style={styles.modalCapacityText}>
+                    <Text
+                      style={styles.modalCapacityText}
+                      numberOfLines={1}
+                      adjustsFontSizeToFit
+                      minimumFontScale={0.8}
+                    >
                       {previewModalSquad.memberCount}/{previewModalSquad.maxMembers} Members • <Text style={{ color: '#582CDB', fontWeight: '800' }}>View Roster ➔</Text>
                     </Text>
                   </Pressable>
@@ -1796,7 +1801,8 @@ const styles = StyleSheet.create({
   modalInfoBox: {
     backgroundColor: '#FAF8F5',
     borderRadius: 16,
-    padding: 12,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
     borderWidth: 1,
     borderColor: '#EFECE6',
     marginBottom: 12,
@@ -1808,17 +1814,19 @@ const styles = StyleSheet.create({
     paddingVertical: 6,
     borderBottomWidth: 1,
     borderBottomColor: '#F1EFE9',
+    gap: 8,
   },
   modalInfoLabel: {
-    fontSize: 12,
+    fontSize: 11.5,
     color: '#64748B',
     fontWeight: '700',
+    flexShrink: 0,
   },
   modalInfoVal: {
-    fontSize: 12,
+    fontSize: 11.5,
     color: '#171420',
     fontWeight: '800',
-    maxWidth: '62%',
+    flex: 1,
     textAlign: 'right',
   },
   modalMembersPreviewRow: {
@@ -1832,11 +1840,14 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#EFECE6',
     marginBottom: 16,
+    gap: 8,
   },
   modalCapacityText: {
     fontSize: 11,
     color: '#64748B',
     fontWeight: '700',
+    flex: 1,
+    textAlign: 'right',
   },
 
   /* ROSTER VIEW */
