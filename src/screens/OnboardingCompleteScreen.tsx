@@ -385,7 +385,7 @@ export const OnboardingCompleteScreen: React.FC<OnboardingCompleteScreenProps> =
               ]}
             >
               <Image
-                source={require('../../assets/images/jarvis-ghost-clean.png')}
+                source={require('../../assets/images/jarvis-core-flame.png')}
                 style={styles.jarvisFlameImage}
                 resizeMode="contain"
               />
