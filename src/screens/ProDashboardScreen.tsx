@@ -1478,15 +1478,19 @@ export const ProDashboardScreen: React.FC<ProDashboardScreenProps> = ({
                 <Text style={styles.modalSubheadingTitle}>CAMPAIGN DELIVERABLES</Text>
                 <View style={{ gap: 8, marginTop: 8 }}>
                   <View style={styles.xpActivityRow}>
-                    <Text style={{ fontSize: 18 }}>🎬</Text>
-                    <View style={{ flex: 1 }}>
+                    <View style={styles.deliverableIconBox}>
+                      <Text style={{ fontSize: 18 }}>🎬</Text>
+                    </View>
+                    <View style={{ flex: 1, minWidth: 0 }}>
                       <Text style={styles.xpActivityTitle}>1x 9:16 Video Integration Reel</Text>
                       <Text style={styles.xpActivityTime}>Include 3-second texture hook &amp; routine demo</Text>
                     </View>
                   </View>
                   <View style={styles.xpActivityRow}>
-                    <Text style={{ fontSize: 18 }}>🔗</Text>
-                    <View style={{ flex: 1 }}>
+                    <View style={styles.deliverableIconBox}>
+                      <Text style={{ fontSize: 18 }}>🔗</Text>
+                    </View>
+                    <View style={{ flex: 1, minWidth: 0 }}>
                       <Text style={styles.xpActivityTitle}>Custom Bio Link &amp; Promo Code</Text>
                       <Text style={styles.xpActivityTime}>Tag @glowupskin with 15% audience discount</Text>
                     </View>
@@ -2980,25 +2984,37 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginTop: 2,
   },
+  deliverableIconBox: {
+    width: 36,
+    height: 36,
+    borderRadius: 10,
+    backgroundColor: '#FAF5FF',
+    borderWidth: 1,
+    borderColor: '#E9D5FF',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 10,
+    flexShrink: 0,
+  },
   xpActivityRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
     backgroundColor: '#FAF8F5',
-    borderRadius: 12,
-    padding: 10,
+    borderRadius: 14,
+    padding: 12,
     borderWidth: 1,
     borderColor: '#EFECE6',
   },
   xpActivityTitle: {
-    fontSize: 12,
+    fontSize: sFont(12.5),
     fontWeight: '800',
     color: '#171420',
   },
   xpActivityTime: {
-    fontSize: 10,
-    color: '#94A3B8',
-    marginTop: 1,
+    fontSize: sFont(11),
+    color: '#64748B',
+    marginTop: 2,
+    lineHeight: 15,
   },
   xpActivityBadge: {
     backgroundColor: '#EDE9FE',
