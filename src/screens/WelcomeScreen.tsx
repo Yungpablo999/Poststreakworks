@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React from 'react';
 import {
   StyleSheet,
   View,
@@ -7,7 +7,6 @@ import {
   StatusBar,
   useWindowDimensions,
   Platform,
-  Animated,
 } from 'react-native';
 import { colors } from '../theme/colors';
 import { GlassBadge } from '../components/GlassBadge';
@@ -34,100 +33,14 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
   const isSmallScreen = height < 740;
   const isMediumScreen = height >= 740 && height < 860;
 
-  // Staggered Entrance Animations for seamless, eye-easing transition
-  const screenFade = useRef(new Animated.Value(0)).current;
-  const heroScale = useRef(new Animated.Value(0.92)).current;
-  const heroTranslateY = useRef(new Animated.Value(18)).current;
-  const contentFade = useRef(new Animated.Value(0)).current;
-  const contentTranslateY = useRef(new Animated.Value(16)).current;
-  const actionFade = useRef(new Animated.Value(0)).current;
-  const actionTranslateY = useRef(new Animated.Value(14)).current;
-  const badgesFade = useRef(new Animated.Value(0)).current;
-
-  useEffect(() => {
-    Animated.parallel([
-      // Overall gentle screen fade
-      Animated.timing(screenFade, {
-        toValue: 1,
-        duration: 550,
-        useNativeDriver: true,
-      }),
-
-      // Ambient badges fade in
-      Animated.timing(badgesFade, {
-        toValue: 1,
-        duration: 700,
-        useNativeDriver: true,
-      }),
-
-      // Staggered sequence for hero -> content -> action buttons
-      Animated.stagger(100, [
-        // 1. Hero Mascot glide
-        Animated.parallel([
-          Animated.spring(heroScale, {
-            toValue: 1,
-            friction: 7,
-            tension: 40,
-            useNativeDriver: true,
-          }),
-          Animated.spring(heroTranslateY, {
-            toValue: 0,
-            friction: 7,
-            tension: 40,
-            useNativeDriver: true,
-          }),
-        ]),
-
-        // 2. Headline & Subtitle fade & rise
-        Animated.parallel([
-          Animated.timing(contentFade, {
-            toValue: 1,
-            duration: 450,
-            useNativeDriver: true,
-          }),
-          Animated.spring(contentTranslateY, {
-            toValue: 0,
-            friction: 8,
-            tension: 40,
-            useNativeDriver: true,
-          }),
-        ]),
-
-        // 3. Action Buttons fade & rise
-        Animated.parallel([
-          Animated.timing(actionFade, {
-            toValue: 1,
-            duration: 450,
-            useNativeDriver: true,
-          }),
-          Animated.spring(actionTranslateY, {
-            toValue: 0,
-            friction: 8,
-            tension: 40,
-            useNativeDriver: true,
-          }),
-        ]),
-      ]),
-    ]).start();
-  }, [
-    screenFade,
-    heroScale,
-    heroTranslateY,
-    contentFade,
-    contentTranslateY,
-    actionFade,
-    actionTranslateY,
-    badgesFade,
-  ]);
-
   return (
     <SafeAreaView style={styles.safeArea}>
       <StatusBar barStyle="dark-content" backgroundColor={colors.background} />
 
       {/* Main Screen Flex Container */}
-      <Animated.View style={[styles.mainContainer, { opacity: screenFade }]}>
+      <View style={styles.mainContainer}>
         {/* TOP ROW: Floating Animated Badges (Fire & Audio Wave) */}
-        <Animated.View style={[styles.topBadgesRow, { opacity: badgesFade }]}>
+        <View style={styles.topBadgesRow}>
           <GlassBadge floatDelay={0} floatDistance={6} size={isSmallScreen ? 54 : 62}>
             <AnimatedFireIcon size={isSmallScreen ? 24 : 28} color="#FABD32" opacity={0.9} />
           </GlassBadge>
@@ -135,33 +48,15 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
           <GlassBadge floatDelay={400} floatDistance={7} size={isSmallScreen ? 54 : 62}>
             <AnimatedAudioWaveIcon size={isSmallScreen ? 23 : 26} color={colors.primary} />
           </GlassBadge>
-        </Animated.View>
+        </View>
 
         {/* HERO SECTION: Mascot Character with Soft Halo */}
-        <Animated.View
-          style={[
-            styles.heroSection,
-            {
-              transform: [
-                { scale: heroScale },
-                { translateY: heroTranslateY },
-              ],
-            },
-          ]}
-        >
+        <View style={styles.heroSection}>
           <HeroMascot />
-        </Animated.View>
+        </View>
 
         {/* CONTENT SECTION: Brand, Main Headline & Subtitle */}
-        <Animated.View
-          style={[
-            styles.contentSection,
-            {
-              opacity: contentFade,
-              transform: [{ translateY: contentTranslateY }],
-            },
-          ]}
-        >
+        <View style={styles.contentSection}>
           <Text style={styles.brandTag}>Poststreak</Text>
 
           <Text
@@ -183,18 +78,10 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
           >
             Create, schedule, collaborate, grow and earn—all in one creator engine.
           </Text>
-        </Animated.View>
+        </View>
 
         {/* ACTION BUTTONS CLUSTER */}
-        <Animated.View
-          style={[
-            styles.actionCluster,
-            {
-              opacity: actionFade,
-              transform: [{ translateY: actionTranslateY }],
-            },
-          ]}
-        >
+        <View style={styles.actionCluster}>
           <PrimaryButton
             title="Get Started"
             onPress={onGetStarted}
@@ -205,10 +92,10 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
             onPress={onSignIn}
             style={styles.actionBtn}
           />
-        </Animated.View>
+        </View>
 
         {/* FOOTER & FLANKING AMBIENT BADGES */}
-        <Animated.View style={[styles.footerContainer, { opacity: badgesFade }]}>
+        <View style={styles.footerContainer}>
           {/* Bottom Left Floating Badge: Growth Trend */}
           <View style={styles.bottomLeftBadge}>
             <GlassBadge floatDelay={600} floatDistance={5} size={isSmallScreen ? 50 : 56}>
@@ -228,8 +115,8 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
               <AnimatedSparklesIcon size={isSmallScreen ? 24 : 27} color="#FABD32" opacity={0.9} />
             </GlassBadge>
           </View>
-        </Animated.View>
-      </Animated.View>
+        </View>
+      </View>
     </SafeAreaView>
   );
 };
