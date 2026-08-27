@@ -81,20 +81,21 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
           <View style={styles.socialProofChip}>
             <View style={styles.avatarStack}>
               <Image
-                source={{ uri: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80' }}
+                source={{ uri: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=120&auto=format&fit=crop&q=80' }}
                 style={[styles.avatarImg, { zIndex: 4 }]}
               />
               <Image
-                source={{ uri: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&auto=format&fit=crop&q=80' }}
-                style={[styles.avatarImg, { marginLeft: -8, zIndex: 3 }]}
+                source={{ uri: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=120&auto=format&fit=crop&q=80' }}
+                style={[styles.avatarImg, { marginLeft: -7, zIndex: 3 }]}
               />
               <Image
-                source={{ uri: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=100&auto=format&fit=crop&q=80' }}
-                style={[styles.avatarImg, { marginLeft: -8, zIndex: 2 }]}
+                source={{ uri: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=120&auto=format&fit=crop&q=80' }}
+                style={[styles.avatarImg, { marginLeft: -7, zIndex: 2 }]}
               />
-              <View style={[styles.avatarCountPill, { marginLeft: -8, zIndex: 1 }]}>
-                <Text style={styles.avatarCountText}>+15k</Text>
-              </View>
+              <Image
+                source={{ uri: 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=120&auto=format&fit=crop&q=80' }}
+                style={[styles.avatarImg, { marginLeft: -7, zIndex: 1 }]}
+              />
             </View>
 
             <View style={styles.socialProofDivider} />
@@ -228,21 +229,21 @@ const styles = StyleSheet.create({
   socialProofChip: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'rgba(255, 255, 255, 0.95)',
-    paddingHorizontal: 14,
+    backgroundColor: 'rgba(255, 255, 255, 0.96)',
+    paddingHorizontal: 16,
     paddingVertical: 8,
-    borderRadius: 32,
+    borderRadius: 30,
     borderWidth: 1,
     borderColor: 'rgba(88, 44, 219, 0.08)',
     shadowColor: '#171420',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.06,
-    shadowRadius: 12,
-    marginTop: 8,
+    shadowOpacity: 0.05,
+    shadowRadius: 10,
+    marginTop: 6,
     gap: 12,
     ...(Platform.OS === 'web'
       ? ({
-          boxShadow: '0 4px 16px rgba(23, 20, 32, 0.06)',
+          boxShadow: '0 4px 16px rgba(23, 20, 32, 0.05)',
         } as any)
       : {}),
   },
@@ -251,31 +252,16 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   avatarImg: {
-    width: 26,
-    height: 26,
-    borderRadius: 13,
-    borderWidth: 1.8,
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    borderWidth: 2,
     borderColor: '#FFFFFF',
     backgroundColor: '#ECE8F6',
   },
-  avatarCountPill: {
-    width: 26,
-    height: 26,
-    borderRadius: 13,
-    backgroundColor: '#582CDB',
-    borderWidth: 1.8,
-    borderColor: '#FFFFFF',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  avatarCountText: {
-    fontSize: 9,
-    fontWeight: '800',
-    color: '#FFFFFF',
-  },
   socialProofDivider: {
     width: 1,
-    height: 18,
+    height: 16,
     backgroundColor: 'rgba(23, 20, 32, 0.08)',
   },
   socialProofMeta: {
@@ -288,19 +274,19 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   starIcon: {
-    color: '#FABD32',
-    fontSize: 12,
+    color: '#F59E0B',
+    fontSize: 11.5,
     letterSpacing: 1.2,
   },
   ratingNumber: {
-    fontSize: 12,
+    fontSize: 11.5,
     fontWeight: '800',
     color: colors.textPrimary,
   },
   socialProofLabel: {
-    fontSize: 11.5,
+    fontSize: 11,
     fontWeight: '600',
-    color: '#6F6782',
+    color: '#5C546E',
     letterSpacing: 0.1,
   },
 
