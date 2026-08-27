@@ -27,19 +27,19 @@ const PRIMARY_PLATFORMS: PlatformItem[] = [
   {
     id: 'tiktok',
     name: 'TikTok',
-    description: 'Short-form video, trends and creator discovery.',
+    description: 'Schedule videos, track growth and discover opportunities.',
     iconType: 'tiktok',
   },
   {
     id: 'instagram',
     name: 'Instagram',
-    description: 'Reels, Stories, posts and creator collaborations.',
+    description: 'Schedule content, track growth and manage collaborations.',
     iconType: 'instagram',
   },
   {
     id: 'youtube',
     name: 'YouTube',
-    description: 'Shorts, long-form videos and channel growth.',
+    description: 'Schedule videos, track channel growth and manage content.',
     iconType: 'youtube',
   },
 ];
