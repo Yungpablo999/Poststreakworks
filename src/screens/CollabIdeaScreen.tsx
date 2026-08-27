@@ -1044,8 +1044,6 @@ export const CollabIdeaScreen: React.FC<CollabIdeaScreenProps> = ({
                 >
                   <Text
                     numberOfLines={1}
-                    adjustsFontSizeToFit
-                    minimumFontScale={0.85}
                     style={styles.startCollabBtnText}
                   >
                     Start Collaboration
@@ -2096,18 +2094,18 @@ const styles = StyleSheet.create({
   // Bottom Floating Action Bar
   bottomActionBar: {
     flexDirection: 'row',
-    gap: 8,
+    gap: 10,
     alignItems: 'center',
     width: '100%',
   },
   startCollabBtn: {
     flex: 1,
-    height: 48,
-    borderRadius: 14,
+    height: 52,
+    borderRadius: 16,
     overflow: 'hidden',
     shadowColor: '#582CDB',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.08,
+    shadowOpacity: 0.12,
     shadowRadius: 10,
     elevation: 4,
   },
@@ -2115,19 +2113,19 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    paddingHorizontal: 8,
+    paddingHorizontal: 12,
   },
   startCollabBtnText: {
-    fontSize: sFont(13, 11.5),
-    fontWeight: '700',
+    fontSize: 16,
+    fontWeight: '800',
     color: '#FFFFFF',
-    letterSpacing: 0.2,
+    letterSpacing: 0.3,
     textAlign: 'center',
   },
   inviteBtn: {
-    height: 48,
-    paddingHorizontal: 14,
-    borderRadius: 14,
+    height: 52,
+    paddingHorizontal: 16,
+    borderRadius: 16,
     backgroundColor: '#F5F3FF',
     borderWidth: 1.5,
     borderColor: '#DDD6FE',
@@ -2135,15 +2133,15 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   inviteBtnText: {
-    fontSize: 13,
+    fontSize: 15,
     fontWeight: '800',
     color: '#582CDB',
     textAlign: 'center',
   },
   saveBookmarkBtn: {
-    width: 48,
-    height: 48,
-    borderRadius: 14,
+    width: 52,
+    height: 52,
+    borderRadius: 16,
     backgroundColor: '#FFFFFF',
     borderWidth: 1.5,
     borderColor: '#EDE9FE',
