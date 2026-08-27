@@ -623,22 +623,22 @@ export const ProVoiceStudioScreen: React.FC<ProVoiceStudioScreenProps> = ({
 
             {/* Editor Footer Row */}
             <View style={styles.scriptFooterRow}>
-              <View style={{ flexDirection: 'row', gap: 16 }}>
+              <View style={{ flexDirection: 'row', gap: 10, alignItems: 'center', flexShrink: 1 }}>
                 <View>
-                  <Text style={styles.metaKeyLabel}>EST. LENGTH</Text>
-                  <Text style={styles.metaValText}>{formatTimer(estimatedSeconds)}</Text>
+                  <Text style={styles.metaKeyLabel} numberOfLines={1}>LENGTH</Text>
+                  <Text style={styles.metaValText} numberOfLines={1}>{formatTimer(estimatedSeconds)}</Text>
                 </View>
                 <View>
-                  <Text style={styles.metaKeyLabel}>QUOTA USAGE</Text>
-                  <Text style={styles.metaValText}>{estimatedMinutesQuota} min</Text>
+                  <Text style={styles.metaKeyLabel} numberOfLines={1}>QUOTA</Text>
+                  <Text style={styles.metaValText} numberOfLines={1}>{estimatedMinutesQuota} min</Text>
                 </View>
                 <View>
-                  <Text style={styles.metaKeyLabel}>SPEED</Text>
-                  <Text style={styles.metaValText}>{selectedSpeed}</Text>
+                  <Text style={styles.metaKeyLabel} numberOfLines={1}>SPEED</Text>
+                  <Text style={styles.metaValText} numberOfLines={1}>{selectedSpeed}</Text>
                 </View>
               </View>
 
-              <View style={{ flexDirection: 'row', gap: 8 }}>
+              <View style={{ flexDirection: 'row', gap: 6, alignItems: 'center', flexShrink: 0 }}>
                 {/* AI Hook Optimizer */}
                 <Pressable
                   style={({ pressed }) => [styles.toolIconBtn, pressed && styles.btnPressed]}
@@ -648,7 +648,7 @@ export const ProVoiceStudioScreen: React.FC<ProVoiceStudioScreenProps> = ({
                   }}
                   hitSlop={6}
                 >
-                  <Text style={{ fontSize: 15 }}>🪄</Text>
+                  <Text style={{ fontSize: 14 }}>🪄</Text>
                 </Pressable>
 
                 {/* Voice Style Selector */}
@@ -660,7 +660,7 @@ export const ProVoiceStudioScreen: React.FC<ProVoiceStudioScreenProps> = ({
                   }}
                   hitSlop={6}
                 >
-                  <Text style={{ fontSize: 15 }}>🎚️</Text>
+                  <Text style={{ fontSize: 14 }}>🎚️</Text>
                 </Pressable>
 
                 {/* Copy/Paste Action */}
@@ -671,7 +671,7 @@ export const ProVoiceStudioScreen: React.FC<ProVoiceStudioScreenProps> = ({
                   }}
                   hitSlop={6}
                 >
-                  <Text style={{ fontSize: 15 }}>📋</Text>
+                  <Text style={{ fontSize: 14 }}>📋</Text>
                 </Pressable>
               </View>
             </View>
@@ -1891,27 +1891,28 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingTop: 12,
+    paddingTop: 10,
     borderTopWidth: 1,
     borderTopColor: '#F1EFE9',
     marginTop: 10,
+    gap: 8,
   },
   metaKeyLabel: {
-    fontSize: 9,
-    fontWeight: '700',
+    fontSize: sFont(8.5),
+    fontWeight: '800',
     color: '#94A3B8',
     letterSpacing: 0.3,
   },
   metaValText: {
-    fontSize: 12,
+    fontSize: sFont(11.5),
     fontWeight: '700',
     color: '#582CDB',
     marginTop: 1,
   },
   toolIconBtn: {
-    width: 34,
-    height: 34,
-    borderRadius: 9,
+    width: 30,
+    height: 30,
+    borderRadius: 8,
     backgroundColor: '#FAF8F5',
     borderWidth: 1,
     borderColor: '#EFECE6',
