@@ -737,11 +737,11 @@ export const ProScheduleScreen: React.FC<ProScheduleScreenProps> = ({
                     </Text>
                   </View>
 
-                  <View style={{ flex: 1 }}>
-                    <Text style={styles.scheduleItemTitle} numberOfLines={1}>
+                  <View style={{ flex: 1, minWidth: 0, marginRight: 6 }}>
+                    <Text style={styles.scheduleItemTitle} numberOfLines={1} ellipsizeMode="tail">
                       {item.title}
                     </Text>
-                    <Text style={styles.scheduleItemPlatform}>{item.platformLabel}</Text>
+                    <Text style={styles.scheduleItemPlatform} numberOfLines={1}>{item.platformLabel}</Text>
                   </View>
 
                   <View style={item.badgeType === 'recommended' ? styles.recommendedPillBadge : styles.scheduledPillBadge}>
@@ -1554,26 +1554,30 @@ export const ProScheduleScreen: React.FC<ProScheduleScreenProps> = ({
                   {displayedItems.length > 0 ? (
                     displayedItems.map((item, idx) => (
                       <View key={item.id} style={styles.expandedPostCard}>
-                        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                          <View style={{ flexDirection: 'row', gap: 10, flex: 1 }}>
-                            <View style={item.badgeType === 'recommended' ? styles.timeBoxGold : styles.timeBoxPurple}>
-                              <Text style={item.badgeType === 'recommended' ? styles.timeBoxGoldText : styles.timeBoxPurpleText}>
-                                {item.time}
-                              </Text>
-                              <Text style={item.badgeType === 'recommended' ? styles.timeBoxGoldSub : styles.timeBoxPurpleSub}>
-                                {item.period}
-                              </Text>
-                            </View>
-
-                            <View style={{ flex: 1 }}>
-                              <Text style={styles.scheduleItemTitle}>{item.title}</Text>
-                              <Text style={styles.scheduleItemPlatform}>{item.platformLabel} • ⚡ 94% Retention</Text>
-                            </View>
+                        <View style={styles.expandedPostTopRow}>
+                          <View style={item.badgeType === 'recommended' ? styles.timeBoxGold : styles.timeBoxPurple}>
+                            <Text style={item.badgeType === 'recommended' ? styles.timeBoxGoldText : styles.timeBoxPurpleText}>
+                              {item.time}
+                            </Text>
+                            <Text style={item.badgeType === 'recommended' ? styles.timeBoxGoldSub : styles.timeBoxPurpleSub}>
+                              {item.period}
+                            </Text>
                           </View>
 
-                          <View style={item.badgeType === 'recommended' ? styles.recommendedPillBadge : styles.scheduledPillBadge}>
-                            <Text style={item.badgeType === 'recommended' ? styles.recommendedPillBadgeText : styles.scheduledPillBadgeText}>
-                              {item.badgeType.toUpperCase()}
+                          <View style={styles.expandedPostContentCol}>
+                            <View style={styles.expandedPostTitleRow}>
+                              <Text style={styles.expandedPostTitle} numberOfLines={2} ellipsizeMode="tail">
+                                {item.title}
+                              </Text>
+                              <View style={item.badgeType === 'recommended' ? styles.recommendedPillBadge : styles.scheduledPillBadge}>
+                                <Text style={item.badgeType === 'recommended' ? styles.recommendedPillBadgeText : styles.scheduledPillBadgeText}>
+                                  {item.badgeType.toUpperCase()}
+                                </Text>
+                              </View>
+                            </View>
+
+                            <Text style={styles.expandedPostPlatformText} numberOfLines={1} ellipsizeMode="tail">
+                              {item.platformLabel} • ⚡ 94% Retention
                             </Text>
                           </View>
                         </View>
@@ -2358,27 +2362,33 @@ const styles = StyleSheet.create({
   },
   scheduledPillBadge: {
     backgroundColor: '#EDE9FE',
-    paddingHorizontal: 8,
-    paddingVertical: 3.5,
+    paddingHorizontal: 6,
+    paddingVertical: 2,
     borderRadius: 6,
+    flexShrink: 0,
+    alignSelf: 'flex-start',
   },
   scheduledPillBadgeText: {
-    fontSize: 9,
-    fontWeight: '700',
+    fontSize: sFont(8.5),
+    fontWeight: '800',
     color: '#582CDB',
+    letterSpacing: 0.2,
   },
   recommendedPillBadge: {
     backgroundColor: '#FEF3C7',
     borderWidth: 1,
     borderColor: '#FBBF24',
-    paddingHorizontal: 8,
-    paddingVertical: 3.5,
+    paddingHorizontal: 6,
+    paddingVertical: 2,
     borderRadius: 6,
+    flexShrink: 0,
+    alignSelf: 'flex-start',
   },
   recommendedPillBadgeText: {
-    fontSize: 9,
-    fontWeight: '700',
+    fontSize: sFont(8.5),
+    fontWeight: '800',
     color: '#B45309',
+    letterSpacing: 0.2,
   },
   emptyScheduleBox: {
     backgroundColor: '#FFFFFF',
@@ -3019,9 +3029,39 @@ const styles = StyleSheet.create({
   expandedPostCard: {
     backgroundColor: '#FAF8F5',
     borderRadius: 16,
-    padding: 14,
+    padding: 12,
     borderWidth: 1,
     borderColor: '#EFECE6',
+  },
+  expandedPostTopRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+  },
+  expandedPostContentCol: {
+    flex: 1,
+    minWidth: 0,
+    marginLeft: 10,
+  },
+  expandedPostTitleRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    justifyContent: 'space-between',
+    gap: 6,
+    marginBottom: 4,
+  },
+  expandedPostTitle: {
+    fontSize: sFont(13.5),
+    fontWeight: '700',
+    color: '#171420',
+    flex: 1,
+    flexShrink: 1,
+    minWidth: 0,
+    lineHeight: 18,
+  },
+  expandedPostPlatformText: {
+    fontSize: sFont(11),
+    color: '#64748B',
+    fontWeight: '700',
   },
   expandedPostActionsRow: {
     flexDirection: 'row',
