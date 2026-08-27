@@ -342,7 +342,12 @@ export const PlatformConnectScreen: React.FC<PlatformConnectScreenProps> = ({
 
             {/* Instruction Badge */}
             <View style={styles.instructionBadge}>
-              <Text style={styles.instructionBadgeText}>
+              <Text
+                style={styles.instructionBadgeText}
+                numberOfLines={1}
+                adjustsFontSizeToFit
+                minimumFontScale={0.75}
+              >
                 CONNECT AT LEAST 1 PLATFORM TO CONTINUE
               </Text>
             </View>
@@ -648,17 +653,18 @@ const styles = StyleSheet.create({
     borderRadius: 100,
     borderWidth: 1,
     borderColor: 'rgba(226, 220, 242, 0.9)',
-    paddingVertical: 8,
-    paddingHorizontal: 16,
-    alignSelf: 'flex-start',
+    paddingVertical: 9,
+    paddingHorizontal: 12,
     width: '100%',
     alignItems: 'center',
+    justifyContent: 'center',
   },
   instructionBadgeText: {
-    fontSize: 11,
+    fontSize: 10.5,
     fontWeight: '800',
     color: '#524C62',
-    letterSpacing: 0.8,
+    letterSpacing: 0.5,
+    textAlign: 'center',
   },
   platformList: {
     gap: 12,
