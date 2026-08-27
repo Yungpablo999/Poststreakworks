@@ -552,13 +552,13 @@ export const ProEarningsScreen: React.FC<ProEarningsScreenProps> = ({
             }}
           >
             <View style={styles.heroTopRow}>
-              <Text style={styles.heroCardLabel}>CURRENT MONTH NET RATE</Text>
-              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+              <Text style={styles.heroCardLabel} numberOfLines={1}>CURRENT NET RATE</Text>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, flexShrink: 0 }}>
                 <View style={styles.growthBadgePill}>
-                  <Text style={styles.growthBadgeText}>📈 +18% vs last month</Text>
+                  <Text style={styles.growthBadgeText} numberOfLines={1}>📈 +18% vs prev</Text>
                 </View>
                 <View style={styles.expandHintBadgeSmall}>
-                  <Text style={styles.expandHintBadgeText}>Expand 🔍</Text>
+                  <Text style={styles.expandHintBadgeText} numberOfLines={1}>Expand 🔍</Text>
                 </View>
               </View>
             </View>
@@ -640,13 +640,13 @@ export const ProEarningsScreen: React.FC<ProEarningsScreenProps> = ({
             }}
           >
             <View style={styles.cardHeaderBetween}>
-              <Text style={styles.cardHeaderTitle}>Income Sources Breakdown</Text>
-              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+              <Text style={styles.cardHeaderTitle} numberOfLines={1}>Income Sources</Text>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, flexShrink: 0 }}>
                 <View style={styles.syncStatusPill}>
-                  <Text style={styles.syncStatusText}>• Multi-Source Sync</Text>
+                  <Text style={styles.syncStatusText} numberOfLines={1}>• Multi-Sync</Text>
                 </View>
                 <View style={styles.expandHintBadgeSmall}>
-                  <Text style={styles.expandHintBadgeText}>Expand 🔍</Text>
+                  <Text style={styles.expandHintBadgeText} numberOfLines={1}>Expand 🔍</Text>
                 </View>
               </View>
             </View>
@@ -691,10 +691,10 @@ export const ProEarningsScreen: React.FC<ProEarningsScreenProps> = ({
             }}
           >
             <View style={styles.cardHeaderBetween}>
-              <Text style={styles.cardHeaderTitle}>Platform Comparison</Text>
-              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+              <Text style={styles.cardHeaderTitle} numberOfLines={1}>Platform Comparison</Text>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, flexShrink: 0 }}>
                 <View style={styles.expandHintBadgeSmall}>
-                  <Text style={styles.expandHintBadgeText}>Expand 🔍</Text>
+                  <Text style={styles.expandHintBadgeText} numberOfLines={1}>Expand 🔍</Text>
                 </View>
                 <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
                   <Path d="M18 20V10M12 20V4M6 20v-6" stroke="#582CDB" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
@@ -2637,19 +2637,23 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   heroCardLabel: {
-    fontSize: 11,
+    fontSize: sFont(11),
     fontWeight: '700',
     color: '#94A3B8',
     letterSpacing: 0.5,
+    flex: 1,
+    minWidth: 0,
+    marginRight: 6,
   },
   growthBadgePill: {
     backgroundColor: '#EDE9FE',
-    paddingHorizontal: 8,
+    paddingHorizontal: 7,
     paddingVertical: 3.5,
     borderRadius: 8,
+    flexShrink: 0,
   },
   growthBadgeText: {
-    fontSize: 10,
+    fontSize: sFont(10),
     fontWeight: '700',
     color: '#582CDB',
   },
@@ -2764,18 +2768,22 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   cardHeaderTitle: {
-    fontSize: 14,
+    fontSize: sFont(14),
     fontWeight: '700',
     color: '#171420',
+    flex: 1,
+    minWidth: 0,
+    marginRight: 6,
   },
   syncStatusPill: {
     backgroundColor: '#EDE9FE',
-    paddingHorizontal: 8,
+    paddingHorizontal: 7,
     paddingVertical: 3.5,
     borderRadius: 8,
+    flexShrink: 0,
   },
   syncStatusText: {
-    fontSize: 10,
+    fontSize: sFont(9.5),
     fontWeight: '700',
     color: '#582CDB',
   },
