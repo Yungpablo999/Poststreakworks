@@ -3,6 +3,7 @@ import {
   StyleSheet,
   View,
   Text,
+  Image,
   SafeAreaView,
   StatusBar,
   useWindowDimensions,
@@ -76,17 +77,23 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
             </Text>
           </View>
 
-          {/* Social Proof Pill: Overlapping Creator Badges + 5 Stars + 12k+ Creators */}
+          {/* Social Proof Pill: Overlapping Creator Avatars + 5 Stars + 15k+ Creators */}
           <View style={styles.socialProofChip}>
             <View style={styles.avatarStack}>
-              <View style={[styles.avatarBubble, { backgroundColor: '#FF5C5C', zIndex: 3 }]}>
-                <Text style={styles.avatarLetter}>✦</Text>
-              </View>
-              <View style={[styles.avatarBubble, { backgroundColor: '#582CDB', marginLeft: -7, zIndex: 2 }]}>
-                <Text style={styles.avatarLetter}>🔥</Text>
-              </View>
-              <View style={[styles.avatarBubble, { backgroundColor: '#FABD32', marginLeft: -7, zIndex: 1 }]}>
-                <Text style={styles.avatarLetter}>⚡</Text>
+              <Image
+                source={{ uri: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80' }}
+                style={[styles.avatarImg, { zIndex: 4 }]}
+              />
+              <Image
+                source={{ uri: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&auto=format&fit=crop&q=80' }}
+                style={[styles.avatarImg, { marginLeft: -8, zIndex: 3 }]}
+              />
+              <Image
+                source={{ uri: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=100&auto=format&fit=crop&q=80' }}
+                style={[styles.avatarImg, { marginLeft: -8, zIndex: 2 }]}
+              />
+              <View style={[styles.avatarCountPill, { marginLeft: -8, zIndex: 1 }]}>
+                <Text style={styles.avatarCountText}>+15k</Text>
               </View>
             </View>
 
@@ -97,7 +104,7 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
                 <Text style={styles.starIcon}>★★★★★</Text>
                 <Text style={styles.ratingNumber}>4.9</Text>
               </View>
-              <Text style={styles.socialProofLabel}>Joined by 12,000+ creators</Text>
+              <Text style={styles.socialProofLabel}>Joined by 15,000+ creators</Text>
             </View>
           </View>
         </View>
@@ -217,48 +224,63 @@ const styles = StyleSheet.create({
     color: colors.primary,
   },
 
-  /* Social Proof Chip */
+  /* Luxury Social Proof Chip */
   socialProofChip: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'rgba(255, 255, 255, 0.85)',
-    paddingHorizontal: 13,
-    paddingVertical: 7,
-    borderRadius: 30,
+    backgroundColor: 'rgba(255, 255, 255, 0.95)',
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: 32,
     borderWidth: 1,
-    borderColor: 'rgba(88, 44, 219, 0.1)',
+    borderColor: 'rgba(88, 44, 219, 0.08)',
     shadowColor: '#171420',
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.05,
-    shadowRadius: 10,
-    marginTop: 6,
-    gap: 9,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.06,
+    shadowRadius: 12,
+    marginTop: 8,
+    gap: 12,
+    ...(Platform.OS === 'web'
+      ? ({
+          boxShadow: '0 4px 16px rgba(23, 20, 32, 0.06)',
+        } as any)
+      : {}),
   },
   avatarStack: {
     flexDirection: 'row',
     alignItems: 'center',
   },
-  avatarBubble: {
-    width: 22,
-    height: 22,
-    borderRadius: 11,
+  avatarImg: {
+    width: 26,
+    height: 26,
+    borderRadius: 13,
+    borderWidth: 1.8,
+    borderColor: '#FFFFFF',
+    backgroundColor: '#ECE8F6',
+  },
+  avatarCountPill: {
+    width: 26,
+    height: 26,
+    borderRadius: 13,
+    backgroundColor: '#582CDB',
+    borderWidth: 1.8,
+    borderColor: '#FFFFFF',
     alignItems: 'center',
     justifyContent: 'center',
-    borderWidth: 1.5,
-    borderColor: '#FFFFFF',
   },
-  avatarLetter: {
-    fontSize: 10,
-    fontWeight: '700',
+  avatarCountText: {
+    fontSize: 9,
+    fontWeight: '800',
     color: '#FFFFFF',
   },
   socialProofDivider: {
     width: 1,
-    height: 16,
-    backgroundColor: 'rgba(23, 20, 32, 0.1)',
+    height: 18,
+    backgroundColor: 'rgba(23, 20, 32, 0.08)',
   },
   socialProofMeta: {
     alignItems: 'flex-start',
+    gap: 1,
   },
   starsRow: {
     flexDirection: 'row',
@@ -267,18 +289,18 @@ const styles = StyleSheet.create({
   },
   starIcon: {
     color: '#FABD32',
-    fontSize: 11,
-    letterSpacing: 1,
+    fontSize: 12,
+    letterSpacing: 1.2,
   },
   ratingNumber: {
-    fontSize: 11,
+    fontSize: 12,
     fontWeight: '800',
     color: colors.textPrimary,
   },
   socialProofLabel: {
-    fontSize: 11,
+    fontSize: 11.5,
     fontWeight: '600',
-    color: '#7F7894',
+    color: '#6F6782',
     letterSpacing: 0.1,
   },
 
