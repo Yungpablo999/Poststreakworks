@@ -49,10 +49,12 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onFinish = () => {} 
   const footerY = useRef(new Animated.Value(30)).current;
   const footerOpacity = useRef(new Animated.Value(0)).current;
 
-  // 4. Overall Exit Fade & Scale (Smooth continuous dissolve)
-  const screenFade = useRef(new Animated.Value(1)).current;
-  const screenScale = useRef(new Animated.Value(1)).current;
-  const screenShiftY = useRef(new Animated.Value(0)).current;
+  // 4. Seamless Hero Morph Transition to Welcome Screen
+  const splashTextOpacity = useRef(new Animated.Value(1)).current;
+  const splashTextY = useRef(new Animated.Value(0)).current;
+  const ghostMorphY = useRef(new Animated.Value(0)).current;
+  const ghostMorphScale = useRef(new Animated.Value(1)).current;
+  const splashBgOpacity = useRef(new Animated.Value(1)).current;
 
   useEffect(() => {
     // Safety auto-dismiss fallback (generous so it never cuts animation prematurely)
@@ -212,22 +214,37 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onFinish = () => {} 
         ]),
 
         // Step 6: Admire pause
-        Animated.delay(1000),
+        Animated.delay(950),
 
-        // Step 7: Continuous Soft Eye-Ease Dissolve & Seamless Transition
+        // Step 7: Continuous Ghost Morph — Text sinks away, Ghost gracefully floats UP to Welcome Hero spot
         Animated.parallel([
-          Animated.timing(screenFade, {
+          // Splash texts fade & slide slightly down
+          Animated.timing(splashTextOpacity, {
             toValue: 0,
+            duration: 300,
+            useNativeDriver: true,
+          }),
+          Animated.timing(splashTextY, {
+            toValue: 24,
+            duration: 300,
+            useNativeDriver: true,
+          }),
+
+          // Ghost smoothly floats UP and scales to Welcome Hero position
+          Animated.timing(ghostMorphY, {
+            toValue: isCompact ? -110 : -135,
             duration: 650,
             useNativeDriver: true,
           }),
-          Animated.timing(screenScale, {
-            toValue: 1.04,
+          Animated.timing(ghostMorphScale, {
+            toValue: isCompact ? 0.78 : 0.76,
             duration: 650,
             useNativeDriver: true,
           }),
-          Animated.timing(screenShiftY, {
-            toValue: -12,
+
+          // Background softly reveals Welcome Screen underneath
+          Animated.timing(splashBgOpacity, {
+            toValue: 0,
             duration: 650,
             useNativeDriver: true,
           }),
@@ -296,9 +313,14 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onFinish = () => {} 
     tagScale,
     footerY,
     footerOpacity,
-    screenFade,
+    splashTextOpacity,
+    splashTextY,
+    ghostMorphY,
+    ghostMorphScale,
+    splashBgOpacity,
     hoverY,
     hoverTilt,
+    isCompact,
     onFinish,
   ]);
 
@@ -318,11 +340,7 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onFinish = () => {} 
       style={[
         styles.container,
         {
-          opacity: screenFade,
-          transform: [
-            { scale: screenScale },
-            { translateY: screenShiftY },
-          ],
+          opacity: splashBgOpacity,
         },
       ]}
     >
@@ -330,7 +348,7 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onFinish = () => {} 
 
       {/* Main Center Area: Extra-Large Mascot + PowerPoint Animated Typography */}
       <View style={styles.mascotArea}>
-        {/* 1. BIGGER HERO GHOST MASCOT */}
+        {/* 1. BIGGER HERO GHOST MASCOT (Morphs & Floats Up to Welcome Screen) */}
         <Animated.View
           style={[
             styles.ghostWrapper,
@@ -339,7 +357,9 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onFinish = () => {} 
               transform: [
                 { translateY: ghostY },
                 { translateY: hoverY },
+                { translateY: ghostMorphY },
                 { scale: ghostScale },
+                { scale: ghostMorphScale },
                 { scaleY: ghostStretchY },
                 { scaleX: ghostSquishX },
                 { rotate: rotation },
@@ -356,7 +376,15 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onFinish = () => {} 
         </Animated.View>
 
         {/* 2. POWERPOINT-STYLE ANIMATED BRANDING */}
-        <View style={styles.brandContainer}>
+        <Animated.View
+          style={[
+            styles.brandContainer,
+            {
+              opacity: splashTextOpacity,
+              transform: [{ translateY: splashTextY }],
+            },
+          ]}
+        >
           {/* Poststreak Title: "Zoom & Pop" Snap in Deep Solid Royal Purple */}
           <Animated.View
             style={[
@@ -390,7 +418,7 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onFinish = () => {} 
             <Text style={styles.taglineText}>Build your creator streak</Text>
             <Text style={styles.taglineEmoji}>🔥</Text>
           </Animated.View>
-        </View>
+        </Animated.View>
       </View>
 
       {/* 3. BOTTOM FOOTER: Kinetic Rise */}
@@ -398,8 +426,11 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onFinish = () => {} 
         style={[
           styles.footer,
           {
-            opacity: footerOpacity,
-            transform: [{ translateY: footerY }],
+            opacity: Animated.multiply(footerOpacity, splashTextOpacity),
+            transform: [
+              { translateY: footerY },
+              { translateY: splashTextY },
+            ],
           },
         ]}
       >
