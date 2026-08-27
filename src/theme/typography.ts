@@ -11,8 +11,8 @@ export const typography = {
   editorialSerif: Platform.select({
     ios: 'Didot',
     android: 'serif',
-    web: "'Italiana', 'Prata', 'Bodoni Moda', 'Playfair Display', 'Didot', Georgia, serif",
-    default: 'serif',
+    web: "Didot, 'Didot LT STD', 'Playfair Display', 'Bodoni Moda', Georgia, serif",
+    default: 'Didot',
   }),
 
   tallDisplay: Platform.select({

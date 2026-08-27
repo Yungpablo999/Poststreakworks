@@ -287,25 +287,35 @@ const styles = StyleSheet.create({
   },
   ambientAuraOuter: {
     position: 'absolute',
-    width: 240,
-    height: 240,
-    borderRadius: 120,
-    backgroundColor: 'rgba(88, 44, 219, 0.06)',
+    width: 246,
+    height: 246,
+    borderRadius: 123,
+    backgroundColor: 'rgba(88, 44, 219, 0.08)',
     shadowColor: '#582CDB',
     shadowOffset: { width: 0, height: 12 },
-    shadowOpacity: 0.1,
-    shadowRadius: 36,
+    shadowOpacity: 0.12,
+    shadowRadius: 40,
+    ...(Platform.OS === 'web'
+      ? ({
+          boxShadow: '0 12px 48px rgba(88, 44, 219, 0.14)',
+        } as any)
+      : {}),
   },
   ambientAuraInner: {
     position: 'absolute',
-    width: 150,
-    height: 150,
-    borderRadius: 75,
-    backgroundColor: 'rgba(251, 191, 36, 0.04)',
+    width: 160,
+    height: 160,
+    borderRadius: 80,
+    backgroundColor: 'rgba(251, 191, 36, 0.05)',
     shadowColor: '#FABD32',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.06,
-    shadowRadius: 20,
+    shadowOpacity: 0.08,
+    shadowRadius: 24,
+    ...(Platform.OS === 'web'
+      ? ({
+          boxShadow: '0 4px 24px rgba(251, 191, 36, 0.08)',
+        } as any)
+      : {}),
   },
   pressable: {
     alignItems: 'center',

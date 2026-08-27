@@ -188,28 +188,27 @@ const styles = StyleSheet.create({
   tallHeadlineContainer: {
     alignItems: 'center',
     justifyContent: 'center',
-    transform: [{ scaleY: 2.4 }, { scaleX: 0.82 }],
-    marginVertical: 32,
-    minHeight: 80,
+    transform: [{ scaleY: 2.05 }, { scaleX: 0.88 }],
+    marginVertical: 18,
   },
   mainHeadline: {
     fontFamily: typography.editorialSerif,
-    fontSize: 58,
+    fontSize: 48,
     fontWeight: '700',
     color: colors.textPrimary,
     textAlign: 'center',
-    letterSpacing: 0.8,
-    lineHeight: 62,
+    letterSpacing: 0.6,
+    lineHeight: 52,
     ...(Platform.OS === 'web' ? { whiteSpace: 'nowrap' } : {}),
   },
   mainHeadlineMedium: {
-    fontSize: 50,
-    lineHeight: 54,
-    letterSpacing: 0.6,
-  },
-  mainHeadlineSmall: {
     fontSize: 42,
     lineHeight: 46,
+    letterSpacing: 0.5,
+  },
+  mainHeadlineSmall: {
+    fontSize: 36,
+    lineHeight: 40,
     letterSpacing: 0.4,
   },
   streakAccent: {
