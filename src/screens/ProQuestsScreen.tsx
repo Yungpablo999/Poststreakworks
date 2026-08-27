@@ -2003,12 +2003,14 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     color: '#171420',
     marginBottom: 2,
+    textAlign: 'center',
   },
   metricSquareLabel: {
     fontSize: 9,
     fontWeight: '800',
     color: '#64748B',
     letterSpacing: 0.5,
+    textAlign: 'center',
   },
 
   // CARD 3: CREATOR LEVEL
