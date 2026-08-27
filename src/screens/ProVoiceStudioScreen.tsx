@@ -21,6 +21,7 @@ import { FloatingTabBar, TabType } from '../components/FloatingTabBar';
 import { BrandToast } from '../components/BrandToast';
 import { UserProfileModal, UserProfileData } from '../components/UserProfileModal';
 import { AnimatedCompletionModal } from '../components/AnimatedCompletionModal';
+import { sFont, isNarrowScreen } from '../utils/responsive';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
@@ -373,9 +374,7 @@ export const ProVoiceStudioScreen: React.FC<ProVoiceStudioScreenProps> = ({
                 resizeMode="contain"
               />
             </Animated.View>
-          </View>
 
-          <View style={styles.headerRight}>
             {/* Pro Active Pill Switch */}
             {onSwitchToFree && (
               <Pressable
@@ -390,7 +389,9 @@ export const ProVoiceStudioScreen: React.FC<ProVoiceStudioScreenProps> = ({
                 <Text style={styles.proPillBadgeText}>⚡ PRO ACTIVE</Text>
               </Pressable>
             )}
+          </View>
 
+          <View style={styles.headerRight}>
             {/* Message Bubble Icon */}
             <Pressable
               style={({ pressed }) => [styles.headerIconBtn, pressed && styles.btnPressed]}
@@ -1559,7 +1560,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: 20,
+    paddingHorizontal: 14,
     paddingTop: 10,
     paddingBottom: 12,
     backgroundColor: '#FAF8F5',
@@ -1567,7 +1568,7 @@ const styles = StyleSheet.create({
   headerLeft: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 12,
+    gap: 8,
   },
   backBtn: {
     width: 36,
@@ -1598,32 +1599,32 @@ const styles = StyleSheet.create({
     elevation: 2,
   },
   headerGhostLogo: {
-    width: 26,
-    height: 26,
+    width: 24,
+    height: 24,
   },
   headerRight: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 10,
+    gap: 8,
   },
   proPillBadge: {
     backgroundColor: '#FEF3C7',
     borderWidth: 1,
     borderColor: '#F59E0B',
-    paddingHorizontal: 8,
+    paddingHorizontal: 7,
     paddingVertical: 3.5,
     borderRadius: 6,
   },
   proPillBadgeText: {
-    fontSize: 9,
-    fontWeight: '700',
+    fontSize: sFont(8.5),
+    fontWeight: '800',
     color: '#B45309',
     letterSpacing: 0.3,
   },
   headerIconBtn: {
-    width: 38,
-    height: 38,
-    borderRadius: 20,
+    width: 36,
+    height: 36,
+    borderRadius: 18,
     backgroundColor: '#FFFFFF',
     borderWidth: 1,
     borderColor: '#EFECE6',
@@ -1637,8 +1638,8 @@ const styles = StyleSheet.create({
   },
   notificationDot: {
     position: 'absolute',
-    top: 9,
-    right: 9,
+    top: 8,
+    right: 8,
     width: 7,
     height: 7,
     borderRadius: 3.5,
@@ -1647,9 +1648,9 @@ const styles = StyleSheet.create({
     borderColor: '#FFFFFF',
   },
   headerProfileBtn: {
-    width: 38,
-    height: 38,
-    borderRadius: 20,
+    width: 36,
+    height: 36,
+    borderRadius: 18,
     borderWidth: 1.5,
     borderColor: '#F59E0B',
     overflow: 'hidden',
