@@ -1792,90 +1792,96 @@ export const ProMatchScreen: React.FC<ProMatchScreenProps> = ({
                 </Pressable>
               </View>
 
-              {/* Matchup Comparison Card */}
-              <LinearGradient
-                colors={['#2A1259', '#1A0C38']}
-                style={styles.arenaMatchupCard}
+              <ScrollView
+                showsVerticalScrollIndicator={false}
+                style={styles.arenaModalScroll}
+                contentContainerStyle={{ paddingBottom: 6 }}
               >
-                <View style={styles.arenaTeamsRow}>
-                  <View style={{ alignItems: 'center', flex: 1, minWidth: 0 }}>
-                    <Text style={styles.arenaTeamTitleMine} numberOfLines={1}>Momentum Makers</Text>
-                    <Text style={styles.arenaTeamScoreMine} numberOfLines={1}>62 PTS</Text>
-                    <View style={styles.arenaLeadBadge}>
-                      <Text style={styles.arenaLeadBadgeText} numberOfLines={1}>👑 IN THE LEAD</Text>
+                {/* Matchup Comparison Card */}
+                <LinearGradient
+                  colors={['#2A1259', '#1A0C38']}
+                  style={styles.arenaMatchupCard}
+                >
+                  <View style={styles.arenaTeamsRow}>
+                    <View style={{ alignItems: 'center', flex: 1, minWidth: 0 }}>
+                      <Text style={styles.arenaTeamTitleMine} numberOfLines={1}>Momentum Makers</Text>
+                      <Text style={styles.arenaTeamScoreMine} numberOfLines={1}>62 PTS</Text>
+                      <View style={styles.arenaLeadBadge}>
+                        <Text style={styles.arenaLeadBadgeText} numberOfLines={1}>👑 IN THE LEAD</Text>
+                      </View>
+                    </View>
+
+                    <View style={styles.arenaVsCircle}>
+                      <Text style={styles.arenaVsText}>VS</Text>
+                    </View>
+
+                    <View style={{ alignItems: 'center', flex: 1, minWidth: 0 }}>
+                      <Text style={styles.arenaTeamTitleOpp} numberOfLines={1}>Lagos Storytellers</Text>
+                      <Text style={styles.arenaTeamScoreOpp} numberOfLines={1}>58 PTS</Text>
+                      <View style={styles.arenaTrailingBadge}>
+                        <Text style={styles.arenaTrailingBadgeText} numberOfLines={1}>4 PTS BEHIND</Text>
+                      </View>
                     </View>
                   </View>
 
-                  <View style={styles.arenaVsCircle}>
-                    <Text style={styles.arenaVsText}>VS</Text>
+                  <View style={styles.arenaTugBar}>
+                    <View style={[styles.arenaTugMine, { width: '55%' }]} />
+                    <View style={[styles.arenaTugOpp, { width: '45%' }]} />
                   </View>
+                </LinearGradient>
 
-                  <View style={{ alignItems: 'center', flex: 1, minWidth: 0 }}>
-                    <Text style={styles.arenaTeamTitleOpp} numberOfLines={1}>Lagos Storytellers</Text>
-                    <Text style={styles.arenaTeamScoreOpp} numberOfLines={1}>58 PTS</Text>
-                    <View style={styles.arenaTrailingBadge}>
-                      <Text style={styles.arenaTrailingBadgeText} numberOfLines={1}>4 PTS BEHIND</Text>
+                {/* Duel Objectives & Tasks */}
+                <View style={styles.arenaObjectivesSection}>
+                  <Text style={styles.arenaSectionHeading}>LIVE OBJECTIVES</Text>
+
+                  <View style={styles.arenaTasksList}>
+                    <View style={styles.arenaTaskRow}>
+                      <Text style={styles.arenaCheckGreen}>✓</Text>
+                      <View style={{ flex: 1 }}>
+                        <Text style={styles.arenaTaskTitle}>Elena Rostova: Posted Reel</Text>
+                        <Text style={styles.arenaTaskSub}>Earned +15 pts for squad</Text>
+                      </View>
+                      <Text style={styles.arenaTaskPts}>+15 pts</Text>
+                    </View>
+
+                    <View style={styles.arenaTaskRow}>
+                      <Text style={styles.arenaCheckGreen}>✓</Text>
+                      <View style={{ flex: 1 }}>
+                        <Text style={styles.arenaTaskTitle}>Amara & Tomi: Duet Reel Collab</Text>
+                        <Text style={styles.arenaTaskSub}>Earned +20 pts for squad</Text>
+                      </View>
+                      <Text style={styles.arenaTaskPts}>+20 pts</Text>
+                    </View>
+
+                    <View style={styles.arenaTaskRowPending}>
+                      <Text style={{ fontSize: 13, color: '#F59E0B' }}>⚡</Text>
+                      <View style={{ flex: 1 }}>
+                        <Text style={[styles.arenaTaskTitle, { color: '#171420', fontWeight: '700' }]}>
+                          Pablo: Post Short-Form Draft
+                        </Text>
+                        <Text style={styles.arenaTaskSub}>Score +15 pts to extend your lead!</Text>
+                      </View>
+                      <Pressable
+                        style={styles.arenaQuickSubmitBtn}
+                        onPress={() => {
+                          setShowDuelArenaModal(false);
+                          if (onOpenPostComposer) {
+                            onOpenPostComposer('Live Squad Duel Gauntlet Reel');
+                          }
+                        }}
+                      >
+                        <Text style={styles.arenaQuickSubmitText}>Log +15</Text>
+                      </Pressable>
                     </View>
                   </View>
                 </View>
 
-                <View style={styles.arenaTugBar}>
-                  <View style={[styles.arenaTugMine, { width: '55%' }]} />
-                  <View style={[styles.arenaTugOpp, { width: '45%' }]} />
+                {/* Bounty Reward Box */}
+                <View style={styles.arenaBountyBox}>
+                  <Text style={styles.arenaBountyTitle}>🏆 SQUAD BOUNTY PRIZE POOL</Text>
+                  <Text style={styles.arenaBountyDesc}>+500 XP Shared Bounty • 7-Day Streak Shield • Arena Champion Crown</Text>
                 </View>
-              </LinearGradient>
-
-              {/* Duel Objectives & Tasks */}
-              <View style={styles.arenaObjectivesSection}>
-                <Text style={styles.arenaSectionHeading}>LIVE OBJECTIVES</Text>
-
-                <View style={styles.arenaTasksList}>
-                  <View style={styles.arenaTaskRow}>
-                    <Text style={styles.arenaCheckGreen}>✓</Text>
-                    <View style={{ flex: 1 }}>
-                      <Text style={styles.arenaTaskTitle}>Elena Rostova: Posted Reel</Text>
-                      <Text style={styles.arenaTaskSub}>Earned +15 pts for squad</Text>
-                    </View>
-                    <Text style={styles.arenaTaskPts}>+15 pts</Text>
-                  </View>
-
-                  <View style={styles.arenaTaskRow}>
-                    <Text style={styles.arenaCheckGreen}>✓</Text>
-                    <View style={{ flex: 1 }}>
-                      <Text style={styles.arenaTaskTitle}>Amara & Tomi: Duet Reel Collab</Text>
-                      <Text style={styles.arenaTaskSub}>Earned +20 pts for squad</Text>
-                    </View>
-                    <Text style={styles.arenaTaskPts}>+20 pts</Text>
-                  </View>
-
-                  <View style={styles.arenaTaskRowPending}>
-                    <Text style={{ fontSize: 13, color: '#F59E0B' }}>⚡</Text>
-                    <View style={{ flex: 1 }}>
-                      <Text style={[styles.arenaTaskTitle, { color: '#171420', fontWeight: '700' }]}>
-                        Pablo: Post Short-Form Draft
-                      </Text>
-                      <Text style={styles.arenaTaskSub}>Score +15 pts to extend your lead!</Text>
-                    </View>
-                    <Pressable
-                      style={styles.arenaQuickSubmitBtn}
-                      onPress={() => {
-                        setShowDuelArenaModal(false);
-                        if (onOpenPostComposer) {
-                          onOpenPostComposer('Live Squad Duel Gauntlet Reel');
-                        }
-                      }}
-                    >
-                      <Text style={styles.arenaQuickSubmitText}>Log +15</Text>
-                    </Pressable>
-                  </View>
-                </View>
-              </View>
-
-              {/* Bounty Reward Box */}
-              <View style={styles.arenaBountyBox}>
-                <Text style={styles.arenaBountyTitle}>🏆 SQUAD BOUNTY PRIZE POOL</Text>
-                <Text style={styles.arenaBountyDesc}>+500 XP Shared Bounty • 7-Day Streak Shield • Arena Champion Crown</Text>
-              </View>
+              </ScrollView>
 
               {/* Action Buttons */}
               <View style={styles.arenaActionsRow}>
@@ -1886,7 +1892,14 @@ export const ProMatchScreen: React.FC<ProMatchScreenProps> = ({
                     if (onOpenSquad) onOpenSquad();
                   }}
                 >
-                  <Text style={styles.arenaChatBtnText}>Squad Live Room</Text>
+                  <Text
+                    style={styles.arenaChatBtnText}
+                    numberOfLines={1}
+                    adjustsFontSizeToFit
+                    minimumFontScale={0.8}
+                  >
+                    Squad Room
+                  </Text>
                 </Pressable>
 
                 <Pressable
@@ -1902,7 +1915,14 @@ export const ProMatchScreen: React.FC<ProMatchScreenProps> = ({
                     colors={['#784DF0', '#582CDB']}
                     style={styles.arenaScoreGradient}
                   >
-                    <Text style={styles.arenaScoreBtnText}>Post to Score 🔥</Text>
+                    <Text
+                      style={styles.arenaScoreBtnText}
+                      numberOfLines={1}
+                      adjustsFontSizeToFit
+                      minimumFontScale={0.8}
+                    >
+                      Post to Score 🔥
+                    </Text>
                   </LinearGradient>
                 </Pressable>
               </View>
@@ -3090,9 +3110,12 @@ const styles = StyleSheet.create({
   arenaModalCard: {
     width: '100%',
     maxWidth: 420,
+    maxHeight: '88%',
     backgroundColor: '#FFFFFF',
     borderRadius: 24,
-    padding: 20,
+    paddingHorizontal: 18,
+    paddingTop: 18,
+    paddingBottom: 16,
     borderWidth: 1,
     borderColor: 'rgba(255, 255, 255, 0.9)',
     shadowColor: '#582CDB',
@@ -3100,6 +3123,9 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.08,
     shadowRadius: 24,
     elevation: 8,
+  },
+  arenaModalScroll: {
+    maxHeight: 380,
   },
   arenaTopHeader: {
     flexDirection: 'row',
@@ -3318,34 +3344,43 @@ const styles = StyleSheet.create({
   arenaActionsRow: {
     flexDirection: 'row',
     gap: 10,
+    alignItems: 'center',
+    paddingTop: 10,
   },
   arenaChatBtn: {
     flex: 1,
     backgroundColor: '#FAF8F5',
-    borderWidth: 1,
+    borderWidth: 1.5,
     borderColor: '#EFECE6',
     borderRadius: 14,
-    paddingVertical: 12,
+    height: 48,
+    justifyContent: 'center',
     alignItems: 'center',
+    paddingHorizontal: 6,
   },
   arenaChatBtnText: {
-    fontSize: 12.5,
+    fontSize: 12,
     fontWeight: '800',
     color: '#475569',
+    textAlign: 'center',
   },
   arenaScoreBtn: {
     flex: 1.2,
+    height: 48,
     borderRadius: 14,
     overflow: 'hidden',
   },
   arenaScoreGradient: {
-    paddingVertical: 12,
+    flex: 1,
+    justifyContent: 'center',
     alignItems: 'center',
+    paddingHorizontal: 8,
   },
   arenaScoreBtnText: {
     fontSize: 12.5,
-    fontWeight: '700',
+    fontWeight: '800',
     color: '#FFFFFF',
+    textAlign: 'center',
   },
 
   // QUICK ACTIONS
