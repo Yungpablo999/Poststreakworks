@@ -1242,7 +1242,14 @@ export const ProQuestsScreen: React.FC<ProQuestsScreenProps> = ({
                     if (onOpenSquad) onOpenSquad();
                   }}
                 >
-                  <Text style={styles.sqmOutlineBtnText}>Squad Room 💬</Text>
+                  <Text
+                    style={styles.sqmOutlineBtnText}
+                    numberOfLines={1}
+                    adjustsFontSizeToFit
+                    minimumFontScale={0.85}
+                  >
+                    Squad Room
+                  </Text>
                 </Pressable>
 
                 <Pressable
@@ -1258,7 +1265,14 @@ export const ProQuestsScreen: React.FC<ProQuestsScreenProps> = ({
                     colors={['#784DF0', '#582CDB']}
                     style={styles.sqmSolidGradient}
                   >
-                    <Text style={styles.sqmSolidBtnText}>Contribute Reel 🔥</Text>
+                    <Text
+                      style={styles.sqmSolidBtnText}
+                      numberOfLines={1}
+                      adjustsFontSizeToFit
+                      minimumFontScale={0.85}
+                    >
+                      Contribute Reel 🔥
+                    </Text>
                   </LinearGradient>
                 </Pressable>
               </View>
@@ -1466,7 +1480,14 @@ export const ProQuestsScreen: React.FC<ProQuestsScreenProps> = ({
                     if (onOpenSquad) onOpenSquad();
                   }}
                 >
-                  <Text style={styles.sqmOutlineBtnText}>Squad Room 💬</Text>
+                  <Text
+                    style={styles.sqmOutlineBtnText}
+                    numberOfLines={1}
+                    adjustsFontSizeToFit
+                    minimumFontScale={0.85}
+                  >
+                    Squad Room
+                  </Text>
                 </Pressable>
 
                 <Pressable
@@ -1482,7 +1503,14 @@ export const ProQuestsScreen: React.FC<ProQuestsScreenProps> = ({
                     colors={['#784DF0', '#582CDB']}
                     style={styles.sqmSolidGradient}
                   >
-                    <Text style={styles.sqmSolidBtnText}>Post to Score +15 pts 🔥</Text>
+                    <Text
+                      style={styles.sqmSolidBtnText}
+                      numberOfLines={1}
+                      adjustsFontSizeToFit
+                      minimumFontScale={0.85}
+                    >
+                      Post to Score 🔥
+                    </Text>
                   </LinearGradient>
                 </Pressable>
               </View>
@@ -3352,34 +3380,43 @@ const styles = StyleSheet.create({
   sqmActionsRow: {
     flexDirection: 'row',
     gap: 10,
+    alignItems: 'center',
+    paddingTop: 10,
   },
   sqmOutlineBtn: {
     flex: 1,
+    height: 48,
     backgroundColor: '#FAF8F5',
-    borderWidth: 1,
+    borderWidth: 1.5,
     borderColor: '#EFECE6',
     borderRadius: 14,
-    paddingVertical: 12,
+    justifyContent: 'center',
     alignItems: 'center',
+    paddingHorizontal: 6,
   },
   sqmOutlineBtnText: {
     fontSize: 12.5,
     fontWeight: '800',
     color: '#475569',
+    textAlign: 'center',
   },
   sqmSolidBtn: {
-    flex: 1.3,
+    flex: 1.2,
+    height: 48,
     borderRadius: 14,
     overflow: 'hidden',
   },
   sqmSolidGradient: {
-    paddingVertical: 12,
+    flex: 1,
+    justifyContent: 'center',
     alignItems: 'center',
+    paddingHorizontal: 8,
   },
   sqmSolidBtnText: {
     fontSize: 12.5,
-    fontWeight: '700',
+    fontWeight: '800',
     color: '#FFFFFF',
+    textAlign: 'center',
   },
 
   /* DUEL TASKS ULTRA-LUXURY MODAL */
