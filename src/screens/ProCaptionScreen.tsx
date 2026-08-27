@@ -220,28 +220,33 @@ export const ProCaptionScreen: React.FC<ProCaptionScreenProps> = ({
     if (Platform.OS !== 'web') {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     }
-    if (modifier === 'Make Shorter') {
+    if (modifier === 'Shorten' || modifier === 'Make Shorter') {
       setMainCaption(
         '3 creator mistakes: waiting for perfection, late posting, ignoring data. Start small, stay consistent, iterate.'
       );
       showToast('✂️ Trimmed caption to 110 characters');
-    } else if (modifier === 'Make More Personal') {
+    } else if (modifier === 'Personalize' || modifier === 'Make More Personal') {
       setMainCaption(
         'I spent my first 6 months making 3 big mistakes: waiting for "perfect" ideas, posting at random times, and ignoring the comments. Everything changed when I built a simple system.'
       );
       showToast('👤 Injected personal creator story');
-    } else if (modifier === 'Add Stronger CTA') {
+    } else if (modifier === 'Strong CTA' || modifier === 'Add Stronger CTA') {
       setMainCaption(
         `${mainCaption}\n\n👉 Which of these 3 is your biggest roadblock today? Drop 1, 2, or 3 below.`
       );
       showToast('💬 Added high-converting comment CTA');
-    } else if (modifier === 'Platform-Specific') {
+    } else if (modifier === 'Platform Sync' || modifier === 'Platform-Specific') {
       showToast('📱 Optimized formatting for 9:16 Reels');
-    } else if (modifier === 'Improve First Line') {
+    } else if (modifier === 'Improve Hook' || modifier === 'Improve First Line') {
       setMainCaption(
         'Stop waiting for perfect ideas—it is costing you 10,000 views. Here are the 3 mistakes slowing you down and how to fix them today.'
       );
       showToast('✨ Boosted hook strength to 94%');
+    } else if (modifier === 'Viral Spark') {
+      setMainCaption(
+        'Most creators fail for one reason: they rely on motivation instead of discipline. Here are the 3 non-negotiables that changed everything.'
+      );
+      showToast('🔥 Injected viral creator energy');
     }
   };
 
@@ -648,26 +653,41 @@ export const ProCaptionScreen: React.FC<ProCaptionScreenProps> = ({
                 </View>
               </View>
 
-              {/* Action Modifiers Chips */}
-              <View style={styles.captionModifiersRow}>
-                {[
-                  'Make Shorter',
-                  'Make More Personal',
-                  'Add Stronger CTA',
-                  'Platform-Specific',
-                  'Improve First Line',
-                ].map((mod) => (
-                  <Pressable
-                    key={mod}
-                    style={styles.captionModifierChip}
-                    onPress={() => handleApplyModifier(mod)}
-                  >
-                    <Text style={styles.captionModifierChipText}>
-                      {mod === 'Make Shorter' ? '➕ ' : mod === 'Make More Personal' ? '👤 ' : mod === 'Add Stronger CTA' ? '💬 ' : mod === 'Platform-Specific' ? '📱 ' : '✨ '}
-                      {mod}
-                    </Text>
-                  </Pressable>
-                ))}
+              {/* Action Modifiers Grid - 2 Rows x 3 Columns */}
+              <View style={styles.captionModifiersSection}>
+                <Text style={styles.captionModifiersLabel}>QUICK AI MODIFIERS</Text>
+                <View style={{ gap: 6, marginTop: 6 }}>
+                  {[
+                    [
+                      { id: 'Shorten', label: 'Shorten', emoji: '✂️' },
+                      { id: 'Personalize', label: 'Personalize', emoji: '👤' },
+                      { id: 'Strong CTA', label: 'Strong CTA', emoji: '💬' },
+                    ],
+                    [
+                      { id: 'Platform Sync', label: 'Platform Sync', emoji: '📱' },
+                      { id: 'Improve Hook', label: 'Improve Hook', emoji: '✨' },
+                      { id: 'Viral Spark', label: 'Viral Spark', emoji: '🔥' },
+                    ],
+                  ].map((row, rIdx) => (
+                    <View key={rIdx} style={{ flexDirection: 'row', gap: 6 }}>
+                      {row.map((mod) => (
+                        <Pressable
+                          key={mod.id}
+                          style={({ pressed }) => [
+                            styles.captionModifierChip,
+                            pressed && styles.btnPressed,
+                          ]}
+                          onPress={() => handleApplyModifier(mod.id)}
+                        >
+                          <Text style={{ fontSize: 11 }}>{mod.emoji}</Text>
+                          <Text style={styles.captionModifierChipText} numberOfLines={1}>
+                            {mod.label}
+                          </Text>
+                        </Pressable>
+                      ))}
+                    </View>
+                  ))}
+                </View>
               </View>
             </View>
           </View>
@@ -1628,25 +1648,35 @@ const styles = StyleSheet.create({
     color: '#171420',
     marginTop: 2,
   },
-  captionModifiersRow: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 6,
+  captionModifiersSection: {
     paddingTop: 10,
+    marginTop: 2,
     borderTopWidth: 1,
     borderTopColor: '#F1EFE9',
   },
+  captionModifiersLabel: {
+    fontSize: sFont(8.5),
+    fontWeight: '800',
+    color: '#94A3B8',
+    letterSpacing: 0.4,
+  },
   captionModifierChip: {
+    flex: 1,
+    minWidth: 0,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
     backgroundColor: '#FAF8F5',
     borderWidth: 1,
     borderColor: '#EFECE6',
-    paddingHorizontal: 8,
-    paddingVertical: 5,
+    paddingHorizontal: 4,
+    paddingVertical: 7,
     borderRadius: 8,
+    gap: 4,
   },
   captionModifierChipText: {
-    fontSize: 10,
-    fontWeight: '800',
+    fontSize: sFont(10),
+    fontWeight: '700',
     color: '#475569',
   },
 
