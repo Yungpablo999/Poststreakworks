@@ -2,6 +2,26 @@ import React, { useState } from 'react';
 import { View, StyleSheet, Platform } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
+
+// Global Typography Injection for Web
+if (Platform.OS === 'web' && typeof document !== 'undefined') {
+  const fontStyleId = 'poststreak-global-fonts';
+  if (!document.getElementById(fontStyleId)) {
+    const link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = 'https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap';
+    document.head.appendChild(link);
+
+    const style = document.createElement('style');
+    style.id = fontStyleId;
+    style.textContent = `
+      * {
+        font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, sans-serif !important;
+      }
+    `;
+    document.head.appendChild(style);
+  }
+}
 import { SplashScreen } from './src/screens/SplashScreen';
 import { WelcomeScreen } from './src/screens/WelcomeScreen';
 import { SignUpScreen } from './src/screens/SignUpScreen';

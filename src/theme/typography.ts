@@ -4,7 +4,7 @@ export const typography = {
   fontFamily: Platform.select({
     ios: 'System',
     android: 'Roboto',
-    web: '-apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
+    web: "'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif",
     default: 'System',
   }),
 

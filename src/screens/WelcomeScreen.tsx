@@ -58,7 +58,7 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
           </View>
         </View>
 
-        {/* CONTENT SECTION: Clean, Minimalist Premium Headline & Subtitle */}
+        {/* CONTENT SECTION: Clean, Minimalist Premium Headline & Social Proof */}
         <View style={styles.contentSection}>
           <Text
             style={[
@@ -71,14 +71,30 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
             <Text style={styles.streakAccent}>Earn.</Text>
           </Text>
 
-          <Text
-            style={[
-              styles.subtitle,
-              isSmallScreen && styles.subtitleSmall,
-            ]}
-          >
-            Your AI-powered creator operating system.
-          </Text>
+          {/* Social Proof Pill: Overlapping Creator Badges + 5 Stars + 12k+ Creators */}
+          <View style={styles.socialProofChip}>
+            <View style={styles.avatarStack}>
+              <View style={[styles.avatarBubble, { backgroundColor: '#FF5C5C', zIndex: 3 }]}>
+                <Text style={styles.avatarLetter}>✦</Text>
+              </View>
+              <View style={[styles.avatarBubble, { backgroundColor: '#582CDB', marginLeft: -7, zIndex: 2 }]}>
+                <Text style={styles.avatarLetter}>🔥</Text>
+              </View>
+              <View style={[styles.avatarBubble, { backgroundColor: '#FABD32', marginLeft: -7, zIndex: 1 }]}>
+                <Text style={styles.avatarLetter}>⚡</Text>
+              </View>
+            </View>
+
+            <View style={styles.socialProofDivider} />
+
+            <View style={styles.socialProofMeta}>
+              <View style={styles.starsRow}>
+                <Text style={styles.starIcon}>★★★★★</Text>
+                <Text style={styles.ratingNumber}>4.9</Text>
+              </View>
+              <Text style={styles.socialProofLabel}>Joined by 12,000+ creators</Text>
+            </View>
+          </View>
         </View>
 
         {/* ACTION BUTTONS CLUSTER */}
@@ -186,19 +202,70 @@ const styles = StyleSheet.create({
   streakAccent: {
     color: colors.primary,
   },
-  subtitle: {
-    fontSize: 14.5,
-    fontWeight: '500',
-    color: '#7F7894',
-    textAlign: 'center',
-    letterSpacing: 0.1,
-    marginTop: 4,
-    maxWidth: 320,
+
+  /* Social Proof Chip */
+  socialProofChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(255, 255, 255, 0.85)',
+    paddingHorizontal: 13,
+    paddingVertical: 7,
+    borderRadius: 30,
+    borderWidth: 1,
+    borderColor: 'rgba(88, 44, 219, 0.1)',
+    shadowColor: '#171420',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.05,
+    shadowRadius: 10,
+    marginTop: 6,
+    gap: 9,
   },
-  subtitleSmall: {
-    fontSize: 13,
-    marginTop: 3,
-    maxWidth: 280,
+  avatarStack: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  avatarBubble: {
+    width: 22,
+    height: 22,
+    borderRadius: 11,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1.5,
+    borderColor: '#FFFFFF',
+  },
+  avatarLetter: {
+    fontSize: 10,
+    fontWeight: '700',
+    color: '#FFFFFF',
+  },
+  socialProofDivider: {
+    width: 1,
+    height: 16,
+    backgroundColor: 'rgba(23, 20, 32, 0.1)',
+  },
+  socialProofMeta: {
+    alignItems: 'flex-start',
+  },
+  starsRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+  starIcon: {
+    color: '#FABD32',
+    fontSize: 11,
+    letterSpacing: 1,
+  },
+  ratingNumber: {
+    fontSize: 11,
+    fontWeight: '800',
+    color: colors.textPrimary,
+  },
+  socialProofLabel: {
+    fontSize: 11,
+    fontWeight: '600',
+    color: '#7F7894',
+    letterSpacing: 0.1,
   },
 
   /* Action Buttons */
