@@ -244,28 +244,8 @@ export const HeroMascot: React.FC = () => {
 
   return (
     <View style={styles.container}>
-      {/* Luminous Hardware-Accelerated SVG Ambient Radial Glow */}
-      <View style={styles.ambientAuraOuter} pointerEvents="none">
-        <Svg width={300} height={300} viewBox="0 0 300 300">
-          <Defs>
-            <RadialGradient
-              id="mascotAmbientGlow"
-              cx="50%"
-              cy="50%"
-              r="50%"
-              fx="50%"
-              fy="50%"
-            >
-              <Stop offset="0%" stopColor="#582CDB" stopOpacity="0.28" />
-              <Stop offset="25%" stopColor="#7C4DFF" stopOpacity="0.18" />
-              <Stop offset="55%" stopColor="#9C27B0" stopOpacity="0.08" />
-              <Stop offset="85%" stopColor="#582CDB" stopOpacity="0.02" />
-              <Stop offset="100%" stopColor="#582CDB" stopOpacity="0" />
-            </RadialGradient>
-          </Defs>
-          <Circle cx="150" cy="150" r="150" fill="url(#mascotAmbientGlow)" />
-        </Svg>
-      </View>
+      {/* Soft Ambient Radial Light Lavender Bubble Disc */}
+      <View style={styles.ambientAuraOuter} />
 
       <Pressable onPress={handleMascotTap} style={styles.pressable}>
         <Animated.View
@@ -304,17 +284,26 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginVertical: 4,
     position: 'relative',
-    width: 270,
-    height: 270,
+    width: 256,
+    height: 256,
   },
   ambientAuraOuter: {
     position: 'absolute',
-    width: 300,
-    height: 300,
-    top: -15,
-    left: -15,
-    alignItems: 'center',
-    justifyContent: 'center',
+    width: 246,
+    height: 246,
+    borderRadius: 123,
+    backgroundColor: 'rgba(88, 44, 219, 0.08)',
+    shadowColor: '#582CDB',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.12,
+    shadowRadius: 36,
+    top: 5,
+    left: 5,
+    ...(Platform.OS === 'web'
+      ? ({
+          boxShadow: '0 8px 36px rgba(88, 44, 219, 0.12)',
+        } as any)
+      : {}),
   },
   pressable: {
     alignItems: 'center',
