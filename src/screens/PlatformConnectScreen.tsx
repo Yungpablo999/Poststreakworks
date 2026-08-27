@@ -449,7 +449,7 @@ export const PlatformConnectScreen: React.FC<PlatformConnectScreenProps> = ({
             </View>
 
             {/* Coming Soon Note */}
-            <Text style={styles.comingSoonText}>More platforms coming soon</Text>
+            <Text style={styles.comingSoonText}>More platforms are on the way</Text>
           </View>
 
           {/* 5. JARVIS CORE ADVICE CARD (With Pure Star-Glowing Flame) */}
