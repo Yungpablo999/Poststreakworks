@@ -582,16 +582,15 @@ export const NicheSelectionScreen: React.FC<NicheSelectionScreenProps> = ({
             </View>
 
             {/* Modal Heading */}
-            <Text style={styles.limitModalTitle}>Maximum 3 Niches</Text>
+            <Text style={styles.limitModalTitle}>3 niches max</Text>
 
             {/* Modal Advice Message */}
             <Text style={styles.limitModalText}>
-              To maximize your creator streaks and get laser-sharp collaboration matches, Jarvis recommends focusing on up to{' '}
-              <Text style={styles.limitHighlight}>3 core niches</Text> for now.
+              For now, focus on your <Text style={styles.limitHighlight}>3 strongest niches</Text> so Jarvis can personalise your experience.
             </Text>
 
             <Text style={styles.limitSubNote}>
-              You can unlock and add more niches anytime from your creator profile!
+              You can add more later from your creator profile.
             </Text>
 
             {/* Got It Button */}
