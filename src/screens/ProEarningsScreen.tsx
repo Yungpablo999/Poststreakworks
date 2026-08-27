@@ -1708,9 +1708,9 @@ export const ProEarningsScreen: React.FC<ProEarningsScreenProps> = ({
                 <View style={[styles.timeframePillRow, { marginVertical: 8 }]}>
                   {[
                     { id: 'all', label: 'All' },
-                    { id: 'brands', label: 'Brand Deals' },
+                    { id: 'brands', label: 'Brands' },
                     { id: 'collabs', label: 'Collabs' },
-                    { id: 'affiliate', label: 'Affiliates' },
+                    { id: 'affiliate', label: 'Affiliate' },
                   ].map((filter) => {
                     const isActive = ledgerCategoryFilter === filter.id;
                     return (
@@ -1729,6 +1729,7 @@ export const ProEarningsScreen: React.FC<ProEarningsScreenProps> = ({
                             styles.timeframePillText,
                             isActive && styles.timeframePillTextActive,
                           ]}
+                          numberOfLines={1}
                         >
                           {filter.label}
                         </Text>
@@ -2119,7 +2120,9 @@ const styles = StyleSheet.create({
   },
   timeframePill: {
     flex: 1,
-    paddingVertical: 8,
+    minWidth: 0,
+    paddingVertical: 7,
+    paddingHorizontal: 2,
     borderRadius: 10,
     alignItems: 'center',
     justifyContent: 'center',
@@ -2132,9 +2135,10 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
   },
   timeframePillText: {
-    fontSize: 12,
+    fontSize: sFont(11),
     fontWeight: '800',
     color: '#64748B',
+    textAlign: 'center',
   },
   timeframePillTextActive: {
     color: '#FFFFFF',
