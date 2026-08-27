@@ -21,6 +21,7 @@ import { BrandToast } from '../components/BrandToast';
 import { UserProfileModal, UserProfileData } from '../components/UserProfileModal';
 import { AnimatedCompletionModal } from '../components/AnimatedCompletionModal';
 import { TinyGoldCheck } from '../components/CreatorStoryModal';
+import { sFont, isNarrowScreen } from '../utils/responsive';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
@@ -387,22 +388,22 @@ export const ProMissionDetailScreen: React.FC<ProMissionDetailScreenProps> = ({
             {/* Action Chips */}
             <View style={{ flexDirection: 'row', gap: 6, marginVertical: 14 }}>
               <Pressable
-                style={styles.blueprintMiniChip}
+                style={({ pressed }) => [styles.blueprintMiniChip, pressed && styles.btnPressed]}
                 onPress={() => showToast('Playing sample voiceover audio...')}
               >
-                <Text style={styles.blueprintMiniChipText}>▶ Play Audio</Text>
+                <Text style={styles.blueprintMiniChipText} numberOfLines={1}>▶ Play Audio</Text>
               </Pressable>
               <Pressable
-                style={styles.blueprintMiniChip}
+                style={({ pressed }) => [styles.blueprintMiniChip, pressed && styles.btnPressed]}
                 onPress={() => showToast('Trending audio attached')}
               >
-                <Text style={styles.blueprintMiniChipText}>⚡ Trending Sound</Text>
+                <Text style={styles.blueprintMiniChipText} numberOfLines={1}>⚡ Trending</Text>
               </Pressable>
               <Pressable
-                style={styles.blueprintMiniChip}
+                style={({ pressed }) => [styles.blueprintMiniChip, pressed && styles.btnPressed]}
                 onPress={() => showToast('Opening CapCut 9:16 Template')}
               >
-                <Text style={styles.blueprintMiniChipText}>📹 CapCut</Text>
+                <Text style={styles.blueprintMiniChipText} numberOfLines={1}>📹 CapCut</Text>
               </Pressable>
             </View>
 
@@ -968,17 +969,21 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   blueprintMiniChip: {
+    flex: 1,
     backgroundColor: '#FAF8F5',
     borderWidth: 1,
     borderColor: '#EFECE6',
-    paddingHorizontal: 10,
-    paddingVertical: 6,
-    borderRadius: 8,
+    paddingHorizontal: 4,
+    paddingVertical: 8,
+    borderRadius: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   blueprintMiniChipText: {
-    fontSize: 11,
+    fontSize: sFont(11),
     fontWeight: '800',
     color: '#582CDB',
+    textAlign: 'center',
   },
   useBlueprintBtn: {
     backgroundColor: '#EDE9FE',
