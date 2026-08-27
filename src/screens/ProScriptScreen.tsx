@@ -23,6 +23,7 @@ import { UserProfileModal, UserProfileData } from '../components/UserProfileModa
 import { AnimatedCompletionModal } from '../components/AnimatedCompletionModal';
 import { TinyGoldCheck } from '../components/CreatorStoryModal';
 import { SocialBrandIcon } from '../components/SocialBrandIcon';
+import { sFont } from '../utils/responsive';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
@@ -667,7 +668,7 @@ export const ProScriptScreen: React.FC<ProScriptScreenProps> = ({
             <View style={{ flexDirection: 'row', gap: 8, marginBottom: 12 }}>
               {[
                 { id: 'tiktok', name: 'TikTok', format: '9:16 Reel', icon: 'tiktok' as const },
-                { id: 'instagram', name: 'Instagram', format: 'Reels / IGTV', icon: 'instagram' as const },
+                { id: 'instagram', name: 'Instagram', format: 'Reels / IG', icon: 'instagram' as const },
                 { id: 'youtube', name: 'YouTube', format: 'Shorts 60s', icon: 'youtube' as const },
               ].map((plat) => {
                 const isSelected = selectedPlatforms.includes(plat.id);
@@ -694,17 +695,19 @@ export const ProScriptScreen: React.FC<ProScriptScreenProps> = ({
                       }
                     }}
                   >
-                    <SocialBrandIcon platform={plat.icon} size={20} />
-                    <View style={{ flex: 1 }}>
-                      <Text style={styles.platFormatName}>{plat.name}</Text>
-                      <Text style={styles.platFormatSub}>{plat.format}</Text>
+                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
+                      <SocialBrandIcon platform={plat.icon} size={18} />
+                      <View style={[styles.platCheckCircle, isSelected && styles.platCheckCircleActive]}>
+                        {isSelected && (
+                          <Svg width={8} height={8} viewBox="0 0 12 12" fill="none">
+                            <Path d="M2.5 6.2L4.8 8.5L9.5 3.5" stroke="#FFFFFF" strokeWidth="2.5" strokeLinecap="round" />
+                          </Svg>
+                        )}
+                      </View>
                     </View>
-                    <View style={[styles.platCheckCircle, isSelected && styles.platCheckCircleActive]}>
-                      {isSelected && (
-                        <Svg width={9} height={9} viewBox="0 0 12 12" fill="none">
-                          <Path d="M2.5 6.2L4.8 8.5L9.5 3.5" stroke="#FFFFFF" strokeWidth="2.5" strokeLinecap="round" />
-                        </Svg>
-                      )}
+                    <View style={{ marginTop: 8, width: '100%' }}>
+                      <Text style={styles.platFormatName} numberOfLines={1}>{plat.name}</Text>
+                      <Text style={styles.platFormatSub} numberOfLines={1}>{plat.format}</Text>
                     </View>
                   </Pressable>
                 );
@@ -1569,33 +1572,33 @@ const styles = StyleSheet.create({
   },
   platformFormatPillCard: {
     flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
+    minWidth: 0,
     backgroundColor: '#FAF8F5',
     borderRadius: 12,
-    padding: 8,
+    padding: 10,
     borderWidth: 1.5,
     borderColor: '#EFECE6',
-    gap: 6,
+    justifyContent: 'space-between',
   },
   platformFormatPillCardSelected: {
     backgroundColor: '#F5F3FF',
     borderColor: '#582CDB',
   },
   platFormatName: {
-    fontSize: 11,
+    fontSize: sFont(11.5),
     fontWeight: '700',
     color: '#171420',
   },
   platFormatSub: {
-    fontSize: 8,
+    fontSize: sFont(9),
     color: '#64748B',
-    marginTop: 1,
+    marginTop: 2,
+    fontWeight: '600',
   },
   platCheckCircle: {
-    width: 14,
-    height: 14,
-    borderRadius: 7,
+    width: 16,
+    height: 16,
+    borderRadius: 8,
     backgroundColor: '#E2E8F0',
     justifyContent: 'center',
     alignItems: 'center',
