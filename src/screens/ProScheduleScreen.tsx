@@ -1169,8 +1169,8 @@ export const ProScheduleScreen: React.FC<ProScheduleScreenProps> = ({
                   style={styles.modalPrimaryActionBtn}
                   onPress={handleConfirmSchedulePost}
                 >
-                  <Text style={styles.modalPrimaryActionBtnText}>
-                    🚀 Schedule to Autopilot Queue (+50 XP) ➔
+                  <Text style={styles.modalPrimaryActionBtnText} numberOfLines={1}>
+                    🚀 Schedule to Autopilot (+50 XP) ➔
                   </Text>
                 </Pressable>
 
@@ -1639,8 +1639,8 @@ export const ProScheduleScreen: React.FC<ProScheduleScreenProps> = ({
                     }, 200);
                   }}
                 >
-                  <Text style={styles.modalPrimaryActionBtnText}>
-                    + Schedule New Post for {CALENDAR_DAYS[selectedDayIndex].dayName} ➔
+                  <Text style={styles.modalPrimaryActionBtnText} numberOfLines={1}>
+                    + Schedule Post for {CALENDAR_DAYS[selectedDayIndex].dayName} ➔
                   </Text>
                 </Pressable>
 
@@ -1772,7 +1772,7 @@ export const ProScheduleScreen: React.FC<ProScheduleScreenProps> = ({
                     }, 200);
                   }}
                 >
-                  <Text style={styles.modalPrimaryActionBtnText}>
+                  <Text style={styles.modalPrimaryActionBtnText} numberOfLines={1}>
                     + Add New Post to Queue ➔
                   </Text>
                 </Pressable>
@@ -2863,14 +2863,17 @@ const styles = StyleSheet.create({
   modalPrimaryActionBtn: {
     backgroundColor: '#582CDB',
     paddingVertical: 13,
+    paddingHorizontal: 12,
     borderRadius: 14,
     alignItems: 'center',
+    justifyContent: 'center',
     marginTop: 6,
   },
   modalPrimaryActionBtnText: {
     color: '#FFFFFF',
-    fontSize: 14,
+    fontSize: sFont(13),
     fontWeight: '700',
+    textAlign: 'center',
   },
   modalGoldActionBtnWrapper: {
     borderRadius: 14,
