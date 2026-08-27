@@ -55,10 +55,8 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
           <HeroMascot />
         </View>
 
-        {/* CONTENT SECTION: Brand, Main Headline & Subtitle */}
+        {/* CONTENT SECTION: Clean, Minimalist Premium Headline */}
         <View style={styles.contentSection}>
-          <Text style={styles.brandTag}>Poststreak</Text>
-
           <Text
             style={[
               styles.mainHeadline,
@@ -68,15 +66,6 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
           >
             Build your{'\n'}
             creator <Text style={styles.streakAccent}>streak.</Text>
-          </Text>
-
-          <Text
-            style={[
-              styles.subtitle,
-              isSmallScreen && styles.subtitleSmall,
-            ]}
-          >
-            Create, schedule, collaborate, grow and earn—all in one creator engine.
           </Text>
         </View>
 
