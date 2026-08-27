@@ -888,7 +888,7 @@ export const ProEarningsScreen: React.FC<ProEarningsScreenProps> = ({
                 }
               }}
             >
-              <Text style={styles.askJarvisIncomeBtnText}>✨ ASK JARVIS INCOME ADVICE ➔</Text>
+              <Text style={styles.askJarvisIncomeBtnText} numberOfLines={1}>✨ ASK JARVIS FOR ADVICE ➔</Text>
             </Pressable>
           </View>
 
@@ -914,7 +914,7 @@ export const ProEarningsScreen: React.FC<ProEarningsScreenProps> = ({
             <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
               <Path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3" stroke="#171420" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
             </Svg>
-            <Text style={styles.downloadPdfBtnText}>DOWNLOAD JULY SUMMARY (PDF)</Text>
+            <Text style={styles.downloadPdfBtnText} numberOfLines={1}>DOWNLOAD JULY SUMMARY (PDF)</Text>
           </Pressable>
 
           {/* ============================================================ */}
@@ -3051,16 +3051,18 @@ const styles = StyleSheet.create({
   askJarvisIncomeBtn: {
     backgroundColor: '#582CDB',
     paddingVertical: 12,
-    paddingHorizontal: 20,
+    paddingHorizontal: 12,
     borderRadius: 14,
     width: '100%',
     alignItems: 'center',
+    justifyContent: 'center',
   },
   askJarvisIncomeBtnText: {
     color: '#FFFFFF',
-    fontSize: 12.5,
+    fontSize: sFont(12),
     fontWeight: '700',
     letterSpacing: 0.3,
+    textAlign: 'center',
   },
 
   // DOWNLOAD SUMMARY
@@ -3073,14 +3075,16 @@ const styles = StyleSheet.create({
     borderWidth: 1.5,
     borderColor: '#EFECE6',
     paddingVertical: 13,
+    paddingHorizontal: 12,
     borderRadius: 14,
     marginBottom: 16,
   },
   downloadPdfBtnText: {
-    fontSize: 12,
+    fontSize: sFont(11.5),
     fontWeight: '700',
     color: '#171420',
     letterSpacing: 0.4,
+    textAlign: 'center',
   },
 
   // RECENT BRAND EARNINGS
