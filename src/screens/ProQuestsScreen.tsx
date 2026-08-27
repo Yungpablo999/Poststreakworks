@@ -1564,12 +1564,21 @@ export const ProQuestsScreen: React.FC<ProQuestsScreenProps> = ({
             <Animated.View style={[styles.modalCard, { transform: [{ scale: modalPopScale }], maxWidth: 440, padding: 22 }]}>
               {/* Modal Header */}
               <View style={styles.modalHeaderRow}>
-                <View style={{ flex: 1, paddingRight: 10 }}>
+                <View style={{ flex: 1, minWidth: 0, paddingRight: 10 }}>
                   <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 2 }}>
                     <Text style={{ fontSize: 16 }}>👑</Text>
-                    <Text style={styles.modalTitle}>Choose Opportunity Type</Text>
+                    <Text
+                      style={[styles.modalTitle, { flex: 1, minWidth: 0 }]}
+                      numberOfLines={1}
+                      adjustsFontSizeToFit
+                      minimumFontScale={0.85}
+                    >
+                      Choose Opportunity Type
+                    </Text>
                   </View>
-                  <Text style={styles.modalSubtitle}>Where would you like to explore priority matches?</Text>
+                  <Text style={styles.modalSubtitle} numberOfLines={1}>
+                    Where would you like to explore priority matches?
+                  </Text>
                 </View>
                 <Pressable onPress={() => setShowOpportunityModal(false)} style={styles.modalCloseCircle} hitSlop={8}>
                   <Text style={styles.modalCloseCross}>✕</Text>
@@ -1577,7 +1586,7 @@ export const ProQuestsScreen: React.FC<ProQuestsScreenProps> = ({
               </View>
 
               {/* 3 Selectable Opportunity Cards */}
-              <View style={{ gap: 12, marginVertical: 14 }}>
+              <View style={{ gap: 10, marginVertical: 12 }}>
                 {/* OPTION 1: CREATOR COLLAB MATCHING */}
                 <Pressable
                   style={({ pressed }) => [styles.oppChoiceCard, pressed && styles.btnPressed]}
@@ -1594,19 +1603,23 @@ export const ProQuestsScreen: React.FC<ProQuestsScreenProps> = ({
                   }}
                 >
                   <View style={styles.oppChoiceIconBoxGold}>
-                    <Text style={{ fontSize: 22 }}>👥</Text>
+                    <Text style={{ fontSize: 20 }}>👥</Text>
                   </View>
-                  <View style={{ flex: 1 }}>
-                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 2 }}>
-                      <Text style={styles.oppChoiceTitle}>Creator Collabs</Text>
+                  <View style={{ flex: 1, minWidth: 0 }}>
+                    <View style={styles.oppChoiceHeaderRow}>
+                      <Text style={styles.oppChoiceTitle} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.85}>
+                        Creator Collabs
+                      </Text>
                       <View style={styles.oppChoiceBadgeGold}>
-                        <Text style={styles.oppChoiceBadgeGoldText}>👑 TOP 2%</Text>
+                        <Text style={styles.oppChoiceBadgeGoldText} numberOfLines={1}>👑 TOP 2%</Text>
                       </View>
                     </View>
-                    <Text style={styles.oppChoiceDesc}>
-                      Match with crowned verified creators for joint Reels, series & split-screen duets.
+                    <Text style={styles.oppChoiceDesc} numberOfLines={2}>
+                      Match with crowned verified creators for joint Reels, series &amp; split-screen duets.
                     </Text>
-                    <Text style={styles.oppChoiceMetaPurple}>4 Crowned Matches • 96% Synergy</Text>
+                    <Text style={styles.oppChoiceMetaPurple} numberOfLines={1}>
+                      4 Crowned Matches • 96% Synergy
+                    </Text>
                   </View>
                   <Text style={styles.oppChoiceChevron}>›</Text>
                 </Pressable>
@@ -1627,19 +1640,23 @@ export const ProQuestsScreen: React.FC<ProQuestsScreenProps> = ({
                   }}
                 >
                   <View style={styles.oppChoiceIconBoxPurple}>
-                    <Text style={{ fontSize: 22 }}>🛡️</Text>
+                    <Text style={{ fontSize: 20 }}>🛡️</Text>
                   </View>
-                  <View style={{ flex: 1 }}>
-                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 2 }}>
-                      <Text style={styles.oppChoiceTitle}>Squad Sprints & Duels</Text>
+                  <View style={{ flex: 1, minWidth: 0 }}>
+                    <View style={styles.oppChoiceHeaderRow}>
+                      <Text style={styles.oppChoiceTitle} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.85}>
+                        Squad &amp; Duels
+                      </Text>
                       <View style={styles.oppChoiceBadgePurple}>
-                        <Text style={styles.oppChoiceBadgePurpleText}>⚡ ACTIVE</Text>
+                        <Text style={styles.oppChoiceBadgePurpleText} numberOfLines={1}>⚡ ACTIVE</Text>
                       </View>
                     </View>
-                    <Text style={styles.oppChoiceDesc}>
+                    <Text style={styles.oppChoiceDesc} numberOfLines={2}>
                       Join creator squads, contribute to 8-Reel goals, and battle live in squad duels.
                     </Text>
-                    <Text style={styles.oppChoiceMetaPurple}>Momentum Makers (Round 2 Live) • +750 XP</Text>
+                    <Text style={styles.oppChoiceMetaPurple} numberOfLines={1}>
+                      Momentum Makers (Round 2) • +750 XP
+                    </Text>
                   </View>
                   <Text style={styles.oppChoiceChevron}>›</Text>
                 </Pressable>
@@ -1656,19 +1673,23 @@ export const ProQuestsScreen: React.FC<ProQuestsScreenProps> = ({
                   }}
                 >
                   <View style={styles.oppChoiceIconBoxGreen}>
-                    <Text style={{ fontSize: 22 }}>💼</Text>
+                    <Text style={{ fontSize: 20 }}>💼</Text>
                   </View>
-                  <View style={{ flex: 1 }}>
-                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 2 }}>
-                      <Text style={styles.oppChoiceTitle}>Brand Sponsorship Deals</Text>
+                  <View style={{ flex: 1, minWidth: 0 }}>
+                    <View style={styles.oppChoiceHeaderRow}>
+                      <Text style={styles.oppChoiceTitle} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.85}>
+                        Brand Sponsorships
+                      </Text>
                       <View style={styles.oppChoiceBadgeGreen}>
-                        <Text style={styles.oppChoiceBadgeGreenText}>💰 $450–$1,200</Text>
+                        <Text style={styles.oppChoiceBadgeGreenText} numberOfLines={1}>💰 $450–$1.2k</Text>
                       </View>
                     </View>
-                    <Text style={styles.oppChoiceDesc}>
-                      Explore verified brand campaigns, food festival reviews & milestone bounties.
+                    <Text style={styles.oppChoiceDesc} numberOfLines={2}>
+                      Explore verified brand campaigns, food festival reviews &amp; milestone bounties.
                     </Text>
-                    <Text style={styles.oppChoiceMetaGreen}>3 Active Brand Quests Available</Text>
+                    <Text style={styles.oppChoiceMetaGreen} numberOfLines={1}>
+                      3 Active Brand Quests Available
+                    </Text>
                   </View>
                   <Text style={styles.oppChoiceChevron}>›</Text>
                 </Pressable>
@@ -2948,47 +2969,59 @@ const styles = StyleSheet.create({
   oppChoiceCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 12,
+    gap: 10,
     backgroundColor: '#FAF8F5',
     borderRadius: 16,
-    padding: 14,
+    padding: 12,
     borderWidth: 1.5,
     borderColor: '#EFECE6',
   },
+  oppChoiceHeaderRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 6,
+    marginBottom: 2,
+  },
   oppChoiceIconBoxGold: {
-    width: 46,
-    height: 46,
-    borderRadius: 23,
+    width: 42,
+    height: 42,
+    borderRadius: 21,
     backgroundColor: '#FEF3C7',
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 1,
     borderColor: '#FDE68A',
+    flexShrink: 0,
   },
   oppChoiceIconBoxPurple: {
-    width: 46,
-    height: 46,
-    borderRadius: 23,
+    width: 42,
+    height: 42,
+    borderRadius: 21,
     backgroundColor: '#EDE9FE',
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 1,
     borderColor: '#DDD6FE',
+    flexShrink: 0,
   },
   oppChoiceIconBoxGreen: {
-    width: 46,
-    height: 46,
-    borderRadius: 23,
+    width: 42,
+    height: 42,
+    borderRadius: 21,
     backgroundColor: '#DCFCE7',
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 1,
     borderColor: '#BBF7D0',
+    flexShrink: 0,
   },
   oppChoiceTitle: {
-    fontSize: 14,
-    fontWeight: '700',
+    fontSize: 13.5,
+    fontWeight: '800',
     color: '#171420',
+    flex: 1,
+    minWidth: 0,
   },
   oppChoiceBadgeGold: {
     backgroundColor: '#FEF3C7',
@@ -2997,10 +3030,11 @@ const styles = StyleSheet.create({
     borderRadius: 6,
     borderWidth: 1,
     borderColor: '#FDE68A',
+    flexShrink: 0,
   },
   oppChoiceBadgeGoldText: {
-    fontSize: 9,
-    fontWeight: '700',
+    fontSize: 8.5,
+    fontWeight: '800',
     color: '#B45309',
   },
   oppChoiceBadgePurple: {
@@ -3010,10 +3044,11 @@ const styles = StyleSheet.create({
     borderRadius: 6,
     borderWidth: 1,
     borderColor: '#DDD6FE',
+    flexShrink: 0,
   },
   oppChoiceBadgePurpleText: {
-    fontSize: 9,
-    fontWeight: '700',
+    fontSize: 8.5,
+    fontWeight: '800',
     color: '#582CDB',
   },
   oppChoiceBadgeGreen: {
@@ -3023,10 +3058,11 @@ const styles = StyleSheet.create({
     borderRadius: 6,
     borderWidth: 1,
     borderColor: '#BBF7D0',
+    flexShrink: 0,
   },
   oppChoiceBadgeGreenText: {
-    fontSize: 9,
-    fontWeight: '700',
+    fontSize: 8.5,
+    fontWeight: '800',
     color: '#166534',
   },
   oppChoiceDesc: {
@@ -3036,22 +3072,23 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
   oppChoiceMetaPurple: {
-    fontSize: 11,
-    fontWeight: '700',
+    fontSize: 10.5,
+    fontWeight: '800',
     color: '#582CDB',
     marginTop: 4,
   },
   oppChoiceMetaGreen: {
-    fontSize: 11,
-    fontWeight: '700',
+    fontSize: 10.5,
+    fontWeight: '800',
     color: '#16A34A',
     marginTop: 4,
   },
   oppChoiceChevron: {
-    fontSize: 22,
+    fontSize: 20,
     fontWeight: '700',
     color: '#94A3B8',
-    marginLeft: 4,
+    marginLeft: 2,
+    flexShrink: 0,
   },
   modalOutlineCloseBtn: {
     backgroundColor: '#F1F5F9',
