@@ -94,7 +94,7 @@ export const ProScriptScreen: React.FC<ProScriptScreenProps> = ({
 
   const [isPlayingPreview, setIsPlayingPreview] = useState(false);
   const [isAccelerated, setIsAccelerated] = useState(false);
-  const [selectedFormat, setSelectedFormat] = useState('9:16 Video (42s)');
+  const [selectedFormat, setSelectedFormat] = useState('9:16 (42s)');
   const [selectedPlatforms, setSelectedPlatforms] = useState<string[]>(['tiktok', 'instagram', 'youtube']);
   const [completionData, setCompletionData] = useState({
     title: 'Script Saved to Drafts!',
@@ -716,29 +716,34 @@ export const ProScriptScreen: React.FC<ProScriptScreenProps> = ({
 
             {/* Format Style Selector Chips */}
             <Text style={styles.formatPresetsLabel}>SCRIPT PACING PRESET</Text>
-            <View style={{ flexDirection: 'row', gap: 6, marginTop: 6, marginBottom: 12 }}>
-              {['9:16 Video (42s)', 'Carousel Slides (6p)', 'Viral X Thread'].map((fmt) => (
+            <View style={styles.formatPresetsRow}>
+              {[
+                { id: '9:16 (42s)', label: '9:16 (42s)' },
+                { id: 'Carousel (6p)', label: 'Carousel (6p)' },
+                { id: 'X Thread', label: 'X Thread' },
+              ].map((fmt) => (
                 <Pressable
-                  key={fmt}
+                  key={fmt.id}
                   style={[
                     styles.formatPresetChip,
-                    selectedFormat === fmt && styles.formatPresetChipActive,
+                    selectedFormat === fmt.id && styles.formatPresetChipActive,
                   ]}
                   onPress={() => {
                     if (Platform.OS !== 'web') {
                       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                     }
-                    setSelectedFormat(fmt);
-                    showToast(`✓ Switched preset: ${fmt}`);
+                    setSelectedFormat(fmt.id);
+                    showToast(`✓ Switched preset: ${fmt.label}`);
                   }}
                 >
                   <Text
                     style={[
                       styles.formatPresetChipText,
-                      selectedFormat === fmt && styles.formatPresetChipTextActive,
+                      selectedFormat === fmt.id && styles.formatPresetChipTextActive,
                     ]}
+                    numberOfLines={1}
                   >
-                    {fmt}
+                    {fmt.label}
                   </Text>
                 </Pressable>
               ))}
@@ -754,7 +759,7 @@ export const ProScriptScreen: React.FC<ProScriptScreenProps> = ({
                 showToast(`✨ Script adapted for ${selectedPlatforms.map(p => p.toUpperCase()).join(' + ')}!`);
               }}
             >
-              <Text style={styles.adaptBtnText}>✨ Adapt &amp; Optimize Format ➔</Text>
+              <Text style={styles.adaptBtnText} numberOfLines={1}>✨ Adapt &amp; Optimize Format ➔</Text>
             </Pressable>
           </View>
 
@@ -1606,32 +1611,43 @@ const styles = StyleSheet.create({
   platCheckCircleActive: {
     backgroundColor: '#582CDB',
   },
+  formatPresetsRow: {
+    flexDirection: 'row',
+    gap: 6,
+    marginTop: 6,
+    marginBottom: 12,
+  },
   formatPresetsLabel: {
-    fontSize: 9,
-    fontWeight: '700',
+    fontSize: sFont(9),
+    fontWeight: '800',
     color: '#94A3B8',
     letterSpacing: 0.4,
   },
   formatPresetChip: {
+    flex: 1,
+    minWidth: 0,
     backgroundColor: '#FAF8F5',
     borderWidth: 1,
     borderColor: '#EFECE6',
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    borderRadius: 6,
+    paddingHorizontal: 4,
+    paddingVertical: 7,
+    borderRadius: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   formatPresetChipActive: {
     backgroundColor: '#EDE9FE',
     borderColor: '#DDD6FE',
   },
   formatPresetChipText: {
-    fontSize: 10,
+    fontSize: sFont(10),
     fontWeight: '800',
     color: '#475569',
+    textAlign: 'center',
   },
   formatPresetChipTextActive: {
     color: '#582CDB',
-    fontWeight: '700',
+    fontWeight: '800',
   },
   adaptBtn: {
     backgroundColor: '#EDE9FE',
@@ -1643,7 +1659,7 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   adaptBtnText: {
-    fontSize: 12,
+    fontSize: sFont(12),
     fontWeight: '700',
     color: '#582CDB',
   },
