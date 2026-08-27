@@ -220,7 +220,7 @@ const styles = StyleSheet.create({
   streakAccent: {
     fontFamily: typography.editorialSerif,
     fontWeight: '700',
-    color: '#D97706', // Rich luxury gold
+    color: colors.primary, // Signature Royal Purple
   },
 
   /* Luxury Social Proof Chip */
