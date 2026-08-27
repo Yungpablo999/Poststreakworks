@@ -21,6 +21,7 @@ import { FloatingTabBar, TabType } from '../components/FloatingTabBar';
 import { UserProfileModal, UserProfileData } from '../components/UserProfileModal';
 import { AnimatedCompletionModal } from '../components/AnimatedCompletionModal';
 import { FreeAppHeader } from '../components/FreeAppHeader';
+import { sFont } from '../utils/responsive';
 
 export interface CollabPlan {
   id: string;
@@ -1041,7 +1042,14 @@ export const CollabIdeaScreen: React.FC<CollabIdeaScreenProps> = ({
                   end={{ x: 1, y: 0 }}
                   style={styles.startCollabGradient}
                 >
-                  <Text style={styles.startCollabBtnText}>Start Collaboration</Text>
+                  <Text
+                    numberOfLines={1}
+                    adjustsFontSizeToFit
+                    minimumFontScale={0.85}
+                    style={styles.startCollabBtnText}
+                  >
+                    Start Collaboration
+                  </Text>
                 </LinearGradient>
               </Pressable>
 
@@ -1049,7 +1057,7 @@ export const CollabIdeaScreen: React.FC<CollabIdeaScreenProps> = ({
                 style={({ pressed }) => [styles.inviteBtn, pressed && styles.btnPressed]}
                 onPress={handleSendInvite}
               >
-                <Text style={styles.inviteBtnText}>Invite</Text>
+                <Text style={styles.inviteBtnText} numberOfLines={1}>Invite</Text>
               </Pressable>
 
               <Pressable
@@ -2090,6 +2098,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     gap: 8,
     alignItems: 'center',
+    width: '100%',
   },
   startCollabBtn: {
     flex: 1,
@@ -2106,16 +2115,18 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    paddingHorizontal: 8,
   },
   startCollabBtnText: {
-    fontSize: 14,
+    fontSize: sFont(13, 11.5),
     fontWeight: '700',
     color: '#FFFFFF',
-    letterSpacing: 0.4,
+    letterSpacing: 0.2,
+    textAlign: 'center',
   },
   inviteBtn: {
     height: 48,
-    paddingHorizontal: 18,
+    paddingHorizontal: 14,
     borderRadius: 14,
     backgroundColor: '#F5F3FF',
     borderWidth: 1.5,
@@ -2124,9 +2135,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   inviteBtnText: {
-    fontSize: 14,
+    fontSize: 13,
     fontWeight: '800',
     color: '#582CDB',
+    textAlign: 'center',
   },
   saveBookmarkBtn: {
     width: 48,
@@ -2137,6 +2149,7 @@ const styles = StyleSheet.create({
     borderColor: '#EDE9FE',
     justifyContent: 'center',
     alignItems: 'center',
+    flexShrink: 0,
   },
   saveBookmarkBtnActive: {
     backgroundColor: '#EDE9FE',
