@@ -757,7 +757,7 @@ export const ProEarningsScreen: React.FC<ProEarningsScreenProps> = ({
                 <Rect x="2" y="5" width="20" height="14" rx="2" stroke="#582CDB" strokeWidth="2.2" />
                 <Path d="M2 10h20" stroke="#582CDB" strokeWidth="2.2" />
               </Svg>
-              <Text style={styles.cardHeaderTitle}>Payout Status</Text>
+              <Text style={styles.cardHeaderTitle} numberOfLines={1}>Payout Status</Text>
             </View>
 
             <View style={styles.payoutDetailRowsWrap}>
@@ -922,7 +922,7 @@ export const ProEarningsScreen: React.FC<ProEarningsScreenProps> = ({
           {/* ============================================================ */}
           <View style={styles.dashboardCard}>
             <View style={styles.cardHeaderBetween}>
-              <Text style={styles.cardHeaderTitle}>Recent Brand Earnings</Text>
+              <Text style={styles.cardHeaderTitle} numberOfLines={1}>Recent Brand Earnings</Text>
               <Text style={styles.totalGoldHeader}>$1,010</Text>
             </View>
 
@@ -957,7 +957,7 @@ export const ProEarningsScreen: React.FC<ProEarningsScreenProps> = ({
           {/* ============================================================ */}
           <View style={styles.dashboardCard}>
             <View style={styles.cardHeaderBetween}>
-              <Text style={styles.cardHeaderTitle}>Collab Revenue</Text>
+              <Text style={styles.cardHeaderTitle} numberOfLines={1}>Collab Revenue</Text>
               <Text style={styles.totalPurpleHeader}>$540</Text>
             </View>
 
@@ -1189,9 +1189,11 @@ export const ProEarningsScreen: React.FC<ProEarningsScreenProps> = ({
                     return (
                       <View style={styles.platformCompChartContainer}>
                         <View style={styles.platformChartHeaderRow}>
-                          <Text style={styles.platformChartHeaderTitle}>REVENUE BY PLATFORM ({earningsTimeframe})</Text>
+                          <Text style={styles.platformChartHeaderTitle} numberOfLines={1}>
+                            PLATFORM REVENUE ({earningsTimeframe})
+                          </Text>
                           <View style={styles.platformTapBadgePill}>
-                            <Text style={styles.platformChartHeaderSub}>Tap bar to inspect 🔍</Text>
+                            <Text style={styles.platformChartHeaderSub} numberOfLines={1}>Inspect 🔍</Text>
                           </View>
                         </View>
 
@@ -2339,24 +2341,28 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 18,
+    marginBottom: 16,
   },
   platformChartHeaderTitle: {
-    fontSize: 10,
-    fontWeight: '700',
+    fontSize: sFont(10),
+    fontWeight: '800',
     color: '#64748B',
-    letterSpacing: 0.5,
+    letterSpacing: 0.4,
+    flex: 1,
+    minWidth: 0,
+    marginRight: 8,
   },
   platformTapBadgePill: {
     backgroundColor: '#FAF5FF',
-    paddingHorizontal: 8,
+    paddingHorizontal: 7,
     paddingVertical: 3,
     borderRadius: 8,
     borderWidth: 1,
     borderColor: '#E9D5FF',
+    flexShrink: 0,
   },
   platformChartHeaderSub: {
-    fontSize: 10,
+    fontSize: sFont(9.5),
     fontWeight: '800',
     color: '#582CDB',
   },
