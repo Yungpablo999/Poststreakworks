@@ -946,7 +946,11 @@ export const ProMessagesScreen: React.FC<ProMessagesScreenProps> = ({
               return (
                 <Pressable
                   key={thread.id}
-                  style={({ pressed }) => [styles.conversationCard, pressed && styles.btnPressed]}
+                  style={({ pressed }) => [
+                    styles.convCard,
+                    thread.unread && styles.convCardUnread,
+                    pressed && styles.btnPressed,
+                  ]}
                   onPress={() => {
                     if (Platform.OS !== 'web') {
                       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -976,23 +980,29 @@ export const ProMessagesScreen: React.FC<ProMessagesScreenProps> = ({
                   </Pressable>
 
                   {/* Middle Content */}
-                  <View style={{ flex: 1, minWidth: 0, marginRight: 4 }}>
+                  <View style={{ flex: 1, minWidth: 0, marginRight: 6 }}>
                     <View style={styles.convTopRow}>
                       <View style={styles.convNameGroup}>
-                        <Text style={styles.convCreatorName} numberOfLines={1}>{thread.name}</Text>
+                        <Text style={styles.convCreatorName} numberOfLines={1} ellipsizeMode="tail">
+                          {thread.name}
+                        </Text>
                         {thread.isPro && (
                           <View style={styles.proMicroPill}>
                             <Text style={styles.proMicroPillText}>PRO</Text>
                           </View>
                         )}
                       </View>
-                      <Text style={styles.convTimeText} numberOfLines={1}>{thread.time}</Text>
+                      <Text style={styles.convTimeText} numberOfLines={1}>
+                        {thread.time}
+                      </Text>
                     </View>
 
                     {/* Collab / Status Tag */}
                     {thread.collabBadge && (
                       <View style={styles.convBadgeBox}>
-                        <Text style={styles.convBadgeText}>{thread.collabBadge}</Text>
+                        <Text style={styles.convBadgeText} numberOfLines={1} ellipsizeMode="tail">
+                          {thread.collabBadge}
+                        </Text>
                       </View>
                     )}
 
@@ -1000,6 +1010,7 @@ export const ProMessagesScreen: React.FC<ProMessagesScreenProps> = ({
                     <Text
                       style={[styles.convLastMessageText, thread.unread && styles.convLastMessageUnread]}
                       numberOfLines={1}
+                      ellipsizeMode="tail"
                     >
                       {thread.lastMessage}
                     </Text>
@@ -1551,28 +1562,35 @@ const styles = StyleSheet.create({
     color: '#171420',
     marginBottom: 10,
   },
-  conversationCard: {
+  convCard: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#FFFFFF',
     borderRadius: 20,
     borderWidth: 1,
     borderColor: '#EFECE6',
-    padding: 14,
-    gap: 12,
+    paddingVertical: 12,
+    paddingHorizontal: 12,
+    gap: 10,
+    overflow: 'hidden',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.02,
     shadowRadius: 4,
     elevation: 1,
   },
+  convCardUnread: {
+    borderColor: '#DDD6FE',
+    backgroundColor: '#FAF8FF',
+  },
   convAvatarContainer: {
     position: 'relative',
+    flexShrink: 0,
   },
   convAvatarImg: {
-    width: 46,
-    height: 46,
-    borderRadius: 23,
+    width: 44,
+    height: 44,
+    borderRadius: 22,
   },
   convTinyGoldCheckPos: {
     position: 'absolute',
@@ -1595,37 +1613,38 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: 2,
-    gap: 8,
+    gap: 6,
   },
   convNameGroup: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
+    gap: 5,
     flex: 1,
     flexShrink: 1,
     minWidth: 0,
-    marginRight: 4,
+    marginRight: 6,
   },
   convCreatorName: {
-    fontSize: sFont(14),
+    fontSize: sFont(13.5),
     fontWeight: '700',
     color: '#171420',
     flexShrink: 1,
   },
   proMicroPill: {
     backgroundColor: '#FEF3C7',
-    paddingHorizontal: 5,
+    paddingHorizontal: 4.5,
     paddingVertical: 1.5,
     borderRadius: 4,
     flexShrink: 0,
   },
   proMicroPillText: {
-    fontSize: sFont(8.5),
-    fontWeight: '700',
+    fontSize: sFont(8),
+    fontWeight: '800',
     color: '#B45309',
+    letterSpacing: 0.2,
   },
   convTimeText: {
-    fontSize: sFont(11),
+    fontSize: sFont(10.5),
     color: '#94A3B8',
     fontWeight: '700',
     flexShrink: 0,
@@ -1637,14 +1656,15 @@ const styles = StyleSheet.create({
     paddingVertical: 2,
     borderRadius: 6,
     marginVertical: 2,
+    maxWidth: '100%',
   },
   convBadgeText: {
-    fontSize: 10,
+    fontSize: sFont(9.5),
     fontWeight: '800',
     color: '#582CDB',
   },
   convLastMessageText: {
-    fontSize: 12,
+    fontSize: sFont(11.5),
     color: '#64748B',
     marginTop: 2,
   },
@@ -1659,6 +1679,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#582CDB',
     justifyContent: 'center',
     alignItems: 'center',
+    flexShrink: 0,
   },
   unreadCountText: {
     color: '#FFFFFF',
