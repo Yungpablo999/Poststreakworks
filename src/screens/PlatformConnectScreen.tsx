@@ -348,7 +348,7 @@ export const PlatformConnectScreen: React.FC<PlatformConnectScreenProps> = ({
                 adjustsFontSizeToFit
                 minimumFontScale={0.75}
               >
-                CONNECT AT LEAST 1 PLATFORM TO CONTINUE
+                CONNECT 1 PLATFORM TO CONTINUE
               </Text>
             </View>
           </View>
