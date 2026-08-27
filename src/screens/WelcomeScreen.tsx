@@ -137,10 +137,13 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
             </GlassBadge>
           </View>
 
-          {/* Center Footer Attribution */}
+          {/* Center Footer Attribution: Subtle Companion Introduction */}
           <View style={styles.footerTextContainer}>
             <Text style={styles.poweredBy}>POWERED BY</Text>
-            <Text style={styles.jarvisCore}>Jarvis Core</Text>
+            <View style={styles.jarvisRow}>
+              <Text style={styles.jarvisCore}>JARVIS CORE</Text>
+              <Text style={styles.sparkleGlyph}>✦</Text>
+            </View>
           </View>
 
           {/* Bottom Right Floating Badge: Twinkling Sparkles */}
@@ -334,21 +337,33 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+  jarvisRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 5,
+  },
   bottomRightBadge: {
     width: 44,
     alignItems: 'flex-end',
   },
   poweredBy: {
-    fontSize: 10,
+    fontSize: 9.5,
     fontWeight: '600',
     color: '#8E869E',
-    letterSpacing: 1.2,
+    letterSpacing: 1.5,
     marginBottom: 2,
+    textAlign: 'center',
   },
   jarvisCore: {
-    fontSize: 17,
+    fontSize: 14.5,
     fontWeight: '700',
     color: colors.primary,
-    letterSpacing: -0.3,
+    letterSpacing: 0.8,
+  },
+  sparkleGlyph: {
+    fontSize: 11,
+    color: '#D97706',
+    marginTop: -1,
   },
 });
