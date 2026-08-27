@@ -855,7 +855,14 @@ export const ProQuestsScreen: React.FC<ProQuestsScreenProps> = ({
                     setShowOpportunityModal(true);
                   }}
                 >
-                  <Text style={styles.viewOpportunitiesBtnText}>View Matching Opportunities 👑 ➔</Text>
+                  <Text
+                    style={styles.viewOpportunitiesBtnText}
+                    numberOfLines={1}
+                    adjustsFontSizeToFit
+                    minimumFontScale={0.85}
+                  >
+                    View Opportunities 👑 ➔
+                  </Text>
                 </Pressable>
               </View>
 
@@ -2552,13 +2559,16 @@ const styles = StyleSheet.create({
   viewOpportunitiesSolidBtn: {
     backgroundColor: '#582CDB',
     paddingVertical: 13,
+    paddingHorizontal: 16,
     borderRadius: 14,
     alignItems: 'center',
+    justifyContent: 'center',
   },
   viewOpportunitiesBtnText: {
     color: '#FFFFFF',
-    fontSize: 14,
-    fontWeight: '700',
+    fontSize: 13.5,
+    fontWeight: '800',
+    textAlign: 'center',
   },
 
   // CARD 8: REPUTATION TIER
