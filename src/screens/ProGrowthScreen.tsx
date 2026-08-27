@@ -1597,13 +1597,14 @@ export const ProGrowthScreen: React.FC<ProGrowthScreenProps> = ({
                         <Text style={{ fontSize: 10, fontWeight: '800', color: '#94A3B8', textAlign: 'center', marginBottom: 12 }}>
                           📊 Tap any format bar to inspect retention &amp; reach benchmarks
                         </Text>
-                        <View style={{ flexDirection: 'row', justifyContent: 'space-around', alignItems: 'flex-end', height: 130, paddingBottom: 6 }}>
+                        <View style={{ flexDirection: 'row', justifyContent: 'space-around', alignItems: 'flex-end', height: 130, paddingBottom: 6, gap: 8, paddingHorizontal: 6 }}>
                           {fmts.map((f: any, fIdx: number) => {
                             const isChosen = selectedFormatIndex === fIdx;
+                            const shortLabel = f.name.startsWith('Talking') ? 'Reels' : f.name.split(' ')[0];
                             return (
                               <Pressable
                                 key={fIdx}
-                                style={{ alignItems: 'center', flex: 1 }}
+                                style={{ alignItems: 'center', flex: 1, minWidth: 0 }}
                                 onPress={() => {
                                   if (Platform.OS !== 'web') {
                                     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -1611,12 +1612,21 @@ export const ProGrowthScreen: React.FC<ProGrowthScreenProps> = ({
                                   setSelectedFormatIndex(fIdx);
                                 }}
                               >
-                                <Text style={{ fontSize: 10, fontWeight: '800', color: isChosen ? f.color : '#64748B', marginBottom: 4 }}>
+                                <Text
+                                  style={{
+                                    fontSize: 10,
+                                    fontWeight: '800',
+                                    color: isChosen ? f.color : '#64748B',
+                                    marginBottom: 4,
+                                    textAlign: 'center',
+                                  }}
+                                  numberOfLines={1}
+                                >
                                   {f.reach}
                                 </Text>
                                 <View
                                   style={{
-                                    width: 38,
+                                    width: 32,
                                     height: f.barHeight,
                                     backgroundColor: isChosen ? f.color : '#E2E8F0',
                                     borderRadius: 10,
@@ -1628,8 +1638,20 @@ export const ProGrowthScreen: React.FC<ProGrowthScreenProps> = ({
                                     shadowRadius: 4,
                                   }}
                                 />
-                                <Text style={{ fontSize: 11, fontWeight: isChosen ? '900' : '700', color: isChosen ? '#171420' : '#64748B', marginTop: 8 }}>
-                                  {f.name.split(' ')[0]}
+                                <Text
+                                  style={{
+                                    fontSize: 10.5,
+                                    fontWeight: isChosen ? '900' : '700',
+                                    color: isChosen ? '#171420' : '#64748B',
+                                    marginTop: 8,
+                                    textAlign: 'center',
+                                    paddingHorizontal: 2,
+                                  }}
+                                  numberOfLines={1}
+                                  adjustsFontSizeToFit
+                                  minimumFontScale={0.75}
+                                >
+                                  {shortLabel}
                                 </Text>
                               </Pressable>
                             );
