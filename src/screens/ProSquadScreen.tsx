@@ -731,8 +731,8 @@ export const ProSquadScreen: React.FC<ProSquadScreenProps> = ({
           {/* ============================================================ */}
           <View style={{ marginTop: 22 }}>
             <View style={styles.sectionHeaderRow}>
-              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-                <Text style={styles.sectionTitle}>Squad Live Chat</Text>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, flex: 1, minWidth: 0, marginRight: 8 }}>
+                <Text style={styles.sectionTitle} numberOfLines={1}>Squad Live Chat</Text>
                 <View style={styles.liveOnlinePill}>
                   <View style={styles.pulsingGreenDot} />
                   <Text style={styles.liveOnlinePillText}>3 Online</Text>
@@ -751,11 +751,13 @@ export const ProSquadScreen: React.FC<ProSquadScreenProps> = ({
             <View style={styles.squadChatContainer}>
               {/* Squad Channel Header Ribbon */}
               <View style={styles.chatChannelRibbon}>
-                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, flex: 1, minWidth: 0, marginRight: 8 }}>
                   <Text style={{ fontSize: 13 }}>🛡️</Text>
-                  <Text style={styles.chatChannelName}>#momentum-creators</Text>
+                  <Text style={styles.chatChannelName} numberOfLines={1}>#momentum-creators</Text>
                 </View>
-                <Text style={styles.chatChannelTopic}>⚡ 78-Day Streak Active</Text>
+                <View style={styles.chatChannelTopicBadge}>
+                  <Text style={styles.chatChannelTopic} numberOfLines={1}>⚡ 78d Streak</Text>
+                </View>
               </View>
 
               {/* Quick AI & Squad Action Prompts */}
@@ -1622,13 +1624,22 @@ const styles = StyleSheet.create({
     borderBottomColor: '#F1F5F9',
   },
   chatChannelName: {
-    fontSize: 12,
+    fontSize: 12.5,
     fontWeight: '800',
     color: '#171420',
   },
+  chatChannelTopicBadge: {
+    backgroundColor: '#F5F3FF',
+    paddingHorizontal: 7,
+    paddingVertical: 3,
+    borderRadius: 7,
+    borderWidth: 1,
+    borderColor: '#EDE9FE',
+    flexShrink: 0,
+  },
   chatChannelTopic: {
-    fontSize: 11,
-    fontWeight: '700',
+    fontSize: 10.5,
+    fontWeight: '800',
     color: '#582CDB',
   },
   quickPromptScroll: {
