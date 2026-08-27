@@ -8,6 +8,7 @@ import {
   useWindowDimensions,
   Platform,
 } from 'react-native';
+import Svg, { Defs, RadialGradient, Stop, Circle } from 'react-native-svg';
 import * as Haptics from 'expo-haptics';
 
 export const HeroMascot: React.FC = () => {
@@ -243,6 +244,28 @@ export const HeroMascot: React.FC = () => {
 
   return (
     <View style={styles.container}>
+      {/* Ultra-Light Feathered Ethereal Lavender Backlight (No Hard Edges) */}
+      <View style={styles.diffuseGlowWrapper} pointerEvents="none">
+        <Svg width={360} height={360} viewBox="0 0 360 360">
+          <Defs>
+            <RadialGradient
+              id="mascotFeatheredBacklight"
+              cx="50%"
+              cy="50%"
+              r="50%"
+              fx="50%"
+              fy="50%"
+            >
+              <Stop offset="0%" stopColor="#A78BFA" stopOpacity="0.14" />
+              <Stop offset="30%" stopColor="#C4B5FD" stopOpacity="0.08" />
+              <Stop offset="65%" stopColor="#DDD6FE" stopOpacity="0.03" />
+              <Stop offset="100%" stopColor="#FFFFFF" stopOpacity="0" />
+            </RadialGradient>
+          </Defs>
+          <Circle cx="180" cy="180" r="180" fill="url(#mascotFeatheredBacklight)" />
+        </Svg>
+      </View>
+
       <Pressable onPress={handleMascotTap} style={styles.pressable}>
         <Animated.View
           style={[
@@ -279,6 +302,16 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     marginVertical: 6,
+    position: 'relative',
+  },
+  diffuseGlowWrapper: {
+    position: 'absolute',
+    width: 360,
+    height: 360,
+    top: -45,
+    left: -45,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   pressable: {
     alignItems: 'center',
