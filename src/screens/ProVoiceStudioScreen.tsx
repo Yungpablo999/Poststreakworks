@@ -929,13 +929,13 @@ export const ProVoiceStudioScreen: React.FC<ProVoiceStudioScreenProps> = ({
             {/* HIGH-DENSITY ACOUSTIC WAVELENGTH VISUALIZER */}
             <View style={styles.wavelengthCapsuleCard}>
               <View style={styles.wavelengthHeaderRow}>
-                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, flex: 1, minWidth: 0, marginRight: 8 }}>
                   <View style={[styles.wavelengthLiveDot, isPlayingAudio && styles.wavelengthLiveDotActive]} />
-                  <Text style={styles.wavelengthLabelText}>
-                    {isPlayingAudio ? 'LIVE MASTER AUDIO FREQUENCY' : 'STUDIO ACOUSTIC WAVELENGTH'}
+                  <Text style={styles.wavelengthLabelText} numberOfLines={1}>
+                    {isPlayingAudio ? 'LIVE AUDIO FREQUENCY' : 'ACOUSTIC WAVELENGTH'}
                   </Text>
                 </View>
-                <Text style={styles.wavelengthHzText}>48.0 kHz • 24-bit Lossless</Text>
+                <Text style={styles.wavelengthHzText} numberOfLines={1}>48 kHz • 24-bit</Text>
               </View>
 
               <View style={styles.wavelengthDenseBarsRow}>
@@ -969,9 +969,9 @@ export const ProVoiceStudioScreen: React.FC<ProVoiceStudioScreenProps> = ({
               </View>
 
               <View style={styles.wavelengthBottomMetrics}>
-                <Text style={styles.wavelengthMetricItem}>DYNAMIC RANGE: 98dB</Text>
-                <Text style={styles.wavelengthMetricItem}>STEREO SYNCED</Text>
-                <Text style={styles.wavelengthMetricItem}>NEURAL ENHANCED</Text>
+                <Text style={styles.wavelengthMetricItem} numberOfLines={1}>RANGE: 98dB</Text>
+                <Text style={styles.wavelengthMetricItem} numberOfLines={1}>STEREO SYNC</Text>
+                <Text style={styles.wavelengthMetricItem} numberOfLines={1}>NEURAL AI</Text>
               </View>
             </View>
 
@@ -2218,20 +2218,24 @@ const styles = StyleSheet.create({
     height: 6,
     borderRadius: 3,
     backgroundColor: '#94A3B8',
+    flexShrink: 0,
   },
   wavelengthLiveDotActive: {
     backgroundColor: '#15803D',
   },
   wavelengthLabelText: {
-    fontSize: 10,
-    fontWeight: '700',
+    fontSize: sFont(9.5),
+    fontWeight: '800',
     color: '#171420',
-    letterSpacing: 0.5,
+    letterSpacing: 0.4,
+    flex: 1,
+    minWidth: 0,
   },
   wavelengthHzText: {
-    fontSize: 10,
+    fontSize: sFont(9.5),
     fontWeight: '700',
     color: '#582CDB',
+    flexShrink: 0,
   },
   wavelengthDenseBarsRow: {
     flexDirection: 'row',
@@ -2257,10 +2261,10 @@ const styles = StyleSheet.create({
     borderTopColor: '#F1EFE9',
   },
   wavelengthMetricItem: {
-    fontSize: 9,
+    fontSize: sFont(8.5),
     fontWeight: '800',
     color: '#64748B',
-    letterSpacing: 0.4,
+    letterSpacing: 0.3,
   },
   speedSelectorRow: {
     flexDirection: 'row',
