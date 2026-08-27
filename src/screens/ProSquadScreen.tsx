@@ -761,30 +761,47 @@ export const ProSquadScreen: React.FC<ProSquadScreenProps> = ({
               </View>
 
               {/* Quick AI & Squad Action Prompts */}
-              <ScrollView
-                horizontal
-                showsHorizontalScrollIndicator={false}
-                contentContainerStyle={styles.quickPromptScroll}
-              >
+              <View style={styles.quickPromptRow}>
                 <Pressable
-                  style={styles.quickPromptChip}
+                  style={({ pressed }) => [styles.quickPromptChip, pressed && styles.btnPressed]}
                   onPress={() => setChatInputText('Just scheduled my 7:30 PM Reel! Momentum high today team! 🔥')}
                 >
-                  <Text style={styles.quickPromptChipText}>🔥 Post Milestone</Text>
+                  <Text
+                    numberOfLines={1}
+                    adjustsFontSizeToFit
+                    minimumFontScale={0.85}
+                    style={styles.quickPromptChipText}
+                  >
+                    🔥 Milestone
+                  </Text>
                 </Pressable>
                 <Pressable
-                  style={styles.quickPromptChip}
+                  style={({ pressed }) => [styles.quickPromptChip, pressed && styles.btnPressed]}
                   onPress={() => setChatInputText('Who wants to film a 30s split-screen duet on creator tech stacks? 🎥')}
                 >
-                  <Text style={styles.quickPromptChipText}>🎬 Pitch Collab</Text>
+                  <Text
+                    numberOfLines={1}
+                    adjustsFontSizeToFit
+                    minimumFontScale={0.85}
+                    style={styles.quickPromptChipText}
+                  >
+                    🎬 Pitch Collab
+                  </Text>
                 </Pressable>
                 <Pressable
-                  style={styles.quickPromptChip}
+                  style={({ pressed }) => [styles.quickPromptChip, pressed && styles.btnPressed]}
                   onPress={() => setChatInputText('Drafting the 3-second hook format from Jarvis. Reviewing now! 📄')}
                 >
-                  <Text style={styles.quickPromptChipText}>📄 Share Draft</Text>
+                  <Text
+                    numberOfLines={1}
+                    adjustsFontSizeToFit
+                    minimumFontScale={0.85}
+                    style={styles.quickPromptChipText}
+                  >
+                    📄 Share Draft
+                  </Text>
                 </Pressable>
-              </ScrollView>
+              </View>
 
               {/* Message Feed */}
               <View style={{ gap: 12, paddingHorizontal: 12, paddingTop: 10, paddingBottom: 6 }}>
@@ -1642,25 +1659,31 @@ const styles = StyleSheet.create({
     fontWeight: '800',
     color: '#582CDB',
   },
-  quickPromptScroll: {
+  quickPromptRow: {
+    flexDirection: 'row',
     gap: 6,
     paddingHorizontal: 12,
     paddingVertical: 8,
     borderBottomWidth: 1,
     borderBottomColor: '#FAF8F5',
+    width: '100%',
   },
   quickPromptChip: {
+    flex: 1,
     backgroundColor: '#FAF8F5',
     borderWidth: 1,
     borderColor: '#EFECE6',
-    paddingHorizontal: 9,
-    paddingVertical: 4,
+    paddingHorizontal: 4,
+    paddingVertical: 6,
     borderRadius: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   quickPromptChipText: {
-    fontSize: 11,
-    fontWeight: '700',
+    fontSize: 10.5,
+    fontWeight: '800',
     color: '#475569',
+    textAlign: 'center',
   },
   chatRowLeft: {
     flexDirection: 'row',
