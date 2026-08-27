@@ -1773,13 +1773,13 @@ export const ProMatchScreen: React.FC<ProMatchScreenProps> = ({
             <View style={styles.arenaModalCard}>
               {/* Top Modal Header */}
               <View style={styles.arenaTopHeader}>
-                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, flex: 1, minWidth: 0, marginRight: 8 }}>
                   <View style={styles.arenaSwordsIconBox}>
                     <Text style={{ fontSize: 16 }}>⚔️</Text>
                   </View>
-                  <View>
-                    <Text style={styles.arenaTitle}>Live Squad Duel Arena</Text>
-                    <Text style={styles.arenaSubtitle}>Round 2 of 3 • Ends in 03h 45m</Text>
+                  <View style={{ flex: 1, minWidth: 0 }}>
+                    <Text style={styles.arenaTitle} numberOfLines={1}>Live Squad Duel Arena</Text>
+                    <Text style={styles.arenaSubtitle} numberOfLines={1}>Round 2 of 3 • Ends in 03h 45m</Text>
                   </View>
                 </View>
 
@@ -1798,11 +1798,11 @@ export const ProMatchScreen: React.FC<ProMatchScreenProps> = ({
                 style={styles.arenaMatchupCard}
               >
                 <View style={styles.arenaTeamsRow}>
-                  <View style={{ alignItems: 'center' }}>
-                    <Text style={styles.arenaTeamTitleMine}>Momentum Makers</Text>
-                    <Text style={styles.arenaTeamScoreMine}>62 PTS</Text>
+                  <View style={{ alignItems: 'center', flex: 1, minWidth: 0 }}>
+                    <Text style={styles.arenaTeamTitleMine} numberOfLines={1}>Momentum Makers</Text>
+                    <Text style={styles.arenaTeamScoreMine} numberOfLines={1}>62 PTS</Text>
                     <View style={styles.arenaLeadBadge}>
-                      <Text style={styles.arenaLeadBadgeText}>👑 IN THE LEAD</Text>
+                      <Text style={styles.arenaLeadBadgeText} numberOfLines={1}>👑 IN THE LEAD</Text>
                     </View>
                   </View>
 
@@ -1810,11 +1810,11 @@ export const ProMatchScreen: React.FC<ProMatchScreenProps> = ({
                     <Text style={styles.arenaVsText}>VS</Text>
                   </View>
 
-                  <View style={{ alignItems: 'center' }}>
-                    <Text style={styles.arenaTeamTitleOpp}>Lagos Storytellers</Text>
-                    <Text style={styles.arenaTeamScoreOpp}>58 PTS</Text>
+                  <View style={{ alignItems: 'center', flex: 1, minWidth: 0 }}>
+                    <Text style={styles.arenaTeamTitleOpp} numberOfLines={1}>Lagos Storytellers</Text>
+                    <Text style={styles.arenaTeamScoreOpp} numberOfLines={1}>58 PTS</Text>
                     <View style={styles.arenaTrailingBadge}>
-                      <Text style={styles.arenaTrailingBadgeText}>4 PTS BEHIND</Text>
+                      <Text style={styles.arenaTrailingBadgeText} numberOfLines={1}>4 PTS BEHIND</Text>
                     </View>
                   </View>
                 </View>
@@ -3105,7 +3105,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 14,
+    marginBottom: 12,
   },
   arenaSwordsIconBox: {
     width: 36,
@@ -3114,15 +3114,17 @@ const styles = StyleSheet.create({
     backgroundColor: '#EDE9FE',
     alignItems: 'center',
     justifyContent: 'center',
+    flexShrink: 0,
   },
   arenaTitle: {
-    fontSize: 17,
-    fontWeight: '700',
+    fontSize: 16,
+    fontWeight: '800',
     color: '#171420',
   },
   arenaSubtitle: {
     fontSize: 11,
     color: '#64748B',
+    marginTop: 1,
   },
   arenaCloseBtn: {
     width: 32,
@@ -3131,6 +3133,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#F1F5F9',
     alignItems: 'center',
     justifyContent: 'center',
+    flexShrink: 0,
   },
   arenaCloseText: {
     fontSize: 13,
@@ -3139,71 +3142,78 @@ const styles = StyleSheet.create({
   },
   arenaMatchupCard: {
     borderRadius: 16,
-    padding: 14,
+    padding: 12,
     marginBottom: 14,
   },
   arenaTeamsRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 12,
+    marginBottom: 10,
+    gap: 6,
   },
   arenaTeamTitleMine: {
-    fontSize: 12,
-    fontWeight: '700',
+    fontSize: 11.5,
+    fontWeight: '800',
     color: '#F3E8FF',
+    textAlign: 'center',
   },
   arenaTeamScoreMine: {
-    fontSize: 20,
-    fontWeight: '700',
+    fontSize: 18,
+    fontWeight: '800',
     color: '#FFFFFF',
     marginTop: 2,
+    textAlign: 'center',
   },
   arenaLeadBadge: {
     backgroundColor: 'rgba(16, 185, 129, 0.25)',
     paddingHorizontal: 6,
     paddingVertical: 2,
-    borderRadius: 4,
+    borderRadius: 5,
     marginTop: 3,
   },
   arenaLeadBadgeText: {
-    fontSize: 8,
-    fontWeight: '700',
+    fontSize: 8.5,
+    fontWeight: '800',
     color: '#6EE7B7',
   },
   arenaVsCircle: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
+    width: 26,
+    height: 26,
+    borderRadius: 13,
     backgroundColor: 'rgba(255, 255, 255, 0.15)',
     alignItems: 'center',
     justifyContent: 'center',
+    flexShrink: 0,
+    marginHorizontal: 4,
   },
   arenaVsText: {
-    fontSize: 10,
-    fontWeight: '700',
+    fontSize: 9.5,
+    fontWeight: '800',
     color: '#FDE68A',
   },
   arenaTeamTitleOpp: {
-    fontSize: 12,
+    fontSize: 11.5,
     fontWeight: '800',
     color: '#CBD5E1',
+    textAlign: 'center',
   },
   arenaTeamScoreOpp: {
-    fontSize: 20,
-    fontWeight: '700',
+    fontSize: 18,
+    fontWeight: '800',
     color: '#E2E8F0',
     marginTop: 2,
+    textAlign: 'center',
   },
   arenaTrailingBadge: {
     backgroundColor: 'rgba(255, 255, 255, 0.1)',
     paddingHorizontal: 6,
     paddingVertical: 2,
-    borderRadius: 4,
+    borderRadius: 5,
     marginTop: 3,
   },
   arenaTrailingBadgeText: {
-    fontSize: 8,
+    fontSize: 8.5,
     fontWeight: '800',
     color: '#CBD5E1',
   },
