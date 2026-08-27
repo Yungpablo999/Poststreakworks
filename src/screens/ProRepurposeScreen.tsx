@@ -20,6 +20,7 @@ import { AnimatedCompletionModal } from '../components/AnimatedCompletionModal';
 import { BrandToast } from '../components/BrandToast';
 import { FloatingTabBar, TabType } from '../components/FloatingTabBar';
 import { SocialBrandIcon } from '../components/SocialBrandIcon';
+import { TinyGoldCheck } from '../components/CreatorStoryModal';
 
 interface ProRepurposeScreenProps {
   userProfile?: UserProfileData;
@@ -301,17 +302,38 @@ export const ProRepurposeScreen: React.FC<ProRepurposeScreenProps> = ({
 
       {/* TOP APP BAR */}
       <View style={styles.topAppBar}>
-        <Pressable
-          style={({ pressed }) => [styles.topGhostLogoBtn, pressed && styles.btnPressed]}
-          onPress={() => (onBack ? onBack() : onNavigate ? onNavigate('dashboard') : null)}
-          hitSlop={8}
-        >
-          <Image
-            source={require('../../assets/images/jarvis-core-flame.png')}
-            style={styles.topGhostLogo}
-            resizeMode="contain"
-          />
-        </Pressable>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+          <Pressable
+            style={({ pressed }) => [styles.topGhostLogoBtn, pressed && styles.btnPressed]}
+            onPress={() => (onBack ? onBack() : onNavigate ? onNavigate('dashboard') : null)}
+            hitSlop={8}
+          >
+            <Image
+              source={require('../../assets/images/jarvis-ghost-clean.png')}
+              style={styles.topGhostLogo}
+              resizeMode="contain"
+            />
+          </Pressable>
+
+          {/* Pro Badge Pill */}
+          <Pressable
+            onPress={() => {
+              if (Platform.OS !== 'web') {
+                Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+              }
+            }}
+            hitSlop={8}
+          >
+            <LinearGradient
+              colors={['#F59E0B', '#F59E0B', '#F59E0B']}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 0 }}
+              style={styles.proHeaderBadge}
+            >
+              <Text style={styles.proHeaderBadgeText}>👑 PRO</Text>
+            </LinearGradient>
+          </Pressable>
+        </View>
 
         <View style={styles.topRightRow}>
           <Pressable
@@ -319,7 +341,15 @@ export const ProRepurposeScreen: React.FC<ProRepurposeScreenProps> = ({
             onPress={() => onNavigate && onNavigate('messages')}
             hitSlop={8}
           >
-            <Text style={{ fontSize: 16 }}>💬</Text>
+            <Svg width={19} height={19} viewBox="0 0 24 24" fill="none">
+              <Path
+                d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"
+                stroke="#171420"
+                strokeWidth="2.2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </Svg>
           </Pressable>
 
           <Pressable
@@ -327,7 +357,22 @@ export const ProRepurposeScreen: React.FC<ProRepurposeScreenProps> = ({
             onPress={() => showToast('🔔 2 new platform suggestions')}
             hitSlop={8}
           >
-            <Text style={{ fontSize: 16 }}>🔔</Text>
+            <Svg width={19} height={19} viewBox="0 0 24 24" fill="none">
+              <Path
+                d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"
+                stroke="#171420"
+                strokeWidth="2.2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+              <Path
+                d="M13.73 21a2 2 0 0 1-3.46 0"
+                stroke="#171420"
+                strokeWidth="2.2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </Svg>
             <View style={styles.topNotifBadge} />
           </Pressable>
 
@@ -341,8 +386,8 @@ export const ProRepurposeScreen: React.FC<ProRepurposeScreenProps> = ({
               style={styles.topAvatarImg}
               resizeMode="cover"
             />
-            <View style={styles.topAvatarGoldBadge}>
-              <Text style={{ fontSize: 8 }}>✓</Text>
+            <View style={{ position: 'absolute', bottom: -2, right: -2 }}>
+              <TinyGoldCheck size={14} />
             </View>
           </Pressable>
         </View>
@@ -1050,9 +1095,9 @@ const styles = StyleSheet.create({
     backgroundColor: '#F7F5F0',
   },
   topGhostLogoBtn: {
-    width: 38,
-    height: 38,
-    borderRadius: 12,
+    width: 36,
+    height: 36,
+    borderRadius: 18,
     backgroundColor: '#FFFFFF',
     justifyContent: 'center',
     alignItems: 'center',
@@ -1060,18 +1105,32 @@ const styles = StyleSheet.create({
     borderColor: '#EFECE6',
   },
   topGhostLogo: {
-    width: 24,
-    height: 24,
+    width: 26,
+    height: 26,
+  },
+  proHeaderBadge: {
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 8,
+    backgroundColor: '#F59E0B',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  proHeaderBadgeText: {
+    fontSize: 10,
+    fontWeight: '900',
+    color: '#78350F',
+    letterSpacing: 0.4,
   },
   topRightRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 10,
+    gap: 8,
   },
   topIconBtn: {
     width: 36,
     height: 36,
-    borderRadius: 12,
+    borderRadius: 18,
     backgroundColor: '#FFFFFF',
     justifyContent: 'center',
     alignItems: 'center',
@@ -1096,7 +1155,7 @@ const styles = StyleSheet.create({
     height: 36,
     borderRadius: 18,
     borderWidth: 2,
-    borderColor: '#582CDB',
+    borderColor: '#F59E0B',
   },
   topAvatarGoldBadge: {
     position: 'absolute',

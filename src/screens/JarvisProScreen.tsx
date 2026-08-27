@@ -19,6 +19,7 @@ import { FloatingTabBar, TabType } from '../components/FloatingTabBar';
 import { BrandToast } from '../components/BrandToast';
 import { UserProfileModal, UserProfileData } from '../components/UserProfileModal';
 import { AnimatedCompletionModal } from '../components/AnimatedCompletionModal';
+import { TinyGoldCheck } from '../components/CreatorStoryModal';
 import { sFont, sPadding, moderateScale, isNarrowScreen } from '../utils/responsive';
 
 interface JarvisProScreenProps {
@@ -168,10 +169,10 @@ export const JarvisProScreen: React.FC<JarvisProScreenProps> = ({
             {onBack && (
               <Pressable
                 onPress={onBack}
-                style={({ pressed }) => [{ marginRight: 8, padding: 4 }, pressed && styles.btnPressed]}
+                style={({ pressed }) => [{ marginRight: 4, padding: 4 }, pressed && styles.btnPressed]}
                 hitSlop={10}
               >
-                <Svg width={22} height={22} viewBox="0 0 24 24" fill="none">
+                <Svg width={20} height={20} viewBox="0 0 24 24" fill="none">
                   <Path d="M15 18l-6-6 6-6" stroke="#171420" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" />
                 </Svg>
               </Pressable>
@@ -183,15 +184,30 @@ export const JarvisProScreen: React.FC<JarvisProScreenProps> = ({
               ]}
             >
               <Image
-                source={require('../../assets/images/jarvis-core-flame.png')}
-                style={styles.headerFlameLogo}
+                source={require('../../assets/images/jarvis-ghost-clean.png')}
+                style={styles.headerGhostLogo}
                 resizeMode="contain"
               />
             </Animated.View>
-            <View>
-              <Text style={styles.headerTitle}>Jarvis Pro</Text>
-              <Text style={styles.headerSubTitle}>AI Growth Suite</Text>
-            </View>
+
+            {/* Pro Badge Pill */}
+            <Pressable
+              onPress={() => {
+                if (Platform.OS !== 'web') {
+                  Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+                }
+              }}
+              hitSlop={8}
+            >
+              <LinearGradient
+                colors={['#F59E0B', '#F59E0B', '#F59E0B']}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 0 }}
+                style={styles.proHeaderBadge}
+              >
+                <Text style={styles.proHeaderBadgeText}>👑 PRO</Text>
+              </LinearGradient>
+            </Pressable>
           </View>
 
           <View style={styles.headerRightGroup}>
@@ -246,22 +262,20 @@ export const JarvisProScreen: React.FC<JarvisProScreenProps> = ({
               <View style={styles.unreadBadgeDot} />
             </Pressable>
 
-            {/* Top-Right: User Profile Person Icon */}
+            {/* Top-Right: User Profile Avatar */}
             <Pressable
               style={({ pressed }) => [styles.headerProfileBtn, pressed && styles.btnPressed]}
               hitSlop={6}
               onPress={() => setShowProfileModal(true)}
             >
-              <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
-                <Path
-                  d="M20 21V19C20 17.9 19.5 16.9 18.7 16.2C17.9 15.5 16.9 15 15.8 15H8.2C7.1 15 6.1 15.5 5.3 16.2C4.5 16.9 4 17.9 4 19V21"
-                  stroke="#582CDB"
-                  strokeWidth="2.2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-                <Circle cx="12" cy="7" r="4" stroke="#582CDB" strokeWidth="2.2" />
-              </Svg>
+              <Image
+                source={userProfile?.avatarSource || require('../../assets/images/jarvis-ghost-clean.png')}
+                style={styles.headerProfileImg}
+                resizeMode="cover"
+              />
+              <View style={{ position: 'absolute', bottom: -2, right: -2 }}>
+                <TinyGoldCheck size={14} />
+              </View>
             </Pressable>
           </View>
         </View>
@@ -810,34 +824,35 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   headerLogoWrapper: {
-    width: 38,
-    height: 38,
-    borderRadius: 20,
+    width: 36,
+    height: 36,
+    borderRadius: 18,
     backgroundColor: 'rgba(255, 255, 255, 0.95)',
     justifyContent: 'center',
     alignItems: 'center',
-    shadowColor: '#582CDB',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.12,
-    shadowRadius: 10,
-    elevation: 3,
-    borderWidth: 1,
-    borderColor: 'rgba(235, 230, 248, 0.9)',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.06,
+    shadowRadius: 6,
+    elevation: 2,
   },
-  headerFlameLogo: {
-    width: 28,
-    height: 28,
+  headerGhostLogo: {
+    width: 26,
+    height: 26,
   },
-  headerTitle: {
-    fontSize: 16,
-    fontWeight: '800',
-    color: '#171420',
-    letterSpacing: -0.2,
+  proHeaderBadge: {
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 8,
+    backgroundColor: '#F59E0B',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
-  headerSubTitle: {
-    fontSize: 11,
-    fontWeight: '600',
-    color: '#582CDB',
+  proHeaderBadgeText: {
+    fontSize: 10,
+    fontWeight: '900',
+    color: '#78350F',
+    letterSpacing: 0.4,
   },
   headerRightGroup: {
     flexDirection: 'row',
@@ -845,35 +860,35 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   headerIconBtn: {
-    width: 38,
-    height: 38,
-    borderRadius: 20,
-    backgroundColor: 'rgba(255, 255, 255, 0.92)',
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: '#FFFFFF',
     borderWidth: 1,
-    borderColor: 'rgba(235, 230, 248, 0.9)',
+    borderColor: '#EFECE6',
     justifyContent: 'center',
     alignItems: 'center',
     position: 'relative',
-    shadowColor: '#171420',
-    shadowOffset: { width: 0, height: 2 },
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.04,
-    shadowRadius: 6,
-    elevation: 2,
+    shadowRadius: 4,
+    elevation: 1,
   },
   headerProfileBtn: {
-    width: 38,
-    height: 38,
-    borderRadius: 20,
-    backgroundColor: 'rgba(237, 232, 252, 0.95)',
-    borderWidth: 1.2,
-    borderColor: 'rgba(221, 214, 254, 0.9)',
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    borderWidth: 2,
+    borderColor: '#F59E0B',
     justifyContent: 'center',
     alignItems: 'center',
-    shadowColor: '#582CDB',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
-    shadowRadius: 6,
-    elevation: 2,
+    position: 'relative',
+  },
+  headerProfileImg: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
   },
   unreadBadgeDot: {
     position: 'absolute',

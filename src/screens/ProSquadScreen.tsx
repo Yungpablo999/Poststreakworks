@@ -22,6 +22,7 @@ import { FloatingTabBar, TabType } from '../components/FloatingTabBar';
 import { BrandToast } from '../components/BrandToast';
 import { UserProfileModal, UserProfileData } from '../components/UserProfileModal';
 import { AnimatedCompletionModal } from '../components/AnimatedCompletionModal';
+import { TinyGoldCheck } from '../components/CreatorStoryModal';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
@@ -318,16 +319,18 @@ export const ProSquadScreen: React.FC<ProSquadScreenProps> = ({
         {/* TOP HEADER BAR                                               */}
         {/* ============================================================ */}
         <View style={styles.headerBar}>
-          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
-            <Pressable
-              style={({ pressed }) => [styles.backCircleBtn, pressed && styles.btnPressed]}
-              onPress={onBack}
-              hitSlop={8}
-            >
-              <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
-                <Path d="M19 12H5M12 19l-7-7 7-7" stroke="#171420" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" />
-              </Svg>
-            </Pressable>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+            {onBack && (
+              <Pressable
+                style={({ pressed }) => [styles.backCircleBtn, pressed && styles.btnPressed]}
+                onPress={onBack}
+                hitSlop={8}
+              >
+                <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
+                  <Path d="M19 12H5M12 19l-7-7 7-7" stroke="#171420" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" />
+                </Svg>
+              </Pressable>
+            )}
 
             <Animated.View style={{ transform: [{ translateY: floatAnim }] }}>
               <Image
@@ -336,6 +339,25 @@ export const ProSquadScreen: React.FC<ProSquadScreenProps> = ({
                 resizeMode="contain"
               />
             </Animated.View>
+
+            {/* Pro Badge Pill */}
+            <Pressable
+              onPress={() => {
+                if (Platform.OS !== 'web') {
+                  Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+                }
+              }}
+              hitSlop={8}
+            >
+              <LinearGradient
+                colors={['#F59E0B', '#F59E0B', '#F59E0B']}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 0 }}
+                style={styles.proHeaderBadge}
+              >
+                <Text style={styles.proHeaderBadgeText}>👑 PRO</Text>
+              </LinearGradient>
+            </Pressable>
           </View>
 
           {/* Right Action Icons */}
@@ -380,10 +402,14 @@ export const ProSquadScreen: React.FC<ProSquadScreenProps> = ({
               hitSlop={6}
             >
               <Image
-                source={require('../../assets/images/elena-avatar.jpg')}
+                source={userProfile?.avatarSource || require('../../assets/images/jarvis-ghost-clean.png')}
                 style={styles.profileAvatarImg}
+                resizeMode="cover"
               />
               <View style={styles.avatarGoldBorderRing} />
+              <View style={{ position: 'absolute', bottom: -2, right: -2 }}>
+                <TinyGoldCheck size={14} />
+              </View>
             </Pressable>
           </View>
         </View>
@@ -1017,6 +1043,20 @@ const styles = StyleSheet.create({
   headerMascot: {
     width: 28,
     height: 28,
+  },
+  proHeaderBadge: {
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 8,
+    backgroundColor: '#F59E0B',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  proHeaderBadgeText: {
+    fontSize: 10,
+    fontWeight: '900',
+    color: '#78350F',
+    letterSpacing: 0.4,
   },
   headerRightActions: {
     flexDirection: 'row',

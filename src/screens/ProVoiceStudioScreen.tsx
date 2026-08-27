@@ -21,6 +21,7 @@ import { FloatingTabBar, TabType } from '../components/FloatingTabBar';
 import { BrandToast } from '../components/BrandToast';
 import { UserProfileModal, UserProfileData } from '../components/UserProfileModal';
 import { AnimatedCompletionModal } from '../components/AnimatedCompletionModal';
+import { TinyGoldCheck } from '../components/CreatorStoryModal';
 import { sFont, isNarrowScreen } from '../utils/responsive';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
@@ -375,20 +376,29 @@ export const ProVoiceStudioScreen: React.FC<ProVoiceStudioScreenProps> = ({
               />
             </Animated.View>
 
-            {/* Pro Active Pill Switch */}
-            {onSwitchToFree && (
-              <Pressable
-                onPress={() => {
-                  if (Platform.OS !== 'web') {
-                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-                  }
+            {/* Pro Badge Pill */}
+            <Pressable
+              onPress={() => {
+                if (Platform.OS !== 'web') {
+                  Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+                }
+                if (onSwitchToFree) {
                   onSwitchToFree();
-                }}
-                style={styles.proPillBadge}
+                } else if (onSaveProfile && userProfile) {
+                  onSaveProfile({ ...userProfile, tier: 'free' });
+                }
+              }}
+              hitSlop={8}
+            >
+              <LinearGradient
+                colors={['#F59E0B', '#F59E0B', '#F59E0B']}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 0 }}
+                style={styles.proHeaderBadge}
               >
-                <Text style={styles.proPillBadgeText}>⚡ PRO ACTIVE</Text>
-              </Pressable>
-            )}
+                <Text style={styles.proHeaderBadgeText}>👑 PRO</Text>
+              </LinearGradient>
+            </Pressable>
           </View>
 
           <View style={styles.headerRight}>
@@ -466,6 +476,9 @@ export const ProVoiceStudioScreen: React.FC<ProVoiceStudioScreenProps> = ({
                 style={styles.headerProfileImg}
                 resizeMode="cover"
               />
+              <View style={{ position: 'absolute', bottom: -2, right: -2 }}>
+                <TinyGoldCheck size={14} />
+              </View>
             </Pressable>
           </View>
         </View>
@@ -1607,19 +1620,19 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 8,
   },
-  proPillBadge: {
-    backgroundColor: '#FEF3C7',
-    borderWidth: 1,
-    borderColor: '#F59E0B',
-    paddingHorizontal: 7,
-    paddingVertical: 3.5,
-    borderRadius: 6,
+  proHeaderBadge: {
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 8,
+    backgroundColor: '#F59E0B',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
-  proPillBadgeText: {
-    fontSize: sFont(8.5),
-    fontWeight: '800',
-    color: '#B45309',
-    letterSpacing: 0.3,
+  proHeaderBadgeText: {
+    fontSize: sFont(10),
+    fontWeight: '900',
+    color: '#78350F',
+    letterSpacing: 0.4,
   },
   headerIconBtn: {
     width: 36,
@@ -1651,13 +1664,16 @@ const styles = StyleSheet.create({
     width: 36,
     height: 36,
     borderRadius: 18,
-    borderWidth: 1.5,
+    borderWidth: 2,
     borderColor: '#F59E0B',
-    overflow: 'hidden',
+    justifyContent: 'center',
+    alignItems: 'center',
+    position: 'relative',
   },
   headerProfileImg: {
-    width: '100%',
-    height: '100%',
+    width: 32,
+    height: 32,
+    borderRadius: 16,
   },
   scrollContent: {
     flex: 1,
