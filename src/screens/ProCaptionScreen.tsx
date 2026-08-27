@@ -544,48 +544,59 @@ export const ProCaptionScreen: React.FC<ProCaptionScreenProps> = ({
               </View>
             </View>
 
-            <View style={styles.toneChipsFlexGrid}>
+            <View style={{ gap: 6 }}>
               {[
-                { name: 'Helpful', emoji: '🤝' },
-                { name: 'Direct', emoji: '🎯' },
-                { name: 'Confident', emoji: '⚡' },
-                { name: 'Honest', emoji: '💡' },
-                { name: 'Motivational', emoji: '🔥' },
-                { name: 'Professional', emoji: '💼' },
-                { name: 'Bold', emoji: '💥' },
-                { name: 'Casual', emoji: '☕' },
-                { name: 'Story-driven', emoji: '📖' },
-              ].map((toneObj) => {
-                const isSelected = selectedTones.includes(toneObj.name);
-                return (
-                  <Pressable
-                    key={toneObj.name}
-                    style={({ pressed }) => [
-                      styles.toneChipPill,
-                      isSelected && styles.toneChipPillActive,
-                      pressed && styles.btnPressed,
-                    ]}
-                    onPress={() => handleToggleTone(toneObj.name)}
-                  >
-                    <Text style={{ fontSize: 12, marginRight: 4 }}>{toneObj.emoji}</Text>
-                    <Text
-                      style={[
-                        styles.toneChipText,
-                        isSelected && styles.toneChipTextActive,
-                      ]}
-                    >
-                      {toneObj.name}
-                    </Text>
-                    {isSelected && (
-                      <View style={styles.toneCheckMarkDot}>
-                        <Svg width={7} height={7} viewBox="0 0 12 12" fill="none">
-                          <Path d="M2.5 6.2L4.8 8.5L9.5 3.5" stroke="#FFFFFF" strokeWidth="2.8" strokeLinecap="round" />
-                        </Svg>
-                      </View>
-                    )}
-                  </Pressable>
-                );
-              })}
+                [
+                  { name: 'Helpful', emoji: '🤝' },
+                  { name: 'Direct', emoji: '🎯' },
+                  { name: 'Confident', emoji: '⚡' },
+                ],
+                [
+                  { name: 'Honest', emoji: '💡' },
+                  { name: 'Inspiring', emoji: '🔥' },
+                  { name: 'Expert', emoji: '💼' },
+                ],
+                [
+                  { name: 'Bold', emoji: '💥' },
+                  { name: 'Casual', emoji: '☕' },
+                  { name: 'Story', emoji: '📖' },
+                ],
+              ].map((row, rIdx) => (
+                <View key={rIdx} style={{ flexDirection: 'row', gap: 6 }}>
+                  {row.map((toneObj) => {
+                    const isSelected = selectedTones.includes(toneObj.name);
+                    return (
+                      <Pressable
+                        key={toneObj.name}
+                        style={({ pressed }) => [
+                          styles.toneChipPill,
+                          isSelected && styles.toneChipPillActive,
+                          pressed && styles.btnPressed,
+                        ]}
+                        onPress={() => handleToggleTone(toneObj.name)}
+                      >
+                        <Text style={{ fontSize: 12 }}>{toneObj.emoji}</Text>
+                        <Text
+                          style={[
+                            styles.toneChipText,
+                            isSelected && styles.toneChipTextActive,
+                          ]}
+                          numberOfLines={1}
+                        >
+                          {toneObj.name}
+                        </Text>
+                        {isSelected && (
+                          <View style={styles.toneCheckMarkDot}>
+                            <Svg width={6} height={6} viewBox="0 0 12 12" fill="none">
+                              <Path d="M2.5 6.2L4.8 8.5L9.5 3.5" stroke="#FFFFFF" strokeWidth="2.8" strokeLinecap="round" />
+                            </Svg>
+                          </View>
+                        )}
+                      </Pressable>
+                    );
+                  })}
+                </View>
+              ))}
             </View>
           </View>
 
@@ -1496,47 +1507,45 @@ const styles = StyleSheet.create({
     color: '#582CDB',
     letterSpacing: 0.3,
   },
-  toneChipsFlexGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 7,
-  },
   toneChipPill: {
+    flex: 1,
+    minWidth: 0,
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'center',
     backgroundColor: '#FAF8F5',
     borderWidth: 1.5,
     borderColor: '#EFECE6',
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 20,
+    paddingHorizontal: 4,
+    paddingVertical: 9,
+    borderRadius: 12,
+    gap: 4,
   },
   toneChipPillActive: {
     backgroundColor: '#582CDB',
     borderColor: '#582CDB',
     shadowColor: '#582CDB',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
+    shadowOpacity: 0.12,
     shadowRadius: 4,
     elevation: 2,
   },
   toneChipText: {
-    fontSize: 12,
-    fontWeight: '800',
+    fontSize: sFont(11),
+    fontWeight: '700',
     color: '#475569',
   },
   toneChipTextActive: {
     color: '#FFFFFF',
-    fontWeight: '700',
+    fontWeight: '800',
   },
   toneCheckMarkDot: {
-    width: 14,
-    height: 14,
-    borderRadius: 7,
+    width: 12,
+    height: 12,
+    borderRadius: 6,
     backgroundColor: 'rgba(255, 255, 255, 0.25)',
     justifyContent: 'center',
     alignItems: 'center',
-    marginLeft: 6,
   },
 
   // CARD 3: SELECTED CAPTION EDITOR
