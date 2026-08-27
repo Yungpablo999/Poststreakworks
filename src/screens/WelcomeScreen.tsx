@@ -81,20 +81,16 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
           <View style={styles.socialProofChip}>
             <View style={styles.avatarStack}>
               <Image
-                source={{ uri: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=120&auto=format&fit=crop&q=80' }}
-                style={[styles.avatarImg, { zIndex: 4 }]}
+                source={{ uri: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80' }}
+                style={[styles.avatarImg, { zIndex: 3 }]}
               />
               <Image
-                source={{ uri: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=120&auto=format&fit=crop&q=80' }}
-                style={[styles.avatarImg, { marginLeft: -7, zIndex: 3 }]}
+                source={{ uri: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&auto=format&fit=crop&q=80' }}
+                style={[styles.avatarImg, { marginLeft: -6, zIndex: 2 }]}
               />
               <Image
-                source={{ uri: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=120&auto=format&fit=crop&q=80' }}
-                style={[styles.avatarImg, { marginLeft: -7, zIndex: 2 }]}
-              />
-              <Image
-                source={{ uri: 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=120&auto=format&fit=crop&q=80' }}
-                style={[styles.avatarImg, { marginLeft: -7, zIndex: 1 }]}
+                source={{ uri: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=100&auto=format&fit=crop&q=80' }}
+                style={[styles.avatarImg, { marginLeft: -6, zIndex: 1 }]}
               />
             </View>
 
@@ -105,7 +101,9 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
                 <Text style={styles.starIcon}>★★★★★</Text>
                 <Text style={styles.ratingNumber}>4.9</Text>
               </View>
-              <Text style={styles.socialProofLabel}>Joined by 15,000+ creators</Text>
+              <Text style={styles.socialProofLabel} numberOfLines={1}>
+                Joined by 15k+ creators
+              </Text>
             </View>
           </View>
         </View>
@@ -230,17 +228,19 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: 'rgba(255, 255, 255, 0.96)',
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 30,
+    paddingLeft: 18,
+    paddingRight: 22,
+    paddingVertical: 7,
+    borderRadius: 24,
     borderWidth: 1,
     borderColor: 'rgba(88, 44, 219, 0.08)',
     shadowColor: '#171420',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.05,
-    shadowRadius: 10,
-    marginTop: 6,
+    shadowRadius: 12,
+    marginTop: 8,
     gap: 12,
+    alignSelf: 'center',
     ...(Platform.OS === 'web'
       ? ({
           boxShadow: '0 4px 16px rgba(23, 20, 32, 0.05)',
@@ -252,10 +252,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   avatarImg: {
-    width: 24,
-    height: 24,
-    borderRadius: 12,
-    borderWidth: 2,
+    width: 22,
+    height: 22,
+    borderRadius: 11,
+    borderWidth: 1.6,
     borderColor: '#FFFFFF',
     backgroundColor: '#ECE8F6',
   },
@@ -275,7 +275,7 @@ const styles = StyleSheet.create({
   },
   starIcon: {
     color: '#F59E0B',
-    fontSize: 11.5,
+    fontSize: 11,
     letterSpacing: 1.2,
   },
   ratingNumber: {
