@@ -20,85 +20,150 @@ interface SplashScreenProps {
 export const SplashScreen: React.FC<SplashScreenProps> = ({ onFinish = () => {} }) => {
   const { width, height } = useWindowDimensions();
   const isCompact = height < 750;
-  const ghostSize = isCompact ? 240 : Math.min(width * 0.75, 300);
+  const ghostSize = isCompact ? 270 : Math.min(width * 0.82, 330);
 
-  // 0.0s — Ghost Entry
+  // 1. Ghost Mascot Full Character Physics (Leap, Squash & Stretch, 3D Tilt)
+  const ghostScale = useRef(new Animated.Value(0.1)).current;
+  const ghostY = useRef(new Animated.Value(90)).current;
+  const ghostStretchY = useRef(new Animated.Value(0.6)).current;
+  const ghostSquishX = useRef(new Animated.Value(1.4)).current;
+  const ghostRotate = useRef(new Animated.Value(-1)).current;
   const ghostOpacity = useRef(new Animated.Value(0)).current;
-  const ghostScale = useRef(new Animated.Value(0.85)).current;
-  const ghostY = useRef(new Animated.Value(20)).current;
 
-  // Ambient living float loop
+  // 2. Continuous Living Hover Loop
   const hoverY = useRef(new Animated.Value(0)).current;
+  const hoverTilt = useRef(new Animated.Value(0)).current;
 
-  // 0.4s — PostStreak Logo Text
+  // 3. 0.4s — PostStreak Title: "Zoom & Pop" Snap
+  const titleScale = useRef(new Animated.Value(0.2)).current;
+  const titleY = useRef(new Animated.Value(35)).current;
   const titleOpacity = useRef(new Animated.Value(0)).current;
-  const titleScale = useRef(new Animated.Value(0.92)).current;
-  const titleY = useRef(new Animated.Value(12)).current;
 
-  // 0.7s — Streak Pill Expansion
+  // 4. 0.7s — Creator Streak Pill: Smooth Expansion & Pop
   const pillOpacity = useRef(new Animated.Value(0)).current;
-  const pillScale = useRef(new Animated.Value(0.86)).current;
-  const pillY = useRef(new Animated.Value(10)).current;
+  const pillScale = useRef(new Animated.Value(0.85)).current;
+  const pillY = useRef(new Animated.Value(12)).current;
 
-  // 1.2s — Powered by Jarvis Core
+  // 5. 1.2s — Footer Companion Intro: Subtle Rise
+  const footerY = useRef(new Animated.Value(20)).current;
   const footerOpacity = useRef(new Animated.Value(0)).current;
-  const footerY = useRef(new Animated.Value(8)).current;
 
-  // 1.5–1.8s — Transition directly into Get Started (Welcome Screen)
-  const splashMasterOpacity = useRef(new Animated.Value(1)).current;
+  // 6. 1.5–1.8s — Seamless Morph Transition to Welcome Screen
+  const splashTextOpacity = useRef(new Animated.Value(1)).current;
+  const splashTextY = useRef(new Animated.Value(0)).current;
   const ghostMorphY = useRef(new Animated.Value(0)).current;
   const ghostMorphScale = useRef(new Animated.Value(1)).current;
+  const splashBgOpacity = useRef(new Animated.Value(1)).current;
 
   useEffect(() => {
-    // Safety auto-dismiss fallback
     const fallbackTimer = setTimeout(() => {
       onFinish();
-    }, 3000);
+    }, 4500);
 
-    // 1. Start Ambient Hover Loop
+    // Continuous Living Hover Loop
     const hoverLoop = Animated.loop(
       Animated.sequence([
-        Animated.timing(hoverY, {
-          toValue: -8,
-          duration: 1200,
-          useNativeDriver: true,
-        }),
-        Animated.timing(hoverY, {
-          toValue: 4,
-          duration: 1100,
-          useNativeDriver: true,
-        }),
+        Animated.parallel([
+          Animated.timing(hoverY, {
+            toValue: -10,
+            duration: 1200,
+            useNativeDriver: true,
+          }),
+          Animated.timing(hoverTilt, {
+            toValue: 1,
+            duration: 1200,
+            useNativeDriver: true,
+          }),
+        ]),
+        Animated.parallel([
+          Animated.timing(hoverY, {
+            toValue: 6,
+            duration: 1100,
+            useNativeDriver: true,
+          }),
+          Animated.timing(hoverTilt, {
+            toValue: -1,
+            duration: 1100,
+            useNativeDriver: true,
+          }),
+        ]),
       ])
     );
-    hoverLoop.start();
 
-    // 2. Orchestrated Brand Intro Timeline (0.0s -> 0.4s -> 0.7s -> 1.2s -> 1.5-1.8s)
+    // Complete Choreographed Intro Timeline
     Animated.sequence([
-      // 0.0s: Ghost fades/scales in
+      // 0.0s: Step 1 — Ghost Emerges & Floats Upward with Squash & Stretch
       Animated.parallel([
         Animated.timing(ghostOpacity, {
           toValue: 1,
-          duration: 380,
+          duration: 340,
           useNativeDriver: true,
         }),
         Animated.spring(ghostScale, {
+          toValue: 1.18,
+          speed: 18,
+          bounciness: 10,
+          useNativeDriver: true,
+        }),
+        Animated.spring(ghostY, {
+          toValue: -20,
+          speed: 16,
+          bounciness: 8,
+          useNativeDriver: true,
+        }),
+        Animated.spring(ghostStretchY, {
+          toValue: 1.25,
+          speed: 18,
+          bounciness: 8,
+          useNativeDriver: true,
+        }),
+        Animated.spring(ghostSquishX, {
+          toValue: 0.82,
+          speed: 18,
+          bounciness: 8,
+          useNativeDriver: true,
+        }),
+        Animated.timing(ghostRotate, {
+          toValue: 0.8,
+          duration: 400,
+          useNativeDriver: true,
+        }),
+      ]),
+
+      // Step 2 — Joyful Cushion Landing & Reset
+      Animated.parallel([
+        Animated.spring(ghostScale, {
+          toValue: 1.0,
+          speed: 22,
+          bounciness: 12,
+          useNativeDriver: true,
+        }),
+        Animated.spring(ghostY, {
+          toValue: 0,
+          speed: 22,
+          bounciness: 10,
+          useNativeDriver: true,
+        }),
+        Animated.spring(ghostStretchY, {
           toValue: 1.0,
           speed: 18,
           bounciness: 8,
           useNativeDriver: true,
         }),
-        Animated.spring(ghostY, {
+        Animated.spring(ghostSquishX, {
+          toValue: 1.0,
+          speed: 18,
+          bounciness: 8,
+          useNativeDriver: true,
+        }),
+        Animated.timing(ghostRotate, {
           toValue: 0,
-          speed: 16,
-          bounciness: 6,
+          duration: 160,
           useNativeDriver: true,
         }),
       ]),
 
-      // Wait until 0.4s (380ms elapsed, wait 40ms)
-      Animated.delay(40),
-
-      // 0.4s: PostStreak logo text appears
+      // 0.4s: Step 3 — PostStreak Logo Text "Zoom & Pop"
       Animated.parallel([
         Animated.timing(titleOpacity, {
           toValue: 1,
@@ -107,22 +172,19 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onFinish = () => {} 
         }),
         Animated.spring(titleScale, {
           toValue: 1.0,
-          speed: 20,
-          bounciness: 8,
+          speed: 22,
+          bounciness: 10,
           useNativeDriver: true,
         }),
         Animated.spring(titleY, {
           toValue: 0,
-          speed: 18,
-          bounciness: 6,
+          speed: 20,
+          bounciness: 8,
           useNativeDriver: true,
         }),
       ]),
 
-      // Wait until 0.7s (380+40+260 = 680ms elapsed, wait 40ms)
-      Animated.delay(40),
-
-      // 0.7s: The pill smoothly expands and fades in
+      // 0.7s: Step 4 — The Pill Smoothly Expands and Fades In
       Animated.parallel([
         Animated.timing(pillOpacity, {
           toValue: 1,
@@ -143,10 +205,10 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onFinish = () => {} 
         }),
       ]),
 
-      // Wait until 1.2s (680+40+280 = 1000ms elapsed, wait 200ms)
+      // Wait until 1.2s
       Animated.delay(200),
 
-      // 1.2s: "Powered by Jarvis Core" appears subtly
+      // 1.2s: Step 5 — "POWERED BY JARVIS CORE ✦" appears subtly
       Animated.parallel([
         Animated.timing(footerOpacity, {
           toValue: 1,
@@ -161,26 +223,35 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onFinish = () => {} 
         }),
       ]),
 
-      // Wait until 1.5s (1200+280 = 1480ms elapsed, wait 70ms)
-      Animated.delay(70),
-
-      // 1.55s–1.8s: Everything transitions directly into the Get Started screen
+      // 1.5s–1.8s: Step 6 — Transition directly into Get Started Screen
+      Animated.delay(120),
       Animated.parallel([
-        // Whole splash fades out smoothly
-        Animated.timing(splashMasterOpacity, {
+        // Splash text sinks away
+        Animated.timing(splashTextOpacity, {
           toValue: 0,
           duration: 280,
           useNativeDriver: true,
         }),
-        // Ghost floats smoothly into the Welcome Hero spot
-        Animated.timing(ghostMorphY, {
-          toValue: isCompact ? -70 : -90,
+        Animated.timing(splashTextY, {
+          toValue: 20,
           duration: 280,
           useNativeDriver: true,
         }),
+        // Ghost gracefully floats up and morphs directly into Welcome hero spot
+        Animated.timing(ghostMorphY, {
+          toValue: isCompact ? -95 : -120,
+          duration: 480,
+          useNativeDriver: true,
+        }),
         Animated.timing(ghostMorphScale, {
-          toValue: 0.88,
-          duration: 280,
+          toValue: isCompact ? 0.82 : 0.80,
+          duration: 480,
+          useNativeDriver: true,
+        }),
+        // Background softly reveals Welcome Screen
+        Animated.timing(splashBgOpacity, {
+          toValue: 0,
+          duration: 480,
           useNativeDriver: true,
         }),
       ]),
@@ -188,18 +259,20 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onFinish = () => {} 
       onFinish();
     });
 
-    // Subtle tactile haptics during animation milestones
+    hoverLoop.start();
+
+    // Haptics milestones
     const t1 = setTimeout(() => {
       if (Platform.OS !== 'web') {
-        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       }
-    }, 400);
+    }, 450);
 
     const t2 = setTimeout(() => {
       if (Platform.OS !== 'web') {
         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
       }
-    }, 720);
+    }, 750);
 
     return () => {
       clearTimeout(fallbackTimer);
@@ -208,24 +281,40 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onFinish = () => {} 
       hoverLoop.stop();
     };
   }, [
-    ghostOpacity,
     ghostScale,
     ghostY,
-    titleOpacity,
+    ghostStretchY,
+    ghostSquishX,
+    ghostRotate,
+    ghostOpacity,
     titleScale,
     titleY,
+    titleOpacity,
     pillOpacity,
     pillScale,
     pillY,
-    footerOpacity,
     footerY,
-    splashMasterOpacity,
+    footerOpacity,
+    splashTextOpacity,
+    splashTextY,
     ghostMorphY,
     ghostMorphScale,
+    splashBgOpacity,
     hoverY,
+    hoverTilt,
     isCompact,
     onFinish,
   ]);
+
+  const rotation = ghostRotate.interpolate({
+    inputRange: [-1, 0, 1],
+    outputRange: ['-16deg', '0deg', '16deg'],
+  });
+
+  const liveTilt = hoverTilt.interpolate({
+    inputRange: [-1, 0, 1],
+    outputRange: ['-3.5deg', '0deg', '3.5deg'],
+  });
 
   return (
     <Animated.View
@@ -233,15 +322,15 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onFinish = () => {} 
       style={[
         styles.container,
         {
-          opacity: splashMasterOpacity,
+          opacity: splashBgOpacity,
         },
       ]}
     >
       <StatusBar barStyle="dark-content" backgroundColor={colors.background} />
 
-      {/* Main Center Area: Mascot + Orchestrated Brand Elements */}
+      {/* Main Center Area: Extra-Large Mascot + Orchestrated Typography */}
       <View style={styles.mascotArea}>
-        {/* 1. HERO GHOST MASCOT (0.0s) */}
+        {/* 1. HERO GHOST MASCOT (0.0s) with Full Squash & Stretch Physics */}
         <Animated.View
           style={[
             styles.ghostWrapper,
@@ -253,6 +342,10 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onFinish = () => {} 
                 { translateY: ghostMorphY },
                 { scale: ghostScale },
                 { scale: ghostMorphScale },
+                { scaleY: ghostStretchY },
+                { scaleX: ghostSquishX },
+                { rotate: rotation },
+                { rotate: liveTilt },
               ],
             },
           ]}
@@ -264,48 +357,62 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onFinish = () => {} 
           />
         </Animated.View>
 
-        {/* 2. POSTSTREAK LOGO TEXT (0.4s) */}
+        {/* 2. ORCHESTRATED BRANDING */}
         <Animated.View
           style={[
-            styles.titleWrapper,
+            styles.brandContainer,
             {
-              opacity: titleOpacity,
-              transform: [
-                { scale: titleScale },
-                { translateY: titleY },
-              ],
+              opacity: splashTextOpacity,
+              transform: [{ translateY: splashTextY }],
             },
           ]}
         >
-          <Text style={styles.solidBrandTitle}>Poststreak</Text>
-        </Animated.View>
+          {/* PostStreak Title (0.4s): "Zoom & Pop" in Signature Royal Purple */}
+          <Animated.View
+            style={[
+              styles.titleWrapper,
+              {
+                opacity: titleOpacity,
+                transform: [
+                  { scale: titleScale },
+                  { translateY: titleY },
+                ],
+              },
+            ]}
+          >
+            <Text style={styles.solidBrandTitle}>Poststreak</Text>
+          </Animated.View>
 
-        {/* 3. SMOOTHLY EXPANDING CREATOR STREAK PILL (0.7s) */}
-        <Animated.View
-          style={[
-            styles.taglinePill,
-            {
-              opacity: pillOpacity,
-              transform: [
-                { scale: pillScale },
-                { translateY: pillY },
-              ],
-            },
-          ]}
-        >
-          <Text style={styles.taglineEmoji}>✨</Text>
-          <Text style={styles.taglineText}>Build your creator streak</Text>
-          <Text style={styles.taglineEmoji}>🔥</Text>
+          {/* Tagline Pill (0.7s): Smoothly Expands and Fades In */}
+          <Animated.View
+            style={[
+              styles.taglinePill,
+              {
+                opacity: pillOpacity,
+                transform: [
+                  { scale: pillScale },
+                  { translateY: pillY },
+                ],
+              },
+            ]}
+          >
+            <Text style={styles.taglineEmoji}>✨</Text>
+            <Text style={styles.taglineText}>Build your creator streak</Text>
+            <Text style={styles.taglineEmoji}>🔥</Text>
+          </Animated.View>
         </Animated.View>
       </View>
 
-      {/* 4. SUBTLE COMPANION INTRODUCTION (1.2s) */}
+      {/* 3. BOTTOM FOOTER (1.2s): Subtle Companion Introduction */}
       <Animated.View
         style={[
           styles.footer,
           {
-            opacity: footerOpacity,
-            transform: [{ translateY: footerY }],
+            opacity: Animated.multiply(footerOpacity, splashTextOpacity),
+            transform: [
+              { translateY: footerY },
+              { translateY: splashTextY },
+            ],
           },
         ]}
       >
@@ -343,6 +450,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 14,
+  },
+  brandContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   titleWrapper: {
     alignItems: 'center',
