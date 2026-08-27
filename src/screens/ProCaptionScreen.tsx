@@ -620,8 +620,11 @@ export const ProCaptionScreen: React.FC<ProCaptionScreenProps> = ({
                   placeholder="Your caption text..."
                   placeholderTextColor="#94A3B8"
                 />
-                <View style={styles.charsCounterPill}>
-                  <Text style={styles.charsCounterText}>{mainCaption.length} chars</Text>
+                <View style={styles.captionInputFooterRow}>
+                  <Text style={styles.captionInputFooterHint}>AI Generated • Tap to edit</Text>
+                  <View style={styles.charsCounterPill}>
+                    <Text style={styles.charsCounterText}>{mainCaption.length} chars</Text>
+                  </View>
                 </View>
               </View>
 
@@ -1561,7 +1564,6 @@ const styles = StyleSheet.create({
     shadowRadius: 6,
   },
   captionInputContainer: {
-    position: 'relative',
     backgroundColor: '#FAF8F5',
     borderRadius: 14,
     padding: 12,
@@ -1569,24 +1571,35 @@ const styles = StyleSheet.create({
     borderColor: '#EFECE6',
   },
   captionTextInput: {
-    fontSize: 12.5,
+    fontSize: sFont(12.5),
     lineHeight: 19,
     color: '#171420',
-    minHeight: 100,
+    minHeight: 90,
     textAlignVertical: 'top',
-    paddingBottom: 22,
+    padding: 0,
+  },
+  captionInputFooterRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginTop: 10,
+    paddingTop: 8,
+    borderTopWidth: 1,
+    borderTopColor: '#EFECE6',
+  },
+  captionInputFooterHint: {
+    fontSize: sFont(9.5),
+    fontWeight: '700',
+    color: '#94A3B8',
   },
   charsCounterPill: {
-    position: 'absolute',
-    bottom: 8,
-    right: 8,
     backgroundColor: '#E2E8F0',
-    paddingHorizontal: 6,
-    paddingVertical: 2,
+    paddingHorizontal: 7,
+    paddingVertical: 2.5,
     borderRadius: 6,
   },
   charsCounterText: {
-    fontSize: 9,
+    fontSize: sFont(9),
     fontWeight: '800',
     color: '#64748B',
   },
