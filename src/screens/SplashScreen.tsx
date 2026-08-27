@@ -49,14 +49,16 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onFinish = () => {} 
   const footerY = useRef(new Animated.Value(30)).current;
   const footerOpacity = useRef(new Animated.Value(0)).current;
 
-  // 4. Overall Exit Fade
+  // 4. Overall Exit Fade & Scale (Smooth continuous dissolve)
   const screenFade = useRef(new Animated.Value(1)).current;
+  const screenScale = useRef(new Animated.Value(1)).current;
+  const screenShiftY = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
-    // Safety auto-dismiss on web or slow devices
+    // Safety auto-dismiss fallback (generous so it never cuts animation prematurely)
     const fallbackTimer = setTimeout(() => {
       onFinish();
-    }, 2800);
+    }, 5500);
 
     // Grand Duolingo + PowerPoint Cinematic Opening Sequence
     const playOpeningSequence = () => {
@@ -94,7 +96,7 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onFinish = () => {} 
           }),
           Animated.timing(ghostRotate, {
             toValue: 1,
-            duration: 550,
+            duration: 500,
             useNativeDriver: true,
           }),
         ]),
@@ -103,22 +105,22 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onFinish = () => {} 
         Animated.parallel([
           Animated.timing(ghostRotate, {
             toValue: -0.6,
-            duration: 220,
+            duration: 200,
             useNativeDriver: true,
           }),
           Animated.timing(ghostY, {
             toValue: 14,
-            duration: 220,
+            duration: 200,
             useNativeDriver: true,
           }),
           Animated.timing(ghostStretchY, {
             toValue: 0.85,
-            duration: 220,
+            duration: 200,
             useNativeDriver: true,
           }),
           Animated.timing(ghostSquishX, {
             toValue: 1.2,
-            duration: 220,
+            duration: 200,
             useNativeDriver: true,
           }),
         ]),
@@ -156,18 +158,18 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onFinish = () => {} 
           }),
         ]),
 
-        // Step 4: PowerPoint-Style Kinetic Text Reveal #1 — Title "Zoom & Pop"
+        // Step 4: Kinetic Reveal #1 — Title "Zoom & Pop"
         Animated.parallel([
           Animated.timing(titleOpacity, {
             toValue: 1,
-            duration: 350,
+            duration: 320,
             useNativeDriver: true,
           }),
           Animated.spring(titleScale, {
             toValue: 1.0,
             useNativeDriver: true,
             speed: 24,
-            bounciness: 14, // Energetic PowerPoint pop
+            bounciness: 12,
           }),
           Animated.spring(titleY, {
             toValue: 0,
@@ -177,18 +179,18 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onFinish = () => {} 
           }),
         ]),
 
-        // Step 5: PowerPoint-Style Kinetic Text Reveal #2 — Tagline "Fly In from Left"
+        // Step 5: Kinetic Reveal #2 — Tagline "Fly In from Left" & Footer
         Animated.parallel([
           Animated.timing(taglineOpacity, {
             toValue: 1,
-            duration: 350,
+            duration: 320,
             useNativeDriver: true,
           }),
           Animated.spring(taglineX, {
             toValue: 0,
             useNativeDriver: true,
             speed: 20,
-            bounciness: 10, // Smooth slide overshoot
+            bounciness: 10,
           }),
           Animated.spring(tagScale, {
             toValue: 1.0,
@@ -198,7 +200,7 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onFinish = () => {} 
           }),
           Animated.timing(footerOpacity, {
             toValue: 1,
-            duration: 450,
+            duration: 400,
             useNativeDriver: true,
           }),
           Animated.spring(footerY, {
@@ -209,15 +211,27 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onFinish = () => {} 
           }),
         ]),
 
-        // Step 6: Admire the full composition
-        Animated.delay(1400),
+        // Step 6: Admire pause
+        Animated.delay(1000),
 
-        // Step 7: Smooth Dissolve to Welcome Screen
-        Animated.timing(screenFade, {
-          toValue: 0,
-          duration: 400,
-          useNativeDriver: true,
-        }),
+        // Step 7: Continuous Soft Eye-Ease Dissolve & Seamless Transition
+        Animated.parallel([
+          Animated.timing(screenFade, {
+            toValue: 0,
+            duration: 650,
+            useNativeDriver: true,
+          }),
+          Animated.timing(screenScale, {
+            toValue: 1.04,
+            duration: 650,
+            useNativeDriver: true,
+          }),
+          Animated.timing(screenShiftY, {
+            toValue: -12,
+            duration: 650,
+            useNativeDriver: true,
+          }),
+        ]),
       ]).start(() => {
         onFinish();
       });
@@ -299,7 +313,19 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onFinish = () => {} 
   });
 
   return (
-    <Animated.View style={[styles.container, { opacity: screenFade }]}>
+    <Animated.View
+      pointerEvents="none"
+      style={[
+        styles.container,
+        {
+          opacity: screenFade,
+          transform: [
+            { scale: screenScale },
+            { translateY: screenShiftY },
+          ],
+        },
+      ]}
+    >
       <StatusBar barStyle="dark-content" backgroundColor={colors.background} />
 
       {/* Main Center Area: Extra-Large Mascot + PowerPoint Animated Typography */}
