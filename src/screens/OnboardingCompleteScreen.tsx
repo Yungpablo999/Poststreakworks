@@ -403,7 +403,14 @@ export const OnboardingCompleteScreen: React.FC<OnboardingCompleteScreenProps> =
           <View style={styles.launchpadCard}>
             <View style={styles.launchpadHeader}>
               <View style={styles.launchpadTitleRow}>
-                <Text style={styles.launchpadBadgeText}>⚡ 7-DAY STREAK LAUNCHPAD</Text>
+                <Text
+                  style={styles.launchpadBadgeText}
+                  numberOfLines={1}
+                  adjustsFontSizeToFit
+                  minimumFontScale={0.8}
+                >
+                  ⚡ 7-DAY STREAK LAUNCHPAD
+                </Text>
               </View>
               <Animated.View
                 style={[
@@ -411,7 +418,7 @@ export const OnboardingCompleteScreen: React.FC<OnboardingCompleteScreenProps> =
                   { transform: [{ scale: perkGlow }] },
                 ]}
               >
-                <Text style={styles.bonusXpText}>+100 XP Unlocked</Text>
+                <Text style={styles.bonusXpText} numberOfLines={1}>+100 XP Bonus</Text>
               </Animated.View>
             </View>
 
@@ -823,16 +830,21 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: 14,
+    gap: 8,
   },
   launchpadTitleRow: {
     flexDirection: 'row',
     alignItems: 'center',
+    flex: 1,
+    minWidth: 0,
+    marginRight: 6,
   },
   launchpadBadgeText: {
-    fontSize: 11,
+    fontSize: 10.5,
     fontWeight: '800',
     color: '#582CDB',
-    letterSpacing: 0.8,
+    letterSpacing: 0.4,
+    flexShrink: 1,
   },
   bonusXpPill: {
     backgroundColor: 'rgba(237, 232, 252, 0.9)',
@@ -841,6 +853,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
     borderWidth: 1,
     borderColor: 'rgba(221, 214, 254, 0.9)',
+    flexShrink: 0,
   },
   bonusXpText: {
     fontSize: 10,
