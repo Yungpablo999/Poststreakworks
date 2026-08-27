@@ -23,6 +23,7 @@ import { AnimatedCompletionModal } from '../components/AnimatedCompletionModal';
 import { BrandToast } from '../components/BrandToast';
 import { TinyGoldCheck } from '../components/CreatorStoryModal';
 import { SocialBrandIcon } from '../components/SocialBrandIcon';
+import { sFont } from '../utils/responsive';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
@@ -531,15 +532,15 @@ export const ProCaptionScreen: React.FC<ProCaptionScreenProps> = ({
           {/* ============================================================ */}
           <View style={styles.toneSectionCard}>
             <View style={styles.toneCardHeaderRow}>
-              <View>
+              <View style={{ flex: 1, minWidth: 0, marginRight: 8 }}>
                 <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
                   <Text style={{ fontSize: 14 }}>🎭</Text>
-                  <Text style={styles.sectionHeaderTitle}>Caption Tone</Text>
+                  <Text style={styles.sectionHeaderTitle} numberOfLines={1}>Caption Tone</Text>
                 </View>
-                <Text style={styles.toneSubHint}>Select voice style for AI phrasing &amp; cadence</Text>
+                <Text style={styles.toneSubHint} numberOfLines={1}>Select voice style for AI phrasing</Text>
               </View>
               <View style={styles.toneActiveCounterBadge}>
-                <Text style={styles.toneActiveCounterText}>{selectedTones.length} SELECTED</Text>
+                <Text style={styles.toneActiveCounterText} numberOfLines={1}>{selectedTones.length} SELECTED</Text>
               </View>
             </View>
 
@@ -1472,25 +1473,26 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   sectionHeaderTitle: {
-    fontSize: 13,
+    fontSize: sFont(13),
     fontWeight: '700',
     color: '#171420',
     letterSpacing: 0.2,
   },
   toneSubHint: {
-    fontSize: 11,
+    fontSize: sFont(10.5),
     color: '#64748B',
     marginTop: 2,
   },
   toneActiveCounterBadge: {
     backgroundColor: '#EDE9FE',
-    paddingHorizontal: 8,
-    paddingVertical: 3.5,
+    paddingHorizontal: 7,
+    paddingVertical: 3,
     borderRadius: 6,
+    flexShrink: 0,
   },
   toneActiveCounterText: {
-    fontSize: 9,
-    fontWeight: '700',
+    fontSize: sFont(8.5),
+    fontWeight: '800',
     color: '#582CDB',
     letterSpacing: 0.3,
   },
