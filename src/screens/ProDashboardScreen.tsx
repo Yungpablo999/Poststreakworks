@@ -1431,11 +1431,45 @@ export const ProDashboardScreen: React.FC<ProDashboardScreenProps> = ({
                   </View>
 
                   <View style={{ flexDirection: 'row', gap: 8, marginTop: 12 }}>
-                    <View style={{ backgroundColor: 'rgba(245, 158, 11, 0.25)', borderWidth: 1, borderColor: '#F59E0B', paddingHorizontal: 10, paddingVertical: 4, borderRadius: 8 }}>
-                      <Text style={{ fontSize: 11, fontWeight: '700', color: '#FDE68A' }}>💰 $450 Guaranteed Bounty</Text>
+                    <View
+                      style={{
+                        flex: 1,
+                        backgroundColor: 'rgba(245, 158, 11, 0.25)',
+                        borderWidth: 1,
+                        borderColor: '#F59E0B',
+                        paddingHorizontal: 6,
+                        paddingVertical: 5,
+                        borderRadius: 8,
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                      }}
+                    >
+                      <Text
+                        style={{ fontSize: sFont(11), fontWeight: '700', color: '#FDE68A', textAlign: 'center' }}
+                        numberOfLines={1}
+                      >
+                        💰 $450 Bounty
+                      </Text>
                     </View>
-                    <View style={{ backgroundColor: 'rgba(139, 92, 246, 0.25)', borderWidth: 1, borderColor: '#8B5CF6', paddingHorizontal: 10, paddingVertical: 4, borderRadius: 8 }}>
-                      <Text style={{ fontSize: 11, fontWeight: '700', color: '#EDE9FE' }}>⚡ +350 XP Reward</Text>
+                    <View
+                      style={{
+                        flex: 1,
+                        backgroundColor: 'rgba(139, 92, 246, 0.25)',
+                        borderWidth: 1,
+                        borderColor: '#8B5CF6',
+                        paddingHorizontal: 6,
+                        paddingVertical: 5,
+                        borderRadius: 8,
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                      }}
+                    >
+                      <Text
+                        style={{ fontSize: sFont(11), fontWeight: '700', color: '#EDE9FE', textAlign: 'center' }}
+                        numberOfLines={1}
+                      >
+                        ⚡ +350 XP Reward
+                      </Text>
                     </View>
                   </View>
                 </LinearGradient>
