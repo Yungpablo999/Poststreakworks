@@ -1026,23 +1026,56 @@ export const ProQuestsScreen: React.FC<ProQuestsScreenProps> = ({
           <View style={styles.modalOverlay}>
             <Animated.View style={[styles.modalCard, { transform: [{ scale: modalPopScale }] }]}>
               <View style={styles.modalHeaderRow}>
-                <View>
+                <View style={{ flex: 1, minWidth: 0, paddingRight: 10 }}>
                   <View style={styles.proPriorityPillModal}>
                     <Text style={styles.proPriorityPillModalText}>PRO PRIORITY APPLICATION</Text>
                   </View>
-                  <Text style={[styles.modalTitle, { marginTop: 4 }]}>{selectedBrandName}</Text>
-                  <Text style={styles.modalSubtitle}>Sponsorship Bounty: {selectedBrandBounty}</Text>
+                  <Text
+                    style={[styles.modalTitle, { marginTop: 4 }]}
+                    numberOfLines={1}
+                    adjustsFontSizeToFit
+                    minimumFontScale={0.8}
+                  >
+                    {selectedBrandName}
+                  </Text>
+                  <Text style={styles.modalSubtitle} numberOfLines={1}>
+                    Sponsorship Bounty: {selectedBrandBounty}
+                  </Text>
                 </View>
                 <Pressable onPress={() => setShowBrandQuestModal(false)} style={styles.modalCloseCircle} hitSlop={8}>
                   <Text style={styles.modalCloseCross}>✕</Text>
                 </Pressable>
               </View>
 
-              <View style={{ gap: 8, marginVertical: 12 }}>
-                <Text style={styles.briefDetailLine}>• Deliverable: 1 Dedicated 45s Reel &amp; TikTok</Text>
-                <Text style={styles.briefDetailLine}>• Payout: {selectedBrandBounty} guaranteed upon approval</Text>
-                <Text style={styles.briefDetailLine}>• Review Time: 24h fast-track priority for Pro creators</Text>
-                <Text style={styles.briefDetailLine}>• Creator Passport Score: 94% match readiness</Text>
+              <View style={styles.briefListStack}>
+                <View style={styles.briefListRow}>
+                  <Text style={styles.briefBulletDot}>•</Text>
+                  <Text style={styles.briefDetailLine}>
+                    <Text style={styles.briefDetailBold}>Deliverable: </Text>
+                    1 Dedicated 45s Reel &amp; TikTok
+                  </Text>
+                </View>
+                <View style={styles.briefListRow}>
+                  <Text style={styles.briefBulletDot}>•</Text>
+                  <Text style={styles.briefDetailLine}>
+                    <Text style={styles.briefDetailBold}>Payout: </Text>
+                    {selectedBrandBounty} guaranteed upon approval
+                  </Text>
+                </View>
+                <View style={styles.briefListRow}>
+                  <Text style={styles.briefBulletDot}>•</Text>
+                  <Text style={styles.briefDetailLine}>
+                    <Text style={styles.briefDetailBold}>Review Time: </Text>
+                    24h fast-track priority for Pro
+                  </Text>
+                </View>
+                <View style={styles.briefListRow}>
+                  <Text style={styles.briefBulletDot}>•</Text>
+                  <Text style={styles.briefDetailLine}>
+                    <Text style={styles.briefDetailBold}>Passport Match: </Text>
+                    94% match readiness
+                  </Text>
+                </View>
               </View>
 
               <Pressable
@@ -2820,12 +2853,13 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
   modalCloseCircle: {
-    width: 30,
-    height: 30,
-    borderRadius: 15,
+    width: 32,
+    height: 32,
+    borderRadius: 16,
     backgroundColor: '#F1F5F9',
     justifyContent: 'center',
     alignItems: 'center',
+    flexShrink: 0,
   },
   modalCloseCross: {
     fontSize: 12,
@@ -2856,11 +2890,35 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     color: '#B45309',
   },
-  briefDetailLine: {
-    fontSize: 12.5,
-    color: '#334155',
+  briefListStack: {
+    gap: 8,
+    marginVertical: 12,
+    backgroundColor: '#FAF8F5',
+    padding: 12,
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: '#EFECE6',
+  },
+  briefListRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: 6,
+  },
+  briefBulletDot: {
+    fontSize: 13,
+    color: '#582CDB',
+    fontWeight: '800',
     lineHeight: 18,
-    fontWeight: '600',
+  },
+  briefDetailLine: {
+    fontSize: 12,
+    color: '#475569',
+    lineHeight: 18,
+    flex: 1,
+  },
+  briefDetailBold: {
+    fontWeight: '700',
+    color: '#171420',
   },
   squadTaskItem: {
     fontSize: 12.5,
