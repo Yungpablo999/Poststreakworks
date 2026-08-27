@@ -8,6 +8,7 @@ import {
   useWindowDimensions,
   Platform,
 } from 'react-native';
+import Svg, { Defs, RadialGradient, Stop, Circle } from 'react-native-svg';
 import * as Haptics from 'expo-haptics';
 
 export const HeroMascot: React.FC = () => {
@@ -243,8 +244,28 @@ export const HeroMascot: React.FC = () => {
 
   return (
     <View style={styles.container}>
-      {/* Soft Ambient Radial Light Aura Bubble */}
-      <View style={styles.ambientAuraOuter} />
+      {/* Luminous Hardware-Accelerated SVG Ambient Radial Glow */}
+      <View style={styles.ambientAuraOuter} pointerEvents="none">
+        <Svg width={300} height={300} viewBox="0 0 300 300">
+          <Defs>
+            <RadialGradient
+              id="mascotAmbientGlow"
+              cx="50%"
+              cy="50%"
+              r="50%"
+              fx="50%"
+              fy="50%"
+            >
+              <Stop offset="0%" stopColor="#582CDB" stopOpacity="0.28" />
+              <Stop offset="25%" stopColor="#7C4DFF" stopOpacity="0.18" />
+              <Stop offset="55%" stopColor="#9C27B0" stopOpacity="0.08" />
+              <Stop offset="85%" stopColor="#582CDB" stopOpacity="0.02" />
+              <Stop offset="100%" stopColor="#582CDB" stopOpacity="0" />
+            </RadialGradient>
+          </Defs>
+          <Circle cx="150" cy="150" r="150" fill="url(#mascotAmbientGlow)" />
+        </Svg>
+      </View>
 
       <Pressable onPress={handleMascotTap} style={styles.pressable}>
         <Animated.View
@@ -283,27 +304,17 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginVertical: 4,
     position: 'relative',
-    width: 260,
-    height: 260,
+    width: 270,
+    height: 270,
   },
   ambientAuraOuter: {
     position: 'absolute',
-    width: 260,
-    height: 260,
-    borderRadius: 130,
-    backgroundColor: 'transparent',
-    shadowColor: '#582CDB',
-    shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 0.16,
-    shadowRadius: 48,
-    top: 0,
-    left: 0,
-    ...(Platform.OS === 'web'
-      ? ({
-          background: 'radial-gradient(circle, rgba(88, 44, 219, 0.12) 0%, rgba(88, 44, 219, 0.05) 45%, rgba(88, 44, 219, 0) 72%)',
-          filter: 'blur(8px)',
-        } as any)
-      : {}),
+    width: 300,
+    height: 300,
+    top: -15,
+    left: -15,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   pressable: {
     alignItems: 'center',
