@@ -1272,9 +1272,9 @@ export const ProVoiceStudioScreen: React.FC<ProVoiceStudioScreenProps> = ({
 
               <View style={{ gap: 8, marginVertical: 14 }}>
                 {[
-                  { name: '+30 Extra Minutes', price: '$9.00', perMin: '$0.30/min', tag: 'STARTER' },
-                  { name: '+60 Extra Minutes', price: '$16.00', perMin: '$0.26/min', tag: '👑 BEST VALUE' },
-                  { name: '+120 Extra Minutes', price: '$28.00', perMin: '$0.23/min', tag: 'PRO SPRINT' },
+                  { name: '+30 Minutes', price: '$9.00', perMin: '$0.30/min', tag: 'STARTER' },
+                  { name: '+60 Minutes', price: '$16.00', perMin: '$0.26/min', tag: 'BEST VALUE' },
+                  { name: '+120 Minutes', price: '$28.00', perMin: '$0.23/min', tag: 'PRO SPRINT' },
                 ].map((pack, idx) => (
                   <Pressable
                     key={idx}
@@ -1284,16 +1284,16 @@ export const ProVoiceStudioScreen: React.FC<ProVoiceStudioScreenProps> = ({
                       showToast(`✓ ${pack.name} credited to your studio!`);
                     }}
                   >
-                    <View>
+                    <View style={{ flex: 1, minWidth: 0, marginRight: 10 }}>
                       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-                        <Text style={styles.refillPackName}>{pack.name}</Text>
+                        <Text style={styles.refillPackName} numberOfLines={1}>{pack.name}</Text>
                         <View style={styles.tagPillMini}>
-                          <Text style={styles.tagPillMiniText}>{pack.tag}</Text>
+                          <Text style={styles.tagPillMiniText} numberOfLines={1}>{pack.tag}</Text>
                         </View>
                       </View>
-                      <Text style={styles.refillPackSub}>{pack.perMin}</Text>
+                      <Text style={styles.refillPackSub} numberOfLines={1}>{pack.perMin}</Text>
                     </View>
-                    <Text style={styles.refillPackPrice}>{pack.price}</Text>
+                    <Text style={styles.refillPackPrice} numberOfLines={1}>{pack.price}</Text>
                   </Pressable>
                 ))}
               </View>
@@ -2564,19 +2564,20 @@ const styles = StyleSheet.create({
     borderColor: '#EFECE6',
   },
   refillPackName: {
-    fontSize: 13,
+    fontSize: sFont(13),
     fontWeight: '700',
     color: '#171420',
   },
   refillPackSub: {
-    fontSize: 11,
+    fontSize: sFont(11),
     color: '#64748B',
     marginTop: 2,
   },
   refillPackPrice: {
-    fontSize: 15,
-    fontWeight: '700',
+    fontSize: sFont(15),
+    fontWeight: '800',
     color: '#582CDB',
+    flexShrink: 0,
   },
   hookOptionCard: {
     backgroundColor: '#FAF8F5',
