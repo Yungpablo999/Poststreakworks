@@ -121,7 +121,7 @@ const ALL_SQUADS: SquadItem[] = [
       require('../../assets/images/marcus-avatar.jpg'),
       require('../../assets/images/kemi-avatar.jpg'),
     ],
-    statusText: 'Review required (< 2h response)',
+    statusText: 'Review required • <2h reply',
     statusType: 'request',
     description: 'High-leverage batch scripting workflows, voice studios, and YouTube Shorts pacing analysis.',
     squadGoal: 'Systematize weekly content batches',
@@ -734,7 +734,7 @@ export const FindSquadScreen: React.FC<FindSquadScreenProps> = ({
 
                   {/* Status & CTA Row */}
                   <View style={styles.squadCardFooterRow}>
-                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5, flex: 1, minWidth: 0, marginRight: 8 }}>
                       <View
                         style={[
                           styles.statusDot,
@@ -743,7 +743,7 @@ export const FindSquadScreen: React.FC<FindSquadScreenProps> = ({
                           squad.statusType === 'request' && styles.statusDotPurple,
                         ]}
                       />
-                      <Text style={styles.statusText}>{squad.statusText}</Text>
+                      <Text style={styles.statusText} numberOfLines={1}>{squad.statusText}</Text>
                     </View>
 
                     <Pressable
@@ -1620,12 +1620,15 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingTop: 6,
+    paddingTop: 8,
+    gap: 8,
+    width: '100%',
   },
   statusDot: {
     width: 6,
     height: 6,
     borderRadius: 3,
+    flexShrink: 0,
   },
   statusDotGreen: {
     backgroundColor: '#10B981',
@@ -1640,12 +1643,14 @@ const styles = StyleSheet.create({
     fontSize: 11,
     fontWeight: '700',
     color: '#64748B',
+    flexShrink: 1,
   },
   cardQuickJoinBtn: {
     backgroundColor: '#EDE9FE',
     paddingHorizontal: 12,
     paddingVertical: 5,
     borderRadius: 8,
+    flexShrink: 0,
   },
   cardQuickJoinBtnPending: {
     backgroundColor: '#FEF3C7',
