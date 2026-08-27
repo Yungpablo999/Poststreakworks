@@ -1280,19 +1280,26 @@ export const ProQuestsScreen: React.FC<ProQuestsScreenProps> = ({
             <Animated.View style={[styles.duelModalCard, { transform: [{ scale: modalPopScale }] }]}>
               {/* Top Header */}
               <View style={styles.duelModalTopHeader}>
-                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, flex: 1 }}>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, flex: 1, minWidth: 0, marginRight: 8 }}>
                   <View style={styles.duelModalSwordsBox}>
                     <Text style={{ fontSize: 16 }}>⚔️</Text>
                   </View>
-                  <View style={{ flex: 1 }}>
-                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                  <View style={{ flex: 1, minWidth: 0 }}>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 2 }}>
                       <View style={styles.duelModalLivePill}>
                         <View style={styles.duelModalLiveDot} />
-                        <Text style={styles.duelModalLivePillText}>ROUND 2 / 3 LIVE</Text>
+                        <Text style={styles.duelModalLivePillText} numberOfLines={1}>ROUND 2 / 3 LIVE</Text>
                       </View>
-                      <Text style={styles.duelModalTimerText}>⏳ 03h 45m left</Text>
+                      <Text style={styles.duelModalTimerText} numberOfLines={1}>⏳ 03h 45m</Text>
                     </View>
-                    <Text style={styles.duelModalTitle}>Momentum Makers vs Lagos Storytellers</Text>
+                    <Text
+                      style={styles.duelModalTitle}
+                      numberOfLines={1}
+                      adjustsFontSizeToFit
+                      minimumFontScale={0.8}
+                    >
+                      Momentum Makers vs Lagos Storytellers
+                    </Text>
                   </View>
                 </View>
 
@@ -3106,6 +3113,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#F1F5F9',
     alignItems: 'center',
     justifyContent: 'center',
+    flexShrink: 0,
   },
   sqmCloseCross: {
     fontSize: 13,
@@ -3403,15 +3411,17 @@ const styles = StyleSheet.create({
     backgroundColor: '#EDE9FE',
     alignItems: 'center',
     justifyContent: 'center',
+    flexShrink: 0,
   },
   duelModalLivePill: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 5,
+    gap: 4,
     backgroundColor: '#FEE2E2',
     paddingHorizontal: 6,
     paddingVertical: 1.5,
     borderRadius: 4,
+    flexShrink: 0,
   },
   duelModalLiveDot: {
     width: 5,
@@ -3420,20 +3430,21 @@ const styles = StyleSheet.create({
     backgroundColor: '#EF4444',
   },
   duelModalLivePillText: {
-    fontSize: 9,
-    fontWeight: '700',
+    fontSize: 8.5,
+    fontWeight: '800',
     color: '#B91C1C',
   },
   duelModalTimerText: {
-    fontSize: 10,
+    fontSize: 9.5,
     fontWeight: '800',
     color: '#64748B',
+    flexShrink: 1,
   },
   duelModalTitle: {
-    fontSize: 15.5,
-    fontWeight: '700',
+    fontSize: 14.5,
+    fontWeight: '800',
     color: '#171420',
-    marginTop: 2,
+    marginTop: 1,
   },
   duelScoreboardCard: {
     borderRadius: 16,
