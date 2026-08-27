@@ -1316,11 +1316,18 @@ export const ProQuestsScreen: React.FC<ProQuestsScreenProps> = ({
                 >
                   <View style={styles.duelScoreboardRow}>
                     {/* Your Squad */}
-                    <View style={{ alignItems: 'center', flex: 1 }}>
-                      <Text style={styles.duelScoreTeamMine}>Momentum Makers</Text>
-                      <Text style={styles.duelScoreNumberMine}>62 PTS</Text>
+                    <View style={{ alignItems: 'center', flex: 1, minWidth: 0 }}>
+                      <Text
+                        style={styles.duelScoreTeamMine}
+                        numberOfLines={1}
+                        adjustsFontSizeToFit
+                        minimumFontScale={0.8}
+                      >
+                        Momentum Makers
+                      </Text>
+                      <Text style={styles.duelScoreNumberMine} numberOfLines={1}>62 PTS</Text>
                       <View style={styles.duelLeadBadge}>
-                        <Text style={styles.duelLeadBadgeText}>👑 IN THE LEAD (+4)</Text>
+                        <Text style={styles.duelLeadBadgeText} numberOfLines={1}>👑 IN THE LEAD</Text>
                       </View>
                     </View>
 
@@ -1330,11 +1337,18 @@ export const ProQuestsScreen: React.FC<ProQuestsScreenProps> = ({
                     </View>
 
                     {/* Opponent Squad */}
-                    <View style={{ alignItems: 'center', flex: 1 }}>
-                      <Text style={styles.duelScoreTeamOpp}>Lagos Storytellers</Text>
-                      <Text style={styles.duelScoreNumberOpp}>58 PTS</Text>
+                    <View style={{ alignItems: 'center', flex: 1, minWidth: 0 }}>
+                      <Text
+                        style={styles.duelScoreTeamOpp}
+                        numberOfLines={1}
+                        adjustsFontSizeToFit
+                        minimumFontScale={0.8}
+                      >
+                        Lagos Storytellers
+                      </Text>
+                      <Text style={styles.duelScoreNumberOpp} numberOfLines={1}>58 PTS</Text>
                       <View style={styles.duelTrailingBadge}>
-                        <Text style={styles.duelTrailingBadgeText}>4 PTS BEHIND</Text>
+                        <Text style={styles.duelTrailingBadgeText} numberOfLines={1}>4 PTS BEHIND</Text>
                       </View>
                     </View>
                   </View>
@@ -3455,66 +3469,75 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 12,
+    marginBottom: 10,
+    gap: 6,
   },
   duelScoreTeamMine: {
-    fontSize: 12,
-    fontWeight: '700',
+    fontSize: 11.5,
+    fontWeight: '800',
     color: '#F3E8FF',
+    textAlign: 'center',
   },
   duelScoreNumberMine: {
-    fontSize: 22,
-    fontWeight: '700',
+    fontSize: 18,
+    fontWeight: '800',
     color: '#FFFFFF',
     marginTop: 2,
+    textAlign: 'center',
   },
   duelLeadBadge: {
     backgroundColor: 'rgba(16, 185, 129, 0.25)',
     paddingHorizontal: 6,
     paddingVertical: 2,
-    borderRadius: 4,
-    marginTop: 2,
+    borderRadius: 5,
+    marginTop: 3,
   },
   duelLeadBadgeText: {
-    fontSize: 8,
-    fontWeight: '700',
+    fontSize: 8.5,
+    fontWeight: '800',
     color: '#6EE7B7',
+    textAlign: 'center',
   },
   duelVsCenterCircle: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
+    width: 26,
+    height: 26,
+    borderRadius: 13,
     backgroundColor: 'rgba(255, 255, 255, 0.15)',
     alignItems: 'center',
     justifyContent: 'center',
+    flexShrink: 0,
+    marginHorizontal: 4,
   },
   duelVsCenterText: {
-    fontSize: 10,
-    fontWeight: '700',
+    fontSize: 9.5,
+    fontWeight: '800',
     color: '#FDE68A',
   },
   duelScoreTeamOpp: {
-    fontSize: 12,
+    fontSize: 11.5,
     fontWeight: '800',
     color: '#CBD5E1',
+    textAlign: 'center',
   },
   duelScoreNumberOpp: {
-    fontSize: 22,
-    fontWeight: '700',
+    fontSize: 18,
+    fontWeight: '800',
     color: '#E2E8F0',
     marginTop: 2,
+    textAlign: 'center',
   },
   duelTrailingBadge: {
     backgroundColor: 'rgba(255, 255, 255, 0.1)',
     paddingHorizontal: 6,
     paddingVertical: 2,
-    borderRadius: 4,
-    marginTop: 2,
+    borderRadius: 5,
+    marginTop: 3,
   },
   duelTrailingBadgeText: {
-    fontSize: 8,
+    fontSize: 8.5,
     fontWeight: '800',
     color: '#CBD5E1',
+    textAlign: 'center',
   },
   duelTugBar: {
     flexDirection: 'row',
