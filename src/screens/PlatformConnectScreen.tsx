@@ -143,11 +143,13 @@ export const PlatformConnectScreen: React.FC<PlatformConnectScreenProps> = ({
 
   const handleContinue = () => {
     if (connectedPlatforms.length === 0) {
+      if (Platform.OS !== 'web') {
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
+      }
       triggerJarvisModal(
         'Connect a Platform',
         <Text style={styles.modalText}>
-          Please connect at least <Text style={styles.highlightText}>1 creator platform</Text> to continue, or tap{' '}
-          <Text style={styles.highlightText}>&ldquo;connect more later&rdquo;</Text> below.
+          Please connect at least <Text style={styles.highlightText}>1 creator platform</Text> to continue and build your personalized creator plan.
         </Text>
       );
       return;
@@ -157,6 +159,26 @@ export const PlatformConnectScreen: React.FC<PlatformConnectScreenProps> = ({
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     }
     onContinue(connectedPlatforms);
+  };
+
+  const handleSkipLater = () => {
+    if (connectedPlatforms.length === 0) {
+      if (Platform.OS !== 'web') {
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
+      }
+      triggerJarvisModal(
+        'Connect a Platform',
+        <Text style={styles.modalText}>
+          Please connect at least <Text style={styles.highlightText}>1 creator platform</Text> to continue. You can always connect additional platforms later from your profile.
+        </Text>
+      );
+      return;
+    }
+
+    if (Platform.OS !== 'web') {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    }
+    onSkipLater();
   };
 
   // Render Real Official Social Media Logos
@@ -497,7 +519,7 @@ export const PlatformConnectScreen: React.FC<PlatformConnectScreenProps> = ({
           </Pressable>
 
           {/* 7. CONNECT MORE LATER LINK */}
-          <Pressable onPress={onSkipLater} hitSlop={10} style={styles.skipLaterContainer}>
+          <Pressable onPress={handleSkipLater} hitSlop={10} style={styles.skipLaterContainer}>
             <Text style={styles.skipLaterText}>connect more later</Text>
           </Pressable>
         </ScrollView>
