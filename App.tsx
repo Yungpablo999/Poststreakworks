@@ -10,7 +10,7 @@ if (Platform.OS === 'web' && typeof document !== 'undefined') {
     const link = document.createElement('link');
     link.rel = 'stylesheet';
     link.href =
-      'https://fonts.googleapis.com/css2?family=Italiana&family=Prata&family=Bodoni+Moda:ital,opsz,wght@0,6..96,600;0,6..96,700;0,6..96,800;1,6..96,600;1,6..96,700&family=Playfair+Display:ital,wght@0,600;0,700;0,800;1,600;1,700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap';
+      'https://fonts.googleapis.com/css2?family=Antonio:wght@600;700&family=Teko:wght@500;600;700&family=Six+Caps&family=Bebas+Neue&family=Italiana&family=Prata&family=Bodoni+Moda:ital,opsz,wght@0,6..96,600;0,6..96,700;0,6..96,800&family=Playfair+Display:ital,wght@0,600;0,700;0,800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap';
     document.head.appendChild(link);
 
     const style = document.createElement('style');

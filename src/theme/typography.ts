@@ -15,6 +15,13 @@ export const typography = {
     default: 'serif',
   }),
 
+  tallDisplay: Platform.select({
+    ios: 'Impact',
+    android: 'sans-serif-condensed',
+    web: "'Teko', 'Antonio', 'Six Caps', 'Bebas Neue', -apple-system, sans-serif",
+    default: 'sans-serif',
+  }),
+
   sizes: {
     hero: 36,
     display: 30,
