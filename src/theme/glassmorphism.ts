@@ -9,15 +9,15 @@ export const glassmorphism = {
 
   // Level 1: Subtle Translucent Surface (Secondary containers, supporting chips, navigation surfaces)
   level1: {
-    backgroundColor: 'rgba(255, 255, 255, 0.72)',
+    backgroundColor: 'rgba(255, 255, 255, 0.78)',
     borderWidth: 1,
-    borderColor: 'rgba(235, 230, 245, 0.8)',
+    borderColor: 'rgba(23, 20, 32, 0.06)',
     ...Platform.select({
       ios: {
         shadowColor: '#171420',
         shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.04,
-        shadowRadius: 12,
+        shadowOpacity: 0.03,
+        shadowRadius: 10,
       },
       android: {
         elevation: 2,
@@ -30,18 +30,18 @@ export const glassmorphism = {
     }),
   } as ViewStyle,
 
-  // Level 2: Interactive Glass Surface (Primary Cards, Interactive controls)
+  // Level 2: Interactive Card Surface (Standard cards, Interactive controls)
   level2: {
     backgroundColor: '#FFFFFF',
-    borderRadius: 20,
+    borderRadius: 18,
     borderWidth: 1,
-    borderColor: '#EFECE6',
+    borderColor: 'rgba(23, 20, 32, 0.07)',
     ...Platform.select({
       ios: {
         shadowColor: '#171420',
-        shadowOffset: { width: 0, height: 8 },
-        shadowOpacity: 0.06,
-        shadowRadius: 20,
+        shadowOffset: { width: 0, height: 6 },
+        shadowOpacity: 0.04,
+        shadowRadius: 16,
       },
       android: {
         elevation: 3,
@@ -49,55 +49,55 @@ export const glassmorphism = {
       web: {
         backdropFilter: 'blur(20px)',
         WebkitBackdropFilter: 'blur(20px)',
-        boxShadow: '0 8px 24px rgba(23, 20, 32, 0.04), inset 0 1px 1px rgba(255, 255, 255, 0.9)',
+        boxShadow: '0 6px 20px rgba(23, 20, 32, 0.04)',
       } as any,
     }),
   } as ViewStyle,
 
   // Level 3: Floating Material (Sheets, Modals, Floating action bars)
   level3: {
-    backgroundColor: 'rgba(255, 255, 255, 0.88)',
-    borderRadius: 28,
-    borderWidth: 1.2,
-    borderColor: 'rgba(255, 255, 255, 0.85)',
+    backgroundColor: 'rgba(255, 255, 255, 0.92)',
+    borderRadius: 24,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.95)',
     ...Platform.select({
       ios: {
-        shadowColor: '#1F2687',
-        shadowOffset: { width: 0, height: 12 },
-        shadowOpacity: 0.10,
-        shadowRadius: 28,
+        shadowColor: '#171420',
+        shadowOffset: { width: 0, height: 10 },
+        shadowOpacity: 0.08,
+        shadowRadius: 24,
       },
       android: {
-        elevation: 8,
+        elevation: 6,
       },
       web: {
-        backdropFilter: 'blur(28px) saturate(180%)',
-        WebkitBackdropFilter: 'blur(28px) saturate(180%)',
-        boxShadow: '0 12px 36px rgba(31, 38, 135, 0.08), inset 0 1.5px 1.5px rgba(255, 255, 255, 0.95)',
+        backdropFilter: 'blur(24px) saturate(180%)',
+        WebkitBackdropFilter: 'blur(24px) saturate(180%)',
+        boxShadow: '0 10px 30px rgba(23, 20, 32, 0.07)',
       } as any,
     }),
   } as ViewStyle,
 
   // Level 4: Premium Hero Material (Pro VIP cards, Major milestones, XP crowns)
   level4: {
-    backgroundColor: 'rgba(22, 18, 36, 0.92)',
-    borderRadius: 24,
+    backgroundColor: 'rgba(22, 18, 36, 0.94)',
+    borderRadius: 22,
     borderWidth: 1.2,
-    borderColor: 'rgba(245, 158, 11, 0.35)',
+    borderColor: 'rgba(245, 158, 11, 0.28)',
     ...Platform.select({
       ios: {
         shadowColor: '#582CDB',
-        shadowOffset: { width: 0, height: 16 },
-        shadowOpacity: 0.16,
-        shadowRadius: 36,
+        shadowOffset: { width: 0, height: 12 },
+        shadowOpacity: 0.14,
+        shadowRadius: 30,
       },
       android: {
-        elevation: 10,
+        elevation: 8,
       },
       web: {
-        backdropFilter: 'blur(32px)',
-        WebkitBackdropFilter: 'blur(32px)',
-        boxShadow: '0 16px 44px rgba(88, 44, 219, 0.14), inset 0 1px 1px rgba(245, 158, 11, 0.25)',
+        backdropFilter: 'blur(28px)',
+        WebkitBackdropFilter: 'blur(28px)',
+        boxShadow: '0 12px 36px rgba(88, 44, 219, 0.12)',
       } as any,
     }),
   } as ViewStyle,
@@ -105,31 +105,31 @@ export const glassmorphism = {
   // Presets & Backward Compatibility
   card: {
     backgroundColor: colors.backgroundCard,
-    borderRadius: 20,
+    borderRadius: 18,
     borderWidth: 1,
     borderColor: colors.cardBorder,
   } as ViewStyle,
 
   lens: {
     backgroundColor: colors.glassUltra,
-    borderRadius: 24,
+    borderRadius: 22,
     borderWidth: 1.2,
     borderColor: colors.cardBorderLight,
   } as ViewStyle,
 
   badge: {
-    backgroundColor: 'rgba(255, 255, 255, 0.85)',
+    backgroundColor: 'rgba(255, 255, 255, 0.90)',
     borderRadius: 100,
     borderWidth: 1,
     borderColor: 'rgba(255, 255, 255, 0.95)',
   } as ViewStyle,
 
   navbar: {
-    backgroundColor: 'rgba(255, 255, 255, 0.90)',
-    borderTopLeftRadius: 28,
-    borderTopRightRadius: 28,
+    backgroundColor: 'rgba(255, 255, 255, 0.92)',
+    borderTopLeftRadius: 26,
+    borderTopRightRadius: 26,
     borderTopWidth: 1,
-    borderColor: 'rgba(235, 230, 245, 0.9)',
+    borderColor: 'rgba(23, 20, 32, 0.06)',
   } as ViewStyle,
 
   shadowBadge: {
@@ -137,14 +137,14 @@ export const glassmorphism = {
       ios: {
         shadowColor: '#171420',
         shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.04,
+        shadowOpacity: 0.03,
         shadowRadius: 10,
       },
       android: {
         elevation: 2,
       },
       web: {
-        boxShadow: '0 4px 16px rgba(23, 20, 32, 0.03)',
+        boxShadow: '0 4px 14px rgba(23, 20, 32, 0.03)',
       } as any,
     }),
   } as ViewStyle,
@@ -153,15 +153,15 @@ export const glassmorphism = {
     ...Platform.select({
       ios: {
         shadowColor: '#582CDB',
-        shadowOffset: { width: 0, height: 12 },
-        shadowOpacity: 0.08,
-        shadowRadius: 28,
+        shadowOffset: { width: 0, height: 10 },
+        shadowOpacity: 0.06,
+        shadowRadius: 24,
       },
       android: {
-        elevation: 6,
+        elevation: 5,
       },
       web: {
-        boxShadow: '0 12px 36px rgba(88, 44, 219, 0.08)',
+        boxShadow: '0 10px 28px rgba(88, 44, 219, 0.06)',
       } as any,
     }),
   } as ViewStyle,
@@ -170,15 +170,15 @@ export const glassmorphism = {
     ...Platform.select({
       ios: {
         shadowColor: '#171420',
-        shadowOffset: { width: 0, height: 8 },
-        shadowOpacity: 0.05,
-        shadowRadius: 20,
+        shadowOffset: { width: 0, height: 6 },
+        shadowOpacity: 0.04,
+        shadowRadius: 16,
       },
       android: {
         elevation: 3,
       },
       web: {
-        boxShadow: '0 8px 24px rgba(23, 20, 32, 0.04)',
+        boxShadow: '0 6px 20px rgba(23, 20, 32, 0.04)',
       } as any,
     }),
   } as ViewStyle,

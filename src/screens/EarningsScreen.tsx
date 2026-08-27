@@ -1467,16 +1467,20 @@ const styles = StyleSheet.create({
   opportunityCardsRow: {
     flexDirection: 'row',
     gap: 10,
-    marginBottom: 20,
+    marginBottom: 18,
   },
   oppCard: {
     flex: 1,
     backgroundColor: '#FFFFFF',
-    borderRadius: 18,
+    borderRadius: 16,
     borderWidth: 1,
-    borderColor: '#EDE8E1',
+    borderColor: 'rgba(23, 20, 32, 0.07)',
     padding: 14,
     justifyContent: 'space-between',
+    shadowColor: '#171420',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.02,
+    shadowRadius: 6,
   },
   oppTopRow: {
     flexDirection: 'row',
@@ -1485,7 +1489,7 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   oppXpBadge: {
-    backgroundColor: '#EDE9FE',
+    backgroundColor: '#F4F0FF',
     paddingVertical: 2,
     paddingHorizontal: 6,
     borderRadius: 4,
@@ -1497,26 +1501,26 @@ const styles = StyleSheet.create({
   },
   oppTitle: {
     fontSize: 12.5,
-    fontWeight: '800',
+    fontWeight: '700',
     color: '#171420',
     marginBottom: 2,
   },
   oppSub: {
     fontSize: 11,
-    color: '#64748B',
+    color: '#5E576E',
     marginBottom: 12,
   },
   oppGhostBtn: {
     height: 34,
     borderRadius: 10,
-    backgroundColor: '#F1F5F9',
+    backgroundColor: '#F4F0FF',
     justifyContent: 'center',
     alignItems: 'center',
   },
   oppGhostBtnText: {
     fontSize: 12,
-    fontWeight: '800',
-    color: '#475569',
+    fontWeight: '700',
+    color: '#582CDB',
   },
   oppPurpleBtn: {
     height: 34,
@@ -1534,11 +1538,16 @@ const styles = StyleSheet.create({
   // CARD 4: PASSPORT
   passportCard: {
     backgroundColor: '#FFFFFF',
-    borderRadius: 20,
+    borderRadius: 18,
     borderWidth: 1,
-    borderColor: '#EDE8E1',
+    borderColor: 'rgba(23, 20, 32, 0.07)',
     padding: 16,
-    marginBottom: 20,
+    marginBottom: 18,
+    shadowColor: '#171420',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.03,
+    shadowRadius: 10,
+    elevation: 2,
   },
   passportHeaderRow: {
     flexDirection: 'row',
@@ -1552,7 +1561,7 @@ const styles = StyleSheet.create({
     color: '#171420',
   },
   passportBadge: {
-    backgroundColor: '#FEF3C7',
+    backgroundColor: '#FFFBEB',
     paddingVertical: 2,
     paddingHorizontal: 6,
     borderRadius: 4,
@@ -1560,11 +1569,11 @@ const styles = StyleSheet.create({
   passportBadgeText: {
     fontSize: 9,
     fontWeight: '700',
-    color: '#B45309',
+    color: '#D97706',
   },
   passportSub: {
     fontSize: 11,
-    color: '#64748B',
+    color: '#5E576E',
     marginBottom: 12,
   },
   passportGrid: {
@@ -1575,14 +1584,16 @@ const styles = StyleSheet.create({
   },
   passportGridItem: {
     width: '48%',
-    backgroundColor: '#FAF8F5',
+    backgroundColor: '#FAF9FD',
     borderRadius: 10,
     padding: 10,
+    borderWidth: 1,
+    borderColor: 'rgba(23, 20, 32, 0.04)',
   },
   passportGridLabel: {
     fontSize: 9,
-    fontWeight: '800',
-    color: '#64748B',
+    fontWeight: '600',
+    color: '#8E869E',
     marginBottom: 2,
   },
   passportGridValue: {
@@ -1593,24 +1604,29 @@ const styles = StyleSheet.create({
   passportBtn: {
     height: 38,
     borderRadius: 10,
-    backgroundColor: '#F1F5F9',
+    backgroundColor: '#F4F0FF',
     justifyContent: 'center',
     alignItems: 'center',
   },
   passportBtnText: {
     fontSize: 12,
-    fontWeight: '800',
-    color: '#171420',
+    fontWeight: '700',
+    color: '#582CDB',
   },
 
   // CARD 5: CAMPAIGNS
   campaignCard: {
     backgroundColor: '#FFFFFF',
-    borderRadius: 20,
+    borderRadius: 18,
     borderWidth: 1,
-    borderColor: '#EDE8E1',
+    borderColor: 'rgba(23, 20, 32, 0.07)',
     padding: 16,
-    marginBottom: 20,
+    marginBottom: 18,
+    shadowColor: '#171420',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.03,
+    shadowRadius: 10,
+    elevation: 2,
   },
   campaignHeaderRow: {
     flexDirection: 'row',
@@ -1624,19 +1640,19 @@ const styles = StyleSheet.create({
     color: '#171420',
   },
   lockPill: {
-    backgroundColor: '#F1F5F9',
+    backgroundColor: 'rgba(23, 20, 32, 0.05)',
     paddingVertical: 2,
     paddingHorizontal: 6,
     borderRadius: 4,
   },
   lockPillText: {
     fontSize: 9,
-    fontWeight: '700',
-    color: '#64748B',
+    fontWeight: '600',
+    color: '#5E576E',
   },
   campaignSub: {
     fontSize: 11,
-    color: '#64748B',
+    color: '#5E576E',
     marginBottom: 12,
   },
   campaignChecklist: {
@@ -1658,29 +1674,34 @@ const styles = StyleSheet.create({
   },
   campCheckText: {
     fontSize: 12,
-    color: '#64748B',
+    color: '#5E576E',
   },
   campaignBtn: {
     height: 38,
     borderRadius: 10,
-    backgroundColor: '#F1F5F9',
+    backgroundColor: '#F4F0FF',
     justifyContent: 'center',
     alignItems: 'center',
   },
   campaignBtnText: {
     fontSize: 12,
-    fontWeight: '800',
-    color: '#171420',
+    fontWeight: '700',
+    color: '#582CDB',
   },
 
   // CARD 6: GOAL
   goalCard: {
     backgroundColor: '#FFFFFF',
-    borderRadius: 20,
+    borderRadius: 18,
     borderWidth: 1,
-    borderColor: '#EDE8E1',
+    borderColor: 'rgba(23, 20, 32, 0.07)',
     padding: 16,
-    marginBottom: 20,
+    marginBottom: 18,
+    shadowColor: '#171420',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.03,
+    shadowRadius: 10,
+    elevation: 2,
   },
   goalHeaderRow: {
     flexDirection: 'row',
@@ -1690,8 +1711,8 @@ const styles = StyleSheet.create({
   },
   goalTitle: {
     fontSize: 11,
-    fontWeight: '800',
-    color: '#64748B',
+    fontWeight: '700',
+    color: '#8E869E',
     marginBottom: 2,
   },
   goalTarget: {
@@ -1703,11 +1724,11 @@ const styles = StyleSheet.create({
     width: 36,
     height: 36,
     borderRadius: 12,
-    backgroundColor: '#FEF9C3',
+    backgroundColor: '#FFFBEB',
     justifyContent: 'center',
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: '#F59E0B',
+    borderColor: '#FEF3C7',
   },
   goalTrackLabels: {
     flexDirection: 'row',
@@ -1721,13 +1742,13 @@ const styles = StyleSheet.create({
   },
   goalStepMuted: {
     fontSize: 9,
-    fontWeight: '700',
-    color: '#94A3B8',
+    fontWeight: '600',
+    color: '#8E869E',
   },
   goalTrack: {
     height: 6,
     borderRadius: 3,
-    backgroundColor: '#F1F5F9',
+    backgroundColor: 'rgba(23, 20, 32, 0.06)',
     overflow: 'hidden',
     marginBottom: 12,
   },
@@ -1739,24 +1760,29 @@ const styles = StyleSheet.create({
   goalBtn: {
     height: 38,
     borderRadius: 10,
-    backgroundColor: '#F1F5F9',
+    backgroundColor: '#F4F0FF',
     justifyContent: 'center',
     alignItems: 'center',
   },
   goalBtnText: {
     fontSize: 12,
-    fontWeight: '800',
-    color: '#171420',
+    fontWeight: '700',
+    color: '#582CDB',
   },
 
   // CARD 7: PRO TOOLS
   proCard: {
     backgroundColor: '#FFFFFF',
-    borderRadius: 20,
+    borderRadius: 18,
     borderWidth: 1,
-    borderColor: '#EDE8E1',
+    borderColor: 'rgba(23, 20, 32, 0.07)',
     padding: 16,
-    marginBottom: 20,
+    marginBottom: 18,
+    shadowColor: '#171420',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.03,
+    shadowRadius: 10,
+    elevation: 2,
   },
   proHeaderRow: {
     flexDirection: 'row',
@@ -1770,21 +1796,21 @@ const styles = StyleSheet.create({
     color: '#171420',
   },
   goldProBadge: {
-    backgroundColor: '#FEF9C3',
+    backgroundColor: '#FFFBEB',
     paddingVertical: 2,
     paddingHorizontal: 6,
     borderRadius: 4,
     borderWidth: 1,
-    borderColor: '#F59E0B',
+    borderColor: '#FEF3C7',
   },
   goldProBadgeText: {
     fontSize: 9,
     fontWeight: '700',
-    color: '#A16207',
+    color: '#D97706',
   },
   proSub: {
     fontSize: 11,
-    color: '#64748B',
+    color: '#5E576E',
     marginBottom: 12,
   },
   proFeaturesList: {

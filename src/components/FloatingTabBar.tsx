@@ -92,11 +92,11 @@ const GrowthNavIcon = ({ color }: { color: string }) => (
 );
 
 const TABS: { id: TabType; label: string; icon: (color: string) => React.ReactNode }[] = [
-  { id: 'home', label: 'HOME', icon: (c) => <HomeNavIcon color={c} /> },
-  { id: 'create', label: 'CREATE', icon: (c) => <CreateNavIcon color={c} /> },
-  { id: 'match', label: 'MATCH', icon: (c) => <MatchNavIcon color={c} /> },
-  { id: 'quests', label: 'QUESTS', icon: (c) => <QuestsNavIcon color={c} /> },
-  { id: 'growth', label: 'GROWTH', icon: (c) => <GrowthNavIcon color={c} /> },
+  { id: 'home', label: 'Home', icon: (c) => <HomeNavIcon color={c} /> },
+  { id: 'create', label: 'Create', icon: (c) => <CreateNavIcon color={c} /> },
+  { id: 'match', label: 'Match', icon: (c) => <MatchNavIcon color={c} /> },
+  { id: 'quests', label: 'Quests', icon: (c) => <QuestsNavIcon color={c} /> },
+  { id: 'growth', label: 'Growth', icon: (c) => <GrowthNavIcon color={c} /> },
 ];
 
 export const FloatingTabBar: React.FC<FloatingTabBarProps> = ({
@@ -113,66 +113,58 @@ export const FloatingTabBar: React.FC<FloatingTabBarProps> = ({
 
   return (
     <View style={[styles.floatingWrapper, style]}>
-      {/* Authentic Frosted Glassmorphism Container */}
-      <LiquidGlassBackground
-        borderRadius={36}
-        tint="purple-gold"
-        accentColor="#582CDB"
-        hasShadow={true}
-        containerStyle={{ width: '100%', maxWidth: 520 }}
-        style={styles.tabsRow}
-      >
-        {TABS.map((tab) => {
-          const isActive = activeTab === tab.id;
+      {/* Refined Floating iOS Glass Bar */}
+      <View style={styles.glassBarContainer}>
+        <View style={styles.tabsRow}>
+          {TABS.map((tab) => {
+            const isActive = activeTab === tab.id;
 
-          if (isActive) {
+            if (isActive) {
+              return (
+                <Pressable
+                  key={tab.id}
+                  onPress={() => handlePress(tab.id)}
+                  style={styles.activeTabTouchable}
+                  hitSlop={6}
+                >
+                  <LinearGradient
+                    colors={['#6A3EE6', '#582CDB']}
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 1, y: 1 }}
+                    style={styles.activeCapsule}
+                  >
+                    <View style={styles.iconWrapper}>
+                      {tab.icon('#FFFFFF')}
+                    </View>
+                    <Text style={styles.tabLabelActive} numberOfLines={1}>
+                      {tab.label}
+                    </Text>
+                  </LinearGradient>
+                </Pressable>
+              );
+            }
+
             return (
               <Pressable
                 key={tab.id}
                 onPress={() => handlePress(tab.id)}
-                style={styles.activePillTouchable}
+                style={({ pressed }) => [
+                  styles.inactiveTabItem,
+                  pressed && styles.inactiveTabPressed,
+                ]}
                 hitSlop={6}
               >
-                {/* Active Royal Purple Capsule */}
-                <LinearGradient
-                  colors={['#784DF0', '#582CDB']}
-                  start={{ x: 0, y: 0 }}
-                  end={{ x: 0, y: 1 }}
-                  style={styles.activeLiquidPill}
-                >
-                  <View style={styles.pillTopGloss} />
-                  <View style={styles.iconWrapper}>
-                    {tab.icon('#FFFFFF')}
-                  </View>
-                  <Text style={styles.tabLabelActive} numberOfLines={1}>
-                    {tab.label}
-                  </Text>
-                  <View style={styles.activeGoldDot} />
-                </LinearGradient>
+                <View style={styles.iconWrapper}>
+                  {tab.icon('#6E677F')}
+                </View>
+                <Text style={styles.tabLabelInactive} numberOfLines={1}>
+                  {tab.label}
+                </Text>
               </Pressable>
             );
-          }
-
-          return (
-            <Pressable
-              key={tab.id}
-              onPress={() => handlePress(tab.id)}
-              style={({ pressed }) => [
-                styles.inactiveTabItem,
-                pressed && styles.inactiveTabPressed,
-              ]}
-              hitSlop={6}
-            >
-              <View style={styles.iconWrapper}>
-                {tab.icon('#4A4458')}
-              </View>
-              <Text style={styles.tabLabelInactive} numberOfLines={1}>
-                {tab.label}
-              </Text>
-            </Pressable>
-          );
-        })}
-      </LiquidGlassBackground>
+          })}
+        </View>
+      </View>
     </View>
   );
 };
@@ -180,86 +172,88 @@ export const FloatingTabBar: React.FC<FloatingTabBarProps> = ({
 const styles = StyleSheet.create({
   floatingWrapper: {
     position: 'absolute',
-    bottom: Platform.OS === 'ios' ? 20 : 14,
-    left: 14,
-    right: 14,
+    bottom: Platform.OS === 'ios' ? 24 : 16,
+    left: 16,
+    right: 16,
     zIndex: 999,
     alignItems: 'center',
     pointerEvents: 'box-none',
+  },
+  glassBarContainer: {
+    width: '100%',
+    maxWidth: 480,
+    backgroundColor: 'rgba(255, 255, 255, 0.90)',
+    borderRadius: 30,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.95)',
+    shadowColor: '#171420',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.08,
+    shadowRadius: 24,
+    elevation: 8,
+    ...(Platform.OS === 'web'
+      ? ({
+          backdropFilter: 'blur(24px) saturate(180%)',
+          WebkitBackdropFilter: 'blur(24px) saturate(180%)',
+          boxShadow: '0 8px 32px rgba(23, 20, 32, 0.07), inset 0 1px 1px rgba(255, 255, 255, 0.9)',
+        } as any)
+      : {}),
   },
   tabsRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-around',
-    paddingVertical: 7,
-    paddingHorizontal: 8,
+    paddingVertical: 6,
+    paddingHorizontal: 6,
     width: '100%',
   },
   inactiveTabItem: {
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 6,
-    paddingHorizontal: 4,
-    borderRadius: 22,
+    paddingVertical: 5,
+    paddingHorizontal: 2,
+    borderRadius: 18,
   },
   inactiveTabPressed: {
-    backgroundColor: 'rgba(255, 255, 255, 0.4)',
+    backgroundColor: 'rgba(23, 20, 32, 0.04)',
     transform: [{ scale: 0.96 }],
   },
   tabLabelInactive: {
-    fontSize: 9.5,
-    fontWeight: '700',
-    color: '#4A4458',
-    letterSpacing: 0.3,
+    fontSize: 10,
+    fontWeight: '600',
+    color: '#6E677F',
+    letterSpacing: 0.1,
     textAlign: 'center',
+    marginTop: 2,
   },
-  activePillTouchable: {
-    flex: 1,
+  activeTabTouchable: {
+    flex: 1.1,
+    paddingHorizontal: 2,
   },
-  activeLiquidPill: {
-    position: 'relative',
+  activeCapsule: {
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 7,
+    paddingVertical: 6,
     paddingHorizontal: 4,
-    borderRadius: 24,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.45)',
+    borderRadius: 20,
     shadowColor: '#582CDB',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.08,
+    shadowOpacity: 0.15,
     shadowRadius: 10,
-    elevation: 5,
-  },
-  pillTopGloss: {
-    position: 'absolute',
-    top: 1,
-    left: 8,
-    right: 8,
-    height: 1.2,
-    backgroundColor: 'rgba(255, 255, 255, 0.5)',
-    borderRadius: 1,
+    elevation: 4,
   },
   iconWrapper: {
     height: 22,
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 2,
   },
   tabLabelActive: {
     color: '#FFFFFF',
-    fontWeight: '800',
-    fontSize: 9,
-    letterSpacing: 0.4,
+    fontWeight: '700',
+    fontSize: 10,
+    letterSpacing: 0.2,
     textAlign: 'center',
-  },
-  activeGoldDot: {
-    position: 'absolute',
-    bottom: 2.5,
-    width: 3.5,
-    height: 3.5,
-    borderRadius: 2,
-    backgroundColor: '#F59E0B',
+    marginTop: 2,
   },
 });
