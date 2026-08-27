@@ -276,12 +276,19 @@ export const OnboardingCompleteScreen: React.FC<OnboardingCompleteScreenProps> =
             <View style={styles.summaryCardHeader}>
               <View style={styles.levelBadgeRow}>
                 <View style={styles.levelPill}>
-                  <Text style={styles.levelPillText}>Level 1</Text>
+                  <Text style={styles.levelPillText} numberOfLines={1}>Level 1</Text>
                 </View>
-                <Text style={styles.levelNameText}>Starter Creator</Text>
+                <Text
+                  style={styles.levelNameText}
+                  numberOfLines={1}
+                  adjustsFontSizeToFit
+                  minimumFontScale={0.85}
+                >
+                  Starter Creator
+                </Text>
               </View>
               <View style={styles.streakBadge}>
-                <Text style={styles.streakBadgeText}>🔥 Day 1 Ready</Text>
+                <Text style={styles.streakBadgeText} numberOfLines={1}>🔥 Day 1 Ready</Text>
               </View>
             </View>
 
@@ -653,17 +660,22 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: 10,
+    gap: 8,
   },
   levelBadgeRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
+    gap: 6,
+    flex: 1,
+    minWidth: 0,
+    marginRight: 6,
   },
   levelPill: {
     backgroundColor: '#582CDB',
     borderRadius: 6,
     paddingVertical: 2.5,
-    paddingHorizontal: 7,
+    paddingHorizontal: 6,
+    flexShrink: 0,
   },
   levelPillText: {
     color: '#FFFFFF',
@@ -671,9 +683,10 @@ const styles = StyleSheet.create({
     fontWeight: '800',
   },
   levelNameText: {
-    fontSize: 14,
-    fontWeight: '700',
+    fontSize: 13.5,
+    fontWeight: '800',
     color: '#171420',
+    flexShrink: 1,
   },
   streakBadge: {
     backgroundColor: 'rgba(255, 247, 237, 0.9)',
@@ -682,9 +695,10 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(255, 237, 213, 0.9)',
     paddingVertical: 2.5,
     paddingHorizontal: 7,
+    flexShrink: 0,
   },
   streakBadgeText: {
-    fontSize: 11,
+    fontSize: 10.5,
     fontWeight: '800',
     color: '#C2410C',
   },
