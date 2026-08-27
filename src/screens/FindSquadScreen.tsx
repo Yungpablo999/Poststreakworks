@@ -522,7 +522,7 @@ export const FindSquadScreen: React.FC<FindSquadScreenProps> = ({
                   setPreviewModalSquad(featuredSquad);
                 }}
               >
-                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, flex: 1, minWidth: 0, marginRight: 8 }}>
                   <View style={styles.avatarStackRow}>
                     {featuredSquad.avatars.map((av, i) => (
                       <Image
@@ -530,22 +530,22 @@ export const FindSquadScreen: React.FC<FindSquadScreenProps> = ({
                         source={av}
                         style={[
                           styles.featuredAvatarImg,
-                          { marginLeft: i === 0 ? 0 : -8, zIndex: 3 - i },
+                          { marginLeft: i === 0 ? 0 : -7, zIndex: 3 - i },
                         ]}
                       />
                     ))}
-                    <View style={[styles.featuredAvatarPlus, { marginLeft: -8, zIndex: 0 }]}>
+                    <View style={[styles.featuredAvatarPlus, { marginLeft: -7, zIndex: 0 }]}>
                       <Text style={styles.featuredAvatarPlusText}>+2</Text>
                     </View>
                   </View>
 
-                  <Text style={styles.featuredMemberCount}>
+                  <Text style={styles.featuredMemberCount} numberOfLines={1}>
                     5/8 Creators <Text style={{ color: '#C084FC', fontSize: 11 }}>➔</Text>
                   </Text>
                 </View>
 
                 <View style={styles.streakPillGold}>
-                  <Text style={styles.streakPillGoldText}>🔥 12d Streak</Text>
+                  <Text style={styles.streakPillGoldText} numberOfLines={1}>🔥 12d Streak</Text>
                 </View>
               </Pressable>
 
@@ -1348,25 +1348,29 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginTop: 14,
     backgroundColor: 'rgba(255, 255, 255, 0.06)',
-    padding: 8,
+    paddingHorizontal: 10,
+    paddingVertical: 8,
     borderRadius: 12,
+    width: '100%',
   },
   featuredMemberCount: {
-    fontSize: 12,
+    fontSize: 11.5,
     fontWeight: '800',
     color: '#E2E8F0',
+    flexShrink: 1,
   },
   streakPillGold: {
     backgroundColor: 'rgba(245, 158, 11, 0.2)',
-    paddingHorizontal: 8,
+    paddingHorizontal: 7,
     paddingVertical: 3,
-    borderRadius: 8,
+    borderRadius: 7,
     borderWidth: 1,
     borderColor: 'rgba(245, 158, 11, 0.4)',
+    flexShrink: 0,
   },
   streakPillGoldText: {
-    fontSize: 11,
-    fontWeight: '700',
+    fontSize: 10.5,
+    fontWeight: '800',
     color: '#FDE68A',
   },
   featuredActionsRow: {
@@ -1587,16 +1591,16 @@ const styles = StyleSheet.create({
     color: '#582CDB',
   },
   featuredAvatarImg: {
-    width: 26,
-    height: 26,
-    borderRadius: 13,
+    width: 24,
+    height: 24,
+    borderRadius: 12,
     borderWidth: 1.5,
     borderColor: '#2A1259',
   },
   featuredAvatarPlus: {
-    width: 26,
-    height: 26,
-    borderRadius: 13,
+    width: 24,
+    height: 24,
+    borderRadius: 12,
     backgroundColor: 'rgba(255, 255, 255, 0.2)',
     borderWidth: 1.5,
     borderColor: '#2A1259',
@@ -1604,7 +1608,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   featuredAvatarPlusText: {
-    fontSize: 10,
+    fontSize: 9.5,
     fontWeight: '800',
     color: '#FFFFFF',
   },
