@@ -933,12 +933,12 @@ export const ProEarningsScreen: React.FC<ProEarningsScreenProps> = ({
                 { name: 'Momentum Boost Bounty', status: 'PENDING', amount: '$200', icon: '⚡' },
               ].map((brand, idx) => (
                 <View key={idx} style={styles.brandEarningRow}>
-                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+                  <View style={styles.brandLeftGroup}>
                     <View style={styles.brandIconBox}>
-                      <Text style={{ fontSize: 18 }}>{brand.icon}</Text>
+                      <Text style={{ fontSize: 17 }}>{brand.icon}</Text>
                     </View>
-                    <View>
-                      <Text style={styles.brandNameText}>{brand.name}</Text>
+                    <View style={styles.brandInfoCol}>
+                      <Text style={styles.brandNameText} numberOfLines={1}>{brand.name}</Text>
                       <View style={[styles.brandStatusPill, brand.status === 'PENDING' && styles.brandStatusPending]}>
                         <Text style={[styles.brandStatusText, brand.status === 'PENDING' && styles.brandStatusTextPending]}>
                           {brand.status}
@@ -946,7 +946,7 @@ export const ProEarningsScreen: React.FC<ProEarningsScreenProps> = ({
                       </View>
                     </View>
                   </View>
-                  <Text style={styles.brandEarnedAmount}>{brand.amount}</Text>
+                  <Text style={styles.brandEarnedAmount} numberOfLines={1}>{brand.amount}</Text>
                 </View>
               ))}
             </View>
@@ -968,8 +968,8 @@ export const ProEarningsScreen: React.FC<ProEarningsScreenProps> = ({
                 { name: 'Referral rewards', amount: '$140' },
               ].map((collab, idx) => (
                 <View key={idx} style={styles.collabRow}>
-                  <Text style={styles.collabNameText}>{collab.name}</Text>
-                  <Text style={styles.collabAmountText}>{collab.amount}</Text>
+                  <Text style={styles.collabNameText} numberOfLines={1}>{collab.name}</Text>
+                  <Text style={styles.collabAmountText} numberOfLines={1}>{collab.amount}</Text>
                 </View>
               ))}
             </View>
@@ -3103,18 +3103,31 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#EFECE6',
   },
+  brandLeftGroup: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    flex: 1,
+    minWidth: 0,
+    marginRight: 10,
+  },
   brandIconBox: {
-    width: 38,
-    height: 38,
+    width: 36,
+    height: 36,
     borderRadius: 10,
     backgroundColor: '#FFFFFF',
     borderWidth: 1,
     borderColor: '#EFECE6',
     justifyContent: 'center',
     alignItems: 'center',
+    flexShrink: 0,
+  },
+  brandInfoCol: {
+    flex: 1,
+    minWidth: 0,
   },
   brandNameText: {
-    fontSize: 13,
+    fontSize: sFont(13),
     fontWeight: '700',
     color: '#171420',
   },
@@ -3130,7 +3143,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#FEF3C7',
   },
   brandStatusText: {
-    fontSize: 9,
+    fontSize: sFont(9),
     fontWeight: '700',
     color: '#15803D',
   },
@@ -3138,9 +3151,10 @@ const styles = StyleSheet.create({
     color: '#B45309',
   },
   brandEarnedAmount: {
-    fontSize: 14,
+    fontSize: sFont(14),
     fontWeight: '700',
     color: '#171420',
+    flexShrink: 0,
   },
 
   // COLLAB REVENUE
@@ -3153,19 +3167,23 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingVertical: 6,
+    paddingVertical: 8,
     borderBottomWidth: 1,
     borderBottomColor: '#F1EFE9',
   },
   collabNameText: {
-    fontSize: 13,
+    fontSize: sFont(13),
     fontWeight: '700',
     color: '#334155',
+    flex: 1,
+    minWidth: 0,
+    marginRight: 8,
   },
   collabAmountText: {
-    fontSize: 14,
+    fontSize: sFont(14),
     fontWeight: '700',
     color: '#171420',
+    flexShrink: 0,
   },
   outlineActionBtn: {
     flex: 1,
