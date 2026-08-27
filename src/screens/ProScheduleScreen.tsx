@@ -1025,7 +1025,7 @@ export const ProScheduleScreen: React.FC<ProScheduleScreenProps> = ({
                 end={{ x: 1, y: 1 }}
                 style={styles.modalGoldBtnGradient}
               >
-                <Text style={styles.modalGoldActionBtnText}>
+                <Text style={styles.modalGoldActionBtnText} numberOfLines={1}>
                   ✨ More Strategy Ideas ➔
                 </Text>
               </LinearGradient>
@@ -1288,8 +1288,8 @@ export const ProScheduleScreen: React.FC<ProScheduleScreenProps> = ({
                     end={{ x: 1, y: 1 }}
                     style={styles.modalGoldBtnGradient}
                   >
-                    <Text style={styles.modalGoldActionBtnText}>
-                      ✨ Accept &amp; Fill Schedule Slot (+75 XP) ➔
+                    <Text style={styles.modalGoldActionBtnText} numberOfLines={1}>
+                      ✨ Accept &amp; Fill Slot (+75 XP) ➔
                     </Text>
                   </LinearGradient>
                 </Pressable>
@@ -1476,7 +1476,7 @@ export const ProScheduleScreen: React.FC<ProScheduleScreenProps> = ({
                         end={{ x: 1, y: 1 }}
                         style={styles.modalGoldBtnGradient}
                       >
-                        <Text style={styles.modalGoldActionBtnText}>
+                        <Text style={styles.modalGoldActionBtnText} numberOfLines={1}>
                           ✨ Save Changes (+25 XP) ➔
                         </Text>
                       </LinearGradient>
@@ -1893,7 +1893,7 @@ export const ProScheduleScreen: React.FC<ProScheduleScreenProps> = ({
                     end={{ x: 1, y: 1 }}
                     style={styles.modalGoldBtnGradient}
                   >
-                    <Text style={styles.modalGoldActionBtnText}>
+                    <Text style={styles.modalGoldActionBtnText} numberOfLines={1}>
                       ✨ Apply {selectedStrategyIds.length} Strategies (+{selectedStrategyIds.length * 25} XP) ➔
                     </Text>
                   </LinearGradient>
@@ -2886,7 +2886,8 @@ const styles = StyleSheet.create({
     elevation: 4,
   },
   modalGoldBtnGradient: {
-    paddingVertical: 14,
+    paddingVertical: 13,
+    paddingHorizontal: 10,
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 1,
@@ -2895,9 +2896,10 @@ const styles = StyleSheet.create({
   },
   modalGoldActionBtnText: {
     color: '#0C0A12',
-    fontSize: 14,
+    fontSize: sFont(13),
     fontWeight: '700',
     letterSpacing: 0.2,
+    textAlign: 'center',
   },
   modalSecondaryOutlineBtn: {
     backgroundColor: '#FAF8F5',
