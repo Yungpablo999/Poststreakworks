@@ -1229,12 +1229,15 @@ export const ProEarningsScreen: React.FC<ProEarningsScreenProps> = ({
                                   />
                                 </View>
 
-                                <View style={{ alignItems: 'center', marginTop: 8 }}>
-                                  <SocialBrandIcon platform={plat.icon} size={18} />
-                                  <Text style={[styles.platformBarLabel, isSelected && styles.platformBarLabelActive]}>
-                                    {plat.name.split(' ')[0]}
+                                <View style={{ alignItems: 'center', marginTop: 6, width: '100%' }}>
+                                  <SocialBrandIcon platform={plat.icon} size={16} />
+                                  <Text
+                                    style={[styles.platformBarLabel, isSelected && styles.platformBarLabelActive]}
+                                    numberOfLines={1}
+                                  >
+                                    {plat.name === 'Instagram' ? 'Insta' : plat.name.split(' ')[0]}
                                   </Text>
-                                  <Text style={styles.platformBarPctText}>{plat.pct}</Text>
+                                  <Text style={styles.platformBarPctText} numberOfLines={1}>{plat.pct}</Text>
                                 </View>
                               </Pressable>
                             );
@@ -2360,15 +2363,17 @@ const styles = StyleSheet.create({
   platformBarsRow: {
     flexDirection: 'row',
     alignItems: 'flex-end',
-    justifyContent: 'space-around',
+    justifyContent: 'space-between',
     paddingTop: 4,
     paddingBottom: 6,
+    gap: 4,
   },
   platformBarCol: {
     flex: 1,
+    minWidth: 0,
     alignItems: 'center',
     paddingVertical: 8,
-    paddingHorizontal: 4,
+    paddingHorizontal: 2,
     borderRadius: 14,
   },
   platformBarColSelected: {
@@ -2381,16 +2386,17 @@ const styles = StyleSheet.create({
     shadowRadius: 6,
   },
   platformBarAmtText: {
-    fontSize: 12,
+    fontSize: sFont(11),
     fontWeight: '800',
     color: '#171420',
-    marginBottom: 8,
+    marginBottom: 6,
+    textAlign: 'center',
   },
   platformBarTrack: {
-    width: 26,
+    width: 24,
     height: 100,
     backgroundColor: '#EDE9FE',
-    borderRadius: 13,
+    borderRadius: 12,
     justifyContent: 'flex-end',
     overflow: 'hidden',
   },
@@ -2399,19 +2405,22 @@ const styles = StyleSheet.create({
     borderRadius: 12,
   },
   platformBarLabel: {
-    fontSize: 11,
+    fontSize: sFont(9.5),
     fontWeight: '700',
     color: '#64748B',
     marginTop: 4,
+    textAlign: 'center',
   },
   platformBarLabelActive: {
     color: '#582CDB',
-    fontWeight: '700',
+    fontWeight: '800',
   },
   platformBarPctText: {
-    fontSize: 10,
+    fontSize: sFont(9),
     fontWeight: '700',
     color: '#94A3B8',
+    marginTop: 1,
+    textAlign: 'center',
   },
 
   /* EXPANDED LEDGER BREAKDOWN STYLES */
