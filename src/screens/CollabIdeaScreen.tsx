@@ -1768,7 +1768,9 @@ const styles = StyleSheet.create({
   },
   jarvisChipsRow: {
     flexDirection: 'row',
-    gap: 6,
+    flexWrap: 'wrap',
+    gap: 8,
+    alignItems: 'center',
   },
   jarvisActionChip: {
     backgroundColor: '#FFFFFF',
