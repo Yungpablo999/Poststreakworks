@@ -370,7 +370,14 @@ export const PlatformConnectScreen: React.FC<PlatformConnectScreenProps> = ({
 
                   {/* Middle: Title & Description */}
                   <View style={styles.platformTextContainer}>
-                    <Text style={styles.platformTitle}>{item.name}</Text>
+                    <Text
+                      style={styles.platformTitle}
+                      numberOfLines={1}
+                      adjustsFontSizeToFit
+                      minimumFontScale={0.85}
+                    >
+                      {item.name}
+                    </Text>
                     <Text style={styles.platformSubtitle}>{item.description}</Text>
                   </View>
 
@@ -683,7 +690,8 @@ const styles = StyleSheet.create({
     borderRadius: 18,
     borderWidth: 1,
     borderColor: 'rgba(23, 20, 32, 0.07)',
-    padding: 16,
+    paddingVertical: 13,
+    paddingHorizontal: 12,
     shadowColor: '#171420',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.03,
@@ -698,7 +706,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: 14,
+    marginRight: 11,
     shadowColor: '#000000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.06,
@@ -707,19 +715,20 @@ const styles = StyleSheet.create({
   },
   platformTextContainer: {
     flex: 1,
-    marginRight: 10,
+    marginRight: 8,
   },
   platformTitle: {
     fontSize: 15,
     fontWeight: '700',
     color: '#171420',
-    marginBottom: 3,
+    marginBottom: 2,
+    letterSpacing: -0.3,
   },
   platformSubtitle: {
-    fontSize: 12,
+    fontSize: 11.5,
     fontWeight: '400',
     color: '#5E576E',
-    lineHeight: 17,
+    lineHeight: 16,
   },
   connectButton: {
     paddingVertical: 7,
@@ -743,12 +752,12 @@ const styles = StyleSheet.create({
   connectedBadge: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 5,
-    paddingVertical: 7,
-    paddingHorizontal: 10,
+    gap: 4,
+    paddingVertical: 6,
+    paddingHorizontal: 8,
   },
   connectedText: {
-    fontSize: 13.5,
+    fontSize: 12.5,
     fontWeight: '700',
     color: '#582CDB',
   },

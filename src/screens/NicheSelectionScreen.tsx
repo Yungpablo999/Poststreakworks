@@ -448,7 +448,12 @@ export const NicheSelectionScreen: React.FC<NicheSelectionScreenProps> = ({
 
                   {/* Title & Subtitle */}
                   <View style={styles.nicheTextContainer}>
-                    <Text style={[styles.nicheTitle, isSelected && styles.nicheTitleSelected]}>
+                    <Text
+                      style={[styles.nicheTitle, isSelected && styles.nicheTitleSelected]}
+                      numberOfLines={1}
+                      adjustsFontSizeToFit
+                      minimumFontScale={0.85}
+                    >
                       {niche.title}
                     </Text>
                     <Text style={styles.nicheSubtitle}>{niche.subtitle}</Text>
