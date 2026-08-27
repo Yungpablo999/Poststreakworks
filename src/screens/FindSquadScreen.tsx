@@ -487,11 +487,11 @@ export const FindSquadScreen: React.FC<FindSquadScreenProps> = ({
               {/* Top Banner Row */}
               <View style={styles.featuredTopRow}>
                 <View style={styles.spotlightBadge}>
-                  <Text style={styles.spotlightBadgeText}>👑 TOP RECOMMENDED SQUAD</Text>
+                  <Text style={styles.spotlightBadgeText} numberOfLines={1}>👑 TOP RECOMMENDED</Text>
                 </View>
 
                 <View style={styles.matchScoreAiPill}>
-                  <Text style={styles.matchScoreAiPillText}>94% FIT</Text>
+                  <Text style={styles.matchScoreAiPillText} numberOfLines={1}>94% FIT</Text>
                 </View>
               </View>
 
@@ -1285,6 +1285,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+    gap: 12,
   },
   spotlightBadge: {
     backgroundColor: 'rgba(253, 230, 138, 0.25)',
@@ -1293,23 +1294,26 @@ const styles = StyleSheet.create({
     borderRadius: 6,
     borderWidth: 1,
     borderColor: 'rgba(253, 230, 138, 0.4)',
+    flexShrink: 1,
   },
   spotlightBadgeText: {
-    fontSize: 10,
-    fontWeight: '700',
+    fontSize: 9.5,
+    fontWeight: '800',
     color: '#FDE68A',
-    letterSpacing: 0.5,
+    letterSpacing: 0.3,
   },
   matchScoreAiPill: {
     backgroundColor: 'rgba(192, 132, 252, 0.25)',
-    paddingHorizontal: 7,
-    paddingVertical: 2.5,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
     borderRadius: 6,
+    flexShrink: 0,
   },
   matchScoreAiPillText: {
-    fontSize: 10,
-    fontWeight: '700',
+    fontSize: 9.5,
+    fontWeight: '800',
     color: '#F3E8FF',
+    letterSpacing: 0.3,
   },
   featuredTitle: {
     fontSize: 20,
