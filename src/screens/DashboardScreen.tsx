@@ -1233,12 +1233,9 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
           </View>
 
           {/* 8. CARD 4: CREATOR MATCH VELOCITY */}
-          <View style={styles.dashboardCard}>
+          <View style={[styles.dashboardCard, isDark && styles.dashboardCardDark]}>
             <View style={styles.matchHeaderRow}>
-              <Text style={styles.matchSectionTitle}>Suggested Match</Text>
-              <View style={styles.growthActionPill}>
-                <Text style={styles.growthActionText}>GROWTH ACTION</Text>
-              </View>
+              <Text style={[styles.matchSectionTitle, isDark && styles.textWhite]}>Suggested Match</Text>
             </View>
 
             {/* Creator Profile Row */}
@@ -1251,21 +1248,31 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
                 />
               </View>
               <View style={styles.creatorDetails}>
-                <Text style={styles.creatorName}>Elena Rostova</Text>
-                <Text style={styles.creatorFollowers}>Tech &amp; Design • 42.8k Followers</Text>
+                <View style={styles.creatorNameRow}>
+                  <Text style={[styles.creatorName, isDark && styles.textWhite]}>Elena Rostova</Text>
+                  <View style={styles.creatorPlatformBadge}>
+                    <Svg width={11} height={11} viewBox="0 0 24 24" fill="none">
+                      <Rect x="2" y="2" width="20" height="20" rx="5" stroke="#E1306C" strokeWidth="2.2" />
+                      <Circle cx="12" cy="12" r="4.5" stroke="#E1306C" strokeWidth="2.2" />
+                      <Circle cx="17.5" cy="6.5" r="1.2" fill="#E1306C" />
+                    </Svg>
+                  </View>
+                </View>
+                <Text style={[styles.creatorFollowers, isDark && styles.textMutedDark]}>
+                  Tech &amp; Design · 42.8K followers
+                </Text>
               </View>
             </View>
 
             {/* Why This Match Box */}
-            <View style={styles.whyMatchBox}>
-              <Text style={styles.whyMatchSparkle}>✨</Text>
-              <Text style={styles.whyMatchText}>
-                <Text style={styles.whyMatchBold}>Why this match? </Text>
-                94% Niche Synergy, matching daily posting pace, and open for squads.
+            <View style={[styles.whyMatchBox, isDark && styles.whyMatchBoxDark]}>
+              <Text style={styles.whyMatchPercent}>94% match</Text>
+              <Text style={[styles.whyMatchText, isDark && styles.textMutedDark]}>
+                Strong niche overlap, similar posting pace, and open to creator squads.
               </Text>
             </View>
 
-            {/* Connect & View Match Button */}
+            {/* View Creator Button */}
             <Pressable
               onPress={() => {
                 if (Platform.OS !== 'web') {
@@ -1276,20 +1283,11 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
                 }
               }}
               style={({ pressed }) => [
-                styles.connectMatchGradientWrap,
-                pressed && styles.connectMatchButtonPressed,
+                styles.connectMatchButton,
+                pressed && styles.missionButtonPressed,
               ]}
             >
-              <LinearGradient
-                colors={['#7C3AED', '#582CDB']}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 0 }}
-                style={styles.connectMatchGradient}
-              >
-                <Text style={styles.connectMatchButtonText} numberOfLines={1}>
-                  {isNarrowScreen ? 'View Creator Card ➔' : 'Connect & View Creator Card ➔'}
-                </Text>
-              </LinearGradient>
+              <Text style={styles.connectMatchButtonText}>View Creator →</Text>
             </Pressable>
           </View>
 
@@ -2586,26 +2584,14 @@ const styles = StyleSheet.create({
   // 8. CREATOR MATCH COLLABORATION
   matchHeaderRow: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 14,
+    marginBottom: 12,
   },
   matchSectionTitle: {
-    fontSize: 16.5,
+    fontSize: 16,
     fontWeight: '700',
     color: '#171420',
-  },
-  growthActionPill: {
-    backgroundColor: '#F4F0FF',
-    borderRadius: 6,
-    paddingVertical: 3,
-    paddingHorizontal: 7,
-  },
-  growthActionText: {
-    fontSize: 10,
-    fontWeight: '700',
-    color: '#582CDB',
-    letterSpacing: 0.3,
+    letterSpacing: -0.2,
   },
   creatorProfileRow: {
     flexDirection: 'row',
@@ -2614,84 +2600,87 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   creatorAvatarBox: {
-    width: 46,
-    height: 46,
-    borderRadius: 23,
+    width: 44,
+    height: 44,
+    borderRadius: 14,
+    overflow: 'hidden',
     backgroundColor: '#F4F0FF',
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderWidth: 1.2,
-    borderColor: 'rgba(88, 44, 219, 0.15)',
   },
   creatorAvatarImage: {
-    width: 46,
-    height: 46,
+    width: '100%',
+    height: '100%',
   },
   creatorDetails: {
     flex: 1,
+    justifyContent: 'center',
+  },
+  creatorNameRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+    marginBottom: 2,
   },
   creatorName: {
     fontSize: 15,
     fontWeight: '700',
     color: '#171420',
-    marginBottom: 2,
+  },
+  creatorPlatformBadge: {
+    width: 16,
+    height: 16,
+    borderRadius: 4,
+    backgroundColor: '#FDF2F8',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   creatorFollowers: {
     fontSize: 12,
     color: '#5E576E',
+    fontWeight: '500',
   },
   whyMatchBox: {
-    flexDirection: 'row',
-    alignItems: 'center',
     backgroundColor: '#FAF9FF',
-    borderRadius: 14,
-    paddingVertical: 10,
+    borderRadius: 12,
+    paddingVertical: 9,
     paddingHorizontal: 12,
     borderWidth: 1,
     borderColor: 'rgba(88, 44, 219, 0.08)',
-    gap: 8,
     marginBottom: 14,
   },
-  whyMatchSparkle: {
-    fontSize: 14,
+  whyMatchBoxDark: {
+    backgroundColor: '#1C1924',
+    borderColor: 'rgba(255, 255, 255, 0.08)',
   },
-  whyMatchText: {
-    flex: 1,
+  whyMatchPercent: {
     fontSize: 12,
-    color: '#5E576E',
-    lineHeight: 17,
-  },
-  whyMatchBold: {
     fontWeight: '700',
     color: '#582CDB',
+    marginBottom: 2,
+    letterSpacing: 0.1,
   },
-  connectMatchButtonPressed: {
-    transform: [{ scale: 0.98 }],
-    opacity: 0.9,
+  whyMatchText: {
+    fontSize: 12,
+    color: '#5E576E',
+    lineHeight: 16.5,
   },
-  connectMatchGradientWrap: {
-    height: 44,
+  connectMatchButton: {
+    backgroundColor: '#582CDB',
+    height: 46,
     borderRadius: 12,
-    overflow: 'hidden',
+    justifyContent: 'center',
+    alignItems: 'center',
     shadowColor: '#582CDB',
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.10,
-    shadowRadius: 6,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.12,
+    shadowRadius: 10,
     elevation: 3,
     width: '100%',
   },
-  connectMatchGradient: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingHorizontal: sPadding(8),
-  },
   connectMatchButtonText: {
-    fontSize: sFont(13),
+    fontSize: 14.5,
     fontWeight: '700',
     color: '#FFFFFF',
-    letterSpacing: 0.1,
-    textAlign: 'center',
+    letterSpacing: -0.1,
   },
 
   // 9. PRO UPGRADE CARD
