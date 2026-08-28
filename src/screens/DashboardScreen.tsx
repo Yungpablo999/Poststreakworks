@@ -1162,14 +1162,14 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
             </View>
           </View>
 
-          {/* 6. CARD 3: CREATOR LEVEL & QUEST (Level 1) */}
+          {/* 6. CARD 3: CREATOR LEVEL & QUEST ("Elite Storyteller") */}
           <View style={styles.dashboardCard}>
             <View style={styles.levelCardHeader}>
               <View style={styles.levelBadgeGroup}>
                 <View style={styles.levelGoldPill}>
-                  <Text style={styles.levelGoldPillText}>LEVEL 1</Text>
+                  <Text style={styles.levelGoldPillText}>LEVEL 42</Text>
                 </View>
-                <Text style={styles.levelNameHeading}>Storyteller</Text>
+                <Text style={styles.levelNameHeading}>Elite Storyteller</Text>
               </View>
               <View style={styles.trophyIconBox}>
                 <Text style={styles.trophyEmoji}>🏆</Text>
@@ -1177,17 +1177,17 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
             </View>
 
             <Text style={styles.levelDescription}>
-              Publish 1 high impact Reel today to unlock <Text style={styles.goldTextBold}>Level 2</Text> rewards.
+              Publish 1 high-impact Reel today to unlock <Text style={styles.goldTextBold}>Level 43</Text>.
             </Text>
 
             {/* XP Progress Bar */}
             <View style={styles.xpLabelsRow}>
-              <Text style={styles.xpCurrent}>100 XP</Text>
-              <Text style={styles.xpTarget}>300 XP</Text>
+              <Text style={styles.xpCurrent}>2,450 XP</Text>
+              <Text style={styles.xpTarget}>3,000 XP</Text>
             </View>
 
             <View style={styles.xpProgressBarBg}>
-              <View style={[styles.xpProgressBarFill, { width: '33%' }]} />
+              <View style={[styles.xpProgressBarFill, { width: '82%' }]} />
             </View>
 
             {/* Start First Mission Action Button */}
