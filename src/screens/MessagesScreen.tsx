@@ -831,48 +831,50 @@ export const MessagesScreen: React.FC<MessagesScreenProps> = ({
                 </View>
               </View>
 
-              {/* Right Action Icons: 👥＋ (Start a Squad) & ⋯ (Conversation Options) */}
+              {/* Right Action Icons: 👥＋ (Start a Squad - only for real creator chats) & ⋯ (Conversation Options) */}
               <View style={styles.chatActiveHeaderRightGroup}>
-                <Pressable
-                  style={({ pressed }) => [styles.chatHeaderActionBtn, isDark && styles.chatHeaderActionBtnDark, pressed && styles.btnPressed]}
-                  hitSlop={8}
-                  onPress={() => {
-                    if (Platform.OS !== 'web') {
-                      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                    }
-                    if (activeChatThread) {
-                      setSquadNameInput(`${activeChatThread.name.split(' ')[0]} & Pablo's Squad`);
-                    }
-                    triggerModalAnim();
-                    setShowCreateSquadModal(true);
-                  }}
-                >
-                  <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
-                    {/* User Body & Head */}
-                    <Path
-                      d="M15 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"
-                      stroke={isDark ? '#FFFFFF' : '#171420'}
-                      strokeWidth="2.1"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                    <Circle
-                      cx="8"
-                      cy="7"
-                      r="4"
-                      stroke={isDark ? '#FFFFFF' : '#171420'}
-                      strokeWidth="2.1"
-                    />
-                    {/* Vibrant Purple Plus on Top-Right */}
-                    <Path
-                      d="M19 8v6M16 11h6"
-                      stroke="#582CDB"
-                      strokeWidth="2.4"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                  </Svg>
-                </Pressable>
+                {activeChatThread.creatorId !== 'jarvis' && (
+                  <Pressable
+                    style={({ pressed }) => [styles.chatHeaderActionBtn, isDark && styles.chatHeaderActionBtnDark, pressed && styles.btnPressed]}
+                    hitSlop={8}
+                    onPress={() => {
+                      if (Platform.OS !== 'web') {
+                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                      }
+                      if (activeChatThread) {
+                        setSquadNameInput(`${activeChatThread.name.split(' ')[0]} & Pablo's Squad`);
+                      }
+                      triggerModalAnim();
+                      setShowCreateSquadModal(true);
+                    }}
+                  >
+                    <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
+                      {/* User Body & Head */}
+                      <Path
+                        d="M15 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"
+                        stroke={isDark ? '#FFFFFF' : '#171420'}
+                        strokeWidth="2.1"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                      <Circle
+                        cx="8"
+                        cy="7"
+                        r="4"
+                        stroke={isDark ? '#FFFFFF' : '#171420'}
+                        strokeWidth="2.1"
+                      />
+                      {/* Vibrant Purple Plus on Top-Right */}
+                      <Path
+                        d="M19 8v6M16 11h6"
+                        stroke="#582CDB"
+                        strokeWidth="2.4"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                    </Svg>
+                  </Pressable>
+                )}
 
                 <Pressable
                   style={({ pressed }) => [styles.chatHeaderActionBtn, isDark && styles.chatHeaderActionBtnDark, pressed && styles.btnPressed]}
@@ -2056,11 +2058,12 @@ export const MessagesScreen: React.FC<MessagesScreenProps> = ({
                       </View>
                     )}
 
-                    {/* Other Available Creators */}
+                    {/* Other Available Real Creators */}
                     {[
+                      { id: 'c1', name: 'Elena Rostova', handle: '@elenacreates', streak: 52, niche: 'Film & Tech Review', avatar: require('../../assets/images/elena-avatar.jpg') },
                       { id: 'c2', name: 'Marcus Chen', handle: '@marcustech', streak: 38, niche: 'AI & Workflow', avatar: require('../../assets/images/marcus-avatar.jpg') },
                       { id: 'c3', name: 'Sophia Taylor', handle: '@sophiastyle', streak: 41, niche: 'Lifestyle & Fashion', avatar: require('../../assets/images/zainab-avatar.jpg') },
-                      { id: 'jarvis', name: 'Jarvis AI', handle: '@jarvis.ai', streak: 100, niche: 'AI Content Director', avatar: require('../../assets/images/jarvis-core-flame.png') },
+                      { id: 'c4', name: 'David Kim', handle: '@davidbuilds', streak: 29, niche: 'Fitness & Mindset', avatar: require('../../assets/images/alex-avatar.jpg') },
                     ]
                       .filter((c) => !activeChatThread || c.id !== activeChatThread.creatorId)
                       .map((creator) => {
