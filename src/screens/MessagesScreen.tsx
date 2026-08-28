@@ -945,7 +945,7 @@ export const MessagesScreen: React.FC<MessagesScreenProps> = ({
             <View style={styles.topBadgesRow}>
               <Text style={[styles.socialHubPageLabel, isDark && styles.textWhite]}>SOCIAL HUB</Text>
               <View style={styles.activePactQuietBadge}>
-                <Text style={styles.activePactQuietText}>⚡ 3 Active Pacts</Text>
+                <Text style={styles.activePactQuietText}>⚡ 3 Active Collabs</Text>
               </View>
             </View>
 
@@ -2002,7 +2002,7 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   socialHubPageLabel: {
-    fontSize: 12,
+    fontSize: 13,
     fontWeight: '800',
     color: '#171420',
     letterSpacing: 0.8,
@@ -2010,15 +2010,16 @@ const styles = StyleSheet.create({
   activePactQuietBadge: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#F5F3FF',
-    paddingVertical: 3.5,
-    paddingHorizontal: 9,
-    borderRadius: 8,
+    backgroundColor: '#F8F6FF',
+    paddingVertical: 2.5,
+    paddingHorizontal: 7,
+    borderRadius: 6,
   },
   activePactQuietText: {
-    fontSize: 11,
+    fontSize: 10.5,
     fontWeight: '600',
-    color: '#6D28D9',
+    color: '#7C3AED',
+    letterSpacing: 0.1,
   },
 
   // Search Box
