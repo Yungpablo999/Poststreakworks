@@ -84,8 +84,8 @@ export const NicheSelectionScreen: React.FC<NicheSelectionScreenProps> = ({
   onBack,
   onContinue,
 }) => {
-  // Pre-selected matches Figma reference (Lifestyle + Tech & Business)
-  const [selectedNiches, setSelectedNiches] = useState<string[]>(['lifestyle', 'tech']);
+  // Clean initial state (empty by default so user selects up to 3)
+  const [selectedNiches, setSelectedNiches] = useState<string[]>([]);
   const [customNiches, setCustomNiches] = useState<NicheItem[]>([]);
   const [showCustomModal, setShowCustomModal] = useState(false);
   const [showLimitModal, setShowLimitModal] = useState(false);

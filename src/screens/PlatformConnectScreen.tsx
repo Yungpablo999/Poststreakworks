@@ -61,8 +61,8 @@ export const PlatformConnectScreen: React.FC<PlatformConnectScreenProps> = ({
   onContinue,
   onSkipLater,
 }) => {
-  // Pre-connected matches Figma reference (Instagram connected by default)
-  const [connectedPlatforms, setConnectedPlatforms] = useState<string[]>(['instagram']);
+  // Initial connected platforms (empty by default so user manually connects)
+  const [connectedPlatforms, setConnectedPlatforms] = useState<string[]>([]);
 
   // Jarvis Validation Modal
   const [showJarvisModal, setShowJarvisModal] = useState(false);
