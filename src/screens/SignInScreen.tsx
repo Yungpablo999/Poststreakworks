@@ -21,14 +21,12 @@ import * as Haptics from 'expo-haptics';
 interface SignInScreenProps {
   onBack: () => void;
   onCreateAccount: () => void;
-  onForgotPassword?: () => void;
   onSubmit?: (email: string) => void;
 }
 
 export const SignInScreen: React.FC<SignInScreenProps> = ({
   onBack,
   onCreateAccount,
-  onForgotPassword,
   onSubmit = (email: string) => {
     const msg = `🎉 Signed in as ${email}!\nWelcome back to your creator dashboard.`;
     if (Platform.OS === 'web') {
@@ -39,9 +37,7 @@ export const SignInScreen: React.FC<SignInScreenProps> = ({
   },
 }) => {
   const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
-  const [focusedField, setFocusedField] = useState<'email' | 'password' | null>(null);
+  const [focusedField, setFocusedField] = useState<'email' | null>(null);
 
   // Jarvis Validation Modal State
   const [showJarvisModal, setShowJarvisModal] = useState(false);
@@ -279,22 +275,9 @@ export const SignInScreen: React.FC<SignInScreenProps> = ({
 
   const handleSignIn = () => {
     const trimmedEmail = email.trim();
-    const trimmedPassword = password.trim();
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-    // 1. Both Email and Password are missing
-    if (!trimmedEmail && !trimmedPassword) {
-      triggerJarvisModal(
-        'Missing Sign In Details',
-        <Text style={styles.modalText}>
-          Jarvis needs both your <Text style={styles.highlightText}>Email Address</Text> and{' '}
-          <Text style={styles.highlightText}>Password</Text> to sign you in and load your creator streaks!
-        </Text>
-      );
-      return;
-    }
-
-    // 2. Only Email is missing
+    // 1. Email is missing
     if (!trimmedEmail) {
       triggerJarvisModal(
         'Missing Email Address',
@@ -305,7 +288,7 @@ export const SignInScreen: React.FC<SignInScreenProps> = ({
       return;
     }
 
-    // 3. Email is improperly formatted
+    // 2. Email is improperly formatted
     if (!emailRegex.test(trimmedEmail)) {
       triggerJarvisModal(
         'Invalid Email Address',
@@ -317,37 +300,10 @@ export const SignInScreen: React.FC<SignInScreenProps> = ({
       return;
     }
 
-    // 4. Only Password is missing
-    if (!trimmedPassword) {
-      triggerJarvisModal(
-        'Missing Password',
-        <Text style={styles.modalText}>
-          Please enter your <Text style={styles.highlightText}>Password</Text> so Jarvis can verify and authenticate your account.
-        </Text>
-      );
-      return;
-    }
-
     if (Platform.OS !== 'web') {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     }
     onSubmit(trimmedEmail);
-  };
-
-  const handleForgotPassword = () => {
-    if (Platform.OS !== 'web') {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    }
-    if (onForgotPassword) {
-      onForgotPassword();
-    } else {
-      triggerJarvisModal(
-        'Reset Password',
-        <Text style={styles.modalText}>
-          Jarvis will guide you through resetting your password in-app.
-        </Text>
-      );
-    }
   };
 
   const handleDirectAuth = (provider: string) => {
@@ -377,7 +333,7 @@ export const SignInScreen: React.FC<SignInScreenProps> = ({
     outputRange: ['-5deg', '0deg', '5deg'],
   });
 
-  const isFormValid = email.trim().length > 0 && password.trim().length > 0;
+  const isFormValid = email.trim().length > 0;
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -467,10 +423,7 @@ export const SignInScreen: React.FC<SignInScreenProps> = ({
           <View style={styles.headingSection}>
             <Text style={styles.mainHeading}>Welcome Back</Text>
             <Text style={styles.subHeading}>
-              Sign in to continue building your creator streak.
-            </Text>
-            <Text style={styles.subHeadingSecondary}>
-              Your missions, streaks, creators and Jarvis insights are waiting.
+              Enter your email to receive a secure sign-in code.
             </Text>
           </View>
 
@@ -516,90 +469,6 @@ export const SignInScreen: React.FC<SignInScreenProps> = ({
                   autoCapitalize="none"
                   autoCorrect={false}
                 />
-              </View>
-            </View>
-
-            {/* PASSWORD FIELD */}
-            <View style={styles.inputGroup}>
-              <View style={styles.passwordLabelRow}>
-                <Text style={styles.inputLabel}>PASSWORD</Text>
-                <Pressable onPress={handleForgotPassword} hitSlop={6}>
-                  <Text style={styles.forgotPasswordText}>Forgot password?</Text>
-                </Pressable>
-              </View>
-
-              <View
-                style={[
-                  styles.inputFieldContainer,
-                  focusedField === 'password' && styles.inputFieldFocused,
-                ]}
-              >
-                <View style={styles.inputIconContainer}>
-                  {/* Lock Icon */}
-                  <Svg width={20} height={20} viewBox="0 0 24 24" fill="none">
-                    <Rect
-                      x="3"
-                      y="11"
-                      width="18"
-                      height="11"
-                      rx="2"
-                      ry="2"
-                      stroke={focusedField === 'password' ? '#582CDB' : '#736B88'}
-                      strokeWidth="2"
-                    />
-                    <Path
-                      d="M7 11V7C7 4.23858 9.23858 2 12 2C14.7614 2 17 4.23858 17 7V11"
-                      stroke={focusedField === 'password' ? '#582CDB' : '#736B88'}
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                    />
-                  </Svg>
-                </View>
-
-                <TextInput
-                  style={styles.textInput}
-                  placeholder="Enter password"
-                  placeholderTextColor="#A39BB5"
-                  value={password}
-                  onChangeText={setPassword}
-                  onFocus={() => setFocusedField('password')}
-                  onBlur={() => setFocusedField(null)}
-                  secureTextEntry={!showPassword}
-                  autoCapitalize="none"
-                  autoCorrect={false}
-                />
-
-                {/* Eye Show/Hide Toggle */}
-                <Pressable
-                  onPress={() => setShowPassword(!showPassword)}
-                  hitSlop={8}
-                  style={styles.eyeIconButton}
-                >
-                  <Svg width={20} height={20} viewBox="0 0 24 24" fill="none">
-                    <Path
-                      d="M1 12S5 4 12 4s11 8 11 8-4 8-11 8-11-8-11-8z"
-                      stroke={showPassword ? '#582CDB' : '#736B88'}
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                    <Circle
-                      cx="12"
-                      cy="12"
-                      r="3"
-                      stroke={showPassword ? '#582CDB' : '#736B88'}
-                      strokeWidth="2"
-                    />
-                    {!showPassword && (
-                      <Path
-                        d="M3 3L21 21"
-                        stroke="#736B88"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                      />
-                    )}
-                  </Svg>
-                </Pressable>
               </View>
             </View>
 

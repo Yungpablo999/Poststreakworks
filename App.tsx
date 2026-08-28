@@ -27,7 +27,7 @@ import { SplashScreen } from './src/screens/SplashScreen';
 import { WelcomeScreen } from './src/screens/WelcomeScreen';
 import { SignUpScreen } from './src/screens/SignUpScreen';
 import { SignInScreen } from './src/screens/SignInScreen';
-import { ResetPasswordScreen } from './src/screens/ResetPasswordScreen';
+import { VerifyCodeScreen } from './src/screens/VerifyCodeScreen';
 import { NicheSelectionScreen } from './src/screens/NicheSelectionScreen';
 import { PlatformConnectScreen } from './src/screens/PlatformConnectScreen';
 import { OnboardingCompleteScreen } from './src/screens/OnboardingCompleteScreen';
@@ -78,6 +78,7 @@ type Screen =
   | 'welcome'
   | 'signup'
   | 'signin'
+  | 'verify-code'
   | 'reset-password'
   | 'niche'
   | 'platforms'
@@ -135,6 +136,9 @@ export default function App() {
   // Creator Onboarding Data State
   const [selectedNiches, setSelectedNiches] = useState<string[]>([]);
   const [connectedPlatforms, setConnectedPlatforms] = useState<string[]>([]);
+  const [authEmail, setAuthEmail] = useState('');
+  const [authUsername, setAuthUsername] = useState('');
+  const [verifyMode, setVerifyMode] = useState<'signup' | 'signin'>('signup');
   const [matchInitialFilter, setMatchInitialFilter] = useState<'all' | 'priority' | 'niche' | 'streak' | 'nearby' | 'ai'>('priority');
   const [selectedIdeaTitle, setSelectedIdeaTitle] = useState('One thing I wish I knew before I started creating');
   const [composerIdeaTitle, setComposerIdeaTitle] = useState('One thing I wish I knew before I started creating');
@@ -267,9 +271,11 @@ export default function App() {
   };
 
   const handleSignUpSubmit = (_username: string, _email: string) => {
+    setAuthUsername(_username);
+    setAuthEmail(_email);
+    setVerifyMode('signup');
     setUserProfile(prev => ({ ...prev, name: _username || prev.name, tier: 'free' }));
-    // Advance to Step 4: Onboarding Completion (100%)
-    navigateTo('complete');
+    navigateTo('verify-code');
   };
 
   // Sign In Screen actions
@@ -281,24 +287,39 @@ export default function App() {
     navigateTo('signup');
   };
 
-  const handleForgotPasswordFromSignIn = () => {
-    navigateTo('reset-password');
-  };
-
   const handleSignInSubmit = (_email: string) => {
+    setAuthEmail(_email);
+    setVerifyMode('signin');
     setUserProfile(prev => ({ ...prev, tier: 'free' }));
-    // Direct sign in straight to the free creator dashboard
-    navigateTo('dashboard');
+    navigateTo('verify-code');
   };
 
-  // Reset Password Screen actions
-  const handleBackFromResetPassword = () => {
-    setCurrentScreen('signin');
+  // Verify Code Screen actions
+  const handleBackFromVerifyCode = () => {
+    if (verifyMode === 'signup') {
+      setCurrentScreen('signup');
+    } else {
+      setCurrentScreen('signin');
+    }
   };
 
-  const handleResetPasswordSuccess = (_email: string) => {
+  const handleEditEmailFromVerifyCode = () => {
+    if (verifyMode === 'signup') {
+      setCurrentScreen('signup');
+    } else {
+      setCurrentScreen('signin');
+    }
+  };
+
+  const handleVerifyCodeSuccess = (_email: string) => {
     setUserProfile(prev => ({ ...prev, tier: 'free' }));
-    navigateTo('dashboard');
+    if (verifyMode === 'signup') {
+      // Advance to Step 4: Onboarding Completion (100%)
+      navigateTo('complete');
+    } else {
+      // Direct sign in straight to the free creator dashboard
+      navigateTo('dashboard');
+    }
   };
 
   // Onboarding Complete actions (Step 4 of Onboarding - 100%)
@@ -346,15 +367,18 @@ export default function App() {
           <SignInScreen
             onBack={handleBackFromSignIn}
             onCreateAccount={handleCreateAccountFromSignIn}
-            onForgotPassword={handleForgotPasswordFromSignIn}
             onSubmit={handleSignInSubmit}
           />
         )}
 
-        {currentScreen === 'reset-password' && (
-          <ResetPasswordScreen
-            onBack={handleBackFromResetPassword}
-            onSuccess={handleResetPasswordSuccess}
+        {currentScreen === 'verify-code' && (
+          <VerifyCodeScreen
+            mode={verifyMode}
+            email={authEmail}
+            username={authUsername}
+            onBack={handleBackFromVerifyCode}
+            onEditEmail={handleEditEmailFromVerifyCode}
+            onSuccess={handleVerifyCodeSuccess}
           />
         )}
 
