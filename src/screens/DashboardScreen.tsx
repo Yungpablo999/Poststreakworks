@@ -59,6 +59,7 @@ interface NotificationItem {
   badgeBg: string;
   badgeBorder: string;
   actionText?: string;
+  priority?: 'high' | 'normal';
 }
 
 const INITIAL_NOTIFICATIONS: NotificationItem[] = [
@@ -73,6 +74,7 @@ const INITIAL_NOTIFICATIONS: NotificationItem[] = [
     badgeBg: '#FEF3C7',
     badgeBorder: '#FDE68A',
     actionText: 'Post Now',
+    priority: 'high',
   },
   {
     id: 'n2',
@@ -85,6 +87,7 @@ const INITIAL_NOTIFICATIONS: NotificationItem[] = [
     badgeBg: '#EDE8FC',
     badgeBorder: '#DDD6FE',
     actionText: 'View Quest',
+    priority: 'high',
   },
   {
     id: 'n3',
@@ -97,6 +100,7 @@ const INITIAL_NOTIFICATIONS: NotificationItem[] = [
     badgeBg: '#E0F2FE',
     badgeBorder: '#BAE6FD',
     actionText: 'Connect',
+    priority: 'high',
   },
   {
     id: 'n4',
@@ -108,6 +112,7 @@ const INITIAL_NOTIFICATIONS: NotificationItem[] = [
     iconEmoji: '⚡',
     badgeBg: '#FEF3C7',
     badgeBorder: '#FDE68A',
+    priority: 'normal',
   },
   {
     id: 'n5',
@@ -119,6 +124,19 @@ const INITIAL_NOTIFICATIONS: NotificationItem[] = [
     iconEmoji: '📈',
     badgeBg: '#ECFDF5',
     badgeBorder: '#A7F3D0',
+    priority: 'normal',
+  },
+  {
+    id: 'n6',
+    type: 'level',
+    title: 'Weekly Level Report',
+    body: 'Streak milestone reached: 47 consecutive days recorded in your creator log.',
+    time: '3d ago',
+    unread: false,
+    iconEmoji: '📊',
+    badgeBg: '#F1F5F9',
+    badgeBorder: '#E2E8F0',
+    priority: 'normal',
   },
 ];
 
@@ -1420,46 +1438,91 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
                     <Text style={styles.emptyNotifSubtitle}>No notifications in this filter.</Text>
                   </View>
                 ) : (
-                  filteredNotifications.map((item) => (
-                    <Pressable
-                      key={item.id}
-                      onPress={() => handleNotificationPress(item.id)}
-                      style={({ pressed }) => [
-                        styles.notifCard,
-                        item.unread && styles.notifCardUnread,
-                        pressed && styles.notifCardPressed,
-                      ]}
-                    >
-                      {/* Left Icon Badge */}
-                      <View
-                        style={[
-                          styles.notifIconBadge,
-                          { backgroundColor: item.badgeBg, borderColor: item.badgeBorder },
+                  filteredNotifications.map((item) => {
+                    const isHighPriority = item.priority === 'high' || !!item.actionText;
+
+                    if (isHighPriority) {
+                      return (
+                        <Pressable
+                          key={item.id}
+                          onPress={() => handleNotificationPress(item.id)}
+                          style={({ pressed }) => [
+                            styles.notifCard,
+                            item.unread && styles.notifCardUnread,
+                            pressed && styles.notifCardPressed,
+                          ]}
+                        >
+                          {/* Left Icon Badge */}
+                          <View
+                            style={[
+                              styles.notifIconBadge,
+                              { backgroundColor: item.badgeBg, borderColor: item.badgeBorder },
+                            ]}
+                          >
+                            <Text style={styles.notifIconEmoji}>{item.iconEmoji}</Text>
+                          </View>
+
+                          {/* Content */}
+                          <View style={styles.notifContent}>
+                            <View style={styles.notifTitleRow}>
+                              <Text style={styles.notifTitle} numberOfLines={1}>{item.title}</Text>
+                              <Text style={styles.notifTime}>{item.time}</Text>
+                            </View>
+                            <Text style={styles.notifBody}>{item.body}</Text>
+
+                            {/* Action Link if present */}
+                            {item.actionText && (
+                              <View style={styles.notifActionRow}>
+                                <Text style={styles.notifActionLink}>{item.actionText}  ›</Text>
+                              </View>
+                            )}
+                          </View>
+
+                          {/* Unread Glow Dot */}
+                          {item.unread && <View style={styles.notifUnreadDot} />}
+                        </Pressable>
+                      );
+                    }
+
+                    // Compact Card for Lower-Priority / Informational Notifications
+                    return (
+                      <Pressable
+                        key={item.id}
+                        onPress={() => handleNotificationPress(item.id)}
+                        style={({ pressed }) => [
+                          styles.notifCardCompact,
+                          item.unread && styles.notifCardCompactUnread,
+                          pressed && styles.notifCardPressed,
                         ]}
                       >
-                        <Text style={styles.notifIconEmoji}>{item.iconEmoji}</Text>
-                      </View>
-
-                      {/* Content */}
-                      <View style={styles.notifContent}>
-                        <View style={styles.notifTitleRow}>
-                          <Text style={styles.notifTitle}>{item.title}</Text>
-                          <Text style={styles.notifTime}>{item.time}</Text>
+                        {/* Compact Left Icon Badge */}
+                        <View
+                          style={[
+                            styles.notifIconBadgeCompact,
+                            { backgroundColor: item.badgeBg, borderColor: item.badgeBorder },
+                          ]}
+                        >
+                          <Text style={styles.notifIconEmojiCompact}>{item.iconEmoji}</Text>
                         </View>
-                        <Text style={styles.notifBody}>{item.body}</Text>
 
-                        {/* Action Link if present */}
-                        {item.actionText && (
-                          <View style={styles.notifActionRow}>
-                            <Text style={styles.notifActionLink}>{item.actionText}  ›</Text>
+                        {/* Compact Content */}
+                        <View style={styles.notifContentCompact}>
+                          <View style={styles.notifTitleRowCompact}>
+                            <Text style={styles.notifTitleCompact} numberOfLines={1}>
+                              {item.title}
+                            </Text>
+                            <Text style={styles.notifTimeCompact}>{item.time}</Text>
                           </View>
-                        )}
-                      </View>
+                          <Text style={styles.notifBodyCompact} numberOfLines={2}>
+                            {item.body}
+                          </Text>
+                        </View>
 
-                      {/* Unread Glow Dot */}
-                      {item.unread && <View style={styles.notifUnreadDot} />}
-                    </Pressable>
-                  ))
+                        {/* Unread Glow Dot */}
+                        {item.unread && <View style={styles.notifUnreadDotCompact} />}
+                      </Pressable>
+                    );
+                  })
                 )}
               </ScrollView>
 
@@ -2975,6 +3038,77 @@ const styles = StyleSheet.create({
     width: 6,
     height: 6,
     borderRadius: 3,
+    backgroundColor: '#582CDB',
+  },
+
+  // Compact Notification Cards (for Lower-Priority / Informational Updates)
+  notifCardCompact: {
+    flexDirection: 'row',
+    backgroundColor: 'rgba(250, 248, 255, 0.6)',
+    borderRadius: 12,
+    paddingVertical: 9,
+    paddingHorizontal: 10,
+    marginBottom: 6,
+    borderWidth: 1,
+    borderColor: 'rgba(235, 230, 248, 0.7)',
+    gap: 9,
+    alignItems: 'center',
+    position: 'relative',
+  },
+  notifCardCompactUnread: {
+    backgroundColor: '#FFFFFF',
+    borderColor: 'rgba(221, 214, 254, 0.8)',
+    shadowColor: '#582CDB',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.04,
+    shadowRadius: 4,
+    elevation: 1,
+  },
+  notifIconBadgeCompact: {
+    width: 28,
+    height: 28,
+    borderRadius: 8,
+    borderWidth: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    flexShrink: 0,
+  },
+  notifIconEmojiCompact: {
+    fontSize: 13,
+  },
+  notifContentCompact: {
+    flex: 1,
+  },
+  notifTitleRowCompact: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 2,
+  },
+  notifTitleCompact: {
+    fontSize: 12.5,
+    fontWeight: '700',
+    color: '#171420',
+    flex: 1,
+    marginRight: 6,
+  },
+  notifTimeCompact: {
+    fontSize: 10.5,
+    color: '#9E97AA',
+    fontWeight: '500',
+  },
+  notifBodyCompact: {
+    fontSize: 11,
+    color: '#64748B',
+    lineHeight: 14.5,
+  },
+  notifUnreadDotCompact: {
+    position: 'absolute',
+    top: 8,
+    right: 8,
+    width: 5,
+    height: 5,
+    borderRadius: 2.5,
     backgroundColor: '#582CDB',
   },
 
