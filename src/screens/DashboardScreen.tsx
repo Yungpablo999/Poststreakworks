@@ -1471,12 +1471,15 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
                 )}
               </ScrollView>
 
-              {/* Modal Footer Done Button */}
+              {/* Modal Footer Mark All as Read Button */}
               <Pressable
-                onPress={() => setShowNotificationModal(false)}
+                onPress={() => {
+                  handleMarkAllNotifsRead();
+                  setShowNotificationModal(false);
+                }}
                 style={({ pressed }) => [styles.savePhotoPrimaryBtn, pressed && styles.savePhotoPrimaryBtnPressed]}
               >
-                <Text style={styles.savePhotoPrimaryBtnText}>Done  ✓</Text>
+                <Text style={styles.savePhotoPrimaryBtnText}>Mark all as read ✓</Text>
               </Pressable>
             </Animated.View>
           </View>
