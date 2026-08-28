@@ -377,6 +377,8 @@ export const SignInScreen: React.FC<SignInScreenProps> = ({
     outputRange: ['-5deg', '0deg', '5deg'],
   });
 
+  const isFormValid = email.trim().length > 0 && password.trim().length > 0;
+
   return (
     <SafeAreaView style={styles.safeArea}>
       <StatusBar barStyle="dark-content" backgroundColor="#FAF8F5" />
@@ -604,7 +606,11 @@ export const SignInScreen: React.FC<SignInScreenProps> = ({
             {/* SIGN IN BUTTON */}
             <Pressable
               onPress={handleSignIn}
-              style={({ pressed }) => [styles.submitButton, pressed && styles.submitButtonPressed]}
+              style={({ pressed }) => [
+                styles.submitButton,
+                !isFormValid && styles.submitButtonDisabled,
+                pressed && isFormValid && styles.submitButtonPressed,
+              ]}
             >
               <Text style={styles.submitButtonText}>Sign In  →</Text>
             </Pressable>
@@ -932,6 +938,11 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.12,
     shadowRadius: 14,
     elevation: 4,
+  },
+  submitButtonDisabled: {
+    backgroundColor: 'rgba(181, 165, 232, 0.7)',
+    shadowOpacity: 0,
+    elevation: 0,
   },
   submitButtonPressed: {
     opacity: 0.92,
