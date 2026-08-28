@@ -1753,7 +1753,9 @@ export const MessagesScreen: React.FC<MessagesScreenProps> = ({
                   end={{ x: 1, y: 0 }}
                   style={styles.connectGradient}
                 >
-                  <Text style={styles.connectBtnText}>Find More Creators (Match Hub) ➔</Text>
+                  <Text style={styles.connectBtnText} numberOfLines={1}>
+                    Find More Creators →
+                  </Text>
                 </LinearGradient>
               </Pressable>
             </Animated.View>
@@ -3035,12 +3037,13 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    paddingHorizontal: 16,
   },
   connectBtnText: {
-    fontSize: 14,
+    fontSize: 14.5,
     fontWeight: '700',
     color: '#FFFFFF',
-    letterSpacing: 0.4,
+    letterSpacing: -0.1,
   },
 
   messageCardDark: {
