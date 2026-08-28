@@ -1405,14 +1405,6 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
                     </Text>
                   </Pressable>
                 </View>
-
-                {unreadCount > 0 && (
-                  <Pressable onPress={handleMarkAllNotifsRead} hitSlop={6}>
-                    <Text style={styles.markAllReadText} numberOfLines={1}>
-                      {isNarrowScreen ? 'Mark all' : 'Mark all read'}
-                    </Text>
-                  </Pressable>
-                )}
               </View>
 
               {/* Scrollable Notification List */}
