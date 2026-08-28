@@ -1292,7 +1292,7 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
           </View>
 
           {/* 9. CARD 6: UNLOCK JARVIS PRO */}
-          <View style={styles.proCard}>
+          <View style={[styles.proCard, isDark && styles.proCardDark]}>
             <View style={styles.proHeaderRow}>
               <View style={styles.proIconBox}>
                 <Image
@@ -1302,15 +1302,12 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
                 />
               </View>
               <View style={styles.proTitleGroup}>
-                <Text style={styles.proTitle}>Unlock Jarvis Pro</Text>
-                <View style={styles.goldProPillBadge}>
-                  <Text style={styles.goldProPillText}>⚡ PRO SUITE</Text>
-                </View>
+                <Text style={[styles.proTitle, isDark && styles.textWhite]}>Unlock Jarvis Pro</Text>
               </View>
             </View>
 
-            <Text style={styles.proDescription}>
-              Get AI autonomous growth strategy, viral script generator, and priority matching.
+            <Text style={[styles.proDescription, isDark && styles.textMutedDark]}>
+              Get autonomous growth strategy, viral script generation, and priority matching.
             </Text>
 
             <Pressable
@@ -1330,12 +1327,12 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
               ]}
             >
               <LinearGradient
-                colors={['#F59E0B', '#F59E0B', '#F59E0B', '#A16207']}
+                colors={['#F4B52B', '#D8920F']}
                 start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 1 }}
+                end={{ x: 1, y: 0 }}
                 style={styles.metallicGoldGradient}
               >
-                <Text style={styles.metallicGoldUpgradeBtnText}>Upgrade to Pro ➔</Text>
+                <Text style={styles.metallicGoldUpgradeBtnText}>Upgrade to Pro →</Text>
               </LinearGradient>
             </Pressable>
           </View>
@@ -2684,29 +2681,69 @@ const styles = StyleSheet.create({
   },
 
   // 9. PRO UPGRADE CARD
-  goldProPillBadge: {
-    alignSelf: 'flex-start',
-    backgroundColor: '#FEF3C7',
-    paddingVertical: 2,
-    paddingHorizontal: 8,
-    borderRadius: 100,
+  proCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 20,
     borderWidth: 1,
-    borderColor: '#FDE68A',
-    marginTop: 2,
+    borderColor: 'rgba(23, 20, 32, 0.07)',
+    padding: 20,
+    marginBottom: 18,
+    shadowColor: '#171420',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.03,
+    shadowRadius: 16,
+    elevation: 3,
   },
-  goldProPillText: {
-    fontSize: 10,
+  proCardDark: {
+    backgroundColor: '#1C1924',
+    borderColor: 'rgba(255, 255, 255, 0.08)',
+  },
+  proHeaderRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    marginBottom: 10,
+  },
+  proIconBox: {
+    width: 44,
+    height: 44,
+    borderRadius: 14,
+    backgroundColor: '#582CDB',
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: '#582CDB',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.16,
+    shadowRadius: 8,
+    elevation: 3,
+  },
+  proIconImage: {
+    width: 28,
+    height: 28,
+  },
+  proTitleGroup: {
+    flex: 1,
+    justifyContent: 'center',
+  },
+  proTitle: {
+    fontSize: 16.5,
     fontWeight: '700',
-    color: '#B45309',
-    letterSpacing: 0.6,
+    color: '#171420',
+    letterSpacing: -0.2,
+  },
+  proDescription: {
+    fontSize: 13,
+    color: '#5E576E',
+    lineHeight: 18.5,
+    marginBottom: 16,
   },
   metallicGoldUpgradeBtn: {
-    height: 48,
-    borderRadius: 14,
+    height: 46,
+    borderRadius: 12,
     overflow: 'hidden',
-    shadowColor: '#F59E0B',
+    shadowColor: '#D8920F',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.12,
+    shadowOpacity: 0.18,
     shadowRadius: 10,
     elevation: 4,
   },
@@ -2718,85 +2755,12 @@ const styles = StyleSheet.create({
   metallicGoldUpgradeBtnText: {
     fontSize: 14.5,
     fontWeight: '700',
-    color: '#171420',
-    letterSpacing: -0.2,
-  },
-  proCard: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 20,
-    borderWidth: 1,
-    borderColor: 'rgba(23, 20, 32, 0.07)',
-    padding: 20,
-    marginBottom: 18,
-    shadowColor: '#171420',
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.04,
-    shadowRadius: 16,
-    elevation: 3,
-  },
-  proHeaderRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-    marginBottom: 10,
-  },
-  proIconBox: {
-    width: 42,
-    height: 42,
-    borderRadius: 12,
-    backgroundColor: '#582CDB',
-    justifyContent: 'center',
-    alignItems: 'center',
-    shadowColor: '#582CDB',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.12,
-    shadowRadius: 8,
-    elevation: 3,
-  },
-  proIconImage: {
-    width: 30,
-    height: 30,
-  },
-  proTitleGroup: {
-    flex: 1,
-  },
-  proTitle: {
-    fontSize: 16.5,
-    fontWeight: '700',
-    color: '#171420',
-  },
-  proSubtitle: {
-    fontSize: 11,
-    fontWeight: '700',
-    color: '#582CDB',
-    letterSpacing: 0.3,
-  },
-  proDescription: {
-    fontSize: 12.5,
-    color: '#5E576E',
-    lineHeight: 18,
-    marginBottom: 16,
-  },
-  upgradeButton: {
-    backgroundColor: '#D4A038',
-    height: 48,
-    borderRadius: 12,
-    justifyContent: 'center',
-    alignItems: 'center',
-    shadowColor: '#D4A038',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.08,
-    shadowRadius: 8,
-    elevation: 3,
+    color: '#FFFFFF',
+    letterSpacing: -0.1,
   },
   upgradeButtonPressed: {
     opacity: 0.92,
     transform: [{ scale: 0.98 }],
-  },
-  upgradeButtonText: {
-    color: '#FFFFFF',
-    fontSize: 15.5,
-    fontWeight: '800',
   },
 
   // 10. GLASS BOTTOM NAVIGATION BAR
