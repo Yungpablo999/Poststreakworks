@@ -499,6 +499,7 @@ export const MessagesScreen: React.FC<MessagesScreenProps> = ({
   const [celebrationSubtitle, setCelebrationSubtitle] = useState('Your streak partner received your message.');
   const [celebrationSpeech, setCelebrationSpeech] = useState('Accountability connection strengthened! +15 XP.');
   const [celebrationBadge, setCelebrationBadge] = useState('COLLAB ACTIVE');
+  const [showChatOptionsMenu, setShowChatOptionsMenu] = useState(false);
 
   // Floating Emoji Animations
   const [floatingEmojis, setFloatingEmojis] = useState<{ id: string; emoji: string; x: number }[]>([]);
@@ -760,52 +761,91 @@ export const MessagesScreen: React.FC<MessagesScreenProps> = ({
         {/* 1. TOP AIRY HEADER BAR */}
         <View style={styles.headerBar}>
           {activeChatThread ? (
-            /* ACTIVE 1-ON-1 CHAT HEADER: Back, Avatar, Name & Status */
+            /* ACTIVE 1-ON-1 CHAT HEADER: Back, Avatar, Name & Status | ＋ ⋯ */
             <View style={styles.chatActiveHeaderRow}>
-              {/* Back Button */}
-              <Pressable
-                onPress={() => {
-                  if (Platform.OS !== 'web') {
-                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                  }
-                  setActiveChatThread(null);
-                }}
-                style={({ pressed }) => [styles.backCircleBtn, pressed && styles.btnPressed]}
-                hitSlop={8}
-              >
-                <Svg width={20} height={20} viewBox="0 0 24 24" fill="none">
-                  <Path d="M15 18L9 12L15 6" stroke="#171420" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" />
-                </Svg>
-              </Pressable>
+              <View style={styles.chatActiveHeaderLeftGroup}>
+                {/* Back Button */}
+                <Pressable
+                  onPress={() => {
+                    if (Platform.OS !== 'web') {
+                      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                    }
+                    setActiveChatThread(null);
+                  }}
+                  style={({ pressed }) => [styles.backCircleBtn, pressed && styles.btnPressed]}
+                  hitSlop={8}
+                >
+                  <Svg width={20} height={20} viewBox="0 0 24 24" fill="none">
+                    <Path d="M15 18L9 12L15 6" stroke="#171420" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" />
+                  </Svg>
+                </Pressable>
 
-              {/* Creator Avatar beside Name */}
-              <Pressable
-                onPress={() => {
-                  const matchedStory = CREATOR_STORIES.find((s) => s.id === activeChatThread.creatorId);
-                  if (matchedStory) {
-                    handleOpenStory(matchedStory);
-                  }
-                }}
-                style={styles.chatHeaderAvatarGroup}
-              >
-                <Image
-                  source={activeChatThread.avatar}
-                  style={styles.chatHeaderAvatar}
-                  resizeMode={activeChatThread.creatorId === 'jarvis' ? 'contain' : 'cover'}
-                />
-                {activeChatThread.isOnline && <View style={styles.chatHeaderOnlineDot} />}
-              </Pressable>
+                {/* Creator Avatar beside Name */}
+                <Pressable
+                  onPress={() => {
+                    const matchedStory = CREATOR_STORIES.find((s) => s.id === activeChatThread.creatorId);
+                    if (matchedStory) {
+                      handleOpenStory(matchedStory);
+                    }
+                  }}
+                  style={styles.chatHeaderAvatarGroup}
+                >
+                  <Image
+                    source={activeChatThread.avatar}
+                    style={styles.chatHeaderAvatar}
+                    resizeMode={activeChatThread.creatorId === 'jarvis' ? 'contain' : 'cover'}
+                  />
+                  {activeChatThread.isOnline && <View style={styles.chatHeaderOnlineDot} />}
+                </Pressable>
 
-              {/* Creator Name & Status */}
-              <View style={styles.chatHeaderInfoCol}>
-                <Text style={[styles.chatHeaderNameText, isDark && styles.textWhite]} numberOfLines={1}>
-                  {activeChatThread.name.startsWith('Jarvis') ? 'Jarvis' : activeChatThread.name.split(' ')[0]}
-                </Text>
-                <Text style={styles.chatHeaderStatusText} numberOfLines={1}>
-                  {activeChatThread.isOnline
-                    ? `🟢 Active · ⚡${activeChatThread.streak}d`
-                    : `⚡${activeChatThread.streak}d`}
-                </Text>
+                {/* Creator Name & Status */}
+                <View style={styles.chatHeaderInfoCol}>
+                  <Text style={[styles.chatHeaderNameText, isDark && styles.textWhite]} numberOfLines={1}>
+                    {activeChatThread.name.startsWith('Jarvis') ? 'Jarvis' : activeChatThread.name.split(' ')[0]}
+                  </Text>
+                  <Text style={styles.chatHeaderStatusText} numberOfLines={1}>
+                    {activeChatThread.isOnline
+                      ? `🟢 Active · ⚡${activeChatThread.streak}d`
+                      : `⚡${activeChatThread.streak}d`}
+                  </Text>
+                </View>
+              </View>
+
+              {/* Right Action Icons: ＋ (Add / Start Collab) & ⋯ (Conversation Options) */}
+              <View style={styles.chatActiveHeaderRightGroup}>
+                <Pressable
+                  style={({ pressed }) => [styles.chatHeaderActionBtn, isDark && styles.chatHeaderActionBtnDark, pressed && styles.btnPressed]}
+                  hitSlop={8}
+                  onPress={() => {
+                    if (Platform.OS !== 'web') {
+                      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                    }
+                    triggerModalAnim();
+                    setShowConnectModal(true);
+                  }}
+                >
+                  <Svg width={17} height={17} viewBox="0 0 24 24" fill="none">
+                    <Path d="M12 5V19M5 12H19" stroke={isDark ? '#FFFFFF' : '#171420'} strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" />
+                  </Svg>
+                </Pressable>
+
+                <Pressable
+                  style={({ pressed }) => [styles.chatHeaderActionBtn, isDark && styles.chatHeaderActionBtnDark, pressed && styles.btnPressed]}
+                  hitSlop={8}
+                  onPress={() => {
+                    if (Platform.OS !== 'web') {
+                      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                    }
+                    triggerModalAnim();
+                    setShowChatOptionsMenu(true);
+                  }}
+                >
+                  <Svg width={17} height={17} viewBox="0 0 24 24" fill="none">
+                    <Circle cx="5" cy="12" r="2" fill={isDark ? '#FFFFFF' : '#171420'} />
+                    <Circle cx="12" cy="12" r="2" fill={isDark ? '#FFFFFF' : '#171420'} />
+                    <Circle cx="19" cy="12" r="2" fill={isDark ? '#FFFFFF' : '#171420'} />
+                  </Svg>
+                </Pressable>
               </View>
             </View>
           ) : (
@@ -1741,6 +1781,123 @@ export const MessagesScreen: React.FC<MessagesScreenProps> = ({
           </View>
         </Modal>
 
+        {/* CONVERSATION OPTIONS MODAL (⋯) */}
+        <Modal
+          visible={showChatOptionsMenu}
+          transparent={true}
+          animationType="fade"
+          onRequestClose={() => setShowChatOptionsMenu(false)}
+        >
+          <Pressable
+            style={styles.modalOverlay}
+            onPress={() => setShowChatOptionsMenu(false)}
+          >
+            <Animated.View
+              style={[
+                styles.optionsMenuModalCard,
+                isDark && { backgroundColor: '#171420', borderColor: '#2D2845' },
+                { transform: [{ scale: modalPopScale }] },
+              ]}
+            >
+              {/* Header */}
+              <View style={styles.modalHeaderRow}>
+                <View style={{ flex: 1, paddingRight: 12 }}>
+                  <Text style={[styles.modalTitle, isDark && styles.textWhite]}>
+                    Conversation Options
+                  </Text>
+                  <Text style={[styles.modalSubtitle, isDark && styles.textMutedDark]} numberOfLines={1}>
+                    Options for your chat with {activeChatThread?.name || 'Creator'}
+                  </Text>
+                </View>
+                <Pressable
+                  onPress={() => setShowChatOptionsMenu(false)}
+                  style={styles.modalCloseCircle}
+                  hitSlop={8}
+                >
+                  <Text style={styles.modalCloseCross}>✕</Text>
+                </Pressable>
+              </View>
+
+              {/* Action Options List */}
+              <View style={styles.optionsList}>
+                <Pressable
+                  style={({ pressed }) => [styles.optionItemRow, pressed && styles.btnPressed]}
+                  onPress={() => {
+                    setShowChatOptionsMenu(false);
+                    if (activeChatThread) {
+                      const matchedStory = CREATOR_STORIES.find((s) => s.id === activeChatThread.creatorId);
+                      if (matchedStory) {
+                        handleOpenStory(matchedStory);
+                      }
+                    }
+                  }}
+                >
+                  <View style={styles.optionItemIconBox}>
+                    <Text style={{ fontSize: 16 }}>👤</Text>
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <Text style={[styles.optionItemTitle, isDark && styles.textWhite]}>View Creator Story & Card</Text>
+                    <Text style={styles.optionItemSub}>See active streak & recent highlights</Text>
+                  </View>
+                </Pressable>
+
+                <Pressable
+                  style={({ pressed }) => [styles.optionItemRow, pressed && styles.btnPressed]}
+                  onPress={() => {
+                    setShowChatOptionsMenu(false);
+                    triggerModalAnim();
+                    setShowConnectModal(true);
+                  }}
+                >
+                  <View style={styles.optionItemIconBox}>
+                    <Text style={{ fontSize: 16 }}>⚡</Text>
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <Text style={[styles.optionItemTitle, isDark && styles.textWhite]}>Start New Collaboration</Text>
+                    <Text style={styles.optionItemSub}>Duo challenge, split vlog, or co-script</Text>
+                  </View>
+                </Pressable>
+
+                <Pressable
+                  style={({ pressed }) => [styles.optionItemRow, pressed && styles.btnPressed]}
+                  onPress={() => {
+                    setShowChatOptionsMenu(false);
+                    if (Platform.OS !== 'web') {
+                      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+                    }
+                  }}
+                >
+                  <View style={styles.optionItemIconBox}>
+                    <Text style={{ fontSize: 16 }}>🔔</Text>
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <Text style={[styles.optionItemTitle, isDark && styles.textWhite]}>Mute Notifications</Text>
+                    <Text style={styles.optionItemSub}>Pause streak ping alerts from this thread</Text>
+                  </View>
+                </Pressable>
+
+                <Pressable
+                  style={({ pressed }) => [styles.optionItemRow, pressed && styles.btnPressed]}
+                  onPress={() => {
+                    setShowChatOptionsMenu(false);
+                    if (Platform.OS !== 'web') {
+                      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
+                    }
+                  }}
+                >
+                  <View style={[styles.optionItemIconBox, { backgroundColor: '#FEF2F2' }]}>
+                    <Text style={{ fontSize: 16 }}>🚩</Text>
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <Text style={[styles.optionItemTitle, { color: '#EF4444' }]}>Report or Block</Text>
+                    <Text style={styles.optionItemSub}>Keep the creator community safe</Text>
+                  </View>
+                </Pressable>
+              </View>
+            </Animated.View>
+          </Pressable>
+        </Modal>
+
         {/* UNIVERSAL CREATOR PASSPORT & PROFILE MODAL */}
         <UserProfileModal
           visible={showProfileModal}
@@ -1809,8 +1966,39 @@ const styles = StyleSheet.create({
   chatActiveHeaderRow: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'space-between',
     flex: 1,
+  },
+  chatActiveHeaderLeftGroup: {
+    flexDirection: 'row',
+    alignItems: 'center',
     gap: 10,
+    flex: 1,
+    marginRight: 8,
+  },
+  chatActiveHeaderRightGroup: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  chatHeaderActionBtn: {
+    width: 36,
+    height: 36,
+    borderRadius: 12,
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1,
+    borderColor: '#EFEBF8',
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: '#582CDB',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 5,
+    elevation: 2,
+  },
+  chatHeaderActionBtnDark: {
+    backgroundColor: '#1E1B2E',
+    borderColor: '#2D2845',
   },
   chatHeaderAvatarGroup: {
     position: 'relative',
@@ -1848,6 +2036,52 @@ const styles = StyleSheet.create({
     color: '#64748B',
     fontWeight: '600',
     marginTop: 0.5,
+  },
+  optionsMenuModalCard: {
+    width: '100%',
+    maxWidth: 380,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 24,
+    borderWidth: 1,
+    borderColor: '#EFEBF8',
+    padding: 20,
+    shadowColor: '#582CDB',
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.08,
+    shadowRadius: 24,
+    elevation: 8,
+  },
+  optionsList: {
+    gap: 8,
+    marginTop: 4,
+  },
+  optionItemRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#FAF8FC',
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: '#EFECE6',
+    padding: 12,
+    gap: 12,
+  },
+  optionItemIconBox: {
+    width: 36,
+    height: 36,
+    borderRadius: 12,
+    backgroundColor: '#EDE9FE',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  optionItemTitle: {
+    fontSize: 13.5,
+    fontWeight: '700',
+    color: '#171420',
+  },
+  optionItemSub: {
+    fontSize: 11,
+    color: '#64748B',
+    marginTop: 1,
   },
   headerCenter: {
     flex: 1,
