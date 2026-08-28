@@ -555,7 +555,7 @@ export const SignUpScreen: React.FC<SignUpScreenProps> = ({
               onPress={handleCreateAccount}
               style={({ pressed }) => [styles.submitButton, pressed && styles.submitButtonPressed]}
             >
-              <Text style={styles.submitButtonText}>Create Account  →</Text>
+              <Text style={styles.submitButtonText}>Create My Account  →</Text>
             </Pressable>
           </View>
 
