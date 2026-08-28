@@ -895,11 +895,11 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
           {/* 3. TODAY'S FOCUS HERO BANNER */}
           <View style={styles.focusHeroSection}>
             <View style={styles.focusPillRow}>
-              <View style={styles.focusTag}>
-                <View style={styles.focusLiveDot} />
-                <Text style={styles.focusTagText}>TODAY&apos;S FOCUS</Text>
+              <View style={styles.focusLabelGroup}>
+                <View style={[styles.focusLiveDot, isDark && styles.focusLiveDotDark]} />
+                <Text style={[styles.focusTagText, isDark && styles.focusTagTextDark]}>TODAY’S FOCUS</Text>
               </View>
-              <Text style={styles.nextPostCountdown}>Next post in 2h 45m</Text>
+              <Text style={[styles.nextPostCountdown, isDark && styles.nextPostCountdownDark]}>Next post · 2h 45m</Text>
             </View>
 
             <Text style={[styles.focusHeadline, isDark && styles.textWhite]}>Post 1 Reel to protect your streak</Text>
@@ -1975,33 +1975,39 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 10,
+    marginBottom: 8,
   },
-  focusTag: {
+  focusLabelGroup: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#582CDB',
-    borderRadius: 8,
-    paddingVertical: 4,
-    paddingHorizontal: 9,
-    gap: 5,
+    gap: 6,
   },
   focusLiveDot: {
-    width: 5,
-    height: 5,
-    borderRadius: 2.5,
-    backgroundColor: '#34D399',
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: '#582CDB',
+  },
+  focusLiveDotDark: {
+    backgroundColor: '#A78BFA',
   },
   focusTagText: {
-    color: '#FFFFFF',
-    fontSize: 11,
+    color: '#582CDB',
+    fontSize: 11.5,
     fontWeight: '800',
-    letterSpacing: 0.6,
+    letterSpacing: 0.8,
+  },
+  focusTagTextDark: {
+    color: '#A78BFA',
   },
   nextPostCountdown: {
-    fontSize: 12.5,
+    fontSize: 12,
     fontWeight: '600',
     color: '#7F7894',
+    letterSpacing: -0.1,
+  },
+  nextPostCountdownDark: {
+    color: '#A39BB5',
   },
   focusHeadline: {
     fontSize: 23,
