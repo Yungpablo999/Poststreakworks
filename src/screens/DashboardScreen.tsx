@@ -1090,22 +1090,19 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
           </Pressable>
 
           {/* 5. CARD 2: SCHEDULED POSTS VELOCITY */}
-          <View style={styles.dashboardCard}>
+          <View style={[styles.dashboardCard, isDark && styles.dashboardCardDark]}>
             <View style={styles.scheduledHeaderRow}>
               <View style={styles.scheduledLabelGroup}>
                 <View style={styles.calendarIconBox}>
-                  <Svg width={16} height={16} viewBox="0 0 24 24" fill="none">
+                  <Svg width={14} height={14} viewBox="0 0 24 24" fill="none">
                     <Rect x="3" y="4" width="18" height="18" rx="2" stroke="#582CDB" strokeWidth="2.2" />
                     <Path d="M16 2V6M8 2V6M3 10H21" stroke="#582CDB" strokeWidth="2.2" strokeLinecap="round" />
                   </Svg>
                 </View>
-                <Text style={styles.scheduledTitle}>SCHEDULED</Text>
-                <View style={styles.scheduledTimePill}>
-                  <Text style={styles.scheduledTimeText}>11:30 AM</Text>
-                </View>
+                <Text style={[styles.scheduledTitle, isDark && styles.textWhite]}>SCHEDULED</Text>
               </View>
 
-              {/* Info / Open Schedule Details Button */}
+              {/* View Schedule Text Action */}
               <Pressable
                 onPress={() => {
                   if (Platform.OS !== 'web') {
@@ -1117,25 +1114,25 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
                     onNavigateTab('create');
                   }
                 }}
-                style={({ pressed }) => [styles.scheduleInfoBtn, pressed && styles.headerIconBtnPressed]}
+                style={({ pressed }) => [styles.scheduleInfoBtn, pressed && styles.scheduleInfoBtnPressed]}
                 hitSlop={8}
               >
-                <Text style={styles.scheduleInfoBtnText}>View Schedule ➔</Text>
+                <Text style={[styles.scheduleInfoBtnText, isDark && styles.scheduleInfoBtnTextDark]}>View Schedule ›</Text>
               </Pressable>
             </View>
 
             <View style={styles.scheduledMetricsContainer}>
               <View style={styles.postsMetricRow}>
-                <Text style={styles.postsCountBig}>03</Text>
-                <Text style={styles.postsCountLabel}>Posts Ready</Text>
+                <Text style={[styles.postsCountBig, isDark && styles.textWhite]}>03</Text>
+                <Text style={[styles.postsCountLabel, isDark && styles.textMutedDark]}>Posts Ready</Text>
               </View>
 
               <View style={styles.weekIncreaseBadge}>
-                <Svg width={13} height={13} viewBox="0 0 24 24" fill="none">
+                <Svg width={12} height={12} viewBox="0 0 24 24" fill="none">
                   <Circle cx="12" cy="12" r="10" stroke="#582CDB" strokeWidth="2.2" />
                   <Path d="M12 6V12L16 14" stroke="#582CDB" strokeWidth="2.2" strokeLinecap="round" />
                 </Svg>
-                <Text style={styles.weekIncreaseText}>+2 this week</Text>
+                <Text style={[styles.weekIncreaseText, isDark && styles.weekIncreaseTextDark]}>+2 this week</Text>
               </View>
             </View>
 
@@ -2270,60 +2267,50 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    flexWrap: 'wrap',
-    gap: 8,
-    marginBottom: 16,
+    marginBottom: 12,
   },
   scheduledLabelGroup: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
-    flexWrap: 'wrap',
-    flex: 1,
-    minWidth: 150,
+    gap: 7,
   },
   calendarIconBox: {
-    width: 28,
-    height: 28,
-    borderRadius: 8,
-    backgroundColor: '#F4F0FF',
+    width: 26,
+    height: 26,
+    borderRadius: 7,
+    backgroundColor: 'rgba(88, 44, 219, 0.08)',
     justifyContent: 'center',
     alignItems: 'center',
   },
   scheduledTitle: {
-    fontSize: 11,
-    fontWeight: '700',
+    fontSize: 11.5,
+    fontWeight: '800',
     color: '#171420',
-    letterSpacing: 0.5,
-  },
-  scheduledTimePill: {
-    backgroundColor: '#582CDB',
-    borderRadius: 8,
-    paddingVertical: 3,
-    paddingHorizontal: 7,
-  },
-  scheduledTimeText: {
-    color: '#FFFFFF',
-    fontSize: 10.5,
-    fontWeight: '700',
+    letterSpacing: 0.6,
   },
   scheduleInfoBtn: {
-    backgroundColor: '#F4F0FF',
-    paddingVertical: 5,
-    paddingHorizontal: 9,
-    borderRadius: 8,
-    flexShrink: 0,
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 4,
+    paddingHorizontal: 2,
+  },
+  scheduleInfoBtnPressed: {
+    opacity: 0.5,
   },
   scheduleInfoBtnText: {
-    fontSize: 11,
-    fontWeight: '700',
+    fontSize: 12.5,
+    fontWeight: '600',
     color: '#582CDB',
+    letterSpacing: -0.1,
+  },
+  scheduleInfoBtnTextDark: {
+    color: '#A78BFA',
   },
   scheduledMetricsContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'flex-end',
-    marginBottom: 16,
+    alignItems: 'baseline',
+    marginBottom: 14,
   },
   postsMetricRow: {
     flexDirection: 'row',
@@ -2331,29 +2318,29 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   postsCountBig: {
-    fontSize: 34,
-    fontWeight: '700',
+    fontSize: 32,
+    fontWeight: '800',
     color: '#171420',
     letterSpacing: -0.8,
   },
   postsCountLabel: {
-    fontSize: 14,
-    fontWeight: '500',
+    fontSize: 13.5,
+    fontWeight: '600',
     color: '#5E576E',
   },
   weekIncreaseBadge: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#F4F0FF',
-    borderRadius: 8,
-    paddingVertical: 4.5,
-    paddingHorizontal: 9,
-    gap: 5,
+    gap: 4,
   },
   weekIncreaseText: {
     fontSize: 12,
-    fontWeight: '700',
+    fontWeight: '600',
     color: '#582CDB',
+    letterSpacing: -0.1,
+  },
+  weekIncreaseTextDark: {
+    color: '#A78BFA',
   },
   nextUpBox: {
     backgroundColor: '#FAF9FF',
