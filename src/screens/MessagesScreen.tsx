@@ -779,19 +779,21 @@ export const MessagesScreen: React.FC<MessagesScreenProps> = ({
               </Svg>
             </Pressable>
 
-            {/* Mascot Logo */}
-            <Animated.View
-              style={[
-                styles.headerLogoWrapper,
-                { transform: [{ translateY: flameFloatY }] },
-              ]}
-            >
-              <Image
-                source={require('../../assets/images/jarvis-ghost-clean.png')}
-                style={styles.headerGhostLogo}
-                resizeMode="contain"
-              />
-            </Animated.View>
+            {/* Mascot Logo - only in inbox */}
+            {!activeChatThread && (
+              <Animated.View
+                style={[
+                  styles.headerLogoWrapper,
+                  { transform: [{ translateY: flameFloatY }] },
+                ]}
+              >
+                <Image
+                  source={require('../../assets/images/jarvis-ghost-clean.png')}
+                  style={styles.headerGhostLogo}
+                  resizeMode="contain"
+                />
+              </Animated.View>
+            )}
 
             {/* Switch to Pro mode pill */}
             {!activeChatThread && (
@@ -823,13 +825,13 @@ export const MessagesScreen: React.FC<MessagesScreenProps> = ({
           {/* Active Chat Header or Empty Space in Inbox */}
           {activeChatThread ? (
             <View style={styles.headerCenter}>
-              <Text style={styles.headerTitleText}>
-                {activeChatThread.name}
+              <Text style={[styles.headerTitleText, isDark && styles.textWhite]} numberOfLines={1}>
+                {activeChatThread.name.startsWith('Jarvis') ? 'Jarvis' : activeChatThread.name.split(' ')[0]}
               </Text>
-              <Text style={styles.headerSubtitleText}>
+              <Text style={styles.headerSubtitleText} numberOfLines={1}>
                 {activeChatThread.isOnline
-                  ? '🟢 Active now • ⚡ 52d streak'
-                  : '⚡ Streak Partner'}
+                  ? `🟢 Active · ⚡${activeChatThread.streak}d`
+                  : `⚡${activeChatThread.streak}d`}
               </Text>
             </View>
           ) : (
@@ -1416,8 +1418,10 @@ export const MessagesScreen: React.FC<MessagesScreenProps> = ({
           </KeyboardAvoidingView>
         )}
 
-        {/* UNIFIED SIGNATURE FLOATING TAB BAR */}
-        <FloatingTabBar activeTab={activeTab} onTabPress={handleTabPress} />
+        {/* UNIFIED SIGNATURE FLOATING TAB BAR (Hidden inside active chat) */}
+        {!activeChatThread && (
+          <FloatingTabBar activeTab={activeTab} onTabPress={handleTabPress} />
+        )}
 
         {/* ========================================================================= */}
         {/* SNAPCHAT / INSTAGRAM STYLE IMMERSIVE STORY & HIGHLIGHTS VIEWER MODAL */}
@@ -2521,12 +2525,12 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: 16,
-    paddingVertical: 10,
+    paddingTop: 10,
+    paddingBottom: Platform.OS === 'ios' ? 24 : 14,
     backgroundColor: '#FFFFFF',
     borderTopWidth: 1,
     borderTopColor: '#EFEBF8',
     gap: 10,
-    marginBottom: 80,
   },
   attachScriptBtn: {
     width: 40,
