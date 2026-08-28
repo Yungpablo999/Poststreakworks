@@ -1209,24 +1209,24 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
           </View>
 
           {/* 7. CARD 3: ACTIVE BRAND QUEST ("Lagos Food Festival") */}
-          <View style={styles.questCard}>
-            <View style={styles.questTargetIconBox}>
-              <Svg width={20} height={20} viewBox="0 0 24 24" fill="none">
-                <Circle cx="12" cy="12" r="10" stroke="#582CDB" strokeWidth="2.2" />
-                <Circle cx="12" cy="4.5" fill="#582CDB" />
-              </Svg>
+          <View style={[styles.questCard, isDark && styles.questCardDark]}>
+            <View style={styles.questThumbnailBox}>
+              <Image
+                source={{ uri: 'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=160&auto=format&fit=crop&q=80' }}
+                style={styles.questThumbnailImage}
+                resizeMode="cover"
+              />
             </View>
 
             <View style={styles.questContentGroup}>
-              <View style={styles.activeQuestTag}>
-                <Text style={styles.activeQuestTagText}>ACTIVE QUEST</Text>
-              </View>
-              <Text style={styles.questTitle}>Lagos Food Festival</Text>
-              <Text style={styles.questSubtext}>Review &amp; Vlog</Text>
+              <Text style={styles.activeQuestTagText}>ACTIVE QUEST</Text>
+              <Text style={[styles.questTitle, isDark && styles.textWhite]}>Lagos Food Festival</Text>
+              <Text style={[styles.questSubtext, isDark && styles.textMutedDark]}>Review &amp; Vlog</Text>
             </View>
 
-            <View style={styles.bountyPill}>
-              <Text style={styles.bountyText}>$450 Bounty</Text>
+            <View style={styles.bountyRewardBox}>
+              <Text style={styles.bountyAmountText}>$450</Text>
+              <Text style={styles.bountySubLabel}>Bounty</Text>
             </View>
           </View>
 
@@ -2514,62 +2514,71 @@ const styles = StyleSheet.create({
     borderRadius: 18,
     borderWidth: 1,
     borderColor: 'rgba(23, 20, 32, 0.07)',
-    padding: 18,
-    marginBottom: 18,
-    gap: 12,
+    paddingVertical: 14,
+    paddingHorizontal: 16,
+    marginBottom: 16,
+    gap: 14,
     shadowColor: '#171420',
-    shadowOffset: { width: 0, height: 6 },
+    shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.03,
-    shadowRadius: 16,
+    shadowRadius: 12,
     elevation: 2,
   },
-  questTargetIconBox: {
-    width: 42,
-    height: 42,
-    borderRadius: 20,
-    backgroundColor: '#F4F0FF',
-    justifyContent: 'center',
-    alignItems: 'center',
+  questCardDark: {
+    backgroundColor: '#1C1924',
+    borderColor: 'rgba(255, 255, 255, 0.08)',
+  },
+  questThumbnailBox: {
+    width: 44,
+    height: 44,
+    borderRadius: 12,
+    overflow: 'hidden',
+    backgroundColor: '#FFFBEB',
+  },
+  questThumbnailImage: {
+    width: '100%',
+    height: '100%',
   },
   questContentGroup: {
     flex: 1,
-  },
-  activeQuestTag: {
-    backgroundColor: '#FFFBEB',
-    borderRadius: 6,
-    paddingVertical: 2,
-    paddingHorizontal: 6,
-    alignSelf: 'flex-start',
-    marginBottom: 4,
-    borderWidth: 1,
-    borderColor: '#FEF3C7',
+    justifyContent: 'center',
   },
   activeQuestTagText: {
-    fontSize: 10,
-    fontWeight: '700',
+    fontSize: 9.5,
+    fontWeight: '800',
     color: '#D97706',
+    letterSpacing: 0.6,
+    textTransform: 'uppercase',
+    marginBottom: 2,
   },
   questTitle: {
-    fontSize: 15,
+    fontSize: 15.5,
     fontWeight: '700',
     color: '#171420',
+    letterSpacing: -0.2,
   },
   questSubtext: {
     fontSize: 12,
     color: '#5E576E',
+    marginTop: 1,
   },
-  bountyPill: {
-    backgroundColor: '#FFFBEB',
-    paddingVertical: 6,
-    paddingHorizontal: 11,
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: '#FEF3C7',
+  bountyRewardBox: {
+    alignItems: 'flex-end',
+    justifyContent: 'center',
+    paddingLeft: 4,
   },
-  bountyText: {
-    fontSize: 14,
-    fontWeight: '700',
+  bountyAmountText: {
+    fontSize: 16,
+    fontWeight: '800',
     color: '#D97706',
+    letterSpacing: -0.3,
+    lineHeight: 20,
+  },
+  bountySubLabel: {
+    fontSize: 10.5,
+    fontWeight: '600',
+    color: '#B45309',
+    letterSpacing: 0.2,
   },
 
   // 8. CREATOR MATCH COLLABORATION
