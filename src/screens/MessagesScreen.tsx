@@ -2063,7 +2063,7 @@ export const MessagesScreen: React.FC<MessagesScreenProps> = ({
                       { id: 'c1', name: 'Elena Rostova', handle: '@elenacreates', streak: 52, niche: 'Film & Tech Review', avatar: require('../../assets/images/elena-avatar.jpg') },
                       { id: 'c2', name: 'Marcus Chen', handle: '@marcustech', streak: 38, niche: 'AI & Workflow', avatar: require('../../assets/images/marcus-avatar.jpg') },
                       { id: 'c3', name: 'Sophia Taylor', handle: '@sophiastyle', streak: 41, niche: 'Lifestyle & Fashion', avatar: require('../../assets/images/zainab-avatar.jpg') },
-                      { id: 'c4', name: 'David Kim', handle: '@davidbuilds', streak: 29, niche: 'Fitness & Mindset', avatar: require('../../assets/images/alex-avatar.jpg') },
+                      { id: 'c4', name: 'David Kim', handle: '@davidbuilds', streak: 29, niche: 'Fitness & Mindset', avatar: require('../../assets/images/david-avatar.jpg') },
                     ]
                       .filter((c) => !activeChatThread || c.id !== activeChatThread.creatorId)
                       .map((creator) => {
