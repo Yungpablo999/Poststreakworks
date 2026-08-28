@@ -917,7 +917,7 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
                 🔥
               </Animated.Text>
               <Text style={[styles.streakMotivationText, isDark && styles.streakMotivationTextDark]}>
-                <Text style={styles.streakMotivationHighlight}>47-day streak</Text> · Keep it alive today
+                <Text style={styles.streakMotivationHighlight}>1-day streak</Text> · Keep it alive today
               </Text>
             </View>
           </View>
@@ -937,7 +937,7 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
               </View>
 
               <View style={styles.streakCountBadge}>
-                <Text style={styles.streakCountNumber}>47-Day Streak</Text>
+                <Text style={styles.streakCountNumber}>1-Day Streak</Text>
                 <Animated.Text
                   style={[
                     styles.streakFireEmoji,
@@ -1474,13 +1474,13 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
                 <View style={styles.calendarStatsRow}>
                   <View style={styles.calendarStatCard}>
                     <Text style={styles.calendarStatValue} numberOfLines={1}>
-                      {isNarrowScreen ? '47d 🔥' : '47 Days 🔥'}
+                      {isNarrowScreen ? '1d 🔥' : '1 Day 🔥'}
                     </Text>
                     <Text style={styles.calendarStatLabel} numberOfLines={1}>Current</Text>
                   </View>
                   <View style={styles.calendarStatCard}>
                     <Text style={styles.calendarStatValue} numberOfLines={1}>
-                      {isNarrowScreen ? '52d 🏆' : '52 Days 🏆'}
+                      {isNarrowScreen ? '1d 🏆' : '1 Day 🏆'}
                     </Text>
                     <Text style={styles.calendarStatLabel} numberOfLines={1}>Best</Text>
                   </View>
@@ -1750,8 +1750,8 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
 
               <Text style={styles.modalTitle}>Mission 1: The Reel Hook 🚀</Text>
               <Text style={styles.modalText}>
-                Create a 15-second high-energy Reel sharing your creator journey hook. Post before 11:30 AM to maintain your{' '}
-                <Text style={styles.modalBold}>47-Day Streak</Text>!
+                Create a 15-second high-energy Reel sharing your creator journey hook. Post before 11:30 AM to build your{' '}
+                <Text style={styles.modalBold}>1-Day Streak</Text>!
               </Text>
 
               <Pressable
