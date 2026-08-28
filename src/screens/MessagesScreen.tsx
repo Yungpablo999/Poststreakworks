@@ -1023,10 +1023,10 @@ export const MessagesScreen: React.FC<MessagesScreenProps> = ({
               contentContainerStyle={styles.categoryTabsRow}
             >
               {[
-                { id: 'all', label: `🔥 All Messages (${threads.length})` },
-                { id: 'buddies', label: '🤝 Streak Partners' },
-                { id: 'collabs', label: '⚡ Collabs & Scripts' },
-                { id: 'jarvis', label: '🤖 Jarvis AI' },
+                { id: 'all', label: `🔥 All · ${threads.length}` },
+                { id: 'buddies', label: '🤝 Partners' },
+                { id: 'collabs', label: '⚡ Collabs' },
+                { id: 'jarvis', label: '🤖 Jarvis' },
               ].map((tab) => {
                 const isSelected = selectedCategory === tab.id;
                 return (
