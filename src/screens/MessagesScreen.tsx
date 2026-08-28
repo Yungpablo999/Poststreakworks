@@ -1678,7 +1678,7 @@ export const MessagesScreen: React.FC<MessagesScreenProps> = ({
           <View style={styles.modalOverlay}>
             <Animated.View style={[styles.modalCard, { transform: [{ scale: modalPopScale }] }]}>
               <View style={styles.modalHeaderRow}>
-                <View>
+                <View style={{ flex: 1, paddingRight: 12 }}>
                   <Text style={styles.modalTitle}>Connect with More Creators</Text>
                   <Text style={styles.modalSubtitle}>Build 2x longer streaks with accountability partners</Text>
                 </View>
@@ -2966,6 +2966,7 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: '#64748B',
     marginTop: 2,
+    lineHeight: 16.5,
   },
   modalCloseCircle: {
     width: 28,
