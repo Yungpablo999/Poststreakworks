@@ -3643,7 +3643,7 @@ const styles = StyleSheet.create({
     width: '100%',
     height: 48,
     borderRadius: 14,
-    backgroundColor: '#D4A038',
+    backgroundColor: '#E5A51C',
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 12,
