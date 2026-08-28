@@ -1444,7 +1444,8 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
               {/* Scrollable Notification List */}
               <ScrollView
                 style={styles.notifScrollView}
-                showsVerticalScrollIndicator={true}
+                contentContainerStyle={styles.notifScrollContent}
+                showsVerticalScrollIndicator={false}
                 bounces={true}
               >
                 {filteredNotifications.length === 0 ? (
@@ -2995,6 +2996,10 @@ const styles = StyleSheet.create({
   notifScrollView: {
     maxHeight: 360,
     marginBottom: 14,
+  },
+  notifScrollContent: {
+    paddingBottom: 4,
+    paddingRight: 1,
   },
   emptyNotifBox: {
     alignItems: 'center',
