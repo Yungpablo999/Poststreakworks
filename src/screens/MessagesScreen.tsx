@@ -501,6 +501,10 @@ export const MessagesScreen: React.FC<MessagesScreenProps> = ({
   const [celebrationBadge, setCelebrationBadge] = useState('COLLAB ACTIVE');
   const [showChatOptionsMenu, setShowChatOptionsMenu] = useState(false);
   const [playingAudioId, setPlayingAudioId] = useState<string | null>(null);
+  const [showCreateSquadModal, setShowCreateSquadModal] = useState(false);
+  const [selectedSquadCreatorIds, setSelectedSquadCreatorIds] = useState<string[]>(['c2']);
+  const [squadNameInput, setSquadNameInput] = useState('');
+  const [squadProjectCollab, setSquadProjectCollab] = useState<'streak' | 'hooks' | 'split'>('streak');
 
   // Floating Emoji Animations
   const [floatingEmojis, setFloatingEmojis] = useState<{ id: string; emoji: string; x: number }[]>([]);
@@ -827,7 +831,7 @@ export const MessagesScreen: React.FC<MessagesScreenProps> = ({
                 </View>
               </View>
 
-              {/* Right Action Icons: ＋ (Add / Start Collab) & ⋯ (Conversation Options) */}
+              {/* Right Action Icons: 👥＋ (Start a Squad) & ⋯ (Conversation Options) */}
               <View style={styles.chatActiveHeaderRightGroup}>
                 <Pressable
                   style={({ pressed }) => [styles.chatHeaderActionBtn, isDark && styles.chatHeaderActionBtnDark, pressed && styles.btnPressed]}
@@ -836,12 +840,37 @@ export const MessagesScreen: React.FC<MessagesScreenProps> = ({
                     if (Platform.OS !== 'web') {
                       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                     }
+                    if (activeChatThread) {
+                      setSquadNameInput(`${activeChatThread.name.split(' ')[0]} & Pablo's Squad`);
+                    }
                     triggerModalAnim();
-                    setShowConnectModal(true);
+                    setShowCreateSquadModal(true);
                   }}
                 >
-                  <Svg width={17} height={17} viewBox="0 0 24 24" fill="none">
-                    <Path d="M12 5V19M5 12H19" stroke={isDark ? '#FFFFFF' : '#171420'} strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" />
+                  <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
+                    {/* User Body & Head */}
+                    <Path
+                      d="M15 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"
+                      stroke={isDark ? '#FFFFFF' : '#171420'}
+                      strokeWidth="2.1"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                    <Circle
+                      cx="8"
+                      cy="7"
+                      r="4"
+                      stroke={isDark ? '#FFFFFF' : '#171420'}
+                      strokeWidth="2.1"
+                    />
+                    {/* Vibrant Purple Plus on Top-Right */}
+                    <Path
+                      d="M19 8v6M16 11h6"
+                      stroke="#582CDB"
+                      strokeWidth="2.4"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
                   </Svg>
                 </Pressable>
 
@@ -1945,6 +1974,193 @@ export const MessagesScreen: React.FC<MessagesScreenProps> = ({
                 </Pressable>
               </View>
             </Animated.View>
+          </Pressable>
+        </Modal>
+
+        {/* START A SQUAD MODAL (👥＋) */}
+        <Modal
+          visible={showCreateSquadModal}
+          transparent={true}
+          animationType="fade"
+          onRequestClose={() => setShowCreateSquadModal(false)}
+        >
+          <Pressable
+            style={styles.modalOverlay}
+            onPress={() => setShowCreateSquadModal(false)}
+          >
+            <KeyboardAvoidingView
+              behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+              style={{ width: '100%', alignItems: 'center' }}
+            >
+              <Pressable
+                style={[
+                  styles.squadModalCard,
+                  isDark && { backgroundColor: '#171420', borderColor: '#2D2845' },
+                ]}
+                onPress={(e) => e.stopPropagation()}
+              >
+                {/* Header */}
+                <View style={styles.modalHeaderRow}>
+                  <View style={{ flex: 1, paddingRight: 12 }}>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 2 }}>
+                      <Text style={[styles.modalTitle, isDark && styles.textWhite]}>
+                        Start a Squad
+                      </Text>
+                      <View style={styles.squadCollabBadge}>
+                        <Text style={styles.squadCollabBadgeText}>GROUP</Text>
+                      </View>
+                    </View>
+                    <Text style={[styles.modalSubtitle, isDark && styles.textMutedDark]}>
+                      Add creators to this conversation and collaborate together.
+                    </Text>
+                  </View>
+                  <Pressable
+                    onPress={() => setShowCreateSquadModal(false)}
+                    style={styles.modalCloseCircle}
+                    hitSlop={8}
+                  >
+                    <Text style={styles.modalCloseCross}>✕</Text>
+                  </Pressable>
+                </View>
+
+                <ScrollView style={{ maxHeight: 400 }} showsVerticalScrollIndicator={false}>
+                  {/* 1. SQUAD NAME INPUT */}
+                  <View style={styles.squadInputGroup}>
+                    <Text style={[styles.squadInputLabel, isDark && styles.textWhite]}>Squad Name</Text>
+                    <TextInput
+                      style={[styles.squadTextInput, isDark && { backgroundColor: '#211D30', color: '#FFFFFF', borderColor: '#363150' }]}
+                      placeholder="e.g. Lagos Creator Sprint, Tech Duo Squad..."
+                      placeholderTextColor="#94A3B8"
+                      value={squadNameInput}
+                      onChangeText={setSquadNameInput}
+                    />
+                  </View>
+
+                  {/* 2. SELECT CREATORS */}
+                  <View style={styles.squadInputGroup}>
+                    <Text style={[styles.squadInputLabel, isDark && styles.textWhite]}>
+                      Select Creators ({1 + selectedSquadCreatorIds.length})
+                    </Text>
+
+                    {/* Pre-selected Current Chat Creator */}
+                    {activeChatThread && (
+                      <View style={[styles.squadCreatorSelectRow, styles.squadCreatorLockedRow]}>
+                        <Image source={activeChatThread.avatar} style={styles.squadCreatorAvatar} resizeMode="cover" />
+                        <View style={{ flex: 1 }}>
+                          <Text style={[styles.squadCreatorName, isDark && styles.textWhite]}>{activeChatThread.name}</Text>
+                          <Text style={styles.squadCreatorSub}>{activeChatThread.handle} · ⚡ {activeChatThread.streak}d</Text>
+                        </View>
+                        <View style={styles.squadLockedPill}>
+                          <Text style={styles.squadLockedPillText}>In this chat ✓</Text>
+                        </View>
+                      </View>
+                    )}
+
+                    {/* Other Available Creators */}
+                    {[
+                      { id: 'c2', name: 'Marcus Chen', handle: '@marcustech', streak: 38, niche: 'AI & Workflow', avatar: require('../../assets/images/marcus-avatar.jpg') },
+                      { id: 'c3', name: 'Sophia Taylor', handle: '@sophiastyle', streak: 41, niche: 'Lifestyle & Fashion', avatar: require('../../assets/images/zainab-avatar.jpg') },
+                      { id: 'jarvis', name: 'Jarvis AI', handle: '@jarvis.ai', streak: 100, niche: 'AI Content Director', avatar: require('../../assets/images/jarvis-core-flame.png') },
+                    ]
+                      .filter((c) => !activeChatThread || c.id !== activeChatThread.creatorId)
+                      .map((creator) => {
+                        const isChecked = selectedSquadCreatorIds.includes(creator.id);
+                        return (
+                          <Pressable
+                            key={creator.id}
+                            style={[
+                              styles.squadCreatorSelectRow,
+                              isChecked && styles.squadCreatorRowSelected,
+                              isDark && { backgroundColor: isChecked ? '#2A2045' : '#211D30', borderColor: isChecked ? '#7C3AED' : '#363150' },
+                            ]}
+                            onPress={() => {
+                              if (Platform.OS !== 'web') {
+                                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                              }
+                              setSelectedSquadCreatorIds((prev) =>
+                                prev.includes(creator.id)
+                                  ? prev.filter((id) => id !== creator.id)
+                                  : [...prev, creator.id]
+                              );
+                            }}
+                          >
+                            <Image
+                              source={creator.avatar}
+                              style={styles.squadCreatorAvatar}
+                              resizeMode={creator.id === 'jarvis' ? 'contain' : 'cover'}
+                            />
+                            <View style={{ flex: 1 }}>
+                              <Text style={[styles.squadCreatorName, isDark && styles.textWhite]}>{creator.name}</Text>
+                              <Text style={styles.squadCreatorSub}>{creator.handle} · ⚡ {creator.streak}d</Text>
+                            </View>
+                            <View style={[styles.squadCheckboxCircle, isChecked && styles.squadCheckboxActive]}>
+                              {isChecked && <Text style={styles.squadCheckmarkText}>✓</Text>}
+                            </View>
+                          </Pressable>
+                        );
+                      })}
+                  </View>
+
+                  {/* 3. COLLABORATION PROJECT / FOCUS */}
+                  <View style={styles.squadInputGroup}>
+                    <Text style={[styles.squadInputLabel, isDark && styles.textWhite]}>Collab Project Focus</Text>
+                    {[
+                      { id: 'streak', title: '🔥 14-Day Streak Challenge', sub: '+50 XP daily pact when all members post' },
+                      { id: 'hooks', title: '🎬 Batch Filming & Hook Swap', sub: 'Peer review scripts & hook retention' },
+                      { id: 'split', title: '⚡ Joint Reel & Split Collab', sub: 'Co-branded storytelling video' },
+                    ].map((proj) => {
+                      const isSelected = squadProjectCollab === proj.id;
+                      return (
+                        <Pressable
+                          key={proj.id}
+                          style={[
+                            styles.squadProjectCard,
+                            isSelected && styles.squadProjectCardSelected,
+                            isDark && { backgroundColor: isSelected ? '#2A2045' : '#211D30', borderColor: isSelected ? '#7C3AED' : '#363150' },
+                          ]}
+                          onPress={() => {
+                            if (Platform.OS !== 'web') {
+                              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                            }
+                            setSquadProjectCollab(proj.id as 'streak' | 'hooks' | 'split');
+                          }}
+                        >
+                          <Text style={[styles.squadProjectTitle, isDark && styles.textWhite]}>{proj.title}</Text>
+                          <Text style={styles.squadProjectSub}>{proj.sub}</Text>
+                        </Pressable>
+                      );
+                    })}
+                  </View>
+                </ScrollView>
+
+                {/* CREATE SQUAD CTA BUTTON */}
+                <Pressable
+                  style={({ pressed }) => [styles.createSquadSubmitBtn, pressed && styles.btnPressed]}
+                  onPress={() => {
+                    if (Platform.OS !== 'web') {
+                      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+                    }
+                    setShowCreateSquadModal(false);
+                    setCelebrationTitle('Squad Initialized!');
+                    setCelebrationSubtitle(`"${squadNameInput || 'Creator Squad'}" created with ${1 + selectedSquadCreatorIds.length} members.`);
+                    setCelebrationSpeech('Squad collaboration started! +25 XP.');
+                    setCelebrationBadge('SQUAD ACTIVE');
+                    setShowCelebrationModal(true);
+                  }}
+                >
+                  <LinearGradient
+                    colors={['#7C3AED', '#582CDB']}
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 1, y: 0 }}
+                    style={styles.createSquadGradient}
+                  >
+                    <Text style={styles.createSquadBtnText}>
+                      Create Squad & Start Group Chat ➔
+                    </Text>
+                  </LinearGradient>
+                </Pressable>
+              </Pressable>
+            </KeyboardAvoidingView>
           </Pressable>
         </Modal>
 
@@ -3339,6 +3555,161 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     color: '#FFFFFF',
     letterSpacing: -0.1,
+  },
+
+  // Squad Creation Modal Styles
+  squadModalCard: {
+    width: '100%',
+    maxWidth: 400,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 24,
+    borderWidth: 1,
+    borderColor: '#EFEBF8',
+    padding: 20,
+    shadowColor: '#582CDB',
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.1,
+    shadowRadius: 24,
+    elevation: 8,
+  },
+  squadCollabBadge: {
+    backgroundColor: '#FAF5FF',
+    paddingHorizontal: 7,
+    paddingVertical: 2,
+    borderRadius: 6,
+    borderWidth: 1,
+    borderColor: '#DDD6FE',
+  },
+  squadCollabBadgeText: {
+    fontSize: 9.5,
+    fontWeight: '800',
+    color: '#6D28D9',
+  },
+  squadInputGroup: {
+    marginBottom: 14,
+  },
+  squadInputLabel: {
+    fontSize: 12,
+    fontWeight: '800',
+    color: '#171420',
+    marginBottom: 6,
+    letterSpacing: 0.2,
+  },
+  squadTextInput: {
+    height: 42,
+    backgroundColor: '#F8FAFC',
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    paddingHorizontal: 12,
+    fontSize: 13,
+    color: '#171420',
+    fontWeight: '500',
+  },
+  squadCreatorSelectRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#F8FAFC',
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    padding: 10,
+    marginBottom: 8,
+    gap: 10,
+  },
+  squadCreatorRowSelected: {
+    borderColor: '#7C3AED',
+    backgroundColor: '#FAF5FF',
+  },
+  squadCreatorLockedRow: {
+    backgroundColor: '#F5F3FF',
+    borderColor: '#DDD6FE',
+  },
+  squadCreatorAvatar: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+  },
+  squadCreatorName: {
+    fontSize: 13.5,
+    fontWeight: '700',
+    color: '#171420',
+  },
+  squadCreatorSub: {
+    fontSize: 11,
+    color: '#64748B',
+    marginTop: 1,
+  },
+  squadLockedPill: {
+    backgroundColor: '#EDE9FE',
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 6,
+  },
+  squadLockedPillText: {
+    fontSize: 10,
+    fontWeight: '700',
+    color: '#6D28D9',
+  },
+  squadCheckboxCircle: {
+    width: 22,
+    height: 22,
+    borderRadius: 11,
+    borderWidth: 1.5,
+    borderColor: '#CBD5E1',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  squadCheckboxActive: {
+    backgroundColor: '#582CDB',
+    borderColor: '#582CDB',
+  },
+  squadCheckmarkText: {
+    fontSize: 12,
+    fontWeight: '800',
+    color: '#FFFFFF',
+  },
+  squadProjectCard: {
+    backgroundColor: '#F8FAFC',
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    padding: 10,
+    marginBottom: 6,
+  },
+  squadProjectCardSelected: {
+    borderColor: '#7C3AED',
+    backgroundColor: '#FAF5FF',
+  },
+  squadProjectTitle: {
+    fontSize: 12.5,
+    fontWeight: '700',
+    color: '#171420',
+  },
+  squadProjectSub: {
+    fontSize: 10.5,
+    color: '#64748B',
+    marginTop: 1,
+  },
+  createSquadSubmitBtn: {
+    borderRadius: 14,
+    overflow: 'hidden',
+    marginTop: 8,
+    shadowColor: '#582CDB',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 10,
+    elevation: 3,
+  },
+  createSquadGradient: {
+    paddingVertical: 13,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  createSquadBtnText: {
+    fontSize: 13.5,
+    fontWeight: '800',
+    color: '#FFFFFF',
   },
 
   messageCardDark: {
