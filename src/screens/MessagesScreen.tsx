@@ -19,6 +19,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import * as Haptics from 'expo-haptics';
 import Svg, { Path, Circle, Rect } from 'react-native-svg';
 import { FloatingTabBar, TabType } from '../components/FloatingTabBar';
+import { BrandToast } from '../components/BrandToast';
 import { UserProfileModal, UserProfileData } from '../components/UserProfileModal';
 import { AnimatedCompletionModal } from '../components/AnimatedCompletionModal';
 import { COLLAB_PLANS } from './CollabIdeaScreen';
@@ -507,6 +508,13 @@ export const MessagesScreen: React.FC<MessagesScreenProps> = ({
   const [squadProjectCollab, setSquadProjectCollab] = useState<'streak' | 'hooks' | 'split'>('streak');
   const [showCollabTypeModal, setShowCollabTypeModal] = useState(false);
   const [selectedCollabType, setSelectedCollabType] = useState<'challenge' | 'joint_reel' | 'co_write' | 'swap'>('challenge');
+  const [mutedThreadIds, setMutedThreadIds] = useState<string[]>([]);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+
+  const showToast = (msg: string) => {
+    setToastMessage(msg);
+    setTimeout(() => setToastMessage(null), 2500);
+  };
 
   // Floating Emoji Animations
   const [floatingEmojis, setFloatingEmojis] = useState<{ id: string; emoji: string; x: number }[]>([]);
@@ -829,6 +837,7 @@ export const MessagesScreen: React.FC<MessagesScreenProps> = ({
                     {activeChatThread.isOnline
                       ? `🟢 Active · ⚡${activeChatThread.streak}d`
                       : `⚡${activeChatThread.streak}d`}
+                    {mutedThreadIds.includes(activeChatThread.id) ? ' · 🔕 Muted' : ''}
                   </Text>
                 </View>
               </View>
@@ -1169,7 +1178,12 @@ export const MessagesScreen: React.FC<MessagesScreenProps> = ({
                       <Text style={[styles.threadCreatorName, isDark && styles.textWhite]} numberOfLines={1}>
                         {thread.name}
                       </Text>
-                      <Text style={styles.threadTime}>{thread.time}</Text>
+                      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+                        {mutedThreadIds.includes(thread.id) && (
+                          <Text style={{ fontSize: 11 }}>🔕</Text>
+                        )}
+                        <Text style={styles.threadTime}>{thread.time}</Text>
+                      </View>
                     </View>
 
                     <Text style={[styles.threadMetaLine, isDark && styles.textMutedDark]} numberOfLines={1}>
@@ -1949,17 +1963,44 @@ export const MessagesScreen: React.FC<MessagesScreenProps> = ({
                   style={({ pressed }) => [styles.optionItemRow, pressed && styles.btnPressed]}
                   onPress={() => {
                     setShowChatOptionsMenu(false);
+                    if (!activeChatThread) return;
+                    const isMuted = mutedThreadIds.includes(activeChatThread.id);
+                    const willMute = !isMuted;
                     if (Platform.OS !== 'web') {
-                      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+                      Haptics.notificationAsync(
+                        willMute
+                          ? Haptics.NotificationFeedbackType.Warning
+                          : Haptics.NotificationFeedbackType.Success
+                      );
                     }
+                    setMutedThreadIds((prev) =>
+                      willMute
+                        ? [...prev, activeChatThread.id]
+                        : prev.filter((id) => id !== activeChatThread.id)
+                    );
+                    showToast(
+                      willMute
+                        ? `Notifications muted for ${activeChatThread.name}`
+                        : `Notifications unmuted for ${activeChatThread.name}`
+                    );
                   }}
                 >
-                  <View style={styles.optionItemIconBox}>
-                    <Text style={{ fontSize: 16 }}>🔔</Text>
+                  <View style={[styles.optionItemIconBox, activeChatThread && mutedThreadIds.includes(activeChatThread.id) && { backgroundColor: '#F1F5F9' }]}>
+                    <Text style={{ fontSize: 16 }}>
+                      {activeChatThread && mutedThreadIds.includes(activeChatThread.id) ? '🔕' : '🔔'}
+                    </Text>
                   </View>
                   <View style={{ flex: 1 }}>
-                    <Text style={[styles.optionItemTitle, isDark && styles.textWhite]}>Mute Notifications</Text>
-                    <Text style={styles.optionItemSub}>Pause streak ping alerts from this thread</Text>
+                    <Text style={[styles.optionItemTitle, isDark && styles.textWhite]}>
+                      {activeChatThread && mutedThreadIds.includes(activeChatThread.id)
+                        ? 'Unmute Notifications'
+                        : 'Mute Notifications'}
+                    </Text>
+                    <Text style={styles.optionItemSub}>
+                      {activeChatThread && mutedThreadIds.includes(activeChatThread.id)
+                        ? 'Resume streak alerts & messages from this thread'
+                        : 'Pause streak ping alerts from this thread'}
+                    </Text>
                   </View>
                 </Pressable>
 
@@ -2361,6 +2402,9 @@ export const MessagesScreen: React.FC<MessagesScreenProps> = ({
             setShowCelebrationModal(false);
           }}
         />
+
+        {/* INTERACTIVE TOAST POPUP NOTIFICATION */}
+        <BrandToast message={toastMessage} />
       </View>
     </SafeAreaView>
   );
