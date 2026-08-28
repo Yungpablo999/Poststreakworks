@@ -245,6 +245,108 @@ const CALENDAR_DATA_CHRONOLOGICAL: MonthData[] = [
   },
 ];
 
+interface DayInsightData {
+  date: string;
+  headline: string;
+  description: string;
+  type: 'completed' | 'scheduled' | 'freeze' | 'rest';
+}
+
+const getJarvisDayInsight = (day: number, month: MonthData): DayInsightData => {
+  const date = `${month.monthName} ${day}`;
+
+  if (month.completedDays.includes(day)) {
+    if (day === 1) {
+      return {
+        date,
+        headline: 'Month Opener Momentum',
+        description: `You set the foundation for ${month.monthName} with a verified Reel hook.`,
+        type: 'completed',
+      };
+    }
+    if (day === 15 || day === 16 || day === 30 || day === 31) {
+      return {
+        date,
+        headline: 'Milestone Streak Verified',
+        description: `Delivered +150 XP and protected your active creator streak on schedule.`,
+        type: 'completed',
+      };
+    }
+    if (day % 7 === 0 || day % 7 === 6) {
+      return {
+        date,
+        headline: 'Weekend Audience Surge',
+        description: `Weekend posting captured peak viewer retention across connected platforms.`,
+        type: 'completed',
+      };
+    }
+    if (day % 3 === 0) {
+      return {
+        date,
+        headline: 'Prime Window Published',
+        description: `Reel went live in the optimal 11:30 AM slot with high algorithmic delivery.`,
+        type: 'completed',
+      };
+    }
+    return {
+      date,
+      headline: 'Streak Posted & Verified',
+      description: `Content published on schedule to protect your streak.`,
+      type: 'completed',
+    };
+  }
+
+  if (month.scheduledDays.includes(day)) {
+    if (day === 17 || day === 18) {
+      return {
+        date,
+        headline: 'Queued for 11:30 AM',
+        description: `Content queued for automatic publishing. Jarvis will verify reach once live.`,
+        type: 'scheduled',
+      };
+    }
+    if (day % 7 === 0 || day % 7 === 6) {
+      return {
+        date,
+        headline: 'Weekend Drop Scheduled',
+        description: `High traffic expected. Draft audio and tags are locked in for maximum reach.`,
+        type: 'scheduled',
+      };
+    }
+    return {
+      date,
+      headline: 'Scheduled Reel Ready',
+      description: `Draft scheduled with optimized caption and hashtags to protect your streak.`,
+      type: 'scheduled',
+    };
+  }
+
+  if (month.freezeDays.includes(day)) {
+    return {
+      date,
+      headline: 'Protected with Streak Freeze',
+      description: `Streak Freeze shield kept your streak progress safe without penalty.`,
+      type: 'freeze',
+    };
+  }
+
+  if (month.isCurrent && day > 16) {
+    return {
+      date,
+      headline: 'Upcoming Open Slot',
+      description: `Ready for a new draft or collab reel. Tap create to build next week's buffer.`,
+      type: 'rest',
+    };
+  }
+
+  return {
+    date,
+    headline: 'Creator Rest Day',
+    description: `Planned recovery day. Balanced pacing keeps your consistency sustainable.`,
+    type: 'rest',
+  };
+};
+
 const PRESET_AVATARS = [
   {
     id: 'ghost',
@@ -409,7 +511,7 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
   const [previewAvatarId, setPreviewAvatarId] = useState<string | null>('ghost');
   const [uploadToastMessage, setUploadToastMessage] = useState<string | null>(null);
 
-  const [selectedDayInfo, setSelectedDayInfo] = useState<string | null>(null);
+  const [selectedDayInfo, setSelectedDayInfo] = useState<DayInsightData | null>(null);
   const [selectedMonthIndex, setSelectedMonthIndex] = useState(4); // Default to May (index 4)
   const [pagerWidth, setPagerWidth] = useState(Dimensions.get('window').width - 68);
 
@@ -672,15 +774,8 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
     if (Platform.OS !== 'web') {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     }
-    if (month.completedDays.includes(day)) {
-      setSelectedDayInfo(`${month.monthName} ${day}: Streak posted & verified. Content published on schedule to protect your streak.`);
-    } else if (month.scheduledDays.includes(day)) {
-      setSelectedDayInfo(`${month.monthName} ${day}: Reel scheduled for 11:30 AM. Auto-publishing will protect your streak.`);
-    } else if (month.freezeDays.includes(day)) {
-      setSelectedDayInfo(`${month.monthName} ${day}: Streak Freeze active. Protected from streak loss during rest/travel.`);
-    } else {
-      setSelectedDayInfo(`${month.monthName} ${day}: Creator rest day. No activity scheduled.`);
-    }
+    const insight = getJarvisDayInsight(day, month);
+    setSelectedDayInfo(insight);
   };
 
   // Real-time instantaneous swipe tracking
@@ -1549,84 +1644,59 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
                     ))}
                   </View>
 
-                  {/* Swipeable ScrollView with Real-Time Instant Natural Swipe Tracking */}
-                  <ScrollView
-                    ref={monthPagerRef}
-                    horizontal
-                    pagingEnabled={true}
-                    directionalLockEnabled={true}
-                    nestedScrollEnabled={true}
-                    showsHorizontalScrollIndicator={false}
-                    onScroll={handleScroll}
-                    onMomentumScrollEnd={handleScroll}
-                    scrollEventThrottle={16}
-                    bounces={true}
-                    keyboardShouldPersistTaps="handled"
-                    style={{ width: pagerWidth, overflow: 'hidden' }}
-                    contentContainerStyle={styles.pagerContent}
-                  >
-                    {CALENDAR_DATA_CHRONOLOGICAL.map((month) => {
-                      const totalGridCells = month.daysCount + month.startOffset;
-                      const totalRows = Math.ceil(totalGridCells / 7);
+                  {/* Active Month Calendar Grid */}
+                  <View style={[styles.monthPageCard, { width: '100%' }]}>
+                    <View style={styles.calendarMonthGrid}>
+                      {Array.from({ length: Math.ceil((CALENDAR_DATA_CHRONOLOGICAL[selectedMonthIndex].daysCount + CALENDAR_DATA_CHRONOLOGICAL[selectedMonthIndex].startOffset) / 7) * 7 }).map((_, cellIdx) => {
+                        const currentMonth = CALENDAR_DATA_CHRONOLOGICAL[selectedMonthIndex];
+                        const dayNum = cellIdx - currentMonth.startOffset + 1;
+                        const isValidDay = dayNum >= 1 && dayNum <= currentMonth.daysCount;
 
-                      return (
-                        <View
-                          key={`page_${month.id}`}
-                          style={[styles.monthPageCard, { width: pagerWidth }]}
-                        >
-                          <View style={styles.calendarMonthGrid}>
-                            {Array.from({ length: totalRows * 7 }).map((_, cellIdx) => {
-                              const dayNum = cellIdx - month.startOffset + 1;
-                              const isValidDay = dayNum >= 1 && dayNum <= month.daysCount;
+                        if (!isValidDay) {
+                          return <View key={`empty_${cellIdx}`} style={styles.calendarCellEmpty} />;
+                        }
 
-                              if (!isValidDay) {
-                                return <View key={`empty_${cellIdx}`} style={styles.calendarCellEmpty} />;
-                              }
+                        const isCompleted = currentMonth.completedDays.includes(dayNum);
+                        const isScheduled = currentMonth.scheduledDays.includes(dayNum);
+                        const isFreeze = currentMonth.freezeDays.includes(dayNum);
 
-                              const isCompleted = month.completedDays.includes(dayNum);
-                              const isScheduled = month.scheduledDays.includes(dayNum);
-                              const isFreeze = month.freezeDays.includes(dayNum);
+                        return (
+                          <Pressable
+                            key={`day_${dayNum}`}
+                            onPress={() => handleDayPress(dayNum, currentMonth)}
+                            style={({ pressed }) => [
+                              styles.calendarCell,
+                              isCompleted && styles.calendarCellCompleted,
+                              isScheduled && styles.calendarCellScheduled,
+                              isFreeze && styles.calendarCellFreeze,
+                              pressed && styles.calendarCellPressed,
+                            ]}
+                          >
+                            <Text
+                              style={[
+                                styles.calendarCellDayNumber,
+                                isCompleted && styles.calendarCellTextCompleted,
+                                isScheduled && styles.calendarCellTextScheduled,
+                                isFreeze && styles.calendarCellTextFreeze,
+                              ]}
+                            >
+                              {dayNum}
+                            </Text>
 
-                              return (
-                                <Pressable
-                                  key={`day_${dayNum}`}
-                                  onPress={() => handleDayPress(dayNum, month)}
-                                  style={({ pressed }) => [
-                                    styles.calendarCell,
-                                    isCompleted && styles.calendarCellCompleted,
-                                    isScheduled && styles.calendarCellScheduled,
-                                    isFreeze && styles.calendarCellFreeze,
-                                    pressed && styles.calendarCellPressed,
-                                  ]}
-                                >
-                                  <Text
-                                    style={[
-                                      styles.calendarCellDayNumber,
-                                      isCompleted && styles.calendarCellTextCompleted,
-                                      isScheduled && styles.calendarCellTextScheduled,
-                                      isFreeze && styles.calendarCellTextFreeze,
-                                    ]}
-                                  >
-                                    {dayNum}
-                                  </Text>
-
-                                  {isCompleted && (
-                                    <Text style={styles.cellMiniIcon}>✓</Text>
-                                  )}
-                                  {isScheduled && (
-                                    <Text style={styles.cellMiniIconScheduled}>⏰</Text>
-                                  )}
-                                  {isFreeze && (
-                                    <Text style={styles.cellMiniIconFreeze}>❄️</Text>
-                                  )}
-                                </Pressable>
-                              );
-                            })}
-                          </View>
-                        </View>
-                      );
-                    })}
-                  </ScrollView>
+                            {isCompleted && (
+                              <Text style={styles.cellMiniIcon}>✓</Text>
+                            )}
+                            {isScheduled && (
+                              <Text style={styles.cellMiniIconScheduled}>⏰</Text>
+                            )}
+                            {isFreeze && (
+                              <Text style={styles.cellMiniIconFreeze}>❄️</Text>
+                            )}
+                          </Pressable>
+                        );
+                      })}
+                    </View>
+                  </View>
                 </View>
 
                 {/* Calendar Legend */}
@@ -1651,32 +1721,19 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
                   </View>
                 </View>
 
-                {/* Contextual Jarvis Intelligence Card (Appears only when a day is tapped) */}
+                {/* Compact Apple-style Jarvis Contextual Intelligence Panel */}
                 {selectedDayInfo && (
-                  <View style={[styles.jarvisStreakInsight, { marginTop: 14 }]}>
-                    <Animated.View
-                      style={[
-                        styles.jarvisFlameWrapper,
-                        {
-                          transform: [
-                            { translateY: ghostFloatY },
-                            { scale: ghostScale },
-                          ],
-                        },
-                      ]}
-                    >
-                      <Image
-                        source={require('../../assets/images/jarvis-core-flame.png')}
-                        style={styles.jarvisFlameImage}
-                        resizeMode="contain"
-                      />
-                    </Animated.View>
-                    <View style={{ flex: 1 }}>
-                      <Text style={styles.jarvisInsightText}>
-                        <Text style={styles.jarvisInsightBold}>Jarvis Intelligence: </Text>
-                        {selectedDayInfo}
-                      </Text>
+                  <View style={styles.jarvisContextCard}>
+                    <View style={styles.jarvisContextHeader}>
+                      <Text style={styles.jarvisContextFlame}>🔥</Text>
+                      <Text style={styles.jarvisContextTitle}>Jarvis Intelligence</Text>
                     </View>
+                    <Text style={styles.jarvisContextDateLine}>
+                      {selectedDayInfo.date} · <Text style={styles.jarvisContextStatusHighlight}>{selectedDayInfo.headline}</Text>
+                    </Text>
+                    <Text style={styles.jarvisContextDescription}>
+                      {selectedDayInfo.description}
+                    </Text>
                   </View>
                 )}
 
@@ -1685,7 +1742,7 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
                   onPress={() => setShowCalendarModal(false)}
                   style={({ pressed }) => [
                     styles.calendarDoneButton,
-                    { marginTop: selectedDayInfo ? 14 : 16 },
+                    { marginTop: selectedDayInfo ? 12 : 16 },
                     pressed && styles.missionButtonPressed,
                   ]}
                 >
@@ -2137,6 +2194,45 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(23, 20, 32, 0.03)',
     borderWidth: 1,
     borderColor: 'rgba(23, 20, 32, 0.04)',
+  },
+  jarvisContextCard: {
+    backgroundColor: 'rgba(88, 44, 219, 0.05)',
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: 'rgba(88, 44, 219, 0.12)',
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+    marginTop: 12,
+  },
+  jarvisContextHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+    marginBottom: 4,
+  },
+  jarvisContextFlame: {
+    fontSize: 12,
+  },
+  jarvisContextTitle: {
+    fontSize: 11.5,
+    fontWeight: '700',
+    color: '#582CDB',
+    letterSpacing: 0.2,
+  },
+  jarvisContextDateLine: {
+    fontSize: 12.5,
+    fontWeight: '700',
+    color: '#171420',
+    marginBottom: 2,
+  },
+  jarvisContextStatusHighlight: {
+    fontWeight: '600',
+    color: '#582CDB',
+  },
+  jarvisContextDescription: {
+    fontSize: 11.5,
+    color: '#5E576E',
+    lineHeight: 16,
   },
   jarvisStreakInsight: {
     flexDirection: 'row',
