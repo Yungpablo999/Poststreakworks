@@ -931,16 +931,13 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
             ]}
           >
             <View style={styles.cardHeaderRow}>
-              <View style={styles.cardTitleGroup}>
-                <Text style={[styles.cardSectionTitle, isDark && styles.textWhite]}>Your Streak</Text>
-                <Text style={styles.streakSubtext}>Consistency is key</Text>
-              </View>
+              <Text style={[styles.cardSectionTitle, isDark && styles.textWhite]}>Your Streak</Text>
+              <Text style={[styles.streakStatusHighlight, isDark && styles.streakStatusHighlightDark]}>96% consistent</Text>
             </View>
 
-            {/* Month Header & Consistency Rate */}
+            {/* Month Header */}
             <View style={styles.calendarMetaRow}>
-              <Text style={styles.monthLabel}>May 2024 →</Text>
-              <Text style={styles.streakStatusHighlight}>96% consistent</Text>
+              <Text style={[styles.monthLabel, isDark && styles.monthLabelDark]}>May 2024 →</Text>
             </View>
 
             <View style={styles.daysHeaderRow}>
@@ -2041,43 +2038,26 @@ const styles = StyleSheet.create({
   cardHeaderRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    marginBottom: 16,
+    alignItems: 'center',
+    marginBottom: 8,
   },
   cardTitleGroup: {
     flex: 1,
   },
   cardSectionTitle: {
-    fontSize: 16.5,
+    fontSize: 16,
     fontWeight: '700',
     color: '#171420',
     letterSpacing: -0.3,
   },
-  streakSubtext: {
-    fontSize: 12.5,
-    fontWeight: '400',
-    color: '#5E576E',
-    marginTop: 3,
-  },
-  streakCountBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-    backgroundColor: '#FAF5FF',
-    paddingVertical: 3.5,
-    paddingHorizontal: 9,
-    borderRadius: 100,
-    borderWidth: 1,
-    borderColor: 'rgba(88, 44, 219, 0.14)',
-  },
-  streakCountNumber: {
-    fontSize: 12.5,
+  streakStatusHighlight: {
+    fontSize: 12,
     fontWeight: '700',
     color: '#582CDB',
     letterSpacing: -0.1,
   },
-  streakFireEmoji: {
-    fontSize: 13,
+  streakStatusHighlightDark: {
+    color: '#A78BFA',
   },
 
   // 4. CALENDAR HEATMAP (APPLE PILL DESIGN)
@@ -2091,13 +2071,11 @@ const styles = StyleSheet.create({
   monthLabel: {
     fontSize: 12,
     fontWeight: '700',
-    color: '#582CDB',
+    color: '#7F7894',
     letterSpacing: -0.1,
   },
-  streakStatusHighlight: {
-    fontSize: 11.5,
-    fontWeight: '600',
-    color: '#582CDB',
+  monthLabelDark: {
+    color: '#9CA3AF',
   },
   daysHeaderRow: {
     flexDirection: 'row',
