@@ -759,143 +759,165 @@ export const MessagesScreen: React.FC<MessagesScreenProps> = ({
       <View style={[styles.container, isDark && { backgroundColor: '#0C0A12' }]}>
         {/* 1. TOP AIRY HEADER BAR */}
         <View style={styles.headerBar}>
-          <View style={styles.headerLeftGroup}>
-            <Pressable
-              onPress={() => {
-                if (Platform.OS !== 'web') {
-                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                }
-                if (activeChatThread) {
-                  setActiveChatThread(null);
-                } else {
-                  onBack();
-                }
-              }}
-              style={({ pressed }) => [styles.backCircleBtn, pressed && styles.btnPressed]}
-              hitSlop={8}
-            >
-              <Svg width={20} height={20} viewBox="0 0 24 24" fill="none">
-                <Path d="M15 18L9 12L15 6" stroke="#171420" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" />
-              </Svg>
-            </Pressable>
-
-            {/* Mascot Logo - only in inbox */}
-            {!activeChatThread && (
-              <Animated.View
-                style={[
-                  styles.headerLogoWrapper,
-                  { transform: [{ translateY: flameFloatY }] },
-                ]}
-              >
-                <Image
-                  source={require('../../assets/images/jarvis-ghost-clean.png')}
-                  style={styles.headerGhostLogo}
-                  resizeMode="contain"
-                />
-              </Animated.View>
-            )}
-
-            {/* Switch to Pro mode pill */}
-            {!activeChatThread && (
+          {activeChatThread ? (
+            /* ACTIVE 1-ON-1 CHAT HEADER: Back, Avatar, Name & Status */
+            <View style={styles.chatActiveHeaderRow}>
+              {/* Back Button */}
               <Pressable
                 onPress={() => {
                   if (Platform.OS !== 'web') {
-                    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                   }
-                  if (onSwitchToPro) {
-                    onSwitchToPro();
-                  } else if (onSaveProfile && userProfile) {
-                    onSaveProfile({ ...userProfile, tier: 'pro' });
-                  }
+                  setActiveChatThread(null);
                 }}
+                style={({ pressed }) => [styles.backCircleBtn, pressed && styles.btnPressed]}
                 hitSlop={8}
               >
-                <LinearGradient
-                  colors={['#EDE9FE', '#DDD6FE']}
-                  start={{ x: 0, y: 0 }}
-                  end={{ x: 1, y: 1 }}
-                  style={styles.freeHeaderBadge}
-                >
-                  <Text style={styles.freeHeaderBadgeText}>✨ PRO</Text>
-                </LinearGradient>
-              </Pressable>
-            )}
-          </View>
-
-          {/* Active Chat Header or Empty Space in Inbox */}
-          {activeChatThread ? (
-            <View style={styles.headerCenter}>
-              <Text style={[styles.headerTitleText, isDark && styles.textWhite]} numberOfLines={1}>
-                {activeChatThread.name.startsWith('Jarvis') ? 'Jarvis' : activeChatThread.name.split(' ')[0]}
-              </Text>
-              <Text style={styles.headerSubtitleText} numberOfLines={1}>
-                {activeChatThread.isOnline
-                  ? `🟢 Active · ⚡${activeChatThread.streak}d`
-                  : `⚡${activeChatThread.streak}d`}
-              </Text>
-            </View>
-          ) : (
-            <View style={{ flex: 1 }} />
-          )}
-
-          {/* Right Action: Plus Button (+) & Profile Icon */}
-          <View style={styles.headerRightGroup}>
-            <Pressable
-              style={({ pressed }) => [styles.newChatBtn, pressed && styles.btnPressed]}
-              hitSlop={8}
-              onPress={() => {
-                triggerModalAnim();
-                setShowConnectModal(true);
-              }}
-            >
-              <LinearGradient
-                colors={['#7C3AED', '#582CDB']}
-                style={styles.plusIconGradient}
-              >
-                <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
-                  <Path d="M12 5V19M5 12H19" stroke="#FFFFFF" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" />
+                <Svg width={20} height={20} viewBox="0 0 24 24" fill="none">
+                  <Path d="M15 18L9 12L15 6" stroke="#171420" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" />
                 </Svg>
-              </LinearGradient>
-            </Pressable>
+              </Pressable>
 
-            {/* Top-Right: Profile Icon after Plus button */}
-            <Pressable
-              style={({ pressed }) => [styles.headerIconBtn, isDark && styles.headerIconBtnDark, pressed && styles.btnPressed]}
-              hitSlop={8}
-              onPress={() => {
-                if (Platform.OS !== 'web') {
-                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                }
-                triggerModalAnim();
-                setShowProfileModal(true);
-              }}
-            >
-              {activeChatThread ? (
+              {/* Creator Avatar beside Name */}
+              <Pressable
+                onPress={() => {
+                  const matchedStory = CREATOR_STORIES.find((s) => s.id === activeChatThread.creatorId);
+                  if (matchedStory) {
+                    handleOpenStory(matchedStory);
+                  }
+                }}
+                style={styles.chatHeaderAvatarGroup}
+              >
                 <Image
                   source={activeChatThread.avatar}
-                  style={styles.headerPartnerMiniAvatar}
-                  resizeMode="cover"
+                  style={styles.chatHeaderAvatar}
+                  resizeMode={activeChatThread.creatorId === 'jarvis' ? 'contain' : 'cover'}
                 />
-              ) : (
-                <Svg width={19} height={19} viewBox="0 0 24 24" fill="none">
-                  <Path
-                    d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"
-                    stroke="#171420"
-                    strokeWidth="2.2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
+                {activeChatThread.isOnline && <View style={styles.chatHeaderOnlineDot} />}
+              </Pressable>
+
+              {/* Creator Name & Status */}
+              <View style={styles.chatHeaderInfoCol}>
+                <Text style={[styles.chatHeaderNameText, isDark && styles.textWhite]} numberOfLines={1}>
+                  {activeChatThread.name.startsWith('Jarvis') ? 'Jarvis' : activeChatThread.name.split(' ')[0]}
+                </Text>
+                <Text style={styles.chatHeaderStatusText} numberOfLines={1}>
+                  {activeChatThread.isOnline
+                    ? `🟢 Active · ⚡${activeChatThread.streak}d`
+                    : `⚡${activeChatThread.streak}d`}
+                </Text>
+              </View>
+            </View>
+          ) : (
+            /* MAIN INBOX HEADER */
+            <>
+              <View style={styles.headerLeftGroup}>
+                <Pressable
+                  onPress={() => {
+                    if (Platform.OS !== 'web') {
+                      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                    }
+                    onBack();
+                  }}
+                  style={({ pressed }) => [styles.backCircleBtn, pressed && styles.btnPressed]}
+                  hitSlop={8}
+                >
+                  <Svg width={20} height={20} viewBox="0 0 24 24" fill="none">
+                    <Path d="M15 18L9 12L15 6" stroke="#171420" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" />
+                  </Svg>
+                </Pressable>
+
+                {/* Mascot Logo */}
+                <Animated.View
+                  style={[
+                    styles.headerLogoWrapper,
+                    { transform: [{ translateY: flameFloatY }] },
+                  ]}
+                >
+                  <Image
+                    source={require('../../assets/images/jarvis-ghost-clean.png')}
+                    style={styles.headerGhostLogo}
+                    resizeMode="contain"
                   />
-                  <Circle
-                    cx="12"
-                    cy="7"
-                    r="4"
-                    stroke="#171420"
-                    strokeWidth="2.2"
-                  />
-                </Svg>
-              )}
-            </Pressable>
-          </View>
+                </Animated.View>
+
+                {/* Switch to Pro mode pill */}
+                <Pressable
+                  onPress={() => {
+                    if (Platform.OS !== 'web') {
+                      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+                    }
+                    if (onSwitchToPro) {
+                      onSwitchToPro();
+                    } else if (onSaveProfile && userProfile) {
+                      onSaveProfile({ ...userProfile, tier: 'pro' });
+                    }
+                  }}
+                  hitSlop={8}
+                >
+                  <LinearGradient
+                    colors={['#EDE9FE', '#DDD6FE']}
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 1, y: 1 }}
+                    style={styles.freeHeaderBadge}
+                  >
+                    <Text style={styles.freeHeaderBadgeText}>✨ PRO</Text>
+                  </LinearGradient>
+                </Pressable>
+              </View>
+
+              {/* Right Action: Plus Button (+) & Profile Icon */}
+              <View style={styles.headerRightGroup}>
+                <Pressable
+                  style={({ pressed }) => [styles.newChatBtn, pressed && styles.btnPressed]}
+                  hitSlop={8}
+                  onPress={() => {
+                    triggerModalAnim();
+                    setShowConnectModal(true);
+                  }}
+                >
+                  <LinearGradient
+                    colors={['#7C3AED', '#582CDB']}
+                    style={styles.plusIconGradient}
+                  >
+                    <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
+                      <Path d="M12 5V19M5 12H19" stroke="#FFFFFF" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" />
+                    </Svg>
+                  </LinearGradient>
+                </Pressable>
+
+                {/* Top-Right: Profile Icon */}
+                <Pressable
+                  style={({ pressed }) => [styles.headerIconBtn, isDark && styles.headerIconBtnDark, pressed && styles.btnPressed]}
+                  hitSlop={8}
+                  onPress={() => {
+                    if (Platform.OS !== 'web') {
+                      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                    }
+                    triggerModalAnim();
+                    setShowProfileModal(true);
+                  }}
+                >
+                  <Svg width={19} height={19} viewBox="0 0 24 24" fill="none">
+                    <Path
+                      d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"
+                      stroke="#171420"
+                      strokeWidth="2.2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                    <Circle
+                      cx="12"
+                      cy="7"
+                      r="4"
+                      stroke="#171420"
+                      strokeWidth="2.2"
+                    />
+                  </Svg>
+                </Pressable>
+              </View>
+            </>
+          )}
         </View>
 
         {/* 2. MAIN CONTENT: INBOX OR ACTIVE CHAT */}
@@ -1783,6 +1805,49 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
+  },
+  chatActiveHeaderRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+    gap: 10,
+  },
+  chatHeaderAvatarGroup: {
+    position: 'relative',
+  },
+  chatHeaderAvatar: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    borderWidth: 1.5,
+    borderColor: '#EDE9FE',
+  },
+  chatHeaderOnlineDot: {
+    position: 'absolute',
+    bottom: 0,
+    right: 0,
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    backgroundColor: '#10B981',
+    borderWidth: 2,
+    borderColor: '#FFFFFF',
+  },
+  chatHeaderInfoCol: {
+    flex: 1,
+    justifyContent: 'center',
+  },
+  chatHeaderNameText: {
+    fontSize: 15,
+    fontWeight: '800',
+    color: '#171420',
+    letterSpacing: -0.2,
+  },
+  chatHeaderStatusText: {
+    fontSize: 11,
+    color: '#64748B',
+    fontWeight: '600',
+    marginTop: 0.5,
   },
   headerCenter: {
     flex: 1,
