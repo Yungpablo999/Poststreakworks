@@ -995,31 +995,6 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
                 </View>
               ))}
             </View>
-
-            {/* Jarvis Insight Banner inside Streak Card */}
-            <View style={styles.jarvisStreakInsight}>
-              <Animated.View
-                style={[
-                  styles.jarvisFlameWrapper,
-                  {
-                    transform: [
-                      { translateY: ghostFloatY },
-                      { scale: ghostScale },
-                    ],
-                  },
-                ]}
-              >
-                <Image
-                  source={require('../../assets/images/jarvis-core-flame.png')}
-                  style={styles.jarvisFlameImage}
-                  resizeMode="contain"
-                />
-              </Animated.View>
-              <Text style={styles.jarvisInsightText}>
-                <Text style={styles.jarvisInsightBold}>Jarvis Insight: </Text>
-                Your streak is strong. Tap calendar to swipe across all months.
-              </Text>
-            </View>
           </Pressable>
 
           {/* 5. CARD 2: SCHEDULED POSTS VELOCITY */}
@@ -1706,6 +1681,31 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
                       <Text style={styles.legendLabel}>Rest Day</Text>
                     </View>
                   </View>
+                </View>
+
+                {/* Jarvis Insight Banner inside Expanded Calendar */}
+                <View style={[styles.jarvisStreakInsight, { marginTop: 14, marginBottom: 14 }]}>
+                  <Animated.View
+                    style={[
+                      styles.jarvisFlameWrapper,
+                      {
+                        transform: [
+                          { translateY: ghostFloatY },
+                          { scale: ghostScale },
+                        ],
+                      },
+                    ]}
+                  >
+                    <Image
+                      source={require('../../assets/images/jarvis-core-flame.png')}
+                      style={styles.jarvisFlameImage}
+                      resizeMode="contain"
+                    />
+                  </Animated.View>
+                  <Text style={styles.jarvisInsightText}>
+                    <Text style={styles.jarvisInsightBold}>Jarvis Insight: </Text>
+                    Your streak is strong. Swipe across all months or tap any day to inspect details.
+                  </Text>
                 </View>
 
                 {/* Modal Footer Done Button */}
