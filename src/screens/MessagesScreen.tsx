@@ -1103,9 +1103,6 @@ export const MessagesScreen: React.FC<MessagesScreenProps> = ({
                 </Pressable>
               ))}
             </View>
-
-            {/* Bottom spacing */}
-            <View style={{ height: 110 }} />
           </ScrollView>
         ) : (
           /* 3. PREMIUM INTERACTIVE 1-ON-1 CHAT ROOM */
@@ -1780,7 +1777,7 @@ const styles = StyleSheet.create({
   scrollContent: {
     paddingHorizontal: sPadding(20),
     paddingTop: 8,
-    paddingBottom: 135,
+    paddingBottom: 85,
   },
   btnPressed: {
     opacity: 0.9,
