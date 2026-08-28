@@ -906,27 +906,19 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
               Post 1 Reel to protect your streak
             </Text>
 
-            {/* Status Pills */}
-            <View style={styles.statusPillsRow}>
-              <View style={styles.streakPillBadge}>
-                <Animated.Text
-                  style={[
-                    styles.streakPillFire,
-                    { transform: [{ scale: flamePulse }] },
-                  ]}
-                >
-                  🔥
-                </Animated.Text>
-                <Text style={styles.streakPillBadgeText}>47-Day Streak</Text>
-              </View>
-
-              <View style={styles.nextPostPillBadge}>
-                <Svg width={12} height={12} viewBox="0 0 24 24" fill="none">
-                  <Circle cx="12" cy="12" r="10" stroke="#6B7280" strokeWidth="2.2" />
-                  <Path d="M12 6V12L16 14" stroke="#6B7280" strokeWidth="2.2" strokeLinecap="round" />
-                </Svg>
-                <Text style={styles.nextPostPillBadgeText}>11:30 AM</Text>
-              </View>
+            {/* Streak Motivation Typography */}
+            <View style={styles.streakMotivationRow}>
+              <Animated.Text
+                style={[
+                  styles.streakMotivationFlame,
+                  { transform: [{ scale: flamePulse }] },
+                ]}
+              >
+                🔥
+              </Animated.Text>
+              <Text style={[styles.streakMotivationText, isDark && styles.streakMotivationTextDark]}>
+                <Text style={styles.streakMotivationHighlight}>47-day streak</Text> · Keep it alive today
+              </Text>
             </View>
           </View>
 
@@ -2015,58 +2007,27 @@ const styles = StyleSheet.create({
     marginBottom: 12,
     ...(Platform.OS === 'web' ? { whiteSpace: 'nowrap' as any } : {}),
   },
-  statusPillsRow: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 8,
-  },
-  levelPillBadge: {
-    backgroundColor: 'rgba(254, 243, 199, 0.85)',
-    borderRadius: 100,
-    borderWidth: 1,
-    borderColor: 'rgba(253, 230, 138, 0.9)',
-    paddingVertical: 5,
-    paddingHorizontal: 12,
-  },
-  levelPillBadgeText: {
-    fontSize: 12,
-    fontWeight: '700',
-    color: '#B45309',
-  },
-  streakPillBadge: {
+  streakMotivationRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'rgba(237, 232, 252, 0.85)',
-    borderRadius: 100,
-    borderWidth: 1,
-    borderColor: 'rgba(221, 214, 254, 0.9)',
-    paddingVertical: 5,
-    paddingHorizontal: 12,
-    gap: 4,
+    gap: 6,
+    marginTop: -2,
   },
-  streakPillFire: {
+  streakMotivationFlame: {
+    fontSize: 14,
+  },
+  streakMotivationText: {
     fontSize: 13,
+    fontWeight: '500',
+    color: '#5E576E',
+    letterSpacing: -0.1,
   },
-  streakPillBadgeText: {
-    fontSize: 12,
+  streakMotivationTextDark: {
+    color: '#A39BB5',
+  },
+  streakMotivationHighlight: {
     fontWeight: '700',
     color: '#582CDB',
-  },
-  nextPostPillBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: 'rgba(243, 244, 246, 0.85)',
-    borderRadius: 100,
-    borderWidth: 1,
-    borderColor: 'rgba(229, 231, 235, 0.9)',
-    paddingVertical: 5,
-    paddingHorizontal: 12,
-    gap: 5,
-  },
-  nextPostPillBadgeText: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: '#4B5563',
   },
 
   // 3. REFINED GLASS CARDS
