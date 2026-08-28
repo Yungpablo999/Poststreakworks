@@ -526,6 +526,8 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
   const [notifications, setNotifications] = useState<NotificationItem[]>(INITIAL_NOTIFICATIONS);
   const [notifFilter, setNotifFilter] = useState<NotificationFilter>('all');
   const [expandedNotifId, setExpandedNotifId] = useState<string | null>(null);
+  const [showBrandQuestBriefModal, setShowBrandQuestBriefModal] = useState(false);
+  const [isBrandQuestAccepted, setIsBrandQuestAccepted] = useState(false);
 
   // Profile Photo State
   const [selectedAvatarId, setSelectedAvatarId] = useState<string | null>(null);
@@ -759,7 +761,8 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
     if (item.type === 'streak') {
       onStartMission?.();
     } else if (item.type === 'quest') {
-      onOpenQuest?.();
+      // Directly open the Brand Quest Brief Modal!
+      setShowBrandQuestBriefModal(true);
     } else if (item.type === 'collab') {
       onOpenMessages?.();
     }
@@ -1245,7 +1248,19 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
           </View>
 
           {/* 7. CARD 3: ACTIVE BRAND QUEST ("Lagos Food Festival") */}
-          <View style={[styles.questCard, isDark && styles.questCardDark]}>
+          <Pressable
+            style={({ pressed }) => [
+              styles.questCard,
+              isDark && styles.questCardDark,
+              pressed && styles.missionButtonPressed,
+            ]}
+            onPress={() => {
+              if (Platform.OS !== 'web') {
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              }
+              setShowBrandQuestBriefModal(true);
+            }}
+          >
             <View style={styles.questThumbnailBox}>
               <Image
                 source={{ uri: 'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=160&auto=format&fit=crop&q=80' }}
@@ -1255,7 +1270,14 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
             </View>
 
             <View style={styles.questContentGroup}>
-              <Text style={styles.activeQuestTagText}>ACTIVE QUEST</Text>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                <Text style={styles.activeQuestTagText}>
+                  {isBrandQuestAccepted ? 'CLAIMED QUEST' : 'BRAND QUEST'}
+                </Text>
+                {isBrandQuestAccepted && (
+                  <Text style={{ fontSize: 10, color: '#059669', fontWeight: '800' }}>✓ ACTIVE</Text>
+                )}
+              </View>
               <Text style={[styles.questTitle, isDark && styles.textWhite]}>Lagos Food Festival</Text>
               <Text style={[styles.questSubtext, isDark && styles.textMutedDark]}>Review &amp; Vlog</Text>
             </View>
@@ -1264,7 +1286,7 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
               <Text style={styles.bountyAmountText}>$450</Text>
               <Text style={styles.bountySubLabel}>Bounty</Text>
             </View>
-          </View>
+          </Pressable>
 
           {/* 8. CARD 4: CREATOR MATCH VELOCITY */}
           <View style={[styles.dashboardCard, isDark && styles.dashboardCardDark]}>
@@ -1590,6 +1612,148 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
               >
                 <Text style={styles.savePhotoPrimaryBtnText}>Mark all as read ✓</Text>
               </Pressable>
+            </Animated.View>
+          </View>
+        </Modal>
+
+        {/* BRAND QUEST BRIEF MODAL */}
+        <Modal
+          visible={showBrandQuestBriefModal}
+          transparent={true}
+          animationType="fade"
+          onRequestClose={() => setShowBrandQuestBriefModal(false)}
+        >
+          <View style={styles.calendarModalOverlay}>
+            <Animated.View
+              style={[
+                styles.brandBriefModalCard,
+                isDark && { backgroundColor: '#171420', borderColor: '#2D2845' },
+              ]}
+            >
+              {/* Header */}
+              <View style={styles.brandBriefHeader}>
+                <View style={{ flex: 1, paddingRight: 12 }}>
+                  <View style={styles.brandBriefTagRow}>
+                    <View style={styles.brandVerifiedPill}>
+                      <Text style={styles.brandVerifiedText}>✓ VERIFIED BRAND QUEST</Text>
+                    </View>
+                    <View style={styles.escrowBadge}>
+                      <Text style={styles.escrowBadgeText}>🔒 Escrow Locked</Text>
+                    </View>
+                  </View>
+                  <Text style={[styles.brandBriefMainTitle, isDark && styles.textWhite]}>
+                    Lagos Food Festival 2026
+                  </Text>
+                  <Text style={[styles.brandBriefSubTitle, isDark && styles.textMutedDark]}>
+                    Campaign Brief & Deliverables
+                  </Text>
+                </View>
+
+                <Pressable
+                  onPress={() => setShowBrandQuestBriefModal(false)}
+                  style={({ pressed }) => [styles.calendarCloseButton, pressed && styles.headerIconBtnPressed]}
+                  hitSlop={8}
+                >
+                  <Svg width={20} height={20} viewBox="0 0 24 24" fill="none">
+                    <Path d="M18 6L6 18M6 6L18 18" stroke="#1A1626" strokeWidth="2.4" strokeLinecap="round" />
+                  </Svg>
+                </Pressable>
+              </View>
+
+              <ScrollView
+                style={{ maxHeight: 380 }}
+                showsVerticalScrollIndicator={false}
+                contentContainerStyle={{ paddingBottom: 10 }}
+              >
+                {/* Bounty & Reward Banner */}
+                <LinearGradient
+                  colors={['#582CDB', '#7C3AED']}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 1 }}
+                  style={styles.brandBriefBountyBanner}
+                >
+                  <View>
+                    <Text style={styles.brandBriefBountyLabel}>TOTAL BOUNTY REWARD</Text>
+                    <Text style={styles.brandBriefBountyAmount}>$450.00 USD</Text>
+                    <Text style={styles.brandBriefBountySub}>+200 XP upon submission approval</Text>
+                  </View>
+                  <View style={styles.brandBriefBountyIconBox}>
+                    <Text style={{ fontSize: 26 }}>💰</Text>
+                  </View>
+                </LinearGradient>
+
+                {/* Campaign Overview */}
+                <View style={[styles.brandBriefSectionBox, isDark && { backgroundColor: '#211D30', borderColor: '#363150' }]}>
+                  <Text style={[styles.brandBriefSectionHeading, isDark && styles.textWhite]}>
+                    Campaign Summary
+                  </Text>
+                  <Text style={[styles.brandBriefBodyText, isDark && styles.textMutedDark]}>
+                    Lagos Food Festival is looking for food, travel & lifestyle creators to review local food stalls, hidden culinary gems, and the live festival experience.
+                  </Text>
+                </View>
+
+                {/* Deliverables Checklist */}
+                <View style={[styles.brandBriefSectionBox, isDark && { backgroundColor: '#211D30', borderColor: '#363150' }]}>
+                  <Text style={[styles.brandBriefSectionHeading, isDark && styles.textWhite]}>
+                    Required Deliverables
+                  </Text>
+                  <View style={styles.brandDeliverablesList}>
+                    <View style={styles.brandDeliverableItem}>
+                      <Text style={styles.deliverableCheckIcon}>✓</Text>
+                      <Text style={[styles.deliverableText, isDark && styles.textWhite]}>
+                        1x Dedicated Reel/TikTok (45-60s) reviewing 3 food vendors
+                      </Text>
+                    </View>
+                    <View style={styles.brandDeliverableItem}>
+                      <Text style={styles.deliverableCheckIcon}>✓</Text>
+                      <Text style={[styles.deliverableText, isDark && styles.textWhite]}>
+                        Tag <Text style={{ fontWeight: '800', color: '#582CDB' }}>@lagosfoodfest</Text> & use #PostStreakPartner
+                      </Text>
+                    </View>
+                    <View style={styles.brandDeliverableItem}>
+                      <Text style={styles.deliverableCheckIcon}>✓</Text>
+                      <Text style={[styles.deliverableText, isDark && styles.textWhite]}>
+                        Submit post link within 7 days of accepting
+                      </Text>
+                    </View>
+                  </View>
+                </View>
+
+                {/* Suggested Hook */}
+                <View style={styles.brandBriefHookBox}>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 4 }}>
+                    <Text style={{ fontSize: 13 }}>💡</Text>
+                    <Text style={styles.brandBriefHookLabel}>AI Hook Suggestion</Text>
+                  </View>
+                  <Text style={styles.brandBriefHookQuote}>
+                    "The 3 best food spots under $10 you cannot miss at Lagos Food Fest..."
+                  </Text>
+                </View>
+              </ScrollView>
+
+              {/* Action Buttons */}
+              <View style={styles.brandBriefFooter}>
+                <Pressable
+                  style={({ pressed }) => [
+                    styles.acceptBrandQuestBtn,
+                    isBrandQuestAccepted && { backgroundColor: '#10B981' },
+                    pressed && styles.missionButtonPressed,
+                  ]}
+                  onPress={() => {
+                    if (Platform.OS !== 'web') {
+                      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+                    }
+                    setIsBrandQuestAccepted(true);
+                    setShowBrandQuestBriefModal(false);
+                    setUploadToastMessage('🎯 Brand Quest Accepted! $450 Bounty escrow locked.');
+                    setTimeout(() => setUploadToastMessage(null), 3000);
+                  }}
+                >
+                  <Text style={styles.acceptBrandQuestBtnText}>
+                    {isBrandQuestAccepted ? '✓ Campaign Accepted & Active' : 'Accept Quest & Lock $450 Bounty ➔'}
+                  </Text>
+                </Pressable>
+              </View>
             </Animated.View>
           </View>
         </Modal>
@@ -3197,6 +3361,185 @@ const styles = StyleSheet.create({
     fontSize: 10,
     fontWeight: '700',
     color: '#7C3AED',
+  },
+
+  // BRAND QUEST BRIEF MODAL STYLES
+  brandBriefModalCard: {
+    width: '100%',
+    maxWidth: 380,
+    backgroundColor: 'rgba(255, 255, 255, 0.98)',
+    borderRadius: 26,
+    paddingTop: 18,
+    paddingHorizontal: 16,
+    paddingBottom: 16,
+    shadowColor: '#171420',
+    shadowOffset: { width: 0, height: 16 },
+    shadowOpacity: 0.15,
+    shadowRadius: 32,
+    elevation: 12,
+    borderWidth: 1,
+    borderColor: 'rgba(235, 230, 248, 0.95)',
+  },
+  brandBriefHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    marginBottom: 12,
+  },
+  brandBriefTagRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    marginBottom: 4,
+  },
+  brandVerifiedPill: {
+    backgroundColor: '#EDE8FC',
+    borderRadius: 6,
+    paddingVertical: 2,
+    paddingHorizontal: 6,
+  },
+  brandVerifiedText: {
+    fontSize: 9.5,
+    fontWeight: '800',
+    color: '#582CDB',
+    letterSpacing: 0.3,
+  },
+  escrowBadge: {
+    backgroundColor: '#ECFDF5',
+    borderRadius: 6,
+    paddingVertical: 2,
+    paddingHorizontal: 6,
+  },
+  escrowBadgeText: {
+    fontSize: 9.5,
+    fontWeight: '700',
+    color: '#059669',
+  },
+  brandBriefMainTitle: {
+    fontSize: 17.5,
+    fontWeight: '800',
+    color: '#171420',
+    letterSpacing: -0.3,
+  },
+  brandBriefSubTitle: {
+    fontSize: 11.5,
+    color: '#7F7894',
+    marginTop: 2,
+  },
+  brandBriefBountyBanner: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    borderRadius: 16,
+    padding: 14,
+    marginBottom: 10,
+  },
+  brandBriefBountyLabel: {
+    fontSize: 9.5,
+    fontWeight: '800',
+    color: 'rgba(255, 255, 255, 0.8)',
+    letterSpacing: 0.5,
+  },
+  brandBriefBountyAmount: {
+    fontSize: 20,
+    fontWeight: '900',
+    color: '#FFFFFF',
+    marginTop: 1,
+    letterSpacing: -0.5,
+  },
+  brandBriefBountySub: {
+    fontSize: 10.5,
+    color: '#FDE68A',
+    fontWeight: '700',
+    marginTop: 2,
+  },
+  brandBriefBountyIconBox: {
+    width: 42,
+    height: 42,
+    borderRadius: 21,
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  brandBriefSectionBox: {
+    backgroundColor: '#FAF8FC',
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: '#EFEBF8',
+    padding: 12,
+    marginBottom: 8,
+  },
+  brandBriefSectionHeading: {
+    fontSize: 12.5,
+    fontWeight: '800',
+    color: '#171420',
+    marginBottom: 4,
+  },
+  brandBriefBodyText: {
+    fontSize: 11.5,
+    color: '#524C62',
+    lineHeight: 16,
+  },
+  brandDeliverablesList: {
+    gap: 6,
+  },
+  brandDeliverableItem: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: 6,
+  },
+  deliverableCheckIcon: {
+    fontSize: 11,
+    fontWeight: '900',
+    color: '#059669',
+    marginTop: 1,
+  },
+  deliverableText: {
+    fontSize: 11.5,
+    color: '#334155',
+    flex: 1,
+    lineHeight: 15.5,
+  },
+  brandBriefHookBox: {
+    backgroundColor: '#FFFBEB',
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: '#FDE68A',
+    padding: 11,
+    marginBottom: 8,
+  },
+  brandBriefHookLabel: {
+    fontSize: 10.5,
+    fontWeight: '800',
+    color: '#B45309',
+  },
+  brandBriefHookQuote: {
+    fontSize: 11.5,
+    fontStyle: 'italic',
+    color: '#78350F',
+    lineHeight: 15.5,
+  },
+  brandBriefFooter: {
+    marginTop: 6,
+  },
+  acceptBrandQuestBtn: {
+    backgroundColor: '#582CDB',
+    borderRadius: 14,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#582CDB',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.16,
+    shadowRadius: 10,
+    elevation: 4,
+  },
+  acceptBrandQuestBtnText: {
+    fontSize: 13,
+    fontWeight: '800',
+    color: '#FFFFFF',
+    letterSpacing: -0.1,
   },
 
   // 12. PROFILE PHOTO UPLOAD MODAL
