@@ -315,6 +315,8 @@ export const PlatformConnectScreen: React.FC<PlatformConnectScreenProps> = ({
     }
   };
 
+  const hasConnected = connectedPlatforms.length > 0;
+
   return (
     <SafeAreaView style={styles.safeArea}>
       <StatusBar barStyle="dark-content" backgroundColor="#FAF8F5" />
@@ -512,7 +514,8 @@ export const PlatformConnectScreen: React.FC<PlatformConnectScreenProps> = ({
             onPress={handleContinue}
             style={({ pressed }) => [
               styles.continueButton,
-              pressed && styles.continueButtonPressed,
+              !hasConnected && styles.continueButtonDisabled,
+              pressed && hasConnected && styles.continueButtonPressed,
             ]}
           >
             <Text style={styles.continueButtonText}>Continue</Text>
@@ -923,6 +926,11 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.08,
     shadowRadius: 12,
     elevation: 4,
+  },
+  continueButtonDisabled: {
+    backgroundColor: 'rgba(181, 165, 232, 0.7)',
+    shadowOpacity: 0,
+    elevation: 0,
   },
   continueButtonPressed: {
     opacity: 0.92,
