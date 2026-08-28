@@ -902,12 +902,7 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
               <Text style={[styles.nextPostCountdown, isDark && styles.nextPostCountdownDark]}>Next post · 2h 45m</Text>
             </View>
 
-            <Text
-              style={[styles.focusHeadline, isDark && styles.textWhite]}
-              numberOfLines={1}
-              adjustsFontSizeToFit
-              minimumFontScale={0.75}
-            >
+            <Text style={[styles.focusHeadline, isDark && styles.textWhite]}>
               Post 1 Reel to protect your streak
             </Text>
 
@@ -2017,11 +2012,12 @@ const styles = StyleSheet.create({
     color: '#A39BB5',
   },
   focusHeadline: {
-    fontSize: 20,
+    fontSize: Platform.OS === 'web' ? ('clamp(15px, 4.5vw, 19px)' as any) : 17.5,
     fontWeight: '700',
     color: '#171420',
-    letterSpacing: -0.4,
+    letterSpacing: -0.3,
     marginBottom: 12,
+    ...(Platform.OS === 'web' ? { whiteSpace: 'nowrap' as any } : {}),
   },
   statusPillsRow: {
     flexDirection: 'row',
