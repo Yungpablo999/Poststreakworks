@@ -673,13 +673,13 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     }
     if (month.completedDays.includes(day)) {
-      setSelectedDayInfo(`🔥 ${month.monthName} ${day}: Reel Posted (Streak Maintained)`);
+      setSelectedDayInfo(`${month.monthName} ${day}: Streak posted & verified. Content published on schedule to protect your streak.`);
     } else if (month.scheduledDays.includes(day)) {
-      setSelectedDayInfo(`⏰ ${month.monthName} ${day}: Scheduled Reel at 11:30 AM`);
+      setSelectedDayInfo(`${month.monthName} ${day}: Reel scheduled for 11:30 AM. Auto-publishing will protect your streak.`);
     } else if (month.freezeDays.includes(day)) {
-      setSelectedDayInfo(`❄️ ${month.monthName} ${day}: Protected with Streak Freeze`);
+      setSelectedDayInfo(`${month.monthName} ${day}: Streak Freeze active. Protected from streak loss during rest/travel.`);
     } else {
-      setSelectedDayInfo(`⚪ ${month.monthName} ${day}: Creator Rest Day`);
+      setSelectedDayInfo(`${month.monthName} ${day}: Creator rest day. No activity scheduled.`);
     }
   };
 
@@ -1486,13 +1486,6 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
                   })}
                 </ScrollView>
 
-                {/* Selected Day Toast/Info Banner */}
-                {selectedDayInfo && (
-                  <View style={styles.selectedDayBanner}>
-                    <Text style={styles.selectedDayText} numberOfLines={1}>{selectedDayInfo}</Text>
-                  </View>
-                )}
-
                 {/* SWIPEABLE HORIZONTAL PAGER FOR ALL MONTHS */}
                 <View
                   style={styles.pagerOuterContainer}
@@ -1658,35 +1651,43 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
                   </View>
                 </View>
 
-                {/* Jarvis Insight Banner inside Expanded Calendar */}
-                <View style={[styles.jarvisStreakInsight, { marginTop: 14, marginBottom: 14 }]}>
-                  <Animated.View
-                    style={[
-                      styles.jarvisFlameWrapper,
-                      {
-                        transform: [
-                          { translateY: ghostFloatY },
-                          { scale: ghostScale },
-                        ],
-                      },
-                    ]}
-                  >
-                    <Image
-                      source={require('../../assets/images/jarvis-core-flame.png')}
-                      style={styles.jarvisFlameImage}
-                      resizeMode="contain"
-                    />
-                  </Animated.View>
-                  <Text style={styles.jarvisInsightText}>
-                    <Text style={styles.jarvisInsightBold}>Jarvis Insight: </Text>
-                    Your streak is strong. Swipe across all months or tap any day to inspect details.
-                  </Text>
-                </View>
+                {/* Contextual Jarvis Intelligence Card (Appears only when a day is tapped) */}
+                {selectedDayInfo && (
+                  <View style={[styles.jarvisStreakInsight, { marginTop: 14 }]}>
+                    <Animated.View
+                      style={[
+                        styles.jarvisFlameWrapper,
+                        {
+                          transform: [
+                            { translateY: ghostFloatY },
+                            { scale: ghostScale },
+                          ],
+                        },
+                      ]}
+                    >
+                      <Image
+                        source={require('../../assets/images/jarvis-core-flame.png')}
+                        style={styles.jarvisFlameImage}
+                        resizeMode="contain"
+                      />
+                    </Animated.View>
+                    <View style={{ flex: 1 }}>
+                      <Text style={styles.jarvisInsightText}>
+                        <Text style={styles.jarvisInsightBold}>Jarvis Intelligence: </Text>
+                        {selectedDayInfo}
+                      </Text>
+                    </View>
+                  </View>
+                )}
 
                 {/* Modal Footer Done Button */}
                 <Pressable
                   onPress={() => setShowCalendarModal(false)}
-                  style={({ pressed }) => [styles.calendarDoneButton, pressed && styles.missionButtonPressed]}
+                  style={({ pressed }) => [
+                    styles.calendarDoneButton,
+                    { marginTop: selectedDayInfo ? 14 : 16 },
+                    pressed && styles.missionButtonPressed,
+                  ]}
                 >
                   <Text style={styles.calendarDoneButtonText}>Done  ✓</Text>
                 </Pressable>
