@@ -505,6 +505,8 @@ export const MessagesScreen: React.FC<MessagesScreenProps> = ({
   const [selectedSquadCreatorIds, setSelectedSquadCreatorIds] = useState<string[]>(['c2']);
   const [squadNameInput, setSquadNameInput] = useState('');
   const [squadProjectCollab, setSquadProjectCollab] = useState<'streak' | 'hooks' | 'split'>('streak');
+  const [showCollabTypeModal, setShowCollabTypeModal] = useState(false);
+  const [selectedCollabType, setSelectedCollabType] = useState<'challenge' | 'joint_reel' | 'co_write' | 'swap'>('challenge');
 
   // Floating Emoji Animations
   const [floatingEmojis, setFloatingEmojis] = useState<{ id: string; emoji: string; x: number }[]>([]);
@@ -1927,15 +1929,15 @@ export const MessagesScreen: React.FC<MessagesScreenProps> = ({
                   onPress={() => {
                     setShowChatOptionsMenu(false);
                     triggerModalAnim();
-                    setShowConnectModal(true);
+                    setShowCollabTypeModal(true);
                   }}
                 >
                   <View style={styles.optionItemIconBox}>
                     <Text style={{ fontSize: 16 }}>⚡</Text>
                   </View>
                   <View style={{ flex: 1 }}>
-                    <Text style={[styles.optionItemTitle, isDark && styles.textWhite]}>Start New Collaboration</Text>
-                    <Text style={styles.optionItemSub}>Duo challenge, split vlog, or co-script</Text>
+                    <Text style={[styles.optionItemTitle, isDark && styles.textWhite]}>Start a Collaboration</Text>
+                    <Text style={styles.optionItemSub}>Streak challenge, joint reel, or content swap</Text>
                   </View>
                 </Pressable>
 
@@ -1975,6 +1977,166 @@ export const MessagesScreen: React.FC<MessagesScreenProps> = ({
                   </View>
                 </Pressable>
               </View>
+            </Animated.View>
+          </Pressable>
+        </Modal>
+
+        {/* START A COLLABORATION MODAL */}
+        <Modal
+          visible={showCollabTypeModal}
+          transparent={true}
+          animationType="fade"
+          onRequestClose={() => setShowCollabTypeModal(false)}
+        >
+          <Pressable
+            style={styles.modalOverlay}
+            onPress={() => setShowCollabTypeModal(false)}
+          >
+            <Animated.View
+              style={[
+                styles.collabTypeModalCard,
+                isDark && { backgroundColor: '#171420', borderColor: '#2D2845' },
+                { transform: [{ scale: modalPopScale }] },
+              ]}
+            >
+              {/* Header */}
+              <View style={styles.modalHeaderRow}>
+                <View style={{ flex: 1, paddingRight: 12 }}>
+                  <Text style={[styles.modalTitle, isDark && styles.textWhite]}>
+                    Start a Collaboration
+                  </Text>
+                  <Text style={[styles.modalSubtitle, isDark && styles.textMutedDark]}>
+                    What do you want to create together?
+                  </Text>
+                </View>
+                <Pressable
+                  onPress={() => setShowCollabTypeModal(false)}
+                  style={styles.modalCloseCircle}
+                  hitSlop={8}
+                >
+                  <Text style={styles.modalCloseCross}>✕</Text>
+                </Pressable>
+              </View>
+
+              {/* Collab Options List */}
+              <View style={styles.collabTypeList}>
+                {[
+                  {
+                    id: 'challenge',
+                    icon: '🔥',
+                    title: 'Streak Challenge',
+                    desc: 'Post together and keep each other accountable.',
+                  },
+                  {
+                    id: 'joint_reel',
+                    icon: '🎬',
+                    title: 'Joint Reel',
+                    desc: 'Create a shared Reel or split-screen video.',
+                  },
+                  {
+                    id: 'co_write',
+                    icon: '📝',
+                    title: 'Co-Write Content',
+                    desc: 'Work together on a script, caption or idea.',
+                  },
+                  {
+                    id: 'swap',
+                    icon: '📅',
+                    title: 'Content Swap',
+                    desc: 'Plan a coordinated posting exchange.',
+                  },
+                ].map((item) => {
+                  const isSelected = selectedCollabType === item.id;
+                  return (
+                    <Pressable
+                      key={item.id}
+                      style={[
+                        styles.collabTypeCard,
+                        isSelected && styles.collabTypeCardSelected,
+                        isDark && { backgroundColor: isSelected ? '#2A2045' : '#211D30', borderColor: isSelected ? '#7C3AED' : '#363150' },
+                      ]}
+                      onPress={() => {
+                        if (Platform.OS !== 'web') {
+                          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                        }
+                        setSelectedCollabType(item.id as any);
+                      }}
+                    >
+                      <View style={styles.collabTypeIconBox}>
+                        <Text style={{ fontSize: 20 }}>{item.icon}</Text>
+                      </View>
+                      <View style={{ flex: 1 }}>
+                        <Text style={[styles.collabTypeTitle, isDark && styles.textWhite]}>
+                          {item.title}
+                        </Text>
+                        <Text style={styles.collabTypeDesc}>
+                          {item.desc}
+                        </Text>
+                      </View>
+                      <View style={[styles.collabTypeRadioCircle, isSelected && styles.collabTypeRadioSelected]}>
+                        {isSelected && <View style={styles.collabTypeRadioDot} />}
+                      </View>
+                    </Pressable>
+                  );
+                })}
+              </View>
+
+              {/* Continue CTA Button */}
+              <Pressable
+                style={({ pressed }) => [styles.createSquadSubmitBtn, pressed && styles.btnPressed]}
+                onPress={() => {
+                  if (Platform.OS !== 'web') {
+                    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+                  }
+                  setShowCollabTypeModal(false);
+                  const collabNames: Record<string, string> = {
+                    challenge: 'Streak Challenge',
+                    joint_reel: 'Joint Reel',
+                    co_write: 'Co-Write Content',
+                    swap: 'Content Swap',
+                  };
+                  const chosenName = collabNames[selectedCollabType] || 'Collaboration';
+                  const partnerName = activeChatThread?.name || 'Creator';
+
+                  // Inject collaboration proposal message into thread
+                  if (activeChatThread) {
+                    const collabMsg: ChatMessage = {
+                      id: `msg_collab_${Date.now()}`,
+                      senderId: 'user',
+                      text: `🤝 Proposed a "${chosenName}" collaboration! Let's build a streak together.`,
+                      time: 'Just now',
+                      isUser: true,
+                    };
+                    setThreads((prev) =>
+                      prev.map((t) =>
+                        t.id === activeChatThread.id
+                          ? { ...t, lastMessage: `Proposed: ${chosenName}`, time: 'Just now', messages: [...t.messages, collabMsg] }
+                          : t
+                      )
+                    );
+                    setActiveChatThread((prev) =>
+                      prev ? { ...prev, lastMessage: `Proposed: ${chosenName}`, time: 'Just now', messages: [...prev.messages, collabMsg] } : prev
+                    );
+                  }
+
+                  setCelebrationTitle('Collaboration Proposed!');
+                  setCelebrationSubtitle(`Sent a ${chosenName} proposal to ${partnerName}.`);
+                  setCelebrationSpeech('Collaboration request active! +20 XP.');
+                  setCelebrationBadge('COLLAB ACTIVE');
+                  setShowCelebrationModal(true);
+                }}
+              >
+                <LinearGradient
+                  colors={['#7C3AED', '#582CDB']}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 0 }}
+                  style={styles.createSquadGradient}
+                >
+                  <Text style={styles.createSquadBtnText} numberOfLines={1}>
+                    Continue →
+                  </Text>
+                </LinearGradient>
+              </Pressable>
             </Animated.View>
           </Pressable>
         </Modal>
@@ -3563,6 +3725,77 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     color: '#FFFFFF',
     letterSpacing: -0.1,
+  },
+
+  // Start a Collaboration Modal Styles
+  collabTypeModalCard: {
+    width: '100%',
+    maxWidth: 390,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 24,
+    borderWidth: 1,
+    borderColor: '#EFEBF8',
+    padding: 20,
+    shadowColor: '#582CDB',
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.1,
+    shadowRadius: 24,
+    elevation: 8,
+  },
+  collabTypeList: {
+    gap: 9,
+    marginBottom: 6,
+  },
+  collabTypeCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#FAF8FC',
+    borderRadius: 16,
+    borderWidth: 1.5,
+    borderColor: '#EFECE6',
+    padding: 12,
+    gap: 12,
+  },
+  collabTypeCardSelected: {
+    backgroundColor: '#FAF5FF',
+    borderColor: '#7C3AED',
+  },
+  collabTypeIconBox: {
+    width: 38,
+    height: 38,
+    borderRadius: 12,
+    backgroundColor: '#EDE9FE',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  collabTypeTitle: {
+    fontSize: 14,
+    fontWeight: '800',
+    color: '#171420',
+  },
+  collabTypeDesc: {
+    fontSize: 11.5,
+    color: '#64748B',
+    marginTop: 1.5,
+    lineHeight: 15.5,
+  },
+  collabTypeRadioCircle: {
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    borderWidth: 1.5,
+    borderColor: '#CBD5E1',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  collabTypeRadioSelected: {
+    borderColor: '#7C3AED',
+  },
+  collabTypeRadioDot: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    backgroundColor: '#7C3AED',
   },
 
   // Squad Creation Modal Styles
