@@ -513,7 +513,7 @@ export const OnboardingCompleteScreen: React.FC<OnboardingCompleteScreenProps> =
             <Text style={styles.statusLabelText}>Completion</Text>
           </View>
 
-          <Text style={styles.statusPercentageText}>100% Complete</Text>
+          <Text style={styles.statusPercentageText}>✨ You&apos;re all set</Text>
         </View>
       </View>
     </SafeAreaView>
