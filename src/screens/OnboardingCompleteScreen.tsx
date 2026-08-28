@@ -460,7 +460,7 @@ export const OnboardingCompleteScreen: React.FC<OnboardingCompleteScreenProps> =
             <View style={styles.insightBox}>
               <Text style={styles.insightEmoji}>💡</Text>
               <Text style={styles.insightText}>
-                Posting your first prompt today gives you a <Text style={styles.insightBold}>2x streak boost</Text> for week one!
+                Complete your first mission today for a <Text style={styles.insightBold}>2× streak boost</Text> this week!
               </Text>
             </View>
           </View>
