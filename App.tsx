@@ -449,6 +449,7 @@ export default function App() {
             <DashboardScreen
               onLogout={handleLogout}
               onStartMission={() => navigateTo('mission-detail')}
+              onOpenQuest={() => navigateTo('quests')}
               onOpenJarvisPro={() => navigateTo('jarvis-pro')}
               onSwitchToPro={() => {
                 setUserProfile(prev => ({ ...prev, tier: 'pro' }));
