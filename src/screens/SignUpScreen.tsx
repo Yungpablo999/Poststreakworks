@@ -460,7 +460,7 @@ export const SignUpScreen: React.FC<SignUpScreenProps> = ({
           <View style={styles.headingSection}>
             <Text style={styles.mainHeading}>Create Your Account</Text>
             <Text style={styles.subHeading}>
-              Join creators using PostStreak to create, schedule, collaborate, grow and earn in one place.
+              Your creator setup is ready. Create your account to save it.
             </Text>
           </View>
 
