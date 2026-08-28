@@ -89,6 +89,7 @@ export const NicheSelectionScreen: React.FC<NicheSelectionScreenProps> = ({
   const [customNiches, setCustomNiches] = useState<NicheItem[]>([]);
   const [showCustomModal, setShowCustomModal] = useState(false);
   const [showLimitModal, setShowLimitModal] = useState(false);
+  const [modalType, setModalType] = useState<'limit' | 'required'>('limit');
   const [customInput, setCustomInput] = useState('');
 
   // 1. Star-like Glowing & Floating Kinetic Physics on the Icon Alone (Zero Circles)
@@ -143,6 +144,17 @@ export const NicheSelectionScreen: React.FC<NicheSelectionScreenProps> = ({
     return () => starLoop.stop();
   }, [jarvisFloatY, jarvisStarScale]);
 
+  const openJarvisModal = (type: 'limit' | 'required') => {
+    setModalType(type);
+    setShowLimitModal(true);
+    Animated.spring(modalPopScale, {
+      toValue: 1,
+      useNativeDriver: true,
+      speed: 22,
+      bounciness: 10,
+    }).start();
+  };
+
   const toggleNiche = (id: string) => {
     if (Platform.OS !== 'web') {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -154,14 +166,7 @@ export const NicheSelectionScreen: React.FC<NicheSelectionScreenProps> = ({
         if (Platform.OS !== 'web') {
           Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
         }
-        // Open Jarvis Core Pop-up
-        setShowLimitModal(true);
-        Animated.spring(modalPopScale, {
-          toValue: 1,
-          useNativeDriver: true,
-          speed: 22,
-          bounciness: 10,
-        }).start();
+        openJarvisModal('limit');
         return;
       }
       setSelectedNiches([...selectedNiches, id]);
@@ -190,7 +195,7 @@ export const NicheSelectionScreen: React.FC<NicheSelectionScreenProps> = ({
     if (selectedNiches.length < 3) {
       setSelectedNiches([...selectedNiches, newId]);
     } else {
-      setShowLimitModal(true);
+      openJarvisModal('limit');
     }
     setCustomInput('');
     setShowCustomModal(false);
@@ -201,8 +206,7 @@ export const NicheSelectionScreen: React.FC<NicheSelectionScreenProps> = ({
       if (Platform.OS !== 'web') {
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
       }
-      const msg = 'Please select at least 1 niche to continue.';
-      Platform.OS === 'web' ? window.alert(msg) : Alert.alert('Select a Niche', msg);
+      openJarvisModal('required');
       return;
     }
 
@@ -587,15 +591,27 @@ export const NicheSelectionScreen: React.FC<NicheSelectionScreenProps> = ({
             </View>
 
             {/* Modal Heading */}
-            <Text style={styles.limitModalTitle}>3 niches max</Text>
+            <Text style={styles.limitModalTitle}>
+              {modalType === 'required' ? 'Select a niche' : '3 niches max'}
+            </Text>
 
             {/* Modal Advice Message */}
             <Text style={styles.limitModalText}>
-              For now, focus on your <Text style={styles.limitHighlight}>3 strongest niches</Text> so Jarvis can personalise your experience.
+              {modalType === 'required' ? (
+                <>
+                  Please choose at least <Text style={styles.limitHighlight}>1 niche</Text> so Jarvis can personalise your creator setup.
+                </>
+              ) : (
+                <>
+                  For now, focus on your <Text style={styles.limitHighlight}>3 strongest niches</Text> so Jarvis can personalise your experience.
+                </>
+              )}
             </Text>
 
             <Text style={styles.limitSubNote}>
-              You can add more later from your creator profile.
+              {modalType === 'required'
+                ? 'You can choose up to 3 niches for your creator profile.'
+                : 'You can add more later from your creator profile.'}
             </Text>
 
             {/* Got It Button */}
