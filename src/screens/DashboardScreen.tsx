@@ -899,7 +899,7 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
                 <View style={[styles.focusLiveDot, isDark && styles.focusLiveDotDark]} />
                 <Text style={[styles.focusTagText, isDark && styles.focusTagTextDark]}>TODAY’S FOCUS</Text>
               </View>
-              <Text style={[styles.nextPostCountdown, isDark && styles.nextPostCountdownDark]}>Next post · 2h 45m</Text>
+              <Text style={[styles.nextPostCountdown, isDark && styles.nextPostCountdownDark]}>Next post · 11:30 AM</Text>
             </View>
 
             <Text style={[styles.focusHeadline, isDark && styles.textWhite]}>
