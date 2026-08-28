@@ -725,11 +725,11 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
     }
   };
 
-  // Streak grid dataset matching the May 2024 reference
+  // 7-day week streak grid dataset matching the May 2024 reference (M, T, W, T, F, S, S)
   const streakGrid = [
-    [false, false, true, true, true, true],
-    [true, true, true, true, true, true],
-    [false, false, false, false, false, false],
+    [false, false, true, true, true, true, true],
+    [true, true, true, true, true, true, false],
+    [false, false, false, false, false, false, false],
   ];
 
   const currentSelectedAvatar = PRESET_AVATARS.find((a) => a.id === selectedAvatarId);
@@ -933,11 +933,10 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
             <View style={styles.cardHeaderRow}>
               <View style={styles.cardTitleGroup}>
                 <Text style={[styles.cardSectionTitle, isDark && styles.textWhite]}>Your Streak</Text>
-                <Text style={styles.streakSubtext}>Consistency is key 🔗 (Tap to swipe full calendar)</Text>
+                <Text style={styles.streakSubtext}>Consistency is key</Text>
               </View>
 
               <View style={styles.streakCountBadge}>
-                <Text style={styles.streakCountNumber}>1-Day Streak</Text>
                 <Animated.Text
                   style={[
                     styles.streakFireEmoji,
@@ -946,17 +945,20 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
                 >
                   🔥
                 </Animated.Text>
+                <Text style={styles.streakCountNumber}>
+                  {userProfile?.streakCount && userProfile.streakCount > 1 ? `${userProfile.streakCount} days` : '47 days'}
+                </Text>
               </View>
             </View>
 
-            {/* Month Header & Days of Week */}
+            {/* Month Header & Consistency Rate */}
             <View style={styles.calendarMetaRow}>
-              <Text style={styles.monthLabel}>MAY 2024  ›</Text>
-              <Text style={styles.streakStatusHighlight}>96% Consistent</Text>
+              <Text style={styles.monthLabel}>May 2024 →</Text>
+              <Text style={styles.streakStatusHighlight}>96% consistent</Text>
             </View>
 
             <View style={styles.daysHeaderRow}>
-              {['M', '·', 'W', 'T', 'F', '·'].map((d, idx) => (
+              {['M', 'T', 'W', 'T', 'F', 'S', 'S'].map((d, idx) => (
                 <Text key={`day_h_${idx}`} style={styles.dayColHeader}>
                   {d}
                 </Text>
@@ -975,8 +977,8 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
                         active && styles.heatmapCellActive,
                       ]}
                     >
-                      {active && (
-                        <Svg width={14} height={14} viewBox="0 0 24 24" fill="none">
+                      {active ? (
+                        <Svg width={13} height={13} viewBox="0 0 24 24" fill="none">
                           <Path
                             d="M20 6L9 17L4 12"
                             stroke="#FFFFFF"
@@ -985,6 +987,8 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
                             strokeLinejoin="round"
                           />
                         </Svg>
+                      ) : (
+                        <View style={styles.inactiveDot} />
                       )}
                     </View>
                   ))}
@@ -2072,22 +2076,22 @@ const styles = StyleSheet.create({
   streakCountBadge: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 5,
-    backgroundColor: '#FAF9FF',
-    paddingVertical: 5,
-    paddingHorizontal: 12,
+    gap: 4,
+    backgroundColor: '#FAF5FF',
+    paddingVertical: 3.5,
+    paddingHorizontal: 9,
     borderRadius: 100,
     borderWidth: 1,
-    borderColor: 'rgba(88, 44, 219, 0.12)',
+    borderColor: 'rgba(88, 44, 219, 0.14)',
   },
   streakCountNumber: {
-    fontSize: 15,
+    fontSize: 12.5,
     fontWeight: '700',
-    color: '#171420',
-    letterSpacing: -0.2,
+    color: '#582CDB',
+    letterSpacing: -0.1,
   },
   streakFireEmoji: {
-    fontSize: 15,
+    fontSize: 13,
   },
 
   // 4. CALENDAR HEATMAP
@@ -2095,17 +2099,17 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 12,
+    marginBottom: 10,
     paddingHorizontal: 2,
   },
   monthLabel: {
-    fontSize: 12,
+    fontSize: 13,
     fontWeight: '700',
     color: '#582CDB',
-    letterSpacing: 0.5,
+    letterSpacing: -0.1,
   },
   streakStatusHighlight: {
-    fontSize: 12,
+    fontSize: 12.5,
     fontWeight: '600',
     color: '#582CDB',
   },
@@ -2121,12 +2125,12 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#8E869E',
     flex: 1,
-    maxWidth: 46,
+    maxWidth: 38,
     textAlign: 'center',
   },
   heatmapGrid: {
-    gap: 8,
-    marginBottom: 18,
+    gap: 6,
+    marginBottom: 16,
     width: '100%',
   },
   heatmapRow: {
@@ -2136,21 +2140,27 @@ const styles = StyleSheet.create({
   },
   heatmapCell: {
     flex: 1,
-    maxWidth: 46,
-    height: 38,
-    borderRadius: 10,
+    maxWidth: 38,
+    height: 34,
+    borderRadius: 8,
     backgroundColor: '#F4F0FF',
     justifyContent: 'center',
     alignItems: 'center',
-    marginHorizontal: 2,
+    marginHorizontal: 1.5,
   },
   heatmapCellActive: {
     backgroundColor: '#582CDB',
     shadowColor: '#582CDB',
-    shadowOffset: { width: 0, height: 3 },
+    shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.12,
-    shadowRadius: 6,
-    elevation: 3,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  inactiveDot: {
+    width: 4,
+    height: 4,
+    borderRadius: 2,
+    backgroundColor: 'rgba(88, 44, 219, 0.18)',
   },
   jarvisStreakInsight: {
     flexDirection: 'row',
