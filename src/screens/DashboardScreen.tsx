@@ -1211,23 +1211,7 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
           </View>
 
           {/* 7. CARD 3: ACTIVE BRAND QUEST ("Lagos Food Festival") */}
-          <Pressable
-            onPress={() => {
-              if (Platform.OS !== 'web') {
-                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-              }
-              if (onOpenQuest) {
-                onOpenQuest('lagos-food-festival');
-              } else if (onNavigateTab) {
-                onNavigateTab('quests');
-              }
-            }}
-            style={({ pressed }) => [
-              styles.questCard,
-              isDark && styles.questCardDark,
-              pressed && styles.cardPressed,
-            ]}
-          >
+          <View style={[styles.questCard, isDark && styles.questCardDark]}>
             <View style={styles.questThumbnailBox}>
               <Image
                 source={{ uri: 'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=160&auto=format&fit=crop&q=80' }}
@@ -1246,7 +1230,7 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
               <Text style={styles.bountyAmountText}>$450</Text>
               <Text style={styles.bountySubLabel}>Bounty</Text>
             </View>
-          </Pressable>
+          </View>
 
           {/* 8. CARD 4: CREATOR MATCH VELOCITY */}
           <View style={styles.dashboardCard}>
