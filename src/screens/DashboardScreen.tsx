@@ -1446,28 +1446,6 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
                 showsVerticalScrollIndicator={false}
                 bounces={true}
               >
-                {/* Quick Stats Banner */}
-                <View style={styles.calendarStatsRow}>
-                  <View style={styles.calendarStatCard}>
-                    <Text style={styles.calendarStatValue} numberOfLines={1}>
-                      {isNarrowScreen ? '1d 🔥' : '1 Day 🔥'}
-                    </Text>
-                    <Text style={styles.calendarStatLabel} numberOfLines={1}>Current</Text>
-                  </View>
-                  <View style={styles.calendarStatCard}>
-                    <Text style={styles.calendarStatValue} numberOfLines={1}>
-                      {isNarrowScreen ? '1d 🏆' : '1 Day 🏆'}
-                    </Text>
-                    <Text style={styles.calendarStatLabel} numberOfLines={1}>Best</Text>
-                  </View>
-                  <View style={styles.calendarStatCard}>
-                    <Text style={styles.calendarStatValue} numberOfLines={1}>96% ⚡</Text>
-                    <Text style={styles.calendarStatLabel} numberOfLines={1}>
-                      {isNarrowScreen ? 'Rate' : 'Consistency'}
-                    </Text>
-                  </View>
-                </View>
-
                 {/* Horizontal Month Chips (Jan -> Dec) - Synchronized with Swipe */}
                 <ScrollView
                   ref={monthChipsScrollRef}
