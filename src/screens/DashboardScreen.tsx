@@ -935,20 +935,6 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
                 <Text style={[styles.cardSectionTitle, isDark && styles.textWhite]}>Your Streak</Text>
                 <Text style={styles.streakSubtext}>Consistency is key</Text>
               </View>
-
-              <View style={styles.streakCountBadge}>
-                <Animated.Text
-                  style={[
-                    styles.streakFireEmoji,
-                    { transform: [{ scale: flamePulse }] },
-                  ]}
-                >
-                  🔥
-                </Animated.Text>
-                <Text style={styles.streakCountNumber}>
-                  {userProfile?.streakCount && userProfile.streakCount > 1 ? `${userProfile.streakCount} days` : '47 days'}
-                </Text>
-              </View>
             </View>
 
             {/* Month Header & Consistency Rate */}
