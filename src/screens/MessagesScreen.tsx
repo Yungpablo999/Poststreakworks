@@ -500,6 +500,7 @@ export const MessagesScreen: React.FC<MessagesScreenProps> = ({
   const [celebrationSpeech, setCelebrationSpeech] = useState('Accountability connection strengthened! +15 XP.');
   const [celebrationBadge, setCelebrationBadge] = useState('COLLAB ACTIVE');
   const [showChatOptionsMenu, setShowChatOptionsMenu] = useState(false);
+  const [playingAudioId, setPlayingAudioId] = useState<string | null>(null);
 
   // Floating Emoji Animations
   const [floatingEmojis, setFloatingEmojis] = useState<{ id: string; emoji: string; x: number }[]>([]);
@@ -662,6 +663,21 @@ export const MessagesScreen: React.FC<MessagesScreenProps> = ({
       prev.map((t) => (t.id === thread.id ? { ...t, unread: false } : t))
     );
     setActiveChatThread({ ...thread, unread: false });
+  };
+
+  const handleTogglePlayAudio = (msgId: string) => {
+    if (Platform.OS !== 'web') {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    }
+    if (playingAudioId === msgId) {
+      setPlayingAudioId(null);
+    } else {
+      setPlayingAudioId(msgId);
+      // Auto pause after 4.5 seconds
+      setTimeout(() => {
+        setPlayingAudioId((curr) => (curr === msgId ? null : curr));
+      }, 4500);
+    }
   };
 
   const handleSendMessage = (customText?: string) => {
@@ -1328,36 +1344,70 @@ export const MessagesScreen: React.FC<MessagesScreenProps> = ({
 
                       {/* Audio Note Bubble */}
                       {msg.isAudioNote ? (
-                        <View
+                        <Pressable
                           style={[
                             styles.audioNoteBubble,
                             msg.isUser ? styles.msgBubbleUser : styles.msgBubblePartner,
+                            isDark && !msg.isUser && styles.msgBubblePartnerDark,
                           ]}
+                          onPress={() => handleTogglePlayAudio(msg.id)}
                         >
+                          {/* Play / Pause Circle Button */}
                           <Pressable
-                            style={styles.audioPlayCircle}
-                            onPress={() => {
-                              if (Platform.OS !== 'web') {
-                                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                              }
-                            }}
+                            style={[
+                              styles.audioPlayCircle,
+                              msg.isUser
+                                ? styles.audioPlayCircleUser
+                                : styles.audioPlayCirclePartner,
+                            ]}
+                            onPress={() => handleTogglePlayAudio(msg.id)}
+                            hitSlop={6}
                           >
-                            <Text style={styles.audioPlayIcon}>▶</Text>
+                            {playingAudioId === msg.id ? (
+                              <Svg width={12} height={12} viewBox="0 0 24 24" fill="none">
+                                <Rect x="6" y="4" width="4" height="16" rx="1.5" fill={msg.isUser ? '#FFFFFF' : '#582CDB'} />
+                                <Rect x="14" y="4" width="4" height="16" rx="1.5" fill={msg.isUser ? '#FFFFFF' : '#582CDB'} />
+                              </Svg>
+                            ) : (
+                              <Svg width={12} height={12} viewBox="0 0 24 24" fill="none" style={{ marginLeft: 2 }}>
+                                <Path
+                                  d="M5 3L19 12L5 21V3Z"
+                                  fill={msg.isUser ? '#FFFFFF' : '#582CDB'}
+                                />
+                              </Svg>
+                            )}
                           </Pressable>
+
+                          {/* Dynamic Animated Waveform */}
                           <View style={styles.waveformContainer}>
-                            <View style={[styles.waveBar, { height: 12 }]} />
-                            <View style={[styles.waveBar, { height: 20 }]} />
-                            <View style={[styles.waveBar, { height: 16 }]} />
-                            <View style={[styles.waveBar, { height: 24 }]} />
-                            <View style={[styles.waveBar, { height: 18 }]} />
-                            <View style={[styles.waveBar, { height: 10 }]} />
-                            <View style={[styles.waveBar, { height: 22 }]} />
-                            <View style={[styles.waveBar, { height: 14 }]} />
+                            {[12, 20, 16, 24, 18, 10, 22, 14, 19, 11].map((h, i) => {
+                              const isBarActive = playingAudioId === msg.id && (i % 3 === 0 || i % 2 === 1);
+                              return (
+                                <View
+                                  key={i}
+                                  style={[
+                                    styles.waveBar,
+                                    { height: isBarActive ? Math.min(26, h + 6) : h },
+                                    msg.isUser ? styles.waveBarUser : styles.waveBarPartner,
+                                    playingAudioId === msg.id && {
+                                      backgroundColor: msg.isUser ? '#FFFFFF' : '#582CDB',
+                                    },
+                                  ]}
+                                />
+                              );
+                            })}
                           </View>
-                          <Text style={[styles.audioDurationText, msg.isUser && { color: '#FFFFFF' }]}>
-                            {msg.audioDuration}
+
+                          <Text
+                            style={[
+                              styles.audioDurationText,
+                              msg.isUser ? { color: '#FFFFFF' } : { color: isDark ? '#E2E8F0' : '#475569' },
+                              playingAudioId === msg.id && !msg.isUser && { color: '#582CDB', fontWeight: '800' },
+                            ]}
+                          >
+                            {playingAudioId === msg.id ? 'Playing…' : msg.audioDuration}
                           </Text>
-                        </View>
+                        </Pressable>
                       ) : (
                         /* Text Bubble */
                         <View
@@ -2698,6 +2748,10 @@ const styles = StyleSheet.create({
     borderColor: '#EFEBF8',
     borderBottomLeftRadius: 4,
   },
+  msgBubblePartnerDark: {
+    backgroundColor: '#1E1B2E',
+    borderColor: '#2D2845',
+  },
   messageText: {
     fontSize: 14,
     lineHeight: 19,
@@ -2760,39 +2814,46 @@ const styles = StyleSheet.create({
   audioNoteBubble: {
     flexDirection: 'row',
     alignItems: 'center',
-    borderRadius: 18,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    gap: 8,
-    minWidth: 160,
+    borderRadius: 20,
+    paddingHorizontal: 13,
+    paddingVertical: 9,
+    gap: 9,
+    minWidth: 175,
   },
   audioPlayCircle: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
-    backgroundColor: 'rgba(255, 255, 255, 0.3)',
+    width: 32,
+    height: 32,
+    borderRadius: 16,
     justifyContent: 'center',
     alignItems: 'center',
   },
-  audioPlayIcon: {
-    fontSize: 12,
-    color: '#FFFFFF',
-    marginLeft: 2,
+  audioPlayCircleUser: {
+    backgroundColor: 'rgba(255, 255, 255, 0.25)',
+  },
+  audioPlayCirclePartner: {
+    backgroundColor: '#F5F3FF',
+    borderWidth: 1,
+    borderColor: '#DDD6FE',
   },
   waveformContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 3,
+    gap: 3.5,
   },
   waveBar: {
     width: 3,
-    backgroundColor: '#DDD6FE',
     borderRadius: 2,
   },
+  waveBarUser: {
+    backgroundColor: 'rgba(255, 255, 255, 0.65)',
+  },
+  waveBarPartner: {
+    backgroundColor: '#C4B5FD',
+  },
   audioDurationText: {
-    fontSize: 11,
-    color: '#64748B',
+    fontSize: 11.5,
     fontWeight: '700',
+    letterSpacing: 0.2,
   },
 
   // Quick Reactions Row
