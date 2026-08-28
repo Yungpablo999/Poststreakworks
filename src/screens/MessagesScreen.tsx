@@ -1601,14 +1601,18 @@ export const MessagesScreen: React.FC<MessagesScreenProps> = ({
               <View style={styles.storyTopProfileBar}>
                 <View style={styles.storyProfileLeft}>
                   <Image source={activeStoryCreator.avatar} style={styles.storyTopAvatar} resizeMode="cover" />
-                  <View>
-                    <Text style={styles.storyTopCreatorName}>{activeStoryCreator.name}</Text>
-                    <Text style={styles.storyTopTimeAgo}>
+                  <View style={styles.storyTopInfoCol}>
+                    <View style={styles.storyTopNameRow}>
+                      <Text style={styles.storyTopCreatorName} numberOfLines={1}>
+                        {activeStoryCreator.name}
+                      </Text>
+                      <View style={styles.storyTopStreakBadge}>
+                        <Text style={styles.storyTopStreakText}>⚡ {activeStoryCreator.streak}d</Text>
+                      </View>
+                    </View>
+                    <Text style={styles.storyTopTimeAgo} numberOfLines={1}>
                       {activeStoryCreator.slides[activeSlideIndex]?.timeAgo || 'Just now'} • {activeStoryCreator.niche}
                     </Text>
-                  </View>
-                  <View style={styles.storyTopStreakBadge}>
-                    <Text style={styles.storyTopStreakText}>⚡ {activeStoryCreator.streak}d</Text>
                   </View>
                 </View>
 
@@ -3352,11 +3356,22 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 16,
     marginBottom: 16,
+    gap: 12,
   },
   storyProfileLeft: {
+    flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
     gap: 10,
+    marginRight: 8,
+  },
+  storyTopInfoCol: {
+    flex: 1,
+  },
+  storyTopNameRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
   },
   storyTopAvatar: {
     width: 40,
@@ -3373,6 +3388,7 @@ const styles = StyleSheet.create({
   storyTopTimeAgo: {
     fontSize: 11,
     color: 'rgba(255, 255, 255, 0.7)',
+    marginTop: 1,
   },
   storyTopStreakBadge: {
     backgroundColor: '#FEF3C7',
@@ -3392,6 +3408,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(255, 255, 255, 0.2)',
     justifyContent: 'center',
     alignItems: 'center',
+    marginLeft: 6,
   },
   storyCloseBtnText: {
     fontSize: 14,
