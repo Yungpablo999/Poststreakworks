@@ -943,11 +943,9 @@ export const MessagesScreen: React.FC<MessagesScreenProps> = ({
           >
             {/* Top Badges Row */}
             <View style={styles.topBadgesRow}>
-              <View style={styles.socialHubPill}>
-                <Text style={styles.socialHubPillText} numberOfLines={1}>SOCIAL HUB</Text>
-              </View>
-              <View style={styles.activePactPill}>
-                <Text style={styles.activePactPillText} numberOfLines={1}>⚡ 3 Active Pacts</Text>
+              <Text style={[styles.socialHubPageLabel, isDark && styles.textWhite]}>SOCIAL HUB</Text>
+              <View style={styles.activePactQuietBadge}>
+                <Text style={styles.activePactQuietText}>⚡ 3 Active Pacts</Text>
               </View>
             </View>
 
@@ -976,10 +974,9 @@ export const MessagesScreen: React.FC<MessagesScreenProps> = ({
               )}
             </View>
 
-            {/* SNAPCHAT-STYLE STORIES & HIGHLIGHTS ROW */}
+            {/* STORIES ROW */}
             <View style={styles.storiesHeaderRow}>
-              <Text style={styles.sectionHeaderTitle}>Stories &amp; Post Highlights</Text>
-              <Text style={styles.storiesSubHint}>Tap to view daily posts</Text>
+              <Text style={[styles.sectionHeaderTitle, isDark && styles.textWhite]}>Stories</Text>
             </View>
 
             <ScrollView
@@ -1009,11 +1006,11 @@ export const MessagesScreen: React.FC<MessagesScreenProps> = ({
                       )}
                     </View>
                   </LinearGradient>
-                  <Text style={styles.storyName} numberOfLines={1}>
-                    {story.name}
+                  <Text style={[styles.storyName, isDark && styles.textWhite]} numberOfLines={1}>
+                    {story.isUser ? 'You' : story.name.split(' ')[0]}
                   </Text>
                   <View style={styles.storyStreakBadge}>
-                    <Text style={styles.storyStreakText}>⚡ {story.streak}d</Text>
+                    <Text style={styles.storyStreakText}>⚡{story.streak}d</Text>
                   </View>
                 </Pressable>
               ))}
@@ -2000,35 +1997,27 @@ const styles = StyleSheet.create({
   topBadgesRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
+    justifyContent: 'space-between',
     marginBottom: 12,
     marginTop: 4,
   },
-  socialHubPill: {
-    backgroundColor: '#582CDB',
+  socialHubPageLabel: {
+    fontSize: 12,
+    fontWeight: '800',
+    color: '#171420',
+    letterSpacing: 0.8,
+  },
+  activePactQuietBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#F5F3FF',
     paddingVertical: 3.5,
     paddingHorizontal: 9,
-    borderRadius: 100,
-    flexShrink: 0,
+    borderRadius: 8,
   },
-  socialHubPillText: {
-    fontSize: sFont(9.5),
-    fontWeight: '800',
-    color: '#FFFFFF',
-    letterSpacing: 0.4,
-  },
-  activePactPill: {
-    backgroundColor: '#FAF8FC',
-    borderWidth: 1,
-    borderColor: '#DDD6FE',
-    paddingVertical: 3.5,
-    paddingHorizontal: 9,
-    borderRadius: 100,
-    flexShrink: 0,
-  },
-  activePactPillText: {
-    fontSize: sFont(10),
-    fontWeight: '800',
+  activePactQuietText: {
+    fontSize: 11,
+    fontWeight: '600',
     color: '#6D28D9',
   },
 
@@ -2065,19 +2054,14 @@ const styles = StyleSheet.create({
   // Stories Header
   storiesHeaderRow: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: 10,
   },
   sectionHeaderTitle: {
-    fontSize: 14,
-    fontWeight: '800',
-    color: '#171420',
-  },
-  storiesSubHint: {
-    fontSize: 11,
-    color: '#6D28D9',
+    fontSize: 15,
     fontWeight: '700',
+    color: '#171420',
+    letterSpacing: -0.2,
   },
 
   // Stories Row
@@ -2153,15 +2137,16 @@ const styles = StyleSheet.create({
   },
   storyStreakBadge: {
     marginTop: 2,
-    backgroundColor: '#FEF3C7',
-    paddingVertical: 1.5,
-    paddingHorizontal: 6,
-    borderRadius: 6,
+    backgroundColor: '#FFFBEB',
+    paddingVertical: 1,
+    paddingHorizontal: 5,
+    borderRadius: 4,
   },
   storyStreakText: {
-    fontSize: 9,
-    fontWeight: '700',
+    fontSize: 9.5,
+    fontWeight: '600',
     color: '#B45309',
+    letterSpacing: 0.1,
   },
 
   // Category Tabs
