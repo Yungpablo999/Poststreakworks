@@ -1632,26 +1632,26 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
             >
               {/* Header */}
               <View style={styles.brandBriefHeader}>
-                <View style={{ flex: 1, paddingRight: 12 }}>
+                <View style={styles.brandBriefHeaderLeft}>
                   <View style={styles.brandBriefTagRow}>
                     <View style={styles.brandVerifiedPill}>
-                      <Text style={styles.brandVerifiedText}>✓ VERIFIED BRAND QUEST</Text>
+                      <Text style={styles.brandVerifiedText}>✓ VERIFIED BRAND</Text>
                     </View>
                     <View style={styles.escrowBadge}>
                       <Text style={styles.escrowBadgeText}>🔒 Escrow Locked</Text>
                     </View>
                   </View>
-                  <Text style={[styles.brandBriefMainTitle, isDark && styles.textWhite]}>
+                  <Text style={[styles.brandBriefMainTitle, isDark && styles.textWhite]} numberOfLines={1}>
                     Lagos Food Festival 2026
                   </Text>
-                  <Text style={[styles.brandBriefSubTitle, isDark && styles.textMutedDark]}>
+                  <Text style={[styles.brandBriefSubTitle, isDark && styles.textMutedDark]} numberOfLines={1}>
                     Campaign Brief & Deliverables
                   </Text>
                 </View>
 
                 <Pressable
                   onPress={() => setShowBrandQuestBriefModal(false)}
-                  style={({ pressed }) => [styles.calendarCloseButton, pressed && styles.headerIconBtnPressed]}
+                  style={({ pressed }) => [styles.calendarCloseButton, styles.brandBriefCloseBtn, pressed && styles.headerIconBtnPressed]}
                   hitSlop={8}
                 >
                   <Svg width={20} height={20} viewBox="0 0 24 24" fill="none">
@@ -1749,7 +1749,7 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
                     setTimeout(() => setUploadToastMessage(null), 3000);
                   }}
                 >
-                  <Text style={styles.acceptBrandQuestBtnText}>
+                  <Text style={styles.acceptBrandQuestBtnText} numberOfLines={1}>
                     {isBrandQuestAccepted ? '✓ Campaign Accepted & Active' : 'Accept Quest & Lock $450 Bounty ➔'}
                   </Text>
                 </Pressable>
@@ -3385,12 +3385,22 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'flex-start',
     marginBottom: 12,
+    gap: 8,
+  },
+  brandBriefHeaderLeft: {
+    flex: 1,
+    paddingRight: 6,
+  },
+  brandBriefCloseBtn: {
+    marginLeft: 6,
+    alignSelf: 'flex-start',
   },
   brandBriefTagRow: {
     flexDirection: 'row',
     alignItems: 'center',
+    flexWrap: 'wrap',
     gap: 6,
-    marginBottom: 4,
+    marginBottom: 6,
   },
   brandVerifiedPill: {
     backgroundColor: '#EDE8FC',
@@ -3525,8 +3535,9 @@ const styles = StyleSheet.create({
   acceptBrandQuestBtn: {
     backgroundColor: '#582CDB',
     borderRadius: 14,
-    paddingVertical: 12,
+    paddingVertical: 13,
     paddingHorizontal: 16,
+    flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     shadowColor: '#582CDB',
@@ -3540,6 +3551,7 @@ const styles = StyleSheet.create({
     fontWeight: '800',
     color: '#FFFFFF',
     letterSpacing: -0.1,
+    textAlign: 'center',
   },
 
   // 12. PROFILE PHOTO UPLOAD MODAL
