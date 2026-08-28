@@ -291,25 +291,6 @@ export const OnboardingCompleteScreen: React.FC<OnboardingCompleteScreenProps> =
                 <Text style={styles.streakBadgeText} numberOfLines={1}>🔥 Day 1 Ready</Text>
               </View>
             </View>
-
-            {/* Configured Tag Chips */}
-            <View style={styles.chipsRow}>
-              {selectedNiches.slice(0, 3).map((niche, idx) => (
-                <View key={`niche_${idx}`} style={styles.chipPill}>
-                  <Text style={styles.chipText}>
-                    {niche.charAt(0).toUpperCase() + niche.slice(1).replace('_', ' ')}
-                  </Text>
-                </View>
-              ))}
-
-              {connectedPlatforms.slice(0, 3).map((plat, idx) => (
-                <View key={`plat_${idx}`} style={[styles.chipPill, styles.chipPlatformPill]}>
-                  <Text style={[styles.chipText, styles.chipPlatformText]}>
-                    {plat.charAt(0).toUpperCase() + plat.slice(1)}
-                  </Text>
-                </View>
-              ))}
-            </View>
           </View>
 
           {/* 4. COMPACT 3-UNLOCKED MILESTONE TILES */}
@@ -666,7 +647,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 10,
     gap: 8,
   },
   levelBadgeRow: {
