@@ -726,10 +726,10 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
   };
 
   // 7-day week streak grid dataset matching the May 2024 reference (M, T, W, T, F, S, S)
-  const streakGrid = [
-    [false, false, true, true, true, true, true],
-    [true, true, true, true, true, true, false],
-    [false, false, false, false, false, false, false],
+  const streakGrid: ('completed' | 'scheduled' | 'freeze' | 'empty')[][] = [
+    ['empty', 'empty', 'completed', 'completed', 'completed', 'completed', 'completed'],
+    ['completed', 'completed', 'completed', 'completed', 'completed', 'completed', 'empty'],
+    ['empty', 'empty', 'empty', 'empty', 'empty', 'empty', 'empty'],
   ];
 
   const currentSelectedAvatar = PRESET_AVATARS.find((a) => a.id === selectedAvatarId);
@@ -932,7 +932,9 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
           >
             <View style={styles.cardHeaderRow}>
               <Text style={[styles.cardSectionTitle, isDark && styles.textWhite]}>Your Streak</Text>
-              <Text style={[styles.streakStatusHighlight, isDark && styles.streakStatusHighlightDark]}>96% consistent</Text>
+              <View style={[styles.streakStatusPill, isDark && styles.streakStatusPillDark]}>
+                <Text style={[styles.streakStatusHighlight, isDark && styles.streakStatusHighlightDark]}>96% consistent</Text>
+              </View>
             </View>
 
             {/* Month Header */}
@@ -948,20 +950,23 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
               ))}
             </View>
 
-            {/* Calendar Heatmap Grid - Apple Pill Design */}
+            {/* Calendar Heatmap Grid - Apple Health Style Quiet Cells */}
             <View style={styles.heatmapGrid}>
               {streakGrid.map((row, rIdx) => (
                 <View key={`row_${rIdx}`} style={styles.heatmapRow}>
-                  {row.map((active, cIdx) => (
+                  {row.map((state, cIdx) => (
                     <View
                       key={`cell_${rIdx}_${cIdx}`}
                       style={[
                         styles.heatmapCell,
-                        active && styles.heatmapCellActive,
+                        state === 'completed' && styles.heatmapCellCompleted,
+                        state === 'scheduled' && styles.heatmapCellScheduled,
+                        state === 'freeze' && styles.heatmapCellFreeze,
+                        state === 'empty' && styles.heatmapCellEmpty,
                       ]}
                     >
-                      {active ? (
-                        <Svg width={11} height={11} viewBox="0 0 24 24" fill="none">
+                      {state === 'completed' && (
+                        <Svg width={10} height={10} viewBox="0 0 24 24" fill="none">
                           <Path
                             d="M20 6L9 17L4 12"
                             stroke="#FFFFFF"
@@ -970,8 +975,17 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
                             strokeLinejoin="round"
                           />
                         </Svg>
-                      ) : (
-                        <View style={styles.inactiveDot} />
+                      )}
+                      {state === 'scheduled' && (
+                        <Svg width={9} height={9} viewBox="0 0 24 24" fill="none">
+                          <Circle cx="12" cy="12" r="9" stroke="#7C3AED" strokeWidth="2.4" strokeDasharray="3,2" />
+                          <Path d="M12 7V12L15 14" stroke="#7C3AED" strokeWidth="2.4" strokeLinecap="round" />
+                        </Svg>
+                      )}
+                      {state === 'freeze' && (
+                        <Svg width={9} height={9} viewBox="0 0 24 24" fill="none">
+                          <Path d="M12 2V22M2 12H22M4.93 4.93L19.07 19.07M19.07 4.93L4.93 19.07" stroke="#0284C7" strokeWidth="2" strokeLinecap="round" />
+                        </Svg>
                       )}
                     </View>
                   ))}
@@ -2050,9 +2064,21 @@ const styles = StyleSheet.create({
     color: '#171420',
     letterSpacing: -0.3,
   },
+  streakStatusPill: {
+    backgroundColor: 'rgba(88, 44, 219, 0.05)',
+    borderWidth: 1,
+    borderColor: 'rgba(88, 44, 219, 0.12)',
+    paddingVertical: 2.5,
+    paddingHorizontal: 7.5,
+    borderRadius: 6,
+  },
+  streakStatusPillDark: {
+    backgroundColor: 'rgba(167, 139, 250, 0.1)',
+    borderColor: 'rgba(167, 139, 250, 0.2)',
+  },
   streakStatusHighlight: {
-    fontSize: 12,
-    fontWeight: '700',
+    fontSize: 11.5,
+    fontWeight: '600',
     color: '#582CDB',
     letterSpacing: -0.1,
   },
@@ -2060,7 +2086,7 @@ const styles = StyleSheet.create({
     color: '#A78BFA',
   },
 
-  // 4. CALENDAR HEATMAP (APPLE PILL DESIGN)
+  // 4. CALENDAR HEATMAP (APPLE HEALTH STYLE)
   calendarMetaRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -2104,26 +2130,34 @@ const styles = StyleSheet.create({
   heatmapCell: {
     flex: 1,
     maxWidth: 32,
-    height: 24,
-    borderRadius: 100,
-    backgroundColor: 'rgba(88, 44, 219, 0.06)',
+    height: 22,
+    borderRadius: 6,
     justifyContent: 'center',
     alignItems: 'center',
     marginHorizontal: 1.5,
   },
-  heatmapCellActive: {
+  heatmapCellCompleted: {
     backgroundColor: '#582CDB',
     shadowColor: '#582CDB',
-    shadowOffset: { width: 0, height: 1.5 },
-    shadowOpacity: 0.16,
-    shadowRadius: 3,
-    elevation: 2,
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.12,
+    shadowRadius: 2,
+    elevation: 1,
   },
-  inactiveDot: {
-    width: 3.5,
-    height: 3.5,
-    borderRadius: 2,
-    backgroundColor: 'rgba(88, 44, 219, 0.22)',
+  heatmapCellScheduled: {
+    backgroundColor: 'rgba(124, 58, 237, 0.08)',
+    borderWidth: 1,
+    borderColor: 'rgba(124, 58, 237, 0.22)',
+  },
+  heatmapCellFreeze: {
+    backgroundColor: 'rgba(56, 189, 248, 0.08)',
+    borderWidth: 1,
+    borderColor: 'rgba(56, 189, 248, 0.22)',
+  },
+  heatmapCellEmpty: {
+    backgroundColor: 'rgba(23, 20, 32, 0.03)',
+    borderWidth: 1,
+    borderColor: 'rgba(23, 20, 32, 0.04)',
   },
   jarvisStreakInsight: {
     flexDirection: 'row',
