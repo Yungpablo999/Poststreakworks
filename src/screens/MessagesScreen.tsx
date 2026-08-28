@@ -2154,8 +2154,8 @@ export const MessagesScreen: React.FC<MessagesScreenProps> = ({
                     end={{ x: 1, y: 0 }}
                     style={styles.createSquadGradient}
                   >
-                    <Text style={styles.createSquadBtnText}>
-                      Create Squad & Start Group Chat ➔
+                    <Text style={styles.createSquadBtnText} numberOfLines={1}>
+                      Create Squad & Start Chat ➔
                     </Text>
                   </LinearGradient>
                 </Pressable>
@@ -3692,24 +3692,30 @@ const styles = StyleSheet.create({
     marginTop: 1,
   },
   createSquadSubmitBtn: {
+    width: '100%',
     borderRadius: 14,
     overflow: 'hidden',
-    marginTop: 8,
+    marginTop: 10,
     shadowColor: '#582CDB',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
+    shadowOpacity: 0.12,
     shadowRadius: 10,
     elevation: 3,
   },
   createSquadGradient: {
-    paddingVertical: 13,
+    flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
+    paddingVertical: 13,
+    paddingHorizontal: 16,
+    gap: 6,
   },
   createSquadBtnText: {
-    fontSize: 13.5,
+    fontSize: 14,
     fontWeight: '800',
     color: '#FFFFFF',
+    letterSpacing: -0.1,
+    textAlign: 'center',
   },
 
   messageCardDark: {
