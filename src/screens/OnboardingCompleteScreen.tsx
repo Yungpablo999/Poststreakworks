@@ -455,7 +455,7 @@ export const OnboardingCompleteScreen: React.FC<OnboardingCompleteScreenProps> =
                 pressed && styles.primaryButtonPressed,
               ]}
             >
-              <Text style={styles.primaryButtonText}>🚀 Start First Mission</Text>
+              <Text style={styles.primaryButtonText}>Start First Mission →</Text>
             </Pressable>
 
             <Pressable

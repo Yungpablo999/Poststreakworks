@@ -1204,7 +1204,7 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
                 pressed && styles.missionButtonPressed,
               ]}
             >
-              <Text style={styles.missionButtonText}>Start First Mission  🚀</Text>
+              <Text style={styles.missionButtonText}>Start First Mission →</Text>
             </Pressable>
           </View>
 
