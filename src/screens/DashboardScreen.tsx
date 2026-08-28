@@ -525,6 +525,7 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
   // Notification State
   const [notifications, setNotifications] = useState<NotificationItem[]>(INITIAL_NOTIFICATIONS);
   const [notifFilter, setNotifFilter] = useState<NotificationFilter>('all');
+  const [expandedNotifId, setExpandedNotifId] = useState<string | null>(null);
 
   // Profile Photo State
   const [selectedAvatarId, setSelectedAvatarId] = useState<string | null>(null);
@@ -747,6 +748,21 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
     setNotifications((prev) =>
       prev.map((n) => (n.id === id ? { ...n, unread: false } : n))
     );
+    setExpandedNotifId((prev) => (prev === id ? null : id));
+  };
+
+  const handleNotifAction = (item: NotificationItem) => {
+    setShowNotificationModal(false);
+    if (Platform.OS !== 'web') {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    }
+    if (item.type === 'streak') {
+      onStartMission?.();
+    } else if (item.type === 'quest') {
+      onOpenQuest?.();
+    } else if (item.type === 'collab') {
+      onOpenMessages?.();
+    }
   };
 
   const handleSelectPreset = (id: string) => {
@@ -1445,7 +1461,12 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
                       return (
                         <Pressable
                           key={item.id}
-                          onPress={() => handleNotificationPress(item.id)}
+                          onPress={() => {
+                            handleNotificationPress(item.id);
+                            if (item.actionText) {
+                              handleNotifAction(item);
+                            }
+                          }}
                           style={({ pressed }) => [
                             styles.notifCard,
                             item.unread && styles.notifCardUnread,
@@ -1472,9 +1493,13 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
 
                             {/* Action Link if present */}
                             {item.actionText && (
-                              <View style={styles.notifActionRow}>
+                              <Pressable
+                                onPress={() => handleNotifAction(item)}
+                                style={styles.notifActionRow}
+                                hitSlop={6}
+                              >
                                 <Text style={styles.notifActionLink}>{item.actionText}  ›</Text>
-                              </View>
+                              </Pressable>
                             )}
                           </View>
 
@@ -1484,13 +1509,16 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
                       );
                     }
 
-                    // Compact Card for Lower-Priority / Informational Notifications
+                    const isExpanded = expandedNotifId === item.id;
+
+                    // Compact Card for Lower-Priority / Informational Notifications (Expandable on Tap)
                     return (
                       <Pressable
                         key={item.id}
                         onPress={() => handleNotificationPress(item.id)}
                         style={({ pressed }) => [
                           styles.notifCardCompact,
+                          isExpanded && styles.notifCardCompactExpanded,
                           item.unread && styles.notifCardCompactUnread,
                           pressed && styles.notifCardPressed,
                         ]}
@@ -1500,22 +1528,47 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
                           style={[
                             styles.notifIconBadgeCompact,
                             { backgroundColor: item.badgeBg, borderColor: item.badgeBorder },
+                            isExpanded && { width: 32, height: 32, borderRadius: 10 },
                           ]}
                         >
-                          <Text style={styles.notifIconEmojiCompact}>{item.iconEmoji}</Text>
+                          <Text style={[styles.notifIconEmojiCompact, isExpanded && { fontSize: 15 }]}>
+                            {item.iconEmoji}
+                          </Text>
                         </View>
 
                         {/* Compact Content */}
                         <View style={styles.notifContentCompact}>
                           <View style={styles.notifTitleRowCompact}>
-                            <Text style={styles.notifTitleCompact} numberOfLines={1}>
+                            <Text
+                              style={[
+                                styles.notifTitleCompact,
+                                isExpanded && { fontSize: 13.5, color: '#171420' },
+                              ]}
+                              numberOfLines={isExpanded ? undefined : 1}
+                            >
                               {item.title}
                             </Text>
-                            <Text style={styles.notifTimeCompact}>{item.time}</Text>
+                            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+                              <Text style={styles.notifTimeCompact}>{item.time}</Text>
+                              <Text style={{ fontSize: 9, color: isExpanded ? '#7C3AED' : '#9E97AA', fontWeight: '800' }}>
+                                {isExpanded ? '▴' : '▾'}
+                              </Text>
+                            </View>
                           </View>
-                          <Text style={styles.notifBodyCompact} numberOfLines={2}>
+                          <Text
+                            style={[
+                              styles.notifBodyCompact,
+                              isExpanded && styles.notifBodyCompactExpanded,
+                            ]}
+                            numberOfLines={isExpanded ? undefined : 2}
+                          >
                             {item.body}
                           </Text>
+                          {isExpanded && (
+                            <View style={styles.notifExpandedFooter}>
+                              <Text style={styles.notifExpandedHint}>Tap to collapse ▴</Text>
+                            </View>
+                          )}
                         </View>
 
                         {/* Unread Glow Dot */}
@@ -3110,6 +3163,35 @@ const styles = StyleSheet.create({
     height: 5,
     borderRadius: 2.5,
     backgroundColor: '#582CDB',
+  },
+  notifCardCompactExpanded: {
+    backgroundColor: '#FFFFFF',
+    borderColor: '#7C3AED',
+    paddingVertical: 11,
+    paddingHorizontal: 12,
+    shadowColor: '#582CDB',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 3,
+    alignItems: 'flex-start',
+  },
+  notifBodyCompactExpanded: {
+    fontSize: 12,
+    lineHeight: 17,
+    color: '#334155',
+    marginTop: 4,
+  },
+  notifExpandedFooter: {
+    marginTop: 6,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'flex-end',
+  },
+  notifExpandedHint: {
+    fontSize: 10,
+    fontWeight: '700',
+    color: '#7C3AED',
   },
 
   // 12. PROFILE PHOTO UPLOAD MODAL
