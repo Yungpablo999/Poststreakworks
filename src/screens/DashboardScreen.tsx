@@ -908,10 +908,6 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
 
             {/* Status Pills */}
             <View style={styles.statusPillsRow}>
-              <View style={styles.levelPillBadge}>
-                <Text style={styles.levelPillBadgeText}>Level 42</Text>
-              </View>
-
               <View style={styles.streakPillBadge}>
                 <Animated.Text
                   style={[
