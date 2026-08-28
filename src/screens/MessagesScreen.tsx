@@ -2040,9 +2040,14 @@ export const MessagesScreen: React.FC<MessagesScreenProps> = ({
 
                   {/* 2. SELECT CREATORS */}
                   <View style={styles.squadInputGroup}>
-                    <Text style={[styles.squadInputLabel, isDark && styles.textWhite]}>
-                      Select Creators ({1 + selectedSquadCreatorIds.length})
-                    </Text>
+                    <View style={styles.squadInputLabelRow}>
+                      <Text style={[styles.squadInputLabel, isDark && styles.textWhite]}>
+                        Add Creators
+                      </Text>
+                      <Text style={styles.squadSelectedCountBadge}>
+                        {1 + selectedSquadCreatorIds.length} selected
+                      </Text>
+                    </View>
 
                     {/* Pre-selected Current Chat Creator */}
                     {activeChatThread && (
@@ -3591,12 +3596,28 @@ const styles = StyleSheet.create({
   squadInputGroup: {
     marginBottom: 14,
   },
+  squadInputLabelRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 6,
+  },
   squadInputLabel: {
     fontSize: 12,
     fontWeight: '800',
     color: '#171420',
-    marginBottom: 6,
     letterSpacing: 0.2,
+  },
+  squadSelectedCountBadge: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: '#6D28D9',
+    backgroundColor: '#FAF5FF',
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 6,
+    borderWidth: 1,
+    borderColor: '#DDD6FE',
   },
   squadTextInput: {
     height: 42,
