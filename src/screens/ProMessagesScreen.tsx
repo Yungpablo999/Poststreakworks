@@ -79,7 +79,7 @@ interface ConversationThread {
 const CREATOR_STORIES_DATA: CreatorStoryData[] = [
   {
     id: 'jarvis',
-    name: 'Jarvis AI Co-Pilot',
+    name: 'Jarvis AI',
     handle: '@jarvis.ai',
     niche: 'AI Content Director',
     avatar: require('../../assets/images/jarvis-core-flame.png'),
@@ -517,7 +517,7 @@ const INITIAL_CONVERSATIONS: ConversationThread[] = [
   {
     id: 'conv_jarvis',
     creatorId: 'jarvis',
-    name: 'Jarvis AI Co-Pilot',
+    name: 'Jarvis AI',
     handle: '@jarvis.ai',
     niche: 'AI Content Director',
     avatar: require('../../assets/images/jarvis-core-flame.png'),

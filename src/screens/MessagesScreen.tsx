@@ -304,7 +304,7 @@ const INITIAL_CONVERSATIONS: ConversationThread[] = [
   {
     id: 'conv_jarvis',
     creatorId: 'jarvis',
-    name: 'Jarvis AI Co-Pilot',
+    name: 'Jarvis AI',
     handle: '@jarvis.ai',
     niche: 'AI Content Director & Strategist',
     avatar: require('../../assets/images/jarvis-core-flame.png'),
@@ -315,7 +315,7 @@ const INITIAL_CONVERSATIONS: ConversationThread[] = [
     unread: true,
     unreadCount: 1,
     category: 'jarvis',
-    collabBadge: '⚡ AI Content Director Active',
+    collabBadge: '⚡ AI Content Director',
     messages: [
       {
         id: 'jm1',
@@ -343,10 +343,10 @@ const INITIAL_CONVERSATIONS: ConversationThread[] = [
     streak: 52,
     isOnline: true,
     lastMessage: 'Loved your lesson on batch filming! Are you free for the duo challenge tomorrow?',
-    time: '2m ago',
+    time: '2m',
     unread: true,
     category: 'buddies',
-    collabBadge: '⚡ 14-Day Pact (Day 8/14)',
+    collabBadge: '⚡ 14-Day Pact · Day 8/14',
     messages: [
       {
         id: 'm1',
@@ -390,10 +390,10 @@ const INITIAL_CONVERSATIONS: ConversationThread[] = [
     streak: 38,
     isOnline: true,
     lastMessage: 'Sent you my caption hook draft. Let me know what you think!',
-    time: '18m ago',
+    time: '18m',
     unread: true,
     category: 'collabs',
-    collabBadge: '📑 Shared Script Draft',
+    collabBadge: '📄 Shared Script Draft',
     messages: [
       {
         id: 'm2_1',
@@ -422,7 +422,7 @@ const INITIAL_CONVERSATIONS: ConversationThread[] = [
     streak: 41,
     isOnline: false,
     lastMessage: 'Just scheduled my post for the 7:30 PM peak window! 🚀',
-    time: '1h ago',
+    time: '1h',
     unread: false,
     category: 'buddies',
     collabBadge: '🎯 Peak Slot Scheduled',
@@ -439,14 +439,14 @@ const INITIAL_CONVERSATIONS: ConversationThread[] = [
   {
     id: 't4',
     creatorId: 'jarvis',
-    name: 'Jarvis Creative Assistant',
+    name: 'Jarvis AI',
     handle: '@jarvis.ai',
     niche: 'AI Co-Pilot',
     avatar: require('../../assets/images/jarvis-core-flame.png'),
     streak: 100,
     isOnline: true,
     lastMessage: 'Streak Alert: 1 post needed today to protect your 47-day streak and earn +50 XP.',
-    time: '3h ago',
+    time: '3h',
     unread: false,
     category: 'jarvis',
     collabBadge: '🤖 Streak Guardian',
@@ -1091,18 +1091,15 @@ export const MessagesScreen: React.FC<MessagesScreenProps> = ({
                   {/* Thread Content */}
                   <View style={styles.threadContentCol}>
                     <View style={styles.threadTopRow}>
-                      <Text style={styles.threadCreatorName} numberOfLines={1}>
+                      <Text style={[styles.threadCreatorName, isDark && styles.textWhite]} numberOfLines={1}>
                         {thread.name}
                       </Text>
                       <Text style={styles.threadTime}>{thread.time}</Text>
                     </View>
 
-                    <View style={styles.threadMetaRow}>
-                      <Text style={styles.threadHandle}>{thread.handle}</Text>
-                      <View style={styles.threadStreakPill}>
-                        <Text style={styles.threadStreakText}>⚡ {thread.streak}d streak</Text>
-                      </View>
-                    </View>
+                    <Text style={[styles.threadMetaLine, isDark && styles.textMutedDark]} numberOfLines={1}>
+                      {thread.handle} · ⚡ {thread.streak}d
+                    </Text>
 
                     {thread.collabBadge && (
                       <View style={styles.collabStatusBadge}>
@@ -1111,7 +1108,7 @@ export const MessagesScreen: React.FC<MessagesScreenProps> = ({
                     )}
 
                     <Text
-                      style={[styles.threadLastMessage, thread.unread && styles.threadLastMessageUnread]}
+                      style={[styles.threadLastMessage, thread.unread && styles.threadLastMessageUnread, isDark && styles.textWhite]}
                       numberOfLines={1}
                     >
                       {thread.lastMessage}
@@ -2180,21 +2177,22 @@ const styles = StyleSheet.create({
 
   // Threads List
   threadsList: {
-    gap: 10,
+    gap: 8,
   },
   threadCard: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#FFFFFF',
-    borderRadius: 20,
+    borderRadius: 16,
     borderWidth: 1,
     borderColor: '#EFEBF8',
-    padding: 14,
-    gap: 12,
+    paddingVertical: 11,
+    paddingHorizontal: 13,
+    gap: 11,
     shadowColor: '#582CDB',
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.04,
-    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.03,
+    shadowRadius: 6,
     elevation: 2,
   },
   threadCardUnread: {
@@ -2202,25 +2200,25 @@ const styles = StyleSheet.create({
     borderColor: '#DDD6FE',
   },
   threadAvatarRing: {
-    width: 52,
-    height: 52,
-    borderRadius: 26,
-    padding: 2,
+    width: 46,
+    height: 46,
+    borderRadius: 23,
+    padding: 1.8,
     justifyContent: 'center',
     alignItems: 'center',
   },
   threadAvatar: {
     width: '100%',
     height: '100%',
-    borderRadius: 24,
+    borderRadius: 21,
   },
   threadOnlineDot: {
     position: 'absolute',
     bottom: 0,
     right: 0,
-    width: 12,
-    height: 12,
-    borderRadius: 6,
+    width: 11,
+    height: 11,
+    borderRadius: 5.5,
     backgroundColor: '#10B981',
     borderWidth: 2,
     borderColor: '#FFFFFF',
@@ -2232,66 +2230,53 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 2,
+    marginBottom: 1,
   },
   threadCreatorName: {
-    fontSize: 14.5,
-    fontWeight: '800',
+    fontSize: 14,
+    fontWeight: '700',
     color: '#171420',
+    letterSpacing: -0.1,
   },
   threadTime: {
     fontSize: 11,
     color: '#94A3B8',
-    fontWeight: '600',
+    fontWeight: '500',
   },
-  threadMetaRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    marginBottom: 4,
-  },
-  threadHandle: {
-    fontSize: 12,
+  threadMetaLine: {
+    fontSize: 11.5,
     color: '#64748B',
-    fontWeight: '600',
-  },
-  threadStreakPill: {
-    backgroundColor: '#EDE9FE',
-    paddingVertical: 1.5,
-    paddingHorizontal: 6,
-    borderRadius: 6,
-  },
-  threadStreakText: {
-    fontSize: 10,
-    fontWeight: '800',
-    color: '#582CDB',
+    fontWeight: '500',
+    marginBottom: 3,
   },
   collabStatusBadge: {
     alignSelf: 'flex-start',
-    backgroundColor: '#FEF3C7',
-    paddingVertical: 2,
-    paddingHorizontal: 7,
-    borderRadius: 6,
-    marginBottom: 4,
+    backgroundColor: '#FFF7DF',
+    borderWidth: 1,
+    borderColor: 'rgba(244, 217, 138, 0.5)',
+    paddingVertical: 1.5,
+    paddingHorizontal: 6,
+    borderRadius: 5,
+    marginBottom: 3,
   },
   collabStatusText: {
-    fontSize: 10,
+    fontSize: 9.5,
     fontWeight: '700',
-    color: '#B45309',
+    color: '#B87508',
   },
   threadLastMessage: {
-    fontSize: 12.5,
+    fontSize: 12,
     color: '#64748B',
-    lineHeight: 17,
+    lineHeight: 16,
   },
   threadLastMessageUnread: {
     color: '#171420',
-    fontWeight: '700',
+    fontWeight: '600',
   },
   unreadPurpleDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
+    width: 7,
+    height: 7,
+    borderRadius: 3.5,
     backgroundColor: '#582CDB',
   },
 
