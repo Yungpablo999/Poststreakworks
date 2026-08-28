@@ -509,6 +509,11 @@ export const MessagesScreen: React.FC<MessagesScreenProps> = ({
   const [showCollabTypeModal, setShowCollabTypeModal] = useState(false);
   const [selectedCollabType, setSelectedCollabType] = useState<'challenge' | 'joint_reel' | 'co_write' | 'swap'>('challenge');
   const [mutedThreadIds, setMutedThreadIds] = useState<string[]>([]);
+  const [blockedThreadIds, setBlockedThreadIds] = useState<string[]>([]);
+  const [showSafetyModal, setShowSafetyModal] = useState(false);
+  const [safetyStep, setSafetyStep] = useState<'choose' | 'report'>('choose');
+  const [reportReason, setReportReason] = useState('Spam or Unsolicited Links');
+  const [reportCustomText, setReportCustomText] = useState('');
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   const showToast = (msg: string) => {
@@ -1500,77 +1505,101 @@ export const MessagesScreen: React.FC<MessagesScreenProps> = ({
                 ))}
               </View>
 
-              {/* CHAT INPUT BAR */}
-              <View style={styles.chatInputBar}>
-                {/* Share Script Quick Action */}
-                <Pressable
-                  style={styles.attachScriptBtn}
-                  onPress={() => {
-                    setInputMessage(
-                      `Hey ${activeChatThread.name}, here is the hook I'm testing: "One thing I wish I knew before I started creating"`
-                    );
-                  }}
-                  hitSlop={8}
-                >
-                  <Svg width={19} height={19} viewBox="0 0 24 24" fill="none">
-                    <Path
-                      d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"
-                      stroke="#582CDB"
-                      strokeWidth="2.2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                    <Path d="M14 2v6h6M16 13H8M16 17H8M10 9H8" stroke="#582CDB" strokeWidth="2.2" />
-                  </Svg>
-                </Pressable>
-
-                {/* Text Input */}
-                <TextInput
-                  value={inputMessage}
-                  onChangeText={setInputMessage}
-                  placeholder={`Message ${activeChatThread.name}...`}
-                  placeholderTextColor="#94A3B8"
-                  style={styles.chatTextInput}
-                  onSubmitEditing={() => handleSendMessage()}
-                />
-
-                {/* Voice Note or Send Button */}
-                {inputMessage.trim().length === 0 ? (
-                  <Pressable
-                    style={styles.voiceNoteBtn}
-                    onPress={handleSendVoiceNote}
-                    hitSlop={8}
-                  >
-                    <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
-                      <Path
-                        d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"
-                        stroke="#582CDB"
-                        strokeWidth="2.2"
-                      />
-                      <Path
-                        d="M19 10v2a7 7 0 0 1-14 0v-2M12 19v4M8 23h8"
-                        stroke="#582CDB"
-                        strokeWidth="2.2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                    </Svg>
-                  </Pressable>
+              {/* BOTTOM CHAT INPUT BAR (or Blocked Banner) */}
+              <View style={styles.chatInputContainer}>
+                {blockedThreadIds.includes(activeChatThread.id) ? (
+                  <View style={styles.blockedNoticeBanner}>
+                    <Text style={styles.blockedNoticeText}>
+                      🚫 You blocked this creator. Unblock to send messages.
+                    </Text>
+                    <Pressable
+                      style={styles.blockedUnblockBtn}
+                      onPress={() => {
+                        if (Platform.OS !== 'web') {
+                          Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+                        }
+                        setBlockedThreadIds((prev) => prev.filter((id) => id !== activeChatThread.id));
+                        showToast(`🔓 Unblocked ${activeChatThread.name}`);
+                      }}
+                    >
+                      <Text style={styles.blockedUnblockBtnText}>Unblock</Text>
+                    </Pressable>
+                  </View>
                 ) : (
-                  <Pressable
-                    style={styles.sendMsgBtnActive}
-                    onPress={() => handleSendMessage()}
-                  >
-                    <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
-                      <Path
-                        d="M22 2L11 13M22 2L15 22L11 13L2 9L22 2Z"
-                        stroke="#FFFFFF"
-                        strokeWidth="2.4"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                    </Svg>
-                  </Pressable>
+                  <View style={styles.chatInputBar}>
+                    {/* Share Script Quick Action */}
+                    <Pressable
+                      style={styles.attachScriptBtn}
+                      onPress={() => {
+                        if (activeChatThread) {
+                          setInputMessage(
+                            `Hey ${activeChatThread.name.split(' ')[0]}, here is the hook I'm testing: "One thing I wish I knew before I started creating"`
+                          );
+                        }
+                      }}
+                      hitSlop={8}
+                    >
+                      <Svg width={19} height={19} viewBox="0 0 24 24" fill="none">
+                        <Path
+                          d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"
+                          stroke="#582CDB"
+                          strokeWidth="2.2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                        <Path d="M14 2v6h6M16 13H8M16 17H8M10 9H8" stroke="#582CDB" strokeWidth="2.2" />
+                      </Svg>
+                    </Pressable>
+
+                    {/* Text Input */}
+                    <TextInput
+                      value={inputMessage}
+                      onChangeText={setInputMessage}
+                      placeholder={`Message ${activeChatThread.name}...`}
+                      placeholderTextColor="#94A3B8"
+                      style={styles.chatTextInput}
+                      onSubmitEditing={() => handleSendMessage()}
+                    />
+
+                    {/* Voice Note or Send Button */}
+                    {inputMessage.trim().length === 0 ? (
+                      <Pressable
+                        style={styles.voiceNoteBtn}
+                        onPress={handleSendVoiceNote}
+                        hitSlop={8}
+                      >
+                        <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
+                          <Path
+                            d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"
+                            stroke="#582CDB"
+                            strokeWidth="2.2"
+                          />
+                          <Path
+                            d="M19 10v2a7 7 0 0 1-14 0v-2M12 19v4M8 23h8"
+                            stroke="#582CDB"
+                            strokeWidth="2.2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          />
+                        </Svg>
+                      </Pressable>
+                    ) : (
+                      <Pressable
+                        style={styles.sendMsgBtnActive}
+                        onPress={() => handleSendMessage()}
+                      >
+                        <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
+                          <Path
+                            d="M22 2L11 13M22 2L15 22L11 13L2 9L22 2Z"
+                            stroke="#FFFFFF"
+                            strokeWidth="2.4"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          />
+                        </Svg>
+                      </Pressable>
+                    )}
+                  </View>
                 )}
               </View>
             </View>
@@ -2008,21 +2037,246 @@ export const MessagesScreen: React.FC<MessagesScreenProps> = ({
                   style={({ pressed }) => [styles.optionItemRow, pressed && styles.btnPressed]}
                   onPress={() => {
                     setShowChatOptionsMenu(false);
-                    if (Platform.OS !== 'web') {
-                      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
+                    if (!activeChatThread) return;
+                    const isBlocked = blockedThreadIds.includes(activeChatThread.id);
+                    if (isBlocked) {
+                      // Unblock directly
+                      if (Platform.OS !== 'web') {
+                        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+                      }
+                      setBlockedThreadIds((prev) => prev.filter((id) => id !== activeChatThread.id));
+                      showToast(`🔓 Unblocked ${activeChatThread.name}`);
+                    } else {
+                      // Open Safety Modal
+                      setSafetyStep('choose');
+                      setReportCustomText('');
+                      triggerModalAnim();
+                      setShowSafetyModal(true);
                     }
                   }}
                 >
-                  <View style={[styles.optionItemIconBox, { backgroundColor: '#FEF2F2' }]}>
-                    <Text style={{ fontSize: 16 }}>🚩</Text>
+                  <View
+                    style={[
+                      styles.optionItemIconBox,
+                      {
+                        backgroundColor:
+                          activeChatThread && blockedThreadIds.includes(activeChatThread.id)
+                            ? '#F5F3FF'
+                            : '#FEF2F2',
+                      },
+                    ]}
+                  >
+                    <Text style={{ fontSize: 16 }}>
+                      {activeChatThread && blockedThreadIds.includes(activeChatThread.id) ? '🔓' : '🚩'}
+                    </Text>
                   </View>
                   <View style={{ flex: 1 }}>
-                    <Text style={[styles.optionItemTitle, { color: '#EF4444' }]}>Report or Block</Text>
-                    <Text style={styles.optionItemSub}>Keep the creator community safe</Text>
+                    <Text
+                      style={[
+                        styles.optionItemTitle,
+                        {
+                          color:
+                            activeChatThread && blockedThreadIds.includes(activeChatThread.id)
+                              ? '#6D28D9'
+                              : '#EF4444',
+                        },
+                      ]}
+                    >
+                      {activeChatThread && blockedThreadIds.includes(activeChatThread.id)
+                        ? 'Unblock Creator'
+                        : 'Report or Block'}
+                    </Text>
+                    <Text style={styles.optionItemSub}>
+                      {activeChatThread && blockedThreadIds.includes(activeChatThread.id)
+                        ? `Allow messages and streak updates from ${activeChatThread.name.split(' ')[0]}`
+                        : 'Keep the creator community safe'}
+                    </Text>
                   </View>
                 </Pressable>
               </View>
             </Animated.View>
+          </Pressable>
+        </Modal>
+
+        {/* SAFETY MODAL (REPORT OR BLOCK) */}
+        <Modal
+          visible={showSafetyModal}
+          transparent={true}
+          animationType="fade"
+          onRequestClose={() => setShowSafetyModal(false)}
+        >
+          <Pressable
+            style={styles.modalOverlay}
+            onPress={() => setShowSafetyModal(false)}
+          >
+            <KeyboardAvoidingView
+              behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+              style={{ width: '100%', alignItems: 'center' }}
+            >
+              <Pressable
+                style={[
+                  styles.safetyModalCard,
+                  isDark && { backgroundColor: '#171420', borderColor: '#2D2845' },
+                ]}
+                onPress={(e) => e.stopPropagation()}
+              >
+                {/* Header */}
+                <View style={styles.modalHeaderRow}>
+                  <View style={{ flex: 1, paddingRight: 12 }}>
+                    <Text style={[styles.modalTitle, isDark && styles.textWhite]}>
+                      {safetyStep === 'choose'
+                        ? 'Safety & Moderation'
+                        : `Report ${activeChatThread?.name || 'Creator'}`}
+                    </Text>
+                    <Text style={[styles.modalSubtitle, isDark && styles.textMutedDark]}>
+                      {safetyStep === 'choose'
+                        ? `Choose an action for ${activeChatThread?.name || 'this creator'}`
+                        : 'Select why you are reporting this account:'}
+                    </Text>
+                  </View>
+                  <Pressable
+                    onPress={() => setShowSafetyModal(false)}
+                    style={styles.modalCloseCircle}
+                    hitSlop={8}
+                  >
+                    <Text style={styles.modalCloseCross}>✕</Text>
+                  </Pressable>
+                </View>
+
+                {safetyStep === 'choose' ? (
+                  /* Step 1: Choose Report or Block */
+                  <View style={styles.safetyOptionsList}>
+                    {/* Option 1: Report */}
+                    <Pressable
+                      style={({ pressed }) => [styles.safetyOptionCard, pressed && styles.btnPressed]}
+                      onPress={() => {
+                        if (Platform.OS !== 'web') {
+                          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                        }
+                        setSafetyStep('report');
+                      }}
+                    >
+                      <View style={[styles.safetyOptionIconBox, { backgroundColor: '#FEF2F2' }]}>
+                        <Text style={{ fontSize: 20 }}>🚩</Text>
+                      </View>
+                      <View style={{ flex: 1 }}>
+                        <Text style={[styles.safetyOptionTitle, { color: '#EF4444' }]}>Report Creator</Text>
+                        <Text style={styles.safetyOptionDesc}>
+                          Report spam, harassment, stolen content, or guideline violations
+                        </Text>
+                      </View>
+                      <Text style={styles.safetyOptionArrow}>➔</Text>
+                    </Pressable>
+
+                    {/* Option 2: Block */}
+                    <Pressable
+                      style={({ pressed }) => [styles.safetyOptionCard, pressed && styles.btnPressed]}
+                      onPress={() => {
+                        if (Platform.OS !== 'web') {
+                          Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
+                        }
+                        if (activeChatThread) {
+                          setBlockedThreadIds((prev) =>
+                            prev.includes(activeChatThread.id) ? prev : [...prev, activeChatThread.id]
+                          );
+                          showToast(`🚫 Blocked ${activeChatThread.name}`);
+                        }
+                        setShowSafetyModal(false);
+                      }}
+                    >
+                      <View style={[styles.safetyOptionIconBox, { backgroundColor: '#FEE2E2' }]}>
+                        <Text style={{ fontSize: 20 }}>🚫</Text>
+                      </View>
+                      <View style={{ flex: 1 }}>
+                        <Text style={[styles.safetyOptionTitle, { color: '#DC2626' }]}>Block Creator</Text>
+                        <Text style={styles.safetyOptionDesc}>
+                          Prevent {activeChatThread?.name.split(' ')[0] || 'them'} from messaging you or seeing your streak activity
+                        </Text>
+                      </View>
+                      <Text style={styles.safetyOptionArrow}>➔</Text>
+                    </Pressable>
+                  </View>
+                ) : (
+                  /* Step 2: Select Report Reason & Submit */
+                  <View>
+                    <ScrollView style={{ maxHeight: 300 }} showsVerticalScrollIndicator={false}>
+                      <View style={styles.reportReasonsList}>
+                        {[
+                          { id: 'Spam or Unsolicited Links', icon: '⚠️', title: 'Spam or Unsolicited Links' },
+                          { id: 'Harassment or Inappropriate Behavior', icon: '🚫', title: 'Harassment or Inappropriate' },
+                          { id: 'False Streak or Stolen Content', icon: '⚡', title: 'False Streak or Stolen Content' },
+                          { id: 'Other Reason', icon: '📝', title: 'Other Reason' },
+                        ].map((reason) => {
+                          const isSelected = reportReason === reason.id;
+                          return (
+                            <Pressable
+                              key={reason.id}
+                              style={[
+                                styles.reportReasonCard,
+                                isSelected && styles.reportReasonCardSelected,
+                                isDark && { backgroundColor: isSelected ? '#2A2045' : '#211D30', borderColor: isSelected ? '#7C3AED' : '#363150' },
+                              ]}
+                              onPress={() => {
+                                if (Platform.OS !== 'web') {
+                                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                                }
+                                setReportReason(reason.id);
+                              }}
+                            >
+                              <Text style={{ fontSize: 16 }}>{reason.icon}</Text>
+                              <Text style={[styles.reportReasonText, isDark && styles.textWhite, isSelected && { fontWeight: '800' }]}>
+                                {reason.title}
+                              </Text>
+                              <View style={[styles.collabTypeRadioCircle, isSelected && styles.collabTypeRadioSelected]}>
+                                {isSelected && <View style={styles.collabTypeRadioDot} />}
+                              </View>
+                            </Pressable>
+                          );
+                        })}
+                      </View>
+
+                      {/* Custom Input */}
+                      <View style={{ marginTop: 8 }}>
+                        <TextInput
+                          style={[
+                            styles.reportTextInput,
+                            isDark && { backgroundColor: '#211D30', color: '#FFFFFF', borderColor: '#363150' },
+                          ]}
+                          placeholder="Provide more details (optional)..."
+                          placeholderTextColor="#94A3B8"
+                          value={reportCustomText}
+                          onChangeText={setReportCustomText}
+                          multiline
+                        />
+                      </View>
+                    </ScrollView>
+
+                    {/* Submit Report Button */}
+                    <Pressable
+                      style={({ pressed }) => [styles.reportSubmitBtn, pressed && styles.btnPressed]}
+                      onPress={() => {
+                        if (Platform.OS !== 'web') {
+                          Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+                        }
+                        setShowSafetyModal(false);
+                        showToast(`🚩 Report submitted for ${activeChatThread?.name || 'creator'}`);
+                      }}
+                    >
+                      <LinearGradient
+                        colors={['#EF4444', '#DC2626']}
+                        start={{ x: 0, y: 0 }}
+                        end={{ x: 1, y: 0 }}
+                        style={styles.createSquadGradient}
+                      >
+                        <Text style={styles.createSquadBtnText} numberOfLines={1}>
+                          Submit Report ➔
+                        </Text>
+                      </LinearGradient>
+                    </Pressable>
+                  </View>
+                )}
+              </Pressable>
+            </KeyboardAvoidingView>
           </Pressable>
         </Modal>
 
@@ -4034,6 +4288,129 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     letterSpacing: -0.1,
     textAlign: 'center',
+  },
+  chatInputContainer: {
+    width: '100%',
+  },
+  // Safety & Moderation (Report / Block) Styles
+  safetyModalCard: {
+    width: '100%',
+    maxWidth: 390,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 24,
+    borderWidth: 1,
+    borderColor: '#EFEBF8',
+    padding: 20,
+    shadowColor: '#582CDB',
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.1,
+    shadowRadius: 24,
+    elevation: 8,
+  },
+  safetyOptionsList: {
+    gap: 10,
+    marginTop: 4,
+  },
+  safetyOptionCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#FAF8FC',
+    borderRadius: 16,
+    borderWidth: 1.5,
+    borderColor: '#EFECE6',
+    padding: 13,
+    gap: 12,
+  },
+  safetyOptionIconBox: {
+    width: 40,
+    height: 40,
+    borderRadius: 12,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  safetyOptionTitle: {
+    fontSize: 14.5,
+    fontWeight: '800',
+  },
+  safetyOptionDesc: {
+    fontSize: 11.5,
+    color: '#64748B',
+    marginTop: 2,
+    lineHeight: 15.5,
+  },
+  safetyOptionArrow: {
+    fontSize: 14,
+    color: '#94A3B8',
+    fontWeight: '800',
+  },
+  reportReasonsList: {
+    gap: 8,
+    marginTop: 4,
+  },
+  reportReasonCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#FAF8FC',
+    borderRadius: 14,
+    borderWidth: 1.5,
+    borderColor: '#EFECE6',
+    padding: 11,
+    gap: 10,
+  },
+  reportReasonCardSelected: {
+    backgroundColor: '#FAF5FF',
+    borderColor: '#7C3AED',
+  },
+  reportReasonText: {
+    flex: 1,
+    fontSize: 13,
+    color: '#171420',
+    fontWeight: '600',
+  },
+  reportTextInput: {
+    height: 60,
+    backgroundColor: '#F8FAFC',
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    fontSize: 12.5,
+    color: '#171420',
+    textAlignVertical: 'top',
+  },
+  reportSubmitBtn: {
+    borderRadius: 14,
+    overflow: 'hidden',
+    marginTop: 12,
+  },
+  blockedNoticeBanner: {
+    backgroundColor: '#FEF2F2',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderTopWidth: 1,
+    borderTopColor: '#FECACA',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  blockedNoticeText: {
+    fontSize: 12,
+    color: '#DC2626',
+    fontWeight: '600',
+    flex: 1,
+    marginRight: 8,
+  },
+  blockedUnblockBtn: {
+    backgroundColor: '#DC2626',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 8,
+  },
+  blockedUnblockBtnText: {
+    fontSize: 11,
+    fontWeight: '800',
+    color: '#FFFFFF',
   },
 
   messageCardDark: {
