@@ -1294,13 +1294,11 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
           {/* 9. CARD 6: UNLOCK JARVIS PRO */}
           <View style={[styles.proCard, isDark && styles.proCardDark]}>
             <View style={styles.proHeaderRow}>
-              <View style={styles.proIconBox}>
-                <Image
-                  source={require('../../assets/images/jarvis-core-flame.png')}
-                  style={styles.proIconImage}
-                  resizeMode="contain"
-                />
-              </View>
+              <Image
+                source={require('../../assets/images/jarvis-core-flame.png')}
+                style={styles.proIconImage}
+                resizeMode="contain"
+              />
               <View style={styles.proTitleGroup}>
                 <Text style={[styles.proTitle, isDark && styles.textWhite]}>Unlock Jarvis Pro</Text>
               </View>
@@ -2704,22 +2702,9 @@ const styles = StyleSheet.create({
     gap: 12,
     marginBottom: 10,
   },
-  proIconBox: {
-    width: 44,
-    height: 44,
-    borderRadius: 14,
-    backgroundColor: '#582CDB',
-    justifyContent: 'center',
-    alignItems: 'center',
-    shadowColor: '#582CDB',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.16,
-    shadowRadius: 8,
-    elevation: 3,
-  },
   proIconImage: {
-    width: 28,
-    height: 28,
+    width: 32,
+    height: 32,
   },
   proTitleGroup: {
     flex: 1,
