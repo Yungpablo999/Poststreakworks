@@ -22,6 +22,23 @@ import { AnimatedCompletionModal } from '../components/AnimatedCompletionModal';
 import { FreeAppHeader } from '../components/FreeAppHeader';
 import { sFont, sPadding, moderateScale, isNarrowScreen } from '../utils/responsive';
 
+const SCHEDULE_DATE_OPTIONS = [
+  'Today · Aug 29',
+  'Tomorrow · Aug 30',
+  'Sun · Aug 31',
+  'Mon · Sep 1',
+  'Tue · Sep 2',
+  'Wed · Sep 3',
+];
+
+const SCHEDULE_TIME_OPTIONS = [
+  '7:30 PM (Peak 🔥)',
+  '8:30 PM (Prime Time)',
+  '11:30 AM (Lunch Rush)',
+  '4:30 PM (Afternoon)',
+  '9:30 PM (Night Scroll)',
+];
+
 interface CreateScreenProps {
   onLogout?: () => void;
   onNavigateTab?: (tab: TabType) => void;
@@ -286,7 +303,10 @@ export const CreateScreen: React.FC<CreateScreenProps> = ({
   // New Post Form State
   const [postTitle, setPostTitle] = useState('');
   const [postPlatform, setPostPlatform] = useState<'tiktok' | 'instagram' | 'youtube'>('tiktok');
-  const [postWhen, setPostWhen] = useState('Today · 7:30 PM');
+  const [selectedCreateDate, setSelectedCreateDate] = useState('Today · Aug 29');
+  const [selectedCreateTime, setSelectedCreateTime] = useState('7:30 PM (Peak 🔥)');
+  const [showCreateDateDropdown, setShowCreateDateDropdown] = useState(false);
+  const [showCreateTimeDropdown, setShowCreateTimeDropdown] = useState(false);
 
   // Script Generator Form State
   const [scriptHook, setScriptHook] = useState('Stop scrolling if you are a creator in 2026.');
@@ -875,45 +895,97 @@ export const CreateScreen: React.FC<CreateScreenProps> = ({
               />
 
               <Text style={styles.modalInputLabel}>WHEN TO POST</Text>
-              <View style={styles.whenToPostInputBox}>
-                <Text style={styles.whenToPostIcon}>🗓️</Text>
-                <TextInput
-                  style={styles.whenToPostTextInput}
-                  value={postWhen}
-                  onChangeText={setPostWhen}
-                  placeholder="Today · 7:30 PM"
-                  placeholderTextColor="#94A3B8"
-                />
+              <View style={styles.dropdownSelectorsRow}>
+                {/* DATE SELECTOR BUTTON */}
+                <Pressable
+                  style={[styles.dropdownBtnHalf, showCreateDateDropdown && styles.dropdownBtnActive]}
+                  onPress={() => {
+                    if (Platform.OS !== 'web') {
+                      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                    }
+                    setShowCreateDateDropdown(!showCreateDateDropdown);
+                    setShowCreateTimeDropdown(false);
+                  }}
+                >
+                  <Text style={styles.dropdownBtnIcon}>🗓️</Text>
+                  <Text style={styles.dropdownBtnText} numberOfLines={1}>
+                    {selectedCreateDate}
+                  </Text>
+                  <Text style={styles.dropdownChevron}>{showCreateDateDropdown ? '▴' : '▾'}</Text>
+                </Pressable>
+
+                {/* TIME SELECTOR BUTTON */}
+                <Pressable
+                  style={[styles.dropdownBtnHalf, showCreateTimeDropdown && styles.dropdownBtnActive]}
+                  onPress={() => {
+                    if (Platform.OS !== 'web') {
+                      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                    }
+                    setShowCreateTimeDropdown(!showCreateTimeDropdown);
+                    setShowCreateDateDropdown(false);
+                  }}
+                >
+                  <Text style={styles.dropdownBtnIcon}>⏰</Text>
+                  <Text style={styles.dropdownBtnText} numberOfLines={1}>
+                    {selectedCreateTime.split(' (')[0]}
+                  </Text>
+                  <Text style={styles.dropdownChevron}>{showCreateTimeDropdown ? '▴' : '▾'}</Text>
+                </Pressable>
               </View>
 
-              {/* Quick Smart Timing Presets */}
-              <View style={styles.quickWhenPillsRow}>
-                {['Today · 7:30 PM', 'Tomorrow · 8:00 PM', 'Sun · 6:00 PM'].map((preset) => (
-                  <Pressable
-                    key={preset}
-                    onPress={() => {
-                      if (Platform.OS !== 'web') {
-                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                      }
-                      setPostWhen(preset);
-                    }}
-                    style={[
-                      styles.quickWhenPill,
-                      postWhen === preset && styles.quickWhenPillActive,
-                    ]}
-                  >
-                    <Text
-                      style={[
-                        styles.quickWhenPillText,
-                        postWhen === preset && styles.quickWhenPillTextActive,
-                      ]}
-                      numberOfLines={1}
-                    >
-                      {preset}
-                    </Text>
-                  </Pressable>
-                ))}
-              </View>
+              {/* DATE DROPDOWN MENU */}
+              {showCreateDateDropdown && (
+                <View style={styles.dropdownMenuBox}>
+                  {SCHEDULE_DATE_OPTIONS.map((item) => {
+                    const isSelected = selectedCreateDate === item;
+                    return (
+                      <Pressable
+                        key={item}
+                        style={[styles.dropdownMenuItem, isSelected && styles.dropdownMenuItemActive]}
+                        onPress={() => {
+                          if (Platform.OS !== 'web') {
+                            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                          }
+                          setSelectedCreateDate(item);
+                          setShowCreateDateDropdown(false);
+                        }}
+                      >
+                        <Text style={[styles.dropdownMenuItemText, isSelected && styles.dropdownMenuItemTextActive]}>
+                          {item}
+                        </Text>
+                        {isSelected && <Text style={styles.dropdownCheckmark}>✓</Text>}
+                      </Pressable>
+                    );
+                  })}
+                </View>
+              )}
+
+              {/* TIME DROPDOWN MENU */}
+              {showCreateTimeDropdown && (
+                <View style={styles.dropdownMenuBox}>
+                  {SCHEDULE_TIME_OPTIONS.map((item) => {
+                    const isSelected = selectedCreateTime === item;
+                    return (
+                      <Pressable
+                        key={item}
+                        style={[styles.dropdownMenuItem, isSelected && styles.dropdownMenuItemActive]}
+                        onPress={() => {
+                          if (Platform.OS !== 'web') {
+                            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                          }
+                          setSelectedCreateTime(item);
+                          setShowCreateTimeDropdown(false);
+                        }}
+                      >
+                        <Text style={[styles.dropdownMenuItemText, isSelected && styles.dropdownMenuItemTextActive]}>
+                          {item}
+                        </Text>
+                        {isSelected && <Text style={styles.dropdownCheckmark}>✓</Text>}
+                      </Pressable>
+                    );
+                  })}
+                </View>
+              )}
 
               <View style={styles.modalBtnRow}>
                 <Pressable
@@ -2082,54 +2154,80 @@ const styles = StyleSheet.create({
     color: '#171420',
     marginBottom: 14,
   },
-  whenToPostInputBox: {
+  dropdownSelectorsRow: {
+    flexDirection: 'row',
+    gap: 8,
+    marginBottom: 12,
+  },
+  dropdownBtnHalf: {
+    flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'space-between',
     backgroundColor: '#FAF8F5',
     borderWidth: 1,
     borderColor: '#EFEBF8',
     borderRadius: 12,
-    paddingHorizontal: 12,
+    paddingHorizontal: 10,
     height: 42,
-    marginBottom: 8,
   },
-  whenToPostIcon: {
-    fontSize: 15,
-    marginRight: 8,
+  dropdownBtnActive: {
+    borderColor: '#582CDB',
+    backgroundColor: '#FAF5FF',
   },
-  whenToPostTextInput: {
-    flex: 1,
+  dropdownBtnIcon: {
     fontSize: 14,
-    fontWeight: '600',
-    color: '#171420',
-    paddingVertical: 0,
+    marginRight: 4,
   },
-  quickWhenPillsRow: {
-    flexDirection: 'row',
-    gap: 6,
-    marginBottom: 16,
-  },
-  quickWhenPill: {
+  dropdownBtnText: {
     flex: 1,
-    paddingVertical: 5,
-    paddingHorizontal: 4,
-    borderRadius: 8,
-    backgroundColor: '#F1F5F9',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  quickWhenPillActive: {
-    backgroundColor: '#EDE9FE',
-    borderWidth: 1,
-    borderColor: '#C4B5FD',
-  },
-  quickWhenPillText: {
-    fontSize: 10,
+    fontSize: 12,
     fontWeight: '700',
-    color: '#64748B',
+    color: '#171420',
   },
-  quickWhenPillTextActive: {
-    color: '#6D28D9',
+  dropdownChevron: {
+    fontSize: 11,
+    color: '#64748B',
+    fontWeight: '800',
+    marginLeft: 2,
+  },
+  dropdownMenuBox: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: '#EFEBF8',
+    padding: 6,
+    marginBottom: 14,
+    shadowColor: '#582CDB',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 12,
+    elevation: 4,
+  },
+  dropdownMenuItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: 9,
+    paddingHorizontal: 12,
+    borderRadius: 8,
+  },
+  dropdownMenuItemActive: {
+    backgroundColor: '#EDE9FE',
+  },
+  dropdownMenuItemText: {
+    fontSize: 12.5,
+    fontWeight: '600',
+    color: '#475569',
+  },
+  dropdownMenuItemTextActive: {
+    fontWeight: '800',
+    color: '#582CDB',
+  },
+  dropdownCheckmark: {
+    fontSize: 12,
+    fontWeight: '800',
+    color: '#582CDB',
   },
   modalBtnRow: {
     flexDirection: 'row',
