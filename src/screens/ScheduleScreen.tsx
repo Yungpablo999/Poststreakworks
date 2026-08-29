@@ -457,7 +457,9 @@ export const ScheduleScreen: React.FC<ScheduleScreenProps> = ({
 
           {/* 2. THIS WEEK STRIP & VIEW FULL CALENDAR */}
           <View style={styles.weekHeaderRow}>
-            <Text style={styles.weekTitle}>This week: 8 posts planned</Text>
+            <Text style={styles.weekTitle} numberOfLines={1} adjustsFontSizeToFit>
+              This week: 8 posts planned
+            </Text>
             <Pressable
               onPress={() => {
                 triggerModalPop();
@@ -1538,16 +1540,18 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: 12,
+    gap: 8,
   },
   weekTitle: {
-    fontSize: 13,
+    fontSize: sFont(13),
     fontWeight: '800',
     color: '#171420',
+    flexShrink: 1,
   },
   viewFullCalendarLink: {
-    fontSize: 12.5,
-    fontWeight: '800',
-    color: '#582CDB',
+    fontSize: sFont(11.5),
+    fontWeight: '600',
+    color: '#6D28D9',
   },
   calendarStrip: {
     flexDirection: 'row',
