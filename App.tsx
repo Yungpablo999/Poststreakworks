@@ -682,6 +682,10 @@ export default function App() {
               }}
               onOpenJarvisPro={() => navigateTo('jarvis-pro')}
               onOpenCreateIdea={() => navigateTo('create')}
+              onOpenPostComposer={(title, platform) => {
+                if (title) setComposerIdeaTitle(title);
+                navigateTo('composer');
+              }}
               onNavigateTab={(tab: TabType) => {
                 if (tab === 'home') {
                   navigateTo('dashboard');

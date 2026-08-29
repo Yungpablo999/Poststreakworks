@@ -31,6 +31,7 @@ interface ScheduleScreenProps {
   onOpenJarvisPro?: () => void;
   onOpenMessages?: () => void;
   onOpenCreateIdea?: () => void;
+  onOpenPostComposer?: (prefillTitle?: string, prefillPlatform?: string) => void;
   userProfile?: UserProfileData;
   onSaveProfile?: (updated: UserProfileData) => void;
 }
@@ -197,9 +198,10 @@ export const ScheduleScreen: React.FC<ScheduleScreenProps> = ({
   onOpenJarvisPro,
   onOpenMessages,
   onOpenCreateIdea,
-
+  onOpenPostComposer,
   userProfile,
-  onSaveProfile,}) => {
+  onSaveProfile,
+}) => {
   const isDark = false;
   const [activeTab, setActiveTab] = useState<TabType>('create');
   const [selectedDay, setSelectedDay] = useState<number>(15);
@@ -427,8 +429,15 @@ export const ScheduleScreen: React.FC<ScheduleScreenProps> = ({
               <Pressable
                 style={({ pressed }) => [styles.scheduleNewPostBtn, pressed && styles.btnPressed]}
                 onPress={() => {
-                  triggerModalPop();
-                  setShowScheduleModal(true);
+                  if (Platform.OS !== 'web') {
+                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                  }
+                  if (onOpenPostComposer) {
+                    onOpenPostComposer();
+                  } else {
+                    triggerModalPop();
+                    setShowScheduleModal(true);
+                  }
                 }}
               >
                 <Text style={styles.scheduleNewPostBtnText}>Schedule New Post</Text>
@@ -559,8 +568,15 @@ export const ScheduleScreen: React.FC<ScheduleScreenProps> = ({
               <Pressable
                 style={({ pressed }) => [styles.finishDraftBtn, pressed && styles.btnPressed]}
                 onPress={() => {
-                  triggerModalPop();
-                  setShowFinishDraftModal(true);
+                  if (Platform.OS !== 'web') {
+                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                  }
+                  if (onOpenPostComposer) {
+                    onOpenPostComposer('One thing I wish I knew before creating', 'instagram');
+                  } else {
+                    triggerModalPop();
+                    setShowFinishDraftModal(true);
+                  }
                 }}
               >
                 <Text style={styles.finishDraftBtnText}>Finish Draft</Text>
@@ -983,13 +999,17 @@ export const ScheduleScreen: React.FC<ScheduleScreenProps> = ({
                   style={styles.viewPostEditBtn}
                   onPress={() => {
                     setShowViewPostModal(false);
-                    if (selectedPost) {
-                      setNewPostTitle(selectedPost.title);
-                      setNewPostPlatform(selectedPost.platform);
-                      setSelectedScheduleTime(selectedPost.time);
+                    if (onOpenPostComposer) {
+                      onOpenPostComposer(selectedPost?.title, selectedPost?.platform);
+                    } else {
+                      if (selectedPost) {
+                        setNewPostTitle(selectedPost.title);
+                        setNewPostPlatform(selectedPost.platform);
+                        setSelectedScheduleTime(selectedPost.time);
+                      }
+                      triggerModalPop();
+                      setShowScheduleModal(true);
                     }
-                    triggerModalPop();
-                    setShowScheduleModal(true);
                   }}
                 >
                   <Text style={styles.viewPostEditBtnText}>View / Edit Post →</Text>
@@ -1179,9 +1199,13 @@ export const ScheduleScreen: React.FC<ScheduleScreenProps> = ({
                 style={styles.calSingleActionBtn}
                 onPress={() => {
                   setShowCalendarModal(false);
-                  setSelectedScheduleDate(calendarSelectedDay === 15 ? 'Today · Aug 29' : `Aug ${calendarSelectedDay}`);
-                  triggerModalPop();
-                  setShowScheduleModal(true);
+                  if (onOpenPostComposer) {
+                    onOpenPostComposer();
+                  } else {
+                    setSelectedScheduleDate(calendarSelectedDay === 15 ? 'Today · Aug 29' : `Aug ${calendarSelectedDay}`);
+                    triggerModalPop();
+                    setShowScheduleModal(true);
+                  }
                 }}
               >
                 <Text style={styles.calSingleActionBtnText}>+ Schedule Post</Text>
