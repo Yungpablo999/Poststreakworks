@@ -21,6 +21,7 @@ import { FloatingTabBar, TabType } from '../components/FloatingTabBar';
 import { UserProfileModal, UserProfileData } from '../components/UserProfileModal';
 import { AnimatedCompletionModal } from '../components/AnimatedCompletionModal';
 import { SocialBrandIcon } from '../components/SocialBrandIcon';
+import { DateTimePickerSheet } from '../components/DateTimePickerSheet';
 import { FreeAppHeader } from '../components/FreeAppHeader';
 import { sFont, sPadding, moderateScale, isNarrowScreen } from '../utils/responsive';
 
@@ -166,9 +167,8 @@ export const ScheduleScreen: React.FC<ScheduleScreenProps> = ({
   const [newPostTitle, setNewPostTitle] = useState('');
   const [newPostPlatform, setNewPostPlatform] = useState<'tiktok' | 'instagram' | 'youtube'>('tiktok');
   const [selectedScheduleDate, setSelectedScheduleDate] = useState('Today · Aug 29');
-  const [selectedScheduleTime, setSelectedScheduleTime] = useState('7:30 PM (Peak 🔥)');
-  const [showDateDropdown, setShowDateDropdown] = useState(false);
-  const [showTimeDropdown, setShowTimeDropdown] = useState(false);
+  const [selectedScheduleTime, setSelectedScheduleTime] = useState('7:30 PM');
+  const [showDateTimePicker, setShowDateTimePicker] = useState(false);
 
   // Draft Editing State
   const [draftTitle, setDraftTitle] = useState('One thing I wish I knew before creating');
@@ -697,97 +697,25 @@ export const ScheduleScreen: React.FC<ScheduleScreenProps> = ({
               />
 
               <Text style={styles.modalInputLabel}>WHEN TO POST</Text>
-              <View style={styles.dropdownSelectorsRow}>
-                {/* DATE SELECTOR BUTTON */}
-                <Pressable
-                  style={[styles.dropdownBtnHalf, showDateDropdown && styles.dropdownBtnActive]}
-                  onPress={() => {
-                    if (Platform.OS !== 'web') {
-                      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                    }
-                    setShowDateDropdown(!showDateDropdown);
-                    setShowTimeDropdown(false);
-                  }}
-                >
-                  <Text style={styles.dropdownBtnIcon}>🗓️</Text>
-                  <Text style={styles.dropdownBtnText} numberOfLines={1}>
-                    {selectedScheduleDate}
+              <Pressable
+                style={styles.whenToPostPickerBtn}
+                onPress={() => {
+                  if (Platform.OS !== 'web') {
+                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                  }
+                  setShowDateTimePicker(true);
+                }}
+              >
+                <View style={styles.whenToPostLeft}>
+                  <Text style={styles.whenToPostIcon}>🗓️</Text>
+                  <Text style={styles.whenToPostPickerValue} numberOfLines={1}>
+                    {selectedScheduleDate} · {selectedScheduleTime}
                   </Text>
-                  <Text style={styles.dropdownChevron}>{showDateDropdown ? '▴' : '▾'}</Text>
-                </Pressable>
-
-                {/* TIME SELECTOR BUTTON */}
-                <Pressable
-                  style={[styles.dropdownBtnHalf, showTimeDropdown && styles.dropdownBtnActive]}
-                  onPress={() => {
-                    if (Platform.OS !== 'web') {
-                      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                    }
-                    setShowTimeDropdown(!showTimeDropdown);
-                    setShowDateDropdown(false);
-                  }}
-                >
-                  <Text style={styles.dropdownBtnIcon}>⏰</Text>
-                  <Text style={styles.dropdownBtnText} numberOfLines={1}>
-                    {selectedScheduleTime.split(' (')[0]}
-                  </Text>
-                  <Text style={styles.dropdownChevron}>{showTimeDropdown ? '▴' : '▾'}</Text>
-                </Pressable>
-              </View>
-
-              {/* DATE DROPDOWN MENU */}
-              {showDateDropdown && (
-                <View style={styles.dropdownMenuBox}>
-                  {SCHEDULE_DATE_OPTIONS.map((item) => {
-                    const isSelected = selectedScheduleDate === item;
-                    return (
-                      <Pressable
-                        key={item}
-                        style={[styles.dropdownMenuItem, isSelected && styles.dropdownMenuItemActive]}
-                        onPress={() => {
-                          if (Platform.OS !== 'web') {
-                            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                          }
-                          setSelectedScheduleDate(item);
-                          setShowDateDropdown(false);
-                        }}
-                      >
-                        <Text style={[styles.dropdownMenuItemText, isSelected && styles.dropdownMenuItemTextActive]}>
-                          {item}
-                        </Text>
-                        {isSelected && <Text style={styles.dropdownCheckmark}>✓</Text>}
-                      </Pressable>
-                    );
-                  })}
                 </View>
-              )}
-
-              {/* TIME DROPDOWN MENU */}
-              {showTimeDropdown && (
-                <View style={styles.dropdownMenuBox}>
-                  {SCHEDULE_TIME_OPTIONS.map((item) => {
-                    const isSelected = selectedScheduleTime === item;
-                    return (
-                      <Pressable
-                        key={item}
-                        style={[styles.dropdownMenuItem, isSelected && styles.dropdownMenuItemActive]}
-                        onPress={() => {
-                          if (Platform.OS !== 'web') {
-                            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                          }
-                          setSelectedScheduleTime(item);
-                          setShowTimeDropdown(false);
-                        }}
-                      >
-                        <Text style={[styles.dropdownMenuItemText, isSelected && styles.dropdownMenuItemTextActive]}>
-                          {item}
-                        </Text>
-                        {isSelected && <Text style={styles.dropdownCheckmark}>✓</Text>}
-                      </Pressable>
-                    );
-                  })}
+                <View style={styles.whenToPostChangePill}>
+                  <Text style={styles.whenToPostChangeText}>Scroll & Pick ▾</Text>
                 </View>
-              )}
+              </Pressable>
 
               <View style={styles.modalBtnRow}>
                 <Pressable style={styles.modalSecondaryBtn} onPress={() => setShowScheduleModal(false)}>
@@ -1168,6 +1096,18 @@ export const ScheduleScreen: React.FC<ScheduleScreenProps> = ({
             </Animated.View>
           </View>
         </Modal>
+
+        {/* DATE TIME PICKER SHEET */}
+        <DateTimePickerSheet
+          visible={showDateTimePicker}
+          onClose={() => setShowDateTimePicker(false)}
+          onConfirm={(val) => {
+            setSelectedScheduleDate(val.dateLabel);
+            setSelectedScheduleTime(val.timeLabel);
+          }}
+          initialDate={selectedScheduleDate}
+          initialTime={selectedScheduleTime}
+        />
       </View>
     </SafeAreaView>
   );
@@ -1878,78 +1818,43 @@ const styles = StyleSheet.create({
     color: '#171420',
     marginBottom: 14,
   },
-  dropdownSelectorsRow: {
-    flexDirection: 'row',
-    gap: 8,
-    marginBottom: 12,
-  },
-  dropdownBtnHalf: {
-    flex: 1,
+  whenToPostPickerBtn: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     backgroundColor: '#FAF8F5',
     borderWidth: 1,
     borderColor: '#EFEBF8',
-    borderRadius: 12,
-    paddingHorizontal: 10,
-    height: 42,
-  },
-  dropdownBtnActive: {
-    borderColor: '#582CDB',
-    backgroundColor: '#FAF5FF',
-  },
-  dropdownBtnIcon: {
-    fontSize: 14,
-    marginRight: 4,
-  },
-  dropdownBtnText: {
-    flex: 1,
-    fontSize: 12,
-    fontWeight: '700',
-    color: '#171420',
-  },
-  dropdownChevron: {
-    fontSize: 11,
-    color: '#64748B',
-    fontWeight: '800',
-    marginLeft: 2,
-  },
-  dropdownMenuBox: {
-    backgroundColor: '#FFFFFF',
     borderRadius: 14,
-    borderWidth: 1,
-    borderColor: '#EFEBF8',
-    padding: 6,
-    marginBottom: 14,
-    shadowColor: '#582CDB',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 12,
-    elevation: 4,
+    paddingHorizontal: 12,
+    height: 48,
+    marginBottom: 16,
   },
-  dropdownMenuItem: {
+  whenToPostLeft: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingVertical: 9,
-    paddingHorizontal: 12,
-    borderRadius: 8,
+    flex: 1,
+    gap: 8,
   },
-  dropdownMenuItemActive: {
-    backgroundColor: '#EDE9FE',
+  whenToPostIcon: {
+    fontSize: 16,
   },
-  dropdownMenuItemText: {
-    fontSize: 12.5,
-    fontWeight: '600',
-    color: '#475569',
-  },
-  dropdownMenuItemTextActive: {
+  whenToPostPickerValue: {
+    fontSize: 13.5,
     fontWeight: '800',
-    color: '#582CDB',
+    color: '#171420',
+    flex: 1,
   },
-  dropdownCheckmark: {
-    fontSize: 12,
+  whenToPostChangePill: {
+    backgroundColor: '#EDE9FE',
+    paddingVertical: 5,
+    paddingHorizontal: 9,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#DDD6FE',
+  },
+  whenToPostChangeText: {
+    fontSize: 11,
     fontWeight: '800',
     color: '#582CDB',
   },
