@@ -161,8 +161,8 @@ const MONTH_POSTS_MAP: { [day: number]: CalendarDayPost[] } = {
     { id: 'm14_1', platform: 'youtube', platformLabel: 'YouTube Shorts', time: '2:00 PM', title: 'Editing faster with mobile capcut tips', status: 'published' }
   ],
   15: [
-    { id: 'post_1', platform: 'tiktok', platformLabel: 'TikTok', time: '11:30 AM', title: '3 creator mistakes I stopped making this year', status: 'scheduled' },
-    { id: 'post_2', platform: 'instagram', platformLabel: 'Instagram Reel', time: '7:30 PM', title: 'One thing I wish I knew before creating', status: 'draft' },
+    { id: 'post_1', platform: 'tiktok', platformLabel: 'TikTok', time: '11:30 AM', title: '3 creator mistakes I stopped making…', status: 'scheduled' },
+    { id: 'post_2', platform: 'instagram', platformLabel: 'Instagram Reel', time: '7:30 PM', title: 'One thing I wish I knew before…', status: 'draft' },
     { id: 'post_3', platform: 'youtube', platformLabel: 'YouTube Shorts', time: '9:00 PM', title: 'The 1 rule to 10x your views', status: 'scheduled' },
   ],
   16: [
@@ -170,7 +170,7 @@ const MONTH_POSTS_MAP: { [day: number]: CalendarDayPost[] } = {
     { id: 'm16_2', platform: 'instagram', platformLabel: 'Instagram Reel', time: '6:00 PM', title: 'Behind the scenes creator workspace', status: 'scheduled' },
   ],
   19: [
-    { id: 'm19_1', platform: 'tiktok', platformLabel: 'TikTok', time: '11:30 AM', title: 'The secret to viral retention graph', status: 'scheduled' }
+    { id: 'm19_1', platform: 'tiktok', platformLabel: 'TikTok', time: '11:30 AM', title: 'The secret to viral retention graphs', status: 'scheduled' }
   ],
   22: [
     { id: 'm22_1', platform: 'youtube', platformLabel: 'YouTube Shorts', time: '4:00 PM', title: 'Top 3 audio trends this weekend', status: 'scheduled' }
@@ -1099,13 +1099,14 @@ export const ScheduleScreen: React.FC<ScheduleScreenProps> = ({
                 {MONTH_POSTS_MAP[calendarSelectedDay] && MONTH_POSTS_MAP[calendarSelectedDay].length > 0 ? (
                   <View style={styles.compactPostList}>
                     {MONTH_POSTS_MAP[calendarSelectedDay].map((p) => {
-                      const platformIcon = p.platform === 'tiktok' ? '🎵' : p.platform === 'instagram' ? '📷' : '▶️';
                       const statusLabel = p.status.charAt(0).toUpperCase() + p.status.slice(1);
                       return (
                         <View key={p.id} style={styles.compactPostRow}>
                           <View style={styles.compactPostHeaderRow}>
-                            <Text style={styles.compactPostIcon}>{platformIcon}</Text>
-                            <Text style={styles.compactPostTitle} numberOfLines={1}>
+                            <View style={styles.compactPostBrandIconWrap}>
+                              <SocialBrandIcon platform={p.platform} size={13} />
+                            </View>
+                            <Text style={styles.compactPostTitle} numberOfLines={1} ellipsizeMode="tail">
                               {p.title}
                             </Text>
                           </View>
@@ -2211,12 +2212,12 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     paddingHorizontal: 4,
-    marginBottom: 8,
+    marginBottom: 4,
   },
   calGridHeaderText: {
     width: '13.5%',
     textAlign: 'center',
-    fontSize: sFont(11),
+    fontSize: sFont(10),
     fontWeight: '800',
     color: '#64748B',
   },
@@ -2225,25 +2226,26 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
     justifyContent: 'space-between',
     backgroundColor: '#FAF8F5',
-    borderRadius: 18,
+    borderRadius: 14,
     borderWidth: 1,
     borderColor: '#EFEBF8',
-    padding: 8,
-    marginBottom: 12,
+    paddingHorizontal: 6,
+    paddingVertical: 4,
+    marginBottom: 6,
   },
   calCell: {
     width: '13.5%',
-    aspectRatio: 1,
-    borderRadius: 10,
+    height: 24,
+    borderRadius: 6,
     justifyContent: 'center',
     alignItems: 'center',
-    marginVertical: 2,
+    marginVertical: 1,
     position: 'relative',
   },
   calCellEmpty: {
     width: '13.5%',
-    aspectRatio: 1,
-    marginVertical: 2,
+    height: 24,
+    marginVertical: 1,
   },
   calCellHasPosts: {
     backgroundColor: '#EDE9FE',
@@ -2251,12 +2253,12 @@ const styles = StyleSheet.create({
   calCellSelected: {
     backgroundColor: '#582CDB',
     shadowColor: '#582CDB',
-    shadowOffset: { width: 0, height: 3 },
+    shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.12,
-    shadowRadius: 6,
+    shadowRadius: 4,
   },
   calCellText: {
-    fontSize: 12.5,
+    fontSize: 11,
     fontWeight: '700',
     color: '#334155',
   },
@@ -2270,38 +2272,38 @@ const styles = StyleSheet.create({
   },
   calCellDotsRow: {
     flexDirection: 'row',
-    gap: 2,
+    gap: 1.5,
     position: 'absolute',
-    bottom: 3,
+    bottom: 1.5,
   },
   dotScheduled: {
-    width: 4,
-    height: 4,
-    borderRadius: 2,
+    width: 3,
+    height: 3,
+    borderRadius: 1.5,
     backgroundColor: '#582CDB',
   },
   dotDraft: {
-    width: 4,
-    height: 4,
-    borderRadius: 2,
+    width: 3,
+    height: 3,
+    borderRadius: 1.5,
     backgroundColor: '#F59E0B',
   },
   dotPublished: {
-    width: 4,
-    height: 4,
-    borderRadius: 2,
+    width: 3,
+    height: 3,
+    borderRadius: 1.5,
     backgroundColor: '#22C55E',
   },
   dotToday: {
-    width: 4,
-    height: 4,
-    borderRadius: 2,
+    width: 3,
+    height: 3,
+    borderRadius: 1.5,
     backgroundColor: '#EF4444',
   },
   calLegendRow: {
     flexDirection: 'row',
     justifyContent: 'space-around',
-    paddingVertical: 5,
+    paddingVertical: 3,
     borderBottomWidth: 1,
     borderBottomColor: '#F1F5F9',
     marginBottom: 8,
@@ -2309,10 +2311,10 @@ const styles = StyleSheet.create({
   calLegendItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 5,
+    gap: 4,
   },
   calLegendText: {
-    fontSize: 10.5,
+    fontSize: 9.5,
     color: '#64748B',
     fontWeight: '600',
   },
@@ -2344,17 +2346,20 @@ const styles = StyleSheet.create({
     color: '#6D28D9',
   },
   compactPostList: {
-    gap: 18,
+    gap: 20,
   },
   compactPostRow: {},
   compactPostHeaderRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
+    gap: 7,
     marginBottom: 3,
   },
-  compactPostIcon: {
-    fontSize: 13,
+  compactPostBrandIconWrap: {
+    width: 15,
+    height: 15,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   compactPostTitle: {
     fontSize: 13,
@@ -2365,7 +2370,7 @@ const styles = StyleSheet.create({
   compactPostMetaRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingLeft: 19,
+    paddingLeft: 22,
     gap: 7,
   },
   compactPostMetaText: {
