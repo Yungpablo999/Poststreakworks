@@ -303,7 +303,7 @@ export const ScheduleScreen: React.FC<ScheduleScreenProps> = ({
             Your posts, planned clearly.
           </Text>
           <Text style={styles.mainSubtitle}>
-            See what is going live today, what is coming next, and what still needs to be finished.
+            See what’s live today, what’s next, and what needs finishing.
           </Text>
 
           {/* 1. TODAY HERO CARD */}
