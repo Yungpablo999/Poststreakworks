@@ -408,6 +408,20 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
     onClose();
   };
 
+  const getBottomActionText = () => {
+    switch (activeSubTab) {
+      case 'socials':
+        return 'Save Connections ✓';
+      case 'verification':
+        return 'Save Verification ✓';
+      case 'settings':
+        return 'Save Preferences ✓';
+      case 'profile':
+      default:
+        return 'Save Profile ✓';
+    }
+  };
+
   const currentAvatarObj =
     CREATOR_AVATARS.find((a) => a.id === selectedAvatarId) || CREATOR_AVATARS[0];
 
@@ -875,7 +889,7 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
               </View>
             )}
 
-            {/* TAB 4: CREATOR PASSPORT & INSTANT VERIFICATION */}
+            {/* TAB 3: CREATOR PASSPORT & INSTANT VERIFICATION */}
             {activeSubTab === 'verification' && (
               <View>
                 {/* 1. HERO VERIFICATION PASSPORT BANNER */}
@@ -886,44 +900,39 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
                   <View style={styles.verifHeroTopRow}>
                     <View style={styles.verifAvatarWrap}>
                       <Image source={currentDisplayAvatarSource} style={styles.verifAvatarImg} />
-                      <View style={isPro ? styles.verifBadgeGold : [styles.verifBadgeGold, { backgroundColor: '#F59E0B' }]}>
-                        <Text style={{ fontSize: 10, color: '#FFFFFF', fontWeight: '700' }}>
-                          {isPro ? '✓' : '🔒'}
+                      <View style={[styles.verifBadgeGold, isPro ? { backgroundColor: '#582CDB' } : { backgroundColor: '#F59E0B' }]}>
+                        <Text style={{ fontSize: 10, color: '#FFFFFF', fontWeight: '800' }}>
+                          {isPro ? '✓' : '4/5'}
                         </Text>
                       </View>
                     </View>
 
                     <View style={{ flex: 1 }}>
-                      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-                        <Text style={styles.verifHeroName}>{name || 'Pablo'}</Text>
-                        <View style={[styles.verifStatusPill, !isPro && { backgroundColor: 'rgba(245, 158, 11, 0.2)' }]}>
-                          <Text style={[styles.verifStatusPillText, !isPro && { color: '#F59E0B' }]}>
-                            {isPro ? '🟢 100% VERIFIED' : '🔒 PRO EXCLUSIVE'}
-                          </Text>
-                        </View>
-                      </View>
-                      <Text style={styles.verifHeroSub}>
-                        {isPro
-                          ? `👑 Pro Creator Passport • Level ${initialProfile?.level || 5}`
-                          : `⚡ Free Creator Passport • Level ${initialProfile?.level || 5}`}
+                      <Text style={styles.verifMainHeroTitle}>
+                        {isPro ? 'Your creator identity is 100% verified.' : 'Your creator identity is almost verified.'}
+                      </Text>
+                      <Text style={styles.verifMainHeroSub}>
+                        {isPro ? '5 of 5 requirements complete · Verified Badge Active' : '4 of 5 requirements complete · 1 step remaining'}
                       </Text>
                     </View>
                   </View>
 
-                  {/* Verification Strength Progress Bar */}
-                  <View style={{ marginTop: 12 }}>
-                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 4 }}>
-                      <Text style={styles.verifMeterLabel}>PASSPORT VERIFICATION SCORE</Text>
-                      <Text style={[styles.verifMeterVal, !isPro && { color: '#F59E0B' }]}>
-                        {isPro ? '100% / 100%' : '95% / 100% (Pro Locked)'}
+                  {/* Verification Progress Bar */}
+                  <View style={{ marginTop: 14 }}>
+                    <View style={styles.verifProgressHeaderRow}>
+                      <Text style={styles.verifProgressLabel}>VERIFICATION PROGRESS</Text>
+                      <Text style={styles.verifProgressValText}>
+                        {isPro ? '5/5 Complete (100%)' : '4/5 Complete (80%)'}
                       </Text>
                     </View>
                     <View style={styles.verifMeterTrack}>
-                      <View
+                      <LinearGradient
+                        colors={isPro ? ['#10B981', '#059669'] : ['#784DF0', '#582CDB']}
+                        start={{ x: 0, y: 0 }}
+                        end={{ x: 1, y: 0 }}
                         style={[
                           styles.verifMeterFill,
-                          { width: isPro ? '100%' : '95%' },
-                          !isPro && { backgroundColor: '#F59E0B' },
+                          { width: isPro ? '100%' : '80%' },
                         ]}
                       />
                     </View>
@@ -944,7 +953,7 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
                       <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
                         <Text style={styles.verifCheckTitle}>Connected Creator Platforms</Text>
                         <Pressable onPress={() => setActiveSubTab('socials')}>
-                          <Text style={styles.verifEditLink}>Edit ➔</Text>
+                          <Text style={styles.verifEditLink}>Edit ›</Text>
                         </Pressable>
                       </View>
                       <Text style={styles.verifCheckSub}>
@@ -979,7 +988,7 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
                       <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
                         <Text style={styles.verifCheckTitle}>Niche &amp; Bio Authenticity</Text>
                         <Pressable onPress={() => setActiveSubTab('profile')}>
-                          <Text style={styles.verifEditLink}>Edit ➔</Text>
+                          <Text style={styles.verifEditLink}>Edit ›</Text>
                         </Pressable>
                       </View>
                       <Text style={styles.verifCheckSub}>
@@ -1063,42 +1072,10 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
                     <Text style={styles.verifPerkSub}>Official verified checkmark on profile</Text>
                   </View>
                 </View>
-
-                {/* 4. PRO-GATED ACTION BUTTON */}
-                <Pressable
-                  style={({ pressed }) => [
-                    styles.verifActionBtn,
-                    pressed && { opacity: 0.9, transform: [{ scale: 0.98 }] },
-                  ]}
-                  onPress={() => {
-                    if (Platform.OS !== 'web') {
-                      Haptics.notificationAsync(
-                        isPro ? Haptics.NotificationFeedbackType.Success : Haptics.NotificationFeedbackType.Warning
-                      );
-                    }
-                    if (isPro) {
-                      setIsVerified(true);
-                      showToast('🎉 Creator Passport 100% Verified! Priority brand matching active!');
-                    } else {
-                      showToast('👑 Verification is exclusive to Pro! Upgrade to claim your Verified Gold Badge & $450+ brand bounties.');
-                    }
-                  }}
-                >
-                  <LinearGradient
-                    colors={isPro ? ['#784DF0', '#582CDB'] : ['#F59E0B', '#D97706']}
-                    start={{ x: 0, y: 0 }}
-                    end={{ x: 1, y: 0 }}
-                    style={styles.verifActionGradient}
-                  >
-                    <Text style={styles.verifActionBtnText} numberOfLines={1}>
-                      {isPro ? '✓ Verified Creator Passport (Active)' : '👑 Unlock Verification (Upgrade to Pro)'}
-                    </Text>
-                  </LinearGradient>
-                </Pressable>
               </View>
             )}
 
-            {/* TAB 3: ACCOUNTABILITY & NOTIFICATIONS (NO DARK MODE) */}
+            {/* TAB 4: SETTINGS */}
             {activeSubTab === 'settings' && (
               <View>
                 <Text style={styles.sectionHeaderTitle}>
@@ -1181,7 +1158,7 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
                 end={{ x: 1, y: 0 }}
                 style={styles.saveBtnGradient}
               >
-                <Text style={styles.saveBtnText}>Save &amp; Update Profile ✓</Text>
+                <Text style={styles.saveBtnText}>{getBottomActionText()}</Text>
               </LinearGradient>
             </Pressable>
           </View>
@@ -1709,6 +1686,36 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     borderWidth: 1.5,
     borderColor: '#1A0C38',
+  },
+  verifMainHeroTitle: {
+    fontSize: 14.5,
+    fontWeight: '800',
+    color: '#FFFFFF',
+    letterSpacing: -0.2,
+    lineHeight: 19,
+  },
+  verifMainHeroSub: {
+    fontSize: 11.5,
+    fontWeight: '600',
+    color: '#D8B4FE',
+    marginTop: 2,
+  },
+  verifProgressHeaderRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 5,
+  },
+  verifProgressLabel: {
+    fontSize: 9,
+    fontWeight: '800',
+    color: '#C084FC',
+    letterSpacing: 0.5,
+  },
+  verifProgressValText: {
+    fontSize: 10,
+    fontWeight: '800',
+    color: '#FDE68A',
   },
   verifHeroName: {
     fontSize: 16,
