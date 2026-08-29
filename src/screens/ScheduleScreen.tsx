@@ -584,40 +584,51 @@ export const ScheduleScreen: React.FC<ScheduleScreenProps> = ({
             </View>
           </View>
 
-          {/* 4. PLATFORM LOAD CARD */}
+          {/* 4. WEEKLY PLATFORM MIX CARD */}
           <View style={styles.platformLoadCard}>
-            <Text style={styles.platformLoadTitle}>Platform Load</Text>
+            <Text style={styles.platformLoadTitle}>Weekly Platform Mix</Text>
 
-            {/* TikTok */}
-            <View style={styles.loadRow}>
-              <View style={styles.loadLabelRow}>
-                <Text style={styles.loadPlatformName}>TikTok</Text>
-                <Text style={styles.loadCountText}>3 posts</Text>
+            <View style={styles.loadRowsContainer}>
+              {/* TikTok */}
+              <View style={styles.loadRow}>
+                <View style={styles.loadLabelRow}>
+                  <View style={styles.loadPlatformNameRow}>
+                    <SocialBrandIcon platform="tiktok" size={13} />
+                    <Text style={styles.loadPlatformName}>TikTok</Text>
+                  </View>
+                  <Text style={styles.loadCountText}>3 posts</Text>
+                </View>
+                <View style={styles.loadTrack}>
+                  <View style={[styles.loadFill, { width: '60%', backgroundColor: '#582CDB' }]} />
+                </View>
               </View>
-              <View style={styles.loadTrack}>
-                <View style={[styles.loadFill, { width: '85%', backgroundColor: '#582CDB' }]} />
-              </View>
-            </View>
 
-            {/* Instagram */}
-            <View style={styles.loadRow}>
-              <View style={styles.loadLabelRow}>
-                <Text style={styles.loadPlatformName}>Instagram</Text>
-                <Text style={styles.loadCountText}>2 posts</Text>
+              {/* Instagram */}
+              <View style={styles.loadRow}>
+                <View style={styles.loadLabelRow}>
+                  <View style={styles.loadPlatformNameRow}>
+                    <SocialBrandIcon platform="instagram" size={13} />
+                    <Text style={styles.loadPlatformName}>Instagram</Text>
+                  </View>
+                  <Text style={styles.loadCountText}>2 posts</Text>
+                </View>
+                <View style={styles.loadTrack}>
+                  <View style={[styles.loadFill, { width: '40%', backgroundColor: '#582CDB' }]} />
+                </View>
               </View>
-              <View style={styles.loadTrack}>
-                <View style={[styles.loadFill, { width: '58%', backgroundColor: '#582CDB' }]} />
-              </View>
-            </View>
 
-            {/* YouTube */}
-            <View style={styles.loadRow}>
-              <View style={styles.loadLabelRow}>
-                <Text style={styles.loadPlatformName}>YouTube</Text>
-                <Text style={styles.loadCountText}>2 posts</Text>
-              </View>
-              <View style={styles.loadTrack}>
-                <View style={[styles.loadFill, { width: '58%', backgroundColor: '#582CDB' }]} />
+              {/* YouTube */}
+              <View style={styles.loadRow}>
+                <View style={styles.loadLabelRow}>
+                  <View style={styles.loadPlatformNameRow}>
+                    <SocialBrandIcon platform="youtube" size={13} />
+                    <Text style={styles.loadPlatformName}>YouTube</Text>
+                  </View>
+                  <Text style={styles.loadCountText}>2 posts</Text>
+                </View>
+                <View style={styles.loadTrack}>
+                  <View style={[styles.loadFill, { width: '40%', backgroundColor: '#582CDB' }]} />
+                </View>
               </View>
             </View>
 
@@ -1757,53 +1768,61 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
   },
 
-  // 4. PLATFORM LOAD
+  // 4. WEEKLY PLATFORM MIX
   platformLoadCard: {
     backgroundColor: '#FFFFFF',
-    borderRadius: 24,
+    borderRadius: 20,
     borderWidth: 1,
     borderColor: '#EFEBF8',
-    padding: 20,
+    padding: 16,
     marginBottom: 20,
   },
   platformLoadTitle: {
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: '800',
     color: '#171420',
     marginBottom: 14,
   },
-  loadRow: {
-    marginBottom: 12,
+  loadRowsContainer: {
+    gap: 14,
   },
+  loadRow: {},
   loadLabelRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: 4,
+    alignItems: 'center',
+    marginBottom: 6,
+  },
+  loadPlatformNameRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
   },
   loadPlatformName: {
-    fontSize: 12,
+    fontSize: 12.5,
     fontWeight: '700',
     color: '#171420',
   },
   loadCountText: {
     fontSize: 12,
     color: '#64748B',
+    fontWeight: '600',
   },
   loadTrack: {
-    height: 6,
-    borderRadius: 3,
-    backgroundColor: '#E2E8F0',
+    height: 5,
+    borderRadius: 2.5,
+    backgroundColor: '#F1F5F9',
     overflow: 'hidden',
   },
   loadFill: {
     height: '100%',
-    borderRadius: 3,
+    borderRadius: 2.5,
   },
   loadFooterNote: {
     fontSize: 12,
     color: '#64748B',
     fontStyle: 'italic',
-    marginTop: 6,
+    marginTop: 14,
   },
 
   // 5. HEALTH & EFFICIENCY
