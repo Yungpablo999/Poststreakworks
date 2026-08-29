@@ -316,7 +316,7 @@ const CREATOR_DECK: CreatorProfile[] = [
       'Elena’s cinematic editing and sound design elevate short-form videos into viral visual spectacles.',
     whyFitsPills: ['Production Value', 'Cinematic Edits', 'Story Pacing'],
     collabIdea: {
-      title: '“Sound Design Secrets of 10M-View Reels”',
+      title: '“Sound Secrets of 10M Reels”',
       hook: 'The 3 hidden audio layers that keep viewers hooked till the end.',
       bts: 'Timeline zoom-ins & foley sound breakdown.',
       lesson: 'Auditory psychology for retention.',
@@ -1581,7 +1581,14 @@ export const MatchScreen: React.FC<MatchScreenProps> = ({
                   <Text style={styles.purplePinIcon}>📍</Text>
                   <Text style={styles.detailCollabIdeaTitle}>Collab Idea</Text>
                 </View>
-                <Text style={styles.collabIdeaName}>{selectedCreatorForDetail.collabIdea.title}</Text>
+                <Text
+                  style={styles.collabIdeaName}
+                  numberOfLines={1}
+                  adjustsFontSizeToFit={true}
+                  minimumFontScale={0.8}
+                >
+                  {selectedCreatorForDetail.collabIdea.title}
+                </Text>
 
                 {/* Structured Script Steps */}
                 <View style={styles.collabScriptStepsCol}>
@@ -3298,10 +3305,11 @@ const styles = StyleSheet.create({
     color: '#582CDB',
   },
   collabIdeaName: {
-    fontSize: 16.5,
-    fontWeight: '700',
+    fontSize: 15,
+    fontWeight: '800',
     color: '#171420',
     marginBottom: 12,
+    letterSpacing: -0.2,
   },
   collabScriptStepsCol: {
     gap: 8,

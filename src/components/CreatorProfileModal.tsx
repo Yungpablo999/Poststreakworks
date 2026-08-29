@@ -99,7 +99,7 @@ export const DEFAULT_ELENA_PROFILE: CreatorProfileData = {
     'Strong niche overlap, similar posting pace, and open to creator squads. Elena’s visual pacing elevates short-form videos into high-retention stories.',
   whyFitsPills: ['Audience Overlap', 'Similar Content Style', 'Strong Posting Rhythm'],
   collabIdea: {
-    title: '“Sound Design Secrets of 10M-View Reels”',
+    title: '“Sound Secrets of 10M Reels”',
     hook: 'The 3 hidden audio layers that keep viewers hooked till the end.',
     bts: 'Timeline zoom-ins & foley sound breakdown.',
     lesson: 'Auditory psychology for retention.',
@@ -293,7 +293,14 @@ export const CreatorProfileModal: React.FC<CreatorProfileModalProps> = ({
               <Text style={styles.purplePinIcon}>📍</Text>
               <Text style={styles.detailCollabIdeaTitle}>Collab Idea</Text>
             </View>
-            <Text style={styles.collabIdeaName}>{creator.collabIdea.title}</Text>
+            <Text
+              style={styles.collabIdeaName}
+              numberOfLines={1}
+              adjustsFontSizeToFit={true}
+              minimumFontScale={0.8}
+            >
+              {creator.collabIdea.title}
+            </Text>
 
             {/* Structured Script Steps */}
             <View style={styles.collabScriptStepsCol}>
@@ -739,10 +746,11 @@ const styles = StyleSheet.create({
     color: '#582CDB',
   },
   collabIdeaName: {
-    fontSize: 16.5,
-    fontWeight: '700',
+    fontSize: 15,
+    fontWeight: '800',
     color: '#171420',
     marginBottom: 12,
+    letterSpacing: -0.2,
   },
   collabScriptStepsCol: {
     gap: 8,
