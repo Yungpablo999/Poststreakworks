@@ -1750,7 +1750,7 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
                   }}
                 >
                   <Text style={styles.acceptBrandQuestBtnText} numberOfLines={1}>
-                    {isBrandQuestAccepted ? '✓ Campaign Accepted & Active' : 'Accept Quest & Lock $450 Bounty ➔'}
+                    {isBrandQuestAccepted ? '✓ Campaign Active' : 'Accept $450 Bounty ➔'}
                   </Text>
                 </Pressable>
               </View>
@@ -3547,10 +3547,10 @@ const styles = StyleSheet.create({
     elevation: 4,
   },
   acceptBrandQuestBtnText: {
-    fontSize: 13,
+    fontSize: 14,
     fontWeight: '800',
     color: '#FFFFFF',
-    letterSpacing: -0.1,
+    letterSpacing: -0.2,
     textAlign: 'center',
   },
 
