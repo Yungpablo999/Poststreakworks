@@ -1103,22 +1103,36 @@ export const ScheduleScreen: React.FC<ScheduleScreenProps> = ({
                       const statusLabel = p.status.charAt(0).toUpperCase() + p.status.slice(1);
                       return (
                         <View key={p.id} style={styles.compactPostRow}>
-                          <Text style={styles.compactPostTitle} numberOfLines={1}>
-                            {platformIcon} {p.title}
-                          </Text>
-                          <Text style={styles.compactPostMeta}>
-                            {p.platformLabel} · {p.time} ·{' '}
-                            <Text
+                          <View style={styles.compactPostHeaderRow}>
+                            <Text style={styles.compactPostIcon}>{platformIcon}</Text>
+                            <Text style={styles.compactPostTitle} numberOfLines={1}>
+                              {p.title}
+                            </Text>
+                          </View>
+                          <View style={styles.compactPostMetaRow}>
+                            <Text style={styles.compactPostMetaText}>
+                              {p.platformLabel} · {p.time}
+                            </Text>
+                            <View
                               style={[
-                                styles.compactPostStatus,
-                                p.status === 'scheduled' && { color: '#582CDB' },
-                                p.status === 'draft' && { color: '#D97706' },
-                                p.status === 'published' && { color: '#16A34A' },
+                                styles.compactPostStatusBadge,
+                                p.status === 'scheduled' && styles.statusBadgeScheduled,
+                                p.status === 'draft' && styles.statusBadgeDraft,
+                                p.status === 'published' && styles.statusBadgePublished,
                               ]}
                             >
-                              {statusLabel}
-                            </Text>
-                          </Text>
+                              <Text
+                                style={[
+                                  styles.compactPostStatusText,
+                                  p.status === 'scheduled' && { color: '#6D28D9' },
+                                  p.status === 'draft' && { color: '#D97706' },
+                                  p.status === 'published' && { color: '#15803D' },
+                                ]}
+                              >
+                                {statusLabel}
+                              </Text>
+                            </View>
+                          </View>
                         </View>
                       );
                     })}
@@ -2304,51 +2318,83 @@ const styles = StyleSheet.create({
   },
   selectedDayDetailCard: {
     backgroundColor: '#FAF8F5',
-    borderRadius: 14,
+    borderRadius: 16,
     borderWidth: 1,
     borderColor: '#EFEBF8',
-    padding: 10,
-    marginBottom: 10,
+    padding: 14,
+    marginBottom: 14,
   },
   selectedDayHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 6,
+    marginBottom: 12,
+    paddingBottom: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: '#F1F5F9',
   },
   selectedDayTitle: {
-    fontSize: 13,
+    fontSize: 13.5,
     fontWeight: '800',
     color: '#171420',
   },
   selectedDayCount: {
-    fontSize: 11,
+    fontSize: 11.5,
     fontWeight: '700',
-    color: '#582CDB',
+    color: '#6D28D9',
   },
   compactPostList: {
-    gap: 6,
+    gap: 18,
   },
-  compactPostRow: {
-    paddingVertical: 2,
+  compactPostRow: {},
+  compactPostHeaderRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    marginBottom: 3,
+  },
+  compactPostIcon: {
+    fontSize: 13,
   },
   compactPostTitle: {
-    fontSize: 12.5,
+    fontSize: 13,
     fontWeight: '700',
     color: '#171420',
-    marginBottom: 1,
+    flex: 1,
   },
-  compactPostMeta: {
+  compactPostMetaRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingLeft: 19,
+    gap: 7,
+  },
+  compactPostMetaText: {
     fontSize: 11,
     color: '#64748B',
     fontWeight: '500',
   },
-  compactPostStatus: {
+  compactPostStatusBadge: {
+    paddingVertical: 1.5,
+    paddingHorizontal: 6,
+    borderRadius: 4,
+  },
+  statusBadgeScheduled: {
+    backgroundColor: '#EDE9FE',
+  },
+  statusBadgeDraft: {
+    backgroundColor: '#FEF3C7',
+  },
+  statusBadgePublished: {
+    backgroundColor: '#DCFCE7',
+  },
+  compactPostStatusText: {
+    fontSize: 9.5,
     fontWeight: '700',
+    letterSpacing: 0.2,
   },
   emptyDayBox: {
     alignItems: 'center',
-    paddingVertical: 6,
+    paddingVertical: 8,
   },
   emptyDayText: {
     fontSize: 11.5,
@@ -2356,19 +2402,19 @@ const styles = StyleSheet.create({
   },
   calSingleActionBtn: {
     width: '100%',
-    height: 44,
-    borderRadius: 12,
+    height: 40,
+    borderRadius: 11,
     backgroundColor: '#582CDB',
     justifyContent: 'center',
     alignItems: 'center',
     shadowColor: '#582CDB',
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.18,
-    shadowRadius: 6,
-    elevation: 3,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.14,
+    shadowRadius: 4,
+    elevation: 2,
   },
   calSingleActionBtnText: {
-    fontSize: 13.5,
+    fontSize: 13,
     fontWeight: '800',
     color: '#FFFFFF',
   },
