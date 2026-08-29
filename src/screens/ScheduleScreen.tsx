@@ -657,9 +657,17 @@ export const ScheduleScreen: React.FC<ScheduleScreenProps> = ({
             <Pressable
               style={({ pressed }) => [styles.fillTomorrowBtn, pressed && styles.btnPressed]}
               onPress={() => {
-                setNewPostTitle('3 unexpected creator hacks that work in 2026');
-                triggerModalPop();
-                setShowScheduleModal(true);
+                if (Platform.OS !== 'web') {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                }
+                if (onOpenPostComposer) {
+                  onOpenPostComposer('3 unexpected creator hacks that work this year', 'tiktok');
+                } else {
+                  setNewPostTitle('3 unexpected creator hacks that work this year');
+                  setSelectedScheduleDate('Tomorrow · Aug 30');
+                  triggerModalPop();
+                  setShowScheduleModal(true);
+                }
               }}
             >
               <Text style={styles.fillTomorrowBtnText}>Fill Tomorrow&apos;s Slot</Text>
@@ -694,8 +702,15 @@ export const ScheduleScreen: React.FC<ScheduleScreenProps> = ({
             <Pressable
               style={({ pressed }) => [styles.useSuggestionBtn, pressed && styles.btnPressed]}
               onPress={() => {
-                triggerModalPop();
-                setShowFinishDraftModal(true);
+                if (Platform.OS !== 'web') {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                }
+                if (onOpenPostComposer) {
+                  onOpenPostComposer('One thing I wish I knew before creating', 'instagram');
+                } else {
+                  triggerModalPop();
+                  setShowFinishDraftModal(true);
+                }
               }}
             >
               <Text style={styles.useSuggestionBtnText}>Use Suggestion</Text>
