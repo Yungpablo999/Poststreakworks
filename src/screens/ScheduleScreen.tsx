@@ -669,7 +669,7 @@ export const ScheduleScreen: React.FC<ScheduleScreenProps> = ({
                 style={styles.modalTextInput}
                 value={newPostTitle}
                 onChangeText={setNewPostTitle}
-                placeholder="e.g. 3 creator habits that changed my reach..."
+                placeholder="Enter your post hook…"
                 placeholderTextColor="#94A3B8"
               />
 

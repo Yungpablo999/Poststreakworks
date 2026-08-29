@@ -870,7 +870,7 @@ export const CreateScreen: React.FC<CreateScreenProps> = ({
                 style={styles.modalTextInput}
                 value={postTitle}
                 onChangeText={setPostTitle}
-                placeholder="e.g. 3 creator habits that changed my reach..."
+                placeholder="Enter your post hook…"
                 placeholderTextColor="#94A3B8"
               />
 
