@@ -291,10 +291,6 @@ export const ScheduleScreen: React.FC<ScheduleScreenProps> = ({
             <View style={styles.contentSchedulePill}>
               <Text style={styles.contentSchedulePillText}>CONTENT SCHEDULE</Text>
             </View>
-
-            <View style={styles.freeSchedulePill}>
-              <Text style={styles.freeSchedulePillText}>Free Schedule</Text>
-            </View>
           </View>
 
           {/* HEADLINE & SUBTITLE */}
