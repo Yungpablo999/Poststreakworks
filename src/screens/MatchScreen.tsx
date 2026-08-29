@@ -1728,12 +1728,14 @@ export const MatchScreen: React.FC<MatchScreenProps> = ({
 
               {/* CARD 4: JARVIS DEEP INSIGHT FROSTED BOX */}
               <View style={styles.detailJarvisInsightCard}>
-                <Image
-                  source={require('../../assets/images/jarvis-core-flame.png')}
-                  style={styles.detailJarvisGhost}
-                  resizeMode="contain"
-                />
-                <Text style={styles.detailJarvisInsightLabel}>JARVIS INSIGHT</Text>
+                <View style={styles.detailJarvisHeaderRow}>
+                  <Image
+                    source={require('../../assets/images/jarvis-core-flame.png')}
+                    style={styles.detailJarvisIcon}
+                    resizeMode="contain"
+                  />
+                  <Text style={styles.detailJarvisInsightLabel}>JARVIS INSIGHT</Text>
+                </View>
                 <Text style={styles.detailJarvisInsightText}>
                   {selectedCreatorForDetail.jarvisDeepInsight}
                 </Text>
@@ -3507,30 +3509,32 @@ const styles = StyleSheet.create({
 
   // Card 4: Jarvis Deep Insight Frosted Box
   detailJarvisInsightCard: {
-    backgroundColor: 'rgba(245, 243, 255, 0.9)',
+    backgroundColor: '#F5F3FF',
     borderRadius: 22,
     padding: 16,
     borderWidth: 1.2,
-    borderColor: 'rgba(221, 214, 254, 0.85)',
-    alignItems: 'center',
+    borderColor: '#DDD6FE',
     marginBottom: 14,
   },
-  detailJarvisGhost: {
-    width: 32,
-    height: 32,
+  detailJarvisHeaderRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
     marginBottom: 6,
+  },
+  detailJarvisIcon: {
+    width: 18,
+    height: 18,
   },
   detailJarvisInsightLabel: {
     fontSize: 11,
     fontWeight: '800',
     color: '#582CDB',
-    letterSpacing: 0.8,
-    marginBottom: 6,
+    letterSpacing: 0.6,
   },
   detailJarvisInsightText: {
     fontSize: 12.5,
-    color: '#4B4360',
-    textAlign: 'center',
+    color: '#3730A3',
     lineHeight: 18,
     fontStyle: 'italic',
     fontWeight: '500',

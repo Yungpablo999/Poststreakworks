@@ -440,12 +440,14 @@ export const CreatorProfileModal: React.FC<CreatorProfileModalProps> = ({
 
           {/* CARD 4: JARVIS DEEP INSIGHT FROSTED BOX */}
           <View style={styles.detailJarvisInsightCard}>
-            <Image
-              source={require('../../assets/images/jarvis-core-flame.png')}
-              style={styles.detailJarvisGhost}
-              resizeMode="contain"
-            />
-            <Text style={styles.detailJarvisInsightLabel}>JARVIS INSIGHT</Text>
+            <View style={styles.detailJarvisHeaderRow}>
+              <Image
+                source={require('../../assets/images/jarvis-core-flame.png')}
+                style={styles.detailJarvisIcon}
+                resizeMode="contain"
+              />
+              <Text style={styles.detailJarvisInsightLabel}>JARVIS INSIGHT</Text>
+            </View>
             <Text style={styles.detailJarvisInsightText}>
               {creator.jarvisDeepInsight}
             </Text>
@@ -959,23 +961,22 @@ const styles = StyleSheet.create({
     borderWidth: 1.2,
     borderColor: '#DDD6FE',
     marginBottom: 14,
-    position: 'relative',
-    overflow: 'hidden',
   },
-  detailJarvisGhost: {
-    position: 'absolute',
-    right: 12,
-    top: 12,
-    width: 28,
-    height: 28,
-    opacity: 0.9,
+  detailJarvisHeaderRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    marginBottom: 6,
+  },
+  detailJarvisIcon: {
+    width: 18,
+    height: 18,
   },
   detailJarvisInsightLabel: {
-    fontSize: 10.5,
+    fontSize: 11,
     fontWeight: '800',
     color: '#582CDB',
     letterSpacing: 0.6,
-    marginBottom: 6,
   },
   detailJarvisInsightText: {
     fontSize: 12.5,
