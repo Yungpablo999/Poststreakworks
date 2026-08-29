@@ -148,7 +148,7 @@ export const ScheduleScreen: React.FC<ScheduleScreenProps> = ({
   // Form State
   const [newPostTitle, setNewPostTitle] = useState('');
   const [newPostPlatform, setNewPostPlatform] = useState<'tiktok' | 'instagram' | 'youtube'>('tiktok');
-  const [newPostTime, setNewPostTime] = useState('7:30 PM');
+  const [newPostWhen, setNewPostWhen] = useState('Today · 7:30 PM');
 
   // Draft Editing State
   const [draftTitle, setDraftTitle] = useState('One thing I wish I knew before creating');
@@ -217,7 +217,7 @@ export const ScheduleScreen: React.FC<ScheduleScreenProps> = ({
       id: 'post_' + Date.now(),
       platform: newPostPlatform,
       platformLabel: newPostPlatform === 'tiktok' ? 'TikTok' : newPostPlatform === 'instagram' ? 'Instagram Reel' : 'YouTube Shorts',
-      time: newPostTime,
+      time: newPostWhen,
       title: newPostTitle.trim(),
       status: 'scheduled',
       hashtags: ['#creatortips', '#poststreak'],
@@ -673,14 +673,46 @@ export const ScheduleScreen: React.FC<ScheduleScreenProps> = ({
                 placeholderTextColor="#94A3B8"
               />
 
-              <Text style={styles.modalInputLabel}>SCHEDULE TIME</Text>
-              <TextInput
-                style={styles.modalTextInput}
-                value={newPostTime}
-                onChangeText={setNewPostTime}
-                placeholder="e.g. 7:30 PM"
-                placeholderTextColor="#94A3B8"
-              />
+              <Text style={styles.modalInputLabel}>WHEN TO POST</Text>
+              <View style={styles.whenToPostInputBox}>
+                <Text style={styles.whenToPostIcon}>🗓️</Text>
+                <TextInput
+                  style={styles.whenToPostTextInput}
+                  value={newPostWhen}
+                  onChangeText={setNewPostWhen}
+                  placeholder="Today · 7:30 PM"
+                  placeholderTextColor="#94A3B8"
+                />
+              </View>
+
+              {/* Quick Smart Timing Presets */}
+              <View style={styles.quickWhenPillsRow}>
+                {['Today · 7:30 PM', 'Tomorrow · 8:00 PM', 'Sun · 6:00 PM'].map((preset) => (
+                  <Pressable
+                    key={preset}
+                    onPress={() => {
+                      if (Platform.OS !== 'web') {
+                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                      }
+                      setNewPostWhen(preset);
+                    }}
+                    style={[
+                      styles.quickWhenPill,
+                      newPostWhen === preset && styles.quickWhenPillActive,
+                    ]}
+                  >
+                    <Text
+                      style={[
+                        styles.quickWhenPillText,
+                        newPostWhen === preset && styles.quickWhenPillTextActive,
+                      ]}
+                      numberOfLines={1}
+                    >
+                      {preset}
+                    </Text>
+                  </Pressable>
+                ))}
+              </View>
 
               <View style={styles.modalBtnRow}>
                 <Pressable style={styles.modalSecondaryBtn} onPress={() => setShowScheduleModal(false)}>
@@ -955,7 +987,7 @@ export const ScheduleScreen: React.FC<ScheduleScreenProps> = ({
                       style={styles.planDayBtn}
                       onPress={() => {
                         setShowCalendarModal(false);
-                        setNewPostTime('11:30 AM');
+                        setNewPostWhen(`Aug ${calendarSelectedDay} · 11:30 AM`);
                         triggerModalPop();
                         setShowScheduleModal(true);
                       }}
@@ -1770,6 +1802,55 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#171420',
     marginBottom: 14,
+  },
+  whenToPostInputBox: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#FAF8F5',
+    borderWidth: 1,
+    borderColor: '#EFEBF8',
+    borderRadius: 12,
+    paddingHorizontal: 12,
+    height: 42,
+    marginBottom: 8,
+  },
+  whenToPostIcon: {
+    fontSize: 15,
+    marginRight: 8,
+  },
+  whenToPostTextInput: {
+    flex: 1,
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#171420',
+    paddingVertical: 0,
+  },
+  quickWhenPillsRow: {
+    flexDirection: 'row',
+    gap: 6,
+    marginBottom: 16,
+  },
+  quickWhenPill: {
+    flex: 1,
+    paddingVertical: 5,
+    paddingHorizontal: 4,
+    borderRadius: 8,
+    backgroundColor: '#F1F5F9',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  quickWhenPillActive: {
+    backgroundColor: '#EDE9FE',
+    borderWidth: 1,
+    borderColor: '#C4B5FD',
+  },
+  quickWhenPillText: {
+    fontSize: 10,
+    fontWeight: '700',
+    color: '#64748B',
+  },
+  quickWhenPillTextActive: {
+    color: '#6D28D9',
   },
   modalBtnRow: {
     flexDirection: 'row',
