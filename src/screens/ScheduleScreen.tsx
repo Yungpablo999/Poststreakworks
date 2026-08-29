@@ -22,7 +22,7 @@ import { UserProfileModal, UserProfileData } from '../components/UserProfileModa
 import { AnimatedCompletionModal } from '../components/AnimatedCompletionModal';
 import { SocialBrandIcon } from '../components/SocialBrandIcon';
 import { FreeAppHeader } from '../components/FreeAppHeader';
-import { sFont, sPadding, moderateScale, isNarrowScreen } from '../utils/responsive';
+import { sFont, sPadding, moderateScale, isNarrowScreen, isSmallScreen } from '../utils/responsive';
 
 interface ScheduleScreenProps {
   onBack?: () => void;
@@ -511,14 +511,18 @@ export const ScheduleScreen: React.FC<ScheduleScreenProps> = ({
               <View style={styles.scheduleCardLeft}>
                 <View style={styles.postPlatformRow}>
                   <View style={styles.postPlatformBrandRow}>
-                    <SocialBrandIcon platform="tiktok" size={13} />
-                    <Text style={styles.postPlatformText}>TikTok · 11:30 AM</Text>
+                    <SocialBrandIcon platform="tiktok" size={12} />
+                    <Text style={styles.postPlatformText} numberOfLines={1} ellipsizeMode="tail">
+                      TikTok · 11:30 AM
+                    </Text>
                   </View>
                   <View style={styles.postStatusTagPurple}>
                     <Text style={styles.postStatusTagPurpleText}>Scheduled</Text>
                   </View>
                 </View>
-                <Text style={styles.postItemTitle}>3 creator mistakes I stopped making this year</Text>
+                <Text style={styles.postItemTitle} numberOfLines={2} ellipsizeMode="tail">
+                  3 creator mistakes I stopped making this year
+                </Text>
               </View>
 
               <Pressable
@@ -538,14 +542,18 @@ export const ScheduleScreen: React.FC<ScheduleScreenProps> = ({
               <View style={styles.scheduleCardLeft}>
                 <View style={styles.postPlatformRow}>
                   <View style={styles.postPlatformBrandRow}>
-                    <SocialBrandIcon platform="instagram" size={13} />
-                    <Text style={styles.postPlatformText}>Instagram Reel · 7:30 PM</Text>
+                    <SocialBrandIcon platform="instagram" size={12} />
+                    <Text style={styles.postPlatformText} numberOfLines={1} ellipsizeMode="tail">
+                      Instagram · 7:30 PM
+                    </Text>
                   </View>
                   <View style={styles.postStatusTagYellow}>
                     <Text style={styles.postStatusTagYellowText}>Draft</Text>
                   </View>
                 </View>
-                <Text style={styles.postItemTitle}>One thing I wish I knew before creating</Text>
+                <Text style={styles.postItemTitle} numberOfLines={2} ellipsizeMode="tail">
+                  One thing I wish I knew before creating
+                </Text>
               </View>
 
               <Pressable
@@ -1609,8 +1617,8 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     borderWidth: 1,
     borderColor: '#EFEBF8',
-    paddingVertical: 12,
-    paddingHorizontal: 14,
+    paddingVertical: 11,
+    paddingHorizontal: sPadding(13),
     shadowColor: '#000000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.03,
@@ -1618,50 +1626,58 @@ const styles = StyleSheet.create({
   },
   scheduleCardLeft: {
     flex: 1,
-    paddingRight: 10,
+    paddingRight: 8,
+    minWidth: 0,
   },
   postPlatformRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
-    marginBottom: 4,
+    justifyContent: 'flex-start',
+    gap: 6,
+    marginBottom: 3,
+    flexWrap: 'nowrap',
   },
   postPlatformBrandRow: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 5,
+    flexShrink: 1,
+    minWidth: 0,
   },
   postPlatformText: {
-    fontSize: 11.5,
+    fontSize: sFont(11),
     color: '#64748B',
     fontWeight: '600',
+    flexShrink: 1,
   },
   postItemTitle: {
-    fontSize: 13.5,
+    fontSize: sFont(13),
     fontWeight: '800',
     color: '#171420',
-    lineHeight: 18,
+    lineHeight: 17,
     marginBottom: 0,
   },
   postStatusTagPurple: {
     backgroundColor: '#EDE9FE',
-    paddingVertical: 2,
-    paddingHorizontal: 6,
+    paddingVertical: 1.5,
+    paddingHorizontal: 5,
     borderRadius: 4,
+    flexShrink: 0,
   },
   postStatusTagPurpleText: {
-    fontSize: 9.5,
+    fontSize: sFont(9.5),
     fontWeight: '700',
     color: '#6D28D9',
   },
   postStatusTagYellow: {
     backgroundColor: '#FEF3C7',
-    paddingVertical: 2,
-    paddingHorizontal: 6,
+    paddingVertical: 1.5,
+    paddingHorizontal: 5,
     borderRadius: 4,
+    flexShrink: 0,
   },
   postStatusTagYellowText: {
-    fontSize: 9.5,
+    fontSize: sFont(9.5),
     fontWeight: '700',
     color: '#D97706',
   },
@@ -1669,23 +1685,25 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
     borderWidth: 1.2,
     borderColor: '#582CDB',
-    paddingVertical: 5.5,
-    paddingHorizontal: 11,
+    paddingVertical: 5,
+    paddingHorizontal: 10,
     borderRadius: 8,
+    flexShrink: 0,
   },
   viewPostBtnText: {
-    fontSize: 11.5,
+    fontSize: sFont(11),
     fontWeight: '700',
     color: '#582CDB',
   },
   finishDraftBtn: {
     backgroundColor: '#F59E0B',
-    paddingVertical: 6,
-    paddingHorizontal: 11,
+    paddingVertical: 5.5,
+    paddingHorizontal: 10,
     borderRadius: 8,
+    flexShrink: 0,
   },
   finishDraftBtnText: {
-    fontSize: 11.5,
+    fontSize: sFont(11),
     fontWeight: '700',
     color: '#FFFFFF',
   },
