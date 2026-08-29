@@ -125,6 +125,22 @@ export const SCHEDULE_TIME_OPTIONS = [
   '11:30 PM',
 ];
 
+const CalendarLineIcon = ({ size = 14, color = '#6B637B' }: { size?: number; color?: string }) => (
+  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+    <Rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+    <Path d="M16 2v4" />
+    <Path d="M8 2v4" />
+    <Path d="M3 10h18" />
+  </Svg>
+);
+
+const ClockLineIcon = ({ size = 14, color = '#6B637B' }: { size?: number; color?: string }) => (
+  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+    <Circle cx="12" cy="12" r="10" />
+    <Path d="M12 6v6l4 2" />
+  </Svg>
+);
+
 interface CalendarDayPost {
   id: string;
   platform: 'tiktok' | 'instagram' | 'youtube';
@@ -751,7 +767,9 @@ export const ScheduleScreen: React.FC<ScheduleScreenProps> = ({
                     setShowTimeDropdown(false);
                   }}
                 >
-                  <Text style={styles.dropdownBtnIcon}>🗓️</Text>
+                  <View style={styles.dropdownBtnIconWrap}>
+                    <CalendarLineIcon size={14} color={showDateDropdown ? '#582CDB' : '#6B637B'} />
+                  </View>
                   <Text style={styles.dropdownBtnText} numberOfLines={1}>
                     {selectedScheduleDate}
                   </Text>
@@ -769,13 +787,25 @@ export const ScheduleScreen: React.FC<ScheduleScreenProps> = ({
                     setShowDateDropdown(false);
                   }}
                 >
-                  <Text style={styles.dropdownBtnIcon}>⏰</Text>
+                  <View style={styles.dropdownBtnIconWrap}>
+                    <ClockLineIcon size={14} color={showTimeDropdown ? '#582CDB' : '#6B637B'} />
+                  </View>
                   <Text style={styles.dropdownBtnText} numberOfLines={1}>
                     {selectedScheduleTime.split(' (')[0]}
                   </Text>
                   <Text style={styles.dropdownChevron}>{showTimeDropdown ? '▴' : '▾'}</Text>
                 </Pressable>
               </View>
+
+              {/* Subtle Jarvis Recommendation */}
+              {selectedScheduleTime.includes('7:30') && !showDateDropdown && !showTimeDropdown && (
+                <View style={styles.jarvisSubtleRow}>
+                  <Text style={styles.jarvisSubtleSparkle}>✨</Text>
+                  <Text style={styles.jarvisSubtleText}>
+                    Jarvis recommends <Text style={styles.jarvisSubtleBold}>7:30 PM</Text> · Best audience window
+                  </Text>
+                </View>
+              )}
 
               {/* SCROLLABLE DATE DROPDOWN MENU */}
               {showDateDropdown && (
@@ -1947,9 +1977,10 @@ const styles = StyleSheet.create({
     borderColor: '#582CDB',
     backgroundColor: '#FAF5FF',
   },
-  dropdownBtnIcon: {
-    fontSize: 14,
-    marginRight: 4,
+  dropdownBtnIconWrap: {
+    marginRight: 6,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   dropdownBtnText: {
     flex: 1,
@@ -1962,6 +1993,26 @@ const styles = StyleSheet.create({
     color: '#64748B',
     fontWeight: '800',
     marginLeft: 2,
+  },
+  jarvisSubtleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: -4,
+    marginBottom: 14,
+    paddingHorizontal: 2,
+    gap: 5,
+  },
+  jarvisSubtleSparkle: {
+    fontSize: 11,
+  },
+  jarvisSubtleText: {
+    fontSize: 11.5,
+    color: '#6B637B',
+    fontWeight: '500',
+  },
+  jarvisSubtleBold: {
+    fontWeight: '700',
+    color: '#582CDB',
   },
   dropdownMenuBox: {
     backgroundColor: '#FFFFFF',
