@@ -20,6 +20,7 @@ import * as Haptics from 'expo-haptics';
 import { LinearGradient } from 'expo-linear-gradient';
 import { FloatingTabBar, TabType } from '../components/FloatingTabBar';
 import { UserProfileModal, UserProfileData } from '../components/UserProfileModal';
+import { BrandToast } from '../components/BrandToast';
 import { sFont, sPadding, moderateScale, isNarrowScreen } from '../utils/responsive';
 
 interface DashboardScreenProps {
@@ -528,6 +529,14 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
   const [expandedNotifId, setExpandedNotifId] = useState<string | null>(null);
   const [showBrandQuestBriefModal, setShowBrandQuestBriefModal] = useState(false);
   const [isBrandQuestAccepted, setIsBrandQuestAccepted] = useState(false);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+
+  const showToast = (msg: string) => {
+    setToastMessage(msg);
+    setTimeout(() => {
+      setToastMessage((curr) => (curr === msg ? null : curr));
+    }, 2800);
+  };
 
   // Profile Photo State
   const [selectedAvatarId, setSelectedAvatarId] = useState<string | null>(null);
@@ -1729,6 +1738,19 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
                     "The 3 best food spots under $10 you cannot miss at Lagos Food Fest..."
                   </Text>
                 </View>
+
+                {/* Success Banner when Accepted */}
+                {isBrandQuestAccepted && (
+                  <View style={styles.brandBriefSuccessBox}>
+                    <Text style={{ fontSize: 18 }}>🎉</Text>
+                    <View style={{ flex: 1 }}>
+                      <Text style={styles.brandBriefSuccessTitle}>Campaign Active & Escrow Locked</Text>
+                      <Text style={styles.brandBriefSuccessSubtitle}>
+                        Your $450 bounty is secured. Tag @lagosfoodfest and submit your link to claim payout.
+                      </Text>
+                    </View>
+                  </View>
+                )}
               </ScrollView>
 
               {/* Action Buttons */}
@@ -1736,20 +1758,29 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
                 <Pressable
                   style={({ pressed }) => [
                     styles.acceptBrandQuestBtn,
-                    isBrandQuestAccepted && { backgroundColor: '#10B981' },
-                    pressed && styles.missionButtonPressed,
+                    isBrandQuestAccepted && styles.acceptBrandQuestBtnActive,
+                    pressed && !isBrandQuestAccepted && styles.missionButtonPressed,
                   ]}
                   onPress={() => {
+                    if (isBrandQuestAccepted) return;
                     if (Platform.OS !== 'web') {
                       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
                     }
                     setIsBrandQuestAccepted(true);
-                    setShowBrandQuestBriefModal(false);
-                    setUploadToastMessage('🎯 Brand Quest Accepted! $450 Bounty escrow locked.');
-                    setTimeout(() => setUploadToastMessage(null), 3000);
+                    showToast('🎉 Campaign Active! $450 Bounty escrow locked.');
+                    setTimeout(() => {
+                      setShowBrandQuestBriefModal(false);
+                    }, 1400);
                   }}
+                  disabled={isBrandQuestAccepted}
                 >
-                  <Text style={styles.acceptBrandQuestBtnText} numberOfLines={1}>
+                  <Text
+                    style={[
+                      styles.acceptBrandQuestBtnText,
+                      isBrandQuestAccepted && styles.acceptBrandQuestBtnTextActive,
+                    ]}
+                    numberOfLines={1}
+                  >
                     {isBrandQuestAccepted ? '✓ Campaign Active' : 'Accept $450 Bounty ➔'}
                   </Text>
                 </Pressable>
@@ -2105,6 +2136,9 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
             </Animated.View>
           </View>
         </Modal>
+
+        {/* Dynamic Toast Popup Notification */}
+        <BrandToast message={toastMessage} />
       </View>
     </SafeAreaView>
   );
@@ -3529,6 +3563,29 @@ const styles = StyleSheet.create({
     color: '#78350F',
     lineHeight: 15.5,
   },
+  brandBriefSuccessBox: {
+    backgroundColor: '#ECFDF5',
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: '#A7F3D0',
+    padding: 12,
+    marginTop: 4,
+    marginBottom: 8,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+  },
+  brandBriefSuccessTitle: {
+    fontSize: 12.5,
+    fontWeight: '800',
+    color: '#065F46',
+    marginBottom: 2,
+  },
+  brandBriefSuccessSubtitle: {
+    fontSize: 11,
+    color: '#047857',
+    lineHeight: 15,
+  },
   brandBriefFooter: {
     marginTop: 6,
   },
@@ -3546,12 +3603,22 @@ const styles = StyleSheet.create({
     shadowRadius: 10,
     elevation: 4,
   },
+  acceptBrandQuestBtnActive: {
+    backgroundColor: '#059669',
+    shadowColor: '#059669',
+    borderColor: '#34D399',
+    borderWidth: 1,
+  },
   acceptBrandQuestBtnText: {
     fontSize: 14,
     fontWeight: '800',
     color: '#FFFFFF',
     letterSpacing: -0.2,
     textAlign: 'center',
+  },
+  acceptBrandQuestBtnTextActive: {
+    color: '#FFFFFF',
+    fontWeight: '800',
   },
 
   // 12. PROFILE PHOTO UPLOAD MODAL
