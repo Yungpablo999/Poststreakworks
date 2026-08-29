@@ -20,6 +20,7 @@ import * as Haptics from 'expo-haptics';
 import { LinearGradient } from 'expo-linear-gradient';
 import { FloatingTabBar, TabType } from '../components/FloatingTabBar';
 import { UserProfileModal, UserProfileData } from '../components/UserProfileModal';
+import { CreatorProfileModal, DEFAULT_ELENA_PROFILE } from '../components/CreatorProfileModal';
 import { BrandToast } from '../components/BrandToast';
 import { sFont, sPadding, moderateScale, isNarrowScreen } from '../utils/responsive';
 
@@ -1809,158 +1810,28 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
           </View>
         </Modal>
 
-        {/* ELENA ROSTOVA CREATOR PROFILE MODAL */}
-        <Modal
+        {/* CREATOR PROFILE DEEP DIVE MODAL */}
+        <CreatorProfileModal
           visible={showMatchedCreatorModal}
-          transparent={true}
-          animationType="fade"
-          onRequestClose={() => setShowMatchedCreatorModal(false)}
-        >
-          <View style={styles.calendarModalOverlay}>
-            <Animated.View
-              style={[
-                styles.creatorDetailModalCard,
-                isDark && { backgroundColor: '#171420', borderColor: '#2D2845' },
-              ]}
-            >
-              {/* Top Header Row with Close Button */}
-              <View style={styles.creatorModalHeader}>
-                <View style={styles.creatorHeaderAvatarBox}>
-                  <Image
-                    source={{ uri: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200&auto=format&fit=crop&q=80' }}
-                    style={styles.creatorModalAvatar}
-                    resizeMode="cover"
-                  />
-                  <View style={styles.creatorOnlineDot} />
-                </View>
-
-                <View style={styles.creatorHeaderInfo}>
-                  <View style={styles.creatorHeaderNameRow}>
-                    <Text style={[styles.creatorModalName, isDark && styles.textWhite]} numberOfLines={1}>
-                      Elena Rostova
-                    </Text>
-                    <View style={styles.verifiedCheckBadge}>
-                      <Text style={styles.verifiedCheckText}>✓</Text>
-                    </View>
-                  </View>
-                  <Text style={[styles.creatorModalHandle, isDark && styles.textMutedDark]}>
-                    @elenacreates · Tech &amp; Design
-                  </Text>
-                  <View style={styles.creatorLocationRow}>
-                    <Text style={styles.creatorLocationEmoji}>📍</Text>
-                    <Text style={styles.creatorLocationText}>Berlin, DE · Available This Week</Text>
-                  </View>
-                </View>
-
-                <Pressable
-                  onPress={() => setShowMatchedCreatorModal(false)}
-                  style={({ pressed }) => [styles.calendarCloseButton, styles.brandBriefCloseBtn, pressed && styles.headerIconBtnPressed]}
-                  hitSlop={8}
-                >
-                  <Svg width={20} height={20} viewBox="0 0 24 24" fill="none">
-                    <Path d="M18 6L6 18M6 6L18 18" stroke="#1A1626" strokeWidth="2.4" strokeLinecap="round" />
-                  </Svg>
-                </Pressable>
-              </View>
-
-              <ScrollView
-                style={{ maxHeight: 380 }}
-                showsVerticalScrollIndicator={false}
-                contentContainerStyle={{ paddingBottom: 6 }}
-              >
-                {/* Match Synergy Gauge Banner */}
-                <LinearGradient
-                  colors={['#582CDB', '#7C3AED']}
-                  start={{ x: 0, y: 0 }}
-                  end={{ x: 1, y: 1 }}
-                  style={styles.matchSynergyBanner}
-                >
-                  <View style={styles.matchScoreCol}>
-                    <Text style={styles.matchScoreLabel}>MATCH COMPATIBILITY</Text>
-                    <Text style={styles.matchScoreValue}>94% Match</Text>
-                    <Text style={styles.matchScoreSub}>High synergy for joint Reels &amp; Duels</Text>
-                  </View>
-                  <View style={styles.matchScoreBadge}>
-                    <Text style={{ fontSize: 24 }}>⚡</Text>
-                  </View>
-                </LinearGradient>
-
-                {/* 3-Col Stats Grid */}
-                <View style={[styles.creatorStatsGrid, isDark && { backgroundColor: '#211D30', borderColor: '#363150' }]}>
-                  <View style={styles.creatorStatCol}>
-                    <Text style={styles.creatorStatVal}>42.8K</Text>
-                    <Text style={styles.creatorStatLbl}>Followers</Text>
-                  </View>
-                  <View style={styles.creatorStatDivider} />
-                  <View style={styles.creatorStatCol}>
-                    <Text style={[styles.creatorStatVal, { color: '#D97706' }]}>🔥 47d</Text>
-                    <Text style={styles.creatorStatLbl}>Streak</Text>
-                  </View>
-                  <View style={styles.creatorStatDivider} />
-                  <View style={styles.creatorStatCol}>
-                    <Text style={[styles.creatorStatVal, { color: '#059669' }]}>95%</Text>
-                    <Text style={styles.creatorStatLbl}>Consistency</Text>
-                  </View>
-                </View>
-
-                {/* Bio / About */}
-                <View style={[styles.brandBriefSectionBox, isDark && { backgroundColor: '#211D30', borderColor: '#363150' }]}>
-                  <Text style={[styles.brandBriefSectionHeading, isDark && styles.textWhite]}>
-                    About Elena
-                  </Text>
-                  <Text style={[styles.brandBriefBodyText, isDark && styles.textMutedDark]}>
-                    Cinematographer &amp; visual director crafting short-form tech and design breakdowns. Active on Instagram &amp; TikTok with high audience retention.
-                  </Text>
-                  <View style={styles.creatorTagsRow}>
-                    <View style={styles.creatorTagPill}>
-                      <Text style={styles.creatorTagText}>🎥 Filmmaking</Text>
-                    </View>
-                    <View style={styles.creatorTagPill}>
-                      <Text style={styles.creatorTagText}>🎬 Sound Design</Text>
-                    </View>
-                    <View style={styles.creatorTagPill}>
-                      <Text style={styles.creatorTagText}>✨ Visual Pacing</Text>
-                    </View>
-                  </View>
-                </View>
-
-                {/* AI Proposed Collaboration Pitch */}
-                <View style={styles.brandBriefHookBox}>
-                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 4 }}>
-                    <Text style={{ fontSize: 13 }}>💡</Text>
-                    <Text style={styles.brandBriefHookLabel}>AI Recommended Collaboration</Text>
-                  </View>
-                  <Text style={styles.collabIdeaTitle}>“Sound Design Secrets of 10M-View Reels”</Text>
-                  <Text style={styles.brandBriefHookQuote}>
-                    Co-direct a split-screen video comparing average retention hooks against Elena’s cinematic auditory layering.
-                  </Text>
-                </View>
-              </ScrollView>
-
-              {/* Action Buttons */}
-              <View style={styles.creatorModalFooter}>
-                <Pressable
-                  style={({ pressed }) => [
-                    styles.acceptBrandQuestBtn,
-                    pressed && styles.missionButtonPressed,
-                  ]}
-                  onPress={() => {
-                    setShowMatchedCreatorModal(false);
-                    if (onOpenMessages) {
-                      onOpenMessages();
-                    } else if (onNavigateTab) {
-                      onNavigateTab('match');
-                    }
-                  }}
-                >
-                  <Text style={styles.acceptBrandQuestBtnText} numberOfLines={1}>
-                    Start Collaboration ➔
-                  </Text>
-                </Pressable>
-              </View>
-            </Animated.View>
-          </View>
-        </Modal>
+          onClose={() => setShowMatchedCreatorModal(false)}
+          creator={DEFAULT_ELENA_PROFILE}
+          onConnect={() => {
+            setShowMatchedCreatorModal(false);
+            if (onOpenMessages) {
+              onOpenMessages();
+            } else if (onNavigateTab) {
+              onNavigateTab('match');
+            }
+          }}
+          onBuildCollabPlan={() => {
+            setShowMatchedCreatorModal(false);
+            if (onOpenMessages) {
+              onOpenMessages();
+            } else if (onNavigateTab) {
+              onNavigateTab('match');
+            }
+          }}
+        />
 
         {/* UNIVERSAL CREATOR PASSPORT & PROFILE MODAL */}
         <UserProfileModal
