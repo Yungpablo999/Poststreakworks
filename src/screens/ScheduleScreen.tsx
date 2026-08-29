@@ -510,18 +510,15 @@ export const ScheduleScreen: React.FC<ScheduleScreenProps> = ({
             <View style={styles.scheduleCard}>
               <View style={styles.scheduleCardLeft}>
                 <View style={styles.postPlatformRow}>
-                  <Svg width={14} height={14} viewBox="0 0 24 24">
-                    <Path
-                      d="M17.5 4.5a4.5 4.5 0 0 1-3.5-4h-2.5v13.5a2.5 2.5 0 1 1-2.5-2.5c.3 0 .5.05.7.15V8.5a5.5 5.5 0 1 0 4.8 5.4V7.2a7.5 7.5 0 0 0 4.5 1.3V5.5c-.5 0-1-.3-1.5-1z"
-                      fill="#171420"
-                    />
-                  </Svg>
-                  <Text style={styles.postPlatformText}>TikTok • 11:30 AM</Text>
+                  <View style={styles.postPlatformBrandRow}>
+                    <SocialBrandIcon platform="tiktok" size={13} />
+                    <Text style={styles.postPlatformText}>TikTok · 11:30 AM</Text>
+                  </View>
+                  <View style={styles.postStatusTagPurple}>
+                    <Text style={styles.postStatusTagPurpleText}>Scheduled</Text>
+                  </View>
                 </View>
                 <Text style={styles.postItemTitle}>3 creator mistakes I stopped making this year</Text>
-                <View style={styles.postStatusTagPurple}>
-                  <Text style={styles.postStatusTagPurpleText}>Scheduled</Text>
-                </View>
               </View>
 
               <Pressable
@@ -537,19 +534,18 @@ export const ScheduleScreen: React.FC<ScheduleScreenProps> = ({
             </View>
 
             {/* Post 2: Draft */}
-            <View style={[styles.scheduleCard, { borderLeftWidth: 3, borderLeftColor: '#F59E0B' }]}>
+            <View style={[styles.scheduleCard, { borderLeftWidth: 3.5, borderLeftColor: '#F59E0B' }]}>
               <View style={styles.scheduleCardLeft}>
                 <View style={styles.postPlatformRow}>
-                  <Svg width={14} height={14} viewBox="0 0 24 24" fill="none">
-                    <Rect x="2" y="2" width="20" height="20" rx="5" stroke="#E1306C" strokeWidth="2" />
-                    <Circle cx="12" cy="12" r="4" stroke="#E1306C" strokeWidth="2" />
-                  </Svg>
-                  <Text style={styles.postPlatformText}>Instagram Reel • 7:30 PM</Text>
+                  <View style={styles.postPlatformBrandRow}>
+                    <SocialBrandIcon platform="instagram" size={13} />
+                    <Text style={styles.postPlatformText}>Instagram Reel · 7:30 PM</Text>
+                  </View>
+                  <View style={styles.postStatusTagYellow}>
+                    <Text style={styles.postStatusTagYellowText}>Draft</Text>
+                  </View>
                 </View>
                 <Text style={styles.postItemTitle}>One thing I wish I knew before creating</Text>
-                <View style={styles.postStatusTagYellow}>
-                  <Text style={styles.postStatusTagYellowText}>Draft</Text>
-                </View>
               </View>
 
               <Pressable
@@ -1602,7 +1598,7 @@ const styles = StyleSheet.create({
     letterSpacing: -0.3,
   },
   scheduleList: {
-    gap: 12,
+    gap: 10,
     marginBottom: 20,
   },
   scheduleCard: {
@@ -1610,10 +1606,11 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     backgroundColor: '#FFFFFF',
-    borderRadius: 18,
+    borderRadius: 16,
     borderWidth: 1,
     borderColor: '#EFEBF8',
-    padding: 16,
+    paddingVertical: 12,
+    paddingHorizontal: 14,
     shadowColor: '#000000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.03,
@@ -1626,66 +1623,69 @@ const styles = StyleSheet.create({
   postPlatformRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
+    gap: 8,
     marginBottom: 4,
   },
+  postPlatformBrandRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+  },
   postPlatformText: {
-    fontSize: 11,
+    fontSize: 11.5,
     color: '#64748B',
     fontWeight: '600',
   },
   postItemTitle: {
-    fontSize: 14,
+    fontSize: 13.5,
     fontWeight: '800',
     color: '#171420',
-    lineHeight: 19,
-    marginBottom: 8,
+    lineHeight: 18,
+    marginBottom: 0,
   },
   postStatusTagPurple: {
     backgroundColor: '#EDE9FE',
-    paddingVertical: 3,
-    paddingHorizontal: 8,
-    borderRadius: 6,
-    alignSelf: 'flex-start',
+    paddingVertical: 2,
+    paddingHorizontal: 6,
+    borderRadius: 4,
   },
   postStatusTagPurpleText: {
-    fontSize: 11,
-    fontWeight: '800',
+    fontSize: 9.5,
+    fontWeight: '700',
     color: '#6D28D9',
   },
   postStatusTagYellow: {
     backgroundColor: '#FEF3C7',
-    paddingVertical: 3,
-    paddingHorizontal: 8,
-    borderRadius: 6,
-    alignSelf: 'flex-start',
+    paddingVertical: 2,
+    paddingHorizontal: 6,
+    borderRadius: 4,
   },
   postStatusTagYellowText: {
-    fontSize: 11,
-    fontWeight: '800',
+    fontSize: 9.5,
+    fontWeight: '700',
     color: '#D97706',
   },
   viewPostBtn: {
     backgroundColor: '#FFFFFF',
     borderWidth: 1.2,
     borderColor: '#582CDB',
-    paddingVertical: 7,
-    paddingHorizontal: 14,
-    borderRadius: 10,
+    paddingVertical: 5.5,
+    paddingHorizontal: 11,
+    borderRadius: 8,
   },
   viewPostBtnText: {
-    fontSize: 12,
-    fontWeight: '800',
+    fontSize: 11.5,
+    fontWeight: '700',
     color: '#582CDB',
   },
   finishDraftBtn: {
     backgroundColor: '#F59E0B',
-    paddingVertical: 8,
-    paddingHorizontal: 14,
-    borderRadius: 10,
+    paddingVertical: 6,
+    paddingHorizontal: 11,
+    borderRadius: 8,
   },
   finishDraftBtnText: {
-    fontSize: 12,
+    fontSize: 11.5,
     fontWeight: '700',
     color: '#FFFFFF',
   },
