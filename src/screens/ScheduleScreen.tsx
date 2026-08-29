@@ -957,9 +957,11 @@ export const ScheduleScreen: React.FC<ScheduleScreenProps> = ({
           <View style={styles.modalOverlay}>
             <Animated.View style={[styles.modalCard, { transform: [{ scale: modalPopScale }] }]}>
               <View style={styles.modalHeaderRow}>
-                <View>
-                  <Text style={styles.modalTitle}>Scheduled Post</Text>
-                  <Text style={styles.modalSubtitle}>Queued for 11:30 AM on TikTok</Text>
+                <View style={{ flex: 1, marginRight: 8 }}>
+                  <Text style={styles.modalTitle} numberOfLines={1}>Scheduled Post</Text>
+                  <Text style={styles.modalSubtitle} numberOfLines={1}>
+                    Queued for {selectedPost?.time || '11:30 AM'} on {selectedPost?.platformLabel || 'TikTok'}
+                  </Text>
                 </View>
                 <Pressable onPress={() => setShowViewPostModal(false)} style={styles.modalCloseCircle} hitSlop={8}>
                   <Text style={styles.modalCloseCross}>✕</Text>
@@ -967,16 +969,39 @@ export const ScheduleScreen: React.FC<ScheduleScreenProps> = ({
               </View>
 
               <View style={styles.previewBox}>
-                <Text style={styles.previewTitle}>&ldquo;{selectedPost?.title}&rdquo;</Text>
-                <Text style={styles.previewMeta}>⚡ 94 Viral Score • 18.4k - 32k Est. Reach</Text>
+                <Text style={styles.previewTitle} numberOfLines={2}>
+                  &ldquo;{selectedPost?.title}&rdquo;
+                </Text>
+                <View style={styles.previewScoreBlock}>
+                  <Text style={styles.previewScoreText}>⚡ Viral Score 94</Text>
+                  <Text style={styles.previewReachText}>Estimated reach: 18.4K–32K</Text>
+                </View>
               </View>
 
-              <Pressable
-                style={styles.modalFullBtn}
-                onPress={() => setShowViewPostModal(false)}
-              >
-                <Text style={styles.modalFullBtnText}>Close</Text>
-              </Pressable>
+              <View style={styles.viewPostBtnRow}>
+                <Pressable
+                  style={styles.viewPostEditBtn}
+                  onPress={() => {
+                    setShowViewPostModal(false);
+                    if (selectedPost) {
+                      setNewPostTitle(selectedPost.title);
+                      setNewPostPlatform(selectedPost.platform);
+                      setSelectedScheduleTime(selectedPost.time);
+                    }
+                    triggerModalPop();
+                    setShowScheduleModal(true);
+                  }}
+                >
+                  <Text style={styles.viewPostEditBtnText}>View / Edit Post →</Text>
+                </Pressable>
+
+                <Pressable
+                  style={styles.viewPostCloseBtn}
+                  onPress={() => setShowViewPostModal(false)}
+                >
+                  <Text style={styles.viewPostCloseBtnText}>Close</Text>
+                </Pressable>
+              </View>
             </Animated.View>
           </View>
         </Modal>
@@ -2131,22 +2156,69 @@ const styles = StyleSheet.create({
   previewBox: {
     backgroundColor: '#FAF8F5',
     borderRadius: 14,
-    padding: 14,
+    paddingVertical: 10,
+    paddingHorizontal: 12,
     borderWidth: 1,
     borderColor: '#EFEBF8',
-    marginVertical: 10,
+    marginVertical: 8,
   },
   previewTitle: {
-    fontSize: 15,
+    fontSize: sFont(14),
     fontWeight: '800',
     color: '#171420',
-    lineHeight: 20,
+    lineHeight: 19,
     marginBottom: 6,
   },
-  previewMeta: {
-    fontSize: 12,
+  previewScoreBlock: {
+    gap: 2,
+  },
+  previewScoreText: {
+    fontSize: sFont(12),
+    fontWeight: '800',
     color: '#582CDB',
+  },
+  previewReachText: {
+    fontSize: sFont(11),
+    fontWeight: '500',
+    color: '#64748B',
+  },
+  viewPostBtnRow: {
+    flexDirection: 'row',
+    gap: 8,
+    marginTop: 10,
+  },
+  viewPostCloseBtn: {
+    flex: 1,
+    height: 42,
+    borderRadius: 12,
+    backgroundColor: '#FAF8F5',
+    borderWidth: 1,
+    borderColor: '#EFEBF8',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  viewPostCloseBtnText: {
+    fontSize: sFont(12.5),
     fontWeight: '700',
+    color: '#64748B',
+  },
+  viewPostEditBtn: {
+    flex: 1.4,
+    height: 42,
+    borderRadius: 12,
+    backgroundColor: '#582CDB',
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: '#582CDB',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.14,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  viewPostEditBtnText: {
+    fontSize: sFont(12.5),
+    fontWeight: '800',
+    color: '#FFFFFF',
   },
   calRowItem: {
     flexDirection: 'row',
