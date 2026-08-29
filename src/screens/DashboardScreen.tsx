@@ -1261,6 +1261,7 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
             style={({ pressed }) => [
               styles.questCard,
               isDark && styles.questCardDark,
+              isBrandQuestAccepted && styles.questCardAccepted,
               pressed && styles.missionButtonPressed,
             ]}
             onPress={() => {
@@ -1280,20 +1281,31 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
 
             <View style={styles.questContentGroup}>
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-                <Text style={styles.activeQuestTagText}>
-                  {isBrandQuestAccepted ? 'CLAIMED QUEST' : 'BRAND QUEST'}
+                <Text style={[styles.activeQuestTagText, isBrandQuestAccepted && { color: '#059669' }]}>
+                  {isBrandQuestAccepted ? 'ACTIVE CAMPAIGN' : 'BRAND QUEST'}
                 </Text>
                 {isBrandQuestAccepted && (
-                  <Text style={{ fontSize: 10, color: '#059669', fontWeight: '800' }}>✓ ACTIVE</Text>
+                  <View style={styles.activeCampaignLivePill}>
+                    <Text style={styles.activeCampaignLiveText}>✓ LIVE</Text>
+                  </View>
                 )}
               </View>
               <Text style={[styles.questTitle, isDark && styles.textWhite]}>Lagos Food Festival</Text>
-              <Text style={[styles.questSubtext, isDark && styles.textMutedDark]}>Review &amp; Vlog</Text>
+              <Text style={[styles.questSubtext, isDark && styles.textMutedDark]}>
+                {isBrandQuestAccepted ? 'Tap to view campaign brief' : 'Review & Vlog'}
+              </Text>
             </View>
 
-            <View style={styles.bountyRewardBox}>
-              <Text style={styles.bountyAmountText}>$450</Text>
-              <Text style={styles.bountySubLabel}>Bounty</Text>
+            <View style={{ alignItems: 'flex-end', justifyContent: 'center', gap: 4 }}>
+              <View style={styles.bountyRewardBox}>
+                <Text style={styles.bountyAmountText}>$450</Text>
+                <Text style={styles.bountySubLabel}>Bounty</Text>
+              </View>
+              <View style={[styles.cardCampaignActionBtn, isBrandQuestAccepted && styles.cardCampaignActionBtnActive]}>
+                <Text style={[styles.cardCampaignActionText, isBrandQuestAccepted && styles.cardCampaignActionTextActive]}>
+                  {isBrandQuestAccepted ? 'View Campaign ›' : 'Start Campaign ›'}
+                </Text>
+              </View>
             </View>
           </Pressable>
 
@@ -1758,32 +1770,39 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
                 <Pressable
                   style={({ pressed }) => [
                     styles.acceptBrandQuestBtn,
-                    isBrandQuestAccepted && styles.acceptBrandQuestBtnActive,
-                    pressed && !isBrandQuestAccepted && styles.missionButtonPressed,
+                    isBrandQuestAccepted && styles.startCampaignActiveBtn,
+                    pressed && styles.missionButtonPressed,
                   ]}
                   onPress={() => {
-                    if (isBrandQuestAccepted) return;
+                    if (isBrandQuestAccepted) {
+                      setShowBrandQuestBriefModal(false);
+                      if (onStartMission) onStartMission();
+                      return;
+                    }
                     if (Platform.OS !== 'web') {
                       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
                     }
                     setIsBrandQuestAccepted(true);
                     showToast('🎉 Campaign Active! $450 Bounty escrow locked.');
-                    setTimeout(() => {
-                      setShowBrandQuestBriefModal(false);
-                    }, 1400);
                   }}
-                  disabled={isBrandQuestAccepted}
                 >
                   <Text
-                    style={[
-                      styles.acceptBrandQuestBtnText,
-                      isBrandQuestAccepted && styles.acceptBrandQuestBtnTextActive,
-                    ]}
+                    style={styles.acceptBrandQuestBtnText}
                     numberOfLines={1}
                   >
-                    {isBrandQuestAccepted ? '✓ Campaign Active' : 'Accept $450 Bounty ➔'}
+                    {isBrandQuestAccepted ? 'Start Campaign ➔' : 'Accept $450 Bounty ➔'}
                   </Text>
                 </Pressable>
+
+                {isBrandQuestAccepted && (
+                  <Pressable
+                    style={({ pressed }) => [styles.closeBriefSecondaryBtn, pressed && styles.headerIconBtnPressed]}
+                    onPress={() => setShowBrandQuestBriefModal(false)}
+                    hitSlop={8}
+                  >
+                    <Text style={styles.closeBriefSecondaryText}>Close Brief</Text>
+                  </Pressable>
+                )}
               </View>
             </Animated.View>
           </View>
@@ -2885,6 +2904,42 @@ const styles = StyleSheet.create({
     color: '#B45309',
     letterSpacing: 0.2,
   },
+  questCardAccepted: {
+    borderColor: 'rgba(16, 185, 129, 0.35)',
+    backgroundColor: '#FAFFFD',
+  },
+  activeCampaignLivePill: {
+    backgroundColor: '#ECFDF5',
+    paddingVertical: 1.5,
+    paddingHorizontal: 5,
+    borderRadius: 4,
+    borderWidth: 1,
+    borderColor: '#A7F3D0',
+  },
+  activeCampaignLiveText: {
+    fontSize: 9,
+    fontWeight: '800',
+    color: '#059669',
+    letterSpacing: 0.2,
+  },
+  cardCampaignActionBtn: {
+    backgroundColor: '#EDE8FC',
+    borderRadius: 6,
+    paddingVertical: 3,
+    paddingHorizontal: 7,
+    marginTop: 2,
+  },
+  cardCampaignActionBtnActive: {
+    backgroundColor: '#ECFDF5',
+  },
+  cardCampaignActionText: {
+    fontSize: 10,
+    fontWeight: '700',
+    color: '#582CDB',
+  },
+  cardCampaignActionTextActive: {
+    color: '#059669',
+  },
 
   // 8. CREATOR MATCH COLLABORATION
   matchHeaderRow: {
@@ -3609,6 +3664,10 @@ const styles = StyleSheet.create({
     borderColor: '#34D399',
     borderWidth: 1,
   },
+  startCampaignActiveBtn: {
+    backgroundColor: '#582CDB',
+    shadowColor: '#582CDB',
+  },
   acceptBrandQuestBtnText: {
     fontSize: 14,
     fontWeight: '800',
@@ -3619,6 +3678,17 @@ const styles = StyleSheet.create({
   acceptBrandQuestBtnTextActive: {
     color: '#FFFFFF',
     fontWeight: '800',
+  },
+  closeBriefSecondaryBtn: {
+    marginTop: 8,
+    paddingVertical: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  closeBriefSecondaryText: {
+    fontSize: 12.5,
+    fontWeight: '700',
+    color: '#7F7894',
   },
 
   // 12. PROFILE PHOTO UPLOAD MODAL
