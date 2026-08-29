@@ -529,7 +529,7 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
   const [expandedNotifId, setExpandedNotifId] = useState<string | null>(null);
   const [showBrandQuestBriefModal, setShowBrandQuestBriefModal] = useState(false);
   const [isBrandQuestAccepted, setIsBrandQuestAccepted] = useState(false);
-  const [showSuggestedCreatorModal, setShowSuggestedCreatorModal] = useState(false);
+  const [showMatchedCreatorModal, setShowMatchedCreatorModal] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   const showToast = (msg: string) => {
@@ -1311,7 +1311,15 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
             </View>
 
             {/* Creator Profile Row */}
-            <View style={styles.creatorProfileRow}>
+            <Pressable
+              style={({ pressed }) => [styles.creatorProfileRow, pressed && styles.headerIconBtnPressed]}
+              onPress={() => {
+                if (Platform.OS !== 'web') {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                }
+                setShowMatchedCreatorModal(true);
+              }}
+            >
               <View style={styles.creatorAvatarBox}>
                 <Image
                   source={{ uri: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80' }}
@@ -1334,7 +1342,7 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
                   Tech &amp; Design · 42.8K followers
                 </Text>
               </View>
-            </View>
+            </Pressable>
 
             {/* Why This Match Box */}
             <View style={[styles.whyMatchBox, isDark && styles.whyMatchBoxDark]}>
@@ -1350,7 +1358,7 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
                 if (Platform.OS !== 'web') {
                   Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
                 }
-                setShowSuggestedCreatorModal(true);
+                setShowMatchedCreatorModal(true);
               }}
               style={({ pressed }) => [
                 styles.connectMatchButton,
@@ -1801,41 +1809,51 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
           </View>
         </Modal>
 
-        {/* SUGGESTED CREATOR PROFILE MODAL (ELENA ROSTOVA) */}
+        {/* ELENA ROSTOVA CREATOR PROFILE MODAL */}
         <Modal
-          visible={showSuggestedCreatorModal}
+          visible={showMatchedCreatorModal}
           transparent={true}
           animationType="fade"
-          onRequestClose={() => setShowSuggestedCreatorModal(false)}
+          onRequestClose={() => setShowMatchedCreatorModal(false)}
         >
           <View style={styles.calendarModalOverlay}>
             <Animated.View
               style={[
-                styles.creatorProfileModalCard,
+                styles.creatorDetailModalCard,
                 isDark && { backgroundColor: '#171420', borderColor: '#2D2845' },
               ]}
             >
-              {/* Modal Header */}
-              <View style={styles.brandBriefHeader}>
-                <View style={styles.brandBriefHeaderLeft}>
-                  <View style={styles.brandBriefTagRow}>
-                    <View style={styles.creatorVerifiedBadge}>
-                      <Text style={styles.creatorVerifiedBadgeText}>✓ 94% MATCH</Text>
-                    </View>
-                    <View style={styles.creatorStreakTagPill}>
-                      <Text style={styles.creatorStreakTagText}>🔥 52d Streak</Text>
+              {/* Top Header Row with Close Button */}
+              <View style={styles.creatorModalHeader}>
+                <View style={styles.creatorHeaderAvatarBox}>
+                  <Image
+                    source={{ uri: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200&auto=format&fit=crop&q=80' }}
+                    style={styles.creatorModalAvatar}
+                    resizeMode="cover"
+                  />
+                  <View style={styles.creatorOnlineDot} />
+                </View>
+
+                <View style={styles.creatorHeaderInfo}>
+                  <View style={styles.creatorHeaderNameRow}>
+                    <Text style={[styles.creatorModalName, isDark && styles.textWhite]} numberOfLines={1}>
+                      Elena Rostova
+                    </Text>
+                    <View style={styles.verifiedCheckBadge}>
+                      <Text style={styles.verifiedCheckText}>✓</Text>
                     </View>
                   </View>
-                  <Text style={[styles.brandBriefMainTitle, isDark && styles.textWhite]} numberOfLines={1}>
-                    Elena Rostova
+                  <Text style={[styles.creatorModalHandle, isDark && styles.textMutedDark]}>
+                    @elenacreates · Tech &amp; Design
                   </Text>
-                  <Text style={[styles.brandBriefSubTitle, isDark && styles.textMutedDark]} numberOfLines={1}>
-                    @elenacreates • Berlin, DE
-                  </Text>
+                  <View style={styles.creatorLocationRow}>
+                    <Text style={styles.creatorLocationEmoji}>📍</Text>
+                    <Text style={styles.creatorLocationText}>Berlin, DE · Available This Week</Text>
+                  </View>
                 </View>
 
                 <Pressable
-                  onPress={() => setShowSuggestedCreatorModal(false)}
+                  onPress={() => setShowMatchedCreatorModal(false)}
                   style={({ pressed }) => [styles.calendarCloseButton, styles.brandBriefCloseBtn, pressed && styles.headerIconBtnPressed]}
                   hitSlop={8}
                 >
@@ -1846,121 +1864,98 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
               </View>
 
               <ScrollView
-                style={{ maxHeight: 390 }}
+                style={{ maxHeight: 380 }}
                 showsVerticalScrollIndicator={false}
-                contentContainerStyle={{ paddingBottom: 10 }}
+                contentContainerStyle={{ paddingBottom: 6 }}
               >
-                {/* Profile Hero Row with Avatar & Key Stats */}
-                <View style={[styles.creatorProfileHeroCard, isDark && { backgroundColor: '#211D30', borderColor: '#363150' }]}>
-                  <View style={styles.creatorModalAvatarBox}>
-                    <Image
-                      source={{ uri: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=160&auto=format&fit=crop&q=80' }}
-                      style={styles.creatorModalAvatarImage}
-                      resizeMode="cover"
-                    />
-                    <View style={styles.creatorModalInstaBadge}>
-                      <Svg width={12} height={12} viewBox="0 0 24 24" fill="none">
-                        <Rect x="2" y="2" width="20" height="20" rx="5" stroke="#FFFFFF" strokeWidth="2.2" />
-                        <Circle cx="12" cy="12" r="4.5" stroke="#FFFFFF" strokeWidth="2.2" />
-                        <Circle cx="17.5" cy="6.5" r="1.2" fill="#FFFFFF" />
-                      </Svg>
-                    </View>
+                {/* Match Synergy Gauge Banner */}
+                <LinearGradient
+                  colors={['#582CDB', '#7C3AED']}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 1 }}
+                  style={styles.matchSynergyBanner}
+                >
+                  <View style={styles.matchScoreCol}>
+                    <Text style={styles.matchScoreLabel}>MATCH COMPATIBILITY</Text>
+                    <Text style={styles.matchScoreValue}>94% Match</Text>
+                    <Text style={styles.matchScoreSub}>High synergy for joint Reels &amp; Duels</Text>
                   </View>
+                  <View style={styles.matchScoreBadge}>
+                    <Text style={{ fontSize: 24 }}>⚡</Text>
+                  </View>
+                </LinearGradient>
 
-                  <View style={styles.creatorModalStatsGrid}>
-                    <View style={styles.creatorModalStatItem}>
-                      <Text style={styles.creatorModalStatVal}>42.8K</Text>
-                      <Text style={styles.creatorModalStatLabel}>Followers</Text>
-                    </View>
-                    <View style={styles.creatorModalStatDivider} />
-                    <View style={styles.creatorModalStatItem}>
-                      <Text style={[styles.creatorModalStatVal, { color: '#D97706' }]}>52d</Text>
-                      <Text style={styles.creatorModalStatLabel}>Streak</Text>
-                    </View>
-                    <View style={styles.creatorModalStatDivider} />
-                    <View style={styles.creatorModalStatItem}>
-                      <Text style={[styles.creatorModalStatVal, { color: '#582CDB' }]}>94%</Text>
-                      <Text style={styles.creatorModalStatLabel}>Match</Text>
-                    </View>
+                {/* 3-Col Stats Grid */}
+                <View style={[styles.creatorStatsGrid, isDark && { backgroundColor: '#211D30', borderColor: '#363150' }]}>
+                  <View style={styles.creatorStatCol}>
+                    <Text style={styles.creatorStatVal}>42.8K</Text>
+                    <Text style={styles.creatorStatLbl}>Followers</Text>
+                  </View>
+                  <View style={styles.creatorStatDivider} />
+                  <View style={styles.creatorStatCol}>
+                    <Text style={[styles.creatorStatVal, { color: '#D97706' }]}>🔥 47d</Text>
+                    <Text style={styles.creatorStatLbl}>Streak</Text>
+                  </View>
+                  <View style={styles.creatorStatDivider} />
+                  <View style={styles.creatorStatCol}>
+                    <Text style={[styles.creatorStatVal, { color: '#059669' }]}>95%</Text>
+                    <Text style={styles.creatorStatLbl}>Consistency</Text>
                   </View>
                 </View>
 
                 {/* Bio / About */}
                 <View style={[styles.brandBriefSectionBox, isDark && { backgroundColor: '#211D30', borderColor: '#363150' }]}>
                   <Text style={[styles.brandBriefSectionHeading, isDark && styles.textWhite]}>
-                    About Creator
+                    About Elena
                   </Text>
                   <Text style={[styles.brandBriefBodyText, isDark && styles.textMutedDark]}>
-                    Cinematographer & visual director crafting short-form tech and design breakdowns. Let's co-create high-retention Reels that convert! 🎬
+                    Cinematographer &amp; visual director crafting short-form tech and design breakdowns. Active on Instagram &amp; TikTok with high audience retention.
                   </Text>
-                </View>
-
-                {/* Compatibility Insights */}
-                <View style={[styles.brandBriefSectionBox, isDark && { backgroundColor: '#211D30', borderColor: '#363150' }]}>
-                  <Text style={[styles.brandBriefSectionHeading, isDark && styles.textWhite]}>
-                    Why You Match
-                  </Text>
-                  <Text style={[styles.brandBriefBodyText, isDark && styles.textMutedDark, { marginBottom: 8 }]}>
-                    Strong niche overlap in Tech & Design, similar 4x/week posting rhythm, and high collaborative response rate.
-                  </Text>
-                  <View style={styles.creatorSkillsRow}>
-                    <View style={styles.creatorSkillChip}>
-                      <Text style={styles.creatorSkillText}>🎥 Filmmaking</Text>
+                  <View style={styles.creatorTagsRow}>
+                    <View style={styles.creatorTagPill}>
+                      <Text style={styles.creatorTagText}>🎥 Filmmaking</Text>
                     </View>
-                    <View style={styles.creatorSkillChip}>
-                      <Text style={styles.creatorSkillText}>🎬 Sound Design</Text>
+                    <View style={styles.creatorTagPill}>
+                      <Text style={styles.creatorTagText}>🎬 Sound Design</Text>
                     </View>
-                    <View style={styles.creatorSkillChip}>
-                      <Text style={styles.creatorSkillText}>✨ Viral Hooks</Text>
-                    </View>
-                    <View style={styles.creatorSkillChip}>
-                      <Text style={styles.creatorSkillText}>📱 Short Form</Text>
+                    <View style={styles.creatorTagPill}>
+                      <Text style={styles.creatorTagText}>✨ Visual Pacing</Text>
                     </View>
                   </View>
                 </View>
 
-                {/* Recommended Collab Idea */}
+                {/* AI Proposed Collaboration Pitch */}
                 <View style={styles.brandBriefHookBox}>
                   <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 4 }}>
                     <Text style={{ fontSize: 13 }}>💡</Text>
                     <Text style={styles.brandBriefHookLabel}>AI Recommended Collaboration</Text>
                   </View>
+                  <Text style={styles.collabIdeaTitle}>“Sound Design Secrets of 10M-View Reels”</Text>
                   <Text style={styles.brandBriefHookQuote}>
-                    "Sound Design Secrets of 10M-View Reels" (Joint Reel • 45s)
+                    Co-direct a split-screen video comparing average retention hooks against Elena’s cinematic auditory layering.
                   </Text>
                 </View>
               </ScrollView>
 
               {/* Action Buttons */}
-              <View style={styles.brandBriefFooter}>
+              <View style={styles.creatorModalFooter}>
                 <Pressable
                   style={({ pressed }) => [
                     styles.acceptBrandQuestBtn,
                     pressed && styles.missionButtonPressed,
                   ]}
                   onPress={() => {
-                    setShowSuggestedCreatorModal(false);
+                    setShowMatchedCreatorModal(false);
                     if (onOpenMessages) {
                       onOpenMessages();
+                    } else if (onNavigateTab) {
+                      onNavigateTab('match');
                     }
                   }}
                 >
                   <Text style={styles.acceptBrandQuestBtnText} numberOfLines={1}>
-                    Collaborate with Elena ➔
+                    Start Collaboration ➔
                   </Text>
-                </Pressable>
-
-                <Pressable
-                  style={({ pressed }) => [styles.closeBriefSecondaryBtn, pressed && styles.headerIconBtnPressed]}
-                  onPress={() => {
-                    setShowSuggestedCreatorModal(false);
-                    if (onNavigateTab) {
-                      onNavigateTab('match');
-                    }
-                  }}
-                  hitSlop={8}
-                >
-                  <Text style={styles.closeBriefSecondaryText}>View in Match Deck</Text>
                 </Pressable>
               </View>
             </Animated.View>
@@ -3853,8 +3848,8 @@ const styles = StyleSheet.create({
     color: '#7F7894',
   },
 
-  // SUGGESTED CREATOR PROFILE MODAL STYLES
-  creatorProfileModalCard: {
+  // ELENA ROSTOVA CREATOR PROFILE MODAL STYLES
+  creatorDetailModalCard: {
     width: '100%',
     maxWidth: 380,
     backgroundColor: 'rgba(255, 255, 255, 0.98)',
@@ -3870,104 +3865,174 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: 'rgba(235, 230, 248, 0.95)',
   },
-  creatorVerifiedBadge: {
-    backgroundColor: '#EDE8FC',
+  creatorModalHeader: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    marginBottom: 12,
+    gap: 10,
+  },
+  creatorHeaderAvatarBox: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    position: 'relative',
+  },
+  creatorModalAvatar: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+  },
+  creatorOnlineDot: {
+    position: 'absolute',
+    bottom: 0,
+    right: 0,
+    width: 12,
+    height: 12,
     borderRadius: 6,
-    paddingVertical: 2,
-    paddingHorizontal: 6,
+    backgroundColor: '#10B981',
+    borderWidth: 2,
+    borderColor: '#FFFFFF',
   },
-  creatorVerifiedBadgeText: {
-    fontSize: 9.5,
-    fontWeight: '800',
-    color: '#582CDB',
-    letterSpacing: 0.3,
+  creatorHeaderInfo: {
+    flex: 1,
   },
-  creatorStreakTagPill: {
-    backgroundColor: '#FFFBEB',
-    borderRadius: 6,
-    paddingVertical: 2,
-    paddingHorizontal: 6,
-  },
-  creatorStreakTagText: {
-    fontSize: 9.5,
-    fontWeight: '700',
-    color: '#D97706',
-  },
-  creatorProfileHeroCard: {
+  creatorHeaderNameRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#F8F6FD',
+    gap: 5,
+  },
+  creatorModalName: {
+    fontSize: 16,
+    fontWeight: '800',
+    color: '#171420',
+    letterSpacing: -0.3,
+  },
+  verifiedCheckBadge: {
+    backgroundColor: '#582CDB',
+    width: 15,
+    height: 15,
+    borderRadius: 7.5,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  verifiedCheckText: {
+    fontSize: 9,
+    fontWeight: '900',
+    color: '#FFFFFF',
+  },
+  creatorModalHandle: {
+    fontSize: 11,
+    color: '#7F7894',
+    marginTop: 1,
+  },
+  creatorLocationRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 3,
+    marginTop: 3,
+  },
+  creatorLocationEmoji: {
+    fontSize: 10,
+  },
+  creatorLocationText: {
+    fontSize: 10,
+    fontWeight: '600',
+    color: '#059669',
+  },
+  matchSynergyBanner: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
     borderRadius: 16,
     padding: 14,
     marginBottom: 10,
-    gap: 14,
+  },
+  matchScoreCol: {
+    flex: 1,
+  },
+  matchScoreLabel: {
+    fontSize: 9.5,
+    fontWeight: '800',
+    color: 'rgba(255, 255, 255, 0.8)',
+    letterSpacing: 0.5,
+  },
+  matchScoreValue: {
+    fontSize: 20,
+    fontWeight: '900',
+    color: '#FFFFFF',
+    marginTop: 1,
+    letterSpacing: -0.5,
+  },
+  matchScoreSub: {
+    fontSize: 10.5,
+    color: '#EDE8FC',
+    fontWeight: '600',
+    marginTop: 2,
+  },
+  matchScoreBadge: {
+    width: 42,
+    height: 42,
+    borderRadius: 21,
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  creatorStatsGrid: {
+    flexDirection: 'row',
+    backgroundColor: '#FAF8FC',
+    borderRadius: 14,
     borderWidth: 1,
     borderColor: '#EFEBF8',
-  },
-  creatorModalAvatarBox: {
-    width: 58,
-    height: 58,
-    borderRadius: 29,
-    position: 'relative',
-  },
-  creatorModalAvatarImage: {
-    width: '100%',
-    height: '100%',
-    borderRadius: 29,
-  },
-  creatorModalInstaBadge: {
-    position: 'absolute',
-    bottom: -2,
-    right: -2,
-    width: 18,
-    height: 18,
-    borderRadius: 9,
-    backgroundColor: '#E1306C',
+    paddingVertical: 10,
+    paddingHorizontal: 8,
+    marginBottom: 10,
     alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 1.5,
-    borderColor: '#FFFFFF',
   },
-  creatorModalStatsGrid: {
+  creatorStatCol: {
     flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-around',
-  },
-  creatorModalStatItem: {
     alignItems: 'center',
   },
-  creatorModalStatVal: {
+  creatorStatVal: {
     fontSize: 15,
     fontWeight: '800',
     color: '#171420',
   },
-  creatorModalStatLabel: {
+  creatorStatLbl: {
     fontSize: 10,
-    color: '#7F7894',
     fontWeight: '600',
+    color: '#7F7894',
     marginTop: 1,
   },
-  creatorModalStatDivider: {
+  creatorStatDivider: {
     width: 1,
-    height: 24,
-    backgroundColor: '#E2DCF3',
+    height: 22,
+    backgroundColor: '#E2DBF2',
   },
-  creatorSkillsRow: {
+  creatorTagsRow: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: 6,
+    marginTop: 8,
   },
-  creatorSkillChip: {
+  creatorTagPill: {
     backgroundColor: '#EDE8FC',
-    borderRadius: 100,
-    paddingVertical: 3.5,
+    paddingVertical: 3,
     paddingHorizontal: 8,
+    borderRadius: 100,
   },
-  creatorSkillText: {
+  creatorTagText: {
     fontSize: 10.5,
     fontWeight: '700',
     color: '#582CDB',
+  },
+  collabIdeaTitle: {
+    fontSize: 12,
+    fontWeight: '800',
+    color: '#78350F',
+    marginBottom: 2,
+  },
+  creatorModalFooter: {
+    marginTop: 6,
   },
 
   // 12. PROFILE PHOTO UPLOAD MODAL
