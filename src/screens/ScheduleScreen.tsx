@@ -294,7 +294,14 @@ export const ScheduleScreen: React.FC<ScheduleScreenProps> = ({
           </View>
 
           {/* HEADLINE & SUBTITLE */}
-          <Text style={styles.mainHeading}>Your posts, planned clearly.</Text>
+          <Text
+            style={styles.mainHeading}
+            numberOfLines={1}
+            adjustsFontSizeToFit={true}
+            minimumFontScale={0.8}
+          >
+            Your posts, planned clearly.
+          </Text>
           <Text style={styles.mainSubtitle}>
             See what is going live today, what is coming next, and what still needs to be finished.
           </Text>
@@ -1172,10 +1179,10 @@ const styles = StyleSheet.create({
 
   // HEADLINE
   mainHeading: {
-    fontSize: 28,
+    fontSize: sFont(22),
     fontWeight: '800',
     color: '#171420',
-    letterSpacing: -0.6,
+    letterSpacing: -0.5,
     marginBottom: 4,
   },
   mainSubtitle: {
