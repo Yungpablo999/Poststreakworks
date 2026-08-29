@@ -11,7 +11,7 @@ import {
   Modal,
   Animated,
 } from 'react-native';
-import Svg, { Path, Circle, Defs, RadialGradient, Stop } from 'react-native-svg';
+import Svg, { Path } from 'react-native-svg';
 import * as Haptics from 'expo-haptics';
 import { LinearGradient } from 'expo-linear-gradient';
 
@@ -33,6 +33,7 @@ export interface CreatorProfileData {
   whyFitsPills: string[];
   collabIdea: {
     title: string;
+    summary?: string;
     hook: string;
     bts: string;
     lesson: string;
@@ -42,6 +43,7 @@ export interface CreatorProfileData {
   primaryNiche: { name: string; level: string; percent: string; color: string };
   secondaryNiche: { name: string; level: string; percent: string; color: string };
   jarvisDeepInsight: string;
+  jarvisShortInsight?: string;
   readinessChecks: string[];
 }
 
@@ -60,20 +62,23 @@ export const DEFAULT_AMARA_PROFILE: CreatorProfileData = {
   availability: 'Available This Week',
   consistencyRating: 'High',
   whyFitsDescription:
-    'Amara’s audience overlaps with your lifestyle and creator journey content. This match could support a strong short-form collaboration.',
-  whyFitsPills: ['Audience Overlap', 'Similar Content Style', 'Strong Posting Rhythm'],
+    'Strong niche overlap · Similar posting rhythm',
+  whyFitsPills: ['Audience Overlap', 'Content Style', 'Posting Rhythm'],
   collabIdea: {
     title: '“24 Hours Creating in Lagos”',
+    summary: 'Co-produce an authentic day-in-the-life Reel highlighting high-energy creator routines in Lagos.',
     hook: 'Two creators, one city, zero sleep.',
     bts: 'iPhone and natural lighting.',
     lesson: 'How we both built our streaks today.',
-    chips: ['🎥 Reel', '⏱ 30-45 Sec', '📅 Sat 2 PM'],
+    chips: ['🎥 Reel', '30-45 sec', 'Sat 2 PM'],
   },
   correlationPercent: 76,
   primaryNiche: { name: 'LIFESTYLE', level: 'High', percent: '94%', color: '#10B981' },
   secondaryNiche: { name: 'TRAVEL', level: 'Medium', percent: '68%', color: '#6366F1' },
   jarvisDeepInsight:
     'Amara’s content style matches your creator journey niche. A simple day-in-the-life collab could work well for both audiences.',
+  jarvisShortInsight:
+    'Her lifestyle content style matches your creator journey niche for natural cross-audience engagement.',
   readinessChecks: [
     'Profile verified & complete',
     'Active high-performance streak',
@@ -84,7 +89,7 @@ export const DEFAULT_AMARA_PROFILE: CreatorProfileData = {
 export const DEFAULT_ELENA_PROFILE: CreatorProfileData = {
   id: 'creator_5',
   name: 'Elena Rostova',
-  role: 'Visual Storyteller',
+  role: 'Tech & Visual Design',
   followers: '42.8K',
   audienceCount: '42,800+',
   location: 'Berlin, DE',
@@ -96,20 +101,23 @@ export const DEFAULT_ELENA_PROFILE: CreatorProfileData = {
   availability: 'Available This Week',
   consistencyRating: 'High',
   whyFitsDescription:
-    'Strong niche overlap, similar posting pace, and open to creator squads. Elena’s visual pacing elevates short-form videos into high-retention stories.',
-  whyFitsPills: ['Audience Overlap', 'Similar Content Style', 'Strong Posting Rhythm'],
+    'Strong niche overlap · Similar posting rhythm',
+  whyFitsPills: ['Audience Overlap', 'Content Style', 'Posting Rhythm'],
   collabIdea: {
     title: '“Sound Secrets of 10M Reels”',
+    summary: 'Explore the audio techniques behind high-retention Reels, from hooks to foley.',
     hook: 'The 3 hidden audio layers that keep viewers hooked till the end.',
     bts: 'Timeline zoom-ins & foley sound breakdown.',
     lesson: 'Auditory psychology for retention.',
-    chips: ['🎥 Reel', '⏱ 40 Sec', '📅 Tue 8 PM'],
+    chips: ['🎥 Reel', '40 sec', 'Tue 8 PM'],
   },
   correlationPercent: 94,
   primaryNiche: { name: 'TECH & DESIGN', level: 'High', percent: '96%', color: '#10B981' },
   secondaryNiche: { name: 'CINEMA', level: 'High', percent: '89%', color: '#6366F1' },
   jarvisDeepInsight:
-    'Her pacing and visual sound design can amplify your video watch-through rates significantly.',
+    'Her visual pacing could improve your retention-focused content.',
+  jarvisShortInsight:
+    'Her visual pacing could improve your retention-focused content.',
   readinessChecks: [
     'Profile verified & complete',
     'Active high-performance streak',
@@ -128,11 +136,12 @@ interface CreatorProfileModalProps {
 export const CreatorProfileModal: React.FC<CreatorProfileModalProps> = ({
   visible,
   onClose,
-  creator = DEFAULT_AMARA_PROFILE,
+  creator = DEFAULT_ELENA_PROFILE,
   onConnect,
   onBuildCollabPlan,
 }) => {
   const [isSaved, setIsSaved] = useState(false);
+  const [showCorrelationDetails, setShowCorrelationDetails] = useState(false);
   const pulseAnim = useRef(new Animated.Value(1)).current;
 
   useEffect(() => {
@@ -187,7 +196,7 @@ export const CreatorProfileModal: React.FC<CreatorProfileModalProps> = ({
     }
   };
 
-  const creatorNameFirst = creator.name.split(' ')[0].toUpperCase();
+  const collabChipsFormatted = creator.collabIdea.chips.join(' · ');
 
   return (
     <Modal
@@ -227,7 +236,7 @@ export const CreatorProfileModal: React.FC<CreatorProfileModalProps> = ({
           contentContainerStyle={styles.detailScrollContent}
           showsVerticalScrollIndicator={false}
         >
-          {/* TOP PHOTO & STATS HERO CARD */}
+          {/* 1. CREATOR IDENTITY HERO CARD */}
           <View style={styles.detailHeroCard}>
             <Image
               source={creator.coverImage}
@@ -236,16 +245,33 @@ export const CreatorProfileModal: React.FC<CreatorProfileModalProps> = ({
             />
 
             <View style={styles.detailHeroBody}>
-              <View style={styles.detailAvailabilityRow}>
-                <Animated.View
-                  style={[
-                    styles.greenStatusDot,
-                    { transform: [{ scale: pulseAnim }] },
-                  ]}
-                />
-                <Text style={styles.detailAvailabilityText}>{creator.availability}</Text>
+              <View style={styles.creatorIdentityHeaderRow}>
+                <View style={{ flex: 1 }}>
+                  <View style={styles.creatorNameRow}>
+                    <Text style={styles.creatorNameText} numberOfLines={1}>
+                      {creator.name}
+                    </Text>
+                    <View style={styles.verifiedBadge}>
+                      <Text style={styles.verifiedBadgeText}>✓</Text>
+                    </View>
+                  </View>
+                  <Text style={styles.creatorRoleText}>
+                    {creator.role} · {creator.location}
+                  </Text>
+                </View>
+
+                <View style={styles.detailAvailabilityRow}>
+                  <Animated.View
+                    style={[
+                      styles.greenStatusDot,
+                      { transform: [{ scale: pulseAnim }] },
+                    ]}
+                  />
+                  <Text style={styles.detailAvailabilityText}>{creator.availability}</Text>
+                </View>
               </View>
 
+              {/* 3-Col Stats Row */}
               <View style={styles.detailTwoStatRow}>
                 <View style={styles.detailTwoStatItem}>
                   <Text style={styles.detailStatValGold}>{creator.followers}</Text>
@@ -256,11 +282,16 @@ export const CreatorProfileModal: React.FC<CreatorProfileModalProps> = ({
                   <Text style={styles.detailStatValPurple}>{creator.consistencyRating}</Text>
                   <Text style={styles.detailStatLbl}>Consistency</Text>
                 </View>
+                <View style={styles.detailTwoStatDivider} />
+                <View style={styles.detailTwoStatItem}>
+                  <Text style={[styles.detailStatValGold, { color: '#EA580C' }]}>🔥 {creator.streak}d</Text>
+                  <Text style={styles.detailStatLbl}>Streak</Text>
+                </View>
               </View>
             </View>
           </View>
 
-          {/* CATEGORY TAG PILLS UNDER PHOTO */}
+          {/* CATEGORY TAG PILLS */}
           <View style={styles.detailCategoryPillsRow}>
             {creator.categoryTags.map((tag, idx) => (
               <View key={idx} style={styles.detailCategoryPill}>
@@ -269,32 +300,76 @@ export const CreatorProfileModal: React.FC<CreatorProfileModalProps> = ({
             ))}
           </View>
 
-          {/* CARD 1: WHY THIS MATCH FITS */}
-          <View style={styles.detailWhyFitsCard}>
-            <View style={styles.detailCardTitleRow}>
-              <Text style={styles.sparkleIcon}>✨</Text>
-              <Text style={styles.detailCardTitleText}>Why This Match Fits</Text>
+          {/* 2. MATCH SCORE — HERO CARD */}
+          <LinearGradient
+            colors={['#582CDB', '#7C3AED']}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={styles.heroMatchScoreCard}
+          >
+            <View style={styles.matchScoreTopRow}>
+              <View style={styles.matchScoreTextCol}>
+                <Text style={styles.matchScoreValue}>{creator.correlationPercent}% Match</Text>
+                <Text style={styles.matchScoreSubtitle}>
+                  Strong niche overlap · Similar posting rhythm
+                </Text>
+              </View>
+              <View style={styles.matchScoreBadgeIcon}>
+                <Text style={{ fontSize: 22 }}>⚡</Text>
+              </View>
             </View>
-            <Text style={styles.detailWhyFitsBody}>
-              {creator.whyFitsDescription}
-            </Text>
-            <View style={styles.detailWhyFitsPillsRow}>
+
+            {/* 3 Small Tags */}
+            <View style={styles.matchScorePillsRow}>
               {creator.whyFitsPills.map((pill, idx) => (
-                <View key={idx} style={styles.whyFitsPill}>
-                  <Text style={styles.whyFitsPillText}>{pill}</Text>
+                <View key={idx} style={styles.matchScorePill}>
+                  <Text style={styles.matchScorePillText}>{pill}</Text>
                 </View>
               ))}
             </View>
-          </View>
 
-          {/* CARD 2: COLLAB IDEA (EXACT MATCH WITH BUILD COLLAB PLAN BUTTON) */}
-          <View style={styles.detailCollabIdeaCard}>
-            <View style={styles.collabIdeaTitleRow}>
+            {/* Tiny Expandable Detail Toggle: Why 94%? › */}
+            <Pressable
+              style={styles.whyScoreToggleBtn}
+              onPress={() => {
+                if (Platform.OS !== 'web') {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                }
+                setShowCorrelationDetails(!showCorrelationDetails);
+              }}
+            >
+              <Text style={styles.whyScoreToggleText}>
+                {showCorrelationDetails ? `Hide details ▴` : `Why ${creator.correlationPercent}%? ›`}
+              </Text>
+            </Pressable>
+
+            {showCorrelationDetails && (
+              <View style={styles.correlationExpandedBox}>
+                <View style={styles.correlationIndicatorPill}>
+                  <Text style={styles.indicatorName}>{creator.primaryNiche.name}</Text>
+                  <Text style={[styles.indicatorLevel, { color: '#6EE7B7' }]}>
+                    {creator.primaryNiche.level} ({creator.primaryNiche.percent})
+                  </Text>
+                </View>
+                <View style={styles.correlationIndicatorPill}>
+                  <Text style={styles.indicatorName}>{creator.secondaryNiche.name}</Text>
+                  <Text style={[styles.indicatorLevel, { color: '#C4B5FD' }]}>
+                    {creator.secondaryNiche.level} ({creator.secondaryNiche.percent})
+                  </Text>
+                </View>
+              </View>
+            )}
+          </LinearGradient>
+
+          {/* 3. COLLAB IDEA — MAIN SECONDARY SECTION */}
+          <View style={styles.collabIdeaCard}>
+            <View style={styles.collabIdeaHeaderRow}>
               <Text style={styles.purplePinIcon}>📍</Text>
-              <Text style={styles.detailCollabIdeaTitle}>Collab Idea</Text>
+              <Text style={styles.collabIdeaTag}>Collab Idea</Text>
             </View>
+
             <Text
-              style={styles.collabIdeaName}
+              style={styles.collabIdeaTitleText}
               numberOfLines={1}
               adjustsFontSizeToFit={true}
               minimumFontScale={0.8}
@@ -302,29 +377,12 @@ export const CreatorProfileModal: React.FC<CreatorProfileModalProps> = ({
               {creator.collabIdea.title}
             </Text>
 
-            {/* Structured Script Steps */}
-            <View style={styles.collabScriptStepsCol}>
-              <View style={styles.scriptStepItem}>
-                <Text style={styles.scriptStepKey}>Hook</Text>
-                <Text style={styles.scriptStepVal}>{creator.collabIdea.hook}</Text>
-              </View>
-              <View style={styles.scriptStepItem}>
-                <Text style={styles.scriptStepKey}>BTS</Text>
-                <Text style={styles.scriptStepVal}>{creator.collabIdea.bts}</Text>
-              </View>
-              <View style={styles.scriptStepItem}>
-                <Text style={styles.scriptStepKey}>Lesson</Text>
-                <Text style={styles.scriptStepVal}>{creator.collabIdea.lesson}</Text>
-              </View>
-            </View>
+            <Text style={styles.collabIdeaSummaryText}>
+              {creator.collabIdea.summary || `${creator.collabIdea.hook} ${creator.collabIdea.lesson}`}
+            </Text>
 
-            {/* Chips */}
-            <View style={styles.collabIdeaChipsRow}>
-              {creator.collabIdea.chips.map((chip, idx) => (
-                <View key={idx} style={styles.collabIdeaChip}>
-                  <Text style={styles.collabIdeaChipText}>{chip}</Text>
-                </View>
-              ))}
+            <View style={styles.collabFormatRow}>
+              <Text style={styles.collabFormatText}>{collabChipsFormatted}</Text>
             </View>
 
             <Pressable
@@ -337,147 +395,35 @@ export const CreatorProfileModal: React.FC<CreatorProfileModalProps> = ({
                 end={{ x: 1, y: 1 }}
                 style={styles.buildCollabPlanGradient}
               >
-                <Text style={styles.buildCollabPlanBtnText}>Build Collab Plan</Text>
+                <Text style={styles.buildCollabPlanBtnText}>Build Collab Plan →</Text>
               </LinearGradient>
             </Pressable>
           </View>
 
-          {/* ROW OF 2 METRIC CARDS: AUDIENCE & STREAK */}
-          <View style={styles.detailTwoCardsRow}>
-            <View style={styles.detailMetricCardHalf}>
-              <View style={styles.metricCardIconRow}>
-                <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
-                  <Circle cx="9" cy="7" r="4" stroke="#582CDB" strokeWidth="2" />
-                  <Path d="M3 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2" stroke="#582CDB" strokeWidth="2" />
-                  <Circle cx="17" cy="11" r="3" stroke="#784DF0" strokeWidth="2" />
-                  <Path d="M16 3.13a4 4 0 0 1 0 7.75" stroke="#784DF0" strokeWidth="2" />
-                </Svg>
-              </View>
-              <Text style={styles.metricCardLabel}>AUDIENCE</Text>
-              <Text style={styles.metricCardBigValue}>{creator.audienceCount}</Text>
+          {/* 4. COMPACT JARVIS INSIGHT */}
+          <View style={styles.jarvisCompactCard}>
+            <View style={styles.jarvisCompactHeader}>
+              <Text style={{ fontSize: 14 }}>✨</Text>
+              <Text style={styles.jarvisCompactLabel}>Jarvis says:</Text>
             </View>
-
-            <View style={styles.detailMetricCardHalf}>
-              <View style={styles.metricCardIconRow}>
-                <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
-                  <Path
-                    d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"
-                    fill="#F59E0B"
-                  />
-                </Svg>
-              </View>
-              <Text style={styles.metricCardLabel}>STREAK</Text>
-              <Text style={styles.metricCardGoldValue}>{creator.streak} Days</Text>
-            </View>
-          </View>
-
-          {/* CARD 3: AUDIENCE CORRELATION VENN DIAGRAM */}
-          <View style={styles.audienceCorrelationCard}>
-            <Text style={styles.correlationHeading}>AUDIENCE CORRELATION</Text>
-
-            {/* VENN DIAGRAM GRAPHIC */}
-            <View style={styles.vennContainer}>
-              <Svg width={240} height={130} viewBox="0 0 240 130">
-                <Defs>
-                  <RadialGradient id="purpleGlow" cx="50%" cy="50%" r="50%">
-                    <Stop offset="0%" stopColor="#7C3AED" stopOpacity="0.35" />
-                    <Stop offset="100%" stopColor="#582CDB" stopOpacity="0.12" />
-                  </RadialGradient>
-                  <RadialGradient id="goldGlow" cx="50%" cy="50%" r="50%">
-                    <Stop offset="0%" stopColor="#F59E0B" stopOpacity="0.35" />
-                    <Stop offset="100%" stopColor="#D97706" stopOpacity="0.1" />
-                  </RadialGradient>
-                </Defs>
-
-                {/* Left Circle: YOU */}
-                <Circle
-                  cx="90"
-                  cy="65"
-                  r="52"
-                  fill="url(#purpleGlow)"
-                  stroke="#7C3AED"
-                  strokeWidth="2.2"
-                />
-                {/* Right Circle: CREATOR */}
-                <Circle
-                  cx="150"
-                  cy="65"
-                  r="52"
-                  fill="url(#goldGlow)"
-                  stroke="#D97706"
-                  strokeWidth="2.2"
-                />
-              </Svg>
-
-              {/* Overlay Labels */}
-              <View style={styles.vennLabelLeft}>
-                <Text style={styles.vennLabelTextPurple}>YOU</Text>
-              </View>
-              <View style={styles.vennCenterBadge}>
-                <Text style={styles.vennCenterPercent}>{creator.correlationPercent}%</Text>
-              </View>
-              <View style={styles.vennLabelRight}>
-                <Text style={styles.vennLabelTextGold}>{creatorNameFirst}</Text>
-              </View>
-            </View>
-
-            {/* Bottom 2 Pill Indicators */}
-            <View style={styles.correlationIndicatorsRow}>
-              <View style={styles.correlationIndicatorPill}>
-                <Text style={styles.indicatorName}>{creator.primaryNiche.name}</Text>
-                <Text style={[styles.indicatorLevel, { color: creator.primaryNiche.color }]}>
-                  {creator.primaryNiche.level}
-                </Text>
-              </View>
-              <View style={styles.correlationIndicatorPill}>
-                <Text style={styles.indicatorName}>{creator.secondaryNiche.name}</Text>
-                <Text style={[styles.indicatorLevel, { color: creator.secondaryNiche.color }]}>
-                  {creator.secondaryNiche.level}
-                </Text>
-              </View>
-            </View>
-          </View>
-
-          {/* CARD 4: JARVIS DEEP INSIGHT FROSTED BOX */}
-          <View style={styles.detailJarvisInsightCard}>
-            <View style={styles.detailJarvisHeaderRow}>
-              <Image
-                source={require('../../assets/images/jarvis-core-flame.png')}
-                style={styles.detailJarvisIcon}
-                resizeMode="contain"
-              />
-              <Text style={styles.detailJarvisInsightLabel}>JARVIS INSIGHT</Text>
-            </View>
-            <Text style={styles.detailJarvisInsightText}>
-              {creator.jarvisDeepInsight}
+            <Text style={styles.jarvisCompactText}>
+              {creator.jarvisShortInsight || creator.jarvisDeepInsight}
             </Text>
           </View>
 
-          {/* CARD 5: READINESS CHECKLIST */}
-          <View style={styles.detailReadinessCard}>
-            <View style={styles.readinessHeaderRow}>
-              <Text style={styles.readinessTitle}>Readiness</Text>
-              <View style={styles.readinessReadyBadge}>
-                <Text style={styles.readinessReadyText}>🟢 Ready</Text>
-              </View>
+          {/* 5. COMPACT READINESS STATUS ROW */}
+          <View style={styles.readinessCompactCard}>
+            <View style={styles.readinessCompactHeader}>
+              <View style={styles.readinessGreenDot} />
+              <Text style={styles.readinessCompactTitle}>Ready to collaborate</Text>
             </View>
-
-            <View style={styles.readinessChecklistCol}>
-              {creator.readinessChecks.map((check, idx) => (
-                <View key={idx} style={styles.readinessItemRow}>
-                  <View style={styles.readinessCheckCircle}>
-                    <Svg width={10} height={10} viewBox="0 0 24 24" fill="none">
-                      <Path d="M20 6L9 17l-5-5" stroke="#582CDB" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round" />
-                    </Svg>
-                  </View>
-                  <Text style={styles.readinessItemText}>{check}</Text>
-                </View>
-              ))}
-            </View>
+            <Text style={styles.readinessCompactSub}>
+              Verified · Active streak · High response likelihood
+            </Text>
           </View>
         </ScrollView>
 
-        {/* FLOATING BOTTOM ACTION BAR IN MODAL */}
+        {/* 6. STICKY BOTTOM ACTION BAR */}
         <View style={styles.detailBottomActionBar}>
           <Pressable
             style={({ pressed }) => [styles.detailConnectBtn, pressed && styles.btnPressed]}
@@ -572,7 +518,7 @@ const styles = StyleSheet.create({
     paddingBottom: 110,
   },
 
-  // Top Photo & Two-Stat Hero Card
+  // 1. Creator Identity Hero Card
   detailHeroCard: {
     backgroundColor: '#FFFFFF',
     borderRadius: 24,
@@ -588,67 +534,115 @@ const styles = StyleSheet.create({
   },
   detailCoverImage: {
     width: '100%',
-    height: 360,
+    height: 320,
   },
   detailHeroBody: {
     padding: 16,
     backgroundColor: '#FFFFFF',
   },
+  creatorIdentityHeaderRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    justifyContent: 'space-between',
+    marginBottom: 14,
+    gap: 8,
+  },
+  creatorNameRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  creatorNameText: {
+    fontSize: 18,
+    fontWeight: '800',
+    color: '#171420',
+    letterSpacing: -0.3,
+  },
+  verifiedBadge: {
+    backgroundColor: '#582CDB',
+    width: 16,
+    height: 16,
+    borderRadius: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  verifiedBadgeText: {
+    fontSize: 9.5,
+    fontWeight: '900',
+    color: '#FFFFFF',
+  },
+  creatorRoleText: {
+    fontSize: 12.5,
+    color: '#7F7894',
+    marginTop: 2,
+    fontWeight: '500',
+  },
   detailAvailabilityRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
-    marginBottom: 12,
+    gap: 6,
+    backgroundColor: '#ECFDF5',
+    paddingVertical: 4,
+    paddingHorizontal: 8,
+    borderRadius: 100,
+    borderWidth: 1,
+    borderColor: '#A7F3D0',
   },
   greenStatusDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
+    width: 7,
+    height: 7,
+    borderRadius: 3.5,
     backgroundColor: '#10B981',
   },
   detailAvailabilityText: {
-    fontSize: 12.5,
+    fontSize: 11,
     fontWeight: '700',
-    color: '#171420',
+    color: '#059669',
   },
   detailTwoStatRow: {
     flexDirection: 'row',
     alignItems: 'center',
+    backgroundColor: '#FAF8FC',
+    borderRadius: 14,
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+    borderWidth: 1,
+    borderColor: '#EFEBF8',
   },
   detailTwoStatItem: {
     flex: 1,
+    alignItems: 'center',
   },
   detailStatValGold: {
-    fontSize: 20,
+    fontSize: 16,
     fontWeight: '800',
-    color: '#F59E0B',
+    color: '#D97706',
     letterSpacing: -0.3,
   },
   detailStatValPurple: {
-    fontSize: 20,
+    fontSize: 16,
     fontWeight: '800',
     color: '#582CDB',
     letterSpacing: -0.3,
   },
   detailStatLbl: {
-    fontSize: 11,
+    fontSize: 10.5,
     fontWeight: '600',
     color: '#7F7894',
-    marginTop: 2,
+    marginTop: 1,
   },
   detailTwoStatDivider: {
     width: 1,
-    height: 32,
+    height: 24,
     backgroundColor: '#E8E3FA',
-    marginHorizontal: 16,
   },
 
-  // Category Pills Row
+  // Category Pills
   detailCategoryPillsRow: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: 6,
-    marginBottom: 16,
+    marginBottom: 14,
   },
   detailCategoryPill: {
     backgroundColor: '#FAF8FF',
@@ -659,69 +653,112 @@ const styles = StyleSheet.create({
     borderColor: '#E8E3FA',
   },
   detailCategoryPillText: {
-    fontSize: 12,
+    fontSize: 11.5,
     fontWeight: '700',
     color: '#582CDB',
   },
 
-  // Card 1: Why This Match Fits
-  detailWhyFitsCard: {
-    backgroundColor: '#FFFFFF',
+  // 2. Hero Match Score Card
+  heroMatchScoreCard: {
     borderRadius: 22,
     padding: 16,
-    borderWidth: 1.2,
-    borderColor: '#E8E3FA',
     marginBottom: 14,
     shadowColor: '#582CDB',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.06,
-    shadowRadius: 12,
-    elevation: 2,
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.18,
+    shadowRadius: 14,
+    elevation: 4,
   },
-  detailCardTitleRow: {
+  matchScoreTopRow: {
     flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'center',
-    gap: 6,
-    marginBottom: 8,
+    marginBottom: 10,
   },
-  sparkleIcon: {
-    fontSize: 14,
-    color: '#582CDB',
+  matchScoreTextCol: {
+    flex: 1,
   },
-  detailCardTitleText: {
-    fontSize: 15,
-    fontWeight: '800',
-    color: '#171420',
+  matchScoreValue: {
+    fontSize: 22,
+    fontWeight: '900',
+    color: '#FFFFFF',
+    letterSpacing: -0.4,
   },
-  detailWhyFitsBody: {
-    fontSize: 12.5,
-    color: '#4B4360',
-    lineHeight: 18,
-    fontWeight: '500',
-    marginBottom: 12,
+  matchScoreSubtitle: {
+    fontSize: 12,
+    color: 'rgba(255, 255, 255, 0.9)',
+    fontWeight: '600',
+    marginTop: 2,
   },
-  detailWhyFitsPillsRow: {
+  matchScoreBadgeIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  matchScorePillsRow: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: 6,
+    marginBottom: 10,
   },
-  whyFitsPill: {
-    backgroundColor: '#FAF8FF',
+  matchScorePill: {
+    backgroundColor: 'rgba(255, 255, 255, 0.18)',
     paddingVertical: 4,
     paddingHorizontal: 10,
     borderRadius: 100,
     borderWidth: 1,
-    borderColor: '#DDD6FE',
+    borderColor: 'rgba(255, 255, 255, 0.25)',
   },
-  whyFitsPillText: {
+  matchScorePillText: {
     fontSize: 11,
     fontWeight: '700',
-    color: '#582CDB',
+    color: '#FFFFFF',
+  },
+  whyScoreToggleBtn: {
+    alignSelf: 'flex-start',
+    paddingVertical: 3,
+    paddingHorizontal: 6,
+  },
+  whyScoreToggleText: {
+    fontSize: 12,
+    fontWeight: '800',
+    color: '#FDE68A',
+    letterSpacing: 0.2,
+  },
+  correlationExpandedBox: {
+    flexDirection: 'row',
+    gap: 8,
+    marginTop: 10,
+    paddingTop: 10,
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(255, 255, 255, 0.2)',
+  },
+  correlationIndicatorPill: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.2)',
+    borderRadius: 12,
+    paddingVertical: 8,
+    paddingHorizontal: 10,
+    alignItems: 'center',
+  },
+  indicatorName: {
+    fontSize: 9.5,
+    fontWeight: '800',
+    color: 'rgba(255, 255, 255, 0.75)',
+    letterSpacing: 0.5,
+    marginBottom: 2,
+  },
+  indicatorLevel: {
+    fontSize: 11.5,
+    fontWeight: '800',
   },
 
-  // Card 2: Collab Idea Blueprint
-  detailCollabIdeaCard: {
-    backgroundColor: '#FAF8FF',
+  // 3. Collab Idea Card
+  collabIdeaCard: {
+    backgroundColor: '#FFFFFF',
     borderRadius: 22,
     padding: 16,
     borderWidth: 1.2,
@@ -733,63 +770,48 @@ const styles = StyleSheet.create({
     shadowRadius: 12,
     elevation: 2,
   },
-  collabIdeaTitleRow: {
+  collabIdeaHeaderRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
+    gap: 5,
     marginBottom: 6,
   },
   purplePinIcon: {
     fontSize: 13,
   },
-  detailCollabIdeaTitle: {
-    fontSize: 13,
+  collabIdeaTag: {
+    fontSize: 12,
     fontWeight: '800',
     color: '#582CDB',
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
   },
-  collabIdeaName: {
-    fontSize: 15,
+  collabIdeaTitleText: {
+    fontSize: 15.5,
     fontWeight: '800',
     color: '#171420',
-    marginBottom: 12,
+    marginBottom: 6,
     letterSpacing: -0.2,
   },
-  collabScriptStepsCol: {
-    gap: 8,
-    marginBottom: 14,
-  },
-  scriptStepItem: {
-    flexDirection: 'row',
-    gap: 8,
-  },
-  scriptStepKey: {
-    fontSize: 12,
-    fontWeight: '800',
-    color: '#582CDB',
-    width: 52,
-  },
-  scriptStepVal: {
-    fontSize: 12,
+  collabIdeaSummaryText: {
+    fontSize: 12.5,
+    color: '#4B4360',
+    lineHeight: 18,
     fontWeight: '500',
-    color: '#171420',
-    flex: 1,
-    lineHeight: 16,
+    marginBottom: 10,
   },
-  collabIdeaChipsRow: {
-    flexDirection: 'row',
-    gap: 6,
-    marginBottom: 14,
-  },
-  collabIdeaChip: {
-    backgroundColor: '#FFFFFF',
-    paddingVertical: 5,
+  collabFormatRow: {
+    backgroundColor: '#FAF8FF',
+    paddingVertical: 6,
     paddingHorizontal: 10,
-    borderRadius: 8,
+    borderRadius: 10,
     borderWidth: 1,
     borderColor: '#E8E3FA',
+    alignSelf: 'flex-start',
+    marginBottom: 14,
   },
-  collabIdeaChipText: {
-    fontSize: 11,
+  collabFormatText: {
+    fontSize: 11.5,
     fontWeight: '700',
     color: '#7F7894',
   },
@@ -805,248 +827,81 @@ const styles = StyleSheet.create({
   },
   buildCollabPlanBtnText: {
     color: '#FFFFFF',
-    fontSize: 13.5,
-    fontWeight: '700',
+    fontSize: 14,
+    fontWeight: '800',
     letterSpacing: -0.2,
   },
 
-  // Row of 2 Metric Cards: Audience & Streak
-  detailTwoCardsRow: {
-    flexDirection: 'row',
-    gap: 12,
-    marginBottom: 14,
-  },
-  detailMetricCardHalf: {
-    flex: 1,
-    backgroundColor: '#FFFFFF',
-    borderRadius: 20,
-    padding: 14,
-    borderWidth: 1.2,
-    borderColor: '#E8E3FA',
-    shadowColor: '#582CDB',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.05,
-    shadowRadius: 10,
-    elevation: 2,
-  },
-  metricCardIconRow: {
-    marginBottom: 8,
-  },
-  metricCardLabel: {
-    fontSize: 10,
-    fontWeight: '800',
-    color: '#7F7894',
-    letterSpacing: 0.5,
-    marginBottom: 2,
-  },
-  metricCardBigValue: {
-    fontSize: 18,
-    fontWeight: '800',
-    color: '#171420',
-    letterSpacing: -0.4,
-  },
-  metricCardGoldValue: {
-    fontSize: 18,
-    fontWeight: '800',
-    color: '#D97706',
-    letterSpacing: -0.4,
-  },
-
-  // Card 3: Audience Correlation Venn Diagram
-  audienceCorrelationCard: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 22,
-    padding: 16,
-    borderWidth: 1.2,
-    borderColor: '#E8E3FA',
-    marginBottom: 14,
-    alignItems: 'center',
-    shadowColor: '#582CDB',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.06,
-    shadowRadius: 12,
-    elevation: 2,
-  },
-  correlationHeading: {
-    fontSize: 11,
-    fontWeight: '800',
-    color: '#7F7894',
-    letterSpacing: 0.6,
-    marginBottom: 6,
-    alignSelf: 'flex-start',
-  },
-  vennContainer: {
-    width: 240,
-    height: 130,
-    justifyContent: 'center',
-    alignItems: 'center',
-    position: 'relative',
-    marginVertical: 4,
-  },
-  vennLabelLeft: {
-    position: 'absolute',
-    left: 45,
-    top: 54,
-  },
-  vennLabelTextPurple: {
-    fontSize: 12.5,
-    fontWeight: '900',
-    color: '#582CDB',
-    letterSpacing: 0.5,
-  },
-  vennCenterBadge: {
-    position: 'absolute',
-    alignSelf: 'center',
-    backgroundColor: '#FFFFFF',
-    borderRadius: 100,
-    paddingVertical: 3,
-    paddingHorizontal: 9,
-    shadowColor: '#582CDB',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.12,
-    shadowRadius: 6,
-    elevation: 3,
-    borderWidth: 1,
-    borderColor: '#DDD6FE',
-  },
-  vennCenterPercent: {
-    fontSize: 13,
-    fontWeight: '900',
-    color: '#582CDB',
-  },
-  vennLabelRight: {
-    position: 'absolute',
-    right: 32,
-    top: 54,
-  },
-  vennLabelTextGold: {
-    fontSize: 12,
-    fontWeight: '900',
-    color: '#D97706',
-    letterSpacing: 0.5,
-  },
-  correlationIndicatorsRow: {
-    flexDirection: 'row',
-    gap: 12,
-    marginTop: 12,
-    width: '100%',
-  },
-  correlationIndicatorPill: {
-    flex: 1,
-    backgroundColor: '#FAF8FF',
-    borderRadius: 14,
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: '#E8E3FA',
-  },
-  indicatorName: {
-    fontSize: 9.5,
-    fontWeight: '800',
-    color: '#7F7894',
-    letterSpacing: 0.5,
-    marginBottom: 2,
-  },
-  indicatorLevel: {
-    fontSize: 12,
-    fontWeight: '800',
-  },
-
-  // Card 4: Jarvis Deep Insight Frosted Box
-  detailJarvisInsightCard: {
+  // 4. Compact Jarvis Insight Card
+  jarvisCompactCard: {
     backgroundColor: '#F5F3FF',
-    borderRadius: 22,
-    padding: 16,
+    borderRadius: 18,
+    paddingVertical: 12,
+    paddingHorizontal: 14,
     borderWidth: 1.2,
     borderColor: '#DDD6FE',
-    marginBottom: 14,
+    marginBottom: 12,
   },
-  detailJarvisHeaderRow: {
+  jarvisCompactHeader: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
-    marginBottom: 6,
+    marginBottom: 4,
   },
-  detailJarvisIcon: {
-    width: 18,
-    height: 18,
-  },
-  detailJarvisInsightLabel: {
+  jarvisCompactLabel: {
     fontSize: 11,
     fontWeight: '800',
     color: '#582CDB',
-    letterSpacing: 0.6,
+    letterSpacing: 0.4,
   },
-  detailJarvisInsightText: {
-    fontSize: 12.5,
+  jarvisCompactText: {
+    fontSize: 12,
     color: '#3730A3',
-    lineHeight: 18,
-    fontStyle: 'italic',
+    lineHeight: 17,
     fontWeight: '500',
+    fontStyle: 'italic',
   },
 
-  // Card 5: Readiness Checklist
-  detailReadinessCard: {
+  // 5. Compact Readiness Status Row
+  readinessCompactCard: {
     backgroundColor: '#FFFFFF',
-    borderRadius: 22,
-    padding: 16,
+    borderRadius: 18,
+    paddingVertical: 12,
+    paddingHorizontal: 14,
     borderWidth: 1.2,
     borderColor: '#E8E3FA',
     marginBottom: 20,
     shadowColor: '#582CDB',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.06,
-    shadowRadius: 12,
-    elevation: 2,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.04,
+    shadowRadius: 8,
+    elevation: 1,
   },
-  readinessHeaderRow: {
+  readinessCompactHeader: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 12,
+    gap: 6,
+    marginBottom: 2,
   },
-  readinessTitle: {
-    fontSize: 15,
+  readinessGreenDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: '#10B981',
+  },
+  readinessCompactTitle: {
+    fontSize: 12.5,
     fontWeight: '800',
     color: '#171420',
   },
-  readinessReadyBadge: {
-    backgroundColor: '#ECFDF5',
-    paddingVertical: 3,
-    paddingHorizontal: 8,
-    borderRadius: 100,
-    borderWidth: 1,
-    borderColor: '#A7F3D0',
-  },
-  readinessReadyText: {
+  readinessCompactSub: {
     fontSize: 11,
-    fontWeight: '700',
-    color: '#059669',
-  },
-  readinessChecklistCol: {
-    gap: 10,
-  },
-  readinessItemRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-  },
-  readinessCheckCircle: {
-    width: 18,
-    height: 18,
-    borderRadius: 9,
-    backgroundColor: '#EDE8FC',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  readinessItemText: {
-    fontSize: 12.5,
-    fontWeight: '600',
-    color: '#171420',
+    color: '#7F7894',
+    fontWeight: '500',
+    marginTop: 2,
   },
 
-  // Floating Bottom Action Bar
+  // 6. Sticky Bottom Action Bar
   detailBottomActionBar: {
     position: 'absolute',
     bottom: 0,
