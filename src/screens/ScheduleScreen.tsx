@@ -20,6 +20,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { FloatingTabBar, TabType } from '../components/FloatingTabBar';
 import { UserProfileModal, UserProfileData } from '../components/UserProfileModal';
 import { AnimatedCompletionModal } from '../components/AnimatedCompletionModal';
+import { SocialBrandIcon } from '../components/SocialBrandIcon';
 import { FreeAppHeader } from '../components/FreeAppHeader';
 import { sFont, sPadding, moderateScale, isNarrowScreen } from '../utils/responsive';
 
@@ -633,25 +634,34 @@ export const ScheduleScreen: React.FC<ScheduleScreenProps> = ({
 
               <Text style={styles.modalInputLabel}>CHOOSE PLATFORM</Text>
               <View style={styles.platformSelectRow}>
-                {(['tiktok', 'instagram', 'youtube'] as const).map((plat) => (
-                  <Pressable
-                    key={plat}
-                    onPress={() => setNewPostPlatform(plat)}
-                    style={[
-                      styles.platformSelectBtn,
-                      newPostPlatform === plat && styles.platformSelectBtnActive,
-                    ]}
-                  >
-                    <Text
+                {(['tiktok', 'instagram', 'youtube'] as const).map((plat) => {
+                  const isActive = newPostPlatform === plat;
+                  return (
+                    <Pressable
+                      key={plat}
+                      onPress={() => {
+                        if (Platform.OS !== 'web') {
+                          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                        }
+                        setNewPostPlatform(plat);
+                      }}
                       style={[
-                        styles.platformSelectBtnText,
-                        newPostPlatform === plat && styles.platformSelectBtnTextActive,
+                        styles.platformSelectBtn,
+                        isActive && styles.platformSelectBtnActive,
                       ]}
                     >
-                      {plat === 'tiktok' ? 'TikTok' : plat === 'instagram' ? 'Instagram' : 'YouTube'}
-                    </Text>
-                  </Pressable>
-                ))}
+                      <SocialBrandIcon platform={plat} size={15} />
+                      <Text
+                        style={[
+                          styles.platformSelectBtnText,
+                          isActive && styles.platformSelectBtnTextActive,
+                        ]}
+                      >
+                        {plat === 'tiktok' ? 'TikTok' : plat === 'instagram' ? 'Instagram' : 'YouTube'}
+                      </Text>
+                    </Pressable>
+                  );
+                })}
               </View>
 
               <Text style={styles.modalInputLabel}>POST TITLE / HOOK</Text>
@@ -1722,24 +1732,28 @@ const styles = StyleSheet.create({
   },
   platformSelectRow: {
     flexDirection: 'row',
-    gap: 6,
+    gap: 8,
     marginBottom: 14,
   },
   platformSelectBtn: {
     flex: 1,
-    paddingVertical: 8,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    height: 38,
+    paddingHorizontal: 8,
     borderRadius: 10,
     backgroundColor: '#FAF8F5',
     borderWidth: 1,
     borderColor: '#EFEBF8',
-    alignItems: 'center',
   },
   platformSelectBtnActive: {
     backgroundColor: '#582CDB',
     borderColor: '#582CDB',
   },
   platformSelectBtnText: {
-    fontSize: 11,
+    fontSize: 12,
     fontWeight: '700',
     color: '#524C62',
   },
