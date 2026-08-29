@@ -1280,32 +1280,26 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
             </View>
 
             <View style={styles.questContentGroup}>
-              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-                <Text style={[styles.activeQuestTagText, isBrandQuestAccepted && { color: '#059669' }]}>
-                  {isBrandQuestAccepted ? 'ACTIVE CAMPAIGN' : 'BRAND QUEST'}
-                </Text>
-                {isBrandQuestAccepted && (
-                  <View style={styles.activeCampaignLivePill}>
-                    <Text style={styles.activeCampaignLiveText}>✓ LIVE</Text>
-                  </View>
-                )}
-              </View>
-              <Text style={[styles.questTitle, isDark && styles.textWhite]}>Lagos Food Festival</Text>
-              <Text style={[styles.questSubtext, isDark && styles.textMutedDark]}>
-                {isBrandQuestAccepted ? 'Tap to view campaign brief' : 'Review & Vlog'}
+              <Text
+                style={[
+                  styles.activeQuestTagText,
+                  isBrandQuestAccepted && styles.activeQuestTagTextAccepted,
+                ]}
+                numberOfLines={1}
+              >
+                {isBrandQuestAccepted ? '● ACTIVE CAMPAIGN' : 'BRAND QUEST'}
+              </Text>
+              <Text style={[styles.questTitle, isDark && styles.textWhite]} numberOfLines={1}>
+                Lagos Food Festival
+              </Text>
+              <Text style={[styles.questSubtext, isDark && styles.textMutedDark]} numberOfLines={1}>
+                Review &amp; Vlog
               </Text>
             </View>
 
-            <View style={{ alignItems: 'flex-end', justifyContent: 'center', gap: 4 }}>
-              <View style={styles.bountyRewardBox}>
-                <Text style={styles.bountyAmountText}>$450</Text>
-                <Text style={styles.bountySubLabel}>Bounty</Text>
-              </View>
-              <View style={[styles.cardCampaignActionBtn, isBrandQuestAccepted && styles.cardCampaignActionBtnActive]}>
-                <Text style={[styles.cardCampaignActionText, isBrandQuestAccepted && styles.cardCampaignActionTextActive]}>
-                  {isBrandQuestAccepted ? 'View Campaign ›' : 'Start Campaign ›'}
-                </Text>
-              </View>
+            <View style={styles.bountyRewardBox}>
+              <Text style={styles.bountyAmountText}>$450</Text>
+              <Text style={styles.bountySubLabel}>Bounty</Text>
             </View>
           </Pressable>
 
@@ -2874,6 +2868,9 @@ const styles = StyleSheet.create({
     letterSpacing: 0.6,
     textTransform: 'uppercase',
     marginBottom: 2,
+  },
+  activeQuestTagTextAccepted: {
+    color: '#059669',
   },
   questTitle: {
     fontSize: 15.5,
