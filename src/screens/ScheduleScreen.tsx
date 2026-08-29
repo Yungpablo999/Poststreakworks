@@ -310,14 +310,9 @@ export const ScheduleScreen: React.FC<ScheduleScreenProps> = ({
           <View style={styles.todayHeroCard}>
             <View style={styles.todayHeaderRow}>
               <Text style={styles.todayMainTitle}>Today</Text>
-              <View style={styles.todayPillsGroup}>
-                <View style={styles.scheduledStatusPill}>
-                  <Text style={styles.scheduledStatusPillText}>1 Scheduled</Text>
-                </View>
-                <View style={styles.draftStatusPill}>
-                  <Text style={styles.draftStatusPillText}>1 Draft</Text>
-                </View>
-              </View>
+              <Text style={styles.todayStatusSubtle}>
+                1 scheduled <Text style={styles.todayStatusDot}>·</Text> 1 draft
+              </Text>
             </View>
 
             <Text style={styles.postsPlannedBig}>
@@ -332,15 +327,20 @@ export const ScheduleScreen: React.FC<ScheduleScreenProps> = ({
               <View style={[styles.progressBarFill, { width: '33.3%' }]} />
             </View>
 
-            {/* Streak Shield Banner */}
+            {/* Streak Shield Banner (Compact Single Line) */}
             <View style={styles.streakBannerBox}>
               <Text style={styles.streakBannerFlame}>🔥</Text>
-              <Text style={styles.streakBannerText}>
-                Posting today protects your <Text style={{ fontWeight: '800', color: '#171420' }}>47-day streak</Text>.
+              <Text
+                style={styles.streakBannerText}
+                numberOfLines={1}
+                adjustsFontSizeToFit={true}
+                minimumFontScale={0.85}
+              >
+                Posting today protects your <Text style={{ fontWeight: '800', color: '#171420' }}>{userProfile?.streakCount || 47}-day streak</Text>
               </Text>
             </View>
 
-            {/* Dual Action Buttons */}
+            {/* Actions: Primary Schedule Button + Quiet Secondary Link */}
             <View style={styles.todayActionButtonsRow}>
               <Pressable
                 style={({ pressed }) => [styles.scheduleNewPostBtn, pressed && styles.btnPressed]}
@@ -353,7 +353,7 @@ export const ScheduleScreen: React.FC<ScheduleScreenProps> = ({
               </Pressable>
 
               <Pressable
-                style={({ pressed }) => [styles.createFromIdeaBtn, pressed && styles.btnPressed]}
+                style={({ pressed }) => [styles.createFromIdeaQuietBtn, pressed && styles.btnPressed]}
                 onPress={() => {
                   if (Platform.OS !== 'web') {
                     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
@@ -364,8 +364,11 @@ export const ScheduleScreen: React.FC<ScheduleScreenProps> = ({
                     onNavigateTab('create');
                   }
                 }}
+                hitSlop={8}
               >
-                <Text style={styles.createFromIdeaBtnText}>Create From Idea</Text>
+                <Text style={styles.createFromIdeaQuietText}>
+                  ✨ <Text style={{ textDecorationLine: 'underline' }}>Create from Idea</Text> →
+                </Text>
               </Pressable>
             </View>
           </View>
@@ -1218,6 +1221,15 @@ const styles = StyleSheet.create({
     fontWeight: '800',
     color: '#171420',
   },
+  todayStatusSubtle: {
+    fontSize: 12.5,
+    fontWeight: '600',
+    color: '#64748B',
+  },
+  todayStatusDot: {
+    color: '#94A3B8',
+    fontWeight: '800',
+  },
   todayPillsGroup: {
     flexDirection: 'row',
     gap: 6,
@@ -1275,28 +1287,31 @@ const styles = StyleSheet.create({
   streakBannerBox: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
+    gap: 6,
     backgroundColor: '#FAF8F5',
-    borderRadius: 12,
+    borderRadius: 10,
     borderWidth: 1,
     borderColor: '#EFEBF8',
-    paddingVertical: 10,
-    paddingHorizontal: 12,
+    paddingVertical: 7,
+    paddingHorizontal: 10,
     marginBottom: 16,
   },
   streakBannerFlame: {
-    fontSize: 14,
+    fontSize: 13,
   },
   streakBannerText: {
-    fontSize: 12.5,
+    fontSize: 12,
     color: '#524C62',
+    flex: 1,
   },
   todayActionButtonsRow: {
-    gap: 10,
+    gap: 8,
+    alignItems: 'center',
   },
   scheduleNewPostBtn: {
     backgroundColor: '#582CDB',
-    height: 48,
+    height: 46,
+    width: '100%',
     borderRadius: 14,
     justifyContent: 'center',
     alignItems: 'center',
@@ -1310,18 +1325,15 @@ const styles = StyleSheet.create({
     fontWeight: '800',
     color: '#FFFFFF',
   },
-  createFromIdeaBtn: {
-    backgroundColor: '#FFFFFF',
-    borderWidth: 1.5,
-    borderColor: '#582CDB',
-    height: 48,
-    borderRadius: 14,
-    justifyContent: 'center',
+  createFromIdeaQuietBtn: {
+    paddingVertical: 6,
+    paddingHorizontal: 12,
     alignItems: 'center',
+    justifyContent: 'center',
   },
-  createFromIdeaBtnText: {
-    fontSize: 14,
-    fontWeight: '800',
+  createFromIdeaQuietText: {
+    fontSize: 13,
+    fontWeight: '700',
     color: '#582CDB',
   },
 
