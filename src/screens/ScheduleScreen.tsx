@@ -717,9 +717,23 @@ export const ScheduleScreen: React.FC<ScheduleScreenProps> = ({
               </View>
             </View>
 
-            <Text style={styles.jarvisRecBody}>
-              Your strongest posting window today is <Text style={{ color: '#D97706', fontWeight: '800' }}>7:30 PM</Text>. Finish your Instagram Reel draft and schedule it for tonight.
-            </Text>
+            {/* Structured Recommendation Block */}
+            <View style={styles.jarvisStructuredBlock}>
+              {/* Row 1: Strongest Window */}
+              <View style={styles.jarvisStructuredItem}>
+                <Text style={styles.jarvisItemHighlightText}>7:30 PM</Text>
+                <Text style={styles.jarvisItemSubText}>Your strongest posting window today</Text>
+              </View>
+
+              {/* Row 2: Instagram Reel Draft */}
+              <View style={styles.jarvisStructuredItem}>
+                <View style={styles.jarvisPlatformRow}>
+                  <SocialBrandIcon platform="instagram" size={13} />
+                  <Text style={styles.jarvisPlatformTitle}>Instagram Reel</Text>
+                </View>
+                <Text style={styles.jarvisItemSubText}>Draft ready to finish</Text>
+              </View>
+            </View>
 
             <Pressable
               style={({ pressed }) => [styles.useSuggestionBtn, pressed && styles.btnPressed]}
@@ -735,13 +749,13 @@ export const ScheduleScreen: React.FC<ScheduleScreenProps> = ({
                 }
               }}
             >
-              <Text style={styles.useSuggestionBtnText}>Use Suggestion</Text>
+              <Text style={styles.useSuggestionBtnText}>Use Suggestion →</Text>
             </Pressable>
           </View>
 
-          {/* Footer Pro Note */}
+          {/* Footer Pro Note - Subtler & Quieter */}
           <Text style={styles.footerProNote}>
-            Free users can plan and track posts. <Text style={{ color: '#582CDB', fontWeight: '700' }}>Pro unlocks advanced best-time scheduling</Text> and deeper analytics.
+            Free users can plan and track posts · <Text style={{ color: '#7C3AED', fontWeight: '600' }}>Pro unlocks advanced AI scheduling</Text>
           </Text>
 
           {/* Bottom Space for Floating Tab Bar */}
@@ -1919,65 +1933,98 @@ const styles = StyleSheet.create({
   // 6. JARVIS RECOMMENDATION
   jarvisRecCard: {
     backgroundColor: '#EDE9FE',
-    borderRadius: 24,
-    padding: 20,
-    marginBottom: 16,
+    borderRadius: 20,
+    padding: 16,
+    marginBottom: 14,
   },
   jarvisRecHeader: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 10,
-    marginBottom: 10,
+    marginBottom: 12,
   },
   jarvisFlameCircle: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
+    width: 34,
+    height: 34,
+    borderRadius: 17,
     backgroundColor: '#FFFFFF',
     justifyContent: 'center',
     alignItems: 'center',
   },
   jarvisFlameIcon: {
-    width: 22,
-    height: 22,
+    width: 20,
+    height: 20,
   },
   jarvisRecTag: {
-    fontSize: 10,
+    fontSize: 9.5,
     fontWeight: '800',
     color: '#6D28D9',
     letterSpacing: 0.6,
   },
   jarvisRecTitle: {
-    fontSize: 15,
+    fontSize: 14.5,
     fontWeight: '800',
     color: '#171420',
   },
-  jarvisRecBody: {
-    fontSize: 13,
-    color: '#475569',
-    lineHeight: 19,
+  jarvisStructuredBlock: {
+    backgroundColor: 'rgba(255, 255, 255, 0.75)',
+    borderRadius: 14,
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+    gap: 10,
     marginBottom: 14,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.9)',
+  },
+  jarvisStructuredItem: {
+    gap: 1.5,
+  },
+  jarvisItemHighlightText: {
+    fontSize: 16,
+    fontWeight: '800',
+    color: '#171420',
+    letterSpacing: -0.2,
+  },
+  jarvisPlatformRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+  },
+  jarvisPlatformTitle: {
+    fontSize: 13.5,
+    fontWeight: '800',
+    color: '#171420',
+  },
+  jarvisItemSubText: {
+    fontSize: 11.5,
+    color: '#64748B',
+    fontWeight: '500',
   },
   useSuggestionBtn: {
     backgroundColor: '#582CDB',
-    height: 46,
+    height: 42,
     borderRadius: 12,
     justifyContent: 'center',
     alignItems: 'center',
+    shadowColor: '#582CDB',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.12,
+    shadowRadius: 4,
+    elevation: 2,
   },
   useSuggestionBtnText: {
-    fontSize: 14,
+    fontSize: 13.5,
     fontWeight: '800',
     color: '#FFFFFF',
   },
 
   footerProNote: {
-    fontSize: 12,
-    color: '#64748B',
+    fontSize: 10.5,
+    color: '#94A3B8',
     textAlign: 'center',
-    lineHeight: 16,
-    paddingHorizontal: 16,
-    marginBottom: 10,
+    lineHeight: 15,
+    paddingHorizontal: 20,
+    marginBottom: 8,
   },
 
   // MODALS
