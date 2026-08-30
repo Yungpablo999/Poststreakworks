@@ -522,9 +522,11 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
 
   const unreadNotifCount = notificationsList.filter((n) => n.unread).length;
 
-  // Filter the display platforms: all selected ones + default top 2 (TikTok, Instagram)
-  const displayedPlatformIds = Array.from(new Set([...selectedPlatforms, 'tiktok', 'instagram']));
-  const displayedPlatforms = ALL_AVAILABLE_PLATFORMS.filter((p) => displayedPlatformIds.includes(p.id));
+  // Filter the display platforms: show only what the user selected. If none selected yet, show starter placeholders.
+  const displayedPlatforms =
+    selectedPlatforms.length > 0
+      ? ALL_AVAILABLE_PLATFORMS.filter((p) => selectedPlatforms.includes(p.id))
+      : ALL_AVAILABLE_PLATFORMS.filter((p) => ['tiktok', 'instagram'].includes(p.id));
 
   return (
     <SafeAreaView style={[styles.safeArea, isDark && { backgroundColor: '#0C0A12' }]}>
@@ -641,10 +643,40 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
             </Pressable>
           </View>
 
-          {/* Clean Evenly Distributed Platforms Row (Full Width Fitting) */}
+          {/* Clean Platforms Row / Grid */}
           <View style={styles.platformsRow}>
             {displayedPlatforms.map((plat) => {
               const isSelected = selectedPlatforms.includes(plat.id);
+              const isSingle = displayedPlatforms.length === 1;
+
+              if (isSingle) {
+                return (
+                  <Pressable
+                    key={plat.id}
+                    style={[
+                      styles.platformCardSingle,
+                      isSelected && styles.platformCardActive,
+                    ]}
+                    onPress={() => togglePlatform(plat.id)}
+                  >
+                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, flex: 1 }}>
+                      <PlatformIcon iconType={plat.iconType} size={36} />
+                      <View style={{ flex: 1 }}>
+                        <Text style={styles.platformCardNameSingle}>{plat.name}</Text>
+                        <Text style={styles.platformCardFormatSingle}>{plat.format}</Text>
+                      </View>
+                    </View>
+                    {isSelected ? (
+                      <View style={styles.platformActiveBadge}>
+                        <Text style={{ fontSize: 10, color: '#FFFFFF', fontWeight: '700' }}>✓</Text>
+                      </View>
+                    ) : (
+                      <View style={styles.platformInactiveBadge} />
+                    )}
+                  </Pressable>
+                );
+              }
+
               return (
                 <Pressable
                   key={plat.id}
@@ -1830,6 +1862,35 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.04,
     shadowRadius: 6,
     elevation: 2,
+  },
+  platformCardSingle: {
+    width: '100%',
+    minHeight: 68,
+    marginBottom: 8,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 18,
+    borderWidth: 1.5,
+    borderColor: '#EFECE6',
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    shadowColor: '#582CDB',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.04,
+    shadowRadius: 6,
+    elevation: 2,
+  },
+  platformCardNameSingle: {
+    fontSize: 14,
+    fontWeight: '800',
+    color: '#171420',
+  },
+  platformCardFormatSingle: {
+    fontSize: 11.5,
+    color: '#64748B',
+    marginTop: 2,
   },
   platformCardActive: {
     borderColor: '#582CDB',
