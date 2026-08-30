@@ -335,7 +335,8 @@ export const MissionDetailScreen: React.FC<MissionDetailScreenProps> = ({
               <Text style={styles.suggestedIdeaTag}>SUGGESTED IDEA</Text>
               <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
                 <Rect x="2" y="3" width="20" height="14" rx="2" stroke="#E0E7FF" strokeWidth="2" />
-                <Path d="M8 21h8M12 17v4" stroke="#E0E7FF" strokeWidth="2" strokeLinecap="round" />
+                <Path d="M8 21H16" stroke="#E0E7FF" strokeWidth="2" strokeLinecap="round" />
+                <Path d="M12 17V21" stroke="#E0E7FF" strokeWidth="2" strokeLinecap="round" />
               </Svg>
             </View>
 
@@ -370,43 +371,7 @@ export const MissionDetailScreen: React.FC<MissionDetailScreenProps> = ({
             </View>
           </View>
 
-          {/* 4. WHAT YOU'LL BUILD */}
-          <View style={styles.improvesCard}>
-            <Text style={styles.improvesSectionTitle}>WHAT YOU&apos;LL BUILD</Text>
-            <View style={styles.improvesPillsRow}>
-              <View style={styles.improvesPillGray}>
-                <Text style={styles.improvesPillGrayText}>Consistency</Text>
-              </View>
-              <View style={styles.improvesPillPurple}>
-                <Text style={styles.improvesPillPurpleText}>XP Boost</Text>
-              </View>
-              <View style={styles.improvesPillGold}>
-                <Text style={styles.improvesPillGoldText}>Growth</Text>
-              </View>
-              <View style={styles.improvesPillPassport}>
-                <Text style={styles.improvesPillPassportText}>Creator Passport</Text>
-              </View>
-            </View>
-          </View>
-
-          {/* 5. XP & REWARD CARD */}
-          <View style={styles.rewardCard}>
-            <View style={styles.rewardTopRow}>
-              <View style={styles.rewardMedalBox}>
-                <Text style={{ fontSize: 20 }}>🎖️</Text>
-              </View>
-              <View>
-                <Text style={styles.rewardTitle}>+80 XP Pending</Text>
-                <Text style={styles.rewardSubtitle}>Streak Protection</Text>
-              </View>
-            </View>
-
-            <View style={styles.momentumBadgePill}>
-              <Text style={styles.momentumBadgeText}>MOMENTUM BUILDER BADGE</Text>
-            </View>
-          </View>
-
-          {/* 6. JARVIS INSIGHT CARD */}
+          {/* 4. JARVIS INSIGHT CARD */}
           <View style={styles.jarvisCard}>
             <View style={styles.jarvisHeaderRow}>
               <Animated.View
@@ -432,15 +397,59 @@ export const MissionDetailScreen: React.FC<MissionDetailScreenProps> = ({
             </Text>
 
             <Pressable
-              style={styles.generateIdeaLink}
+              style={({ pressed }) => [styles.generateIdeaBtn, pressed && styles.btnPressed]}
               onPress={() => {
-                triggerModalPop();
-                setShowIdeaModal(true);
+                if (Platform.OS !== 'web') {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                }
+                if (onOpenCreateIdea) {
+                  onOpenCreateIdea();
+                } else if (onNavigateTab) {
+                  onNavigateTab('create');
+                } else {
+                  triggerModalPop();
+                  setShowIdeaModal(true);
+                }
               }}
-              hitSlop={6}
             >
-              <Text style={styles.generateIdeaLinkText}>✨ GENERATE IDEA</Text>
+              <Text style={styles.generateIdeaBtnText}>✨ Generate Idea →</Text>
             </Pressable>
+          </View>
+
+          {/* 5. WHAT YOU'LL BUILD */}
+          <View style={styles.improvesCard}>
+            <Text style={styles.improvesSectionTitle}>WHAT YOU&apos;LL BUILD</Text>
+            <View style={styles.improvesPillsRow}>
+              <View style={styles.improvesPillGray}>
+                <Text style={styles.improvesPillGrayText}>Consistency</Text>
+              </View>
+              <View style={styles.improvesPillPurple}>
+                <Text style={styles.improvesPillPurpleText}>XP Boost</Text>
+              </View>
+              <View style={styles.improvesPillGold}>
+                <Text style={styles.improvesPillGoldText}>Growth</Text>
+              </View>
+              <View style={styles.improvesPillPassport}>
+                <Text style={styles.improvesPillPassportText}>Creator Passport</Text>
+              </View>
+            </View>
+          </View>
+
+          {/* 6. XP & REWARD CARD */}
+          <View style={styles.rewardCard}>
+            <View style={styles.rewardTopRow}>
+              <View style={styles.rewardMedalBox}>
+                <Text style={{ fontSize: 20 }}>🏅</Text>
+              </View>
+              <View style={{ flex: 1 }}>
+                <Text style={styles.rewardTitle}>+80 XP</Text>
+                <Text style={styles.rewardSubtitle}>Earned when you complete today&apos;s mission</Text>
+              </View>
+            </View>
+
+            <View style={styles.momentumBadgePill}>
+              <Text style={styles.momentumBadgeText}>🏅 Momentum Builder · Reward for completing this mission</Text>
+            </View>
           </View>
 
           {/* 7. DUAL ACTION BUTTONS */}
@@ -449,8 +458,15 @@ export const MissionDetailScreen: React.FC<MissionDetailScreenProps> = ({
             <Pressable
               style={({ pressed }) => [styles.createPostBtn, pressed && styles.btnPressed]}
               onPress={() => {
-                triggerModalPop();
-                setShowCreateModal(true);
+                if (Platform.OS !== 'web') {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                }
+                if (onOpenPostComposer) {
+                  onOpenPostComposer(postTitle, postPlatform);
+                } else {
+                  triggerModalPop();
+                  setShowCreateModal(true);
+                }
               }}
             >
               <LinearGradient
@@ -463,12 +479,17 @@ export const MissionDetailScreen: React.FC<MissionDetailScreenProps> = ({
               </LinearGradient>
             </Pressable>
 
-            {/* Secondary Button: I Published This */}
+            {/* Secondary Button: Manual fallback */}
             <Pressable
               style={({ pressed }) => [styles.publishedBtn, pressed && styles.btnPressed]}
-              onPress={handleCompleteMission}
+              onPress={() => {
+                if (Platform.OS !== 'web') {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                }
+                handleCompleteMission();
+              }}
             >
-              <Text style={styles.publishedBtnText}>✓  I Published This</Text>
+              <Text style={styles.publishedBtnText}>✓  I published manually</Text>
             </Pressable>
           </View>
 
@@ -1337,19 +1358,25 @@ const styles = StyleSheet.create({
     fontStyle: 'italic',
     marginBottom: 12,
   },
-  generateIdeaLink: {
+  generateIdeaBtn: {
+    backgroundColor: '#FAF8F5',
+    borderWidth: 1,
+    borderColor: '#EFEBF8',
+    paddingVertical: 8,
+    paddingHorizontal: 14,
+    borderRadius: 10,
     alignSelf: 'flex-start',
+    marginTop: 4,
   },
-  generateIdeaLinkText: {
-    fontSize: 12,
+  generateIdeaBtnText: {
+    fontSize: 12.5,
     fontWeight: '800',
     color: '#582CDB',
-    letterSpacing: 0.5,
   },
 
   // 7. DUAL ACTION BUTTONS
   actionButtonsContainer: {
-    gap: 12,
+    gap: 10,
     marginBottom: 10,
   },
   createPostBtn: {
@@ -1358,7 +1385,7 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     shadowColor: '#582CDB',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.08,
+    shadowOpacity: 0.12,
     shadowRadius: 10,
     elevation: 3,
   },
@@ -1374,18 +1401,18 @@ const styles = StyleSheet.create({
     letterSpacing: -0.2,
   },
   publishedBtn: {
-    height: 52,
-    borderRadius: 16,
-    borderWidth: 1.5,
-    borderColor: '#582CDB',
-    backgroundColor: '#FFFFFF',
+    height: 44,
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    backgroundColor: '#F8FAFC',
     justifyContent: 'center',
     alignItems: 'center',
   },
   publishedBtnText: {
-    fontSize: 15,
-    fontWeight: '800',
-    color: '#582CDB',
+    fontSize: 13,
+    fontWeight: '700',
+    color: '#64748B',
   },
 
   // MODALS
