@@ -730,7 +730,10 @@ export const ProPostComposerScreen: React.FC<ProPostComposerScreenProps> = ({
           <View style={styles.modalOverlay}>
             <Animated.View style={[styles.modalCard, { transform: [{ scale: modalPopScale }] }]}>
               <View style={styles.modalHeaderBetween}>
-                <Text style={styles.modalTitle}>Choose Post Idea</Text>
+                <View style={{ flex: 1, paddingRight: 8 }}>
+                  <Text style={styles.modalTitle}>Choose Post Idea</Text>
+                  <Text style={styles.modalSubtitle}>Choose an idea from your vault or start with a quick prompt.</Text>
+                </View>
                 <Pressable onPress={() => setShowChangeIdeaModal(false)} hitSlop={8}>
                   <Text style={styles.modalCloseText}>✕</Text>
                 </Pressable>
@@ -740,21 +743,22 @@ export const ProPostComposerScreen: React.FC<ProPostComposerScreenProps> = ({
                 {SAMPLE_IDEAS.map((idea, idx) => (
                   <Pressable
                     key={idx}
-                    style={styles.ideaOptionCard}
+                    style={[styles.ideaOptionCard, currentIdea === idea && { borderColor: '#7C3AED', backgroundColor: '#F5F3FF' }]}
                     onPress={() => {
                       setCurrentIdea(idea);
                       setShowChangeIdeaModal(false);
                       showToast(`✓ Selected: "${idea}"`);
                     }}
                   >
-                    <Text style={styles.ideaOptionText}>&ldquo;{idea}&rdquo;</Text>
+                    <Text style={[styles.ideaOptionText, currentIdea === idea && { color: '#7C3AED', fontWeight: '800' }]}>&ldquo;{idea}&rdquo;</Text>
+                    {currentIdea === idea && (
+                      <View style={{ width: 22, height: 22, borderRadius: 11, backgroundColor: '#7C3AED', justifyContent: 'center', alignItems: 'center' }}>
+                        <Text style={{ color: '#FFFFFF', fontSize: 12, fontWeight: '800' }}>✓</Text>
+                      </View>
+                    )}
                   </Pressable>
                 ))}
               </View>
-
-              <Pressable style={styles.modalCancelBtn} onPress={() => setShowChangeIdeaModal(false)}>
-                <Text style={styles.modalCancelBtnText}>Close</Text>
-              </Pressable>
             </Animated.View>
           </View>
         </Modal>
@@ -1373,17 +1377,30 @@ const styles = StyleSheet.create({
     color: '#171420',
     letterSpacing: -0.3,
   },
+  modalSubtitle: {
+    fontSize: 12,
+    color: '#64748B',
+    marginTop: 2,
+    lineHeight: 16,
+  },
   ideaOptionCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 12,
     backgroundColor: '#FAF8F5',
-    borderRadius: 12,
-    padding: 12,
-    borderWidth: 1,
+    borderRadius: 14,
+    paddingVertical: 12,
+    paddingHorizontal: 14,
+    borderWidth: 1.5,
     borderColor: '#EFECE6',
   },
   ideaOptionText: {
+    flex: 1,
     fontSize: 13,
     fontWeight: '800',
     color: '#171420',
+    lineHeight: 18,
   },
   platformModalRow: {
     flexDirection: 'row',

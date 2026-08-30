@@ -1242,14 +1242,14 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
               <View style={styles.modalHeaderRow}>
                 <View style={styles.modalTitleContainer}>
                   <Text style={styles.modalTitle}>Choose Post Idea</Text>
-                  <Text style={styles.modalSubtitle}>Select from your Idea Vault or Quick Prompts</Text>
+                  <Text style={styles.modalSubtitle}>Choose an idea from your vault or start with a quick prompt.</Text>
                 </View>
                 <Pressable onPress={() => setShowChangeIdeaModal(false)} style={styles.modalCloseCircle} hitSlop={8}>
                   <Text style={styles.modalCloseCross}>✕</Text>
                 </Pressable>
               </View>
 
-              <ScrollView style={{ maxHeight: 260 }} showsVerticalScrollIndicator={false}>
+              <ScrollView style={{ maxHeight: 340 }} showsVerticalScrollIndicator={false}>
                 {SAMPLE_IDEAS.map((idea, idx) => (
                   <Pressable
                     key={idx}
@@ -1268,16 +1268,14 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
                     <Text style={[styles.ideaChoiceText, currentIdea === idea && styles.ideaChoiceTextActive]}>
                       &ldquo;{idea}&rdquo;
                     </Text>
+                    {currentIdea === idea && (
+                      <View style={styles.ideaChoiceCheckmark}>
+                        <Text style={styles.ideaChoiceCheckmarkText}>✓</Text>
+                      </View>
+                    )}
                   </Pressable>
                 ))}
               </ScrollView>
-
-              <Pressable
-                style={styles.modalFullBtn}
-                onPress={() => setShowChangeIdeaModal(false)}
-              >
-                <Text style={styles.modalFullBtnText}>Close</Text>
-              </Pressable>
             </Animated.View>
           </View>
         </Modal>
@@ -2909,11 +2907,16 @@ const styles = StyleSheet.create({
   },
 
   ideaChoiceItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 12,
     backgroundColor: '#F8FAFC',
-    borderRadius: 12,
-    borderWidth: 1,
+    borderRadius: 14,
+    borderWidth: 1.5,
     borderColor: '#EFECE6',
-    padding: 12,
+    paddingVertical: 12,
+    paddingHorizontal: 14,
     marginBottom: 8,
   },
   ideaChoiceItemActive: {
@@ -2921,13 +2924,30 @@ const styles = StyleSheet.create({
     borderColor: '#582CDB',
   },
   ideaChoiceText: {
+    flex: 1,
     fontSize: 13,
     color: '#334155',
     fontWeight: '600',
+    lineHeight: 18,
   },
   ideaChoiceTextActive: {
     color: '#582CDB',
     fontWeight: '800',
+  },
+  ideaChoiceCheckmark: {
+    width: 22,
+    height: 22,
+    borderRadius: 11,
+    backgroundColor: '#582CDB',
+    justifyContent: 'center',
+    alignItems: 'center',
+    flexShrink: 0,
+  },
+  ideaChoiceCheckmarkText: {
+    color: '#FFFFFF',
+    fontSize: 12,
+    fontWeight: '800',
+    lineHeight: 14,
   },
   notifCard: {
     flexDirection: 'row',
