@@ -241,7 +241,7 @@ const CREATOR_STORIES: CreatorStory[] = [
         timeAgo: '2d ago',
         highlights: [
           { title: '3 AI tools I use every single day to post', platform: 'TikTok', views: '92.1k', saves: '12.4k' },
-          { title: 'How to automate your content schedule', platform: 'LinkedIn', views: '45.7k', saves: '5.2k' },
+          { title: 'How to automate your content schedule', platform: 'YouTube Shorts', views: '45.7k', saves: '5.2k' },
         ],
       },
     ],

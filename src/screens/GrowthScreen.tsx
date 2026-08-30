@@ -142,36 +142,6 @@ const INITIAL_GROWTH_PLATFORMS: GrowthPlatformAccount[] = [
     canAdd: false,
   },
   {
-    id: 'linkedin',
-    name: 'LinkedIn',
-    handle: 'Pablo (Tech & Creator)',
-    followers: '1.2K',
-    countNumeric: 1200,
-    bgTint: '#EFF6FF',
-    connected: false,
-    canAdd: true,
-  },
-  {
-    id: 'x_twitter',
-    name: 'X (Twitter)',
-    handle: '@pablocreates',
-    followers: '3.1K',
-    countNumeric: 3100,
-    bgTint: '#F8FAFC',
-    connected: false,
-    canAdd: true,
-  },
-  {
-    id: 'snapchat',
-    name: 'Snapchat',
-    handle: 'pablo.snaps',
-    followers: '1.8K',
-    countNumeric: 1800,
-    bgTint: '#FEF9C3',
-    connected: false,
-    canAdd: true,
-  },
-  {
     id: 'threads',
     name: 'Threads',
     handle: '@pablocreates',
@@ -229,7 +199,7 @@ export const GrowthScreen: React.FC<GrowthScreenProps> = ({
   const [showConnectPlatformModal, setShowConnectPlatformModal] = useState(false);
   const [platformsList, setPlatformsList] = useState<GrowthPlatformAccount[]>(INITIAL_GROWTH_PLATFORMS);
   const [customHandleInput, setCustomHandleInput] = useState('');
-  const [selectedPlatformToAdd, setSelectedPlatformToAdd] = useState('linkedin');
+  const [selectedPlatformToAdd, setSelectedPlatformToAdd] = useState('threads');
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   const showToast = (msg: string) => {

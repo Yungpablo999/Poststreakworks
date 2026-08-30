@@ -80,8 +80,7 @@ const PLATFORM_OPTIONS = [
   { id: 'tiktok', name: 'TikTok', multiplier: '0.8x', icon: '♪' },
   { id: 'instagram', name: 'Insta Reel', multiplier: '1.2x', icon: '📷' },
   { id: 'shorts', name: 'Shorts', multiplier: '1.0x', icon: '▶' },
-  { id: 'linkedin', name: 'LinkedIn', multiplier: '1.5x', icon: 'in' },
-  { id: 'x', name: 'X', multiplier: '0.9x', icon: '𝕏' },
+  { id: 'threads', name: 'Threads', multiplier: '1.3x', icon: '🧵' },
 ];
 
 export const IdeaDetailScreen: React.FC<IdeaDetailScreenProps> = ({

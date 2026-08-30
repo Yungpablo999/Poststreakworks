@@ -43,9 +43,8 @@ export const ProRepurposeScreen: React.FC<ProRepurposeScreenProps> = ({
   const [selectedFormats, setSelectedFormats] = useState<string[]>([
     'tiktok',
     'ig_reel',
-    'linkedin',
-    'x_post',
     'shorts',
+    'threads',
   ]);
   const [selectedCaptionVariation, setSelectedCaptionVariation] = useState('direct');
   const [isGenerating, setIsGenerating] = useState(false);
@@ -57,7 +56,7 @@ export const ProRepurposeScreen: React.FC<ProRepurposeScreenProps> = ({
   // Edit Modals
   const [showEditIdeaModal, setShowEditIdeaModal] = useState(false);
   const [showMorePlatformsModal, setShowMorePlatformsModal] = useState(false);
-  const [extraPlatforms, setExtraPlatforms] = useState<string[]>(['threads', 'pinterest']);
+  const [extraPlatforms, setExtraPlatforms] = useState<string[]>(['pinterest', 'facebook']);
   const [editIdeaText, setEditIdeaText] = useState(originalIdea);
   const [editingVersion, setEditingVersion] = useState<{ id: string; title: string; body: string } | null>(null);
 
@@ -74,24 +73,24 @@ export const ProRepurposeScreen: React.FC<ProRepurposeScreenProps> = ({
       body: 'Stop doing these 3 things if you want to grow past 1,000 followers...',
     },
     {
-      id: 'linkedin',
-      platform: 'LinkedIn Insight',
-      platformType: 'linkedin',
+      id: 'shorts',
+      platform: 'YouTube Shorts',
+      platformType: 'youtube',
       badge: 'OPTIMIZED',
       badgeColor: '#DCFCE7',
       badgeTextColor: '#15803D',
-      title: 'Scaling in the Creator Economy',
-      body: "Reflecting on the friction points of early-stage creation. Consistency isn't just about output volume...",
+      title: 'How I Batch-Film 10 Shorts in 2 Hours',
+      body: 'Breakdown of workflow systems that 10x your output without burnout.',
     },
     {
-      id: 'x_post',
-      platform: 'X Thread Starter',
-      platformType: 'x',
+      id: 'threads',
+      platform: 'Threads Insight',
+      platformType: 'threads',
       badge: 'READY',
       badgeColor: '#DCFCE7',
       badgeTextColor: '#15803D',
-      title: '1/ 90% of new creators fail because of these 3 traps. Here\'s how to avoid them: [thread]',
-      body: 'Breakdown of workflow systems that 10x your output without burnout.',
+      title: 'Stop waiting for the "perfect" idea to start posting.',
+      body: 'Consistency and honest lessons outperform polished perfection every single time.',
     },
   ]);
 
@@ -99,10 +98,10 @@ export const ProRepurposeScreen: React.FC<ProRepurposeScreenProps> = ({
   const [showCompletionModal, setShowCompletionModal] = useState(false);
   const [completionData, setCompletionData] = useState({
     title: 'Content Repurposed!',
-    subtitle: '1 idea converted into 5 platform-optimized posts (+150 XP)',
-    badgeText: '✨ 5-PLATFORM MULTI-REPURPOSE (+150 XP)',
+    subtitle: '1 idea converted into 4 platform-optimized posts (+150 XP)',
+    badgeText: '✨ 4-PLATFORM MULTI-REPURPOSE (+150 XP)',
     xpEarned: 150,
-    speechBubble: 'All 5 versions are calibrated for peak algorithmic retention, Pablo! 🔥',
+    speechBubble: 'All 4 versions are calibrated for peak algorithmic retention, Pablo! 🔥',
   });
 
   const modalPopScale = useRef(new Animated.Value(0.9)).current;
@@ -211,13 +210,13 @@ export const ProRepurposeScreen: React.FC<ProRepurposeScreenProps> = ({
     if (Platform.OS !== 'web') {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     }
-    const all = ['tiktok', 'ig_reel', 'linkedin', 'x_post', 'shorts'];
+    const all = ['tiktok', 'ig_reel', 'shorts', 'threads'];
     if (selectedFormats.length === all.length) {
       setSelectedFormats(['tiktok']);
       showToast('Reset to TikTok format');
     } else {
       setSelectedFormats(all);
-      showToast('✓ Selected all 5 formats');
+      showToast('✓ Selected all 4 formats');
     }
   };
 
@@ -235,7 +234,7 @@ export const ProRepurposeScreen: React.FC<ProRepurposeScreenProps> = ({
         subtitle: `Created tailored scripts for ${selectedFormats.length} platforms.`,
         badgeText: '✨ MULTI-PLATFORM SYNC (+50 XP)',
         xpEarned: 50,
-        speechBubble: 'Hooks, tone & pacing calibrated for TikTok, Reels, LinkedIn & X, Pablo! 🚀',
+        speechBubble: 'Hooks, tone & pacing calibrated for TikTok, Reels, Shorts & Threads, Pablo! 🚀',
       });
       setShowCompletionModal(true);
     }, 900);
@@ -433,7 +432,7 @@ export const ProRepurposeScreen: React.FC<ProRepurposeScreenProps> = ({
 
           <Text style={styles.heroTitle}>Turn one idea into platform-ready posts.</Text>
           <Text style={styles.heroSubtitle}>
-            Adapt one content idea into tailored versions for TikTok, Instagram, LinkedIn, X, and Shorts.
+            Adapt one content idea into tailored versions for TikTok, Instagram Reels, YouTube Shorts, and Threads.
           </Text>
         </View>
 
@@ -491,7 +490,7 @@ export const ProRepurposeScreen: React.FC<ProRepurposeScreenProps> = ({
             <Text style={styles.sectionHeaderTitle}>Select Formats</Text>
             <Pressable onPress={handleToggleSelectAll} hitSlop={8}>
               <Text style={styles.selectAllLinkText}>
-                {selectedFormats.length === 5 ? 'Deselect All' : 'Select All'}
+                {selectedFormats.length === 4 ? 'Deselect All' : 'Select All'}
               </Text>
             </Pressable>
           </View>
@@ -501,9 +500,9 @@ export const ProRepurposeScreen: React.FC<ProRepurposeScreenProps> = ({
             {[
               { id: 'tiktok', name: 'TikTok', platformType: 'tiktok' },
               { id: 'ig_reel', name: 'IG Reel', platformType: 'instagram' },
-              { id: 'linkedin', name: 'LinkedIn', platformType: 'linkedin' },
-              { id: 'x_post', name: 'X Post', platformType: 'x' },
               { id: 'shorts', name: 'Shorts', platformType: 'youtube' },
+              { id: 'threads', name: 'Threads', platformType: 'threads' },
+              { id: 'facebook', name: 'Facebook', platformType: 'facebook' },
               { id: 'more', name: 'More', isMore: true },
             ].map((fmt) => {
               const isSelected = selectedFormats.includes(fmt.id);
@@ -986,12 +985,6 @@ export const ProRepurposeScreen: React.FC<ProRepurposeScreenProps> = ({
                   name: 'Facebook',
                   platformType: 'facebook',
                   desc: 'Creator pages & community groups',
-                },
-                {
-                  id: 'snapchat',
-                  name: 'Snapchat',
-                  platformType: 'snapchat',
-                  desc: 'Spotlight & short story snaps',
                 },
                 {
                   id: 'newsletter',

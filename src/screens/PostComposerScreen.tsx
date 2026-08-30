@@ -55,7 +55,7 @@ interface PlatformOption {
   multiplier: string;
   bgColor: string;
   gradient?: string[];
-  iconType: 'tiktok' | 'instagram' | 'youtube' | 'linkedin' | 'x' | 'threads' | 'pinterest' | 'snapchat' | 'facebook';
+  iconType: 'tiktok' | 'instagram' | 'youtube' | 'threads' | 'pinterest' | 'facebook';
 }
 
 const NOTIFICATIONS: NotificationItem[] = [
@@ -118,24 +118,6 @@ const ALL_AVAILABLE_PLATFORMS: PlatformOption[] = [
     iconType: 'youtube',
   },
   {
-    id: 'linkedin',
-    name: 'LinkedIn',
-    shortName: 'LinkedIn',
-    format: 'Carousels & Posts',
-    multiplier: '1.6x Reach',
-    bgColor: '#0A66C2',
-    iconType: 'linkedin',
-  },
-  {
-    id: 'x',
-    name: 'X (Twitter)',
-    shortName: 'X',
-    format: 'Threads & Takes',
-    multiplier: '1.0x Reach',
-    bgColor: '#000000',
-    iconType: 'x',
-  },
-  {
     id: 'threads',
     name: 'Threads',
     shortName: 'Threads',
@@ -152,15 +134,6 @@ const ALL_AVAILABLE_PLATFORMS: PlatformOption[] = [
     multiplier: '1.5x Saves',
     bgColor: '#E60023',
     iconType: 'pinterest',
-  },
-  {
-    id: 'snapchat',
-    name: 'Snapchat',
-    shortName: 'Snap',
-    format: 'Spotlight & Stories',
-    multiplier: '0.9x Reach',
-    bgColor: '#FFFC00',
-    iconType: 'snapchat',
   },
   {
     id: 'facebook',
@@ -251,24 +224,6 @@ const PlatformIcon = ({ iconType, size = 38 }: { iconType: string; size?: number
       </View>
     );
   }
-  if (iconType === 'linkedin') {
-    return (
-      <View style={[styles.officialIconContainer, { width: size, height: size, backgroundColor: '#0A66C2' }]}>
-        <Svg width={size * 0.55} height={size * 0.55} viewBox="0 0 24 24" fill="#FFFFFF">
-          <Path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z" />
-        </Svg>
-      </View>
-    );
-  }
-  if (iconType === 'x') {
-    return (
-      <View style={[styles.officialIconContainer, { width: size, height: size, backgroundColor: '#000000' }]}>
-        <Svg width={size * 0.52} height={size * 0.52} viewBox="0 0 24 24" fill="#FFFFFF">
-          <Path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
-        </Svg>
-      </View>
-    );
-  }
   if (iconType === 'threads') {
     return (
       <View style={[styles.officialIconContainer, { width: size, height: size, backgroundColor: '#000000' }]}>
@@ -283,15 +238,6 @@ const PlatformIcon = ({ iconType, size = 38 }: { iconType: string; size?: number
       <View style={[styles.officialIconContainer, { width: size, height: size, backgroundColor: '#E60023' }]}>
         <Svg width={size * 0.55} height={size * 0.55} viewBox="0 0 24 24" fill="#FFFFFF">
           <Path d="M12 2a10 10 0 0 0-3.66 19.31c-.05-.82-.09-2.09.02-2.99l.86-3.67s-.22-.44-.22-1.09c0-1.02.59-1.78 1.33-1.78.63 0 .93.47.93 1.04 0 .63-.4 1.58-.61 2.45-.17.74.37 1.34 1.1 1.34 1.32 0 2.34-1.39 2.34-3.4 0-1.78-1.28-3.02-3.11-3.02-2.27 0-3.6 1.7-3.6 3.46 0 .69.26 1.42.59 1.82.07.08.08.15.06.23l-.22.92c-.04.14-.12.17-.28.1-1.04-.48-1.69-2-1.69-3.22 0-2.62 1.9-5.03 5.49-5.03 2.88 0 5.12 2.05 5.12 4.8 0 2.86-1.8 5.16-4.3 5.16-.84 0-1.63-.44-1.9-.95l-.52 1.98c-.19.73-.7 1.64-1.04 2.2A10 10 0 1 0 12 2z" />
-        </Svg>
-      </View>
-    );
-  }
-  if (iconType === 'snapchat') {
-    return (
-      <View style={[styles.officialIconContainer, { width: size, height: size, backgroundColor: '#FFFC00' }]}>
-        <Svg width={size * 0.55} height={size * 0.55} viewBox="0 0 24 24" fill="#000000">
-          <Path d="M12.001 2c-3.8 0-6.2 2.7-6.2 6.2 0 1.2.3 2.6 1 3.5-.1.4-.4.8-.8 1.1-.3.2-.6.4-.9.5-.3.1-.4.3-.4.5 0 .3.3.5.7.6.8.2 1.8.1 2.5-.2.6.8 1.4 1.2 2.2 1.4.3.5.7.8 1.3.8h1.2c.6 0 1-.3 1.3-.8.8-.2 1.6-.6 2.2-1.4.7.3 1.7.4 2.5.2.4-.1.7-.3.7-.6 0-.2-.1-.4-.4-.5-.3-.1-.6-.3-.9-.5-.4-.3-.7-.7-.8-1.1.7-.9 1-2.3 1-3.5 0-3.5-2.4-6.2-6.2-6.2z" />
         </Svg>
       </View>
     );

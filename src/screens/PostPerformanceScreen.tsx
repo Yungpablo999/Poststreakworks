@@ -137,7 +137,7 @@ export const PostPerformanceScreen: React.FC<PostPerformanceScreenProps> = ({
     if (onOpenContentAngle) {
       onOpenContentAngle();
     } else if (onOpenScript) {
-      onOpenScript('Repurposing: 3 creator mistakes into Instagram & LinkedIn format');
+      onOpenScript('Repurposing: 3 creator mistakes into Instagram & Shorts format');
     } else {
       showToast('Repurposing post into 4 multi-channel formats...');
     }
@@ -658,10 +658,10 @@ export const PostPerformanceScreen: React.FC<PostPerformanceScreenProps> = ({
 
               <View style={styles.repurposeGridItem}>
                 <View style={styles.repurposeItemHeader}>
-                  <Text style={styles.repurposeItemTitle} numberOfLines={1}>💼 LinkedIn</Text>
-                  <Text style={styles.repurposeFitBadgeMedium}>MED</Text>
+                  <Text style={styles.repurposeItemTitle} numberOfLines={1}>▶ YouTube Shorts</Text>
+                  <Text style={styles.repurposeFitBadgeMedium}>HIGH</Text>
                 </View>
-                <Text style={styles.repurposeSnippetText}>"Executive text breakdown with takeaways..."</Text>
+                <Text style={styles.repurposeSnippetText}>"Fast-paced vertical short with on-screen text..."</Text>
                 <Text style={styles.repurposeLockTag}>🔒 PRO PREVIEW</Text>
               </View>
 

@@ -1106,12 +1106,12 @@ export const ProCreateScreen: React.FC<ProCreateScreenProps> = ({
                   <Text style={styles.repurposeOptionText}>Instagram Carousel (7-Slide Breakdown)</Text>
                 </View>
                 <View style={styles.repurposeOptionRow}>
-                  <Text style={{ fontSize: 16 }}>🐦</Text>
-                  <Text style={styles.repurposeOptionText}>X / Twitter Thread (5 Viral Tweets)</Text>
+                  <Text style={{ fontSize: 16 }}>▶️</Text>
+                  <Text style={styles.repurposeOptionText}>YouTube Shorts (60s Fast Pacing)</Text>
                 </View>
                 <View style={styles.repurposeOptionRow}>
-                  <Text style={{ fontSize: 16 }}>💼</Text>
-                  <Text style={styles.repurposeOptionText}>LinkedIn Authority Post with Key Insights</Text>
+                  <Text style={{ fontSize: 16 }}>🧵</Text>
+                  <Text style={styles.repurposeOptionText}>Threads Viral Insight (Key Takeaways)</Text>
                 </View>
               </View>
 

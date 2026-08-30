@@ -88,7 +88,7 @@ const JARVIS_STRATEGIES: StrategyItem[] = [
     icon: '🚀',
     title: 'Multi-Sync Cascade Pacing',
     tag: 'DISTRIBUTION MULTIPLIER',
-    body: 'Publish your 9:16 video to Instagram and TikTok simultaneously, then release the long-form text breakdown on LinkedIn 2 hours later to maximize B2B authority.',
+    body: 'Publish your 9:16 video to Instagram and TikTok simultaneously, then release the YouTube Shorts breakdown 2 hours later to maximize multi-channel reach.',
   },
   {
     id: 'strat_4',
@@ -108,20 +108,20 @@ interface FullQueueItem {
   dayLabel: string;
   status: 'AUTOPILOT' | 'READY' | 'QUEUED';
   score: string;
-  iconType: 'tiktok' | 'instagram' | 'youtube' | 'linkedin' | 'x';
+  iconType: 'tiktok' | 'instagram' | 'youtube' | 'threads';
 }
 
 const INITIAL_FULL_QUEUE: FullQueueItem[] = [
   {
     id: 'q1',
-    title: 'LinkedIn Insight: Why 90% of creators fail by Month 2',
-    platformLabel: '💼 LinkedIn',
+    title: 'Shorts Insight: Why 90% of creators fail by Month 2',
+    platformLabel: '▶ Shorts',
     time: '10:00',
     period: 'AM',
     dayLabel: 'Tomorrow (Thu)',
     status: 'AUTOPILOT',
     score: '96% Match',
-    iconType: 'linkedin',
+    iconType: 'youtube',
   },
   {
     id: 'q2',
@@ -158,14 +158,14 @@ const INITIAL_FULL_QUEUE: FullQueueItem[] = [
   },
   {
     id: 'q5',
-    title: 'X Viral Thread: 5 tools that automate my content pipeline',
-    platformLabel: '💼 LinkedIn',
+    title: 'Threads Take: 5 tools that automate my content pipeline',
+    platformLabel: '🧵 Threads',
     time: '09:30',
     period: 'AM',
     dayLabel: 'Monday (Oct 30)',
     status: 'AUTOPILOT',
     score: '95% Match',
-    iconType: 'linkedin',
+    iconType: 'threads',
   },
   {
     id: 'q6',
@@ -185,7 +185,7 @@ interface ScheduleItem {
   time: string;
   period: string;
   title: string;
-  platform: 'tiktok' | 'instagram' | 'youtube' | 'linkedin';
+  platform: 'tiktok' | 'instagram' | 'youtube' | 'threads';
   platformLabel: string;
   badgeType: 'scheduled' | 'recommended' | 'draft';
   dayIndex: number;
@@ -217,8 +217,8 @@ const INITIAL_SCHEDULE_ITEMS: ScheduleItem[] = [
     time: '10:00',
     period: 'AM',
     title: '5 retention rules that 10x watch time',
-    platform: 'linkedin',
-    platformLabel: '💼 LinkedIn',
+    platform: 'youtube',
+    platformLabel: '▶ Shorts',
     badgeType: 'scheduled',
     dayIndex: 3, // THU 26
   },
@@ -305,7 +305,7 @@ export const ProScheduleScreen: React.FC<ProScheduleScreenProps> = ({
   // Form states: Schedule Post
   const [postTitleInput, setPostTitleInput] = useState('');
   const [postTimeInput, setPostTimeInput] = useState('7:30 PM (Peak)');
-  const [selectedPlatform, setSelectedPlatform] = useState<'tiktok' | 'instagram' | 'youtube' | 'linkedin'>('instagram');
+  const [selectedPlatform, setSelectedPlatform] = useState<'tiktok' | 'instagram' | 'youtube' | 'threads'>('instagram');
   const [hashtagsInput, setHashtagsInput] = useState('#creatortips #growth #buildinpublic');
 
   // Form states: Fill Gap
@@ -376,7 +376,7 @@ export const ProScheduleScreen: React.FC<ProScheduleScreenProps> = ({
           ? '≈ TikTok'
           : selectedPlatform === 'youtube'
           ? '▶ Shorts'
-          : '💼 LinkedIn',
+          : '🧵 Threads',
       badgeType: 'scheduled',
       dayIndex: selectedDayIndex,
     };
@@ -814,14 +814,14 @@ export const ProScheduleScreen: React.FC<ProScheduleScreenProps> = ({
           </View>
 
           <View style={styles.queueContainerCard}>
-            {/* Item 1: LinkedIn */}
+            {/* Item 1: Shorts */}
             <Pressable
               style={styles.queueItemRow}
-              onPress={() => showToast('LinkedIn Insight scheduled for Tomorrow 10:00 AM')}
+              onPress={() => showToast('YouTube Short scheduled for Tomorrow 10:00 AM')}
             >
-              <SocialBrandIcon platform="linkedin" size={28} />
+              <SocialBrandIcon platform="youtube" size={28} />
               <View style={{ flex: 1, marginLeft: 10 }}>
-                <Text style={styles.queueItemTitle}>LinkedIn Insight: Why 90% Fail by Month 2</Text>
+                <Text style={styles.queueItemTitle}>Shorts Insight: Why 90% Fail by Month 2</Text>
                 <Text style={styles.queueItemTime}>Tomorrow, 10:00 AM • ⚡ 96% Match</Text>
               </View>
               <Text style={styles.threeDotsMenu}>⋮</Text>
@@ -951,8 +951,8 @@ export const ProScheduleScreen: React.FC<ProScheduleScreenProps> = ({
                 <Text style={styles.legendText}>YOUTUBE</Text>
               </View>
               <View style={styles.legendItem}>
-                <View style={[styles.legendDot, { backgroundColor: '#0A66C2' }]} />
-                <Text style={styles.legendText}>LINKEDIN</Text>
+                <View style={[styles.legendDot, { backgroundColor: '#000000' }]} />
+                <Text style={styles.legendText}>THREADS</Text>
               </View>
             </View>
           </View>
@@ -1134,7 +1134,7 @@ export const ProScheduleScreen: React.FC<ProScheduleScreenProps> = ({
                     { id: 'instagram', label: '📸 IG Reel' },
                     { id: 'tiktok', label: '≈ TikTok' },
                     { id: 'youtube', label: '▶ Shorts' },
-                    { id: 'linkedin', label: '💼 LinkedIn' },
+                    { id: 'threads', label: '🧵 Threads' },
                   ].map((p) => {
                     const isSelected = selectedPlatform === p.id;
                     return (
@@ -1391,7 +1391,7 @@ export const ProScheduleScreen: React.FC<ProScheduleScreenProps> = ({
                   {/* 2. TARGET PLATFORM */}
                   <Text style={styles.inputLabel}>TARGET PLATFORM</Text>
                   <View style={{ flexDirection: 'row', gap: 6, marginBottom: 12 }}>
-                    {['📸 IG Reel', '≈ TikTok', '▶ Shorts', '💼 LinkedIn'].map((plat) => (
+                    {['📸 IG Reel', '≈ TikTok', '▶ Shorts', '🧵 Threads'].map((plat) => (
                       <Pressable
                         key={plat}
                         style={[
@@ -1713,7 +1713,7 @@ export const ProScheduleScreen: React.FC<ProScheduleScreenProps> = ({
 
                 {/* Filter Chips */}
                 <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginVertical: 10 }}>
-                  {['ALL', 'IG Reel', 'TikTok', 'Shorts', 'LinkedIn'].map((filter) => (
+                  {['ALL', 'IG Reel', 'TikTok', 'Shorts', 'Threads'].map((filter) => (
                     <Pressable
                       key={filter}
                       style={[
@@ -1758,7 +1758,7 @@ export const ProScheduleScreen: React.FC<ProScheduleScreenProps> = ({
                             time: item.time,
                             period: item.period,
                             title: item.title,
-                            platform: (item.iconType === 'x' ? 'linkedin' : item.iconType) as any,
+                            platform: item.iconType,
                             platformLabel: item.platformLabel,
                             badgeType: 'scheduled',
                             dayIndex: selectedDayIndex,

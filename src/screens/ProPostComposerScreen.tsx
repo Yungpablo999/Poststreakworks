@@ -45,7 +45,7 @@ interface PlatformOption {
   name: string;
   shortName: string;
   format: string;
-  platformType: 'tiktok' | 'instagram' | 'youtube' | 'linkedin' | 'x' | 'threads';
+  platformType: 'tiktok' | 'instagram' | 'youtube' | 'threads';
 }
 
 const PRO_PLATFORMS: PlatformOption[] = [
@@ -69,20 +69,6 @@ const PRO_PLATFORMS: PlatformOption[] = [
     shortName: 'YouTube',
     format: 'Shorts & Community',
     platformType: 'youtube',
-  },
-  {
-    id: 'x',
-    name: 'X (Twitter)',
-    shortName: 'X',
-    format: 'Viral Thread',
-    platformType: 'x',
-  },
-  {
-    id: 'linkedin',
-    name: 'LinkedIn',
-    shortName: 'LinkedIn',
-    format: 'Thought Leadership',
-    platformType: 'linkedin',
   },
   {
     id: 'threads',

@@ -154,24 +154,6 @@ const INITIAL_PLATFORMS: PlatformAccount[] = [
     bgTint: '#FEF2F2',
   },
   {
-    id: 'x',
-    name: 'X (Twitter)',
-    handle: '@amara_builder',
-    followers: '4.5K',
-    connected: false,
-    color: '#000000',
-    bgTint: '#F8FAFC',
-  },
-  {
-    id: 'linkedin',
-    name: 'LinkedIn',
-    handle: 'amara-okafor',
-    followers: '6.1K',
-    connected: false,
-    color: '#0A66C2',
-    bgTint: '#EFF6FF',
-  },
-  {
     id: 'threads',
     name: 'Threads',
     handle: '@amara.threads',
@@ -179,15 +161,6 @@ const INITIAL_PLATFORMS: PlatformAccount[] = [
     connected: false,
     color: '#000000',
     bgTint: '#F8FAFC',
-  },
-  {
-    id: 'snapchat',
-    name: 'Snapchat',
-    handle: '@amarasnaps',
-    followers: '5.8K',
-    connected: false,
-    color: '#F59E0B',
-    bgTint: '#FEFCE8',
   },
 ];
 

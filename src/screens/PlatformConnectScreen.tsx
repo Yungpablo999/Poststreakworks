@@ -20,7 +20,7 @@ interface PlatformItem {
   id: string;
   name: string;
   description: string;
-  iconType: 'tiktok' | 'instagram' | 'youtube' | 'x' | 'linkedin' | 'facebook' | 'threads' | 'pinterest' | 'snapchat';
+  iconType: 'tiktok' | 'instagram' | 'youtube' | 'facebook' | 'threads' | 'pinterest';
 }
 
 const PRIMARY_PLATFORMS: PlatformItem[] = [
@@ -256,24 +256,6 @@ export const PlatformConnectScreen: React.FC<PlatformConnectScreenProps> = ({
           </View>
         );
 
-      case 'x':
-        return (
-          <View style={[styles.platformIconBox, { width: size, height: size, backgroundColor: '#000000' }]}>
-            <Svg width={size * 0.52} height={size * 0.52} viewBox="0 0 24 24" fill="#FFFFFF">
-              <Path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
-            </Svg>
-          </View>
-        );
-
-      case 'linkedin':
-        return (
-          <View style={[styles.platformIconBox, { width: size, height: size, backgroundColor: '#0A66C2' }]}>
-            <Svg width={size * 0.58} height={size * 0.58} viewBox="0 0 24 24" fill="#FFFFFF">
-              <Path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z" />
-            </Svg>
-          </View>
-        );
-
       case 'facebook':
         return (
           <View style={[styles.miniBrandIcon, { backgroundColor: '#1877F2' }]}>
@@ -297,15 +279,6 @@ export const PlatformConnectScreen: React.FC<PlatformConnectScreenProps> = ({
           <View style={[styles.miniBrandIcon, { backgroundColor: '#E60023' }]}>
             <Svg width={13} height={13} viewBox="0 0 24 24" fill="#FFFFFF">
               <Path d="M12 0C5.373 0 0 5.372 0 12c0 5.084 3.163 9.426 7.627 11.174-.105-.949-.2-2.405.042-3.441.218-.937 1.407-5.965 1.407-5.965s-.359-.719-.359-1.782c0-1.668.967-2.914 2.171-2.914 1.023 0 1.518.769 1.518 1.69 0 1.029-.655 2.568-.994 3.995-.283 1.194.599 2.169 1.777 2.169 2.133 0 3.772-2.249 3.772-5.495 0-2.873-2.064-4.882-5.012-4.882-3.414 0-5.418 2.561-5.418 5.207 0 1.031.397 2.138.893 2.738.098.119.112.224.083.345-.09.375-.291 1.199-.332 1.365-.053.225-.172.271-.401.165-1.495-.69-2.433-2.878-2.433-4.646 0-3.776 2.748-7.252 7.92-7.252 4.158 0 7.392 2.967 7.392 6.923 0 4.135-2.607 7.462-6.233 7.462-1.214 0-2.354-.629-2.758-1.379l-.749 2.848c-.269 1.045-1.004 2.352-1.498 3.146 1.123.345 2.306.535 3.55.535 6.627 0 12-5.373 12-12 0-6.628-5.373-12-12-12z" />
-            </Svg>
-          </View>
-        );
-
-      case 'snapchat':
-        return (
-          <View style={[styles.miniBrandIcon, { backgroundColor: '#FFFC00' }]}>
-            <Svg width={14} height={14} viewBox="0 0 24 24" fill="#000000">
-              <Path d="M12.001 2c-3.8 0-6.2 2.7-6.2 6.2 0 1.2.3 2.6 1 3.5-.1.4-.4.8-.8 1.1-.3.2-.6.4-.9.5-.3.1-.4.3-.4.5 0 .3.3.5.7.6.8.2 1.8.1 2.5-.2.6.8 1.4 1.2 2.2 1.4.3.5.7.8 1.3.8h1.2c.6 0 1-.3 1.3-.8.8-.2 1.6-.6 2.2-1.4.7.3 1.7.4 2.5.2.4-.1.7-.3.7-.6 0-.2-.1-.4-.4-.5-.3-.1-.6-.3-.9-.5-.4-.3-.7-.7-.8-1.1.7-.9 1-2.3 1-3.5 0-3.5-2.4-6.2-6.2-6.2z" />
             </Svg>
           </View>
         );
