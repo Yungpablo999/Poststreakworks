@@ -149,21 +149,17 @@ export const MissionDetailScreen: React.FC<MissionDetailScreenProps> = ({
           showsVerticalScrollIndicator={false}
           bounces={true}
         >
-          {/* TOP PILL BADGES */}
+          {/* TOP PILL BADGE */}
           <View style={styles.topBadgesRow}>
             <View style={styles.todayMissionPill}>
               <Text style={styles.todayMissionPillText}>TODAY&apos;S MISSION</Text>
-            </View>
-
-            <View style={styles.freeMissionPill}>
-              <Text style={styles.freeMissionPillText}>FREE MISSION</Text>
             </View>
           </View>
 
           {/* MAIN HEADLINE & SUBTITLE */}
           <Text style={styles.mainHeading}>Post once before 9 PM.</Text>
           <Text style={styles.mainSubtitle}>
-            Protect your <Text style={{ fontWeight: '800', color: '#171420' }}>47-day streak</Text> and keep your creator momentum alive.
+            Protect your <Text style={{ fontWeight: '800', color: '#171420' }}>{userProfile?.streakCount || 47}-day streak</Text> and keep your momentum alive.
           </Text>
 
           {/* 1. MISSION PROGRESS CARD */}

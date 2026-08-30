@@ -253,7 +253,7 @@ export const QuestsScreen: React.FC<QuestsScreenProps> = ({
 
             <Text style={styles.todayQuestTitle}>Post once before 9 PM</Text>
             <Text style={styles.todayQuestSub}>
-              Protect your 47-day streak and keep your creator momentum alive.
+              Protect your {userProfile?.streakCount || 47}-day streak and keep your momentum alive.
             </Text>
 
             {/* Progress Row & Bar */}
