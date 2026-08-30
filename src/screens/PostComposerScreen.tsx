@@ -723,7 +723,7 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
           </View>
 
           <Text style={styles.platformsDisclaimer}>
-            Free users can prepare posts for selected platforms. Some auto-publishing options may require <Text style={{ color: '#D97706', fontWeight: '800' }}>Pro</Text> or platform approval.
+            Free users can prepare posts for selected platforms. Auto-publishing may require <Text style={{ color: '#D97706', fontWeight: '800' }}>Pro</Text>.
           </Text>
 
           {/* 3. MEDIA UPLOAD ZONE */}
