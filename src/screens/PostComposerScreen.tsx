@@ -1165,7 +1165,7 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
           <View style={styles.modalOverlay}>
             <Animated.View style={[styles.modalCard, { transform: [{ scale: modalPopScale }] }]}>
               <View style={styles.modalHeaderRow}>
-                <View>
+                <View style={styles.modalTitleContainer}>
                   <Text style={styles.modalTitle}>Choose Social Platforms</Text>
                   <Text style={styles.modalSubtitle}>Auto-format &amp; publish across all channels</Text>
                 </View>
@@ -1240,7 +1240,7 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
           <View style={styles.modalOverlay}>
             <Animated.View style={[styles.modalCard, { transform: [{ scale: modalPopScale }] }]}>
               <View style={styles.modalHeaderRow}>
-                <View>
+                <View style={styles.modalTitleContainer}>
                   <Text style={styles.modalTitle}>Choose Post Idea</Text>
                   <Text style={styles.modalSubtitle}>Select from your Idea Vault or Quick Prompts</Text>
                 </View>
@@ -1293,7 +1293,7 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
             <Animated.View style={[styles.calendarModalCard, { transform: [{ scale: modalPopScale }] }]}>
               {/* Header */}
               <View style={styles.modalHeaderRow}>
-                <View>
+                <View style={styles.modalTitleContainer}>
                   <Text style={styles.modalTitle}>Schedule Post</Text>
                   <Text style={styles.modalSubtitle}>Pick a date &amp; peak audience window</Text>
                 </View>
@@ -1476,7 +1476,7 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
           <View style={styles.modalOverlay}>
             <Animated.View style={[styles.modalCard, { transform: [{ scale: modalPopScale }] }]}>
               <View style={styles.modalHeaderRow}>
-                <View>
+                <View style={styles.modalTitleContainer}>
                   <Text style={styles.modalTitle}>Notifications</Text>
                   <Text style={styles.modalSubtitle}>Streak updates &amp; creator alerts</Text>
                 </View>
@@ -1537,7 +1537,7 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
           <View style={styles.modalOverlay}>
             <Animated.View style={[styles.modalCard, { transform: [{ scale: modalPopScale }] }]}>
               <View style={styles.modalHeaderRow}>
-                <View>
+                <View style={styles.modalTitleContainer}>
                   <Text style={styles.modalTitle}>Jarvis AI Chat</Text>
                   <Text style={styles.modalSubtitle}>Real-time creative assistant</Text>
                 </View>
@@ -2625,6 +2625,11 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'flex-start',
     marginBottom: 14,
+    gap: 12,
+  },
+  modalTitleContainer: {
+    flex: 1,
+    paddingRight: 8,
   },
   modalTitle: {
     fontSize: 17,
@@ -2635,6 +2640,7 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: '#64748B',
     marginTop: 2,
+    lineHeight: 16,
   },
   modalCloseCircle: {
     width: 28,
@@ -2643,11 +2649,15 @@ const styles = StyleSheet.create({
     backgroundColor: '#F1F5F9',
     justifyContent: 'center',
     alignItems: 'center',
+    flexShrink: 0,
+    marginTop: 2,
   },
   modalCloseCross: {
     fontSize: 12,
-    fontWeight: '800',
+    fontWeight: '700',
     color: '#64748B',
+    lineHeight: 14,
+    textAlign: 'center',
   },
 
   // Platform Modal Rows
