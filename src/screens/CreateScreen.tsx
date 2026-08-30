@@ -686,7 +686,7 @@ export const CreateScreen: React.FC<CreateScreenProps> = ({
                 </Svg>
               </View>
               <Text style={styles.toolTitle} numberOfLines={1}>New Post</Text>
-              <Text style={styles.toolSubtitle} numberOfLines={1}>Start from scratch</Text>
+              <Text style={styles.toolSubtitle} numberOfLines={1}>Create from scratch</Text>
             </Pressable>
 
             {/* Tool 2: Ideas */}
@@ -735,7 +735,16 @@ export const CreateScreen: React.FC<CreateScreenProps> = ({
               onPress={openCaption}
             >
               <View style={[styles.toolIconBox, { backgroundColor: '#EDE9FE' }]}>
-                <Text style={[styles.quoteIconText, { color: '#582CDB' }]}>99</Text>
+                <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
+                  <Path
+                    d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"
+                    stroke="#582CDB"
+                    strokeWidth="2.2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                  <Path d="M15 5l4 4" stroke="#582CDB" strokeWidth="2.2" strokeLinecap="round" />
+                </Svg>
               </View>
               <Text style={styles.toolTitle} numberOfLines={1}>Caption</Text>
               <Text style={styles.toolSubtitle} numberOfLines={1}>Write in your voice</Text>
