@@ -479,7 +479,7 @@ export const ProPostComposerScreen: React.FC<ProPostComposerScreenProps> = ({
 
             <Text style={styles.postIdeaMainTitle}>&ldquo;{currentIdea}&rdquo;</Text>
             <Text style={styles.postIdeaSub}>
-              Turn this idea into a short-form post for your selected platforms.
+              Shape this idea into a post your audience will want to see.
             </Text>
 
             {/* Chips */}
@@ -489,7 +489,7 @@ export const ProPostComposerScreen: React.FC<ProPostComposerScreenProps> = ({
               contentContainerStyle={{ flexDirection: 'row', gap: 8, paddingHorizontal: 2 }}
               style={{ flexGrow: 0, marginTop: 12 }}
             >
-              {['Personal Lesson', 'Creator Advice', 'Streak Saver', 'Viral Reel'].map((chip) => (
+              {['Personal Lesson', 'Creator Advice', 'Consistency', 'Viral Reel'].map((chip) => (
                 <Pressable
                   key={chip}
                   style={[

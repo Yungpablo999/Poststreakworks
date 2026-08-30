@@ -654,7 +654,7 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
 
             <Text style={styles.postIdeaTitle}>&ldquo;{currentIdea}&rdquo;</Text>
             <Text style={styles.postIdeaDesc}>
-              Turn this idea into a short-form post for your selected platforms.
+              Shape this idea into a post your audience will want to see.
             </Text>
 
             <View style={styles.ideaTagsRow}>
@@ -664,8 +664,8 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
               <View style={styles.ideaTagPill}>
                 <Text style={styles.ideaTagPillText}>Creator Advice</Text>
               </View>
-              <View style={styles.streakSaverPill}>
-                <Text style={styles.streakSaverPillText}>Streak Saver</Text>
+              <View style={styles.ideaTagPill}>
+                <Text style={styles.ideaTagPillText}>Consistency</Text>
               </View>
             </View>
           </View>
