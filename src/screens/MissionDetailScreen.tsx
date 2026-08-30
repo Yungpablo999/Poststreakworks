@@ -353,9 +353,16 @@ export const MissionDetailScreen: React.FC<MissionDetailScreenProps> = ({
               <Pressable
                 style={({ pressed }) => [styles.useThisIdeaBtn, pressed && styles.btnPressed]}
                 onPress={() => {
-                  setPostTitle('One thing I wish I knew before I started creating');
-                  triggerModalPop();
-                  setShowCreateModal(true);
+                  if (Platform.OS !== 'web') {
+                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                  }
+                  if (onOpenPostComposer) {
+                    onOpenPostComposer('One thing I wish I knew before I started creating', 'tiktok');
+                  } else {
+                    setPostTitle('One thing I wish I knew before I started creating');
+                    triggerModalPop();
+                    setShowCreateModal(true);
+                  }
                 }}
               >
                 <Text style={styles.useThisIdeaBtnText} numberOfLines={1}>Use This Idea</Text>
@@ -363,9 +370,9 @@ export const MissionDetailScreen: React.FC<MissionDetailScreenProps> = ({
             </View>
           </View>
 
-          {/* 4. WHAT THIS MISSION IMPROVES */}
+          {/* 4. WHAT YOU'LL BUILD */}
           <View style={styles.improvesCard}>
-            <Text style={styles.improvesSectionTitle}>WHAT THIS MISSION IMPROVES</Text>
+            <Text style={styles.improvesSectionTitle}>WHAT YOU&apos;LL BUILD</Text>
             <View style={styles.improvesPillsRow}>
               <View style={styles.improvesPillGray}>
                 <Text style={styles.improvesPillGrayText}>Consistency</Text>
@@ -376,8 +383,8 @@ export const MissionDetailScreen: React.FC<MissionDetailScreenProps> = ({
               <View style={styles.improvesPillGold}>
                 <Text style={styles.improvesPillGoldText}>Growth</Text>
               </View>
-              <View style={styles.improvesPillGray}>
-                <Text style={styles.improvesPillGrayText}>Passport</Text>
+              <View style={styles.improvesPillPassport}>
+                <Text style={styles.improvesPillPassportText}>Creator Passport</Text>
               </View>
             </View>
           </View>
@@ -1220,6 +1227,19 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: '700',
     color: '#D97706',
+  },
+  improvesPillPassport: {
+    backgroundColor: '#F3E8FF',
+    paddingVertical: 6,
+    paddingHorizontal: 14,
+    borderRadius: 100,
+    borderWidth: 1,
+    borderColor: '#E9D5FF',
+  },
+  improvesPillPassportText: {
+    fontSize: 12,
+    fontWeight: '800',
+    color: '#6D28D9',
   },
 
   // 5. XP & REWARD CARD
