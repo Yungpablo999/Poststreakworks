@@ -1079,22 +1079,26 @@ export const MessagesScreen: React.FC<MessagesScreenProps> = ({
                   style={styles.storyItem}
                   onPress={() => handleOpenStory(story)}
                 >
-                  <LinearGradient
-                    colors={story.isOnline ? ['#EC4899', '#8B5CF6', '#F59E0B'] : ['#CBD5E1', '#E2E8F0']}
-                    start={{ x: 0, y: 0 }}
-                    end={{ x: 1, y: 1 }}
-                    style={styles.storyAvatarRingGradient}
-                  >
-                    <View style={styles.storyAvatarInnerWhite}>
-                      <Image source={story.avatar} style={styles.storyAvatar} resizeMode="cover" />
-                      {story.isOnline && <View style={styles.onlineDot} />}
-                      {story.isUser && (
-                        <View style={styles.userAddStatusBadge}>
-                          <Text style={styles.userAddStatusText}>+</Text>
-                        </View>
-                      )}
-                    </View>
-                  </LinearGradient>
+                  <View style={styles.storyAvatarWrap}>
+                    <LinearGradient
+                      colors={story.isOnline ? ['#EC4899', '#8B5CF6', '#F59E0B'] : ['#CBD5E1', '#E2E8F0']}
+                      start={{ x: 0, y: 0 }}
+                      end={{ x: 1, y: 1 }}
+                      style={styles.storyAvatarRingGradient}
+                    >
+                      <View style={styles.storyAvatarInnerWhite}>
+                        <Image source={story.avatar} style={styles.storyAvatar} resizeMode="cover" />
+                      </View>
+                    </LinearGradient>
+
+                    {story.isUser ? (
+                      <View style={styles.userAddStatusBadge}>
+                        <Text style={styles.userAddStatusText}>+</Text>
+                      </View>
+                    ) : story.isOnline ? (
+                      <View style={styles.onlineDot} />
+                    ) : null}
+                  </View>
                   <Text style={[styles.storyName, isDark && styles.textWhite]} numberOfLines={1}>
                     {story.isUser ? 'You' : story.name.split(' ')[0]}
                   </Text>
@@ -3073,6 +3077,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     width: 72,
   },
+  storyAvatarWrap: {
+    position: 'relative',
+    width: 62,
+    height: 62,
+    marginBottom: 4,
+  },
   storyAvatarRingGradient: {
     width: 62,
     height: 62,
@@ -3080,14 +3090,13 @@ const styles = StyleSheet.create({
     padding: 2.5,
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 4,
   },
   storyAvatarInnerWhite: {
-    position: 'relative',
     width: '100%',
     height: '100%',
-    borderRadius: 29,
+    borderRadius: 28.5,
     backgroundColor: '#FAF8F5',
+    overflow: 'hidden',
     padding: 2,
     justifyContent: 'center',
     alignItems: 'center',
@@ -3095,37 +3104,43 @@ const styles = StyleSheet.create({
   storyAvatar: {
     width: '100%',
     height: '100%',
-    borderRadius: 27,
+    borderRadius: 26.5,
   },
   onlineDot: {
     position: 'absolute',
     bottom: 0,
     right: 0,
-    width: 12,
-    height: 12,
-    borderRadius: 6,
+    width: 14,
+    height: 14,
+    borderRadius: 7,
     backgroundColor: '#10B981',
-    borderWidth: 2,
-    borderColor: '#FFFFFF',
+    borderWidth: 2.5,
+    borderColor: '#FAF8F5',
   },
   userAddStatusBadge: {
     position: 'absolute',
-    bottom: 0,
-    right: 0,
-    width: 17,
-    height: 17,
-    borderRadius: 8.5,
+    bottom: -1,
+    right: -1,
+    width: 20,
+    height: 20,
+    borderRadius: 10,
     backgroundColor: '#582CDB',
-    borderWidth: 1.5,
-    borderColor: '#FFFFFF',
+    borderWidth: 2,
+    borderColor: '#FAF8F5',
     justifyContent: 'center',
     alignItems: 'center',
+    shadowColor: '#582CDB',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.15,
+    shadowRadius: 2,
+    elevation: 2,
   },
   userAddStatusText: {
-    fontSize: 12,
-    fontWeight: '700',
+    fontSize: 13,
+    fontWeight: '800',
     color: '#FFFFFF',
-    lineHeight: 13,
+    lineHeight: 14,
+    marginTop: -1,
   },
   storyName: {
     fontSize: 12,
