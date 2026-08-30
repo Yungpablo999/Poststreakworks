@@ -612,23 +612,33 @@ export const ProPostComposerScreen: React.FC<ProPostComposerScreenProps> = ({
               </View>
             )}
 
-            {/* Action Buttons: Upload Media & Add Thumbnail */}
+            {/* Action Buttons: Add Media & Add Thumbnail */}
             <View style={{ flexDirection: 'row', gap: 10, marginTop: 14 }}>
               <Pressable
                 style={({ pressed }) => [styles.mediaActionBtn, pressed && styles.btnPressed]}
                 onPress={() => openFilePicker('media')}
               >
-                <Svg width={16} height={16} viewBox="0 0 24 24" fill="none">
-                  <Path d="M12 19V5M5 12l7-7 7 7" stroke="#171420" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
+                <Svg width={15} height={15} viewBox="0 0 24 24" fill="none">
+                  <Path
+                    d="M4 16L8.586 11.414C9.367 10.633 10.633 10.633 11.414 11.414L16 16M14 14L15.586 12.414C16.367 11.633 17.633 11.633 18.414 12.414L20 14M14 8H14.01M6 20H18C19.105 20 20 19.105 20 18V6C20 4.895 19.105 4 18 4H6C4.895 4 4 4.895 4 6V18C4 19.105 4.895 20 6 20Z"
+                    stroke="#171420"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
                 </Svg>
-                <Text style={styles.mediaActionBtnText}>Upload Media</Text>
+                <Text style={styles.mediaActionBtnText}>Add Media</Text>
               </Pressable>
 
               <Pressable
                 style={({ pressed }) => [styles.mediaActionBtn, pressed && styles.btnPressed]}
                 onPress={() => openFilePicker('thumbnail')}
               >
-                <Text style={{ fontSize: 14 }}>🖼️</Text>
+                <Svg width={15} height={15} viewBox="0 0 24 24" fill="none">
+                  <Rect x="3" y="3" width="18" height="18" rx="4" stroke="#171420" strokeWidth="2" />
+                  <Circle cx="8.5" cy="8.5" r="1.5" fill="#171420" />
+                  <Path d="M21 15L16 10L5 21" stroke="#171420" strokeWidth="2" strokeLinecap="round" />
+                </Svg>
                 <Text style={styles.mediaActionBtnText}>Add Thumbnail</Text>
               </Pressable>
             </View>

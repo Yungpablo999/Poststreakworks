@@ -273,6 +273,7 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
   // Media State
   const [hasMedia, setHasMedia] = useState(false);
   const [mediaType, setMediaType] = useState<'video' | 'image' | 'thumbnail' | null>(null);
+  const [hasThumbnail, setHasThumbnail] = useState(false);
 
   // Caption & Tone State
   const [caption, setCaption] = useState(
@@ -435,8 +436,16 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
     if (Platform.OS !== 'web') {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     }
-    setHasMedia(true);
-    setMediaType(type);
+    if (type === 'thumbnail') {
+      setHasThumbnail(true);
+      if (!hasMedia) {
+        setHasMedia(true);
+        setMediaType('image');
+      }
+    } else {
+      setHasMedia(true);
+      setMediaType(type);
+    }
   };
 
   const handlePublishOrSchedule = () => {
@@ -708,51 +717,130 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
           <Text style={styles.sectionLabel}>MEDIA</Text>
           <View style={styles.mediaUploadBox}>
             {hasMedia ? (
-              <View style={styles.mediaPreviewContainer}>
-                <View style={styles.mediaPreviewThumb}>
-                  <Text style={{ fontSize: 28 }}>🎬</Text>
-                  <Text style={styles.mediaPreviewTitle}>ShortForm_Reel_V1.mp4</Text>
-                  <Text style={styles.mediaPreviewMeta}>1080x1920 • 30s • HD</Text>
+              /* Attached Media Preview Box */
+              <View style={styles.mediaAttachedContainer}>
+                <View style={styles.mediaAttachedHeaderRow}>
+                  {/* Thumbnail / Video Icon Box */}
+                  <View style={styles.mediaAttachedThumbBox}>
+                    <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
+                      <Path d="M8 5v14l11-7z" fill="#FFFFFF" />
+                    </Svg>
+                    <View style={styles.mediaThumbDurationTag}>
+                      <Text style={styles.mediaThumbDurationText}>0:30</Text>
+                    </View>
+                  </View>
+
+                  <View style={{ flex: 1, marginLeft: 12 }}>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 3 }}>
+                      <View style={styles.mediaAttachedStatusBadge}>
+                        <Text style={styles.mediaAttachedStatusText}>✓ ATTACHED</Text>
+                      </View>
+                      <Text style={styles.mediaAttachedSizeText}>24.5 MB</Text>
+                    </View>
+                    <Text style={styles.mediaAttachedFileName} numberOfLines={1}>
+                      {mediaType === 'image' ? 'Creative_Visual_V1.jpg' : 'ShortForm_Reel_V1.mp4'}
+                    </Text>
+                    <Text style={styles.mediaAttachedSpecsText}>1080×1920 • 30s • 4K HDR</Text>
+                  </View>
                 </View>
-                <Pressable
-                  onPress={() => setHasMedia(false)}
-                  style={styles.removeMediaBtn}
-                >
-                  <Text style={styles.removeMediaBtnText}>✕ Remove Media</Text>
-                </Pressable>
+
+                {/* Sub-actions Row: Replace, Thumbnail, Remove */}
+                <View style={styles.mediaAttachedActionsRow}>
+                  <Pressable
+                    style={({ pressed }) => [styles.mediaSubActionBtn, pressed && styles.btnPressed]}
+                    onPress={() => handleUploadMedia(mediaType === 'image' ? 'image' : 'video')}
+                  >
+                    <Svg width={13} height={13} viewBox="0 0 24 24" fill="none">
+                      <Path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" stroke="#582CDB" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
+                    </Svg>
+                    <Text style={styles.mediaSubActionBtnText}>Replace</Text>
+                  </Pressable>
+
+                  <Pressable
+                    style={({ pressed }) => [styles.mediaSubActionBtn, pressed && styles.btnPressed]}
+                    onPress={() => {
+                      if (Platform.OS !== 'web') {
+                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                      }
+                      setHasThumbnail(!hasThumbnail);
+                    }}
+                  >
+                    <Svg width={13} height={13} viewBox="0 0 24 24" fill="none">
+                      <Rect x="3" y="3" width="18" height="18" rx="4" stroke={hasThumbnail ? '#15803D' : '#582CDB'} strokeWidth="2" />
+                      <Circle cx="8.5" cy="8.5" r="1.5" fill={hasThumbnail ? '#15803D' : '#582CDB'} />
+                      <Path d="M21 15L16 10L5 21" stroke={hasThumbnail ? '#15803D' : '#582CDB'} strokeWidth="2" strokeLinecap="round" />
+                    </Svg>
+                    <Text style={[styles.mediaSubActionBtnText, hasThumbnail && { color: '#15803D' }]}>
+                      {hasThumbnail ? 'Thumbnail Added ✓' : 'Add Thumbnail'}
+                    </Text>
+                  </Pressable>
+
+                  <Pressable
+                    style={({ pressed }) => [styles.mediaSubActionRemoveBtn, pressed && styles.btnPressed]}
+                    onPress={() => {
+                      if (Platform.OS !== 'web') {
+                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                      }
+                      setHasMedia(false);
+                      setHasThumbnail(false);
+                    }}
+                  >
+                    <Svg width={12} height={12} viewBox="0 0 24 24" fill="none">
+                      <Path d="M18 6L6 18M6 6l12 12" stroke="#EF4444" strokeWidth="2.5" strokeLinecap="round" />
+                    </Svg>
+                    <Text style={styles.mediaSubActionRemoveText}>Remove</Text>
+                  </Pressable>
+                </View>
               </View>
             ) : (
-              <Pressable
-                onPress={() => handleUploadMedia('video')}
-                style={styles.mediaDashedDropzone}
-              >
-                <View style={styles.mediaIconCircle}>
-                  <Svg width={24} height={24} viewBox="0 0 24 24" fill="none">
-                    <Rect x="3" y="3" width="18" height="18" rx="4" stroke="#6D28D9" strokeWidth="2" />
-                    <Circle cx="8.5" cy="8.5" r="1.5" fill="#6D28D9" />
-                    <Path d="M21 15L16 10L5 21" stroke="#6D28D9" strokeWidth="2" strokeLinecap="round" />
-                  </Svg>
+              /* Empty Media Dropzone + Actions */
+              <View>
+                <Pressable
+                  onPress={() => handleUploadMedia('video')}
+                  style={styles.mediaDashedDropzone}
+                >
+                  <View style={styles.mediaIconCircle}>
+                    <Svg width={22} height={22} viewBox="0 0 24 24" fill="none">
+                      <Rect x="3" y="3" width="18" height="18" rx="4" stroke="#6D28D9" strokeWidth="2" />
+                      <Circle cx="8.5" cy="8.5" r="1.5" fill="#6D28D9" />
+                      <Path d="M21 15L16 10L5 21" stroke="#6D28D9" strokeWidth="2" strokeLinecap="round" />
+                    </Svg>
+                  </View>
+                  <Text style={styles.mediaDropzoneTitle}>Add video, image or thumbnail</Text>
+                  <Text style={styles.mediaDropzoneSubtitle}>Video • Image • Carousel</Text>
+                </Pressable>
+
+                <View style={styles.mediaButtonsRow}>
+                  <Pressable
+                    style={({ pressed }) => [styles.mediaActionBtn, pressed && styles.btnPressed]}
+                    onPress={() => handleUploadMedia('video')}
+                  >
+                    <Svg width={14} height={14} viewBox="0 0 24 24" fill="none">
+                      <Path
+                        d="M4 16L8.586 11.414C9.367 10.633 10.633 10.633 11.414 11.414L16 16M14 14L15.586 12.414C16.367 11.633 17.633 11.633 18.414 12.414L20 14M14 8H14.01M6 20H18C19.105 20 20 19.105 20 18V6C20 4.895 19.105 4 18 4H6C4.895 4 4 4.895 4 6V18C4 19.105 4.895 20 6 20Z"
+                        stroke="#582CDB"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                    </Svg>
+                    <Text style={styles.mediaActionBtnText}>Add Media</Text>
+                  </Pressable>
+
+                  <Pressable
+                    style={({ pressed }) => [styles.mediaActionBtn, pressed && styles.btnPressed]}
+                    onPress={() => handleUploadMedia('thumbnail')}
+                  >
+                    <Svg width={14} height={14} viewBox="0 0 24 24" fill="none">
+                      <Rect x="3" y="3" width="18" height="18" rx="4" stroke="#582CDB" strokeWidth="2" />
+                      <Circle cx="8.5" cy="8.5" r="1.5" fill="#582CDB" />
+                      <Path d="M21 15L16 10L5 21" stroke="#582CDB" strokeWidth="2" strokeLinecap="round" />
+                    </Svg>
+                    <Text style={styles.mediaActionBtnText}>Add Thumbnail</Text>
+                  </Pressable>
                 </View>
-                <Text style={styles.mediaDropzoneTitle}>Add video, image or thumbnail</Text>
-                <Text style={styles.mediaDropzoneSubtitle}>Video • Image • Carousel</Text>
-              </Pressable>
+              </View>
             )}
-
-            <View style={styles.mediaButtonsRow}>
-              <Pressable
-                style={({ pressed }) => [styles.mediaActionBtn, pressed && styles.btnPressed]}
-                onPress={() => handleUploadMedia('video')}
-              >
-                <Text style={styles.mediaActionBtnText}>⤓ Upload Media</Text>
-              </Pressable>
-
-              <Pressable
-                style={({ pressed }) => [styles.mediaActionBtn, pressed && styles.btnPressed]}
-                onPress={() => handleUploadMedia('thumbnail')}
-              >
-                <Text style={styles.mediaActionBtnText}>🖼 Add Thumbnail</Text>
-              </Pressable>
-            </View>
           </View>
 
           {/* 4. CAPTION WRITING */}
@@ -1982,38 +2070,107 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: '#64748B',
   },
-  mediaPreviewContainer: {
+  // Attached Media Preview Styles
+  mediaAttachedContainer: {
     backgroundColor: '#FAF8FC',
     borderRadius: 16,
     borderWidth: 1,
     borderColor: '#DDD6FE',
-    padding: 16,
+    padding: 12,
+  },
+  mediaAttachedHeaderRow: {
+    flexDirection: 'row',
     alignItems: 'center',
     marginBottom: 12,
   },
-  mediaPreviewThumb: {
+  mediaAttachedThumbBox: {
+    width: 52,
+    height: 64,
+    borderRadius: 12,
+    backgroundColor: '#1E1435',
+    justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 8,
+    position: 'relative',
+    overflow: 'hidden',
   },
-  mediaPreviewTitle: {
-    fontSize: 14,
+  mediaThumbDurationTag: {
+    position: 'absolute',
+    bottom: 3,
+    backgroundColor: 'rgba(0,0,0,0.65)',
+    paddingVertical: 1,
+    paddingHorizontal: 4,
+    borderRadius: 4,
+  },
+  mediaThumbDurationText: {
+    fontSize: 9,
     fontWeight: '800',
-    color: '#171420',
-    marginTop: 6,
+    color: '#FFFFFF',
   },
-  mediaPreviewMeta: {
+  mediaAttachedStatusBadge: {
+    backgroundColor: '#DCFCE7',
+    paddingVertical: 1.5,
+    paddingHorizontal: 6,
+    borderRadius: 4,
+  },
+  mediaAttachedStatusText: {
+    fontSize: 9.5,
+    fontWeight: '800',
+    color: '#15803D',
+    letterSpacing: 0.3,
+  },
+  mediaAttachedSizeText: {
     fontSize: 11,
     color: '#64748B',
-    marginTop: 2,
+    fontWeight: '600',
   },
-  removeMediaBtn: {
-    backgroundColor: '#FEE2E2',
-    paddingVertical: 4,
-    paddingHorizontal: 10,
-    borderRadius: 6,
+  mediaAttachedFileName: {
+    fontSize: 13.5,
+    fontWeight: '800',
+    color: '#171420',
+    marginBottom: 2,
   },
-  removeMediaBtnText: {
+  mediaAttachedSpecsText: {
     fontSize: 11,
+    color: '#64748B',
+  },
+  mediaAttachedActionsRow: {
+    flexDirection: 'row',
+    gap: 8,
+    borderTopWidth: 1,
+    borderTopColor: '#EDE9FE',
+    paddingTop: 10,
+  },
+  mediaSubActionBtn: {
+    flex: 1,
+    height: 34,
+    borderRadius: 10,
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1,
+    borderColor: '#EDE9FE',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 5,
+  },
+  mediaSubActionBtnText: {
+    fontSize: 11.5,
+    fontWeight: '800',
+    color: '#582CDB',
+  },
+  mediaSubActionRemoveBtn: {
+    height: 34,
+    paddingHorizontal: 12,
+    borderRadius: 10,
+    backgroundColor: '#FEF2F2',
+    borderWidth: 1,
+    borderColor: '#FEE2E2',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 4,
+  },
+  mediaSubActionRemoveText: {
+    fontSize: 11.5,
     fontWeight: '800',
     color: '#EF4444',
   },
@@ -2028,8 +2185,10 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
     borderWidth: 1,
     borderColor: '#EDE9FE',
-    justifyContent: 'center',
+    flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
   },
   mediaActionBtnText: {
     fontSize: 12,
