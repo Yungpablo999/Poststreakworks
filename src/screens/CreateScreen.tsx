@@ -285,15 +285,15 @@ const LiveVoiceWaveform: React.FC = () => {
   }, [bar0, bar1, bar2, bar3, bar4, bar5, bar6, bar7, bar8, auraOpacity]);
 
   const barsData = [
-    { anim: bar0, color: '#6366F1', baseHeight: 36 }, // Purple
-    { anim: bar1, color: '#8B5CF6', baseHeight: 42 }, // Violet Purple
-    { anim: bar2, color: '#FBBF24', baseHeight: 48 }, // Rich Gold
-    { anim: bar3, color: '#F59E0B', baseHeight: 46 }, // Amber Gold
-    { anim: bar4, color: '#8B5CF6', baseHeight: 50 }, // Center Purple Peak
-    { anim: bar5, color: '#FBBF24', baseHeight: 48 }, // Rich Gold
-    { anim: bar6, color: '#F59E0B', baseHeight: 46 }, // Amber Gold
-    { anim: bar7, color: '#8B5CF6', baseHeight: 42 }, // Violet Purple
-    { anim: bar8, color: '#6366F1', baseHeight: 36 }, // Purple
+    { anim: bar0, color: '#6366F1', baseHeight: 22 }, // Purple
+    { anim: bar1, color: '#8B5CF6', baseHeight: 28 }, // Violet Purple
+    { anim: bar2, color: '#FBBF24', baseHeight: 32 }, // Rich Gold
+    { anim: bar3, color: '#F59E0B', baseHeight: 30 }, // Amber Gold
+    { anim: bar4, color: '#8B5CF6', baseHeight: 34 }, // Center Purple Peak
+    { anim: bar5, color: '#FBBF24', baseHeight: 32 }, // Rich Gold
+    { anim: bar6, color: '#F59E0B', baseHeight: 30 }, // Amber Gold
+    { anim: bar7, color: '#8B5CF6', baseHeight: 28 }, // Violet Purple
+    { anim: bar8, color: '#6366F1', baseHeight: 22 }, // Purple
   ];
 
   return (
@@ -454,7 +454,9 @@ export const CreateScreen: React.FC<CreateScreenProps> = ({
 
   const openDraft = (draft: DraftItem) => {
     setSelectedDraft(draft);
-    if (onOpenIdeaDetail) {
+    if (onOpenPostComposer) {
+      onOpenPostComposer(draft.title, draft.platform.toLowerCase());
+    } else if (onOpenIdeaDetail) {
       onOpenIdeaDetail(draft.title);
     } else {
       triggerModalPop();
@@ -791,7 +793,7 @@ export const CreateScreen: React.FC<CreateScreenProps> = ({
               >
                 <Image source={draft.imageSource} style={styles.draftThumbnail} resizeMode="cover" />
                 <View style={styles.draftContentCol}>
-                  <Text style={styles.draftTitle} numberOfLines={1}>
+                  <Text style={styles.draftTitle} numberOfLines={2}>
                     {draft.title}
                   </Text>
                   <Text style={styles.draftMeta}>
@@ -1372,7 +1374,7 @@ export const CreateScreen: React.FC<CreateScreenProps> = ({
                   >
                     <Image source={draft.imageSource} style={styles.draftThumbnail} resizeMode="cover" />
                     <View style={styles.draftContentCol}>
-                      <Text style={styles.draftTitle} numberOfLines={1}>{draft.title}</Text>
+                      <Text style={styles.draftTitle} numberOfLines={2}>{draft.title}</Text>
                       <Text style={styles.draftMeta}>{draft.platform} • {draft.editedTime}</Text>
                     </View>
                   </Pressable>
@@ -1990,85 +1992,87 @@ const styles = StyleSheet.create({
   // 6. VOICE STUDIO PRO CARD (METALLIC GOLD & PURPLE DASHED)
   voiceStudioCard: {
     backgroundColor: '#FFFFFF',
-    borderRadius: 20,
+    borderRadius: 18,
     borderWidth: 1.5,
     borderColor: '#F59E0B',
     borderStyle: 'dashed',
-    padding: 22,
+    paddingVertical: 14,
+    paddingHorizontal: 16,
     alignItems: 'center',
-    marginBottom: 10,
+    marginBottom: 8,
     shadowColor: '#F59E0B',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.06,
-    shadowRadius: 12,
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.05,
+    shadowRadius: 10,
   },
   voiceStudioProPill: {
     backgroundColor: '#FEF3C7',
     borderWidth: 1,
     borderColor: '#FDE68A',
-    paddingVertical: 3.5,
-    paddingHorizontal: 12,
+    paddingVertical: 2.5,
+    paddingHorizontal: 9,
     borderRadius: 100,
-    marginBottom: 10,
+    marginBottom: 6,
   },
   voiceStudioProPillText: {
-    fontSize: 10,
+    fontSize: 9.5,
     fontWeight: '800',
     color: '#B45309',
-    letterSpacing: 0.6,
+    letterSpacing: 0.5,
   },
   voiceStudioTitle: {
-    fontSize: 19,
-    fontWeight: '800',
+    fontSize: 16.5,
+    fontWeight: '700',
     color: '#171420',
-    marginBottom: 4,
+    marginBottom: 2,
+    letterSpacing: -0.3,
   },
   voiceStudioSubtitle: {
-    fontSize: 13,
+    fontSize: 12,
     color: '#64748B',
-    marginBottom: 14,
+    marginBottom: 10,
     fontWeight: '500',
   },
   waveformWrapper: {
-    height: 56,
+    height: 38,
     justifyContent: 'center',
     alignItems: 'center',
     position: 'relative',
-    marginBottom: 16,
+    marginBottom: 12,
     width: '100%',
   },
   waveformAura: {
     position: 'absolute',
-    width: 150,
-    height: 42,
-    borderRadius: 22,
-    backgroundColor: 'rgba(234, 179, 8, 0.18)',
+    width: 120,
+    height: 30,
+    borderRadius: 15,
+    backgroundColor: 'rgba(234, 179, 8, 0.16)',
     shadowColor: '#F59E0B',
     shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.12,
-    shadowRadius: 22,
+    shadowOpacity: 0.1,
+    shadowRadius: 16,
   },
   waveformContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 6,
-    height: 48,
+    gap: 5,
+    height: 34,
   },
   waveBar: {
-    width: 6.5,
+    width: 5,
     borderRadius: 10,
   },
   unlockVoiceBtn: {
     width: '100%',
-    maxWidth: 240,
-    height: 44,
+    maxWidth: 220,
+    height: 38,
     borderRadius: 100,
     overflow: 'hidden',
     shadowColor: '#F59E0B',
-    shadowOffset: { width: 0, height: 4 },
+    shadowOffset: { width: 0, height: 3 },
     shadowOpacity: 0.12,
-    shadowRadius: 8,
+    shadowRadius: 6,
     elevation: 3,
   },
   unlockVoiceGradient: {
@@ -2077,7 +2081,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   unlockVoiceBtnText: {
-    fontSize: 14,
+    fontSize: 13,
     fontWeight: '700',
     color: '#171420',
     letterSpacing: -0.2,
