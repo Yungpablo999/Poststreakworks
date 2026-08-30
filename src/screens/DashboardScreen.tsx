@@ -1841,7 +1841,7 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
           initialProfile={userProfile}
           onSaveProfile={(updated) => {
             if (onSaveProfile) onSaveProfile(updated);
-            setSelectedAvatarId(updated.avatarId);
+            setSelectedAvatarId(updated.avatarId || null);
           }}
         />
 

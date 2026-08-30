@@ -148,8 +148,6 @@ export default function App() {
     handle: '@pablocreates',
     bio: 'Consistency is my superpower. Building my creator streak with Jarvis AI.',
     niche: 'Tech & Lifestyle Creator • Lagos',
-    avatarId: 'ghost',
-    avatarSource: require('./assets/images/jarvis-ghost-clean.png'),
     tier: 'free',
     streakCount: 1,
     level: 1,

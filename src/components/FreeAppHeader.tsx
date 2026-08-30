@@ -202,7 +202,7 @@ export const FreeAppHeader: React.FC<FreeAppHeaderProps> = ({
           onPress={handleProfilePress}
           style={({ pressed }) => [
             styles.profilePhotoBtn,
-            (userProfile?.customAvatarUri || userProfile?.avatarSource) ? styles.profilePhotoBtnActive : null,
+            (userProfile?.customAvatarUri || (userProfile?.avatarSource && userProfile.avatarId && userProfile.avatarId !== 'ghost')) ? styles.profilePhotoBtnActive : null,
             pressed && styles.headerIconBtnPressed,
           ]}
           hitSlop={8}
@@ -213,7 +213,7 @@ export const FreeAppHeader: React.FC<FreeAppHeaderProps> = ({
               style={styles.headerCustomAvatarImage}
               resizeMode="cover"
             />
-          ) : userProfile?.avatarSource ? (
+          ) : (userProfile?.avatarSource && userProfile.avatarId && userProfile.avatarId !== 'ghost') ? (
             <Image
               source={userProfile.avatarSource}
               style={styles.headerCustomAvatarImage}
@@ -241,7 +241,7 @@ export const FreeAppHeader: React.FC<FreeAppHeaderProps> = ({
           {/* Small "+" Add Photo Badge */}
           <View style={styles.addPhotoPlusBadge}>
             <Text style={styles.addPhotoPlusText}>
-              {(userProfile?.customAvatarUri || userProfile?.avatarSource) ? '✎' : '+'}
+              {(userProfile?.customAvatarUri || (userProfile?.avatarSource && userProfile.avatarId && userProfile.avatarId !== 'ghost')) ? '✎' : '+'}
             </Text>
           </View>
         </Pressable>

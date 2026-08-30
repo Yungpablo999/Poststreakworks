@@ -24,8 +24,8 @@ export interface UserProfileData {
   bio: string;
   niche: string;
   tier?: 'free' | 'pro' | 'founding';
-  avatarId: string;
-  avatarSource: any;
+  avatarId?: string;
+  avatarSource?: any;
   customAvatarUri?: string;
   streakCount: number;
   level: number;
