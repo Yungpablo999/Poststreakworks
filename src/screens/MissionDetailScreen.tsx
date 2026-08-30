@@ -182,8 +182,8 @@ export const MissionDetailScreen: React.FC<MissionDetailScreenProps> = ({
               </View>
 
               <View style={styles.metricBox}>
-                <Text style={styles.metricEmoji}>🔥</Text>
-                <Text style={styles.metricLabel}>STREAK</Text>
+                <Text style={styles.metricValueStreak}>🔥 {userProfile?.streakCount || 47}</Text>
+                <Text style={styles.metricLabel}>DAY STREAK</Text>
               </View>
 
               <View style={styles.metricBox}>
@@ -192,12 +192,52 @@ export const MissionDetailScreen: React.FC<MissionDetailScreenProps> = ({
               </View>
             </View>
 
-            {/* Warning / Reminder Banner */}
-            <View style={styles.warningBanner}>
-              <Text style={styles.warningBannerText}>
-                ! One post today keeps your streak alive.
-              </Text>
-            </View>
+            {/* Dynamic Conditional Warning / Streak Safety Banner */}
+            {(() => {
+              const currentHour = new Date().getHours();
+              const hoursLeft = 21 - currentHour;
+              let banner = {
+                icon: '🔥',
+                text: "Your streak is safe once you complete today’s mission.",
+                bg: '#FAF5FF',
+                border: '#E9D5FF',
+                color: '#7E22CE',
+              };
+
+              if (isCompleted) {
+                banner = {
+                  icon: '✨',
+                  text: "Streak safe! Today's mission is locked in.",
+                  bg: '#ECFDF5',
+                  border: '#A7F3D0',
+                  color: '#059669',
+                };
+              } else if (hoursLeft <= 0 || hoursLeft <= 2) {
+                banner = {
+                  icon: '🔴',
+                  text: 'Post before 9 PM to save your streak.',
+                  bg: '#FEF2F2',
+                  border: '#FECACA',
+                  color: '#DC2626',
+                };
+              } else if (hoursLeft <= 4) {
+                banner = {
+                  icon: '⚠️',
+                  text: `Only ${hoursLeft} hours left to protect your streak.`,
+                  bg: '#FEF3C7',
+                  border: '#FDE68A',
+                  color: '#B45309',
+                };
+              }
+
+              return (
+                <View style={[styles.warningBanner, { backgroundColor: banner.bg, borderColor: banner.border }]}>
+                  <Text style={[styles.warningBannerText, { color: banner.color }]}>
+                    {banner.icon} {banner.text}
+                  </Text>
+                </View>
+              );
+            })()}
           </View>
 
           {/* 2. STEP-BY-STEP GUIDE */}
@@ -865,9 +905,15 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   metricValueGold: {
-    fontSize: 15,
+    fontSize: 14.5,
     fontWeight: '800',
     color: '#D97706',
+    marginBottom: 2,
+  },
+  metricValueStreak: {
+    fontSize: 14.5,
+    fontWeight: '800',
+    color: '#171420',
     marginBottom: 2,
   },
   metricEmoji: {
@@ -875,10 +921,10 @@ const styles = StyleSheet.create({
     marginBottom: 2,
   },
   metricLabel: {
-    fontSize: 10,
+    fontSize: 9.5,
     fontWeight: '800',
     color: '#6B7280',
-    letterSpacing: 0.5,
+    letterSpacing: 0.4,
   },
   warningBanner: {
     backgroundColor: '#FEF2F2',
