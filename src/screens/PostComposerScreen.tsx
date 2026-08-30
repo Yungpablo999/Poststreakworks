@@ -819,113 +819,110 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
             Free users can prepare posts for selected platforms. Auto-publishing may require <Text style={{ color: '#D97706', fontWeight: '800' }}>Pro</Text>.
           </Text>
 
-          {/* 3. CONTENT FORMAT SELECTION & JARVIS RECOMMENDATION */}
+          {/* 3. CONTENT FORMAT SELECTION */}
           <View style={styles.sectionLabelRow}>
             <Text style={styles.sectionLabel}>CONTENT FORMAT</Text>
-            <View style={styles.aiBadge}>
-              <Text style={styles.aiBadgeText}>JARVIS RECOMMENDED</Text>
-            </View>
+            <Text style={styles.sectionHelperText}>Choose what you're creating</Text>
           </View>
 
-          <View style={styles.formatRecommendationCard}>
-            {/* Spotlight Recommendation Banner */}
-            <View style={styles.formatRecommendationHeader}>
-              <View style={styles.formatIconCircle}>
-                <Text style={{ fontSize: 20 }}>{recommendedFormatConfig.icon}</Text>
-              </View>
-              <View style={{ flex: 1 }}>
-                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 2 }}>
-                  <Text style={styles.formatRecommendationTitle}>{recommendedFormatConfig.title}</Text>
-                  <View style={styles.formatRatioBadge}>
-                    <Text style={styles.formatRatioBadgeText}>{recommendedFormatConfig.badge}</Text>
-                  </View>
-                </View>
-                <Text style={styles.formatRecommendationDesc}>
-                  {recommendedFormatConfig.recommendedDescription}
-                </Text>
-              </View>
+          <View style={styles.formatsGrid}>
+            {CONTENT_FORMATS.map((fmt) => {
+              const isFmtSelected = selectedFormat === fmt.id;
+              const isFmtRecommended = recommendedFormatConfig.id === fmt.id;
+              const isFullRow = fmt.id === 'long_video';
 
-              {selectedFormat === recommendedFormatConfig.id ? (
-                <View style={styles.formatActiveCheckPill}>
-                  <Text style={styles.formatActiveCheckText}>Active ✓</Text>
-                </View>
-              ) : (
+              if (isFullRow) {
+                return (
+                  <Pressable
+                    key={fmt.id}
+                    style={[
+                      styles.formatCardFull,
+                      isFmtSelected && styles.formatCardFullActive,
+                    ]}
+                    onPress={() => {
+                      if (Platform.OS !== 'web') {
+                        Haptics.selectionAsync();
+                      }
+                      setSelectedFormat(fmt.id);
+                    }}
+                  >
+                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, flex: 1 }}>
+                      <View style={[styles.formatIconBox, isFmtSelected && styles.formatIconBoxActive]}>
+                        <Text style={{ fontSize: 18 }}>{fmt.icon}</Text>
+                      </View>
+                      <View style={{ flex: 1 }}>
+                        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                          <Text style={[styles.formatCardTitle, isFmtSelected && styles.formatCardTitleActive]}>
+                            {fmt.title}
+                          </Text>
+                          <Text style={styles.formatRatioTag}>{fmt.badge}</Text>
+                        </View>
+                        <Text style={styles.formatCardDesc}>16:9 Landscape • Full explanation / tutorial</Text>
+                      </View>
+                    </View>
+
+                    <View style={[styles.formatCheckCircle, isFmtSelected && styles.formatCheckCircleActive]}>
+                      {isFmtSelected && <Text style={{ color: '#FFFFFF', fontSize: 10, fontWeight: '800' }}>✓</Text>}
+                    </View>
+                  </Pressable>
+                );
+              }
+
+              return (
                 <Pressable
-                  style={styles.formatUseRecommendedBtn}
+                  key={fmt.id}
+                  style={[
+                    styles.formatCard,
+                    isFmtSelected && styles.formatCardActive,
+                  ]}
                   onPress={() => {
                     if (Platform.OS !== 'web') {
-                      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                      Haptics.selectionAsync();
                     }
-                    setSelectedFormat(recommendedFormatConfig.id);
+                    setSelectedFormat(fmt.id);
                   }}
                 >
-                  <Text style={styles.formatUseRecommendedBtnText}>Use</Text>
+                  <View style={styles.formatCardTop}>
+                    <View style={[styles.formatIconBox, isFmtSelected && styles.formatIconBoxActive]}>
+                      <Text style={{ fontSize: 18 }}>{fmt.icon}</Text>
+                    </View>
+                    {isFmtRecommended && (
+                      <View style={styles.formatRecommendedPill}>
+                        <Text style={styles.formatRecommendedPillText}>★ Best Fit</Text>
+                      </View>
+                    )}
+                  </View>
+
+                  <View style={{ marginTop: 8 }}>
+                    <Text style={[styles.formatCardTitle, isFmtSelected && styles.formatCardTitleActive]}>
+                      {fmt.title}
+                    </Text>
+                    <Text style={styles.formatRatioTag}>{fmt.badge}</Text>
+                  </View>
+
+                  <View style={[styles.formatCheckCircle, isFmtSelected && styles.formatCheckCircleActive]}>
+                    {isFmtSelected && <Text style={{ color: '#FFFFFF', fontSize: 10, fontWeight: '800' }}>✓</Text>}
+                  </View>
                 </Pressable>
-              )}
-            </View>
-
-            {/* Other Formats Selector Chips */}
-            <View style={styles.formatChipsContainer}>
-              <Text style={styles.formatChipsLabel}>All Content Formats</Text>
-              <ScrollView
-                horizontal
-                showsHorizontalScrollIndicator={false}
-                contentContainerStyle={styles.formatChipsRow}
-              >
-                {CONTENT_FORMATS.map((fmt) => {
-                  const isFmtSelected = selectedFormat === fmt.id;
-                  const isFmtRecommended = recommendedFormatConfig.id === fmt.id;
-
-                  return (
-                    <Pressable
-                      key={fmt.id}
-                      style={[
-                        styles.formatChip,
-                        isFmtSelected && styles.formatChipActive,
-                      ]}
-                      onPress={() => {
-                        if (Platform.OS !== 'web') {
-                          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                        }
-                        setSelectedFormat(fmt.id);
-                      }}
-                    >
-                      <Text style={{ fontSize: 13 }}>{fmt.icon}</Text>
-                      <Text style={[styles.formatChipText, isFmtSelected && styles.formatChipTextActive]}>
-                        {fmt.shortTitle}
-                      </Text>
-                      {isFmtRecommended && (
-                        <View style={styles.formatChipStarBadge}>
-                          <Text style={styles.formatChipStarText}>★ Best</Text>
-                        </View>
-                      )}
-                      {isFmtSelected && (
-                        <View style={styles.formatChipCheck}>
-                          <Text style={{ fontSize: 8.5, color: '#FFFFFF', fontWeight: '800' }}>✓</Text>
-                        </View>
-                      )}
-                    </Pressable>
-                  );
-                })}
-              </ScrollView>
-            </View>
-
-            {/* Smart Compatibility Adaption Note */}
-            {incompatiblePlatforms.length > 0 && (
-              <View style={styles.formatIncompatibleNotice}>
-                <Svg width={13} height={13} viewBox="0 0 24 24" fill="none">
-                  <Circle cx="12" cy="12" r="10" stroke="#D97706" strokeWidth="2" />
-                  <Path d="M12 8v4M12 16h.01" stroke="#D97706" strokeWidth="2" strokeLinecap="round" />
-                </Svg>
-                <Text style={styles.formatIncompatibleText}>
-                  {incompatiblePlatforms
-                    .map((p) => ALL_AVAILABLE_PLATFORMS.find((x) => x.id === p)?.name)
-                    .join(' & ')}{' '}
-                  doesn’t support this format natively. PostStreak will automatically adapt your content.
-                </Text>
-              </View>
-            )}
+              );
+            })}
           </View>
+
+          {/* Smart Compatibility Adaption Note */}
+          {incompatiblePlatforms.length > 0 && (
+            <View style={styles.formatIncompatibleNotice}>
+              <Svg width={13} height={13} viewBox="0 0 24 24" fill="none">
+                <Circle cx="12" cy="12" r="10" stroke="#D97706" strokeWidth="2" />
+                <Path d="M12 8v4M12 16h.01" stroke="#D97706" strokeWidth="2" strokeLinecap="round" />
+              </Svg>
+              <Text style={styles.formatIncompatibleText}>
+                {incompatiblePlatforms
+                  .map((p) => ALL_AVAILABLE_PLATFORMS.find((x) => x.id === p)?.name)
+                  .join(' & ')}{' '}
+                will adapt your {currentFormatConfig.title.toLowerCase()} for optimal feed display.
+              </Text>
+            </View>
+          )}
 
           {/* 4. MEDIA / ATTACHMENT ZONE (CONTEXTUAL TO SELECTED FORMAT) */}
           <Text style={styles.sectionLabel}>MEDIA</Text>
@@ -2293,143 +2290,122 @@ const styles = StyleSheet.create({
     marginBottom: 18,
   },
 
-  // 3. Content Format Selection & Recommendation Styles
-  formatRecommendationCard: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 20,
-    borderWidth: 1,
-    borderColor: '#EFEBF8',
-    padding: 16,
-    marginBottom: 18,
-    shadowColor: '#582CDB',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.06,
-    shadowRadius: 10,
-    elevation: 3,
+  sectionHelperText: {
+    fontSize: 12,
+    color: '#64748B',
+    fontWeight: '500',
   },
-  formatRecommendationHeader: {
+
+  // 3. Content Format Selection Grid
+  formatsGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+    marginBottom: 8,
+  },
+  formatCard: {
+    width: '48%',
+    minHeight: 116,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 18,
+    borderWidth: 1.5,
+    borderColor: '#EFECE6',
+    padding: 12,
+    marginBottom: 10,
+    justifyContent: 'space-between',
+    shadowColor: '#582CDB',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.04,
+    shadowRadius: 6,
+    elevation: 2,
+  },
+  formatCardActive: {
+    borderColor: '#582CDB',
+    backgroundColor: '#FAF8FE',
+  },
+  formatCardFull: {
+    width: '100%',
+    minHeight: 68,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 18,
+    borderWidth: 1.5,
+    borderColor: '#EFECE6',
+    paddingVertical: 12,
+    paddingHorizontal: 14,
+    marginBottom: 10,
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 12,
-    backgroundColor: '#FAF5FF',
-    borderRadius: 16,
-    borderWidth: 1,
-    borderColor: '#DDD6FE',
-    padding: 12,
+    justifyContent: 'space-between',
+    shadowColor: '#582CDB',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.04,
+    shadowRadius: 6,
+    elevation: 2,
   },
-  formatIconCircle: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: '#EDE9FE',
+  formatCardFullActive: {
+    borderColor: '#582CDB',
+    backgroundColor: '#FAF8FE',
+  },
+  formatCardTop: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  formatIconBox: {
+    width: 36,
+    height: 36,
+    borderRadius: 11,
+    backgroundColor: '#F8FAFC',
     justifyContent: 'center',
     alignItems: 'center',
   },
-  formatRecommendationTitle: {
-    fontSize: 14,
-    fontWeight: '800',
-    color: '#171420',
-  },
-  formatRatioBadge: {
+  formatIconBoxActive: {
     backgroundColor: '#EDE9FE',
-    paddingVertical: 1.5,
+  },
+  formatRecommendedPill: {
+    backgroundColor: '#FEF3C7',
+    paddingVertical: 2,
     paddingHorizontal: 6,
     borderRadius: 6,
+    borderWidth: 0.5,
+    borderColor: '#FDE68A',
   },
-  formatRatioBadgeText: {
+  formatRecommendedPillText: {
     fontSize: 9.5,
-    fontWeight: '800',
-    color: '#6D28D9',
-  },
-  formatRecommendationDesc: {
-    fontSize: 11.5,
-    color: '#4B5563',
-    lineHeight: 16,
-    marginTop: 2,
-  },
-  formatActiveCheckPill: {
-    backgroundColor: '#582CDB',
-    paddingVertical: 4,
-    paddingHorizontal: 10,
-    borderRadius: 100,
-  },
-  formatActiveCheckText: {
-    fontSize: 11,
-    fontWeight: '800',
-    color: '#FFFFFF',
-  },
-  formatUseRecommendedBtn: {
-    backgroundColor: '#FFFFFF',
-    borderWidth: 1.2,
-    borderColor: '#7C3AED',
-    paddingVertical: 4,
-    paddingHorizontal: 12,
-    borderRadius: 100,
-  },
-  formatUseRecommendedBtnText: {
-    fontSize: 11.5,
-    fontWeight: '800',
-    color: '#7C3AED',
-  },
-  formatChipsContainer: {
-    marginTop: 14,
-  },
-  formatChipsLabel: {
-    fontSize: 11,
-    fontWeight: '800',
-    color: '#64748B',
-    textTransform: 'uppercase',
-    letterSpacing: 0.4,
-    marginBottom: 8,
-  },
-  formatChipsRow: {
-    flexDirection: 'row',
-    gap: 8,
-    paddingBottom: 2,
-  },
-  formatChip: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    backgroundColor: '#F8FAFC',
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: '#E2E8F0',
-    paddingVertical: 7,
-    paddingHorizontal: 12,
-  },
-  formatChipActive: {
-    backgroundColor: '#FAF5FF',
-    borderColor: '#7C3AED',
-  },
-  formatChipText: {
-    fontSize: 12,
-    fontWeight: '700',
-    color: '#475569',
-  },
-  formatChipTextActive: {
-    color: '#7C3AED',
-    fontWeight: '800',
-  },
-  formatChipStarBadge: {
-    backgroundColor: '#FEF3C7',
-    paddingVertical: 1,
-    paddingHorizontal: 5,
-    borderRadius: 4,
-  },
-  formatChipStarText: {
-    fontSize: 9,
     fontWeight: '800',
     color: '#B45309',
   },
-  formatChipCheck: {
-    width: 14,
-    height: 14,
-    borderRadius: 7,
-    backgroundColor: '#7C3AED',
+  formatCardTitle: {
+    fontSize: 13.5,
+    fontWeight: '800',
+    color: '#171420',
+  },
+  formatCardTitleActive: {
+    color: '#582CDB',
+  },
+  formatRatioTag: {
+    fontSize: 11,
+    color: '#64748B',
+    marginTop: 2,
+  },
+  formatCardDesc: {
+    fontSize: 11,
+    color: '#64748B',
+    marginTop: 2,
+  },
+  formatCheckCircle: {
+    width: 16,
+    height: 16,
+    borderRadius: 8,
+    borderWidth: 1.5,
+    borderColor: '#CBD5E1',
     justifyContent: 'center',
     alignItems: 'center',
-    marginLeft: 2,
+    alignSelf: 'flex-end',
+  },
+  formatCheckCircleActive: {
+    borderColor: '#582CDB',
+    backgroundColor: '#582CDB',
   },
   formatIncompatibleNotice: {
     flexDirection: 'row',
@@ -2440,7 +2416,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#FDE68A',
     padding: 10,
-    marginTop: 12,
+    marginBottom: 16,
   },
   formatIncompatibleText: {
     fontSize: 11,
