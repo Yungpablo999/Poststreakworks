@@ -146,6 +146,90 @@ const ALL_AVAILABLE_PLATFORMS: PlatformOption[] = [
   },
 ];
 
+export type ContentFormatType = 'short_video' | 'carousel' | 'image' | 'text' | 'long_video';
+
+export interface ContentFormatOption {
+  id: ContentFormatType;
+  title: string;
+  shortTitle: string;
+  badge: string;
+  ratio: string;
+  icon: string;
+  recommendedDescription: string;
+  mediaLabel: string;
+  mediaSub: string;
+  primaryMediaActionText: string;
+  supportedPlatformIds: string[];
+}
+
+export const CONTENT_FORMATS: ContentFormatOption[] = [
+  {
+    id: 'short_video',
+    title: 'Short Video',
+    shortTitle: 'Shorts / Reels',
+    badge: '9:16 Vertical',
+    ratio: '9:16',
+    icon: '🎬',
+    recommendedDescription: 'Best fit for this idea and your selected short-form channels.',
+    mediaLabel: 'Add your short-form video',
+    mediaSub: '9:16 vertical • up to 60s • 4K recommended',
+    primaryMediaActionText: 'Add Video',
+    supportedPlatformIds: ['tiktok', 'instagram', 'youtube', 'facebook'],
+  },
+  {
+    id: 'carousel',
+    title: 'Carousel',
+    shortTitle: 'Multi-Slide',
+    badge: '4:5 / 1:1',
+    ratio: '4:5',
+    icon: '📑',
+    recommendedDescription: 'Great for educational breakdowns, step-by-step swipe posts & saves.',
+    mediaLabel: 'Add carousel slides',
+    mediaSub: 'Up to 10 slides • 4:5 or 1:1 recommended',
+    primaryMediaActionText: 'Add Slides (0/10)',
+    supportedPlatformIds: ['instagram', 'tiktok', 'pinterest', 'facebook'],
+  },
+  {
+    id: 'image',
+    title: 'Single Visual',
+    shortTitle: 'Photo / Visual',
+    badge: '4:5 Portrait',
+    ratio: '4:5',
+    icon: '📸',
+    recommendedDescription: 'High-impact standalone visual or aesthetic graphic for feeds.',
+    mediaLabel: 'Add high-res visual',
+    mediaSub: '4:5 portrait or 9:16 vertical recommended',
+    primaryMediaActionText: 'Add Image',
+    supportedPlatformIds: ['instagram', 'pinterest', 'facebook', 'threads'],
+  },
+  {
+    id: 'text',
+    title: 'Text / Thread',
+    shortTitle: 'Written Take',
+    badge: 'Text-First',
+    ratio: 'Text',
+    icon: '✍️',
+    recommendedDescription: 'Direct text takeaway, opinion, or multi-part insight thread.',
+    mediaLabel: 'Media is optional for text posts',
+    mediaSub: 'Attach an optional visual or write your post below',
+    primaryMediaActionText: 'Add Optional Visual',
+    supportedPlatformIds: ['threads', 'facebook'],
+  },
+  {
+    id: 'long_video',
+    title: 'Long Video',
+    shortTitle: '16:9 Landscape',
+    badge: '16:9 HD',
+    ratio: '16:9',
+    icon: '▶️',
+    recommendedDescription: 'In-depth tutorial, vlog, or full horizontal explanation video.',
+    mediaLabel: 'Add your long-form video',
+    mediaSub: '16:9 landscape • HD/4K recommended',
+    primaryMediaActionText: 'Add Video',
+    supportedPlatformIds: ['youtube', 'facebook'],
+  },
+];
+
 const MONTH_NAMES = [
   'January',
   'February',
@@ -269,7 +353,10 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
   const [selectedPlatforms, setSelectedPlatforms] = useState<string[]>(
     initialPlatform ? [initialPlatform] : []
   );
-  
+
+  // Content Format State (Intelligent Content Type)
+  const [selectedFormat, setSelectedFormat] = useState<ContentFormatType>('short_video');
+
   // Media State
   const [hasMedia, setHasMedia] = useState(false);
   const [mediaType, setMediaType] = useState<'video' | 'image' | 'thumbnail' | null>(null);
@@ -526,8 +613,27 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
     }, 250);
   };
 
+  // Content Format Resolution & Intelligence
+  const getRecommendedFormatId = (platforms: string[]): ContentFormatType => {
+    if (platforms.length === 1 && platforms[0] === 'threads') return 'text';
+    if (platforms.length === 1 && platforms[0] === 'pinterest') return 'carousel';
+    return 'short_video';
+  };
+
+  const recommendedFormatId = getRecommendedFormatId(selectedPlatforms);
+  const currentFormatConfig =
+    CONTENT_FORMATS.find((f) => f.id === selectedFormat) || CONTENT_FORMATS[0];
+  const recommendedFormatConfig =
+    CONTENT_FORMATS.find((f) => f.id === recommendedFormatId) || CONTENT_FORMATS[0];
+
+  // Incompatibility / Adaptation Warnings
+  const incompatiblePlatforms = selectedPlatforms.filter(
+    (platId) => !currentFormatConfig.supportedPlatformIds.includes(platId)
+  );
+
   // Readiness Calculation
-  const readinessPercent = 50 + (selectedPlatforms.length > 0 ? 25 : 0) + (hasMedia ? 25 : 0);
+  const hasMediaOrTextOnly = selectedFormat === 'text' || hasMedia;
+  const readinessPercent = 50 + (selectedPlatforms.length > 0 ? 25 : 0) + (hasMediaOrTextOnly ? 25 : 0);
 
   const unreadNotifCount = notificationsList.filter((n) => n.unread).length;
 
@@ -713,20 +819,165 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
             Free users can prepare posts for selected platforms. Auto-publishing may require <Text style={{ color: '#D97706', fontWeight: '800' }}>Pro</Text>.
           </Text>
 
-          {/* 3. MEDIA UPLOAD ZONE */}
+          {/* 3. CONTENT FORMAT SELECTION & JARVIS RECOMMENDATION */}
+          <View style={styles.sectionLabelRow}>
+            <Text style={styles.sectionLabel}>CONTENT FORMAT</Text>
+            <View style={styles.aiBadge}>
+              <Text style={styles.aiBadgeText}>JARVIS RECOMMENDED</Text>
+            </View>
+          </View>
+
+          <View style={styles.formatRecommendationCard}>
+            {/* Spotlight Recommendation Banner */}
+            <View style={styles.formatRecommendationHeader}>
+              <View style={styles.formatIconCircle}>
+                <Text style={{ fontSize: 20 }}>{recommendedFormatConfig.icon}</Text>
+              </View>
+              <View style={{ flex: 1 }}>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 2 }}>
+                  <Text style={styles.formatRecommendationTitle}>{recommendedFormatConfig.title}</Text>
+                  <View style={styles.formatRatioBadge}>
+                    <Text style={styles.formatRatioBadgeText}>{recommendedFormatConfig.badge}</Text>
+                  </View>
+                </View>
+                <Text style={styles.formatRecommendationDesc}>
+                  {recommendedFormatConfig.recommendedDescription}
+                </Text>
+              </View>
+
+              {selectedFormat === recommendedFormatConfig.id ? (
+                <View style={styles.formatActiveCheckPill}>
+                  <Text style={styles.formatActiveCheckText}>Active ✓</Text>
+                </View>
+              ) : (
+                <Pressable
+                  style={styles.formatUseRecommendedBtn}
+                  onPress={() => {
+                    if (Platform.OS !== 'web') {
+                      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                    }
+                    setSelectedFormat(recommendedFormatConfig.id);
+                  }}
+                >
+                  <Text style={styles.formatUseRecommendedBtnText}>Use</Text>
+                </Pressable>
+              )}
+            </View>
+
+            {/* Other Formats Selector Chips */}
+            <View style={styles.formatChipsContainer}>
+              <Text style={styles.formatChipsLabel}>All Content Formats</Text>
+              <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={styles.formatChipsRow}
+              >
+                {CONTENT_FORMATS.map((fmt) => {
+                  const isFmtSelected = selectedFormat === fmt.id;
+                  const isFmtRecommended = recommendedFormatConfig.id === fmt.id;
+
+                  return (
+                    <Pressable
+                      key={fmt.id}
+                      style={[
+                        styles.formatChip,
+                        isFmtSelected && styles.formatChipActive,
+                      ]}
+                      onPress={() => {
+                        if (Platform.OS !== 'web') {
+                          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                        }
+                        setSelectedFormat(fmt.id);
+                      }}
+                    >
+                      <Text style={{ fontSize: 13 }}>{fmt.icon}</Text>
+                      <Text style={[styles.formatChipText, isFmtSelected && styles.formatChipTextActive]}>
+                        {fmt.shortTitle}
+                      </Text>
+                      {isFmtRecommended && (
+                        <View style={styles.formatChipStarBadge}>
+                          <Text style={styles.formatChipStarText}>★ Best</Text>
+                        </View>
+                      )}
+                      {isFmtSelected && (
+                        <View style={styles.formatChipCheck}>
+                          <Text style={{ fontSize: 8.5, color: '#FFFFFF', fontWeight: '800' }}>✓</Text>
+                        </View>
+                      )}
+                    </Pressable>
+                  );
+                })}
+              </ScrollView>
+            </View>
+
+            {/* Smart Compatibility Adaption Note */}
+            {incompatiblePlatforms.length > 0 && (
+              <View style={styles.formatIncompatibleNotice}>
+                <Svg width={13} height={13} viewBox="0 0 24 24" fill="none">
+                  <Circle cx="12" cy="12" r="10" stroke="#D97706" strokeWidth="2" />
+                  <Path d="M12 8v4M12 16h.01" stroke="#D97706" strokeWidth="2" strokeLinecap="round" />
+                </Svg>
+                <Text style={styles.formatIncompatibleText}>
+                  {incompatiblePlatforms
+                    .map((p) => ALL_AVAILABLE_PLATFORMS.find((x) => x.id === p)?.name)
+                    .join(' & ')}{' '}
+                  doesn’t support this format natively. PostStreak will automatically adapt your content.
+                </Text>
+              </View>
+            )}
+          </View>
+
+          {/* 4. MEDIA / ATTACHMENT ZONE (CONTEXTUAL TO SELECTED FORMAT) */}
           <Text style={styles.sectionLabel}>MEDIA</Text>
           <View style={styles.mediaUploadBox}>
-            {hasMedia ? (
+            {selectedFormat === 'text' && !hasMedia ? (
+              /* Text Post Active (No mandatory media required) */
+              <View style={styles.textFirstFormatBanner}>
+                <View style={styles.textFirstIconCircle}>
+                  <Text style={{ fontSize: 20 }}>✍️</Text>
+                </View>
+                <View style={{ flex: 1 }}>
+                  <Text style={styles.textFirstTitle}>Text-First Format Active</Text>
+                  <Text style={styles.textFirstSubtitle}>
+                    No media upload is required for text takes & insights. Write your post below!
+                  </Text>
+                </View>
+                <Pressable
+                  style={styles.textFirstAddMediaBtn}
+                  onPress={() => handleUploadMedia('image')}
+                >
+                  <Svg width={12} height={12} viewBox="0 0 24 24" fill="none">
+                    <Path d="M12 5v14M5 12h14" stroke="#582CDB" strokeWidth="2.5" strokeLinecap="round" />
+                  </Svg>
+                  <Text style={styles.textFirstAddMediaBtnText}>Add Visual</Text>
+                </Pressable>
+              </View>
+            ) : hasMedia ? (
               /* Attached Media Preview Box */
               <View style={styles.mediaAttachedContainer}>
                 <View style={styles.mediaAttachedHeaderRow}>
                   {/* Thumbnail / Video Icon Box */}
                   <View style={styles.mediaAttachedThumbBox}>
-                    <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
-                      <Path d="M8 5v14l11-7z" fill="#FFFFFF" />
-                    </Svg>
+                    {selectedFormat === 'carousel' ? (
+                      <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
+                        <Rect x="4" y="4" width="16" height="16" rx="3" stroke="#FFFFFF" strokeWidth="2" />
+                        <Path d="M9 4v16" stroke="#FFFFFF" strokeWidth="2" />
+                      </Svg>
+                    ) : selectedFormat === 'image' ? (
+                      <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
+                        <Rect x="3" y="3" width="18" height="18" rx="4" stroke="#FFFFFF" strokeWidth="2" />
+                        <Circle cx="8.5" cy="8.5" r="1.5" fill="#FFFFFF" />
+                        <Path d="M21 15l-5-5L5 21" stroke="#FFFFFF" strokeWidth="2" strokeLinecap="round" />
+                      </Svg>
+                    ) : (
+                      <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
+                        <Path d="M8 5v14l11-7z" fill="#FFFFFF" />
+                      </Svg>
+                    )}
                     <View style={styles.mediaThumbDurationTag}>
-                      <Text style={styles.mediaThumbDurationText}>0:30</Text>
+                      <Text style={styles.mediaThumbDurationText}>
+                        {selectedFormat === 'carousel' ? '5 Slides' : selectedFormat === 'image' ? '1 Visual' : '0:30'}
+                      </Text>
                     </View>
                   </View>
 
@@ -735,12 +986,28 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
                       <View style={styles.mediaAttachedStatusBadge}>
                         <Text style={styles.mediaAttachedStatusText}>✓ ATTACHED</Text>
                       </View>
-                      <Text style={styles.mediaAttachedSizeText}>24.5 MB</Text>
+                      <Text style={styles.mediaAttachedSizeText}>
+                        {selectedFormat === 'carousel' ? '12.8 MB (5 slides)' : '24.5 MB'}
+                      </Text>
                     </View>
                     <Text style={styles.mediaAttachedFileName} numberOfLines={1}>
-                      {mediaType === 'image' ? 'Creative_Visual_V1.jpg' : 'ShortForm_Reel_V1.mp4'}
+                      {selectedFormat === 'carousel'
+                        ? 'Swipe_Carousel_Deck_V1'
+                        : selectedFormat === 'image'
+                        ? 'Creative_Visual_V1.jpg'
+                        : selectedFormat === 'long_video'
+                        ? 'Longform_Tutorial_16x9.mp4'
+                        : 'ShortForm_Reel_V1.mp4'}
                     </Text>
-                    <Text style={styles.mediaAttachedSpecsText}>1080×1920 • 30s • 4K HDR</Text>
+                    <Text style={styles.mediaAttachedSpecsText}>
+                      {selectedFormat === 'carousel'
+                        ? '4:5 Aspect • 5 High-Res Slides • Optimized'
+                        : selectedFormat === 'image'
+                        ? '1080×1350 • 4:5 Portrait • High Quality'
+                        : selectedFormat === 'long_video'
+                        ? '1920×1080 • 16:9 Landscape • 4K 60FPS'
+                        : '1080×1920 • 9:16 Vertical • 30s • 4K HDR'}
+                    </Text>
                   </View>
                 </View>
 
@@ -793,10 +1060,10 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
                 </View>
               </View>
             ) : (
-              /* Empty Media Dropzone + Actions */
+              /* Empty Media Dropzone Contextual to Content Format */
               <View>
                 <Pressable
-                  onPress={() => handleUploadMedia('video')}
+                  onPress={() => handleUploadMedia(selectedFormat === 'image' ? 'image' : 'video')}
                   style={styles.mediaDashedDropzone}
                 >
                   <View style={styles.mediaIconCircle}>
@@ -806,14 +1073,14 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
                       <Path d="M21 15L16 10L5 21" stroke="#6D28D9" strokeWidth="2" strokeLinecap="round" />
                     </Svg>
                   </View>
-                  <Text style={styles.mediaDropzoneTitle}>Add video, image or thumbnail</Text>
-                  <Text style={styles.mediaDropzoneSubtitle}>Video • Image • Carousel</Text>
+                  <Text style={styles.mediaDropzoneTitle}>{currentFormatConfig.mediaLabel}</Text>
+                  <Text style={styles.mediaDropzoneSubtitle}>{currentFormatConfig.mediaSub}</Text>
                 </Pressable>
 
                 <View style={styles.mediaButtonsRow}>
                   <Pressable
                     style={({ pressed }) => [styles.mediaActionBtn, pressed && styles.btnPressed]}
-                    onPress={() => handleUploadMedia('video')}
+                    onPress={() => handleUploadMedia(selectedFormat === 'image' ? 'image' : 'video')}
                   >
                     <Svg width={14} height={14} viewBox="0 0 24 24" fill="none">
                       <Path
@@ -824,7 +1091,7 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
                         strokeLinejoin="round"
                       />
                     </Svg>
-                    <Text style={styles.mediaActionBtnText}>Add Media</Text>
+                    <Text style={styles.mediaActionBtnText}>{currentFormatConfig.primaryMediaActionText}</Text>
                   </Pressable>
 
                   <Pressable
@@ -2026,7 +2293,208 @@ const styles = StyleSheet.create({
     marginBottom: 18,
   },
 
-  // 3. Media Upload Zone
+  // 3. Content Format Selection & Recommendation Styles
+  formatRecommendationCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: '#EFEBF8',
+    padding: 16,
+    marginBottom: 18,
+    shadowColor: '#582CDB',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.06,
+    shadowRadius: 10,
+    elevation: 3,
+  },
+  formatRecommendationHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    backgroundColor: '#FAF5FF',
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: '#DDD6FE',
+    padding: 12,
+  },
+  formatIconCircle: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: '#EDE9FE',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  formatRecommendationTitle: {
+    fontSize: 14,
+    fontWeight: '800',
+    color: '#171420',
+  },
+  formatRatioBadge: {
+    backgroundColor: '#EDE9FE',
+    paddingVertical: 1.5,
+    paddingHorizontal: 6,
+    borderRadius: 6,
+  },
+  formatRatioBadgeText: {
+    fontSize: 9.5,
+    fontWeight: '800',
+    color: '#6D28D9',
+  },
+  formatRecommendationDesc: {
+    fontSize: 11.5,
+    color: '#4B5563',
+    lineHeight: 16,
+    marginTop: 2,
+  },
+  formatActiveCheckPill: {
+    backgroundColor: '#582CDB',
+    paddingVertical: 4,
+    paddingHorizontal: 10,
+    borderRadius: 100,
+  },
+  formatActiveCheckText: {
+    fontSize: 11,
+    fontWeight: '800',
+    color: '#FFFFFF',
+  },
+  formatUseRecommendedBtn: {
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1.2,
+    borderColor: '#7C3AED',
+    paddingVertical: 4,
+    paddingHorizontal: 12,
+    borderRadius: 100,
+  },
+  formatUseRecommendedBtnText: {
+    fontSize: 11.5,
+    fontWeight: '800',
+    color: '#7C3AED',
+  },
+  formatChipsContainer: {
+    marginTop: 14,
+  },
+  formatChipsLabel: {
+    fontSize: 11,
+    fontWeight: '800',
+    color: '#64748B',
+    textTransform: 'uppercase',
+    letterSpacing: 0.4,
+    marginBottom: 8,
+  },
+  formatChipsRow: {
+    flexDirection: 'row',
+    gap: 8,
+    paddingBottom: 2,
+  },
+  formatChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    backgroundColor: '#F8FAFC',
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    paddingVertical: 7,
+    paddingHorizontal: 12,
+  },
+  formatChipActive: {
+    backgroundColor: '#FAF5FF',
+    borderColor: '#7C3AED',
+  },
+  formatChipText: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#475569',
+  },
+  formatChipTextActive: {
+    color: '#7C3AED',
+    fontWeight: '800',
+  },
+  formatChipStarBadge: {
+    backgroundColor: '#FEF3C7',
+    paddingVertical: 1,
+    paddingHorizontal: 5,
+    borderRadius: 4,
+  },
+  formatChipStarText: {
+    fontSize: 9,
+    fontWeight: '800',
+    color: '#B45309',
+  },
+  formatChipCheck: {
+    width: 14,
+    height: 14,
+    borderRadius: 7,
+    backgroundColor: '#7C3AED',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginLeft: 2,
+  },
+  formatIncompatibleNotice: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    backgroundColor: '#FFFBEB',
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: '#FDE68A',
+    padding: 10,
+    marginTop: 12,
+  },
+  formatIncompatibleText: {
+    fontSize: 11,
+    color: '#92400E',
+    lineHeight: 15,
+    flex: 1,
+  },
+  textFirstFormatBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    backgroundColor: '#F8FAFC',
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    padding: 14,
+  },
+  textFirstIconCircle: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: '#EDE9FE',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  textFirstTitle: {
+    fontSize: 13.5,
+    fontWeight: '800',
+    color: '#171420',
+    marginBottom: 2,
+  },
+  textFirstSubtitle: {
+    fontSize: 11.5,
+    color: '#64748B',
+    lineHeight: 16,
+  },
+  textFirstAddMediaBtn: {
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1,
+    borderColor: '#DDD6FE',
+    paddingVertical: 6,
+    paddingHorizontal: 10,
+    borderRadius: 10,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+  textFirstAddMediaBtnText: {
+    fontSize: 11,
+    fontWeight: '800',
+    color: '#582CDB',
+  },
+
+  // 4. Media Upload Zone
   mediaUploadBox: {
     backgroundColor: '#FFFFFF',
     borderRadius: 20,
