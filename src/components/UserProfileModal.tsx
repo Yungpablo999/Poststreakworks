@@ -28,6 +28,7 @@ export interface UserProfileData {
   streakCount: number;
   level: number;
   xp: number;
+  nextLevelXp?: number;
   partnersCount: number;
   tiktokHandle?: string;
   instagramHandle?: string;

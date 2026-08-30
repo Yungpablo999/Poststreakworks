@@ -137,6 +137,7 @@ function AppContent() {
       streakCount: authUser.streakCount,
       level: authUser.level,
       xp: authUser.xp,
+      nextLevelXp: authUser.nextLevelXp,
     }));
   }, [authUser]);
 
@@ -153,6 +154,7 @@ function AppContent() {
         streakCount: res.data!.current_streak,
         level: res.data!.level,
         xp: res.data!.xp,
+        nextLevelXp: res.data!.nextLevelXp,
       }));
     });
     return () => {

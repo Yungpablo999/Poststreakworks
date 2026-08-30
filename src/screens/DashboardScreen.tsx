@@ -901,7 +901,7 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
             {/* Status Pills */}
             <View style={styles.statusPillsRow}>
               <View style={styles.levelPillBadge}>
-                <Text style={styles.levelPillBadgeText}>Level 42</Text>
+                <Text style={styles.levelPillBadgeText}>Level {userProfile?.level ?? 1}</Text>
               </View>
 
               <View style={styles.streakPillBadge}>
@@ -913,7 +913,7 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
                 >
                   🔥
                 </Animated.Text>
-                <Text style={styles.streakPillBadgeText}>47-Day Streak</Text>
+                <Text style={styles.streakPillBadgeText}>{userProfile?.streakCount ?? 0}-Day Streak</Text>
               </View>
 
               <View style={styles.nextPostPillBadge}>
@@ -941,7 +941,7 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
               </View>
 
               <View style={styles.streakCountBadge}>
-                <Text style={styles.streakCountNumber}>47-Day Streak</Text>
+                <Text style={styles.streakCountNumber}>{userProfile?.streakCount ?? 0}-Day Streak</Text>
                 <Animated.Text
                   style={[
                     styles.streakFireEmoji,
@@ -1103,7 +1103,7 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
             <View style={styles.levelCardHeader}>
               <View style={styles.levelBadgeGroup}>
                 <View style={styles.levelGoldPill}>
-                  <Text style={styles.levelGoldPillText}>LEVEL 42</Text>
+                  <Text style={styles.levelGoldPillText}>LEVEL {userProfile?.level ?? 1}</Text>
                 </View>
                 <Text style={styles.levelNameHeading}>Elite Storyteller</Text>
               </View>
@@ -1113,17 +1113,29 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
             </View>
 
             <Text style={styles.levelDescription}>
-              Publish 1 high impact Reel today to unlock <Text style={styles.goldTextBold}>Level 43</Text> rewards.
+              Publish 1 high impact Reel today to unlock <Text style={styles.goldTextBold}>Level {(userProfile?.level ?? 1) + 1}</Text> rewards.
             </Text>
 
-            {/* XP Progress Bar */}
+            {/* XP Progress Bar — nextLevelXp is the top of the CURRENT level's
+                band (matches backend's levelForXp), not cumulative total XP,
+                so the bar resets each level rather than climbing forever. */}
             <View style={styles.xpLabelsRow}>
-              <Text style={styles.xpCurrent}>2,450 XP</Text>
-              <Text style={styles.xpTarget}>3,000 XP</Text>
+              <Text style={styles.xpCurrent}>{(userProfile?.xp ?? 0).toLocaleString()} XP</Text>
+              <Text style={styles.xpTarget}>{(userProfile?.nextLevelXp ?? 250).toLocaleString()} XP</Text>
             </View>
 
             <View style={styles.xpProgressBarBg}>
-              <View style={[styles.xpProgressBarFill, { width: '82%' }]} />
+              <View
+                style={[
+                  styles.xpProgressBarFill,
+                  {
+                    width: `${Math.min(
+                      100,
+                      Math.round(((userProfile?.xp ?? 0) / Math.max(1, userProfile?.nextLevelXp ?? 250)) * 100),
+                    )}%`,
+                  },
+                ]}
+              />
             </View>
 
             {/* Start First Mission Action Button */}
@@ -1738,7 +1750,7 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
               <Text style={styles.modalTitle}>Mission 1: The Reel Hook 🚀</Text>
               <Text style={styles.modalText}>
                 Create a 15-second high-energy Reel sharing your creator journey hook. Post before 11:30 AM to maintain your{' '}
-                <Text style={styles.modalBold}>47-Day Streak</Text>!
+                <Text style={styles.modalBold}>{userProfile?.streakCount ?? 0}-Day Streak</Text>!
               </Text>
 
               <Pressable
