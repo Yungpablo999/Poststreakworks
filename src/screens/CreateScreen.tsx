@@ -668,7 +668,7 @@ export const CreateScreen: React.FC<CreateScreenProps> = ({
             <View style={styles.jarvisSuggestionContent}>
               <Text style={styles.jarvisSuggestionTitle}>Jarvis Suggestion</Text>
               <Text style={styles.jarvisSuggestionText}>
-                Your streak is active. One finished post today keeps your momentum strong.
+                Your audience is responding well to creator lessons. Try turning today&rsquo;s idea into a short, personal story.
               </Text>
             </View>
           </View>
