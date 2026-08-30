@@ -452,9 +452,8 @@ export const MissionDetailScreen: React.FC<MissionDetailScreenProps> = ({
             </View>
           </View>
 
-          {/* 7. DUAL ACTION BUTTONS */}
+          {/* 7. PRIMARY ACTION BUTTON */}
           <View style={styles.actionButtonsContainer}>
-            {/* Primary Button: Create Post */}
             <Pressable
               style={({ pressed }) => [styles.createPostBtn, pressed && styles.btnPressed]}
               onPress={() => {
@@ -477,19 +476,6 @@ export const MissionDetailScreen: React.FC<MissionDetailScreenProps> = ({
               >
                 <Text style={styles.createPostBtnText}>⊕  Create Post</Text>
               </LinearGradient>
-            </Pressable>
-
-            {/* Secondary Button: Manual fallback */}
-            <Pressable
-              style={({ pressed }) => [styles.publishedBtn, pressed && styles.btnPressed]}
-              onPress={() => {
-                if (Platform.OS !== 'web') {
-                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                }
-                handleCompleteMission();
-              }}
-            >
-              <Text style={styles.publishedBtnText}>✓  I published manually</Text>
             </Pressable>
           </View>
 
