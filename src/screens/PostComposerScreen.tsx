@@ -634,7 +634,7 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
           {/* Main Headline & Subtitle */}
           <Text style={styles.mainTitle}>Shape your next post.</Text>
           <Text style={styles.mainSubtitle}>
-            Write your caption, choose platforms, add media and schedule your content.
+            Write your caption, choose platforms, add media, and schedule.
           </Text>
 
           {/* 1. POST IDEA CARD */}

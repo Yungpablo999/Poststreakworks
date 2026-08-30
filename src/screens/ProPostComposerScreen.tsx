@@ -456,7 +456,7 @@ export const ProPostComposerScreen: React.FC<ProPostComposerScreenProps> = ({
 
             <Text style={styles.mainTitleText}>Shape your next post.</Text>
             <Text style={styles.mainSubText}>
-              Write your caption, choose platforms, add media and schedule your content.
+              Write your caption, choose platforms, add media, and schedule.
             </Text>
           </View>
 
