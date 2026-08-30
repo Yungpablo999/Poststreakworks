@@ -521,6 +521,7 @@ export default function App() {
                 navigateTo('messages');
               }}
               onOpenCreateIdea={() => navigateTo('create')}
+              onOpenIdeaAngle={() => navigateTo('content-angle')}
               onOpenPostComposer={(title, platform) => {
                 if (title) setComposerIdeaTitle(title);
                 navigateTo('composer');

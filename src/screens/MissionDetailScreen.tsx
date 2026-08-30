@@ -29,6 +29,7 @@ interface MissionDetailScreenProps {
   onOpenMessages?: () => void;
   onOpenJarvisPro?: () => void;
   onOpenCreateIdea?: () => void;
+  onOpenIdeaAngle?: () => void;
   onOpenPostComposer?: (prefillTitle?: string, prefillPlatform?: string) => void;
   userProfile?: UserProfileData;
   onSaveProfile?: (updated: UserProfileData) => void;
@@ -41,6 +42,7 @@ export const MissionDetailScreen: React.FC<MissionDetailScreenProps> = ({
   onOpenMessages,
   onOpenJarvisPro,
   onOpenCreateIdea,
+  onOpenIdeaAngle,
   onOpenPostComposer,
   userProfile,
   onSaveProfile,
@@ -255,7 +257,9 @@ export const MissionDetailScreen: React.FC<MissionDetailScreenProps> = ({
                 if (Platform.OS !== 'web') {
                   Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                 }
-                if (onOpenCreateIdea) {
+                if (onOpenIdeaAngle) {
+                  onOpenIdeaAngle();
+                } else if (onOpenCreateIdea) {
                   onOpenCreateIdea();
                 } else if (onNavigateTab) {
                   onNavigateTab('create');
@@ -402,7 +406,9 @@ export const MissionDetailScreen: React.FC<MissionDetailScreenProps> = ({
                 if (Platform.OS !== 'web') {
                   Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                 }
-                if (onOpenCreateIdea) {
+                if (onOpenIdeaAngle) {
+                  onOpenIdeaAngle();
+                } else if (onOpenCreateIdea) {
                   onOpenCreateIdea();
                 } else if (onNavigateTab) {
                   onNavigateTab('create');
