@@ -1538,10 +1538,10 @@ const styles = StyleSheet.create({
 
   // Main Titles
   mainTitle: {
-    fontSize: sFont(22),
+    fontSize: Platform.OS === 'web' ? ('clamp(18px, 4.5vw, 22px)' as any) : sFont(20),
     fontWeight: '700',
     color: '#171420',
-    letterSpacing: -0.5,
+    letterSpacing: -0.35,
     marginBottom: 6,
   },
   mainSubtitle: {

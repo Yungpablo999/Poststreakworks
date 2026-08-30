@@ -21,6 +21,7 @@ import { FloatingTabBar, TabType } from '../components/FloatingTabBar';
 import { UserProfileData, UserProfileModal } from '../components/UserProfileModal';
 import { AnimatedCompletionModal } from '../components/AnimatedCompletionModal';
 import { FreeAppHeader } from '../components/FreeAppHeader';
+import { sFont } from '../utils/responsive';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
@@ -1190,11 +1191,11 @@ const styles = StyleSheet.create({
     letterSpacing: 0.8,
   },
   heroTitle: {
-    fontSize: 25,
+    fontSize: Platform.OS === 'web' ? ('clamp(18px, 4.5vw, 22px)' as any) : sFont(20),
     fontWeight: '700',
     color: '#171420',
-    letterSpacing: -0.4,
-    lineHeight: 31,
+    letterSpacing: -0.35,
+    lineHeight: 28,
     marginBottom: 4,
   },
   heroSubtitle: {

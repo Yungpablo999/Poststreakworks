@@ -21,6 +21,7 @@ import { BrandToast } from '../components/BrandToast';
 import { FloatingTabBar, TabType } from '../components/FloatingTabBar';
 import { SocialBrandIcon } from '../components/SocialBrandIcon';
 import { TinyGoldCheck } from '../components/CreatorStoryModal';
+import { sFont } from '../utils/responsive';
 
 interface ProRepurposeScreenProps {
   userProfile?: UserProfileData;
@@ -1225,10 +1226,10 @@ const styles = StyleSheet.create({
     letterSpacing: 0.4,
   },
   heroTitle: {
-    fontSize: 22,
+    fontSize: Platform.OS === 'web' ? ('clamp(18px, 4.5vw, 22px)' as any) : sFont(20),
     fontWeight: '700',
     color: '#171420',
-    letterSpacing: -0.5,
+    letterSpacing: -0.35,
     lineHeight: 28,
   },
   heroSubtitle: {
