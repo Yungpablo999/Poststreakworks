@@ -636,11 +636,11 @@ export const CreateScreen: React.FC<CreateScreenProps> = ({
                   Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
                 }
                 if (onOpenPostComposer) {
-                  onOpenPostComposer('One thing I wish I knew before I started creating', 'instagram');
+                  onOpenPostComposer('One thing I wish I knew before I started creating');
                 } else if (onOpenIdeaDetail) {
                   onOpenIdeaDetail('One thing I wish I knew before I started creating');
                 } else {
-                  openNewPost('One thing I wish I knew before I started creating', 'instagram');
+                  openNewPost('One thing I wish I knew before I started creating');
                 }
               }}
             >

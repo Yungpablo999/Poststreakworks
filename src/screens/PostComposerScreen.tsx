@@ -307,7 +307,7 @@ const PlatformIcon = ({ iconType, size = 38 }: { iconType: string; size?: number
 
 export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
   ideaTitle = 'One thing I wish I knew before I started creating',
-  initialPlatform = 'tiktok',
+  initialPlatform = '',
   onBack,
   onLogout,
   onOpenSchedule,
@@ -320,7 +320,9 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
   const isDark = false;
   const [activeTab, setActiveTab] = useState<TabType>('create');
   const [currentIdea, setCurrentIdea] = useState(ideaTitle);
-  const [selectedPlatforms, setSelectedPlatforms] = useState<string[]>(['tiktok', 'instagram']);
+  const [selectedPlatforms, setSelectedPlatforms] = useState<string[]>(
+    initialPlatform ? [initialPlatform] : []
+  );
   
   // Media State
   const [hasMedia, setHasMedia] = useState(false);
@@ -417,9 +419,7 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     }
     if (selectedPlatforms.includes(id)) {
-      if (selectedPlatforms.length > 1) {
-        setSelectedPlatforms(selectedPlatforms.filter((p) => p !== id));
-      }
+      setSelectedPlatforms(selectedPlatforms.filter((p) => p !== id));
     } else {
       setSelectedPlatforms([...selectedPlatforms, id]);
     }
@@ -572,7 +572,7 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
   };
 
   // Readiness Calculation
-  const readinessPercent = hasMedia ? 100 : 75;
+  const readinessPercent = 50 + (selectedPlatforms.length > 0 ? 25 : 0) + (hasMedia ? 25 : 0);
 
   const unreadNotifCount = notificationsList.filter((n) => n.unread).length;
 
@@ -993,14 +993,20 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
             </View>
 
             <View style={styles.checklistRow}>
-              <View style={styles.checkIconFilled}>
-                <Text style={styles.checkMarkWhite}>✓</Text>
-              </View>
-              <Text style={styles.checklistText}>
-                Platforms selected ({selectedPlatforms.map((p) => {
-                  const match = ALL_AVAILABLE_PLATFORMS.find((item) => item.id === p);
-                  return match ? match.shortName : p;
-                }).join(', ')})
+              {selectedPlatforms.length > 0 ? (
+                <View style={styles.checkIconFilled}>
+                  <Text style={styles.checkMarkWhite}>✓</Text>
+                </View>
+              ) : (
+                <View style={styles.checkIconEmpty} />
+              )}
+              <Text style={[styles.checklistText, selectedPlatforms.length === 0 && { color: '#94A3B8' }]}>
+                {selectedPlatforms.length > 0
+                  ? `Platforms selected (${selectedPlatforms.map((p) => {
+                      const match = ALL_AVAILABLE_PLATFORMS.find((item) => item.id === p);
+                      return match ? match.shortName : p;
+                    }).join(', ')})`
+                  : 'Platforms not selected'}
               </Text>
             </View>
 

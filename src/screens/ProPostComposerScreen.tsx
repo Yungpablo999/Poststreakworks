@@ -139,7 +139,9 @@ export const ProPostComposerScreen: React.FC<ProPostComposerScreenProps> = ({
   const [captionText, setCaptionText] = useState(
     'Stop waiting for the "perfect" idea. Consistency and honest lessons outperform polished perfection every single time.\n\nSave this for when you feel stuck. 🚀\n\n#CreatorTips #ContentStrategy #GrowthHacks'
   );
-  const [selectedPlatforms, setSelectedPlatforms] = useState<string[]>(['tiktok', 'instagram', 'youtube']);
+  const [selectedPlatforms, setSelectedPlatforms] = useState<string[]>(
+    initialPlatform ? [initialPlatform] : []
+  );
   const [selectedCategoryChip, setSelectedCategoryChip] = useState('Personal Lesson');
   const [selectedTimeSlot, setSelectedTimeSlot] = useState('7:30 PM (Peak Reach)');
   const [showAllPlatformsModal, setShowAllPlatformsModal] = useState(false);
@@ -200,11 +202,7 @@ export const ProPostComposerScreen: React.FC<ProPostComposerScreenProps> = ({
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     }
     if (selectedPlatforms.includes(id)) {
-      if (selectedPlatforms.length > 1) {
-        setSelectedPlatforms(selectedPlatforms.filter((p) => p !== id));
-      } else {
-        showToast('At least 1 platform must remain selected');
-      }
+      setSelectedPlatforms(selectedPlatforms.filter((p) => p !== id));
     } else {
       setSelectedPlatforms([...selectedPlatforms, id]);
     }
