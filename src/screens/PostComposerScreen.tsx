@@ -94,7 +94,7 @@ const ALL_AVAILABLE_PLATFORMS: PlatformOption[] = [
     name: 'TikTok',
     shortName: 'TikTok',
     format: '9:16 Video / Reels',
-    multiplier: '1.2x Reach',
+    multiplier: 'Best Fit',
     bgColor: '#000000',
     iconType: 'tiktok',
   },
@@ -103,7 +103,7 @@ const ALL_AVAILABLE_PLATFORMS: PlatformOption[] = [
     name: 'Instagram',
     shortName: 'IG',
     format: 'Reels & Carousel',
-    multiplier: '1.4x Reach',
+    multiplier: 'Recommended',
     bgColor: '#833AB4',
     gradient: ['#833AB4', '#FD1D1D', '#FCAF45'],
     iconType: 'instagram',
@@ -113,7 +113,7 @@ const ALL_AVAILABLE_PLATFORMS: PlatformOption[] = [
     name: 'YouTube',
     shortName: 'YT',
     format: 'Shorts & Longform',
-    multiplier: '1.1x Reach',
+    multiplier: 'High Retention',
     bgColor: '#FF0000',
     iconType: 'youtube',
   },
@@ -122,7 +122,7 @@ const ALL_AVAILABLE_PLATFORMS: PlatformOption[] = [
     name: 'Threads',
     shortName: 'Threads',
     format: 'Quotes & Insights',
-    multiplier: '1.3x Reach',
+    multiplier: 'Strong Fit',
     bgColor: '#000000',
     iconType: 'threads',
   },
@@ -131,7 +131,7 @@ const ALL_AVAILABLE_PLATFORMS: PlatformOption[] = [
     name: 'Pinterest',
     shortName: 'Pinterest',
     format: 'Idea Pins & Saves',
-    multiplier: '1.5x Saves',
+    multiplier: 'Visual Saves',
     bgColor: '#E60023',
     iconType: 'pinterest',
   },
@@ -140,7 +140,7 @@ const ALL_AVAILABLE_PLATFORMS: PlatformOption[] = [
     name: 'Facebook',
     shortName: 'FB',
     format: 'Reels & Groups',
-    multiplier: '0.8x Reach',
+    multiplier: 'Community',
     bgColor: '#1877F2',
     iconType: 'facebook',
   },
@@ -1119,14 +1119,18 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
               <View style={styles.modalHeaderRow}>
                 <View style={styles.modalTitleContainer}>
                   <Text style={styles.modalTitle}>Choose Social Platforms</Text>
-                  <Text style={styles.modalSubtitle}>Auto-format &amp; publish across all channels</Text>
+                  <Text style={styles.modalSubtitle}>Choose where your post will be published</Text>
                 </View>
                 <Pressable onPress={() => setShowPlatformsModal(false)} style={styles.modalCloseCircle} hitSlop={8}>
                   <Text style={styles.modalCloseCross}>✕</Text>
                 </Pressable>
               </View>
 
-              <ScrollView style={{ maxHeight: 340 }} showsVerticalScrollIndicator={false}>
+              <ScrollView
+                style={{ maxHeight: 285 }}
+                contentContainerStyle={{ paddingBottom: 6 }}
+                showsVerticalScrollIndicator={true}
+              >
                 {ALL_AVAILABLE_PLATFORMS.map((plat) => {
                   const isSelected = selectedPlatforms.includes(plat.id);
                   return (
