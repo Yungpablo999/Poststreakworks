@@ -1163,7 +1163,11 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
               </ScrollView>
 
               <Pressable
-                style={styles.modalPrimaryActionBtn}
+                disabled={selectedPlatforms.length === 0}
+                style={[
+                  styles.modalPrimaryActionBtn,
+                  selectedPlatforms.length === 0 && styles.modalPrimaryActionBtnDisabled,
+                ]}
                 onPress={() => {
                   if (Platform.OS !== 'web') {
                     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
@@ -1171,16 +1175,24 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
                   setShowPlatformsModal(false);
                 }}
               >
-                <LinearGradient
-                  colors={['#7C3AED', '#582CDB']}
-                  start={{ x: 0, y: 0 }}
-                  end={{ x: 1, y: 0 }}
-                  style={styles.modalPrimaryGradient}
-                >
-                  <Text style={styles.modalPrimaryActionText}>
-                    Apply Channels ({selectedPlatforms.length} Selected) ✓
-                  </Text>
-                </LinearGradient>
+                {selectedPlatforms.length > 0 ? (
+                  <LinearGradient
+                    colors={['#7C3AED', '#582CDB']}
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 1, y: 0 }}
+                    style={styles.modalPrimaryGradient}
+                  >
+                    <Text style={styles.modalPrimaryActionText}>
+                      Apply Channels ({selectedPlatforms.length} Selected) ✓
+                    </Text>
+                  </LinearGradient>
+                ) : (
+                  <View style={styles.modalPrimaryDisabledContainer}>
+                    <Text style={styles.modalPrimaryDisabledText}>
+                      Select at least 1 channel
+                    </Text>
+                  </View>
+                )}
               </Pressable>
             </Animated.View>
           </View>
@@ -2675,15 +2687,31 @@ const styles = StyleSheet.create({
     shadowRadius: 10,
     elevation: 4,
   },
+  modalPrimaryActionBtnDisabled: {
+    backgroundColor: '#E2E8F0',
+    shadowOpacity: 0,
+    elevation: 0,
+  },
   modalPrimaryGradient: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
   },
+  modalPrimaryDisabledContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#E2E8F0',
+  },
   modalPrimaryActionText: {
     fontSize: 14,
     fontWeight: '800',
     color: '#FFFFFF',
+  },
+  modalPrimaryDisabledText: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: '#94A3B8',
   },
 
   // CALENDAR MODAL STYLES
