@@ -900,8 +900,8 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
                   <View style={styles.verifHeroTopRow}>
                     <View style={styles.verifAvatarWrap}>
                       <Image source={currentDisplayAvatarSource} style={styles.verifAvatarImg} />
-                      <View style={[styles.verifBadgeGold, isPro ? { backgroundColor: '#582CDB' } : { backgroundColor: '#F59E0B' }]}>
-                        <Text style={{ fontSize: 10, color: '#FFFFFF', fontWeight: '800' }}>
+                      <View style={[styles.verifBadgeGold, isPro ? styles.verifBadgePro : styles.verifBadgeFree]}>
+                        <Text style={styles.verifBadgeText}>
                           {isPro ? '✓' : '4/5'}
                         </Text>
                       </View>
@@ -1676,16 +1676,30 @@ const styles = StyleSheet.create({
   },
   verifBadgeGold: {
     position: 'absolute',
-    bottom: -2,
-    right: -2,
-    width: 18,
+    bottom: -3,
+    right: -4,
     height: 18,
     borderRadius: 9,
-    backgroundColor: '#F59E0B',
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 1.5,
     borderColor: '#1A0C38',
+  },
+  verifBadgePro: {
+    width: 18,
+    backgroundColor: '#582CDB',
+  },
+  verifBadgeFree: {
+    minWidth: 26,
+    paddingHorizontal: 4,
+    backgroundColor: '#F59E0B',
+  },
+  verifBadgeText: {
+    fontSize: 9,
+    color: '#FFFFFF',
+    fontWeight: '900',
+    textAlign: 'center',
+    letterSpacing: -0.2,
   },
   verifMainHeroTitle: {
     fontSize: 14.5,
