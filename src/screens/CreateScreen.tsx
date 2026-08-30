@@ -614,13 +614,13 @@ export const CreateScreen: React.FC<CreateScreenProps> = ({
               </Text>
             </View>
 
-            {/* Platform & Best Time Row */}
+            {/* Platform & Best Time Row (Single Clean Line) */}
             <View style={styles.streakMetaRow}>
               <View style={styles.streakPlatformsBadge}>
-                <Text style={styles.streakPlatformsText}>TikTok · Instagram Reel</Text>
+                <Text style={styles.streakPlatformsText} numberOfLines={1}>TikTok · Instagram Reel</Text>
               </View>
               <View style={styles.bestTimeBadge}>
-                <Text style={styles.bestTimeBadgeText}>⚡ Best time: 7:30 PM</Text>
+                <Text style={styles.bestTimeBadgeText} numberOfLines={1}>⚡ Best time: 7:30 PM</Text>
               </View>
             </View>
 
@@ -1714,33 +1714,37 @@ const styles = StyleSheet.create({
   streakMetaRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    flexWrap: 'wrap',
-    gap: 7,
+    justifyContent: 'space-between',
     marginBottom: 12,
+    width: '100%',
   },
   streakPlatformsBadge: {
     backgroundColor: '#F4F0FF',
-    paddingVertical: 4,
-    paddingHorizontal: 9,
-    borderRadius: 7,
+    paddingVertical: 3.5,
+    paddingHorizontal: 8,
+    borderRadius: 6,
+    flexShrink: 1,
   },
   streakPlatformsText: {
-    fontSize: 11,
+    fontSize: 10.5,
     fontWeight: '700',
     color: '#582CDB',
+    letterSpacing: -0.2,
   },
   bestTimeBadge: {
     backgroundColor: '#FFFBEB',
     borderWidth: 1,
     borderColor: '#FEF3C7',
     paddingVertical: 3.5,
-    paddingHorizontal: 9,
-    borderRadius: 7,
+    paddingHorizontal: 8,
+    borderRadius: 6,
+    flexShrink: 0,
   },
   bestTimeBadgeText: {
-    fontSize: 11,
+    fontSize: 10.5,
     fontWeight: '700',
     color: '#D97706',
+    letterSpacing: -0.2,
   },
   useIdeaBtn: {
     height: 44,
