@@ -33,7 +33,7 @@ export const AnimatedCompletionModal: React.FC<AnimatedCompletionModalProps> = (
   subtitle = 'Your post has been scheduled & streak is protected.',
   badgeText = 'POST COMPLETED',
   xpEarned = 50,
-  streakCount = 48,
+  streakCount = 1,
   speechBubble,
   actionText = 'Continue',
   onAction,

@@ -68,7 +68,7 @@ const NOTIFICATIONS: NotificationItem[] = [
   {
     id: 'n2',
     title: 'Streak Saver Ready',
-    body: "Convert today's idea into a post to keep your 47-day streak.",
+    body: "Convert today's idea into a post to keep your 1-day streak.",
     time: '2h ago',
     unread: true,
     iconEmoji: '🔥',
@@ -272,7 +272,7 @@ export const ContentAngleScreen: React.FC<ContentAngleScreenProps> = ({
     if (nextSaved) {
       setCelebrationTitle('Idea Saved!');
       setCelebrationSubtitle('"One thing I wish I knew before I started creating" has been saved to your vault.');
-      setCelebrationSpeech('47-day streak protected! Idea ready to turn into a post anytime.');
+      setCelebrationSpeech('1-day streak protected! Idea ready to turn into a post anytime.');
       setShowCelebrationModal(true);
     }
   };
@@ -300,7 +300,7 @@ export const ContentAngleScreen: React.FC<ContentAngleScreenProps> = ({
     if (becameSaved) {
       setCelebrationTitle('Idea Saved!');
       setCelebrationSubtitle(`"${savedTitle}" has been saved to your vault.`);
-      setCelebrationSpeech('47-day streak protected! Idea ready in your vault.');
+      setCelebrationSpeech('1-day streak protected! Idea ready in your vault.');
       setShowCelebrationModal(true);
     }
   };
@@ -341,7 +341,7 @@ export const ContentAngleScreen: React.FC<ContentAngleScreenProps> = ({
     setAllIdeas([newIdea, ...allIdeas]);
     setCelebrationTitle('New Ideas Generated!');
     setCelebrationSubtitle('Fresh angles tailored for your niche are ready to create.');
-    setCelebrationSpeech('47-day streak protected! Keep up this awesome momentum.');
+    setCelebrationSpeech('1-day streak protected! Keep up this awesome momentum.');
     setShowCelebrationModal(true);
   };
 
@@ -835,7 +835,7 @@ export const ContentAngleScreen: React.FC<ContentAngleScreenProps> = ({
               <View style={styles.chatCard}>
                 <Text style={styles.chatSpeaker}>Jarvis AI</Text>
                 <Text style={styles.chatMsg}>
-                  I filtered these angles based on your 47-day streak history! Personal lessons have your highest completion rate.
+                  I filtered these angles based on your {userProfile?.streakCount || 1}-day streak history! Personal lessons have your highest completion rate.
                 </Text>
               </View>
 
@@ -857,7 +857,7 @@ export const ContentAngleScreen: React.FC<ContentAngleScreenProps> = ({
           speechBubble={celebrationSpeech}
           badgeText="IDEAS READY"
           xpEarned={30}
-          streakCount={47}
+          streakCount={userProfile?.streakCount || 1}
           actionText="Keep Exploring ➔"
           onDismiss={() => {
             setShowCelebrationModal(false);

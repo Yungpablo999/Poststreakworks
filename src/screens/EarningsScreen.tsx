@@ -416,7 +416,7 @@ export const EarningsScreen: React.FC<EarningsScreenProps> = ({
               </View>
               <View style={styles.checklistRow}>
                 <Text style={{ color: '#15803D', fontSize: 13, fontWeight: '700' }}>✓</Text>
-                <Text style={styles.checkTextActive}>47-day streak active 🔥</Text>
+                <Text style={styles.checkTextActive}>{userProfile?.streakCount || 1}-day streak active 🔥</Text>
               </View>
               <View style={styles.checklistRow}>
                 <Text style={{ color: '#94A3B8', fontSize: 13 }}>○</Text>
@@ -1091,7 +1091,7 @@ export const EarningsScreen: React.FC<EarningsScreenProps> = ({
           speechBubble={celebrationSpeech}
           badgeText={celebrationBadge}
           xpEarned={celebrationXp}
-          streakCount={47}
+          streakCount={userProfile?.streakCount || 1}
           actionText="Let's Build ➔"
           onDismiss={() => setShowCelebrationModal(false)}
         />

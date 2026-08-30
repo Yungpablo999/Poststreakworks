@@ -862,7 +862,7 @@ export const ProScriptScreen: React.FC<ProScriptScreenProps> = ({
           <View style={styles.streakCard}>
             <Text style={styles.streakCardHeaderLabel}>STREAK &amp; XP IMPACT</Text>
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 8 }}>
-              <Text style={styles.streakValText}>🔥 47 Days Streak</Text>
+              <Text style={styles.streakValText}>🔥 {userProfile?.streakCount || 1} Day{userProfile?.streakCount === 1 ? '' : 's'} Streak</Text>
               <Text style={styles.xpValText}>⚡ +50 XP Creator Level</Text>
             </View>
 

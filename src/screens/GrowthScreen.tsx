@@ -1023,7 +1023,7 @@ export const GrowthScreen: React.FC<GrowthScreenProps> = ({
           speechBubble={celebrationSpeech}
           badgeText={celebrationBadge}
           xpEarned={celebrationXp}
-          streakCount={47}
+          streakCount={userProfile?.streakCount || 1}
           actionText="Continue ➔"
           onDismiss={() => setShowCelebrationModal(false)}
         />

@@ -1037,7 +1037,7 @@ export const ProCaptionScreen: React.FC<ProCaptionScreenProps> = ({
             <View style={{ marginTop: 12, paddingTop: 10, borderTopWidth: 1, borderTopColor: '#F1EFE9' }}>
               <Text style={styles.streakLabel}>STREAK</Text>
               <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 2 }}>
-                <Text style={styles.streakVal}>47 Days 🔥</Text>
+                <Text style={styles.streakVal}>{userProfile?.streakCount || 1} Day{userProfile?.streakCount === 1 ? '' : 's'} 🔥</Text>
                 <View style={styles.streakProtectedBadge}>
                   <Text style={styles.streakProtectedBadgeText}>Always Protected</Text>
                 </View>

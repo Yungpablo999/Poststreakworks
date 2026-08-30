@@ -69,7 +69,7 @@ export const COLLAB_PLANS: CollabPlan[] = [
     caption:
       '"Spent the day creating with @{partner}. We realized that the hardest part of growth is not the work, it is the plan. Here is how we filmed 3 hooks in under 30 minutes..."',
     jarvisAdvice:
-      "Keep this first collaboration simple. A short behind-the-scenes Reel is much easier to finish and publish today, ensuring you do not lose your 47-day momentum while exploring this new partnership.",
+      "Keep this first collaboration simple. A short behind-the-scenes Reel is much easier to finish and publish today, ensuring you do not lose your daily streak momentum while exploring this new partnership.",
     format: 'Short Reel',
     formatSub: 'Vertical 9:16, under 45s',
   },
@@ -1012,7 +1012,7 @@ export const CollabIdeaScreen: React.FC<CollabIdeaScreenProps> = ({
 
               <View style={styles.impactItemRow}>
                 <Text style={styles.impactGreenCheck}>🟢</Text>
-                <Text style={styles.impactItemText}>Protects 47-day streak</Text>
+                <Text style={styles.impactItemText}>Protects {userProfile?.streakCount || 1}-day streak</Text>
               </View>
 
               <View style={styles.impactItemRow}>
@@ -1360,7 +1360,7 @@ export const CollabIdeaScreen: React.FC<CollabIdeaScreenProps> = ({
             speechBubble={celebrationSpeech}
             badgeText={celebrationBadge}
             xpEarned={50}
-            streakCount={47}
+            streakCount={userProfile?.streakCount || 1}
             actionText="Keep Editing ➔"
             onDismiss={() => {
               setShowCelebrationModal(false);

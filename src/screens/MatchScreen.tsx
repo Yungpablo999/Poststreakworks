@@ -271,7 +271,7 @@ const CREATOR_DECK: CreatorProfile[] = [
     availability: 'Available Daily',
     consistencyRating: 'Elite',
     whyFitsDescription:
-      'Marcus thrives on ironclad daily discipline, creating an ideal accountability synergy with your 47-day streak.',
+      'Marcus thrives on ironclad daily discipline, creating an ideal accountability synergy with your daily streak.',
     whyFitsPills: ['Discipline Synergy', 'Streak Alignment', 'High Energy'],
     collabIdea: {
       title: '“The 5 AM Creator Morning Routine”',
@@ -1368,7 +1368,7 @@ export const MatchScreen: React.FC<MatchScreenProps> = ({
           subtitle={'You connected with ' + lastConnectedName + '. +50 XP awarded to your streak!'}
           badgeText="CREATOR CONNECTED"
           xpEarned={50}
-          streakCount={48}
+          streakCount={userProfile?.streakCount || 1}
           actionText="Continue Exploring"
           onDismiss={() => setShowConnectModal(false)}
         />
@@ -1469,7 +1469,7 @@ export const MatchScreen: React.FC<MatchScreenProps> = ({
           subtitle={'Your proposal for ' + pitchRecipient.collabIdea.title + ' was delivered to ' + pitchRecipient.name + '. +50 XP awarded!'}
           badgeText="PITCH DELIVERED"
           xpEarned={50}
-          streakCount={48}
+          streakCount={userProfile?.streakCount || 1}
           actionText="Explore More Creators"
           onDismiss={() => setShowPitchSuccessModal(false)}
         />

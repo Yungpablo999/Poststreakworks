@@ -160,7 +160,7 @@ const NOTIFICATIONS: NotificationItem[] = [
   {
     id: 'notif_1',
     title: '🔥 Streak Protected!',
-    body: 'Your 47-day creator streak is safe for today.',
+    body: 'Your 1-day creator streak is safe for today.',
     time: '10m ago',
     unread: true,
     iconEmoji: '🔥',
@@ -521,7 +521,7 @@ export const CreateScreen: React.FC<CreateScreenProps> = ({
     // Trigger Animated Ghost Celebration Modal
     setCelebrationTitle('Post Draft Scheduled!');
     setCelebrationSubtitle('Your draft is stored and scheduled for tomorrow at 11:30 AM.');
-    setCelebrationSpeech('Ghost says: You are on fire today Amara! 47 days and counting!');
+    setCelebrationSpeech(`Ghost says: You are on fire today Amara! ${userProfile?.streakCount || 1} day and counting!`);
     setCelebrationBadge('STREAK PROTECTED');
     setCelebrationXp(50);
     setShowCelebrationModal(true);
@@ -603,7 +603,9 @@ export const CreateScreen: React.FC<CreateScreenProps> = ({
                 </View>
                 <View style={styles.streakTitlesContainer}>
                   <Text style={styles.streakSaverTag} numberOfLines={1}>STREAK SAVER</Text>
-                  <Text style={styles.streakDaysTitle} numberOfLines={1}>47-day streak · Active</Text>
+                  <Text style={styles.streakDaysTitle} numberOfLines={1}>
+                    {userProfile?.streakCount || 1}-day streak · Active
+                  </Text>
                 </View>
               </View>
             </View>
@@ -1509,7 +1511,7 @@ export const CreateScreen: React.FC<CreateScreenProps> = ({
           speechBubble={celebrationSpeech}
           badgeText={celebrationBadge}
           xpEarned={celebrationXp}
-          streakCount={47}
+          streakCount={userProfile?.streakCount || 1}
           actionText="Continue ➔"
           onDismiss={() => setShowCelebrationModal(false)}
         />

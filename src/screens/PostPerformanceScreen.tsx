@@ -878,7 +878,7 @@ export const PostPerformanceScreen: React.FC<PostPerformanceScreenProps> = ({
           subtitle="You now have the exact retention and hook formula from your viral post."
           badgeText="VIRAL BLUEPRINT"
           xpEarned={100}
-          streakCount={47}
+          streakCount={userProfile?.streakCount || 1}
           actionText="Create Next Post ➔"
           onDismiss={() => {
             setShowCelebrationModal(false);

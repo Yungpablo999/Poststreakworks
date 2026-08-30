@@ -400,7 +400,7 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
       avatarId: selectedAvatarId || undefined,
       avatarSource: sourceToSave || undefined,
       customAvatarUri: customAvatarUri || undefined,
-      streakCount: initialProfile?.streakCount || 47,
+      streakCount: initialProfile?.streakCount || 1,
       level: initialProfile?.level || 5,
       xp: initialProfile?.xp || 3450,
       partnersCount: initialProfile?.partnersCount || 12,
@@ -639,8 +639,8 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
                   <View style={isPro ? styles.heroStreakPillPro : styles.heroStreakPill}>
                     <Text style={isPro ? styles.heroStreakPillTextPro : styles.heroStreakPillText}>
                       {isPro
-                        ? '⚡ 47-Day Streak • 👑 Pro Creator Passport'
-                        : '⚡ 47-Day Streak • 🆓 Free Creator Passport'}
+                        ? `⚡ ${initialProfile?.streakCount || 1}-Day Streak • 👑 Pro Creator Passport`
+                        : `⚡ ${initialProfile?.streakCount || 1}-Day Streak • 🆓 Free Creator Passport`}
                     </Text>
                   </View>
                 </View>
@@ -663,7 +663,7 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
                 {/* 3. STATS STRIP */}
                 <View style={styles.statsStrip}>
                   <View style={styles.statBox}>
-                    <Text style={styles.statVal}>47d</Text>
+                    <Text style={styles.statVal}>{initialProfile?.streakCount || 1}d</Text>
                     <Text style={styles.statLabel}>Streak</Text>
                   </View>
                   <View style={styles.statDivider} />
@@ -1026,7 +1026,7 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
                     <View style={{ flex: 1 }}>
                       <Text style={styles.verifCheckTitle}>7-Day Consistency Threshold</Text>
                       <Text style={styles.verifCheckSub}>
-                        Active {initialProfile?.streakCount || 47}-Day Posting Streak • Verified by Jarvis AI 🔥
+                        Active {initialProfile?.streakCount || 1}-Day Posting Streak • Verified by Jarvis AI 🔥
                       </Text>
                     </View>
                   </View>

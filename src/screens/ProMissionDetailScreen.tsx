@@ -621,7 +621,7 @@ export const ProMissionDetailScreen: React.FC<ProMissionDetailScreenProps> = ({
           <Text style={styles.sectionHeaderTitleBold}>WHAT THIS UNLOCKS</Text>
           <View style={[styles.unlocksCard, { marginBottom: 140 }]}>
             <View style={styles.unlockItemRow}>
-              <Text style={styles.unlockItemText}>🔥 47-day streak protected</Text>
+              <Text style={styles.unlockItemText}>🔥 {userProfile?.streakCount || 1}-day streak protected</Text>
               <Text style={styles.unlockArrow}>↗</Text>
             </View>
             <View style={styles.unlockDivider} />

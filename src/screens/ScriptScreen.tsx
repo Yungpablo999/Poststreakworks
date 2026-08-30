@@ -61,7 +61,7 @@ const NOTIFICATIONS: NotificationItem[] = [
   {
     id: 'n2',
     title: 'Streak Saver Ready',
-    body: "Convert today's idea into a post to keep your 47-day streak.",
+    body: "Convert today's idea into a post to keep your 1-day streak.",
     time: '2h ago',
     unread: true,
     iconEmoji: '🔥',
@@ -223,7 +223,7 @@ export const ScriptScreen: React.FC<ScriptScreenProps> = ({
   const [showCelebrationModal, setShowCelebrationModal] = useState(false);
   const [celebrationTitle, setCelebrationTitle] = useState('Script Ready!');
   const [celebrationSubtitle, setCelebrationSubtitle] = useState('Your full video script is formatted and ready for filming.');
-  const [celebrationSpeech, setCelebrationSpeech] = useState('47-day streak protected! +40 XP earned.');
+  const [celebrationSpeech, setCelebrationSpeech] = useState('1-day streak protected! +40 XP earned.');
   const [celebrationBadge, setCelebrationBadge] = useState('SCRIPT CRAFTED');
 
   const [notificationsList, setNotificationsList] = useState<NotificationItem[]>(NOTIFICATIONS);
@@ -380,7 +380,7 @@ ${selectedCtaText}`;
 
     setCelebrationTitle('Script Copied!');
     setCelebrationSubtitle('Full script copied to clipboard and ready for your teleprompter or notes.');
-    setCelebrationSpeech('47-day streak protected! +40 XP added.');
+    setCelebrationSpeech('1-day streak protected! +40 XP added.');
     setCelebrationBadge('COPIED TO CLIPBOARD');
     setShowCelebrationModal(true);
   };
@@ -739,7 +739,7 @@ ${selectedCtaText}`;
               <View style={styles.streakImpactHeaderRow}>
                 <View>
                   <Text style={styles.streakImpactLabel}>STREAK IMPACT</Text>
-                  <Text style={styles.streakImpactSub}>Helps protect 47-day streak</Text>
+                  <Text style={styles.streakImpactSub}>Helps protect {userProfile?.streakCount || 1}-day streak</Text>
                 </View>
                 <Text style={styles.streakImpactXp}>+40 XP</Text>
               </View>
@@ -1198,7 +1198,7 @@ ${selectedCtaText}`;
             speechBubble={celebrationSpeech}
             badgeText={celebrationBadge}
             xpEarned={40}
-            streakCount={47}
+            streakCount={userProfile?.streakCount || 1}
             actionText="Keep Editing ➔"
             onDismiss={() => {
               setShowCelebrationModal(false);

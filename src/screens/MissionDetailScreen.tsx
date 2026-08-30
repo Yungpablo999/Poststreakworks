@@ -165,7 +165,7 @@ export const MissionDetailScreen: React.FC<MissionDetailScreenProps> = ({
           {/* MAIN HEADLINE & SUBTITLE */}
           <Text style={styles.mainHeading}>Post once before 9 PM.</Text>
           <Text style={styles.mainSubtitle}>
-            Protect your <Text style={{ fontWeight: '800', color: '#171420' }}>{userProfile?.streakCount || 47}-day streak</Text> and keep your momentum alive.
+            Protect your <Text style={{ fontWeight: '800', color: '#171420' }}>{userProfile?.streakCount || 1}-day streak</Text> and keep your momentum alive.
           </Text>
 
           {/* 1. MISSION PROGRESS CARD */}
@@ -188,7 +188,7 @@ export const MissionDetailScreen: React.FC<MissionDetailScreenProps> = ({
               </View>
 
               <View style={styles.metricBox}>
-                <Text style={styles.metricValueStreak}>🔥 {userProfile?.streakCount || 47}</Text>
+                <Text style={styles.metricValueStreak}>🔥 {userProfile?.streakCount || 1}</Text>
                 <Text style={styles.metricLabel}>DAY STREAK</Text>
               </View>
 
@@ -496,11 +496,11 @@ export const MissionDetailScreen: React.FC<MissionDetailScreenProps> = ({
         <AnimatedCompletionModal
           visible={showCelebrationModal}
           title="Mission Accomplished!"
-          subtitle="Your daily post is live & your 47-day streak momentum is 100% protected."
+          subtitle="Your daily post is live & your streak momentum is 100% protected."
           speechBubble="Ghost says: Consistency is your superpower Amara! +80 XP added to your Passport!"
           badgeText="MISSION COMPLETE"
           xpEarned={80}
-          streakCount={47}
+          streakCount={userProfile?.streakCount || 1}
           actionText="Continue ➔"
           onDismiss={() => {
             setShowCelebrationModal(false);
@@ -655,7 +655,7 @@ export const MissionDetailScreen: React.FC<MissionDetailScreenProps> = ({
               <View style={styles.modalHeaderRow}>
                 <View style={{ flex: 1, marginRight: 8 }}>
                   <Text style={styles.modalTitle} numberOfLines={1}>AI Hook Sparks</Text>
-                  <Text style={styles.modalSubtitle} numberOfLines={1}>Angles tailored for your 47-day streak:</Text>
+                  <Text style={styles.modalSubtitle} numberOfLines={1}>Angles tailored for your {userProfile?.streakCount || 1}-day streak:</Text>
                 </View>
                 <Pressable
                   onPress={() => setShowIdeaModal(false)}
@@ -722,7 +722,7 @@ export const MissionDetailScreen: React.FC<MissionDetailScreenProps> = ({
                 <Text style={{ fontSize: 18 }}>🔥</Text>
                 <View style={{ flex: 1 }}>
                   <Text style={styles.notifTitle}>Post before 9 PM</Text>
-                  <Text style={styles.notifBody}>Your 47-day streak requires 1 post today.</Text>
+                  <Text style={styles.notifBody}>Your {userProfile?.streakCount || 1}-day streak requires 1 post today.</Text>
                 </View>
               </View>
 

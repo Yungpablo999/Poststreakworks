@@ -111,7 +111,7 @@ const CREATOR_STORIES: CreatorStory[] = [
     handle: '@amara.creates',
     niche: 'Lifestyle & Tech',
     avatar: require('../../assets/images/amara-avatar.jpg'),
-    streak: 47,
+    streak: 1,
     isOnline: true,
     statusText: 'Filming Reel 🎬',
     isUser: true,
@@ -122,8 +122,8 @@ const CREATOR_STORIES: CreatorStory[] = [
         title: 'Today\'s Filming Session',
         subtitle: 'Behind the scenes with PostStreak',
         timeAgo: 'Just now',
-        quote: 'Filming day 47! Testing a 3-part curiosity hook on batch productivity.',
-        badge: '⚡ 47-DAY STREAK ACTIVE',
+        quote: 'Filming day 1! Testing a 3-part curiosity hook on batch productivity.',
+        badge: '⚡ 1-DAY STREAK ACTIVE',
       },
       {
         id: 's_user_2',
@@ -300,7 +300,7 @@ const INITIAL_CONVERSATIONS: ConversationThread[] = [
       {
         id: 'jm0',
         senderId: 'jarvis',
-        text: 'Streak Alert: 1 post needed today to protect your 47-day streak and earn +50 XP.',
+        text: 'Streak Alert: 1 post needed today to protect your 1-day streak and earn +50 XP.',
         time: '7:00 AM',
         isUser: false,
       },
@@ -338,7 +338,7 @@ const INITIAL_CONVERSATIONS: ConversationThread[] = [
       {
         id: 'm1',
         senderId: 'c1',
-        text: 'Hey Amara! Just saw your 47-day streak update on the leaderboard, huge congrats!',
+        text: 'Hey Amara! Just saw your 1-day streak update on the leaderboard, huge congrats!',
         time: '10:14 AM',
         isUser: false,
       },
@@ -2654,7 +2654,7 @@ export const MessagesScreen: React.FC<MessagesScreenProps> = ({
           speechBubble={celebrationSpeech}
           badgeText={celebrationBadge}
           xpEarned={15}
-          streakCount={47}
+          streakCount={userProfile?.streakCount || 1}
           actionText="Keep Chatting ➔"
           onDismiss={() => {
             setShowCelebrationModal(false);

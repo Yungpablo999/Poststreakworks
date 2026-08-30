@@ -313,7 +313,7 @@ export const FindSquadScreen: React.FC<FindSquadScreenProps> = ({
     setCelebrationState({
       visible: true,
       title: 'Application Submitted!',
-      description: `Your verified creator profile and 47-day streak record were sent to the hosts of ${squad.name}. Applications are reviewed within 2 hours. You\'ll get a notification once accepted!`,
+      description: `Your verified creator profile and ${userProfile?.streakCount || 1}-day streak record were sent to the hosts of ${squad.name}. Applications are reviewed within 2 hours. You'll get a notification once accepted!`,
       xpAmount: 50,
       actionLabel: 'Explore More Squads 👍',
       onAction: () => {
@@ -510,7 +510,7 @@ export const FindSquadScreen: React.FC<FindSquadScreenProps> = ({
                   resizeMode="contain"
                 />
                 <Text style={styles.jarvisSyncText}>
-                  Matches your 47-day streak and daily short-form pacing goals.
+                  Matches your {userProfile?.streakCount || 1}-day streak and daily short-form pacing goals.
                 </Text>
               </View>
 

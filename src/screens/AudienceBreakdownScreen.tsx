@@ -1357,7 +1357,7 @@ export const AudienceBreakdownScreen: React.FC<AudienceBreakdownScreenProps> = (
           subtitle="You now have unrestricted access to Audience Age, Top Locations, and Peak Active Times."
           badgeText="PRO UNLOCKED"
           xpEarned={100}
-          streakCount={47}
+          streakCount={userProfile?.streakCount || 1}
           actionText="Explore Demographics ➔"
           onDismiss={() => {
             setShowCelebrationModal(false);

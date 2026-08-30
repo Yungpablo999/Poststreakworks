@@ -420,7 +420,7 @@ export const ScheduleScreen: React.FC<ScheduleScreenProps> = ({
                 adjustsFontSizeToFit={true}
                 minimumFontScale={0.85}
               >
-                Posting today protects your <Text style={{ fontWeight: '800', color: '#171420' }}>{userProfile?.streakCount || 47}-day streak</Text>
+                Posting today protects your <Text style={{ fontWeight: '800', color: '#171420' }}>{userProfile?.streakCount || 1}-day streak</Text>
               </Text>
             </View>
 
@@ -773,7 +773,7 @@ export const ScheduleScreen: React.FC<ScheduleScreenProps> = ({
           speechBubble={completionSpeech}
           badgeText={completionBadge}
           xpEarned={completionXp}
-          streakCount={47}
+          streakCount={userProfile?.streakCount || 1}
           actionText="Continue ➔"
           onDismiss={() => setShowCompletionModal(false)}
         />

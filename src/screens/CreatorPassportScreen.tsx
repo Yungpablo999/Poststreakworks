@@ -399,7 +399,7 @@ export const CreatorPassportScreen: React.FC<CreatorPassportScreenProps> = ({
             {/* Badges Row */}
             <View style={styles.identityBadgesRow}>
               <View style={styles.streakBadgePill}>
-                <Text style={styles.streakBadgePillText}>🔥 47-DAY STREAK</Text>
+                <Text style={styles.streakBadgePillText}>🔥 {userProfile?.streakCount || 1}-DAY STREAK</Text>
               </View>
               <View style={styles.platformsBadgePill}>
                 <Text style={styles.platformsBadgePillText}>🔗 {connectedPlatforms.length} PLATFORMS</Text>
@@ -462,8 +462,8 @@ export const CreatorPassportScreen: React.FC<CreatorPassportScreenProps> = ({
             </View>
 
             <View style={styles.streakDaysRow}>
-              <Text style={styles.streakDaysNumber}>47</Text>
-              <Text style={styles.streakDaysUnit}>Days</Text>
+              <Text style={styles.streakDaysNumber}>{userProfile?.streakCount || 1}</Text>
+              <Text style={styles.streakDaysUnit}>Day{userProfile?.streakCount === 1 ? '' : 's'}</Text>
             </View>
 
             <Text style={styles.streakSubtext}>Consistency threshold met for standard opportunities.</Text>

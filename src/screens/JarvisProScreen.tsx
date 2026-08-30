@@ -775,7 +775,7 @@ export const JarvisProScreen: React.FC<JarvisProScreenProps> = ({
           subtitle="All autonomous AI strategies, viral script generators, and priority matching are now unlocked."
           badgeText="JARVIS PRO UNLOCKED"
           xpEarned={250}
-          streakCount={48}
+          streakCount={userProfile?.streakCount || 1}
           actionText="Start Exploring Pro"
           onDismiss={() => setShowCheckoutSuccessModal(false)}
         />

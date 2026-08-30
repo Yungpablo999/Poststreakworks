@@ -687,7 +687,7 @@ export const ProDashboardScreen: React.FC<ProDashboardScreenProps> = ({
               </View>
 
               <View style={styles.proPillGold}>
-                <Text style={styles.proPillGoldText}>47-Day Streak</Text>
+                <Text style={styles.proPillGoldText}>{userProfile?.streakCount || 1}-Day Streak</Text>
               </View>
 
               <View style={styles.proPillGray}>
@@ -714,7 +714,7 @@ export const ProDashboardScreen: React.FC<ProDashboardScreenProps> = ({
             <View style={styles.streakCardHeader}>
               <Text style={styles.streakLabel}>YOUR STREAK (TAP TO EXPAND)</Text>
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 2 }}>
-                <Text style={styles.streakBigCount}>47-Day Streak</Text>
+                <Text style={styles.streakBigCount}>{userProfile?.streakCount || 1}-Day Streak</Text>
                 <Animated.Text style={{ fontSize: 20, transform: [{ scale: flamePulse }] }}>
                   🔥
                 </Animated.Text>
@@ -1111,7 +1111,7 @@ export const ProDashboardScreen: React.FC<ProDashboardScreenProps> = ({
               <View style={styles.calendarStatsRow}>
                 <View style={styles.calendarStatCard}>
                   <Text style={styles.calendarStatValue} numberOfLines={1}>
-                    {isNarrowScreen ? '47d 🔥' : '47 Days 🔥'}
+                    {isNarrowScreen ? `${userProfile?.streakCount || 1}d 🔥` : `${userProfile?.streakCount || 1} Day${userProfile?.streakCount === 1 ? '' : 's'} 🔥`}
                   </Text>
                   <Text style={styles.calendarStatLabel} numberOfLines={1}>Current</Text>
                 </View>

@@ -159,7 +159,7 @@ export const QuestsScreen: React.FC<QuestsScreenProps> = ({
     setTimeout(() => {
       setCelebrationTitle('Reputation Goal Locked!');
       setCelebrationSubtitle('Ghost is tracking your daily quests toward 100% Creator Passport rating.');
-      setCelebrationSpeech('Ghost says: Consistency is your secret weapon Amara! Keep up your 47-day streak!');
+      setCelebrationSpeech(`Ghost says: Consistency is your secret weapon Amara! Keep up your ${userProfile?.streakCount || 1}-day streak!`);
       setCelebrationBadge('PASSPORT ACTIVE');
       setCelebrationXp(40);
       setShowCelebrationModal(true);
@@ -253,7 +253,7 @@ export const QuestsScreen: React.FC<QuestsScreenProps> = ({
 
             <Text style={styles.todayQuestTitle}>Post once before 9 PM</Text>
             <Text style={styles.todayQuestSub}>
-              Protect your {userProfile?.streakCount || 47}-day streak and keep your momentum alive.
+              Protect your {userProfile?.streakCount || 1}-day streak and keep your momentum alive.
             </Text>
 
             {/* Progress Row & Bar */}
@@ -662,7 +662,7 @@ export const QuestsScreen: React.FC<QuestsScreenProps> = ({
           speechBubble={celebrationSpeech}
           badgeText={celebrationBadge}
           xpEarned={celebrationXp}
-          streakCount={47}
+          streakCount={userProfile?.streakCount || 1}
           actionText="Continue ➔"
           onDismiss={() => setShowCelebrationModal(false)}
         />

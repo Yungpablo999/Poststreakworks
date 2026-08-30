@@ -61,7 +61,7 @@ const NOTIFICATIONS: NotificationItem[] = [
   {
     id: 'n2',
     title: 'Streak Saver Ready',
-    body: "Convert today's idea into a post to keep your 47-day streak.",
+    body: "Convert today's idea into a post to keep your 1-day streak.",
     time: '2h ago',
     unread: true,
     iconEmoji: '🔥',
@@ -82,7 +82,7 @@ const SUGGESTED_CAPTIONS_CATALOG = [
   },
   {
     id: 'cap_2',
-    text: 'Here is the real secret behind keeping a 47-day streak: you do not need 10 hours to film. You just need 15 minutes and one clear lesson you learned yesterday.',
+    text: 'Here is the real secret behind keeping a daily streak: you do not need 10 hours to film. You just need 15 minutes and one clear lesson you learned yesterday.',
     cta: 'Save this post so you have it ready for your next filming session!',
     hashtags: '#ContentCreation #Consistency #CreatorMindset #GrowthHacks',
     tags: ['Honest', 'Actionable', 'High Saves'],
@@ -136,7 +136,7 @@ export const CaptionScreen: React.FC<CaptionScreenProps> = ({
   const [showCelebrationModal, setShowCelebrationModal] = useState(false);
   const [celebrationTitle, setCelebrationTitle] = useState('Caption Ready!');
   const [celebrationSubtitle, setCelebrationSubtitle] = useState('Your viral caption and hashtags are primed for your post.');
-  const [celebrationSpeech, setCelebrationSpeech] = useState('47-day streak protected! +35 XP earned.');
+  const [celebrationSpeech, setCelebrationSpeech] = useState('1-day streak protected! +35 XP earned.');
   const [celebrationBadge, setCelebrationBadge] = useState('CAPTION CRAFTED');
 
   const [notificationsList, setNotificationsList] = useState<NotificationItem[]>(NOTIFICATIONS);
@@ -208,7 +208,7 @@ export const CaptionScreen: React.FC<CaptionScreenProps> = ({
 
     setCelebrationTitle('New Caption Generated!');
     setCelebrationSubtitle('Fresh viral angle and hashtags loaded into your editor.');
-    setCelebrationSpeech('47-day streak protected! Keep up the momentum.');
+    setCelebrationSpeech('1-day streak protected! Keep up the momentum.');
     setCelebrationBadge('CAPTION REFRESHED');
     setShowCelebrationModal(true);
   };
@@ -241,7 +241,7 @@ export const CaptionScreen: React.FC<CaptionScreenProps> = ({
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     }
     setDraftText(
-      "When I started 47 days ago, I almost quit twice because my posts didn't look cinematic. But consistency beats perfection every single time."
+      "When I started my creator journey, I almost quit twice because my posts didn't look cinematic. But consistency beats perfection every single time."
     );
   };
 
@@ -264,7 +264,7 @@ export const CaptionScreen: React.FC<CaptionScreenProps> = ({
     if (next) {
       setCelebrationTitle('Caption Saved!');
       setCelebrationSubtitle('Caption and hashtags saved to your creator drafts.');
-      setCelebrationSpeech('47-day streak protected! Ready anytime.');
+      setCelebrationSpeech('1-day streak protected! Ready anytime.');
       setCelebrationBadge('DRAFT SAVED');
       setShowCelebrationModal(true);
     }
@@ -787,7 +787,7 @@ export const CaptionScreen: React.FC<CaptionScreenProps> = ({
             speechBubble={celebrationSpeech}
             badgeText={celebrationBadge}
             xpEarned={35}
-            streakCount={47}
+            streakCount={userProfile?.streakCount || 1}
             actionText="Keep Editing ➔"
             onDismiss={() => {
               setShowCelebrationModal(false);

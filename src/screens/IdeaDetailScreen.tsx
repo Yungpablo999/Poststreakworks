@@ -61,7 +61,7 @@ const NOTIFICATIONS: NotificationItem[] = [
   {
     id: 'n2',
     title: 'Streak Saver Ready',
-    body: "Convert today's idea into a post to keep your 47-day streak.",
+    body: "Convert today's idea into a post to keep your 1-day streak.",
     time: '2h ago',
     unread: true,
     iconEmoji: '🔥',
@@ -234,7 +234,7 @@ export const IdeaDetailScreen: React.FC<IdeaDetailScreenProps> = ({
     } else {
       setCelebrationTitle('Draft Created!');
       setCelebrationSubtitle(`"${ideaTitle}" is now ready in your drafts queue with full hook & caption.`);
-      setCelebrationSpeech('47-day streak protected! Keep this momentum going.');
+      setCelebrationSpeech('1-day streak protected! Keep this momentum going.');
       setShowCelebrationModal(true);
     }
   };
@@ -357,7 +357,7 @@ export const IdeaDetailScreen: React.FC<IdeaDetailScreenProps> = ({
             <View style={styles.streakRibbonBanner}>
               <Text style={styles.streakRibbonIcon}>🎖</Text>
               <Text style={styles.streakRibbonText}>
-                Completing this today helps protect your <Text style={{ fontWeight: '800' }}>47-day streak</Text>.
+                Completing this today helps protect your <Text style={{ fontWeight: '800' }}>{userProfile?.streakCount || 1}-day streak</Text>.
               </Text>
             </View>
           </View>
@@ -654,7 +654,7 @@ export const IdeaDetailScreen: React.FC<IdeaDetailScreenProps> = ({
               <View style={styles.impactCheckCircle}>
                 <Text style={{ fontSize: 12, color: '#582CDB' }}>✓</Text>
               </View>
-              <Text style={styles.streakImpactText}>47-day streak protected</Text>
+              <Text style={styles.streakImpactText}>{userProfile?.streakCount || 1}-day streak protected</Text>
             </View>
 
             <View style={styles.streakImpactItemRow}>
@@ -942,7 +942,7 @@ export const IdeaDetailScreen: React.FC<IdeaDetailScreenProps> = ({
           speechBubble={celebrationSpeech}
           badgeText="IDEA CRAFTED"
           xpEarned={40}
-          streakCount={47}
+          streakCount={userProfile?.streakCount || 1}
           actionText="Keep Editing ➔"
           onDismiss={() => {
             setShowCelebrationModal(false);

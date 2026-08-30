@@ -72,7 +72,7 @@ const NOTIFICATIONS: NotificationItem[] = [
   {
     id: 'n2',
     title: 'Streak Saver Ready',
-    body: "Convert today's idea into a post to keep your 47-day streak.",
+    body: "Convert today's idea into a post to keep your 1-day streak.",
     time: '2h ago',
     unread: true,
     iconEmoji: '🔥',
@@ -365,7 +365,7 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
   const [showCelebrationModal, setShowCelebrationModal] = useState(false);
   const [celebrationTitle, setCelebrationTitle] = useState('Post Scheduled!');
   const [celebrationSubtitle, setCelebrationSubtitle] = useState('Your post has been scheduled for Today at 7:30 PM.');
-  const [celebrationSpeech, setCelebrationSpeech] = useState('47-day streak protected! +50 XP added to your creator level.');
+  const [celebrationSpeech, setCelebrationSpeech] = useState('1-day streak protected! +50 XP added to your creator level.');
 
   const [notificationsList, setNotificationsList] = useState<NotificationItem[]>(NOTIFICATIONS);
 
@@ -504,7 +504,7 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
     } else if (publishMode === 'schedule') {
       setCelebrationTitle('Post Scheduled!');
       setCelebrationSubtitle(`Your post is locked in for ${scheduledTime}.`);
-      setCelebrationSpeech('47-day streak protected! +50 XP added to your creator level.');
+      setCelebrationSpeech('1-day streak protected! +50 XP added to your creator level.');
     } else {
       setCelebrationTitle('Draft Saved!');
       setCelebrationSubtitle('Your post draft with full media & tags is saved in your queue.');
@@ -565,7 +565,7 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
     // Trigger celebration animation popup
     setCelebrationTitle('Post Scheduled!');
     setCelebrationSubtitle(`Your post has been locked in for ${formattedStr}.`);
-    setCelebrationSpeech('47-day streak protected! +50 XP added to your creator level.');
+    setCelebrationSpeech('1-day streak protected! +50 XP added to your creator level.');
     setTimeout(() => {
       setShowCelebrationModal(true);
     }, 250);
@@ -1032,7 +1032,7 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
             </View>
             <View style={{ flex: 1 }}>
               <Text style={styles.streakBannerTitle}>
-                Scheduling this post today protects your <Text style={{ fontWeight: '700' }}>47-day streak</Text>.
+                Scheduling this post today protects your <Text style={{ fontWeight: '700' }}>{userProfile?.streakCount || 1}-day streak</Text>.
               </Text>
               <View style={styles.streakBannerBadgesRow}>
                 <View style={styles.streakXpPill}>
@@ -1575,7 +1575,7 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
           speechBubble={celebrationSpeech}
           badgeText="POST READY"
           xpEarned={50}
-          streakCount={47}
+          streakCount={userProfile?.streakCount || 1}
           actionText="Keep Editing ➔"
           onDismiss={() => {
             setShowCelebrationModal(false);

@@ -131,8 +131,8 @@ const INITIAL_NOTIFICATIONS: NotificationItem[] = [
   {
     id: 'n6',
     type: 'level',
-    title: 'Weekly Level Report',
-    body: 'Streak milestone reached: 47 consecutive days recorded in your creator log.',
+    title: 'Daily Streak Report',
+    body: 'Streak recorded: 1 day active in your creator log.',
     time: '3d ago',
     unread: false,
     iconEmoji: '📊',

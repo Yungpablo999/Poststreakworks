@@ -846,8 +846,8 @@ export const ChallengeDetailScreen: React.FC<ChallengeDetailScreenProps> = ({
               </View>
 
               <View style={styles.notificationItem}>
-                <Text style={styles.notifItemTitle}>🔥 47-Day Streak Active</Text>
-                <Text style={styles.notifItemTime}>Posting today locks in Day 48</Text>
+                <Text style={styles.notifItemTitle}>🔥 {userProfile?.streakCount || 1}-Day Streak Active</Text>
+                <Text style={styles.notifItemTime}>Posting today locks in your next streak day</Text>
               </View>
 
               <Pressable
@@ -874,10 +874,10 @@ export const ChallengeDetailScreen: React.FC<ChallengeDetailScreenProps> = ({
         <AnimatedCompletionModal
           visible={showCelebrationModal}
           title="Storyteller Quest Completed!"
-          subtitle="You earned +150 XP, unlocked the Storyteller Badge, and protected Day 48 of your streak!"
+          subtitle="You earned +150 XP, unlocked the Storyteller Badge, and protected your daily streak!"
           badgeText="QUEST COMPLETE"
           xpEarned={150}
-          streakCount={48}
+          streakCount={userProfile?.streakCount || 1}
           actionText="Back to Dashboard 🚀"
           onDismiss={() => {
             setShowCelebrationModal(false);
