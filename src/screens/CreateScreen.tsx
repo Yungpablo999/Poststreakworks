@@ -601,44 +601,37 @@ export const CreateScreen: React.FC<CreateScreenProps> = ({
                 </View>
                 <View style={styles.streakTitlesContainer}>
                   <Text style={styles.streakSaverTag} numberOfLines={1}>STREAK SAVER</Text>
-                  <Text style={styles.streakDaysTitle} numberOfLines={1}>47-day streak</Text>
+                  <Text style={styles.streakDaysTitle} numberOfLines={1}>47-day streak · Active</Text>
                 </View>
-              </View>
-
-              <View style={styles.activePill}>
-                <View style={styles.activeDot} />
-                <Text style={styles.activePillText} numberOfLines={1}>Active</Text>
               </View>
             </View>
 
             {/* Prompt Inner Box */}
             <View style={styles.promptInnerBox}>
+              <Text style={styles.promptLabel}>Create a 30-second Reel:</Text>
               <Text style={styles.promptText}>
-                Create a 30-second Reel: &ldquo;One thing I wish I knew before I started creating.&rdquo;
+                &ldquo;One thing I wish I knew before I started creating.&rdquo;
               </Text>
             </View>
 
-            {/* Platform & Suggested Time Row (Purple & Gold Accents) */}
-            <View style={styles.tagsRow}>
-              <View style={styles.tagPillPurple}>
-                <Text style={styles.tagPillPurpleText}>TikTok</Text>
-              </View>
-              <View style={styles.tagPillPurple}>
-                <Text style={styles.tagPillPurpleText}>Instagram Reel</Text>
-              </View>
-              <View style={styles.suggestedTimePillGold}>
-                <Text style={styles.suggestedTimePillGoldText}>⚡ Suggested: 7:30 PM</Text>
+            {/* Platform & Best Time Row */}
+            <View style={styles.streakMetaRow}>
+              <Text style={styles.streakPlatformsText}>TikTok · Instagram Reel</Text>
+              <View style={styles.bestTimeBadge}>
+                <Text style={styles.bestTimeBadgeText}>⚡ Best time: 7:30 PM</Text>
               </View>
             </View>
 
-            {/* Primary Action Button: Use This Idea */}
+            {/* Primary Action Button: Use This Idea -> Post Composer */}
             <Pressable
               style={({ pressed }) => [styles.useIdeaBtn, pressed && styles.btnPressed]}
               onPress={() => {
                 if (Platform.OS !== 'web') {
                   Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
                 }
-                if (onOpenIdeaDetail) {
+                if (onOpenPostComposer) {
+                  onOpenPostComposer('One thing I wish I knew before I started creating', 'instagram');
+                } else if (onOpenIdeaDetail) {
                   onOpenIdeaDetail('One thing I wish I knew before I started creating');
                 } else {
                   openNewPost('One thing I wish I knew before I started creating', 'instagram');
@@ -1637,26 +1630,25 @@ const styles = StyleSheet.create({
     fontWeight: '500',
   },
 
-  // 1. HERO STREAK SAVER CARD (PURPLE & GOLD ACCENTS)
+  // 1. HERO STREAK SAVER CARD
   streakSaverCard: {
     backgroundColor: '#FFFFFF',
-    borderRadius: 20,
+    borderRadius: 18,
     borderWidth: 1,
     borderColor: 'rgba(23, 20, 32, 0.07)',
-    padding: sPadding(16),
-    marginBottom: 18,
+    padding: sPadding(14),
+    marginBottom: 16,
     shadowColor: '#171420',
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.04,
-    shadowRadius: 16,
-    elevation: 3,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.03,
+    shadowRadius: 12,
+    elevation: 2,
     overflow: 'hidden',
   },
   streakHeaderRow: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 12,
+    marginBottom: 10,
     width: '100%',
   },
   streakLeftGroup: {
@@ -1664,13 +1656,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 8,
     flex: 1,
-    marginRight: 8,
     minWidth: 0,
   },
   flameIconCircle: {
-    width: 34,
-    height: 34,
-    borderRadius: 17,
+    width: 32,
+    height: 32,
+    borderRadius: 16,
     backgroundColor: '#FFFBEB',
     borderWidth: 1,
     borderColor: '#FEF3C7',
@@ -1679,102 +1670,83 @@ const styles = StyleSheet.create({
     flexShrink: 0,
   },
   flameEmoji: {
-    fontSize: 16,
+    fontSize: 15,
   },
   streakTitlesContainer: {
     flex: 1,
     minWidth: 0,
   },
   streakSaverTag: {
-    fontSize: sFont(10),
-    fontWeight: '700',
+    fontSize: 9.5,
+    fontWeight: '800',
     color: '#D97706',
-    letterSpacing: 0.3,
+    letterSpacing: 0.4,
   },
   streakDaysTitle: {
-    fontSize: sFont(16),
+    fontSize: sFont(14.5),
     fontWeight: '700',
     color: '#171420',
     letterSpacing: -0.2,
-  },
-  activePill: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 5,
-    backgroundColor: '#FAF9FF',
-    borderWidth: 1,
-    borderColor: 'rgba(88, 44, 219, 0.15)',
-    paddingVertical: 3.5,
-    paddingHorizontal: 8,
-    borderRadius: 100,
-    flexShrink: 0,
-  },
-  activeDot: {
-    width: 5,
-    height: 5,
-    borderRadius: 2.5,
-    backgroundColor: '#582CDB',
-  },
-  activePillText: {
-    fontSize: sFont(10.5),
-    fontWeight: '700',
-    color: '#582CDB',
+    marginTop: 1,
   },
   promptInnerBox: {
     backgroundColor: '#FAF9FD',
-    borderRadius: 14,
+    borderRadius: 12,
     borderWidth: 1,
-    borderColor: 'rgba(23, 20, 32, 0.06)',
-    padding: 14,
-    marginBottom: 14,
+    borderColor: 'rgba(23, 20, 32, 0.05)',
+    padding: 12,
+    marginBottom: 10,
+  },
+  promptLabel: {
+    fontSize: 12.5,
+    fontWeight: '700',
+    color: '#171420',
+    marginBottom: 3,
   },
   promptText: {
-    fontSize: 14,
-    color: '#171420',
-    lineHeight: 20,
+    fontSize: 13.5,
+    color: '#474154',
+    lineHeight: 19,
     fontWeight: '500',
   },
-  tagsRow: {
+  streakMetaRow: {
     flexDirection: 'row',
-    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 12,
     gap: 8,
-    marginBottom: 18,
   },
-  tagPillPurple: {
-    backgroundColor: '#F4F0FF',
-    borderWidth: 1,
-    borderColor: 'rgba(88, 44, 219, 0.12)',
-    paddingVertical: 4,
-    paddingHorizontal: 10,
-    borderRadius: 8,
-  },
-  tagPillPurpleText: {
-    fontSize: 11,
+  streakPlatformsText: {
+    fontSize: 11.5,
     fontWeight: '600',
     color: '#582CDB',
+    backgroundColor: '#F4F0FF',
+    paddingVertical: 3.5,
+    paddingHorizontal: 9,
+    borderRadius: 6,
   },
-  suggestedTimePillGold: {
+  bestTimeBadge: {
     backgroundColor: '#FFFBEB',
     borderWidth: 1,
     borderColor: '#FEF3C7',
-    paddingVertical: 4,
-    paddingHorizontal: 10,
-    borderRadius: 8,
+    paddingVertical: 3.5,
+    paddingHorizontal: 9,
+    borderRadius: 6,
   },
-  suggestedTimePillGoldText: {
+  bestTimeBadgeText: {
     fontSize: 11,
     fontWeight: '700',
     color: '#D97706',
   },
   useIdeaBtn: {
-    height: 48,
-    borderRadius: 14,
+    height: 44,
+    borderRadius: 12,
     overflow: 'hidden',
     shadowColor: '#582CDB',
-    shadowOffset: { width: 0, height: 4 },
+    shadowOffset: { width: 0, height: 3 },
     shadowOpacity: 0.12,
-    shadowRadius: 10,
-    elevation: 4,
+    shadowRadius: 8,
+    elevation: 3,
   },
   useIdeaGradient: {
     flex: 1,
