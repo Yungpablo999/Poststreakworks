@@ -1351,7 +1351,7 @@ export const CreateScreen: React.FC<CreateScreenProps> = ({
               <View style={styles.modalHeaderRow}>
                 <View style={{ flex: 1, minWidth: 0, marginRight: 10 }}>
                   <Text style={styles.modalTitle}>All Creator Drafts</Text>
-                  <Text style={styles.modalSubtitle}>Manage your active video concepts</Text>
+                  <Text style={styles.modalSubtitle}>Pick up where you left off</Text>
                 </View>
                 <Pressable
                   onPress={() => setShowAllDraftsModal(false)}
@@ -1363,22 +1363,29 @@ export const CreateScreen: React.FC<CreateScreenProps> = ({
               </View>
 
               <ScrollView style={{ maxHeight: 280 }} showsVerticalScrollIndicator={false}>
-                {drafts.map((draft) => (
-                  <Pressable
-                    key={draft.id}
-                    style={styles.draftCard}
-                    onPress={() => {
-                      setShowAllDraftsModal(false);
-                      openDraft(draft);
-                    }}
-                  >
-                    <Image source={draft.imageSource} style={styles.draftThumbnail} resizeMode="cover" />
-                    <View style={styles.draftContentCol}>
-                      <Text style={styles.draftTitle} numberOfLines={2}>{draft.title}</Text>
-                      <Text style={styles.draftMeta}>{draft.platform} • {draft.editedTime}</Text>
-                    </View>
-                  </Pressable>
-                ))}
+                <View style={{ gap: 8 }}>
+                  {drafts.map((draft) => (
+                    <Pressable
+                      key={draft.id}
+                      style={({ pressed }) => [styles.draftCard, pressed && styles.btnPressed]}
+                      onPress={() => {
+                        setShowAllDraftsModal(false);
+                        openDraft(draft);
+                      }}
+                    >
+                      <Image source={draft.imageSource} style={styles.draftThumbnail} resizeMode="cover" />
+                      <View style={styles.draftContentCol}>
+                        <Text style={styles.draftTitle} numberOfLines={2}>{draft.title}</Text>
+                        <Text style={styles.draftMeta}>{draft.platform} • {draft.editedTime}</Text>
+                      </View>
+                      <View style={styles.draftChevronBox}>
+                        <Svg width={14} height={14} viewBox="0 0 24 24" fill="none">
+                          <Path d="M9 18l6-6-6-6" stroke="#94A3B8" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" />
+                        </Svg>
+                      </View>
+                    </Pressable>
+                  ))}
+                </View>
               </ScrollView>
 
               <Pressable
@@ -1953,33 +1960,36 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#FFFFFF',
-    borderRadius: 16,
+    borderRadius: 15,
     borderWidth: 1,
     borderColor: 'rgba(23, 20, 32, 0.07)',
-    padding: 12,
-    gap: 12,
+    paddingVertical: 9.5,
+    paddingHorizontal: 11,
+    gap: 11,
     shadowColor: '#171420',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.03,
     shadowRadius: 6,
   },
   draftThumbnail: {
-    width: 44,
-    height: 44,
-    borderRadius: 10,
+    width: 40,
+    height: 40,
+    borderRadius: 9,
     backgroundColor: '#F1F5F9',
   },
   draftContentCol: {
     flex: 1,
+    minWidth: 0,
   },
   draftTitle: {
-    fontSize: 14,
+    fontSize: 13.5,
     fontWeight: '600',
     color: '#171420',
-    marginBottom: 3,
+    marginBottom: 2,
+    lineHeight: 18,
   },
   draftMeta: {
-    fontSize: 12,
+    fontSize: 11.5,
     color: '#5E576E',
     fontWeight: '400',
   },
@@ -1987,6 +1997,11 @@ const styles = StyleSheet.create({
     fontSize: 18,
     color: '#582CDB',
     paddingHorizontal: 6,
+  },
+  draftChevronBox: {
+    paddingLeft: 4,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 
   // 6. VOICE STUDIO PRO CARD (METALLIC GOLD & PURPLE DASHED)
