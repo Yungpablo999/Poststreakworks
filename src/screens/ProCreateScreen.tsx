@@ -438,11 +438,36 @@ export const ProCreateScreen: React.FC<ProCreateScreenProps> = ({
               ]}
               hitSlop={8}
             >
-              <Image
-                source={userProfile?.avatarSource || require('../../assets/images/jarvis-ghost-clean.png')}
-                style={styles.headerCustomAvatarImage}
-                resizeMode="cover"
-              />
+              {userProfile?.customAvatarUri ? (
+                <Image
+                  source={{ uri: userProfile.customAvatarUri }}
+                  style={styles.headerCustomAvatarImage}
+                  resizeMode="cover"
+                />
+              ) : (userProfile?.avatarSource && userProfile.avatarId && userProfile.avatarId !== 'ghost') ? (
+                <Image
+                  source={userProfile.avatarSource}
+                  style={styles.headerCustomAvatarImage}
+                  resizeMode="cover"
+                />
+              ) : (
+                <Svg width={19} height={19} viewBox="0 0 24 24" fill="none">
+                  <Path
+                    d="M20 21V19C20 17.9 19.5 16.9 18.7 16.2C17.9 15.5 16.9 15 15.8 15H8.2C7.1 15 6.1 15.5 5.3 16.2C4.5 16.9 4 17.9 4 19V21"
+                    stroke="#F59E0B"
+                    strokeWidth="2.3"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                  <Circle
+                    cx="12"
+                    cy="7"
+                    r="4"
+                    stroke="#F59E0B"
+                    strokeWidth="2.3"
+                  />
+                </Svg>
+              )}
               <View style={{ position: 'absolute', bottom: -2, right: -2 }}>
                 <TinyGoldCheck size={14} />
               </View>

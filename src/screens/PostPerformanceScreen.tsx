@@ -220,10 +220,36 @@ export const PostPerformanceScreen: React.FC<PostPerformanceScreenProps> = ({
               {/* Bottom Video Meta Info */}
               <View style={styles.videoMetaContainer}>
                 <View style={styles.videoAuthorRow}>
-                  <Image
-                    source={userProfile?.avatarSource || require('../../assets/images/jarvis-ghost-clean.png')}
-                    style={styles.videoAuthorAvatar}
-                  />
+                  {userProfile?.customAvatarUri ? (
+                    <Image
+                      source={{ uri: userProfile.customAvatarUri }}
+                      style={styles.videoAuthorAvatar}
+                    />
+                  ) : (userProfile?.avatarSource && userProfile.avatarId && userProfile.avatarId !== 'ghost') ? (
+                    <Image
+                      source={userProfile.avatarSource}
+                      style={styles.videoAuthorAvatar}
+                    />
+                  ) : (
+                    <View style={[styles.videoAuthorAvatar, { backgroundColor: '#F5F3FF', justifyContent: 'center', alignItems: 'center' }]}>
+                      <Svg width={14} height={14} viewBox="0 0 24 24" fill="none">
+                        <Path
+                          d="M20 21V19C20 17.9 19.5 16.9 18.7 16.2C17.9 15.5 16.9 15 15.8 15H8.2C7.1 15 6.1 15.5 5.3 16.2C4.5 16.9 4 17.9 4 19V21"
+                          stroke="#582CDB"
+                          strokeWidth="2.3"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                        <Circle
+                          cx="12"
+                          cy="7"
+                          r="4"
+                          stroke="#582CDB"
+                          strokeWidth="2.3"
+                        />
+                      </Svg>
+                    </View>
+                  )}
                   <Text style={styles.videoAuthorName}>
                     {userProfile?.handle || '@pablo.creates'} • TikTok
                   </Text>

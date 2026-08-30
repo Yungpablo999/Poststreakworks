@@ -250,7 +250,9 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
   const [bio, setBio] = useState(
     initialProfile?.bio || 'Consistency is my superpower. Building a 100-day creator streak with Jarvis AI.'
   );
-  const [selectedAvatarId, setSelectedAvatarId] = useState(initialProfile?.avatarId || 'ghost');
+  const [selectedAvatarId, setSelectedAvatarId] = useState<string | null>(
+    initialProfile?.avatarId || null
+  );
   const [customAvatarUri, setCustomAvatarUri] = useState<string | null>(
     initialProfile?.customAvatarUri || null
   );
@@ -293,6 +295,14 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
       if (initialSubTab) {
         setActiveSubTab(initialSubTab);
       }
+      if (initialProfile) {
+        setName(initialProfile.name || 'Pablo');
+        setHandle(initialProfile.handle || '@pablocreates');
+        setBio(initialProfile.bio || '');
+        setNiche(initialProfile.niche || '');
+        setSelectedAvatarId(initialProfile.avatarId || null);
+        setCustomAvatarUri(initialProfile.customAvatarUri || null);
+      }
       modalScale.setValue(0.9);
       Animated.spring(modalScale, {
         toValue: 1,
@@ -301,7 +311,7 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
         useNativeDriver: true,
       }).start();
     }
-  }, [visible, initialSubTab]);
+  }, [visible, initialSubTab, initialProfile]);
 
   const showToast = (msg: string) => {
     setToastMessage(msg);
@@ -371,14 +381,15 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
     if (Platform.OS !== 'web') {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     }
-    const currentAvatar =
-      CREATOR_AVATARS.find((a) => a.id === selectedAvatarId) || CREATOR_AVATARS[0];
+    const currentAvatar = selectedAvatarId
+      ? CREATOR_AVATARS.find((a) => a.id === selectedAvatarId)
+      : null;
 
     const sourceToSave = customAvatarUri
       ? customAvatarUri.startsWith('data:') || customAvatarUri.startsWith('http')
         ? { uri: customAvatarUri }
-        : currentAvatar.source
-      : currentAvatar.source;
+        : currentAvatar?.source
+      : currentAvatar?.source;
 
     const updated: UserProfileData = {
       name: name.trim() || 'Pablo',
@@ -386,8 +397,8 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
       bio: bio.trim(),
       niche: niche.trim(),
       tier: initialProfile?.tier || 'pro',
-      avatarId: selectedAvatarId,
-      avatarSource: sourceToSave,
+      avatarId: selectedAvatarId || undefined,
+      avatarSource: sourceToSave || undefined,
       customAvatarUri: customAvatarUri || undefined,
       streakCount: initialProfile?.streakCount || 47,
       level: initialProfile?.level || 5,
@@ -422,14 +433,15 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
     }
   };
 
-  const currentAvatarObj =
-    CREATOR_AVATARS.find((a) => a.id === selectedAvatarId) || CREATOR_AVATARS[0];
+  const currentAvatarObj = selectedAvatarId
+    ? CREATOR_AVATARS.find((a) => a.id === selectedAvatarId)
+    : null;
 
   const currentDisplayAvatarSource = customAvatarUri
     ? customAvatarUri.startsWith('data:') || customAvatarUri.startsWith('http')
       ? { uri: customAvatarUri }
-      : currentAvatarObj.source
-    : currentAvatarObj.source;
+      : currentAvatarObj?.source
+    : currentAvatarObj?.source || null;
 
   return (
     <Modal
@@ -589,13 +601,34 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
                     style={styles.heroAvatarRing}
                     hitSlop={6}
                   >
-                    <Image
-                      source={currentDisplayAvatarSource}
-                      style={styles.heroAvatarImage}
-                      resizeMode="cover"
-                    />
+                    {currentDisplayAvatarSource ? (
+                      <Image
+                        source={currentDisplayAvatarSource}
+                        style={styles.heroAvatarImage}
+                        resizeMode="cover"
+                      />
+                    ) : (
+                      <View style={styles.heroAvatarEmptyPlaceholder}>
+                        <Svg width={38} height={38} viewBox="0 0 24 24" fill="none">
+                          <Path
+                            d="M20 21V19C20 17.9 19.5 16.9 18.7 16.2C17.9 15.5 16.9 15 15.8 15H8.2C7.1 15 6.1 15.5 5.3 16.2C4.5 16.9 4 17.9 4 19V21"
+                            stroke="#582CDB"
+                            strokeWidth="2.2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          />
+                          <Circle
+                            cx="12"
+                            cy="7"
+                            r="4"
+                            stroke="#582CDB"
+                            strokeWidth="2.2"
+                          />
+                        </Svg>
+                      </View>
+                    )}
                     <View style={styles.heroCameraBadge}>
-                      <Text style={{ fontSize: 13, color: '#FFFFFF' }}>📷</Text>
+                      <Text style={styles.heroPlusBadgeText}>+</Text>
                     </View>
                   </Pressable>
 
@@ -899,7 +932,28 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
                 >
                   <View style={styles.verifHeroTopRow}>
                     <View style={styles.verifAvatarWrap}>
-                      <Image source={currentDisplayAvatarSource} style={styles.verifAvatarImg} />
+                      {currentDisplayAvatarSource ? (
+                        <Image source={currentDisplayAvatarSource} style={styles.verifAvatarImg} />
+                      ) : (
+                        <View style={[styles.verifAvatarImg, styles.verifAvatarEmpty]}>
+                          <Svg width={22} height={22} viewBox="0 0 24 24" fill="none">
+                            <Path
+                              d="M20 21V19C20 17.9 19.5 16.9 18.7 16.2C17.9 15.5 16.9 15 15.8 15H8.2C7.1 15 6.1 15.5 5.3 16.2C4.5 16.9 4 17.9 4 19V21"
+                              stroke="#582CDB"
+                              strokeWidth="2.2"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                            />
+                            <Circle
+                              cx="12"
+                              cy="7"
+                              r="4"
+                              stroke="#582CDB"
+                              strokeWidth="2.2"
+                            />
+                          </Svg>
+                        </View>
+                      )}
                       <View style={[styles.verifBadgeGold, isPro ? styles.verifBadgePro : styles.verifBadgeFree]}>
                         <Text style={styles.verifBadgeText}>
                           {isPro ? '✓' : '4/5'}
@@ -1338,15 +1392,25 @@ const styles = StyleSheet.create({
     width: 82,
     height: 82,
     borderRadius: 41,
-    borderWidth: 3,
+    borderWidth: 2.5,
     borderColor: '#7C3AED',
-    padding: 2,
+    backgroundColor: '#FAF5FF',
+    justifyContent: 'center',
+    alignItems: 'center',
     marginBottom: 8,
   },
   heroAvatarImage: {
     width: '100%',
     height: '100%',
-    borderRadius: 37,
+    borderRadius: 38,
+  },
+  heroAvatarEmptyPlaceholder: {
+    width: '100%',
+    height: '100%',
+    borderRadius: 38,
+    backgroundColor: '#F5F3FF',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   heroCameraBadge: {
     position: 'absolute',
@@ -1360,6 +1424,18 @@ const styles = StyleSheet.create({
     borderColor: '#FFFFFF',
     justifyContent: 'center',
     alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.15,
+    shadowRadius: 2,
+    elevation: 3,
+  },
+  heroPlusBadgeText: {
+    fontSize: 16,
+    fontWeight: '800',
+    color: '#FFFFFF',
+    lineHeight: 18,
+    marginTop: -1,
   },
   heroNameText: {
     fontSize: 18,
@@ -1673,6 +1749,11 @@ const styles = StyleSheet.create({
     borderRadius: 23,
     borderWidth: 2,
     borderColor: '#F59E0B',
+  },
+  verifAvatarEmpty: {
+    backgroundColor: '#FAF5FF',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   verifBadgeGold: {
     position: 'absolute',

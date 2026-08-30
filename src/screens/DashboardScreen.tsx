@@ -877,7 +877,13 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
     ['empty', 'empty', 'empty', 'empty', 'empty', 'empty', 'empty'],
   ];
 
-  const currentSelectedAvatar = PRESET_AVATARS.find((a) => a.id === selectedAvatarId);
+  const currentSelectedAvatar = userProfile?.customAvatarUri
+    ? { id: 'custom', source: { uri: userProfile.customAvatarUri } }
+    : (userProfile?.avatarSource && userProfile.avatarId && userProfile.avatarId !== 'ghost')
+      ? { id: userProfile.avatarId, source: userProfile.avatarSource }
+      : selectedAvatarId
+        ? PRESET_AVATARS.find((a) => a.id === selectedAvatarId)
+        : null;
   const currentPreviewAvatar = PRESET_AVATARS.find((a) => a.id === previewAvatarId) || PRESET_AVATARS[0];
 
   // Filtered Notifications
