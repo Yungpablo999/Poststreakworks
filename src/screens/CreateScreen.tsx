@@ -570,7 +570,7 @@ export const CreateScreen: React.FC<CreateScreenProps> = ({
           showsVerticalScrollIndicator={false}
           bounces={true}
         >
-          {/* TOP PILL BADGES (ROYAL PURPLE & METALLIC GOLD) */}
+          {/* TOP PILL BADGES */}
           <View style={styles.topBadgesRow}>
             <LinearGradient
               colors={['#7C3AED', '#582CDB']}
@@ -582,14 +582,14 @@ export const CreateScreen: React.FC<CreateScreenProps> = ({
             </LinearGradient>
 
             <View style={styles.freeToolsPill}>
-              <Text style={styles.freeToolsPillText}>✨ FREE CREATE TOOLS</Text>
+              <Text style={styles.freeToolsPillText}>Free Tools</Text>
             </View>
           </View>
 
           {/* HEADLINE & SUBTITLE */}
           <Text style={styles.mainHeading}>Create your next post.</Text>
           <Text style={styles.mainSubtitle}>
-            Turn one idea into a post your audience wants to watch.
+            Turn one idea into content your audience wants to see.
           </Text>
 
           {/* 1. HERO STREAK SAVER CARD */}
@@ -1587,21 +1587,21 @@ const styles = StyleSheet.create({
     paddingTop: 8,
   },
 
-  // TOP PILL BADGES (ROYAL PURPLE & GOLD)
+  // TOP PILL BADGES
   topBadgesRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
-    marginBottom: 12,
+    gap: 7,
+    marginBottom: 10,
   },
   createPill: {
-    paddingVertical: 5,
-    paddingHorizontal: 13,
+    paddingVertical: 4,
+    paddingHorizontal: 11,
     borderRadius: 100,
     overflow: 'hidden',
   },
   createPillText: {
-    fontSize: 11,
+    fontSize: 10.5,
     fontWeight: '800',
     color: '#FFFFFF',
     letterSpacing: 0.2,
@@ -1610,15 +1610,15 @@ const styles = StyleSheet.create({
     backgroundColor: '#FEF3C7',
     borderWidth: 1,
     borderColor: '#FDE68A',
-    paddingVertical: 4,
-    paddingHorizontal: 12,
+    paddingVertical: 3,
+    paddingHorizontal: 9,
     borderRadius: 100,
   },
   freeToolsPillText: {
-    fontSize: 11,
-    fontWeight: '800',
+    fontSize: 10,
+    fontWeight: '700',
     color: '#B45309',
-    letterSpacing: 0.5,
+    letterSpacing: 0.2,
   },
 
   // HEADLINE
