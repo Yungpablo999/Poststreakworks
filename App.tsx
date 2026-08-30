@@ -520,6 +520,11 @@ export default function App() {
                 setActiveMessageThreadId(threadId);
                 navigateTo('messages');
               }}
+              onOpenCreateIdea={() => navigateTo('create')}
+              onOpenPostComposer={(title, platform) => {
+                if (title) setComposerIdeaTitle(title);
+                navigateTo('composer');
+              }}
               onNavigateTab={(tab: TabType) => {
                 if (tab === 'home') {
                   navigateTo('dashboard');

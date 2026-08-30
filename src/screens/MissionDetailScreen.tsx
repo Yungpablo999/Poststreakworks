@@ -28,6 +28,8 @@ interface MissionDetailScreenProps {
   onNavigateTab?: (tab: TabType) => void;
   onOpenMessages?: () => void;
   onOpenJarvisPro?: () => void;
+  onOpenCreateIdea?: () => void;
+  onOpenPostComposer?: (prefillTitle?: string, prefillPlatform?: string) => void;
   userProfile?: UserProfileData;
   onSaveProfile?: (updated: UserProfileData) => void;
 }
@@ -38,6 +40,8 @@ export const MissionDetailScreen: React.FC<MissionDetailScreenProps> = ({
   onNavigateTab,
   onOpenMessages,
   onOpenJarvisPro,
+  onOpenCreateIdea,
+  onOpenPostComposer,
   userProfile,
   onSaveProfile,
 }) => {
@@ -240,42 +244,102 @@ export const MissionDetailScreen: React.FC<MissionDetailScreenProps> = ({
             })()}
           </View>
 
-          {/* 2. STEP-BY-STEP GUIDE */}
+          {/* 2. STEP-BY-STEP GUIDE (MISSION CONTROL) */}
           <View style={styles.guideCard}>
-            <Text style={styles.guideSectionTitle}>STEP-BY-STEP GUIDE</Text>
+            <View style={styles.guideHeaderRow}>
+              <Text style={styles.guideSectionTitle}>STEP-BY-STEP GUIDE</Text>
+              <Text style={styles.guideTapHint}>Tap step to start</Text>
+            </View>
 
-            {/* Step 1 */}
-            <View style={styles.stepRow}>
+            {/* Step 1: Choose your idea */}
+            <Pressable
+              style={({ pressed }) => [styles.stepRow, pressed && styles.stepRowPressed]}
+              onPress={() => {
+                if (Platform.OS !== 'web') {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                }
+                if (onOpenCreateIdea) {
+                  onOpenCreateIdea();
+                } else if (onNavigateTab) {
+                  onNavigateTab('create');
+                } else {
+                  triggerModalPop();
+                  setShowIdeaModal(true);
+                }
+              }}
+            >
               <View style={[styles.stepCircle, step1Done && styles.stepCircleActive]}>
                 <Text style={[styles.stepCircleNumber, step1Done && styles.stepCircleNumberActive]}>1</Text>
               </View>
               <View style={styles.stepContent}>
-                <Text style={styles.stepTitle}>Choose your idea</Text>
-                <Text style={styles.stepDescription}>Pick a trending topic or use a suggestion.</Text>
+                <View style={styles.stepTitleRow}>
+                  <Text style={styles.stepTitle}>Choose your idea</Text>
+                  <Text style={styles.stepArrow}>→</Text>
+                </View>
+                <Text style={styles.stepDescription}>Pick a topic, trend, or use Jarvis’s suggestion.</Text>
               </View>
-            </View>
+            </Pressable>
 
-            {/* Step 2 */}
-            <View style={styles.stepRow}>
+            {/* Step 2: Create your post */}
+            <Pressable
+              style={({ pressed }) => [styles.stepRow, pressed && styles.stepRowPressed]}
+              onPress={() => {
+                if (Platform.OS !== 'web') {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                }
+                if (onOpenPostComposer) {
+                  onOpenPostComposer(postTitle, postPlatform);
+                } else {
+                  triggerModalPop();
+                  setShowCreateModal(true);
+                }
+              }}
+            >
               <View style={[styles.stepCircle, step2Done && styles.stepCircleActive]}>
                 <Text style={[styles.stepCircleNumber, step2Done && styles.stepCircleNumberActive]}>2</Text>
               </View>
               <View style={styles.stepContent}>
-                <Text style={styles.stepTitle}>Write your script</Text>
-                <Text style={styles.stepDescription}>Keep it concise. Focus on the hook.</Text>
+                <View style={styles.stepTitleRow}>
+                  <Text style={styles.stepTitle}>Create your post</Text>
+                  <Text style={styles.stepArrow}>→</Text>
+                </View>
+                <Text style={styles.stepDescription}>Write your caption, script, or post content.</Text>
               </View>
-            </View>
+            </Pressable>
 
-            {/* Step 3 */}
-            <View style={[styles.stepRow, { marginBottom: 0 }]}>
-              <View style={[styles.stepCircle, step3Done && styles.stepCircleActive]}>
-                <Text style={[styles.stepCircleNumber, step3Done && styles.stepCircleNumberActive]}>3</Text>
+            {/* Step 3: Publish before 9 PM */}
+            <Pressable
+              style={({ pressed }) => [styles.stepRow, { marginBottom: 0 }, pressed && styles.stepRowPressed]}
+              onPress={() => {
+                if (Platform.OS !== 'web') {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                }
+                if (isCompleted) {
+                  triggerModalPop();
+                  setShowCelebrationModal(true);
+                } else if (onOpenPostComposer) {
+                  onOpenPostComposer(postTitle, postPlatform);
+                } else {
+                  triggerModalPop();
+                  setShowCreateModal(true);
+                }
+              }}
+            >
+              <View style={[styles.stepCircle, (step3Done || isCompleted) && styles.stepCircleActive]}>
+                {isCompleted ? (
+                  <Text style={{ fontSize: 13, color: '#582CDB', fontWeight: '800' }}>✓</Text>
+                ) : (
+                  <Text style={[styles.stepCircleNumber, step3Done && styles.stepCircleNumberActive]}>3</Text>
+                )}
               </View>
               <View style={styles.stepContent}>
-                <Text style={styles.stepTitle}>Publish before 9 PM</Text>
+                <View style={styles.stepTitleRow}>
+                  <Text style={styles.stepTitle}>Publish before 9 PM</Text>
+                  <Text style={styles.stepArrow}>→</Text>
+                </View>
                 <Text style={styles.stepDescription}>Make sure your post goes live before the deadline.</Text>
               </View>
-            </View>
+            </Pressable>
           </View>
 
           {/* 3. SUGGESTED IDEA CARD (ROYAL PURPLE) */}
@@ -959,13 +1023,30 @@ const styles = StyleSheet.create({
     fontWeight: '800',
     color: '#6B7280',
     letterSpacing: 0.6,
-    marginBottom: 16,
+  },
+  guideHeaderRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 14,
+  },
+  guideTapHint: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: '#582CDB',
   },
   stepRow: {
     flexDirection: 'row',
     alignItems: 'flex-start',
-    gap: 14,
-    marginBottom: 18,
+    gap: 12,
+    marginBottom: 14,
+    paddingVertical: 4,
+    paddingHorizontal: 4,
+    borderRadius: 10,
+  },
+  stepRowPressed: {
+    backgroundColor: '#FAF8F5',
+    opacity: 0.85,
   },
   stepCircle: {
     width: 28,
@@ -993,11 +1074,22 @@ const styles = StyleSheet.create({
   stepContent: {
     flex: 1,
   },
+  stepTitleRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 2,
+  },
   stepTitle: {
-    fontSize: 15,
+    fontSize: 14.5,
     fontWeight: '800',
     color: '#171420',
-    marginBottom: 2,
+  },
+  stepArrow: {
+    fontSize: 13.5,
+    fontWeight: '700',
+    color: '#94A3B8',
+    paddingRight: 2,
   },
   stepDescription: {
     fontSize: 13,
