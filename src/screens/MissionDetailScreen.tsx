@@ -246,10 +246,7 @@ export const MissionDetailScreen: React.FC<MissionDetailScreenProps> = ({
 
           {/* 2. STEP-BY-STEP GUIDE (MISSION CONTROL) */}
           <View style={styles.guideCard}>
-            <View style={styles.guideHeaderRow}>
-              <Text style={styles.guideSectionTitle}>STEP-BY-STEP GUIDE</Text>
-              <Text style={styles.guideTapHint}>Tap step to start</Text>
-            </View>
+            <Text style={styles.guideSectionTitle}>STEP-BY-STEP GUIDE</Text>
 
             {/* Step 1: Choose your idea */}
             <Pressable
@@ -307,24 +304,8 @@ export const MissionDetailScreen: React.FC<MissionDetailScreenProps> = ({
               </View>
             </Pressable>
 
-            {/* Step 3: Publish before 9 PM */}
-            <Pressable
-              style={({ pressed }) => [styles.stepRow, { marginBottom: 0 }, pressed && styles.stepRowPressed]}
-              onPress={() => {
-                if (Platform.OS !== 'web') {
-                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-                }
-                if (isCompleted) {
-                  triggerModalPop();
-                  setShowCelebrationModal(true);
-                } else if (onOpenPostComposer) {
-                  onOpenPostComposer(postTitle, postPlatform);
-                } else {
-                  triggerModalPop();
-                  setShowCreateModal(true);
-                }
-              }}
-            >
+            {/* Step 3: Publish before 9 PM (Milestone Status Step) */}
+            <View style={[styles.stepRow, { marginBottom: 0 }]}>
               <View style={[styles.stepCircle, (step3Done || isCompleted) && styles.stepCircleActive]}>
                 {isCompleted ? (
                   <Text style={{ fontSize: 13, color: '#582CDB', fontWeight: '800' }}>✓</Text>
@@ -335,11 +316,17 @@ export const MissionDetailScreen: React.FC<MissionDetailScreenProps> = ({
               <View style={styles.stepContent}>
                 <View style={styles.stepTitleRow}>
                   <Text style={styles.stepTitle}>Publish before 9 PM</Text>
-                  <Text style={styles.stepArrow}>→</Text>
+                  {isCompleted ? (
+                    <View style={styles.stepStatusBadge}>
+                      <Text style={styles.stepStatusBadgeText}>Done ✓</Text>
+                    </View>
+                  ) : (
+                    <Text style={styles.stepStatusQuietText}>Auto-tracks</Text>
+                  )}
                 </View>
                 <Text style={styles.stepDescription}>Make sure your post goes live before the deadline.</Text>
               </View>
-            </Pressable>
+            </View>
           </View>
 
           {/* 3. SUGGESTED IDEA CARD (ROYAL PURPLE) */}
@@ -1090,6 +1077,22 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     color: '#94A3B8',
     paddingRight: 2,
+  },
+  stepStatusBadge: {
+    backgroundColor: '#ECFDF5',
+    paddingVertical: 2,
+    paddingHorizontal: 7,
+    borderRadius: 6,
+  },
+  stepStatusBadgeText: {
+    fontSize: 10.5,
+    fontWeight: '800',
+    color: '#059669',
+  },
+  stepStatusQuietText: {
+    fontSize: 11,
+    fontWeight: '600',
+    color: '#94A3B8',
   },
   stepDescription: {
     fontSize: 13,
