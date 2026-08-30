@@ -635,22 +635,44 @@ export const ScheduleScreen: React.FC<ScheduleScreenProps> = ({
             <Text style={styles.loadFooterNote}>*TikTok is your focus this week.*</Text>
           </View>
 
-          {/* 5. HEALTH & EFFICIENCY CARD */}
+          {/* 5. SCHEDULE HEALTH CARD */}
           <View style={styles.healthCard}>
-            <Text style={styles.healthTitle}>Health &amp; Efficiency</Text>
+            <Text style={styles.healthTitle}>Schedule Health</Text>
 
             <View style={styles.healthItemsList}>
               <View style={styles.healthItem}>
-                <Text style={{ color: '#582CDB', fontSize: 14 }}>✓</Text>
-                <Text style={styles.healthItemText}>8 posts planned this week</Text>
+                <View style={styles.healthItemIconWrap}>
+                  <Svg width={14} height={14} viewBox="0 0 24 24" fill="none">
+                    <Path d="M20 6L9 17L4 12" stroke="#582CDB" strokeWidth="2.8" strokeLinecap="round" strokeLinejoin="round" />
+                  </Svg>
+                </View>
+                <Text style={styles.healthItemText}>
+                  <Text style={styles.healthItemBoldNum}>8</Text> posts planned this week
+                </Text>
               </View>
+
               <View style={styles.healthItem}>
-                <Text style={{ fontSize: 13 }}>📁</Text>
-                <Text style={styles.healthItemText}>2 drafts need finishing</Text>
+                <View style={styles.healthItemIconWrap}>
+                  <Svg width={14} height={14} viewBox="0 0 24 24" fill="none">
+                    <Rect x="4" y="4" width="16" height="16" rx="3.5" stroke="#D97706" strokeWidth="2" strokeLinecap="round" />
+                    <Path d="M8 9H16M8 13H13" stroke="#D97706" strokeWidth="2" strokeLinecap="round" />
+                  </Svg>
+                </View>
+                <Text style={styles.healthItemText}>
+                  <Text style={styles.healthItemBoldNum}>2</Text> drafts need finishing
+                </Text>
               </View>
+
               <View style={styles.healthItem}>
-                <Text style={{ fontSize: 13 }}>📅</Text>
-                <Text style={styles.healthItemText}>1 open slot tomorrow</Text>
+                <View style={styles.healthItemIconWrap}>
+                  <Svg width={14} height={14} viewBox="0 0 24 24" fill="none">
+                    <Circle cx="12" cy="12" r="9" stroke="#64748B" strokeWidth="2" />
+                    <Path d="M12 7V12L15 15" stroke="#64748B" strokeWidth="2" strokeLinecap="round" />
+                  </Svg>
+                </View>
+                <Text style={styles.healthItemText}>
+                  <Text style={styles.healthItemBoldNum}>1</Text> open slot tomorrow
+                </Text>
               </View>
             </View>
 
@@ -1840,23 +1862,23 @@ const styles = StyleSheet.create({
     marginTop: 14,
   },
 
-  // 5. HEALTH & EFFICIENCY
+  // 5. SCHEDULE HEALTH
   healthCard: {
     backgroundColor: '#FAF8F5',
-    borderRadius: 24,
+    borderRadius: 20,
     borderWidth: 1,
     borderColor: '#EFEBF8',
-    padding: 20,
+    padding: 16,
     marginBottom: 20,
   },
   healthTitle: {
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: '800',
     color: '#171420',
     marginBottom: 12,
   },
   healthItemsList: {
-    gap: 8,
+    gap: 10,
     marginBottom: 16,
   },
   healthItem: {
@@ -1864,9 +1886,21 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 8,
   },
+  healthItemIconWrap: {
+    width: 18,
+    height: 18,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
   healthItemText: {
     fontSize: 13,
     color: '#475569',
+    fontWeight: '500',
+  },
+  healthItemBoldNum: {
+    fontSize: 13.5,
+    fontWeight: '800',
+    color: '#171420',
   },
   fillTomorrowBtn: {
     backgroundColor: '#FFFFFF',
