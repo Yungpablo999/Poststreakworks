@@ -159,6 +159,7 @@ export const CaptionScreen: React.FC<CaptionScreenProps> = ({
 
   // Suggested Captions
   const [suggestedIndex, setSuggestedIndex] = useState(0);
+  const [isCaptionExpanded, setIsCaptionExpanded] = useState(false);
   const currentSuggestion = SUGGESTED_CAPTIONS_CATALOG[suggestedIndex];
 
   // Editable Draft Editor & Fields
@@ -242,6 +243,7 @@ export const CaptionScreen: React.FC<CaptionScreenProps> = ({
     }
     const nextIdx = (suggestedIndex + 1) % SUGGESTED_CAPTIONS_CATALOG.length;
     setSuggestedIndex(nextIdx);
+    setIsCaptionExpanded(false);
     const nextItem = SUGGESTED_CAPTIONS_CATALOG[nextIdx];
     setDraftText(nextItem.text);
     setQuickCta(nextItem.cta);
@@ -486,9 +488,31 @@ export const CaptionScreen: React.FC<CaptionScreenProps> = ({
                 </View>
               </View>
 
-              <Text style={styles.recommendedCaptionText}>
+              <Text
+                style={styles.recommendedCaptionText}
+                numberOfLines={isCaptionExpanded ? undefined : 3}
+              >
                 {currentSuggestion.text}
               </Text>
+
+              {/* Read More / Show Less Toggle Button */}
+              {currentSuggestion.text.length > 90 && (
+                <Pressable
+                  onPress={(e) => {
+                    e.stopPropagation();
+                    if (Platform.OS !== 'web') {
+                      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                    }
+                    setIsCaptionExpanded(!isCaptionExpanded);
+                  }}
+                  hitSlop={8}
+                  style={styles.readMoreBtn}
+                >
+                  <Text style={styles.readMoreText}>
+                    {isCaptionExpanded ? 'Show less ▴' : 'Read more ▾'}
+                  </Text>
+                </Pressable>
+              )}
 
               {/* Tags Row */}
               <View style={styles.recommendedTagsRow}>
@@ -1216,8 +1240,19 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#171420',
     lineHeight: 20,
-    marginBottom: 12,
+    marginBottom: 8,
     fontWeight: '500',
+  },
+  readMoreBtn: {
+    alignSelf: 'flex-start',
+    marginBottom: 10,
+    paddingVertical: 2,
+    paddingHorizontal: 2,
+  },
+  readMoreText: {
+    fontSize: 12,
+    fontWeight: '800',
+    color: '#582CDB',
   },
   recommendedTagsRow: {
     flexDirection: 'row',
