@@ -407,6 +407,7 @@ export const MatchScreen: React.FC<MatchScreenProps> = ({
   const ghostFloatY = useRef(new Animated.Value(0)).current;
   const toastOpacity = useRef(new Animated.Value(0)).current;
   const pulseAnim = useRef(new Animated.Value(1)).current;
+  const pitchInputRef = useRef<TextInput>(null);
 
   // Ultra-responsive, effortless Tinder PanResponder
   const panResponder = useRef(
@@ -1553,12 +1554,24 @@ export const MatchScreen: React.FC<MatchScreenProps> = ({
                 {/* Pitch note textarea */}
                 <View style={styles.inputGroupFull}>
                   <View style={styles.pitchHeaderRow}>
-                    <Text style={styles.inputFieldLabel}>PERSONALIZED COLLAB PITCH</Text>
-                    <View style={styles.pitchEditBadge}>
-                      <Text style={styles.pitchEditBadgeText}>✏️ Tap to edit</Text>
-                    </View>
+                    <Text style={styles.inputFieldLabel} numberOfLines={1}>
+                      PERSONALIZED PITCH
+                    </Text>
+                    <Pressable
+                      style={({ pressed }) => [styles.pitchEditBadge, pressed && styles.btnPressed]}
+                      onPress={() => {
+                        if (Platform.OS !== 'web') {
+                          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                        }
+                        pitchInputRef.current?.focus();
+                      }}
+                      hitSlop={8}
+                    >
+                      <Text style={styles.pitchEditBadgeText}>✏️ Edit</Text>
+                    </Pressable>
                   </View>
                   <TextInput
+                    ref={pitchInputRef}
                     style={styles.pitchTextAreaInput}
                     value={pitchMessageDraft}
                     onChangeText={setPitchMessageDraft}
@@ -3542,15 +3555,18 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     marginBottom: 6,
+    width: '100%',
   },
   pitchEditBadge: {
     backgroundColor: '#EDE8FC',
-    paddingVertical: 2,
-    paddingHorizontal: 7,
-    borderRadius: 6,
+    paddingVertical: 3,
+    paddingHorizontal: 8,
+    borderRadius: 100,
+    borderWidth: 1,
+    borderColor: '#DDD6FE',
   },
   pitchEditBadgeText: {
-    fontSize: 9.5,
+    fontSize: 10.5,
     fontWeight: '800',
     color: '#582CDB',
   },
