@@ -170,6 +170,37 @@ const LESSON_PRESETS = [
   },
 ];
 
+const TAKEAWAY_QUICK_ACTIONS = [
+  {
+    id: 'punchier',
+    icon: '⚡',
+    title: 'Make it punchier',
+    text: 'Stop waiting for perfect ideas. Share the useful lessons you learn every day.',
+    tag: 'Punchy',
+  },
+  {
+    id: 'memorable',
+    icon: '🧠',
+    title: 'Make it more memorable',
+    text: 'One small lesson shared daily beats 100 perfect ideas kept in your notes.',
+    tag: 'Memorable',
+  },
+  {
+    id: 'personal',
+    icon: '👤',
+    title: 'Make it more personal',
+    text: 'The day I stopped overthinking and shared my daily progress is the day everything clicked.',
+    tag: 'Personal',
+  },
+  {
+    id: 'actionable',
+    icon: '🎯',
+    title: 'Make it more actionable',
+    text: 'Write down 1 thing you figured out today and post it before you go to bed.',
+    tag: 'Actionable',
+  },
+];
+
 const CTA_PRESETS = [
   {
     id: 'cta_1',
@@ -907,9 +938,6 @@ ${selectedCtaText}`;
                   <Text style={styles.sectionTitle}>Takeaway</Text>
                   <Text style={styles.editableHintMicro}>Editable</Text>
                 </View>
-                <Pressable onPress={() => handleOpenPhaseModal('lesson')} hitSlop={8}>
-                  <Text style={styles.editSectionLink}>Studio ➔</Text>
-                </Pressable>
               </View>
 
               <View style={styles.takeawayBox}>
@@ -1222,7 +1250,7 @@ ${selectedCtaText}`;
           </Modal>
 
           {/* ========================================================================= */}
-          {/* MODAL 3: FULL LESSON / TAKEAWAY POP-UP MODAL */}
+          {/* LIGHTWEIGHT TAKEAWAY IMPROVEMENT MENU */}
           {/* ========================================================================= */}
           <Modal
             visible={showLessonModal}
@@ -1231,11 +1259,11 @@ ${selectedCtaText}`;
             onRequestClose={() => setShowLessonModal(false)}
           >
             <View style={styles.modalOverlay}>
-              <Animated.View style={[styles.modalCardLarge, { transform: [{ scale: modalPopScale }] }]}>
+              <Animated.View style={[styles.modalCard, { transform: [{ scale: modalPopScale }] }]}>
                 <View style={styles.modalHeaderRow}>
                   <View>
-                    <Text style={styles.modalTitle}>💡 Core Lesson Studio</Text>
-                    <Text style={styles.modalSubtitle}>The memorable takeaway that gets saved</Text>
+                    <Text style={styles.modalTitle}>💡 Improve Takeaway</Text>
+                    <Text style={styles.modalSubtitle}>Quick 1-tap refinements for your conclusion</Text>
                   </View>
                   <Pressable
                     onPress={() => setShowLessonModal(false)}
@@ -1246,51 +1274,63 @@ ${selectedCtaText}`;
                   </Pressable>
                 </View>
 
-                <ScrollView style={{ maxHeight: 380 }} showsVerticalScrollIndicator={false}>
-                  {LESSON_PRESETS.map((lesson) => {
-                    const isSelected = selectedLessonId === lesson.id;
+                <ScrollView style={{ maxHeight: 360 }} showsVerticalScrollIndicator={false}>
+                  {TAKEAWAY_QUICK_ACTIONS.map((item) => {
+                    const isSelected = takeawayText === item.text;
                     return (
                       <Pressable
-                        key={lesson.id}
+                        key={item.id}
                         onPress={() => {
-                          setSelectedLessonId(lesson.id);
-                          setTakeawayText(lesson.text);
+                          if (Platform.OS !== 'web') {
+                            Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+                          }
+                          setTakeawayText(item.text);
+                          setShowLessonModal(false);
+                          setCelebrationTitle('Takeaway Updated!');
+                          setCelebrationSubtitle(`"${item.title}" applied to your script.`);
+                          setCelebrationSpeech('Takeaway conclusion updated!');
+                          setCelebrationBadge('TAKEAWAY READY');
+                          setShowCelebrationModal(true);
                         }}
                         style={({ pressed }) => [
-                          styles.lessonModalItemCard,
-                          isSelected && styles.lessonModalItemCardActive,
+                          styles.takeawayMenuItemCard,
+                          isSelected && styles.takeawayMenuItemCardActive,
                           pressed && styles.btnPressed,
                         ]}
                       >
-                        <View style={styles.lessonModalItemHeader}>
-                          <Text style={[styles.lessonModalItemTitle, isSelected && styles.lessonModalItemTitleActive]}>
-                            {isSelected ? `✓ ${lesson.title}` : lesson.title}
-                          </Text>
+                        <View style={styles.takeawayMenuItemHeader}>
+                          <View style={styles.takeawayMenuItemTitleGroup}>
+                            <Text style={styles.takeawayMenuIcon}>{item.icon}</Text>
+                            <Text style={[styles.takeawayMenuItemTitle, isSelected && styles.takeawayMenuItemTitleActive]}>
+                              {item.title}
+                            </Text>
+                          </View>
                           <View style={styles.modalTagRightGroup}>
-                            <View style={[styles.lessonModalTagPill, isSelected && styles.lessonModalTagPillActive]}>
-                              <Text style={[styles.lessonModalTagText, isSelected && styles.lessonModalTagTextActive]}>{lesson.tag}</Text>
+                            <View style={[styles.takeawayMenuTagPill, isSelected && styles.takeawayMenuTagPillActive]}>
+                              <Text style={[styles.takeawayMenuTagText, isSelected && styles.takeawayMenuTagTextActive]}>{item.tag}</Text>
                             </View>
                             {isSelected && (
                               <View style={styles.selectedCheckBadge}>
-                                <Text style={styles.selectedCheckText}>SELECTED</Text>
+                                <Text style={styles.selectedCheckText}>ACTIVE</Text>
                               </View>
                             )}
                           </View>
                         </View>
-                        <Text style={styles.lessonModalItemText}>&ldquo;{lesson.text}&rdquo;</Text>
+                        <Text style={styles.takeawayMenuItemText}>&ldquo;{item.text}&rdquo;</Text>
                       </Pressable>
                     );
                   })}
                 </ScrollView>
 
+                {/* AI Rewrite Action in Lightweight Menu */}
                 <Pressable
-                  style={styles.modalFullBtn}
+                  style={({ pressed }) => [styles.takeawayMenuAiBtn, pressed && styles.btnPressed]}
                   onPress={() => {
-                    const found = LESSON_PRESETS.find((l) => l.id === selectedLessonId) || LESSON_PRESETS[0];
-                    handleApplyLessonFromModal(found);
+                    setShowLessonModal(false);
+                    handleAiRewriteCurrentPhase();
                   }}
                 >
-                  <Text style={styles.modalFullBtnText}>Apply Takeaway ➔</Text>
+                  <Text style={styles.takeawayMenuAiBtnText}>✨ AI Rewrite Takeaway · 1 edit</Text>
                 </Pressable>
               </Animated.View>
             </View>
@@ -2458,66 +2498,88 @@ const styles = StyleSheet.create({
     lineHeight: 18,
   },
 
-  // Lesson Modal Item Cards
-  lessonModalItemCard: {
+  // Lightweight Takeaway Menu Item Cards
+  takeawayMenuItemCard: {
     backgroundColor: '#FAF8FE',
-    borderRadius: 16,
+    borderRadius: 14,
     borderWidth: 1.5,
     borderColor: '#EDE9FE',
-    padding: 14,
-    marginBottom: 10,
+    padding: 12,
+    marginBottom: 8,
   },
-  lessonModalItemCardActive: {
+  takeawayMenuItemCardActive: {
     backgroundColor: '#FFFFFF',
     borderWidth: 2,
     borderColor: '#582CDB',
     shadowColor: '#582CDB',
-    shadowOffset: { width: 0, height: 4 },
+    shadowOffset: { width: 0, height: 3 },
     shadowOpacity: 0.1,
-    shadowRadius: 8,
+    shadowRadius: 6,
     elevation: 3,
   },
-  lessonModalItemHeader: {
+  takeawayMenuItemHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    gap: 6,
     marginBottom: 6,
   },
-  lessonModalItemTitle: {
-    fontSize: 12.5,
-    fontWeight: '800',
-    color: '#171420',
+  takeawayMenuItemTitleGroup: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
     flex: 1,
     marginRight: 6,
   },
-  lessonModalItemTitleActive: {
+  takeawayMenuIcon: {
+    fontSize: 13,
+  },
+  takeawayMenuItemTitle: {
+    fontSize: 12.5,
+    fontWeight: '800',
+    color: '#171420',
+  },
+  takeawayMenuItemTitleActive: {
     color: '#582CDB',
   },
-  lessonModalTagPill: {
+  takeawayMenuTagPill: {
     backgroundColor: '#EDE9FE',
-    paddingVertical: 2.5,
-    paddingHorizontal: 7,
-    borderRadius: 6,
+    paddingVertical: 2,
+    paddingHorizontal: 6,
+    borderRadius: 5,
     flexShrink: 0,
   },
-  lessonModalTagPillActive: {
+  takeawayMenuTagPillActive: {
     backgroundColor: '#FAF5FF',
     borderWidth: 1,
     borderColor: '#DDD6FE',
   },
-  lessonModalTagText: {
+  takeawayMenuTagText: {
     fontSize: 9.5,
     fontWeight: '800',
     color: '#6D28D9',
   },
-  lessonModalTagTextActive: {
+  takeawayMenuTagTextActive: {
     color: '#582CDB',
   },
-  lessonModalItemText: {
-    fontSize: 13,
+  takeawayMenuItemText: {
+    fontSize: 12.5,
     color: '#334155',
     lineHeight: 18,
+  },
+  takeawayMenuAiBtn: {
+    height: 42,
+    borderRadius: 12,
+    backgroundColor: '#FAF5FF',
+    borderWidth: 1.5,
+    borderColor: '#EDE9FE',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 6,
+  },
+  takeawayMenuAiBtnText: {
+    fontSize: 12,
+    fontWeight: '800',
+    color: '#582CDB',
   },
 
   // CTA Modal Item Cards
