@@ -163,7 +163,7 @@ const CREATOR_DECK: CreatorProfile[] = [
       'High response likelihood',
     ],
     tracking: {
-      growthRate: '+4.2k this month',
+      growthRate: '+4.2K followers',
       postingPace: '4 posts/week',
       engagementScore: '94/100',
       bestCollabWindow: 'Fri & Sun • 7:30 PM',
@@ -206,7 +206,7 @@ const CREATOR_DECK: CreatorProfile[] = [
       'High response likelihood',
     ],
     tracking: {
-      growthRate: '+12.8k this month',
+      growthRate: '+12.8K followers',
       postingPace: '5 posts/week',
       engagementScore: '98/100',
       bestCollabWindow: 'Wed & Thu • 6:00 PM',
@@ -249,7 +249,7 @@ const CREATOR_DECK: CreatorProfile[] = [
       'High response likelihood',
     ],
     tracking: {
-      growthRate: '+2.1k this month',
+      growthRate: '+2.1K followers',
       postingPace: '3 posts/week',
       engagementScore: '91/100',
       bestCollabWindow: 'Sat • 11:30 AM',
@@ -1257,34 +1257,75 @@ export const MatchScreen: React.FC<MatchScreenProps> = ({
                         <Text style={styles.trackedMetaText}>{creator.role} • {creator.followers}</Text>
                       </View>
                       <Pressable
-                        style={styles.connectSmallBtn}
+                        style={({ pressed }) => [styles.connectSmallBtn, pressed && styles.btnPressed]}
                         onPress={() => {
-                          setConnectedCreators((prev) => [creator, ...prev]);
-                          setLastConnectedName(creator.name);
-                          setShowConnectModal(true);
+                          if (Platform.OS !== 'web') {
+                            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                          }
+                          handleOpenPitchModal(creator);
                         }}
                       >
-                        <Text style={styles.connectSmallBtnText}>Accept</Text>
+                        <Text style={styles.connectSmallBtnText}>Match →</Text>
                       </Pressable>
                     </View>
 
-                    {/* Live Tracking Intelligence Box */}
+                    {/* Live Tracking Intelligence Box (Interactive) */}
                     <View style={styles.trackingMetricsBox}>
-                      <View style={styles.trackingMetricRow}>
+                      <Pressable
+                        style={({ pressed }) => [styles.trackingMetricRow, pressed && { opacity: 0.7 }]}
+                        onPress={() => {
+                          if (Platform.OS !== 'web') Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                          showToast(`📈 Growth Velocity: ${creator.name.split(' ')[0]} gained ${creator.tracking.growthRate} over the last 30 days.`);
+                        }}
+                        hitSlop={4}
+                      >
                         <Text style={styles.trackingMetricLabel}>📈 Growth Velocity:</Text>
-                        <Text style={styles.trackingMetricValue}>{creator.tracking.growthRate}</Text>
-                      </View>
-                      <View style={styles.trackingMetricRow}>
+                        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+                          <Text style={styles.trackingMetricValue}>{creator.tracking.growthRate}</Text>
+                          <Text style={{ fontSize: 10, color: '#A78BFA' }}>ⓘ</Text>
+                        </View>
+                      </Pressable>
+
+                      <Pressable
+                        style={({ pressed }) => [styles.trackingMetricRow, pressed && { opacity: 0.7 }]}
+                        onPress={() => {
+                          if (Platform.OS !== 'web') Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                          showToast(`⏱ Posting Rhythm: ${creator.name.split(' ')[0]} posts ${creator.tracking.postingPace} with a ${creator.streak}-day streak.`);
+                        }}
+                        hitSlop={4}
+                      >
                         <Text style={styles.trackingMetricLabel}>⏱ Posting Rhythm:</Text>
-                        <Text style={styles.trackingMetricValue}>{creator.tracking.postingPace}</Text>
-                      </View>
-                      <View style={styles.trackingMetricRow}>
+                        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+                          <Text style={styles.trackingMetricValue}>{creator.tracking.postingPace}</Text>
+                          <Text style={{ fontSize: 10, color: '#A78BFA' }}>ⓘ</Text>
+                        </View>
+                      </Pressable>
+
+                      <Pressable
+                        style={({ pressed }) => [styles.trackingMetricRow, pressed && { opacity: 0.7 }]}
+                        onPress={() => {
+                          if (Platform.OS !== 'web') Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                          showToast(`✨ Collab Window: ${creator.name.split(' ')[0]}’s audience engagement peaks on ${creator.tracking.bestCollabWindow}.`);
+                        }}
+                        hitSlop={4}
+                      >
                         <Text style={styles.trackingMetricLabel}>✨ Best Collab Window:</Text>
-                        <Text style={styles.trackingMetricValue}>{creator.tracking.bestCollabWindow}</Text>
-                      </View>
-                      <View style={styles.trackingStatusRow}>
+                        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+                          <Text style={styles.trackingMetricValue}>{creator.tracking.bestCollabWindow}</Text>
+                          <Text style={{ fontSize: 10, color: '#A78BFA' }}>ⓘ</Text>
+                        </View>
+                      </Pressable>
+
+                      <Pressable
+                        style={({ pressed }) => [styles.trackingStatusRow, pressed && { opacity: 0.7 }]}
+                        onPress={() => {
+                          if (Platform.OS !== 'web') Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                          showToast(`🟢 Activity: ${creator.name.split(' ')[0]} posted ${creator.tracking.lastActive}.`);
+                        }}
+                        hitSlop={4}
+                      >
                         <Text style={styles.trackingStatusText}>{creator.tracking.statusText}</Text>
-                      </View>
+                      </Pressable>
                     </View>
                   </View>
                 ))
