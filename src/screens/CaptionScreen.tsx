@@ -368,7 +368,7 @@ export const CaptionScreen: React.FC<CaptionScreenProps> = ({
                 />
               </Pressable>
 
-              {/* Goal Line with Obvious Tappable Action: 🎯 Goal: Get saves and comments · Change ➔ */}
+              {/* Goal Line with Dedicated Change Pill Button */}
               <Pressable
                 style={({ pressed }) => [styles.goalRow, pressed && styles.btnPressed]}
                 onPress={() => {
@@ -382,10 +382,12 @@ export const CaptionScreen: React.FC<CaptionScreenProps> = ({
               >
                 <View style={styles.goalLeftGroup}>
                   <Text style={styles.goalIcon}>🎯</Text>
-                  <Text style={styles.goalLabel} numberOfLines={1} ellipsizeMode="tail">
+                  <Text style={styles.goalLabel}>
                     Goal: <Text style={styles.goalValue}>{selectedGoal}</Text>
-                    <Text style={styles.goalChangeInline}> · Change ➔</Text>
                   </Text>
+                </View>
+                <View style={styles.goalChangePill}>
+                  <Text style={styles.goalChangePillText}>Change ➔</Text>
                 </View>
               </Pressable>
             </View>
@@ -1034,14 +1036,17 @@ const styles = StyleSheet.create({
   },
   goalRow: {
     flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'center',
     paddingVertical: 2,
+    gap: 8,
   },
   goalLeftGroup: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
     flex: 1,
+    marginRight: 6,
   },
   goalIcon: {
     fontSize: 14,
@@ -1050,16 +1055,26 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: '#64748B',
     fontWeight: '600',
-    flex: 1,
+    flexShrink: 1,
   },
   goalValue: {
     color: '#582CDB',
     fontWeight: '800',
   },
-  goalChangeInline: {
-    color: '#582CDB',
+  goalChangePill: {
+    backgroundColor: '#FAF5FF',
+    borderWidth: 1,
+    borderColor: '#EDE9FE',
+    paddingVertical: 3.5,
+    paddingHorizontal: 9,
+    borderRadius: 7,
+    flexShrink: 0,
+  },
+  goalChangePillText: {
+    fontSize: 11,
     fontWeight: '800',
-    fontSize: 12,
+    color: '#582CDB',
+    letterSpacing: 0.2,
   },
 
   // Choose a Tone Section
