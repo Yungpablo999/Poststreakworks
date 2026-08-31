@@ -248,12 +248,6 @@ export const CaptionScreen: React.FC<CaptionScreenProps> = ({
     setDraftText(nextItem.text);
     setQuickCta(nextItem.cta);
     setHashtagsText(nextItem.hashtags);
-
-    setCelebrationTitle('New Caption Generated!');
-    setCelebrationSubtitle('Fresh viral angle and hashtags loaded into your editor.');
-    setCelebrationSpeech('1-day streak protected! Keep up the momentum.');
-    setCelebrationBadge('CAPTION REFRESHED');
-    setShowCelebrationModal(true);
   };
 
   const handleApplyRecommendation = () => {
