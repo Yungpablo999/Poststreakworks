@@ -670,21 +670,25 @@ export const ChallengeDetailScreen: React.FC<ChallengeDetailScreenProps> = ({
           {/* SECTION 6: REPUTATION EFFECT (2x2 Grid) */}
           <Text style={styles.sectionHeading}>Reputation Effect</Text>
           <View style={styles.reputationGrid}>
-            <View style={styles.reputationTile}>
-              <Text style={styles.reputationTileLabel}>Consistency</Text>
-              <Text style={styles.reputationTileValuePurple}>+4%</Text>
+            <View style={styles.reputationRow}>
+              <View style={styles.reputationTile}>
+                <Text style={styles.reputationTileLabel}>Consistency</Text>
+                <Text style={styles.reputationTileValuePurple}>+4%</Text>
+              </View>
+              <View style={styles.reputationTile}>
+                <Text style={styles.reputationTileLabel}>Passport</Text>
+                <Text style={styles.reputationTileValuePurple}>+6%</Text>
+              </View>
             </View>
-            <View style={styles.reputationTile}>
-              <Text style={styles.reputationTileLabel}>Passport</Text>
-              <Text style={styles.reputationTileValuePurple}>+6%</Text>
-            </View>
-            <View style={styles.reputationTile}>
-              <Text style={styles.reputationTileLabel}>Quests</Text>
-              <Text style={styles.reputationTileValueDark}>+1</Text>
-            </View>
-            <View style={styles.reputationTile}>
-              <Text style={styles.reputationTileLabel}>Status</Text>
-              <Text style={styles.reputationTileValueGold}>Ready</Text>
+            <View style={styles.reputationRow}>
+              <View style={styles.reputationTile}>
+                <Text style={styles.reputationTileLabel}>Quests</Text>
+                <Text style={styles.reputationTileValueDark}>+1</Text>
+              </View>
+              <View style={styles.reputationTile}>
+                <Text style={styles.reputationTileLabel}>Status</Text>
+                <Text style={styles.reputationTileValueGold}>Ready</Text>
+              </View>
             </View>
           </View>
 
@@ -1621,13 +1625,15 @@ const styles = StyleSheet.create({
 
   // REPUTATION GRID (2x2)
   reputationGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 12,
+    gap: 10,
     marginBottom: 12,
   },
+  reputationRow: {
+    flexDirection: 'row',
+    gap: 10,
+  },
   reputationTile: {
-    width: '48%',
+    flex: 1,
     backgroundColor: '#FFFFFF',
     borderRadius: 18,
     borderWidth: 1,
