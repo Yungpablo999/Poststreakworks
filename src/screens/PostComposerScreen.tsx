@@ -245,6 +245,39 @@ const MONTH_NAMES = [
   'December',
 ];
 
+interface SmartScheduleSlot {
+  time: string;
+  isRecommended: boolean;
+  reason?: string;
+}
+
+interface SmartScheduleGroup {
+  dayLabel: string;
+  dateStr: string;
+  slots: SmartScheduleSlot[];
+}
+
+const SMART_SCHEDULE_GROUPS: SmartScheduleGroup[] = [
+  {
+    dayLabel: 'Today',
+    dateStr: 'Aug 18',
+    slots: [
+      { time: '7:30 PM', isRecommended: true, reason: 'Peak Audience' },
+      { time: '8:00 PM', isRecommended: false },
+      { time: '8:30 PM', isRecommended: false },
+    ],
+  },
+  {
+    dayLabel: 'Tomorrow',
+    dateStr: 'Aug 19',
+    slots: [
+      { time: '11:30 AM', isRecommended: true, reason: 'High Engagement' },
+      { time: '1:00 PM', isRecommended: false },
+      { time: '7:30 PM', isRecommended: false },
+    ],
+  },
+];
+
 const TIME_SLOTS = [
   { id: 't1', time: '7:30 PM', label: '⚡ Peak Reach', peak: true },
   { id: 't2', time: '9:00 AM', label: 'Morning Wave', peak: false },
@@ -395,6 +428,7 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
   const [showPlatformsModal, setShowPlatformsModal] = useState(false);
   const [showChangeIdeaModal, setShowChangeIdeaModal] = useState(false);
   const [showCalendarModal, setShowCalendarModal] = useState(false);
+  const [showCustomCalendarView, setShowCustomCalendarView] = useState(false);
   const [showNotificationModal, setShowNotificationModal] = useState(false);
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [showChatModal, setShowChatModal] = useState(false);
@@ -1399,8 +1433,8 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
             <View style={styles.timingHeaderRow}>
               <Text style={styles.timingSuggestedLightbulb}>💡</Text>
               <View style={{ flex: 1 }}>
-                <Text style={styles.timingSuggestedTitle}>Suggested time: Today • 7:30 PM</Text>
-                <Text style={styles.timingSuggestedSub}>Your audience is usually more active in this window.</Text>
+                <Text style={styles.timingSuggestedTitle}>Jarvis recommends 7:30 PM</Text>
+                <Text style={styles.timingSuggestedSub}>Your audience is usually more active around this time.</Text>
               </View>
             </View>
 
@@ -1444,6 +1478,7 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
                 </View>
                 <Pressable
                   onPress={() => {
+                    setShowCustomCalendarView(false);
                     triggerModalAnim();
                     setShowCalendarModal(true);
                   }}
@@ -1801,173 +1836,268 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
               <View style={styles.modalHeaderRow}>
                 <View style={styles.modalTitleContainer}>
                   <Text style={styles.modalTitle}>Schedule Post</Text>
-                  <Text style={styles.modalSubtitle}>Pick a date &amp; peak audience window</Text>
+                  <Text style={styles.modalSubtitle}>
+                    {showCustomCalendarView
+                      ? 'Pick a custom date & audience window'
+                      : 'Jarvis recommended audience windows'}
+                  </Text>
                 </View>
                 <Pressable onPress={() => setShowCalendarModal(false)} style={styles.modalCloseCircle} hitSlop={8}>
                   <Text style={styles.modalCloseCross}>✕</Text>
                 </Pressable>
               </View>
 
-              <ScrollView showsVerticalScrollIndicator={false} style={{ maxHeight: 460 }}>
-                {/* Month Selector Bar */}
-                <View style={styles.calMonthNavRow}>
+              {!showCustomCalendarView ? (
+                /* 1. SMART RECOMMENDED SCHEDULE SLOTS */
+                <ScrollView showsVerticalScrollIndicator={false} style={{ maxHeight: 440 }}>
+                  {SMART_SCHEDULE_GROUPS.map((group) => (
+                    <View key={group.dayLabel} style={styles.smartScheduleGroup}>
+                      <Text style={styles.smartScheduleGroupHeader}>{group.dayLabel.toUpperCase()}</Text>
+                      <View style={styles.smartSlotRow}>
+                        {group.slots.map((slot) => {
+                          const slotFullStr = `${group.dayLabel}, ${slot.time}`;
+                          const isSlotSelected = scheduledTime === slotFullStr;
+
+                          return (
+                            <Pressable
+                              key={slot.time}
+                              style={[
+                                styles.smartSlotCard,
+                                isSlotSelected && styles.smartSlotCardActive,
+                              ]}
+                              onPress={() => {
+                                if (Platform.OS !== 'web') {
+                                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                                }
+                                setScheduledTime(slotFullStr);
+                                setShowCalendarModal(false);
+                              }}
+                            >
+                              <View style={styles.smartSlotCardLeft}>
+                                <Text
+                                  style={[
+                                    styles.smartSlotTimeText,
+                                    isSlotSelected && styles.smartSlotTimeTextActive,
+                                  ]}
+                                >
+                                  {slot.time}
+                                </Text>
+                                {slot.isRecommended && (
+                                  <View style={styles.smartSlotRecBadge}>
+                                    <Text style={styles.smartSlotRecBadgeText}>
+                                      ⭐ Recommended{slot.reason ? ` (${slot.reason})` : ''}
+                                    </Text>
+                                  </View>
+                                )}
+                              </View>
+
+                              <View
+                                style={[
+                                  styles.smartSlotRadioCircle,
+                                  isSlotSelected && styles.smartSlotRadioCircleActive,
+                                ]}
+                              >
+                                {isSlotSelected && (
+                                  <Text style={{ color: '#FFFFFF', fontSize: 10, fontWeight: '800' }}>✓</Text>
+                                )}
+                              </View>
+                            </Pressable>
+                          );
+                        })}
+                      </View>
+                    </View>
+                  ))}
+
+                  {/* Choose Custom Date & Time Option */}
                   <Pressable
-                    onPress={handlePrevMonth}
-                    style={({ pressed }) => [styles.calMonthNavBtn, pressed && styles.btnPressed]}
-                    hitSlop={8}
+                    style={({ pressed }) => [styles.chooseCustomDateBtn, pressed && styles.btnPressed]}
+                    onPress={() => {
+                      if (Platform.OS !== 'web') {
+                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                      }
+                      setShowCustomCalendarView(true);
+                    }}
                   >
-                    <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
-                      <Path d="M15 18L9 12L15 6" stroke="#171420" strokeWidth="2.5" strokeLinecap="round" />
+                    <Svg width={15} height={15} viewBox="0 0 24 24" fill="none">
+                      <Rect x="3" y="4" width="18" height="18" rx="3" stroke="#582CDB" strokeWidth="2" />
+                      <Path d="M16 2v4M8 2v4M3 10h18" stroke="#582CDB" strokeWidth="2" strokeLinecap="round" />
                     </Svg>
+                    <Text style={styles.chooseCustomDateBtnText}>Choose Date &amp; Time...</Text>
+                  </Pressable>
+                </ScrollView>
+              ) : (
+                /* 2. CUSTOM CALENDAR & TIME PICKER */
+                <ScrollView showsVerticalScrollIndicator={false} style={{ maxHeight: 460 }}>
+                  <Pressable
+                    onPress={() => setShowCustomCalendarView(false)}
+                    style={styles.backToSmartSlotsBtn}
+                  >
+                    <Svg width={12} height={12} viewBox="0 0 24 24" fill="none">
+                      <Path d="M19 12H5M12 19l-7-7 7-7" stroke="#6D28D9" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+                    </Svg>
+                    <Text style={styles.backToSmartSlotsBtnText}>Back to Recommended Slots</Text>
                   </Pressable>
 
-                  <View style={{ alignItems: 'center' }}>
-                    <Text style={styles.calMonthNavTitle}>
-                      {MONTH_NAMES[calMonthIndex]} {calYear}
-                    </Text>
-                    {calMonthIndex === 7 && calYear === 2026 && (
-                      <Text style={styles.calMonthNavBadge}>CURRENT MONTH</Text>
-                    )}
+                  {/* Month Selector Bar */}
+                  <View style={styles.calMonthNavRow}>
+                    <Pressable
+                      onPress={handlePrevMonth}
+                      style={({ pressed }) => [styles.calMonthNavBtn, pressed && styles.btnPressed]}
+                      hitSlop={8}
+                    >
+                      <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
+                        <Path d="M15 18L9 12L15 6" stroke="#171420" strokeWidth="2.5" strokeLinecap="round" />
+                      </Svg>
+                    </Pressable>
+
+                    <View style={{ alignItems: 'center' }}>
+                      <Text style={styles.calMonthNavTitle}>
+                        {MONTH_NAMES[calMonthIndex]} {calYear}
+                      </Text>
+                      {calMonthIndex === 7 && calYear === 2026 && (
+                        <Text style={styles.calMonthNavBadge}>CURRENT MONTH</Text>
+                      )}
+                    </View>
+
+                    <Pressable
+                      onPress={handleNextMonth}
+                      style={({ pressed }) => [styles.calMonthNavBtn, pressed && styles.btnPressed]}
+                      hitSlop={8}
+                    >
+                      <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
+                        <Path d="M9 18L15 12L9 6" stroke="#171420" strokeWidth="2.5" strokeLinecap="round" />
+                      </Svg>
+                    </Pressable>
                   </View>
 
+                  {/* Day of Week Headers */}
+                  <View style={styles.calWeekDaysRow}>
+                    {['M', 'T', 'W', 'T', 'F', 'S', 'S'].map((dayChar, dIdx) => (
+                      <Text key={dIdx} style={styles.calWeekDayText}>
+                        {dayChar}
+                      </Text>
+                    ))}
+                  </View>
+
+                  {/* Days Grid */}
+                  <View style={styles.calDaysGrid}>
+                    {/* Empty cells before month start */}
+                    {Array.from({ length: firstDayOfWeek }).map((_, emptyIdx) => (
+                      <View key={`empty_${emptyIdx}`} style={styles.calDayCell} />
+                    ))}
+
+                    {/* Day numbers */}
+                    {Array.from({ length: daysInMonth }).map((_, dayIdx) => {
+                      const dayNum = dayIdx + 1;
+                      const isSelected = selectedCalDay === dayNum;
+                      const isToday = dayNum === 18 && calMonthIndex === 7 && calYear === 2026;
+                      const isPeakDay = dayNum % 3 === 0 || dayNum === 18 || dayNum === 19;
+
+                      return (
+                        <Pressable
+                          key={`day_${dayNum}`}
+                          onPress={() => {
+                            if (Platform.OS !== 'web') {
+                              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                            }
+                            setSelectedCalDay(dayNum);
+                          }}
+                          style={[
+                            styles.calDayCell,
+                            isSelected && styles.calDayCellSelected,
+                          ]}
+                        >
+                          <Text
+                            style={[
+                              styles.calDayNumText,
+                              isSelected && styles.calDayNumTextSelected,
+                              isToday && !isSelected && styles.calDayNumTextToday,
+                            ]}
+                          >
+                            {dayNum}
+                          </Text>
+                          {isToday && !isSelected && <View style={styles.calTodayDot} />}
+                          {isPeakDay && !isSelected && !isToday && (
+                            <View style={styles.calPeakDot} />
+                          )}
+                        </Pressable>
+                      );
+                    })}
+                  </View>
+
+                  {/* Time Slots Section */}
+                  <Text style={styles.calSectionHeader}>SELECT TIME SLOT</Text>
+                  <View style={styles.calTimeSlotsGrid}>
+                    {TIME_SLOTS.map((slot) => {
+                      const isSlotSelected = selectedTimeSlot === slot.time;
+                      return (
+                        <Pressable
+                          key={slot.id}
+                          onPress={() => {
+                            if (Platform.OS !== 'web') {
+                              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                            }
+                            setSelectedTimeSlot(slot.time);
+                          }}
+                          style={[
+                            styles.calTimeSlotCard,
+                            isSlotSelected && styles.calTimeSlotCardActive,
+                          ]}
+                        >
+                          <Text
+                            style={[
+                              styles.calTimeSlotTime,
+                              isSlotSelected && styles.calTimeSlotTimeActive,
+                            ]}
+                          >
+                            {slot.time}
+                          </Text>
+                          <Text
+                            style={[
+                              styles.calTimeSlotLabel,
+                              isSlotSelected && styles.calTimeSlotLabelActive,
+                            ]}
+                          >
+                            {slot.label}
+                          </Text>
+                        </Pressable>
+                      );
+                    })}
+                  </View>
+
+                  {/* Selected Slot Preview Callout */}
+                  <View style={styles.calPreviewBox}>
+                    <View style={styles.calPreviewIconCircle}>
+                      <Text style={{ fontSize: 16 }}>⚡</Text>
+                    </View>
+                    <View style={{ flex: 1 }}>
+                      <Text style={styles.calPreviewTitle}>
+                        {MONTH_NAMES[calMonthIndex].substring(0, 3)} {selectedCalDay}, {calYear} at {selectedTimeSlot}
+                      </Text>
+                      <Text style={styles.calPreviewSub}>
+                        Peak audience active window • Streak protection preserved
+                      </Text>
+                    </View>
+                  </View>
+
+                  {/* Schedule Confirmation CTA */}
                   <Pressable
-                    onPress={handleNextMonth}
-                    style={({ pressed }) => [styles.calMonthNavBtn, pressed && styles.btnPressed]}
-                    hitSlop={8}
+                    style={styles.modalPrimaryActionBtn}
+                    onPress={handleConfirmCalendarSchedule}
                   >
-                    <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
-                      <Path d="M9 18L15 12L9 6" stroke="#171420" strokeWidth="2.5" strokeLinecap="round" />
-                    </Svg>
+                    <LinearGradient
+                      colors={['#7C3AED', '#582CDB']}
+                      start={{ x: 0, y: 0 }}
+                      end={{ x: 1, y: 0 }}
+                      style={styles.modalPrimaryGradient}
+                    >
+                      <Text style={styles.modalPrimaryActionText}>
+                        Schedule Post ({MONTH_NAMES[calMonthIndex].substring(0, 3)} {selectedCalDay}, {selectedTimeSlot}) ✓
+                      </Text>
+                    </LinearGradient>
                   </Pressable>
-                </View>
-
-                {/* Day of Week Headers */}
-                <View style={styles.calWeekDaysRow}>
-                  {['M', 'T', 'W', 'T', 'F', 'S', 'S'].map((dayChar, dIdx) => (
-                    <Text key={dIdx} style={styles.calWeekDayText}>
-                      {dayChar}
-                    </Text>
-                  ))}
-                </View>
-
-                {/* Days Grid */}
-                <View style={styles.calDaysGrid}>
-                  {/* Empty cells before month start */}
-                  {Array.from({ length: firstDayOfWeek }).map((_, emptyIdx) => (
-                    <View key={`empty_${emptyIdx}`} style={styles.calDayCell} />
-                  ))}
-
-                  {/* Day numbers */}
-                  {Array.from({ length: daysInMonth }).map((_, dayIdx) => {
-                    const dayNum = dayIdx + 1;
-                    const isSelected = selectedCalDay === dayNum;
-                    const isToday = dayNum === 18 && calMonthIndex === 7 && calYear === 2026;
-                    const isPeakDay = dayNum % 3 === 0 || dayNum === 18 || dayNum === 19;
-
-                    return (
-                      <Pressable
-                        key={`day_${dayNum}`}
-                        onPress={() => {
-                          if (Platform.OS !== 'web') {
-                            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                          }
-                          setSelectedCalDay(dayNum);
-                        }}
-                        style={[
-                          styles.calDayCell,
-                          isSelected && styles.calDayCellSelected,
-                        ]}
-                      >
-                        <Text
-                          style={[
-                            styles.calDayNumText,
-                            isSelected && styles.calDayNumTextSelected,
-                            isToday && !isSelected && styles.calDayNumTextToday,
-                          ]}
-                        >
-                          {dayNum}
-                        </Text>
-                        {isToday && !isSelected && <View style={styles.calTodayDot} />}
-                        {isPeakDay && !isSelected && !isToday && (
-                          <View style={styles.calPeakDot} />
-                        )}
-                      </Pressable>
-                    );
-                  })}
-                </View>
-
-                {/* Time Slots Section */}
-                <Text style={styles.calSectionHeader}>SELECT TIME SLOT</Text>
-                <View style={styles.calTimeSlotsGrid}>
-                  {TIME_SLOTS.map((slot) => {
-                    const isSlotSelected = selectedTimeSlot === slot.time;
-                    return (
-                      <Pressable
-                        key={slot.id}
-                        onPress={() => {
-                          if (Platform.OS !== 'web') {
-                            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                          }
-                          setSelectedTimeSlot(slot.time);
-                        }}
-                        style={[
-                          styles.calTimeSlotCard,
-                          isSlotSelected && styles.calTimeSlotCardActive,
-                        ]}
-                      >
-                        <Text
-                          style={[
-                            styles.calTimeSlotTime,
-                            isSlotSelected && styles.calTimeSlotTimeActive,
-                          ]}
-                        >
-                          {slot.time}
-                        </Text>
-                        <Text
-                          style={[
-                            styles.calTimeSlotLabel,
-                            isSlotSelected && styles.calTimeSlotLabelActive,
-                          ]}
-                        >
-                          {slot.label}
-                        </Text>
-                      </Pressable>
-                    );
-                  })}
-                </View>
-
-                {/* Selected Slot Preview Callout */}
-                <View style={styles.calPreviewBox}>
-                  <View style={styles.calPreviewIconCircle}>
-                    <Text style={{ fontSize: 16 }}>⚡</Text>
-                  </View>
-                  <View style={{ flex: 1 }}>
-                    <Text style={styles.calPreviewTitle}>
-                      {MONTH_NAMES[calMonthIndex].substring(0, 3)} {selectedCalDay}, {calYear} at {selectedTimeSlot}
-                    </Text>
-                    <Text style={styles.calPreviewSub}>
-                      Peak audience active window • Streak protection preserved
-                    </Text>
-                  </View>
-                </View>
-              </ScrollView>
-
-              {/* Schedule Confirmation CTA */}
-              <Pressable
-                style={styles.modalPrimaryActionBtn}
-                onPress={handleConfirmCalendarSchedule}
-              >
-                <LinearGradient
-                  colors={['#7C3AED', '#582CDB']}
-                  start={{ x: 0, y: 0 }}
-                  end={{ x: 1, y: 0 }}
-                  style={styles.modalPrimaryGradient}
-                >
-                  <Text style={styles.modalPrimaryActionText}>
-                    Schedule Post ({MONTH_NAMES[calMonthIndex].substring(0, 3)} {selectedCalDay}, {selectedTimeSlot}) ✓
-                  </Text>
-                </LinearGradient>
-              </Pressable>
+                </ScrollView>
+              )}
             </Animated.View>
           </View>
         </Modal>
@@ -3616,6 +3746,114 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '700',
     color: '#94A3B8',
+  },
+
+  // SMART SCHEDULE SLOTS STYLES
+  smartScheduleGroup: {
+    marginBottom: 14,
+  },
+  smartScheduleGroupHeader: {
+    fontSize: 10.5,
+    fontWeight: '800',
+    color: '#8E85A2',
+    letterSpacing: 0.5,
+    marginBottom: 8,
+    textTransform: 'uppercase',
+  },
+  smartSlotRow: {
+    gap: 8,
+  },
+  smartSlotCard: {
+    backgroundColor: '#FAF8FC',
+    borderRadius: 14,
+    borderWidth: 1.2,
+    borderColor: '#EFEBF8',
+    paddingVertical: 11,
+    paddingHorizontal: 14,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  smartSlotCardActive: {
+    borderColor: '#582CDB',
+    backgroundColor: '#FAF5FF',
+  },
+  smartSlotCardLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    flexWrap: 'wrap',
+    flex: 1,
+  },
+  smartSlotTimeText: {
+    fontSize: 13.5,
+    fontWeight: '800',
+    color: '#171420',
+  },
+  smartSlotTimeTextActive: {
+    color: '#582CDB',
+  },
+  smartSlotRecBadge: {
+    backgroundColor: '#FEF3C7',
+    paddingVertical: 2,
+    paddingHorizontal: 7,
+    borderRadius: 6,
+    borderWidth: 0.5,
+    borderColor: '#FDE68A',
+  },
+  smartSlotRecBadgeText: {
+    fontSize: 9.5,
+    fontWeight: '800',
+    color: '#B45309',
+  },
+  smartSlotRadioCircle: {
+    width: 18,
+    height: 18,
+    borderRadius: 9,
+    borderWidth: 1.5,
+    borderColor: '#CBD5E1',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginLeft: 8,
+  },
+  smartSlotRadioCircleActive: {
+    borderColor: '#582CDB',
+    backgroundColor: '#582CDB',
+  },
+  chooseCustomDateBtn: {
+    marginTop: 4,
+    marginBottom: 10,
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1.2,
+    borderColor: '#E2E8F0',
+    borderRadius: 14,
+    paddingVertical: 12,
+    paddingHorizontal: 14,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+  },
+  chooseCustomDateBtnText: {
+    fontSize: 12.5,
+    fontWeight: '800',
+    color: '#582CDB',
+  },
+  backToSmartSlotsBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    marginBottom: 12,
+    alignSelf: 'flex-start',
+    paddingVertical: 5,
+    paddingHorizontal: 10,
+    borderRadius: 8,
+    backgroundColor: '#EDE9FE',
+  },
+  backToSmartSlotsBtnText: {
+    fontSize: 11.5,
+    fontWeight: '700',
+    color: '#6D28D9',
   },
 
   // CALENDAR MODAL STYLES
