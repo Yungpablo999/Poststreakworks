@@ -687,7 +687,13 @@ export const ChallengeDetailScreen: React.FC<ChallengeDetailScreenProps> = ({
               </View>
               <View style={styles.reputationTile}>
                 <Text style={styles.reputationTileLabel}>Status</Text>
-                <Text style={styles.reputationTileValueGold}>Ready</Text>
+                <Text
+                  style={styles.reputationTileValueGold}
+                  numberOfLines={1}
+                  adjustsFontSizeToFit={true}
+                >
+                  On Track
+                </Text>
               </View>
             </View>
           </View>
@@ -696,7 +702,7 @@ export const ChallengeDetailScreen: React.FC<ChallengeDetailScreenProps> = ({
           <View style={styles.reputationCalloutRow}>
             <Text style={styles.reputationCalloutEmoji}>🛡️</Text>
             <Text style={styles.reputationCalloutText}>
-              Brands are more likely to trust creators with consistent weekly activity.
+              Consistent weekly activity helps brands identify reliable creators.
             </Text>
           </View>
 
@@ -1664,7 +1670,7 @@ const styles = StyleSheet.create({
     letterSpacing: -0.5,
   },
   reputationTileValueGold: {
-    fontSize: 20,
+    fontSize: 19,
     fontWeight: '700',
     color: '#B45309',
     letterSpacing: -0.5,
