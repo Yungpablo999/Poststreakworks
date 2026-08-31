@@ -1610,6 +1610,17 @@ export const MatchScreen: React.FC<MatchScreenProps> = ({
           visible={showDetailModal}
           onClose={() => setShowDetailModal(false)}
           creator={selectedCreatorForDetail as any}
+          isConnected={Boolean(
+            selectedCreatorForDetail &&
+              connectedCreators.some(
+                (c) => c.id === selectedCreatorForDetail.id || c.name === selectedCreatorForDetail.name
+              )
+          )}
+          onMessage={(creator) => {
+            setShowDetailModal(false);
+            setSelectedRecipient(creator.name);
+            setShowMessageModal(true);
+          }}
           onConnect={(creator) => {
             setShowDetailModal(false);
             handleOpenPitchModal(creator as any);

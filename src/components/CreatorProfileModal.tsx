@@ -129,16 +129,20 @@ interface CreatorProfileModalProps {
   visible: boolean;
   onClose: () => void;
   creator?: CreatorProfileData;
+  isConnected?: boolean;
   onConnect?: (creator: CreatorProfileData) => void;
   onBuildCollabPlan?: (creator: CreatorProfileData) => void;
+  onMessage?: (creator: CreatorProfileData) => void;
 }
 
 export const CreatorProfileModal: React.FC<CreatorProfileModalProps> = ({
   visible,
   onClose,
   creator = DEFAULT_ELENA_PROFILE,
+  isConnected = false,
   onConnect,
   onBuildCollabPlan,
+  onMessage,
 }) => {
   const [isSaved, setIsSaved] = useState(false);
   const [showCorrelationDetails, setShowCorrelationDetails] = useState(false);
@@ -183,6 +187,17 @@ export const CreatorProfileModal: React.FC<CreatorProfileModalProps> = ({
     }
   };
 
+  const handleMessage = () => {
+    if (Platform.OS !== 'web') {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    }
+    if (onMessage) {
+      onMessage(creator);
+    } else {
+      onClose();
+    }
+  };
+
   const handleCollabPlan = () => {
     if (Platform.OS !== 'web') {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
@@ -219,16 +234,24 @@ export const CreatorProfileModal: React.FC<CreatorProfileModalProps> = ({
           </Pressable>
 
           <View style={styles.detailHeaderTitleBox}>
-            <Text style={styles.detailHeaderTitle}>Creator Profile</Text>
+            <Text style={styles.detailHeaderTitle}>
+              {isConnected ? 'Connected Partner' : 'Creator Profile'}
+            </Text>
           </View>
 
-          <Pressable
-            style={({ pressed }) => [styles.detailSaveTopBtn, pressed && styles.btnPressed]}
-            onPress={handleToggleSave}
-            hitSlop={8}
-          >
-            <Text style={{ fontSize: 18 }}>{isSaved ? '⭐' : '☆'}</Text>
-          </Pressable>
+          {isConnected ? (
+            <View style={styles.connectedBadgeHeader}>
+              <Text style={styles.connectedBadgeHeaderText}>✓ Connected</Text>
+            </View>
+          ) : (
+            <Pressable
+              style={({ pressed }) => [styles.detailSaveTopBtn, pressed && styles.btnPressed]}
+              onPress={handleToggleSave}
+              hitSlop={8}
+            >
+              <Text style={{ fontSize: 18 }}>{isSaved ? '⭐' : '☆'}</Text>
+            </Pressable>
+          )}
         </View>
 
         <ScrollView
@@ -265,9 +288,12 @@ export const CreatorProfileModal: React.FC<CreatorProfileModalProps> = ({
                     style={[
                       styles.greenStatusDot,
                       { transform: [{ scale: pulseAnim }] },
+                      isConnected && { backgroundColor: '#10B981' },
                     ]}
                   />
-                  <Text style={styles.detailAvailabilityText}>{creator.availability}</Text>
+                  <Text style={[styles.detailAvailabilityText, isConnected && { color: '#059669', fontWeight: '800' }]}>
+                    {isConnected ? 'Connected Partner' : creator.availability}
+                  </Text>
                 </View>
               </View>
 
@@ -414,50 +440,81 @@ export const CreatorProfileModal: React.FC<CreatorProfileModalProps> = ({
           {/* 5. COMPACT READINESS STATUS ROW */}
           <View style={styles.readinessCompactCard}>
             <View style={styles.readinessCompactHeader}>
-              <View style={styles.readinessGreenDot} />
-              <Text style={styles.readinessCompactTitle}>Ready to collaborate</Text>
+              <View style={[styles.readinessGreenDot, isConnected && { backgroundColor: '#10B981' }]} />
+              <Text style={styles.readinessCompactTitle}>
+                {isConnected ? 'Direct Messaging Active' : 'Ready to collaborate'}
+              </Text>
             </View>
             <Text style={styles.readinessCompactSub}>
-              Verified · Active streak · High response likelihood
+              {isConnected
+                ? `You and ${creator.name.split(' ')[0]} are connected partners. Direct messaging and collab planning are unlocked.`
+                : 'Verified · Active streak · High response likelihood'}
             </Text>
           </View>
         </ScrollView>
 
         {/* 6. STICKY BOTTOM ACTION BAR */}
         <View style={styles.detailBottomActionBar}>
-          <Pressable
-            style={({ pressed }) => [styles.detailConnectBtn, pressed && styles.btnPressed]}
-            onPress={handleConnect}
-          >
-            <LinearGradient
-              colors={['#784DF0', '#582CDB']}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 1 }}
-              style={styles.detailConnectGradient}
-            >
-              <Text style={styles.detailConnectBtnText}>Connect</Text>
-            </LinearGradient>
-          </Pressable>
+          {isConnected ? (
+            <View style={styles.connectedActionRow}>
+              <Pressable
+                style={({ pressed }) => [styles.detailMessageFullBtn, pressed && styles.btnPressed]}
+                onPress={handleMessage}
+              >
+                <LinearGradient
+                  colors={['#784DF0', '#582CDB']}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 1 }}
+                  style={styles.detailConnectGradient}
+                >
+                  <Text style={styles.detailConnectBtnText}>💬 Message {creator.name.split(' ')[0]}</Text>
+                </LinearGradient>
+              </Pressable>
 
-          <Pressable
-            style={({ pressed }) => [
-              styles.detailBookmarkBtn,
-              isSaved && styles.detailBookmarkBtnActive,
-              pressed && styles.btnPressed,
-            ]}
-            onPress={handleToggleSave}
-            hitSlop={8}
-          >
-            <Svg width={20} height={20} viewBox="0 0 24 24" fill={isSaved ? '#582CDB' : 'none'}>
-              <Path
-                d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"
-                stroke="#582CDB"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </Svg>
-          </Pressable>
+              <Pressable
+                style={({ pressed }) => [styles.detailCollabSecondaryBtn, pressed && styles.btnPressed]}
+                onPress={handleCollabPlan}
+              >
+                <Text style={styles.detailCollabSecondaryBtnText}>🚀 Pitch Plan</Text>
+              </Pressable>
+            </View>
+          ) : (
+            <>
+              <Pressable
+                style={({ pressed }) => [styles.detailConnectBtn, pressed && styles.btnPressed]}
+                onPress={handleConnect}
+              >
+                <LinearGradient
+                  colors={['#784DF0', '#582CDB']}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 1 }}
+                  style={styles.detailConnectGradient}
+                >
+                  <Text style={styles.detailConnectBtnText}>Connect</Text>
+                </LinearGradient>
+              </Pressable>
+
+              <Pressable
+                style={({ pressed }) => [
+                  styles.detailBookmarkBtn,
+                  isSaved && styles.detailBookmarkBtnActive,
+                  pressed && styles.btnPressed,
+                ]}
+                onPress={handleToggleSave}
+                hitSlop={8}
+              >
+                <Svg width={20} height={20} viewBox="0 0 24 24" fill={isSaved ? '#582CDB' : 'none'}>
+                  <Path
+                    d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"
+                    stroke="#582CDB"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </Svg>
+              </Pressable>
+            </>
+          )}
         </View>
       </SafeAreaView>
     </Modal>
@@ -951,5 +1008,50 @@ const styles = StyleSheet.create({
   },
   detailBookmarkBtnActive: {
     backgroundColor: '#EDE8FC',
+  },
+  connectedBadgeHeader: {
+    backgroundColor: '#ECFDF5',
+    paddingVertical: 4,
+    paddingHorizontal: 9,
+    borderRadius: 100,
+    borderWidth: 1,
+    borderColor: '#A7F3D0',
+  },
+  connectedBadgeHeaderText: {
+    fontSize: 11,
+    fontWeight: '800',
+    color: '#059669',
+  },
+  connectedActionRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    width: '100%',
+  },
+  detailMessageFullBtn: {
+    flex: 1,
+    height: 48,
+    borderRadius: 16,
+    overflow: 'hidden',
+    shadowColor: '#582CDB',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 10,
+    elevation: 4,
+  },
+  detailCollabSecondaryBtn: {
+    paddingHorizontal: 14,
+    height: 48,
+    borderRadius: 16,
+    backgroundColor: '#FAF8FF',
+    borderWidth: 1.2,
+    borderColor: '#DDD6FE',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  detailCollabSecondaryBtnText: {
+    fontSize: 13,
+    fontWeight: '800',
+    color: '#582CDB',
   },
 });
