@@ -137,8 +137,8 @@ const BODY_PRESETS = [
   },
   {
     id: 'energetic',
-    title: 'High Energy (25-30s)',
-    tag: '🔥 Inspiring',
+    title: 'More Punchy (25s)',
+    tag: '⚡ Punchy',
     text: 'Here is the secret top creators do not tell you: massive content plans are a trap! Share the real lesson you figured out yesterday. Speed beats perfection every single time!',
   },
   {
@@ -821,33 +821,39 @@ ${selectedCtaText}`;
                 />
               </View>
 
-              {/* Body Refinement Chips */}
-              <View style={styles.bodyChipsRow}>
+              {/* Intentional AI Quick Edits Toolbar */}
+              <View style={styles.bodyQuickActionsRow}>
                 {[
-                  { id: 'shorter', label: 'Make Shorter' },
-                  { id: 'personal', label: 'More Personal' },
-                  { id: 'energetic', label: 'More Energetic' },
+                  { id: 'shorter', icon: '✨', label: 'Make Shorter' },
+                  { id: 'personal', icon: '👤', label: 'Make Personal' },
+                  { id: 'energetic', icon: '⚡', label: 'More Punchy' },
                 ].map((chip) => {
                   const isActive = selectedBodyPresetId === chip.id;
                   return (
                     <Pressable
                       key={chip.id}
                       onPress={() => {
+                        if (Platform.OS !== 'web') {
+                          Haptics.selectionAsync();
+                        }
                         const found = BODY_PRESETS.find((p) => p.id === chip.id);
                         if (found) {
                           handleApplyBodyFromModal(found);
                         }
                       }}
-                      style={[
-                        styles.bodyFilterChip,
-                        isActive && styles.bodyFilterChipActive,
+                      style={({ pressed }) => [
+                        styles.bodyQuickActionChip,
+                        isActive && styles.bodyQuickActionChipActive,
+                        pressed && styles.btnPressed,
                       ]}
                     >
+                      <Text style={styles.bodyQuickActionIcon}>{chip.icon}</Text>
                       <Text
                         style={[
-                          styles.bodyFilterChipText,
-                          isActive && styles.bodyFilterChipTextActive,
+                          styles.bodyQuickActionText,
+                          isActive && styles.bodyQuickActionTextActive,
                         ]}
+                        numberOfLines={1}
                       >
                         {chip.label}
                       </Text>
@@ -1895,33 +1901,39 @@ const styles = StyleSheet.create({
     padding: 0,
     margin: 0,
   },
-  bodyChipsRow: {
+  bodyQuickActionsRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    flexWrap: 'wrap',
     gap: 6,
-    rowGap: 6,
+    marginTop: 2,
   },
-  bodyFilterChip: {
-    backgroundColor: '#FFFFFF',
+  bodyQuickActionChip: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 4,
+    backgroundColor: '#FAF5FF',
     borderWidth: 1,
-    borderColor: '#DDD6FE',
-    paddingVertical: 4,
-    paddingHorizontal: 9,
-    borderRadius: 100,
-    flexShrink: 0,
+    borderColor: '#EDE9FE',
+    paddingVertical: 8,
+    paddingHorizontal: 6,
+    borderRadius: 10,
   },
-  bodyFilterChipActive: {
-    backgroundColor: '#EDE9FE',
+  bodyQuickActionChipActive: {
+    backgroundColor: '#582CDB',
     borderColor: '#582CDB',
   },
-  bodyFilterChipText: {
+  bodyQuickActionIcon: {
     fontSize: 11,
-    fontWeight: '700',
+  },
+  bodyQuickActionText: {
+    fontSize: 10.5,
+    fontWeight: '800',
     color: '#6D28D9',
   },
-  bodyFilterChipTextActive: {
-    color: '#582CDB',
+  bodyQuickActionTextActive: {
+    color: '#FFFFFF',
   },
 
   // Jarvis Creative Assistant Banner
