@@ -348,53 +348,90 @@ export const QuestsScreen: React.FC<QuestsScreenProps> = ({
 
           <View style={styles.starterQuestsList}>
             {/* Quest 1 */}
-            <View style={styles.starterQuestCard}>
+            <Pressable
+              style={({ pressed }) => [
+                styles.starterQuestCard,
+                pressed && { opacity: 0.9, transform: [{ scale: 0.99 }] },
+              ]}
+              onPress={() => handleStartStarterQuest('q1', 'Create your next post idea', 60, 'create')}
+            >
               <View style={styles.starterQuestLeft}>
                 <View style={styles.starterQuestBadgeRow}>
                   <Text style={styles.xpPillGold}>+60 XP</Text>
+                  <Text style={styles.typePillDot}>·</Text>
                   <Text style={styles.typePill}>Daily</Text>
                 </View>
-                <Text style={styles.starterQuestTitle}>Create your next content idea</Text>
+                <Text style={styles.starterQuestTitle}>Create your next post idea</Text>
               </View>
               <Pressable
                 style={({ pressed }) => [styles.starterQuestActionBtn, pressed && styles.btnPressed]}
-                onPress={() => handleStartStarterQuest('q1', 'Create your next content idea', 60, 'create')}
+                onPress={(e) => {
+                  e.stopPropagation?.();
+                  handleStartStarterQuest('q1', 'Create your next post idea', 60, 'create');
+                }}
                 hitSlop={8}
               >
                 <Text style={styles.starterQuestActionText}>Start</Text>
               </Pressable>
-            </View>
+            </Pressable>
 
             {/* Quest 2 */}
-            <View style={styles.starterQuestCard}>
+            <Pressable
+              style={({ pressed }) => [
+                styles.starterQuestCard,
+                pressed && { opacity: 0.9, transform: [{ scale: 0.99 }] },
+              ]}
+              onPress={() => handleStartStarterQuest('q2', 'Connect with one creator', 90, 'match')}
+            >
               <View style={styles.starterQuestLeft}>
                 <View style={styles.starterQuestBadgeRow}>
                   <Text style={styles.xpPillGold}>+90 XP</Text>
+                  <Text style={styles.typePillDot}>·</Text>
                   <Text style={styles.typePill}>Recommended</Text>
                 </View>
                 <Text style={styles.starterQuestTitle}>Connect with one creator</Text>
               </View>
               <Pressable
                 style={({ pressed }) => [styles.starterQuestActionBtn, pressed && styles.btnPressed]}
-                onPress={() => handleStartStarterQuest('q2', 'Connect with one creator', 90, 'match')}
+                onPress={(e) => {
+                  e.stopPropagation?.();
+                  handleStartStarterQuest('q2', 'Connect with one creator', 90, 'match');
+                }}
                 hitSlop={8}
               >
                 <Text style={styles.starterQuestActionText}>Find Match</Text>
               </Pressable>
-            </View>
+            </Pressable>
 
             {/* Quest 3 */}
-            <View style={styles.starterQuestCard}>
+            <Pressable
+              style={({ pressed }) => [
+                styles.starterQuestCard,
+                pressed && { opacity: 0.9, transform: [{ scale: 0.99 }] },
+              ]}
+              onPress={() => {
+                if (Platform.OS !== 'web') {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                }
+                if (onOpenSchedule) {
+                  onOpenSchedule();
+                } else if (onNavigateTab) {
+                  onNavigateTab('schedule' as TabType);
+                }
+              }}
+            >
               <View style={styles.starterQuestLeft}>
                 <View style={styles.starterQuestBadgeRow}>
                   <Text style={styles.xpPillGold}>+50 XP</Text>
-                  <Text style={styles.typePill}>Every</Text>
+                  <Text style={styles.typePillDot}>·</Text>
+                  <Text style={styles.typePill}>Weekly</Text>
                 </View>
                 <Text style={styles.starterQuestTitle}>Schedule your next post</Text>
               </View>
               <Pressable
                 style={({ pressed }) => [styles.starterQuestActionBtn, pressed && styles.btnPressed]}
-                onPress={() => {
+                onPress={(e) => {
+                  e.stopPropagation?.();
                   if (Platform.OS !== 'web') {
                     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
                   }
@@ -408,7 +445,7 @@ export const QuestsScreen: React.FC<QuestsScreenProps> = ({
               >
                 <Text style={styles.starterQuestActionText}>Schedule</Text>
               </Pressable>
-            </View>
+            </Pressable>
           </View>
 
           {/* 4. COMMUNITY CHALLENGE HERO CARD (ROYAL PURPLE GRADIENT) */}
@@ -1197,17 +1234,23 @@ const styles = StyleSheet.create({
   },
   starterQuestLeft: {
     flex: 1,
+    paddingRight: 10,
   },
   starterQuestBadgeRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
+    gap: 5,
     marginBottom: 4,
   },
   xpPillGold: {
     fontSize: 11,
-    fontWeight: '700',
+    fontWeight: '800',
     color: '#D97706',
+  },
+  typePillDot: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: '#A39CB5',
   },
   typePill: {
     fontSize: 11,
