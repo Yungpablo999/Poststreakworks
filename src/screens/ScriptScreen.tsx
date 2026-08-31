@@ -824,9 +824,9 @@ ${selectedCtaText}`;
               {/* Intentional AI Quick Edits Toolbar */}
               <View style={styles.bodyQuickActionsRow}>
                 {[
-                  { id: 'shorter', icon: '✨', label: 'Make Shorter' },
-                  { id: 'personal', icon: '👤', label: 'Make Personal' },
-                  { id: 'energetic', icon: '⚡', label: 'More Punchy' },
+                  { id: 'shorter', icon: '✨', label: 'Shorter' },
+                  { id: 'personal', icon: '👤', label: 'Personal' },
+                  { id: 'energetic', icon: '⚡', label: 'Punchy' },
                 ].map((chip) => {
                   const isActive = selectedBodyPresetId === chip.id;
                   return (
@@ -1917,7 +1917,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#EDE9FE',
     paddingVertical: 8,
-    paddingHorizontal: 6,
+    paddingHorizontal: 8,
     borderRadius: 10,
   },
   bodyQuickActionChipActive: {
@@ -1928,7 +1928,7 @@ const styles = StyleSheet.create({
     fontSize: 11,
   },
   bodyQuickActionText: {
-    fontSize: 10.5,
+    fontSize: 11,
     fontWeight: '800',
     color: '#6D28D9',
   },
