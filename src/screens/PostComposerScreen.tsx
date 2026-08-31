@@ -1370,10 +1370,10 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
                 style={({ pressed }) => [styles.tagActionCustomBtn, pressed && styles.btnPressed]}
                 onPress={() => setShowAddTagInput(!showAddTagInput)}
               >
-                <Svg width={13} height={13} viewBox="0 0 24 24" fill="none">
+                <Svg width={12} height={12} viewBox="0 0 24 24" fill="none">
                   <Path d="M12 5v14M5 12h14" stroke="#582CDB" strokeWidth="2.4" strokeLinecap="round" />
                 </Svg>
-                <Text style={styles.tagActionCustomBtnText}>Add Custom Tag</Text>
+                <Text style={styles.tagActionCustomBtnText} numberOfLines={1}>Add Custom Tag</Text>
               </Pressable>
 
               {/* Stronger Primary Purple Filled Generate Tags Button */}
@@ -1387,8 +1387,8 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
                   end={{ x: 1, y: 1 }}
                   style={styles.tagActionGenerateGradient}
                 >
-                  <Text style={{ fontSize: 13 }}>✨</Text>
-                  <Text style={styles.tagActionGenerateBtnText}>Generate Tags</Text>
+                  <Text style={{ fontSize: 12 }}>✨</Text>
+                  <Text style={styles.tagActionGenerateBtnText} numberOfLines={1}>Generate Tags</Text>
                 </LinearGradient>
               </Pressable>
             </View>
@@ -3024,7 +3024,7 @@ const styles = StyleSheet.create({
   },
   tagActionsRow: {
     flexDirection: 'row',
-    gap: 10,
+    gap: 8,
   },
   tagActionCustomBtn: {
     flex: 1,
@@ -3036,10 +3036,11 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 6,
+    paddingHorizontal: 4,
+    gap: 4,
   },
   tagActionCustomBtnText: {
-    fontSize: 12,
+    fontSize: 11,
     fontWeight: '700',
     color: '#582CDB',
   },
@@ -3059,10 +3060,11 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 6,
+    paddingHorizontal: 4,
+    gap: 4,
   },
   tagActionGenerateBtnText: {
-    fontSize: 12,
+    fontSize: 11,
     fontWeight: '800',
     color: '#FFFFFF',
   },
