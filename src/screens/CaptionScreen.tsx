@@ -811,7 +811,7 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     paddingHorizontal: 20,
-    paddingTop: 8,
+    paddingTop: 2,
     paddingBottom: 135,
   },
   btnPressed: {
@@ -897,8 +897,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
-    marginBottom: 8,
-    marginTop: 4,
+    marginBottom: 6,
+    marginTop: 0,
   },
   captionWriterPill: {
     backgroundColor: '#582CDB',
