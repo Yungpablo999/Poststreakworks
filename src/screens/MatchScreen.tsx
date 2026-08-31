@@ -1261,8 +1261,8 @@ export const MatchScreen: React.FC<MatchScreenProps> = ({
                             <Text style={styles.streakBadgeMiniText}>🔥 {creator.streak}d</Text>
                           </View>
                         </View>
-                        <Text style={styles.trackedMetaText} numberOfLines={1}>
-                          {creator.role} • {creator.followers}
+                        <Text style={styles.trackedMetaText} numberOfLines={1} adjustsFontSizeToFit={true}>
+                          {creator.role} · {creator.followers}
                         </Text>
                       </View>
                       <Pressable
@@ -1346,22 +1346,40 @@ export const MatchScreen: React.FC<MatchScreenProps> = ({
           {activeSection === 'connected' && (
             <View style={styles.tabContentSection}>
               {connectedCreators.map((creator) => (
-                <View key={creator.id} style={styles.matchItemCard}>
+                <Pressable
+                  key={creator.id}
+                  style={({ pressed }) => [
+                    styles.matchItemCard,
+                    pressed && { opacity: 0.88, transform: [{ scale: 0.99 }] },
+                  ]}
+                  onPress={() => {
+                    handleOpenInfo(creator);
+                  }}
+                >
                   <Image source={creator.coverImage} style={styles.matchAvatarImg} resizeMode="cover" />
                   <View style={styles.matchInfoCol}>
-                    <Text style={styles.matchNameText}>{creator.name}</Text>
-                    <Text style={styles.matchMetaText}>{creator.role} • {creator.followers}</Text>
+                    <Text style={styles.matchNameText} numberOfLines={1}>
+                      {creator.name}
+                    </Text>
+                    <Text style={styles.matchMetaText} numberOfLines={1} adjustsFontSizeToFit={true}>
+                      {creator.role} · {creator.followers}
+                    </Text>
                   </View>
                   <Pressable
-                    style={styles.messageBtn}
-                    onPress={() => {
+                    style={({ pressed }) => [styles.messageBtn, pressed && { opacity: 0.7 }]}
+                    onPress={(e) => {
+                      e.stopPropagation?.();
+                      if (Platform.OS !== 'web') {
+                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                      }
                       setSelectedRecipient(creator.name);
                       setShowMessageModal(true);
                     }}
+                    hitSlop={8}
                   >
                     <Text style={styles.messageBtnText}>Message</Text>
                   </Pressable>
-                </View>
+                </Pressable>
               ))}
             </View>
           )}
@@ -2759,33 +2777,38 @@ const styles = StyleSheet.create({
     width: 46,
     height: 46,
     borderRadius: 23,
-    marginRight: 12,
+    marginRight: 10,
+    flexShrink: 0,
   },
   matchInfoCol: {
     flex: 1,
+    minWidth: 0,
+    marginRight: 10,
+    justifyContent: 'center',
   },
   matchNameText: {
-    fontSize: 14.5,
+    fontSize: sFont(14.5),
     fontWeight: '800',
     color: '#171420',
     marginBottom: 2,
   },
   matchMetaText: {
-    fontSize: 12,
+    fontSize: sFont(11.5),
     color: '#7F7894',
     fontWeight: '500',
   },
   messageBtn: {
     backgroundColor: '#FAF8FF',
-    borderWidth: 1,
+    borderWidth: 1.2,
     borderColor: '#DDD6FE',
-    borderRadius: 10,
-    paddingVertical: 6,
-    paddingHorizontal: 14,
+    borderRadius: 100,
+    paddingVertical: 6.5,
+    paddingHorizontal: 13,
+    flexShrink: 0,
   },
   messageBtnText: {
-    fontSize: 12,
-    fontWeight: '700',
+    fontSize: sFont(11.5),
+    fontWeight: '800',
     color: '#582CDB',
   },
   connectSmallBtn: {
