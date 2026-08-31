@@ -1091,10 +1091,12 @@ export const MatchScreen: React.FC<MatchScreenProps> = ({
                       style={styles.collabGhostIcon}
                       resizeMode="contain"
                     />
-                    <Text style={styles.collabHeaderTitle}>JARVIS SUGGESTED COLLAB</Text>
+                    <Text style={styles.collabHeaderTitle} numberOfLines={1} adjustsFontSizeToFit={true}>
+                      JARVIS SUGGESTED COLLAB
+                    </Text>
                   </View>
                   <View style={styles.potencyBadge}>
-                    <Text style={styles.potencyBadgeText}>📈 High potential</Text>
+                    <Text style={styles.potencyBadgeText}>📈 High Potential</Text>
                   </View>
                 </View>
 
@@ -2227,30 +2229,36 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: 8,
+    gap: 8,
   },
   collabHeaderLeft: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
+    gap: 5,
+    flex: 1,
+    flexShrink: 1,
   },
   collabGhostIcon: {
-    width: 15,
-    height: 15,
+    width: 14,
+    height: 14,
+    flexShrink: 0,
   },
   collabHeaderTitle: {
-    fontSize: 10.5,
+    fontSize: sFont(9.5),
     fontWeight: '800',
     color: '#7F7894',
-    letterSpacing: 0.6,
+    letterSpacing: 0.4,
+    flexShrink: 1,
   },
   potencyBadge: {
     backgroundColor: '#F3EEFB',
-    paddingVertical: 2.5,
-    paddingHorizontal: 7,
+    paddingVertical: 2,
+    paddingHorizontal: 6.5,
     borderRadius: 100,
+    flexShrink: 0,
   },
   potencyBadgeText: {
-    fontSize: 9.5,
+    fontSize: sFont(9),
     fontWeight: '700',
     color: '#7C3AED',
   },
