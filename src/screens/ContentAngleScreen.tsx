@@ -27,7 +27,7 @@ interface ContentAngleScreenProps {
   onOpenSchedule?: () => void;
   onOpenJarvisPro?: () => void;
   onNavigateTab?: (tab: TabType) => void;
-  onUseIdea?: (ideaTitle: string) => void;
+  onUseIdea?: (ideaTitle: string, format?: string) => void;
   onOpenMessages?: () => void;
   userProfile?: UserProfileData;
   onSaveProfile?: (updated: UserProfileData) => void;
@@ -163,6 +163,12 @@ export const ContentAngleScreen: React.FC<ContentAngleScreenProps> = ({
   const [selectedAngleFilters, setSelectedAngleFilters] = useState<string[]>(['faster']);
   const [selectedJarvisChips, setSelectedJarvisChips] = useState<string[]>([]);
 
+  // Three-dot Idea Action Menu & Filter States
+  const [selectedIdeaForMenu, setSelectedIdeaForMenu] = useState<IdeaCardItem | null>(null);
+  const [showIdeaMenuModal, setShowIdeaMenuModal] = useState(false);
+  const [hiddenIdeaIds, setHiddenIdeaIds] = useState<string[]>([]);
+  const [actionToast, setActionToast] = useState<string | null>(null);
+
   // Modals
   const [showNotificationModal, setShowNotificationModal] = useState(false);
   const [showProfileModal, setShowProfileModal] = useState(false);
@@ -205,6 +211,44 @@ export const ContentAngleScreen: React.FC<ContentAngleScreenProps> = ({
       friction: 8,
       useNativeDriver: true,
     }).start();
+  };
+
+  const triggerToast = (msg: string) => {
+    setActionToast(msg);
+    setTimeout(() => {
+      setActionToast((prev) => (prev === msg ? null : prev));
+    }, 3000);
+  };
+
+  const handleOpenIdeaMenu = (idea: IdeaCardItem) => {
+    if (Platform.OS !== 'web') {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    }
+    setSelectedIdeaForMenu(idea);
+    triggerModalAnim();
+    setShowIdeaMenuModal(true);
+  };
+
+  const handleMenuAction = (action: 'save' | 'hide' | 'not_relevant' | 'report') => {
+    if (!selectedIdeaForMenu) return;
+    if (Platform.OS !== 'web') {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    }
+    const currentIdea = selectedIdeaForMenu;
+    setShowIdeaMenuModal(false);
+
+    if (action === 'save') {
+      toggleBookmark(currentIdea.id);
+      triggerToast(currentIdea.bookmarked ? 'Idea removed from saved' : 'Idea saved to bookmarks');
+    } else if (action === 'hide') {
+      setHiddenIdeaIds((prev) => [...prev, currentIdea.id]);
+      triggerToast('Idea hidden from feed');
+    } else if (action === 'not_relevant') {
+      setHiddenIdeaIds((prev) => [...prev, currentIdea.id]);
+      triggerToast('Thanks! Jarvis will recommend fewer ideas like this');
+    } else if (action === 'report') {
+      triggerToast('Report received. Thank you for your feedback');
+    }
   };
 
   const handleTabPress = (tab: TabType) => {
@@ -305,12 +349,12 @@ export const ContentAngleScreen: React.FC<ContentAngleScreenProps> = ({
     }
   };
 
-  const handleSelectIdea = (ideaTitle: string) => {
+  const handleSelectIdea = (ideaTitle: string, format?: string) => {
     if (Platform.OS !== 'web') {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     }
     if (onUseIdea) {
-      onUseIdea(ideaTitle);
+      onUseIdea(ideaTitle, format);
     }
   };
 
@@ -346,7 +390,9 @@ export const ContentAngleScreen: React.FC<ContentAngleScreenProps> = ({
   };
 
   const unreadNotifCount = notificationsList.filter((n) => n.unread).length;
-  const displayedIdeas = showAllIdeas ? allIdeas : allIdeas.slice(0, 2);
+  const displayedIdeas = allIdeas
+    .filter((item) => !hiddenIdeaIds.includes(item.id))
+    .slice(0, showAllIdeas ? allIdeas.length : 2);
 
   return (
     <SafeAreaView style={[styles.safeArea, isDark && { backgroundColor: '#0C0A12' }]}>
@@ -505,7 +551,7 @@ export const ContentAngleScreen: React.FC<ContentAngleScreenProps> = ({
             <View style={styles.heroActionRow}>
               <Pressable
                 style={({ pressed }) => [styles.useIdeaMainBtn, pressed && styles.btnPressed]}
-                onPress={() => handleSelectIdea('One thing I wish I knew before I started creating')}
+                onPress={() => handleSelectIdea('One thing I wish I knew before I started creating', 'Short Reel')}
               >
                 <LinearGradient
                   colors={['#7C3AED', '#582CDB']}
@@ -583,12 +629,19 @@ export const ContentAngleScreen: React.FC<ContentAngleScreenProps> = ({
             })}
           </ScrollView>
 
+          {/* Action Toast Notice */}
+          {actionToast && (
+            <View style={styles.actionToastBanner}>
+              <Text style={styles.actionToastText}>{actionToast}</Text>
+            </View>
+          )}
+
           {/* More Idea Cards (Clean & Compact) */}
           {displayedIdeas.map((item) => (
             <View key={item.id} style={styles.moreIdeaCard}>
               <View style={styles.moreIdeaCardHeader}>
                 <Text style={styles.moreIdeaCardTitle}>&ldquo;{item.title}&rdquo;</Text>
-                <Pressable hitSlop={8}>
+                <Pressable hitSlop={8} onPress={() => handleOpenIdeaMenu(item)}>
                   <Text style={styles.moreIdeaDots}>•••</Text>
                 </Pressable>
               </View>
@@ -601,7 +654,7 @@ export const ContentAngleScreen: React.FC<ContentAngleScreenProps> = ({
               <View style={styles.moreIdeaActionRow}>
                 <Pressable
                   style={({ pressed }) => [styles.moreIdeaUseBtn, pressed && styles.btnPressed]}
-                  onPress={() => handleSelectIdea(item.title)}
+                  onPress={() => handleSelectIdea(item.title, item.format)}
                 >
                   <Text style={styles.moreIdeaUseBtnText}>Use Idea</Text>
                 </Pressable>
@@ -845,6 +898,111 @@ export const ContentAngleScreen: React.FC<ContentAngleScreenProps> = ({
               >
                 <Text style={styles.modalFullBtnText}>Close Chat</Text>
               </Pressable>
+            </Animated.View>
+          </View>
+        </Modal>
+
+        {/* IDEA OPTIONS THREE-DOT MENU MODAL */}
+        <Modal
+          visible={showIdeaMenuModal}
+          transparent={true}
+          animationType="fade"
+          onRequestClose={() => setShowIdeaMenuModal(false)}
+        >
+          <View style={styles.modalOverlay}>
+            <Animated.View style={[styles.ideaMenuCard, { transform: [{ scale: modalPopScale }] }]}>
+              <View style={styles.ideaMenuHeaderRow}>
+                <View style={{ flex: 1, paddingRight: 10 }}>
+                  <Text style={styles.ideaMenuSubtitle}>IDEA OPTIONS</Text>
+                  <Text style={styles.ideaMenuTitle} numberOfLines={1}>
+                    &ldquo;{selectedIdeaForMenu?.title}&rdquo;
+                  </Text>
+                </View>
+                <Pressable
+                  onPress={() => setShowIdeaMenuModal(false)}
+                  style={styles.modalCloseCircle}
+                  hitSlop={8}
+                >
+                  <Text style={styles.modalCloseCross}>✕</Text>
+                </Pressable>
+              </View>
+
+              <View style={styles.ideaMenuList}>
+                {/* 1. Save / Unsave */}
+                <Pressable
+                  style={({ pressed }) => [styles.ideaMenuItem, pressed && styles.btnPressed]}
+                  onPress={() => handleMenuAction('save')}
+                >
+                  <View style={styles.ideaMenuIconCircle}>
+                    <Svg width={16} height={16} viewBox="0 0 24 24" fill={selectedIdeaForMenu?.bookmarked ? '#582CDB' : 'none'}>
+                      <Path
+                        d="M19 21L12 16L5 21V5C5 3.89543 5.89543 3 7 3H17C18.1046 3 19 3.89543 19 5V21Z"
+                        stroke="#582CDB"
+                        strokeWidth="2.2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                    </Svg>
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <Text style={styles.ideaMenuItemTitle}>
+                      {selectedIdeaForMenu?.bookmarked ? 'Remove from Saved' : 'Save idea'}
+                    </Text>
+                    <Text style={styles.ideaMenuItemSub}>
+                      {selectedIdeaForMenu?.bookmarked ? 'Remove bookmark from your vault' : 'Bookmark to your inspiration vault'}
+                    </Text>
+                  </View>
+                </Pressable>
+
+                {/* 2. Hide idea */}
+                <Pressable
+                  style={({ pressed }) => [styles.ideaMenuItem, pressed && styles.btnPressed]}
+                  onPress={() => handleMenuAction('hide')}
+                >
+                  <View style={styles.ideaMenuIconCircle}>
+                    <Svg width={16} height={16} viewBox="0 0 24 24" fill="none">
+                      <Path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24M1 1l22 22" stroke="#64748B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                    </Svg>
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <Text style={styles.ideaMenuItemTitle}>Hide idea</Text>
+                    <Text style={styles.ideaMenuItemSub}>Hide from your current idea feed</Text>
+                  </View>
+                </Pressable>
+
+                {/* 3. Not relevant */}
+                <Pressable
+                  style={({ pressed }) => [styles.ideaMenuItem, pressed && styles.btnPressed]}
+                  onPress={() => handleMenuAction('not_relevant')}
+                >
+                  <View style={styles.ideaMenuIconCircle}>
+                    <Svg width={16} height={16} viewBox="0 0 24 24" fill="none">
+                      <Circle cx="12" cy="12" r="10" stroke="#64748B" strokeWidth="2" />
+                      <Path d="M4.93 4.93l14.14 14.14" stroke="#64748B" strokeWidth="2" strokeLinecap="round" />
+                    </Svg>
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <Text style={styles.ideaMenuItemTitle}>Not relevant</Text>
+                    <Text style={styles.ideaMenuItemSub}>Tune Jarvis to suggest fewer like this</Text>
+                  </View>
+                </Pressable>
+
+                {/* 4. Report */}
+                <Pressable
+                  style={({ pressed }) => [styles.ideaMenuItem, styles.ideaMenuItemLast, pressed && styles.btnPressed]}
+                  onPress={() => handleMenuAction('report')}
+                >
+                  <View style={[styles.ideaMenuIconCircle, { backgroundColor: '#FEE2E2' }]}>
+                    <Svg width={16} height={16} viewBox="0 0 24 24" fill="none">
+                      <Path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1zM4 22v-7" stroke="#DC2626" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                    </Svg>
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <Text style={[styles.ideaMenuItemTitle, { color: '#DC2626' }]}>Report</Text>
+                    <Text style={styles.ideaMenuItemSub}>Flag inappropriate or broken idea</Text>
+                  </View>
+                </Pressable>
+              </View>
             </Animated.View>
           </View>
         </Modal>
@@ -1676,5 +1834,92 @@ const styles = StyleSheet.create({
     fontSize: 12.5,
     color: '#171420',
     lineHeight: 18,
+  },
+
+  // Action Toast Notice
+  actionToastBanner: {
+    backgroundColor: '#EDE9FE',
+    borderWidth: 1,
+    borderColor: '#DDD6FE',
+    borderRadius: 12,
+    paddingVertical: 9,
+    paddingHorizontal: 14,
+    marginBottom: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  actionToastText: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#582CDB',
+    textAlign: 'center',
+  },
+
+  // Idea Options Three-Dot Menu
+  ideaMenuCard: {
+    width: '100%',
+    maxWidth: 400,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 22,
+    padding: 20,
+    shadowColor: '#582CDB',
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.15,
+    shadowRadius: 20,
+    elevation: 8,
+  },
+  ideaMenuHeaderRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingBottom: 14,
+    borderBottomWidth: 1,
+    borderBottomColor: '#F1F5F9',
+    marginBottom: 8,
+  },
+  ideaMenuSubtitle: {
+    fontSize: 10,
+    fontWeight: '800',
+    color: '#64748B',
+    letterSpacing: 0.6,
+    marginBottom: 2,
+  },
+  ideaMenuTitle: {
+    fontSize: 14,
+    fontWeight: '800',
+    color: '#171420',
+  },
+  ideaMenuList: {
+    paddingTop: 4,
+  },
+  ideaMenuItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: '#F8FAFC',
+  },
+  ideaMenuItemLast: {
+    borderBottomWidth: 0,
+    paddingBottom: 4,
+  },
+  ideaMenuIconCircle: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: '#EDE9FE',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  ideaMenuItemTitle: {
+    fontSize: 13.5,
+    fontWeight: '800',
+    color: '#171420',
+    marginBottom: 2,
+  },
+  ideaMenuItemSub: {
+    fontSize: 11,
+    color: '#64748B',
   },
 });

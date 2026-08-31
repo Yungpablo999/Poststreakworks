@@ -142,7 +142,29 @@ export default function App() {
   const [matchInitialFilter, setMatchInitialFilter] = useState<'all' | 'priority' | 'niche' | 'streak' | 'nearby' | 'ai'>('priority');
   const [selectedIdeaTitle, setSelectedIdeaTitle] = useState('One thing I wish I knew before I started creating');
   const [composerIdeaTitle, setComposerIdeaTitle] = useState('One thing I wish I knew before I started creating');
+  const [composerIdeaFormat, setComposerIdeaFormat] = useState<'short_video' | 'carousel' | 'image' | 'long_video' | 'text' | undefined>(undefined);
   const [activeMessageThreadId, setActiveMessageThreadId] = useState<string | undefined>(undefined);
+
+  const handleUseIdea = (title: string, format?: string) => {
+    if (title) setComposerIdeaTitle(title);
+    if (format) {
+      const f = format.toLowerCase();
+      if (f.includes('carousel')) {
+        setComposerIdeaFormat('carousel');
+      } else if (f.includes('image') || f.includes('visual') || f.includes('photo')) {
+        setComposerIdeaFormat('image');
+      } else if (f.includes('long') || f.includes('youtube') || f.includes('tutorial')) {
+        setComposerIdeaFormat('long_video');
+      } else if (f.includes('text') || f.includes('thread')) {
+        setComposerIdeaFormat('text');
+      } else {
+        setComposerIdeaFormat('short_video');
+      }
+    } else {
+      setComposerIdeaFormat(undefined);
+    }
+    navigateTo('composer');
+  };
   const [userProfile, setUserProfile] = useState<UserProfileData>({
     name: 'Pablo',
     handle: '@pablocreates',
@@ -1034,6 +1056,7 @@ export default function App() {
           ) : (
             <PostComposerScreen
               ideaTitle={composerIdeaTitle}
+              initialFormat={composerIdeaFormat}
               onBack={() => navigateTo(previousScreen ? previousScreen : 'create')}
               onLogout={handleLogout}
               onOpenSchedule={() => navigateTo('schedule')}
@@ -1072,10 +1095,7 @@ export default function App() {
                 navigateTo('messages');
               }}
               onOpenJarvisPro={() => navigateTo('jarvis-pro')}
-              onUseIdea={(title) => {
-                if (title) setComposerIdeaTitle(title);
-                navigateTo('composer');
-              }}
+              onUseIdea={handleUseIdea}
               onSwitchToFree={() => {
                 if (userProfile) {
                   setUserProfile({ ...userProfile, tier: 'free' });
@@ -1107,10 +1127,7 @@ export default function App() {
                   navigateTo('messages');
                 }}
               onOpenJarvisPro={() => navigateTo('jarvis-pro')}
-              onUseIdea={(title) => {
-                if (title) setComposerIdeaTitle(title);
-                navigateTo('composer');
-              }}
+              onUseIdea={handleUseIdea}
               onNavigateTab={(tab: TabType) => {
                 if (tab === 'home') {
                   navigateTo('dashboard');

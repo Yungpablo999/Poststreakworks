@@ -25,6 +25,7 @@ import { sFont, sPadding, isNarrowScreen } from '../utils/responsive';
 
 interface PostComposerScreenProps {
   ideaTitle?: string;
+  initialFormat?: ContentFormatType;
   initialPlatform?: string;
   onBack: () => void;
   onLogout?: () => void;
@@ -370,6 +371,7 @@ const PlatformIcon = ({ iconType, size = 38 }: { iconType: string; size?: number
 
 export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
   ideaTitle = 'One thing I wish I knew before I started creating',
+  initialFormat,
   initialPlatform = '',
   onBack,
   onLogout,
@@ -377,9 +379,9 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
   onOpenMessages,
   onOpenJarvisPro,
   onNavigateTab,
-
   userProfile,
-  onSaveProfile,}) => {
+  onSaveProfile,
+}) => {
   const isDark = false;
   const [activeTab, setActiveTab] = useState<TabType>('create');
   const [currentIdea, setCurrentIdea] = useState(ideaTitle);
@@ -388,7 +390,7 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
   );
 
   // Content Format State (Intelligent Content Type)
-  const [selectedFormat, setSelectedFormat] = useState<ContentFormatType>('short_video');
+  const [selectedFormat, setSelectedFormat] = useState<ContentFormatType>(initialFormat || 'short_video');
 
   // Media State
   const [hasMedia, setHasMedia] = useState(false);
@@ -451,6 +453,26 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
     caption: 1180,
     schedule: 1540,
   });
+
+  // Sync prop changes for frictionless idea adoption
+  useEffect(() => {
+    if (ideaTitle) {
+      setCurrentIdea(ideaTitle);
+      if (ideaTitle.toLowerCase().includes('habits')) {
+        setCaption('3 simple creator habits that helped me post 5x faster:\n1. Batch recording my talking points\n2. Reusing proven hooks\n3. Focusing on 1 key takeaway per post.\n\nWhich of these are you trying next?');
+        setTags(['#CreatorTips', '#Habits', '#Consistency']);
+      } else if (ideaTitle.toLowerCase().includes('planning')) {
+        setCaption('My simple 3-step content planning routine that saves me 4+ hours every week:\n1. Brainstorm 5 pain points\n2. Outline in bullet points\n3. Schedule for peak engagement windows.\n\nSave this for your next planning session!');
+        setTags(['#ContentPlanning', '#CreatorWorkflow', '#GetSaves']);
+      }
+    }
+  }, [ideaTitle]);
+
+  useEffect(() => {
+    if (initialFormat) {
+      setSelectedFormat(initialFormat);
+    }
+  }, [initialFormat]);
 
   useEffect(() => {
     const floatAnim = Animated.loop(
