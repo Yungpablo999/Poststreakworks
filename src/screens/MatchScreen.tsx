@@ -752,27 +752,27 @@ export const MatchScreen: React.FC<MatchScreenProps> = ({
               Swipe right to match, left to skip, or tap ⓘ for deep-dive match intelligence.
             </Text>
 
-            {/* LIVE TRACKING STATS BAR */}
+            {/* LIVE TRACKING STATS BAR (INFORMATION & QUICK DESTINATION JUMPS) */}
             <View style={styles.trackingStatsBar}>
-              <View style={styles.trackingStatItem}>
+              <Pressable style={styles.trackingStatItem} onPress={() => setActiveSection('deck')}>
                 <Text style={styles.trackingStatVal}>⭐ {matchesLeft}/5</Text>
                 <Text style={styles.trackingStatLbl} numberOfLines={1}>Matches</Text>
-              </View>
+              </Pressable>
               <View style={styles.trackingStatDivider} />
-              <View style={styles.trackingStatItem}>
+              <Pressable style={styles.trackingStatItem} onPress={() => setActiveSection('requests')}>
                 <Text style={styles.trackingStatVal}>📩 {incomingRequests.length}</Text>
                 <Text style={styles.trackingStatLbl} numberOfLines={1}>Requests</Text>
-              </View>
+              </Pressable>
               <View style={styles.trackingStatDivider} />
-              <View style={styles.trackingStatItem}>
+              <Pressable style={styles.trackingStatItem} onPress={() => setActiveSection('tracking')}>
                 <Text style={styles.trackingStatVal}>📡 {savedCreators.length}</Text>
                 <Text style={styles.trackingStatLbl} numberOfLines={1}>Tracked</Text>
-              </View>
+              </Pressable>
               <View style={styles.trackingStatDivider} />
-              <View style={styles.trackingStatItem}>
+              <Pressable style={styles.trackingStatItem} onPress={() => setActiveSection('connected')}>
                 <Text style={styles.trackingStatVal}>💜 {connectedCreators.length}</Text>
                 <Text style={styles.trackingStatLbl} numberOfLines={1}>Connected</Text>
-              </View>
+              </Pressable>
             </View>
           </View>
 
@@ -1839,24 +1839,25 @@ const styles = StyleSheet.create({
     paddingVertical: 2,
   },
   filterPill: {
-    paddingVertical: 6,
-    paddingHorizontal: 12,
+    paddingVertical: 5.5,
+    paddingHorizontal: 13,
     borderRadius: 100,
-    backgroundColor: 'rgba(255, 255, 255, 0.92)',
-    borderWidth: 1.2,
-    borderColor: 'rgba(235, 230, 248, 0.95)',
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1,
+    borderColor: '#E8E5EE',
   },
   filterPillActive: {
-    backgroundColor: '#582CDB',
-    borderColor: '#582CDB',
+    backgroundColor: '#F3EEFB',
+    borderColor: '#7C3AED',
+    borderWidth: 1.2,
   },
   filterPillText: {
     fontSize: 12,
     fontWeight: '600',
-    color: '#7F7894',
+    color: '#64748B',
   },
   filterPillTextActive: {
-    color: '#FFFFFF',
+    color: '#7C3AED',
     fontWeight: '800',
   },
 

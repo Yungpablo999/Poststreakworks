@@ -2257,25 +2257,26 @@ const styles = StyleSheet.create({
     paddingVertical: 2,
   },
   filterPill: {
-    paddingHorizontal: 11,
-    paddingVertical: 6,
-    borderRadius: 10,
+    paddingHorizontal: 12,
+    paddingVertical: 5.5,
+    borderRadius: 100,
     backgroundColor: '#FFFFFF',
     borderWidth: 1,
-    borderColor: '#EFECE6',
+    borderColor: '#E8E5EE',
   },
   filterPillActive: {
-    backgroundColor: '#582CDB',
-    borderColor: '#582CDB',
+    backgroundColor: '#F3EEFB',
+    borderColor: '#7C3AED',
+    borderWidth: 1.2,
   },
   filterPillText: {
-    fontSize: 11,
-    fontWeight: '800',
+    fontSize: 11.5,
+    fontWeight: '600',
     color: '#64748B',
   },
   filterPillTextActive: {
-    color: '#FFFFFF',
-    fontWeight: '700',
+    color: '#7C3AED',
+    fontWeight: '800',
   },
 
   // 7. SWIPING DECK & HERO CARD
