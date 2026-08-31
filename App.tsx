@@ -153,6 +153,7 @@ export default function App() {
   const [activeMessageThreadId, setActiveMessageThreadId] = useState<string | undefined>(undefined);
 
   const handleUseIdea = (title: string, format?: string) => {
+    setComposerQuestDraft(null);
     if (title) setComposerIdeaTitle(title);
     if (format) {
       const f = format.toLowerCase();
@@ -203,6 +204,9 @@ export default function App() {
 
   // Animated page transition handler
   const navigateTo = (nextScreen: Screen, customMessage?: string) => {
+    if (nextScreen !== 'composer') {
+      setComposerQuestDraft(null);
+    }
     if (nextScreen !== currentScreen) {
       const msg =
         customMessage ||
