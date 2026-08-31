@@ -1023,7 +1023,7 @@ ${selectedCtaText}`;
               <View style={styles.streakImpactHeaderRow}>
                 <View>
                   <Text style={styles.streakImpactLabel}>STREAK IMPACT</Text>
-                  <Text style={styles.streakImpactSub}>Helps protect {userProfile?.streakCount || 1}-day streak</Text>
+                  <Text style={styles.streakImpactSub}>Helps protect your {userProfile?.streakCount || 1}-day streak</Text>
                 </View>
                 <Text style={styles.streakImpactXp}>+40 XP</Text>
               </View>
