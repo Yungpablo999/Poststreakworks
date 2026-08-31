@@ -965,6 +965,7 @@ export default function App() {
           <ChallengeDetailScreen
             onBackToDashboard={() => navigateTo('quests')}
             onLogout={handleLogout}
+            onOpenComposer={() => navigateTo('composer')}
             onOpenMessages={(threadId?: string) => {
                 setActiveMessageThreadId(threadId);
                 navigateTo('messages');

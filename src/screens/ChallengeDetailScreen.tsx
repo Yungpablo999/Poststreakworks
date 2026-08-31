@@ -29,6 +29,7 @@ interface ChallengeDetailScreenProps {
   onLogout?: () => void;
   onOpenMessages?: () => void;
   onOpenJarvisPro?: () => void;
+  onOpenComposer?: () => void;
   userProfile?: UserProfileData;
   onSaveProfile?: (updated: UserProfileData) => void;
 }
@@ -95,6 +96,7 @@ export const ChallengeDetailScreen: React.FC<ChallengeDetailScreenProps> = ({
   onLogout,
   onOpenMessages,
   onOpenJarvisPro,
+  onOpenComposer,
   userProfile,
   onSaveProfile,
 }) => {
@@ -277,6 +279,17 @@ export const ChallengeDetailScreen: React.FC<ChallengeDetailScreenProps> = ({
     setShowCreatePostModal(true);
   };
 
+  const handleContinueQuest = () => {
+    if (Platform.OS !== 'web') {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    }
+    if (onOpenComposer) {
+      onOpenComposer();
+    } else if (onNavigateTab) {
+      onNavigateTab('create' as TabType);
+    }
+  };
+
   return (
     <SafeAreaView style={[styles.safeArea, isDark && { backgroundColor: '#0C0A12' }]}>
       <StatusBar barStyle={isDark ? "light-content" : "dark-content"} backgroundColor={isDark ? "#0C0A12" : "#FAF8F5"} />
@@ -379,38 +392,22 @@ export const ChallengeDetailScreen: React.FC<ChallengeDetailScreenProps> = ({
               </View>
             </View>
 
-            {/* Dual Action Buttons */}
-            <View style={styles.heroActionBtnCol}>
-              <Pressable
-                style={({ pressed }) => [styles.continueQuestBtn, pressed && styles.btnPressed]}
-                onPress={() => {
-                  if (progressPercent >= 100) {
-                    handleCompleteQuest();
-                  } else {
-                    triggerModalPop();
-                    setShowCreatePostModal(true);
-                  }
-                }}
+            {/* Primary Action Button */}
+            <Pressable
+              style={({ pressed }) => [styles.continueQuestBtn, pressed && styles.btnPressed]}
+              onPress={handleContinueQuest}
+            >
+              <LinearGradient
+                colors={['#784DF0', '#582CDB']}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                style={styles.continueQuestGradient}
               >
-                <LinearGradient
-                  colors={['#784DF0', '#582CDB']}
-                  start={{ x: 0, y: 0 }}
-                  end={{ x: 1, y: 1 }}
-                  style={styles.continueQuestGradient}
-                >
-                  <Text style={styles.continueQuestBtnText}>
-                    {isQuestFinished ? '✓ Quest Completed' : 'Continue Quest'}
-                  </Text>
-                </LinearGradient>
-              </Pressable>
-
-              <Pressable
-                style={({ pressed }) => [styles.createPostOutlineBtn, pressed && styles.btnPressed]}
-                onPress={() => setShowCreatePostModal(true)}
-              >
-                <Text style={styles.createPostOutlineBtnText}>Create Story Post</Text>
-              </Pressable>
-            </View>
+                <Text style={styles.continueQuestBtnText}>
+                  {isQuestFinished ? '✓ Quest Completed' : 'Continue Quest'}
+                </Text>
+              </LinearGradient>
+            </Pressable>
           </View>
 
           {/* SECTION 2: QUEST REQUIREMENTS */}
