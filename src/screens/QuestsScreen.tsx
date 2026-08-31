@@ -747,8 +747,10 @@ export const QuestsScreen: React.FC<QuestsScreenProps> = ({
           <View style={styles.modalOverlay}>
             <Animated.View style={[styles.modalCard, { transform: [{ scale: modalPopScale }] }]}>
               <View style={styles.modalHeaderRow}>
-                <View>
-                  <Text style={styles.modalTitle}>Creator Passport Breakdown</Text>
+                <View style={{ flex: 1, paddingRight: 12 }}>
+                  <Text style={styles.modalTitle} numberOfLines={1} adjustsFontSizeToFit={true} minimumFontScale={0.85}>
+                    Creator Passport
+                  </Text>
                   <Text style={styles.modalSubtitle}>How your 35% score is calculated:</Text>
                 </View>
                 <Pressable onPress={() => setShowReputationModal(false)} style={styles.modalCloseCircle} hitSlop={8}>
