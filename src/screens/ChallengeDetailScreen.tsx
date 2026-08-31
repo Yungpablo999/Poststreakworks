@@ -413,105 +413,133 @@ export const ChallengeDetailScreen: React.FC<ChallengeDetailScreenProps> = ({
           {/* SECTION 2: QUEST REQUIREMENTS */}
           <Text style={styles.sectionHeading}>Quest Requirements</Text>
           <View style={styles.requirementsList}>
-            {requirements.map((req) => (
-              <View
-                key={req.id}
-                style={[
-                  styles.requirementCard,
-                  req.status === 'completed' && styles.requirementCardCompleted,
-                ]}
-              >
-                <View style={styles.requirementLeft}>
-                  <View
-                    style={[
-                      styles.reqIconCircle,
-                      req.status === 'completed' && styles.reqIconCircleCompleted,
-                    ]}
-                  >
-                    {req.iconType === 'document' && (
-                      <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
-                        <Path
-                          d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"
-                          stroke={req.status === 'completed' ? '#582CDB' : '#524C62'}
-                          strokeWidth="2"
-                        />
-                        <Path
-                          d="M14 2v6h6M16 13H8M16 17H8M10 9H8"
-                          stroke={req.status === 'completed' ? '#582CDB' : '#524C62'}
-                          strokeWidth="2"
-                          strokeLinecap="round"
-                        />
-                      </Svg>
-                    )}
-                    {req.iconType === 'lightbulb' && (
-                      <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
-                        <Path
-                          d="M9 18h6M10 22h4M12 2a7 7 0 0 0-7 7c0 2.6 1.4 4.8 3.5 6h7c2.1-1.2 3.5-3.4 3.5-6a7 7 0 0 0-7-7z"
-                          stroke={req.status === 'completed' ? '#582CDB' : '#524C62'}
-                          strokeWidth="2"
-                          strokeLinecap="round"
-                        />
-                      </Svg>
-                    )}
-                    {req.iconType === 'clock' && (
-                      <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
-                        <Circle
-                          cx="12"
-                          cy="12"
-                          r="10"
-                          stroke={req.status === 'completed' ? '#582CDB' : '#524C62'}
-                          strokeWidth="2"
-                        />
-                        <Path
-                          d="M12 6v6l4 2"
-                          stroke={req.status === 'completed' ? '#582CDB' : '#524C62'}
-                          strokeWidth="2"
-                          strokeLinecap="round"
-                        />
-                      </Svg>
-                    )}
-                    {req.iconType === 'checkmark' && (
-                      <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
-                        <Circle
-                          cx="12"
-                          cy="12"
-                          r="10"
-                          stroke={req.status === 'completed' ? '#582CDB' : '#524C62'}
-                          strokeWidth="2"
-                        />
-                        <Path
-                          d="M9 12l2 2 4-4"
-                          stroke={req.status === 'completed' ? '#582CDB' : '#524C62'}
-                          strokeWidth="2"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        />
-                      </Svg>
-                    )}
-                  </View>
-                  <Text style={styles.requirementTitle}>{req.title}</Text>
-                </View>
+            {requirements.map((req) => {
+              const iconStroke =
+                req.status === 'completed'
+                  ? '#059669'
+                  : req.status === 'in_progress'
+                  ? '#582CDB'
+                  : req.status === 'locked'
+                  ? '#A39CB5'
+                  : '#7F7894';
 
+              return (
                 <View
+                  key={req.id}
                   style={[
-                    styles.reqStatusPill,
-                    req.status === 'completed' && styles.reqStatusPillDone,
-                    req.status === 'in_progress' && styles.reqStatusPillProgress,
-                    req.status === 'locked' && styles.reqStatusPillLocked,
+                    styles.requirementCard,
+                    req.status === 'in_progress' && styles.requirementCardInProgress,
+                    req.status === 'not_started' && styles.requirementCardNotStarted,
+                    req.status === 'completed' && styles.requirementCardCompleted,
+                    req.status === 'locked' && styles.requirementCardLocked,
                   ]}
                 >
-                  <Text
+                  <View style={styles.requirementLeft}>
+                    <View
+                      style={[
+                        styles.reqIconCircle,
+                        req.status === 'in_progress' && styles.reqIconCircleProgress,
+                        req.status === 'completed' && styles.reqIconCircleCompleted,
+                        req.status === 'locked' && styles.reqIconCircleLocked,
+                      ]}
+                    >
+                      {req.iconType === 'document' && (
+                        <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
+                          <Path
+                            d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"
+                            stroke={iconStroke}
+                            strokeWidth="2"
+                          />
+                          <Path
+                            d="M14 2v6h6M16 13H8M16 17H8M10 9H8"
+                            stroke={iconStroke}
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                          />
+                        </Svg>
+                      )}
+                      {req.iconType === 'lightbulb' && (
+                        <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
+                          <Path
+                            d="M9 18h6M10 22h4M12 2a7 7 0 0 0-7 7c0 2.6 1.4 4.8 3.5 6h7c2.1-1.2 3.5-3.4 3.5-6a7 7 0 0 0-7-7z"
+                            stroke={iconStroke}
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                          />
+                        </Svg>
+                      )}
+                      {req.iconType === 'clock' && (
+                        <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
+                          <Circle
+                            cx="12"
+                            cy="12"
+                            r="10"
+                            stroke={iconStroke}
+                            strokeWidth="2"
+                          />
+                          <Path
+                            d="M12 6v6l4 2"
+                            stroke={iconStroke}
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                          />
+                        </Svg>
+                      )}
+                      {req.iconType === 'checkmark' && (
+                        <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
+                          <Circle
+                            cx="12"
+                            cy="12"
+                            r="10"
+                            stroke={iconStroke}
+                            strokeWidth="2"
+                          />
+                          <Path
+                            d="M9 12l2 2 4-4"
+                            stroke={iconStroke}
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          />
+                        </Svg>
+                      )}
+                    </View>
+                    <Text
+                      style={[
+                        styles.requirementTitle,
+                        req.status === 'in_progress' && styles.requirementTitleProgress,
+                        req.status === 'completed' && styles.requirementTitleDone,
+                        req.status === 'locked' && styles.requirementTitleLocked,
+                      ]}
+                    >
+                      {req.title}
+                    </Text>
+                  </View>
+
+                  <View
                     style={[
-                      styles.reqStatusPillText,
-                      req.status === 'completed' && styles.reqStatusPillTextDone,
-                      req.status === 'in_progress' && styles.reqStatusPillTextProgress,
+                      styles.reqStatusPill,
+                      req.status === 'in_progress' && styles.reqStatusPillProgress,
+                      req.status === 'not_started' && styles.reqStatusPillNotStarted,
+                      req.status === 'completed' && styles.reqStatusPillDone,
+                      req.status === 'locked' && styles.reqStatusPillLocked,
                     ]}
                   >
-                    {req.status === 'locked' ? '🔒 Locked' : req.statusLabel}
-                  </Text>
+                    <Text
+                      style={[
+                        styles.reqStatusPillText,
+                        req.status === 'in_progress' && styles.reqStatusPillTextProgress,
+                        req.status === 'not_started' && styles.reqStatusPillTextNotStarted,
+                        req.status === 'completed' && styles.reqStatusPillTextDone,
+                        req.status === 'locked' && styles.reqStatusPillTextLocked,
+                      ]}
+                    >
+                      {req.status === 'locked' ? '🔒 Locked' : req.statusLabel}
+                    </Text>
+                  </View>
                 </View>
-              </View>
-            ))}
+              );
+            })}
           </View>
 
           {/* SECTION 3: SUGGESTED ANGLE (Royal Purple Card) */}
@@ -1255,18 +1283,37 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
     borderRadius: 18,
     borderWidth: 1,
-    borderColor: '#FDE68A',
+    borderColor: 'rgba(23, 20, 32, 0.07)',
     paddingVertical: 14,
     paddingHorizontal: 16,
-    shadowColor: '#000000',
+    shadowColor: '#171420',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.03,
+    shadowOpacity: 0.02,
     shadowRadius: 6,
     elevation: 1,
   },
+  requirementCardInProgress: {
+    borderColor: '#DDD6FE',
+    borderWidth: 1.5,
+    backgroundColor: '#FFFFFF',
+    shadowColor: '#582CDB',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.08,
+    shadowRadius: 10,
+    elevation: 3,
+  },
+  requirementCardNotStarted: {
+    borderColor: 'rgba(23, 20, 32, 0.06)',
+    backgroundColor: '#FFFFFF',
+  },
   requirementCardCompleted: {
-    borderColor: '#D8B4FE',
-    backgroundColor: '#FAF5FF',
+    borderColor: '#A7F3D0',
+    backgroundColor: '#F0FDF4',
+  },
+  requirementCardLocked: {
+    borderColor: 'rgba(23, 20, 32, 0.04)',
+    backgroundColor: '#F7F5FA',
+    opacity: 0.7,
   },
   requirementLeft: {
     flexDirection: 'row',
@@ -1283,31 +1330,55 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
+  reqIconCircleProgress: {
+    backgroundColor: '#EDE9FE',
+  },
   reqIconCircleCompleted: {
-    backgroundColor: '#ECE8F9',
+    backgroundColor: '#DCFCE7',
+  },
+  reqIconCircleLocked: {
+    backgroundColor: '#EFEBF5',
   },
   requirementTitle: {
     fontSize: 13,
-    fontWeight: '700',
-    color: '#171420',
+    fontWeight: '600',
+    color: '#2D263B',
     flex: 1,
     lineHeight: 18,
   },
+  requirementTitleProgress: {
+    fontWeight: '800',
+    color: '#171420',
+  },
+  requirementTitleDone: {
+    fontWeight: '700',
+    color: '#065F46',
+  },
+  requirementTitleLocked: {
+    fontWeight: '500',
+    color: '#8A829A',
+  },
   reqStatusPill: {
-    backgroundColor: '#F3F4F6',
     paddingVertical: 3.5,
     paddingHorizontal: 8,
     borderRadius: 100,
     flexShrink: 0,
   },
   reqStatusPillProgress: {
-    backgroundColor: '#ECE8F9',
+    backgroundColor: '#EDE9FE',
+    borderWidth: 1,
+    borderColor: '#DDD6FE',
+  },
+  reqStatusPillNotStarted: {
+    backgroundColor: '#F3F0F8',
   },
   reqStatusPillDone: {
     backgroundColor: '#DCFCE7',
+    borderWidth: 1,
+    borderColor: '#A7F3D0',
   },
   reqStatusPillLocked: {
-    backgroundColor: '#F3F4F6',
+    backgroundColor: '#EBE7F2',
   },
   reqStatusPillText: {
     fontSize: 11,
@@ -1316,9 +1387,19 @@ const styles = StyleSheet.create({
   },
   reqStatusPillTextProgress: {
     color: '#582CDB',
+    fontWeight: '800',
+  },
+  reqStatusPillTextNotStarted: {
+    color: '#7F7894',
+    fontWeight: '600',
   },
   reqStatusPillTextDone: {
-    color: '#16A34A',
+    color: '#059669',
+    fontWeight: '800',
+  },
+  reqStatusPillTextLocked: {
+    color: '#8A829A',
+    fontWeight: '600',
   },
 
   // SUGGESTED ANGLE (Royal Purple Card)
