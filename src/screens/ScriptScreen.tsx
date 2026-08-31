@@ -463,17 +463,15 @@ export const ScriptScreen: React.FC<ScriptScreenProps> = ({
     if (Platform.OS !== 'web') {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     }
-    const fullScript = `HOOK:
-${selectedHook}
-
-BODY:
-${bodyText}
-
-TAKEAWAY:
-${takeawayText}
-
-CTA:
-${selectedCtaText}`;
+    const sections = [
+      `HOOK:\n${selectedHook}`,
+      `BODY:\n${bodyText}`,
+    ];
+    if (takeawayText && takeawayText.trim().length > 0) {
+      sections.push(`KEY LESSON:\n${takeawayText.trim()}`);
+    }
+    sections.push(`CTA:\n${selectedCtaText}`);
+    const fullScript = sections.join('\n\n');
 
     try {
       if (Platform.OS === 'web' && typeof navigator !== 'undefined' && navigator.clipboard) {
@@ -935,13 +933,13 @@ ${selectedCtaText}`;
               </View>
             </LinearGradient>
 
-            {/* 6. TAKEAWAY CARD (LIVE-EDITABLE) */}
+            {/* 6. KEY LESSON CARD (LIVE-EDITABLE, OPTIONAL) */}
             <View style={styles.sectionCard}>
               <View style={styles.sectionHeaderRow}>
                 <View style={styles.sectionTitleGroup}>
                   <Text style={styles.sectionIcon}>💡</Text>
-                  <Text style={styles.sectionTitle}>Takeaway</Text>
-                  <Text style={styles.editableHintMicro}>Editable</Text>
+                  <Text style={styles.sectionTitle}>Key Lesson</Text>
+                  <Text style={styles.editableHintMicro}>Optional</Text>
                 </View>
               </View>
 
@@ -949,7 +947,7 @@ ${selectedCtaText}`;
                 <TextInput
                   value={takeawayText}
                   onChangeText={setTakeawayText}
-                  placeholder="Type takeaway lesson..."
+                  placeholder="Type the 1 core lesson to remember (or leave blank)..."
                   placeholderTextColor="#94A3B8"
                   multiline
                   scrollEnabled={false}
@@ -962,7 +960,7 @@ ${selectedCtaText}`;
                   style={({ pressed }) => [styles.improveTakeawayBtn, pressed && styles.btnPressed]}
                   onPress={() => handleOpenPhaseModal('lesson')}
                 >
-                  <Text style={styles.improveTakeawayBtnText}>Improve Takeaway ➔</Text>
+                  <Text style={styles.improveTakeawayBtnText}>Improve Key Lesson ➔</Text>
                 </Pressable>
               </View>
             </View>
@@ -1038,8 +1036,8 @@ ${selectedCtaText}`;
               <View style={styles.scriptPreviewHeaderRow}>
                 <Text style={styles.scriptPreviewLabel}>SCRIPT PREVIEW</Text>
                 <View style={styles.scriptPreviewPillsRow}>
-                  <Text style={styles.scriptPreviewPillText}>⏱ Short-form</Text>
-                  <Text style={styles.scriptPreviewPillText}>💡 Helpful</Text>
+                  <Text style={styles.scriptPreviewPillText}>⏱ 30–45s</Text>
+                  <Text style={styles.scriptPreviewPillText}>💡 Educational</Text>
                 </View>
               </View>
 
@@ -1053,10 +1051,12 @@ ${selectedCtaText}`;
                   <Text style={styles.previewLineBold}>Body: </Text>
                   {bodyText}
                 </Text>
-                <Text style={[styles.previewLineText, { marginTop: 8 }]}>
-                  <Text style={styles.previewLineBold}>Takeaway: </Text>
-                  {takeawayText}
-                </Text>
+                {!!(takeawayText && takeawayText.trim().length > 0) && (
+                  <Text style={[styles.previewLineText, { marginTop: 8 }]}>
+                    <Text style={styles.previewLineBold}>Key Lesson: </Text>
+                    {takeawayText}
+                  </Text>
+                )}
                 <Text style={[styles.previewLineText, { marginTop: 8 }]}>
                   <Text style={styles.previewLineBold}>CTA: </Text>
                   {selectedCtaText}
@@ -1280,8 +1280,8 @@ ${selectedCtaText}`;
               <Animated.View style={[styles.modalCard, { transform: [{ scale: modalPopScale }] }]}>
                 <View style={styles.modalHeaderRow}>
                   <View>
-                    <Text style={styles.modalTitle}>💡 Improve Takeaway</Text>
-                    <Text style={styles.modalSubtitle}>Quick 1-tap refinements for your conclusion</Text>
+                    <Text style={styles.modalTitle}>💡 Improve Key Lesson</Text>
+                    <Text style={styles.modalSubtitle}>The 1 core sentence you want viewers to remember</Text>
                   </View>
                   <Pressable
                     onPress={() => setShowLessonModal(false)}
