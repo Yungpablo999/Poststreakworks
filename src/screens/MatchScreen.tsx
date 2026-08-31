@@ -1136,7 +1136,7 @@ export const MatchScreen: React.FC<MatchScreenProps> = ({
                   </View>
                 </View>
                 <Text style={styles.requestsHeaderSubtitle}>
-                  Creators who reached out to collaborate with you. Accept to connect and unlock direct messaging.
+                  Creators who want to collaborate with you. Accept to connect and unlock direct messaging.
                 </Text>
               </View>
 
