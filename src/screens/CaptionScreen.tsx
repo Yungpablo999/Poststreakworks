@@ -76,8 +76,8 @@ const GOAL_OPTIONS = [
     icon: '💬',
     title: 'Get saves & comments',
     caption: 'I used to wait until every idea felt perfect before posting. But the truth is, perfection is the enemy of progress. Once I started sharing small lessons instead of waiting for the perfect idea, creating became easier.',
-    cta: 'What is one creator habit that helped you stay consistent?',
-    hashtags: '#CreatorTips #Growth #Strategy #DailyPosting',
+    cta: 'What creator habit has helped you stay consistent?',
+    hashtags: '#CreatorTips #Growth #Consistency #ContentStrategy',
     tags: ['Helpful', 'Personal', 'Strong CTA'],
   },
   {
@@ -86,7 +86,7 @@ const GOAL_OPTIONS = [
     title: 'Post fast & protect my streak',
     caption: 'Done and posted beats perfect and unpublished every single day. 15 minutes of sharing your daily progress is all it takes to keep your streak alive.',
     cta: 'Double-tap if you are keeping your posting streak alive today! 🔥',
-    hashtags: '#PostStreak #CreatorConsistency #DailyPosting #NoExcuses',
+    hashtags: '#ContentCreation #Consistency #CreatorMindset',
     tags: ['Fast Post', 'Streak Saver', 'High Energy'],
   },
   {
@@ -95,7 +95,7 @@ const GOAL_OPTIONS = [
     title: 'Drive traffic & DM leads',
     caption: 'Want to know the exact workflow I use to batch-create content and turn daily viewers into warm inbound leads without burning out?',
     cta: 'Comment "GROWTH" below and I will send you my daily creation template for free!',
-    hashtags: '#InboundLeads #CreatorBusiness #AudienceGrowth #ContentStrategy',
+    hashtags: '#InboundLeads #CreatorBusiness #AudienceGrowth',
     tags: ['Lead Magnet', 'Inbound', 'High Conversion'],
   },
   {
@@ -104,7 +104,7 @@ const GOAL_OPTIONS = [
     title: 'Viral shares & reach',
     caption: 'Why do 90% of creators stop posting in month 2? Because they overthink the Big Idea. Shift your mindset from inventing to documenting and watch your reach explode.',
     cta: 'Share this post with a creator who needed to hear this today!',
-    hashtags: '#ViralHooks #SocialMediaGrowth #Storytelling #PostDaily',
+    hashtags: '#ViralHooks #GrowthHacks #Storytelling #PostDaily',
     tags: ['Viral Reach', 'High Shares', 'Algorithm Rank'],
   },
 ];
@@ -115,22 +115,22 @@ const SUGGESTED_CAPTIONS_CATALOG = [
   {
     id: 'cap_1',
     text: 'I used to wait until every idea felt perfect before posting. But the truth is, perfection is the enemy of progress. Once I started sharing small lessons instead of waiting for the perfect idea, creating became easier.',
-    cta: 'What is one creator habit that helped you?',
-    hashtags: '#CreatorTips #Growth #Strategy #DailyPosting',
+    cta: 'What creator habit has helped you stay consistent?',
+    hashtags: '#CreatorTips #Growth #Consistency #ContentStrategy',
     tags: ['Helpful', 'Personal', 'Strong CTA'],
   },
   {
     id: 'cap_2',
     text: 'Here is the real secret behind keeping a daily streak: you do not need 10 hours to film. You just need 15 minutes and one clear lesson you learned yesterday.',
     cta: 'Save this post so you have it ready for your next filming session!',
-    hashtags: '#ContentCreation #Consistency #CreatorMindset #GrowthHacks',
+    hashtags: '#ContentCreation #Consistency #CreatorMindset',
     tags: ['Honest', 'Actionable', 'High Saves'],
   },
   {
     id: 'cap_3',
     text: 'Why do 90% of creators stop posting in month 2? Because they overthink the Big Idea. Shift your mindset from inventing to documenting.',
     cta: 'Drop a "🔥" if you needed to hear this today!',
-    hashtags: '#ViralHooks #SocialMediaGrowth #Storytelling #PostDaily',
+    hashtags: '#ViralHooks #GrowthHacks #Storytelling #PostDaily',
     tags: ['Motivational', 'High Energy', 'Conversation'],
   },
 ];
@@ -156,6 +156,12 @@ export const CaptionScreen: React.FC<CaptionScreenProps> = ({
   const [selectedTones, setSelectedTones] = useState<string[]>(['Helpful', 'Honest']);
   const [isTopicFocused, setIsTopicFocused] = useState(false);
   const topicInputRef = useRef<TextInput>(null);
+
+  const [isQuickCtaFocused, setIsQuickCtaFocused] = useState(false);
+  const quickCtaInputRef = useRef<TextInput>(null);
+
+  const [isHashtagsFocused, setIsHashtagsFocused] = useState(false);
+  const hashtagsInputRef = useRef<TextInput>(null);
 
   // Suggested Captions
   const [suggestedIndex, setSuggestedIndex] = useState(0);
@@ -532,34 +538,62 @@ export const CaptionScreen: React.FC<CaptionScreenProps> = ({
             </Pressable>
 
             {/* 4. QUICK CTA CARD (EDITABLE) */}
-            <View style={styles.quickCtaCard}>
+            <Pressable
+              onPress={() => quickCtaInputRef.current?.focus()}
+              style={[styles.quickCtaCard, isQuickCtaFocused && styles.quickCtaCardFocused]}
+            >
               <View style={styles.cardHeaderFlex}>
                 <Text style={styles.microCapLabel}>QUICK CTA</Text>
-                <Text style={styles.editableHintMicro}>Editable</Text>
+                <Pressable
+                  onPress={() => quickCtaInputRef.current?.focus()}
+                  hitSlop={8}
+                  style={styles.editActionPill}
+                >
+                  <Text style={styles.editActionPillText}>Edit →</Text>
+                </Pressable>
               </View>
               <TextInput
+                ref={quickCtaInputRef}
                 value={quickCta}
                 onChangeText={setQuickCta}
                 placeholder="Type custom CTA..."
                 placeholderTextColor="#94A3B8"
+                multiline={true}
+                scrollEnabled={false}
+                onFocus={() => setIsQuickCtaFocused(true)}
+                onBlur={() => setIsQuickCtaFocused(false)}
                 style={styles.quickCtaInput}
               />
-            </View>
+            </Pressable>
 
             {/* 5. HASHTAGS CARD (EDITABLE) */}
-            <View style={styles.hashtagsCard}>
+            <Pressable
+              onPress={() => hashtagsInputRef.current?.focus()}
+              style={[styles.hashtagsCard, isHashtagsFocused && styles.hashtagsCardFocused]}
+            >
               <View style={styles.cardHeaderFlex}>
                 <Text style={styles.microCapLabel}>HASHTAGS</Text>
-                <Text style={styles.editableHintMicro}>Editable</Text>
+                <Pressable
+                  onPress={() => hashtagsInputRef.current?.focus()}
+                  hitSlop={8}
+                  style={styles.editActionPill}
+                >
+                  <Text style={styles.editActionPillText}>Edit →</Text>
+                </Pressable>
               </View>
               <TextInput
+                ref={hashtagsInputRef}
                 value={hashtagsText}
                 onChangeText={setHashtagsText}
                 placeholder="Type hashtags..."
                 placeholderTextColor="#94A3B8"
+                multiline={true}
+                scrollEnabled={false}
+                onFocus={() => setIsHashtagsFocused(true)}
+                onBlur={() => setIsHashtagsFocused(false)}
                 style={styles.hashtagsInput}
               />
-            </View>
+            </Pressable>
 
             {/* 6. DRAFT EDITOR CARD (LIVE-EDITABLE MULTILINE) */}
             <View style={styles.draftEditorCard}>
@@ -1288,28 +1322,64 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     borderWidth: 1,
     borderColor: '#EFECE6',
-    padding: 12,
+    paddingHorizontal: 14,
+    paddingVertical: 11,
     marginBottom: 10,
   },
+  quickCtaCardFocused: {
+    backgroundColor: '#FFFFFF',
+    borderColor: '#582CDB',
+    shadowColor: '#582CDB',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.06,
+    shadowRadius: 6,
+    elevation: 2,
+  },
   quickCtaInput: {
-    fontSize: 13,
+    fontSize: 13.5,
     color: '#171420',
     fontWeight: '600',
+    lineHeight: 19,
     paddingVertical: 4,
+    margin: 0,
   },
   hashtagsCard: {
     backgroundColor: '#F8FAFC',
     borderRadius: 16,
     borderWidth: 1,
     borderColor: '#EFECE6',
-    padding: 12,
+    paddingHorizontal: 14,
+    paddingVertical: 11,
     marginBottom: 14,
+  },
+  hashtagsCardFocused: {
+    backgroundColor: '#FFFFFF',
+    borderColor: '#582CDB',
+    shadowColor: '#582CDB',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.06,
+    shadowRadius: 6,
+    elevation: 2,
   },
   hashtagsInput: {
     fontSize: 12.5,
-    color: '#582CDB',
-    fontWeight: '700',
+    color: '#6D28D9',
+    fontWeight: '600',
+    lineHeight: 18,
     paddingVertical: 4,
+    margin: 0,
+  },
+  editActionPill: {
+    backgroundColor: '#F3EEFB',
+    paddingVertical: 2.5,
+    paddingHorizontal: 8,
+    borderRadius: 6,
+  },
+  editActionPillText: {
+    fontSize: 10,
+    fontWeight: '800',
+    color: '#582CDB',
+    letterSpacing: 0.2,
   },
   microCapLabel: {
     fontSize: 10,
