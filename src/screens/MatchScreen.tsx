@@ -295,7 +295,7 @@ const CREATOR_DECK: CreatorProfile[] = [
       'High response likelihood',
     ],
     tracking: {
-      growthRate: '+8.5k this month',
+      growthRate: '+8.5K followers',
       postingPace: '7 posts/week',
       engagementScore: '96/100',
       bestCollabWindow: 'Mon - Fri • 7:00 AM',
@@ -338,7 +338,7 @@ const CREATOR_DECK: CreatorProfile[] = [
       'High response likelihood',
     ],
     tracking: {
-      growthRate: '+6.4k this month',
+      growthRate: '+6.4K followers',
       postingPace: '4 posts/week',
       engagementScore: '95/100',
       bestCollabWindow: 'Tue & Sat • 8:00 PM',
@@ -1484,7 +1484,7 @@ export const MatchScreen: React.FC<MatchScreenProps> = ({
                   setShowPitchModal(false);
                 }}
               />
-              <View style={[styles.modalCard, { maxWidth: 340 }]}>
+              <View style={[styles.modalCard, { maxWidth: 356 }]}>
                 <View style={styles.modalBadgePill}>
                   <Text style={styles.modalBadgeText}>COLLAB PITCH • JARVIS AI</Text>
                 </View>
@@ -1565,7 +1565,9 @@ export const MatchScreen: React.FC<MatchScreenProps> = ({
                       handleSendPitchConfirm();
                     }}
                   >
-                    <Text style={styles.modalPrimaryBtnText} numberOfLines={1}>Send Pitch (+50 XP)</Text>
+                    <Text style={styles.modalPrimaryBtnText} numberOfLines={1} adjustsFontSizeToFit={true}>
+                      Send Pitch (+50 XP)
+                    </Text>
                   </Pressable>
                 </View>
               </View>
