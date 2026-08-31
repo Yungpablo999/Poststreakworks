@@ -70,6 +70,45 @@ const NOTIFICATIONS: NotificationItem[] = [
   },
 ];
 
+const GOAL_OPTIONS = [
+  {
+    id: 'saves_comments',
+    icon: '💬',
+    title: 'Get saves & comments',
+    caption: 'I used to wait until every idea felt perfect before posting. But the truth is, perfection is the enemy of progress. Once I started sharing small lessons instead of waiting for the perfect idea, creating became easier.',
+    cta: 'What is one creator habit that helped you stay consistent?',
+    hashtags: '#CreatorTips #Growth #Strategy #DailyPosting',
+    tags: ['Helpful', 'Personal', 'Strong CTA'],
+  },
+  {
+    id: 'fast_streak',
+    icon: '⚡',
+    title: 'Post fast & protect my streak',
+    caption: 'Done and posted beats perfect and unpublished every single day. 15 minutes of sharing your daily progress is all it takes to keep your streak alive.',
+    cta: 'Double-tap if you are keeping your posting streak alive today! 🔥',
+    hashtags: '#PostStreak #CreatorConsistency #DailyPosting #NoExcuses',
+    tags: ['Fast Post', 'Streak Saver', 'High Energy'],
+  },
+  {
+    id: 'traffic_leads',
+    icon: '📈',
+    title: 'Drive traffic & DM leads',
+    caption: 'Want to know the exact workflow I use to batch-create content and turn daily viewers into warm inbound leads without burning out?',
+    cta: 'Comment "GROWTH" below and I will send you my daily creation template for free!',
+    hashtags: '#InboundLeads #CreatorBusiness #AudienceGrowth #ContentStrategy',
+    tags: ['Lead Magnet', 'Inbound', 'High Conversion'],
+  },
+  {
+    id: 'viral_reach',
+    icon: '🔥',
+    title: 'Viral shares & reach',
+    caption: 'Why do 90% of creators stop posting in month 2? Because they overthink the Big Idea. Shift your mindset from inventing to documenting and watch your reach explode.',
+    cta: 'Share this post with a creator who needed to hear this today!',
+    hashtags: '#ViralHooks #SocialMediaGrowth #Storytelling #PostDaily',
+    tags: ['Viral Reach', 'High Shares', 'Algorithm Rank'],
+  },
+];
+
 const TONE_OPTIONS = ['Helpful', 'Honest', 'Motivational', 'Funny', 'Professional'];
 
 const SUGGESTED_CAPTIONS_CATALOG = [
@@ -113,7 +152,7 @@ export const CaptionScreen: React.FC<CaptionScreenProps> = ({
 
   // Live-Editable Screen State
   const [postTopic, setPostTopic] = useState(ideaTitle);
-  const [selectedGoal, setSelectedGoal] = useState('Get saves and comments');
+  const [selectedGoal, setSelectedGoal] = useState('Get saves & comments');
   const [selectedTones, setSelectedTones] = useState<string[]>(['Helpful', 'Honest']);
   const [isTopicFocused, setIsTopicFocused] = useState(false);
   const topicInputRef = useRef<TextInput>(null);
@@ -649,8 +688,8 @@ export const CaptionScreen: React.FC<CaptionScreenProps> = ({
               <Animated.View style={[styles.modalCard, { transform: [{ scale: modalPopScale }] }]}>
                 <View style={styles.modalHeaderRow}>
                   <View>
-                    <Text style={styles.modalTitle}>Select Content Goal</Text>
-                    <Text style={styles.modalSubtitle}>Optimizes caption for algorithm conversion</Text>
+                    <Text style={styles.modalTitle}>🎯 Select Content Goal</Text>
+                    <Text style={styles.modalSubtitle}>Choose what you want your caption to achieve</Text>
                   </View>
                   <Pressable
                     onPress={() => setShowGoalModal(false)}
@@ -661,28 +700,38 @@ export const CaptionScreen: React.FC<CaptionScreenProps> = ({
                   </Pressable>
                 </View>
 
-                {[
-                  'Get saves and comments',
-                  'Protect streak & quick post',
-                  'Drive traffic & DM leads',
-                  'Viral shares & reach',
-                ].map((goal) => {
-                  const isSelected = selectedGoal === goal;
+                {GOAL_OPTIONS.map((item) => {
+                  const isSelected = selectedGoal === item.title;
                   return (
                     <Pressable
-                      key={goal}
+                      key={item.id}
                       onPress={() => {
                         if (Platform.OS !== 'web') {
-                          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                          Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
                         }
-                        setSelectedGoal(goal);
+                        setSelectedGoal(item.title);
+                        setDraftText(item.caption);
+                        setQuickCta(item.cta);
+                        setHashtagsText(item.hashtags);
                         setShowGoalModal(false);
                       }}
-                      style={[styles.goalModalOption, isSelected && styles.goalModalOptionActive]}
+                      style={({ pressed }) => [
+                        styles.goalModalOption,
+                        isSelected && styles.goalModalOptionActive,
+                        pressed && styles.btnPressed,
+                      ]}
                     >
-                      <Text style={[styles.goalModalOptionText, isSelected && styles.goalModalOptionTextActive]}>
-                        {goal}
-                      </Text>
+                      <View style={styles.goalModalOptionRow}>
+                        <Text style={styles.goalModalIcon}>{item.icon}</Text>
+                        <Text style={[styles.goalModalOptionText, isSelected && styles.goalModalOptionTextActive]}>
+                          {item.title}
+                        </Text>
+                      </View>
+                      {isSelected && (
+                        <View style={styles.selectedCheckBadge}>
+                          <Text style={styles.selectedCheckText}>✓ SELECTED</Text>
+                        </View>
+                      )}
                     </Pressable>
                   );
                 })}
@@ -1545,15 +1594,34 @@ const styles = StyleSheet.create({
   goalModalOption: {
     backgroundColor: '#F8FAFC',
     borderRadius: 14,
-    borderWidth: 1,
+    borderWidth: 1.5,
     borderColor: '#EFECE6',
-    paddingVertical: 12,
+    paddingVertical: 13,
     paddingHorizontal: 14,
     marginBottom: 8,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
   },
   goalModalOptionActive: {
     backgroundColor: '#FAF5FF',
     borderColor: '#582CDB',
+    borderWidth: 2,
+    shadowColor: '#582CDB',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.08,
+    shadowRadius: 6,
+    elevation: 2,
+  },
+  goalModalOptionRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    flex: 1,
+    marginRight: 6,
+  },
+  goalModalIcon: {
+    fontSize: 15,
   },
   goalModalOptionText: {
     fontSize: 13,
@@ -1563,6 +1631,19 @@ const styles = StyleSheet.create({
   goalModalOptionTextActive: {
     color: '#582CDB',
     fontWeight: '800',
+  },
+  selectedCheckBadge: {
+    backgroundColor: '#582CDB',
+    paddingVertical: 2.5,
+    paddingHorizontal: 7,
+    borderRadius: 6,
+    flexShrink: 0,
+  },
+  selectedCheckText: {
+    fontSize: 9,
+    fontWeight: '800',
+    color: '#FFFFFF',
+    letterSpacing: 0.3,
   },
   modalFullBtn: {
     backgroundColor: '#582CDB',
