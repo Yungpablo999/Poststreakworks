@@ -530,11 +530,11 @@ export const QuestsScreen: React.FC<QuestsScreenProps> = ({
               <Text style={styles.repValueDark}>1 / 3</Text>
             </View>
 
-            {/* Bottom Row: 35% & Improve Reputation */}
+            {/* Bottom Row: 35% & Build Reputation */}
             <View style={styles.reputationFooterRow}>
               <View style={styles.repPercentGroup}>
                 <Text style={styles.repPercentText}>35%</Text>
-                <Text style={styles.repPercentSub}>Passport activity</Text>
+                <Text style={styles.repPercentSub}>Creator Passport</Text>
               </View>
 
               <Pressable
@@ -544,7 +544,7 @@ export const QuestsScreen: React.FC<QuestsScreenProps> = ({
                   setShowReputationModal(true);
                 }}
               >
-                <Text style={styles.improveRepBtnText}>Improve Reputation</Text>
+                <Text style={styles.improveRepBtnText}>Build Reputation →</Text>
               </Pressable>
             </View>
           </View>
@@ -748,8 +748,8 @@ export const QuestsScreen: React.FC<QuestsScreenProps> = ({
             <Animated.View style={[styles.modalCard, { transform: [{ scale: modalPopScale }] }]}>
               <View style={styles.modalHeaderRow}>
                 <View>
-                  <Text style={styles.modalTitle}>Creator Passport</Text>
-                  <Text style={styles.modalSubtitle}>How to reach 100% Reputation:</Text>
+                  <Text style={styles.modalTitle}>Creator Passport Breakdown</Text>
+                  <Text style={styles.modalSubtitle}>How your 35% score is calculated:</Text>
                 </View>
                 <Pressable onPress={() => setShowReputationModal(false)} style={styles.modalCloseCircle} hitSlop={8}>
                   <Text style={styles.modalCloseCross}>✕</Text>
@@ -758,16 +758,16 @@ export const QuestsScreen: React.FC<QuestsScreenProps> = ({
 
               <View style={{ gap: 10, marginVertical: 12 }}>
                 <View style={styles.repDetailRow}>
-                  <Text style={styles.repDetailTitle}>🔥 7-Day Consistency</Text>
-                  <Text style={styles.repDetailDesc}>+25% toward brand qualification score</Text>
+                  <Text style={styles.repDetailTitle}>🔥 Consistency Score (20%)</Text>
+                  <Text style={styles.repDetailDesc}>Daily posting streak and on-time publishing</Text>
                 </View>
                 <View style={styles.repDetailRow}>
-                  <Text style={styles.repDetailTitle}>🤝 Squad Collaborations</Text>
-                  <Text style={styles.repDetailDesc}>+20% proof of creator reliability</Text>
+                  <Text style={styles.repDetailTitle}>⚡ Quest Completion (15%)</Text>
+                  <Text style={styles.repDetailDesc}>1 of 3 weekly quests completed (+15%)</Text>
                 </View>
                 <View style={styles.repDetailRow}>
-                  <Text style={styles.repDetailTitle}>⚡ 30 Quests Finished</Text>
-                  <Text style={styles.repDetailDesc}>Unlocks verified Gold Passport seal</Text>
+                  <Text style={styles.repDetailTitle}>🤝 Collaboration Proof (0%)</Text>
+                  <Text style={styles.repDetailDesc}>Not started · Match and collab to earn up to +40%</Text>
                 </View>
               </View>
 
