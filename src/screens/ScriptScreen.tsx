@@ -154,7 +154,7 @@ const LESSON_PRESETS = [
     id: 'lesson_1',
     title: 'Actionable Rule',
     tag: '⭐ Recommended',
-    text: 'Consistency gets easier when you stop waiting for perfect ideas and start sharing useful lessons.',
+    text: 'Stop waiting for perfect ideas. Share the useful lessons you learn every day.',
   },
   {
     id: 'lesson_2',
@@ -907,6 +907,9 @@ ${selectedCtaText}`;
                   <Text style={styles.sectionTitle}>Takeaway</Text>
                   <Text style={styles.editableHintMicro}>Editable</Text>
                 </View>
+                <Pressable onPress={() => handleOpenPhaseModal('lesson')} hitSlop={8}>
+                  <Text style={styles.editSectionLink}>Studio ➔</Text>
+                </Pressable>
               </View>
 
               <View style={styles.takeawayBox}>
@@ -921,12 +924,14 @@ ${selectedCtaText}`;
                 />
               </View>
 
-              <Pressable
-                onPress={() => handleOpenPhaseModal('lesson')}
-                hitSlop={8}
-              >
-                <Text style={styles.improveTakeawayLink}>IMPROVE TAKEAWAY ➔</Text>
-              </Pressable>
+              <View style={styles.takeawayActionRow}>
+                <Pressable
+                  style={({ pressed }) => [styles.improveTakeawayBtn, pressed && styles.btnPressed]}
+                  onPress={() => handleOpenPhaseModal('lesson')}
+                >
+                  <Text style={styles.improveTakeawayBtnText}>Improve Takeaway ➔</Text>
+                </Pressable>
+              </View>
             </View>
 
             {/* 7. CALL TO ACTION CARD (LIVE-EDITABLE) */}
@@ -2041,11 +2046,25 @@ const styles = StyleSheet.create({
     padding: 0,
     margin: 0,
   },
-  improveTakeawayLink: {
-    fontSize: 12,
-    fontWeight: '700',
+  takeawayActionRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 2,
+  },
+  improveTakeawayBtn: {
+    backgroundColor: '#FAF5FF',
+    borderWidth: 1,
+    borderColor: '#EDE9FE',
+    paddingVertical: 7,
+    paddingHorizontal: 14,
+    borderRadius: 10,
+    alignSelf: 'flex-start',
+  },
+  improveTakeawayBtnText: {
+    fontSize: 11.5,
+    fontWeight: '800',
     color: '#582CDB',
-    letterSpacing: 0.4,
+    letterSpacing: 0.2,
   },
 
   // Call to Action Card
