@@ -777,7 +777,14 @@ export const ChallengeDetailScreen: React.FC<ChallengeDetailScreenProps> = ({
                     end={{ x: 1, y: 1 }}
                     style={styles.modalPrimaryGradient}
                   >
-                    <Text style={styles.modalPrimaryBtnText}>Schedule & Earn +50 XP</Text>
+                    <Text
+                      style={styles.modalPrimaryBtnText}
+                      numberOfLines={1}
+                      adjustsFontSizeToFit={true}
+                      minimumFontScale={0.8}
+                    >
+                      Schedule & Earn +50 XP
+                    </Text>
                   </LinearGradient>
                 </Pressable>
               </View>
@@ -1742,7 +1749,7 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   modalSecondaryBtn: {
-    flex: 1,
+    paddingHorizontal: 16,
     height: 46,
     borderRadius: 12,
     borderWidth: 1,
@@ -1757,20 +1764,22 @@ const styles = StyleSheet.create({
     color: '#524C62',
   },
   modalPrimaryBtn: {
-    flex: 2,
+    flex: 1,
     height: 46,
     borderRadius: 12,
     overflow: 'hidden',
   },
   modalPrimaryGradient: {
     flex: 1,
+    paddingHorizontal: 12,
     justifyContent: 'center',
     alignItems: 'center',
   },
   modalPrimaryBtnText: {
-    fontSize: 14,
+    fontSize: isSmallScreen ? 12.5 : 13.5,
     fontWeight: '800',
     color: '#FFFFFF',
+    letterSpacing: -0.2,
   },
 
   // SCRIPT BLUEPRINT BOX
