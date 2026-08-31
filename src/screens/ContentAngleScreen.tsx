@@ -54,6 +54,40 @@ interface IdeaCardItem {
   bookmarked: boolean;
 }
 
+interface SavedIdeaItem {
+  id: string;
+  title: string;
+  format: string;
+  savedTime: string;
+}
+
+const INITIAL_SAVED_IDEAS: SavedIdeaItem[] = [
+  {
+    id: 'saved_1',
+    title: 'My morning setup routine',
+    format: 'Short Reel',
+    savedTime: 'Saved 2 h ago',
+  },
+  {
+    id: 'saved_2',
+    title: 'My simple content planning routine',
+    format: 'Carousel',
+    savedTime: 'Saved Yesterday',
+  },
+  {
+    id: 'saved_3',
+    title: 'How I turn 1 idea into 4 different posts across platforms',
+    format: 'Carousel / Reel',
+    savedTime: 'Saved 3 days ago',
+  },
+  {
+    id: 'saved_4',
+    title: '3 creator habits that made posting easier',
+    format: 'Short Reel',
+    savedTime: 'Saved 5 days ago',
+  },
+];
+
 const NOTIFICATIONS: NotificationItem[] = [
   {
     id: 'n1',
@@ -158,7 +192,8 @@ export const ContentAngleScreen: React.FC<ContentAngleScreenProps> = ({
   const [isHeroSaved, setIsHeroSaved] = useState(false);
   const [allIdeas, setAllIdeas] = useState<IdeaCardItem[]>(ALL_IDEAS_LIST);
   const [showAllIdeas, setShowAllIdeas] = useState(false);
-  const [savedIdeasCount, setSavedIdeasCount] = useState(2);
+  const [savedIdeasList, setSavedIdeasList] = useState<SavedIdeaItem[]>(INITIAL_SAVED_IDEAS);
+  const [showAllSavedIdeas, setShowAllSavedIdeas] = useState(false);
   const [quotaUsed, setQuotaUsed] = useState(3);
   const [selectedAngleFilters, setSelectedAngleFilters] = useState<string[]>(['faster']);
   const [selectedJarvisChips, setSelectedJarvisChips] = useState<string[]>([]);
@@ -311,13 +346,23 @@ export const ContentAngleScreen: React.FC<ContentAngleScreenProps> = ({
     }
     const nextSaved = !isHeroSaved;
     setIsHeroSaved(nextSaved);
-    setSavedIdeasCount((c) => (nextSaved ? c + 1 : Math.max(0, c - 1)));
 
     if (nextSaved) {
+      setSavedIdeasList((prev) => [
+        {
+          id: 'saved_hero',
+          title: 'One thing I wish I knew before I started creating',
+          format: 'Short Reel',
+          savedTime: 'Saved just now',
+        },
+        ...prev.filter((s) => s.id !== 'saved_hero'),
+      ]);
       setCelebrationTitle('Idea Saved!');
       setCelebrationSubtitle('"One thing I wish I knew before I started creating" has been saved to your vault.');
       setCelebrationSpeech('1-day streak protected! Idea ready to turn into a post anytime.');
       setShowCelebrationModal(true);
+    } else {
+      setSavedIdeasList((prev) => prev.filter((s) => s.id !== 'saved_hero'));
     }
   };
 
@@ -326,6 +371,7 @@ export const ContentAngleScreen: React.FC<ContentAngleScreenProps> = ({
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     }
     let savedTitle = '';
+    let savedFormat = 'Short Reel';
     let becameSaved = false;
 
     setAllIdeas((prev) =>
@@ -334,7 +380,7 @@ export const ContentAngleScreen: React.FC<ContentAngleScreenProps> = ({
           const next = !item.bookmarked;
           becameSaved = next;
           savedTitle = item.title;
-          setSavedIdeasCount((c) => (next ? c + 1 : Math.max(0, c - 1)));
+          savedFormat = item.format;
           return { ...item, bookmarked: next };
         }
         return item;
@@ -342,10 +388,21 @@ export const ContentAngleScreen: React.FC<ContentAngleScreenProps> = ({
     );
 
     if (becameSaved) {
+      setSavedIdeasList((prev) => [
+        {
+          id: `saved_${id}`,
+          title: savedTitle,
+          format: savedFormat,
+          savedTime: 'Saved just now',
+        },
+        ...prev.filter((s) => s.id !== `saved_${id}`),
+      ]);
       setCelebrationTitle('Idea Saved!');
       setCelebrationSubtitle(`"${savedTitle}" has been saved to your vault.`);
       setCelebrationSpeech('1-day streak protected! Idea ready in your vault.');
       setShowCelebrationModal(true);
+    } else {
+      setSavedIdeasList((prev) => prev.filter((s) => s.id !== `saved_${id}`));
     }
   };
 
@@ -366,12 +423,17 @@ export const ContentAngleScreen: React.FC<ContentAngleScreenProps> = ({
   };
 
   const handleGenerateMoreIdeas = () => {
+    if (quotaUsed >= 5) {
+      if (Platform.OS !== 'web') {
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+      }
+      if (onOpenJarvisPro) onOpenJarvisPro();
+      return;
+    }
     if (Platform.OS !== 'web') {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     }
-    if (quotaUsed < 5) {
-      setQuotaUsed((q) => q + 1);
-    }
+    setQuotaUsed((q) => Math.min(5, q + 1));
 
     const newIdea: IdeaCardItem = {
       id: `idea_${Date.now()}`,
@@ -393,6 +455,7 @@ export const ContentAngleScreen: React.FC<ContentAngleScreenProps> = ({
   const displayedIdeas = allIdeas
     .filter((item) => !hiddenIdeaIds.includes(item.id))
     .slice(0, showAllIdeas ? allIdeas.length : 2);
+  const displayedSavedIdeas = showAllSavedIdeas ? savedIdeasList : savedIdeasList.slice(0, 2);
 
   return (
     <SafeAreaView style={[styles.safeArea, isDark && { backgroundColor: '#0C0A12' }]}>
@@ -681,7 +744,7 @@ export const ContentAngleScreen: React.FC<ContentAngleScreenProps> = ({
           ))}
 
           {/* 5. DAILY QUOTA CARD */}
-          <View style={styles.quotaCard}>
+          <View style={[styles.quotaCard, quotaUsed >= 5 && styles.quotaCardReached]}>
             <View style={styles.quotaHeaderRow}>
               <Text style={styles.quotaLabel}>DAILY QUOTA</Text>
               <Pressable
@@ -698,15 +761,37 @@ export const ContentAngleScreen: React.FC<ContentAngleScreenProps> = ({
 
             {/* Gold/Amber Progress Track */}
             <View style={styles.quotaProgressTrack}>
-              <View style={[styles.quotaProgressFill, { width: `${(quotaUsed / 5) * 100}%` }]} />
+              <View
+                style={[
+                  styles.quotaProgressFill,
+                  { width: `${Math.min(100, (quotaUsed / 5) * 100)}%` },
+                  quotaUsed >= 5 && styles.quotaProgressFillMax,
+                ]}
+              />
             </View>
 
-            <Pressable
-              style={({ pressed }) => [styles.quotaGenerateBtn, pressed && styles.btnPressed]}
-              onPress={handleGenerateMoreIdeas}
-            >
-              <Text style={styles.quotaGenerateBtnText}>Generate More</Text>
-            </Pressable>
+            {quotaUsed >= 5 ? (
+              <Pressable
+                style={({ pressed }) => [styles.quotaReachedBtn, pressed && styles.btnPressed]}
+                onPress={() => {
+                  if (Platform.OS !== 'web') {
+                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                  }
+                  if (onOpenJarvisPro) onOpenJarvisPro();
+                }}
+              >
+                <Text style={styles.quotaReachedBtnText}>
+                  Quota reached · Upgrade to generate more ⚡
+                </Text>
+              </Pressable>
+            ) : (
+              <Pressable
+                style={({ pressed }) => [styles.quotaGenerateBtn, pressed && styles.btnPressed]}
+                onPress={handleGenerateMoreIdeas}
+              >
+                <Text style={styles.quotaGenerateBtnText}>Generate More</Text>
+              </Pressable>
+            )}
           </View>
 
           {/* 6. JARVIS INSIGHT CARD (HARMONIOUS LAVENDER-CREAM) */}
@@ -762,22 +847,67 @@ export const ContentAngleScreen: React.FC<ContentAngleScreenProps> = ({
           </LinearGradient>
 
           {/* 7. SAVED IDEAS SECTION */}
-          <Text style={styles.sectionHeaderLabel}>SAVED IDEAS ({savedIdeasCount})</Text>
-          <Pressable
-            style={styles.savedIdeaItemCard}
-            onPress={() => handleSelectIdea('My morning setup routine')}
-          >
-            <View style={styles.savedIdeaIconBox}>
-              <Text style={{ fontSize: 16, color: '#64748B' }}>≡</Text>
+          {savedIdeasList.length > 0 && (
+            <View style={styles.savedIdeasSection}>
+              <View style={styles.savedIdeasHeaderRow}>
+                <Text style={styles.sectionHeaderLabel}>SAVED IDEAS ({savedIdeasList.length})</Text>
+                {savedIdeasList.length > 2 && (
+                  <Pressable
+                    onPress={() => {
+                      if (Platform.OS !== 'web') {
+                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                      }
+                      setShowAllSavedIdeas(!showAllSavedIdeas);
+                    }}
+                    hitSlop={8}
+                  >
+                    <Text style={styles.viewAllSavedLink}>
+                      {showAllSavedIdeas ? 'Show Less ‹' : `View all (${savedIdeasList.length}) ›`}
+                    </Text>
+                  </Pressable>
+                )}
+              </View>
+
+              <View style={styles.savedIdeasList}>
+                {displayedSavedIdeas.map((saved) => (
+                  <Pressable
+                    key={saved.id}
+                    style={({ pressed }) => [styles.savedIdeaItemCard, pressed && styles.btnPressed]}
+                    onPress={() => handleSelectIdea(saved.title, saved.format)}
+                  >
+                    <View style={styles.savedIdeaIconBox}>
+                      <Text style={{ fontSize: 16, color: '#582CDB' }}>≡</Text>
+                    </View>
+                    <View style={{ flex: 1 }}>
+                      <Text style={styles.savedIdeaTitle} numberOfLines={1}>
+                        {saved.title}
+                      </Text>
+                      <Text style={styles.savedIdeaTime}>{saved.savedTime} • {saved.format}</Text>
+                    </View>
+                    <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
+                      <Path d="M9 18L15 12L9 6" stroke="#94A3B8" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
+                    </Svg>
+                  </Pressable>
+                ))}
+              </View>
+
+              {!showAllSavedIdeas && savedIdeasList.length > 2 && (
+                <Pressable
+                  style={styles.viewAllSavedBottomBtn}
+                  onPress={() => {
+                    if (Platform.OS !== 'web') {
+                      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                    }
+                    setShowAllSavedIdeas(true);
+                  }}
+                >
+                  <Text style={styles.viewAllSavedBottomBtnText}>
+                    View all saved ideas ({savedIdeasList.length}) →
+                  </Text>
+                </Pressable>
+              )}
             </View>
-            <View style={{ flex: 1 }}>
-              <Text style={styles.savedIdeaTitle}>My morning setup routine...</Text>
-              <Text style={styles.savedIdeaTime}>Saved 2 h ago</Text>
-            </View>
-            <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
-              <Path d="M9 18L15 12L9 6" stroke="#94A3B8" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
-            </Svg>
-          </Pressable>
+          )}
 
           {/* 8. PRIMARY BOTTOM ACTION: GENERATE MORE IDEAS */}
           <Pressable
@@ -785,12 +915,14 @@ export const ContentAngleScreen: React.FC<ContentAngleScreenProps> = ({
             onPress={handleGenerateMoreIdeas}
           >
             <LinearGradient
-              colors={['#7C3AED', '#582CDB']}
+              colors={quotaUsed >= 5 ? ['#7C3AED', '#582CDB'] : ['#7C3AED', '#582CDB']}
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 0 }}
               style={styles.generateMoreMainGradient}
             >
-              <Text style={styles.generateMoreMainBtnText}>✨ Generate More Ideas</Text>
+              <Text style={styles.generateMoreMainBtnText}>
+                {quotaUsed >= 5 ? '⚡ Upgrade for Unlimited Ideas' : '✨ Generate More Ideas'}
+              </Text>
             </LinearGradient>
           </Pressable>
 
@@ -1509,6 +1641,11 @@ const styles = StyleSheet.create({
     color: '#171420',
     marginBottom: 10,
   },
+  quotaCardReached: {
+    backgroundColor: '#FFFBEB',
+    borderWidth: 1,
+    borderColor: '#FDE68A',
+  },
   quotaProgressTrack: {
     height: 8,
     backgroundColor: '#E2E8F0',
@@ -1520,6 +1657,9 @@ const styles = StyleSheet.create({
     height: '100%',
     backgroundColor: '#F59E0B',
     borderRadius: 4,
+  },
+  quotaProgressFillMax: {
+    backgroundColor: '#D97706',
   },
   quotaGenerateBtn: {
     height: 42,
@@ -1534,6 +1674,21 @@ const styles = StyleSheet.create({
     fontSize: 12.5,
     fontWeight: '800',
     color: '#1E293B',
+  },
+  quotaReachedBtn: {
+    height: 42,
+    borderRadius: 12,
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1.5,
+    borderColor: '#F59E0B',
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 8,
+  },
+  quotaReachedBtnText: {
+    fontSize: 12,
+    fontWeight: '800',
+    color: '#B45309',
   },
 
   // 6. Jarvis Insight Card
@@ -1609,12 +1764,28 @@ const styles = StyleSheet.create({
   },
 
   // 7. Saved Ideas Section
+  savedIdeasSection: {
+    marginBottom: 16,
+  },
+  savedIdeasHeaderRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
   sectionHeaderLabel: {
     fontSize: 11,
     fontWeight: '800',
     color: '#7F7894',
     letterSpacing: 0.6,
-    marginBottom: 8,
+  },
+  viewAllSavedLink: {
+    fontSize: 12,
+    fontWeight: '800',
+    color: '#582CDB',
+  },
+  savedIdeasList: {
+    gap: 8,
   },
   savedIdeaItemCard: {
     flexDirection: 'row',
@@ -1625,7 +1796,6 @@ const styles = StyleSheet.create({
     borderColor: '#EFEBF8',
     padding: 14,
     gap: 12,
-    marginBottom: 18,
     shadowColor: '#582CDB',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.04,
@@ -1636,7 +1806,7 @@ const styles = StyleSheet.create({
     width: 36,
     height: 36,
     borderRadius: 10,
-    backgroundColor: '#F1F5F9',
+    backgroundColor: '#EDE9FE',
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -1649,6 +1819,17 @@ const styles = StyleSheet.create({
   savedIdeaTime: {
     fontSize: 11,
     color: '#94A3B8',
+  },
+  viewAllSavedBottomBtn: {
+    paddingVertical: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 4,
+  },
+  viewAllSavedBottomBtnText: {
+    fontSize: 12.5,
+    fontWeight: '800',
+    color: '#582CDB',
   },
 
   // 8. Generate More Ideas Main Action
