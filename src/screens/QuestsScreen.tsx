@@ -221,6 +221,7 @@ export const QuestsScreen: React.FC<QuestsScreenProps> = ({
 
         {/* 2. MAIN SCROLLABLE CONTENT */}
         <ScrollView
+          style={{ flex: 1 }}
           contentContainerStyle={styles.scrollContent}
           showsVerticalScrollIndicator={false}
           bounces={true}
@@ -933,18 +934,20 @@ const styles = StyleSheet.create({
 
   // HEADLINE
   mainHeading: {
-    fontSize: Platform.OS === 'web' ? ('clamp(18px, 4.5vw, 22px)' as any) : sFont(20),
-    fontWeight: '700',
+    fontSize: Platform.OS === 'web' ? ('clamp(22px, 5vw, 25px)' as any) : sFont(23),
+    fontWeight: '800',
     color: '#171420',
-    letterSpacing: -0.35,
-    marginBottom: 4,
+    letterSpacing: -0.5,
+    marginBottom: 6,
+    lineHeight: Platform.OS === 'web' ? ('clamp(27px, 5.8vw, 30px)' as any) : sFont(28),
   },
   mainSubtitle: {
-    fontSize: 14,
-    color: '#524C62',
-    lineHeight: 19,
+    fontSize: sFont(13),
+    color: '#7F7894',
+    lineHeight: 18.5,
     marginBottom: 20,
-    fontWeight: '500',
+    fontWeight: '400',
+    maxWidth: '96%',
   },
 
   // 1. TODAY'S QUEST HERO CARD
