@@ -639,7 +639,54 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
     }
   };
 
+  const [composerToast, setComposerToast] = useState<string | null>(null);
+
+  const showToastNotice = (msg: string) => {
+    setComposerToast(msg);
+    setTimeout(() => {
+      setComposerToast((prev) => (prev === msg ? null : prev));
+    }, 3200);
+  };
+
   const handlePublishOrSchedule = () => {
+    // 1. Allow saving draft anytime without restriction
+    if (publishMode === 'draft') {
+      if (Platform.OS !== 'web') {
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      }
+      setCelebrationTitle('Draft Saved!');
+      setCelebrationSubtitle('Your post draft with full media & tags is saved in your queue.');
+      setCelebrationSpeech('Great work preparing ahead!');
+      setShowCelebrationModal(true);
+      return;
+    }
+
+    // 2. If attempting to Post Now or Schedule Post, verify 100% readiness
+    if (!isAllReady) {
+      if (Platform.OS !== 'web') {
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
+      }
+
+      if (!isPlatformsReady) {
+        showToastNotice('Select at least one platform before scheduling');
+        navigateToSection('platforms');
+      } else if (!isMediaReady) {
+        showToastNotice('Add your media before scheduling');
+        navigateToSection('media');
+      } else if (!isCaptionReady) {
+        showToastNotice('Add a post caption (minimum 10 characters)');
+        navigateToSection('caption');
+      } else if (!isFormatReady) {
+        showToastNotice('Select a content format');
+        navigateToSection('format');
+      } else if (!isScheduleReady) {
+        showToastNotice('Select a schedule time');
+        navigateToSection('schedule');
+      }
+      return;
+    }
+
+    // 3. Post is 100% Ready
     if (Platform.OS !== 'web') {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     }
@@ -651,10 +698,6 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
       setCelebrationTitle('Post Scheduled!');
       setCelebrationSubtitle(`Your post is locked in for ${scheduledTime}.`);
       setCelebrationSpeech('1-day streak protected! +50 XP added to your creator level.');
-    } else {
-      setCelebrationTitle('Draft Saved!');
-      setCelebrationSubtitle('Your post draft with full media & tags is saved in your queue.');
-      setCelebrationSpeech('Great work preparing ahead!');
     }
     setShowCelebrationModal(true);
   };
@@ -1765,7 +1808,7 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
               </View>
 
               <View style={styles.jarvisScorePill}>
-                <Text style={styles.jarvisScoreText}>95% Retention</Text>
+                <Text style={styles.jarvisScoreText}>95% Predicted Retention</Text>
               </View>
             </View>
 
@@ -1813,6 +1856,14 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
               </LinearGradient>
             </Pressable>
           </LinearGradient>
+
+          {/* Readiness Notice Toast */}
+          {composerToast && (
+            <View style={styles.composerToastBanner}>
+              <Text style={styles.composerToastIcon}>💡</Text>
+              <Text style={styles.composerToastText}>{composerToast}</Text>
+            </View>
+          )}
 
           {/* 10. PRIMARY & SECONDARY ACTION BUTTONS */}
           <View style={styles.composerActionRow}>
@@ -3746,6 +3797,34 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     color: '#FFFFFF',
     letterSpacing: 0.5,
+  },
+
+  // Composer Toast Notice
+  composerToastBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    backgroundColor: '#FEF3C7',
+    borderWidth: 1.2,
+    borderColor: '#FDE68A',
+    borderRadius: 14,
+    paddingVertical: 10,
+    paddingHorizontal: 14,
+    marginBottom: 12,
+    shadowColor: '#B45309',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.08,
+    shadowRadius: 6,
+    elevation: 3,
+  },
+  composerToastIcon: {
+    fontSize: 15,
+  },
+  composerToastText: {
+    fontSize: 12.5,
+    fontWeight: '700',
+    color: '#92400E',
+    flex: 1,
   },
 
   // 10. Bottom Action Row
