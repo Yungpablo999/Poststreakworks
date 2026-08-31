@@ -1158,11 +1158,11 @@ ${selectedCtaText}`;
                             numberOfLines={1}
                             ellipsizeMode="tail"
                           >
-                            {isSelected ? `✓ ${preset.type}` : preset.type}
+                            {preset.type}
                           </Text>
                           {isSelected && (
                             <View style={styles.selectedCheckBadge}>
-                              <Text style={styles.selectedCheckText}>SELECTED</Text>
+                              <Text style={styles.selectedCheckText}>✓ SELECTED</Text>
                             </View>
                           )}
                         </View>
@@ -1235,7 +1235,7 @@ ${selectedCtaText}`;
                             numberOfLines={1}
                             ellipsizeMode="tail"
                           >
-                            {isSelected ? `✓ ${preset.title}` : preset.title}
+                            {preset.title}
                           </Text>
                           <View style={styles.modalTagRightGroup}>
                             <View style={[styles.bodyModalTagPill, isSelected && styles.bodyModalTagPillActive]}>
@@ -1243,7 +1243,7 @@ ${selectedCtaText}`;
                             </View>
                             {isSelected && (
                               <View style={styles.selectedCheckBadge}>
-                                <Text style={styles.selectedCheckText}>SELECTED</Text>
+                                <Text style={styles.selectedCheckText}>✓ SELECTED</Text>
                               </View>
                             )}
                           </View>
@@ -1331,7 +1331,7 @@ ${selectedCtaText}`;
                             </View>
                             {isSelected && (
                               <View style={styles.selectedCheckBadge}>
-                                <Text style={styles.selectedCheckText}>SELECTED</Text>
+                                <Text style={styles.selectedCheckText}>✓ SELECTED</Text>
                               </View>
                             )}
                           </View>
@@ -1388,12 +1388,11 @@ ${selectedCtaText}`;
                       <Pressable
                         key={cta.id}
                         onPress={() => {
-                          if (selectedCtaText === cta.text) {
-                            setSelectedCtaText('');
-                          } else {
-                            setSelectedCtaText(cta.text);
-                            setCtaIndex(index);
+                          if (Platform.OS !== 'web') {
+                            Haptics.selectionAsync();
                           }
+                          setSelectedCtaText(cta.text);
+                          setCtaIndex(index);
                         }}
                         style={({ pressed }) => [
                           styles.ctaModalItemCard,
@@ -1408,11 +1407,11 @@ ${selectedCtaText}`;
                               numberOfLines={1}
                               ellipsizeMode="tail"
                             >
-                              {isSelected ? `✓ ${cta.type}` : cta.type}
+                              {cta.type}
                             </Text>
                             {isSelected && (
                               <View style={styles.selectedCheckBadge}>
-                                <Text style={styles.selectedCheckText}>SELECTED</Text>
+                                <Text style={styles.selectedCheckText}>✓ SELECTED</Text>
                               </View>
                             )}
                           </View>
