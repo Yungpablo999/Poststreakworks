@@ -745,7 +745,9 @@ export const MatchScreen: React.FC<MatchScreenProps> = ({
               </View>
             </View>
 
-            <Text style={styles.pageHeadline}>Find creators worth building with.</Text>
+            <Text style={styles.pageHeadline} numberOfLines={1} adjustsFontSizeToFit={true}>
+              Find creators worth building with.
+            </Text>
             <Text style={styles.pageSubtitle}>
               Swipe right to accept, left to decline, or tap ⓘ for deep-dive match intelligence.
             </Text>
@@ -1722,11 +1724,11 @@ const styles = StyleSheet.create({
     color: '#582CDB',
   },
   pageHeadline: {
-    fontSize: 24,
+    fontSize: Platform.OS === 'web' ? ('clamp(17px, 4.5vw, 20px)' as any) : sFont(19),
     fontWeight: '700',
     color: '#171420',
-    letterSpacing: -0.5,
-    lineHeight: 30,
+    letterSpacing: -0.4,
+    lineHeight: 26,
     marginBottom: 4,
   },
   pageSubtitle: {

@@ -23,6 +23,7 @@ import { BrandToast } from '../components/BrandToast';
 import { UserProfileModal, UserProfileData } from '../components/UserProfileModal';
 import { AnimatedCompletionModal } from '../components/AnimatedCompletionModal';
 import { TinyGoldCheck } from '../components/CreatorStoryModal';
+import { sFont } from '../utils/responsive';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 const SWIPE_THRESHOLD = 95;
@@ -867,7 +868,9 @@ export const ProMatchScreen: React.FC<ProMatchScreenProps> = ({
           {/* ============================================================ */}
           {/* 3. HEADLINE & SUBTITLE                                       */}
           {/* ============================================================ */}
-          <Text style={styles.mainHeadline}>Find creators worth building with.</Text>
+          <Text style={styles.mainHeadline} numberOfLines={1} adjustsFontSizeToFit={true}>
+            Find creators worth building with.
+          </Text>
           <Text style={styles.subHeadline}>
             Swipe right to accept, left to decline, or tap ⓘ for deep-dive match intelligence.
           </Text>
@@ -2147,11 +2150,11 @@ const styles = StyleSheet.create({
 
   // 3. HEADLINE
   mainHeadline: {
-    fontSize: 24,
+    fontSize: Platform.OS === 'web' ? ('clamp(17px, 4.5vw, 20px)' as any) : sFont(19),
     fontWeight: '700',
     color: '#171420',
-    letterSpacing: -0.5,
-    lineHeight: 30,
+    letterSpacing: -0.4,
+    lineHeight: 26,
     marginBottom: 4,
   },
   subHeadline: {
