@@ -115,6 +115,8 @@ export const CaptionScreen: React.FC<CaptionScreenProps> = ({
   const [postTopic, setPostTopic] = useState(ideaTitle);
   const [selectedGoal, setSelectedGoal] = useState('Get saves and comments');
   const [selectedTones, setSelectedTones] = useState<string[]>(['Helpful', 'Honest']);
+  const [isTopicFocused, setIsTopicFocused] = useState(false);
+  const topicInputRef = useRef<TextInput>(null);
 
   // Suggested Captions
   const [suggestedIndex, setSuggestedIndex] = useState(0);
@@ -347,37 +349,45 @@ export const CaptionScreen: React.FC<CaptionScreenProps> = ({
                 <Text style={styles.editableHintMicro}>Editable</Text>
               </View>
 
-              {/* Editable Topic Box */}
-              <View style={styles.topicInnerBox}>
+              {/* Editable Topic Box (Directly Tappable Content Box) */}
+              <Pressable
+                onPress={() => topicInputRef.current?.focus()}
+                style={[styles.topicInnerBox, isTopicFocused && styles.topicInnerBoxFocused]}
+              >
                 <TextInput
+                  ref={topicInputRef}
                   value={postTopic}
                   onChangeText={setPostTopic}
                   placeholder="Type your post topic or idea..."
                   placeholderTextColor="#94A3B8"
-                  multiline
+                  multiline={true}
+                  scrollEnabled={false}
+                  onFocus={() => setIsTopicFocused(true)}
+                  onBlur={() => setIsTopicFocused(false)}
                   style={styles.topicInput}
                 />
-              </View>
+              </Pressable>
 
-              {/* Goal Line with Change Button */}
-              <View style={styles.goalRow}>
+              {/* Goal Line with Obvious Tappable Action: 🎯 Goal: Get saves and comments · Change ➔ */}
+              <Pressable
+                style={({ pressed }) => [styles.goalRow, pressed && styles.btnPressed]}
+                onPress={() => {
+                  if (Platform.OS !== 'web') {
+                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                  }
+                  triggerModalAnim();
+                  setShowGoalModal(true);
+                }}
+                hitSlop={8}
+              >
                 <View style={styles.goalLeftGroup}>
                   <Text style={styles.goalIcon}>🎯</Text>
-                  <Text style={styles.goalLabel}>
+                  <Text style={styles.goalLabel} numberOfLines={1} ellipsizeMode="tail">
                     Goal: <Text style={styles.goalValue}>{selectedGoal}</Text>
+                    <Text style={styles.goalChangeInline}> · Change ➔</Text>
                   </Text>
                 </View>
-
-                <Pressable
-                  onPress={() => {
-                    triggerModalAnim();
-                    setShowGoalModal(true);
-                  }}
-                  hitSlop={8}
-                >
-                  <Text style={styles.goalChangeLink}>Change</Text>
-                </Pressable>
-              </View>
+              </Pressable>
             </View>
 
             {/* 2. CHOOSE A TONE SECTION */}
@@ -1000,25 +1010,38 @@ const styles = StyleSheet.create({
     borderRadius: 14,
     borderWidth: 1,
     borderColor: '#EFECE6',
-    padding: 12,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
     marginBottom: 12,
+  },
+  topicInnerBoxFocused: {
+    backgroundColor: '#FFFFFF',
+    borderColor: '#582CDB',
+    shadowColor: '#582CDB',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 6,
+    elevation: 2,
   },
   topicInput: {
     fontSize: 14,
     color: '#171420',
-    lineHeight: 19,
+    lineHeight: 20,
     fontWeight: '600',
     minHeight: 40,
+    padding: 0,
+    margin: 0,
   },
   goalRow: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
+    paddingVertical: 2,
   },
   goalLeftGroup: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
+    flex: 1,
   },
   goalIcon: {
     fontSize: 14,
@@ -1027,15 +1050,16 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: '#64748B',
     fontWeight: '600',
+    flex: 1,
   },
   goalValue: {
     color: '#582CDB',
     fontWeight: '800',
   },
-  goalChangeLink: {
-    fontSize: 12,
-    fontWeight: '800',
+  goalChangeInline: {
     color: '#582CDB',
+    fontWeight: '800',
+    fontSize: 12,
   },
 
   // Choose a Tone Section
