@@ -1317,6 +1317,7 @@ export const MatchScreen: React.FC<MatchScreenProps> = ({
           )}
 
           {/* SECTION: CREATOR SQUADS PRO BANNER */}
+          {/* BANNER: CREATOR SQUADS */}
           <View style={styles.squadsBannerCard}>
             <LinearGradient
               colors={['#582CDB', '#3F1AA8']}
@@ -1335,12 +1336,12 @@ export const MatchScreen: React.FC<MatchScreenProps> = ({
               </View>
 
               <Text style={styles.squadsDescText}>
-                Collaborate at scale. Join private circles of creators in your niche to share resources, feedback, and growth hacks.
+                Join private creator circles in your niche to collaborate, share feedback, and grow together.
               </Text>
 
               <View style={styles.squadsFooterRow}>
-                <View style={styles.squadsProPill}>
-                  <Text style={styles.squadsProPillText}>⚡ PRO SUITE</Text>
+                <View style={styles.squadsProBadge}>
+                  <Text style={styles.squadsProBadgeText}>⚡ PRO FEATURE</Text>
                 </View>
                 <Pressable
                   style={({ pressed }) => [styles.unlockSquadsBtn, pressed && styles.btnPressed]}
@@ -1363,7 +1364,7 @@ export const MatchScreen: React.FC<MatchScreenProps> = ({
                     end={{ x: 1, y: 1 }}
                     style={styles.goldBtnGradient}
                   >
-                    <Text style={styles.unlockSquadsBtnText}>Unlock Creator Squads</Text>
+                    <Text style={styles.unlockSquadsBtnText}>Unlock Creator Squads →</Text>
                   </LinearGradient>
                 </Pressable>
               </View>
@@ -1379,7 +1380,7 @@ export const MatchScreen: React.FC<MatchScreenProps> = ({
             />
             <View style={styles.wisdomContentCol}>
               <Text style={styles.wisdomQuote}>
-                “Creators with similar niches and consistent posting habits tend to collaborate better.”
+                “Jarvis finds creators who match your niche, posting habits, and growth goals—so your next collaboration has a better chance of working.”
               </Text>
               <Text style={styles.wisdomAuthor}>— Jarvis Engine</Text>
             </View>
@@ -2734,20 +2735,20 @@ const styles = StyleSheet.create({
     gap: 8,
     rowGap: 8,
   },
-  squadsProPill: {
-    backgroundColor: '#FEF3C7',
+  squadsProBadge: {
+    backgroundColor: 'rgba(255, 255, 255, 0.16)',
     paddingVertical: 4,
     paddingHorizontal: 9,
     borderRadius: 100,
     borderWidth: 1,
-    borderColor: '#FDE68A',
+    borderColor: 'rgba(255, 255, 255, 0.28)',
     flexShrink: 0,
   },
-  squadsProPillText: {
+  squadsProBadgeText: {
     fontSize: sFont(10),
     fontWeight: '700',
-    color: '#B45309',
-    letterSpacing: 0.6,
+    color: '#FEF3C7',
+    letterSpacing: 0.5,
   },
   unlockSquadsBtn: {
     borderRadius: 100,
@@ -2755,12 +2756,12 @@ const styles = StyleSheet.create({
     flexShrink: 0,
   },
   goldBtnGradient: {
-    paddingVertical: 7,
-    paddingHorizontal: 13,
+    paddingVertical: 7.5,
+    paddingHorizontal: 14,
   },
   unlockSquadsBtnText: {
     fontSize: sFont(11.5),
-    fontWeight: '700',
+    fontWeight: '800',
     color: '#171420',
   },
 
@@ -2786,8 +2787,8 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: '#4B4360',
     fontStyle: 'italic',
-    lineHeight: 16,
-    marginBottom: 3,
+    lineHeight: 17,
+    marginBottom: 4,
   },
   wisdomAuthor: {
     fontSize: 11,
