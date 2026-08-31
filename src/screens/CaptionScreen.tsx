@@ -288,12 +288,12 @@ export const CaptionScreen: React.FC<CaptionScreenProps> = ({
     );
   };
 
-  const handleImproveHook = () => {
+  const handleImproveOpening = () => {
     if (Platform.OS !== 'web') {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     }
     setDraftText(
-      'Stop making this mistake if you want to stay consistent as a creator: waiting for the perfect idea.'
+      'Stop making this mistake if you want to stay consistent as a creator: waiting for the perfect idea before you post.'
     );
   };
 
@@ -642,9 +642,9 @@ export const CaptionScreen: React.FC<CaptionScreenProps> = ({
 
               <Pressable
                 style={({ pressed }) => [styles.improveHookBtn, pressed && styles.btnPressed]}
-                onPress={handleImproveHook}
+                onPress={handleImproveOpening}
               >
-                <Text style={styles.improveHookBtnText}>Improve Hook</Text>
+                <Text style={styles.improveHookBtnText}>Improve Opening</Text>
               </Pressable>
             </View>
 
@@ -1432,7 +1432,8 @@ const styles = StyleSheet.create({
     borderRadius: 14,
     borderWidth: 1,
     borderColor: '#EDE9FE',
-    padding: 12,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
     marginBottom: 12,
   },
   draftEditorInput: {
@@ -1440,7 +1441,10 @@ const styles = StyleSheet.create({
     color: '#171420',
     lineHeight: 20,
     fontWeight: '500',
-    minHeight: 80,
+    minHeight: 52,
+    maxHeight: 240,
+    padding: 0,
+    margin: 0,
   },
   draftStatusRow: {
     flexDirection: 'row',
