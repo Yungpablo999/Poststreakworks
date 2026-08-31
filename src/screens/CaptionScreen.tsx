@@ -669,7 +669,7 @@ export const CaptionScreen: React.FC<CaptionScreenProps> = ({
               </View>
 
               <Text style={styles.jarvisBodyText}>
-                This caption works best when the <Text style={{ fontWeight: '800' }}>first line</Text> is specific. Mention one realisation that changed how you create.
+                Your <Text style={{ fontWeight: '800' }}>first line</Text> could be more specific. Add one realisation that changed how you create—it’ll make this feel more personal.
               </Text>
 
               <Pressable
