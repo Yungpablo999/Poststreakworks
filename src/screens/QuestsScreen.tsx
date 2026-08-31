@@ -482,7 +482,12 @@ export const QuestsScreen: React.FC<QuestsScreenProps> = ({
               {/* Bottom Row */}
               <View style={styles.communityFooterRow}>
                 <View style={styles.challengeRewardBox}>
-                  <Text style={styles.challengeRewardTitle} numberOfLines={1}>
+                  <Text
+                    style={styles.challengeRewardTitle}
+                    numberOfLines={1}
+                    adjustsFontSizeToFit={true}
+                    minimumFontScale={0.75}
+                  >
                     🏆 Consistency Badge
                   </Text>
                   <Text style={styles.challengeRewardSub}>+250 XP Reward</Text>
@@ -1374,19 +1379,20 @@ const styles = StyleSheet.create({
   },
   challengeRewardBox: {
     flex: 1,
-    paddingRight: 8,
+    paddingRight: 6,
+    justifyContent: 'center',
   },
   challengeRewardTitle: {
-    fontSize: 13,
+    fontSize: sFont(12),
     fontWeight: '800',
     color: '#FEF08A',
-    letterSpacing: -0.2,
+    letterSpacing: -0.3,
     marginBottom: 2,
   },
   challengeRewardSub: {
-    fontSize: 11,
+    fontSize: sFont(10.5),
     fontWeight: '700',
-    color: 'rgba(255, 255, 255, 0.85)',
+    color: 'rgba(255, 255, 255, 0.9)',
   },
   joinChallengeBtn: {
     borderRadius: 100,
@@ -1396,17 +1402,18 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.12,
     shadowRadius: 6,
     elevation: 3,
+    flexShrink: 0,
   },
   joinChallengeGradient: {
-    paddingVertical: 9,
-    paddingHorizontal: 18,
+    paddingVertical: 8.5,
+    paddingHorizontal: 14,
     borderRadius: 100,
     alignItems: 'center',
     justifyContent: 'center',
   },
   joinChallengeBtnText: {
-    fontSize: 12.5,
-    fontWeight: '700',
+    fontSize: sFont(12),
+    fontWeight: '800',
     color: '#171420',
     letterSpacing: -0.2,
   },
