@@ -457,17 +457,23 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
       }}
     >
       <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
         style={{ flex: 1 }}
       >
-        <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
-          <View style={styles.overlay}>
-            <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
-              <Animated.View
-                style={[styles.modalCard, { transform: [{ scale: modalScale }] }]}
-              >
-                {/* TOP MODAL HEADER: PRO / FREE BADGE NEAR CREATOR PASSPORT */}
-                <View style={styles.modalHeaderRow}>
+        <View style={styles.overlay}>
+          {/* Tap backdrop to dismiss */}
+          <Pressable
+            style={StyleSheet.absoluteFill}
+            onPress={() => {
+              Keyboard.dismiss();
+              onClose();
+            }}
+          />
+          <Animated.View
+            style={[styles.modalCard, { transform: [{ scale: modalScale }] }]}
+          >
+            {/* TOP MODAL HEADER: PRO / FREE BADGE NEAR CREATOR PASSPORT */}
+            <View style={styles.modalHeaderRow}>
             <View style={{ flex: 1 }}>
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
                 <Text style={styles.modalTitle}>Creator Passport</Text>
@@ -1230,11 +1236,9 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
             </Pressable>
           </View>
         </Animated.View>
-      </TouchableWithoutFeedback>
-    </View>
-  </TouchableWithoutFeedback>
-</KeyboardAvoidingView>
-</Modal>
+      </View>
+    </KeyboardAvoidingView>
+  </Modal>
   );
 };
 
