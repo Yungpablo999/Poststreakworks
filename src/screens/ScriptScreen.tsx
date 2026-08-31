@@ -642,6 +642,7 @@ ${selectedCtaText}`;
                       placeholder="Type your hook..."
                       placeholderTextColor="#94A3B8"
                       multiline
+                      scrollEnabled={false}
                       style={styles.hookInput}
                     />
                   )}
@@ -652,6 +653,7 @@ ${selectedCtaText}`;
                       placeholder="Write or customize script body..."
                       placeholderTextColor="#94A3B8"
                       multiline
+                      scrollEnabled={false}
                       style={styles.bodyInput}
                     />
                   )}
@@ -662,6 +664,7 @@ ${selectedCtaText}`;
                       placeholder="Type takeaway lesson..."
                       placeholderTextColor="#94A3B8"
                       multiline
+                      scrollEnabled={false}
                       style={styles.takeawayInput}
                     />
                   )}
@@ -672,6 +675,7 @@ ${selectedCtaText}`;
                       placeholder="Type call to action..."
                       placeholderTextColor="#94A3B8"
                       multiline
+                      scrollEnabled={false}
                       style={styles.ctaInput}
                     />
                   )}
@@ -809,6 +813,7 @@ ${selectedCtaText}`;
                   placeholder="Write or customize script body..."
                   placeholderTextColor="#94A3B8"
                   multiline
+                  scrollEnabled={false}
                   style={styles.bodyInput}
                 />
               </View>
@@ -902,6 +907,7 @@ ${selectedCtaText}`;
                   placeholder="Type takeaway lesson..."
                   placeholderTextColor="#94A3B8"
                   multiline
+                  scrollEnabled={false}
                   style={styles.takeawayInput}
                 />
               </View>
@@ -934,6 +940,7 @@ ${selectedCtaText}`;
                   placeholder="Type call to action..."
                   placeholderTextColor="#94A3B8"
                   multiline
+                  scrollEnabled={false}
                   style={styles.ctaInput}
                 />
               </View>
@@ -1817,15 +1824,19 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     borderWidth: 1,
     borderColor: '#EDE9FE',
-    padding: 12,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
     marginBottom: 4,
   },
   hookInput: {
     fontSize: 14,
     fontWeight: '700',
     color: '#171420',
-    lineHeight: 19,
-    minHeight: 36,
+    lineHeight: 20,
+    minHeight: 40,
+    padding: 0,
+    paddingLeft: 2,
+    margin: 0,
   },
   alternativeHooksLabel: {
     fontSize: 10,
@@ -1858,14 +1869,17 @@ const styles = StyleSheet.create({
     borderRadius: 14,
     borderWidth: 1,
     borderColor: '#EFECE6',
-    padding: 12,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
     marginBottom: 12,
   },
   bodyInput: {
     fontSize: 13,
     color: '#334155',
-    lineHeight: 19,
+    lineHeight: 20,
     minHeight: 70,
+    padding: 0,
+    margin: 0,
   },
   bodyChipsRow: {
     flexDirection: 'row',
@@ -1888,8 +1902,8 @@ const styles = StyleSheet.create({
     borderColor: '#582CDB',
   },
   bodyFilterChipText: {
-    fontSize: sFont(11),
-    fontWeight: '800',
+    fontSize: 11,
+    fontWeight: '700',
     color: '#6D28D9',
   },
   bodyFilterChipTextActive: {
@@ -1959,14 +1973,17 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     borderWidth: 1,
     borderColor: '#EFECE6',
-    padding: 12,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
     marginBottom: 10,
   },
   takeawayInput: {
     fontSize: 13,
     color: '#171420',
-    lineHeight: 18,
+    lineHeight: 19,
     minHeight: 36,
+    padding: 0,
+    margin: 0,
   },
   improveTakeawayLink: {
     fontSize: 12,
@@ -1981,7 +1998,8 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     borderWidth: 1,
     borderColor: '#EFECE6',
-    padding: 12,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
     marginBottom: 12,
   },
   ctaInput: {
