@@ -544,13 +544,6 @@ export const CaptionScreen: React.FC<CaptionScreenProps> = ({
             >
               <View style={styles.cardHeaderFlex}>
                 <Text style={styles.microCapLabel}>QUICK CTA</Text>
-                <Pressable
-                  onPress={() => quickCtaInputRef.current?.focus()}
-                  hitSlop={8}
-                  style={styles.editActionPill}
-                >
-                  <Text style={styles.editActionPillText}>Edit →</Text>
-                </Pressable>
               </View>
               <TextInput
                 ref={quickCtaInputRef}
@@ -573,13 +566,6 @@ export const CaptionScreen: React.FC<CaptionScreenProps> = ({
             >
               <View style={styles.cardHeaderFlex}>
                 <Text style={styles.microCapLabel}>HASHTAGS</Text>
-                <Pressable
-                  onPress={() => hashtagsInputRef.current?.focus()}
-                  hitSlop={8}
-                  style={styles.editActionPill}
-                >
-                  <Text style={styles.editActionPillText}>Edit →</Text>
-                </Pressable>
               </View>
               <TextInput
                 ref={hashtagsInputRef}
