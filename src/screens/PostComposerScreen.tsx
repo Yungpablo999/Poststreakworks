@@ -185,8 +185,8 @@ export const CONTENT_FORMATS: ContentFormatOption[] = [
     icon: '📑',
     recommendedDescription: 'Great for educational breakdowns, step-by-step swipe posts & saves.',
     mediaLabel: 'Add carousel slides',
-    mediaSub: 'Up to 10 slides • 4:5 or 1:1 recommended',
-    primaryMediaActionText: 'Add Slides (0/10)',
+    mediaSub: 'Up to 30 slides • 4:5 or 1:1 recommended',
+    primaryMediaActionText: 'Add Slides (0/30)',
     supportedPlatformIds: ['instagram', 'tiktok', 'pinterest', 'facebook'],
   },
   {
@@ -639,8 +639,8 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
           : '9:16 vertical • Recommended 15–60s';
       case 'carousel':
         return platNames
-          ? `Up to 10 slides • 4:5 or 1:1 • Optimized for ${platNames}`
-          : 'Up to 10 slides • 4:5 or 1:1 recommended';
+          ? `Up to 30 slides • 4:5 or 1:1 • Optimized for ${platNames}`
+          : 'Up to 30 slides • 4:5 or 1:1 recommended';
       case 'image':
         return platNames
           ? `High resolution • 4:5 portrait • Optimized for ${platNames}`
