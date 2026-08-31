@@ -238,7 +238,9 @@ export const QuestsScreen: React.FC<QuestsScreenProps> = ({
           </View>
 
           {/* HEADLINE & SUBTITLE */}
-          <Text style={styles.mainHeading}>Complete quests. Build your streak.</Text>
+          <Text style={styles.mainHeading} numberOfLines={1} adjustsFontSizeToFit={true}>
+            Complete quests. Build your streak.
+          </Text>
           <Text style={styles.mainSubtitle}>
             Daily missions, creator challenges and reputation goals that help you stay consistent.
           </Text>
@@ -934,12 +936,12 @@ const styles = StyleSheet.create({
 
   // HEADLINE
   mainHeading: {
-    fontSize: Platform.OS === 'web' ? ('clamp(22px, 5vw, 25px)' as any) : sFont(23),
+    fontSize: Platform.OS === 'web' ? ('clamp(17px, 3.8vw, 20.5px)' as any) : sFont(18.5),
     fontWeight: '800',
     color: '#171420',
-    letterSpacing: -0.5,
+    letterSpacing: -0.35,
     marginBottom: 6,
-    lineHeight: Platform.OS === 'web' ? ('clamp(27px, 5.8vw, 30px)' as any) : sFont(28),
+    lineHeight: Platform.OS === 'web' ? ('clamp(22px, 4.8vw, 26px)' as any) : sFont(24),
   },
   mainSubtitle: {
     fontSize: sFont(13),
