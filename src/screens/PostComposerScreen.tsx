@@ -377,7 +377,6 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
     '#CreatorTips',
     '#ContentCreation',
     '#Consistency',
-    '#CreatorJourney',
   ]);
   const [newTagInput, setNewTagInput] = useState('');
   const [showAddTagInput, setShowAddTagInput] = useState(false);
@@ -492,12 +491,73 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
     }, 450);
   };
 
+  // Intelligent, platform- and format-aware tag resolution
+  const getIntelligentTagsForContext = (
+    platforms: string[],
+    format: ContentFormatType,
+    text: string
+  ): string[] => {
+    const topicPool: string[] = [];
+
+    // Platform-specific tags
+    if (platforms.includes('tiktok')) {
+      topicPool.push('#TikTokGrowth', '#CreatorTips');
+    }
+    if (platforms.includes('instagram')) {
+      topicPool.push('#ContentCreation', '#CreatorsOfInstagram');
+    }
+    if (platforms.includes('youtube')) {
+      topicPool.push('#Shorts', '#CreatorStrategy');
+    }
+    if (platforms.includes('pinterest')) {
+      topicPool.push('#CreativeInspiration', '#VisualTips');
+    }
+    if (platforms.includes('threads')) {
+      topicPool.push('#BuildInPublic', '#CreatorEconomy');
+    }
+    if (platforms.includes('facebook')) {
+      topicPool.push('#CreatorCommunity');
+    }
+
+    // Format-specific tags
+    if (format === 'carousel') {
+      topicPool.push('#CarouselPost', '#SwipeFiles');
+    } else if (format === 'short_video') {
+      topicPool.push('#ReelsTips', '#ViralReels');
+    } else if (format === 'text') {
+      topicPool.push('#CreatorInsights', '#ThreadPost');
+    } else if (format === 'long_video') {
+      topicPool.push('#FullTutorial', '#DeepDive');
+    }
+
+    // Keyword detection from caption text
+    const lower = text.toLowerCase();
+    if (lower.includes('habit') || lower.includes('daily') || lower.includes('routine')) {
+      topicPool.push('#DailyHabits');
+    }
+    if (lower.includes('consistency') || lower.includes('consistent')) {
+      topicPool.push('#Consistency');
+    }
+    if (lower.includes('grow') || lower.includes('audience') || lower.includes('reach')) {
+      topicPool.push('#AudienceGrowth');
+    }
+    if (lower.includes('start') || lower.includes('beginner') || lower.includes('lesson')) {
+      topicPool.push('#CreatorJourney');
+    }
+
+    // Default core pool
+    topicPool.push('#CreatorTips', '#ContentCreation', '#Consistency');
+
+    const unique = Array.from(new Set(topicPool));
+    return unique.slice(0, 4);
+  };
+
   const handleGenerateTags = () => {
     if (Platform.OS !== 'web') {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     }
-    const newSuggested = ['#ViralReels', '#PostStreak', '#DailyCreating', '#CreatorEconomy'];
-    setTags((prev) => Array.from(new Set([...prev, ...newSuggested])));
+    const smartTags = getIntelligentTagsForContext(selectedPlatforms, selectedFormat, caption);
+    setTags((prev) => Array.from(new Set([...prev, ...smartTags])));
     if (Platform.OS !== 'web') {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     }
@@ -1249,8 +1309,31 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
           </View>
 
           {/* 5. HASHTAGS & TAGS */}
-          <Text style={styles.sectionLabel}>HASHTAGS &amp; TAGS</Text>
+          <View style={styles.sectionLabelRow}>
+            <Text style={styles.sectionLabel}>HASHTAGS &amp; TAGS</Text>
+            {selectedPlatforms.length > 0 && (
+              <View style={styles.platformTagsBadgeRow}>
+                {selectedPlatforms.map((platId) => {
+                  const plat = ALL_AVAILABLE_PLATFORMS.find((p) => p.id === platId);
+                  if (!plat) return null;
+                  return (
+                    <View key={plat.id} style={[styles.platformMiniTagPill, { backgroundColor: plat.bgColor }]}>
+                      <Text style={styles.platformMiniTagText}>{plat.name}</Text>
+                    </View>
+                  );
+                })}
+              </View>
+            )}
+          </View>
+
           <View style={styles.tagsContainer}>
+            <View style={styles.tagsContextRow}>
+              <Text style={styles.tagsContextSparkle}>✨</Text>
+              <Text style={styles.tagsContextText}>
+                Jarvis selected these based on your post &amp; {selectedPlatforms.length > 0 ? selectedPlatforms.map(p => ALL_AVAILABLE_PLATFORMS.find(x => x.id === p)?.name).join(' + ') : 'channels'}
+              </Text>
+            </View>
+
             <View style={styles.tagsPillsRow}>
               {tags.map((tag) => (
                 <Pressable
@@ -1259,7 +1342,7 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
                   style={styles.tagPill}
                 >
                   <Text style={styles.tagPillText}>{tag}</Text>
-                  <Text style={styles.tagPillCross}>✕</Text>
+                  <Text style={styles.tagPillCross}>×</Text>
                 </Pressable>
               ))}
             </View>
@@ -1273,6 +1356,7 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
                   value={newTagInput}
                   onChangeText={setNewTagInput}
                   onSubmitEditing={handleAddCustomTag}
+                  autoFocus
                 />
                 <Pressable onPress={handleAddCustomTag} style={styles.addTagConfirmBtn}>
                   <Text style={styles.addTagConfirmText}>Add</Text>
@@ -1281,18 +1365,31 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
             )}
 
             <View style={styles.tagActionsRow}>
+              {/* Secondary Outlined Custom Tag Button */}
               <Pressable
-                style={({ pressed }) => [styles.tagActionBtn, pressed && styles.btnPressed]}
+                style={({ pressed }) => [styles.tagActionCustomBtn, pressed && styles.btnPressed]}
                 onPress={() => setShowAddTagInput(!showAddTagInput)}
               >
-                <Text style={styles.tagActionBtnText}>+ Add Custom Tag</Text>
+                <Svg width={13} height={13} viewBox="0 0 24 24" fill="none">
+                  <Path d="M12 5v14M5 12h14" stroke="#582CDB" strokeWidth="2.4" strokeLinecap="round" />
+                </Svg>
+                <Text style={styles.tagActionCustomBtnText}>Add Custom Tag</Text>
               </Pressable>
 
+              {/* Stronger Primary Purple Filled Generate Tags Button */}
               <Pressable
-                style={({ pressed }) => [styles.tagActionBtn, pressed && styles.btnPressed]}
+                style={({ pressed }) => [styles.tagActionGenerateBtn, pressed && styles.btnPressed]}
                 onPress={handleGenerateTags}
               >
-                <Text style={styles.tagActionBtnText}>✨ Generate Tags</Text>
+                <LinearGradient
+                  colors={['#582CDB', '#7C3AED']}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 1 }}
+                  style={styles.tagActionGenerateGradient}
+                >
+                  <Text style={{ fontSize: 13 }}>✨</Text>
+                  <Text style={styles.tagActionGenerateBtnText}>Generate Tags</Text>
+                </LinearGradient>
               </Pressable>
             </View>
           </View>
@@ -2827,10 +2924,25 @@ const styles = StyleSheet.create({
   },
 
   // 5. Tags
+  platformTagsBadgeRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+  },
+  platformMiniTagPill: {
+    paddingVertical: 2,
+    paddingHorizontal: 7,
+    borderRadius: 6,
+  },
+  platformMiniTagText: {
+    fontSize: 9.5,
+    fontWeight: '800',
+    color: '#FFFFFF',
+  },
   tagsContainer: {
     backgroundColor: '#FFFFFF',
     borderRadius: 20,
-    borderWidth: 1,
+    borderWidth: 1.5,
     borderColor: '#EFEBF8',
     padding: 16,
     marginBottom: 18,
@@ -2840,20 +2952,35 @@ const styles = StyleSheet.create({
     shadowRadius: 10,
     elevation: 3,
   },
+  tagsContextRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    marginBottom: 12,
+  },
+  tagsContextSparkle: {
+    fontSize: 12,
+  },
+  tagsContextText: {
+    fontSize: 11.5,
+    color: '#64748B',
+    fontWeight: '600',
+    flex: 1,
+  },
   tagsPillsRow: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: 6,
-    marginBottom: 12,
+    marginBottom: 14,
   },
   tagPill: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#EDE9FE',
-    paddingVertical: 4,
+    backgroundColor: '#F3E8FF',
+    paddingVertical: 5,
     paddingHorizontal: 10,
     borderRadius: 8,
-    gap: 4,
+    gap: 6,
   },
   tagPillText: {
     fontSize: 12,
@@ -2861,9 +2988,10 @@ const styles = StyleSheet.create({
     color: '#6D28D9',
   },
   tagPillCross: {
-    fontSize: 10,
+    fontSize: 14,
     color: '#7C3AED',
     fontWeight: '700',
+    marginTop: -1,
   },
   addTagInputRow: {
     flexDirection: 'row',
@@ -2876,7 +3004,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#F8FAFC',
     borderRadius: 10,
     borderWidth: 1,
-    borderColor: '#EFECE6',
+    borderColor: '#E2E8F0',
     paddingHorizontal: 12,
     fontSize: 12,
     color: '#1E293B',
@@ -2898,20 +3026,45 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     gap: 10,
   },
-  tagActionBtn: {
+  tagActionCustomBtn: {
     flex: 1,
     height: 40,
     borderRadius: 12,
     backgroundColor: '#FFFFFF',
-    borderWidth: 1,
-    borderColor: '#EDE9FE',
-    justifyContent: 'center',
+    borderWidth: 1.2,
+    borderColor: '#E2E8F0',
+    flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
   },
-  tagActionBtnText: {
+  tagActionCustomBtnText: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#582CDB',
+  },
+  tagActionGenerateBtn: {
+    flex: 1,
+    height: 40,
+    borderRadius: 12,
+    overflow: 'hidden',
+    shadowColor: '#582CDB',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 5,
+    elevation: 3,
+  },
+  tagActionGenerateGradient: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+  },
+  tagActionGenerateBtnText: {
     fontSize: 12,
     fontWeight: '800',
-    color: '#582CDB',
+    color: '#FFFFFF',
   },
 
   // 6. Timing & Scheduling
