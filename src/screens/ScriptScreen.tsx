@@ -554,6 +554,7 @@ export const ScriptScreen: React.FC<ScriptScreenProps> = ({
             showsVerticalScrollIndicator={false}
             bounces={true}
             keyboardShouldPersistTaps="handled"
+            keyboardDismissMode="on-drag"
           >
             {/* Top Pill Badge */}
             <View style={styles.topBadgesRow}>

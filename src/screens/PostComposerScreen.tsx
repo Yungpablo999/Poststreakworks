@@ -922,6 +922,8 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
           contentContainerStyle={styles.scrollContent}
           showsVerticalScrollIndicator={false}
           bounces={true}
+          keyboardShouldPersistTaps="handled"
+          keyboardDismissMode="on-drag"
         >
           {/* Top Pill Badges (Gold Gradient & Draft) */}
           <View style={styles.topBadgesRow}>

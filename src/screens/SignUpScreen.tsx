@@ -378,6 +378,7 @@ export const SignUpScreen: React.FC<SignUpScreenProps> = ({
           contentContainerStyle={styles.scrollContent}
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
+          keyboardDismissMode="on-drag"
           bounces={true}
         >
           {/* 1. TOP BAR: Back Arrow + 4-Step Progress Indicator */}

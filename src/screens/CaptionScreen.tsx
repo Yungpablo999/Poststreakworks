@@ -363,6 +363,7 @@ export const CaptionScreen: React.FC<CaptionScreenProps> = ({
             showsVerticalScrollIndicator={false}
             bounces={true}
             keyboardShouldPersistTaps="handled"
+            keyboardDismissMode="on-drag"
           >
             {/* Top Pill Badges */}
             <View style={styles.topBadgesRow}>

@@ -12,6 +12,9 @@ import {
   Image,
   TextInput,
   Dimensions,
+  Keyboard,
+  TouchableWithoutFeedback,
+  KeyboardAvoidingView,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as Haptics from 'expo-haptics';
@@ -448,14 +451,23 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
       visible={visible}
       transparent={true}
       animationType="fade"
-      onRequestClose={onClose}
+      onRequestClose={() => {
+        Keyboard.dismiss();
+        onClose();
+      }}
     >
-      <View style={styles.overlay}>
-        <Animated.View
-          style={[styles.modalCard, { transform: [{ scale: modalScale }] }]}
-        >
-          {/* TOP MODAL HEADER: PRO / FREE BADGE NEAR CREATOR PASSPORT */}
-          <View style={styles.modalHeaderRow}>
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        style={{ flex: 1 }}
+      >
+        <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
+          <View style={styles.overlay}>
+            <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
+              <Animated.View
+                style={[styles.modalCard, { transform: [{ scale: modalScale }] }]}
+              >
+                {/* TOP MODAL HEADER: PRO / FREE BADGE NEAR CREATOR PASSPORT */}
+                <View style={styles.modalHeaderRow}>
             <View style={{ flex: 1 }}>
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
                 <Text style={styles.modalTitle}>Creator Passport</Text>
@@ -583,6 +595,7 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
             style={styles.scrollBody}
             showsVerticalScrollIndicator={false}
             keyboardShouldPersistTaps="handled"
+            keyboardDismissMode="on-drag"
           >
             {/* FLOATING TOAST BANNER */}
             {toastMessage && (
@@ -1217,8 +1230,11 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
             </Pressable>
           </View>
         </Animated.View>
-      </View>
-    </Modal>
+      </TouchableWithoutFeedback>
+    </View>
+  </TouchableWithoutFeedback>
+</KeyboardAvoidingView>
+</Modal>
   );
 };
 

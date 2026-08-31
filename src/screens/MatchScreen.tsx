@@ -15,6 +15,9 @@ import {
   Platform,
   Dimensions,
   Easing,
+  Keyboard,
+  TouchableWithoutFeedback,
+  KeyboardAvoidingView,
 } from 'react-native';
 import Svg, { Path, Circle, Defs, RadialGradient, Stop } from 'react-native-svg';
 import * as Haptics from 'expo-haptics';
@@ -745,6 +748,8 @@ export const MatchScreen: React.FC<MatchScreenProps> = ({
           style={styles.scrollView}
           contentContainerStyle={styles.scrollContent}
           showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
+          keyboardDismissMode="on-drag"
         >
           {/* SECTION 1: MATCH HEADER & LIVE RADAR STATS */}
           <View style={styles.pageHeaderSection}>
@@ -1461,88 +1466,118 @@ export const MatchScreen: React.FC<MatchScreenProps> = ({
           visible={showPitchModal}
           transparent={true}
           animationType="fade"
-          onRequestClose={() => setShowPitchModal(false)}
+          onRequestClose={() => {
+            Keyboard.dismiss();
+            setShowPitchModal(false);
+          }}
         >
-          <View style={styles.modalOverlay}>
-            <View style={[styles.modalCard, { maxWidth: 340 }]}>
-              <View style={styles.modalBadgePill}>
-                <Text style={styles.modalBadgeText}>COLLAB PITCH • JARVIS AI</Text>
-              </View>
-              <Text style={styles.modalTitle}>Pitch Plan to {pitchRecipient.name.split(' ')[0]}</Text>
-              <Text style={styles.modalSubtitle}>
-                Send this co-creation blueprint as your connection invite.
-              </Text>
-
-              {/* Idea Preview Card */}
-              <View style={styles.pitchIdeaPreviewBox}>
-                <Text style={styles.pitchIdeaPreviewTitle}>{pitchRecipient.collabIdea.title}</Text>
-                <Text style={styles.pitchIdeaPreviewMeta}>
-                  {pitchRecipient.collabIdea.chips.join(' • ')}
-                </Text>
-              </View>
-
-              {/* Platform Selector */}
-              <View style={styles.inputGroupFull}>
-                <Text style={styles.inputFieldLabel}>TARGET PLATFORM</Text>
-                <View style={styles.platformPillRow}>
-                  <Pressable
-                    style={[styles.platformPill, selectedPitchPlatform === 'instagram' && styles.platformPillActive]}
-                    onPress={() => setSelectedPitchPlatform('instagram')}
-                  >
-                    <Text style={[styles.platformPillText, selectedPitchPlatform === 'instagram' && styles.platformPillTextActive]}>
-                      Instagram
+          <KeyboardAvoidingView
+            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+            style={{ flex: 1 }}
+          >
+            <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
+              <View style={styles.modalOverlay}>
+                <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
+                  <View style={[styles.modalCard, { maxWidth: 340 }]}>
+                    <View style={styles.modalBadgePill}>
+                      <Text style={styles.modalBadgeText}>COLLAB PITCH • JARVIS AI</Text>
+                    </View>
+                    <Text style={styles.modalTitle}>Pitch Plan to {pitchRecipient.name.split(' ')[0]}</Text>
+                    <Text style={styles.modalSubtitle}>
+                      Send this co-creation blueprint as your connection invite.
                     </Text>
-                  </Pressable>
-                  <Pressable
-                    style={[styles.platformPill, selectedPitchPlatform === 'tiktok' && styles.platformPillActive]}
-                    onPress={() => setSelectedPitchPlatform('tiktok')}
-                  >
-                    <Text style={[styles.platformPillText, selectedPitchPlatform === 'tiktok' && styles.platformPillTextActive]}>
-                      TikTok
-                    </Text>
-                  </Pressable>
-                  <Pressable
-                    style={[styles.platformPill, selectedPitchPlatform === 'youtube' && styles.platformPillActive]}
-                    onPress={() => setSelectedPitchPlatform('youtube')}
-                  >
-                    <Text style={[styles.platformPillText, selectedPitchPlatform === 'youtube' && styles.platformPillTextActive]}>
-                      Shorts
-                    </Text>
-                  </Pressable>
-                </View>
-              </View>
 
-              {/* Pitch note textarea */}
-              <View style={styles.inputGroupFull}>
-                <Text style={styles.inputFieldLabel}>PERSONALIZED COLLAB PITCH</Text>
-                <TextInput
-                  style={styles.pitchTextAreaInput}
-                  value={pitchMessageDraft}
-                  onChangeText={setPitchMessageDraft}
-                  placeholder="Write your pitch message..."
-                  placeholderTextColor="#A39CB5"
-                  multiline={true}
-                  numberOfLines={3}
-                  textAlignVertical="top"
-                />
-              </View>
+                    {/* Idea Preview Card */}
+                    <View style={styles.pitchIdeaPreviewBox}>
+                      <Text style={styles.pitchIdeaPreviewTitle}>{pitchRecipient.collabIdea.title}</Text>
+                      <Text style={styles.pitchIdeaPreviewMeta}>
+                        {pitchRecipient.collabIdea.chips.join(' • ')}
+                      </Text>
+                    </View>
 
-              <View style={styles.modalBtnRow}>
-                <Pressable
-                  style={styles.modalCancelBtn}
-                  onPress={() => setShowPitchModal(false)}
-                >
-                  <Text style={styles.modalCancelBtnText}>Cancel</Text>
-                </Pressable>
-                <Pressable
-                  style={styles.modalPrimaryBtn}
-                  onPress={handleSendPitchConfirm}
-                >
-                  <Text style={styles.modalPrimaryBtnText} numberOfLines={1}>Send Pitch (+50 XP)</Text>
-                </Pressable>
+                    {/* Platform Selector */}
+                    <View style={styles.inputGroupFull}>
+                      <Text style={styles.inputFieldLabel}>TARGET PLATFORM</Text>
+                      <View style={styles.platformPillRow}>
+                        <Pressable
+                          style={[styles.platformPill, selectedPitchPlatform === 'instagram' && styles.platformPillActive]}
+                          onPress={() => {
+                            Keyboard.dismiss();
+                            setSelectedPitchPlatform('instagram');
+                          }}
+                        >
+                          <Text style={[styles.platformPillText, selectedPitchPlatform === 'instagram' && styles.platformPillTextActive]}>
+                            Instagram
+                          </Text>
+                        </Pressable>
+                        <Pressable
+                          style={[styles.platformPill, selectedPitchPlatform === 'tiktok' && styles.platformPillActive]}
+                          onPress={() => {
+                            Keyboard.dismiss();
+                            setSelectedPitchPlatform('tiktok');
+                          }}
+                        >
+                          <Text style={[styles.platformPillText, selectedPitchPlatform === 'tiktok' && styles.platformPillTextActive]}>
+                            TikTok
+                          </Text>
+                        </Pressable>
+                        <Pressable
+                          style={[styles.platformPill, selectedPitchPlatform === 'youtube' && styles.platformPillActive]}
+                          onPress={() => {
+                            Keyboard.dismiss();
+                            setSelectedPitchPlatform('youtube');
+                          }}
+                        >
+                          <Text style={[styles.platformPillText, selectedPitchPlatform === 'youtube' && styles.platformPillTextActive]}>
+                            Shorts
+                          </Text>
+                        </Pressable>
+                      </View>
+                    </View>
+
+                    {/* Pitch note textarea */}
+                    <View style={styles.inputGroupFull}>
+                      <Text style={styles.inputFieldLabel}>PERSONALIZED COLLAB PITCH</Text>
+                      <TextInput
+                        style={styles.pitchTextAreaInput}
+                        value={pitchMessageDraft}
+                        onChangeText={setPitchMessageDraft}
+                        placeholder="Write your pitch message..."
+                        placeholderTextColor="#A39CB5"
+                        multiline={true}
+                        numberOfLines={3}
+                        textAlignVertical="top"
+                        blurOnSubmit={true}
+                        returnKeyType="done"
+                        onSubmitEditing={Keyboard.dismiss}
+                      />
+                    </View>
+
+                    <View style={styles.modalBtnRow}>
+                      <Pressable
+                        style={styles.modalCancelBtn}
+                        onPress={() => {
+                          Keyboard.dismiss();
+                          setShowPitchModal(false);
+                        }}
+                      >
+                        <Text style={styles.modalCancelBtnText}>Cancel</Text>
+                      </Pressable>
+                      <Pressable
+                        style={styles.modalPrimaryBtn}
+                        onPress={() => {
+                          Keyboard.dismiss();
+                          handleSendPitchConfirm();
+                        }}
+                      >
+                        <Text style={styles.modalPrimaryBtnText} numberOfLines={1}>Send Pitch (+50 XP)</Text>
+                      </Pressable>
+                    </View>
+                  </View>
+                </TouchableWithoutFeedback>
               </View>
-            </View>
-          </View>
+            </TouchableWithoutFeedback>
+          </KeyboardAvoidingView>
         </Modal>
 
         {/* 6B. ANIMATED COMPLETION CELEBRATION (ON PITCH SENT SUCCESS) */}
@@ -1577,40 +1612,61 @@ export const MatchScreen: React.FC<MatchScreenProps> = ({
           visible={showMessageModal}
           transparent={true}
           animationType="fade"
-          onRequestClose={() => setShowMessageModal(false)}
+          onRequestClose={() => {
+            Keyboard.dismiss();
+            setShowMessageModal(false);
+          }}
         >
-          <View style={styles.modalOverlay}>
-            <View style={styles.modalCard}>
-              <Text style={styles.modalTitle}>Message {selectedRecipient || 'Creator'}</Text>
-              <Text style={styles.modalSubtitle}>Start a collaborative dialogue directly.</Text>
+          <KeyboardAvoidingView
+            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+            style={{ flex: 1 }}
+          >
+            <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
+              <View style={styles.modalOverlay}>
+                <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
+                  <View style={styles.modalCard}>
+                    <Text style={styles.modalTitle}>Message {selectedRecipient || 'Creator'}</Text>
+                    <Text style={styles.modalSubtitle}>Start a collaborative dialogue directly.</Text>
 
-              <TextInput
-                style={styles.modalTextAreaInput}
-                placeholder="Hey, loved your latest post! Let’s collaborate on a co-created Reel..."
-                placeholderTextColor="#A39CB5"
-                value={messageText}
-                onChangeText={setMessageText}
-                multiline={true}
-                numberOfLines={3}
-                textAlignVertical="top"
-              />
+                    <TextInput
+                      style={styles.modalTextAreaInput}
+                      placeholder="Hey, loved your latest post! Let’s collaborate on a co-created Reel..."
+                      placeholderTextColor="#A39CB5"
+                      value={messageText}
+                      onChangeText={setMessageText}
+                      multiline={true}
+                      numberOfLines={3}
+                      textAlignVertical="top"
+                      blurOnSubmit={true}
+                      returnKeyType="done"
+                      onSubmitEditing={Keyboard.dismiss}
+                    />
 
-              <View style={styles.modalBtnRow}>
-                <Pressable
-                  style={styles.modalCancelBtn}
-                  onPress={() => setShowMessageModal(false)}
-                >
-                  <Text style={styles.modalCancelBtnText}>Cancel</Text>
-                </Pressable>
-                <Pressable
-                  style={styles.modalPrimaryBtn}
-                  onPress={handleSendMessage}
-                >
-                  <Text style={styles.modalPrimaryBtnText}>Send Message</Text>
-                </Pressable>
+                    <View style={styles.modalBtnRow}>
+                      <Pressable
+                        style={styles.modalCancelBtn}
+                        onPress={() => {
+                          Keyboard.dismiss();
+                          setShowMessageModal(false);
+                        }}
+                      >
+                        <Text style={styles.modalCancelBtnText}>Cancel</Text>
+                      </Pressable>
+                      <Pressable
+                        style={styles.modalPrimaryBtn}
+                        onPress={() => {
+                          Keyboard.dismiss();
+                          handleSendMessage();
+                        }}
+                      >
+                        <Text style={styles.modalPrimaryBtnText}>Send Message</Text>
+                      </Pressable>
+                    </View>
+                  </View>
+                </TouchableWithoutFeedback>
               </View>
-            </View>
-          </View>
+            </TouchableWithoutFeedback>
+          </KeyboardAvoidingView>
         </Modal>
 
         {/* 9. NOTIFICATIONS MODAL */}

@@ -346,6 +346,7 @@ export const SignInScreen: React.FC<SignInScreenProps> = ({
           contentContainerStyle={styles.scrollContent}
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
+          keyboardDismissMode="on-drag"
           bounces={true}
         >
           {/* 1. TOP BAR: Back Arrow */}

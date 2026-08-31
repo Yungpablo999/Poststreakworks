@@ -1355,6 +1355,8 @@ export const MessagesScreen: React.FC<MessagesScreenProps> = ({
                 ref={chatScrollRef}
                 contentContainerStyle={styles.chatMessagesScroll}
                 showsVerticalScrollIndicator={false}
+                keyboardShouldPersistTaps="handled"
+                keyboardDismissMode="on-drag"
               >
                 {activeChatThread.messages.map((msg) => (
                   <View
