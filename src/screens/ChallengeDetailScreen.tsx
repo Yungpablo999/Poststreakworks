@@ -323,7 +323,7 @@ export const ChallengeDetailScreen: React.FC<ChallengeDetailScreenProps> = ({
 
           <Text style={styles.pageTitle}>Storyteller Challenge</Text>
           <Text style={styles.pageSubtitle}>
-            Share one personal creator lesson to build your storytelling habit and protect your streak.
+            Share one personal creator lesson to build your storytelling habit and strengthen your streak.
           </Text>
 
           {/* SECTION 1: HERO QUEST CARD */}
@@ -1000,9 +1000,9 @@ const styles = StyleSheet.create({
   // BADGES & HEADLINE
   tagRow: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 8,
+    gap: 8,
+    marginBottom: 12,
   },
   activeQuestTag: {
     backgroundColor: '#582CDB',
