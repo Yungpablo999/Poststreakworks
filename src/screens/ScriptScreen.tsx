@@ -220,6 +220,9 @@ export const ScriptScreen: React.FC<ScriptScreenProps> = ({
   const isDark = false;
   const [activeTab, setActiveTab] = useState<TabType>('create');
 
+  // Active Script Phase Tab (HOOK | BODY | LESSON | CTA)
+  const [activeScriptPhase, setActiveScriptPhase] = useState<'hook' | 'body' | 'lesson' | 'cta'>('hook');
+
   // Live-Editable Script Components State
   const [selectedHook, setSelectedHook] = useState(HOOK_PRESETS[0].text);
   const [generationsLeft, setGenerationsLeft] = useState(2);
@@ -365,6 +368,57 @@ export const ScriptScreen: React.FC<ScriptScreenProps> = ({
     setShowCelebrationModal(true);
   };
 
+  const handleAiRegenerateCurrentPhase = () => {
+    if (generationsLeft <= 0) {
+      if (Platform.OS !== 'web') {
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
+      }
+      if (onOpenJarvisPro) onOpenJarvisPro();
+      return;
+    }
+    if (Platform.OS !== 'web') {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    }
+    setGenerationsLeft((g) => Math.max(0, g - 1));
+
+    if (activeScriptPhase === 'hook') {
+      const aiHooks = [
+        'Stop waiting for inspiration—here is how to post daily effortlessly.',
+        'The 60-second routine that made content creation simple.',
+        'How 1 simple switch completely fixed my creator burnout.',
+        'The reason 90% of creators struggle to post consistently.',
+      ];
+      setSelectedHook(aiHooks[Math.floor(Math.random() * aiHooks.length)]);
+    } else if (activeScriptPhase === 'body') {
+      const aiBodies = [
+        'Creators fail because they make posting too complicated. Break your idea down into 1 problem, 1 perspective shift, and 1 action. That takes 10 minutes to film and delivers 10x the clarity.',
+        'I used to spend 3 hours filming 1 short video. Then I switched to raw, single-take value drops. My views doubled and my creation time dropped by 80%.',
+        'Consistency comes from lowering the friction to start. Document the work you are already doing instead of brainstorming from scratch.',
+      ];
+      setBodyText(aiBodies[Math.floor(Math.random() * aiBodies.length)]);
+    } else if (activeScriptPhase === 'lesson') {
+      const aiLessons = [
+        'Focus on sharing real progress rather than proving expertise.',
+        'Small daily repetitions build bigger audiences than occasional viral hits.',
+        'Speed beats perfection—publish today and refine tomorrow.',
+      ];
+      setTakeawayText(aiLessons[Math.floor(Math.random() * aiLessons.length)]);
+    } else if (activeScriptPhase === 'cta') {
+      const aiCtas = [
+        'Which part of this resonates most with your creator journey?',
+        'Share this with a creator who is struggling to stay consistent.',
+        'Drop a 🔥 in the comments if you needed this reminder today!',
+      ];
+      setSelectedCtaText(aiCtas[Math.floor(Math.random() * aiCtas.length)]);
+    }
+
+    setCelebrationTitle('AI Rewrite Applied!');
+    setCelebrationSubtitle(`New ${activeScriptPhase.toUpperCase()} generated tailored to your post.`);
+    setCelebrationSpeech('AI optimization ready! You can edit or swap anytime.');
+    setCelebrationBadge('AI OPTIMIZED');
+    setShowCelebrationModal(true);
+  };
+
   const handleShuffleCta = () => {
     if (Platform.OS !== 'web') {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
@@ -506,78 +560,232 @@ ${selectedCtaText}`;
               </View>
             </View>
 
-            {/* 2. SCRIPT PHASE BUTTONS (EACH OPENS A FULL DEDICATED POP-UP MODAL) */}
+            {/* 2. SCRIPT PHASE TABS (SWITCHES ACTIVE STUDIO PHASE) */}
             <View style={styles.phaseTabsRow}>
               {[
                 { id: 'hook', label: '⚓ HOOK' },
                 { id: 'body', label: '📑 BODY' },
                 { id: 'lesson', label: '💡 LESSON' },
                 { id: 'cta', label: '📢 CTA' },
-              ].map((tab) => (
-                <Pressable
-                  key={tab.id}
-                  onPress={() => handleOpenPhaseModal(tab.id as 'hook' | 'body' | 'lesson' | 'cta')}
-                  style={({ pressed }) => [
-                    styles.phaseTabBtn,
-                    tab.id === 'hook' && styles.phaseTabBtnPrimary,
-                    pressed && styles.btnPressed,
-                  ]}
-                >
-                  <Text
-                    style={[
-                      styles.phaseTabBtnText,
-                      tab.id === 'hook' && styles.phaseTabBtnTextPrimary,
+              ].map((tab) => {
+                const isActive = activeScriptPhase === tab.id;
+                return (
+                  <Pressable
+                    key={tab.id}
+                    onPress={() => {
+                      if (Platform.OS !== 'web') {
+                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                      }
+                      setActiveScriptPhase(tab.id as 'hook' | 'body' | 'lesson' | 'cta');
+                    }}
+                    style={({ pressed }) => [
+                      styles.phaseTabBtn,
+                      isActive && styles.phaseTabBtnPrimary,
+                      pressed && styles.btnPressed,
                     ]}
                   >
-                    {tab.label}
-                  </Text>
-                </Pressable>
-              ))}
+                    <Text
+                      style={[
+                        styles.phaseTabBtnText,
+                        isActive && styles.phaseTabBtnTextPrimary,
+                      ]}
+                    >
+                      {tab.label}
+                    </Text>
+                  </Pressable>
+                );
+              })}
             </View>
 
-            {/* 3. HOOK CARD (LIVE-EDITABLE INPUT) */}
+            {/* 3. DYNAMIC SCRIPT STUDIO CARD (AFFECTED BY ACTIVE TAB) */}
             <View style={styles.sectionCard}>
               <View style={styles.sectionHeaderRow}>
                 <View style={styles.sectionTitleGroup}>
-                  <Text style={styles.sectionIcon}>⚓</Text>
-                  <Text style={styles.sectionTitle}>Hook</Text>
+                  <Text style={styles.sectionIcon}>
+                    {activeScriptPhase === 'hook' && '⚓'}
+                    {activeScriptPhase === 'body' && '📑'}
+                    {activeScriptPhase === 'lesson' && '💡'}
+                    {activeScriptPhase === 'cta' && '📢'}
+                  </Text>
+                  <Text style={styles.sectionTitle}>
+                    {activeScriptPhase === 'hook' && 'Hook'}
+                    {activeScriptPhase === 'body' && 'Body'}
+                    {activeScriptPhase === 'lesson' && 'Lesson'}
+                    {activeScriptPhase === 'cta' && 'Call to Action'}
+                  </Text>
                   <Text style={styles.editableHintMicro}>Editable</Text>
                 </View>
+
+                {/* Subtle Quota Badge (Doesn't Compete with Hook) */}
                 <Pressable
-                  onPress={() => handleOpenPhaseModal('hook')}
+                  onPress={() => {
+                    if (onOpenJarvisPro) onOpenJarvisPro();
+                  }}
                   hitSlop={8}
                 >
                   <View style={styles.generationsBadge}>
-                    <Text style={styles.generationsBadgeText}>{generationsLeft} generations left ⚡</Text>
+                    <Text style={styles.generationsBadgeText}>⚡ {generationsLeft} edits left</Text>
                   </View>
                 </Pressable>
               </View>
 
-              {/* Active Selected Hook Box */}
-              <View style={styles.activeHookBox}>
-                <TextInput
-                  value={selectedHook}
-                  onChangeText={setSelectedHook}
-                  placeholder="Type your hook..."
-                  placeholderTextColor="#94A3B8"
-                  multiline
-                  style={styles.hookInput}
-                />
+              {/* Current Selected Component (Visually Clear & Distinct) */}
+              <View style={styles.activePhaseContainer}>
+                <Text style={styles.currentSectionLabel}>
+                  CURRENT {activeScriptPhase === 'lesson' ? 'LESSON' : activeScriptPhase === 'cta' ? 'CTA' : activeScriptPhase.toUpperCase()}
+                </Text>
+                <View style={styles.activeHookBox}>
+                  {activeScriptPhase === 'hook' && (
+                    <TextInput
+                      value={selectedHook}
+                      onChangeText={setSelectedHook}
+                      placeholder="Type your hook..."
+                      placeholderTextColor="#94A3B8"
+                      multiline
+                      style={styles.hookInput}
+                    />
+                  )}
+                  {activeScriptPhase === 'body' && (
+                    <TextInput
+                      value={bodyText}
+                      onChangeText={setBodyText}
+                      placeholder="Write or customize script body..."
+                      placeholderTextColor="#94A3B8"
+                      multiline
+                      style={styles.bodyInput}
+                    />
+                  )}
+                  {activeScriptPhase === 'lesson' && (
+                    <TextInput
+                      value={takeawayText}
+                      onChangeText={setTakeawayText}
+                      placeholder="Type takeaway lesson..."
+                      placeholderTextColor="#94A3B8"
+                      multiline
+                      style={styles.takeawayInput}
+                    />
+                  )}
+                  {activeScriptPhase === 'cta' && (
+                    <TextInput
+                      value={selectedCtaText}
+                      onChangeText={setSelectedCtaText}
+                      placeholder="Type call to action..."
+                      placeholderTextColor="#94A3B8"
+                      multiline
+                      style={styles.ctaInput}
+                    />
+                  )}
+                </View>
               </View>
 
-              <Text style={styles.alternativeHooksLabel}>ALTERNATIVE HOOKS (TAP TO SWAP)</Text>
-
-              {/* Alternative Hooks List */}
-              {HOOK_PRESETS.filter((h) => h.text !== selectedHook).slice(0, 2).map((hookItem, i) => (
+              {/* Action Toolbar for Current Phase */}
+              <View style={styles.studioActionRow}>
                 <Pressable
-                  key={i}
-                  onPress={() => handleSelectHook(hookItem.text)}
-                  style={styles.altHookBox}
+                  style={({ pressed }) => [styles.aiRegenerateBtn, pressed && styles.btnPressed]}
+                  onPress={handleAiRegenerateCurrentPhase}
                 >
-                  <Text style={styles.altHookType}>{hookItem.type}</Text>
-                  <Text style={styles.altHookText}>&ldquo;{hookItem.text}&rdquo;</Text>
+                  <Text style={styles.aiRegenerateBtnText}>
+                    ✨ AI Rewrite {activeScriptPhase === 'lesson' ? 'Lesson' : activeScriptPhase === 'cta' ? 'CTA' : activeScriptPhase.toUpperCase()} (1 edit)
+                  </Text>
                 </Pressable>
-              ))}
+                <Pressable
+                  style={({ pressed }) => [styles.studioModalBtn, pressed && styles.btnPressed]}
+                  onPress={() => handleOpenPhaseModal(activeScriptPhase)}
+                >
+                  <Text style={styles.studioModalBtnText}>Studio ➔</Text>
+                </Pressable>
+              </View>
+
+              {/* Alternatives Sub-header with Free Swap clarification */}
+              <View style={styles.altHeaderRow}>
+                <Text style={styles.alternativeHooksLabel}>
+                  ALTERNATIVE {activeScriptPhase === 'lesson' ? 'LESSONS' : activeScriptPhase === 'cta' ? 'CTAs' : `${activeScriptPhase.toUpperCase()}S`}
+                </Text>
+                <View style={styles.freeBadgeMicro}>
+                  <Text style={styles.freeBadgeMicroText}>FREE SWAP</Text>
+                </View>
+              </View>
+
+              {/* Dynamic Alternatives List based on active tab */}
+              {activeScriptPhase === 'hook' && (
+                <View style={styles.altListContainer}>
+                  {HOOK_PRESETS.filter((h) => h.text !== selectedHook).slice(0, 3).map((hookItem, i) => (
+                    <Pressable
+                      key={i}
+                      onPress={() => {
+                        if (Platform.OS !== 'web') {
+                          Haptics.selectionAsync();
+                        }
+                        setSelectedHook(hookItem.text);
+                      }}
+                      style={styles.altHookBox}
+                    >
+                      <Text style={styles.altHookType}>{hookItem.type}</Text>
+                      <Text style={styles.altHookText}>&ldquo;{hookItem.text}&rdquo;</Text>
+                    </Pressable>
+                  ))}
+                </View>
+              )}
+
+              {activeScriptPhase === 'body' && (
+                <View style={styles.altListContainer}>
+                  {BODY_PRESETS.filter((b) => b.text !== bodyText).slice(0, 3).map((bodyItem) => (
+                    <Pressable
+                      key={bodyItem.id}
+                      onPress={() => {
+                        if (Platform.OS !== 'web') {
+                          Haptics.selectionAsync();
+                        }
+                        handleApplyBodyFromModal(bodyItem);
+                      }}
+                      style={styles.altHookBox}
+                    >
+                      <Text style={styles.altHookType}>📑 {bodyItem.title} • {bodyItem.tag}</Text>
+                      <Text style={styles.altHookText}>&ldquo;{bodyItem.text}&rdquo;</Text>
+                    </Pressable>
+                  ))}
+                </View>
+              )}
+
+              {activeScriptPhase === 'lesson' && (
+                <View style={styles.altListContainer}>
+                  {LESSON_PRESETS.filter((l) => l.text !== takeawayText).map((lessonItem) => (
+                    <Pressable
+                      key={lessonItem.id}
+                      onPress={() => {
+                        if (Platform.OS !== 'web') {
+                          Haptics.selectionAsync();
+                        }
+                        handleApplyLessonFromModal(lessonItem);
+                      }}
+                      style={styles.altHookBox}
+                    >
+                      <Text style={styles.altHookType}>💡 {lessonItem.title} • {lessonItem.tag}</Text>
+                      <Text style={styles.altHookText}>&ldquo;{lessonItem.text}&rdquo;</Text>
+                    </Pressable>
+                  ))}
+                </View>
+              )}
+
+              {activeScriptPhase === 'cta' && (
+                <View style={styles.altListContainer}>
+                  {CTA_PRESETS.filter((c) => c.text !== selectedCtaText).slice(0, 3).map((ctaItem) => (
+                    <Pressable
+                      key={ctaItem.id}
+                      onPress={() => {
+                        if (Platform.OS !== 'web') {
+                          Haptics.selectionAsync();
+                        }
+                        handleApplyCtaFromModal(ctaItem);
+                      }}
+                      style={styles.altHookBox}
+                    >
+                      <Text style={styles.altHookType}>{ctaItem.type}</Text>
+                      <Text style={styles.altHookText}>&ldquo;{ctaItem.text}&rdquo;</Text>
+                    </Pressable>
+                  ))}
+                </View>
+              )}
             </View>
 
             {/* 4. BODY CARD (LIVE-EDITABLE MULTILINE) */}
@@ -1510,18 +1718,18 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
   },
   generationsBadge: {
-    backgroundColor: '#FEF3C7',
+    backgroundColor: '#FAF5FF',
     borderWidth: 1,
-    borderColor: '#FDE68A',
+    borderColor: '#DDD6FE',
     paddingVertical: 3,
     paddingHorizontal: 8,
     borderRadius: 6,
     flexShrink: 0,
   },
   generationsBadgeText: {
-    fontSize: 10,
-    fontWeight: '700',
-    color: '#B45309',
+    fontSize: 10.5,
+    fontWeight: '800',
+    color: '#6D28D9',
   },
   editSectionLink: {
     fontSize: sFont(12),
@@ -1529,6 +1737,76 @@ const styles = StyleSheet.create({
     color: '#582CDB',
     marginLeft: 8,
     flexShrink: 0,
+  },
+
+  // Active Phase Studio Box
+  activePhaseContainer: {
+    marginBottom: 10,
+  },
+  currentSectionLabel: {
+    fontSize: 10,
+    fontWeight: '800',
+    color: '#6D28D9',
+    letterSpacing: 0.5,
+    marginBottom: 6,
+  },
+  studioActionRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginBottom: 14,
+  },
+  aiRegenerateBtn: {
+    flex: 1,
+    height: 38,
+    borderRadius: 10,
+    backgroundColor: '#FAF5FF',
+    borderWidth: 1,
+    borderColor: '#EDE9FE',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  aiRegenerateBtnText: {
+    fontSize: 11.5,
+    fontWeight: '800',
+    color: '#582CDB',
+  },
+  studioModalBtn: {
+    height: 38,
+    paddingHorizontal: 12,
+    borderRadius: 10,
+    backgroundColor: '#F1F5F9',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  studioModalBtnText: {
+    fontSize: 11.5,
+    fontWeight: '800',
+    color: '#475569',
+  },
+  altHeaderRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 8,
+    marginTop: 2,
+  },
+  freeBadgeMicro: {
+    backgroundColor: '#ECFDF5',
+    borderWidth: 1,
+    borderColor: '#A7F3D0',
+    paddingVertical: 2,
+    paddingHorizontal: 6,
+    borderRadius: 4,
+  },
+  freeBadgeMicroText: {
+    fontSize: 9,
+    fontWeight: '800',
+    color: '#059669',
+    letterSpacing: 0.4,
+  },
+  altListContainer: {
+    gap: 8,
   },
 
   // Hook Boxes
@@ -1540,7 +1818,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#EDE9FE',
     padding: 12,
-    marginBottom: 12,
+    marginBottom: 4,
   },
   hookInput: {
     fontSize: 14,
@@ -1554,7 +1832,6 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     color: '#64748B',
     letterSpacing: 0.6,
-    marginBottom: 8,
   },
   altHookBox: {
     backgroundColor: '#F8FAFC',
@@ -1562,7 +1839,6 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#EFECE6',
     padding: 12,
-    marginBottom: 8,
   },
   altHookType: {
     fontSize: 10,
