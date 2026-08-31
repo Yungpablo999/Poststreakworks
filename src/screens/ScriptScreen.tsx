@@ -1153,7 +1153,11 @@ ${selectedCtaText}`;
                         ]}
                       >
                         <View style={styles.hookModalItemHeader}>
-                          <Text style={[styles.hookModalItemType, isSelected && styles.hookModalItemTypeActive]}>
+                          <Text
+                            style={[styles.hookModalItemType, isSelected && styles.hookModalItemTypeActive]}
+                            numberOfLines={1}
+                            ellipsizeMode="tail"
+                          >
                             {isSelected ? `✓ ${preset.type}` : preset.type}
                           </Text>
                           {isSelected && (
@@ -1226,7 +1230,11 @@ ${selectedCtaText}`;
                         ]}
                       >
                         <View style={styles.bodyModalItemHeader}>
-                          <Text style={[styles.bodyModalItemTitle, isSelected && styles.bodyModalItemTitleActive]}>
+                          <Text
+                            style={[styles.bodyModalItemTitle, isSelected && styles.bodyModalItemTitleActive]}
+                            numberOfLines={1}
+                            ellipsizeMode="tail"
+                          >
                             {isSelected ? `✓ ${preset.title}` : preset.title}
                           </Text>
                           <View style={styles.modalTagRightGroup}>
@@ -1309,7 +1317,11 @@ ${selectedCtaText}`;
                         <View style={styles.takeawayMenuItemHeader}>
                           <View style={styles.takeawayMenuItemTitleGroup}>
                             <Text style={styles.takeawayMenuIcon}>{item.icon}</Text>
-                            <Text style={[styles.takeawayMenuItemTitle, isSelected && styles.takeawayMenuItemTitleActive]}>
+                            <Text
+                              style={[styles.takeawayMenuItemTitle, isSelected && styles.takeawayMenuItemTitleActive]}
+                              numberOfLines={1}
+                              ellipsizeMode="tail"
+                            >
                               {item.title}
                             </Text>
                           </View>
@@ -1390,17 +1402,21 @@ ${selectedCtaText}`;
                         ]}
                       >
                         <View style={styles.ctaModalItemHeader}>
-                          <Text style={[styles.ctaModalItemType, isSelected && styles.ctaModalItemTypeActive]}>
-                            {isSelected ? `✓ ${cta.type}` : cta.type}
-                          </Text>
-                          <View style={styles.modalTagRightGroup}>
-                            <Text style={styles.ctaModalGoal}>{cta.goal}</Text>
+                          <View style={styles.ctaModalHeaderTopRow}>
+                            <Text
+                              style={[styles.ctaModalItemType, isSelected && styles.ctaModalItemTypeActive]}
+                              numberOfLines={1}
+                              ellipsizeMode="tail"
+                            >
+                              {isSelected ? `✓ ${cta.type}` : cta.type}
+                            </Text>
                             {isSelected && (
                               <View style={styles.selectedCheckBadge}>
                                 <Text style={styles.selectedCheckText}>SELECTED</Text>
                               </View>
                             )}
                           </View>
+                          <Text style={styles.ctaModalGoal}>{cta.goal}</Text>
                         </View>
                         <Text style={styles.ctaModalItemText}>&ldquo;{cta.text}&rdquo;</Text>
                       </Pressable>
@@ -2391,8 +2407,9 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     borderWidth: 1.5,
     borderColor: '#EDE9FE',
-    padding: 14,
+    padding: 13,
     marginBottom: 10,
+    overflow: 'hidden',
   },
   hookModalItemCardActive: {
     backgroundColor: '#FFFFFF',
@@ -2407,33 +2424,37 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+    gap: 6,
     marginBottom: 6,
   },
   hookModalItemType: {
     fontSize: 12,
     fontWeight: '700',
     color: '#6D28D9',
+    flex: 1,
+    marginRight: 6,
   },
   hookModalItemTypeActive: {
     color: '#582CDB',
   },
   selectedCheckBadge: {
     backgroundColor: '#582CDB',
-    paddingVertical: 2.5,
-    paddingHorizontal: 8,
-    borderRadius: 6,
+    paddingVertical: 2,
+    paddingHorizontal: 6,
+    borderRadius: 5,
     flexShrink: 0,
+    alignSelf: 'center',
   },
   selectedCheckText: {
-    fontSize: 9.5,
+    fontSize: 8.5,
     fontWeight: '800',
     color: '#FFFFFF',
-    letterSpacing: 0.4,
+    letterSpacing: 0.3,
   },
   modalTagRightGroup: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 5,
+    gap: 4,
     flexShrink: 0,
   },
   hookModalItemText: {
@@ -2454,8 +2475,9 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     borderWidth: 1.5,
     borderColor: '#EDE9FE',
-    padding: 14,
+    padding: 13,
     marginBottom: 10,
+    overflow: 'hidden',
   },
   bodyModalItemCardActive: {
     backgroundColor: '#FFFFFF',
@@ -2475,7 +2497,7 @@ const styles = StyleSheet.create({
     marginBottom: 6,
   },
   bodyModalItemTitle: {
-    fontSize: 12.5,
+    fontSize: 12,
     fontWeight: '800',
     color: '#171420',
     flex: 1,
@@ -2486,9 +2508,9 @@ const styles = StyleSheet.create({
   },
   bodyModalTagPill: {
     backgroundColor: '#EDE9FE',
-    paddingVertical: 2.5,
-    paddingHorizontal: 7,
-    borderRadius: 6,
+    paddingVertical: 2,
+    paddingHorizontal: 6,
+    borderRadius: 5,
     flexShrink: 0,
   },
   bodyModalTagPillActive: {
@@ -2497,7 +2519,7 @@ const styles = StyleSheet.create({
     borderColor: '#DDD6FE',
   },
   bodyModalTagText: {
-    fontSize: 9.5,
+    fontSize: 9,
     fontWeight: '800',
     color: '#6D28D9',
   },
@@ -2518,6 +2540,7 @@ const styles = StyleSheet.create({
     borderColor: '#EDE9FE',
     padding: 12,
     marginBottom: 8,
+    overflow: 'hidden',
   },
   takeawayMenuItemCardActive: {
     backgroundColor: '#FFFFFF',
@@ -2533,6 +2556,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+    gap: 6,
     marginBottom: 6,
   },
   takeawayMenuItemTitleGroup: {
@@ -2546,9 +2570,10 @@ const styles = StyleSheet.create({
     fontSize: 13,
   },
   takeawayMenuItemTitle: {
-    fontSize: 12.5,
+    fontSize: 12,
     fontWeight: '800',
     color: '#171420',
+    flexShrink: 1,
   },
   takeawayMenuItemTitleActive: {
     color: '#582CDB',
@@ -2566,7 +2591,7 @@ const styles = StyleSheet.create({
     borderColor: '#DDD6FE',
   },
   takeawayMenuTagText: {
-    fontSize: 9.5,
+    fontSize: 9,
     fontWeight: '800',
     color: '#6D28D9',
   },
@@ -2600,8 +2625,9 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     borderWidth: 1.5,
     borderColor: '#EDE9FE',
-    padding: 14,
+    padding: 13,
     marginBottom: 10,
+    overflow: 'hidden',
   },
   ctaModalItemCardActive: {
     backgroundColor: '#FFFFFF',
@@ -2614,20 +2640,28 @@ const styles = StyleSheet.create({
   },
   ctaModalItemHeader: {
     flexDirection: 'column',
-    alignItems: 'flex-start',
-    gap: 2,
+    gap: 3,
     marginBottom: 6,
   },
+  ctaModalHeaderTopRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    width: '100%',
+    gap: 6,
+  },
   ctaModalItemType: {
-    fontSize: 12.5,
+    fontSize: 12,
     fontWeight: '800',
     color: '#6D28D9',
+    flex: 1,
+    marginRight: 6,
   },
   ctaModalItemTypeActive: {
     color: '#582CDB',
   },
   ctaModalGoal: {
-    fontSize: 11,
+    fontSize: 10.5,
     fontWeight: '600',
     color: '#64748B',
     marginBottom: 2,
