@@ -1167,28 +1167,18 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
           </View>
 
           <View style={[styles.captionContainer, isCaptionFocused && styles.captionContainerFocused]}>
-            <View style={styles.captionInputWrapper}>
-              <TextInput
-                style={styles.captionInput}
-                multiline
-                value={caption}
-                onChangeText={setCaption}
-                onFocus={() => setIsCaptionFocused(true)}
-                onBlur={() => setIsCaptionFocused(false)}
-                placeholder="Write or tap to edit your post caption..."
-                placeholderTextColor="#94A3B8"
-                selectionColor="#7C3AED"
-                cursorColor="#7C3AED"
-              />
-              {!isCaptionFocused && (
-                <View style={styles.captionEditableBadge}>
-                  <Svg width={11} height={11} viewBox="0 0 24 24" fill="none">
-                    <Path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z" stroke="#7C3AED" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
-                  </Svg>
-                  <Text style={styles.captionEditableBadgeText}>Tap to edit</Text>
-                </View>
-              )}
-            </View>
+            <TextInput
+              style={styles.captionInput}
+              multiline
+              value={caption}
+              onChangeText={setCaption}
+              onFocus={() => setIsCaptionFocused(true)}
+              onBlur={() => setIsCaptionFocused(false)}
+              placeholder="Write or tap to edit your post caption..."
+              placeholderTextColor="#94A3B8"
+              selectionColor="#7C3AED"
+              cursorColor="#7C3AED"
+            />
 
             <View style={styles.captionMetaRow}>
               <View style={styles.captionMetaLeft}>
@@ -2755,11 +2745,6 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.12,
     shadowRadius: 12,
   },
-  captionInputWrapper: {
-    position: 'relative',
-    minHeight: 110,
-    marginBottom: 12,
-  },
   captionInput: {
     minHeight: 110,
     fontSize: 14.5,
@@ -2767,23 +2752,7 @@ const styles = StyleSheet.create({
     lineHeight: 22,
     textAlignVertical: 'top',
     padding: 0,
-  },
-  captionEditableBadge: {
-    position: 'absolute',
-    top: -4,
-    right: 0,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-    backgroundColor: '#F3E8FF',
-    paddingVertical: 2,
-    paddingHorizontal: 7,
-    borderRadius: 6,
-  },
-  captionEditableBadgeText: {
-    fontSize: 9.5,
-    fontWeight: '700',
-    color: '#7C3AED',
+    marginBottom: 12,
   },
   captionMetaRow: {
     flexDirection: 'row',
