@@ -97,7 +97,7 @@ const DECK_CREATORS: CreatorCardData[] = [
     followers: '85K',
     location: 'Lagos, NG',
     coverImage: require('../../assets/images/amara-avatar.jpg'),
-    bio: 'Filming authentic travel routines & luxury getaways across West Africa. Looking for lifestyle co-creators for dynamic storytelling.',
+    bio: 'Filming authentic travel routines across West Africa. Looking for creators to co-create luxury travel content.',
     tags: ['🌿 Travel', '✨ Lifestyle', '🎥 4K Vlogs'],
     categoryTags: ['Lifestyle', 'Travel', 'Storytelling', 'Available This Week'],
     streak: 44,
@@ -133,7 +133,7 @@ const DECK_CREATORS: CreatorCardData[] = [
     followers: '120K',
     location: 'San Francisco, CA',
     coverImage: require('../../assets/images/david-avatar.jpg'),
-    bio: 'Breaking down creator tools, AI automation workflows, and desk setups that maximize high-output focus.',
+    bio: 'Breaking down creator tools & AI automation. Looking for creators to co-test high-output workflows.',
     tags: ['⚡ AI Systems', '💻 Tech Reviews', '📈 Productivity'],
     categoryTags: ['Tech', 'AI Systems', 'Productivity', 'Available This Week'],
     streak: 52,
@@ -169,7 +169,7 @@ const DECK_CREATORS: CreatorCardData[] = [
     followers: '64K',
     location: 'London, UK',
     coverImage: require('../../assets/images/elena-avatar.jpg'),
-    bio: 'Daily morning routines, disciplined training, and nutrition for creators who want boundless energy.',
+    bio: 'Daily morning routines & disciplined fitness. Looking for creators to co-produce high-energy split reels.',
     tags: ['💪 Fitness', '🥑 Wellness', '⏰ Routine'],
     categoryTags: ['Fitness', 'Wellness', 'Daily Routine', 'Available This Week'],
     streak: 39,
@@ -1108,8 +1108,10 @@ export const ProMatchScreen: React.FC<ProMatchScreenProps> = ({
                       <View style={styles.cardBottomContent}>
                         {/* Name & Streak Row with Priority Crown */}
                         <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
-                          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, flex: 1, marginRight: 8 }}>
-                            <Text style={[styles.creatorNameText, { flexShrink: 1 }]} numberOfLines={1}>{currentCreator.name}</Text>
+                          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                            <Text style={styles.creatorNameText}>
+                              {currentCreator.name.split(' ')[0]}
+                            </Text>
                             {currentCreator.isPriorityCrown && (
                               <View style={styles.crownEmblemBox}>
                                 <Text style={{ fontSize: 14 }}>👑</Text>
@@ -1118,22 +1120,19 @@ export const ProMatchScreen: React.FC<ProMatchScreenProps> = ({
                             <View style={styles.verifiedCheckCircle}>
                               <Text style={{ fontSize: 10, color: '#FFFFFF', fontWeight: '700' }}>✓</Text>
                             </View>
-                          </View>
-
-                          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, flexShrink: 0 }}>
                             {/* Streak Pill */}
                             <View style={styles.streakPill}>
                               <Text style={styles.streakPillText}>🔥 {currentCreator.streak}d</Text>
                             </View>
-
-                            {/* Deep Dive Button */}
-                            <Pressable
-                              style={styles.deepDivePillBtn}
-                              onPress={() => handleOpenDeepDive(currentCreator)}
-                            >
-                              <Text style={styles.deepDivePillBtnText}>Deep Dive ➔</Text>
-                            </Pressable>
                           </View>
+
+                          {/* Deep Dive Button */}
+                          <Pressable
+                            style={styles.deepDivePillBtn}
+                            onPress={() => handleOpenDeepDive(currentCreator)}
+                          >
+                            <Text style={styles.deepDivePillBtnText}>Deep Dive ➔</Text>
+                          </Pressable>
                         </View>
 
                         {/* Role, Platforms & Location */}
@@ -1170,7 +1169,7 @@ export const ProMatchScreen: React.FC<ProMatchScreenProps> = ({
                   {/* Gesture Guide Bar */}
                   <View style={styles.gestureGuideBar}>
                     <Text style={styles.gestureGuideText} numberOfLines={1}>
-                      👈 Left decline  •  👆 Up track  •  Right match 👉
+                      👈 Left to skip  •  Right to match 👉
                     </Text>
                   </View>
 

@@ -135,7 +135,7 @@ const CREATOR_DECK: CreatorProfile[] = [
     audienceCount: '85,000+',
     location: 'Lagos, NG',
     coverImage: require('../../assets/images/amara-creator-cover.jpg'),
-    bio: 'Filming authentic travel routines & luxury getaways across West Africa. Looking for lifestyle co-creators for dynamic split-screen Reels! 🌴',
+    bio: 'Filming authentic travel routines across West Africa. Looking for creators to co-create luxury travel content.',
     tags: ['🌿 Travel', '✨ Lifestyle', '🎥 4K Vlogs'],
     categoryTags: ['Lifestyle', 'Travel', 'Storytelling', 'Short-form Video'],
     streak: 44,
@@ -178,7 +178,7 @@ const CREATOR_DECK: CreatorProfile[] = [
     audienceCount: '156,000+',
     location: 'London, UK',
     coverImage: require('../../assets/images/tomi-avatar.jpg'),
-    bio: 'Building AI-first creator workflows & reviewing next-gen tech. Let’s co-produce deep dives that get millions of views! ⚡',
+    bio: 'Building AI-first creator workflows & tech reviews. Looking for creators to co-host product launch deep-dives.',
     tags: ['🤖 AI Tools', '📱 Tech Reviews', '📈 Viral Reach'],
     categoryTags: ['Tech', 'AI Workflows', 'Hardware', 'Productivity'],
     streak: 52,
@@ -221,7 +221,7 @@ const CREATOR_DECK: CreatorProfile[] = [
     audienceCount: '52,000+',
     location: 'Toronto, CA',
     coverImage: require('../../assets/images/zainab-avatar.jpg'),
-    bio: 'Curating high-end aesthetic lookbooks, capsule wardrobes & studio vlogs. Seeking visual storytellers for collaborative shoots! ☕',
+    bio: 'Curating high-end aesthetic lookbooks & studio vlogs. Looking for creators to co-produce visual shoots.',
     tags: ['👗 Fashion', '✨ Aesthetic', '☕ Lifestyle'],
     categoryTags: ['Fashion', 'Minimalism', 'Studio Vlogs', 'Lookbooks'],
     streak: 38,
@@ -264,7 +264,7 @@ const CREATOR_DECK: CreatorProfile[] = [
     audienceCount: '110,000+',
     location: 'New York, US',
     coverImage: require('../../assets/images/marcus-avatar.jpg'),
-    bio: 'High-performance fitness & daily creator discipline routines. Looking for accountability partners for 30-day challenge series! 💪',
+    bio: 'High-performance fitness & daily discipline routines. Looking for creators to partner on 30-day challenge series.',
     tags: ['🏋️ Fitness', '🔥 Daily Habits', '⚡ High Retention'],
     categoryTags: ['Fitness', 'Discipline', 'Daily Routine', 'Mindset'],
     streak: 60,
@@ -881,9 +881,16 @@ export const MatchScreen: React.FC<MatchScreenProps> = ({
                       style={styles.tinderCardGradient}
                     >
                       <View style={styles.tinderCardHeaderRow}>
-                        <Text style={styles.tinderCreatorName}>{nextCreator.name}</Text>
-                        <View style={styles.tinderStreakBadge}>
-                          <Text style={styles.tinderStreakBadgeText}>🔥 {nextCreator.streak}d</Text>
+                        <View style={styles.nameVerifiedRow}>
+                          <Text style={styles.tinderCreatorName}>
+                            {nextCreator.name.split(' ')[0]}
+                          </Text>
+                          <View style={styles.verifiedCheckBadge}>
+                            <Text style={styles.verifiedCheckText}>✓</Text>
+                          </View>
+                          <View style={styles.tinderStreakBadge}>
+                            <Text style={styles.tinderStreakBadgeText}>🔥 {nextCreator.streak}d</Text>
+                          </View>
                         </View>
                       </View>
                       <Text style={styles.tinderCreatorRole}>
@@ -997,27 +1004,26 @@ export const MatchScreen: React.FC<MatchScreenProps> = ({
                       style={styles.tinderCardGradient}
                     >
                       <View style={styles.tinderCardHeaderRow}>
-                        <View style={[styles.nameVerifiedRow, { flex: 1, marginRight: 8 }]}>
-                          <Text style={[styles.tinderCreatorName, { flexShrink: 1 }]} numberOfLines={1}>{currentCreator.name}</Text>
+                        <View style={styles.nameVerifiedRow}>
+                          <Text style={styles.tinderCreatorName}>
+                            {currentCreator.name.split(' ')[0]}
+                          </Text>
                           <View style={styles.verifiedCheckBadge}>
                             <Text style={styles.verifiedCheckText}>✓</Text>
                           </View>
-                        </View>
-
-                        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
                           <View style={styles.tinderStreakBadge}>
                             <Text style={styles.tinderStreakBadgeText}>🔥 {currentCreator.streak}d</Text>
                           </View>
-
-                          {/* Info Button Next to Streak on Card Bottom */}
-                          <Pressable
-                            style={styles.cardBottomInfoPill}
-                            onPress={() => handleOpenInfo(currentCreator)}
-                            hitSlop={8}
-                          >
-                            <Text style={styles.cardBottomInfoPillText}>Deep Dive ➔</Text>
-                          </Pressable>
                         </View>
+
+                        {/* Info Button on Card Bottom */}
+                        <Pressable
+                          style={styles.cardBottomInfoPill}
+                          onPress={() => handleOpenInfo(currentCreator)}
+                          hitSlop={8}
+                        >
+                          <Text style={styles.cardBottomInfoPillText}>Deep Dive ➔</Text>
+                        </Pressable>
                       </View>
 
                       <Text style={styles.tinderCreatorRole}>
@@ -1044,11 +1050,9 @@ export const MatchScreen: React.FC<MatchScreenProps> = ({
 
               {/* GESTURE HINT STRIP */}
               <View style={styles.gestureHintRow}>
-                <Text style={styles.gestureHintText}>👈 Left decline</Text>
+                <Text style={styles.gestureHintText}>👈 Left to skip</Text>
                 <Text style={styles.gestureHintDot}>•</Text>
-                <Text style={styles.gestureHintText}>👆 Up track</Text>
-                <Text style={styles.gestureHintDot}>•</Text>
-                <Text style={styles.gestureHintText}>Right match 👉</Text>
+                <Text style={styles.gestureHintText}>Right to match 👉</Text>
               </View>
 
               {/* SUGGESTED COLLAB CARD */}
