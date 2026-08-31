@@ -593,40 +593,57 @@ export const ChallengeDetailScreen: React.FC<ChallengeDetailScreenProps> = ({
           <View style={styles.progressGaugeCard}>
             {/* SVG Circular Progress Ring */}
             <View style={styles.gaugeCenterBox}>
-              <Svg width={110} height={110} viewBox="0 0 110 110">
+              <Svg width={104} height={104} viewBox="0 0 104 104">
                 <Circle
-                  cx="55"
-                  cy="55"
-                  r="45"
+                  cx="52"
+                  cy="52"
+                  r="43"
                   stroke="#EAE5F8"
-                  strokeWidth="9"
+                  strokeWidth="8.5"
                   fill="none"
                 />
                 <Circle
-                  cx="55"
-                  cy="55"
-                  r="45"
+                  cx="52"
+                  cy="52"
+                  r="43"
                   stroke="#582CDB"
-                  strokeWidth="9"
-                  strokeDasharray={`${2 * Math.PI * 45}`}
-                  strokeDashoffset={`${2 * Math.PI * 45 * (1 - progressPercent / 100)}`}
+                  strokeWidth="8.5"
+                  strokeDasharray={`${2 * Math.PI * 43}`}
+                  strokeDashoffset={`${2 * Math.PI * 43 * (1 - progressPercent / 100)}`}
                   strokeLinecap="round"
                   fill="none"
-                  transform="rotate(-90 55 55)"
+                  transform="rotate(-90 52 52)"
                 />
               </Svg>
               <View style={styles.gaugeTextOverlay}>
-                <Text style={styles.gaugePercentText}>{progressPercent}%</Text>
+                <Text style={styles.gaugeStepCountText}>
+                  {isQuestFinished ? '3 / 3' : `${completedCount || 1} / 3`}
+                </Text>
+                <Text style={styles.gaugeStepSubtext}>
+                  {isQuestFinished ? 'completed' : 'steps'}
+                </Text>
               </View>
             </View>
 
             <Text style={styles.gaugeHeading}>Your Quest Progress</Text>
-            <View style={styles.gaugeBulletList}>
-              <Text style={styles.gaugeBulletText}>
-                • Steps completed: {completedCount || 1} of 3
-              </Text>
-              <Text style={styles.gaugeBulletText}>• Time remaining: 1 day</Text>
-              <Text style={styles.gaugeBulletText}>• Streak impact: protect momentum</Text>
+            <Text style={styles.gaugeSubheading}>
+              {isQuestFinished ? 'All 3 steps complete' : `${completedCount || 1} of 3 steps complete`}
+            </Text>
+
+            {/* Actionable gamified badges */}
+            <View style={styles.gaugeActionableRow}>
+              <View style={styles.gaugeActionableItem}>
+                <Text style={styles.gaugeActionableText}>
+                  {isQuestFinished
+                    ? '🎉 Quest ready to claim reward!'
+                    : `🔥 ${Math.max(1, 3 - (completedCount || 1))} steps to protect your streak`}
+                </Text>
+              </View>
+              <View style={styles.gaugeActionableItem}>
+                <Text style={styles.gaugeActionableText}>
+                  ⏰ Deadline tomorrow at 11:30 PM
+                </Text>
+              </View>
             </View>
           </View>
 
@@ -1493,12 +1510,13 @@ const styles = StyleSheet.create({
   // CIRCULAR PROGRESS GAUGE CARD
   progressGaugeCard: {
     backgroundColor: '#FFFFFF',
-    borderRadius: 24,
+    borderRadius: 22,
     borderWidth: 1,
     borderColor: '#EFEBF8',
-    padding: 22,
+    paddingVertical: 16,
+    paddingHorizontal: 18,
     alignItems: 'center',
-    marginBottom: 26,
+    marginBottom: 24,
     shadowColor: '#582CDB',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.05,
@@ -1507,36 +1525,62 @@ const styles = StyleSheet.create({
   },
   gaugeCenterBox: {
     position: 'relative',
-    width: 110,
-    height: 110,
+    width: 104,
+    height: 104,
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 14,
+    marginBottom: 10,
   },
   gaugeTextOverlay: {
     position: 'absolute',
     justifyContent: 'center',
     alignItems: 'center',
   },
-  gaugePercentText: {
-    fontSize: 24,
-    fontWeight: '700',
-    color: '#171420',
-  },
-  gaugeHeading: {
-    fontSize: 17,
+  gaugeStepCountText: {
+    fontSize: 20,
     fontWeight: '800',
     color: '#171420',
-    marginBottom: 8,
+    letterSpacing: -0.5,
   },
-  gaugeBulletList: {
-    gap: 4,
+  gaugeStepSubtext: {
+    fontSize: 10,
+    fontWeight: '700',
+    color: '#7F7894',
+    textTransform: 'uppercase',
+    letterSpacing: 0.4,
+    marginTop: 1,
+  },
+  gaugeHeading: {
+    fontSize: 16,
+    fontWeight: '800',
+    color: '#171420',
+    marginBottom: 2,
+  },
+  gaugeSubheading: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: '#582CDB',
+    marginBottom: 10,
+  },
+  gaugeActionableRow: {
+    width: '100%',
+    gap: 6,
     alignItems: 'center',
   },
-  gaugeBulletText: {
-    fontSize: 13,
-    color: '#524C62',
-    fontWeight: '500',
+  gaugeActionableItem: {
+    backgroundColor: '#FAF8FD',
+    borderWidth: 1,
+    borderColor: '#EFEBF8',
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    borderRadius: 10,
+    width: '100%',
+    alignItems: 'center',
+  },
+  gaugeActionableText: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#342D45',
   },
 
   // WHY MATTERS CARD
