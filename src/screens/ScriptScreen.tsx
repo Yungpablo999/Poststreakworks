@@ -563,10 +563,10 @@ ${selectedCtaText}`;
             {/* 2. SCRIPT PHASE TABS (SWITCHES ACTIVE STUDIO PHASE) */}
             <View style={styles.phaseTabsRow}>
               {[
-                { id: 'hook', label: '⚓ HOOK' },
-                { id: 'body', label: '📑 BODY' },
-                { id: 'lesson', label: '💡 LESSON' },
-                { id: 'cta', label: '📢 CTA' },
+                { id: 'hook', emoji: '⚓', label: 'HOOK' },
+                { id: 'body', emoji: '📑', label: 'BODY' },
+                { id: 'lesson', emoji: '💡', label: 'LESSON' },
+                { id: 'cta', emoji: '📢', label: 'CTA' },
               ].map((tab) => {
                 const isActive = activeScriptPhase === tab.id;
                 return (
@@ -584,14 +584,17 @@ ${selectedCtaText}`;
                       pressed && styles.btnPressed,
                     ]}
                   >
-                    <Text
-                      style={[
-                        styles.phaseTabBtnText,
-                        isActive && styles.phaseTabBtnTextPrimary,
-                      ]}
-                    >
-                      {tab.label}
-                    </Text>
+                    <View style={styles.phaseTabInnerRow}>
+                      <Text style={styles.phaseTabEmoji}>{tab.emoji}</Text>
+                      <Text
+                        style={[
+                          styles.phaseTabBtnText,
+                          isActive && styles.phaseTabBtnTextPrimary,
+                        ]}
+                      >
+                        {tab.label}
+                      </Text>
+                    </View>
                   </Pressable>
                 );
               })}
@@ -1658,6 +1661,7 @@ const styles = StyleSheet.create({
     borderColor: '#EDE9FE',
     justifyContent: 'center',
     alignItems: 'center',
+    paddingHorizontal: 4,
     shadowColor: '#582CDB',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.04,
@@ -1667,6 +1671,15 @@ const styles = StyleSheet.create({
   phaseTabBtnPrimary: {
     backgroundColor: '#582CDB',
     borderColor: '#582CDB',
+  },
+  phaseTabInnerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 5,
+  },
+  phaseTabEmoji: {
+    fontSize: 12,
   },
   phaseTabBtnText: {
     fontSize: 11,
