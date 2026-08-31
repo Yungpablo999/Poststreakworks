@@ -1649,19 +1649,19 @@ const styles = StyleSheet.create({
   // 2. Phase Buttons Row (4 Buttons)
   phaseTabsRow: {
     flexDirection: 'row',
-    gap: 6,
+    gap: 5,
     marginBottom: 14,
   },
   phaseTabBtn: {
     flex: 1,
-    height: 40,
+    height: 38,
     borderRadius: 12,
     backgroundColor: '#FFFFFF',
     borderWidth: 1,
     borderColor: '#EDE9FE',
     justifyContent: 'center',
     alignItems: 'center',
-    paddingHorizontal: 4,
+    paddingHorizontal: 6,
     shadowColor: '#582CDB',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.04,
@@ -1676,16 +1676,16 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 5,
+    gap: 3.5,
   },
   phaseTabEmoji: {
-    fontSize: 12,
+    fontSize: 11,
   },
   phaseTabBtnText: {
-    fontSize: 11,
+    fontSize: 10,
     fontWeight: '800',
     color: '#582CDB',
-    letterSpacing: 0.3,
+    letterSpacing: 0,
   },
   phaseTabBtnTextPrimary: {
     color: '#FFFFFF',
