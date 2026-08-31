@@ -879,22 +879,22 @@ ${selectedCtaText}`;
                   />
                 </View>
                 <Text style={styles.jarvisBannerText}>
-                  Keep your script focused on one clear lesson so it\'s easier for viewers to remember and save.
+                  Keep your script focused on one clear lesson.{"\n"}Make it easy to remember — and worth saving.
                 </Text>
               </View>
 
               <View style={styles.jarvisBannerChipsRow}>
                 <Pressable
-                  style={styles.jarvisBannerChip}
+                  style={({ pressed }) => [styles.jarvisBannerChip, pressed && styles.btnPressed]}
                   onPress={() => handleOpenPhaseModal('hook')}
                 >
-                  <Text style={styles.jarvisBannerChipText}>Improve Hook</Text>
+                  <Text style={styles.jarvisBannerChipText}>Improve Hook ➔</Text>
                 </Pressable>
                 <Pressable
-                  style={styles.jarvisBannerChip}
+                  style={({ pressed }) => [styles.jarvisBannerChip, pressed && styles.btnPressed]}
                   onPress={() => handleOpenPhaseModal('body')}
                 >
-                  <Text style={styles.jarvisBannerChipText}>Make More Personal</Text>
+                  <Text style={styles.jarvisBannerChipText}>Make More Personal ➔</Text>
                 </Pressable>
               </View>
             </LinearGradient>
@@ -1999,7 +1999,7 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 12.5,
     color: '#FFFFFF',
-    lineHeight: 18,
+    lineHeight: 19,
     fontWeight: '600',
   },
   jarvisBannerChipsRow: {
@@ -2009,10 +2009,10 @@ const styles = StyleSheet.create({
     rowGap: 8,
   },
   jarvisBannerChip: {
-    backgroundColor: 'rgba(255, 255, 255, 0.15)',
+    backgroundColor: 'rgba(255, 255, 255, 0.16)',
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.25)',
-    paddingVertical: 5,
+    borderColor: 'rgba(255, 255, 255, 0.28)',
+    paddingVertical: 6,
     paddingHorizontal: 12,
     borderRadius: 10,
   },
@@ -2020,6 +2020,7 @@ const styles = StyleSheet.create({
     fontSize: 11,
     fontWeight: '800',
     color: '#FFFFFF',
+    letterSpacing: 0.2,
   },
 
   // Takeaway Card
