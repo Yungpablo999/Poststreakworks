@@ -925,9 +925,6 @@ export const ContentAngleScreen: React.FC<ContentAngleScreenProps> = ({
               </Text>
             </LinearGradient>
           </Pressable>
-
-          {/* Bottom spacing to clear floating tab bar */}
-          <View style={{ height: 110 }} />
         </ScrollView>
 
         {/* UNIFIED SIGNATURE FLOATING TAB BAR */}
@@ -1171,7 +1168,7 @@ const styles = StyleSheet.create({
   scrollContent: {
     paddingHorizontal: 20,
     paddingTop: 8,
-    paddingBottom: 135,
+    paddingBottom: 100,
   },
   btnPressed: {
     opacity: 0.9,
