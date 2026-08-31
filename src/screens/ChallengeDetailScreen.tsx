@@ -718,19 +718,19 @@ export const ChallengeDetailScreen: React.FC<ChallengeDetailScreenProps> = ({
               </View>
               <View style={styles.jarvisTitleCol}>
                 <Text style={styles.jarvisInsightTitle}>Jarvis Insight</Text>
-                <Text style={styles.jarvisInsightSub}>CREATOR CORE AI</Text>
+                <Text style={styles.jarvisInsightSub}>CREATOR CORE</Text>
               </View>
             </View>
 
             <Text style={styles.jarvisInsightQuoteText}>
-              Your audience responds well to practical creator lessons. Keep this post honest, specific and easy to save.
+              Based on your recent content, practical creator lessons perform best. Keep this post honest, specific and easy to save.
             </Text>
 
             <Pressable
               style={({ pressed }) => [styles.generateDraftBtn, pressed && styles.btnPressed]}
               onPress={() => setShowAiDraftModal(true)}
             >
-              <Text style={styles.generateDraftBtnText}>Generate Quest Draft ➔</Text>
+              <Text style={styles.generateDraftBtnText}>Generate Quest Draft →</Text>
             </Pressable>
           </View>
 
@@ -1739,10 +1739,12 @@ const styles = StyleSheet.create({
     color: '#171420',
   },
   jarvisInsightSub: {
-    fontSize: 10,
-    fontWeight: '800',
-    color: '#582CDB',
-    letterSpacing: 0.6,
+    fontSize: 9.5,
+    fontWeight: '700',
+    color: '#7F7894',
+    letterSpacing: 0.8,
+    textTransform: 'uppercase',
+    marginTop: 1,
   },
   jarvisInsightQuoteText: {
     fontSize: 14,
