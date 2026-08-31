@@ -1108,18 +1108,19 @@ ${selectedCtaText}`;
                       <Pressable
                         key={index}
                         onPress={() => handleSelectHook(preset.text)}
-                        style={[
+                        style={({ pressed }) => [
                           styles.hookModalItemCard,
                           isSelected && styles.hookModalItemCardActive,
+                          pressed && styles.btnPressed,
                         ]}
                       >
                         <View style={styles.hookModalItemHeader}>
                           <Text style={[styles.hookModalItemType, isSelected && styles.hookModalItemTypeActive]}>
-                            {preset.type}
+                            {isSelected ? `✓ ${preset.type}` : preset.type}
                           </Text>
                           {isSelected && (
                             <View style={styles.selectedCheckBadge}>
-                              <Text style={styles.selectedCheckText}>✓ ACTIVE</Text>
+                              <Text style={styles.selectedCheckText}>SELECTED</Text>
                             </View>
                           )}
                         </View>
@@ -1175,15 +1176,25 @@ ${selectedCtaText}`;
                           setSelectedBodyPresetId(preset.id);
                           setBodyText(preset.text);
                         }}
-                        style={[
+                        style={({ pressed }) => [
                           styles.bodyModalItemCard,
                           isSelected && styles.bodyModalItemCardActive,
+                          pressed && styles.btnPressed,
                         ]}
                       >
                         <View style={styles.bodyModalItemHeader}>
-                          <Text style={styles.bodyModalItemTitle}>{preset.title}</Text>
-                          <View style={styles.bodyModalTagPill}>
-                            <Text style={styles.bodyModalTagText}>{preset.tag}</Text>
+                          <Text style={[styles.bodyModalItemTitle, isSelected && styles.bodyModalItemTitleActive]}>
+                            {isSelected ? `✓ ${preset.title}` : preset.title}
+                          </Text>
+                          <View style={styles.modalTagRightGroup}>
+                            <View style={[styles.bodyModalTagPill, isSelected && styles.bodyModalTagPillActive]}>
+                              <Text style={[styles.bodyModalTagText, isSelected && styles.bodyModalTagTextActive]}>{preset.tag}</Text>
+                            </View>
+                            {isSelected && (
+                              <View style={styles.selectedCheckBadge}>
+                                <Text style={styles.selectedCheckText}>SELECTED</Text>
+                              </View>
+                            )}
                           </View>
                         </View>
                         <Text style={styles.bodyModalItemText}>{preset.text}</Text>
@@ -1240,15 +1251,25 @@ ${selectedCtaText}`;
                           setSelectedLessonId(lesson.id);
                           setTakeawayText(lesson.text);
                         }}
-                        style={[
+                        style={({ pressed }) => [
                           styles.lessonModalItemCard,
                           isSelected && styles.lessonModalItemCardActive,
+                          pressed && styles.btnPressed,
                         ]}
                       >
                         <View style={styles.lessonModalItemHeader}>
-                          <Text style={styles.lessonModalItemTitle}>{lesson.title}</Text>
-                          <View style={styles.lessonModalTagPill}>
-                            <Text style={styles.lessonModalTagText}>{lesson.tag}</Text>
+                          <Text style={[styles.lessonModalItemTitle, isSelected && styles.lessonModalItemTitleActive]}>
+                            {isSelected ? `✓ ${lesson.title}` : lesson.title}
+                          </Text>
+                          <View style={styles.modalTagRightGroup}>
+                            <View style={[styles.lessonModalTagPill, isSelected && styles.lessonModalTagPillActive]}>
+                              <Text style={[styles.lessonModalTagText, isSelected && styles.lessonModalTagTextActive]}>{lesson.tag}</Text>
+                            </View>
+                            {isSelected && (
+                              <View style={styles.selectedCheckBadge}>
+                                <Text style={styles.selectedCheckText}>SELECTED</Text>
+                              </View>
+                            )}
                           </View>
                         </View>
                         <Text style={styles.lessonModalItemText}>&ldquo;{lesson.text}&rdquo;</Text>
@@ -1305,16 +1326,24 @@ ${selectedCtaText}`;
                           setSelectedCtaText(cta.text);
                           setCtaIndex(index);
                         }}
-                        style={[
+                        style={({ pressed }) => [
                           styles.ctaModalItemCard,
                           isSelected && styles.ctaModalItemCardActive,
+                          pressed && styles.btnPressed,
                         ]}
                       >
                         <View style={styles.ctaModalItemHeader}>
                           <Text style={[styles.ctaModalItemType, isSelected && styles.ctaModalItemTypeActive]}>
-                            {cta.type}
+                            {isSelected ? `✓ ${cta.type}` : cta.type}
                           </Text>
-                          <Text style={styles.ctaModalGoal}>{cta.goal}</Text>
+                          <View style={styles.modalTagRightGroup}>
+                            <Text style={styles.ctaModalGoal}>{cta.goal}</Text>
+                            {isSelected && (
+                              <View style={styles.selectedCheckBadge}>
+                                <Text style={styles.selectedCheckText}>SELECTED</Text>
+                              </View>
+                            )}
+                          </View>
                         </View>
                         <Text style={styles.ctaModalItemText}>&ldquo;{cta.text}&rdquo;</Text>
                       </Pressable>
@@ -2317,15 +2346,23 @@ const styles = StyleSheet.create({
     color: '#582CDB',
   },
   selectedCheckBadge: {
-    backgroundColor: '#EDE9FE',
-    paddingVertical: 2,
+    backgroundColor: '#582CDB',
+    paddingVertical: 2.5,
     paddingHorizontal: 8,
     borderRadius: 6,
+    flexShrink: 0,
   },
   selectedCheckText: {
-    fontSize: 10,
-    fontWeight: '700',
-    color: '#582CDB',
+    fontSize: 9.5,
+    fontWeight: '800',
+    color: '#FFFFFF',
+    letterSpacing: 0.4,
+  },
+  modalTagRightGroup: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+    flexShrink: 0,
   },
   hookModalItemText: {
     fontSize: 14,
@@ -2350,6 +2387,7 @@ const styles = StyleSheet.create({
   },
   bodyModalItemCardActive: {
     backgroundColor: '#FFFFFF',
+    borderWidth: 2,
     borderColor: '#582CDB',
     shadowColor: '#582CDB',
     shadowOffset: { width: 0, height: 4 },
@@ -2371,6 +2409,9 @@ const styles = StyleSheet.create({
     flex: 1,
     marginRight: 6,
   },
+  bodyModalItemTitleActive: {
+    color: '#582CDB',
+  },
   bodyModalTagPill: {
     backgroundColor: '#EDE9FE',
     paddingVertical: 2.5,
@@ -2378,10 +2419,18 @@ const styles = StyleSheet.create({
     borderRadius: 6,
     flexShrink: 0,
   },
+  bodyModalTagPillActive: {
+    backgroundColor: '#FAF5FF',
+    borderWidth: 1,
+    borderColor: '#DDD6FE',
+  },
   bodyModalTagText: {
     fontSize: 9.5,
     fontWeight: '800',
     color: '#6D28D9',
+  },
+  bodyModalTagTextActive: {
+    color: '#582CDB',
   },
   bodyModalItemText: {
     fontSize: 12.5,
@@ -2400,6 +2449,7 @@ const styles = StyleSheet.create({
   },
   lessonModalItemCardActive: {
     backgroundColor: '#FFFFFF',
+    borderWidth: 2,
     borderColor: '#582CDB',
     shadowColor: '#582CDB',
     shadowOffset: { width: 0, height: 4 },
@@ -2421,6 +2471,9 @@ const styles = StyleSheet.create({
     flex: 1,
     marginRight: 6,
   },
+  lessonModalItemTitleActive: {
+    color: '#582CDB',
+  },
   lessonModalTagPill: {
     backgroundColor: '#EDE9FE',
     paddingVertical: 2.5,
@@ -2428,10 +2481,18 @@ const styles = StyleSheet.create({
     borderRadius: 6,
     flexShrink: 0,
   },
+  lessonModalTagPillActive: {
+    backgroundColor: '#FAF5FF',
+    borderWidth: 1,
+    borderColor: '#DDD6FE',
+  },
   lessonModalTagText: {
     fontSize: 9.5,
     fontWeight: '800',
     color: '#6D28D9',
+  },
+  lessonModalTagTextActive: {
+    color: '#582CDB',
   },
   lessonModalItemText: {
     fontSize: 13,
