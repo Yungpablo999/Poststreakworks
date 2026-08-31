@@ -1249,12 +1249,16 @@ export const MatchScreen: React.FC<MatchScreenProps> = ({
                       <Image source={creator.coverImage} style={styles.trackedAvatarImg} resizeMode="cover" />
                       <View style={styles.trackedInfoCol}>
                         <View style={styles.trackedNameRow}>
-                          <Text style={styles.trackedNameText}>{creator.name}</Text>
+                          <Text style={styles.trackedNameText} numberOfLines={1} adjustsFontSizeToFit={true}>
+                            {creator.name}
+                          </Text>
                           <View style={styles.streakBadgeMini}>
                             <Text style={styles.streakBadgeMiniText}>🔥 {creator.streak}d</Text>
                           </View>
                         </View>
-                        <Text style={styles.trackedMetaText}>{creator.role} • {creator.followers}</Text>
+                        <Text style={styles.trackedMetaText} numberOfLines={1}>
+                          {creator.role} • {creator.followers}
+                        </Text>
                       </View>
                       <Pressable
                         style={({ pressed }) => [styles.connectSmallBtn, pressed && styles.btnPressed]}
@@ -2567,15 +2571,18 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: 12,
+    gap: 10,
   },
   trackedAvatarImg: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    marginRight: 12,
+    width: 46,
+    height: 46,
+    borderRadius: 23,
+    flexShrink: 0,
   },
   trackedInfoCol: {
     flex: 1,
+    minWidth: 0,
+    justifyContent: 'center',
   },
   trackedNameRow: {
     flexDirection: 'row',
@@ -2584,15 +2591,17 @@ const styles = StyleSheet.create({
     marginBottom: 2,
   },
   trackedNameText: {
-    fontSize: 15,
+    fontSize: 14.5,
     fontWeight: '800',
     color: '#171420',
+    flexShrink: 1,
   },
   streakBadgeMini: {
     backgroundColor: '#FEF3C7',
     paddingVertical: 2,
     paddingHorizontal: 6,
     borderRadius: 100,
+    flexShrink: 0,
   },
   streakBadgeMiniText: {
     fontSize: 10,
@@ -2725,12 +2734,14 @@ const styles = StyleSheet.create({
   },
   connectSmallBtn: {
     backgroundColor: '#582CDB',
-    borderRadius: 10,
-    paddingVertical: 6,
-    paddingHorizontal: 14,
+    borderRadius: 100,
+    paddingVertical: 6.5,
+    paddingHorizontal: 13,
+    flexShrink: 0,
+    marginLeft: 6,
   },
   connectSmallBtnText: {
-    fontSize: 12,
+    fontSize: 11.5,
     fontWeight: '800',
     color: '#FFFFFF',
   },
