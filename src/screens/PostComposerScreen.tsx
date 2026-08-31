@@ -370,6 +370,7 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
   const [captionCta, setCaptionCta] = useState<'Ask Question' | 'Save Post' | 'Share Thoughts'>('Ask Question');
   const [aiEditsLeft, setAiEditsLeft] = useState(3);
   const [isAiProcessing, setIsAiProcessing] = useState(false);
+  const [isCaptionFocused, setIsCaptionFocused] = useState(false);
 
   // Tags State
   const [tags, setTags] = useState<string[]>([
@@ -1165,15 +1166,29 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
             </View>
           </View>
 
-          <View style={styles.captionContainer}>
-            <TextInput
-              style={styles.captionInput}
-              multiline
-              value={caption}
-              onChangeText={setCaption}
-              placeholder="Write your post caption..."
-              placeholderTextColor="#94A3B8"
-            />
+          <View style={[styles.captionContainer, isCaptionFocused && styles.captionContainerFocused]}>
+            <View style={styles.captionInputWrapper}>
+              <TextInput
+                style={styles.captionInput}
+                multiline
+                value={caption}
+                onChangeText={setCaption}
+                onFocus={() => setIsCaptionFocused(true)}
+                onBlur={() => setIsCaptionFocused(false)}
+                placeholder="Write or tap to edit your post caption..."
+                placeholderTextColor="#94A3B8"
+                selectionColor="#7C3AED"
+                cursorColor="#7C3AED"
+              />
+              {!isCaptionFocused && (
+                <View style={styles.captionEditableBadge}>
+                  <Svg width={11} height={11} viewBox="0 0 24 24" fill="none">
+                    <Path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z" stroke="#7C3AED" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
+                  </Svg>
+                  <Text style={styles.captionEditableBadgeText}>Tap to edit</Text>
+                </View>
+              )}
+            </View>
 
             <View style={styles.captionMetaRow}>
               <View style={styles.captionMetaLeft}>
@@ -1186,6 +1201,7 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
                   style={styles.tonePill}
                 >
                   <Text style={styles.toneLabel}>TONE</Text>
+                  <Text style={styles.toneDivider}>·</Text>
                   <Text style={styles.toneValue}>💡 {captionTone}</Text>
                 </Pressable>
 
@@ -1202,7 +1218,10 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
                   style={styles.tonePill}
                 >
                   <Text style={styles.toneLabel}>CTA</Text>
-                  <Text style={styles.toneValue}>{captionCta === 'Ask Question' ? 'Question' : captionCta === 'Save Post' ? 'Save' : 'Share'}</Text>
+                  <Text style={styles.toneDivider}>·</Text>
+                  <Text style={styles.toneValue}>
+                    {captionCta === 'Ask Question' ? 'Question' : captionCta === 'Save Post' ? 'Save' : 'Share'}
+                  </Text>
                 </Pressable>
               </View>
 
@@ -1217,7 +1236,7 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
                 disabled={isAiProcessing}
               >
                 <Text style={styles.aiPillBtnText}>
-                  {isAiProcessing ? '...' : 'REWRITE'}
+                  {isAiProcessing ? '...' : 'Rewrite'}
                 </Text>
               </Pressable>
 
@@ -1226,7 +1245,7 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
                 onPress={() => handleAiAction('shorter')}
                 disabled={isAiProcessing}
               >
-                <Text style={styles.aiPillBtnText}>SHORTER</Text>
+                <Text style={styles.aiPillBtnText}>Shorten</Text>
               </Pressable>
 
               <Pressable
@@ -1234,7 +1253,7 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
                 onPress={() => handleAiAction('cta')}
                 disabled={isAiProcessing}
               >
-                <Text style={styles.aiPillBtnText}>ADD CTA</Text>
+                <Text style={styles.aiPillBtnText}>Add CTA</Text>
               </Pressable>
             </View>
           </View>
@@ -2719,7 +2738,7 @@ const styles = StyleSheet.create({
   captionContainer: {
     backgroundColor: '#FFFFFF',
     borderRadius: 20,
-    borderWidth: 1,
+    borderWidth: 1.5,
     borderColor: '#EFEBF8',
     padding: 16,
     marginBottom: 18,
@@ -2729,13 +2748,42 @@ const styles = StyleSheet.create({
     shadowRadius: 10,
     elevation: 3,
   },
-  captionInput: {
-    minHeight: 100,
-    fontSize: 14,
-    color: '#1E293B',
-    lineHeight: 20,
-    textAlignVertical: 'top',
+  captionContainerFocused: {
+    borderColor: '#7C3AED',
+    backgroundColor: '#FAF9FE',
+    shadowColor: '#7C3AED',
+    shadowOpacity: 0.12,
+    shadowRadius: 12,
+  },
+  captionInputWrapper: {
+    position: 'relative',
+    minHeight: 110,
     marginBottom: 12,
+  },
+  captionInput: {
+    minHeight: 110,
+    fontSize: 14.5,
+    color: '#1E293B',
+    lineHeight: 22,
+    textAlignVertical: 'top',
+    padding: 0,
+  },
+  captionEditableBadge: {
+    position: 'absolute',
+    top: -4,
+    right: 0,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    backgroundColor: '#F3E8FF',
+    paddingVertical: 2,
+    paddingHorizontal: 7,
+    borderRadius: 6,
+  },
+  captionEditableBadgeText: {
+    fontSize: 9.5,
+    fontWeight: '700',
+    color: '#7C3AED',
   },
   captionMetaRow: {
     flexDirection: 'row',
@@ -2762,15 +2810,21 @@ const styles = StyleSheet.create({
     backgroundColor: '#F8FAFC',
     borderWidth: 1,
     borderColor: '#EFECE6',
-    paddingVertical: 3,
-    paddingHorizontal: 7,
+    paddingVertical: 3.5,
+    paddingHorizontal: 8,
     borderRadius: 6,
-    gap: 3,
+    gap: 4,
   },
   toneLabel: {
-    fontSize: 8.5,
+    fontSize: 9,
     fontWeight: '700',
     color: '#94A3B8',
+    letterSpacing: 0.3,
+  },
+  toneDivider: {
+    fontSize: 10,
+    fontWeight: '800',
+    color: '#CBD5E1',
   },
   toneValue: {
     fontSize: 10.5,
@@ -2789,19 +2843,18 @@ const styles = StyleSheet.create({
   },
   aiPillBtn: {
     flex: 1,
-    height: 36,
+    height: 38,
     borderRadius: 10,
     backgroundColor: '#F8FAFC',
     borderWidth: 1,
-    borderColor: '#EFECE6',
+    borderColor: '#E2E8F0',
     justifyContent: 'center',
     alignItems: 'center',
   },
   aiPillBtnText: {
-    fontSize: 11,
-    fontWeight: '800',
-    color: '#475569',
-    letterSpacing: 0.4,
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#334155',
   },
 
   // 5. Tags
