@@ -238,7 +238,12 @@ export const QuestsScreen: React.FC<QuestsScreenProps> = ({
           </View>
 
           {/* HEADLINE & SUBTITLE */}
-          <Text style={styles.mainHeading} numberOfLines={1} adjustsFontSizeToFit={true}>
+          <Text
+            style={styles.mainHeading}
+            numberOfLines={1}
+            adjustsFontSizeToFit={true}
+            minimumFontScale={0.85}
+          >
             Complete quests. Build your streak.
           </Text>
           <Text style={styles.mainSubtitle}>
@@ -936,20 +941,19 @@ const styles = StyleSheet.create({
 
   // HEADLINE
   mainHeading: {
-    fontSize: Platform.OS === 'web' ? ('clamp(17px, 3.8vw, 20.5px)' as any) : sFont(18.5),
+    fontSize: Platform.OS === 'web' ? ('clamp(17px, 4.5vw, 20px)' as any) : sFont(19),
     fontWeight: '800',
     color: '#171420',
-    letterSpacing: -0.35,
-    marginBottom: 6,
-    lineHeight: Platform.OS === 'web' ? ('clamp(22px, 4.8vw, 26px)' as any) : sFont(24),
+    letterSpacing: -0.4,
+    lineHeight: 26,
+    marginBottom: 4,
   },
   mainSubtitle: {
-    fontSize: sFont(13),
-    color: '#7F7894',
-    lineHeight: 18.5,
-    marginBottom: 20,
+    fontSize: 13,
     fontWeight: '400',
-    maxWidth: '96%',
+    color: '#5E576E',
+    lineHeight: 18,
+    marginBottom: 16,
   },
 
   // 1. TODAY'S QUEST HERO CARD
