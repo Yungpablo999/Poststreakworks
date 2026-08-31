@@ -916,7 +916,7 @@ const styles = StyleSheet.create({
   scrollContent: {
     paddingHorizontal: 20,
     paddingTop: 2,
-    paddingBottom: 85,
+    paddingBottom: 130,
   },
   btnPressed: {
     opacity: 0.9,
