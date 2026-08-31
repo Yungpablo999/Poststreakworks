@@ -21,6 +21,7 @@ import { BrandToast } from '../components/BrandToast';
 import { UserProfileModal, UserProfileData } from '../components/UserProfileModal';
 import { AnimatedCompletionModal } from '../components/AnimatedCompletionModal';
 import { FreeAppHeader } from '../components/FreeAppHeader';
+import { sFont, isNarrowScreen, isSmallScreen, sPadding } from '../utils/responsive';
 
 interface ChallengeDetailScreenProps {
   onBackToDashboard?: () => void;
@@ -336,9 +337,9 @@ export const ChallengeDetailScreen: React.FC<ChallengeDetailScreenProps> = ({
                 style={styles.endsTomorrowText}
                 numberOfLines={1}
                 adjustsFontSizeToFit={true}
-                minimumFontScale={0.8}
+                minimumFontScale={0.7}
               >
-                ENDS TOMORROW • 11:30 PM
+                ENDS TOMORROW · 11:30 PM
               </Text>
             </View>
 
@@ -1076,22 +1077,22 @@ const styles = StyleSheet.create({
   inProgressPill: {
     backgroundColor: '#ECE8F9',
     paddingVertical: 3,
-    paddingHorizontal: 10,
+    paddingHorizontal: 9,
     borderRadius: 100,
     flexShrink: 0,
   },
   inProgressPillText: {
-    fontSize: 10,
+    fontSize: 9.5,
     fontWeight: '700',
     color: '#582CDB',
-    letterSpacing: 0.5,
+    letterSpacing: 0.4,
   },
   endsTomorrowText: {
-    fontSize: 10.5,
+    fontSize: isNarrowScreen ? 9.5 : isSmallScreen ? 10 : 10.5,
     fontWeight: '800',
     color: '#B45309',
-    letterSpacing: 0.2,
-    flexShrink: 1,
+    letterSpacing: 0,
+    flex: 1,
     textAlign: 'right',
   },
   heroQuestTitle: {
