@@ -14,6 +14,7 @@ import {
   Image,
   Platform,
   Dimensions,
+  Easing,
 } from 'react-native';
 import Svg, { Path, Circle, Defs, RadialGradient, Stop } from 'react-native-svg';
 import * as Haptics from 'expo-haptics';
@@ -404,35 +405,31 @@ export const MatchScreen: React.FC<MatchScreenProps> = ({
   const toastOpacity = useRef(new Animated.Value(0)).current;
   const pulseAnim = useRef(new Animated.Value(1)).current;
 
-  // Ultra-smooth Tinder PanResponder with scroll locking
+  // Ultra-smooth Tinder PanResponder with zero-jank direct tracking
   const panResponder = useRef(
     PanResponder.create({
       onStartShouldSetPanResponder: () => false,
       onStartShouldSetPanResponderCapture: () => false,
       onMoveShouldSetPanResponder: (_, gesture) => {
-        return Math.abs(gesture.dx) > 12 && Math.abs(gesture.dx) > Math.abs(gesture.dy) * 1.4;
+        return Math.abs(gesture.dx) > 7 && Math.abs(gesture.dx) > Math.abs(gesture.dy);
       },
-      onMoveShouldSetPanResponderCapture: (_, gesture) => {
-        return Math.abs(gesture.dx) > 12 && Math.abs(gesture.dx) > Math.abs(gesture.dy) * 1.4;
-      },
+      onMoveShouldSetPanResponderCapture: () => false,
       onPanResponderGrant: () => {
-        setIsSwipingCard(true);
+        position.stopAnimation();
       },
       onPanResponderMove: (_, gesture) => {
-        position.setValue({ x: gesture.dx, y: gesture.dy * 0.2 });
+        position.setValue({ x: gesture.dx, y: gesture.dy * 0.3 });
       },
       onPanResponderRelease: (_, gesture) => {
-        setIsSwipingCard(false);
-        if (gesture.dx > SWIPE_THRESHOLD || gesture.vx > 0.6) {
+        if (gesture.dx > 80 || (gesture.dx > 30 && gesture.vx > 0.4)) {
           swipeCard('right');
-        } else if (gesture.dx < -SWIPE_THRESHOLD || gesture.vx < -0.6) {
+        } else if (gesture.dx < -80 || (gesture.dx < -30 && gesture.vx < -0.4)) {
           swipeCard('left');
         } else {
           resetCardPosition();
         }
       },
       onPanResponderTerminate: () => {
-        setIsSwipingCard(false);
         resetCardPosition();
       },
       onPanResponderTerminationRequest: () => true,
@@ -492,22 +489,25 @@ export const MatchScreen: React.FC<MatchScreenProps> = ({
   const resetCardPosition = () => {
     Animated.spring(position, {
       toValue: { x: 0, y: 0 },
-      friction: 5,
-      tension: 50,
+      friction: 7,
+      tension: 70,
       useNativeDriver: true,
     }).start();
   };
 
   const swipeCard = (direction: 'left' | 'right' | 'up') => {
     const creator = CREATOR_DECK[currentIndex % CREATOR_DECK.length];
-    const x = direction === 'right' ? SCREEN_WIDTH + 140 : direction === 'left' ? -SCREEN_WIDTH - 140 : 0;
-    const y = direction === 'up' ? -SCREEN_WIDTH - 140 : 0;
+    const targetX = direction === 'right' ? SCREEN_WIDTH + 140 : direction === 'left' ? -SCREEN_WIDTH - 140 : 0;
+    const targetY = direction === 'up' ? -SCREEN_WIDTH - 140 : 0;
 
     Animated.timing(position, {
-      toValue: { x, y },
-      duration: 220,
+      toValue: { x: targetX, y: targetY },
+      duration: 180,
+      easing: Easing.out(Easing.quad),
       useNativeDriver: true,
     }).start(() => {
+      position.setValue({ x: 0, y: 0 });
+      setCurrentIndex((prev) => prev + 1);
       onSwipeComplete(direction, creator);
     });
   };
@@ -669,10 +669,11 @@ export const MatchScreen: React.FC<MatchScreenProps> = ({
   const isCurrentSaved = savedCreators.some((c) => c.id === currentCreator.id);
   const isDetailSaved = savedCreators.some((c) => c.id === selectedCreatorForDetail.id);
 
-  // Card rotation & stamp interpolation
+  // Card rotation & stamp interpolation with natural physical dynamics
   const rotate = position.x.interpolate({
-    inputRange: [-SCREEN_WIDTH * 1.5, 0, SCREEN_WIDTH * 1.5],
-    outputRange: ['-16deg', '0deg', '16deg'],
+    inputRange: [-SCREEN_WIDTH * 0.8, 0, SCREEN_WIDTH * 0.8],
+    outputRange: ['-14deg', '0deg', '14deg'],
+    extrapolate: 'clamp',
   });
 
   const animatedCardStyle = {
@@ -683,20 +684,32 @@ export const MatchScreen: React.FC<MatchScreenProps> = ({
     ],
   };
 
+  const nextCardScale = position.x.interpolate({
+    inputRange: [-160, 0, 160],
+    outputRange: [1, 0.95, 1],
+    extrapolate: 'clamp',
+  });
+
+  const nextCardOpacity = position.x.interpolate({
+    inputRange: [-160, 0, 160],
+    outputRange: [1, 0.88, 1],
+    extrapolate: 'clamp',
+  });
+
   const acceptStampOpacity = position.x.interpolate({
-    inputRange: [15, SWIPE_THRESHOLD],
+    inputRange: [20, 80],
     outputRange: [0, 1],
     extrapolate: 'clamp',
   });
 
   const declineStampOpacity = position.x.interpolate({
-    inputRange: [-SWIPE_THRESHOLD, -15],
+    inputRange: [-80, -20],
     outputRange: [1, 0],
     extrapolate: 'clamp',
   });
 
   const saveStampOpacity = position.y.interpolate({
-    inputRange: [-SWIPE_UP_THRESHOLD, -15],
+    inputRange: [-80, -20],
     outputRange: [1, 0],
     extrapolate: 'clamp',
   });
@@ -726,7 +739,6 @@ export const MatchScreen: React.FC<MatchScreenProps> = ({
           style={styles.scrollView}
           contentContainerStyle={styles.scrollContent}
           showsVerticalScrollIndicator={false}
-          scrollEnabled={!isSwipingCard}
         >
           {/* SECTION 1: MATCH HEADER & LIVE RADAR STATS */}
           <View style={styles.pageHeaderSection}>
@@ -869,7 +881,16 @@ export const MatchScreen: React.FC<MatchScreenProps> = ({
               {/* TINDER SWIPEABLE CARD STACK */}
               <View style={styles.cardStackContainer}>
                 {/* BOTTOM / NEXT CARD IN STACK */}
-                <View style={styles.bottomCardContainer} pointerEvents="none">
+                <Animated.View
+                  style={[
+                    styles.bottomCardContainer,
+                    {
+                      transform: [{ scale: nextCardScale }],
+                      opacity: nextCardOpacity,
+                    },
+                  ]}
+                  pointerEvents="none"
+                >
                   <View style={styles.tinderCardOuter}>
                     <Image
                       source={nextCreator.coverImage}
@@ -908,7 +929,7 @@ export const MatchScreen: React.FC<MatchScreenProps> = ({
                       </View>
                     </LinearGradient>
                   </View>
-                </View>
+                </Animated.View>
 
                 {/* TOP ACTIVE SWIPEABLE CARD */}
                 <Animated.View

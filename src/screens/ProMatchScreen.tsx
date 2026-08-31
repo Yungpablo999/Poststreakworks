@@ -14,6 +14,7 @@ import {
   Image,
   Platform,
   Dimensions,
+  Easing,
 } from 'react-native';
 import Svg, { Path, Circle, Rect } from 'react-native-svg';
 import * as Haptics from 'expo-haptics';
@@ -405,35 +406,31 @@ export const ProMatchScreen: React.FC<ProMatchScreenProps> = ({
     }).start();
   };
 
-  // PanResponder for Interactive Deck Swiping (Horizontal Only with Vertical Scroll Passthrough)
+  // Ultra-smooth Tinder PanResponder with zero-jank direct tracking
   const panResponder = useRef(
     PanResponder.create({
       onStartShouldSetPanResponder: () => false,
       onStartShouldSetPanResponderCapture: () => false,
       onMoveShouldSetPanResponder: (_, gesture) => {
-        return Math.abs(gesture.dx) > 12 && Math.abs(gesture.dx) > Math.abs(gesture.dy) * 1.4;
+        return Math.abs(gesture.dx) > 7 && Math.abs(gesture.dx) > Math.abs(gesture.dy);
       },
-      onMoveShouldSetPanResponderCapture: (_, gesture) => {
-        return Math.abs(gesture.dx) > 12 && Math.abs(gesture.dx) > Math.abs(gesture.dy) * 1.4;
-      },
+      onMoveShouldSetPanResponderCapture: () => false,
       onPanResponderGrant: () => {
-        setIsSwipingCard(true);
+        position.stopAnimation();
       },
       onPanResponderMove: (_, gesture) => {
-        position.setValue({ x: gesture.dx, y: gesture.dy * 0.2 });
+        position.setValue({ x: gesture.dx, y: gesture.dy * 0.3 });
       },
       onPanResponderRelease: (_, gesture) => {
-        setIsSwipingCard(false);
-        if (gesture.dx > SWIPE_THRESHOLD) {
+        if (gesture.dx > 80 || (gesture.dx > 30 && gesture.vx > 0.4)) {
           swipeRight();
-        } else if (gesture.dx < -SWIPE_THRESHOLD) {
+        } else if (gesture.dx < -80 || (gesture.dx < -30 && gesture.vx < -0.4)) {
           swipeLeft();
         } else {
           resetPosition();
         }
       },
       onPanResponderTerminate: () => {
-        setIsSwipingCard(false);
         resetPosition();
       },
       onPanResponderTerminationRequest: () => true,
@@ -443,7 +440,8 @@ export const ProMatchScreen: React.FC<ProMatchScreenProps> = ({
   const resetPosition = () => {
     Animated.spring(position, {
       toValue: { x: 0, y: 0 },
-      friction: 5,
+      friction: 7,
+      tension: 70,
       useNativeDriver: true,
     }).start();
   };
@@ -457,8 +455,9 @@ export const ProMatchScreen: React.FC<ProMatchScreenProps> = ({
     }
 
     Animated.timing(position, {
-      toValue: { x: SCREEN_WIDTH + 150, y: 0 },
-      duration: 250,
+      toValue: { x: SCREEN_WIDTH + 140, y: 0 },
+      duration: 180,
+      easing: Easing.out(Easing.quad),
       useNativeDriver: true,
     }).start(() => {
       onSwipeComplete('right', creator);
@@ -474,8 +473,9 @@ export const ProMatchScreen: React.FC<ProMatchScreenProps> = ({
     }
 
     Animated.timing(position, {
-      toValue: { x: -SCREEN_WIDTH - 150, y: 0 },
-      duration: 250,
+      toValue: { x: -SCREEN_WIDTH - 140, y: 0 },
+      duration: 180,
+      easing: Easing.out(Easing.quad),
       useNativeDriver: true,
     }).start(() => {
       onSwipeComplete('left', creator);
@@ -655,26 +655,38 @@ export const ProMatchScreen: React.FC<ProMatchScreenProps> = ({
     setShowCompletionModal(true);
   };
 
-  // Interpolated Swiping Transforms
   const rotate = position.x.interpolate({
-    inputRange: [-SCREEN_WIDTH * 1.5, 0, SCREEN_WIDTH * 1.5],
+    inputRange: [-SCREEN_WIDTH * 0.8, 0, SCREEN_WIDTH * 0.8],
     outputRange: ['-14deg', '0deg', '14deg'],
+    extrapolate: 'clamp',
+  });
+
+  const nextCardScale = position.x.interpolate({
+    inputRange: [-160, 0, 160],
+    outputRange: [1, 0.95, 1],
+    extrapolate: 'clamp',
+  });
+
+  const nextCardOpacity = position.x.interpolate({
+    inputRange: [-160, 0, 160],
+    outputRange: [1, 0.88, 1],
+    extrapolate: 'clamp',
   });
 
   const likeOpacity = position.x.interpolate({
-    inputRange: [20, SWIPE_THRESHOLD],
+    inputRange: [20, 80],
     outputRange: [0, 1],
     extrapolate: 'clamp',
   });
 
   const nopeOpacity = position.x.interpolate({
-    inputRange: [-SWIPE_THRESHOLD, -20],
+    inputRange: [-80, -20],
     outputRange: [1, 0],
     extrapolate: 'clamp',
   });
 
   const trackOpacity = position.y.interpolate({
-    inputRange: [-SWIPE_UP_THRESHOLD, -20],
+    inputRange: [-80, -20],
     outputRange: [1, 0],
     extrapolate: 'clamp',
   });
@@ -686,20 +698,13 @@ export const ProMatchScreen: React.FC<ProMatchScreenProps> = ({
     <SafeAreaView style={styles.safeArea}>
       <StatusBar barStyle="dark-content" backgroundColor="#FAF8F5" />
       <View style={styles.container}>
-        {/* ============================================================ */}
-        {/* 1. TOP APP HEADER (EXACT STANDARD PRO HEADER)                 */}
-        {/* ============================================================ */}
         <View style={styles.headerBar}>
-          {/* Top-Left: Ghost Logo Mascot + Mode Switcher */}
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
             <Animated.View
               style={[
                 styles.headerLogoWrapper,
                 {
-                  transform: [
-                    { translateY: ghostFloatY },
-                    { scale: ghostScale },
-                  ],
+                  transform: [{ translateY: ghostFloatY }],
                 },
               ]}
             >
@@ -715,11 +720,7 @@ export const ProMatchScreen: React.FC<ProMatchScreenProps> = ({
                 if (Platform.OS !== 'web') {
                   Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
                 }
-                if (onSwitchToFree) {
-                  onSwitchToFree();
-                } else if (onSaveProfile && userProfile) {
-                  onSaveProfile({ ...userProfile, tier: 'free' });
-                }
+                if (onLogout) onLogout();
               }}
               hitSlop={8}
             >
@@ -1010,17 +1011,27 @@ export const ProMatchScreen: React.FC<ProMatchScreenProps> = ({
                   <View style={styles.deckContainer}>
                     {/* Underneath Card (3D Stack Depth) */}
                     {nextCreator && (
-                      <View style={[styles.cardWrapper, styles.underneathCard]}>
+                      <Animated.View
+                        style={[
+                          styles.cardWrapper,
+                          styles.underneathCard,
+                          {
+                            transform: [{ scale: nextCardScale }],
+                            opacity: nextCardOpacity,
+                          },
+                        ]}
+                        pointerEvents="none"
+                      >
                         <Image source={nextCreator.coverImage} style={styles.cardImage} resizeMode="cover" />
                         <LinearGradient
                           colors={['transparent', 'rgba(0,0,0,0.4)', 'rgba(0,0,0,0.92)']}
                           style={styles.cardGradientOverlay}
                         />
                         <View style={styles.cardBottomContent}>
-                          <Text style={styles.creatorNameText}>{nextCreator.name}</Text>
+                          <Text style={styles.creatorNameText}>{nextCreator.name.split(' ')[0]}</Text>
                           <Text style={styles.creatorRoleLocationText}>{nextCreator.role}</Text>
                         </View>
-                      </View>
+                      </Animated.View>
                     )}
 
                     {/* Top Swiping Card */}
