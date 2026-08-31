@@ -1192,6 +1192,7 @@ export default function App() {
           ) : (
             <ScriptScreen
               ideaTitle={selectedIdeaTitle}
+              format={composerIdeaFormat}
               onBack={() => navigateTo(previousScreen ? previousScreen : 'create')}
               onLogout={handleLogout}
               onOpenSchedule={() => navigateTo('schedule')}

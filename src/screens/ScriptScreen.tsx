@@ -25,6 +25,7 @@ import { sFont, sPadding, isNarrowScreen } from '../utils/responsive';
 
 interface ScriptScreenProps {
   ideaTitle?: string;
+  format?: string;
   onBack: () => void;
   onLogout?: () => void;
   onOpenSchedule?: () => void;
@@ -35,6 +36,23 @@ interface ScriptScreenProps {
   userProfile?: UserProfileData;
   onSaveProfile?: (updated: UserProfileData) => void;
 }
+
+export const getFormatDurationLabel = (format?: string, title?: string): string => {
+  const f = (format || '').toLowerCase();
+  const t = (title || '').toLowerCase();
+
+  if (f.includes('carousel') || t.includes('carousel') || t.includes('slide') || f === 'carousel') {
+    return '🖼️ 6–8 slides • Carousel';
+  }
+  if (f.includes('long') || f.includes('youtube') || t.includes('tutorial') || t.includes('deep dive') || f === 'long_video') {
+    return '🎬 3–5 min • Long-form';
+  }
+  if (f.includes('text') || f.includes('thread') || t.includes('thread') || t.includes('essay') || f === 'text') {
+    return '📝 Text-first • Thread';
+  }
+  // Default to short video / reel / tiktok
+  return '🎬 30–45 sec • Short-form';
+};
 
 interface NotificationItem {
   id: string;
@@ -187,6 +205,7 @@ const CTA_PRESETS = [
 
 export const ScriptScreen: React.FC<ScriptScreenProps> = ({
   ideaTitle = 'One thing I wish I knew before I started creating',
+  format,
   onBack,
   onLogout,
   onOpenSchedule,
@@ -196,7 +215,8 @@ export const ScriptScreen: React.FC<ScriptScreenProps> = ({
   onOpenMessages,
 
   userProfile,
-  onSaveProfile,}) => {
+  onSaveProfile,
+}) => {
   const isDark = false;
   const [activeTab, setActiveTab] = useState<TabType>('create');
 
@@ -466,7 +486,9 @@ ${selectedCtaText}`;
             <View style={styles.selectedIdeaCard}>
               <View style={styles.selectedIdeaHeaderRow}>
                 <Text style={styles.selectedIdeaLabel}>SELECTED IDEA</Text>
-                <Text style={styles.selectedIdeaDuration}>30-45 sec</Text>
+                <Text style={styles.selectedIdeaDuration}>
+                  {getFormatDurationLabel(format, ideaTitle)}
+                </Text>
               </View>
 
               <Text style={styles.selectedIdeaTitle}>&ldquo;{ideaTitle}&rdquo;</Text>
