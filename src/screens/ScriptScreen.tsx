@@ -225,7 +225,7 @@ export const ScriptScreen: React.FC<ScriptScreenProps> = ({
 
   // Live-Editable Script Components State
   const [selectedHook, setSelectedHook] = useState(HOOK_PRESETS[0].text);
-  const [generationsLeft, setGenerationsLeft] = useState(2);
+  const [editsLeft, setEditsLeft] = useState(2);
   const [bodyText, setBodyText] = useState(BODY_PRESETS[0].text);
   const [selectedBodyPresetId, setSelectedBodyPresetId] = useState('original');
   const [takeawayText, setTakeawayText] = useState(LESSON_PRESETS[0].text);
@@ -368,8 +368,8 @@ export const ScriptScreen: React.FC<ScriptScreenProps> = ({
     setShowCelebrationModal(true);
   };
 
-  const handleAiRegenerateCurrentPhase = () => {
-    if (generationsLeft <= 0) {
+  const handleAiRewriteCurrentPhase = () => {
+    if (editsLeft <= 0) {
       if (Platform.OS !== 'web') {
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
       }
@@ -379,7 +379,7 @@ export const ScriptScreen: React.FC<ScriptScreenProps> = ({
     if (Platform.OS !== 'web') {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     }
-    setGenerationsLeft((g) => Math.max(0, g - 1));
+    setEditsLeft((e) => Math.max(0, e - 1));
 
     if (activeScriptPhase === 'hook') {
       const aiHooks = [
@@ -413,9 +413,9 @@ export const ScriptScreen: React.FC<ScriptScreenProps> = ({
     }
 
     setCelebrationTitle('AI Rewrite Applied!');
-    setCelebrationSubtitle(`New ${activeScriptPhase.toUpperCase()} generated tailored to your post.`);
-    setCelebrationSpeech('AI optimization ready! You can edit or swap anytime.');
-    setCelebrationBadge('AI OPTIMIZED');
+    setCelebrationSubtitle(`New ${activeScriptPhase.toUpperCase()} refined for your script (1 edit used).`);
+    setCelebrationSpeech('Script refined! Swap presets anytime for free.');
+    setCelebrationBadge('AI EDITED');
     setShowCelebrationModal(true);
   };
 
@@ -626,8 +626,8 @@ ${selectedCtaText}`;
                   }}
                   hitSlop={8}
                 >
-                  <View style={styles.generationsBadge}>
-                    <Text style={styles.generationsBadgeText}>⚡ {generationsLeft} edits left</Text>
+                  <View style={styles.editsBadge}>
+                    <Text style={styles.editsBadgeText}>⚡ {editsLeft} edits left</Text>
                   </View>
                 </Pressable>
               </View>
@@ -688,10 +688,10 @@ ${selectedCtaText}`;
               {/* Action Toolbar for Current Phase */}
               <View style={styles.studioActionRow}>
                 <Pressable
-                  style={({ pressed }) => [styles.aiRegenerateBtn, pressed && styles.btnPressed]}
-                  onPress={handleAiRegenerateCurrentPhase}
+                  style={({ pressed }) => [styles.aiRewriteBtn, pressed && styles.btnPressed]}
+                  onPress={handleAiRewriteCurrentPhase}
                 >
-                  <Text style={styles.aiRegenerateBtnText} numberOfLines={1} ellipsizeMode="tail">
+                  <Text style={styles.aiRewriteBtnText} numberOfLines={1} ellipsizeMode="tail">
                     ✨ AI Rewrite · 1 edit
                   </Text>
                 </Pressable>
@@ -706,7 +706,7 @@ ${selectedCtaText}`;
               {/* Alternatives Sub-header with Free Swap clarification */}
               <View style={styles.altHeaderRow}>
                 <Text style={styles.alternativeHooksLabel}>
-                  ALTERNATIVE {activeScriptPhase === 'lesson' ? 'LESSONS' : activeScriptPhase === 'cta' ? 'CTAs' : `${activeScriptPhase.toUpperCase()}S`}
+                  ALTERNATIVE {activeScriptPhase === 'body' ? 'BODY STYLES' : activeScriptPhase === 'lesson' ? 'LESSONS' : activeScriptPhase === 'cta' ? 'CTAs' : 'HOOKS'}
                 </Text>
                 <View style={styles.freeBadgeMicro}>
                   <Text style={styles.freeBadgeMicroText}>FREE SWAP</Text>
@@ -1737,7 +1737,7 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     overflow: 'hidden',
   },
-  generationsBadge: {
+  editsBadge: {
     backgroundColor: '#FAF5FF',
     borderWidth: 1,
     borderColor: '#DDD6FE',
@@ -1746,7 +1746,7 @@ const styles = StyleSheet.create({
     borderRadius: 6,
     flexShrink: 0,
   },
-  generationsBadgeText: {
+  editsBadgeText: {
     fontSize: 10.5,
     fontWeight: '800',
     color: '#6D28D9',
@@ -1776,7 +1776,7 @@ const styles = StyleSheet.create({
     gap: 8,
     marginBottom: 14,
   },
-  aiRegenerateBtn: {
+  aiRewriteBtn: {
     flex: 1,
     height: 38,
     borderRadius: 10,
@@ -1787,7 +1787,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 8,
   },
-  aiRegenerateBtnText: {
+  aiRewriteBtnText: {
     fontSize: 11.5,
     fontWeight: '800',
     color: '#582CDB',
