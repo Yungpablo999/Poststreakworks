@@ -651,7 +651,7 @@ export const ChallengeDetailScreen: React.FC<ChallengeDetailScreenProps> = ({
           <Text style={styles.sectionHeading}>Why this quest matters</Text>
           <View style={styles.whyMattersCard}>
             <Text style={styles.whyMattersText}>
-              Storytelling helps your audience trust you. Completing this quest improves your Creator Passport and strengthens your consistency record.
+              Storytelling builds audience trust. Complete this quest to strengthen your Creator Passport and show brands that you create consistently.
             </Text>
 
             <View style={styles.whyMattersPillRow}>
