@@ -29,7 +29,7 @@ interface ChallengeDetailScreenProps {
   onLogout?: () => void;
   onOpenMessages?: () => void;
   onOpenJarvisPro?: () => void;
-  onOpenComposer?: () => void;
+  onOpenComposer?: (idea?: string, platform?: string) => void;
   userProfile?: UserProfileData;
   onSaveProfile?: (updated: UserProfileData) => void;
 }
@@ -275,8 +275,11 @@ export const ChallengeDetailScreen: React.FC<ChallengeDetailScreenProps> = ({
     if (Platform.OS !== 'web') {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     }
-    triggerModalPop();
-    setShowCreatePostModal(true);
+    if (onOpenComposer) {
+      onOpenComposer('One thing I wish I knew before I started creating', postPlatform);
+    } else if (onNavigateTab) {
+      onNavigateTab('create' as TabType);
+    }
   };
 
   const handleContinueQuest = () => {
@@ -284,7 +287,7 @@ export const ChallengeDetailScreen: React.FC<ChallengeDetailScreenProps> = ({
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     }
     if (onOpenComposer) {
-      onOpenComposer();
+      onOpenComposer(postTitle, postPlatform);
     } else if (onNavigateTab) {
       onNavigateTab('create' as TabType);
     }
@@ -560,7 +563,7 @@ export const ChallengeDetailScreen: React.FC<ChallengeDetailScreenProps> = ({
 
               {/* Formula Capsule */}
               <View style={styles.formulaCapsule}>
-                <Text style={styles.formulaCapsuleText}>Hook ➔ Story ➔ Lesson ➔ CTA</Text>
+                <Text style={styles.formulaCapsuleText}>Hook → Story → Lesson → CTA</Text>
               </View>
 
               {/* Platform Chips */}
@@ -1404,17 +1407,18 @@ const styles = StyleSheet.create({
 
   // SUGGESTED ANGLE (Royal Purple Card)
   suggestedAngleCard: {
-    borderRadius: 24,
+    borderRadius: 22,
     overflow: 'hidden',
-    marginBottom: 26,
+    marginBottom: 24,
     shadowColor: '#582CDB',
-    shadowOffset: { width: 0, height: 8 },
+    shadowOffset: { width: 0, height: 6 },
     shadowOpacity: 0.12,
-    shadowRadius: 18,
+    shadowRadius: 16,
     elevation: 4,
   },
   suggestedAngleGradient: {
-    padding: 22,
+    paddingVertical: 18,
+    paddingHorizontal: 18,
   },
   suggestedAngleTag: {
     alignSelf: 'flex-start',
@@ -1422,7 +1426,7 @@ const styles = StyleSheet.create({
     paddingVertical: 3,
     paddingHorizontal: 10,
     borderRadius: 100,
-    marginBottom: 12,
+    marginBottom: 10,
   },
   suggestedAngleTagText: {
     fontSize: 10,
@@ -1431,19 +1435,19 @@ const styles = StyleSheet.create({
     letterSpacing: 0.6,
   },
   suggestedAngleQuote: {
-    fontSize: 19,
+    fontSize: 18,
     fontWeight: '800',
     color: '#FFFFFF',
     letterSpacing: -0.3,
-    lineHeight: 26,
-    marginBottom: 14,
+    lineHeight: 24,
+    marginBottom: 12,
   },
   formulaCapsule: {
     backgroundColor: 'rgba(255, 255, 255, 0.16)',
-    paddingVertical: 8,
-    paddingHorizontal: 14,
-    borderRadius: 12,
-    marginBottom: 14,
+    paddingVertical: 7,
+    paddingHorizontal: 12,
+    borderRadius: 10,
+    marginBottom: 10,
   },
   formulaCapsuleText: {
     fontSize: 12,
@@ -1454,13 +1458,13 @@ const styles = StyleSheet.create({
   platformChipsRow: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 8,
-    marginBottom: 18,
+    gap: 6,
+    marginBottom: 14,
   },
   platformTranslucentChip: {
     backgroundColor: 'rgba(255, 255, 255, 0.15)',
-    paddingVertical: 4,
-    paddingHorizontal: 10,
+    paddingVertical: 3.5,
+    paddingHorizontal: 9,
     borderRadius: 8,
   },
   platformTranslucentChipText: {
@@ -1470,14 +1474,14 @@ const styles = StyleSheet.create({
   },
   useIdeaWhiteBtn: {
     backgroundColor: '#FFFFFF',
-    height: 46,
+    height: 44,
     borderRadius: 12,
     justifyContent: 'center',
     alignItems: 'center',
     shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.12,
-    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.1,
+    shadowRadius: 6,
   },
   useIdeaWhiteBtnText: {
     fontSize: 14,
