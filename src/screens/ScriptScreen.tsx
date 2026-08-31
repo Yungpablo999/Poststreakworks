@@ -688,8 +688,8 @@ ${selectedCtaText}`;
                   style={({ pressed }) => [styles.aiRegenerateBtn, pressed && styles.btnPressed]}
                   onPress={handleAiRegenerateCurrentPhase}
                 >
-                  <Text style={styles.aiRegenerateBtnText}>
-                    ✨ AI Rewrite {activeScriptPhase === 'lesson' ? 'Lesson' : activeScriptPhase === 'cta' ? 'CTA' : activeScriptPhase.toUpperCase()} (1 edit)
+                  <Text style={styles.aiRegenerateBtnText} numberOfLines={1} ellipsizeMode="tail">
+                    ✨ AI Rewrite · 1 edit
                   </Text>
                 </Pressable>
                 <Pressable
@@ -1772,6 +1772,7 @@ const styles = StyleSheet.create({
     borderColor: '#EDE9FE',
     justifyContent: 'center',
     alignItems: 'center',
+    paddingHorizontal: 8,
   },
   aiRegenerateBtnText: {
     fontSize: 11.5,
