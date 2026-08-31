@@ -687,7 +687,7 @@ export const CaptionScreen: React.FC<CaptionScreenProps> = ({
             <View style={styles.modalOverlay}>
               <Animated.View style={[styles.modalCard, { transform: [{ scale: modalPopScale }] }]}>
                 <View style={styles.modalHeaderRow}>
-                  <View>
+                  <View style={styles.modalTitleCol}>
                     <Text style={styles.modalTitle}>🎯 Select Content Goal</Text>
                     <Text style={styles.modalSubtitle}>Choose what you want your caption to achieve</Text>
                   </View>
@@ -749,9 +749,9 @@ export const CaptionScreen: React.FC<CaptionScreenProps> = ({
             <View style={styles.modalOverlay}>
               <Animated.View style={[styles.modalCard, { transform: [{ scale: modalPopScale }] }]}>
                 <View style={styles.modalHeaderRow}>
-                  <View>
+                  <View style={styles.modalTitleCol}>
                     <Text style={styles.modalTitle}>Notifications</Text>
-                    <Text style={styles.modalSubtitle}>Streak updates &amp; creator alerts</Text>
+                    <Text style={styles.modalSubtitle}>Streak updates & creator alerts</Text>
                   </View>
                   <Pressable
                     onPress={() => setShowNotificationModal(false)}
@@ -810,7 +810,7 @@ export const CaptionScreen: React.FC<CaptionScreenProps> = ({
             <View style={styles.modalOverlay}>
               <Animated.View style={[styles.modalCard, { transform: [{ scale: modalPopScale }] }]}>
                 <View style={styles.modalHeaderRow}>
-                  <View>
+                  <View style={styles.modalTitleCol}>
                     <Text style={styles.modalTitle}>Jarvis AI Chat</Text>
                     <Text style={styles.modalSubtitle}>Real-time creative assistant</Text>
                   </View>
@@ -1561,12 +1561,18 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.08,
     shadowRadius: 24,
     elevation: 8,
+    overflow: 'hidden',
   },
   modalHeaderRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'flex-start',
     marginBottom: 14,
+    width: '100%',
+  },
+  modalTitleCol: {
+    flex: 1,
+    marginRight: 10,
   },
   modalTitle: {
     fontSize: 17,
@@ -1577,6 +1583,7 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: '#64748B',
     marginTop: 2,
+    lineHeight: 16,
   },
   modalCloseCircle: {
     width: 28,
@@ -1585,6 +1592,8 @@ const styles = StyleSheet.create({
     backgroundColor: '#F1F5F9',
     justifyContent: 'center',
     alignItems: 'center',
+    flexShrink: 0,
+    marginTop: 2,
   },
   modalCloseCross: {
     fontSize: 12,
