@@ -758,18 +758,22 @@ export const QuestsScreen: React.FC<QuestsScreenProps> = ({
                 </Pressable>
               </View>
 
-              <View style={{ gap: 10, marginVertical: 12 }}>
+              <View style={{ gap: 8, marginVertical: 10 }}>
                 <View style={styles.repDetailRow}>
                   <Text style={styles.repDetailTitle}>🔥 Consistency Score (20%)</Text>
-                  <Text style={styles.repDetailDesc}>Daily posting streak and on-time publishing</Text>
+                  <Text style={styles.repDetailDesc}>Daily posting streak and on-time publishing (max 35%)</Text>
                 </View>
                 <View style={styles.repDetailRow}>
-                  <Text style={styles.repDetailTitle}>⚡ Quest Completion (15%)</Text>
-                  <Text style={styles.repDetailDesc}>1 of 3 weekly quests completed (+15%)</Text>
+                  <Text style={styles.repDetailTitle}>⚡ Quest Completion Score (15%)</Text>
+                  <Text style={styles.repDetailDesc}>1 of 3 weekly quests completed (max 25%)</Text>
                 </View>
                 <View style={styles.repDetailRow}>
                   <Text style={styles.repDetailTitle}>🤝 Collaboration Proof (0%)</Text>
-                  <Text style={styles.repDetailDesc}>Not started · Match and collab to earn up to +40%</Text>
+                  <Text style={styles.repDetailDesc}>Not started · Match and squad collabs (max 25%)</Text>
+                </View>
+                <View style={styles.repDetailRow}>
+                  <Text style={styles.repDetailTitle}>🛡️ Platform Verification (0%)</Text>
+                  <Text style={styles.repDetailDesc}>Connected socials & verified creator metrics (max 15%)</Text>
                 </View>
               </View>
 
