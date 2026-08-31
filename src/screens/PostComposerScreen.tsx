@@ -458,12 +458,43 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
   useEffect(() => {
     if (ideaTitle) {
       setCurrentIdea(ideaTitle);
-      if (ideaTitle.toLowerCase().includes('habits')) {
-        setCaption('3 simple creator habits that helped me post 5x faster:\n1. Batch recording my talking points\n2. Reusing proven hooks\n3. Focusing on 1 key takeaway per post.\n\nWhich of these are you trying next?');
+      const lower = ideaTitle.toLowerCase();
+      if (
+        lower.includes('story') ||
+        lower.includes('lesson') ||
+        lower.includes('wish i knew') ||
+        lower.includes('mistake') ||
+        lower.includes('storyteller') ||
+        lower.includes('started creating')
+      ) {
+        setCaption(
+          'When I first started creating content, I delayed posting for months waiting for everything to be perfect.\n\nWhen I finally hit record on my phone and shared one honest lesson, my 3rd video hit 50k views.\n\nKey takeaway: Storytelling and consistency beat high production every time.\n\nWhat is one lesson you learned the hard way? Drop it below 👇'
+        );
+        setCaptionTone('Story');
+        setCaptionCta('Ask Question');
+        setTags(['#CreatorJourney', '#Storytelling', '#LessonsLearned', '#PostStreak']);
+        setSelectedFormat('short_video');
+      } else if (lower.includes('habits')) {
+        setCaption(
+          '3 simple creator habits that helped me post 5x faster:\n1. Batch recording my talking points\n2. Reusing proven hooks\n3. Focusing on 1 key takeaway per post.\n\nWhich of these are you trying next?'
+        );
+        setCaptionTone('Helpful');
+        setCaptionCta('Ask Question');
         setTags(['#CreatorTips', '#Habits', '#Consistency']);
-      } else if (ideaTitle.toLowerCase().includes('planning')) {
-        setCaption('My simple 3-step content planning routine that saves me 4+ hours every week:\n1. Brainstorm 5 pain points\n2. Outline in bullet points\n3. Schedule for peak engagement windows.\n\nSave this for your next planning session!');
+      } else if (lower.includes('planning')) {
+        setCaption(
+          'My simple 3-step content planning routine that saves me 4+ hours every week:\n1. Brainstorm 5 pain points\n2. Outline in bullet points\n3. Schedule for peak engagement windows.\n\nSave this for your next planning session!'
+        );
+        setCaptionTone('Helpful');
+        setCaptionCta('Save Post');
         setTags(['#ContentPlanning', '#CreatorWorkflow', '#GetSaves']);
+      } else if (lower.includes('viral') || lower.includes('hook')) {
+        setCaption(
+          'Stop scrolling if you want to grow as a creator this month.\n\nThe #1 shift that changed my reach wasn’t the algorithm—it was hooking the viewer in the first 2 seconds.\n\nSave this framework for your next post!'
+        );
+        setCaptionTone('Viral');
+        setCaptionCta('Save Post');
+        setTags(['#ViralHooks', '#CreatorGrowth', '#ContentTips']);
       }
     }
   }, [ideaTitle]);
@@ -473,6 +504,12 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
       setSelectedFormat(initialFormat);
     }
   }, [initialFormat]);
+
+  useEffect(() => {
+    if (initialPlatform) {
+      setSelectedPlatforms([initialPlatform]);
+    }
+  }, [initialPlatform]);
 
   useEffect(() => {
     const floatAnim = Animated.loop(

@@ -160,6 +160,31 @@ export const ProPostComposerScreen: React.FC<ProPostComposerScreenProps> = ({
     ).start();
   }, [flameFloatY]);
 
+  useEffect(() => {
+    if (ideaTitle) {
+      setCurrentIdea(ideaTitle);
+      const lower = ideaTitle.toLowerCase();
+      if (
+        lower.includes('story') ||
+        lower.includes('lesson') ||
+        lower.includes('wish i knew') ||
+        lower.includes('mistake') ||
+        lower.includes('storyteller') ||
+        lower.includes('started creating')
+      ) {
+        setCaptionText(
+          'When I first started creating content, I delayed posting for months waiting for everything to be perfect.\n\nWhen I finally hit record on my phone and shared one honest lesson, my 3rd video hit 50k views.\n\nKey lesson: Storytelling and consistency beat high production every time.\n\nWhat is one lesson you learned the hard way? Drop it below 👇\n\n#Storytelling #CreatorJourney #LessonsLearned #PostStreak'
+        );
+        setSelectedCategoryChip('Personal Lesson');
+      } else if (lower.includes('habits')) {
+        setCaptionText(
+          '3 simple creator habits that helped me post 5x faster:\n1. Batch recording talking points\n2. Reusing high-retention hooks\n3. Focusing on 1 key takeaway per post.\n\nWhich of these are you trying next? 🚀\n\n#CreatorTips #Habits #Consistency'
+        );
+        setSelectedCategoryChip('Creator Habit');
+      }
+    }
+  }, [ideaTitle]);
+
   const showToast = (msg: string) => {
     if (Platform.OS !== 'web') {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
