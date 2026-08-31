@@ -1502,13 +1502,13 @@ export const MatchScreen: React.FC<MatchScreenProps> = ({
                   setShowPitchModal(false);
                 }}
               />
-              <View style={[styles.modalCard, { maxWidth: 356 }]}>
+              <View style={[styles.modalCard, { maxWidth: 360, width: '92%' }]}>
                 <View style={styles.modalBadgePill}>
                   <Text style={styles.modalBadgeText}>COLLAB PITCH • JARVIS AI</Text>
                 </View>
                 <Text style={styles.modalTitle}>Pitch Plan to {pitchRecipient.name.split(' ')[0]}</Text>
                 <Text style={styles.modalSubtitle}>
-                  Send this co-creation blueprint as your connection invite.
+                  Send this personalized collaboration pitch with your connection request.
                 </Text>
 
                 {/* Idea Preview Card */}
@@ -1552,7 +1552,12 @@ export const MatchScreen: React.FC<MatchScreenProps> = ({
 
                 {/* Pitch note textarea */}
                 <View style={styles.inputGroupFull}>
-                  <Text style={styles.inputFieldLabel}>PERSONALIZED COLLAB PITCH</Text>
+                  <View style={styles.pitchHeaderRow}>
+                    <Text style={styles.inputFieldLabel}>PERSONALIZED COLLAB PITCH</Text>
+                    <View style={styles.pitchEditBadge}>
+                      <Text style={styles.pitchEditBadgeText}>✏️ Tap to edit</Text>
+                    </View>
+                  </View>
                   <TextInput
                     style={styles.pitchTextAreaInput}
                     value={pitchMessageDraft}
@@ -1560,7 +1565,8 @@ export const MatchScreen: React.FC<MatchScreenProps> = ({
                     placeholder="Write your pitch message..."
                     placeholderTextColor="#A39CB5"
                     multiline={true}
-                    numberOfLines={3}
+                    numberOfLines={5}
+                    scrollEnabled={true}
                     textAlignVertical="top"
                     editable={true}
                   />
@@ -1584,7 +1590,7 @@ export const MatchScreen: React.FC<MatchScreenProps> = ({
                     }}
                   >
                     <Text style={styles.modalPrimaryBtnText} numberOfLines={1} adjustsFontSizeToFit={true}>
-                      Send Pitch (+50 XP)
+                      Send Pitch +50 XP
                     </Text>
                   </Pressable>
                 </View>
@@ -3531,9 +3537,27 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#7F7894',
   },
+  pitchHeaderRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 6,
+  },
+  pitchEditBadge: {
+    backgroundColor: '#EDE8FC',
+    paddingVertical: 2,
+    paddingHorizontal: 7,
+    borderRadius: 6,
+  },
+  pitchEditBadgeText: {
+    fontSize: 9.5,
+    fontWeight: '800',
+    color: '#582CDB',
+  },
   pitchTextAreaInput: {
     width: '100%',
-    height: 80,
+    minHeight: 105,
+    maxHeight: 135,
     borderWidth: 1.2,
     borderColor: 'rgba(221, 214, 254, 0.9)',
     borderRadius: 12,
@@ -3542,7 +3566,7 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: '#171420',
     backgroundColor: 'rgba(250, 248, 255, 0.8)',
-    lineHeight: 18,
+    lineHeight: 19,
   },
 
   // MODALS
@@ -3661,11 +3685,12 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     gap: 10,
     width: '100%',
+    marginTop: 4,
   },
   modalCancelBtn: {
-    paddingHorizontal: 20,
-    height: 42,
-    borderRadius: 12,
+    paddingHorizontal: 16,
+    height: 44,
+    borderRadius: 14,
     borderWidth: 1.2,
     borderColor: '#E5E1F0',
     justifyContent: 'center',
@@ -3679,15 +3704,15 @@ const styles = StyleSheet.create({
   },
   modalPrimaryBtn: {
     flex: 1,
-    height: 42,
-    borderRadius: 12,
+    height: 44,
+    borderRadius: 14,
     backgroundColor: '#582CDB',
     justifyContent: 'center',
     alignItems: 'center',
-    paddingHorizontal: 12,
+    paddingHorizontal: 8,
   },
   modalPrimaryBtnText: {
-    fontSize: 12.5,
+    fontSize: 13,
     fontWeight: '800',
     color: '#FFFFFF',
     textAlign: 'center',
