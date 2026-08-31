@@ -481,14 +481,19 @@ export const QuestsScreen: React.FC<QuestsScreenProps> = ({
 
               {/* Bottom Row */}
               <View style={styles.communityFooterRow}>
-                <Text style={styles.consistencyBadgeTag}>Consistency Badge</Text>
+                <View style={styles.challengeRewardBox}>
+                  <Text style={styles.challengeRewardTitle} numberOfLines={1}>
+                    🏆 Consistency Badge
+                  </Text>
+                  <Text style={styles.challengeRewardSub}>+250 XP Reward</Text>
+                </View>
 
                 <Pressable
                   style={({ pressed }) => [styles.joinChallengeBtn, pressed && styles.btnPressed]}
                   onPress={handleJoinCommunityChallenge}
                 >
                   <LinearGradient
-                    colors={['#F59E0B', '#F59E0B', '#F59E0B']}
+                    colors={['#F59E0B', '#EAB308']}
                     start={{ x: 0, y: 0 }}
                     end={{ x: 1, y: 1 }}
                     style={styles.joinChallengeGradient}
@@ -1364,11 +1369,24 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+    gap: 10,
+    marginTop: 4,
   },
-  consistencyBadgeTag: {
+  challengeRewardBox: {
+    flex: 1,
+    paddingRight: 8,
+  },
+  challengeRewardTitle: {
     fontSize: 13,
     fontWeight: '800',
-    color: '#F59E0B',
+    color: '#FEF08A',
+    letterSpacing: -0.2,
+    marginBottom: 2,
+  },
+  challengeRewardSub: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: 'rgba(255, 255, 255, 0.85)',
   },
   joinChallengeBtn: {
     borderRadius: 100,
