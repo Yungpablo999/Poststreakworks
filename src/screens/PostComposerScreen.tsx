@@ -439,9 +439,18 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
 
   const [notificationsList, setNotificationsList] = useState<NotificationItem[]>(NOTIFICATIONS);
 
-  // Animations
+  // Animations & Navigation Refs
   const flameFloatY = useRef(new Animated.Value(0)).current;
   const modalPopScale = useRef(new Animated.Value(0.9)).current;
+  const mainScrollViewRef = useRef<ScrollView>(null);
+  const captionInputRef = useRef<TextInput>(null);
+  const sectionPositions = useRef<{ [key: string]: number }>({
+    platforms: 260,
+    format: 480,
+    media: 860,
+    caption: 1180,
+    schedule: 1540,
+  });
 
   useEffect(() => {
     const floatAnim = Animated.loop(
@@ -758,9 +767,52 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
     (platId) => !currentFormatConfig.supportedPlatformIds.includes(platId)
   );
 
-  // Readiness Calculation
-  const hasMediaOrTextOnly = selectedFormat === 'text' || hasMedia;
-  const readinessPercent = 50 + (selectedPlatforms.length > 0 ? 25 : 0) + (hasMediaOrTextOnly ? 25 : 0);
+  // Weighted Readiness Calculation (100% total)
+  // Platforms: 25%, Media: 30%, Caption: 20%, Schedule: 15%, Content Format: 10%
+  const isFormatReady = Boolean(selectedFormat);
+  const isCaptionReady = caption.trim().length >= 10;
+  const isPlatformsReady = selectedPlatforms.length > 0;
+  const isMediaReady = selectedFormat === 'text' || hasMedia;
+  const isScheduleReady =
+    publishMode === 'now' ||
+    publishMode === 'draft' ||
+    (publishMode === 'schedule' && Boolean(scheduledTime));
+
+  const readinessPercent =
+    (isFormatReady ? 10 : 0) +
+    (isCaptionReady ? 20 : 0) +
+    (isPlatformsReady ? 25 : 0) +
+    (isMediaReady ? 30 : 0) +
+    (isScheduleReady ? 15 : 0);
+
+  const isAllReady = readinessPercent === 100;
+
+  const navigateToSection = (section: 'format' | 'caption' | 'platforms' | 'media' | 'schedule') => {
+    if (Platform.OS !== 'web') {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    }
+    const targetY = sectionPositions.current[section] ?? 0;
+    mainScrollViewRef.current?.scrollTo({ y: Math.max(0, targetY - 20), animated: true });
+
+    if (section === 'caption') {
+      setTimeout(() => captionInputRef.current?.focus(), 350);
+    } else if (section === 'platforms' && !isPlatformsReady) {
+      setTimeout(() => {
+        triggerModalAnim();
+        setShowPlatformsModal(true);
+      }, 350);
+    } else if (section === 'schedule') {
+      setTimeout(() => {
+        setShowCustomCalendarView(false);
+        triggerModalAnim();
+        setShowCalendarModal(true);
+      }, 350);
+    } else if (section === 'media' && !isMediaReady) {
+      setTimeout(() => {
+        handleUploadMedia(selectedFormat === 'image' ? 'image' : 'video');
+      }, 350);
+    }
+  };
 
   const unreadNotifCount = notificationsList.filter((n) => n.unread).length;
 
@@ -801,6 +853,7 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
 
         {/* 2. MAIN SCROLLABLE CONTENT */}
         <ScrollView
+          ref={mainScrollViewRef}
           contentContainerStyle={styles.scrollContent}
           showsVerticalScrollIndicator={false}
           bounces={true}
@@ -861,7 +914,12 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
           </View>
 
           {/* 2. CHOOSE PLATFORMS WITH MORE PLATFORMS TRIGGER */}
-          <View style={styles.sectionLabelRow}>
+          <View
+            style={styles.sectionLabelRow}
+            onLayout={(e) => {
+              sectionPositions.current.platforms = e.nativeEvent.layout.y;
+            }}
+          >
             <Text style={styles.sectionLabel}>CHOOSE PLATFORMS</Text>
             <Pressable
               style={({ pressed }) => [styles.morePlatformsHeaderBtn, pressed && styles.btnPressed]}
@@ -947,7 +1005,12 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
           </Text>
 
           {/* 3. CONTENT FORMAT (RECOMMENDED + OTHER FORMATS) */}
-          <View style={styles.sectionLabelRow}>
+          <View
+            style={styles.sectionLabelRow}
+            onLayout={(e) => {
+              sectionPositions.current.format = e.nativeEvent.layout.y;
+            }}
+          >
             <Text style={styles.sectionLabel}>CONTENT FORMAT</Text>
             <View style={styles.aiBadge}>
               <Text style={styles.aiBadgeText}>SMART RECOMMENDATION</Text>
@@ -1070,7 +1133,14 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
           )}
 
           {/* 4. MEDIA / ATTACHMENT ZONE (CONTEXTUAL TO SELECTED FORMAT) */}
-          <Text style={styles.sectionLabel}>MEDIA</Text>
+          <Text
+            style={styles.sectionLabel}
+            onLayout={(e) => {
+              sectionPositions.current.media = e.nativeEvent.layout.y;
+            }}
+          >
+            MEDIA
+          </Text>
           <View style={styles.mediaUploadBox}>
             {selectedFormat === 'text' && !hasMedia ? (
               /* Text Post Active (No mandatory media required) */
@@ -1157,12 +1227,12 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
                 <View style={styles.mediaAttachedActionsRow}>
                   <Pressable
                     style={({ pressed }) => [styles.mediaSubActionBtn, pressed && styles.btnPressed]}
-                    onPress={() => handleUploadMedia(mediaType === 'image' ? 'image' : 'video')}
+                    onPress={() => handleUploadMedia(selectedFormat === 'image' ? 'image' : 'video')}
                   >
                     <Svg width={13} height={13} viewBox="0 0 24 24" fill="none">
-                      <Path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" stroke="#582CDB" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
+                      <Path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" stroke="#582CDB" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                     </Svg>
-                    <Text style={styles.mediaSubActionBtnText}>Replace</Text>
+                    <Text style={styles.mediaSubActionBtnText}>Replace Media</Text>
                   </Pressable>
 
                   <Pressable
@@ -1195,27 +1265,47 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
                     }}
                   >
                     <Svg width={12} height={12} viewBox="0 0 24 24" fill="none">
-                      <Path d="M18 6L6 18M6 6l12 12" stroke="#EF4444" strokeWidth="2.5" strokeLinecap="round" />
+                      <Path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" stroke="#EF4444" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                     </Svg>
                     <Text style={styles.mediaSubActionRemoveText}>Remove</Text>
                   </Pressable>
                 </View>
               </View>
             ) : (
-              /* Empty Media Dropzone Contextual to Content Format */
+              /* Empty Format-Adapted Dropzone */
               <View>
                 <Pressable
-                  onPress={() => handleUploadMedia(selectedFormat === 'image' ? 'image' : 'video')}
                   style={styles.mediaDashedDropzone}
+                  onPress={() => handleUploadMedia(selectedFormat === 'image' ? 'image' : 'video')}
                 >
                   <View style={styles.mediaIconCircle}>
-                    <Svg width={22} height={22} viewBox="0 0 24 24" fill="none">
-                      <Rect x="3" y="3" width="18" height="18" rx="4" stroke="#6D28D9" strokeWidth="2" />
-                      <Circle cx="8.5" cy="8.5" r="1.5" fill="#6D28D9" />
-                      <Path d="M21 15L16 10L5 21" stroke="#6D28D9" strokeWidth="2" strokeLinecap="round" />
-                    </Svg>
+                    {selectedFormat === 'carousel' ? (
+                      <Svg width={24} height={24} viewBox="0 0 24 24" fill="none">
+                        <Rect x="4" y="4" width="16" height="16" rx="3" stroke="#582CDB" strokeWidth="2" />
+                        <Path d="M9 4v16" stroke="#582CDB" strokeWidth="2" />
+                      </Svg>
+                    ) : selectedFormat === 'image' ? (
+                      <Svg width={24} height={24} viewBox="0 0 24 24" fill="none">
+                        <Rect x="3" y="3" width="18" height="18" rx="4" stroke="#582CDB" strokeWidth="2" />
+                        <Circle cx="8.5" cy="8.5" r="1.5" fill="#582CDB" />
+                        <Path d="M21 15l-5-5L5 21" stroke="#582CDB" strokeWidth="2" strokeLinecap="round" />
+                      </Svg>
+                    ) : (
+                      <Svg width={24} height={24} viewBox="0 0 24 24" fill="none">
+                        <Path d="M12 4v12m0 0l-4-4m4 4l4-4M4 17v3a1 1 0 001 1h14a1 1 0 001-1v-3" stroke="#582CDB" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                      </Svg>
+                    )}
                   </View>
-                  <Text style={styles.mediaDropzoneTitle}>{currentFormatConfig.mediaLabel}</Text>
+
+                  <Text style={styles.mediaDropzoneTitle}>
+                    {selectedFormat === 'carousel'
+                      ? 'Add carousel slides or deck'
+                      : selectedFormat === 'image'
+                      ? 'Add high-res image visual'
+                      : selectedFormat === 'long_video'
+                      ? 'Add your long-form video'
+                      : 'Add your short-form video'}
+                  </Text>
                   <Text style={styles.mediaDropzoneSubtitle}>{dynamicMediaSub}</Text>
                 </Pressable>
 
@@ -1253,7 +1343,12 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
           </View>
 
           {/* 4. CAPTION WRITING */}
-          <View style={styles.sectionLabelRow}>
+          <View
+            style={styles.sectionLabelRow}
+            onLayout={(e) => {
+              sectionPositions.current.caption = e.nativeEvent.layout.y;
+            }}
+          >
             <Text style={styles.sectionLabel}>CAPTION WRITING</Text>
             <View style={styles.aiBadge}>
               <Text style={styles.aiBadgeText}>{aiEditsLeft} AI EDITS LEFT</Text>
@@ -1262,6 +1357,7 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
 
           <View style={[styles.captionContainer, isCaptionFocused && styles.captionContainerFocused]}>
             <TextInput
+              ref={captionInputRef}
               style={styles.captionInput}
               multiline
               value={caption}
@@ -1429,7 +1525,12 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
           </View>
 
           {/* 6. PUBLISHING & SCHEDULE TIMING */}
-          <View style={styles.timingCard}>
+          <View
+            style={styles.timingCard}
+            onLayout={(e) => {
+              sectionPositions.current.schedule = e.nativeEvent.layout.y;
+            }}
+          >
             <View style={styles.timingHeaderRow}>
               <Text style={styles.timingSuggestedLightbulb}>💡</Text>
               <View style={{ flex: 1 }}>
@@ -1490,65 +1591,132 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
             )}
           </View>
 
-          {/* 7. POST READINESS CHECKLIST */}
-          <View style={styles.readinessCard}>
+          {/* 7. POST READINESS CHECKLIST (WEIGHTED & INTERACTIVE NAVIGATOR) */}
+          <View style={[styles.readinessCard, isAllReady && styles.readinessCardComplete]}>
             <View style={styles.readinessHeaderRow}>
-              <Text style={styles.readinessTitle}>POST READINESS</Text>
-              <Text style={styles.readinessPercent}>{readinessPercent}%</Text>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 7, flexWrap: 'wrap' }}>
+                <Text style={styles.readinessTitle}>POST READINESS</Text>
+                {isAllReady && (
+                  <View style={styles.readinessReadyBadge}>
+                    <Text style={styles.readinessReadyBadgeText}>100% READY TO POST 🎉</Text>
+                  </View>
+                )}
+              </View>
+              <Text style={[styles.readinessPercent, isAllReady && styles.readinessPercentComplete]}>
+                {readinessPercent}%
+              </Text>
             </View>
 
             <View style={styles.readinessProgressBarTrack}>
               <LinearGradient
-                colors={['#7C3AED', '#582CDB']}
+                colors={isAllReady ? ['#10B981', '#059669'] : ['#7C3AED', '#582CDB']}
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 0 }}
                 style={[styles.readinessProgressBarFill, { width: `${readinessPercent}%` }]}
               />
             </View>
 
-            <View style={styles.checklistRow}>
-              <View style={styles.checkIconFilled}>
-                <Text style={styles.checkMarkWhite}>✓</Text>
-              </View>
-              <Text style={styles.checklistText}>Caption added and optimized</Text>
-            </View>
-
-            <View style={styles.checklistRow}>
-              {selectedPlatforms.length > 0 ? (
-                <View style={styles.checkIconFilled}>
-                  <Text style={styles.checkMarkWhite}>✓</Text>
+            {/* Checklist Items as Tappable Navigation Rows */}
+            <View style={styles.checklistContainer}>
+              {/* 1. Content Format (10%) */}
+              <Pressable
+                style={({ pressed }) => [styles.checklistRowInteractive, pressed && styles.btnPressed]}
+                onPress={() => navigateToSection('format')}
+                hitSlop={4}
+              >
+                <View style={isFormatReady ? styles.checkIconFilled : styles.checkIconEmpty}>
+                  {isFormatReady && <Text style={styles.checkMarkWhite}>✓</Text>}
                 </View>
-              ) : (
-                <View style={styles.checkIconEmpty} />
-              )}
-              <Text style={[styles.checklistText, selectedPlatforms.length === 0 && { color: '#94A3B8' }]}>
-                {selectedPlatforms.length > 0
-                  ? `Platforms selected (${selectedPlatforms.map((p) => {
-                      const match = ALL_AVAILABLE_PLATFORMS.find((item) => item.id === p);
-                      return match ? match.shortName : p;
-                    }).join(', ')})`
-                  : 'Platforms not selected'}
-              </Text>
-            </View>
-
-            <View style={styles.checklistRow}>
-              {hasMedia ? (
-                <View style={styles.checkIconFilled}>
-                  <Text style={styles.checkMarkWhite}>✓</Text>
+                <View style={styles.checklistTextContainer}>
+                  <Text style={[styles.checklistText, !isFormatReady && styles.checklistTextIncomplete]}>
+                    {isFormatReady
+                      ? `Content format selected (${currentFormatConfig.title})`
+                      : 'Content format not selected'}
+                  </Text>
                 </View>
-              ) : (
-                <View style={styles.checkIconEmpty} />
-              )}
-              <Text style={[styles.checklistText, !hasMedia && { color: '#94A3B8' }]}>
-                {hasMedia ? 'Media uploaded and attached' : 'Media not added'}
-              </Text>
-            </View>
+                {!isFormatReady && <Text style={styles.checklistNavChevron}>›</Text>}
+              </Pressable>
 
-            <View style={styles.checklistRow}>
-              <View style={styles.checkIconFilled}>
-                <Text style={styles.checkMarkWhite}>✓</Text>
-              </View>
-              <Text style={styles.checklistText}>Schedule time selected</Text>
+              {/* 2. Caption (20%) */}
+              <Pressable
+                style={({ pressed }) => [styles.checklistRowInteractive, pressed && styles.btnPressed]}
+                onPress={() => navigateToSection('caption')}
+                hitSlop={4}
+              >
+                <View style={isCaptionReady ? styles.checkIconFilled : styles.checkIconEmpty}>
+                  {isCaptionReady && <Text style={styles.checkMarkWhite}>✓</Text>}
+                </View>
+                <View style={styles.checklistTextContainer}>
+                  <Text style={[styles.checklistText, !isCaptionReady && styles.checklistTextIncomplete]}>
+                    {isCaptionReady ? 'Caption added & optimized' : 'Caption not added'}
+                  </Text>
+                </View>
+                {!isCaptionReady && <Text style={styles.checklistNavChevron}>›</Text>}
+              </Pressable>
+
+              {/* 3. Platforms (25%) */}
+              <Pressable
+                style={({ pressed }) => [styles.checklistRowInteractive, pressed && styles.btnPressed]}
+                onPress={() => navigateToSection('platforms')}
+                hitSlop={4}
+              >
+                <View style={isPlatformsReady ? styles.checkIconFilled : styles.checkIconEmpty}>
+                  {isPlatformsReady && <Text style={styles.checkMarkWhite}>✓</Text>}
+                </View>
+                <View style={styles.checklistTextContainer}>
+                  <Text style={[styles.checklistText, !isPlatformsReady && styles.checklistTextIncomplete]}>
+                    {isPlatformsReady
+                      ? `Platforms selected (${selectedPlatforms.map((p) => {
+                          const match = ALL_AVAILABLE_PLATFORMS.find((item) => item.id === p);
+                          return match ? match.shortName : p;
+                        }).join(', ')})`
+                      : 'Platforms not selected'}
+                  </Text>
+                </View>
+                {!isPlatformsReady && <Text style={styles.checklistNavChevron}>›</Text>}
+              </Pressable>
+
+              {/* 4. Media (30%) */}
+              <Pressable
+                style={({ pressed }) => [styles.checklistRowInteractive, pressed && styles.btnPressed]}
+                onPress={() => navigateToSection('media')}
+                hitSlop={4}
+              >
+                <View style={isMediaReady ? styles.checkIconFilled : styles.checkIconEmpty}>
+                  {isMediaReady && <Text style={styles.checkMarkWhite}>✓</Text>}
+                </View>
+                <View style={styles.checklistTextContainer}>
+                  <Text style={[styles.checklistText, !isMediaReady && styles.checklistTextIncomplete]}>
+                    {selectedFormat === 'text'
+                      ? 'Text-first format (no media required)'
+                      : hasMedia
+                      ? 'Media uploaded & attached'
+                      : 'Media not added'}
+                  </Text>
+                </View>
+                {!isMediaReady && <Text style={styles.checklistNavChevron}>›</Text>}
+              </Pressable>
+
+              {/* 5. Schedule (15%) */}
+              <Pressable
+                style={({ pressed }) => [styles.checklistRowInteractive, pressed && styles.btnPressed]}
+                onPress={() => navigateToSection('schedule')}
+                hitSlop={4}
+              >
+                <View style={isScheduleReady ? styles.checkIconFilled : styles.checkIconEmpty}>
+                  {isScheduleReady && <Text style={styles.checkMarkWhite}>✓</Text>}
+                </View>
+                <View style={styles.checklistTextContainer}>
+                  <Text style={[styles.checklistText, !isScheduleReady && styles.checklistTextIncomplete]}>
+                    {publishMode === 'now'
+                      ? 'Post immediately on publish'
+                      : publishMode === 'draft'
+                      ? 'Save as draft'
+                      : `Schedule time selected (${scheduledTime})`}
+                  </Text>
+                </View>
+                {!isScheduleReady && <Text style={styles.checklistNavChevron}>›</Text>}
+              </Pressable>
             </View>
           </View>
 
@@ -3291,7 +3459,7 @@ const styles = StyleSheet.create({
   readinessCard: {
     backgroundColor: '#FFFFFF',
     borderRadius: 20,
-    borderWidth: 1,
+    borderWidth: 1.5,
     borderColor: '#EFEBF8',
     padding: 16,
     marginBottom: 18,
@@ -3301,11 +3469,16 @@ const styles = StyleSheet.create({
     shadowRadius: 10,
     elevation: 3,
   },
+  readinessCardComplete: {
+    borderColor: '#A7F3D0',
+    backgroundColor: '#F0FDF4',
+    shadowColor: '#059669',
+  },
   readinessHeaderRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 8,
+    marginBottom: 10,
   },
   readinessTitle: {
     fontSize: 11,
@@ -3313,10 +3486,27 @@ const styles = StyleSheet.create({
     color: '#64748B',
     letterSpacing: 0.6,
   },
+  readinessReadyBadge: {
+    backgroundColor: '#D1FAE5',
+    paddingVertical: 2,
+    paddingHorizontal: 7,
+    borderRadius: 6,
+    borderWidth: 0.8,
+    borderColor: '#A7F3D0',
+  },
+  readinessReadyBadgeText: {
+    fontSize: 9.5,
+    fontWeight: '800',
+    color: '#065F46',
+    letterSpacing: 0.3,
+  },
   readinessPercent: {
-    fontSize: 14,
-    fontWeight: '700',
+    fontSize: 15,
+    fontWeight: '800',
     color: '#582CDB',
+  },
+  readinessPercentComplete: {
+    color: '#059669',
   },
   readinessProgressBarTrack: {
     height: 6,
@@ -3329,11 +3519,14 @@ const styles = StyleSheet.create({
     height: '100%',
     borderRadius: 3,
   },
-  checklistRow: {
+  checklistContainer: {
+    gap: 8,
+  },
+  checklistRowInteractive: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
-    marginBottom: 8,
+    gap: 10,
+    paddingVertical: 3,
   },
   checkIconFilled: {
     width: 18,
@@ -3346,7 +3539,7 @@ const styles = StyleSheet.create({
   checkMarkWhite: {
     fontSize: 10,
     color: '#FFFFFF',
-    fontWeight: '700',
+    fontWeight: '800',
   },
   checkIconEmpty: {
     width: 18,
@@ -3354,11 +3547,25 @@ const styles = StyleSheet.create({
     borderRadius: 9,
     borderWidth: 1.5,
     borderColor: '#CBD5E1',
+    backgroundColor: '#FFFFFF',
+  },
+  checklistTextContainer: {
+    flex: 1,
   },
   checklistText: {
     fontSize: 12.5,
-    fontWeight: '600',
+    fontWeight: '700',
     color: '#1E293B',
+  },
+  checklistTextIncomplete: {
+    color: '#94A3B8',
+    fontWeight: '600',
+  },
+  checklistNavChevron: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#7C3AED',
+    marginLeft: 4,
   },
 
   // 8. Streak Banner
