@@ -1273,7 +1273,7 @@ export const MatchScreen: React.FC<MatchScreenProps> = ({
                       </Pressable>
                     </View>
 
-                    {/* Live Tracking Intelligence Box (Interactive) */}
+                    {/* Live Tracking Intelligence Box (Interactive & Clean Alignment) */}
                     <View style={styles.trackingMetricsBox}>
                       <Pressable
                         style={({ pressed }) => [styles.trackingMetricRow, pressed && { opacity: 0.7 }]}
@@ -1283,9 +1283,9 @@ export const MatchScreen: React.FC<MatchScreenProps> = ({
                         }}
                         hitSlop={4}
                       >
-                        <Text style={styles.trackingMetricLabel}>📈 Growth Velocity:</Text>
-                        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
-                          <Text style={styles.trackingMetricValue}>{creator.tracking.growthRate}</Text>
+                        <Text style={styles.trackingMetricLabel} numberOfLines={1}>📈 Growth Velocity</Text>
+                        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4, flexShrink: 0 }}>
+                          <Text style={styles.trackingMetricValue} numberOfLines={1}>{creator.tracking.growthRate}</Text>
                           <Text style={{ fontSize: 10, color: '#A78BFA' }}>ⓘ</Text>
                         </View>
                       </Pressable>
@@ -1298,9 +1298,9 @@ export const MatchScreen: React.FC<MatchScreenProps> = ({
                         }}
                         hitSlop={4}
                       >
-                        <Text style={styles.trackingMetricLabel}>⏱ Posting Rhythm:</Text>
-                        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
-                          <Text style={styles.trackingMetricValue}>{creator.tracking.postingPace}</Text>
+                        <Text style={styles.trackingMetricLabel} numberOfLines={1}>⏱ Posting Rhythm</Text>
+                        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4, flexShrink: 0 }}>
+                          <Text style={styles.trackingMetricValue} numberOfLines={1}>{creator.tracking.postingPace}</Text>
                           <Text style={{ fontSize: 10, color: '#A78BFA' }}>ⓘ</Text>
                         </View>
                       </Pressable>
@@ -1313,9 +1313,9 @@ export const MatchScreen: React.FC<MatchScreenProps> = ({
                         }}
                         hitSlop={4}
                       >
-                        <Text style={styles.trackingMetricLabel}>✨ Best Collab Window:</Text>
-                        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
-                          <Text style={styles.trackingMetricValue}>{creator.tracking.bestCollabWindow}</Text>
+                        <Text style={styles.trackingMetricLabel} numberOfLines={1}>✨ Best Collab Window</Text>
+                        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4, flexShrink: 0 }}>
+                          <Text style={styles.trackingMetricValue} numberOfLines={1}>{creator.tracking.bestCollabWindow}</Text>
                           <Text style={{ fontSize: 10, color: '#A78BFA' }}>ⓘ</Text>
                         </View>
                       </Pressable>
@@ -1328,7 +1328,7 @@ export const MatchScreen: React.FC<MatchScreenProps> = ({
                         }}
                         hitSlop={4}
                       >
-                        <Text style={styles.trackingStatusText}>{creator.tracking.statusText}</Text>
+                        <Text style={styles.trackingStatusText} numberOfLines={1}>{creator.tracking.statusText}</Text>
                       </Pressable>
                     </View>
                   </View>
@@ -2620,32 +2620,35 @@ const styles = StyleSheet.create({
     padding: 12,
     borderWidth: 1,
     borderColor: '#E8E3FA',
+    gap: 7,
   },
   trackingMetricRow: {
     flexDirection: 'row',
+    alignItems: 'center',
     justifyContent: 'space-between',
-    marginBottom: 6,
+    gap: 8,
   },
   trackingMetricLabel: {
-    fontSize: 12,
+    fontSize: sFont(11.5),
     fontWeight: '600',
     color: '#7F7894',
+    flexShrink: 1,
   },
   trackingMetricValue: {
-    fontSize: 12,
+    fontSize: sFont(12),
     fontWeight: '800',
     color: '#171420',
   },
   trackingStatusRow: {
-    marginTop: 4,
-    paddingTop: 6,
+    marginTop: 3,
+    paddingTop: 7,
     borderTopWidth: 1,
     borderTopColor: '#EDE8FC',
   },
   trackingStatusText: {
-    fontSize: 11,
+    fontSize: sFont(11.5),
     fontWeight: '700',
-    color: '#582CDB',
+    color: '#10B981',
   },
 
   emptyStateBox: {
