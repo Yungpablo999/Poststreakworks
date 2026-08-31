@@ -1284,7 +1284,7 @@ ${selectedCtaText}`;
                   </Pressable>
                 </View>
 
-                <ScrollView style={{ maxHeight: 340 }} showsVerticalScrollIndicator={false}>
+                <ScrollView style={{ maxHeight: 380 }} showsVerticalScrollIndicator={false}>
                   {TAKEAWAY_QUICK_ACTIONS.map((item) => {
                     const isSelected = takeawayText === item.text;
                     return (
@@ -1339,13 +1339,6 @@ ${selectedCtaText}`;
                   }}
                 >
                   <Text style={styles.takeawayMenuAiBtnText}>✨ Rewrite · 1 edit</Text>
-                </Pressable>
-
-                <Pressable
-                  style={[styles.modalFullBtn, { marginTop: 8 }]}
-                  onPress={() => setShowLessonModal(false)}
-                >
-                  <Text style={styles.modalFullBtnText}>Apply Takeaway ➔</Text>
                 </Pressable>
               </Animated.View>
             </View>
