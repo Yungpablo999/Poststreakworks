@@ -750,12 +750,12 @@ export const ChallengeDetailScreen: React.FC<ChallengeDetailScreenProps> = ({
               <Text style={styles.rewardPreviewValuePurple}>+150 XP</Text>
             </View>
             <View style={styles.rewardPreviewRow}>
-              <Text style={styles.rewardPreviewLabel}>Badge Progression</Text>
-              <Text style={styles.rewardPreviewValuePurple}>Storyteller</Text>
+              <Text style={styles.rewardPreviewLabel}>Badge Reward</Text>
+              <Text style={styles.rewardPreviewValuePurple}>🏆 Storyteller</Text>
             </View>
             <View style={[styles.rewardPreviewRow, { borderBottomWidth: 0 }]}>
-              <Text style={styles.rewardPreviewLabel}>Passport Update</Text>
-              <Text style={styles.rewardPreviewValueDark}>Active</Text>
+              <Text style={styles.rewardPreviewLabel}>Creator Passport</Text>
+              <Text style={styles.rewardPreviewValueDark}>+1 Activity</Text>
             </View>
           </View>
 
