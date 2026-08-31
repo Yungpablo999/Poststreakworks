@@ -338,9 +338,9 @@ export const ScriptScreen: React.FC<ScriptScreenProps> = ({
 
   const handleSelectHook = (hook: string) => {
     if (Platform.OS !== 'web') {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     }
-    setSelectedHook(hook);
+    setSelectedHook((prev) => (prev === hook ? '' : hook));
   };
 
   const handleApplyHookFromModal = (hook: string) => {
@@ -443,10 +443,10 @@ export const ScriptScreen: React.FC<ScriptScreenProps> = ({
       setSelectedCtaText(aiCtas[Math.floor(Math.random() * aiCtas.length)]);
     }
 
-    setCelebrationTitle('AI Rewrite Applied!');
+    setCelebrationTitle('Rewrite Applied!');
     setCelebrationSubtitle(`New ${activeScriptPhase.toUpperCase()} refined for your script (1 edit used).`);
     setCelebrationSpeech('Script refined! Swap presets anytime for free.');
-    setCelebrationBadge('AI EDITED');
+    setCelebrationBadge('REWRITTEN');
     setShowCelebrationModal(true);
   };
 
@@ -723,7 +723,7 @@ ${selectedCtaText}`;
                   onPress={handleAiRewriteCurrentPhase}
                 >
                   <Text style={styles.aiRewriteBtnText} numberOfLines={1} ellipsizeMode="tail">
-                    ✨ AI Rewrite · 1 edit
+                    ✨ Rewrite · 1 edit
                   </Text>
                 </Pressable>
                 <Pressable
@@ -867,9 +867,14 @@ ${selectedCtaText}`;
                         if (Platform.OS !== 'web') {
                           Haptics.selectionAsync();
                         }
-                        const found = BODY_PRESETS.find((p) => p.id === chip.id);
-                        if (found) {
-                          handleApplyBodyFromModal(found);
+                        if (isActive) {
+                          setSelectedBodyPresetId('original');
+                          setBodyText(BODY_PRESETS[0].text);
+                        } else {
+                          const found = BODY_PRESETS.find((p) => p.id === chip.id);
+                          if (found) {
+                            handleApplyBodyFromModal(found);
+                          }
                         }
                       }}
                       style={({ pressed }) => [
@@ -1206,8 +1211,13 @@ ${selectedCtaText}`;
                       <Pressable
                         key={preset.id}
                         onPress={() => {
-                          setSelectedBodyPresetId(preset.id);
-                          setBodyText(preset.text);
+                          if (selectedBodyPresetId === preset.id) {
+                            setSelectedBodyPresetId('');
+                            setBodyText('');
+                          } else {
+                            setSelectedBodyPresetId(preset.id);
+                            setBodyText(preset.text);
+                          }
                         }}
                         style={({ pressed }) => [
                           styles.bodyModalItemCard,
@@ -1274,7 +1284,7 @@ ${selectedCtaText}`;
                   </Pressable>
                 </View>
 
-                <ScrollView style={{ maxHeight: 360 }} showsVerticalScrollIndicator={false}>
+                <ScrollView style={{ maxHeight: 340 }} showsVerticalScrollIndicator={false}>
                   {TAKEAWAY_QUICK_ACTIONS.map((item) => {
                     const isSelected = takeawayText === item.text;
                     return (
@@ -1282,15 +1292,13 @@ ${selectedCtaText}`;
                         key={item.id}
                         onPress={() => {
                           if (Platform.OS !== 'web') {
-                            Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+                            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                           }
-                          setTakeawayText(item.text);
-                          setShowLessonModal(false);
-                          setCelebrationTitle('Takeaway Updated!');
-                          setCelebrationSubtitle(`"${item.title}" applied to your script.`);
-                          setCelebrationSpeech('Takeaway conclusion updated!');
-                          setCelebrationBadge('TAKEAWAY READY');
-                          setShowCelebrationModal(true);
+                          if (isSelected) {
+                            setTakeawayText('');
+                          } else {
+                            setTakeawayText(item.text);
+                          }
                         }}
                         style={({ pressed }) => [
                           styles.takeawayMenuItemCard,
@@ -1311,7 +1319,7 @@ ${selectedCtaText}`;
                             </View>
                             {isSelected && (
                               <View style={styles.selectedCheckBadge}>
-                                <Text style={styles.selectedCheckText}>ACTIVE</Text>
+                                <Text style={styles.selectedCheckText}>SELECTED</Text>
                               </View>
                             )}
                           </View>
@@ -1322,7 +1330,7 @@ ${selectedCtaText}`;
                   })}
                 </ScrollView>
 
-                {/* AI Rewrite Action in Lightweight Menu */}
+                {/* Rewrite Action in Lightweight Menu */}
                 <Pressable
                   style={({ pressed }) => [styles.takeawayMenuAiBtn, pressed && styles.btnPressed]}
                   onPress={() => {
@@ -1330,7 +1338,14 @@ ${selectedCtaText}`;
                     handleAiRewriteCurrentPhase();
                   }}
                 >
-                  <Text style={styles.takeawayMenuAiBtnText}>✨ AI Rewrite Takeaway · 1 edit</Text>
+                  <Text style={styles.takeawayMenuAiBtnText}>✨ Rewrite · 1 edit</Text>
+                </Pressable>
+
+                <Pressable
+                  style={[styles.modalFullBtn, { marginTop: 8 }]}
+                  onPress={() => setShowLessonModal(false)}
+                >
+                  <Text style={styles.modalFullBtnText}>Apply Takeaway ➔</Text>
                 </Pressable>
               </Animated.View>
             </View>
@@ -1368,8 +1383,12 @@ ${selectedCtaText}`;
                       <Pressable
                         key={cta.id}
                         onPress={() => {
-                          setSelectedCtaText(cta.text);
-                          setCtaIndex(index);
+                          if (selectedCtaText === cta.text) {
+                            setSelectedCtaText('');
+                          } else {
+                            setSelectedCtaText(cta.text);
+                            setCtaIndex(index);
+                          }
                         }}
                         style={({ pressed }) => [
                           styles.ctaModalItemCard,
