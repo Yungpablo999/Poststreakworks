@@ -267,23 +267,38 @@ export const QuestsScreen: React.FC<QuestsScreenProps> = ({
             {/* Progress Row & Bar */}
             <View style={styles.progressLabelRow}>
               <Text style={styles.progressLabelLeft}>PROGRESS</Text>
-              <Text style={styles.progressLabelRight}>0 / 1 COMPLETED</Text>
+              <Text style={styles.progressLabelRight}>
+                {completedQuests.includes('today_quest') ? '1 / 1 COMPLETED' : '0 / 1 COMPLETED'}
+              </Text>
             </View>
             <View style={styles.progressBarTrack}>
-              <View style={styles.progressBarFill} />
+              <View
+                style={[
+                  styles.progressBarFill,
+                  { width: completedQuests.includes('today_quest') ? '100%' : '0%' },
+                ]}
+              />
             </View>
 
             {/* Bottom Row */}
             <View style={styles.todayQuestFooterRow}>
               <Text style={styles.todayQuestRewardsText}>
-                <Text style={{ fontWeight: '800', color: '#D97706' }}>+80 XP</Text>  •  Streak Protected
+                <Text style={{ fontWeight: '800', color: completedQuests.includes('today_quest') ? '#10B981' : '#D97706' }}>
+                  {completedQuests.includes('today_quest') ? '✓ +80 XP' : '+80 XP'}
+                </Text>  •  Streak Protected
               </Text>
 
               <Pressable
-                style={({ pressed }) => [styles.startQuestBtn, pressed && styles.btnPressed]}
+                style={({ pressed }) => [
+                  styles.startQuestBtn,
+                  completedQuests.includes('today_quest') && styles.completedQuestBtn,
+                  pressed && styles.btnPressed,
+                ]}
                 onPress={handleStartTodayQuest}
               >
-                <Text style={styles.startQuestBtnText}>Start Quest</Text>
+                <Text style={[styles.startQuestBtnText, completedQuests.includes('today_quest') && styles.completedQuestBtnText]}>
+                  {completedQuests.includes('today_quest') ? '✓ Completed' : 'Start Quest'}
+                </Text>
               </Pressable>
             </View>
           </View>
@@ -1037,7 +1052,6 @@ const styles = StyleSheet.create({
     marginBottom: 14,
   },
   progressBarFill: {
-    width: '18%',
     height: '100%',
     backgroundColor: '#582CDB',
     borderRadius: 3,
@@ -1072,6 +1086,17 @@ const styles = StyleSheet.create({
     fontSize: 12.5,
     fontWeight: '700',
     color: '#FFFFFF',
+  },
+  completedQuestBtn: {
+    backgroundColor: '#ECFDF5',
+    borderWidth: 1,
+    borderColor: '#A7F3D0',
+    shadowOpacity: 0,
+  },
+  completedQuestBtnText: {
+    fontSize: 12.5,
+    fontWeight: '800',
+    color: '#059669',
   },
 
   // 2. CREATOR STATS BAR & LEVEL
