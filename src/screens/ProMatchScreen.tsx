@@ -872,7 +872,7 @@ export const ProMatchScreen: React.FC<ProMatchScreenProps> = ({
             Find creators worth building with.
           </Text>
           <Text style={styles.subHeadline}>
-            Swipe right to accept, left to decline, or tap ⓘ for deep-dive match intelligence.
+            Swipe right to match, left to skip, or tap ⓘ for deep-dive match intelligence.
           </Text>
 
           {/* ============================================================ */}

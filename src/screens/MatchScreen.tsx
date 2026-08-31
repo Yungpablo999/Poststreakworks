@@ -749,7 +749,7 @@ export const MatchScreen: React.FC<MatchScreenProps> = ({
               Find creators worth building with.
             </Text>
             <Text style={styles.pageSubtitle}>
-              Swipe right to accept, left to decline, or tap ⓘ for deep-dive match intelligence.
+              Swipe right to match, left to skip, or tap ⓘ for deep-dive match intelligence.
             </Text>
 
             {/* LIVE TRACKING STATS BAR */}
