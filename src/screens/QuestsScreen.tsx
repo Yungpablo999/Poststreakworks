@@ -19,7 +19,7 @@ import { FloatingTabBar, TabType } from '../components/FloatingTabBar';
 import { UserProfileModal, UserProfileData } from '../components/UserProfileModal';
 import { AnimatedCompletionModal } from '../components/AnimatedCompletionModal';
 import { FreeAppHeader } from '../components/FreeAppHeader';
-import { sFont, isNarrowScreen } from '../utils/responsive';
+import { sFont, isNarrowScreen, isSmallScreen, sPadding } from '../utils/responsive';
 
 interface QuestsScreenProps {
   onBackToDashboard?: () => void;
@@ -242,7 +242,7 @@ export const QuestsScreen: React.FC<QuestsScreenProps> = ({
             style={styles.mainHeading}
             numberOfLines={1}
             adjustsFontSizeToFit={true}
-            minimumFontScale={0.85}
+            minimumFontScale={0.65}
           >
             Complete quests. Build your streak.
           </Text>
@@ -903,7 +903,7 @@ const styles = StyleSheet.create({
   },
 
   scrollContent: {
-    paddingHorizontal: 20,
+    paddingHorizontal: sPadding(18),
     paddingTop: 8,
   },
 
@@ -941,11 +941,18 @@ const styles = StyleSheet.create({
 
   // HEADLINE
   mainHeading: {
-    fontSize: Platform.OS === 'web' ? ('clamp(17px, 4.5vw, 20px)' as any) : sFont(19),
+    fontSize:
+      Platform.OS === 'web'
+        ? ('clamp(14px, 3.8vw, 18px)' as any)
+        : isNarrowScreen
+        ? 14
+        : isSmallScreen
+        ? 15.5
+        : 17,
     fontWeight: '800',
     color: '#171420',
-    letterSpacing: -0.4,
-    lineHeight: 26,
+    letterSpacing: -0.45,
+    lineHeight: 23,
     marginBottom: 4,
   },
   mainSubtitle: {
