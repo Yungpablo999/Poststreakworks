@@ -405,34 +405,42 @@ export const MatchScreen: React.FC<MatchScreenProps> = ({
   const toastOpacity = useRef(new Animated.Value(0)).current;
   const pulseAnim = useRef(new Animated.Value(1)).current;
 
-  // Ultra-smooth Tinder PanResponder with zero-jank direct tracking
+  // Ultra-responsive, effortless Tinder PanResponder
   const panResponder = useRef(
     PanResponder.create({
       onStartShouldSetPanResponder: () => false,
       onStartShouldSetPanResponderCapture: () => false,
       onMoveShouldSetPanResponder: (_, gesture) => {
-        return Math.abs(gesture.dx) > 7 && Math.abs(gesture.dx) > Math.abs(gesture.dy);
+        return Math.abs(gesture.dx) > 4;
       },
-      onMoveShouldSetPanResponderCapture: () => false,
+      onMoveShouldSetPanResponderCapture: (_, gesture) => {
+        return Math.abs(gesture.dx) > 6 && Math.abs(gesture.dx) > Math.abs(gesture.dy) * 0.75;
+      },
       onPanResponderGrant: () => {
         position.stopAnimation();
       },
       onPanResponderMove: (_, gesture) => {
-        position.setValue({ x: gesture.dx, y: gesture.dy * 0.3 });
+        position.setValue({ x: gesture.dx, y: gesture.dy * 0.25 });
       },
       onPanResponderRelease: (_, gesture) => {
-        if (gesture.dx > 80 || (gesture.dx > 30 && gesture.vx > 0.4)) {
+        if (gesture.dx > 45 || gesture.vx > 0.18) {
           swipeCard('right');
-        } else if (gesture.dx < -80 || (gesture.dx < -30 && gesture.vx < -0.4)) {
+        } else if (gesture.dx < -45 || gesture.vx < -0.18) {
           swipeCard('left');
         } else {
           resetCardPosition();
         }
       },
-      onPanResponderTerminate: () => {
-        resetCardPosition();
+      onPanResponderTerminate: (_, gesture) => {
+        if (gesture.dx > 45 || gesture.vx > 0.18) {
+          swipeCard('right');
+        } else if (gesture.dx < -45 || gesture.vx < -0.18) {
+          swipeCard('left');
+        } else {
+          resetCardPosition();
+        }
       },
-      onPanResponderTerminationRequest: () => true,
+      onPanResponderTerminationRequest: () => false,
     })
   ).current;
 
@@ -489,25 +497,23 @@ export const MatchScreen: React.FC<MatchScreenProps> = ({
   const resetCardPosition = () => {
     Animated.spring(position, {
       toValue: { x: 0, y: 0 },
-      friction: 7,
-      tension: 70,
+      friction: 6,
+      tension: 80,
       useNativeDriver: true,
     }).start();
   };
 
   const swipeCard = (direction: 'left' | 'right' | 'up') => {
     const creator = CREATOR_DECK[currentIndex % CREATOR_DECK.length];
-    const targetX = direction === 'right' ? SCREEN_WIDTH + 140 : direction === 'left' ? -SCREEN_WIDTH - 140 : 0;
-    const targetY = direction === 'up' ? -SCREEN_WIDTH - 140 : 0;
+    const targetX = direction === 'right' ? SCREEN_WIDTH + 160 : direction === 'left' ? -SCREEN_WIDTH - 160 : 0;
+    const targetY = direction === 'up' ? -SCREEN_WIDTH - 160 : 0;
 
     Animated.timing(position, {
       toValue: { x: targetX, y: targetY },
-      duration: 180,
-      easing: Easing.out(Easing.quad),
+      duration: 190,
+      easing: Easing.out(Easing.cubic),
       useNativeDriver: true,
     }).start(() => {
-      position.setValue({ x: 0, y: 0 });
-      setCurrentIndex((prev) => prev + 1);
       onSwipeComplete(direction, creator);
     });
   };

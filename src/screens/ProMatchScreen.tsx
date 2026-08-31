@@ -406,42 +406,50 @@ export const ProMatchScreen: React.FC<ProMatchScreenProps> = ({
     }).start();
   };
 
-  // Ultra-smooth Tinder PanResponder with zero-jank direct tracking
+  // Ultra-responsive, effortless Tinder PanResponder
   const panResponder = useRef(
     PanResponder.create({
       onStartShouldSetPanResponder: () => false,
       onStartShouldSetPanResponderCapture: () => false,
       onMoveShouldSetPanResponder: (_, gesture) => {
-        return Math.abs(gesture.dx) > 7 && Math.abs(gesture.dx) > Math.abs(gesture.dy);
+        return Math.abs(gesture.dx) > 4;
       },
-      onMoveShouldSetPanResponderCapture: () => false,
+      onMoveShouldSetPanResponderCapture: (_, gesture) => {
+        return Math.abs(gesture.dx) > 6 && Math.abs(gesture.dx) > Math.abs(gesture.dy) * 0.75;
+      },
       onPanResponderGrant: () => {
         position.stopAnimation();
       },
       onPanResponderMove: (_, gesture) => {
-        position.setValue({ x: gesture.dx, y: gesture.dy * 0.3 });
+        position.setValue({ x: gesture.dx, y: gesture.dy * 0.25 });
       },
       onPanResponderRelease: (_, gesture) => {
-        if (gesture.dx > 80 || (gesture.dx > 30 && gesture.vx > 0.4)) {
+        if (gesture.dx > 45 || gesture.vx > 0.18) {
           swipeRight();
-        } else if (gesture.dx < -80 || (gesture.dx < -30 && gesture.vx < -0.4)) {
+        } else if (gesture.dx < -45 || gesture.vx < -0.18) {
           swipeLeft();
         } else {
           resetPosition();
         }
       },
-      onPanResponderTerminate: () => {
-        resetPosition();
+      onPanResponderTerminate: (_, gesture) => {
+        if (gesture.dx > 45 || gesture.vx > 0.18) {
+          swipeRight();
+        } else if (gesture.dx < -45 || gesture.vx < -0.18) {
+          swipeLeft();
+        } else {
+          resetPosition();
+        }
       },
-      onPanResponderTerminationRequest: () => true,
+      onPanResponderTerminationRequest: () => false,
     })
   ).current;
 
   const resetPosition = () => {
     Animated.spring(position, {
       toValue: { x: 0, y: 0 },
-      friction: 7,
-      tension: 70,
+      friction: 6,
+      tension: 80,
       useNativeDriver: true,
     }).start();
   };
@@ -455,9 +463,9 @@ export const ProMatchScreen: React.FC<ProMatchScreenProps> = ({
     }
 
     Animated.timing(position, {
-      toValue: { x: SCREEN_WIDTH + 140, y: 0 },
-      duration: 180,
-      easing: Easing.out(Easing.quad),
+      toValue: { x: SCREEN_WIDTH + 160, y: 0 },
+      duration: 190,
+      easing: Easing.out(Easing.cubic),
       useNativeDriver: true,
     }).start(() => {
       onSwipeComplete('right', creator);
@@ -473,9 +481,9 @@ export const ProMatchScreen: React.FC<ProMatchScreenProps> = ({
     }
 
     Animated.timing(position, {
-      toValue: { x: -SCREEN_WIDTH - 140, y: 0 },
-      duration: 180,
-      easing: Easing.out(Easing.quad),
+      toValue: { x: -SCREEN_WIDTH - 160, y: 0 },
+      duration: 190,
+      easing: Easing.out(Easing.cubic),
       useNativeDriver: true,
     }).start(() => {
       onSwipeComplete('left', creator);
