@@ -544,6 +544,10 @@ export const CaptionScreen: React.FC<CaptionScreenProps> = ({
             >
               <View style={styles.cardHeaderFlex}>
                 <Text style={styles.microCapLabel}>QUICK CTA</Text>
+                <View style={styles.editSignBadge}>
+                  <Text style={styles.editSignPencil}>✎</Text>
+                  <Text style={styles.editSignText}>Edit</Text>
+                </View>
               </View>
               <TextInput
                 ref={quickCtaInputRef}
@@ -566,6 +570,10 @@ export const CaptionScreen: React.FC<CaptionScreenProps> = ({
             >
               <View style={styles.cardHeaderFlex}>
                 <Text style={styles.microCapLabel}>HASHTAGS</Text>
+                <View style={styles.editSignBadge}>
+                  <Text style={styles.editSignPencil}>✎</Text>
+                  <Text style={styles.editSignText}>Edit</Text>
+                </View>
               </View>
               <TextInput
                 ref={hashtagsInputRef}
@@ -1355,16 +1363,24 @@ const styles = StyleSheet.create({
     paddingVertical: 4,
     margin: 0,
   },
-  editActionPill: {
+  editSignBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 3,
     backgroundColor: '#F3EEFB',
-    paddingVertical: 2.5,
-    paddingHorizontal: 8,
-    borderRadius: 6,
+    paddingVertical: 2,
+    paddingHorizontal: 6,
+    borderRadius: 5,
   },
-  editActionPillText: {
-    fontSize: 10,
+  editSignPencil: {
+    fontSize: 9,
+    color: '#7C3AED',
     fontWeight: '800',
-    color: '#582CDB',
+  },
+  editSignText: {
+    fontSize: 9.5,
+    fontWeight: '800',
+    color: '#7C3AED',
     letterSpacing: 0.2,
   },
   microCapLabel: {
