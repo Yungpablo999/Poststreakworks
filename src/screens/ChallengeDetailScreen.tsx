@@ -256,17 +256,17 @@ export const ChallengeDetailScreen: React.FC<ChallengeDetailScreenProps> = ({
     }
     setShowCreatePostModal(false);
 
-    // Mark step 1 & 2 as completed
+    // Mark step 1 (post planned) as completed
     setRequirements((prev) =>
       prev.map((r) => {
-        if (r.id === 'req_1' || r.id === 'req_2') {
+        if (r.id === 'req_1') {
           return { ...r, status: 'completed', statusLabel: 'Done ✓' };
         }
         return r;
       })
     );
 
-    showToast(`✓ Post scheduled for ${postTime}! +50 XP awarded.`);
+    showToast(`✓ Post planned for ${postTime}! 2/3 steps remaining.`);
   };
 
   const handleUseIdea = () => {
@@ -714,37 +714,39 @@ export const ChallengeDetailScreen: React.FC<ChallengeDetailScreenProps> = ({
             <Animated.View style={[styles.modalCard, { transform: [{ scale: modalPopScale }] }]}>
               <Text style={styles.modalTitle}>Plan Quest Post</Text>
               <Text style={styles.modalSubtitle}>
-                Lock this storyteller post into your timeline to protect your streak.
+                Plan your storyteller post and keep it on track for the quest deadline.
               </Text>
 
               <Text style={styles.modalInputLabel}>CHOOSE PLATFORM</Text>
               <View style={styles.platformSelectRow}>
-                {(['tiktok', 'instagram', 'youtube'] as const).map((plat) => (
+                {([
+                  { id: 'tiktok', label: 'TikTok' },
+                  { id: 'instagram', label: 'Instagram Reels' },
+                  { id: 'youtube', label: 'YouTube Shorts' },
+                ] as const).map((plat) => (
                   <Pressable
-                    key={plat}
-                    onPress={() => setPostPlatform(plat)}
+                    key={plat.id}
+                    onPress={() => setPostPlatform(plat.id)}
                     style={[
                       styles.platformSelectBtn,
-                      postPlatform === plat && styles.platformSelectBtnActive,
+                      postPlatform === plat.id && styles.platformSelectBtnActive,
                     ]}
                   >
                     <Text
                       style={[
                         styles.platformSelectBtnText,
-                        postPlatform === plat && styles.platformSelectBtnTextActive,
+                        postPlatform === plat.id && styles.platformSelectBtnTextActive,
                       ]}
+                      numberOfLines={1}
+                      adjustsFontSizeToFit={true}
                     >
-                      {plat === 'tiktok'
-                        ? 'TikTok'
-                        : plat === 'instagram'
-                        ? 'Instagram'
-                        : 'YouTube'}
+                      {plat.label}
                     </Text>
                   </Pressable>
                 ))}
               </View>
 
-              <Text style={styles.modalInputLabel}>STORY HOOK / TOPIC</Text>
+              <Text style={styles.modalInputLabel}>POST IDEA</Text>
               <TextInput
                 style={styles.modalTextInput}
                 value={postTitle}
@@ -1713,18 +1715,20 @@ const styles = StyleSheet.create({
   platformSelectBtn: {
     flex: 1,
     paddingVertical: 8,
+    paddingHorizontal: 4,
     borderRadius: 10,
     backgroundColor: '#FFFFFF',
     borderWidth: 1,
     borderColor: '#EFEBF8',
     alignItems: 'center',
+    justifyContent: 'center',
   },
   platformSelectBtnActive: {
     backgroundColor: '#582CDB',
     borderColor: '#582CDB',
   },
   platformSelectBtnText: {
-    fontSize: 11.5,
+    fontSize: isSmallScreen ? 10 : 11,
     fontWeight: '700',
     color: '#524C62',
     textAlign: 'center',
