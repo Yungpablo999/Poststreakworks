@@ -715,9 +715,6 @@ export const CaptionScreen: React.FC<CaptionScreenProps> = ({
                 </Svg>
               </Pressable>
             </View>
-
-            {/* Bottom spacing to clear floating tab bar */}
-            <View style={{ height: 110 }} />
           </ScrollView>
 
           {/* UNIFIED SIGNATURE FLOATING TAB BAR */}
@@ -919,7 +916,7 @@ const styles = StyleSheet.create({
   scrollContent: {
     paddingHorizontal: 20,
     paddingTop: 2,
-    paddingBottom: 135,
+    paddingBottom: 85,
   },
   btnPressed: {
     opacity: 0.9,
@@ -1531,7 +1528,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#EFEBF8',
     padding: 16,
-    marginBottom: 16,
+    marginBottom: 12,
     shadowColor: '#582CDB',
     shadowOffset: { width: 0, height: 3 },
     shadowOpacity: 0.05,
@@ -1596,7 +1593,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 10,
-    marginBottom: 10,
+    marginBottom: 0,
   },
   addToPostMainBtn: {
     flex: 1,
