@@ -1094,14 +1094,16 @@ export const MatchScreen: React.FC<MatchScreenProps> = ({
                     <Text style={styles.collabHeaderTitle}>JARVIS SUGGESTED COLLAB</Text>
                   </View>
                   <View style={styles.potencyBadge}>
-                    <Text style={styles.potencyBadgeText}>📈 High potency</Text>
+                    <Text style={styles.potencyBadgeText}>📈 High potential</Text>
                   </View>
                 </View>
 
                 <Text style={styles.collabHeadline}>‘Day in Lagos’ co-created Reel</Text>
+                
                 <View style={styles.collabMetaRow}>
-                  <View style={styles.collabMetaChip}><Text style={styles.collabMetaChipText}>Reel</Text></View>
-                  <View style={styles.collabMetaChip}><Text style={styles.collabMetaChipText}>7:30 PM Peak</Text></View>
+                  <View style={styles.collabMetaChip}>
+                    <Text style={styles.collabMetaChipText}>Reel  •  7:30 PM Peak</Text>
+                  </View>
                 </View>
 
                 <Pressable
@@ -2224,38 +2226,33 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    flexWrap: 'wrap',
-    gap: 6,
     marginBottom: 8,
   },
   collabHeaderLeft: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
-    flex: 1,
-    minWidth: 150,
   },
   collabGhostIcon: {
-    width: 16,
-    height: 16,
+    width: 15,
+    height: 15,
   },
   collabHeaderTitle: {
-    fontSize: 11,
+    fontSize: 10.5,
     fontWeight: '800',
     color: '#7F7894',
     letterSpacing: 0.6,
   },
   potencyBadge: {
-    backgroundColor: '#EDE8FC',
-    paddingVertical: 3,
-    paddingHorizontal: 8,
+    backgroundColor: '#F3EEFB',
+    paddingVertical: 2.5,
+    paddingHorizontal: 7,
     borderRadius: 100,
-    flexShrink: 0,
   },
   potencyBadgeText: {
-    fontSize: 11,
+    fontSize: 9.5,
     fontWeight: '700',
-    color: '#582CDB',
+    color: '#7C3AED',
   },
   collabHeadline: {
     fontSize: 17,
@@ -2266,20 +2263,20 @@ const styles = StyleSheet.create({
   },
   collabMetaRow: {
     flexDirection: 'row',
-    gap: 8,
+    alignItems: 'center',
     marginBottom: 14,
   },
   collabMetaChip: {
-    backgroundColor: '#FAF8FF',
-    paddingVertical: 4,
-    paddingHorizontal: 10,
+    backgroundColor: '#F8F6FD',
+    paddingVertical: 3.5,
+    paddingHorizontal: 9,
     borderRadius: 100,
     borderWidth: 1,
-    borderColor: '#E8E3FA',
+    borderColor: '#EDE8F8',
   },
   collabMetaChipText: {
     fontSize: 11,
-    fontWeight: '700',
+    fontWeight: '600',
     color: '#582CDB',
   },
   buildIdeaBtn: {
