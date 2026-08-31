@@ -172,7 +172,7 @@ export const CONTENT_FORMATS: ContentFormatOption[] = [
     icon: '🎬',
     recommendedDescription: 'Best fit for this idea and your selected short-form channels.',
     mediaLabel: 'Add your short-form video',
-    mediaSub: '9:16 vertical • up to 60s • 4K recommended',
+    mediaSub: '9:16 vertical • Recommended 15–60s',
     primaryMediaActionText: 'Add Video',
     supportedPlatformIds: ['tiktok', 'instagram', 'youtube', 'facebook'],
   },
@@ -625,6 +625,38 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
     CONTENT_FORMATS.find((f) => f.id === selectedFormat) || CONTENT_FORMATS[0];
   const recommendedFormatConfig =
     CONTENT_FORMATS.find((f) => f.id === recommendedFormatId) || CONTENT_FORMATS[0];
+  const otherFormats = CONTENT_FORMATS.filter((f) => f.id !== recommendedFormatId);
+
+  // Platform-Aware Dynamic Media Subtitle
+  const getDynamicMediaSub = (formatId: ContentFormatType, platforms: string[]): string => {
+    const activePlats = ALL_AVAILABLE_PLATFORMS.filter((p) => platforms.includes(p.id));
+    const platNames = activePlats.map((p) => p.shortName).join(' + ');
+
+    switch (formatId) {
+      case 'short_video':
+        return platNames
+          ? `9:16 vertical • Recommended 15–60s • Optimized for ${platNames}`
+          : '9:16 vertical • Recommended 15–60s';
+      case 'carousel':
+        return platNames
+          ? `Up to 10 slides • 4:5 or 1:1 • Optimized for ${platNames}`
+          : 'Up to 10 slides • 4:5 or 1:1 recommended';
+      case 'image':
+        return platNames
+          ? `High resolution • 4:5 portrait • Optimized for ${platNames}`
+          : 'High resolution • 4:5 portrait or 9:16 vertical';
+      case 'long_video':
+        return platNames
+          ? `16:9 landscape • HD/4K • Optimized for ${platNames}`
+          : '16:9 landscape • HD/4K recommended';
+      case 'text':
+        return 'Direct text takeaway or insight thread';
+      default:
+        return 'Recommended format';
+    }
+  };
+
+  const dynamicMediaSub = getDynamicMediaSub(selectedFormat, selectedPlatforms);
 
   // Incompatibility / Adaptation Warnings
   const incompatiblePlatforms = selectedPlatforms.filter(
@@ -819,25 +851,84 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
             Free users can prepare posts for selected platforms. Auto-publishing may require <Text style={{ color: '#D97706', fontWeight: '800' }}>Pro</Text>.
           </Text>
 
-          {/* 3. CONTENT FORMAT SELECTION */}
+          {/* 3. CONTENT FORMAT (RECOMMENDED + OTHER FORMATS) */}
           <View style={styles.sectionLabelRow}>
             <Text style={styles.sectionLabel}>CONTENT FORMAT</Text>
-            <Text style={styles.sectionHelperText}>Choose what you're creating</Text>
+            <View style={styles.aiBadge}>
+              <Text style={styles.aiBadgeText}>SMART RECOMMENDATION</Text>
+            </View>
           </View>
 
-          <View style={styles.formatsGrid}>
-            {CONTENT_FORMATS.map((fmt) => {
-              const isFmtSelected = selectedFormat === fmt.id;
-              const isFmtRecommended = recommendedFormatConfig.id === fmt.id;
-              const isFullRow = fmt.id === 'long_video';
+          {/* 1. Recommended Format Spotlight */}
+          <View style={styles.formatRecommendedSection}>
+            <Text style={styles.formatGroupHeaderLabel}>RECOMMENDED</Text>
+            <Pressable
+              style={[
+                styles.formatRecommendedCard,
+                selectedFormat === recommendedFormatConfig.id && styles.formatRecommendedCardActive,
+              ]}
+              onPress={() => {
+                if (Platform.OS !== 'web') {
+                  Haptics.selectionAsync();
+                }
+                setSelectedFormat(recommendedFormatConfig.id);
+              }}
+            >
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, flex: 1 }}>
+                <View
+                  style={[
+                    styles.formatIconBox,
+                    selectedFormat === recommendedFormatConfig.id && styles.formatIconBoxActive,
+                  ]}
+                >
+                  <Text style={{ fontSize: 20 }}>{recommendedFormatConfig.icon}</Text>
+                </View>
 
-              if (isFullRow) {
+                <View style={{ flex: 1 }}>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 2 }}>
+                    <Text
+                      style={[
+                        styles.formatCardTitle,
+                        selectedFormat === recommendedFormatConfig.id && styles.formatCardTitleActive,
+                      ]}
+                    >
+                      {recommendedFormatConfig.title}
+                    </Text>
+                    <View style={styles.formatBestFitPill}>
+                      <Text style={styles.formatBestFitPillText}>★ Best Fit</Text>
+                    </View>
+                  </View>
+                  <Text style={styles.formatRatioTag}>{recommendedFormatConfig.badge}</Text>
+                  <Text style={styles.formatCardDesc}>{recommendedFormatConfig.recommendedDescription}</Text>
+                </View>
+              </View>
+
+              <View
+                style={[
+                  styles.formatCheckCircle,
+                  selectedFormat === recommendedFormatConfig.id && styles.formatCheckCircleActive,
+                ]}
+              >
+                {selectedFormat === recommendedFormatConfig.id && (
+                  <Text style={{ color: '#FFFFFF', fontSize: 10, fontWeight: '800' }}>✓</Text>
+                )}
+              </View>
+            </Pressable>
+          </View>
+
+          {/* 2. Other Formats Section (2x2 Grid) */}
+          <View style={styles.otherFormatsSection}>
+            <Text style={styles.formatGroupHeaderLabel}>OTHER FORMATS</Text>
+            <View style={styles.formatsGrid}>
+              {otherFormats.map((fmt) => {
+                const isFmtSelected = selectedFormat === fmt.id;
+
                 return (
                   <Pressable
                     key={fmt.id}
                     style={[
-                      styles.formatCardFull,
-                      isFmtSelected && styles.formatCardFullActive,
+                      styles.formatCard,
+                      isFmtSelected && styles.formatCardActive,
                     ]}
                     onPress={() => {
                       if (Platform.OS !== 'web') {
@@ -846,66 +937,25 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
                       setSelectedFormat(fmt.id);
                     }}
                   >
-                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, flex: 1 }}>
+                    <View style={styles.formatCardTop}>
                       <View style={[styles.formatIconBox, isFmtSelected && styles.formatIconBoxActive]}>
                         <Text style={{ fontSize: 18 }}>{fmt.icon}</Text>
                       </View>
-                      <View style={{ flex: 1 }}>
-                        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-                          <Text style={[styles.formatCardTitle, isFmtSelected && styles.formatCardTitleActive]}>
-                            {fmt.title}
-                          </Text>
-                          <Text style={styles.formatRatioTag}>{fmt.badge}</Text>
-                        </View>
-                        <Text style={styles.formatCardDesc}>16:9 Landscape • Full explanation / tutorial</Text>
+                      <View style={[styles.formatCheckCircle, isFmtSelected && styles.formatCheckCircleActive]}>
+                        {isFmtSelected && <Text style={{ color: '#FFFFFF', fontSize: 10, fontWeight: '800' }}>✓</Text>}
                       </View>
                     </View>
 
-                    <View style={[styles.formatCheckCircle, isFmtSelected && styles.formatCheckCircleActive]}>
-                      {isFmtSelected && <Text style={{ color: '#FFFFFF', fontSize: 10, fontWeight: '800' }}>✓</Text>}
+                    <View style={{ marginTop: 8 }}>
+                      <Text style={[styles.formatCardTitle, isFmtSelected && styles.formatCardTitleActive]}>
+                        {fmt.title}
+                      </Text>
+                      <Text style={styles.formatRatioTag}>{fmt.badge}</Text>
                     </View>
                   </Pressable>
                 );
-              }
-
-              return (
-                <Pressable
-                  key={fmt.id}
-                  style={[
-                    styles.formatCard,
-                    isFmtSelected && styles.formatCardActive,
-                  ]}
-                  onPress={() => {
-                    if (Platform.OS !== 'web') {
-                      Haptics.selectionAsync();
-                    }
-                    setSelectedFormat(fmt.id);
-                  }}
-                >
-                  <View style={styles.formatCardTop}>
-                    <View style={[styles.formatIconBox, isFmtSelected && styles.formatIconBoxActive]}>
-                      <Text style={{ fontSize: 18 }}>{fmt.icon}</Text>
-                    </View>
-                    {isFmtRecommended && (
-                      <View style={styles.formatRecommendedPill}>
-                        <Text style={styles.formatRecommendedPillText}>★ Best Fit</Text>
-                      </View>
-                    )}
-                  </View>
-
-                  <View style={{ marginTop: 8 }}>
-                    <Text style={[styles.formatCardTitle, isFmtSelected && styles.formatCardTitleActive]}>
-                      {fmt.title}
-                    </Text>
-                    <Text style={styles.formatRatioTag}>{fmt.badge}</Text>
-                  </View>
-
-                  <View style={[styles.formatCheckCircle, isFmtSelected && styles.formatCheckCircleActive]}>
-                    {isFmtSelected && <Text style={{ color: '#FFFFFF', fontSize: 10, fontWeight: '800' }}>✓</Text>}
-                  </View>
-                </Pressable>
-              );
-            })}
+              })}
+            </View>
           </View>
 
           {/* Smart Compatibility Adaption Note */}
@@ -1071,7 +1121,7 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
                     </Svg>
                   </View>
                   <Text style={styles.mediaDropzoneTitle}>{currentFormatConfig.mediaLabel}</Text>
-                  <Text style={styles.mediaDropzoneSubtitle}>{currentFormatConfig.mediaSub}</Text>
+                  <Text style={styles.mediaDropzoneSubtitle}>{dynamicMediaSub}</Text>
                 </Pressable>
 
                 <View style={styles.mediaButtonsRow}>
@@ -2296,7 +2346,56 @@ const styles = StyleSheet.create({
     fontWeight: '500',
   },
 
-  // 3. Content Format Selection Grid
+  // 3. Content Format Selection Styles
+  formatRecommendedSection: {
+    marginBottom: 14,
+  },
+  otherFormatsSection: {
+    marginBottom: 6,
+  },
+  formatGroupHeaderLabel: {
+    fontSize: 10.5,
+    fontWeight: '800',
+    color: '#8E85A2',
+    letterSpacing: 0.5,
+    marginBottom: 8,
+    textTransform: 'uppercase',
+  },
+  formatRecommendedCard: {
+    width: '100%',
+    minHeight: 76,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 18,
+    borderWidth: 1.5,
+    borderColor: '#EFECE6',
+    paddingVertical: 12,
+    paddingHorizontal: 14,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    shadowColor: '#582CDB',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.04,
+    shadowRadius: 6,
+    elevation: 2,
+  },
+  formatRecommendedCardActive: {
+    borderColor: '#582CDB',
+    backgroundColor: '#FAF8FE',
+  },
+  formatBestFitPill: {
+    backgroundColor: '#FEF3C7',
+    paddingVertical: 2,
+    paddingHorizontal: 6,
+    borderRadius: 6,
+    borderWidth: 0.5,
+    borderColor: '#FDE68A',
+  },
+  formatBestFitPillText: {
+    fontSize: 9.5,
+    fontWeight: '800',
+    color: '#B45309',
+  },
   formatsGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
@@ -2323,29 +2422,6 @@ const styles = StyleSheet.create({
     borderColor: '#582CDB',
     backgroundColor: '#FAF8FE',
   },
-  formatCardFull: {
-    width: '100%',
-    minHeight: 68,
-    backgroundColor: '#FFFFFF',
-    borderRadius: 18,
-    borderWidth: 1.5,
-    borderColor: '#EFECE6',
-    paddingVertical: 12,
-    paddingHorizontal: 14,
-    marginBottom: 10,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    shadowColor: '#582CDB',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.04,
-    shadowRadius: 6,
-    elevation: 2,
-  },
-  formatCardFullActive: {
-    borderColor: '#582CDB',
-    backgroundColor: '#FAF8FE',
-  },
   formatCardTop: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -2361,19 +2437,6 @@ const styles = StyleSheet.create({
   },
   formatIconBoxActive: {
     backgroundColor: '#EDE9FE',
-  },
-  formatRecommendedPill: {
-    backgroundColor: '#FEF3C7',
-    paddingVertical: 2,
-    paddingHorizontal: 6,
-    borderRadius: 6,
-    borderWidth: 0.5,
-    borderColor: '#FDE68A',
-  },
-  formatRecommendedPillText: {
-    fontSize: 9.5,
-    fontWeight: '800',
-    color: '#B45309',
   },
   formatCardTitle: {
     fontSize: 13.5,
