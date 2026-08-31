@@ -143,6 +143,13 @@ export default function App() {
   const [selectedIdeaTitle, setSelectedIdeaTitle] = useState('One thing I wish I knew before I started creating');
   const [composerIdeaTitle, setComposerIdeaTitle] = useState('One thing I wish I knew before I started creating');
   const [composerIdeaFormat, setComposerIdeaFormat] = useState<'short_video' | 'carousel' | 'image' | 'long_video' | 'text' | undefined>(undefined);
+  const [composerQuestDraft, setComposerQuestDraft] = useState<{
+    title: string;
+    hook: string;
+    story: string;
+    lesson: string;
+    cta: string;
+  } | null>(null);
   const [activeMessageThreadId, setActiveMessageThreadId] = useState<string | undefined>(undefined);
 
   const handleUseIdea = (title: string, format?: string) => {
@@ -965,8 +972,13 @@ export default function App() {
           <ChallengeDetailScreen
             onBackToDashboard={() => navigateTo('quests')}
             onLogout={handleLogout}
-            onOpenComposer={(idea?: string) => {
+            onOpenComposer={(idea?: string, platform?: string, questDraft?: any) => {
               if (idea) setComposerIdeaTitle(idea);
+              if (questDraft) {
+                setComposerQuestDraft(questDraft);
+              } else {
+                setComposerQuestDraft(null);
+              }
               navigateTo('composer');
             }}
             onOpenMessages={(threadId?: string) => {
@@ -1004,6 +1016,7 @@ export default function App() {
             onOpenJarvisPro={() => navigateTo('jarvis-pro')}
             onOpenPostComposer={(title) => {
               if (title) setComposerIdeaTitle(title);
+              setComposerQuestDraft(null);
               navigateTo('composer');
             }}
             onNavigateTab={(tab: TabType) => {
@@ -1028,6 +1041,7 @@ export default function App() {
           (userProfile?.tier === 'pro' || userProfile?.tier === 'founding') ? (
             <ProPostComposerScreen
               ideaTitle={composerIdeaTitle}
+              questDraft={composerQuestDraft}
               onBack={() => navigateTo(previousScreen ? previousScreen : 'create')}
               onLogout={handleLogout}
               onOpenSchedule={() => navigateTo('schedule')}
@@ -1060,6 +1074,7 @@ export default function App() {
           ) : (
             <PostComposerScreen
               ideaTitle={composerIdeaTitle}
+              questDraft={composerQuestDraft}
               initialFormat={composerIdeaFormat}
               onBack={() => navigateTo(previousScreen ? previousScreen : 'create')}
               onLogout={handleLogout}

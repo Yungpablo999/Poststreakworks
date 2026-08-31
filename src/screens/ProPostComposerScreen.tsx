@@ -28,6 +28,7 @@ const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
 interface ProPostComposerScreenProps {
   ideaTitle?: string;
+  questDraft?: { title: string; hook: string; story: string; lesson: string; cta: string } | null;
   initialPlatform?: string;
   onBack: () => void;
   onLogout?: () => void;
@@ -89,6 +90,7 @@ const SAMPLE_IDEAS = [
 
 export const ProPostComposerScreen: React.FC<ProPostComposerScreenProps> = ({
   ideaTitle,
+  questDraft,
   initialPlatform,
   onBack,
   onLogout,
@@ -184,6 +186,16 @@ export const ProPostComposerScreen: React.FC<ProPostComposerScreenProps> = ({
       }
     }
   }, [ideaTitle]);
+
+  useEffect(() => {
+    if (questDraft) {
+      if (questDraft.title) setCurrentIdea(questDraft.title);
+      setCaptionText(
+        `${questDraft.hook}\n\n${questDraft.story}\n\nKey lesson: ${questDraft.lesson}\n\n${questDraft.cta}\n\n#Storytelling #CreatorJourney #LessonsLearned #PostStreak`
+      );
+      setSelectedCategoryChip('Personal Lesson');
+    }
+  }, [questDraft]);
 
   const showToast = (msg: string) => {
     if (Platform.OS !== 'web') {
@@ -458,9 +470,15 @@ export const ProPostComposerScreen: React.FC<ProPostComposerScreenProps> = ({
               <View style={styles.createPostTagBox}>
                 <Text style={styles.createPostTagText}>✨ CREATE POST — PRO</Text>
               </View>
-              <View style={styles.draftPill}>
-                <Text style={styles.draftPillText}>AUTOPILOT READY</Text>
-              </View>
+              {questDraft ? (
+                <View style={styles.questDraftBadge}>
+                  <Text style={styles.questDraftBadgeText}>🔥 STORYTELLER QUEST DRAFT</Text>
+                </View>
+              ) : (
+                <View style={styles.draftPill}>
+                  <Text style={styles.draftPillText}>AUTOPILOT READY</Text>
+                </View>
+              )}
             </View>
 
             <Text style={styles.mainTitleText}>Shape your next post.</Text>
@@ -1035,6 +1053,20 @@ const styles = StyleSheet.create({
     fontSize: 10,
     fontWeight: '700',
     color: '#582CDB',
+    letterSpacing: 0.3,
+  },
+  questDraftBadge: {
+    backgroundColor: '#FAF5FF',
+    borderWidth: 1,
+    borderColor: '#D8B4FE',
+    paddingHorizontal: 9,
+    paddingVertical: 3.5,
+    borderRadius: 6,
+  },
+  questDraftBadgeText: {
+    fontSize: 10,
+    fontWeight: '800',
+    color: '#6B21A8',
     letterSpacing: 0.3,
   },
   mainTitleText: {

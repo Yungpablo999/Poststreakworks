@@ -25,6 +25,7 @@ import { sFont, sPadding, isNarrowScreen } from '../utils/responsive';
 
 interface PostComposerScreenProps {
   ideaTitle?: string;
+  questDraft?: { title: string; hook: string; story: string; lesson: string; cta: string } | null;
   initialFormat?: ContentFormatType;
   initialPlatform?: string;
   onBack: () => void;
@@ -371,6 +372,7 @@ const PlatformIcon = ({ iconType, size = 38 }: { iconType: string; size?: number
 
 export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
   ideaTitle = 'One thing I wish I knew before I started creating',
+  questDraft,
   initialFormat,
   initialPlatform = '',
   onBack,
@@ -498,6 +500,20 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
       }
     }
   }, [ideaTitle]);
+
+  // Sync incoming Quest Draft from Jarvis
+  useEffect(() => {
+    if (questDraft) {
+      if (questDraft.title) setCurrentIdea(questDraft.title);
+      setCaption(
+        `${questDraft.hook}\n\n${questDraft.story}\n\nKey lesson: ${questDraft.lesson}\n\n${questDraft.cta}`
+      );
+      setCaptionTone('Story');
+      setCaptionCta('Ask Question');
+      setSelectedFormat('short_video');
+      setTags(['#Storytelling', '#CreatorJourney', '#LessonsLearned', '#PostStreak']);
+    }
+  }, [questDraft]);
 
   useEffect(() => {
     if (initialFormat) {
@@ -962,7 +978,7 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
           keyboardShouldPersistTaps="handled"
           keyboardDismissMode="on-drag"
         >
-          {/* Top Pill Badges (Gold Gradient & Draft) */}
+          {/* Top Pill Badges (Gold Gradient & Draft / Quest Draft) */}
           <View style={styles.topBadgesRow}>
             <LinearGradient
               colors={['#F59E0B', '#D97706']}
@@ -973,9 +989,15 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
               <Text style={styles.createPostPillText}>CREATE POST</Text>
             </LinearGradient>
 
-            <View style={styles.draftPill}>
-              <Text style={styles.draftPillText}>DRAFT</Text>
-            </View>
+            {questDraft ? (
+              <View style={styles.questDraftBadge}>
+                <Text style={styles.questDraftBadgeText}>🔥 STORYTELLER QUEST DRAFT</Text>
+              </View>
+            ) : (
+              <View style={styles.draftPill}>
+                <Text style={styles.draftPillText}>DRAFT</Text>
+              </View>
+            )}
           </View>
 
           {/* Main Headline & Subtitle */}
@@ -2631,6 +2653,20 @@ const styles = StyleSheet.create({
     fontSize: 10,
     fontWeight: '800',
     color: '#7F7894',
+    letterSpacing: 0.4,
+  },
+  questDraftBadge: {
+    backgroundColor: '#FAF5FF',
+    borderWidth: 1,
+    borderColor: '#D8B4FE',
+    paddingVertical: 4,
+    paddingHorizontal: 10,
+    borderRadius: 100,
+  },
+  questDraftBadgeText: {
+    fontSize: 10,
+    fontWeight: '800',
+    color: '#6B21A8',
     letterSpacing: 0.4,
   },
   mainTitle: {

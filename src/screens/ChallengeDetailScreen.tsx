@@ -23,13 +23,21 @@ import { AnimatedCompletionModal } from '../components/AnimatedCompletionModal';
 import { FreeAppHeader } from '../components/FreeAppHeader';
 import { sFont, isNarrowScreen, isSmallScreen, sPadding } from '../utils/responsive';
 
+export interface QuestScriptDraft {
+  title: string;
+  hook: string;
+  story: string;
+  lesson: string;
+  cta: string;
+}
+
 interface ChallengeDetailScreenProps {
   onBackToDashboard?: () => void;
   onNavigateTab?: (tab: TabType) => void;
   onLogout?: () => void;
   onOpenMessages?: () => void;
   onOpenJarvisPro?: () => void;
-  onOpenComposer?: (idea?: string, platform?: string) => void;
+  onOpenComposer?: (idea?: string, platform?: string, questDraft?: QuestScriptDraft) => void;
   userProfile?: UserProfileData;
   onSaveProfile?: (updated: UserProfileData) => void;
 }
@@ -857,22 +865,38 @@ export const ChallengeDetailScreen: React.FC<ChallengeDetailScreenProps> = ({
           onRequestClose={() => setShowAiDraftModal(false)}
         >
           <View style={styles.modalOverlay}>
-            <Animated.View style={[styles.modalCard, { transform: [{ scale: modalPopScale }] }]}>
+            <Animated.View
+              style={[
+                styles.modalCard,
+                styles.aiDraftModalCard,
+                { transform: [{ scale: modalPopScale }] },
+              ]}
+            >
               <View style={styles.modalHeaderRow}>
                 <Text style={styles.modalTitle}>Jarvis Quest Draft</Text>
-                <Pressable onPress={() => setShowAiDraftModal(false)}>
+                <Pressable onPress={() => setShowAiDraftModal(false)} hitSlop={8}>
                   <Text style={styles.modalCloseIcon}>✕</Text>
                 </Pressable>
               </View>
 
               <Text style={styles.modalSubtitle}>
-                AI crafted story structure based on your creator style:
+                Built by Jarvis for your creator style.
               </Text>
 
-              <ScrollView style={{ maxHeight: 340 }} showsVerticalScrollIndicator={false}>
+              <ScrollView
+                style={styles.draftsScrollContainer}
+                contentContainerStyle={{ paddingBottom: 8 }}
+                showsVerticalScrollIndicator={true}
+              >
                 {AI_GENERATED_SCRIPTS.map((script, idx) => (
                   <View key={idx} style={styles.scriptBlueprintBox}>
+                    <View style={styles.draftBadgeRow}>
+                      <View style={styles.draftBadge}>
+                        <Text style={styles.draftBadgeText}>DRAFT {idx + 1}</Text>
+                      </View>
+                    </View>
                     <Text style={styles.scriptBlueprintTitle}>{script.title}</Text>
+
                     <Text style={styles.scriptSectionLabel}>🎣 HOOK:</Text>
                     <Text style={styles.scriptSectionText}>&ldquo;{script.hook}&rdquo;</Text>
 
@@ -883,15 +907,20 @@ export const ChallengeDetailScreen: React.FC<ChallengeDetailScreenProps> = ({
                     <Text style={styles.scriptSectionText}>{script.lesson}</Text>
 
                     <Pressable
-                      style={styles.useDraftBtn}
+                      style={({ pressed }) => [styles.useDraftBtn, pressed && styles.btnPressed]}
                       onPress={() => {
-                        setPostTitle(script.title);
+                        if (Platform.OS !== 'web') {
+                          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                        }
                         setShowAiDraftModal(false);
-                        triggerModalPop();
-    setShowCreatePostModal(true);
+                        if (onOpenComposer) {
+                          onOpenComposer(script.title, postPlatform, script);
+                        } else if (onNavigateTab) {
+                          onNavigateTab('create' as TabType);
+                        }
                       }}
                     >
-                      <Text style={styles.useDraftBtnText}>Use This Draft in Studio</Text>
+                      <Text style={styles.useDraftBtnText}>Use This Draft in Studio →</Text>
                     </Pressable>
                   </View>
                 ))}
@@ -1926,20 +1955,44 @@ const styles = StyleSheet.create({
     letterSpacing: -0.2,
   },
 
-  // SCRIPT BLUEPRINT BOX
+  // SCRIPT BLUEPRINT BOX & AI DRAFT MODAL
+  aiDraftModalCard: {
+    maxHeight: '82%',
+    paddingBottom: 14,
+  },
+  draftsScrollContainer: {
+    maxHeight: 380,
+  },
+  draftBadgeRow: {
+    flexDirection: 'row',
+    marginBottom: 6,
+  },
+  draftBadge: {
+    backgroundColor: '#EDE9FE',
+    paddingVertical: 2.5,
+    paddingHorizontal: 8,
+    borderRadius: 6,
+  },
+  draftBadgeText: {
+    fontSize: 9.5,
+    fontWeight: '800',
+    color: '#582CDB',
+    letterSpacing: 0.5,
+  },
   scriptBlueprintBox: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: '#FAF8FD',
     borderRadius: 16,
     borderWidth: 1,
     borderColor: '#EFEBF8',
-    padding: 16,
-    marginBottom: 14,
+    padding: 14,
+    marginBottom: 12,
   },
   scriptBlueprintTitle: {
     fontSize: 15,
     fontWeight: '800',
     color: '#171420',
-    marginBottom: 8,
+    marginBottom: 6,
+    lineHeight: 20,
   },
   scriptSectionLabel: {
     fontSize: 11,
@@ -1950,18 +2003,23 @@ const styles = StyleSheet.create({
   },
   scriptSectionText: {
     fontSize: 12.5,
-    color: '#524C62',
+    color: '#4B435C',
     lineHeight: 18,
   },
   useDraftBtn: {
     marginTop: 12,
     backgroundColor: '#582CDB',
-    paddingVertical: 8,
+    paddingVertical: 9,
     borderRadius: 10,
     alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#582CDB',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 4,
   },
   useDraftBtnText: {
-    fontSize: 12.5,
+    fontSize: 13,
     fontWeight: '800',
     color: '#FFFFFF',
   },
