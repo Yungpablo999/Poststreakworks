@@ -332,7 +332,14 @@ export const ChallengeDetailScreen: React.FC<ChallengeDetailScreenProps> = ({
               <View style={styles.inProgressPill}>
                 <Text style={styles.inProgressPillText}>IN PROGRESS</Text>
               </View>
-              <Text style={styles.endsTomorrowText}>ENDS TOMORROW • 11:30 PM</Text>
+              <Text
+                style={styles.endsTomorrowText}
+                numberOfLines={1}
+                adjustsFontSizeToFit={true}
+                minimumFontScale={0.8}
+              >
+                ENDS TOMORROW • 11:30 PM
+              </Text>
             </View>
 
             <Text style={styles.heroQuestTitle}>Storyteller Challenge</Text>
@@ -367,7 +374,7 @@ export const ChallengeDetailScreen: React.FC<ChallengeDetailScreenProps> = ({
                 <Text style={styles.badgeRewardPillText}>🏆 Storyteller Badge</Text>
               </View>
               <View style={styles.passportRewardPill}>
-                <Text style={styles.passportRewardPillText}>Passport Activity</Text>
+                <Text style={styles.passportRewardPillText}>Creator Passport +6%</Text>
               </View>
             </View>
 
@@ -380,7 +387,7 @@ export const ChallengeDetailScreen: React.FC<ChallengeDetailScreenProps> = ({
                     handleCompleteQuest();
                   } else {
                     triggerModalPop();
-    setShowCreatePostModal(true);
+                    setShowCreatePostModal(true);
                   }
                 }}
               >
@@ -400,7 +407,7 @@ export const ChallengeDetailScreen: React.FC<ChallengeDetailScreenProps> = ({
                 style={({ pressed }) => [styles.createPostOutlineBtn, pressed && styles.btnPressed]}
                 onPress={() => setShowCreatePostModal(true)}
               >
-                <Text style={styles.createPostOutlineBtnText}>Create Post</Text>
+                <Text style={styles.createPostOutlineBtnText}>Create Story Post</Text>
               </Pressable>
             </View>
           </View>
@@ -1063,6 +1070,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+    gap: 8,
     marginBottom: 14,
   },
   inProgressPill: {
@@ -1070,6 +1078,7 @@ const styles = StyleSheet.create({
     paddingVertical: 3,
     paddingHorizontal: 10,
     borderRadius: 100,
+    flexShrink: 0,
   },
   inProgressPillText: {
     fontSize: 10,
@@ -1078,10 +1087,12 @@ const styles = StyleSheet.create({
     letterSpacing: 0.5,
   },
   endsTomorrowText: {
-    fontSize: 11,
+    fontSize: 10.5,
     fontWeight: '800',
     color: '#B45309',
-    letterSpacing: 0.3,
+    letterSpacing: 0.2,
+    flexShrink: 1,
+    textAlign: 'right',
   },
   heroQuestTitle: {
     fontSize: 21,
