@@ -175,19 +175,28 @@ export const PostPerformanceScreen: React.FC<PostPerformanceScreenProps> = ({
         {/* 2. SCROLLABLE CONTENT */}
         <ScrollView
           style={styles.scrollContent}
-          contentContainerStyle={{ paddingBottom: 135 }}
+          contentContainerStyle={{ paddingBottom: 90 }}
           showsVerticalScrollIndicator={false}
         >
           {/* HERO SECTION TITLE */}
-          <View style={styles.badgePillRow}>
-            <View style={styles.deepDivePill}>
-              <Text style={styles.deepDivePillText}>⚡ POST PERFORMANCE DEEP DIVE</Text>
+          <View style={styles.heroTitleContainer}>
+            <View style={styles.badgePillRow}>
+              <View style={styles.deepDivePill}>
+                <Text style={styles.deepDivePillText}>⚡ POST PERFORMANCE DEEP DIVE</Text>
+              </View>
             </View>
+            <Text
+              style={styles.mainTitle}
+              numberOfLines={1}
+              adjustsFontSizeToFit={true}
+              minimumFontScale={0.85}
+            >
+              See why your best post worked.
+            </Text>
+            <Text style={styles.mainSubtitle}>
+              Understand the views, retention, hooks, and engagement signals behind your post.
+            </Text>
           </View>
-          <Text style={styles.mainTitle}>See why your best post worked.</Text>
-          <Text style={styles.mainSubtitle}>
-            Break down views, watch time, retention, hooks, and engagement psychology.
-          </Text>
 
           {/* CARD 1: BEST POST HERO CARD */}
           <View style={styles.sectionHeaderRow}>
@@ -1035,6 +1044,10 @@ const styles = StyleSheet.create({
   },
 
   // HERO TITLES
+  heroTitleContainer: {
+    marginBottom: 4,
+    paddingRight: 8,
+  },
   badgePillRow: {
     marginBottom: 6,
   },
@@ -1052,7 +1065,7 @@ const styles = StyleSheet.create({
     letterSpacing: 0.5,
   },
   mainTitle: {
-    fontSize: Platform.OS === 'web' ? ('clamp(18px, 4.5vw, 22px)' as any) : sFont(20),
+    fontSize: Platform.OS === 'web' ? ('clamp(17px, 4.2vw, 21px)' as any) : sFont(19.5),
     fontWeight: '700',
     color: '#171420',
     letterSpacing: -0.35,
@@ -1062,7 +1075,7 @@ const styles = StyleSheet.create({
     fontSize: sFont(13),
     color: '#64748B',
     lineHeight: 18,
-    marginBottom: 18,
+    marginBottom: 16,
   },
 
   // SECTION HEADERS
