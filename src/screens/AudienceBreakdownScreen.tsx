@@ -1465,8 +1465,6 @@ export const AudienceBreakdownScreen: React.FC<AudienceBreakdownScreenProps> = (
               </Pressable>
             </View>
           </View>
-
-          <View style={{ height: 100 }} />
         </ScrollView>
 
         {/* FLOATING TAB BAR */}
@@ -1858,7 +1856,7 @@ const styles = StyleSheet.create({
   scrollContent: {
     paddingHorizontal: sPadding(20),
     paddingTop: 16,
-    paddingBottom: 135,
+    paddingBottom: 90,
   },
 
   // Toast
@@ -3022,7 +3020,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#EFEBF8',
     padding: 18,
-    marginBottom: 20,
+    marginBottom: 8,
   },
   jarvisCoreAvatarBox: {
     width: 44,
