@@ -644,20 +644,33 @@ export const CreatorPassportScreen: React.FC<CreatorPassportScreenProps> = ({
             </View>
 
             {/* Creator Starter Challenge Sub-box */}
-            <View style={styles.starterChallengeSubCard}>
+            <Pressable
+              style={({ pressed }) => [styles.starterChallengeSubCard, pressed && styles.rowPressed]}
+              onPress={() => {
+                if (Platform.OS !== 'web') {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                }
+                if (onOpenQuests) {
+                  onOpenQuests();
+                } else if (onNavigateTab) {
+                  onNavigateTab('quests');
+                }
+              }}
+            >
               <View style={styles.blueDot} />
               <View style={{ flex: 1 }}>
                 <Text style={styles.starterChallengeTitle}>Creator Starter Challenge</Text>
                 <Text style={styles.starterChallengeSub}>1 of 3 tasks completed</Text>
               </View>
-            </View>
+              <Text style={styles.starterChallengeArrow}>→</Text>
+            </Pressable>
           </View>
 
           {/* CARD 7: CREATOR LEVEL */}
           <View style={styles.levelCard}>
             <View style={styles.levelHeaderRow}>
               <Text style={styles.levelTitle}>Creator Level</Text>
-              <Text style={styles.nextLevelText}>56% to next level</Text>
+              <Text style={styles.nextLevelText}>56% to Consistent</Text>
             </View>
 
             <View style={styles.levelStepRow}>
@@ -1625,6 +1638,12 @@ const styles = StyleSheet.create({
   starterChallengeSub: {
     fontSize: 11,
     color: '#64748B',
+  },
+  starterChallengeArrow: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: '#582CDB',
+    marginLeft: 6,
   },
 
   // CARD 7: LEVEL
