@@ -333,40 +333,72 @@ export const PostPerformanceScreen: React.FC<PostPerformanceScreenProps> = ({
 
           <View style={styles.perfGrid2x2}>
             {/* 1. Total Views */}
-            <View style={styles.perfMetricBox}>
+            <Pressable
+              style={({ pressed }) => [styles.perfMetricBox, pressed && styles.btnPressed]}
+              onPress={() => {
+                if (Platform.OS !== 'web') {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                }
+                showToast('Views: 24,500 total (↑ 41.2% vs previous period)');
+              }}
+            >
               <Text style={styles.perfMetricLabel}>TOTAL VIEWS</Text>
               <Text style={styles.perfMetricValue}>24,500</Text>
               <View style={styles.perfSurgePillGreen}>
-                <Text style={styles.perfSurgeTextGreen}>📈 +41.2%</Text>
+                <Text style={styles.perfSurgeTextGreen}>↑ 41.2% vs prev period</Text>
               </View>
-            </View>
+            </Pressable>
 
             {/* 2. Completion Rate */}
-            <View style={styles.perfMetricBox}>
+            <Pressable
+              style={({ pressed }) => [styles.perfMetricBox, pressed && styles.btnPressed]}
+              onPress={() => {
+                if (Platform.OS !== 'web') {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                }
+                showToast('Completion: 71.6% retention (Top 3% on TikTok)');
+              }}
+            >
               <Text style={styles.perfMetricLabel}>COMPLETION RATE</Text>
               <Text style={styles.perfMetricValue}>71.6%</Text>
               <View style={styles.perfSurgePillNeutral}>
                 <Text style={styles.perfSurgeTextNeutral}>⭐ Top 3% on TikTok</Text>
               </View>
-            </View>
+            </Pressable>
 
             {/* 3. Followers Gained */}
-            <View style={styles.perfMetricBox}>
+            <Pressable
+              style={({ pressed }) => [styles.perfMetricBox, pressed && styles.btnPressed]}
+              onPress={() => {
+                if (Platform.OS !== 'web') {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                }
+                showToast('Conversion: +910 followers (Single post record)');
+              }}
+            >
               <Text style={styles.perfMetricLabel}>FOLLOWERS GAINED</Text>
               <Text style={styles.perfMetricValue}>+910</Text>
               <View style={styles.perfSurgePillPurple}>
                 <Text style={styles.perfSurgeTextPurple}>🎯 Single Post Record</Text>
               </View>
-            </View>
+            </Pressable>
 
             {/* 4. Shares */}
-            <View style={styles.perfMetricBox}>
+            <Pressable
+              style={({ pressed }) => [styles.perfMetricBox, pressed && styles.btnPressed]}
+              onPress={() => {
+                if (Platform.OS !== 'web') {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                }
+                showToast('Shares: 330 total (🔥 3.4× your average)');
+              }}
+            >
               <Text style={styles.perfMetricLabel}>SHARES</Text>
               <Text style={styles.perfMetricValue}>330</Text>
               <View style={styles.perfSurgePillGold}>
-                <Text style={styles.perfSurgeTextGold}>🔥 3.4x avg video</Text>
+                <Text style={styles.perfSurgeTextGold}>🔥 3.4× your average</Text>
               </View>
-            </View>
+            </Pressable>
           </View>
 
           {/* Highlight Callout Banner */}
