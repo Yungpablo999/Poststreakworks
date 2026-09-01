@@ -211,6 +211,8 @@ export const EarningsScreen: React.FC<EarningsScreenProps> = ({
   const [selectedGoal, setSelectedGoal] = useState('First $50 Goal');
   const [selectedGoalIndex, setSelectedGoalIndex] = useState(0);
   const [isGoalActive, setIsGoalActive] = useState(false);
+  const [celebrationActionText, setCelebrationActionText] = useState("Let's Build ➔");
+  const [celebrationTarget, setCelebrationTarget] = useState<'quests' | 'readiness' | 'passport' | null>(null);
 
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
@@ -1070,30 +1072,70 @@ export const EarningsScreen: React.FC<EarningsScreenProps> = ({
               <View style={styles.goalPathSection}>
                 <Text style={styles.goalPathSectionTitle}>YOUR PATH</Text>
                 <View style={styles.goalPathList}>
-                  <View style={styles.goalPathItem}>
+                  {/* 1. Profile */}
+                  <Pressable
+                    style={({ pressed }) => [styles.goalPathItem, pressed && styles.rowPressed]}
+                    onPress={() => {
+                      setShowMilestoneModal(false);
+                      if (onOpenCreatorPassport) onOpenCreatorPassport();
+                      else {
+                        triggerModalPop();
+                        setShowProfileModal(true);
+                      }
+                    }}
+                  >
                     <View style={styles.greenCheckBadge}>
                       <Text style={styles.greenCheckBadgeText}>✓</Text>
                     </View>
                     <Text style={styles.goalPathTextActive}>Complete your profile</Text>
-                  </View>
-                  <View style={styles.goalPathItem}>
+                  </Pressable>
+
+                  {/* 2. Streak */}
+                  <Pressable
+                    style={({ pressed }) => [styles.goalPathItem, pressed && styles.rowPressed]}
+                    onPress={() => {
+                      setShowMilestoneModal(false);
+                      if (onOpenSchedule) onOpenSchedule();
+                      else if (onNavigateTab) onNavigateTab('create');
+                    }}
+                  >
                     <View style={styles.greenCheckBadge}>
                       <Text style={styles.greenCheckBadgeText}>✓</Text>
                     </View>
                     <Text style={styles.goalPathTextActive}>Maintain your posting streak</Text>
-                  </View>
-                  <View style={styles.goalPathItem}>
+                  </Pressable>
+
+                  {/* 3. Starter Quests */}
+                  <Pressable
+                    style={({ pressed }) => [styles.goalPathItem, pressed && styles.rowPressed]}
+                    onPress={() => {
+                      setShowMilestoneModal(false);
+                      if (onOpenQuests) onOpenQuests();
+                      else if (onNavigateTab) onNavigateTab('quests');
+                    }}
+                  >
                     <View style={styles.greyCircleBadge}>
                       <Text style={{ fontSize: 10, color: '#94A3B8' }}>○</Text>
                     </View>
-                    <Text style={styles.goalPathTextPending}>Complete 3 starter quests</Text>
-                  </View>
-                  <View style={styles.goalPathItem}>
+                    <Text style={styles.goalPathTextPending}>Complete 3 starter quests →</Text>
+                  </Pressable>
+
+                  {/* 4. Campaigns */}
+                  <Pressable
+                    style={({ pressed }) => [styles.goalPathItem, pressed && styles.rowPressed]}
+                    onPress={() => {
+                      setShowMilestoneModal(false);
+                      triggerModalPop();
+                      setShowCampaignModal(true);
+                    }}
+                  >
                     <View style={styles.lockBadgeIcon}>
                       <Text style={{ fontSize: 11 }}>🔒</Text>
                     </View>
-                    <Text style={styles.goalPathTextMuted}>Unlock creator campaigns</Text>
-                  </View>
+                    <Text style={styles.goalPathTextMuted}>Unlock creator campaigns →</Text>
+                  </Pressable>
+
+                  {/* 5. First $50 */}
                   <View style={styles.goalPathItem}>
                     <View style={styles.moneyBadgeIcon}>
                       <Text style={{ fontSize: 11 }}>💰</Text>
@@ -1126,9 +1168,11 @@ export const EarningsScreen: React.FC<EarningsScreenProps> = ({
                   setCelebrationSubtitle(
                     'Your First $50 Goal is now active. Complete your starter quests to unlock campaigns and start earning.'
                   );
-                  setCelebrationSpeech("Ghost says: You're officially on the path to your first $50! 🚀");
+                  setCelebrationSpeech("Ghost says: Let's complete your quests and unlock that $50! 🚀");
                   setCelebrationBadge('GOAL ACTIVE');
                   setCelebrationXp(100);
+                  setCelebrationActionText('Start Quests ➔');
+                  setCelebrationTarget('quests');
                   setTimeout(() => {
                     setShowCelebrationModal(true);
                   }, 250);
@@ -1152,8 +1196,25 @@ export const EarningsScreen: React.FC<EarningsScreenProps> = ({
           badgeText={celebrationBadge}
           xpEarned={celebrationXp}
           streakCount={userProfile?.streakCount || 1}
-          actionText="Let's Build ➔"
-          onDismiss={() => setShowCelebrationModal(false)}
+          actionText={celebrationActionText}
+          onAction={() => {
+            setShowCelebrationModal(false);
+            if (celebrationTarget === 'quests') {
+              if (onOpenQuests) onOpenQuests();
+              else if (onNavigateTab) onNavigateTab('quests');
+            } else if (celebrationTarget === 'readiness') {
+              if (onOpenReadiness) onOpenReadiness();
+            } else if (celebrationTarget === 'passport') {
+              if (onOpenCreatorPassport) onOpenCreatorPassport();
+            }
+          }}
+          onDismiss={() => {
+            setShowCelebrationModal(false);
+            if (celebrationTarget === 'quests') {
+              if (onOpenQuests) onOpenQuests();
+              else if (onNavigateTab) onNavigateTab('quests');
+            }
+          }}
         />
 
         {/* CAMPAIGN REQUIREMENTS MODAL */}
