@@ -210,6 +210,7 @@ export const EarningsScreen: React.FC<EarningsScreenProps> = ({
   const [celebrationXp, setCelebrationXp] = useState(100);
   const [selectedGoal, setSelectedGoal] = useState('First $50 Goal');
   const [selectedGoalIndex, setSelectedGoalIndex] = useState(0);
+  const [isGoalActive, setIsGoalActive] = useState(false);
 
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
@@ -713,22 +714,25 @@ export const EarningsScreen: React.FC<EarningsScreenProps> = ({
             </Pressable>
           </View>
 
-          {/* CARD 6: STARTER GOAL */}
+          {/* CARD 6: STARTER GOAL / ACTIVE MILESTONE */}
           <View style={styles.goalCard}>
             <View style={styles.goalHeaderRow}>
               <View>
-                <Text style={styles.goalTitle}>Starter Goal</Text>
-                <Text style={styles.goalTarget}>{selectedGoal}</Text>
+                <Text style={styles.goalTitle}>{isGoalActive ? 'ACTIVE MILESTONE' : 'STARTER GOAL'}</Text>
+                <Text style={styles.goalTarget}>First $50 Goal</Text>
+                {isGoalActive && (
+                  <Text style={styles.goalActiveSubAmount}>$0 / $50 earned</Text>
+                )}
               </View>
-              <View style={styles.trophyCircle}>
-                <Text style={{ fontSize: 18 }}>🏆</Text>
+              <View style={[styles.trophyCircle, isGoalActive && { backgroundColor: '#EDE9FE', borderColor: '#C084FC' }]}>
+                <Text style={{ fontSize: 18 }}>{isGoalActive ? '🎯' : '🏆'}</Text>
               </View>
             </View>
 
             <View style={styles.goalTrackLabels}>
               <Text style={styles.goalStepActive}>PROFILE ✓</Text>
               <Text style={styles.goalStepActive}>STREAK ✓</Text>
-              <Text style={styles.goalStepActive}>QUESTS ✓</Text>
+              <Text style={styles.goalStepActive}>QUESTS 1/3</Text>
               <Text style={styles.goalStepMuted}>APPLY 🔒</Text>
             </View>
             <View style={styles.goalTrack}>
@@ -736,13 +740,19 @@ export const EarningsScreen: React.FC<EarningsScreenProps> = ({
             </View>
 
             <Pressable
-              style={({ pressed }) => [styles.goalBtn, pressed && styles.btnPressed]}
+              style={({ pressed }) => [
+                styles.goalBtn,
+                isGoalActive && styles.goalBtnActive,
+                pressed && styles.btnPressed,
+              ]}
               onPress={() => {
                 triggerModalPop();
                 setShowMilestoneModal(true);
               }}
             >
-              <Text style={styles.goalBtnText}>Set Goal</Text>
+              <Text style={[styles.goalBtnText, isGoalActive && styles.goalBtnTextActive]}>
+                {isGoalActive ? 'View Goal →' : 'Set Goal'}
+              </Text>
             </Pressable>
           </View>
 
@@ -1035,7 +1045,7 @@ export const EarningsScreen: React.FC<EarningsScreenProps> = ({
           </View>
         </Modal>
 
-        {/* SET GOAL MODAL */}
+        {/* SET GOAL MODAL / YOUR FIRST $50 GOAL */}
         <Modal
           visible={showMilestoneModal}
           transparent={true}
@@ -1046,55 +1056,87 @@ export const EarningsScreen: React.FC<EarningsScreenProps> = ({
             <Animated.View style={[styles.modalCard, { transform: [{ scale: modalPopScale }] }]}>
               <View style={styles.modalHeaderRow}>
                 <View style={{ flex: 1, paddingRight: 8 }}>
-                  <Text style={styles.modalTitle}>Set Income Milestone</Text>
-                  <Text style={styles.modalSubtitle}>Target your next creator milestone</Text>
+                  <Text style={styles.modalTitle}>🎯 Your First $50 Goal</Text>
+                  <Text style={styles.modalSubtitle}>
+                    Your first milestone is to earn $50 from creator opportunities.
+                  </Text>
                 </View>
                 <Pressable onPress={() => setShowMilestoneModal(false)} style={styles.modalCloseCircle} hitSlop={8}>
                   <Text style={styles.modalCloseCross}>✕</Text>
                 </Pressable>
               </View>
 
-              <View style={styles.milestoneGrid}>
-                {['First $50 Goal', '$250 Micro Creator', '$1,000 Pro Tier'].map((goal, idx) => {
-                  const isSelected = selectedGoalIndex === idx;
-                  return (
-                    <Pressable
-                      key={idx}
-                      style={[styles.milestoneOption, isSelected && styles.milestoneOptionActive]}
-                      onPress={() => {
-                        if (Platform.OS !== 'web') {
-                          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                        }
-                        setSelectedGoalIndex(idx);
-                        setSelectedGoal(goal);
-                      }}
-                    >
-                      <Text style={[styles.milestoneOptionText, isSelected && styles.milestoneOptionTextActive]}>
-                        {goal}
-                      </Text>
-                    </Pressable>
-                  );
-                })}
+              {/* Your Path Section */}
+              <View style={styles.goalPathSection}>
+                <Text style={styles.goalPathSectionTitle}>YOUR PATH</Text>
+                <View style={styles.goalPathList}>
+                  <View style={styles.goalPathItem}>
+                    <View style={styles.greenCheckBadge}>
+                      <Text style={styles.greenCheckBadgeText}>✓</Text>
+                    </View>
+                    <Text style={styles.goalPathTextActive}>Complete your profile</Text>
+                  </View>
+                  <View style={styles.goalPathItem}>
+                    <View style={styles.greenCheckBadge}>
+                      <Text style={styles.greenCheckBadgeText}>✓</Text>
+                    </View>
+                    <Text style={styles.goalPathTextActive}>Maintain your posting streak</Text>
+                  </View>
+                  <View style={styles.goalPathItem}>
+                    <View style={styles.greyCircleBadge}>
+                      <Text style={{ fontSize: 10, color: '#94A3B8' }}>○</Text>
+                    </View>
+                    <Text style={styles.goalPathTextPending}>Complete 3 starter quests</Text>
+                  </View>
+                  <View style={styles.goalPathItem}>
+                    <View style={styles.lockBadgeIcon}>
+                      <Text style={{ fontSize: 11 }}>🔒</Text>
+                    </View>
+                    <Text style={styles.goalPathTextMuted}>Unlock creator campaigns</Text>
+                  </View>
+                  <View style={styles.goalPathItem}>
+                    <View style={styles.moneyBadgeIcon}>
+                      <Text style={{ fontSize: 11 }}>💰</Text>
+                    </View>
+                    <Text style={styles.goalPathTextMuted}>Earn your first $50</Text>
+                  </View>
+                </View>
+              </View>
+
+              {/* Progress Box */}
+              <View style={styles.goalProgressBox}>
+                <View style={styles.goalProgressHeader}>
+                  <Text style={styles.goalProgressAmount}>$0 / $50 earned</Text>
+                  <Text style={styles.goalProgressPercent}>0%</Text>
+                </View>
+                <View style={styles.goalProgressBarTrack}>
+                  <View style={[styles.goalProgressBarFill, { width: '0%' }]} />
+                </View>
               </View>
 
               <Pressable
-                style={styles.modalFullBtn}
+                style={({ pressed }) => [styles.modalFullBtn, pressed && styles.btnPressed]}
                 onPress={() => {
                   if (Platform.OS !== 'web') {
                     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
                   }
+                  setIsGoalActive(true);
                   setShowMilestoneModal(false);
-                  setCelebrationTitle('Income Goal Set!');
-                  setCelebrationSubtitle(`Targeting ${selectedGoal}. Your creator monetization roadmap is now active.`);
-                  setCelebrationSpeech(`Ghost says: You're on track for ${selectedGoal}! 🚀`);
-                  setCelebrationBadge('GOAL LOCKED IN');
+                  setCelebrationTitle('First $50 Goal Active! 🎯');
+                  setCelebrationSubtitle(
+                    'Your First $50 Goal is now active. Complete your starter quests to unlock campaigns and start earning.'
+                  );
+                  setCelebrationSpeech("Ghost says: You're officially on the path to your first $50! 🚀");
+                  setCelebrationBadge('GOAL ACTIVE');
                   setCelebrationXp(100);
                   setTimeout(() => {
                     setShowCelebrationModal(true);
                   }, 250);
                 }}
               >
-                <Text style={styles.modalFullBtnText}>Save Goal</Text>
+                <Text style={styles.modalFullBtnText}>
+                  {isGoalActive ? 'Keep Goal Active →' : 'Start My $50 Goal →'}
+                </Text>
               </Pressable>
             </Animated.View>
           </View>
@@ -1852,6 +1894,12 @@ const styles = StyleSheet.create({
     backgroundColor: '#582CDB',
     borderRadius: 3,
   },
+  goalActiveSubAmount: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#582CDB',
+    marginTop: 2,
+  },
   goalBtn: {
     height: 38,
     borderRadius: 10,
@@ -1859,10 +1907,95 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
+  goalBtnActive: {
+    backgroundColor: '#582CDB',
+  },
   goalBtnText: {
     fontSize: 12,
     fontWeight: '700',
     color: '#582CDB',
+  },
+  goalBtnTextActive: {
+    color: '#FFFFFF',
+  },
+  goalPathSection: {
+    marginVertical: 10,
+  },
+  goalPathSectionTitle: {
+    fontSize: 10,
+    fontWeight: '700',
+    color: '#64748B',
+    letterSpacing: 0.5,
+    marginBottom: 8,
+  },
+  goalPathList: {
+    gap: 8,
+  },
+  goalPathItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+  },
+  goalPathTextActive: {
+    fontSize: 12.5,
+    fontWeight: '700',
+    color: '#171420',
+  },
+  goalPathTextPending: {
+    fontSize: 12.5,
+    fontWeight: '700',
+    color: '#582CDB',
+  },
+  goalPathTextMuted: {
+    fontSize: 12.5,
+    color: '#94A3B8',
+  },
+  lockBadgeIcon: {
+    width: 18,
+    height: 18,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  moneyBadgeIcon: {
+    width: 18,
+    height: 18,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  goalProgressBox: {
+    backgroundColor: '#FAF8F5',
+    borderRadius: 12,
+    padding: 12,
+    borderWidth: 1,
+    borderColor: '#EDE8E1',
+    marginVertical: 10,
+  },
+  goalProgressHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 6,
+  },
+  goalProgressAmount: {
+    fontSize: 13,
+    fontWeight: '800',
+    color: '#171420',
+  },
+  goalProgressPercent: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#64748B',
+  },
+  goalProgressBarTrack: {
+    height: 6,
+    backgroundColor: '#E2E8F0',
+    borderRadius: 3,
+    overflow: 'hidden',
+  },
+  goalProgressBarFill: {
+    height: '100%',
+    backgroundColor: '#582CDB',
+    borderRadius: 3,
   },
 
   // CARD 7: PRO TOOLS
