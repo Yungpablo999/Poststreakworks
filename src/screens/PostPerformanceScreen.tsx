@@ -297,14 +297,14 @@ export const PostPerformanceScreen: React.FC<PostPerformanceScreenProps> = ({
                 if (onOpenEarnings) {
                   onOpenEarnings();
                 } else {
-                  showToast('Est. Revenue: $142.50 from this viral post');
+                  showToast('Est. earnings: $142.50 from this top post');
                 }
               }}
             >
-              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5, flex: 1, marginRight: 8 }}>
+              <View style={styles.postEarningsLeftRow}>
                 <Text style={{ fontSize: 13 }}>💰</Text>
-                <Text style={styles.postEarningsChipText} numberOfLines={1}>
-                  Est. Revenue: <Text style={{ color: '#582CDB', fontWeight: '800' }}>$142.50</Text>
+                <Text style={styles.postEarningsChipText}>
+                  Est. earnings: <Text style={{ color: '#582CDB', fontWeight: '800' }}>$142.50</Text>
                 </Text>
               </View>
               <Text style={styles.postEarningsChipLink}>View Earnings ➔</Text>
@@ -1096,26 +1096,26 @@ const styles = StyleSheet.create({
   // CARD 1: BEST POST HERO CARD
   bestPostCard: {
     backgroundColor: '#FFFFFF',
-    borderRadius: 24,
+    borderRadius: 22,
     borderWidth: 1,
     borderColor: '#EDE8E1',
-    padding: sPadding(14),
-    marginBottom: 18,
+    padding: 12,
+    marginBottom: 16,
     shadowColor: '#171420',
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.06,
-    shadowRadius: 16,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.05,
+    shadowRadius: 14,
     elevation: 3,
   },
   videoPreviewContainer: {
     width: '100%',
-    height: 240,
-    borderRadius: 18,
+    height: 220,
+    borderRadius: 16,
     overflow: 'hidden',
     position: 'relative',
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 12,
+    marginBottom: 10,
   },
   videoThumbnail: {
     width: '100%',
@@ -1123,48 +1123,48 @@ const styles = StyleSheet.create({
   },
   topPostBadge: {
     position: 'absolute',
-    top: 12,
-    left: 12,
+    top: 10,
+    left: 10,
     backgroundColor: '#FBBF24',
-    paddingVertical: 4,
-    paddingHorizontal: 9,
+    paddingVertical: 3.5,
+    paddingHorizontal: 8.5,
     borderRadius: 6,
   },
   topPostBadgeText: {
-    fontSize: 10,
+    fontSize: 9.5,
     fontWeight: '700',
     color: '#171420',
     letterSpacing: 0.4,
   },
   playButtonCircle: {
-    width: 52,
-    height: 52,
-    borderRadius: 26,
-    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: 'rgba(255, 255, 255, 0.92)',
     justifyContent: 'center',
     alignItems: 'center',
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
+    shadowOffset: { width: 0, height: 3 },
     shadowOpacity: 0.12,
-    shadowRadius: 8,
+    shadowRadius: 6,
     elevation: 4,
   },
   playIconTriangle: {
-    fontSize: 18,
+    fontSize: 16,
     color: '#582CDB',
     marginLeft: 3,
   },
   videoMetaContainer: {
     position: 'absolute',
-    bottom: 12,
-    left: 12,
-    right: 12,
+    bottom: 10,
+    left: 10,
+    right: 10,
   },
   videoAuthorRow: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
-    marginBottom: 4,
+    marginBottom: 3,
   },
   videoAuthorAvatar: {
     width: 20,
@@ -1181,10 +1181,10 @@ const styles = StyleSheet.create({
     textShadowRadius: 3,
   },
   videoPostTitle: {
-    fontSize: 14,
+    fontSize: 13.5,
     fontWeight: '700',
     color: '#FFFFFF',
-    lineHeight: 18,
+    lineHeight: 17.5,
     textShadowColor: 'rgba(0,0,0,0.6)',
     textShadowRadius: 4,
   },
@@ -1193,10 +1193,10 @@ const styles = StyleSheet.create({
   postStatsBar: {
     flexDirection: 'row',
     backgroundColor: '#FAF8F5',
-    borderRadius: 14,
-    paddingVertical: 10,
+    borderRadius: 12,
+    paddingVertical: 8,
     paddingHorizontal: 8,
-    marginBottom: 12,
+    marginBottom: 10,
     borderWidth: 1,
     borderColor: '#EDE8E1',
   },
@@ -1209,10 +1209,10 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     color: '#64748B',
     letterSpacing: 0.5,
-    marginBottom: 2,
+    marginBottom: 1,
   },
   postStatValue: {
-    fontSize: 15,
+    fontSize: 14.5,
     fontWeight: '700',
     color: '#171420',
   },
@@ -1234,11 +1234,18 @@ const styles = StyleSheet.create({
     gap: 8,
     backgroundColor: '#FAF5FF',
     borderRadius: 12,
-    paddingVertical: 8,
-    paddingHorizontal: 12,
+    paddingVertical: 7,
+    paddingHorizontal: 11,
     borderWidth: 1,
     borderColor: '#E9D5FF',
-    marginBottom: 12,
+    marginBottom: 10,
+  },
+  postEarningsLeftRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    flex: 1,
+    marginRight: 6,
   },
   postEarningsChipText: {
     fontSize: 11.5,
@@ -1252,8 +1259,8 @@ const styles = StyleSheet.create({
     flexShrink: 0,
   },
   createSimilarBtn: {
-    height: 46,
-    borderRadius: 14,
+    height: 44,
+    borderRadius: 13,
     overflow: 'hidden',
     shadowColor: '#582CDB',
     shadowOffset: { width: 0, height: 3 },
