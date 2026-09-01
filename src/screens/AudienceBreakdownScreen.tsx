@@ -177,6 +177,13 @@ const INITIAL_PLATFORMS: PlatformAccount[] = [
 // TIMEFRAME DATASETS FOR 7D, 1M, 3M
 export type TimeframeMode = '7d' | '1m' | '3m';
 
+export interface PlatformBreakdown {
+  tiktok: number;
+  instagram: number;
+  youtube: number;
+  other: number;
+}
+
 export interface VelocityItem {
   id: string;
   label: string;
@@ -185,28 +192,170 @@ export interface VelocityItem {
   displayGain: string;
   barHeightRatio: number;
   highlightText: string;
+  platforms: PlatformBreakdown;
+  spikeReason: string;
 }
 
 const TIMEFRAME_DATA: Record<TimeframeMode, VelocityItem[]> = {
   '7d': [
-    { id: 'mon', label: 'Mon', fullDate: 'Monday, Aug 12', gain: 120, displayGain: '+120', barHeightRatio: 0.35, highlightText: 'Morning story post' },
-    { id: 'tue', label: 'Tue', fullDate: 'Tuesday, Aug 13', gain: 160, displayGain: '+160', barHeightRatio: 0.47, highlightText: 'Reel reach boost' },
-    { id: 'wed', label: 'Wed', fullDate: 'Wednesday, Aug 14', gain: 140, displayGain: '+140', barHeightRatio: 0.41, highlightText: 'Collab comments' },
-    { id: 'thu', label: 'Thu', fullDate: 'Thursday, Aug 15', gain: 340, displayGain: '+340', barHeightRatio: 1.0, highlightText: '⚡ Viral TikTok breakdown' },
-    { id: 'fri', label: 'Fri', fullDate: 'Friday, Aug 16', gain: 210, displayGain: '+210', barHeightRatio: 0.62, highlightText: 'Surge saves boost' },
-    { id: 'sat', label: 'Sat', fullDate: 'Saturday, Aug 17', gain: 180, displayGain: '+180', barHeightRatio: 0.53, highlightText: 'Weekend creator Q&A' },
-    { id: 'sun', label: 'Sun', fullDate: 'Sunday, Aug 18', gain: 130, displayGain: '+130', barHeightRatio: 0.38, highlightText: 'Weekly summary reel' },
+    {
+      id: 'mon',
+      label: 'Mon',
+      fullDate: 'Monday, Oct 21',
+      gain: 120,
+      displayGain: '+120',
+      barHeightRatio: 0.35,
+      highlightText: 'Morning story post',
+      platforms: { tiktok: 85, instagram: 25, youtube: 10, other: 0 },
+      spikeReason: 'Morning story post',
+    },
+    {
+      id: 'tue',
+      label: 'Tue',
+      fullDate: 'Tuesday, Oct 22',
+      gain: 160,
+      displayGain: '+160',
+      barHeightRatio: 0.47,
+      highlightText: 'Reel reach boost',
+      platforms: { tiktok: 110, instagram: 35, youtube: 15, other: 0 },
+      spikeReason: 'Reel reach boost',
+    },
+    {
+      id: 'wed',
+      label: 'Wed',
+      fullDate: 'Wednesday, Oct 23',
+      gain: 140,
+      displayGain: '+140',
+      barHeightRatio: 0.41,
+      highlightText: 'Collab comments',
+      platforms: { tiktok: 95, instagram: 30, youtube: 15, other: 0 },
+      spikeReason: 'Collab comments',
+    },
+    {
+      id: 'thu',
+      label: 'Thu',
+      fullDate: 'Thursday, Oct 24',
+      gain: 340,
+      displayGain: '+340',
+      barHeightRatio: 1.0,
+      highlightText: '⚡ Viral TikTok breakdown',
+      platforms: { tiktok: 290, instagram: 38, youtube: 12, other: 0 },
+      spikeReason: 'Viral TikTok breakdown',
+    },
+    {
+      id: 'fri',
+      label: 'Fri',
+      fullDate: 'Friday, Oct 25',
+      gain: 210,
+      displayGain: '+210',
+      barHeightRatio: 0.62,
+      highlightText: 'Surge saves boost',
+      platforms: { tiktok: 155, instagram: 40, youtube: 15, other: 0 },
+      spikeReason: 'Surge saves boost',
+    },
+    {
+      id: 'sat',
+      label: 'Sat',
+      fullDate: 'Saturday, Oct 26',
+      gain: 180,
+      displayGain: '+180',
+      barHeightRatio: 0.53,
+      highlightText: 'Weekend creator Q&A',
+      platforms: { tiktok: 130, instagram: 35, youtube: 15, other: 0 },
+      spikeReason: 'Weekend creator Q&A',
+    },
+    {
+      id: 'sun',
+      label: 'Sun',
+      fullDate: 'Sunday, Oct 27',
+      gain: 130,
+      displayGain: '+130',
+      barHeightRatio: 0.38,
+      highlightText: 'Weekly summary reel',
+      platforms: { tiktok: 90, instagram: 28, youtube: 12, other: 0 },
+      spikeReason: 'Weekly summary reel',
+    },
   ],
   '1m': [
-    { id: 'w1', label: 'W1', fullDate: 'Jul 21 - Jul 27', gain: 680, displayGain: '+680', barHeightRatio: 0.53, highlightText: 'Hook experiment' },
-    { id: 'w2', label: 'W2', fullDate: 'Jul 28 - Aug 03', gain: 840, displayGain: '+840', barHeightRatio: 0.65, highlightText: 'Reels reach expanded' },
-    { id: 'w3', label: 'W3', fullDate: 'Aug 04 - Aug 10', gain: 1060, displayGain: '+1,060', barHeightRatio: 0.83, highlightText: 'Double posting schedule' },
-    { id: 'w4', label: 'W4 (Now)', fullDate: 'Aug 11 - Aug 18', gain: 1280, displayGain: '+1,280', barHeightRatio: 1.0, highlightText: '⚡ Best month week!' },
+    {
+      id: 'w1',
+      label: 'W1',
+      fullDate: 'Oct 01 - Oct 07',
+      gain: 680,
+      displayGain: '+680',
+      barHeightRatio: 0.53,
+      highlightText: 'Hook experiment',
+      platforms: { tiktok: 480, instagram: 140, youtube: 60, other: 0 },
+      spikeReason: 'Hook experiment',
+    },
+    {
+      id: 'w2',
+      label: 'W2',
+      fullDate: 'Oct 08 - Oct 14',
+      gain: 840,
+      displayGain: '+840',
+      barHeightRatio: 0.65,
+      highlightText: 'Reels reach expanded',
+      platforms: { tiktok: 590, instagram: 180, youtube: 70, other: 0 },
+      spikeReason: 'Reels reach expanded',
+    },
+    {
+      id: 'w3',
+      label: 'W3',
+      fullDate: 'Oct 15 - Oct 21',
+      gain: 1060,
+      displayGain: '+1,060',
+      barHeightRatio: 0.83,
+      highlightText: 'Double posting schedule',
+      platforms: { tiktok: 740, instagram: 230, youtube: 90, other: 0 },
+      spikeReason: 'Double posting schedule',
+    },
+    {
+      id: 'w4',
+      label: 'W4 (Now)',
+      fullDate: 'Oct 22 - Oct 28',
+      gain: 1280,
+      displayGain: '+1,280',
+      barHeightRatio: 1.0,
+      highlightText: '⚡ Best month week!',
+      platforms: { tiktok: 910, instagram: 270, youtube: 100, other: 0 },
+      spikeReason: 'Viral series culmination',
+    },
   ],
   '3m': [
-    { id: 'm1', label: 'Jun', fullDate: 'June 2026', gain: 2840, displayGain: '+2.8K', barHeightRatio: 0.54, highlightText: 'Core audience base' },
-    { id: 'm2', label: 'Jul', fullDate: 'July 2026', gain: 3950, displayGain: '+3.9K', barHeightRatio: 0.76, highlightText: 'Viral series started' },
-    { id: 'm3', label: 'Aug (MTD)', fullDate: 'August 2026', gain: 5210, displayGain: '+5.2K', barHeightRatio: 1.0, highlightText: '⚡ Record multi-surge (+32%)' },
+    {
+      id: 'm1',
+      label: 'Aug',
+      fullDate: 'August 2026',
+      gain: 2840,
+      displayGain: '+2.8K',
+      barHeightRatio: 0.54,
+      highlightText: 'Core audience base',
+      platforms: { tiktok: 2000, instagram: 600, youtube: 240, other: 0 },
+      spikeReason: 'Core audience base',
+    },
+    {
+      id: 'm2',
+      label: 'Sep',
+      fullDate: 'September 2026',
+      gain: 3950,
+      displayGain: '+3.9K',
+      barHeightRatio: 0.76,
+      highlightText: 'Viral series started',
+      platforms: { tiktok: 2800, instagram: 850, youtube: 300, other: 0 },
+      spikeReason: 'Viral series launch',
+    },
+    {
+      id: 'm3',
+      label: 'Oct (MTD)',
+      fullDate: 'October 2026',
+      gain: 5210,
+      displayGain: '+5.2K',
+      barHeightRatio: 1.0,
+      highlightText: '⚡ Record multi-surge (+32%)',
+      platforms: { tiktok: 3750, instagram: 1100, youtube: 360, other: 0 },
+      spikeReason: 'Cross-platform monetization sync',
+    },
   ],
 };
 
@@ -727,6 +876,37 @@ export const AudienceBreakdownScreen: React.FC<AudienceBreakdownScreenProps> = (
               </View>
             </View>
 
+            {/* INTERACTIVE DAY / TIMEFRAME BREAKDOWN PANEL */}
+            <View style={styles.velocityDetailCard}>
+              <View style={styles.velocityDetailHeader}>
+                <Text style={styles.velocityDetailTitle}>
+                  {activeItem.fullDate} · <Text style={{ color: '#582CDB', fontWeight: '800' }}>{activeItem.displayGain} followers</Text>
+                </Text>
+              </View>
+
+              <View style={styles.detailPlatformTags}>
+                <View style={styles.detailPlatBadge}>
+                  <Text style={styles.detailPlatItem}>TikTok <Text style={{ fontWeight: '800', color: '#171420' }}>+{activeItem.platforms.tiktok}</Text></Text>
+                </View>
+                <View style={styles.detailPlatBadge}>
+                  <Text style={styles.detailPlatItem}>Instagram <Text style={{ fontWeight: '800', color: '#171420' }}>+{activeItem.platforms.instagram}</Text></Text>
+                </View>
+                <View style={styles.detailPlatBadge}>
+                  <Text style={styles.detailPlatItem}>YouTube <Text style={{ fontWeight: '800', color: '#171420' }}>+{activeItem.platforms.youtube}</Text></Text>
+                </View>
+                {activeItem.platforms.other > 0 && (
+                  <View style={styles.detailPlatBadge}>
+                    <Text style={styles.detailPlatItem}>Other <Text style={{ fontWeight: '800', color: '#171420' }}>+{activeItem.platforms.other}</Text></Text>
+                  </View>
+                )}
+              </View>
+
+              <View style={styles.velocitySpikeReasonRow}>
+                <Text style={styles.spikeReasonLabel}>Why it spiked: </Text>
+                <Text style={styles.spikeReasonValue}>{activeItem.spikeReason}</Text>
+              </View>
+            </View>
+
             {/* GOAL TARGET TRACKER */}
             <View style={styles.velocityGoalBox}>
               <View style={styles.velocityGoalTopRow}>
@@ -764,12 +944,12 @@ export const AudienceBreakdownScreen: React.FC<AudienceBreakdownScreenProps> = (
                   ]}
                 />
               </View>
-              <Text style={styles.velocityGoalSub} numberOfLines={1}>
+              <Text style={styles.velocityGoalSub}>
                 {selectedTimeframe === '7d'
-                  ? '⚡ Only 220 followers to reach your 7-day streak target!'
+                  ? '⚡ Only 220 followers to hit your 7-day target'
                   : selectedTimeframe === '1m'
-                  ? '🚀 140 followers away from achieving your monthly creator record!'
-                  : '👑 On track to exceed your Q3 creator milestone!'}
+                  ? '🚀 140 followers away from achieving your monthly creator record'
+                  : '👑 On track to exceed your Q3 creator milestone'}
               </Text>
             </View>
 
@@ -1911,6 +2091,58 @@ const styles = StyleSheet.create({
   barWeekLabelActive: {
     color: '#582CDB',
     fontWeight: '700',
+  },
+
+  // Velocity Detail Card
+  velocityDetailCard: {
+    backgroundColor: '#FAF8F5',
+    borderRadius: 14,
+    padding: 12,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    marginBottom: 14,
+  },
+  velocityDetailHeader: {
+    marginBottom: 8,
+  },
+  velocityDetailTitle: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#171420',
+  },
+  detailPlatformTags: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 6,
+    marginBottom: 8,
+  },
+  detailPlatBadge: {
+    backgroundColor: '#FFFFFF',
+    paddingVertical: 3,
+    paddingHorizontal: 7,
+    borderRadius: 6,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+  },
+  detailPlatItem: {
+    fontSize: 10.5,
+    fontWeight: '600',
+    color: '#64748B',
+  },
+  velocitySpikeReasonRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+  spikeReasonLabel: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: '#582CDB',
+  },
+  spikeReasonValue: {
+    fontSize: 11,
+    fontWeight: '600',
+    color: '#334155',
   },
 
   // Goal Box
