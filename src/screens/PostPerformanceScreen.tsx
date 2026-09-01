@@ -947,10 +947,10 @@ export const PostPerformanceScreen: React.FC<PostPerformanceScreenProps> = ({
 
               <View style={styles.demoHorizontalDivider} />
 
-              <View style={styles.demoAudienceTypeRow}>
+              <View style={styles.demoAudienceTypeCol}>
                 <Text style={styles.demoLabel}>AUDIENCE TYPE</Text>
                 <Text style={styles.demoAudienceTypeValue}>
-                  Creators <Text style={{ color: '#582CDB', fontWeight: '800' }}>67%</Text> · Educators <Text style={{ color: '#582CDB', fontWeight: '800' }}>21%</Text>
+                  Creators (67%) · Educators (21%)
                 </Text>
               </View>
             </View>
@@ -2197,16 +2197,14 @@ const styles = StyleSheet.create({
     backgroundColor: '#E2E8F0',
     marginVertical: 10,
   },
-  demoAudienceTypeRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+  demoAudienceTypeCol: {
     alignItems: 'center',
-    paddingHorizontal: 4,
+    paddingTop: 2,
   },
   demoAudienceTypeValue: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: '#334155',
+    fontSize: 13,
+    fontWeight: '700',
+    color: '#171420',
   },
   demoLockedTeaserBox: {
     backgroundColor: '#FAF8F5',
