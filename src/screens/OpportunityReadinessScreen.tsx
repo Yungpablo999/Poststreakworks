@@ -414,7 +414,7 @@ export const OpportunityReadinessScreen: React.FC<OpportunityReadinessScreenProp
           <View style={styles.checklistContainer}>
             {/* 1. Profile Completion */}
             <Pressable
-              style={styles.checklistCard}
+              style={({ pressed }) => [styles.checklistCard, pressed && styles.cardPressed]}
               onPress={() => {
                 triggerModalPop();
                 setShowProfileModal(true);
@@ -427,13 +427,13 @@ export const OpportunityReadinessScreen: React.FC<OpportunityReadinessScreenProp
                 <Text style={styles.checkTitle}>Profile Completion</Text>
               </View>
               <View style={styles.inProgressBadge}>
-                <Text style={styles.inProgressBadgeText}>IN PROGRESS</Text>
+                <Text style={styles.inProgressBadgeText}>IN PROGRESS →</Text>
               </View>
             </Pressable>
 
             {/* 2. 2+ Platforms Connected */}
             <Pressable
-              style={styles.checklistCard}
+              style={({ pressed }) => [styles.checklistCard, pressed && styles.cardPressed]}
               onPress={() => {
                 triggerModalPop();
                 setShowConnectPlatformModal(true);
@@ -451,14 +451,14 @@ export const OpportunityReadinessScreen: React.FC<OpportunityReadinessScreenProp
                 </View>
               ) : (
                 <View style={styles.inProgressBadge}>
-                  <Text style={styles.inProgressBadgeText}>IN PROGRESS</Text>
+                  <Text style={styles.inProgressBadgeText}>IN PROGRESS →</Text>
                 </View>
               )}
             </Pressable>
 
             {/* 3. Creator Passport */}
             <Pressable
-              style={styles.checklistCard}
+              style={({ pressed }) => [styles.checklistCard, pressed && styles.cardPressed]}
               onPress={() => {
                 if (Platform.OS !== 'web') {
                   Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
@@ -478,12 +478,24 @@ export const OpportunityReadinessScreen: React.FC<OpportunityReadinessScreenProp
                 <Text style={styles.checkTitle}>Creator Passport</Text>
               </View>
               <View style={styles.inProgressBadge}>
-                <Text style={styles.inProgressBadgeText}>IN PROGRESS</Text>
+                <Text style={styles.inProgressBadgeText}>IN PROGRESS →</Text>
               </View>
             </Pressable>
 
             {/* 4. 7-day Streak */}
-            <View style={styles.checklistCard}>
+            <Pressable
+              style={({ pressed }) => [styles.checklistCard, pressed && styles.cardPressed]}
+              onPress={() => {
+                if (Platform.OS !== 'web') {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                }
+                if (onOpenSchedule) {
+                  onOpenSchedule();
+                } else if (onNavigateTab) {
+                  onNavigateTab('quests');
+                }
+              }}
+            >
               <View style={styles.checklistLeft}>
                 <View style={[styles.checkIconBox, { backgroundColor: '#DCFCE7' }]}>
                   <Text style={{ fontSize: 14 }}>🔥</Text>
@@ -493,7 +505,7 @@ export const OpportunityReadinessScreen: React.FC<OpportunityReadinessScreenProp
               <View style={styles.greenCheckCircle}>
                 <Text style={styles.greenCheckText}>✓</Text>
               </View>
-            </View>
+            </Pressable>
           </View>
 
           {/* CARD 3: PROFILE DETAILS */}
@@ -1111,6 +1123,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     borderWidth: 1,
     borderColor: '#EDE8E1',
+  },
+  cardPressed: {
+    opacity: 0.85,
+    transform: [{ scale: 0.985 }],
   },
   checklistLeft: {
     flexDirection: 'row',
