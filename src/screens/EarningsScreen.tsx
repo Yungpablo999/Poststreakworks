@@ -484,9 +484,9 @@ export const EarningsScreen: React.FC<EarningsScreenProps> = ({
             <View style={styles.estimatedCard}>
               <View style={styles.estimatedHeaderRow}>
                 <View style={{ flex: 1, paddingRight: 10 }}>
-                  <Text style={styles.estimatedLabel}>Estimated Tracked Earnings</Text>
+                  <Text style={styles.estimatedLabel}>Estimated Potential Earnings</Text>
                   <Text style={styles.estimatedSubExplanation}>
-                    Based on your completed campaigns, brand opportunities, and tracked creator activity.
+                    Estimated potential earnings based on your creator activity and available opportunities.
                   </Text>
                 </View>
                 <Text style={styles.estimatedAmount}>$1,420.50</Text>

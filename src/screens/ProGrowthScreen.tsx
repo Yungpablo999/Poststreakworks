@@ -1258,7 +1258,7 @@ export const ProGrowthScreen: React.FC<ProGrowthScreenProps> = ({
               </View>
               <View style={styles.earningsHubDivider} />
               <View style={styles.earningsHubStatCol}>
-                <Text style={styles.earningsHubStatLabel}>EST. TRACKED</Text>
+                <Text style={styles.earningsHubStatLabel}>EST. POTENTIAL</Text>
                 <Text style={[styles.earningsHubStatVal, { color: '#582CDB' }]}>$5,800.00</Text>
               </View>
             </View>
