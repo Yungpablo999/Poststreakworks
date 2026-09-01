@@ -94,6 +94,7 @@ export const PostPerformanceScreen: React.FC<PostPerformanceScreenProps> = ({
   const [activeTab, setActiveTab] = useState<TabType>('growth');
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [showJarvisExplanationModal, setShowJarvisExplanationModal] = useState(false);
+  const [isHowItWorksExpanded, setIsHowItWorksExpanded] = useState(false);
   const [showCelebrationModal, setShowCelebrationModal] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
@@ -703,16 +704,36 @@ export const PostPerformanceScreen: React.FC<PostPerformanceScreenProps> = ({
             </View>
 
             <Text style={styles.jarvisCoreLabel}>JARVIS CORE INSIGHT</Text>
-            <Text style={styles.jarvisCoreText}>
-              This post succeeded because of high retention in the first 3 seconds. The pattern interrupt hook caused viewers to stop scrolling.
+            <Text style={styles.jarvisCoreTextPrimary}>
+              This post succeeded because of high retention in the first 3 seconds.
             </Text>
+            <Text style={styles.jarvisCoreTextSecondary}>
+              The pattern-interrupt hook appears to be a key reason viewers stopped scrolling.
+            </Text>
+
+            {isHowItWorksExpanded && (
+              <View style={styles.howItWorksExpandBox}>
+                <Text style={styles.howItWorksExpandTitle}>Why Jarvis thinks this:</Text>
+                <Text style={styles.howItWorksExpandBody}>
+                  Your first-3-second retention was significantly above your normal TikTok baseline, while posts using similar opening structures performed better than your average.
+                </Text>
+              </View>
+            )}
 
             <View style={styles.jarvisActionLinksRow}>
               <Pressable
-                onPress={() => setShowJarvisExplanationModal(true)}
-                hitSlop={6}
+                onPress={() => {
+                  if (Platform.OS !== 'web') {
+                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                  }
+                  setIsHowItWorksExpanded(prev => !prev);
+                }}
+                hitSlop={8}
+                style={({ pressed }) => [styles.jarvisLinkBtn, pressed && styles.btnPressed]}
               >
-                <Text style={styles.jarvisLinkText}>💡 How it works</Text>
+                <Text style={styles.jarvisLinkText}>
+                  💡 How it works {isHowItWorksExpanded ? '▲' : '➔'}
+                </Text>
               </Pressable>
               <Pressable
                 onPress={() => {
@@ -721,7 +742,8 @@ export const PostPerformanceScreen: React.FC<PostPerformanceScreenProps> = ({
                     onOpenScript('Remix: 3 creator mistakes that are killing your growth');
                   }
                 }}
-                hitSlop={6}
+                hitSlop={8}
+                style={({ pressed }) => [styles.jarvisLinkBtn, pressed && styles.btnPressed]}
               >
                 <Text style={styles.jarvisLinkText}>Remix script ➔</Text>
               </Pressable>
@@ -1796,20 +1818,54 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     color: '#582CDB',
     letterSpacing: 0.6,
-    marginBottom: 4,
+    marginBottom: 6,
   },
-  jarvisCoreText: {
-    fontSize: 13,
-    color: '#334155',
+  jarvisCoreTextPrimary: {
+    fontSize: sFont(12.5),
+    fontWeight: '700',
+    color: '#171420',
     textAlign: 'center',
     lineHeight: 18,
+    marginBottom: 4,
+    paddingHorizontal: 6,
+  },
+  jarvisCoreTextSecondary: {
+    fontSize: sFont(12),
+    color: '#64748B',
+    textAlign: 'center',
+    lineHeight: 17,
     marginBottom: 12,
+    paddingHorizontal: 8,
+  },
+  howItWorksExpandBox: {
+    width: '100%',
+    backgroundColor: '#FAF5FF',
+    borderRadius: 14,
+    padding: 12,
+    borderWidth: 1,
+    borderColor: '#E9D5FF',
+    marginBottom: 12,
+  },
+  howItWorksExpandTitle: {
+    fontSize: sFont(11),
+    fontWeight: '800',
+    color: '#582CDB',
+    marginBottom: 4,
+  },
+  howItWorksExpandBody: {
+    fontSize: sFont(11.5),
+    color: '#334155',
+    lineHeight: 16.5,
   },
   jarvisActionLinksRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     gap: 12,
+  },
+  jarvisLinkBtn: {
+    paddingVertical: 4,
+    paddingHorizontal: 6,
   },
   jarvisLinkText: {
     fontSize: 11.5,
