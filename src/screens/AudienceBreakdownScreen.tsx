@@ -85,11 +85,38 @@ export const SnapchatSvg = ({ size = 20 }: { size?: number }) => (
   </Svg>
 );
 
-export const ThreadsSvg = ({ size = 20 }: { size?: number }) => (
+export const BookmarkSvg = ({ size = 18, color = '#171420' }: { size?: number; color?: string }) => (
   <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
     <Path
-      d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm3.84 12.3c-.45 2.1-2.03 3.32-4.14 3.32-2.58 0-4.4-1.84-4.4-4.47 0-2.67 1.88-4.57 4.54-4.57 2.45 0 4.1 1.62 4.17 3.86h-1.87c-.07-1.26-.98-2.14-2.3-2.14-1.62 0-2.65 1.25-2.65 2.85 0 1.63 1.05 2.8 2.58 2.8 1.15 0 1.97-.62 2.22-1.65h1.85z"
-      fill="#000000"
+      d="M5 4a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v17l-7-4-7 4V4z"
+      stroke={color}
+      strokeWidth="2.2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  </Svg>
+);
+
+export const SpeechBubbleSvg = ({ size = 18, color = '#171420' }: { size?: number; color?: string }) => (
+  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+    <Path
+      d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"
+      stroke={color}
+      strokeWidth="2.2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  </Svg>
+);
+
+export const ShareArrowSvg = ({ size = 18, color = '#171420' }: { size?: number; color?: string }) => (
+  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+    <Path
+      d="M7 17L17 7M17 7H8M17 7V16"
+      stroke={color}
+      strokeWidth="2.2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
     />
   </Svg>
 );
@@ -405,6 +432,7 @@ export const AudienceBreakdownScreen: React.FC<AudienceBreakdownScreenProps> = (
   const [platformsList, setPlatformsList] = useState<PlatformAccount[]>(INITIAL_PLATFORMS);
   const [customHandleInput, setCustomHandleInput] = useState('');
   const [selectedPlatformToAdd, setSelectedPlatformToAdd] = useState('youtube');
+  const [selectedQualitySignal, setSelectedQualitySignal] = useState<'saves' | 'comments' | 'shares' | null>(null);
 
   // Modals
   const [showProfileModal, setShowProfileModal] = useState(false);
@@ -1216,41 +1244,101 @@ export const AudienceBreakdownScreen: React.FC<AudienceBreakdownScreenProps> = (
 
           {/* CARD 6: QUALITY SIGNALS */}
           <View style={styles.qualitySignalsCard}>
-            <Text style={styles.cardHeaderLabel}>QUALITY SIGNALS</Text>
+            <View style={styles.qualityHeaderRow}>
+              <Text style={styles.cardHeaderLabel}>QUALITY SIGNALS</Text>
+              <Text style={styles.qualityTapHint}>Tap for signal breakdown</Text>
+            </View>
 
-            <View style={styles.qualityRow}>
+            {/* Saves */}
+            <Pressable
+              style={({ pressed }) => [styles.qualityRow, pressed && styles.qualityRowPressed]}
+              onPress={() => {
+                if (Platform.OS !== 'web') {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                }
+                setSelectedQualitySignal((prev) => (prev === 'saves' ? null : 'saves'));
+              }}
+            >
               <View style={styles.qualityRowLeft}>
-                <Text style={{ fontSize: 16 }}>💾</Text>
+                <View style={styles.qualityIconBadge}>
+                  <BookmarkSvg size={16} color="#582CDB" />
+                </View>
                 <Text style={styles.qualityName}>Saves</Text>
               </View>
               <View style={styles.qualityBadgeStrong}>
                 <Text style={styles.qualityBadgeStrongText}>STRONG</Text>
               </View>
-            </View>
+            </Pressable>
+            {selectedQualitySignal === 'saves' && (
+              <View style={styles.qualityExplanationBox}>
+                <Text style={styles.qualityExplanationTitle}>Saves · STRONG</Text>
+                <Text style={styles.qualityExplanationText}>
+                  Your posts are saved 3.4x more often than the platform average, indicating high bookmark & replay value.
+                </Text>
+              </View>
+            )}
 
             <View style={styles.qualityDivider} />
 
-            <View style={styles.qualityRow}>
+            {/* Comments */}
+            <Pressable
+              style={({ pressed }) => [styles.qualityRow, pressed && styles.qualityRowPressed]}
+              onPress={() => {
+                if (Platform.OS !== 'web') {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                }
+                setSelectedQualitySignal((prev) => (prev === 'comments' ? null : 'comments'));
+              }}
+            >
               <View style={styles.qualityRowLeft}>
-                <Text style={{ fontSize: 16 }}>💬</Text>
+                <View style={styles.qualityIconBadge}>
+                  <SpeechBubbleSvg size={16} color="#64748B" />
+                </View>
                 <Text style={styles.qualityName}>Comments</Text>
               </View>
               <View style={styles.qualityBadgeSteady}>
                 <Text style={styles.qualityBadgeSteadyText}>STEADY</Text>
               </View>
-            </View>
+            </Pressable>
+            {selectedQualitySignal === 'comments' && (
+              <View style={styles.qualityExplanationBox}>
+                <Text style={styles.qualityExplanationTitle}>Comments · STEADY</Text>
+                <Text style={styles.qualityExplanationText}>
+                  Consistent community discussions and reply depth across your educational breakdowns.
+                </Text>
+              </View>
+            )}
 
             <View style={styles.qualityDivider} />
 
-            <View style={styles.qualityRow}>
+            {/* Shares */}
+            <Pressable
+              style={({ pressed }) => [styles.qualityRow, pressed && styles.qualityRowPressed]}
+              onPress={() => {
+                if (Platform.OS !== 'web') {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                }
+                setSelectedQualitySignal((prev) => (prev === 'shares' ? null : 'shares'));
+              }}
+            >
               <View style={styles.qualityRowLeft}>
-                <Text style={{ fontSize: 16 }}>↗️</Text>
+                <View style={styles.qualityIconBadge}>
+                  <ShareArrowSvg size={16} color="#059669" />
+                </View>
                 <Text style={styles.qualityName}>Shares</Text>
               </View>
               <View style={styles.qualityBadgeVeryHigh}>
                 <Text style={styles.qualityBadgeVeryHighText}>VERY HIGH</Text>
               </View>
-            </View>
+            </Pressable>
+            {selectedQualitySignal === 'shares' && (
+              <View style={styles.qualityExplanationBox}>
+                <Text style={styles.qualityExplanationTitle}>Shares · VERY HIGH</Text>
+                <Text style={styles.qualityExplanationText}>
+                  Your posts are being shared significantly more than your recent average (+48% viral velocity).
+                </Text>
+              </View>
+            )}
           </View>
 
           {/* CARD 7: LOCKED IN PRO - ADVANCED DEMOGRAPHICS */}
@@ -2690,16 +2778,40 @@ const styles = StyleSheet.create({
     padding: 18,
     marginBottom: 16,
   },
+  qualityHeaderRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 4,
+  },
+  qualityTapHint: {
+    fontSize: 10.5,
+    fontWeight: '700',
+    color: '#582CDB',
+  },
   qualityRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingVertical: 10,
   },
+  qualityRowPressed: {
+    opacity: 0.7,
+  },
   qualityRowLeft: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
+    gap: 10,
+  },
+  qualityIconBadge: {
+    width: 32,
+    height: 32,
+    borderRadius: 9,
+    backgroundColor: '#F8FAFC',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
   },
   qualityName: {
     fontSize: 14,
@@ -2738,6 +2850,27 @@ const styles = StyleSheet.create({
     fontSize: 9,
     fontWeight: '700',
     color: '#15803D',
+  },
+  qualityExplanationBox: {
+    backgroundColor: '#FAF8F5',
+    borderRadius: 12,
+    padding: 10,
+    marginTop: 2,
+    marginBottom: 6,
+    borderWidth: 1,
+    borderColor: '#EDE8E1',
+  },
+  qualityExplanationTitle: {
+    fontSize: 11,
+    fontWeight: '800',
+    color: '#171420',
+    marginBottom: 2,
+  },
+  qualityExplanationText: {
+    fontSize: 11.5,
+    color: '#475569',
+    lineHeight: 16,
+    fontWeight: '500',
   },
   qualityDivider: {
     height: 1,
