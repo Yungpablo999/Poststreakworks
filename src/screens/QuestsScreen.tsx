@@ -620,26 +620,26 @@ export const QuestsScreen: React.FC<QuestsScreenProps> = ({
             {/* Requirements Checklist */}
             <View style={styles.requirementsList}>
               <View style={styles.reqItem}>
-                <Text style={{ color: '#582CDB', fontSize: 13, fontWeight: '800' }}>●</Text>
+                <Text style={{ color: '#15803D', fontSize: 13, fontWeight: '800' }}>✓</Text>
                 <Text style={styles.reqTextActive}>7-day streak</Text>
+              </View>
+              <View style={styles.reqItem}>
+                <Text style={{ color: '#15803D', fontSize: 13, fontWeight: '800' }}>✓</Text>
+                <Text style={styles.reqTextActive}>Complete Creator Passport</Text>
+              </View>
+              <View style={styles.reqItem}>
+                <Text style={{ color: '#94A3B8', fontSize: 13 }}>○</Text>
+                <Text style={styles.reqText}>Connect another social account</Text>
               </View>
               <View style={styles.reqItem}>
                 <Text style={{ color: '#94A3B8', fontSize: 13 }}>○</Text>
                 <Text style={styles.reqText}>Complete 3 starter quests</Text>
               </View>
-              <View style={styles.reqItem}>
-                <Text style={{ color: '#94A3B8', fontSize: 13 }}>○</Text>
-                <Text style={styles.reqText}>Add creator profile</Text>
-              </View>
-              <View style={styles.reqItem}>
-                <Text style={{ color: '#94A3B8', fontSize: 13 }}>○</Text>
-                <Text style={styles.reqText}>Connect one platform</Text>
-              </View>
             </View>
 
             {/* Footer */}
             <View style={styles.brandQuestFooter}>
-              <Text style={styles.unlocksAtLvlText} numberOfLines={1}>🔒 Unlocks at lvl 3/4</Text>
+              <Text style={styles.unlocksAtLvlText} numberOfLines={1}>🔒 Unlocks at Level 3</Text>
               <Pressable
                 onPress={() => {
                   triggerModalPop();
@@ -794,21 +794,75 @@ export const QuestsScreen: React.FC<QuestsScreenProps> = ({
           <View style={styles.modalOverlay}>
             <Animated.View style={[styles.modalCard, { transform: [{ scale: modalPopScale }] }]}>
               <View style={styles.modalHeaderRow}>
-                <View>
-                  <Text style={styles.modalTitle}>Brand Campaign Tiers</Text>
-                  <Text style={styles.modalSubtitle}>Requirements for paid sponsorships</Text>
+                <View style={{ flex: 1, paddingRight: 8 }}>
+                  <Text style={styles.modalTitle}>Campaign Requirements</Text>
+                  <Text style={styles.modalSubtitle}>Brand sponsor eligibility</Text>
                 </View>
                 <Pressable onPress={() => setShowBrandModal(false)} style={styles.modalCloseCircle} hitSlop={8}>
                   <Text style={styles.modalCloseCross}>✕</Text>
                 </Pressable>
               </View>
 
-              <Text style={{ fontSize: 13, color: '#475569', lineHeight: 19, marginVertical: 10 }}>
-                Brands filter for creators who maintain a minimum 14-day streak and Level 4 Passport status. Complete your daily missions to unlock brand invites!
-              </Text>
+              {/* Tier Callout Banner */}
+              <View style={styles.reqGoalBanner}>
+                <Text style={styles.reqGoalBannerText}>
+                  🎯 <Text style={{ fontWeight: '800', color: '#171420' }}>Starter Campaigns:</Text> Passport ≥ 70% •{' '}
+                  <Text style={{ fontWeight: '800', color: '#582CDB' }}>High-Intent Brands:</Text> Readiness ≥ 85%
+                </Text>
+              </View>
 
-              <Pressable style={styles.modalFullBtn} onPress={handleUnderstoodBrand}>
-                <Text style={styles.modalFullBtnText}>I Understood ✓</Text>
+              {/* Structured Requirements List */}
+              <View style={styles.reqListContainer}>
+                {/* 1. Streak */}
+                <View style={styles.reqItemRow}>
+                  <View style={styles.greenCheckBadge}>
+                    <Text style={styles.greenCheckBadgeText}>✓</Text>
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <Text style={styles.reqItemTitle}>7-Day Posting Streak</Text>
+                    <Text style={styles.reqItemStatusActive}>Active</Text>
+                  </View>
+                </View>
+
+                {/* 2. Passport Score */}
+                <View style={styles.reqItemRow}>
+                  <View style={styles.greenCheckBadge}>
+                    <Text style={styles.greenCheckBadgeText}>✓</Text>
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <Text style={styles.reqItemTitle}>Creator Passport Score ≥ 70%</Text>
+                    <Text style={styles.reqItemStatusActive}>Achieved (70%)</Text>
+                  </View>
+                </View>
+
+                {/* 3. Social Account */}
+                <View style={styles.reqItemRow}>
+                  <View style={styles.greenCheckBadge}>
+                    <Text style={styles.greenCheckBadgeText}>✓</Text>
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <Text style={styles.reqItemTitle}>At least 1 linked social account with 10K+ reach</Text>
+                    <Text style={styles.reqItemStatusActive}>Active (28.4K TikTok)</Text>
+                  </View>
+                </View>
+
+                {/* 4. Complete 3 community quests */}
+                <View style={styles.reqItemRow}>
+                  <View style={styles.greyCircleBadge}>
+                    <Text style={{ fontSize: 10, color: '#94A3B8' }}>○</Text>
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <Text style={styles.reqItemTitle}>Complete 3 community quests</Text>
+                    <Text style={styles.reqItemStatusPending}>1 of 3 completed</Text>
+                  </View>
+                </View>
+              </View>
+
+              <Pressable
+                style={({ pressed }) => [styles.modalFullBtn, pressed && styles.btnPressed]}
+                onPress={handleUnderstoodBrand}
+              >
+                <Text style={styles.modalFullBtnText}>Got It</Text>
               </Pressable>
             </Animated.View>
           </View>
@@ -1927,5 +1981,74 @@ const styles = StyleSheet.create({
     borderColor: '#EFEBF8',
     padding: 12,
     marginBottom: 10,
+  },
+  greenCheckBadge: {
+    width: 18,
+    height: 18,
+    borderRadius: 9,
+    backgroundColor: '#DCFCE7',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 2,
+  },
+  greenCheckBadgeText: {
+    fontSize: 10,
+    fontWeight: '700',
+    color: '#15803D',
+  },
+  greyCircleBadge: {
+    width: 18,
+    height: 18,
+    borderRadius: 9,
+    borderWidth: 1.5,
+    borderColor: '#CBD5E1',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 2,
+  },
+  reqGoalBanner: {
+    backgroundColor: '#FAF5FF',
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#E9D5FF',
+    padding: 10,
+    marginTop: 10,
+    marginBottom: 12,
+  },
+  reqGoalBannerText: {
+    fontSize: 12,
+    color: '#475569',
+    lineHeight: 16,
+    fontWeight: '600',
+  },
+  reqListContainer: {
+    gap: 8,
+    marginBottom: 4,
+  },
+  reqItemRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    backgroundColor: '#FAF8F5',
+    borderRadius: 12,
+    padding: 10,
+    borderWidth: 1,
+    borderColor: '#EDE8E1',
+  },
+  reqItemTitle: {
+    fontSize: 12.5,
+    fontWeight: '700',
+    color: '#171420',
+    marginBottom: 1,
+  },
+  reqItemStatusActive: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: '#15803D',
+  },
+  reqItemStatusPending: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: '#582CDB',
   },
 });
