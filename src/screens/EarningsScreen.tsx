@@ -544,6 +544,7 @@ export const EarningsScreen: React.FC<EarningsScreenProps> = ({
               </View>
               <Text style={styles.oppTitle}>Complete 3 starter quests</Text>
               <Text style={styles.oppSub}>1 of 3 completed</Text>
+              <Text style={styles.oppBenefit}>Earn +500 XP</Text>
 
               <Pressable
                 style={({ pressed }) => [styles.oppGhostBtn, pressed && styles.btnPressed]}
@@ -571,7 +572,8 @@ export const EarningsScreen: React.FC<EarningsScreenProps> = ({
                 </View>
               </View>
               <Text style={styles.oppTitle}>Connect one extra account</Text>
-              <Text style={styles.oppSub}>Improve matching score</Text>
+              <Text style={styles.oppSub}>2 platforms connected</Text>
+              <Text style={styles.oppBenefit}>Improve your matching score</Text>
 
               {/* CONNECT NOW BUTTON POPPING UP SOCIAL MEDIA MODAL */}
               <Pressable
@@ -1491,11 +1493,19 @@ const styles = StyleSheet.create({
     fontSize: 12.5,
     fontWeight: '700',
     color: '#171420',
-    marginBottom: 2,
+    marginBottom: 4,
+    minHeight: 34,
   },
   oppSub: {
     fontSize: 11,
-    color: '#5E576E',
+    color: '#64748B',
+    fontWeight: '600',
+    marginBottom: 2,
+  },
+  oppBenefit: {
+    fontSize: 10.5,
+    color: '#582CDB',
+    fontWeight: '700',
     marginBottom: 12,
   },
   oppGhostBtn: {
