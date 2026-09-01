@@ -742,7 +742,7 @@ export const EarningsScreen: React.FC<EarningsScreenProps> = ({
                 setShowMilestoneModal(true);
               }}
             >
-              <Text style={styles.goalBtnText}>Start $50 Goal</Text>
+              <Text style={styles.goalBtnText}>Set Goal</Text>
             </Pressable>
           </View>
 
