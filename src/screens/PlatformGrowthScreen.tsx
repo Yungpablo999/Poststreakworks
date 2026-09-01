@@ -303,7 +303,7 @@ export const PlatformGrowthScreen: React.FC<PlatformGrowthScreenProps> = ({
           {/* CARD 1: AGGREGATE GROWTH HERO CARD */}
           <View style={styles.aggregateCard}>
             <View style={styles.aggregateTopRow}>
-              <View>
+              <View style={{ flex: 1, marginRight: 10 }}>
                 <Text style={styles.aggregateLabel}>AGGREGATE GROWTH</Text>
                 <View style={styles.aggregateMetricRow}>
                   <Text style={styles.aggregateNumber}>+12.4%</Text>
@@ -1265,25 +1265,28 @@ const styles = StyleSheet.create({
   },
   aggregateMetricRow: {
     flexDirection: 'row',
+    flexWrap: 'wrap',
     alignItems: 'baseline',
-    gap: 8,
+    gap: 6,
   },
   aggregateNumber: {
-    fontSize: sFont(32),
+    fontSize: sFont(28),
     fontWeight: '700',
     color: '#171420',
     letterSpacing: -0.8,
   },
   aggregateTrend: {
-    fontSize: sFont(13),
+    fontSize: sFont(12.5),
     fontWeight: '800',
     color: '#15803D',
   },
   topPlatformPill: {
     backgroundColor: '#EDE9FE',
     paddingVertical: 5,
-    paddingHorizontal: 10,
+    paddingHorizontal: 9,
     borderRadius: 8,
+    flexShrink: 0,
+    alignSelf: 'flex-start',
   },
   topPlatformPillText: {
     fontSize: 10,
