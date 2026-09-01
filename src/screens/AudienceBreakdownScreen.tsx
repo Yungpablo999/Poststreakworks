@@ -502,7 +502,7 @@ export const AudienceBreakdownScreen: React.FC<AudienceBreakdownScreenProps> = (
           </View>
 
           {/* HERO SECTION TITLE */}
-          <Text style={styles.mainTitle}>Understand your audience growth</Text>
+          <Text style={styles.mainTitle} numberOfLines={1} adjustsFontSizeToFit>Understand your audience growth</Text>
           <Text style={styles.mainSubtitle}>
             Track how your audience is growing, where it’s coming from, and what’s driving it.
           </Text>
@@ -1513,7 +1513,7 @@ const styles = StyleSheet.create({
 
   // Main Titles
   mainTitle: {
-    fontSize: Platform.OS === 'web' ? ('clamp(18px, 4.5vw, 22px)' as any) : sFont(20),
+    fontSize: Platform.OS === 'web' ? ('clamp(16px, 4.2vw, 20px)' as any) : sFont(18),
     fontWeight: '700',
     color: '#171420',
     letterSpacing: -0.35,
