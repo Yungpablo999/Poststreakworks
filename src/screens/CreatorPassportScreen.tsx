@@ -94,25 +94,7 @@ const SnapchatSvg = ({ size = 18 }: { size?: number }) => (
 );
 
 const renderBrandIcon = (id: string, size = 18) => {
-  switch (id) {
-    case 'tiktok':
-      return <TikTokSvg size={size} />;
-    case 'instagram':
-      return <InstagramSvg size={size} />;
-    case 'youtube':
-      return <YouTubeSvg size={size} />;
-    case 'linkedin':
-      return <LinkedInSvg size={size} />;
-    case 'x':
-    case 'x_twitter':
-      return <XSvg size={size} />;
-    case 'snapchat':
-      return <SnapchatSvg size={size} />;
-    case 'threads':
-      return <ThreadsSvg size={size} />;
-    default:
-      return <TikTokSvg size={size} />;
-  }
+  return <SocialBrandIcon platform={id} size={size} />;
 };
 
 interface PlatformAccount {
@@ -154,6 +136,15 @@ const INITIAL_PLATFORMS: PlatformAccount[] = [
     bgTint: '#FEF2F2',
   },
   {
+    id: 'facebook',
+    name: 'Facebook',
+    handle: '@amara.creator',
+    followers: '5.6K',
+    connected: false,
+    color: '#1877F2',
+    bgTint: '#EFF6FF',
+  },
+  {
     id: 'threads',
     name: 'Threads',
     handle: '@amara.threads',
@@ -161,6 +152,15 @@ const INITIAL_PLATFORMS: PlatformAccount[] = [
     connected: false,
     color: '#000000',
     bgTint: '#F8FAFC',
+  },
+  {
+    id: 'pinterest',
+    name: 'Pinterest',
+    handle: '@amarapins',
+    followers: '11.8K',
+    connected: false,
+    color: '#E60023',
+    bgTint: '#FFF1F2',
   },
 ];
 

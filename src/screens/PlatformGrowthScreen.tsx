@@ -92,26 +92,10 @@ const SnapchatSvg = ({ size = 20 }: { size?: number }) => (
   </Svg>
 );
 
+import { SocialBrandIcon } from '../components/SocialBrandIcon';
+
 const renderPlatformBrandIcon = (id: string, size = 20) => {
-  switch (id) {
-    case 'tiktok':
-      return <TikTokSvg size={size} />;
-    case 'instagram':
-      return <InstagramSvg size={size} />;
-    case 'youtube':
-      return <YouTubeSvg size={size} />;
-    case 'linkedin':
-      return <LinkedInSvg size={size} />;
-    case 'x':
-    case 'x_twitter':
-      return <XSvg size={size} />;
-    case 'snapchat':
-      return <SnapchatSvg size={size} />;
-    case 'threads':
-      return <ThreadsSvg size={size} />;
-    default:
-      return <TikTokSvg size={size} />;
-  }
+  return <SocialBrandIcon platform={id} size={size} />;
 };
 
 interface PlatformGrowthScreenProps {
@@ -150,15 +134,17 @@ export const PlatformGrowthScreen: React.FC<PlatformGrowthScreenProps> = ({
   const [showConnectModal, setShowConnectModal] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
-  // Platform Accounts State
+  // Platform Accounts State (The 6 Social Platforms)
   const [platformsList, setPlatformsList] = useState([
     { id: 'tiktok', name: 'TikTok', handle: '@your_creator', followers: '+840', impressions: '12.4K', engage: '920', connected: true, top: true },
     { id: 'instagram', name: 'Instagram', handle: '@your_handle', followers: '+390', impressions: '7.8K', engage: '560', connected: true, top: false },
     { id: 'youtube', name: 'YouTube', handle: 'Your Channel', followers: '+170', impressions: '3.9K', engage: '240', connected: true, top: false },
+    { id: 'facebook', name: 'Facebook', handle: '@not_connected', followers: '0', impressions: '0', engage: '0', connected: false, top: false },
     { id: 'threads', name: 'Threads', handle: '@not_connected', followers: '0', impressions: '0', engage: '0', connected: false, top: false },
+    { id: 'pinterest', name: 'Pinterest', handle: '@not_connected', followers: '0', impressions: '0', engage: '0', connected: false, top: false },
   ]);
   const [customHandleInput, setCustomHandleInput] = useState('');
-  const [selectedPlatformToAdd, setSelectedPlatformToAdd] = useState('threads');
+  const [selectedPlatformToAdd, setSelectedPlatformToAdd] = useState('facebook');
 
   const handleTogglePlatformConnect = (id: string) => {
     if (Platform.OS !== 'web') {

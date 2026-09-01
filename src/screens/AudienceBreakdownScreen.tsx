@@ -94,25 +94,10 @@ export const ThreadsSvg = ({ size = 20 }: { size?: number }) => (
   </Svg>
 );
 
+import { SocialBrandIcon } from '../components/SocialBrandIcon';
+
 export const renderPlatformBrandIcon = (id: string, size = 20) => {
-  switch (id) {
-    case 'tiktok':
-      return <TikTokSvg size={size} />;
-    case 'instagram':
-      return <InstagramSvg size={size} />;
-    case 'youtube':
-      return <YouTubeSvg size={size} />;
-    case 'linkedin':
-      return <LinkedInSvg size={size} />;
-    case 'x_twitter':
-      return <XSvg size={size} />;
-    case 'snapchat':
-      return <SnapchatSvg size={size} />;
-    case 'threads':
-      return <ThreadsSvg size={size} />;
-    default:
-      return <TikTokSvg size={size} />;
-  }
+  return <SocialBrandIcon platform={id} size={size} />;
 };
 
 interface PlatformAccount {
@@ -158,12 +143,32 @@ const INITIAL_PLATFORMS: PlatformAccount[] = [
     canAdd: true,
   },
   {
+    id: 'facebook',
+    name: 'Facebook',
+    handle: '@pablo.creator',
+    followers: '3.8K',
+    countNumeric: 3800,
+    bgTint: '#EFF6FF',
+    connected: false,
+    canAdd: true,
+  },
+  {
     id: 'threads',
     name: 'Threads',
     handle: '@pablocreates',
     followers: '2.2K',
     countNumeric: 2200,
     bgTint: '#F5F3FF',
+    connected: false,
+    canAdd: true,
+  },
+  {
+    id: 'pinterest',
+    name: 'Pinterest',
+    handle: '@pablopins',
+    followers: '8.4K',
+    countNumeric: 8400,
+    bgTint: '#FFF1F2',
     connected: false,
     canAdd: true,
   },
