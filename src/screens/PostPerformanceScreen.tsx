@@ -926,21 +926,36 @@ export const PostPerformanceScreen: React.FC<PostPerformanceScreenProps> = ({
 
           <View style={styles.audienceForPostCard}>
             <Text style={styles.audienceForPostSub}>
-              Viewers were primarily creators and aspiring influencers:
+              Your strongest audience segment: creators &amp; aspiring influencers.
             </Text>
 
+            {/* 3-Column Free Metrics Breakdown */}
             <View style={styles.demographicRow}>
               <View style={styles.demographicCol}>
                 <Text style={styles.demoLabel}>PRIMARY AGE</Text>
-                <Text style={styles.demoValue}>18-24 (58%)</Text>
-                <Text style={styles.demoSub}>25-34 (32%)</Text>
+                <Text style={styles.demoValue}>18–24 (58%)</Text>
+                <Text style={styles.demoSub}>25–34 (32%)</Text>
               </View>
               <View style={styles.demoDivider} />
               <View style={styles.demographicCol}>
-                <Text style={styles.demoLabel}>TOP CITIES</Text>
+                <Text style={styles.demoLabel}>TOP CITY</Text>
                 <Text style={styles.demoValue}>London (24%)</Text>
                 <Text style={styles.demoSub}>Lagos, NYC, Toronto</Text>
               </View>
+              <View style={styles.demoDivider} />
+              <View style={styles.demographicCol}>
+                <Text style={styles.demoLabel}>AUDIENCE TYPE</Text>
+                <Text style={styles.demoValue}>Creators (67%)</Text>
+                <Text style={styles.demoSub}>Educators (21%)</Text>
+              </View>
+            </View>
+
+            {/* Pro Demographics Teaser */}
+            <View style={styles.demoLockedTeaserBox}>
+              <Text style={styles.demoLockedTeaserTitle}>🔒 Full demographic breakdown</Text>
+              <Text style={styles.demoLockedTeaserSub}>
+                Gender • Cities • Active times • Interests
+              </Text>
             </View>
 
             <Pressable
@@ -968,8 +983,6 @@ export const PostPerformanceScreen: React.FC<PostPerformanceScreenProps> = ({
               </LinearGradient>
             </Pressable>
           </View>
-
-          <View style={{ height: 100 }} />
         </ScrollView>
 
         {/* FLOATING LIQUID GLASS TAB BAR */}
@@ -2168,6 +2181,27 @@ const styles = StyleSheet.create({
     height: '80%',
     backgroundColor: '#E2E8F0',
     alignSelf: 'center',
+  },
+  demoLockedTeaserBox: {
+    backgroundColor: '#FAF8F5',
+    borderRadius: 12,
+    paddingVertical: 9,
+    paddingHorizontal: 12,
+    borderWidth: 1,
+    borderColor: '#EFECE6',
+    marginBottom: 12,
+    alignItems: 'center',
+  },
+  demoLockedTeaserTitle: {
+    fontSize: sFont(11.5),
+    fontWeight: '800',
+    color: '#A16207',
+    marginBottom: 2,
+  },
+  demoLockedTeaserSub: {
+    fontSize: sFont(10.5),
+    color: '#64748B',
+    fontWeight: '500',
   },
   unlockFullDemoBtn: {
     height: 46,
