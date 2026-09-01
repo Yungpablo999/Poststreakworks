@@ -2117,9 +2117,14 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   exploreProBtn: {
-    height: 42,
-    borderRadius: 12,
+    height: 44,
+    borderRadius: 100,
     overflow: 'hidden',
+    shadowColor: '#F59E0B',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.16,
+    shadowRadius: 8,
+    elevation: 3,
   },
   exploreProGradient: {
     flex: 1,
@@ -2127,9 +2132,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   exploreProBtnText: {
-    fontSize: 12.5,
+    fontSize: 13.5,
     fontWeight: '700',
     color: '#171420',
+    letterSpacing: -0.2,
   },
 
   // CARD 8: JARVIS INSIGHT

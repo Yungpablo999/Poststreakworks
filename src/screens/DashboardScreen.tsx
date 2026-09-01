@@ -1410,9 +1410,9 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
               ]}
             >
               <LinearGradient
-                colors={['#F4B52B', '#D8920F']}
+                colors={['#F59E0B', '#F59E0B', '#F59E0B', '#A16207']}
                 start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 0 }}
+                end={{ x: 1, y: 1 }}
                 style={styles.metallicGoldGradient}
               >
                 <Text style={styles.metallicGoldUpgradeBtnText}>Upgrade to Pro →</Text>
@@ -3123,9 +3123,9 @@ const styles = StyleSheet.create({
   },
   metallicGoldUpgradeBtn: {
     height: 46,
-    borderRadius: 12,
+    borderRadius: 100,
     overflow: 'hidden',
-    shadowColor: '#D8920F',
+    shadowColor: '#F59E0B',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.18,
     shadowRadius: 10,
@@ -3139,7 +3139,7 @@ const styles = StyleSheet.create({
   metallicGoldUpgradeBtnText: {
     fontSize: 14.5,
     fontWeight: '700',
-    color: '#FFFFFF',
+    color: '#171420',
     letterSpacing: -0.1,
   },
   upgradeButtonPressed: {
