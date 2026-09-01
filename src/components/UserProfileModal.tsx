@@ -895,7 +895,7 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
                       <YouTubeRealIcon size={20} />
                     </View>
                     <View style={{ flex: 1 }}>
-                      <Text style={styles.socialPlatformTitle}>YouTube Shorts</Text>
+                      <Text style={styles.socialPlatformTitle}>YouTube</Text>
                       <Text style={styles.socialPlatformSub}>Watch time &amp; subscriber growth</Text>
                     </View>
                     <View style={styles.connectedPill}>

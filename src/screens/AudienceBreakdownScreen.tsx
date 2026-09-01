@@ -161,7 +161,7 @@ const INITIAL_PLATFORMS: PlatformAccount[] = [
   },
   {
     id: 'youtube',
-    name: 'YouTube Shorts',
+    name: 'YouTube',
     handle: 'Pablo Creates',
     followers: '4.6K',
     countNumeric: 4600,
@@ -1091,7 +1091,7 @@ export const AudienceBreakdownScreen: React.FC<AudienceBreakdownScreenProps> = (
               <View style={styles.splitHeaderRow}>
                 <View style={styles.splitNameRow}>
                   <View style={[styles.platformIndicatorDot, { backgroundColor: '#F59E0B' }]} />
-                  <Text style={styles.splitPlatformName}>YouTube Shorts</Text>
+                  <Text style={styles.splitPlatformName}>YouTube</Text>
                 </View>
                 <View style={styles.splitRightRow}>
                   <Text style={styles.splitPercentage}>10%</Text>

@@ -133,7 +133,7 @@ const INITIAL_GROWTH_PLATFORMS: GrowthPlatformAccount[] = [
   },
   {
     id: 'youtube',
-    name: 'YouTube Shorts',
+    name: 'YouTube',
     handle: 'Pablo Creates',
     followers: '2.8k subs',
     countNumeric: 2800,
@@ -610,50 +610,48 @@ export const GrowthScreen: React.FC<GrowthScreenProps> = ({
               </View>
               <Text style={styles.platformGrowthGreen}>+3.4%  ▲</Text>
             </View>
-
-            {/* YouTube Shorts - Official YouTube Red Icon */}
+            {/* YouTube - Official YouTube Red Icon */}
             <View style={styles.platformRow}>
               <View style={styles.platformLeft}>
                 <View style={[styles.platformIconBox, { backgroundColor: '#FF0000' }]}>
                   <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
                     <Path
-                      d="M21.58 7.19a2.5 2.5 0 0 0-1.76-1.77C18.26 5 12 5 12 5s-6.26 0-7.82.42A2.5 2.5 0 0 0 2.42 7.19C2 8.76 2 12 2 12s0 3.24.42 4.81a2.5 2.5 0 0 0 1.76 1.77C5.74 19 12 19 12 19s6.26 0 7.82-.42a2.5 2.5 0 0 0 1.76-1.77C22 15.24 22 12 22 12s0-3.24-.42-4.81z"
+                      d="M21.58 7.19a2.5 2.5 0 0 0-1.76-1.77C18.26 5 12 5 12 5s-6.26 0-7.82.42A2.5 2.5 0 0 0 2.42 7.19C2 8.76 2 12 2 12s0 3.24.42 4.81a2.5 2.5 0 0 0 1.76 1.77C22 15.24 22 12 22 12s0-3.24-.42-4.81z"
                       fill="#FFFFFF"
                     />
                     <Path d="M10 15.5l5.5-3.5L10 8.5v7z" fill="#FF0000" />
                   </Svg>
                 </View>
                 <View>
-                  <Text style={styles.platformName}>YouTube Shorts</Text>
+                  <Text style={styles.platformName}>YouTube</Text>
                   <Text style={styles.platformFollowers}>2.8k subs</Text>
                 </View>
               </View>
               <Text style={styles.platformGrowthGreen}>+1.1%  ▲</Text>
             </View>
 
-            {/* LinkedIn - Official In Brand Icon */}
-            <View style={[styles.platformRow, { borderBottomWidth: 0 }]}>
+            {/* Connect more platforms */}
+            <Pressable
+              style={({ pressed }) => [
+                styles.platformRow,
+                { borderBottomWidth: 0 },
+                pressed && styles.btnPressed,
+              ]}
+              onPress={handleOpenConnectPlatforms}
+            >
               <View style={styles.platformLeft}>
-                <View style={[styles.platformIconBox, { backgroundColor: '#0A66C2' }]}>
-                  <Svg width={16} height={16} viewBox="0 0 24 24" fill="none">
-                    <Path
-                      d="M19 3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14m-.5 15.5v-5.3a3.26 3.26 0 0 0-3.26-3.26c-.85 0-1.84.52-2.28 1.3v-1.11h-2.79v8.37h2.79v-4.93c0-.77.62-1.4 1.39-1.4a1.4 1.4 0 0 1 1.4 1.4v4.93h2.75M6.46 10.9v8.37H9.25V10.9H6.46M7.86 6.54a1.65 1.65 0 1 0 0 3.3 1.65 1.65 0 0 0 0-3.3z"
-                      fill="#FFFFFF"
-                    />
-                  </Svg>
+                <View style={[styles.platformIconBox, { backgroundColor: '#FAF5FF', borderColor: '#E9D5FF', borderWidth: 1 }]}>
+                  <Text style={{ fontSize: 13, fontWeight: '700', color: '#582CDB' }}>＋</Text>
                 </View>
                 <View style={{ flex: 1, marginRight: 8 }}>
-                  <Text style={[styles.platformName, { flexShrink: 1 }]} numberOfLines={1}>Unlock multi-platform sync</Text>
-                  <Text style={styles.platformFollowers}>Connect YouTube &amp; X</Text>
+                  <Text style={styles.platformName} numberOfLines={1}>Connect more platforms</Text>
+                  <Text style={styles.platformFollowers} numberOfLines={1}>Facebook · Threads · Pinterest</Text>
                 </View>
               </View>
-              <Pressable
-                style={styles.connectPillBtn}
-                onPress={handleOpenConnectPlatforms}
-              >
-                <Text style={styles.connectPillBtnText}>Connect</Text>
-              </Pressable>
-            </View>
+              <View style={styles.connectPillBtn}>
+                <Text style={styles.connectPillBtnText}>Connect →</Text>
+              </View>
+            </Pressable>
           </View>
 
           {/* 3. BEST PERFORMING POST HERO CARD */}
