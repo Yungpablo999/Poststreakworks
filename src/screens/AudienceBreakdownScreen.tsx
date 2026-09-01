@@ -989,46 +989,91 @@ export const AudienceBreakdownScreen: React.FC<AudienceBreakdownScreenProps> = (
 
           <View style={styles.platformSplitCard}>
             {/* TikTok Row */}
-            <View style={styles.splitItem}>
+            <Pressable
+              style={({ pressed }) => [styles.splitItem, pressed && styles.splitItemPressed]}
+              onPress={() => {
+                if (Platform.OS !== 'web') {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                }
+                if (onOpenPlatformGrowth) {
+                  onOpenPlatformGrowth();
+                } else {
+                  showToast('Viewing TikTok audience insights');
+                }
+              }}
+            >
               <View style={styles.splitHeaderRow}>
                 <View style={styles.splitNameRow}>
                   <View style={[styles.platformIndicatorDot, { backgroundColor: '#582CDB' }]} />
                   <Text style={styles.splitPlatformName}>TikTok</Text>
                 </View>
-                <Text style={styles.splitPercentage}>65%</Text>
+                <View style={styles.splitRightRow}>
+                  <Text style={styles.splitPercentage}>65%</Text>
+                  <Text style={styles.splitChevron}>›</Text>
+                </View>
               </View>
               <View style={styles.splitProgressTrack}>
                 <View style={[styles.splitProgressFill, { width: '65%', backgroundColor: '#582CDB' }]} />
               </View>
-            </View>
+            </Pressable>
 
             {/* Instagram Row */}
-            <View style={styles.splitItem}>
+            <Pressable
+              style={({ pressed }) => [styles.splitItem, pressed && styles.splitItemPressed]}
+              onPress={() => {
+                if (Platform.OS !== 'web') {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                }
+                if (onOpenPlatformGrowth) {
+                  onOpenPlatformGrowth();
+                } else {
+                  showToast('Viewing Instagram audience insights');
+                }
+              }}
+            >
               <View style={styles.splitHeaderRow}>
                 <View style={styles.splitNameRow}>
                   <View style={[styles.platformIndicatorDot, { backgroundColor: '#8B5CF6' }]} />
                   <Text style={styles.splitPlatformName}>Instagram</Text>
                 </View>
-                <Text style={styles.splitPercentage}>25%</Text>
+                <View style={styles.splitRightRow}>
+                  <Text style={styles.splitPercentage}>25%</Text>
+                  <Text style={styles.splitChevron}>›</Text>
+                </View>
               </View>
               <View style={styles.splitProgressTrack}>
                 <View style={[styles.splitProgressFill, { width: '25%', backgroundColor: '#8B5CF6' }]} />
               </View>
-            </View>
+            </Pressable>
 
             {/* YouTube Shorts Row */}
-            <View style={styles.splitItem}>
+            <Pressable
+              style={({ pressed }) => [styles.splitItem, pressed && styles.splitItemPressed]}
+              onPress={() => {
+                if (Platform.OS !== 'web') {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                }
+                if (onOpenPlatformGrowth) {
+                  onOpenPlatformGrowth();
+                } else {
+                  showToast('Viewing YouTube Shorts audience insights');
+                }
+              }}
+            >
               <View style={styles.splitHeaderRow}>
                 <View style={styles.splitNameRow}>
                   <View style={[styles.platformIndicatorDot, { backgroundColor: '#F59E0B' }]} />
                   <Text style={styles.splitPlatformName}>YouTube Shorts</Text>
                 </View>
-                <Text style={styles.splitPercentage}>10%</Text>
+                <View style={styles.splitRightRow}>
+                  <Text style={styles.splitPercentage}>10%</Text>
+                  <Text style={styles.splitChevron}>›</Text>
+                </View>
               </View>
               <View style={styles.splitProgressTrack}>
                 <View style={[styles.splitProgressFill, { width: '10%', backgroundColor: '#F59E0B' }]} />
               </View>
-            </View>
+            </Pressable>
           </View>
 
           {/* CARD 3: FASTEST GROWING PLATFORM SPOTLIGHT (PREMIUM PURPLE/IVORY STYLING) */}
@@ -2239,7 +2284,12 @@ const styles = StyleSheet.create({
     gap: 16,
     marginBottom: 16,
   },
-  splitItem: {},
+  splitItem: {
+    paddingVertical: 2,
+  },
+  splitItemPressed: {
+    opacity: 0.7,
+  },
   splitHeaderRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -2250,6 +2300,17 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
+  },
+  splitRightRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+  splitChevron: {
+    fontSize: 16,
+    color: '#94A3B8',
+    fontWeight: '600',
+    marginTop: -1,
   },
   platformIndicatorDot: {
     width: 6,
