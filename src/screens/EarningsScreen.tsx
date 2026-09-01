@@ -605,7 +605,7 @@ export const EarningsScreen: React.FC<EarningsScreenProps> = ({
             <View style={styles.passportGrid}>
               <View style={styles.passportGridItem}>
                 <Text style={styles.passportGridLabel}>PROFILE COMPLETION</Text>
-                <Text style={styles.passportGridValue}>70%</Text>
+                <Text style={styles.passportGridValue}>80%</Text>
               </View>
               <View style={styles.passportGridItem}>
                 <Text style={styles.passportGridLabel}>CONSISTENCY</Text>
@@ -635,7 +635,7 @@ export const EarningsScreen: React.FC<EarningsScreenProps> = ({
                 }
               }}
             >
-              <Text style={styles.passportBtnText}>View Passport</Text>
+              <Text style={styles.passportBtnText}>View Passport →</Text>
             </Pressable>
           </View>
 
