@@ -319,12 +319,12 @@ export const PlatformGrowthScreen: React.FC<PlatformGrowthScreenProps> = ({
             {/* Growth Distribution Bar */}
             <View style={styles.distributionHeaderRow}>
               <Text style={styles.distLabel}>GROWTH DISTRIBUTION</Text>
-              <Text style={styles.distValue}>1,200 NEW FOLLOWERS</Text>
+              <Text style={styles.distValue}>1,400 NEW FOLLOWERS</Text>
             </View>
 
             <View style={styles.distBarTrack}>
-              <View style={[styles.distBarSegment, { width: '65%', backgroundColor: '#582CDB' }]} />
-              <View style={[styles.distBarSegment, { width: '25%', backgroundColor: '#8B5CF6' }]} />
+              <View style={[styles.distBarSegment, { width: '60%', backgroundColor: '#582CDB' }]} />
+              <View style={[styles.distBarSegment, { width: '30%', backgroundColor: '#8B5CF6' }]} />
               <View style={[styles.distBarSegment, { width: '10%', backgroundColor: '#C4B5FD' }]} />
             </View>
 
@@ -336,11 +336,11 @@ export const PlatformGrowthScreen: React.FC<PlatformGrowthScreenProps> = ({
               </View>
               <View style={styles.distLegendItem}>
                 <View style={[styles.distLegendDot, { backgroundColor: '#8B5CF6' }]} />
-                <Text style={styles.distLegendText}>Instagram (390)</Text>
+                <Text style={styles.distLegendText}>Instagram (420)</Text>
               </View>
               <View style={styles.distLegendItem}>
                 <View style={[styles.distLegendDot, { backgroundColor: '#C4B5FD' }]} />
-                <Text style={styles.distLegendText}>YouTube (170)</Text>
+                <Text style={styles.distLegendText}>YouTube (140)</Text>
               </View>
             </View>
           </View>
@@ -349,8 +349,17 @@ export const PlatformGrowthScreen: React.FC<PlatformGrowthScreenProps> = ({
           <View style={styles.weeklyCard}>
             <View style={styles.weeklyHeaderRow}>
               <View style={{ flex: 1, marginRight: 8 }}>
-                <Text style={styles.weeklyTitle} numberOfLines={1}>Weekly Comparison</Text>
-                <Text style={styles.weeklySubtitle} numberOfLines={1}>Velocity &amp; share of new audience</Text>
+                <Text
+                  style={styles.weeklyTitle}
+                  numberOfLines={1}
+                  adjustsFontSizeToFit={true}
+                  minimumFontScale={0.85}
+                >
+                  Weekly Comparison
+                </Text>
+                <Text style={styles.weeklySubtitle} numberOfLines={1}>
+                  See where your new followers are coming from.
+                </Text>
               </View>
               <View style={styles.weeklyPillBadge}>
                 <Text style={styles.weeklyPillBadgeText}>⚡ 7D VOLUME</Text>
@@ -398,22 +407,22 @@ export const PlatformGrowthScreen: React.FC<PlatformGrowthScreenProps> = ({
                   {!selectedBar
                     ? '+1.4K New Followers'
                     : selectedBar === 'TT'
-                    ? '+840 (70%)'
+                    ? '+840 (60%)'
                     : selectedBar === 'IG'
-                    ? '+390 (22%)'
+                    ? '+420 (30%)'
                     : selectedBar === 'YT'
-                    ? '+170 (8%)'
+                    ? '+140 (10%)'
                     : '0 (Not connected)'}
                 </Text>
                 <Text style={styles.spotlightRate} numberOfLines={1}>
                   {!selectedBar
-                    ? '⚡ 3 active networks'
+                    ? '⚡ 2 connected platforms'
                     : selectedBar === 'TT'
                     ? '🔥 120/day avg'
                     : selectedBar === 'IG'
-                    ? '✨ 55/day avg'
+                    ? '✨ 60/day avg'
                     : selectedBar === 'YT'
-                    ? '▶️ 24/day avg'
+                    ? '▶️ 20/day avg'
                     : '🔗 Link account'}
                 </Text>
               </View>
@@ -487,7 +496,7 @@ export const PlatformGrowthScreen: React.FC<PlatformGrowthScreenProps> = ({
                     styles.barTopBadgeText,
                     (!selectedBar || selectedBar === 'IG') && styles.barTopBadgeTextActive,
                   ]}>
-                    +390
+                    +420
                   </Text>
                 </View>
                 <View style={styles.weeklyBarTrack}>
@@ -501,7 +510,7 @@ export const PlatformGrowthScreen: React.FC<PlatformGrowthScreenProps> = ({
                     end={{ x: 0, y: 1 }}
                     style={[
                       styles.weeklyBarFill,
-                      { height: 72 },
+                      { height: 76 },
                       selectedBar === 'IG' && styles.weeklyBarFillActive,
                     ]}
                   />
@@ -534,7 +543,7 @@ export const PlatformGrowthScreen: React.FC<PlatformGrowthScreenProps> = ({
                     styles.barTopBadgeText,
                     (!selectedBar || selectedBar === 'YT') && styles.barTopBadgeTextActive,
                   ]}>
-                    +170
+                    +140
                   </Text>
                 </View>
                 <View style={styles.weeklyBarTrack}>
@@ -548,7 +557,7 @@ export const PlatformGrowthScreen: React.FC<PlatformGrowthScreenProps> = ({
                     end={{ x: 0, y: 1 }}
                     style={[
                       styles.weeklyBarFill,
-                      { height: 44 },
+                      { height: 42 },
                       selectedBar === 'YT' && styles.weeklyBarFillActive,
                     ]}
                   />
