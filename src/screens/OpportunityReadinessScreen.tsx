@@ -520,16 +520,22 @@ export const OpportunityReadinessScreen: React.FC<OpportunityReadinessScreenProp
               </View>
             </View>
 
-            {/* Tag Pills */}
+            {/* Tag Pills (5 fields: 4 completed = 80%) */}
             <View style={styles.tagsRow}>
               <View style={styles.tagGreen}>
                 <Text style={styles.tagGreenText}>Photo ✓</Text>
               </View>
               <View style={styles.tagGreen}>
+                <Text style={styles.tagGreenText}>Handle ✓</Text>
+              </View>
+              <View style={styles.tagGreen}>
+                <Text style={styles.tagGreenText}>Category ✓</Text>
+              </View>
+              <View style={styles.tagGreen}>
                 <Text style={styles.tagGreenText}>Bio ✓</Text>
               </View>
               <View style={styles.tagGrey}>
-                <Text style={styles.tagGreyText}>Audience Goal ...</Text>
+                <Text style={styles.tagGreyText}>Audience Goal • Not set</Text>
               </View>
             </View>
 
@@ -1221,7 +1227,9 @@ const styles = StyleSheet.create({
   },
   tagsRow: {
     flexDirection: 'row',
-    gap: 8,
+    flexWrap: 'wrap',
+    gap: 6,
+    rowGap: 6,
     marginBottom: 14,
   },
   tagGreen: {
