@@ -378,18 +378,22 @@ export const OpportunityReadinessScreen: React.FC<OpportunityReadinessScreenProp
               <View style={styles.metricItem}>
                 <Text style={styles.metricItemLabel}>PROFILE</Text>
                 <Text style={styles.metricItemValue}>80%</Text>
+                <Text style={styles.metricItemContribution}>+20% score</Text>
               </View>
               <View style={styles.metricItem}>
                 <Text style={styles.metricItemLabel}>PLATFORMS</Text>
                 <Text style={styles.metricItemValue}>{connectedCount} Connected</Text>
+                <Text style={styles.metricItemContribution}>+{connectedCount * 10}% score</Text>
               </View>
               <View style={styles.metricItem}>
                 <Text style={styles.metricItemLabel}>STREAK</Text>
                 <Text style={[styles.metricItemValue, { color: '#15803D' }]}>Strong</Text>
+                <Text style={styles.metricItemContribution}>+15% score</Text>
               </View>
               <View style={styles.metricItem}>
                 <Text style={styles.metricItemLabel}>STARTER CHALLENGE</Text>
                 <Text style={styles.metricItemValue}>1/3</Text>
+                <Text style={styles.metricItemContribution}>+15% score</Text>
               </View>
             </View>
 
@@ -1059,6 +1063,12 @@ const styles = StyleSheet.create({
     fontSize: sFont(13.5),
     fontWeight: '700',
     color: '#171420',
+  },
+  metricItemContribution: {
+    fontSize: sFont(10),
+    fontWeight: '700',
+    color: '#582CDB',
+    marginTop: 2,
   },
   insightBox: {
     backgroundColor: '#FAF5FF',

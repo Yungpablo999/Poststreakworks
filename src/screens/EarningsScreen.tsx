@@ -377,10 +377,10 @@ export const EarningsScreen: React.FC<EarningsScreenProps> = ({
             {/* Opportunity Readiness Progress Bar */}
             <View style={styles.readinessHeaderRow}>
               <Text style={styles.readinessLabel}>Opportunity Readiness</Text>
-              <Text style={styles.readinessPercent}>35%</Text>
+              <Text style={styles.readinessPercent}>70%</Text>
             </View>
             <View style={styles.readinessTrack}>
-              <View style={[styles.readinessFill, { width: '35%' }]} />
+              <View style={[styles.readinessFill, { width: '70%' }]} />
             </View>
 
             {/* Checklist */}
@@ -985,7 +985,7 @@ export const EarningsScreen: React.FC<EarningsScreenProps> = ({
               <View style={styles.notifCard}>
                 <Text style={{ fontSize: 18 }}>🎉</Text>
                 <View style={{ flex: 1 }}>
-                  <Text style={styles.notifTitle}>Campaign Readiness: 35%</Text>
+                  <Text style={styles.notifTitle}>Campaign Readiness: 70%</Text>
                   <Text style={styles.notifBody}>Finish 2 more starter quests to qualify for micro-sponsorships.</Text>
                 </View>
               </View>

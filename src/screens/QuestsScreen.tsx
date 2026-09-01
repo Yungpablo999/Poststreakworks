@@ -556,7 +556,7 @@ export const QuestsScreen: React.FC<QuestsScreenProps> = ({
                 <View style={styles.earningsHubTitleRow}>
                   <Text style={styles.earningsHubTitle}>Creator Earnings</Text>
                   <View style={styles.readinessTag}>
-                    <Text style={styles.readinessTagText}>35% CAMPAIGN READY</Text>
+                    <Text style={styles.readinessTagText}>70% CAMPAIGN READY</Text>
                   </View>
                 </View>
                 <Text style={styles.earningsHubSub} numberOfLines={1}>Build your path to paid brand campaigns</Text>
