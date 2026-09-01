@@ -476,16 +476,28 @@ export const CreatorPassportScreen: React.FC<CreatorPassportScreenProps> = ({
             <View style={styles.streakScoreTopRow}>
               <Text style={styles.streakScoreLabel}>STREAK SCORE</Text>
               <View style={styles.qualifiedBadge}>
-                <Text style={styles.qualifiedBadgeText}>QUALIFIED</Text>
+                <Text style={styles.qualifiedBadgeText}>
+                  {(userProfile?.streakCount || 1) >= 30
+                    ? 'HIGH CONSISTENCY'
+                    : (userProfile?.streakCount || 1) >= 7
+                    ? 'STARTER READY'
+                    : 'STANDARD READY'}
+                </Text>
               </View>
             </View>
 
             <View style={styles.streakDaysRow}>
               <Text style={styles.streakDaysNumber}>{userProfile?.streakCount || 1}</Text>
-              <Text style={styles.streakDaysUnit}>Day{userProfile?.streakCount === 1 ? '' : 's'}</Text>
+              <Text style={styles.streakDaysUnit}>Day{(userProfile?.streakCount || 1) === 1 ? '' : 's'}</Text>
             </View>
 
-            <Text style={styles.streakSubtext}>Consistency threshold met for standard opportunities.</Text>
+            <Text style={styles.streakSubtext}>
+              {(userProfile?.streakCount || 1) >= 30
+                ? 'High consistency threshold unlocked for premium campaigns.'
+                : (userProfile?.streakCount || 1) >= 7
+                ? 'Starter campaign threshold unlocked for brand opportunities.'
+                : 'Consistency threshold met for standard opportunities.'}
+            </Text>
           </View>
 
           {/* CARD 4: POSTING CONSISTENCY */}
