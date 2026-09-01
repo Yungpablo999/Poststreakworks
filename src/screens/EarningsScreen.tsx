@@ -479,7 +479,12 @@ export const EarningsScreen: React.FC<EarningsScreenProps> = ({
           ) : (
             <View style={styles.estimatedCard}>
               <View style={styles.estimatedHeaderRow}>
-                <Text style={styles.estimatedLabel}>Estimated tracked earnings</Text>
+                <View style={{ flex: 1, paddingRight: 10 }}>
+                  <Text style={styles.estimatedLabel}>Estimated Tracked Earnings</Text>
+                  <Text style={styles.estimatedSubExplanation}>
+                    Based on your completed campaigns, brand opportunities, and tracked creator activity.
+                  </Text>
+                </View>
                 <Text style={styles.estimatedAmount}>$1,420.50</Text>
               </View>
 
@@ -1391,9 +1396,15 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   estimatedLabel: {
-    fontSize: 12.5,
+    fontSize: 13,
     fontWeight: '800',
     color: '#171420',
+  },
+  estimatedSubExplanation: {
+    fontSize: 11,
+    color: '#64748B',
+    lineHeight: 15,
+    marginTop: 3,
   },
   estimatedAmount: {
     fontSize: 18,
