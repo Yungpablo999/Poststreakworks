@@ -394,8 +394,8 @@ export const EarningsScreen: React.FC<EarningsScreenProps> = ({
                 <Text style={styles.checkTextActive}>{userProfile?.streakCount || 1}-day streak active 🔥</Text>
               </View>
               <View style={styles.checklistRow}>
-                <Text style={{ color: '#94A3B8', fontSize: 13 }}>○</Text>
-                <Text style={styles.checkText}>1 of 3 starter quests completed</Text>
+                <Text style={{ color: '#94A3B8', fontSize: 13, fontWeight: '600' }}>○</Text>
+                <Text style={styles.checkText}>1 / 3 starter quests completed</Text>
               </View>
             </View>
 
@@ -415,7 +415,7 @@ export const EarningsScreen: React.FC<EarningsScreenProps> = ({
                 }
               }}
             >
-              <Text style={styles.improveBtnText}>Improve Readiness</Text>
+              <Text style={styles.improveBtnText}>Improve Readiness →</Text>
             </Pressable>
           </View>
 
