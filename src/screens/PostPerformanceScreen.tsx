@@ -779,7 +779,7 @@ export const PostPerformanceScreen: React.FC<PostPerformanceScreenProps> = ({
           <View style={styles.sectionHeaderRow}>
             <Text style={styles.sectionTitle}>The Hook</Text>
             <View style={styles.hookRetentionBadge}>
-              <Text style={styles.hookRetentionBadgeText}>+84% RETENTION</Text>
+              <Text style={styles.hookRetentionBadgeText}>+84% FIRST-3S RETENTION</Text>
             </View>
           </View>
 
@@ -799,7 +799,7 @@ export const PostPerformanceScreen: React.FC<PostPerformanceScreenProps> = ({
 
           <View style={styles.captionCard}>
             <Text style={styles.captionBodyText}>
-              Stop making these mistakes if you want to grow in 2026. The 2nd one is why 90% of creators stay stuck at 1K followers. Comment 'GROWTH' and I'll send you the free checklist.
+              Stop making these mistakes if you want to grow in 2026. The 2nd one is a common reason creators get stuck. Comment 'GROWTH' and I'll send you the free checklist.
             </Text>
             <Text style={styles.captionHashtags}>
               #creatoradvice #contentcreation #growontiktok #videoediting
