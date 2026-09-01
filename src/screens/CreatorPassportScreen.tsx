@@ -1013,11 +1013,58 @@ export const CreatorPassportScreen: React.FC<CreatorPassportScreenProps> = ({
                 </Pressable>
               </View>
 
-              <View style={{ gap: 10, marginVertical: 12 }}>
-                <Text style={styles.reqDetailLine}>• 7-Day Posting Streak (Active ✓)</Text>
-                <Text style={styles.reqDetailLine}>• Profile Niche &amp; Bio Defined (Active ✓)</Text>
-                <Text style={styles.reqDetailLine}>• 2+ Active Connected Social Accounts (Active ✓)</Text>
-                <Text style={styles.reqDetailLine}>• 1 Completed Community Quest (In Progress)</Text>
+              {/* Goal Unlock Banner */}
+              <View style={styles.reqGoalBanner}>
+                <Text style={styles.reqGoalBannerText}>
+                  🎯 Reach <Text style={{ fontWeight: '800', color: '#582CDB' }}>85% readiness</Text> to unlock high-intent brand opportunities.
+                </Text>
+              </View>
+
+              {/* Structured Requirements List */}
+              <View style={styles.reqListContainer}>
+                {/* 1. Streak */}
+                <View style={styles.reqItemRow}>
+                  <View style={styles.greenCheckBadge}>
+                    <Text style={styles.greenCheckBadgeText}>✓</Text>
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <Text style={styles.reqItemTitle}>7-Day Posting Streak</Text>
+                    <Text style={styles.reqItemStatusActive}>Active</Text>
+                  </View>
+                </View>
+
+                {/* 2. Profile */}
+                <View style={styles.reqItemRow}>
+                  <View style={styles.greenCheckBadge}>
+                    <Text style={styles.greenCheckBadgeText}>✓</Text>
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <Text style={styles.reqItemTitle}>Profile Niche & Bio</Text>
+                    <Text style={styles.reqItemStatusActive}>Defined</Text>
+                  </View>
+                </View>
+
+                {/* 3. Platforms */}
+                <View style={styles.reqItemRow}>
+                  <View style={styles.greenCheckBadge}>
+                    <Text style={styles.greenCheckBadgeText}>✓</Text>
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <Text style={styles.reqItemTitle}>2+ Connected Social Accounts</Text>
+                    <Text style={styles.reqItemStatusActive}>Active</Text>
+                  </View>
+                </View>
+
+                {/* 4. Community Quest */}
+                <View style={styles.reqItemRow}>
+                  <View style={styles.greyCircleBadge}>
+                    <Text style={{ fontSize: 10, color: '#94A3B8' }}>○</Text>
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <Text style={styles.reqItemTitle}>1 Community Quest</Text>
+                    <Text style={styles.reqItemStatusPending}>In progress</Text>
+                  </View>
+                </View>
               </View>
 
               <Pressable style={styles.modalFullBtn} onPress={() => setShowRequirementsModal(false)}>
@@ -2122,6 +2169,51 @@ const styles = StyleSheet.create({
     fontSize: 12.5,
     color: '#475569',
     lineHeight: 18,
+  },
+  reqGoalBanner: {
+    backgroundColor: '#FAF5FF',
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#E9D5FF',
+    padding: 10,
+    marginTop: 10,
+    marginBottom: 12,
+  },
+  reqGoalBannerText: {
+    fontSize: 12,
+    color: '#475569',
+    lineHeight: 16,
+    fontWeight: '600',
+  },
+  reqListContainer: {
+    gap: 8,
+    marginBottom: 4,
+  },
+  reqItemRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    backgroundColor: '#FAF8F5',
+    borderRadius: 12,
+    padding: 10,
+    borderWidth: 1,
+    borderColor: '#EDE8E1',
+  },
+  reqItemTitle: {
+    fontSize: 12.5,
+    fontWeight: '700',
+    color: '#171420',
+    marginBottom: 1,
+  },
+  reqItemStatusActive: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: '#15803D',
+  },
+  reqItemStatusPending: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: '#582CDB',
   },
   modalFullBtn: {
     height: 44,
