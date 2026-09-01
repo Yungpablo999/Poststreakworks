@@ -531,15 +531,15 @@ export const AudienceBreakdownScreen: React.FC<AudienceBreakdownScreenProps> = (
             <View style={styles.legendRow}>
               <View style={styles.legendItem}>
                 <View style={[styles.legendDot, { backgroundColor: '#582CDB' }]} />
-                <Text style={styles.legendLabel}>TT</Text>
+                <Text style={styles.legendLabel}>TikTok</Text>
               </View>
               <View style={styles.legendItem}>
                 <View style={[styles.legendDot, { backgroundColor: '#8B5CF6' }]} />
-                <Text style={styles.legendLabel}>IG</Text>
+                <Text style={styles.legendLabel}>Instagram</Text>
               </View>
               <View style={styles.legendItem}>
                 <View style={[styles.legendDot, { backgroundColor: '#F59E0B' }]} />
-                <Text style={styles.legendLabel}>YT</Text>
+                <Text style={styles.legendLabel}>YouTube</Text>
               </View>
               <View style={styles.legendItem}>
                 <View style={[styles.legendDot, { backgroundColor: '#CBD5E1' }]} />
@@ -547,7 +547,7 @@ export const AudienceBreakdownScreen: React.FC<AudienceBreakdownScreenProps> = (
               </View>
             </View>
 
-            {/* ACTION BUTTON: CONNECT PLATFORM */}
+            {/* ACTION BUTTON: MANAGE PLATFORMS */}
             <View style={styles.cardActionsCol}>
               <Pressable
                 style={({ pressed }) => [styles.purpleActionBtn, pressed && styles.btnPressed]}
@@ -560,7 +560,7 @@ export const AudienceBreakdownScreen: React.FC<AudienceBreakdownScreenProps> = (
                   style={styles.purpleActionGradient}
                 >
                   <Text style={styles.purpleActionBtnText}>
-                    CONNECT PLATFORM ({connectedCount} ACTIVE)
+                    MANAGE PLATFORMS · {connectedCount} ACTIVE →
                   </Text>
                 </LinearGradient>
               </Pressable>
