@@ -970,7 +970,7 @@ export const CreatorPassportScreen: React.FC<CreatorPassportScreenProps> = ({
           <View style={styles.modalOverlay}>
             <Animated.View style={[styles.modalCard, { transform: [{ scale: modalPopScale }] }]}>
               <View style={styles.modalHeaderRow}>
-                <View>
+                <View style={{ flex: 1, paddingRight: 8 }}>
                   <Text style={styles.modalTitle}>Passport Alerts</Text>
                   <Text style={styles.modalSubtitle}>Verification updates</Text>
                 </View>
@@ -1004,7 +1004,7 @@ export const CreatorPassportScreen: React.FC<CreatorPassportScreenProps> = ({
           <View style={styles.modalOverlay}>
             <Animated.View style={[styles.modalCard, { transform: [{ scale: modalPopScale }] }]}>
               <View style={styles.modalHeaderRow}>
-                <View>
+                <View style={{ flex: 1, paddingRight: 8 }}>
                   <Text style={styles.modalTitle}>Creator Passport Requirements</Text>
                   <Text style={styles.modalSubtitle}>Sponsorship readiness guidelines</Text>
                 </View>

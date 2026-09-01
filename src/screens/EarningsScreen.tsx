@@ -977,7 +977,7 @@ export const EarningsScreen: React.FC<EarningsScreenProps> = ({
           <View style={styles.modalOverlay}>
             <Animated.View style={[styles.modalCard, { transform: [{ scale: modalPopScale }] }]}>
               <View style={styles.modalHeaderRow}>
-                <View>
+                <View style={{ flex: 1, paddingRight: 8 }}>
                   <Text style={styles.modalTitle}>Earnings Alerts</Text>
                   <Text style={styles.modalSubtitle}>Payout and opportunity updates</Text>
                 </View>
@@ -1011,7 +1011,7 @@ export const EarningsScreen: React.FC<EarningsScreenProps> = ({
           <View style={styles.modalOverlay}>
             <Animated.View style={[styles.modalCard, { transform: [{ scale: modalPopScale }] }]}>
               <View style={styles.modalHeaderRow}>
-                <View>
+                <View style={{ flex: 1, paddingRight: 8 }}>
                   <Text style={styles.modalTitle}>Set Income Milestone</Text>
                   <Text style={styles.modalSubtitle}>Target your next creator milestone</Text>
                 </View>
@@ -1090,7 +1090,7 @@ export const EarningsScreen: React.FC<EarningsScreenProps> = ({
           <View style={styles.modalOverlay}>
             <Animated.View style={[styles.modalCard, { transform: [{ scale: modalPopScale }] }]}>
               <View style={styles.modalHeaderRow}>
-                <View>
+                <View style={{ flex: 1, paddingRight: 8 }}>
                   <Text style={styles.modalTitle}>Campaign Requirements</Text>
                   <Text style={styles.modalSubtitle}>Brand sponsor eligibility</Text>
                 </View>
