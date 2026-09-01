@@ -1133,14 +1133,65 @@ export const EarningsScreen: React.FC<EarningsScreenProps> = ({
                 </Pressable>
               </View>
 
-              <View style={{ gap: 10, marginVertical: 12 }}>
-                <Text style={styles.reqDetailLine}>• 7-Day Posting Streak (Active ✓)</Text>
-                <Text style={styles.reqDetailLine}>• Creator Passport Score &gt;= 70%</Text>
-                <Text style={styles.reqDetailLine}>• Minimum 1 linked social account with 10k+ reach</Text>
-                <Text style={styles.reqDetailLine}>• 3 completed community quests</Text>
+              {/* Tier Callout Banner */}
+              <View style={styles.reqGoalBanner}>
+                <Text style={styles.reqGoalBannerText}>
+                  🎯 <Text style={{ fontWeight: '800', color: '#171420' }}>Starter Campaigns:</Text> Passport ≥ 70% •{' '}
+                  <Text style={{ fontWeight: '800', color: '#582CDB' }}>High-Intent Brands:</Text> Readiness ≥ 85%
+                </Text>
               </View>
 
-              <Pressable style={styles.modalFullBtn} onPress={() => setShowCampaignModal(false)}>
+              {/* Structured Requirements List */}
+              <View style={styles.reqListContainer}>
+                {/* 1. Streak */}
+                <View style={styles.reqItemRow}>
+                  <View style={styles.greenCheckBadge}>
+                    <Text style={styles.greenCheckBadgeText}>✓</Text>
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <Text style={styles.reqItemTitle}>7-Day Posting Streak</Text>
+                    <Text style={styles.reqItemStatusActive}>Active</Text>
+                  </View>
+                </View>
+
+                {/* 2. Passport Score */}
+                <View style={styles.reqItemRow}>
+                  <View style={styles.greenCheckBadge}>
+                    <Text style={styles.greenCheckBadgeText}>✓</Text>
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <Text style={styles.reqItemTitle}>Creator Passport Score ≥ 70%</Text>
+                    <Text style={styles.reqItemStatusActive}>Achieved (70%)</Text>
+                  </View>
+                </View>
+
+                {/* 3. Social Account */}
+                <View style={styles.reqItemRow}>
+                  <View style={styles.greenCheckBadge}>
+                    <Text style={styles.greenCheckBadgeText}>✓</Text>
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <Text style={styles.reqItemTitle}>At least 1 linked social account with 10K+ reach</Text>
+                    <Text style={styles.reqItemStatusActive}>Active (28.4K TikTok)</Text>
+                  </View>
+                </View>
+
+                {/* 4. Complete 3 community quests */}
+                <View style={styles.reqItemRow}>
+                  <View style={styles.greyCircleBadge}>
+                    <Text style={{ fontSize: 10, color: '#94A3B8' }}>○</Text>
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <Text style={styles.reqItemTitle}>Complete 3 community quests</Text>
+                    <Text style={styles.reqItemStatusPending}>1 of 3 completed</Text>
+                  </View>
+                </View>
+              </View>
+
+              <Pressable
+                style={({ pressed }) => [styles.modalFullBtn, pressed && styles.btnPressed]}
+                onPress={() => setShowCampaignModal(false)}
+              >
                 <Text style={styles.modalFullBtnText}>Got It</Text>
               </Pressable>
             </Animated.View>
@@ -2250,6 +2301,75 @@ const styles = StyleSheet.create({
     fontSize: 12.5,
     color: '#475569',
     lineHeight: 18,
+  },
+  greenCheckBadge: {
+    width: 18,
+    height: 18,
+    borderRadius: 9,
+    backgroundColor: '#DCFCE7',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 2,
+  },
+  greenCheckBadgeText: {
+    fontSize: 10,
+    fontWeight: '700',
+    color: '#15803D',
+  },
+  greyCircleBadge: {
+    width: 18,
+    height: 18,
+    borderRadius: 9,
+    borderWidth: 1.5,
+    borderColor: '#CBD5E1',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 2,
+  },
+  reqGoalBanner: {
+    backgroundColor: '#FAF5FF',
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#E9D5FF',
+    padding: 10,
+    marginTop: 10,
+    marginBottom: 12,
+  },
+  reqGoalBannerText: {
+    fontSize: 12,
+    color: '#475569',
+    lineHeight: 16,
+    fontWeight: '600',
+  },
+  reqListContainer: {
+    gap: 8,
+    marginBottom: 4,
+  },
+  reqItemRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    backgroundColor: '#FAF8F5',
+    borderRadius: 12,
+    padding: 10,
+    borderWidth: 1,
+    borderColor: '#EDE8E1',
+  },
+  reqItemTitle: {
+    fontSize: 12.5,
+    fontWeight: '700',
+    color: '#171420',
+    marginBottom: 1,
+  },
+  reqItemStatusActive: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: '#15803D',
+  },
+  reqItemStatusPending: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: '#582CDB',
   },
   modalFullBtn: {
     height: 44,
