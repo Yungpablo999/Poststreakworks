@@ -1120,32 +1120,68 @@ export const AudienceBreakdownScreen: React.FC<AudienceBreakdownScreenProps> = (
           </View>
 
           {/* 4 PLATFORM STATS GRID (2x2) WITH AUTHENTIC BRAND SVG ICONS */}
-          <View style={styles.platformGrid2x2}>
-            {platformsList.slice(0, 4).map((plat) => (
-              <View key={plat.id} style={styles.platformGridBox}>
-                <View style={styles.platformGridHeader}>
-                  <View style={[styles.platformMiniIconBadge, { backgroundColor: plat.bgTint }]}>
-                    {renderPlatformBrandIcon(plat.id, 18)}
-                  </View>
-                  {plat.connected ? (
-                    <View style={styles.connectedTag}>
-                      <Text style={styles.connectedTagText}>CONNECTED</Text>
+          <View style={styles.platformGridContainer}>
+            <View style={styles.platformGrid2x2}>
+              {platformsList.slice(0, 4).map((plat) => {
+                const displayName = plat.name.split(' ')[0];
+                return (
+                  <Pressable
+                    key={plat.id}
+                    style={({ pressed }) => [
+                      styles.platformGridBox,
+                      pressed && styles.platformGridBoxPressed,
+                    ]}
+                    onPress={() => {
+                      if (Platform.OS !== 'web') {
+                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                      }
+                      if (plat.connected) {
+                        if (onOpenPlatformGrowth) {
+                          onOpenPlatformGrowth();
+                        } else {
+                          showToast(`Viewing ${plat.name} audience analytics`);
+                        }
+                      } else {
+                        handleConnectSinglePlatform(plat.id);
+                      }
+                    }}
+                  >
+                    <View style={styles.platformGridHeader}>
+                      <View style={[styles.platformMiniIconBadge, { backgroundColor: plat.bgTint }]}>
+                        {renderPlatformBrandIcon(plat.id, 18)}
+                      </View>
+                      {plat.connected ? (
+                        <View style={styles.connectedTag}>
+                          <Text style={styles.connectedTagText}>CONNECTED</Text>
+                        </View>
+                      ) : (
+                        <View style={styles.connectLinkTag}>
+                          <Text style={styles.connectLinkText}>+ CONNECT</Text>
+                        </View>
+                      )}
                     </View>
-                  ) : (
-                    <Pressable
-                      onPress={() => handleConnectSinglePlatform(plat.id)}
-                      hitSlop={6}
-                    >
-                      <Text style={styles.connectLinkText}>+ CONNECT</Text>
-                    </Pressable>
-                  )}
-                </View>
-                <Text style={styles.platformGridLabel}>{plat.name.split(' ')[0]}</Text>
-                <Text style={styles.platformGridMetric}>
-                  {plat.connected ? plat.followers : '—'}
-                </Text>
-              </View>
-            ))}
+                    <Text style={styles.platformGridLabel}>{displayName}</Text>
+                    {plat.connected ? (
+                      <Text style={styles.platformGridMetric}>{plat.followers}</Text>
+                    ) : (
+                      <Text style={styles.platformGridMetricUnconnected}>Connect to view</Text>
+                    )}
+                  </Pressable>
+                );
+              })}
+            </View>
+
+            {/* Subtle secondary text CTA underneath the grid */}
+            <Pressable
+              style={({ pressed }) => [
+                styles.connectMorePlatformsTextLink,
+                pressed && styles.btnPressed,
+              ]}
+              onPress={handleOpenConnectPlatforms}
+              hitSlop={8}
+            >
+              <Text style={styles.connectMorePlatformsText}>＋ Connect more platforms →</Text>
+            </Pressable>
           </View>
 
           {/* CARD 5: AUDIENCE INSIGHT CALLOUT */}
@@ -2470,11 +2506,14 @@ const styles = StyleSheet.create({
   },
 
   // 4 Platform Stats Grid (2x2)
+  platformGridContainer: {
+    marginBottom: 16,
+  },
   platformGrid2x2: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: 10,
-    marginBottom: 16,
+    marginBottom: 8,
   },
   platformGridBox: {
     width: (SCREEN_WIDTH - 50) / 2,
@@ -2483,6 +2522,9 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#EFEBF8',
     padding: 14,
+  },
+  platformGridBoxPressed: {
+    opacity: 0.75,
   },
   platformGridHeader: {
     flexDirection: 'row',
@@ -2510,9 +2552,17 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     color: '#15803D',
   },
+  connectLinkTag: {
+    backgroundColor: '#FAF5FF',
+    paddingVertical: 2,
+    paddingHorizontal: 6,
+    borderRadius: 4,
+    borderWidth: 1,
+    borderColor: '#E9D5FF',
+  },
   connectLinkText: {
-    fontSize: 10,
-    fontWeight: '700',
+    fontSize: 9.5,
+    fontWeight: '800',
     color: '#582CDB',
   },
   platformGridLabel: {
@@ -2525,6 +2575,22 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     color: '#171420',
     marginTop: 2,
+  },
+  platformGridMetricUnconnected: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#94A3B8',
+    marginTop: 5,
+  },
+  connectMorePlatformsTextLink: {
+    alignItems: 'center',
+    paddingVertical: 6,
+    marginTop: 2,
+  },
+  connectMorePlatformsText: {
+    fontSize: 12.5,
+    fontWeight: '700',
+    color: '#582CDB',
   },
 
   // Card 5: Audience Insight Callout
