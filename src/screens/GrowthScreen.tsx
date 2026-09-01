@@ -167,6 +167,23 @@ interface GrowthScreenProps {
   onSaveProfile?: (updated: UserProfileData) => void;
 }
 
+interface AudienceChartPoint {
+  date: string;
+  followers: string;
+  gain: string;
+  cx: number;
+  cy: number;
+  percentX: number;
+}
+
+const AUDIENCE_CHART_POINTS: AudienceChartPoint[] = [
+  { date: 'Oct 01', followers: '22.1K', gain: '+42', cx: 10, cy: 75, percentX: 6 },
+  { date: 'Oct 08', followers: '22.9K', gain: '+180', cx: 85, cy: 52, percentX: 27 },
+  { date: 'Oct 15', followers: '23.6K', gain: '+310', cx: 155, cy: 26, percentX: 49 },
+  { date: 'Oct 21', followers: '24.1K', gain: '+220', cx: 230, cy: 62, percentX: 72 },
+  { date: 'Oct 28', followers: '24.8K', gain: '+450', cx: 310, cy: 18, percentX: 92 },
+];
+
 export const GrowthScreen: React.FC<GrowthScreenProps> = ({
   onBackToDashboard,
   onOpenPostPerformance,
@@ -182,6 +199,7 @@ export const GrowthScreen: React.FC<GrowthScreenProps> = ({
 }) => {
   const isDark = false;
   const [activeTab, setActiveTab] = useState<TabType>('growth');
+  const [selectedChartPointIndex, setSelectedChartPointIndex] = useState(4);
 
   // Modal States
   const [showCelebrationModal, setShowCelebrationModal] = useState(false);
@@ -381,10 +399,16 @@ export const GrowthScreen: React.FC<GrowthScreenProps> = ({
             <View style={styles.audienceHeaderRow}>
               <View>
                 <Text style={styles.audienceLabel}>TOTAL AUDIENCE</Text>
-                <Text style={styles.audiencePercentText}>+12.4%</Text>
+                <View style={styles.audienceValueRow}>
+                  <Text style={styles.audienceMainNumber}>24.8K</Text>
+                  <View style={styles.growthBadgePill}>
+                    <Text style={styles.growthBadgePillText}>+12.4%</Text>
+                  </View>
+                </View>
+                <Text style={styles.audienceSubCompare}>vs last 30 days</Text>
               </View>
               <View style={styles.vs30DaysPill}>
-                <Text style={styles.vs30DaysPillText}>VS LAST 30 DAYS</Text>
+                <Text style={styles.vs30DaysPillText}>LAST 30 DAYS</Text>
               </View>
             </View>
 
@@ -392,12 +416,12 @@ export const GrowthScreen: React.FC<GrowthScreenProps> = ({
             <View style={styles.statsRow}>
               <View style={styles.statBox}>
                 <Text style={styles.statLabel}>NEW FOLLOWERS</Text>
-                <Text style={styles.statValue}>1.2k</Text>
+                <Text style={styles.statValue}>1.2K</Text>
               </View>
 
               <View style={styles.statBox}>
                 <Text style={styles.statLabel}>PROFILE VISITS</Text>
-                <Text style={styles.statValue}>1.9k</Text>
+                <Text style={styles.statValue}>1.9K</Text>
               </View>
 
               <View style={styles.statBox}>
@@ -407,40 +431,107 @@ export const GrowthScreen: React.FC<GrowthScreenProps> = ({
             </View>
 
             {/* Interactive Smooth Curve Graph */}
-            <View style={styles.graphContainer}>
-              <Svg width="100%" height={110} viewBox="0 0 320 110" preserveAspectRatio="none">
-                <Defs>
-                  <SvgLinearGradient id="curveGrad" x1="0%" y1="0%" x2="0%" y2="100%">
-                    <Stop offset="0%" stopColor="#6366F1" stopOpacity="0.22" />
-                    <Stop offset="100%" stopColor="#6366F1" stopOpacity="0.0" />
-                  </SvgLinearGradient>
-                </Defs>
+            {(() => {
+              const activeChartPoint = AUDIENCE_CHART_POINTS[selectedChartPointIndex] || AUDIENCE_CHART_POINTS[4];
+              return (
+                <View style={styles.graphContainer}>
+                  {/* Floating Tooltip Indicator */}
+                  <View
+                    style={[
+                      styles.chartTooltipBubble,
+                      {
+                        left: `${Math.max(4, Math.min(56, activeChartPoint.percentX - 22))}%`,
+                      },
+                    ]}
+                  >
+                    <Text style={styles.chartTooltipText}>
+                      {activeChartPoint.date} · <Text style={{ fontWeight: '800', color: '#582CDB' }}>{activeChartPoint.followers} followers</Text>
+                    </Text>
+                  </View>
 
-                {/* Area Fill */}
-                <Path
-                  d="M0,75 C45,75 75,55 120,30 C160,8 190,85 240,65 C270,48 290,15 320,18 L320,110 L0,110 Z"
-                  fill="url(#curveGrad)"
-                />
+                  <Svg width="100%" height={110} viewBox="0 0 320 110" preserveAspectRatio="none">
+                    <Defs>
+                      <SvgLinearGradient id="curveGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                        <Stop offset="0%" stopColor="#6366F1" stopOpacity="0.22" />
+                        <Stop offset="100%" stopColor="#6366F1" stopOpacity="0.0" />
+                      </SvgLinearGradient>
+                    </Defs>
 
-                {/* Smooth Curve Line */}
-                <Path
-                  d="M0,75 C45,75 75,55 120,30 C160,8 190,85 240,65 C270,48 290,15 320,18"
-                  fill="none"
-                  stroke="#6366F1"
-                  strokeWidth="3"
-                  strokeLinecap="round"
-                />
+                    {/* Area Fill */}
+                    <Path
+                      d="M0,75 C45,75 75,55 120,30 C160,8 190,85 240,65 C270,48 290,15 320,18 L320,110 L0,110 Z"
+                      fill="url(#curveGrad)"
+                    />
 
-                {/* Benchmark Peak Dot */}
-                <Circle cx="320" cy="18" r="5" fill="#6366F1" />
-                <Circle cx="320" cy="18" r="9" stroke="#6366F1" strokeWidth="1.5" fill="none" opacity="0.4" />
-              </Svg>
+                    {/* Smooth Curve Line */}
+                    <Path
+                      d="M0,75 C45,75 75,55 120,30 C160,8 190,85 240,65 C270,48 290,15 320,18"
+                      fill="none"
+                      stroke="#6366F1"
+                      strokeWidth="3"
+                      strokeLinecap="round"
+                    />
 
-              <View style={styles.graphDateRow}>
-                <Text style={styles.graphDateText}>OCT 01</Text>
-                <Text style={styles.graphDateText}>OCT 28</Text>
-              </View>
-            </View>
+                    {/* Dotted Guide Line for selected point */}
+                    <Path
+                      d={`M${activeChartPoint.cx},${activeChartPoint.cy} L${activeChartPoint.cx},105`}
+                      stroke="#6366F1"
+                      strokeWidth="1.2"
+                      strokeDasharray="3,3"
+                      opacity="0.45"
+                    />
+
+                    {/* Render Interactive Data Points */}
+                    {AUDIENCE_CHART_POINTS.map((pt, idx) => {
+                      const isSelected = selectedChartPointIndex === idx;
+                      return (
+                        <React.Fragment key={idx}>
+                          {isSelected ? (
+                            <>
+                              <Circle cx={pt.cx} cy={pt.cy} r="10" stroke="#6366F1" strokeWidth="2" fill="#FFFFFF" />
+                              <Circle cx={pt.cx} cy={pt.cy} r="5" fill="#6366F1" />
+                            </>
+                          ) : (
+                            <Circle
+                              cx={pt.cx}
+                              cy={pt.cy}
+                              r="4"
+                              fill="#FFFFFF"
+                              stroke="#6366F1"
+                              strokeWidth="2"
+                              opacity="0.85"
+                            />
+                          )}
+                        </React.Fragment>
+                      );
+                    })}
+                  </Svg>
+
+                  {/* Touch slices for direct scrubbing / tap */}
+                  <View style={styles.chartInteractiveOverlay} pointerEvents="box-none">
+                    {AUDIENCE_CHART_POINTS.map((pt, idx) => (
+                      <Pressable
+                        key={idx}
+                        style={styles.chartTouchSlice}
+                        onPress={() => {
+                          if (Platform.OS !== 'web') {
+                            Haptics.selectionAsync();
+                          }
+                          setSelectedChartPointIndex(idx);
+                        }}
+                        hitSlop={8}
+                      />
+                    ))}
+                  </View>
+
+                  <View style={styles.graphDateRow}>
+                    <Text style={styles.graphDateText}>OCT 01</Text>
+                    <Text style={styles.graphFollowersLegend}>● Followers</Text>
+                    <Text style={styles.graphDateText}>OCT 28</Text>
+                  </View>
+                </View>
+              );
+            })()}
 
             {/* Bottom Link */}
             <Pressable
@@ -1531,6 +1622,35 @@ const styles = StyleSheet.create({
     letterSpacing: 0.6,
     marginBottom: 2,
   },
+  audienceValueRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginTop: 2,
+    marginBottom: 2,
+  },
+  audienceMainNumber: {
+    fontSize: 28,
+    fontWeight: '800',
+    color: '#171420',
+    letterSpacing: -0.6,
+  },
+  growthBadgePill: {
+    backgroundColor: '#DCFCE7',
+    paddingVertical: 3,
+    paddingHorizontal: 7,
+    borderRadius: 100,
+  },
+  growthBadgePillText: {
+    fontSize: 11,
+    fontWeight: '800',
+    color: '#15803D',
+  },
+  audienceSubCompare: {
+    fontSize: 11,
+    fontWeight: '600',
+    color: '#64748B',
+  },
   audiencePercentText: {
     fontSize: 32,
     fontWeight: '700',
@@ -1579,11 +1699,51 @@ const styles = StyleSheet.create({
   },
   graphContainer: {
     marginBottom: 12,
+    position: 'relative',
+  },
+  chartTooltipBubble: {
+    position: 'absolute',
+    top: -12,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 8,
+    paddingVertical: 3,
+    paddingHorizontal: 8,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 4,
+    elevation: 4,
+    zIndex: 10,
+  },
+  chartTooltipText: {
+    fontSize: 10.5,
+    fontWeight: '600',
+    color: '#475569',
+  },
+  chartInteractiveOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 20,
+    flexDirection: 'row',
+  },
+  chartTouchSlice: {
+    flex: 1,
+    height: '100%',
   },
   graphDateRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
+    alignItems: 'center',
     marginTop: 4,
+  },
+  graphFollowersLegend: {
+    fontSize: 10,
+    fontWeight: '700',
+    color: '#6366F1',
   },
   graphDateText: {
     fontSize: 10,
