@@ -521,19 +521,38 @@ export const PostPerformanceScreen: React.FC<PostPerformanceScreenProps> = ({
                 <Text style={styles.recommendedTitle}>
                   "3 tools every solo creator needs to save 10 hours a week"
                 </Text>
+                <Text style={styles.recommendedReasoning}>
+                  Based on your strongest content pattern: creator education + actionable advice.
+                </Text>
               </View>
             </View>
 
             <View style={styles.recommendedMetaBox}>
-              <View style={styles.recommendedMetaItem}>
+              <Pressable
+                style={({ pressed }) => [styles.recommendedMetaItem, pressed && styles.btnPressed]}
+                onPress={() => {
+                  if (Platform.OS !== 'web') {
+                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                  }
+                  showToast('AI Reach: Grounded in your viral hold rate, 71.6% retention, & prime 6:30 PM window');
+                }}
+              >
                 <Text style={styles.metaLabel} numberOfLines={1}>ESTIMATED REACH</Text>
                 <Text style={styles.metaValue} numberOfLines={1}>18K - 32K Views</Text>
-              </View>
+              </Pressable>
               <View style={styles.metaDivider} />
-              <View style={styles.recommendedMetaItem}>
+              <Pressable
+                style={({ pressed }) => [styles.recommendedMetaItem, pressed && styles.btnPressed]}
+                onPress={() => {
+                  if (Platform.OS !== 'web') {
+                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                  }
+                  showToast('Peak Window: Highest audience activity on your TikTok channel is 6:00 PM – 8:00 PM');
+                }}
+              >
                 <Text style={styles.metaLabel} numberOfLines={1}>BEST POSTING TIME</Text>
                 <Text style={styles.metaValue} numberOfLines={1}>Tomorrow, 6:30 PM</Text>
-              </View>
+              </Pressable>
             </View>
 
             <Pressable
@@ -1557,6 +1576,13 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     color: '#171420',
     lineHeight: 19,
+  },
+  recommendedReasoning: {
+    fontSize: 11,
+    color: '#64748B',
+    lineHeight: 15,
+    marginTop: 3,
+    fontWeight: '500',
   },
   recommendedMetaBox: {
     flexDirection: 'row',
