@@ -492,6 +492,7 @@ export const CreatorPassportScreen: React.FC<CreatorPassportScreenProps> = ({
             </View>
 
             <Text style={styles.streakSubtext}>
+              Consecutive days meeting your posting target •{' '}
               {(userProfile?.streakCount || 1) >= 30
                 ? 'High consistency threshold unlocked for premium campaigns.'
                 : (userProfile?.streakCount || 1) >= 7
@@ -503,7 +504,10 @@ export const CreatorPassportScreen: React.FC<CreatorPassportScreenProps> = ({
           {/* CARD 4: POSTING CONSISTENCY */}
           <View style={styles.consistencyCard}>
             <View style={styles.consistencyHeaderRow}>
-              <Text style={styles.consistencyTitle}>Posting Consistency</Text>
+              <View>
+                <Text style={styles.consistencyTitle}>Posting Consistency</Text>
+                <Text style={styles.consistencySub}>Posts published this week</Text>
+              </View>
               <View style={styles.strongTag}>
                 <Text style={styles.strongTagText}>📈 STRONG</Text>
               </View>
@@ -1394,6 +1398,12 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontWeight: '700',
     color: '#171420',
+  },
+  consistencySub: {
+    fontSize: 11,
+    color: '#64748B',
+    fontWeight: '600',
+    marginTop: 2,
   },
   strongTag: {
     backgroundColor: '#DCFCE7',
