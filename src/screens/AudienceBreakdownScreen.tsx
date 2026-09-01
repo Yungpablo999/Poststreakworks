@@ -1355,32 +1355,62 @@ export const AudienceBreakdownScreen: React.FC<AudienceBreakdownScreenProps> = (
             </Text>
 
             <View style={styles.lockedList}>
+              {/* Row 1: Audience Age & Gender */}
               <View style={styles.lockedItemRow}>
-                <Text style={styles.lockedItemText}>Audience Age &amp; Gender</Text>
-                <Text style={styles.lockedItemIcon}>
-                  {isProUnlocked ? '18-24 (62%)' : '🔒'}
-                </Text>
+                <View style={{ flex: 1, marginRight: 8 }}>
+                  <Text style={styles.lockedItemTitle}>Audience Age & Gender</Text>
+                  <Text style={styles.lockedItemTeaser} numberOfLines={1}>
+                    18–24 · 25–34 · 35–44...
+                  </Text>
+                </View>
+                <View style={styles.lockedBadgePill}>
+                  <Text style={styles.lockedBadgeIcon}>🔒</Text>
+                </View>
               </View>
+
               <View style={styles.lockedDivider} />
+
+              {/* Row 2: Top Locations & Cities */}
               <View style={styles.lockedItemRow}>
-                <Text style={styles.lockedItemText}>Top Locations &amp; Cities</Text>
-                <Text style={styles.lockedItemIcon}>
-                  {isProUnlocked ? 'Lagos, London, NYC' : '🔒'}
-                </Text>
+                <View style={{ flex: 1, marginRight: 8 }}>
+                  <Text style={styles.lockedItemTitle}>Top Locations & Cities</Text>
+                  <Text style={styles.lockedItemTeaser} numberOfLines={1}>
+                    London · Manchester · Lagos...
+                  </Text>
+                </View>
+                <View style={styles.lockedBadgePill}>
+                  <Text style={styles.lockedBadgeIcon}>🔒</Text>
+                </View>
               </View>
+
               <View style={styles.lockedDivider} />
+
+              {/* Row 3: Peak Active Times */}
               <View style={styles.lockedItemRow}>
-                <Text style={styles.lockedItemText}>Peak Active Times</Text>
-                <Text style={styles.lockedItemIcon}>
-                  {isProUnlocked ? '7:30 PM - 9:00 PM' : '🔒'}
-                </Text>
+                <View style={{ flex: 1, marginRight: 8 }}>
+                  <Text style={styles.lockedItemTitle}>Peak Active Times</Text>
+                  <Text style={styles.lockedItemTeaser} numberOfLines={1}>
+                    Best time: 7–9 PM...
+                  </Text>
+                </View>
+                <View style={styles.lockedBadgePill}>
+                  <Text style={styles.lockedBadgeIcon}>🔒</Text>
+                </View>
               </View>
+
               <View style={styles.lockedDivider} />
+
+              {/* Row 4: Audience Interest Cloud */}
               <View style={styles.lockedItemRow}>
-                <Text style={styles.lockedItemText}>Audience Interest Cloud</Text>
-                <Text style={styles.lockedItemIcon}>
-                  {isProUnlocked ? 'AI, Creator Tools' : '🔒'}
-                </Text>
+                <View style={{ flex: 1, marginRight: 8 }}>
+                  <Text style={styles.lockedItemTitle}>Audience Interest Cloud</Text>
+                  <Text style={styles.lockedItemTeaser} numberOfLines={1}>
+                    Creator tools · Education · Tech...
+                  </Text>
+                </View>
+                <View style={styles.lockedBadgePill}>
+                  <Text style={styles.lockedBadgeIcon}>🔒</Text>
+                </View>
               </View>
             </View>
 
@@ -2931,31 +2961,47 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingVertical: 4,
+    paddingVertical: 6,
   },
-  lockedItemText: {
+  lockedItemTitle: {
     fontSize: 13,
-    fontWeight: '700',
-    color: '#475569',
-  },
-  lockedItemIcon: {
-    fontSize: 12,
     fontWeight: '800',
+    color: '#171420',
+    marginBottom: 2,
+  },
+  lockedItemTeaser: {
+    fontSize: 11.5,
+    fontWeight: '600',
     color: '#94A3B8',
+    opacity: 0.7,
+    letterSpacing: -0.1,
+  },
+  lockedBadgePill: {
+    width: 28,
+    height: 28,
+    borderRadius: 8,
+    backgroundColor: '#FEF9C3',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#FEF08A',
+  },
+  lockedBadgeIcon: {
+    fontSize: 12,
   },
   lockedDivider: {
     height: 1,
-    backgroundColor: '#F8FAFC',
+    backgroundColor: '#F1F5F9',
   },
   unlockAnalyticsBtn: {
     height: 48,
-    borderRadius: 14,
+    borderRadius: 100,
     overflow: 'hidden',
     shadowColor: '#F59E0B',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.12,
-    shadowRadius: 8,
-    elevation: 3,
+    shadowOpacity: 0.18,
+    shadowRadius: 10,
+    elevation: 4,
   },
   unlockGradient: {
     flex: 1,
