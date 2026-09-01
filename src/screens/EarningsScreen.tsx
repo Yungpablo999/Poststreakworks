@@ -650,22 +650,56 @@ export const EarningsScreen: React.FC<EarningsScreenProps> = ({
             <Text style={styles.campaignSub}>Complete requirements to unlock incoming brand deals.</Text>
 
             <View style={styles.campaignChecklist}>
-              <View style={styles.campaignCheckItem}>
-                <Text style={{ color: '#15803D', fontSize: 13, fontWeight: '700' }}>✓</Text>
+              <Pressable
+                style={({ pressed }) => [styles.campaignCheckItem, pressed && styles.rowPressed]}
+                onPress={() => {
+                  triggerModalPop();
+                  setShowCampaignModal(true);
+                }}
+              >
+                <Text style={{ color: '#15803D', fontSize: 13, fontWeight: '800' }}>✓</Text>
                 <Text style={styles.campCheckActive}>7-day streak</Text>
-              </View>
-              <View style={styles.campaignCheckItem}>
-                <Text style={{ color: '#15803D', fontSize: 13, fontWeight: '700' }}>✓</Text>
-                <Text style={styles.campCheckActive}>Complete Passport</Text>
-              </View>
-              <View style={styles.campaignCheckItem}>
-                <Text style={{ color: '#94A3B8', fontSize: 13 }}>🕒</Text>
-                <Text style={styles.campCheckText}>Add social account</Text>
-              </View>
-              <View style={styles.campaignCheckItem}>
-                <Text style={{ color: '#94A3B8', fontSize: 13 }}>🕒</Text>
-                <Text style={styles.campCheckText}>Finish 3 quests</Text>
-              </View>
+              </Pressable>
+
+              <Pressable
+                style={({ pressed }) => [styles.campaignCheckItem, pressed && styles.rowPressed]}
+                onPress={() => {
+                  if (onOpenCreatorPassport) {
+                    onOpenCreatorPassport();
+                  } else {
+                    triggerModalPop();
+                    setShowProfileModal(true);
+                  }
+                }}
+              >
+                <Text style={{ color: '#15803D', fontSize: 13, fontWeight: '800' }}>✓</Text>
+                <Text style={styles.campCheckActive}>Complete Creator Passport</Text>
+              </Pressable>
+
+              <Pressable
+                style={({ pressed }) => [styles.campaignCheckItem, pressed && styles.rowPressed]}
+                onPress={() => {
+                  triggerModalPop();
+                  setShowConnectPlatformModal(true);
+                }}
+              >
+                <Text style={{ color: '#582CDB', fontSize: 12 }}>◷</Text>
+                <Text style={styles.campCheckActionable}>Connect another social account →</Text>
+              </Pressable>
+
+              <Pressable
+                style={({ pressed }) => [styles.campaignCheckItem, pressed && styles.rowPressed]}
+                onPress={() => {
+                  if (onOpenQuests) {
+                    onOpenQuests();
+                  } else if (onNavigateTab) {
+                    onNavigateTab('quests');
+                  }
+                }}
+              >
+                <Text style={{ color: '#582CDB', fontSize: 12 }}>◷</Text>
+                <Text style={styles.campCheckActionable}>Finish 3 quests →</Text>
+              </Pressable>
             </View>
 
             <Pressable
@@ -1660,19 +1694,31 @@ const styles = StyleSheet.create({
     marginBottom: 14,
   },
   campaignCheckItem: {
-    width: '46%',
+    width: '47%',
     flexDirection: 'row',
-    alignItems: 'center',
+    alignItems: 'flex-start',
     gap: 6,
   },
   campCheckActive: {
     fontSize: 12,
     fontWeight: '700',
     color: '#171420',
+    lineHeight: 16,
+  },
+  campCheckActionable: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#582CDB',
+    lineHeight: 16,
   },
   campCheckText: {
     fontSize: 12,
     color: '#5E576E',
+    lineHeight: 16,
+  },
+  rowPressed: {
+    opacity: 0.7,
+    transform: [{ scale: 0.985 }],
   },
   campaignBtn: {
     height: 38,
