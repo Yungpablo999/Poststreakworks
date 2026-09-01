@@ -815,19 +815,19 @@ export const GrowthScreen: React.FC<GrowthScreenProps> = ({
               <View style={styles.legendItem}>
                 <View style={[styles.legendDot, { backgroundColor: '#171420' }]} />
                 <Text style={styles.legendText}>TikTok</Text>
-                <Text style={styles.legendValue}>+65%</Text>
+                <Text style={styles.legendValue}>65%</Text>
               </View>
 
               <View style={styles.legendItem}>
                 <View style={[styles.legendDot, { backgroundColor: '#6366F1' }]} />
                 <Text style={styles.legendText}>Instagram</Text>
-                <Text style={styles.legendValue}>+25%</Text>
+                <Text style={styles.legendValue}>25%</Text>
               </View>
 
               <View style={styles.legendItem}>
                 <View style={[styles.legendDot, { backgroundColor: '#EF4444' }]} />
                 <Text style={styles.legendText}>YouTube</Text>
-                <Text style={styles.legendValue}>+10%</Text>
+                <Text style={styles.legendValue}>10%</Text>
               </View>
             </View>
 
@@ -846,7 +846,7 @@ export const GrowthScreen: React.FC<GrowthScreenProps> = ({
               }}
               hitSlop={6}
             >
-              <Text style={styles.seeAllReachText}>See All Post Analytics ➔</Text>
+              <Text style={styles.seeAllReachText}>View Full Analytics ➔</Text>
             </Pressable>
           </View>
 
