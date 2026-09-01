@@ -819,7 +819,7 @@ export const EarningsScreen: React.FC<EarningsScreenProps> = ({
             <View style={{ flex: 1 }}>
               <Text style={styles.jarvisTag}>JARVIS CORE INSIGHT</Text>
               <Text style={styles.jarvisText}>
-                &ldquo;Your streak is strong, but your passport needs campaign proof before bigger opportunities unlock.&rdquo;
+                &ldquo;Your streak is strong. Build more campaign proof to strengthen your passport and unlock bigger opportunities.&rdquo;
               </Text>
             </View>
           </View>
