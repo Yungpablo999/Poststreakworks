@@ -399,6 +399,7 @@ export const AudienceBreakdownScreen: React.FC<AudienceBreakdownScreenProps> = (
   // Timeline mode (7d, 1m, 3m)
   const [selectedTimeframe, setSelectedTimeframe] = useState<TimeframeMode>('7d');
   const [selectedItemId, setSelectedItemId] = useState<string>('thu'); // default peak Thursday
+  const [showBarDetail, setShowBarDetail] = useState(false); // Only visible upon tapping a bar
 
   // Platform state list
   const [platformsList, setPlatformsList] = useState<PlatformAccount[]>(INITIAL_PLATFORMS);
@@ -477,6 +478,7 @@ export const AudienceBreakdownScreen: React.FC<AudienceBreakdownScreenProps> = (
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     }
     setSelectedTimeframe(mode);
+    setShowBarDetail(false);
     const newDataset = TIMEFRAME_DATA[mode];
     // Select peak or latest in that timeframe
     if (mode === '7d') {
@@ -818,7 +820,12 @@ export const AudienceBreakdownScreen: React.FC<AudienceBreakdownScreenProps> = (
                         if (Platform.OS !== 'web') {
                           Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                         }
-                        setSelectedItemId(item.id);
+                        if (selectedItemId === item.id && showBarDetail) {
+                          setShowBarDetail(false);
+                        } else {
+                          setSelectedItemId(item.id);
+                          setShowBarDetail(true);
+                        }
                       }}
                     >
                       {/* Gain Number Above Bar */}
@@ -876,36 +883,32 @@ export const AudienceBreakdownScreen: React.FC<AudienceBreakdownScreenProps> = (
               </View>
             </View>
 
-            {/* INTERACTIVE DAY / TIMEFRAME BREAKDOWN PANEL */}
-            <View style={styles.velocityDetailCard}>
-              <View style={styles.velocityDetailHeader}>
-                <Text style={styles.velocityDetailTitle}>
-                  {activeItem.fullDate} · <Text style={{ color: '#582CDB', fontWeight: '800' }}>{activeItem.displayGain} followers</Text>
+            {/* OPTIONAL COMPACT TAP DETAIL PANEL (ONLY SHOWN ON TAP) */}
+            {showBarDetail && (
+              <View style={styles.compactVelocityDetailCard}>
+                <View style={styles.compactDetailTopRow}>
+                  <Text style={styles.compactDetailDayHeader}>
+                    {activeItem.label.toUpperCase()} · <Text style={{ color: '#582CDB', fontWeight: '800' }}>{activeItem.displayGain} FOLLOWERS</Text>
+                  </Text>
+                  <Pressable
+                    onPress={() => setShowBarDetail(false)}
+                    hitSlop={8}
+                    style={styles.compactDetailCloseBtn}
+                  >
+                    <Text style={styles.compactDetailCloseText}>✕</Text>
+                  </Pressable>
+                </View>
+
+                <Text style={styles.compactDetailPlatformsText} numberOfLines={1}>
+                  TikTok +{activeItem.platforms.tiktok} · Instagram +{activeItem.platforms.instagram} · YouTube +{activeItem.platforms.youtube}
+                  {activeItem.platforms.other > 0 ? ` · Other +${activeItem.platforms.other}` : ''}
+                </Text>
+
+                <Text style={styles.compactDetailSpikeText} numberOfLines={1}>
+                  ⚡ {activeItem.spikeReason}
                 </Text>
               </View>
-
-              <View style={styles.detailPlatformTags}>
-                <View style={styles.detailPlatBadge}>
-                  <Text style={styles.detailPlatItem}>TikTok <Text style={{ fontWeight: '800', color: '#171420' }}>+{activeItem.platforms.tiktok}</Text></Text>
-                </View>
-                <View style={styles.detailPlatBadge}>
-                  <Text style={styles.detailPlatItem}>Instagram <Text style={{ fontWeight: '800', color: '#171420' }}>+{activeItem.platforms.instagram}</Text></Text>
-                </View>
-                <View style={styles.detailPlatBadge}>
-                  <Text style={styles.detailPlatItem}>YouTube <Text style={{ fontWeight: '800', color: '#171420' }}>+{activeItem.platforms.youtube}</Text></Text>
-                </View>
-                {activeItem.platforms.other > 0 && (
-                  <View style={styles.detailPlatBadge}>
-                    <Text style={styles.detailPlatItem}>Other <Text style={{ fontWeight: '800', color: '#171420' }}>+{activeItem.platforms.other}</Text></Text>
-                  </View>
-                )}
-              </View>
-
-              <View style={styles.velocitySpikeReasonRow}>
-                <Text style={styles.spikeReasonLabel}>Why it spiked: </Text>
-                <Text style={styles.spikeReasonValue}>{activeItem.spikeReason}</Text>
-              </View>
-            </View>
+            )}
 
             {/* GOAL TARGET TRACKER */}
             <View style={styles.velocityGoalBox}>
@@ -2093,56 +2096,46 @@ const styles = StyleSheet.create({
     fontWeight: '700',
   },
 
-  // Velocity Detail Card
-  velocityDetailCard: {
+  // Compact Velocity Detail Card (shown only on bar tap)
+  compactVelocityDetailCard: {
     backgroundColor: '#FAF8F5',
-    borderRadius: 14,
-    padding: 12,
+    borderRadius: 12,
+    paddingVertical: 9,
+    paddingHorizontal: 12,
     borderWidth: 1,
-    borderColor: '#E2E8F0',
-    marginBottom: 14,
+    borderColor: '#EDE8E1',
+    marginBottom: 12,
   },
-  velocityDetailHeader: {
-    marginBottom: 8,
-  },
-  velocityDetailTitle: {
-    fontSize: 12,
-    fontWeight: '700',
-    color: '#171420',
-  },
-  detailPlatformTags: {
+  compactDetailTopRow: {
     flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 6,
-    marginBottom: 8,
-  },
-  detailPlatBadge: {
-    backgroundColor: '#FFFFFF',
-    paddingVertical: 3,
-    paddingHorizontal: 7,
-    borderRadius: 6,
-    borderWidth: 1,
-    borderColor: '#E2E8F0',
-  },
-  detailPlatItem: {
-    fontSize: 10.5,
-    fontWeight: '600',
-    color: '#64748B',
-  },
-  velocitySpikeReasonRow: {
-    flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'center',
-    gap: 4,
+    marginBottom: 2,
   },
-  spikeReasonLabel: {
+  compactDetailDayHeader: {
+    fontSize: 10.5,
+    fontWeight: '800',
+    color: '#171420',
+    letterSpacing: 0.5,
+  },
+  compactDetailCloseBtn: {
+    padding: 2,
+  },
+  compactDetailCloseText: {
+    fontSize: 11,
+    color: '#94A3B8',
+    fontWeight: '700',
+  },
+  compactDetailPlatformsText: {
+    fontSize: 11.5,
+    fontWeight: '600',
+    color: '#475569',
+    marginBottom: 2,
+  },
+  compactDetailSpikeText: {
     fontSize: 11,
     fontWeight: '700',
     color: '#582CDB',
-  },
-  spikeReasonValue: {
-    fontSize: 11,
-    fontWeight: '600',
-    color: '#334155',
   },
 
   // Goal Box
