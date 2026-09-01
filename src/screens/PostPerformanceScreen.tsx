@@ -39,6 +39,42 @@ interface PostPerformanceScreenProps {
   onLogout?: () => void;
 }
 
+const BookmarkSvg = ({ size = 18, color = '#171420' }: { size?: number; color?: string }) => (
+  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+    <Path
+      d="M5 4a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v17l-7-4-7 4V4z"
+      stroke={color}
+      strokeWidth="2.2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  </Svg>
+);
+
+const SpeechBubbleSvg = ({ size = 18, color = '#171420' }: { size?: number; color?: string }) => (
+  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+    <Path
+      d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"
+      stroke={color}
+      strokeWidth="2.2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  </Svg>
+);
+
+const ShareArrowSvg = ({ size = 18, color = '#171420' }: { size?: number; color?: string }) => (
+  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+    <Path
+      d="M7 17L17 7M17 7H8M17 7V16"
+      stroke={color}
+      strokeWidth="2.2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  </Svg>
+);
+
 export const PostPerformanceScreen: React.FC<PostPerformanceScreenProps> = ({
   onBack,
   onNavigateTab,
@@ -586,9 +622,17 @@ export const PostPerformanceScreen: React.FC<PostPerformanceScreenProps> = ({
 
           <View style={styles.engagementQualityCard}>
             {/* Saves */}
-            <View style={styles.engagementQualityRow}>
+            <Pressable
+              style={({ pressed }) => [styles.engagementQualityRow, pressed && styles.btnPressed]}
+              onPress={() => {
+                if (Platform.OS !== 'web') {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                }
+                showToast('Saves Quality: 3,420 bookmarks (Top 1% of all your posts)');
+              }}
+            >
               <View style={[styles.engagementIconBox, { backgroundColor: '#FEF3C7' }]}>
-                <Text style={{ fontSize: 18 }}>🔖</Text>
+                <BookmarkSvg size={18} color="#D97706" />
               </View>
               <View style={{ flex: 1 }}>
                 <Text style={styles.engagementNumber}>3,420 Saves</Text>
@@ -597,14 +641,22 @@ export const PostPerformanceScreen: React.FC<PostPerformanceScreenProps> = ({
               <View style={styles.qualityPillGold}>
                 <Text style={styles.qualityPillGoldText}>VERY HIGH</Text>
               </View>
-            </View>
+            </Pressable>
 
             <View style={styles.engagementDivider} />
 
             {/* Comments */}
-            <View style={styles.engagementQualityRow}>
+            <Pressable
+              style={({ pressed }) => [styles.engagementQualityRow, pressed && styles.btnPressed]}
+              onPress={() => {
+                if (Platform.OS !== 'web') {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                }
+                showToast('Discussion Quality: 248 high-intent comments & questions');
+              }}
+            >
               <View style={[styles.engagementIconBox, { backgroundColor: '#EDE9FE' }]}>
-                <Text style={{ fontSize: 18 }}>💬</Text>
+                <SpeechBubbleSvg size={18} color="#582CDB" />
               </View>
               <View style={{ flex: 1 }}>
                 <Text style={styles.engagementNumber}>248 Comments</Text>
@@ -613,23 +665,31 @@ export const PostPerformanceScreen: React.FC<PostPerformanceScreenProps> = ({
               <View style={styles.qualityPillPurple}>
                 <Text style={styles.qualityPillPurpleText}>STRONG</Text>
               </View>
-            </View>
+            </Pressable>
 
             <View style={styles.engagementDivider} />
 
             {/* Shares */}
-            <View style={styles.engagementQualityRow}>
+            <Pressable
+              style={({ pressed }) => [styles.engagementQualityRow, pressed && styles.btnPressed]}
+              onPress={() => {
+                if (Platform.OS !== 'web') {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                }
+                showToast('Share Velocity: 330 shares (3.4× your average video)');
+              }}
+            >
               <View style={[styles.engagementIconBox, { backgroundColor: '#ECFDF5' }]}>
-                <Text style={{ fontSize: 18 }}>↗️</Text>
+                <ShareArrowSvg size={18} color="#059669" />
               </View>
               <View style={{ flex: 1 }}>
                 <Text style={styles.engagementNumber}>330 Shares</Text>
-                <Text style={styles.engagementSub}>Sent to creator squads &amp; DMs</Text>
+                <Text style={styles.engagementSub}>3.4× your average video</Text>
               </View>
               <View style={styles.qualityPillGreen}>
                 <Text style={styles.qualityPillGreenText}>HIGH</Text>
               </View>
-            </View>
+            </Pressable>
           </View>
 
           {/* CARD 6: JARVIS CORE INSIGHT */}
