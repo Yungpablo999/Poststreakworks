@@ -929,24 +929,29 @@ export const PostPerformanceScreen: React.FC<PostPerformanceScreenProps> = ({
               Your strongest audience segment: creators &amp; aspiring influencers.
             </Text>
 
-            {/* 3-Column Free Metrics Breakdown */}
-            <View style={styles.demographicRow}>
-              <View style={styles.demographicCol}>
-                <Text style={styles.demoLabel}>PRIMARY AGE</Text>
-                <Text style={styles.demoValue}>18–24 (58%)</Text>
-                <Text style={styles.demoSub}>25–34 (32%)</Text>
+            {/* Free Metrics Box with generous spacing */}
+            <View style={styles.demographicBox}>
+              <View style={styles.demographicRow}>
+                <View style={styles.demographicCol}>
+                  <Text style={styles.demoLabel}>PRIMARY AGE</Text>
+                  <Text style={styles.demoValue}>18–24 (58%)</Text>
+                  <Text style={styles.demoSub}>25–34 (32%)</Text>
+                </View>
+                <View style={styles.demoDivider} />
+                <View style={styles.demographicCol}>
+                  <Text style={styles.demoLabel}>TOP CITY</Text>
+                  <Text style={styles.demoValue}>London (24%)</Text>
+                  <Text style={styles.demoSub}>Lagos · NYC · Toronto</Text>
+                </View>
               </View>
-              <View style={styles.demoDivider} />
-              <View style={styles.demographicCol}>
-                <Text style={styles.demoLabel}>TOP CITY</Text>
-                <Text style={styles.demoValue}>London (24%)</Text>
-                <Text style={styles.demoSub}>Lagos, NYC, Toronto</Text>
-              </View>
-              <View style={styles.demoDivider} />
-              <View style={styles.demographicCol}>
+
+              <View style={styles.demoHorizontalDivider} />
+
+              <View style={styles.demoAudienceTypeRow}>
                 <Text style={styles.demoLabel}>AUDIENCE TYPE</Text>
-                <Text style={styles.demoValue}>Creators (67%)</Text>
-                <Text style={styles.demoSub}>Educators (21%)</Text>
+                <Text style={styles.demoAudienceTypeValue}>
+                  Creators <Text style={{ color: '#582CDB', fontWeight: '800' }}>67%</Text> · Educators <Text style={{ color: '#582CDB', fontWeight: '800' }}>21%</Text>
+                </Text>
               </View>
             </View>
 
@@ -2146,28 +2151,32 @@ const styles = StyleSheet.create({
     color: '#64748B',
     marginBottom: 12,
   },
-  demographicRow: {
-    flexDirection: 'row',
+  demographicBox: {
     backgroundColor: '#FAF8F5',
     borderRadius: 14,
     padding: 12,
-    marginBottom: 14,
+    marginBottom: 12,
     borderWidth: 1,
     borderColor: '#EFECE6',
+  },
+  demographicRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 2,
   },
   demographicCol: {
     flex: 1,
     alignItems: 'center',
   },
   demoLabel: {
-    fontSize: 9,
+    fontSize: 9.5,
     fontWeight: '700',
     color: '#64748B',
-    letterSpacing: 0.4,
-    marginBottom: 2,
+    letterSpacing: 0.5,
+    marginBottom: 3,
   },
   demoValue: {
-    fontSize: 13,
+    fontSize: 14,
     fontWeight: '700',
     color: '#171420',
   },
@@ -2178,9 +2187,26 @@ const styles = StyleSheet.create({
   },
   demoDivider: {
     width: 1,
-    height: '80%',
+    height: 38,
     backgroundColor: '#E2E8F0',
     alignSelf: 'center',
+    marginHorizontal: 4,
+  },
+  demoHorizontalDivider: {
+    height: 1,
+    backgroundColor: '#E2E8F0',
+    marginVertical: 10,
+  },
+  demoAudienceTypeRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 4,
+  },
+  demoAudienceTypeValue: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#334155',
   },
   demoLockedTeaserBox: {
     backgroundColor: '#FAF8F5',
