@@ -399,29 +399,75 @@ export const CreatorPassportScreen: React.FC<CreatorPassportScreenProps> = ({
             </View>
 
             <View style={styles.strengthChecklist}>
-              <View style={styles.strengthCheckRow}>
+              {/* 1. Photo */}
+              <Pressable
+                style={({ pressed }) => [styles.strengthCheckRow, pressed && styles.rowPressed]}
+                onPress={() => {
+                  triggerModalPop();
+                  setShowProfileModal(true);
+                }}
+              >
+                <View style={styles.greenCheckBadge}>
+                  <Text style={styles.greenCheckBadgeText}>✓</Text>
+                </View>
+                <Text style={styles.strengthCheckActive}>Creator photo added</Text>
+              </Pressable>
+
+              {/* 2. Niche */}
+              <Pressable
+                style={({ pressed }) => [styles.strengthCheckRow, pressed && styles.rowPressed]}
+                onPress={() => {
+                  triggerModalPop();
+                  setShowProfileModal(true);
+                }}
+              >
                 <View style={styles.greenCheckBadge}>
                   <Text style={styles.greenCheckBadgeText}>✓</Text>
                 </View>
                 <Text style={styles.strengthCheckActive}>Niche defined</Text>
-              </View>
+              </Pressable>
 
-              <View style={styles.strengthCheckRow}>
+              {/* 3. Bio */}
+              <Pressable
+                style={({ pressed }) => [styles.strengthCheckRow, pressed && styles.rowPressed]}
+                onPress={() => {
+                  triggerModalPop();
+                  setShowProfileModal(true);
+                }}
+              >
                 <View style={styles.greenCheckBadge}>
                   <Text style={styles.greenCheckBadgeText}>✓</Text>
                 </View>
                 <Text style={styles.strengthCheckActive}>Profile bio active</Text>
-              </View>
+              </Pressable>
 
-              <View style={styles.strengthCheckRow}>
-                <View style={styles.greyCircleBadge} />
-                <Text style={styles.strengthCheckMuted}>Audience goal set</Text>
-              </View>
+              {/* 4. Handle */}
+              <Pressable
+                style={({ pressed }) => [styles.strengthCheckRow, pressed && styles.rowPressed]}
+                onPress={() => {
+                  triggerModalPop();
+                  setShowProfileModal(true);
+                }}
+              >
+                <View style={styles.greenCheckBadge}>
+                  <Text style={styles.greenCheckBadgeText}>✓</Text>
+                </View>
+                <Text style={styles.strengthCheckActive}>Creator handle linked</Text>
+              </Pressable>
 
-              <View style={styles.strengthCheckRow}>
-                <View style={styles.greyCircleBadge} />
-                <Text style={styles.strengthCheckMuted}>Content examples</Text>
-              </View>
+              {/* 5. Audience Goal (Actionable, Unchecked) */}
+              <Pressable
+                style={({ pressed }) => [styles.strengthCheckRow, pressed && styles.rowPressed]}
+                onPress={() => {
+                  triggerModalPop();
+                  setShowProfileModal(true);
+                }}
+              >
+                <View style={styles.greyCircleBadge}>
+                  <Text style={{ fontSize: 10, color: '#94A3B8' }}>○</Text>
+                </View>
+                <Text style={styles.strengthCheckActionable}>Audience goal set →</Text>
+              </Pressable>
             </View>
           </View>
 
@@ -1242,13 +1288,22 @@ const styles = StyleSheet.create({
     borderColor: '#CBD5E1',
   },
   strengthCheckActive: {
-    fontSize: 12,
+    fontSize: 12.5,
     fontWeight: '700',
     color: '#171420',
+  },
+  strengthCheckActionable: {
+    fontSize: 12.5,
+    fontWeight: '700',
+    color: '#582CDB',
   },
   strengthCheckMuted: {
     fontSize: 12,
     color: '#64748B',
+  },
+  rowPressed: {
+    opacity: 0.7,
+    transform: [{ scale: 0.985 }],
   },
 
   // CARD 3: STREAK SCORE
