@@ -937,10 +937,10 @@ const styles = StyleSheet.create({
     letterSpacing: 0.6,
   },
   mainTitle: {
-    fontSize: Platform.OS === 'web' ? ('clamp(18px, 4.5vw, 22px)' as any) : sFont(20),
+    fontSize: Platform.OS === 'web' ? ('clamp(15px, 4.2vw, 18px)' as any) : (isNarrowScreen ? 15 : sFont(16.5)),
     fontWeight: '700',
     color: '#171420',
-    letterSpacing: -0.35,
+    letterSpacing: -0.4,
     marginBottom: 6,
   },
   freePathPillRow: {
