@@ -358,12 +358,7 @@ export const EarningsScreen: React.FC<EarningsScreenProps> = ({
             </View>
           </View>
 
-          <Text
-            style={styles.mainTitle}
-            numberOfLines={1}
-            adjustsFontSizeToFit={true}
-            minimumFontScale={0.75}
-          >
+          <Text style={styles.mainTitle}>
             Build your path to paid brand campaigns.
           </Text>
 
@@ -1237,10 +1232,10 @@ const styles = StyleSheet.create({
     letterSpacing: 0.6,
   },
   mainTitle: {
-    fontSize: Platform.OS === 'web' ? ('clamp(16px, 4.2vw, 20px)' as any) : sFont(18),
+    fontSize: Platform.OS === 'web' ? ('clamp(14px, 3.8vw, 16.5px)' as any) : (isNarrowScreen ? 14.5 : sFont(15.5)),
     fontWeight: '700',
     color: '#171420',
-    letterSpacing: -0.35,
+    letterSpacing: -0.4,
     marginBottom: 16,
   },
 
