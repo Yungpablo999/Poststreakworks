@@ -1197,10 +1197,21 @@ export const AudienceBreakdownScreen: React.FC<AudienceBreakdownScreenProps> = (
               Your audience responds most to practical creator education. This content drives 3x more shares than lifestyle posts.
             </Text>
 
-            <View style={styles.recommendedNextPostBox}>
-              <Text style={styles.recommendedLabel}>RECOMMENDED NEXT POST</Text>
+            <Pressable
+              style={({ pressed }) => [
+                styles.recommendedNextPostBox,
+                pressed && styles.recommendedNextPostBoxPressed,
+              ]}
+              onPress={handleCreateSimilarPost}
+            >
+              <View style={styles.recommendedHeaderRow}>
+                <Text style={styles.recommendedLabel}>RECOMMENDED NEXT POST</Text>
+                <View style={styles.tapToCreateBadge}>
+                  <Text style={styles.tapToCreateText}>Tap to create ✨</Text>
+                </View>
+              </View>
               <Text style={styles.recommendedTitle}>"3 systems that help creators stay consistent"</Text>
-            </View>
+            </Pressable>
           </View>
 
           {/* CARD 6: QUALITY SIGNALS */}
@@ -2628,18 +2639,41 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   recommendedNextPostBox: {
-    backgroundColor: '#F8FAFC',
+    backgroundColor: '#FAF8F5',
     borderRadius: 14,
     padding: 12,
-    borderLeftWidth: 3,
+    borderLeftWidth: 3.5,
     borderLeftColor: '#582CDB',
+    borderWidth: 1,
+    borderColor: '#EDE8E1',
+  },
+  recommendedNextPostBoxPressed: {
+    opacity: 0.8,
+  },
+  recommendedHeaderRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 4,
+  },
+  tapToCreateBadge: {
+    backgroundColor: '#FAF5FF',
+    paddingVertical: 2,
+    paddingHorizontal: 6,
+    borderRadius: 4,
+    borderWidth: 1,
+    borderColor: '#E9D5FF',
+  },
+  tapToCreateText: {
+    fontSize: 9.5,
+    fontWeight: '800',
+    color: '#582CDB',
   },
   recommendedLabel: {
     fontSize: 9,
-    fontWeight: '700',
+    fontWeight: '800',
     color: '#582CDB',
     letterSpacing: 0.5,
-    marginBottom: 2,
   },
   recommendedTitle: {
     fontSize: 13,
