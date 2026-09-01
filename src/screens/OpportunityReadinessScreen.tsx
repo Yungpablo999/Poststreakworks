@@ -560,7 +560,7 @@ export const OpportunityReadinessScreen: React.FC<OpportunityReadinessScreenProp
             <Text style={styles.platformsCardTitle}>Connected Platforms</Text>
 
             <View style={styles.platformBadgeList}>
-              {platformsList.slice(0, 5).map((plat) => (
+              {platformsList.filter((p) => p.connected).map((plat) => (
                 <Pressable
                   key={plat.id}
                   style={styles.platformBadgeItem}
@@ -575,7 +575,7 @@ export const OpportunityReadinessScreen: React.FC<OpportunityReadinessScreenProp
                   <Text
                     style={[
                       styles.platformBadgeLabel,
-                      plat.connected && { color: '#059669', fontWeight: '800' },
+                      { color: '#059669', fontWeight: '800' },
                     ]}
                   >
                     {plat.name.split(' ')[0].toUpperCase()}

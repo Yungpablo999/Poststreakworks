@@ -138,7 +138,7 @@ export const PlatformGrowthScreen: React.FC<PlatformGrowthScreenProps> = ({
   const [platformsList, setPlatformsList] = useState([
     { id: 'tiktok', name: 'TikTok', handle: '@your_creator', followers: '+840', impressions: '12.4K', engage: '920', connected: true, top: true },
     { id: 'instagram', name: 'Instagram', handle: '@your_handle', followers: '+390', impressions: '7.8K', engage: '560', connected: true, top: false },
-    { id: 'youtube', name: 'YouTube', handle: 'Your Channel', followers: '+170', impressions: '3.9K', engage: '240', connected: true, top: false },
+    { id: 'youtube', name: 'YouTube', handle: 'Your Channel', followers: '+170', impressions: '3.9K', engage: '240', connected: false, top: false },
     { id: 'facebook', name: 'Facebook', handle: '@not_connected', followers: '0', impressions: '0', engage: '0', connected: false, top: false },
     { id: 'threads', name: 'Threads', handle: '@not_connected', followers: '0', impressions: '0', engage: '0', connected: false, top: false },
     { id: 'pinterest', name: 'Pinterest', handle: '@not_connected', followers: '0', impressions: '0', engage: '0', connected: false, top: false },

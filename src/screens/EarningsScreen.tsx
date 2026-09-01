@@ -133,7 +133,7 @@ const INITIAL_PLATFORMS: PlatformAccount[] = [
     name: 'YouTube',
     handle: '@amarashorts',
     followers: '8.9K',
-    connected: true,
+    connected: false,
     color: '#FF0000',
     bgTint: '#FEF2F2',
   },
