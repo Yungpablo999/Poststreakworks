@@ -373,7 +373,7 @@ export const GrowthScreen: React.FC<GrowthScreenProps> = ({
           {/* HEADLINE & SUBTITLE */}
           <Text style={styles.mainHeading}>See your growth clearly.</Text>
           <Text style={styles.mainSubtitle}>
-            Track your weekly growth, top content and audience signals.
+            Track your growth, top content, and audience signals.
           </Text>
 
           {/* 1. TOTAL AUDIENCE GROWTH HERO CARD */}
