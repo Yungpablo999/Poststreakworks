@@ -348,7 +348,7 @@ export const OpportunityReadinessScreen: React.FC<OpportunityReadinessScreenProp
           <View style={styles.freePathPillRow}>
             <View style={styles.freePathPill}>
               <View style={styles.yellowDot} />
-              <Text style={styles.freePathText}>Free Readiness Path</Text>
+              <Text style={styles.freePathText}>Free Path to Opportunities</Text>
             </View>
           </View>
 
