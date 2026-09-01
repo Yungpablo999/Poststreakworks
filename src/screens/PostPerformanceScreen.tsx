@@ -810,47 +810,83 @@ export const PostPerformanceScreen: React.FC<PostPerformanceScreenProps> = ({
           <View style={styles.sectionHeaderRow}>
             <Text style={styles.sectionTitle} numberOfLines={1}>Repurpose Preview</Text>
             <View style={styles.proPillBadge}>
-              <Text style={styles.proPillBadgeText}>🔒 PRO PREVIEW</Text>
+              <Text style={styles.proPillBadgeText}>🔒 PRO</Text>
             </View>
           </View>
 
           <View style={styles.repurposeCard}>
             <View style={styles.repurposeGrid}>
-              <View style={styles.repurposeGridItem}>
+              <Pressable
+                style={({ pressed }) => [styles.repurposeGridItem, pressed && styles.btnPressed]}
+                onPress={() => {
+                  if (Platform.OS !== 'web') {
+                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                  }
+                  if (onOpenJarvisPro) onOpenJarvisPro();
+                  else handleRepurposePost();
+                }}
+              >
                 <View style={styles.repurposeItemHeader}>
                   <Text style={styles.repurposeItemTitle} numberOfLines={1}>📸 Reels</Text>
                   <Text style={styles.repurposeFitBadge}>HIGH</Text>
                 </View>
                 <Text style={styles.repurposeSnippetText}>"Hook adapted for 9:16 reels format..."</Text>
-                <Text style={styles.repurposeLockTag}>🔒 PRO PREVIEW</Text>
-              </View>
+                <Text style={styles.repurposeLockTag}>🔒 Preview locked</Text>
+              </Pressable>
 
-              <View style={styles.repurposeGridItem}>
+              <Pressable
+                style={({ pressed }) => [styles.repurposeGridItem, pressed && styles.btnPressed]}
+                onPress={() => {
+                  if (Platform.OS !== 'web') {
+                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                  }
+                  if (onOpenJarvisPro) onOpenJarvisPro();
+                  else handleRepurposePost();
+                }}
+              >
                 <View style={styles.repurposeItemHeader}>
-                  <Text style={styles.repurposeItemTitle} numberOfLines={1}>▶️ Shorts</Text>
+                  <Text style={styles.repurposeItemTitle} numberOfLines={1}>▶️ YouTube</Text>
                   <Text style={styles.repurposeFitBadge}>HIGH</Text>
                 </View>
-                <Text style={styles.repurposeSnippetText}>"Loop pacing &amp; retention hook tuned..."</Text>
-                <Text style={styles.repurposeLockTag}>🔒 PRO PREVIEW</Text>
-              </View>
+                <Text style={styles.repurposeSnippetText}>"Fast-paced vertical short with on-screen text..."</Text>
+                <Text style={styles.repurposeLockTag}>🔒 Preview locked</Text>
+              </Pressable>
 
-              <View style={styles.repurposeGridItem}>
+              <Pressable
+                style={({ pressed }) => [styles.repurposeGridItem, pressed && styles.btnPressed]}
+                onPress={() => {
+                  if (Platform.OS !== 'web') {
+                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                  }
+                  if (onOpenJarvisPro) onOpenJarvisPro();
+                  else handleRepurposePost();
+                }}
+              >
                 <View style={styles.repurposeItemHeader}>
-                  <Text style={styles.repurposeItemTitle} numberOfLines={1}>▶ YouTube Shorts</Text>
+                  <Text style={styles.repurposeItemTitle} numberOfLines={1}>💼 LinkedIn</Text>
                   <Text style={styles.repurposeFitBadgeMedium}>HIGH</Text>
                 </View>
-                <Text style={styles.repurposeSnippetText}>"Fast-paced vertical short with on-screen text..."</Text>
-                <Text style={styles.repurposeLockTag}>🔒 PRO PREVIEW</Text>
-              </View>
+                <Text style={styles.repurposeSnippetText}>"Actionable 3-point breakdown &amp; takeaways..."</Text>
+                <Text style={styles.repurposeLockTag}>🔒 Preview locked</Text>
+              </Pressable>
 
-              <View style={styles.repurposeGridItem}>
+              <Pressable
+                style={({ pressed }) => [styles.repurposeGridItem, pressed && styles.btnPressed]}
+                onPress={() => {
+                  if (Platform.OS !== 'web') {
+                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                  }
+                  if (onOpenJarvisPro) onOpenJarvisPro();
+                  else handleRepurposePost();
+                }}
+              >
                 <View style={styles.repurposeItemHeader}>
                   <Text style={styles.repurposeItemTitle} numberOfLines={1}>🧵 Threads</Text>
                   <Text style={styles.repurposeFitBadge}>HIGH</Text>
                 </View>
                 <Text style={styles.repurposeSnippetText}>"5-slide swipeable text hook..."</Text>
-                <Text style={styles.repurposeLockTag}>🔒 PRO PREVIEW</Text>
-              </View>
+                <Text style={styles.repurposeLockTag}>🔒 Preview locked</Text>
+              </Pressable>
             </View>
 
             <Text style={styles.repurposeSubtext}>
