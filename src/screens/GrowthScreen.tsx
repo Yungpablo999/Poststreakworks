@@ -667,6 +667,9 @@ export const GrowthScreen: React.FC<GrowthScreenProps> = ({
                 resizeMode="cover"
               />
               <View style={styles.bestPostContent}>
+                <View style={styles.bestPostPlatformTag}>
+                  <Text style={styles.bestPostPlatformTagText}>TikTok · Video</Text>
+                </View>
                 <Text style={styles.bestPostTitle}>
                   &ldquo;3 creator mistakes I stopped making this year&rdquo;
                 </Text>
@@ -681,7 +684,9 @@ export const GrowthScreen: React.FC<GrowthScreenProps> = ({
               <View style={styles.perfBarRow}>
                 <View style={styles.perfBarLabelRow}>
                   <Text style={styles.perfBarLabel}>VIEWS</Text>
-                  <Text style={styles.perfBarValue}>14.2k</Text>
+                  <Text style={styles.perfBarValue}>
+                    14.2k <Text style={styles.perfBarComparison}>+42% vs avg</Text>
+                  </Text>
                 </View>
                 <View style={styles.perfBarTrack}>
                   <View style={[styles.perfBarFill, { width: '85%', backgroundColor: '#6366F1' }]} />
@@ -690,8 +695,10 @@ export const GrowthScreen: React.FC<GrowthScreenProps> = ({
 
               <View style={styles.perfBarRow}>
                 <View style={styles.perfBarLabelRow}>
-                  <Text style={styles.perfBarLabel}>WATCH TIME</Text>
-                  <Text style={styles.perfBarValue}>42s</Text>
+                  <Text style={styles.perfBarLabel}>AVG. WATCH TIME</Text>
+                  <Text style={styles.perfBarValue}>
+                    42s <Text style={styles.perfBarComparison}>+35% vs avg</Text>
+                  </Text>
                 </View>
                 <View style={styles.perfBarTrack}>
                   <View style={[styles.perfBarFill, { width: '70%', backgroundColor: '#8B5CF6' }]} />
@@ -701,7 +708,9 @@ export const GrowthScreen: React.FC<GrowthScreenProps> = ({
               <View style={styles.perfBarRow}>
                 <View style={styles.perfBarLabelRow}>
                   <Text style={styles.perfBarLabel}>SHARES</Text>
-                  <Text style={styles.perfBarValue}>84 (Top 5%)</Text>
+                  <Text style={styles.perfBarValue}>
+                    84 <Text style={styles.perfBarCompGold}>(Top 5%)</Text>
+                  </Text>
                 </View>
                 <View style={styles.perfBarTrack}>
                   <View style={[styles.perfBarFill, { width: '92%', backgroundColor: '#F59E0B' }]} />
@@ -1857,6 +1866,21 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
   },
+  bestPostPlatformTag: {
+    alignSelf: 'flex-start',
+    backgroundColor: '#FAF5FF',
+    paddingVertical: 2,
+    paddingHorizontal: 6,
+    borderRadius: 5,
+    borderWidth: 1,
+    borderColor: '#E9D5FF',
+    marginBottom: 4,
+  },
+  bestPostPlatformTagText: {
+    fontSize: 9.5,
+    fontWeight: '800',
+    color: '#582CDB',
+  },
   bestPostTitle: {
     fontSize: 14,
     fontWeight: '800',
@@ -1876,6 +1900,7 @@ const styles = StyleSheet.create({
   perfBarLabelRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
+    alignItems: 'center',
     marginBottom: 4,
   },
   perfBarLabel: {
@@ -1888,6 +1913,16 @@ const styles = StyleSheet.create({
     fontSize: 11,
     fontWeight: '800',
     color: '#171420',
+  },
+  perfBarComparison: {
+    fontSize: 9.5,
+    fontWeight: '700',
+    color: '#10B981',
+  },
+  perfBarCompGold: {
+    fontSize: 9.5,
+    fontWeight: '700',
+    color: '#D97706',
   },
   perfBarTrack: {
     height: 6,
