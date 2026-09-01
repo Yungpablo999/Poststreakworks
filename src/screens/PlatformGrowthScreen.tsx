@@ -279,7 +279,7 @@ export const PlatformGrowthScreen: React.FC<PlatformGrowthScreenProps> = ({
         {/* 2. SCROLLABLE CONTENT */}
         <ScrollView
           style={styles.scrollContent}
-          contentContainerStyle={{ paddingBottom: 135 }}
+          contentContainerStyle={{ paddingBottom: 90 }}
           showsVerticalScrollIndicator={false}
         >
           {/* HERO SECTION TITLE */}
@@ -288,9 +288,16 @@ export const PlatformGrowthScreen: React.FC<PlatformGrowthScreenProps> = ({
               <Text style={styles.heroPillText}>PLATFORM GROWTH PREVIEW</Text>
             </View>
           </View>
-          <Text style={styles.mainTitle}>See which platforms are growing.</Text>
+          <Text
+            style={styles.mainTitle}
+            numberOfLines={1}
+            adjustsFontSizeToFit={true}
+            minimumFontScale={0.85}
+          >
+            See which platforms are growing.
+          </Text>
           <Text style={styles.mainSubtitle}>
-            Track your audience expansion across all connected networks. <Text style={styles.activePlatformsHighlight}>3 of 4 platforms active.</Text>
+            Track how your audience is growing across all connected platforms. <Text style={styles.activePlatformsHighlight}>2 of 6 platforms connected.</Text>
           </Text>
 
           {/* CARD 1: AGGREGATE GROWTH HERO CARD */}
@@ -888,8 +895,6 @@ export const PlatformGrowthScreen: React.FC<PlatformGrowthScreenProps> = ({
               </LinearGradient>
             </Pressable>
           </View>
-
-          <View style={{ height: 100 }} />
         </ScrollView>
 
         {/* FLOATING LIQUID GLASS TAB BAR */}
