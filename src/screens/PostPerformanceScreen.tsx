@@ -415,7 +415,16 @@ export const PostPerformanceScreen: React.FC<PostPerformanceScreenProps> = ({
           </View>
 
           <View style={styles.whyItWorkedCard}>
-            <View style={styles.whyItem}>
+            {/* Factor 1: Visual Hook */}
+            <Pressable
+              style={({ pressed }) => [styles.whyItem, pressed && styles.btnPressed]}
+              onPress={() => {
+                if (Platform.OS !== 'web') {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                }
+                showToast('Hook Analysis: 88% viewer hold rate in the first 2 seconds');
+              }}
+            >
               <View style={styles.whyCheckCircle}>
                 <Text style={styles.whyCheckMark}>✓</Text>
               </View>
@@ -425,11 +434,20 @@ export const PostPerformanceScreen: React.FC<PostPerformanceScreenProps> = ({
                   First 2 seconds featured high-contrast text overlay and fast pattern interrupt.
                 </Text>
               </View>
-            </View>
+            </Pressable>
 
             <View style={styles.whyDivider} />
 
-            <View style={styles.whyItem}>
+            {/* Factor 2: Low Friction Format */}
+            <Pressable
+              style={({ pressed }) => [styles.whyItem, pressed && styles.btnPressed]}
+              onPress={() => {
+                if (Platform.OS !== 'web') {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                }
+                showToast('Pacing: 71.6% completion rate across all 3 tips');
+              }}
+            >
               <View style={styles.whyCheckCircle}>
                 <Text style={styles.whyCheckMark}>✓</Text>
               </View>
@@ -439,11 +457,20 @@ export const PostPerformanceScreen: React.FC<PostPerformanceScreenProps> = ({
                   Bulleted advice format kept viewers watching until the final tip.
                 </Text>
               </View>
-            </View>
+            </Pressable>
 
             <View style={styles.whyDivider} />
 
-            <View style={styles.whyItem}>
+            {/* Factor 3: Relatable Problem */}
+            <Pressable
+              style={({ pressed }) => [styles.whyItem, pressed && styles.btnPressed]}
+              onPress={() => {
+                if (Platform.OS !== 'web') {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                }
+                showToast('Engagement: 184 comments driven by relatable creator friction');
+              }}
+            >
               <View style={styles.whyCheckCircle}>
                 <Text style={styles.whyCheckMark}>✓</Text>
               </View>
@@ -453,21 +480,30 @@ export const PostPerformanceScreen: React.FC<PostPerformanceScreenProps> = ({
                   Addressed common beginner creator frustration that drives comment debates.
                 </Text>
               </View>
-            </View>
+            </Pressable>
 
             <View style={styles.whyDivider} />
 
-            <View style={styles.whyItem}>
+            {/* Factor 4: High Save-to-Share Ratio */}
+            <Pressable
+              style={({ pressed }) => [styles.whyItem, pressed && styles.btnPressed]}
+              onPress={() => {
+                if (Platform.OS !== 'web') {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                }
+                showToast('Save Intent: 10.4x saves-to-shares ratio (Top 2% reference metric)');
+              }}
+            >
               <View style={styles.whyCheckCircle}>
                 <Text style={styles.whyCheckMark}>✓</Text>
               </View>
               <View style={{ flex: 1 }}>
                 <Text style={styles.whyItemTitle}>High Save-to-Share Ratio</Text>
                 <Text style={styles.whyItemBody}>
-                  Creators bookmarked this post as an actionable checklist for later.
+                  3,420 saves vs. 330 shares — unusually strong save intent &amp; reference value.
                 </Text>
               </View>
-            </View>
+            </Pressable>
           </View>
 
           {/* CARD 4: RECOMMENDED CREATION (JARVIS TOPIC MATCH) */}
