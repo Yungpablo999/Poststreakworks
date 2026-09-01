@@ -1084,7 +1084,7 @@ export const AudienceBreakdownScreen: React.FC<AudienceBreakdownScreenProps> = (
                 <Text style={styles.fastestBadgeText} numberOfLines={1}>FASTEST GROWING</Text>
               </View>
               <View style={styles.spotlightSurgePill}>
-                <Text style={styles.spotlightSurgePillText}>📈 +22%</Text>
+                <Text style={styles.spotlightSurgePillText}>↗ +22% VS LAST WEEK</Text>
               </View>
             </View>
 
