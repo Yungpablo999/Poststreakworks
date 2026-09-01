@@ -504,7 +504,7 @@ export const AudienceBreakdownScreen: React.FC<AudienceBreakdownScreenProps> = (
           {/* HERO SECTION TITLE */}
           <Text style={styles.mainTitle}>Understand your audience growth</Text>
           <Text style={styles.mainSubtitle}>
-            See your total audience, weekly growth, platform split and fastest growing channel.
+            Track how your audience is growing, where it’s coming from, and what’s driving it.
           </Text>
 
           {/* CARD 1: TOTAL AUDIENCE HERO CARD */}
