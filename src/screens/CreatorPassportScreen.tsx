@@ -549,7 +549,13 @@ export const CreatorPassportScreen: React.FC<CreatorPassportScreenProps> = ({
 
             <View style={styles.platformRowsList}>
               {/* TikTok */}
-              <View style={styles.passportPlatformItem}>
+              <Pressable
+                style={({ pressed }) => [styles.passportPlatformItem, pressed && styles.rowPressed]}
+                onPress={() => {
+                  triggerModalPop();
+                  setShowConnectPlatformModal(true);
+                }}
+              >
                 <View style={styles.passportPlatformLeft}>
                   <View style={[styles.platformIconCircle, { backgroundColor: '#F1F5F9' }]}>
                     <TikTokSvg size={18} />
@@ -557,10 +563,16 @@ export const CreatorPassportScreen: React.FC<CreatorPassportScreenProps> = ({
                   <Text style={styles.passportPlatformName}>TikTok</Text>
                 </View>
                 <Text style={styles.connectedGreenLabel}>CONNECTED</Text>
-              </View>
+              </Pressable>
 
               {/* Instagram */}
-              <View style={styles.passportPlatformItem}>
+              <Pressable
+                style={({ pressed }) => [styles.passportPlatformItem, pressed && styles.rowPressed]}
+                onPress={() => {
+                  triggerModalPop();
+                  setShowConnectPlatformModal(true);
+                }}
+              >
                 <View style={styles.passportPlatformLeft}>
                   <View style={[styles.platformIconCircle, { backgroundColor: '#FDF2F8' }]}>
                     <InstagramSvg size={18} />
@@ -568,27 +580,39 @@ export const CreatorPassportScreen: React.FC<CreatorPassportScreenProps> = ({
                   <Text style={styles.passportPlatformName}>Instagram</Text>
                 </View>
                 <Text style={styles.connectedGreenLabel}>CONNECTED</Text>
-              </View>
+              </Pressable>
 
               {/* YouTube */}
-              <View style={styles.passportPlatformItem}>
+              <Pressable
+                style={({ pressed }) => [styles.passportPlatformItem, pressed && styles.rowPressed]}
+                onPress={() => {
+                  triggerModalPop();
+                  setShowConnectPlatformModal(true);
+                }}
+              >
                 <View style={styles.passportPlatformLeft}>
                   <View style={[styles.platformIconCircle, { backgroundColor: '#FEF2F2' }]}>
                     <YouTubeSvg size={18} />
                   </View>
                   <Text style={styles.passportPlatformName}>YouTube</Text>
                 </View>
-                <Pressable
-                  onPress={() => {
-                    triggerModalPop();
-                    setShowConnectPlatformModal(true);
-                  }}
-                  hitSlop={6}
-                >
-                  <Text style={styles.connectPurpleLink}>CONNECT</Text>
-                </Pressable>
-              </View>
+                <Text style={styles.connectPurpleLink}>CONNECT →</Text>
+              </Pressable>
             </View>
+
+            {/* Connect More Platforms Action */}
+            <Pressable
+              style={({ pressed }) => [styles.connectMorePlatformsBtn, pressed && styles.rowPressed]}
+              onPress={() => {
+                if (Platform.OS !== 'web') {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                }
+                triggerModalPop();
+                setShowConnectPlatformModal(true);
+              }}
+            >
+              <Text style={styles.connectMorePlatformsBtnText}>＋ Connect more platforms</Text>
+            </Pressable>
           </View>
 
           {/* CARD 6: CAMPAIGN ACTIVITY */}
@@ -763,7 +787,7 @@ export const CreatorPassportScreen: React.FC<CreatorPassportScreenProps> = ({
               <View style={styles.modalHeaderRow}>
                 <View style={{ flex: 1, marginRight: 8 }}>
                   <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, flexWrap: 'wrap', marginBottom: 2 }}>
-                    <Text style={styles.modalTitle}>Connected Platforms</Text>
+                    <Text style={styles.modalTitle}>Connect a platform</Text>
                     <View style={styles.activePlatformsCountBadge}>
                       <Text style={styles.activePlatformsCountText}>
                         {platformsList.filter((p) => p.connected).length} Connected
@@ -1491,6 +1515,24 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     color: '#582CDB',
     letterSpacing: 0.4,
+  },
+  connectMorePlatformsBtn: {
+    marginTop: 14,
+    paddingVertical: 12,
+    paddingHorizontal: 14,
+    borderRadius: 12,
+    backgroundColor: '#F8FAFC',
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    borderStyle: 'dashed',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  connectMorePlatformsBtnText: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: '#582CDB',
   },
 
   // CARD 6: CAMPAIGN ACTIVITY
