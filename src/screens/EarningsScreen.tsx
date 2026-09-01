@@ -726,10 +726,10 @@ export const EarningsScreen: React.FC<EarningsScreenProps> = ({
             </View>
 
             <View style={styles.goalTrackLabels}>
-              <Text style={styles.goalStepActive}>PROFILE</Text>
-              <Text style={styles.goalStepActive}>STREAK</Text>
-              <Text style={styles.goalStepActive}>QUESTS</Text>
-              <Text style={styles.goalStepMuted}>APPLY</Text>
+              <Text style={styles.goalStepActive}>PROFILE ✓</Text>
+              <Text style={styles.goalStepActive}>STREAK ✓</Text>
+              <Text style={styles.goalStepActive}>QUESTS ✓</Text>
+              <Text style={styles.goalStepMuted}>APPLY 🔒</Text>
             </View>
             <View style={styles.goalTrack}>
               <View style={[styles.goalFill, { width: '75%' }]} />
@@ -742,7 +742,7 @@ export const EarningsScreen: React.FC<EarningsScreenProps> = ({
                 setShowMilestoneModal(true);
               }}
             >
-              <Text style={styles.goalBtnText}>Set Goal</Text>
+              <Text style={styles.goalBtnText}>Start $50 Goal</Text>
             </Pressable>
           </View>
 
