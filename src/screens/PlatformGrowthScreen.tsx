@@ -307,7 +307,7 @@ export const PlatformGrowthScreen: React.FC<PlatformGrowthScreenProps> = ({
                 <Text style={styles.aggregateLabel}>AGGREGATE GROWTH</Text>
                 <View style={styles.aggregateMetricRow}>
                   <Text style={styles.aggregateNumber}>+12.4%</Text>
-                  <Text style={styles.aggregateTrend}>↗ 2.1%</Text>
+                  <Text style={styles.aggregateTrend}>↗ 2.1% vs last week</Text>
                 </View>
               </View>
 
@@ -336,11 +336,11 @@ export const PlatformGrowthScreen: React.FC<PlatformGrowthScreenProps> = ({
               </View>
               <View style={styles.distLegendItem}>
                 <View style={[styles.distLegendDot, { backgroundColor: '#8B5CF6' }]} />
-                <Text style={styles.distLegendText}>IG (390)</Text>
+                <Text style={styles.distLegendText}>Instagram (390)</Text>
               </View>
               <View style={styles.distLegendItem}>
                 <View style={[styles.distLegendDot, { backgroundColor: '#C4B5FD' }]} />
-                <Text style={styles.distLegendText}>YT (170)</Text>
+                <Text style={styles.distLegendText}>YouTube (170)</Text>
               </View>
             </View>
           </View>
@@ -1320,7 +1320,9 @@ const styles = StyleSheet.create({
   },
   distLegendRow: {
     flexDirection: 'row',
-    gap: 14,
+    flexWrap: 'wrap',
+    alignItems: 'center',
+    gap: 12,
   },
   distLegendItem: {
     flexDirection: 'row',
@@ -1333,7 +1335,7 @@ const styles = StyleSheet.create({
     borderRadius: 3,
   },
   distLegendText: {
-    fontSize: 11,
+    fontSize: sFont(10.5),
     fontWeight: '700',
     color: '#475569',
   },
