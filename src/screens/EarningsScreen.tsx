@@ -358,7 +358,14 @@ export const EarningsScreen: React.FC<EarningsScreenProps> = ({
             </View>
           </View>
 
-          <Text style={styles.mainTitle}>Build your path to paid brand campaigns.</Text>
+          <Text
+            style={styles.mainTitle}
+            numberOfLines={1}
+            adjustsFontSizeToFit={true}
+            minimumFontScale={0.75}
+          >
+            Build your path to paid brand campaigns.
+          </Text>
 
           {/* CARD 1: CURRENT BALANCE & READINESS */}
           <View style={styles.balanceCard}>
@@ -1230,7 +1237,7 @@ const styles = StyleSheet.create({
     letterSpacing: 0.6,
   },
   mainTitle: {
-    fontSize: Platform.OS === 'web' ? ('clamp(18px, 4.5vw, 22px)' as any) : sFont(20),
+    fontSize: Platform.OS === 'web' ? ('clamp(16px, 4.2vw, 20px)' as any) : sFont(18),
     fontWeight: '700',
     color: '#171420',
     letterSpacing: -0.35,
