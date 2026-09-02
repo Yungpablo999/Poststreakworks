@@ -938,58 +938,118 @@ export const GrowthScreen: React.FC<GrowthScreenProps> = ({
 
           <View style={styles.milestonesList}>
             {/* Milestone 1 */}
-            <View style={styles.milestoneCard}>
-              <View style={styles.milestoneLeft}>
-                <View style={[styles.milestoneIconCircle, { backgroundColor: '#EDE9FE' }]}>
-                  <Text style={{ fontSize: 14 }}>⚡</Text>
+            <Pressable
+              style={({ pressed }) => [styles.milestoneCard, pressed && styles.btnPressed]}
+              onPress={() => {
+                if (Platform.OS !== 'web') {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                }
+                setCelebrationTitle('TikTok Milestone: 14.2K / 15K');
+                setCelebrationSubtitle('Only 800 new followers needed to unlock the 15K Creator Tier badge!');
+                setCelebrationSpeech('Ghost says: You gained +840 TikTok followers this week! Keep posting daily!');
+                setCelebrationBadge('TIKTOK 15K GOAL');
+                setCelebrationXp(50);
+                setShowCelebrationModal(true);
+              }}
+            >
+              <View style={styles.milestoneTopRow}>
+                <View style={styles.milestoneLeft}>
+                  <View style={[styles.milestoneIconCircle, { backgroundColor: '#EDE9FE' }]}>
+                    <Text style={{ fontSize: 14 }}>⚡</Text>
+                  </View>
+                  <View style={{ flex: 1, marginRight: 8 }}>
+                    <Text style={styles.milestoneTitle}>Reach 15K TikTok Followers</Text>
+                    <Text style={styles.milestoneSub}>14.2K / 15K · 800 to go</Text>
+                  </View>
                 </View>
-                <View style={{ flex: 1, marginRight: 8 }}>
-                  <Text style={styles.milestoneTitle} numberOfLines={1}>Reach 15k TikTok Followers</Text>
-                  <Text style={styles.milestoneSub}>14.2k / 15k</Text>
+                <View style={styles.milestoneBadgePurple}>
+                  <Text style={styles.milestoneBadgePurpleText}>94.7%</Text>
                 </View>
               </View>
-              <View style={styles.milestoneBadgePurple}>
-                <Text style={styles.milestoneBadgePurpleText}>800 to go</Text>
+              {/* Progress Bar */}
+              <View style={styles.milestoneProgressTrack}>
+                <View style={[styles.milestoneProgressFill, { width: '94.7%', backgroundColor: '#7C3AED' }]} />
               </View>
-            </View>
+            </Pressable>
 
             {/* Milestone 2 */}
-            <View style={styles.milestoneCard}>
-              <View style={styles.milestoneLeft}>
-                <View style={[styles.milestoneIconCircle, { backgroundColor: '#FEF3C7' }]}>
-                  <Text style={{ fontSize: 14 }}>🏆</Text>
+            <Pressable
+              style={({ pressed }) => [styles.milestoneCard, pressed && styles.btnPressed]}
+              onPress={() => {
+                if (Platform.OS !== 'web') {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                }
+                setCelebrationTitle('7-Day Consistency Completed!');
+                setCelebrationSubtitle('You posted every single day this week and kept your streak alive.');
+                setCelebrationSpeech('Ghost says: Perfect consistency! Your streak multiplier is active! 🔥');
+                setCelebrationBadge('STREAK CHAMPION');
+                setCelebrationXp(100);
+                setShowCelebrationModal(true);
+              }}
+            >
+              <View style={styles.milestoneTopRow}>
+                <View style={styles.milestoneLeft}>
+                  <View style={[styles.milestoneIconCircle, { backgroundColor: '#FEF3C7' }]}>
+                    <Text style={{ fontSize: 14 }}>🏆</Text>
+                  </View>
+                  <View style={{ flex: 1, marginRight: 8 }}>
+                    <Text style={styles.milestoneTitle}>7-Day Consistency Challenge</Text>
+                    <Text style={styles.milestoneSub}>Day 7 of 7 · Goal met</Text>
+                  </View>
                 </View>
-                <View style={{ flex: 1, marginRight: 8 }}>
-                  <Text style={styles.milestoneTitle} numberOfLines={1}>7-Day Consistency Streak</Text>
-                  <Text style={styles.milestoneSub}>Day 7 of 7</Text>
+                <View style={styles.milestoneBadgeGold}>
+                  <Text style={styles.completedGoldText}>Completed ✓</Text>
                 </View>
               </View>
-              <Text style={styles.completedGoldText}>Completed ✓</Text>
-            </View>
+              {/* Progress Bar */}
+              <View style={styles.milestoneProgressTrack}>
+                <View style={[styles.milestoneProgressFill, { width: '100%', backgroundColor: '#F59E0B' }]} />
+              </View>
+            </Pressable>
 
             {/* Milestone 3 */}
-            <View style={styles.milestoneCard}>
-              <View style={styles.milestoneLeft}>
-                <View style={[styles.milestoneIconCircle, { backgroundColor: '#FEE2E2' }]}>
-                  <Text style={{ fontSize: 14 }}>🎯</Text>
+            <Pressable
+              style={({ pressed }) => [styles.milestoneCard, pressed && styles.btnPressed]}
+              onPress={() => {
+                if (Platform.OS !== 'web') {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                }
+                setCelebrationTitle('Weekly Video Target: 2/3');
+                setCelebrationSubtitle('Post 1 more video to complete your weekly mission and claim 75 XP.');
+                setCelebrationSpeech('Ghost says: You only need one more video to hit 100% completion this week!');
+                setCelebrationBadge('VIDEO MISSION');
+                setCelebrationXp(25);
+                setShowCelebrationModal(true);
+              }}
+            >
+              <View style={styles.milestoneTopRow}>
+                <View style={styles.milestoneLeft}>
+                  <View style={[styles.milestoneIconCircle, { backgroundColor: '#FEE2E2' }]}>
+                    <Text style={{ fontSize: 14 }}>🎯</Text>
+                  </View>
+                  <View style={{ flex: 1, marginRight: 8 }}>
+                    <Text style={styles.milestoneTitle}>Post 3 Videos This Week</Text>
+                    <Text style={styles.milestoneSub}>2 / 3 posted · 1 remaining</Text>
+                  </View>
                 </View>
-                <View style={{ flex: 1, marginRight: 8 }}>
-                  <Text style={styles.milestoneTitle} numberOfLines={1}>Post 3 Videos This Week</Text>
-                  <Text style={styles.milestoneSub}>2 / 3 posted</Text>
-                </View>
+                <Pressable
+                  style={styles.postNowBtn}
+                  onPress={() => {
+                    if (Platform.OS !== 'web') {
+                      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                    }
+                    if (onNavigateTab) onNavigateTab('create');
+                  }}
+                  hitSlop={6}
+                >
+                  <Text style={styles.postNowBtnText}>Post 1</Text>
+                </Pressable>
               </View>
-              <Pressable
-                style={styles.postNowBtn}
-                onPress={() => {
-                  if (Platform.OS !== 'web') {
-                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-                  }
-                  if (onNavigateTab) onNavigateTab('create');
-                }}
-              >
-                <Text style={styles.postNowBtnText}>Post 1</Text>
-              </Pressable>
-            </View>
+              {/* Progress Bar */}
+              <View style={styles.milestoneProgressTrack}>
+                <View style={[styles.milestoneProgressFill, { width: '66.7%', backgroundColor: '#DC2626' }]} />
+              </View>
+            </Pressable>
           </View>
 
           {/* 8. WEEKLY GROWTH REPORT */}
@@ -2214,14 +2274,22 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   milestoneCard: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
     backgroundColor: '#FFFFFF',
     borderRadius: 18,
     borderWidth: 1,
     borderColor: '#EFEBF8',
     padding: 14,
+    shadowColor: '#171420',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.03,
+    shadowRadius: 4,
+    elevation: 1,
+  },
+  milestoneTopRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 10,
   },
   milestoneLeft: {
     flexDirection: 'row',
@@ -2231,9 +2299,9 @@ const styles = StyleSheet.create({
     marginRight: 8,
   },
   milestoneIconCircle: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
+    width: 34,
+    height: 34,
+    borderRadius: 12,
     justifyContent: 'center',
     alignItems: 'center',
     flexShrink: 0,
@@ -2242,10 +2310,12 @@ const styles = StyleSheet.create({
     fontSize: 13.5,
     fontWeight: '800',
     color: '#171420',
+    marginBottom: 2,
   },
   milestoneSub: {
     fontSize: 11.5,
     color: '#64748B',
+    fontWeight: '500',
   },
   milestoneBadgePurple: {
     backgroundColor: '#EDE9FE',
@@ -2255,15 +2325,32 @@ const styles = StyleSheet.create({
     flexShrink: 0,
   },
   milestoneBadgePurpleText: {
-    fontSize: 10.5,
+    fontSize: 11,
     fontWeight: '800',
     color: '#6D28D9',
   },
+  milestoneBadgeGold: {
+    backgroundColor: '#FEF3C7',
+    paddingVertical: 4,
+    paddingHorizontal: 9,
+    borderRadius: 100,
+    flexShrink: 0,
+  },
   completedGoldText: {
-    fontSize: 11.5,
+    fontSize: 11,
     fontWeight: '800',
     color: '#D97706',
-    flexShrink: 0,
+  },
+  milestoneProgressTrack: {
+    width: '100%',
+    height: 6,
+    backgroundColor: '#F1F5F9',
+    borderRadius: 3,
+    overflow: 'hidden',
+  },
+  milestoneProgressFill: {
+    height: '100%',
+    borderRadius: 3,
   },
   postNowBtn: {
     backgroundColor: '#DC2626',
