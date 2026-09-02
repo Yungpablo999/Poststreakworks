@@ -74,7 +74,7 @@ export const JarvisProScreen: React.FC<JarvisProScreenProps> = ({
   onSaveProfile,}) => {
   const isDark = false;
   const [activeTab, setActiveTab] = useState<TabType>('growth');
-  const [expandedBriefStep, setExpandedBriefStep] = useState<string | null>(null);
+  const [expandedBriefStep, setExpandedBriefStep] = useState<string | null>('step_1');
   const [expandedFaqId, setExpandedFaqId] = useState<string | null>(null);
 
   // Modals & Celebrations
@@ -389,7 +389,7 @@ export const JarvisProScreen: React.FC<JarvisProScreenProps> = ({
                 />
               </View>
               <Text style={styles.briefAdviceText}>
-                Your strongest move today: post one creator advice Reel before 7:30 PM, then turn it into a caption and collab idea.
+                Your strongest move today: create one creator-advice Reel and post it at 7:30 PM, then turn it into a caption and collab idea.
               </Text>
             </View>
 
@@ -414,7 +414,7 @@ export const JarvisProScreen: React.FC<JarvisProScreenProps> = ({
                 {expandedBriefStep === 'step_1' && (
                   <View style={styles.briefStepExpandedContent}>
                     <Text style={styles.briefExpandedText}>
-                      💡 Hook Draft: “The 1 creator habit that took me from 0 to 80k views in 30 days.”
+                      💡 Hook Draft: “3 creator mistakes that are quietly killing your growth…”
                     </Text>
                   </View>
                 )}
