@@ -938,26 +938,13 @@ export const GrowthScreen: React.FC<GrowthScreenProps> = ({
 
           <View style={styles.milestonesList}>
             {/* Milestone 1 */}
-            <Pressable
-              style={({ pressed }) => [styles.milestoneCard, pressed && styles.btnPressed]}
-              onPress={() => {
-                if (Platform.OS !== 'web') {
-                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                }
-                setCelebrationTitle('TikTok Milestone: 14.2K / 15K');
-                setCelebrationSubtitle('Only 800 new followers needed to unlock the 15K Creator Tier badge!');
-                setCelebrationSpeech('Ghost says: You gained +840 TikTok followers this week! Keep posting daily!');
-                setCelebrationBadge('TIKTOK 15K GOAL');
-                setCelebrationXp(50);
-                setShowCelebrationModal(true);
-              }}
-            >
+            <View style={styles.milestoneCard}>
               <View style={styles.milestoneTopRow}>
                 <View style={styles.milestoneLeft}>
                   <View style={[styles.milestoneIconCircle, { backgroundColor: '#EDE9FE' }]}>
                     <Text style={{ fontSize: 14 }}>⚡</Text>
                   </View>
-                  <View style={{ flex: 1, marginRight: 8 }}>
+                  <View style={styles.milestoneTextCol}>
                     <Text style={styles.milestoneTitle}>Reach 15K TikTok Followers</Text>
                     <Text style={styles.milestoneSub}>14.2K / 15K · 800 to go</Text>
                   </View>
@@ -970,29 +957,16 @@ export const GrowthScreen: React.FC<GrowthScreenProps> = ({
               <View style={styles.milestoneProgressTrack}>
                 <View style={[styles.milestoneProgressFill, { width: '94.7%', backgroundColor: '#7C3AED' }]} />
               </View>
-            </Pressable>
+            </View>
 
             {/* Milestone 2 */}
-            <Pressable
-              style={({ pressed }) => [styles.milestoneCard, pressed && styles.btnPressed]}
-              onPress={() => {
-                if (Platform.OS !== 'web') {
-                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                }
-                setCelebrationTitle('7-Day Consistency Completed!');
-                setCelebrationSubtitle('You posted every single day this week and kept your streak alive.');
-                setCelebrationSpeech('Ghost says: Perfect consistency! Your streak multiplier is active! 🔥');
-                setCelebrationBadge('STREAK CHAMPION');
-                setCelebrationXp(100);
-                setShowCelebrationModal(true);
-              }}
-            >
+            <View style={styles.milestoneCard}>
               <View style={styles.milestoneTopRow}>
                 <View style={styles.milestoneLeft}>
                   <View style={[styles.milestoneIconCircle, { backgroundColor: '#FEF3C7' }]}>
                     <Text style={{ fontSize: 14 }}>🏆</Text>
                   </View>
-                  <View style={{ flex: 1, marginRight: 8 }}>
+                  <View style={styles.milestoneTextCol}>
                     <Text style={styles.milestoneTitle}>7-Day Consistency Challenge</Text>
                     <Text style={styles.milestoneSub}>Day 7 of 7 · Goal met</Text>
                   </View>
@@ -1005,51 +979,42 @@ export const GrowthScreen: React.FC<GrowthScreenProps> = ({
               <View style={styles.milestoneProgressTrack}>
                 <View style={[styles.milestoneProgressFill, { width: '100%', backgroundColor: '#F59E0B' }]} />
               </View>
-            </Pressable>
+            </View>
 
             {/* Milestone 3 */}
-            <Pressable
-              style={({ pressed }) => [styles.milestoneCard, pressed && styles.btnPressed]}
-              onPress={() => {
-                if (Platform.OS !== 'web') {
-                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                }
-                setCelebrationTitle('Weekly Video Target: 2/3');
-                setCelebrationSubtitle('Post 1 more video to complete your weekly mission and claim 75 XP.');
-                setCelebrationSpeech('Ghost says: You only need one more video to hit 100% completion this week!');
-                setCelebrationBadge('VIDEO MISSION');
-                setCelebrationXp(25);
-                setShowCelebrationModal(true);
-              }}
-            >
+            <View style={styles.milestoneCard}>
               <View style={styles.milestoneTopRow}>
                 <View style={styles.milestoneLeft}>
                   <View style={[styles.milestoneIconCircle, { backgroundColor: '#FEE2E2' }]}>
                     <Text style={{ fontSize: 14 }}>🎯</Text>
                   </View>
-                  <View style={{ flex: 1, marginRight: 8 }}>
+                  <View style={styles.milestoneTextCol}>
                     <Text style={styles.milestoneTitle}>Post 3 Videos This Week</Text>
                     <Text style={styles.milestoneSub}>2 / 3 posted · 1 remaining</Text>
                   </View>
                 </View>
                 <Pressable
-                  style={styles.postNowBtn}
+                  style={({ pressed }) => [styles.postNowBtn, pressed && styles.btnPressed]}
                   onPress={() => {
                     if (Platform.OS !== 'web') {
                       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
                     }
-                    if (onNavigateTab) onNavigateTab('create');
+                    if (onNavigateTab) {
+                      onNavigateTab('create');
+                    } else {
+                      showToast('Opening Create Post...');
+                    }
                   }}
                   hitSlop={6}
                 >
-                  <Text style={styles.postNowBtnText}>Post 1</Text>
+                  <Text style={styles.postNowBtnText}>Post ➔</Text>
                 </Pressable>
               </View>
               {/* Progress Bar */}
               <View style={styles.milestoneProgressTrack}>
                 <View style={[styles.milestoneProgressFill, { width: '66.7%', backgroundColor: '#DC2626' }]} />
               </View>
-            </Pressable>
+            </View>
           </View>
 
           {/* 8. WEEKLY GROWTH REPORT */}
@@ -2284,19 +2249,26 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.03,
     shadowRadius: 4,
     elevation: 1,
+    overflow: 'hidden',
   },
   milestoneTopRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: 10,
+    gap: 8,
   },
   milestoneLeft: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 10,
     flex: 1,
-    marginRight: 8,
+    minWidth: 0,
+    marginRight: 6,
+  },
+  milestoneTextCol: {
+    flex: 1,
+    minWidth: 0,
   },
   milestoneIconCircle: {
     width: 34,
@@ -2320,9 +2292,11 @@ const styles = StyleSheet.create({
   milestoneBadgePurple: {
     backgroundColor: '#EDE9FE',
     paddingVertical: 4,
-    paddingHorizontal: 9,
+    paddingHorizontal: 8,
     borderRadius: 100,
     flexShrink: 0,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   milestoneBadgePurpleText: {
     fontSize: 11,
@@ -2332,9 +2306,11 @@ const styles = StyleSheet.create({
   milestoneBadgeGold: {
     backgroundColor: '#FEF3C7',
     paddingVertical: 4,
-    paddingHorizontal: 9,
+    paddingHorizontal: 8,
     borderRadius: 100,
     flexShrink: 0,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   completedGoldText: {
     fontSize: 11,
