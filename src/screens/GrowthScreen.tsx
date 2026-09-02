@@ -1194,14 +1194,48 @@ export const GrowthScreen: React.FC<GrowthScreenProps> = ({
                 </Pressable>
               </View>
 
-              <View style={styles.modalDetailCard}>
-                <Text style={styles.modalDetailTitle}>⚡ Action 1: Batch 2 Shorts</Text>
-                <Text style={styles.modalDetailBody}>Schedule them for 7:30 PM Wednesday and Friday.</Text>
+              <View style={styles.modalActionItemCard}>
+                <View style={{ flex: 1, marginRight: 8 }}>
+                  <Text style={styles.modalDetailTitle}>⚡ Action 1: Batch 2 Shorts</Text>
+                  <Text style={styles.modalDetailBody}>Schedule for Wed + Fri · 7:30 PM</Text>
+                </View>
+                <Pressable
+                  style={({ pressed }) => [styles.modalActionMiniBtn, pressed && styles.btnPressed]}
+                  onPress={() => {
+                    setShowStrategyModal(false);
+                    if (onNavigateTab) {
+                      onNavigateTab('create');
+                    } else {
+                      showToast('Scheduled for Wed + Fri at 7:30 PM');
+                    }
+                  }}
+                  hitSlop={6}
+                >
+                  <Text style={styles.modalActionMiniBtnText}>Schedule ➔</Text>
+                </Pressable>
               </View>
 
-              <View style={[styles.modalDetailCard, { marginTop: 8 }]}>
-                <Text style={styles.modalDetailTitle}>🤝 Action 2: Squad Collab</Text>
-                <Text style={styles.modalDetailBody}>Join the 7-Day Consistency Challenge with Elena.</Text>
+              <View style={[styles.modalActionItemCard, { marginTop: 8 }]}>
+                <View style={{ flex: 1, marginRight: 8 }}>
+                  <Text style={styles.modalDetailTitle}>🤝 Action 2: Squad Collab</Text>
+                  <Text style={styles.modalDetailBody}>Join 7-Day Consistency Challenge</Text>
+                </View>
+                <Pressable
+                  style={({ pressed }) => [styles.modalActionMiniBtn, pressed && styles.btnPressed]}
+                  onPress={() => {
+                    setShowStrategyModal(false);
+                    if (onOpenMessages) {
+                      onOpenMessages();
+                    } else if (onNavigateTab) {
+                      onNavigateTab('match');
+                    } else {
+                      showToast('Joined 7-Day Consistency Challenge with Elena!');
+                    }
+                  }}
+                  hitSlop={6}
+                >
+                  <Text style={styles.modalActionMiniBtnText}>Join ➔</Text>
+                </Pressable>
               </View>
 
               <Pressable
@@ -1211,7 +1245,7 @@ export const GrowthScreen: React.FC<GrowthScreenProps> = ({
                   if (onNavigateTab) onNavigateTab('create');
                 }}
               >
-                <Text style={styles.modalFullBtnText}>Apply Strategy Now ➔</Text>
+                <Text style={styles.modalFullBtnText}>✨ Apply Strategy Now ➔</Text>
               </Pressable>
             </Animated.View>
           </View>
@@ -2419,6 +2453,30 @@ const styles = StyleSheet.create({
     padding: 12,
     borderWidth: 1,
     borderColor: '#EFEBF8',
+  },
+  modalActionItemCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: '#FAF8F5',
+    borderRadius: 14,
+    padding: 12,
+    borderWidth: 1,
+    borderColor: '#EFEBF8',
+  },
+  modalActionMiniBtn: {
+    backgroundColor: '#EDE9FE',
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#DDD6FE',
+    flexShrink: 0,
+  },
+  modalActionMiniBtnText: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#582CDB',
   },
   modalDetailTitle: {
     fontSize: 14,
