@@ -852,7 +852,10 @@ export const GrowthScreen: React.FC<GrowthScreenProps> = ({
 
           {/* 5. FORMAT PERFORMANCE BAR CHART */}
           <View style={styles.sectionHeaderRow}>
-            <Text style={styles.sectionHeading}>FORMAT PERFORMANCE</Text>
+            <View>
+              <Text style={styles.sectionHeading}>FORMAT PERFORMANCE</Text>
+              <Text style={styles.sectionSubheading}>Average retention score by format</Text>
+            </View>
           </View>
 
           <View style={styles.formatCard}>
@@ -883,7 +886,7 @@ export const GrowthScreen: React.FC<GrowthScreenProps> = ({
             <View style={styles.formatInsightBox}>
               <Text style={{ fontSize: 16 }}>💡</Text>
               <Text style={styles.formatInsightText}>
-                Short Videos scored <Text style={{ fontWeight: '800', color: '#171420' }}>2.4x higher retention</Text> than static posts this week.
+                Short Videos scored <Text style={{ fontWeight: '800', color: '#171420' }}>2.4× higher retention</Text> than static posts this week.
               </Text>
             </View>
           </View>
@@ -1777,6 +1780,12 @@ const styles = StyleSheet.create({
     fontWeight: '800',
     color: '#6B7280',
     letterSpacing: 0.6,
+  },
+  sectionSubheading: {
+    fontSize: 12,
+    color: '#64748B',
+    marginTop: 2,
+    fontWeight: '500',
   },
   platformsCard: {
     backgroundColor: '#FFFFFF',
