@@ -660,7 +660,7 @@ export const PlatformGrowthScreen: React.FC<PlatformGrowthScreenProps> = ({
               }}
               hitSlop={6}
             >
-              <Text style={styles.managePlatformsLinkText}>+ Connect Platforms</Text>
+              <Text style={styles.managePlatformsLinkText}>+ Connect</Text>
             </Pressable>
           </View>
 
@@ -1601,20 +1601,23 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 10,
     marginTop: 4,
+    gap: 12,
   },
   sectionTitle: {
     fontSize: 18,
     fontWeight: '700',
     color: '#171420',
     letterSpacing: -0.3,
+    flexShrink: 1,
   },
   managePlatformsLink: {
-    paddingVertical: 4,
+    paddingVertical: 5,
     paddingHorizontal: 10,
     backgroundColor: '#FAF5FF',
     borderRadius: 8,
     borderWidth: 1,
     borderColor: '#E9D5FF',
+    flexShrink: 0,
   },
   managePlatformsLinkText: {
     fontSize: 11,
@@ -1624,55 +1627,6 @@ const styles = StyleSheet.create({
   platformListContainer: {
     gap: 10,
     marginBottom: 18,
-  },
-  connectMoreCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    backgroundColor: '#FAF8F5',
-    borderRadius: 18,
-    borderWidth: 1.5,
-    borderColor: '#E2D9F3',
-    borderStyle: 'dashed',
-    padding: 14,
-    marginTop: 4,
-    gap: 10,
-  },
-  connectMoreLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-    flex: 1,
-  },
-  connectMoreIconCircle: {
-    width: 36,
-    height: 36,
-    borderRadius: 12,
-    backgroundColor: '#EDE9FE',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  connectMoreTitle: {
-    fontSize: 13,
-    fontWeight: '800',
-    color: '#171420',
-  },
-  connectMoreSub: {
-    fontSize: 11,
-    color: '#64748B',
-    marginTop: 1,
-  },
-  connectMoreBtnPill: {
-    backgroundColor: '#582CDB',
-    paddingVertical: 7,
-    paddingHorizontal: 12,
-    borderRadius: 100,
-    flexShrink: 0,
-  },
-  connectMoreBtnPillText: {
-    fontSize: 11,
-    fontWeight: '800',
-    color: '#FFFFFF',
   },
   platformCardItem: {
     backgroundColor: '#FFFFFF',
