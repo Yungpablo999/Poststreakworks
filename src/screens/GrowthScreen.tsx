@@ -1202,7 +1202,7 @@ export const GrowthScreen: React.FC<GrowthScreenProps> = ({
                 <View style={styles.modalActionContent}>
                   <Text style={styles.modalDetailTitle}>⚡ Action 1: Batch 2 Shorts</Text>
                   <Text style={styles.modalDetailBody}>
-                    Schedule them for 7:30 PM Wednesday and Friday.
+                    Schedule for Wed + Fri · 7:30 PM
                   </Text>
                 </View>
                 <Pressable
@@ -1221,11 +1221,11 @@ export const GrowthScreen: React.FC<GrowthScreenProps> = ({
                 </Pressable>
               </View>
 
-              <View style={[styles.modalActionItemCard, { marginTop: 12 }]}>
+              <View style={[styles.modalActionItemCard, { marginTop: 10 }]}>
                 <View style={styles.modalActionContent}>
                   <Text style={styles.modalDetailTitle}>🤝 Action 2: Squad Collab</Text>
                   <Text style={styles.modalDetailBody}>
-                    Join the 7-Day Consistency Challenge with Elena.
+                    Join 7-Day Consistency Challenge
                   </Text>
                 </View>
                 <Pressable
@@ -2467,40 +2467,46 @@ const styles = StyleSheet.create({
     borderColor: '#EFEBF8',
   },
   modalActionItemCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
     backgroundColor: '#FAF8F5',
-    borderRadius: 16,
-    padding: 14,
+    borderRadius: 14,
+    paddingVertical: 12,
+    paddingHorizontal: 12,
     borderWidth: 1,
     borderColor: '#EFEBF8',
+    gap: 10,
   },
   modalActionContent: {
-    marginBottom: 10,
+    flex: 1,
+    marginRight: 6,
   },
   modalActionMiniBtn: {
-    alignSelf: 'flex-start',
     backgroundColor: '#EDE9FE',
-    paddingVertical: 6,
-    paddingHorizontal: 14,
+    paddingVertical: 7,
+    paddingHorizontal: 12,
     borderRadius: 8,
     borderWidth: 1,
     borderColor: '#DDD6FE',
+    flexShrink: 0,
   },
   modalActionMiniBtnText: {
-    fontSize: 12,
+    fontSize: 11.5,
     fontWeight: '800',
     color: '#582CDB',
   },
   modalDetailTitle: {
-    fontSize: 14,
+    fontSize: 13.5,
     fontWeight: '800',
     color: '#171420',
-    marginBottom: 4,
+    marginBottom: 2,
   },
   modalDetailBody: {
-    fontSize: 13,
-    color: '#475569',
+    fontSize: 11.5,
+    color: '#64748B',
     fontWeight: '500',
-    lineHeight: 18,
+    lineHeight: 16,
   },
   modalFullBtn: {
     backgroundColor: '#582CDB',
