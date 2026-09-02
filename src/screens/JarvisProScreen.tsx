@@ -190,7 +190,7 @@ export const JarvisProScreen: React.FC<JarvisProScreenProps> = ({
               />
             </Animated.View>
 
-            {/* Pro Badge Pill */}
+            {/* Free Plan / Pro Badge Pill */}
             <Pressable
               onPress={() => {
                 if (Platform.OS !== 'web') {
@@ -199,14 +199,20 @@ export const JarvisProScreen: React.FC<JarvisProScreenProps> = ({
               }}
               hitSlop={8}
             >
-              <LinearGradient
-                colors={['#F59E0B', '#F59E0B', '#F59E0B']}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 0 }}
-                style={styles.proHeaderBadge}
-              >
-                <Text style={styles.proHeaderBadgeText}>👑 PRO</Text>
-              </LinearGradient>
+              {(userProfile?.tier === 'pro' || userProfile?.tier === 'founding' || showCheckoutSuccessModal) ? (
+                <LinearGradient
+                  colors={['#F59E0B', '#F59E0B', '#F59E0B']}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 0 }}
+                  style={styles.proHeaderBadge}
+                >
+                  <Text style={styles.proHeaderBadgeText}>👑 PRO</Text>
+                </LinearGradient>
+              ) : (
+                <View style={styles.freeHeaderBadge}>
+                  <Text style={styles.freeHeaderBadgeText}>🔒 FREE PLAN</Text>
+                </View>
+              )}
             </Pressable>
           </View>
 
@@ -332,11 +338,9 @@ export const JarvisProScreen: React.FC<JarvisProScreenProps> = ({
               </View>
 
               {/* Main Hero Headline */}
-              <Text style={styles.heroHeadline}>Meet Jarvis{
-}Pro</Text>
+              <Text style={styles.heroHeadline}>Meet Jarvis Pro</Text>
               <Text style={styles.heroSubtitle}>
-                Your AI growth companion{
-}inside PostStreak.
+                Your AI growth companion inside PostStreak.
               </Text>
 
               {/* Frosted Pill Chips */}
@@ -878,6 +882,22 @@ const styles = StyleSheet.create({
     fontWeight: '900',
     color: '#78350F',
     letterSpacing: 0.4,
+  },
+  freeHeaderBadge: {
+    paddingHorizontal: 8,
+    paddingVertical: 3.5,
+    borderRadius: 8,
+    backgroundColor: '#F1F5F9',
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  freeHeaderBadgeText: {
+    fontSize: 9.5,
+    fontWeight: '800',
+    color: '#64748B',
+    letterSpacing: 0.3,
   },
   headerRightGroup: {
     flexDirection: 'row',
