@@ -770,34 +770,6 @@ export const PlatformGrowthScreen: React.FC<PlatformGrowthScreenProps> = ({
                 </View>
               </View>
             </View>
-
-            {/* X (Twitter) Unconnected Row (Purple Connect Button) */}
-            <View style={[styles.platformCardItem, styles.platformCardItemUnconnected]}>
-              <View style={styles.platformItemHeader}>
-                <View style={styles.platformItemIdentity}>
-                  <View style={[styles.platformIconCircle, { backgroundColor: '#F8FAFC' }]}>
-                    <XSvg size={18} />
-                  </View>
-                  <View>
-                    <Text style={styles.platformItemName}>X (Twitter)</Text>
-                    <Text style={styles.platformUnconnectedStatus}>Not connected</Text>
-                  </View>
-                </View>
-
-                <Pressable
-                  style={({ pressed }) => [styles.connectPillActionBtn, pressed && styles.btnPressed]}
-                  onPress={() => {
-                    if (Platform.OS !== 'web') {
-                      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-                    }
-                    triggerModalPop();
-                    setShowConnectModal(true);
-                  }}
-                >
-                  <Text style={styles.connectPillActionBtnText}>Connect +</Text>
-                </Pressable>
-              </View>
-            </View>
           </View>
 
           {/* CARD 5: JARVIS INSIGHT CARD */}
