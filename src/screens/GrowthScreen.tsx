@@ -913,7 +913,7 @@ export const GrowthScreen: React.FC<GrowthScreenProps> = ({
             </View>
 
             <Text style={styles.jarvisBodyQuote}>
-              &ldquo;Your audience retention spikes when you deliver your main value within the first 4 seconds. Double down on mistake-based hooks.&rdquo;
+              &ldquo;Posts that deliver their main value within 4 seconds show your strongest retention. Double down on mistake-based hooks.&rdquo;
             </Text>
 
             <Pressable
@@ -923,7 +923,7 @@ export const GrowthScreen: React.FC<GrowthScreenProps> = ({
                 setShowStrategyModal(true);
               }}
             >
-              <Text style={styles.viewStrategyBtnText}>View Insight ➔</Text>
+              <Text style={styles.viewStrategyBtnText}>See the Breakdown ➔</Text>
             </Pressable>
           </View>
 
