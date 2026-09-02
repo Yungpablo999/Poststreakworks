@@ -1217,7 +1217,7 @@ export const GrowthScreen: React.FC<GrowthScreenProps> = ({
                   </Pressable>
                 </View>
                 <Text style={styles.modalDetailBody}>
-                  Schedule them for 7:30 PM Wednesday and Friday.
+                  Schedule for Wed + Fri · 7:30 PM
                 </Text>
               </View>
 
@@ -1244,7 +1244,7 @@ export const GrowthScreen: React.FC<GrowthScreenProps> = ({
                   </Pressable>
                 </View>
                 <Text style={styles.modalDetailBody}>
-                  Join the 7-Day Consistency Challenge with Elena.
+                  Join 7-Day Consistency Challenge with Elena
                 </Text>
               </View>
 
