@@ -297,7 +297,7 @@ export const PlatformGrowthScreen: React.FC<PlatformGrowthScreenProps> = ({
             See which platforms are growing.
           </Text>
           <Text style={styles.mainSubtitle}>
-            Track how your audience is growing across all connected platforms. <Text style={styles.activePlatformsHighlight}>2 of 6 platforms connected.</Text>
+            Track how your audience is growing across all connected platforms. <Text style={styles.activePlatformsHighlight}>{platformsList.filter((p) => p.connected).length} of 6 platforms connected.</Text>
           </Text>
 
           {/* CARD 1: AGGREGATE GROWTH HERO CARD */}
@@ -649,6 +649,19 @@ export const PlatformGrowthScreen: React.FC<PlatformGrowthScreenProps> = ({
           {/* CARD 4: PLATFORM BREAKDOWN LIST */}
           <View style={styles.sectionHeaderRow}>
             <Text style={styles.sectionTitle}>Platform Breakdown</Text>
+            <Pressable
+              style={({ pressed }) => [styles.managePlatformsLink, pressed && styles.btnPressed]}
+              onPress={() => {
+                if (Platform.OS !== 'web') {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                }
+                triggerModalPop();
+                setShowConnectModal(true);
+              }}
+              hitSlop={6}
+            >
+              <Text style={styles.managePlatformsLinkText}>+ Connect Platforms</Text>
+            </Pressable>
           </View>
 
           <View style={styles.platformListContainer}>
@@ -785,6 +798,33 @@ export const PlatformGrowthScreen: React.FC<PlatformGrowthScreenProps> = ({
                 </Pressable>
               </View>
             </View>
+
+            {/* Connect More Platforms Action Card */}
+            <Pressable
+              style={({ pressed }) => [styles.connectMoreCard, pressed && styles.btnPressed]}
+              onPress={() => {
+                if (Platform.OS !== 'web') {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                }
+                triggerModalPop();
+                setShowConnectModal(true);
+              }}
+            >
+              <View style={styles.connectMoreLeft}>
+                <View style={styles.connectMoreIconCircle}>
+                  <Text style={{ fontSize: 18 }}>⚡</Text>
+                </View>
+                <View style={{ flex: 1 }}>
+                  <Text style={styles.connectMoreTitle}>Connect More Platforms</Text>
+                  <Text style={styles.connectMoreSub}>
+                    Link Threads, Facebook, or Pinterest to sync all analytics
+                  </Text>
+                </View>
+              </View>
+              <View style={styles.connectMoreBtnPill}>
+                <Text style={styles.connectMoreBtnPillText}>+ Sync Hub</Text>
+              </View>
+            </Pressable>
           </View>
 
           {/* CARD 5: JARVIS INSIGHT CARD */}
@@ -1623,9 +1663,71 @@ const styles = StyleSheet.create({
     color: '#171420',
     letterSpacing: -0.3,
   },
+  managePlatformsLink: {
+    paddingVertical: 4,
+    paddingHorizontal: 10,
+    backgroundColor: '#FAF5FF',
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#E9D5FF',
+  },
+  managePlatformsLinkText: {
+    fontSize: 11,
+    fontWeight: '800',
+    color: '#582CDB',
+  },
   platformListContainer: {
     gap: 10,
     marginBottom: 18,
+  },
+  connectMoreCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: '#FAF8F5',
+    borderRadius: 18,
+    borderWidth: 1.5,
+    borderColor: '#E2D9F3',
+    borderStyle: 'dashed',
+    padding: 14,
+    marginTop: 4,
+    gap: 10,
+  },
+  connectMoreLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    flex: 1,
+  },
+  connectMoreIconCircle: {
+    width: 36,
+    height: 36,
+    borderRadius: 12,
+    backgroundColor: '#EDE9FE',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  connectMoreTitle: {
+    fontSize: 13,
+    fontWeight: '800',
+    color: '#171420',
+  },
+  connectMoreSub: {
+    fontSize: 11,
+    color: '#64748B',
+    marginTop: 1,
+  },
+  connectMoreBtnPill: {
+    backgroundColor: '#582CDB',
+    paddingVertical: 7,
+    paddingHorizontal: 12,
+    borderRadius: 100,
+    flexShrink: 0,
+  },
+  connectMoreBtnPillText: {
+    fontSize: 11,
+    fontWeight: '800',
+    color: '#FFFFFF',
   },
   platformCardItem: {
     backgroundColor: '#FFFFFF',
