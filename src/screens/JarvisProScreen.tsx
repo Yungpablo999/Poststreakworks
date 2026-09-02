@@ -567,7 +567,7 @@ export const JarvisProScreen: React.FC<JarvisProScreenProps> = ({
               </Text>
             </View>
 
-            {/* Feature 4: Match Tier */}
+            {/* Feature 4: Creator Matching */}
             <View style={styles.featureGridCard}>
               <View style={styles.featureIconContainer}>
                 <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
@@ -585,35 +585,13 @@ export const JarvisProScreen: React.FC<JarvisProScreenProps> = ({
                   />
                 </Svg>
               </View>
-              <Text style={styles.featureTitle} numberOfLines={1}>Match Tier</Text>
+              <Text style={styles.featureTitle} numberOfLines={1}>Creator Matching</Text>
               <Text style={styles.featureDescription} numberOfLines={3}>
-                Deep affinity scores for collaborations.
+                Find high-fit creators for your next collaboration.
               </Text>
             </View>
 
-            {/* Feature 5: Squad Missions */}
-            <View style={styles.featureGridCard}>
-              <View style={styles.featureIconContainer}>
-                <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
-                  <Path
-                    d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"
-                    stroke="#582CDB"
-                    strokeWidth="2"
-                  />
-                  <Path
-                    d="M12 15l-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"
-                    stroke="#582CDB"
-                    strokeWidth="2"
-                  />
-                </Svg>
-              </View>
-              <Text style={styles.featureTitle} numberOfLines={1}>Squad Missions</Text>
-              <Text style={styles.featureDescription} numberOfLines={3}>
-                Exclusive high-stakes missions.
-              </Text>
-            </View>
-
-            {/* Feature 6: Accountability */}
+            {/* Feature 5: Accountability */}
             <View style={styles.featureGridCard}>
               <View style={styles.featureIconContainer}>
                 <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
@@ -635,7 +613,29 @@ export const JarvisProScreen: React.FC<JarvisProScreenProps> = ({
               </View>
               <Text style={styles.featureTitle} numberOfLines={1}>Accountability</Text>
               <Text style={styles.featureDescription} numberOfLines={3}>
-                Readiness audits and streak protection.
+                Stay consistent with goals, streaks and weekly actions.
+              </Text>
+            </View>
+
+            {/* Feature 6: Squad Missions */}
+            <View style={styles.featureGridCard}>
+              <View style={styles.featureIconContainer}>
+                <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
+                  <Path
+                    d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"
+                    stroke="#582CDB"
+                    strokeWidth="2"
+                  />
+                  <Path
+                    d="M12 15l-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"
+                    stroke="#582CDB"
+                    strokeWidth="2"
+                  />
+                </Svg>
+              </View>
+              <Text style={styles.featureTitle} numberOfLines={1}>Squad Missions</Text>
+              <Text style={styles.featureDescription} numberOfLines={3}>
+                Exclusive challenges that push your growth further.
               </Text>
             </View>
           </View>
