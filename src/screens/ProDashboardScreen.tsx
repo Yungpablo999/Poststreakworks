@@ -683,15 +683,15 @@ export const ProDashboardScreen: React.FC<ProDashboardScreenProps> = ({
 
             <View style={styles.proPlanBadgesRow}>
               <View style={styles.proPillPurple}>
-                <Text style={styles.proPillPurpleText}>Level 42</Text>
+                <Text style={styles.proPillPurpleText}>Level 1</Text>
               </View>
 
               <View style={styles.proPillGold}>
-                <Text style={styles.proPillGoldText}>{userProfile?.streakCount || 1}-Day Streak</Text>
+                <Text style={styles.proPillGoldText}>1-Day Streak</Text>
               </View>
 
               <View style={styles.proPillGray}>
-                <Text style={styles.proPillGrayText}>5 Platforms Connected</Text>
+                <Text style={styles.proPillGrayText}>2 Platforms Connected</Text>
               </View>
 
               <View style={styles.proPillActiveGold}>
