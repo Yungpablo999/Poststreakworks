@@ -798,33 +798,6 @@ export const PlatformGrowthScreen: React.FC<PlatformGrowthScreenProps> = ({
                 </Pressable>
               </View>
             </View>
-
-            {/* Connect More Platforms Action Card */}
-            <Pressable
-              style={({ pressed }) => [styles.connectMoreCard, pressed && styles.btnPressed]}
-              onPress={() => {
-                if (Platform.OS !== 'web') {
-                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-                }
-                triggerModalPop();
-                setShowConnectModal(true);
-              }}
-            >
-              <View style={styles.connectMoreLeft}>
-                <View style={styles.connectMoreIconCircle}>
-                  <Text style={{ fontSize: 18 }}>⚡</Text>
-                </View>
-                <View style={{ flex: 1 }}>
-                  <Text style={styles.connectMoreTitle}>Connect More Platforms</Text>
-                  <Text style={styles.connectMoreSub}>
-                    Link Threads, Facebook, or Pinterest to sync all analytics
-                  </Text>
-                </View>
-              </View>
-              <View style={styles.connectMoreBtnPill}>
-                <Text style={styles.connectMoreBtnPillText}>+ Sync Hub</Text>
-              </View>
-            </Pressable>
           </View>
 
           {/* CARD 5: JARVIS INSIGHT CARD */}
