@@ -854,6 +854,8 @@ export default function App() {
               onOpenPostPerformance={() => navigateTo('post-performance')}
               onOpenPlatformGrowth={() => navigateTo('platform-growth')}
               onOpenEarnings={() => navigateTo('earnings')}
+              onOpenSquad={() => navigateTo('squad')}
+              onOpenFindSquad={() => navigateTo('find-squad')}
               onNavigateTab={(tab: TabType) => {
                 if (tab === 'home') {
                   navigateTo('dashboard');

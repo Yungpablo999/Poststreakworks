@@ -163,6 +163,8 @@ interface GrowthScreenProps {
   onOpenJarvisPro?: () => void;
   onOpenMessages?: () => void;
   onOpenAudienceBreakdown?: () => void;
+  onOpenSquad?: () => void;
+  onOpenFindSquad?: () => void;
   userProfile?: UserProfileData;
   onSaveProfile?: (updated: UserProfileData) => void;
 }
@@ -194,6 +196,8 @@ export const GrowthScreen: React.FC<GrowthScreenProps> = ({
   onOpenJarvisPro,
   onOpenMessages,
   onOpenAudienceBreakdown,
+  onOpenSquad,
+  onOpenFindSquad,
   userProfile,
   onSaveProfile,
 }) => {
@@ -1196,8 +1200,8 @@ export const GrowthScreen: React.FC<GrowthScreenProps> = ({
 
               <View style={styles.modalActionItemCard}>
                 <View style={{ flex: 1, marginRight: 8 }}>
-                  <Text style={styles.modalDetailTitle}>⚡ Action 1: Batch 2 Shorts</Text>
-                  <Text style={styles.modalDetailBody}>Schedule for Wed + Fri · 7:30 PM</Text>
+                  <Text style={styles.modalDetailTitle} numberOfLines={1}>⚡ Action 1: Batch 2 Shorts</Text>
+                  <Text style={styles.modalDetailBody} numberOfLines={1}>Schedule for Wed + Fri · 7:30 PM</Text>
                 </View>
                 <Pressable
                   style={({ pressed }) => [styles.modalActionMiniBtn, pressed && styles.btnPressed]}
@@ -1217,19 +1221,21 @@ export const GrowthScreen: React.FC<GrowthScreenProps> = ({
 
               <View style={[styles.modalActionItemCard, { marginTop: 8 }]}>
                 <View style={{ flex: 1, marginRight: 8 }}>
-                  <Text style={styles.modalDetailTitle}>🤝 Action 2: Squad Collab</Text>
-                  <Text style={styles.modalDetailBody}>Join 7-Day Consistency Challenge</Text>
+                  <Text style={styles.modalDetailTitle} numberOfLines={1}>🤝 Action 2: Squad Collab</Text>
+                  <Text style={styles.modalDetailBody} numberOfLines={1}>Join 7-Day Consistency Challenge</Text>
                 </View>
                 <Pressable
                   style={({ pressed }) => [styles.modalActionMiniBtn, pressed && styles.btnPressed]}
                   onPress={() => {
                     setShowStrategyModal(false);
-                    if (onOpenMessages) {
-                      onOpenMessages();
+                    if (onOpenSquad) {
+                      onOpenSquad();
+                    } else if (onOpenFindSquad) {
+                      onOpenFindSquad();
                     } else if (onNavigateTab) {
                       onNavigateTab('match');
                     } else {
-                      showToast('Joined 7-Day Consistency Challenge with Elena!');
+                      showToast('Opening Creator Squad...');
                     }
                   }}
                   hitSlop={6}
@@ -2460,34 +2466,37 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     backgroundColor: '#FAF8F5',
     borderRadius: 14,
-    padding: 12,
+    paddingVertical: 10,
+    paddingHorizontal: 12,
     borderWidth: 1,
     borderColor: '#EFEBF8',
+    gap: 8,
   },
   modalActionMiniBtn: {
     backgroundColor: '#EDE9FE',
     paddingVertical: 6,
-    paddingHorizontal: 12,
+    paddingHorizontal: 10,
     borderRadius: 8,
     borderWidth: 1,
     borderColor: '#DDD6FE',
     flexShrink: 0,
   },
   modalActionMiniBtnText: {
-    fontSize: 12,
-    fontWeight: '700',
+    fontSize: 11,
+    fontWeight: '800',
     color: '#582CDB',
   },
   modalDetailTitle: {
-    fontSize: 14,
+    fontSize: 13,
     fontWeight: '800',
     color: '#171420',
     marginBottom: 2,
   },
   modalDetailBody: {
-    fontSize: 12,
+    fontSize: 11,
     color: '#64748B',
-    lineHeight: 17,
+    fontWeight: '500',
+    lineHeight: 15,
   },
   modalFullBtn: {
     backgroundColor: '#582CDB',
