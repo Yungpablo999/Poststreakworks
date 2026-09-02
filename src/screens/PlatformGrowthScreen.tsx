@@ -809,8 +809,13 @@ export const PlatformGrowthScreen: React.FC<PlatformGrowthScreenProps> = ({
               }}
             >
               <View style={styles.nextStepLeft}>
-                <Text style={{ fontSize: 18, color: '#582CDB' }}>⊕</Text>
-                <Text style={styles.nextStepText}>Create TikTok Post</Text>
+                <View style={styles.nextStepIconCircle}>
+                  <Text style={{ fontSize: 16, color: '#582CDB', fontWeight: '800' }}>⊕</Text>
+                </View>
+                <View style={{ flex: 1 }}>
+                  <Text style={styles.nextStepText}>Create TikTok Post</Text>
+                  <Text style={styles.nextStepSubText}>Based on your winning content pattern</Text>
+                </View>
               </View>
               <Text style={styles.nextStepChevron}>›</Text>
             </Pressable>
@@ -831,10 +836,17 @@ export const PlatformGrowthScreen: React.FC<PlatformGrowthScreenProps> = ({
               }}
             >
               <View style={styles.nextStepLeft}>
-                <Text style={{ fontSize: 16, color: '#582CDB' }}>✨</Text>
-                <Text style={styles.nextStepText}>Repurpose for IG</Text>
-                <View style={styles.nextStepProPill}>
-                  <Text style={styles.nextStepProPillText}>🔒 PRO</Text>
+                <View style={styles.nextStepIconCircle}>
+                  <Text style={{ fontSize: 15, color: '#582CDB' }}>✨</Text>
+                </View>
+                <View style={{ flex: 1 }}>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                    <Text style={styles.nextStepText}>Repurpose for IG</Text>
+                    <View style={styles.nextStepProPill}>
+                      <Text style={styles.nextStepProPillText}>🔒 PRO</Text>
+                    </View>
+                  </View>
+                  <Text style={styles.nextStepSubText}>Convert top video into high-save carousel</Text>
                 </View>
               </View>
               <Text style={styles.nextStepChevron}>›</Text>
@@ -885,7 +897,7 @@ export const PlatformGrowthScreen: React.FC<PlatformGrowthScreenProps> = ({
                 end={{ x: 1, y: 1 }}
                 style={styles.unlockProGradient}
               >
-                <Text style={styles.unlockProBtnText}>Unlock Pro Features</Text>
+                <Text style={styles.unlockProBtnText}>Unlock Full Growth History →</Text>
               </LinearGradient>
             </Pressable>
           </View>
@@ -1988,12 +2000,29 @@ const styles = StyleSheet.create({
   nextStepLeft: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 10,
+    gap: 12,
+    flex: 1,
+  },
+  nextStepIconCircle: {
+    width: 34,
+    height: 34,
+    borderRadius: 10,
+    backgroundColor: '#FAF5FF',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#E9D5FF',
   },
   nextStepText: {
     fontSize: 14,
     fontWeight: '700',
     color: '#171420',
+  },
+  nextStepSubText: {
+    fontSize: 11,
+    color: '#64748B',
+    marginTop: 1,
+    fontWeight: '500',
   },
   nextStepProPill: {
     backgroundColor: '#FEF9C3',
