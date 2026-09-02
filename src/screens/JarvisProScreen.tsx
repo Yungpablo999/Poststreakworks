@@ -652,17 +652,17 @@ export const JarvisProScreen: React.FC<JarvisProScreenProps> = ({
             <View style={styles.pricingChecklistCol}>
               <View style={styles.pricingCheckItem}>
                 <Text style={styles.pricingCheckIcon}>✓</Text>
-                <Text style={styles.pricingCheckText}>Full Jarvis Intelligence</Text>
+                <Text style={styles.pricingCheckText}>Full access to Jarvis AI</Text>
               </View>
 
               <View style={styles.pricingCheckItem}>
                 <Text style={styles.pricingCheckIcon}>✓</Text>
-                <Text style={styles.pricingCheckText}>Growth analytics suite</Text>
+                <Text style={styles.pricingCheckText}>Advanced growth analytics</Text>
               </View>
 
               <View style={styles.pricingCheckItem}>
                 <Text style={styles.pricingCheckIcon}>✓</Text>
-                <Text style={styles.pricingCheckText}>Unlimited discovery</Text>
+                <Text style={styles.pricingCheckText}>Unlimited creator discovery</Text>
               </View>
 
               <View style={styles.pricingCheckItem}>
