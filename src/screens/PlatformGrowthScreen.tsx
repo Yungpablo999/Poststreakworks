@@ -137,8 +137,8 @@ export const PlatformGrowthScreen: React.FC<PlatformGrowthScreenProps> = ({
   // Platform Accounts State (The 6 Social Platforms)
   const [platformsList, setPlatformsList] = useState([
     { id: 'tiktok', name: 'TikTok', handle: '@your_creator', followers: '+840', impressions: '12.4K', engage: '920', connected: true, top: true },
-    { id: 'instagram', name: 'Instagram', handle: '@your_handle', followers: '+390', impressions: '7.8K', engage: '560', connected: true, top: false },
-    { id: 'youtube', name: 'YouTube', handle: 'Your Channel', followers: '+170', impressions: '3.9K', engage: '240', connected: false, top: false },
+    { id: 'instagram', name: 'Instagram', handle: '@your_handle', followers: '+420', impressions: '7.8K', engage: '560', connected: true, top: false },
+    { id: 'youtube', name: 'YouTube', handle: 'Your Channel', followers: '+140', impressions: '3.9K', engage: '240', connected: false, top: false },
     { id: 'facebook', name: 'Facebook', handle: '@not_connected', followers: '0', impressions: '0', engage: '0', connected: false, top: false },
     { id: 'threads', name: 'Threads', handle: '@not_connected', followers: '0', impressions: '0', engage: '0', connected: false, top: false },
     { id: 'pinterest', name: 'Pinterest', handle: '@not_connected', followers: '0', impressions: '0', engage: '0', connected: false, top: false },
@@ -674,7 +674,7 @@ export const PlatformGrowthScreen: React.FC<PlatformGrowthScreenProps> = ({
                 <View style={styles.platformStatCol}>
                   <Text style={styles.platformStatLabel}>FOLLOWERS</Text>
                   <Text style={styles.platformStatValue}>
-                    +840 <Text style={styles.platformStatGain}>22% ▲</Text>
+                    +840 <Text style={styles.platformStatGain}>↑22%</Text>
                   </Text>
                 </View>
                 <View style={styles.platformStatDivider} />
@@ -708,7 +708,7 @@ export const PlatformGrowthScreen: React.FC<PlatformGrowthScreenProps> = ({
                 <View style={styles.platformStatCol}>
                   <Text style={styles.platformStatLabel}>FOLLOWERS</Text>
                   <Text style={styles.platformStatValue}>
-                    +390 <Text style={styles.platformStatGain}>14% ▲</Text>
+                    +420 <Text style={styles.platformStatGain}>↑14%</Text>
                   </Text>
                 </View>
                 <View style={styles.platformStatDivider} />
@@ -742,7 +742,7 @@ export const PlatformGrowthScreen: React.FC<PlatformGrowthScreenProps> = ({
                 <View style={styles.platformStatCol}>
                   <Text style={styles.platformStatLabel}>SUBS</Text>
                   <Text style={styles.platformStatValue}>
-                    +170 <Text style={styles.platformStatGain}>9% ▲</Text>
+                    +140 <Text style={styles.platformStatGain}>↑9%</Text>
                   </Text>
                 </View>
                 <View style={styles.platformStatDivider} />
