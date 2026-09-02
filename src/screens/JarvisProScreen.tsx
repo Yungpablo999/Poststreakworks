@@ -707,9 +707,9 @@ export const JarvisProScreen: React.FC<JarvisProScreenProps> = ({
               <View style={styles.comparisonHeaderRow}>
                 <Text style={styles.withoutProHeader}>✕ Without Pro</Text>
               </View>
-              <Text style={styles.withoutProItem}>• Guess content hooks</Text>
+              <Text style={styles.withoutProItem}>• Guess what to post</Text>
               <Text style={styles.withoutProItem}>• Track stats manually</Text>
-              <Text style={styles.withoutProItem}>• Random collaborations</Text>
+              <Text style={styles.withoutProItem}>• Find collaborators randomly</Text>
             </View>
 
             {/* Bottom Box: With Jarvis Pro */}
@@ -717,9 +717,9 @@ export const JarvisProScreen: React.FC<JarvisProScreenProps> = ({
               <View style={styles.comparisonHeaderRow}>
                 <Text style={styles.withProHeader}>✓ With Jarvis Pro</Text>
               </View>
-              <Text style={styles.withProItem}>• Precise daily briefs</Text>
-              <Text style={styles.withProItem}>• Automated insight engine</Text>
-              <Text style={styles.withProItem}>• Goal-backed matching</Text>
+              <Text style={styles.withProItem}>• Get precise daily recommendations</Text>
+              <Text style={styles.withProItem}>• Know what to improve next</Text>
+              <Text style={styles.withProItem}>• Find creators who fit your goals</Text>
             </View>
           </View>
 
