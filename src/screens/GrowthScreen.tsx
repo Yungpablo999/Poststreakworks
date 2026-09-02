@@ -1031,10 +1031,33 @@ export const GrowthScreen: React.FC<GrowthScreenProps> = ({
                 </Svg>
               </View>
               <View style={{ flex: 1 }}>
-                <Text style={styles.reportTitle}>October 14 - 20 Report</Text>
+                <Text style={styles.reportTitle}>October 14 – 20 Report</Text>
                 <Text style={styles.reportSummary}>
                   Your total impressions jumped 22%. Best day was Wednesday at 7:30 PM.
                 </Text>
+              </View>
+            </View>
+
+            {/* This week at a glance */}
+            <View style={styles.reportGlanceBox}>
+              <Text style={styles.reportGlanceTitle}>This week at a glance</Text>
+              <View style={styles.reportGlanceList}>
+                <View style={styles.reportGlanceItem}>
+                  <Text style={styles.reportGlanceIcon}>👀</Text>
+                  <Text style={styles.reportGlanceText}>Impressions <Text style={styles.reportGlanceBold}>↑ 22%</Text></Text>
+                </View>
+                <View style={styles.reportGlanceItem}>
+                  <Text style={styles.reportGlanceIcon}>👥</Text>
+                  <Text style={styles.reportGlanceText}>Followers <Text style={styles.reportGlanceBold}>↑ 14%</Text></Text>
+                </View>
+                <View style={styles.reportGlanceItem}>
+                  <Text style={styles.reportGlanceIcon}>🎥</Text>
+                  <Text style={styles.reportGlanceText}>Short videos performed <Text style={styles.reportGlanceBold}>2.4× better</Text></Text>
+                </View>
+                <View style={styles.reportGlanceItem}>
+                  <Text style={styles.reportGlanceIcon}>🕢</Text>
+                  <Text style={styles.reportGlanceText}>Best posting time <Text style={styles.reportGlanceBold}>Wed · 7:30 PM</Text></Text>
+                </View>
               </View>
             </View>
 
@@ -1064,15 +1087,15 @@ export const GrowthScreen: React.FC<GrowthScreenProps> = ({
             <View style={styles.proPillarsList}>
               <View style={styles.proPillarItem}>
                 <Text style={styles.proPillarCheck}>🔒</Text>
-                <Text style={styles.proPillarText}>Real-time retention curve tracking</Text>
+                <Text style={styles.proPillarText}>Deeper Retention Analysis</Text>
               </View>
               <View style={styles.proPillarItem}>
                 <Text style={styles.proPillarCheck}>🔒</Text>
-                <Text style={styles.proPillarText}>AI script performance scorer</Text>
+                <Text style={styles.proPillarText}>AI Content Performance Score</Text>
               </View>
               <View style={styles.proPillarItem}>
                 <Text style={styles.proPillarCheck}>🔒</Text>
-                <Text style={styles.proPillarText}>Multi-creator audience overlap data</Text>
+                <Text style={styles.proPillarText}>Cross-Creator Audience Insights</Text>
               </View>
             </View>
 
@@ -2373,6 +2396,43 @@ const styles = StyleSheet.create({
     fontSize: 12.5,
     color: '#475569',
     lineHeight: 18,
+  },
+  reportGlanceBox: {
+    backgroundColor: '#FAF8F5',
+    borderRadius: 14,
+    padding: 12,
+    marginTop: 4,
+    marginBottom: 14,
+    borderWidth: 1,
+    borderColor: '#EFEBF8',
+  },
+  reportGlanceTitle: {
+    fontSize: 11.5,
+    fontWeight: '800',
+    color: '#6B637B',
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+    marginBottom: 8,
+  },
+  reportGlanceList: {
+    gap: 6,
+  },
+  reportGlanceItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  reportGlanceIcon: {
+    fontSize: 13,
+  },
+  reportGlanceText: {
+    fontSize: 12.5,
+    color: '#475569',
+    fontWeight: '500',
+  },
+  reportGlanceBold: {
+    fontWeight: '800',
+    color: '#171420',
   },
   downloadReportLink: {
     alignItems: 'flex-start',
