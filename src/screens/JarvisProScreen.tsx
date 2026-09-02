@@ -42,7 +42,7 @@ const FAQ_DATA: FaqItem[] = [
     id: 'faq_1',
     question: 'What is Jarvis Pro?',
     answer:
-      'Jarvis Pro is your autonomous AI creator strategist that analyzes your audience, drafts viral hooks, optimizes posting times, and pairs you with high-affinity collaboration partners.',
+      'Jarvis Pro is your AI creator strategist that analyzes your audience, generates content ideas and hooks, optimizes posting times, and finds high-fit collaboration opportunities.',
   },
   {
     id: 'faq_2',
@@ -60,7 +60,7 @@ const FAQ_DATA: FaqItem[] = [
     id: 'faq_4',
     question: 'Is Voice Studio included?',
     answer:
-      'Yes, all advanced AI voice cloning, caption transcription, and audio mastering tools are completely included in Pro with unlimited credits.',
+      'Yes. Voice Studio is included with Jarvis Pro, giving you access to AI voice tools, transcription, and audio mastering.',
   },
 ];
 
