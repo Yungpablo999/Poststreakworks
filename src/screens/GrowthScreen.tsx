@@ -1199,49 +1199,53 @@ export const GrowthScreen: React.FC<GrowthScreenProps> = ({
               </View>
 
               <View style={styles.modalActionItemCard}>
-                <View style={{ flex: 1, marginRight: 8 }}>
-                  <Text style={styles.modalDetailTitle} numberOfLines={1}>⚡ Action 1: Batch 2 Shorts</Text>
-                  <Text style={styles.modalDetailBody} numberOfLines={1}>Schedule for Wed + Fri · 7:30 PM</Text>
+                <View style={styles.modalActionHeaderRow}>
+                  <Text style={styles.modalDetailTitle}>⚡ Action 1: Batch 2 Shorts</Text>
+                  <Pressable
+                    style={({ pressed }) => [styles.modalActionMiniBtn, pressed && styles.btnPressed]}
+                    onPress={() => {
+                      setShowStrategyModal(false);
+                      if (onNavigateTab) {
+                        onNavigateTab('create');
+                      } else {
+                        showToast('Scheduled for Wed + Fri at 7:30 PM');
+                      }
+                    }}
+                    hitSlop={6}
+                  >
+                    <Text style={styles.modalActionMiniBtnText}>Schedule ➔</Text>
+                  </Pressable>
                 </View>
-                <Pressable
-                  style={({ pressed }) => [styles.modalActionMiniBtn, pressed && styles.btnPressed]}
-                  onPress={() => {
-                    setShowStrategyModal(false);
-                    if (onNavigateTab) {
-                      onNavigateTab('create');
-                    } else {
-                      showToast('Scheduled for Wed + Fri at 7:30 PM');
-                    }
-                  }}
-                  hitSlop={6}
-                >
-                  <Text style={styles.modalActionMiniBtnText}>Schedule ➔</Text>
-                </Pressable>
+                <Text style={styles.modalDetailBody}>
+                  Schedule them for 7:30 PM Wednesday and Friday.
+                </Text>
               </View>
 
-              <View style={[styles.modalActionItemCard, { marginTop: 8 }]}>
-                <View style={{ flex: 1, marginRight: 8 }}>
-                  <Text style={styles.modalDetailTitle} numberOfLines={1}>🤝 Action 2: Squad Collab</Text>
-                  <Text style={styles.modalDetailBody} numberOfLines={1}>Join 7-Day Consistency Challenge</Text>
+              <View style={[styles.modalActionItemCard, { marginTop: 10 }]}>
+                <View style={styles.modalActionHeaderRow}>
+                  <Text style={styles.modalDetailTitle}>🤝 Action 2: Squad Collab</Text>
+                  <Pressable
+                    style={({ pressed }) => [styles.modalActionMiniBtn, pressed && styles.btnPressed]}
+                    onPress={() => {
+                      setShowStrategyModal(false);
+                      if (onOpenSquad) {
+                        onOpenSquad();
+                      } else if (onOpenFindSquad) {
+                        onOpenFindSquad();
+                      } else if (onNavigateTab) {
+                        onNavigateTab('match');
+                      } else {
+                        showToast('Opening Creator Squad...');
+                      }
+                    }}
+                    hitSlop={6}
+                  >
+                    <Text style={styles.modalActionMiniBtnText}>Join ➔</Text>
+                  </Pressable>
                 </View>
-                <Pressable
-                  style={({ pressed }) => [styles.modalActionMiniBtn, pressed && styles.btnPressed]}
-                  onPress={() => {
-                    setShowStrategyModal(false);
-                    if (onOpenSquad) {
-                      onOpenSquad();
-                    } else if (onOpenFindSquad) {
-                      onOpenFindSquad();
-                    } else if (onNavigateTab) {
-                      onNavigateTab('match');
-                    } else {
-                      showToast('Opening Creator Squad...');
-                    }
-                  }}
-                  hitSlop={6}
-                >
-                  <Text style={styles.modalActionMiniBtnText}>Join ➔</Text>
-                </Pressable>
+                <Text style={styles.modalDetailBody}>
+                  Join the 7-Day Consistency Challenge with Elena.
+                </Text>
               </View>
 
               <Pressable
@@ -2461,20 +2465,22 @@ const styles = StyleSheet.create({
     borderColor: '#EFEBF8',
   },
   modalActionItemCard: {
+    backgroundColor: '#FAF8F5',
+    borderRadius: 14,
+    padding: 12,
+    borderWidth: 1,
+    borderColor: '#EFEBF8',
+  },
+  modalActionHeaderRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    backgroundColor: '#FAF8F5',
-    borderRadius: 14,
-    paddingVertical: 10,
-    paddingHorizontal: 12,
-    borderWidth: 1,
-    borderColor: '#EFEBF8',
+    marginBottom: 4,
     gap: 8,
   },
   modalActionMiniBtn: {
     backgroundColor: '#EDE9FE',
-    paddingVertical: 6,
+    paddingVertical: 5,
     paddingHorizontal: 10,
     borderRadius: 8,
     borderWidth: 1,
@@ -2490,13 +2496,13 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontWeight: '800',
     color: '#171420',
-    marginBottom: 2,
+    flexShrink: 1,
   },
   modalDetailBody: {
-    fontSize: 11,
+    fontSize: 12,
     color: '#64748B',
     fontWeight: '500',
-    lineHeight: 15,
+    lineHeight: 17,
   },
   modalFullBtn: {
     backgroundColor: '#582CDB',
