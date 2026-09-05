@@ -1230,13 +1230,25 @@ export const ProDashboardScreen: React.FC<ProDashboardScreenProps> = ({
                 {/* Pro Quick Stats Banner */}
                 <View style={styles.calendarStatsRow}>
                   <View style={styles.calendarStatCard}>
-                    <Text style={styles.calendarStatValue} numberOfLines={1}>
-                      {(userProfile?.streakCount && userProfile.streakCount > 1) ? userProfile.streakCount : 48}d 🔥
+                    <Text
+                      style={styles.calendarStatValue}
+                      numberOfLines={1}
+                      adjustsFontSizeToFit
+                      minimumFontScale={0.85}
+                    >
+                      {(userProfile?.streakCount && userProfile.streakCount > 1) ? userProfile.streakCount : 48} Days 🔥
                     </Text>
-                    <Text style={styles.calendarStatLabel} numberOfLines={1}>Streak</Text>
+                    <Text style={styles.calendarStatLabel} numberOfLines={1}>
+                      Streak
+                    </Text>
                   </View>
                   <View style={[styles.calendarStatCard, { backgroundColor: '#FEF9C3', borderColor: '#F59E0B' }]}>
-                    <Text style={[styles.calendarStatValue, { color: '#B45309' }]} numberOfLines={1}>
+                    <Text
+                      style={[styles.calendarStatValue, { color: '#B45309' }]}
+                      numberOfLines={1}
+                      adjustsFontSizeToFit
+                      minimumFontScale={0.85}
+                    >
                       Top 1% 👑
                     </Text>
                     <Text style={[styles.calendarStatLabel, { color: '#A16207' }]} numberOfLines={1}>
@@ -1244,17 +1256,29 @@ export const ProDashboardScreen: React.FC<ProDashboardScreenProps> = ({
                     </Text>
                   </View>
                   <View style={styles.calendarStatCard}>
-                    <Text style={styles.calendarStatValue} numberOfLines={1}>99.2% ⚡</Text>
+                    <Text
+                      style={styles.calendarStatValue}
+                      numberOfLines={1}
+                      adjustsFontSizeToFit
+                      minimumFontScale={0.85}
+                    >
+                      99.2% ⚡
+                    </Text>
                     <Text style={styles.calendarStatLabel} numberOfLines={1}>
                       Consistency
                     </Text>
                   </View>
                   <View style={[styles.calendarStatCard, { backgroundColor: '#EDE9FE', borderColor: '#C4B5FD' }]}>
-                    <Text style={[styles.calendarStatValue, { color: '#582CDB' }]} numberOfLines={1}>
+                    <Text
+                      style={[styles.calendarStatValue, { color: '#582CDB' }]}
+                      numberOfLines={1}
+                      adjustsFontSizeToFit
+                      minimumFontScale={0.85}
+                    >
                       2 Freezes 🛡️
                     </Text>
                     <Text style={[styles.calendarStatLabel, { color: '#6D28D9' }]} numberOfLines={1}>
-                      Shield
+                      Available
                     </Text>
                   </View>
                 </View>
@@ -2784,7 +2808,7 @@ const styles = StyleSheet.create({
     minWidth: 0,
   },
   calendarStatValue: {
-    fontSize: sFont(11.5),
+    fontSize: sFont(10.5),
     fontWeight: '800',
     color: '#171420',
     marginBottom: 2,
