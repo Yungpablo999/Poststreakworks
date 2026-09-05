@@ -903,19 +903,17 @@ export const ProMessagesScreen: React.FC<ProMessagesScreenProps> = ({
                       ]}
                       resizeMode={creator.id === 'jarvis' ? 'contain' : 'cover'}
                     />
-                    {/* TINY GOLD CHECK BADGE FOR PRO CREATORS */}
-                    {creator.isPro && creator.id !== 'jarvis' && (
-                      <View style={styles.storyTinyGoldCheckPos}>
-                        <TinyGoldCheck size={14} />
-                      </View>
-                    )}
                     {creator.id === 'jarvis' ? (
                       <View style={styles.storyAiSparklePos}>
                         <Text style={{ fontSize: 9 }}>✨</Text>
                       </View>
-                    ) : (
-                      creator.isOnline && <View style={styles.storyOnlineDot} />
-                    )}
+                    ) : creator.isOnline ? (
+                      <View style={styles.storyOnlineDot} />
+                    ) : creator.isPro ? (
+                      <View style={styles.storyTinyGoldCheckPos}>
+                        <TinyGoldCheck size={14} />
+                      </View>
+                    ) : null}
                   </View>
                   <Text style={styles.storyCreatorName} numberOfLines={1}>
                     {creator.name.split(' ')[0]}
@@ -1506,13 +1504,13 @@ const styles = StyleSheet.create({
   },
   storyOnlineDot: {
     position: 'absolute',
-    top: 2,
-    right: 2,
-    width: 10,
-    height: 10,
-    borderRadius: 5,
+    bottom: 0,
+    right: 0,
+    width: 13,
+    height: 13,
+    borderRadius: 6.5,
     backgroundColor: '#10B981',
-    borderWidth: 1.5,
+    borderWidth: 2,
     borderColor: '#FFFFFF',
   },
   storyCreatorName: {
