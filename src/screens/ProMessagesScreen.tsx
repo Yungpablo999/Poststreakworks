@@ -247,11 +247,11 @@ const parseTimeAgoMinutes = (timeStr: string): number => {
 };
 
 const AVAILABLE_SQUAD_CREATORS = [
-  { id: 'kemi', name: 'Kemi Adeleke', handle: '@kemi_designs', streak: 42, niche: 'UI/UX & Brand Designer', avatar: require('../../assets/images/kemi-avatar.jpg') },
+  { id: 'kemi', name: 'Kemi Adeleke', handle: '@kemi_designs', streak: 42, niche: 'UI/UX & Branding', avatar: require('../../assets/images/kemi-avatar.jpg') },
   { id: 'amara', name: 'Amara Okafor', handle: '@amara.creates', streak: 44, niche: 'Travel & Lifestyle', avatar: require('../../assets/images/amara-avatar.jpg') },
   { id: 'david', name: 'David Kim', handle: '@davidkim_tech', streak: 52, niche: 'Tech & AI Systems', avatar: require('../../assets/images/david-avatar.jpg') },
-  { id: 'tomi', name: 'Tomi Adebayo', handle: '@tomi_tech', streak: 55, niche: 'Tech & Gadget Reviewer', avatar: require('../../assets/images/tomi-avatar.jpg') },
-  { id: 'elena', name: 'Elena Rostova', handle: '@elena_fit', streak: 39, niche: 'High-Performance & Fitness', avatar: require('../../assets/images/elena-avatar.jpg') },
+  { id: 'tomi', name: 'Tomi Adebayo', handle: '@tomi_tech', streak: 55, niche: 'Tech & Gadgets', avatar: require('../../assets/images/tomi-avatar.jpg') },
+  { id: 'elena', name: 'Elena Rostova', handle: '@elena_fit', streak: 39, niche: 'Fitness & Performance', avatar: require('../../assets/images/elena-avatar.jpg') },
   { id: 'marcus', name: 'Marcus Vance', handle: '@marcus_vance', streak: 61, niche: 'B2B SaaS Growth', avatar: require('../../assets/images/marcus-avatar.jpg') },
   { id: 'zainab', name: 'Zainab Okafor', handle: '@zainab_okafor', streak: 41, niche: 'Lifestyle & Wellness', avatar: require('../../assets/images/zainab-avatar.jpg') },
 ];
@@ -262,7 +262,7 @@ const INITIAL_CONVERSATIONS: ConversationThread[] = [
     creatorId: 'kemi',
     name: 'Kemi Adeleke',
     handle: '@kemi_designs',
-    niche: 'UI/UX & Brand Designer',
+    niche: 'UI/UX & Branding',
     avatar: require('../../assets/images/kemi-avatar.jpg'),
     streak: 42,
     isOnline: true,
@@ -411,7 +411,7 @@ const INITIAL_CONVERSATIONS: ConversationThread[] = [
     creatorId: 'tomi',
     name: 'Tomi Adebayo',
     handle: '@tomi_tech',
-    niche: 'Tech & Gadget Reviewer',
+    niche: 'Tech & Gadgets',
     avatar: require('../../assets/images/tomi-avatar.jpg'),
     streak: 55,
     isOnline: true,
@@ -453,7 +453,7 @@ const INITIAL_CONVERSATIONS: ConversationThread[] = [
     creatorId: 'jarvis',
     name: 'Jarvis AI',
     handle: '@jarvis.ai',
-    niche: 'AI Content Director',
+    niche: 'AI Co-Pilot',
     avatar: require('../../assets/images/jarvis-core-flame.png'),
     streak: 99,
     isOnline: true,
@@ -478,7 +478,7 @@ const INITIAL_CONVERSATIONS: ConversationThread[] = [
     creatorId: 'elena',
     name: 'Elena Rostova',
     handle: '@elena_fit',
-    niche: 'High-Performance & Fitness',
+    niche: 'Fitness & Performance',
     avatar: require('../../assets/images/elena-avatar.jpg'),
     streak: 39,
     isOnline: true,
@@ -749,11 +749,11 @@ export const ProMessagesScreen: React.FC<ProMessagesScreenProps> = ({
         {/* ============================================================ */}
         {/* 1. TOP HEADER BAR WITH PRO MODE SWITCHER OR ACTIVE CHAT HEADER */}
         {/* ============================================================ */}
-        <View style={styles.headerBar}>
+        <View style={[styles.headerBar, activeChatThread && styles.chatHeaderBar]}>
           {activeChatThread ? (
             /* ACTIVE CHAT ROOM HEADER */
             <View style={styles.chatActiveHeaderRow}>
-              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, flex: 1, minWidth: 0, marginRight: 8 }}>
+              <View style={styles.chatActiveHeaderLeftGroup}>
                 <Pressable
                   onPress={() => {
                     if (Platform.OS !== 'web') {
@@ -761,7 +761,7 @@ export const ProMessagesScreen: React.FC<ProMessagesScreenProps> = ({
                     }
                     setActiveChatThread(null);
                   }}
-                  style={({ pressed }) => [styles.backBtnCircle, pressed && styles.btnPressed]}
+                  style={({ pressed }) => [styles.chatBackBtnCircle, pressed && styles.btnPressed]}
                   hitSlop={8}
                 >
                   <Text style={{ fontSize: 18, color: '#171420', fontWeight: '700' }}>‹</Text>
@@ -782,24 +782,27 @@ export const ProMessagesScreen: React.FC<ProMessagesScreenProps> = ({
                   />
                   {activeChatThread.isPro && (
                     <View style={styles.chatTinyGoldCheckPos}>
-                      <TinyGoldCheck size={13} />
+                      <TinyGoldCheck size={12} />
                     </View>
                   )}
                   {activeChatThread.isOnline && <View style={styles.chatHeaderOnlineDot} />}
                 </Pressable>
 
-                <View style={{ flex: 1, minWidth: 0 }}>
-                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-                    <Text style={styles.chatHeaderName} numberOfLines={1}>{activeChatThread.name}</Text>
+                <View style={styles.chatHeaderTextCol}>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>
+                    <Text style={styles.chatHeaderName} numberOfLines={1} ellipsizeMode="tail">
+                      {activeChatThread.name}
+                    </Text>
                     {activeChatThread.isPro && (
                       <View style={styles.proMicroPill}>
                         <Text style={styles.proMicroPillText}>PRO</Text>
                       </View>
                     )}
                   </View>
-                  <Text style={styles.chatHeaderStatus} numberOfLines={1}>
-                    {activeChatThread.isOnline ? '● Active now' : 'Offline'} • {activeChatThread.niche}
-                    {mutedThreadIds.includes(activeChatThread.id) ? ' • 🔕 Muted' : ''}
+                  <Text style={styles.chatHeaderStatus} numberOfLines={1} ellipsizeMode="tail">
+                    {activeChatThread.isOnline ? '● Active now' : 'Offline'}
+                    {activeChatThread.niche ? ` · ${activeChatThread.niche}` : ''}
+                    {mutedThreadIds.includes(activeChatThread.id) ? ' · 🔕 Muted' : ''}
                   </Text>
                 </View>
               </View>
@@ -821,7 +824,7 @@ export const ProMessagesScreen: React.FC<ProMessagesScreenProps> = ({
                       setShowCreateSquadModal(true);
                     }}
                   >
-                    <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
+                    <Svg width={16} height={16} viewBox="0 0 24 24" fill="none">
                       {/* User Body & Head */}
                       <Path
                         d="M15 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"
@@ -859,7 +862,7 @@ export const ProMessagesScreen: React.FC<ProMessagesScreenProps> = ({
                     setShowChatOptionsMenu(true);
                   }}
                 >
-                  <Svg width={17} height={17} viewBox="0 0 24 24" fill="none">
+                  <Svg width={16} height={16} viewBox="0 0 24 24" fill="none">
                     <Circle cx="5" cy="12" r="2.2" fill="#171420" />
                     <Circle cx="12" cy="12" r="2.2" fill="#171420" />
                     <Circle cx="19" cy="12" r="2.2" fill="#171420" />
@@ -2117,6 +2120,11 @@ const styles = StyleSheet.create({
     paddingBottom: 12,
     backgroundColor: '#FAF8F5',
   },
+  chatHeaderBar: {
+    paddingHorizontal: 12,
+    paddingTop: 8,
+    paddingBottom: 10,
+  },
   backBtnCircle: {
     width: 36,
     height: 36,
@@ -2551,13 +2559,33 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
   },
+  chatActiveHeaderLeftGroup: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    flex: 1,
+    minWidth: 0,
+    marginRight: 6,
+  },
+  chatBackBtnCircle: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1,
+    borderColor: '#EFECE6',
+    justifyContent: 'center',
+    alignItems: 'center',
+    flexShrink: 0,
+  },
   chatHeaderAvatarWrapper: {
     position: 'relative',
+    flexShrink: 0,
   },
   chatHeaderAvatar: {
-    width: 38,
-    height: 38,
-    borderRadius: 20,
+    width: 36,
+    height: 36,
+    borderRadius: 18,
   },
   chatTinyGoldCheckPos: {
     position: 'absolute',
@@ -2568,21 +2596,28 @@ const styles = StyleSheet.create({
     position: 'absolute',
     bottom: 0,
     right: 0,
-    width: 10,
-    height: 10,
+    width: 9.5,
+    height: 9.5,
     borderRadius: 5,
     backgroundColor: '#10B981',
     borderWidth: 1.5,
     borderColor: '#FFFFFF',
   },
+  chatHeaderTextCol: {
+    flex: 1,
+    minWidth: 0,
+    justifyContent: 'center',
+  },
   chatHeaderName: {
-    fontSize: 15,
+    fontSize: sFont(14),
     fontWeight: '700',
     color: '#171420',
+    flexShrink: 1,
   },
   chatHeaderStatus: {
-    fontSize: 11,
+    fontSize: sFont(10.5),
     color: '#64748B',
+    marginTop: 1,
   },
   chatActionCircle: {
     width: 34,
@@ -2890,12 +2925,13 @@ const styles = StyleSheet.create({
   chatActiveHeaderRightGroup: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
+    gap: 6,
+    flexShrink: 0,
   },
   chatHeaderActionBtn: {
-    width: 38,
-    height: 38,
-    borderRadius: 12,
+    width: 34,
+    height: 34,
+    borderRadius: 10,
     backgroundColor: '#FFFFFF',
     borderWidth: 1,
     borderColor: '#EFECE6',
