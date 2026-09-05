@@ -720,16 +720,29 @@ export const ProDashboardScreen: React.FC<ProDashboardScreenProps> = ({
             }}
             style={({ pressed }) => [styles.dashboardCard, pressed && styles.cardPressed]}
           >
+            {/* 1. Header with Label, Big Streak & Stats */}
             <View style={styles.streakCardHeader}>
-              <Text style={styles.streakLabel}>ACTIVITY THIS MONTH (TAP TO EXPAND)</Text>
-              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 2 }}>
+              <View style={styles.cardHeaderTopRow}>
+                <Text style={styles.streakLabel}>ACTIVITY THIS MONTH (TAP TO EXPAND)</Text>
+                <View style={styles.streakProStatsRow}>
+                  <View style={styles.consistencyPill}>
+                    <Text style={styles.consistencyPillText}>96% Consistent</Text>
+                  </View>
+                  <View style={styles.bestStreakPill}>
+                    <Text style={styles.bestStreakPillText}>Best: {userProfile?.streakCount || 1}d</Text>
+                  </View>
+                </View>
+              </View>
+
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 4 }}>
                 <Text style={styles.streakBigCount}>{userProfile?.streakCount || 1}-Day Streak</Text>
-                <Animated.Text style={{ fontSize: 20, transform: [{ scale: flamePulse }] }}>
+                <Animated.Text style={{ fontSize: 22, transform: [{ scale: flamePulse }] }}>
                   🔥
                 </Animated.Text>
               </View>
             </View>
 
+            {/* 2. Month Header with Interactive Navigation */}
             <View style={styles.monthHeaderRow}>
               <Pressable
                 onPress={(e) => {
@@ -756,6 +769,7 @@ export const ProDashboardScreen: React.FC<ProDashboardScreenProps> = ({
               </Pressable>
             </View>
 
+            {/* 3. Weekday Column Headers */}
             <View style={styles.daysHeaderRow}>
               {['M', 'T', 'W', 'T', 'F', 'S', 'S'].map((d, idx) => (
                 <Text key={`pro_day_col_${idx}`} style={styles.dayColHeaderText}>
@@ -764,43 +778,74 @@ export const ProDashboardScreen: React.FC<ProDashboardScreenProps> = ({
               ))}
             </View>
 
+            {/* 4. Rounded Calendar Heatmap Grid */}
             <View style={styles.heatmapGridContainer}>
+              {/* Row 1 */}
               <View style={styles.heatmapRow}>
-                <View style={styles.heatmapCellInactive} />
-                <View style={styles.heatmapCellInactive} />
-                <View style={styles.heatmapCellInactive} />
-                <View style={styles.heatmapCellActive}>
-                  <Text style={styles.checkMarkText}>✓</Text>
+                <View style={styles.heatmapCellEmpty} />
+                <View style={styles.heatmapCellEmpty} />
+                <View style={styles.heatmapCellCompleted}>
+                  <Svg width={12} height={12} viewBox="0 0 24 24" fill="none">
+                    <Path d="M20 6L9 17L4 12" stroke="#FFFFFF" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+                  </Svg>
                 </View>
-                <View style={styles.heatmapCellInactive} />
-                <View style={styles.heatmapCellActive}>
-                  <Text style={styles.checkMarkText}>✓</Text>
+                <View style={styles.heatmapCellEmpty} />
+                <View style={styles.heatmapCellCompleted}>
+                  <Svg width={12} height={12} viewBox="0 0 24 24" fill="none">
+                    <Path d="M20 6L9 17L4 12" stroke="#FFFFFF" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+                  </Svg>
                 </View>
-                <View style={styles.heatmapCellInactive} />
+                <View style={styles.heatmapCellEmpty} />
+                <View style={styles.heatmapCellEmpty} />
               </View>
 
+              {/* Row 2 */}
               <View style={styles.heatmapRow}>
-                <View style={styles.heatmapCellInactive} />
-                <View style={styles.heatmapCellInactive} />
-                <View style={styles.heatmapCellActive}>
-                  <Text style={styles.checkMarkText}>✓</Text>
+                <View style={styles.heatmapCellEmpty} />
+                <View style={styles.heatmapCellFreeze}>
+                  <Svg width={11} height={11} viewBox="0 0 24 24" fill="none">
+                    <Path d="M12 2V22M2 12H22M4.93 4.93L19.07 19.07M19.07 4.93L4.93 19.07" stroke="#0284C7" strokeWidth="2.2" strokeLinecap="round" />
+                  </Svg>
                 </View>
-                <View style={styles.heatmapCellInactive} />
-                <View style={styles.heatmapCellInactive} />
-                <View style={styles.heatmapCellInactive} />
-                <View style={[styles.heatmapCellActive, { backgroundColor: '#582CDB', borderWidth: 1.5, borderColor: '#F59E0B' }]}>
-                  <Text style={[styles.checkMarkText, { color: '#FCD34D' }]}>🔥</Text>
+                <View style={styles.heatmapCellCompleted}>
+                  <Svg width={12} height={12} viewBox="0 0 24 24" fill="none">
+                    <Path d="M20 6L9 17L4 12" stroke="#FFFFFF" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+                  </Svg>
+                </View>
+                <View style={styles.heatmapCellEmpty} />
+                <View style={styles.heatmapCellScheduled}>
+                  <Svg width={11} height={11} viewBox="0 0 24 24" fill="none">
+                    <Circle cx="12" cy="12" r="9" stroke="#7C3AED" strokeWidth="2.2" strokeDasharray="3,2" />
+                    <Path d="M12 7V12L15 14" stroke="#7C3AED" strokeWidth="2.2" strokeLinecap="round" />
+                  </Svg>
+                </View>
+                <View style={styles.heatmapCellEmpty} />
+                <View style={styles.heatmapCellTodayActive}>
+                  <Text style={{ fontSize: 13 }}>🔥</Text>
                 </View>
               </View>
             </View>
 
-            <View style={styles.topCreatorCalloutBanner}>
-              <Image
-                source={require('../../assets/images/jarvis-core-flame.png')}
-                style={{ width: 22, height: 22 }}
-                resizeMode="contain"
-              />
-              <Text style={styles.topCreatorText}>Top 1% for consistency & growth this month.</Text>
+            {/* 5. Jarvis Pro Insight Box */}
+            <View style={styles.jarvisProInsightBox}>
+              <View style={styles.jarvisFlameWrapper}>
+                <Image
+                  source={require('../../assets/images/jarvis-core-flame.png')}
+                  style={{ width: 22, height: 22 }}
+                  resizeMode="contain"
+                />
+              </View>
+              <View style={{ flex: 1 }}>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 2 }}>
+                  <Text style={styles.jarvisInsightHeading}>JARVIS PRO INSIGHT</Text>
+                  <View style={styles.topCreatorTinyBadge}>
+                    <Text style={styles.topCreatorTinyBadgeText}>Top 1%</Text>
+                  </View>
+                </View>
+                <Text style={styles.jarvisInsightBodyText}>
+                  Posting at 7:30 PM is driving 2.4x higher reel retention this month. 1 post scheduled for tomorrow to maintain your momentum.
+                </Text>
+              </View>
             </View>
           </Pressable>
 
@@ -2097,6 +2142,43 @@ const styles = StyleSheet.create({
   streakCardHeader: {
     marginBottom: 12,
   },
+  cardHeaderTopRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 2,
+  },
+  streakProStatsRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  consistencyPill: {
+    backgroundColor: '#EDE9FE',
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#DDD6FE',
+  },
+  consistencyPillText: {
+    fontSize: 10.5,
+    fontWeight: '700',
+    color: '#582CDB',
+  },
+  bestStreakPill: {
+    backgroundColor: '#FEF3C7',
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#FDE68A',
+  },
+  bestStreakPillText: {
+    fontSize: 10.5,
+    fontWeight: '700',
+    color: '#B45309',
+  },
   streakLabel: {
     fontSize: 11,
     fontWeight: '800',
@@ -2141,48 +2223,119 @@ const styles = StyleSheet.create({
     fontSize: 11,
     fontWeight: '800',
     color: '#94A3B8',
-    width: 32,
+    width: 34,
     textAlign: 'center',
   },
   heatmapGridContainer: {
-    gap: 6,
+    gap: 8,
     marginBottom: 14,
   },
   heatmapRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
   },
-  heatmapCellInactive: {
+  heatmapCellEmpty: {
     width: 34,
     height: 34,
-    borderRadius: 8,
+    borderRadius: 9,
     backgroundColor: '#F8FAFC',
-  },
-  heatmapCellActive: {
-    width: 34,
-    height: 34,
-    borderRadius: 8,
-    backgroundColor: '#6366F1',
+    borderWidth: 1,
+    borderColor: '#F1F5F9',
     justifyContent: 'center',
     alignItems: 'center',
   },
-  checkMarkText: {
-    color: '#FFFFFF',
-    fontSize: 14,
-    fontWeight: '700',
-  },
-  topCreatorCalloutBanner: {
-    flexDirection: 'row',
+  heatmapCellCompleted: {
+    width: 34,
+    height: 34,
+    borderRadius: 9,
+    backgroundColor: '#582CDB',
+    justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#F8FAFC',
-    padding: 12,
+    shadowColor: '#582CDB',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.16,
+    shadowRadius: 3,
+    elevation: 2,
+  },
+  heatmapCellScheduled: {
+    width: 34,
+    height: 34,
+    borderRadius: 9,
+    backgroundColor: '#FAF5FF',
+    borderWidth: 1.5,
+    borderColor: '#C4B5FD',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  heatmapCellFreeze: {
+    width: 34,
+    height: 34,
+    borderRadius: 9,
+    backgroundColor: '#F0F9FF',
+    borderWidth: 1.5,
+    borderColor: '#BAE6FD',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  heatmapCellTodayActive: {
+    width: 34,
+    height: 34,
+    borderRadius: 9,
+    backgroundColor: '#582CDB',
+    borderWidth: 2,
+    borderColor: '#F59E0B',
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: '#F59E0B',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  jarvisProInsightBox: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    backgroundColor: '#FAF9FF',
     borderRadius: 14,
+    padding: 12,
+    borderWidth: 1,
+    borderColor: '#EDE9FE',
     gap: 10,
   },
-  topCreatorText: {
-    fontSize: 13,
-    fontWeight: '700',
-    color: '#171420',
+  jarvisFlameWrapper: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: '#FFFFFF',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+  },
+  jarvisInsightHeading: {
+    fontSize: 10.5,
+    fontWeight: '800',
+    color: '#582CDB',
+    letterSpacing: 0.5,
+  },
+  topCreatorTinyBadge: {
+    backgroundColor: '#FEF3C7',
+    paddingHorizontal: 6,
+    paddingVertical: 1.5,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#FDE68A',
+  },
+  topCreatorTinyBadgeText: {
+    fontSize: 9.5,
+    fontWeight: '800',
+    color: '#B45309',
+  },
+  jarvisInsightBodyText: {
+    fontSize: 12,
+    color: '#475569',
+    lineHeight: 17,
+    fontWeight: '500',
   },
   scheduledLabel: {
     fontSize: 11,
