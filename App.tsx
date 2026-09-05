@@ -684,7 +684,7 @@ export default function App() {
               onOpenJarvisPro={() => navigateTo('jarvis-pro')}
               onOpenCreateIdea={() => navigateTo('create')}
               onStartMission={() => navigateTo('mission-detail')}
-              onOpenPostComposer={(title) => {
+              onOpenPostComposer={(title, platform) => {
                 if (title) setComposerIdeaTitle(title);
                 navigateTo('composer');
               }}

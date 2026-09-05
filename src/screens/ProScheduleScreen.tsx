@@ -33,7 +33,7 @@ const { width: SCREEN_WIDTH } = Dimensions.get('window');
 interface ProScheduleScreenProps {
   onBack?: () => void;
   onStartMission?: () => void;
-  onOpenPostComposer?: (title?: string) => void;
+  onOpenPostComposer?: (title?: string, platform?: string) => void;
   onLogout?: () => void;
   onNavigateTab?: (tab: TabType) => void;
   onOpenJarvisPro?: () => void;
@@ -713,8 +713,12 @@ export const ProScheduleScreen: React.FC<ProScheduleScreenProps> = ({
                   if (Platform.OS !== 'web') {
                     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
                   }
-                  triggerModalPop();
-                  setShowSchedulePostModal(true);
+                  if (onOpenPostComposer) {
+                    onOpenPostComposer();
+                  } else {
+                    triggerModalPop();
+                    setShowSchedulePostModal(true);
+                  }
                 }}
               >
                 <Text style={styles.schedulePostPrimaryBtnText}>Schedule Post</Text>
@@ -724,10 +728,14 @@ export const ProScheduleScreen: React.FC<ProScheduleScreenProps> = ({
                 style={({ pressed }) => [styles.fillGapsOutlineBtn, pressed && styles.btnPressed]}
                 onPress={() => {
                   if (Platform.OS !== 'web') {
-                    Haptics.ImpactFeedbackStyle && Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                   }
-                  triggerModalPop();
-                  setShowFillGapModal(true);
+                  if (onOpenPostComposer) {
+                    onOpenPostComposer('Why 90% of creators quit by month 2', 'instagram');
+                  } else {
+                    triggerModalPop();
+                    setShowFillGapModal(true);
+                  }
                 }}
               >
                 <Text style={styles.fillGapsOutlineBtnText}>Fill Gaps</Text>
@@ -740,7 +748,13 @@ export const ProScheduleScreen: React.FC<ProScheduleScreenProps> = ({
               <View style={styles.metricsGridRow}>
                 <Pressable
                   style={styles.metricGridTile}
-                  onPress={() => showToast(`${scheduledCount} posts scheduled in queue`)}
+                  onPress={() => {
+                    if (Platform.OS !== 'web') {
+                      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                    }
+                    triggerModalPop();
+                    setShowExpandViewModal(true);
+                  }}
                 >
                   <Text style={styles.metricGridLabel}>SCHEDULED</Text>
                   <Text style={styles.metricGridVal}>{scheduledCount}</Text>
@@ -748,7 +762,16 @@ export const ProScheduleScreen: React.FC<ProScheduleScreenProps> = ({
 
                 <Pressable
                   style={styles.metricGridTile}
-                  onPress={() => showToast(`${draftsCount} drafts ready for publishing`)}
+                  onPress={() => {
+                    if (Platform.OS !== 'web') {
+                      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                    }
+                    if (onOpenPostComposer) {
+                      onOpenPostComposer('Personal lesson Reel • Behind the scenes studio', 'instagram');
+                    } else {
+                      showToast(`${draftsCount} drafts ready for publishing`);
+                    }
+                  }}
                 >
                   <Text style={styles.metricGridLabel}>DRAFTS</Text>
                   <Text style={styles.metricGridVal}>{draftsCount}</Text>
@@ -768,8 +791,15 @@ export const ProScheduleScreen: React.FC<ProScheduleScreenProps> = ({
                 <Pressable
                   style={[styles.metricGridTile, styles.metricGridTileOpenSlots]}
                   onPress={() => {
-                    triggerModalPop();
-                    setShowFillGapModal(true);
+                    if (Platform.OS !== 'web') {
+                      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                    }
+                    if (onOpenPostComposer) {
+                      onOpenPostComposer('The exact equipment I use to record 4K content on iPhone', 'instagram');
+                    } else {
+                      triggerModalPop();
+                      setShowFillGapModal(true);
+                    }
                   }}
                 >
                   <Text style={[styles.metricGridLabel, styles.metricGridLabelOpenSlots]}>OPEN SLOTS</Text>
@@ -869,7 +899,16 @@ export const ProScheduleScreen: React.FC<ProScheduleScreenProps> = ({
                     styles.scheduleItemCard,
                     item.badgeType === 'recommended' && styles.scheduleItemCardGoldBorder,
                   ]}
-                  onPress={() => setSelectedPostDetail(item)}
+                  onPress={() => {
+                    if (Platform.OS !== 'web') {
+                      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                    }
+                    if (onOpenPostComposer) {
+                      onOpenPostComposer(item.title, item.platform);
+                    } else {
+                      setSelectedPostDetail(item);
+                    }
+                  }}
                 >
                   <View style={item.badgeType === 'recommended' ? styles.timeBoxGold : styles.timeBoxPurple}>
                     <Text style={item.badgeType === 'recommended' ? styles.timeBoxGoldText : styles.timeBoxPurpleText}>
@@ -901,8 +940,15 @@ export const ProScheduleScreen: React.FC<ProScheduleScreenProps> = ({
                 <Pressable
                   style={styles.emptyAddPostBtn}
                   onPress={() => {
-                    triggerModalPop();
-                    setShowSchedulePostModal(true);
+                    if (Platform.OS !== 'web') {
+                      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                    }
+                    if (onOpenPostComposer) {
+                      onOpenPostComposer();
+                    } else {
+                      triggerModalPop();
+                      setShowSchedulePostModal(true);
+                    }
                   }}
                 >
                   <Text style={styles.emptyAddPostBtnText}>+ Schedule Post</Text>
@@ -937,7 +983,16 @@ export const ProScheduleScreen: React.FC<ProScheduleScreenProps> = ({
                 {idx > 0 && <View style={styles.queueItemDivider} />}
                 <Pressable
                   style={styles.queueItemRow}
-                  onPress={() => showToast(`${item.title} • ${item.time} ${item.period}`)}
+                  onPress={() => {
+                    if (Platform.OS !== 'web') {
+                      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                    }
+                    if (onOpenPostComposer) {
+                      onOpenPostComposer(item.title, item.iconType);
+                    } else {
+                      showToast(`${item.title} • ${item.time} ${item.period}`);
+                    }
+                  }}
                 >
                   <SocialBrandIcon platform={item.iconType} size={28} />
                   <View style={{ flex: 1, marginLeft: 10 }}>
@@ -1288,10 +1343,17 @@ export const ProScheduleScreen: React.FC<ProScheduleScreenProps> = ({
                 {/* Primary Action Button */}
                 <Pressable
                   style={styles.modalPrimaryActionBtn}
-                  onPress={handleConfirmSchedulePost}
+                  onPress={() => {
+                    setShowSchedulePostModal(false);
+                    if (onOpenPostComposer) {
+                      onOpenPostComposer(postTitleInput || 'Plan your next viral hook', selectedPlatform);
+                    } else {
+                      handleConfirmSchedulePost();
+                    }
+                  }}
                 >
                   <Text style={styles.modalPrimaryActionBtnText} numberOfLines={1}>
-                    🚀 Schedule to Autopilot (+50 XP) ➔
+                    🚀 Open in Post Composer (+50 XP) ➔
                   </Text>
                 </Pressable>
 
@@ -1335,7 +1397,9 @@ export const ProScheduleScreen: React.FC<ProScheduleScreenProps> = ({
 
                 {/* Detected Slot Banner */}
                 <View style={styles.gapSlotDetectedBanner}>
-                  <Text style={styles.gapSlotDetectedTitle}>⚠️ FRIDAY OCT 27 • 7:30 PM</Text>
+                  <Text style={styles.gapSlotDetectedTitle}>
+                    ⚠️ {weekData.days[5]?.dayName} {weekData.days[5]?.monthName?.toUpperCase()} {weekData.days[5]?.dayNum} • 7:30 PM
+                  </Text>
                   <Text style={styles.gapSlotDetectedSub}>High traffic window without scheduled content</Text>
                 </View>
 
@@ -1401,7 +1465,14 @@ export const ProScheduleScreen: React.FC<ProScheduleScreenProps> = ({
                 {/* Action Buttons */}
                 <Pressable
                   style={styles.modalGoldActionBtnWrapper}
-                  onPress={handleConfirmFillGap}
+                  onPress={() => {
+                    setShowFillGapModal(false);
+                    if (onOpenPostComposer) {
+                      onOpenPostComposer(editableGapTitle, 'instagram');
+                    } else {
+                      handleConfirmFillGap();
+                    }
+                  }}
                 >
                   <LinearGradient
                     colors={['#FDE68A', '#F59E0B', '#D97706']}
@@ -1410,7 +1481,7 @@ export const ProScheduleScreen: React.FC<ProScheduleScreenProps> = ({
                     style={styles.modalGoldBtnGradient}
                   >
                     <Text style={styles.modalGoldActionBtnText} numberOfLines={1}>
-                      ✨ Accept &amp; Fill Slot (+75 XP) ➔
+                      ✨ Draft in Post Composer (+75 XP) ➔
                     </Text>
                   </LinearGradient>
                 </Pressable>
@@ -1713,7 +1784,7 @@ export const ProScheduleScreen: React.FC<ProScheduleScreenProps> = ({
                               }
                               setShowExpandViewModal(false);
                               if (onOpenPostComposer) {
-                                onOpenPostComposer(item.title);
+                                onOpenPostComposer(item.title, item.platform);
                               } else if (onStartMission) {
                                 onStartMission();
                               } else {
@@ -1730,13 +1801,17 @@ export const ProScheduleScreen: React.FC<ProScheduleScreenProps> = ({
                               if (Platform.OS !== 'web') {
                                 Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                               }
-                              setEditingPostTitle(item.title);
-                              setEditingPostPlatform(item.platformLabel);
-                              setEditingPostTime(item.time);
-                              setEditingPostPeriod(item.period);
                               setShowExpandViewModal(false);
-                              triggerModalPop();
-                              setSelectedPostDetail(item);
+                              if (onOpenPostComposer) {
+                                onOpenPostComposer(item.title, item.platform);
+                              } else {
+                                setEditingPostTitle(item.title);
+                                setEditingPostPlatform(item.platformLabel);
+                                setEditingPostTime(item.time);
+                                setEditingPostPeriod(item.period);
+                                triggerModalPop();
+                                setSelectedPostDetail(item);
+                              }
                             }}
                           >
                             <Text style={styles.expandedPostActionBtnSecondaryText}>✏️ Edit Details</Text>
@@ -1758,10 +1833,14 @@ export const ProScheduleScreen: React.FC<ProScheduleScreenProps> = ({
                   style={styles.modalPrimaryActionBtn}
                   onPress={() => {
                     setShowExpandViewModal(false);
-                    setTimeout(() => {
-                      triggerModalPop();
-                      setShowSchedulePostModal(true);
-                    }, 200);
+                    if (onOpenPostComposer) {
+                      onOpenPostComposer();
+                    } else {
+                      setTimeout(() => {
+                        triggerModalPop();
+                        setShowSchedulePostModal(true);
+                      }, 200);
+                    }
                   }}
                 >
                   <Text style={styles.modalPrimaryActionBtnText} numberOfLines={1}>
