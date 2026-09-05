@@ -392,27 +392,6 @@ export const ProEarningsScreen: React.FC<ProEarningsScreenProps> = ({
         {/* 1. TOP HEADER BAR */}
         <View style={styles.header}>
           <View style={styles.headerLeft}>
-            <Pressable
-              style={({ pressed }) => [styles.backBtn, pressed && styles.btnPressed]}
-              onPress={() => {
-                if (Platform.OS !== 'web') {
-                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                }
-                onBack();
-              }}
-              hitSlop={8}
-            >
-              <Svg width={20} height={20} viewBox="0 0 24 24" fill="none">
-                <Path
-                  d="M19 12H5M12 19l-7-7 7-7"
-                  stroke="#171420"
-                  strokeWidth="2.2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </Svg>
-            </Pressable>
-
             <Animated.View
               style={[
                 styles.headerLogoWrapper,

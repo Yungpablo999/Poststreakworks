@@ -22,6 +22,7 @@ import { FloatingTabBar, TabType } from '../components/FloatingTabBar';
 import { BrandToast } from '../components/BrandToast';
 import { UserProfileModal, UserProfileData } from '../components/UserProfileModal';
 import { CreatorStoryModal, CreatorStoryData, StorySlide, TinyGoldCheck } from '../components/CreatorStoryModal';
+import { ProNotificationsModal, ProNotificationItem, DEFAULT_PRO_NOTIFICATIONS } from '../components/ProNotificationsModal';
 import { sFont, isNarrowScreen } from '../utils/responsive';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
@@ -582,6 +583,9 @@ export const ProMessagesScreen: React.FC<ProMessagesScreenProps> = ({
 }) => {
   const [selectedFilter, setSelectedFilter] = useState<'all' | 'collabs' | 'squad' | 'deals' | 'jarvis'>('all');
   const [searchQuery, setSearchQuery] = useState('');
+  const [notifications, setNotifications] = useState<ProNotificationItem[]>(DEFAULT_PRO_NOTIFICATIONS);
+  const [showNotificationModal, setShowNotificationModal] = useState(false);
+  const unreadCount = notifications.filter((n) => n.unread).length;
   const [conversations, setConversations] = useState<ConversationThread[]>(INITIAL_CONVERSATIONS);
   const [activeChatThread, setActiveChatThread] = useState<ConversationThread | null>(() => {
     if (initialConversationId) {
@@ -873,15 +877,7 @@ export const ProMessagesScreen: React.FC<ProMessagesScreenProps> = ({
           ) : (
             /* MAIN INBOX HEADER */
             <>
-              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
-                <Pressable
-                  onPress={onBack}
-                  style={({ pressed }) => [styles.backBtnCircle, pressed && styles.btnPressed]}
-                  hitSlop={8}
-                >
-                  <Text style={{ fontSize: 18, color: '#171420', fontWeight: '700' }}>‹</Text>
-                </Pressable>
-
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
                 {/* PostStreak 3D Ghost Mascot */}
                 <Animated.View
                   style={[
@@ -921,14 +917,15 @@ export const ProMessagesScreen: React.FC<ProMessagesScreenProps> = ({
                 </Pressable>
               </View>
 
-              {/* Right Action: Plus Button (+) & Profile Icon with Tiny Gold Check */}
+              {/* Right Action Icons: Messages, Notification Bell & Profile Avatar */}
               <View style={styles.headerRightGroup}>
+                {/* Chat Messages */}
                 <Pressable
-                  style={({ pressed }) => [styles.newChatBtn, pressed && styles.btnPressed]}
+                  style={({ pressed }) => [styles.headerIconBtn, pressed && styles.headerIconBtnPressed]}
                   hitSlop={8}
                   onPress={() => {
                     if (Platform.OS !== 'web') {
-                      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                     }
                     if (onOpenMatch) {
                       onOpenMatch();
@@ -937,19 +934,53 @@ export const ProMessagesScreen: React.FC<ProMessagesScreenProps> = ({
                     }
                   }}
                 >
-                  <LinearGradient
-                    colors={['#7C3AED', '#582CDB']}
-                    style={styles.plusIconGradient}
-                  >
-                    <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
-                      <Path d="M12 5V19M5 12H19" stroke="#FFFFFF" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" />
-                    </Svg>
-                  </LinearGradient>
+                  <Svg width={20} height={20} viewBox="0 0 24 24" fill="none">
+                    <Path
+                      d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"
+                      stroke="#1A1626"
+                      strokeWidth="2.2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </Svg>
+                </Pressable>
+
+                {/* Notification Bell */}
+                <Pressable
+                  style={({ pressed }) => [styles.headerIconBtn, pressed && styles.headerIconBtnPressed]}
+                  hitSlop={8}
+                  onPress={() => {
+                    if (Platform.OS !== 'web') {
+                      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                    }
+                    setShowNotificationModal(true);
+                  }}
+                >
+                  <Svg width={20} height={20} viewBox="0 0 24 24" fill="none">
+                    <Path
+                      d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"
+                      stroke="#1A1626"
+                      strokeWidth="2.2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                    <Path
+                      d="M13.73 21a2 2 0 0 1-3.46 0"
+                      stroke="#1A1626"
+                      strokeWidth="2.2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </Svg>
+                  {unreadCount > 0 && <View style={styles.notifBadgeDot} />}
                 </Pressable>
 
                 {/* User Profile Avatar with Tiny Gold Check Badge */}
                 <Pressable
                   onPress={() => {
+                    if (Platform.OS !== 'web') {
+                      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                    }
                     setShowProfileModal(true);
                   }}
                   style={styles.profileAvatarWrapper}
@@ -982,6 +1013,8 @@ export const ProMessagesScreen: React.FC<ProMessagesScreenProps> = ({
                         r="4"
                         stroke="#F59E0B"
                         strokeWidth="2.3"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
                       />
                     </Svg>
                   )}
@@ -2083,6 +2116,23 @@ export const ProMessagesScreen: React.FC<ProMessagesScreenProps> = ({
           }}
         />
 
+        {/* PRO NOTIFICATIONS MODAL */}
+        <ProNotificationsModal
+          visible={showNotificationModal}
+          onClose={() => setShowNotificationModal(false)}
+          notifications={notifications}
+          onNotificationsChange={setNotifications}
+          onActionPress={(actionKey) => {
+            setShowNotificationModal(false);
+            if (actionKey === 'open_match' && onOpenMatch) {
+              onOpenMatch();
+            } else if (onNavigateTab) {
+              onNavigateTab('match');
+            }
+          }}
+          onToast={showToast}
+        />
+
         {/* PROFILE MODAL */}
         <UserProfileModal
           visible={showProfileModal}
@@ -2119,6 +2169,37 @@ const styles = StyleSheet.create({
     paddingTop: 10,
     paddingBottom: 12,
     backgroundColor: '#FAF8F5',
+  },
+  headerIconBtn: {
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    backgroundColor: '#FFFFFF',
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: '#171420',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 6,
+    elevation: 2,
+    borderWidth: 1,
+    borderColor: 'rgba(235, 230, 248, 0.6)',
+    position: 'relative',
+  },
+  headerIconBtnPressed: {
+    opacity: 0.8,
+    transform: [{ scale: 0.94 }],
+  },
+  notifBadgeDot: {
+    position: 'absolute',
+    top: 8,
+    right: 8,
+    width: 7,
+    height: 7,
+    borderRadius: 3.5,
+    backgroundColor: '#EF4444',
+    borderWidth: 1.5,
+    borderColor: '#FFFFFF',
   },
   chatHeaderBar: {
     paddingHorizontal: 12,

@@ -915,21 +915,6 @@ export const MessagesScreen: React.FC<MessagesScreenProps> = ({
             /* MAIN INBOX HEADER */
             <>
               <View style={styles.headerLeftGroup}>
-                <Pressable
-                  onPress={() => {
-                    if (Platform.OS !== 'web') {
-                      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                    }
-                    onBack();
-                  }}
-                  style={({ pressed }) => [styles.backCircleBtn, pressed && styles.btnPressed]}
-                  hitSlop={8}
-                >
-                  <Svg width={20} height={20} viewBox="0 0 24 24" fill="none">
-                    <Path d="M15 18L9 12L15 6" stroke="#171420" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" />
-                  </Svg>
-                </Pressable>
-
                 {/* Mascot Logo */}
                 <Animated.View
                   style={[
