@@ -917,13 +917,44 @@ export const ProDashboardScreen: React.FC<ProDashboardScreenProps> = ({
               </Text>
             </View>
 
-            <View style={styles.hourlyChartContainer}>
-              <View style={[styles.hourlyBar, { height: 10, backgroundColor: '#F1F5F9' }]} />
-              <View style={[styles.hourlyBar, { height: 16, backgroundColor: '#E2E8F0' }]} />
-              <View style={[styles.hourlyBar, { height: 38, backgroundColor: '#6366F1' }]} />
-              <View style={[styles.hourlyBar, { height: 44, backgroundColor: '#582CDB' }]} />
-              <View style={[styles.hourlyBar, { height: 34, backgroundColor: '#6366F1' }]} />
-              <View style={[styles.hourlyBar, { height: 12, backgroundColor: '#F1F5F9' }]} />
+            {/* 5-Hour Performance Bar Chart with Peak Window Highlight */}
+            <View style={styles.hourlyChartSection}>
+              <View style={styles.hourlyChartContainer}>
+                {/* 6 PM */}
+                <View style={styles.hourlyColumn}>
+                  <View style={[styles.hourlyBar, { height: 14, backgroundColor: '#E2E8F0' }]} />
+                  <Text style={styles.hourLabel}>6 PM</Text>
+                </View>
+
+                {/* 7 PM (Peak Window Start) */}
+                <View style={styles.hourlyColumn}>
+                  <View style={[styles.hourlyBar, { height: 40, backgroundColor: '#6366F1' }]} />
+                  <Text style={[styles.hourLabel, styles.hourLabelPeak]}>7 PM</Text>
+                </View>
+
+                {/* 8 PM (Highest Peak) */}
+                <View style={styles.hourlyColumn}>
+                  <View style={[styles.hourlyBar, { height: 48, backgroundColor: '#582CDB', shadowColor: '#582CDB', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.25, shadowRadius: 4, elevation: 2 }]} />
+                  <Text style={[styles.hourLabel, styles.hourLabelPeak]}>8 PM</Text>
+                </View>
+
+                {/* 9 PM (Peak Window End) */}
+                <View style={styles.hourlyColumn}>
+                  <View style={[styles.hourlyBar, { height: 36, backgroundColor: '#6366F1' }]} />
+                  <Text style={[styles.hourLabel, styles.hourLabelPeak]}>9 PM</Text>
+                </View>
+
+                {/* 10 PM */}
+                <View style={styles.hourlyColumn}>
+                  <View style={[styles.hourlyBar, { height: 16, backgroundColor: '#E2E8F0' }]} />
+                  <Text style={styles.hourLabel}>10 PM</Text>
+                </View>
+              </View>
+
+              {/* Data Transparency Footer Line */}
+              <View style={styles.peakWindowNoteRow}>
+                <Text style={styles.dataTransparencyText}>Based on your last 20 Reels</Text>
+              </View>
             </View>
           </Pressable>
 
@@ -2341,16 +2372,48 @@ const styles = StyleSheet.create({
     color: '#15803D',
     fontWeight: '700',
   },
+  hourlyChartSection: {
+    marginTop: 6,
+  },
   hourlyChartContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'flex-end',
-    height: 48,
-    paddingHorizontal: 8,
+    height: 70,
+    paddingHorizontal: 6,
+  },
+  hourlyColumn: {
+    alignItems: 'center',
+    gap: 6,
+    flex: 1,
   },
   hourlyBar: {
-    width: 44,
+    width: 36,
     borderRadius: 8,
+    maxWidth: '85%',
+  },
+  hourLabel: {
+    fontSize: 10.5,
+    fontWeight: '600',
+    color: '#94A3B8',
+  },
+  hourLabelPeak: {
+    color: '#582CDB',
+    fontWeight: '700',
+  },
+  peakWindowNoteRow: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 10,
+    paddingTop: 8,
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(23, 20, 32, 0.04)',
+  },
+  dataTransparencyText: {
+    fontSize: 10.5,
+    color: '#94A3B8',
+    fontWeight: '500',
   },
   levelCircleBadge: {
     width: 44,
