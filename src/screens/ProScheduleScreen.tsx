@@ -608,7 +608,7 @@ export const ProScheduleScreen: React.FC<ProScheduleScreenProps> = ({
             </View>
             <Text style={styles.mainTitleText}>Plan your content with precision.</Text>
             <Text style={styles.mainSubText}>
-              Manage your schedule, find content gaps and post during your strongest windows.
+              Manage your schedule, find content gaps, and post at your strongest times.
             </Text>
           </View>
 
