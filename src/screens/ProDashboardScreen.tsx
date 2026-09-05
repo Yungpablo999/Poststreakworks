@@ -23,6 +23,7 @@ import { FloatingTabBar, TabType } from '../components/FloatingTabBar';
 import { BrandToast } from '../components/BrandToast';
 import { UserProfileModal, UserProfileData } from '../components/UserProfileModal';
 import { CreatorStoryModal, CreatorStoryData } from '../components/CreatorStoryModal';
+import { ProNotificationsModal, ProNotificationItem, DEFAULT_PRO_NOTIFICATIONS } from '../components/ProNotificationsModal';
 import { sFont, sPadding, moderateScale, isNarrowScreen } from '../utils/responsive';
 
 export const TinyGoldCheck = ({ size = 13 }: { size?: number }) => (
@@ -211,54 +212,6 @@ const FULL_YEAR_CALENDAR: MonthData[] = [
   },
 ];
 
-interface NotificationItem {
-  id: string;
-  type: 'streak' | 'collab' | 'quest' | 'level' | 'growth';
-  title: string;
-  body: string;
-  time: string;
-  unread: boolean;
-  iconEmoji: string;
-  badgeBg: string;
-  badgeBorder: string;
-}
-
-const INITIAL_NOTIFICATIONS: NotificationItem[] = [
-  {
-    id: 'n1',
-    type: 'streak',
-    title: 'Streak Lock Reminder 🔥',
-    body: 'Post 1 Reel before 11:30 AM today to lock in Day 48 and protect your consistency score.',
-    time: '15m ago',
-    unread: true,
-    iconEmoji: '🔥',
-    badgeBg: '#FEF3C7',
-    badgeBorder: '#FDE68A',
-  },
-  {
-    id: 'n2',
-    type: 'quest',
-    title: 'GlowUp Skincare Launch ($450 Bounty)',
-    body: 'Brand deal application unlocked for Pro Creators. Tap to review submission brief.',
-    time: '1h ago',
-    unread: true,
-    iconEmoji: '🎯',
-    badgeBg: '#EDE8FC',
-    badgeBorder: '#DDD6FE',
-  },
-  {
-    id: 'n3',
-    type: 'collab',
-    title: 'Collab Match Suggested',
-    body: 'Amara Okafor (94% Match) is active and open for squad collab.',
-    time: '3h ago',
-    unread: true,
-    iconEmoji: '🤝',
-    badgeBg: '#E0F2FE',
-    badgeBorder: '#BAE6FD',
-  },
-];
-
 export const ProDashboardScreen: React.FC<ProDashboardScreenProps> = ({
   onLogout,
   onStartMission,
@@ -345,7 +298,7 @@ export const ProDashboardScreen: React.FC<ProDashboardScreenProps> = ({
   const monthChipsScrollRef = useRef<ScrollView>(null);
 
   // Notifications
-  const [notifications, setNotifications] = useState<NotificationItem[]>(INITIAL_NOTIFICATIONS);
+  const [notifications, setNotifications] = useState<ProNotificationItem[]>(DEFAULT_PRO_NOTIFICATIONS);
 
   // Voice Studio State
   const [selectedVoiceTone, setSelectedVoiceTone] = useState('Energetic Narrator');
@@ -509,6 +462,41 @@ export const ProDashboardScreen: React.FC<ProDashboardScreenProps> = ({
   };
 
   const unreadCount = notifications.filter((n) => n.unread).length;
+
+  const handleNotifAction = (actionKey: string, notif: ProNotificationItem) => {
+    switch (actionKey) {
+      case 'open_voice_studio':
+      case 'open_script':
+        if (onOpenVoiceStudio) onOpenVoiceStudio();
+        else if (onOpenCreate) onOpenCreate();
+        else if (onNavigateTab) onNavigateTab('create');
+        break;
+      case 'open_deal':
+        if (onOpenQuests) onOpenQuests();
+        else if (onNavigateTab) onNavigateTab('quests');
+        break;
+      case 'open_collab':
+        if (onOpenMessages) onOpenMessages('conv_amara');
+        break;
+      case 'create_reel':
+        if (onOpenPostComposer) onOpenPostComposer();
+        else if (onOpenCreate) onOpenCreate();
+        else if (onNavigateTab) onNavigateTab('create');
+        break;
+      case 'open_growth':
+        if (onOpenGrowth) onOpenGrowth();
+        else if (onNavigateTab) onNavigateTab('growth');
+        break;
+      case 'open_squad':
+        if (onOpenMessages) onOpenMessages();
+        break;
+      case 'open_schedule':
+        if (onOpenSchedule) onOpenSchedule();
+        break;
+      default:
+        break;
+    }
+  };
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -1871,43 +1859,15 @@ export const ProDashboardScreen: React.FC<ProDashboardScreenProps> = ({
           </View>
         </Modal>
 
-        {/* MODAL: NOTIFICATIONS */}
-        <Modal
+        {/* MODAL: PRO ADVANCED NOTIFICATIONS */}
+        <ProNotificationsModal
           visible={showNotificationModal}
-          transparent={true}
-          animationType="fade"
-          onRequestClose={() => setShowNotificationModal(false)}
-        >
-          <View style={styles.modalOverlay}>
-            <Animated.View style={[styles.modalCard, { transform: [{ scale: modalPopScale }] }]}>
-              <View style={styles.modalHeaderRow}>
-                <View style={{ flex: 1, minWidth: 0, marginRight: 10 }}>
-                  <Text style={styles.modalTitle}>Activity &amp; Alerts</Text>
-                  <Text style={styles.modalSubtitle}>Autonomous co-pilot notifications</Text>
-                </View>
-                <Pressable onPress={() => setShowNotificationModal(false)} style={styles.modalCloseCircle} hitSlop={8}>
-                  <Text style={styles.modalCloseCross}>✕</Text>
-                </Pressable>
-              </View>
-
-              <ScrollView style={{ maxHeight: 300, marginVertical: 10 }}>
-                {notifications.map((n) => (
-                  <View key={n.id} style={styles.notifCard}>
-                    <Text style={{ fontSize: 20 }}>{n.iconEmoji}</Text>
-                    <View style={{ flex: 1 }}>
-                      <Text style={styles.notifTitle}>{n.title}</Text>
-                      <Text style={styles.notifBody}>{n.body}</Text>
-                    </View>
-                  </View>
-                ))}
-              </ScrollView>
-
-              <Pressable style={styles.modalFullBtn} onPress={() => setShowNotificationModal(false)}>
-                <Text style={styles.modalFullBtnText}>Close</Text>
-              </Pressable>
-            </Animated.View>
-          </View>
-        </Modal>
+          onClose={() => setShowNotificationModal(false)}
+          notifications={notifications}
+          onNotificationsChange={setNotifications}
+          onActionPress={handleNotifAction}
+          onToast={showToast}
+        />
 
         {/* CREATOR STORY MODAL */}
         <CreatorStoryModal

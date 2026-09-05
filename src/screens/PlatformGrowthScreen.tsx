@@ -21,6 +21,7 @@ import { FloatingTabBar, TabType } from '../components/FloatingTabBar';
 import { BrandToast } from '../components/BrandToast';
 import { UserProfileModal, UserProfileData } from '../components/UserProfileModal';
 import { AnimatedCompletionModal } from '../components/AnimatedCompletionModal';
+import { ProNotificationsModal } from '../components/ProNotificationsModal';
 import { FreeAppHeader } from '../components/FreeAppHeader';
 import { sFont, sPadding, moderateScale, isNarrowScreen } from '../utils/responsive';
 
@@ -915,39 +916,15 @@ export const PlatformGrowthScreen: React.FC<PlatformGrowthScreenProps> = ({
           onSaveProfile={onSaveProfile}
         />
 
-        {/* NOTIFICATION MODAL */}
-        <Modal
+        {/* PRO NOTIFICATIONS MODAL */}
+        <ProNotificationsModal
           visible={showNotificationModal}
-          transparent={true}
-          animationType="fade"
-          onRequestClose={() => setShowNotificationModal(false)}
-        >
-          <View style={styles.modalOverlay}>
-            <Animated.View style={[styles.modalCard, { transform: [{ scale: modalPopScale }] }]}>
-              <View style={styles.modalHeaderRow}>
-                <View>
-                  <Text style={styles.modalTitle}>Notifications</Text>
-                  <Text style={styles.modalSubtitle}>Cross-platform milestones</Text>
-                </View>
-                <Pressable onPress={() => setShowNotificationModal(false)} style={styles.modalCloseCircle} hitSlop={8}>
-                  <Text style={styles.modalCloseCross}>✕</Text>
-                </Pressable>
-              </View>
-
-              <View style={styles.notifCard}>
-                <Text style={{ fontSize: 18 }}>📈</Text>
-                <View style={{ flex: 1 }}>
-                  <Text style={styles.notifTitle}>+12.4% Aggregate Surge</Text>
-                  <Text style={styles.notifBody}>TikTok leading cross-platform momentum with +840 followers.</Text>
-                </View>
-              </View>
-
-              <Pressable style={styles.modalFullBtn} onPress={() => setShowNotificationModal(false)}>
-                <Text style={styles.modalFullBtnText}>Close</Text>
-              </Pressable>
-            </Animated.View>
-          </View>
-        </Modal>
+          onClose={() => setShowNotificationModal(false)}
+          onToast={(msg) => {
+            setToastMessage(msg);
+            setTimeout(() => setToastMessage(null), 3000);
+          }}
+        />
 
         {/* COMPREHENSIVE ALL SOCIAL MEDIA CONNECT HUB POPUP MODAL */}
         <Modal

@@ -19,6 +19,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { FloatingTabBar, TabType } from '../components/FloatingTabBar';
 import { BrandToast } from '../components/BrandToast';
 import { UserProfileModal, UserProfileData } from '../components/UserProfileModal';
+import { ProNotificationsModal, ProNotificationItem, DEFAULT_PRO_NOTIFICATIONS } from '../components/ProNotificationsModal';
 
 export const TinyGoldCheck = ({ size = 13 }: { size?: number }) => (
   <View
@@ -70,37 +71,6 @@ interface ProQuestsScreenProps {
   onSaveProfile?: (updated: UserProfileData) => void;
 }
 
-interface NotificationItem {
-  id: string;
-  type: 'streak' | 'collab' | 'quest' | 'level' | 'growth';
-  title: string;
-  body: string;
-  time: string;
-  unread: boolean;
-  iconEmoji: string;
-}
-
-const INITIAL_NOTIFICATIONS: NotificationItem[] = [
-  {
-    id: 'n1',
-    type: 'quest',
-    title: '60-Day Consistency Milestone Unlocked',
-    body: 'Pro Priority sponsor application ready ($450 bounty).',
-    time: '15m ago',
-    unread: true,
-    iconEmoji: '🎁',
-  },
-  {
-    id: 'n2',
-    type: 'streak',
-    title: 'Squad Quest 4/8 Complete',
-    body: 'Momentum Makers is 50% toward the Weekly Push crown!',
-    time: '45m ago',
-    unread: true,
-    iconEmoji: '⚡',
-  },
-];
-
 export const ProQuestsScreen: React.FC<ProQuestsScreenProps> = ({
   onBackToDashboard,
   onLogout,
@@ -138,7 +108,7 @@ export const ProQuestsScreen: React.FC<ProQuestsScreenProps> = ({
   const [selectedBrandBounty, setSelectedBrandBounty] = useState('$450');
 
   // Notifications
-  const [notifications, setNotifications] = useState<NotificationItem[]>(INITIAL_NOTIFICATIONS);
+  const [notifications, setNotifications] = useState<ProNotificationItem[]>(DEFAULT_PRO_NOTIFICATIONS);
 
   // Animations
   const ghostFloatY = useRef(new Animated.Value(0)).current;
@@ -1757,6 +1727,18 @@ export const ProQuestsScreen: React.FC<ProQuestsScreenProps> = ({
             </Animated.View>
           </View>
         </Modal>
+
+        {/* PRO ADVANCED NOTIFICATIONS MODAL */}
+        <ProNotificationsModal
+          visible={showNotificationModal}
+          onClose={() => setShowNotificationModal(false)}
+          notifications={notifications}
+          onNotificationsChange={setNotifications}
+          onToast={(msg) => {
+            setToastMessage(msg);
+            setTimeout(() => setToastMessage(null), 3000);
+          }}
+        />
 
         {/* PROFILE MODAL */}
         <UserProfileModal

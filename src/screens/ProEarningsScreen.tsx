@@ -20,6 +20,7 @@ import { FloatingTabBar, TabType } from '../components/FloatingTabBar';
 import { BrandToast } from '../components/BrandToast';
 import { UserProfileModal, UserProfileData } from '../components/UserProfileModal';
 import { AnimatedCompletionModal } from '../components/AnimatedCompletionModal';
+import { ProNotificationsModal } from '../components/ProNotificationsModal';
 import { TinyGoldCheck } from '../components/CreatorStoryModal';
 import { SocialBrandIcon } from '../components/SocialBrandIcon';
 import { sFont, isNarrowScreen } from '../utils/responsive';
@@ -1926,36 +1927,15 @@ export const ProEarningsScreen: React.FC<ProEarningsScreenProps> = ({
           </View>
         </Modal>
 
-                {/* NOTIFICATIONS MODAL */}
-        <Modal
+                {/* PRO NOTIFICATIONS MODAL */}
+        <ProNotificationsModal
           visible={showNotificationModal}
-          transparent={true}
-          animationType="fade"
-          onRequestClose={() => setShowNotificationModal(false)}
-        >
-          <View style={styles.modalOverlay}>
-            <Animated.View style={[styles.modalCard, { transform: [{ scale: modalPopScale }] }]}>
-              <View style={styles.modalHeaderBetween}>
-                <Text style={styles.modalTitle}>Earnings Alerts</Text>
-                <Pressable onPress={() => setShowNotificationModal(false)} hitSlop={8}>
-                  <Text style={styles.modalCloseText}>✕</Text>
-                </Pressable>
-              </View>
-              <View style={{ gap: 8, marginVertical: 12 }}>
-                <View style={styles.transferRow}>
-                  <Text style={{ fontSize: 20 }}>💰</Text>
-                  <View style={{ flex: 1 }}>
-                    <Text style={styles.transferDate}>$450.00 from GlowUp Skincare</Text>
-                    <Text style={styles.transferStatus}>Campaign brief approved • Processing deposit</Text>
-                  </View>
-                </View>
-              </View>
-              <Pressable style={styles.modalCancelBtn} onPress={() => setShowNotificationModal(false)}>
-                <Text style={styles.modalCancelBtnText}>Close</Text>
-              </Pressable>
-            </Animated.View>
-          </View>
-        </Modal>
+          onClose={() => setShowNotificationModal(false)}
+          onToast={(msg) => {
+            setToastMessage(msg);
+            setTimeout(() => setToastMessage(null), 3000);
+          }}
+        />
 
         {/* PROFILE MODAL */}
         <UserProfileModal

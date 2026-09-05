@@ -23,6 +23,7 @@ import { FloatingTabBar, TabType } from '../components/FloatingTabBar';
 import { BrandToast } from '../components/BrandToast';
 import { UserProfileModal, UserProfileData } from '../components/UserProfileModal';
 import { AnimatedCompletionModal } from '../components/AnimatedCompletionModal';
+import { ProNotificationsModal } from '../components/ProNotificationsModal';
 import { TinyGoldCheck } from '../components/CreatorStoryModal';
 import { sFont } from '../utils/responsive';
 
@@ -1975,6 +1976,16 @@ export const ProMatchScreen: React.FC<ProMatchScreenProps> = ({
             </View>
           </View>
         </Modal>
+
+        {/* PRO NOTIFICATIONS MODAL */}
+        <ProNotificationsModal
+          visible={showNotificationModal}
+          onClose={() => setShowNotificationModal(false)}
+          onToast={(msg) => {
+            setToastMessage(msg);
+            setTimeout(() => setToastMessage(null), 3000);
+          }}
+        />
 
         {/* PROFILE MODAL */}
         <UserProfileModal
