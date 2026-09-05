@@ -747,134 +747,257 @@ export const ProMessagesScreen: React.FC<ProMessagesScreenProps> = ({
       <StatusBar barStyle="dark-content" backgroundColor="#FAF8F5" />
       <View style={styles.container}>
         {/* ============================================================ */}
-        {/* 1. TOP HEADER BAR WITH PRO MODE SWITCHER                    */}
+        {/* 1. TOP HEADER BAR WITH PRO MODE SWITCHER OR ACTIVE CHAT HEADER */}
         {/* ============================================================ */}
         <View style={styles.headerBar}>
-          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
-            <Pressable
-              onPress={onBack}
-              style={({ pressed }) => [styles.backBtnCircle, pressed && styles.btnPressed]}
-              hitSlop={8}
-            >
-              <Text style={{ fontSize: 18, color: '#171420', fontWeight: '700' }}>‹</Text>
-            </Pressable>
+          {activeChatThread ? (
+            /* ACTIVE CHAT ROOM HEADER */
+            <View style={styles.chatActiveHeaderRow}>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, flex: 1, minWidth: 0, marginRight: 8 }}>
+                <Pressable
+                  onPress={() => {
+                    if (Platform.OS !== 'web') {
+                      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                    }
+                    setActiveChatThread(null);
+                  }}
+                  style={({ pressed }) => [styles.backBtnCircle, pressed && styles.btnPressed]}
+                  hitSlop={8}
+                >
+                  <Text style={{ fontSize: 18, color: '#171420', fontWeight: '700' }}>‹</Text>
+                </Pressable>
 
-            {/* PostStreak 3D Ghost Mascot */}
-            <Animated.View
-              style={[
-                styles.headerLogoWrapper,
-                { transform: [{ translateY: flameFloatY }] },
-              ]}
-            >
-              <Image
-                source={require('../../assets/images/jarvis-ghost-clean.png')}
-                style={styles.headerGhostLogo}
-                resizeMode="contain"
-              />
-            </Animated.View>
-
-            {/* Mode Switcher */}
-            <Pressable
-              onPress={() => {
-                if (Platform.OS !== 'web') {
-                  Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-                }
-                if (onSwitchToFree) {
-                  onSwitchToFree();
-                } else if (onSaveProfile && userProfile) {
-                  onSaveProfile({ ...userProfile, tier: 'free' });
-                }
-              }}
-              hitSlop={8}
-            >
-              <LinearGradient
-                colors={['#F59E0B', '#F59E0B', '#F59E0B']}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 0 }}
-                style={styles.proHeaderBadge}
-              >
-                <Text style={styles.proHeaderBadgeText}>👑 PRO</Text>
-              </LinearGradient>
-            </Pressable>
-          </View>
-
-          {/* Right Action: Plus Button (+) & Profile Icon with Tiny Gold Check */}
-          <View style={styles.headerRightGroup}>
-            <Pressable
-              style={({ pressed }) => [styles.newChatBtn, pressed && styles.btnPressed]}
-              hitSlop={8}
-              onPress={() => {
-                if (Platform.OS !== 'web') {
-                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-                }
-                if (onOpenMatch) {
-                  onOpenMatch();
-                } else if (onNavigateTab) {
-                  onNavigateTab('match');
-                }
-              }}
-            >
-              <LinearGradient
-                colors={['#7C3AED', '#582CDB']}
-                style={styles.plusIconGradient}
-              >
-                <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
-                  <Path d="M12 5V19M5 12H19" stroke="#FFFFFF" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" />
-                </Svg>
-              </LinearGradient>
-            </Pressable>
-
-            {/* User Profile Avatar with Tiny Gold Check Badge */}
-            <Pressable
-              onPress={() => {
-                setShowProfileModal(true);
-              }}
-              style={styles.profileAvatarWrapper}
-              hitSlop={8}
-            >
-              {userProfile?.customAvatarUri ? (
-                <Image
-                  source={{ uri: userProfile.customAvatarUri }}
-                  style={styles.headerUserAvatar}
-                  resizeMode="cover"
-                />
-              ) : (userProfile?.avatarSource && userProfile.avatarId && userProfile.avatarId !== 'ghost') ? (
-                <Image
-                  source={userProfile.avatarSource}
-                  style={styles.headerUserAvatar}
-                  resizeMode="cover"
-                />
-              ) : (
-                <Svg width={19} height={19} viewBox="0 0 24 24" fill="none">
-                  <Path
-                    d="M20 21V19C20 17.9 19.5 16.9 18.7 16.2C17.9 15.5 16.9 15 15.8 15H8.2C7.1 15 6.1 15.5 5.3 16.2C4.5 16.9 4 17.9 4 19V21"
-                    stroke="#F59E0B"
-                    strokeWidth="2.3"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
+                {/* Creator Avatar */}
+                <Pressable
+                  onPress={() => openCreatorStory(activeChatThread.creatorId)}
+                  style={styles.chatHeaderAvatarWrapper}
+                >
+                  <Image
+                    source={activeChatThread.avatar}
+                    style={[
+                      styles.chatHeaderAvatar,
+                      activeChatThread.creatorId === 'jarvis' && { backgroundColor: '#EDE9FE', padding: 4 },
+                    ]}
+                    resizeMode={activeChatThread.creatorId === 'jarvis' ? 'contain' : 'cover'}
                   />
-                  <Circle
-                    cx="12"
-                    cy="7"
-                    r="4"
-                    stroke="#F59E0B"
-                    strokeWidth="2.3"
-                  />
-                </Svg>
-              )}
-              <View style={styles.avatarTinyGoldCheckPos}>
-                <TinyGoldCheck size={14} />
+                  {activeChatThread.isPro && (
+                    <View style={styles.chatTinyGoldCheckPos}>
+                      <TinyGoldCheck size={13} />
+                    </View>
+                  )}
+                  {activeChatThread.isOnline && <View style={styles.chatHeaderOnlineDot} />}
+                </Pressable>
+
+                <View style={{ flex: 1, minWidth: 0 }}>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                    <Text style={styles.chatHeaderName} numberOfLines={1}>{activeChatThread.name}</Text>
+                    {activeChatThread.isPro && (
+                      <View style={styles.proMicroPill}>
+                        <Text style={styles.proMicroPillText}>PRO</Text>
+                      </View>
+                    )}
+                  </View>
+                  <Text style={styles.chatHeaderStatus} numberOfLines={1}>
+                    {activeChatThread.isOnline ? '● Active now' : 'Offline'} • {activeChatThread.niche}
+                    {mutedThreadIds.includes(activeChatThread.id) ? ' • 🔕 Muted' : ''}
+                  </Text>
+                </View>
               </View>
-            </Pressable>
-          </View>
+
+              {/* Right Action Icons: 👥＋ (Start a Squad) & ⋯ (Conversation Options) */}
+              <View style={styles.chatActiveHeaderRightGroup}>
+                {activeChatThread.creatorId !== 'jarvis' && activeChatThread.category !== 'squad' && (
+                  <Pressable
+                    style={({ pressed }) => [styles.chatHeaderActionBtn, pressed && styles.btnPressed]}
+                    hitSlop={8}
+                    onPress={() => {
+                      if (Platform.OS !== 'web') {
+                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                      }
+                      if (activeChatThread) {
+                        setSquadNameInput(`${activeChatThread.name.split(' ')[0]} & Pablo's Squad`);
+                      }
+                      setSelectedSquadCreatorIds([]);
+                      setShowCreateSquadModal(true);
+                    }}
+                  >
+                    <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
+                      {/* User Body & Head */}
+                      <Path
+                        d="M15 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"
+                        stroke="#171420"
+                        strokeWidth="2.1"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                      <Circle
+                        cx="8"
+                        cy="7"
+                        r="4"
+                        stroke="#171420"
+                        strokeWidth="2.1"
+                      />
+                      {/* Purple Plus */}
+                      <Path
+                        d="M19 8v6M16 11h6"
+                        stroke="#582CDB"
+                        strokeWidth="2.4"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                    </Svg>
+                  </Pressable>
+                )}
+
+                <Pressable
+                  style={({ pressed }) => [styles.chatHeaderActionBtn, pressed && styles.btnPressed]}
+                  hitSlop={8}
+                  onPress={() => {
+                    if (Platform.OS !== 'web') {
+                      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                    }
+                    setShowChatOptionsMenu(true);
+                  }}
+                >
+                  <Svg width={17} height={17} viewBox="0 0 24 24" fill="none">
+                    <Circle cx="5" cy="12" r="2.2" fill="#171420" />
+                    <Circle cx="12" cy="12" r="2.2" fill="#171420" />
+                    <Circle cx="19" cy="12" r="2.2" fill="#171420" />
+                  </Svg>
+                </Pressable>
+              </View>
+            </View>
+          ) : (
+            /* MAIN INBOX HEADER */
+            <>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+                <Pressable
+                  onPress={onBack}
+                  style={({ pressed }) => [styles.backBtnCircle, pressed && styles.btnPressed]}
+                  hitSlop={8}
+                >
+                  <Text style={{ fontSize: 18, color: '#171420', fontWeight: '700' }}>‹</Text>
+                </Pressable>
+
+                {/* PostStreak 3D Ghost Mascot */}
+                <Animated.View
+                  style={[
+                    styles.headerLogoWrapper,
+                    { transform: [{ translateY: flameFloatY }] },
+                  ]}
+                >
+                  <Image
+                    source={require('../../assets/images/jarvis-ghost-clean.png')}
+                    style={styles.headerGhostLogo}
+                    resizeMode="contain"
+                  />
+                </Animated.View>
+
+                {/* Mode Switcher */}
+                <Pressable
+                  onPress={() => {
+                    if (Platform.OS !== 'web') {
+                      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+                    }
+                    if (onSwitchToFree) {
+                      onSwitchToFree();
+                    } else if (onSaveProfile && userProfile) {
+                      onSaveProfile({ ...userProfile, tier: 'free' });
+                    }
+                  }}
+                  hitSlop={8}
+                >
+                  <LinearGradient
+                    colors={['#F59E0B', '#F59E0B', '#F59E0B']}
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 1, y: 0 }}
+                    style={styles.proHeaderBadge}
+                  >
+                    <Text style={styles.proHeaderBadgeText}>👑 PRO</Text>
+                  </LinearGradient>
+                </Pressable>
+              </View>
+
+              {/* Right Action: Plus Button (+) & Profile Icon with Tiny Gold Check */}
+              <View style={styles.headerRightGroup}>
+                <Pressable
+                  style={({ pressed }) => [styles.newChatBtn, pressed && styles.btnPressed]}
+                  hitSlop={8}
+                  onPress={() => {
+                    if (Platform.OS !== 'web') {
+                      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                    }
+                    if (onOpenMatch) {
+                      onOpenMatch();
+                    } else if (onNavigateTab) {
+                      onNavigateTab('match');
+                    }
+                  }}
+                >
+                  <LinearGradient
+                    colors={['#7C3AED', '#582CDB']}
+                    style={styles.plusIconGradient}
+                  >
+                    <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
+                      <Path d="M12 5V19M5 12H19" stroke="#FFFFFF" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" />
+                    </Svg>
+                  </LinearGradient>
+                </Pressable>
+
+                {/* User Profile Avatar with Tiny Gold Check Badge */}
+                <Pressable
+                  onPress={() => {
+                    setShowProfileModal(true);
+                  }}
+                  style={styles.profileAvatarWrapper}
+                  hitSlop={8}
+                >
+                  {userProfile?.customAvatarUri ? (
+                    <Image
+                      source={{ uri: userProfile.customAvatarUri }}
+                      style={styles.headerUserAvatar}
+                      resizeMode="cover"
+                    />
+                  ) : (userProfile?.avatarSource && userProfile.avatarId && userProfile.avatarId !== 'ghost') ? (
+                    <Image
+                      source={userProfile.avatarSource}
+                      style={styles.headerUserAvatar}
+                      resizeMode="cover"
+                    />
+                  ) : (
+                    <Svg width={19} height={19} viewBox="0 0 24 24" fill="none">
+                      <Path
+                        d="M20 21V19C20 17.9 19.5 16.9 18.7 16.2C17.9 15.5 16.9 15 15.8 15H8.2C7.1 15 6.1 15.5 5.3 16.2C4.5 16.9 4 17.9 4 19V21"
+                        stroke="#F59E0B"
+                        strokeWidth="2.3"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                      <Circle
+                        cx="12"
+                        cy="7"
+                        r="4"
+                        stroke="#F59E0B"
+                        strokeWidth="2.3"
+                      />
+                    </Svg>
+                  )}
+                  <View style={styles.avatarTinyGoldCheckPos}>
+                    <TinyGoldCheck size={14} />
+                  </View>
+                </Pressable>
+              </View>
+            </>
+          )}
         </View>
 
-        {/* 2. MAIN SCROLLABLE MESSAGES INBOX */}
-        <ScrollView
-          contentContainerStyle={styles.scrollContent}
-          showsVerticalScrollIndicator={false}
-          bounces={true}
-        >
+        {!activeChatThread ? (
+          /* 2. MAIN SCROLLABLE MESSAGES INBOX */
+          <ScrollView
+            contentContainerStyle={styles.scrollContent}
+            showsVerticalScrollIndicator={false}
+            bounces={true}
+          >
           {/* SEARCH BAR */}
           <View style={styles.searchBarBox}>
             <Text style={{ fontSize: 14, marginRight: 8 }}>🔍</Text>
@@ -1102,138 +1225,21 @@ export const ProMessagesScreen: React.FC<ProMessagesScreenProps> = ({
             })}
           </View>
         </ScrollView>
-
-        {/* ============================================================ */}
-        {/* 6. INTERACTIVE FULL-SCREEN CHAT THREAD MODAL                 */}
-        {/* ============================================================ */}
-        <Modal
-          visible={activeChatThread !== null}
-          animationType="slide"
-          onRequestClose={() => setActiveChatThread(null)}
-        >
-          {activeChatThread && (
-            <SafeAreaView style={styles.chatModalSafeArea}>
-              <StatusBar barStyle="dark-content" backgroundColor="#FAF8F5" />
-              <KeyboardAvoidingView
-                behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-                style={{ flex: 1 }}
-              >
-                {/* CHAT HEADER */}
-                <View style={styles.chatRoomHeader}>
-                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, flex: 1, flexShrink: 1, minWidth: 0, marginRight: 8 }}>
-                    <Pressable
-                      onPress={() => setActiveChatThread(null)}
-                      style={styles.chatBackBtn}
-                      hitSlop={8}
-                    >
-                      <Text style={{ fontSize: 20, fontWeight: '700', color: '#171420' }}>‹</Text>
-                    </Pressable>
-
-                    {/* Tapping Chat Header Avatar opens their Story/Highlight! */}
-                    <Pressable
-                      onPress={() => openCreatorStory(activeChatThread.creatorId)}
-                      style={styles.chatHeaderAvatarWrapper}
-                    >
-                      <Image
-                        source={activeChatThread.avatar}
-                        style={[
-                          styles.chatHeaderAvatar,
-                          activeChatThread.creatorId === 'jarvis' && { backgroundColor: '#EDE9FE', padding: 4 },
-                        ]}
-                        resizeMode={activeChatThread.creatorId === 'jarvis' ? 'contain' : 'cover'}
-                      />
-                      {activeChatThread.isPro && (
-                        <View style={styles.chatTinyGoldCheckPos}>
-                          <TinyGoldCheck size={13} />
-                        </View>
-                      )}
-                    </Pressable>
-
-                    <View style={{ flex: 1, flexShrink: 1, minWidth: 0 }}>
-                      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-                        <Text style={styles.chatHeaderName} numberOfLines={1}>{activeChatThread.name}</Text>
-                        <View style={styles.proMicroPill}>
-                          <Text style={styles.proMicroPillText}>PRO</Text>
-                        </View>
-                      </View>
-                      <Text style={styles.chatHeaderStatus} numberOfLines={1}>
-                        {activeChatThread.isOnline ? '● Active now' : 'Offline'} • {activeChatThread.niche}
-                        {mutedThreadIds.includes(activeChatThread.id) ? ' • 🔕 Muted' : ''}
-                      </Text>
-                    </View>
-                  </View>
-
-                  {/* Right Action Icons: 👥＋ (Start a Squad) & ⋯ (Conversation Options) */}
-                  <View style={styles.chatActiveHeaderRightGroup}>
-                    {activeChatThread.creatorId !== 'jarvis' && activeChatThread.category !== 'squad' && (
-                      <Pressable
-                        style={({ pressed }) => [styles.chatHeaderActionBtn, pressed && styles.btnPressed]}
-                        hitSlop={8}
-                        onPress={() => {
-                          if (Platform.OS !== 'web') {
-                            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                          }
-                          if (activeChatThread) {
-                            setSquadNameInput(`${activeChatThread.name.split(' ')[0]} & Pablo's Squad`);
-                          }
-                          setSelectedSquadCreatorIds([]);
-                          setShowCreateSquadModal(true);
-                        }}
-                      >
-                        <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
-                          {/* User Body & Head */}
-                          <Path
-                            d="M15 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"
-                            stroke="#171420"
-                            strokeWidth="2.1"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                          />
-                          <Circle
-                            cx="8"
-                            cy="7"
-                            r="4"
-                            stroke="#171420"
-                            strokeWidth="2.1"
-                          />
-                          {/* Purple Plus */}
-                          <Path
-                            d="M19 8v6M16 11h6"
-                            stroke="#582CDB"
-                            strokeWidth="2.4"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                          />
-                        </Svg>
-                      </Pressable>
-                    )}
-
-                    <Pressable
-                      style={({ pressed }) => [styles.chatHeaderActionBtn, pressed && styles.btnPressed]}
-                      hitSlop={8}
-                      onPress={() => {
-                        if (Platform.OS !== 'web') {
-                          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                        }
-                        setShowChatOptionsMenu(true);
-                      }}
-                    >
-                      <Svg width={17} height={17} viewBox="0 0 24 24" fill="none">
-                        <Circle cx="5" cy="12" r="2.2" fill="#171420" />
-                        <Circle cx="12" cy="12" r="2.2" fill="#171420" />
-                        <Circle cx="19" cy="12" r="2.2" fill="#171420" />
-                      </Svg>
-                    </Pressable>
-                  </View>
-                </View>
-
-                {/* QUICK AI ACTION PILLS */}
-                <ScrollView
-                  horizontal
-                  showsHorizontalScrollIndicator={false}
-                  contentContainerStyle={styles.quickAiActionsContent}
-                  style={styles.quickAiActionsScroll}
-                >
+        ) : (
+          /* ============================================================ */
+          /* 2. ACTIVE 1-ON-1 / SQUAD CHAT ROOM VIEW                      */
+          /* ============================================================ */
+          <KeyboardAvoidingView
+            behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+            style={{ flex: 1, backgroundColor: '#FAF8F5' }}
+          >
+            {/* QUICK AI ACTION PILLS */}
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={styles.quickAiActionsContent}
+              style={styles.quickAiActionsScroll}
+            >
                   <Pressable
                     style={styles.quickAiActionPill}
                     onPress={() => {
@@ -1474,9 +1480,7 @@ export const ProMessagesScreen: React.FC<ProMessagesScreenProps> = ({
                   </View>
                 )}
               </KeyboardAvoidingView>
-            </SafeAreaView>
-          )}
-        </Modal>
+        )}
 
         {/* ============================================================ */}
         {/* START A SQUAD MODAL (👥＋)                                     */}
@@ -2541,6 +2545,12 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
+  chatActiveHeaderRow: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
   chatHeaderAvatarWrapper: {
     position: 'relative',
   },
@@ -2553,6 +2563,17 @@ const styles = StyleSheet.create({
     position: 'absolute',
     bottom: -1,
     right: -1,
+  },
+  chatHeaderOnlineDot: {
+    position: 'absolute',
+    bottom: 0,
+    right: 0,
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    backgroundColor: '#10B981',
+    borderWidth: 1.5,
+    borderColor: '#FFFFFF',
   },
   chatHeaderName: {
     fontSize: 15,
