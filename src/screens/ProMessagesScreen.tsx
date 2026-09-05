@@ -904,19 +904,31 @@ export const ProMessagesScreen: React.FC<ProMessagesScreenProps> = ({
                       resizeMode={creator.id === 'jarvis' ? 'contain' : 'cover'}
                     />
                     {/* TINY GOLD CHECK BADGE FOR PRO CREATORS */}
-                    {creator.isPro && (
+                    {creator.isPro && creator.id !== 'jarvis' && (
                       <View style={styles.storyTinyGoldCheckPos}>
                         <TinyGoldCheck size={14} />
                       </View>
                     )}
-                    {creator.isOnline && <View style={styles.storyOnlineDot} />}
+                    {creator.id === 'jarvis' ? (
+                      <View style={styles.storyAiSparklePos}>
+                        <Text style={{ fontSize: 9 }}>✨</Text>
+                      </View>
+                    ) : (
+                      creator.isOnline && <View style={styles.storyOnlineDot} />
+                    )}
                   </View>
                   <Text style={styles.storyCreatorName} numberOfLines={1}>
                     {creator.name.split(' ')[0]}
                   </Text>
-                  <View style={styles.storyStreakPill}>
-                    <Text style={styles.storyStreakText}>🔥 {creator.streak}</Text>
-                  </View>
+                  {creator.id === 'jarvis' ? (
+                    <View style={styles.storyAiCoPilotPill}>
+                      <Text style={styles.storyAiCoPilotText}>✨ AI Co-Pilot</Text>
+                    </View>
+                  ) : (
+                    <View style={styles.storyStreakPill}>
+                      <Text style={styles.storyStreakText}>🔥 {creator.streak}</Text>
+                    </View>
+                  )}
                 </Pressable>
               ))}
             </ScrollView>
@@ -1519,6 +1531,33 @@ const styles = StyleSheet.create({
     fontSize: 9,
     fontWeight: '700',
     color: '#582CDB',
+  },
+  storyAiSparklePos: {
+    position: 'absolute',
+    bottom: -1,
+    right: -1,
+    width: 15,
+    height: 15,
+    borderRadius: 7.5,
+    backgroundColor: '#582CDB',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 1.5,
+    borderColor: '#FFFFFF',
+  },
+  storyAiCoPilotPill: {
+    backgroundColor: '#F5F3FF',
+    borderWidth: 0.8,
+    borderColor: '#DDD6FE',
+    paddingHorizontal: 5,
+    paddingVertical: 1.5,
+    borderRadius: 6,
+  },
+  storyAiCoPilotText: {
+    fontSize: 8,
+    fontWeight: '800',
+    color: '#6D28D9',
+    letterSpacing: 0.1,
   },
 
   // PINNED COLLAB BANNER
