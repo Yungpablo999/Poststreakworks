@@ -1088,13 +1088,14 @@ export const ProDashboardScreen: React.FC<ProDashboardScreenProps> = ({
             </View>
 
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginVertical: 14 }}>
-              <View>
-                <Text style={styles.voiceMinsCount}>118 <Text style={styles.voiceMinsTotal}>/ 150 mins</Text></Text>
+              <View style={{ flex: 1, paddingRight: 8 }}>
+                <Text style={styles.voiceMinsCount}>118 <Text style={styles.voiceMinsTotal}>/ 150 min used</Text></Text>
                 <Text style={styles.savedVoiceSub}>Saved Voice — Energetic Narrator</Text>
               </View>
 
               <View style={styles.voiceProgressCircle}>
                 <Text style={styles.voiceProgressText}>78%</Text>
+                <Text style={styles.voiceProgressSub}>MATCH</Text>
               </View>
             </View>
 
@@ -2591,18 +2592,27 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
   voiceProgressCircle: {
-    width: 42,
-    height: 42,
-    borderRadius: 20,
+    width: 50,
+    height: 50,
+    borderRadius: 25,
     borderWidth: 2,
-    borderColor: '#EFECE6',
+    borderColor: '#EDE9FE',
+    backgroundColor: '#FAF5FF',
     justifyContent: 'center',
     alignItems: 'center',
   },
   voiceProgressText: {
-    fontSize: 11,
-    fontWeight: '700',
-    color: '#171420',
+    fontSize: 12,
+    fontWeight: '800',
+    color: '#7C3AED',
+    lineHeight: 14,
+  },
+  voiceProgressSub: {
+    fontSize: 8,
+    fontWeight: '800',
+    color: '#8B5CF6',
+    letterSpacing: 0.4,
+    marginTop: 1,
   },
   createVoiceBtn: {
     backgroundColor: '#582CDB',
