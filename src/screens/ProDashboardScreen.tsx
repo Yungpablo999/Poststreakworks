@@ -250,7 +250,7 @@ const INITIAL_NOTIFICATIONS: NotificationItem[] = [
     id: 'n3',
     type: 'collab',
     title: 'Collab Match Suggested',
-    body: 'Amara Okafor (94% Audience Overlap) is active and open for squad collab.',
+    body: 'Amara Okafor (94% Match) is active and open for squad collab.',
     time: '3h ago',
     unread: true,
     iconEmoji: '🤝',
@@ -1155,7 +1155,7 @@ export const ProDashboardScreen: React.FC<ProDashboardScreenProps> = ({
               </Pressable>
               <View style={{ flex: 1 }}>
                 <Text style={styles.matchCreatorName}>Amara Okafor</Text>
-                <Text style={styles.matchOverlapTag}>94% Audience overlap</Text>
+                <Text style={styles.matchOverlapTag}>94% Match</Text>
               </View>
             </View>
 
@@ -1163,7 +1163,7 @@ export const ProDashboardScreen: React.FC<ProDashboardScreenProps> = ({
               <Text style={{ fontSize: 13 }}>✨</Text>
               <Text style={styles.whyMatchInlineText}>
                 <Text style={{ fontWeight: '700', color: '#582CDB' }}>Why this match? </Text>
-                Similar niche, active streak, open to collab.
+                Similar niche • 94% audience overlap • Active streak • Open to collab
               </Text>
             </View>
 
