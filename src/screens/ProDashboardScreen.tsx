@@ -293,6 +293,8 @@ export const ProDashboardScreen: React.FC<ProDashboardScreenProps> = ({
   // Calendar State
   const [selectedMonthIndex, setSelectedMonthIndex] = useState(8); // September
   const [selectedDayInfo, setSelectedDayInfo] = useState<string | null>(null);
+  const [calendarWidth, setCalendarWidth] = useState(Dimensions.get('window').width - 56);
+  const calendarPagerRef = useRef<ScrollView>(null);
   const monthChipsScrollRef = useRef<ScrollView>(null);
 
   // Notifications
@@ -315,10 +317,17 @@ export const ProDashboardScreen: React.FC<ProDashboardScreenProps> = ({
       setSelectedMonthIndex(8);
       setSelectedDayInfo(null);
       setTimeout(() => {
-        scrollToMonth(8);
-      }, 60);
+        calendarPagerRef.current?.scrollTo({
+          x: 8 * calendarWidth,
+          animated: false,
+        });
+        monthChipsScrollRef.current?.scrollTo({
+          x: Math.max(0, 8 * 68 - 100),
+          animated: false,
+        });
+      }, 50);
     }
-  }, [showCalendarModal]);
+  }, [showCalendarModal, calendarWidth]);
 
   useEffect(() => {
     Animated.loop(
@@ -394,14 +403,20 @@ export const ProDashboardScreen: React.FC<ProDashboardScreenProps> = ({
     }
   };
 
-  const scrollToMonth = (index: number) => {
-    setSelectedMonthIndex(index);
-    setSelectedDayInfo(null);
-    if (monthChipsScrollRef.current) {
-      monthChipsScrollRef.current.scrollTo({
-        x: Math.max(0, index * 68 - 100),
-        animated: true,
+  const scrollToMonth = (index: number, animated = true) => {
+    if (index >= 0 && index < FULL_YEAR_CALENDAR.length) {
+      setSelectedMonthIndex(index);
+      setSelectedDayInfo(null);
+      calendarPagerRef.current?.scrollTo({
+        x: index * calendarWidth,
+        animated,
       });
+      if (monthChipsScrollRef.current) {
+        monthChipsScrollRef.current.scrollTo({
+          x: Math.max(0, index * 68 - 100),
+          animated: true,
+        });
+      }
     }
   };
 
@@ -410,7 +425,7 @@ export const ProDashboardScreen: React.FC<ProDashboardScreenProps> = ({
       if (Platform.OS !== 'web') {
         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
       }
-      scrollToMonth(selectedMonthIndex - 1);
+      scrollToMonth(selectedMonthIndex - 1, true);
     }
   };
 
@@ -419,7 +434,7 @@ export const ProDashboardScreen: React.FC<ProDashboardScreenProps> = ({
       if (Platform.OS !== 'web') {
         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
       }
-      scrollToMonth(selectedMonthIndex + 1);
+      scrollToMonth(selectedMonthIndex + 1, true);
     }
   };
 
@@ -1290,8 +1305,22 @@ export const ProDashboardScreen: React.FC<ProDashboardScreenProps> = ({
                   </View>
                 )}
 
-                {/* Active Month Calendar Container */}
-                <View style={styles.pagerOuterContainer}>
+                {/* Active Month Calendar Container with Smooth Swiping */}
+                <View
+                  style={styles.pagerOuterContainer}
+                  onLayout={(e) => {
+                    const measuredWidth = Math.floor(e.nativeEvent.layout.width);
+                    if (measuredWidth > 0 && Math.abs(measuredWidth - calendarWidth) > 1) {
+                      setCalendarWidth(measuredWidth);
+                      setTimeout(() => {
+                        calendarPagerRef.current?.scrollTo({
+                          x: selectedMonthIndex * measuredWidth,
+                          animated: false,
+                        });
+                      }, 20);
+                    }
+                  }}
+                >
                   {/* Month Navigator Header with ‹ and › */}
                   <View style={styles.monthNavHeader}>
                     <Pressable
@@ -1343,57 +1372,88 @@ export const ProDashboardScreen: React.FC<ProDashboardScreenProps> = ({
                     ))}
                   </View>
 
-                  {/* Active Month 7-Column Grid (No Edge Clipping) */}
-                  <View style={styles.monthPageCard}>
-                    <View style={styles.calendarMonthGrid}>
-                      {Array.from({ length: Math.ceil((FULL_YEAR_CALENDAR[selectedMonthIndex].daysCount + FULL_YEAR_CALENDAR[selectedMonthIndex].startOffset) / 7) * 7 }).map((_, cellIdx) => {
-                        const currentMonth = FULL_YEAR_CALENDAR[selectedMonthIndex];
-                        const dayNumber = cellIdx - currentMonth.startOffset + 1;
-                        const isValidDay = dayNumber >= 1 && dayNumber <= currentMonth.daysCount;
-
-                        if (!isValidDay) {
-                          return <View key={`pro_empty_${cellIdx}`} style={styles.calendarCellEmpty} />;
+                  {/* Swipeable Horizontal Months Pager */}
+                  <ScrollView
+                    ref={calendarPagerRef}
+                    horizontal
+                    pagingEnabled
+                    showsHorizontalScrollIndicator={false}
+                    nestedScrollEnabled={true}
+                    decelerationRate="fast"
+                    snapToInterval={calendarWidth}
+                    snapToAlignment="center"
+                    scrollEventThrottle={16}
+                    onMomentumScrollEnd={(e) => {
+                      if (calendarWidth <= 0) return;
+                      const newIndex = Math.round(e.nativeEvent.contentOffset.x / calendarWidth);
+                      if (newIndex >= 0 && newIndex < FULL_YEAR_CALENDAR.length && newIndex !== selectedMonthIndex) {
+                        setSelectedMonthIndex(newIndex);
+                        setSelectedDayInfo(null);
+                        if (Platform.OS !== 'web') {
+                          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                         }
+                        monthChipsScrollRef.current?.scrollTo({
+                          x: Math.max(0, newIndex * 68 - 100),
+                          animated: true,
+                        });
+                      }
+                    }}
+                  >
+                    {FULL_YEAR_CALENDAR.map((currentMonth, mIdx) => (
+                      <View
+                        key={`month_page_${currentMonth.id}`}
+                        style={[styles.monthPageCard, { width: calendarWidth }]}
+                      >
+                        <View style={styles.calendarMonthGrid}>
+                          {Array.from({ length: Math.ceil((currentMonth.daysCount + currentMonth.startOffset) / 7) * 7 }).map((_, cellIdx) => {
+                            const dayNumber = cellIdx - currentMonth.startOffset + 1;
+                            const isValidDay = dayNumber >= 1 && dayNumber <= currentMonth.daysCount;
 
-                        const isCompleted = currentMonth.completedDays.includes(dayNumber);
-                        const isScheduled = currentMonth.scheduledDays.includes(dayNumber);
-                        const isFreeze = currentMonth.freezeDays.includes(dayNumber);
-                        const isToday = currentMonth.isCurrent && dayNumber === 5;
+                            if (!isValidDay) {
+                              return <View key={`pro_empty_${currentMonth.id}_${cellIdx}`} style={styles.calendarCellEmpty} />;
+                            }
 
-                        return (
-                          <Pressable
-                            key={`pro_day_${dayNumber}`}
-                            onPress={() => handleDayPress(dayNumber, currentMonth)}
-                            style={({ pressed }) => [
-                              styles.calendarCell,
-                              isCompleted && styles.calendarCellCompleted,
-                              isScheduled && styles.calendarCellScheduled,
-                              isFreeze && styles.calendarCellFreeze,
-                              isToday && styles.calendarCellToday,
-                              pressed && styles.calendarCellPressed,
-                            ]}
-                          >
-                            <Text
-                              style={[
-                                styles.calendarCellDayNumber,
-                                isCompleted && styles.calendarCellTextCompleted,
-                                isScheduled && styles.calendarCellTextScheduled,
-                                isFreeze && styles.calendarCellTextFreeze,
-                                isToday && styles.calendarCellTextToday,
-                              ]}
-                            >
-                              {dayNumber}
-                            </Text>
+                            const isCompleted = currentMonth.completedDays.includes(dayNumber);
+                            const isScheduled = currentMonth.scheduledDays.includes(dayNumber);
+                            const isFreeze = currentMonth.freezeDays.includes(dayNumber);
+                            const isToday = currentMonth.isCurrent && dayNumber === 5;
 
-                            {isCompleted && <Text style={styles.cellMiniIcon}>✓</Text>}
-                            {isScheduled && <Text style={styles.cellMiniIconScheduled}>⚡</Text>}
-                            {isFreeze && <Text style={styles.cellMiniIconFreeze}>🛡️</Text>}
-                            {isToday && <View style={styles.dayCellTodayDot} />}
-                          </Pressable>
-                        );
-                      })}
-                    </View>
-                  </View>
+                            return (
+                              <Pressable
+                                key={`pro_day_${currentMonth.id}_${dayNumber}`}
+                                onPress={() => handleDayPress(dayNumber, currentMonth)}
+                                style={({ pressed }) => [
+                                  styles.calendarCell,
+                                  isCompleted && styles.calendarCellCompleted,
+                                  isScheduled && styles.calendarCellScheduled,
+                                  isFreeze && styles.calendarCellFreeze,
+                                  isToday && styles.calendarCellToday,
+                                  pressed && styles.calendarCellPressed,
+                                ]}
+                              >
+                                <Text
+                                  style={[
+                                    styles.calendarCellDayNumber,
+                                    isCompleted && styles.calendarCellTextCompleted,
+                                    isScheduled && styles.calendarCellTextScheduled,
+                                    isFreeze && styles.calendarCellTextFreeze,
+                                    isToday && styles.calendarCellTextToday,
+                                  ]}
+                                >
+                                  {dayNumber}
+                                </Text>
+
+                                {isCompleted && <Text style={styles.cellMiniIcon}>✓</Text>}
+                                {isScheduled && <Text style={styles.cellMiniIconScheduled}>⚡</Text>}
+                                {isFreeze && <Text style={styles.cellMiniIconFreeze}>🛡️</Text>}
+                                {isToday && <View style={styles.dayCellTodayDot} />}
+                              </Pressable>
+                            );
+                          })}
+                        </View>
+                      </View>
+                    ))}
+                  </ScrollView>
                 </View>
 
                 {/* Legend & Pro Autopilot Shield Footer */}
@@ -2800,7 +2860,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: 'rgba(235, 230, 248, 0.9)',
     paddingVertical: 10,
-    paddingHorizontal: 6,
+    paddingHorizontal: 0,
     marginBottom: 8,
     overflow: 'hidden',
   },
@@ -2809,7 +2869,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: 8,
-    paddingHorizontal: 4,
+    paddingHorizontal: 10,
   },
   monthNavChevronBtn: {
     width: 30,
@@ -2850,7 +2910,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     marginBottom: 6,
-    paddingHorizontal: 0,
+    paddingHorizontal: 6,
   },
   calendarDayNameText: {
     width: '14.28%',
@@ -2860,7 +2920,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   monthPageCard: {
-    paddingHorizontal: 0,
+    paddingHorizontal: 6,
     overflow: 'hidden',
   },
   calendarMonthGrid: {
