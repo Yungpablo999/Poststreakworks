@@ -146,9 +146,9 @@ const CALENDAR_DATA_CHRONOLOGICAL: MonthData[] = [
   {
     id: 'jan',
     monthName: 'January',
-    year: 2024,
+    year: 2026,
     daysCount: 31,
-    startOffset: 0,
+    startOffset: 3,
     completedDays: [10, 11, 12, 17, 18, 19, 24, 25, 26, 31],
     scheduledDays: [],
     freezeDays: [],
@@ -156,19 +156,19 @@ const CALENDAR_DATA_CHRONOLOGICAL: MonthData[] = [
   {
     id: 'feb',
     monthName: 'February',
-    year: 2024,
-    daysCount: 29,
-    startOffset: 3,
-    completedDays: [1, 2, 7, 8, 9, 14, 15, 16, 21, 22, 23, 28, 29],
+    year: 2026,
+    daysCount: 28,
+    startOffset: 6,
+    completedDays: [1, 2, 7, 8, 9, 14, 15, 16, 21, 22, 23, 27, 28],
     scheduledDays: [],
     freezeDays: [],
   },
   {
     id: 'mar',
     monthName: 'March',
-    year: 2024,
+    year: 2026,
     daysCount: 31,
-    startOffset: 4,
+    startOffset: 6,
     completedDays: [15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31],
     scheduledDays: [],
     freezeDays: [],
@@ -176,9 +176,9 @@ const CALENDAR_DATA_CHRONOLOGICAL: MonthData[] = [
   {
     id: 'apr',
     monthName: 'April',
-    year: 2024,
+    year: 2026,
     daysCount: 30,
-    startOffset: 0,
+    startOffset: 2,
     completedDays: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30],
     scheduledDays: [],
     freezeDays: [],
@@ -186,70 +186,70 @@ const CALENDAR_DATA_CHRONOLOGICAL: MonthData[] = [
   {
     id: 'may',
     monthName: 'May',
-    year: 2024,
+    year: 2026,
     daysCount: 31,
-    startOffset: 2,
-    completedDays: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16],
-    scheduledDays: [17, 18, 19, 21, 23, 25, 28],
-    freezeDays: [20],
-    isCurrent: true,
+    startOffset: 4,
+    completedDays: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31],
+    scheduledDays: [],
+    freezeDays: [11],
   },
   {
     id: 'jun',
     monthName: 'June',
-    year: 2024,
+    year: 2026,
     daysCount: 30,
-    startOffset: 5,
-    completedDays: [],
-    scheduledDays: [1, 3, 5, 7, 10, 12, 14, 17, 19, 21, 24, 26],
+    startOffset: 0,
+    completedDays: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30],
+    scheduledDays: [],
     freezeDays: [],
   },
   {
     id: 'jul',
     monthName: 'July',
-    year: 2024,
+    year: 2026,
     daysCount: 31,
-    startOffset: 0,
-    completedDays: [],
-    scheduledDays: [2, 4, 8, 11, 15, 18, 22, 25, 29],
-    freezeDays: [],
+    startOffset: 2,
+    completedDays: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31],
+    scheduledDays: [],
+    freezeDays: [18],
   },
   {
     id: 'aug',
     monthName: 'August',
-    year: 2024,
+    year: 2026,
     daysCount: 31,
-    startOffset: 3,
-    completedDays: [],
-    scheduledDays: [1, 5, 8, 12, 15, 19, 22, 26, 29],
+    startOffset: 5,
+    completedDays: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31],
+    scheduledDays: [],
     freezeDays: [],
   },
   {
     id: 'sep',
     monthName: 'September',
-    year: 2024,
+    year: 2026,
     daysCount: 30,
-    startOffset: 6,
-    completedDays: [],
-    scheduledDays: [],
+    startOffset: 1,
+    completedDays: [1, 2, 3, 4],
+    scheduledDays: [8, 11, 15, 18, 22, 25, 29],
     freezeDays: [],
+    isCurrent: true,
   },
   {
     id: 'oct',
     monthName: 'October',
-    year: 2024,
+    year: 2026,
     daysCount: 31,
-    startOffset: 1,
+    startOffset: 3,
     completedDays: [],
-    scheduledDays: [],
+    scheduledDays: [2, 6, 9, 13, 16, 20, 23, 27, 30],
     freezeDays: [],
   },
   {
     id: 'nov',
     monthName: 'November',
-    year: 2024,
+    year: 2026,
     daysCount: 30,
-    startOffset: 4,
+    startOffset: 6,
     completedDays: [],
     scheduledDays: [],
     freezeDays: [],
@@ -257,9 +257,9 @@ const CALENDAR_DATA_CHRONOLOGICAL: MonthData[] = [
   {
     id: 'dec',
     monthName: 'December',
-    year: 2024,
+    year: 2026,
     daysCount: 31,
-    startOffset: 6,
+    startOffset: 1,
     completedDays: [],
     scheduledDays: [],
     freezeDays: [],
@@ -274,7 +274,16 @@ interface DayInsightData {
 }
 
 const getJarvisDayInsight = (day: number, month: MonthData): DayInsightData => {
-  const date = `${month.monthName} ${day}`;
+  const date = `${month.monthName} ${day}, 2026`;
+
+  if (month.isCurrent && day === 5) {
+    return {
+      date,
+      headline: 'Today — Day 48 Active 🔥',
+      description: 'Your streak is protected for today. Optimal post window: 7:30 PM.',
+      type: 'completed',
+    };
+  }
 
   if (month.completedDays.includes(day)) {
     if (day === 1) {
@@ -318,7 +327,7 @@ const getJarvisDayInsight = (day: number, month: MonthData): DayInsightData => {
   }
 
   if (month.scheduledDays.includes(day)) {
-    if (day === 17 || day === 18) {
+    if (day === 8 || day === 11 || day === 15) {
       return {
         date,
         headline: 'Queued for 11:30 AM',
@@ -351,7 +360,7 @@ const getJarvisDayInsight = (day: number, month: MonthData): DayInsightData => {
     };
   }
 
-  if (month.isCurrent && day > 16) {
+  if (month.isCurrent && day > 5) {
     return {
       date,
       headline: 'Upcoming Open Slot',
@@ -546,7 +555,7 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
   const [uploadToastMessage, setUploadToastMessage] = useState<string | null>(null);
 
   const [selectedDayInfo, setSelectedDayInfo] = useState<DayInsightData | null>(null);
-  const [selectedMonthIndex, setSelectedMonthIndex] = useState(4); // Default to May (index 4)
+  const [selectedMonthIndex, setSelectedMonthIndex] = useState(8); // Default to September (index 8)
   const [pagerWidth, setPagerWidth] = useState(Dimensions.get('window').width - 68);
 
   // Animations
@@ -710,7 +719,7 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
     }).start();
 
     setTimeout(() => {
-      scrollToMonth(4, false);
+      scrollToMonth(8, false);
     }, 80);
   };
 
@@ -1090,7 +1099,7 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
 
             {/* Month Header */}
             <View style={styles.calendarMetaRow}>
-              <Text style={[styles.monthLabel, isDark && styles.monthLabelDark]}>May 2024 →</Text>
+              <Text style={[styles.monthLabel, isDark && styles.monthLabelDark]}>September 2026 →</Text>
             </View>
 
             <View style={styles.daysHeaderRow}>
@@ -1959,7 +1968,7 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
 
                     <View style={styles.monthNameTitleGroup}>
                       <Text style={styles.focusedMonthTitle}>
-                        {CALENDAR_DATA_CHRONOLOGICAL[selectedMonthIndex].monthName} 2024
+                        {CALENDAR_DATA_CHRONOLOGICAL[selectedMonthIndex].monthName} 2026
                       </Text>
                       {CALENDAR_DATA_CHRONOLOGICAL[selectedMonthIndex].isCurrent && (
                         <View style={styles.currentMonthBadge}>

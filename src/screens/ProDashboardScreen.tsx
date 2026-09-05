@@ -92,9 +92,9 @@ const FULL_YEAR_CALENDAR: MonthData[] = [
   {
     id: 'jan',
     monthName: 'January',
-    year: 2024,
+    year: 2026,
     daysCount: 31,
-    startOffset: 0,
+    startOffset: 3,
     completedDays: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31],
     scheduledDays: [],
     freezeDays: [],
@@ -102,19 +102,19 @@ const FULL_YEAR_CALENDAR: MonthData[] = [
   {
     id: 'feb',
     monthName: 'February',
-    year: 2024,
-    daysCount: 29,
-    startOffset: 3,
-    completedDays: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29],
+    year: 2026,
+    daysCount: 28,
+    startOffset: 6,
+    completedDays: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28],
     scheduledDays: [],
     freezeDays: [14],
   },
   {
     id: 'mar',
     monthName: 'March',
-    year: 2024,
+    year: 2026,
     daysCount: 31,
-    startOffset: 4,
+    startOffset: 6,
     completedDays: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31],
     scheduledDays: [],
     freezeDays: [],
@@ -122,9 +122,9 @@ const FULL_YEAR_CALENDAR: MonthData[] = [
   {
     id: 'apr',
     monthName: 'April',
-    year: 2024,
+    year: 2026,
     daysCount: 30,
-    startOffset: 0,
+    startOffset: 2,
     completedDays: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30],
     scheduledDays: [],
     freezeDays: [8],
@@ -132,70 +132,70 @@ const FULL_YEAR_CALENDAR: MonthData[] = [
   {
     id: 'may',
     monthName: 'May',
-    year: 2024,
+    year: 2026,
     daysCount: 31,
-    startOffset: 2,
-    completedDays: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19],
-    scheduledDays: [20, 22, 24, 26, 28, 30],
+    startOffset: 4,
+    completedDays: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31],
+    scheduledDays: [],
     freezeDays: [11],
-    isCurrent: true,
   },
   {
     id: 'jun',
     monthName: 'June',
-    year: 2024,
+    year: 2026,
     daysCount: 30,
-    startOffset: 5,
-    completedDays: [],
-    scheduledDays: [1, 3, 5, 8, 12, 15, 19, 22, 26, 29],
+    startOffset: 0,
+    completedDays: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30],
+    scheduledDays: [],
     freezeDays: [],
   },
   {
     id: 'jul',
     monthName: 'July',
-    year: 2024,
+    year: 2026,
     daysCount: 31,
-    startOffset: 0,
-    completedDays: [],
-    scheduledDays: [2, 6, 9, 14, 18, 21, 25, 28],
-    freezeDays: [],
+    startOffset: 2,
+    completedDays: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31],
+    scheduledDays: [],
+    freezeDays: [18],
   },
   {
     id: 'aug',
     monthName: 'August',
-    year: 2024,
+    year: 2026,
     daysCount: 31,
-    startOffset: 3,
-    completedDays: [],
-    scheduledDays: [1, 5, 10, 15, 20, 25, 30],
+    startOffset: 5,
+    completedDays: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31],
+    scheduledDays: [],
     freezeDays: [],
   },
   {
     id: 'sep',
     monthName: 'September',
-    year: 2024,
+    year: 2026,
     daysCount: 30,
-    startOffset: 6,
-    completedDays: [],
-    scheduledDays: [],
+    startOffset: 1,
+    completedDays: [1, 2, 3, 4],
+    scheduledDays: [8, 11, 15, 18, 22, 25, 29],
     freezeDays: [],
+    isCurrent: true,
   },
   {
     id: 'oct',
     monthName: 'October',
-    year: 2024,
+    year: 2026,
     daysCount: 31,
-    startOffset: 1,
+    startOffset: 3,
     completedDays: [],
-    scheduledDays: [],
+    scheduledDays: [2, 6, 9, 13, 16, 20, 23, 27, 30],
     freezeDays: [],
   },
   {
     id: 'nov',
     monthName: 'November',
-    year: 2024,
+    year: 2026,
     daysCount: 30,
-    startOffset: 4,
+    startOffset: 6,
     completedDays: [],
     scheduledDays: [],
     freezeDays: [],
@@ -203,9 +203,9 @@ const FULL_YEAR_CALENDAR: MonthData[] = [
   {
     id: 'dec',
     monthName: 'December',
-    year: 2024,
+    year: 2026,
     daysCount: 31,
-    startOffset: 6,
+    startOffset: 1,
     completedDays: [],
     scheduledDays: [],
     freezeDays: [],
@@ -291,7 +291,7 @@ export const ProDashboardScreen: React.FC<ProDashboardScreenProps> = ({
   };
 
   // Calendar State
-  const [selectedMonthIndex, setSelectedMonthIndex] = useState(4); // May
+  const [selectedMonthIndex, setSelectedMonthIndex] = useState(8); // September
   const [selectedDayInfo, setSelectedDayInfo] = useState<string | null>(null);
   const [pagerWidth, setPagerWidth] = useState(Dimensions.get('window').width - 68);
   const calendarScrollRef = useRef<ScrollView>(null);
@@ -311,6 +311,16 @@ export const ProDashboardScreen: React.FC<ProDashboardScreenProps> = ({
   const ghostScale = useRef(new Animated.Value(1)).current;
   const waveformAnim = useRef(new Animated.Value(0.4)).current;
   const modalPopScale = useRef(new Animated.Value(0.92)).current;
+
+  useEffect(() => {
+    if (showCalendarModal) {
+      setSelectedMonthIndex(8);
+      setSelectedDayInfo(null);
+      setTimeout(() => {
+        scrollToMonth(8, false);
+      }, 60);
+    }
+  }, [showCalendarModal]);
 
   useEffect(() => {
     Animated.loop(
@@ -386,18 +396,18 @@ export const ProDashboardScreen: React.FC<ProDashboardScreenProps> = ({
     }
   };
 
-  const scrollToMonth = (index: number) => {
+  const scrollToMonth = (index: number, animated = true) => {
     setSelectedMonthIndex(index);
-    if (calendarScrollRef.current) {
+    if (calendarScrollRef.current && pagerWidth > 0) {
       calendarScrollRef.current.scrollTo({
         x: index * pagerWidth,
-        animated: true,
+        animated,
       });
     }
     if (monthChipsScrollRef.current) {
       monthChipsScrollRef.current.scrollTo({
         x: Math.max(0, index * 68 - 100),
-        animated: true,
+        animated,
       });
     }
   };
@@ -444,19 +454,19 @@ export const ProDashboardScreen: React.FC<ProDashboardScreenProps> = ({
     const isCompleted = month.completedDays.includes(day);
     const isScheduled = month.scheduledDays.includes(day);
     const isFreeze = month.freezeDays.includes(day);
-    const isToday = month.isCurrent && day === 19;
+    const isToday = month.isCurrent && day === 5;
 
     let info = '';
     if (isToday) {
-      info = `⚡ Today, May 19: 🔥 Day 47 Locked In! Scheduled Reel: 11:30 AM`;
+      info = `⚡ Today, September 5, 2026: 🔥 Day 48 Locked In! Next Post: 7:30 PM`;
     } else if (isCompleted) {
-      info = `🔥 ${month.monthName} ${day}: Posted 2 Reels • 94% Retention • +1,420 Views`;
+      info = `🔥 ${month.monthName} ${day}, 2026: Posted 2 Reels • 94% Retention • +1,420 Views ✓`;
     } else if (isScheduled) {
-      info = `⚡ ${month.monthName} ${day}: Autopilot Post Queued (Instagram & TikTok)`;
+      info = `⚡ ${month.monthName} ${day}, 2026: Autopilot Post Queued (Instagram & TikTok)`;
     } else if (isFreeze) {
-      info = `🛡️ ${month.monthName} ${day}: Pro Streak Shield Used • Streak Protected!`;
+      info = `🛡️ ${month.monthName} ${day}, 2026: Pro Streak Shield Used • Streak Protected!`;
     } else {
-      info = `🗓️ ${month.monthName} ${day}, 2024 • Target: 1 Reel to advance Streak`;
+      info = `🗓️ ${month.monthName} ${day}, 2026 • Target: 1 Reel to advance Streak`;
     }
     setSelectedDayInfo(info);
   };
@@ -711,13 +721,13 @@ export const ProDashboardScreen: React.FC<ProDashboardScreenProps> = ({
             }}
             style={({ pressed }) => [styles.dashboardCard, pressed && styles.cardPressed]}
           >
-            {/* 1. Header: YOUR STREAK, 1-Day Streak 🔥, 96% Consistent */}
+            {/* 1. Header: YOUR STREAK, 48-Day Streak 🔥, 96% Consistent */}
             <Text style={styles.streakLabel}>YOUR STREAK</Text>
 
             <View style={styles.cardHeaderRow}>
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>
                 <Text style={styles.streakBigHeadline}>
-                  {userProfile?.streakCount || 1}-Day Streak
+                  {(userProfile?.streakCount && userProfile.streakCount > 1) ? userProfile.streakCount : 48}-Day Streak
                 </Text>
                 <Animated.Text style={{ fontSize: 16, transform: [{ scale: flamePulse }] }}>
                   🔥
@@ -1231,7 +1241,7 @@ export const ProDashboardScreen: React.FC<ProDashboardScreenProps> = ({
               <View style={styles.calendarStatsRow}>
                 <View style={styles.calendarStatCard}>
                   <Text style={styles.calendarStatValue} numberOfLines={1}>
-                    {isNarrowScreen ? `${userProfile?.streakCount || 1}d 🔥` : `${userProfile?.streakCount || 1} Day${userProfile?.streakCount === 1 ? '' : 's'} 🔥`}
+                    {(userProfile?.streakCount && userProfile.streakCount > 1) ? userProfile.streakCount : 48}d 🔥
                   </Text>
                   <Text style={styles.calendarStatLabel} numberOfLines={1}>Current</Text>
                 </View>
@@ -1331,7 +1341,7 @@ export const ProDashboardScreen: React.FC<ProDashboardScreenProps> = ({
 
                   <View style={styles.monthNameTitleGroup}>
                     <Text style={styles.focusedMonthTitle}>
-                      {FULL_YEAR_CALENDAR[selectedMonthIndex].monthName} 2024
+                      {FULL_YEAR_CALENDAR[selectedMonthIndex].monthName} 2026
                     </Text>
                     {FULL_YEAR_CALENDAR[selectedMonthIndex].isCurrent && (
                       <View style={styles.currentMonthBadge}>
@@ -1385,7 +1395,7 @@ export const ProDashboardScreen: React.FC<ProDashboardScreenProps> = ({
                             const isCompleted = isDayInMonth && month.completedDays.includes(dayNumber);
                             const isScheduled = isDayInMonth && month.scheduledDays.includes(dayNumber);
                             const isFreeze = isDayInMonth && month.freezeDays.includes(dayNumber);
-                            const isToday = month.isCurrent && dayNumber === 19;
+                            const isToday = month.isCurrent && dayNumber === 5;
 
                             if (!isDayInMonth) {
                               return <View key={`pro_empty_${month.id}_${cIdx}`} style={styles.dayCellEmpty} />;
@@ -1406,9 +1416,10 @@ export const ProDashboardScreen: React.FC<ProDashboardScreenProps> = ({
                                 <Text
                                   style={[
                                     styles.dayCellNumber,
-                                    (isCompleted || isToday) && styles.dayCellNumberCompleted,
+                                    isCompleted && styles.dayCellNumberCompleted,
                                     isScheduled && styles.dayCellNumberScheduled,
                                     isFreeze && styles.dayCellNumberFreeze,
+                                    isToday && styles.dayCellNumberToday,
                                   ]}
                                 >
                                   {dayNumber}
@@ -1417,6 +1428,7 @@ export const ProDashboardScreen: React.FC<ProDashboardScreenProps> = ({
                                 {isCompleted && <Text style={styles.dayCellCheckIcon}>✓</Text>}
                                 {isScheduled && <Text style={styles.dayCellScheduledIcon}>⚡</Text>}
                                 {isFreeze && <Text style={styles.dayCellFreezeIcon}>🛡️</Text>}
+                                {isToday && <View style={styles.dayCellTodayDot} />}
                               </Pressable>
                             );
                           })}
@@ -2910,8 +2922,8 @@ const styles = StyleSheet.create({
   },
   dayCellTodayPro: {
     borderWidth: 2,
-    borderColor: '#F59E0B',
-    backgroundColor: '#582CDB',
+    borderColor: '#EF4444',
+    backgroundColor: '#FEF2F2',
   },
   dayCellNumber: {
     fontSize: 10,
@@ -2929,6 +2941,18 @@ const styles = StyleSheet.create({
   dayCellNumberFreeze: {
     color: '#0369A1',
     fontWeight: '700',
+  },
+  dayCellNumberToday: {
+    color: '#DC2626',
+    fontWeight: '800',
+  },
+  dayCellTodayDot: {
+    width: 5,
+    height: 5,
+    borderRadius: 2.5,
+    backgroundColor: '#EF4444',
+    position: 'absolute',
+    bottom: 3,
   },
   dayCellCheckIcon: {
     fontSize: 8,
