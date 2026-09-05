@@ -301,24 +301,36 @@ const generateInitialScheduleItems = (todayIndex: number): ScheduleItem[] => {
 const GAP_SUGGESTIONS = [
   {
     id: 'gap_1',
-    title: 'Why 90% of creators quit by month 2',
-    format: '📸 Storytelling Reel • 42s Retention',
-    score: '96% Audience Fit',
+    angle: 'Contrarian Take',
+    angleIcon: '🔥',
+    score: '⚡ 98% Fit',
+    title: 'Most creators fail at X because they optimize for reach before retention',
+    format: 'Short Reel • High Comment Velocity',
+    platform: 'instagram',
+    platformLabel: 'Instagram Reel',
     hashtags: '#creatortips #mindset #consistency',
   },
   {
     id: 'gap_2',
-    title: 'The exact equipment I use to record 4K content on iPhone',
-    format: '📊 Breakdown Carousel • High Saves',
-    score: '92% Audience Fit',
-    hashtags: '#creatorsetup #iphonetips #cinematography',
+    angle: 'Behind-the-Scenes',
+    angleIcon: '🎬',
+    score: '⚡ 95% Fit',
+    title: 'How I built my production workflow in 48 hours without burning out',
+    format: 'Breakdown Carousel • High Saves & Shares',
+    platform: 'instagram',
+    platformLabel: 'Instagram Carousel',
+    hashtags: '#creatorsetup #workflow #efficiency',
   },
   {
     id: 'gap_3',
-    title: 'Unpopular truth about algorithmic reach in 2026',
-    format: '≈ Contrarian Short • High Comments',
-    score: '89% Audience Fit',
-    hashtags: '#viralgrowth #socialmediatips #algorithm',
+    angle: 'Actionable Framework',
+    angleIcon: '🛠️',
+    score: '⚡ 92% Fit',
+    title: '3 metrics you must track daily if you want consistent inbound growth',
+    format: 'Step-by-Step Thread • High Bookmarks',
+    platform: 'x',
+    platformLabel: 'X Thread',
+    hashtags: '#growthstrategy #analytics #scaling',
   },
 ];
 
@@ -730,12 +742,8 @@ export const ProScheduleScreen: React.FC<ProScheduleScreenProps> = ({
                   if (Platform.OS !== 'web') {
                     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                   }
-                  if (onOpenPostComposer) {
-                    onOpenPostComposer('Why 90% of creators quit by month 2', 'instagram');
-                  } else {
-                    triggerModalPop();
-                    setShowFillGapModal(true);
-                  }
+                  triggerModalPop();
+                  setShowFillGapModal(true);
                 }}
               >
                 <Text style={styles.fillGapsOutlineBtnText}>Fill Gaps</Text>
@@ -794,12 +802,8 @@ export const ProScheduleScreen: React.FC<ProScheduleScreenProps> = ({
                     if (Platform.OS !== 'web') {
                       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                     }
-                    if (onOpenPostComposer) {
-                      onOpenPostComposer('The exact equipment I use to record 4K content on iPhone', 'instagram');
-                    } else {
-                      triggerModalPop();
-                      setShowFillGapModal(true);
-                    }
+                    triggerModalPop();
+                    setShowFillGapModal(true);
                   }}
                 >
                   <Text style={[styles.metricGridLabel, styles.metricGridLabelOpenSlots]}>OPEN SLOTS</Text>
@@ -1369,7 +1373,7 @@ export const ProScheduleScreen: React.FC<ProScheduleScreenProps> = ({
         </Modal>
 
         {/* ============================================================ */}
-        {/* MODAL 2: IN-DEPTH PRO FILL GAP RESOLVER MODAL                */}
+        {/* MODAL 2: JARVIS 3-HOOK STRATEGY PICKER SHEET (PRO GAP)       */}
         {/* ============================================================ */}
         <Modal
           visible={showFillGapModal}
@@ -1378,112 +1382,100 @@ export const ProScheduleScreen: React.FC<ProScheduleScreenProps> = ({
           onRequestClose={() => setShowFillGapModal(false)}
         >
           <View style={styles.modalOverlay}>
-            <Animated.View style={[styles.modalCard, { transform: [{ scale: modalPopScale }] }]}>
+            <Animated.View style={[styles.modalCard, { transform: [{ scale: modalPopScale }], maxHeight: '90%' }]}>
               <ScrollView showsVerticalScrollIndicator={false} bounces={false}>
                 {/* Header */}
                 <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
                   <View style={styles.modalGoldTagBadge}>
-                    <Text style={styles.modalGoldTagBadgeText}>🪄 JARVIS GAP RESOLVER — PRO</Text>
+                    <Text style={styles.modalGoldTagBadgeText}>🪄 JARVIS GAP STRATEGIST — PRO</Text>
                   </View>
                   <Pressable onPress={() => setShowFillGapModal(false)} hitSlop={8}>
                     <Text style={{ fontSize: 18, color: '#94A3B8', fontWeight: '700' }}>✕</Text>
                   </Pressable>
                 </View>
 
-                <Text style={styles.modalTitleText}>Auto-Fill Detected Schedule Gaps</Text>
+                <Text style={styles.modalTitleText}>Auto-Fill Content Gap</Text>
                 <Text style={styles.modalSubText}>
-                  Jarvis detected open slots in your weekly schedule. Select an AI-tailored hook or edit your own to protect your streak.
+                  Jarvis analyzed your performance history and generated 3 high-impact pitches for this open slot. Tap any pitch to start composing immediately:
                 </Text>
 
-                {/* Detected Slot Banner */}
+                {/* Detected Slot Alert Banner */}
                 <View style={styles.gapSlotDetectedBanner}>
-                  <Text style={styles.gapSlotDetectedTitle}>
-                    ⚠️ {weekData.days[5]?.dayName} {weekData.days[5]?.monthName?.toUpperCase()} {weekData.days[5]?.dayNum} • 7:30 PM
+                  <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 2 }}>
+                    <Text style={styles.gapSlotDetectedTitle}>
+                      ⚠️ {weekData.days[5]?.dayName || 'Friday'} • 7:30 PM
+                    </Text>
+                    <View style={styles.gapSlotAudienceBadge}>
+                      <Text style={styles.gapSlotAudienceBadgeText}>🔥 Peak Window</Text>
+                    </View>
+                  </View>
+                  <Text style={styles.gapSlotDetectedSub}>
+                    High traffic slot with 0 scheduled posts. Plugging this gap protects your streak & boosts reach.
                   </Text>
-                  <Text style={styles.gapSlotDetectedSub}>High traffic window without scheduled content</Text>
                 </View>
 
-                {/* 3 Selectable Gap Hooks */}
-                <Text style={styles.inputLabel}>CHOOSE AI-RECOMMENDED HOOK</Text>
-                {GAP_SUGGESTIONS.map((sug, sIdx) => {
-                  const isSelected = selectedGapIndex === sIdx;
+                {/* 3 Interactive AI Strategy Cards */}
+                <Text style={styles.inputLabel}>CHOOSE AI STRATEGY (1-TAP TO COMPOSE)</Text>
+                {GAP_SUGGESTIONS.map((sug) => {
                   return (
                     <Pressable
                       key={sug.id}
-                      style={[
+                      style={({ pressed }) => [
                         styles.gapSuggestionCard,
-                        isSelected && styles.gapSuggestionCardSelected,
+                        pressed && styles.gapSuggestionCardPressed,
                       ]}
                       onPress={() => {
                         if (Platform.OS !== 'web') {
-                          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
                         }
-                        setSelectedGapIndex(sIdx);
-                        setEditableGapTitle(sug.title);
+                        setShowFillGapModal(false);
+                        if (onOpenPostComposer) {
+                          onOpenPostComposer(sug.title, sug.platform);
+                        }
                       }}
                     >
-                      <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
-                        <Text style={styles.gapSugFormatText}>{sug.format}</Text>
+                      {/* Top Row: Angle & Audience Fit */}
+                      <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+                        <View style={styles.gapSugAngleBadge}>
+                          <Text style={styles.gapSugAngleText}>
+                            {sug.angleIcon} {sug.angle}
+                          </Text>
+                        </View>
                         <View style={styles.gapSugScoreBadge}>
                           <Text style={styles.gapSugScoreText}>{sug.score}</Text>
                         </View>
                       </View>
-                      <Text style={[styles.gapSugTitleText, isSelected && { color: '#582CDB' }]}>
+
+                      {/* Hook Headline */}
+                      <Text style={styles.gapSugTitleText} numberOfLines={2}>
                         &ldquo;{sug.title}&rdquo;
                       </Text>
+
+                      {/* Bottom Row: Format & Action CTA */}
+                      <View style={styles.gapSugBottomRow}>
+                        <Text style={styles.gapSugFormatText}>
+                          {sug.platformLabel} • {sug.format}
+                        </Text>
+                        <Text style={styles.gapSugActionTag}>Draft Now ➔</Text>
+                      </View>
                     </Pressable>
                   );
                 })}
 
-                {/* Editable Hook Input */}
-                <Text style={[styles.inputLabel, { marginTop: 10 }]}>EDIT SELECTED HOOK / NOTES</Text>
-                <TextInput
-                  style={styles.modalInput}
-                  value={editableGapTitle}
-                  onChangeText={setEditableGapTitle}
-                  placeholder="Edit content hook..."
-                  placeholderTextColor="#94A3B8"
-                />
-
-                {/* Peak Time */}
-                <Text style={[styles.inputLabel, { marginTop: 10 }]}>LOCK IN TIME</Text>
-                <View style={{ flexDirection: 'row', gap: 6, marginBottom: 12 }}>
-                  {['7:30 PM (Peak)', '12:00 PM (Mid)'].map((t, tIdx) => {
-                    const isSelected = editableGapTime === t;
-                    return (
-                      <Pressable
-                        key={tIdx}
-                        style={[styles.timeChipBtn, isSelected && styles.timeChipBtnActive]}
-                        onPress={() => setEditableGapTime(t)}
-                      >
-                        <Text style={[styles.timeChipText, isSelected && styles.timeChipTextActive]}>{t}</Text>
-                      </Pressable>
-                    );
-                  })}
-                </View>
-
-                {/* Action Buttons */}
+                {/* Secondary Option: Blank Post Composer */}
                 <Pressable
-                  style={styles.modalGoldActionBtnWrapper}
+                  style={({ pressed }) => [styles.gapBlankComposerBtn, pressed && styles.btnPressed]}
                   onPress={() => {
+                    if (Platform.OS !== 'web') {
+                      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                    }
                     setShowFillGapModal(false);
                     if (onOpenPostComposer) {
-                      onOpenPostComposer(editableGapTitle, 'instagram');
-                    } else {
-                      handleConfirmFillGap();
+                      onOpenPostComposer('', 'instagram');
                     }
                   }}
                 >
-                  <LinearGradient
-                    colors={['#FDE68A', '#F59E0B', '#D97706']}
-                    start={{ x: 0, y: 0 }}
-                    end={{ x: 1, y: 1 }}
-                    style={styles.modalGoldBtnGradient}
-                  >
-                    <Text style={styles.modalGoldActionBtnText} numberOfLines={1}>
-                      ✨ Draft in Post Composer (+75 XP) ➔
-                    </Text>
-                  </LinearGradient>
+                  <Text style={styles.gapBlankComposerBtnText}>✍️ Start with Blank Composer</Text>
                 </Pressable>
 
                 <Pressable
@@ -3212,58 +3204,117 @@ const styles = StyleSheet.create({
     fontWeight: '800',
   },
 
-  // GAP MODAL SPECIFIC
+  // GAP MODAL SPECIFIC (JARVIS 3-HOOK PICKER SHEET)
   gapSlotDetectedBanner: {
     backgroundColor: '#FEF3C7',
     borderWidth: 1,
-    borderColor: '#FBBF24',
-    borderRadius: 12,
+    borderColor: '#FDE68A',
+    borderRadius: 14,
     padding: 12,
-    marginBottom: 12,
+    marginBottom: 14,
   },
   gapSlotDetectedTitle: {
-    fontSize: 11,
-    fontWeight: '700',
-    color: '#B45309',
+    fontSize: 12,
+    fontWeight: '800',
+    color: '#92400E',
+    letterSpacing: 0.2,
+  },
+  gapSlotAudienceBadge: {
+    backgroundColor: '#FDE68A',
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 4,
+  },
+  gapSlotAudienceBadgeText: {
+    fontSize: 10,
+    fontWeight: '800',
+    color: '#92400E',
   },
   gapSlotDetectedSub: {
     fontSize: 11,
     color: '#B45309',
     marginTop: 2,
+    lineHeight: 15,
   },
   gapSuggestionCard: {
     backgroundColor: '#FAF8F5',
-    borderWidth: 1,
+    borderWidth: 1.5,
     borderColor: '#EFECE6',
-    borderRadius: 12,
-    padding: 12,
-    marginBottom: 8,
+    borderRadius: 14,
+    padding: 14,
+    marginBottom: 10,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.03,
+    shadowRadius: 2,
+    elevation: 1,
   },
-  gapSuggestionCardSelected: {
+  gapSuggestionCardPressed: {
     backgroundColor: '#EDE9FE',
     borderColor: '#8B5CF6',
-    borderWidth: 1.5,
+    transform: [{ scale: 0.985 }],
   },
-  gapSugFormatText: {
-    fontSize: 10,
-    color: '#64748B',
+  gapSugAngleBadge: {
+    backgroundColor: '#EDE9FE',
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 6,
+  },
+  gapSugAngleText: {
+    fontSize: 11,
     fontWeight: '700',
+    color: '#582CDB',
   },
   gapSugScoreBadge: {
-    backgroundColor: '#DCFCE7',
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-    borderRadius: 4,
+    backgroundColor: '#FEF3C7',
+    borderWidth: 1,
+    borderColor: '#FDE68A',
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 6,
   },
   gapSugScoreText: {
-    fontSize: 9,
-    fontWeight: '700',
-    color: '#15803D',
+    fontSize: 11,
+    fontWeight: '800',
+    color: '#B45309',
   },
   gapSugTitleText: {
-    fontSize: 12.5,
+    fontSize: 13.5,
     fontWeight: '800',
     color: '#171420',
+    lineHeight: 19,
+    marginVertical: 4,
+  },
+  gapSugBottomRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginTop: 4,
+  },
+  gapSugFormatText: {
+    fontSize: 11,
+    color: '#64748B',
+    fontWeight: '600',
+  },
+  gapSugActionTag: {
+    fontSize: 11.5,
+    fontWeight: '800',
+    color: '#582CDB',
+  },
+  gapBlankComposerBtn: {
+    paddingVertical: 12,
+    alignItems: 'center',
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#EFECE6',
+    backgroundColor: '#FFFFFF',
+    marginTop: 4,
+    marginBottom: 6,
+  },
+  gapBlankComposerBtnText: {
+    fontSize: 12.5,
+    fontWeight: '700',
+    color: '#475569',
   },
 
   // POST DETAIL MODAL
