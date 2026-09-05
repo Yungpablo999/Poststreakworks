@@ -1205,8 +1205,17 @@ export const ProDashboardScreen: React.FC<ProDashboardScreenProps> = ({
               {/* Pro Modal Header */}
               <View style={styles.calendarModalHeader}>
                 <View style={styles.calendarModalTitleGroup}>
-                  <Text style={styles.calendarModalMainTitle}>Streak & Activity Calendar 2026</Text>
-                  <Text style={styles.calendarModalSubtitle}>Swipe naturally to browse across months</Text>
+                  <Text
+                    style={styles.calendarModalMainTitle}
+                    numberOfLines={1}
+                    adjustsFontSizeToFit
+                    minimumFontScale={0.8}
+                  >
+                    Streak & Activity Calendar 2026
+                  </Text>
+                  <Text style={styles.calendarModalSubtitle} numberOfLines={1}>
+                    Swipe or tap to browse across months
+                  </Text>
                 </View>
 
                 <Pressable
@@ -2768,8 +2777,8 @@ const styles = StyleSheet.create({
     marginRight: 8,
   },
   calendarModalMainTitle: {
-    fontSize: sFont(18),
-    fontWeight: '700',
+    fontSize: sFont(16),
+    fontWeight: '800',
     color: '#171420',
     letterSpacing: -0.4,
   },
