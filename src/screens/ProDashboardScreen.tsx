@@ -720,15 +720,22 @@ export const ProDashboardScreen: React.FC<ProDashboardScreenProps> = ({
             }}
             style={({ pressed }) => [styles.dashboardCard, pressed && styles.cardPressed]}
           >
-            {/* Header: Title & 96% Consistent Badge */}
+            {/* 1. Header: YOUR STREAK, 1-Day Streak 🔥, 96% Consistent */}
+            <Text style={styles.streakLabel}>YOUR STREAK</Text>
+
             <View style={styles.cardHeaderRow}>
-              <Text style={styles.cardSectionTitle}>Your Streak</Text>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                <Text style={styles.streakBigHeadline}>{userProfile?.streakCount || 1}-Day Streak</Text>
+                <Animated.Text style={{ fontSize: 20, transform: [{ scale: flamePulse }] }}>
+                  🔥
+                </Animated.Text>
+              </View>
               <View style={styles.streakStatusPill}>
-                <Text style={styles.streakStatusHighlight}>96% consistent</Text>
+                <Text style={styles.streakStatusHighlight}>96% Consistent</Text>
               </View>
             </View>
 
-            {/* Dynamic Month Header with Navigation */}
+            {/* 2. Dynamic Month Header with Navigation */}
             <View style={styles.calendarMetaRow}>
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
                 <Pressable
@@ -755,7 +762,7 @@ export const ProDashboardScreen: React.FC<ProDashboardScreenProps> = ({
               </View>
             </View>
 
-            {/* Weekday Columns */}
+            {/* 3. Weekday Columns */}
             <View style={styles.daysHeaderRow}>
               {['M', 'T', 'W', 'T', 'F', 'S', 'S'].map((d, idx) => (
                 <Text key={`pro_day_col_${idx}`} style={styles.dayColHeader}>
@@ -764,7 +771,7 @@ export const ProDashboardScreen: React.FC<ProDashboardScreenProps> = ({
               ))}
             </View>
 
-            {/* Compact Apple Health-Style 3-Row Grid */}
+            {/* 4. Compact Apple Health-Style 3-Row Grid */}
             <View style={styles.heatmapGrid}>
               {/* Row 1 */}
               <View style={styles.heatmapRow}>
@@ -842,6 +849,13 @@ export const ProDashboardScreen: React.FC<ProDashboardScreenProps> = ({
                 <View style={[styles.heatmapCell, styles.heatmapCellEmpty]} />
                 <View style={[styles.heatmapCell, styles.heatmapCellEmpty]} />
               </View>
+            </View>
+
+            {/* 5. Subtle Jarvis Momentum Line */}
+            <View style={styles.subtleJarvisRow}>
+              <Text style={styles.subtleJarvisText}>
+                🔥 <Text style={styles.subtleJarvisBold}>Jarvis:</Text> You’re building momentum. Keep it going tomorrow.
+              </Text>
             </View>
           </Pressable>
 
@@ -2135,6 +2149,19 @@ const styles = StyleSheet.create({
     transform: [{ scale: 0.985 }],
     opacity: 0.95,
   },
+  streakLabel: {
+    fontSize: 11,
+    fontWeight: '800',
+    color: '#64748B',
+    letterSpacing: 0.5,
+    marginBottom: 2,
+  },
+  streakBigHeadline: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: '#171420',
+    letterSpacing: -0.3,
+  },
   cardHeaderRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -2225,6 +2252,23 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(23, 20, 32, 0.03)',
     borderWidth: 1,
     borderColor: 'rgba(23, 20, 32, 0.04)',
+  },
+  subtleJarvisRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 10,
+    paddingTop: 8,
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(23, 20, 32, 0.05)',
+  },
+  subtleJarvisText: {
+    fontSize: 11.5,
+    color: '#64748B',
+    lineHeight: 16,
+  },
+  subtleJarvisBold: {
+    fontWeight: '700',
+    color: '#582CDB',
   },
   scheduledLabel: {
     fontSize: 11,
