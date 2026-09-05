@@ -876,8 +876,8 @@ export const ProDashboardScreen: React.FC<ProDashboardScreenProps> = ({
               <View>
                 <Text style={styles.scheduledLabel}>POSTS SCHEDULED</Text>
                 <View style={{ flexDirection: 'row', alignItems: 'baseline', gap: 6, marginTop: 4 }}>
-                  <Text style={styles.scheduledBigNumber}>8</Text>
-                  <Text style={styles.scheduledThisWeek}>+4 this week</Text>
+                  <Text style={styles.scheduledBigNumber}>1</Text>
+                  <Text style={styles.scheduledThisWeek}>+1 this week</Text>
                 </View>
               </View>
 
@@ -889,10 +889,10 @@ export const ProDashboardScreen: React.FC<ProDashboardScreenProps> = ({
             <View style={styles.scheduledDivider} />
 
             <View style={styles.scheduledBottomRow}>
-              <Text style={styles.nextPostTimeText}>Next: 11:30 AM</Text>
+              <Text style={styles.nextPostTimeText}>Next: Today 7:30 PM</Text>
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
                 <Text style={{ fontSize: 12 }}>⚡</Text>
-                <Text style={styles.autopilotActiveText}>Autopilot Active</Text>
+                <Text style={styles.autopilotActiveText}>Autopilot Ready</Text>
               </View>
             </View>
           </Pressable>
@@ -974,12 +974,12 @@ export const ProDashboardScreen: React.FC<ProDashboardScreenProps> = ({
                 colors={['#8B5CF6', '#7C3AED', '#A855F7']}
                 style={styles.levelCircleBadge}
               >
-                <Text style={styles.levelCircleNumber}>42</Text>
+                <Text style={styles.levelCircleNumber}>1</Text>
               </LinearGradient>
 
               <View style={{ flex: 1 }}>
-                <Text style={styles.levelTitleText}>Elite Storyteller</Text>
-                <Text style={styles.levelXpText}>2,450 / 3,000 XP</Text>
+                <Text style={styles.levelTitleText}>Starter</Text>
+                <Text style={styles.levelXpText}>0 / 100 XP</Text>
               </View>
             </View>
 
@@ -988,12 +988,12 @@ export const ProDashboardScreen: React.FC<ProDashboardScreenProps> = ({
                 colors={['#6366F1', '#8B5CF6', '#F59E0B', '#F59E0B']}
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 0 }}
-                style={[styles.xpTrackFill, { width: '82%' }]}
+                style={[styles.xpTrackFill, { width: '0%' }]}
               />
             </View>
           </Pressable>
 
-          {/* CARD 6: ACTIVE PRO BRAND QUEST ("GlowUp Skincare Launch") */}
+          {/* CARD 6: AVAILABLE PRO BRAND QUEST ("GlowUp Skincare Launch") */}
           <Pressable
             onPress={() => {
               if (Platform.OS !== 'web') {
@@ -1012,7 +1012,7 @@ export const ProDashboardScreen: React.FC<ProDashboardScreenProps> = ({
               <View style={{ flex: 1 }}>
                 <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 2 }}>
                   <View style={styles.proPriorityPill}>
-                    <Text style={styles.proPriorityText}>👑 ACTIVE BRAND QUEST</Text>
+                    <Text style={styles.proPriorityText}>👑 AVAILABLE BRAND QUEST</Text>
                   </View>
                   <Text style={styles.brandQuestSubLabel}>+$450 BOUNTY</Text>
                 </View>
@@ -1031,7 +1031,7 @@ export const ProDashboardScreen: React.FC<ProDashboardScreenProps> = ({
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
               <Text style={styles.earningsCardLabel}>MONTHLY EARNINGS</Text>
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-                <Text style={styles.earningsMonthText}>MAY 2024</Text>
+                <Text style={styles.earningsMonthText}>{displayedMonthName} {displayedYear}</Text>
                 <View style={{ flexDirection: 'row', gap: 3 }}>
                   <View style={[styles.dot, styles.dotActive]} />
                   <View style={styles.dot} />
@@ -1560,7 +1560,7 @@ export const ProDashboardScreen: React.FC<ProDashboardScreenProps> = ({
                 {/* Header */}
                 <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
                   <View style={styles.proPriorityPill}>
-                    <Text style={styles.proPriorityText}>👑 ACTIVE BRAND CAMPAIGN</Text>
+                    <Text style={styles.proPriorityText}>👑 AVAILABLE BRAND QUEST</Text>
                   </View>
                   <Pressable onPress={() => setShowBrandQuestModal(false)} hitSlop={8}>
                     <Text style={{ fontSize: 18, color: '#94A3B8', fontWeight: '700' }}>✕</Text>
@@ -1580,7 +1580,7 @@ export const ProDashboardScreen: React.FC<ProDashboardScreenProps> = ({
                     </View>
                     <View style={{ flex: 1 }}>
                       <Text style={{ fontSize: 17, fontWeight: '700', color: '#FFFFFF' }}>GlowUp Skincare Launch</Text>
-                      <Text style={{ fontSize: 11, color: '#C7D2FE', marginTop: 1, fontWeight: '700' }}>Verified Sponsor • 2 Days Remaining</Text>
+                      <Text style={{ fontSize: 11, color: '#C7D2FE', marginTop: 1, fontWeight: '700' }}>Verified Sponsor Opportunity • 2 Days Remaining</Text>
                     </View>
                   </View>
 
@@ -1655,7 +1655,7 @@ export const ProDashboardScreen: React.FC<ProDashboardScreenProps> = ({
                 <View style={[styles.nextLevelPreviewBox, { backgroundColor: '#F5F3FF', borderColor: '#C4B5FD', marginTop: 12 }]}>
                   <Text style={[styles.nextLevelPreviewTitle, { color: '#582CDB' }]}>🪄 JARVIS MATCH INSIGHT</Text>
                   <Text style={[styles.nextLevelPreviewBody, { color: '#4338CA' }]}>
-                    Your audience has a 94% affinity with aesthetic lifestyle routines. Filming during your 7:30 PM slot gives this brief maximum sponsored reach.
+                    Your audience has a 94% affinity with aesthetic lifestyle routines. Completing this brand brief awards +350 XP and unlocks Level 2 Creator status!
                   </Text>
                 </View>
 
@@ -1678,7 +1678,7 @@ export const ProDashboardScreen: React.FC<ProDashboardScreenProps> = ({
                     style={styles.modalGoldBtnGradient}
                   >
                     <Text style={styles.modalGoldActionBtnText} numberOfLines={1}>
-                      ✨ Start Campaign (+350 XP) ➔
+                      ✨ Accept &amp; Start Brief (+350 XP) ➔
                     </Text>
                   </LinearGradient>
                 </Pressable>
@@ -1737,63 +1737,63 @@ export const ProDashboardScreen: React.FC<ProDashboardScreenProps> = ({
                 >
                   <View style={{ flexDirection: 'row', alignItems: 'center', gap: 14 }}>
                     <View style={styles.heroLevelNumberCircle}>
-                      <Text style={styles.heroLevelNumberText}>42</Text>
+                      <Text style={styles.heroLevelNumberText}>1</Text>
                     </View>
                     <View style={{ flex: 1 }}>
-                      <Text style={styles.heroLevelTitle}>Elite Storyteller</Text>
-                      <Text style={styles.heroLevelSub}>Master Tier Creator • Top 3% Consistency</Text>
+                      <Text style={styles.heroLevelTitle}>Starter</Text>
+                      <Text style={styles.heroLevelSub}>Novice Tier Creator • 1-Day Streak</Text>
                     </View>
                   </View>
 
                   {/* XP Progress Bar */}
                   <View style={{ marginTop: 14 }}>
                     <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 6 }}>
-                      <Text style={styles.heroXpCurrentText}>2,450 XP</Text>
-                      <Text style={styles.heroXpTargetText}>3,000 XP (Level 43)</Text>
+                      <Text style={styles.heroXpCurrentText}>0 XP</Text>
+                      <Text style={styles.heroXpTargetText}>100 XP (Level 2)</Text>
                     </View>
                     <View style={styles.heroXpTrackBg}>
                       <LinearGradient
                         colors={['#FDE68A', '#F59E0B', '#D97706']}
                         start={{ x: 0, y: 0 }}
                         end={{ x: 1, y: 0 }}
-                        style={[styles.heroXpTrackFill, { width: '81.7%' }]}
+                        style={[styles.heroXpTrackFill, { width: '0%' }]}
                       />
                     </View>
                     <Text style={styles.heroXpRemainingSub}>
-                      🔥 Only 550 XP needed to unlock <Text style={{ fontWeight: '700', color: '#FDE68A' }}>Level 43 Master Storyteller</Text>
+                      🔥 Only 100 XP needed to unlock <Text style={{ fontWeight: '700', color: '#FDE68A' }}>Level 2 Content Creator</Text>
                     </Text>
                   </View>
                 </LinearGradient>
 
                 {/* BADGE SHOWCASE GRID */}
-                <Text style={[styles.modalSubheadingTitle, { marginTop: 16 }]}>EARNED CREATOR BADGES (4/8)</Text>
+                <Text style={[styles.modalSubheadingTitle, { marginTop: 16 }]}>EARNED CREATOR BADGES (2/8)</Text>
                 <View style={styles.badgeShowcaseGrid}>
                   {/* Badge 1 */}
                   <View style={styles.badgeShowcaseItem}>
-                    <Text style={{ fontSize: 24, marginBottom: 4 }}>🏆</Text>
-                    <Text style={styles.badgeShowcaseName}>Elite Storyteller</Text>
-                    <Text style={styles.badgeShowcaseDesc}>40+ high-retention narrative videos</Text>
+                    <Text style={{ fontSize: 24, marginBottom: 4 }}>✨</Text>
+                    <Text style={styles.badgeShowcaseName}>Pro Pioneer</Text>
+                    <Text style={styles.badgeShowcaseDesc}>Upgraded to PostStreak Pro</Text>
                   </View>
 
                   {/* Badge 2 */}
                   <View style={styles.badgeShowcaseItem}>
                     <Text style={{ fontSize: 24, marginBottom: 4 }}>🔥</Text>
-                    <Text style={styles.badgeShowcaseName}>52-Day Streak</Text>
-                    <Text style={styles.badgeShowcaseDesc}>Unbroken daily publishing momentum</Text>
+                    <Text style={styles.badgeShowcaseName}>1-Day Streak</Text>
+                    <Text style={styles.badgeShowcaseDesc}>Started daily posting streak</Text>
                   </View>
 
                   {/* Badge 3 */}
-                  <View style={styles.badgeShowcaseItem}>
-                    <Text style={{ fontSize: 24, marginBottom: 4 }}>🎙️</Text>
+                  <View style={[styles.badgeShowcaseItem, { opacity: 0.6 }]}>
+                    <Text style={{ fontSize: 24, marginBottom: 4 }}>🔒</Text>
                     <Text style={styles.badgeShowcaseName}>Voice Studio Pro</Text>
-                    <Text style={styles.badgeShowcaseDesc}>10+ batches voiced with Jarvis AI</Text>
+                    <Text style={styles.badgeShowcaseDesc}>Generate first AI voiceover</Text>
                   </View>
 
                   {/* Badge 4 */}
-                  <View style={styles.badgeShowcaseItem}>
-                    <Text style={{ fontSize: 24, marginBottom: 4 }}>👑</Text>
-                    <Text style={styles.badgeShowcaseName}>Multi-Sync Pioneer</Text>
-                    <Text style={styles.badgeShowcaseDesc}>4-channel automatic distribution</Text>
+                  <View style={[styles.badgeShowcaseItem, { opacity: 0.6 }]}>
+                    <Text style={{ fontSize: 24, marginBottom: 4 }}>🔒</Text>
+                    <Text style={styles.badgeShowcaseName}>Quest Master</Text>
+                    <Text style={styles.badgeShowcaseDesc}>Complete first brand quest</Text>
                   </View>
                 </View>
 
@@ -1801,10 +1801,9 @@ export const ProDashboardScreen: React.FC<ProDashboardScreenProps> = ({
                 <Text style={[styles.modalSubheadingTitle, { marginTop: 16 }]}>RECENT XP ACTIVITY</Text>
                 <View style={{ gap: 8, marginTop: 6 }}>
                   {[
-                    { title: 'Daily 7:30 PM Video Published', time: 'Today', xp: '+50 XP' },
-                    { title: 'Multi-Platform Sync Configured', time: 'Yesterday', xp: '+25 XP' },
-                    { title: 'Squad Live Duel Victory with Elena', time: '2 days ago', xp: '+75 XP' },
-                    { title: '50-Day Consistency Milestone Trophy', time: '3 days ago', xp: '+250 XP' },
+                    { title: 'Upgraded to PostStreak Pro', time: 'Today', xp: '+0 XP' },
+                    { title: '1-Day Streak Active', time: 'Today', xp: '+0 XP' },
+                    { title: 'Connected 2 Channels', time: 'Today', xp: '+0 XP' },
                   ].map((item, idx) => (
                     <View key={idx} style={styles.xpActivityRow}>
                       <View style={{ flex: 1 }}>
@@ -1818,13 +1817,13 @@ export const ProDashboardScreen: React.FC<ProDashboardScreenProps> = ({
                   ))}
                 </View>
 
-                {/* NEXT LEVEL UNLOCKS (LEVEL 43 PREVIEW) */}
+                {/* NEXT LEVEL UNLOCKS (LEVEL 2 PREVIEW) */}
                 <View style={styles.nextLevelPreviewBox}>
-                  <Text style={styles.nextLevelPreviewTitle}>🌟 LEVEL 43 MILESTONE UNLOCKS</Text>
+                  <Text style={styles.nextLevelPreviewTitle}>🌟 LEVEL 2 MILESTONE UNLOCKS</Text>
                   <Text style={styles.nextLevelPreviewBody}>
-                    • Master Storyteller Gold Profile Badge{"\n"}
-                    • Priority Brand Deal &amp; Sponsor Matching ($500+ brief pool){"\n"}
-                    • +500 Squad XP Multiplier Boost
+                    • Custom Reel Stencils &amp; Templates{"\n"}
+                    • Unlocks Squad Live Duels &amp; Collabs{"\n"}
+                    • +50 Daily XP Multiplier Boost
                   </Text>
                 </View>
 
