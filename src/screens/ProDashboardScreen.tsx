@@ -709,7 +709,7 @@ export const ProDashboardScreen: React.FC<ProDashboardScreenProps> = ({
             </View>
           </View>
 
-          {/* CARD 2: YOUR STREAK HEATMAP (TAP FOR PREMIUM PRO CALENDAR) */}
+          {/* CARD 2: YOUR STREAK HEATMAP */}
           <Pressable
             onPress={() => {
               if (Platform.OS !== 'web') {
@@ -720,131 +720,127 @@ export const ProDashboardScreen: React.FC<ProDashboardScreenProps> = ({
             }}
             style={({ pressed }) => [styles.dashboardCard, pressed && styles.cardPressed]}
           >
-            {/* 1. Header with Label, Big Streak & Stats */}
-            <View style={styles.streakCardHeader}>
-              <View style={styles.cardHeaderTopRow}>
-                <Text style={styles.streakLabel}>ACTIVITY THIS MONTH (TAP TO EXPAND)</Text>
-                <View style={styles.streakProStatsRow}>
-                  <View style={styles.consistencyPill}>
-                    <Text style={styles.consistencyPillText}>96% Consistent</Text>
-                  </View>
-                  <View style={styles.bestStreakPill}>
-                    <Text style={styles.bestStreakPillText}>Best: {userProfile?.streakCount || 1}d</Text>
-                  </View>
-                </View>
-              </View>
-
-              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 4 }}>
-                <Text style={styles.streakBigCount}>{userProfile?.streakCount || 1}-Day Streak</Text>
-                <Animated.Text style={{ fontSize: 22, transform: [{ scale: flamePulse }] }}>
-                  🔥
-                </Animated.Text>
+            {/* Header: Title & 96% Consistent Badge */}
+            <View style={styles.cardHeaderRow}>
+              <Text style={styles.cardSectionTitle}>Your Streak</Text>
+              <View style={styles.streakStatusPill}>
+                <Text style={styles.streakStatusHighlight}>96% consistent</Text>
               </View>
             </View>
 
-            {/* 2. Month Header with Interactive Navigation */}
-            <View style={styles.monthHeaderRow}>
-              <Pressable
-                onPress={(e) => {
-                  e.stopPropagation();
-                  if (Platform.OS !== 'web') Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                  setDashboardMonthOffset((prev) => prev - 1);
-                }}
-                hitSlop={8}
-                style={styles.monthNavBtn}
-              >
-                <Text style={styles.monthNavArrow}>‹</Text>
-              </Pressable>
-              <Text style={styles.monthLabelText}>{displayedMonthName} {displayedYear}</Text>
-              <Pressable
-                onPress={(e) => {
-                  e.stopPropagation();
-                  if (Platform.OS !== 'web') Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                  setDashboardMonthOffset((prev) => prev + 1);
-                }}
-                hitSlop={8}
-                style={styles.monthNavBtn}
-              >
-                <Text style={styles.monthNavArrow}>›</Text>
-              </Pressable>
+            {/* Dynamic Month Header with Navigation */}
+            <View style={styles.calendarMetaRow}>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                <Pressable
+                  onPress={(e) => {
+                    e.stopPropagation();
+                    if (Platform.OS !== 'web') Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                    setDashboardMonthOffset((prev) => prev - 1);
+                  }}
+                  hitSlop={8}
+                >
+                  <Text style={styles.monthNavArrow}>‹</Text>
+                </Pressable>
+                <Text style={styles.monthLabel}>{displayedMonthName} {displayedYear}</Text>
+                <Pressable
+                  onPress={(e) => {
+                    e.stopPropagation();
+                    if (Platform.OS !== 'web') Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                    setDashboardMonthOffset((prev) => prev + 1);
+                  }}
+                  hitSlop={8}
+                >
+                  <Text style={styles.monthNavArrow}>›</Text>
+                </Pressable>
+              </View>
             </View>
 
-            {/* 3. Weekday Column Headers */}
+            {/* Weekday Columns */}
             <View style={styles.daysHeaderRow}>
               {['M', 'T', 'W', 'T', 'F', 'S', 'S'].map((d, idx) => (
-                <Text key={`pro_day_col_${idx}`} style={styles.dayColHeaderText}>
+                <Text key={`pro_day_col_${idx}`} style={styles.dayColHeader}>
                   {d}
                 </Text>
               ))}
             </View>
 
-            {/* 4. Rounded Calendar Heatmap Grid */}
-            <View style={styles.heatmapGridContainer}>
+            {/* Compact Apple Health-Style 3-Row Grid */}
+            <View style={styles.heatmapGrid}>
               {/* Row 1 */}
               <View style={styles.heatmapRow}>
-                <View style={styles.heatmapCellEmpty} />
-                <View style={styles.heatmapCellEmpty} />
-                <View style={styles.heatmapCellCompleted}>
-                  <Svg width={12} height={12} viewBox="0 0 24 24" fill="none">
-                    <Path d="M20 6L9 17L4 12" stroke="#FFFFFF" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+                <View style={[styles.heatmapCell, styles.heatmapCellEmpty]} />
+                <View style={[styles.heatmapCell, styles.heatmapCellEmpty]} />
+                <View style={[styles.heatmapCell, styles.heatmapCellCompleted]}>
+                  <Svg width={10} height={10} viewBox="0 0 24 24" fill="none">
+                    <Path d="M20 6L9 17L4 12" stroke="#FFFFFF" strokeWidth="3.2" strokeLinecap="round" strokeLinejoin="round" />
                   </Svg>
                 </View>
-                <View style={styles.heatmapCellEmpty} />
-                <View style={styles.heatmapCellCompleted}>
-                  <Svg width={12} height={12} viewBox="0 0 24 24" fill="none">
-                    <Path d="M20 6L9 17L4 12" stroke="#FFFFFF" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+                <View style={[styles.heatmapCell, styles.heatmapCellCompleted]}>
+                  <Svg width={10} height={10} viewBox="0 0 24 24" fill="none">
+                    <Path d="M20 6L9 17L4 12" stroke="#FFFFFF" strokeWidth="3.2" strokeLinecap="round" strokeLinejoin="round" />
                   </Svg>
                 </View>
-                <View style={styles.heatmapCellEmpty} />
-                <View style={styles.heatmapCellEmpty} />
+                <View style={[styles.heatmapCell, styles.heatmapCellCompleted]}>
+                  <Svg width={10} height={10} viewBox="0 0 24 24" fill="none">
+                    <Path d="M20 6L9 17L4 12" stroke="#FFFFFF" strokeWidth="3.2" strokeLinecap="round" strokeLinejoin="round" />
+                  </Svg>
+                </View>
+                <View style={[styles.heatmapCell, styles.heatmapCellCompleted]}>
+                  <Svg width={10} height={10} viewBox="0 0 24 24" fill="none">
+                    <Path d="M20 6L9 17L4 12" stroke="#FFFFFF" strokeWidth="3.2" strokeLinecap="round" strokeLinejoin="round" />
+                  </Svg>
+                </View>
+                <View style={[styles.heatmapCell, styles.heatmapCellCompleted]}>
+                  <Svg width={10} height={10} viewBox="0 0 24 24" fill="none">
+                    <Path d="M20 6L9 17L4 12" stroke="#FFFFFF" strokeWidth="3.2" strokeLinecap="round" strokeLinejoin="round" />
+                  </Svg>
+                </View>
               </View>
 
               {/* Row 2 */}
               <View style={styles.heatmapRow}>
-                <View style={styles.heatmapCellEmpty} />
-                <View style={styles.heatmapCellFreeze}>
-                  <Svg width={11} height={11} viewBox="0 0 24 24" fill="none">
-                    <Path d="M12 2V22M2 12H22M4.93 4.93L19.07 19.07M19.07 4.93L4.93 19.07" stroke="#0284C7" strokeWidth="2.2" strokeLinecap="round" />
+                <View style={[styles.heatmapCell, styles.heatmapCellCompleted]}>
+                  <Svg width={10} height={10} viewBox="0 0 24 24" fill="none">
+                    <Path d="M20 6L9 17L4 12" stroke="#FFFFFF" strokeWidth="3.2" strokeLinecap="round" strokeLinejoin="round" />
                   </Svg>
                 </View>
-                <View style={styles.heatmapCellCompleted}>
-                  <Svg width={12} height={12} viewBox="0 0 24 24" fill="none">
-                    <Path d="M20 6L9 17L4 12" stroke="#FFFFFF" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+                <View style={[styles.heatmapCell, styles.heatmapCellCompleted]}>
+                  <Svg width={10} height={10} viewBox="0 0 24 24" fill="none">
+                    <Path d="M20 6L9 17L4 12" stroke="#FFFFFF" strokeWidth="3.2" strokeLinecap="round" strokeLinejoin="round" />
                   </Svg>
                 </View>
-                <View style={styles.heatmapCellEmpty} />
-                <View style={styles.heatmapCellScheduled}>
-                  <Svg width={11} height={11} viewBox="0 0 24 24" fill="none">
-                    <Circle cx="12" cy="12" r="9" stroke="#7C3AED" strokeWidth="2.2" strokeDasharray="3,2" />
-                    <Path d="M12 7V12L15 14" stroke="#7C3AED" strokeWidth="2.2" strokeLinecap="round" />
+                <View style={[styles.heatmapCell, styles.heatmapCellCompleted]}>
+                  <Svg width={10} height={10} viewBox="0 0 24 24" fill="none">
+                    <Path d="M20 6L9 17L4 12" stroke="#FFFFFF" strokeWidth="3.2" strokeLinecap="round" strokeLinejoin="round" />
                   </Svg>
                 </View>
-                <View style={styles.heatmapCellEmpty} />
-                <View style={styles.heatmapCellTodayActive}>
-                  <Text style={{ fontSize: 13 }}>🔥</Text>
+                <View style={[styles.heatmapCell, styles.heatmapCellCompleted]}>
+                  <Svg width={10} height={10} viewBox="0 0 24 24" fill="none">
+                    <Path d="M20 6L9 17L4 12" stroke="#FFFFFF" strokeWidth="3.2" strokeLinecap="round" strokeLinejoin="round" />
+                  </Svg>
                 </View>
+                <View style={[styles.heatmapCell, styles.heatmapCellCompleted]}>
+                  <Svg width={10} height={10} viewBox="0 0 24 24" fill="none">
+                    <Path d="M20 6L9 17L4 12" stroke="#FFFFFF" strokeWidth="3.2" strokeLinecap="round" strokeLinejoin="round" />
+                  </Svg>
+                </View>
+                <View style={[styles.heatmapCell, styles.heatmapCellCompleted]}>
+                  <Svg width={10} height={10} viewBox="0 0 24 24" fill="none">
+                    <Path d="M20 6L9 17L4 12" stroke="#FFFFFF" strokeWidth="3.2" strokeLinecap="round" strokeLinejoin="round" />
+                  </Svg>
+                </View>
+                <View style={[styles.heatmapCell, styles.heatmapCellEmpty]} />
               </View>
-            </View>
 
-            {/* 5. Jarvis Pro Insight Box */}
-            <View style={styles.jarvisProInsightBox}>
-              <View style={styles.jarvisFlameWrapper}>
-                <Image
-                  source={require('../../assets/images/jarvis-core-flame.png')}
-                  style={{ width: 22, height: 22 }}
-                  resizeMode="contain"
-                />
-              </View>
-              <View style={{ flex: 1 }}>
-                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 2 }}>
-                  <Text style={styles.jarvisInsightHeading}>JARVIS PRO INSIGHT</Text>
-                  <View style={styles.topCreatorTinyBadge}>
-                    <Text style={styles.topCreatorTinyBadgeText}>Top 1%</Text>
-                  </View>
-                </View>
-                <Text style={styles.jarvisInsightBodyText}>
-                  Posting at 7:30 PM is driving 2.4x higher reel retention this month. 1 post scheduled for tomorrow to maintain your momentum.
-                </Text>
+              {/* Row 3 */}
+              <View style={styles.heatmapRow}>
+                <View style={[styles.heatmapCell, styles.heatmapCellEmpty]} />
+                <View style={[styles.heatmapCell, styles.heatmapCellEmpty]} />
+                <View style={[styles.heatmapCell, styles.heatmapCellEmpty]} />
+                <View style={[styles.heatmapCell, styles.heatmapCellEmpty]} />
+                <View style={[styles.heatmapCell, styles.heatmapCellEmpty]} />
+                <View style={[styles.heatmapCell, styles.heatmapCellEmpty]} />
+                <View style={[styles.heatmapCell, styles.heatmapCellEmpty]} />
               </View>
             </View>
           </Pressable>
@@ -2139,203 +2135,96 @@ const styles = StyleSheet.create({
     transform: [{ scale: 0.985 }],
     opacity: 0.95,
   },
-  streakCardHeader: {
-    marginBottom: 12,
-  },
-  cardHeaderTopRow: {
+  cardHeaderRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 2,
+    marginBottom: 8,
   },
-  streakProStatsRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-  },
-  consistencyPill: {
-    backgroundColor: '#EDE9FE',
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: '#DDD6FE',
-  },
-  consistencyPillText: {
-    fontSize: 10.5,
-    fontWeight: '700',
-    color: '#582CDB',
-  },
-  bestStreakPill: {
-    backgroundColor: '#FEF3C7',
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: '#FDE68A',
-  },
-  bestStreakPillText: {
-    fontSize: 10.5,
-    fontWeight: '700',
-    color: '#B45309',
-  },
-  streakLabel: {
-    fontSize: 11,
-    fontWeight: '800',
-    color: '#64748B',
-    letterSpacing: 0.5,
-  },
-  streakBigCount: {
-    fontSize: 22,
+  cardSectionTitle: {
+    fontSize: 18,
     fontWeight: '700',
     color: '#171420',
+    letterSpacing: -0.3,
   },
-  monthHeaderRow: {
+  streakStatusPill: {
+    backgroundColor: 'rgba(88, 44, 219, 0.08)',
+    borderWidth: 1,
+    borderColor: 'rgba(88, 44, 219, 0.15)',
+    paddingVertical: 3,
+    paddingHorizontal: 10,
+    borderRadius: 8,
+  },
+  streakStatusHighlight: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#582CDB',
+    letterSpacing: -0.1,
+  },
+  calendarMetaRow: {
     flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: 8,
-    gap: 6,
+    paddingHorizontal: 2,
   },
-  monthNavBtn: {
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-    borderRadius: 6,
-    backgroundColor: '#F1F5F9',
+  monthLabel: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#7F7894',
+    letterSpacing: -0.1,
   },
   monthNavArrow: {
-    fontSize: 14,
+    fontSize: 13,
     fontWeight: '800',
     color: '#582CDB',
-  },
-  monthLabelText: {
-    fontSize: 11,
-    fontWeight: '800',
-    color: '#64748B',
-    letterSpacing: 0.5,
+    paddingHorizontal: 2,
   },
   daysHeaderRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: 8,
     paddingHorizontal: 2,
+    marginBottom: 6,
+    width: '100%',
   },
-  dayColHeaderText: {
-    fontSize: 11,
-    fontWeight: '800',
-    color: '#94A3B8',
-    width: 34,
+  dayColHeader: {
+    fontSize: 10.5,
+    fontWeight: '600',
+    color: '#8E869E',
+    flex: 1,
+    maxWidth: 34,
     textAlign: 'center',
   },
-  heatmapGridContainer: {
-    gap: 8,
-    marginBottom: 14,
+  heatmapGrid: {
+    gap: 5,
+    width: '100%',
   },
   heatmapRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
+    width: '100%',
   },
-  heatmapCellEmpty: {
-    width: 34,
-    height: 34,
-    borderRadius: 9,
-    backgroundColor: '#F8FAFC',
-    borderWidth: 1,
-    borderColor: '#F1F5F9',
+  heatmapCell: {
+    flex: 1,
+    maxWidth: 34,
+    height: 23,
+    borderRadius: 6,
     justifyContent: 'center',
     alignItems: 'center',
+    marginHorizontal: 1.5,
   },
   heatmapCellCompleted: {
-    width: 34,
-    height: 34,
-    borderRadius: 9,
     backgroundColor: '#582CDB',
-    justifyContent: 'center',
-    alignItems: 'center',
     shadowColor: '#582CDB',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.16,
-    shadowRadius: 3,
-    elevation: 2,
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.12,
+    shadowRadius: 2,
+    elevation: 1,
   },
-  heatmapCellScheduled: {
-    width: 34,
-    height: 34,
-    borderRadius: 9,
-    backgroundColor: '#FAF5FF',
-    borderWidth: 1.5,
-    borderColor: '#C4B5FD',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  heatmapCellFreeze: {
-    width: 34,
-    height: 34,
-    borderRadius: 9,
-    backgroundColor: '#F0F9FF',
-    borderWidth: 1.5,
-    borderColor: '#BAE6FD',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  heatmapCellTodayActive: {
-    width: 34,
-    height: 34,
-    borderRadius: 9,
-    backgroundColor: '#582CDB',
-    borderWidth: 2,
-    borderColor: '#F59E0B',
-    justifyContent: 'center',
-    alignItems: 'center',
-    shadowColor: '#F59E0B',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  jarvisProInsightBox: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    backgroundColor: '#FAF9FF',
-    borderRadius: 14,
-    padding: 12,
+  heatmapCellEmpty: {
+    backgroundColor: 'rgba(23, 20, 32, 0.03)',
     borderWidth: 1,
-    borderColor: '#EDE9FE',
-    gap: 10,
-  },
-  jarvisFlameWrapper: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: '#FFFFFF',
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: '#E2E8F0',
-  },
-  jarvisInsightHeading: {
-    fontSize: 10.5,
-    fontWeight: '800',
-    color: '#582CDB',
-    letterSpacing: 0.5,
-  },
-  topCreatorTinyBadge: {
-    backgroundColor: '#FEF3C7',
-    paddingHorizontal: 6,
-    paddingVertical: 1.5,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: '#FDE68A',
-  },
-  topCreatorTinyBadgeText: {
-    fontSize: 9.5,
-    fontWeight: '800',
-    color: '#B45309',
-  },
-  jarvisInsightBodyText: {
-    fontSize: 12,
-    color: '#475569',
-    lineHeight: 17,
-    fontWeight: '500',
+    borderColor: 'rgba(23, 20, 32, 0.04)',
   },
   scheduledLabel: {
     fontSize: 11,
