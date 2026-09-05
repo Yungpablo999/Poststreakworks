@@ -724,11 +724,11 @@ export const ProDashboardScreen: React.FC<ProDashboardScreenProps> = ({
             <Text style={styles.streakLabel}>YOUR STREAK</Text>
 
             <View style={styles.cardHeaderRow}>
-              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5, flexShrink: 1 }}>
-                <Text style={styles.streakBigHeadline} numberOfLines={1}>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>
+                <Text style={styles.streakBigHeadline}>
                   {userProfile?.streakCount || 1}-Day Streak
                 </Text>
-                <Animated.Text style={{ fontSize: 17, transform: [{ scale: flamePulse }] }}>
+                <Animated.Text style={{ fontSize: 16, transform: [{ scale: flamePulse }] }}>
                   🔥
                 </Animated.Text>
               </View>
@@ -2159,17 +2159,16 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   streakBigHeadline: {
-    fontSize: 18,
+    fontSize: 16.5,
     fontWeight: '700',
     color: '#171420',
-    letterSpacing: -0.3,
+    letterSpacing: -0.2,
   },
   cardHeaderRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 10,
-    gap: 8,
+    marginBottom: 8,
   },
   cardSectionTitle: {
     fontSize: 18,
@@ -2181,13 +2180,12 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(88, 44, 219, 0.08)',
     borderWidth: 1,
     borderColor: 'rgba(88, 44, 219, 0.15)',
-    paddingVertical: 3.5,
-    paddingHorizontal: 8.5,
-    borderRadius: 8,
-    flexShrink: 0,
+    paddingVertical: 3,
+    paddingHorizontal: 8,
+    borderRadius: 6,
   },
   streakStatusHighlight: {
-    fontSize: 11,
+    fontSize: 10.5,
     fontWeight: '700',
     color: '#582CDB',
     letterSpacing: -0.1,
