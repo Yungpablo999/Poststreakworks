@@ -1010,11 +1010,10 @@ export const ProDashboardScreen: React.FC<ProDashboardScreenProps> = ({
               </View>
 
               <View style={{ flex: 1 }}>
-                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 2 }}>
+                <View style={{ marginBottom: 3 }}>
                   <View style={styles.proPriorityPill}>
-                    <Text style={styles.proPriorityText} numberOfLines={1}>👑 AVAILABLE QUEST</Text>
+                    <Text style={styles.proPriorityText}>👑 AVAILABLE BRAND QUEST</Text>
                   </View>
-                  <Text style={styles.brandQuestSubLabel} numberOfLines={1}>+$450 BOUNTY</Text>
                 </View>
                 <Text style={styles.brandQuestTitle}>GlowUp Skincare Launch</Text>
                 <Text style={{ fontSize: 11, color: '#64748B', marginTop: 1 }}>
@@ -2465,6 +2464,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 6,
     paddingVertical: 2,
     borderRadius: 4,
+    alignSelf: 'flex-start',
   },
   proPriorityText: {
     fontSize: 9,
