@@ -246,6 +246,16 @@ const parseTimeAgoMinutes = (timeStr: string): number => {
   return 999999;
 };
 
+const AVAILABLE_SQUAD_CREATORS = [
+  { id: 'kemi', name: 'Kemi Adeleke', handle: '@kemi_designs', streak: 42, niche: 'UI/UX & Brand Designer', avatar: require('../../assets/images/kemi-avatar.jpg') },
+  { id: 'amara', name: 'Amara Okafor', handle: '@amara.creates', streak: 44, niche: 'Travel & Lifestyle', avatar: require('../../assets/images/amara-avatar.jpg') },
+  { id: 'david', name: 'David Kim', handle: '@davidkim_tech', streak: 52, niche: 'Tech & AI Systems', avatar: require('../../assets/images/david-avatar.jpg') },
+  { id: 'tomi', name: 'Tomi Adebayo', handle: '@tomi_tech', streak: 55, niche: 'Tech & Gadget Reviewer', avatar: require('../../assets/images/tomi-avatar.jpg') },
+  { id: 'elena', name: 'Elena Rostova', handle: '@elena_fit', streak: 39, niche: 'High-Performance & Fitness', avatar: require('../../assets/images/elena-avatar.jpg') },
+  { id: 'marcus', name: 'Marcus Vance', handle: '@marcus_vance', streak: 61, niche: 'B2B SaaS Growth', avatar: require('../../assets/images/marcus-avatar.jpg') },
+  { id: 'zainab', name: 'Zainab Okafor', handle: '@zainab_okafor', streak: 41, niche: 'Lifestyle & Wellness', avatar: require('../../assets/images/zainab-avatar.jpg') },
+];
+
 const INITIAL_CONVERSATIONS: ConversationThread[] = [
   {
     id: 'conv_kemi',
@@ -593,6 +603,17 @@ export const ProMessagesScreen: React.FC<ProMessagesScreenProps> = ({
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [collabProposalDecisions, setCollabProposalDecisions] = useState<Record<string, 'accepted' | 'maybe_later' | 'declined'>>({});
+
+  // Squad Creation & Options Menu States
+  const [showCreateSquadModal, setShowCreateSquadModal] = useState(false);
+  const [squadNameInput, setSquadNameInput] = useState('');
+  const [selectedSquadCreatorIds, setSelectedSquadCreatorIds] = useState<string[]>([]);
+  const [squadProjectCollab, setSquadProjectCollab] = useState<'streak' | 'hooks' | 'split' | 'duel'>('streak');
+  const [showChatOptionsMenu, setShowChatOptionsMenu] = useState(false);
+  const [mutedThreadIds, setMutedThreadIds] = useState<string[]>([]);
+  const [blockedThreadIds, setBlockedThreadIds] = useState<string[]>([]);
+  const [showSafetyModal, setShowSafetyModal] = useState(false);
+  const [safetyStep, setSafetyStep] = useState<'choose' | 'report'>('choose');
 
   const flameFloatY = useRef(new Animated.Value(0)).current;
 
@@ -1137,17 +1158,73 @@ export const ProMessagesScreen: React.FC<ProMessagesScreenProps> = ({
                       </View>
                       <Text style={styles.chatHeaderStatus} numberOfLines={1}>
                         {activeChatThread.isOnline ? '● Active now' : 'Offline'} • {activeChatThread.niche}
+                        {mutedThreadIds.includes(activeChatThread.id) ? ' • 🔕 Muted' : ''}
                       </Text>
                     </View>
                   </View>
 
-                  <Pressable
-                    style={styles.chatActionCircle}
-                    onPress={() => openCreatorStory(activeChatThread.creatorId)}
-                    hitSlop={8}
-                  >
-                    <Text style={{ fontSize: 14 }}>🌟</Text>
-                  </Pressable>
+                  {/* Right Action Icons: 👥＋ (Start a Squad) & ⋯ (Conversation Options) */}
+                  <View style={styles.chatActiveHeaderRightGroup}>
+                    {activeChatThread.creatorId !== 'jarvis' && activeChatThread.category !== 'squad' && (
+                      <Pressable
+                        style={({ pressed }) => [styles.chatHeaderActionBtn, pressed && styles.btnPressed]}
+                        hitSlop={8}
+                        onPress={() => {
+                          if (Platform.OS !== 'web') {
+                            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                          }
+                          if (activeChatThread) {
+                            setSquadNameInput(`${activeChatThread.name.split(' ')[0]} & Pablo's Squad`);
+                          }
+                          setSelectedSquadCreatorIds([]);
+                          setShowCreateSquadModal(true);
+                        }}
+                      >
+                        <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
+                          {/* User Body & Head */}
+                          <Path
+                            d="M15 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"
+                            stroke="#171420"
+                            strokeWidth="2.1"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          />
+                          <Circle
+                            cx="8"
+                            cy="7"
+                            r="4"
+                            stroke="#171420"
+                            strokeWidth="2.1"
+                          />
+                          {/* Purple Plus */}
+                          <Path
+                            d="M19 8v6M16 11h6"
+                            stroke="#582CDB"
+                            strokeWidth="2.4"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          />
+                        </Svg>
+                      </Pressable>
+                    )}
+
+                    <Pressable
+                      style={({ pressed }) => [styles.chatHeaderActionBtn, pressed && styles.btnPressed]}
+                      hitSlop={8}
+                      onPress={() => {
+                        if (Platform.OS !== 'web') {
+                          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                        }
+                        setShowChatOptionsMenu(true);
+                      }}
+                    >
+                      <Svg width={17} height={17} viewBox="0 0 24 24" fill="none">
+                        <Circle cx="5" cy="12" r="2.2" fill="#171420" />
+                        <Circle cx="12" cy="12" r="2.2" fill="#171420" />
+                        <Circle cx="19" cy="12" r="2.2" fill="#171420" />
+                      </Svg>
+                    </Pressable>
+                  </View>
                 </View>
 
                 {/* QUICK AI ACTION PILLS */}
@@ -1340,45 +1417,641 @@ export const ProMessagesScreen: React.FC<ProMessagesScreenProps> = ({
                   })}
                 </ScrollView>
 
-                {/* CHAT INPUT BAR */}
-                <View style={styles.chatInputBar}>
-                  <Pressable
-                    style={styles.attachBtn}
-                    onPress={() => showToast('Attach Script, Reel draft, or Audio note')}
-                  >
-                    <Text style={{ fontSize: 18, color: '#582CDB', fontWeight: '700' }}>+</Text>
-                  </Pressable>
+                {/* CHAT INPUT BAR OR BLOCKED BANNER */}
+                {blockedThreadIds.includes(activeChatThread.id) ? (
+                  <View style={styles.blockedNoticeBanner}>
+                    <Text style={styles.blockedNoticeText}>
+                      🚫 You blocked this creator. Unblock to send messages.
+                    </Text>
+                    <Pressable
+                      style={styles.blockedUnblockBtn}
+                      onPress={() => {
+                        if (Platform.OS !== 'web') {
+                          Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+                        }
+                        setBlockedThreadIds((prev) => prev.filter((id) => id !== activeChatThread.id));
+                        showToast(`🔓 Unblocked ${activeChatThread.name}`);
+                      }}
+                    >
+                      <Text style={styles.blockedUnblockBtnText}>Unblock</Text>
+                    </Pressable>
+                  </View>
+                ) : (
+                  <View style={styles.chatInputBar}>
+                    <Pressable
+                      style={styles.attachBtn}
+                      onPress={() => showToast('Attach Script, Reel draft, or Audio note')}
+                    >
+                      <Text style={{ fontSize: 18, color: '#582CDB', fontWeight: '700' }}>+</Text>
+                    </Pressable>
 
-                  <TextInput
-                    style={styles.chatTextInput}
-                    placeholder="Type a message or AI pitch..."
-                    placeholderTextColor="#94A3B8"
-                    value={chatInputText}
-                    onChangeText={setChatInputText}
-                    onSubmitEditing={handleSendMessage}
-                  />
+                    <TextInput
+                      style={styles.chatTextInput}
+                      placeholder="Type a message or AI pitch..."
+                      placeholderTextColor="#94A3B8"
+                      value={chatInputText}
+                      onChangeText={setChatInputText}
+                      onSubmitEditing={handleSendMessage}
+                    />
 
-                  <Pressable
-                    style={[
-                      styles.sendBtn,
-                      chatInputText.trim().length > 0 && styles.sendBtnActive,
-                    ]}
-                    onPress={handleSendMessage}
-                  >
-                    <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
-                      <Path
-                        d="M22 2L11 13M22 2L15 22L11 13M11 13L2 9L22 2"
-                        stroke="#FFFFFF"
-                        strokeWidth="2.2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                    </Svg>
-                  </Pressable>
-                </View>
+                    <Pressable
+                      style={[
+                        styles.sendBtn,
+                        chatInputText.trim().length > 0 && styles.sendBtnActive,
+                      ]}
+                      onPress={handleSendMessage}
+                    >
+                      <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
+                        <Path
+                          d="M22 2L11 13M22 2L15 22L11 13M11 13L2 9L22 2"
+                          stroke="#FFFFFF"
+                          strokeWidth="2.2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                      </Svg>
+                    </Pressable>
+                  </View>
+                )}
               </KeyboardAvoidingView>
             </SafeAreaView>
           )}
+        </Modal>
+
+        {/* ============================================================ */}
+        {/* START A SQUAD MODAL (👥＋)                                     */}
+        {/* ============================================================ */}
+        <Modal
+          visible={showCreateSquadModal}
+          transparent={true}
+          animationType="fade"
+          onRequestClose={() => setShowCreateSquadModal(false)}
+        >
+          <Pressable
+            style={styles.modalOverlay}
+            onPress={() => setShowCreateSquadModal(false)}
+          >
+            <KeyboardAvoidingView
+              behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+              style={{ width: '100%', alignItems: 'center' }}
+            >
+              <Pressable
+                style={styles.squadModalCard}
+                onPress={(e) => e.stopPropagation()}
+              >
+                {/* Header */}
+                <View style={styles.modalHeaderRow}>
+                  <View style={{ flex: 1, paddingRight: 12 }}>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 2 }}>
+                      <Text style={styles.modalTitle}>
+                        Start a Squad
+                      </Text>
+                      <View style={styles.squadCollabBadge}>
+                        <Text style={styles.squadCollabBadgeText}>GROUP PRO</Text>
+                      </View>
+                    </View>
+                    <Text style={styles.modalSubtitle}>
+                      Add creators to this conversation and collaborate together.
+                    </Text>
+                  </View>
+                  <Pressable
+                    onPress={() => setShowCreateSquadModal(false)}
+                    style={styles.modalCloseCircle}
+                    hitSlop={8}
+                  >
+                    <Text style={styles.modalCloseCross}>✕</Text>
+                  </Pressable>
+                </View>
+
+                <ScrollView style={{ maxHeight: 390 }} showsVerticalScrollIndicator={false}>
+                  {/* 1. SQUAD NAME INPUT */}
+                  <View style={styles.squadInputGroup}>
+                    <Text style={styles.squadInputLabel}>Squad Name</Text>
+                    <TextInput
+                      style={styles.squadTextInput}
+                      placeholder="e.g. Lagos Creator Sprint, Tech Duo Squad..."
+                      placeholderTextColor="#94A3B8"
+                      value={squadNameInput}
+                      onChangeText={setSquadNameInput}
+                    />
+                  </View>
+
+                  {/* 2. SELECT CREATORS */}
+                  <View style={styles.squadInputGroup}>
+                    <View style={styles.squadInputLabelRow}>
+                      <Text style={styles.squadInputLabel}>
+                        Add Creators
+                      </Text>
+                      <Text style={styles.squadSelectedCountBadge}>
+                        {1 + selectedSquadCreatorIds.length} selected
+                      </Text>
+                    </View>
+
+                    {/* Pre-selected Current Chat Creator */}
+                    {activeChatThread && (
+                      <View style={[styles.squadCreatorSelectRow, styles.squadCreatorLockedRow]}>
+                        <Image source={activeChatThread.avatar} style={styles.squadCreatorAvatar} resizeMode="cover" />
+                        <View style={{ flex: 1, minWidth: 0 }}>
+                          <Text style={styles.squadCreatorName} numberOfLines={1}>{activeChatThread.name}</Text>
+                          <Text style={styles.squadCreatorSub}>{activeChatThread.handle} · ⚡ {activeChatThread.streak}d</Text>
+                        </View>
+                        <View style={styles.squadLockedPill}>
+                          <Text style={styles.squadLockedPillText}>In this chat ✓</Text>
+                        </View>
+                      </View>
+                    )}
+
+                    {/* Other Available Real Creators */}
+                    {AVAILABLE_SQUAD_CREATORS
+                      .filter((c) => !activeChatThread || c.id !== activeChatThread.creatorId)
+                      .map((creator) => {
+                        const isChecked = selectedSquadCreatorIds.includes(creator.id);
+                        return (
+                          <Pressable
+                            key={creator.id}
+                            style={[
+                              styles.squadCreatorSelectRow,
+                              isChecked && styles.squadCreatorRowSelected,
+                            ]}
+                            onPress={() => {
+                              if (Platform.OS !== 'web') {
+                                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                              }
+                              setSelectedSquadCreatorIds((prev) =>
+                                prev.includes(creator.id)
+                                  ? prev.filter((id) => id !== creator.id)
+                                  : [...prev, creator.id]
+                              );
+                            }}
+                          >
+                            <Image
+                              source={creator.avatar}
+                              style={styles.squadCreatorAvatar}
+                              resizeMode="cover"
+                            />
+                            <View style={{ flex: 1, minWidth: 0 }}>
+                              <Text style={styles.squadCreatorName} numberOfLines={1}>{creator.name}</Text>
+                              <Text style={styles.squadCreatorSub}>{creator.handle} · ⚡ {creator.streak}d</Text>
+                            </View>
+                            <View style={[styles.squadCheckboxCircle, isChecked && styles.squadCheckboxActive]}>
+                              {isChecked && <Text style={styles.squadCheckmarkText}>✓</Text>}
+                            </View>
+                          </Pressable>
+                        );
+                      })}
+                  </View>
+
+                  {/* 3. COLLABORATION PROJECT / FOCUS */}
+                  <View style={styles.squadInputGroup}>
+                    <Text style={styles.squadInputLabel}>Collab Project Focus</Text>
+                    {[
+                      { id: 'streak', title: '🔥 14-Day Streak Challenge', sub: '+50 XP daily pact when all members post' },
+                      { id: 'duel', title: '⚔️ Live Creator Duel', sub: '+750 XP team vs team ranking sprint' },
+                      { id: 'hooks', title: '🎬 Batch Filming & Hook Swap', sub: 'Peer review scripts & hook retention' },
+                      { id: 'split', title: '⚡ Joint Reel & Split Collab', sub: 'Co-authored storytelling video' },
+                    ].map((proj) => {
+                      const isSelected = squadProjectCollab === proj.id;
+                      return (
+                        <Pressable
+                          key={proj.id}
+                          style={[
+                            styles.squadProjectCard,
+                            isSelected && styles.squadProjectCardSelected,
+                          ]}
+                          onPress={() => {
+                            if (Platform.OS !== 'web') {
+                              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                            }
+                            setSquadProjectCollab(proj.id as any);
+                          }}
+                        >
+                          <Text style={styles.squadProjectTitle}>{proj.title}</Text>
+                          <Text style={styles.squadProjectSub}>{proj.sub}</Text>
+                        </Pressable>
+                      );
+                    })}
+                  </View>
+                </ScrollView>
+
+                {/* CREATE SQUAD CTA BUTTON */}
+                <Pressable
+                  style={({ pressed }) => [styles.createSquadSubmitBtn, pressed && styles.btnPressed]}
+                  onPress={() => {
+                    if (Platform.OS !== 'web') {
+                      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+                    }
+                    const sName = squadNameInput.trim() || `${activeChatThread?.name.split(' ')[0] || 'Creator'} & Pablo's Squad`;
+                    const newSquadThread: ConversationThread = {
+                      id: `conv_squad_${Date.now()}`,
+                      creatorId: 'squad',
+                      name: sName,
+                      handle: `@${sName.toLowerCase().replace(/[^a-z0-9]/g, '')}`,
+                      niche: `Level 1 • ${1 + selectedSquadCreatorIds.length} Members`,
+                      avatar: activeChatThread?.avatar || require('../../assets/images/elena-avatar.jpg'),
+                      streak: 1,
+                      isOnline: true,
+                      isPro: true,
+                      lastMessage: `You created "${sName}"! Squad initialized with ${1 + selectedSquadCreatorIds.length} creators. 🔥`,
+                      time: 'Just now',
+                      unread: false,
+                      category: 'squad',
+                      collabBadge: '⚔️ Live Duel Active (+750 XP)',
+                      messages: [
+                        {
+                          id: `sq_m_${Date.now()}`,
+                          senderId: 'user',
+                          text: `🔥 Welcome everyone to ${sName}! Let’s crush our streak challenge together.`,
+                          time: 'Just now',
+                          isUser: true,
+                        },
+                      ],
+                    };
+
+                    setConversations((prev) => [newSquadThread, ...prev.filter((c) => c.id !== newSquadThread.id)]);
+                    setActiveChatThread(newSquadThread);
+                    setShowCreateSquadModal(false);
+                    showToast(`🔥 Squad "${sName}" Created! (+250 XP)`);
+                  }}
+                >
+                  <LinearGradient
+                    colors={['#7C3AED', '#582CDB']}
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 1, y: 0 }}
+                    style={styles.createSquadGradient}
+                  >
+                    <Text style={styles.createSquadBtnText} numberOfLines={1}>
+                      Create Squad & Start Chat ➔
+                    </Text>
+                  </LinearGradient>
+                </Pressable>
+              </Pressable>
+            </KeyboardAvoidingView>
+          </Pressable>
+        </Modal>
+
+        {/* ============================================================ */}
+        {/* CONVERSATION OPTIONS MODAL (⋯)                                */}
+        {/* ============================================================ */}
+        <Modal
+          visible={showChatOptionsMenu}
+          transparent={true}
+          animationType="fade"
+          onRequestClose={() => setShowChatOptionsMenu(false)}
+        >
+          <Pressable
+            style={styles.modalOverlay}
+            onPress={() => setShowChatOptionsMenu(false)}
+          >
+            <Pressable
+              style={styles.optionsMenuModalCard}
+              onPress={(e) => e.stopPropagation()}
+            >
+              {/* Header */}
+              <View style={styles.modalHeaderRow}>
+                <View style={{ flex: 1, paddingRight: 12 }}>
+                  <Text style={styles.modalTitle}>
+                    Conversation Options
+                  </Text>
+                  <Text style={styles.modalSubtitle} numberOfLines={1}>
+                    Options for your chat with {activeChatThread?.name || 'Creator'}
+                  </Text>
+                </View>
+                <Pressable
+                  onPress={() => setShowChatOptionsMenu(false)}
+                  style={styles.modalCloseCircle}
+                  hitSlop={8}
+                >
+                  <Text style={styles.modalCloseCross}>✕</Text>
+                </Pressable>
+              </View>
+
+              {/* Action Options List */}
+              <View style={styles.optionsList}>
+                <Pressable
+                  style={({ pressed }) => [styles.optionItemRow, pressed && styles.btnPressed]}
+                  onPress={() => {
+                    setShowChatOptionsMenu(false);
+                    if (activeChatThread) {
+                      openCreatorStory(activeChatThread.creatorId);
+                    }
+                  }}
+                >
+                  <View style={styles.optionItemIconBox}>
+                    <Text style={{ fontSize: 16 }}>👤</Text>
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <Text style={styles.optionItemTitle}>View Creator Story & Highlights</Text>
+                    <Text style={styles.optionItemSub}>See active streak & recent story cards</Text>
+                  </View>
+                </Pressable>
+
+                <Pressable
+                  style={({ pressed }) => [styles.optionItemRow, pressed && styles.btnPressed]}
+                  onPress={() => {
+                    setShowChatOptionsMenu(false);
+                    if (!activeChatThread) return;
+                    setChatInputText('Hey! Want to do a joint 60s Reel collab this weekend? ⚡');
+                    showToast('Draft collab pitch inserted into chat bar');
+                  }}
+                >
+                  <View style={styles.optionItemIconBox}>
+                    <Text style={{ fontSize: 16 }}>⚡</Text>
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <Text style={styles.optionItemTitle}>Propose Pro Collaboration</Text>
+                    <Text style={styles.optionItemSub}>Streak duel, split reel, or content swap</Text>
+                  </View>
+                </Pressable>
+
+                <Pressable
+                  style={({ pressed }) => [styles.optionItemRow, pressed && styles.btnPressed]}
+                  onPress={() => {
+                    setShowChatOptionsMenu(false);
+                    if (!activeChatThread) return;
+                    const isMuted = mutedThreadIds.includes(activeChatThread.id);
+                    const willMute = !isMuted;
+                    if (Platform.OS !== 'web') {
+                      Haptics.notificationAsync(
+                        willMute
+                          ? Haptics.NotificationFeedbackType.Warning
+                          : Haptics.NotificationFeedbackType.Success
+                      );
+                    }
+                    setMutedThreadIds((prev) =>
+                      willMute
+                        ? [...prev, activeChatThread.id]
+                        : prev.filter((id) => id !== activeChatThread.id)
+                    );
+                    showToast(
+                      willMute
+                        ? `🔕 Notifications muted for ${activeChatThread.name}`
+                        : `🔔 Notifications unmuted for ${activeChatThread.name}`
+                    );
+                  }}
+                >
+                  <View style={[styles.optionItemIconBox, activeChatThread && mutedThreadIds.includes(activeChatThread.id) && { backgroundColor: '#F1F5F9' }]}>
+                    <Text style={{ fontSize: 16 }}>
+                      {activeChatThread && mutedThreadIds.includes(activeChatThread.id) ? '🔕' : '🔔'}
+                    </Text>
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <Text style={styles.optionItemTitle}>
+                      {activeChatThread && mutedThreadIds.includes(activeChatThread.id)
+                        ? 'Unmute Notifications'
+                        : 'Mute Notifications'}
+                    </Text>
+                    <Text style={styles.optionItemSub}>
+                      {activeChatThread && mutedThreadIds.includes(activeChatThread.id)
+                        ? 'Resume streak alerts & messages from this thread'
+                        : 'Pause streak notification pings from this thread'}
+                    </Text>
+                  </View>
+                </Pressable>
+
+                <Pressable
+                  style={({ pressed }) => [styles.optionItemRow, pressed && styles.btnPressed]}
+                  onPress={() => {
+                    setShowChatOptionsMenu(false);
+                    if (!activeChatThread) return;
+                    showToast('🎙️ Collab outline sent to Voice Studio Pro!');
+                  }}
+                >
+                  <View style={styles.optionItemIconBox}>
+                    <Text style={{ fontSize: 16 }}>🎙️</Text>
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <Text style={styles.optionItemTitle}>Export Pitch to Voice Studio</Text>
+                    <Text style={styles.optionItemSub}>Generate AI voiceover hook for this topic</Text>
+                  </View>
+                </Pressable>
+
+                <Pressable
+                  style={({ pressed }) => [styles.optionItemRow, pressed && styles.btnPressed]}
+                  onPress={() => {
+                    setShowChatOptionsMenu(false);
+                    if (!activeChatThread) return;
+                    if (Platform.OS !== 'web') {
+                      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                    }
+                    const clearedThread: ConversationThread = {
+                      ...activeChatThread,
+                      messages: [],
+                      lastMessage: 'Conversation history cleared.',
+                    };
+                    setActiveChatThread(clearedThread);
+                    setConversations((prev) =>
+                      prev.map((c) => (c.id === clearedThread.id ? clearedThread : c))
+                    );
+                    showToast(`🧹 Chat history cleared for ${activeChatThread.name}`);
+                  }}
+                >
+                  <View style={styles.optionItemIconBox}>
+                    <Text style={{ fontSize: 16 }}>🗑️</Text>
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <Text style={styles.optionItemTitle}>Clear Chat History</Text>
+                    <Text style={styles.optionItemSub}>Remove messages from this conversation</Text>
+                  </View>
+                </Pressable>
+
+                <Pressable
+                  style={({ pressed }) => [styles.optionItemRow, pressed && styles.btnPressed]}
+                  onPress={() => {
+                    setShowChatOptionsMenu(false);
+                    if (!activeChatThread) return;
+                    const isBlocked = blockedThreadIds.includes(activeChatThread.id);
+                    if (isBlocked) {
+                      if (Platform.OS !== 'web') {
+                        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+                      }
+                      setBlockedThreadIds((prev) => prev.filter((id) => id !== activeChatThread.id));
+                      showToast(`🔓 Unblocked ${activeChatThread.name}`);
+                    } else {
+                      setSafetyStep('choose');
+                      setShowSafetyModal(true);
+                    }
+                  }}
+                >
+                  <View
+                    style={[
+                      styles.optionItemIconBox,
+                      {
+                        backgroundColor:
+                          activeChatThread && blockedThreadIds.includes(activeChatThread.id)
+                            ? '#F5F3FF'
+                            : '#FEF2F2',
+                      },
+                    ]}
+                  >
+                    <Text style={{ fontSize: 16 }}>
+                      {activeChatThread && blockedThreadIds.includes(activeChatThread.id) ? '🔓' : '🚩'}
+                    </Text>
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <Text
+                      style={[
+                        styles.optionItemTitle,
+                        {
+                          color:
+                            activeChatThread && blockedThreadIds.includes(activeChatThread.id)
+                              ? '#6D28D9'
+                              : '#EF4444',
+                        },
+                      ]}
+                    >
+                      {activeChatThread && blockedThreadIds.includes(activeChatThread.id)
+                        ? 'Unblock Creator'
+                        : 'Report or Block'}
+                    </Text>
+                    <Text style={styles.optionItemSub}>
+                      {activeChatThread && blockedThreadIds.includes(activeChatThread.id)
+                        ? `Allow messages from ${activeChatThread.name.split(' ')[0]}`
+                        : 'Keep the creator community safe'}
+                    </Text>
+                  </View>
+                </Pressable>
+              </View>
+            </Pressable>
+          </Pressable>
+        </Modal>
+
+        {/* ============================================================ */}
+        {/* SAFETY MODAL (REPORT OR BLOCK)                                */}
+        {/* ============================================================ */}
+        <Modal
+          visible={showSafetyModal}
+          transparent={true}
+          animationType="fade"
+          onRequestClose={() => setShowSafetyModal(false)}
+        >
+          <Pressable
+            style={styles.modalOverlay}
+            onPress={() => setShowSafetyModal(false)}
+          >
+            <KeyboardAvoidingView
+              behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+              style={{ width: '100%', alignItems: 'center' }}
+            >
+              <Pressable
+                style={styles.safetyModalCard}
+                onPress={(e) => e.stopPropagation()}
+              >
+                {/* Header */}
+                <View style={styles.modalHeaderRow}>
+                  <View style={{ flex: 1, paddingRight: 12 }}>
+                    <Text style={styles.modalTitle}>
+                      {safetyStep === 'choose'
+                        ? 'Safety & Moderation'
+                        : `Report ${activeChatThread?.name || 'Creator'}`}
+                    </Text>
+                    <Text style={styles.modalSubtitle}>
+                      {safetyStep === 'choose'
+                        ? `Choose an action for ${activeChatThread?.name || 'this creator'}`
+                        : 'Select why you are reporting this account:'}
+                    </Text>
+                  </View>
+                  <Pressable
+                    onPress={() => setShowSafetyModal(false)}
+                    style={styles.modalCloseCircle}
+                    hitSlop={8}
+                  >
+                    <Text style={styles.modalCloseCross}>✕</Text>
+                  </Pressable>
+                </View>
+
+                {safetyStep === 'choose' ? (
+                  /* Step 1: Choose Report or Block */
+                  <View style={styles.safetyOptionsList}>
+                    {/* Option 1: Report */}
+                    <Pressable
+                      style={({ pressed }) => [styles.safetyOptionCard, pressed && styles.btnPressed]}
+                      onPress={() => {
+                        if (Platform.OS !== 'web') {
+                          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                        }
+                        setSafetyStep('report');
+                      }}
+                    >
+                      <View style={[styles.safetyOptionIconBox, { backgroundColor: '#FEF2F2' }]}>
+                        <Text style={{ fontSize: 20 }}>🚩</Text>
+                      </View>
+                      <View style={{ flex: 1 }}>
+                        <Text style={[styles.safetyOptionTitle, { color: '#EF4444' }]}>Report Creator</Text>
+                        <Text style={styles.safetyOptionDesc}>
+                          Report spam, harassment, stolen content, or guideline violations
+                        </Text>
+                      </View>
+                      <Text style={styles.safetyOptionArrow}>➔</Text>
+                    </Pressable>
+
+                    {/* Option 2: Block */}
+                    <Pressable
+                      style={({ pressed }) => [styles.safetyOptionCard, pressed && styles.btnPressed]}
+                      onPress={() => {
+                        if (Platform.OS !== 'web') {
+                          Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
+                        }
+                        if (activeChatThread) {
+                          setBlockedThreadIds((prev) =>
+                            prev.includes(activeChatThread.id) ? prev : [...prev, activeChatThread.id]
+                          );
+                          showToast(`🚫 Blocked ${activeChatThread.name}`);
+                        }
+                        setShowSafetyModal(false);
+                      }}
+                    >
+                      <View style={[styles.safetyOptionIconBox, { backgroundColor: '#FEE2E2' }]}>
+                        <Text style={{ fontSize: 20 }}>🚫</Text>
+                      </View>
+                      <View style={{ flex: 1 }}>
+                        <Text style={[styles.safetyOptionTitle, { color: '#DC2626' }]}>Block Creator</Text>
+                        <Text style={styles.safetyOptionDesc}>
+                          Prevent {activeChatThread?.name.split(' ')[0] || 'them'} from messaging you or seeing your streak activity
+                        </Text>
+                      </View>
+                      <Text style={styles.safetyOptionArrow}>➔</Text>
+                    </Pressable>
+                  </View>
+                ) : (
+                  /* Step 2: Select Report Reason */
+                  <View style={styles.safetyOptionsList}>
+                    {[
+                      { id: 'spam', icon: '📢', title: 'Spam or Promotional Links', sub: 'Unsolicited links, bot messages, or ads' },
+                      { id: 'harassment', icon: '⚠️', title: 'Harassment or Inappropriate Conduct', sub: 'Abusive language, intimidation, or bullying' },
+                      { id: 'stolen', icon: '🎭', title: 'Impersonation or Stolen Content', sub: 'Copying original videos, fake creator identity' },
+                      { id: 'other', icon: '🛡️', title: 'Other Guideline Violation', sub: 'Violates creator community standards' },
+                    ].map((reason) => (
+                      <Pressable
+                        key={reason.id}
+                        style={({ pressed }) => [styles.safetyReasonCard, pressed && styles.btnPressed]}
+                        onPress={() => {
+                          if (Platform.OS !== 'web') {
+                            Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+                          }
+                          setShowSafetyModal(false);
+                          showToast(`🛡️ Report submitted for ${activeChatThread?.name}. Our safety team is reviewing it.`);
+                        }}
+                      >
+                        <Text style={{ fontSize: 18, marginRight: 10 }}>{reason.icon}</Text>
+                        <View style={{ flex: 1 }}>
+                          <Text style={styles.safetyReasonTitle}>{reason.title}</Text>
+                          <Text style={styles.safetyReasonSub}>{reason.sub}</Text>
+                        </View>
+                        <Text style={{ color: '#7C3AED', fontWeight: '700' }}>➔</Text>
+                      </Pressable>
+                    ))}
+
+                    <Pressable
+                      style={styles.safetyBackLink}
+                      onPress={() => setSafetyStep('choose')}
+                    >
+                      <Text style={styles.safetyBackLinkText}>‹ Back to Safety Options</Text>
+                    </Pressable>
+                  </View>
+                )}
+              </Pressable>
+            </KeyboardAvoidingView>
+          </Pressable>
         </Modal>
 
         {/* ============================================================ */}
@@ -2190,6 +2863,376 @@ const styles = StyleSheet.create({
   },
   sendBtnActive: {
     backgroundColor: '#582CDB',
+  },
+
+  // CHAT HEADER ACTION BUTTONS
+  chatActiveHeaderRightGroup: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  chatHeaderActionBtn: {
+    width: 38,
+    height: 38,
+    borderRadius: 12,
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1,
+    borderColor: '#EFECE6',
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.04,
+    shadowRadius: 3,
+    elevation: 1,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(15, 12, 28, 0.55)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+  },
+  modalHeaderRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    justifyContent: 'space-between',
+    marginBottom: 16,
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: '800',
+    color: '#171420',
+  },
+  modalSubtitle: {
+    fontSize: 12,
+    color: '#64748B',
+    marginTop: 2,
+  },
+  modalCloseCircle: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: '#F1F5F9',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalCloseCross: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#64748B',
+  },
+  squadModalCard: {
+    width: '100%',
+    maxWidth: 420,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 24,
+    padding: 20,
+    borderWidth: 1,
+    borderColor: '#EFECE6',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.12,
+    shadowRadius: 20,
+    elevation: 8,
+  },
+  squadCollabBadge: {
+    backgroundColor: '#EDE9FE',
+    paddingHorizontal: 7,
+    paddingVertical: 2,
+    borderRadius: 6,
+  },
+  squadCollabBadgeText: {
+    fontSize: 9,
+    fontWeight: '800',
+    color: '#7C3AED',
+  },
+  squadInputGroup: {
+    marginBottom: 14,
+  },
+  squadInputLabel: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#171420',
+    marginBottom: 6,
+  },
+  squadInputLabelRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 6,
+  },
+  squadSelectedCountBadge: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: '#7C3AED',
+  },
+  squadTextInput: {
+    backgroundColor: '#F8FAFC',
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    borderRadius: 14,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    fontSize: 13,
+    color: '#171420',
+  },
+  squadCreatorSelectRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    padding: 10,
+    borderRadius: 14,
+    backgroundColor: '#F8FAFC',
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    marginBottom: 6,
+  },
+  squadCreatorRowSelected: {
+    backgroundColor: '#F5F3FF',
+    borderColor: '#7C3AED',
+  },
+  squadCreatorLockedRow: {
+    backgroundColor: '#F8FAFC',
+    borderColor: '#E2E8F0',
+    opacity: 0.9,
+  },
+  squadCreatorAvatar: {
+    width: 34,
+    height: 34,
+    borderRadius: 17,
+  },
+  squadCreatorName: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: '#171420',
+  },
+  squadCreatorSub: {
+    fontSize: 11,
+    color: '#64748B',
+  },
+  squadLockedPill: {
+    backgroundColor: '#DCFCE7',
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 8,
+  },
+  squadLockedPillText: {
+    fontSize: 10,
+    fontWeight: '700',
+    color: '#15803D',
+  },
+  squadCheckboxCircle: {
+    width: 22,
+    height: 22,
+    borderRadius: 11,
+    borderWidth: 1.5,
+    borderColor: '#CBD5E1',
+    backgroundColor: '#FFFFFF',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  squadCheckboxActive: {
+    backgroundColor: '#7C3AED',
+    borderColor: '#7C3AED',
+  },
+  squadCheckmarkText: {
+    color: '#FFFFFF',
+    fontSize: 12,
+    fontWeight: '800',
+  },
+  squadProjectCard: {
+    padding: 10,
+    borderRadius: 12,
+    backgroundColor: '#F8FAFC',
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    marginBottom: 6,
+  },
+  squadProjectCardSelected: {
+    backgroundColor: '#F5F3FF',
+    borderColor: '#7C3AED',
+  },
+  squadProjectTitle: {
+    fontSize: 12.5,
+    fontWeight: '700',
+    color: '#171420',
+    marginBottom: 2,
+  },
+  squadProjectSub: {
+    fontSize: 11,
+    color: '#64748B',
+  },
+  createSquadSubmitBtn: {
+    marginTop: 6,
+    borderRadius: 14,
+    overflow: 'hidden',
+  },
+  createSquadGradient: {
+    paddingVertical: 13,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  createSquadBtnText: {
+    fontSize: 13.5,
+    fontWeight: '800',
+    color: '#FFFFFF',
+  },
+
+  // CONVERSATION OPTIONS MODAL
+  optionsMenuModalCard: {
+    width: '100%',
+    maxWidth: 400,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 24,
+    padding: 20,
+    borderWidth: 1,
+    borderColor: '#EFECE6',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.12,
+    shadowRadius: 20,
+    elevation: 8,
+  },
+  optionsList: {
+    gap: 6,
+  },
+  optionItemRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    paddingVertical: 10,
+    paddingHorizontal: 10,
+    borderRadius: 14,
+    backgroundColor: '#F8FAFC',
+  },
+  optionItemIconBox: {
+    width: 36,
+    height: 36,
+    borderRadius: 10,
+    backgroundColor: '#EDE9FE',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  optionItemTitle: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: '#171420',
+  },
+  optionItemSub: {
+    fontSize: 11,
+    color: '#64748B',
+    marginTop: 1,
+  },
+
+  // SAFETY MODAL
+  safetyModalCard: {
+    width: '100%',
+    maxWidth: 400,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 24,
+    padding: 20,
+    borderWidth: 1,
+    borderColor: '#EFECE6',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.12,
+    shadowRadius: 20,
+    elevation: 8,
+  },
+  safetyOptionsList: {
+    gap: 8,
+  },
+  safetyOptionCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    padding: 12,
+    borderRadius: 14,
+    backgroundColor: '#F8FAFC',
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+  },
+  safetyOptionIconBox: {
+    width: 40,
+    height: 40,
+    borderRadius: 12,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  safetyOptionTitle: {
+    fontSize: 13.5,
+    fontWeight: '700',
+    marginBottom: 2,
+  },
+  safetyOptionDesc: {
+    fontSize: 11,
+    color: '#64748B',
+    lineHeight: 15,
+  },
+  safetyOptionArrow: {
+    fontSize: 14,
+    color: '#94A3B8',
+    fontWeight: '700',
+  },
+  safetyReasonCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 12,
+    borderRadius: 14,
+    backgroundColor: '#F8FAFC',
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+  },
+  safetyReasonTitle: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: '#171420',
+  },
+  safetyReasonSub: {
+    fontSize: 11,
+    color: '#64748B',
+    marginTop: 1,
+  },
+  safetyBackLink: {
+    marginTop: 6,
+    alignItems: 'center',
+    paddingVertical: 6,
+  },
+  safetyBackLinkText: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#7C3AED',
+  },
+
+  // BLOCKED BANNER
+  blockedNoticeBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: '#FEF2F2',
+    borderTopWidth: 1,
+    borderTopColor: '#FECACA',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    gap: 10,
+  },
+  blockedNoticeText: {
+    flex: 1,
+    fontSize: 12,
+    color: '#DC2626',
+    fontWeight: '600',
+  },
+  blockedUnblockBtn: {
+    backgroundColor: '#DC2626',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 8,
+  },
+  blockedUnblockBtnText: {
+    color: '#FFFFFF',
+    fontSize: 12,
+    fontWeight: '800',
   },
 
   // COMMON
