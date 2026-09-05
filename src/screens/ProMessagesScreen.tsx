@@ -232,6 +232,20 @@ const CREATOR_STORIES_DATA: CreatorStoryData[] = [
   },
 ];
 
+const parseTimeAgoMinutes = (timeStr: string): number => {
+  const lower = timeStr.toLowerCase().trim();
+  if (lower.includes('just now') || lower === 'now') return 0;
+  const minMatch = lower.match(/^(\d+)\s*m/);
+  if (minMatch) return parseInt(minMatch[1], 10);
+  const hourMatch = lower.match(/^(\d+)\s*h/);
+  if (hourMatch) return parseInt(hourMatch[1], 10) * 60;
+  const dayMatch = lower.match(/^(\d+)\s*d/);
+  if (dayMatch) return parseInt(dayMatch[1], 10) * 1440;
+  const weekMatch = lower.match(/^(\d+)\s*w/);
+  if (weekMatch) return parseInt(weekMatch[1], 10) * 10080;
+  return 999999;
+};
+
 const INITIAL_CONVERSATIONS: ConversationThread[] = [
   {
     id: 'conv_kemi',
@@ -271,48 +285,6 @@ const INITIAL_CONVERSATIONS: ConversationThread[] = [
         senderId: 'kemi',
         text: 'Let me know what you think of the concept! When are you free to film or review the storyboard?',
         time: '11:32 AM',
-        isUser: false,
-      },
-    ],
-  },
-  {
-    id: 'conv_tomi',
-    creatorId: 'tomi',
-    name: 'Tomi Adebayo',
-    handle: '@tomi_tech',
-    niche: 'Tech & Gadget Reviewer',
-    avatar: require('../../assets/images/tomi-avatar.jpg'),
-    streak: 55,
-    isOnline: true,
-    isPro: true,
-    lastMessage: 'Would love to do a 60s creator desk setup critique video with you! Let me know if you are open to filming next Tuesday.',
-    time: '2h ago',
-    unread: true,
-    unreadCount: 1,
-    category: 'collabs',
-    collabBadge: '🤝 Collab Idea Waiting',
-    messages: [
-      {
-        id: 'tm1',
-        senderId: 'tomi',
-        text: 'Hey Pablo! Jarvis recommended our channels for a high-retention tech crossover.',
-        time: '9:15 AM',
-        isUser: false,
-      },
-      {
-        id: 'tm2',
-        senderId: 'tomi',
-        isCollabProposal: true,
-        collabTitle: 'Extreme Creator Studio Upgrades Under $100',
-        collabBounty: '60s Dual-Camera Reel / Short • High Retention',
-        time: '9:16 AM',
-        isUser: false,
-      },
-      {
-        id: 'tm3',
-        senderId: 'tomi',
-        text: 'Would love to do a 60s creator desk setup critique video with you! Let me know if you are open to filming next Tuesday.',
-        time: '9:18 AM',
         isUser: false,
       },
     ],
@@ -360,6 +332,39 @@ const INITIAL_CONVERSATIONS: ConversationThread[] = [
     ],
   },
   {
+    id: 'conv_squad',
+    creatorId: 'squad',
+    name: 'Momentum Makers Squad',
+    handle: '@momentum.squad',
+    niche: 'Level 12 • 18-Day Streak',
+    avatar: require('../../assets/images/elena-avatar.jpg'),
+    streak: 18,
+    isOnline: true,
+    isPro: true,
+    lastMessage: 'Elena: We just took the lead in the Live Duel (62 pts vs 58 pts)! Keep posting! 🔥',
+    time: '22m ago',
+    unread: true,
+    unreadCount: 1,
+    category: 'squad',
+    collabBadge: '⚔️ Live Duel Active (+750 XP)',
+    messages: [
+      {
+        id: 'sm1',
+        senderId: 'david',
+        text: 'Just scheduled my 7:30 PM Reel for today!',
+        time: '10:45 AM',
+        isUser: false,
+      },
+      {
+        id: 'sm2',
+        senderId: 'elena',
+        text: 'Elena: We just took the lead in the Live Duel (62 pts vs 58 pts)! Keep posting! 🔥',
+        time: '11:02 AM',
+        isUser: false,
+      },
+    ],
+  },
+  {
     id: 'conv_david',
     creatorId: 'david',
     name: 'David Kim',
@@ -387,6 +392,73 @@ const INITIAL_CONVERSATIONS: ConversationThread[] = [
         senderId: 'david',
         text: 'Just checked out the 3-App stack script draft in Jarvis. Pacing looks incredible!',
         time: '10:05 AM',
+        isUser: false,
+      },
+    ],
+  },
+  {
+    id: 'conv_tomi',
+    creatorId: 'tomi',
+    name: 'Tomi Adebayo',
+    handle: '@tomi_tech',
+    niche: 'Tech & Gadget Reviewer',
+    avatar: require('../../assets/images/tomi-avatar.jpg'),
+    streak: 55,
+    isOnline: true,
+    isPro: true,
+    lastMessage: 'Would love to do a 60s creator desk setup critique video with you! Let me know if you are open to filming next Tuesday.',
+    time: '2h ago',
+    unread: true,
+    unreadCount: 1,
+    category: 'collabs',
+    collabBadge: '🤝 Collab Idea Waiting',
+    messages: [
+      {
+        id: 'tm1',
+        senderId: 'tomi',
+        text: 'Hey Pablo! Jarvis recommended our channels for a high-retention tech crossover.',
+        time: '9:15 AM',
+        isUser: false,
+      },
+      {
+        id: 'tm2',
+        senderId: 'tomi',
+        isCollabProposal: true,
+        collabTitle: 'Extreme Creator Studio Upgrades Under $100',
+        collabBounty: '60s Dual-Camera Reel / Short • High Retention',
+        time: '9:16 AM',
+        isUser: false,
+      },
+      {
+        id: 'tm3',
+        senderId: 'tomi',
+        text: 'Would love to do a 60s creator desk setup critique video with you! Let me know if you are open to filming next Tuesday.',
+        time: '9:18 AM',
+        isUser: false,
+      },
+    ],
+  },
+  {
+    id: 'conv_jarvis',
+    creatorId: 'jarvis',
+    name: 'Jarvis AI',
+    handle: '@jarvis.ai',
+    niche: 'AI Content Director',
+    avatar: require('../../assets/images/jarvis-core-flame.png'),
+    streak: 99,
+    isOnline: true,
+    isPro: true,
+    lastMessage: '⚡ Best posting window today is 7:30 PM. Your draft script is ready in Voice Studio.',
+    time: '2h ago',
+    unread: false,
+    category: 'jarvis',
+    collabBadge: '🪄 Co-Pilot Autopilot Active',
+    messages: [
+      {
+        id: 'jm1',
+        senderId: 'jarvis',
+        text: '⚡ Best posting window today is 7:30 PM. Your draft script is ready in Voice Studio.',
+        time: '8:00 AM',
         isUser: false,
       },
     ],
@@ -477,64 +549,6 @@ const INITIAL_CONVERSATIONS: ConversationThread[] = [
         senderId: 'zainab',
         text: 'Loved your latest Reel! Let’s co-create a mindful creator routine video.',
         time: '5:45 AM',
-        isUser: false,
-      },
-    ],
-  },
-  {
-    id: 'conv_squad',
-    creatorId: 'squad',
-    name: 'Momentum Makers Squad',
-    handle: '@momentum.squad',
-    niche: 'Level 12 • 18-Day Streak',
-    avatar: require('../../assets/images/elena-avatar.jpg'),
-    streak: 18,
-    isOnline: true,
-    isPro: true,
-    lastMessage: 'Elena: We just took the lead in the Live Duel (62 pts vs 58 pts)! Keep posting! 🔥',
-    time: '22m ago',
-    unread: true,
-    unreadCount: 1,
-    category: 'squad',
-    collabBadge: '⚔️ Live Duel Active (+750 XP)',
-    messages: [
-      {
-        id: 'sm1',
-        senderId: 'david',
-        text: 'Just scheduled my 7:30 PM Reel for today!',
-        time: '10:45 AM',
-        isUser: false,
-      },
-      {
-        id: 'sm2',
-        senderId: 'elena',
-        text: 'Elena: We just took the lead in the Live Duel (62 pts vs 58 pts)! Keep posting! 🔥',
-        time: '11:02 AM',
-        isUser: false,
-      },
-    ],
-  },
-  {
-    id: 'conv_jarvis',
-    creatorId: 'jarvis',
-    name: 'Jarvis AI',
-    handle: '@jarvis.ai',
-    niche: 'AI Content Director',
-    avatar: require('../../assets/images/jarvis-core-flame.png'),
-    streak: 99,
-    isOnline: true,
-    isPro: true,
-    lastMessage: '⚡ Best posting window today is 7:30 PM. Your draft script is ready in Voice Studio.',
-    time: '2h ago',
-    unread: false,
-    category: 'jarvis',
-    collabBadge: '🪄 Co-Pilot Autopilot Active',
-    messages: [
-      {
-        id: 'jm1',
-        senderId: 'jarvis',
-        text: '⚡ Best posting window today is 7:30 PM. Your draft script is ready in Voice Studio.',
-        time: '8:00 AM',
         isUser: false,
       },
     ],
@@ -696,14 +710,16 @@ export const ProMessagesScreen: React.FC<ProMessagesScreenProps> = ({
     }, 1400);
   };
 
-  const filteredConversations = conversations.filter((c) => {
-    const matchesFilter = selectedFilter === 'all' || c.category === selectedFilter;
-    const matchesSearch =
-      c.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      c.lastMessage.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      c.niche.toLowerCase().includes(searchQuery.toLowerCase());
-    return matchesFilter && matchesSearch;
-  });
+  const filteredConversations = conversations
+    .filter((c) => {
+      const matchesFilter = selectedFilter === 'all' || c.category === selectedFilter;
+      const matchesSearch =
+        c.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        c.lastMessage.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        c.niche.toLowerCase().includes(searchQuery.toLowerCase());
+      return matchesFilter && matchesSearch;
+    })
+    .sort((a, b) => parseTimeAgoMinutes(a.time) - parseTimeAgoMinutes(b.time));
 
   return (
     <SafeAreaView style={styles.safeArea}>
