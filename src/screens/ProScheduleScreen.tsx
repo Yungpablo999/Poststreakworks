@@ -129,7 +129,7 @@ const JARVIS_STRATEGIES: StrategyItem[] = [
     id: 'strat_2',
     icon: '🎬',
     title: 'Contrarian Hook Architecture',
-    tag: 'RETENTION RETENTION • 96% MATCH',
+    tag: 'RETENTION RETENTION • 96% AUDIENCE FIT',
     body: 'Start with "Why 90% of creators fail by Month 2" rather than an intro. Cuts initial 3-second dropoff by 42% on TikTok and Instagram Reels.',
   },
   {
@@ -181,7 +181,7 @@ const generateInitialFullQueue = (baseDate: Date): FullQueueItem[] => {
       period: 'AM',
       dayLabel: getRelativeDayLabel(1),
       status: 'AUTOPILOT',
-      score: '96% Match',
+      score: '96% Audience Fit',
       iconType: 'youtube',
     },
     {
@@ -192,7 +192,7 @@ const generateInitialFullQueue = (baseDate: Date): FullQueueItem[] => {
       period: 'PM',
       dayLabel: getRelativeDayLabel(2),
       status: 'READY',
-      score: '94% Match',
+      score: '94% Audience Fit',
       iconType: 'instagram',
     },
     {
@@ -203,7 +203,7 @@ const generateInitialFullQueue = (baseDate: Date): FullQueueItem[] => {
       period: 'PM',
       dayLabel: getRelativeDayLabel(3),
       status: 'AUTOPILOT',
-      score: '98% Match',
+      score: '98% Audience Fit',
       iconType: 'tiktok',
     },
     {
@@ -214,7 +214,7 @@ const generateInitialFullQueue = (baseDate: Date): FullQueueItem[] => {
       period: 'PM',
       dayLabel: getRelativeDayLabel(4),
       status: 'QUEUED',
-      score: '91% Match',
+      score: '91% Audience Fit',
       iconType: 'youtube',
     },
     {
@@ -225,7 +225,7 @@ const generateInitialFullQueue = (baseDate: Date): FullQueueItem[] => {
       period: 'AM',
       dayLabel: getRelativeDayLabel(5),
       status: 'AUTOPILOT',
-      score: '95% Match',
+      score: '95% Audience Fit',
       iconType: 'threads',
     },
     {
@@ -236,7 +236,7 @@ const generateInitialFullQueue = (baseDate: Date): FullQueueItem[] => {
       period: 'PM',
       dayLabel: getRelativeDayLabel(6),
       status: 'READY',
-      score: '96% Match',
+      score: '96% Audience Fit',
       iconType: 'instagram',
     },
   ];
@@ -303,21 +303,21 @@ const GAP_SUGGESTIONS = [
     id: 'gap_1',
     title: 'Why 90% of creators quit by month 2',
     format: '📸 Storytelling Reel • 42s Retention',
-    score: '96% Match',
+    score: '96% Audience Fit',
     hashtags: '#creatortips #mindset #consistency',
   },
   {
     id: 'gap_2',
     title: 'The exact equipment I use to record 4K content on iPhone',
     format: '📊 Breakdown Carousel • High Saves',
-    score: '92% Match',
+    score: '92% Audience Fit',
     hashtags: '#creatorsetup #iphonetips #cinematography',
   },
   {
     id: 'gap_3',
     title: 'Unpopular truth about algorithmic reach in 2026',
     format: '≈ Contrarian Short • High Comments',
-    score: '89% Match',
+    score: '89% Audience Fit',
     hashtags: '#viralgrowth #socialmediatips #algorithm',
   },
 ];
@@ -881,7 +881,7 @@ export const ProScheduleScreen: React.FC<ProScheduleScreenProps> = ({
                   </View>
 
                   <View style={{ flex: 1, minWidth: 0, marginRight: 6 }}>
-                    <Text style={styles.scheduleItemTitle} numberOfLines={1} ellipsizeMode="tail">
+                    <Text style={styles.scheduleItemTitle} numberOfLines={2} ellipsizeMode="tail">
                       {item.title}
                     </Text>
                     <Text style={styles.scheduleItemPlatform} numberOfLines={1}>{item.platformLabel}</Text>
@@ -932,48 +932,26 @@ export const ProScheduleScreen: React.FC<ProScheduleScreenProps> = ({
           </View>
 
           <View style={styles.queueContainerCard}>
-            {/* Item 1: Shorts */}
-            <Pressable
-              style={styles.queueItemRow}
-              onPress={() => showToast('YouTube Short scheduled for Tomorrow 10:00 AM')}
-            >
-              <SocialBrandIcon platform="youtube" size={28} />
-              <View style={{ flex: 1, marginLeft: 10 }}>
-                <Text style={styles.queueItemTitle}>Shorts Insight: Why 90% Fail by Month 2</Text>
-                <Text style={styles.queueItemTime}>Tomorrow, 10:00 AM • ⚡ 96% Match</Text>
-              </View>
-              <Text style={styles.threeDotsMenu}>⋮</Text>
-            </Pressable>
-
-            <View style={styles.queueItemDivider} />
-
-            {/* Item 2: Instagram */}
-            <Pressable
-              style={styles.queueItemRow}
-              onPress={() => showToast('Instagram Carousel scheduled for Friday 06:00 PM')}
-            >
-              <SocialBrandIcon platform="instagram" size={28} />
-              <View style={{ flex: 1, marginLeft: 10 }}>
-                <Text style={styles.queueItemTitle}>Instagram Carousel: 4K Recording Setup</Text>
-                <Text style={styles.queueItemTime}>Friday, 06:00 PM • ⚡ 94% Match</Text>
-              </View>
-              <Text style={styles.threeDotsMenu}>⋮</Text>
-            </Pressable>
-
-            <View style={styles.queueItemDivider} />
-
-            {/* Item 3: TikTok */}
-            <Pressable
-              style={styles.queueItemRow}
-              onPress={() => showToast('TikTok Duet scheduled for Saturday 05:30 PM')}
-            >
-              <SocialBrandIcon platform="tiktok" size={28} />
-              <View style={{ flex: 1, marginLeft: 10 }}>
-                <Text style={styles.queueItemTitle}>TikTok Reel: 2026 Algorithm Truth</Text>
-                <Text style={styles.queueItemTime}>Saturday, 05:30 PM • ⚡ 98% Match</Text>
-              </View>
-              <Text style={styles.threeDotsMenu}>⋮</Text>
-            </Pressable>
+            {fullQueueList.slice(0, 3).map((item, idx) => (
+              <React.Fragment key={item.id}>
+                {idx > 0 && <View style={styles.queueItemDivider} />}
+                <Pressable
+                  style={styles.queueItemRow}
+                  onPress={() => showToast(`${item.title} • ${item.time} ${item.period}`)}
+                >
+                  <SocialBrandIcon platform={item.iconType} size={28} />
+                  <View style={{ flex: 1, marginLeft: 10 }}>
+                    <Text style={styles.queueItemTitle} numberOfLines={2} ellipsizeMode="tail">
+                      {item.title}
+                    </Text>
+                    <Text style={styles.queueItemTime}>
+                      {item.dayLabel.split(' (')[0]}, {item.time} {item.period} • ⚡ {item.score}
+                    </Text>
+                  </View>
+                  <Text style={styles.threeDotsMenu}>⋮</Text>
+                </Pressable>
+              </React.Fragment>
+            ))}
           </View>
 
           {/* ============================================================ */}
