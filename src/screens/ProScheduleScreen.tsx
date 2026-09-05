@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
 import {
   StyleSheet,
   View,
@@ -47,19 +47,67 @@ interface ProScheduleScreenProps {
 interface CalendarDay {
   dayName: string;
   dayNum: number;
+  monthName: string;
+  fullDateStr: string;
   dotsCount: number;
   isToday?: boolean;
 }
 
-const CALENDAR_DAYS: CalendarDay[] = [
-  { dayName: 'SUN', dayNum: 23, dotsCount: 1 },
-  { dayName: 'TUE', dayNum: 24, dotsCount: 2 },
-  { dayName: 'WED', dayNum: 25, dotsCount: 2, isToday: true },
-  { dayName: 'THU', dayNum: 26, dotsCount: 1 },
-  { dayName: 'FRI', dayNum: 27, dotsCount: 2 },
-  { dayName: 'SAT', dayNum: 28, dotsCount: 1 },
-  { dayName: 'SUN', dayNum: 29, dotsCount: 2 },
+const MONTH_NAMES_SHORT = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+const MONTH_NAMES_FULL = [
+  'January', 'February', 'March', 'April', 'May', 'June',
+  'July', 'August', 'September', 'October', 'November', 'December'
 ];
+const DAY_NAMES_SHORT = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
+
+const getDynamicWeekData = () => {
+  const now = new Date();
+  const baseDate = new Date(now.getFullYear() === 2026 ? now : new Date(2026, 8, 5));
+  const currentDayOfWeek = baseDate.getDay(); // 0 = Sun ... 6 = Sat
+
+  // 7-day week starting on Sunday
+  const sunday = new Date(baseDate);
+  sunday.setDate(baseDate.getDate() - currentDayOfWeek);
+
+  const days: CalendarDay[] = [];
+  let todayIndex = currentDayOfWeek;
+
+  for (let i = 0; i < 7; i++) {
+    const d = new Date(sunday);
+    d.setDate(sunday.getDate() + i);
+    const isToday =
+      d.getDate() === baseDate.getDate() &&
+      d.getMonth() === baseDate.getMonth() &&
+      d.getFullYear() === baseDate.getFullYear();
+
+    if (isToday) {
+      todayIndex = i;
+    }
+
+    days.push({
+      dayName: DAY_NAMES_SHORT[d.getDay()],
+      dayNum: d.getDate(),
+      monthName: MONTH_NAMES_SHORT[d.getMonth()],
+      fullDateStr: `${MONTH_NAMES_SHORT[d.getMonth()]} ${d.getDate()}`,
+      dotsCount: isToday ? 2 : (i % 2 === 0 ? 1 : 2),
+      isToday,
+    });
+  }
+
+  const startDay = days[0];
+  const endDay = days[6];
+  let rangeLabel = '';
+  if (startDay.monthName === endDay.monthName) {
+    const monthFull = MONTH_NAMES_FULL[MONTH_NAMES_SHORT.indexOf(startDay.monthName)];
+    rangeLabel = `${monthFull} ${startDay.dayNum} – ${endDay.dayNum}`;
+  } else {
+    const startFull = MONTH_NAMES_FULL[MONTH_NAMES_SHORT.indexOf(startDay.monthName)];
+    const endFull = MONTH_NAMES_FULL[MONTH_NAMES_SHORT.indexOf(endDay.monthName)];
+    rangeLabel = `${startFull} ${startDay.dayNum} – ${endFull} ${endDay.dayNum}`;
+  }
+
+  return { days, rangeLabel, todayIndex, baseDate };
+};
 
 interface StrategyItem {
   id: string;
@@ -112,74 +160,87 @@ interface FullQueueItem {
   iconType: 'tiktok' | 'instagram' | 'youtube' | 'threads';
 }
 
-const INITIAL_FULL_QUEUE: FullQueueItem[] = [
-  {
-    id: 'q1',
-    title: 'Shorts Insight: Why 90% of creators fail by Month 2',
-    platformLabel: '▶ Shorts',
-    time: '10:00',
-    period: 'AM',
-    dayLabel: 'Tomorrow (Thu)',
-    status: 'AUTOPILOT',
-    score: '96% Match',
-    iconType: 'youtube',
-  },
-  {
-    id: 'q2',
-    title: 'Instagram Carousel: The 1 iPhone 4K Recording Setup',
-    platformLabel: '📸 IG Reel',
-    time: '06:00',
-    period: 'PM',
-    dayLabel: 'Friday (Oct 27)',
-    status: 'READY',
-    score: '94% Match',
-    iconType: 'instagram',
-  },
-  {
-    id: 'q3',
-    title: 'TikTok Duet: Unpopular truth about the 2026 algorithm',
-    platformLabel: '≈ TikTok',
-    time: '05:30',
-    period: 'PM',
-    dayLabel: 'Saturday (Oct 28)',
-    status: 'AUTOPILOT',
-    score: '98% Match',
-    iconType: 'tiktok',
-  },
-  {
-    id: 'q4',
-    title: 'YouTube Short: How I batch-film 10 videos in 2 hours',
-    platformLabel: '▶ Shorts',
-    time: '02:00',
-    period: 'PM',
-    dayLabel: 'Sunday (Oct 29)',
-    status: 'QUEUED',
-    score: '91% Match',
-    iconType: 'youtube',
-  },
-  {
-    id: 'q5',
-    title: 'Threads Take: 5 tools that automate my content pipeline',
-    platformLabel: '🧵 Threads',
-    time: '09:30',
-    period: 'AM',
-    dayLabel: 'Monday (Oct 30)',
-    status: 'AUTOPILOT',
-    score: '95% Match',
-    iconType: 'threads',
-  },
-  {
-    id: 'q6',
-    title: 'Instagram Reel: Behind the scenes of my video workflow',
-    platformLabel: '📸 IG Reel',
-    time: '07:30',
-    period: 'PM',
-    dayLabel: 'Tuesday (Oct 31)',
-    status: 'READY',
-    score: '96% Match',
-    iconType: 'instagram',
-  },
-];
+const generateInitialFullQueue = (baseDate: Date): FullQueueItem[] => {
+  const getRelativeDayLabel = (offsetDays: number) => {
+    const d = new Date(baseDate);
+    d.setDate(baseDate.getDate() + offsetDays);
+    const dayOfWeek = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'][d.getDay()];
+    const shortMonth = MONTH_NAMES_SHORT[d.getMonth()];
+    if (offsetDays === 1) {
+      return `Tomorrow (${dayOfWeek.slice(0, 3)}, ${shortMonth} ${d.getDate()})`;
+    }
+    return `${dayOfWeek} (${shortMonth} ${d.getDate()})`;
+  };
+
+  return [
+    {
+      id: 'q1',
+      title: 'Shorts Insight: Why 90% of creators fail by Month 2',
+      platformLabel: '▶ Shorts',
+      time: '10:00',
+      period: 'AM',
+      dayLabel: getRelativeDayLabel(1),
+      status: 'AUTOPILOT',
+      score: '96% Match',
+      iconType: 'youtube',
+    },
+    {
+      id: 'q2',
+      title: 'Instagram Carousel: The 1 iPhone 4K Recording Setup',
+      platformLabel: '📸 IG Reel',
+      time: '06:00',
+      period: 'PM',
+      dayLabel: getRelativeDayLabel(2),
+      status: 'READY',
+      score: '94% Match',
+      iconType: 'instagram',
+    },
+    {
+      id: 'q3',
+      title: 'TikTok Duet: Unpopular truth about the 2026 algorithm',
+      platformLabel: '≈ TikTok',
+      time: '05:30',
+      period: 'PM',
+      dayLabel: getRelativeDayLabel(3),
+      status: 'AUTOPILOT',
+      score: '98% Match',
+      iconType: 'tiktok',
+    },
+    {
+      id: 'q4',
+      title: 'YouTube Short: How I batch-film 10 videos in 2 hours',
+      platformLabel: '▶ Shorts',
+      time: '02:00',
+      period: 'PM',
+      dayLabel: getRelativeDayLabel(4),
+      status: 'QUEUED',
+      score: '91% Match',
+      iconType: 'youtube',
+    },
+    {
+      id: 'q5',
+      title: 'Threads Take: 5 tools that automate my content pipeline',
+      platformLabel: '🧵 Threads',
+      time: '09:30',
+      period: 'AM',
+      dayLabel: getRelativeDayLabel(5),
+      status: 'AUTOPILOT',
+      score: '95% Match',
+      iconType: 'threads',
+    },
+    {
+      id: 'q6',
+      title: 'Instagram Reel: Behind the scenes of my video workflow',
+      platformLabel: '📸 IG Reel',
+      time: '07:30',
+      period: 'PM',
+      dayLabel: getRelativeDayLabel(6),
+      status: 'READY',
+      score: '96% Match',
+      iconType: 'instagram',
+    },
+  ];
+};
 
 interface ScheduleItem {
   id: string;
@@ -192,48 +253,50 @@ interface ScheduleItem {
   dayIndex: number;
 }
 
-const INITIAL_SCHEDULE_ITEMS: ScheduleItem[] = [
-  {
-    id: 'sch_1',
-    time: '11:30',
-    period: 'AM',
-    title: '3 creator mistakes I stopped making this year',
-    platform: 'tiktok',
-    platformLabel: '≈ TikTok',
-    badgeType: 'scheduled',
-    dayIndex: 2, // WED 25
-  },
-  {
-    id: 'sch_2',
-    time: '07:30',
-    period: 'PM',
-    title: 'Personal lesson Reel • Behind the scenes studio',
-    platform: 'instagram',
-    platformLabel: '📸 IG Reel',
-    badgeType: 'recommended',
-    dayIndex: 2, // WED 25
-  },
-  {
-    id: 'sch_3',
-    time: '10:00',
-    period: 'AM',
-    title: '5 retention rules that 10x watch time',
-    platform: 'youtube',
-    platformLabel: '▶ Shorts',
-    badgeType: 'scheduled',
-    dayIndex: 3, // THU 26
-  },
-  {
-    id: 'sch_4',
-    time: '06:00',
-    period: 'PM',
-    title: 'Step-by-step editing workflow in CapCut',
-    platform: 'instagram',
-    platformLabel: '📸 IG Reel',
-    badgeType: 'scheduled',
-    dayIndex: 4, // FRI 27
-  },
-];
+const generateInitialScheduleItems = (todayIndex: number): ScheduleItem[] => {
+  return [
+    {
+      id: 'sch_1',
+      time: '11:30',
+      period: 'AM',
+      title: '3 creator mistakes I stopped making this year',
+      platform: 'tiktok',
+      platformLabel: '≈ TikTok',
+      badgeType: 'scheduled',
+      dayIndex: Math.max(0, todayIndex - 3),
+    },
+    {
+      id: 'sch_2',
+      time: '07:30',
+      period: 'PM',
+      title: 'Personal lesson Reel • Behind the scenes studio',
+      platform: 'instagram',
+      platformLabel: '📸 IG Reel',
+      badgeType: 'recommended',
+      dayIndex: todayIndex,
+    },
+    {
+      id: 'sch_3',
+      time: '10:00',
+      period: 'AM',
+      title: '5 retention rules that 10x watch time',
+      platform: 'youtube',
+      platformLabel: '▶ Shorts',
+      badgeType: 'scheduled',
+      dayIndex: Math.max(0, todayIndex - 2),
+    },
+    {
+      id: 'sch_4',
+      time: '06:00',
+      period: 'PM',
+      title: 'Step-by-step editing workflow in CapCut',
+      platform: 'instagram',
+      platformLabel: '📸 IG Reel',
+      badgeType: 'scheduled',
+      dayIndex: Math.max(0, todayIndex - 1),
+    },
+  ];
+};
 
 const GAP_SUGGESTIONS = [
   {
@@ -272,9 +335,12 @@ export const ProScheduleScreen: React.FC<ProScheduleScreenProps> = ({
   userProfile,
   onSaveProfile,
 }) => {
+  const weekData = useMemo(() => getDynamicWeekData(), []);
   const [activeTab, setActiveTab] = useState<TabType>('home');
-  const [selectedDayIndex, setSelectedDayIndex] = useState<number>(2); // WED 25
-  const [scheduleList, setScheduleList] = useState<ScheduleItem[]>(INITIAL_SCHEDULE_ITEMS);
+  const [selectedDayIndex, setSelectedDayIndex] = useState<number>(weekData.todayIndex);
+  const [scheduleList, setScheduleList] = useState<ScheduleItem[]>(() =>
+    generateInitialScheduleItems(weekData.todayIndex)
+  );
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [notifications, setNotifications] = useState<ProNotificationItem[]>(DEFAULT_PRO_NOTIFICATIONS);
   const [showNotificationModal, setShowNotificationModal] = useState(false);
@@ -284,7 +350,9 @@ export const ProScheduleScreen: React.FC<ProScheduleScreenProps> = ({
   const [showFullQueueModal, setShowFullQueueModal] = useState(false);
   const [showStrategyModal, setShowStrategyModal] = useState(false);
   const [selectedStrategyIds, setSelectedStrategyIds] = useState<string[]>(['strat_1', 'strat_2']);
-  const [fullQueueList, setFullQueueList] = useState<FullQueueItem[]>(INITIAL_FULL_QUEUE);
+  const [fullQueueList, setFullQueueList] = useState<FullQueueItem[]>(() =>
+    generateInitialFullQueue(weekData.baseDate)
+  );
   const [selectedQueueFilter, setSelectedQueueFilter] = useState('ALL');
   const [showFillGapModal, setShowFillGapModal] = useState(false);
   const [selectedPostDetail, setSelectedPostDetail] = useState<ScheduleItem | null>(null);
@@ -295,6 +363,17 @@ export const ProScheduleScreen: React.FC<ProScheduleScreenProps> = ({
   const [editingPostPeriod, setEditingPostPeriod] = useState('PM');
   const [editingPostHashtags, setEditingPostHashtags] = useState('#CreatorGrowth #ViralReels #PostStreak');
   const [autopilotEnabled, setAutopilotEnabled] = useState<boolean>(true);
+
+  // Dynamic Operating Dashboard Calculations
+  const TARGET_WEEKLY_SLOTS = 7;
+  const scheduledCount = scheduleList.length;
+  const draftsCount = 2;
+  const postedCount = 1;
+  const openSlotsCount = Math.max(0, TARGET_WEEKLY_SLOTS - (scheduledCount + postedCount));
+  const planCompletionPct = Math.min(
+    100,
+    Math.round(((postedCount + scheduledCount) / TARGET_WEEKLY_SLOTS) * 100)
+  );
 
   // Completion Animation State
   const [showCompletionModal, setShowCompletionModal] = useState(false);
@@ -624,7 +703,7 @@ export const ProScheduleScreen: React.FC<ProScheduleScreenProps> = ({
           {/* ============================================================ */}
           <View style={styles.weeklyOutlookCard}>
             <Text style={styles.weeklyOutlookTitle}>Weekly Outlook</Text>
-            <Text style={styles.weeklyOutlookRange}>October 23 – October 29</Text>
+            <Text style={styles.weeklyOutlookRange}>{weekData.rangeLabel}</Text>
 
             {/* Top Action Buttons: Schedule Post & Fill Gaps */}
             <View style={styles.outlookButtonsRow}>
@@ -645,7 +724,7 @@ export const ProScheduleScreen: React.FC<ProScheduleScreenProps> = ({
                 style={({ pressed }) => [styles.fillGapsOutlineBtn, pressed && styles.btnPressed]}
                 onPress={() => {
                   if (Platform.OS !== 'web') {
-                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                    Haptics.ImpactFeedbackStyle && Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                   }
                   triggerModalPop();
                   setShowFillGapModal(true);
@@ -661,18 +740,18 @@ export const ProScheduleScreen: React.FC<ProScheduleScreenProps> = ({
               <View style={styles.metricsGridRow}>
                 <Pressable
                   style={styles.metricGridTile}
-                  onPress={() => showToast(`${scheduleList.length} posts scheduled in queue`)}
+                  onPress={() => showToast(`${scheduledCount} posts scheduled in queue`)}
                 >
                   <Text style={styles.metricGridLabel}>SCHEDULED</Text>
-                  <Text style={styles.metricGridVal}>{scheduleList.length}</Text>
+                  <Text style={styles.metricGridVal}>{scheduledCount}</Text>
                 </Pressable>
 
                 <Pressable
                   style={styles.metricGridTile}
-                  onPress={() => showToast('2 drafts ready for publishing')}
+                  onPress={() => showToast(`${draftsCount} drafts ready for publishing`)}
                 >
                   <Text style={styles.metricGridLabel}>DRAFTS</Text>
-                  <Text style={styles.metricGridVal}>2</Text>
+                  <Text style={styles.metricGridVal}>{draftsCount}</Text>
                 </Pressable>
               </View>
 
@@ -680,21 +759,21 @@ export const ProScheduleScreen: React.FC<ProScheduleScreenProps> = ({
               <View style={styles.metricsGridRow}>
                 <Pressable
                   style={styles.metricGridTile}
-                  onPress={() => showToast('1 post successfully published today')}
+                  onPress={() => showToast(`${postedCount} post successfully published this week`)}
                 >
                   <Text style={styles.metricGridLabel}>POSTED</Text>
-                  <Text style={styles.metricGridVal}>1</Text>
+                  <Text style={styles.metricGridVal}>{postedCount}</Text>
                 </Pressable>
 
                 <Pressable
-                  style={styles.metricGridTile}
+                  style={[styles.metricGridTile, styles.metricGridTileOpenSlots]}
                   onPress={() => {
                     triggerModalPop();
                     setShowFillGapModal(true);
                   }}
                 >
-                  <Text style={styles.metricGridLabel}>OPEN SLOTS</Text>
-                  <Text style={styles.metricGridVal}>2</Text>
+                  <Text style={[styles.metricGridLabel, styles.metricGridLabelOpenSlots]}>OPEN SLOTS</Text>
+                  <Text style={[styles.metricGridVal, styles.metricGridValOpenSlots]}>{openSlotsCount}</Text>
                 </Pressable>
               </View>
             </View>
@@ -702,14 +781,14 @@ export const ProScheduleScreen: React.FC<ProScheduleScreenProps> = ({
             {/* PLAN COMPLETION PROGRESS */}
             <View style={styles.planCompletionHeaderRow}>
               <Text style={styles.planCompletionLabel}>PLAN COMPLETION</Text>
-              <Text style={styles.planCompletionReadyText}>65% READY</Text>
+              <Text style={styles.planCompletionReadyText}>{planCompletionPct}% READY</Text>
             </View>
             <View style={styles.planCompletionProgressBarTrack}>
               <LinearGradient
                 colors={['#582CDB', '#8B5CF6', '#C59B27']}
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 0 }}
-                style={[styles.planCompletionProgressBarFill, { width: '65%' }]}
+                style={[styles.planCompletionProgressBarFill, { width: `${planCompletionPct}%` }]}
               />
             </View>
           </View>
@@ -719,7 +798,7 @@ export const ProScheduleScreen: React.FC<ProScheduleScreenProps> = ({
           {/* ============================================================ */}
           <Text style={styles.sectionSmallHeading}>CALENDAR VIEW</Text>
           <View style={styles.calendarViewStrip}>
-            {CALENDAR_DAYS.map((day, idx) => {
+            {weekData.days.map((day, idx) => {
               const isSelected = selectedDayIndex === idx;
               return (
                 <Pressable
@@ -727,6 +806,7 @@ export const ProScheduleScreen: React.FC<ProScheduleScreenProps> = ({
                   style={[
                     styles.dayPillCard,
                     isSelected && styles.dayPillCardSelected,
+                    day.isToday && !isSelected && styles.dayPillCardToday,
                   ]}
                   onPress={() => {
                     if (Platform.OS !== 'web') {
@@ -758,10 +838,14 @@ export const ProScheduleScreen: React.FC<ProScheduleScreenProps> = ({
           </View>
 
           {/* ============================================================ */}
-          {/* SECTION 3: TODAY'S SCHEDULE                                  */}
+          {/* SECTION 3: TODAY'S / SELECTED DAY'S SCHEDULE                 */}
           {/* ============================================================ */}
           <View style={styles.sectionHeaderRowWithLink}>
-            <Text style={styles.sectionHeaderTitleBold}>Today&apos;s Schedule</Text>
+            <Text style={styles.sectionHeaderTitleBold}>
+              {weekData.days[selectedDayIndex]?.isToday
+                ? "Today's Schedule"
+                : `${weekData.days[selectedDayIndex]?.dayName}'s Schedule (${weekData.days[selectedDayIndex]?.monthName} ${weekData.days[selectedDayIndex]?.dayNum})`}
+            </Text>
             <Pressable
               onPress={() => {
                 if (Platform.OS !== 'web') {
@@ -1593,7 +1677,7 @@ export const ProScheduleScreen: React.FC<ProScheduleScreenProps> = ({
                 <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
                   <View style={styles.modalProTagBadge}>
                     <Text style={styles.modalProTagBadgeText}>
-                      📅 {CALENDAR_DAYS[selectedDayIndex].dayName} {CALENDAR_DAYS[selectedDayIndex].dayNum}TH TIMELINE
+                      📅 {weekData.days[selectedDayIndex]?.dayName} {weekData.days[selectedDayIndex]?.monthName?.toUpperCase()} {weekData.days[selectedDayIndex]?.dayNum} TIMELINE
                     </Text>
                   </View>
                   <Pressable onPress={() => setShowExpandViewModal(false)} hitSlop={8}>
@@ -1602,7 +1686,7 @@ export const ProScheduleScreen: React.FC<ProScheduleScreenProps> = ({
                 </View>
 
                 <Text style={styles.modalTitleText}>
-                  {CALENDAR_DAYS[selectedDayIndex].dayName} Detailed Schedule
+                  {weekData.days[selectedDayIndex]?.dayName} ({weekData.days[selectedDayIndex]?.monthName} {weekData.days[selectedDayIndex]?.dayNum}) Detailed Schedule
                 </Text>
                 <Text style={styles.modalSubText}>
                   Complete chronological breakdown of posts, predicted retention windows, and status for this day.
@@ -1685,7 +1769,7 @@ export const ProScheduleScreen: React.FC<ProScheduleScreenProps> = ({
                   ) : (
                     <View style={styles.emptyScheduleBox}>
                       <Text style={{ fontSize: 24, marginBottom: 4 }}>☕</Text>
-                      <Text style={styles.emptyScheduleTitle}>No posts scheduled for {CALENDAR_DAYS[selectedDayIndex].dayName}</Text>
+                      <Text style={styles.emptyScheduleTitle}>No posts scheduled for {weekData.days[selectedDayIndex]?.dayName}</Text>
                       <Text style={styles.emptyScheduleSub}>Lock in a peak engagement slot to maintain your streak momentum.</Text>
                     </View>
                   )}
@@ -1703,7 +1787,7 @@ export const ProScheduleScreen: React.FC<ProScheduleScreenProps> = ({
                   }}
                 >
                   <Text style={styles.modalPrimaryActionBtnText} numberOfLines={1}>
-                    + Schedule Post for {CALENDAR_DAYS[selectedDayIndex].dayName} ➔
+                    + Schedule Post for {weekData.days[selectedDayIndex]?.dayName} ➔
                   </Text>
                 </Pressable>
 
@@ -2284,6 +2368,10 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#F1EFE9',
   },
+  metricGridTileOpenSlots: {
+    backgroundColor: '#FFFDF7',
+    borderColor: '#FDE68A',
+  },
   metricGridLabel: {
     fontSize: 10,
     fontWeight: '800',
@@ -2291,10 +2379,16 @@ const styles = StyleSheet.create({
     letterSpacing: 0.5,
     marginBottom: 4,
   },
+  metricGridLabelOpenSlots: {
+    color: '#B45309',
+  },
   metricGridVal: {
     fontSize: 20,
     fontWeight: '700',
     color: '#171420',
+  },
+  metricGridValOpenSlots: {
+    color: '#B45309',
   },
   planCompletionHeaderRow: {
     flexDirection: 'row',
@@ -2346,6 +2440,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderWidth: 1,
     borderColor: '#EFECE6',
+  },
+  dayPillCardToday: {
+    borderColor: '#F59E0B',
+    borderWidth: 1.2,
   },
   dayPillCardSelected: {
     backgroundColor: '#EDE9FE',
