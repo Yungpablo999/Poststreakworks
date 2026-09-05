@@ -995,7 +995,7 @@ export const ProMessagesScreen: React.FC<ProMessagesScreenProps> = ({
           {/* ============================================================ */}
           <Text style={styles.conversationsHeaderTitle}>Recent Conversations</Text>
 
-          <View style={{ gap: 10, marginBottom: 120 }}>
+          <View style={{ gap: 10 }}>
             {filteredConversations.map((thread) => {
               return (
                 <Pressable
@@ -1520,7 +1520,7 @@ const styles = StyleSheet.create({
   scrollContent: {
     paddingHorizontal: 20,
     paddingTop: 4,
-    paddingBottom: 135,
+    paddingBottom: 95,
   },
 
   // SEARCH BAR
