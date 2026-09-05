@@ -2196,10 +2196,10 @@ const styles = StyleSheet.create({
     letterSpacing: 0.6,
   },
   mainTitleText: {
-    fontSize: 20.5,
+    fontSize: 18.5,
     fontWeight: '700',
     color: '#171420',
-    letterSpacing: -0.4,
+    letterSpacing: -0.35,
     marginBottom: 6,
   },
   mainSubText: {
