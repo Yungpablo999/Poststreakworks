@@ -332,12 +332,12 @@ const INITIAL_CONVERSATIONS: ConversationThread[] = [
     unread: true,
     unreadCount: 2,
     category: 'collabs',
-    collabBadge: '🤝 Collab Proposal (96% Match)',
+    collabBadge: '🤝 Collab Proposal (94% Match)',
     messages: [
       {
         id: 'm1',
         senderId: 'amara',
-        text: 'Hey Pablo! Jarvis flagged our channels as a 96% fit for lifestyle storytelling.',
+        text: 'Hey Pablo! Jarvis flagged our channels as a 94% fit for lifestyle storytelling.',
         time: '11:20 AM',
         isUser: false,
       },
@@ -578,6 +578,7 @@ export const ProMessagesScreen: React.FC<ProMessagesScreenProps> = ({
   const [selectedStoryData, setSelectedStoryData] = useState<CreatorStoryData | null>(null);
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [collabProposalDecisions, setCollabProposalDecisions] = useState<Record<string, 'accepted' | 'maybe_later' | 'declined'>>({});
 
   const flameFloatY = useRef(new Animated.Value(0)).current;
 
@@ -1192,24 +1193,100 @@ export const ProMessagesScreen: React.FC<ProMessagesScreenProps> = ({
                         {/* EMBEDDED COLLAB PROPOSAL CARD */}
                         {msg.isCollabProposal ? (
                           <View style={styles.collabProposalCardBubble}>
-                            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
+                            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
                               <View style={styles.proposalTagBox}>
                                 <Text style={styles.proposalTagText}>PROPOSED COLLABORATION</Text>
                               </View>
-                              <Text style={{ fontSize: 16 }}>🤝</Text>
+                              <View style={styles.proposalMatchBadge}>
+                                <Text style={styles.proposalMatchBadgeText}>94% FIT</Text>
+                              </View>
                             </View>
 
                             <Text style={styles.proposalTitleText}>&ldquo;{msg.collabTitle}&rdquo;</Text>
                             <Text style={styles.proposalDescText}>{msg.collabBounty}</Text>
 
-                            <Pressable
-                              style={styles.acceptProposalBtn}
-                              onPress={() => {
-                                showToast(`Collab Accepted! Added to both Smart Schedules.`);
-                              }}
-                            >
-                              <Text style={styles.acceptProposalBtnText}>Accept Collab Blueprint ➔</Text>
-                            </Pressable>
+                            {collabProposalDecisions[msg.id] === 'accepted' ? (
+                              <View style={styles.proposalStatusAcceptedBox}>
+                                <Text style={styles.proposalStatusAcceptedText}>
+                                  ✅ Collaboration Accepted! Added to Saturday Smart Schedule (2:00 PM)
+                                </Text>
+                              </View>
+                            ) : collabProposalDecisions[msg.id] === 'maybe_later' ? (
+                              <View style={styles.proposalStatusPendingBox}>
+                                <Text style={styles.proposalStatusPendingText}>
+                                  ⏳ Saved for review. Reminder set before Saturday.
+                                </Text>
+                                <Pressable
+                                  style={{ marginTop: 6 }}
+                                  onPress={() => {
+                                    setCollabProposalDecisions((prev) => ({ ...prev, [msg.id]: 'accepted' }));
+                                    if (Platform.OS !== 'web') {
+                                      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+                                    }
+                                    showToast('Collaboration Accepted! Added to Smart Schedule.');
+                                  }}
+                                >
+                                  <Text style={styles.reopenDecisionLink}>Accept Collaboration ➔</Text>
+                                </Pressable>
+                              </View>
+                            ) : collabProposalDecisions[msg.id] === 'declined' ? (
+                              <View style={styles.proposalStatusDeclinedBox}>
+                                <Text style={styles.proposalStatusDeclinedText}>
+                                  ✕ Invitation Declined
+                                </Text>
+                              </View>
+                            ) : (
+                              <View style={{ marginTop: 8, gap: 6 }}>
+                                <Pressable
+                                  style={styles.acceptProposalBtn}
+                                  onPress={() => {
+                                    setCollabProposalDecisions((prev) => ({ ...prev, [msg.id]: 'accepted' }));
+                                    if (Platform.OS !== 'web') {
+                                      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+                                    }
+                                    showToast(`Collab Accepted! Added to Saturday Smart Schedule (2:00 PM).`);
+                                    const replyMessage: ChatMessage = {
+                                      id: `reply_${Date.now()}`,
+                                      senderId: 'user',
+                                      text: "Awesome! I'm in for Saturday at 2 PM. Let's create something fire 🔥",
+                                      time: 'Just now',
+                                      isUser: true,
+                                    };
+                                    setActiveChatThread((prev) => prev ? { ...prev, messages: [...prev.messages, replyMessage] } : null);
+                                  }}
+                                >
+                                  <Text style={styles.acceptProposalBtnText}>Accept Collaboration ➔</Text>
+                                </Pressable>
+
+                                <View style={styles.collabDecisionSubRow}>
+                                  <Pressable
+                                    style={styles.maybeLaterBtn}
+                                    onPress={() => {
+                                      setCollabProposalDecisions((prev) => ({ ...prev, [msg.id]: 'maybe_later' }));
+                                      if (Platform.OS !== 'web') {
+                                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                                      }
+                                      showToast('Saved for later. Reminder set.');
+                                    }}
+                                  >
+                                    <Text style={styles.maybeLaterBtnText}>Maybe Later</Text>
+                                  </Pressable>
+
+                                  <Pressable
+                                    style={styles.declineBtn}
+                                    onPress={() => {
+                                      setCollabProposalDecisions((prev) => ({ ...prev, [msg.id]: 'declined' }));
+                                      if (Platform.OS !== 'web') {
+                                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                                      }
+                                      showToast('Invitation declined.');
+                                    }}
+                                  >
+                                    <Text style={styles.declineBtnText}>Decline</Text>
+                                  </Pressable>
+                                </View>
+                              </View>
+                            )}
                           </View>
                         ) : msg.isAudioNote ? (
                           /* EMBEDDED AUDIO MEMO BUBBLE */
@@ -1921,12 +1998,100 @@ const styles = StyleSheet.create({
     paddingVertical: 9,
     borderRadius: 10,
     alignItems: 'center',
-    marginTop: 6,
   },
   acceptProposalBtnText: {
     color: '#FFFFFF',
     fontSize: 12,
     fontWeight: '700',
+  },
+  proposalMatchBadge: {
+    backgroundColor: 'rgba(88, 44, 219, 0.15)',
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 4,
+  },
+  proposalMatchBadgeText: {
+    fontSize: 9,
+    fontWeight: '800',
+    color: '#582CDB',
+  },
+  collabDecisionSubRow: {
+    flexDirection: 'row',
+    gap: 8,
+    marginTop: 2,
+  },
+  maybeLaterBtn: {
+    flex: 1,
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1,
+    borderColor: '#DDD6FE',
+    paddingVertical: 8,
+    borderRadius: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  maybeLaterBtnText: {
+    color: '#582CDB',
+    fontSize: 11.5,
+    fontWeight: '700',
+  },
+  declineBtn: {
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  declineBtnText: {
+    color: '#94A3B8',
+    fontSize: 11.5,
+    fontWeight: '700',
+  },
+  proposalStatusAcceptedBox: {
+    backgroundColor: '#ECFDF5',
+    borderWidth: 1,
+    borderColor: '#A7F3D0',
+    padding: 10,
+    borderRadius: 10,
+    marginTop: 6,
+  },
+  proposalStatusAcceptedText: {
+    fontSize: 11.5,
+    fontWeight: '700',
+    color: '#065F46',
+    lineHeight: 16,
+  },
+  proposalStatusPendingBox: {
+    backgroundColor: '#FFFBEB',
+    borderWidth: 1,
+    borderColor: '#FDE68A',
+    padding: 10,
+    borderRadius: 10,
+    marginTop: 6,
+  },
+  proposalStatusPendingText: {
+    fontSize: 11.5,
+    fontWeight: '700',
+    color: '#92400E',
+    lineHeight: 16,
+  },
+  reopenDecisionLink: {
+    fontSize: 11.5,
+    fontWeight: '800',
+    color: '#582CDB',
+  },
+  proposalStatusDeclinedBox: {
+    backgroundColor: '#F1F5F9',
+    borderWidth: 1,
+    borderColor: '#CBD5E1',
+    padding: 8,
+    borderRadius: 10,
+    marginTop: 6,
+  },
+  proposalStatusDeclinedText: {
+    fontSize: 11.5,
+    fontWeight: '700',
+    color: '#64748B',
   },
   audioNoteBubble: {
     flexDirection: 'row',
