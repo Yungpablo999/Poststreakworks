@@ -1137,7 +1137,7 @@ export const ProDashboardScreen: React.FC<ProDashboardScreenProps> = ({
           </View>
 
           {/* CARD 9: CREATOR MATCH */}
-          <View style={[styles.dashboardCard, { marginBottom: 120 }]}>
+          <View style={styles.dashboardCard}>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, marginBottom: 12 }}>
               <Pressable
                 onPress={() => openCreatorStory('amara')}
@@ -2070,7 +2070,7 @@ const styles = StyleSheet.create({
   scrollContent: {
     paddingHorizontal: 20,
     paddingTop: 8,
-    paddingBottom: 135,
+    paddingBottom: 100,
   },
   proPlanHeroCard: {
     backgroundColor: '#FFFFFF',
