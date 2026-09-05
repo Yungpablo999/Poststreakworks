@@ -478,6 +478,9 @@ export const ProDashboardScreen: React.FC<ProDashboardScreenProps> = ({
       case 'open_collab':
         if (onOpenMessages) onOpenMessages('conv_amara');
         break;
+      case 'open_messages':
+        if (onOpenMessages) onOpenMessages('conv_david');
+        break;
       case 'create_reel':
         if (onOpenPostComposer) onOpenPostComposer();
         else if (onOpenCreate) onOpenCreate();

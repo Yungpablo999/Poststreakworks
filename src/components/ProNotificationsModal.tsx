@@ -17,6 +17,7 @@ export type ProNotifCategory = 'all' | 'ai' | 'deals' | 'collabs' | 'streaks' | 
 
 export interface ProNotificationItem {
   id: string;
+  priority: 'high' | 'normal';
   category: 'ai' | 'deals' | 'collabs' | 'streaks' | 'growth' | 'squad';
   categoryTag: string;
   tagColor: string;
@@ -38,18 +39,20 @@ export interface ProNotificationItem {
     | 'create_reel'
     | 'open_growth'
     | 'open_squad'
-    | 'open_schedule';
+    | 'open_schedule'
+    | 'open_messages';
 }
 
 export const DEFAULT_PRO_NOTIFICATIONS: ProNotificationItem[] = [
   {
     id: 'pn_1',
+    priority: 'high',
     category: 'ai',
     categoryTag: '✨ JARVIS CO-PILOT',
     tagColor: '#582CDB',
     tagBg: '#EDE9FE',
     title: 'Optimal Post Window Detected (7:30 PM)',
-    body: 'Your audience engagement velocity peaks at 7:30 PM (+38% reach). Draft script "3 Creator Mistakes" is rendered in Voice Studio.',
+    body: 'Audience engagement velocity peaks at 7:30 PM (+38% reach). Draft script "3 Creator Mistakes" is ready in Voice Studio.',
     time: '12m ago',
     unread: true,
     iconEmoji: '⚡',
@@ -64,12 +67,13 @@ export const DEFAULT_PRO_NOTIFICATIONS: ProNotificationItem[] = [
   },
   {
     id: 'pn_2',
+    priority: 'high',
     category: 'deals',
     categoryTag: '💎 VERIFIED SPONSOR',
     tagColor: '#059669',
     tagBg: '#ECFDF5',
     title: 'Nordic Tech Pro Sponsorship ($1,200 Bounty)',
-    body: 'Exclusive direct invitation for Pablo. 60s integrated product spotlight for AI productivity tools. Escrow pre-funded and insured.',
+    body: 'Exclusive direct invitation for Pablo. 60s integrated product spotlight for AI tools. Escrow pre-funded and insured.',
     time: '45m ago',
     unread: true,
     iconEmoji: '💰',
@@ -84,6 +88,7 @@ export const DEFAULT_PRO_NOTIFICATIONS: ProNotificationItem[] = [
   },
   {
     id: 'pn_3',
+    priority: 'high',
     category: 'collabs',
     categoryTag: '🤝 95% AUDIENCE FIT',
     tagColor: '#0284C7',
@@ -104,63 +109,83 @@ export const DEFAULT_PRO_NOTIFICATIONS: ProNotificationItem[] = [
   },
   {
     id: 'pn_4',
+    priority: 'normal',
+    category: 'collabs',
+    categoryTag: '💬 MESSAGE',
+    tagColor: '#582CDB',
+    tagBg: '#EDE9FE',
+    title: 'David Kim sent you a message',
+    body: 'Pacing on the 3-app stack looks incredible! Let\'s lock in the audio.',
+    time: '1h ago',
+    unread: true,
+    iconEmoji: '💬',
+    badgeBg: '#FAF5FF',
+    badgeBorder: '#DDD6FE',
+    actionKey: 'open_messages',
+  },
+  {
+    id: 'pn_5',
+    priority: 'normal',
     category: 'streaks',
-    categoryTag: '🔥 STREAK SHIELD',
+    categoryTag: '🔥 STREAK',
     tagColor: '#D97706',
     tagBg: '#FEF3C7',
-    title: 'Day 48 Streak Locked & Insured',
-    body: 'Post 1 Reel before 11:30 PM today to maintain top 1% global consistency ranking. 2 Streak Freezes remaining in vault.',
+    title: 'Day 48 Streak Locked & Protected',
+    body: 'Post 1 Reel before 11:30 PM to maintain top 1% global rank.',
     time: '3h ago',
     unread: false,
     iconEmoji: '🔥',
     badgeBg: '#FEF3C7',
     badgeBorder: '#FDE68A',
-    metaPills: [
-      { label: '🏆 Top 1% Global' },
-      { label: '🛡️ 2 Freezes Active' },
-    ],
-    actionText: "Create Today's Reel",
     actionKey: 'create_reel',
   },
   {
-    id: 'pn_5',
+    id: 'pn_6',
+    priority: 'normal',
     category: 'ai',
-    categoryTag: '📈 ALGORITHM VELOCITY',
+    categoryTag: '📈 ANALYTICS',
     tagColor: '#9333EA',
     tagBg: '#FAF5FF',
-    title: 'Reel #47 Outperforming Channel Average (+142%)',
-    body: 'High save rate detected (18.4%). Jarvis recommends posting a follow-up Carousel within 24h to capture algorithmic tailwind.',
+    title: 'Reel #47 Outperforming Benchmark (+142%)',
+    body: 'High 18.4% save rate detected. Jarvis recommends a follow-up carousel.',
     time: '5h ago',
     unread: false,
     iconEmoji: '🚀',
     badgeBg: '#FAF5FF',
     badgeBorder: '#E9D5FF',
-    metaPills: [
-      { label: '📊 18.4% Save Rate', isHighlight: true },
-      { label: '⚡ 4.2k Shares' },
-    ],
-    actionText: 'Generate Follow-Up Carousel',
     actionKey: 'open_growth',
   },
   {
-    id: 'pn_6',
+    id: 'pn_7',
+    priority: 'normal',
     category: 'collabs',
-    categoryTag: '👑 SQUAD SYNC',
+    categoryTag: '👑 SQUAD',
     tagColor: '#B45309',
     tagBg: '#FFFBEB',
-    title: 'Creators Club reached 100-Day Milestone',
-    body: '2.5x XP Boost activated for all squad members for the next 48 hours. Group collab challenge unlocked.',
+    title: 'Creators Club reached 100-Day Sync',
+    body: '2.5x XP Boost activated for all squad members for the next 48 hours.',
     time: '1d ago',
     unread: false,
     iconEmoji: '👑',
     badgeBg: '#FFFBEB',
     badgeBorder: '#FDE68A',
-    metaPills: [
-      { label: '✨ 2.5x XP Boost', isHighlight: true },
-      { label: '🔥 6 Creators Active' },
-    ],
-    actionText: 'Open Squad Hub',
     actionKey: 'open_squad',
+  },
+  {
+    id: 'pn_8',
+    priority: 'normal',
+    category: 'collabs',
+    categoryTag: '✨ COLLAB',
+    tagColor: '#582CDB',
+    tagBg: '#EDE9FE',
+    title: 'Kemi Adeleke saved your joint concept',
+    body: 'Added slide notes to "High-Converting Carousel Slide".',
+    time: '1d ago',
+    unread: false,
+    iconEmoji: '✨',
+    badgeBg: '#EDE9FE',
+    badgeBorder: '#DDD6FE',
+    actionKey: 'open_collab',
   },
 ];
 
@@ -340,95 +365,142 @@ export const ProNotificationsModal: React.FC<ProNotificationsModalProps> = ({
                 <Text style={styles.emptySubtitle}>No alerts in this category right now.</Text>
               </View>
             ) : (
-              filteredNotifs.map((item) => (
-                <Pressable
-                  key={item.id}
-                  onPress={() => handleCardPress(item.id)}
-                  style={({ pressed }) => [
-                    styles.notifCard,
-                    item.unread && styles.notifCardUnread,
-                    pressed && styles.cardPressed,
-                  ]}
-                >
-                  <View style={styles.cardHeaderRow}>
-                    {/* Icon Badge */}
+              filteredNotifs.map((item) => {
+                const isHighPriority = item.priority === 'high';
+
+                if (isHighPriority) {
+                  return (
+                    <Pressable
+                      key={item.id}
+                      onPress={() => handleCardPress(item.id)}
+                      style={({ pressed }) => [
+                        styles.notifCard,
+                        item.unread && styles.notifCardUnread,
+                        pressed && styles.cardPressed,
+                      ]}
+                    >
+                      <View style={styles.cardHeaderRow}>
+                        {/* Icon Badge */}
+                        <View
+                          style={[
+                            styles.iconBadge,
+                            { backgroundColor: item.badgeBg, borderColor: item.badgeBorder },
+                          ]}
+                        >
+                          <Text style={styles.iconEmoji}>{item.iconEmoji}</Text>
+                        </View>
+
+                        {/* Content Top Header */}
+                        <View style={styles.cardTextCol}>
+                          <View style={styles.cardMetaRow}>
+                            <View
+                              style={[
+                                styles.categoryTagPill,
+                                { backgroundColor: item.tagBg },
+                              ]}
+                            >
+                              <Text style={[styles.categoryTagText, { color: item.tagColor }]}>
+                                {item.categoryTag}
+                              </Text>
+                            </View>
+                            <Text style={styles.timeAgoText}>{item.time}</Text>
+                          </View>
+
+                          <Text style={styles.notifTitleText} numberOfLines={2}>
+                            {item.title}
+                          </Text>
+                        </View>
+
+                        {/* Unread Glow Dot */}
+                        {item.unread && <View style={styles.unreadDot} />}
+                      </View>
+
+                      {/* Body Text */}
+                      <Text style={styles.notifBodyText}>{item.body}</Text>
+
+                      {/* Pro Metrics Pills */}
+                      {item.metaPills && item.metaPills.length > 0 && (
+                        <View style={styles.metaPillsRow}>
+                          {item.metaPills.map((pill, idx) => (
+                            <View
+                              key={idx}
+                              style={[
+                                styles.metaPill,
+                                pill.isHighlight && styles.metaPillHighlight,
+                              ]}
+                            >
+                              <Text
+                                style={[
+                                  styles.metaPillText,
+                                  pill.isHighlight && styles.metaPillTextHighlight,
+                                ]}
+                              >
+                                {pill.label}
+                              </Text>
+                            </View>
+                          ))}
+                        </View>
+                      )}
+
+                      {/* 1-Tap Action Link */}
+                      {item.actionText && (
+                        <Pressable
+                          onPress={() => handleAction(item)}
+                          style={({ pressed }) => [
+                            styles.actionLinkRow,
+                            pressed && { opacity: 0.75 },
+                          ]}
+                          hitSlop={6}
+                        >
+                          <Text style={styles.actionLinkText}>{item.actionText}</Text>
+                          <Text style={styles.actionLinkArrow}>➔</Text>
+                        </Pressable>
+                      )}
+                    </Pressable>
+                  );
+                }
+
+                // COMPACT CARD FOR LOWER-PRIORITY / ACTIVITY NOTIFICATIONS
+                return (
+                  <Pressable
+                    key={item.id}
+                    onPress={() => {
+                      handleCardPress(item.id);
+                      if (item.actionKey) {
+                        handleAction(item);
+                      }
+                    }}
+                    style={({ pressed }) => [
+                      styles.compactNotifCard,
+                      item.unread && styles.compactNotifCardUnread,
+                      pressed && styles.cardPressed,
+                    ]}
+                  >
                     <View
                       style={[
-                        styles.iconBadge,
+                        styles.compactIconBadge,
                         { backgroundColor: item.badgeBg, borderColor: item.badgeBorder },
                       ]}
                     >
-                      <Text style={styles.iconEmoji}>{item.iconEmoji}</Text>
+                      <Text style={styles.compactIconEmoji}>{item.iconEmoji}</Text>
                     </View>
 
-                    {/* Content Top Header */}
-                    <View style={styles.cardTextCol}>
-                      <View style={styles.cardMetaRow}>
-                        <View
-                          style={[
-                            styles.categoryTagPill,
-                            { backgroundColor: item.tagBg },
-                          ]}
-                        >
-                          <Text style={[styles.categoryTagText, { color: item.tagColor }]}>
-                            {item.categoryTag}
-                          </Text>
-                        </View>
-                        <Text style={styles.timeAgoText}>{item.time}</Text>
+                    <View style={styles.compactContentCol}>
+                      <View style={styles.compactTitleRow}>
+                        <Text style={styles.compactTitleText} numberOfLines={1}>
+                          {item.title}
+                        </Text>
+                        <Text style={styles.compactTimeText}>{item.time}</Text>
                       </View>
-
-                      <Text style={styles.notifTitleText} numberOfLines={2}>
-                        {item.title}
+                      <Text style={styles.compactBodyText} numberOfLines={1} ellipsizeMode="tail">
+                        {item.body}
                       </Text>
                     </View>
 
-                    {/* Unread Glow Dot */}
-                    {item.unread && <View style={styles.unreadDot} />}
-                  </View>
-
-                  {/* Body Text */}
-                  <Text style={styles.notifBodyText}>{item.body}</Text>
-
-                  {/* Pro Metrics Pills */}
-                  {item.metaPills && item.metaPills.length > 0 && (
-                    <View style={styles.metaPillsRow}>
-                      {item.metaPills.map((pill, idx) => (
-                        <View
-                          key={idx}
-                          style={[
-                            styles.metaPill,
-                            pill.isHighlight && styles.metaPillHighlight,
-                          ]}
-                        >
-                          <Text
-                            style={[
-                              styles.metaPillText,
-                              pill.isHighlight && styles.metaPillTextHighlight,
-                            ]}
-                          >
-                            {pill.label}
-                          </Text>
-                        </View>
-                      ))}
-                    </View>
-                  )}
-
-                  {/* 1-Tap Action Link */}
-                  {item.actionText && (
-                    <Pressable
-                      onPress={() => handleAction(item)}
-                      style={({ pressed }) => [
-                        styles.actionLinkRow,
-                        pressed && { opacity: 0.75 },
-                      ]}
-                      hitSlop={6}
-                    >
-                      <Text style={styles.actionLinkText}>{item.actionText}</Text>
-                      <Text style={styles.actionLinkArrow}>➔</Text>
-                    </Pressable>
-                  )}
-                </Pressable>
-              ))
+                    {item.unread && <View style={styles.compactUnreadDot} />}
+                  </Pressable>
+                );
+              })
             )}
           </ScrollView>
 
@@ -590,6 +662,7 @@ const styles = StyleSheet.create({
     color: '#94A3B8',
   },
 
+  // HIGH PRIORITY RICH CARD
   notifCard: {
     backgroundColor: '#FAF9FC',
     borderRadius: 18,
@@ -721,6 +794,75 @@ const styles = StyleSheet.create({
     fontSize: sFont(10.5),
     color: '#582CDB',
     fontWeight: '800',
+  },
+
+  // COMPACT CARD (LOWER PRIORITY / ACTIVITY)
+  compactNotifCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#FAF9FC',
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: '#EFECE6',
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+    gap: 10,
+  },
+  compactNotifCardUnread: {
+    backgroundColor: '#FFFFFF',
+    borderColor: '#DDD6FE',
+    shadowColor: '#582CDB',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.03,
+    shadowRadius: 4,
+    elevation: 1,
+  },
+  compactIconBadge: {
+    width: 34,
+    height: 34,
+    borderRadius: 10,
+    borderWidth: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    flexShrink: 0,
+  },
+  compactIconEmoji: {
+    fontSize: 16,
+  },
+  compactContentCol: {
+    flex: 1,
+    minWidth: 0,
+  },
+  compactTitleRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 2,
+    gap: 6,
+  },
+  compactTitleText: {
+    fontSize: sFont(13),
+    fontWeight: '700',
+    color: '#171420',
+    flex: 1,
+    minWidth: 0,
+  },
+  compactTimeText: {
+    fontSize: sFont(10),
+    color: '#94A3B8',
+    fontWeight: '600',
+    flexShrink: 0,
+  },
+  compactBodyText: {
+    fontSize: sFont(11.5),
+    color: '#5E576E',
+  },
+  compactUnreadDot: {
+    width: 7,
+    height: 7,
+    borderRadius: 3.5,
+    backgroundColor: '#582CDB',
+    flexShrink: 0,
   },
 
   // BOTTOM MARK ALL READ BUTTON
