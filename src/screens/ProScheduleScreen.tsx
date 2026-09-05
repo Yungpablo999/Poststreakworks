@@ -606,7 +606,14 @@ export const ProScheduleScreen: React.FC<ProScheduleScreenProps> = ({
             <View style={styles.contentScheduleTagBox}>
               <Text style={styles.contentScheduleTagText}>CONTENT SCHEDULE — PRO</Text>
             </View>
-            <Text style={styles.mainTitleText}>Plan your content with precision.</Text>
+            <Text
+              style={styles.mainTitleText}
+              numberOfLines={1}
+              adjustsFontSizeToFit
+              minimumFontScale={0.8}
+            >
+              Plan your content with precision.
+            </Text>
             <Text style={styles.mainSubText}>
               Manage your schedule, find content gaps, and post at your strongest times.
             </Text>
@@ -2189,7 +2196,7 @@ const styles = StyleSheet.create({
     letterSpacing: 0.6,
   },
   mainTitleText: {
-    fontSize: 22,
+    fontSize: 20.5,
     fontWeight: '700',
     color: '#171420',
     letterSpacing: -0.4,
