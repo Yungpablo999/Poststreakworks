@@ -921,7 +921,9 @@ export const ProMessagesScreen: React.FC<ProMessagesScreenProps> = ({
                   </Text>
                   {creator.id === 'jarvis' ? (
                     <View style={styles.storyAiCoPilotPill}>
-                      <Text style={styles.storyAiCoPilotText}>✨ AI Co-Pilot</Text>
+                      <Text style={styles.storyAiCoPilotText} numberOfLines={1}>
+                        ✨ AI Co-Pilot
+                      </Text>
                     </View>
                   ) : (
                     <View style={styles.storyStreakPill}>
@@ -1557,7 +1559,7 @@ const styles = StyleSheet.create({
   },
   storyItemCol: {
     alignItems: 'center',
-    width: 68,
+    width: 72,
   },
   storyAvatarOuterRing: {
     width: 58,
@@ -1624,15 +1626,17 @@ const styles = StyleSheet.create({
     backgroundColor: '#F5F3FF',
     borderWidth: 0.8,
     borderColor: '#DDD6FE',
-    paddingHorizontal: 5,
+    paddingHorizontal: 4,
     paddingVertical: 1.5,
     borderRadius: 6,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   storyAiCoPilotText: {
-    fontSize: 8,
+    fontSize: 7.5,
     fontWeight: '800',
     color: '#6D28D9',
-    letterSpacing: 0.1,
+    letterSpacing: -0.2,
   },
 
   // PINNED COLLAB BANNER
