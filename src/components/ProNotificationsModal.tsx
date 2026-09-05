@@ -296,9 +296,6 @@ export const ProNotificationsModal: React.FC<ProNotificationsModalProps> = ({
                   <Text style={styles.unreadBadgePillText}>{unreadCount} NEW</Text>
                 </View>
               )}
-              <View style={styles.proLiveBadge}>
-                <Text style={styles.proLiveBadgeText}>⚡ PRO LIVE</Text>
-              </View>
             </View>
 
             <Pressable
@@ -546,15 +543,12 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 12,
+    marginBottom: 14,
   },
   headerTitleGroup: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
-    flex: 1,
-    minWidth: 0,
-    marginRight: 8,
+    gap: 8,
   },
   modalMainTitle: {
     fontSize: sFont(19),
@@ -574,20 +568,6 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     letterSpacing: 0.4,
   },
-  proLiveBadge: {
-    backgroundColor: '#FEF3C7',
-    paddingHorizontal: 6,
-    paddingVertical: 2.5,
-    borderRadius: 6,
-    borderWidth: 1,
-    borderColor: '#FDE68A',
-  },
-  proLiveBadgeText: {
-    fontSize: sFont(8.5),
-    fontWeight: '800',
-    color: '#B45309',
-    letterSpacing: 0.3,
-  },
   closeCircleBtn: {
     width: 32,
     height: 32,
@@ -597,6 +577,7 @@ const styles = StyleSheet.create({
     borderColor: '#EFECE6',
     justifyContent: 'center',
     alignItems: 'center',
+    flexShrink: 0,
   },
   btnPressed: {
     opacity: 0.78,
