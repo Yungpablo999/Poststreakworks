@@ -293,8 +293,6 @@ export const ProDashboardScreen: React.FC<ProDashboardScreenProps> = ({
   // Calendar State
   const [selectedMonthIndex, setSelectedMonthIndex] = useState(8); // September
   const [selectedDayInfo, setSelectedDayInfo] = useState<string | null>(null);
-  const [pagerWidth, setPagerWidth] = useState(Dimensions.get('window').width - 68);
-  const calendarScrollRef = useRef<ScrollView>(null);
   const monthChipsScrollRef = useRef<ScrollView>(null);
 
   // Notifications
@@ -317,7 +315,7 @@ export const ProDashboardScreen: React.FC<ProDashboardScreenProps> = ({
       setSelectedMonthIndex(8);
       setSelectedDayInfo(null);
       setTimeout(() => {
-        scrollToMonth(8, false);
+        scrollToMonth(8);
       }, 60);
     }
   }, [showCalendarModal]);
@@ -396,36 +394,14 @@ export const ProDashboardScreen: React.FC<ProDashboardScreenProps> = ({
     }
   };
 
-  const scrollToMonth = (index: number, animated = true) => {
+  const scrollToMonth = (index: number) => {
     setSelectedMonthIndex(index);
-    if (calendarScrollRef.current && pagerWidth > 0) {
-      calendarScrollRef.current.scrollTo({
-        x: index * pagerWidth,
-        animated,
-      });
-    }
+    setSelectedDayInfo(null);
     if (monthChipsScrollRef.current) {
       monthChipsScrollRef.current.scrollTo({
         x: Math.max(0, index * 68 - 100),
-        animated,
+        animated: true,
       });
-    }
-  };
-
-  const handleCalendarScrollEnd = (e: NativeSyntheticEvent<NativeScrollEvent>) => {
-    const offsetX = e.nativeEvent.contentOffset.x;
-    const index = Math.round(offsetX / pagerWidth);
-    if (index >= 0 && index < FULL_YEAR_CALENDAR.length && index !== selectedMonthIndex) {
-      if (Platform.OS !== 'web') {
-        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-      }
-      setSelectedMonthIndex(index);
-      if (monthChipsScrollRef.current) {
-        monthChipsScrollRef.current.scrollTo({
-          x: Math.max(0, index * 68 - 100),
-          animated: true,
-        });
-      }
     }
   };
 
@@ -1196,7 +1172,7 @@ export const ProDashboardScreen: React.FC<ProDashboardScreenProps> = ({
         <FloatingTabBar activeTab={activeTab} onTabPress={handleTabPress} />
 
         {/* ============================================================ */}
-        {/* MODAL: ULTRA-PREMIUM SWIPEABLE PRO STREAK CALENDAR MODAL     */}
+        {/* MODAL: ULTRA-PREMIUM PRO STREAK CALENDAR MODAL               */}
         {/* ============================================================ */}
         <Modal
           visible={showCalendarModal}
@@ -1214,256 +1190,240 @@ export const ProDashboardScreen: React.FC<ProDashboardScreenProps> = ({
               {/* Pro Modal Header */}
               <View style={styles.calendarModalHeader}>
                 <View style={styles.calendarModalTitleGroup}>
-                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-                    <Text style={styles.calendarModalMainTitle}>Streak & Activity Calendar {displayedYear}</Text>
-                    <LinearGradient
-                      colors={['#F59E0B', '#F59E0B', '#F59E0B']}
-                      start={{ x: 0, y: 0 }}
-                      end={{ x: 1, y: 0 }}
-                      style={styles.proBadgePill}
-                    >
-                      <Text style={styles.proBadgeText}>👑 PRO</Text>
-                    </LinearGradient>
-                  </View>
-                  <Text style={styles.calendarModalSubtitle}>Swipe across months • Autopilot Shield Active</Text>
+                  <Text style={styles.calendarModalMainTitle}>Streak & Activity Calendar 2026</Text>
+                  <Text style={styles.calendarModalSubtitle}>Swipe naturally to browse across months</Text>
                 </View>
 
                 <Pressable
                   onPress={() => setShowCalendarModal(false)}
-                  style={styles.calendarCloseButton}
+                  style={({ pressed }) => [styles.calendarCloseButton, pressed && styles.btnPressed]}
                   hitSlop={8}
                 >
-                  <Text style={styles.modalCloseCross}>✕</Text>
+                  <Svg width={20} height={20} viewBox="0 0 24 24" fill="none">
+                    <Path d="M18 6L6 18M6 6L18 18" stroke="#171420" strokeWidth="2.2" strokeLinecap="round" />
+                  </Svg>
                 </Pressable>
               </View>
 
-              {/* Pro Quick Stats Banner */}
-              <View style={styles.calendarStatsRow}>
-                <View style={styles.calendarStatCard}>
-                  <Text style={styles.calendarStatValue} numberOfLines={1}>
-                    {(userProfile?.streakCount && userProfile.streakCount > 1) ? userProfile.streakCount : 48}d 🔥
-                  </Text>
-                  <Text style={styles.calendarStatLabel} numberOfLines={1}>Current</Text>
-                </View>
-                <View style={[styles.calendarStatCard, { backgroundColor: '#FEF9C3', borderColor: '#F59E0B' }]}>
-                  <Text style={[styles.calendarStatValue, { color: '#B45309' }]} numberOfLines={1}>
-                    Top 1% 👑
-                  </Text>
-                  <Text style={[styles.calendarStatLabel, { color: '#A16207' }]} numberOfLines={1}>
-                    {isNarrowScreen ? 'Global' : 'Worldwide'}
-                  </Text>
-                </View>
-                <View style={styles.calendarStatCard}>
-                  <Text style={styles.calendarStatValue} numberOfLines={1}>99.2% ⚡</Text>
-                  <Text style={styles.calendarStatLabel} numberOfLines={1}>
-                    {isNarrowScreen ? 'Rate' : 'Consistency'}
-                  </Text>
-                </View>
-                <View style={[styles.calendarStatCard, { backgroundColor: '#EDE9FE', borderColor: '#C4B5FD' }]}>
-                  <Text style={[styles.calendarStatValue, { color: '#582CDB' }]} numberOfLines={1}>
-                    {isNarrowScreen ? '2x 🛡️' : '2 Freezes 🛡️'}
-                  </Text>
-                  <Text style={[styles.calendarStatLabel, { color: '#6D28D9' }]} numberOfLines={1}>
-                    Shield
-                  </Text>
-                </View>
-              </View>
-
-              {/* Horizontal Month Chips (Jan -> Dec) */}
+              {/* Scrollable Calendar Body */}
               <ScrollView
-                ref={monthChipsScrollRef}
-                horizontal
-                showsHorizontalScrollIndicator={false}
-                contentContainerStyle={styles.monthChipsContainer}
+                style={styles.calendarModalScroll}
+                contentContainerStyle={styles.calendarModalScrollContent}
+                showsVerticalScrollIndicator={false}
+                bounces={true}
               >
-                {FULL_YEAR_CALENDAR.map((m, idx) => {
-                  const isSelected = selectedMonthIndex === idx;
-                  return (
-                    <Pressable
-                      key={`chip_${m.id}`}
-                      onPress={() => {
-                        if (Platform.OS !== 'web') {
-                          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                        }
-                        scrollToMonth(idx);
-                      }}
-                      style={[
-                        styles.monthChipPill,
-                        isSelected && styles.monthChipPillActive,
-                      ]}
-                    >
-                      <Text
+                {/* Pro Quick Stats Banner */}
+                <View style={styles.calendarStatsRow}>
+                  <View style={styles.calendarStatCard}>
+                    <Text style={styles.calendarStatValue} numberOfLines={1}>
+                      {(userProfile?.streakCount && userProfile.streakCount > 1) ? userProfile.streakCount : 48}d 🔥
+                    </Text>
+                    <Text style={styles.calendarStatLabel} numberOfLines={1}>Streak</Text>
+                  </View>
+                  <View style={[styles.calendarStatCard, { backgroundColor: '#FEF9C3', borderColor: '#F59E0B' }]}>
+                    <Text style={[styles.calendarStatValue, { color: '#B45309' }]} numberOfLines={1}>
+                      Top 1% 👑
+                    </Text>
+                    <Text style={[styles.calendarStatLabel, { color: '#A16207' }]} numberOfLines={1}>
+                      Worldwide
+                    </Text>
+                  </View>
+                  <View style={styles.calendarStatCard}>
+                    <Text style={styles.calendarStatValue} numberOfLines={1}>99.2% ⚡</Text>
+                    <Text style={styles.calendarStatLabel} numberOfLines={1}>
+                      Consistency
+                    </Text>
+                  </View>
+                  <View style={[styles.calendarStatCard, { backgroundColor: '#EDE9FE', borderColor: '#C4B5FD' }]}>
+                    <Text style={[styles.calendarStatValue, { color: '#582CDB' }]} numberOfLines={1}>
+                      2 Freezes 🛡️
+                    </Text>
+                    <Text style={[styles.calendarStatLabel, { color: '#6D28D9' }]} numberOfLines={1}>
+                      Shield
+                    </Text>
+                  </View>
+                </View>
+
+                {/* Horizontal Month Chips (Jan -> Dec) */}
+                <ScrollView
+                  ref={monthChipsScrollRef}
+                  horizontal
+                  showsHorizontalScrollIndicator={false}
+                  contentContainerStyle={styles.monthChipsContainer}
+                >
+                  {FULL_YEAR_CALENDAR.map((m, idx) => {
+                    const isSelected = selectedMonthIndex === idx;
+                    return (
+                      <Pressable
+                        key={`chip_${m.id}`}
+                        onPress={() => {
+                          if (Platform.OS !== 'web') {
+                            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                          }
+                          scrollToMonth(idx);
+                        }}
                         style={[
-                          styles.monthChipText,
-                          isSelected && styles.monthChipTextActive,
+                          styles.monthChipPill,
+                          isSelected && styles.monthChipPillActive,
                         ]}
                       >
-                        {m.monthName.slice(0, 3)}
-                      </Text>
-                      {m.isCurrent && (
-                        <View style={[styles.monthChipCurrentDot, isSelected && styles.monthChipCurrentDotActive]} />
-                      )}
-                    </Pressable>
-                  );
-                })}
-              </ScrollView>
-
-              {/* Selected Day Toast/Info Banner */}
-              {selectedDayInfo && (
-                <View style={styles.selectedDayBanner}>
-                  <Text style={styles.selectedDayText}>{selectedDayInfo}</Text>
-                </View>
-              )}
-
-              {/* SWIPEABLE HORIZONTAL PAGER FOR ALL MONTHS */}
-              <View
-                style={styles.pagerOuterContainer}
-                onLayout={(e) => {
-                  const measuredWidth = Math.floor(e.nativeEvent.layout.width - 16);
-                  if (measuredWidth > 0 && Math.abs(measuredWidth - pagerWidth) > 1) {
-                    setPagerWidth(measuredWidth);
-                  }
-                }}
-              >
-                {/* Month Navigator Header with ‹ and › */}
-                <View style={styles.monthNavHeader}>
-                  <Pressable
-                    onPress={handlePrevMonth}
-                    disabled={selectedMonthIndex === 0}
-                    style={[
-                      styles.monthNavChevronBtn,
-                      selectedMonthIndex === 0 && styles.monthNavChevronDisabled,
-                    ]}
-                    hitSlop={8}
-                  >
-                    <Text style={{ fontSize: 18, color: selectedMonthIndex === 0 ? '#CBD5E1' : '#582CDB', fontWeight: '700' }}>‹</Text>
-                  </Pressable>
-
-                  <View style={styles.monthNameTitleGroup}>
-                    <Text style={styles.focusedMonthTitle}>
-                      {FULL_YEAR_CALENDAR[selectedMonthIndex].monthName} 2026
-                    </Text>
-                    {FULL_YEAR_CALENDAR[selectedMonthIndex].isCurrent && (
-                      <View style={styles.currentMonthBadge}>
-                        <Text style={styles.currentMonthBadgeText}>CURRENT 🔥</Text>
-                      </View>
-                    )}
-                  </View>
-
-                  <Pressable
-                    onPress={handleNextMonth}
-                    disabled={selectedMonthIndex === FULL_YEAR_CALENDAR.length - 1}
-                    style={[
-                      styles.monthNavChevronBtn,
-                      selectedMonthIndex === FULL_YEAR_CALENDAR.length - 1 && styles.monthNavChevronDisabled,
-                    ]}
-                    hitSlop={8}
-                  >
-                    <Text style={{ fontSize: 18, color: selectedMonthIndex === FULL_YEAR_CALENDAR.length - 1 ? '#CBD5E1' : '#582CDB', fontWeight: '700' }}>›</Text>
-                  </Pressable>
-                </View>
-
-                {/* Day-of-Week Column Headers */}
-                <View style={styles.dayColHeadersRow}>
-                  {['M', 'T', 'W', 'T', 'F', 'S', 'S'].map((dayHeader, dIdx) => (
-                    <Text key={`pro_cal_col_${dIdx}`} style={styles.dayColHeaderLabel}>
-                      {dayHeader}
-                    </Text>
-                  ))}
-                </View>
-
-                {/* Horizontal Paging ScrollView */}
-                <ScrollView
-                  ref={calendarScrollRef}
-                  horizontal
-                  pagingEnabled
-                  showsHorizontalScrollIndicator={false}
-                  onMomentumScrollEnd={handleCalendarScrollEnd}
-                  contentContainerStyle={{ width: pagerWidth * FULL_YEAR_CALENDAR.length }}
-                  decelerationRate="fast"
-                >
-                  {FULL_YEAR_CALENDAR.map((month) => {
-                    const totalGridCells = Math.ceil((month.daysCount + month.startOffset) / 7) * 7;
-                    const cells = Array.from({ length: totalGridCells });
-
-                    return (
-                      <View key={`month_page_${month.id}`} style={[styles.singleMonthPage, { width: pagerWidth }]}>
-                        <View style={styles.monthGridWrap}>
-                          {cells.map((_, cIdx) => {
-                            const dayNumber = cIdx - month.startOffset + 1;
-                            const isDayInMonth = dayNumber >= 1 && dayNumber <= month.daysCount;
-                            const isCompleted = isDayInMonth && month.completedDays.includes(dayNumber);
-                            const isScheduled = isDayInMonth && month.scheduledDays.includes(dayNumber);
-                            const isFreeze = isDayInMonth && month.freezeDays.includes(dayNumber);
-                            const isToday = month.isCurrent && dayNumber === 5;
-
-                            if (!isDayInMonth) {
-                              return <View key={`pro_empty_${month.id}_${cIdx}`} style={styles.dayCellEmpty} />;
-                            }
-
-                            return (
-                              <Pressable
-                                key={`pro_day_${month.id}_${dayNumber}`}
-                                onPress={() => handleDayPress(dayNumber, month)}
-                                style={[
-                                  styles.dayCellBase,
-                                  isCompleted && styles.dayCellCompleted,
-                                  isScheduled && styles.dayCellScheduled,
-                                  isFreeze && styles.dayCellFreeze,
-                                  isToday && styles.dayCellTodayPro,
-                                ]}
-                              >
-                                <Text
-                                  style={[
-                                    styles.dayCellNumber,
-                                    isCompleted && styles.dayCellNumberCompleted,
-                                    isScheduled && styles.dayCellNumberScheduled,
-                                    isFreeze && styles.dayCellNumberFreeze,
-                                    isToday && styles.dayCellNumberToday,
-                                  ]}
-                                >
-                                  {dayNumber}
-                                </Text>
-
-                                {isCompleted && <Text style={styles.dayCellCheckIcon}>✓</Text>}
-                                {isScheduled && <Text style={styles.dayCellScheduledIcon}>⚡</Text>}
-                                {isFreeze && <Text style={styles.dayCellFreezeIcon}>🛡️</Text>}
-                                {isToday && <View style={styles.dayCellTodayDot} />}
-                              </Pressable>
-                            );
-                          })}
-                        </View>
-                      </View>
+                        <Text
+                          style={[
+                            styles.monthChipText,
+                            isSelected && styles.monthChipTextActive,
+                          ]}
+                        >
+                          {m.monthName.slice(0, 3)}
+                        </Text>
+                        {m.isCurrent && (
+                          <View style={[styles.monthChipCurrentDot, isSelected && styles.monthChipCurrentDotActive]} />
+                        )}
+                      </Pressable>
                     );
                   })}
                 </ScrollView>
-              </View>
 
-              {/* Legend & Pro Autopilot Shield Footer */}
-              <View style={styles.legendContainer}>
-                <View style={styles.legendItem}>
-                  <View style={[styles.legendDot, { backgroundColor: '#582CDB' }]} />
-                  <Text style={styles.legendLabel} numberOfLines={1}>Completed (✓)</Text>
+                {/* Selected Day Toast/Info Banner */}
+                {selectedDayInfo && (
+                  <View style={styles.selectedDayBanner}>
+                    <Text style={styles.selectedDayText}>{selectedDayInfo}</Text>
+                  </View>
+                )}
+
+                {/* Active Month Calendar Container */}
+                <View style={styles.pagerOuterContainer}>
+                  {/* Month Navigator Header with ‹ and › */}
+                  <View style={styles.monthNavHeader}>
+                    <Pressable
+                      onPress={handlePrevMonth}
+                      disabled={selectedMonthIndex === 0}
+                      style={[
+                        styles.monthNavChevronBtn,
+                        selectedMonthIndex === 0 && styles.monthNavChevronDisabled,
+                      ]}
+                      hitSlop={8}
+                    >
+                      <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
+                        <Path d="M15 18L9 12L15 6" stroke={selectedMonthIndex === 0 ? '#CBD5E1' : '#582CDB'} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+                      </Svg>
+                    </Pressable>
+
+                    <View style={styles.monthNameTitleGroup}>
+                      <Text style={styles.focusedMonthTitle}>
+                        {FULL_YEAR_CALENDAR[selectedMonthIndex].monthName} 2026
+                      </Text>
+                      {FULL_YEAR_CALENDAR[selectedMonthIndex].isCurrent && (
+                        <View style={styles.currentMonthBadge}>
+                          <Text style={styles.currentMonthBadgeText}>CURRENT 🔥</Text>
+                        </View>
+                      )}
+                    </View>
+
+                    <Pressable
+                      onPress={handleNextMonth}
+                      disabled={selectedMonthIndex === FULL_YEAR_CALENDAR.length - 1}
+                      style={[
+                        styles.monthNavChevronBtn,
+                        selectedMonthIndex === FULL_YEAR_CALENDAR.length - 1 && styles.monthNavChevronDisabled,
+                      ]}
+                      hitSlop={8}
+                    >
+                      <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
+                        <Path d="M9 18L15 12L9 6" stroke={selectedMonthIndex === FULL_YEAR_CALENDAR.length - 1 ? '#CBD5E1' : '#582CDB'} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+                      </Svg>
+                    </Pressable>
+                  </View>
+
+                  {/* Day-of-Week Column Headers */}
+                  <View style={styles.calendarDayNamesRow}>
+                    {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((dayHeader, dIdx) => (
+                      <Text key={`pro_cal_col_${dIdx}`} style={styles.calendarDayNameText}>
+                        {dayHeader}
+                      </Text>
+                    ))}
+                  </View>
+
+                  {/* Active Month 7-Column Grid (No Edge Clipping) */}
+                  <View style={styles.monthPageCard}>
+                    <View style={styles.calendarMonthGrid}>
+                      {Array.from({ length: Math.ceil((FULL_YEAR_CALENDAR[selectedMonthIndex].daysCount + FULL_YEAR_CALENDAR[selectedMonthIndex].startOffset) / 7) * 7 }).map((_, cellIdx) => {
+                        const currentMonth = FULL_YEAR_CALENDAR[selectedMonthIndex];
+                        const dayNumber = cellIdx - currentMonth.startOffset + 1;
+                        const isValidDay = dayNumber >= 1 && dayNumber <= currentMonth.daysCount;
+
+                        if (!isValidDay) {
+                          return <View key={`pro_empty_${cellIdx}`} style={styles.calendarCellEmpty} />;
+                        }
+
+                        const isCompleted = currentMonth.completedDays.includes(dayNumber);
+                        const isScheduled = currentMonth.scheduledDays.includes(dayNumber);
+                        const isFreeze = currentMonth.freezeDays.includes(dayNumber);
+                        const isToday = currentMonth.isCurrent && dayNumber === 5;
+
+                        return (
+                          <Pressable
+                            key={`pro_day_${dayNumber}`}
+                            onPress={() => handleDayPress(dayNumber, currentMonth)}
+                            style={({ pressed }) => [
+                              styles.calendarCell,
+                              isCompleted && styles.calendarCellCompleted,
+                              isScheduled && styles.calendarCellScheduled,
+                              isFreeze && styles.calendarCellFreeze,
+                              isToday && styles.calendarCellToday,
+                              pressed && styles.calendarCellPressed,
+                            ]}
+                          >
+                            <Text
+                              style={[
+                                styles.calendarCellDayNumber,
+                                isCompleted && styles.calendarCellTextCompleted,
+                                isScheduled && styles.calendarCellTextScheduled,
+                                isFreeze && styles.calendarCellTextFreeze,
+                                isToday && styles.calendarCellTextToday,
+                              ]}
+                            >
+                              {dayNumber}
+                            </Text>
+
+                            {isCompleted && <Text style={styles.cellMiniIcon}>✓</Text>}
+                            {isScheduled && <Text style={styles.cellMiniIconScheduled}>⚡</Text>}
+                            {isFreeze && <Text style={styles.cellMiniIconFreeze}>🛡️</Text>}
+                            {isToday && <View style={styles.dayCellTodayDot} />}
+                          </Pressable>
+                        );
+                      })}
+                    </View>
+                  </View>
                 </View>
-                <View style={styles.legendItem}>
-                  <View style={[styles.legendDot, { backgroundColor: '#F59E0B' }]} />
-                  <Text style={styles.legendLabel} numberOfLines={1}>Autopilot (⚡)</Text>
+
+                {/* Legend & Pro Autopilot Shield Footer */}
+                <View style={styles.calendarLegendBox}>
+                  <View style={styles.legendItemsGrid}>
+                    <View style={styles.legendItem}>
+                      <View style={[styles.legendDot, { backgroundColor: '#582CDB' }]} />
+                      <Text style={styles.legendLabel}>Completed (✓)</Text>
+                    </View>
+                    <View style={styles.legendItem}>
+                      <View style={[styles.legendDot, { backgroundColor: '#F59E0B' }]} />
+                      <Text style={styles.legendLabel}>Autopilot (⚡)</Text>
+                    </View>
+                    <View style={styles.legendItem}>
+                      <View style={[styles.legendDot, { backgroundColor: '#0284C7' }]} />
+                      <Text style={styles.legendLabel}>Pro Shield (🛡️)</Text>
+                    </View>
+                    <View style={styles.legendItem}>
+                      <View style={[styles.legendDot, { backgroundColor: '#EF4444' }]} />
+                      <Text style={styles.legendLabel}>Today (🔴)</Text>
+                    </View>
+                  </View>
                 </View>
-                <View style={styles.legendItem}>
-                  <View style={[styles.legendDot, { backgroundColor: '#38BDF8' }]} />
-                  <Text style={styles.legendLabel} numberOfLines={1}>Pro Shield (🛡️)</Text>
-                </View>
-                <View style={styles.legendItem}>
-                  <View style={[styles.legendDot, { backgroundColor: '#EF4444' }]} />
-                  <Text style={styles.legendLabel} numberOfLines={1}>Today</Text>
-                </View>
-              </View>
+              </ScrollView>
 
               <Pressable
-                style={styles.modalFullBtn}
+                style={({ pressed }) => [styles.donePrimaryBtn, pressed && styles.btnPressed]}
                 onPress={() => setShowCalendarModal(false)}
               >
-                <Text style={styles.modalFullBtnText}>Done</Text>
+                <Text style={styles.donePrimaryBtnText}>Done ✓</Text>
               </Pressable>
             </Animated.View>
           </View>
@@ -2683,172 +2643,186 @@ const styles = StyleSheet.create({
   // ULTRA-PREMIUM PRO CALENDAR MODAL STYLES
   calendarModalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(15, 10, 30, 0.75)',
+    backgroundColor: 'rgba(23, 20, 32, 0.55)',
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 16,
+    padding: sPadding(14),
   },
   calendarModalCard: {
     width: '100%',
     maxWidth: 420,
-    backgroundColor: '#FFFFFF',
-    borderRadius: 26,
-    padding: 20,
-    shadowColor: '#582CDB',
-    shadowOffset: { width: 0, height: 12 },
-    shadowOpacity: 0.08,
-    shadowRadius: 24,
-    elevation: 10,
+    maxHeight: '90%',
+    backgroundColor: 'rgba(255, 255, 255, 0.98)',
+    borderRadius: 28,
+    paddingTop: sPadding(16),
+    paddingHorizontal: sPadding(14),
+    paddingBottom: sPadding(12),
+    shadowColor: '#171420',
+    shadowOffset: { width: 0, height: 16 },
+    shadowOpacity: 0.16,
+    shadowRadius: 32,
+    elevation: 12,
+    borderWidth: 1,
+    borderColor: 'rgba(235, 230, 248, 0.95)',
+    overflow: 'hidden',
+  },
+  calendarModalScroll: {
+    flexGrow: 0,
+  },
+  calendarModalScrollContent: {
+    paddingBottom: 4,
   },
   calendarModalHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    marginBottom: 14,
+    alignItems: 'center',
+    marginBottom: 10,
   },
   calendarModalTitleGroup: {
     flex: 1,
+    minWidth: 0,
+    marginRight: 8,
   },
   calendarModalMainTitle: {
-    fontSize: 18,
+    fontSize: sFont(18),
     fontWeight: '700',
     color: '#171420',
-  },
-  proBadgePill: {
-    paddingVertical: 2,
-    paddingHorizontal: 7,
-    borderRadius: 6,
-    borderWidth: 1,
-    borderColor: '#FBBF24',
-  },
-  proBadgeText: {
-    fontSize: 9,
-    fontWeight: '700',
-    color: '#B45309',
-    letterSpacing: 0.5,
+    letterSpacing: -0.4,
   },
   calendarModalSubtitle: {
-    fontSize: 12,
-    color: '#64748B',
-    marginTop: 2,
+    fontSize: sFont(11),
+    color: '#7F7894',
+    marginTop: 1,
   },
   calendarCloseButton: {
     width: 32,
     height: 32,
     borderRadius: 16,
-    backgroundColor: '#F1F5F9',
+    backgroundColor: 'rgba(250, 248, 255, 0.9)',
+    borderWidth: 1,
+    borderColor: 'rgba(235, 230, 248, 0.9)',
     justifyContent: 'center',
     alignItems: 'center',
+    flexShrink: 0,
   },
   calendarStatsRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    gap: 4,
-    marginBottom: 12,
+    gap: 6,
+    marginBottom: 10,
     width: '100%',
   },
   calendarStatCard: {
     flex: 1,
-    backgroundColor: '#F8FAFC',
+    backgroundColor: 'rgba(250, 248, 255, 0.8)',
+    borderRadius: 14,
     borderWidth: 1,
-    borderColor: '#EFECE6',
-    borderRadius: 12,
-    paddingVertical: 7,
+    borderColor: 'rgba(237, 232, 252, 0.85)',
+    paddingVertical: 6,
     paddingHorizontal: 2,
     alignItems: 'center',
     minWidth: 0,
   },
   calendarStatValue: {
-    fontSize: sFont(10.5),
+    fontSize: sFont(11.5),
     fontWeight: '800',
     color: '#171420',
+    marginBottom: 2,
     textAlign: 'center',
   },
   calendarStatLabel: {
     fontSize: sFont(9),
     fontWeight: '700',
-    color: '#64748B',
-    marginTop: 2,
+    color: '#582CDB',
     textAlign: 'center',
   },
   monthChipsContainer: {
     flexDirection: 'row',
     gap: 6,
-    paddingBottom: 10,
+    paddingBottom: 8,
+    paddingHorizontal: 2,
   },
   monthChipPill: {
-    paddingHorizontal: 12,
+    position: 'relative',
     paddingVertical: 6,
-    borderRadius: 16,
-    backgroundColor: '#F1F5F9',
+    paddingHorizontal: 12,
+    borderRadius: 12,
+    backgroundColor: 'rgba(243, 238, 251, 0.8)',
+    borderWidth: 1,
+    borderColor: 'rgba(226, 220, 242, 0.9)',
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 4,
   },
   monthChipPillActive: {
     backgroundColor: '#582CDB',
+    borderColor: '#582CDB',
   },
   monthChipText: {
-    fontSize: 11,
+    fontSize: sFont(11),
     fontWeight: '700',
-    color: '#475569',
+    color: '#7F7894',
   },
   monthChipTextActive: {
     color: '#FFFFFF',
-    fontWeight: '700',
   },
   monthChipCurrentDot: {
+    position: 'absolute',
+    top: 4,
+    right: 5,
     width: 5,
     height: 5,
     borderRadius: 2.5,
     backgroundColor: '#F59E0B',
   },
   monthChipCurrentDotActive: {
-    backgroundColor: '#F59E0B',
+    backgroundColor: '#FBBF24',
+    borderWidth: 0.8,
+    borderColor: '#FFFFFF',
   },
   selectedDayBanner: {
-    backgroundColor: '#FEF9C3',
-    borderWidth: 1,
-    borderColor: '#F59E0B',
+    backgroundColor: 'rgba(237, 232, 252, 0.9)',
     borderRadius: 12,
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-    marginBottom: 10,
+    paddingVertical: 6,
+    paddingHorizontal: 10,
+    marginBottom: 8,
+    borderWidth: 1,
+    borderColor: 'rgba(221, 214, 254, 0.9)',
   },
   selectedDayText: {
-    fontSize: 12,
-    fontWeight: '800',
-    color: '#B45309',
+    fontSize: sFont(11),
+    fontWeight: '700',
+    color: '#582CDB',
     textAlign: 'center',
   },
   pagerOuterContainer: {
-    backgroundColor: '#FAF8F5',
+    backgroundColor: 'rgba(255, 255, 255, 0.9)',
     borderRadius: 18,
     borderWidth: 1,
-    borderColor: '#EFECE6',
+    borderColor: 'rgba(235, 230, 248, 0.9)',
     paddingVertical: 10,
-    paddingHorizontal: 8,
-    marginBottom: 12,
+    paddingHorizontal: 6,
+    marginBottom: 8,
+    overflow: 'hidden',
   },
   monthNavHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: 8,
     marginBottom: 8,
+    paddingHorizontal: 4,
   },
   monthNavChevronBtn: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
-    backgroundColor: '#FFFFFF',
+    width: 30,
+    height: 30,
+    borderRadius: 9,
+    backgroundColor: 'rgba(250, 248, 255, 0.8)',
+    borderWidth: 1,
+    borderColor: 'rgba(235, 230, 248, 0.85)',
     justifyContent: 'center',
     alignItems: 'center',
-    borderWidth: 1,
-    borderColor: '#EFECE6',
   },
   monthNavChevronDisabled: {
-    opacity: 0.4,
+    opacity: 0.35,
   },
   monthNameTitleGroup: {
     flexDirection: 'row',
@@ -2856,95 +2830,117 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   focusedMonthTitle: {
-    fontSize: 14,
+    fontSize: sFont(14.5),
     fontWeight: '700',
     color: '#171420',
   },
   currentMonthBadge: {
-    backgroundColor: '#FEF3C7',
-    paddingHorizontal: 6,
+    backgroundColor: '#582CDB',
+    borderRadius: 6,
     paddingVertical: 2,
-    borderRadius: 4,
+    paddingHorizontal: 5,
   },
   currentMonthBadgeText: {
     fontSize: 9,
-    fontWeight: '700',
-    color: '#B45309',
-  },
-  dayColHeadersRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    marginBottom: 6,
-    paddingHorizontal: 4,
-  },
-  dayColHeaderLabel: {
-    width: 32,
-    textAlign: 'center',
-    fontSize: 10,
     fontWeight: '800',
-    color: '#94A3B8',
+    color: '#FFFFFF',
+    letterSpacing: 0.4,
   },
-  singleMonthPage: {
-    alignItems: 'center',
+  calendarDayNamesRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 6,
+    paddingHorizontal: 0,
   },
-  monthGridWrap: {
+  calendarDayNameText: {
+    width: '14.28%',
+    fontSize: sFont(10),
+    fontWeight: '700',
+    color: '#64748B',
+    textAlign: 'center',
+  },
+  monthPageCard: {
+    paddingHorizontal: 0,
+    overflow: 'hidden',
+  },
+  calendarMonthGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    justifyContent: 'space-around',
-    width: '100%',
-    rowGap: 6,
+    justifyContent: 'flex-start',
+    rowGap: 4,
   },
-  dayCellEmpty: {
-    width: 34,
-    height: 34,
-  },
-  dayCellBase: {
-    width: 34,
-    height: 34,
-    borderRadius: 8,
-    backgroundColor: '#FFFFFF',
+  calendarCell: {
+    width: '13.4%',
+    height: sPadding(36),
+    borderRadius: 9,
+    backgroundColor: 'rgba(250, 248, 255, 0.8)',
     borderWidth: 1,
-    borderColor: '#EFECE6',
+    borderColor: 'rgba(237, 232, 252, 0.85)',
     justifyContent: 'center',
     alignItems: 'center',
+    marginHorizontal: '0.44%',
   },
-  dayCellCompleted: {
+  calendarCellEmpty: {
+    width: '13.4%',
+    height: sPadding(36),
+    marginHorizontal: '0.44%',
+  },
+  calendarCellCompleted: {
     backgroundColor: '#582CDB',
-    borderColor: '#4C1D95',
+    borderColor: '#582CDB',
+    shadowColor: '#582CDB',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 4,
+    elevation: 2,
   },
-  dayCellScheduled: {
+  calendarCellScheduled: {
     backgroundColor: '#FEF9C3',
-    borderColor: '#F59E0B',
+    borderColor: '#FDE68A',
   },
-  dayCellFreeze: {
+  calendarCellFreeze: {
     backgroundColor: '#E0F2FE',
-    borderColor: '#7DD3FC',
+    borderColor: '#BAE6FD',
   },
-  dayCellTodayPro: {
+  calendarCellToday: {
     borderWidth: 2,
     borderColor: '#EF4444',
     backgroundColor: '#FEF2F2',
   },
-  dayCellNumber: {
-    fontSize: 10,
-    fontWeight: '700',
-    color: '#334155',
+  calendarCellPressed: {
+    transform: [{ scale: 0.92 }],
   },
-  dayCellNumberCompleted: {
+  calendarCellDayNumber: {
+    fontSize: sFont(11),
+    fontWeight: '700',
+    color: '#171420',
+  },
+  calendarCellTextCompleted: {
     color: '#FFFFFF',
-    fontWeight: '700',
   },
-  dayCellNumberScheduled: {
+  calendarCellTextScheduled: {
     color: '#B45309',
-    fontWeight: '700',
   },
-  dayCellNumberFreeze: {
-    color: '#0369A1',
-    fontWeight: '700',
+  calendarCellTextFreeze: {
+    color: '#0284C7',
   },
-  dayCellNumberToday: {
+  calendarCellTextToday: {
     color: '#DC2626',
     fontWeight: '800',
+  },
+  cellMiniIcon: {
+    fontSize: 8,
+    fontWeight: '800',
+    color: '#FFFFFF',
+    marginTop: 1,
+  },
+  cellMiniIconScheduled: {
+    fontSize: 7.5,
+    marginTop: 1,
+  },
+  cellMiniIconFreeze: {
+    fontSize: 7,
+    marginTop: 1,
   },
   dayCellTodayDot: {
     width: 5,
@@ -2952,55 +2948,57 @@ const styles = StyleSheet.create({
     borderRadius: 2.5,
     backgroundColor: '#EF4444',
     position: 'absolute',
-    bottom: 3,
-  },
-  dayCellCheckIcon: {
-    fontSize: 8,
-    color: '#FFFFFF',
-    fontWeight: '700',
-    position: 'absolute',
     bottom: 2,
   },
-  dayCellScheduledIcon: {
-    fontSize: 7.5,
-    position: 'absolute',
-    bottom: 2,
+  calendarLegendBox: {
+    backgroundColor: 'rgba(250, 248, 255, 0.75)',
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: 'rgba(235, 230, 248, 0.85)',
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    marginBottom: 10,
   },
-  dayCellFreezeIcon: {
-    fontSize: 7,
-    position: 'absolute',
-    bottom: 2,
-  },
-  legendContainer: {
+  legendItemsGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'space-between',
-    rowGap: 8,
-    backgroundColor: '#FAF8F5',
-    borderRadius: 12,
-    paddingVertical: 8,
-    paddingHorizontal: 10,
-    borderWidth: 1,
-    borderColor: '#EFECE6',
-    marginBottom: 14,
+    rowGap: 6,
   },
   legendItem: {
-    width: '48%',
     flexDirection: 'row',
     alignItems: 'center',
+    width: '48%',
     gap: 6,
   },
   legendDot: {
-    width: 7,
-    height: 7,
-    borderRadius: 3.5,
+    width: 8,
+    height: 8,
+    borderRadius: 4,
     flexShrink: 0,
   },
   legendLabel: {
-    fontSize: sFont(10.5),
-    color: '#64748B',
-    fontWeight: '700',
-    flexShrink: 1,
+    fontSize: sFont(10),
+    fontWeight: '600',
+    color: '#5E576E',
+  },
+  donePrimaryBtn: {
+    backgroundColor: '#582CDB',
+    borderRadius: 14,
+    paddingVertical: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#582CDB',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  donePrimaryBtnText: {
+    fontSize: sFont(13.5),
+    fontWeight: '800',
+    color: '#FFFFFF',
+    letterSpacing: 0.2,
   },
 
   // COMMON MODALS
