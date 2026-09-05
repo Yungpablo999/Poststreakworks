@@ -282,9 +282,18 @@ export const ProDashboardScreen: React.FC<ProDashboardScreenProps> = ({
   const [showNotificationModal, setShowNotificationModal] = useState(false);
   const [showCalendarModal, setShowCalendarModal] = useState(false);
   const [showVoiceStudioModal, setShowVoiceStudioModal] = useState(false);
-  
   const [showBrandQuestModal, setShowBrandQuestModal] = useState(false);
   const [showCreatorLevelModal, setShowCreatorLevelModal] = useState(false);
+  const [dashboardMonthOffset, setDashboardMonthOffset] = useState(0);
+  
+  const currentDashboardDate = new Date();
+  currentDashboardDate.setMonth(currentDashboardDate.getMonth() + dashboardMonthOffset);
+  const monthNamesList = [
+    'JANUARY', 'FEBRUARY', 'MARCH', 'APRIL', 'MAY', 'JUNE',
+    'JULY', 'AUGUST', 'SEPTEMBER', 'OCTOBER', 'NOVEMBER', 'DECEMBER'
+  ];
+  const displayedMonthName = monthNamesList[currentDashboardDate.getMonth()];
+  const displayedYear = currentDashboardDate.getFullYear();
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [selectedStoryData, setSelectedStoryData] = useState<CreatorStoryData | null>(null);
 
@@ -712,7 +721,7 @@ export const ProDashboardScreen: React.FC<ProDashboardScreenProps> = ({
             style={({ pressed }) => [styles.dashboardCard, pressed && styles.cardPressed]}
           >
             <View style={styles.streakCardHeader}>
-              <Text style={styles.streakLabel}>YOUR STREAK (TAP TO EXPAND)</Text>
+              <Text style={styles.streakLabel}>ACTIVITY THIS MONTH (TAP TO EXPAND)</Text>
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 2 }}>
                 <Text style={styles.streakBigCount}>{userProfile?.streakCount || 1}-Day Streak</Text>
                 <Animated.Text style={{ fontSize: 20, transform: [{ scale: flamePulse }] }}>
@@ -722,7 +731,29 @@ export const ProDashboardScreen: React.FC<ProDashboardScreenProps> = ({
             </View>
 
             <View style={styles.monthHeaderRow}>
-              <Text style={styles.monthLabelText}>MAY 2024  ›</Text>
+              <Pressable
+                onPress={(e) => {
+                  e.stopPropagation();
+                  if (Platform.OS !== 'web') Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                  setDashboardMonthOffset((prev) => prev - 1);
+                }}
+                hitSlop={8}
+                style={styles.monthNavBtn}
+              >
+                <Text style={styles.monthNavArrow}>‹</Text>
+              </Pressable>
+              <Text style={styles.monthLabelText}>{displayedMonthName} {displayedYear}</Text>
+              <Pressable
+                onPress={(e) => {
+                  e.stopPropagation();
+                  if (Platform.OS !== 'web') Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                  setDashboardMonthOffset((prev) => prev + 1);
+                }}
+                hitSlop={8}
+                style={styles.monthNavBtn}
+              >
+                <Text style={styles.monthNavArrow}>›</Text>
+              </Pressable>
             </View>
 
             <View style={styles.daysHeaderRow}>
@@ -737,19 +768,29 @@ export const ProDashboardScreen: React.FC<ProDashboardScreenProps> = ({
               <View style={styles.heatmapRow}>
                 <View style={styles.heatmapCellInactive} />
                 <View style={styles.heatmapCellInactive} />
-                {[1, 2, 3, 4, 5].map((_, i) => (
-                  <View key={`pro_r1_${i}`} style={styles.heatmapCellActive}>
-                    <Text style={styles.checkMarkText}>✓</Text>
-                  </View>
-                ))}
+                <View style={styles.heatmapCellInactive} />
+                <View style={styles.heatmapCellActive}>
+                  <Text style={styles.checkMarkText}>✓</Text>
+                </View>
+                <View style={styles.heatmapCellInactive} />
+                <View style={styles.heatmapCellActive}>
+                  <Text style={styles.checkMarkText}>✓</Text>
+                </View>
+                <View style={styles.heatmapCellInactive} />
               </View>
 
               <View style={styles.heatmapRow}>
-                {[1, 2, 3, 4, 5, 6, 7].map((_, i) => (
-                  <View key={`pro_r2_${i}`} style={styles.heatmapCellActive}>
-                    <Text style={styles.checkMarkText}>✓</Text>
-                  </View>
-                ))}
+                <View style={styles.heatmapCellInactive} />
+                <View style={styles.heatmapCellInactive} />
+                <View style={styles.heatmapCellActive}>
+                  <Text style={styles.checkMarkText}>✓</Text>
+                </View>
+                <View style={styles.heatmapCellInactive} />
+                <View style={styles.heatmapCellInactive} />
+                <View style={styles.heatmapCellInactive} />
+                <View style={[styles.heatmapCellActive, { backgroundColor: '#582CDB', borderWidth: 1.5, borderColor: '#F59E0B' }]}>
+                  <Text style={[styles.checkMarkText, { color: '#FCD34D' }]}>🔥</Text>
+                </View>
               </View>
             </View>
 
@@ -759,7 +800,7 @@ export const ProDashboardScreen: React.FC<ProDashboardScreenProps> = ({
                 style={{ width: 22, height: 22 }}
                 resizeMode="contain"
               />
-              <Text style={styles.topCreatorText}>Top 1% of creators this month.</Text>
+              <Text style={styles.topCreatorText}>Top 1% for consistency & growth this month.</Text>
             </View>
           </Pressable>
 
@@ -1085,7 +1126,7 @@ export const ProDashboardScreen: React.FC<ProDashboardScreenProps> = ({
               <View style={styles.calendarModalHeader}>
                 <View style={styles.calendarModalTitleGroup}>
                   <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-                    <Text style={styles.calendarModalMainTitle}>Streak Calendar 2024</Text>
+                    <Text style={styles.calendarModalMainTitle}>Streak & Activity Calendar {displayedYear}</Text>
                     <LinearGradient
                       colors={['#F59E0B', '#F59E0B', '#F59E0B']}
                       start={{ x: 0, y: 0 }}
@@ -2068,12 +2109,26 @@ const styles = StyleSheet.create({
     color: '#171420',
   },
   monthHeaderRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
     marginBottom: 8,
+    gap: 6,
+  },
+  monthNavBtn: {
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 6,
+    backgroundColor: '#F1F5F9',
+  },
+  monthNavArrow: {
+    fontSize: 14,
+    fontWeight: '800',
+    color: '#582CDB',
   },
   monthLabelText: {
     fontSize: 11,
     fontWeight: '800',
-    color: '#94A3B8',
+    color: '#64748B',
     letterSpacing: 0.5,
   },
   daysHeaderRow: {
