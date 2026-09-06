@@ -332,9 +332,9 @@ const GAP_SUGGESTIONS = [
     score: '98% Fit',
     reasoning: 'Based on your recent saves, Reel retention & audience response to contrarian topics.',
     title: 'Most creators fail at X because they optimize for reach before retention',
-    format: 'Short Reel • High Comment Velocity',
+    format: 'Reel • High Comments',
     platform: 'instagram',
-    platformLabel: 'Instagram Reel',
+    platformLabel: 'Instagram',
     hashtags: '#creatortips #mindset #consistency',
   },
   {
@@ -344,9 +344,9 @@ const GAP_SUGGESTIONS = [
     score: '95% Fit',
     reasoning: 'Based on your past breakdown carousels driving 3.2x higher bookmark & share velocity.',
     title: 'How I built my production workflow in 48 hours without burning out',
-    format: 'Breakdown Carousel • High Saves & Shares',
+    format: 'Carousel • High Saves',
     platform: 'instagram',
-    platformLabel: 'Instagram Carousel',
+    platformLabel: 'Instagram',
     hashtags: '#creatorsetup #workflow #efficiency',
   },
   {
@@ -356,7 +356,7 @@ const GAP_SUGGESTIONS = [
     score: '92% Fit',
     reasoning: 'Based on your growth analytics: step-by-step metric frameworks deliver your strongest conversion.',
     title: '3 metrics you must track daily if you want consistent inbound growth',
-    format: 'Step-by-Step Thread • High Bookmarks',
+    format: 'Thread • High Bookmarks',
     platform: 'x',
     platformLabel: 'X Thread',
     hashtags: '#growthstrategy #analytics #scaling',
@@ -1780,9 +1780,11 @@ export const ProScheduleScreen: React.FC<ProScheduleScreenProps> = ({
 
                       {/* Bottom Row: Format & Action CTA (Protected from clipping) */}
                       <View style={styles.gapSugBottomRow}>
-                        <Text style={styles.gapSugFormatText} numberOfLines={1} ellipsizeMode="tail">
-                          {sug.platformLabel} • {sug.format}
-                        </Text>
+                        <View style={styles.gapSugFormatContainer}>
+                          <Text style={styles.gapSugFormatText} numberOfLines={1} ellipsizeMode="tail">
+                            {sug.platformLabel} • {sug.format}
+                          </Text>
+                        </View>
                         <View style={styles.gapSugDraftPill}>
                           <Text style={styles.gapSugActionTag}>Draft ➔</Text>
                         </View>
@@ -3810,15 +3812,16 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(15, 10, 30, 0.75)',
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 20,
+    paddingHorizontal: 16,
+    paddingVertical: 24,
   },
   modalCard: {
     width: '100%',
-    maxWidth: 400,
-    maxHeight: '88%',
+    maxWidth: 420,
+    maxHeight: '90%',
     backgroundColor: '#FFFFFF',
     borderRadius: 24,
-    padding: 22,
+    padding: 18,
   },
   modalProTagBadge: {
     backgroundColor: '#EDE9FE',
@@ -4165,20 +4168,28 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     marginTop: 6,
-    gap: 8,
+    width: '100%',
+  },
+  gapSugFormatContainer: {
+    flex: 1,
+    minWidth: 0,
+    marginRight: 8,
   },
   gapSugFormatText: {
     fontSize: 11,
     color: '#64748B',
     fontWeight: '600',
-    flex: 1,
   },
   gapSugDraftPill: {
     backgroundColor: '#EDE9FE',
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: 6,
+    paddingHorizontal: 10,
+    paddingVertical: 4.5,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#DDD6FE',
     flexShrink: 0,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   gapSugActionTag: {
     fontSize: 11,
