@@ -492,8 +492,8 @@ export const ProIdeaStrategyScreen: React.FC<ProIdeaStrategyScreenProps> = ({
               ))}
             </View>
 
-            {/* Audience Question Seed */}
-            <Text style={[styles.setupFieldLabel, { marginTop: 12 }]}>AUDIENCE QUESTION / SEED</Text>
+            {/* Content Seed / Question */}
+            <Text style={[styles.setupFieldLabel, { marginTop: 12 }]}>CONTENT SEED / QUESTION</Text>
             <View style={styles.promptBubbleBox}>
               <Text style={styles.promptBubbleText}>
                 &ldquo;{audiencePrompt}&rdquo;
@@ -797,10 +797,10 @@ export const ProIdeaStrategyScreen: React.FC<ProIdeaStrategyScreenProps> = ({
               </View>
 
               <Text style={{ fontSize: 12, color: '#64748B', marginBottom: 12 }}>
-                Customize your niche and audience seed prompt to steer the AI generator.
+                Customize your niche and content seed or question to steer the AI generator.
               </Text>
 
-              <Text style={styles.setupFieldLabel}>AUDIENCE SEED PROMPT</Text>
+              <Text style={styles.setupFieldLabel}>CONTENT SEED / QUESTION</Text>
               <TextInput
                 style={styles.modalTextInput}
                 multiline
