@@ -329,7 +329,8 @@ const GAP_SUGGESTIONS = [
     id: 'gap_1',
     angle: 'Contrarian Take',
     angleIcon: '🔥',
-    score: '⚡ 98% Fit',
+    score: '98% Fit',
+    reasoning: 'Based on your recent saves, Reel retention & audience response to contrarian topics.',
     title: 'Most creators fail at X because they optimize for reach before retention',
     format: 'Short Reel • High Comment Velocity',
     platform: 'instagram',
@@ -340,7 +341,8 @@ const GAP_SUGGESTIONS = [
     id: 'gap_2',
     angle: 'Behind-the-Scenes',
     angleIcon: '🎬',
-    score: '⚡ 95% Fit',
+    score: '95% Fit',
+    reasoning: 'Based on your past breakdown carousels driving 3.2x higher bookmark & share velocity.',
     title: 'How I built my production workflow in 48 hours without burning out',
     format: 'Breakdown Carousel • High Saves & Shares',
     platform: 'instagram',
@@ -351,7 +353,8 @@ const GAP_SUGGESTIONS = [
     id: 'gap_3',
     angle: 'Actionable Framework',
     angleIcon: '🛠️',
-    score: '⚡ 92% Fit',
+    score: '92% Fit',
+    reasoning: 'Based on your growth analytics: step-by-step metric frameworks deliver your strongest conversion.',
     title: '3 metrics you must track daily if you want consistent inbound growth',
     format: 'Step-by-Step Thread • High Bookmarks',
     platform: 'x',
@@ -406,6 +409,7 @@ export const ProScheduleScreen: React.FC<ProScheduleScreenProps> = ({
   const [savedAutopilotMode, setSavedAutopilotMode] = useState<'recommend' | 'schedule' | 'autopost'>('schedule');
   const [autopilotMode, setAutopilotMode] = useState<'recommend' | 'schedule' | 'autopost'>('schedule');
   const [expandedWindow, setExpandedWindow] = useState<'today' | 'tomorrow' | null>(null);
+  const [expandedReasonId, setExpandedReasonId] = useState<string | null>(null);
 
   // Dynamic Operating Dashboard Calculations
   const TARGET_WEEKLY_SLOTS = 7;
@@ -1721,6 +1725,7 @@ export const ProScheduleScreen: React.FC<ProScheduleScreenProps> = ({
                 {/* 3 Interactive AI Strategy Cards */}
                 <Text style={styles.inputLabel}>CHOOSE AI STRATEGY (1-TAP TO COMPOSE)</Text>
                 {GAP_SUGGESTIONS.map((sug) => {
+                  const isReasonExpanded = expandedReasonId === sug.id;
                   return (
                     <Pressable
                       key={sug.id}
@@ -1738,29 +1743,49 @@ export const ProScheduleScreen: React.FC<ProScheduleScreenProps> = ({
                         }
                       }}
                     >
-                      {/* Top Row: Angle & Audience Fit */}
-                      <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+                      {/* Top Row: Angle & Tappable Audience Fit Score */}
+                      <View style={styles.gapSugTopRow}>
                         <View style={styles.gapSugAngleBadge}>
                           <Text style={styles.gapSugAngleText}>
                             {sug.angleIcon} {sug.angle}
                           </Text>
                         </View>
-                        <View style={styles.gapSugScoreBadge}>
-                          <Text style={styles.gapSugScoreText}>{sug.score}</Text>
-                        </View>
+                        <Pressable
+                          style={styles.gapSugScoreBadge}
+                          onPress={(e) => {
+                            e.stopPropagation();
+                            if (Platform.OS !== 'web') {
+                              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                            }
+                            setExpandedReasonId((prev) => (prev === sug.id ? null : sug.id));
+                          }}
+                          hitSlop={8}
+                        >
+                          <Text style={styles.gapSugScoreText}>⚡ {sug.score} ⓘ</Text>
+                        </Pressable>
                       </View>
 
-                      {/* Hook Headline */}
-                      <Text style={styles.gapSugTitleText} numberOfLines={2}>
+                      {/* Expanded AI Reasoning Breakdown */}
+                      {isReasonExpanded && (
+                        <View style={styles.gapSugReasoningBox}>
+                          <Text style={styles.gapSugReasoningTitle}>WHY {sug.score.toUpperCase()}?</Text>
+                          <Text style={styles.gapSugReasoningText}>{sug.reasoning}</Text>
+                        </View>
+                      )}
+
+                      {/* Hook Headline (Complete text without awkward word breaks) */}
+                      <Text style={styles.gapSugTitleText}>
                         &ldquo;{sug.title}&rdquo;
                       </Text>
 
-                      {/* Bottom Row: Format & Action CTA */}
+                      {/* Bottom Row: Format & Action CTA (Protected from clipping) */}
                       <View style={styles.gapSugBottomRow}>
-                        <Text style={styles.gapSugFormatText}>
+                        <Text style={styles.gapSugFormatText} numberOfLines={1} ellipsizeMode="tail">
                           {sug.platformLabel} • {sug.format}
                         </Text>
-                        <Text style={styles.gapSugActionTag}>Draft Now ➔</Text>
+                        <View style={styles.gapSugDraftPill}>
+                          <Text style={styles.gapSugActionTag}>Draft ➔</Text>
+                        </View>
                       </View>
                     </Pressable>
                   );
@@ -4076,6 +4101,12 @@ const styles = StyleSheet.create({
     borderColor: '#8B5CF6',
     transform: [{ scale: 0.985 }],
   },
+  gapSugTopRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 6,
+  },
   gapSugAngleBadge: {
     backgroundColor: '#EDE9FE',
     paddingHorizontal: 8,
@@ -4090,7 +4121,7 @@ const styles = StyleSheet.create({
   gapSugScoreBadge: {
     backgroundColor: '#FEF3C7',
     borderWidth: 1,
-    borderColor: '#FDE68A',
+    borderColor: '#F59E0B',
     paddingHorizontal: 8,
     paddingVertical: 3,
     borderRadius: 6,
@@ -4099,6 +4130,28 @@ const styles = StyleSheet.create({
     fontSize: 11,
     fontWeight: '800',
     color: '#B45309',
+  },
+  gapSugReasoningBox: {
+    backgroundColor: '#FFFBEB',
+    borderWidth: 1,
+    borderColor: '#FDE68A',
+    borderRadius: 10,
+    padding: 9,
+    marginTop: 4,
+    marginBottom: 8,
+  },
+  gapSugReasoningTitle: {
+    fontSize: 9.5,
+    fontWeight: '800',
+    color: '#92400E',
+    letterSpacing: 0.5,
+    marginBottom: 2,
+  },
+  gapSugReasoningText: {
+    fontSize: 11,
+    fontWeight: '600',
+    color: '#78350F',
+    lineHeight: 15,
   },
   gapSugTitleText: {
     fontSize: 13.5,
@@ -4111,15 +4164,24 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginTop: 4,
+    marginTop: 6,
+    gap: 8,
   },
   gapSugFormatText: {
     fontSize: 11,
     color: '#64748B',
     fontWeight: '600',
+    flex: 1,
+  },
+  gapSugDraftPill: {
+    backgroundColor: '#EDE9FE',
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 6,
+    flexShrink: 0,
   },
   gapSugActionTag: {
-    fontSize: 11.5,
+    fontSize: 11,
     fontWeight: '800',
     color: '#582CDB',
   },
