@@ -114,6 +114,7 @@ interface StrategyItem {
   icon: string;
   title: string;
   tag: string;
+  summary: string;
   body: string;
 }
 
@@ -123,20 +124,23 @@ const JARVIS_STRATEGIES: StrategyItem[] = [
     icon: '⚡',
     title: 'Peak Velocity Window (7:15 – 7:45 PM)',
     tag: 'ALGORITHM TIMING • +2.4X REACH',
+    summary: 'Schedule 45s Reels at 7:30 PM to trigger discovery velocity wave.',
     body: 'Wednesday and Friday evening algorithms favor early watch-time velocity. Schedule your 45-second Reels at 7:30 PM to trigger the discovery explore page.',
   },
   {
     id: 'strat_2',
     icon: '🎬',
     title: 'Contrarian Hook Architecture',
-    tag: 'RETENTION RETENTION • 96% AUDIENCE FIT',
-    body: 'Start with "Why 90% of creators fail by Month 2" rather than an intro. Cuts initial 3-second dropoff by 42% on TikTok and Instagram Reels.',
+    tag: 'RETENTION • 96% AUDIENCE FIT',
+    summary: 'Open with bold contrarian statement to cut 3s dropoff by 42%.',
+    body: 'Start with "Why 90% of creators fail by Month 2" rather than a casual intro. Cuts initial 3-second dropoff by 42% on TikTok and Instagram Reels.',
   },
   {
     id: 'strat_3',
     icon: '🚀',
     title: 'Multi-Sync Cascade Pacing',
     tag: 'DISTRIBUTION MULTIPLIER',
+    summary: 'Publish Instagram + TikTok together → YouTube Shorts 2h later.',
     body: 'Publish your 9:16 video to Instagram and TikTok simultaneously, then release the YouTube Shorts breakdown 2 hours later to maximize multi-channel reach.',
   },
   {
@@ -144,6 +148,7 @@ const JARVIS_STRATEGIES: StrategyItem[] = [
     icon: '🤝',
     title: 'Pre-Release Squad Engagement',
     tag: 'DUEL BOOST • +750 XP',
+    summary: 'Notify your squad 15m before launch for early viral comment momentum.',
     body: 'Notify your squad (Elena & Amara) 15 minutes before your post goes live to secure initial high-retention comments and fuel viral reach.',
   },
 ];
@@ -410,6 +415,7 @@ export const ProScheduleScreen: React.FC<ProScheduleScreenProps> = ({
   const [autopilotMode, setAutopilotMode] = useState<'recommend' | 'schedule' | 'autopost'>('schedule');
   const [expandedWindow, setExpandedWindow] = useState<'today' | 'tomorrow' | null>(null);
   const [expandedReasonId, setExpandedReasonId] = useState<string | null>(null);
+  const [expandedStrategyId, setExpandedStrategyId] = useState<string | null>(null);
 
   // Dynamic Operating Dashboard Calculations
   const TARGET_WEEKLY_SLOTS = 7;
@@ -2657,6 +2663,8 @@ export const ProScheduleScreen: React.FC<ProScheduleScreenProps> = ({
                 <View style={{ gap: 10, marginVertical: 12 }}>
                   {JARVIS_STRATEGIES.map((strat) => {
                     const isSelected = selectedStrategyIds.includes(strat.id);
+                    const isExpanded = expandedStrategyId === strat.id;
+
                     return (
                       <Pressable
                         key={strat.id}
@@ -2680,9 +2688,10 @@ export const ProScheduleScreen: React.FC<ProScheduleScreenProps> = ({
                           }
                         }}
                       >
-                        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 6 }}>
-                          <View style={{ flexDirection: 'row', gap: 10, alignItems: 'center', flex: 1 }}>
-                            <Text style={{ fontSize: 20 }}>{strat.icon}</Text>
+                        {/* Top Row: Icon, Title, Tag & Checkbox */}
+                        <View style={styles.strategyCardHeaderRow}>
+                          <View style={{ flexDirection: 'row', gap: 10, alignItems: 'flex-start', flex: 1 }}>
+                            <Text style={{ fontSize: 20, marginTop: 1 }}>{strat.icon}</Text>
                             <View style={{ flex: 1 }}>
                               <Text style={styles.strategyIdeaTitle}>{strat.title}</Text>
                               <Text style={styles.strategyIdeaTag}>{strat.tag}</Text>
@@ -2698,7 +2707,32 @@ export const ProScheduleScreen: React.FC<ProScheduleScreenProps> = ({
                           </View>
                         </View>
 
-                        <Text style={styles.strategyIdeaBody}>{strat.body}</Text>
+                        {/* Scan-First Punchy Summary */}
+                        <Text style={styles.strategySummaryText}>{strat.summary}</Text>
+
+                        {/* Expandable Deeper Breakdown Affordance */}
+                        <Pressable
+                          style={styles.strategyExpandBtn}
+                          onPress={(e) => {
+                            e.stopPropagation();
+                            if (Platform.OS !== 'web') {
+                              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                            }
+                            setExpandedStrategyId((prev) => (prev === strat.id ? null : strat.id));
+                          }}
+                          hitSlop={8}
+                        >
+                          <Text style={styles.strategyExpandBtnText}>
+                            {isExpanded ? 'Hide Details ▲' : 'Deep Tactical Breakdown ▾'}
+                          </Text>
+                        </Pressable>
+
+                        {/* Expanded Deeper Explanation */}
+                        {isExpanded && (
+                          <View style={styles.strategyExpandedDetailBox}>
+                            <Text style={styles.strategyIdeaBody}>{strat.body}</Text>
+                          </View>
+                        )}
                       </Pressable>
                     );
                   })}
@@ -4471,6 +4505,38 @@ const styles = StyleSheet.create({
     color: '#582CDB',
     letterSpacing: 0.4,
     marginTop: 1,
+  },
+  strategyCardHeaderRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    marginBottom: 4,
+  },
+  strategySummaryText: {
+    fontSize: 12.5,
+    fontWeight: '600',
+    color: '#171420',
+    lineHeight: 17,
+    marginTop: 4,
+    marginBottom: 6,
+  },
+  strategyExpandBtn: {
+    alignSelf: 'flex-start',
+    paddingVertical: 2.5,
+    paddingHorizontal: 7,
+    borderRadius: 6,
+    backgroundColor: '#EDE9FE',
+  },
+  strategyExpandBtnText: {
+    fontSize: 10,
+    fontWeight: '800',
+    color: '#582CDB',
+  },
+  strategyExpandedDetailBox: {
+    marginTop: 8,
+    paddingTop: 8,
+    borderTopWidth: 1,
+    borderTopColor: '#EDE9FE',
   },
   strategyIdeaBody: {
     fontSize: 12,
