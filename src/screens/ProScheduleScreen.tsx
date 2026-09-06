@@ -1442,12 +1442,12 @@ export const ProScheduleScreen: React.FC<ProScheduleScreenProps> = ({
                 }}
               >
                 <LinearGradient
-                  colors={['#FDE68A', '#F59E0B', '#D97706']}
+                  colors={['#F59E0B', '#F59E0B', '#D97706']}
                   start={{ x: 0, y: 0 }}
                   end={{ x: 1, y: 1 }}
                   style={styles.goldBtnGradient}
                 >
-                  <Text style={styles.fillSlotGoldBtnText}>✨ Fill Slot</Text>
+                  <Text style={styles.fillSlotGoldBtnText}>Fill Slot</Text>
                 </LinearGradient>
               </Pressable>
 
@@ -1504,13 +1504,13 @@ export const ProScheduleScreen: React.FC<ProScheduleScreenProps> = ({
               }}
             >
               <LinearGradient
-                colors={['#FDE68A', '#F59E0B', '#D97706']}
+                colors={['#F59E0B', '#F59E0B', '#D97706']}
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 1 }}
                 style={styles.modalGoldBtnGradient}
               >
                 <Text style={styles.modalGoldActionBtnText} numberOfLines={1}>
-                  ✨ More Strategy Ideas ➔
+                  More Strategy Ideas ➔
                 </Text>
               </LinearGradient>
             </Pressable>
@@ -1959,13 +1959,13 @@ export const ProScheduleScreen: React.FC<ProScheduleScreenProps> = ({
                       }}
                     >
                       <LinearGradient
-                        colors={['#FDE68A', '#F59E0B', '#D97706']}
+                        colors={['#F59E0B', '#F59E0B', '#D97706']}
                         start={{ x: 0, y: 0 }}
                         end={{ x: 1, y: 1 }}
                         style={styles.modalGoldBtnGradient}
                       >
                         <Text style={styles.modalGoldActionBtnText} numberOfLines={1}>
-                          ✨ Save Changes (+25 XP) ➔
+                          Save Changes (+25 XP) ➔
                         </Text>
                       </LinearGradient>
                     </Pressable>
@@ -2699,13 +2699,13 @@ export const ProScheduleScreen: React.FC<ProScheduleScreenProps> = ({
                   }}
                 >
                   <LinearGradient
-                    colors={['#FDE68A', '#F59E0B', '#D97706']}
+                    colors={['#F59E0B', '#F59E0B', '#D97706']}
                     start={{ x: 0, y: 0 }}
                     end={{ x: 1, y: 1 }}
                     style={styles.modalGoldBtnGradient}
                   >
                     <Text style={styles.modalGoldActionBtnText} numberOfLines={1}>
-                      ✨ Apply {selectedStrategyIds.length} Strategies (+{selectedStrategyIds.length * 25} XP) ➔
+                      Apply {selectedStrategyIds.length} Strategies (+{selectedStrategyIds.length * 25} XP) ➔
                     </Text>
                   </LinearGradient>
                 </Pressable>
@@ -3714,28 +3714,26 @@ const styles = StyleSheet.create({
   },
   fillSlotGoldBtn: {
     flex: 1,
-    borderRadius: 12,
+    borderRadius: 14,
     overflow: 'hidden',
     shadowColor: '#F59E0B',
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.12,
-    shadowRadius: 8,
-    elevation: 3,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.16,
+    shadowRadius: 10,
+    elevation: 4,
   },
   goldBtnGradient: {
     flex: 1,
-    paddingVertical: 11,
+    paddingVertical: 12,
     justifyContent: 'center',
     alignItems: 'center',
-    borderWidth: 1,
-    borderColor: '#FCD34D',
-    borderRadius: 12,
+    borderRadius: 14,
   },
   fillSlotGoldBtnText: {
-    color: '#0C0A12',
-    fontSize: 13,
-    fontWeight: '700',
-    letterSpacing: 0.2,
+    color: '#171420',
+    fontSize: 13.5,
+    fontWeight: '800',
+    letterSpacing: -0.2,
   },
   askJarvisOutlineBtn: {
     flex: 1,
@@ -3969,29 +3967,27 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   modalGoldActionBtnWrapper: {
-    borderRadius: 14,
+    borderRadius: 16,
     overflow: 'hidden',
     marginTop: 8,
     shadowColor: '#F59E0B',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.12,
+    shadowOpacity: 0.16,
     shadowRadius: 10,
     elevation: 4,
   },
   modalGoldBtnGradient: {
-    paddingVertical: 13,
-    paddingHorizontal: 10,
+    paddingVertical: 14,
+    paddingHorizontal: 12,
     alignItems: 'center',
     justifyContent: 'center',
-    borderWidth: 1,
-    borderColor: '#FCD34D',
-    borderRadius: 14,
+    borderRadius: 16,
   },
   modalGoldActionBtnText: {
-    color: '#0C0A12',
-    fontSize: sFont(13),
-    fontWeight: '700',
-    letterSpacing: 0.2,
+    color: '#171420',
+    fontSize: sFont(13.5),
+    fontWeight: '800',
+    letterSpacing: -0.2,
     textAlign: 'center',
   },
   modalSecondaryOutlineBtn: {
