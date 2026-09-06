@@ -930,7 +930,7 @@ export const ProCreateScreen: React.FC<ProCreateScreenProps> = ({
               <Text style={{ fontSize: 18 }}>⚡</Text>
             </View>
 
-            <Text style={styles.bestWindowSub}>Best window today</Text>
+            <Text style={styles.bestWindowSub}>Your best window today</Text>
             <Text style={styles.bestWindowTime}>7:30 <Text style={styles.bestWindowPm}>PM</Text></Text>
 
             <View style={styles.scheduleDivider} />
