@@ -1488,7 +1488,7 @@ export const ProScheduleScreen: React.FC<ProScheduleScreenProps> = ({
             colors={['#3B14A7', '#582CDB']}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
-            style={[styles.jarvisInsightCard, { marginBottom: 140 }]}
+            style={styles.jarvisInsightCard}
           >
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 8 }}>
               <Image
@@ -2981,7 +2981,7 @@ const styles = StyleSheet.create({
   scrollContent: {
     paddingHorizontal: 20,
     paddingTop: 4,
-    paddingBottom: 135,
+    paddingBottom: 95,
   },
 
   // TITLES SECTION
@@ -3816,6 +3816,7 @@ const styles = StyleSheet.create({
   jarvisInsightCard: {
     borderRadius: 24,
     padding: 20,
+    marginBottom: 16,
   },
   jarvisInsightHeader: {
     fontSize: 16,
