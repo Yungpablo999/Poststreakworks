@@ -754,7 +754,7 @@ export const ProCreateScreen: React.FC<ProCreateScreenProps> = ({
                 </View>
                 <View style={{ flex: 1 }}>
                   <Text style={styles.voiceCardTitle}>Voice Studio</Text>
-                  <Text style={styles.voiceCardSub} numberOfLines={1}>Create AI voice from script</Text>
+                  <Text style={styles.voiceCardSub} numberOfLines={1}>AI voice from script</Text>
                 </View>
               </View>
 
@@ -813,12 +813,12 @@ export const ProCreateScreen: React.FC<ProCreateScreenProps> = ({
 
             {/* SPECS ROW */}
             <View style={styles.voiceSpecsRow}>
-              <View>
-                <Text style={styles.seriesVoiceLabel}>SERIES VOICE</Text>
-                <Text style={styles.seriesVoiceVal}>{selectedVoiceTone}</Text>
+              <View style={{ flex: 1, marginRight: 12 }}>
+                <Text style={styles.seriesVoiceLabel}>ACTIVE VOICE</Text>
+                <Text style={styles.seriesVoiceVal} numberOfLines={1}>{selectedVoiceTone}</Text>
               </View>
 
-              <View style={{ alignItems: 'flex-end' }}>
+              <View style={{ alignItems: 'flex-end', flexShrink: 0 }}>
                 <Text style={styles.minsCountVal}>118m</Text>
                 <Text style={styles.minsRemainingLabel}>MINS REMAINING</Text>
               </View>
