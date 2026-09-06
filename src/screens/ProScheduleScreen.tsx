@@ -1965,23 +1965,27 @@ export const ProScheduleScreen: React.FC<ProScheduleScreenProps> = ({
                           if (Platform.OS !== 'web') {
                             Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                           }
-                          // Pre-fill Edit Modal with this queue item
-                          setEditingPostTitle(item.title);
-                          setEditingPostPlatform(item.platformLabel);
-                          setEditingPostTime(item.time);
-                          setEditingPostPeriod(item.period);
                           setShowFullQueueModal(false);
-                          triggerModalPop();
-                          setSelectedPostDetail({
-                            id: item.id,
-                            time: item.time,
-                            period: item.period,
-                            title: item.title,
-                            platform: item.iconType,
-                            platformLabel: item.platformLabel,
-                            badgeType: 'scheduled',
-                            dayIndex: selectedDayIndex,
-                          });
+                          if (onOpenPostComposer) {
+                            onOpenPostComposer(item.title, item.iconType);
+                          } else {
+                            // Fallback
+                            setEditingPostTitle(item.title);
+                            setEditingPostPlatform(item.platformLabel);
+                            setEditingPostTime(item.time);
+                            setEditingPostPeriod(item.period);
+                            triggerModalPop();
+                            setSelectedPostDetail({
+                              id: item.id,
+                              time: item.time,
+                              period: item.period,
+                              title: item.title,
+                              platform: item.iconType,
+                              platformLabel: item.platformLabel,
+                              badgeType: 'scheduled',
+                              dayIndex: selectedDayIndex,
+                            });
+                          }
                         }}
                       >
                         <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' }}>
@@ -2024,7 +2028,7 @@ export const ProScheduleScreen: React.FC<ProScheduleScreenProps> = ({
                         </View>
 
                         <View style={styles.queueCardFooterRow}>
-                          <Text style={styles.queueCardActionHint}>✏️ Tap to edit details &amp; peak timing</Text>
+                          <Text style={styles.queueCardActionHint}>✏️ Tap to edit in Post Composer</Text>
                           <Text style={{ fontSize: 13, color: '#582CDB', fontWeight: '700' }}>➔</Text>
                         </View>
                       </Pressable>
