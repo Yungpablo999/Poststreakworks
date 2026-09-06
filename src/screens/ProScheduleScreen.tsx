@@ -402,6 +402,8 @@ export const ProScheduleScreen: React.FC<ProScheduleScreenProps> = ({
   const [editingPostPeriod, setEditingPostPeriod] = useState('PM');
   const [editingPostHashtags, setEditingPostHashtags] = useState('#CreatorGrowth #ViralReels #PostStreak');
   const [autopilotEnabled, setAutopilotEnabled] = useState<boolean>(true);
+  const [showAutopilotModal, setShowAutopilotModal] = useState<boolean>(false);
+  const [autopilotMode, setAutopilotMode] = useState<'recommend' | 'schedule' | 'autopost'>('schedule');
 
   // Dynamic Operating Dashboard Calculations
   const TARGET_WEEKLY_SLOTS = 7;
@@ -1100,6 +1102,21 @@ export const ProScheduleScreen: React.FC<ProScheduleScreenProps> = ({
                 <Text style={styles.autopilotSubTileVal}>2 Drafts</Text>
               </View>
             </View>
+
+            {/* Subtle Action Link: What Autopilot manages → */}
+            <Pressable
+              style={({ pressed }) => [styles.autopilotManageLinkBtn, pressed && styles.btnPressed]}
+              onPress={() => {
+                if (Platform.OS !== 'web') {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                }
+                triggerModalPop();
+                setShowAutopilotModal(true);
+              }}
+              hitSlop={8}
+            >
+              <Text style={styles.autopilotManageLinkText}>What Autopilot manages →</Text>
+            </Pressable>
           </View>
 
           {/* ============================================================ */}
@@ -2158,6 +2175,176 @@ export const ProScheduleScreen: React.FC<ProScheduleScreenProps> = ({
           </View>
         </Modal>
 
+        {/* ============================================================ */}
+        {/* MODAL 7: AUTOPILOT ENGINE CONTROLS & GOVERNANCE MODAL        */}
+        {/* ============================================================ */}
+        <Modal
+          visible={showAutopilotModal}
+          transparent={true}
+          animationType="fade"
+          onRequestClose={() => setShowAutopilotModal(false)}
+        >
+          <View style={styles.modalOverlay}>
+            <Animated.View style={[styles.modalCard, { transform: [{ scale: modalPopScale }], maxHeight: '90%' }]}>
+              <ScrollView showsVerticalScrollIndicator={false} bounces={false}>
+                {/* Header */}
+                <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+                  <View style={styles.modalGoldTagBadge}>
+                    <Text style={styles.modalGoldTagBadgeText}>🤖 PRO AUTOPILOT GOVERNANCE</Text>
+                  </View>
+                  <Pressable onPress={() => setShowAutopilotModal(false)} hitSlop={8}>
+                    <Text style={{ fontSize: 18, color: '#94A3B8', fontWeight: '700' }}>✕</Text>
+                  </Pressable>
+                </View>
+
+                <Text style={styles.modalTitleText} numberOfLines={1} adjustsFontSizeToFit>
+                  What Autopilot Manages
+                </Text>
+                <Text style={styles.modalSubText}>
+                  Jarvis coordinates your posting consistency, queue timing, and streak protection behind the scenes.
+                </Text>
+
+                {/* 3 Clear Automation Modes (Trust Levels) */}
+                <Text style={styles.inputLabel}>AUTOMATION MODE (SELECT TRUST LEVEL)</Text>
+
+                <Pressable
+                  style={[
+                    styles.autopilotModeCard,
+                    autopilotMode === 'recommend' && styles.autopilotModeCardActive,
+                  ]}
+                  onPress={() => {
+                    if (Platform.OS !== 'web') Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                    setAutopilotMode('recommend');
+                  }}
+                >
+                  <View style={styles.autopilotModeTitleRow}>
+                    <Text style={styles.autopilotModeName}>💡 Recommend</Text>
+                    <View style={[styles.autopilotModeBadge, autopilotMode === 'recommend' && styles.autopilotModeBadgeActive]}>
+                      <Text style={[styles.autopilotModeBadgeText, autopilotMode === 'recommend' && styles.autopilotModeBadgeTextActive]}>
+                        MANUAL APPROVAL
+                      </Text>
+                    </View>
+                  </View>
+                  <Text style={styles.autopilotModeDesc}>
+                    Jarvis suggests peak windows &amp; draft hooks. Zero changes are committed to schedule without your review.
+                  </Text>
+                </Pressable>
+
+                <Pressable
+                  style={[
+                    styles.autopilotModeCard,
+                    autopilotMode === 'schedule' && styles.autopilotModeCardActive,
+                  ]}
+                  onPress={() => {
+                    if (Platform.OS !== 'web') Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                    setAutopilotMode('schedule');
+                  }}
+                >
+                  <View style={styles.autopilotModeTitleRow}>
+                    <Text style={styles.autopilotModeName}>📅 Schedule (Default)</Text>
+                    <View style={[styles.autopilotModeBadge, autopilotMode === 'schedule' && styles.autopilotModeBadgeActive]}>
+                      <Text style={[styles.autopilotModeBadgeText, autopilotMode === 'schedule' && styles.autopilotModeBadgeTextActive]}>
+                        SMART QUEUE
+                      </Text>
+                    </View>
+                  </View>
+                  <Text style={styles.autopilotModeDesc}>
+                    PostStreak locks open slots into your weekly calendar. You give quick 1-tap confirmation before publishing.
+                  </Text>
+                </Pressable>
+
+                <Pressable
+                  style={[
+                    styles.autopilotModeCard,
+                    autopilotMode === 'autopost' && styles.autopilotModeCardActive,
+                  ]}
+                  onPress={() => {
+                    if (Platform.OS !== 'web') Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                    setAutopilotMode('autopost');
+                  }}
+                >
+                  <View style={styles.autopilotModeTitleRow}>
+                    <Text style={styles.autopilotModeName}>⚡ Auto-Post</Text>
+                    <View style={[styles.autopilotModeBadge, autopilotMode === 'autopost' && styles.autopilotModeBadgeActive]}>
+                      <Text style={[styles.autopilotModeBadgeText, autopilotMode === 'autopost' && styles.autopilotModeBadgeTextActive]}>
+                        FULL AUTOPILOT
+                      </Text>
+                    </View>
+                  </View>
+                  <Text style={styles.autopilotModeDesc}>
+                    PostStreak publishes approved queue items automatically to connected social accounts at peak traffic windows.
+                  </Text>
+                </Pressable>
+
+                {/* What Autopilot Manages Breakdown */}
+                <Text style={[styles.inputLabel, { marginTop: 12 }]}>ACTIVE CAPABILITIES &amp; CONTROLS</Text>
+                <View style={styles.autopilotCapabilitiesCard}>
+                  <View style={styles.autopilotCapabilityRow}>
+                    <Text style={styles.autopilotCapIcon}>🕒</Text>
+                    <View style={{ flex: 1 }}>
+                      <Text style={styles.autopilotCapTitle}>Best Posting Times</Text>
+                      <Text style={styles.autopilotCapSub}>Calculated daily from follower active-hour analytics.</Text>
+                    </View>
+                  </View>
+
+                  <View style={styles.autopilotCapabilityRow}>
+                    <Text style={styles.autopilotCapIcon}>📊</Text>
+                    <View style={{ flex: 1 }}>
+                      <Text style={styles.autopilotCapTitle}>Queue Prioritization</Text>
+                      <Text style={styles.autopilotCapSub}>Slots high-retention concepts into highest-traffic days.</Text>
+                    </View>
+                  </View>
+
+                  <View style={styles.autopilotCapabilityRow}>
+                    <Text style={styles.autopilotCapIcon}>🎯</Text>
+                    <View style={{ flex: 1 }}>
+                      <Text style={styles.autopilotCapTitle}>Platform Selection &amp; Gaps</Text>
+                      <Text style={styles.autopilotCapSub}>Identifies empty slots 48h early to preserve streak health.</Text>
+                    </View>
+                  </View>
+
+                  <View style={styles.autopilotCapabilityRow}>
+                    <Text style={styles.autopilotCapIcon}>💡</Text>
+                    <View style={{ flex: 1 }}>
+                      <Text style={styles.autopilotCapTitle}>Draft Recommendations</Text>
+                      <Text style={styles.autopilotCapSub}>Generates 3 curated hooks for any detected open gap.</Text>
+                    </View>
+                  </View>
+
+                  <View style={[styles.autopilotCapabilityRow, { borderBottomWidth: 0 }]}>
+                    <Text style={styles.autopilotCapIcon}>⏱️</Text>
+                    <View style={{ flex: 1 }}>
+                      <Text style={styles.autopilotCapTitle}>Timing Adjustments</Text>
+                      <Text style={styles.autopilotCapSub}>Auto-shifts slots if your audience peak shifts on weekends.</Text>
+                    </View>
+                  </View>
+                </View>
+
+                {/* Action Button */}
+                <Pressable
+                  style={[styles.modalPrimaryActionBtn, { marginTop: 14 }]}
+                  onPress={() => {
+                    if (Platform.OS !== 'web') {
+                      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+                    }
+                    setShowAutopilotModal(false);
+                    showToast(`Autopilot set to ${autopilotMode.toUpperCase()} mode`);
+                  }}
+                >
+                  <Text style={styles.modalPrimaryActionBtnText}>Save Autopilot Settings ➔</Text>
+                </Pressable>
+
+                <Pressable
+                  style={styles.modalCancelBtn}
+                  onPress={() => setShowAutopilotModal(false)}
+                >
+                  <Text style={styles.modalCancelBtnText}>Dismiss</Text>
+                </Pressable>
+              </ScrollView>
+            </Animated.View>
+          </View>
+        </Modal>
+
                 {/* ============================================================ */}
         {/* MODAL 6: JARVIS PRO STRATEGY ROADMAP MODAL                  */}
         {/* ============================================================ */}
@@ -2960,6 +3147,99 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '700',
     color: '#171420',
+  },
+  autopilotManageLinkBtn: {
+    marginTop: 12,
+    paddingTop: 10,
+    borderTopWidth: 1,
+    borderTopColor: '#DDD6FE',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  autopilotManageLinkText: {
+    fontSize: 12,
+    fontWeight: '800',
+    color: '#582CDB',
+  },
+
+  // AUTOPILOT MODAL STYLES
+  autopilotModeCard: {
+    backgroundColor: '#FAF8F5',
+    borderWidth: 1.5,
+    borderColor: '#EFECE6',
+    borderRadius: 14,
+    padding: 12,
+    marginBottom: 8,
+  },
+  autopilotModeCardActive: {
+    backgroundColor: '#EDE9FE',
+    borderColor: '#8B5CF6',
+  },
+  autopilotModeTitleRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 4,
+  },
+  autopilotModeName: {
+    fontSize: 13,
+    fontWeight: '800',
+    color: '#171420',
+  },
+  autopilotModeBadge: {
+    backgroundColor: '#E2E8F0',
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 4,
+  },
+  autopilotModeBadgeActive: {
+    backgroundColor: '#8B5CF6',
+  },
+  autopilotModeBadgeText: {
+    fontSize: 8.5,
+    fontWeight: '800',
+    color: '#475569',
+  },
+  autopilotModeBadgeTextActive: {
+    color: '#FFFFFF',
+  },
+  autopilotModeDesc: {
+    fontSize: 11,
+    color: '#64748B',
+    lineHeight: 15,
+  },
+  autopilotCapabilitiesCard: {
+    backgroundColor: '#FAF8F5',
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: '#EFECE6',
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+    marginBottom: 8,
+  },
+  autopilotCapabilityRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: 10,
+    paddingVertical: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: '#F1F5F9',
+  },
+  autopilotCapIcon: {
+    fontSize: 14,
+    marginTop: 1,
+  },
+  autopilotCapTitle: {
+    fontSize: 11.5,
+    fontWeight: '700',
+    color: '#171420',
+    marginBottom: 1,
+  },
+  autopilotCapSub: {
+    fontSize: 10.5,
+    color: '#64748B',
+    lineHeight: 14,
   },
 
   // SECTION 6: ANALYTICS OPTIMAL WINDOWS
