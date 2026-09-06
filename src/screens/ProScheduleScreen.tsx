@@ -405,6 +405,7 @@ export const ProScheduleScreen: React.FC<ProScheduleScreenProps> = ({
   const [showAutopilotModal, setShowAutopilotModal] = useState<boolean>(false);
   const [savedAutopilotMode, setSavedAutopilotMode] = useState<'recommend' | 'schedule' | 'autopost'>('schedule');
   const [autopilotMode, setAutopilotMode] = useState<'recommend' | 'schedule' | 'autopost'>('schedule');
+  const [expandedWindow, setExpandedWindow] = useState<'today' | 'tomorrow' | null>(null);
 
   // Dynamic Operating Dashboard Calculations
   const TARGET_WEEKLY_SLOTS = 7;
@@ -1122,59 +1123,292 @@ export const ProScheduleScreen: React.FC<ProScheduleScreenProps> = ({
           </View>
 
           {/* ============================================================ */}
-          {/* SECTION 6: OPTIMAL WINDOWS & PLATFORM MIX                    */}
+          {/* SECTION 6: OPTIMAL WINDOWS & PLATFORM DISTRIBUTION           */}
           {/* ============================================================ */}
           <View style={styles.analyticsSectionCard}>
-            <Text style={styles.analyticsSectionTitle}>Optimal Windows</Text>
+            <View style={styles.optimalWindowsHeaderRow}>
+              <Text style={styles.analyticsSectionTitle}>Optimal Windows</Text>
+              <Text style={styles.optimalWindowsHintText}>Tap window to view per-platform</Text>
+            </View>
 
             {/* TODAY */}
-            <View style={{ marginTop: 10, marginBottom: 12 }}>
-              <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 4 }}>
-                <Text style={styles.windowDayLabel}>TODAY</Text>
+            <Pressable
+              style={({ pressed }) => [
+                styles.windowRowPressable,
+                expandedWindow === 'today' && styles.windowRowPressableActive,
+                pressed && styles.btnPressed,
+              ]}
+              onPress={() => {
+                if (Platform.OS !== 'web') {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                }
+                setExpandedWindow((prev) => (prev === 'today' ? null : 'today'));
+              }}
+            >
+              <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 6, alignItems: 'center' }}>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                  <Text style={styles.windowDayLabel}>TODAY</Text>
+                  <Text style={styles.expandChevron}>{expandedWindow === 'today' ? '▲' : '▼'}</Text>
+                </View>
                 <Text style={styles.windowPeakLabel}>7:30 PM • Peak</Text>
               </View>
               <View style={styles.timelineBarTrack}>
                 <View style={[styles.timelinePeakBlock, { left: '70%' }]} />
               </View>
-            </View>
+            </Pressable>
+
+            {/* Dynamic Expanded Platform Breakdown: TODAY */}
+            {expandedWindow === 'today' && (
+              <View style={styles.platformWindowExpandedContainer}>
+                <View style={styles.platformTimingHeaderRow}>
+                  <Text style={styles.platformTimingHeader}>ALGORITHM PEAKS BY PLATFORM</Text>
+                  <Text style={styles.platformTimingHeaderSub}>TODAY</Text>
+                </View>
+                <View style={styles.platformTimingGrid}>
+                  {/* TikTok */}
+                  <Pressable
+                    style={({ pressed }) => [styles.platformTimingCard, pressed && styles.btnPressed]}
+                    onPress={() => {
+                      if (Platform.OS !== 'web') Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                      if (onOpenPostComposer) {
+                        onOpenPostComposer('', 'tiktok');
+                      } else {
+                        showToast('TikTok peak: 7:30 PM');
+                      }
+                    }}
+                  >
+                    <View style={styles.platformTimingTop}>
+                      <View style={styles.platformBadgeWrap}>
+                        <View style={[styles.platformDot, { backgroundColor: '#000000' }]} />
+                        <Text style={styles.platformTimingName}>TikTok</Text>
+                      </View>
+                      <Text style={styles.platformTimingTime}>7:30 PM</Text>
+                    </View>
+                    <Text style={styles.platformTimingDesc}>⚡ Peak viral short-form retention</Text>
+                  </Pressable>
+
+                  {/* Instagram */}
+                  <Pressable
+                    style={({ pressed }) => [styles.platformTimingCard, pressed && styles.btnPressed]}
+                    onPress={() => {
+                      if (Platform.OS !== 'web') Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                      if (onOpenPostComposer) {
+                        onOpenPostComposer('', 'instagram');
+                      } else {
+                        showToast('Instagram peak: 8:00 PM');
+                      }
+                    }}
+                  >
+                    <View style={styles.platformTimingTop}>
+                      <View style={styles.platformBadgeWrap}>
+                        <View style={[styles.platformDot, { backgroundColor: '#E1306C' }]} />
+                        <Text style={styles.platformTimingName}>Instagram</Text>
+                      </View>
+                      <Text style={styles.platformTimingTime}>8:00 PM</Text>
+                    </View>
+                    <Text style={styles.platformTimingDesc}>🔥 Peak save & share velocity</Text>
+                  </Pressable>
+
+                  {/* YouTube */}
+                  <Pressable
+                    style={({ pressed }) => [styles.platformTimingCard, pressed && styles.btnPressed]}
+                    onPress={() => {
+                      if (Platform.OS !== 'web') Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                      if (onOpenPostComposer) {
+                        onOpenPostComposer('', 'youtube');
+                      } else {
+                        showToast('YouTube Shorts peak: 6:30 PM');
+                      }
+                    }}
+                  >
+                    <View style={styles.platformTimingTop}>
+                      <View style={styles.platformBadgeWrap}>
+                        <View style={[styles.platformDot, { backgroundColor: '#EF4444' }]} />
+                        <Text style={styles.platformTimingName}>YouTube</Text>
+                      </View>
+                      <Text style={styles.platformTimingTime}>6:30 PM</Text>
+                    </View>
+                    <Text style={styles.platformTimingDesc}>▶ High Shorts completion rate</Text>
+                  </Pressable>
+
+                  {/* Threads */}
+                  <Pressable
+                    style={({ pressed }) => [styles.platformTimingCard, pressed && styles.btnPressed]}
+                    onPress={() => {
+                      if (Platform.OS !== 'web') Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                      if (onOpenPostComposer) {
+                        onOpenPostComposer('', 'threads');
+                      } else {
+                        showToast('Threads peak: 11:00 AM');
+                      }
+                    }}
+                  >
+                    <View style={styles.platformTimingTop}>
+                      <View style={styles.platformBadgeWrap}>
+                        <View style={[styles.platformDot, { backgroundColor: '#3B82F6' }]} />
+                        <Text style={styles.platformTimingName}>Threads</Text>
+                      </View>
+                      <Text style={styles.platformTimingTime}>11:00 AM</Text>
+                    </View>
+                    <Text style={styles.platformTimingDesc}>💬 Morning discussion spike</Text>
+                  </Pressable>
+                </View>
+              </View>
+            )}
 
             {/* TOMORROW */}
-            <View style={{ marginBottom: 16 }}>
-              <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 4 }}>
-                <Text style={styles.windowDayLabel}>TOMORROW</Text>
+            <Pressable
+              style={({ pressed }) => [
+                styles.windowRowPressable,
+                expandedWindow === 'tomorrow' && styles.windowRowPressableActive,
+                pressed && styles.btnPressed,
+              ]}
+              onPress={() => {
+                if (Platform.OS !== 'web') {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                }
+                setExpandedWindow((prev) => (prev === 'tomorrow' ? null : 'tomorrow'));
+              }}
+            >
+              <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 6, alignItems: 'center' }}>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                  <Text style={styles.windowDayLabel}>TOMORROW</Text>
+                  <Text style={styles.expandChevron}>{expandedWindow === 'tomorrow' ? '▲' : '▼'}</Text>
+                </View>
                 <Text style={styles.windowPeakLabel}>12:00 PM • Mid</Text>
               </View>
               <View style={styles.timelineBarTrack}>
                 <View style={[styles.timelinePeakBlock, { left: '45%', backgroundColor: '#A78BFA' }]} />
               </View>
-            </View>
+            </Pressable>
 
-            {/* PLATFORM MIX */}
-            <Text style={styles.platformMixTitle}>Platform Mix</Text>
-            <View style={styles.platformMixBarContainer}>
-              <View style={[styles.mixBarSegment, { flex: 35, backgroundColor: '#000000', borderTopLeftRadius: 6, borderBottomLeftRadius: 6 }]} />
-              <View style={[styles.mixBarSegment, { flex: 30, backgroundColor: '#7C3AED' }]} />
-              <View style={[styles.mixBarSegment, { flex: 20, backgroundColor: '#EF4444' }]} />
-              <View style={[styles.mixBarSegment, { flex: 15, backgroundColor: '#0A66C2', borderTopRightRadius: 6, borderBottomRightRadius: 6 }]} />
-            </View>
+            {/* Dynamic Expanded Platform Breakdown: TOMORROW */}
+            {expandedWindow === 'tomorrow' && (
+              <View style={styles.platformWindowExpandedContainer}>
+                <View style={styles.platformTimingHeaderRow}>
+                  <Text style={styles.platformTimingHeader}>ALGORITHM PEAKS BY PLATFORM</Text>
+                  <Text style={styles.platformTimingHeaderSub}>TOMORROW</Text>
+                </View>
+                <View style={styles.platformTimingGrid}>
+                  {/* TikTok */}
+                  <Pressable
+                    style={({ pressed }) => [styles.platformTimingCard, pressed && styles.btnPressed]}
+                    onPress={() => {
+                      if (Platform.OS !== 'web') Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                      if (onOpenPostComposer) {
+                        onOpenPostComposer('', 'tiktok');
+                      } else {
+                        showToast('TikTok peak: 12:00 PM');
+                      }
+                    }}
+                  >
+                    <View style={styles.platformTimingTop}>
+                      <View style={styles.platformBadgeWrap}>
+                        <View style={[styles.platformDot, { backgroundColor: '#000000' }]} />
+                        <Text style={styles.platformTimingName}>TikTok</Text>
+                      </View>
+                      <Text style={styles.platformTimingTime}>12:00 PM</Text>
+                    </View>
+                    <Text style={styles.platformTimingDesc}>⚡ Lunch break algorithm surge</Text>
+                  </Pressable>
 
-            {/* LEGEND */}
-            <View style={styles.legendRow}>
-              <View style={styles.legendItem}>
-                <View style={[styles.legendDot, { backgroundColor: '#000000' }]} />
-                <Text style={styles.legendText}>TIKTOK</Text>
+                  {/* Instagram */}
+                  <Pressable
+                    style={({ pressed }) => [styles.platformTimingCard, pressed && styles.btnPressed]}
+                    onPress={() => {
+                      if (Platform.OS !== 'web') Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                      if (onOpenPostComposer) {
+                        onOpenPostComposer('', 'instagram');
+                      } else {
+                        showToast('Instagram peak: 1:15 PM');
+                      }
+                    }}
+                  >
+                    <View style={styles.platformTimingTop}>
+                      <View style={styles.platformBadgeWrap}>
+                        <View style={[styles.platformDot, { backgroundColor: '#E1306C' }]} />
+                        <Text style={styles.platformTimingName}>Instagram</Text>
+                      </View>
+                      <Text style={styles.platformTimingTime}>1:15 PM</Text>
+                    </View>
+                    <Text style={styles.platformTimingDesc}>🔥 Midday feed scroll peak</Text>
+                  </Pressable>
+
+                  {/* YouTube */}
+                  <Pressable
+                    style={({ pressed }) => [styles.platformTimingCard, pressed && styles.btnPressed]}
+                    onPress={() => {
+                      if (Platform.OS !== 'web') Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                      if (onOpenPostComposer) {
+                        onOpenPostComposer('', 'youtube');
+                      } else {
+                        showToast('YouTube Shorts peak: 3:30 PM');
+                      }
+                    }}
+                  >
+                    <View style={styles.platformTimingTop}>
+                      <View style={styles.platformBadgeWrap}>
+                        <View style={[styles.platformDot, { backgroundColor: '#EF4444' }]} />
+                        <Text style={styles.platformTimingName}>YouTube</Text>
+                      </View>
+                      <Text style={styles.platformTimingTime}>3:30 PM</Text>
+                    </View>
+                    <Text style={styles.platformTimingDesc}>▶ Afternoon watch acceleration</Text>
+                  </Pressable>
+
+                  {/* Threads */}
+                  <Pressable
+                    style={({ pressed }) => [styles.platformTimingCard, pressed && styles.btnPressed]}
+                    onPress={() => {
+                      if (Platform.OS !== 'web') Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                      if (onOpenPostComposer) {
+                        onOpenPostComposer('', 'threads');
+                      } else {
+                        showToast('Threads peak: 9:00 AM');
+                      }
+                    }}
+                  >
+                    <View style={styles.platformTimingTop}>
+                      <View style={styles.platformBadgeWrap}>
+                        <View style={[styles.platformDot, { backgroundColor: '#3B82F6' }]} />
+                        <Text style={styles.platformTimingName}>Threads</Text>
+                      </View>
+                      <Text style={styles.platformTimingTime}>9:00 AM</Text>
+                    </View>
+                    <Text style={styles.platformTimingDesc}>💬 Morning feed catch-up</Text>
+                  </Pressable>
+                </View>
               </View>
-              <View style={styles.legendItem}>
-                <View style={[styles.legendDot, { backgroundColor: '#7C3AED' }]} />
-                <Text style={styles.legendText}>INSTA</Text>
+            )}
+
+            {/* PLATFORM DISTRIBUTION */}
+            <View style={{ marginTop: 12 }}>
+              <Text style={styles.platformMixTitle}>Platform distribution</Text>
+              <View style={styles.platformMixBarContainer}>
+                <View style={[styles.mixBarSegment, { flex: 32, backgroundColor: '#000000', borderTopLeftRadius: 6, borderBottomLeftRadius: 6 }]} />
+                <View style={[styles.mixBarSegment, { flex: 28, backgroundColor: '#E1306C' }]} />
+                <View style={[styles.mixBarSegment, { flex: 22, backgroundColor: '#EF4444' }]} />
+                <View style={[styles.mixBarSegment, { flex: 18, backgroundColor: '#3B82F6', borderTopRightRadius: 6, borderBottomRightRadius: 6 }]} />
               </View>
-              <View style={styles.legendItem}>
-                <View style={[styles.legendDot, { backgroundColor: '#EF4444' }]} />
-                <Text style={styles.legendText}>YOUTUBE</Text>
-              </View>
-              <View style={styles.legendItem}>
-                <View style={[styles.legendDot, { backgroundColor: '#000000' }]} />
-                <Text style={styles.legendText}>THREADS</Text>
+
+              {/* LEGEND WITH PERCENTAGES */}
+              <View style={styles.legendRow}>
+                <View style={styles.legendItem}>
+                  <View style={[styles.legendDot, { backgroundColor: '#000000' }]} />
+                  <Text style={styles.legendText}>TIKTOK 32%</Text>
+                </View>
+                <View style={styles.legendItem}>
+                  <View style={[styles.legendDot, { backgroundColor: '#E1306C' }]} />
+                  <Text style={styles.legendText}>INSTA 28%</Text>
+                </View>
+                <View style={styles.legendItem}>
+                  <View style={[styles.legendDot, { backgroundColor: '#EF4444' }]} />
+                  <Text style={styles.legendText}>YOUTUBE 22%</Text>
+                </View>
+                <View style={styles.legendItem}>
+                  <View style={[styles.legendDot, { backgroundColor: '#3B82F6' }]} />
+                  <Text style={styles.legendText}>THREADS 18%</Text>
+                </View>
               </View>
             </View>
           </View>
@@ -3288,6 +3522,112 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     color: '#171420',
   },
+  optimalWindowsHeaderRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 4,
+  },
+  optimalWindowsHintText: {
+    fontSize: 10.5,
+    fontWeight: '600',
+    color: '#8B5CF6',
+  },
+  windowRowPressable: {
+    paddingVertical: 8,
+    paddingHorizontal: 10,
+    borderRadius: 12,
+    backgroundColor: '#FAF8F5',
+    borderWidth: 1,
+    borderColor: '#F3EFE6',
+    marginTop: 8,
+    marginBottom: 6,
+  },
+  windowRowPressableActive: {
+    backgroundColor: '#F5F3FF',
+    borderColor: '#DDD6FE',
+  },
+  expandChevron: {
+    fontSize: 9,
+    color: '#8B5CF6',
+    fontWeight: '800',
+  },
+  platformWindowExpandedContainer: {
+    backgroundColor: '#FBF9FE',
+    borderRadius: 14,
+    padding: 12,
+    marginTop: 2,
+    marginBottom: 10,
+    borderWidth: 1,
+    borderColor: '#EDE9FE',
+  },
+  platformTimingHeaderRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 8,
+    paddingBottom: 6,
+    borderBottomWidth: 1,
+    borderBottomColor: '#F3E8FF',
+  },
+  platformTimingHeader: {
+    fontSize: 9.5,
+    fontWeight: '800',
+    color: '#7C3AED',
+    letterSpacing: 0.5,
+  },
+  platformTimingHeaderSub: {
+    fontSize: 9.5,
+    fontWeight: '800',
+    color: '#9CA3AF',
+  },
+  platformTimingGrid: {
+    gap: 6,
+  },
+  platformTimingCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 10,
+    paddingVertical: 7,
+    paddingHorizontal: 10,
+    borderWidth: 1,
+    borderColor: '#F3F0FA',
+    shadowColor: '#582CDB',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.04,
+    shadowRadius: 3,
+    elevation: 1,
+  },
+  platformTimingTop: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 2,
+  },
+  platformBadgeWrap: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  platformDot: {
+    width: 7,
+    height: 7,
+    borderRadius: 3.5,
+  },
+  platformTimingName: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#171420',
+  },
+  platformTimingTime: {
+    fontSize: 12,
+    fontWeight: '800',
+    color: '#582CDB',
+  },
+  platformTimingDesc: {
+    fontSize: 10.5,
+    fontWeight: '500',
+    color: '#64748B',
+  },
   windowDayLabel: {
     fontSize: 10,
     fontWeight: '800',
@@ -3301,10 +3641,10 @@ const styles = StyleSheet.create({
   },
   timelineBarTrack: {
     height: 12,
-    backgroundColor: '#FAF8F5',
+    backgroundColor: '#FFFFFF',
     borderRadius: 6,
     borderWidth: 1,
-    borderColor: '#F1EFE9',
+    borderColor: '#EFECE6',
     position: 'relative',
     justifyContent: 'center',
   },
@@ -3334,6 +3674,9 @@ const styles = StyleSheet.create({
   legendRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
+    alignItems: 'center',
+    flexWrap: 'wrap',
+    gap: 6,
   },
   legendItem: {
     flexDirection: 'row',
@@ -3349,6 +3692,7 @@ const styles = StyleSheet.create({
     fontSize: 10,
     fontWeight: '800',
     color: '#64748B',
+    letterSpacing: 0.2,
   },
 
   // SECTION 7: DETECTED GAPS
