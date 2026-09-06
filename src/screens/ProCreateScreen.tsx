@@ -964,7 +964,7 @@ export const ProCreateScreen: React.FC<ProCreateScreenProps> = ({
           {/* ============================================================ */}
           {/* CARD 7: JARVIS SUGGESTION                                    */}
           {/* ============================================================ */}
-          <View style={[styles.jarvisSuggestionCard, { marginBottom: 120 }]}>
+          <View style={styles.jarvisSuggestionCard}>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
               <View style={styles.jarvisFlameIconBox}>
                 <Image
@@ -977,7 +977,7 @@ export const ProCreateScreen: React.FC<ProCreateScreenProps> = ({
               <View style={{ flex: 1 }}>
                 <Text style={styles.jarvisSuggestionTag}>JARVIS SUGGESTION</Text>
                 <Text style={styles.jarvisSuggestionText}>
-                  &ldquo;Your Lifestyle Reels perform best with a fast hook in the first 2 seconds.&rdquo;
+                  &ldquo;Your Lifestyle Reels perform best when the hook lands within the first 2 seconds.&rdquo;
                 </Text>
               </View>
             </View>
@@ -1429,7 +1429,7 @@ const styles = StyleSheet.create({
   scrollContent: {
     paddingHorizontal: 20,
     paddingTop: 8,
-    paddingBottom: 135,
+    paddingBottom: 95,
   },
 
   // TOP TAGS
@@ -2059,6 +2059,7 @@ const styles = StyleSheet.create({
     borderLeftWidth: 4,
     borderLeftColor: '#7C3AED',
     padding: 14,
+    marginBottom: 16,
   },
   jarvisFlameIconBox: {
     width: 36,
