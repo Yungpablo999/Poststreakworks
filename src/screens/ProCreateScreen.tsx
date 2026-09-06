@@ -684,7 +684,7 @@ export const ProCreateScreen: React.FC<ProCreateScreenProps> = ({
               <Text style={styles.toolGridSub}>Create high-converting captions.</Text>
             </Pressable>
 
-            {/* Tool 4: Voice Studio (UNLOCKED) */}
+            {/* Tool 4: Voice Studio */}
             <Pressable
               style={({ pressed }) => [styles.toolGridCard, pressed && styles.btnPressed]}
               onPress={() => {
@@ -696,19 +696,14 @@ export const ProCreateScreen: React.FC<ProCreateScreenProps> = ({
                 }
               }}
             >
-              <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                <View style={styles.toolIconSquare}>
-                  <Text style={{ fontSize: 18 }}>🎙️</Text>
-                </View>
-                <View style={styles.unlockedPill}>
-                  <Text style={styles.unlockedPillText}>UNLOCKED</Text>
-                </View>
+              <View style={styles.toolIconSquare}>
+                <Text style={{ fontSize: 18 }}>🎙️</Text>
               </View>
               <Text style={styles.toolGridTitle}>Voice Studio</Text>
               <Text style={styles.toolGridSub}>Turn scripts into narration.</Text>
             </Pressable>
 
-            {/* Tool 5: Repurpose (PRO TOOL) */}
+            {/* Tool 5: Repurpose */}
             <Pressable
               style={({ pressed }) => [styles.toolGridCard, pressed && styles.btnPressed]}
               onPress={() => {
@@ -723,13 +718,8 @@ export const ProCreateScreen: React.FC<ProCreateScreenProps> = ({
                 }
               }}
             >
-              <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                <View style={styles.toolIconSquare}>
-                  <Text style={{ fontSize: 18 }}>🔄</Text>
-                </View>
-                <View style={styles.proToolBadgePill}>
-                  <Text style={styles.proToolBadgeText}>PRO TOOL</Text>
-                </View>
+              <View style={styles.toolIconSquare}>
+                <Text style={{ fontSize: 18 }}>🔄</Text>
               </View>
               <Text style={styles.toolGridTitle}>Repurpose</Text>
               <Text style={styles.toolGridSub}>Turn one asset into multiple formats.</Text>
@@ -747,7 +737,7 @@ export const ProCreateScreen: React.FC<ProCreateScreenProps> = ({
                 <Text style={{ fontSize: 18 }}>⚓</Text>
               </View>
               <Text style={styles.toolGridTitle}>Hook Gen</Text>
-              <Text style={styles.toolGridSub}>200+ viral video opening hooks.</Text>
+              <Text style={styles.toolGridSub}>200+ proven video opening hooks.</Text>
             </Pressable>
           </View>
 
@@ -1256,7 +1246,7 @@ export const ProCreateScreen: React.FC<ProCreateScreenProps> = ({
             <Animated.View style={[styles.modalCard, { transform: [{ scale: modalPopScale }] }]}>
               <View style={styles.modalHeaderRow}>
                 <View style={{ flex: 1, minWidth: 0, marginRight: 10 }}>
-                  <Text style={styles.modalTitle}>Viral Hook Library</Text>
+                  <Text style={styles.modalTitle}>Proven Hook Library</Text>
                   <Text style={styles.modalSubtitle}>Top-performing openers for first 2 seconds</Text>
                 </View>
                 <Pressable onPress={() => setShowHookModal(false)} style={styles.modalCloseCircle} hitSlop={8}>
@@ -1266,7 +1256,7 @@ export const ProCreateScreen: React.FC<ProCreateScreenProps> = ({
 
               <ScrollView style={{ maxHeight: 260, marginVertical: 8 }}>
                 {[
-                  '“If you create content in 2024, stop scrolling.”',
+                  '“If you create short-form content, stop scrolling.”',
                   '“Here is the secret nobody tells you about short-form retention.”',
                   '“3 mistakes I stopped making that changed everything.”',
                   '“Watch this before you post your next Reel.”',
