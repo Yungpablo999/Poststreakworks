@@ -546,7 +546,7 @@ export const ProScheduleScreen: React.FC<ProScheduleScreenProps> = ({
     // Trigger 3D Ghost Celebration Animation
     setCompletionData({
       title: 'Content Gap Resolved!',
-      subtitle: 'Your Friday 7:30 PM slot is filled with high-retention storytelling.',
+      subtitle: 'Your Wednesday 7:30 PM slot is filled with high-retention storytelling.',
       badgeText: 'GAP FILLED',
       xpEarned: 75,
       speechBubble: 'Your streak momentum is unstoppable!',
@@ -1490,7 +1490,7 @@ export const ProScheduleScreen: React.FC<ProScheduleScreenProps> = ({
             </View>
 
             <Text style={styles.jarvisInsightBody}>
-              Your current rhythm is strong. Fill Friday&apos;s open slot with a short personal lesson Reel to protect momentum.
+              Your current rhythm is strong. Fill Wednesday&apos;s 7:30 PM slot with a short personal lesson Reel to protect momentum.
             </Text>
 
             <Pressable
@@ -1510,7 +1510,7 @@ export const ProScheduleScreen: React.FC<ProScheduleScreenProps> = ({
                 style={styles.modalGoldBtnGradient}
               >
                 <Text style={styles.modalGoldActionBtnText} numberOfLines={1}>
-                  More Strategy Ideas ➔
+                  ✨ See More Opportunities ➔
                 </Text>
               </LinearGradient>
             </Pressable>
@@ -1707,7 +1707,7 @@ export const ProScheduleScreen: React.FC<ProScheduleScreenProps> = ({
                 <View style={styles.gapSlotDetectedBanner}>
                   <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 2 }}>
                     <Text style={styles.gapSlotDetectedTitle}>
-                      ⚠️ {weekData.days[5]?.dayName || 'Friday'} • 7:30 PM
+                      ⚠️ Wednesday • 7:30 PM
                     </Text>
                     <View style={styles.gapSlotAudienceBadge}>
                       <Text style={styles.gapSlotAudienceBadgeText}>🔥 Peak Window</Text>
