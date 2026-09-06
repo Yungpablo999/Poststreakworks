@@ -564,7 +564,7 @@ export const ProCreateScreen: React.FC<ProCreateScreenProps> = ({
 
               <View style={styles.pipelineConnectorLine} />
 
-              {/* Step 4: Done */}
+              {/* Step 4: Schedule */}
               <Pressable
                 style={styles.pipelineStepItem}
                 onPress={() => {
@@ -574,7 +574,7 @@ export const ProCreateScreen: React.FC<ProCreateScreenProps> = ({
                 <View style={styles.pipelineIconBox}>
                   <Text style={{ fontSize: 16 }}>🗓️</Text>
                 </View>
-                <Text style={styles.pipelineStepLabel}>Done</Text>
+                <Text style={styles.pipelineStepLabel}>Schedule</Text>
               </Pressable>
             </View>
 
