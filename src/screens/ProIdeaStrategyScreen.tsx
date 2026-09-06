@@ -392,7 +392,7 @@ export const ProIdeaStrategyScreen: React.FC<ProIdeaStrategyScreenProps> = ({
 
             <Text style={styles.mainTitleText}>Find the idea with the strongest upside.</Text>
             <Text style={styles.mainSubText}>
-              Generate and score ideas by niche, platform, audience goal, streak impact, brand fit, and collaboration potential.
+              Generate and score ideas using your niche, platform, audience goal, streak impact, brand fit, and collaboration potential.
             </Text>
 
             <View style={{ flexDirection: 'row', gap: 8, marginTop: 10 }}>
