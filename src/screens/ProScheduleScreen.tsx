@@ -1388,23 +1388,29 @@ export const ProScheduleScreen: React.FC<ProScheduleScreenProps> = ({
                 <View style={[styles.mixBarSegment, { flex: 18, backgroundColor: '#3B82F6', borderTopRightRadius: 6, borderBottomRightRadius: 6 }]} />
               </View>
 
-              {/* LEGEND WITH PERCENTAGES */}
-              <View style={styles.legendRow}>
-                <View style={styles.legendItem}>
-                  <View style={[styles.legendDot, { backgroundColor: '#000000' }]} />
-                  <Text style={styles.legendText}>TIKTOK 32%</Text>
+              {/* LEGEND WITH PERCENTAGES (CONSISTENT 2x2 GRID ACROSS MOBILE & LAPTOP) */}
+              <View style={styles.legendGrid}>
+                {/* Row 1 */}
+                <View style={styles.legendGridRow}>
+                  <View style={styles.legendItem}>
+                    <View style={[styles.legendDot, { backgroundColor: '#000000' }]} />
+                    <Text style={styles.legendText}>TIKTOK 32%</Text>
+                  </View>
+                  <View style={styles.legendItem}>
+                    <View style={[styles.legendDot, { backgroundColor: '#E1306C' }]} />
+                    <Text style={styles.legendText}>INSTA 28%</Text>
+                  </View>
                 </View>
-                <View style={styles.legendItem}>
-                  <View style={[styles.legendDot, { backgroundColor: '#E1306C' }]} />
-                  <Text style={styles.legendText}>INSTA 28%</Text>
-                </View>
-                <View style={styles.legendItem}>
-                  <View style={[styles.legendDot, { backgroundColor: '#EF4444' }]} />
-                  <Text style={styles.legendText}>YOUTUBE 22%</Text>
-                </View>
-                <View style={styles.legendItem}>
-                  <View style={[styles.legendDot, { backgroundColor: '#3B82F6' }]} />
-                  <Text style={styles.legendText}>THREADS 18%</Text>
+                {/* Row 2 */}
+                <View style={styles.legendGridRow}>
+                  <View style={styles.legendItem}>
+                    <View style={[styles.legendDot, { backgroundColor: '#EF4444' }]} />
+                    <Text style={styles.legendText}>YOUTUBE 22%</Text>
+                  </View>
+                  <View style={styles.legendItem}>
+                    <View style={[styles.legendDot, { backgroundColor: '#3B82F6' }]} />
+                    <Text style={styles.legendText}>THREADS 18%</Text>
+                  </View>
                 </View>
               </View>
             </View>
@@ -3658,17 +3664,19 @@ const styles = StyleSheet.create({
   mixBarSegment: {
     height: '100%',
   },
-  legendRow: {
+  legendGrid: {
+    gap: 8,
+  },
+  legendGridRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    flexWrap: 'wrap',
-    gap: 6,
   },
   legendItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 4,
+    gap: 6,
+    flex: 1,
   },
   legendDot: {
     width: 6,
@@ -3676,7 +3684,7 @@ const styles = StyleSheet.create({
     borderRadius: 3,
   },
   legendText: {
-    fontSize: 10,
+    fontSize: 10.5,
     fontWeight: '800',
     color: '#64748B',
     letterSpacing: 0.2,
