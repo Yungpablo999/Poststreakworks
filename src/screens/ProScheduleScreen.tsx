@@ -253,47 +253,73 @@ interface ScheduleItem {
   dayIndex: number;
 }
 
+const parseTimeToMinutes = (timeStr: string, period: string): number => {
+  const parts = timeStr.split(':');
+  let hours = parseInt(parts[0] || '0', 10);
+  const minutes = parseInt(parts[1] || '0', 10);
+  const p = (period || '').toUpperCase().trim();
+
+  if (p === 'PM' && hours < 12) {
+    hours += 12;
+  } else if (p === 'AM' && hours === 12) {
+    hours = 0;
+  }
+
+  return hours * 60 + minutes;
+};
+
+const sortScheduleItemsChronologically = (items: ScheduleItem[]): ScheduleItem[] => {
+  return [...items].sort((a, b) => {
+    if (a.dayIndex !== b.dayIndex) {
+      return a.dayIndex - b.dayIndex;
+    }
+    const minA = parseTimeToMinutes(a.time, a.period);
+    const minB = parseTimeToMinutes(b.time, b.period);
+    return minA - minB;
+  });
+};
+
 const generateInitialScheduleItems = (todayIndex: number): ScheduleItem[] => {
   return [
     {
       id: 'sch_1',
-      time: '11:30',
-      period: 'AM',
-      title: '3 creator mistakes I stopped making this year',
-      platform: 'tiktok',
-      platformLabel: '≈ TikTok',
-      badgeType: 'scheduled',
-      dayIndex: Math.max(0, todayIndex - 3),
-    },
-    {
-      id: 'sch_2',
-      time: '07:30',
-      period: 'PM',
-      title: 'Personal lesson Reel • Behind the scenes studio',
-      platform: 'instagram',
-      platformLabel: '📸 IG Reel',
-      badgeType: 'recommended',
-      dayIndex: todayIndex,
-    },
-    {
-      id: 'sch_3',
       time: '10:00',
       period: 'AM',
       title: '5 retention rules that 10x watch time',
       platform: 'youtube',
       platformLabel: '▶ Shorts',
       badgeType: 'scheduled',
-      dayIndex: Math.max(0, todayIndex - 2),
+      dayIndex: todayIndex,
     },
     {
-      id: 'sch_4',
-      time: '06:00',
+      id: 'sch_2',
+      time: '11:30',
+      period: 'AM',
+      title: '3 creator mistakes I stopped making this year',
+      platform: 'tiktok',
+      platformLabel: '≈ TikTok',
+      badgeType: 'scheduled',
+      dayIndex: todayIndex,
+    },
+    {
+      id: 'sch_3',
+      time: '6:00',
       period: 'PM',
       title: 'Step-by-step editing workflow in CapCut',
       platform: 'instagram',
       platformLabel: '📸 IG Reel',
       badgeType: 'scheduled',
-      dayIndex: Math.max(0, todayIndex - 1),
+      dayIndex: todayIndex,
+    },
+    {
+      id: 'sch_4',
+      time: '7:30',
+      period: 'PM',
+      title: 'Personal lesson Reel • Behind the scenes studio',
+      platform: 'instagram',
+      platformLabel: '📸 IG Reel',
+      badgeType: 'recommended',
+      dayIndex: todayIndex,
     },
   ];
 };
@@ -525,10 +551,13 @@ export const ProScheduleScreen: React.FC<ProScheduleScreenProps> = ({
     }, 300);
   };
 
-  // Filter items for selected day
-  const displayedItems = scheduleList.filter(
-    (item) => item.dayIndex === selectedDayIndex
-  );
+  // Filter items for selected day, strictly sorted chronologically
+  const displayedItems = useMemo(() => {
+    const filtered = scheduleList.filter(
+      (item) => item.dayIndex === selectedDayIndex
+    );
+    return sortScheduleItemsChronologically(filtered);
+  }, [scheduleList, selectedDayIndex]);
 
   return (
     <SafeAreaView style={styles.safeArea}>
