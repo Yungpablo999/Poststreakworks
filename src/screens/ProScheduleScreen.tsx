@@ -1755,7 +1755,11 @@ export const ProScheduleScreen: React.FC<ProScheduleScreenProps> = ({
                   </Pressable>
                 </View>
 
-                <Text style={styles.modalTitleText}>
+                <Text
+                  style={styles.modalTitleText}
+                  numberOfLines={1}
+                  adjustsFontSizeToFit
+                >
                   {weekData.days[selectedDayIndex]?.dayName} ({weekData.days[selectedDayIndex]?.monthName} {weekData.days[selectedDayIndex]?.dayNum}) Detailed Schedule
                 </Text>
                 <Text style={styles.modalSubText}>
@@ -3039,10 +3043,11 @@ const styles = StyleSheet.create({
     color: '#582CDB',
   },
   modalTitleText: {
-    fontSize: 18,
-    fontWeight: '700',
+    fontSize: sFont(16),
+    fontWeight: '800',
     color: '#171420',
     marginBottom: 4,
+    letterSpacing: -0.2,
   },
   modalSubText: {
     fontSize: 12,
