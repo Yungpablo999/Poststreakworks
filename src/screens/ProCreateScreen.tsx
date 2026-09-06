@@ -840,7 +840,7 @@ export const ProCreateScreen: React.FC<ProCreateScreenProps> = ({
                   }
                 }}
               >
-                <Text style={styles.generateVoiceBtnText}>⚡ Generate Voice</Text>
+                <Text style={styles.generateVoiceBtnText} numberOfLines={1}>⚡ Generate Voice</Text>
               </Pressable>
 
               <Pressable
@@ -857,7 +857,7 @@ export const ProCreateScreen: React.FC<ProCreateScreenProps> = ({
                   }
                 }}
               >
-                <Text style={styles.openStudioOutlineBtnText}>Open Studio</Text>
+                <Text style={styles.openStudioOutlineBtnText} numberOfLines={1}>Open Studio</Text>
               </Pressable>
             </View>
           </View>
@@ -1868,31 +1868,33 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   generateVoiceBtn: {
-    flex: 1,
+    flex: 1.18,
     backgroundColor: '#582CDB',
     paddingVertical: 12,
+    paddingHorizontal: 8,
     borderRadius: 12,
     alignItems: 'center',
     justifyContent: 'center',
   },
   generateVoiceBtnText: {
     color: '#FFFFFF',
-    fontSize: 13,
+    fontSize: 12,
     fontWeight: '700',
   },
   openStudioOutlineBtn: {
-    flex: 1,
+    flex: 0.82,
     backgroundColor: '#FFFFFF',
     borderWidth: 1,
     borderColor: '#EFECE6',
     paddingVertical: 12,
+    paddingHorizontal: 8,
     borderRadius: 12,
     alignItems: 'center',
     justifyContent: 'center',
   },
   openStudioOutlineBtnText: {
     color: '#171420',
-    fontSize: 13,
+    fontSize: 12,
     fontWeight: '800',
   },
 
