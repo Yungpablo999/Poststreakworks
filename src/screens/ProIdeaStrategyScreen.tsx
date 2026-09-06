@@ -390,7 +390,14 @@ export const ProIdeaStrategyScreen: React.FC<ProIdeaStrategyScreenProps> = ({
               <Text style={styles.goldStrategyBadgeText}>PRO STRATEGY</Text>
             </View>
 
-            <Text style={styles.mainTitleText}>Find the idea with the strongest upside.</Text>
+            <Text
+              style={styles.mainTitleText}
+              numberOfLines={1}
+              adjustsFontSizeToFit
+              minimumFontScale={0.8}
+            >
+              Find the idea with the strongest upside.
+            </Text>
             <Text style={styles.mainSubText}>
               Generate and score ideas using your niche, platform, audience goal, streak impact, brand fit, and collaboration potential.
             </Text>
@@ -1065,10 +1072,10 @@ const styles = StyleSheet.create({
     letterSpacing: 0.3,
   },
   mainTitleText: {
-    fontSize: 23,
+    fontSize: 20,
     fontWeight: '700',
     color: '#171420',
-    letterSpacing: -0.5,
+    letterSpacing: -0.4,
   },
   mainSubText: {
     fontSize: 12.5,
