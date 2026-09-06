@@ -145,7 +145,7 @@ export const ProCreateScreen: React.FC<ProCreateScreenProps> = ({
       title: 'Behind the scenes tour & studio setup',
       platform: 'Instagram',
       platformType: 'instagram',
-      typeBadge: 'VOICE DRAFT',
+      typeBadge: 'VOICE READY',
       typeColor: '#EDE9FE',
       typeTextColor: '#582CDB',
       time: 'Edited 4h ago',
@@ -883,7 +883,7 @@ export const ProCreateScreen: React.FC<ProCreateScreenProps> = ({
             <Pressable
               style={({ pressed }) => [styles.draftItemCard, pressed && styles.btnPressed]}
               onPress={() => {
-                if (onOpenScript) onOpenScript('3 mistakes I stopped making...');
+                if (onOpenScript) onOpenScript('3 mistakes I stopped making as a creator');
               }}
             >
               <View style={styles.draftIconSquare}>
@@ -900,8 +900,12 @@ export const ProCreateScreen: React.FC<ProCreateScreenProps> = ({
             <Pressable
               style={({ pressed }) => [styles.draftItemCard, pressed && styles.btnPressed]}
               onPress={() => {
-                triggerModalPop();
-                setShowVoiceStudioModal(true);
+                if (onOpenVoiceStudio) {
+                  onOpenVoiceStudio();
+                } else {
+                  triggerModalPop();
+                  setShowVoiceStudioModal(true);
+                }
               }}
             >
               <View style={styles.draftIconSquare}>
@@ -909,7 +913,7 @@ export const ProCreateScreen: React.FC<ProCreateScreenProps> = ({
               </View>
               <View style={{ flex: 1 }}>
                 <Text style={styles.draftItemTitle}>Behind the scenes tour</Text>
-                <Text style={styles.voiceDraftTag}>VOICE DRAFT</Text>
+                <Text style={styles.voiceReadyTag}>VOICE READY</Text>
               </View>
               <Text style={styles.draftChevron}>›</Text>
             </Pressable>
@@ -1942,6 +1946,12 @@ const styles = StyleSheet.create({
     fontSize: 10,
     fontWeight: '700',
     color: '#2563EB',
+    marginTop: 2,
+  },
+  voiceReadyTag: {
+    fontSize: 10,
+    fontWeight: '700',
+    color: '#582CDB',
     marginTop: 2,
   },
   voiceDraftTag: {
