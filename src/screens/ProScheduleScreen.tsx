@@ -403,6 +403,7 @@ export const ProScheduleScreen: React.FC<ProScheduleScreenProps> = ({
   const [editingPostHashtags, setEditingPostHashtags] = useState('#CreatorGrowth #ViralReels #PostStreak');
   const [autopilotEnabled, setAutopilotEnabled] = useState<boolean>(true);
   const [showAutopilotModal, setShowAutopilotModal] = useState<boolean>(false);
+  const [savedAutopilotMode, setSavedAutopilotMode] = useState<'recommend' | 'schedule' | 'autopost'>('schedule');
   const [autopilotMode, setAutopilotMode] = useState<'recommend' | 'schedule' | 'autopost'>('schedule');
 
   // Dynamic Operating Dashboard Calculations
@@ -1110,6 +1111,7 @@ export const ProScheduleScreen: React.FC<ProScheduleScreenProps> = ({
                 if (Platform.OS !== 'web') {
                   Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                 }
+                setAutopilotMode(savedAutopilotMode);
                 triggerModalPop();
                 setShowAutopilotModal(true);
               }}
@@ -2192,7 +2194,13 @@ export const ProScheduleScreen: React.FC<ProScheduleScreenProps> = ({
                   <View style={styles.modalGoldTagBadge}>
                     <Text style={styles.modalGoldTagBadgeText}>🤖 PRO AUTOPILOT GOVERNANCE</Text>
                   </View>
-                  <Pressable onPress={() => setShowAutopilotModal(false)} hitSlop={8}>
+                  <Pressable
+                    onPress={() => {
+                      setAutopilotMode(savedAutopilotMode);
+                      setShowAutopilotModal(false);
+                    }}
+                    hitSlop={8}
+                  >
                     <Text style={{ fontSize: 18, color: '#94A3B8', fontWeight: '700' }}>✕</Text>
                   </Pressable>
                 </View>
@@ -2274,6 +2282,11 @@ export const ProScheduleScreen: React.FC<ProScheduleScreenProps> = ({
                   <Text style={styles.autopilotModeDesc}>
                     PostStreak publishes approved queue items automatically to connected social accounts at peak traffic windows.
                   </Text>
+                  <View style={styles.autoPostTrustBadge}>
+                    <Text style={styles.autoPostTrustBadgeText}>
+                      🛡️ Only content you’ve approved can be published automatically.
+                    </Text>
+                  </View>
                 </Pressable>
 
                 {/* What Autopilot Manages Breakdown */}
@@ -2327,6 +2340,7 @@ export const ProScheduleScreen: React.FC<ProScheduleScreenProps> = ({
                     if (Platform.OS !== 'web') {
                       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
                     }
+                    setSavedAutopilotMode(autopilotMode);
                     setShowAutopilotModal(false);
                     showToast(`Autopilot set to ${autopilotMode.toUpperCase()} mode`);
                   }}
@@ -2336,9 +2350,12 @@ export const ProScheduleScreen: React.FC<ProScheduleScreenProps> = ({
 
                 <Pressable
                   style={styles.modalCancelBtn}
-                  onPress={() => setShowAutopilotModal(false)}
+                  onPress={() => {
+                    setAutopilotMode(savedAutopilotMode);
+                    setShowAutopilotModal(false);
+                  }}
                 >
-                  <Text style={styles.modalCancelBtnText}>Dismiss</Text>
+                  <Text style={styles.modalCancelBtnText}>Cancel</Text>
                 </Pressable>
               </ScrollView>
             </Animated.View>
@@ -3208,6 +3225,21 @@ const styles = StyleSheet.create({
     fontSize: 11,
     color: '#64748B',
     lineHeight: 15,
+  },
+  autoPostTrustBadge: {
+    backgroundColor: '#DCFCE7',
+    borderWidth: 1,
+    borderColor: '#BBF7D0',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 6,
+    marginTop: 6,
+  },
+  autoPostTrustBadgeText: {
+    fontSize: 10,
+    fontWeight: '700',
+    color: '#15803D',
+    lineHeight: 14,
   },
   autopilotCapabilitiesCard: {
     backgroundColor: '#FAF8F5',
