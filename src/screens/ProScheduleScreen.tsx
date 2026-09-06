@@ -387,6 +387,7 @@ export const ProScheduleScreen: React.FC<ProScheduleScreenProps> = ({
   const [showExpandViewModal, setShowExpandViewModal] = useState(false);
   const [showFullQueueModal, setShowFullQueueModal] = useState(false);
   const [showStrategyModal, setShowStrategyModal] = useState(false);
+  const [showAudienceFitModal, setShowAudienceFitModal] = useState(false);
   const [selectedStrategyIds, setSelectedStrategyIds] = useState<string[]>(['strat_1', 'strat_2']);
   const [fullQueueList, setFullQueueList] = useState<FullQueueItem[]>(() =>
     generateInitialFullQueue(weekData.baseDate)
@@ -1028,13 +1029,31 @@ export const ProScheduleScreen: React.FC<ProScheduleScreenProps> = ({
                   }}
                 >
                   <SocialBrandIcon platform={item.iconType} size={28} />
-                  <View style={{ flex: 1, marginLeft: 10 }}>
+                  <View style={{ flex: 1, marginLeft: 10, minWidth: 0 }}>
                     <Text style={styles.queueItemTitle} numberOfLines={2} ellipsizeMode="tail">
                       {item.title}
                     </Text>
-                    <Text style={styles.queueItemTime}>
-                      {item.dayLabel.split(' (')[0]}, {item.time} {item.period} • ⚡ {item.score}
-                    </Text>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', flexWrap: 'wrap', marginTop: 3, gap: 4 }}>
+                      <Text style={styles.queueItemTime}>
+                        {item.dayLabel.split(' (')[0]}, {item.time} {item.period} •
+                      </Text>
+                      <Pressable
+                        style={styles.audienceFitInlinePill}
+                        onPress={(e) => {
+                          e.stopPropagation();
+                          if (Platform.OS !== 'web') {
+                            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                          }
+                          triggerModalPop();
+                          setShowAudienceFitModal(true);
+                        }}
+                        hitSlop={6}
+                      >
+                        <Text style={styles.audienceFitInlinePillText}>
+                          ⚡ {item.score} <Text style={{ fontSize: 9.5, color: '#92400E' }}>ⓘ</Text>
+                        </Text>
+                      </Pressable>
+                    </View>
                   </View>
                   <Text style={styles.threeDotsMenu}>⋮</Text>
                 </Pressable>
@@ -1966,14 +1985,36 @@ export const ProScheduleScreen: React.FC<ProScheduleScreenProps> = ({
                         }}
                       >
                         <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                          <View style={{ flexDirection: 'row', gap: 10, flex: 1, alignItems: 'center' }}>
-                            <SocialBrandIcon platform={item.iconType} size={32} />
+                          <View style={{ flexDirection: 'row', gap: 10, flex: 1, minWidth: 0, alignItems: 'flex-start' }}>
+                            <View style={{ marginTop: 2 }}>
+                              <SocialBrandIcon platform={item.iconType} size={32} />
+                            </View>
 
-                            <View style={{ flex: 1 }}>
-                              <Text style={styles.scheduleItemTitle} numberOfLines={2}>{item.title}</Text>
-                              <Text style={styles.scheduleItemPlatform}>
-                                {item.dayLabel} • {item.time} {item.period} • ⚡ {item.score}
+                            <View style={{ flex: 1, minWidth: 0, marginRight: 8 }}>
+                              <Text style={styles.scheduleItemTitle} numberOfLines={2} ellipsizeMode="tail">
+                                {item.title}
                               </Text>
+                              <View style={{ flexDirection: 'row', alignItems: 'center', flexWrap: 'wrap', marginTop: 3, gap: 4 }}>
+                                <Text style={styles.scheduleItemPlatform}>
+                                  {item.dayLabel} • {item.time} {item.period} •
+                                </Text>
+                                <Pressable
+                                  style={styles.audienceFitInlinePill}
+                                  onPress={(e) => {
+                                    e.stopPropagation();
+                                    if (Platform.OS !== 'web') {
+                                      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                                    }
+                                    triggerModalPop();
+                                    setShowAudienceFitModal(true);
+                                  }}
+                                  hitSlop={6}
+                                >
+                                  <Text style={styles.audienceFitInlinePillText}>
+                                    ⚡ {item.score} <Text style={{ fontSize: 9.5, color: '#92400E' }}>ⓘ</Text>
+                                  </Text>
+                                </Pressable>
+                              </View>
                             </View>
                           </View>
 
@@ -2011,6 +2052,102 @@ export const ProScheduleScreen: React.FC<ProScheduleScreenProps> = ({
                   onPress={() => setShowFullQueueModal(false)}
                 >
                   <Text style={styles.modalCancelBtnText}>Close Queue</Text>
+                </Pressable>
+              </ScrollView>
+            </Animated.View>
+          </View>
+        </Modal>
+
+        {/* ============================================================ */}
+        {/* MODAL 6: AUDIENCE FIT EXPLANATION & METHODOLOGY              */}
+        {/* ============================================================ */}
+        <Modal
+          visible={showAudienceFitModal}
+          transparent={true}
+          animationType="fade"
+          onRequestClose={() => setShowAudienceFitModal(false)}
+        >
+          <View style={styles.modalOverlay}>
+            <Animated.View style={[styles.modalCard, { transform: [{ scale: modalPopScale }], maxWidth: 420 }]}>
+              <ScrollView showsVerticalScrollIndicator={false} bounces={false}>
+                {/* Header */}
+                <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+                  <View style={styles.modalGoldTagBadge}>
+                    <Text style={styles.modalGoldTagBadgeText}>⚡ JARVIS PREDICTIVE INTEL</Text>
+                  </View>
+                  <Pressable onPress={() => setShowAudienceFitModal(false)} hitSlop={8}>
+                    <Text style={{ fontSize: 18, color: '#94A3B8', fontWeight: '700' }}>✕</Text>
+                  </Pressable>
+                </View>
+
+                <Text style={styles.modalTitleText} numberOfLines={1} adjustsFontSizeToFit>
+                  What is Audience Fit?
+                </Text>
+
+                {/* Core Definition Banner */}
+                <View style={styles.audienceFitDefinitionBanner}>
+                  <Text style={styles.audienceFitDefinitionText}>
+                    How closely this content matches your audience’s interests, past engagement patterns, and content preferences.
+                  </Text>
+                </View>
+
+                {/* Breakdown Pillars */}
+                <Text style={styles.inputLabel}>HOW JARVIS CALCULATES THIS SCORE</Text>
+
+                <View style={styles.audienceFitPillarRow}>
+                  <View style={styles.audienceFitPillarIconBox}>
+                    <Text style={{ fontSize: 16 }}>🎯</Text>
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <Text style={styles.audienceFitPillarTitle}>Topic &amp; Interest Alignment</Text>
+                    <Text style={styles.audienceFitPillarSub}>
+                      Measures semantic overlap with topics your audience bookmarks, saves, and shares most frequently.
+                    </Text>
+                  </View>
+                </View>
+
+                <View style={styles.audienceFitPillarRow}>
+                  <View style={styles.audienceFitPillarIconBox}>
+                    <Text style={{ fontSize: 16 }}>🕒</Text>
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <Text style={styles.audienceFitPillarTitle}>Peak Attention Timing</Text>
+                    <Text style={styles.audienceFitPillarSub}>
+                      Scores whether the scheduled slot matches your followers' highest historical active hours.
+                    </Text>
+                  </View>
+                </View>
+
+                <View style={styles.audienceFitPillarRow}>
+                  <View style={styles.audienceFitPillarIconBox}>
+                    <Text style={{ fontSize: 16 }}>📈</Text>
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <Text style={styles.audienceFitPillarTitle}>Retention &amp; Format Fit</Text>
+                    <Text style={styles.audienceFitPillarSub}>
+                      Evaluates video pacing and format against your top-performing 10% highest-retention posts.
+                    </Text>
+                  </View>
+                </View>
+
+                {/* Action Button */}
+                <Pressable
+                  style={[styles.modalPrimaryActionBtn, { marginTop: 14 }]}
+                  onPress={() => {
+                    if (Platform.OS !== 'web') {
+                      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                    }
+                    setShowAudienceFitModal(false);
+                  }}
+                >
+                  <Text style={styles.modalPrimaryActionBtnText}>Got it ➔</Text>
+                </Pressable>
+
+                <Pressable
+                  style={styles.modalCancelBtn}
+                  onPress={() => setShowAudienceFitModal(false)}
+                >
+                  <Text style={styles.modalCancelBtnText}>Dismiss</Text>
                 </Pressable>
               </ScrollView>
             </Animated.View>
@@ -3349,6 +3486,67 @@ const styles = StyleSheet.create({
     fontSize: 12.5,
     fontWeight: '700',
     color: '#475569',
+  },
+
+  // AUDIENCE FIT MODAL & PILL STYLES
+  audienceFitInlinePill: {
+    backgroundColor: '#FEF3C7',
+    borderWidth: 1,
+    borderColor: '#FDE68A',
+    paddingHorizontal: 6,
+    paddingVertical: 1.5,
+    borderRadius: 6,
+  },
+  audienceFitInlinePillText: {
+    fontSize: 10,
+    fontWeight: '800',
+    color: '#92400E',
+  },
+  audienceFitDefinitionBanner: {
+    backgroundColor: '#EDE9FE',
+    borderLeftWidth: 4,
+    borderLeftColor: '#582CDB',
+    padding: 12,
+    borderRadius: 10,
+    marginBottom: 14,
+  },
+  audienceFitDefinitionText: {
+    fontSize: 12.5,
+    color: '#1E1B4B',
+    lineHeight: 18,
+    fontWeight: '600',
+  },
+  audienceFitPillarRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: 10,
+    backgroundColor: '#FAF8F5',
+    padding: 10,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#EFECE6',
+    marginBottom: 8,
+  },
+  audienceFitPillarIconBox: {
+    width: 32,
+    height: 32,
+    borderRadius: 8,
+    backgroundColor: '#FFFFFF',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+  },
+  audienceFitPillarTitle: {
+    fontSize: 12,
+    fontWeight: '800',
+    color: '#171420',
+    marginBottom: 2,
+  },
+  audienceFitPillarSub: {
+    fontSize: 11,
+    color: '#64748B',
+    lineHeight: 15,
   },
 
   // POST DETAIL MODAL
