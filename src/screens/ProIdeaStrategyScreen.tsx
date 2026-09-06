@@ -394,7 +394,7 @@ export const ProIdeaStrategyScreen: React.FC<ProIdeaStrategyScreenProps> = ({
               style={styles.mainTitleText}
               numberOfLines={1}
               adjustsFontSizeToFit
-              minimumFontScale={0.8}
+              minimumFontScale={0.65}
             >
               Find the idea with the strongest upside.
             </Text>
@@ -1072,10 +1072,10 @@ const styles = StyleSheet.create({
     letterSpacing: 0.3,
   },
   mainTitleText: {
-    fontSize: 20,
+    fontSize: 17,
     fontWeight: '700',
     color: '#171420',
-    letterSpacing: -0.4,
+    letterSpacing: -0.3,
   },
   mainSubText: {
     fontSize: 12.5,
