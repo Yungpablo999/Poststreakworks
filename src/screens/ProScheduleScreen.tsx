@@ -1126,10 +1126,7 @@ export const ProScheduleScreen: React.FC<ProScheduleScreenProps> = ({
           {/* SECTION 6: OPTIMAL WINDOWS & PLATFORM DISTRIBUTION           */}
           {/* ============================================================ */}
           <View style={styles.analyticsSectionCard}>
-            <View style={styles.optimalWindowsHeaderRow}>
-              <Text style={styles.analyticsSectionTitle}>Optimal Windows</Text>
-              <Text style={styles.optimalWindowsHintText}>Tap window to view per-platform</Text>
-            </View>
+            <Text style={styles.analyticsSectionTitle}>Optimal Windows</Text>
 
             {/* TODAY */}
             <Pressable
@@ -3521,17 +3518,7 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontWeight: '700',
     color: '#171420',
-  },
-  optimalWindowsHeaderRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
     marginBottom: 4,
-  },
-  optimalWindowsHintText: {
-    fontSize: 10.5,
-    fontWeight: '600',
-    color: '#8B5CF6',
   },
   windowRowPressable: {
     paddingVertical: 8,
