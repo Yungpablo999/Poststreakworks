@@ -2269,14 +2269,20 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   profileAvatarWrapper: {
-    position: 'relative',
-  },
-  headerUserAvatar: {
     width: 38,
     height: 38,
     borderRadius: 20,
     borderWidth: 2,
     borderColor: '#F59E0B',
+    backgroundColor: '#FFFFFF',
+    justifyContent: 'center',
+    alignItems: 'center',
+    position: 'relative',
+  },
+  headerUserAvatar: {
+    width: '100%',
+    height: '100%',
+    borderRadius: 18,
   },
   avatarTinyGoldCheckPos: {
     position: 'absolute',

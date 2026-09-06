@@ -1116,11 +1116,17 @@ const styles = StyleSheet.create({
     backgroundColor: '#EF4444',
   },
   profileAvatarBtn: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: '#FFFFFF',
+    justifyContent: 'center',
+    alignItems: 'center',
     position: 'relative',
   },
   profileAvatarImg: {
-    width: 36,
-    height: 36,
+    width: '100%',
+    height: '100%',
     borderRadius: 18,
   },
   avatarGoldBorderRing: {
