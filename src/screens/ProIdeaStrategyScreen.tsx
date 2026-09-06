@@ -10,6 +10,7 @@ import {
   Modal,
   Image,
   Dimensions,
+  useWindowDimensions,
   SafeAreaView,
   StatusBar,
   TextInput,
@@ -62,6 +63,10 @@ export const ProIdeaStrategyScreen: React.FC<ProIdeaStrategyScreenProps> = ({
   userProfile,
   onSaveProfile,
 }) => {
+  const { width: windowWidth } = useWindowDimensions();
+  // Dynamically compute font size so 42 characters fit on a single line on any device screen without truncation
+  const titleFontSize = Math.min(17.5, Math.max(13, (windowWidth - 44) / 23.5));
+
   const [activeTab, setActiveTab] = useState<TabType>('create');
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [showNotificationModal, setShowNotificationModal] = useState(false);
@@ -391,10 +396,10 @@ export const ProIdeaStrategyScreen: React.FC<ProIdeaStrategyScreenProps> = ({
             </View>
 
             <Text
-              style={styles.mainTitleText}
-              numberOfLines={1}
-              adjustsFontSizeToFit
-              minimumFontScale={0.65}
+              style={[
+                styles.mainTitleText,
+                { fontSize: titleFontSize, letterSpacing: -0.3 },
+              ]}
             >
               Find the idea with the strongest upside.
             </Text>
