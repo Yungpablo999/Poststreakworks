@@ -46,7 +46,7 @@ const STRUCTURE_STEPS: StructureStepItem[] = [
     timing: '0–3s',
     focus: '3-sec thumbstopper',
     snippet: '“Most new creators do not fail because they lack ideas. They fail because they wait too long to post.”',
-    visualCue: 'Direct-to-camera punch-in (1.1x) in the first 0.8s to stop the scroll instantly.',
+    visualCue: 'Direct-to-camera punch-in (1.1x) in the first 0.8s to create an immediate visual interruption.',
     voicePacing: 'High urgency, confident assertive cadence with zero pre-intro silence.',
     editingCue: 'Kinetic text overlay on screen with subtle sound pop on the first 3 words.',
   },
@@ -109,17 +109,10 @@ const INITIAL_SCRIPT_SECTIONS: ScriptSectionBlock[] = [
     placeholder: 'Hook script...',
   },
   {
-    id: 'setup',
-    tag: 'SETUP',
-    timing: '3–6s',
-    content: 'Look, I get it. You want it to be perfect. But perfectionism is just procrastination in a fancy suit.',
-    placeholder: 'Setup context...',
-  },
-  {
     id: 'mistake1',
     tag: 'MISTAKE 1',
-    timing: '6–14s',
-    content: 'Waiting for the "Perfect Idea". It doesn\'t exist. Good ideas come from the data of bad ones.',
+    timing: '3–14s',
+    content: 'Waiting for the "Perfect Idea". It doesn\'t exist. Good ideas come from publishing through the average ones.',
     placeholder: 'Mistake 1 breakdown...',
   },
   {
@@ -133,7 +126,7 @@ const INITIAL_SCRIPT_SECTIONS: ScriptSectionBlock[] = [
     id: 'mistake3',
     tag: 'MISTAKE 3',
     timing: '25–36s',
-    content: 'Zero system. You\'re starting from scratch every single time, which leads directly to creator burnout.',
+    content: 'Zero system. Starting from scratch every single time leads directly to creator burnout.',
     placeholder: 'Mistake 3 breakdown...',
   },
   {
@@ -329,8 +322,7 @@ export const ProScriptScreen: React.FC<ProScriptScreenProps> = ({
     setScriptSections(prev =>
       prev.map(s => {
         if (s.id === 'hook') return { ...s, content: 'Most new creators fail because they wait too long to post.' };
-        if (s.id === 'setup') return { ...s, content: 'Perfectionism is just procrastination in disguise.' };
-        if (s.id === 'mistake1') return { ...s, content: 'Waiting for the "Perfect Idea". Good ideas come from shipping average ones.' };
+        if (s.id === 'mistake1') return { ...s, content: 'Waiting for the "Perfect Idea". Good ideas come from shipping through average ones.' };
         if (s.id === 'mistake2') return { ...s, content: 'Over-editing for 6 hours. High volume beats overthinking every time.' };
         if (s.id === 'mistake3') return { ...s, content: 'Zero system. Starting from scratch every morning creates burnout.' };
         if (s.id === 'cta') return { ...s, content: 'Which one is slowing you down? Drop 1, 2, or 3 below.' };
@@ -347,7 +339,6 @@ export const ProScriptScreen: React.FC<ProScriptScreenProps> = ({
     setScriptSections(prev =>
       prev.map(s => {
         if (s.id === 'hook') return { ...s, content: 'You are not failing because you lack ideas. You are failing because you hesitate to post.' };
-        if (s.id === 'setup') return { ...s, content: 'Perfectionism is procrastination with an excuse.' };
         if (s.id === 'mistake1') return { ...s, content: 'Waiting for perfection. The only way to find great ideas is publishing through average ones.' };
         if (s.id === 'mistake2') return { ...s, content: 'Spending 6 hours on an edit. Stop over-tweaking and start shipping.' };
         if (s.id === 'mistake3') return { ...s, content: 'No repeatable workflow. If you rebuild the wheel daily, you burn out.' };
@@ -364,7 +355,7 @@ export const ProScriptScreen: React.FC<ProScriptScreenProps> = ({
     }
     setScriptSections(prev =>
       prev.map(s => {
-        if (s.id === 'setup') return { ...s, content: 'Look, I get it. Your drafts folder has 47 unfinished reels and your ego is protecting them like state secrets.' };
+        if (s.id === 'mistake1') return { ...s, content: 'Waiting for the "perfect idea"—while your drafts folder has 47 unfinished reels and your ego protects them like state secrets.' };
         if (s.id === 'cta') return { ...s, content: 'Be honest—are you guilty of 1, 2, or all 3? Drop your confession below.' };
         return s;
       })
@@ -378,7 +369,7 @@ export const ProScriptScreen: React.FC<ProScriptScreenProps> = ({
     }
     setScriptSections(prev =>
       prev.map(s => {
-        if (s.id === 'setup') return { ...s, content: 'Here’s the truth: waiting for the perfect moment will cost you months of momentum.' };
+        if (s.id === 'mistake1') return { ...s, content: 'Waiting for the "Perfect Idea". Here’s the truth: good ideas come from publishing through average ones.' };
         if (s.id === 'mistake2') return { ...s, content: 'Over-editing for 6 hours. Spending six hours editing every post makes consistency impossible.' };
         return s;
       })
@@ -801,7 +792,7 @@ export const ProScriptScreen: React.FC<ProScriptScreenProps> = ({
           <View style={[styles.sectionHeaderRowBetween, { marginTop: 22 }]}>
             <Text style={styles.sectionHeaderTitle}>SCRIPT STRUCTURE</Text>
             <View style={styles.durationOptimalPill}>
-              <Text style={styles.durationOptimalPillText}>⏱ 42 SECONDS (OPTIMAL)</Text>
+              <Text style={styles.durationOptimalPillText}>⏱ 42 SECONDS • OPTIMIZED</Text>
             </View>
           </View>
 
