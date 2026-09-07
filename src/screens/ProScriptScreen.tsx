@@ -419,7 +419,7 @@ export const ProScriptScreen: React.FC<ProScriptScreenProps> = ({
               Build a script that holds attention.
             </Text>
             <Text style={styles.mainSubText}>
-              Build stronger Hooks, Bodies and CTAs with AI-guided pacing and retention strategy.
+              Build stronger Hooks, Bodies and CTAs with pacing and retention strategy.
             </Text>
 
             <View style={{ flexDirection: 'row', gap: 8, marginTop: 10 }}>
