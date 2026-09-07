@@ -218,7 +218,7 @@ export const ProScriptScreen: React.FC<ProScriptScreenProps> = ({
 
   const [isPlayingPreview, setIsPlayingPreview] = useState(false);
   const [isAccelerated, setIsAccelerated] = useState(false);
-  const [selectedFormat, setSelectedFormat] = useState('9:16 (42s)');
+  const [selectedFormat, setSelectedFormat] = useState('42s (Standard)');
   const [selectedPlatforms, setSelectedPlatforms] = useState<string[]>(['tiktok', 'instagram', 'youtube']);
   const [expandedStructureIndex, setExpandedStructureIndex] = useState<number | null>(null);
   const [completionData, setCompletionData] = useState({
@@ -1091,9 +1091,9 @@ export const ProScriptScreen: React.FC<ProScriptScreenProps> = ({
             <Text style={styles.formatPresetsLabel}>SCRIPT PACING PRESET</Text>
             <View style={styles.formatPresetsRow}>
               {[
-                { id: '9:16 (42s)', label: '9:16 (42s)' },
-                { id: 'Carousel (6p)', label: 'Carousel (6p)' },
-                { id: 'X Thread', label: 'X Thread' },
+                { id: '30s (Punchy)', label: '30s (Punchy)' },
+                { id: '42s (Standard)', label: '42s (Standard)' },
+                { id: '60s (Deep Dive)', label: '60s (Deep Dive)' },
               ].map((fmt) => (
                 <Pressable
                   key={fmt.id}
