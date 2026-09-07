@@ -46,6 +46,7 @@ interface IdeaItem {
   badgeEmoji: string;
   score: number;
   title: string;
+  shortTitle: string;
   bestFor: string;
   audienceFit: number;
   virality: number;
@@ -90,6 +91,7 @@ export const ProIdeaStrategyScreen: React.FC<ProIdeaStrategyScreenProps> = ({
       badgeEmoji: '👏',
       score: 93,
       title: 'One small creator habit that made posting easier',
+      shortTitle: 'Creator Habit',
       bestFor: 'Fast Completion',
       audienceFit: 96,
       virality: 91,
@@ -100,6 +102,7 @@ export const ProIdeaStrategyScreen: React.FC<ProIdeaStrategyScreenProps> = ({
       badgeEmoji: '📈',
       score: 89,
       title: '3 mistakes that slow down new creators',
+      shortTitle: '3 Creator Mistakes',
       bestFor: 'Saves & Reach',
       audienceFit: 92,
       virality: 87,
@@ -201,6 +204,7 @@ export const ProIdeaStrategyScreen: React.FC<ProIdeaStrategyScreenProps> = ({
         badgeEmoji: '🔥',
         score: 95,
         title: 'The single iPhone camera toggle you forgot to turn on',
+        shortTitle: 'Camera Toggle Trick',
         bestFor: 'Viral Views',
         audienceFit: 97,
         virality: 95,
@@ -211,6 +215,7 @@ export const ProIdeaStrategyScreen: React.FC<ProIdeaStrategyScreenProps> = ({
         badgeEmoji: '⚡',
         score: 92,
         title: 'Why posting every day is actually holding you back',
+        shortTitle: 'Daily Posting Trap',
         bestFor: 'Contrarian Debate',
         audienceFit: 94,
         virality: 89,
@@ -629,29 +634,26 @@ export const ProIdeaStrategyScreen: React.FC<ProIdeaStrategyScreenProps> = ({
               <Text style={[styles.tableHeadCol, { flex: 0.8, textAlign: 'right' }]}>SCORE</Text>
             </View>
 
-            <View style={styles.tableBodyRow}>
-              <Text style={[styles.tableItemTitle, { flex: 2 }]} numberOfLines={1}>
-                1. Habit Habit: habit
-              </Text>
-              <View style={{ flex: 1.2, alignItems: 'center' }}>
-                <View style={styles.tableTagGold}>
-                  <Text style={styles.tableTagGoldText}>Reach</Text>
+            {ideas.map((idea, idx) => {
+              const isLast = idx === ideas.length - 1;
+              const isStreak = idea.category === 'STREAK-SAVER';
+              const tagLabel = isStreak ? 'Reach' : 'Growth';
+              return (
+                <View key={idea.id} style={[styles.tableBodyRow, isLast && { borderBottomWidth: 0 }]}>
+                  <Text style={[styles.tableItemTitle, { flex: 2 }]} numberOfLines={1}>
+                    {`${idx + 1}. ${idea.shortTitle}`}
+                  </Text>
+                  <View style={{ flex: 1.2, alignItems: 'center' }}>
+                    <View style={isStreak ? styles.tableTagGold : styles.tableTagPurple}>
+                      <Text style={isStreak ? styles.tableTagGoldText : styles.tableTagPurpleText}>
+                        {tagLabel}
+                      </Text>
+                    </View>
+                  </View>
+                  <Text style={[styles.tableScoreVal, { flex: 0.8, textAlign: 'right' }]}>{idea.score}</Text>
                 </View>
-              </View>
-              <Text style={[styles.tableScoreVal, { flex: 0.8, textAlign: 'right' }]}>93</Text>
-            </View>
-
-            <View style={[styles.tableBodyRow, { borderBottomWidth: 0 }]}>
-              <Text style={[styles.tableItemTitle, { flex: 2 }]} numberOfLines={1}>
-                2. 3 Mistakes
-              </Text>
-              <View style={{ flex: 1.2, alignItems: 'center' }}>
-                <View style={styles.tableTagPurple}>
-                  <Text style={styles.tableTagPurpleText}>Growth</Text>
-                </View>
-              </View>
-              <Text style={[styles.tableScoreVal, { flex: 0.8, textAlign: 'right' }]}>89</Text>
-            </View>
+              );
+            })}
           </View>
 
           {/* ============================================================ */}
