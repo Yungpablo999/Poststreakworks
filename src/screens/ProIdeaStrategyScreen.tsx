@@ -540,10 +540,10 @@ export const ProIdeaStrategyScreen: React.FC<ProIdeaStrategyScreenProps> = ({
                 </View>
               </View>
 
-              {/* Virality */}
+              {/* Growth Potential */}
               <View style={{ flex: 1 }}>
                 <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 4 }}>
-                  <Text style={styles.meterLabel}>VIRALITY</Text>
+                  <Text style={styles.meterLabel}>GROWTH POTENTIAL</Text>
                   <Text style={styles.meterValText}>88%</Text>
                 </View>
                 <View style={styles.meterTrack}>
@@ -556,7 +556,7 @@ export const ProIdeaStrategyScreen: React.FC<ProIdeaStrategyScreenProps> = ({
             <View style={styles.insightCalloutBox}>
               <Text style={{ fontSize: 14, marginRight: 6 }}>📍</Text>
               <Text style={styles.insightCalloutText}>
-                &ldquo;The contrarian angle has a 1.4x higher bookmark rate in your niche/format.&rdquo;
+                &ldquo;Contrarian angles show strong bookmark and retention potential in your niche format.&rdquo;
               </Text>
             </View>
           </View>
