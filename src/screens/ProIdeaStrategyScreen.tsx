@@ -741,7 +741,7 @@ export const ProIdeaStrategyScreen: React.FC<ProIdeaStrategyScreenProps> = ({
               style={({ pressed }) => [styles.buildCompleteWorkflowBtn, pressed && styles.btnPressed]}
               onPress={handleBuildWorkflow}
             >
-              <Text style={styles.buildCompleteWorkflowBtnText}>Build Complete Workflow</Text>
+              <Text style={styles.buildCompleteWorkflowBtnText}>Build Workflow from Top Idea →</Text>
             </Pressable>
 
             <Pressable
@@ -1463,15 +1463,17 @@ const styles = StyleSheet.create({
 
   // SECTION 6: SAVED PRO IDEAS
   savedIdeaCardHorizontal: {
-    width: 170,
+    width: 184,
     backgroundColor: '#FFFFFF',
     borderRadius: 16,
     padding: 14,
     borderWidth: 1,
     borderColor: '#EFECE6',
+    justifyContent: 'space-between',
+    minHeight: 104,
   },
   savedIdeaTitle: {
-    fontSize: 12,
+    fontSize: 12.5,
     fontWeight: '700',
     color: '#171420',
     lineHeight: 17,
