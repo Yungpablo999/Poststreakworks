@@ -65,7 +65,7 @@ const STRUCTURE_STEPS: StructureStepItem[] = [
     title: 'Mistake 2',
     timing: '14–25s',
     focus: 'Friction point',
-    snippet: '“Over-editing for 6 hours. If it takes you that long, your audience’s attention span was lost in 3 seconds anyway.”',
+    snippet: '“Over-editing for 6 hours. If you’re spending six hours editing every post, you’re making consistency much harder than it needs to be.”',
     visualCue: 'Angle switch or quick b-roll cut to editing timeline / screen capture.',
     voicePacing: 'Relatable tone, slight cadence drop to deliver the reality check with impact.',
     editingCue: 'Speed ramp or split-screen highlight at the 18-second retention check.',
@@ -89,6 +89,59 @@ const STRUCTURE_STEPS: StructureStepItem[] = [
     visualCue: 'Direct eye contact, natural hand gesture pointing toward the comment section below.',
     voicePacing: 'Warm, inviting, open-ended question to maximize comment velocity.',
     editingCue: 'Animated comment prompt sticker + clean sound chime.',
+  },
+];
+
+interface ScriptSectionBlock {
+  id: string;
+  tag: string;
+  timing: string;
+  content: string;
+  placeholder?: string;
+}
+
+const INITIAL_SCRIPT_SECTIONS: ScriptSectionBlock[] = [
+  {
+    id: 'hook',
+    tag: 'HOOK',
+    timing: '0–3s',
+    content: 'Most new creators do not fail because they lack ideas. They fail because they wait too long to post.',
+    placeholder: 'Hook script...',
+  },
+  {
+    id: 'setup',
+    tag: 'SETUP',
+    timing: '3–6s',
+    content: 'Look, I get it. You want it to be perfect. But perfectionism is just procrastination in a fancy suit.',
+    placeholder: 'Setup context...',
+  },
+  {
+    id: 'mistake1',
+    tag: 'MISTAKE 1',
+    timing: '6–14s',
+    content: 'Waiting for the "Perfect Idea". It doesn\'t exist. Good ideas come from the data of bad ones.',
+    placeholder: 'Mistake 1 breakdown...',
+  },
+  {
+    id: 'mistake2',
+    tag: 'MISTAKE 2',
+    timing: '14–25s',
+    content: 'Over-editing for 6 hours. If you’re spending six hours editing every post, you’re making consistency much harder than it needs to be.',
+    placeholder: 'Mistake 2 breakdown...',
+  },
+  {
+    id: 'mistake3',
+    tag: 'MISTAKE 3',
+    timing: '25–36s',
+    content: 'Zero system. You\'re starting from scratch every single time, which leads directly to creator burnout.',
+    placeholder: 'Mistake 3 breakdown...',
+  },
+  {
+    id: 'cta',
+    tag: 'CTA',
+    timing: '36–42s',
+    content: 'Which of these three is slowing you down the most? Let me know in the comments.',
+    placeholder: 'Call to action...',
   },
 ];
 
@@ -157,9 +210,18 @@ export const ProScriptScreen: React.FC<ProScriptScreenProps> = ({
     },
   ]);
 
-  const [scriptBody, setScriptBody] = useState(
-    `[Hook] Most new creators do not fail because they lack ideas. They fail because they wait too long to post.\n\nLook, I get it. You want it to be perfect. But perfectionism is just procrastination in a fancy suit.\n\nMistake one: Waiting for the "Perfect Idea". It doesn't exist. Good ideas come from the data of bad ones.\n\nMistake two: Editing for 6 hours. If it takes you that long, your audience's attention span is over in 3 seconds anyway.\n\nMistake three: Not having a repeatable workflow. You're starting from scratch every single time.\n\n[CTA] Which of these three is slowing you down the most? Let me know in the comments.`
-  );
+  const [scriptSections, setScriptSections] = useState<ScriptSectionBlock[]>(INITIAL_SCRIPT_SECTIONS);
+
+  // Computes unified script text for Voice Studio and Draft exports
+  const getFullScriptText = () => {
+    return scriptSections.map(s => `[${s.tag}] ${s.content}`).join('\n\n');
+  };
+
+  const handleUpdateSectionContent = (id: string, newContent: string) => {
+    setScriptSections(prev =>
+      prev.map(section => (section.id === id ? { ...section, content: newContent } : section))
+    );
+  };
 
   const [isPlayingPreview, setIsPlayingPreview] = useState(false);
   const [isAccelerated, setIsAccelerated] = useState(false);
@@ -230,9 +292,9 @@ export const ProScriptScreen: React.FC<ProScriptScreenProps> = ({
     }
     setSelectedHookIndex(index);
     const chosenHook = hookOptions[index].text;
-    const bodyLines = scriptBody.split('\n\n');
-    bodyLines[0] = `[Hook] ${chosenHook}`;
-    setScriptBody(bodyLines.join('\n\n'));
+    setScriptSections(prev =>
+      prev.map(section => (section.id === 'hook' ? { ...section, content: chosenHook } : section))
+    );
     showToast(`✓ Applied Hook #${index + 1}`);
   };
 
@@ -260,13 +322,75 @@ export const ProScriptScreen: React.FC<ProScriptScreenProps> = ({
     showToast('✨ Jarvis generated 3 new viral hooks!');
   };
 
+  const handleMakeShorter = () => {
+    if (Platform.OS !== 'web') {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    }
+    setScriptSections(prev =>
+      prev.map(s => {
+        if (s.id === 'hook') return { ...s, content: 'Most new creators fail because they wait too long to post.' };
+        if (s.id === 'setup') return { ...s, content: 'Perfectionism is just procrastination in disguise.' };
+        if (s.id === 'mistake1') return { ...s, content: 'Waiting for the "Perfect Idea". Good ideas come from shipping average ones.' };
+        if (s.id === 'mistake2') return { ...s, content: 'Over-editing for 6 hours. High volume beats overthinking every time.' };
+        if (s.id === 'mistake3') return { ...s, content: 'Zero system. Starting from scratch every morning creates burnout.' };
+        if (s.id === 'cta') return { ...s, content: 'Which one is slowing you down? Drop 1, 2, or 3 below.' };
+        return s;
+      })
+    );
+    showToast('✂️ Trimmed script duration to 30s');
+  };
+
+  const handleMakePunchier = () => {
+    if (Platform.OS !== 'web') {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    }
+    setScriptSections(prev =>
+      prev.map(s => {
+        if (s.id === 'hook') return { ...s, content: 'You are not failing because you lack ideas. You are failing because you hesitate to post.' };
+        if (s.id === 'setup') return { ...s, content: 'Perfectionism is procrastination with an excuse.' };
+        if (s.id === 'mistake1') return { ...s, content: 'Waiting for perfection. The only way to find great ideas is publishing through average ones.' };
+        if (s.id === 'mistake2') return { ...s, content: 'Spending 6 hours on an edit. Stop over-tweaking and start shipping.' };
+        if (s.id === 'mistake3') return { ...s, content: 'No repeatable workflow. If you rebuild the wheel daily, you burn out.' };
+        if (s.id === 'cta') return { ...s, content: 'Which mistake is holding you back? Comment 1, 2, or 3.' };
+        return s;
+      })
+    );
+    showToast('💥 Boosted hook and delivery cadence');
+  };
+
+  const handleAddHumor = () => {
+    if (Platform.OS !== 'web') {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    }
+    setScriptSections(prev =>
+      prev.map(s => {
+        if (s.id === 'setup') return { ...s, content: 'Look, I get it. Your drafts folder has 47 unfinished reels and your ego is protecting them like state secrets.' };
+        if (s.id === 'cta') return { ...s, content: 'Be honest—are you guilty of 1, 2, or all 3? Drop your confession below.' };
+        return s;
+      })
+    );
+    showToast('😄 Injected relatable creator punchline');
+  };
+
+  const handleImproveFlow = () => {
+    if (Platform.OS !== 'web') {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    }
+    setScriptSections(prev =>
+      prev.map(s => {
+        if (s.id === 'setup') return { ...s, content: 'Here’s the truth: waiting for the perfect moment will cost you months of momentum.' };
+        if (s.id === 'mistake2') return { ...s, content: 'Over-editing for 6 hours. Spending six hours editing every post makes consistency impossible.' };
+        return s;
+      })
+    );
+    showToast('🌊 Smoothed transitions between scenes');
+  };
+
   const handlePolishWithJarvis = () => {
     if (Platform.OS !== 'web') {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     }
-    setScriptBody(
-      `[Hook] Most new creators don't fail from lack of talent. They fail because they wait too long to post.\n\nPerfectionism is just fear in disguise.\n\nMistake 1: Waiting for the "Perfect Idea". It doesn't exist. Great content comes from publishing through the average ones.\n\nMistake 2: Over-editing. A 6-hour edit won't save a boring first 3 seconds.\n\nMistake 3: Zero system. Re-inventing the wheel every morning leads directly to burnout.\n\n[CTA] Which one are you guilty of right now? Drop 1, 2, or 3 below.`
-    );
+    setScriptSections(INITIAL_SCRIPT_SECTIONS);
     showToast('🪄 Script polished with Jarvis AI!');
   };
 
@@ -289,7 +413,7 @@ export const ProScriptScreen: React.FC<ProScriptScreenProps> = ({
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     }
     if (onOpenVoiceStudio) {
-      onOpenVoiceStudio(scriptBody, currentIdeaTitle);
+      onOpenVoiceStudio(getFullScriptText(), currentIdeaTitle);
     } else {
       showToast('🎙️ Loaded script into Pro Voice Studio');
     }
@@ -790,38 +914,61 @@ export const ProScriptScreen: React.FC<ProScriptScreenProps> = ({
           </View>
 
           {/* ============================================================ */}
-          {/* CARD 5: SCRIPT BODY (Interactive Text Editor)                */}
+          {/* CARD 5: SCRIPT BODY (Interactive Section Editor)             */}
           {/* ============================================================ */}
           <View style={[styles.sectionHeaderRowBetween, { marginTop: 22 }]}>
             <Text style={styles.sectionHeaderTitle}>SCRIPT BODY</Text>
-            <Text style={{ fontSize: 13 }}>✏️</Text>
+            <View style={styles.editorCountBadge}>
+              <Text style={styles.editorCountBadgeText}>6 SECTIONS</Text>
+            </View>
           </View>
 
           <View style={styles.scriptBodyCard}>
-            <TextInput
-              style={styles.scriptBodyTextInput}
-              multiline
-              value={scriptBody}
-              onChangeText={setScriptBody}
-              placeholder="Your script body..."
-              placeholderTextColor="#94A3B8"
-            />
+            {scriptSections.map((section, index) => {
+              const isLast = index === scriptSections.length - 1;
+              return (
+                <View
+                  key={section.id}
+                  style={[
+                    styles.editorSectionBlock,
+                    !isLast && styles.editorSectionDivider,
+                  ]}
+                >
+                  <View style={styles.editorSectionHeaderRow}>
+                    <View style={styles.editorSectionTagBadge}>
+                      <Text style={styles.editorSectionTagText}>[{section.tag}]</Text>
+                    </View>
+                    <Text style={styles.editorSectionTimingText}>{section.timing}</Text>
+                  </View>
+
+                  <TextInput
+                    style={styles.editorSectionTextInput}
+                    multiline
+                    scrollEnabled={false}
+                    value={section.content}
+                    onChangeText={(text) => handleUpdateSectionContent(section.id, text)}
+                    placeholder={section.placeholder || `Enter ${section.tag.toLowerCase()}...`}
+                    placeholderTextColor="#94A3B8"
+                  />
+                </View>
+              );
+            })}
 
             {/* AI Rewriters */}
             <ScrollView
               horizontal
               showsHorizontalScrollIndicator={false}
-              contentContainerStyle={{ gap: 6, marginTop: 12, paddingTop: 10, borderTopWidth: 1, borderTopColor: '#F1EFE9' }}
+              contentContainerStyle={styles.editorRewritersScroll}
             >
               {[
-                { label: 'Make Shorter', action: () => showToast('✂️ Trimmed script duration to 30s') },
-                { label: 'Make Punchier', action: () => showToast('💥 Boosted hook and delivery cadence') },
-                { label: 'Add Humor', action: () => showToast('😄 Injected relatable creator punchline') },
-                { label: 'Improve Flow', action: () => showToast('🌊 Smoothed transitions between scenes') },
+                { label: 'Make Shorter', action: handleMakeShorter },
+                { label: 'Make Punchier', action: handleMakePunchier },
+                { label: 'Add Humor', action: handleAddHumor },
+                { label: 'Improve Flow', action: handleImproveFlow },
               ].map((pill, idx) => (
                 <Pressable
                   key={idx}
-                  style={styles.quickRewritePill}
+                  style={({ pressed }) => [styles.quickRewritePill, pressed && styles.btnPressed]}
                   onPress={pill.action}
                 >
                   <Text style={styles.quickRewritePillText}>{pill.label}</Text>
@@ -829,7 +976,7 @@ export const ProScriptScreen: React.FC<ProScriptScreenProps> = ({
               ))}
 
               <Pressable
-                style={styles.aiPolishPillBtn}
+                style={({ pressed }) => [styles.aiPolishPillBtn, pressed && styles.btnPressed]}
                 onPress={handlePolishWithJarvis}
               >
                 <Text style={styles.aiPolishPillBtnText}>🪄 AI Polish with Jarvis</Text>
@@ -846,7 +993,13 @@ export const ProScriptScreen: React.FC<ProScriptScreenProps> = ({
               <Text style={styles.estimateBigNum}>42s</Text>
               <Text style={styles.estimateUnitText}> Est. Duration</Text>
             </View>
-            <Text style={styles.estimateSubText}>124 WORDS • 2.9 W/S</Text>
+            <Text style={styles.estimateSubText}>
+              {scriptSections.reduce(
+                (acc, s) => acc + (s.content.trim() ? s.content.trim().split(/\s+/).length : 0),
+                0
+              )}{' '}
+              WORDS • 2.9 W/S
+            </Text>
 
             <View style={styles.estimateMetricsRow}>
               <Text style={styles.estimateMetricLabel}>Pacing: <Text style={styles.estimateMetricVal}>91%</Text></Text>
@@ -1802,11 +1955,24 @@ const styles = StyleSheet.create({
     marginVertical: 8,
   },
 
-  // CARD 5: SCRIPT BODY
+  // CARD 5: SCRIPT BODY (Structured Editor)
+  editorCountBadge: {
+    backgroundColor: '#F1EFE9',
+    paddingHorizontal: 7,
+    paddingVertical: 2,
+    borderRadius: 5,
+  },
+  editorCountBadgeText: {
+    fontSize: 9.5,
+    fontWeight: '700',
+    color: '#64748B',
+    letterSpacing: 0.3,
+  },
   scriptBodyCard: {
     backgroundColor: '#FFFFFF',
     borderRadius: 18,
-    padding: 16,
+    paddingHorizontal: 16,
+    paddingVertical: 14,
     borderWidth: 1,
     borderColor: '#EFECE6',
     shadowColor: '#000',
@@ -1814,31 +1980,73 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.03,
     shadowRadius: 6,
   },
-  scriptBodyTextInput: {
-    fontSize: 12.5,
+  editorSectionBlock: {
+    paddingVertical: 8,
+  },
+  editorSectionDivider: {
+    borderBottomWidth: 1,
+    borderBottomColor: '#F3F0E9',
+    paddingBottom: 10,
+    marginBottom: 4,
+  },
+  editorSectionHeaderRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 6,
+  },
+  editorSectionTagBadge: {
+    backgroundColor: '#FAF8F5',
+    paddingHorizontal: 7,
+    paddingVertical: 2.5,
+    borderRadius: 5,
+    borderWidth: 1,
+    borderColor: '#EFECE6',
+  },
+  editorSectionTagText: {
+    fontSize: 10,
+    fontWeight: '800',
+    color: '#582CDB',
+    letterSpacing: 0.5,
+  },
+  editorSectionTimingText: {
+    fontSize: 10.5,
+    fontWeight: '600',
+    color: '#94A3B8',
+  },
+  editorSectionTextInput: {
+    fontSize: 13,
+    fontWeight: '500',
     lineHeight: 20,
     color: '#171420',
-    minHeight: 180,
-    textAlignVertical: 'top',
+    padding: 0,
+    margin: 0,
+  },
+  editorRewritersScroll: {
+    gap: 6,
+    marginTop: 8,
+    paddingTop: 12,
+    borderTopWidth: 1,
+    borderTopColor: '#F1EFE9',
   },
   quickRewritePill: {
     backgroundColor: '#FAF8F5',
     borderWidth: 1,
     borderColor: '#EFECE6',
-    paddingHorizontal: 9,
-    paddingVertical: 5,
-    borderRadius: 6,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 7,
   },
   quickRewritePillText: {
     fontSize: 11,
-    fontWeight: '800',
+    fontWeight: '700',
     color: '#475569',
   },
   aiPolishPillBtn: {
     backgroundColor: '#EDE9FE',
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    borderRadius: 6,
+    paddingHorizontal: 11,
+    paddingVertical: 6,
+    borderRadius: 7,
   },
   aiPolishPillBtnText: {
     fontSize: 11,
