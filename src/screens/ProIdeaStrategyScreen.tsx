@@ -907,31 +907,41 @@ export const ProIdeaStrategyScreen: React.FC<ProIdeaStrategyScreenProps> = ({
                 </Pressable>
               </View>
 
-              <View style={{ gap: 8, marginVertical: 12 }}>
+              <View style={{ gap: 8, marginTop: 12, marginBottom: 6 }}>
                 {savedIdeas.map((idea) => (
                   <Pressable
                     key={idea.id}
-                    style={styles.savedModalItem}
+                    style={({ pressed }) => [styles.savedModalItem, pressed && styles.btnPressed]}
                     onPress={() => {
+                      if (Platform.OS !== 'web') {
+                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                      }
                       setShowSavedIdeasModal(false);
                       handleSelectIdea(idea.title);
                     }}
                   >
                     <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <Text style={{ fontSize: 13, fontWeight: '700', color: '#171420', flex: 1, marginRight: 8 }}>
+                      <Text style={{ fontSize: 13, fontWeight: '700', color: '#171420', flex: 1, marginRight: 10 }}>
                         {idea.title}
                       </Text>
-                      <View style={styles.savedScorePill}>
-                        <Text style={styles.savedScorePillText}>{idea.score} SCORE</Text>
+                      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                        <View style={styles.savedScorePill}>
+                          <Text style={styles.savedScorePillText}>{idea.score} SCORE</Text>
+                        </View>
+                        <Svg width={14} height={14} viewBox="0 0 24 24" fill="none">
+                          <Path
+                            d="M9 18L15 12L9 6"
+                            stroke="#94A3B8"
+                            strokeWidth="2.4"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          />
+                        </Svg>
                       </View>
                     </View>
                   </Pressable>
                 ))}
               </View>
-
-              <Pressable style={styles.modalCancelBtn} onPress={() => setShowSavedIdeasModal(false)}>
-                <Text style={styles.modalCancelBtnText}>Close</Text>
-              </Pressable>
             </Animated.View>
           </View>
         </Modal>
