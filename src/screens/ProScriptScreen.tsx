@@ -1161,7 +1161,7 @@ export const ProScriptScreen: React.FC<ProScriptScreenProps> = ({
                   <View style={styles.retentionIconBox}>
                     <Text style={styles.retentionIconText}>{note.icon}</Text>
                   </View>
-                  <Text style={styles.retentionNoteText} numberOfLines={1}>
+                  <Text style={styles.retentionNoteText}>
                     {note.text}
                   </Text>
                 </View>
@@ -2308,31 +2308,33 @@ const styles = StyleSheet.create({
   },
   retentionRow: {
     flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
+    alignItems: 'flex-start',
+    gap: 10,
+    paddingVertical: 2,
   },
   retentionIconBox: {
-    width: 22,
-    height: 22,
-    borderRadius: 6,
+    width: 24,
+    height: 24,
+    borderRadius: 7,
     backgroundColor: '#FAF8F5',
     borderWidth: 1,
     borderColor: '#EFECE6',
     justifyContent: 'center',
     alignItems: 'center',
     flexShrink: 0,
+    marginTop: 1,
   },
   retentionIconText: {
-    fontSize: sFont(11),
+    fontSize: sFont(11.5),
     fontWeight: '800',
     color: '#582CDB',
   },
   retentionNoteText: {
-    fontSize: sFont(11.5),
-    fontWeight: '700',
+    fontSize: sFont(12),
+    fontWeight: '600',
+    lineHeight: 18,
     color: '#171420',
     flex: 1,
-    minWidth: 0,
   },
 
   // CARD 9: VOICE PREVIEW
