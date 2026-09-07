@@ -443,7 +443,7 @@ export const ProScriptScreen: React.FC<ProScriptScreenProps> = ({
             </Text>
 
             <View style={styles.tagsPillsRow}>
-              {['Creator Advice', 'Viral Reel', 'Short-form Video', 'Category: 7-Step'].map((tag) => (
+              {['Creator Advice', 'High-Reach Reel', 'Short-form Video', 'Mistake Breakdown'].map((tag) => (
                 <View key={tag} style={styles.ideaTagPill}>
                   <Text style={styles.ideaTagPillText}>{tag}</Text>
                 </View>
