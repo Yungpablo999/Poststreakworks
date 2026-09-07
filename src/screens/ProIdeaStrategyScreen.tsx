@@ -562,11 +562,11 @@ export const ProIdeaStrategyScreen: React.FC<ProIdeaStrategyScreenProps> = ({
           </View>
 
           {/* ============================================================ */}
-          {/* SECTION 3: TOP SCORED RECOMMENDATIONS                        */}
+          {/* SECTION 3: TOP RECOMMENDATIONS                               */}
           {/* ============================================================ */}
           <View style={[styles.sectionHeaderRowBetween, { marginTop: 22 }]}>
-            <Text style={styles.sectionHeaderTitle}>TOP SCORED RECOMMENDATIONS</Text>
-            <Text style={styles.totalGeneratedText}>{ideas.length} TOTAL GENERATED</Text>
+            <Text style={styles.sectionHeaderTitle}>TOP RECOMMENDATIONS</Text>
+            <Text style={styles.totalGeneratedText}>{ideas.length} GENERATED</Text>
           </View>
 
           <View style={{ gap: 10, marginTop: 4 }}>
@@ -1116,13 +1116,14 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+    gap: 12,
     marginBottom: 8,
   },
   sectionHeaderTitle: {
-    fontSize: 12,
+    fontSize: 11.5,
     fontWeight: '700',
     color: '#64748B',
-    letterSpacing: 0.5,
+    letterSpacing: 0.4,
   },
   editAllLink: {
     fontSize: 11,
@@ -1278,8 +1279,9 @@ const styles = StyleSheet.create({
   // SECTION 3: TOP SCORED RECOMMENDATIONS
   totalGeneratedText: {
     fontSize: 10,
-    fontWeight: '800',
+    fontWeight: '700',
     color: '#94A3B8',
+    letterSpacing: 0.3,
   },
   recommendedIdeaCard: {
     backgroundColor: '#FFFFFF',
