@@ -10,6 +10,7 @@ import {
   Modal,
   Image,
   Dimensions,
+  useWindowDimensions,
   SafeAreaView,
   StatusBar,
   TextInput,
@@ -58,6 +59,10 @@ export const ProScriptScreen: React.FC<ProScriptScreenProps> = ({
   userProfile,
   onSaveProfile,
 }) => {
+  const { width: windowWidth } = useWindowDimensions();
+  // Dynamically compute font size so 38 characters fit on a single line on any device screen without truncation
+  const titleFontSize = Math.min(19, Math.max(14, (windowWidth - 44) / 21));
+
   const [activeTab, setActiveTab] = useState<TabType>('create');
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [showNotificationModal, setShowNotificationModal] = useState(false);
@@ -405,7 +410,14 @@ export const ProScriptScreen: React.FC<ProScriptScreenProps> = ({
               <Text style={styles.goldScriptBadgeText}>PRO SCRIPT ENGINE</Text>
             </View>
 
-            <Text style={styles.mainTitleText}>Build a script that holds attention.</Text>
+            <Text
+              style={[
+                styles.mainTitleText,
+                { fontSize: titleFontSize, letterSpacing: -0.3 },
+              ]}
+            >
+              Build a script that holds attention.
+            </Text>
             <Text style={styles.mainSubText}>
               Build stronger Hooks, Bodies and CTAs with AI-guided pacing and retention strategy.
             </Text>
