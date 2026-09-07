@@ -87,7 +87,7 @@ const STRUCTURE_STEPS: StructureStepItem[] = [
     focus: 'Engagement question',
     snippet: '“Which of these three is slowing you down the most? Let me know in the comments.”',
     visualCue: 'Direct eye contact, natural hand gesture pointing toward the comment section below.',
-    voicePacing: 'Warm, inviting, open-ended question to maximize comment velocity.',
+    voicePacing: 'Warm, inviting, open-ended question designed to encourage comments.',
     editingCue: 'Animated comment prompt sticker + clean sound chime.',
   },
 ];
@@ -1152,10 +1152,10 @@ export const ProScriptScreen: React.FC<ProScriptScreenProps> = ({
             <Text style={styles.retentionNotesHeaderLabel}>RETENTION NOTES</Text>
             <View style={{ gap: 8, marginTop: 10 }}>
               {[
-                { icon: '✓', text: 'First 3s hook optimized for retention' },
-                { icon: '⚡', text: 'Pattern interrupts placed at 12s & 24s' },
-                { icon: '💡', text: 'Duration calibrated for seamless loops' },
-                { icon: '💬', text: 'Question CTA drives comment velocity' },
+                { icon: '✓', text: 'First 3s hook designed to strengthen early retention' },
+                { icon: '⚡', text: 'Pattern interrupts placed at 14s & 25s transitions' },
+                { icon: '💡', text: 'Duration optimized for a smoother loop' },
+                { icon: '💬', text: 'Question CTA designed to encourage comments' },
               ].map((note, nIdx) => (
                 <View key={nIdx} style={styles.retentionRow}>
                   <View style={styles.retentionIconBox}>
