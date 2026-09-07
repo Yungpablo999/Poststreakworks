@@ -794,17 +794,76 @@ export const ProIdeaStrategyScreen: React.FC<ProIdeaStrategyScreenProps> = ({
                 </Pressable>
               </View>
 
-              <Text style={{ fontSize: 12, color: '#64748B', marginBottom: 12 }}>
-                Customize your niche and content seed or question to steer the AI generator.
+              <Text style={{ fontSize: 12, color: '#64748B', marginBottom: 14, lineHeight: 17 }}>
+                Customize your niche, audience goal, and content seed or question to steer the AI generator.
               </Text>
 
+              {/* Niche */}
+              <Text style={styles.setupFieldLabel}>NICHE</Text>
+              <View style={[styles.pillRow, { marginBottom: 12 }]}>
+                {['Creator Education', 'Lifestyle', 'Business'].map((niche) => (
+                  <Pressable
+                    key={niche}
+                    style={[
+                      styles.setupOptionPill,
+                      selectedNiche === niche && styles.setupOptionPillActive,
+                    ]}
+                    onPress={() => {
+                      if (Platform.OS !== 'web') {
+                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                      }
+                      setSelectedNiche(niche);
+                    }}
+                  >
+                    <Text
+                      style={[
+                        styles.setupOptionText,
+                        selectedNiche === niche && styles.setupOptionTextActive,
+                      ]}
+                    >
+                      {niche}
+                    </Text>
+                  </Pressable>
+                ))}
+              </View>
+
+              {/* Audience Goal */}
+              <Text style={styles.setupFieldLabel}>AUDIENCE GOAL</Text>
+              <View style={[styles.pillRow, { marginBottom: 12 }]}>
+                {['Grow engagement', 'Protect streak'].map((goal) => (
+                  <Pressable
+                    key={goal}
+                    style={[
+                      styles.setupOptionPill,
+                      selectedGoal === goal && styles.setupOptionPillActive,
+                    ]}
+                    onPress={() => {
+                      if (Platform.OS !== 'web') {
+                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                      }
+                      setSelectedGoal(goal);
+                    }}
+                  >
+                    <Text
+                      style={[
+                        styles.setupOptionText,
+                        selectedGoal === goal && styles.setupOptionTextActive,
+                      ]}
+                    >
+                      {goal}
+                    </Text>
+                  </Pressable>
+                ))}
+              </View>
+
+              {/* Content Seed / Question */}
               <Text style={styles.setupFieldLabel}>CONTENT SEED / QUESTION</Text>
               <TextInput
                 style={styles.modalTextInput}
                 multiline
                 value={audiencePrompt}
                 onChangeText={setAudiencePrompt}
-                placeholder="What creator topic should we explore?"
+                placeholder="What creator topic or question should we explore?"
               />
 
               <Pressable
@@ -816,7 +875,7 @@ export const ProIdeaStrategyScreen: React.FC<ProIdeaStrategyScreenProps> = ({
                   setShowEditStrategyModal(false);
                   setCompletionData({
                     title: 'Strategy Saved & Re-scored!',
-                    subtitle: `AI calibrated your new prompt: "${audiencePrompt.slice(0, 45)}..."`,
+                    subtitle: `AI calibrated ${selectedNiche} + ${selectedGoal}: "${audiencePrompt.slice(0, 35)}..."`,
                     badgeText: '✨ 94 QUALITY SCORE RE-CALIBRATED',
                     xpEarned: 50,
                     speechBubble: 'Strategy locked and re-scored, Pablo! Fresh viral angles ready! 🔥',
@@ -826,7 +885,7 @@ export const ProIdeaStrategyScreen: React.FC<ProIdeaStrategyScreenProps> = ({
                   }, 200);
                 }}
               >
-                <Text style={styles.modalSaveBtnText}>Save &amp; Re-score Ideas</Text>
+                <Text style={styles.modalSaveBtnText}>Save &amp; Re-score Ideas →</Text>
               </Pressable>
             </Animated.View>
           </View>
