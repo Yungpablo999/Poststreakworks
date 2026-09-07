@@ -531,7 +531,7 @@ export const ProIdeaStrategyScreen: React.FC<ProIdeaStrategyScreenProps> = ({
             <View style={{ flexDirection: 'row', gap: 14, marginTop: 14 }}>
               {/* Audience Fit */}
               <View style={{ flex: 1 }}>
-                <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 4 }}>
+                <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', gap: 6, marginBottom: 4 }}>
                   <Text style={styles.meterLabel}>AUDIENCE FIT</Text>
                   <Text style={styles.meterValText}>94%</Text>
                 </View>
@@ -542,7 +542,7 @@ export const ProIdeaStrategyScreen: React.FC<ProIdeaStrategyScreenProps> = ({
 
               {/* Growth Potential */}
               <View style={{ flex: 1 }}>
-                <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 4 }}>
+                <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', gap: 6, marginBottom: 4 }}>
                   <Text style={styles.meterLabel}>GROWTH POTENTIAL</Text>
                   <Text style={styles.meterValText}>88%</Text>
                 </View>
@@ -1237,9 +1237,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   meterLabel: {
-    fontSize: 10,
+    fontSize: 9,
     fontWeight: '700',
     color: '#64748B',
+    letterSpacing: 0.2,
   },
   meterValText: {
     fontSize: 11,
