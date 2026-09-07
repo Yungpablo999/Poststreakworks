@@ -589,9 +589,9 @@ export const ProIdeaStrategyScreen: React.FC<ProIdeaStrategyScreenProps> = ({
                     </Text>
                   </View>
 
-                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+                  <View style={{ flexDirection: 'row', alignItems: 'baseline' }}>
                     <Text style={styles.ideaScoreVal}>{idea.score}</Text>
-                    <Text style={{ fontSize: 14 }}>{idea.badgeEmoji}</Text>
+                    <Text style={styles.ideaScoreDenominator}> / 100</Text>
                   </View>
                 </View>
 
@@ -1320,6 +1320,11 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontWeight: '700',
     color: '#171420',
+  },
+  ideaScoreDenominator: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: '#94A3B8',
   },
   ideaMainHeadline: {
     fontSize: 15,
