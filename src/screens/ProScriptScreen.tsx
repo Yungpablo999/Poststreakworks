@@ -28,6 +28,70 @@ import { sFont } from '../utils/responsive';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
+interface StructureStepItem {
+  step: number;
+  title: string;
+  timing: string;
+  focus: string;
+  snippet: string;
+  visualCue: string;
+  voicePacing: string;
+  editingCue: string;
+}
+
+const STRUCTURE_STEPS: StructureStepItem[] = [
+  {
+    step: 1,
+    title: 'Hook',
+    timing: '0–3s',
+    focus: '3-sec thumbstopper',
+    snippet: '“Most new creators do not fail because they lack ideas. They fail because they wait too long to post.”',
+    visualCue: 'Direct-to-camera punch-in (1.1x) in the first 0.8s to stop the scroll instantly.',
+    voicePacing: 'High urgency, confident assertive cadence with zero pre-intro silence.',
+    editingCue: 'Kinetic text overlay on screen with subtle sound pop on the first 3 words.',
+  },
+  {
+    step: 2,
+    title: 'Mistake 1',
+    timing: '3–14s',
+    focus: 'Problem #1 reveal',
+    snippet: '“Waiting for the perfect idea. It doesn’t exist. Good ideas come from publishing through the average ones.”',
+    visualCue: 'Direct-to-camera crop shift with on-screen bold keyword callout.',
+    voicePacing: 'Assertive, conversational tempo; keep transitions tight without dead air.',
+    editingCue: 'Quick jump cut on “Mistake 1”, followed by a subtle woosh transition.',
+  },
+  {
+    step: 3,
+    title: 'Mistake 2',
+    timing: '14–25s',
+    focus: 'Friction point',
+    snippet: '“Over-editing for 6 hours. If it takes you that long, your audience’s attention span was lost in 3 seconds anyway.”',
+    visualCue: 'Angle switch or quick b-roll cut to editing timeline / screen capture.',
+    voicePacing: 'Relatable tone, slight cadence drop to deliver the reality check with impact.',
+    editingCue: 'Speed ramp or split-screen highlight at the 18-second retention check.',
+  },
+  {
+    step: 4,
+    title: 'Mistake 3',
+    timing: '25–36s',
+    focus: 'Systems bottleneck',
+    snippet: '“Zero system. Re-inventing the wheel every morning leads directly to creator burnout.”',
+    visualCue: 'Medium close-up framing with side-panel graphic showing workflow steps.',
+    voicePacing: 'Grounded, authoritative cadence; emphasize the word “System” for weight.',
+    editingCue: 'Highlight pill animation on screen to visually lock in the main takeaway.',
+  },
+  {
+    step: 5,
+    title: 'CTA',
+    timing: '36–42s',
+    focus: 'Engagement question',
+    snippet: '“Which of these three is slowing you down the most? Let me know in the comments.”',
+    visualCue: 'Direct eye contact, natural hand gesture pointing toward the comment section below.',
+    voicePacing: 'Warm, inviting, open-ended question to maximize comment velocity.',
+    editingCue: 'Animated comment prompt sticker + clean sound chime.',
+  },
+];
+
 interface ProScriptScreenProps {
   ideaTitle?: string;
   onBack: () => void;
@@ -101,6 +165,7 @@ export const ProScriptScreen: React.FC<ProScriptScreenProps> = ({
   const [isAccelerated, setIsAccelerated] = useState(false);
   const [selectedFormat, setSelectedFormat] = useState('9:16 (42s)');
   const [selectedPlatforms, setSelectedPlatforms] = useState<string[]>(['tiktok', 'instagram', 'youtube']);
+  const [expandedStructureIndex, setExpandedStructureIndex] = useState<number | null>(null);
   const [completionData, setCompletionData] = useState({
     title: 'Script Saved to Drafts!',
     subtitle: `"${currentIdeaTitle}" is ready for Voice Studio or immediate posting.`,
@@ -108,6 +173,13 @@ export const ProScriptScreen: React.FC<ProScriptScreenProps> = ({
     xpEarned: 50,
     speechBubble: 'Script polished to perfection, Pablo! Ready to record! 🎙️',
   });
+
+  const handleToggleStructureRow = (index: number) => {
+    if (Platform.OS !== 'web') {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    }
+    setExpandedStructureIndex(prev => (prev === index ? null : index));
+  };
 
   const flameFloatY = useRef(new Animated.Value(0)).current;
   const modalPopScale = useRef(new Animated.Value(0.88)).current;
@@ -610,28 +682,111 @@ export const ProScriptScreen: React.FC<ProScriptScreenProps> = ({
           </View>
 
           <View style={styles.structureTimelineCard}>
-            {[
-              { step: 1, title: 'Hook', timing: '0-3s | 3-sec thumbstopper', icon: '✔', active: true },
-              { step: 2, title: 'Mistake 1', timing: '4-14s | Problem #1 reveal', icon: '➔', active: false },
-              { step: 3, title: 'Mistake 2', timing: '15-25s | Friction point', icon: '◆', active: false },
-              { step: 4, title: 'Mistake 3', timing: '26-36s | Systems bottleneck', icon: '☰', active: false },
-              { step: 5, title: 'CTA', timing: '37-42s | Engagement question', icon: '💬', active: false },
-            ].map((item, idx) => (
-              <View key={idx} style={styles.timelineRowItem}>
-                <View style={[styles.timelineNumCircle, item.active && styles.timelineNumCircleActive]}>
-                  <Text style={[styles.timelineNumText, item.active && styles.timelineNumTextActive]}>
-                    {item.step}
-                  </Text>
+            {STRUCTURE_STEPS.map((item, idx) => {
+              const isExpanded = expandedStructureIndex === idx;
+              const isLast = idx === STRUCTURE_STEPS.length - 1;
+
+              return (
+                <View
+                  key={item.step}
+                  style={[
+                    styles.timelineItemWrapper,
+                    isExpanded && styles.timelineItemWrapperExpanded,
+                    !isLast && !isExpanded && styles.timelineItemBorderBottom,
+                  ]}
+                >
+                  <Pressable
+                    style={({ pressed }) => [
+                      styles.timelineRowItem,
+                      pressed && styles.timelineRowItemPressed,
+                    ]}
+                    onPress={() => handleToggleStructureRow(idx)}
+                    accessibilityRole="button"
+                    accessibilityState={{ expanded: isExpanded }}
+                    accessibilityLabel={`${item.title}, ${item.timing}, ${item.focus}. ${
+                      isExpanded ? 'Tap to collapse' : 'Tap to expand production cues'
+                    }`}
+                  >
+                    <View
+                      style={[
+                        styles.timelineNumCircle,
+                        (isExpanded || item.step === 1) && styles.timelineNumCircleActive,
+                      ]}
+                    >
+                      <Text
+                        style={[
+                          styles.timelineNumText,
+                          (isExpanded || item.step === 1) && styles.timelineNumTextActive,
+                        ]}
+                      >
+                        {item.step}
+                      </Text>
+                    </View>
+
+                    <View style={{ flex: 1 }}>
+                      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                        <Text style={styles.timelineItemTitle}>{item.title}</Text>
+                        <View style={styles.timelineTimingBadge}>
+                          <Text style={styles.timelineTimingBadgeText}>{item.timing}</Text>
+                        </View>
+                      </View>
+                      <Text style={styles.timelineItemTiming}>{item.focus}</Text>
+                    </View>
+
+                    <View style={styles.timelineChevronContainer}>
+                      <Text style={styles.timelineChevronText}>{isExpanded ? '⌄' : '›'}</Text>
+                    </View>
+                  </Pressable>
+
+                  {isExpanded && (
+                    <View style={styles.timelineExpandedContent}>
+                      {/* Spoken Snippet Box */}
+                      <View style={styles.timelineSnippetBox}>
+                        <Text style={styles.timelineSnippetLabel}>SPOKEN FOCUS</Text>
+                        <Text style={styles.timelineSnippetText}>{item.snippet}</Text>
+                      </View>
+
+                      {/* Production Cues Card */}
+                      <View style={styles.timelineCuesBox}>
+                        <View style={styles.timelineCueRow}>
+                          <View style={styles.timelineCueIconBadge}>
+                            <Text style={styles.timelineCueIcon}>🎥</Text>
+                          </View>
+                          <View style={{ flex: 1 }}>
+                            <Text style={styles.timelineCueTitle}>Visual Direction</Text>
+                            <Text style={styles.timelineCueBody}>{item.visualCue}</Text>
+                          </View>
+                        </View>
+
+                        <View style={styles.timelineCueDivider} />
+
+                        <View style={styles.timelineCueRow}>
+                          <View style={styles.timelineCueIconBadge}>
+                            <Text style={styles.timelineCueIcon}>🎙️</Text>
+                          </View>
+                          <View style={{ flex: 1 }}>
+                            <Text style={styles.timelineCueTitle}>Voice Pacing</Text>
+                            <Text style={styles.timelineCueBody}>{item.voicePacing}</Text>
+                          </View>
+                        </View>
+
+                        <View style={styles.timelineCueDivider} />
+
+                        <View style={styles.timelineCueRow}>
+                          <View style={styles.timelineCueIconBadge}>
+                            <Text style={styles.timelineCueIcon}>✂️</Text>
+                          </View>
+                          <View style={{ flex: 1 }}>
+                            <Text style={styles.timelineCueTitle}>Editing Cue</Text>
+                            <Text style={styles.timelineCueBody}>{item.editingCue}</Text>
+                          </View>
+                        </View>
+                      </View>
+                    </View>
+                  )}
                 </View>
-                <View style={{ flex: 1 }}>
-                  <Text style={styles.timelineItemTitle}>{item.title}</Text>
-                  <Text style={styles.timelineItemTiming}>{item.timing}</Text>
-                </View>
-                <Text style={{ fontSize: 13, color: item.active ? '#15803D' : '#64748B' }}>
-                  {item.icon}
-                </Text>
-              </View>
-            ))}
+              );
+            })}
           </View>
 
           {/* ============================================================ */}
@@ -1492,23 +1647,43 @@ const styles = StyleSheet.create({
   structureTimelineCard: {
     backgroundColor: '#FFFFFF',
     borderRadius: 18,
-    padding: 14,
+    padding: 8,
     borderWidth: 1,
     borderColor: '#EFECE6',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.03,
+    shadowRadius: 6,
+  },
+  timelineItemWrapper: {
+    borderRadius: 12,
+    overflow: 'hidden',
+  },
+  timelineItemWrapperExpanded: {
+    backgroundColor: '#FAF9F6',
+    borderWidth: 1,
+    borderColor: '#E8E4DC',
+    marginVertical: 4,
+  },
+  timelineItemBorderBottom: {
+    borderBottomWidth: 1,
+    borderBottomColor: '#F4F2EC',
   },
   timelineRowItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 12,
-    paddingVertical: 8,
-    borderBottomWidth: 1,
-    borderBottomColor: '#FAF8F5',
+    gap: 10,
+    paddingVertical: 10,
+    paddingHorizontal: 8,
+  },
+  timelineRowItemPressed: {
+    opacity: 0.75,
   },
   timelineNumCircle: {
-    width: 24,
-    height: 24,
-    borderRadius: 12,
-    backgroundColor: '#E2E8F0',
+    width: 26,
+    height: 26,
+    borderRadius: 13,
+    backgroundColor: '#F1EFE9',
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -1516,21 +1691,115 @@ const styles = StyleSheet.create({
     backgroundColor: '#582CDB',
   },
   timelineNumText: {
-    fontSize: 11,
+    fontSize: 11.5,
     fontWeight: '700',
-    color: '#475569',
+    color: '#64748B',
   },
   timelineNumTextActive: {
     color: '#FFFFFF',
   },
   timelineItemTitle: {
-    fontSize: 12.5,
+    fontSize: 13.5,
     fontWeight: '700',
     color: '#171420',
   },
+  timelineTimingBadge: {
+    backgroundColor: '#F1EFE9',
+    paddingHorizontal: 6,
+    paddingVertical: 1.5,
+    borderRadius: 6,
+  },
+  timelineTimingBadgeText: {
+    fontSize: 10.5,
+    fontWeight: '700',
+    color: '#475569',
+    letterSpacing: 0.2,
+  },
   timelineItemTiming: {
-    fontSize: 11,
+    fontSize: 11.5,
     color: '#64748B',
+    marginTop: 1.5,
+  },
+  timelineChevronContainer: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    backgroundColor: '#F8F6F0',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  timelineChevronText: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: '#64748B',
+  },
+  timelineExpandedContent: {
+    paddingHorizontal: 10,
+    paddingBottom: 12,
+    paddingTop: 2,
+  },
+  timelineSnippetBox: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 10,
+    padding: 10,
+    borderLeftWidth: 3,
+    borderLeftColor: '#582CDB',
+    borderWidth: 1,
+    borderColor: '#EFECE6',
+    marginBottom: 8,
+  },
+  timelineSnippetLabel: {
+    fontSize: 9.5,
+    fontWeight: '800',
+    color: '#582CDB',
+    letterSpacing: 0.6,
+    marginBottom: 3,
+  },
+  timelineSnippetText: {
+    fontSize: 12,
+    fontStyle: 'italic',
+    color: '#334155',
+    lineHeight: 17,
+  },
+  timelineCuesBox: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 10,
+    padding: 10,
+    borderWidth: 1,
+    borderColor: '#EFECE6',
+  },
+  timelineCueRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: 8,
+  },
+  timelineCueIconBadge: {
+    width: 24,
+    height: 24,
+    borderRadius: 6,
+    backgroundColor: '#F8F6F0',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 1,
+  },
+  timelineCueIcon: {
+    fontSize: 12,
+  },
+  timelineCueTitle: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: '#1E293B',
+    marginBottom: 2,
+  },
+  timelineCueBody: {
+    fontSize: 11,
+    color: '#475569',
+    lineHeight: 15,
+  },
+  timelineCueDivider: {
+    height: 1,
+    backgroundColor: '#F4F2EC',
+    marginVertical: 8,
   },
 
   // CARD 5: SCRIPT BODY
