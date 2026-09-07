@@ -709,29 +709,25 @@ export const ProIdeaStrategyScreen: React.FC<ProIdeaStrategyScreenProps> = ({
             </Pressable>
           </View>
 
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={{ gap: 10, marginTop: 4, paddingBottom: 6 }}
-          >
+          <View style={{ flexDirection: 'row', gap: 10, marginTop: 4 }}>
             {savedIdeas.slice(0, 2).map((item) => (
               <Pressable
                 key={item.id}
-                style={styles.savedIdeaCardHorizontal}
+                style={({ pressed }) => [styles.savedIdeaCardGrid, pressed && styles.btnPressed]}
                 onPress={() => handleSelectIdea(item.title)}
               >
-                <Text style={styles.savedIdeaTitle} numberOfLines={2}>
+                <Text style={styles.savedIdeaTitle} numberOfLines={3}>
                   {item.title}
                 </Text>
-                <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 12 }}>
+                <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 10 }}>
                   <View style={styles.savedScorePill}>
                     <Text style={styles.savedScorePillText}>{item.score} SCORE</Text>
                   </View>
-                  <Text style={{ fontSize: 14 }}>🔖</Text>
+                  <Text style={{ fontSize: 13 }}>🔖</Text>
                 </View>
               </Pressable>
             ))}
-          </ScrollView>
+          </View>
 
           {/* ============================================================ */}
           {/* BOTTOM ACTION BUTTONS                                        */}
@@ -1462,21 +1458,21 @@ const styles = StyleSheet.create({
   },
 
   // SECTION 6: SAVED PRO IDEAS
-  savedIdeaCardHorizontal: {
-    width: 184,
+  savedIdeaCardGrid: {
+    flex: 1,
     backgroundColor: '#FFFFFF',
     borderRadius: 16,
-    padding: 14,
+    padding: 13,
     borderWidth: 1,
     borderColor: '#EFECE6',
     justifyContent: 'space-between',
     minHeight: 104,
   },
   savedIdeaTitle: {
-    fontSize: 12.5,
+    fontSize: 12,
     fontWeight: '700',
     color: '#171420',
-    lineHeight: 17,
+    lineHeight: 16.5,
   },
   savedScorePill: {
     backgroundColor: '#FEF3C7',
