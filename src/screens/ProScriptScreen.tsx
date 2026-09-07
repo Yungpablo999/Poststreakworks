@@ -1206,10 +1206,10 @@ export const ProScriptScreen: React.FC<ProScriptScreenProps> = ({
             </View>
 
             <Pressable
-              style={styles.applyVoiceStudioBtn}
+              style={({ pressed }) => [styles.applyVoiceStudioBtn, pressed && styles.btnPressed]}
               onPress={handleSendToVoiceStudio}
             >
-              <Text style={styles.applyVoiceStudioBtnText}>APPLY TO VOICE STUDIO</Text>
+              <Text style={styles.applyVoiceStudioBtnText}>🎙️ SEND TO VOICE STUDIO</Text>
             </Pressable>
           </View>
 
@@ -2392,15 +2392,16 @@ const styles = StyleSheet.create({
   },
   applyVoiceStudioBtn: {
     backgroundColor: '#582CDB',
-    paddingVertical: 10,
-    borderRadius: 10,
+    paddingVertical: 11,
+    borderRadius: 12,
     alignItems: 'center',
-    marginTop: 10,
+    marginTop: 12,
   },
   applyVoiceStudioBtnText: {
     color: '#FFFFFF',
-    fontSize: 11,
+    fontSize: sFont(11.5),
     fontWeight: '700',
+    letterSpacing: 0.3,
   },
 
   // CARD 10: STREAK & XP IMPACT
