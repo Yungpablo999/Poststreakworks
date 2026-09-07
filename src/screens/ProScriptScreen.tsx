@@ -218,7 +218,7 @@ export const ProScriptScreen: React.FC<ProScriptScreenProps> = ({
 
   const [isPlayingPreview, setIsPlayingPreview] = useState(false);
   const [isAccelerated, setIsAccelerated] = useState(false);
-  const [selectedFormat, setSelectedFormat] = useState('42s (Standard)');
+  const [selectedFormat, setSelectedFormat] = useState('42s');
   const [selectedPlatforms, setSelectedPlatforms] = useState<string[]>(['tiktok', 'instagram', 'youtube']);
   const [expandedStructureIndex, setExpandedStructureIndex] = useState<number | null>(null);
   const [completionData, setCompletionData] = useState({
@@ -1091,35 +1091,49 @@ export const ProScriptScreen: React.FC<ProScriptScreenProps> = ({
             <Text style={styles.formatPresetsLabel}>SCRIPT PACING PRESET</Text>
             <View style={styles.formatPresetsRow}>
               {[
-                { id: '30s (Punchy)', label: '30s (Punchy)' },
-                { id: '42s (Standard)', label: '42s (Standard)' },
-                { id: '60s (Deep Dive)', label: '60s (Deep Dive)' },
-              ].map((fmt) => (
-                <Pressable
-                  key={fmt.id}
-                  style={[
-                    styles.formatPresetChip,
-                    selectedFormat === fmt.id && styles.formatPresetChipActive,
-                  ]}
-                  onPress={() => {
-                    if (Platform.OS !== 'web') {
-                      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                    }
-                    setSelectedFormat(fmt.id);
-                    showToast(`✓ Switched preset: ${fmt.label}`);
-                  }}
-                >
-                  <Text
+                { id: '30s', duration: '30s', label: 'Punchy' },
+                { id: '42s', duration: '42s', label: 'Standard' },
+                { id: '60s', duration: '60s', label: 'Deep Dive' },
+              ].map((fmt) => {
+                const isActive = selectedFormat === fmt.id;
+                return (
+                  <Pressable
+                    key={fmt.id}
                     style={[
-                      styles.formatPresetChipText,
-                      selectedFormat === fmt.id && styles.formatPresetChipTextActive,
+                      styles.formatPresetChip,
+                      isActive && styles.formatPresetChipActive,
                     ]}
-                    numberOfLines={1}
+                    onPress={() => {
+                      if (Platform.OS !== 'web') {
+                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                      }
+                      setSelectedFormat(fmt.id);
+                      showToast(`✓ Switched pacing: ${fmt.duration} • ${fmt.label}`);
+                    }}
+                    accessibilityRole="button"
+                    accessibilityLabel={`${fmt.duration} ${fmt.label} pacing preset`}
                   >
-                    {fmt.label}
-                  </Text>
-                </Pressable>
-              ))}
+                    <Text
+                      style={[
+                        styles.formatPresetDurationText,
+                        isActive && styles.formatPresetDurationTextActive,
+                      ]}
+                      numberOfLines={1}
+                    >
+                      {fmt.duration}
+                    </Text>
+                    <Text
+                      style={[
+                        styles.formatPresetLabelText,
+                        isActive && styles.formatPresetLabelTextActive,
+                      ]}
+                      numberOfLines={1}
+                    >
+                      {fmt.label}
+                    </Text>
+                  </Pressable>
+                );
+              })}
             </View>
 
             {/* Dynamic Adapt Action Button */}
@@ -2245,25 +2259,35 @@ const styles = StyleSheet.create({
     flex: 1,
     minWidth: 0,
     backgroundColor: '#FAF8F5',
-    borderWidth: 1,
+    borderWidth: 1.5,
     borderColor: '#EFECE6',
     paddingHorizontal: 4,
     paddingVertical: 7,
-    borderRadius: 8,
+    borderRadius: 10,
     alignItems: 'center',
     justifyContent: 'center',
   },
   formatPresetChipActive: {
-    backgroundColor: '#EDE9FE',
-    borderColor: '#DDD6FE',
+    backgroundColor: '#F5F3FF',
+    borderColor: '#582CDB',
   },
-  formatPresetChipText: {
-    fontSize: sFont(10),
+  formatPresetDurationText: {
+    fontSize: sFont(12),
     fontWeight: '800',
-    color: '#475569',
+    color: '#171420',
+    textAlign: 'center',
+    marginBottom: 1,
+  },
+  formatPresetDurationTextActive: {
+    color: '#582CDB',
+  },
+  formatPresetLabelText: {
+    fontSize: sFont(9.5),
+    fontWeight: '700',
+    color: '#64748B',
     textAlign: 'center',
   },
-  formatPresetChipTextActive: {
+  formatPresetLabelTextActive: {
     color: '#582CDB',
     fontWeight: '800',
   },
