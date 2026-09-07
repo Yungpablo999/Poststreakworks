@@ -1009,11 +1009,11 @@ export const ProScriptScreen: React.FC<ProScriptScreenProps> = ({
           </View>
 
           {/* ============================================================ */}
-          {/* CARD 7: FORMAT & MULTI-PLATFORM ADAPT STUDIO                 */}
+          {/* CARD 7: MULTI-PLATFORM SYNC                                  */}
           {/* ============================================================ */}
           <View style={styles.formatAdaptCard}>
-            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
-              <Text style={styles.formatAdaptHeaderLabel}>FORMAT &amp; MULTI-PLATFORM SYNC</Text>
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12, gap: 10 }}>
+              <Text style={styles.formatAdaptHeaderLabel} numberOfLines={1}>MULTI-PLATFORM SYNC</Text>
               <View style={styles.formatActiveBadge}>
                 <Text style={styles.formatActiveBadgeText}>👑 9:16 VERTICAL HD</Text>
               </View>
@@ -2115,19 +2115,21 @@ const styles = StyleSheet.create({
     marginTop: 14,
   },
   formatAdaptHeaderLabel: {
-    fontSize: 10,
+    flex: 1,
+    fontSize: 10.5,
     fontWeight: '700',
     color: '#64748B',
     letterSpacing: 0.4,
   },
   formatActiveBadge: {
     backgroundColor: '#DCFCE7',
-    paddingHorizontal: 7,
-    paddingVertical: 2.5,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
     borderRadius: 6,
+    flexShrink: 0,
   },
   formatActiveBadgeText: {
-    fontSize: 9,
+    fontSize: 9.5,
     fontWeight: '700',
     color: '#15803D',
   },
