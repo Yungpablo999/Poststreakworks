@@ -1009,30 +1009,31 @@ export const ProScriptScreen: React.FC<ProScriptScreenProps> = ({
           </View>
 
           {/* ============================================================ */}
-          {/* CARD 7: MULTI-PLATFORM SYNC                                  */}
+          {/* CARD 7: MULTI-PLATFORM READY                                 */}
           {/* ============================================================ */}
           <View style={styles.formatAdaptCard}>
-            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12, gap: 10 }}>
-              <Text style={styles.formatAdaptHeaderLabel} numberOfLines={1}>MULTI-PLATFORM SYNC</Text>
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+              <Text style={styles.formatAdaptHeaderLabel}>MULTI-PLATFORM READY</Text>
               <View style={styles.formatActiveBadge}>
-                <Text style={styles.formatActiveBadgeText}>👑 9:16 VERTICAL HD</Text>
+                <Text style={styles.formatActiveBadgeText}>👑 9:16 HD</Text>
               </View>
             </View>
 
             {/* Platform Selection Row */}
-            <View style={{ flexDirection: 'row', gap: 8, marginBottom: 12 }}>
+            <View style={{ flexDirection: 'row', gap: 7, marginBottom: 12 }}>
               {[
-                { id: 'tiktok', name: 'TikTok', format: '9:16 Reel', icon: 'tiktok' as const },
-                { id: 'instagram', name: 'Instagram', format: 'Reels / IG', icon: 'instagram' as const },
-                { id: 'youtube', name: 'YouTube', format: 'Shorts 60s', icon: 'youtube' as const },
+                { id: 'tiktok', name: 'TikTok', icon: 'tiktok' as const },
+                { id: 'instagram', name: 'Instagram', icon: 'instagram' as const },
+                { id: 'youtube', name: 'YouTube', icon: 'youtube' as const },
               ].map((plat) => {
                 const isSelected = selectedPlatforms.includes(plat.id);
                 return (
                   <Pressable
                     key={plat.id}
-                    style={[
+                    style={({ pressed }) => [
                       styles.platformFormatPillCard,
-                      isSelected && styles.platformFormatPillCardSelected,
+                      isSelected ? styles.platformFormatPillCardSelected : styles.platformFormatPillCardUnselected,
+                      pressed && styles.btnPressed,
                     ]}
                     onPress={() => {
                       if (Platform.OS !== 'web') {
@@ -1041,28 +1042,54 @@ export const ProScriptScreen: React.FC<ProScriptScreenProps> = ({
                       if (isSelected) {
                         if (selectedPlatforms.length > 1) {
                           setSelectedPlatforms(selectedPlatforms.filter((p) => p !== plat.id));
+                          showToast(`Removed ${plat.name} from publishing destinations`);
                         } else {
-                          showToast('At least 1 platform must remain active');
+                          showToast('At least 1 publishing destination must remain selected');
                         }
                       } else {
                         setSelectedPlatforms([...selectedPlatforms, plat.id]);
-                        showToast(`✓ Added ${plat.name} to sync`);
+                        showToast(`✓ Selected ${plat.name} as destination`);
                       }
                     }}
+                    accessibilityRole="checkbox"
+                    accessibilityState={{ checked: isSelected }}
+                    accessibilityLabel={`${plat.name}, connected account. ${
+                      isSelected ? 'Selected destination for this script' : 'Tap to select as destination'
+                    }`}
                   >
-                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
-                      <SocialBrandIcon platform={plat.icon} size={18} />
+                    <View style={styles.platCardTopRow}>
+                      <View style={styles.platIconWrapper}>
+                        <SocialBrandIcon platform={plat.icon} size={17} />
+                        <View style={styles.platConnectedDot} />
+                      </View>
                       <View style={[styles.platCheckCircle, isSelected && styles.platCheckCircleActive]}>
                         {isSelected && (
                           <Svg width={8} height={8} viewBox="0 0 12 12" fill="none">
-                            <Path d="M2.5 6.2L4.8 8.5L9.5 3.5" stroke="#FFFFFF" strokeWidth="2.5" strokeLinecap="round" />
+                            <Path d="M2.5 6.2L4.8 8.5L9.5 3.5" stroke="#FFFFFF" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
                           </Svg>
                         )}
                       </View>
                     </View>
-                    <View style={{ marginTop: 8, width: '100%' }}>
-                      <Text style={styles.platFormatName} numberOfLines={1}>{plat.name}</Text>
-                      <Text style={styles.platFormatSub} numberOfLines={1}>{plat.format}</Text>
+
+                    <Text style={styles.platFormatName} numberOfLines={1}>
+                      {plat.name}
+                    </Text>
+
+                    <View
+                      style={[
+                        styles.platStatusBadge,
+                        isSelected ? styles.platStatusBadgeSelected : styles.platStatusBadgeUnselected,
+                      ]}
+                    >
+                      <Text
+                        style={[
+                          styles.platStatusBadgeText,
+                          isSelected ? styles.platStatusBadgeTextSelected : styles.platStatusBadgeTextUnselected,
+                        ]}
+                        numberOfLines={1}
+                      >
+                        {isSelected ? 'Selected' : 'Connected'}
+                      </Text>
                     </View>
                   </Pressable>
                 );
@@ -2115,18 +2142,16 @@ const styles = StyleSheet.create({
     marginTop: 14,
   },
   formatAdaptHeaderLabel: {
-    flex: 1,
     fontSize: 10.5,
     fontWeight: '700',
     color: '#64748B',
-    letterSpacing: 0.4,
+    letterSpacing: 0.5,
   },
   formatActiveBadge: {
     backgroundColor: '#DCFCE7',
-    paddingHorizontal: 8,
-    paddingVertical: 3,
+    paddingHorizontal: 7,
+    paddingVertical: 2.5,
     borderRadius: 6,
-    flexShrink: 0,
   },
   formatActiveBadgeText: {
     fontSize: 9.5,
@@ -2136,38 +2161,82 @@ const styles = StyleSheet.create({
   platformFormatPillCard: {
     flex: 1,
     minWidth: 0,
-    backgroundColor: '#FAF8F5',
     borderRadius: 12,
-    padding: 10,
+    padding: 8,
     borderWidth: 1.5,
-    borderColor: '#EFECE6',
     justifyContent: 'space-between',
+    minHeight: 84,
   },
   platformFormatPillCardSelected: {
     backgroundColor: '#F5F3FF',
+    borderColor: '#582CDB',
+  },
+  platformFormatPillCardUnselected: {
+    backgroundColor: '#FFFFFF',
+    borderColor: '#EFECE6',
+  },
+  platCardTopRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    width: '100%',
+    marginBottom: 4,
+  },
+  platIconWrapper: {
+    position: 'relative',
+  },
+  platConnectedDot: {
+    position: 'absolute',
+    bottom: -1,
+    right: -2,
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: '#15803D',
+    borderWidth: 1,
+    borderColor: '#FFFFFF',
+  },
+  platCheckCircle: {
+    width: 16,
+    height: 16,
+    borderRadius: 8,
+    borderWidth: 1.5,
+    borderColor: '#CBD5E1',
+    backgroundColor: '#FFFFFF',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  platCheckCircleActive: {
+    backgroundColor: '#582CDB',
     borderColor: '#582CDB',
   },
   platFormatName: {
     fontSize: sFont(11.5),
     fontWeight: '700',
     color: '#171420',
+    marginBottom: 4,
   },
-  platFormatSub: {
-    fontSize: sFont(9),
+  platStatusBadge: {
+    paddingHorizontal: 5,
+    paddingVertical: 2,
+    borderRadius: 4,
+    alignSelf: 'flex-start',
+  },
+  platStatusBadgeSelected: {
+    backgroundColor: '#EDE9FE',
+  },
+  platStatusBadgeUnselected: {
+    backgroundColor: '#F1F5F9',
+  },
+  platStatusBadgeText: {
+    fontSize: sFont(8.5),
+    fontWeight: '700',
+  },
+  platStatusBadgeTextSelected: {
+    color: '#582CDB',
+  },
+  platStatusBadgeTextUnselected: {
     color: '#64748B',
-    marginTop: 2,
-    fontWeight: '600',
-  },
-  platCheckCircle: {
-    width: 16,
-    height: 16,
-    borderRadius: 8,
-    backgroundColor: '#E2E8F0',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  platCheckCircleActive: {
-    backgroundColor: '#582CDB',
   },
   formatPresetsRow: {
     flexDirection: 'row',
