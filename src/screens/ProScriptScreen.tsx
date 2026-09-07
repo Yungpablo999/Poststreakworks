@@ -79,7 +79,7 @@ export const ProScriptScreen: React.FC<ProScriptScreenProps> = ({
     {
       badge: 'BEST PERFORMING',
       text: 'Most new creators do not fail because they lack ideas. They fail because they wait too long to post.',
-      type: 'Direct • High Retention',
+      type: 'Direct • High Hook Potential',
     },
     {
       badge: 'CURIOSITY GAP',
@@ -172,7 +172,7 @@ export const ProScriptScreen: React.FC<ProScriptScreenProps> = ({
       {
         badge: 'VIRAL HOOK',
         text: 'The #1 reason creator accounts stay stuck under 1,000 views is this single mistake.',
-        type: 'High Urgency • Retention Spikes',
+        type: 'High Urgency • Hook Potential',
       },
       {
         badge: 'STORY HOOK',
@@ -562,9 +562,10 @@ export const ProScriptScreen: React.FC<ProScriptScreenProps> = ({
               return (
                 <Pressable
                   key={index}
-                  style={[
+                  style={({ pressed }) => [
                     styles.hookOptionCard,
                     isSelected && styles.hookOptionCardSelected,
+                    pressed && styles.btnPressed,
                   ]}
                   onPress={() => handleApplyHook(index)}
                 >
@@ -576,7 +577,16 @@ export const ProScriptScreen: React.FC<ProScriptScreenProps> = ({
                   <Text style={[styles.hookOptionText, isSelected && styles.hookOptionTextSelected]}>
                     &ldquo;{hook.text}&rdquo;
                   </Text>
-                  <Text style={styles.hookOptionType}>{hook.type}</Text>
+                  <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 8 }}>
+                    <Text style={styles.hookOptionType}>{hook.type}</Text>
+                    {isSelected ? (
+                      <View style={styles.activeHookPill}>
+                        <Text style={styles.activeHookPillText}>Active Hook ✓</Text>
+                      </View>
+                    ) : (
+                      <Text style={styles.tapToUseText}>Tap to use →</Text>
+                    )}
+                  </View>
                 </Pressable>
               );
             })}
@@ -1435,7 +1445,22 @@ const styles = StyleSheet.create({
   hookOptionType: {
     fontSize: 11,
     color: '#64748B',
-    marginTop: 6,
+  },
+  activeHookPill: {
+    backgroundColor: '#FEF3C7',
+    paddingHorizontal: 7,
+    paddingVertical: 2.5,
+    borderRadius: 5,
+  },
+  activeHookPillText: {
+    fontSize: 9.5,
+    fontWeight: '700',
+    color: '#D97706',
+  },
+  tapToUseText: {
+    fontSize: 10.5,
+    fontWeight: '700',
+    color: '#582CDB',
   },
   generateMoreHooksBtn: {
     backgroundColor: '#FFFFFF',
