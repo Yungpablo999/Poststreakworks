@@ -521,7 +521,7 @@ export const ProScriptScreen: React.FC<ProScriptScreenProps> = ({
               <View style={{ flex: 1, gap: 10 }}>
                 <View>
                   <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 3 }}>
-                    <Text style={styles.meterLabel}>HOOK RETENTION</Text>
+                    <Text style={styles.meterLabel}>HOOK STRENGTH</Text>
                     <Text style={styles.meterVal}>92%</Text>
                   </View>
                   <View style={styles.meterTrack}>
