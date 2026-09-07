@@ -680,7 +680,7 @@ export const ProIdeaStrategyScreen: React.FC<ProIdeaStrategyScreenProps> = ({
             </View>
 
             <Text style={styles.jarvisIntelQuote}>
-              &ldquo;Start with the <Text style={{ fontWeight: '700', color: '#582CDB' }}>Growth Idea</Text> if you want stronger saves and authority. Choose the <Text style={{ fontWeight: '700', color: '#D97706' }}>Streak-Saver Idea</Text> if your main goal is to protect today&apos;s streak quickly.&rdquo;
+              &ldquo;Start with the <Text style={{ fontWeight: '700', color: '#582CDB' }}>Growth Idea</Text> if you want stronger saves and more authority. Choose the <Text style={{ fontWeight: '700', color: '#D97706' }}>Streak-Saver Idea</Text> if your main goal is to protect today&apos;s streak.&rdquo;
             </Text>
 
             <Pressable
