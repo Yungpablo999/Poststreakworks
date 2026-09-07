@@ -218,7 +218,7 @@ export const ProScriptScreen: React.FC<ProScriptScreenProps> = ({
 
   const [isPlayingPreview, setIsPlayingPreview] = useState(false);
   const [isAccelerated, setIsAccelerated] = useState(false);
-  const [selectedFormat, setSelectedFormat] = useState('30-45s');
+  const [selectedFormat, setSelectedFormat] = useState('30-60s');
   const [selectedPlatforms, setSelectedPlatforms] = useState<string[]>(['tiktok', 'instagram', 'youtube']);
   const [expandedStructureIndex, setExpandedStructureIndex] = useState<number | null>(null);
   const [completionData, setCompletionData] = useState({
@@ -1091,9 +1091,9 @@ export const ProScriptScreen: React.FC<ProScriptScreenProps> = ({
             <Text style={styles.formatPresetsLabel}>SCRIPT PACING PRESET</Text>
             <View style={styles.formatPresetsRow}>
               {[
-                { id: '20-30s', duration: '20–30s', label: 'Punchy' },
-                { id: '30-45s', duration: '30–45s', label: 'Standard' },
-                { id: '45-60s', duration: '45–60s', label: 'Deep Dive' },
+                { id: '0-30s', duration: '0–30s', label: 'Punchy' },
+                { id: '30-60s', duration: '30–60s', label: 'Standard' },
+                { id: 'over-60s', duration: 'Over 60s', label: 'Deep Dive' },
               ].map((fmt) => {
                 const isActive = selectedFormat === fmt.id;
                 return (
