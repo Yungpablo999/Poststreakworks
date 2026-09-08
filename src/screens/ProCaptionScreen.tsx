@@ -993,25 +993,44 @@ export const ProCaptionScreen: React.FC<ProCaptionScreenProps> = ({
 
               {/* Tri-Metrics Container */}
               <View style={styles.captionMetricsRow}>
-                <View style={[styles.captionMetricBox, { flex: 1.35 }]}>
-                  <Text style={styles.captionMetricHeader}>TONE</Text>
+                <View style={[styles.captionMetricBox, { flex: 1.4 }]}>
                   <Text
-                    style={styles.captionMetricVal}
+                    style={styles.captionMetricHeader}
                     numberOfLines={1}
                     adjustsFontSizeToFit
-                    minimumFontScale={0.75}
+                    minimumFontScale={0.8}
+                  >
+                    TONE
+                  </Text>
+                  <Text
+                    style={styles.captionMetricToneVal}
+                    numberOfLines={2}
                   >
                     {selectedTones.length > 0 ? selectedTones.join(' • ') : 'Natural'}
                   </Text>
                 </View>
 
                 <View style={styles.captionMetricBox}>
-                  <Text style={styles.captionMetricHeader}>SAVE POTENTIAL</Text>
+                  <Text
+                    style={styles.captionMetricHeader}
+                    numberOfLines={1}
+                    adjustsFontSizeToFit
+                    minimumFontScale={0.75}
+                  >
+                    SAVE POTENTIAL
+                  </Text>
                   <Text style={[styles.captionMetricVal, { color: '#15803D' }]}>High</Text>
                 </View>
 
                 <View style={styles.captionMetricBox}>
-                  <Text style={styles.captionMetricHeader}>FIRST 80 CHAR FIT</Text>
+                  <Text
+                    style={styles.captionMetricHeader}
+                    numberOfLines={1}
+                    adjustsFontSizeToFit
+                    minimumFontScale={0.75}
+                  >
+                    FIRST 80 FIT
+                  </Text>
                   <Text style={styles.captionMetricVal}>91%</Text>
                 </View>
               </View>
@@ -2045,27 +2064,37 @@ const styles = StyleSheet.create({
   },
   captionMetricsRow: {
     flexDirection: 'row',
-    gap: 8,
+    gap: 6,
     marginVertical: 12,
   },
   captionMetricBox: {
     flex: 1,
     backgroundColor: '#FAF8F5',
     borderRadius: 10,
-    padding: 8,
+    paddingHorizontal: 7,
+    paddingVertical: 7,
     borderWidth: 1,
     borderColor: '#EFECE6',
+    justifyContent: 'center',
+    minHeight: 52,
   },
   captionMetricHeader: {
-    fontSize: 9,
-    fontWeight: '700',
+    fontSize: sFont(8.5),
+    fontWeight: '800',
     color: '#94A3B8',
-    letterSpacing: 0.3,
+    letterSpacing: 0.15,
   },
   captionMetricVal: {
-    fontSize: 11,
+    fontSize: sFont(11),
     fontWeight: '700',
     color: '#171420',
+    marginTop: 2,
+  },
+  captionMetricToneVal: {
+    fontSize: sFont(9.5),
+    fontWeight: '700',
+    color: '#171420',
+    lineHeight: 13,
     marginTop: 2,
   },
   captionModifiersSection: {
