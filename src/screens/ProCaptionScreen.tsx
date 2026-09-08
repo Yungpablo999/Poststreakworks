@@ -64,7 +64,7 @@ const PLATFORM_VARIATIONS: PlatformVariation[] = [
       score: 94,
       label: 'Retention Hook',
     },
-    keyAdvantage: 'Stops fast swiping and triggers instant comment debate.',
+    keyAdvantage: 'Designed to stop fast swipes and encourage comments.',
     editingPlatformName: 'TikTok',
   },
   {
@@ -83,7 +83,7 @@ const PLATFORM_VARIATIONS: PlatformVariation[] = [
       score: 96,
       label: 'Save Potential',
     },
-    keyAdvantage: 'Keeps CTA above the "...more" fold to boost saves and bookmarks.',
+    keyAdvantage: 'Designed to keep CTA visible above the fold to encourage saves and bookmarks.',
     editingPlatformName: 'Instagram Reel',
   },
   {
@@ -102,7 +102,7 @@ const PLATFORM_VARIATIONS: PlatformVariation[] = [
       score: 91,
       label: 'Search & Click Intent',
     },
-    keyAdvantage: 'Captures search intent and routes viewers into pinned link/comments.',
+    keyAdvantage: 'Designed to align with search intent and direct viewers to the comments.',
     editingPlatformName: 'YouTube Shorts',
   },
 ];
@@ -142,6 +142,7 @@ export const ProCaptionScreen: React.FC<ProCaptionScreenProps> = ({
   const [showCompletionModal, setShowCompletionModal] = useState(false);
   const [showHashtagModal, setShowHashtagModal] = useState(false);
   const [showAllPlatformsModal, setShowAllPlatformsModal] = useState(false);
+  const [expandedPlatforms, setExpandedPlatforms] = useState<string[]>([]);
   const [newHashtagInput, setNewHashtagInput] = useState('');
   const [hashtagList, setHashtagList] = useState<string[]>([
     'creatorhabits',
@@ -286,6 +287,17 @@ export const ProCaptionScreen: React.FC<ProCaptionScreenProps> = ({
       captionInputRef.current?.focus();
     }, 280);
     showToast(`✏️ Editing ${platformName} caption in editor below`);
+  };
+
+  const handleTogglePlatformExpanded = (platformId: string) => {
+    if (Platform.OS !== 'web') {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    }
+    setExpandedPlatforms((prev) =>
+      prev.includes(platformId)
+        ? prev.filter((id) => id !== platformId)
+        : [...prev, platformId]
+    );
   };
 
   const handleAddHashtag = (tagToAdd?: string) => {
@@ -1601,6 +1613,7 @@ export const ProCaptionScreen: React.FC<ProCaptionScreenProps> = ({
               <ScrollView style={{ marginTop: 12 }} showsVerticalScrollIndicator={false} contentContainerStyle={{ gap: 14, paddingBottom: 12 }}>
                 {PLATFORM_VARIATIONS.map((plat, idx) => {
                   const isEditingThis = activeEditingPlatform === plat.editingPlatformName;
+                  const isExpanded = expandedPlatforms.includes(plat.id);
                   return (
                     <View
                       key={plat.id}
@@ -1609,29 +1622,39 @@ export const ProCaptionScreen: React.FC<ProCaptionScreenProps> = ({
                         isEditingThis && styles.compareMatrixCardActive,
                       ]}
                     >
-                      {/* Platform Header */}
-                      <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 7 }}>
+                      {/* Platform Header with Tap-to-Toggle */}
+                      <Pressable
+                        style={styles.compareCardHeaderPressable}
+                        onPress={() => handleTogglePlatformExpanded(plat.id)}
+                        hitSlop={4}
+                      >
+                        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 7, flex: 1 }}>
                           <SocialBrandIcon platform={plat.icon} size={18} />
-                          <View>
-                            <Text style={styles.compareModalPlatformName}>{plat.name}</Text>
+                          <View style={{ flex: 1 }}>
+                            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
+                              <Text style={styles.compareModalPlatformName}>{plat.name}</Text>
+                              <View style={styles.compareScorePill}>
+                                <Text style={styles.compareScorePillText}>{plat.optimizationScore.score}%</Text>
+                              </View>
+                            </View>
                             <Text style={styles.compareModalPlatformBadge}>{plat.badge}</Text>
                           </View>
                         </View>
-                        {isEditingThis ? (
-                          <View style={styles.compareActiveBadge}>
-                            <Text style={styles.compareActiveBadgeText}>EDITING IN LIVE EDITOR ✓</Text>
-                          </View>
-                        ) : (
-                          <View style={styles.compareChannelTargetBadge}>
-                            <Text style={styles.compareChannelTargetBadgeText}>{plat.targetLength}</Text>
-                          </View>
-                        )}
-                      </View>
 
-                      {/* 1. CAPTION */}
+                        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                          {isEditingThis && (
+                            <View style={styles.compareActiveBadge}>
+                              <Text style={styles.compareActiveBadgeText}>EDITING ✓</Text>
+                            </View>
+                          )}
+                          <View style={styles.compareExpandIconBtn}>
+                            <Text style={styles.compareExpandIconText}>{isExpanded ? '▲' : '▼'}</Text>
+                          </View>
+                        </View>
+                      </Pressable>
+
+                      {/* 1. CAPTION PREVIEW */}
                       <View style={styles.compareMatrixSection}>
-                        <Text style={styles.compareMatrixSectionLabel}>📝 TAILORED CAPTION</Text>
                         <View style={styles.compareCaptionBox}>
                           <Text style={styles.compareCaptionText}>
                             &ldquo;{plat.caption}&rdquo;
@@ -1639,57 +1662,75 @@ export const ProCaptionScreen: React.FC<ProCaptionScreenProps> = ({
                         </View>
                       </View>
 
-                      {/* 2. TONE & 3. CHAR FIT ROW */}
-                      <View style={{ flexDirection: 'row', gap: 8, marginTop: 8 }}>
-                        <View style={styles.compareMatrixMiniBox}>
-                          <Text style={styles.compareMatrixSectionLabel}>🎨 TONE &amp; VOICE</Text>
-                          <Text style={styles.compareMatrixValText} numberOfLines={1}>
-                            {plat.tone}
-                          </Text>
+                      {/* 2. SUMMARY METRICS (Always visible) */}
+                      <View style={styles.compareSummaryBadgesRow}>
+                        <View style={styles.compareSummaryBadge}>
+                          <Text style={styles.compareSummaryBadgeText}>📏 {plat.charCount} chars ✓</Text>
                         </View>
-
-                        <View style={styles.compareMatrixMiniBox}>
-                          <Text style={styles.compareMatrixSectionLabel}>📏 CHAR COUNT &amp; TARGET</Text>
-                          <Text style={[styles.compareMatrixValText, { color: '#15803D' }]} numberOfLines={1}>
-                            {plat.charCount} chars ({plat.targetLength.replace('Recommended: ', '')} ✓)
-                          </Text>
+                        <View style={styles.compareSummaryBadge}>
+                          <Text style={styles.compareSummaryBadgeText}>⚡ {plat.optimizationScore.label} ✓</Text>
+                        </View>
+                        <View style={styles.compareSummaryBadge}>
+                          <Text style={styles.compareSummaryBadgeText}>🎯 {plat.targetLength.replace('Recommended: ', '')}</Text>
                         </View>
                       </View>
 
-                      {/* 4. CTA STRATEGY */}
-                      <View style={[styles.compareMatrixSection, { marginTop: 8 }]}>
-                        <Text style={styles.compareMatrixSectionLabel}>🎯 CTA STRATEGY</Text>
-                        <View style={styles.compareStrategyBox}>
-                          <Text style={styles.compareStrategyText}>
-                            {plat.ctaStrategy}
-                          </Text>
-                        </View>
-                      </View>
+                      {/* 3. DEEPER BREAKDOWN (Collapsible) */}
+                      {isExpanded && (
+                        <View style={styles.compareDeepBreakdownContainer}>
+                          {/* TONE & VOICE + TARGET */}
+                          <View style={{ flexDirection: 'row', gap: 8, marginTop: 4 }}>
+                            <View style={styles.compareMatrixMiniBox}>
+                              <Text style={styles.compareMatrixSectionLabel}>🎨 TONE &amp; VOICE</Text>
+                              <Text style={styles.compareMatrixValText} numberOfLines={1}>
+                                {plat.tone}
+                              </Text>
+                            </View>
 
-                      {/* 5. OPTIMIZATION SCORE */}
-                      <View style={[styles.compareMatrixSection, { marginTop: 8 }]}>
-                        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
-                          <Text style={styles.compareMatrixSectionLabel}>📊 OPTIMIZATION SCORE</Text>
-                          <Text style={styles.compareScoreNumText}>
-                            {plat.optimizationScore.score}%
-                          </Text>
-                        </View>
-                        <View style={styles.compareScoreTrack}>
-                          <View style={[styles.compareScoreFill, { width: `${plat.optimizationScore.score}%` }]} />
-                        </View>
-                        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 4 }}>
-                          <Text style={styles.compareScoreLabelText}>{plat.optimizationScore.label}</Text>
-                          <Text style={styles.compareScoreTargetText}>Target Met ✓</Text>
-                        </View>
-                      </View>
+                            <View style={styles.compareMatrixMiniBox}>
+                              <Text style={styles.compareMatrixSectionLabel}>⏱️ TARGET LENGTH</Text>
+                              <Text style={[styles.compareMatrixValText, { color: '#15803D' }]} numberOfLines={1}>
+                                {plat.targetLength}
+                              </Text>
+                            </View>
+                          </View>
 
-                      {/* 6. KEY STRATEGIC ADVANTAGE */}
-                      <View style={styles.compareAdvantageBox}>
-                        <Text style={{ fontSize: 11 }}>💡</Text>
-                        <Text style={styles.compareAdvantageText}>
-                          {plat.keyAdvantage}
-                        </Text>
-                      </View>
+                          {/* CTA STRATEGY */}
+                          <View style={[styles.compareMatrixSection, { marginTop: 8 }]}>
+                            <Text style={styles.compareMatrixSectionLabel}>🎯 CTA STRATEGY</Text>
+                            <View style={styles.compareStrategyBox}>
+                              <Text style={styles.compareStrategyText}>
+                                {plat.ctaStrategy}
+                              </Text>
+                            </View>
+                          </View>
+
+                          {/* OPTIMIZATION SCORE */}
+                          <View style={[styles.compareMatrixSection, { marginTop: 8 }]}>
+                            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
+                              <Text style={styles.compareMatrixSectionLabel}>📊 OPTIMIZATION SCORE</Text>
+                              <Text style={styles.compareScoreNumText}>
+                                {plat.optimizationScore.score}%
+                              </Text>
+                            </View>
+                            <View style={styles.compareScoreTrack}>
+                              <View style={[styles.compareScoreFill, { width: `${plat.optimizationScore.score}%` }]} />
+                            </View>
+                            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 4 }}>
+                              <Text style={styles.compareScoreLabelText}>{plat.optimizationScore.label}</Text>
+                              <Text style={styles.compareScoreTargetText}>Target Met ✓</Text>
+                            </View>
+                          </View>
+
+                          {/* JARVIS STRATEGIC ADVANTAGE */}
+                          <View style={styles.compareAdvantageBox}>
+                            <Text style={{ fontSize: 11 }}>💡</Text>
+                            <Text style={styles.compareAdvantageText}>
+                              {plat.keyAdvantage}
+                            </Text>
+                          </View>
+                        </View>
+                      )}
 
                       {/* ACTIONS ROW */}
                       <View style={styles.compareActionsRow}>
@@ -1718,6 +1759,18 @@ export const ProCaptionScreen: React.FC<ProCaptionScreenProps> = ({
                           onPress={() => handleCopyCaptionText(plat.caption, plat.name)}
                         >
                           <Text style={styles.compareModalCopyBtnText}>📋 Copy</Text>
+                        </Pressable>
+
+                        <Pressable
+                          style={({ pressed }) => [
+                            styles.compareToggleExpandBtn,
+                            pressed && styles.btnPressed,
+                          ]}
+                          onPress={() => handleTogglePlatformExpanded(plat.id)}
+                        >
+                          <Text style={styles.compareToggleExpandBtnText}>
+                            {isExpanded ? 'Less ▴' : 'Details ▾'}
+                          </Text>
                         </Pressable>
                       </View>
                     </View>
@@ -2480,6 +2533,11 @@ const styles = StyleSheet.create({
     shadowColor: '#582CDB',
     shadowOpacity: 0.08,
   },
+  compareCardHeaderPressable: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
   compareModalPlatformName: {
     fontSize: sFont(12.5),
     fontWeight: '800',
@@ -2490,6 +2548,32 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     color: '#64748B',
     marginTop: 1,
+  },
+  compareScorePill: {
+    backgroundColor: '#EDE9FE',
+    paddingHorizontal: 6,
+    paddingVertical: 1.5,
+    borderRadius: 6,
+    borderWidth: 1,
+    borderColor: '#DDD6FE',
+  },
+  compareScorePillText: {
+    fontSize: sFont(9),
+    fontWeight: '800',
+    color: '#582CDB',
+  },
+  compareExpandIconBtn: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    backgroundColor: '#F1EFE9',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  compareExpandIconText: {
+    fontSize: sFont(8.5),
+    color: '#64748B',
+    fontWeight: '700',
   },
   compareActiveBadge: {
     backgroundColor: '#EDE9FE',
@@ -2514,6 +2598,31 @@ const styles = StyleSheet.create({
     fontSize: sFont(8.5),
     fontWeight: '700',
     color: '#64748B',
+  },
+  compareSummaryBadgesRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 6,
+    marginTop: 8,
+  },
+  compareSummaryBadge: {
+    backgroundColor: '#FAF8F5',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 6,
+    borderWidth: 1,
+    borderColor: '#EFECE6',
+  },
+  compareSummaryBadgeText: {
+    fontSize: sFont(9.5),
+    fontWeight: '700',
+    color: '#334155',
+  },
+  compareDeepBreakdownContainer: {
+    marginTop: 4,
+    paddingTop: 8,
+    borderTopWidth: 1,
+    borderTopColor: '#F1EFE9',
   },
   compareMatrixSection: {
     marginTop: 10,
@@ -2649,6 +2758,22 @@ const styles = StyleSheet.create({
     fontSize: sFont(11),
     fontWeight: '700',
     color: '#171420',
+  },
+  compareToggleExpandBtn: {
+    backgroundColor: '#FAF8F5',
+    borderWidth: 1,
+    borderColor: '#EFECE6',
+    paddingHorizontal: 10,
+    paddingVertical: 9,
+    borderRadius: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+    minHeight: 36,
+  },
+  compareToggleExpandBtnText: {
+    fontSize: sFont(10.5),
+    fontWeight: '700',
+    color: '#64748B',
   },
 
   // CARD 5: ENGAGEMENT SCORE
