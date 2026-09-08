@@ -100,7 +100,7 @@ const VOICE_STYLES: VoiceStyleItem[] = [
 const PRESET_SCRIPTS = [
   {
     id: 'hook',
-    label: '🔥 3-Sec Viral Hook',
+    label: '🔥 3-Sec Hook',
     text: "Stop making this mistake if you want to stay consistent as a creator. Consistency isn't about working 24/7—it's about building a system that works even when you're not in the mood. Let me show you my 3-step 'Streak Engine' that keeps you posting consistently every single day without burn out.",
     title: 'Creator Mistake Reel Voiceover',
   },
@@ -614,7 +614,10 @@ export const ProVoiceStudioScreen: React.FC<ProVoiceStudioScreenProps> = ({
           {/* SECTION: SCRIPT TO VOICE                                      */}
           {/* ============================================================ */}
           <View style={styles.sectionHeaderRow}>
-            <Text style={styles.sectionHeaderTitle}>Script to Voice</Text>
+            <View style={{ flex: 1, minWidth: 0, marginRight: 8 }}>
+              <Text style={styles.sectionHeaderTitle}>Script to Voice</Text>
+              <Text style={styles.presetsSubHint}>Swipe presets to switch hook angle (4) ➔</Text>
+            </View>
             <View style={styles.wordCounterPill}>
               <Text style={styles.wordCounterText}>
                 {wordCount} words • ~{estimatedSeconds}s audio
@@ -626,16 +629,17 @@ export const ProVoiceStudioScreen: React.FC<ProVoiceStudioScreenProps> = ({
           <ScrollView
             horizontal
             showsHorizontalScrollIndicator={false}
-            contentContainerStyle={{ gap: 8, paddingBottom: 10 }}
+            contentContainerStyle={{ gap: 8, paddingBottom: 10, paddingRight: 12 }}
           >
             {PRESET_SCRIPTS.map((preset) => {
               const isSelected = scriptTitle === preset.title;
               return (
                 <Pressable
                   key={preset.id}
-                  style={[
+                  style={({ pressed }) => [
                     styles.presetChip,
                     isSelected && styles.presetChipActive,
+                    pressed && styles.btnPressed,
                   ]}
                   onPress={() => handleLoadPreset(preset)}
                 >
@@ -1918,13 +1922,19 @@ const styles = StyleSheet.create({
     fontWeight: '800',
     color: '#64748B',
   },
+  presetsSubHint: {
+    fontSize: sFont(10.5),
+    fontWeight: '600',
+    color: '#8B5CF6',
+    marginTop: 2,
+  },
   presetChip: {
     backgroundColor: '#FFFFFF',
     borderWidth: 1,
     borderColor: '#EFECE6',
-    paddingHorizontal: 12,
+    paddingHorizontal: 10,
     paddingVertical: 6,
-    borderRadius: 10,
+    borderRadius: 9,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.02,
@@ -1935,13 +1945,13 @@ const styles = StyleSheet.create({
     borderColor: '#8B5CF6',
   },
   presetChipText: {
-    fontSize: 12,
-    fontWeight: '800',
+    fontSize: sFont(11),
+    fontWeight: '700',
     color: '#475569',
   },
   presetChipTextActive: {
     color: '#582CDB',
-    fontWeight: '700',
+    fontWeight: '800',
   },
   scriptEditorCard: {
     backgroundColor: '#FFFFFF',
