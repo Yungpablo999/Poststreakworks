@@ -1016,23 +1016,25 @@ export const ProCaptionScreen: React.FC<ProCaptionScreenProps> = ({
                 </View>
               </View>
 
-              {/* Action Modifiers Grid - 2 Rows x 3 Columns */}
+              {/* Action Modifiers Grid - 3 Rows x 2 Columns */}
               <View style={styles.captionModifiersSection}>
                 <Text style={styles.captionModifiersLabel}>QUICK JARVIS MODIFIERS</Text>
-                <View style={{ gap: 6, marginTop: 6 }}>
+                <View style={{ gap: 7, marginTop: 7 }}>
                   {[
                     [
                       { id: 'Shorten', label: 'Shorten', emoji: '✂️' },
                       { id: 'Personalize', label: 'Personalize', emoji: '👤' },
-                      { id: 'Strong CTA', label: 'Strong CTA', emoji: '💬' },
                     ],
                     [
+                      { id: 'Strong CTA', label: 'Strong CTA', emoji: '💬' },
                       { id: 'Platform Sync', label: 'Platform Sync', emoji: '📱' },
+                    ],
+                    [
                       { id: 'Improve Hook', label: 'Improve Hook', emoji: '✨' },
                       { id: 'Viral Spark', label: 'Viral Spark', emoji: '🔥' },
                     ],
                   ].map((row, rIdx) => (
-                    <View key={rIdx} style={{ flexDirection: 'row', gap: 6 }}>
+                    <View key={rIdx} style={{ flexDirection: 'row', gap: 8 }}>
                       {row.map((mod) => (
                         <Pressable
                           key={mod.id}
@@ -1042,8 +1044,13 @@ export const ProCaptionScreen: React.FC<ProCaptionScreenProps> = ({
                           ]}
                           onPress={() => handleApplyModifier(mod.id)}
                         >
-                          <Text style={{ fontSize: 11 }}>{mod.emoji}</Text>
-                          <Text style={styles.captionModifierChipText} numberOfLines={1}>
+                          <Text style={{ fontSize: 13 }}>{mod.emoji}</Text>
+                          <Text
+                            style={styles.captionModifierChipText}
+                            numberOfLines={1}
+                            adjustsFontSizeToFit
+                            minimumFontScale={0.85}
+                          >
                             {mod.label}
                           </Text>
                         </Pressable>
@@ -2075,22 +2082,21 @@ const styles = StyleSheet.create({
   },
   captionModifierChip: {
     flex: 1,
-    minWidth: 0,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: '#FAF8F5',
     borderWidth: 1,
     borderColor: '#EFECE6',
-    paddingHorizontal: 4,
-    paddingVertical: 7,
-    borderRadius: 8,
-    gap: 4,
+    paddingHorizontal: 10,
+    paddingVertical: 8.5,
+    borderRadius: 10,
+    gap: 6,
   },
   captionModifierChipText: {
-    fontSize: sFont(10),
+    fontSize: sFont(11.5),
     fontWeight: '700',
-    color: '#475569',
+    color: '#334155',
   },
 
   // CARD 3: PLATFORM CAPTIONS (Single Full-Width Card + Tabs + Comparison Modal)
