@@ -205,11 +205,8 @@ export const ProCaptionScreen: React.FC<ProCaptionScreenProps> = ({
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     }
     if (selectedTones.includes(tone)) {
-      if (selectedTones.length > 1) {
-        setSelectedTones(selectedTones.filter((t) => t !== tone));
-      } else {
-        showToast('At least 1 tone must remain selected');
-      }
+      setSelectedTones(selectedTones.filter((t) => t !== tone));
+      showToast(`Removed ${tone} tone`);
     } else {
       if (selectedTones.length >= 3) {
         showToast('Choose up to 3 tones');
@@ -676,7 +673,7 @@ export const ProCaptionScreen: React.FC<ProCaptionScreenProps> = ({
                 <View style={styles.captionMetricBox}>
                   <Text style={styles.captionMetricHeader}>TONE</Text>
                   <Text style={styles.captionMetricVal} numberOfLines={1}>
-                    {selectedTones.slice(0, 2).join(', ')}
+                    {selectedTones.length > 0 ? selectedTones.slice(0, 2).join(', ') : 'Natural'}
                   </Text>
                 </View>
 
