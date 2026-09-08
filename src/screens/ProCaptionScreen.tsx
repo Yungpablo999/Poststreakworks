@@ -27,6 +27,50 @@ import { sFont } from '../utils/responsive';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
+interface PlatformVariation {
+  id: string;
+  name: string;
+  icon: 'tiktok' | 'instagram' | 'youtube';
+  badge: string;
+  caption: string;
+  charCount: number;
+  specs: string[];
+  editingPlatformName: string;
+}
+
+const PLATFORM_VARIATIONS: PlatformVariation[] = [
+  {
+    id: 'tiktok',
+    name: 'TikTok',
+    icon: 'tiktok',
+    badge: 'SHORT, DIRECT',
+    caption: '3 creator mistakes slowing you down. System > Ideas. Which one is yours? 👇',
+    charCount: 79,
+    specs: ['⚡ Punchy Hook', '💬 High Comments', '⏱ < 80 Chars'],
+    editingPlatformName: 'TikTok',
+  },
+  {
+    id: 'instagram',
+    name: 'Instagram Reel',
+    icon: 'instagram',
+    badge: 'REELS & CAROUSEL',
+    caption: '3 mistakes that stop creators from scaling. Save this for when you need a reminder to keep posting.',
+    charCount: 108,
+    specs: ['📌 Bookmark Focused', '✨ Clean Spacing', '📈 High Saves'],
+    editingPlatformName: 'Instagram Reel',
+  },
+  {
+    id: 'youtube',
+    name: 'YouTube Shorts',
+    icon: 'youtube',
+    badge: 'SHORTS & SEO',
+    caption: 'Why 90% of creators stay stuck (and the 3 habits that fix it). Full breakdown in comments.',
+    charCount: 98,
+    specs: ['🔍 Search Optimized', '🎥 Click Intent', '🔗 Pinned Loop'],
+    editingPlatformName: 'YouTube Shorts',
+  },
+];
+
 interface ProCaptionScreenProps {
   ideaTitle?: string;
   onBack: () => void;
@@ -61,6 +105,7 @@ export const ProCaptionScreen: React.FC<ProCaptionScreenProps> = ({
   const [showNotificationModal, setShowNotificationModal] = useState(false);
   const [showCompletionModal, setShowCompletionModal] = useState(false);
   const [showHashtagModal, setShowHashtagModal] = useState(false);
+  const [showAllPlatformsModal, setShowAllPlatformsModal] = useState(false);
   const [newHashtagInput, setNewHashtagInput] = useState('');
   const [hashtagList, setHashtagList] = useState<string[]>([
     'creatorhabits',
@@ -83,12 +128,13 @@ export const ProCaptionScreen: React.FC<ProCaptionScreenProps> = ({
   ]);
 
   const [activePlatformCaptionIndex, setActivePlatformCaptionIndex] = useState(0);
-  const [activeEditingPlatform, setActiveEditingPlatform] = useState('Instagram Reel');
+  const [activeEditingPlatform, setActiveEditingPlatform] = useState('TikTok');
   const scrollViewRef = useRef<ScrollView>(null);
   const captionInputRef = useRef<TextInput>(null);
+  const touchStartX = useRef(0);
 
   const [mainCaption, setMainCaption] = useState(
-    '3 mistakes that slow down new creators: waiting for perfect ideas, posting too late, and ignoring what your audience already responds to. Start small, stay consistent, and improve as you go.'
+    '3 creator mistakes slowing you down. System > Ideas. Which one is yours? 👇'
   );
 
   const [selectedCTA, setSelectedCTA] = useState<string | null>(
@@ -150,17 +196,60 @@ export const ProCaptionScreen: React.FC<ProCaptionScreenProps> = ({
     }).start();
   };
 
+  const handleSelectPlatformIndex = (index: number, autoLoad = false) => {
+    if (Platform.OS !== 'web') {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    }
+    setActivePlatformCaptionIndex(index);
+    const selected = PLATFORM_VARIATIONS[index];
+    if (autoLoad || selected.editingPlatformName === activeEditingPlatform) {
+      setMainCaption(selected.caption);
+      setActiveEditingPlatform(selected.editingPlatformName);
+      showToast(`✓ Loaded ${selected.name} Caption`);
+    }
+  };
+
+  const handlePrevPlatform = () => {
+    if (Platform.OS !== 'web') {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    }
+    const newIdx = activePlatformCaptionIndex > 0 ? activePlatformCaptionIndex - 1 : PLATFORM_VARIATIONS.length - 1;
+    setActivePlatformCaptionIndex(newIdx);
+  };
+
+  const handleNextPlatform = () => {
+    if (Platform.OS !== 'web') {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    }
+    const newIdx = activePlatformCaptionIndex < PLATFORM_VARIATIONS.length - 1 ? activePlatformCaptionIndex + 1 : 0;
+    setActivePlatformCaptionIndex(newIdx);
+  };
+
+  const handleCopyCaptionText = (textToCopy: string, platformLabel: string) => {
+    if (Platform.OS !== 'web') {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    }
+    if (Platform.OS === 'web' && typeof navigator !== 'undefined' && navigator.clipboard) {
+      navigator.clipboard.writeText(textToCopy);
+    }
+    showToast(`📋 Copied ${platformLabel} caption!`);
+  };
+
   const handleEditPlatformCaption = (platformName: string, captionText: string) => {
     if (Platform.OS !== 'web') {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     }
     setMainCaption(captionText);
     setActiveEditingPlatform(platformName);
+    const foundIdx = PLATFORM_VARIATIONS.findIndex((p) => p.editingPlatformName === platformName);
+    if (foundIdx !== -1) {
+      setActivePlatformCaptionIndex(foundIdx);
+    }
     scrollViewRef.current?.scrollTo({ y: 360, animated: true });
     setTimeout(() => {
       captionInputRef.current?.focus();
     }, 280);
-    showToast(`✏️ Editing ${platformName} caption in editor above`);
+    showToast(`✏️ Editing ${platformName} caption in editor below`);
   };
 
   const handleAddHashtag = (tagToAdd?: string) => {
@@ -641,195 +730,195 @@ export const ProCaptionScreen: React.FC<ProCaptionScreenProps> = ({
           </View>
 
           {/* ============================================================ */}
-          {/* CARD 3: PLATFORM CAPTIONS CAROUSEL                           */}
+          {/* CARD 3: PLATFORM CAPTIONS (Full-Width Card + Segmented Tabs) */}
           {/* ============================================================ */}
           <View style={{ marginTop: 22 }}>
-            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
                 <Text style={{ fontSize: 13 }}>📱</Text>
                 <Text style={styles.sectionHeaderTitle}>Platform Captions</Text>
               </View>
-              <Text style={{ fontSize: 11, fontWeight: '700', color: '#582CDB' }}>
-                Editing: {activeEditingPlatform}
-              </Text>
+              <Pressable
+                style={({ pressed }) => [styles.compareAllFormatsBtn, pressed && styles.btnPressed]}
+                onPress={() => {
+                  triggerModalPop();
+                  setShowAllPlatformsModal(true);
+                }}
+                hitSlop={6}
+              >
+                <Text style={styles.compareAllFormatsBtnText}>📑 Compare All (3)</Text>
+              </Pressable>
             </View>
             <Text style={[styles.toneSubHint, { marginBottom: 10 }]}>
-              Select a platform to customize its caption in the editor below
+              Tap tabs or swipe to switch platform format
             </Text>
 
-            <ScrollView
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              contentContainerStyle={{ gap: 12 }}
-            >
-              {/* TikTok Card */}
-              {(() => {
-                const isTikTokActive = activeEditingPlatform === 'TikTok';
-                const tiktokText = '3 creator mistakes slowing you down. System > Ideas. Which one is yours? 👇';
+            {/* Segmented Platform Tabs Bar */}
+            <View style={styles.platformTabsContainer}>
+              {PLATFORM_VARIATIONS.map((plat, idx) => {
+                const isSelected = activePlatformCaptionIndex === idx;
+                const isEditing = activeEditingPlatform === plat.editingPlatformName;
                 return (
                   <Pressable
-                    style={[
-                      styles.platformCaptionDeckCard,
-                      isTikTokActive && styles.platformCaptionDeckCardActive,
+                    key={plat.id}
+                    style={({ pressed }) => [
+                      styles.platformTabItem,
+                      isSelected && styles.platformTabItemActive,
+                      pressed && styles.btnPressed,
                     ]}
-                    onPress={() => handleEditPlatformCaption('TikTok', tiktokText)}
+                    onPress={() => handleSelectPlatformIndex(idx)}
                   >
-                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-                        <SocialBrandIcon platform="tiktok" size={18} />
-                        <Text style={styles.platDeckTitle}>TikTok</Text>
-                      </View>
-                      <View style={[styles.platDeckBadge, isTikTokActive && styles.platDeckBadgeActive]}>
-                        <Text style={[styles.platDeckBadgeText, isTikTokActive && styles.platDeckBadgeTextActive]}>
-                          {isTikTokActive ? 'EDITING ✓' : 'SHORT, DIRECT'}
-                        </Text>
-                      </View>
-                    </View>
-
-                    <Text style={styles.platDeckBodyText}>
-                      {tiktokText}
+                    <SocialBrandIcon platform={plat.icon} size={14} />
+                    <Text
+                      style={[
+                        styles.platformTabText,
+                        isSelected && styles.platformTabTextActive,
+                      ]}
+                      numberOfLines={1}
+                    >
+                      {plat.name}
                     </Text>
-
-                    <View style={styles.platDeckBtnRow}>
-                      <Pressable
-                        style={({ pressed }) => [
-                          styles.platDeckEditBtn,
-                          isTikTokActive && styles.platDeckEditBtnActive,
-                          pressed && styles.btnPressed,
-                        ]}
-                        onPress={() => handleEditPlatformCaption('TikTok', tiktokText)}
-                      >
-                        <Text style={[styles.platDeckEditBtnText, isTikTokActive && styles.platDeckEditBtnTextActive]}>
-                          {isTikTokActive ? 'Active in Editor' : 'Edit'}
-                        </Text>
-                      </Pressable>
-                      <Pressable
-                        style={[styles.platDeckUseBtn, isTikTokActive && styles.platDeckUseBtnActive]}
-                        onPress={() => {
-                          setMainCaption(tiktokText);
-                          setActiveEditingPlatform('TikTok');
-                          showToast('✓ Loaded TikTok Caption');
-                        }}
-                      >
-                        <Text style={styles.platDeckUseBtnText}>{isTikTokActive ? 'Loaded' : 'Use'}</Text>
-                      </Pressable>
-                    </View>
+                    {isEditing && <View style={styles.tabEditingDot} />}
                   </Pressable>
                 );
-              })()}
+              })}
+            </View>
 
-              {/* Instagram Card */}
-              {(() => {
-                const isInstaActive = activeEditingPlatform === 'Instagram Reel';
-                const instaText = '3 mistakes that stop creators from scaling. Save this for when you need a reminder to keep posting.';
-                return (
-                  <Pressable
-                    style={[
-                      styles.platformCaptionDeckCard,
-                      isInstaActive && styles.platformCaptionDeckCardActive,
-                    ]}
-                    onPress={() => handleEditPlatformCaption('Instagram Reel', instaText)}
-                  >
-                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-                        <SocialBrandIcon platform="instagram" size={18} />
-                        <Text style={styles.platDeckTitle}>Instagram</Text>
-                      </View>
-                      <View style={[styles.platDeckBadge, isInstaActive && styles.platDeckBadgeActive]}>
-                        <Text style={[styles.platDeckBadgeText, isInstaActive && styles.platDeckBadgeTextActive]}>
-                          {isInstaActive ? 'EDITING ✓' : 'REELS & CAROUSEL'}
-                        </Text>
+            {/* Full-Width Platform Hero Card (Zero Cutoff) */}
+            {(() => {
+              const currentPlat = PLATFORM_VARIATIONS[activePlatformCaptionIndex];
+              const isCurrentlyEditing = activeEditingPlatform === currentPlat.editingPlatformName;
+
+              return (
+                <View
+                  style={[
+                    styles.platformHeroCard,
+                    isCurrentlyEditing && styles.platformHeroCardActive,
+                  ]}
+                  onTouchStart={(e) => {
+                    touchStartX.current = e.nativeEvent.pageX;
+                  }}
+                  onTouchEnd={(e) => {
+                    const dx = e.nativeEvent.pageX - touchStartX.current;
+                    if (dx < -45) {
+                      handleNextPlatform();
+                    } else if (dx > 45) {
+                      handlePrevPlatform();
+                    }
+                  }}
+                >
+                  {/* Card Header */}
+                  <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                      <SocialBrandIcon platform={currentPlat.icon} size={20} />
+                      <View>
+                        <Text style={styles.platformHeroTitle}>{currentPlat.name}</Text>
+                        <Text style={styles.platformHeroFormat}>{currentPlat.badge}</Text>
                       </View>
                     </View>
 
-                    <Text style={styles.platDeckBodyText}>
-                      {instaText}
+                    {isCurrentlyEditing ? (
+                      <View style={styles.activeEditingPill}>
+                        <Text style={styles.activeEditingPillText}>EDITING IN LIVE EDITOR ✓</Text>
+                      </View>
+                    ) : (
+                      <Pressable
+                        style={styles.loadToEditorQuickBtn}
+                        onPress={() => handleEditPlatformCaption(currentPlat.editingPlatformName, currentPlat.caption)}
+                      >
+                        <Text style={styles.loadToEditorQuickBtnText}>Load into Editor ⚡</Text>
+                      </Pressable>
+                    )}
+                  </View>
+
+                  {/* Full Caption Quote Box */}
+                  <View style={styles.platformHeroQuoteBox}>
+                    <Text style={styles.platformHeroQuoteText}>
+                      &ldquo;{currentPlat.caption}&rdquo;
                     </Text>
+                  </View>
 
-                    <View style={styles.platDeckBtnRow}>
-                      <Pressable
-                        style={({ pressed }) => [
-                          styles.platDeckEditBtn,
-                          isInstaActive && styles.platDeckEditBtnActive,
-                          pressed && styles.btnPressed,
-                        ]}
-                        onPress={() => handleEditPlatformCaption('Instagram Reel', instaText)}
-                      >
-                        <Text style={[styles.platDeckEditBtnText, isInstaActive && styles.platDeckEditBtnTextActive]}>
-                          {isInstaActive ? 'Active in Editor' : 'Edit'}
-                        </Text>
-                      </Pressable>
-                      <Pressable
-                        style={[styles.platDeckUseBtn, isInstaActive && styles.platDeckUseBtnActive]}
-                        onPress={() => {
-                          setMainCaption(instaText);
-                          setActiveEditingPlatform('Instagram Reel');
-                          showToast('✓ Loaded Instagram Caption');
-                        }}
-                      >
-                        <Text style={styles.platDeckUseBtnText}>{isInstaActive ? 'Loaded' : 'Use'}</Text>
-                      </Pressable>
-                    </View>
-                  </Pressable>
-                );
-              })()}
-
-              {/* YouTube Shorts Card */}
-              {(() => {
-                const isYtActive = activeEditingPlatform === 'YouTube Shorts';
-                const ytText = 'Why 90% of creators stay stuck (and the 3 habits that fix it). Full breakdown in comments.';
-                return (
-                  <Pressable
-                    style={[
-                      styles.platformCaptionDeckCard,
-                      isYtActive && styles.platformCaptionDeckCardActive,
-                    ]}
-                    onPress={() => handleEditPlatformCaption('YouTube Shorts', ytText)}
-                  >
-                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-                        <SocialBrandIcon platform="youtube" size={18} />
-                        <Text style={styles.platDeckTitle}>YouTube</Text>
+                  {/* Specs & Performance Badges */}
+                  <View style={styles.platformSpecsRow}>
+                    {currentPlat.specs.map((spec, sIdx) => (
+                      <View key={sIdx} style={styles.platformSpecPill}>
+                        <Text style={styles.platformSpecPillText}>{spec}</Text>
                       </View>
-                      <View style={[styles.platDeckBadge, isYtActive && styles.platDeckBadgeActive]}>
-                        <Text style={[styles.platDeckBadgeText, isYtActive && styles.platDeckBadgeTextActive]}>
-                          {isYtActive ? 'EDITING ✓' : 'SHORTS & SEO'}
-                        </Text>
-                      </View>
+                    ))}
+                    <View style={[styles.platformSpecPill, { backgroundColor: '#EDE9FE' }]}>
+                      <Text style={[styles.platformSpecPillText, { color: '#582CDB' }]}>
+                        {currentPlat.charCount} Chars
+                      </Text>
+                    </View>
+                  </View>
+
+                  {/* Primary Actions Row */}
+                  <View style={styles.platformHeroActionsRow}>
+                    <Pressable
+                      style={({ pressed }) => [
+                        styles.platformHeroPrimaryBtn,
+                        isCurrentlyEditing && styles.platformHeroPrimaryBtnActive,
+                        pressed && styles.btnPressed,
+                      ]}
+                      onPress={() => handleEditPlatformCaption(currentPlat.editingPlatformName, currentPlat.caption)}
+                    >
+                      <Text style={styles.platformHeroPrimaryBtnText}>
+                        {isCurrentlyEditing ? '✏️ Active in Live Editor' : `✏️ Edit ${currentPlat.name} Caption`}
+                      </Text>
+                    </Pressable>
+
+                    <Pressable
+                      style={({ pressed }) => [
+                        styles.platformHeroSecondaryBtn,
+                        pressed && styles.btnPressed,
+                      ]}
+                      onPress={() => handleCopyCaptionText(currentPlat.caption, currentPlat.name)}
+                    >
+                      <Text style={styles.platformHeroSecondaryBtnText}>📋 Copy</Text>
+                    </Pressable>
+                  </View>
+
+                  {/* Paging & Swipe Controls */}
+                  <View style={styles.platformPagingRow}>
+                    <Pressable
+                      style={styles.platformPageNavBtn}
+                      onPress={handlePrevPlatform}
+                      hitSlop={8}
+                    >
+                      <Text style={styles.platformPageNavBtnText}>‹ Prev</Text>
+                    </Pressable>
+
+                    <View style={styles.platformDotsContainer}>
+                      {PLATFORM_VARIATIONS.map((_, dotIdx) => (
+                        <Pressable
+                          key={dotIdx}
+                          onPress={() => handleSelectPlatformIndex(dotIdx)}
+                          hitSlop={6}
+                        >
+                          <View
+                            style={[
+                              styles.platformPagingDot,
+                              activePlatformCaptionIndex === dotIdx && styles.platformPagingDotActive,
+                            ]}
+                          />
+                        </Pressable>
+                      ))}
+                      <Text style={styles.platformPageCountText}>
+                        {activePlatformCaptionIndex + 1} of {PLATFORM_VARIATIONS.length}
+                      </Text>
                     </View>
 
-                    <Text style={styles.platDeckBodyText}>
-                      {ytText}
-                    </Text>
-
-                    <View style={styles.platDeckBtnRow}>
-                      <Pressable
-                        style={({ pressed }) => [
-                          styles.platDeckEditBtn,
-                          isYtActive && styles.platDeckEditBtnActive,
-                          pressed && styles.btnPressed,
-                        ]}
-                        onPress={() => handleEditPlatformCaption('YouTube Shorts', ytText)}
-                      >
-                        <Text style={[styles.platDeckEditBtnText, isYtActive && styles.platDeckEditBtnTextActive]}>
-                          {isYtActive ? 'Active in Editor' : 'Edit'}
-                        </Text>
-                      </Pressable>
-                      <Pressable
-                        style={[styles.platDeckUseBtn, isYtActive && styles.platDeckUseBtnActive]}
-                        onPress={() => {
-                          setMainCaption(ytText);
-                          setActiveEditingPlatform('YouTube Shorts');
-                          showToast('✓ Loaded YouTube Caption');
-                        }}
-                      >
-                        <Text style={styles.platDeckUseBtnText}>{isYtActive ? 'Loaded' : 'Use'}</Text>
-                      </Pressable>
-                    </View>
-                  </Pressable>
-                );
-              })()}
-            </ScrollView>
+                    <Pressable
+                      style={styles.platformPageNavBtn}
+                      onPress={handleNextPlatform}
+                      hitSlop={8}
+                    >
+                      <Text style={styles.platformPageNavBtnText}>Next ›</Text>
+                    </Pressable>
+                  </View>
+                </View>
+              );
+            })()}
           </View>
 
           {/* ============================================================ */}
@@ -1377,6 +1466,92 @@ export const ProCaptionScreen: React.FC<ProCaptionScreenProps> = ({
           </View>
         </Modal>
 
+        {/* ALL PLATFORMS COMPARISON MODAL */}
+        <Modal
+          visible={showAllPlatformsModal}
+          transparent={true}
+          animationType="fade"
+          onRequestClose={() => setShowAllPlatformsModal(false)}
+        >
+          <View style={styles.modalOverlay}>
+            <Animated.View style={[styles.modalCard, { transform: [{ scale: modalPopScale }], maxHeight: '85%' }]}>
+              <View style={styles.modalHeaderBetween}>
+                <View>
+                  <Text style={styles.modalTitle}>All Platform Formats</Text>
+                  <Text style={styles.modalSubTitle}>Compare tailored variations for each channel</Text>
+                </View>
+                <Pressable onPress={() => setShowAllPlatformsModal(false)} hitSlop={8}>
+                  <Text style={styles.modalCloseText}>✕</Text>
+                </Pressable>
+              </View>
+
+              <ScrollView style={{ marginTop: 12 }} contentContainerStyle={{ gap: 12, paddingBottom: 10 }}>
+                {PLATFORM_VARIATIONS.map((plat, idx) => {
+                  const isEditingThis = activeEditingPlatform === plat.editingPlatformName;
+                  return (
+                    <View
+                      key={plat.id}
+                      style={[
+                        styles.compareModalCard,
+                        isEditingThis && styles.compareModalCardActive,
+                      ]}
+                    >
+                      <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                          <SocialBrandIcon platform={plat.icon} size={16} />
+                          <Text style={styles.compareModalPlatformName}>{plat.name}</Text>
+                        </View>
+                        <View style={[styles.platDeckBadge, isEditingThis && styles.platDeckBadgeActive]}>
+                          <Text style={[styles.platDeckBadgeText, isEditingThis && styles.platDeckBadgeTextActive]}>
+                            {plat.badge}
+                          </Text>
+                        </View>
+                      </View>
+
+                      <Text style={styles.compareModalCaptionText}>
+                        &ldquo;{plat.caption}&rdquo;
+                      </Text>
+
+                      <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 8 }}>
+                        <Text style={styles.compareModalMetaText}>
+                          {plat.charCount} chars • {plat.specs[0]}
+                        </Text>
+                        <View style={{ flexDirection: 'row', gap: 6 }}>
+                          <Pressable
+                            style={styles.compareModalCopyBtn}
+                            onPress={() => handleCopyCaptionText(plat.caption, plat.name)}
+                          >
+                            <Text style={styles.compareModalCopyBtnText}>Copy</Text>
+                          </Pressable>
+                          <Pressable
+                            style={[styles.compareModalEditBtn, isEditingThis && styles.compareModalEditBtnActive]}
+                            onPress={() => {
+                              handleEditPlatformCaption(plat.editingPlatformName, plat.caption);
+                              setActivePlatformCaptionIndex(idx);
+                              setShowAllPlatformsModal(false);
+                            }}
+                          >
+                            <Text style={[styles.compareModalEditBtnText, isEditingThis && styles.compareModalEditBtnTextActive]}>
+                              {isEditingThis ? 'Editing ✓' : 'Use in Editor'}
+                            </Text>
+                          </Pressable>
+                        </View>
+                      </View>
+                    </View>
+                  );
+                })}
+              </ScrollView>
+
+              <Pressable
+                style={[styles.modalCancelBtn, { marginTop: 14 }]}
+                onPress={() => setShowAllPlatformsModal(false)}
+              >
+                <Text style={styles.modalCancelBtnText}>Close</Text>
+              </Pressable>
+            </Animated.View>
+          </View>
+        </Modal>
+
         {/* 3D GHOST CELEBRATION MODAL */}
         <AnimatedCompletionModal
           visible={showCompletionModal}
@@ -1800,29 +1975,225 @@ const styles = StyleSheet.create({
     color: '#475569',
   },
 
-  // CARD 3: PLATFORM CAPTIONS
-  platformCaptionDeckCard: {
-    width: 224,
+  // CARD 3: PLATFORM CAPTIONS (Single Full-Width Card + Tabs + Comparison Modal)
+  compareAllFormatsBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#EDE9FE',
+    paddingHorizontal: 9,
+    paddingVertical: 4.5,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#DDD6FE',
+  },
+  compareAllFormatsBtnText: {
+    fontSize: sFont(10.5),
+    fontWeight: '800',
+    color: '#582CDB',
+  },
+  platformTabsContainer: {
+    flexDirection: 'row',
+    backgroundColor: '#F3EFE6',
+    borderRadius: 12,
+    padding: 3,
+    marginBottom: 10,
+    gap: 4,
+  },
+  platformTabItem: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 7,
+    borderRadius: 9,
+    gap: 5,
+  },
+  platformTabItemActive: {
+    backgroundColor: '#FFFFFF',
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.08,
+    shadowRadius: 3,
+    elevation: 2,
+  },
+  platformTabText: {
+    fontSize: sFont(11),
+    fontWeight: '600',
+    color: '#64748B',
+  },
+  platformTabTextActive: {
+    color: '#171420',
+    fontWeight: '800',
+  },
+  tabEditingDot: {
+    width: 5,
+    height: 5,
+    borderRadius: 2.5,
+    backgroundColor: '#582CDB',
+  },
+  platformHeroCard: {
     backgroundColor: '#FFFFFF',
     borderRadius: 18,
-    padding: 14,
+    padding: 16,
     borderWidth: 1.5,
     borderColor: '#EFECE6',
-    justifyContent: 'space-between',
-  },
-  platformCaptionDeckCardActive: {
-    borderColor: '#582CDB',
-    backgroundColor: '#FAF8FF',
-    shadowColor: '#582CDB',
+    shadowColor: '#000000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
+    shadowOpacity: 0.04,
     shadowRadius: 6,
     elevation: 2,
   },
-  platDeckTitle: {
-    fontSize: 12,
+  platformHeroCardActive: {
+    borderColor: '#582CDB',
+    backgroundColor: '#FAF8FF',
+    shadowColor: '#582CDB',
+    shadowOpacity: 0.09,
+    shadowRadius: 8,
+  },
+  platformHeroTitle: {
+    fontSize: sFont(13),
+    fontWeight: '800',
+    color: '#171420',
+  },
+  platformHeroFormat: {
+    fontSize: sFont(9),
+    fontWeight: '700',
+    color: '#64748B',
+    marginTop: 1,
+    letterSpacing: 0.3,
+  },
+  activeEditingPill: {
+    backgroundColor: '#EDE9FE',
+    borderWidth: 1,
+    borderColor: '#DDD6FE',
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 6,
+  },
+  activeEditingPillText: {
+    fontSize: sFont(9),
+    fontWeight: '800',
+    color: '#582CDB',
+  },
+  loadToEditorQuickBtn: {
+    backgroundColor: '#FAF8F5',
+    borderWidth: 1,
+    borderColor: '#EFECE6',
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 6,
+  },
+  loadToEditorQuickBtnText: {
+    fontSize: sFont(9.5),
+    fontWeight: '700',
+    color: '#64748B',
+  },
+  platformHeroQuoteBox: {
+    backgroundColor: '#FAF8F5',
+    borderRadius: 12,
+    padding: 13,
+    borderWidth: 1,
+    borderColor: '#F1EFE9',
+    marginVertical: 12,
+  },
+  platformHeroQuoteText: {
+    fontSize: sFont(12.5),
+    lineHeight: 18.5,
+    color: '#171420',
+    fontWeight: '500',
+  },
+  platformSpecsRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 6,
+    marginBottom: 14,
+  },
+  platformSpecPill: {
+    backgroundColor: '#F1EFE9',
+    paddingHorizontal: 8,
+    paddingVertical: 3.5,
+    borderRadius: 6,
+  },
+  platformSpecPillText: {
+    fontSize: sFont(9.5),
+    fontWeight: '700',
+    color: '#475569',
+  },
+  platformHeroActionsRow: {
+    flexDirection: 'row',
+    gap: 8,
+  },
+  platformHeroPrimaryBtn: {
+    flex: 1,
+    backgroundColor: '#582CDB',
+    paddingVertical: 9,
+    borderRadius: 9,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  platformHeroPrimaryBtnActive: {
+    backgroundColor: '#431FB3',
+  },
+  platformHeroPrimaryBtnText: {
+    fontSize: sFont(11.5),
+    fontWeight: '700',
+    color: '#FFFFFF',
+  },
+  platformHeroSecondaryBtn: {
+    backgroundColor: '#FAF8F5',
+    borderWidth: 1,
+    borderColor: '#EFECE6',
+    paddingHorizontal: 14,
+    paddingVertical: 9,
+    borderRadius: 9,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  platformHeroSecondaryBtnText: {
+    fontSize: sFont(11.5),
     fontWeight: '700',
     color: '#171420',
+  },
+  platformPagingRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginTop: 12,
+    paddingTop: 10,
+    borderTopWidth: 1,
+    borderTopColor: '#F1EFE9',
+  },
+  platformPageNavBtn: {
+    paddingVertical: 3,
+    paddingHorizontal: 6,
+  },
+  platformPageNavBtnText: {
+    fontSize: sFont(11),
+    fontWeight: '800',
+    color: '#582CDB',
+  },
+  platformDotsContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+  },
+  platformPagingDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: '#CBD5E1',
+  },
+  platformPagingDotActive: {
+    width: 16,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: '#582CDB',
+  },
+  platformPageCountText: {
+    fontSize: sFont(10),
+    fontWeight: '700',
+    color: '#94A3B8',
+    marginLeft: 6,
   },
   platDeckBadge: {
     backgroundColor: '#FAF8F5',
@@ -1845,51 +2216,65 @@ const styles = StyleSheet.create({
     color: '#582CDB',
     fontWeight: '800',
   },
-  platDeckBodyText: {
-    fontSize: 11,
-    color: '#171420',
-    lineHeight: 16,
-    marginVertical: 10,
-  },
-  platDeckBtnRow: {
-    flexDirection: 'row',
-    gap: 8,
-  },
-  platDeckEditBtn: {
-    flex: 1,
+
+  // COMPARE ALL PLATFORMS MODAL CARDS
+  compareModalCard: {
     backgroundColor: '#FAF8F5',
-    borderWidth: 1,
+    borderRadius: 14,
+    padding: 12,
+    borderWidth: 1.5,
     borderColor: '#EFECE6',
-    paddingVertical: 6,
-    borderRadius: 8,
-    alignItems: 'center',
   },
-  platDeckEditBtnActive: {
-    backgroundColor: '#EDE9FE',
-    borderColor: '#DDD6FE',
+  compareModalCardActive: {
+    borderColor: '#582CDB',
+    backgroundColor: '#FAF8FF',
   },
-  platDeckEditBtnText: {
-    fontSize: 11,
+  compareModalPlatformName: {
+    fontSize: sFont(12),
     fontWeight: '800',
     color: '#171420',
   },
-  platDeckEditBtnTextActive: {
-    color: '#582CDB',
+  compareModalCaptionText: {
+    fontSize: sFont(11.5),
+    lineHeight: 16.5,
+    color: '#171420',
+    marginVertical: 8,
   },
-  platDeckUseBtn: {
-    flex: 1,
+  compareModalMetaText: {
+    fontSize: sFont(9.5),
+    fontWeight: '700',
+    color: '#64748B',
+  },
+  compareModalCopyBtn: {
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    paddingHorizontal: 8,
+    paddingVertical: 4.5,
+    borderRadius: 6,
+  },
+  compareModalCopyBtnText: {
+    fontSize: sFont(10),
+    fontWeight: '700',
+    color: '#171420',
+  },
+  compareModalEditBtn: {
     backgroundColor: '#582CDB',
-    paddingVertical: 6,
-    borderRadius: 8,
-    alignItems: 'center',
+    paddingHorizontal: 10,
+    paddingVertical: 4.5,
+    borderRadius: 6,
   },
-  platDeckUseBtnActive: {
+  compareModalEditBtnActive: {
     backgroundColor: '#431FB3',
   },
-  platDeckUseBtnText: {
-    fontSize: 11,
+  compareModalEditBtnText: {
+    fontSize: sFont(10),
     fontWeight: '700',
     color: '#FFFFFF',
+  },
+  compareModalEditBtnTextActive: {
+    color: '#FFFFFF',
+    fontWeight: '800',
   },
 
   // CARD 5: ENGAGEMENT SCORE
