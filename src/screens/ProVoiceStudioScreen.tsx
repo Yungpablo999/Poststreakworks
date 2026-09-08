@@ -546,7 +546,7 @@ export const ProVoiceStudioScreen: React.FC<ProVoiceStudioScreenProps> = ({
                 <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
                   <Text style={styles.minutesCardLabel}>Voice Minutes</Text>
                   <View style={styles.ultraHdPill}>
-                    <Text style={styles.ultraHdPillText}>48kHz HD</Text>
+                    <Text style={styles.ultraHdPillText}>Studio Audio</Text>
                   </View>
                 </View>
 
@@ -606,7 +606,7 @@ export const ProVoiceStudioScreen: React.FC<ProVoiceStudioScreenProps> = ({
                 setShowManageMinutesModal(true);
               }}
             >
-              <Text style={styles.manageMinutesBtnText}>Manage Minutes &amp; Quota History</Text>
+              <Text style={styles.manageMinutesBtnText}>Manage Minutes &amp; Quota →</Text>
             </Pressable>
           </View>
 
@@ -743,7 +743,7 @@ export const ProVoiceStudioScreen: React.FC<ProVoiceStudioScreenProps> = ({
                 />
               </Svg>
               <Text style={styles.generateVoiceBtnText}>
-                {isGenerating ? '⚡ Synthesizing 4K Audio...' : 'Generate Voice'}
+                {isGenerating ? '⚡ Synthesizing Studio Audio...' : 'Generate Voice'}
               </Text>
             </LinearGradient>
           </Pressable>
@@ -834,11 +834,11 @@ export const ProVoiceStudioScreen: React.FC<ProVoiceStudioScreenProps> = ({
                       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
                     }
                     setCelebrationData({
-                      title: '4K Audio Master Exported!',
-                      subtitle: `"${scriptTitle}.wav" (48kHz Ultra-HD) downloaded & ready for your video editor.`,
-                      badgeText: '📥 4K AUDIO EXPORTED',
+                      title: 'Voiceover Master Exported!',
+                      subtitle: `"${scriptTitle}.wav" (Studio Audio) downloaded & ready for your video editor.`,
+                      badgeText: '📥 AUDIO EXPORTED (+50 XP)',
                       xpEarned: 50,
-                      speechBubble: '4K audio master ready, Pablo! Time to drop some viral magic! 🔥',
+                      speechBubble: 'Studio voiceover ready, Pablo! Ready for your video editor! 🚀',
                     });
                     setShowCelebrationModal(true);
                   }}
@@ -1507,11 +1507,11 @@ export const ProVoiceStudioScreen: React.FC<ProVoiceStudioScreenProps> = ({
                             }
                             setShowAllProjectsModal(false);
                             setCelebrationData({
-                              title: '4K Audio Master Exported!',
+                              title: 'Voiceover Master Exported!',
                               subtitle: `"${proj.name}.wav" downloaded to your device storage.`,
-                              badgeText: '📥 4K AUDIO EXPORTED',
+                              badgeText: '📥 AUDIO EXPORTED (+50 XP)',
                               xpEarned: 50,
-                              speechBubble: '4K master ready! Time to drop some viral magic! 🔥',
+                              speechBubble: 'Studio voiceover ready, Pablo! Ready to create! 🚀',
                             });
                             setShowCelebrationModal(true);
                           }}
@@ -1858,17 +1858,19 @@ const styles = StyleSheet.create({
   },
   manageMinutesBtn: {
     backgroundColor: '#FAF8F5',
-    borderWidth: 1.2,
+    borderWidth: 1,
     borderColor: '#EFECE6',
-    paddingVertical: 11,
-    borderRadius: 12,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: 9,
     alignItems: 'center',
-    marginTop: 16,
+    justifyContent: 'center',
+    marginTop: 13,
   },
   manageMinutesBtnText: {
-    fontSize: 12,
-    fontWeight: '700',
-    color: '#171420',
+    fontSize: sFont(11),
+    fontWeight: '600',
+    color: '#475569',
   },
 
   // SCRIPT TO VOICE
