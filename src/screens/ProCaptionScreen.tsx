@@ -29,6 +29,7 @@ const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
 interface PlatformVariation {
   id: string;
+  tabLabel: string;
   name: string;
   icon: 'tiktok' | 'instagram' | 'youtube';
   badge: string;
@@ -41,6 +42,7 @@ interface PlatformVariation {
 const PLATFORM_VARIATIONS: PlatformVariation[] = [
   {
     id: 'tiktok',
+    tabLabel: 'TikTok',
     name: 'TikTok',
     icon: 'tiktok',
     badge: 'SHORT, DIRECT',
@@ -51,6 +53,7 @@ const PLATFORM_VARIATIONS: PlatformVariation[] = [
   },
   {
     id: 'instagram',
+    tabLabel: 'Instagram',
     name: 'Instagram Reel',
     icon: 'instagram',
     badge: 'REELS & CAROUSEL',
@@ -61,6 +64,7 @@ const PLATFORM_VARIATIONS: PlatformVariation[] = [
   },
   {
     id: 'youtube',
+    tabLabel: 'YouTube',
     name: 'YouTube Shorts',
     icon: 'youtube',
     badge: 'SHORTS & SEO',
@@ -768,15 +772,17 @@ export const ProCaptionScreen: React.FC<ProCaptionScreenProps> = ({
                     ]}
                     onPress={() => handleSelectPlatformIndex(idx)}
                   >
-                    <SocialBrandIcon platform={plat.icon} size={14} />
+                    <SocialBrandIcon platform={plat.icon} size={13.5} />
                     <Text
                       style={[
                         styles.platformTabText,
                         isSelected && styles.platformTabTextActive,
                       ]}
                       numberOfLines={1}
+                      adjustsFontSizeToFit
+                      minimumFontScale={0.8}
                     >
-                      {plat.name}
+                      {plat.tabLabel}
                     </Text>
                     {isEditing && <View style={styles.tabEditingDot} />}
                   </Pressable>
@@ -1995,7 +2001,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     backgroundColor: '#F3EFE6',
     borderRadius: 12,
-    padding: 3,
+    padding: 3.5,
     marginBottom: 10,
     gap: 4,
   },
@@ -2005,8 +2011,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     paddingVertical: 7,
+    paddingHorizontal: 4,
     borderRadius: 9,
-    gap: 5,
+    gap: 4.5,
   },
   platformTabItemActive: {
     backgroundColor: '#FFFFFF',
@@ -2017,9 +2024,10 @@ const styles = StyleSheet.create({
     elevation: 2,
   },
   platformTabText: {
-    fontSize: sFont(11),
-    fontWeight: '600',
+    fontSize: sFont(10.5),
+    fontWeight: '700',
     color: '#64748B',
+    letterSpacing: -0.2,
   },
   platformTabTextActive: {
     color: '#171420',
@@ -2030,6 +2038,7 @@ const styles = StyleSheet.create({
     height: 5,
     borderRadius: 2.5,
     backgroundColor: '#582CDB',
+    marginLeft: 1,
   },
   platformHeroCard: {
     backgroundColor: '#FFFFFF',
