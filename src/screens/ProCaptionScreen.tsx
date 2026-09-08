@@ -514,7 +514,14 @@ export const ProCaptionScreen: React.FC<ProCaptionScreenProps> = ({
               <Text style={styles.goldScriptBadgeText}>PRO CAPTION WRITER</Text>
             </View>
 
-            <Text style={styles.mainTitleText}>Write captions for every platform.</Text>
+            <Text
+              style={styles.mainTitleText}
+              numberOfLines={1}
+              adjustsFontSizeToFit
+              minimumFontScale={0.8}
+            >
+              Write captions for every platform.
+            </Text>
             <Text style={styles.mainSubText}>
               Create platform-specific captions, CTAs and hashtag sets designed for engagement.
             </Text>
@@ -1448,7 +1455,7 @@ const styles = StyleSheet.create({
     letterSpacing: 0.3,
   },
   mainTitleText: {
-    fontSize: 23,
+    fontSize: sFont(21),
     fontWeight: '700',
     color: '#171420',
     letterSpacing: -0.5,
