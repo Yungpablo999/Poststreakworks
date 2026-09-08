@@ -616,7 +616,7 @@ export const ProVoiceStudioScreen: React.FC<ProVoiceStudioScreenProps> = ({
           <View style={styles.sectionHeaderRow}>
             <View style={{ flex: 1, minWidth: 0, marginRight: 8 }}>
               <Text style={styles.sectionHeaderTitle}>Script to Voice</Text>
-              <Text style={styles.presetsSubHint}>Swipe presets to switch hook angle (4) ➔</Text>
+              <Text style={styles.presetsSubHint} numberOfLines={1}>Swipe presets ➔</Text>
             </View>
             <View style={styles.wordCounterPill}>
               <Text style={styles.wordCounterText}>
@@ -1923,10 +1923,10 @@ const styles = StyleSheet.create({
     color: '#64748B',
   },
   presetsSubHint: {
-    fontSize: sFont(10.5),
-    fontWeight: '600',
+    fontSize: sFont(10),
+    fontWeight: '700',
     color: '#8B5CF6',
-    marginTop: 2,
+    marginTop: 1.5,
   },
   presetChip: {
     backgroundColor: '#FFFFFF',
