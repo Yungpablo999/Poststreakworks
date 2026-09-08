@@ -101,7 +101,7 @@ const PRESET_SCRIPTS = [
   {
     id: 'hook',
     label: '🔥 3-Sec Viral Hook',
-    text: "Stop making this mistake if you want to stay consistent as a creator. Consistency isn't about working 24/7—it's about building a system that works even when you're not in the mood. Let me show you my 3-step 'Streak Engine' that has kept me posting for 42 days straight without burn out.",
+    text: "Stop making this mistake if you want to stay consistent as a creator. Consistency isn't about working 24/7—it's about building a system that works even when you're not in the mood. Let me show you my 3-step 'Streak Engine' that keeps you posting consistently every single day without burn out.",
     title: 'Creator Mistake Reel Voiceover',
   },
   {
@@ -684,39 +684,59 @@ export const ProVoiceStudioScreen: React.FC<ProVoiceStudioScreenProps> = ({
               </View>
 
               <View style={{ flexDirection: 'row', gap: 6, alignItems: 'center', flexShrink: 0 }}>
-                {/* AI Hook Optimizer */}
+                {/* AI Hook Optimizer / Polish */}
                 <Pressable
                   style={({ pressed }) => [styles.toolIconBtn, pressed && styles.btnPressed]}
                   onPress={() => {
+                    if (Platform.OS !== 'web') {
+                      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                    }
+                    showToast('✨ Jarvis Hook & Script Polish');
                     triggerModalPop();
                     setShowHookOptimizerModal(true);
                   }}
                   hitSlop={6}
+                  accessibilityLabel="AI Hook & Script Polish"
+                  accessibilityHint="Opens Jarvis script and hook optimizer"
                 >
-                  <Text style={{ fontSize: 14 }}>🪄</Text>
+                  <Text style={{ fontSize: 13 }}>✨</Text>
                 </Pressable>
 
-                {/* Voice Style Selector */}
+                {/* Voice Style Selector & Adjustments */}
                 <Pressable
                   style={({ pressed }) => [styles.toolIconBtn, pressed && styles.btnPressed]}
                   onPress={() => {
+                    if (Platform.OS !== 'web') {
+                      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                    }
+                    showToast('🎚️ Voice Style & Adjustments');
                     triggerModalPop();
                     setShowVoiceStyleModal(true);
                   }}
                   hitSlop={6}
+                  accessibilityLabel="Voice Style & Adjustments"
+                  accessibilityHint="Opens voice style selector and audio tuning"
                 >
-                  <Text style={{ fontSize: 14 }}>🎚️</Text>
+                  <Text style={{ fontSize: 13 }}>🎚️</Text>
                 </Pressable>
 
-                {/* Copy/Paste Action */}
+                {/* Copy Script Action */}
                 <Pressable
                   style={({ pressed }) => [styles.toolIconBtn, pressed && styles.btnPressed]}
                   onPress={() => {
-                    showToast('✓ Script copied to clipboard');
+                    if (Platform.OS !== 'web') {
+                      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+                    }
+                    if (Platform.OS === 'web' && typeof navigator !== 'undefined' && navigator.clipboard) {
+                      navigator.clipboard.writeText(scriptText);
+                    }
+                    showToast('📋 Script copied to clipboard!');
                   }}
                   hitSlop={6}
+                  accessibilityLabel="Copy Script to Clipboard"
+                  accessibilityHint="Copies current script text to clipboard"
                 >
-                  <Text style={{ fontSize: 14 }}>📋</Text>
+                  <Text style={{ fontSize: 13 }}>📋</Text>
                 </Pressable>
               </View>
             </View>
