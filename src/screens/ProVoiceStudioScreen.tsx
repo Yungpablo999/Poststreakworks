@@ -525,7 +525,14 @@ export const ProVoiceStudioScreen: React.FC<ProVoiceStudioScreenProps> = ({
             </View>
           </View>
 
-          <Text style={styles.mainTitle}>Turn scripts into voiceovers.</Text>
+          <Text
+            style={styles.mainTitle}
+            numberOfLines={1}
+            adjustsFontSizeToFit
+            minimumFontScale={0.85}
+          >
+            Turn scripts into voiceovers.
+          </Text>
           <Text style={styles.subTitle}>
             Convert written hooks &amp; storylines into studio-quality voiceovers in seconds.
           </Text>
@@ -1753,10 +1760,10 @@ const styles = StyleSheet.create({
     letterSpacing: 0.2,
   },
   mainTitle: {
-    fontSize: 23,
+    fontSize: sFont(20.5),
     fontWeight: '700',
     color: '#171420',
-    letterSpacing: -0.5,
+    letterSpacing: -0.4,
   },
   subTitle: {
     fontSize: 12.5,
