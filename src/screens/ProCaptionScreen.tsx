@@ -944,8 +944,8 @@ export const ProCaptionScreen: React.FC<ProCaptionScreenProps> = ({
                       ]}
                       onPress={() => handleEditPlatformCaption(currentPlat.editingPlatformName, currentPlat.caption)}
                     >
-                      <Text style={styles.platformHeroPrimaryBtnText}>
-                        {isCurrentlyEditing ? '✏️ Active in Live Editor' : `✏️ Edit ${currentPlat.name} Caption`}
+                      <Text style={styles.platformHeroPrimaryBtnText} numberOfLines={1}>
+                        {isCurrentlyEditing ? '✓ Active in Live Editor' : '✏️ Edit in Live Editor'}
                       </Text>
                     </Pressable>
 
@@ -1701,8 +1701,8 @@ export const ProCaptionScreen: React.FC<ProCaptionScreenProps> = ({
                             setShowAllPlatformsModal(false);
                           }}
                         >
-                          <Text style={styles.compareModalEditBtnText}>
-                            {isEditingThis ? '✏️ Active in Live Editor' : `✏️ Use ${plat.name} in Editor`}
+                          <Text style={styles.compareModalEditBtnText} numberOfLines={1}>
+                            {isEditingThis ? '✓ Active in Editor' : '✏️ Use in Editor'}
                           </Text>
                         </Pressable>
 
@@ -2605,17 +2605,19 @@ const styles = StyleSheet.create({
   compareModalEditBtn: {
     flex: 1,
     backgroundColor: '#582CDB',
-    paddingVertical: 8,
+    paddingVertical: 9,
+    paddingHorizontal: 8,
     borderRadius: 8,
     alignItems: 'center',
     justifyContent: 'center',
+    minHeight: 36,
   },
   compareModalEditBtnActive: {
     backgroundColor: '#431FB3',
   },
   compareModalEditBtnText: {
     fontSize: sFont(11),
-    fontWeight: '700',
+    fontWeight: '800',
     color: '#FFFFFF',
   },
   compareModalCopyBtn: {
@@ -2623,10 +2625,11 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#EFECE6',
     paddingHorizontal: 12,
-    paddingVertical: 8,
+    paddingVertical: 9,
     borderRadius: 8,
     alignItems: 'center',
     justifyContent: 'center',
+    minHeight: 36,
   },
   compareModalCopyBtnText: {
     fontSize: sFont(11),
