@@ -1668,14 +1668,18 @@ export const ProCaptionScreen: React.FC<ProCaptionScreenProps> = ({
 
                       {/* 5. OPTIMIZATION SCORE */}
                       <View style={[styles.compareMatrixSection, { marginTop: 8 }]}>
-                        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 3 }}>
+                        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
                           <Text style={styles.compareMatrixSectionLabel}>📊 OPTIMIZATION SCORE</Text>
                           <Text style={styles.compareScoreNumText}>
-                            {plat.optimizationScore.score}% • {plat.optimizationScore.label}
+                            {plat.optimizationScore.score}%
                           </Text>
                         </View>
                         <View style={styles.compareScoreTrack}>
                           <View style={[styles.compareScoreFill, { width: `${plat.optimizationScore.score}%` }]} />
+                        </View>
+                        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 4 }}>
+                          <Text style={styles.compareScoreLabelText}>{plat.optimizationScore.label}</Text>
+                          <Text style={styles.compareScoreTargetText}>Target Met ✓</Text>
                         </View>
                       </View>
 
@@ -2560,7 +2564,7 @@ const styles = StyleSheet.create({
     color: '#334155',
   },
   compareScoreNumText: {
-    fontSize: sFont(10),
+    fontSize: sFont(11.5),
     fontWeight: '800',
     color: '#582CDB',
   },
@@ -2575,6 +2579,16 @@ const styles = StyleSheet.create({
     height: '100%',
     backgroundColor: '#582CDB',
     borderRadius: 2.5,
+  },
+  compareScoreLabelText: {
+    fontSize: sFont(10),
+    fontWeight: '700',
+    color: '#64748B',
+  },
+  compareScoreTargetText: {
+    fontSize: sFont(9.5),
+    fontWeight: '800',
+    color: '#15803D',
   },
   compareAdvantageBox: {
     flexDirection: 'row',
