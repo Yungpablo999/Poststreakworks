@@ -1213,7 +1213,7 @@ export const ProVoiceStudioScreen: React.FC<ProVoiceStudioScreenProps> = ({
               <Text style={styles.jarvisInsightTitle}>Jarvis Strategy Insight</Text>
             </View>
             <Text style={styles.jarvisInsightBody}>
-              &ldquo;Keep this voiceover under 45 seconds. Shorter voiceovers with a clear hook tend to score 2.4x higher viewer retention for Instagram Reels and TikTok.&rdquo;
+              &ldquo;Keep this voiceover under 45 seconds. Shorter voiceovers with a clear hook can help maintain viewer attention on Reels and TikTok.&rdquo;
             </Text>
 
             <Pressable
@@ -1246,7 +1246,7 @@ export const ProVoiceStudioScreen: React.FC<ProVoiceStudioScreenProps> = ({
               <Text style={{ fontSize: 16 }}>👑</Text>
             </View>
             <Text style={styles.needMinutesSub}>
-              Buy extra voice minutes when your included Pro minutes run low. Refill anytime with instant allocation.
+              Running low on Pro minutes? Refill anytime with an extra voice pack. Get your extra minutes instantly.
             </Text>
             <Pressable
               style={({ pressed }) => [styles.buyMoreBtn, pressed && styles.btnPressed]}
