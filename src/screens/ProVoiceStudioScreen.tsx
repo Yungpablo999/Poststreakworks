@@ -26,13 +26,20 @@ import { sFont, isNarrowScreen } from '../utils/responsive';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
+export interface AttachedVoiceoverData {
+  title: string;
+  voiceName: string;
+  duration: string;
+  speed: string;
+}
+
 interface ProVoiceStudioScreenProps {
   onBack: () => void;
   onNavigateTab?: (tab: TabType) => void;
   onOpenJarvisPro?: () => void;
   onOpenMessages?: (threadId?: string) => void;
   onOpenSchedule?: () => void;
-  onOpenPostComposer?: (prefillTitle?: string) => void;
+  onOpenPostComposer?: (prefillTitle?: string, attachedAudio?: AttachedVoiceoverData) => void;
   onSwitchToFree?: () => void;
   userProfile?: UserProfileData;
   onSaveProfile?: (updated: UserProfileData) => void;
@@ -847,7 +854,10 @@ export const ProVoiceStudioScreen: React.FC<ProVoiceStudioScreenProps> = ({
               <View style={{ flexDirection: 'row', gap: 8, marginBottom: 10 }}>
                 <Pressable
                   style={({ pressed }) => [styles.audioSecondaryBtn, pressed && styles.btnPressed]}
-                  onPress={handleGenerateVoice}
+                  onPress={() => {
+                    showToast(`🔄 Regenerating with ${selectedVoiceStyle.name} (${selectedSpeed})...`);
+                    handleGenerateVoice();
+                  }}
                 >
                   <Text style={styles.audioSecondaryBtnText}>🔄 Regenerate</Text>
                 </Pressable>
@@ -867,7 +877,7 @@ export const ProVoiceStudioScreen: React.FC<ProVoiceStudioScreenProps> = ({
                     setShowCelebrationModal(true);
                   }}
                 >
-                  <Text style={styles.audioSecondaryBtnText}>📥 Export (.WAV)</Text>
+                  <Text style={styles.audioSecondaryBtnText}>📥 Export WAV</Text>
                 </Pressable>
               </View>
 
@@ -876,7 +886,15 @@ export const ProVoiceStudioScreen: React.FC<ProVoiceStudioScreenProps> = ({
                 style={({ pressed }) => [styles.useInPostBtn, pressed && styles.btnPressed]}
                 onPress={() => {
                   if (onOpenPostComposer) {
-                    onOpenPostComposer(`${scriptTitle} (Voiceover Master Attached)`);
+                    onOpenPostComposer(
+                      scriptTitle,
+                      {
+                        title: scriptTitle,
+                        voiceName: selectedVoiceStyle.name,
+                        duration: formatTimer(totalAudioDuration),
+                        speed: selectedSpeed,
+                      }
+                    );
                   }
                 }}
               >

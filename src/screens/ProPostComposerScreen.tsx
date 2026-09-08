@@ -26,9 +26,18 @@ import { SocialBrandIcon } from '../components/SocialBrandIcon';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
+export interface AttachedAudioData {
+  title: string;
+  voiceName: string;
+  duration: string;
+  speed: string;
+}
+
 interface ProPostComposerScreenProps {
   ideaTitle?: string;
   questDraft?: { title: string; hook: string; story: string; lesson: string; cta: string } | null;
+  attachedAudio?: AttachedAudioData | null;
+  onClearAttachedAudio?: () => void;
   initialPlatform?: string;
   onBack: () => void;
   onLogout?: () => void;
@@ -91,6 +100,8 @@ const SAMPLE_IDEAS = [
 export const ProPostComposerScreen: React.FC<ProPostComposerScreenProps> = ({
   ideaTitle,
   questDraft,
+  attachedAudio,
+  onClearAttachedAudio,
   initialPlatform,
   onBack,
   onLogout,
@@ -140,10 +151,37 @@ export const ProPostComposerScreen: React.FC<ProPostComposerScreenProps> = ({
     size: string;
     type: 'video' | 'image';
   } | null>(null);
+  const [localAttachedAudio, setLocalAttachedAudio] = useState<AttachedAudioData | null>(
+    attachedAudio || null
+  );
+  const [isPlayingVoiceover, setIsPlayingVoiceover] = useState(false);
+  const [voiceoverPlaybackSec, setVoiceoverPlaybackSec] = useState(0);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   const flameFloatY = useRef(new Animated.Value(0)).current;
   const modalPopScale = useRef(new Animated.Value(0.88)).current;
+
+  useEffect(() => {
+    if (attachedAudio) {
+      setLocalAttachedAudio(attachedAudio);
+    }
+  }, [attachedAudio]);
+
+  useEffect(() => {
+    let timer: any;
+    if (isPlayingVoiceover) {
+      timer = setInterval(() => {
+        setVoiceoverPlaybackSec((prev) => {
+          if (prev >= 30) {
+            setIsPlayingVoiceover(false);
+            return 0;
+          }
+          return prev + 1;
+        });
+      }, 1000);
+      return () => clearInterval(timer);
+    }
+  }, [isPlayingVoiceover]);
 
   useEffect(() => {
     Animated.loop(
@@ -590,6 +628,85 @@ export const ProPostComposerScreen: React.FC<ProPostComposerScreenProps> = ({
           <Text style={styles.platformDisclaimerText}>
             👑 Pro Multi-Sync active. Your content is automatically tailored to each platform&apos;s optimal algorithm format.
           </Text>
+
+          {/* ============================================================ */}
+          {/* ATTACHED STUDIO VOICEOVER CARD (SEAMLESS PRO WORKFLOW)       */}
+          {/* ============================================================ */}
+          {localAttachedAudio && (
+            <View style={{ marginTop: 18 }}>
+              <View style={styles.sectionHeaderRowWithBtn}>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                  <Text style={{ fontSize: 16 }}>🎙️</Text>
+                  <Text style={styles.sectionHeaderTitle}>ATTACHED STUDIO VOICEOVER</Text>
+                </View>
+                <Pressable
+                  onPress={() => {
+                    if (Platform.OS !== 'web') {
+                      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                    }
+                    setLocalAttachedAudio(null);
+                    if (onClearAttachedAudio) onClearAttachedAudio();
+                    showToast('🗑️ Voiceover detached from post');
+                  }}
+                  hitSlop={8}
+                >
+                  <Text style={{ fontSize: 11, color: '#EF4444', fontWeight: '800' }}>✕ Detach</Text>
+                </Pressable>
+              </View>
+
+              <View style={styles.attachedAudioCard}>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+                  {/* Play/Pause Button */}
+                  <Pressable
+                    style={({ pressed }) => [styles.audioPlayBtnCircle, pressed && styles.btnPressed]}
+                    onPress={() => {
+                      if (Platform.OS !== 'web') {
+                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                      }
+                      setIsPlayingVoiceover(!isPlayingVoiceover);
+                      if (!isPlayingVoiceover) {
+                        showToast(`▶ Playing ${localAttachedAudio.title}`);
+                      }
+                    }}
+                  >
+                    <Svg width={16} height={16} viewBox="0 0 24 24" fill="none">
+                      {isPlayingVoiceover ? (
+                        <Path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z" fill="#FFFFFF" />
+                      ) : (
+                        <Path d="M8 5v14l11-7L8 5z" fill="#FFFFFF" />
+                      )}
+                    </Svg>
+                  </Pressable>
+
+                  {/* Audio Info */}
+                  <View style={{ flex: 1 }}>
+                    <View style={{ flexDirection: 'row', gap: 6, alignItems: 'center', marginBottom: 3 }}>
+                      <View style={styles.audioProBadge}>
+                        <Text style={styles.audioProBadgeText}>🎙️ STUDIO MASTER</Text>
+                      </View>
+                      <View style={styles.audioSpeedBadge}>
+                        <Text style={styles.audioSpeedBadgeText}>{localAttachedAudio.speed}</Text>
+                      </View>
+                    </View>
+                    <Text style={styles.attachedAudioTitle} numberOfLines={1}>
+                      {localAttachedAudio.title}
+                    </Text>
+                    <Text style={styles.attachedAudioMeta}>
+                      {localAttachedAudio.voiceName} • {localAttachedAudio.duration} • 48kHz HD
+                    </Text>
+                  </View>
+                </View>
+
+                {/* Status Bar / Synchronization hint */}
+                <View style={styles.audioSyncBanner}>
+                  <View style={styles.audioSyncDot} />
+                  <Text style={styles.audioSyncText}>
+                    {isPlayingVoiceover ? `Playing preview (${voiceoverPlaybackSec}s)...` : 'Synced with 9:16 video timeline • Ready to publish'}
+                  </Text>
+                </View>
+              </View>
+            </View>
+          )}
 
           {/* ============================================================ */}
           {/* CARD 3: MEDIA UPLOAD & ASSET STUDIO                          */}
@@ -1512,5 +1629,89 @@ const styles = StyleSheet.create({
   btnPressed: {
     opacity: 0.9,
     transform: [{ scale: 0.98 }],
+  },
+  // Attached Audio Card Styles
+  attachedAudioCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 16,
+    padding: 14,
+    borderWidth: 1.5,
+    borderColor: '#DDD6FE',
+    shadowColor: '#582CDB',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.08,
+    shadowRadius: 10,
+    elevation: 3,
+  },
+  audioPlayBtnCircle: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: '#582CDB',
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#582CDB',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.25,
+    shadowRadius: 6,
+    elevation: 4,
+  },
+  audioProBadge: {
+    backgroundColor: '#FAF5FF',
+    paddingHorizontal: 7,
+    paddingVertical: 3,
+    borderRadius: 6,
+    borderWidth: 1,
+    borderColor: '#E9D5FF',
+  },
+  audioProBadgeText: {
+    fontSize: 9.5,
+    fontWeight: '900',
+    color: '#6D28D9',
+    letterSpacing: 0.5,
+  },
+  audioSpeedBadge: {
+    backgroundColor: '#F3F4F6',
+    paddingHorizontal: 6,
+    paddingVertical: 3,
+    borderRadius: 6,
+  },
+  audioSpeedBadgeText: {
+    fontSize: 9.5,
+    fontWeight: '800',
+    color: '#4B5563',
+  },
+  attachedAudioTitle: {
+    fontSize: 14.5,
+    fontWeight: '800',
+    color: '#171420',
+    marginTop: 2,
+  },
+  attachedAudioMeta: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#6B7280',
+    marginTop: 2,
+  },
+  audioSyncBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    backgroundColor: '#F5F3FF',
+    paddingHorizontal: 10,
+    paddingVertical: 7,
+    borderRadius: 8,
+    marginTop: 11,
+  },
+  audioSyncDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: '#10B981',
+  },
+  audioSyncText: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: '#6D28D9',
   },
 });

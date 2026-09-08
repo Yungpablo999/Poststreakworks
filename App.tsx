@@ -150,10 +150,17 @@ export default function App() {
     lesson: string;
     cta: string;
   } | null>(null);
+  const [composerAttachedAudio, setComposerAttachedAudio] = useState<{
+    title: string;
+    voiceName: string;
+    duration: string;
+    speed: string;
+  } | null>(null);
   const [activeMessageThreadId, setActiveMessageThreadId] = useState<string | undefined>(undefined);
 
   const handleUseIdea = (title: string, format?: string) => {
     setComposerQuestDraft(null);
+    setComposerAttachedAudio(null);
     if (title) setComposerIdeaTitle(title);
     if (format) {
       const f = format.toLowerCase();
@@ -1048,6 +1055,8 @@ export default function App() {
             <ProPostComposerScreen
               ideaTitle={composerIdeaTitle}
               questDraft={composerQuestDraft}
+              attachedAudio={composerAttachedAudio}
+              onClearAttachedAudio={() => setComposerAttachedAudio(null)}
               onBack={() => navigateTo(previousScreen ? previousScreen : 'create')}
               onLogout={handleLogout}
               onOpenSchedule={() => navigateTo('schedule')}
@@ -1082,6 +1091,8 @@ export default function App() {
               ideaTitle={composerIdeaTitle}
               questDraft={composerQuestDraft}
               initialFormat={composerIdeaFormat}
+              attachedAudio={composerAttachedAudio}
+              onClearAttachedAudio={() => setComposerAttachedAudio(null)}
               onBack={() => navigateTo(previousScreen ? previousScreen : 'create')}
               onLogout={handleLogout}
               onOpenSchedule={() => navigateTo('schedule')}
@@ -1558,8 +1569,9 @@ export default function App() {
             }}
             onOpenSchedule={() => navigateTo('schedule')}
             onOpenJarvisPro={() => navigateTo('jarvis-pro')}
-            onOpenPostComposer={(prefillTitle) => {
+            onOpenPostComposer={(prefillTitle, attachedAudio) => {
               if (prefillTitle) setComposerIdeaTitle(prefillTitle);
+              if (attachedAudio) setComposerAttachedAudio(attachedAudio);
               navigateTo('composer');
             }}
             onSwitchToFree={() => {

@@ -28,6 +28,13 @@ interface PostComposerScreenProps {
   questDraft?: { title: string; hook: string; story: string; lesson: string; cta: string } | null;
   initialFormat?: ContentFormatType;
   initialPlatform?: string;
+  attachedAudio?: {
+    title: string;
+    voiceName: string;
+    duration: string;
+    speed: string;
+  } | null;
+  onClearAttachedAudio?: () => void;
   onBack: () => void;
   onLogout?: () => void;
   onOpenSchedule?: () => void;
@@ -375,6 +382,8 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
   questDraft,
   initialFormat,
   initialPlatform = '',
+  attachedAudio,
+  onClearAttachedAudio,
   onBack,
   onLogout,
   onOpenSchedule,
