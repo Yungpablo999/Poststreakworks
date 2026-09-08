@@ -991,47 +991,43 @@ export const ProCaptionScreen: React.FC<ProCaptionScreenProps> = ({
                 </View>
               </View>
 
-              {/* Tri-Metrics Container */}
-              <View style={styles.captionMetricsRow}>
-                <View style={[styles.captionMetricBox, { flex: 1.4 }]}>
-                  <Text
-                    style={styles.captionMetricHeader}
-                    numberOfLines={1}
-                    adjustsFontSizeToFit
-                    minimumFontScale={0.8}
-                  >
-                    TONE
-                  </Text>
-                  <Text
-                    style={styles.captionMetricToneVal}
-                    numberOfLines={2}
-                  >
-                    {selectedTones.length > 0 ? selectedTones.join(' • ') : 'Natural'}
-                  </Text>
+              {/* Live Editor Quality & Tone Bar (Spacious Layout - Zero Truncation) */}
+              <View style={styles.captionMetaSection}>
+                {/* Tone Pill Strip */}
+                <View style={styles.captionToneRow}>
+                  <Text style={styles.captionToneLabel}>TONE</Text>
+                  <View style={styles.captionTonePillsContainer}>
+                    {selectedTones.length > 0 ? (
+                      selectedTones.map((tone) => (
+                        <View key={tone} style={styles.captionTonePill}>
+                          <Text style={styles.captionTonePillText}>{tone}</Text>
+                        </View>
+                      ))
+                    ) : (
+                      <View style={styles.captionTonePill}>
+                        <Text style={styles.captionTonePillText}>Natural</Text>
+                      </View>
+                    )}
+                  </View>
                 </View>
 
-                <View style={styles.captionMetricBox}>
-                  <Text
-                    style={styles.captionMetricHeader}
-                    numberOfLines={1}
-                    adjustsFontSizeToFit
-                    minimumFontScale={0.75}
-                  >
-                    SAVE POTENTIAL
-                  </Text>
-                  <Text style={[styles.captionMetricVal, { color: '#15803D' }]}>High</Text>
-                </View>
+                {/* 2 Equal Metric Cards */}
+                <View style={styles.captionMetricsRow}>
+                  <View style={styles.captionMetricBox}>
+                    <Text style={styles.captionMetricHeader}>SAVE POTENTIAL</Text>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 4 }}>
+                      <Text style={[styles.captionMetricVal, { color: '#15803D' }]}>High</Text>
+                      <Text style={styles.captionMetricSubText}>• Top 10%</Text>
+                    </View>
+                  </View>
 
-                <View style={styles.captionMetricBox}>
-                  <Text
-                    style={styles.captionMetricHeader}
-                    numberOfLines={1}
-                    adjustsFontSizeToFit
-                    minimumFontScale={0.75}
-                  >
-                    FIRST 80 FIT
-                  </Text>
-                  <Text style={styles.captionMetricVal}>91%</Text>
+                  <View style={styles.captionMetricBox}>
+                    <Text style={styles.captionMetricHeader}>FIRST 80 CHAR FIT</Text>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 4 }}>
+                      <Text style={styles.captionMetricVal}>91%</Text>
+                      <Text style={styles.captionMetricSubText}>• Above Fold</Text>
+                    </View>
+                  </View>
                 </View>
               </View>
 
@@ -2062,40 +2058,73 @@ const styles = StyleSheet.create({
     fontWeight: '800',
     color: '#64748B',
   },
+  captionMetaSection: {
+    marginTop: 12,
+    marginBottom: 10,
+    gap: 8,
+  },
+  captionToneRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#FAF8F5',
+    borderRadius: 10,
+    paddingHorizontal: 10,
+    paddingVertical: 7,
+    borderWidth: 1,
+    borderColor: '#EFECE6',
+    gap: 8,
+  },
+  captionToneLabel: {
+    fontSize: sFont(8.5),
+    fontWeight: '800',
+    color: '#94A3B8',
+    letterSpacing: 0.3,
+  },
+  captionTonePillsContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 5,
+    flex: 1,
+  },
+  captionTonePill: {
+    backgroundColor: '#EDE9FE',
+    paddingHorizontal: 7,
+    paddingVertical: 2.5,
+    borderRadius: 6,
+  },
+  captionTonePillText: {
+    fontSize: sFont(10),
+    fontWeight: '700',
+    color: '#582CDB',
+  },
   captionMetricsRow: {
     flexDirection: 'row',
-    gap: 6,
-    marginVertical: 12,
+    gap: 8,
   },
   captionMetricBox: {
     flex: 1,
     backgroundColor: '#FAF8F5',
     borderRadius: 10,
-    paddingHorizontal: 7,
-    paddingVertical: 7,
+    paddingHorizontal: 10,
+    paddingVertical: 8,
     borderWidth: 1,
     borderColor: '#EFECE6',
-    justifyContent: 'center',
-    minHeight: 52,
   },
   captionMetricHeader: {
-    fontSize: sFont(8.5),
+    fontSize: sFont(9),
     fontWeight: '800',
     color: '#94A3B8',
-    letterSpacing: 0.15,
+    letterSpacing: 0.3,
   },
   captionMetricVal: {
-    fontSize: sFont(11),
-    fontWeight: '700',
+    fontSize: sFont(12.5),
+    fontWeight: '800',
     color: '#171420',
-    marginTop: 2,
   },
-  captionMetricToneVal: {
+  captionMetricSubText: {
     fontSize: sFont(9.5),
-    fontWeight: '700',
-    color: '#171420',
-    lineHeight: 13,
-    marginTop: 2,
+    fontWeight: '600',
+    color: '#64748B',
   },
   captionModifiersSection: {
     paddingTop: 10,
