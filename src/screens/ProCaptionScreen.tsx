@@ -1127,7 +1127,7 @@ export const ProCaptionScreen: React.FC<ProCaptionScreenProps> = ({
             <View style={styles.insightCalloutBox}>
               <Text style={{ fontSize: 13, marginRight: 6 }}>💡</Text>
               <Text style={styles.insightCalloutText}>
-                The caption is clear and saveable, but the CTA can be slightly sharper for comments.
+                The caption is clear and engaging, but the CTA can be slightly sharper to drive more comments.
               </Text>
             </View>
           </View>
