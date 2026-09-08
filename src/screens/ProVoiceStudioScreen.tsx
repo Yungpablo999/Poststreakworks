@@ -156,7 +156,7 @@ export const ProVoiceStudioScreen: React.FC<ProVoiceStudioScreenProps> = ({
   const [scriptTitle, setScriptTitle] = useState('Creator Mistake Reel Voiceover');
   const [scriptText, setScriptText] = useState(PRESET_SCRIPTS[0].text);
   const [selectedVoiceStyle, setSelectedVoiceStyle] = useState(VOICE_STYLES[0]);
-  const [selectedSpeed, setSelectedSpeed] = useState<'0.9x' | '1.0x' | '1.1x' | '1.2x'>('1.0x');
+  const [selectedSpeed, setSelectedSpeed] = useState<'0.9x' | '1.0x' | '1.1x' | '1.2x'>('1.1x');
   const [isGenerating, setIsGenerating] = useState(false);
   const [isPlayingAudio, setIsPlayingAudio] = useState(false);
   const [playbackSeconds, setPlaybackSeconds] = useState(15);
@@ -361,6 +361,14 @@ export const ProVoiceStudioScreen: React.FC<ProVoiceStudioScreenProps> = ({
     setTotalAudioDuration(Math.max(8, Math.round(proj.text.split(/\s+/).filter(Boolean).length / 2.6)));
     setPlaybackSeconds(0);
     showToast(`✓ Loaded "${proj.name}" into editor`);
+  };
+
+  const getActivePaceLabel = (spd: '0.9x' | '1.0x' | '1.1x' | '1.2x', defaultPace: string) => {
+    if (spd === '0.9x') return '0.9x Slow';
+    if (spd === '1.0x') return '1.0x Steady';
+    if (spd === '1.1x') return '1.1x Fast';
+    if (spd === '1.2x') return '1.2x High Energy';
+    return defaultPace;
   };
 
   const formatTimer = (sec: number) => {
@@ -1073,11 +1081,15 @@ export const ProVoiceStudioScreen: React.FC<ProVoiceStudioScreenProps> = ({
             <View style={{ flexDirection: 'row', gap: 8, marginTop: 12 }}>
               <View style={styles.toneChipBox}>
                 <Text style={styles.toneChipLabel} numberOfLines={1}>TONE</Text>
-                <Text style={styles.toneChipValue} numberOfLines={1}>{selectedVoiceStyle.tone}</Text>
+                <Text style={styles.toneChipValue} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8}>
+                  {selectedVoiceStyle.tone}
+                </Text>
               </View>
               <View style={styles.toneChipBox}>
                 <Text style={styles.toneChipLabel} numberOfLines={1}>PACE</Text>
-                <Text style={styles.toneChipValue} numberOfLines={1}>{selectedVoiceStyle.pace}</Text>
+                <Text style={styles.toneChipValue} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8}>
+                  {getActivePaceLabel(selectedSpeed, selectedVoiceStyle.pace)}
+                </Text>
               </View>
             </View>
 
@@ -1141,8 +1153,11 @@ export const ProVoiceStudioScreen: React.FC<ProVoiceStudioScreenProps> = ({
                     selectedSpeed === spd && styles.speedPillBtnActive,
                   ]}
                   onPress={() => {
+                    if (Platform.OS !== 'web') {
+                      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                    }
                     setSelectedSpeed(spd);
-                    showToast(`Speed set to ${spd}`);
+                    showToast(`Speed set to ${spd} (${getActivePaceLabel(spd, selectedVoiceStyle.pace)})`);
                   }}
                 >
                   <Text
@@ -1286,6 +1301,10 @@ export const ProVoiceStudioScreen: React.FC<ProVoiceStudioScreenProps> = ({
                         ]}
                         onPress={() => {
                           setSelectedVoiceStyle(v);
+                          if (v.pace.startsWith('1.2x')) setSelectedSpeed('1.2x');
+                          else if (v.pace.startsWith('1.1x') || v.pace.startsWith('1.15x')) setSelectedSpeed('1.1x');
+                          else if (v.pace.startsWith('0.9x')) setSelectedSpeed('0.9x');
+                          else setSelectedSpeed('1.0x');
                           setShowVoiceStyleModal(false);
                           showToast(`✓ Switched voice to "${v.name}"`);
                         }}
