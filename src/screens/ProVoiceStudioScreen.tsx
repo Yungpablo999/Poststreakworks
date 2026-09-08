@@ -1364,16 +1364,16 @@ export const ProVoiceStudioScreen: React.FC<ProVoiceStudioScreenProps> = ({
                   </Pressable>
                 </View>
 
-                <Text style={styles.modalTitle}>Voice Minutes Allocation</Text>
+                <Text style={styles.modalTitle}>Voice Minutes &amp; Quota</Text>
                 <Text style={styles.modalSub}>
-                  118 of 150 Ultra HD minutes remaining for July billing cycle. Resets on Aug 1st.
+                  118 of 150 Studio minutes remaining for this cycle. Resets in 19 days.
                 </Text>
 
                 {/* Quota Progress Bar */}
                 <View style={styles.quotaProgressCard}>
                   <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
                     <Text style={styles.quotaBarLabel}>Usage: 32 / 150 min (21.3%)</Text>
-                    <Text style={styles.quotaBarRemaining}>118m Left</Text>
+                    <Text style={styles.quotaBarRemaining}>118 min left</Text>
                   </View>
                   <View style={styles.quotaTrackBg}>
                     <View style={[styles.quotaTrackFill, { width: '21.3%' }]} />
@@ -1383,9 +1383,9 @@ export const ProVoiceStudioScreen: React.FC<ProVoiceStudioScreenProps> = ({
                 <Text style={[styles.savedVoiceHeaderLabel, { marginTop: 14 }]}>RECENT DEDUCTIONS</Text>
                 <View style={{ gap: 8, marginTop: 8 }}>
                   {[
-                    { title: 'Creator Mistake Reel', date: 'Jul 18', cost: '-1 min', format: 'Reels' },
-                    { title: 'Morning Routine Mini', date: 'Jul 14', cost: '-1 min', format: 'Shorts' },
-                    { title: 'Streak Engine Breakdown', date: 'Jul 10', cost: '-1 min', format: 'Reels' },
+                    { title: 'Creator Mistake Reel', date: 'Yesterday', cost: '-1 min', format: 'Reels' },
+                    { title: 'Morning Routine Mini', date: '3d ago', cost: '-1 min', format: 'Shorts' },
+                    { title: 'Streak Engine Breakdown', date: '5d ago', cost: '-1 min', format: 'Reels' },
                   ].map((item, idx) => (
                     <View key={idx} style={styles.transferRow}>
                       <View>
