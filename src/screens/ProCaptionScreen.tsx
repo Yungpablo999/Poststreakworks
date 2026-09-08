@@ -380,12 +380,56 @@ export const ProCaptionScreen: React.FC<ProCaptionScreenProps> = ({
     if (Platform.OS !== 'web') {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     }
+
+    const allCtaChoices = [
+      'Which mistake slows you down the most?',
+      'Save this for your next planning session.',
+      'Send this to a creator starting out.',
+      'Follow for daily creator systems & growth breakdowns.',
+      'Which one is yours? 👇',
+      'Which one slows you down the most? 👇',
+      'Which one are you guilty of? 👇',
+      'Which one is slowing you down the most? Let me know below.',
+      'Save this for when you need a reminder to keep posting.',
+      'Save this for your next filming day.',
+      'Full breakdown in comments.',
+      'Full breakdown in comments ⬇️',
+    ];
+
     if (selectedCTA === ctaText) {
+      // DESELECT: Remove current CTA from caption
       setSelectedCTA(null);
+      let newCaption = mainCaption;
+      if (newCaption.includes(ctaText)) {
+        newCaption = newCaption.replace(ctaText, '').trim();
+        newCaption = newCaption.replace(/\n\s*\n\s*$/, '').trim();
+      }
+      setMainCaption(newCaption);
       showToast('Unselected CTA');
     } else {
+      // SELECT: Replace previous CTA or append new CTA
+      const prevCTA = selectedCTA;
       setSelectedCTA(ctaText);
-      showToast(`✓ Applied CTA: "${ctaText.slice(0, 28)}..."`);
+
+      let newCaption = mainCaption;
+      if (prevCTA && newCaption.includes(prevCTA)) {
+        newCaption = newCaption.replace(prevCTA, ctaText);
+      } else {
+        let replaced = false;
+        for (const known of allCtaChoices) {
+          if (newCaption.includes(known)) {
+            newCaption = newCaption.replace(known, ctaText);
+            replaced = true;
+            break;
+          }
+        }
+        if (!replaced) {
+          newCaption = `${newCaption.trim()}\n\n${ctaText}`;
+        }
+      }
+
+      setMainCaption(newCaption);
+      showToast(`✓ Applied CTA: "${ctaText.slice(0, 26)}..."`);
     }
   };
 
@@ -1147,28 +1191,28 @@ export const ProCaptionScreen: React.FC<ProCaptionScreenProps> = ({
                   id: 'recommended',
                   type: 'COMMENT SPIKE',
                   text: 'Which mistake slows you down the most?',
-                  desc: 'Best for comment volume & algorithm conversation spikes.',
+                  desc: 'Best for encouraging comments & conversation.',
                   isRecommended: true,
                 },
                 {
                   id: 'save',
                   type: 'SAVE',
                   text: 'Save this for your next planning session.',
-                  desc: 'Drives bookmarks for long-term algorithmic recall.',
+                  desc: 'Best for bookmarks and long-term reference.',
                   isRecommended: false,
                 },
                 {
                   id: 'share',
                   type: 'SHARE',
                   text: 'Send this to a creator starting out.',
-                  desc: 'Boosts DM shares & viral loop expansion.',
+                  desc: 'Best for encouraging shares and reaching new viewers.',
                   isRecommended: false,
                 },
                 {
                   id: 'follow',
                   type: 'FOLLOW',
                   text: 'Follow for daily creator systems & growth breakdowns.',
-                  desc: 'Direct acquisition hook for new followers.',
+                  desc: 'Best for attracting and growing new followers.',
                   isRecommended: false,
                 },
               ].map((cta) => {
