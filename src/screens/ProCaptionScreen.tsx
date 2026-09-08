@@ -1325,7 +1325,7 @@ export const ProCaptionScreen: React.FC<ProCaptionScreenProps> = ({
               <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 2 }}>
                 <Text style={styles.streakVal}>{userProfile?.streakCount || 1} Day{userProfile?.streakCount === 1 ? '' : 's'} 🔥</Text>
                 <View style={styles.streakProtectedBadge}>
-                  <Text style={styles.streakProtectedBadgeText}>Always Protected</Text>
+                  <Text style={styles.streakProtectedBadgeText}>🛡️ Pro Streak Protected</Text>
                 </View>
               </View>
             </View>
@@ -2999,13 +2999,13 @@ const styles = StyleSheet.create({
   },
   streakProtectedBadge: {
     backgroundColor: '#EDE9FE',
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-    borderRadius: 4,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 6,
   },
   streakProtectedBadgeText: {
-    fontSize: 9,
-    fontWeight: '700',
+    fontSize: sFont(9),
+    fontWeight: '800',
     color: '#582CDB',
   },
 
