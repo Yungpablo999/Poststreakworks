@@ -527,7 +527,7 @@ export const ProVoiceStudioScreen: React.FC<ProVoiceStudioScreenProps> = ({
 
           <Text style={styles.mainTitle}>Turn scripts into voiceovers.</Text>
           <Text style={styles.subTitle}>
-            Convert written hooks &amp; storylines into human-grade 4K studio audio in seconds.
+            Convert written hooks &amp; storylines into studio-quality voiceovers in seconds.
           </Text>
 
           {/* ============================================================ */}
@@ -1712,40 +1712,45 @@ const styles = StyleSheet.create({
   },
   heroPillGold: {
     backgroundColor: '#FEF3C7',
-    borderWidth: 1,
-    borderColor: '#FDE68A',
-    paddingHorizontal: 9,
-    paddingVertical: 3.5,
-    borderRadius: 6,
+    borderWidth: 1.5,
+    borderColor: '#FCD34D',
+    paddingHorizontal: 10,
+    paddingVertical: 4.5,
+    borderRadius: 7,
+    shadowColor: '#D97706',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 1,
   },
   heroPillGoldText: {
-    fontSize: 10,
-    fontWeight: '700',
-    color: '#D97706',
-    letterSpacing: 0.3,
+    fontSize: 10.5,
+    fontWeight: '800',
+    color: '#92400E',
+    letterSpacing: 0.4,
   },
   heroPillPurple: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 5,
-    backgroundColor: '#EDE9FE',
+    backgroundColor: '#F5F3FF',
     borderWidth: 1,
-    borderColor: '#DDD6FE',
-    paddingHorizontal: 9,
+    borderColor: '#E0E7FF',
+    paddingHorizontal: 8,
     paddingVertical: 3.5,
     borderRadius: 6,
   },
   livePulseDot: {
-    width: 6,
-    height: 6,
-    borderRadius: 3,
-    backgroundColor: '#582CDB',
+    width: 5,
+    height: 5,
+    borderRadius: 2.5,
+    backgroundColor: '#7C3AED',
   },
   heroPillPurpleText: {
-    fontSize: 10,
-    fontWeight: '700',
-    color: '#582CDB',
-    letterSpacing: 0.3,
+    fontSize: 9.5,
+    fontWeight: '600',
+    color: '#6D28D9',
+    letterSpacing: 0.2,
   },
   mainTitle: {
     fontSize: 23,
