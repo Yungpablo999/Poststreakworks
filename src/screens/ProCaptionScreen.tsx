@@ -35,7 +35,15 @@ interface PlatformVariation {
   badge: string;
   caption: string;
   charCount: number;
+  targetLength: string;
   specs: string[];
+  tone: string;
+  ctaStrategy: string;
+  optimizationScore: {
+    score: number;
+    label: string;
+  };
+  keyAdvantage: string;
   editingPlatformName: string;
 }
 
@@ -48,7 +56,15 @@ const PLATFORM_VARIATIONS: PlatformVariation[] = [
     badge: 'SHORT, DIRECT',
     caption: '3 creator mistakes slowing you down. System > Ideas. Which one is yours? 👇',
     charCount: 79,
-    specs: ['⚡ Punchy Hook', '💬 High Comments', '⏱ < 80 Chars'],
+    targetLength: 'Recommended: <80 chars',
+    specs: ['⚡ Punchy Hook', '💬 High Comments', '⏱️ Recommended: <80 chars'],
+    tone: 'Direct & Punchy',
+    ctaStrategy: 'Comment Spike: "Which one is yours? 👇"',
+    optimizationScore: {
+      score: 94,
+      label: 'Retention Hook',
+    },
+    keyAdvantage: 'Stops fast swiping and triggers instant comment debate.',
     editingPlatformName: 'TikTok',
   },
   {
@@ -59,7 +75,15 @@ const PLATFORM_VARIATIONS: PlatformVariation[] = [
     badge: 'REELS & CAROUSEL',
     caption: '3 mistakes that stop creators from scaling. Save this for when you need a reminder to keep posting.',
     charCount: 108,
-    specs: ['📌 Bookmark Focused', '✨ Clean Spacing', '📈 High Saves'],
+    targetLength: 'Recommended: <125 chars',
+    specs: ['📌 Bookmark Focused', '✨ Clean Spacing', '⏱️ Recommended: <125 chars'],
+    tone: 'Educational & Empowering',
+    ctaStrategy: 'Bookmark & Save: "Save this for when you need a reminder..."',
+    optimizationScore: {
+      score: 96,
+      label: 'Save Potential',
+    },
+    keyAdvantage: 'Keeps CTA above the "...more" fold to boost saves and bookmarks.',
     editingPlatformName: 'Instagram Reel',
   },
   {
@@ -70,7 +94,15 @@ const PLATFORM_VARIATIONS: PlatformVariation[] = [
     badge: 'SHORTS & SEO',
     caption: 'Why 90% of creators stay stuck (and the 3 habits that fix it). Full breakdown in comments.',
     charCount: 98,
-    specs: ['🔍 Search Optimized', '🎥 Click Intent', '🔗 Pinned Loop'],
+    targetLength: 'Recommended: <100 chars',
+    specs: ['🔍 Search Optimized', '🎥 Click Intent', '⏱️ Recommended: <100 chars'],
+    tone: 'Analytical & High-Authority',
+    ctaStrategy: 'Comment Funnel: "Full breakdown in comments"',
+    optimizationScore: {
+      score: 91,
+      label: 'Search & Click Intent',
+    },
+    keyAdvantage: 'Captures search intent and routes viewers into pinned link/comments.',
     editingPlatformName: 'YouTube Shorts',
   },
 ];
@@ -851,9 +883,9 @@ export const ProCaptionScreen: React.FC<ProCaptionScreenProps> = ({
                         <Text style={styles.platformSpecPillText}>{spec}</Text>
                       </View>
                     ))}
-                    <View style={[styles.platformSpecPill, { backgroundColor: '#EDE9FE' }]}>
-                      <Text style={[styles.platformSpecPillText, { color: '#582CDB' }]}>
-                        {currentPlat.charCount} Chars
+                    <View style={[styles.platformSpecPill, styles.platformCharCountPill]}>
+                      <Text style={styles.platformCharCountPillText}>
+                        {currentPlat.charCount} chars ✓
                       </Text>
                     </View>
                   </View>
@@ -1472,7 +1504,7 @@ export const ProCaptionScreen: React.FC<ProCaptionScreenProps> = ({
           </View>
         </Modal>
 
-        {/* ALL PLATFORMS COMPARISON MODAL */}
+        {/* ALL PLATFORMS COMPARISON STRATEGY MATRIX MODAL */}
         <Modal
           visible={showAllPlatformsModal}
           transparent={true}
@@ -1480,68 +1512,134 @@ export const ProCaptionScreen: React.FC<ProCaptionScreenProps> = ({
           onRequestClose={() => setShowAllPlatformsModal(false)}
         >
           <View style={styles.modalOverlay}>
-            <Animated.View style={[styles.modalCard, { transform: [{ scale: modalPopScale }], maxHeight: '85%' }]}>
+            <Animated.View style={[styles.modalCard, { transform: [{ scale: modalPopScale }], maxHeight: '88%', paddingHorizontal: 16 }]}>
               <View style={styles.modalHeaderBetween}>
                 <View>
-                  <Text style={styles.modalTitle}>All Platform Formats</Text>
-                  <Text style={styles.modalSubTitle}>Compare tailored variations for each channel</Text>
+                  <Text style={styles.modalTitle}>Platform Strategy Matrix</Text>
+                  <Text style={styles.modalSubTitle}>Side-by-side comparison across TikTok, Instagram & YouTube</Text>
                 </View>
                 <Pressable onPress={() => setShowAllPlatformsModal(false)} hitSlop={8}>
                   <Text style={styles.modalCloseText}>✕</Text>
                 </Pressable>
               </View>
 
-              <ScrollView style={{ marginTop: 12 }} contentContainerStyle={{ gap: 12, paddingBottom: 10 }}>
+              <ScrollView style={{ marginTop: 12 }} showsVerticalScrollIndicator={false} contentContainerStyle={{ gap: 14, paddingBottom: 12 }}>
                 {PLATFORM_VARIATIONS.map((plat, idx) => {
                   const isEditingThis = activeEditingPlatform === plat.editingPlatformName;
                   return (
                     <View
                       key={plat.id}
                       style={[
-                        styles.compareModalCard,
-                        isEditingThis && styles.compareModalCardActive,
+                        styles.compareMatrixCard,
+                        isEditingThis && styles.compareMatrixCardActive,
                       ]}
                     >
+                      {/* Platform Header */}
                       <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-                          <SocialBrandIcon platform={plat.icon} size={16} />
-                          <Text style={styles.compareModalPlatformName}>{plat.name}</Text>
+                        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 7 }}>
+                          <SocialBrandIcon platform={plat.icon} size={18} />
+                          <View>
+                            <Text style={styles.compareModalPlatformName}>{plat.name}</Text>
+                            <Text style={styles.compareModalPlatformBadge}>{plat.badge}</Text>
+                          </View>
                         </View>
-                        <View style={[styles.platDeckBadge, isEditingThis && styles.platDeckBadgeActive]}>
-                          <Text style={[styles.platDeckBadgeText, isEditingThis && styles.platDeckBadgeTextActive]}>
-                            {plat.badge}
+                        {isEditingThis ? (
+                          <View style={styles.compareActiveBadge}>
+                            <Text style={styles.compareActiveBadgeText}>EDITING IN LIVE EDITOR ✓</Text>
+                          </View>
+                        ) : (
+                          <View style={styles.compareChannelTargetBadge}>
+                            <Text style={styles.compareChannelTargetBadgeText}>{plat.targetLength}</Text>
+                          </View>
+                        )}
+                      </View>
+
+                      {/* 1. CAPTION */}
+                      <View style={styles.compareMatrixSection}>
+                        <Text style={styles.compareMatrixSectionLabel}>📝 TAILORED CAPTION</Text>
+                        <View style={styles.compareCaptionBox}>
+                          <Text style={styles.compareCaptionText}>
+                            &ldquo;{plat.caption}&rdquo;
                           </Text>
                         </View>
                       </View>
 
-                      <Text style={styles.compareModalCaptionText}>
-                        &ldquo;{plat.caption}&rdquo;
-                      </Text>
-
-                      <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 8 }}>
-                        <Text style={styles.compareModalMetaText}>
-                          {plat.charCount} chars • {plat.specs[0]}
-                        </Text>
-                        <View style={{ flexDirection: 'row', gap: 6 }}>
-                          <Pressable
-                            style={styles.compareModalCopyBtn}
-                            onPress={() => handleCopyCaptionText(plat.caption, plat.name)}
-                          >
-                            <Text style={styles.compareModalCopyBtnText}>Copy</Text>
-                          </Pressable>
-                          <Pressable
-                            style={[styles.compareModalEditBtn, isEditingThis && styles.compareModalEditBtnActive]}
-                            onPress={() => {
-                              handleEditPlatformCaption(plat.editingPlatformName, plat.caption);
-                              setActivePlatformCaptionIndex(idx);
-                              setShowAllPlatformsModal(false);
-                            }}
-                          >
-                            <Text style={[styles.compareModalEditBtnText, isEditingThis && styles.compareModalEditBtnTextActive]}>
-                              {isEditingThis ? 'Editing ✓' : 'Use in Editor'}
-                            </Text>
-                          </Pressable>
+                      {/* 2. TONE & 3. CHAR FIT ROW */}
+                      <View style={{ flexDirection: 'row', gap: 8, marginTop: 8 }}>
+                        <View style={styles.compareMatrixMiniBox}>
+                          <Text style={styles.compareMatrixSectionLabel}>🎨 TONE &amp; VOICE</Text>
+                          <Text style={styles.compareMatrixValText} numberOfLines={1}>
+                            {plat.tone}
+                          </Text>
                         </View>
+
+                        <View style={styles.compareMatrixMiniBox}>
+                          <Text style={styles.compareMatrixSectionLabel}>📏 CHAR COUNT &amp; TARGET</Text>
+                          <Text style={[styles.compareMatrixValText, { color: '#15803D' }]} numberOfLines={1}>
+                            {plat.charCount} chars ({plat.targetLength.replace('Recommended: ', '')} ✓)
+                          </Text>
+                        </View>
+                      </View>
+
+                      {/* 4. CTA STRATEGY */}
+                      <View style={[styles.compareMatrixSection, { marginTop: 8 }]}>
+                        <Text style={styles.compareMatrixSectionLabel}>🎯 CTA STRATEGY</Text>
+                        <View style={styles.compareStrategyBox}>
+                          <Text style={styles.compareStrategyText}>
+                            {plat.ctaStrategy}
+                          </Text>
+                        </View>
+                      </View>
+
+                      {/* 5. OPTIMIZATION SCORE */}
+                      <View style={[styles.compareMatrixSection, { marginTop: 8 }]}>
+                        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 3 }}>
+                          <Text style={styles.compareMatrixSectionLabel}>📊 OPTIMIZATION SCORE</Text>
+                          <Text style={styles.compareScoreNumText}>
+                            {plat.optimizationScore.score}% • {plat.optimizationScore.label}
+                          </Text>
+                        </View>
+                        <View style={styles.compareScoreTrack}>
+                          <View style={[styles.compareScoreFill, { width: `${plat.optimizationScore.score}%` }]} />
+                        </View>
+                      </View>
+
+                      {/* 6. KEY STRATEGIC ADVANTAGE */}
+                      <View style={styles.compareAdvantageBox}>
+                        <Text style={{ fontSize: 11 }}>💡</Text>
+                        <Text style={styles.compareAdvantageText}>
+                          {plat.keyAdvantage}
+                        </Text>
+                      </View>
+
+                      {/* ACTIONS ROW */}
+                      <View style={styles.compareActionsRow}>
+                        <Pressable
+                          style={({ pressed }) => [
+                            styles.compareModalEditBtn,
+                            isEditingThis && styles.compareModalEditBtnActive,
+                            pressed && styles.btnPressed,
+                          ]}
+                          onPress={() => {
+                            handleEditPlatformCaption(plat.editingPlatformName, plat.caption);
+                            setActivePlatformCaptionIndex(idx);
+                            setShowAllPlatformsModal(false);
+                          }}
+                        >
+                          <Text style={styles.compareModalEditBtnText}>
+                            {isEditingThis ? '✏️ Active in Live Editor' : `✏️ Use ${plat.name} in Editor`}
+                          </Text>
+                        </Pressable>
+
+                        <Pressable
+                          style={({ pressed }) => [
+                            styles.compareModalCopyBtn,
+                            pressed && styles.btnPressed,
+                          ]}
+                          onPress={() => handleCopyCaptionText(plat.caption, plat.name)}
+                        >
+                          <Text style={styles.compareModalCopyBtnText}>📋 Copy</Text>
+                        </Pressable>
                       </View>
                     </View>
                   );
@@ -1549,10 +1647,10 @@ export const ProCaptionScreen: React.FC<ProCaptionScreenProps> = ({
               </ScrollView>
 
               <Pressable
-                style={[styles.modalCancelBtn, { marginTop: 14 }]}
+                style={[styles.modalCancelBtn, { marginTop: 10 }]}
                 onPress={() => setShowAllPlatformsModal(false)}
               >
-                <Text style={styles.modalCancelBtnText}>Close</Text>
+                <Text style={styles.modalCancelBtnText}>Done</Text>
               </Pressable>
             </Animated.View>
           </View>
@@ -2226,64 +2324,192 @@ const styles = StyleSheet.create({
     fontWeight: '800',
   },
 
-  // COMPARE ALL PLATFORMS MODAL CARDS
-  compareModalCard: {
-    backgroundColor: '#FAF8F5',
-    borderRadius: 14,
-    padding: 12,
+  platformCharCountPill: {
+    backgroundColor: '#EDE9FE',
+    borderWidth: 1,
+    borderColor: '#DDD6FE',
+  },
+  platformCharCountPillText: {
+    fontSize: sFont(9.5),
+    fontWeight: '800',
+    color: '#582CDB',
+  },
+
+  // COMPARE ALL PLATFORMS STRATEGY MATRIX MODAL
+  compareMatrixCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 16,
+    padding: 14,
     borderWidth: 1.5,
     borderColor: '#EFECE6',
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 1,
   },
-  compareModalCardActive: {
+  compareMatrixCardActive: {
     borderColor: '#582CDB',
     backgroundColor: '#FAF8FF',
+    shadowColor: '#582CDB',
+    shadowOpacity: 0.08,
   },
   compareModalPlatformName: {
-    fontSize: sFont(12),
+    fontSize: sFont(12.5),
     fontWeight: '800',
     color: '#171420',
   },
-  compareModalCaptionText: {
-    fontSize: sFont(11.5),
-    lineHeight: 16.5,
-    color: '#171420',
-    marginVertical: 8,
+  compareModalPlatformBadge: {
+    fontSize: sFont(9),
+    fontWeight: '700',
+    color: '#64748B',
+    marginTop: 1,
   },
-  compareModalMetaText: {
-    fontSize: sFont(9.5),
+  compareActiveBadge: {
+    backgroundColor: '#EDE9FE',
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 6,
+    borderWidth: 1,
+    borderColor: '#DDD6FE',
+  },
+  compareActiveBadgeText: {
+    fontSize: sFont(8.5),
+    fontWeight: '800',
+    color: '#582CDB',
+  },
+  compareChannelTargetBadge: {
+    backgroundColor: '#F1EFE9',
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 6,
+  },
+  compareChannelTargetBadgeText: {
+    fontSize: sFont(8.5),
     fontWeight: '700',
     color: '#64748B',
   },
-  compareModalCopyBtn: {
-    backgroundColor: '#FFFFFF',
-    borderWidth: 1,
-    borderColor: '#E2E8F0',
-    paddingHorizontal: 8,
-    paddingVertical: 4.5,
-    borderRadius: 6,
+  compareMatrixSection: {
+    marginTop: 10,
   },
-  compareModalCopyBtnText: {
-    fontSize: sFont(10),
+  compareMatrixSectionLabel: {
+    fontSize: sFont(8.5),
+    fontWeight: '800',
+    color: '#94A3B8',
+    letterSpacing: 0.4,
+    marginBottom: 4,
+  },
+  compareCaptionBox: {
+    backgroundColor: '#FAF8F5',
+    borderRadius: 10,
+    padding: 10,
+    borderWidth: 1,
+    borderColor: '#F1EFE9',
+  },
+  compareCaptionText: {
+    fontSize: sFont(11.5),
+    lineHeight: 16.5,
+    color: '#171420',
+    fontWeight: '500',
+  },
+  compareMatrixMiniBox: {
+    flex: 1,
+    backgroundColor: '#FAF8F5',
+    borderRadius: 9,
+    padding: 8,
+    borderWidth: 1,
+    borderColor: '#F1EFE9',
+  },
+  compareMatrixValText: {
+    fontSize: sFont(11),
     fontWeight: '700',
     color: '#171420',
   },
-  compareModalEditBtn: {
+  compareStrategyBox: {
+    backgroundColor: '#FAF8F5',
+    borderRadius: 9,
+    padding: 8,
+    borderWidth: 1,
+    borderColor: '#F1EFE9',
+  },
+  compareStrategyText: {
+    fontSize: sFont(11),
+    fontWeight: '600',
+    color: '#334155',
+  },
+  compareScoreNumText: {
+    fontSize: sFont(10),
+    fontWeight: '800',
+    color: '#582CDB',
+  },
+  compareScoreTrack: {
+    height: 5,
+    backgroundColor: '#E2E8F0',
+    borderRadius: 2.5,
+    overflow: 'hidden',
+    marginTop: 2,
+  },
+  compareScoreFill: {
+    height: '100%',
     backgroundColor: '#582CDB',
-    paddingHorizontal: 10,
-    paddingVertical: 4.5,
-    borderRadius: 6,
+    borderRadius: 2.5,
+  },
+  compareAdvantageBox: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    backgroundColor: '#FFFBEB',
+    borderRadius: 8,
+    paddingHorizontal: 9,
+    paddingVertical: 6,
+    borderWidth: 1,
+    borderColor: '#FEF3C7',
+    marginTop: 10,
+  },
+  compareAdvantageText: {
+    flex: 1,
+    fontSize: sFont(10.5),
+    color: '#92400E',
+    fontWeight: '600',
+  },
+  compareActionsRow: {
+    flexDirection: 'row',
+    gap: 8,
+    marginTop: 12,
+    paddingTop: 10,
+    borderTopWidth: 1,
+    borderTopColor: '#F1EFE9',
+  },
+  compareModalEditBtn: {
+    flex: 1,
+    backgroundColor: '#582CDB',
+    paddingVertical: 8,
+    borderRadius: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   compareModalEditBtnActive: {
     backgroundColor: '#431FB3',
   },
   compareModalEditBtnText: {
-    fontSize: sFont(10),
+    fontSize: sFont(11),
     fontWeight: '700',
     color: '#FFFFFF',
   },
-  compareModalEditBtnTextActive: {
-    color: '#FFFFFF',
-    fontWeight: '800',
+  compareModalCopyBtn: {
+    backgroundColor: '#FAF8F5',
+    borderWidth: 1,
+    borderColor: '#EFECE6',
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  compareModalCopyBtnText: {
+    fontSize: sFont(11),
+    fontWeight: '700',
+    color: '#171420',
   },
 
   // CARD 5: ENGAGEMENT SCORE
