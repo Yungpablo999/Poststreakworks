@@ -956,7 +956,7 @@ export const ProCaptionScreen: React.FC<ProCaptionScreenProps> = ({
                       ]}
                       onPress={() => handleEditPlatformCaption(currentPlat.editingPlatformName, currentPlat.caption)}
                     >
-                      <Text style={styles.platformHeroPrimaryBtnText} numberOfLines={1}>
+                      <Text style={styles.platformHeroPrimaryBtnText}>
                         {isCurrentlyEditing ? '✓ Active in Live Editor' : '✏️ Edit in Live Editor'}
                       </Text>
                     </Pressable>
@@ -1682,14 +1682,14 @@ export const ProCaptionScreen: React.FC<ProCaptionScreenProps> = ({
                           <View style={{ flexDirection: 'row', gap: 8, marginTop: 4 }}>
                             <View style={styles.compareMatrixMiniBox}>
                               <Text style={styles.compareMatrixSectionLabel}>🎨 TONE &amp; VOICE</Text>
-                              <Text style={styles.compareMatrixValText} numberOfLines={1}>
+                              <Text style={styles.compareMatrixValText}>
                                 {plat.tone}
                               </Text>
                             </View>
 
                             <View style={styles.compareMatrixMiniBox}>
                               <Text style={styles.compareMatrixSectionLabel}>⏱️ TARGET LENGTH</Text>
-                              <Text style={[styles.compareMatrixValText, { color: '#15803D' }]} numberOfLines={1}>
+                              <Text style={[styles.compareMatrixValText, { color: '#15803D' }]}>
                                 {plat.targetLength}
                               </Text>
                             </View>
@@ -1732,7 +1732,7 @@ export const ProCaptionScreen: React.FC<ProCaptionScreenProps> = ({
                         </View>
                       )}
 
-                      {/* ACTIONS ROW */}
+                      {/* PRIMARY ACTIONS ROW (2 spacious buttons - ZERO word cut) */}
                       <View style={styles.compareActionsRow}>
                         <Pressable
                           style={({ pressed }) => [
@@ -1746,8 +1746,8 @@ export const ProCaptionScreen: React.FC<ProCaptionScreenProps> = ({
                             setShowAllPlatformsModal(false);
                           }}
                         >
-                          <Text style={styles.compareModalEditBtnText} numberOfLines={1}>
-                            {isEditingThis ? '✓ Active in Editor' : '✏️ Use in Editor'}
+                          <Text style={styles.compareModalEditBtnText}>
+                            {isEditingThis ? '✓ Active in Live Editor' : '✏️ Use in Live Editor'}
                           </Text>
                         </Pressable>
 
@@ -1760,19 +1760,21 @@ export const ProCaptionScreen: React.FC<ProCaptionScreenProps> = ({
                         >
                           <Text style={styles.compareModalCopyBtnText}>📋 Copy</Text>
                         </Pressable>
-
-                        <Pressable
-                          style={({ pressed }) => [
-                            styles.compareToggleExpandBtn,
-                            pressed && styles.btnPressed,
-                          ]}
-                          onPress={() => handleTogglePlatformExpanded(plat.id)}
-                        >
-                          <Text style={styles.compareToggleExpandBtnText}>
-                            {isExpanded ? 'Less ▴' : 'Details ▾'}
-                          </Text>
-                        </Pressable>
                       </View>
+
+                      {/* DEDICATED FULL-WIDTH EXPAND / COLLAPSE BAR */}
+                      <Pressable
+                        style={({ pressed }) => [
+                          styles.compareToggleExpandRow,
+                          pressed && styles.btnPressed,
+                        ]}
+                        onPress={() => handleTogglePlatformExpanded(plat.id)}
+                        hitSlop={6}
+                      >
+                        <Text style={styles.compareToggleExpandRowText}>
+                          {isExpanded ? 'Hide Strategy & Analysis ▴' : 'View Full Strategy & Analysis ▾'}
+                        </Text>
+                      </Pressable>
                     </View>
                   );
                 })}
@@ -2728,52 +2730,54 @@ const styles = StyleSheet.create({
   compareModalEditBtn: {
     flex: 1,
     backgroundColor: '#582CDB',
-    paddingVertical: 9,
-    paddingHorizontal: 8,
-    borderRadius: 8,
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+    borderRadius: 9,
     alignItems: 'center',
     justifyContent: 'center',
-    minHeight: 36,
+    minHeight: 38,
   },
   compareModalEditBtnActive: {
     backgroundColor: '#431FB3',
   },
   compareModalEditBtnText: {
-    fontSize: sFont(11),
+    fontSize: sFont(11.5),
     fontWeight: '800',
     color: '#FFFFFF',
+    textAlign: 'center',
   },
   compareModalCopyBtn: {
     backgroundColor: '#FAF8F5',
     borderWidth: 1,
     borderColor: '#EFECE6',
-    paddingHorizontal: 12,
-    paddingVertical: 9,
-    borderRadius: 8,
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: 9,
     alignItems: 'center',
     justifyContent: 'center',
-    minHeight: 36,
+    minHeight: 38,
   },
   compareModalCopyBtnText: {
-    fontSize: sFont(11),
+    fontSize: sFont(11.5),
     fontWeight: '700',
     color: '#171420',
   },
-  compareToggleExpandBtn: {
+  compareToggleExpandRow: {
     backgroundColor: '#FAF8F5',
     borderWidth: 1,
     borderColor: '#EFECE6',
-    paddingHorizontal: 10,
-    paddingVertical: 9,
-    borderRadius: 8,
+    borderRadius: 9,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
     alignItems: 'center',
     justifyContent: 'center',
-    minHeight: 36,
+    marginTop: 8,
   },
-  compareToggleExpandBtnText: {
+  compareToggleExpandRowText: {
     fontSize: sFont(10.5),
     fontWeight: '700',
     color: '#64748B',
+    textAlign: 'center',
   },
 
   // CARD 5: ENGAGEMENT SCORE
