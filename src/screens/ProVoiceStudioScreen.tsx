@@ -161,6 +161,7 @@ export const ProVoiceStudioScreen: React.FC<ProVoiceStudioScreenProps> = ({
   const [isPlayingAudio, setIsPlayingAudio] = useState(false);
   const [playbackSeconds, setPlaybackSeconds] = useState(15);
   const [totalAudioDuration, setTotalAudioDuration] = useState(42);
+  const [playingProjectId, setPlayingProjectId] = useState<string | null>(null);
 
   // Recent Projects
   const [recentProjects, setRecentProjects] = useState([
@@ -224,6 +225,7 @@ export const ProVoiceStudioScreen: React.FC<ProVoiceStudioScreenProps> = ({
         setPlaybackSeconds((prev) => {
           if (prev >= totalAudioDuration) {
             setIsPlayingAudio(false);
+            setPlayingProjectId(null);
             return 0;
           }
           return prev + 1;
@@ -329,6 +331,36 @@ export const ProVoiceStudioScreen: React.FC<ProVoiceStudioScreenProps> = ({
     }
     const newSec = Math.round(percent * totalAudioDuration);
     setPlaybackSeconds(newSec);
+  };
+
+  const handleToggleProjectPlay = (proj: (typeof recentProjects)[0]) => {
+    if (Platform.OS !== 'web') {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    }
+    if (playingProjectId === proj.id && isPlayingAudio) {
+      setIsPlayingAudio(false);
+      setPlayingProjectId(null);
+      showToast(`⏸ Paused "${proj.name}"`);
+    } else {
+      setPlayingProjectId(proj.id);
+      setScriptTitle(proj.name);
+      setScriptText(proj.text);
+      setTotalAudioDuration(Math.max(8, Math.round(proj.text.split(/\s+/).filter(Boolean).length / 2.6)));
+      setPlaybackSeconds(0);
+      setIsPlayingAudio(true);
+      showToast(`▶ Playing "${proj.name}"`);
+    }
+  };
+
+  const handleLoadProjectIntoEditor = (proj: (typeof recentProjects)[0]) => {
+    if (Platform.OS !== 'web') {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    }
+    setScriptTitle(proj.name);
+    setScriptText(proj.text);
+    setTotalAudioDuration(Math.max(8, Math.round(proj.text.split(/\s+/).filter(Boolean).length / 2.6)));
+    setPlaybackSeconds(0);
+    showToast(`✓ Loaded "${proj.name}" into editor`);
   };
 
   const formatTimer = (sec: number) => {
@@ -940,44 +972,80 @@ export const ProVoiceStudioScreen: React.FC<ProVoiceStudioScreenProps> = ({
           </View>
 
           <View style={{ gap: 8 }}>
-            {recentProjects.map((proj) => (
-              <View key={proj.id} style={styles.projectItemCard}>
-                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, flex: 1 }}>
-                  <Pressable
-                    style={styles.projectPlayBtn}
-                    onPress={() => {
-                      setScriptTitle(proj.name);
-                      setScriptText(proj.text);
-                      setTotalAudioDuration(Math.round(proj.text.split(' ').length / 2.6));
-                      setPlaybackSeconds(0);
-                      setIsPlayingAudio(true);
-                      showToast(`▶ Playing ${proj.name}`);
-                    }}
-                  >
-                    <Svg width={14} height={14} viewBox="0 0 24 24" fill="none">
-                      <Path d="M8 5v14l11-7L8 5z" fill="#582CDB" />
-                    </Svg>
-                  </Pressable>
-                  <View style={{ flex: 1 }}>
-                    <Text style={styles.projectNameText}>{proj.name}</Text>
-                    <Text style={styles.projectSubText}>
-                      {proj.duration} • {proj.status} • {proj.platform}
-                    </Text>
-                  </View>
-                </View>
+            {recentProjects.slice(0, 3).map((proj) => {
+              const isCurrentPlaying = playingProjectId === proj.id && isPlayingAudio;
+              return (
+                <View key={proj.id} style={styles.projectItemCard}>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, flex: 1 }}>
+                    {/* Play/Pause Tile */}
+                    <Pressable
+                      style={({ pressed }) => [
+                        styles.projectPlayBtn,
+                        isCurrentPlaying && styles.projectPlayBtnActive,
+                        pressed && styles.btnPressed,
+                      ]}
+                      onPress={() => handleToggleProjectPlay(proj)}
+                      hitSlop={6}
+                      accessibilityLabel={isCurrentPlaying ? `Pause ${proj.name}` : `Play preview for ${proj.name}`}
+                    >
+                      <Svg width={14} height={14} viewBox="0 0 24 24" fill="none">
+                        {isCurrentPlaying ? (
+                          <Path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z" fill="#582CDB" />
+                        ) : (
+                          <Path d="M8 5v14l11-7L8 5z" fill="#582CDB" />
+                        )}
+                      </Svg>
+                    </Pressable>
 
-                <Pressable
-                  style={styles.projectReuseBtn}
-                  onPress={() => {
-                    setScriptTitle(proj.name);
-                    setScriptText(proj.text);
-                    showToast(`✓ Loaded "${proj.name}" into editor`);
-                  }}
-                >
-                  <Text style={styles.projectReuseBtnText}>Reuse</Text>
-                </Pressable>
-              </View>
-            ))}
+                    {/* Project Title & Metadata (Tapping opens into editor) */}
+                    <Pressable
+                      style={{ flex: 1, paddingRight: 6 }}
+                      onPress={() => handleLoadProjectIntoEditor(proj)}
+                    >
+                      <Text style={styles.projectNameText} numberOfLines={1}>
+                        {proj.name}
+                      </Text>
+                      <View style={styles.projectSubRow}>
+                        <Text style={styles.projectSubDuration}>{proj.duration}</Text>
+                        <Text style={styles.projectSubDot}>•</Text>
+                        <View style={styles.statusInlineTag}>
+                          <View
+                            style={[
+                              styles.statusMiniDot,
+                              proj.status === 'Exported'
+                                ? styles.statusMiniDotExported
+                                : styles.statusMiniDotSaved,
+                            ]}
+                          />
+                          <Text
+                            style={[
+                              styles.statusInlineText,
+                              proj.status === 'Exported'
+                                ? styles.statusInlineTextExported
+                                : styles.statusInlineTextSaved,
+                            ]}
+                          >
+                            {proj.status}
+                          </Text>
+                        </View>
+                        <Text style={styles.projectSubDot}>•</Text>
+                        <Text style={styles.projectSubPlatform} numberOfLines={1}>
+                          {proj.platform}
+                        </Text>
+                      </View>
+                    </Pressable>
+                  </View>
+
+                  {/* Reuse Button */}
+                  <Pressable
+                    style={({ pressed }) => [styles.projectReuseBtn, pressed && styles.btnPressed]}
+                    onPress={() => handleLoadProjectIntoEditor(proj)}
+                  >
+                    <Text style={styles.projectReuseBtnText}>Reuse</Text>
+                  </Pressable>
+                </View>
+              );
+            })}
           </View>
 
           {/* ============================================================ */}
@@ -1487,59 +1555,84 @@ export const ProVoiceStudioScreen: React.FC<ProVoiceStudioScreenProps> = ({
                 </Text>
 
                 <View style={{ gap: 10, marginVertical: 14 }}>
-                  {recentProjects.map((proj) => (
-                    <View key={proj.id} style={styles.expandedProjectCard}>
-                      <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, flex: 1 }}>
-                          <Pressable
-                            style={styles.projectPlayBtn}
-                            onPress={() => {
-                              setScriptTitle(proj.name);
-                              setScriptText(proj.text);
-                              setTotalAudioDuration(Math.round(proj.text.split(' ').length / 2.6));
-                              setPlaybackSeconds(0);
-                              setIsPlayingAudio(true);
-                              setShowAllProjectsModal(false);
-                              showToast(`▶ Playing "${proj.name}"`);
-                            }}
-                          >
-                            <Svg width={14} height={14} viewBox="0 0 24 24" fill="none">
-                              <Path d="M8 5v14l11-7L8 5z" fill="#582CDB" />
-                            </Svg>
-                          </Pressable>
-                          <View style={{ flex: 1 }}>
-                            <Text style={styles.projectNameText}>{proj.name}</Text>
-                            <Text style={styles.projectSubText}>
-                              {proj.duration} • {proj.platform}
-                            </Text>
+                  {recentProjects.map((proj) => {
+                    const isCurrentPlaying = playingProjectId === proj.id && isPlayingAudio;
+                    return (
+                      <View key={proj.id} style={styles.expandedProjectCard}>
+                        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, flex: 1 }}>
+                            <Pressable
+                              style={({ pressed }) => [
+                                styles.projectPlayBtn,
+                                isCurrentPlaying && styles.projectPlayBtnActive,
+                                pressed && styles.btnPressed,
+                              ]}
+                              onPress={() => handleToggleProjectPlay(proj)}
+                              hitSlop={6}
+                              accessibilityLabel={isCurrentPlaying ? `Pause ${proj.name}` : `Play preview for ${proj.name}`}
+                            >
+                              <Svg width={14} height={14} viewBox="0 0 24 24" fill="none">
+                                {isCurrentPlaying ? (
+                                  <Path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z" fill="#582CDB" />
+                                ) : (
+                                  <Path d="M8 5v14l11-7L8 5z" fill="#582CDB" />
+                                )}
+                              </Svg>
+                            </Pressable>
+                            <Pressable
+                              style={{ flex: 1 }}
+                              onPress={() => {
+                                handleLoadProjectIntoEditor(proj);
+                                setShowAllProjectsModal(false);
+                              }}
+                            >
+                              <Text style={styles.projectNameText}>{proj.name}</Text>
+                              <View style={styles.projectSubRow}>
+                                <Text style={styles.projectSubDuration}>{proj.duration}</Text>
+                                <Text style={styles.projectSubDot}>•</Text>
+                                <View style={styles.statusInlineTag}>
+                                  <View
+                                    style={[
+                                      styles.statusMiniDot,
+                                      proj.status === 'Exported'
+                                        ? styles.statusMiniDotExported
+                                        : styles.statusMiniDotSaved,
+                                    ]}
+                                  />
+                                  <Text
+                                    style={[
+                                      styles.statusInlineText,
+                                      proj.status === 'Exported'
+                                        ? styles.statusInlineTextExported
+                                        : styles.statusInlineTextSaved,
+                                    ]}
+                                  >
+                                    {proj.status}
+                                  </Text>
+                                </View>
+                                <Text style={styles.projectSubDot}>•</Text>
+                                <Text style={styles.projectSubPlatform}>{proj.platform}</Text>
+                              </View>
+                            </Pressable>
                           </View>
                         </View>
 
-                        <View style={[styles.statusTagPill, proj.status === 'Exported' && styles.statusTagExported]}>
-                          <Text style={[styles.statusTagText, proj.status === 'Exported' && styles.statusTagTextExported]}>
-                            {proj.status.toUpperCase()}
-                          </Text>
-                        </View>
-                      </View>
+                        {/* Script Preview Snippet */}
+                        <Text style={styles.expandedProjectSnippet} numberOfLines={2}>
+                          &ldquo;{proj.text}&rdquo;
+                        </Text>
 
-                      {/* Script Preview Snippet */}
-                      <Text style={styles.expandedProjectSnippet} numberOfLines={2}>
-                        &ldquo;{proj.text}&rdquo;
-                      </Text>
-
-                      {/* Action Row */}
-                      <View style={{ flexDirection: 'row', gap: 8, marginTop: 10 }}>
-                        <Pressable
-                          style={styles.expandedActionReuseBtn}
-                          onPress={() => {
-                            setScriptTitle(proj.name);
-                            setScriptText(proj.text);
-                            setShowAllProjectsModal(false);
-                            showToast(`✓ Loaded "${proj.name}" into editor`);
-                          }}
-                        >
-                          <Text style={styles.expandedActionReuseText}>✏️ Load in Editor</Text>
-                        </Pressable>
+                        {/* Action Row */}
+                        <View style={{ flexDirection: 'row', gap: 8, marginTop: 10 }}>
+                          <Pressable
+                            style={styles.expandedActionReuseBtn}
+                            onPress={() => {
+                              handleLoadProjectIntoEditor(proj);
+                              setShowAllProjectsModal(false);
+                            }}
+                          >
+                            <Text style={styles.expandedActionReuseText}>✏️ Load in Editor</Text>
+                          </Pressable>
 
                         <Pressable
                           style={styles.expandedActionExportBtn}
@@ -1562,8 +1655,9 @@ export const ProVoiceStudioScreen: React.FC<ProVoiceStudioScreenProps> = ({
                         </Pressable>
                       </View>
                     </View>
-                  ))}
-                </View>
+                  );
+                })}
+              </View>
 
                 <Pressable
                   style={styles.modalCancelBtn}
@@ -2206,10 +2300,62 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
+  projectPlayBtnActive: {
+    backgroundColor: '#DDD6FE',
+    borderWidth: 1.5,
+    borderColor: '#7C3AED',
+  },
   projectNameText: {
     fontSize: 13,
     fontWeight: '700',
     color: '#171420',
+  },
+  projectSubRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flexWrap: 'nowrap',
+    marginTop: 2,
+  },
+  projectSubDuration: {
+    fontSize: 11,
+    fontWeight: '600',
+    color: '#64748B',
+  },
+  projectSubDot: {
+    fontSize: 11,
+    color: '#CBD5E1',
+    marginHorizontal: 3,
+  },
+  projectSubPlatform: {
+    fontSize: 11,
+    color: '#64748B',
+    flexShrink: 1,
+  },
+  statusInlineTag: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 3.5,
+  },
+  statusMiniDot: {
+    width: 5,
+    height: 5,
+    borderRadius: 2.5,
+  },
+  statusMiniDotExported: {
+    backgroundColor: '#10B981',
+  },
+  statusMiniDotSaved: {
+    backgroundColor: '#8B5CF6',
+  },
+  statusInlineText: {
+    fontSize: 11,
+    fontWeight: '700',
+  },
+  statusInlineTextExported: {
+    color: '#059669',
+  },
+  statusInlineTextSaved: {
+    color: '#6D28D9',
   },
   projectSubText: {
     fontSize: 11,
