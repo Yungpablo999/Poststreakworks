@@ -1486,7 +1486,7 @@ export const ProCaptionScreen: React.FC<ProCaptionScreenProps> = ({
           <View style={styles.modalOverlay}>
             <Animated.View style={[styles.modalCard, { transform: [{ scale: modalPopScale }] }]}>
               <View style={styles.modalHeaderBetween}>
-                <View>
+                <View style={{ flex: 1, paddingRight: 8 }}>
                   <Text style={styles.modalTitle}>Hashtag Manager</Text>
                   <Text style={styles.modalSubTitle}>Add, remove, or customize hashtags</Text>
                 </View>
@@ -1589,9 +1589,9 @@ export const ProCaptionScreen: React.FC<ProCaptionScreenProps> = ({
           <View style={styles.modalOverlay}>
             <Animated.View style={[styles.modalCard, { transform: [{ scale: modalPopScale }], maxHeight: '88%', paddingHorizontal: 16 }]}>
               <View style={styles.modalHeaderBetween}>
-                <View>
+                <View style={{ flex: 1, paddingRight: 8 }}>
                   <Text style={styles.modalTitle}>Platform Strategy Matrix</Text>
-                  <Text style={styles.modalSubTitle}>Side-by-side comparison across TikTok, Instagram & YouTube</Text>
+                  <Text style={styles.modalSubTitle}>Compare formats across TikTok, Instagram & YouTube</Text>
                 </View>
                 <Pressable onPress={() => setShowAllPlatformsModal(false)} hitSlop={8}>
                   <Text style={styles.modalCloseText}>✕</Text>
@@ -2853,9 +2853,10 @@ const styles = StyleSheet.create({
 
   // HASHTAG MANAGER MODAL
   modalSubTitle: {
-    fontSize: 11,
+    fontSize: sFont(11),
     color: '#64748B',
     marginTop: 2,
+    lineHeight: 15,
   },
   addHashtagBarRow: {
     flexDirection: 'row',
