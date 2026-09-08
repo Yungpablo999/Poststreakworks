@@ -641,9 +641,201 @@ export const ProCaptionScreen: React.FC<ProCaptionScreenProps> = ({
           </View>
 
           {/* ============================================================ */}
-          {/* CARD 3: SELECTED CAPTION (Instagram Reel)                    */}
+          {/* CARD 3: PLATFORM CAPTIONS CAROUSEL                           */}
           {/* ============================================================ */}
           <View style={{ marginTop: 22 }}>
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                <Text style={{ fontSize: 13 }}>📱</Text>
+                <Text style={styles.sectionHeaderTitle}>Platform Captions</Text>
+              </View>
+              <Text style={{ fontSize: 11, fontWeight: '700', color: '#582CDB' }}>
+                Editing: {activeEditingPlatform}
+              </Text>
+            </View>
+            <Text style={[styles.toneSubHint, { marginBottom: 10 }]}>
+              Select a platform to customize its caption in the editor below
+            </Text>
+
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={{ gap: 12 }}
+            >
+              {/* TikTok Card */}
+              {(() => {
+                const isTikTokActive = activeEditingPlatform === 'TikTok';
+                const tiktokText = '3 creator mistakes slowing you down. System > Ideas. Which one is yours? 👇';
+                return (
+                  <Pressable
+                    style={[
+                      styles.platformCaptionDeckCard,
+                      isTikTokActive && styles.platformCaptionDeckCardActive,
+                    ]}
+                    onPress={() => handleEditPlatformCaption('TikTok', tiktokText)}
+                  >
+                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                        <SocialBrandIcon platform="tiktok" size={18} />
+                        <Text style={styles.platDeckTitle}>TikTok</Text>
+                      </View>
+                      <View style={[styles.platDeckBadge, isTikTokActive && styles.platDeckBadgeActive]}>
+                        <Text style={[styles.platDeckBadgeText, isTikTokActive && styles.platDeckBadgeTextActive]}>
+                          {isTikTokActive ? 'EDITING ✓' : 'SHORT, DIRECT'}
+                        </Text>
+                      </View>
+                    </View>
+
+                    <Text style={styles.platDeckBodyText}>
+                      {tiktokText}
+                    </Text>
+
+                    <View style={styles.platDeckBtnRow}>
+                      <Pressable
+                        style={({ pressed }) => [
+                          styles.platDeckEditBtn,
+                          isTikTokActive && styles.platDeckEditBtnActive,
+                          pressed && styles.btnPressed,
+                        ]}
+                        onPress={() => handleEditPlatformCaption('TikTok', tiktokText)}
+                      >
+                        <Text style={[styles.platDeckEditBtnText, isTikTokActive && styles.platDeckEditBtnTextActive]}>
+                          {isTikTokActive ? 'Active in Editor' : 'Edit'}
+                        </Text>
+                      </Pressable>
+                      <Pressable
+                        style={[styles.platDeckUseBtn, isTikTokActive && styles.platDeckUseBtnActive]}
+                        onPress={() => {
+                          setMainCaption(tiktokText);
+                          setActiveEditingPlatform('TikTok');
+                          showToast('✓ Loaded TikTok Caption');
+                        }}
+                      >
+                        <Text style={styles.platDeckUseBtnText}>{isTikTokActive ? 'Loaded' : 'Use'}</Text>
+                      </Pressable>
+                    </View>
+                  </Pressable>
+                );
+              })()}
+
+              {/* Instagram Card */}
+              {(() => {
+                const isInstaActive = activeEditingPlatform === 'Instagram Reel';
+                const instaText = '3 mistakes that stop creators from scaling. Save this for when you need a reminder to keep posting.';
+                return (
+                  <Pressable
+                    style={[
+                      styles.platformCaptionDeckCard,
+                      isInstaActive && styles.platformCaptionDeckCardActive,
+                    ]}
+                    onPress={() => handleEditPlatformCaption('Instagram Reel', instaText)}
+                  >
+                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                        <SocialBrandIcon platform="instagram" size={18} />
+                        <Text style={styles.platDeckTitle}>Instagram</Text>
+                      </View>
+                      <View style={[styles.platDeckBadge, isInstaActive && styles.platDeckBadgeActive]}>
+                        <Text style={[styles.platDeckBadgeText, isInstaActive && styles.platDeckBadgeTextActive]}>
+                          {isInstaActive ? 'EDITING ✓' : 'REELS & CAROUSEL'}
+                        </Text>
+                      </View>
+                    </View>
+
+                    <Text style={styles.platDeckBodyText}>
+                      {instaText}
+                    </Text>
+
+                    <View style={styles.platDeckBtnRow}>
+                      <Pressable
+                        style={({ pressed }) => [
+                          styles.platDeckEditBtn,
+                          isInstaActive && styles.platDeckEditBtnActive,
+                          pressed && styles.btnPressed,
+                        ]}
+                        onPress={() => handleEditPlatformCaption('Instagram Reel', instaText)}
+                      >
+                        <Text style={[styles.platDeckEditBtnText, isInstaActive && styles.platDeckEditBtnTextActive]}>
+                          {isInstaActive ? 'Active in Editor' : 'Edit'}
+                        </Text>
+                      </Pressable>
+                      <Pressable
+                        style={[styles.platDeckUseBtn, isInstaActive && styles.platDeckUseBtnActive]}
+                        onPress={() => {
+                          setMainCaption(instaText);
+                          setActiveEditingPlatform('Instagram Reel');
+                          showToast('✓ Loaded Instagram Caption');
+                        }}
+                      >
+                        <Text style={styles.platDeckUseBtnText}>{isInstaActive ? 'Loaded' : 'Use'}</Text>
+                      </Pressable>
+                    </View>
+                  </Pressable>
+                );
+              })()}
+
+              {/* YouTube Shorts Card */}
+              {(() => {
+                const isYtActive = activeEditingPlatform === 'YouTube Shorts';
+                const ytText = 'Why 90% of creators stay stuck (and the 3 habits that fix it). Full breakdown in comments.';
+                return (
+                  <Pressable
+                    style={[
+                      styles.platformCaptionDeckCard,
+                      isYtActive && styles.platformCaptionDeckCardActive,
+                    ]}
+                    onPress={() => handleEditPlatformCaption('YouTube Shorts', ytText)}
+                  >
+                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                        <SocialBrandIcon platform="youtube" size={18} />
+                        <Text style={styles.platDeckTitle}>YouTube</Text>
+                      </View>
+                      <View style={[styles.platDeckBadge, isYtActive && styles.platDeckBadgeActive]}>
+                        <Text style={[styles.platDeckBadgeText, isYtActive && styles.platDeckBadgeTextActive]}>
+                          {isYtActive ? 'EDITING ✓' : 'SHORTS & SEO'}
+                        </Text>
+                      </View>
+                    </View>
+
+                    <Text style={styles.platDeckBodyText}>
+                      {ytText}
+                    </Text>
+
+                    <View style={styles.platDeckBtnRow}>
+                      <Pressable
+                        style={({ pressed }) => [
+                          styles.platDeckEditBtn,
+                          isYtActive && styles.platDeckEditBtnActive,
+                          pressed && styles.btnPressed,
+                        ]}
+                        onPress={() => handleEditPlatformCaption('YouTube Shorts', ytText)}
+                      >
+                        <Text style={[styles.platDeckEditBtnText, isYtActive && styles.platDeckEditBtnTextActive]}>
+                          {isYtActive ? 'Active in Editor' : 'Edit'}
+                        </Text>
+                      </Pressable>
+                      <Pressable
+                        style={[styles.platDeckUseBtn, isYtActive && styles.platDeckUseBtnActive]}
+                        onPress={() => {
+                          setMainCaption(ytText);
+                          setActiveEditingPlatform('YouTube Shorts');
+                          showToast('✓ Loaded YouTube Caption');
+                        }}
+                      >
+                        <Text style={styles.platDeckUseBtnText}>{isYtActive ? 'Loaded' : 'Use'}</Text>
+                      </Pressable>
+                    </View>
+                  </Pressable>
+                );
+              })()}
+            </ScrollView>
+          </View>
+
+          {/* ============================================================ */}
+          {/* CARD 4: SELECTED CAPTION EDITOR                              */}
+          {/* ============================================================ */}
+          <View style={{ marginTop: 24 }}>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 8 }}>
               <Text style={{ fontSize: 13 }}>📝</Text>
               <Text style={styles.sectionHeaderTitle}>Selected Caption ({activeEditingPlatform})</Text>
@@ -725,124 +917,6 @@ export const ProCaptionScreen: React.FC<ProCaptionScreenProps> = ({
                 </View>
               </View>
             </View>
-          </View>
-
-          {/* ============================================================ */}
-          {/* CARD 4: PLATFORM CAPTIONS CAROUSEL                           */}
-          {/* ============================================================ */}
-          <View style={{ marginTop: 24 }}>
-            <Text style={styles.sectionHeaderTitle}>Platform Captions</Text>
-
-            <ScrollView
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              contentContainerStyle={{ gap: 12, marginTop: 10 }}
-            >
-              {/* TikTok Card */}
-              <View style={styles.platformCaptionDeckCard}>
-                <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-                    <SocialBrandIcon platform="tiktok" size={18} />
-                    <Text style={styles.platDeckTitle}>TikTok</Text>
-                  </View>
-                  <View style={styles.platDeckBadge}>
-                    <Text style={styles.platDeckBadgeText}>SHORT, DIRECT</Text>
-                  </View>
-                </View>
-
-                <Text style={styles.platDeckBodyText}>
-                  3 creator mistakes slowing you down. System &gt; Ideas. Which one is yours? 👇
-                </Text>
-
-                <View style={styles.platDeckBtnRow}>
-                  <Pressable
-                    style={({ pressed }) => [styles.platDeckEditBtn, pressed && styles.btnPressed]}
-                    onPress={() => handleEditPlatformCaption('TikTok', '3 creator mistakes slowing you down. System > Ideas. Which one is yours? 👇')}
-                  >
-                    <Text style={styles.platDeckEditBtnText}>Edit</Text>
-                  </Pressable>
-                  <Pressable
-                    style={styles.platDeckUseBtn}
-                    onPress={() => {
-                      setMainCaption('3 creator mistakes slowing you down. System > Ideas. Which one is yours? 👇');
-                      showToast('✓ Loaded TikTok Caption');
-                    }}
-                  >
-                    <Text style={styles.platDeckUseBtnText}>Use</Text>
-                  </Pressable>
-                </View>
-              </View>
-
-              {/* Instagram Card */}
-              <View style={styles.platformCaptionDeckCard}>
-                <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-                    <SocialBrandIcon platform="instagram" size={18} />
-                    <Text style={styles.platDeckTitle}>Instagram</Text>
-                  </View>
-                  <View style={styles.platDeckBadge}>
-                    <Text style={styles.platDeckBadgeText}>REELS &amp; CAROUSEL</Text>
-                  </View>
-                </View>
-
-                <Text style={styles.platDeckBodyText}>
-                  3 mistakes that stop creators from scaling. Save this for when you need a reminder to keep posting.
-                </Text>
-
-                <View style={styles.platDeckBtnRow}>
-                  <Pressable
-                    style={({ pressed }) => [styles.platDeckEditBtn, pressed && styles.btnPressed]}
-                    onPress={() => handleEditPlatformCaption('Instagram Reel', '3 mistakes that stop creators from scaling. Save this for when you need a reminder to keep posting.')}
-                  >
-                    <Text style={styles.platDeckEditBtnText}>Edit</Text>
-                  </Pressable>
-                  <Pressable
-                    style={styles.platDeckUseBtn}
-                    onPress={() => {
-                      setMainCaption('3 mistakes that stop creators from scaling. Save this for when you need a reminder to keep posting.');
-                      showToast('✓ Loaded Instagram Caption');
-                    }}
-                  >
-                    <Text style={styles.platDeckUseBtnText}>Use</Text>
-                  </Pressable>
-                </View>
-              </View>
-
-              {/* YouTube Shorts Card */}
-              <View style={styles.platformCaptionDeckCard}>
-                <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-                    <SocialBrandIcon platform="youtube" size={18} />
-                    <Text style={styles.platDeckTitle}>YouTube</Text>
-                  </View>
-                  <View style={styles.platDeckBadge}>
-                    <Text style={styles.platDeckBadgeText}>SHORTS &amp; SEO</Text>
-                  </View>
-                </View>
-
-                <Text style={styles.platDeckBodyText}>
-                  Why 90% of creators stay stuck (and the 3 habits that fix it). Full breakdown in comments.
-                </Text>
-
-                <View style={styles.platDeckBtnRow}>
-                  <Pressable
-                    style={({ pressed }) => [styles.platDeckEditBtn, pressed && styles.btnPressed]}
-                    onPress={() => handleEditPlatformCaption('YouTube Shorts', 'Why 90% of creators stay stuck (and the 3 habits that fix it). Full breakdown in comments.')}
-                  >
-                    <Text style={styles.platDeckEditBtnText}>Edit</Text>
-                  </Pressable>
-                  <Pressable
-                    style={styles.platDeckUseBtn}
-                    onPress={() => {
-                      setMainCaption('Why 90% of creators stay stuck (and the 3 habits that fix it). Full breakdown in comments.');
-                      showToast('✓ Loaded YouTube Caption');
-                    }}
-                  >
-                    <Text style={styles.platDeckUseBtnText}>Use</Text>
-                  </Pressable>
-                </View>
-              </View>
-            </ScrollView>
           </View>
 
           {/* ============================================================ */}
@@ -1726,15 +1800,24 @@ const styles = StyleSheet.create({
     color: '#475569',
   },
 
-  // CARD 4: PLATFORM CAPTIONS
+  // CARD 3: PLATFORM CAPTIONS
   platformCaptionDeckCard: {
-    width: 220,
+    width: 224,
     backgroundColor: '#FFFFFF',
     borderRadius: 18,
     padding: 14,
-    borderWidth: 1,
+    borderWidth: 1.5,
     borderColor: '#EFECE6',
     justifyContent: 'space-between',
+  },
+  platformCaptionDeckCardActive: {
+    borderColor: '#582CDB',
+    backgroundColor: '#FAF8FF',
+    shadowColor: '#582CDB',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 6,
+    elevation: 2,
   },
   platDeckTitle: {
     fontSize: 12,
@@ -1749,10 +1832,18 @@ const styles = StyleSheet.create({
     paddingVertical: 2,
     borderRadius: 4,
   },
+  platDeckBadgeActive: {
+    backgroundColor: '#EDE9FE',
+    borderColor: '#DDD6FE',
+  },
   platDeckBadgeText: {
     fontSize: 8,
     fontWeight: '700',
     color: '#64748B',
+  },
+  platDeckBadgeTextActive: {
+    color: '#582CDB',
+    fontWeight: '800',
   },
   platDeckBodyText: {
     fontSize: 11,
@@ -1773,10 +1864,17 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     alignItems: 'center',
   },
+  platDeckEditBtnActive: {
+    backgroundColor: '#EDE9FE',
+    borderColor: '#DDD6FE',
+  },
   platDeckEditBtnText: {
     fontSize: 11,
     fontWeight: '800',
     color: '#171420',
+  },
+  platDeckEditBtnTextActive: {
+    color: '#582CDB',
   },
   platDeckUseBtn: {
     flex: 1,
@@ -1784,6 +1882,9 @@ const styles = StyleSheet.create({
     paddingVertical: 6,
     borderRadius: 8,
     alignItems: 'center',
+  },
+  platDeckUseBtnActive: {
+    backgroundColor: '#431FB3',
   },
   platDeckUseBtnText: {
     fontSize: 11,
