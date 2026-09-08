@@ -1382,7 +1382,7 @@ export const ProCaptionScreen: React.FC<ProCaptionScreenProps> = ({
               style={({ pressed }) => [styles.applyJarvisHeroBtn, pressed && styles.btnPressed]}
               onPress={handleApplyJarvisRecommendation}
             >
-              <Text style={styles.applyJarvisHeroBtnText}>✨ Apply Recommendation</Text>
+              <Text style={styles.applyJarvisHeroBtnText}>✨ Apply to Caption</Text>
             </Pressable>
           </LinearGradient>
 
