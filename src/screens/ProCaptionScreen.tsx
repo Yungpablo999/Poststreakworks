@@ -211,6 +211,10 @@ export const ProCaptionScreen: React.FC<ProCaptionScreenProps> = ({
         showToast('At least 1 tone must remain selected');
       }
     } else {
+      if (selectedTones.length >= 3) {
+        showToast('Choose up to 3 tones');
+        return;
+      }
       setSelectedTones([...selectedTones, tone]);
       showToast(`✓ Added ${tone} tone`);
     }
@@ -560,7 +564,7 @@ export const ProCaptionScreen: React.FC<ProCaptionScreenProps> = ({
               Selected Idea: &ldquo;{currentIdeaTitle}&rdquo;
             </Text>
             <Text style={styles.sourceIdeaDesc}>
-              Context: short-form creator advice post about consistency and system building for long-term growth.
+              About this idea: short-form creator advice post about consistency and system building for long-term growth.
             </Text>
           </View>
 
@@ -574,10 +578,10 @@ export const ProCaptionScreen: React.FC<ProCaptionScreenProps> = ({
                   <Text style={{ fontSize: 14 }}>🎭</Text>
                   <Text style={styles.sectionHeaderTitle} numberOfLines={1}>Caption Tone</Text>
                 </View>
-                <Text style={styles.toneSubHint} numberOfLines={1}>Select voice style for AI phrasing</Text>
+                <Text style={styles.toneSubHint} numberOfLines={1}>Select 1–3 voice styles for AI phrasing</Text>
               </View>
               <View style={styles.toneActiveCounterBadge}>
-                <Text style={styles.toneActiveCounterText} numberOfLines={1}>{selectedTones.length} SELECTED</Text>
+                <Text style={styles.toneActiveCounterText} numberOfLines={1}>{selectedTones.length} OF 3 SELECTED</Text>
               </View>
             </View>
 
@@ -611,6 +615,8 @@ export const ProCaptionScreen: React.FC<ProCaptionScreenProps> = ({
                           pressed && styles.btnPressed,
                         ]}
                         onPress={() => handleToggleTone(toneObj.name)}
+                        accessibilityRole="button"
+                        accessibilityLabel={`${toneObj.name} tone, ${isSelected ? 'selected' : 'unselected'}`}
                       >
                         <Text style={{ fontSize: 12 }}>{toneObj.emoji}</Text>
                         <Text
@@ -624,8 +630,8 @@ export const ProCaptionScreen: React.FC<ProCaptionScreenProps> = ({
                         </Text>
                         {isSelected && (
                           <View style={styles.toneCheckMarkDot}>
-                            <Svg width={6} height={6} viewBox="0 0 12 12" fill="none">
-                              <Path d="M2.5 6.2L4.8 8.5L9.5 3.5" stroke="#FFFFFF" strokeWidth="2.8" strokeLinecap="round" />
+                            <Svg width={5.5} height={5.5} viewBox="0 0 12 12" fill="none">
+                              <Path d="M2.5 6.2L4.8 8.5L9.5 3.5" stroke="#FFFFFF" strokeWidth="2.8" strokeLinecap="round" strokeLinejoin="round" />
                             </Svg>
                           </View>
                         )}
@@ -1577,10 +1583,11 @@ const styles = StyleSheet.create({
     backgroundColor: '#FAF8F5',
     borderWidth: 1.5,
     borderColor: '#EFECE6',
-    paddingHorizontal: 4,
-    paddingVertical: 9,
+    paddingHorizontal: 2,
+    paddingVertical: 8.5,
     borderRadius: 12,
     gap: 4,
+    position: 'relative',
   },
   toneChipPillActive: {
     backgroundColor: '#582CDB',
@@ -1592,19 +1599,23 @@ const styles = StyleSheet.create({
     elevation: 2,
   },
   toneChipText: {
-    fontSize: sFont(11),
+    fontSize: sFont(10.5),
     fontWeight: '700',
     color: '#475569',
+    letterSpacing: -0.2,
   },
   toneChipTextActive: {
     color: '#FFFFFF',
     fontWeight: '800',
   },
   toneCheckMarkDot: {
-    width: 12,
-    height: 12,
-    borderRadius: 6,
-    backgroundColor: 'rgba(255, 255, 255, 0.25)',
+    position: 'absolute',
+    top: 3.5,
+    right: 3.5,
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    backgroundColor: 'rgba(255, 255, 255, 0.3)',
     justifyContent: 'center',
     alignItems: 'center',
   },
