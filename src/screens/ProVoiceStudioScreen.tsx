@@ -131,6 +131,21 @@ const PRESET_SCRIPTS = [
   },
 ];
 
+export interface RefillPackItem {
+  id: string;
+  name: string;
+  minutes: number;
+  price: string;
+  perMin: string;
+  tag: string;
+}
+
+const REFILL_PACKS: RefillPackItem[] = [
+  { id: 'p30', name: '+30 Minutes', minutes: 30, price: '$9.00', perMin: '$0.30/min', tag: 'STARTER' },
+  { id: 'p60', name: '+60 Minutes', minutes: 60, price: '$16.00', perMin: '$0.27/min', tag: 'BEST VALUE' },
+  { id: 'p120', name: '+120 Minutes', minutes: 120, price: '$28.00', perMin: '$0.23/min', tag: 'PRO SPRINT' },
+];
+
 export const ProVoiceStudioScreen: React.FC<ProVoiceStudioScreenProps> = ({
   onBack,
   onNavigateTab,
@@ -149,6 +164,7 @@ export const ProVoiceStudioScreen: React.FC<ProVoiceStudioScreenProps> = ({
   const [showManageMinutesModal, setShowManageMinutesModal] = useState(false);
   const [showVoiceStyleModal, setShowVoiceStyleModal] = useState(false);
   const [showRefillMinutesModal, setShowRefillMinutesModal] = useState(false);
+  const [selectedRefillPack, setSelectedRefillPack] = useState<RefillPackItem>(REFILL_PACKS[1]);
   const [showHookOptimizerModal, setShowHookOptimizerModal] = useState(false);
   const [showAllProjectsModal, setShowAllProjectsModal] = useState(false);
 
@@ -1441,42 +1457,83 @@ export const ProVoiceStudioScreen: React.FC<ProVoiceStudioScreenProps> = ({
 
               <Text style={styles.modalTitle}>Refill Voice Minutes</Text>
               <Text style={styles.modalSub}>
-                Instant credits added directly to your studio balance. Minutes never expire.
+                Running low on Pro minutes? Refill anytime with an extra voice pack.
               </Text>
 
-              <View style={{ gap: 8, marginVertical: 14 }}>
-                {[
-                  { name: '+30 Minutes', price: '$9.00', perMin: '$0.30/min', tag: 'STARTER' },
-                  { name: '+60 Minutes', price: '$16.00', perMin: '$0.26/min', tag: 'BEST VALUE' },
-                  { name: '+120 Minutes', price: '$28.00', perMin: '$0.23/min', tag: 'PRO SPRINT' },
-                ].map((pack, idx) => (
-                  <Pressable
-                    key={idx}
-                    style={styles.refillPackCard}
-                    onPress={() => {
-                      setShowRefillMinutesModal(false);
-                      showToast(`✓ ${pack.name} credited to your studio!`);
-                    }}
-                  >
-                    <View style={{ flex: 1, minWidth: 0, marginRight: 10 }}>
-                      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-                        <Text style={styles.refillPackName} numberOfLines={1}>{pack.name}</Text>
-                        <View style={styles.tagPillMini}>
-                          <Text style={styles.tagPillMiniText} numberOfLines={1}>{pack.tag}</Text>
+              <View style={{ gap: 10, marginVertical: 14 }}>
+                {REFILL_PACKS.map((pack) => {
+                  const isSelected = selectedRefillPack.id === pack.id;
+                  return (
+                    <Pressable
+                      key={pack.id}
+                      style={[
+                        styles.refillPackCard,
+                        isSelected && styles.refillPackCardSelected,
+                      ]}
+                      onPress={() => {
+                        Haptics.selectionAsync();
+                        setSelectedRefillPack(pack);
+                      }}
+                    >
+                      <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1, minWidth: 0, marginRight: 8 }}>
+                        <View style={[styles.refillRadioCircle, isSelected && styles.refillRadioCircleSelected]}>
+                          {isSelected && <View style={styles.refillRadioInnerDot} />}
+                        </View>
+                        <View style={{ flex: 1, minWidth: 0, marginLeft: 10 }}>
+                          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
+                            <Text style={[styles.refillPackName, isSelected && styles.refillPackNameSelected]} numberOfLines={1}>
+                              {pack.name}
+                            </Text>
+                            <View style={[styles.tagPillMini, isSelected && styles.tagPillMiniSelected]}>
+                              <Text style={[styles.tagPillMiniText, isSelected && styles.tagPillMiniTextSelected]} numberOfLines={1}>
+                                {pack.tag}
+                              </Text>
+                            </View>
+                            {isSelected && (
+                              <View style={styles.refillSelectedBadge}>
+                                <Text style={styles.refillSelectedBadgeText}>✓ Selected</Text>
+                              </View>
+                            )}
+                          </View>
+                          <Text style={styles.refillPackSub} numberOfLines={1}>
+                            {pack.perMin} · Instant allocation
+                          </Text>
                         </View>
                       </View>
-                      <Text style={styles.refillPackSub} numberOfLines={1}>{pack.perMin}</Text>
-                    </View>
-                    <Text style={styles.refillPackPrice} numberOfLines={1}>{pack.price}</Text>
-                  </Pressable>
-                ))}
+                      <Text style={[styles.refillPackPrice, isSelected && styles.refillPackPriceSelected]} numberOfLines={1}>
+                        {pack.price}
+                      </Text>
+                    </Pressable>
+                  );
+                })}
               </View>
+
+              {/* Policy Rollover Note */}
+              <View style={styles.refillPolicyNote}>
+                <Text style={styles.refillPolicyNoteText}>
+                  🛡️ <Text style={{ fontWeight: '700', color: '#171420' }}>Minutes never expire.</Text> Extra packs are stored in your vault and only consumed if your monthly quota is depleted.
+                </Text>
+              </View>
+
+              {/* Dynamic Action Button */}
+              <Pressable
+                style={({ pressed }) => [styles.refillContinueBtn, pressed && styles.btnPressed]}
+                onPress={() => {
+                  Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+                  setShowRefillMinutesModal(false);
+                  showToast(`✓ ${selectedRefillPack.name} credited instantly!`);
+                }}
+              >
+                <Text style={styles.refillContinueBtnText}>
+                  Continue — {selectedRefillPack.price} →
+                </Text>
+              </Pressable>
 
               <Pressable
                 style={styles.modalCancelBtn}
                 onPress={() => setShowRefillMinutesModal(false)}
               >
-                <Text style={styles.modalCancelBtnText}>Close</Text>
+                <Text style={styles.modalCancelBtnText}>Cancel</Text>
               </Pressable>
             </Animated.View>
           </View>
@@ -2832,14 +2889,69 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: '#FAF8F5',
     borderRadius: 14,
-    padding: 12,
-    borderWidth: 1,
+    paddingVertical: 12,
+    paddingHorizontal: 13,
+    borderWidth: 1.5,
     borderColor: '#EFECE6',
+  },
+  refillPackCardSelected: {
+    backgroundColor: '#F5F3FF',
+    borderColor: '#582CDB',
+    shadowColor: '#582CDB',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.12,
+    shadowRadius: 8,
+    elevation: 3,
+  },
+  refillRadioCircle: {
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    borderWidth: 2,
+    borderColor: '#CBD5E1',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#FFFFFF',
+    flexShrink: 0,
+  },
+  refillRadioCircleSelected: {
+    borderColor: '#582CDB',
+    backgroundColor: '#FFFFFF',
+  },
+  refillRadioInnerDot: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    backgroundColor: '#582CDB',
   },
   refillPackName: {
     fontSize: sFont(13),
     fontWeight: '700',
     color: '#171420',
+  },
+  refillPackNameSelected: {
+    color: '#582CDB',
+    fontWeight: '800',
+  },
+  tagPillMiniSelected: {
+    backgroundColor: '#EDE9FE',
+    borderColor: '#C4B5FD',
+  },
+  tagPillMiniTextSelected: {
+    color: '#582CDB',
+    fontWeight: '800',
+  },
+  refillSelectedBadge: {
+    backgroundColor: '#582CDB',
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 6,
+  },
+  refillSelectedBadgeText: {
+    color: '#FFFFFF',
+    fontSize: sFont(9.5),
+    fontWeight: '800',
+    letterSpacing: 0.2,
   },
   refillPackSub: {
     fontSize: sFont(11),
@@ -2849,8 +2961,45 @@ const styles = StyleSheet.create({
   refillPackPrice: {
     fontSize: sFont(15),
     fontWeight: '800',
-    color: '#582CDB',
+    color: '#64748B',
     flexShrink: 0,
+  },
+  refillPackPriceSelected: {
+    color: '#582CDB',
+    fontSize: sFont(16),
+  },
+  refillPolicyNote: {
+    backgroundColor: '#F8FAFC',
+    borderRadius: 10,
+    paddingHorizontal: 12,
+    paddingVertical: 9,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    marginBottom: 14,
+  },
+  refillPolicyNoteText: {
+    fontSize: sFont(11),
+    color: '#475569',
+    lineHeight: 16,
+  },
+  refillContinueBtn: {
+    backgroundColor: '#582CDB',
+    paddingVertical: 14,
+    borderRadius: 14,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#582CDB',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.25,
+    shadowRadius: 10,
+    elevation: 4,
+    marginBottom: 6,
+  },
+  refillContinueBtnText: {
+    color: '#FFFFFF',
+    fontSize: sFont(14),
+    fontWeight: '800',
+    letterSpacing: 0.3,
   },
   hookOptionCard: {
     backgroundColor: '#FAF8F5',
