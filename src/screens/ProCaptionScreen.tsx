@@ -1324,7 +1324,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingHorizontal: 20,
     paddingTop: 10,
-    paddingBottom: 12,
+    paddingBottom: 10,
     backgroundColor: '#FAF8F5',
   },
   backBtnCircle: {
@@ -1430,7 +1430,7 @@ const styles = StyleSheet.create({
     paddingBottom: 140,
   },
   topTitlesSection: {
-    marginTop: 8,
+    marginTop: 5,
     marginBottom: 16,
   },
   goldScriptBadge: {
