@@ -1528,7 +1528,7 @@ export const ProCaptionScreen: React.FC<ProCaptionScreenProps> = ({
 
               {/* Active Removable Hashtags */}
               <Text style={styles.modalSectionSubHeader}>ACTIVE HASHTAGS ({hashtagList.length})</Text>
-              <ScrollView style={{ maxHeight: 150 }} contentContainerStyle={styles.removableHashtagsGrid}>
+              <ScrollView style={{ maxHeight: 180 }} contentContainerStyle={[styles.removableHashtagsGrid, { paddingBottom: 4 }]}>
                 {hashtagList.map((tag) => (
                   <Pressable
                     key={tag}
@@ -1544,12 +1544,12 @@ export const ProCaptionScreen: React.FC<ProCaptionScreenProps> = ({
               </ScrollView>
 
               {/* Quick Suggestions Row */}
-              <Text style={[styles.modalSectionSubHeader, { marginTop: 14 }]}>TRENDING SUGGESTIONS</Text>
+              <Text style={[styles.modalSectionSubHeader, { marginTop: 14 }]}>JARVIS SUGGESTIONS</Text>
               <View style={styles.quickSuggestionsRow}>
-                {['creatoreconomy', 'growontiktok', 'reeltips', 'dailycontent', 'viralpost'].map((sug) => (
+                {['creatoreconomy', 'growontiktok', 'reeltips', 'dailycontent', 'creatortips', 'contentcreation'].map((sug) => (
                   <Pressable
                     key={sug}
-                    style={styles.suggestionPill}
+                    style={({ pressed }) => [styles.suggestionPill, pressed && styles.btnPressed]}
                     onPress={() => handleAddHashtag(sug)}
                   >
                     <Text style={styles.suggestionPillText}>+ #{sug}</Text>
