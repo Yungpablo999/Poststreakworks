@@ -399,9 +399,9 @@ export const ProCaptionScreen: React.FC<ProCaptionScreenProps> = ({
     setCompletionData({
       title: 'Jarvis Recommendation Applied!',
       subtitle: `Caption hook, high-converting CTA & structure calibrated for 94% retention.`,
-      badgeText: '✨ JARVIS AI OPTIMIZED (+50 XP)',
+      badgeText: '✨ JARVIS OPTIMIZED (+50 XP)',
       xpEarned: 50,
-      speechBubble: 'AI calibration complete, Pablo! First 80 characters fit above the fold perfectly! 🚀',
+      speechBubble: 'Jarvis calibration complete, Pablo! First 80 characters fit above the fold perfectly! 🚀',
     });
     setShowCompletionModal(true);
   };
@@ -700,7 +700,7 @@ export const ProCaptionScreen: React.FC<ProCaptionScreenProps> = ({
                   <Text style={{ fontSize: 14 }}>🎭</Text>
                   <Text style={styles.sectionHeaderTitle} numberOfLines={1}>Caption Tone</Text>
                 </View>
-                <Text style={styles.toneSubHint} numberOfLines={1}>Select 1–3 voice styles for AI phrasing</Text>
+                <Text style={styles.toneSubHint} numberOfLines={1}>Select 1–3 voice styles for Jarvis phrasing</Text>
               </View>
               <View style={styles.toneActiveCounterBadge}>
                 <Text style={styles.toneActiveCounterText} numberOfLines={1}>{selectedTones.length} OF 3 SELECTED</Text>
@@ -980,7 +980,11 @@ export const ProCaptionScreen: React.FC<ProCaptionScreenProps> = ({
                   placeholderTextColor="#94A3B8"
                 />
                 <View style={styles.captionInputFooterRow}>
-                  <Text style={styles.captionInputFooterHint}>AI Generated • Tap to edit</Text>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+                    <Text style={styles.captionInputFooterHint}>Jarvis Generated</Text>
+                    <Text style={{ fontSize: 9.5, color: '#CBD5E1' }}>·</Text>
+                    <Text style={styles.captionInputEditActionHint}>✏️ Tap to edit</Text>
+                  </View>
                   <View style={styles.charsCounterPill}>
                     <Text style={styles.charsCounterText}>{mainCaption.length} chars</Text>
                   </View>
@@ -989,10 +993,15 @@ export const ProCaptionScreen: React.FC<ProCaptionScreenProps> = ({
 
               {/* Tri-Metrics Container */}
               <View style={styles.captionMetricsRow}>
-                <View style={styles.captionMetricBox}>
+                <View style={[styles.captionMetricBox, { flex: 1.35 }]}>
                   <Text style={styles.captionMetricHeader}>TONE</Text>
-                  <Text style={styles.captionMetricVal} numberOfLines={1}>
-                    {selectedTones.length > 0 ? selectedTones.slice(0, 2).join(', ') : 'Natural'}
+                  <Text
+                    style={styles.captionMetricVal}
+                    numberOfLines={1}
+                    adjustsFontSizeToFit
+                    minimumFontScale={0.75}
+                  >
+                    {selectedTones.length > 0 ? selectedTones.join(' • ') : 'Natural'}
                   </Text>
                 </View>
 
@@ -1009,7 +1018,7 @@ export const ProCaptionScreen: React.FC<ProCaptionScreenProps> = ({
 
               {/* Action Modifiers Grid - 2 Rows x 3 Columns */}
               <View style={styles.captionModifiersSection}>
-                <Text style={styles.captionModifiersLabel}>QUICK AI MODIFIERS</Text>
+                <Text style={styles.captionModifiersLabel}>QUICK JARVIS MODIFIERS</Text>
                 <View style={{ gap: 6, marginTop: 6 }}>
                   {[
                     [
@@ -1276,7 +1285,7 @@ export const ProCaptionScreen: React.FC<ProCaptionScreenProps> = ({
                 </View>
                 <View>
                   <Text style={styles.jarvisHeroTitle}>Jarvis Insight</Text>
-                  <Text style={styles.jarvisHeroSub}>PRO AI COACH</Text>
+                  <Text style={styles.jarvisHeroSub}>JARVIS PRO COACH</Text>
                 </View>
               </View>
               <View style={styles.jarvisActiveEnginePill}>
@@ -2010,6 +2019,11 @@ const styles = StyleSheet.create({
     fontSize: sFont(9.5),
     fontWeight: '700',
     color: '#94A3B8',
+  },
+  captionInputEditActionHint: {
+    fontSize: sFont(9.5),
+    fontWeight: '800',
+    color: '#582CDB',
   },
   charsCounterPill: {
     backgroundColor: '#E2E8F0',
