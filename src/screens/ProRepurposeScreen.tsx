@@ -432,7 +432,7 @@ export const ProRepurposeScreen: React.FC<ProRepurposeScreenProps> = ({
 
           <Text style={styles.heroTitle}>Turn one idea into platform-ready posts.</Text>
           <Text style={styles.heroSubtitle}>
-            Adapt one content idea into tailored versions for TikTok, Instagram Reels, YouTube Shorts, and Threads.
+            Turn one content idea into platform-native versions for TikTok, Instagram Reels, YouTube Shorts, and Threads.
           </Text>
         </View>
 
