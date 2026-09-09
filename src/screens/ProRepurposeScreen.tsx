@@ -430,7 +430,14 @@ export const ProRepurposeScreen: React.FC<ProRepurposeScreenProps> = ({
             <Text style={styles.repurposeStudioBadgeText}>REPURPOSE STUDIO</Text>
           </View>
 
-          <Text style={styles.heroTitle}>Turn one idea into platform-ready posts.</Text>
+          <Text
+            style={styles.heroTitle}
+            numberOfLines={1}
+            adjustsFontSizeToFit
+            minimumFontScale={0.75}
+          >
+            Turn one idea into platform-ready posts.
+          </Text>
           <Text style={styles.heroSubtitle}>
             Turn one content idea into platform-native versions for TikTok, Instagram Reels, YouTube Shorts, and Threads.
           </Text>
@@ -1225,11 +1232,10 @@ const styles = StyleSheet.create({
     letterSpacing: 0.4,
   },
   heroTitle: {
-    fontSize: Platform.OS === 'web' ? ('clamp(18px, 4.5vw, 22px)' as any) : sFont(20),
-    fontWeight: '700',
+    fontSize: Platform.OS === 'web' ? ('clamp(16px, 3.8vw, 19px)' as any) : sFont(17.5),
+    fontWeight: '800',
     color: '#171420',
     letterSpacing: -0.35,
-    lineHeight: 28,
   },
   heroSubtitle: {
     fontSize: 12.5,
