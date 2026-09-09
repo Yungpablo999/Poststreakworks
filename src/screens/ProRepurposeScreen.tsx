@@ -32,6 +32,96 @@ interface ProRepurposeScreenProps {
 
 const { width } = Dimensions.get('window');
 
+export interface CaptionVariationItem {
+  id: string;
+  type: string;
+  shortLabel: string;
+  text: string;
+}
+
+const PLATFORM_CAPTION_VARIATIONS: Record<string, CaptionVariationItem[]> = {
+  tiktok: [
+    {
+      id: 'direct',
+      type: 'TIKTOK · PUNCHY HOOK',
+      shortLabel: 'Direct',
+      text: '3 mistakes slowing your growth: 1. Over-editing, 2. No 3-sec hook, 3. Inconsistent schedule. Which one are you fixing first?',
+    },
+    {
+      id: 'story',
+      type: 'TIKTOK · STORY LESSON',
+      shortLabel: 'Story',
+      text: 'I spent 6 months stuck at 0 views until I stopped overthinking video production. Save this for your next batch filming day.',
+    },
+    {
+      id: 'question',
+      type: 'TIKTOK · VIRAL CTA',
+      shortLabel: 'Conversation',
+      text: 'Drop your current streak below — let’s audit your 3-second hook structure together in the comments.',
+    },
+  ],
+  ig_reel: [
+    {
+      id: 'direct',
+      type: 'IG REEL · DIRECT LIST',
+      shortLabel: 'Direct',
+      text: '3 mistakes slowing you down: 1. Lack of routine, 2. Bad lighting, 3. Long intros. Fixed.',
+    },
+    {
+      id: 'story',
+      type: 'IG REEL · SAVE ANGLE',
+      shortLabel: 'Story',
+      text: 'Save this for when you need a reminder. These 3 lessons transformed my creation journey...',
+    },
+    {
+      id: 'question',
+      type: 'IG REEL · CONVERSATION',
+      shortLabel: 'Conversation',
+      text: 'Which of these 3 creator traps took you the longest to unlearn? Drop your number below.',
+    },
+  ],
+  shorts: [
+    {
+      id: 'direct',
+      type: 'SHORTS · RETENTION HOOK',
+      shortLabel: 'Direct',
+      text: 'Stop making these 3 video mistakes if you want viewers to stay past the first 3 seconds. Full breakdown in this Short.',
+    },
+    {
+      id: 'story',
+      type: 'SHORTS · SYSTEM LESSON',
+      shortLabel: 'Story',
+      text: 'How to batch 10 Shorts in 2 hours: build an idea vault and record in 1-hour sprints. Subscribe for daily creator systems.',
+    },
+    {
+      id: 'question',
+      type: 'SHORTS · ENGAGEMENT LOOP',
+      shortLabel: 'Conversation',
+      text: 'What is the #1 thing holding your channel back right now? Let’s break it down in the comments.',
+    },
+  ],
+  threads: [
+    {
+      id: 'direct',
+      type: 'THREADS · CONTRARIAN',
+      shortLabel: 'Direct',
+      text: 'Hot take: You don’t need more ideas. You need a frictionless habit loop that turns 1 thought into 4 reps every week.',
+    },
+    {
+      id: 'story',
+      type: 'THREADS · AUTHENTIC LESSON',
+      shortLabel: 'Story',
+      text: 'The biggest mistake I made starting out was waiting for perfection. 1 honest, raw post daily beats a polished draft sitting on your desktop.',
+    },
+    {
+      id: 'question',
+      type: 'THREADS · OPEN THREAD',
+      shortLabel: 'Conversation',
+      text: 'Creators on Threads: What’s one piece of advice you’d give your Day-1 self? Sharing my top 3 below.',
+    },
+  ],
+};
+
 export const ProRepurposeScreen: React.FC<ProRepurposeScreenProps> = ({
   userProfile,
   onNavigate,
@@ -48,6 +138,10 @@ export const ProRepurposeScreen: React.FC<ProRepurposeScreenProps> = ({
   ]);
   const [selectedCaptionVariation, setSelectedCaptionVariation] = useState('direct');
   const [isGenerating, setIsGenerating] = useState(false);
+
+  // Active platform for tailored captions (defaults to first selected format or 'ig_reel')
+  const activeCaptionPlatform = selectedFormats[0] || 'ig_reel';
+  const currentCaptions = PLATFORM_CAPTION_VARIATIONS[activeCaptionPlatform] || PLATFORM_CAPTION_VARIATIONS.ig_reel;
 
   // Toast & Modals
   const [toastMessage, setToastMessage] = useState<string | null>(null);
@@ -629,30 +723,29 @@ export const ProRepurposeScreen: React.FC<ProRepurposeScreenProps> = ({
         {/* CARD 4: CAPTION VARIATIONS                                   */}
         {/* ============================================================ */}
         <View style={styles.cardSectionContainer}>
-          <Text style={styles.sectionHeaderTitle}>Caption Variations</Text>
+          <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+            <Text style={styles.sectionHeaderTitle}>
+              Caption Variations · {currentCaptions.length}
+            </Text>
+            <View style={styles.captionPlatformBadge}>
+              <Text style={styles.captionPlatformBadgeText}>
+                {activeCaptionPlatform === 'tiktok'
+                  ? '📱 TikTok Tailored'
+                  : activeCaptionPlatform === 'shorts'
+                  ? '▶ Shorts Tailored'
+                  : activeCaptionPlatform === 'threads'
+                  ? '🧵 Threads Tailored'
+                  : '📸 IG Reel Tailored'}
+              </Text>
+            </View>
+          </View>
 
           <ScrollView
             horizontal
             showsHorizontalScrollIndicator={false}
             contentContainerStyle={styles.captionVariationsScroll}
           >
-            {[
-              {
-                id: 'direct',
-                type: 'DIRECT',
-                text: '3 mistakes slowing you down: 1. Lack of routine, 2. Bad lighting, 3. Long intros. Fixed.',
-              },
-              {
-                id: 'story',
-                type: 'STORY-FOCUSED',
-                text: 'Save this for when you need a reminder. These 3 lessons transformed my creation journey...',
-              },
-              {
-                id: 'question',
-                type: 'CONVERSATION HOOK',
-                text: 'Which of these 3 creator traps took you the longest to unlearn? Drop your number below.',
-              },
-            ].map((cap) => {
+            {currentCaptions.map((cap) => {
               const isSelected = selectedCaptionVariation === cap.id;
               return (
                 <Pressable
@@ -667,7 +760,7 @@ export const ProRepurposeScreen: React.FC<ProRepurposeScreenProps> = ({
                       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                     }
                     setSelectedCaptionVariation(cap.id);
-                    showToast(`✓ Applied ${cap.type} caption angle`);
+                    showToast(`✓ Applied ${cap.shortLabel} angle`);
                   }}
                 >
                   <View style={styles.captionVarTypeBadge}>
@@ -680,6 +773,32 @@ export const ProRepurposeScreen: React.FC<ProRepurposeScreenProps> = ({
               );
             })}
           </ScrollView>
+
+          {/* Carousel Pagination & Indicator Row */}
+          <View style={styles.captionIndicatorRow}>
+            {currentCaptions.map((cap) => {
+              const isSelected = selectedCaptionVariation === cap.id;
+              return (
+                <Pressable
+                  key={cap.id}
+                  style={[styles.captionIndicatorPill, isSelected && styles.captionIndicatorPillActive]}
+                  onPress={() => {
+                    if (Platform.OS !== 'web') {
+                      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                    }
+                    setSelectedCaptionVariation(cap.id);
+                    showToast(`✓ Selected ${cap.shortLabel} angle`);
+                  }}
+                  hitSlop={6}
+                >
+                  <View style={[styles.captionIndicatorDot, isSelected && styles.captionIndicatorDotActive]} />
+                  <Text style={[styles.captionIndicatorLabel, isSelected && styles.captionIndicatorLabelActive]}>
+                    {cap.shortLabel}
+                  </Text>
+                </Pressable>
+              );
+            })}
+          </View>
         </View>
 
         {/* ============================================================ */}
@@ -1529,6 +1648,59 @@ const styles = StyleSheet.create({
     color: '#334155',
     lineHeight: 16,
     fontWeight: '600',
+  },
+  captionPlatformBadge: {
+    backgroundColor: '#FAF5FF',
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 6,
+    borderWidth: 1,
+    borderColor: '#E9D5FF',
+  },
+  captionPlatformBadgeText: {
+    fontSize: 10,
+    fontWeight: '800',
+    color: '#7C3AED',
+  },
+  captionIndicatorRow: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: 8,
+    marginTop: 10,
+  },
+  captionIndicatorPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+    backgroundColor: '#FAF8F5',
+    borderWidth: 1,
+    borderColor: '#EFECE6',
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 12,
+  },
+  captionIndicatorPillActive: {
+    backgroundColor: '#EDE9FE',
+    borderColor: '#C4B5FD',
+  },
+  captionIndicatorDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: '#CBD5E1',
+  },
+  captionIndicatorDotActive: {
+    backgroundColor: '#582CDB',
+  },
+  captionIndicatorLabel: {
+    fontSize: sFont(10.5),
+    fontWeight: '700',
+    color: '#64748B',
+  },
+  captionIndicatorLabelActive: {
+    color: '#582CDB',
+    fontWeight: '800',
   },
 
   // CARD 5: REPURPOSE SCORE
