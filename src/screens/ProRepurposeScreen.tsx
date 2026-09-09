@@ -992,9 +992,12 @@ export const ProRepurposeScreen: React.FC<ProRepurposeScreenProps> = ({
 
           <View style={{ gap: 8, marginTop: 10 }}>
             <View style={styles.scheduleSlotRow}>
-              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 7, flex: 1, marginRight: 6 }}>
                 <SocialBrandIcon platform="tiktok" size={18} />
                 <Text style={styles.scheduleSlotName}>TikTok</Text>
+                <View style={styles.jarvisPickBadge}>
+                  <Text style={styles.jarvisPickBadgeText}>✨ JARVIS PICK</Text>
+                </View>
               </View>
               <View style={styles.scheduleTimePill}>
                 <Text style={styles.scheduleTimePillText}>7:30 PM</Text>
@@ -1038,12 +1041,26 @@ export const ProRepurposeScreen: React.FC<ProRepurposeScreenProps> = ({
         {/* ============================================================ */}
         <View style={styles.progressSafetyRow}>
           <View style={styles.metricCardBox}>
-            <Text style={styles.metricCardLabel}>PROGRESS</Text>
+            <Text
+              style={styles.metricCardLabel}
+              numberOfLines={1}
+              adjustsFontSizeToFit
+              minimumFontScale={0.8}
+            >
+              REPURPOSE READINESS
+            </Text>
             <Text style={styles.metricCardValue}>86%</Text>
           </View>
 
           <View style={styles.metricCardBox}>
-            <Text style={styles.metricCardLabel}>SAFETY</Text>
+            <Text
+              style={styles.metricCardLabel}
+              numberOfLines={1}
+              adjustsFontSizeToFit
+              minimumFontScale={0.8}
+            >
+              STREAK SAFETY
+            </Text>
             <Text style={[styles.metricCardValue, { color: '#F59E0B' }]}>47D</Text>
           </View>
         </View>
@@ -1058,11 +1075,11 @@ export const ProRepurposeScreen: React.FC<ProRepurposeScreenProps> = ({
               if (Platform.OS !== 'web') {
                 Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
               }
-              showToast('🔄 Regenerating all platform versions...');
+              showToast('↻ Regenerating all platform versions...');
               handleGenerateVersions();
             }}
           >
-            <Text style={styles.bottomRegenerateFullBtnText}>🔄  Regenerate All Formats</Text>
+            <Text style={styles.bottomRegenerateFullBtnText}>↻  Regenerate All Versions</Text>
           </Pressable>
         </View>
       </ScrollView>
@@ -2156,6 +2173,20 @@ const styles = StyleSheet.create({
     fontSize: 12.5,
     fontWeight: '800',
     color: '#171420',
+  },
+  jarvisPickBadge: {
+    backgroundColor: '#FEF3C7',
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 5,
+    borderWidth: 1,
+    borderColor: '#FDE68A',
+  },
+  jarvisPickBadgeText: {
+    fontSize: sFont(8.5),
+    fontWeight: '800',
+    color: '#B45309',
+    letterSpacing: 0.3,
   },
   scheduleTimePill: {
     backgroundColor: '#EDE9FE',
