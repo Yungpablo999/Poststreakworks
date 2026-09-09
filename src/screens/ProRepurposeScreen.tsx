@@ -914,9 +914,16 @@ export const ProRepurposeScreen: React.FC<ProRepurposeScreenProps> = ({
                 showToast('✓ Prioritized TikTok for first release');
               }}
             >
-              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, flex: 1, marginRight: 6 }}>
                 <Text style={styles.jarvisPrimaryStar}>⭐</Text>
-                <Text style={styles.jarvisPrimaryStrategyText}>RECOMMENDED: SCHEDULE TIKTOK FIRST</Text>
+                <Text
+                  style={styles.jarvisPrimaryStrategyText}
+                  numberOfLines={1}
+                  adjustsFontSizeToFit
+                  minimumFontScale={0.75}
+                >
+                  RECOMMENDED: SCHEDULE TIKTOK FIRST
+                </Text>
               </View>
               <Text style={styles.jarvisPrimaryArrow}>➔</Text>
             </Pressable>
@@ -932,7 +939,14 @@ export const ProRepurposeScreen: React.FC<ProRepurposeScreenProps> = ({
                   showToast('✓ Applied Cross-Post Reel strategy');
                 }}
               >
-                <Text style={styles.jarvisSecondaryStrategyText}>CROSS-POST REEL</Text>
+                <Text
+                  style={styles.jarvisSecondaryStrategyText}
+                  numberOfLines={1}
+                  adjustsFontSizeToFit
+                  minimumFontScale={0.8}
+                >
+                  CROSS-POST REEL
+                </Text>
               </Pressable>
 
               <Pressable
@@ -944,7 +958,14 @@ export const ProRepurposeScreen: React.FC<ProRepurposeScreenProps> = ({
                   showToast('✓ Applied Extract Thread strategy');
                 }}
               >
-                <Text style={styles.jarvisSecondaryStrategyText}>EXTRACT THREAD</Text>
+                <Text
+                  style={styles.jarvisSecondaryStrategyText}
+                  numberOfLines={1}
+                  adjustsFontSizeToFit
+                  minimumFontScale={0.8}
+                >
+                  EXTRACT THREAD
+                </Text>
               </Pressable>
             </View>
           </View>
@@ -2425,12 +2446,13 @@ const styles = StyleSheet.create({
     backgroundColor: '#FEF3C7',
     borderColor: '#FCD34D',
     borderWidth: 1.5,
-    paddingVertical: 10,
-    paddingHorizontal: 12,
+    paddingVertical: 9.5,
+    paddingHorizontal: 10,
     borderRadius: 12,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+    overflow: 'hidden',
     shadowColor: '#F59E0B',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.12,
@@ -2438,16 +2460,17 @@ const styles = StyleSheet.create({
     elevation: 2,
   },
   jarvisPrimaryStar: {
-    fontSize: 12,
+    fontSize: 11,
   },
   jarvisPrimaryStrategyText: {
-    fontSize: 10,
+    fontSize: sFont(9.5),
     fontWeight: '800',
     color: '#92400E',
-    letterSpacing: 0.4,
+    letterSpacing: 0.2,
+    flexShrink: 1,
   },
   jarvisPrimaryArrow: {
-    fontSize: 12,
+    fontSize: 11,
     fontWeight: '800',
     color: '#92400E',
   },
@@ -2457,15 +2480,17 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: 'rgba(255, 255, 255, 0.15)',
     paddingVertical: 9,
+    paddingHorizontal: 6,
     borderRadius: 10,
     alignItems: 'center',
     justifyContent: 'center',
+    overflow: 'hidden',
   },
   jarvisSecondaryStrategyText: {
-    fontSize: 9.5,
+    fontSize: sFont(9.5),
     fontWeight: '700',
     color: '#E2E8F0',
-    letterSpacing: 0.3,
+    letterSpacing: 0.2,
   },
 
   // QUEUE CONFIRMATION MODAL
