@@ -150,6 +150,8 @@ export const ProRepurposeScreen: React.FC<ProRepurposeScreenProps> = ({
   // Edit Modals
   const [showEditIdeaModal, setShowEditIdeaModal] = useState(false);
   const [showMorePlatformsModal, setShowMorePlatformsModal] = useState(false);
+  const [showScoreInfoModal, setShowScoreInfoModal] = useState(false);
+  const [showReviewScheduleModal, setShowReviewScheduleModal] = useState(false);
   const [extraPlatforms, setExtraPlatforms] = useState<string[]>(['pinterest', 'facebook']);
   const [editIdeaText, setEditIdeaText] = useState(originalIdea);
   const [editingVersion, setEditingVersion] = useState<{ id: string; title: string; body: string } | null>(null);
@@ -807,14 +809,37 @@ export const ProRepurposeScreen: React.FC<ProRepurposeScreenProps> = ({
         <View style={styles.repurposeScoreCard}>
           <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
             <View>
-              <Text style={styles.repurposeScoreTitle}>Repurpose Score</Text>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                <Text style={styles.repurposeScoreTitle}>Repurpose Score</Text>
+                <Pressable
+                  onPress={() => {
+                    if (Platform.OS !== 'web') {
+                      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                    }
+                    setShowScoreInfoModal(true);
+                  }}
+                  hitSlop={8}
+                  style={styles.scoreInfoBtn}
+                >
+                  <Text style={styles.scoreInfoBtnText}>ⓘ</Text>
+                </Pressable>
+              </View>
               <Text style={styles.repurposeScoreSub}>Strategic readiness factor</Text>
             </View>
 
             {/* Circular Gauge 88 */}
-            <View style={styles.gaugeCircle}>
+            <Pressable
+              onPress={() => {
+                if (Platform.OS !== 'web') {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                }
+                setShowScoreInfoModal(true);
+              }}
+              hitSlop={6}
+              style={styles.gaugeCircle}
+            >
               <Text style={styles.gaugeScoreVal}>88</Text>
-            </View>
+            </Pressable>
           </View>
 
           {/* Metric Progress Bars */}
@@ -877,24 +902,64 @@ export const ProRepurposeScreen: React.FC<ProRepurposeScreenProps> = ({
             </Text>
           </View>
 
-          {/* Strategy Pills */}
-          <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginBottom: 12 }}>
-            {['SCHEDULE TIKTOK FIRST', 'CROSS-POST REEL', 'EXTRACT THREAD'].map((pill) => (
+          {/* Strategy 3-Tier Hierarchy */}
+          <View style={{ gap: 8, marginTop: 4, marginBottom: 12 }}>
+            {/* Tier 1: Jarvis Top Recommendation */}
+            <Pressable
+              style={({ pressed }) => [styles.jarvisPrimaryStrategyBtn, pressed && styles.btnPressed]}
+              onPress={() => {
+                if (Platform.OS !== 'web') {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                }
+                showToast('✓ Prioritized TikTok for first release');
+              }}
+            >
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                <Text style={styles.jarvisPrimaryStar}>⭐</Text>
+                <Text style={styles.jarvisPrimaryStrategyText}>RECOMMENDED: SCHEDULE TIKTOK FIRST</Text>
+              </View>
+              <Text style={styles.jarvisPrimaryArrow}>➔</Text>
+            </Pressable>
+
+            {/* Tier 2: Secondary Alternatives */}
+            <View style={{ flexDirection: 'row', gap: 8 }}>
               <Pressable
-                key={pill}
-                style={styles.jarvisGoldStrategyPill}
-                onPress={() => showToast(`✓ Applied ${pill}`)}
+                style={({ pressed }) => [styles.jarvisSecondaryStrategyBtn, pressed && styles.btnPressed]}
+                onPress={() => {
+                  if (Platform.OS !== 'web') {
+                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                  }
+                  showToast('✓ Applied Cross-Post Reel strategy');
+                }}
               >
-                <Text style={styles.jarvisGoldStrategyPillText}>{pill}</Text>
+                <Text style={styles.jarvisSecondaryStrategyText}>CROSS-POST REEL</Text>
               </Pressable>
-            ))}
+
+              <Pressable
+                style={({ pressed }) => [styles.jarvisSecondaryStrategyBtn, pressed && styles.btnPressed]}
+                onPress={() => {
+                  if (Platform.OS !== 'web') {
+                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                  }
+                  showToast('✓ Applied Extract Thread strategy');
+                }}
+              >
+                <Text style={styles.jarvisSecondaryStrategyText}>EXTRACT THREAD</Text>
+              </Pressable>
+            </View>
           </View>
 
+          {/* Tier 3: Automation CTA */}
           <Pressable
             style={({ pressed }) => [styles.jarvisScheduleBtn, pressed && styles.btnPressed]}
-            onPress={handleScheduleAll}
+            onPress={() => {
+              if (Platform.OS !== 'web') {
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+              }
+              setShowReviewScheduleModal(true);
+            }}
           >
-            <Text style={styles.jarvisScheduleBtnText}>✨ Schedule All via Jarvis</Text>
+            <Text style={styles.jarvisScheduleBtnText}>✨ Review & Schedule via Jarvis →</Text>
           </Pressable>
         </LinearGradient>
 
@@ -929,7 +994,12 @@ export const ProRepurposeScreen: React.FC<ProRepurposeScreenProps> = ({
           {/* Schedule All Amber Action Button */}
           <Pressable
             style={({ pressed }) => [styles.amberScheduleAllBtn, pressed && styles.btnPressed]}
-            onPress={handleScheduleAll}
+            onPress={() => {
+              if (Platform.OS !== 'web') {
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+              }
+              setShowReviewScheduleModal(true);
+            }}
           >
             <LinearGradient
               colors={['#F59E0B', '#D97706']}
@@ -937,7 +1007,7 @@ export const ProRepurposeScreen: React.FC<ProRepurposeScreenProps> = ({
               end={{ x: 1, y: 0 }}
               style={styles.amberScheduleAllGradient}
             >
-              <Text style={styles.amberScheduleAllBtnText}>📅  Schedule All</Text>
+              <Text style={styles.amberScheduleAllBtnText}>📅  Review & Schedule All</Text>
             </LinearGradient>
           </Pressable>
         </View>
@@ -1189,6 +1259,186 @@ export const ProRepurposeScreen: React.FC<ProRepurposeScreenProps> = ({
                 onPress={handleDoneMorePlatforms}
               >
                 <Text style={styles.modalSaveBtnText}>Done</Text>
+              </Pressable>
+            </View>
+          </Animated.View>
+        </View>
+      </Modal>
+
+      {/* REPURPOSE SCORE BREAKDOWN MODAL */}
+      <Modal
+        visible={showScoreInfoModal}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => setShowScoreInfoModal(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <Animated.View style={[styles.modalCard, { transform: [{ scale: modalPopScale }] }]}>
+            <View style={styles.modalHeaderBetween}>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                <View style={styles.scoreInfoBadge}>
+                  <Text style={styles.scoreInfoBadgeText}>88 / 100</Text>
+                </View>
+                <Text style={styles.modalTitle}>Repurpose Score</Text>
+              </View>
+              <Pressable onPress={() => setShowScoreInfoModal(false)} hitSlop={8}>
+                <Text style={styles.modalCloseText}>✕</Text>
+              </Pressable>
+            </View>
+
+            <Text style={styles.scoreModalExplanation}>
+              Measures how ready your idea is to be adapted across formats based on structure, hook strength, platform fit and content depth.
+            </Text>
+
+            {/* Factor Breakdown */}
+            <View style={{ gap: 9, marginTop: 14 }}>
+              {[
+                {
+                  name: 'Structure & Flow',
+                  val: '94%',
+                  color: '#10B981',
+                  desc: 'Clear narrative arc & logical segment transitions',
+                },
+                {
+                  name: 'Hook Strength',
+                  val: '91%',
+                  color: '#582CDB',
+                  desc: 'High-retention opening framing that stops scrolling',
+                },
+                {
+                  name: 'Platform Versatility',
+                  val: '88%',
+                  color: '#F59E0B',
+                  desc: 'Fits vertical short-form video & text conversations',
+                },
+                {
+                  name: 'Depth & Resonance',
+                  val: '82%',
+                  color: '#6366F1',
+                  desc: 'Practical takeaways encouraging saves & shares',
+                },
+              ].map((factor) => (
+                <View key={factor.name} style={styles.scoreFactorCard}>
+                  <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
+                    <Text style={styles.scoreFactorTitle}>{factor.name}</Text>
+                    <Text style={[styles.scoreFactorVal, { color: factor.color }]}>{factor.val}</Text>
+                  </View>
+                  <View style={styles.scoreFactorBarTrack}>
+                    <View style={[styles.scoreFactorBarFill, { width: factor.val as any, backgroundColor: factor.color }]} />
+                  </View>
+                  <Text style={styles.scoreFactorDesc}>{factor.desc}</Text>
+                </View>
+              ))}
+            </View>
+
+            <Pressable
+              style={[styles.modalSaveBtn, { marginTop: 16, width: '100%', alignItems: 'center' }]}
+              onPress={() => setShowScoreInfoModal(false)}
+            >
+              <Text style={styles.modalSaveBtnText}>Got it</Text>
+            </Pressable>
+          </Animated.View>
+        </View>
+      </Modal>
+
+      {/* REVIEW & SCHEDULE QUEUE CONFIRMATION MODAL */}
+      <Modal
+        visible={showReviewScheduleModal}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => setShowReviewScheduleModal(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <Animated.View style={[styles.modalCard, { transform: [{ scale: modalPopScale }] }]}>
+            <View style={styles.modalHeaderBetween}>
+              <View>
+                <Text style={styles.modalTitle}>Review & Schedule Queue</Text>
+                <Text style={styles.modalSubTitle}>Confirm automated multi-platform release</Text>
+              </View>
+              <Pressable onPress={() => setShowReviewScheduleModal(false)} hitSlop={8}>
+                <Text style={styles.modalCloseText}>✕</Text>
+              </Pressable>
+            </View>
+
+            {/* Queue items */}
+            <ScrollView style={{ maxHeight: 260 }} contentContainerStyle={{ gap: 8, paddingVertical: 4 }}>
+              {[
+                {
+                  platform: 'TikTok',
+                  platformType: 'tiktok',
+                  time: '7:30 PM',
+                  tag: 'PEAK DISCOVERY',
+                  title: 'The Slow-Mo Creator Trap',
+                },
+                {
+                  platform: 'Instagram Reels',
+                  platformType: 'instagram',
+                  time: '8:00 PM',
+                  tag: 'OPTIMAL EXPLORE',
+                  title: 'The Slow-Mo Creator Trap',
+                },
+                {
+                  platform: 'Threads',
+                  platformType: 'threads',
+                  time: '8:30 PM',
+                  tag: 'EVENING CONVO',
+                  title: 'Stop waiting for the "perfect" idea...',
+                },
+                {
+                  platform: 'YouTube Shorts',
+                  platformType: 'youtube',
+                  time: '9:00 PM',
+                  tag: 'LATE SURGE',
+                  title: 'How I Batch-Film 10 Shorts in 2 Hours',
+                },
+              ].map((item) => (
+                <View key={item.platform} style={styles.queueItemRow}>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, flex: 1 }}>
+                    <View style={styles.queueIconBox}>
+                      <SocialBrandIcon platform={item.platformType} size={18} />
+                    </View>
+                    <View style={{ flex: 1 }}>
+                      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                        <Text style={styles.queuePlatformName}>{item.platform}</Text>
+                        <View style={styles.queueTagBadge}>
+                          <Text style={styles.queueTagBadgeText}>{item.tag}</Text>
+                        </View>
+                      </View>
+                      <Text style={styles.queueItemTitle} numberOfLines={1}>
+                        {item.title}
+                      </Text>
+                    </View>
+                  </View>
+                  <View style={styles.queueTimeBox}>
+                    <Text style={styles.queueTimeText}>{item.time}</Text>
+                  </View>
+                </View>
+              ))}
+            </ScrollView>
+
+            {/* Safety Notice */}
+            <View style={styles.queueSafetyNotice}>
+              <Text style={styles.queueSafetyNoticeText}>
+                🔒 Posts will be queued in your Jarvis schedule. You can edit or cancel any post before publish time.
+              </Text>
+            </View>
+
+            <View style={{ flexDirection: 'row', gap: 10, marginTop: 14 }}>
+              <Pressable
+                style={styles.modalCancelBtn}
+                onPress={() => setShowReviewScheduleModal(false)}
+              >
+                <Text style={styles.modalCancelBtnText}>Cancel</Text>
+              </Pressable>
+
+              <Pressable
+                style={[styles.modalSaveBtn, { flex: 2 }]}
+                onPress={() => {
+                  setShowReviewScheduleModal(false);
+                  handleScheduleAll();
+                }}
+              >
+                <Text style={styles.modalSaveBtnText}>Confirm & Queue All</Text>
               </Pressable>
             </View>
           </Animated.View>
@@ -2098,5 +2348,193 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontSize: 12,
     fontWeight: '700',
+  },
+
+  // SCORE INFO MODAL & BUTTONS
+  scoreInfoBtn: {
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    backgroundColor: '#FAF8F5',
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  scoreInfoBtnText: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: '#64748B',
+    lineHeight: 13,
+  },
+  scoreInfoBadge: {
+    backgroundColor: '#FEF3C7',
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#FDE68A',
+  },
+  scoreInfoBadgeText: {
+    fontSize: 11,
+    fontWeight: '800',
+    color: '#B45309',
+  },
+  scoreModalExplanation: {
+    fontSize: 12,
+    color: '#475569',
+    lineHeight: 18,
+    marginTop: 2,
+    marginBottom: 4,
+  },
+  scoreFactorCard: {
+    backgroundColor: '#FAF8F5',
+    borderRadius: 12,
+    padding: 10,
+    borderWidth: 1,
+    borderColor: '#EFECE6',
+  },
+  scoreFactorTitle: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#171420',
+  },
+  scoreFactorVal: {
+    fontSize: 12,
+    fontWeight: '800',
+  },
+  scoreFactorBarTrack: {
+    height: 5,
+    backgroundColor: '#E2E8F0',
+    borderRadius: 2.5,
+    overflow: 'hidden',
+    marginVertical: 4,
+  },
+  scoreFactorBarFill: {
+    height: '100%',
+    borderRadius: 2.5,
+  },
+  scoreFactorDesc: {
+    fontSize: 10.5,
+    color: '#64748B',
+    marginTop: 2,
+  },
+
+  // JARVIS 3-TIER HIERARCHY
+  jarvisPrimaryStrategyBtn: {
+    backgroundColor: '#FEF3C7',
+    borderColor: '#FCD34D',
+    borderWidth: 1.5,
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+    borderRadius: 12,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    shadowColor: '#F59E0B',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.12,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  jarvisPrimaryStar: {
+    fontSize: 12,
+  },
+  jarvisPrimaryStrategyText: {
+    fontSize: 10,
+    fontWeight: '800',
+    color: '#92400E',
+    letterSpacing: 0.4,
+  },
+  jarvisPrimaryArrow: {
+    fontSize: 12,
+    fontWeight: '800',
+    color: '#92400E',
+  },
+  jarvisSecondaryStrategyBtn: {
+    flex: 1,
+    backgroundColor: 'rgba(255, 255, 255, 0.08)',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.15)',
+    paddingVertical: 9,
+    borderRadius: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  jarvisSecondaryStrategyText: {
+    fontSize: 9.5,
+    fontWeight: '700',
+    color: '#E2E8F0',
+    letterSpacing: 0.3,
+  },
+
+  // QUEUE CONFIRMATION MODAL
+  queueItemRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: '#FAF8F5',
+    borderRadius: 14,
+    padding: 10,
+    borderWidth: 1,
+    borderColor: '#EFECE6',
+  },
+  queueIconBox: {
+    width: 32,
+    height: 32,
+    borderRadius: 10,
+    backgroundColor: '#FFFFFF',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#EFECE6',
+  },
+  queuePlatformName: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#171420',
+  },
+  queueTagBadge: {
+    backgroundColor: '#EDE9FE',
+    paddingHorizontal: 5,
+    paddingVertical: 1.5,
+    borderRadius: 4,
+  },
+  queueTagBadgeText: {
+    fontSize: 8,
+    fontWeight: '700',
+    color: '#582CDB',
+    letterSpacing: 0.3,
+  },
+  queueItemTitle: {
+    fontSize: 10.5,
+    color: '#64748B',
+    marginTop: 1,
+  },
+  queueTimeBox: {
+    backgroundColor: '#FEF3C7',
+    paddingHorizontal: 7,
+    paddingVertical: 3.5,
+    borderRadius: 6,
+    borderWidth: 1,
+    borderColor: '#FDE68A',
+  },
+  queueTimeText: {
+    fontSize: 10,
+    fontWeight: '700',
+    color: '#92400E',
+  },
+  queueSafetyNotice: {
+    backgroundColor: '#F8FAFC',
+    borderRadius: 10,
+    padding: 10,
+    marginTop: 10,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+  },
+  queueSafetyNoticeText: {
+    fontSize: 10.5,
+    color: '#475569',
+    lineHeight: 15,
   },
 });
