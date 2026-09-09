@@ -1693,15 +1693,19 @@ export const ProVoiceStudioScreen: React.FC<ProVoiceStudioScreenProps> = ({
                           </View>
                         </View>
 
-                        {/* Script Preview Snippet */}
-                        <Text style={styles.expandedProjectSnippet} numberOfLines={2}>
+                        {/* Script Preview Snippet (Fixed 2-line maximum for uniform card rhythm) */}
+                        <Text
+                          style={styles.expandedProjectSnippet}
+                          numberOfLines={2}
+                          ellipsizeMode="tail"
+                        >
                           &ldquo;{proj.text}&rdquo;
                         </Text>
 
                         {/* Action Row */}
-                        <View style={{ flexDirection: 'row', gap: 8, marginTop: 10 }}>
+                        <View style={styles.expandedActionRow}>
                           <Pressable
-                            style={styles.expandedActionReuseBtn}
+                            style={({ pressed }) => [styles.expandedActionReuseBtn, pressed && styles.btnPressed]}
                             onPress={() => {
                               handleLoadProjectIntoEditor(proj);
                               setShowAllProjectsModal(false);
@@ -1710,26 +1714,26 @@ export const ProVoiceStudioScreen: React.FC<ProVoiceStudioScreenProps> = ({
                             <Text style={styles.expandedActionReuseText}>✏️ Load in Editor</Text>
                           </Pressable>
 
-                        <Pressable
-                          style={styles.expandedActionExportBtn}
-                          onPress={() => {
-                            if (Platform.OS !== 'web') {
-                              Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-                            }
-                            setShowAllProjectsModal(false);
-                            setCelebrationData({
-                              title: 'Voiceover Master Exported!',
-                              subtitle: `"${proj.name}.wav" downloaded to your device storage.`,
-                              badgeText: '📥 AUDIO EXPORTED (+50 XP)',
-                              xpEarned: 50,
-                              speechBubble: 'Studio voiceover ready, Pablo! Ready to create! 🚀',
-                            });
-                            setShowCelebrationModal(true);
-                          }}
-                        >
-                          <Text style={styles.expandedActionExportText}>📥 Export WAV</Text>
-                        </Pressable>
-                      </View>
+                          <Pressable
+                            style={({ pressed }) => [styles.expandedActionExportBtn, pressed && styles.btnPressed]}
+                            onPress={() => {
+                              if (Platform.OS !== 'web') {
+                                Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+                              }
+                              setShowAllProjectsModal(false);
+                              setCelebrationData({
+                                title: 'Voiceover Master Exported!',
+                                subtitle: `"${proj.name}.wav" downloaded to your device storage.`,
+                                badgeText: '📥 AUDIO EXPORTED (+50 XP)',
+                                xpEarned: 50,
+                                speechBubble: 'Studio voiceover ready, Pablo! Ready to create! 🚀',
+                              });
+                              setShowCelebrationModal(true);
+                            }}
+                          >
+                            <Text style={styles.expandedActionExportText}>📥 Export WAV</Text>
+                          </Pressable>
+                        </View>
                     </View>
                   );
                 })}
@@ -3075,35 +3079,43 @@ const styles = StyleSheet.create({
     color: '#15803D',
   },
   expandedProjectSnippet: {
-    fontSize: 12,
+    fontSize: sFont(12),
     color: '#475569',
-    lineHeight: 16,
-    marginTop: 8,
+    lineHeight: 17,
+    minHeight: 34,
+    marginTop: 10,
+    marginBottom: 12,
     fontStyle: 'italic',
+  },
+  expandedActionRow: {
+    flexDirection: 'row',
+    gap: 8,
   },
   expandedActionReuseBtn: {
     flex: 1,
     backgroundColor: '#EDE9FE',
-    paddingVertical: 8,
-    borderRadius: 8,
+    paddingVertical: 9,
+    borderRadius: 9,
     alignItems: 'center',
+    justifyContent: 'center',
   },
   expandedActionReuseText: {
-    fontSize: 11,
+    fontSize: sFont(11.5),
     fontWeight: '700',
     color: '#582CDB',
   },
   expandedActionExportBtn: {
     flex: 1,
     backgroundColor: '#FFFFFF',
-    borderWidth: 1,
+    borderWidth: 1.5,
     borderColor: '#EFECE6',
-    paddingVertical: 8,
-    borderRadius: 8,
+    paddingVertical: 9,
+    borderRadius: 9,
     alignItems: 'center',
+    justifyContent: 'center',
   },
   expandedActionExportText: {
-    fontSize: 11,
+    fontSize: sFont(11.5),
     fontWeight: '800',
     color: '#171420',
   },
