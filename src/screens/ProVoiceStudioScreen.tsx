@@ -574,7 +574,7 @@ export const ProVoiceStudioScreen: React.FC<ProVoiceStudioScreenProps> = ({
         {/* 2. SCROLLABLE CONTENT */}
         <ScrollView
           style={styles.scrollContent}
-          contentContainerStyle={{ paddingBottom: 85 }}
+          contentContainerStyle={{ paddingBottom: 110 }}
           showsVerticalScrollIndicator={false}
         >
           {/* BADGES HEADER ROW */}
@@ -2741,7 +2741,7 @@ const styles = StyleSheet.create({
     padding: 18,
     borderWidth: 1,
     borderColor: '#FDE68A',
-    marginBottom: 6,
+    marginBottom: 10,
   },
   needMinutesTitle: {
     fontSize: 14.5,
