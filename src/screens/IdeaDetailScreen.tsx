@@ -348,7 +348,7 @@ export const IdeaDetailScreen: React.FC<IdeaDetailScreenProps> = ({
                 <Text style={styles.ideaTagPillText}>Creator Advice</Text>
               </View>
               <View style={styles.ideaTagPill}>
-                <Text style={styles.ideaTagPillText}>High Save Potential</Text>
+                <Text style={styles.ideaTagPillText}>Save-Focused</Text>
               </View>
             </View>
 

@@ -606,7 +606,7 @@ export const ContentAngleScreen: React.FC<ContentAngleScreenProps> = ({
                 <Text style={styles.heroTagPillText}>30-sec Reel</Text>
               </View>
               <View style={styles.heroSaveTagPill}>
-                <Text style={styles.heroSaveTagPillText}>High Save Potential</Text>
+                <Text style={styles.heroSaveTagPillText}>Save-Focused</Text>
               </View>
             </View>
 
@@ -666,7 +666,7 @@ export const ContentAngleScreen: React.FC<ContentAngleScreenProps> = ({
           >
             {[
               { id: 'faster', label: 'Faster formats' },
-              { id: 'saves', label: 'Higher save potential' },
+              { id: 'saves', label: 'Save-focused' },
               { id: 'trend', label: 'Trend-based' },
             ].map((f) => {
               const isActive = selectedAngleFilters.includes(f.id);

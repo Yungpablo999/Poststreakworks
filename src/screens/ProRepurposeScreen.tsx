@@ -468,7 +468,7 @@ export const ProRepurposeScreen: React.FC<ProRepurposeScreenProps> = ({
                 <Text style={styles.retentionBadgeText}>RETENTION READY</Text>
               </View>
               <View style={styles.savePotentialBadge}>
-                <Text style={styles.savePotentialBadgeText}>HIGH SAVE POTENTIAL</Text>
+                <Text style={styles.savePotentialBadgeText}>SAVE-FOCUSED</Text>
               </View>
             </View>
 
