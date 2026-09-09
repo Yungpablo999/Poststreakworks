@@ -1328,18 +1328,18 @@ export const ProVoiceStudioScreen: React.FC<ProVoiceStudioScreenProps> = ({
                         }}
                       >
                         <View style={styles.voiceOptionHeaderRow}>
-                          <View style={styles.voiceOptionTitleContainer}>
-                            <Text
-                              style={[
-                                styles.voiceOptionName,
-                                isSelected && styles.voiceOptionNameSelected,
-                              ]}
-                              numberOfLines={1}
-                              adjustsFontSizeToFit
-                              minimumFontScale={0.85}
-                            >
-                              {v.name}
-                            </Text>
+                          <Text
+                            style={[
+                              styles.voiceOptionName,
+                              isSelected && styles.voiceOptionNameSelected,
+                            ]}
+                            numberOfLines={1}
+                            adjustsFontSizeToFit
+                            minimumFontScale={0.85}
+                          >
+                            {v.name}
+                          </Text>
+                          <View style={styles.voiceOptionBadgesRow}>
                             <View style={[styles.tagPillMini, isSelected && styles.tagPillMiniSelected]}>
                               <Text
                                 style={[
@@ -1351,12 +1351,12 @@ export const ProVoiceStudioScreen: React.FC<ProVoiceStudioScreenProps> = ({
                                 {v.tag}
                               </Text>
                             </View>
+                            {isSelected && (
+                              <View style={styles.voiceActiveBadge}>
+                                <Text style={styles.voiceActiveBadgeText}>✓ ACTIVE</Text>
+                              </View>
+                            )}
                           </View>
-                          {isSelected && (
-                            <View style={styles.voiceActiveBadge}>
-                              <Text style={styles.voiceActiveBadgeText}>✓ ACTIVE</Text>
-                            </View>
-                          )}
                         </View>
                         <Text style={styles.voiceOptionDesc} numberOfLines={2}>{v.desc}</Text>
                         <View style={{ flexDirection: 'row', gap: 6, marginTop: 8, flexWrap: 'wrap' }}>
@@ -2829,22 +2829,23 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 4,
   },
-  voiceOptionTitleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    flex: 1,
-    minWidth: 0,
-    marginRight: 6,
-  },
   voiceOptionName: {
     fontSize: sFont(13),
     fontWeight: '700',
     color: '#171420',
+    flex: 1,
+    minWidth: 0,
+    marginRight: 8,
   },
   voiceOptionNameSelected: {
     color: '#582CDB',
     fontWeight: '800',
+  },
+  voiceOptionBadgesRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    flexShrink: 0,
   },
   voiceActiveBadge: {
     backgroundColor: '#582CDB',
