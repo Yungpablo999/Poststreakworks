@@ -76,11 +76,11 @@ export const ProRepurposeScreen: React.FC<ProRepurposeScreenProps> = ({
       id: 'shorts',
       platform: 'YouTube Shorts',
       platformType: 'youtube',
-      badge: 'OPTIMIZED',
+      badge: 'READY',
       badgeColor: '#DCFCE7',
       badgeTextColor: '#15803D',
       title: 'How I Batch-Film 10 Shorts in 2 Hours',
-      body: 'Breakdown of workflow systems that 10x your output without burnout.',
+      body: 'Breakdown of workflow systems that help you increase your output without burnout.',
     },
     {
       id: 'threads',
