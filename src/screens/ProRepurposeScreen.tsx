@@ -507,7 +507,7 @@ export const ProRepurposeScreen: React.FC<ProRepurposeScreenProps> = ({
             {[
               { id: 'tiktok', name: 'TikTok', platformType: 'tiktok' },
               { id: 'ig_reel', name: 'IG Reel', platformType: 'instagram' },
-              { id: 'shorts', name: 'Shorts', platformType: 'youtube' },
+              { id: 'shorts', name: 'YouTube Shorts', platformType: 'youtube' },
               { id: 'threads', name: 'Threads', platformType: 'threads' },
               { id: 'facebook', name: 'Facebook', platformType: 'facebook' },
               { id: 'more', name: 'More', isMore: true },
@@ -541,7 +541,12 @@ export const ProRepurposeScreen: React.FC<ProRepurposeScreenProps> = ({
                   <View style={{ height: 22, justifyContent: 'center', alignItems: 'center' }}>
                     <SocialBrandIcon platform={fmt.platformType!} size={20} />
                   </View>
-                  <Text style={[styles.formatCardName, isSelected && styles.formatCardNameActive]}>
+                  <Text
+                    style={[styles.formatCardName, isSelected && styles.formatCardNameActive]}
+                    numberOfLines={1}
+                    adjustsFontSizeToFit
+                    minimumFontScale={0.78}
+                  >
                     {fmt.name}
                   </Text>
                   {isSelected && (
