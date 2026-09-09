@@ -1311,28 +1311,52 @@ export const ProVoiceStudioScreen: React.FC<ProVoiceStudioScreenProps> = ({
                     return (
                       <Pressable
                         key={v.id}
-                        style={[
+                        style={({ pressed }) => [
                           styles.voiceOptionCard,
                           isSelected && styles.voiceOptionCardSelected,
+                          pressed && styles.btnPressed,
                         ]}
                         onPress={() => {
+                          if (Platform.OS !== 'web') {
+                            Haptics.selectionAsync();
+                          }
                           setSelectedVoiceStyle(v);
                           if (v.pace.startsWith('1.2x')) setSelectedSpeed('1.2x');
                           else if (v.pace.startsWith('1.1x') || v.pace.startsWith('1.15x')) setSelectedSpeed('1.1x');
                           else if (v.pace.startsWith('0.9x')) setSelectedSpeed('0.9x');
                           else setSelectedSpeed('1.0x');
-                          setShowVoiceStyleModal(false);
-                          showToast(`✓ Switched voice to "${v.name}"`);
                         }}
                       >
-                        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
-                          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, flex: 1, minWidth: 0, marginRight: 8 }}>
-                            <Text style={styles.voiceOptionName} numberOfLines={1}>{v.name}</Text>
-                            <View style={styles.tagPillMini}>
-                              <Text style={styles.tagPillMiniText} numberOfLines={1}>{v.tag}</Text>
+                        <View style={styles.voiceOptionHeaderRow}>
+                          <View style={styles.voiceOptionTitleContainer}>
+                            <Text
+                              style={[
+                                styles.voiceOptionName,
+                                isSelected && styles.voiceOptionNameSelected,
+                              ]}
+                              numberOfLines={1}
+                              adjustsFontSizeToFit
+                              minimumFontScale={0.85}
+                            >
+                              {v.name}
+                            </Text>
+                            <View style={[styles.tagPillMini, isSelected && styles.tagPillMiniSelected]}>
+                              <Text
+                                style={[
+                                  styles.tagPillMiniText,
+                                  isSelected && styles.tagPillMiniTextSelected,
+                                ]}
+                                numberOfLines={1}
+                              >
+                                {v.tag}
+                              </Text>
                             </View>
                           </View>
-                          {isSelected && <Text style={styles.voiceOptionCheck} numberOfLines={1}>✓ ACTIVE</Text>}
+                          {isSelected && (
+                            <View style={styles.voiceActiveBadge}>
+                              <Text style={styles.voiceActiveBadgeText}>✓ ACTIVE</Text>
+                            </View>
+                          )}
                         </View>
                         <Text style={styles.voiceOptionDesc} numberOfLines={2}>{v.desc}</Text>
                         <View style={{ flexDirection: 'row', gap: 6, marginTop: 8, flexWrap: 'wrap' }}>
@@ -1348,11 +1372,27 @@ export const ProVoiceStudioScreen: React.FC<ProVoiceStudioScreenProps> = ({
                   })}
                 </View>
 
+                {/* Primary Apply Action Button */}
+                <Pressable
+                  style={({ pressed }) => [styles.voiceApplyBtn, pressed && styles.btnPressed]}
+                  onPress={() => {
+                    if (Platform.OS !== 'web') {
+                      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+                    }
+                    setShowVoiceStyleModal(false);
+                    showToast(`✓ Applied voice "${selectedVoiceStyle.name}"`);
+                  }}
+                >
+                  <Text style={styles.voiceApplyBtnText}>
+                    Apply {selectedVoiceStyle.name} →
+                  </Text>
+                </Pressable>
+
                 <Pressable
                   style={styles.modalCancelBtn}
                   onPress={() => setShowVoiceStyleModal(false)}
                 >
-                  <Text style={styles.modalCancelBtnText}>Close</Text>
+                  <Text style={styles.modalCancelBtnText}>Cancel</Text>
                 </Pressable>
               </ScrollView>
             </Animated.View>
@@ -2775,13 +2815,49 @@ const styles = StyleSheet.create({
   },
   voiceOptionCardSelected: {
     backgroundColor: '#F5F3FF',
-    borderColor: '#8B5CF6',
+    borderColor: '#582CDB',
+    borderWidth: 2,
+    shadowColor: '#582CDB',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.12,
+    shadowRadius: 8,
+    elevation: 3,
+  },
+  voiceOptionHeaderRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 4,
+  },
+  voiceOptionTitleContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    flex: 1,
+    minWidth: 0,
+    marginRight: 6,
   },
   voiceOptionName: {
     fontSize: sFont(13),
     fontWeight: '700',
     color: '#171420',
-    flexShrink: 1,
+  },
+  voiceOptionNameSelected: {
+    color: '#582CDB',
+    fontWeight: '800',
+  },
+  voiceActiveBadge: {
+    backgroundColor: '#582CDB',
+    paddingHorizontal: 7,
+    paddingVertical: 2.5,
+    borderRadius: 6,
+    flexShrink: 0,
+  },
+  voiceActiveBadgeText: {
+    fontSize: sFont(9),
+    fontWeight: '800',
+    color: '#FFFFFF',
+    letterSpacing: 0.3,
   },
   voiceOptionCheck: {
     fontSize: sFont(9.5),
@@ -2794,6 +2870,25 @@ const styles = StyleSheet.create({
     color: '#64748B',
     marginTop: 2,
     lineHeight: 15,
+  },
+  voiceApplyBtn: {
+    backgroundColor: '#582CDB',
+    paddingVertical: 14,
+    borderRadius: 14,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#582CDB',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.25,
+    shadowRadius: 10,
+    elevation: 4,
+    marginBottom: 6,
+  },
+  voiceApplyBtnText: {
+    color: '#FFFFFF',
+    fontSize: sFont(14),
+    fontWeight: '800',
+    letterSpacing: 0.3,
   },
   tagPillMini: {
     backgroundColor: '#FEF3C7',
