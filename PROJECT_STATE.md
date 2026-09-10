@@ -4,7 +4,23 @@
 get reset, new chats start cold. This is the actual source of truth for what's been built, what's
 real vs. stub, and what to do next. Keep it updated as work progresses; don't let it go stale.
 
-Last updated: 2026-08-31, after commit `bd383fd` on `master`.
+Last updated: 2026-09-10.
+
+### Scope decisions locked in on 2026-09-10 (apply, don't relitigate)
+
+- **Postiz: dropped entirely.** Not using it for multi-channel or anything else. Ignore every earlier
+  note about Postiz being the multi-channel engine. Direct-API integrations only (LinkedIn/X are
+  ported; other channels are unscoped for now, not Postiz).
+- **Auth for now: plain JWT via email+password.** Sign-up/sign-in auto-confirm the email server-side
+  (gated on `AUTH_DEV_AUTOCONFIRM=true`, which MUST be off in production) and always return a real
+  Supabase session token, so the frontend team can wire authenticated screens without the
+  email-verification round trip. Google/Apple/Microsoft OAuth sign-in: deferred.
+- **Payments: dummy/mock flow.** No real Paystack/Stripe integration or keys for now — billing
+  screens get wired against a stubbed payment path.
+- **Voice Studio / Fish Audio: future work.** Don't wire Voice screens or build the Fish Audio
+  integration yet.
+- **GitHub repo is temporary.** An org repo comes later; don't over-invest in repo-specific CI or
+  settings on `Yungpablo999/Poststreakworks`.
 
 ## 1. Your role here
 
@@ -126,12 +142,14 @@ means a fresh session has to get them again. If you're starting fresh and these 
 What's been provided and confirmed working: Supabase (URL, anon/publishable key, service role/secret
 key, **and the DB password** — `aws-1-eu-west-1` pooler shard, not `aws-0`), Groq, Gemini (wired as
 fallback to Groq, not primary), Google OAuth client id/secret, X OAuth client id/secret, LinkedIn
-OAuth client id/secret, `CRON_SECRET`, Resend, PostHog, Postiz API key (see §7 — the Postiz *service*
-itself was unreachable as of last check, key alone doesn't help until that's resolved).
+OAuth client id/secret, `CRON_SECRET`, Resend, PostHog.
 
-Still missing (ask the user, don't block other work on it): `PAYSTACK_SECRET_KEY`,
-`STRIPE_SECRET_KEY` + `STRIPE_WEBHOOK_SECRET`, `FISH_AUDIO_API_KEY`, `SENTRY_DSN`, Apple Sign-In
-(Services ID, Team ID, Key ID, `.p8` key), Microsoft Sign-In (Azure Client ID/Secret/Tenant ID).
+`AUTH_DEV_AUTOCONFIRM=true` also belongs in `backend/apps/web/.env.local` — see the 2026-09-10 auth
+decision at the top of this file. It has no secret value, just set it.
+
+Not needed anymore per the 2026-09-10 decisions: Paystack/Stripe keys (dummy payments), Fish Audio
+key (voice deferred), Apple/Microsoft Sign-In credentials (OAuth sign-in deferred), Postiz. `SENTRY_DSN`
+is still optional and not blocking.
 
 A Supabase **Personal Access Token** (account-level, different from the keys above) was never
 provided — only needed if the user wants Claude configuring Auth providers via the Management API
@@ -150,7 +168,9 @@ server-side `staff_admin` auth gate.
 **Explicit stubs (marked in code, not hidden):**
 - `packages/analytics/*` (9 files) — no data pipeline behind them
 - `GET /api/v1/growth/*` (4 routes), `POST /api/v1/jarvis/rate-card` — honest 501s, need a
-  per-creator/per-platform metrics pipeline that doesn't exist yet
+  per-creator/per-platform metrics pipeline that doesn't exist yet. OPEN DECISION (asked the user
+  2026-09-10, not yet answered): serve **dummy analytics data** so growth screens can be wired now
+  (consistent with the dummy-payments call), or leave them until a real pipeline exists.
 - `packages/workflows/*-lifecycle.ts` + `*-journey.ts`/`*-flow.ts` (9 files) — structural stubs.
   Separate from `streak-engine.ts`, which is real and in active use.
 - `packages/hooks/index.ts` — 6 frontend-facing React hooks, all `TODO`, arguably frontend team's
@@ -170,21 +190,18 @@ server-side `staff_admin` auth gate.
 - **Sign-in with Google, Apple, and Microsoft** are all wanted. Google has credentials; Apple/Microsoft
   don't yet (§5). None of the three OAuth sign-in flows are built in the backend yet — current auth is
   email/password + Supabase OTP only.
-- **Postiz** (self-hosted, `gitroomhq/postiz-app`, deployed on Railway) is the intended engine for
-  **multi-channel** publishing (the long tail beyond LinkedIn/X — Instagram, TikTok, etc.). Decision:
-  **use Postiz for everything except LinkedIn and X; keep the direct-API integrations
-  (`packages/integrations/linkedin.ts`, `x.ts`) for those two.** Confirmed from a real finding: v1's
-  live `posts` table has a `postiz_id` column — v1 was *already* publishing through Postiz, not a
-  from-scratch decision. **Not yet built.** Also, as of the last check the Railway app at
-  `https://gitroomhqpostiz-applatest-production-3ad5.up.railway.app` returned Railway's own
-  "Application not found" (edge-proxy 404, not a Postiz 404) — the instance needs to actually be
-  running before any of this integration work can start. Confirm it's live before building against it.
+- **Postiz: dropped** (2026-09-10). The earlier plan to use it for multi-channel publishing is dead.
+  Note for context only: v1's live `posts` table has a `postiz_id` column, so v1 *was* publishing
+  through Postiz — but we're not carrying that forward. Direct-API for LinkedIn/X; other channels
+  unscoped.
 
 ## 8. Frontend wiring status — the current active work
 
 **Verified live and working** (commit `bd383fd` on `master`):
 - Sign-up and sign-in, full round trip against the real Supabase project, tested in-browser via the
-  Expo web build at `localhost:8081` against the backend at `localhost:3000`.
+  Expo web build at `localhost:8081` against the backend at `localhost:3000`. As of 2026-09-10 both
+  routes auto-confirm the email server-side (gated on `AUTH_DEV_AUTOCONFIRM`) and always return a real
+  JWT + `refreshToken`; sign-up with no password generates one and returns it as `generatedPassword`.
 - `DashboardScreen`'s level/streak/XP display — this was **hardcoded mock text** (`"Level 42"`,
   `"47-Day Streak"`, `"2,450 XP"` as literal JSX strings, not bound to any prop) until commit
   `bd383fd`. Now reads from `userProfile` (which `App.tsx` already populated correctly from real API

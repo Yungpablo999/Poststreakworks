@@ -39,17 +39,34 @@ export async function POST(request: Request) {
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
   );
+  const serviceClient = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!,
+    { auth: { autoRefreshToken: false, persistSession: false } },
+  );
 
-  const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+  let { data, error } = await supabase.auth.signInWithPassword({ email, password });
+
+  // Temp/staging affordance (project decision 2026-09-10): if the only thing
+  // standing in the way is an unconfirmed email, confirm it server-side and
+  // retry once. Gated on AUTH_DEV_AUTOCONFIRM — off in production, where a
+  // genuine "email not confirmed" must stay a hard failure.
+  if (
+    process.env.AUTH_DEV_AUTOCONFIRM === "true" &&
+    error?.message?.toLowerCase().includes("email not confirmed")
+  ) {
+    const { data: userList } = await serviceClient.auth.admin.listUsers({ perPage: 1000 });
+    const target = userList?.users.find((u) => u.email?.toLowerCase() === email.toLowerCase());
+    if (target) {
+      await serviceClient.auth.admin.updateUserById(target.id, { email_confirm: true });
+      ({ data, error } = await supabase.auth.signInWithPassword({ email, password }));
+    }
+  }
 
   if (error || !data.session) {
     return NextResponse.json({ message: error?.message ?? "Invalid credentials" }, { status: 401 });
   }
 
-  const serviceClient = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!,
-  );
   const user = await assembleUserProfile(serviceClient, data.user.id);
 
   return NextResponse.json({
