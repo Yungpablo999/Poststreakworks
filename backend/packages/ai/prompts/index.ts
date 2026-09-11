@@ -45,7 +45,6 @@ Time of day: ${params.timeOfDay}
 Base instructions: ${params.baseInstructions}
 
 Write the personalized version:`,
-    model: "llama-3.3-70b-versatile",
     temperature: 0.7,
   };
 }
@@ -80,7 +79,6 @@ Platform: ${params.platform}
 Target audience: ${params.audience}
 
 Generate 5 content ideas:`,
-    model: "llama-3.3-70b-versatile",
     temperature: 0.8,
   };
 }
@@ -111,7 +109,6 @@ Tone: ${params.tone}
 Format: ${params.format}
 
 Generate 7 hooks:`,
-    model: "llama-3.3-70b-versatile",
     temperature: 0.9,
   };
 }
@@ -144,7 +141,6 @@ Style: ${params.style}
 Call-to-action: ${params.cta}
 
 Write the script:`,
-    model: "llama-3.3-70b-versatile",
     temperature: 0.7,
   };
 }
@@ -177,7 +173,6 @@ Platform: ${params.platform}
 Include hashtags: ${params.includeHashtags}
 
 Write the caption:`,
-    model: "llama-3.3-70b-versatile",
     temperature: 0.7,
   };
 }
@@ -214,7 +209,6 @@ Be conservative — flag when uncertain rather than missing real issues. False p
 Content: ${params.content}
 
 Analyze:`,
-    model: "llama-3.3-70b-versatile",
     temperature: 0.1,
   };
 }
