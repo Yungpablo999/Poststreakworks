@@ -39,7 +39,12 @@ export async function geminiChat(options: GeminiChatOptions): Promise<string> {
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) throw new Error("GEMINI_API_KEY is not set");
 
-  const model = options.model ?? "gemini-2.0-flash";
+  // gemini-2.0-flash was retired (404, confirmed live against
+  // /v1beta/models on 2026-09-11). Using the -latest alias rather than
+  // pinning a dated model name again — this is a fallback path, so
+  // "whatever Google currently recommends" matters more here than
+  // pinned, predictable behavior.
+  const model = options.model ?? "gemini-flash-latest";
   const response = await fetch(`${GEMINI_API_URL}/${model}:generateContent?key=${apiKey}`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -60,7 +65,12 @@ export async function* geminiChatStream(options: GeminiChatOptions) {
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) throw new Error("GEMINI_API_KEY is not set");
 
-  const model = options.model ?? "gemini-2.0-flash";
+  // gemini-2.0-flash was retired (404, confirmed live against
+  // /v1beta/models on 2026-09-11). Using the -latest alias rather than
+  // pinning a dated model name again — this is a fallback path, so
+  // "whatever Google currently recommends" matters more here than
+  // pinned, predictable behavior.
+  const model = options.model ?? "gemini-flash-latest";
   const response = await fetch(
     `${GEMINI_API_URL}/${model}:streamGenerateContent?alt=sse&key=${apiKey}`,
     {

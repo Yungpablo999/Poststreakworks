@@ -26,7 +26,13 @@ async function groqChatOnly(options: GroqChatOptions) {
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      model: options.model ?? "llama-3.3-70b-versatile",
+      // llama-3.3-70b-versatile was retired from Groq's lineup (404
+      // model_not_found, confirmed live against /v1/models on 2026-09-11).
+      // gpt-oss-120b is the closest general-purpose replacement; it's a
+      // reasoning model, so give it enough max_tokens headroom (the default
+      // below) or it can burn the whole budget on hidden reasoning and
+      // return empty content — verified fine at 300+ tokens, empty at 10.
+      model: options.model ?? "openai/gpt-oss-120b",
       messages: options.messages,
       temperature: options.temperature ?? 0.7,
       max_tokens: options.max_tokens ?? 1024,
