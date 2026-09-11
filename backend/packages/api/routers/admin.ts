@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { createTRPCRouter, staffProcedure } from "../context";
+import { createTRPCRouter, staffProcedure, createSupabaseServiceClient } from "../context";
 import { TRPCError } from "@trpc/server";
 
 export const adminRouter = createTRPCRouter({
@@ -175,8 +175,13 @@ export const adminRouter = createTRPCRouter({
               ? "restricted"
               : "suspended";
 
+      // users_update_own (auth.uid() = id) would silently filter this to
+      // zero rows via ctx.supabase since the target is never the caller —
+      // PostgREST reports that as success with no data, not an error, so
+      // this would have quietly done nothing while returning
+      // {success: true}. staffProcedure already verified staff_admin.
       const [statusErr, sanctionErr] = await Promise.all([
-        ctx.supabase
+        createSupabaseServiceClient()
           .from("users")
           .update({ account_status: accountStatus })
           .eq("id", input.userId),
@@ -212,7 +217,7 @@ export const adminRouter = createTRPCRouter({
     .query(async ({ ctx, input }) => {
       const { data, error } = await ctx.supabase
         .from("user_sanctions")
-        .select("*, staff:users!issued_by(display_name)")
+        .select("*")
         .eq("user_id", input.userId)
         .order("issued_at", { ascending: false });
 
@@ -223,6 +228,14 @@ export const adminRouter = createTRPCRouter({
         });
       }
 
-      return data;
+      // Same users_select_own RLS gap as elsewhere — see helper note in
+      // safety-moderation.ts. Narrow service-role lookup for display_name.
+      const staffIds = [...new Set((data ?? []).map((s) => s.issued_by))];
+      const { data: staffRows } = staffIds.length
+        ? await createSupabaseServiceClient().from("users").select("id, display_name").in("id", staffIds)
+        : { data: [] as { id: string; display_name: string | null }[] };
+      const staffMap = new Map((staffRows ?? []).map((s) => [s.id, s.display_name]));
+
+      return (data ?? []).map((s) => ({ ...s, staff: { display_name: staffMap.get(s.issued_by) ?? null } }));
     }),
 });

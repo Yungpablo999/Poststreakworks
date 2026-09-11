@@ -4,7 +4,36 @@
 get reset, new chats start cold. This is the actual source of truth for what's been built, what's
 real vs. stub, and what to do next. Keep it updated as work progresses; don't let it go stale.
 
-Last updated: 2026-09-10.
+Last updated: 2026-09-11.
+
+### Dummy test accounts (2026-09-11) — use these for any manual/frontend testing
+
+Two real, fully-seeded accounts exist in the live Supabase project so every wired screen has
+something real to render:
+- **Primary**: `demo@poststreak.app` / `DemoUser2026!` — "Amara Demo", pro tier, 12-day streak,
+  level 4, connected LinkedIn+Twitter, 8 posts (published/scheduled/draft), an active subscription,
+  earnings history, an active duel + squad + match + conversation with the counterparty below,
+  quest progress, notifications, milestones, referral history.
+- **Counterparty**: `demo-creator-2@poststreak.app` / `DemoUser2026!` — "Kwame Creates", exists purely
+  so Amara's matches/duels/squad/messages have a real counterpart — deliberately NOT a reused real v1
+  user (don't attach fake social data to a real founder's account).
+- Seed script: `backend/scripts/seed-dummy-data.js` (run once already; not idempotent — see its header
+  before re-running). Also seeded the global `quests`, `community_challenges`, and `brand_campaigns`
+  catalogs, which were completely empty project-wide before this.
+
+**A real, systemic bug was found and fixed while verifying this end to end**: `ctx.supabase` in tRPC
+context is request-scoped to the caller's own JWT, so RLS applies — and `users` only has a
+`users_select_own` policy. Every router embedding another user's `display_name`/`avatar_url` via
+`users!fk(...)` was silently returning null (or, with `!inner`, dropping the row entirely) for anyone
+but the caller. Fixed in `creator-network.ts` (conversations/messages), `duels.ts`,
+`accounts.ts.getPublicProfile` (this one was **completely broken for every profile, always** — it's a
+`publicProcedure` with `!inner`, so `auth.uid()` is null and the join can never succeed),
+`safety-moderation.ts`, and `admin.ts`. The `admin.ts`/`safety-moderation.ts` `sanctionUser`/
+`resolveReport` mutations had a worse variant: `users.update({account_status})` on a target user
+would be silently filtered to zero rows by RLS (not an error), so staff warn/restrict/suspend actions
+never actually took effect. All fixed the same way: a narrow `createSupabaseServiceClient()` lookup/
+write for exactly the fields that need cross-user access, everything else stays on `ctx.supabase` so
+RLS keeps governing row visibility normally. Verified live post-fix (see git log for the commit).
 
 ### Scope decisions locked in on 2026-09-10 (apply, don't relitigate)
 

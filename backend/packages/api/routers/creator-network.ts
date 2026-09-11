@@ -1,6 +1,29 @@
 import { z } from "zod";
-import { createTRPCRouter, protectedProcedure } from "../context";
+import { createTRPCRouter, protectedProcedure, createSupabaseServiceClient } from "../context";
 import { TRPCError } from "@trpc/server";
+
+// users only has an RLS policy for reading your OWN row (users_select_own —
+// see supabase/migrations/20260814000001), so ctx.supabase (RLS-scoped to
+// the caller) can never see another user's display_name/avatar_url — an
+// embedded `users!fk(...)` select on it silently returns null, not an
+// error. Fetching those two public-identity fields is a narrow, deliberate
+// use of the service-role client, same pattern as rate-limit.ts and the
+// admin auth gate — everything else here still goes through ctx.supabase
+// so RLS keeps governing which rows (matches/conversations/messages) the
+// caller can see at all.
+async function getDisplayInfo(userIds: string[]): Promise<Map<string, { display_name: string | null; avatar_url: string | null }>> {
+  const map = new Map<string, { display_name: string | null; avatar_url: string | null }>();
+  const uniqueIds = [...new Set(userIds)].filter(Boolean);
+  if (uniqueIds.length === 0) return map;
+  const { data } = await createSupabaseServiceClient()
+    .from("users")
+    .select("id, display_name, avatar_url")
+    .in("id", uniqueIds);
+  for (const row of data ?? []) {
+    map.set(row.id, { display_name: row.display_name, avatar_url: row.avatar_url });
+  }
+  return map;
+}
 
 export const creatorNetworkRouter = createTRPCRouter({
   /**
@@ -202,19 +225,20 @@ export const creatorNetworkRouter = createTRPCRouter({
 
     if (!profile) return [];
 
+    // matches_select_own already scopes this to rows where the caller is
+    // user_a or user_b, so no extra .or() filter is needed (and one on an
+    // embedded resource here would need the embed to be !inner to behave
+    // predictably) — just embed matches directly via the FK on conversations.
     const { data, error } = await ctx.supabase
       .from("conversations")
       .select(`
         *,
         match:matches(
-          *,
-          user_a:creator_profiles!user_a_id(user_id, display_name, avatar_url),
-          user_b:creator_profiles!user_b_id(user_id, display_name, avatar_url)
+          id, status, matched_at,
+          user_a:creator_profiles!user_a_id(id, user_id, niche, slug),
+          user_b:creator_profiles!user_b_id(id, user_id, niche, slug)
         )
-      `)
-      .or(
-        `match.user_a_id.eq.${profile.id},match.user_b_id.eq.${profile.id}`,
-      );
+      `);
 
     if (error) {
       throw new TRPCError({
@@ -223,7 +247,27 @@ export const creatorNetworkRouter = createTRPCRouter({
       });
     }
 
-    return data;
+    const otherUserIds = (data ?? [])
+      .map((c) => {
+        const match = c.match as unknown as {
+          user_a: { user_id: string } | null;
+          user_b: { user_id: string } | null;
+        } | null;
+        const a = match?.user_a?.user_id;
+        const b = match?.user_b?.user_id;
+        return a === ctx.user.id ? b : a;
+      })
+      .filter((id): id is string => !!id);
+    const displayInfo = await getDisplayInfo(otherUserIds);
+
+    return (data ?? []).map((c) => {
+      const match = c.match as unknown as {
+        user_a: { user_id: string } | null;
+        user_b: { user_id: string } | null;
+      } | null;
+      const otherId = match?.user_a?.user_id === ctx.user.id ? match?.user_b?.user_id : match?.user_a?.user_id;
+      return { ...c, otherCreator: otherId ? { userId: otherId, ...displayInfo.get(otherId) } : null };
+    });
   }),
 
   /**
@@ -240,7 +284,7 @@ export const creatorNetworkRouter = createTRPCRouter({
     .query(async ({ ctx, input }) => {
       let query = ctx.supabase
         .from("messages")
-        .select("*, sender:users!sender_id(display_name, avatar_url)")
+        .select("*")
         .eq("conversation_id", input.conversationId)
         .order("created_at", { ascending: true })
         .limit(input.limit);
@@ -258,7 +302,8 @@ export const creatorNetworkRouter = createTRPCRouter({
         });
       }
 
-      return data;
+      const displayInfo = await getDisplayInfo((data ?? []).map((m) => m.sender_id));
+      return (data ?? []).map((m) => ({ ...m, sender: displayInfo.get(m.sender_id) ?? null }));
     }),
 
   /**

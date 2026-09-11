@@ -1,6 +1,35 @@
 import { z } from "zod";
-import { createTRPCRouter, protectedProcedure } from "../context";
+import { createTRPCRouter, protectedProcedure, createSupabaseServiceClient } from "../context";
 import { TRPCError } from "@trpc/server";
+
+// users only has an RLS policy for reading your OWN row (users_select_own
+// — see supabase/migrations/20260814000001), so ctx.supabase (RLS-scoped
+// to the caller) silently returns null for the opponent's embedded
+// users!fk(display_name, avatar_url) — not an error, just missing data.
+// Same fix as creator-network.ts: a narrow service-role lookup for just
+// these two public-identity columns.
+async function getDisplayInfo(userIds: string[]): Promise<Map<string, { display_name: string | null; avatar_url: string | null }>> {
+  const map = new Map<string, { display_name: string | null; avatar_url: string | null }>();
+  const uniqueIds = [...new Set(userIds)].filter(Boolean);
+  if (uniqueIds.length === 0) return map;
+  const { data } = await createSupabaseServiceClient()
+    .from("users")
+    .select("id, display_name, avatar_url")
+    .in("id", uniqueIds);
+  for (const row of data ?? []) {
+    map.set(row.id, { display_name: row.display_name, avatar_url: row.avatar_url });
+  }
+  return map;
+}
+
+async function withOpponentInfo(duels: { user_a_id: string; user_b_id: string }[]) {
+  const displayInfo = await getDisplayInfo(duels.flatMap((d) => [d.user_a_id, d.user_b_id]));
+  return duels.map((d) => ({
+    ...d,
+    user_a: displayInfo.get(d.user_a_id) ?? null,
+    user_b: displayInfo.get(d.user_b_id) ?? null,
+  }));
+}
 
 export const duelsRouter = createTRPCRouter({
   /**
@@ -9,11 +38,7 @@ export const duelsRouter = createTRPCRouter({
   getActive: protectedProcedure.query(async ({ ctx }) => {
     const { data, error } = await ctx.supabase
       .from("duels")
-      .select(`
-        *,
-        user_a:users!user_a_id(display_name, avatar_url),
-        user_b:users!user_b_id(display_name, avatar_url)
-      `)
+      .select("*")
       .or(`user_a_id.eq.${ctx.user.id},user_b_id.eq.${ctx.user.id}`)
       .eq("status", "active");
 
@@ -24,7 +49,7 @@ export const duelsRouter = createTRPCRouter({
       });
     }
 
-    return data;
+    return withOpponentInfo(data ?? []);
   }),
 
   /**
@@ -33,11 +58,7 @@ export const duelsRouter = createTRPCRouter({
   getHistory: protectedProcedure.query(async ({ ctx }) => {
     const { data, error } = await ctx.supabase
       .from("duels")
-      .select(`
-        *,
-        user_a:users!user_a_id(display_name, avatar_url),
-        user_b:users!user_b_id(display_name, avatar_url)
-      `)
+      .select("*")
       .or(`user_a_id.eq.${ctx.user.id},user_b_id.eq.${ctx.user.id}`)
       .in("status", ["completed", "cancelled"])
       .order("created_at", { ascending: false })
@@ -50,7 +71,7 @@ export const duelsRouter = createTRPCRouter({
       });
     }
 
-    return data;
+    return withOpponentInfo(data ?? []);
   }),
 
   /**

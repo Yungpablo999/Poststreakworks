@@ -1,6 +1,28 @@
 import { z } from "zod";
-import { createTRPCRouter, protectedProcedure, staffProcedure } from "../context";
+import { createTRPCRouter, protectedProcedure, staffProcedure, createSupabaseServiceClient } from "../context";
 import { TRPCError } from "@trpc/server";
+
+// users only has an RLS policy for reading/updating your OWN row
+// (users_select_own / users_update_own — see supabase/migrations/
+// 20260814000001). Every lookup of ANOTHER user's display_name/email here
+// silently returns null via ctx.supabase, and — more seriously —
+// resolveReport's account_status update on the *target* user would
+// silently affect zero rows. staffProcedure has already verified the
+// caller is staff_admin, so a narrow service-role client for exactly
+// these operations is the correct, deliberate elevation, not a shortcut.
+async function getDisplayInfo(userIds: string[]) {
+  const map = new Map<string, { display_name: string | null; email: string | null; avatar_url: string | null }>();
+  const uniqueIds = [...new Set(userIds)].filter(Boolean);
+  if (uniqueIds.length === 0) return map;
+  const { data } = await createSupabaseServiceClient()
+    .from("users")
+    .select("id, display_name, email, avatar_url")
+    .in("id", uniqueIds);
+  for (const row of data ?? []) {
+    map.set(row.id, { display_name: row.display_name, email: row.email, avatar_url: row.avatar_url });
+  }
+  return map;
+}
 
 export const safetyModerationRouter = createTRPCRouter({
   /**
@@ -66,7 +88,7 @@ export const safetyModerationRouter = createTRPCRouter({
   getBlocks: protectedProcedure.query(async ({ ctx }) => {
     const { data, error } = await ctx.supabase
       .from("blocks")
-      .select("*, blocked:users!blocked_id(display_name, avatar_url)")
+      .select("*")
       .eq("blocker_id", ctx.user.id);
 
     if (error) {
@@ -76,7 +98,11 @@ export const safetyModerationRouter = createTRPCRouter({
       });
     }
 
-    return data;
+    const displayInfo = await getDisplayInfo((data ?? []).map((b) => b.blocked_id));
+    return (data ?? []).map((b) => {
+      const info = displayInfo.get(b.blocked_id);
+      return { ...b, blocked: info ? { display_name: info.display_name, avatar_url: info.avatar_url } : null };
+    });
   }),
 
   /**
@@ -146,11 +172,7 @@ export const safetyModerationRouter = createTRPCRouter({
   getQueue: staffProcedure.query(async ({ ctx }) => {
     const { data, error } = await ctx.supabase
       .from("reports")
-      .select(`
-        *,
-        reporter:users!reporter_id(display_name, email),
-        target_user:users!target_user_id(display_name, email)
-      `)
+      .select("*")
       .in("status", ["pending", "reviewing"])
       .order("created_at", { ascending: true });
 
@@ -161,7 +183,13 @@ export const safetyModerationRouter = createTRPCRouter({
       });
     }
 
-    return data;
+    const ids = (data ?? []).flatMap((r) => [r.reporter_id, r.target_user_id]);
+    const displayInfo = await getDisplayInfo(ids);
+    return (data ?? []).map((r) => ({
+      ...r,
+      reporter: displayInfo.get(r.reporter_id) ?? null,
+      target_user: r.target_user_id ? (displayInfo.get(r.target_user_id) ?? null) : null,
+    }));
   }),
 
   /**
@@ -216,7 +244,11 @@ export const safetyModerationRouter = createTRPCRouter({
               ? "restricted"
               : "suspended";
 
-        await ctx.supabase
+        // A regular ctx.supabase update here would be filtered to zero rows
+        // by users_update_own (auth.uid() = id) — the target is never the
+        // caller. staffProcedure already verified staff_admin, so this is a
+        // deliberate, authorized elevation, not a bypass.
+        await createSupabaseServiceClient()
           .from("users")
           .update({ account_status: accountStatus })
           .eq("id", input.targetUserId);
@@ -238,7 +270,7 @@ export const safetyModerationRouter = createTRPCRouter({
   getAuditTrail: staffProcedure.query(async ({ ctx }) => {
     const { data, error } = await ctx.supabase
       .from("moderation_actions")
-      .select("*, staff:users!staff_user_id(display_name), report:reports(target_user_id, category)")
+      .select("*, report:reports(target_user_id, category)")
       .order("created_at", { ascending: false })
       .limit(100);
 
@@ -249,6 +281,10 @@ export const safetyModerationRouter = createTRPCRouter({
       });
     }
 
-    return data;
+    const displayInfo = await getDisplayInfo((data ?? []).map((a) => a.staff_user_id));
+    return (data ?? []).map((a) => ({
+      ...a,
+      staff: displayInfo.get(a.staff_user_id) ? { display_name: displayInfo.get(a.staff_user_id)!.display_name } : null,
+    }));
   }),
 });

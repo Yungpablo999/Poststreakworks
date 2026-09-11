@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { createTRPCRouter, protectedProcedure, publicProcedure } from "../context";
+import { createTRPCRouter, protectedProcedure, publicProcedure, createSupabaseServiceClient } from "../context";
 import { TRPCError } from "@trpc/server";
 
 const profileUpdateSchema = z.object({
@@ -64,7 +64,7 @@ export const accountsRouter = createTRPCRouter({
     .query(async ({ ctx, input }) => {
       const { data, error } = await ctx.supabase
         .from("creator_profiles")
-        .select("*, users!inner(display_name, avatar_url, country)")
+        .select("*")
         .eq("slug", input.handle)
         .eq("is_public", true)
         .single();
@@ -79,7 +79,18 @@ export const accountsRouter = createTRPCRouter({
         });
       }
 
-      return data;
+      // users only has an RLS policy for reading your OWN row, and this
+      // procedure is unauthenticated (auth.uid() is null here) — a `!inner`
+      // embed on it would ALWAYS fail the join and 404 every profile,
+      // public or not. Narrow service-role lookup for the two public
+      // identity columns, same pattern as creator-network.ts/duels.ts.
+      const { data: userRow } = await createSupabaseServiceClient()
+        .from("users")
+        .select("display_name, avatar_url, country")
+        .eq("id", data.user_id)
+        .single();
+
+      return { ...data, users: userRow ?? null };
     }),
 
   /**
