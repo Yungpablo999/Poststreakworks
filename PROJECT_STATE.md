@@ -236,6 +236,14 @@ server-side `staff_admin` auth gate.
   `bd383fd`. Now reads from `userProfile` (which `App.tsx` already populated correctly from real API
   responses — the bug was purely that `DashboardScreen` never consumed it). Verified live: fresh test
   account correctly shows "Level 1", "0-Day Streak", "0 XP", "250 XP".
+- `ProDashboardScreen` (2026-09-11) — **a completely separate screen** from `DashboardScreen`, chosen
+  by `App.tsx` when `userProfile.tier === 'pro'`. Had the exact same class of bug, independently: its
+  own hardcoded "Level 42" / "47-Day Streak" / "2,450 / 3,000 XP" in three places (top badges, the
+  level card, and the level-detail modal), never touched by the `DashboardScreen` fix since it's a
+  different file. Fixed the same way. Verified live with the seeded pro-tier dummy account: shows
+  "Level 4", "12-Day Streak" correctly. **Known remaining gap in this screen**: "5 Platforms
+  Connected" is still hardcoded — `UserProfileData` has no platform-count field and
+  `SocialPlatformsService.listPlatforms()` isn't wired into it yet.
 
 **The pattern to replicate for every other screen** (confirmed by checking Quests, Earnings,
 PlatformConnect, CreatorPassport — 1,000–2,300 lines each): every screen's props interface is just

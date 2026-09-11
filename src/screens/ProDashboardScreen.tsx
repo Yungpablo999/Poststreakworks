@@ -657,13 +657,15 @@ export const ProDashboardScreen: React.FC<ProDashboardScreenProps> = ({
 
             <View style={styles.proPlanBadgesRow}>
               <View style={styles.proPillPurple}>
-                <Text style={styles.proPillPurpleText}>Level 42</Text>
+                <Text style={styles.proPillPurpleText}>Level {userProfile?.level ?? 1}</Text>
               </View>
 
               <View style={styles.proPillGold}>
-                <Text style={styles.proPillGoldText}>47-Day Streak</Text>
+                <Text style={styles.proPillGoldText}>{userProfile?.streakCount ?? 0}-Day Streak</Text>
               </View>
 
+              {/* Platform count isn't on UserProfileData yet — SocialPlatformsService.listPlatforms()
+                  isn't wired into this screen. Real gap, not silently hidden: see PROJECT_STATE.md. */}
               <View style={styles.proPillGray}>
                 <Text style={styles.proPillGrayText}>5 Platforms Connected</Text>
               </View>
@@ -688,7 +690,7 @@ export const ProDashboardScreen: React.FC<ProDashboardScreenProps> = ({
             <View style={styles.streakCardHeader}>
               <Text style={styles.streakLabel}>YOUR STREAK (TAP TO EXPAND)</Text>
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 2 }}>
-                <Text style={styles.streakBigCount}>47-Day Streak</Text>
+                <Text style={styles.streakBigCount}>{userProfile?.streakCount ?? 0}-Day Streak</Text>
                 <Animated.Text style={{ fontSize: 20, transform: [{ scale: flamePulse }] }}>
                   🔥
                 </Animated.Text>
@@ -819,12 +821,14 @@ export const ProDashboardScreen: React.FC<ProDashboardScreenProps> = ({
                 colors={['#8B5CF6', '#7C3AED', '#A855F7']}
                 style={styles.levelCircleBadge}
               >
-                <Text style={styles.levelCircleNumber}>42</Text>
+                <Text style={styles.levelCircleNumber}>{userProfile?.level ?? 1}</Text>
               </LinearGradient>
 
               <View style={{ flex: 1 }}>
                 <Text style={styles.levelTitleText}>Elite Storyteller</Text>
-                <Text style={styles.levelXpText}>2,450 / 3,000 XP</Text>
+                <Text style={styles.levelXpText}>
+                  {(userProfile?.xp ?? 0).toLocaleString()} / {(userProfile?.nextLevelXp ?? 250).toLocaleString()} XP
+                </Text>
               </View>
             </View>
 
@@ -833,7 +837,15 @@ export const ProDashboardScreen: React.FC<ProDashboardScreenProps> = ({
                 colors={['#6366F1', '#8B5CF6', '#EAB308', '#FDE047']}
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 0 }}
-                style={[styles.xpTrackFill, { width: '82%' }]}
+                style={[
+                  styles.xpTrackFill,
+                  {
+                    width: `${Math.min(
+                      100,
+                      Math.round(((userProfile?.xp ?? 0) / Math.max(1, userProfile?.nextLevelXp ?? 250)) * 100),
+                    )}%`,
+                  },
+                ]}
               />
             </View>
           </Pressable>
@@ -1532,7 +1544,7 @@ export const ProDashboardScreen: React.FC<ProDashboardScreenProps> = ({
                 >
                   <View style={{ flexDirection: 'row', alignItems: 'center', gap: 14 }}>
                     <View style={styles.heroLevelNumberCircle}>
-                      <Text style={styles.heroLevelNumberText}>42</Text>
+                      <Text style={styles.heroLevelNumberText}>{userProfile?.level ?? 1}</Text>
                     </View>
                     <View style={{ flex: 1 }}>
                       <Text style={styles.heroLevelTitle}>Elite Storyteller</Text>
@@ -1543,19 +1555,30 @@ export const ProDashboardScreen: React.FC<ProDashboardScreenProps> = ({
                   {/* XP Progress Bar */}
                   <View style={{ marginTop: 14 }}>
                     <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 6 }}>
-                      <Text style={styles.heroXpCurrentText}>2,450 XP</Text>
-                      <Text style={styles.heroXpTargetText}>3,000 XP (Level 43)</Text>
+                      <Text style={styles.heroXpCurrentText}>{(userProfile?.xp ?? 0).toLocaleString()} XP</Text>
+                      <Text style={styles.heroXpTargetText}>
+                        {(userProfile?.nextLevelXp ?? 250).toLocaleString()} XP (Level {(userProfile?.level ?? 1) + 1})
+                      </Text>
                     </View>
                     <View style={styles.heroXpTrackBg}>
                       <LinearGradient
                         colors={['#FDE68A', '#F59E0B', '#D97706']}
                         start={{ x: 0, y: 0 }}
                         end={{ x: 1, y: 0 }}
-                        style={[styles.heroXpTrackFill, { width: '81.7%' }]}
+                        style={[
+                          styles.heroXpTrackFill,
+                          {
+                            width: `${Math.min(
+                              100,
+                              Math.round(((userProfile?.xp ?? 0) / Math.max(1, userProfile?.nextLevelXp ?? 250)) * 100),
+                            )}%`,
+                          },
+                        ]}
                       />
                     </View>
                     <Text style={styles.heroXpRemainingSub}>
-                      🔥 Only 550 XP needed to unlock <Text style={{ fontWeight: '900', color: '#FDE68A' }}>Level 43 Master Storyteller</Text>
+                      🔥 Only {Math.max(0, (userProfile?.nextLevelXp ?? 250) - (userProfile?.xp ?? 0)).toLocaleString()} XP needed to unlock{' '}
+                      <Text style={{ fontWeight: '900', color: '#FDE68A' }}>Level {(userProfile?.level ?? 1) + 1} Master Storyteller</Text>
                     </Text>
                   </View>
                 </LinearGradient>
