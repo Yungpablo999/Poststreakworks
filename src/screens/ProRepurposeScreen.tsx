@@ -1399,7 +1399,7 @@ export const ProRepurposeScreen: React.FC<ProRepurposeScreenProps> = ({
             </View>
 
             {/* Queue items */}
-            <ScrollView style={{ maxHeight: 260 }} contentContainerStyle={{ gap: 8, paddingVertical: 4 }}>
+            <ScrollView style={{ maxHeight: 270 }} contentContainerStyle={{ gap: 8, paddingVertical: 4 }}>
               {[
                 {
                   platform: 'TikTok',
@@ -1431,24 +1431,35 @@ export const ProRepurposeScreen: React.FC<ProRepurposeScreenProps> = ({
                 },
               ].map((item) => (
                 <View key={item.platform} style={styles.queueItemRow}>
-                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, flex: 1 }}>
-                    <View style={styles.queueIconBox}>
-                      <SocialBrandIcon platform={item.platformType} size={18} />
-                    </View>
-                    <View style={{ flex: 1 }}>
-                      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-                        <Text style={styles.queuePlatformName}>{item.platform}</Text>
-                        <View style={styles.queueTagBadge}>
-                          <Text style={styles.queueTagBadgeText}>{item.tag}</Text>
-                        </View>
+                  {/* Top Row: Icon + Platform Name & Time Pill */}
+                  <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, flex: 1, marginRight: 8 }}>
+                      <View style={styles.queueIconBox}>
+                        <SocialBrandIcon platform={item.platformType} size={16} />
                       </View>
-                      <Text style={styles.queueItemTitle} numberOfLines={1}>
-                        {item.title}
+                      <Text
+                        style={styles.queuePlatformName}
+                        numberOfLines={1}
+                        adjustsFontSizeToFit
+                        minimumFontScale={0.85}
+                      >
+                        {item.platform}
                       </Text>
                     </View>
+
+                    <View style={styles.queueTimeBox}>
+                      <Text style={styles.queueTimeText}>{item.time}</Text>
+                    </View>
                   </View>
-                  <View style={styles.queueTimeBox}>
-                    <Text style={styles.queueTimeText}>{item.time}</Text>
+
+                  {/* Bottom Row: Post Title (left) & Strategy Tag Badge (right) */}
+                  <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: 6, gap: 8 }}>
+                    <Text style={styles.queueItemTitle} numberOfLines={1}>
+                      &ldquo;{item.title}&rdquo;
+                    </Text>
+                    <View style={styles.queueTagBadge}>
+                      <Text style={styles.queueTagBadgeText}>{item.tag}</Text>
+                    </View>
                   </View>
                 </View>
               ))}
@@ -2526,19 +2537,17 @@ const styles = StyleSheet.create({
 
   // QUEUE CONFIRMATION MODAL
   queueItemRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
     backgroundColor: '#FAF8F5',
     borderRadius: 14,
-    padding: 10,
+    paddingVertical: 10,
+    paddingHorizontal: 12,
     borderWidth: 1,
     borderColor: '#EFECE6',
   },
   queueIconBox: {
-    width: 32,
-    height: 32,
-    borderRadius: 10,
+    width: 28,
+    height: 28,
+    borderRadius: 8,
     backgroundColor: '#FFFFFF',
     justifyContent: 'center',
     alignItems: 'center',
@@ -2546,38 +2555,43 @@ const styles = StyleSheet.create({
     borderColor: '#EFECE6',
   },
   queuePlatformName: {
-    fontSize: 12,
-    fontWeight: '700',
+    fontSize: 12.5,
+    fontWeight: '800',
     color: '#171420',
   },
   queueTagBadge: {
     backgroundColor: '#EDE9FE',
-    paddingHorizontal: 5,
-    paddingVertical: 1.5,
-    borderRadius: 4,
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 5,
+    borderWidth: 1,
+    borderColor: '#DDD6FE',
+    flexShrink: 0,
   },
   queueTagBadgeText: {
-    fontSize: 8,
-    fontWeight: '700',
+    fontSize: sFont(8),
+    fontWeight: '800',
     color: '#582CDB',
     letterSpacing: 0.3,
   },
   queueItemTitle: {
-    fontSize: 10.5,
+    fontSize: 11,
     color: '#64748B',
-    marginTop: 1,
+    flex: 1,
+    fontStyle: 'italic',
   },
   queueTimeBox: {
     backgroundColor: '#FEF3C7',
-    paddingHorizontal: 7,
+    paddingHorizontal: 8,
     paddingVertical: 3.5,
     borderRadius: 6,
     borderWidth: 1,
     borderColor: '#FDE68A',
+    flexShrink: 0,
   },
   queueTimeText: {
-    fontSize: 10,
-    fontWeight: '700',
+    fontSize: 10.5,
+    fontWeight: '800',
     color: '#92400E',
   },
   queueSafetyNotice: {
