@@ -42,7 +42,6 @@ export interface CaptionVariationItem {
 export interface GeneratedVersionItem {
   id: string;
   platform: string;
-  format: string;
   platformType: 'tiktok' | 'instagram' | 'youtube' | 'threads' | 'facebook' | 'pinterest';
   badge: string;
   badgeColor: string;
@@ -54,7 +53,6 @@ export interface GeneratedVersionItem {
 export interface PostStreakPlatform {
   id: string;
   name: string;
-  format: string;
   platformType: 'tiktok' | 'instagram' | 'youtube' | 'threads' | 'facebook' | 'pinterest';
   desc: string;
 }
@@ -63,42 +61,36 @@ export const CORE_POSTSTREAK_PLATFORMS: PostStreakPlatform[] = [
   {
     id: 'tiktok',
     name: 'TikTok',
-    format: 'Short-form video',
     platformType: 'tiktok',
-    desc: 'Short-form video · 15-60s fast-paced hook',
+    desc: 'Short videos & viral trend discovery',
   },
   {
     id: 'instagram',
     name: 'Instagram',
-    format: 'Reel',
     platformType: 'instagram',
-    desc: 'Reels & visual carousel explore reach',
+    desc: 'Reels, carousels, stories, and posts',
   },
   {
     id: 'youtube',
     name: 'YouTube',
-    format: 'Short',
     platformType: 'youtube',
-    desc: 'Shorts & video subscriber engine',
+    desc: 'Shorts & long-form video reach',
   },
   {
     id: 'threads',
     name: 'Threads',
-    format: 'Text Thread',
     platformType: 'threads',
-    desc: 'Conversation notes & viral micro-thoughts',
+    desc: 'Text notes & real-time discussions',
   },
   {
     id: 'facebook',
     name: 'Facebook',
-    format: 'Creator Post / Reel',
     platformType: 'facebook',
-    desc: 'Creator pages & community groups',
+    desc: 'Creator posts, reels & communities',
   },
   {
     id: 'pinterest',
     name: 'Pinterest',
-    format: 'Idea Pin',
     platformType: 'pinterest',
     desc: 'Idea pins & visual infographics',
   },
@@ -106,46 +98,40 @@ export const CORE_POSTSTREAK_PLATFORMS: PostStreakPlatform[] = [
 
 const PLATFORM_TEMPLATES: Record<
   string,
-  { platform: string; format: string; platformType: 'tiktok' | 'instagram' | 'youtube' | 'threads' | 'facebook' | 'pinterest'; title: string; body: string }
+  { platform: string; platformType: 'tiktok' | 'instagram' | 'youtube' | 'threads' | 'facebook' | 'pinterest'; title: string; body: string }
 > = {
   tiktok: {
     platform: 'TikTok',
-    format: 'Short-form video',
     platformType: 'tiktok',
     title: 'The Slow-Mo Creator Trap',
     body: 'Stop doing these 3 things if you want to grow past 1,000 followers...',
   },
   instagram: {
     platform: 'Instagram',
-    format: 'Reel',
     platformType: 'instagram',
     title: 'The Slow-Mo Creator Trap',
     body: 'Breakdown of 3 simple shifts to optimize your daily creation workflow.',
   },
   youtube: {
     platform: 'YouTube',
-    format: 'Short',
     platformType: 'youtube',
-    title: 'How I Batch-Film 10 Shorts in 2 Hours',
+    title: 'How I Batch-Film 10 Videos in 2 Hours',
     body: 'Breakdown of workflow systems that help you increase your output without burnout.',
   },
   threads: {
     platform: 'Threads',
-    format: 'Text Thread',
     platformType: 'threads',
     title: 'Stop waiting for the "perfect" idea to start posting.',
     body: 'Consistency and honest lessons outperform polished perfection every single time.',
   },
   facebook: {
     platform: 'Facebook',
-    format: 'Creator Post / Reel',
     platformType: 'facebook',
     title: '3 systems to double creator output',
     body: 'How to build a sustainable daily posting workflow without burning out.',
   },
   pinterest: {
     platform: 'Pinterest',
-    format: 'Idea Pin',
     platformType: 'pinterest',
     title: 'Creator Workflow Infographic',
     body: 'Step-by-step visual blueprint for batching content and protecting your streak.',
@@ -348,12 +334,11 @@ export const ProRepurposeScreen: React.FC<ProRepurposeScreenProps> = ({
   const [editIdeaText, setEditIdeaText] = useState(originalIdea);
   const [editingVersion, setEditingVersion] = useState<{ id: string; title: string; body: string } | null>(null);
 
-  // Generated Versions Data (Platform first, Format underneath)
+  // Generated Versions Data (Platform first)
   const [versions, setVersions] = useState<GeneratedVersionItem[]>([
     {
       id: 'tiktok',
       platform: 'TikTok',
-      format: 'Short-form video',
       platformType: 'tiktok' as const,
       badge: 'READY',
       badgeColor: '#DCFCE7',
@@ -364,7 +349,6 @@ export const ProRepurposeScreen: React.FC<ProRepurposeScreenProps> = ({
     {
       id: 'instagram',
       platform: 'Instagram',
-      format: 'Reel',
       platformType: 'instagram' as const,
       badge: 'READY',
       badgeColor: '#DCFCE7',
@@ -375,18 +359,16 @@ export const ProRepurposeScreen: React.FC<ProRepurposeScreenProps> = ({
     {
       id: 'youtube',
       platform: 'YouTube',
-      format: 'Short',
       platformType: 'youtube' as const,
       badge: 'READY',
       badgeColor: '#DCFCE7',
       badgeTextColor: '#15803D',
-      title: 'How I Batch-Film 10 Shorts in 2 Hours',
+      title: 'How I Batch-Film 10 Videos in 2 Hours',
       body: 'Breakdown of workflow systems that help you increase your output without burnout.',
     },
     {
       id: 'threads',
       platform: 'Threads',
-      format: 'Text Thread',
       platformType: 'threads' as const,
       badge: 'READY',
       badgeColor: '#DCFCE7',
@@ -467,7 +449,6 @@ export const ProRepurposeScreen: React.FC<ProRepurposeScreenProps> = ({
       return {
         id: pid,
         platform: tpl.platform,
-        format: tpl.format,
         platformType: tpl.platformType,
         badge: 'READY',
         badgeColor: '#DCFCE7',
@@ -505,7 +486,6 @@ export const ProRepurposeScreen: React.FC<ProRepurposeScreenProps> = ({
         return {
           id: pid,
           platform: tpl.platform,
-          format: tpl.format,
           platformType: tpl.platformType,
           badge: 'READY',
           badgeColor: '#DCFCE7',
@@ -521,7 +501,7 @@ export const ProRepurposeScreen: React.FC<ProRepurposeScreenProps> = ({
         subtitle: `Created tailored scripts for ${selectedPlatforms.length} PostStreak platforms.`,
         badgeText: `✨ ${selectedPlatforms.length}-PLATFORM SYNC (+50 XP)`,
         xpEarned: 50,
-        speechBubble: 'Platform-native formats calibrated for peak algorithmic reach, Pablo! 🚀',
+        speechBubble: 'Platform versions calibrated for peak reach, Pablo! 🚀',
       });
       setShowCompletionModal(true);
     }, 900);
@@ -781,11 +761,11 @@ export const ProRepurposeScreen: React.FC<ProRepurposeScreenProps> = ({
         {/* ============================================================ */}
         <View style={styles.cardSectionContainer}>
           <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
-            <View>
+            <View style={{ flex: 1, paddingRight: 8 }}>
               <Text style={styles.sectionHeaderTitle}>Select Platforms</Text>
               <Text style={styles.sectionHeaderSub}>Choose PostStreak platforms to adapt this idea for</Text>
             </View>
-            <Pressable onPress={handleToggleSelectAll} hitSlop={8}>
+            <Pressable onPress={handleToggleSelectAll} hitSlop={8} style={{ flexShrink: 0 }}>
               <Text style={styles.selectAllLinkText}>
                 {selectedPlatforms.length === 6 ? 'Deselect All' : 'Select All (6)'}
               </Text>
@@ -806,24 +786,14 @@ export const ProRepurposeScreen: React.FC<ProRepurposeScreenProps> = ({
                   ]}
                   onPress={() => handleTogglePlatform(plt.id)}
                 >
-                  <View style={{ height: 22, justifyContent: 'center', alignItems: 'center' }}>
-                    <SocialBrandIcon platform={plt.platformType} size={20} />
+                  <View style={{ height: 26, justifyContent: 'center', alignItems: 'center' }}>
+                    <SocialBrandIcon platform={plt.platformType} size={22} />
                   </View>
                   <Text
                     style={[styles.platformCardName, isSelected && styles.platformCardNameActive]}
                     numberOfLines={1}
-                    adjustsFontSizeToFit
-                    minimumFontScale={0.8}
                   >
                     {plt.name}
-                  </Text>
-                  <Text
-                    style={[styles.platformCardFormat, isSelected && styles.platformCardFormatActive]}
-                    numberOfLines={1}
-                    adjustsFontSizeToFit
-                    minimumFontScale={0.75}
-                  >
-                    {plt.format}
                   </Text>
                   {isSelected && (
                     <View style={styles.platformCheckDot}>
@@ -862,15 +832,12 @@ export const ProRepurposeScreen: React.FC<ProRepurposeScreenProps> = ({
           <View style={{ gap: 12, marginTop: 10 }}>
             {versions.map((ver) => (
               <View key={ver.id} style={styles.versionCard}>
-                <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
                   <View style={{ flexDirection: 'row', alignItems: 'center', gap: 9 }}>
                     <View style={styles.versionIconBox}>
                       <SocialBrandIcon platform={ver.platformType} size={18} />
                     </View>
-                    <View>
-                      <Text style={styles.versionPlatformText}>{ver.platform}</Text>
-                      <Text style={styles.versionFormatSubText}>{ver.format}</Text>
-                    </View>
+                    <Text style={styles.versionPlatformText}>{ver.platform}</Text>
                   </View>
                   <View style={[styles.versionBadge, { backgroundColor: ver.badgeColor }]}>
                     <Text style={[styles.versionBadgeText, { color: ver.badgeTextColor }]}>
@@ -1411,12 +1378,7 @@ export const ProRepurposeScreen: React.FC<ProRepurposeScreenProps> = ({
                         <SocialBrandIcon platform={item.platformType} size={20} />
                       </View>
                       <View style={{ flex: 1 }}>
-                        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-                          <Text style={styles.extraPlatformName}>{item.name}</Text>
-                          <View style={styles.extraPlatformFormatBadge}>
-                            <Text style={styles.extraPlatformFormatBadgeText}>{item.format}</Text>
-                          </View>
-                        </View>
+                        <Text style={styles.extraPlatformName}>{item.name}</Text>
                         <Text style={styles.extraPlatformDesc}>{item.desc}</Text>
                       </View>
                     </View>
@@ -1925,44 +1887,35 @@ const styles = StyleSheet.create({
     width: (width - 40 - 16) / 3,
     backgroundColor: '#FFFFFF',
     borderRadius: 14,
-    paddingVertical: 10,
-    paddingHorizontal: 6,
+    paddingVertical: 14,
+    paddingHorizontal: 8,
     alignItems: 'center',
+    justifyContent: 'center',
     borderWidth: 1.5,
     borderColor: '#EFECE6',
     position: 'relative',
-    gap: 2,
+    gap: 6,
   },
   platformCardActive: {
     borderColor: '#582CDB',
     backgroundColor: '#F5F3FF',
   },
   platformCardName: {
-    fontSize: 11,
-    fontWeight: '800',
+    fontSize: 12,
+    fontWeight: '700',
     color: '#64748B',
-    marginTop: 3,
   },
   platformCardNameActive: {
     fontWeight: '800',
     color: '#171420',
   },
-  platformCardFormat: {
-    fontSize: 9,
-    fontWeight: '600',
-    color: '#94A3B8',
-  },
-  platformCardFormatActive: {
-    color: '#582CDB',
-    fontWeight: '700',
-  },
   platformCheckDot: {
     position: 'absolute',
-    top: 5,
-    right: 5,
-    width: 14,
-    height: 14,
-    borderRadius: 7,
+    top: 6,
+    right: 6,
+    width: 15,
+    height: 15,
+    borderRadius: 7.5,
     backgroundColor: '#582CDB',
     justifyContent: 'center',
     alignItems: 'center',
@@ -2010,12 +1963,6 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontWeight: '800',
     color: '#171420',
-  },
-  versionFormatSubText: {
-    fontSize: 10,
-    fontWeight: '600',
-    color: '#64748B',
-    marginTop: 1,
   },
   versionBadge: {
     paddingHorizontal: 6,
@@ -2469,18 +2416,6 @@ const styles = StyleSheet.create({
     fontSize: 12.5,
     fontWeight: '700',
     color: '#171420',
-  },
-  extraPlatformFormatBadge: {
-    backgroundColor: '#EDE9FE',
-    paddingHorizontal: 6,
-    paddingVertical: 1.5,
-    borderRadius: 4,
-  },
-  extraPlatformFormatBadgeText: {
-    fontSize: sFont(8),
-    fontWeight: '800',
-    color: '#582CDB',
-    letterSpacing: 0.3,
   },
   extraPlatformDesc: {
     fontSize: 10,
