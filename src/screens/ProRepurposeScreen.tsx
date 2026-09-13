@@ -39,6 +39,119 @@ export interface CaptionVariationItem {
   text: string;
 }
 
+export interface GeneratedVersionItem {
+  id: string;
+  platform: string;
+  format: string;
+  platformType: 'tiktok' | 'instagram' | 'youtube' | 'threads' | 'facebook' | 'pinterest';
+  badge: string;
+  badgeColor: string;
+  badgeTextColor: string;
+  title: string;
+  body: string;
+}
+
+export interface PostStreakPlatform {
+  id: string;
+  name: string;
+  format: string;
+  platformType: 'tiktok' | 'instagram' | 'youtube' | 'threads' | 'facebook' | 'pinterest';
+  desc: string;
+}
+
+export const CORE_POSTSTREAK_PLATFORMS: PostStreakPlatform[] = [
+  {
+    id: 'tiktok',
+    name: 'TikTok',
+    format: 'Short-form video',
+    platformType: 'tiktok',
+    desc: 'Short-form video · 15-60s fast-paced hook',
+  },
+  {
+    id: 'instagram',
+    name: 'Instagram',
+    format: 'Reel',
+    platformType: 'instagram',
+    desc: 'Reels & visual carousel explore reach',
+  },
+  {
+    id: 'youtube',
+    name: 'YouTube',
+    format: 'Short',
+    platformType: 'youtube',
+    desc: 'Shorts & video subscriber engine',
+  },
+  {
+    id: 'threads',
+    name: 'Threads',
+    format: 'Text Thread',
+    platformType: 'threads',
+    desc: 'Conversation notes & viral micro-thoughts',
+  },
+  {
+    id: 'facebook',
+    name: 'Facebook',
+    format: 'Creator Post / Reel',
+    platformType: 'facebook',
+    desc: 'Creator pages & community groups',
+  },
+  {
+    id: 'pinterest',
+    name: 'Pinterest',
+    format: 'Idea Pin',
+    platformType: 'pinterest',
+    desc: 'Idea pins & visual infographics',
+  },
+];
+
+const PLATFORM_TEMPLATES: Record<
+  string,
+  { platform: string; format: string; platformType: 'tiktok' | 'instagram' | 'youtube' | 'threads' | 'facebook' | 'pinterest'; title: string; body: string }
+> = {
+  tiktok: {
+    platform: 'TikTok',
+    format: 'Short-form video',
+    platformType: 'tiktok',
+    title: 'The Slow-Mo Creator Trap',
+    body: 'Stop doing these 3 things if you want to grow past 1,000 followers...',
+  },
+  instagram: {
+    platform: 'Instagram',
+    format: 'Reel',
+    platformType: 'instagram',
+    title: 'The Slow-Mo Creator Trap',
+    body: 'Breakdown of 3 simple shifts to optimize your daily creation workflow.',
+  },
+  youtube: {
+    platform: 'YouTube',
+    format: 'Short',
+    platformType: 'youtube',
+    title: 'How I Batch-Film 10 Shorts in 2 Hours',
+    body: 'Breakdown of workflow systems that help you increase your output without burnout.',
+  },
+  threads: {
+    platform: 'Threads',
+    format: 'Text Thread',
+    platformType: 'threads',
+    title: 'Stop waiting for the "perfect" idea to start posting.',
+    body: 'Consistency and honest lessons outperform polished perfection every single time.',
+  },
+  facebook: {
+    platform: 'Facebook',
+    format: 'Creator Post / Reel',
+    platformType: 'facebook',
+    title: '3 systems to double creator output',
+    body: 'How to build a sustainable daily posting workflow without burning out.',
+  },
+  pinterest: {
+    platform: 'Pinterest',
+    format: 'Idea Pin',
+    platformType: 'pinterest',
+    title: 'Creator Workflow Infographic',
+    body: 'Step-by-step visual blueprint for batching content and protecting your streak.',
+  },
+};
+
 const PLATFORM_CAPTION_VARIATIONS: Record<string, CaptionVariationItem[]> = {
   tiktok: [
     {
@@ -60,6 +173,26 @@ const PLATFORM_CAPTION_VARIATIONS: Record<string, CaptionVariationItem[]> = {
       text: 'Drop your current streak below — let’s audit your 3-second hook structure together in the comments.',
     },
   ],
+  instagram: [
+    {
+      id: 'direct',
+      type: 'IG REEL · DIRECT LIST',
+      shortLabel: 'Direct',
+      text: '3 mistakes slowing you down: 1. Lack of routine, 2. Bad lighting, 3. Long intros. Fixed.',
+    },
+    {
+      id: 'story',
+      type: 'IG REEL · SAVE ANGLE',
+      shortLabel: 'Story',
+      text: 'Save this for when you need a reminder. These 3 lessons transformed my creation journey...',
+    },
+    {
+      id: 'question',
+      type: 'IG REEL · CONVERSATION',
+      shortLabel: 'Conversation',
+      text: 'Which of these 3 creator traps took you the longest to unlearn? Drop your number below.',
+    },
+  ],
   ig_reel: [
     {
       id: 'direct',
@@ -78,6 +211,26 @@ const PLATFORM_CAPTION_VARIATIONS: Record<string, CaptionVariationItem[]> = {
       type: 'IG REEL · CONVERSATION',
       shortLabel: 'Conversation',
       text: 'Which of these 3 creator traps took you the longest to unlearn? Drop your number below.',
+    },
+  ],
+  youtube: [
+    {
+      id: 'direct',
+      type: 'SHORTS · RETENTION HOOK',
+      shortLabel: 'Direct',
+      text: 'Stop making these 3 video mistakes if you want viewers to stay past the first 3 seconds. Full breakdown in this Short.',
+    },
+    {
+      id: 'story',
+      type: 'SHORTS · SYSTEM LESSON',
+      shortLabel: 'Story',
+      text: 'How to batch 10 Shorts in 2 hours: build an idea vault and record in 1-hour sprints. Subscribe for daily creator systems.',
+    },
+    {
+      id: 'question',
+      type: 'SHORTS · ENGAGEMENT LOOP',
+      shortLabel: 'Conversation',
+      text: 'What is the #1 thing holding your channel back right now? Let’s break it down in the comments.',
     },
   ],
   shorts: [
@@ -120,6 +273,46 @@ const PLATFORM_CAPTION_VARIATIONS: Record<string, CaptionVariationItem[]> = {
       text: 'Creators on Threads: What’s one piece of advice you’d give your Day-1 self? Sharing my top 3 below.',
     },
   ],
+  facebook: [
+    {
+      id: 'direct',
+      type: 'FACEBOOK · COMMUNITY LESSON',
+      shortLabel: 'Direct',
+      text: '3 common workflow traps that slow down creators — and the simple shift that fixes each one. Share this with your creator circle!',
+    },
+    {
+      id: 'story',
+      type: 'FACEBOOK · CREATOR STORY',
+      shortLabel: 'Story',
+      text: 'When I started batching content, everything changed. Here is the exact routine that helped me double my consistency.',
+    },
+    {
+      id: 'question',
+      type: 'FACEBOOK · DISCUSSION',
+      shortLabel: 'Conversation',
+      text: 'Fellow creators: what part of content creation takes up the most time in your week? Let’s share tips below.',
+    },
+  ],
+  pinterest: [
+    {
+      id: 'direct',
+      type: 'PINTEREST · ACTIONABLE PIN',
+      shortLabel: 'Direct',
+      text: '3 Creator Mistakes You Need to Avoid (And How to Fix Them Today). Save this pin to your Creator Strategy board!',
+    },
+    {
+      id: 'story',
+      type: 'PINTEREST · STEP-BY-STEP',
+      shortLabel: 'Story',
+      text: 'How to build a sustainable daily posting routine without burnout. Pin this guide for your next planning session.',
+    },
+    {
+      id: 'question',
+      type: 'PINTEREST · CHECKLIST PIN',
+      shortLabel: 'Conversation',
+      text: 'The Ultimate Content Batching Checklist for Creators. Save this and comment which workflow tip you’re trying first!',
+    },
+  ],
 };
 
 export const ProRepurposeScreen: React.FC<ProRepurposeScreenProps> = ({
@@ -130,18 +323,18 @@ export const ProRepurposeScreen: React.FC<ProRepurposeScreenProps> = ({
 }) => {
   // Core State
   const [originalIdea, setOriginalIdea] = useState(initialIdeaTitle);
-  const [selectedFormats, setSelectedFormats] = useState<string[]>([
+  const [selectedPlatforms, setSelectedPlatforms] = useState<string[]>([
     'tiktok',
-    'ig_reel',
-    'shorts',
+    'instagram',
+    'youtube',
     'threads',
   ]);
   const [selectedCaptionVariation, setSelectedCaptionVariation] = useState('direct');
   const [isGenerating, setIsGenerating] = useState(false);
 
-  // Active platform for tailored captions (defaults to first selected format or 'ig_reel')
-  const activeCaptionPlatform = selectedFormats[0] || 'ig_reel';
-  const currentCaptions = PLATFORM_CAPTION_VARIATIONS[activeCaptionPlatform] || PLATFORM_CAPTION_VARIATIONS.ig_reel;
+  // Active platform for tailored captions (defaults to first selected platform or 'tiktok')
+  const activeCaptionPlatform = selectedPlatforms[0] || 'tiktok';
+  const currentCaptions = PLATFORM_CAPTION_VARIATIONS[activeCaptionPlatform] || PLATFORM_CAPTION_VARIATIONS.tiktok;
 
   // Toast & Modals
   const [toastMessage, setToastMessage] = useState<string | null>(null);
@@ -152,16 +345,16 @@ export const ProRepurposeScreen: React.FC<ProRepurposeScreenProps> = ({
   const [showMorePlatformsModal, setShowMorePlatformsModal] = useState(false);
   const [showScoreInfoModal, setShowScoreInfoModal] = useState(false);
   const [showReviewScheduleModal, setShowReviewScheduleModal] = useState(false);
-  const [extraPlatforms, setExtraPlatforms] = useState<string[]>(['pinterest', 'facebook']);
   const [editIdeaText, setEditIdeaText] = useState(originalIdea);
   const [editingVersion, setEditingVersion] = useState<{ id: string; title: string; body: string } | null>(null);
 
-  // Generated Versions Data
-  const [versions, setVersions] = useState([
+  // Generated Versions Data (Platform first, Format underneath)
+  const [versions, setVersions] = useState<GeneratedVersionItem[]>([
     {
       id: 'tiktok',
-      platform: 'TikTok Version',
-      platformType: 'tiktok',
+      platform: 'TikTok',
+      format: 'Short-form video',
+      platformType: 'tiktok' as const,
       badge: 'READY',
       badgeColor: '#DCFCE7',
       badgeTextColor: '#15803D',
@@ -169,9 +362,21 @@ export const ProRepurposeScreen: React.FC<ProRepurposeScreenProps> = ({
       body: 'Stop doing these 3 things if you want to grow past 1,000 followers...',
     },
     {
-      id: 'shorts',
-      platform: 'YouTube Shorts',
-      platformType: 'youtube',
+      id: 'instagram',
+      platform: 'Instagram',
+      format: 'Reel',
+      platformType: 'instagram' as const,
+      badge: 'READY',
+      badgeColor: '#DCFCE7',
+      badgeTextColor: '#15803D',
+      title: 'The Slow-Mo Creator Trap',
+      body: 'Breakdown of 3 simple shifts to optimize your daily creation workflow.',
+    },
+    {
+      id: 'youtube',
+      platform: 'YouTube',
+      format: 'Short',
+      platformType: 'youtube' as const,
       badge: 'READY',
       badgeColor: '#DCFCE7',
       badgeTextColor: '#15803D',
@@ -180,8 +385,9 @@ export const ProRepurposeScreen: React.FC<ProRepurposeScreenProps> = ({
     },
     {
       id: 'threads',
-      platform: 'Threads Insight',
-      platformType: 'threads',
+      platform: 'Threads',
+      format: 'Text Thread',
+      platformType: 'threads' as const,
       badge: 'READY',
       badgeColor: '#DCFCE7',
       badgeTextColor: '#15803D',
@@ -216,14 +422,36 @@ export const ProRepurposeScreen: React.FC<ProRepurposeScreenProps> = ({
     setToastKey((k) => k + 1);
   };
 
-  const handleToggleExtraPlatform = (platformId: string) => {
+  // Platform Selection Toggles
+  const handleTogglePlatform = (platformId: string) => {
     if (Platform.OS !== 'web') {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     }
-    if (extraPlatforms.includes(platformId)) {
-      setExtraPlatforms(extraPlatforms.filter((p) => p !== platformId));
+    const pltName = CORE_POSTSTREAK_PLATFORMS.find((p) => p.id === platformId)?.name || platformId;
+    if (selectedPlatforms.includes(platformId)) {
+      if (selectedPlatforms.length > 1) {
+        setSelectedPlatforms(selectedPlatforms.filter((f) => f !== platformId));
+        showToast(`Deselected ${pltName}`);
+      } else {
+        showToast('At least 1 platform must remain selected');
+      }
     } else {
-      setExtraPlatforms([...extraPlatforms, platformId]);
+      setSelectedPlatforms([...selectedPlatforms, platformId]);
+      showToast(`✓ Added ${pltName}`);
+    }
+  };
+
+  const handleToggleSelectAll = () => {
+    if (Platform.OS !== 'web') {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    }
+    const allIds = CORE_POSTSTREAK_PLATFORMS.map((p) => p.id);
+    if (selectedPlatforms.length === allIds.length) {
+      setSelectedPlatforms(['tiktok']);
+      showToast('Reset to TikTok platform');
+    } else {
+      setSelectedPlatforms(allIds);
+      showToast('✓ Selected all 6 PostStreak platforms');
     }
   };
 
@@ -232,88 +460,35 @@ export const ProRepurposeScreen: React.FC<ProRepurposeScreenProps> = ({
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     }
     setShowMorePlatformsModal(false);
-    
-    // Add extra platforms to selectedFormats
-    const merged = Array.from(new Set([...selectedFormats, ...extraPlatforms]));
-    setSelectedFormats(merged);
 
-    // If Threads selected, add to generated versions if not present
-    if (extraPlatforms.includes('threads') && !versions.some((v) => v.id === 'threads')) {
-      setVersions((prev) => [
-        ...prev,
-        {
-          id: 'threads',
-          platform: 'Threads Note',
-          platformType: 'threads',
-          badge: 'READY',
-          badgeColor: '#DCFCE7',
-          badgeTextColor: '#15803D',
-          title: 'Quick take for creators...',
-          body: 'The fastest way to burn out is pretending you need 4 hours per post. Build a 20-min system instead.',
-        },
-      ]);
-    }
-
-    // If Newsletter selected, add to generated versions
-    if (extraPlatforms.includes('newsletter') && !versions.some((v) => v.id === 'newsletter')) {
-      setVersions((prev) => [
-        ...prev,
-        {
-          id: 'newsletter',
-          platform: 'Newsletter Issue',
-          platformType: 'email',
-          badge: 'OPTIMIZED',
-          badgeColor: '#DCFCE7',
-          badgeTextColor: '#15803D',
-          title: 'Creator Systems Weekly #47',
-          body: 'Deep dive into eliminating creation friction, standardizing hooks, and protecting your streak.',
-        },
-      ]);
-    }
+    // Synchronize generated versions with current selected platforms
+    const newVersions = selectedPlatforms.map((pid) => {
+      const tpl = PLATFORM_TEMPLATES[pid] || PLATFORM_TEMPLATES.tiktok;
+      return {
+        id: pid,
+        platform: tpl.platform,
+        format: tpl.format,
+        platformType: tpl.platformType,
+        badge: 'READY',
+        badgeColor: '#DCFCE7',
+        badgeTextColor: '#15803D',
+        title: tpl.title,
+        body: tpl.body,
+      };
+    });
+    setVersions(newVersions);
 
     setCompletionData({
-      title: 'Platforms Added!',
-      subtitle: `${extraPlatforms.length} custom platform engines synchronized for multi-channel reach.`,
-      badgeText: '✨ MULTI-PLATFORM SYNC (+50 XP)',
+      title: 'Platforms Synchronized!',
+      subtitle: `${selectedPlatforms.length} PostStreak platforms calibrated for multi-channel reach.`,
+      badgeText: `✨ ${selectedPlatforms.length}-PLATFORM SYNC (+50 XP)`,
       xpEarned: 50,
-      speechBubble: 'Extra platform engines are ready to adapt your idea, Pablo! 🔥',
+      speechBubble: 'Platform versions are ready to adapt your idea, Pablo! 🔥',
     });
 
     setTimeout(() => {
       setShowCompletionModal(true);
     }, 200);
-  };
-
-  // Format Selection Toggles
-  const handleToggleFormat = (formatId: string) => {
-    if (Platform.OS !== 'web') {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    }
-    if (selectedFormats.includes(formatId)) {
-      if (selectedFormats.length > 1) {
-        setSelectedFormats(selectedFormats.filter((f) => f !== formatId));
-        showToast(`Deselected ${formatId.toUpperCase()}`);
-      } else {
-        showToast('At least 1 format must remain selected');
-      }
-    } else {
-      setSelectedFormats([...selectedFormats, formatId]);
-      showToast(`✓ Added ${formatId.toUpperCase()}`);
-    }
-  };
-
-  const handleToggleSelectAll = () => {
-    if (Platform.OS !== 'web') {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    }
-    const all = ['tiktok', 'ig_reel', 'shorts', 'threads'];
-    if (selectedFormats.length === all.length) {
-      setSelectedFormats(['tiktok']);
-      showToast('Reset to TikTok format');
-    } else {
-      setSelectedFormats(all);
-      showToast('✓ Selected all 4 formats');
-    }
   };
 
   // Generate Action
@@ -322,15 +497,31 @@ export const ProRepurposeScreen: React.FC<ProRepurposeScreenProps> = ({
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     }
     setIsGenerating(true);
-    showToast('✨ Adapting idea for all selected platforms...');
+    showToast('✨ Adapting idea for selected PostStreak platforms...');
     setTimeout(() => {
       setIsGenerating(false);
+      const newVersions = selectedPlatforms.map((pid) => {
+        const tpl = PLATFORM_TEMPLATES[pid] || PLATFORM_TEMPLATES.tiktok;
+        return {
+          id: pid,
+          platform: tpl.platform,
+          format: tpl.format,
+          platformType: tpl.platformType,
+          badge: 'READY',
+          badgeColor: '#DCFCE7',
+          badgeTextColor: '#15803D',
+          title: tpl.title,
+          body: tpl.body,
+        };
+      });
+      setVersions(newVersions);
+
       setCompletionData({
         title: 'Platform Versions Generated!',
-        subtitle: `Created tailored scripts for ${selectedFormats.length} platforms.`,
-        badgeText: '✨ MULTI-PLATFORM SYNC (+50 XP)',
+        subtitle: `Created tailored scripts for ${selectedPlatforms.length} PostStreak platforms.`,
+        badgeText: `✨ ${selectedPlatforms.length}-PLATFORM SYNC (+50 XP)`,
         xpEarned: 50,
-        speechBubble: 'Hooks, tone & pacing calibrated for TikTok, Reels, Shorts & Threads, Pablo! 🚀',
+        speechBubble: 'Platform-native formats calibrated for peak algorithmic reach, Pablo! 🚀',
       });
       setShowCompletionModal(true);
     }, 900);
@@ -586,67 +777,56 @@ export const ProRepurposeScreen: React.FC<ProRepurposeScreenProps> = ({
         </View>
 
         {/* ============================================================ */}
-        {/* CARD 2: SELECT FORMATS                                       */}
+        {/* CARD 2: SELECT PLATFORMS                                     */}
         {/* ============================================================ */}
         <View style={styles.cardSectionContainer}>
           <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
-            <Text style={styles.sectionHeaderTitle}>Select Formats</Text>
+            <View>
+              <Text style={styles.sectionHeaderTitle}>Select Platforms</Text>
+              <Text style={styles.sectionHeaderSub}>Choose PostStreak platforms to adapt this idea for</Text>
+            </View>
             <Pressable onPress={handleToggleSelectAll} hitSlop={8}>
               <Text style={styles.selectAllLinkText}>
-                {selectedFormats.length === 4 ? 'Deselect All' : 'Select All'}
+                {selectedPlatforms.length === 6 ? 'Deselect All' : 'Select All (6)'}
               </Text>
             </Pressable>
           </View>
 
-          {/* Formats Grid */}
-          <View style={styles.formatsGrid}>
-            {[
-              { id: 'tiktok', name: 'TikTok', platformType: 'tiktok' },
-              { id: 'ig_reel', name: 'IG Reel', platformType: 'instagram' },
-              { id: 'shorts', name: 'YouTube Shorts', platformType: 'youtube' },
-              { id: 'threads', name: 'Threads', platformType: 'threads' },
-              { id: 'facebook', name: 'Facebook', platformType: 'facebook' },
-              { id: 'more', name: 'More', isMore: true },
-            ].map((fmt) => {
-              const isSelected = selectedFormats.includes(fmt.id);
-              if (fmt.isMore) {
-                return (
-                  <Pressable
-                    key={fmt.id}
-                    style={({ pressed }) => [styles.formatMoreCard, pressed && styles.btnPressed]}
-                    onPress={() => {
-                      triggerModalPop();
-                      setShowMorePlatformsModal(true);
-                    }}
-                  >
-                    <Text style={{ fontSize: 18, color: '#64748B', fontWeight: '700' }}>＋</Text>
-                    <Text style={styles.formatMoreText}>{fmt.name}</Text>
-                  </Pressable>
-                );
-              }
+          {/* Platforms Grid (6 Core Platforms) */}
+          <View style={styles.platformsGrid}>
+            {CORE_POSTSTREAK_PLATFORMS.map((plt) => {
+              const isSelected = selectedPlatforms.includes(plt.id);
               return (
                 <Pressable
-                  key={fmt.id}
+                  key={plt.id}
                   style={({ pressed }) => [
-                    styles.formatCard,
-                    isSelected && styles.formatCardActive,
+                    styles.platformCard,
+                    isSelected && styles.platformCardActive,
                     pressed && styles.btnPressed,
                   ]}
-                  onPress={() => handleToggleFormat(fmt.id)}
+                  onPress={() => handleTogglePlatform(plt.id)}
                 >
                   <View style={{ height: 22, justifyContent: 'center', alignItems: 'center' }}>
-                    <SocialBrandIcon platform={fmt.platformType!} size={20} />
+                    <SocialBrandIcon platform={plt.platformType} size={20} />
                   </View>
                   <Text
-                    style={[styles.formatCardName, isSelected && styles.formatCardNameActive]}
+                    style={[styles.platformCardName, isSelected && styles.platformCardNameActive]}
                     numberOfLines={1}
                     adjustsFontSizeToFit
-                    minimumFontScale={0.78}
+                    minimumFontScale={0.8}
                   >
-                    {fmt.name}
+                    {plt.name}
+                  </Text>
+                  <Text
+                    style={[styles.platformCardFormat, isSelected && styles.platformCardFormatActive]}
+                    numberOfLines={1}
+                    adjustsFontSizeToFit
+                    minimumFontScale={0.75}
+                  >
+                    {plt.format}
                   </Text>
                   {isSelected && (
-                    <View style={styles.formatCheckDot}>
+                    <View style={styles.platformCheckDot}>
                       <Text style={{ fontSize: 8, color: '#FFFFFF', fontWeight: '700' }}>✓</Text>
                     </View>
                   )}
@@ -667,7 +847,7 @@ export const ProRepurposeScreen: React.FC<ProRepurposeScreenProps> = ({
               style={styles.generateVersionsGradient}
             >
               <Text style={styles.generateVersionsBtnText}>
-                {isGenerating ? '⏳ Adapting Across Formats...' : '✨ Generate Versions'}
+                {isGenerating ? '⏳ Adapting Across Platforms...' : '✨ Generate Versions'}
               </Text>
             </LinearGradient>
           </Pressable>
@@ -682,10 +862,15 @@ export const ProRepurposeScreen: React.FC<ProRepurposeScreenProps> = ({
           <View style={{ gap: 12, marginTop: 10 }}>
             {versions.map((ver) => (
               <View key={ver.id} style={styles.versionCard}>
-                <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 7 }}>
-                    <SocialBrandIcon platform={ver.platformType} size={18} />
-                    <Text style={styles.versionPlatformText}>{ver.platform}</Text>
+                <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 9 }}>
+                    <View style={styles.versionIconBox}>
+                      <SocialBrandIcon platform={ver.platformType} size={18} />
+                    </View>
+                    <View>
+                      <Text style={styles.versionPlatformText}>{ver.platform}</Text>
+                      <Text style={styles.versionFormatSubText}>{ver.format}</Text>
+                    </View>
                   </View>
                   <View style={[styles.versionBadge, { backgroundColor: ver.badgeColor }]}>
                     <Text style={[styles.versionBadgeText, { color: ver.badgeTextColor }]}>
@@ -733,11 +918,15 @@ export const ProRepurposeScreen: React.FC<ProRepurposeScreenProps> = ({
               <Text style={styles.captionPlatformBadgeText}>
                 {activeCaptionPlatform === 'tiktok'
                   ? '📱 TikTok Tailored'
-                  : activeCaptionPlatform === 'shorts'
-                  ? '▶ Shorts Tailored'
+                  : activeCaptionPlatform === 'youtube'
+                  ? '▶ YouTube Shorts Tailored'
                   : activeCaptionPlatform === 'threads'
                   ? '🧵 Threads Tailored'
-                  : '📸 IG Reel Tailored'}
+                  : activeCaptionPlatform === 'facebook'
+                  ? '👥 Facebook Tailored'
+                  : activeCaptionPlatform === 'pinterest'
+                  ? '📌 Pinterest Tailored'
+                  : '📸 Instagram Tailored'}
               </Text>
             </View>
           </View>
@@ -1186,7 +1375,7 @@ export const ProRepurposeScreen: React.FC<ProRepurposeScreenProps> = ({
         </View>
       </Modal>
 
-            {/* SELECT MORE PLATFORMS & FORMATS MODAL */}
+      {/* ADD MORE PLATFORMS MODAL */}
       <Modal
         visible={showMorePlatformsModal}
         transparent={true}
@@ -1196,61 +1385,18 @@ export const ProRepurposeScreen: React.FC<ProRepurposeScreenProps> = ({
         <View style={styles.modalOverlay}>
           <Animated.View style={[styles.modalCard, { transform: [{ scale: modalPopScale }] }]}>
             <View style={styles.modalHeaderBetween}>
-              <View>
+              <View style={{ flex: 1, paddingRight: 10 }}>
                 <Text style={styles.modalTitle}>Add More Platforms</Text>
-                <Text style={styles.modalSubTitle}>Select custom channels to adapt this idea for</Text>
+                <Text style={styles.modalSubTitle}>Choose additional PostStreak platforms to adapt this idea for.</Text>
               </View>
               <Pressable onPress={() => setShowMorePlatformsModal(false)} hitSlop={8}>
                 <Text style={styles.modalCloseText}>✕</Text>
               </Pressable>
             </View>
 
-            <ScrollView style={{ maxHeight: 320 }} contentContainerStyle={{ gap: 8, paddingVertical: 4 }}>
-              {[
-                {
-                  id: 'threads',
-                  name: 'Threads',
-                  platformType: 'threads',
-                  desc: 'Conversation notes & viral micro-thoughts',
-                },
-                {
-                  id: 'pinterest',
-                  name: 'Pinterest',
-                  platformType: 'pinterest',
-                  desc: 'Idea pins & visual infographics',
-                },
-                {
-                  id: 'facebook',
-                  name: 'Facebook',
-                  platformType: 'facebook',
-                  desc: 'Creator pages & community groups',
-                },
-                {
-                  id: 'newsletter',
-                  name: 'Newsletter / Substack',
-                  emoji: '✉️',
-                  desc: 'Long-form email breakdown with key takeaways',
-                },
-                {
-                  id: 'podcast',
-                  name: 'Podcast Audio Clip',
-                  emoji: '🎙️',
-                  desc: 'Speaking script & audiogram soundbite',
-                },
-                {
-                  id: 'carousel',
-                  name: 'Carousel Deck',
-                  emoji: '📊',
-                  desc: '5-slide PDF / multi-image swipeable carousel',
-                },
-                {
-                  id: 'article',
-                  name: 'Medium / Blog Article',
-                  emoji: '📝',
-                  desc: 'SEO-ready thought leadership article',
-                },
-              ].map((item) => {
-                const isSelected = extraPlatforms.includes(item.id);
+            <ScrollView style={{ maxHeight: 340 }} contentContainerStyle={{ gap: 8, paddingVertical: 4 }}>
+              {CORE_POSTSTREAK_PLATFORMS.map((item) => {
+                const isSelected = selectedPlatforms.includes(item.id);
                 return (
                   <Pressable
                     key={item.id}
@@ -1258,18 +1404,19 @@ export const ProRepurposeScreen: React.FC<ProRepurposeScreenProps> = ({
                       styles.extraPlatformRow,
                       isSelected && styles.extraPlatformRowActive,
                     ]}
-                    onPress={() => handleToggleExtraPlatform(item.id)}
+                    onPress={() => handleTogglePlatform(item.id)}
                   >
                     <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, flex: 1 }}>
                       <View style={styles.extraPlatformIconBox}>
-                        {item.platformType ? (
-                          <SocialBrandIcon platform={item.platformType} size={20} />
-                        ) : (
-                          <Text style={{ fontSize: 18 }}>{item.emoji}</Text>
-                        )}
+                        <SocialBrandIcon platform={item.platformType} size={20} />
                       </View>
                       <View style={{ flex: 1 }}>
-                        <Text style={styles.extraPlatformName}>{item.name}</Text>
+                        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                          <Text style={styles.extraPlatformName}>{item.name}</Text>
+                          <View style={styles.extraPlatformFormatBadge}>
+                            <Text style={styles.extraPlatformFormatBadgeText}>{item.format}</Text>
+                          </View>
+                        </View>
                         <Text style={styles.extraPlatformDesc}>{item.desc}</Text>
                       </View>
                     </View>
@@ -1758,69 +1905,67 @@ const styles = StyleSheet.create({
     fontWeight: '700',
   },
 
-  // CARD 2: SELECT FORMATS
+  // CARD 2: SELECT PLATFORMS
+  sectionHeaderSub: {
+    fontSize: 11,
+    color: '#64748B',
+    marginTop: 2,
+  },
   selectAllLinkText: {
     fontSize: 11,
     fontWeight: '700',
     color: '#582CDB',
   },
-  formatsGrid: {
+  platformsGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: 8,
   },
-  formatCard: {
+  platformCard: {
     width: (width - 40 - 16) / 3,
     backgroundColor: '#FFFFFF',
     borderRadius: 14,
-    paddingVertical: 12,
-    paddingHorizontal: 8,
+    paddingVertical: 10,
+    paddingHorizontal: 6,
     alignItems: 'center',
     borderWidth: 1.5,
     borderColor: '#EFECE6',
     position: 'relative',
-    gap: 4,
+    gap: 2,
   },
-  formatCardActive: {
+  platformCardActive: {
     borderColor: '#582CDB',
     backgroundColor: '#F5F3FF',
   },
-  formatCardName: {
+  platformCardName: {
     fontSize: 11,
     fontWeight: '800',
     color: '#64748B',
+    marginTop: 3,
   },
-  formatCardNameActive: {
-    fontWeight: '700',
+  platformCardNameActive: {
+    fontWeight: '800',
     color: '#171420',
   },
-  formatCheckDot: {
+  platformCardFormat: {
+    fontSize: 9,
+    fontWeight: '600',
+    color: '#94A3B8',
+  },
+  platformCardFormatActive: {
+    color: '#582CDB',
+    fontWeight: '700',
+  },
+  platformCheckDot: {
     position: 'absolute',
-    top: 6,
-    right: 6,
+    top: 5,
+    right: 5,
     width: 14,
     height: 14,
     borderRadius: 7,
     backgroundColor: '#582CDB',
     justifyContent: 'center',
     alignItems: 'center',
-  },
-  formatMoreCard: {
-    width: (width - 40 - 16) / 3,
-    backgroundColor: '#FAF8F5',
-    borderRadius: 14,
-    paddingVertical: 12,
-    paddingHorizontal: 8,
-    alignItems: 'center',
-    borderWidth: 1.5,
-    borderColor: '#CBD5E1',
-    borderStyle: 'dashed',
-    gap: 4,
-  },
-  formatMoreText: {
-    fontSize: 11,
-    fontWeight: '800',
-    color: '#94A3B8',
   },
   generateVersionsBtn: {
     borderRadius: 14,
@@ -1851,10 +1996,26 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#EFECE6',
   },
+  versionIconBox: {
+    width: 30,
+    height: 30,
+    borderRadius: 8,
+    backgroundColor: '#FAF8F5',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#EFECE6',
+  },
   versionPlatformText: {
-    fontSize: 12,
-    fontWeight: '700',
+    fontSize: 13,
+    fontWeight: '800',
     color: '#171420',
+  },
+  versionFormatSubText: {
+    fontSize: 10,
+    fontWeight: '600',
+    color: '#64748B',
+    marginTop: 1,
   },
   versionBadge: {
     paddingHorizontal: 6,
@@ -2308,6 +2469,18 @@ const styles = StyleSheet.create({
     fontSize: 12.5,
     fontWeight: '700',
     color: '#171420',
+  },
+  extraPlatformFormatBadge: {
+    backgroundColor: '#EDE9FE',
+    paddingHorizontal: 6,
+    paddingVertical: 1.5,
+    borderRadius: 4,
+  },
+  extraPlatformFormatBadgeText: {
+    fontSize: sFont(8),
+    fontWeight: '800',
+    color: '#582CDB',
+    letterSpacing: 0.3,
   },
   extraPlatformDesc: {
     fontSize: 10,
