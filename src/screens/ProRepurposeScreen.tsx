@@ -411,12 +411,8 @@ export const ProRepurposeScreen: React.FC<ProRepurposeScreenProps> = ({
     }
     const pltName = CORE_POSTSTREAK_PLATFORMS.find((p) => p.id === platformId)?.name || platformId;
     if (selectedPlatforms.includes(platformId)) {
-      if (selectedPlatforms.length > 1) {
-        setSelectedPlatforms(selectedPlatforms.filter((f) => f !== platformId));
-        showToast(`Deselected ${pltName}`);
-      } else {
-        showToast('At least 1 platform must remain selected');
-      }
+      setSelectedPlatforms(selectedPlatforms.filter((f) => f !== platformId));
+      showToast(`Deselected ${pltName}`);
     } else {
       setSelectedPlatforms([...selectedPlatforms, platformId]);
       showToast(`✓ Added ${pltName}`);
@@ -429,11 +425,11 @@ export const ProRepurposeScreen: React.FC<ProRepurposeScreenProps> = ({
     }
     const allIds = CORE_POSTSTREAK_PLATFORMS.map((p) => p.id);
     if (selectedPlatforms.length === allIds.length) {
-      setSelectedPlatforms(['tiktok']);
-      showToast('Reset to TikTok platform');
+      setSelectedPlatforms([]);
+      showToast('Deselected all platforms');
     } else {
       setSelectedPlatforms(allIds);
-      showToast('✓ Selected all 6 PostStreak platforms');
+      showToast('✓ Selected all 6 platforms');
     }
   };
 
@@ -459,21 +455,30 @@ export const ProRepurposeScreen: React.FC<ProRepurposeScreenProps> = ({
     });
     setVersions(newVersions);
 
-    setCompletionData({
-      title: 'Platforms Synchronized!',
-      subtitle: `${selectedPlatforms.length} PostStreak platforms calibrated for multi-channel reach.`,
-      badgeText: `✨ ${selectedPlatforms.length}-PLATFORM SYNC (+50 XP)`,
-      xpEarned: 50,
-      speechBubble: 'Platform versions are ready to adapt your idea, Pablo! 🔥',
-    });
+    if (selectedPlatforms.length > 0) {
+      setCompletionData({
+        title: 'Platforms Synchronized!',
+        subtitle: `${selectedPlatforms.length} PostStreak platforms calibrated for multi-channel reach.`,
+        badgeText: `✨ ${selectedPlatforms.length}-PLATFORM SYNC (+50 XP)`,
+        xpEarned: 50,
+        speechBubble: 'Platform versions are ready to adapt your idea, Pablo! 🔥',
+      });
 
-    setTimeout(() => {
-      setShowCompletionModal(true);
-    }, 200);
+      setTimeout(() => {
+        setShowCompletionModal(true);
+      }, 200);
+    }
   };
 
   // Generate Action
   const handleGenerateVersions = () => {
+    if (selectedPlatforms.length === 0) {
+      if (Platform.OS !== 'web') {
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
+      }
+      showToast('Select at least 1 platform to generate versions');
+      return;
+    }
     if (Platform.OS !== 'web') {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     }
