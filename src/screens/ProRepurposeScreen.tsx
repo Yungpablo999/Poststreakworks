@@ -104,19 +104,19 @@ const PLATFORM_TEMPLATES: Record<
     platform: 'TikTok',
     platformType: 'tiktok',
     title: 'The Slow-Mo Creator Trap',
-    body: 'Stop doing these 3 things if you want to grow past 1,000 followers...',
+    body: 'Stop doing these 3 things if you want to grow past 1,000 followers: over-editing without a clear hook, waiting days between uploads, and ignoring your retention drop-offs.',
   },
   instagram: {
     platform: 'Instagram',
     platformType: 'instagram',
     title: 'The Slow-Mo Creator Trap',
-    body: 'Breakdown of 3 simple shifts to optimize your daily creation workflow.',
+    body: 'Breakdown of 3 simple shifts to optimize your daily creation workflow and double your reel engagement.',
   },
   youtube: {
     platform: 'YouTube',
     platformType: 'youtube',
     title: 'How I Batch-Film 10 Videos in 2 Hours',
-    body: 'Breakdown of workflow systems that help you increase your output without burnout.',
+    body: 'Breakdown of workflow systems that help you increase your output without burnout: batch scripting, 1-hour recording sprints, and reusable templates.',
   },
   threads: {
     platform: 'Threads',
@@ -128,13 +128,13 @@ const PLATFORM_TEMPLATES: Record<
     platform: 'Facebook',
     platformType: 'facebook',
     title: '3 systems to double creator output',
-    body: 'How to build a sustainable daily posting workflow without burning out.',
+    body: 'How to build a sustainable daily posting workflow without burning out: simplify your formats, batch your production, and protect your streak.',
   },
   pinterest: {
     platform: 'Pinterest',
     platformType: 'pinterest',
     title: 'Creator Workflow Infographic',
-    body: 'Step-by-step visual blueprint for batching content and protecting your streak.',
+    body: 'Step-by-step visual blueprint for batching content, optimizing your workflow, and protecting your creator streak.',
   },
 };
 
@@ -332,7 +332,7 @@ export const ProRepurposeScreen: React.FC<ProRepurposeScreenProps> = ({
   const [showScoreInfoModal, setShowScoreInfoModal] = useState(false);
   const [showReviewScheduleModal, setShowReviewScheduleModal] = useState(false);
   const [editIdeaText, setEditIdeaText] = useState(originalIdea);
-  const [editingVersion, setEditingVersion] = useState<{ id: string; title: string; body: string } | null>(null);
+  const [editingVersion, setEditingVersion] = useState<{ id: string; platform: string; title: string; body: string } | null>(null);
 
   // Generated Versions Data (Platform first)
   const [versions, setVersions] = useState<GeneratedVersionItem[]>([
@@ -344,7 +344,7 @@ export const ProRepurposeScreen: React.FC<ProRepurposeScreenProps> = ({
       badgeColor: '#DCFCE7',
       badgeTextColor: '#15803D',
       title: 'The Slow-Mo Creator Trap',
-      body: 'Stop doing these 3 things if you want to grow past 1,000 followers...',
+      body: 'Stop doing these 3 things if you want to grow past 1,000 followers: over-editing without a clear hook, waiting days between uploads, and ignoring your retention drop-offs.',
     },
     {
       id: 'instagram',
@@ -354,7 +354,7 @@ export const ProRepurposeScreen: React.FC<ProRepurposeScreenProps> = ({
       badgeColor: '#DCFCE7',
       badgeTextColor: '#15803D',
       title: 'The Slow-Mo Creator Trap',
-      body: 'Breakdown of 3 simple shifts to optimize your daily creation workflow.',
+      body: 'Breakdown of 3 simple shifts to optimize your daily creation workflow and double your reel engagement.',
     },
     {
       id: 'youtube',
@@ -364,7 +364,7 @@ export const ProRepurposeScreen: React.FC<ProRepurposeScreenProps> = ({
       badgeColor: '#DCFCE7',
       badgeTextColor: '#15803D',
       title: 'How I Batch-Film 10 Videos in 2 Hours',
-      body: 'Breakdown of workflow systems that help you increase your output without burnout.',
+      body: 'Breakdown of workflow systems that help you increase your output without burnout: batch scripting, 1-hour recording sprints, and reusable templates.',
     },
     {
       id: 'threads',
@@ -859,7 +859,7 @@ export const ProRepurposeScreen: React.FC<ProRepurposeScreenProps> = ({
                   <Pressable
                     style={({ pressed }) => [styles.versionEditBtn, pressed && styles.btnPressed]}
                     onPress={() => {
-                      setEditingVersion({ id: ver.id, title: ver.title, body: ver.body });
+                      setEditingVersion({ id: ver.id, platform: ver.platform, title: ver.title, body: ver.body });
                       triggerModalPop();
                     }}
                   >
@@ -1299,7 +1299,9 @@ export const ProRepurposeScreen: React.FC<ProRepurposeScreenProps> = ({
         <View style={styles.modalOverlay}>
           <Animated.View style={[styles.modalCard, { transform: [{ scale: modalPopScale }] }]}>
             <View style={styles.modalHeaderBetween}>
-              <Text style={styles.modalTitle}>Edit Platform Version</Text>
+              <Text style={styles.modalTitle}>
+                {editingVersion?.platform ? `Edit ${editingVersion.platform} Version` : 'Edit Platform Version'}
+              </Text>
               <Pressable onPress={() => setEditingVersion(null)} hitSlop={8}>
                 <Text style={styles.modalCloseText}>✕</Text>
               </Pressable>
