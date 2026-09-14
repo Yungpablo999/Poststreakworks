@@ -322,6 +322,10 @@ export const ProRepurposeScreen: React.FC<ProRepurposeScreenProps> = ({
   const activeCaptionPlatform = selectedPlatforms[0] || 'tiktok';
   const currentCaptions = PLATFORM_CAPTION_VARIATIONS[activeCaptionPlatform] || PLATFORM_CAPTION_VARIATIONS.tiktok;
 
+  // Carousel ref & dimensions for Caption Variations
+  const captionScrollRef = useRef<ScrollView>(null);
+  const captionCardWidth = width - 40;
+
   // Toast & Modals
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [toastKey, setToastKey] = useState(0);
@@ -904,9 +908,20 @@ export const ProRepurposeScreen: React.FC<ProRepurposeScreenProps> = ({
           </View>
 
           <ScrollView
+            ref={captionScrollRef}
             horizontal
+            pagingEnabled={Platform.OS !== 'web'}
+            snapToInterval={captionCardWidth}
+            snapToAlignment="center"
+            decelerationRate="fast"
             showsHorizontalScrollIndicator={false}
             contentContainerStyle={styles.captionVariationsScroll}
+            onMomentumScrollEnd={(e) => {
+              const idx = Math.round(e.nativeEvent.contentOffset.x / captionCardWidth);
+              if (currentCaptions[idx]) {
+                setSelectedCaptionVariation(currentCaptions[idx].id);
+              }
+            }}
           >
             {currentCaptions.map((cap) => {
               const isSelected = selectedCaptionVariation === cap.id;
@@ -915,6 +930,7 @@ export const ProRepurposeScreen: React.FC<ProRepurposeScreenProps> = ({
                   key={cap.id}
                   style={({ pressed }) => [
                     styles.captionVarCard,
+                    { width: captionCardWidth },
                     isSelected && styles.captionVarCardActive,
                     pressed && styles.btnPressed,
                   ]}
@@ -929,7 +945,7 @@ export const ProRepurposeScreen: React.FC<ProRepurposeScreenProps> = ({
                   <View style={styles.captionVarTypeBadge}>
                     <Text style={styles.captionVarTypeBadgeText}>{cap.type}</Text>
                   </View>
-                  <Text style={styles.captionVarText} numberOfLines={4}>
+                  <Text style={styles.captionVarText} numberOfLines={5}>
                     {cap.text}
                   </Text>
                 </Pressable>
@@ -939,7 +955,7 @@ export const ProRepurposeScreen: React.FC<ProRepurposeScreenProps> = ({
 
           {/* Carousel Pagination & Indicator Row */}
           <View style={styles.captionIndicatorRow}>
-            {currentCaptions.map((cap) => {
+            {currentCaptions.map((cap, idx) => {
               const isSelected = selectedCaptionVariation === cap.id;
               return (
                 <Pressable
@@ -950,6 +966,7 @@ export const ProRepurposeScreen: React.FC<ProRepurposeScreenProps> = ({
                       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                     }
                     setSelectedCaptionVariation(cap.id);
+                    captionScrollRef.current?.scrollTo({ x: idx * captionCardWidth, animated: true });
                     showToast(`✓ Selected ${cap.shortLabel} angle`);
                   }}
                   hitSlop={6}
@@ -2027,17 +2044,18 @@ const styles = StyleSheet.create({
 
   // CARD 4: CAPTION VARIATIONS
   captionVariationsScroll: {
-    gap: 10,
     marginTop: 10,
-    paddingRight: 10,
   },
   captionVarCard: {
-    width: 220,
     backgroundColor: '#FFFFFF',
-    borderRadius: 16,
-    padding: 12,
+    borderRadius: 18,
+    padding: 15,
     borderWidth: 1.5,
     borderColor: '#EFECE6',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.03,
+    shadowRadius: 6,
   },
   captionVarCardActive: {
     borderColor: '#582CDB',
@@ -2046,21 +2064,21 @@ const styles = StyleSheet.create({
   captionVarTypeBadge: {
     backgroundColor: '#EDE9FE',
     alignSelf: 'flex-start',
-    paddingHorizontal: 6,
-    paddingVertical: 2.5,
-    borderRadius: 5,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 6,
     marginBottom: 8,
   },
   captionVarTypeBadgeText: {
-    fontSize: 9,
-    fontWeight: '700',
+    fontSize: 9.5,
+    fontWeight: '800',
     color: '#582CDB',
-    letterSpacing: 0.3,
+    letterSpacing: 0.4,
   },
   captionVarText: {
-    fontSize: 11,
+    fontSize: 12,
     color: '#334155',
-    lineHeight: 16,
+    lineHeight: 18,
     fontWeight: '600',
   },
   captionPlatformBadge: {
