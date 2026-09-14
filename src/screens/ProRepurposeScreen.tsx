@@ -1089,18 +1089,17 @@ export const ProRepurposeScreen: React.FC<ProRepurposeScreenProps> = ({
                 if (Platform.OS !== 'web') {
                   Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
                 }
-                showToast('✓ Prioritized TikTok for first release');
+                showToast('✓ Opening Schedule Queue with TikTok Priority');
+                setShowReviewScheduleModal(true);
               }}
             >
-              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, flex: 1, marginRight: 6 }}>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, flex: 1, marginRight: 4 }}>
                 <Text style={styles.jarvisPrimaryStar}>⭐</Text>
                 <Text
                   style={styles.jarvisPrimaryStrategyText}
                   numberOfLines={1}
-                  adjustsFontSizeToFit
-                  minimumFontScale={0.75}
                 >
-                  RECOMMENDED: SCHEDULE TIKTOK FIRST
+                  SCHEDULE TIKTOK FIRST
                 </Text>
               </View>
               <Text style={styles.jarvisPrimaryArrow}>➔</Text>
@@ -1111,17 +1110,13 @@ export const ProRepurposeScreen: React.FC<ProRepurposeScreenProps> = ({
               <Pressable
                 style={({ pressed }) => [styles.jarvisSecondaryStrategyBtn, pressed && styles.btnPressed]}
                 onPress={() => {
-                  if (Platform.OS !== 'web') {
-                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                  }
-                  showToast('✓ Applied Cross-Post Reel strategy');
+                  const igVer = versions.find((v) => v.platformType === 'instagram') || versions[0];
+                  handleUseVersion(igVer);
                 }}
               >
                 <Text
                   style={styles.jarvisSecondaryStrategyText}
                   numberOfLines={1}
-                  adjustsFontSizeToFit
-                  minimumFontScale={0.8}
                 >
                   CROSS-POST REEL
                 </Text>
@@ -1130,17 +1125,13 @@ export const ProRepurposeScreen: React.FC<ProRepurposeScreenProps> = ({
               <Pressable
                 style={({ pressed }) => [styles.jarvisSecondaryStrategyBtn, pressed && styles.btnPressed]}
                 onPress={() => {
-                  if (Platform.OS !== 'web') {
-                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                  }
-                  showToast('✓ Applied Extract Thread strategy');
+                  const threadsVer = versions.find((v) => v.platformType === 'threads') || versions[0];
+                  handleUseVersion(threadsVer);
                 }}
               >
                 <Text
                   style={styles.jarvisSecondaryStrategyText}
                   numberOfLines={1}
-                  adjustsFontSizeToFit
-                  minimumFontScale={0.8}
                 >
                   EXTRACT THREAD
                 </Text>
