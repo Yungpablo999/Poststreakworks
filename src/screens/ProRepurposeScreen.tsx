@@ -349,6 +349,7 @@ export const ProRepurposeScreen: React.FC<ProRepurposeScreenProps> = ({
   const [editIdeaText, setEditIdeaText] = useState(originalIdea);
   const [editingVersion, setEditingVersion] = useState<{ id: string; platform: string; title: string; body: string } | null>(null);
   const [editingQueueItem, setEditingQueueItem] = useState<QueueItem | null>(null);
+  const [queueModalView, setQueueModalView] = useState<'list' | 'edit'>('list');
 
   // Review & Schedule Queue State (Platform · Format architecture)
   const [queueItems, setQueueItems] = useState<QueueItem[]>([
@@ -1235,7 +1236,9 @@ export const ProRepurposeScreen: React.FC<ProRepurposeScreenProps> = ({
                   Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
                 }
                 showToast('✓ Opening Schedule Queue with TikTok Priority');
+                setQueueModalView('list');
                 setShowReviewScheduleModal(true);
+                triggerModalPop();
               }}
             >
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, flex: 1, marginRight: 4 }}>
@@ -1291,7 +1294,9 @@ export const ProRepurposeScreen: React.FC<ProRepurposeScreenProps> = ({
               if (Platform.OS !== 'web') {
                 Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
               }
+              setQueueModalView('list');
               setShowReviewScheduleModal(true);
+              triggerModalPop();
             }}
           >
             <Text style={styles.jarvisScheduleBtnText}>✨ Review & Schedule via Jarvis →</Text>
@@ -1314,9 +1319,13 @@ export const ProRepurposeScreen: React.FC<ProRepurposeScreenProps> = ({
                 const tiktokItem = queueItems.find((q) => q.id === 'tiktok') || queueItems[0];
                 if (tiktokItem) {
                   setEditingQueueItem({ ...tiktokItem });
+                  setQueueModalView('edit');
+                  setShowReviewScheduleModal(true);
                   triggerModalPop();
                 } else {
+                  setQueueModalView('list');
                   setShowReviewScheduleModal(true);
+                  triggerModalPop();
                 }
               }}
             >
@@ -1343,9 +1352,13 @@ export const ProRepurposeScreen: React.FC<ProRepurposeScreenProps> = ({
                 const igItem = queueItems.find((q) => q.id === 'instagram') || queueItems[1];
                 if (igItem) {
                   setEditingQueueItem({ ...igItem });
+                  setQueueModalView('edit');
+                  setShowReviewScheduleModal(true);
                   triggerModalPop();
                 } else {
+                  setQueueModalView('list');
                   setShowReviewScheduleModal(true);
+                  triggerModalPop();
                 }
               }}
             >
@@ -1368,7 +1381,9 @@ export const ProRepurposeScreen: React.FC<ProRepurposeScreenProps> = ({
               if (Platform.OS !== 'web') {
                 Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
               }
+              setQueueModalView('list');
               setShowReviewScheduleModal(true);
+              triggerModalPop();
             }}
           >
             <LinearGradient
@@ -1680,219 +1695,262 @@ export const ProRepurposeScreen: React.FC<ProRepurposeScreenProps> = ({
         </View>
       </Modal>
 
-      {/* EDIT QUEUE ITEM SCHEDULE MODAL */}
-      <Modal
-        visible={editingQueueItem !== null}
-        transparent={true}
-        animationType="fade"
-        onRequestClose={() => setEditingQueueItem(null)}
-      >
-        <View style={styles.modalOverlay}>
-          <Animated.View style={[styles.modalCard, { transform: [{ scale: modalPopScale }] }]}>
-            <View style={styles.modalHeaderBetween}>
-              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
-                {editingQueueItem && (
-                  <View style={styles.queueIconBox}>
-                    <SocialBrandIcon platform={editingQueueItem.platformType} size={18} />
-                  </View>
-                )}
-                <View>
-                  <Text style={styles.modalTitle}>
-                    {editingQueueItem ? `Edit ${editingQueueItem.platform}` : 'Edit Schedule'}
-                  </Text>
-                  <Text style={styles.modalSubTitle}>Adjust scheduled time & post hook</Text>
-                </View>
-              </View>
-              <Pressable onPress={() => setEditingQueueItem(null)} hitSlop={8}>
-                <Text style={styles.modalCloseText}>✕</Text>
-              </Pressable>
-            </View>
-
-            {/* Scheduled Release Time Section */}
-            <Text style={styles.modalInputLabel}>SCHEDULED RELEASE TIME</Text>
-            <View style={styles.queueTimePickerRow}>
-              {['6:30 PM', '7:00 PM', '7:30 PM', '8:00 PM', '8:30 PM', '9:00 PM', '9:30 PM', '10:00 PM'].map((t) => {
-                const isSelected = editingQueueItem?.time === t;
-                return (
-                  <Pressable
-                    key={t}
-                    style={[styles.queueTimePickerPill, isSelected && styles.queueTimePickerPillActive]}
-                    onPress={() => {
-                      if (Platform.OS !== 'web') {
-                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                      }
-                      setEditingQueueItem((prev) => (prev ? { ...prev, time: t } : null));
-                    }}
-                  >
-                    <Text style={[styles.queueTimePickerPillText, isSelected && styles.queueTimePickerPillTextActive]}>
-                      {t}
-                    </Text>
-                  </Pressable>
-                );
-              })}
-            </View>
-
-            {/* Post Title / Hook Section */}
-            <Text style={[styles.modalInputLabel, { marginTop: 14 }]}>POST TITLE / HOOK</Text>
-            <TextInput
-              style={[styles.modalTextInput, { height: 60 }]}
-              value={editingQueueItem?.title}
-              onChangeText={(text) =>
-                setEditingQueueItem((prev) => (prev ? { ...prev, title: text } : null))
-              }
-              placeholder="Post title or hook..."
-              placeholderTextColor="#94A3B8"
-            />
-
-            {/* Actions: Remove, Save */}
-            <View style={{ flexDirection: 'row', gap: 10, marginTop: 16 }}>
-              <Pressable
-                style={styles.modalDeleteBtn}
-                onPress={() => {
-                  if (!editingQueueItem) return;
-                  if (Platform.OS !== 'web') {
-                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-                  }
-                  const removedPlatform = editingQueueItem.platform;
-                  setQueueItems((prev) => prev.filter((item) => item.id !== editingQueueItem.id));
-                  setEditingQueueItem(null);
-                  showToast(`✓ Removed ${removedPlatform} from queue`);
-                }}
-              >
-                <Text style={styles.modalDeleteBtnText}>Remove</Text>
-              </Pressable>
-
-              <Pressable
-                style={styles.modalSaveBtn}
-                onPress={() => {
-                  if (!editingQueueItem) return;
-                  if (Platform.OS !== 'web') {
-                    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-                  }
-                  setQueueItems((prev) =>
-                    prev.map((item) => (item.id === editingQueueItem.id ? editingQueueItem : item))
-                  );
-                  const updatedName = editingQueueItem.platform;
-                  const updatedTime = editingQueueItem.time;
-                  setEditingQueueItem(null);
-                  showToast(`✓ Updated ${updatedName} to ${updatedTime}`);
-                }}
-              >
-                <Text style={styles.modalSaveBtnText}>Save Schedule</Text>
-              </Pressable>
-            </View>
-          </Animated.View>
-        </View>
-      </Modal>
-
-      {/* REVIEW & SCHEDULE QUEUE CONFIRMATION MODAL */}
+      {/* REVIEW & SCHEDULE QUEUE CONFIRMATION & EDIT MODAL */}
       <Modal
         visible={showReviewScheduleModal}
         transparent={true}
         animationType="fade"
-        onRequestClose={() => setShowReviewScheduleModal(false)}
+        onRequestClose={() => {
+          if (queueModalView === 'edit') {
+            setQueueModalView('list');
+          } else {
+            setShowReviewScheduleModal(false);
+          }
+        }}
       >
         <View style={styles.modalOverlay}>
           <Animated.View style={[styles.modalCard, { transform: [{ scale: modalPopScale }] }]}>
-            <View style={styles.modalHeaderBetween}>
+            {queueModalView === 'list' ? (
+              /* LIST VIEW */
               <View>
-                <Text style={styles.modalTitle}>Review & Schedule Queue</Text>
-                <Text style={styles.modalSubTitle}>Confirm automated multi-platform release</Text>
-              </View>
-              <Pressable onPress={() => setShowReviewScheduleModal(false)} hitSlop={8}>
-                <Text style={styles.modalCloseText}>✕</Text>
-              </Pressable>
-            </View>
+                <View style={styles.modalHeaderBetween}>
+                  <View>
+                    <Text style={styles.modalTitle}>Review & Schedule Queue</Text>
+                    <Text style={styles.modalSubTitle}>Confirm automated multi-platform release</Text>
+                  </View>
+                  <Pressable onPress={() => setShowReviewScheduleModal(false)} hitSlop={8}>
+                    <Text style={styles.modalCloseText}>✕</Text>
+                  </Pressable>
+                </View>
 
-            {/* Queue items */}
-            <ScrollView style={{ maxHeight: 280 }} contentContainerStyle={{ gap: 8, paddingVertical: 4 }}>
-              {queueItems.length === 0 ? (
-                <View style={styles.emptyQueueNotice}>
-                  <Text style={styles.emptyQueueNoticeText}>
-                    No posts in queue. Tap Regenerate or choose platforms to refill.
+                {/* Queue items */}
+                <ScrollView style={{ maxHeight: 290 }} contentContainerStyle={{ gap: 9, paddingVertical: 4 }}>
+                  {queueItems.length === 0 ? (
+                    <View style={styles.emptyQueueNotice}>
+                      <Text style={styles.emptyQueueNoticeText}>
+                        No posts in queue. Tap Regenerate or choose platforms to refill.
+                      </Text>
+                    </View>
+                  ) : (
+                    queueItems.map((item) => (
+                      <Pressable
+                        key={item.id}
+                        style={({ pressed }) => [
+                          styles.queueItemRow,
+                          pressed && styles.queueItemRowPressed,
+                        ]}
+                        onPress={() => {
+                          if (Platform.OS !== 'web') {
+                            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                          }
+                          setEditingQueueItem({ ...item });
+                          setQueueModalView('edit');
+                        }}
+                      >
+                        {/* Top Row: Icon + Platform & Format Name + Time & Edit Badge */}
+                        <View style={styles.queueCardHeaderRow}>
+                          <View style={styles.queueCardPlatformLeft}>
+                            <View style={styles.queueIconBox}>
+                              <SocialBrandIcon platform={item.platformType} size={16} />
+                            </View>
+                            <Text
+                              style={styles.queuePlatformName}
+                              numberOfLines={1}
+                            >
+                              {item.platform}
+                            </Text>
+                          </View>
+
+                          <View style={styles.queueCardTimeRight}>
+                            <View style={styles.queueTimeBox}>
+                              <Text style={styles.queueTimeText}>{item.time}</Text>
+                            </View>
+                            <View style={styles.queueEditPencilBadge}>
+                              <Text style={{ fontSize: 11 }}>✏️</Text>
+                            </View>
+                          </View>
+                        </View>
+
+                        {/* Middle: Post Title */}
+                        <Text style={styles.queueItemTitle} numberOfLines={2}>
+                          &ldquo;{item.title}&rdquo;
+                        </Text>
+
+                        {/* Bottom Row: Strategy Tag Badge + Edit cue */}
+                        <View style={styles.queueCardFooterRow}>
+                          <View style={styles.queueTagBadge}>
+                            <Text style={styles.queueTagBadgeText}>{item.tag}</Text>
+                          </View>
+                          <Text style={styles.queueTapToEditText}>Edit time or Composer ➔</Text>
+                        </View>
+                      </Pressable>
+                    ))
+                  )}
+                </ScrollView>
+
+                {/* Safety Notice */}
+                <View style={styles.queueSafetyNotice}>
+                  <Text style={styles.queueSafetyNoticeText}>
+                    🔒 Tap any card to adjust scheduled time or open in Post Composer.
                   </Text>
                 </View>
-              ) : (
-                queueItems.map((item) => (
+
+                <View style={{ flexDirection: 'row', gap: 10, marginTop: 14 }}>
                   <Pressable
-                    key={item.id}
-                    style={({ pressed }) => [
-                      styles.queueItemRow,
-                      pressed && styles.queueItemRowPressed,
-                    ]}
+                    style={styles.modalCancelBtn}
+                    onPress={() => setShowReviewScheduleModal(false)}
+                  >
+                    <Text style={styles.modalCancelBtnText}>Cancel</Text>
+                  </Pressable>
+
+                  <Pressable
+                    style={[styles.modalSaveBtn, { flex: 2 }]}
                     onPress={() => {
-                      if (Platform.OS !== 'web') {
-                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                      }
-                      setEditingQueueItem({ ...item });
-                      triggerModalPop();
+                      setShowReviewScheduleModal(false);
+                      handleScheduleAll();
                     }}
                   >
-                    {/* Top Row: Icon + Platform Name & Time Pill */}
-                    <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-                      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, flex: 1, marginRight: 8 }}>
-                        <View style={styles.queueIconBox}>
-                          <SocialBrandIcon platform={item.platformType} size={16} />
-                        </View>
-                        <Text
-                          style={styles.queuePlatformName}
-                          numberOfLines={1}
-                          adjustsFontSizeToFit
-                          minimumFontScale={0.85}
-                        >
-                          {item.platform}
-                        </Text>
-                      </View>
-
-                      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-                        <View style={styles.queueTimeBox}>
-                          <Text style={styles.queueTimeText}>{item.time}</Text>
-                        </View>
-                        <View style={styles.queueEditPencilBadge}>
-                          <Text style={{ fontSize: 10 }}>✏️</Text>
-                        </View>
-                      </View>
-                    </View>
-
-                    {/* Bottom Row: Post Title (left) & Strategy Tag Badge (right) */}
-                    <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: 6, gap: 8 }}>
-                      <Text style={styles.queueItemTitle} numberOfLines={1}>
-                        &ldquo;{item.title}&rdquo;
-                      </Text>
-                      <View style={styles.queueTagBadge}>
-                        <Text style={styles.queueTagBadgeText}>{item.tag}</Text>
-                      </View>
-                    </View>
+                    <Text style={styles.modalSaveBtnText}>Confirm & Queue All</Text>
                   </Pressable>
-                ))
-              )}
-            </ScrollView>
+                </View>
+              </View>
+            ) : (
+              /* EDIT ITEM VIEW */
+              editingQueueItem && (
+                <View>
+                  <View style={styles.modalHeaderBetween}>
+                    <Pressable
+                      onPress={() => {
+                        if (Platform.OS !== 'web') {
+                          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                        }
+                        setQueueModalView('list');
+                      }}
+                      style={styles.queueBackBtn}
+                      hitSlop={8}
+                    >
+                      <Text style={styles.queueBackBtnText}>← Back to Queue</Text>
+                    </Pressable>
+                    <Pressable onPress={() => setShowReviewScheduleModal(false)} hitSlop={8}>
+                      <Text style={styles.modalCloseText}>✕</Text>
+                    </Pressable>
+                  </View>
 
-            {/* Safety Notice */}
-            <View style={styles.queueSafetyNotice}>
-              <Text style={styles.queueSafetyNoticeText}>
-                🔒 Tap any card to adjust scheduled time or hook. Posts will be queued in your Jarvis schedule.
-              </Text>
-            </View>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 12, marginTop: 4 }}>
+                    <View style={styles.queueIconBox}>
+                      <SocialBrandIcon platform={editingQueueItem.platformType} size={18} />
+                    </View>
+                    <View style={{ flex: 1 }}>
+                      <Text style={styles.modalTitle}>Edit {editingQueueItem.platform}</Text>
+                      <Text style={styles.modalSubTitle}>Adjust time, edit hook, or open in Post Composer</Text>
+                    </View>
+                  </View>
 
-            <View style={{ flexDirection: 'row', gap: 10, marginTop: 14 }}>
-              <Pressable
-                style={styles.modalCancelBtn}
-                onPress={() => setShowReviewScheduleModal(false)}
-              >
-                <Text style={styles.modalCancelBtnText}>Cancel</Text>
-              </Pressable>
+                  <ScrollView style={{ maxHeight: 310 }} showsVerticalScrollIndicator={false}>
+                    {/* Scheduled Release Time Section */}
+                    <Text style={styles.modalInputLabel}>SCHEDULED RELEASE TIME</Text>
+                    <View style={styles.queueTimePickerRow}>
+                      {['6:30 PM', '7:00 PM', '7:30 PM', '8:00 PM', '8:30 PM', '9:00 PM', '9:30 PM', '10:00 PM'].map((t) => {
+                        const isSelected = editingQueueItem.time === t;
+                        return (
+                          <Pressable
+                            key={t}
+                            style={[styles.queueTimePickerPill, isSelected && styles.queueTimePickerPillActive]}
+                            onPress={() => {
+                              if (Platform.OS !== 'web') {
+                                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                              }
+                              setEditingQueueItem((prev) => (prev ? { ...prev, time: t } : null));
+                            }}
+                          >
+                            <Text style={[styles.queueTimePickerPillText, isSelected && styles.queueTimePickerPillTextActive]}>
+                              {t}
+                            </Text>
+                          </Pressable>
+                        );
+                      })}
+                    </View>
 
-              <Pressable
-                style={[styles.modalSaveBtn, { flex: 2 }]}
-                onPress={() => {
-                  setShowReviewScheduleModal(false);
-                  handleScheduleAll();
-                }}
-              >
-                <Text style={styles.modalSaveBtnText}>Confirm & Queue All</Text>
-              </Pressable>
-            </View>
+                    {/* Post Title / Hook Section */}
+                    <Text style={[styles.modalInputLabel, { marginTop: 12 }]}>POST TITLE / HOOK</Text>
+                    <TextInput
+                      style={[styles.modalTextInput, { minHeight: 52, paddingVertical: 8 }]}
+                      value={editingQueueItem.title}
+                      onChangeText={(text) =>
+                        setEditingQueueItem((prev) => (prev ? { ...prev, title: text } : null))
+                      }
+                      placeholder="Post title or hook..."
+                      placeholderTextColor="#94A3B8"
+                      multiline
+                    />
+
+                    {/* Open in Post Composer Button */}
+                    <Pressable
+                      style={({ pressed }) => [styles.openInComposerCardBtn, pressed && styles.btnPressed]}
+                      onPress={() => {
+                        if (Platform.OS !== 'web') {
+                          Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+                        }
+                        setShowReviewScheduleModal(false);
+                        const verToLoad =
+                          versions.find((v) => v.platformType === editingQueueItem.platformType) || versions[0];
+                        handleUseVersion({
+                          ...verToLoad,
+                          title: editingQueueItem.title,
+                        });
+                      }}
+                    >
+                      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 9 }}>
+                        <Text style={{ fontSize: 16 }}>🎨</Text>
+                        <View style={{ flex: 1 }}>
+                          <Text style={styles.openInComposerTitle}>Open in Post Composer</Text>
+                          <Text style={styles.openInComposerSub}>Add media uploads, hashtags & format settings</Text>
+                        </View>
+                        <Text style={styles.openInComposerArrow}>➔</Text>
+                      </View>
+                    </Pressable>
+                  </ScrollView>
+
+                  {/* Actions: Remove, Save */}
+                  <View style={{ flexDirection: 'row', gap: 10, marginTop: 14 }}>
+                    <Pressable
+                      style={styles.modalDeleteBtn}
+                      onPress={() => {
+                        if (Platform.OS !== 'web') {
+                          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                        }
+                        const removedPlatform = editingQueueItem.platform;
+                        setQueueItems((prev) => prev.filter((item) => item.id !== editingQueueItem.id));
+                        setQueueModalView('list');
+                        setEditingQueueItem(null);
+                        showToast(`✓ Removed ${removedPlatform} from queue`);
+                      }}
+                    >
+                      <Text style={styles.modalDeleteBtnText}>Remove</Text>
+                    </Pressable>
+
+                    <Pressable
+                      style={styles.modalSaveBtn}
+                      onPress={() => {
+                        if (Platform.OS !== 'web') {
+                          Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+                        }
+                        setQueueItems((prev) =>
+                          prev.map((item) => (item.id === editingQueueItem.id ? editingQueueItem : item))
+                        );
+                        const updatedName = editingQueueItem.platform;
+                        const updatedTime = editingQueueItem.time;
+                        setQueueModalView('list');
+                        setEditingQueueItem(null);
+                        showToast(`✓ Updated ${updatedName} to ${updatedTime}`);
+                      }}
+                    >
+                      <Text style={styles.modalSaveBtnText}>Save Schedule</Text>
+                    </Pressable>
+                  </View>
+                </View>
+              )
+            )}
           </Animated.View>
         </View>
       </Modal>
@@ -3018,6 +3076,73 @@ const styles = StyleSheet.create({
     color: '#64748B',
     textAlign: 'center',
   },
+  queueCardHeaderRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 4,
+  },
+  queueCardPlatformLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    flex: 1,
+    marginRight: 6,
+  },
+  queueCardTimeRight: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    flexShrink: 0,
+  },
+  queueCardFooterRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginTop: 6,
+  },
+  queueTapToEditText: {
+    fontSize: 9.5,
+    fontWeight: '700',
+    color: '#7C3AED',
+  },
+  queueBackBtn: {
+    paddingVertical: 5,
+    paddingHorizontal: 10,
+    borderRadius: 8,
+    backgroundColor: '#F5F3FF',
+    borderWidth: 1,
+    borderColor: '#DDD6FE',
+  },
+  queueBackBtnText: {
+    fontSize: 11.5,
+    fontWeight: '700',
+    color: '#582CDB',
+  },
+  openInComposerCardBtn: {
+    backgroundColor: '#FAF5FF',
+    borderRadius: 14,
+    padding: 12,
+    borderWidth: 1.5,
+    borderColor: '#E9D5FF',
+    marginTop: 12,
+    marginBottom: 4,
+  },
+  openInComposerTitle: {
+    fontSize: 12.5,
+    fontWeight: '800',
+    color: '#582CDB',
+  },
+  openInComposerSub: {
+    fontSize: 10,
+    color: '#6B21A8',
+    marginTop: 2,
+  },
+  openInComposerArrow: {
+    fontSize: 13,
+    fontWeight: '800',
+    color: '#582CDB',
+  },
   queueIconBox: {
     width: 28,
     height: 28,
@@ -3049,10 +3174,11 @@ const styles = StyleSheet.create({
     letterSpacing: 0.3,
   },
   queueItemTitle: {
-    fontSize: 11,
-    color: '#64748B',
-    flex: 1,
+    fontSize: 11.5,
+    color: '#334155',
     fontStyle: 'italic',
+    lineHeight: 16,
+    marginVertical: 2,
   },
   queueTimeBox: {
     backgroundColor: '#FEF3C7',
