@@ -869,7 +869,7 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
                       <InstagramRealIcon size={20} />
                     </View>
                     <View style={{ flex: 1 }}>
-                      <Text style={styles.socialPlatformTitle}>Instagram Reels</Text>
+                      <Text style={styles.socialPlatformTitle}>Instagram</Text>
                       <Text style={styles.socialPlatformSub}>Co-authoring &amp; collaboration tags</Text>
                     </View>
                     <View style={styles.connectedPill}>

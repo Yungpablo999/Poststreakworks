@@ -84,12 +84,12 @@ const PLATFORM_VARIATIONS: PlatformVariation[] = [
       label: 'Save Potential',
     },
     keyAdvantage: 'Designed to keep CTA visible above the fold to encourage saves and bookmarks.',
-    editingPlatformName: 'Instagram Reel',
+    editingPlatformName: 'Instagram · Reel',
   },
   {
     id: 'youtube',
     tabLabel: 'YouTube',
-    name: 'YouTube Shorts',
+    name: 'YouTube · Short',
     icon: 'youtube',
     badge: 'SHORTS & SEO',
     caption: 'Why 90% of creators stay stuck (and the 3 habits that fix it). Full breakdown in comments.',
@@ -103,7 +103,7 @@ const PLATFORM_VARIATIONS: PlatformVariation[] = [
       label: 'Search & Click Intent',
     },
     keyAdvantage: 'Designed to align with search intent and direct viewers to the comments.',
-    editingPlatformName: 'YouTube Shorts',
+    editingPlatformName: 'YouTube · Short',
   },
 ];
 

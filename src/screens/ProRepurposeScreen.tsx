@@ -50,6 +50,17 @@ export interface GeneratedVersionItem {
   body: string;
 }
 
+export interface QueueItem {
+  id: string;
+  platform: string;
+  platformName: string;
+  formatName: string;
+  platformType: 'tiktok' | 'instagram' | 'youtube' | 'threads' | 'facebook' | 'pinterest';
+  time: string;
+  tag: string;
+  title: string;
+}
+
 export interface PostStreakPlatform {
   id: string;
   name: string;
@@ -337,6 +348,51 @@ export const ProRepurposeScreen: React.FC<ProRepurposeScreenProps> = ({
   const [showReviewScheduleModal, setShowReviewScheduleModal] = useState(false);
   const [editIdeaText, setEditIdeaText] = useState(originalIdea);
   const [editingVersion, setEditingVersion] = useState<{ id: string; platform: string; title: string; body: string } | null>(null);
+  const [editingQueueItem, setEditingQueueItem] = useState<QueueItem | null>(null);
+
+  // Review & Schedule Queue State (Platform · Format architecture)
+  const [queueItems, setQueueItems] = useState<QueueItem[]>([
+    {
+      id: 'tiktok',
+      platform: 'TikTok · Video',
+      platformName: 'TikTok',
+      formatName: 'Video',
+      platformType: 'tiktok',
+      time: '7:30 PM',
+      tag: 'PEAK DISCOVERY',
+      title: 'The Slow-Mo Creator Trap',
+    },
+    {
+      id: 'instagram',
+      platform: 'Instagram · Reel',
+      platformName: 'Instagram',
+      formatName: 'Reel',
+      platformType: 'instagram',
+      time: '8:00 PM',
+      tag: 'OPTIMAL EXPLORE',
+      title: 'The Slow-Mo Creator Trap',
+    },
+    {
+      id: 'threads',
+      platform: 'Threads · Text',
+      platformName: 'Threads',
+      formatName: 'Text',
+      platformType: 'threads',
+      time: '8:30 PM',
+      tag: 'EVENING CONVO',
+      title: 'Stop waiting for the "perfect" idea to start posting.',
+    },
+    {
+      id: 'youtube',
+      platform: 'YouTube · Short',
+      platformName: 'YouTube',
+      formatName: 'Short',
+      platformType: 'youtube',
+      time: '9:00 PM',
+      tag: 'LATE SURGE',
+      title: 'How I Batch-Film 10 Videos in 2 Hours',
+    },
+  ]);
 
   // Generated Versions Data (Platform first)
   const [versions, setVersions] = useState<GeneratedVersionItem[]>([
@@ -443,6 +499,31 @@ export const ProRepurposeScreen: React.FC<ProRepurposeScreenProps> = ({
     }
     setShowMorePlatformsModal(false);
 
+    const formatMap: Record<string, string> = {
+      tiktok: 'Video',
+      instagram: 'Reel',
+      youtube: 'Short',
+      threads: 'Text',
+      facebook: 'Video',
+      pinterest: 'Pin',
+    };
+    const timeMap: Record<string, string> = {
+      tiktok: '7:30 PM',
+      instagram: '8:00 PM',
+      threads: '8:30 PM',
+      youtube: '9:00 PM',
+      facebook: '9:15 PM',
+      pinterest: '9:30 PM',
+    };
+    const tagMap: Record<string, string> = {
+      tiktok: 'PEAK DISCOVERY',
+      instagram: 'OPTIMAL EXPLORE',
+      threads: 'EVENING CONVO',
+      youtube: 'LATE SURGE',
+      facebook: 'COMMUNITY FEED',
+      pinterest: 'EVERGREEN SEARCH',
+    };
+
     // Synchronize generated versions with current selected platforms
     const newVersions = selectedPlatforms.map((pid) => {
       const tpl = PLATFORM_TEMPLATES[pid] || PLATFORM_TEMPLATES.tiktok;
@@ -458,6 +539,22 @@ export const ProRepurposeScreen: React.FC<ProRepurposeScreenProps> = ({
       };
     });
     setVersions(newVersions);
+
+    const newQueue: QueueItem[] = selectedPlatforms.map((pid) => {
+      const tpl = PLATFORM_TEMPLATES[pid] || PLATFORM_TEMPLATES.tiktok;
+      const fmt = formatMap[pid] || 'Post';
+      return {
+        id: pid,
+        platform: `${tpl.platform} · ${fmt}`,
+        platformName: tpl.platform,
+        formatName: fmt,
+        platformType: tpl.platformType,
+        time: timeMap[pid] || '8:00 PM',
+        tag: tagMap[pid] || 'OPTIMAL REACH',
+        title: tpl.title,
+      };
+    });
+    setQueueItems(newQueue);
 
     if (selectedPlatforms.length > 0) {
       setCompletionData({
@@ -490,6 +587,32 @@ export const ProRepurposeScreen: React.FC<ProRepurposeScreenProps> = ({
     showToast('✨ Adapting idea for selected PostStreak platforms...');
     setTimeout(() => {
       setIsGenerating(false);
+
+      const formatMap: Record<string, string> = {
+        tiktok: 'Video',
+        instagram: 'Reel',
+        youtube: 'Short',
+        threads: 'Text',
+        facebook: 'Video',
+        pinterest: 'Pin',
+      };
+      const timeMap: Record<string, string> = {
+        tiktok: '7:30 PM',
+        instagram: '8:00 PM',
+        threads: '8:30 PM',
+        youtube: '9:00 PM',
+        facebook: '9:15 PM',
+        pinterest: '9:30 PM',
+      };
+      const tagMap: Record<string, string> = {
+        tiktok: 'PEAK DISCOVERY',
+        instagram: 'OPTIMAL EXPLORE',
+        threads: 'EVENING CONVO',
+        youtube: 'LATE SURGE',
+        facebook: 'COMMUNITY FEED',
+        pinterest: 'EVERGREEN SEARCH',
+      };
+
       const newVersions = selectedPlatforms.map((pid) => {
         const tpl = PLATFORM_TEMPLATES[pid] || PLATFORM_TEMPLATES.tiktok;
         return {
@@ -504,6 +627,22 @@ export const ProRepurposeScreen: React.FC<ProRepurposeScreenProps> = ({
         };
       });
       setVersions(newVersions);
+
+      const newQueue: QueueItem[] = selectedPlatforms.map((pid) => {
+        const tpl = PLATFORM_TEMPLATES[pid] || PLATFORM_TEMPLATES.tiktok;
+        const fmt = formatMap[pid] || 'Post';
+        return {
+          id: pid,
+          platform: `${tpl.platform} · ${fmt}`,
+          platformName: tpl.platform,
+          formatName: fmt,
+          platformType: tpl.platformType,
+          time: timeMap[pid] || '8:00 PM',
+          tag: tagMap[pid] || 'OPTIMAL REACH',
+          title: tpl.title,
+        };
+      });
+      setQueueItems(newQueue);
 
       setCompletionData({
         title: 'Platform Versions Generated!',
@@ -534,11 +673,17 @@ export const ProRepurposeScreen: React.FC<ProRepurposeScreenProps> = ({
     if (Platform.OS !== 'web') {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     }
+    const count = queueItems.length;
+    const summaryList = queueItems
+      .slice(0, 2)
+      .map((q) => `${q.platform} at ${q.time}`)
+      .join(' • ');
+
     setCompletionData({
       title: 'Smart Multi-Post Scheduled!',
-      subtitle: 'TikTok queued for 7:30 PM • Instagram Reels queued for 8:00 PM',
-      badgeText: '📅 MULTI-CHANNEL QUEUED (+150 XP)',
-      xpEarned: 150,
+      subtitle: summaryList || `${count} platform posts queued across optimal peak hours`,
+      badgeText: `📅 ${count}-CHANNEL QUEUED (+${count * 35} XP)`,
+      xpEarned: count * 35,
       speechBubble: 'Strategic schedule locked in at peak engagement windows! 🔥',
     });
     setShowCompletionModal(true);
@@ -715,7 +860,7 @@ export const ProRepurposeScreen: React.FC<ProRepurposeScreenProps> = ({
             Turn one idea into platform-ready posts.
           </Text>
           <Text style={styles.heroSubtitle}>
-            Turn one content idea into platform-native versions for TikTok, Instagram Reels, YouTube Shorts, and Threads.
+            Turn one content idea into platform-native versions for TikTok · Video, Instagram · Reel, YouTube · Short, and Threads · Text.
           </Text>
         </View>
 
@@ -895,7 +1040,7 @@ export const ProRepurposeScreen: React.FC<ProRepurposeScreenProps> = ({
                 {activeCaptionPlatform === 'tiktok'
                   ? '📱 TikTok Tailored'
                   : activeCaptionPlatform === 'youtube'
-                  ? '▶ YouTube Shorts Tailored'
+                  ? '▶ YouTube · Short Tailored'
                   : activeCaptionPlatform === 'threads'
                   ? '🧵 Threads Tailored'
                   : activeCaptionPlatform === 'facebook'
@@ -1160,28 +1305,60 @@ export const ProRepurposeScreen: React.FC<ProRepurposeScreenProps> = ({
           <Text style={styles.scheduleHeaderTitle}>Strategic Schedule</Text>
 
           <View style={{ gap: 8, marginTop: 10 }}>
-            <View style={styles.scheduleSlotRow}>
+            <Pressable
+              style={({ pressed }) => [styles.scheduleSlotRow, pressed && styles.btnPressed]}
+              onPress={() => {
+                if (Platform.OS !== 'web') {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                }
+                const tiktokItem = queueItems.find((q) => q.id === 'tiktok') || queueItems[0];
+                if (tiktokItem) {
+                  setEditingQueueItem({ ...tiktokItem });
+                  triggerModalPop();
+                } else {
+                  setShowReviewScheduleModal(true);
+                }
+              }}
+            >
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 7, flex: 1, marginRight: 6 }}>
                 <SocialBrandIcon platform="tiktok" size={18} />
-                <Text style={styles.scheduleSlotName}>TikTok</Text>
+                <Text style={styles.scheduleSlotName}>TikTok · Video</Text>
                 <View style={styles.jarvisPickBadge}>
                   <Text style={styles.jarvisPickBadgeText}>✨ JARVIS PICK</Text>
                 </View>
               </View>
               <View style={styles.scheduleTimePill}>
-                <Text style={styles.scheduleTimePillText}>7:30 PM</Text>
+                <Text style={styles.scheduleTimePillText}>
+                  {queueItems.find((q) => q.id === 'tiktok')?.time || '7:30 PM'}
+                </Text>
               </View>
-            </View>
+            </Pressable>
 
-            <View style={styles.scheduleSlotRow}>
+            <Pressable
+              style={({ pressed }) => [styles.scheduleSlotRow, pressed && styles.btnPressed]}
+              onPress={() => {
+                if (Platform.OS !== 'web') {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                }
+                const igItem = queueItems.find((q) => q.id === 'instagram') || queueItems[1];
+                if (igItem) {
+                  setEditingQueueItem({ ...igItem });
+                  triggerModalPop();
+                } else {
+                  setShowReviewScheduleModal(true);
+                }
+              }}
+            >
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
                 <SocialBrandIcon platform="instagram" size={18} />
-                <Text style={styles.scheduleSlotName}>Instagram</Text>
+                <Text style={styles.scheduleSlotName}>Instagram · Reel</Text>
               </View>
               <View style={styles.scheduleTimePill}>
-                <Text style={styles.scheduleTimePillText}>8:00 PM</Text>
+                <Text style={styles.scheduleTimePillText}>
+                  {queueItems.find((q) => q.id === 'instagram')?.time || '8:00 PM'}
+                </Text>
               </View>
-            </View>
+            </Pressable>
           </View>
 
           {/* Schedule All Amber Action Button */}
@@ -1503,6 +1680,111 @@ export const ProRepurposeScreen: React.FC<ProRepurposeScreenProps> = ({
         </View>
       </Modal>
 
+      {/* EDIT QUEUE ITEM SCHEDULE MODAL */}
+      <Modal
+        visible={editingQueueItem !== null}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => setEditingQueueItem(null)}
+      >
+        <View style={styles.modalOverlay}>
+          <Animated.View style={[styles.modalCard, { transform: [{ scale: modalPopScale }] }]}>
+            <View style={styles.modalHeaderBetween}>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+                {editingQueueItem && (
+                  <View style={styles.queueIconBox}>
+                    <SocialBrandIcon platform={editingQueueItem.platformType} size={18} />
+                  </View>
+                )}
+                <View>
+                  <Text style={styles.modalTitle}>
+                    {editingQueueItem ? `Edit ${editingQueueItem.platform}` : 'Edit Schedule'}
+                  </Text>
+                  <Text style={styles.modalSubTitle}>Adjust scheduled time & post hook</Text>
+                </View>
+              </View>
+              <Pressable onPress={() => setEditingQueueItem(null)} hitSlop={8}>
+                <Text style={styles.modalCloseText}>✕</Text>
+              </Pressable>
+            </View>
+
+            {/* Scheduled Release Time Section */}
+            <Text style={styles.modalInputLabel}>SCHEDULED RELEASE TIME</Text>
+            <View style={styles.queueTimePickerRow}>
+              {['6:30 PM', '7:00 PM', '7:30 PM', '8:00 PM', '8:30 PM', '9:00 PM', '9:30 PM', '10:00 PM'].map((t) => {
+                const isSelected = editingQueueItem?.time === t;
+                return (
+                  <Pressable
+                    key={t}
+                    style={[styles.queueTimePickerPill, isSelected && styles.queueTimePickerPillActive]}
+                    onPress={() => {
+                      if (Platform.OS !== 'web') {
+                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                      }
+                      setEditingQueueItem((prev) => (prev ? { ...prev, time: t } : null));
+                    }}
+                  >
+                    <Text style={[styles.queueTimePickerPillText, isSelected && styles.queueTimePickerPillTextActive]}>
+                      {t}
+                    </Text>
+                  </Pressable>
+                );
+              })}
+            </View>
+
+            {/* Post Title / Hook Section */}
+            <Text style={[styles.modalInputLabel, { marginTop: 14 }]}>POST TITLE / HOOK</Text>
+            <TextInput
+              style={[styles.modalTextInput, { height: 60 }]}
+              value={editingQueueItem?.title}
+              onChangeText={(text) =>
+                setEditingQueueItem((prev) => (prev ? { ...prev, title: text } : null))
+              }
+              placeholder="Post title or hook..."
+              placeholderTextColor="#94A3B8"
+            />
+
+            {/* Actions: Remove, Save */}
+            <View style={{ flexDirection: 'row', gap: 10, marginTop: 16 }}>
+              <Pressable
+                style={styles.modalDeleteBtn}
+                onPress={() => {
+                  if (!editingQueueItem) return;
+                  if (Platform.OS !== 'web') {
+                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                  }
+                  const removedPlatform = editingQueueItem.platform;
+                  setQueueItems((prev) => prev.filter((item) => item.id !== editingQueueItem.id));
+                  setEditingQueueItem(null);
+                  showToast(`✓ Removed ${removedPlatform} from queue`);
+                }}
+              >
+                <Text style={styles.modalDeleteBtnText}>Remove</Text>
+              </Pressable>
+
+              <Pressable
+                style={styles.modalSaveBtn}
+                onPress={() => {
+                  if (!editingQueueItem) return;
+                  if (Platform.OS !== 'web') {
+                    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+                  }
+                  setQueueItems((prev) =>
+                    prev.map((item) => (item.id === editingQueueItem.id ? editingQueueItem : item))
+                  );
+                  const updatedName = editingQueueItem.platform;
+                  const updatedTime = editingQueueItem.time;
+                  setEditingQueueItem(null);
+                  showToast(`✓ Updated ${updatedName} to ${updatedTime}`);
+                }}
+              >
+                <Text style={styles.modalSaveBtnText}>Save Schedule</Text>
+              </Pressable>
+            </View>
+          </Animated.View>
+        </View>
+      </Modal>
+
       {/* REVIEW & SCHEDULE QUEUE CONFIRMATION MODAL */}
       <Modal
         visible={showReviewScheduleModal}
@@ -1523,76 +1805,73 @@ export const ProRepurposeScreen: React.FC<ProRepurposeScreenProps> = ({
             </View>
 
             {/* Queue items */}
-            <ScrollView style={{ maxHeight: 270 }} contentContainerStyle={{ gap: 8, paddingVertical: 4 }}>
-              {[
-                {
-                  platform: 'TikTok',
-                  platformType: 'tiktok',
-                  time: '7:30 PM',
-                  tag: 'PEAK DISCOVERY',
-                  title: 'The Slow-Mo Creator Trap',
-                },
-                {
-                  platform: 'Instagram Reels',
-                  platformType: 'instagram',
-                  time: '8:00 PM',
-                  tag: 'OPTIMAL EXPLORE',
-                  title: 'The Slow-Mo Creator Trap',
-                },
-                {
-                  platform: 'Threads',
-                  platformType: 'threads',
-                  time: '8:30 PM',
-                  tag: 'EVENING CONVO',
-                  title: 'Stop waiting for the "perfect" idea...',
-                },
-                {
-                  platform: 'YouTube Shorts',
-                  platformType: 'youtube',
-                  time: '9:00 PM',
-                  tag: 'LATE SURGE',
-                  title: 'How I Batch-Film 10 Shorts in 2 Hours',
-                },
-              ].map((item) => (
-                <View key={item.platform} style={styles.queueItemRow}>
-                  {/* Top Row: Icon + Platform Name & Time Pill */}
-                  <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, flex: 1, marginRight: 8 }}>
-                      <View style={styles.queueIconBox}>
-                        <SocialBrandIcon platform={item.platformType} size={16} />
-                      </View>
-                      <Text
-                        style={styles.queuePlatformName}
-                        numberOfLines={1}
-                        adjustsFontSizeToFit
-                        minimumFontScale={0.85}
-                      >
-                        {item.platform}
-                      </Text>
-                    </View>
-
-                    <View style={styles.queueTimeBox}>
-                      <Text style={styles.queueTimeText}>{item.time}</Text>
-                    </View>
-                  </View>
-
-                  {/* Bottom Row: Post Title (left) & Strategy Tag Badge (right) */}
-                  <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: 6, gap: 8 }}>
-                    <Text style={styles.queueItemTitle} numberOfLines={1}>
-                      &ldquo;{item.title}&rdquo;
-                    </Text>
-                    <View style={styles.queueTagBadge}>
-                      <Text style={styles.queueTagBadgeText}>{item.tag}</Text>
-                    </View>
-                  </View>
+            <ScrollView style={{ maxHeight: 280 }} contentContainerStyle={{ gap: 8, paddingVertical: 4 }}>
+              {queueItems.length === 0 ? (
+                <View style={styles.emptyQueueNotice}>
+                  <Text style={styles.emptyQueueNoticeText}>
+                    No posts in queue. Tap Regenerate or choose platforms to refill.
+                  </Text>
                 </View>
-              ))}
+              ) : (
+                queueItems.map((item) => (
+                  <Pressable
+                    key={item.id}
+                    style={({ pressed }) => [
+                      styles.queueItemRow,
+                      pressed && styles.queueItemRowPressed,
+                    ]}
+                    onPress={() => {
+                      if (Platform.OS !== 'web') {
+                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                      }
+                      setEditingQueueItem({ ...item });
+                      triggerModalPop();
+                    }}
+                  >
+                    {/* Top Row: Icon + Platform Name & Time Pill */}
+                    <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+                      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, flex: 1, marginRight: 8 }}>
+                        <View style={styles.queueIconBox}>
+                          <SocialBrandIcon platform={item.platformType} size={16} />
+                        </View>
+                        <Text
+                          style={styles.queuePlatformName}
+                          numberOfLines={1}
+                          adjustsFontSizeToFit
+                          minimumFontScale={0.85}
+                        >
+                          {item.platform}
+                        </Text>
+                      </View>
+
+                      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                        <View style={styles.queueTimeBox}>
+                          <Text style={styles.queueTimeText}>{item.time}</Text>
+                        </View>
+                        <View style={styles.queueEditPencilBadge}>
+                          <Text style={{ fontSize: 10 }}>✏️</Text>
+                        </View>
+                      </View>
+                    </View>
+
+                    {/* Bottom Row: Post Title (left) & Strategy Tag Badge (right) */}
+                    <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: 6, gap: 8 }}>
+                      <Text style={styles.queueItemTitle} numberOfLines={1}>
+                        &ldquo;{item.title}&rdquo;
+                      </Text>
+                      <View style={styles.queueTagBadge}>
+                        <Text style={styles.queueTagBadgeText}>{item.tag}</Text>
+                      </View>
+                    </View>
+                  </Pressable>
+                ))
+              )}
             </ScrollView>
 
             {/* Safety Notice */}
             <View style={styles.queueSafetyNotice}>
               <Text style={styles.queueSafetyNoticeText}>
-                🔒 Posts will be queued in your Jarvis schedule. You can edit or cancel any post before publish time.
+                🔒 Tap any card to adjust scheduled time or hook. Posts will be queued in your Jarvis schedule.
               </Text>
             </View>
 
@@ -2659,14 +2938,85 @@ const styles = StyleSheet.create({
     letterSpacing: 0.2,
   },
 
-  // QUEUE CONFIRMATION MODAL
+  // QUEUE CONFIRMATION MODAL & EDIT MODAL
   queueItemRow: {
     backgroundColor: '#FAF8F5',
     borderRadius: 14,
     paddingVertical: 10,
     paddingHorizontal: 12,
+    borderWidth: 1.5,
+    borderColor: '#EFECE6',
+  },
+  queueItemRowPressed: {
+    backgroundColor: '#F5F3FF',
+    borderColor: '#C4B5FD',
+    transform: [{ scale: 0.99 }],
+  },
+  queueEditPencilBadge: {
+    width: 22,
+    height: 22,
+    borderRadius: 6,
+    backgroundColor: '#FAF5FF',
+    borderWidth: 1,
+    borderColor: '#E9D5FF',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  queueTimePickerRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+    marginTop: 6,
+    marginBottom: 4,
+  },
+  queueTimePickerPill: {
+    paddingHorizontal: 12,
+    paddingVertical: 7,
+    borderRadius: 10,
+    backgroundColor: '#FAF8F5',
+    borderWidth: 1.5,
+    borderColor: '#E2E8F0',
+  },
+  queueTimePickerPillActive: {
+    backgroundColor: '#582CDB',
+    borderColor: '#582CDB',
+  },
+  queueTimePickerPillText: {
+    fontSize: 11.5,
+    fontWeight: '700',
+    color: '#475569',
+  },
+  queueTimePickerPillTextActive: {
+    color: '#FFFFFF',
+    fontWeight: '800',
+  },
+  modalDeleteBtn: {
+    flex: 1,
+    backgroundColor: '#FEF2F2',
+    borderWidth: 1.5,
+    borderColor: '#FECACA',
+    paddingVertical: 11,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  modalDeleteBtnText: {
+    color: '#DC2626',
+    fontSize: 12,
+    fontWeight: '700',
+  },
+  emptyQueueNotice: {
+    padding: 16,
+    backgroundColor: '#FAF8F5',
+    borderRadius: 12,
     borderWidth: 1,
     borderColor: '#EFECE6',
+    alignItems: 'center',
+  },
+  emptyQueueNoticeText: {
+    fontSize: 12,
+    color: '#64748B',
+    textAlign: 'center',
   },
   queueIconBox: {
     width: 28,

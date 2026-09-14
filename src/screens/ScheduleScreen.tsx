@@ -156,25 +156,25 @@ const MONTH_POSTS_MAP: { [day: number]: CalendarDayPost[] } = {
     { id: 'm12_1', platform: 'tiktok', platformLabel: 'TikTok', time: '11:00 AM', title: 'Why consistency beats talent in 2026', status: 'published' }
   ],
   13: [
-    { id: 'm13_1', platform: 'instagram', platformLabel: 'Instagram Reel', time: '6:30 PM', title: '3 hooks that doubled my watch time', status: 'published' }
+    { id: 'm13_1', platform: 'instagram', platformLabel: 'Instagram · Reel', time: '6:30 PM', title: '3 hooks that doubled my watch time', status: 'published' }
   ],
   14: [
-    { id: 'm14_1', platform: 'youtube', platformLabel: 'YouTube Shorts', time: '2:00 PM', title: 'Editing faster with mobile capcut tips', status: 'published' }
+    { id: 'm14_1', platform: 'youtube', platformLabel: 'YouTube · Short', time: '2:00 PM', title: 'Editing faster with mobile capcut tips', status: 'published' }
   ],
   15: [
-    { id: 'post_1', platform: 'tiktok', platformLabel: 'TikTok', time: '11:30 AM', title: '3 creator mistakes I stopped making…', status: 'scheduled' },
-    { id: 'post_2', platform: 'instagram', platformLabel: 'Instagram Reel', time: '7:30 PM', title: 'One thing I wish I knew before…', status: 'draft' },
-    { id: 'post_3', platform: 'youtube', platformLabel: 'YouTube Shorts', time: '9:00 PM', title: 'The 1 rule to 10x your views', status: 'scheduled' },
+    { id: 'post_1', platform: 'tiktok', platformLabel: 'TikTok', time: '11:30 AM', title: '3 creator mistakes I stopped making', status: 'scheduled' },
+    { id: 'post_2', platform: 'instagram', platformLabel: 'Instagram · Reel', time: '7:30 PM', title: 'One thing I wish I knew before posting', status: 'draft' },
+    { id: 'post_3', platform: 'youtube', platformLabel: 'YouTube · Short', time: '9:00 PM', title: 'The 1 rule to 10x your views', status: 'scheduled' },
   ],
   16: [
     { id: 'm16_1', platform: 'tiktok', platformLabel: 'TikTok', time: '12:00 PM', title: 'How to batch 5 videos in 1 hour', status: 'scheduled' },
-    { id: 'm16_2', platform: 'instagram', platformLabel: 'Instagram Reel', time: '6:00 PM', title: 'Behind the scenes creator workspace', status: 'scheduled' },
+    { id: 'm16_2', platform: 'instagram', platformLabel: 'Instagram · Reel', time: '6:00 PM', title: 'Behind the scenes creator workspace', status: 'scheduled' },
   ],
   19: [
     { id: 'm19_1', platform: 'tiktok', platformLabel: 'TikTok', time: '11:30 AM', title: 'The secret to viral retention graphs', status: 'scheduled' }
   ],
   22: [
-    { id: 'm22_1', platform: 'youtube', platformLabel: 'YouTube Shorts', time: '4:00 PM', title: 'Top 3 audio trends this weekend', status: 'scheduled' }
+    { id: 'm22_1', platform: 'youtube', platformLabel: 'YouTube · Short', time: '4:00 PM', title: 'Top 3 audio trends this weekend', status: 'scheduled' }
   ],
   26: [
     { id: 'm26_1', platform: 'tiktok', platformLabel: 'TikTok', time: '1:00 PM', title: 'How to build your first creator squad', status: 'scheduled' }
@@ -299,7 +299,7 @@ export const ScheduleScreen: React.FC<ScheduleScreenProps> = ({
     const newPost: ScheduledPost = {
       id: 'post_' + Date.now(),
       platform: newPostPlatform,
-      platformLabel: newPostPlatform === 'tiktok' ? 'TikTok' : newPostPlatform === 'instagram' ? 'Instagram Reel' : 'YouTube Shorts',
+      platformLabel: newPostPlatform === 'tiktok' ? 'TikTok · Video' : newPostPlatform === 'instagram' ? 'Instagram · Reel' : 'YouTube · Short',
       time: scheduledTimeString,
       title: newPostTitle.trim(),
       status: 'scheduled',

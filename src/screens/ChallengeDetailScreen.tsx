@@ -580,10 +580,10 @@ export const ChallengeDetailScreen: React.FC<ChallengeDetailScreenProps> = ({
                   <Text style={styles.platformTranslucentChipText}>TikTok</Text>
                 </View>
                 <View style={styles.platformTranslucentChip}>
-                  <Text style={styles.platformTranslucentChipText}>Instagram Reel</Text>
+                  <Text style={styles.platformTranslucentChipText}>Instagram · Reel</Text>
                 </View>
                 <View style={styles.platformTranslucentChip}>
-                  <Text style={styles.platformTranslucentChipText}>YouTube Shorts</Text>
+                  <Text style={styles.platformTranslucentChipText}>YouTube · Short</Text>
                 </View>
               </View>
 
@@ -784,8 +784,8 @@ export const ChallengeDetailScreen: React.FC<ChallengeDetailScreenProps> = ({
               <View style={styles.platformSelectRow}>
                 {([
                   { id: 'tiktok', label: 'TikTok' },
-                  { id: 'instagram', label: 'Instagram Reels' },
-                  { id: 'youtube', label: 'YouTube Shorts' },
+                  { id: 'instagram', label: 'Instagram · Reel' },
+                  { id: 'youtube', label: 'YouTube · Short' },
                 ] as const).map((plat) => (
                   <Pressable
                     key={plat.id}

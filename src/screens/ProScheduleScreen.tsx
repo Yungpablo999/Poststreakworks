@@ -133,15 +133,15 @@ const JARVIS_STRATEGIES: StrategyItem[] = [
     title: 'Contrarian Hook Architecture',
     tag: 'RETENTION • 96% AUDIENCE FIT',
     summary: 'Open with bold contrarian statement to cut 3s dropoff by 42%.',
-    body: 'Start with "Why 90% of creators fail by Month 2" rather than a casual intro. Cuts initial 3-second dropoff by 42% on TikTok and Instagram Reels.',
+    body: 'Start with "Why 90% of creators fail by Month 2" rather than a casual intro. Cuts initial 3-second dropoff by 42% on TikTok · Video and Instagram · Reel.',
   },
   {
     id: 'strat_3',
     icon: '🚀',
     title: 'Multi-Sync Cascade Pacing',
     tag: 'DISTRIBUTION MULTIPLIER',
-    summary: 'Publish Instagram + TikTok together → YouTube Shorts 2h later.',
-    body: 'Publish your 9:16 video to Instagram and TikTok simultaneously, then release the YouTube Shorts breakdown 2 hours later to maximize multi-channel reach.',
+    summary: 'Publish Instagram · Reel + TikTok · Video together → YouTube · Short 2h later.',
+    body: 'Publish your 9:16 video to Instagram and TikTok simultaneously, then release the YouTube · Short breakdown 2 hours later to maximize multi-channel reach.',
   },
   {
     id: 'strat_4',

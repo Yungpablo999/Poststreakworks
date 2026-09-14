@@ -151,7 +151,7 @@ const INITIAL_PLATFORMS: PlatformAccount[] = [
   },
   {
     id: 'instagram',
-    name: 'Instagram Reels',
+    name: 'Instagram · Reel',
     handle: '@pablocreates',
     followers: '7.8K',
     countNumeric: 7800,
@@ -1453,7 +1453,7 @@ export const AudienceBreakdownScreen: React.FC<AudienceBreakdownScreenProps> = (
 
             <Text style={styles.jarvisCoreLabel}>JARVIS CORE INSIGHT 4</Text>
             <Text style={styles.jarvisCoreText}>
-              Your strongest audience signal is TikTok. Create more creator education posts there, then repurpose the best ones to Instagram and YouTube Shorts.
+              Your strongest audience signal is TikTok. Create more creator education posts there, then repurpose the best ones to Instagram · Reel and YouTube · Short.
             </Text>
 
             <View style={styles.jarvisActionLinksRow}>
@@ -1692,7 +1692,7 @@ export const AudienceBreakdownScreen: React.FC<AudienceBreakdownScreenProps> = (
                 <View style={styles.modalCalcCard}>
                   <Text style={styles.modalCalcTitle}>3. Cross-Platform Growth</Text>
                   <Text style={styles.modalCalcBody}>
-                    Repurposing to Instagram Reels captures a 2.4x higher non-follower reach when using the same 3-second hook.
+                    Repurposing to Instagram · Reel captures a 2.4x higher non-follower reach when using the same 3-second hook.
                   </Text>
                 </View>
               </ScrollView>

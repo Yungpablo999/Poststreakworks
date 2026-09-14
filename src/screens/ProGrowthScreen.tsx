@@ -49,7 +49,7 @@ const INITIAL_GROWTH_PLATFORMS: GrowthPlatformAccount[] = [
   },
   {
     id: 'instagram',
-    name: 'Instagram Reels',
+    name: 'Instagram · Reel',
     handle: '@pablocreates',
     followers: '25.6k',
     growthPct: '+8.1%',
@@ -60,7 +60,7 @@ const INITIAL_GROWTH_PLATFORMS: GrowthPlatformAccount[] = [
   },
   {
     id: 'youtube',
-    name: 'YouTube Shorts',
+    name: 'YouTube · Short',
     handle: '@pablofilms',
     followers: '22.4k',
     growthPct: '+4.2%',
@@ -1854,7 +1854,7 @@ export const ProGrowthScreen: React.FC<ProGrowthScreenProps> = ({
                           <SocialBrandIcon platform="instagram" size={20} />
                           <View style={{ flex: 1, marginLeft: 10 }}>
                             <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 4 }}>
-                              <Text style={styles.audienceChannelName}>Instagram Reels</Text>
+                              <Text style={styles.audienceChannelName}>Instagram · Reel</Text>
                               <Text style={styles.audienceChannelVal}>{aud.igGain} <Text style={styles.audienceChannelPct}>{aud.igPct}</Text></Text>
                             </View>
                             <View style={styles.audienceChannelTrackBg}>
@@ -1882,7 +1882,7 @@ export const ProGrowthScreen: React.FC<ProGrowthScreenProps> = ({
                           <SocialBrandIcon platform="youtube" size={20} />
                           <View style={{ flex: 1, marginLeft: 10 }}>
                             <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 4 }}>
-                              <Text style={styles.audienceChannelName}>YouTube Shorts</Text>
+                              <Text style={styles.audienceChannelName}>YouTube · Short</Text>
                               <Text style={styles.audienceChannelVal}>{aud.ytGain} <Text style={styles.audienceChannelPct}>{aud.ytPct}</Text></Text>
                             </View>
                             <View style={styles.audienceChannelTrackBg}>
@@ -1928,7 +1928,7 @@ export const ProGrowthScreen: React.FC<ProGrowthScreenProps> = ({
                           <SocialBrandIcon platform="instagram" size={20} />
                           <View style={{ flex: 1, marginLeft: 10 }}>
                             <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 4 }}>
-                              <Text style={styles.audienceChannelName}>Instagram Reels</Text>
+                              <Text style={styles.audienceChannelName}>Instagram · Reel</Text>
                               <Text style={styles.audienceChannelVal}>{rch.igReach} <Text style={styles.audienceChannelPct}>{rch.igPct}</Text></Text>
                             </View>
                             <View style={styles.audienceChannelTrackBg}>
@@ -1956,7 +1956,7 @@ export const ProGrowthScreen: React.FC<ProGrowthScreenProps> = ({
                           <SocialBrandIcon platform="youtube" size={20} />
                           <View style={{ flex: 1, marginLeft: 10 }}>
                             <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 4 }}>
-                              <Text style={styles.audienceChannelName}>YouTube Shorts</Text>
+                              <Text style={styles.audienceChannelName}>YouTube · Short</Text>
                               <Text style={styles.audienceChannelVal}>{rch.ytReach} <Text style={styles.audienceChannelPct}>{rch.ytPct}</Text></Text>
                             </View>
                             <View style={styles.audienceChannelTrackBg}>
