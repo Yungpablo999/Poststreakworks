@@ -14,6 +14,8 @@ import {
   Dimensions,
 } from 'react-native';
 import { Text, TextInput } from '../components/ui/AppText';
+import { isStage1Platform, STAGE_2_ENABLED } from '../config/features';
+import { GrowthDayZeroPreview } from '../components/growth/GrowthDayZeroPreview';
 import { BrandLogo } from '../components/BrandLogo';
 import Svg, { Path, Circle, Rect, Defs, LinearGradient as SvgLinearGradient, Stop } from 'react-native-svg';
 import * as Haptics from 'expo-haptics';
@@ -36,6 +38,7 @@ interface GrowthPlatformAccount {
   bgTint: string;
 }
 
+// Only Stage 1 platforms are shown; other entries stay for later stages.
 const INITIAL_GROWTH_PLATFORMS: GrowthPlatformAccount[] = [
   {
     id: 'tiktok',
@@ -103,7 +106,7 @@ const INITIAL_GROWTH_PLATFORMS: GrowthPlatformAccount[] = [
     color: '#E60023',
     bgTint: '#FFF1F2',
   },
-];
+].filter((p) => isStage1Platform(p.id));
 
 const parseFollowerCount = (str: string): number => {
   const clean = str.replace(/[^0-9.]/g, '');
@@ -334,7 +337,7 @@ const TIMEFRAME_CONFIGS = {
       formats: [
         { name: 'Talking Reels', icon: '🎥', reach: '18.4K', barHeight: 85, color: '#582CDB', retention: '74%', saveRate: '4.8%', delta: '+280 followers gained' },
         { name: 'Carousels', icon: '📑', reach: '14.2K', barHeight: 70, color: '#7C3AED', retention: '82%', saveRate: '8.4% (Top Saves 🔥)', delta: '+210 followers gained' },
-        { name: 'Shorts', icon: '▶️', reach: '11.8K', barHeight: 55, color: '#F59E0B', retention: '70%', saveRate: '3.6%', delta: '+120 followers gained' },
+        { name: 'Shorts', icon: '▶️', reach: '11.8K', barHeight: 55, color: '#A78BFA', retention: '70%', saveRate: '3.6%', delta: '+120 followers gained' },
         { name: 'Posts / X', icon: '💬', reach: '8.5K', barHeight: 40, color: '#64748B', retention: '65%', saveRate: '4.2%', delta: '+70 followers gained' },
       ],
     },
@@ -428,7 +431,7 @@ const TIMEFRAME_CONFIGS = {
       formats: [
         { name: 'Talking Reels', icon: '🎥', reach: '22.6K', barHeight: 90, color: '#582CDB', retention: '76%', saveRate: '5.1%', delta: '+560 followers gained' },
         { name: 'Carousels', icon: '📑', reach: '16.8K', barHeight: 75, color: '#7C3AED', retention: '85%', saveRate: '8.6% (Top Saves 🔥)', delta: '+430 followers gained' },
-        { name: 'Shorts', icon: '▶️', reach: '13.4K', barHeight: 58, color: '#F59E0B', retention: '72%', saveRate: '3.8%', delta: '+240 followers gained' },
+        { name: 'Shorts', icon: '▶️', reach: '13.4K', barHeight: 58, color: '#A78BFA', retention: '72%', saveRate: '3.8%', delta: '+240 followers gained' },
         { name: 'Posts / X', icon: '💬', reach: '9.8K', barHeight: 42, color: '#64748B', retention: '68%', saveRate: '4.5%', delta: '+120 followers gained' },
       ],
     },
@@ -523,7 +526,7 @@ const TIMEFRAME_CONFIGS = {
       formats: [
         { name: 'Talking Reels', icon: '🎥', reach: '28.4K', barHeight: 95, color: '#582CDB', retention: '78%', saveRate: '5.4%', delta: '+1,120 followers gained' },
         { name: 'Carousels', icon: '📑', reach: '19.2K', barHeight: 80, color: '#7C3AED', retention: '88%', saveRate: '9.2% (Top Saves 🔥)', delta: '+840 followers gained' },
-        { name: 'Shorts', icon: '▶️', reach: '15.8K', barHeight: 62, color: '#F59E0B', retention: '75%', saveRate: '4.1%', delta: '+360 followers gained' },
+        { name: 'Shorts', icon: '▶️', reach: '15.8K', barHeight: 62, color: '#A78BFA', retention: '75%', saveRate: '4.1%', delta: '+360 followers gained' },
         { name: 'Posts / X', icon: '💬', reach: '11.2K', barHeight: 45, color: '#64748B', retention: '72%', saveRate: '4.9%', delta: '+160 followers gained' },
       ],
     },
@@ -617,7 +620,7 @@ const TIMEFRAME_CONFIGS = {
       formats: [
         { name: 'Talking Reels', icon: '🎥', reach: '34.8K', barHeight: 100, color: '#582CDB', retention: '82%', saveRate: '5.8%', delta: '+3,240 followers gained' },
         { name: 'Carousels', icon: '📑', reach: '24.6K', barHeight: 85, color: '#7C3AED', retention: '92%', saveRate: '9.6% (Top Saves 🔥)', delta: '+2,380 followers gained' },
-        { name: 'Shorts', icon: '▶️', reach: '19.4K', barHeight: 68, color: '#F59E0B', retention: '78%', saveRate: '4.4%', delta: '+820 followers gained' },
+        { name: 'Shorts', icon: '▶️', reach: '19.4K', barHeight: 68, color: '#A78BFA', retention: '78%', saveRate: '4.4%', delta: '+820 followers gained' },
         { name: 'Posts / X', icon: '💬', reach: '14.8K', barHeight: 48, color: '#64748B', retention: '76%', saveRate: '5.2%', delta: '+400 followers gained' },
       ],
     },
@@ -958,6 +961,8 @@ export const ProGrowthScreen: React.FC<ProGrowthScreenProps> = ({
   // Hybrid Data Model Calculations
   const connectedPlatformsList = platformsList.filter((p) => p.connected);
   const hasConnectedPlatforms = connectedPlatformsList.length > 0;
+  // Day 0: new creator with nothing connected — no stats, charts or extra CTAs.
+  const isDayZero = isNewUser && !hasConnectedPlatforms;
 
   // Total followers across connected platforms
   const totalConnectedFollowersNumeric = connectedPlatformsList.reduce(
@@ -1230,7 +1235,7 @@ export const ProGrowthScreen: React.FC<ProGrowthScreenProps> = ({
                 <View style={styles.heroStarterBox}>
                   <Text style={styles.starterMilestoneTitle}>No growth data yet</Text>
                   <Text style={styles.starterMilestoneSub}>
-                    Connect your platforms below or publish your first post to start charting your audience and momentum.
+                    Connect YouTube, Threads, Instagram, Facebook or TikTok to start seeing your audience and what's working.
                   </Text>
 
                   {/* Direct Action Trigger */}
@@ -1240,16 +1245,10 @@ export const ProGrowthScreen: React.FC<ProGrowthScreenProps> = ({
                       if (Platform.OS !== 'web') {
                         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
                       }
-                      if (onOpenPostComposer) {
-                        onOpenPostComposer('Day 1 creator introduction: Why I started sharing', 'TikTok');
-                      } else if (onNavigateTab) {
-                        onNavigateTab('create');
-                      } else {
-                        showToast('Opening Post Composer for Day 1 Post...');
-                      }
+                      setShowAddPlatformModal(true);
                     }}
                   >
-                    <Text style={styles.starterActionBtnText}>🚀 Create Day 1 Post →</Text>
+                    <Text style={styles.starterActionBtnText}>Connect a platform →</Text>
                   </Pressable>
                 </View>
               )
@@ -1292,6 +1291,7 @@ export const ProGrowthScreen: React.FC<ProGrowthScreenProps> = ({
             )}
 
             {/* 2x2 METRICS GRID */}
+            {!isDayZero && (
             <View style={styles.metricsGrid2x2}>
               <View style={styles.gridMetricItem}>
                 <Text style={styles.gridMetricLabel}>REACH</Text>
@@ -1337,6 +1337,7 @@ export const ProGrowthScreen: React.FC<ProGrowthScreenProps> = ({
                 )}
               </View>
             </View>
+            )}
           </Pressable>
 
           {/* ============================================================ */}
@@ -1484,7 +1485,7 @@ export const ProGrowthScreen: React.FC<ProGrowthScreenProps> = ({
                     strokeWidth="2.5"
                     strokeLinecap="round"
                   />
-                  <Circle cx={340} cy={35} r={4} fill="#F59E0B" />
+                  <Circle cx={340} cy={35} r={4} fill="#5B3EE8" />
                 </Svg>
               </View>
 
@@ -1496,6 +1497,10 @@ export const ProGrowthScreen: React.FC<ProGrowthScreenProps> = ({
             </Pressable>
           )}
 
+          {isDayZero ? (
+            <GrowthDayZeroPreview />
+          ) : (
+          <>
           {/* ============================================================ */}
           {/* CARD 4: CONTENT FORMAT PERFORMANCE                           */}
           {/* ============================================================ */}
@@ -1688,7 +1693,7 @@ export const ProGrowthScreen: React.FC<ProGrowthScreenProps> = ({
                 { day: 'T', full: 'Tue', heat: '#DDD6FE' },
                 { day: 'W', full: 'Wed', heat: '#A78BFA' },
                 { day: 'T', full: 'Thu', heat: '#8B5CF6' },
-                { day: 'F', full: 'Fri', heat: '#F59E0B' },
+                { day: 'F', full: 'Fri', heat: '#3F2BB5' },
                 { day: 'S', full: 'Sat', heat: '#C4B5FD' },
                 { day: 'S', full: 'Sun', heat: '#F1F5F9' },
               ].map((item, idx) => (
@@ -1711,7 +1716,7 @@ export const ProGrowthScreen: React.FC<ProGrowthScreenProps> = ({
                       fontSize: 12,
                       fontWeight: '700',
                       color:
-                        !isNewUser && (item.heat === '#8B5CF6' || item.heat === '#582CDB' || item.heat === '#F59E0B')
+                        !isNewUser && (item.heat === '#8B5CF6' || item.heat === '#582CDB' || item.heat === '#3F2BB5')
                           ? '#FFFFFF'
                           : '#94A3B8',
                     }}
@@ -1845,7 +1850,7 @@ export const ProGrowthScreen: React.FC<ProGrowthScreenProps> = ({
               </Text>
             </Pressable>
 
-            {/* Tile 3: Protect growth momentum -> Options Modal */}
+            {/* Tile 3: Posting helpers -> Options Modal */}
             <Pressable
               style={({ pressed }) => [styles.quickActionTile, pressed && styles.btnPressed]}
               onPress={() => {
@@ -1857,11 +1862,11 @@ export const ProGrowthScreen: React.FC<ProGrowthScreenProps> = ({
               }}
             >
               <View style={styles.tileHeaderRow}>
-                <Text style={{ fontSize: 18 }}>🛡️</Text>
+                <Text style={{ fontSize: 18 }}>🧰</Text>
                 <Text style={styles.tileArrowText}>→</Text>
               </View>
               <Text style={styles.tileTitleText}>
-                {isNewUser ? 'Activate streak\nshield' : 'Protect growth\nmomentum'}
+                {'Posting\nhelpers'}
               </Text>
             </Pressable>
 
@@ -1926,6 +1931,8 @@ export const ProGrowthScreen: React.FC<ProGrowthScreenProps> = ({
               </Pressable>
             )}
           </View>
+          </>
+          )}
         </ScrollView>
 
         {/* 10. FLOATING LIQUID GLASS BOTTOM NAVIGATION BAR */}
@@ -2044,7 +2051,7 @@ export const ProGrowthScreen: React.FC<ProGrowthScreenProps> = ({
                         <View style={styles.graphActivePointCellDivider} />
                         <View style={styles.graphActivePointMetricCell}>
                           <Text style={styles.graphActivePointCellLabel}>SAVE RATE</Text>
-                          <Text style={[styles.graphActivePointCellVal, { color: '#F59E0B' }]}>{fmt.saveRate.split(' ')[0]}</Text>
+                          <Text style={[styles.graphActivePointCellVal, { color: '#8B5CF6' }]}>{fmt.saveRate.split(' ')[0]}</Text>
                         </View>
                       </View>
                     </View>
@@ -2300,7 +2307,7 @@ export const ProGrowthScreen: React.FC<ProGrowthScreenProps> = ({
                                     isSelected && styles.nodeCircleDotSelected,
                                     {
                                       backgroundColor: isSelected
-                                        ? '#F59E0B'
+                                        ? '#3F2BB5'
                                         : expandedGraphType === 'growth30d'
                                         ? '#582CDB'
                                         : '#7C3AED',
@@ -2617,7 +2624,7 @@ export const ProGrowthScreen: React.FC<ProGrowthScreenProps> = ({
                   </View>
                   <View style={styles.reportVitalCard}>
                     <Text style={styles.reportVitalLabel}>CREATOR HEALTH SCORE</Text>
-                    <Text style={[styles.reportVitalVal, { color: '#F59E0B' }]}>98 / 100</Text>
+                    <Text style={[styles.reportVitalVal, { color: '#5B3EE8' }]}>98 / 100</Text>
                     <Text style={styles.reportVitalDelta}>Top 1% Momentum</Text>
                   </View>
                 </View>
@@ -2654,7 +2661,7 @@ export const ProGrowthScreen: React.FC<ProGrowthScreenProps> = ({
 
                   {/* Highlight 3: Peak Publishing Window */}
                   <View style={styles.reportHighlightItem}>
-                    <View style={[styles.reportHighlightIconCircle, { backgroundColor: '#FEF3C7' }]}>
+                    <View style={[styles.reportHighlightIconCircle, { backgroundColor: '#EDE9FE' }]}>
                       <Text style={{ fontSize: 16 }}>⚡</Text>
                     </View>
                     <View style={{ flex: 1 }}>
@@ -3052,7 +3059,7 @@ export const ProGrowthScreen: React.FC<ProGrowthScreenProps> = ({
                       <Text style={styles.trafficSourceVal}>{selectedPost.trafficDirect}</Text>
                     </View>
                     <View style={styles.trafficTrackBg}>
-                      <View style={[styles.trafficTrackFill, { width: selectedPost.trafficDirect as any, backgroundColor: '#F59E0B' }]} />
+                      <View style={[styles.trafficTrackFill, { width: selectedPost.trafficDirect as any, backgroundColor: '#A78BFA' }]} />
                     </View>
                   </View>
                 </View>
@@ -3164,8 +3171,8 @@ export const ProGrowthScreen: React.FC<ProGrowthScreenProps> = ({
                 <View style={styles.modalHeaderRow}>
                   <View style={{ flex: 1, paddingRight: 10 }}>
                     <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 2 }}>
-                      <Text style={{ fontSize: 18 }}>🛡️</Text>
-                      <Text style={styles.modalTitle}>Protect Growth Momentum</Text>
+                      <Text style={{ fontSize: 18 }}>🧰</Text>
+                      <Text style={styles.modalTitle}>Posting Helpers</Text>
                     </View>
                     <Text style={styles.modalSubtitle}>
                       Configure autonomous safeguards to protect your streak &amp; algorithm reach
@@ -3188,11 +3195,11 @@ export const ProGrowthScreen: React.FC<ProGrowthScreenProps> = ({
                   >
                     <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
                       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, flex: 1 }}>
-                        <Text style={{ fontSize: 20 }}>🛡️</Text>
+                        <Text style={{ fontSize: 20 }}>📝</Text>
                         <View style={{ flex: 1 }}>
-                          <Text style={styles.protectOptionTitle}>Streak Autopilot Shield</Text>
+                          <Text style={styles.protectOptionTitle}>Backup Draft</Text>
                           <Text style={styles.protectOptionDesc}>
-                            Auto-queues an emergency evergreen draft if unposted by 9:00 PM.
+                            Keeps one evergreen draft ready for busy days.
                           </Text>
                         </View>
                       </View>
@@ -3214,9 +3221,9 @@ export const ProGrowthScreen: React.FC<ProGrowthScreenProps> = ({
                       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, flex: 1 }}>
                         <Text style={{ fontSize: 20 }}>⚡</Text>
                         <View style={{ flex: 1 }}>
-                          <Text style={styles.protectOptionTitle}>Algorithmic Safety Buffer</Text>
+                          <Text style={styles.protectOptionTitle}>Draft Buffer</Text>
                           <Text style={styles.protectOptionDesc}>
-                            Maintains 3 pre-rendered drafts to prevent posting velocity drops.
+                            Keeps a few drafts ready so posting feels easy.
                           </Text>
                         </View>
                       </View>
@@ -3238,9 +3245,9 @@ export const ProGrowthScreen: React.FC<ProGrowthScreenProps> = ({
                       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, flex: 1 }}>
                         <Text style={{ fontSize: 20 }}>🔔</Text>
                         <View style={{ flex: 1 }}>
-                          <Text style={styles.protectOptionTitle}>Peak Window Push Reminders</Text>
+                          <Text style={styles.protectOptionTitle}>Gentle Reminder</Text>
                           <Text style={styles.protectOptionDesc}>
-                            Sends 30-min priority notifications before optimal 7:30 PM slot.
+                            One friendly nudge before your best posting time.
                           </Text>
                         </View>
                       </View>
@@ -3250,29 +3257,31 @@ export const ProGrowthScreen: React.FC<ProGrowthScreenProps> = ({
                     </View>
                   </Pressable>
 
-                  {/* Option 4 */}
-                  <Pressable
-                    style={[styles.protectOptionCard, squadBoostActive && styles.protectOptionCardActive]}
-                    onPress={() => {
-                      if (Platform.OS !== 'web') Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                      setSquadBoostActive(!squadBoostActive);
-                    }}
-                  >
-                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, flex: 1 }}>
-                        <Text style={{ fontSize: 20 }}>👥</Text>
-                        <View style={{ flex: 1 }}>
-                          <Text style={styles.protectOptionTitle}>Squad Engagement Alert</Text>
-                          <Text style={styles.protectOptionDesc}>
-                            Pings squad members to like &amp; comment in first 15 mins.
-                          </Text>
+                  {/* Option 4: Squad alerts are a Stage 2 feature */}
+                  {STAGE_2_ENABLED && (
+                    <Pressable
+                      style={[styles.protectOptionCard, squadBoostActive && styles.protectOptionCardActive]}
+                      onPress={() => {
+                        if (Platform.OS !== 'web') Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                        setSquadBoostActive(!squadBoostActive);
+                      }}
+                    >
+                      <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, flex: 1 }}>
+                          <Text style={{ fontSize: 20 }}>👥</Text>
+                          <View style={{ flex: 1 }}>
+                            <Text style={styles.protectOptionTitle}>Squad Engagement Alert</Text>
+                            <Text style={styles.protectOptionDesc}>
+                              Pings squad members to like &amp; comment in first 15 mins.
+                            </Text>
+                          </View>
+                        </View>
+                        <View style={[styles.protectToggleCircle, squadBoostActive && styles.protectToggleCircleActive]}>
+                          <Text style={styles.protectToggleText}>{squadBoostActive ? 'ON' : 'OFF'}</Text>
                         </View>
                       </View>
-                      <View style={[styles.protectToggleCircle, squadBoostActive && styles.protectToggleCircleActive]}>
-                        <Text style={styles.protectToggleText}>{squadBoostActive ? 'ON' : 'OFF'}</Text>
-                      </View>
-                    </View>
-                  </Pressable>
+                    </Pressable>
+                  )}
                 </View>
 
                 {/* Save Button */}
@@ -3281,10 +3290,10 @@ export const ProGrowthScreen: React.FC<ProGrowthScreenProps> = ({
                   onPress={() => {
                     if (Platform.OS !== 'web') Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
                     setShowProtectMomentumModal(false);
-                    showToast('✓ Growth Momentum Safeguards updated & active!');
+                    showToast('✓ Posting helpers saved');
                   }}
                 >
-                  <Text style={styles.modalRepurposeBtnText}>Save &amp; Activate Safeguards</Text>
+                  <Text style={styles.modalRepurposeBtnText}>Save Helpers</Text>
                 </Pressable>
               </ScrollView>
             </Animated.View>
@@ -4027,7 +4036,7 @@ const styles = StyleSheet.create({
     color: '#171420',
   },
   platformSyncPill: {
-    backgroundColor: '#FEF3C7',
+    backgroundColor: '#EDE9FE',
     paddingHorizontal: 7,
     paddingVertical: 3,
     borderRadius: 6,
@@ -4035,7 +4044,7 @@ const styles = StyleSheet.create({
   platformSyncText: {
     fontSize: 9,
     fontWeight: '700',
-    color: '#B45309',
+    color: '#5B3EE8',
   },
   platformsContainerCard: {
     backgroundColor: '#FFFFFF',

@@ -14,6 +14,7 @@ import {
   Dimensions,
 } from 'react-native';
 import { Text, TextInput } from '../components/ui/AppText';
+import { isStage1Platform } from '../config/features';
 import Svg, { Path, Circle, Rect, Defs, LinearGradient as SvgLinearGradient, Stop } from 'react-native-svg';
 import * as Haptics from 'expo-haptics';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -110,6 +111,7 @@ interface GrowthPlatformAccount {
   canAdd: boolean;
 }
 
+// Only Stage 1 platforms are shown; other entries stay for later stages.
 const INITIAL_GROWTH_PLATFORMS: GrowthPlatformAccount[] = [
   {
     id: 'tiktok',
@@ -171,7 +173,7 @@ const INITIAL_GROWTH_PLATFORMS: GrowthPlatformAccount[] = [
     connected: false,
     canAdd: true,
   },
-];
+].filter((p) => isStage1Platform(p.id));
 
 interface GrowthScreenProps {
   onBackToDashboard?: () => void;
@@ -506,14 +508,9 @@ export const GrowthScreen: React.FC<GrowthScreenProps> = ({
                   style={({ pressed }) => [styles.connectAccountBtn, pressed && styles.btnPressed]}
                   onPress={handleOpenConnectPlatforms}
                 >
-                  <LinearGradient
-                    colors={['#6366F1', '#582CDB']}
-                    start={{ x: 0, y: 0 }}
-                    end={{ x: 1, y: 1 }}
-                    style={styles.connectAccountGradient}
-                  >
+                  <View style={[styles.connectAccountGradient, { backgroundColor: '#5B3EE8' }]}>
                     <Text style={styles.connectAccountBtnText}>Connect an Account</Text>
-                  </LinearGradient>
+                  </View>
                 </Pressable>
               </View>
             ) : (
@@ -800,7 +797,7 @@ export const GrowthScreen: React.FC<GrowthScreenProps> = ({
                 </View>
                 <View style={{ flex: 1, marginRight: 8 }}>
                   <Text style={styles.platformName} numberOfLines={1}>Connect more platforms</Text>
-                  <Text style={styles.platformFollowers} numberOfLines={1}>Facebook · Threads · Pinterest</Text>
+                  <Text style={styles.platformFollowers} numberOfLines={1}>Facebook · Threads</Text>
                 </View>
               </View>
               <View style={styles.connectPillBtn}>
@@ -870,7 +867,7 @@ export const GrowthScreen: React.FC<GrowthScreenProps> = ({
                       </Text>
                     </View>
                     <View style={styles.perfBarTrack}>
-                      <View style={[styles.perfBarFill, { width: '92%', backgroundColor: '#F59E0B' }]} />
+                      <View style={[styles.perfBarFill, { width: '92%', backgroundColor: '#5B3EE8' }]} />
                     </View>
                   </View>
                 </View>
@@ -890,14 +887,9 @@ export const GrowthScreen: React.FC<GrowthScreenProps> = ({
                     }
                   }}
                 >
-                  <LinearGradient
-                    colors={['#6366F1', '#582CDB']}
-                    start={{ x: 0, y: 0 }}
-                    end={{ x: 1, y: 1 }}
-                    style={styles.analyzeGradient}
-                  >
+                  <View style={[styles.analyzeGradient, { backgroundColor: '#5B3EE8' }]}>
                     <Text style={styles.analyzeBtnText}>Analyze Why It Worked</Text>
-                  </LinearGradient>
+                  </View>
                 </Pressable>
               </View>
             </>
@@ -1081,7 +1073,7 @@ export const GrowthScreen: React.FC<GrowthScreenProps> = ({
                 <View style={styles.milestoneCard}>
                   <View style={styles.milestoneTopRow}>
                     <View style={styles.milestoneLeft}>
-                      <View style={[styles.milestoneIconCircle, { backgroundColor: '#FEF3C7' }]}>
+                      <View style={[styles.milestoneIconCircle, { backgroundColor: '#EDE9FE' }]}>
                         <Text style={{ fontSize: 14 }}>🏆</Text>
                       </View>
                       <View style={styles.milestoneTextCol}>
@@ -1095,7 +1087,7 @@ export const GrowthScreen: React.FC<GrowthScreenProps> = ({
                   </View>
                   {/* Progress Bar */}
                   <View style={styles.milestoneProgressTrack}>
-                    <View style={[styles.milestoneProgressFill, { width: '100%', backgroundColor: '#F59E0B' }]} />
+                    <View style={[styles.milestoneProgressFill, { width: '100%', backgroundColor: '#5B3EE8' }]} />
                   </View>
                 </View>
 
@@ -1248,14 +1240,9 @@ export const GrowthScreen: React.FC<GrowthScreenProps> = ({
               style={({ pressed }) => [styles.exploreProBtn, pressed && styles.btnPressed]}
               onPress={handleOpenPro}
             >
-              <LinearGradient
-                colors={['#F59E0B', '#F59E0B', '#F59E0B', '#A16207']}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 1 }}
-                style={styles.exploreProGradient}
-              >
+              <View style={[styles.exploreProGradient, { backgroundColor: '#F59E0B' }]}>
                 <Text style={styles.exploreProBtnText}>Explore Pro Plans</Text>
-              </LinearGradient>
+              </View>
             </Pressable>
           </View>
 
@@ -2170,7 +2157,7 @@ const styles = StyleSheet.create({
   perfBarCompGold: {
     fontSize: 9.5,
     fontWeight: '700',
-    color: '#D97706',
+    color: '#5B3EE8',
   },
   perfBarTrack: {
     height: 6,
@@ -2474,7 +2461,7 @@ const styles = StyleSheet.create({
     color: '#6D28D9',
   },
   milestoneBadgeGold: {
-    backgroundColor: '#FEF3C7',
+    backgroundColor: '#EDE9FE',
     paddingVertical: 4,
     paddingHorizontal: 8,
     borderRadius: 100,
@@ -2485,7 +2472,7 @@ const styles = StyleSheet.create({
   completedGoldText: {
     fontSize: 11,
     fontWeight: '800',
-    color: '#D97706',
+    color: '#5B3EE8',
   },
   milestoneProgressTrack: {
     width: '100%',

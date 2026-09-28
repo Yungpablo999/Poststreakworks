@@ -12,3 +12,6 @@ export type Stage1Platform = (typeof STAGE_1_PLATFORMS)[number];
 
 // Free-tier limits.
 export const FREE_REPURPOSES_PER_MONTH = 2;
+
+export const isStage1Platform = (id: string): id is Stage1Platform =>
+  (STAGE_1_PLATFORMS as readonly string[]).includes(id);

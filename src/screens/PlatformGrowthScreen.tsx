@@ -13,6 +13,7 @@ import {
   Dimensions,
 } from 'react-native';
 import { Text, TextInput } from '../components/ui/AppText';
+import { isStage1Platform } from '../config/features';
 import Svg, { Path, Circle, Rect } from 'react-native-svg';
 import * as Haptics from 'expo-haptics';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -138,7 +139,7 @@ export const PlatformGrowthScreen: React.FC<PlatformGrowthScreenProps> = ({
     { id: 'facebook', name: 'Facebook', handle: '@not_connected', followers: '0', impressions: '0', engage: '0', connected: false, top: false },
     { id: 'threads', name: 'Threads', handle: '@not_connected', followers: '0', impressions: '0', engage: '0', connected: false, top: false },
     { id: 'pinterest', name: 'Pinterest', handle: '@not_connected', followers: '0', impressions: '0', engage: '0', connected: false, top: false },
-  ]);
+  ].filter((p) => isStage1Platform(p.id)));
   const [customHandleInput, setCustomHandleInput] = useState('');
   const [selectedPlatformToAdd, setSelectedPlatformToAdd] = useState('facebook');
 
