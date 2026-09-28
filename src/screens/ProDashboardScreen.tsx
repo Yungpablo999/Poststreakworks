@@ -2,7 +2,6 @@ import React, { useState, useRef, useEffect, useMemo, useCallback } from 'react'
 import {
   StyleSheet,
   View,
-  Text,
   Pressable,
   ScrollView,
   Platform,
@@ -12,11 +11,12 @@ import {
   Animated,
   Modal,
   Dimensions,
-  TextInput,
   FlatList,
   NativeSyntheticEvent,
   NativeScrollEvent,
 } from 'react-native';
+import { Text, TextInput } from '../components/ui/AppText';
+import { BrandLogo } from '../components/BrandLogo';
 import Svg, { Path, Circle, Rect } from 'react-native-svg';
 import * as Haptics from 'expo-haptics';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -542,24 +542,8 @@ export const ProDashboardScreen: React.FC<ProDashboardScreenProps> = ({
         {/* 1. TOP HEADER BAR */}
         <View style={styles.headerBar}>
           {/* Top-Left: Ghost Logo Mascot + Mode Switcher */}
-          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-            <Animated.View
-              style={[
-                styles.headerLogoWrapper,
-                {
-                  transform: [
-                    { translateY: ghostFloatY },
-                    { scale: ghostScale },
-                  ],
-                },
-              ]}
-            >
-              <Image
-                source={require('../../assets/images/jarvis-ghost-clean.png')}
-                style={styles.headerGhostLogo}
-                resizeMode="contain"
-              />
-            </Animated.View>
+          <View style={{ alignItems: 'flex-start', gap: 6, flexShrink: 1 }}>
+            <BrandLogo size="sm" />
 
             <HeaderDualModePills
               tier="pro"

@@ -2,7 +2,6 @@ import React, { useState, useRef, useEffect } from 'react';
 import {
   StyleSheet,
   View,
-  Text,
   ScrollView,
   SafeAreaView,
   StatusBar,
@@ -12,6 +11,8 @@ import {
   Image,
   Platform,
 } from 'react-native';
+import { Text } from '../components/ui/AppText';
+import { BrandLogo } from '../components/BrandLogo';
 import Svg, { Path, Circle } from 'react-native-svg';
 import * as Haptics from 'expo-haptics';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -175,18 +176,7 @@ export const JarvisProScreen: React.FC<JarvisProScreenProps> = ({
                 </Svg>
               </Pressable>
             )}
-            <Animated.View
-              style={[
-                styles.headerLogoWrapper,
-                { transform: [{ translateY: flameFloatY }] },
-              ]}
-            >
-              <Image
-                source={require('../../assets/images/jarvis-ghost-clean.png')}
-                style={styles.headerGhostLogo}
-                resizeMode="contain"
-              />
-            </Animated.View>
+            <BrandLogo size="sm" isDark={isDark} />
 
             {/* Free Plan / Pro Badge Pill */}
             <Pressable

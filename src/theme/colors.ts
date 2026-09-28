@@ -1,3 +1,5 @@
+// Gold is reserved for Pro: Pro badges and Pro-only features. Never use it as
+// general decoration, warnings or streak styling.
 export const goldTokens = {
   primary: '#F59E0B',       // Radiant Metallic Amber Gold
   light: '#FEF3C7',         // Soft Cream Gold Surface
@@ -87,7 +89,7 @@ export const colors = {
   primaryLight: '#EDE9FE',
   purpleGlow: '#5B3EE8',
   
-  // Pro Gold
+  // Pro Gold — Pro badges and Pro-only features only
   gold: '#F59E0B',
   goldLight: '#FEF3C7',
   amberDark: '#B45309',

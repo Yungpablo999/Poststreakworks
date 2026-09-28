@@ -2,15 +2,14 @@ import React, { useState, useEffect, useRef } from 'react';
 import {
   StyleSheet,
   View,
-  Text,
   Modal,
   Image,
   Pressable,
   Platform,
   Dimensions,
   Animated,
-  TextInput,
 } from 'react-native';
+import { Text, TextInput } from './ui/AppText';
 import Svg, { Path, Circle, Rect } from 'react-native-svg';
 import * as Haptics from 'expo-haptics';
 import { LinearGradient } from 'expo-linear-gradient';

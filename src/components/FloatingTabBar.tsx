@@ -2,7 +2,6 @@ import React, { useEffect, useRef, useState } from 'react';
 import {
   StyleSheet,
   View,
-  Text,
   Pressable,
   Platform,
   ViewStyle,
@@ -10,6 +9,7 @@ import {
   Easing,
   LayoutChangeEvent,
 } from 'react-native';
+import { Text } from './ui/AppText';
 import Svg, { Path, Circle } from 'react-native-svg';
 import * as Haptics from 'expo-haptics';
 import { LinearGradient } from 'expo-linear-gradient';

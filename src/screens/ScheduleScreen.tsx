@@ -2,18 +2,17 @@ import React, { useState, useRef, useEffect } from 'react';
 import {
   StyleSheet,
   View,
-  Text,
   ScrollView,
   SafeAreaView,
   StatusBar,
   Pressable,
   Animated,
   Modal,
-  TextInput,
   Image,
   Platform,
   Alert,
 } from 'react-native';
+import { Text, TextInput } from '../components/ui/AppText';
 import Svg, { Path, Circle, Rect } from 'react-native-svg';
 import * as Haptics from 'expo-haptics';
 import { LinearGradient } from 'expo-linear-gradient';

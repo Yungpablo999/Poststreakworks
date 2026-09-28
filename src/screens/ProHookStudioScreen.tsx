@@ -2,7 +2,6 @@ import React, { useState, useRef, useEffect, useMemo } from 'react';
 import {
   StyleSheet,
   View,
-  Text,
   ScrollView,
   Pressable,
   Platform,
@@ -13,8 +12,9 @@ import {
   useWindowDimensions,
   SafeAreaView,
   StatusBar,
-  TextInput,
 } from 'react-native';
+import { Text, TextInput } from '../components/ui/AppText';
+import { BrandLogo } from '../components/BrandLogo';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as Haptics from 'expo-haptics';
 import Svg, { Path, Circle, Rect } from 'react-native-svg';
@@ -576,18 +576,7 @@ export const ProHookStudioScreen: React.FC<ProHookStudioScreenProps> = ({
             </Pressable>
 
             {/* Mascot */}
-            <Animated.View
-              style={[
-                styles.headerLogoWrapper,
-                { transform: [{ translateY: flameFloatY }] },
-              ]}
-            >
-              <Image
-                source={require('../../assets/images/jarvis-ghost-clean.png')}
-                style={styles.headerGhostLogo}
-                resizeMode="contain"
-              />
-            </Animated.View>
+            <BrandLogo size="sm" />
 
             {/* Pro Badge Pill */}
             <Pressable

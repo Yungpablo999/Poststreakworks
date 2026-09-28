@@ -2,12 +2,13 @@ import React, { useRef, useEffect } from 'react';
 import {
   StyleSheet,
   View,
-  Text,
   Pressable,
   Animated,
   Image,
   Platform,
 } from 'react-native';
+import { Text } from './ui/AppText';
+import { BrandLogo } from './BrandLogo';
 import Svg, { Path, Circle } from 'react-native-svg';
 import * as Haptics from 'expo-haptics';
 import { sFont, sPadding, isNarrowScreen } from '../utils/responsive';
@@ -125,29 +126,17 @@ export const FreeAppHeader: React.FC<FreeAppHeaderProps> = ({
           </Pressable>
         )}
 
-        <Animated.View
-          style={[
-            styles.headerLogoWrapper,
-            isDark && styles.headerLogoWrapperDark,
-            { transform: [{ translateY: ghostFloatY }] },
-          ]}
-        >
-          <Image
-            source={require('../../assets/images/jarvis-ghost-clean.png')}
-            style={styles.headerGhostLogo}
-            resizeMode="contain"
-            accessible={true}
-            accessibilityLabel="Jarvis mascot"
-          />
-        </Animated.View>
+        <View style={styles.headerBrandStack}>
+          <BrandLogo size="sm" isDark={isDark} />
 
-        <HeaderDualModePills
-          tier={currentTier}
-          persona={currentPersona}
-          onToggleTier={handleToggleTier}
-          onTogglePersona={onTogglePersona}
-          isDark={isDark}
-        />
+          <HeaderDualModePills
+            tier={currentTier}
+            persona={currentPersona}
+            onToggleTier={handleToggleTier}
+            onTogglePersona={onTogglePersona}
+            isDark={isDark}
+          />
+        </View>
       </View>
 
       {/* Right: Notification & Person Profile Photo */}
@@ -239,6 +228,11 @@ export const FreeAppHeader: React.FC<FreeAppHeaderProps> = ({
 };
 
 const styles = StyleSheet.create({
+  headerBrandStack: {
+    alignItems: 'flex-start',
+    gap: 6,
+    flexShrink: 1,
+  },
   headerBar: {
     flexDirection: 'row',
     alignItems: 'center',

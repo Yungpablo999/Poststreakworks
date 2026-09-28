@@ -2,7 +2,6 @@ import React, { useState, useRef, useEffect } from 'react';
 import {
   StyleSheet,
   View,
-  Text,
   Pressable,
   ScrollView,
   Platform,
@@ -11,8 +10,8 @@ import {
   StatusBar,
   Animated,
   Modal,
-  TextInput,
 } from 'react-native';
+import { Text, TextInput } from '../components/ui/AppText';
 import Svg, { Path, Circle, Rect, G } from 'react-native-svg';
 import * as Haptics from 'expo-haptics';
 import { LinearGradient } from 'expo-linear-gradient';

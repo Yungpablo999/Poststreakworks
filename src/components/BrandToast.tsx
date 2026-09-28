@@ -1,5 +1,6 @@
 import React, { useEffect, useRef } from 'react';
-import { StyleSheet, Text, Animated } from 'react-native';
+import { StyleSheet, Animated } from 'react-native';
+import { Text } from './ui/AppText';
 import { LinearGradient } from 'expo-linear-gradient';
 
 interface BrandToastProps {

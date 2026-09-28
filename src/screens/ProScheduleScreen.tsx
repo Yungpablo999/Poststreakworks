@@ -2,19 +2,19 @@ import React, { useState, useRef, useEffect, useMemo } from 'react';
 import {
   StyleSheet,
   View,
-  Text,
   ScrollView,
   SafeAreaView,
   StatusBar,
   Pressable,
   Animated,
   Modal,
-  TextInput,
   Image,
   Platform,
   Dimensions,
   Switch,
 } from 'react-native';
+import { Text, TextInput } from '../components/ui/AppText';
+import { BrandLogo } from '../components/BrandLogo';
 import Svg, { Path, Circle, Rect } from 'react-native-svg';
 import * as Haptics from 'expo-haptics';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -582,18 +582,7 @@ export const ProScheduleScreen: React.FC<ProScheduleScreenProps> = ({
         <View style={styles.headerBar}>
           {/* Top-Left: Mascot + Mode Switcher */}
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-            <Animated.View
-              style={[
-                styles.headerLogoWrapper,
-                { transform: [{ translateY: flameFloatY }] },
-              ]}
-            >
-              <Image
-                source={require('../../assets/images/jarvis-ghost-clean.png')}
-                style={styles.headerGhostLogo}
-                resizeMode="contain"
-              />
-            </Animated.View>
+            <BrandLogo size="sm" />
 
             {/* Mode Switcher */}
             <Pressable

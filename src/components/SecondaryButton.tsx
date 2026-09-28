@@ -1,7 +1,6 @@
 import React from 'react';
 import {
   StyleSheet,
-  Text,
   Pressable,
   Platform,
   ViewStyle,
@@ -9,6 +8,7 @@ import {
   StyleProp,
   View,
 } from 'react-native';
+import { Text } from './ui/AppText';
 import * as Haptics from 'expo-haptics';
 
 export interface SecondaryButtonProps {

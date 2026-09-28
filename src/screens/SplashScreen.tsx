@@ -2,13 +2,13 @@ import React, { useEffect, useRef } from 'react';
 import {
   StyleSheet,
   View,
-  Text,
   Animated,
   Image,
   useWindowDimensions,
   Platform,
   StatusBar,
 } from 'react-native';
+import { Text } from '../components/ui/AppText';
 import * as Haptics from 'expo-haptics';
 import { colors } from '../theme/colors';
 
@@ -398,7 +398,7 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onFinish = () => {} 
               },
             ]}
           >
-            <Text style={styles.solidBrandTitle}>Poststreak</Text>
+            <Text style={styles.solidBrandTitle}>PostStreak</Text>
           </Animated.View>
 
           {/* Tagline: "Fly In from Left" in Elegant Violet Frosted Pill Badge */}
@@ -476,8 +476,8 @@ const styles = StyleSheet.create({
   },
   solidBrandTitle: {
     fontSize: 50,
-    fontWeight: '700',
-    color: '#491ECC', // Deep Solid Royal Purple with ultra contrast
+    fontWeight: '800',
+    color: '#5B3EE8', // Brand primary purple
     letterSpacing: -1.8,
     textShadowColor: 'rgba(73, 30, 204, 0.18)',
     textShadowOffset: { width: 0, height: 6 },

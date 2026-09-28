@@ -13,7 +13,8 @@
         {
           "launchMode": "launcher"
         }
-      ]
+      ],
+      "expo-font"
     ],
     "ios": {
       "supportsTablet": true,

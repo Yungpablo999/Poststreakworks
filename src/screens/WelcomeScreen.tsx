@@ -2,13 +2,13 @@ import React from 'react';
 import {
   StyleSheet,
   View,
-  Text,
   Image,
   SafeAreaView,
   StatusBar,
   useWindowDimensions,
   Platform,
 } from 'react-native';
+import { Text } from '../components/ui/AppText';
 import { colors } from '../theme/colors';
 import { typography } from '../theme/typography';
 import { GlassBadge } from '../components/GlassBadge';
@@ -203,32 +203,28 @@ const styles = StyleSheet.create({
   tallHeadlineContainer: {
     alignItems: 'center',
     justifyContent: 'center',
-    transform: [{ scaleY: 2.05 }, { scaleX: 0.88 }],
-    marginVertical: 18,
+    marginVertical: 12,
   },
   mainHeadline: {
-    fontFamily: typography.editorialSerif,
-    fontSize: 48,
-    fontWeight: '700',
+    fontSize: 40,
+    fontWeight: '800',
     color: colors.textPrimary,
     textAlign: 'center',
-    letterSpacing: 0.6,
-    lineHeight: 52,
+    letterSpacing: -1,
+    lineHeight: 48,
     ...(Platform.OS === 'web' ? { whiteSpace: 'nowrap' } : {}),
   },
   mainHeadlineMedium: {
-    fontSize: 42,
-    lineHeight: 46,
-    letterSpacing: 0.5,
+    fontSize: 36,
+    lineHeight: 44,
   },
   mainHeadlineSmall: {
-    fontSize: 36,
+    fontSize: 32,
     lineHeight: 40,
-    letterSpacing: 0.4,
   },
   streakAccent: {
-    fontFamily: typography.editorialSerif,
-    fontWeight: '700',
+    fontFamily: typography.earnAccent,
+    letterSpacing: -0.5,
     color: colors.primary, // Signature Royal Purple
   },
 

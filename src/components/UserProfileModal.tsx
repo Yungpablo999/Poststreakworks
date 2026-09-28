@@ -3,19 +3,18 @@ import React, { useState, useRef, useEffect } from 'react';
 import {
   StyleSheet,
   View,
-  Text,
   ScrollView,
   Pressable,
   Platform,
   Animated,
   Modal,
   Image,
-  TextInput,
   Dimensions,
   Keyboard,
   TouchableWithoutFeedback,
   KeyboardAvoidingView,
 } from 'react-native';
+import { Text, TextInput } from './ui/AppText';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as Haptics from 'expo-haptics';
 import Svg, { Path, Circle, Rect } from 'react-native-svg';

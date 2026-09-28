@@ -2,7 +2,6 @@ import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react'
 import {
   StyleSheet,
   View,
-  Text,
   Pressable,
   ScrollView,
   Platform,
@@ -16,6 +15,8 @@ import {
   NativeSyntheticEvent,
   NativeScrollEvent,
 } from 'react-native';
+import { Text } from '../components/ui/AppText';
+import { BrandLogo } from '../components/BrandLogo';
 import Svg, { Path, Circle, Rect } from 'react-native-svg';
 import * as Haptics from 'expo-haptics';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -921,23 +922,7 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
         <View style={styles.headerBar}>
           {/* Top-Left: Ghost Logo Mascot + Mode Switcher */}
           <View style={styles.headerLeftGroup}>
-            <Animated.View
-              style={[
-                styles.headerLogoWrapper,
-                {
-                  transform: [
-                    { translateY: ghostFloatY },
-                    { scale: ghostScale },
-                  ],
-                },
-              ]}
-            >
-              <Image
-                source={require('../../assets/images/jarvis-ghost-clean.png')}
-                style={styles.headerGhostLogo}
-                resizeMode="contain"
-              />
-            </Animated.View>
+            <BrandLogo size="sm" isDark={isDark} />
 
             <HeaderDualModePills
               tier="free"
@@ -2321,8 +2306,7 @@ const styles = StyleSheet.create({
     maxWidth: '100%',
   },
   headerLeftGroup: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    alignItems: 'flex-start',
     gap: 6,
     flexShrink: 1,
   },

@@ -1,7 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import {
   View,
-  Text,
   StyleSheet,
   Modal,
   Pressable,
@@ -9,6 +8,7 @@ import {
   Animated,
   Platform,
 } from 'react-native';
+import { Text } from './ui/AppText';
 import Svg, { Path } from 'react-native-svg';
 import * as Haptics from 'expo-haptics';
 import { sFont } from '../utils/responsive';

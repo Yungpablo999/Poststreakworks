@@ -2,13 +2,13 @@ import React, { useEffect, useRef } from 'react';
 import {
   StyleSheet,
   View,
-  Text,
   Animated,
   Image,
   Modal,
   Pressable,
   Platform,
 } from 'react-native';
+import { Text } from './ui/AppText';
 import Svg, { Path, Circle } from 'react-native-svg';
 import * as Haptics from 'expo-haptics';
 import { BlurView } from 'expo-blur';

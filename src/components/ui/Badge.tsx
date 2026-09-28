@@ -1,12 +1,12 @@
 import React from 'react';
 import {
   StyleSheet,
-  Text,
   View,
   ViewStyle,
   TextStyle,
   StyleProp,
 } from 'react-native';
+import { Text } from './AppText';
 import { colors } from '../../theme/colors';
 import { radius } from '../../theme/radius';
 

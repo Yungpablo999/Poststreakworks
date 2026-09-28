@@ -2,12 +2,12 @@ import React, { useEffect, useRef, useState } from 'react';
 import {
   StyleSheet,
   View,
-  Text,
   Animated,
   Image,
   Modal,
   Platform,
 } from 'react-native';
+import { Text } from './ui/AppText';
 import { BlurView } from 'expo-blur';
 import { LinearGradient } from 'expo-linear-gradient';
 

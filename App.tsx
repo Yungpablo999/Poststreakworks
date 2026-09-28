@@ -3,26 +3,8 @@ import { View, StyleSheet, Platform } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
-// Global Typography Injection for Web
-if (Platform.OS === 'web' && typeof document !== 'undefined') {
-  const fontStyleId = 'poststreak-global-fonts';
-  if (!document.getElementById(fontStyleId)) {
-    const link = document.createElement('link');
-    link.rel = 'stylesheet';
-    link.href =
-      'https://fonts.googleapis.com/css2?family=Antonio:wght@600;700&family=Teko:wght@500;600;700&family=Six+Caps&family=Bebas+Neue&family=Italiana&family=Prata&family=Bodoni+Moda:ital,opsz,wght@0,6..96,600;0,6..96,700;0,6..96,800&family=Playfair+Display:ital,wght@0,600;0,700;0,800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap';
-    document.head.appendChild(link);
-
-    const style = document.createElement('style');
-    style.id = fontStyleId;
-    style.textContent = `
-      body, input, button, select, textarea {
-        font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, sans-serif;
-      }
-    `;
-    document.head.appendChild(style);
-  }
-}
+import { useFonts } from 'expo-font';
+import { fontAssets } from './src/theme/fonts';
 import { SplashScreen } from './src/screens/SplashScreen';
 import { WelcomeScreen } from './src/screens/WelcomeScreen';
 import { SignUpScreen } from './src/screens/SignUpScreen';
@@ -97,6 +79,8 @@ type Screen =
   | 'hook-studio';
 
 export default function App() {
+  // Brand fonts (Plus Jakarta Sans + Playfair Display italic for "Earn.").
+  const [fontsLoaded, fontError] = useFonts(fontAssets);
   const [showSplash, setShowSplash] = useState(true);
   const [currentScreen, setCurrentScreen] = useState<Screen>('welcome');
   const [previousScreen, setPreviousScreen] = useState<Screen>('welcome');
@@ -436,6 +420,12 @@ export default function App() {
         return null;
     }
   };
+
+  // Hold on the brand background for the split second fonts take to load,
+  // so text never flashes in the system font. On error, fall back gracefully.
+  if (!fontsLoaded && !fontError) {
+    return <View style={styles.container} />;
+  }
 
   return (
     <SafeAreaProvider>

@@ -2,8 +2,6 @@ import React, { useState, useEffect, useRef } from 'react';
 import {
   StyleSheet,
   View,
-  Text,
-  TextInput,
   Pressable,
   ScrollView,
   KeyboardAvoidingView,
@@ -15,6 +13,7 @@ import {
   Animated,
   Modal,
 } from 'react-native';
+import { Text, TextInput } from '../components/ui/AppText';
 import Svg, { Path, Circle } from 'react-native-svg';
 import * as Haptics from 'expo-haptics';
 

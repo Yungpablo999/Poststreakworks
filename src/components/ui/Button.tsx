@@ -1,7 +1,6 @@
 import React from 'react';
 import {
   StyleSheet,
-  Text,
   Pressable,
   View,
   ActivityIndicator,
@@ -10,6 +9,7 @@ import {
   TextStyle,
   StyleProp,
 } from 'react-native';
+import { Text } from './AppText';
 import Svg, { Path } from 'react-native-svg';
 import * as Haptics from 'expo-haptics';
 import { colors } from '../../theme/colors';
