@@ -37,7 +37,6 @@ interface ProScheduleScreenProps {
   onLogout?: () => void;
   onNavigateTab?: (tab: TabType) => void;
   onOpenJarvisPro?: () => void;
-  onOpenMessages?: (threadId?: string) => void;
   onOpenCreateIdea?: () => void;
   onSwitchToFree?: () => void;
   userProfile?: UserProfileData;
@@ -132,8 +131,8 @@ const JARVIS_STRATEGIES: StrategyItem[] = [
     icon: '🎬',
     title: 'Contrarian Hook Architecture',
     tag: 'RETENTION • 96% AUDIENCE FIT',
-    summary: 'Open with bold contrarian statement to cut 3s dropoff by 42%.',
-    body: 'Start with "Why 90% of creators fail by Month 2" rather than a casual intro. Cuts initial 3-second dropoff by 42% on TikTok · Video and Instagram · Reel.',
+    summary: 'Open with bold contrarian statement to strengthen 3-second retention.',
+    body: 'Start with "Why 90% of creators fail by Month 2" rather than a casual intro to capture early attention on TikTok · Video and Instagram · Reel.',
   },
   {
     id: 'strat_3',
@@ -375,7 +374,6 @@ export const ProScheduleScreen: React.FC<ProScheduleScreenProps> = ({
   onLogout,
   onNavigateTab,
   onOpenJarvisPro,
-  onOpenMessages,
   onOpenCreateIdea,
   onSwitchToFree,
   userProfile,
@@ -622,34 +620,8 @@ export const ProScheduleScreen: React.FC<ProScheduleScreenProps> = ({
             </Pressable>
           </View>
 
-          {/* Right Action Icons: Messages, Notification Bell & Profile Avatar */}
+          {/* Right Action Icons: Notification Bell & Profile Avatar */}
           <View style={styles.headerRightGroup}>
-            {/* Chat Messages */}
-            <Pressable
-              style={({ pressed }) => [styles.headerIconBtn, pressed && styles.headerIconBtnPressed]}
-              hitSlop={8}
-              onPress={() => {
-                if (Platform.OS !== 'web') {
-                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                }
-                if (onOpenMessages) {
-                  onOpenMessages();
-                } else if (onNavigateTab) {
-                  onNavigateTab('match');
-                }
-              }}
-            >
-              <Svg width={20} height={20} viewBox="0 0 24 24" fill="none">
-                <Path
-                  d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"
-                  stroke="#1A1626"
-                  strokeWidth="2.2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </Svg>
-            </Pressable>
-
             {/* Notification Bell */}
             <Pressable
               style={({ pressed }) => [styles.headerIconBtn, pressed && styles.headerIconBtnPressed]}
@@ -739,18 +711,13 @@ export const ProScheduleScreen: React.FC<ProScheduleScreenProps> = ({
           {/* HEADER TAG & TITLES */}
           <View style={styles.topTitlesSection}>
             <View style={styles.contentScheduleTagBox}>
-              <Text style={styles.contentScheduleTagText}>CONTENT SCHEDULE — PRO</Text>
+              <Text style={styles.contentScheduleTagText}>CONTENT SCHEDULE • PRO</Text>
             </View>
             <Text
               style={styles.mainTitleText}
-              numberOfLines={1}
-              adjustsFontSizeToFit
-              minimumFontScale={0.8}
+              numberOfLines={2}
             >
               Plan your content with precision.
-            </Text>
-            <Text style={styles.mainSubText}>
-              Manage your schedule, find content gaps, and post at your strongest times.
             </Text>
           </View>
 
@@ -1467,12 +1434,10 @@ export const ProScheduleScreen: React.FC<ProScheduleScreenProps> = ({
                   if (Platform.OS !== 'web') {
                     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                   }
-                  if (onOpenMessages) {
-                    onOpenMessages('conv_jarvis');
-                  } else if (onOpenJarvisPro) {
+                  if (onOpenJarvisPro) {
                     onOpenJarvisPro();
                   } else {
-                    showToast('Opening Jarvis AI Chatbot...');
+                    showToast('Opening Jarvis AI Pro...');
                   }
                 }}
               >
@@ -2771,20 +2736,18 @@ export const ProScheduleScreen: React.FC<ProScheduleScreenProps> = ({
                   </LinearGradient>
                 </Pressable>
 
-                {/* Secondary Action: Chat with Jarvis */}
+                {/* Secondary Action: Ask Jarvis */}
                 <Pressable
                   style={({ pressed }) => [styles.modalSecondaryOutlineBtn, { marginTop: 8 }, pressed && styles.btnPressed]}
                   onPress={() => {
                     setShowStrategyModal(false);
-                    if (onOpenMessages) {
-                      onOpenMessages('conv_jarvis');
-                    } else if (onOpenJarvisPro) {
+                    if (onOpenJarvisPro) {
                       onOpenJarvisPro();
                     }
                   }}
                 >
                   <Text style={styles.modalSecondaryOutlineBtnText} numberOfLines={1}>
-                    💬 Chat with Jarvis for Plan ➔
+                    ✨ Open Jarvis Pro for Plan ➔
                   </Text>
                 </Pressable>
 
@@ -2822,12 +2785,10 @@ export const ProScheduleScreen: React.FC<ProScheduleScreenProps> = ({
           onNotificationsChange={setNotifications}
           onActionPress={(actionKey) => {
             setShowNotificationModal(false);
-            if (actionKey === 'open_messages' && onOpenMessages) {
-              onOpenMessages();
-            } else if (actionKey === 'open_create' && onOpenCreateIdea) {
+            if (actionKey === 'open_create' && onOpenCreateIdea) {
               onOpenCreateIdea();
-            } else if (onNavigateTab) {
-              onNavigateTab('match');
+            } else if (actionKey === 'open_jarvis' && onOpenJarvisPro) {
+              onOpenJarvisPro();
             }
           }}
           onToast={showToast}
@@ -3011,11 +2972,12 @@ const styles = StyleSheet.create({
     letterSpacing: 0.6,
   },
   mainTitleText: {
-    fontSize: 18.5,
+    fontSize: Platform.OS === 'web' ? ('clamp(15px, 3.8vw, 17px)' as any) : sFont(16),
     fontWeight: '700',
     color: '#171420',
     letterSpacing: -0.35,
-    marginBottom: 6,
+    lineHeight: 22,
+    marginBottom: 4,
   },
   mainSubText: {
     fontSize: 12.5,

@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useMemo, useCallback } from 'react';
 import {
   StyleSheet,
   View,
@@ -13,6 +13,7 @@ import {
   Modal,
   Dimensions,
   TextInput,
+  FlatList,
   NativeSyntheticEvent,
   NativeScrollEvent,
 } from 'react-native';
@@ -57,21 +58,22 @@ export const TinyGoldCheck = ({ size = 13 }: { size?: number }) => (
 );
 
 
+import { HeaderDualModePills, UserPersona } from '../components/HeaderDualModePills';
+
 interface ProDashboardScreenProps {
   onLogout?: () => void;
   onStartMission?: () => void;
   onNavigateTab?: (tab: TabType) => void;
   onOpenJarvisPro?: () => void;
   onOpenSchedule?: () => void;
-  onOpenMessages?: (threadId?: string) => void;
   onOpenPostComposer?: (prefillTitle?: string) => void;
-  onOpenEarnings?: () => void;
   onOpenQuests?: () => void;
   onOpenGrowth?: () => void;
-  onOpenMatch?: () => void;
   onOpenCreate?: () => void;
   onOpenVoiceStudio?: () => void;
   onSwitchToFree?: () => void;
+  onTogglePersona?: () => void;
+  userPersona?: UserPersona;
   userProfile?: UserProfileData;
   onSaveProfile?: (updated: UserProfileData) => void;
 }
@@ -218,18 +220,18 @@ export const ProDashboardScreen: React.FC<ProDashboardScreenProps> = ({
   onNavigateTab,
   onOpenJarvisPro,
   onOpenSchedule,
-  onOpenMessages,
   onOpenPostComposer,
-  onOpenEarnings,
   onOpenQuests,
   onOpenGrowth,
-  onOpenMatch,
   onOpenCreate,
   onOpenVoiceStudio,
   onSwitchToFree,
+  onTogglePersona,
+  userPersona,
   userProfile,
   onSaveProfile,
 }) => {
+  const isNewUser = (userPersona || userProfile?.userPersona) === 'new';
   const [activeTab, setActiveTab] = useState<TabType>('home');
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [showNotificationModal, setShowNotificationModal] = useState(false);
@@ -294,7 +296,7 @@ export const ProDashboardScreen: React.FC<ProDashboardScreenProps> = ({
   const [selectedMonthIndex, setSelectedMonthIndex] = useState(8); // September
   const [selectedDayInfo, setSelectedDayInfo] = useState<string | null>(null);
   const [calendarWidth, setCalendarWidth] = useState(Dimensions.get('window').width - 56);
-  const calendarPagerRef = useRef<ScrollView>(null);
+  const calendarFlatListRef = useRef<FlatList<MonthData>>(null);
   const monthChipsScrollRef = useRef<ScrollView>(null);
 
   // Notifications
@@ -315,19 +317,22 @@ export const ProDashboardScreen: React.FC<ProDashboardScreenProps> = ({
   useEffect(() => {
     if (showCalendarModal) {
       setSelectedMonthIndex(8);
+      selectedMonthIndexRef.current = 8;
       setSelectedDayInfo(null);
       setTimeout(() => {
-        calendarPagerRef.current?.scrollTo({
-          x: 8 * calendarWidth,
-          animated: false,
-        });
+        try {
+          calendarFlatListRef.current?.scrollToIndex({
+            index: 8,
+            animated: false,
+          });
+        } catch (e) {}
         monthChipsScrollRef.current?.scrollTo({
           x: Math.max(0, 8 * 68 - 100),
           animated: false,
         });
-      }, 50);
+      }, 60);
     }
-  }, [showCalendarModal, calendarWidth]);
+  }, [showCalendarModal]);
 
   useEffect(() => {
     Animated.loop(
@@ -403,38 +408,69 @@ export const ProDashboardScreen: React.FC<ProDashboardScreenProps> = ({
     }
   };
 
+  const proCalendarMonthsData: MonthData[] = useMemo(() => {
+    if (isNewUser) {
+      return FULL_YEAR_CALENDAR.map((m) => ({
+        ...m,
+        completedDays: [],
+        scheduledDays: [],
+        freezeDays: [],
+      }));
+    }
+    return FULL_YEAR_CALENDAR;
+  }, [isNewUser]);
+
+  const proStreakGrid: ('completed' | 'scheduled' | 'freeze' | 'empty')[][] = isNewUser
+    ? [
+        ['empty', 'empty', 'empty', 'empty', 'empty', 'empty', 'empty'],
+        ['empty', 'empty', 'empty', 'empty', 'empty', 'empty', 'empty'],
+        ['empty', 'empty', 'empty', 'empty', 'empty', 'empty', 'empty'],
+      ]
+    : [
+        ['empty', 'empty', 'completed', 'completed', 'completed', 'completed', 'completed'],
+        ['completed', 'completed', 'completed', 'completed', 'completed', 'completed', 'empty'],
+        ['empty', 'empty', 'empty', 'empty', 'empty', 'empty', 'empty'],
+      ];
+
+  const selectedMonthIndexRef = useRef(selectedMonthIndex);
+  useEffect(() => {
+    selectedMonthIndexRef.current = selectedMonthIndex;
+  }, [selectedMonthIndex]);
+
   const scrollToMonth = (index: number, animated = true) => {
-    if (index >= 0 && index < FULL_YEAR_CALENDAR.length) {
+    if (index >= 0 && index < proCalendarMonthsData.length) {
       setSelectedMonthIndex(index);
+      selectedMonthIndexRef.current = index;
       setSelectedDayInfo(null);
-      calendarPagerRef.current?.scrollTo({
-        x: index * calendarWidth,
-        animated,
-      });
       if (monthChipsScrollRef.current) {
         monthChipsScrollRef.current.scrollTo({
           x: Math.max(0, index * 68 - 100),
           animated: true,
         });
       }
+      if (Platform.OS !== 'web') {
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+      }
+      try {
+        calendarFlatListRef.current?.scrollToIndex({
+          index,
+          animated,
+        });
+      } catch (e) {
+        // fallback
+      }
     }
   };
 
   const handlePrevMonth = () => {
-    if (selectedMonthIndex > 0) {
-      if (Platform.OS !== 'web') {
-        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-      }
-      scrollToMonth(selectedMonthIndex - 1, true);
+    if (selectedMonthIndexRef.current > 0) {
+      scrollToMonth(selectedMonthIndexRef.current - 1, true);
     }
   };
 
   const handleNextMonth = () => {
-    if (selectedMonthIndex < FULL_YEAR_CALENDAR.length - 1) {
-      if (Platform.OS !== 'web') {
-        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-      }
-      scrollToMonth(selectedMonthIndex + 1, true);
+    if (selectedMonthIndexRef.current < proCalendarMonthsData.length - 1) {
+      scrollToMonth(selectedMonthIndexRef.current + 1, true);
     }
   };
 
@@ -448,16 +484,24 @@ export const ProDashboardScreen: React.FC<ProDashboardScreenProps> = ({
     const isToday = month.isCurrent && day === 5;
 
     let info = '';
-    if (isToday) {
-      info = `⚡ Today, September 5, 2026: 🔥 Day 48 Locked In! Next Post: 7:30 PM`;
-    } else if (isCompleted) {
-      info = `🔥 ${month.monthName} ${day}, 2026: Posted 2 Reels • 94% Retention • +1,420 Views ✓`;
-    } else if (isScheduled) {
-      info = `⚡ ${month.monthName} ${day}, 2026: Autopilot Post Queued (Instagram & TikTok)`;
-    } else if (isFreeze) {
-      info = `🛡️ ${month.monthName} ${day}, 2026: Pro Streak Shield Used • Streak Protected!`;
+    if (isNewUser) {
+      if (isToday) {
+        info = `⚡ Today, September 5, 2026: Day 1 Habit Launch 🚀 • Ready to post your first Pro Reel!`;
+      } else {
+        info = `🗓️ ${month.monthName} ${day}, 2026 • Post daily to log verified streaks`;
+      }
     } else {
-      info = `🗓️ ${month.monthName} ${day}, 2026 • Target: 1 Reel to advance Streak`;
+      if (isToday) {
+        info = `⚡ Today, September 5, 2026: 🔥 Daily Streak Locked In! Next Post: 7:30 PM`;
+      } else if (isCompleted) {
+        info = `🔥 ${month.monthName} ${day}, 2026: Posted 2 Reels • 94% Retention • +1,420 Views ✓`;
+      } else if (isScheduled) {
+        info = `⚡ ${month.monthName} ${day}, 2026: Autopilot Post Queued (Instagram & TikTok)`;
+      } else if (isFreeze) {
+        info = `🛡️ ${month.monthName} ${day}, 2026: Pro Streak Shield Used • Streak Protected!`;
+      } else {
+        info = `🗓️ ${month.monthName} ${day}, 2026 • Target: 1 Reel to advance Streak`;
+      }
     }
     setSelectedDayInfo(info);
   };
@@ -468,19 +512,11 @@ export const ProDashboardScreen: React.FC<ProDashboardScreenProps> = ({
     switch (actionKey) {
       case 'open_voice_studio':
       case 'open_script':
+      case 'open_hook_studio':
+      case 'open_repurpose':
         if (onOpenVoiceStudio) onOpenVoiceStudio();
         else if (onOpenCreate) onOpenCreate();
         else if (onNavigateTab) onNavigateTab('create');
-        break;
-      case 'open_deal':
-        if (onOpenQuests) onOpenQuests();
-        else if (onNavigateTab) onNavigateTab('quests');
-        break;
-      case 'open_collab':
-        if (onOpenMessages) onOpenMessages('conv_amara');
-        break;
-      case 'open_messages':
-        if (onOpenMessages) onOpenMessages('conv_david');
         break;
       case 'create_reel':
         if (onOpenPostComposer) onOpenPostComposer();
@@ -490,9 +526,6 @@ export const ProDashboardScreen: React.FC<ProDashboardScreenProps> = ({
       case 'open_growth':
         if (onOpenGrowth) onOpenGrowth();
         else if (onNavigateTab) onNavigateTab('growth');
-        break;
-      case 'open_squad':
-        if (onOpenMessages) onOpenMessages();
         break;
       case 'open_schedule':
         if (onOpenSchedule) onOpenSchedule();
@@ -528,58 +561,23 @@ export const ProDashboardScreen: React.FC<ProDashboardScreenProps> = ({
               />
             </Animated.View>
 
-            <Pressable
-              onPress={() => {
-                if (Platform.OS !== 'web') {
-                  Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-                }
+            <HeaderDualModePills
+              tier="pro"
+              persona={isNewUser ? 'new' : 'returning'}
+              onToggleTier={() => {
                 if (onSwitchToFree) {
                   onSwitchToFree();
                 } else if (onSaveProfile && userProfile) {
                   onSaveProfile({ ...userProfile, tier: 'free' });
                 }
               }}
-              hitSlop={8}
-            >
-              <LinearGradient
-                colors={['#F59E0B', '#F59E0B', '#F59E0B']}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 0 }}
-                style={styles.proHeaderBadge}
-              >
-                <Text style={styles.proHeaderBadgeText}>👑 PRO</Text>
-              </LinearGradient>
-            </Pressable>
+              onTogglePersona={onTogglePersona}
+              isDark={false}
+            />
           </View>
 
-          {/* Right Action Icons: Messages, Notification Bell & Profile Avatar */}
+          {/* Right Action Icons: Notification Bell & Profile Avatar */}
           <View style={styles.headerRightGroup}>
-            {/* Chat Messages */}
-            <Pressable
-              style={({ pressed }) => [styles.headerIconBtn, pressed && styles.headerIconBtnPressed]}
-              hitSlop={8}
-              onPress={() => {
-                if (Platform.OS !== 'web') {
-                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                }
-                if (onOpenMessages) {
-                  onOpenMessages();
-                } else if (onNavigateTab) {
-                  onNavigateTab('match');
-                }
-              }}
-            >
-              <Svg width={20} height={20} viewBox="0 0 24 24" fill="none">
-                <Path
-                  d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"
-                  stroke="#1A1626"
-                  strokeWidth="2.2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </Svg>
-            </Pressable>
-
             {/* Notification Bell */}
             <Pressable
               style={({ pressed }) => [styles.headerIconBtn, pressed && styles.headerIconBtnPressed]}
@@ -674,32 +672,196 @@ export const ProDashboardScreen: React.FC<ProDashboardScreenProps> = ({
           <View style={styles.proPlanHeroCard}>
             <View style={styles.proPlanHeaderRow}>
               <View style={styles.proPlanTagBox}>
-                <Text style={styles.proPlanTagText}>TODAY&apos;S PRO PLAN</Text>
+                <Text style={styles.proPlanTagText}>
+                  {isNewUser ? "JARVIS PRO DAY 1 LAUNCH 🚀" : "TODAY'S PRO PLAN"}
+                </Text>
               </View>
             </View>
 
-            <Text style={styles.proPlanHeadline}>
-              Publish your Reel, then turn your next script into a voiceover.
-            </Text>
+            {isNewUser ? (
+              <>
+                <Text
+                  style={styles.proPlanHeadline}
+                  numberOfLines={2}
+                >
+                  Welcome to Jarvis Pro Suite!
+                </Text>
+                <Text style={styles.proPlanSubheadline}>
+                  Calibrate your AI voice studio and generate your first 3 viral hooks.
+                </Text>
+              </>
+            ) : (
+              <Text
+                style={styles.proPlanHeadline}
+                numberOfLines={2}
+              >
+                Publish your Reel. Record your voiceover.
+              </Text>
+            )}
 
             <View style={styles.proPlanBadgesRow}>
               <View style={styles.proPillPurple}>
-                <Text style={styles.proPillPurpleText}>Level 1</Text>
+                <Text style={styles.proPillPurpleText}>
+                  {isNewUser ? "Level 1" : "Level 4"}
+                </Text>
               </View>
 
               <View style={styles.proPillGold}>
-                <Text style={styles.proPillGoldText}>1-Day Streak</Text>
+                <Text style={styles.proPillGoldText}>
+                  {isNewUser ? "Start Streak 🔥" : "30-Day Streak"}
+                </Text>
               </View>
 
               <View style={styles.proPillGray}>
-                <Text style={styles.proPillGrayText}>2 Platforms Connected</Text>
+                <Text style={styles.proPillGrayText}>
+                  {isNewUser ? "0 Platforms Connected" : "2 Platforms Connected"}
+                </Text>
               </View>
 
               <View style={styles.proPillActiveGold}>
-                <Text style={styles.proPillActiveGoldText}>✨ Pro Active</Text>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                  <View style={{ width: 18, height: 18, justifyContent: 'center', alignItems: 'center' }}>
+                    <Text style={{ fontSize: 13, lineHeight: 16 }}>✨</Text>
+                  </View>
+                  <Text style={styles.proPillActiveGoldText}>Pro Active</Text>
+                </View>
               </View>
             </View>
           </View>
+
+          {/* PRO DAY 1 QUICKSTART ACCELERATOR CARD */}
+          {isNewUser && (
+            <View style={[styles.dashboardCard, { borderColor: '#F59E0B', backgroundColor: '#FFFBEB' }]}>
+              <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12, gap: 8 }}>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, flex: 1, minWidth: 0 }}>
+                  <View style={{ width: 18, height: 18, justifyContent: 'center', alignItems: 'center', flexShrink: 0 }}>
+                    <Text style={{ fontSize: 13, lineHeight: 16 }}>⚡</Text>
+                  </View>
+                  <Text
+                    style={styles.acceleratorEyebrowText}
+                    numberOfLines={1}
+                    adjustsFontSizeToFit
+                    minimumFontScale={0.75}
+                  >
+                    JARVIS PRO DAY 1 ACCELERATOR
+                  </Text>
+                </View>
+                <View style={{ backgroundColor: '#FEF3C7', paddingHorizontal: 8, paddingVertical: 3, borderRadius: 100, flexShrink: 0 }}>
+                  <Text style={styles.acceleratorBadgeEyebrowText}>
+                    1 OF 4 COMPLETED
+                  </Text>
+                </View>
+              </View>
+
+              <View style={{ gap: 8 }}>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                  <Text style={{ color: '#16A34A', fontWeight: '800', fontSize: 14, flexShrink: 0, lineHeight: 16 }}>✓</Text>
+                  <Text style={styles.acceleratorActivatedText} numberOfLines={1}>
+                    Jarvis AI Pro Suite Activated
+                  </Text>
+                </View>
+                <Pressable
+                  onPress={() => (onOpenVoiceStudio ? onOpenVoiceStudio() : undefined)}
+                  style={({ pressed }) => [
+                    {
+                      flexDirection: 'row',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      backgroundColor: '#FFFFFF',
+                      paddingVertical: 9,
+                      paddingHorizontal: 10,
+                      borderRadius: 10,
+                      borderWidth: 1,
+                      borderColor: '#FDE68A',
+                      gap: 8,
+                      overflow: 'hidden',
+                    },
+                    pressed && { opacity: 0.85, transform: [{ scale: 0.99 }] },
+                  ]}
+                >
+                  <View style={{ flex: 1, minWidth: 0, flexDirection: 'row', alignItems: 'center', gap: 7 }}>
+                    <Text style={{ color: '#D97706', fontWeight: '800', fontSize: 12, flexShrink: 0, lineHeight: 14 }}>●</Text>
+                    <Text
+                      style={{ flex: 1, fontSize: sFont(11.5), color: '#1F2937', fontWeight: '700' }}
+                      numberOfLines={1}
+                      ellipsizeMode="tail"
+                      adjustsFontSizeToFit
+                      minimumFontScale={0.8}
+                    >
+                      Calibrate AI Voice Studio (Record sample)
+                    </Text>
+                  </View>
+                  <Text style={{ fontSize: sFont(10.5), color: '#B45309', fontWeight: '800', letterSpacing: 0.3, flexShrink: 0 }} numberOfLines={1}>OPEN ›</Text>
+                </Pressable>
+                <Pressable
+                  onPress={() => (onOpenCreate ? onOpenCreate() : undefined)}
+                  style={({ pressed }) => [
+                    {
+                      flexDirection: 'row',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      backgroundColor: '#FFFFFF',
+                      paddingVertical: 9,
+                      paddingHorizontal: 10,
+                      borderRadius: 10,
+                      borderWidth: 1,
+                      borderColor: '#FDE68A',
+                      gap: 8,
+                      overflow: 'hidden',
+                    },
+                    pressed && { opacity: 0.85, transform: [{ scale: 0.99 }] },
+                  ]}
+                >
+                  <View style={{ flex: 1, minWidth: 0, flexDirection: 'row', alignItems: 'center', gap: 7 }}>
+                    <Text style={{ color: '#9CA3AF', fontWeight: '800', fontSize: 12, flexShrink: 0, lineHeight: 14 }}>○</Text>
+                    <Text
+                      style={{ flex: 1, fontSize: sFont(11.5), color: '#4B5563', fontWeight: '600' }}
+                      numberOfLines={1}
+                      ellipsizeMode="tail"
+                      adjustsFontSizeToFit
+                      minimumFontScale={0.8}
+                    >
+                      Generate 3 AI Hook Variations in Studio
+                    </Text>
+                  </View>
+                  <Text style={{ fontSize: sFont(10.5), color: '#6B7280', fontWeight: '700', letterSpacing: 0.3, flexShrink: 0 }} numberOfLines={1}>STUDIO ›</Text>
+                </Pressable>
+                <Pressable
+                  onPress={() => (onOpenSchedule ? onOpenSchedule() : undefined)}
+                  style={({ pressed }) => [
+                    {
+                      flexDirection: 'row',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      backgroundColor: '#FFFFFF',
+                      paddingVertical: 9,
+                      paddingHorizontal: 10,
+                      borderRadius: 10,
+                      borderWidth: 1,
+                      borderColor: '#FDE68A',
+                      gap: 8,
+                      overflow: 'hidden',
+                    },
+                    pressed && { opacity: 0.85, transform: [{ scale: 0.99 }] },
+                  ]}
+                >
+                  <View style={{ flex: 1, minWidth: 0, flexDirection: 'row', alignItems: 'center', gap: 7 }}>
+                    <Text style={{ color: '#9CA3AF', fontWeight: '800', fontSize: 12, flexShrink: 0, lineHeight: 14 }}>○</Text>
+                    <Text
+                      style={{ flex: 1, fontSize: sFont(11.5), color: '#4B5563', fontWeight: '600' }}
+                      numberOfLines={1}
+                      ellipsizeMode="tail"
+                      adjustsFontSizeToFit
+                      minimumFontScale={0.8}
+                    >
+                      Auto-Schedule 7-Day Content Plan
+                    </Text>
+                  </View>
+                  <Text style={{ fontSize: sFont(10.5), color: '#6B7280', fontWeight: '700', letterSpacing: 0.3, flexShrink: 0 }} numberOfLines={1}>PLAN ›</Text>
+                </Pressable>
+              </View>
+            </View>
+          )}
 
           {/* CARD 2: YOUR STREAK HEATMAP */}
           <Pressable
@@ -715,17 +877,24 @@ export const ProDashboardScreen: React.FC<ProDashboardScreenProps> = ({
             {/* 1. Header: YOUR STREAK, 48-Day Streak 🔥, 96% Consistent */}
             <Text style={styles.streakLabel}>YOUR STREAK</Text>
 
-            <View style={styles.cardHeaderRow}>
-              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>
+            <View style={[styles.cardHeaderRow, { gap: 8 }]}>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5, flexShrink: 0 }}>
                 <Text style={styles.streakBigHeadline}>
-                  {(userProfile?.streakCount && userProfile.streakCount > 1) ? userProfile.streakCount : 48}-Day Streak
+                  {isNewUser ? 'Start Your Streak' : ((userProfile?.streakCount && userProfile.streakCount > 1) ? userProfile.streakCount : 48) + '-Day Streak'}
                 </Text>
                 <Animated.Text style={{ fontSize: 16, transform: [{ scale: flamePulse }] }}>
                   🔥
                 </Animated.Text>
               </View>
-              <View style={styles.streakStatusPill}>
-                <Text style={styles.streakStatusHighlight}>96% Consistent</Text>
+              <View style={[styles.streakStatusPill, { flexShrink: 1, minWidth: 0 }]}>
+                <Text
+                  style={styles.streakStatusHighlight}
+                  numberOfLines={1}
+                  adjustsFontSizeToFit
+                  minimumFontScale={0.8}
+                >
+                  {isNewUser ? 'Ready to Post' : '96% Consistent'}
+                </Text>
               </View>
             </View>
 
@@ -767,88 +936,48 @@ export const ProDashboardScreen: React.FC<ProDashboardScreenProps> = ({
 
             {/* 4. Compact Apple Health-Style 3-Row Grid */}
             <View style={styles.heatmapGrid}>
-              {/* Row 1 */}
-              <View style={styles.heatmapRow}>
-                <View style={[styles.heatmapCell, styles.heatmapCellEmpty]} />
-                <View style={[styles.heatmapCell, styles.heatmapCellEmpty]} />
-                <View style={[styles.heatmapCell, styles.heatmapCellCompleted]}>
-                  <Svg width={10} height={10} viewBox="0 0 24 24" fill="none">
-                    <Path d="M20 6L9 17L4 12" stroke="#FFFFFF" strokeWidth="3.2" strokeLinecap="round" strokeLinejoin="round" />
-                  </Svg>
+              {proStreakGrid.map((row, rIdx) => (
+                <View key={`pro_row_${rIdx}`} style={styles.heatmapRow}>
+                  {row.map((cellState, cIdx) => (
+                    <View
+                      key={`pro_cell_${rIdx}_${cIdx}`}
+                      style={[
+                        styles.heatmapCell,
+                        cellState === 'completed' && styles.heatmapCellCompleted,
+                        cellState === 'scheduled' && styles.heatmapCellScheduled,
+                        cellState === 'freeze' && styles.heatmapCellFreeze,
+                        cellState === 'empty' && styles.heatmapCellEmpty,
+                      ]}
+                    >
+                      {cellState === 'completed' && (
+                        <Svg width={10} height={10} viewBox="0 0 24 24" fill="none">
+                          <Path d="M20 6L9 17L4 12" stroke="#FFFFFF" strokeWidth="3.2" strokeLinecap="round" strokeLinejoin="round" />
+                        </Svg>
+                      )}
+                      {cellState === 'scheduled' && (
+                        <Svg width={9} height={9} viewBox="0 0 24 24" fill="none">
+                          <Circle cx="12" cy="12" r="9" stroke="#7C3AED" strokeWidth="2.4" strokeDasharray="3,2" />
+                          <Path d="M12 7V12L15 14" stroke="#7C3AED" strokeWidth="2.4" strokeLinecap="round" />
+                        </Svg>
+                      )}
+                      {cellState === 'freeze' && (
+                        <Svg width={9} height={9} viewBox="0 0 24 24" fill="none">
+                          <Path d="M12 2V22M2 12H22M4.93 4.93L19.07 19.07M19.07 4.93L4.93 19.07" stroke="#0284C7" strokeWidth="2" strokeLinecap="round" />
+                        </Svg>
+                      )}
+                    </View>
+                  ))}
                 </View>
-                <View style={[styles.heatmapCell, styles.heatmapCellCompleted]}>
-                  <Svg width={10} height={10} viewBox="0 0 24 24" fill="none">
-                    <Path d="M20 6L9 17L4 12" stroke="#FFFFFF" strokeWidth="3.2" strokeLinecap="round" strokeLinejoin="round" />
-                  </Svg>
-                </View>
-                <View style={[styles.heatmapCell, styles.heatmapCellCompleted]}>
-                  <Svg width={10} height={10} viewBox="0 0 24 24" fill="none">
-                    <Path d="M20 6L9 17L4 12" stroke="#FFFFFF" strokeWidth="3.2" strokeLinecap="round" strokeLinejoin="round" />
-                  </Svg>
-                </View>
-                <View style={[styles.heatmapCell, styles.heatmapCellCompleted]}>
-                  <Svg width={10} height={10} viewBox="0 0 24 24" fill="none">
-                    <Path d="M20 6L9 17L4 12" stroke="#FFFFFF" strokeWidth="3.2" strokeLinecap="round" strokeLinejoin="round" />
-                  </Svg>
-                </View>
-                <View style={[styles.heatmapCell, styles.heatmapCellCompleted]}>
-                  <Svg width={10} height={10} viewBox="0 0 24 24" fill="none">
-                    <Path d="M20 6L9 17L4 12" stroke="#FFFFFF" strokeWidth="3.2" strokeLinecap="round" strokeLinejoin="round" />
-                  </Svg>
-                </View>
-              </View>
-
-              {/* Row 2 */}
-              <View style={styles.heatmapRow}>
-                <View style={[styles.heatmapCell, styles.heatmapCellCompleted]}>
-                  <Svg width={10} height={10} viewBox="0 0 24 24" fill="none">
-                    <Path d="M20 6L9 17L4 12" stroke="#FFFFFF" strokeWidth="3.2" strokeLinecap="round" strokeLinejoin="round" />
-                  </Svg>
-                </View>
-                <View style={[styles.heatmapCell, styles.heatmapCellCompleted]}>
-                  <Svg width={10} height={10} viewBox="0 0 24 24" fill="none">
-                    <Path d="M20 6L9 17L4 12" stroke="#FFFFFF" strokeWidth="3.2" strokeLinecap="round" strokeLinejoin="round" />
-                  </Svg>
-                </View>
-                <View style={[styles.heatmapCell, styles.heatmapCellCompleted]}>
-                  <Svg width={10} height={10} viewBox="0 0 24 24" fill="none">
-                    <Path d="M20 6L9 17L4 12" stroke="#FFFFFF" strokeWidth="3.2" strokeLinecap="round" strokeLinejoin="round" />
-                  </Svg>
-                </View>
-                <View style={[styles.heatmapCell, styles.heatmapCellCompleted]}>
-                  <Svg width={10} height={10} viewBox="0 0 24 24" fill="none">
-                    <Path d="M20 6L9 17L4 12" stroke="#FFFFFF" strokeWidth="3.2" strokeLinecap="round" strokeLinejoin="round" />
-                  </Svg>
-                </View>
-                <View style={[styles.heatmapCell, styles.heatmapCellCompleted]}>
-                  <Svg width={10} height={10} viewBox="0 0 24 24" fill="none">
-                    <Path d="M20 6L9 17L4 12" stroke="#FFFFFF" strokeWidth="3.2" strokeLinecap="round" strokeLinejoin="round" />
-                  </Svg>
-                </View>
-                <View style={[styles.heatmapCell, styles.heatmapCellCompleted]}>
-                  <Svg width={10} height={10} viewBox="0 0 24 24" fill="none">
-                    <Path d="M20 6L9 17L4 12" stroke="#FFFFFF" strokeWidth="3.2" strokeLinecap="round" strokeLinejoin="round" />
-                  </Svg>
-                </View>
-                <View style={[styles.heatmapCell, styles.heatmapCellEmpty]} />
-              </View>
-
-              {/* Row 3 */}
-              <View style={styles.heatmapRow}>
-                <View style={[styles.heatmapCell, styles.heatmapCellEmpty]} />
-                <View style={[styles.heatmapCell, styles.heatmapCellEmpty]} />
-                <View style={[styles.heatmapCell, styles.heatmapCellEmpty]} />
-                <View style={[styles.heatmapCell, styles.heatmapCellEmpty]} />
-                <View style={[styles.heatmapCell, styles.heatmapCellEmpty]} />
-                <View style={[styles.heatmapCell, styles.heatmapCellEmpty]} />
-                <View style={[styles.heatmapCell, styles.heatmapCellEmpty]} />
-              </View>
+              ))}
             </View>
 
             {/* 5. Subtle Jarvis Momentum Line */}
             <View style={styles.subtleJarvisRow}>
+              <View style={{ width: 18, height: 18, justifyContent: 'center', alignItems: 'center', flexShrink: 0 }}>
+                <Text style={{ fontSize: 14, lineHeight: 17 }}>🔥</Text>
+              </View>
               <Text style={styles.subtleJarvisText}>
-                🔥 <Text style={styles.subtleJarvisBold}>Jarvis:</Text> You’re building momentum. Keep it going tomorrow.
+                <Text style={styles.subtleJarvisBold}>Jarvis:</Text> You’re building momentum. Keep it going tomorrow.
               </Text>
             </View>
           </Pressable>
@@ -868,22 +997,24 @@ export const ProDashboardScreen: React.FC<ProDashboardScreenProps> = ({
               <View>
                 <Text style={styles.scheduledLabel}>POSTS SCHEDULED</Text>
                 <View style={{ flexDirection: 'row', alignItems: 'baseline', gap: 6, marginTop: 4 }}>
-                  <Text style={styles.scheduledBigNumber}>1</Text>
-                  <Text style={styles.scheduledThisWeek}>+1 this week</Text>
+                  <Text style={styles.scheduledBigNumber}>{isNewUser ? '0' : '1'}</Text>
+                  <Text style={styles.scheduledThisWeek}>{isNewUser ? '0 this week' : '+1 this week'}</Text>
                 </View>
               </View>
 
               <View style={styles.calendarIconSquare}>
-                <Text style={{ fontSize: 18 }}>🗓️</Text>
+                <Text style={styles.calendarIconText}>🗓️</Text>
               </View>
             </View>
 
             <View style={styles.scheduledDivider} />
 
             <View style={styles.scheduledBottomRow}>
-              <Text style={styles.nextPostTimeText}>Next: Today 7:30 PM</Text>
-              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
-                <Text style={{ fontSize: 12 }}>⚡</Text>
+              <Text style={styles.nextPostTimeText}>{isNewUser ? 'Next: None scheduled' : 'Next: Today 7:30 PM'}</Text>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                <View style={{ width: 18, height: 18, justifyContent: 'center', alignItems: 'center' }}>
+                  <Text style={{ fontSize: 13, lineHeight: 16 }}>⚡</Text>
+                </View>
                 <Text style={styles.autopilotActiveText}>Autopilot Ready</Text>
               </View>
             </View>
@@ -902,10 +1033,18 @@ export const ProDashboardScreen: React.FC<ProDashboardScreenProps> = ({
           >
             <View style={styles.insightHeaderRow}>
               <View style={styles.trendingIconBox}>
-                <Text style={{ fontSize: 14 }}>📈</Text>
+                <Text style={styles.trendingIconText}>📈</Text>
               </View>
               <Text style={styles.insightBodyText}>
-                Your Reels perform <Text style={styles.highlightGreen}>31% better</Text> between 7:00 PM and 9:00 PM.
+                {isNewUser ? (
+                  <>
+                    Optimal posting window: <Text style={styles.highlightGreen}>7:00 PM – 9:00 PM</Text>. Jarvis personalizes this after your first Reels.
+                  </>
+                ) : (
+                  <>
+                    Your Reels perform <Text style={styles.highlightGreen}>31% better</Text> between 7:00 PM and 9:00 PM.
+                  </>
+                )}
               </Text>
             </View>
 
@@ -945,7 +1084,9 @@ export const ProDashboardScreen: React.FC<ProDashboardScreenProps> = ({
 
               {/* Data Transparency Footer Line */}
               <View style={styles.peakWindowNoteRow}>
-                <Text style={styles.dataTransparencyText}>Based on your last 20 Reels</Text>
+                <Text style={styles.dataTransparencyText}>
+                  {isNewUser ? 'Benchmark data · Calibrates as you post' : 'Based on your last 20 Reels'}
+                </Text>
               </View>
             </View>
           </Pressable>
@@ -985,7 +1126,7 @@ export const ProDashboardScreen: React.FC<ProDashboardScreenProps> = ({
             </View>
           </Pressable>
 
-          {/* CARD 6: AVAILABLE PRO BRAND QUEST ("GlowUp Skincare Launch") */}
+          {/* CARD 6: AVAILABLE PRO SPRINT QUEST */}
           <Pressable
             onPress={() => {
               if (Platform.OS !== 'web') {
@@ -998,18 +1139,23 @@ export const ProDashboardScreen: React.FC<ProDashboardScreenProps> = ({
           >
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 14 }}>
               <View style={styles.brandIconSquare}>
-                <Text style={{ fontSize: 22 }}>🎁</Text>
+                <Text style={{ fontSize: 22 }}>⚡</Text>
               </View>
 
               <View style={{ flex: 1 }}>
                 <View style={{ marginBottom: 3 }}>
                   <View style={styles.proPriorityPill}>
-                    <Text style={styles.proPriorityText}>👑 AVAILABLE BRAND QUEST</Text>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                      <View style={{ width: 18, height: 18, justifyContent: 'center', alignItems: 'center' }}>
+                        <Text style={{ fontSize: 13, lineHeight: 16 }}>👑</Text>
+                      </View>
+                      <Text style={styles.proPriorityText}>AVAILABLE PRO SPRINT</Text>
+                    </View>
                   </View>
                 </View>
-                <Text style={styles.brandQuestTitle}>GlowUp Skincare Launch</Text>
-                <Text style={{ fontSize: 11, color: '#64748B', marginTop: 1 }}>
-                  Product Integration Reel • +350 XP &amp; $450 Bounty
+                <Text style={styles.brandQuestTitle}>Viral Hook Sprint Challenge</Text>
+                <Text style={styles.brandQuestSubText}>
+                  3-Hook Storytelling Challenge • +350 XP &amp; Streak Shield
                 </Text>
               </View>
 
@@ -1017,41 +1163,6 @@ export const ProDashboardScreen: React.FC<ProDashboardScreenProps> = ({
             </View>
           </Pressable>
 
-          {/* CARD 7: MONTHLY EARNINGS ($4,250.00) */}
-          <View style={styles.dashboardCard}>
-            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-              <Text style={styles.earningsCardLabel}>MONTHLY EARNINGS</Text>
-              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-                <Text style={styles.earningsMonthText}>{displayedMonthName} {displayedYear}</Text>
-                <View style={{ flexDirection: 'row', gap: 3 }}>
-                  <View style={[styles.dot, styles.dotActive]} />
-                  <View style={styles.dot} />
-                  <View style={styles.dot} />
-                </View>
-              </View>
-            </View>
-
-            <View style={{ marginVertical: 10 }}>
-              <Text style={styles.earningsBigAmount}>$4,250.00</Text>
-              <Text style={styles.earningsGrowthRate}>+18% vs last month</Text>
-            </View>
-
-            <Pressable
-              style={({ pressed }) => [styles.viewEarningsBtn, pressed && styles.btnPressed]}
-              onPress={() => {
-                if (Platform.OS !== 'web') {
-                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-                }
-                if (onOpenEarnings) {
-                  onOpenEarnings();
-                } else if (onNavigateTab) {
-                  onNavigateTab('growth');
-                }
-              }}
-            >
-              <Text style={styles.viewEarningsBtnText}>View Earnings</Text>
-            </Pressable>
-          </View>
 
           {/* CARD 8: VOICE STUDIO PRO */}
           <View style={styles.dashboardCard}>
@@ -1081,13 +1192,13 @@ export const ProDashboardScreen: React.FC<ProDashboardScreenProps> = ({
 
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginVertical: 14 }}>
               <View style={{ flex: 1, paddingRight: 8 }}>
-                <Text style={styles.voiceMinsCount}>118 <Text style={styles.voiceMinsTotal}>/ 150 min used</Text></Text>
-                <Text style={styles.savedVoiceSub}>Saved Voice — Energetic Narrator</Text>
+                <Text style={styles.voiceMinsCount}>{isNewUser ? '0' : '118'} <Text style={styles.voiceMinsTotal}>/ 150 min used</Text></Text>
+                <Text style={styles.savedVoiceSub}>{isNewUser ? 'Ready to clone your voice' : 'Saved Voice — Energetic Narrator'}</Text>
               </View>
 
               <View style={styles.voiceProgressCircle}>
-                <Text style={styles.voiceProgressText}>78%</Text>
-                <Text style={styles.voiceProgressSub}>MATCH</Text>
+                <Text style={styles.voiceProgressText}>{isNewUser ? '0%' : '78%'}</Text>
+                <Text style={styles.voiceProgressSub}>{isNewUser ? 'READY' : 'MATCH'}</Text>
               </View>
             </View>
 
@@ -1106,7 +1217,12 @@ export const ProDashboardScreen: React.FC<ProDashboardScreenProps> = ({
                   }
                 }}
               >
-                <Text style={styles.createVoiceBtnText}>✨ Create Voice</Text>
+                <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+                  <View style={{ width: 18, height: 18, justifyContent: 'center', alignItems: 'center' }}>
+                    <Text style={{ fontSize: 13, lineHeight: 16 }}>✨</Text>
+                  </View>
+                  <Text style={styles.createVoiceBtnText}>Create Voice</Text>
+                </View>
               </Pressable>
 
               <Pressable
@@ -1126,60 +1242,6 @@ export const ProDashboardScreen: React.FC<ProDashboardScreenProps> = ({
                 <Text style={styles.openStudioBtnText}>Open Studio</Text>
               </Pressable>
             </View>
-          </View>
-
-          {/* CARD 9: CREATOR MATCH */}
-          <View style={styles.dashboardCard}>
-            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, marginBottom: 12 }}>
-              <Pressable
-                onPress={() => openCreatorStory('amara')}
-                style={{ position: 'relative' }}
-                hitSlop={8}
-              >
-                <Image
-                  source={require('../../assets/images/amara-avatar.jpg')}
-                  style={styles.matchAvatarImage}
-                  resizeMode="cover"
-                />
-                <View style={{ position: 'absolute', bottom: -1, right: -1 }}>
-                  <TinyGoldCheck size={13} />
-                </View>
-              </Pressable>
-              <View style={{ flex: 1 }}>
-                <Text style={styles.matchCreatorName}>Amara Okafor</Text>
-                <Text style={styles.matchOverlapTag}>94% Match</Text>
-              </View>
-            </View>
-
-            <View style={styles.whyMatchCalloutRow}>
-              <Text style={{ fontSize: 13 }}>✨</Text>
-              <Text style={styles.whyMatchInlineText}>
-                <Text style={{ fontWeight: '700', color: '#582CDB' }}>Why this match? </Text>
-                Similar niche • 94% audience overlap • Active streak • Open to collab
-              </Text>
-            </View>
-
-            <View style={styles.matchRecommendationBox}>
-              <Text style={styles.matchRecommendationText}>
-                Recommended for a collaborative &lsquo;Behind the Scenes&rsquo; series based on your audience.
-              </Text>
-            </View>
-
-            <Pressable
-              style={({ pressed }) => [styles.connectMatchOutlineBtn, pressed && styles.btnPressed]}
-              onPress={() => {
-                if (Platform.OS !== 'web') {
-                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-                }
-                if (onOpenMatch) {
-                  onOpenMatch();
-                } else if (onNavigateTab) {
-                  onNavigateTab('match');
-                }
-              }}
-            >
-              <Text style={styles.connectMatchBtnText}>Connect</Text>
-            </Pressable>
           </View>
         </ScrollView>
 
@@ -1245,7 +1307,7 @@ export const ProDashboardScreen: React.FC<ProDashboardScreenProps> = ({
                       adjustsFontSizeToFit
                       minimumFontScale={0.85}
                     >
-                      {(userProfile?.streakCount && userProfile.streakCount > 1) ? userProfile.streakCount : 48} Days 🔥
+                      {isNewUser ? 'Day 1 🔥' : ((userProfile?.streakCount && userProfile.streakCount > 1) ? userProfile.streakCount : 48) + ' Days 🔥'}
                     </Text>
                     <Text style={styles.calendarStatLabel} numberOfLines={1}>
                       Streak
@@ -1258,10 +1320,10 @@ export const ProDashboardScreen: React.FC<ProDashboardScreenProps> = ({
                       adjustsFontSizeToFit
                       minimumFontScale={0.85}
                     >
-                      Top 1% 👑
+                      {isNewUser ? 'Starter 🚀' : 'Top 1% 👑'}
                     </Text>
                     <Text style={[styles.calendarStatLabel, { color: '#A16207' }]} numberOfLines={1}>
-                      Worldwide
+                      {isNewUser ? 'Rank Tier' : 'Worldwide'}
                     </Text>
                   </View>
                   <View style={styles.calendarStatCard}>
@@ -1271,7 +1333,7 @@ export const ProDashboardScreen: React.FC<ProDashboardScreenProps> = ({
                       adjustsFontSizeToFit
                       minimumFontScale={0.85}
                     >
-                      99.2% ⚡
+                      {isNewUser ? 'Ready ⚡' : '99.2% ⚡'}
                     </Text>
                     <Text style={styles.calendarStatLabel} numberOfLines={1}>
                       Consistency
@@ -1299,7 +1361,7 @@ export const ProDashboardScreen: React.FC<ProDashboardScreenProps> = ({
                   showsHorizontalScrollIndicator={false}
                   contentContainerStyle={styles.monthChipsContainer}
                 >
-                  {FULL_YEAR_CALENDAR.map((m, idx) => {
+                  {proCalendarMonthsData.map((m, idx) => {
                     const isSelected = selectedMonthIndex === idx;
                     return (
                       <Pressable
@@ -1345,12 +1407,6 @@ export const ProDashboardScreen: React.FC<ProDashboardScreenProps> = ({
                     const measuredWidth = Math.floor(e.nativeEvent.layout.width);
                     if (measuredWidth > 0 && Math.abs(measuredWidth - calendarWidth) > 1) {
                       setCalendarWidth(measuredWidth);
-                      setTimeout(() => {
-                        calendarPagerRef.current?.scrollTo({
-                          x: selectedMonthIndex * measuredWidth,
-                          animated: false,
-                        });
-                      }, 20);
                     }
                   }}
                 >
@@ -1372,9 +1428,9 @@ export const ProDashboardScreen: React.FC<ProDashboardScreenProps> = ({
 
                     <View style={styles.monthNameTitleGroup}>
                       <Text style={styles.focusedMonthTitle}>
-                        {FULL_YEAR_CALENDAR[selectedMonthIndex].monthName} 2026
+                        {proCalendarMonthsData[selectedMonthIndex].monthName} 2026
                       </Text>
-                      {FULL_YEAR_CALENDAR[selectedMonthIndex].isCurrent && (
+                      {proCalendarMonthsData[selectedMonthIndex].isCurrent && (
                         <View style={styles.currentMonthBadge}>
                           <Text style={styles.currentMonthBadgeText}>CURRENT 🔥</Text>
                         </View>
@@ -1383,15 +1439,15 @@ export const ProDashboardScreen: React.FC<ProDashboardScreenProps> = ({
 
                     <Pressable
                       onPress={handleNextMonth}
-                      disabled={selectedMonthIndex === FULL_YEAR_CALENDAR.length - 1}
+                      disabled={selectedMonthIndex === proCalendarMonthsData.length - 1}
                       style={[
                         styles.monthNavChevronBtn,
-                        selectedMonthIndex === FULL_YEAR_CALENDAR.length - 1 && styles.monthNavChevronDisabled,
+                        selectedMonthIndex === proCalendarMonthsData.length - 1 && styles.monthNavChevronDisabled,
                       ]}
                       hitSlop={8}
                     >
                       <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
-                        <Path d="M9 18L15 12L9 6" stroke={selectedMonthIndex === FULL_YEAR_CALENDAR.length - 1 ? '#CBD5E1' : '#582CDB'} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+                        <Path d="M9 18L15 12L9 6" stroke={selectedMonthIndex === proCalendarMonthsData.length - 1 ? '#CBD5E1' : '#582CDB'} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
                       </Svg>
                     </Pressable>
                   </View>
@@ -1405,40 +1461,65 @@ export const ProDashboardScreen: React.FC<ProDashboardScreenProps> = ({
                     ))}
                   </View>
 
-                  {/* Swipeable Horizontal Months Pager */}
-                  <ScrollView
-                    ref={calendarPagerRef}
+                  {/* High-Performance 120fps Native Paging Carousel */}
+                  <FlatList
+                    ref={calendarFlatListRef}
+                    data={proCalendarMonthsData}
+                    keyExtractor={(item) => item.id}
                     horizontal
                     pagingEnabled
                     showsHorizontalScrollIndicator={false}
                     nestedScrollEnabled={true}
+                    directionalLockEnabled={true}
                     decelerationRate="fast"
                     snapToInterval={calendarWidth}
                     snapToAlignment="center"
                     scrollEventThrottle={16}
-                    onMomentumScrollEnd={(e) => {
-                      if (calendarWidth <= 0) return;
-                      const newIndex = Math.round(e.nativeEvent.contentOffset.x / calendarWidth);
-                      if (newIndex >= 0 && newIndex < FULL_YEAR_CALENDAR.length && newIndex !== selectedMonthIndex) {
-                        setSelectedMonthIndex(newIndex);
-                        setSelectedDayInfo(null);
-                        if (Platform.OS !== 'web') {
-                          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                    getItemLayout={(_, index) => ({
+                      length: calendarWidth,
+                      offset: calendarWidth * index,
+                      index,
+                    })}
+                    initialScrollIndex={8}
+                    onScrollToIndexFailed={(info) => {
+                      setTimeout(() => {
+                        try {
+                          calendarFlatListRef.current?.scrollToIndex({
+                            index: info.index,
+                            animated: false,
+                          });
+                        } catch (e) {}
+                      }, 80);
+                    }}
+                    onScroll={(e) => {
+                      const offsetX = e.nativeEvent.contentOffset.x;
+                      if (calendarWidth > 0) {
+                        const activeIdx = Math.round(offsetX / calendarWidth);
+                        if (
+                          activeIdx >= 0 &&
+                          activeIdx < proCalendarMonthsData.length &&
+                          activeIdx !== selectedMonthIndexRef.current
+                        ) {
+                          selectedMonthIndexRef.current = activeIdx;
+                          setSelectedMonthIndex(activeIdx);
+                          setSelectedDayInfo(null);
+                          monthChipsScrollRef.current?.scrollTo({
+                            x: Math.max(0, activeIdx * 68 - 100),
+                            animated: true,
+                          });
+                          if (Platform.OS !== 'web') {
+                            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                          }
                         }
-                        monthChipsScrollRef.current?.scrollTo({
-                          x: Math.max(0, newIndex * 68 - 100),
-                          animated: true,
-                        });
                       }
                     }}
-                  >
-                    {FULL_YEAR_CALENDAR.map((currentMonth, mIdx) => (
-                      <View
-                        key={`month_page_${currentMonth.id}`}
-                        style={[styles.monthPageCard, { width: calendarWidth }]}
-                      >
+                    renderItem={({ item: currentMonth }) => (
+                      <View style={{ width: calendarWidth, paddingHorizontal: 1 }}>
                         <View style={styles.calendarMonthGrid}>
-                          {Array.from({ length: Math.ceil((currentMonth.daysCount + currentMonth.startOffset) / 7) * 7 }).map((_, cellIdx) => {
+                          {Array.from({
+                            length:
+                              Math.ceil((currentMonth.daysCount + currentMonth.startOffset) / 7) * 7,
+                          }).map((_, cellIdx) => {
                             const dayNumber = cellIdx - currentMonth.startOffset + 1;
                             const isValidDay = dayNumber >= 1 && dayNumber <= currentMonth.daysCount;
 
@@ -1485,8 +1566,8 @@ export const ProDashboardScreen: React.FC<ProDashboardScreenProps> = ({
                           })}
                         </View>
                       </View>
-                    ))}
-                  </ScrollView>
+                    )}
+                  />
                 </View>
 
                 {/* Legend & Pro Autopilot Shield Footer */}
@@ -1602,7 +1683,7 @@ export const ProDashboardScreen: React.FC<ProDashboardScreenProps> = ({
 
 
                         {/* ============================================================ */}
-        {/* MODAL: ACTIVE PRO BRAND QUEST MODAL                          */}
+        {/* MODAL: ACTIVE PRO SPRINT QUEST MODAL                         */}
         {/* ============================================================ */}
         <Modal
           visible={showBrandQuestModal}
@@ -1616,7 +1697,7 @@ export const ProDashboardScreen: React.FC<ProDashboardScreenProps> = ({
                 {/* Header */}
                 <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
                   <View style={styles.proPriorityPill}>
-                    <Text style={styles.proPriorityText}>👑 AVAILABLE BRAND QUEST</Text>
+                    <Text style={styles.proPriorityText}>👑 AVAILABLE CREATOR SPRINT</Text>
                   </View>
                   <Pressable onPress={() => setShowBrandQuestModal(false)} hitSlop={8}>
                     <Text style={{ fontSize: 18, color: '#94A3B8', fontWeight: '700' }}>✕</Text>
@@ -1632,11 +1713,11 @@ export const ProDashboardScreen: React.FC<ProDashboardScreenProps> = ({
                 >
                   <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
                     <View style={{ width: 44, height: 44, borderRadius: 22, backgroundColor: 'rgba(255, 255, 255, 0.15)', justifyContent: 'center', alignItems: 'center' }}>
-                      <Text style={{ fontSize: 22 }}>🎁</Text>
+                      <Text style={{ fontSize: 22 }}>⚡</Text>
                     </View>
                     <View style={{ flex: 1 }}>
-                      <Text style={{ fontSize: 17, fontWeight: '700', color: '#FFFFFF' }}>GlowUp Skincare Launch</Text>
-                      <Text style={{ fontSize: 11, color: '#C7D2FE', marginTop: 1, fontWeight: '700' }}>Verified Sponsor Opportunity • 2 Days Remaining</Text>
+                      <Text style={{ fontSize: 17, fontWeight: '700', color: '#FFFFFF' }}>Viral Hook Sprint Challenge</Text>
+                      <Text style={{ fontSize: 11, color: '#C7D2FE', marginTop: 1, fontWeight: '700' }}>Creator Milestone Sprint • 2 Days Remaining</Text>
                     </View>
                   </View>
 
@@ -1658,7 +1739,7 @@ export const ProDashboardScreen: React.FC<ProDashboardScreenProps> = ({
                         style={{ fontSize: sFont(11), fontWeight: '700', color: '#FDE68A', textAlign: 'center' }}
                         numberOfLines={1}
                       >
-                        💰 $450 Bounty
+                        🛡️ 7-Day Shield
                       </Text>
                     </View>
                     <View
@@ -1685,33 +1766,33 @@ export const ProDashboardScreen: React.FC<ProDashboardScreenProps> = ({
                 </LinearGradient>
 
                 {/* Deliverables & Brief */}
-                <Text style={styles.modalSubheadingTitle}>CAMPAIGN DELIVERABLES</Text>
+                <Text style={styles.modalSubheadingTitle}>SPRINT OBJECTIVES</Text>
                 <View style={{ gap: 8, marginTop: 8 }}>
                   <View style={styles.xpActivityRow}>
                     <View style={styles.deliverableIconBox}>
                       <Text style={{ fontSize: 18 }}>🎬</Text>
                     </View>
                     <View style={{ flex: 1, minWidth: 0 }}>
-                      <Text style={styles.xpActivityTitle}>1x 9:16 Video Integration Reel</Text>
-                      <Text style={styles.xpActivityTime}>Include 3-second texture hook &amp; routine demo</Text>
+                      <Text style={styles.xpActivityTitle}>1x 9:16 Storytelling Hook Reel</Text>
+                      <Text style={styles.xpActivityTime}>Include 3-second contrarian hook &amp; core lesson</Text>
                     </View>
                   </View>
                   <View style={styles.xpActivityRow}>
                     <View style={styles.deliverableIconBox}>
-                      <Text style={{ fontSize: 18 }}>🔗</Text>
+                      <Text style={{ fontSize: 18 }}>📑</Text>
                     </View>
                     <View style={{ flex: 1, minWidth: 0 }}>
-                      <Text style={styles.xpActivityTitle}>Custom Bio Link &amp; Promo Code</Text>
-                      <Text style={styles.xpActivityTime}>Tag @glowupskin with 15% audience discount</Text>
+                      <Text style={styles.xpActivityTitle}>Pin High-Value Carousel Breakdown</Text>
+                      <Text style={styles.xpActivityTime}>Share step-by-step checklist to drive bookmarks &amp; saves</Text>
                     </View>
                   </View>
                 </View>
 
                 {/* Jarvis AI Recommendation */}
                 <View style={[styles.nextLevelPreviewBox, { backgroundColor: '#F5F3FF', borderColor: '#C4B5FD', marginTop: 12 }]}>
-                  <Text style={[styles.nextLevelPreviewTitle, { color: '#582CDB' }]}>🪄 JARVIS MATCH INSIGHT</Text>
+                  <Text style={[styles.nextLevelPreviewTitle, { color: '#582CDB' }]}>🪄 JARVIS SPRINT INSIGHT</Text>
                   <Text style={[styles.nextLevelPreviewBody, { color: '#4338CA' }]}>
-                    Your audience has a 94% affinity with aesthetic lifestyle routines. Completing this brand brief awards +350 XP and unlocks Level 2 Creator status!
+                    Strong audience alignment with high-retention formats. Completing this sprint challenge awards +350 XP and unlocks Level 2 Creator status!
                   </Text>
                 </View>
 
@@ -1721,7 +1802,7 @@ export const ProDashboardScreen: React.FC<ProDashboardScreenProps> = ({
                   onPress={() => {
                     setShowBrandQuestModal(false);
                     if (onOpenPostComposer) {
-                      onOpenPostComposer('My 3-Step Morning Skincare Secret (GlowUp Collab)');
+                      onOpenPostComposer('3 Creator Mistakes I Stopped Making');
                     } else if (onStartMission) {
                       onStartMission();
                     }
@@ -1734,28 +1815,16 @@ export const ProDashboardScreen: React.FC<ProDashboardScreenProps> = ({
                     style={styles.modalGoldBtnGradient}
                   >
                     <Text style={styles.modalGoldActionBtnText} numberOfLines={1}>
-                      ✨ Accept &amp; Start Brief (+350 XP) ➔
+                      ✨ Accept &amp; Start Sprint (+350 XP) ➔
                     </Text>
                   </LinearGradient>
-                </Pressable>
-
-                <Pressable
-                  style={styles.modalSecondaryOutlineBtn}
-                  onPress={() => {
-                    setShowBrandQuestModal(false);
-                    if (onOpenMessages) onOpenMessages('conv_glowup');
-                  }}
-                >
-                  <Text style={styles.modalSecondaryOutlineBtnText} numberOfLines={1}>
-                    💬 Message Brand Sponsor ➔
-                  </Text>
                 </Pressable>
 
                 <Pressable
                   style={styles.modalCancelBtn}
                   onPress={() => setShowBrandQuestModal(false)}
                 >
-                  <Text style={styles.modalCancelBtnText}>Close Brief</Text>
+                  <Text style={styles.modalCancelBtnText}>Close Sprint</Text>
                 </Pressable>
               </ScrollView>
             </Animated.View>
@@ -1797,7 +1866,7 @@ export const ProDashboardScreen: React.FC<ProDashboardScreenProps> = ({
                     </View>
                     <View style={{ flex: 1 }}>
                       <Text style={styles.heroLevelTitle}>Starter</Text>
-                      <Text style={styles.heroLevelSub}>Novice Tier Creator • 1-Day Streak</Text>
+                      <Text style={styles.heroLevelSub}>Novice Tier Creator • Day 1 Active</Text>
                     </View>
                   </View>
 
@@ -1834,7 +1903,7 @@ export const ProDashboardScreen: React.FC<ProDashboardScreenProps> = ({
                   {/* Badge 2 */}
                   <View style={styles.badgeShowcaseItem}>
                     <Text style={{ fontSize: 24, marginBottom: 4 }}>🔥</Text>
-                    <Text style={styles.badgeShowcaseName}>1-Day Streak</Text>
+                    <Text style={styles.badgeShowcaseName}>Streak Starter</Text>
                     <Text style={styles.badgeShowcaseDesc}>Started daily posting streak</Text>
                   </View>
 
@@ -1858,8 +1927,8 @@ export const ProDashboardScreen: React.FC<ProDashboardScreenProps> = ({
                 <View style={{ gap: 8, marginTop: 6 }}>
                   {[
                     { title: 'Upgraded to PostStreak Pro', time: 'Today', xp: '+0 XP' },
-                    { title: '1-Day Streak Active', time: 'Today', xp: '+0 XP' },
-                    { title: 'Connected 2 Channels', time: 'Today', xp: '+0 XP' },
+                    { title: 'Streak Kickoff Active', time: 'Today', xp: '+0 XP' },
+                    { title: isNewUser ? 'Ready to Connect Channels' : 'Connected 2 Channels', time: 'Today', xp: '+0 XP' },
                   ].map((item, idx) => (
                     <View key={idx} style={styles.xpActivityRow}>
                       <View style={{ flex: 1 }}>
@@ -1948,7 +2017,7 @@ export const ProDashboardScreen: React.FC<ProDashboardScreenProps> = ({
           }}
           onSendCollabPitch={(creator) => {
             setSelectedStoryData(null);
-            if (onOpenMessages) onOpenMessages();
+            showToast(`Collab request sent to ${creator.name}!`);
           }}
         />
 
@@ -2098,7 +2167,7 @@ const styles = StyleSheet.create({
   scrollContent: {
     paddingHorizontal: 20,
     paddingTop: 8,
-    paddingBottom: 100,
+    paddingBottom: Platform.OS === 'ios' ? 88 : 80,
   },
   proPlanHeroCard: {
     backgroundColor: '#FFFFFF',
@@ -2127,70 +2196,101 @@ const styles = StyleSheet.create({
     borderColor: '#FEF3C7',
   },
   proPlanTagText: {
-    fontSize: 10,
-    fontWeight: '700',
-    color: '#D97706',
-    letterSpacing: 0.3,
+    fontSize: 11,
+    fontWeight: '800',
+    color: '#B45309',
+    letterSpacing: 0.66,
+    lineHeight: 14,
   },
   proPlanHeadline: {
-    fontSize: 15,
+    fontSize: Platform.OS === 'web' ? ('clamp(15px, 3.8vw, 17px)' as any) : sFont(16),
     fontWeight: '700',
     color: '#171420',
+    letterSpacing: -0.35,
     lineHeight: 22,
+    marginBottom: 8,
+  },
+  proPlanSubheadline: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: '#5E576E',
+    letterSpacing: 0,
+    lineHeight: 20.3,
     marginBottom: 14,
   },
   proPlanBadgesRow: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: 6,
+    alignItems: 'center',
   },
   proPillPurple: {
     backgroundColor: '#F4F0FF',
-    paddingHorizontal: 10,
-    paddingVertical: 5,
+    paddingHorizontal: 9,
+    paddingVertical: 4.5,
     borderRadius: 10,
     borderWidth: 1,
     borderColor: 'rgba(88, 44, 219, 0.12)',
+    minHeight: 26,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   proPillPurpleText: {
-    fontSize: 11,
+    fontSize: sFont(10.5),
     fontWeight: '700',
     color: '#582CDB',
+    letterSpacing: -0.1,
+    lineHeight: 14,
   },
   proPillGold: {
     backgroundColor: '#FFFBEB',
-    paddingHorizontal: 10,
-    paddingVertical: 5,
+    paddingHorizontal: 9,
+    paddingVertical: 4.5,
     borderRadius: 10,
     borderWidth: 1,
     borderColor: '#FEF3C7',
+    minHeight: 26,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   proPillGoldText: {
-    fontSize: 11,
+    fontSize: sFont(10.5),
     fontWeight: '700',
     color: '#D97706',
+    letterSpacing: -0.1,
+    lineHeight: 14,
   },
   proPillGray: {
     backgroundColor: '#F8FAFC',
-    paddingHorizontal: 10,
-    paddingVertical: 5,
+    paddingHorizontal: 9,
+    paddingVertical: 4.5,
     borderRadius: 10,
+    minHeight: 26,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   proPillGrayText: {
-    fontSize: 11,
+    fontSize: sFont(10.5),
     fontWeight: '600',
     color: '#5E576E',
+    letterSpacing: -0.1,
+    lineHeight: 14,
   },
   proPillActiveGold: {
     backgroundColor: '#D97706',
-    paddingHorizontal: 10,
-    paddingVertical: 5,
+    paddingHorizontal: 9,
+    paddingVertical: 4.5,
     borderRadius: 10,
+    minHeight: 26,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   proPillActiveGoldText: {
-    fontSize: 11,
+    fontSize: sFont(10.5),
     fontWeight: '700',
     color: '#FFFFFF',
+    letterSpacing: -0.1,
+    lineHeight: 14,
   },
   dashboardCard: {
     backgroundColor: '#FFFFFF',
@@ -2204,23 +2304,45 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.04,
     shadowRadius: 16,
     elevation: 3,
+    overflow: 'hidden',
   },
   cardPressed: {
     transform: [{ scale: 0.985 }],
     opacity: 0.95,
   },
+  acceleratorEyebrowText: {
+    fontSize: 11,
+    fontWeight: '800',
+    color: '#92400E',
+    letterSpacing: 0.66,
+    flex: 1,
+  },
+  acceleratorBadgeEyebrowText: {
+    fontSize: 11,
+    fontWeight: '800',
+    color: '#B45309',
+    letterSpacing: 0.66,
+  },
+  acceleratorActivatedText: {
+    fontSize: 14,
+    lineHeight: 20.3,
+    letterSpacing: 0,
+    color: '#92400E',
+    fontWeight: '600',
+    flex: 1,
+  },
   streakLabel: {
     fontSize: 11,
     fontWeight: '800',
     color: '#64748B',
-    letterSpacing: 0.5,
-    marginBottom: 4,
+    letterSpacing: 0.66,
+    marginBottom: 6,
   },
   streakBigHeadline: {
-    fontSize: 16.5,
+    fontSize: sFont(17),
     fontWeight: '700',
     color: '#171420',
-    letterSpacing: -0.2,
+    letterSpacing: -0.3,
   },
   cardHeaderRow: {
     flexDirection: 'row',
@@ -2308,6 +2430,16 @@ const styles = StyleSheet.create({
     shadowRadius: 2,
     elevation: 1,
   },
+  heatmapCellScheduled: {
+    backgroundColor: '#F5F3FF',
+    borderWidth: 1,
+    borderColor: '#DDD6FE',
+  },
+  heatmapCellFreeze: {
+    backgroundColor: '#F0F9FF',
+    borderWidth: 1,
+    borderColor: '#BAE6FD',
+  },
   heatmapCellEmpty: {
     backgroundColor: 'rgba(23, 20, 32, 0.03)',
     borderWidth: 1,
@@ -2320,11 +2452,14 @@ const styles = StyleSheet.create({
     paddingTop: 8,
     borderTopWidth: 1,
     borderTopColor: 'rgba(23, 20, 32, 0.05)',
+    gap: 8,
   },
   subtleJarvisText: {
-    fontSize: 11.5,
+    fontSize: 14,
+    lineHeight: 20.3,
+    letterSpacing: 0,
     color: '#64748B',
-    lineHeight: 16,
+    flex: 1,
   },
   subtleJarvisBold: {
     fontWeight: '700',
@@ -2334,30 +2469,34 @@ const styles = StyleSheet.create({
     fontSize: 11,
     fontWeight: '800',
     color: '#64748B',
-    letterSpacing: 0.5,
+    letterSpacing: 0.66,
   },
   scheduledBigNumber: {
     fontSize: 28,
     fontWeight: '700',
     color: '#582CDB',
+    letterSpacing: -0.5,
   },
   scheduledThisWeek: {
-    fontSize: 14,
-    fontWeight: '700',
+    fontSize: sFont(13.5),
+    fontWeight: '600',
     color: '#171420',
+    letterSpacing: -0.1,
   },
   calendarIconSquare: {
-    width: 38,
-    height: 38,
-    borderRadius: 12,
-    backgroundColor: '#EDE9FE',
+    width: 24,
+    height: 24,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  calendarIconText: {
+    fontSize: 20,
+    lineHeight: 24,
   },
   scheduledDivider: {
     height: 1,
     backgroundColor: '#F1F5F9',
-    marginVertical: 14,
+    marginVertical: 12,
   },
   scheduledBottomRow: {
     flexDirection: 'row',
@@ -2365,35 +2504,42 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   nextPostTimeText: {
-    fontSize: 13,
-    fontWeight: '700',
+    fontSize: sFont(12.5),
+    fontWeight: '600',
     color: '#171420',
+    letterSpacing: -0.1,
   },
   autopilotActiveText: {
-    fontSize: 12,
-    fontWeight: '800',
+    fontSize: sFont(11.5),
+    fontWeight: '700',
     color: '#15803D',
+    letterSpacing: -0.1,
   },
   insightHeaderRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 10,
+    gap: 8,
     marginBottom: 16,
   },
   trendingIconBox: {
-    width: 32,
-    height: 32,
-    borderRadius: 10,
+    width: 24,
+    height: 24,
+    borderRadius: 6,
     backgroundColor: '#DCFCE7',
     justifyContent: 'center',
     alignItems: 'center',
   },
+  trendingIconText: {
+    fontSize: 14,
+    lineHeight: 18,
+  },
   insightBodyText: {
     flex: 1,
-    fontSize: 13,
+    fontSize: 14,
     fontWeight: '600',
     color: '#171420',
-    lineHeight: 19,
+    lineHeight: 20.3,
+    letterSpacing: 0,
   },
   highlightGreen: {
     color: '#15803D',
@@ -2460,13 +2606,14 @@ const styles = StyleSheet.create({
     fontWeight: '700',
   },
   levelTitleText: {
-    fontSize: 16,
+    fontSize: sFont(15.5),
     fontWeight: '700',
     color: '#171420',
+    letterSpacing: -0.2,
   },
   levelXpText: {
-    fontSize: 11,
-    fontWeight: '700',
+    fontSize: sFont(11),
+    fontWeight: '600',
     color: '#64748B',
     marginTop: 2,
   },
@@ -2496,9 +2643,10 @@ const styles = StyleSheet.create({
     alignSelf: 'flex-start',
   },
   proPriorityText: {
-    fontSize: 9,
-    fontWeight: '700',
+    fontSize: 11,
+    fontWeight: '800',
     color: '#B45309',
+    letterSpacing: 0.66,
   },
   brandQuestSubLabel: {
     fontSize: 10,
@@ -2508,10 +2656,18 @@ const styles = StyleSheet.create({
     flexShrink: 0,
   },
   brandQuestTitle: {
-    fontSize: 17,
+    fontSize: sFont(16),
     fontWeight: '700',
     color: '#171420',
+    letterSpacing: -0.2,
     marginTop: 4,
+  },
+  brandQuestSubText: {
+    fontSize: 14,
+    lineHeight: 20.3,
+    letterSpacing: 0,
+    color: '#64748B',
+    marginTop: 2,
   },
   chevronRight: {
     fontSize: 22,
@@ -2572,8 +2728,8 @@ const styles = StyleSheet.create({
   voiceStudioLabel: {
     fontSize: 11,
     fontWeight: '800',
-    color: '#171420',
-    letterSpacing: 0.5,
+    color: '#64748B',
+    letterSpacing: 0.66,
   },
   proUnlockedPill: {
     backgroundColor: '#FEF9C3',
@@ -2582,9 +2738,10 @@ const styles = StyleSheet.create({
     borderRadius: 4,
   },
   proUnlockedText: {
-    fontSize: 9,
-    fontWeight: '700',
+    fontSize: 11,
+    fontWeight: '800',
     color: '#A16207',
+    letterSpacing: 0.66,
   },
   waveformContainerBox: {
     backgroundColor: '#F5F3FF',
@@ -2607,6 +2764,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: '700',
     color: '#171420',
+    letterSpacing: -0.3,
   },
   voiceMinsTotal: {
     fontSize: 12,
@@ -2614,9 +2772,11 @@ const styles = StyleSheet.create({
     color: '#94A3B8',
   },
   savedVoiceSub: {
-    fontSize: 11,
-    fontWeight: '700',
+    fontSize: 14,
+    fontWeight: '600',
     color: '#64748B',
+    lineHeight: 20.3,
+    letterSpacing: 0,
     marginTop: 2,
   },
   voiceProgressCircle: {

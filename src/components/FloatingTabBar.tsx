@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   StyleSheet,
   View,
@@ -6,13 +6,15 @@ import {
   Pressable,
   Platform,
   ViewStyle,
+  Animated,
+  Easing,
+  LayoutChangeEvent,
 } from 'react-native';
 import Svg, { Path, Circle } from 'react-native-svg';
 import * as Haptics from 'expo-haptics';
 import { LinearGradient } from 'expo-linear-gradient';
-import { LiquidGlassBackground } from './LiquidGlassBackground';
 
-export type TabType = 'home' | 'create' | 'match' | 'quests' | 'growth';
+export type TabType = 'home' | 'create' | 'quests' | 'growth';
 
 export interface FloatingTabBarProps {
   activeTab: TabType;
@@ -22,7 +24,7 @@ export interface FloatingTabBarProps {
 
 // Vector SVG Icons for Bottom Navigation
 const HomeNavIcon = ({ color }: { color: string }) => (
-  <Svg width={21} height={21} viewBox="0 0 24 24" fill={color}>
+  <Svg width={20} height={20} viewBox="0 0 24 24" fill={color}>
     <Path
       d="M12 2.5L2 11.5H5.5V21.5H9.5V14.5C9.5 13.67 10.17 13 11 13H13C13.83 13 14.5 13.67 14.5 14.5V21.5H18.5V11.5H22L12 2.5Z"
       fill={color}
@@ -31,34 +33,14 @@ const HomeNavIcon = ({ color }: { color: string }) => (
 );
 
 const CreateNavIcon = ({ color }: { color: string }) => (
-  <Svg width={21} height={21} viewBox="0 0 24 24" fill="none">
+  <Svg width={20} height={20} viewBox="0 0 24 24" fill="none">
     <Circle cx="12" cy="12" r="9.5" stroke={color} strokeWidth="2.4" />
     <Path d="M12 7.5V16.5M7.5 12H16.5" stroke={color} strokeWidth="2.4" strokeLinecap="round" />
   </Svg>
 );
 
-const MatchNavIcon = ({ color }: { color: string }) => (
-  <Svg width={23} height={21} viewBox="0 0 28 24" fill={color}>
-    <Circle cx="14" cy="5.8" r="3.6" fill={color} />
-    <Path
-      d="M8.2 18.2C8.2 15 10.8 12.2 14 12.2C17.2 12.2 19.8 15 19.8 18.2V20.5H8.2V18.2Z"
-      fill={color}
-    />
-    <Circle cx="5.2" cy="8.2" r="2.8" fill={color} />
-    <Path
-      d="M1.2 19.2C1.2 17 3 15 5.2 15C6.1 15 6.9 15.3 7.5 15.7C7.3 16.5 7.2 17.4 7.2 18.2V20.5H1.2V19.2Z"
-      fill={color}
-    />
-    <Circle cx="22.8" cy="8.2" r="2.8" fill={color} />
-    <Path
-      d="M26.8 19.2C26.8 17 25 15 22.8 15C21.9 15 21.1 15.3 20.5 15.7C20.7 16.5 20.8 17.4 20.8 18.2V20.5H26.8V19.2Z"
-      fill={color}
-    />
-  </Svg>
-);
-
 const QuestsNavIcon = ({ color }: { color: string }) => (
-  <Svg width={21} height={21} viewBox="0 0 24 24" fill="none">
+  <Svg width={20} height={20} viewBox="0 0 24 24" fill="none">
     <Path d="M3.5 3.5L5.8 2L13.2 9.4L11.4 11.2L4 3.8V3.5Z" fill={color} />
     <Path d="M3.5 3.5L2 5.8L9.4 13.2L11.2 11.4L3.8 4H3.5Z" fill={color} />
     <Path d="M14.5 9.2L9.8 13.9L11.3 15.4L16 10.7L14.5 9.2Z" fill={color} />
@@ -73,7 +55,7 @@ const QuestsNavIcon = ({ color }: { color: string }) => (
 );
 
 const GrowthNavIcon = ({ color }: { color: string }) => (
-  <Svg width={21} height={21} viewBox="0 0 24 24" fill="none">
+  <Svg width={20} height={20} viewBox="0 0 24 24" fill="none">
     <Path
       d="M3.5 17L9 11.5L13 15L20.5 7"
       stroke={color}
@@ -94,16 +76,47 @@ const GrowthNavIcon = ({ color }: { color: string }) => (
 const TABS: { id: TabType; label: string; icon: (color: string) => React.ReactNode }[] = [
   { id: 'home', label: 'Home', icon: (c) => <HomeNavIcon color={c} /> },
   { id: 'create', label: 'Create', icon: (c) => <CreateNavIcon color={c} /> },
-  { id: 'match', label: 'Match', icon: (c) => <MatchNavIcon color={c} /> },
   { id: 'quests', label: 'Quests', icon: (c) => <QuestsNavIcon color={c} /> },
   { id: 'growth', label: 'Growth', icon: (c) => <GrowthNavIcon color={c} /> },
 ];
+
+const TAB_INDICES: Record<TabType, number> = {
+  home: 0,
+  create: 1,
+  quests: 2,
+  growth: 3,
+};
 
 export const FloatingTabBar: React.FC<FloatingTabBarProps> = ({
   activeTab,
   onTabPress,
   style,
 }) => {
+  const [rowWidth, setRowWidth] = useState(0);
+  const activeIndex = TAB_INDICES[activeTab] ?? 0;
+  const tabWidth = rowWidth > 0 ? (rowWidth - 12) / 4 : 0;
+  const pillTranslateX = useRef(new Animated.Value(0)).current;
+
+  const handleLayout = (e: LayoutChangeEvent) => {
+    const width = e.nativeEvent.layout.width;
+    if (width > 0 && width !== rowWidth) {
+      setRowWidth(width);
+      const singleWidth = (width - 12) / 4;
+      pillTranslateX.setValue(activeIndex * singleWidth);
+    }
+  };
+
+  useEffect(() => {
+    if (tabWidth > 0) {
+      Animated.timing(pillTranslateX, {
+        toValue: activeIndex * tabWidth,
+        duration: 240,
+        easing: Easing.bezier(0.16, 1, 0.3, 1),
+        useNativeDriver: Platform.OS !== 'web',
+      }).start();
+    }
+  }, [activeIndex, tabWidth]);
+
   const handlePress = (tab: TabType) => {
     if (Platform.OS !== 'web') {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -115,49 +128,52 @@ export const FloatingTabBar: React.FC<FloatingTabBarProps> = ({
     <View style={[styles.floatingWrapper, style]}>
       {/* Refined Floating iOS Glass Bar */}
       <View style={styles.glassBarContainer}>
-        <View style={styles.tabsRow}>
+        <View style={styles.tabsRow} onLayout={handleLayout}>
+          {/* Animated Gliding Purple Pill Indicator */}
+          {tabWidth > 0 && (
+            <Animated.View
+              style={[
+                styles.slidingPillContainer,
+                {
+                  width: tabWidth,
+                  transform: [{ translateX: pillTranslateX }],
+                },
+              ]}
+              pointerEvents="none"
+            >
+              <LinearGradient
+                colors={['#6A3EE6', '#582CDB']}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                style={styles.activeCapsule}
+              />
+            </Animated.View>
+          )}
+
+          {/* Interactive Tab Slots */}
           {TABS.map((tab) => {
             const isActive = activeTab === tab.id;
-
-            if (isActive) {
-              return (
-                <Pressable
-                  key={tab.id}
-                  onPress={() => handlePress(tab.id)}
-                  style={styles.activeTabTouchable}
-                  hitSlop={6}
-                >
-                  <LinearGradient
-                    colors={['#6A3EE6', '#582CDB']}
-                    start={{ x: 0, y: 0 }}
-                    end={{ x: 1, y: 1 }}
-                    style={styles.activeCapsule}
-                  >
-                    <View style={styles.iconWrapper}>
-                      {tab.icon('#FFFFFF')}
-                    </View>
-                    <Text style={styles.tabLabelActive} numberOfLines={1}>
-                      {tab.label}
-                    </Text>
-                  </LinearGradient>
-                </Pressable>
-              );
-            }
 
             return (
               <Pressable
                 key={tab.id}
                 onPress={() => handlePress(tab.id)}
                 style={({ pressed }) => [
-                  styles.inactiveTabItem,
-                  pressed && styles.inactiveTabPressed,
+                  styles.tabSlot,
+                  pressed && styles.tabSlotPressed,
                 ]}
-                hitSlop={6}
+                hitSlop={8}
+                accessibilityRole="tab"
+                accessibilityLabel={`${tab.label} tab`}
+                accessibilityState={{ selected: isActive }}
               >
                 <View style={styles.iconWrapper}>
-                  {tab.icon('#6E677F')}
+                  {tab.icon(isActive ? '#FFFFFF' : '#6E677F')}
                 </View>
-                <Text style={styles.tabLabelInactive} numberOfLines={1}>
+                <Text
+                  style={isActive ? styles.tabLabelActive : styles.tabLabelInactive}
+                  numberOfLines={1}
+                >
                   {tab.label}
                 </Text>
               </Pressable>
@@ -182,7 +198,7 @@ const styles = StyleSheet.create({
   glassBarContainer: {
     width: '100%',
     maxWidth: 480,
-    backgroundColor: 'rgba(255, 255, 255, 0.90)',
+    backgroundColor: 'rgba(255, 255, 255, 0.92)',
     borderRadius: 30,
     borderWidth: 1,
     borderColor: 'rgba(255, 255, 255, 0.95)',
@@ -200,51 +216,45 @@ const styles = StyleSheet.create({
       : {}),
   },
   tabsRow: {
+    position: 'relative',
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-around',
-    paddingVertical: 6,
+    justifyContent: 'space-between',
+    paddingVertical: 5,
     paddingHorizontal: 6,
     width: '100%',
   },
-  inactiveTabItem: {
+  slidingPillContainer: {
+    position: 'absolute',
+    left: 6,
+    top: 5,
+    bottom: 5,
+    zIndex: 1,
+  },
+  tabSlot: {
     flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 5,
     paddingHorizontal: 2,
-    borderRadius: 18,
-  },
-  inactiveTabPressed: {
-    backgroundColor: 'rgba(23, 20, 32, 0.04)',
-    transform: [{ scale: 0.96 }],
-  },
-  tabLabelInactive: {
-    fontSize: 10,
-    fontWeight: '600',
-    color: '#6E677F',
-    letterSpacing: 0.1,
-    textAlign: 'center',
-    marginTop: 2,
-  },
-  activeTabTouchable: {
-    flex: 1.1,
-    paddingHorizontal: 2,
-  },
-  activeCapsule: {
     alignItems: 'center',
     justifyContent: 'center',
     paddingVertical: 6,
-    paddingHorizontal: 4,
+    zIndex: 2,
+  },
+  tabSlotPressed: {
+    transform: [{ scale: 0.94 }],
+    opacity: 0.85,
+  },
+  activeCapsule: {
+    width: '100%',
+    height: '100%',
     borderRadius: 20,
     shadowColor: '#582CDB',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.15,
+    shadowOpacity: 0.22,
     shadowRadius: 10,
     elevation: 4,
   },
   iconWrapper: {
-    height: 22,
+    height: 20,
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -253,6 +263,14 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     fontSize: 10,
     letterSpacing: 0.2,
+    textAlign: 'center',
+    marginTop: 2,
+  },
+  tabLabelInactive: {
+    fontSize: 10,
+    fontWeight: '600',
+    color: '#6E677F',
+    letterSpacing: 0.1,
     textAlign: 'center',
     marginTop: 2,
   },

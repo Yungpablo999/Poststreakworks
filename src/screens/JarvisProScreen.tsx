@@ -25,7 +25,6 @@ import { sFont, sPadding, moderateScale, isNarrowScreen } from '../utils/respons
 interface JarvisProScreenProps {
   onLogout?: () => void;
   onNavigateTab?: (tab: TabType) => void;
-  onOpenMessages?: () => void;
   onBack?: () => void;
   userProfile?: UserProfileData;
   onSaveProfile?: (updated: UserProfileData) => void;
@@ -42,7 +41,7 @@ const FAQ_DATA: FaqItem[] = [
     id: 'faq_1',
     question: 'What is Jarvis Pro?',
     answer:
-      'Jarvis Pro is your AI creator strategist that analyzes your audience, generates content ideas and hooks, optimizes posting times, and finds high-fit collaboration opportunities.',
+      'Jarvis Pro is your AI creator strategist that analyzes your audience, generates content ideas and hooks, optimizes posting times, and accelerates your content growth and streak velocity.',
   },
   {
     id: 'faq_2',
@@ -67,11 +66,10 @@ const FAQ_DATA: FaqItem[] = [
 export const JarvisProScreen: React.FC<JarvisProScreenProps> = ({
   onLogout,
   onNavigateTab,
-  onOpenMessages,
   onBack,
-
   userProfile,
-  onSaveProfile,}) => {
+  onSaveProfile,
+}) => {
   const isDark = false;
   const [activeTab, setActiveTab] = useState<TabType>('growth');
   const [expandedBriefStep, setExpandedBriefStep] = useState<string | null>('step_1');
@@ -217,32 +215,6 @@ export const JarvisProScreen: React.FC<JarvisProScreenProps> = ({
           </View>
 
           <View style={styles.headerRightGroup}>
-            {/* Message / Chat Bubble Button */}
-            <Pressable
-              style={({ pressed }) => [styles.headerIconBtn, pressed && styles.btnPressed]}
-              hitSlop={8}
-              onPress={() => {
-                if (Platform.OS !== 'web') {
-                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                }
-                if (onOpenMessages) {
-                  onOpenMessages();
-                } else {
-                  showToast('💬 Jarvis Pro Assistant');
-                }
-              }}
-            >
-              <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
-                <Path
-                  d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"
-                  stroke="#171420"
-                  strokeWidth="2.2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </Svg>
-            </Pressable>
-
             {/* Notification Bell */}
             <Pressable
               style={({ pressed }) => [styles.headerIconBtn, pressed && styles.btnPressed]}
@@ -352,7 +324,7 @@ export const JarvisProScreen: React.FC<JarvisProScreenProps> = ({
                   <Text style={styles.heroChipText}>Growth Intelligence</Text>
                 </View>
                 <View style={styles.heroChip}>
-                  <Text style={styles.heroChipText}>Creator Matching</Text>
+                  <Text style={styles.heroChipText}>Viral Formats</Text>
                 </View>
               </View>
 
@@ -389,7 +361,7 @@ export const JarvisProScreen: React.FC<JarvisProScreenProps> = ({
                 />
               </View>
               <Text style={styles.briefAdviceText}>
-                Your strongest move today: create one creator-advice Reel and post it at 7:30 PM, then turn it into a caption and collab idea.
+                Your strongest move today: create one creator-advice Reel and post it at 7:30 PM, then generate viral script variations.
               </Text>
             </View>
 
@@ -445,7 +417,7 @@ export const JarvisProScreen: React.FC<JarvisProScreenProps> = ({
                 )}
               </Pressable>
 
-              {/* Step 3: Match with Amara */}
+              {/* Step 3: Complete Growth Mission */}
               <Pressable
                 style={styles.briefStepItem}
                 onPress={() => handleToggleBriefStep('step_3')}
@@ -453,9 +425,9 @@ export const JarvisProScreen: React.FC<JarvisProScreenProps> = ({
                 <View style={styles.briefStepHeader}>
                   <View style={styles.briefStepLeft}>
                     <View style={styles.briefStepIconBox}>
-                      <Text style={styles.briefStepIcon}>👥</Text>
+                      <Text style={styles.briefStepIcon}>⚡</Text>
                     </View>
-                    <Text style={styles.briefStepTitle}>Match with Amara</Text>
+                    <Text style={styles.briefStepTitle}>Execute Growth Mission</Text>
                   </View>
                   <Text style={styles.briefStepChevron}>
                     {expandedBriefStep === 'step_3' ? '∧' : '∨'}
@@ -464,7 +436,7 @@ export const JarvisProScreen: React.FC<JarvisProScreenProps> = ({
                 {expandedBriefStep === 'step_3' && (
                   <View style={styles.briefStepExpandedContent}>
                     <Text style={styles.briefExpandedText}>
-                      ✨ 76% Audience Overlap: Co-create “24 Hours Creating in Lagos” for maximum cross-pollination.
+                      ✨ Complete today's quest for +50 XP and streak multiplier bonus.
                     </Text>
                   </View>
                 )}
@@ -567,27 +539,29 @@ export const JarvisProScreen: React.FC<JarvisProScreenProps> = ({
               </Text>
             </View>
 
-            {/* Feature 4: Creator Matching */}
+            {/* Feature 4: Voice & Hook Studio */}
             <View style={styles.featureGridCard}>
               <View style={styles.featureIconContainer}>
                 <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
-                  <Circle cx="9" cy="7" r="4" stroke="#582CDB" strokeWidth="2" />
                   <Path
-                    d="M3 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2"
+                    d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"
                     stroke="#582CDB"
                     strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
                   />
-                  <Circle cx="17" cy="11" r="3" stroke="#784DF0" strokeWidth="2" />
                   <Path
-                    d="M16 3.13a4 4 0 0 1 0 7.75"
-                    stroke="#784DF0"
+                    d="M19 10v2a7 7 0 0 1-14 0v-2"
+                    stroke="#582CDB"
                     strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
                   />
                 </Svg>
               </View>
-              <Text style={styles.featureTitle} numberOfLines={1}>Creator Matching</Text>
+              <Text style={styles.featureTitle} numberOfLines={1}>Voice & Hook Studio</Text>
               <Text style={styles.featureDescription} numberOfLines={3}>
-                Find high-fit creators for your next collaboration.
+                Generate high-converting hooks and AI voice variations.
               </Text>
             </View>
 
@@ -662,17 +636,17 @@ export const JarvisProScreen: React.FC<JarvisProScreenProps> = ({
 
               <View style={styles.pricingCheckItem}>
                 <Text style={styles.pricingCheckIcon}>✓</Text>
-                <Text style={styles.pricingCheckText}>Unlimited creator discovery</Text>
+                <Text style={styles.pricingCheckText}>Unlimited AI script generations</Text>
               </View>
 
               <View style={styles.pricingCheckItem}>
                 <Text style={styles.pricingCheckIcon}>✓</Text>
-                <Text style={styles.pricingCheckText}>Priority creator matching</Text>
+                <Text style={styles.pricingCheckText}>Voice & Hook Studio access</Text>
               </View>
 
               <View style={styles.pricingCheckItem}>
                 <Text style={styles.pricingCheckIcon}>✓</Text>
-                <Text style={styles.pricingCheckText}>Digital Media Kit & Rate Card</Text>
+                <Text style={styles.pricingCheckText}>Custom AI prompt templates</Text>
               </View>
             </View>
 
@@ -709,7 +683,7 @@ export const JarvisProScreen: React.FC<JarvisProScreenProps> = ({
               </View>
               <Text style={styles.withoutProItem}>• Guess what to post</Text>
               <Text style={styles.withoutProItem}>• Track stats manually</Text>
-              <Text style={styles.withoutProItem}>• Find collaborators randomly</Text>
+              <Text style={styles.withoutProItem}>• Produce content in isolation</Text>
             </View>
 
             {/* Bottom Box: With Jarvis Pro */}
@@ -719,7 +693,7 @@ export const JarvisProScreen: React.FC<JarvisProScreenProps> = ({
               </View>
               <Text style={styles.withProItem}>• Get precise daily recommendations</Text>
               <Text style={styles.withProItem}>• Know what to improve next</Text>
-              <Text style={styles.withProItem}>• Find creators who fit your goals</Text>
+              <Text style={styles.withProItem}>• Automated viral script generation</Text>
             </View>
           </View>
 
@@ -776,7 +750,7 @@ export const JarvisProScreen: React.FC<JarvisProScreenProps> = ({
         <AnimatedCompletionModal
           visible={showCheckoutSuccessModal}
           title="Welcome to Jarvis Pro! ⚡"
-          subtitle="All autonomous AI strategies, viral script generators, and priority matching are now unlocked."
+          subtitle="All autonomous AI strategies, viral script generators, and growth engines are now unlocked."
           badgeText="JARVIS PRO UNLOCKED"
           xpEarned={250}
           streakCount={userProfile?.streakCount || 1}

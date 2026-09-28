@@ -143,7 +143,6 @@ interface ProScriptScreenProps {
   onBack: () => void;
   onLogout?: () => void;
   onOpenSchedule?: () => void;
-  onOpenMessages?: () => void;
   onOpenJarvisPro?: () => void;
   onNavigateTab?: (tab: TabType) => void;
   onOpenVoiceStudio?: (scriptText?: string, scriptTitle?: string) => void;
@@ -159,7 +158,6 @@ export const ProScriptScreen: React.FC<ProScriptScreenProps> = ({
   onBack,
   onLogout,
   onOpenSchedule,
-  onOpenMessages,
   onOpenJarvisPro,
   onNavigateTab,
   onOpenVoiceStudio,
@@ -497,25 +495,6 @@ export const ProScriptScreen: React.FC<ProScriptScreenProps> = ({
               style={({ pressed }) => [styles.headerIconBtn, pressed && styles.btnPressed]}
               hitSlop={8}
               onPress={() => {
-                if (onOpenMessages) onOpenMessages();
-                else if (onNavigateTab) onNavigateTab('match');
-              }}
-            >
-              <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
-                <Path
-                  d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"
-                  stroke="#171420"
-                  strokeWidth="2.2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </Svg>
-            </Pressable>
-
-            <Pressable
-              style={({ pressed }) => [styles.headerIconBtn, pressed && styles.btnPressed]}
-              hitSlop={8}
-              onPress={() => {
                 triggerModalPop();
                 setShowNotificationModal(true);
               }}
@@ -598,10 +577,8 @@ export const ProScriptScreen: React.FC<ProScriptScreenProps> = ({
             </View>
 
             <Text
-              style={[
-                styles.mainTitleText,
-                { fontSize: titleFontSize, letterSpacing: -0.3 },
-              ]}
+              style={styles.mainTitleText}
+              numberOfLines={2}
             >
               Build a script that holds attention.
             </Text>
@@ -630,7 +607,7 @@ export const ProScriptScreen: React.FC<ProScriptScreenProps> = ({
             </Text>
 
             <View style={styles.tagsPillsRow}>
-              {['Creator Advice', 'High-Reach Reel', 'Short-form Video', 'Mistake Breakdown'].map((tag) => (
+              {['Creator Advice', 'High-Reach Potential', 'Short-form Video', 'Mistake Breakdown'].map((tag) => (
                 <View key={tag} style={styles.ideaTagPill}>
                   <Text style={styles.ideaTagPillText}>{tag}</Text>
                 </View>
@@ -1524,10 +1501,12 @@ const styles = StyleSheet.create({
     letterSpacing: 0.3,
   },
   mainTitleText: {
-    fontSize: 23,
+    fontSize: Platform.OS === 'web' ? ('clamp(15px, 3.8vw, 17px)' as any) : sFont(16),
     fontWeight: '700',
     color: '#171420',
-    letterSpacing: -0.5,
+    letterSpacing: -0.35,
+    lineHeight: 22,
+    marginBottom: 4,
   },
   mainSubText: {
     fontSize: 12.5,

@@ -15,8 +15,11 @@ import {
   Animated,
   Modal,
 } from 'react-native';
-import Svg, { Path, Circle, Rect } from 'react-native-svg';
+import Svg, { Path } from 'react-native-svg';
 import * as Haptics from 'expo-haptics';
+import { colors } from '../theme/colors';
+import { radius } from '../theme/radius';
+import { spacing } from '../theme/spacing';
 
 interface SignInScreenProps {
   onBack: () => void;
@@ -337,7 +340,7 @@ export const SignInScreen: React.FC<SignInScreenProps> = ({
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <StatusBar barStyle="dark-content" backgroundColor="#FAF8F5" />
+      <StatusBar barStyle="dark-content" backgroundColor="#F7F5F0" />
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
         style={styles.container}
@@ -359,7 +362,7 @@ export const SignInScreen: React.FC<SignInScreenProps> = ({
               <Svg width={24} height={24} viewBox="0 0 24 24" fill="none">
                 <Path
                   d="M19 12H5M5 12L12 19M5 12L12 5"
-                  stroke="#1A1626"
+                  stroke="#171420"
                   strokeWidth="2.4"
                   strokeLinecap="round"
                   strokeLinejoin="round"
@@ -410,7 +413,7 @@ export const SignInScreen: React.FC<SignInScreenProps> = ({
                   <Path
                     d="M13 2L3 14H12L11 22L21 10H12L13 2Z"
                     fill="#FFE07A"
-                    stroke="#D4A017"
+                    stroke="#D97706"
                     strokeWidth="1.5"
                     strokeLinecap="round"
                     strokeLinejoin="round"
@@ -444,14 +447,14 @@ export const SignInScreen: React.FC<SignInScreenProps> = ({
                   <Svg width={20} height={20} viewBox="0 0 24 24" fill="none">
                     <Path
                       d="M4 4H20C21.1 4 22 4.9 22 6V18C22 19.1 21.1 20 20 20H4C2.9 20 2 19.1 2 18V6C2 4.9 2.9 4 4 4Z"
-                      stroke={focusedField === 'email' ? '#582CDB' : '#736B88'}
+                      stroke={focusedField === 'email' ? colors.primary : '#736B88'}
                       strokeWidth="2"
                       strokeLinecap="round"
                       strokeLinejoin="round"
                     />
                     <Path
                       d="M22 6L12 13L2 6"
-                      stroke={focusedField === 'email' ? '#582CDB' : '#736B88'}
+                      stroke={focusedField === 'email' ? colors.primary : '#736B88'}
                       strokeWidth="2"
                       strokeLinecap="round"
                       strokeLinejoin="round"
@@ -486,7 +489,7 @@ export const SignInScreen: React.FC<SignInScreenProps> = ({
             </Pressable>
           </View>
 
-          {/* 5. ALTERNATIVE SIGN IN (Divider + Google & Apple) */}
+          {/* 5. ALTERNATIVE SIGN IN (Divider + Google, Apple & X) */}
           <View style={styles.dividerRow}>
             <View style={styles.dividerLine} />
             <Text style={styles.dividerText}>OR CONTINUE WITH</Text>
@@ -525,10 +528,21 @@ export const SignInScreen: React.FC<SignInScreenProps> = ({
               onPress={() => handleDirectAuth('Apple')}
               style={({ pressed }) => [styles.socialButton, pressed && styles.socialButtonPressed]}
             >
-              <Svg width={20} height={20} viewBox="0 0 24 24" fill="#1A1626">
+              <Svg width={20} height={20} viewBox="0 0 24 24" fill="#171420">
                 <Path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M15.97 6.38c.62-.75 1.04-1.8 0.93-2.85-.9.04-1.99.6-2.63 1.35-.56.65-1.05 1.71-.92 2.73 1 .08 2.02-.51 2.62-1.23z" />
               </Svg>
               <Text style={styles.socialButtonText}>Apple</Text>
+            </Pressable>
+
+            {/* X (TWITTER) SSO */}
+            <Pressable
+              onPress={() => handleDirectAuth('X')}
+              style={({ pressed }) => [styles.socialButton, pressed && styles.socialButtonPressed]}
+            >
+              <Svg width={18} height={18} viewBox="0 0 24 24" fill="#171420">
+                <Path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+              </Svg>
+              <Text style={styles.socialButtonText}>X</Text>
             </Pressable>
           </View>
 
@@ -568,7 +582,7 @@ export const SignInScreen: React.FC<SignInScreenProps> = ({
                 },
               ]}
             >
-              {/* Pure Glowing Star-Flame in Pop-up (Zero Circles) */}
+              {/* Pure Glowing Star-Flame in Pop-up */}
               <Animated.View
                 style={[
                   styles.modalPureStarWrapper,
@@ -620,20 +634,15 @@ export const SignInScreen: React.FC<SignInScreenProps> = ({
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#FAF9FD',
+    backgroundColor: colors.background, // #F7F5F0
   },
   container: {
     flex: 1,
     justifyContent: 'space-between',
-    backgroundColor: '#FAF9FD',
-  },
-  keyboardAvoid: {
-    flex: 1,
-    justifyContent: 'space-between',
-    backgroundColor: '#FAF9FD',
+    backgroundColor: colors.background,
   },
   scrollContent: {
-    paddingHorizontal: 22,
+    paddingHorizontal: 20,
     paddingTop: 8,
     paddingBottom: 24,
   },
@@ -649,6 +658,7 @@ const styles = StyleSheet.create({
     height: 36,
     justifyContent: 'center',
     alignItems: 'flex-start',
+    ...(Platform.OS === 'web' ? { cursor: 'pointer' as any } : {}),
   },
   backButtonPressed: {
     opacity: 0.5,
@@ -673,11 +683,12 @@ const styles = StyleSheet.create({
     width: 130,
     height: 130,
     borderRadius: 65,
-    backgroundColor: '#F3EEFB',
+    backgroundColor: '#EDE9FE',
     borderWidth: 1,
-    borderColor: 'rgba(88, 44, 219, 0.08)',
+    borderColor: colors.border, // #ECE8E0
     justifyContent: 'center',
     alignItems: 'center',
+    ...(Platform.OS === 'web' ? { cursor: 'pointer' as any } : {}),
   },
   mascotImage: {
     width: 74,
@@ -700,7 +711,7 @@ const styles = StyleSheet.create({
   mainHeading: {
     fontSize: 26,
     fontWeight: '700',
-    color: '#171420',
+    color: colors.textPrimary, // #171420
     letterSpacing: -0.5,
     marginBottom: 6,
     textAlign: 'center',
@@ -708,32 +719,24 @@ const styles = StyleSheet.create({
   subHeading: {
     fontSize: 14,
     fontWeight: '400',
-    color: '#5E576E',
+    color: colors.textSecondary, // #5E576E
     textAlign: 'center',
     lineHeight: 20,
     maxWidth: 320,
     marginBottom: 4,
   },
-  subHeadingSecondary: {
-    fontSize: 12.5,
-    fontWeight: '400',
-    color: '#8E869E',
-    textAlign: 'center',
-    lineHeight: 18,
-    maxWidth: 300,
-  },
   formCard: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 20,
+    backgroundColor: '#FFFFFF', // Solid white
+    borderRadius: radius.card, // 20px
     borderWidth: 1,
-    borderColor: 'rgba(23, 20, 32, 0.07)',
-    padding: 22,
-    marginBottom: 16,
+    borderColor: colors.border, // #ECE8E0
+    padding: spacing.cardPadding, // 20px
+    marginBottom: spacing.cardGap, // 16px
     shadowColor: '#171420',
-    shadowOffset: { width: 0, height: 6 },
+    shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.04,
-    shadowRadius: 16,
-    elevation: 3,
+    shadowRadius: 12,
+    elevation: 2,
   },
   inputGroup: {
     marginBottom: 16,
@@ -745,42 +748,24 @@ const styles = StyleSheet.create({
     letterSpacing: 0.2,
     marginBottom: 8,
   },
-  passwordLabelRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 8,
-  },
-  forgotPasswordText: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: '#582CDB',
-  },
   inputFieldContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#FFFFFF',
     borderWidth: 1.2,
-    borderColor: 'rgba(23, 20, 32, 0.09)',
-    borderRadius: 14,
+    borderColor: colors.border, // #ECE8E0
+    borderRadius: radius.input, // 14px
     paddingHorizontal: 12,
     height: 50,
     width: '100%',
     overflow: 'hidden',
   },
   inputFieldFocused: {
-    borderColor: '#582CDB',
+    borderColor: colors.primary, // #5B3EE8
     backgroundColor: '#FAF9FF',
   },
   inputIconContainer: {
     marginRight: 8,
-    flexShrink: 0,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  eyeIconButton: {
-    padding: 4,
-    marginLeft: 4,
     flexShrink: 0,
     justifyContent: 'center',
     alignItems: 'center',
@@ -790,33 +775,35 @@ const styles = StyleSheet.create({
     minWidth: 0,
     fontSize: 14.5,
     fontWeight: '500',
-    color: '#171420',
+    color: colors.textPrimary, // #171420
     paddingVertical: 0,
     paddingHorizontal: 0,
     paddingRight: 6,
     ...(Platform.OS === 'web' ? { outlineStyle: 'none' as any } : {}),
   },
   submitButton: {
-    backgroundColor: '#582CDB',
+    backgroundColor: colors.primary, // #5B3EE8
     height: 50,
-    borderRadius: 14,
+    borderRadius: radius.button, // 14px
     justifyContent: 'center',
     alignItems: 'center',
     marginTop: 6,
-    shadowColor: '#582CDB',
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.12,
-    shadowRadius: 14,
+    shadowColor: colors.primary,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.16,
+    shadowRadius: 10,
     elevation: 4,
+    ...(Platform.OS === 'web' ? { cursor: 'pointer' as any } : {}),
   },
   submitButtonDisabled: {
-    backgroundColor: 'rgba(181, 165, 232, 0.7)',
+    backgroundColor: 'rgba(91, 62, 232, 0.4)',
     shadowOpacity: 0,
     elevation: 0,
+    ...(Platform.OS === 'web' ? { cursor: 'not-allowed' as any } : {}),
   },
   submitButtonPressed: {
     opacity: 0.92,
-    transform: [{ scale: 0.98 }],
+    transform: [{ scale: 0.985 }],
   },
   submitButtonText: {
     color: '#FFFFFF',
@@ -833,19 +820,19 @@ const styles = StyleSheet.create({
   dividerLine: {
     flex: 1,
     height: 1,
-    backgroundColor: 'rgba(23, 20, 32, 0.06)',
+    backgroundColor: colors.border, // #ECE8E0
   },
   dividerText: {
     fontSize: 11,
     fontWeight: '600',
-    color: '#8E869E',
+    color: colors.textMuted, // #8E869E
     letterSpacing: 0.5,
     marginHorizontal: 12,
   },
   socialAuthRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    gap: 12,
+    gap: 10,
     marginBottom: 18,
   },
   socialButton: {
@@ -855,25 +842,26 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     height: 48,
     backgroundColor: '#FFFFFF',
-    borderRadius: 14,
+    borderRadius: radius.button, // 14px
     borderWidth: 1,
-    borderColor: 'rgba(23, 20, 32, 0.08)',
-    gap: 9,
+    borderColor: colors.border, // #ECE8E0
+    gap: 7,
     shadowColor: '#171420',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.03,
     shadowRadius: 6,
     elevation: 1,
+    ...(Platform.OS === 'web' ? { cursor: 'pointer' as any } : {}),
   },
   socialButtonPressed: {
     backgroundColor: '#F8F6FD',
-    borderColor: 'rgba(88, 44, 219, 0.2)',
+    borderColor: colors.primary,
     transform: [{ scale: 0.97 }],
   },
   socialButtonText: {
-    fontSize: 14,
+    fontSize: 13.5,
     fontWeight: '600',
-    color: '#171420',
+    color: colors.textPrimary, // #171420
   },
   signUpContainer: {
     flexDirection: 'row',
@@ -883,13 +871,14 @@ const styles = StyleSheet.create({
   },
   dontHaveText: {
     fontSize: 14,
-    color: '#5E576E',
+    color: colors.textSecondary,
     fontWeight: '400',
   },
   signUpLinkText: {
     fontSize: 14,
-    color: '#582CDB',
+    color: colors.primary, // #5B3EE8
     fontWeight: '700',
+    ...(Platform.OS === 'web' ? { cursor: 'pointer' as any } : {}),
   },
   legalContainer: {
     flexDirection: 'row',
@@ -901,8 +890,9 @@ const styles = StyleSheet.create({
   legalText: {
     fontSize: 11,
     fontWeight: '600',
-    color: '#8E869E',
+    color: colors.textMuted,
     letterSpacing: 0.5,
+    ...(Platform.OS === 'web' ? { cursor: 'pointer' as any } : {}),
   },
   legalSpacer: {
     width: 8,
@@ -928,7 +918,7 @@ const styles = StyleSheet.create({
     shadowRadius: 30,
     elevation: 10,
     borderWidth: 1,
-    borderColor: 'rgba(23, 20, 32, 0.08)',
+    borderColor: colors.border, // #ECE8E0
   },
   modalPureStarWrapper: {
     justifyContent: 'center',
@@ -943,10 +933,10 @@ const styles = StyleSheet.create({
   jarvisCoreBadge: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'rgba(237, 232, 252, 0.9)',
+    backgroundColor: '#EDE9FE',
     paddingVertical: 4,
     paddingHorizontal: 12,
-    borderRadius: 100,
+    borderRadius: radius.pill,
     marginBottom: 10,
     gap: 5,
   },
@@ -956,13 +946,13 @@ const styles = StyleSheet.create({
   jarvisBadgeText: {
     fontSize: 11,
     fontWeight: '800',
-    color: '#582CDB',
+    color: colors.primary, // #5B3EE8
     letterSpacing: 0.8,
   },
   modalTitle: {
     fontSize: 19,
     fontWeight: '700',
-    color: '#171420',
+    color: colors.textPrimary,
     marginBottom: 10,
     textAlign: 'center',
     letterSpacing: -0.4,
@@ -975,21 +965,22 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   highlightText: {
-    color: '#582CDB',
+    color: colors.primary,
     fontWeight: '700',
   },
   gotItButton: {
     width: '100%',
     height: 48,
-    borderRadius: 14,
-    backgroundColor: '#582CDB',
+    borderRadius: radius.button,
+    backgroundColor: colors.primary,
     justifyContent: 'center',
     alignItems: 'center',
-    shadowColor: '#582CDB',
+    shadowColor: colors.primary,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.08,
     shadowRadius: 10,
     elevation: 4,
+    ...(Platform.OS === 'web' ? { cursor: 'pointer' as any } : {}),
   },
   gotItButtonPressed: {
     opacity: 0.92,

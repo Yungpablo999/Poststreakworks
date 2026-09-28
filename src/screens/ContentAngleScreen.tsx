@@ -28,7 +28,6 @@ interface ContentAngleScreenProps {
   onOpenJarvisPro?: () => void;
   onNavigateTab?: (tab: TabType) => void;
   onUseIdea?: (ideaTitle: string, format?: string) => void;
-  onOpenMessages?: () => void;
   userProfile?: UserProfileData;
   onSaveProfile?: (updated: UserProfileData) => void;
 }
@@ -102,7 +101,7 @@ const NOTIFICATIONS: NotificationItem[] = [
   {
     id: 'n2',
     title: 'Streak Saver Ready',
-    body: "Convert today's idea into a post to keep your 1-day streak.",
+    body: "Convert today's idea into a post to kick off your creator streak.",
     time: '2h ago',
     unread: true,
     iconEmoji: '🔥',
@@ -177,7 +176,6 @@ export const ContentAngleScreen: React.FC<ContentAngleScreenProps> = ({
   onOpenJarvisPro,
   onNavigateTab,
   onUseIdea,
-  onOpenMessages,
 
   userProfile,
   onSaveProfile,}) => {
@@ -207,7 +205,6 @@ export const ContentAngleScreen: React.FC<ContentAngleScreenProps> = ({
   // Modals
   const [showNotificationModal, setShowNotificationModal] = useState(false);
   const [showProfileModal, setShowProfileModal] = useState(false);
-  const [showChatModal, setShowChatModal] = useState(false);
   const [showCelebrationModal, setShowCelebrationModal] = useState(false);
   const [celebrationTitle, setCelebrationTitle] = useState('Idea Generated!');
   const [celebrationSubtitle, setCelebrationSubtitle] = useState('New batch of viral content angles added to your vault.');
@@ -359,7 +356,7 @@ export const ContentAngleScreen: React.FC<ContentAngleScreenProps> = ({
       ]);
       setCelebrationTitle('Idea Saved!');
       setCelebrationSubtitle('"One thing I wish I knew before I started creating" has been saved to your vault.');
-      setCelebrationSpeech('1-day streak protected! Idea ready to turn into a post anytime.');
+      setCelebrationSpeech('Day 1 idea saved! Ready to turn into a post anytime.');
       setShowCelebrationModal(true);
     } else {
       setSavedIdeasList((prev) => prev.filter((s) => s.id !== 'saved_hero'));
@@ -399,7 +396,7 @@ export const ContentAngleScreen: React.FC<ContentAngleScreenProps> = ({
       ]);
       setCelebrationTitle('Idea Saved!');
       setCelebrationSubtitle(`"${savedTitle}" has been saved to your vault.`);
-      setCelebrationSpeech('1-day streak protected! Idea ready in your vault.');
+      setCelebrationSpeech('Day 1 idea saved! Ready in your vault.');
       setShowCelebrationModal(true);
     } else {
       setSavedIdeasList((prev) => prev.filter((s) => s.id !== `saved_${id}`));
@@ -447,7 +444,7 @@ export const ContentAngleScreen: React.FC<ContentAngleScreenProps> = ({
     setAllIdeas([newIdea, ...allIdeas]);
     setCelebrationTitle('New Ideas Generated!');
     setCelebrationSubtitle('Fresh angles tailored for your niche are ready to create.');
-    setCelebrationSpeech('1-day streak protected! Keep up this awesome momentum.');
+    setCelebrationSpeech('Day 1 momentum active! Keep up this awesome focus.');
     setShowCelebrationModal(true);
   };
 
@@ -465,14 +462,6 @@ export const ContentAngleScreen: React.FC<ContentAngleScreenProps> = ({
         <FreeAppHeader
           onBack={onBack}
           onOpenJarvisPro={onOpenJarvisPro}
-          onOpenMessages={() => {
-            if (onOpenMessages) {
-              onOpenMessages();
-            } else {
-              triggerModalAnim();
-              setShowChatModal(true);
-            }
-          }}
           onOpenNotifications={() => {
             triggerModalAnim();
             setShowNotificationModal(true);
@@ -501,7 +490,12 @@ export const ContentAngleScreen: React.FC<ContentAngleScreenProps> = ({
           </View>
 
           {/* Main Headline & Subtitle */}
-          <Text style={styles.mainTitle}>Find your next content angle.</Text>
+          <Text
+            style={styles.mainTitle}
+            numberOfLines={2}
+          >
+            Find your next content angle.
+          </Text>
           <Text style={styles.mainSubtitle}>
             Choose your niche and goal, then generate ideas you can turn into posts.
           </Text>
@@ -991,46 +985,6 @@ export const ContentAngleScreen: React.FC<ContentAngleScreenProps> = ({
           onSaveProfile={onSaveProfile}
         />
 
-        {/* MODAL: CREATOR CHAT */}
-        <Modal
-          visible={showChatModal}
-          transparent={true}
-          animationType="fade"
-          onRequestClose={() => setShowChatModal(false)}
-        >
-          <View style={styles.modalOverlay}>
-            <Animated.View style={[styles.modalCard, { transform: [{ scale: modalPopScale }] }]}>
-              <View style={styles.modalHeaderRow}>
-                <View>
-                  <Text style={styles.modalTitle}>Jarvis AI Chat</Text>
-                  <Text style={styles.modalSubtitle}>Real-time creative assistant</Text>
-                </View>
-                <Pressable
-                  onPress={() => setShowChatModal(false)}
-                  style={styles.modalCloseCircle}
-                  hitSlop={8}
-                >
-                  <Text style={styles.modalCloseCross}>✕</Text>
-                </Pressable>
-              </View>
-
-              <View style={styles.chatCard}>
-                <Text style={styles.chatSpeaker}>Jarvis AI</Text>
-                <Text style={styles.chatMsg}>
-                  I filtered these angles based on your {userProfile?.streakCount || 1}-day streak history! Personal lessons have your highest completion rate.
-                </Text>
-              </View>
-
-              <Pressable
-                style={styles.modalFullBtn}
-                onPress={() => setShowChatModal(false)}
-              >
-                <Text style={styles.modalFullBtnText}>Close Chat</Text>
-              </Pressable>
-            </Animated.View>
-          </View>
-        </Modal>
-
         {/* IDEA OPTIONS THREE-DOT MENU MODAL */}
         <Modal
           visible={showIdeaMenuModal}
@@ -1280,10 +1234,11 @@ const styles = StyleSheet.create({
   },
 
   mainTitle: {
-    fontSize: Platform.OS === 'web' ? ('clamp(18px, 4.5vw, 22px)' as any) : sFont(20),
+    fontSize: Platform.OS === 'web' ? ('clamp(15px, 3.8vw, 17px)' as any) : sFont(16),
     fontWeight: '700',
     color: '#171420',
     letterSpacing: -0.35,
+    lineHeight: 22,
     marginBottom: 4,
     marginTop: 4,
   },

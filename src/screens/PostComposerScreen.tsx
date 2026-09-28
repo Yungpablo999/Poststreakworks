@@ -25,7 +25,16 @@ import { sFont, sPadding, isNarrowScreen } from '../utils/responsive';
 
 interface PostComposerScreenProps {
   ideaTitle?: string;
-  questDraft?: { title: string; hook: string; story: string; lesson: string; cta: string } | null;
+  questDraft?: {
+    title: string;
+    hook: string;
+    story: string;
+    lesson: string;
+    cta: string;
+    badgeLabel?: string;
+    requirements?: string[];
+    xpReward?: number;
+  } | null;
   initialFormat?: ContentFormatType;
   initialPlatform?: string;
   attachedAudio?: {
@@ -38,7 +47,6 @@ interface PostComposerScreenProps {
   onBack: () => void;
   onLogout?: () => void;
   onOpenSchedule?: () => void;
-  onOpenMessages?: () => void;
   onOpenJarvisPro?: () => void;
   onNavigateTab?: (tab: TabType) => void;
   userProfile?: UserProfileData;
@@ -81,7 +89,7 @@ const NOTIFICATIONS: NotificationItem[] = [
   {
     id: 'n2',
     title: 'Streak Saver Ready',
-    body: "Convert today's idea into a post to keep your 1-day streak.",
+    body: "Convert today's idea into a post to kick off your creator streak.",
     time: '2h ago',
     unread: true,
     iconEmoji: '🔥',
@@ -387,7 +395,6 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
   onBack,
   onLogout,
   onOpenSchedule,
-  onOpenMessages,
   onOpenJarvisPro,
   onNavigateTab,
   userProfile,
@@ -448,7 +455,7 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
   const [showCelebrationModal, setShowCelebrationModal] = useState(false);
   const [celebrationTitle, setCelebrationTitle] = useState('Post Scheduled!');
   const [celebrationSubtitle, setCelebrationSubtitle] = useState('Your post has been scheduled for Today at 7:30 PM.');
-  const [celebrationSpeech, setCelebrationSpeech] = useState('1-day streak protected! +50 XP added to your creator level.');
+  const [celebrationSpeech, setCelebrationSpeech] = useState('Day 1 post scheduled! +50 XP added to your creator level.');
 
   const [notificationsList, setNotificationsList] = useState<NotificationItem[]>(NOTIFICATIONS);
 
@@ -781,7 +788,7 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
     } else if (publishMode === 'schedule') {
       setCelebrationTitle('Post Scheduled!');
       setCelebrationSubtitle(`Your post is locked in for ${scheduledTime}.`);
-      setCelebrationSpeech('1-day streak protected! +50 XP added to your creator level.');
+      setCelebrationSpeech('Day 1 post scheduled! +50 XP added to your creator level.');
     }
     setShowCelebrationModal(true);
   };
@@ -838,7 +845,7 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
     // Trigger celebration animation popup
     setCelebrationTitle('Post Scheduled!');
     setCelebrationSubtitle(`Your post has been locked in for ${formattedStr}.`);
-    setCelebrationSpeech('1-day streak protected! +50 XP added to your creator level.');
+    setCelebrationSpeech('Day 1 post scheduled! +50 XP added to your creator level.');
     setTimeout(() => {
       setShowCelebrationModal(true);
     }, 250);
@@ -957,14 +964,6 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
         <FreeAppHeader
           onBack={onBack}
           onOpenJarvisPro={onOpenJarvisPro}
-          onOpenMessages={() => {
-            if (onOpenMessages) {
-              onOpenMessages();
-            } else {
-              triggerModalAnim();
-              setShowChatModal(true);
-            }
-          }}
           onOpenNotifications={() => {
             triggerModalAnim();
             setShowNotificationModal(true);
@@ -1000,7 +999,7 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
 
             {questDraft ? (
               <View style={styles.questDraftBadge}>
-                <Text style={styles.questDraftBadgeText}>🔥 STORYTELLER QUEST DRAFT</Text>
+                <Text style={styles.questDraftBadgeText}>{questDraft.badgeLabel || '🔥 STORYTELLER QUEST DRAFT'}</Text>
               </View>
             ) : (
               <View style={styles.draftPill}>
@@ -1009,10 +1008,12 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
             )}
           </View>
 
-          {/* Main Headline & Subtitle */}
-          <Text style={styles.mainTitle}>Shape your next post.</Text>
-          <Text style={styles.mainSubtitle}>
-            Write your caption, choose platforms, add media, and schedule.
+          {/* Main Headline */}
+          <Text
+            style={styles.mainTitle}
+            numberOfLines={2}
+          >
+            Shape your next post.
           </Text>
 
           {/* 1. POST IDEA CARD */}
@@ -1047,6 +1048,31 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
               </View>
             </View>
           </View>
+
+          {/* ATTACHED PRO QUEST REQUIREMENTS CARD */}
+          {questDraft?.requirements && questDraft.requirements.length > 0 && (
+            <View style={styles.attachedQuestRequirementsCard}>
+              <View style={styles.attachedQuestHeaderRow}>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                  <Text style={{ fontSize: 14 }}>🎯</Text>
+                  <Text style={styles.attachedQuestHeaderTitle}>QUEST REQUIREMENTS ATTACHED</Text>
+                </View>
+                {questDraft.xpReward && (
+                  <View style={styles.attachedQuestXpBadge}>
+                    <Text style={styles.attachedQuestXpText}>+{questDraft.xpReward} XP</Text>
+                  </View>
+                )}
+              </View>
+              {questDraft.requirements.map((req, idx) => (
+                <View key={idx} style={styles.attachedQuestRequirementItem}>
+                  <View style={styles.attachedQuestCheckCircle}>
+                    <Text style={styles.attachedQuestCheckMark}>✓</Text>
+                  </View>
+                  <Text style={styles.attachedQuestRequirementText}>{req}</Text>
+                </View>
+              ))}
+            </View>
+          )}
 
           {/* 2. CHOOSE PLATFORMS WITH MORE PLATFORMS TRIGGER */}
           <View
@@ -2474,46 +2500,6 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
           onSaveProfile={onSaveProfile}
         />
 
-        {/* MODAL 5: CREATOR CHAT */}
-        <Modal
-          visible={showChatModal}
-          transparent={true}
-          animationType="fade"
-          onRequestClose={() => setShowChatModal(false)}
-        >
-          <View style={styles.modalOverlay}>
-            <Animated.View style={[styles.modalCard, { transform: [{ scale: modalPopScale }] }]}>
-              <View style={styles.modalHeaderRow}>
-                <View style={styles.modalTitleContainer}>
-                  <Text style={styles.modalTitle}>Jarvis AI Chat</Text>
-                  <Text style={styles.modalSubtitle}>Real-time creative assistant</Text>
-                </View>
-                <Pressable
-                  onPress={() => setShowChatModal(false)}
-                  style={styles.modalCloseCircle}
-                  hitSlop={8}
-                >
-                  <Text style={styles.modalCloseCross}>✕</Text>
-                </Pressable>
-              </View>
-
-              <View style={styles.chatCard}>
-                <Text style={styles.chatSpeaker}>Jarvis AI</Text>
-                <Text style={styles.chatMsg}>
-                  I reviewed your draft! Adding a clear question at the end boosts comment engagement by 3.2x.
-                </Text>
-              </View>
-
-              <Pressable
-                style={styles.modalFullBtn}
-                onPress={() => setShowChatModal(false)}
-              >
-                <Text style={styles.modalFullBtnText}>Close Chat</Text>
-              </Pressable>
-            </Animated.View>
-          </View>
-        </Modal>
-
         {/* SIGNATURE ANIMATED GHOST CELEBRATION MODAL */}
         <AnimatedCompletionModal
           visible={showCelebrationModal}
@@ -2679,10 +2665,11 @@ const styles = StyleSheet.create({
     letterSpacing: 0.4,
   },
   mainTitle: {
-    fontSize: Platform.OS === 'web' ? ('clamp(18px, 4.5vw, 22px)' as any) : sFont(20),
+    fontSize: Platform.OS === 'web' ? ('clamp(15px, 3.8vw, 17px)' as any) : sFont(16),
     fontWeight: '700',
     color: '#171420',
     letterSpacing: -0.35,
+    lineHeight: 22,
     marginBottom: 4,
     marginTop: 4,
   },
@@ -2754,8 +2741,68 @@ const styles = StyleSheet.create({
   ideaTagPillText: {
     fontSize: sFont(11),
     fontWeight: '700',
-    color: '#6D28D9',
+    color: '#582CDB',
   },
+
+  // Attached Pro Quest Requirements Card
+  attachedQuestRequirementsCard: {
+    backgroundColor: '#FAF5FF',
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: '#E9D5FF',
+    padding: 14,
+    marginBottom: 18,
+  },
+  attachedQuestHeaderRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 10,
+  },
+  attachedQuestHeaderTitle: {
+    fontSize: 10.5,
+    fontWeight: '800',
+    color: '#6B21A8',
+    letterSpacing: 0.5,
+  },
+  attachedQuestXpBadge: {
+    backgroundColor: '#7C3AED',
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 6,
+  },
+  attachedQuestXpText: {
+    fontSize: 10,
+    fontWeight: '800',
+    color: '#FFFFFF',
+    letterSpacing: 0.4,
+  },
+  attachedQuestRequirementItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginBottom: 6,
+  },
+  attachedQuestCheckCircle: {
+    width: 18,
+    height: 18,
+    borderRadius: 9,
+    backgroundColor: '#7C3AED',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  attachedQuestCheckMark: {
+    fontSize: 10,
+    fontWeight: '900',
+    color: '#FFFFFF',
+  },
+  attachedQuestRequirementText: {
+    fontSize: 12.5,
+    fontWeight: '600',
+    color: '#3B0764',
+    flex: 1,
+  },
+
   streakSaverPill: {
     backgroundColor: '#582CDB',
     paddingVertical: 4,

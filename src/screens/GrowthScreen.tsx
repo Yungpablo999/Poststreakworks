@@ -23,6 +23,7 @@ import { BrandToast } from '../components/BrandToast';
 import { UserProfileModal, UserProfileData } from '../components/UserProfileModal';
 import { AnimatedCompletionModal } from '../components/AnimatedCompletionModal';
 import { FreeAppHeader } from '../components/FreeAppHeader';
+import { UserPersona } from '../components/HeaderDualModePills';
 import { sFont, isNarrowScreen } from '../utils/responsive';
 
 
@@ -142,6 +143,16 @@ const INITIAL_GROWTH_PLATFORMS: GrowthPlatformAccount[] = [
     canAdd: false,
   },
   {
+    id: 'facebook',
+    name: 'Facebook',
+    handle: 'Pablo Creates',
+    followers: '4.6k followers',
+    countNumeric: 4600,
+    bgTint: '#EFF6FF',
+    connected: false,
+    canAdd: true,
+  },
+  {
     id: 'threads',
     name: 'Threads',
     handle: '@pablocreates',
@@ -151,20 +162,29 @@ const INITIAL_GROWTH_PLATFORMS: GrowthPlatformAccount[] = [
     connected: false,
     canAdd: true,
   },
+  {
+    id: 'pinterest',
+    name: 'Pinterest',
+    handle: '@pablopins',
+    followers: '6.8k pins',
+    countNumeric: 6800,
+    bgTint: '#FFF1F2',
+    connected: false,
+    canAdd: true,
+  },
 ];
 
 interface GrowthScreenProps {
   onBackToDashboard?: () => void;
   onOpenPostPerformance?: () => void;
   onOpenPlatformGrowth?: () => void;
-  onOpenEarnings?: () => void;
   onLogout?: () => void;
   onNavigateTab?: (tab: TabType) => void;
   onOpenJarvisPro?: () => void;
-  onOpenMessages?: () => void;
+  onSwitchToPro?: () => void;
+  userPersona?: UserPersona;
+  onTogglePersona?: () => void;
   onOpenAudienceBreakdown?: () => void;
-  onOpenSquad?: () => void;
-  onOpenFindSquad?: () => void;
   userProfile?: UserProfileData;
   onSaveProfile?: (updated: UserProfileData) => void;
 }
@@ -190,18 +210,18 @@ export const GrowthScreen: React.FC<GrowthScreenProps> = ({
   onBackToDashboard,
   onOpenPostPerformance,
   onOpenPlatformGrowth,
-  onOpenEarnings,
   onLogout,
   onNavigateTab,
   onOpenJarvisPro,
-  onOpenMessages,
+  onSwitchToPro,
+  userPersona,
+  onTogglePersona,
   onOpenAudienceBreakdown,
-  onOpenSquad,
-  onOpenFindSquad,
   userProfile,
   onSaveProfile,
 }) => {
   const isDark = false;
+  const isNewUser = (userPersona || userProfile?.userPersona || 'new') === 'new';
   const [activeTab, setActiveTab] = useState<TabType>('growth');
   const [selectedChartPointIndex, setSelectedChartPointIndex] = useState(4);
 
@@ -239,6 +259,41 @@ export const GrowthScreen: React.FC<GrowthScreenProps> = ({
     setShowConnectPlatformModal(true);
   };
 
+  // Synchronize platforms list with userProfile connectedPlatforms
+  useEffect(() => {
+    if (userProfile && userProfile.connectedPlatforms !== undefined) {
+      setPlatformsList((prev) =>
+        prev.map((p) => ({
+          ...p,
+          connected: userProfile.connectedPlatforms!.includes(p.id),
+          handle:
+            p.id === 'tiktok' && userProfile.tiktokHandle
+              ? userProfile.tiktokHandle
+              : p.id === 'instagram' && userProfile.instagramHandle
+              ? userProfile.instagramHandle
+              : p.id === 'youtube' && userProfile.youtubeHandle
+              ? userProfile.youtubeHandle
+              : p.id === 'facebook' && userProfile.facebookHandle
+              ? userProfile.facebookHandle
+              : p.id === 'threads' && userProfile.threadsHandle
+              ? userProfile.threadsHandle
+              : p.id === 'pinterest' && userProfile.pinterestHandle
+              ? userProfile.pinterestHandle
+              : p.handle,
+        }))
+      );
+    }
+  }, [
+    userProfile?.connectedPlatforms,
+    userProfile?.connectedPlatforms?.join(','),
+    userProfile?.tiktokHandle,
+    userProfile?.instagramHandle,
+    userProfile?.youtubeHandle,
+    userProfile?.facebookHandle,
+    userProfile?.threadsHandle,
+    userProfile?.pinterestHandle,
+  ]);
+
   const handleConnectSinglePlatform = (platformId: string) => {
     if (Platform.OS !== 'web') {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
@@ -248,6 +303,16 @@ export const GrowthScreen: React.FC<GrowthScreenProps> = ({
     );
     const targetPlat = platformsList.find((p) => p.id === platformId);
     showToast(`✓ ${targetPlat?.name || 'Platform'} connected! Sync active.`);
+
+    if (onSaveProfile && userProfile) {
+      const current = userProfile.connectedPlatforms || ['tiktok', 'instagram', 'youtube'];
+      if (!current.includes(platformId)) {
+        onSaveProfile({
+          ...userProfile,
+          connectedPlatforms: [...current, platformId],
+        });
+      }
+    }
   };
 
   const handleRemoveSinglePlatform = (platformId: string) => {
@@ -259,6 +324,14 @@ export const GrowthScreen: React.FC<GrowthScreenProps> = ({
     );
     const targetPlat = platformsList.find((p) => p.id === platformId);
     showToast(`Removed ${targetPlat?.name || 'account'}`);
+
+    if (onSaveProfile && userProfile) {
+      const current = userProfile.connectedPlatforms || ['tiktok', 'instagram', 'youtube'];
+      onSaveProfile({
+        ...userProfile,
+        connectedPlatforms: current.filter((p) => p !== platformId),
+      });
+    }
   };
 
   const handleAddCustomPlatform = () => {
@@ -269,19 +342,45 @@ export const GrowthScreen: React.FC<GrowthScreenProps> = ({
     if (Platform.OS !== 'web') {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     }
+    const formatted = customHandleInput.startsWith('@') ? customHandleInput : `@${customHandleInput.trim()}`;
     setPlatformsList((prev) =>
       prev.map((p) =>
         p.id === selectedPlatformToAdd
-          ? { ...p, connected: true, handle: customHandleInput.trim() }
+          ? { ...p, connected: true, handle: formatted }
           : p
       )
     );
     const targetPlat = platformsList.find((p) => p.id === selectedPlatformToAdd);
-    showToast(`✓ ${targetPlat?.name} linked to ${customHandleInput.trim()}!`);
+    showToast(`✓ ${targetPlat?.name} linked to ${formatted}!`);
     setCustomHandleInput('');
-  };
 
-  const [showChatModal, setShowChatModal] = useState(false);
+    if (onSaveProfile && userProfile) {
+      const current = userProfile.connectedPlatforms || ['tiktok', 'instagram', 'youtube'];
+      const nextConnected = current.includes(selectedPlatformToAdd)
+        ? current
+        : [...current, selectedPlatformToAdd];
+      const handleKey =
+        selectedPlatformToAdd === 'tiktok'
+          ? 'tiktokHandle'
+          : selectedPlatformToAdd === 'instagram'
+          ? 'instagramHandle'
+          : selectedPlatformToAdd === 'youtube'
+          ? 'youtubeHandle'
+          : selectedPlatformToAdd === 'facebook'
+          ? 'facebookHandle'
+          : selectedPlatformToAdd === 'threads'
+          ? 'threadsHandle'
+          : selectedPlatformToAdd === 'pinterest'
+          ? 'pinterestHandle'
+          : undefined;
+
+      onSaveProfile({
+        ...userProfile,
+        connectedPlatforms: nextConnected,
+        ...(handleKey ? { [handleKey]: formatted } : {}),
+      });
+    }
+  };
 
   // Animations
   const flameFloatY = useRef(new Animated.Value(0)).current;
@@ -354,15 +453,10 @@ export const GrowthScreen: React.FC<GrowthScreenProps> = ({
       <View style={[styles.container, isDark && { backgroundColor: '#0C0A12' }]}>
         {/* 1. TOP AIRY HEADER BAR */}
         <FreeAppHeader
+          onSwitchToPro={onSwitchToPro || onOpenJarvisPro}
           onOpenJarvisPro={onOpenJarvisPro}
-          onOpenMessages={() => {
-            if (onOpenMessages) {
-              onOpenMessages();
-            } else {
-              triggerModalPop();
-              setShowChatModal(true);
-            }
-          }}
+          onTogglePersona={onTogglePersona}
+          userPersona={userPersona || userProfile?.userPersona}
           onOpenNotifications={() => {
             triggerModalPop();
             setShowNotificationModal(true);
@@ -392,169 +486,196 @@ export const GrowthScreen: React.FC<GrowthScreenProps> = ({
             </View>
           </View>
 
-          {/* HEADLINE & SUBTITLE */}
-          <Text style={styles.mainHeading}>See your growth clearly.</Text>
-          <Text style={styles.mainSubtitle}>
-            Track your growth, top content, and audience signals.
+          {/* HEADLINE */}
+          <Text
+            style={styles.mainHeading}
+            numberOfLines={2}
+          >
+            See your growth clearly.
           </Text>
 
           {/* 1. TOTAL AUDIENCE GROWTH HERO CARD */}
           <View style={styles.audienceHeroCard}>
-            <View style={styles.audienceHeaderRow}>
-              <View>
+            {isNewUser ? (
+              <View style={styles.audienceEmptyContainer}>
                 <Text style={styles.audienceLabel}>TOTAL AUDIENCE</Text>
-                <View style={styles.audienceValueRow}>
-                  <Text style={styles.audienceMainNumber}>24.8K</Text>
-                  <View style={styles.growthBadgePill}>
-                    <Text style={styles.growthBadgePillText}>+12.4%</Text>
-                  </View>
-                </View>
-                <Text style={styles.audienceSubCompare}>vs last 30 days</Text>
-              </View>
-              <View style={styles.vs30DaysPill}>
-                <Text style={styles.vs30DaysPillText}>LAST 30 DAYS</Text>
-              </View>
-            </View>
-
-            {/* 3 Metric Stat Boxes */}
-            <View style={styles.statsRow}>
-              <View style={styles.statBox}>
-                <Text style={styles.statLabel}>NEW FOLLOWERS</Text>
-                <Text style={styles.statValue}>1.2K</Text>
-              </View>
-
-              <View style={styles.statBox}>
-                <Text style={styles.statLabel}>PROFILE VISITS</Text>
-                <Text style={styles.statValue}>1.9K</Text>
-              </View>
-
-              <View style={styles.statBox}>
-                <Text style={styles.statLabel}>ENGAGEMENT</Text>
-                <Text style={styles.statValue}>600</Text>
-              </View>
-            </View>
-
-            {/* Interactive Smooth Curve Graph */}
-            {(() => {
-              const activeChartPoint = AUDIENCE_CHART_POINTS[selectedChartPointIndex] || AUDIENCE_CHART_POINTS[4];
-              return (
-                <View style={styles.graphContainer}>
-                  {/* Floating Tooltip Indicator */}
-                  <View
-                    style={[
-                      styles.chartTooltipBubble,
-                      {
-                        left: `${Math.max(4, Math.min(56, activeChartPoint.percentX - 22))}%`,
-                      },
-                    ]}
+                <Text style={styles.audienceEmptyHeadline}>No data yet</Text>
+                <Text style={styles.audienceEmptySubtext}>
+                  Connect an account and your first stats show up within minutes
+                </Text>
+                <Pressable
+                  style={({ pressed }) => [styles.connectAccountBtn, pressed && styles.btnPressed]}
+                  onPress={handleOpenConnectPlatforms}
+                >
+                  <LinearGradient
+                    colors={['#6366F1', '#582CDB']}
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 1, y: 1 }}
+                    style={styles.connectAccountGradient}
                   >
-                    <Text style={styles.chartTooltipText}>
-                      {activeChartPoint.date} · <Text style={{ fontWeight: '800', color: '#582CDB' }}>{activeChartPoint.followers} followers</Text>
-                    </Text>
+                    <Text style={styles.connectAccountBtnText}>Connect an Account</Text>
+                  </LinearGradient>
+                </Pressable>
+              </View>
+            ) : (
+              <>
+                <View style={styles.audienceHeaderRow}>
+                  <View>
+                    <Text style={styles.audienceLabel}>TOTAL AUDIENCE</Text>
+                    <View style={styles.audienceValueRow}>
+                      <Text style={styles.audienceMainNumber}>24.8K</Text>
+                      <View style={styles.growthBadgePill}>
+                        <Text style={styles.growthBadgePillText}>+12.4%</Text>
+                      </View>
+                    </View>
+                    <Text style={styles.audienceSubCompare}>vs last 30 days</Text>
                   </View>
-
-                  <Svg width="100%" height={110} viewBox="0 0 320 110" preserveAspectRatio="none">
-                    <Defs>
-                      <SvgLinearGradient id="curveGrad" x1="0%" y1="0%" x2="0%" y2="100%">
-                        <Stop offset="0%" stopColor="#6366F1" stopOpacity="0.22" />
-                        <Stop offset="100%" stopColor="#6366F1" stopOpacity="0.0" />
-                      </SvgLinearGradient>
-                    </Defs>
-
-                    {/* Area Fill */}
-                    <Path
-                      d="M0,75 C45,75 75,55 120,30 C160,8 190,85 240,65 C270,48 290,15 320,18 L320,110 L0,110 Z"
-                      fill="url(#curveGrad)"
-                    />
-
-                    {/* Smooth Curve Line */}
-                    <Path
-                      d="M0,75 C45,75 75,55 120,30 C160,8 190,85 240,65 C270,48 290,15 320,18"
-                      fill="none"
-                      stroke="#6366F1"
-                      strokeWidth="3"
-                      strokeLinecap="round"
-                    />
-
-                    {/* Dotted Guide Line for selected point */}
-                    <Path
-                      d={`M${activeChartPoint.cx},${activeChartPoint.cy} L${activeChartPoint.cx},105`}
-                      stroke="#6366F1"
-                      strokeWidth="1.2"
-                      strokeDasharray="3,3"
-                      opacity="0.45"
-                    />
-
-                    {/* Render Interactive Data Points */}
-                    {AUDIENCE_CHART_POINTS.map((pt, idx) => {
-                      const isSelected = selectedChartPointIndex === idx;
-                      return (
-                        <React.Fragment key={idx}>
-                          {isSelected ? (
-                            <>
-                              <Circle cx={pt.cx} cy={pt.cy} r="10" stroke="#6366F1" strokeWidth="2" fill="#FFFFFF" />
-                              <Circle cx={pt.cx} cy={pt.cy} r="5" fill="#6366F1" />
-                            </>
-                          ) : (
-                            <Circle
-                              cx={pt.cx}
-                              cy={pt.cy}
-                              r="4"
-                              fill="#FFFFFF"
-                              stroke="#6366F1"
-                              strokeWidth="2"
-                              opacity="0.85"
-                            />
-                          )}
-                        </React.Fragment>
-                      );
-                    })}
-                  </Svg>
-
-                  {/* Touch slices for direct scrubbing / tap */}
-                  <View style={styles.chartInteractiveOverlay} pointerEvents="box-none">
-                    {AUDIENCE_CHART_POINTS.map((pt, idx) => (
-                      <Pressable
-                        key={idx}
-                        style={styles.chartTouchSlice}
-                        onPress={() => {
-                          if (Platform.OS !== 'web') {
-                            Haptics.selectionAsync();
-                          }
-                          setSelectedChartPointIndex(idx);
-                        }}
-                        hitSlop={8}
-                      />
-                    ))}
-                  </View>
-
-                  <View style={styles.graphDateRow}>
-                    <Text style={styles.graphDateText}>OCT 01</Text>
-                    <Text style={styles.graphFollowersLegend}>● Followers</Text>
-                    <Text style={styles.graphDateText}>OCT 28</Text>
+                  <View style={styles.vs30DaysPill}>
+                    <Text style={styles.vs30DaysPillText}>LAST 30 DAYS</Text>
                   </View>
                 </View>
-              );
-            })()}
 
-            {/* Bottom Link */}
-            <Pressable
-              style={styles.viewFullAudienceLink}
-              onPress={() => {
-                if (Platform.OS !== 'web') {
-                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                }
-                if (onOpenAudienceBreakdown) {
-                  onOpenAudienceBreakdown();
-                } else {
-                  triggerModalPop();
-                  setShowAudienceModal(true);
-                }
-              }}
-              hitSlop={8}
-            >
-              <Text style={styles.viewFullAudienceText}>View Full Audience Breakdown ➔</Text>
-            </Pressable>
+                {/* 3 Metric Stat Boxes */}
+                <View style={styles.statsRow}>
+                  <View style={styles.statBox}>
+                    <Text style={styles.statLabel}>NEW FOLLOWERS</Text>
+                    <Text style={styles.statValue}>1.2K</Text>
+                  </View>
+
+                  <View style={styles.statBox}>
+                    <Text style={styles.statLabel}>PROFILE VISITS</Text>
+                    <Text style={styles.statValue}>1.9K</Text>
+                  </View>
+
+                  <View style={styles.statBox}>
+                    <Text style={styles.statLabel}>ENGAGEMENT</Text>
+                    <Text style={styles.statValue}>600</Text>
+                  </View>
+                </View>
+
+                {/* Interactive Smooth Curve Graph */}
+                {(() => {
+                  const activeChartPoint = AUDIENCE_CHART_POINTS[selectedChartPointIndex] || AUDIENCE_CHART_POINTS[4];
+                  return (
+                    <View style={styles.graphContainer}>
+                      {/* Floating Tooltip Indicator */}
+                      <View
+                        style={[
+                          styles.chartTooltipBubble,
+                          {
+                            left: `${Math.max(4, Math.min(56, activeChartPoint.percentX - 22))}%`,
+                          },
+                        ]}
+                      >
+                        <Text style={styles.chartTooltipText}>
+                          {activeChartPoint.date} · <Text style={{ fontWeight: '800', color: '#582CDB' }}>{activeChartPoint.followers} followers</Text>
+                        </Text>
+                      </View>
+
+                      <Svg width="100%" height={110} viewBox="0 0 320 110" preserveAspectRatio="none">
+                        <Defs>
+                          <SvgLinearGradient id="curveGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                            <Stop offset="0%" stopColor="#6366F1" stopOpacity="0.22" />
+                            <Stop offset="100%" stopColor="#6366F1" stopOpacity="0.0" />
+                          </SvgLinearGradient>
+                        </Defs>
+
+                        {/* Area Fill */}
+                        <Path
+                          d="M0,75 C45,75 75,55 120,30 C160,8 190,85 240,65 C270,48 290,15 320,18 L320,110 L0,110 Z"
+                          fill="url(#curveGrad)"
+                        />
+
+                        {/* Smooth Curve Line */}
+                        <Path
+                          d="M0,75 C45,75 75,55 120,30 C160,8 190,85 240,65 C270,48 290,15 320,18"
+                          fill="none"
+                          stroke="#6366F1"
+                          strokeWidth="3"
+                          strokeLinecap="round"
+                        />
+
+                        {/* Dotted Guide Line for selected point */}
+                        <Path
+                          d={`M${activeChartPoint.cx},${activeChartPoint.cy} L${activeChartPoint.cx},105`}
+                          stroke="#6366F1"
+                          strokeWidth="1.2"
+                          strokeDasharray="3,3"
+                          opacity="0.45"
+                        />
+
+                        {/* Render Interactive Data Points */}
+                        {AUDIENCE_CHART_POINTS.map((pt, idx) => {
+                          const isSelected = selectedChartPointIndex === idx;
+                          return (
+                            <React.Fragment key={idx}>
+                              {isSelected ? (
+                                <>
+                                  <Circle cx={pt.cx} cy={pt.cy} r="10" stroke="#6366F1" strokeWidth="2" fill="#FFFFFF" />
+                                  <Circle cx={pt.cx} cy={pt.cy} r="5" fill="#6366F1" />
+                                </>
+                              ) : (
+                                <Circle
+                                  cx={pt.cx}
+                                  cy={pt.cy}
+                                  r="4"
+                                  fill="#FFFFFF"
+                                  stroke="#6366F1"
+                                  strokeWidth="2"
+                                  opacity="0.85"
+                                />
+                              )}
+                            </React.Fragment>
+                          );
+                        })}
+                      </Svg>
+
+                      {/* Touch slices for direct scrubbing / tap */}
+                      <View style={styles.chartInteractiveOverlay} pointerEvents="box-none">
+                        {AUDIENCE_CHART_POINTS.map((pt, idx) => (
+                          <Pressable
+                            key={idx}
+                            style={styles.chartTouchSlice}
+                            onPress={() => {
+                              if (Platform.OS !== 'web') {
+                                Haptics.selectionAsync();
+                              }
+                              setSelectedChartPointIndex(idx);
+                            }}
+                            hitSlop={8}
+                          />
+                        ))}
+                      </View>
+
+                      <View style={styles.graphDateRow}>
+                        <Text style={styles.graphDateText}>OCT 01</Text>
+                        <Text style={styles.graphFollowersLegend}>● Followers</Text>
+                        <Text style={styles.graphDateText}>OCT 28</Text>
+                      </View>
+                    </View>
+                  );
+                })()}
+
+                {/* Bottom Link */}
+                <Pressable
+                  style={styles.viewFullAudienceLink}
+                  onPress={() => {
+                    if (Platform.OS !== 'web') {
+                      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                    }
+                    if (onOpenAudienceBreakdown) {
+                      onOpenAudienceBreakdown();
+                    } else {
+                      triggerModalPop();
+                      setShowAudienceModal(true);
+                    }
+                  }}
+                  hitSlop={8}
+                >
+                  <Text style={styles.viewFullAudienceText}>View Full Audience Breakdown ➔</Text>
+                </Pressable>
+              </>
+            )}
           </View>
 
           {/* 2. CONNECTED PLATFORMS */}
@@ -563,7 +684,7 @@ export const GrowthScreen: React.FC<GrowthScreenProps> = ({
           </View>
 
           <View style={styles.platformsCard}>
-            {/* TikTok - Authentic 3D Chromatic Icon */}
+            {/* TikTok */}
             <View style={styles.platformRow}>
               <View style={styles.platformLeft}>
                 <View style={[styles.platformIconBox, { backgroundColor: '#000000' }]}>
@@ -586,13 +707,23 @@ export const GrowthScreen: React.FC<GrowthScreenProps> = ({
                 </View>
                 <View>
                   <Text style={styles.platformName}>TikTok</Text>
-                  <Text style={styles.platformFollowers}>14.2k followers</Text>
+                  {!isNewUser && <Text style={styles.platformFollowers}>14.2k followers</Text>}
                 </View>
               </View>
-              <Text style={styles.platformGrowthGreen}>+8.2%  ▲</Text>
+              {isNewUser ? (
+                <Pressable
+                  style={({ pressed }) => [styles.connectPlatformSmallBtn, pressed && styles.btnPressed]}
+                  onPress={() => handleConnectSinglePlatform('tiktok')}
+                  hitSlop={6}
+                >
+                  <Text style={styles.connectPlatformSmallBtnText}>Connect</Text>
+                </Pressable>
+              ) : (
+                <Text style={styles.platformGrowthGreen}>+8.2%  ▲</Text>
+              )}
             </View>
 
-            {/* Instagram - Official Instagram Gradient Camera Icon */}
+            {/* Instagram */}
             <View style={styles.platformRow}>
               <View style={styles.platformLeft}>
                 <LinearGradient
@@ -609,12 +740,23 @@ export const GrowthScreen: React.FC<GrowthScreenProps> = ({
                 </LinearGradient>
                 <View>
                   <Text style={styles.platformName}>Instagram</Text>
-                  <Text style={styles.platformFollowers}>7.8k followers</Text>
+                  {!isNewUser && <Text style={styles.platformFollowers}>7.8k followers</Text>}
                 </View>
               </View>
-              <Text style={styles.platformGrowthGreen}>+3.4%  ▲</Text>
+              {isNewUser ? (
+                <Pressable
+                  style={({ pressed }) => [styles.connectPlatformSmallBtn, pressed && styles.btnPressed]}
+                  onPress={() => handleConnectSinglePlatform('instagram')}
+                  hitSlop={6}
+                >
+                  <Text style={styles.connectPlatformSmallBtnText}>Connect</Text>
+                </Pressable>
+              ) : (
+                <Text style={styles.platformGrowthGreen}>+3.4%  ▲</Text>
+              )}
             </View>
-            {/* YouTube - Official YouTube Red Icon */}
+
+            {/* YouTube */}
             <View style={styles.platformRow}>
               <View style={styles.platformLeft}>
                 <View style={[styles.platformIconBox, { backgroundColor: '#FF0000' }]}>
@@ -628,10 +770,20 @@ export const GrowthScreen: React.FC<GrowthScreenProps> = ({
                 </View>
                 <View>
                   <Text style={styles.platformName}>YouTube</Text>
-                  <Text style={styles.platformFollowers}>2.8k subs</Text>
+                  {!isNewUser && <Text style={styles.platformFollowers}>2.8k subs</Text>}
                 </View>
               </View>
-              <Text style={styles.platformGrowthGreen}>+1.1%  ▲</Text>
+              {isNewUser ? (
+                <Pressable
+                  style={({ pressed }) => [styles.connectPlatformSmallBtn, pressed && styles.btnPressed]}
+                  onPress={() => handleConnectSinglePlatform('youtube')}
+                  hitSlop={6}
+                >
+                  <Text style={styles.connectPlatformSmallBtnText}>Connect</Text>
+                </Pressable>
+              ) : (
+                <Text style={styles.platformGrowthGreen}>+1.1%  ▲</Text>
+              )}
             </View>
 
             {/* Connect more platforms */}
@@ -658,242 +810,205 @@ export const GrowthScreen: React.FC<GrowthScreenProps> = ({
             </Pressable>
           </View>
 
-          {/* 3. BEST PERFORMING POST HERO CARD */}
-          <View style={styles.sectionHeaderRow}>
-            <Text style={styles.sectionHeading}>BEST PERFORMING POST</Text>
-          </View>
-
-          <View style={styles.bestPostCard}>
-            <View style={styles.bestPostTopRow}>
-              <Image
-                source={require('../../assets/images/amara-portrait.jpg')}
-                style={styles.bestPostThumbnail}
-                resizeMode="cover"
-              />
-              <View style={styles.bestPostContent}>
-                <View style={styles.bestPostPlatformTag}>
-                  <Text style={styles.bestPostPlatformTagText}>TikTok · Video</Text>
-                </View>
-                <Text style={styles.bestPostTitle}>
-                  &ldquo;3 creator mistakes I stopped making this year&rdquo;
-                </Text>
-                <Text style={styles.bestPostStatsMeta}>
-                  14.2k views • 1.8k likes • 84 shares
-                </Text>
-              </View>
-            </View>
-
-            {/* Multi-Metric Performance Bars */}
-            <View style={styles.perfBarsList}>
-              <View style={styles.perfBarRow}>
-                <View style={styles.perfBarLabelRow}>
-                  <Text style={styles.perfBarLabel}>VIEWS</Text>
-                  <Text style={styles.perfBarValue}>
-                    14.2k <Text style={styles.perfBarComparison}>+42% vs avg</Text>
-                  </Text>
-                </View>
-                <View style={styles.perfBarTrack}>
-                  <View style={[styles.perfBarFill, { width: '85%', backgroundColor: '#6366F1' }]} />
-                </View>
+          {/* 3. BEST PERFORMING POST HERO CARD (RETURNING USERS ONLY) */}
+          {!isNewUser && (
+            <>
+              <View style={styles.sectionHeaderRow}>
+                <Text style={styles.sectionHeading}>BEST PERFORMING POST</Text>
               </View>
 
-              <View style={styles.perfBarRow}>
-                <View style={styles.perfBarLabelRow}>
-                  <Text style={styles.perfBarLabel}>AVG. WATCH TIME</Text>
-                  <Text style={styles.perfBarValue}>
-                    42s <Text style={styles.perfBarComparison}>+35% vs avg</Text>
-                  </Text>
-                </View>
-                <View style={styles.perfBarTrack}>
-                  <View style={[styles.perfBarFill, { width: '70%', backgroundColor: '#8B5CF6' }]} />
-                </View>
-              </View>
-
-              <View style={styles.perfBarRow}>
-                <View style={styles.perfBarLabelRow}>
-                  <Text style={styles.perfBarLabel}>SHARES</Text>
-                  <Text style={styles.perfBarValue}>
-                    84 <Text style={styles.perfBarCompGold}>(Top 5%)</Text>
-                  </Text>
-                </View>
-                <View style={styles.perfBarTrack}>
-                  <View style={[styles.perfBarFill, { width: '92%', backgroundColor: '#F59E0B' }]} />
-                </View>
-              </View>
-            </View>
-
-            {/* CTA Button */}
-            <Pressable
-              style={({ pressed }) => [styles.analyzeBtn, pressed && styles.btnPressed]}
-              onPress={() => {
-                if (Platform.OS !== 'web') {
-                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-                }
-                if (onOpenPostPerformance) {
-                  onOpenPostPerformance();
-                } else {
-                  triggerModalPop();
-                  setShowPostAnalysisModal(true);
-                }
-              }}
-            >
-              <LinearGradient
-                colors={['#6366F1', '#582CDB']}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 1 }}
-                style={styles.analyzeGradient}
-              >
-                <Text style={styles.analyzeBtnText}>Analyze Why It Worked</Text>
-              </LinearGradient>
-            </Pressable>
-          </View>
-
-          
-          {/* CREATOR EARNINGS & MONETIZATION ENTRY CARD */}
-          <View style={styles.earningsHubCard}>
-            <View style={styles.earningsHubHeader}>
-              <View style={styles.earningsHubHeaderLeft}>
-                <View style={styles.earningsHubTitleRow}>
-                  <Text style={styles.earningsHubTitle}>Creator Earnings</Text>
-                  <View style={styles.readinessTag}>
-                    <Text style={styles.readinessTagText}>70% CAMPAIGN READY</Text>
+              <View style={styles.bestPostCard}>
+                <View style={styles.bestPostTopRow}>
+                  <Image
+                    source={require('../../assets/images/amara-portrait.jpg')}
+                    style={styles.bestPostThumbnail}
+                    resizeMode="cover"
+                  />
+                  <View style={styles.bestPostContent}>
+                    <View style={styles.bestPostPlatformTag}>
+                      <Text style={styles.bestPostPlatformTagText}>TikTok · Video</Text>
+                    </View>
+                    <Text style={styles.bestPostTitle}>
+                      &ldquo;3 creator mistakes I stopped making this year&rdquo;
+                    </Text>
+                    <Text style={styles.bestPostStatsMeta}>
+                      14.2k views • 1.8k likes • 84 shares
+                    </Text>
                   </View>
                 </View>
-                <Text style={styles.earningsHubSub} numberOfLines={1}>Build your path to paid brand campaigns</Text>
+
+                {/* Multi-Metric Performance Bars */}
+                <View style={styles.perfBarsList}>
+                  <View style={styles.perfBarRow}>
+                    <View style={styles.perfBarLabelRow}>
+                      <Text style={styles.perfBarLabel}>VIEWS</Text>
+                      <Text style={styles.perfBarValue}>
+                        14.2k <Text style={styles.perfBarComparison}>+42% vs avg</Text>
+                      </Text>
+                    </View>
+                    <View style={styles.perfBarTrack}>
+                      <View style={[styles.perfBarFill, { width: '85%', backgroundColor: '#6366F1' }]} />
+                    </View>
+                  </View>
+
+                  <View style={styles.perfBarRow}>
+                    <View style={styles.perfBarLabelRow}>
+                      <Text style={styles.perfBarLabel}>AVG. WATCH TIME</Text>
+                      <Text style={styles.perfBarValue}>
+                        42s <Text style={styles.perfBarComparison}>+35% vs avg</Text>
+                      </Text>
+                    </View>
+                    <View style={styles.perfBarTrack}>
+                      <View style={[styles.perfBarFill, { width: '70%', backgroundColor: '#8B5CF6' }]} />
+                    </View>
+                  </View>
+
+                  <View style={styles.perfBarRow}>
+                    <View style={styles.perfBarLabelRow}>
+                      <Text style={styles.perfBarLabel}>SHARES</Text>
+                      <Text style={styles.perfBarValue}>
+                        84 <Text style={styles.perfBarCompGold}>(Top 5%)</Text>
+                      </Text>
+                    </View>
+                    <View style={styles.perfBarTrack}>
+                      <View style={[styles.perfBarFill, { width: '92%', backgroundColor: '#F59E0B' }]} />
+                    </View>
+                  </View>
+                </View>
+
+                {/* CTA Button */}
+                <Pressable
+                  style={({ pressed }) => [styles.analyzeBtn, pressed && styles.btnPressed]}
+                  onPress={() => {
+                    if (Platform.OS !== 'web') {
+                      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                    }
+                    if (onOpenPostPerformance) {
+                      onOpenPostPerformance();
+                    } else {
+                      triggerModalPop();
+                      setShowPostAnalysisModal(true);
+                    }
+                  }}
+                >
+                  <LinearGradient
+                    colors={['#6366F1', '#582CDB']}
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 1, y: 1 }}
+                    style={styles.analyzeGradient}
+                  >
+                    <Text style={styles.analyzeBtnText}>Analyze Why It Worked</Text>
+                  </LinearGradient>
+                </Pressable>
               </View>
-              <View style={styles.earningsHubIconCircle}>
-                <Text style={{ fontSize: 18 }}>💰</Text>
+            </>
+          )}
+
+          {/* 4. TOTAL POST REACH BREAKDOWN CARD (RETURNING USERS ONLY) */}
+          {!isNewUser && (
+            <View style={styles.reachCard}>
+              <View style={styles.reachHeaderRow}>
+                <View>
+                  <Text style={styles.reachHeaderLabel}>TOTAL POST REACH</Text>
+                  <Text style={styles.reachNumber}>24,850</Text>
+                </View>
+                <View style={styles.reachPercentPill}>
+                  <Text style={styles.reachPercentPillText}>+18%</Text>
+                </View>
               </View>
+
+              {/* Multi-Segment Distribution Bar */}
+              <View style={styles.distBarTrack}>
+                <View style={[styles.distBarSeg, { width: '65%', backgroundColor: '#171420' }]} />
+                <View style={[styles.distBarSeg, { width: '25%', backgroundColor: '#6366F1' }]} />
+                <View style={[styles.distBarSeg, { width: '10%', backgroundColor: '#EF4444' }]} />
+              </View>
+
+              {/* Legend */}
+              <View style={styles.legendRow}>
+                <View style={styles.legendItem}>
+                  <View style={[styles.legendDot, { backgroundColor: '#171420' }]} />
+                  <Text style={styles.legendText}>TikTok</Text>
+                  <Text style={styles.legendValue}>65%</Text>
+                </View>
+
+                <View style={styles.legendItem}>
+                  <View style={[styles.legendDot, { backgroundColor: '#6366F1' }]} />
+                  <Text style={styles.legendText}>Instagram</Text>
+                  <Text style={styles.legendValue}>25%</Text>
+                </View>
+
+                <View style={styles.legendItem}>
+                  <View style={[styles.legendDot, { backgroundColor: '#EF4444' }]} />
+                  <Text style={styles.legendText}>YouTube</Text>
+                  <Text style={styles.legendValue}>10%</Text>
+                </View>
+              </View>
+
+              <Pressable
+                style={({ pressed }) => [styles.seeAllReachLink, pressed && styles.btnPressed]}
+                onPress={() => {
+                  if (Platform.OS !== 'web') {
+                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                  }
+                  if (onOpenPlatformGrowth) {
+                    onOpenPlatformGrowth();
+                  } else {
+                    triggerModalPop();
+                    setShowAudienceModal(true);
+                  }
+                }}
+                hitSlop={6}
+              >
+                <Text style={styles.seeAllReachText}>View Full Analytics ➔</Text>
+              </Pressable>
             </View>
+          )}
 
-            <View style={styles.earningsHubStatsRow}>
-              <View style={styles.earningsHubStatCol}>
-                <Text style={styles.earningsHubStatLabel}>CURRENT BALANCE</Text>
-                <Text style={styles.earningsHubStatVal}>$0.00</Text>
-              </View>
-              <View style={styles.earningsHubDivider} />
-              <View style={styles.earningsHubStatCol}>
-                <Text style={styles.earningsHubStatLabel}>EST. POTENTIAL</Text>
-                <Text style={[styles.earningsHubStatVal, { color: '#582CDB' }]}>$1,420.50</Text>
-              </View>
-            </View>
-
-            <Pressable
-              style={({ pressed }) => [styles.earningsHubBtn, pressed && styles.btnPressed]}
-              onPress={() => {
-                if (Platform.OS !== 'web') {
-                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-                }
-                if (onOpenEarnings) {
-                  onOpenEarnings();
-                } else {
-                  showToast('Opening Creator Earnings...');
-                }
-              }}
-            >
-              <Text style={styles.earningsHubBtnText}>View Creator Earnings →</Text>
-            </Pressable>
-          </View>
-
-          {/* 4. TOTAL POST REACH BREAKDOWN CARD */}
-          <View style={styles.reachCard}>
-            <View style={styles.reachHeaderRow}>
-              <View>
-                <Text style={styles.reachHeaderLabel}>TOTAL POST REACH</Text>
-                <Text style={styles.reachNumber}>24,850</Text>
-              </View>
-              <View style={styles.reachPercentPill}>
-                <Text style={styles.reachPercentPillText}>+18%</Text>
-              </View>
-            </View>
-
-            {/* Multi-Segment Distribution Bar */}
-            <View style={styles.distBarTrack}>
-              <View style={[styles.distBarSeg, { width: '65%', backgroundColor: '#171420' }]} />
-              <View style={[styles.distBarSeg, { width: '25%', backgroundColor: '#6366F1' }]} />
-              <View style={[styles.distBarSeg, { width: '10%', backgroundColor: '#EF4444' }]} />
-            </View>
-
-            {/* Legend */}
-            <View style={styles.legendRow}>
-              <View style={styles.legendItem}>
-                <View style={[styles.legendDot, { backgroundColor: '#171420' }]} />
-                <Text style={styles.legendText}>TikTok</Text>
-                <Text style={styles.legendValue}>65%</Text>
+          {/* 5. FORMAT PERFORMANCE BAR CHART (RETURNING USERS ONLY) */}
+          {!isNewUser && (
+            <>
+              <View style={styles.sectionHeaderRow}>
+                <View>
+                  <Text style={styles.sectionHeading}>FORMAT PERFORMANCE</Text>
+                  <Text style={styles.sectionSubheading}>Average retention score by format</Text>
+                </View>
               </View>
 
-              <View style={styles.legendItem}>
-                <View style={[styles.legendDot, { backgroundColor: '#6366F1' }]} />
-                <Text style={styles.legendText}>Instagram</Text>
-                <Text style={styles.legendValue}>25%</Text>
+              <View style={styles.formatCard}>
+                <View style={styles.formatBarsContainer}>
+                  {/* Short Video */}
+                  <View style={styles.formatBarCol}>
+                    <Text style={styles.formatPercentLabel}>78%</Text>
+                    <View style={[styles.formatBarPillar, { height: 110, backgroundColor: '#6366F1' }]} />
+                    <Text style={styles.formatBarTitle}>Short Video</Text>
+                  </View>
+
+                  {/* Text/Thread */}
+                  <View style={styles.formatBarCol}>
+                    <Text style={styles.formatPercentLabel}>54%</Text>
+                    <View style={[styles.formatBarPillar, { height: 75, backgroundColor: '#C7D2FE' }]} />
+                    <Text style={styles.formatBarTitle}>Text/Thread</Text>
+                  </View>
+
+                  {/* Carousel */}
+                  <View style={styles.formatBarCol}>
+                    <Text style={styles.formatPercentLabel}>32%</Text>
+                    <View style={[styles.formatBarPillar, { height: 45, backgroundColor: '#E2E8F0' }]} />
+                    <Text style={styles.formatBarTitle}>Carousel</Text>
+                  </View>
+                </View>
+
+                {/* Insight Callout Box */}
+                <View style={styles.formatInsightBox}>
+                  <Text style={{ fontSize: 16 }}>💡</Text>
+                  <Text style={styles.formatInsightText}>
+                    Short Videos scored <Text style={{ fontWeight: '800', color: '#171420' }}>2.4× higher retention</Text> than static posts this week.
+                  </Text>
+                </View>
               </View>
-
-              <View style={styles.legendItem}>
-                <View style={[styles.legendDot, { backgroundColor: '#EF4444' }]} />
-                <Text style={styles.legendText}>YouTube</Text>
-                <Text style={styles.legendValue}>10%</Text>
-              </View>
-            </View>
-
-            <Pressable
-              style={({ pressed }) => [styles.seeAllReachLink, pressed && styles.btnPressed]}
-              onPress={() => {
-                if (Platform.OS !== 'web') {
-                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                }
-                if (onOpenPlatformGrowth) {
-                  onOpenPlatformGrowth();
-                } else {
-                  triggerModalPop();
-                  setShowAudienceModal(true);
-                }
-              }}
-              hitSlop={6}
-            >
-              <Text style={styles.seeAllReachText}>View Full Analytics ➔</Text>
-            </Pressable>
-          </View>
-
-          {/* 5. FORMAT PERFORMANCE BAR CHART */}
-          <View style={styles.sectionHeaderRow}>
-            <View>
-              <Text style={styles.sectionHeading}>FORMAT PERFORMANCE</Text>
-              <Text style={styles.sectionSubheading}>Average retention score by format</Text>
-            </View>
-          </View>
-
-          <View style={styles.formatCard}>
-            <View style={styles.formatBarsContainer}>
-              {/* Short Video */}
-              <View style={styles.formatBarCol}>
-                <Text style={styles.formatPercentLabel}>78%</Text>
-                <View style={[styles.formatBarPillar, { height: 110, backgroundColor: '#6366F1' }]} />
-                <Text style={styles.formatBarTitle}>Short Video</Text>
-              </View>
-
-              {/* Text/Thread */}
-              <View style={styles.formatBarCol}>
-                <Text style={styles.formatPercentLabel}>54%</Text>
-                <View style={[styles.formatBarPillar, { height: 75, backgroundColor: '#C7D2FE' }]} />
-                <Text style={styles.formatBarTitle}>Text/Thread</Text>
-              </View>
-
-              {/* Carousel */}
-              <View style={styles.formatBarCol}>
-                <Text style={styles.formatPercentLabel}>32%</Text>
-                <View style={[styles.formatBarPillar, { height: 45, backgroundColor: '#E2E8F0' }]} />
-                <Text style={styles.formatBarTitle}>Carousel</Text>
-              </View>
-            </View>
-
-            {/* Insight Callout Box */}
-            <View style={styles.formatInsightBox}>
-              <Text style={{ fontSize: 16 }}>💡</Text>
-              <Text style={styles.formatInsightText}>
-                Short Videos scored <Text style={{ fontWeight: '800', color: '#171420' }}>2.4× higher retention</Text> than static posts this week.
-              </Text>
-            </View>
-          </View>
+            </>
+          )}
 
           {/* 6. JARVIS GROWTH STRATEGY (LUXURY DARK NAVY) */}
           <View style={styles.jarvisStrategyCard}>
@@ -917,7 +1032,9 @@ export const GrowthScreen: React.FC<GrowthScreenProps> = ({
             </View>
 
             <Text style={styles.jarvisBodyQuote}>
-              &ldquo;Posts that deliver their main value within 4 seconds show your strongest retention. Double down on mistake-based hooks.&rdquo;
+              {isNewUser
+                ? '“Jarvis learns your patterns as you post — your first strategy tip shows up after a few Reels.”'
+                : '“Posts that deliver their main value within 4 seconds show your strongest retention. Double down on mistake-based hooks.”'}
             </Text>
 
             <Pressable
@@ -931,91 +1048,95 @@ export const GrowthScreen: React.FC<GrowthScreenProps> = ({
             </Pressable>
           </View>
 
-          {/* 7. MILESTONES SECTION */}
-          <View style={styles.sectionHeaderRow}>
-            <Text style={styles.sectionHeading}>MILESTONES</Text>
-          </View>
+          {/* 7. MILESTONES SECTION (RETURNING USERS ONLY) */}
+          {!isNewUser && (
+            <>
+              <View style={styles.sectionHeaderRow}>
+                <Text style={styles.sectionHeading}>MILESTONES</Text>
+              </View>
 
-          <View style={styles.milestonesList}>
-            {/* Milestone 1 */}
-            <View style={styles.milestoneCard}>
-              <View style={styles.milestoneTopRow}>
-                <View style={styles.milestoneLeft}>
-                  <View style={[styles.milestoneIconCircle, { backgroundColor: '#EDE9FE' }]}>
-                    <Text style={{ fontSize: 14 }}>⚡</Text>
+              <View style={styles.milestonesList}>
+                {/* Milestone 1 */}
+                <View style={styles.milestoneCard}>
+                  <View style={styles.milestoneTopRow}>
+                    <View style={styles.milestoneLeft}>
+                      <View style={[styles.milestoneIconCircle, { backgroundColor: '#EDE9FE' }]}>
+                        <Text style={{ fontSize: 14 }}>⚡</Text>
+                      </View>
+                      <View style={styles.milestoneTextCol}>
+                        <Text style={styles.milestoneTitle}>Reach 15K TikTok Followers</Text>
+                        <Text style={styles.milestoneSub}>14.2K / 15K · 800 to go</Text>
+                      </View>
+                    </View>
+                    <View style={styles.milestoneBadgePurple}>
+                      <Text style={styles.milestoneBadgePurpleText}>94.7%</Text>
+                    </View>
                   </View>
-                  <View style={styles.milestoneTextCol}>
-                    <Text style={styles.milestoneTitle}>Reach 15K TikTok Followers</Text>
-                    <Text style={styles.milestoneSub}>14.2K / 15K · 800 to go</Text>
+                  {/* Progress Bar */}
+                  <View style={styles.milestoneProgressTrack}>
+                    <View style={[styles.milestoneProgressFill, { width: '94.7%', backgroundColor: '#7C3AED' }]} />
                   </View>
                 </View>
-                <View style={styles.milestoneBadgePurple}>
-                  <Text style={styles.milestoneBadgePurpleText}>94.7%</Text>
-                </View>
-              </View>
-              {/* Progress Bar */}
-              <View style={styles.milestoneProgressTrack}>
-                <View style={[styles.milestoneProgressFill, { width: '94.7%', backgroundColor: '#7C3AED' }]} />
-              </View>
-            </View>
 
-            {/* Milestone 2 */}
-            <View style={styles.milestoneCard}>
-              <View style={styles.milestoneTopRow}>
-                <View style={styles.milestoneLeft}>
-                  <View style={[styles.milestoneIconCircle, { backgroundColor: '#FEF3C7' }]}>
-                    <Text style={{ fontSize: 14 }}>🏆</Text>
+                {/* Milestone 2 */}
+                <View style={styles.milestoneCard}>
+                  <View style={styles.milestoneTopRow}>
+                    <View style={styles.milestoneLeft}>
+                      <View style={[styles.milestoneIconCircle, { backgroundColor: '#FEF3C7' }]}>
+                        <Text style={{ fontSize: 14 }}>🏆</Text>
+                      </View>
+                      <View style={styles.milestoneTextCol}>
+                        <Text style={styles.milestoneTitle}>7-Day Consistency Challenge</Text>
+                        <Text style={styles.milestoneSub}>Day 7 of 7 · Goal met</Text>
+                      </View>
+                    </View>
+                    <View style={styles.milestoneBadgeGold}>
+                      <Text style={styles.completedGoldText}>Completed ✓</Text>
+                    </View>
                   </View>
-                  <View style={styles.milestoneTextCol}>
-                    <Text style={styles.milestoneTitle}>7-Day Consistency Challenge</Text>
-                    <Text style={styles.milestoneSub}>Day 7 of 7 · Goal met</Text>
+                  {/* Progress Bar */}
+                  <View style={styles.milestoneProgressTrack}>
+                    <View style={[styles.milestoneProgressFill, { width: '100%', backgroundColor: '#F59E0B' }]} />
                   </View>
                 </View>
-                <View style={styles.milestoneBadgeGold}>
-                  <Text style={styles.completedGoldText}>Completed ✓</Text>
-                </View>
-              </View>
-              {/* Progress Bar */}
-              <View style={styles.milestoneProgressTrack}>
-                <View style={[styles.milestoneProgressFill, { width: '100%', backgroundColor: '#F59E0B' }]} />
-              </View>
-            </View>
 
-            {/* Milestone 3 */}
-            <View style={styles.milestoneCard}>
-              <View style={styles.milestoneTopRow}>
-                <View style={styles.milestoneLeft}>
-                  <View style={[styles.milestoneIconCircle, { backgroundColor: '#FEE2E2' }]}>
-                    <Text style={{ fontSize: 14 }}>🎯</Text>
+                {/* Milestone 3 */}
+                <View style={styles.milestoneCard}>
+                  <View style={styles.milestoneTopRow}>
+                    <View style={styles.milestoneLeft}>
+                      <View style={[styles.milestoneIconCircle, { backgroundColor: '#FEE2E2' }]}>
+                        <Text style={{ fontSize: 14 }}>🎯</Text>
+                      </View>
+                      <View style={styles.milestoneTextCol}>
+                        <Text style={styles.milestoneTitle}>Post 3 Videos This Week</Text>
+                        <Text style={styles.milestoneSub}>2 / 3 posted · 1 remaining</Text>
+                      </View>
+                    </View>
+                    <Pressable
+                      style={({ pressed }) => [styles.postNowBtn, pressed && styles.btnPressed]}
+                      onPress={() => {
+                        if (Platform.OS !== 'web') {
+                          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                        }
+                        if (onNavigateTab) {
+                          onNavigateTab('create');
+                        } else {
+                          showToast('Opening Create Post...');
+                        }
+                      }}
+                      hitSlop={6}
+                    >
+                      <Text style={styles.postNowBtnText}>Post ➔</Text>
+                    </Pressable>
                   </View>
-                  <View style={styles.milestoneTextCol}>
-                    <Text style={styles.milestoneTitle}>Post 3 Videos This Week</Text>
-                    <Text style={styles.milestoneSub}>2 / 3 posted · 1 remaining</Text>
+                  {/* Progress Bar */}
+                  <View style={styles.milestoneProgressTrack}>
+                    <View style={[styles.milestoneProgressFill, { width: '66.7%', backgroundColor: '#DC2626' }]} />
                   </View>
                 </View>
-                <Pressable
-                  style={({ pressed }) => [styles.postNowBtn, pressed && styles.btnPressed]}
-                  onPress={() => {
-                    if (Platform.OS !== 'web') {
-                      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-                    }
-                    if (onNavigateTab) {
-                      onNavigateTab('create');
-                    } else {
-                      showToast('Opening Create Post...');
-                    }
-                  }}
-                  hitSlop={6}
-                >
-                  <Text style={styles.postNowBtnText}>Post ➔</Text>
-                </Pressable>
               </View>
-              {/* Progress Bar */}
-              <View style={styles.milestoneProgressTrack}>
-                <View style={[styles.milestoneProgressFill, { width: '66.7%', backgroundColor: '#DC2626' }]} />
-              </View>
-            </View>
-          </View>
+            </>
+          )}
 
           {/* 8. WEEKLY GROWTH REPORT */}
           <View style={styles.sectionHeaderRow}>
@@ -1031,53 +1152,61 @@ export const GrowthScreen: React.FC<GrowthScreenProps> = ({
                 </Svg>
               </View>
               <View style={{ flex: 1 }}>
-                <Text style={styles.reportTitle}>October 14 – 20 Report</Text>
+                <Text style={styles.reportTitle}>
+                  {isNewUser ? 'Weekly Growth Report' : 'October 14 – 20 Report'}
+                </Text>
                 <Text style={styles.reportSummary}>
-                  Your total impressions jumped 22%. Best day was Wednesday at 7:30 PM.
+                  {isNewUser
+                    ? 'Your first report arrives after 7 days of data.'
+                    : 'Your total impressions jumped 22%. Best day was Wednesday at 7:30 PM.'}
                 </Text>
               </View>
             </View>
 
-            {/* This week at a glance */}
-            <View style={styles.reportGlanceBox}>
-              <Text style={styles.reportGlanceTitle}>This week at a glance</Text>
-              <View style={styles.reportGlanceList}>
-                <View style={styles.reportGlanceItem}>
-                  <Text style={styles.reportGlanceIcon}>👀</Text>
-                  <Text style={styles.reportGlanceText}>Impressions <Text style={styles.reportGlanceBold}>↑ 22%</Text></Text>
+            {/* This week at a glance - only for returning users */}
+            {!isNewUser && (
+              <>
+                <View style={styles.reportGlanceBox}>
+                  <Text style={styles.reportGlanceTitle}>This week at a glance</Text>
+                  <View style={styles.reportGlanceList}>
+                    <View style={styles.reportGlanceItem}>
+                      <Text style={styles.reportGlanceIcon}>👀</Text>
+                      <Text style={styles.reportGlanceText}>Impressions <Text style={styles.reportGlanceBold}>↑ 22%</Text></Text>
+                    </View>
+                    <View style={styles.reportGlanceItem}>
+                      <Text style={styles.reportGlanceIcon}>👥</Text>
+                      <Text style={styles.reportGlanceText}>Followers <Text style={styles.reportGlanceBold}>↑ 14%</Text></Text>
+                    </View>
+                    <View style={styles.reportGlanceItem}>
+                      <Text style={styles.reportGlanceIcon}>🎥</Text>
+                      <Text style={styles.reportGlanceText}>Short videos performed <Text style={styles.reportGlanceBold}>2.4× better</Text></Text>
+                    </View>
+                    <View style={styles.reportGlanceItem}>
+                      <Text style={styles.reportGlanceIcon}>🕢</Text>
+                      <Text style={styles.reportGlanceText}>Best posting time <Text style={styles.reportGlanceBold}>Wed · 7:30 PM</Text></Text>
+                    </View>
+                  </View>
                 </View>
-                <View style={styles.reportGlanceItem}>
-                  <Text style={styles.reportGlanceIcon}>👥</Text>
-                  <Text style={styles.reportGlanceText}>Followers <Text style={styles.reportGlanceBold}>↑ 14%</Text></Text>
-                </View>
-                <View style={styles.reportGlanceItem}>
-                  <Text style={styles.reportGlanceIcon}>🎥</Text>
-                  <Text style={styles.reportGlanceText}>Short videos performed <Text style={styles.reportGlanceBold}>2.4× better</Text></Text>
-                </View>
-                <View style={styles.reportGlanceItem}>
-                  <Text style={styles.reportGlanceIcon}>🕢</Text>
-                  <Text style={styles.reportGlanceText}>Best posting time <Text style={styles.reportGlanceBold}>Wed · 7:30 PM</Text></Text>
-                </View>
-              </View>
-            </View>
 
-            <Pressable
-              style={styles.downloadReportLink}
-              onPress={() => {
-                if (Platform.OS !== 'web') {
-                  Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-                }
-                setCelebrationTitle('Report Exported!');
-                setCelebrationSubtitle('Your weekly PDF growth breakdown is ready to review.');
-                setCelebrationSpeech('Ghost says: You have maintained top 5% retention all week!');
-                setCelebrationBadge('PDF DOWNLOADED');
-                setCelebrationXp(30);
-                setShowCelebrationModal(true);
-              }}
-              hitSlop={6}
-            >
-              <Text style={styles.downloadReportText}>Download Weekly Report PDF ➔</Text>
-            </Pressable>
+                <Pressable
+                  style={styles.downloadReportLink}
+                  onPress={() => {
+                    if (Platform.OS !== 'web') {
+                      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+                    }
+                    setCelebrationTitle('Report Exported!');
+                    setCelebrationSubtitle('Your weekly PDF growth breakdown is ready to review.');
+                    setCelebrationSpeech('Ghost says: You have maintained top 5% retention all week!');
+                    setCelebrationBadge('PDF DOWNLOADED');
+                    setCelebrationXp(30);
+                    setShowCelebrationModal(true);
+                  }}
+                  hitSlop={6}
+                >
+                  <Text style={styles.downloadReportText}>Download Weekly Report PDF ➔</Text>
+                </Pressable>
+              </>
+            )}
           </View>
 
           {/* 9. UNLOCK DEEPER GROWTH ANALYTICS PRO CARD */}
@@ -1095,7 +1224,7 @@ export const GrowthScreen: React.FC<GrowthScreenProps> = ({
               </View>
               <View style={styles.proPillarItem}>
                 <Text style={styles.proPillarCheck}>🔒</Text>
-                <Text style={styles.proPillarText}>Cross-Creator Audience Insights</Text>
+                <Text style={styles.proPillarText}>Historical Trend Export</Text>
               </View>
             </View>
 
@@ -1271,7 +1400,7 @@ export const GrowthScreen: React.FC<GrowthScreenProps> = ({
 
               <View style={[styles.modalActionItemCard, { marginTop: 10 }]}>
                 <View style={styles.modalActionContent}>
-                  <Text style={styles.modalDetailTitle}>🤝 Action 2: Squad Collab</Text>
+                  <Text style={styles.modalDetailTitle}>🤝 Action 2: Challenge Quest</Text>
                   <Text style={styles.modalDetailBody}>
                     Join 7-Day Consistency Challenge
                   </Text>
@@ -1280,14 +1409,10 @@ export const GrowthScreen: React.FC<GrowthScreenProps> = ({
                   style={({ pressed }) => [styles.modalActionMiniBtn, pressed && styles.btnPressed]}
                   onPress={() => {
                     setShowStrategyModal(false);
-                    if (onOpenSquad) {
-                      onOpenSquad();
-                    } else if (onOpenFindSquad) {
-                      onOpenFindSquad();
-                    } else if (onNavigateTab) {
-                      onNavigateTab('match');
+                    if (onNavigateTab) {
+                      onNavigateTab('quests');
                     } else {
-                      showToast('Opening Creator Squad...');
+                      showToast('Opening Quests...');
                     }
                   }}
                   hitSlop={6}
@@ -1530,36 +1655,6 @@ export const GrowthScreen: React.FC<GrowthScreenProps> = ({
           onSaveProfile={onSaveProfile}
         />
 
-        {/* CHAT MODAL */}
-        <Modal
-          visible={showChatModal}
-          transparent={true}
-          animationType="fade"
-          onRequestClose={() => setShowChatModal(false)}
-        >
-          <View style={styles.modalOverlay}>
-            <Animated.View style={[styles.modalCard, { transform: [{ scale: modalPopScale }] }]}>
-              <View style={styles.modalHeaderRow}>
-                <View>
-                  <Text style={styles.modalTitle}>Squad Chat</Text>
-                  <Text style={styles.modalSubtitle}>Collaborate with your creator squad</Text>
-                </View>
-                <Pressable onPress={() => setShowChatModal(false)} style={styles.modalCloseCircle} hitSlop={8}>
-                  <Text style={styles.modalCloseCross}>✕</Text>
-                </Pressable>
-              </View>
-
-              <View style={styles.chatCard}>
-                <Text style={{ fontSize: 12, fontWeight: '800', color: '#582CDB', marginBottom: 2 }}>🤖 Jarvis Assistant</Text>
-                <Text style={{ fontSize: 13, color: '#334155' }}>Your engagement scored in the top 5% among tech creators!</Text>
-              </View>
-
-              <Pressable style={styles.modalFullBtn} onPress={() => setShowChatModal(false)}>
-                <Text style={styles.modalFullBtnText}>Close</Text>
-              </Pressable>
-            </Animated.View>
-          </View>
-        </Modal>
         {/* TOAST BANNER */}
         <BrandToast message={toastMessage} />
       </View>
@@ -1683,10 +1778,11 @@ const styles = StyleSheet.create({
 
   // HEADLINE
   mainHeading: {
-    fontSize: Platform.OS === 'web' ? ('clamp(18px, 4.5vw, 22px)' as any) : sFont(20),
+    fontSize: Platform.OS === 'web' ? ('clamp(15px, 3.8vw, 17px)' as any) : sFont(16),
     fontWeight: '700',
     color: '#171420',
     letterSpacing: -0.35,
+    lineHeight: 22,
     marginBottom: 4,
   },
   mainSubtitle: {
@@ -1710,6 +1806,58 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.05,
     shadowRadius: 16,
     elevation: 3,
+  },
+  audienceEmptyContainer: {
+    paddingVertical: 4,
+  },
+  audienceEmptyHeadline: {
+    fontSize: 24,
+    fontWeight: '800',
+    color: '#171420',
+    letterSpacing: -0.4,
+    marginTop: 4,
+    marginBottom: 4,
+  },
+  audienceEmptySubtext: {
+    fontSize: 13,
+    color: '#64748B',
+    lineHeight: 18,
+    marginBottom: 18,
+  },
+  connectAccountBtn: {
+    borderRadius: 100,
+    overflow: 'hidden',
+    shadowColor: '#582CDB',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.12,
+    shadowRadius: 8,
+    elevation: 3,
+  },
+  connectAccountGradient: {
+    paddingVertical: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 100,
+  },
+  connectAccountBtnText: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: '#FFFFFF',
+    letterSpacing: -0.2,
+  },
+  connectPlatformSmallBtn: {
+    backgroundColor: '#FAF5FF',
+    borderWidth: 1,
+    borderColor: '#E9D5FF',
+    paddingVertical: 5,
+    paddingHorizontal: 14,
+    borderRadius: 100,
+    flexShrink: 0,
+  },
+  connectPlatformSmallBtnText: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#582CDB',
   },
   audienceHeaderRow: {
     flexDirection: 'row',

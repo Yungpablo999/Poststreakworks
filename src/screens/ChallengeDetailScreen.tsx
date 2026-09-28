@@ -35,7 +35,6 @@ interface ChallengeDetailScreenProps {
   onBackToDashboard?: () => void;
   onNavigateTab?: (tab: TabType) => void;
   onLogout?: () => void;
-  onOpenMessages?: () => void;
   onOpenJarvisPro?: () => void;
   onOpenComposer?: (idea?: string, platform?: string, questDraft?: QuestScriptDraft) => void;
   userProfile?: UserProfileData;
@@ -102,7 +101,6 @@ export const ChallengeDetailScreen: React.FC<ChallengeDetailScreenProps> = ({
   onBackToDashboard,
   onNavigateTab,
   onLogout,
-  onOpenMessages,
   onOpenJarvisPro,
   onOpenComposer,
   userProfile,
@@ -309,13 +307,6 @@ export const ChallengeDetailScreen: React.FC<ChallengeDetailScreenProps> = ({
         <FreeAppHeader
           onBack={onBackToDashboard}
           onOpenJarvisPro={onOpenJarvisPro}
-          onOpenMessages={() => {
-            if (onOpenMessages) {
-              onOpenMessages();
-            } else {
-              showToast('💬 Creator Chat: 2 unread collab messages');
-            }
-          }}
           onOpenNotifications={() => {
             triggerModalPop();
             setShowNotificationsModal(true);

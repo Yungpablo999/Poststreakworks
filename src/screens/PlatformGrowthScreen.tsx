@@ -103,9 +103,7 @@ interface PlatformGrowthScreenProps {
   onBack: () => void;
   onNavigateTab?: (tab: TabType) => void;
   onOpenJarvisPro?: () => void;
-  onOpenMessages?: () => void;
   onOpenSchedule?: () => void;
-  onOpenEarnings?: () => void;
   onOpenComposer?: (ideaTitle?: string) => void;
   onOpenScript?: (ideaTitle?: string) => void;
   onOpenContentAngle?: () => void;
@@ -118,9 +116,7 @@ export const PlatformGrowthScreen: React.FC<PlatformGrowthScreenProps> = ({
   onBack,
   onNavigateTab,
   onOpenJarvisPro,
-  onOpenMessages,
   onOpenSchedule,
-  onOpenEarnings,
   onOpenComposer,
   onOpenScript,
   onOpenContentAngle,
@@ -259,13 +255,6 @@ export const PlatformGrowthScreen: React.FC<PlatformGrowthScreenProps> = ({
         <FreeAppHeader
           onBack={onBack}
           onOpenJarvisPro={onOpenJarvisPro}
-          onOpenMessages={() => {
-            if (onOpenMessages) {
-              onOpenMessages();
-            } else if (onNavigateTab) {
-              onNavigateTab('match');
-            }
-          }}
           onOpenNotifications={() => {
             triggerModalPop();
             setShowNotificationModal(true);
@@ -291,9 +280,7 @@ export const PlatformGrowthScreen: React.FC<PlatformGrowthScreenProps> = ({
           </View>
           <Text
             style={styles.mainTitle}
-            numberOfLines={1}
-            adjustsFontSizeToFit={true}
-            minimumFontScale={0.85}
+            numberOfLines={2}
           >
             See which platforms are growing.
           </Text>
@@ -1202,10 +1189,11 @@ const styles = StyleSheet.create({
     letterSpacing: 0.5,
   },
   mainTitle: {
-    fontSize: Platform.OS === 'web' ? ('clamp(18px, 4.5vw, 22px)' as any) : sFont(20),
+    fontSize: Platform.OS === 'web' ? ('clamp(15px, 3.8vw, 17px)' as any) : sFont(16),
     fontWeight: '700',
     color: '#171420',
     letterSpacing: -0.35,
+    lineHeight: 22,
     marginBottom: 4,
   },
   mainSubtitle: {

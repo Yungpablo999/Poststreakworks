@@ -1972,10 +1972,7 @@ export const ProRepurposeScreen: React.FC<ProRepurposeScreenProps> = ({
         onTabPress={(tab: TabType) => {
           if (onNavigate) {
             if (tab === 'home') onNavigate('dashboard');
-            else if (tab === 'create') onNavigate('create');
-            else if (tab === 'match') onNavigate('match');
-            else if (tab === 'quests') onNavigate('quests');
-            else if (tab === 'growth') onNavigate('growth');
+            else onNavigate(tab);
           }
         }}
       />

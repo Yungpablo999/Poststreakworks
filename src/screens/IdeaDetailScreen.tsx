@@ -28,7 +28,6 @@ interface IdeaDetailScreenProps {
   onBack: () => void;
   onLogout?: () => void;
   onOpenSchedule?: () => void;
-  onOpenMessages?: () => void;
   onOpenJarvisPro?: () => void;
   onNavigateTab?: (tab: TabType) => void;
   onOpenPostComposer?: (ideaTitle?: string) => void;
@@ -61,7 +60,7 @@ const NOTIFICATIONS: NotificationItem[] = [
   {
     id: 'n2',
     title: 'Streak Saver Ready',
-    body: "Convert today's idea into a post to keep your 1-day streak.",
+    body: "Convert today's idea into a post to kick off your creator streak.",
     time: '2h ago',
     unread: true,
     iconEmoji: '🔥',
@@ -88,7 +87,6 @@ export const IdeaDetailScreen: React.FC<IdeaDetailScreenProps> = ({
   onBack,
   onLogout,
   onOpenSchedule,
-  onOpenMessages,
   onOpenJarvisPro,
   onNavigateTab,
   onOpenPostComposer,
@@ -111,7 +109,6 @@ export const IdeaDetailScreen: React.FC<IdeaDetailScreenProps> = ({
   const [showScheduleModal, setShowScheduleModal] = useState(false);
   const [showNotificationModal, setShowNotificationModal] = useState(false);
   const [showProfileModal, setShowProfileModal] = useState(false);
-  const [showChatModal, setShowChatModal] = useState(false);
   const [showCelebrationModal, setShowCelebrationModal] = useState(false);
   const [celebrationTitle, setCelebrationTitle] = useState('Idea Ready!');
   const [celebrationSubtitle, setCelebrationSubtitle] = useState('Your post draft has been saved & added to your queue.');
@@ -233,7 +230,7 @@ export const IdeaDetailScreen: React.FC<IdeaDetailScreenProps> = ({
     } else {
       setCelebrationTitle('Draft Created!');
       setCelebrationSubtitle(`"${ideaTitle}" is now ready in your drafts queue with full hook & caption.`);
-      setCelebrationSpeech('1-day streak protected! Keep this momentum going.');
+      setCelebrationSpeech('Day 1 draft ready! Keep this momentum going.');
       setShowCelebrationModal(true);
     }
   };
@@ -268,14 +265,6 @@ export const IdeaDetailScreen: React.FC<IdeaDetailScreenProps> = ({
         <FreeAppHeader
           onBack={onBack}
           onOpenJarvisPro={onOpenJarvisPro}
-          onOpenMessages={() => {
-            if (onOpenMessages) {
-              onOpenMessages();
-            } else {
-              triggerModalAnim();
-              setShowChatModal(true);
-            }
-          }}
           onOpenNotifications={() => {
             triggerModalAnim();
             setShowNotificationModal(true);
@@ -312,7 +301,12 @@ export const IdeaDetailScreen: React.FC<IdeaDetailScreenProps> = ({
           </View>
 
           {/* Main Title & Subtitle */}
-          <Text style={styles.mainTitle}>Turn this idea into your next post.</Text>
+          <Text
+            style={styles.mainTitle}
+            numberOfLines={2}
+          >
+            Turn this idea into your next post.
+          </Text>
           <Text style={styles.mainSubtitle}>
             Use this streak-saving idea to create content your audience can connect with.
           </Text>
@@ -893,46 +887,6 @@ export const IdeaDetailScreen: React.FC<IdeaDetailScreenProps> = ({
           onSaveProfile={onSaveProfile}
         />
 
-        {/* MODAL 5: CREATOR CHAT */}
-        <Modal
-          visible={showChatModal}
-          transparent={true}
-          animationType="fade"
-          onRequestClose={() => setShowChatModal(false)}
-        >
-          <View style={styles.modalOverlay}>
-            <Animated.View style={[styles.modalCard, { transform: [{ scale: modalPopScale }] }]}>
-              <View style={styles.modalHeaderRow}>
-                <View>
-                  <Text style={styles.modalTitle}>Jarvis AI Chat</Text>
-                  <Text style={styles.modalSubtitle}>Real-time creative assistant</Text>
-                </View>
-                <Pressable
-                  onPress={() => setShowChatModal(false)}
-                  style={styles.modalCloseCircle}
-                  hitSlop={8}
-                >
-                  <Text style={styles.modalCloseCross}>✕</Text>
-                </Pressable>
-              </View>
-
-              <View style={styles.chatCard}>
-                <Text style={styles.chatSpeaker}>Jarvis AI</Text>
-                <Text style={styles.chatMsg}>
-                  I analyzed your niche reach. This idea &ldquo;{ideaTitle}&rdquo; has strong viral retention potential on TikTok &amp; Reels!
-                </Text>
-              </View>
-
-              <Pressable
-                style={styles.modalFullBtn}
-                onPress={() => setShowChatModal(false)}
-              >
-                <Text style={styles.modalFullBtnText}>Close Chat</Text>
-              </Pressable>
-            </Animated.View>
-          </View>
-        </Modal>
-
         {/* SIGNATURE ANIMATED GHOST CELEBRATION MODAL */}
         <AnimatedCompletionModal
           visible={showCelebrationModal}
@@ -1085,10 +1039,11 @@ const styles = StyleSheet.create({
   },
 
   mainTitle: {
-    fontSize: Platform.OS === 'web' ? ('clamp(18px, 4.5vw, 22px)' as any) : sFont(20),
+    fontSize: Platform.OS === 'web' ? ('clamp(15px, 3.8vw, 17px)' as any) : sFont(16),
     fontWeight: '700',
     color: '#171420',
     letterSpacing: -0.35,
+    lineHeight: 22,
     marginBottom: 4,
     marginTop: 4,
   },

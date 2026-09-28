@@ -4,9 +4,10 @@ import { LinearGradient } from 'expo-linear-gradient';
 
 interface BrandToastProps {
   message: string | null;
+  bottom?: number;
 }
 
-export const BrandToast: React.FC<BrandToastProps> = ({ message }) => {
+export const BrandToast: React.FC<BrandToastProps> = ({ message, bottom = 102 }) => {
   const translateY = useRef(new Animated.Value(20)).current;
   const opacity = useRef(new Animated.Value(0)).current;
   const scale = useRef(new Animated.Value(0.9)).current;
@@ -59,6 +60,7 @@ export const BrandToast: React.FC<BrandToastProps> = ({ message }) => {
       style={[
         styles.toastWrapper,
         {
+          bottom,
           opacity,
           transform: [{ translateY }, { scale }],
         },
@@ -80,14 +82,14 @@ export const BrandToast: React.FC<BrandToastProps> = ({ message }) => {
 const styles = StyleSheet.create({
   toastWrapper: {
     position: 'absolute',
-    bottom: 102,
     alignSelf: 'center',
-    zIndex: 99999,
+    maxWidth: '92%',
+    zIndex: 999999,
     shadowColor: '#582CDB',
     shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.12,
+    shadowOpacity: 0.18,
     shadowRadius: 14,
-    elevation: 12,
+    elevation: 20,
   },
   toastGradientCapsule: {
     flexDirection: 'row',
@@ -100,9 +102,10 @@ const styles = StyleSheet.create({
   },
   toastText: {
     color: '#FFFFFF',
-    fontSize: 12.5,
+    fontSize: 12,
     fontWeight: '700',
     letterSpacing: 0.2,
     textAlign: 'center',
+    lineHeight: 16,
   },
 });

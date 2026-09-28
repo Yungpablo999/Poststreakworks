@@ -20,6 +20,7 @@ import { FloatingTabBar, TabType } from '../components/FloatingTabBar';
 import { UserProfileModal, UserProfileData } from '../components/UserProfileModal';
 import { AnimatedCompletionModal } from '../components/AnimatedCompletionModal';
 import { FreeAppHeader } from '../components/FreeAppHeader';
+import { UserPersona } from '../components/HeaderDualModePills';
 import { sFont, sPadding, moderateScale, isNarrowScreen } from '../utils/responsive';
 
 const SCHEDULE_DATE_OPTIONS = (() => {
@@ -109,6 +110,10 @@ interface CreateScreenProps {
   onOpenCaption?: (ideaTitle?: string) => void;
   onOpenRepurpose?: (ideaTitle?: string) => void;
   onOpenMessages?: () => void;
+  userPersona?: UserPersona;
+  onTogglePersona?: () => void;
+  onSwitchToPro?: () => void;
+  onSwitchToFree?: () => void;
   userProfile?: UserProfileData;
   onSaveProfile?: (updated: UserProfileData) => void;
 }
@@ -132,7 +137,7 @@ interface NotificationItem {
   badgeBorder: string;
 }
 
-const INITIAL_DRAFTS: DraftItem[] = [
+const RETURNING_DRAFTS: DraftItem[] = [
   {
     id: 'draft_1',
     title: '3 mistakes new creators make',
@@ -149,6 +154,8 @@ const INITIAL_DRAFTS: DraftItem[] = [
   },
 ];
 
+const INITIAL_DRAFTS: DraftItem[] = [];
+
 const TRENDING_IDEAS = [
   'One thing I wish I knew before I started creating.',
   '3 creator tools that saved me 10 hours this week.',
@@ -159,8 +166,8 @@ const TRENDING_IDEAS = [
 const NOTIFICATIONS: NotificationItem[] = [
   {
     id: 'notif_1',
-    title: '🔥 Streak Protected!',
-    body: 'Your 1-day creator streak is safe for today.',
+    title: '🔥 Daily Habit Active',
+    body: 'Kick off your daily creator streak today.',
     time: '10m ago',
     unread: true,
     iconEmoji: '🔥',
@@ -179,11 +186,11 @@ const NOTIFICATIONS: NotificationItem[] = [
   },
   {
     id: 'notif_3',
-    title: '🤝 Elena liked your draft',
-    body: 'Elena left feedback on "3 creator mistakes I stopped making".',
+    title: '✨ Studio Draft Autosaved',
+    body: 'Your draft "3 creator mistakes I stopped making" is saved and ready.',
     time: '5h ago',
     unread: false,
-    iconEmoji: '💬',
+    iconEmoji: '📝',
     badgeBg: 'rgba(241, 245, 249, 0.9)',
     badgeBorder: '#E2E8F0',
   },
@@ -330,13 +337,20 @@ export const CreateScreen: React.FC<CreateScreenProps> = ({
   onOpenIdeaAngle,
   onOpenScript,
   onOpenCaption,
+  onOpenRepurpose,
   onOpenMessages,
-
+  userPersona,
+  onTogglePersona,
+  onSwitchToPro,
+  onSwitchToFree,
   userProfile,
-  onSaveProfile,}) => {
+  onSaveProfile,
+}) => {
   const isDark = false;
+  const isNewUser = (userPersona || userProfile?.userPersona || 'new') === 'new';
   const [activeTab, setActiveTab] = useState<TabType>('create');
   const [drafts, setDrafts] = useState<DraftItem[]>(INITIAL_DRAFTS);
+  const displayedDrafts = isNewUser ? drafts : (drafts.length > 0 ? drafts : RETURNING_DRAFTS);
   const [notificationsList, setNotificationsList] = useState<NotificationItem[]>(NOTIFICATIONS);
 
   // Modal Visibility States
@@ -452,6 +466,15 @@ export const CreateScreen: React.FC<CreateScreenProps> = ({
     }
   };
 
+  const openRepurpose = () => {
+    if (Platform.OS !== 'web') {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    }
+    if (onOpenRepurpose) {
+      onOpenRepurpose('3 mistakes new creators make');
+    }
+  };
+
   const openDraft = (draft: DraftItem) => {
     setSelectedDraft(draft);
     if (onOpenPostComposer) {
@@ -557,8 +580,11 @@ export const CreateScreen: React.FC<CreateScreenProps> = ({
       <View style={[styles.container, isDark && { backgroundColor: '#0C0A12' }]}>
         {/* 1. TOP AIRY HEADER BAR */}
         <FreeAppHeader
+          onSwitchToPro={onSwitchToPro}
+          onSwitchToFree={onSwitchToFree}
+          onTogglePersona={onTogglePersona}
+          userPersona={userPersona || userProfile?.userPersona}
           onOpenJarvisPro={onOpenJarvisPro}
-          onOpenMessages={openChat}
           onOpenNotifications={openNotifications}
           onOpenProfile={openProfile}
           userProfile={userProfile}
@@ -588,10 +614,12 @@ export const CreateScreen: React.FC<CreateScreenProps> = ({
             </View>
           </View>
 
-          {/* HEADLINE & SUBTITLE */}
-          <Text style={styles.mainHeading}>Create your next post.</Text>
-          <Text style={styles.mainSubtitle}>
-            Turn one idea into content your audience wants to see.
+          {/* HEADLINE */}
+          <Text
+            style={styles.mainHeading}
+            numberOfLines={2}
+          >
+            Create your next post.
           </Text>
 
           {/* 1. HERO STREAK SAVER CARD */}
@@ -599,12 +627,11 @@ export const CreateScreen: React.FC<CreateScreenProps> = ({
             <View style={styles.streakHeaderRow}>
               <View style={styles.streakLeftGroup}>
                 <View style={styles.flameIconCircle}>
-                  <Text style={styles.flameEmoji}>🔥</Text>
+                  <Text style={styles.flameEmoji}>💡</Text>
                 </View>
                 <View style={styles.streakTitlesContainer}>
-                  <Text style={styles.streakSaverTag} numberOfLines={1}>STREAK SAVER</Text>
                   <Text style={styles.streakDaysTitle} numberOfLines={1}>
-                    {userProfile?.streakCount || 1}-day streak · Active
+                    Your first idea
                   </Text>
                 </View>
               </View>
@@ -647,7 +674,7 @@ export const CreateScreen: React.FC<CreateScreenProps> = ({
               <LinearGradient
                 colors={['#6366F1', '#582CDB']}
                 start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 1 }}
+                end={{ x: 1, y: 0 }}
                 style={styles.useIdeaGradient}
               >
                 <Text style={styles.useIdeaBtnText}>Use This Idea ➔</Text>
@@ -672,7 +699,7 @@ export const CreateScreen: React.FC<CreateScreenProps> = ({
             <View style={styles.jarvisSuggestionContent}>
               <Text style={styles.jarvisSuggestionTitle}>Jarvis Suggestion</Text>
               <Text style={styles.jarvisSuggestionText}>
-                Your audience is responding well to creator lessons. Try turning today&rsquo;s idea into a short, personal story.
+                Jarvis learns your style as you post &mdash; this gets sharper after your first few Reels.
               </Text>
             </View>
           </View>
@@ -755,7 +782,67 @@ export const CreateScreen: React.FC<CreateScreenProps> = ({
             </Pressable>
           </View>
 
-          {/* 4. SCHEDULED POSTS CARD (3 posts scheduled) */}
+          {/* 3.5 REPURPOSE SPOTLIGHT BANNER */}
+          <Pressable
+            style={({ pressed }) => [styles.repurposeBannerCard, pressed && styles.btnPressed]}
+            onPress={openRepurpose}
+          >
+            <View style={styles.repurposeBannerLeft}>
+              <View style={styles.repurposeIconBox}>
+                <Svg width={20} height={20} viewBox="0 0 24 24" fill="none">
+                  <Path
+                    d="M21 2v6h-6"
+                    stroke="#582CDB"
+                    strokeWidth="2.2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                  <Path
+                    d="M3 12a9 9 0 0 1 15-6.7L21 8"
+                    stroke="#582CDB"
+                    strokeWidth="2.2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                  <Path
+                    d="M3 22v-6h6"
+                    stroke="#582CDB"
+                    strokeWidth="2.2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                  <Path
+                    d="M21 12a9 9 0 0 1-15 6.7L3 16"
+                    stroke="#582CDB"
+                    strokeWidth="2.2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </Svg>
+              </View>
+              <View style={styles.repurposeBannerContent}>
+                <View style={styles.repurposeTitleRow}>
+                  <Text style={styles.repurposeBannerTitle}>Repurpose</Text>
+                  <LinearGradient
+                    colors={['#10B981', '#059669']}
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 1, y: 1 }}
+                    style={styles.repurposeLimitBadge}
+                  >
+                    <Text style={styles.repurposeLimitBadgeText}>2 free/mo</Text>
+                  </LinearGradient>
+                </View>
+                <Text style={styles.repurposeBannerSubtitle} numberOfLines={1}>
+                  Turn one asset into multiple formats
+                </Text>
+              </View>
+            </View>
+            <View style={styles.repurposeActionBtn}>
+              <Text style={styles.repurposeActionText}>Try Free ➔</Text>
+            </View>
+          </Pressable>
+
+          {/* 4. SCHEDULED POSTS CARD (Empty State) */}
           <Pressable
             style={({ pressed }) => [styles.scheduledBannerCard, pressed && styles.btnPressed]}
             onPress={handleOpenScheduleView}
@@ -768,8 +855,10 @@ export const CreateScreen: React.FC<CreateScreenProps> = ({
                 </Svg>
               </View>
               <View style={styles.scheduledTextGroup}>
-                <Text style={styles.scheduledTitle} numberOfLines={1}>3 posts scheduled</Text>
-                <Text style={styles.scheduledSub} numberOfLines={1}>Next: Tomorrow at 11:30 AM</Text>
+                <Text style={styles.scheduledTitle} numberOfLines={1}>No posts scheduled yet</Text>
+                <Text style={styles.scheduledSub} numberOfLines={2}>
+                  Plan your first post once you&rsquo;ve picked an idea above
+                </Text>
               </View>
             </View>
 
@@ -781,35 +870,45 @@ export const CreateScreen: React.FC<CreateScreenProps> = ({
           {/* 5. YOUR DRAFTS SECTION */}
           <View style={styles.draftsHeaderRow}>
             <Text style={styles.draftsSectionTitle}>Your Drafts</Text>
-            <Pressable onPress={openAllDrafts} hitSlop={6}>
-              <Text style={styles.viewAllDraftsLink}>View all drafts</Text>
-            </Pressable>
+            {displayedDrafts.length > 0 && (
+              <Pressable onPress={openAllDrafts} hitSlop={6}>
+                <Text style={styles.viewAllDraftsLink}>View all drafts</Text>
+              </Pressable>
+            )}
           </View>
 
           <View style={styles.draftsList}>
-            {drafts.map((draft) => (
-              <Pressable
-                key={draft.id}
-                style={({ pressed }) => [styles.draftCard, pressed && styles.btnPressed]}
-                onPress={() => openDraft(draft)}
-              >
-                <Image source={draft.imageSource} style={styles.draftThumbnail} resizeMode="cover" />
-                <View style={styles.draftContentCol}>
-                  <Text style={styles.draftTitle} numberOfLines={2}>
-                    {draft.title}
-                  </Text>
-                  <Text style={styles.draftMeta}>
-                    {draft.platform === 'TikTok' ? '💬' : '📷'} {draft.platform} • {draft.editedTime}
-                  </Text>
-                </View>
+            {displayedDrafts.length === 0 ? (
+              <View style={styles.draftsEmptyCard}>
+                <Text style={styles.draftsEmptyText}>
+                  No drafts yet &mdash; start with New Post or Ideas above.
+                </Text>
+              </View>
+            ) : (
+              displayedDrafts.map((draft) => (
                 <Pressable
-                  hitSlop={8}
+                  key={draft.id}
+                  style={({ pressed }) => [styles.draftCard, pressed && styles.btnPressed]}
                   onPress={() => openDraft(draft)}
                 >
-                  <Text style={styles.draftMoreDots}>⋮</Text>
+                  <Image source={draft.imageSource} style={styles.draftThumbnail} resizeMode="cover" />
+                  <View style={styles.draftContentCol}>
+                    <Text style={styles.draftTitle} numberOfLines={2}>
+                      {draft.title}
+                    </Text>
+                    <Text style={styles.draftMeta}>
+                      {draft.platform === 'TikTok' ? '💬' : '📷'} {draft.platform} • {draft.editedTime}
+                    </Text>
+                  </View>
+                  <Pressable
+                    hitSlop={8}
+                    onPress={() => openDraft(draft)}
+                  >
+                    <Text style={styles.draftMoreDots}>⋮</Text>
+                  </Pressable>
                 </Pressable>
-              </Pressable>
-            ))}
+              ))
+            )}
           </View>
 
           {/* 6. VOICE STUDIO PRO CARD */}
@@ -1638,11 +1737,12 @@ const styles = StyleSheet.create({
 
   // HEADLINE
   mainHeading: {
-    fontSize: Platform.OS === 'web' ? ('clamp(18px, 4.5vw, 22px)' as any) : sFont(20),
+    fontSize: Platform.OS === 'web' ? ('clamp(15px, 3.8vw, 17px)' as any) : sFont(16),
     fontWeight: '700',
     color: '#171420',
     letterSpacing: -0.35,
-    marginBottom: 4,
+    lineHeight: 22,
+    marginBottom: 16,
   },
   mainSubtitle: {
     fontSize: 14,
@@ -1836,7 +1936,7 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
     justifyContent: 'space-between',
     rowGap: 10,
-    marginBottom: 18,
+    marginBottom: 14,
     width: '100%',
   },
   toolGridCard: {
@@ -1875,6 +1975,91 @@ const styles = StyleSheet.create({
     fontSize: sFont(11),
     color: '#5E576E',
     fontWeight: '400',
+  },
+
+  // 3.5 REPURPOSE SPOTLIGHT BANNER
+  repurposeBannerCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 18,
+    borderWidth: 1,
+    borderColor: 'rgba(88, 44, 219, 0.12)',
+    padding: sPadding(14),
+    marginBottom: 18,
+    shadowColor: '#171420',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.03,
+    shadowRadius: 8,
+    elevation: 2,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 12,
+  },
+  repurposeBannerLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    flex: 1,
+    minWidth: 0,
+  },
+  repurposeIconBox: {
+    width: 38,
+    height: 38,
+    borderRadius: 11,
+    backgroundColor: '#EDE9FE',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: 'rgba(88, 44, 219, 0.08)',
+  },
+  repurposeBannerContent: {
+    flex: 1,
+    minWidth: 0,
+  },
+  repurposeTitleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginBottom: 2,
+  },
+  repurposeBannerTitle: {
+    fontSize: sFont(14),
+    fontWeight: '700',
+    color: '#171420',
+  },
+  repurposeLimitBadge: {
+    paddingHorizontal: 7,
+    paddingVertical: 2.5,
+    borderRadius: 100,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 0.5,
+    borderColor: '#34D399',
+  },
+  repurposeLimitBadgeText: {
+    fontWeight: '800',
+    fontSize: sFont(9),
+    color: '#FFFFFF',
+    letterSpacing: 0.2,
+  },
+  repurposeBannerSubtitle: {
+    fontSize: sFont(11.5),
+    color: '#5E576E',
+    lineHeight: 16,
+    fontWeight: '400',
+  },
+  repurposeActionBtn: {
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 8,
+    backgroundColor: '#FAF9FF',
+    borderWidth: 1,
+    borderColor: 'rgba(88, 44, 219, 0.15)',
+  },
+  repurposeActionText: {
+    fontSize: sFont(11.5),
+    fontWeight: '700',
+    color: '#582CDB',
   },
 
   // 4. SCHEDULED POSTS BANNER
@@ -1957,6 +2142,28 @@ const styles = StyleSheet.create({
   draftsList: {
     gap: 10,
     marginBottom: 24,
+  },
+  draftsEmptyCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 15,
+    borderWidth: 1,
+    borderColor: 'rgba(23, 20, 32, 0.07)',
+    paddingVertical: 18,
+    paddingHorizontal: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#171420',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.02,
+    shadowRadius: 6,
+    elevation: 1,
+  },
+  draftsEmptyText: {
+    fontSize: sFont(12.5),
+    color: '#6B637B',
+    fontWeight: '500',
+    textAlign: 'center',
+    lineHeight: 18,
   },
   draftCard: {
     flexDirection: 'row',

@@ -27,10 +27,8 @@ interface PostPerformanceScreenProps {
   onBack: () => void;
   onNavigateTab?: (tab: TabType) => void;
   onOpenJarvisPro?: () => void;
-  onOpenMessages?: () => void;
   onOpenSchedule?: () => void;
   onOpenAudienceBreakdown?: () => void;
-  onOpenEarnings?: () => void;
   onOpenComposer?: (ideaTitle?: string) => void;
   onOpenScript?: (ideaTitle?: string) => void;
   onOpenContentAngle?: () => void;
@@ -79,10 +77,8 @@ export const PostPerformanceScreen: React.FC<PostPerformanceScreenProps> = ({
   onBack,
   onNavigateTab,
   onOpenJarvisPro,
-  onOpenMessages,
   onOpenSchedule,
   onOpenAudienceBreakdown,
-  onOpenEarnings,
   onOpenComposer,
   onOpenScript,
   onOpenContentAngle,
@@ -191,13 +187,6 @@ export const PostPerformanceScreen: React.FC<PostPerformanceScreenProps> = ({
         <FreeAppHeader
           onBack={onBack}
           onOpenJarvisPro={onOpenJarvisPro}
-          onOpenMessages={() => {
-            if (onOpenMessages) {
-              onOpenMessages();
-            } else if (onNavigateTab) {
-              onNavigateTab('match');
-            }
-          }}
           onOpenNotifications={() => {
             triggerModalPop();
             setShowNotificationModal(true);
@@ -224,9 +213,7 @@ export const PostPerformanceScreen: React.FC<PostPerformanceScreenProps> = ({
             </View>
             <Text
               style={styles.mainTitle}
-              numberOfLines={1}
-              adjustsFontSizeToFit={true}
-              minimumFontScale={0.85}
+              numberOfLines={2}
             >
               See why your best post worked.
             </Text>
@@ -324,36 +311,13 @@ export const PostPerformanceScreen: React.FC<PostPerformanceScreenProps> = ({
               </View>
             </View>
 
-            {/* Estimated Post Earnings Revenue Chip */}
-            <Pressable
-              style={({ pressed }) => [styles.postEarningsChip, pressed && styles.btnPressed]}
-              onPress={() => {
-                if (Platform.OS !== 'web') {
-                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                }
-                if (onOpenEarnings) {
-                  onOpenEarnings();
-                } else {
-                  showToast('Est. earnings: $142.50 from this top post');
-                }
-              }}
-            >
-              <View style={styles.postEarningsLeftRow}>
-                <Text style={{ fontSize: 13 }}>💰</Text>
-                <Text style={styles.postEarningsChipText}>
-                  Est. earnings: <Text style={{ color: '#582CDB', fontWeight: '800' }}>$142.50</Text>
-                </Text>
-              </View>
-              <Text style={styles.postEarningsChipLink}>View Earnings ➔</Text>
-            </Pressable>
-
             {/* Action Button */}
             <Pressable
               style={({ pressed }) => [styles.createSimilarBtn, pressed && styles.btnPressed]}
               onPress={handleCreateSimilarPost}
             >
               <LinearGradient
-                colors={['#582CDB', '#4318FF']}
+                colors={['#6A3EE6', '#582CDB']}
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 0 }}
                 style={styles.actionBtnGradient}
@@ -606,7 +570,7 @@ export const PostPerformanceScreen: React.FC<PostPerformanceScreenProps> = ({
               }}
             >
               <LinearGradient
-                colors={['#582CDB', '#4318FF']}
+                colors={['#6A3EE6', '#582CDB']}
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 0 }}
                 style={styles.actionBtnGradient}
@@ -1288,10 +1252,11 @@ const styles = StyleSheet.create({
     letterSpacing: 0.5,
   },
   mainTitle: {
-    fontSize: Platform.OS === 'web' ? ('clamp(17px, 4.2vw, 21px)' as any) : sFont(19.5),
+    fontSize: Platform.OS === 'web' ? ('clamp(15px, 3.8vw, 17px)' as any) : sFont(16),
     fontWeight: '700',
     color: '#171420',
     letterSpacing: -0.35,
+    lineHeight: 22,
     marginBottom: 4,
   },
   mainSubtitle: {

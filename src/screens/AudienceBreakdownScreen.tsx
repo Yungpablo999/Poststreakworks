@@ -390,7 +390,6 @@ interface AudienceBreakdownScreenProps {
   onBack: () => void;
   onOpenPostPerformance?: () => void;
   onOpenPlatformGrowth?: () => void;
-  onOpenEarnings?: () => void;
   onLogout?: () => void;
   onOpenSchedule?: () => void;
   onOpenJarvisPro?: () => void;
@@ -398,7 +397,6 @@ interface AudienceBreakdownScreenProps {
   onOpenCreate?: (prefillTopic?: string) => void;
   onOpenPostComposer?: (prefillTitle?: string) => void;
   onOpenPlatformConnect?: () => void;
-  onOpenMessages?: () => void;
   userProfile?: UserProfileData;
   onSaveProfile?: (updated: UserProfileData) => void;
 }
@@ -407,7 +405,6 @@ export const AudienceBreakdownScreen: React.FC<AudienceBreakdownScreenProps> = (
   onBack,
   onOpenPostPerformance,
   onOpenPlatformGrowth,
-  onOpenEarnings,
   onLogout,
   onOpenSchedule,
   onOpenJarvisPro,
@@ -415,7 +412,6 @@ export const AudienceBreakdownScreen: React.FC<AudienceBreakdownScreenProps> = (
   onOpenCreate,
   onOpenPostComposer,
   onOpenPlatformConnect,
-  onOpenMessages,
   userProfile,
   onSaveProfile,
 }) => {
@@ -601,17 +597,9 @@ export const AudienceBreakdownScreen: React.FC<AudienceBreakdownScreenProps> = (
       <StatusBar barStyle="dark-content" backgroundColor="#FAF8F5" />
       <View style={styles.container}>
         {/* 1. TOP HEADER */}
-        {/* 1. TOP HEADER */}
         <FreeAppHeader
           onBack={onBack}
           onOpenJarvisPro={onOpenJarvisPro}
-          onOpenMessages={() => {
-            if (onOpenMessages) {
-              onOpenMessages();
-            } else if (onNavigateTab) {
-              onNavigateTab('match');
-            }
-          }}
           onOpenProfile={() => {
             triggerModalAnim();
             setShowProfileModal(true);
@@ -681,7 +669,12 @@ export const AudienceBreakdownScreen: React.FC<AudienceBreakdownScreenProps> = (
           </View>
 
           {/* HERO SECTION TITLE */}
-          <Text style={styles.mainTitle} numberOfLines={1} adjustsFontSizeToFit>Understand your audience growth</Text>
+          <Text
+            style={styles.mainTitle}
+            numberOfLines={2}
+          >
+            Understand your audience growth
+          </Text>
           <Text style={styles.mainSubtitle}>
             Track how your audience is growing, where it’s coming from, and what’s driving it.
           </Text>
@@ -733,7 +726,7 @@ export const AudienceBreakdownScreen: React.FC<AudienceBreakdownScreenProps> = (
                 onPress={handleOpenConnectPlatforms}
               >
                 <LinearGradient
-                  colors={['#582CDB', '#4318FF']}
+                  colors={['#6A3EE6', '#582CDB']}
                   start={{ x: 0, y: 0 }}
                   end={{ x: 1, y: 0 }}
                   style={styles.purpleActionGradient}
@@ -887,7 +880,7 @@ export const AudienceBreakdownScreen: React.FC<AudienceBreakdownScreenProps> = (
                         >
                           {isSelected && (
                             <LinearGradient
-                              colors={['#8B5CF6', '#582CDB', '#4318FF']}
+                              colors={['#8B5CF6', '#6A3EE6', '#582CDB']}
                               start={{ x: 0, y: 0 }}
                               end={{ x: 0, y: 1 }}
                               style={StyleSheet.absoluteFill}
@@ -1137,7 +1130,7 @@ export const AudienceBreakdownScreen: React.FC<AudienceBreakdownScreenProps> = (
               onPress={handleCreateSimilarPost}
             >
               <LinearGradient
-                colors={['#582CDB', '#4318FF']}
+                colors={['#6A3EE6', '#582CDB']}
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 0 }}
                 style={styles.createSimilarGradient}
@@ -1663,7 +1656,7 @@ export const AudienceBreakdownScreen: React.FC<AudienceBreakdownScreenProps> = (
           <View style={styles.modalOverlay}>
             <View style={styles.modalCardLarge}>
               <View style={styles.modalHeaderRow}>
-                <View>
+                <View style={{ flex: 1, marginRight: 8 }}>
                   <Text style={styles.modalTitle}>Jarvis Intelligence Model</Text>
                   <Text style={styles.modalSubtitle}>How your audience signal was calculated</Text>
                 </View>
@@ -1904,11 +1897,12 @@ const styles = StyleSheet.create({
 
   // Main Titles
   mainTitle: {
-    fontSize: Platform.OS === 'web' ? ('clamp(16px, 4.2vw, 20px)' as any) : sFont(18),
+    fontSize: Platform.OS === 'web' ? ('clamp(15px, 3.8vw, 17px)' as any) : sFont(16),
     fontWeight: '700',
     color: '#171420',
     letterSpacing: -0.35,
-    marginBottom: 6,
+    lineHeight: 22,
+    marginBottom: 4,
   },
   mainSubtitle: {
     fontSize: sFont(13),

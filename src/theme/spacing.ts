@@ -12,8 +12,10 @@ export const spacing = {
   
   // Layout specific
   screenPadding: 16,
-  cardPadding: 14,
-  cardPaddingLarge: 18,
+  cardGap: 16,
+  cardPadding: 20,
+  cardPaddingSmall: 14,
+  cardPaddingLarge: 24,
   headerHeight: 56,
   tabBarBottomOffset: 96,
 };

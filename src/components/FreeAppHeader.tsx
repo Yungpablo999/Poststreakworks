@@ -13,11 +13,15 @@ import * as Haptics from 'expo-haptics';
 import { sFont, sPadding, isNarrowScreen } from '../utils/responsive';
 import { UserProfileData } from './UserProfileModal';
 
+import { HeaderDualModePills, UserPersona, UserTier } from './HeaderDualModePills';
+
 export interface FreeAppHeaderProps {
   onBack?: () => void;
   onSwitchToPro?: () => void;
+  onSwitchToFree?: () => void;
+  onTogglePersona?: () => void;
+  userPersona?: UserPersona;
   onOpenJarvisPro?: () => void;
-  onOpenMessages?: () => void;
   onOpenNotifications?: () => void;
   onOpenProfile?: () => void;
   userProfile?: UserProfileData;
@@ -29,8 +33,10 @@ export interface FreeAppHeaderProps {
 export const FreeAppHeader: React.FC<FreeAppHeaderProps> = ({
   onBack,
   onSwitchToPro,
+  onSwitchToFree,
+  onTogglePersona,
+  userPersona,
   onOpenJarvisPro,
-  onOpenMessages,
   onOpenNotifications,
   onOpenProfile,
   userProfile,
@@ -60,23 +66,17 @@ export const FreeAppHeader: React.FC<FreeAppHeaderProps> = ({
     return () => floatLoop.stop();
   }, [ghostFloatY]);
 
-  const handleProPress = () => {
-    if (Platform.OS !== 'web') {
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-    }
-    if (onSwitchToPro) {
-      onSwitchToPro();
-    } else if (onOpenJarvisPro) {
-      onOpenJarvisPro();
-    }
-  };
-
-  const handleChatPress = () => {
-    if (Platform.OS !== 'web') {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    }
-    if (onOpenMessages) {
-      onOpenMessages();
+  const handleToggleTier = () => {
+    if (userProfile?.tier === 'pro' || userProfile?.tier === 'founding') {
+      if (onSwitchToFree) {
+        onSwitchToFree();
+      }
+    } else {
+      if (onSwitchToPro) {
+        onSwitchToPro();
+      } else if (onOpenJarvisPro) {
+        onOpenJarvisPro();
+      }
     }
   };
 
@@ -98,15 +98,20 @@ export const FreeAppHeader: React.FC<FreeAppHeaderProps> = ({
     }
   };
 
+  const currentPersona = userPersona || userProfile?.userPersona || 'returning';
+  const currentTier = (userProfile?.tier as UserTier) || 'free';
+
   return (
     <View style={[styles.headerBar, { backgroundColor: isDark ? '#0C0A12' : backgroundColor }]}>
-      {/* Top-Left: Back Button (if provided) + Ghost Logo Mascot + PRO Pill Badge */}
+      {/* Top-Left: Back Button (if provided) + Ghost Logo Mascot + Dual Switcher Pills */}
       <View style={styles.headerLeftGroup}>
         {onBack && (
           <Pressable
             onPress={onBack}
             style={({ pressed }) => [styles.backChevronBtn, pressed && styles.headerIconBtnPressed]}
-            hitSlop={10}
+            hitSlop={12}
+            accessibilityRole="button"
+            accessibilityLabel="Go back"
           >
             <Svg width={20} height={20} viewBox="0 0 24 24" fill="none">
               <Path
@@ -131,43 +136,22 @@ export const FreeAppHeader: React.FC<FreeAppHeaderProps> = ({
             source={require('../../assets/images/jarvis-ghost-clean.png')}
             style={styles.headerGhostLogo}
             resizeMode="contain"
+            accessible={true}
+            accessibilityLabel="Jarvis mascot"
           />
         </Animated.View>
 
-        <Pressable
-          onPress={handleProPress}
-          hitSlop={8}
-          style={({ pressed }) => [styles.proPillBtn, pressed && styles.headerIconBtnPressed]}
-        >
-          <Text style={styles.proPillBtnText} numberOfLines={1}>
-            {isNarrowScreen ? '🔒 PRO' : '🔒 FREE (PRO)'}
-          </Text>
-        </Pressable>
+        <HeaderDualModePills
+          tier={currentTier}
+          persona={currentPersona}
+          onToggleTier={handleToggleTier}
+          onTogglePersona={onTogglePersona}
+          isDark={isDark}
+        />
       </View>
 
-      {/* Right: Message, Notification & Person Profile Photo */}
+      {/* Right: Notification & Person Profile Photo */}
       <View style={styles.headerRightGroup}>
-        {/* Chat Bubble Button */}
-        <Pressable
-          style={({ pressed }) => [
-            styles.headerIconBtn,
-            isDark && styles.headerIconBtnDark,
-            pressed && styles.headerIconBtnPressed,
-          ]}
-          hitSlop={8}
-          onPress={handleChatPress}
-        >
-          <Svg width={20} height={20} viewBox="0 0 24 24" fill="none">
-            <Path
-              d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"
-              stroke={isDark ? '#FFFFFF' : '#1A1626'}
-              strokeWidth="2.2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </Svg>
-        </Pressable>
-
         {/* Notification Bell with Red Dot */}
         <Pressable
           onPress={handleNotifPress}
@@ -176,7 +160,9 @@ export const FreeAppHeader: React.FC<FreeAppHeaderProps> = ({
             isDark && styles.headerIconBtnDark,
             pressed && styles.headerIconBtnPressed,
           ]}
-          hitSlop={8}
+          hitSlop={10}
+          accessibilityRole="button"
+          accessibilityLabel={unreadCount > 0 ? `Notifications, ${unreadCount} unread` : 'Notifications'}
         >
           <Svg width={20} height={20} viewBox="0 0 24 24" fill="none">
             <Path
@@ -205,7 +191,9 @@ export const FreeAppHeader: React.FC<FreeAppHeaderProps> = ({
             (userProfile?.customAvatarUri || (userProfile?.avatarSource && userProfile.avatarId && userProfile.avatarId !== 'ghost')) ? styles.profilePhotoBtnActive : null,
             pressed && styles.headerIconBtnPressed,
           ]}
-          hitSlop={8}
+          hitSlop={10}
+          accessibilityRole="button"
+          accessibilityLabel="Creator profile settings"
         >
           {userProfile?.customAvatarUri ? (
             <Image

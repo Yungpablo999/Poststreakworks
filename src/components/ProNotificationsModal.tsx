@@ -13,12 +13,12 @@ import Svg, { Path } from 'react-native-svg';
 import * as Haptics from 'expo-haptics';
 import { sFont } from '../utils/responsive';
 
-export type ProNotifCategory = 'all' | 'ai' | 'deals' | 'collabs' | 'streaks' | 'unread';
+export type ProNotifCategory = 'all' | 'ai' | 'streaks' | 'growth' | 'unread';
 
 export interface ProNotificationItem {
   id: string;
   priority: 'high' | 'normal';
-  category: 'ai' | 'deals' | 'collabs' | 'streaks' | 'growth' | 'squad';
+  category: 'ai' | 'growth' | 'streaks';
   categoryTag: string;
   tagColor: string;
   tagBg: string;
@@ -34,13 +34,11 @@ export interface ProNotificationItem {
   actionKey?:
     | 'open_script'
     | 'open_voice_studio'
-    | 'open_deal'
-    | 'open_collab'
     | 'create_reel'
     | 'open_growth'
-    | 'open_squad'
     | 'open_schedule'
-    | 'open_messages';
+    | 'open_hook_studio'
+    | 'open_repurpose';
 }
 
 export const DEFAULT_PRO_NOTIFICATIONS: ProNotificationItem[] = [
@@ -68,60 +66,60 @@ export const DEFAULT_PRO_NOTIFICATIONS: ProNotificationItem[] = [
   {
     id: 'pn_2',
     priority: 'high',
-    category: 'deals',
-    categoryTag: '💎 VERIFIED SPONSOR',
-    tagColor: '#059669',
-    tagBg: '#ECFDF5',
-    title: 'Nordic Tech Pro Sponsorship ($1,200 Bounty)',
-    body: 'Exclusive direct invitation for Pablo. 60s integrated product spotlight for AI tools. Escrow pre-funded and insured.',
+    category: 'growth',
+    categoryTag: '🚀 VIRAL RETENTION SPIKE',
+    tagColor: '#7C3AED',
+    tagBg: '#EDE9FE',
+    title: 'Hook Retention Surged to 91% (+84%)',
+    body: 'Your 3s hook retention on the latest Reel is in the top 1% of creators this week. Jarvis drafted 2 follow-up angles.',
     time: '45m ago',
     unread: true,
-    iconEmoji: '💰',
-    badgeBg: '#ECFDF5',
-    badgeBorder: '#A7F3D0',
+    iconEmoji: '🚀',
+    badgeBg: '#EDE9FE',
+    badgeBorder: '#DDD6FE',
     metaPills: [
-      { label: '💵 $1,200 Escrow Locked', isHighlight: true },
-      { label: '⚡ 98% Niche Fit' },
+      { label: '🔥 Top 1% Retention', isHighlight: true },
+      { label: '⚡ +84% Completion' },
     ],
-    actionText: 'Review Offer & Claim Bounty',
-    actionKey: 'open_deal',
+    actionText: 'Explore Follow-Up Angles',
+    actionKey: 'open_growth',
   },
   {
     id: 'pn_3',
     priority: 'high',
-    category: 'collabs',
-    categoryTag: '🤝 95% AUDIENCE FIT',
-    tagColor: '#0284C7',
-    tagBg: '#E0F2FE',
-    title: 'Amara Okafor sent a Split-Screen Reel Pitch',
-    body: '"The 3-Tool Creator Stack for 2026" • Both channels cross-promoting this Saturday at 2:00 PM.',
+    category: 'streaks',
+    categoryTag: '🛡️ STREAK SHIELD ACTIVE',
+    tagColor: '#D97706',
+    tagBg: '#FEF3C7',
+    title: 'Streak Freeze Shield Equipped',
+    body: 'Your 48-day streak is auto-protected for 48 hours. Post anytime before tomorrow midnight.',
     time: '2h ago',
     unread: true,
-    iconEmoji: '🤝',
-    badgeBg: '#E0F2FE',
-    badgeBorder: '#BAE6FD',
+    iconEmoji: '🛡️',
+    badgeBg: '#FEF3C7',
+    badgeBorder: '#FDE68A',
     metaPills: [
-      { label: '👥 85K Travel/Lifestyle' },
-      { label: '🔥 44-Day Streak' },
+      { label: '🔥 48-Day Active', isHighlight: true },
+      { label: '🛡️ 48h Shield' },
     ],
-    actionText: 'Accept Pitch & Open Chat',
-    actionKey: 'open_collab',
+    actionText: 'Create Reel to Maintain',
+    actionKey: 'create_reel',
   },
   {
     id: 'pn_4',
     priority: 'normal',
-    category: 'collabs',
-    categoryTag: '💬 MESSAGE',
+    category: 'ai',
+    categoryTag: '🎬 HOOK STUDIO',
     tagColor: '#582CDB',
     tagBg: '#EDE9FE',
-    title: 'David Kim sent you a message',
-    body: 'Pacing on the 3-app stack looks incredible! Let\'s lock in the audio.',
+    title: '3 High-Converting Hooks Generated',
+    body: 'Jarvis analyzed your niche trends and produced 3 contrarian hook variations for your next Reel.',
     time: '1h ago',
     unread: true,
-    iconEmoji: '💬',
+    iconEmoji: '🎬',
     badgeBg: '#FAF5FF',
     badgeBorder: '#DDD6FE',
-    actionKey: 'open_messages',
+    actionKey: 'open_script',
   },
   {
     id: 'pn_5',
@@ -131,7 +129,7 @@ export const DEFAULT_PRO_NOTIFICATIONS: ProNotificationItem[] = [
     tagColor: '#D97706',
     tagBg: '#FEF3C7',
     title: 'Day 48 Streak Locked & Protected',
-    body: 'Post 1 Reel before 11:30 PM to maintain top 1% global rank.',
+    body: 'Post 1 Reel before 11:30 PM to maintain top 1% global consistency rank.',
     time: '3h ago',
     unread: false,
     iconEmoji: '🔥',
@@ -142,12 +140,12 @@ export const DEFAULT_PRO_NOTIFICATIONS: ProNotificationItem[] = [
   {
     id: 'pn_6',
     priority: 'normal',
-    category: 'ai',
+    category: 'growth',
     categoryTag: '📈 ANALYTICS',
     tagColor: '#9333EA',
     tagBg: '#FAF5FF',
     title: 'Reel #47 Outperforming Benchmark (+142%)',
-    body: 'High 18.4% save rate detected. Jarvis recommends a follow-up carousel.',
+    body: 'High 18.4% save rate detected. Jarvis recommends converting key points into a 7-slide carousel.',
     time: '5h ago',
     unread: false,
     iconEmoji: '🚀',
@@ -158,34 +156,34 @@ export const DEFAULT_PRO_NOTIFICATIONS: ProNotificationItem[] = [
   {
     id: 'pn_7',
     priority: 'normal',
-    category: 'collabs',
-    categoryTag: '👑 SQUAD',
-    tagColor: '#B45309',
-    tagBg: '#FFFBEB',
-    title: 'Creators Club reached 100-Day Sync',
-    body: '2.5x XP Boost activated for all squad members for the next 48 hours.',
+    category: 'growth',
+    categoryTag: '⚡ LEVEL XP BOOST',
+    tagColor: '#582CDB',
+    tagBg: '#EDE9FE',
+    title: 'XP Milestone Unlocked (+350 XP)',
+    body: 'You crossed 3,200 total creator XP this month. Only 300 XP needed to unlock Level 43 Master Storyteller.',
     time: '1d ago',
     unread: false,
-    iconEmoji: '👑',
-    badgeBg: '#FFFBEB',
-    badgeBorder: '#FDE68A',
-    actionKey: 'open_squad',
+    iconEmoji: '⚡',
+    badgeBg: '#EDE9FE',
+    badgeBorder: '#DDD6FE',
+    actionKey: 'open_growth',
   },
   {
     id: 'pn_8',
     priority: 'normal',
-    category: 'collabs',
-    categoryTag: '✨ COLLAB',
-    tagColor: '#582CDB',
-    tagBg: '#EDE9FE',
-    title: 'Kemi Adeleke saved your joint concept',
-    body: 'Added slide notes to "High-Converting Carousel Slide".',
+    category: 'ai',
+    categoryTag: '📑 REPURPOSE QUEUE',
+    tagColor: '#7C3AED',
+    tagBg: '#FAF5FF',
+    title: 'Multi-Platform Repurpose Ready',
+    body: 'Your talking video was converted into 1 carousel breakdown and 3 short-form scripts.',
     time: '1d ago',
     unread: false,
-    iconEmoji: '✨',
-    badgeBg: '#EDE9FE',
-    badgeBorder: '#DDD6FE',
-    actionKey: 'open_collab',
+    iconEmoji: '📑',
+    badgeBg: '#FAF5FF',
+    badgeBorder: '#E9D5FF',
+    actionKey: 'open_script',
   },
 ];
 
@@ -229,15 +227,13 @@ export const ProNotificationsModal: React.FC<ProNotificationsModalProps> = ({
 
   const unreadCount = notifsList.filter((n) => n.unread).length;
   const aiCount = notifsList.filter((n) => n.category === 'ai').length;
-  const dealCount = notifsList.filter((n) => n.category === 'deals').length;
-  const collabCount = notifsList.filter((n) => n.category === 'collabs').length;
+  const growthCount = notifsList.filter((n) => n.category === 'growth').length;
   const streakCount = notifsList.filter((n) => n.category === 'streaks').length;
 
   const filteredNotifs = notifsList.filter((item) => {
     if (activeFilter === 'unread') return item.unread;
     if (activeFilter === 'ai') return item.category === 'ai';
-    if (activeFilter === 'deals') return item.category === 'deals';
-    if (activeFilter === 'collabs') return item.category === 'collabs';
+    if (activeFilter === 'growth') return item.category === 'growth';
     if (activeFilter === 'streaks') return item.category === 'streaks';
     return true;
   });
@@ -320,9 +316,8 @@ export const ProNotificationsModal: React.FC<ProNotificationsModalProps> = ({
                 { key: 'all', label: `All (${notifsList.length})` },
                 { key: 'unread', label: `Unread (${unreadCount})` },
                 { key: 'ai', label: `⚡ AI Co-Pilot (${aiCount})` },
-                { key: 'deals', label: `💰 Deals (${dealCount})` },
-                { key: 'collabs', label: `🤝 Collabs (${collabCount})` },
                 { key: 'streaks', label: `🔥 Streaks (${streakCount})` },
+                { key: 'growth', label: `📈 Growth & XP (${growthCount})` },
               ].map((tab) => {
                 const isSelected = activeFilter === tab.key;
                 return (

@@ -31,7 +31,6 @@ interface CaptionScreenProps {
   onOpenJarvisPro?: () => void;
   onNavigateTab?: (tab: TabType) => void;
   onAddToPost?: (captionText: string, hashtags: string) => void;
-  onOpenMessages?: () => void;
   userProfile?: UserProfileData;
   onSaveProfile?: (updated: UserProfileData) => void;
 }
@@ -61,7 +60,7 @@ const NOTIFICATIONS: NotificationItem[] = [
   {
     id: 'n2',
     title: 'Streak Saver Ready',
-    body: "Convert today's idea into a post to keep your 1-day streak.",
+    body: "Convert today's idea into a post to kick off your creator streak.",
     time: '2h ago',
     unread: true,
     iconEmoji: '🔥',
@@ -143,10 +142,9 @@ export const CaptionScreen: React.FC<CaptionScreenProps> = ({
   onOpenJarvisPro,
   onNavigateTab,
   onAddToPost,
-  onOpenMessages,
-
   userProfile,
-  onSaveProfile,}) => {
+  onSaveProfile,
+}) => {
   const isDark = false;
   const [activeTab, setActiveTab] = useState<TabType>('create');
 
@@ -180,11 +178,10 @@ export const CaptionScreen: React.FC<CaptionScreenProps> = ({
   const [showGoalModal, setShowGoalModal] = useState(false);
   const [showNotificationModal, setShowNotificationModal] = useState(false);
   const [showProfileModal, setShowProfileModal] = useState(false);
-  const [showChatModal, setShowChatModal] = useState(false);
   const [showCelebrationModal, setShowCelebrationModal] = useState(false);
   const [celebrationTitle, setCelebrationTitle] = useState('Caption Ready!');
   const [celebrationSubtitle, setCelebrationSubtitle] = useState('Your viral caption and hashtags are primed for your post.');
-  const [celebrationSpeech, setCelebrationSpeech] = useState('1-day streak protected! +35 XP earned.');
+  const [celebrationSpeech, setCelebrationSpeech] = useState('Day 1 post ready! +35 XP earned.');
   const [celebrationBadge, setCelebrationBadge] = useState('CAPTION CRAFTED');
 
   const [notificationsList, setNotificationsList] = useState<NotificationItem[]>(NOTIFICATIONS);
@@ -307,7 +304,7 @@ export const CaptionScreen: React.FC<CaptionScreenProps> = ({
     if (next) {
       setCelebrationTitle('Caption Saved!');
       setCelebrationSubtitle('Caption and hashtags saved to your creator drafts.');
-      setCelebrationSpeech('1-day streak protected! Ready anytime.');
+      setCelebrationSpeech('Day 1 post ready! Ready anytime.');
       setCelebrationBadge('DRAFT SAVED');
       setShowCelebrationModal(true);
     }
@@ -336,14 +333,6 @@ export const CaptionScreen: React.FC<CaptionScreenProps> = ({
           <FreeAppHeader
             onBack={onBack}
             onOpenJarvisPro={onOpenJarvisPro}
-            onOpenMessages={() => {
-              if (onOpenMessages) {
-                onOpenMessages();
-              } else {
-                triggerModalAnim();
-                setShowChatModal(true);
-              }
-            }}
             onOpenNotifications={() => {
               triggerModalAnim();
               setShowNotificationModal(true);
@@ -376,7 +365,12 @@ export const CaptionScreen: React.FC<CaptionScreenProps> = ({
             </View>
 
             {/* Main Title & Subtitle */}
-            <Text style={styles.mainTitle}>Write a caption that fits your post.</Text>
+            <Text
+              style={styles.mainTitle}
+              numberOfLines={2}
+            >
+              Write a caption that fits your post.
+            </Text>
             <Text style={styles.mainSubtitle}>
               Create captions, CTAs and hashtags that match your content goal and platform.
             </Text>
@@ -844,46 +838,6 @@ export const CaptionScreen: React.FC<CaptionScreenProps> = ({
           onSaveProfile={onSaveProfile}
         />
 
-          {/* MODAL: CREATOR CHAT */}
-          <Modal
-            visible={showChatModal}
-            transparent={true}
-            animationType="fade"
-            onRequestClose={() => setShowChatModal(false)}
-          >
-            <View style={styles.modalOverlay}>
-              <Animated.View style={[styles.modalCard, { transform: [{ scale: modalPopScale }] }]}>
-                <View style={styles.modalHeaderRow}>
-                  <View style={styles.modalTitleCol}>
-                    <Text style={styles.modalTitle}>Jarvis AI Chat</Text>
-                    <Text style={styles.modalSubtitle}>Real-time creative assistant</Text>
-                  </View>
-                  <Pressable
-                    onPress={() => setShowChatModal(false)}
-                    style={styles.modalCloseCircle}
-                    hitSlop={8}
-                  >
-                    <Text style={styles.modalCloseCross}>✕</Text>
-                  </Pressable>
-                </View>
-
-                <View style={styles.chatCard}>
-                  <Text style={styles.chatSpeaker}>Jarvis AI</Text>
-                  <Text style={styles.chatMsg}>
-                    I crafted these captions to maximize saves and comment discussions! The first 2 lines stop the scroll.
-                  </Text>
-                </View>
-
-                <Pressable
-                  style={styles.modalFullBtn}
-                  onPress={() => setShowChatModal(false)}
-                >
-                  <Text style={styles.modalFullBtnText}>Close Chat</Text>
-                </Pressable>
-              </Animated.View>
-            </View>
-          </Modal>
-
           {/* SIGNATURE ANIMATED GHOST CELEBRATION MODAL */}
           <AnimatedCompletionModal
             visible={showCelebrationModal}
@@ -1033,10 +987,11 @@ const styles = StyleSheet.create({
   },
 
   mainTitle: {
-    fontSize: Platform.OS === 'web' ? ('clamp(18px, 4.5vw, 22px)' as any) : sFont(20),
+    fontSize: Platform.OS === 'web' ? ('clamp(15px, 3.8vw, 17px)' as any) : sFont(16),
     fontWeight: '700',
     color: '#171420',
     letterSpacing: -0.35,
+    lineHeight: 22,
     marginBottom: 4,
     marginTop: 4,
   },

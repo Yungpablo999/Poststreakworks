@@ -21,6 +21,8 @@ import { FloatingTabBar, TabType } from '../components/FloatingTabBar';
 import { BrandToast } from '../components/BrandToast';
 import { UserProfileModal, UserProfileData } from '../components/UserProfileModal';
 import { SocialBrandIcon } from '../components/SocialBrandIcon';
+import { HeaderDualModePills, UserPersona } from '../components/HeaderDualModePills';
+import { sFont } from '../utils/responsive';
 
 export const TinyGoldCheck = ({ size = 13 }: { size?: number }) => (
   <View
@@ -65,9 +67,11 @@ interface ProCreateScreenProps {
   onOpenCaption?: (ideaTitle?: string) => void;
   onOpenRepurpose?: (ideaTitle?: string) => void;
   onOpenVoiceStudio?: () => void;
-  onOpenMessages?: () => void;
+  onOpenHookStudio?: () => void;
   onSwitchToFree?: () => void;
   userProfile?: UserProfileData;
+  userPersona?: UserPersona;
+  onTogglePersona?: () => void;
   onSaveProfile?: (updated: UserProfileData) => void;
 }
 
@@ -80,6 +84,81 @@ interface NotificationItem {
   unread: boolean;
   iconEmoji: string;
 }
+
+const RETURNING_DRAFTS = [
+  {
+    id: 'd1',
+    title: '3 mistakes I stopped making as a creator',
+    platform: 'TikTok',
+    platformType: 'tiktok',
+    typeBadge: 'SCRIPT READY',
+    typeColor: '#DCFCE7',
+    typeTextColor: '#15803D',
+    time: 'Edited 2h ago',
+    actionText: 'Continue Script',
+    actionTarget: 'script',
+  },
+  {
+    id: 'd2',
+    title: 'Behind the scenes tour & studio setup',
+    platform: 'Instagram',
+    platformType: 'instagram',
+    typeBadge: 'VOICE READY',
+    typeColor: '#EDE9FE',
+    typeTextColor: '#582CDB',
+    time: 'Edited 4h ago',
+    actionText: 'Open Voice Studio',
+    actionTarget: 'voice-studio',
+  },
+  {
+    id: 'd3',
+    title: 'How I gained 10k followers in 30 days',
+    platform: 'YouTube',
+    platformType: 'youtube',
+    typeBadge: 'IDEA OUTLINE',
+    typeColor: '#FEF3C7',
+    typeTextColor: '#D97706',
+    time: 'Edited yesterday',
+    actionText: 'Open Composer',
+    actionTarget: 'composer',
+  },
+  {
+    id: 'd4',
+    title: 'Stop waiting for the perfect video idea',
+    platform: 'TikTok',
+    platformType: 'tiktok',
+    typeBadge: 'CAPTION READY',
+    typeColor: '#DCFCE7',
+    typeTextColor: '#15803D',
+    time: 'Edited 2 days ago',
+    actionText: 'Open Caption',
+    actionTarget: 'caption',
+  },
+  {
+    id: 'd5',
+    title: '5 tools that 10x your creator workflow',
+    platform: 'Instagram',
+    platformType: 'instagram',
+    typeBadge: 'REPURPOSE READY',
+    typeColor: '#EDE9FE',
+    typeTextColor: '#582CDB',
+    time: 'Edited 3 days ago',
+    actionText: 'Repurpose Now',
+    actionTarget: 'repurpose',
+  },
+  {
+    id: 'd6',
+    title: 'The algorithm secret nobody talks about',
+    platform: 'TikTok',
+    platformType: 'tiktok',
+    typeBadge: 'HOOK DRAFT',
+    typeColor: '#EDE9FE',
+    typeTextColor: '#582CDB',
+    time: 'Edited 4 days ago',
+    actionText: 'Open Script',
+    actionTarget: 'script',
+  },
+];
 
 const INITIAL_NOTIFICATIONS: NotificationItem[] = [
   {
@@ -114,11 +193,14 @@ export const ProCreateScreen: React.FC<ProCreateScreenProps> = ({
   onOpenCaption,
   onOpenRepurpose,
   onOpenVoiceStudio,
-  onOpenMessages,
+  onOpenHookStudio,
   onSwitchToFree,
   userProfile,
+  userPersona,
+  onTogglePersona,
   onSaveProfile,
 }) => {
+  const isNewUser = (userPersona || userProfile?.userPersona) === 'new';
   const [activeTab, setActiveTab] = useState<TabType>('create');
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [showNotificationModal, setShowNotificationModal] = useState(false);
@@ -127,86 +209,21 @@ export const ProCreateScreen: React.FC<ProCreateScreenProps> = ({
   const [showHookModal, setShowHookModal] = useState(false);
   const [showAllDraftsModal, setShowAllDraftsModal] = useState(false);
   const [draftFilter, setDraftFilter] = useState<'ALL' | 'TIKTOK' | 'INSTAGRAM' | 'YOUTUBE'>('ALL');
-  const [activeDraftsList, setActiveDraftsList] = useState([
-    {
-      id: 'd1',
-      title: '3 mistakes I stopped making as a creator',
-      platform: 'TikTok',
-      platformType: 'tiktok',
-      typeBadge: 'SCRIPT READY',
-      typeColor: '#DCFCE7',
-      typeTextColor: '#15803D',
-      time: 'Edited 2h ago',
-      actionText: 'Continue Script',
-      actionTarget: 'script',
-    },
-    {
-      id: 'd2',
-      title: 'Behind the scenes tour & studio setup',
-      platform: 'Instagram',
-      platformType: 'instagram',
-      typeBadge: 'VOICE READY',
-      typeColor: '#EDE9FE',
-      typeTextColor: '#582CDB',
-      time: 'Edited 4h ago',
-      actionText: 'Open Voice Studio',
-      actionTarget: 'voice-studio',
-    },
-    {
-      id: 'd3',
-      title: 'How I gained 10k followers in 30 days',
-      platform: 'YouTube',
-      platformType: 'youtube',
-      typeBadge: 'IDEA OUTLINE',
-      typeColor: '#FEF3C7',
-      typeTextColor: '#D97706',
-      time: 'Edited yesterday',
-      actionText: 'Open Composer',
-      actionTarget: 'composer',
-    },
-    {
-      id: 'd4',
-      title: 'Stop waiting for the perfect video idea',
-      platform: 'TikTok',
-      platformType: 'tiktok',
-      typeBadge: 'CAPTION READY',
-      typeColor: '#DCFCE7',
-      typeTextColor: '#15803D',
-      time: 'Edited 2 days ago',
-      actionText: 'Open Caption',
-      actionTarget: 'caption',
-    },
-    {
-      id: 'd5',
-      title: '5 tools that 10x your creator workflow',
-      platform: 'Instagram',
-      platformType: 'instagram',
-      typeBadge: 'REPURPOSE READY',
-      typeColor: '#EDE9FE',
-      typeTextColor: '#582CDB',
-      time: 'Edited 3 days ago',
-      actionText: 'Repurpose Now',
-      actionTarget: 'repurpose',
-    },
-    {
-      id: 'd6',
-      title: 'The algorithm secret nobody talks about',
-      platform: 'TikTok',
-      platformType: 'tiktok',
-      typeBadge: 'HOOK DRAFT',
-      typeColor: '#EDE9FE',
-      typeTextColor: '#582CDB',
-      time: 'Edited 4 days ago',
-      actionText: 'Open Script',
-      actionTarget: 'script',
-    },
-  ]);
+  const [activeDraftsList, setActiveDraftsList] = useState(isNewUser ? [] : RETURNING_DRAFTS);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
+  useEffect(() => {
+    setActiveDraftsList(isNewUser ? [] : RETURNING_DRAFTS);
+    setSelectedVoiceTone(isNewUser ? 'Studio Default' : 'Energetic Studio Mix');
+    setVoiceScriptInput(
+      isNewUser ? '' : 'Here are 3 creator mistakes I stopped making this year that helped me grow 10x faster...'
+    );
+  }, [isNewUser]);
+
   // Voice Studio State
-  const [selectedVoiceTone, setSelectedVoiceTone] = useState('Energetic Studio Mix');
+  const [selectedVoiceTone, setSelectedVoiceTone] = useState(isNewUser ? 'Studio Default' : 'Energetic Studio Mix');
   const [voiceScriptInput, setVoiceScriptInput] = useState(
-    'Here are 3 creator mistakes I stopped making this year that helped me grow 10x faster...'
+    isNewUser ? '' : 'Here are 3 creator mistakes I stopped making this year that helped me grow 10x faster...'
   );
   const [isGeneratingVoice, setIsGeneratingVoice] = useState(false);
   const [isRepurposing, setIsRepurposing] = useState(false);
@@ -339,58 +356,22 @@ export const ProCreateScreen: React.FC<ProCreateScreenProps> = ({
               />
             </Animated.View>
 
-            <Pressable
-              onPress={() => {
-                if (Platform.OS !== 'web') {
-                  Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-                }
+            <HeaderDualModePills
+              tier="pro"
+              persona={isNewUser ? 'new' : 'returning'}
+              onToggleTier={() => {
                 if (onSwitchToFree) {
                   onSwitchToFree();
                 } else if (onSaveProfile && userProfile) {
                   onSaveProfile({ ...userProfile, tier: 'free' });
                 }
               }}
-              hitSlop={8}
-            >
-              <LinearGradient
-                colors={['#F59E0B', '#F59E0B', '#F59E0B']}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 0 }}
-                style={styles.proHeaderBadge}
-              >
-                <Text style={styles.proHeaderBadgeText}>👑 PRO</Text>
-              </LinearGradient>
-            </Pressable>
+              onTogglePersona={onTogglePersona}
+            />
           </View>
 
-          {/* Right Action Icons: Messages, Notification Bell & Profile Avatar */}
+          {/* Right Action Icons: Notification Bell & Profile Avatar */}
           <View style={styles.headerRightGroup}>
-            {/* Chat Messages */}
-            <Pressable
-              style={({ pressed }) => [styles.headerIconBtn, pressed && styles.headerIconBtnPressed]}
-              hitSlop={8}
-              onPress={() => {
-                if (Platform.OS !== 'web') {
-                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                }
-                if (onOpenMessages) {
-                  onOpenMessages();
-                } else if (onNavigateTab) {
-                  onNavigateTab('match');
-                }
-              }}
-            >
-              <Svg width={20} height={20} viewBox="0 0 24 24" fill="none">
-                <Path
-                  d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"
-                  stroke="#1A1626"
-                  strokeWidth="2.2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </Svg>
-            </Pressable>
-
             {/* Notification Bell */}
             <Pressable
               style={({ pressed }) => [styles.headerIconBtn, pressed && styles.headerIconBtnPressed]}
@@ -484,7 +465,7 @@ export const ProCreateScreen: React.FC<ProCreateScreenProps> = ({
           {/* TOP TAGS ROW: CREATE — PRO & PRO ACCESS */}
           <View style={styles.topTagsRow}>
             <View style={styles.createProPill}>
-              <Text style={styles.createProPillText}>CREATE — PRO</Text>
+              <Text style={styles.createProPillText}>CREATE • PRO</Text>
             </View>
 
             <View style={styles.proAccessPill}>
@@ -492,10 +473,12 @@ export const ProCreateScreen: React.FC<ProCreateScreenProps> = ({
             </View>
           </View>
 
-          {/* MAIN HEADLINE & SUBTITLE */}
-          <Text style={styles.mainTitleText}>Build your next post faster.</Text>
-          <Text style={styles.mainSubtitleText}>
-            From idea to voiceover to schedule, everything starts here.
+          {/* MAIN HEADLINE */}
+          <Text
+            style={styles.mainTitleText}
+            numberOfLines={2}
+          >
+            Build your next post faster.
           </Text>
 
           {/* ============================================================ */}
@@ -581,52 +564,69 @@ export const ProCreateScreen: React.FC<ProCreateScreenProps> = ({
             {/* CURRENT PROJECT EMBEDDED BOX */}
             <View style={styles.currentProjectBox}>
               <Text style={styles.currentProjectLabel}>CURRENT PROJECT</Text>
-              <Text style={styles.currentProjectTitle}>
-                &ldquo;3 creator mistakes I stopped making this year&rdquo;
-              </Text>
+              {isNewUser ? (
+                <View style={{ marginTop: 2 }}>
+                  <Text style={styles.currentProjectTitle}>No project yet</Text>
+                  <Text style={{ fontSize: 13, color: '#64748B', marginTop: 4, lineHeight: 18 }}>
+                    Start with an idea above and it&apos;ll show up here.
+                  </Text>
+                </View>
+              ) : (
+                <>
+                  <Text style={styles.currentProjectTitle}>
+                    &ldquo;3 creator mistakes I stopped making this year&rdquo;
+                  </Text>
 
-              <View style={styles.projectTagsRow}>
-                <View style={styles.projectTagGray}>
-                  <Text style={styles.projectTagGrayText}>TikTok</Text>
-                </View>
-                <View style={styles.projectTagGray}>
-                  <Text style={styles.projectTagGrayText}>IG Reel</Text>
-                </View>
-                <View style={styles.projectTagGold}>
-                  <Text style={styles.projectTagGoldText}>7:30 PM</Text>
-                </View>
-              </View>
+                  <View style={styles.projectTagsRow}>
+                    <View style={styles.projectTagGray}>
+                      <Text style={styles.projectTagGrayText}>TikTok</Text>
+                    </View>
+                    <View style={styles.projectTagGray}>
+                      <Text style={styles.projectTagGrayText}>IG Reel</Text>
+                    </View>
+                    <View style={styles.projectTagGold}>
+                      <Text style={styles.projectTagGoldText}>7:30 PM</Text>
+                    </View>
+                  </View>
+                </>
+              )}
             </View>
 
             {/* WORKFLOW ACTION BUTTONS */}
-            <View style={styles.workflowActionsRow}>
+            <View style={[styles.workflowActionsRow, isNewUser && { gap: 0 }]}>
               <Pressable
-                style={({ pressed }) => [styles.startCreatingBtn, pressed && styles.btnPressed]}
+                style={({ pressed }) => [
+                  styles.startCreatingBtn,
+                  isNewUser && { flex: 1 },
+                  pressed && styles.btnPressed,
+                ]}
                 onPress={() => {
                   if (Platform.OS !== 'web') {
                     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
                   }
                   if (onOpenPostComposer) {
-                    onOpenPostComposer('3 creator mistakes I stopped making this year', 'Instagram');
+                    onOpenPostComposer(isNewUser ? undefined : '3 creator mistakes I stopped making this year', 'Instagram');
                   }
                 }}
               >
                 <Text style={styles.startCreatingBtnText}>Start Creating</Text>
               </Pressable>
 
-              <Pressable
-                style={({ pressed }) => [styles.resumeDraftBtn, pressed && styles.btnPressed]}
-                onPress={() => {
-                  if (Platform.OS !== 'web') {
-                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                  }
-                  if (onOpenScript) {
-                    onOpenScript('3 creator mistakes I stopped making this year');
-                  }
-                }}
-              >
-                <Text style={styles.resumeDraftBtnText}>Resume Draft</Text>
-              </Pressable>
+              {!isNewUser && (
+                <Pressable
+                  style={({ pressed }) => [styles.resumeDraftBtn, pressed && styles.btnPressed]}
+                  onPress={() => {
+                    if (Platform.OS !== 'web') {
+                      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                    }
+                    if (onOpenScript) {
+                      onOpenScript('3 creator mistakes I stopped making this year');
+                    }
+                  }}
+                >
+                  <Text style={styles.resumeDraftBtnText}>Resume Draft</Text>
+                </Pressable>
+              )}
             </View>
           </View>
 
@@ -729,8 +729,12 @@ export const ProCreateScreen: React.FC<ProCreateScreenProps> = ({
             <Pressable
               style={({ pressed }) => [styles.toolGridCard, pressed && styles.btnPressed]}
               onPress={() => {
-                triggerModalPop();
-                setShowHookModal(true);
+                if (onOpenHookStudio) {
+                  onOpenHookStudio();
+                } else {
+                  triggerModalPop();
+                  setShowHookModal(true);
+                }
               }}
             >
               <View style={styles.toolIconSquare}>
@@ -804,7 +808,7 @@ export const ProCreateScreen: React.FC<ProCreateScreenProps> = ({
               <Pressable
                 style={styles.previewVoicePill}
                 onPress={() => {
-                  showToast('Playing preview audio: "Energetic Studio Mix"...');
+                  showToast(`Playing preview audio: "${isNewUser ? 'Studio Default' : selectedVoiceTone}"...`);
                 }}
               >
                 <Text style={styles.previewVoiceText}>▶ Preview Voice</Text>
@@ -815,11 +819,13 @@ export const ProCreateScreen: React.FC<ProCreateScreenProps> = ({
             <View style={styles.voiceSpecsRow}>
               <View style={{ flex: 1, marginRight: 12 }}>
                 <Text style={styles.seriesVoiceLabel}>ACTIVE VOICE</Text>
-                <Text style={styles.seriesVoiceVal} numberOfLines={1}>{selectedVoiceTone}</Text>
+                <Text style={styles.seriesVoiceVal} numberOfLines={1}>
+                  {isNewUser ? 'Studio Default' : selectedVoiceTone}
+                </Text>
               </View>
 
               <View style={{ alignItems: 'flex-end', flexShrink: 0 }}>
-                <Text style={styles.minsCountVal}>118m</Text>
+                <Text style={styles.minsCountVal}>{isNewUser ? '150m' : '118m'}</Text>
                 <Text style={styles.minsRemainingLabel}>MINS REMAINING</Text>
               </View>
             </View>
@@ -874,49 +880,61 @@ export const ProCreateScreen: React.FC<ProCreateScreenProps> = ({
               }}
               hitSlop={8}
             >
-              <Text style={styles.viewAllText}>View all ({activeDraftsList.length}) ➔</Text>
+              <Text style={styles.viewAllText}>
+                {isNewUser ? 'View all ➔' : `View all (${activeDraftsList.length}) ➔`}
+              </Text>
             </Pressable>
           </View>
 
           <View style={{ gap: 8, marginBottom: 16 }}>
-            {/* Draft 1 */}
-            <Pressable
-              style={({ pressed }) => [styles.draftItemCard, pressed && styles.btnPressed]}
-              onPress={() => {
-                if (onOpenScript) onOpenScript('3 mistakes I stopped making as a creator');
-              }}
-            >
-              <View style={styles.draftIconSquare}>
-                <Text style={{ fontSize: 18 }}>📄</Text>
+            {isNewUser ? (
+              <View style={[styles.draftItemCard, { justifyContent: 'center', alignItems: 'center', paddingVertical: 18, borderStyle: 'dashed', borderColor: '#E2E8F0' }]}>
+                <Text style={[styles.draftItemTitle, { color: '#64748B', fontWeight: '500', fontSize: 13 }]}>
+                  No drafts yet — your first one will appear here.
+                </Text>
               </View>
-              <View style={{ flex: 1 }}>
-                <Text style={styles.draftItemTitle}>3 mistakes I stopped making...</Text>
-                <Text style={styles.scriptReadyTag}>SCRIPT READY</Text>
-              </View>
-              <Text style={styles.draftChevron}>›</Text>
-            </Pressable>
+            ) : (
+              <>
+                {/* Draft 1 */}
+                <Pressable
+                  style={({ pressed }) => [styles.draftItemCard, pressed && styles.btnPressed]}
+                  onPress={() => {
+                    if (onOpenScript) onOpenScript('3 mistakes I stopped making as a creator');
+                  }}
+                >
+                  <View style={styles.draftIconSquare}>
+                    <Text style={{ fontSize: 18 }}>📄</Text>
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <Text style={styles.draftItemTitle}>3 mistakes I stopped making...</Text>
+                    <Text style={styles.scriptReadyTag}>SCRIPT READY</Text>
+                  </View>
+                  <Text style={styles.draftChevron}>›</Text>
+                </Pressable>
 
-            {/* Draft 2 */}
-            <Pressable
-              style={({ pressed }) => [styles.draftItemCard, pressed && styles.btnPressed]}
-              onPress={() => {
-                if (onOpenVoiceStudio) {
-                  onOpenVoiceStudio();
-                } else {
-                  triggerModalPop();
-                  setShowVoiceStudioModal(true);
-                }
-              }}
-            >
-              <View style={styles.draftIconSquare}>
-                <Text style={{ fontSize: 18 }}>🎙️</Text>
-              </View>
-              <View style={{ flex: 1 }}>
-                <Text style={styles.draftItemTitle}>Behind the scenes tour</Text>
-                <Text style={styles.voiceReadyTag}>VOICE READY</Text>
-              </View>
-              <Text style={styles.draftChevron}>›</Text>
-            </Pressable>
+                {/* Draft 2 */}
+                <Pressable
+                  style={({ pressed }) => [styles.draftItemCard, pressed && styles.btnPressed]}
+                  onPress={() => {
+                    if (onOpenVoiceStudio) {
+                      onOpenVoiceStudio();
+                    } else {
+                      triggerModalPop();
+                      setShowVoiceStudioModal(true);
+                    }
+                  }}
+                >
+                  <View style={styles.draftIconSquare}>
+                    <Text style={{ fontSize: 18 }}>🎙️</Text>
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <Text style={styles.draftItemTitle}>Behind the scenes tour</Text>
+                    <Text style={styles.voiceReadyTag}>VOICE READY</Text>
+                  </View>
+                  <Text style={styles.draftChevron}>›</Text>
+                </Pressable>
+              </>
+            )}
           </View>
 
           {/* ============================================================ */}
@@ -930,21 +948,25 @@ export const ProCreateScreen: React.FC<ProCreateScreenProps> = ({
               <Text style={{ fontSize: 18 }}>⚡</Text>
             </View>
 
-            <Text style={styles.bestWindowSub}>Your best window today</Text>
+            <Text style={styles.bestWindowSub}>
+              {isNewUser ? 'Suggested window today' : 'Your best window today'}
+            </Text>
             <Text style={styles.bestWindowTime}>7:30 <Text style={styles.bestWindowPm}>PM</Text></Text>
 
             <View style={styles.scheduleDivider} />
 
             <View style={styles.scheduledStatusRow}>
               <View>
-                <Text style={styles.scheduledBigStat}>6</Text>
+                <Text style={styles.scheduledBigStat}>{isNewUser ? '0' : '6'}</Text>
                 <Text style={styles.scheduledStatLabel}>SCHEDULED</Text>
               </View>
 
               <View style={{ alignItems: 'flex-end' }}>
                 <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-                  <View style={styles.greenActiveDot} />
-                  <Text style={styles.autopilotActiveLabel}>Active</Text>
+                  <View style={[styles.greenActiveDot, isNewUser && { backgroundColor: '#94A3B8' }]} />
+                  <Text style={[styles.autopilotActiveLabel, isNewUser && { color: '#64748B' }]}>
+                    {isNewUser ? 'Not set up' : 'Active'}
+                  </Text>
                 </View>
                 <Text style={styles.scheduledStatLabel}>AUTOPILOT</Text>
               </View>
@@ -977,7 +999,9 @@ export const ProCreateScreen: React.FC<ProCreateScreenProps> = ({
               <View style={{ flex: 1 }}>
                 <Text style={styles.jarvisSuggestionTag}>JARVIS SUGGESTION</Text>
                 <Text style={styles.jarvisSuggestionText}>
-                  &ldquo;Your Lifestyle Reels perform best when the hook lands within the first 2 seconds.&rdquo;
+                  {isNewUser
+                    ? '“Jarvis learns your style as you post — your first tip shows up after a few Reels.”'
+                    : '“Your Lifestyle Reels perform best when the hook lands within the first 2 seconds.”'}
                 </Text>
               </View>
             </View>
@@ -1157,9 +1181,18 @@ export const ProCreateScreen: React.FC<ProCreateScreenProps> = ({
               </View>
 
               {/* Platform Filter Pills */}
-              <View style={{ flexDirection: 'row', gap: 6, marginVertical: 10, width: '100%' }}>
+              <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={{ gap: 8, paddingVertical: 2 }}
+                style={{ marginVertical: 10 }}
+              >
                 {(['ALL', 'TIKTOK', 'INSTAGRAM', 'YOUTUBE'] as const).map((filterKey) => {
                   const isActive = draftFilter === filterKey;
+                  let count = activeDraftsList.length;
+                  if (filterKey !== 'ALL') {
+                    count = activeDraftsList.filter((d) => d.platform.toUpperCase() === filterKey).length;
+                  }
                   return (
                     <Pressable
                       key={filterKey}
@@ -1172,65 +1205,91 @@ export const ProCreateScreen: React.FC<ProCreateScreenProps> = ({
                       }}
                     >
                       <Text
-                        numberOfLines={1}
                         style={[styles.draftFilterPillText, isActive && styles.draftFilterPillTextActive]}
                       >
-                        {filterKey}
+                        {filterKey === 'ALL' ? `ALL (${count})` : `${filterKey} (${count})`}
                       </Text>
                     </Pressable>
                   );
                 })}
-              </View>
+              </ScrollView>
 
               {/* Drafts List Scrollable */}
-              <ScrollView style={{ maxHeight: 340 }} showsVerticalScrollIndicator={false}>
-                <View style={{ gap: 8 }}>
-                  {activeDraftsList
-                    .filter((d) => draftFilter === 'ALL' || d.platform.toUpperCase() === draftFilter)
-                    .map((draft) => (
-                      <Pressable
-                        key={draft.id}
-                        style={({ pressed }) => [styles.draftModalCard, pressed && styles.btnPressed]}
-                        onPress={() => handleOpenDraftItem(draft)}
-                      >
-                        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-                          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, flex: 1, paddingRight: 6 }}>
-                            <SocialBrandIcon platform={draft.platformType} size={18} />
-                            <Text style={styles.draftModalTitle} numberOfLines={1}>
-                              {draft.title}
-                            </Text>
+              <ScrollView style={{ maxHeight: 370 }} showsVerticalScrollIndicator={false}>
+                <View style={{ gap: 10 }}>
+                  {activeDraftsList.filter((d) => draftFilter === 'ALL' || d.platform.toUpperCase() === draftFilter).length === 0 ? (
+                    <View style={{ paddingVertical: 28, alignItems: 'center', justifyContent: 'center' }}>
+                      <Text style={{ fontSize: 24, marginBottom: 8 }}>📝</Text>
+                      <Text style={{ fontSize: 14, fontWeight: '700', color: '#1E293B', marginBottom: 4 }}>No drafts yet</Text>
+                      <Text style={{ fontSize: 13, color: '#64748B', textAlign: 'center', lineHeight: 18 }}>
+                        When you save or create scripts, voiceovers, and captions, they will appear here.
+                      </Text>
+                    </View>
+                  ) : (
+                    activeDraftsList
+                      .filter((d) => draftFilter === 'ALL' || d.platform.toUpperCase() === draftFilter)
+                      .map((draft) => (
+                        <Pressable
+                          key={draft.id}
+                          style={({ pressed }) => [styles.draftModalCard, pressed && styles.btnPressed]}
+                          onPress={() => handleOpenDraftItem(draft)}
+                        >
+                          <View style={styles.draftCardMainRow}>
+                            <View style={styles.draftIconBubble}>
+                              <SocialBrandIcon platform={draft.platformType} size={18} />
+                            </View>
+                            <View style={{ flex: 1 }}>
+                              <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', gap: 6 }}>
+                                <Text style={styles.draftModalTitle}>
+                                  {draft.title}
+                                </Text>
+                                <View style={[styles.draftModalBadge, { backgroundColor: draft.typeColor }]}>
+                                  <Text style={[styles.draftModalBadgeText, { color: draft.typeTextColor }]}>
+                                    {draft.typeBadge}
+                                  </Text>
+                                </View>
+                              </View>
+                              <Text style={styles.draftModalTimeText}>{draft.time} • {draft.platform}</Text>
+                            </View>
                           </View>
-                          <View style={[styles.draftModalBadge, { backgroundColor: draft.typeColor }]}>
-                            <Text style={[styles.draftModalBadgeText, { color: draft.typeTextColor }]}>
-                              {draft.typeBadge}
-                            </Text>
-                          </View>
-                        </View>
 
-                        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 8 }}>
-                          <Text style={styles.draftModalTimeText}>{draft.time} • {draft.platform}</Text>
-                          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+                          <View style={styles.draftCardFooterRow}>
                             <Pressable
-                              onPress={() => handleDeleteDraftItem(draft.id)}
+                              onPress={(e) => {
+                                if (e && e.stopPropagation) e.stopPropagation();
+                                handleDeleteDraftItem(draft.id);
+                              }}
                               hitSlop={8}
+                              style={styles.draftDeleteBtn}
+                              accessibilityLabel="Delete draft"
                             >
-                              <Text style={{ fontSize: 13, color: '#94A3B8' }}>🗑️</Text>
+                              <Svg width={13} height={13} viewBox="0 0 24 24" fill="none">
+                                <Path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" stroke="#94A3B8" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                                <Path d="M10 11v6M14 11v6" stroke="#94A3B8" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                              </Svg>
+                              <Text style={styles.draftDeleteText}>Delete</Text>
                             </Pressable>
-                            <Text style={styles.draftModalActionText}>{draft.actionText} ➔</Text>
+
+                            <Pressable
+                              style={({ pressed }) => [styles.draftActionBtn, pressed && styles.btnPressed]}
+                              onPress={() => handleOpenDraftItem(draft)}
+                            >
+                              <Text style={styles.draftActionBtnText}>{draft.actionText} →</Text>
+                            </Pressable>
                           </View>
-                        </View>
-                      </Pressable>
-                    ))}
+                        </Pressable>
+                      ))
+                  )}
                 </View>
               </ScrollView>
 
               {/* Modal Actions */}
               <View style={{ marginTop: 14 }}>
                 <Pressable
-                  style={styles.modalFullBtn}
+                  style={({ pressed }) => [styles.draftModalSecondaryCloseBtn, pressed && styles.btnPressed]}
                   onPress={() => setShowAllDraftsModal(false)}
                 >
-                  <Text style={styles.modalFullBtnText}>Close</Text>
+                  <Text style={styles.draftModalSecondaryCloseBtnText}>Close</Text>
                 </Pressable>
               </View>
             </Animated.View>
@@ -1463,11 +1522,12 @@ const styles = StyleSheet.create({
     color: '#B45309',
   },
   mainTitleText: {
-    fontSize: 22,
+    fontSize: Platform.OS === 'web' ? ('clamp(15px, 3.8vw, 17px)' as any) : sFont(16),
     fontWeight: '700',
     color: '#171420',
-    letterSpacing: -0.4,
-    marginBottom: 4,
+    letterSpacing: -0.35,
+    lineHeight: 22,
+    marginBottom: 16,
   },
   mainSubtitleText: {
     fontSize: 13,
@@ -2096,29 +2156,29 @@ const styles = StyleSheet.create({
     color: '#582CDB',
   },
   draftFilterPill: {
-    flex: 1,
-    paddingHorizontal: 2,
-    paddingVertical: 7,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
     borderRadius: 8,
     backgroundColor: '#FAF8F5',
     borderWidth: 1,
     borderColor: '#EFECE6',
     alignItems: 'center',
     justifyContent: 'center',
+    flexShrink: 0,
   },
   draftFilterPillActive: {
     backgroundColor: '#582CDB',
     borderColor: '#582CDB',
   },
   draftFilterPillText: {
-    fontSize: 10,
+    fontSize: sFont(10),
     fontWeight: '800',
     color: '#64748B',
     textAlign: 'center',
   },
   draftFilterPillTextActive: {
     color: '#FFFFFF',
-    fontWeight: '700',
+    fontWeight: '800',
   },
   draftModalCard: {
     backgroundColor: '#FAF8F5',
@@ -2127,30 +2187,94 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#EFECE6',
   },
+  draftCardMainRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: 10,
+  },
+  draftIconBubble: {
+    width: 34,
+    height: 34,
+    borderRadius: 10,
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexShrink: 0,
+    marginTop: 1,
+  },
   draftModalTitle: {
-    fontSize: 12.5,
-    fontWeight: '800',
+    fontSize: sFont(12.5),
+    fontWeight: '700',
     color: '#171420',
+    flex: 1,
+    lineHeight: 17,
   },
   draftModalBadge: {
     paddingHorizontal: 6,
-    paddingVertical: 2.5,
+    paddingVertical: 2,
     borderRadius: 5,
+    flexShrink: 0,
+    alignSelf: 'flex-start',
   },
   draftModalBadgeText: {
-    fontSize: 9,
-    fontWeight: '700',
+    fontSize: sFont(8.5),
+    fontWeight: '800',
     letterSpacing: 0.3,
   },
   draftModalTimeText: {
-    fontSize: 11,
+    fontSize: sFont(11),
     color: '#64748B',
     fontWeight: '600',
+    marginTop: 4,
   },
-  draftModalActionText: {
-    fontSize: 11,
+  draftCardFooterRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginTop: 10,
+    paddingTop: 8,
+    borderTopWidth: 1,
+    borderTopColor: '#F1F5F9',
+  },
+  draftDeleteBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    paddingVertical: 4,
+    paddingHorizontal: 4,
+  },
+  draftDeleteText: {
+    fontSize: sFont(11),
+    color: '#94A3B8',
     fontWeight: '700',
-    color: '#582CDB',
+  },
+  draftActionBtn: {
+    backgroundColor: '#582CDB',
+    paddingHorizontal: 11,
+    paddingVertical: 5.5,
+    borderRadius: 8,
+  },
+  draftActionBtnText: {
+    color: '#FFFFFF',
+    fontSize: sFont(11),
+    fontWeight: '800',
+    letterSpacing: 0.2,
+  },
+  draftModalSecondaryCloseBtn: {
+    backgroundColor: '#FAF8F5',
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    paddingVertical: 12,
+    borderRadius: 14,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  draftModalSecondaryCloseBtnText: {
+    color: '#64748B',
+    fontSize: sFont(13.5),
+    fontWeight: '700',
   },
   modalCancelBtn: {
     flex: 1,

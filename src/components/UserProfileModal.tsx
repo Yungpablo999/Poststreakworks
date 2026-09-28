@@ -27,21 +27,37 @@ export interface UserProfileData {
   bio: string;
   niche: string;
   tier?: 'free' | 'pro' | 'founding';
+  userPersona?: 'returning' | 'new';
   avatarId?: string;
   avatarSource?: any;
   customAvatarUri?: string;
   streakCount: number;
   level: number;
   xp: number;
-  partnersCount: number;
+  postsCount?: number;
   tiktokHandle?: string;
   instagramHandle?: string;
   youtubeHandle?: string;
+  facebookHandle?: string;
+  threadsHandle?: string;
+  pinterestHandle?: string;
   xHandle?: string;
+  connectedPlatforms?: string[];
   niches: string[];
   isVerified?: boolean;
   portfolioUrl?: string;
 }
+
+export const formatCompactStat = (val: number | undefined | null): string => {
+  if (val === undefined || val === null) return '0';
+  if (val >= 1000000) {
+    return (val / 1000000).toFixed(1).replace(/\.0$/, '') + 'M';
+  }
+  if (val >= 1000) {
+    return (val / 1000).toFixed(1).replace(/\.0$/, '') + 'k';
+  }
+  return val.toString();
+};
 
 export const CREATOR_AVATARS = [
   {
@@ -122,6 +138,59 @@ export const ALL_NICHES = [
   'Travel & Vlogs',
   'Fashion & Beauty',
   'Education',
+];
+
+export interface PassportPlatformConfig {
+  id: string;
+  name: string;
+  subtitle: string;
+  placeholder: string;
+  bgTint: string;
+}
+
+export const PASSPORT_SOCIAL_PLATFORMS: PassportPlatformConfig[] = [
+  {
+    id: 'tiktok',
+    name: 'TikTok',
+    subtitle: 'Sync video hooks & viral reach',
+    placeholder: '@tiktok_handle',
+    bgTint: '#F1F5F9',
+  },
+  {
+    id: 'instagram',
+    name: 'Instagram',
+    subtitle: 'Reels, Carousels & visual reach',
+    placeholder: '@ig_handle',
+    bgTint: '#FDF2F8',
+  },
+  {
+    id: 'youtube',
+    name: 'YouTube',
+    subtitle: 'Watch time & subscriber growth',
+    placeholder: 'Channel Name',
+    bgTint: '#FEF2F2',
+  },
+  {
+    id: 'facebook',
+    name: 'Facebook',
+    subtitle: 'Community reach & fan page updates',
+    placeholder: 'Page or Profile Name',
+    bgTint: '#EFF6FF',
+  },
+  {
+    id: 'threads',
+    name: 'Threads',
+    subtitle: 'Creator conversations & quick drops',
+    placeholder: '@threads_handle',
+    bgTint: '#F8FAFC',
+  },
+  {
+    id: 'pinterest',
+    name: 'Pinterest',
+    subtitle: 'Visual discovery & moodboards',
+    placeholder: '@pinterest_handle',
+    bgTint: '#FFF1F2',
+  },
 ];
 
 // AUTHENTIC BRAND VECTOR SVG ICONS
@@ -263,15 +332,21 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
     initialProfile?.niches || ['Lifestyle', 'Tech & AI', 'Storytelling']
   );
 
-  // Socials
-  const [tiktokHandle, setTiktokHandle] = useState(initialProfile?.tiktokHandle || '@pablo.creates');
-  const [instagramHandle, setInstagramHandle] = useState(initialProfile?.instagramHandle || '@pablocreates');
-  const [youtubeHandle, setYoutubeHandle] = useState(initialProfile?.youtubeHandle || 'Pablo Creates');
-  const [xHandle, setXHandle] = useState(initialProfile?.xHandle || '@pablocreates');
+  // Socials & Connected Platforms
+  const [connectedPlatforms, setConnectedPlatforms] = useState<string[]>(
+    initialProfile?.connectedPlatforms || ['tiktok', 'instagram', 'youtube']
+  );
+  const [tiktokHandle, setTiktokHandle] = useState(initialProfile?.tiktokHandle || '');
+  const [instagramHandle, setInstagramHandle] = useState(initialProfile?.instagramHandle || '');
+  const [youtubeHandle, setYoutubeHandle] = useState(initialProfile?.youtubeHandle || '');
+  const [facebookHandle, setFacebookHandle] = useState(initialProfile?.facebookHandle || '');
+  const [threadsHandle, setThreadsHandle] = useState(initialProfile?.threadsHandle || '');
+  const [pinterestHandle, setPinterestHandle] = useState(initialProfile?.pinterestHandle || '');
+  const [xHandle, setXHandle] = useState(initialProfile?.xHandle || '');
 
   // Preferences & Accountability
   const [streakReminders, setStreakReminders] = useState(true);
-  const [collabInvites, setCollabInvites] = useState(true);
+  const [peakWindowAlerts, setPeakWindowAlerts] = useState(true);
   const [hapticFeedback, setHapticFeedback] = useState(true);
 
   // Verification state
@@ -305,6 +380,16 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
         setNiche(initialProfile.niche || '');
         setSelectedAvatarId(initialProfile.avatarId || null);
         setCustomAvatarUri(initialProfile.customAvatarUri || null);
+        if (initialProfile.connectedPlatforms) {
+          setConnectedPlatforms(initialProfile.connectedPlatforms);
+        }
+        if (initialProfile.tiktokHandle !== undefined) setTiktokHandle(initialProfile.tiktokHandle);
+        if (initialProfile.instagramHandle !== undefined) setInstagramHandle(initialProfile.instagramHandle);
+        if (initialProfile.youtubeHandle !== undefined) setYoutubeHandle(initialProfile.youtubeHandle);
+        if (initialProfile.facebookHandle !== undefined) setFacebookHandle(initialProfile.facebookHandle);
+        if (initialProfile.threadsHandle !== undefined) setThreadsHandle(initialProfile.threadsHandle);
+        if (initialProfile.pinterestHandle !== undefined) setPinterestHandle(initialProfile.pinterestHandle);
+        if (initialProfile.xHandle !== undefined) setXHandle(initialProfile.xHandle);
       }
       modalScale.setValue(0.9);
       Animated.spring(modalScale, {
@@ -324,6 +409,108 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
       Animated.delay(2000),
       Animated.timing(toastFade, { toValue: 0, duration: 250, useNativeDriver: true }),
     ]).start(() => setToastMessage(null));
+  };
+
+  const getHandleForPlatform = (id: string) => {
+    switch (id) {
+      case 'tiktok':
+        return tiktokHandle;
+      case 'instagram':
+        return instagramHandle;
+      case 'youtube':
+        return youtubeHandle;
+      case 'facebook':
+        return facebookHandle;
+      case 'threads':
+        return threadsHandle;
+      case 'pinterest':
+        return pinterestHandle;
+      default:
+        return '';
+    }
+  };
+
+  const setHandleForPlatform = (id: string, val: string) => {
+    switch (id) {
+      case 'tiktok':
+        setTiktokHandle(val);
+        break;
+      case 'instagram':
+        setInstagramHandle(val);
+        break;
+      case 'youtube':
+        setYoutubeHandle(val);
+        break;
+      case 'facebook':
+        setFacebookHandle(val);
+        break;
+      case 'threads':
+        setThreadsHandle(val);
+        break;
+      case 'pinterest':
+        setPinterestHandle(val);
+        break;
+    }
+    if (val.trim() && !connectedPlatforms.includes(id)) {
+      setConnectedPlatforms((prev) => [...prev, id]);
+    }
+  };
+
+  const handleTogglePlatform = (id: string) => {
+    if (Platform.OS !== 'web') {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    }
+    const isConn = connectedPlatforms.includes(id);
+    const target = PASSPORT_SOCIAL_PLATFORMS.find((p) => p.id === id);
+    const nextConnected = isConn
+      ? connectedPlatforms.filter((p) => p !== id)
+      : [...connectedPlatforms, id];
+
+    setConnectedPlatforms(nextConnected);
+    if (isConn) {
+      showToast(`Removed ${target?.name || id}`);
+    } else {
+      showToast(`✓ Connected ${target?.name || id}`);
+    }
+
+    if (onSaveProfile) {
+      const currentAvatar = selectedAvatarId
+        ? CREATOR_AVATARS.find((a) => a.id === selectedAvatarId)
+        : null;
+
+      const sourceToSave = customAvatarUri
+        ? customAvatarUri.startsWith('data:') || customAvatarUri.startsWith('http')
+          ? { uri: customAvatarUri }
+          : currentAvatar?.source
+        : currentAvatar?.source;
+
+      const updated: UserProfileData = {
+        name: name.trim() || initialProfile?.name || 'Pablo',
+        handle: handle ? (handle.startsWith('@') ? handle.trim() : `@${handle.trim()}`) : (initialProfile?.handle || '@pablocreates'),
+        bio: bio !== undefined ? bio.trim() : (initialProfile?.bio || ''),
+        niche: niche !== undefined ? niche.trim() : (initialProfile?.niche || ''),
+        tier: initialProfile?.tier || 'pro',
+        avatarId: selectedAvatarId || undefined,
+        avatarSource: sourceToSave || undefined,
+        customAvatarUri: customAvatarUri || undefined,
+        streakCount: initialProfile?.streakCount || 1,
+        level: initialProfile?.level || 5,
+        xp: initialProfile?.xp || 3450,
+        postsCount: initialProfile?.postsCount ?? 0,
+        connectedPlatforms: nextConnected,
+        tiktokHandle: tiktokHandle?.trim() || undefined,
+        instagramHandle: instagramHandle?.trim() || undefined,
+        youtubeHandle: youtubeHandle?.trim() || undefined,
+        facebookHandle: facebookHandle?.trim() || undefined,
+        threadsHandle: threadsHandle?.trim() || undefined,
+        pinterestHandle: pinterestHandle?.trim() || undefined,
+        xHandle: xHandle?.trim() || undefined,
+        niches: selectedNiches,
+        isVerified,
+        portfolioUrl: portfolioUrl?.trim(),
+      };
+      onSaveProfile(updated);
+    }
   };
 
   const handleSelectAvatar = (avatarId: string) => {
@@ -406,11 +593,15 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
       streakCount: initialProfile?.streakCount || 1,
       level: initialProfile?.level || 5,
       xp: initialProfile?.xp || 3450,
-      partnersCount: initialProfile?.partnersCount || 12,
+      postsCount: initialProfile?.postsCount ?? 0,
+      connectedPlatforms,
       tiktokHandle: tiktokHandle.trim(),
       instagramHandle: instagramHandle.trim(),
       youtubeHandle: youtubeHandle.trim(),
-      xHandle: xHandle.trim(),
+      facebookHandle: facebookHandle.trim(),
+      threadsHandle: threadsHandle.trim(),
+      pinterestHandle: pinterestHandle.trim(),
+      xHandle: xHandle?.trim() || undefined,
       niches: selectedNiches,
       isVerified,
       portfolioUrl: portfolioUrl.trim(),
@@ -687,13 +878,13 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
                   </View>
                   <View style={styles.statDivider} />
                   <View style={styles.statBox}>
-                    <Text style={styles.statVal}>12</Text>
-                    <Text style={styles.statLabel}>Partners</Text>
+                    <Text style={styles.statVal}>Lvl {initialProfile?.level ?? 5}</Text>
+                    <Text style={styles.statLabel}>Level</Text>
                   </View>
                   <View style={styles.statDivider} />
                   <View style={styles.statBox}>
-                    <Text style={styles.statVal}>3.4k</Text>
-                    <Text style={styles.statLabel}>Collab XP</Text>
+                    <Text style={styles.statVal}>{formatCompactStat(initialProfile?.xp ?? 3450)}</Text>
+                    <Text style={styles.statLabel}>Total XP</Text>
                   </View>
                   <View style={styles.statDivider} />
                   <View style={styles.statBox}>
@@ -833,111 +1024,40 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
               <View>
                 <Text style={styles.sectionHeaderTitle}>CONNECTED PLATFORMS</Text>
                 <Text style={styles.tabSubDescription}>
-                  Link your creator handles to verify stats for collaborations and challenges.
+                  Connect your creator platforms to sync verified growth, stats, and challenges.
                 </Text>
 
-                {/* 1. TikTok (Official Icon) */}
-                <View style={styles.socialCard}>
-                  <View style={styles.socialHeaderRow}>
-                    <View style={[styles.socialPlatformBadge, { backgroundColor: '#F1F5F9' }]}>
-                      <TikTokRealIcon size={20} />
-                    </View>
-                    <View style={{ flex: 1 }}>
-                      <Text style={styles.socialPlatformTitle}>TikTok</Text>
-                      <Text style={styles.socialPlatformSub}>Sync video hooks &amp; viral reach</Text>
-                    </View>
-                    <View style={styles.connectedPill}>
-                      <Text style={styles.connectedPillText}>CONNECTED</Text>
-                    </View>
-                  </View>
-                  <View style={styles.socialInputBox}>
-                    <TextInput
-                      value={tiktokHandle}
-                      onChangeText={setTiktokHandle}
-                      placeholder="@tiktok_handle"
-                      placeholderTextColor="#94A3B8"
-                      autoCapitalize="none"
-                      style={styles.textInputField}
-                    />
-                  </View>
-                </View>
+                {PASSPORT_SOCIAL_PLATFORMS.map((plat) => {
+                  const isConn = connectedPlatforms.includes(plat.id);
 
-                {/* 2. Instagram (Official Gradient Icon) */}
-                <View style={styles.socialCard}>
-                  <View style={styles.socialHeaderRow}>
-                    <View style={[styles.socialPlatformBadge, { backgroundColor: '#FDF2F8' }]}>
-                      <InstagramRealIcon size={20} />
+                  return (
+                    <View key={plat.id} style={styles.socialCard}>
+                      <View style={styles.socialHeaderRow}>
+                        <View style={[styles.socialPlatformBadge, { backgroundColor: plat.bgTint }]}>
+                          <SocialBrandIcon platform={plat.id} size={22} />
+                        </View>
+                        <View style={{ flex: 1 }}>
+                          <Text style={styles.socialPlatformTitle}>{plat.name}</Text>
+                          <Text style={styles.socialPlatformSub}>
+                            {isConn ? 'Connected & auto-synced' : plat.subtitle}
+                          </Text>
+                        </View>
+                        <Pressable
+                          onPress={() => handleTogglePlatform(plat.id)}
+                          style={({ pressed }) => [
+                            isConn ? styles.connectedPill : styles.notConnectedPill,
+                            pressed && { opacity: 0.8 },
+                          ]}
+                          hitSlop={6}
+                        >
+                          <Text style={isConn ? styles.connectedPillText : styles.notConnectedPillText}>
+                            {isConn ? 'CONNECTED ✓' : '+ CONNECT'}
+                          </Text>
+                        </Pressable>
+                      </View>
                     </View>
-                    <View style={{ flex: 1 }}>
-                      <Text style={styles.socialPlatformTitle}>Instagram</Text>
-                      <Text style={styles.socialPlatformSub}>Co-authoring &amp; collaboration tags</Text>
-                    </View>
-                    <View style={styles.connectedPill}>
-                      <Text style={styles.connectedPillText}>CONNECTED</Text>
-                    </View>
-                  </View>
-                  <View style={styles.socialInputBox}>
-                    <TextInput
-                      value={instagramHandle}
-                      onChangeText={setInstagramHandle}
-                      placeholder="@ig_handle"
-                      placeholderTextColor="#94A3B8"
-                      autoCapitalize="none"
-                      style={styles.textInputField}
-                    />
-                  </View>
-                </View>
-
-                {/* 3. YouTube Shorts (Official Red Play Icon) */}
-                <View style={styles.socialCard}>
-                  <View style={styles.socialHeaderRow}>
-                    <View style={[styles.socialPlatformBadge, { backgroundColor: '#FEF2F2' }]}>
-                      <YouTubeRealIcon size={20} />
-                    </View>
-                    <View style={{ flex: 1 }}>
-                      <Text style={styles.socialPlatformTitle}>YouTube</Text>
-                      <Text style={styles.socialPlatformSub}>Watch time &amp; subscriber growth</Text>
-                    </View>
-                    <View style={styles.connectedPill}>
-                      <Text style={styles.connectedPillText}>CONNECTED</Text>
-                    </View>
-                  </View>
-                  <View style={styles.socialInputBox}>
-                    <TextInput
-                      value={youtubeHandle}
-                      onChangeText={setYoutubeHandle}
-                      placeholder="Channel Name"
-                      placeholderTextColor="#94A3B8"
-                      style={styles.textInputField}
-                    />
-                  </View>
-                </View>
-
-                {/* 4. X / Twitter (Official Brand Icon) */}
-                <View style={styles.socialCard}>
-                  <View style={styles.socialHeaderRow}>
-                    <View style={[styles.socialPlatformBadge, { backgroundColor: '#F8FAFC' }]}>
-                      <XTwitterRealIcon size={18} />
-                    </View>
-                    <View style={{ flex: 1 }}>
-                      <Text style={styles.socialPlatformTitle}>X (Twitter)</Text>
-                      <Text style={styles.socialPlatformSub}>Creator thoughts &amp; daily updates</Text>
-                    </View>
-                    <View style={styles.connectedPill}>
-                      <Text style={styles.connectedPillText}>CONNECTED</Text>
-                    </View>
-                  </View>
-                  <View style={styles.socialInputBox}>
-                    <TextInput
-                      value={xHandle}
-                      onChangeText={setXHandle}
-                      placeholder="@x_handle"
-                      placeholderTextColor="#94A3B8"
-                      autoCapitalize="none"
-                      style={styles.textInputField}
-                    />
-                  </View>
-                </View>
+                  );
+                })}
               </View>
             )}
 
@@ -1030,7 +1150,11 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
                         </Pressable>
                       </View>
                       <Text style={styles.verifCheckSub}>
-                        TikTok ({tiktokHandle || '@pablo.creates'}), IG ({instagramHandle || '@pablocreates'}), YT, X
+                        {connectedPlatforms.length > 0
+                          ? connectedPlatforms
+                              .map((p) => p.charAt(0).toUpperCase() + p.slice(1))
+                              .join(', ') + ' connected & synced'
+                          : 'No platforms connected yet'}
                       </Text>
                     </View>
                   </View>
@@ -1111,7 +1235,7 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
                       <Text style={styles.verifCheckTitle}>Pro Creator Membership</Text>
                       <Text style={[styles.verifCheckSub, !isPro && { color: '#D97706', fontWeight: '700' }]}>
                         {isPro
-                          ? 'Active Pro Creator • Verified Passport & Deal Escrow Active 👑'
+                          ? 'Active Pro Creator • Verified Passport & Level Status Active 👑'
                           : 'Pro Membership Required • Upgrade to claim verified badge 🔒'}
                       </Text>
                     </View>
@@ -1122,9 +1246,9 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
                 <Text style={styles.sectionHeaderTitle}>WHAT YOUR VERIFIED PASSPORT UNLOCKS</Text>
                 <View style={styles.verifPerksGrid}>
                   <View style={styles.verifPerkCard}>
-                    <Text style={styles.verifPerkIcon}>💰</Text>
-                    <Text style={styles.verifPerkTitle}>Brand Bounties</Text>
-                    <Text style={styles.verifPerkSub}>$450 - $1,200 priority sponsorship deals</Text>
+                    <Text style={styles.verifPerkIcon}>⚡</Text>
+                    <Text style={styles.verifPerkTitle}>Bonus XP Quests</Text>
+                    <Text style={styles.verifPerkSub}>+350 - +1,200 XP priority creator challenges</Text>
                   </View>
 
                   <View style={styles.verifPerkCard}>
@@ -1172,14 +1296,14 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
 
                 <View style={styles.preferenceRow}>
                   <View style={{ flex: 1 }}>
-                    <Text style={styles.prefTitle}>Creator Collab Invitations</Text>
+                    <Text style={styles.prefTitle}>AI Peak Window Alerts</Text>
                     <Text style={styles.prefSub}>
-                      Allow verified partners to pitch duo challenges &amp; Reels
+                      Alerts when audience activity velocity peaks on your platforms
                     </Text>
                   </View>
                   <HarmoniousSwitch
-                    value={collabInvites}
-                    onValueChange={setCollabInvites}
+                    value={peakWindowAlerts}
+                    onValueChange={setPeakWindowAlerts}
                   />
                 </View>
 
@@ -1663,52 +1787,66 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     borderWidth: 1,
     borderColor: '#EFECE6',
-    padding: 12,
+    paddingVertical: 12,
+    paddingHorizontal: 14,
     marginBottom: 10,
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.03,
+    shadowRadius: 3,
+    elevation: 1,
   },
   socialHeaderRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 10,
-    marginBottom: 8,
+    gap: 12,
   },
   socialPlatformBadge: {
-    width: 34,
-    height: 34,
-    borderRadius: 10,
+    width: 38,
+    height: 38,
+    borderRadius: 12,
     justifyContent: 'center',
     alignItems: 'center',
     borderWidth: 1,
     borderColor: '#EFECE6',
   },
   socialPlatformTitle: {
-    fontSize: 13,
+    fontSize: 13.5,
     fontWeight: '800',
     color: '#171420',
   },
   socialPlatformSub: {
     fontSize: 10.5,
     color: '#64748B',
+    marginTop: 1.5,
   },
   connectedPill: {
     backgroundColor: '#DCFCE7',
-    paddingVertical: 2.5,
-    paddingHorizontal: 7,
-    borderRadius: 6,
+    paddingVertical: 4.5,
+    paddingHorizontal: 9,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#BBF7D0',
   },
   connectedPillText: {
-    fontSize: 8.5,
-    fontWeight: '700',
+    fontSize: 9.5,
+    fontWeight: '800',
     color: '#15803D',
+    letterSpacing: 0.2,
   },
-  socialInputBox: {
-    backgroundColor: '#F8FAFC',
-    borderRadius: 10,
+  notConnectedPill: {
+    backgroundColor: '#F3E8FF',
+    paddingVertical: 4.5,
+    paddingHorizontal: 9,
+    borderRadius: 8,
     borderWidth: 1,
-    borderColor: '#EFECE6',
-    paddingHorizontal: 10,
-    height: 38,
-    justifyContent: 'center',
+    borderColor: '#E9D5FF',
+  },
+  notConnectedPillText: {
+    fontSize: 9.5,
+    fontWeight: '800',
+    color: '#7C3AED',
+    letterSpacing: 0.2,
   },
 
   // Preferences Tab (Harmonious Theme & Switch Colors)

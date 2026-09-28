@@ -42,8 +42,6 @@ import { CreateScreen } from './src/screens/CreateScreen';
 import { ProCreateScreen } from './src/screens/ProCreateScreen';
 import { ScheduleScreen } from './src/screens/ScheduleScreen';
 import { ProScheduleScreen } from './src/screens/ProScheduleScreen';
-import { MatchScreen } from './src/screens/MatchScreen';
-import { ProMatchScreen } from './src/screens/ProMatchScreen';
 import { JarvisProScreen } from './src/screens/JarvisProScreen';
 import { GrowthScreen } from './src/screens/GrowthScreen';
 import { ProGrowthScreen } from './src/screens/ProGrowthScreen';
@@ -57,22 +55,17 @@ import { ProRepurposeScreen } from './src/screens/ProRepurposeScreen';
 import { ContentAngleScreen } from './src/screens/ContentAngleScreen';
 import { ScriptScreen } from './src/screens/ScriptScreen';
 import { CaptionScreen } from './src/screens/CaptionScreen';
-import { MessagesScreen } from './src/screens/MessagesScreen';
-import { ProMessagesScreen } from './src/screens/ProMessagesScreen';
-import { CollabIdeaScreen } from './src/screens/CollabIdeaScreen';
-import { ProSquadScreen } from './src/screens/ProSquadScreen';
-import { FindSquadScreen } from './src/screens/FindSquadScreen';
 import { AudienceBreakdownScreen } from './src/screens/AudienceBreakdownScreen';
 import { PostPerformanceScreen } from './src/screens/PostPerformanceScreen';
 import { PlatformGrowthScreen } from './src/screens/PlatformGrowthScreen';
-import { EarningsScreen } from './src/screens/EarningsScreen';
-import { ProEarningsScreen } from './src/screens/ProEarningsScreen';
 import { ProVoiceStudioScreen } from './src/screens/ProVoiceStudioScreen';
-import { OpportunityReadinessScreen } from './src/screens/OpportunityReadinessScreen';
-import { CreatorPassportScreen } from './src/screens/CreatorPassportScreen';
+import { ProHookStudioScreen } from './src/screens/ProHookStudioScreen';
 import { GhostLoadingScreen } from './src/components/GhostLoadingScreen';
+import { ScreenTransitionContainer, ScreenTransitionType } from './src/components/ScreenTransitionContainer';
+import { EdgeSwipeBackWrapper } from './src/components/EdgeSwipeBackWrapper';
 import { TabType } from './src/components/FloatingTabBar';
 import { UserProfileData } from './src/components/UserProfileModal';
+import { UserPersona } from './src/components/HeaderDualModePills';
 
 type Screen =
   | 'welcome'
@@ -86,9 +79,6 @@ type Screen =
   | 'dashboard'
   | 'mission-detail'
   | 'create'
-  | 'match'
-  | 'squad'
-  | 'find-squad'
   | 'growth'
   | 'quests'
   | 'schedule'
@@ -99,16 +89,12 @@ type Screen =
   | 'script'
   | 'caption'
   | 'repurpose'
-  | 'messages'
-  | 'collab-idea'
   | 'jarvis-pro'
   | 'audience-breakdown'
   | 'post-performance'
   | 'platform-growth'
-  | 'earnings'
-  | 'opportunity-readiness'
-  | 'creator-passport'
-  | 'voice-studio';
+  | 'voice-studio'
+  | 'hook-studio';
 
 export default function App() {
   const [showSplash, setShowSplash] = useState(true);
@@ -139,7 +125,6 @@ export default function App() {
   const [authEmail, setAuthEmail] = useState('');
   const [authUsername, setAuthUsername] = useState('');
   const [verifyMode, setVerifyMode] = useState<'signup' | 'signin'>('signup');
-  const [matchInitialFilter, setMatchInitialFilter] = useState<'all' | 'priority' | 'niche' | 'streak' | 'nearby' | 'ai'>('priority');
   const [selectedIdeaTitle, setSelectedIdeaTitle] = useState('One thing I wish I knew before I started creating');
   const [composerIdeaTitle, setComposerIdeaTitle] = useState('One thing I wish I knew before I started creating');
   const [composerIdeaFormat, setComposerIdeaFormat] = useState<'short_video' | 'carousel' | 'image' | 'long_video' | 'text' | undefined>(undefined);
@@ -149,6 +134,9 @@ export default function App() {
     story: string;
     lesson: string;
     cta: string;
+    badgeLabel?: string;
+    requirements?: string[];
+    xpReward?: number;
   } | null>(null);
   const [composerAttachedAudio, setComposerAttachedAudio] = useState<{
     title: string;
@@ -156,7 +144,6 @@ export default function App() {
     duration: string;
     speed: string;
   } | null>(null);
-  const [activeMessageThreadId, setActiveMessageThreadId] = useState<string | undefined>(undefined);
 
   const handleUseIdea = (title: string, format?: string) => {
     setComposerQuestDraft(null);
@@ -180,91 +167,94 @@ export default function App() {
     }
     navigateTo('composer');
   };
+  const [userPersona, setUserPersona] = useState<UserPersona>('new');
+
+  const handleTogglePersona = () => {
+    setUserPersona((prev) => {
+      const nextPersona = prev === 'returning' ? 'new' : 'returning';
+      setUserProfile((profile) => ({
+        ...profile,
+        userPersona: nextPersona,
+        streakCount: nextPersona === 'new' ? 1 : 17,
+        level: nextPersona === 'new' ? 1 : 5,
+        xp: nextPersona === 'new' ? 0 : 3450,
+        postsCount: nextPersona === 'new' ? 0 : 24,
+        connectedPlatforms: nextPersona === 'new' ? [] : ['tiktok', 'instagram', 'youtube'],
+      }));
+      return nextPersona;
+    });
+  };
+
   const [userProfile, setUserProfile] = useState<UserProfileData>({
     name: 'Pablo',
     handle: '@pablocreates',
     bio: 'Consistency is my superpower. Building my creator streak with Jarvis AI.',
     niche: 'Tech & Lifestyle Creator • Lagos',
     tier: 'free',
+    userPersona: 'new',
     streakCount: 1,
     level: 1,
-    xp: 100,
-    partnersCount: 0,
-    tiktokHandle: '@pablo.creates',
-    instagramHandle: '@pablocreates',
-    youtubeHandle: 'Pablo Creates',
+    xp: 0,
+    postsCount: 0,
+    connectedPlatforms: [],
     niches: ['Lifestyle', 'Tech & AI', 'Storytelling'],
   });
-  const [collabPartnerData, setCollabPartnerData] = useState<{
-    name: string;
-    handle: string;
-    niche: string;
-    avatar: any;
-    planIndex?: number;
-  }>({
-    name: 'Elena Rostova',
-    handle: '@elenacreates',
-    niche: 'Tech & Lifestyle, Lagos',
-    avatar: require('./assets/images/elena-avatar.jpg'),
-    planIndex: 0,
-  });
 
-  // Animated page transition handler
+  // Smart Navigation Handler: Instant (0ms) for bottom tabs & regular screens; Smart AI loader for generation workflows
   const navigateTo = (nextScreen: Screen, customMessage?: string) => {
     if (nextScreen !== 'composer') {
       setComposerQuestDraft(null);
     }
-    if (nextScreen !== currentScreen) {
+    if (nextScreen === currentScreen) return;
+
+    // AI Generation workflows that genuinely benefit from showing Jarvis AI at work
+    const isAiWorkflow =
+      Boolean(customMessage) ||
+      nextScreen === 'caption' ||
+      nextScreen === 'script' ||
+      nextScreen === 'content-angle' ||
+      nextScreen === 'repurpose';
+
+    if (isAiWorkflow) {
       const msg =
         customMessage ||
-        (nextScreen === 'collab-idea'
-          ? 'Opening Collab Blueprint...'
-          : nextScreen === 'messages'
-          ? 'Opening Creator Messages...'
-          : nextScreen === 'caption'
+        (nextScreen === 'caption'
           ? 'Writing Caption & Hashtags...'
           : nextScreen === 'script'
           ? 'Crafting Video Script...'
           : nextScreen === 'content-angle'
           ? 'Finding Content Angles...'
-          : nextScreen === 'composer'
-          ? 'Opening Post Composer...'
-          : nextScreen === 'idea-detail'
-          ? 'Crafting Viral Idea...'
-          : nextScreen === 'challenge-detail'
-          ? 'Entering Community Challenge'
-          : nextScreen === 'mission-detail'
-          ? "Entering Today's Mission"
-          : nextScreen === 'quests'
-          ? 'Entering Quests Hub'
-          : nextScreen === 'growth'
-          ? 'Opening Growth Analytics'
-          : nextScreen === 'jarvis-pro'
-          ? 'Entering Jarvis Pro Suite'
-          : nextScreen === 'schedule'
-          ? 'Loading Content Timeline'
-          : nextScreen === 'create'
-          ? 'Opening Creator Studio'
-          : nextScreen === 'match'
-          ? 'Scanning Match Radar'
-          : nextScreen === 'dashboard'
-          ? 'Syncing Creator Feed'
-          : 'Switching screens');
+          : nextScreen === 'repurpose'
+          ? 'Formatting Multi-Platform Assets...'
+          : 'Jarvis Co-Pilot Processing...');
+
       setLoadingMessage(msg);
       setIsPageLoading(true);
+
       setTimeout(() => {
         setPreviousScreen(currentScreen);
         setCurrentScreen(nextScreen);
         setTimeout(() => {
           setIsPageLoading(false);
-        }, 200);
-      }, 550);
+        }, 150);
+      }, 400);
+    } else {
+      // Instant, snappy native transition for bottom tabs, dashboards, and standard views
+      setPreviousScreen(currentScreen);
+      setCurrentScreen(nextScreen);
+    }
+  };
+
+  const handleTabNavigation = (tab: TabType) => {
+    if (tab === 'home') {
+      navigateTo('dashboard');
+    } else {
+      navigateTo(tab);
     }
   };
 
   // Welcome Screen actions
   const handleGetStarted = () => {
-    // New flow: Get Started takes user to Onboarding Step 1 (Niche Selection)
     navigateTo('niche');
   };
 
@@ -279,7 +269,6 @@ export default function App() {
 
   const handleNicheContinue = (niches: string[]) => {
     setSelectedNiches(niches);
-    // Advance to Step 2: Platform Connection (50%)
     navigateTo('platforms');
   };
 
@@ -290,12 +279,10 @@ export default function App() {
 
   const handlePlatformsContinue = (platforms: string[]) => {
     setConnectedPlatforms(platforms);
-    // Advance to Step 3: Account Creation (75%)
     navigateTo('signup');
   };
 
   const handlePlatformsSkip = () => {
-    // Advance to Step 3: Account Creation (75%) with default platforms
     navigateTo('signup');
   };
 
@@ -352,10 +339,8 @@ export default function App() {
   const handleVerifyCodeSuccess = (_email: string) => {
     setUserProfile(prev => ({ ...prev, tier: 'free' }));
     if (verifyMode === 'signup') {
-      // Advance to Step 4: Onboarding Completion (100%)
       navigateTo('complete');
     } else {
-      // Direct sign in straight to the free creator dashboard
       navigateTo('dashboard');
     }
   };
@@ -367,13 +352,11 @@ export default function App() {
 
   const handleStartFirstMission = () => {
     setUserProfile(prev => ({ ...prev, tier: 'free' }));
-    // Launch to Free Mission Detail Page
     navigateTo('mission-detail');
   };
 
   const handleGoToDashboard = () => {
     setUserProfile(prev => ({ ...prev, tier: 'free' }));
-    // Launch directly to free dashboard
     navigateTo('dashboard');
   };
 
@@ -381,17 +364,104 @@ export default function App() {
     navigateTo('welcome');
   };
 
+  const getTransitionType = (screen: Screen): ScreenTransitionType => {
+    if (
+      screen === 'dashboard' ||
+      screen === 'quests' ||
+      screen === 'growth' ||
+      screen === 'create' ||
+      screen === 'schedule'
+    ) {
+      return 'tab';
+    }
+    if (
+      screen === 'welcome' ||
+      screen === 'signup' ||
+      screen === 'signin' ||
+      screen === 'niche' ||
+      screen === 'platforms' ||
+      screen === 'complete' ||
+      screen === 'verify-code'
+    ) {
+      return 'push';
+    }
+    return 'modal';
+  };
+
+  const getBackScreen = (screen: Screen): Screen | null => {
+    switch (screen) {
+      case 'signup':
+        return 'platforms';
+      case 'signin':
+        return 'welcome';
+      case 'verify-code':
+        return verifyMode === 'signup' ? 'signup' : 'signin';
+      case 'niche':
+        return 'welcome';
+      case 'platforms':
+        return 'niche';
+      case 'complete':
+        return 'signup';
+      case 'mission-detail':
+        return 'dashboard';
+      case 'challenge-detail':
+        return 'quests';
+      case 'idea-detail':
+        return 'create';
+      case 'composer':
+        return previousScreen && previousScreen !== 'composer' ? previousScreen : 'create';
+      case 'content-angle':
+        return 'create';
+      case 'script':
+        return 'create';
+      case 'caption':
+        return 'create';
+      case 'repurpose':
+        return 'create';
+      case 'jarvis-pro':
+        return 'dashboard';
+      case 'audience-breakdown':
+        return 'growth';
+      case 'post-performance':
+        return 'growth';
+      case 'platform-growth':
+        return 'growth';
+      case 'voice-studio':
+        return 'create';
+      case 'hook-studio':
+        return 'create';
+      case 'schedule':
+        return 'dashboard';
+      default:
+        return null;
+    }
+  };
+
   return (
     <SafeAreaProvider>
       <View style={styles.container}>
         <StatusBar style="dark" />
 
-        {currentScreen === 'welcome' && (
-          <WelcomeScreen
-            onGetStarted={handleGetStarted}
-            onSignIn={handleOpenSignInFromWelcome}
-          />
-        )}
+        <EdgeSwipeBackWrapper
+          enabled={Boolean(getBackScreen(currentScreen))}
+          onSwipeBack={() => {
+            const backTarget = getBackScreen(currentScreen);
+            if (backTarget) {
+              navigateTo(backTarget);
+            }
+          }}
+        >
+          <ScreenTransitionContainer
+            screenKey={currentScreen}
+            previousScreenKey={previousScreen}
+            transitionType={getTransitionType(currentScreen)}
+          >
+          {currentScreen === 'welcome' && (
+            <WelcomeScreen
+              onGetStarted={handleGetStarted}
+              onSignIn={handleOpenSignInFromWelcome}
+            />
+          )}
 
         {currentScreen === 'signup' && (
           <SignUpScreen
@@ -452,14 +522,8 @@ export default function App() {
               onStartMission={() => navigateTo('mission-detail')}
               onOpenJarvisPro={() => navigateTo('jarvis-pro')}
               onOpenSchedule={() => navigateTo('schedule')}
-              onOpenMessages={(threadId?: string) => {
-                setActiveMessageThreadId(threadId);
-                navigateTo('messages');
-              }}
-              onOpenEarnings={() => navigateTo('earnings')}
               onOpenQuests={() => navigateTo('quests')}
               onOpenGrowth={() => navigateTo('growth')}
-              onOpenMatch={() => navigateTo('match')}
               onOpenCreate={() => navigateTo('create')}
               onOpenVoiceStudio={() => navigateTo('voice-studio')}
               onOpenPostComposer={(ideaTitle) => {
@@ -469,19 +533,11 @@ export default function App() {
               onSwitchToFree={() => {
                 setUserProfile(prev => ({ ...prev, tier: 'free' }));
               }}
-              onNavigateTab={(tab: TabType) => {
-                if (tab === 'create') {
-                  navigateTo('create');
-                } else if (tab === 'match') {
-                  navigateTo('match');
-                } else if (tab === 'quests') {
-                  navigateTo('quests');
-                } else if (tab === 'growth') {
-                  navigateTo('growth');
-                }
-              }}
+              onNavigateTab={handleTabNavigation}
               userProfile={userProfile}
-              onSaveProfile={(updated) => setUserProfile(prev => ({ ...prev, ...updated, tier: updated.tier || prev.tier || "free" }))}
+              userPersona={userPersona}
+              onTogglePersona={handleTogglePersona}
+              onSaveProfile={(updated) => setUserProfile(prev => ({ ...prev, ...updated, tier: updated.tier || prev.tier || 'free' }))}
             />
           ) : (
             <DashboardScreen
@@ -492,24 +548,12 @@ export default function App() {
               onSwitchToPro={() => {
                 setUserProfile(prev => ({ ...prev, tier: 'pro' }));
               }}
+              userPersona={userPersona}
+              onTogglePersona={handleTogglePersona}
               onOpenSchedule={() => navigateTo('schedule')}
-              onOpenMessages={(threadId?: string) => {
-                setActiveMessageThreadId(threadId);
-                navigateTo('messages');
-              }}
-              onNavigateTab={(tab: TabType) => {
-                if (tab === 'create') {
-                  navigateTo('create');
-                } else if (tab === 'match') {
-                  navigateTo('match');
-                } else if (tab === 'quests') {
-                  navigateTo('quests');
-                } else if (tab === 'growth') {
-                  navigateTo('growth');
-                }
-              }}
+              onNavigateTab={handleTabNavigation}
               userProfile={userProfile}
-              onSaveProfile={(updated) => setUserProfile(prev => ({ ...prev, ...updated, tier: updated.tier || prev.tier || "free" }))}
+              onSaveProfile={(updated) => setUserProfile(prev => ({ ...prev, ...updated, tier: updated.tier || prev.tier || 'free' }))}
             />
           )
         )}
@@ -520,13 +564,11 @@ export default function App() {
               onBack={() => navigateTo(previousScreen ? previousScreen : 'dashboard')}
               onLogout={handleLogout}
               onOpenSchedule={() => navigateTo('schedule')}
-              onOpenMessages={(threadId?: string) => {
-                setActiveMessageThreadId(threadId);
-                navigateTo('messages');
-              }}
               onOpenJarvisPro={() => navigateTo('jarvis-pro')}
-              onOpenPostComposer={(ideaTitle) => {
+              onOpenPostComposer={(ideaTitle, platform, questDraft, format) => {
                 if (ideaTitle) setComposerIdeaTitle(ideaTitle);
+                if (questDraft) setComposerQuestDraft(questDraft);
+                if (format) setComposerIdeaFormat(format as any);
                 navigateTo('composer');
               }}
               onSwitchToFree={() => {
@@ -534,51 +576,23 @@ export default function App() {
                   setUserProfile({ ...userProfile, tier: 'free' });
                 }
               }}
-              onNavigateTab={(tab: TabType) => {
-                if (tab === 'home') {
-                  navigateTo('dashboard');
-                } else if (tab === 'create') {
-                  navigateTo('create');
-                } else if (tab === 'match') {
-                  navigateTo('match');
-                } else if (tab === 'quests') {
-                  navigateTo('quests');
-                } else if (tab === 'growth') {
-                  navigateTo('growth');
-                }
-              }}
+              onNavigateTab={handleTabNavigation}
               userProfile={userProfile}
-              onSaveProfile={(updated) => setUserProfile(prev => ({ ...prev, ...updated, tier: updated.tier || prev.tier || "free" }))}
+              onSaveProfile={(updated) => setUserProfile(prev => ({ ...prev, ...updated, tier: updated.tier || prev.tier || 'free' }))}
             />
           ) : (
             <MissionDetailScreen
               onBackToDashboard={() => navigateTo('dashboard')}
               onLogout={handleLogout}
-              onOpenMessages={(threadId?: string) => {
-                setActiveMessageThreadId(threadId);
-                navigateTo('messages');
-              }}
               onOpenCreateIdea={() => navigateTo('create')}
               onOpenIdeaAngle={() => navigateTo('content-angle')}
               onOpenPostComposer={(title, platform) => {
                 if (title) setComposerIdeaTitle(title);
                 navigateTo('composer');
               }}
-              onNavigateTab={(tab: TabType) => {
-                if (tab === 'home') {
-                  navigateTo('dashboard');
-                } else if (tab === 'create') {
-                  navigateTo('create');
-                } else if (tab === 'match') {
-                  navigateTo('match');
-                } else if (tab === 'quests') {
-                  navigateTo('quests');
-                } else if (tab === 'growth') {
-                  navigateTo('growth');
-                }
-              }}
+              onNavigateTab={handleTabNavigation}
               userProfile={userProfile}
-              onSaveProfile={(updated) => setUserProfile(prev => ({ ...prev, ...updated, tier: updated.tier || prev.tier || "free" }))}
+              onSaveProfile={(updated) => setUserProfile(prev => ({ ...prev, ...updated, tier: updated.tier || prev.tier || 'free' }))}
             />
           )
         )}
@@ -588,10 +602,6 @@ export default function App() {
             <ProCreateScreen
               onLogout={handleLogout}
               onOpenSchedule={() => navigateTo('schedule')}
-              onOpenMessages={(threadId?: string) => {
-                setActiveMessageThreadId(threadId);
-                navigateTo('messages');
-              }}
               onOpenJarvisPro={() => navigateTo('jarvis-pro')}
               onOpenIdeaDetail={(title) => {
                 if (title) setSelectedIdeaTitle(title);
@@ -603,6 +613,7 @@ export default function App() {
               }}
               onOpenIdeaAngle={() => navigateTo('content-angle')}
               onOpenVoiceStudio={() => navigateTo('voice-studio')}
+              onOpenHookStudio={() => navigateTo('hook-studio')}
               onOpenScript={(title) => {
                 if (title) setSelectedIdeaTitle(title);
                 navigateTo('script');
@@ -618,28 +629,16 @@ export default function App() {
               onSwitchToFree={() => {
                 setUserProfile(prev => ({ ...prev, tier: 'free' }));
               }}
-              onNavigateTab={(tab: TabType) => {
-                if (tab === 'home') {
-                  navigateTo('dashboard');
-                } else if (tab === 'match') {
-                  navigateTo('match');
-                } else if (tab === 'quests') {
-                  navigateTo('quests');
-                } else if (tab === 'growth') {
-                  navigateTo('growth');
-                }
-              }}
+              onNavigateTab={handleTabNavigation}
               userProfile={userProfile}
-              onSaveProfile={(updated) => setUserProfile(prev => ({ ...prev, ...updated, tier: updated.tier || prev.tier || "free" }))}
+              userPersona={userPersona}
+              onTogglePersona={handleTogglePersona}
+              onSaveProfile={(updated) => setUserProfile(prev => ({ ...prev, ...updated, tier: updated.tier || prev.tier || 'free' }))}
             />
           ) : (
             <CreateScreen
               onLogout={handleLogout}
               onOpenSchedule={() => navigateTo('schedule')}
-              onOpenMessages={(threadId?: string) => {
-                setActiveMessageThreadId(threadId);
-                navigateTo('messages');
-              }}
               onOpenJarvisPro={() => navigateTo('jarvis-pro')}
               onOpenIdeaDetail={(title) => {
                 if (title) setSelectedIdeaTitle(title);
@@ -662,19 +661,17 @@ export default function App() {
                 if (title) setSelectedIdeaTitle(title);
                 navigateTo('repurpose');
               }}
-              onNavigateTab={(tab: TabType) => {
-                if (tab === 'home') {
-                  navigateTo('dashboard');
-                } else if (tab === 'match') {
-                  navigateTo('match');
-                } else if (tab === 'quests') {
-                  navigateTo('quests');
-                } else if (tab === 'growth') {
-                  navigateTo('growth');
-                }
+              onNavigateTab={handleTabNavigation}
+              userPersona={userPersona}
+              onTogglePersona={handleTogglePersona}
+              onSwitchToPro={() => {
+                setUserProfile(prev => ({ ...prev, tier: 'pro' }));
+              }}
+              onSwitchToFree={() => {
+                setUserProfile(prev => ({ ...prev, tier: 'free' }));
               }}
               userProfile={userProfile}
-              onSaveProfile={(updated) => setUserProfile(prev => ({ ...prev, ...updated, tier: updated.tier || prev.tier || "free" }))}
+              onSaveProfile={(updated) => setUserProfile(prev => ({ ...prev, ...updated, tier: updated.tier || prev.tier || 'free' }))}
             />
           )
         )}
@@ -684,10 +681,6 @@ export default function App() {
             <ProScheduleScreen
               onBack={() => navigateTo(previousScreen ? previousScreen : 'dashboard')}
               onLogout={handleLogout}
-              onOpenMessages={(threadId?: string) => {
-                setActiveMessageThreadId(threadId);
-                navigateTo('messages');
-              }}
               onOpenJarvisPro={() => navigateTo('jarvis-pro')}
               onOpenCreateIdea={() => navigateTo('create')}
               onStartMission={() => navigateTo('mission-detail')}
@@ -700,113 +693,23 @@ export default function App() {
                   setUserProfile({ ...userProfile, tier: 'free' });
                 }
               }}
-              onNavigateTab={(tab: TabType) => {
-                if (tab === 'home') {
-                  navigateTo('dashboard');
-                } else if (tab === 'create') {
-                  navigateTo('create');
-                } else if (tab === 'match') {
-                  navigateTo('match');
-                } else if (tab === 'quests') {
-                  navigateTo('quests');
-                } else if (tab === 'growth') {
-                  navigateTo('growth');
-                }
-              }}
+              onNavigateTab={handleTabNavigation}
               userProfile={userProfile}
-              onSaveProfile={(updated) => setUserProfile(prev => ({ ...prev, ...updated, tier: updated.tier || prev.tier || "free" }))}
+              onSaveProfile={(updated) => setUserProfile(prev => ({ ...prev, ...updated, tier: updated.tier || prev.tier || 'free' }))}
             />
           ) : (
             <ScheduleScreen
               onBack={() => navigateTo(previousScreen ? previousScreen : 'dashboard')}
               onLogout={handleLogout}
-              onOpenMessages={(threadId?: string) => {
-                setActiveMessageThreadId(threadId);
-                navigateTo('messages');
-              }}
               onOpenJarvisPro={() => navigateTo('jarvis-pro')}
               onOpenCreateIdea={() => navigateTo('create')}
               onOpenPostComposer={(title, platform) => {
                 if (title) setComposerIdeaTitle(title);
                 navigateTo('composer');
               }}
-              onNavigateTab={(tab: TabType) => {
-                if (tab === 'home') {
-                  navigateTo('dashboard');
-                } else if (tab === 'create') {
-                  navigateTo('create');
-                } else if (tab === 'match') {
-                  navigateTo('match');
-                } else if (tab === 'quests') {
-                  navigateTo('quests');
-                } else if (tab === 'growth') {
-                  navigateTo('growth');
-                }
-              }}
+              onNavigateTab={handleTabNavigation}
               userProfile={userProfile}
-              onSaveProfile={(updated) => setUserProfile(prev => ({ ...prev, ...updated, tier: updated.tier || prev.tier || "free" }))}
-            />
-          )
-        )}
-
-        {currentScreen === 'match' && (
-          (userProfile?.tier === 'pro' || userProfile?.tier === 'founding') ? (
-            <ProMatchScreen
-              initialFilter={matchInitialFilter}
-              onLogout={handleLogout}
-              onOpenMessages={(threadId?: string) => {
-                setActiveMessageThreadId(threadId);
-                navigateTo('messages');
-              }}
-              onOpenJarvisPro={() => navigateTo('jarvis-pro')}
-              onOpenPostComposer={(ideaTitle) => {
-                if (ideaTitle) setComposerIdeaTitle(ideaTitle);
-                navigateTo('composer');
-              }}
-              onOpenCollabIdea={(partnerData) => {
-                if (partnerData) setCollabPartnerData(partnerData);
-                navigateTo('collab-idea');
-              }}
-              onOpenSquad={() => navigateTo('squad')}
-              onOpenFindSquad={() => navigateTo('find-squad')}
-              onSwitchToFree={() => {
-                setUserProfile(prev => ({ ...prev, tier: 'free' }));
-              }}
-              onNavigateTab={(tab: TabType) => {
-                if (tab === 'home') {
-                  navigateTo('dashboard');
-                } else if (tab === 'create') {
-                  navigateTo('create');
-                } else if (tab === 'quests') {
-                  navigateTo('quests');
-                } else if (tab === 'growth') {
-                  navigateTo('growth');
-                }
-              }}
-              userProfile={userProfile}
-              onSaveProfile={(updated) => setUserProfile(prev => ({ ...prev, ...updated, tier: updated.tier || prev.tier || "free" }))}
-            />
-          ) : (
-            <MatchScreen
-              onLogout={handleLogout}
-              onOpenMessages={(threadId?: string) => {
-                setActiveMessageThreadId(threadId);
-                navigateTo('messages');
-              }}
-              onOpenJarvisPro={() => navigateTo('jarvis-pro')}
-              onNavigateTab={(tab: TabType) => {
-                if (tab === 'home') {
-                  navigateTo('dashboard');
-                } else if (tab === 'create') {
-                  navigateTo('create');
-                } else if (tab === 'quests') {
-                  navigateTo('quests');
-                } else if (tab === 'growth') {
-                  navigateTo('growth');
-                }
-              }}
-              userProfile={userProfile}
-              onSaveProfile={(updated) => setUserProfile(prev => ({ ...prev, ...updated, tier: updated.tier || prev.tier || "free" }))}
+              onSaveProfile={(updated) => setUserProfile(prev => ({ ...prev, ...updated, tier: updated.tier || prev.tier || 'free' }))}
             />
           )
         )}
@@ -816,15 +719,10 @@ export default function App() {
             <ProGrowthScreen
               onBackToDashboard={() => navigateTo('dashboard')}
               onLogout={handleLogout}
-              onOpenMessages={(threadId?: string) => {
-                setActiveMessageThreadId(threadId);
-                navigateTo('messages');
-              }}
               onOpenJarvisPro={() => navigateTo('jarvis-pro')}
               onOpenAudienceBreakdown={() => navigateTo('audience-breakdown')}
               onOpenPostPerformance={() => navigateTo('post-performance')}
               onOpenPlatformGrowth={() => navigateTo('platform-growth')}
-              onOpenEarnings={() => navigateTo('earnings')}
               onOpenSchedule={() => navigateTo('schedule')}
               onOpenPostComposer={(title, platform) => {
                 if (title) setComposerIdeaTitle(title);
@@ -834,48 +732,28 @@ export default function App() {
               onSwitchToFree={() => {
                 setUserProfile(prev => ({ ...prev, tier: 'free' }));
               }}
-              onNavigateTab={(tab: TabType) => {
-                if (tab === 'home') {
-                  navigateTo('dashboard');
-                } else if (tab === 'create') {
-                  navigateTo('create');
-                } else if (tab === 'match') {
-                  navigateTo('match');
-                } else if (tab === 'quests') {
-                  navigateTo('quests');
-                }
-              }}
+              onNavigateTab={handleTabNavigation}
               userProfile={userProfile}
-              onSaveProfile={(updated) => setUserProfile(prev => ({ ...prev, ...updated, tier: updated.tier || prev.tier || "free" }))}
+              userPersona={userPersona}
+              onTogglePersona={handleTogglePersona}
+              onSaveProfile={(updated) => setUserProfile(prev => ({ ...prev, ...updated, tier: updated.tier || prev.tier || 'free' }))}
             />
           ) : (
             <GrowthScreen
               onBackToDashboard={() => navigateTo('dashboard')}
               onLogout={handleLogout}
-              onOpenMessages={(threadId?: string) => {
-                setActiveMessageThreadId(threadId);
-                navigateTo('messages');
-              }}
               onOpenJarvisPro={() => navigateTo('jarvis-pro')}
+              onSwitchToPro={() => {
+                setUserProfile(prev => ({ ...prev, tier: 'pro' }));
+              }}
+              userPersona={userPersona}
+              onTogglePersona={handleTogglePersona}
               onOpenAudienceBreakdown={() => navigateTo('audience-breakdown')}
               onOpenPostPerformance={() => navigateTo('post-performance')}
               onOpenPlatformGrowth={() => navigateTo('platform-growth')}
-              onOpenEarnings={() => navigateTo('earnings')}
-              onOpenSquad={() => navigateTo('squad')}
-              onOpenFindSquad={() => navigateTo('find-squad')}
-              onNavigateTab={(tab: TabType) => {
-                if (tab === 'home') {
-                  navigateTo('dashboard');
-                } else if (tab === 'create') {
-                  navigateTo('create');
-                } else if (tab === 'match') {
-                  navigateTo('match');
-                } else if (tab === 'quests') {
-                  navigateTo('quests');
-                }
-              }}
+              onNavigateTab={handleTabNavigation}
               userProfile={userProfile}
-              onSaveProfile={(updated) => setUserProfile(prev => ({ ...prev, ...updated, tier: updated.tier || prev.tier || "free" }))}
+              onSaveProfile={(updated) => setUserProfile(prev => ({ ...prev, ...updated, tier: updated.tier || prev.tier || 'free' }))}
             />
           )
         )}
@@ -884,25 +762,9 @@ export default function App() {
           <JarvisProScreen
             onBack={() => navigateTo('growth')}
             onLogout={handleLogout}
-            onOpenMessages={(threadId?: string) => {
-                setActiveMessageThreadId(threadId);
-                navigateTo('messages');
-              }}
-            onNavigateTab={(tab: TabType) => {
-              if (tab === 'home') {
-                navigateTo('dashboard');
-              } else if (tab === 'create') {
-                navigateTo('create');
-              } else if (tab === 'match') {
-                navigateTo('match');
-              } else if (tab === 'quests') {
-                navigateTo('quests');
-              } else if (tab === 'growth') {
-                navigateTo('growth');
-              }
-            }}
+            onNavigateTab={handleTabNavigation}
             userProfile={userProfile}
-            onSaveProfile={(updated) => setUserProfile(prev => ({ ...prev, ...updated, tier: updated.tier || prev.tier || "free" }))}
+            onSaveProfile={(updated) => setUserProfile(prev => ({ ...prev, ...updated, tier: updated.tier || prev.tier || 'free' }))}
           />
         )}
 
@@ -914,40 +776,21 @@ export default function App() {
               onOpenMissionDetail={() => navigateTo('mission-detail')}
               onOpenCommunityChallenge={() => navigateTo('challenge-detail')}
               onOpenSchedule={() => navigateTo('schedule')}
-              onOpenMessages={(threadId?: string) => {
-                setActiveMessageThreadId(threadId);
-                navigateTo('messages');
-              }}
               onOpenJarvisPro={() => navigateTo('jarvis-pro')}
-              onOpenEarnings={() => navigateTo('earnings')}
-              onOpenPostComposer={(title, platform) => {
+              onOpenPostComposer={(title, platform, questDraft, format) => {
                 if (title) setComposerIdeaTitle(title);
+                if (questDraft) setComposerQuestDraft(questDraft);
+                if (format) setComposerIdeaFormat(format as any);
                 navigateTo('composer');
-              }}
-              onOpenSquad={() => navigateTo('squad')}
-              onOpenPassport={() => navigateTo('growth')}
-              onOpenOpportunities={() => {
-                setMatchInitialFilter('priority');
-                navigateTo('match');
               }}
               onSwitchToFree={() => {
                 setUserProfile(prev => ({ ...prev, tier: 'free' }));
               }}
-              onNavigateTab={(tab: TabType) => {
-                if (tab === 'home') {
-                  navigateTo('dashboard');
-                } else if (tab === 'create') {
-                  navigateTo('create');
-                } else if (tab === 'match') {
-                  navigateTo('match');
-                } else if (tab === 'growth') {
-                  navigateTo('growth');
-                } else if ((tab as string) === 'schedule') {
-                  navigateTo('schedule');
-                }
-              }}
+              onNavigateTab={handleTabNavigation}
               userProfile={userProfile}
-              onSaveProfile={(updated) => setUserProfile(prev => ({ ...prev, ...updated, tier: updated.tier || prev.tier || "free" }))}
+              userPersona={userPersona}
+              onTogglePersona={handleTogglePersona}
+              onSaveProfile={(updated) => setUserProfile(prev => ({ ...prev, ...updated, tier: updated.tier || prev.tier || 'free' }))}
             />
           ) : (
             <QuestsScreen
@@ -956,27 +799,15 @@ export default function App() {
               onOpenMissionDetail={() => navigateTo('mission-detail')}
               onOpenCommunityChallenge={() => navigateTo('challenge-detail')}
               onOpenSchedule={() => navigateTo('schedule')}
-              onOpenMessages={(threadId?: string) => {
-                setActiveMessageThreadId(threadId);
-                navigateTo('messages');
-              }}
               onOpenJarvisPro={() => navigateTo('jarvis-pro')}
-              onOpenEarnings={() => navigateTo('earnings')}
-              onNavigateTab={(tab: TabType) => {
-                if (tab === 'home') {
-                  navigateTo('dashboard');
-                } else if (tab === 'create') {
-                  navigateTo('create');
-                } else if (tab === 'match') {
-                  navigateTo('match');
-                } else if (tab === 'growth') {
-                  navigateTo('growth');
-                } else if ((tab as string) === 'schedule') {
-                  navigateTo('schedule');
-                }
+              onSwitchToPro={() => {
+                setUserProfile(prev => ({ ...prev, tier: 'pro' }));
               }}
+              userPersona={userPersona}
+              onTogglePersona={handleTogglePersona}
+              onNavigateTab={handleTabNavigation}
               userProfile={userProfile}
-              onSaveProfile={(updated) => setUserProfile(prev => ({ ...prev, ...updated, tier: updated.tier || prev.tier || "free" }))}
+              onSaveProfile={(updated) => setUserProfile(prev => ({ ...prev, ...updated, tier: updated.tier || prev.tier || 'free' }))}
             />
           )
         )}
@@ -994,25 +825,9 @@ export default function App() {
               }
               navigateTo('composer');
             }}
-            onOpenMessages={(threadId?: string) => {
-                setActiveMessageThreadId(threadId);
-                navigateTo('messages');
-              }}
-            onNavigateTab={(tab: TabType) => {
-              if (tab === 'home') {
-                navigateTo('dashboard');
-              } else if (tab === 'create') {
-                navigateTo('create');
-              } else if (tab === 'match') {
-                navigateTo('match');
-              } else if (tab === 'quests') {
-                navigateTo('quests');
-              } else if (tab === 'growth') {
-                navigateTo('growth');
-              }
-            }}
+            onNavigateTab={handleTabNavigation}
             userProfile={userProfile}
-            onSaveProfile={(updated) => setUserProfile(prev => ({ ...prev, ...updated, tier: updated.tier || prev.tier || "free" }))}
+            onSaveProfile={(updated) => setUserProfile(prev => ({ ...prev, ...updated, tier: updated.tier || prev.tier || 'free' }))}
           />
         )}
 
@@ -1022,31 +837,15 @@ export default function App() {
             onBack={() => navigateTo(previousScreen ? previousScreen : 'create')}
             onLogout={handleLogout}
             onOpenSchedule={() => navigateTo('schedule')}
-            onOpenMessages={(threadId?: string) => {
-                setActiveMessageThreadId(threadId);
-                navigateTo('messages');
-              }}
             onOpenJarvisPro={() => navigateTo('jarvis-pro')}
             onOpenPostComposer={(title) => {
               if (title) setComposerIdeaTitle(title);
               setComposerQuestDraft(null);
               navigateTo('composer');
             }}
-            onNavigateTab={(tab: TabType) => {
-              if (tab === 'home') {
-                navigateTo('dashboard');
-              } else if (tab === 'create') {
-                navigateTo('create');
-              } else if (tab === 'match') {
-                navigateTo('match');
-              } else if (tab === 'quests') {
-                navigateTo('quests');
-              } else if (tab === 'growth') {
-                navigateTo('growth');
-              }
-            }}
+            onNavigateTab={handleTabNavigation}
             userProfile={userProfile}
-            onSaveProfile={(updated) => setUserProfile(prev => ({ ...prev, ...updated, tier: updated.tier || prev.tier || "free" }))}
+            onSaveProfile={(updated) => setUserProfile(prev => ({ ...prev, ...updated, tier: updated.tier || prev.tier || 'free' }))}
           />
         )}
 
@@ -1060,26 +859,10 @@ export default function App() {
             onBack={() => navigateTo(previousScreen ? previousScreen : 'create')}
             onLogout={handleLogout}
             onOpenSchedule={() => navigateTo('schedule')}
-            onOpenMessages={(threadId?: string) => {
-              setActiveMessageThreadId(threadId);
-              navigateTo('messages');
-            }}
             onOpenJarvisPro={() => navigateTo('jarvis-pro')}
-            onNavigateTab={(tab: TabType) => {
-              if (tab === 'home') {
-                navigateTo('dashboard');
-              } else if (tab === 'create') {
-                navigateTo('create');
-              } else if (tab === 'match') {
-                navigateTo('match');
-              } else if (tab === 'quests') {
-                navigateTo('quests');
-              } else if (tab === 'growth') {
-                navigateTo('growth');
-              }
-            }}
+            onNavigateTab={handleTabNavigation}
             userProfile={userProfile}
-            onSaveProfile={(updated) => setUserProfile(prev => ({ ...prev, ...updated, tier: updated.tier || prev.tier || "free" }))}
+            onSaveProfile={(updated) => setUserProfile(prev => ({ ...prev, ...updated, tier: updated.tier || prev.tier || 'free' }))}
           />
         )}
 
@@ -1089,10 +872,6 @@ export default function App() {
               onBack={() => navigateTo(previousScreen ? previousScreen : 'create')}
               onLogout={handleLogout}
               onOpenSchedule={() => navigateTo('schedule')}
-              onOpenMessages={(threadId?: string) => {
-                setActiveMessageThreadId(threadId);
-                navigateTo('messages');
-              }}
               onOpenJarvisPro={() => navigateTo('jarvis-pro')}
               onUseIdea={handleUseIdea}
               onSwitchToFree={() => {
@@ -1100,48 +879,20 @@ export default function App() {
                   setUserProfile({ ...userProfile, tier: 'free' });
                 }
               }}
-              onNavigateTab={(tab: TabType) => {
-                if (tab === 'home') {
-                  navigateTo('dashboard');
-                } else if (tab === 'create') {
-                  navigateTo('create');
-                } else if (tab === 'match') {
-                  navigateTo('match');
-                } else if (tab === 'quests') {
-                  navigateTo('quests');
-                } else if (tab === 'growth') {
-                  navigateTo('growth');
-                }
-              }}
+              onNavigateTab={handleTabNavigation}
               userProfile={userProfile}
-              onSaveProfile={(updated) => setUserProfile(prev => ({ ...prev, ...updated, tier: updated.tier || prev.tier || "free" }))}
+              onSaveProfile={(updated) => setUserProfile(prev => ({ ...prev, ...updated, tier: updated.tier || prev.tier || 'free' }))}
             />
           ) : (
             <ContentAngleScreen
               onBack={() => navigateTo(previousScreen ? previousScreen : 'create')}
               onLogout={handleLogout}
               onOpenSchedule={() => navigateTo('schedule')}
-              onOpenMessages={(threadId?: string) => {
-                  setActiveMessageThreadId(threadId);
-                  navigateTo('messages');
-                }}
               onOpenJarvisPro={() => navigateTo('jarvis-pro')}
               onUseIdea={handleUseIdea}
-              onNavigateTab={(tab: TabType) => {
-                if (tab === 'home') {
-                  navigateTo('dashboard');
-                } else if (tab === 'create') {
-                  navigateTo('create');
-                } else if (tab === 'match') {
-                  navigateTo('match');
-                } else if (tab === 'quests') {
-                  navigateTo('quests');
-                } else if (tab === 'growth') {
-                  navigateTo('growth');
-                }
-              }}
+              onNavigateTab={handleTabNavigation}
               userProfile={userProfile}
-              onSaveProfile={(updated) => setUserProfile(prev => ({ ...prev, ...updated, tier: updated.tier || prev.tier || "free" }))}
+              onSaveProfile={(updated) => setUserProfile(prev => ({ ...prev, ...updated, tier: updated.tier || prev.tier || 'free' }))}
             />
           )
         )}
@@ -1153,10 +904,6 @@ export default function App() {
               onBack={() => navigateTo(previousScreen ? previousScreen : 'create')}
               onLogout={handleLogout}
               onOpenSchedule={() => navigateTo('schedule')}
-              onOpenMessages={(threadId?: string) => {
-                setActiveMessageThreadId(threadId);
-                navigateTo('messages');
-              }}
               onOpenJarvisPro={() => navigateTo('jarvis-pro')}
               onOpenVoiceStudio={(text, title) => {
                 if (title) setSelectedIdeaTitle(title);
@@ -1172,21 +919,9 @@ export default function App() {
                   setUserProfile({ ...userProfile, tier: 'free' });
                 }
               }}
-              onNavigateTab={(tab: TabType) => {
-                if (tab === 'home') {
-                  navigateTo('dashboard');
-                } else if (tab === 'create') {
-                  navigateTo('create');
-                } else if (tab === 'match') {
-                  navigateTo('match');
-                } else if (tab === 'quests') {
-                  navigateTo('quests');
-                } else if (tab === 'growth') {
-                  navigateTo('growth');
-                }
-              }}
+              onNavigateTab={handleTabNavigation}
               userProfile={userProfile}
-              onSaveProfile={(updated) => setUserProfile(prev => ({ ...prev, ...updated, tier: updated.tier || prev.tier || "free" }))}
+              onSaveProfile={(updated) => setUserProfile(prev => ({ ...prev, ...updated, tier: updated.tier || prev.tier || 'free' }))}
             />
           ) : (
             <ScriptScreen
@@ -1195,30 +930,14 @@ export default function App() {
               onBack={() => navigateTo(previousScreen ? previousScreen : 'create')}
               onLogout={handleLogout}
               onOpenSchedule={() => navigateTo('schedule')}
-              onOpenMessages={(threadId?: string) => {
-                  setActiveMessageThreadId(threadId);
-                  navigateTo('messages');
-                }}
               onOpenJarvisPro={() => navigateTo('jarvis-pro')}
               onUseAsPost={(scriptData) => {
                 if (scriptData.hook) setComposerIdeaTitle(scriptData.hook);
                 navigateTo('composer');
               }}
-              onNavigateTab={(tab: TabType) => {
-                if (tab === 'home') {
-                  navigateTo('dashboard');
-                } else if (tab === 'create') {
-                  navigateTo('create');
-                } else if (tab === 'match') {
-                  navigateTo('match');
-                } else if (tab === 'quests') {
-                  navigateTo('quests');
-                } else if (tab === 'growth') {
-                  navigateTo('growth');
-                }
-              }}
+              onNavigateTab={handleTabNavigation}
               userProfile={userProfile}
-              onSaveProfile={(updated) => setUserProfile(prev => ({ ...prev, ...updated, tier: updated.tier || prev.tier || "free" }))}
+              onSaveProfile={(updated) => setUserProfile(prev => ({ ...prev, ...updated, tier: updated.tier || prev.tier || 'free' }))}
             />
           )
         )}
@@ -1230,10 +949,6 @@ export default function App() {
               onBack={() => navigateTo(previousScreen ? previousScreen : 'create')}
               onLogout={handleLogout}
               onOpenSchedule={() => navigateTo('schedule')}
-              onOpenMessages={(threadId?: string) => {
-                setActiveMessageThreadId(threadId);
-                navigateTo('messages');
-              }}
               onOpenJarvisPro={() => navigateTo('jarvis-pro')}
               onAddToPost={(captionText, hashtags) => {
                 if (captionText) setComposerIdeaTitle(captionText);
@@ -1245,21 +960,9 @@ export default function App() {
                   setUserProfile({ ...userProfile, tier: 'free' });
                 }
               }}
-              onNavigateTab={(tab: TabType) => {
-                if (tab === 'home') {
-                  navigateTo('dashboard');
-                } else if (tab === 'create') {
-                  navigateTo('create');
-                } else if (tab === 'match') {
-                  navigateTo('match');
-                } else if (tab === 'quests') {
-                  navigateTo('quests');
-                } else if (tab === 'growth') {
-                  navigateTo('growth');
-                }
-              }}
+              onNavigateTab={handleTabNavigation}
               userProfile={userProfile}
-              onSaveProfile={(updated) => setUserProfile(prev => ({ ...prev, ...updated, tier: updated.tier || prev.tier || "free" }))}
+              onSaveProfile={(updated) => setUserProfile(prev => ({ ...prev, ...updated, tier: updated.tier || prev.tier || 'free' }))}
             />
           ) : (
             <CaptionScreen
@@ -1267,248 +970,14 @@ export default function App() {
               onBack={() => navigateTo(previousScreen ? previousScreen : 'create')}
               onLogout={handleLogout}
               onOpenSchedule={() => navigateTo('schedule')}
-              onOpenMessages={(threadId?: string) => {
-                  setActiveMessageThreadId(threadId);
-                  navigateTo('messages');
-                }}
               onOpenJarvisPro={() => navigateTo('jarvis-pro')}
               onAddToPost={(captionText) => {
                 if (captionText) setComposerIdeaTitle(captionText);
                 navigateTo('composer');
               }}
-              onNavigateTab={(tab: TabType) => {
-                if (tab === 'home') {
-                  navigateTo('dashboard');
-                } else if (tab === 'create') {
-                  navigateTo('create');
-                } else if (tab === 'match') {
-                  navigateTo('match');
-                } else if (tab === 'quests') {
-                  navigateTo('quests');
-                } else if (tab === 'growth') {
-                  navigateTo('growth');
-                }
-              }}
+              onNavigateTab={handleTabNavigation}
               userProfile={userProfile}
-              onSaveProfile={(updated) => setUserProfile(prev => ({ ...prev, ...updated, tier: updated.tier || prev.tier || "free" }))}
-            />
-          )
-        )}
-
-        {currentScreen === 'messages' && (
-          (userProfile?.tier === 'pro' || userProfile?.tier === 'founding') ? (
-            <ProMessagesScreen
-              initialConversationId={activeMessageThreadId}
-              onBack={() => {
-                setActiveMessageThreadId(undefined);
-                navigateTo(previousScreen ? previousScreen : 'dashboard');
-              }}
-              onLogout={handleLogout}
-              onOpenSchedule={() => navigateTo('schedule')}
-              onOpenJarvisPro={() => navigateTo('jarvis-pro')}
-              onOpenCreate={() => navigateTo('create')}
-              onOpenPostComposer={(ideaTitle) => {
-                if (ideaTitle) setComposerIdeaTitle(ideaTitle);
-                navigateTo('composer');
-              }}
-              onOpenMatch={() => navigateTo('match')}
-              onOpenCollabIdea={(partnerData) => {
-                if (partnerData) setCollabPartnerData(partnerData);
-                navigateTo('collab-idea');
-              }}
-              onSwitchToFree={() => {
-                if (userProfile) {
-                  setUserProfile({ ...userProfile, tier: 'free' });
-                }
-              }}
-              onNavigateTab={(tab: TabType) => {
-                if (tab === 'home') {
-                  navigateTo('dashboard');
-                } else if (tab === 'create') {
-                  navigateTo('create');
-                } else if (tab === 'match') {
-                  navigateTo('match');
-                } else if (tab === 'quests') {
-                  navigateTo('quests');
-                } else if (tab === 'growth') {
-                  navigateTo('growth');
-                }
-              }}
-              userProfile={userProfile}
-              onSaveProfile={(updated) => setUserProfile(prev => ({ ...prev, ...updated, tier: updated.tier || prev.tier || "free" }))}
-            />
-          ) : (
-            <MessagesScreen
-              initialConversationId={activeMessageThreadId}
-              onBack={() => {
-                setActiveMessageThreadId(undefined);
-                navigateTo(previousScreen ? previousScreen : 'dashboard');
-              }}
-              onLogout={handleLogout}
-              onOpenSchedule={() => navigateTo('schedule')}
-              onOpenJarvisPro={() => navigateTo('jarvis-pro')}
-              onOpenCreate={() => navigateTo('create')}
-              onOpenPostComposer={(ideaTitle) => {
-                if (ideaTitle) setComposerIdeaTitle(ideaTitle);
-                navigateTo('composer');
-              }}
-              onOpenMatch={() => navigateTo('match')}
-              onOpenCollabIdea={(partnerData) => {
-                if (partnerData) setCollabPartnerData(partnerData);
-                navigateTo('collab-idea');
-              }}
-              onSwitchToPro={() => {
-                if (userProfile) {
-                  setUserProfile({ ...userProfile, tier: 'pro' });
-                }
-              }}
-              onNavigateTab={(tab: TabType) => {
-                if (tab === 'home') {
-                  navigateTo('dashboard');
-                } else if (tab === 'create') {
-                  navigateTo('create');
-                } else if (tab === 'match') {
-                  navigateTo('match');
-                } else if (tab === 'quests') {
-                  navigateTo('quests');
-                } else if (tab === 'growth') {
-                  navigateTo('growth');
-                }
-              }}
-              userProfile={userProfile}
-              onSaveProfile={(updated) => setUserProfile(prev => ({ ...prev, ...updated, tier: updated.tier || prev.tier || "free" }))}
-            />
-          )
-        )}
-
-                
-        
-        
-        
-        
-        {currentScreen === 'creator-passport' && (
-          <CreatorPassportScreen
-            onBack={() => navigateTo(previousScreen ? previousScreen : 'earnings')}
-            onLogout={handleLogout}
-            onOpenMessages={(threadId?: string) => {
-                setActiveMessageThreadId(threadId);
-                navigateTo('messages');
-              }}
-            onOpenSchedule={() => navigateTo('schedule')}
-            onOpenJarvisPro={() => navigateTo('jarvis-pro')}
-            onOpenQuests={() => navigateTo('quests')}
-            onOpenReadiness={() => navigateTo('opportunity-readiness')}
-            onOpenPlatforms={() => navigateTo('platforms')}
-            onNavigateTab={(tab: TabType) => {
-              if (tab === 'home') {
-                navigateTo('dashboard');
-              } else if (tab === 'create') {
-                navigateTo('create');
-              } else if (tab === 'match') {
-                navigateTo('match');
-              } else if (tab === 'quests') {
-                navigateTo('quests');
-              } else if (tab === 'growth') {
-                navigateTo('growth');
-              }
-            }}
-            userProfile={userProfile}
-            onSaveProfile={(updated) => setUserProfile(prev => ({ ...prev, ...updated, tier: updated.tier || prev.tier || "free" }))}
-          />
-        )}
-
-        {currentScreen === 'opportunity-readiness' && (
-          <OpportunityReadinessScreen
-            onBack={() => navigateTo(previousScreen ? previousScreen : 'earnings')}
-            onLogout={handleLogout}
-            onOpenMessages={(threadId?: string) => {
-                setActiveMessageThreadId(threadId);
-                navigateTo('messages');
-              }}
-            onOpenSchedule={() => navigateTo('schedule')}
-            onOpenJarvisPro={() => navigateTo('jarvis-pro')}
-            onOpenPlatforms={() => navigateTo('platforms')}
-            onOpenCreatorPassport={() => navigateTo('creator-passport')}
-            onNavigateTab={(tab: TabType) => {
-              if (tab === 'home') {
-                navigateTo('dashboard');
-              } else if (tab === 'create') {
-                navigateTo('create');
-              } else if (tab === 'match') {
-                navigateTo('match');
-              } else if (tab === 'quests') {
-                navigateTo('quests');
-              } else if (tab === 'growth') {
-                navigateTo('growth');
-              }
-            }}
-            userProfile={userProfile}
-            onSaveProfile={(updated) => setUserProfile(prev => ({ ...prev, ...updated, tier: updated.tier || prev.tier || "free" }))}
-          />
-        )}
-
-        {currentScreen === 'earnings' && (
-          (userProfile?.tier === 'pro' || userProfile?.tier === 'founding') ? (
-            <ProEarningsScreen
-              onBack={() => navigateTo(previousScreen ? previousScreen : 'growth')}
-              onLogout={handleLogout}
-              onOpenMessages={(threadId?: string) => {
-                setActiveMessageThreadId(threadId);
-                navigateTo('messages');
-              }}
-              onOpenSchedule={() => navigateTo('schedule')}
-              onOpenJarvisPro={() => navigateTo('jarvis-pro')}
-              onOpenQuests={() => navigateTo('quests')}
-              onOpenPlatforms={() => navigateTo('platforms')}
-              onOpenReadiness={() => navigateTo('opportunity-readiness')}
-              onOpenCreatorPassport={() => navigateTo('creator-passport')}
-              onSwitchToFree={() => {
-                if (userProfile) {
-                  setUserProfile({ ...userProfile, tier: 'free' });
-                }
-              }}
-              onNavigateTab={(tab: TabType) => {
-                if (tab === 'home') {
-                  navigateTo('dashboard');
-                } else if (tab === 'create') {
-                  navigateTo('create');
-                } else if (tab === 'match') {
-                  navigateTo('match');
-                } else if (tab === 'quests') {
-                  navigateTo('quests');
-                } else if (tab === 'growth') {
-                  navigateTo('growth');
-                }
-              }}
-              userProfile={userProfile}
-              onSaveProfile={(updated) => setUserProfile(prev => ({ ...prev, ...updated, tier: updated.tier || prev.tier || "free" }))}
-            />
-          ) : (
-            <EarningsScreen
-              onBack={() => navigateTo(previousScreen ? previousScreen : 'growth')}
-              onLogout={handleLogout}
-              onOpenMessages={() => navigateTo('messages')}
-              onOpenSchedule={() => navigateTo('schedule')}
-              onOpenJarvisPro={() => navigateTo('jarvis-pro')}
-              onOpenQuests={() => navigateTo('quests')}
-              onOpenPlatforms={() => navigateTo('platforms')}
-              onOpenReadiness={() => navigateTo('opportunity-readiness')}
-              onOpenCreatorPassport={() => navigateTo('creator-passport')}
-              onNavigateTab={(tab: TabType) => {
-                if (tab === 'home') {
-                  navigateTo('dashboard');
-                } else if (tab === 'create') {
-                  navigateTo('create');
-                } else if (tab === 'match') {
-                  navigateTo('match');
-                } else if (tab === 'quests') {
-                  navigateTo('quests');
-                } else if (tab === 'growth') {
-                  navigateTo('growth');
-                }
-              }}
-              userProfile={userProfile}
-              onSaveProfile={(updated) => setUserProfile(prev => ({ ...prev, ...updated, tier: updated.tier || prev.tier || "free" }))}
+              onSaveProfile={(updated) => setUserProfile(prev => ({ ...prev, ...updated, tier: updated.tier || prev.tier || 'free' }))}
             />
           )
         )}
@@ -1526,10 +995,6 @@ export default function App() {
           <ProVoiceStudioScreen
             onBack={() => navigateTo(previousScreen ? previousScreen : 'create')}
             onLogout={handleLogout}
-            onOpenMessages={(threadId?: string) => {
-              setActiveMessageThreadId(threadId);
-              navigateTo('messages');
-            }}
             onOpenSchedule={() => navigateTo('schedule')}
             onOpenJarvisPro={() => navigateTo('jarvis-pro')}
             onOpenPostComposer={(prefillTitle, attachedAudio) => {
@@ -1542,21 +1007,29 @@ export default function App() {
                 setUserProfile({ ...userProfile, tier: 'free' });
               }
             }}
-            onNavigateTab={(tab: TabType) => {
-              if (tab === 'home') {
-                navigateTo('dashboard');
-              } else if (tab === 'create') {
-                navigateTo('create');
-              } else if (tab === 'match') {
-                navigateTo('match');
-              } else if (tab === 'quests') {
-                navigateTo('quests');
-              } else if (tab === 'growth') {
-                navigateTo('growth');
-              }
-            }}
+            onNavigateTab={handleTabNavigation}
             userProfile={userProfile}
-            onSaveProfile={(updated) => setUserProfile(prev => ({ ...prev, ...updated, tier: updated.tier || prev.tier || "free" }))}
+            onSaveProfile={(updated) => setUserProfile(prev => ({ ...prev, ...updated, tier: updated.tier || prev.tier || 'free' }))}
+          />
+        )}
+
+        {currentScreen === 'hook-studio' && (
+          <ProHookStudioScreen
+            onBack={() => navigateTo(previousScreen ? previousScreen : 'create')}
+            onLogout={handleLogout}
+            onOpenSchedule={() => navigateTo('schedule')}
+            onOpenJarvisPro={() => navigateTo('jarvis-pro')}
+            onOpenPostComposer={(prefillTitle, prefillPlatform) => {
+              if (prefillTitle) setComposerIdeaTitle(prefillTitle);
+              navigateTo('composer');
+            }}
+            onOpenScript={(title) => {
+              if (title) setSelectedIdeaTitle(title);
+              navigateTo('script');
+            }}
+            onNavigateTab={handleTabNavigation}
+            userProfile={userProfile}
+            onSaveProfile={(updated) => setUserProfile(prev => ({ ...prev, ...updated, tier: updated.tier || prev.tier || 'free' }))}
           />
         )}
 
@@ -1564,10 +1037,6 @@ export default function App() {
           <PlatformGrowthScreen
             onBack={() => navigateTo('growth')}
             onLogout={handleLogout}
-            onOpenMessages={(threadId?: string) => {
-                setActiveMessageThreadId(threadId);
-                navigateTo('messages');
-              }}
             onOpenSchedule={() => navigateTo('schedule')}
             onOpenJarvisPro={() => navigateTo('jarvis-pro')}
             onOpenComposer={(prefillTitle) => {
@@ -1579,22 +1048,9 @@ export default function App() {
               navigateTo('script');
             }}
             onOpenContentAngle={() => navigateTo('content-angle')}
-            onOpenEarnings={() => navigateTo('earnings')}
-            onNavigateTab={(tab: TabType) => {
-              if (tab === 'home') {
-                navigateTo('dashboard');
-              } else if (tab === 'create') {
-                navigateTo('create');
-              } else if (tab === 'match') {
-                navigateTo('match');
-              } else if (tab === 'quests') {
-                navigateTo('quests');
-              } else if (tab === 'growth') {
-                navigateTo('growth');
-              }
-            }}
+            onNavigateTab={handleTabNavigation}
             userProfile={userProfile}
-            onSaveProfile={(updated) => setUserProfile(prev => ({ ...prev, ...updated, tier: updated.tier || prev.tier || "free" }))}
+            onSaveProfile={(updated) => setUserProfile(prev => ({ ...prev, ...updated, tier: updated.tier || prev.tier || 'free' }))}
           />
         )}
 
@@ -1602,10 +1058,6 @@ export default function App() {
           <PostPerformanceScreen
             onBack={() => navigateTo('growth')}
             onLogout={handleLogout}
-            onOpenMessages={(threadId?: string) => {
-                setActiveMessageThreadId(threadId);
-                navigateTo('messages');
-              }}
             onOpenSchedule={() => navigateTo('schedule')}
             onOpenAudienceBreakdown={() => navigateTo('audience-breakdown')}
             onOpenJarvisPro={() => navigateTo('jarvis-pro')}
@@ -1618,22 +1070,9 @@ export default function App() {
               navigateTo('script');
             }}
             onOpenContentAngle={() => navigateTo('content-angle')}
-            onOpenEarnings={() => navigateTo('earnings')}
-            onNavigateTab={(tab: TabType) => {
-              if (tab === 'home') {
-                navigateTo('dashboard');
-              } else if (tab === 'create') {
-                navigateTo('create');
-              } else if (tab === 'match') {
-                navigateTo('match');
-              } else if (tab === 'quests') {
-                navigateTo('quests');
-              } else if (tab === 'growth') {
-                navigateTo('growth');
-              }
-            }}
+            onNavigateTab={handleTabNavigation}
             userProfile={userProfile}
-            onSaveProfile={(updated) => setUserProfile(prev => ({ ...prev, ...updated, tier: updated.tier || prev.tier || "free" }))}
+            onSaveProfile={(updated) => setUserProfile(prev => ({ ...prev, ...updated, tier: updated.tier || prev.tier || 'free' }))}
           />
         )}
 
@@ -1643,14 +1082,9 @@ export default function App() {
             onLogout={handleLogout}
             onOpenSchedule={() => navigateTo('schedule')}
             onOpenJarvisPro={() => navigateTo('jarvis-pro')}
-            onOpenMessages={(threadId?: string) => {
-                setActiveMessageThreadId(threadId);
-                navigateTo('messages');
-              }}
             onOpenPlatformConnect={() => navigateTo('platforms')}
             onOpenPostPerformance={() => navigateTo('post-performance')}
             onOpenPlatformGrowth={() => navigateTo('platform-growth')}
-            onOpenEarnings={() => navigateTo('earnings')}
             onOpenCreate={(prefillTopic) => {
               if (prefillTopic) setComposerIdeaTitle(prefillTopic);
               navigateTo('create');
@@ -1659,137 +1093,13 @@ export default function App() {
               if (prefillTitle) setComposerIdeaTitle(prefillTitle);
               navigateTo('composer');
             }}
-            onNavigateTab={(tab: TabType) => {
-              if (tab === 'home') {
-                navigateTo('dashboard');
-              } else if (tab === 'create') {
-                navigateTo('create');
-              } else if (tab === 'match') {
-                navigateTo('match');
-              } else if (tab === 'quests') {
-                navigateTo('quests');
-              } else if (tab === 'growth') {
-                navigateTo('growth');
-              }
-            }}
+            onNavigateTab={handleTabNavigation}
             userProfile={userProfile}
-            onSaveProfile={(updated) => setUserProfile(prev => ({ ...prev, ...updated, tier: updated.tier || prev.tier || "free" }))}
+            onSaveProfile={(updated) => setUserProfile(prev => ({ ...prev, ...updated, tier: updated.tier || prev.tier || 'free' }))}
           />
         )}
-
-        {currentScreen === 'collab-idea' && (
-          <CollabIdeaScreen
-            partnerName={collabPartnerData.name}
-            partnerHandle={collabPartnerData.handle}
-            partnerNiche={collabPartnerData.niche}
-            partnerAvatar={collabPartnerData.avatar}
-            initialPlanIndex={collabPartnerData.planIndex ?? 0}
-            onBack={() => navigateTo(previousScreen ? previousScreen : 'messages')}
-            onLogout={handleLogout}
-            onOpenSchedule={() => navigateTo('schedule')}
-            onOpenJarvisPro={() => navigateTo('jarvis-pro')}
-            onOpenMessages={(threadId?: string) => {
-                setActiveMessageThreadId(threadId);
-                navigateTo('messages');
-              }}
-            onStartCollaboration={(collabData) => {
-              if (collabData?.title) setComposerIdeaTitle(collabData.title);
-              navigateTo('composer');
-            }}
-            onNavigateTab={(tab: TabType) => {
-              if (tab === 'home') {
-                navigateTo('dashboard');
-              } else if (tab === 'create') {
-                navigateTo('create');
-              } else if (tab === 'match') {
-                navigateTo('match');
-              } else if (tab === 'quests') {
-                navigateTo('quests');
-              } else if (tab === 'growth') {
-                navigateTo('growth');
-              }
-            }}
-            userProfile={userProfile}
-            onSaveProfile={(updated) => setUserProfile(prev => ({ ...prev, ...updated, tier: updated.tier || prev.tier || "free" }))}
-          />
-        )}
-
-        {currentScreen === 'squad' && (
-          <ProSquadScreen
-            onBack={() => navigateTo(previousScreen ? previousScreen : 'match')}
-            onLogout={handleLogout}
-            onOpenSchedule={() => navigateTo('schedule')}
-            onOpenJarvisPro={() => navigateTo('jarvis-pro')}
-            onOpenCreate={() => navigateTo('create')}
-            onOpenPostComposer={(ideaTitle) => {
-              if (ideaTitle) setComposerIdeaTitle(ideaTitle);
-              navigateTo('composer');
-            }}
-            onOpenMatch={() => navigateTo('match')}
-            onOpenCollabIdea={(partnerData) => {
-              if (partnerData) setCollabPartnerData(partnerData);
-              navigateTo('collab-idea');
-            }}
-            onOpenMessages={(threadId?: string) => {
-              setActiveMessageThreadId(threadId || 'conv_squad');
-              navigateTo('messages');
-            }}
-            onNavigateTab={(tab: TabType) => {
-              if (tab === 'home') {
-                navigateTo('dashboard');
-              } else if (tab === 'create') {
-                navigateTo('create');
-              } else if (tab === 'match') {
-                navigateTo('match');
-              } else if (tab === 'quests') {
-                navigateTo('quests');
-              } else if (tab === 'growth') {
-                navigateTo('growth');
-              }
-            }}
-            userProfile={userProfile}
-            onSaveProfile={(updated) => setUserProfile(prev => ({ ...prev, ...updated, tier: updated.tier || prev.tier || "free" }))}
-          />
-        )}
-
-        {currentScreen === 'find-squad' && (
-          <FindSquadScreen
-            onBack={() => navigateTo(previousScreen ? previousScreen : 'match')}
-            onLogout={handleLogout}
-            onOpenSchedule={() => navigateTo('schedule')}
-            onOpenJarvisPro={() => navigateTo('jarvis-pro')}
-            onOpenCreate={() => navigateTo('create')}
-            onOpenPostComposer={(ideaTitle) => {
-              if (ideaTitle) setComposerIdeaTitle(ideaTitle);
-              navigateTo('composer');
-            }}
-            onOpenMatch={() => navigateTo('match')}
-            onOpenSquad={() => navigateTo('squad')}
-            onOpenCollabIdea={(partnerData) => {
-              if (partnerData) setCollabPartnerData(partnerData);
-              navigateTo('collab-idea');
-            }}
-            onOpenMessages={(threadId?: string) => {
-              setActiveMessageThreadId(threadId);
-              navigateTo('messages');
-            }}
-            onNavigateTab={(tab: TabType) => {
-              if (tab === 'home') {
-                navigateTo('dashboard');
-              } else if (tab === 'create') {
-                navigateTo('create');
-              } else if (tab === 'match') {
-                navigateTo('match');
-              } else if (tab === 'quests') {
-                navigateTo('quests');
-              } else if (tab === 'growth') {
-                navigateTo('growth');
-              }
-            }}
-            userProfile={userProfile}
-            onSaveProfile={(updated) => setUserProfile(prev => ({ ...prev, ...updated, tier: updated.tier || prev.tier || "free" }))}
-          />
-        )}
+          </ScreenTransitionContainer>
+        </EdgeSwipeBackWrapper>
 
         {showSplash && (
           <SplashScreen onFinish={() => setShowSplash(false)} />

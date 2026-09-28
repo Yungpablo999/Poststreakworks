@@ -26,7 +26,6 @@ interface MissionDetailScreenProps {
   onBackToDashboard?: () => void;
   onLogout?: () => void;
   onNavigateTab?: (tab: TabType) => void;
-  onOpenMessages?: () => void;
   onOpenJarvisPro?: () => void;
   onOpenCreateIdea?: () => void;
   onOpenIdeaAngle?: () => void;
@@ -39,7 +38,6 @@ export const MissionDetailScreen: React.FC<MissionDetailScreenProps> = ({
   onBackToDashboard,
   onLogout,
   onNavigateTab,
-  onOpenMessages,
   onOpenJarvisPro,
   onOpenCreateIdea,
   onOpenIdeaAngle,
@@ -60,7 +58,6 @@ export const MissionDetailScreen: React.FC<MissionDetailScreenProps> = ({
   const [showIdeaModal, setShowIdeaModal] = useState(false);
   const [showNotificationModal, setShowNotificationModal] = useState(false);
   const [showProfileModal, setShowProfileModal] = useState(false);
-  const [showChatModal, setShowChatModal] = useState(false);
 
   // Form State
   const [postTitle, setPostTitle] = useState('One thing I wish I knew before I started creating.');
@@ -129,14 +126,6 @@ export const MissionDetailScreen: React.FC<MissionDetailScreenProps> = ({
         {/* 1. TOP AIRY HEADER BAR */}
         <FreeAppHeader
           onOpenJarvisPro={onOpenJarvisPro}
-          onOpenMessages={() => {
-            if (onOpenMessages) {
-              onOpenMessages();
-            } else {
-              triggerModalPop();
-              setShowChatModal(true);
-            }
-          }}
           onOpenNotifications={() => {
             triggerModalPop();
             setShowNotificationModal(true);
@@ -163,7 +152,12 @@ export const MissionDetailScreen: React.FC<MissionDetailScreenProps> = ({
           </View>
 
           {/* MAIN HEADLINE & SUBTITLE */}
-          <Text style={styles.mainHeading}>Post once before 9 PM.</Text>
+          <Text
+            style={styles.mainHeading}
+            numberOfLines={2}
+          >
+            Post once before 9 PM.
+          </Text>
           <Text style={styles.mainSubtitle}>
             Protect your <Text style={{ fontWeight: '800', color: '#171420' }}>{userProfile?.streakCount || 1}-day streak</Text> and keep your momentum alive.
           </Text>
@@ -745,44 +739,6 @@ export const MissionDetailScreen: React.FC<MissionDetailScreenProps> = ({
           initialProfile={userProfile}
           onSaveProfile={onSaveProfile}
         />
-
-        {/* CHAT MODAL */}
-        <Modal
-          visible={showChatModal}
-          transparent={true}
-          animationType="fade"
-          onRequestClose={() => setShowChatModal(false)}
-        >
-          <View style={styles.modalOverlay}>
-            <Animated.View style={[styles.modalCard, { transform: [{ scale: modalPopScale }] }]}>
-              <View style={styles.modalHeaderRow}>
-                <View style={{ flex: 1, marginRight: 8 }}>
-                  <Text style={styles.modalTitle} numberOfLines={1}>Squad Chat</Text>
-                  <Text style={styles.modalSubtitle} numberOfLines={1}>Collaborate with your creator squad</Text>
-                </View>
-                <Pressable
-                  onPress={() => setShowChatModal(false)}
-                  style={styles.modalCloseCircle}
-                  hitSlop={8}
-                >
-                  <Text style={styles.modalCloseCross}>✕</Text>
-                </Pressable>
-              </View>
-
-              <View style={styles.chatCard}>
-                <Text style={{ fontSize: 12, fontWeight: '800', color: '#582CDB', marginBottom: 2 }}>🤖 Jarvis Assistant</Text>
-                <Text style={{ fontSize: 13, color: '#334155' }}>Your peak audience reach starts at 7:30 PM today!</Text>
-              </View>
-
-              <Pressable
-                style={styles.modalFullBtn}
-                onPress={() => setShowChatModal(false)}
-              >
-                <Text style={styles.modalFullBtnText}>Close</Text>
-              </Pressable>
-            </Animated.View>
-          </View>
-        </Modal>
       </View>
     </SafeAreaView>
   );
@@ -904,10 +860,11 @@ const styles = StyleSheet.create({
 
   // HEADLINE
   mainHeading: {
-    fontSize: Platform.OS === 'web' ? ('clamp(18px, 4.5vw, 22px)' as any) : sFont(20),
+    fontSize: Platform.OS === 'web' ? ('clamp(15px, 3.8vw, 17px)' as any) : sFont(16),
     fontWeight: '700',
     color: '#171420',
     letterSpacing: -0.35,
+    lineHeight: 22,
     marginBottom: 4,
   },
   mainSubtitle: {
