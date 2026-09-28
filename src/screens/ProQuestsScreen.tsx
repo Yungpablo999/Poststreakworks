@@ -13,6 +13,8 @@ import {
   Dimensions,
 } from 'react-native';
 import { Text } from '../components/ui/AppText';
+import { STAGE_2_ENABLED } from '../config/features';
+import { CheckInCard } from '../components/CheckInCard';
 import { BrandLogo } from '../components/BrandLogo';
 import Svg, { Path, Circle, Rect } from 'react-native-svg';
 import * as Haptics from 'expo-haptics';
@@ -70,13 +72,13 @@ interface CompletedMissionItem {
 const COMPLETED_MISSIONS_DATA: CompletedMissionItem[] = [
   {
     id: 'cm-1',
-    title: 'Morning Reel Lock-in',
+    title: 'Morning Reel Posted',
     xp: '+150 XP',
     completedAt: 'Today at 8:45 AM',
     category: 'Daily Consistency',
     icon: '🎬',
-    summary: 'Published and verified a 42-second vertical Reel before the morning lock-in window.',
-    badge: '🔥 Streak Maintained',
+    summary: 'Published a 42-second vertical Reel to start the day.',
+    badge: '🔥 Check-in counted',
     metric: '100% Pacing Score',
   },
   {
@@ -86,20 +88,20 @@ const COMPLETED_MISSIONS_DATA: CompletedMissionItem[] = [
     completedAt: 'Yesterday at 7:15 PM',
     category: 'Milestone Achievement',
     icon: '⚡',
-    summary: 'Maintained 7 consecutive days of verified creator publishing without missing a daily deadline.',
-    badge: '🛡️ Streak Shield Awarded',
+    summary: 'Checked in 7 days in a row. A lovely rhythm to build on.',
+    badge: '🎉 Week 1 badge',
     metric: '7/7 Days Verified',
   },
   {
     id: 'cm-3',
-    title: 'Collab Pitch to Elena',
+    title: 'First Hook Studio Session',
     xp: '+100 XP',
     completedAt: '2 days ago at 3:20 PM',
-    category: 'Creator Collaboration',
-    icon: '🤝',
-    summary: 'Split-screen duet hook pitch accepted and verified with squad partner Elena Rostova.',
-    badge: '👑 Synergy Score +8%',
-    metric: 'Collaborative Script Approved',
+    category: 'Creator Studio',
+    icon: '✍️',
+    summary: 'Generated 3 hook ideas and saved your favourite to drafts.',
+    badge: '✨ New tool tried',
+    metric: '3 hooks saved',
   },
 ];
 
@@ -188,41 +190,8 @@ export const ProQuestsScreen: React.FC<ProQuestsScreenProps> = ({
     }
   };
 
-  // Live Countdown State for Today's Pro Quest (Target: 9:00 PM today)
-  const calculateInitialSeconds = () => {
-    const now = new Date();
-    const target = new Date();
-    target.setHours(21, 0, 0, 0); // 9:00 PM today
-    const diff = Math.floor((target.getTime() - now.getTime()) / 1000);
-    // If it's already past 9 PM today, provide a dynamic countdown for testing (e.g. 4h 12m 45s)
-    return diff > 0 ? diff : 4 * 3600 + 12 * 60 + 45;
-  };
-
-  const [questTimeLeft, setQuestTimeLeft] = useState<number>(calculateInitialSeconds);
-  const [todayQuestStatus, setTodayQuestStatus] = useState<'active' | 'completed' | 'expired'>('active');
-
-  useEffect(() => {
-    if (todayQuestStatus !== 'active') return;
-    const interval = setInterval(() => {
-      setQuestTimeLeft((prev) => {
-        if (prev <= 1) {
-          clearInterval(interval);
-          setTodayQuestStatus('expired');
-          return 0;
-        }
-        return prev - 1;
-      });
-    }, 1000);
-    return () => clearInterval(interval);
-  }, [todayQuestStatus]);
-
-  const formatCountdown = (totalSec: number) => {
-    if (totalSec <= 0) return '00:00:00';
-    const h = Math.floor(totalSec / 3600);
-    const m = Math.floor((totalSec % 3600) / 60);
-    const s = totalSec % 60;
-    return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
-  };
+  // Today's quest has no deadline or countdown — it's done whenever the creator gets to it.
+  const [todayQuestStatus, setTodayQuestStatus] = useState<'active' | 'completed'>('active');
 
   // Notifications
   const [notifications, setNotifications] = useState<ProNotificationItem[]>(DEFAULT_PRO_NOTIFICATIONS);
@@ -423,8 +392,8 @@ export const ProQuestsScreen: React.FC<ProQuestsScreenProps> = ({
             Win missions. Build reputation.
           </Text>
 
-          {/* FILTER PILLS: All Quests | Squad (2) (Hidden for new users) */}
-          {!isNewUser && (
+          {/* FILTER PILLS: All Quests | Squad (2) — Squads are Stage 2 */}
+          {STAGE_2_ENABLED && !isNewUser && (
             <View style={styles.questFilterRow}>
               <Pressable
                 onPress={() => {
@@ -483,29 +452,17 @@ export const ProQuestsScreen: React.FC<ProQuestsScreenProps> = ({
                 adjustsFontSizeToFit={true}
                 minimumFontScale={0.65}
               >
-                Publish your Reel before 9 PM
+                Publish a Reel today
               </Text>
               <Text style={styles.todayQuestSub}>
-                {isNewUser
-                  ? 'Lock in Day 1 • Earn 350 XP • Boost Creator Level.'
-                  : 'Lock in Daily Streak • Earn 350 XP • Boost Creator Level.'}
+                Earn 350 XP • Boost your Creator Level • Any time today
               </Text>
 
-              {/* COUNTDOWN TIMER */}
-              {todayQuestStatus === 'completed' ? (
+              {/* COMPLETED CONFIRMATION (no countdown) */}
+              {todayQuestStatus === 'completed' && (
                 <View style={[styles.countdownTimerBox, styles.countdownCompletedBox]}>
                   <Text style={styles.timeCompletedLabel}>✓ MISSION ACCOMPLISHED</Text>
                   <Text style={styles.countdownCompletedDigits}>+350 XP CLAIMED 🎉</Text>
-                </View>
-              ) : todayQuestStatus === 'expired' ? (
-                <View style={[styles.countdownTimerBox, styles.countdownExpiredBox]}>
-                  <Text style={styles.timeExpiredLabel}>⚠️ QUEST TIME EXPIRED</Text>
-                  <Text style={styles.countdownExpiredDigits}>00:00:00</Text>
-                </View>
-              ) : (
-                <View style={styles.countdownTimerBox}>
-                  <Text style={styles.timeLeftLabel}>TIME LEFT</Text>
-                  <Text style={styles.countdownBigDigits}>{formatCountdown(questTimeLeft)}</Text>
                 </View>
               )}
 
@@ -535,19 +492,13 @@ export const ProQuestsScreen: React.FC<ProQuestsScreenProps> = ({
               {todayQuestStatus === 'completed' ? (
                 <View style={[styles.questSparkleCallout, styles.questSparkleCompleted]}>
                   <Text style={[styles.questSparkleText, { color: '#059669' }]}>
-                    ✨ <Text style={{ fontWeight: '700' }}>Daily Streak Locked!</Text> +350 XP credited to your Creator Profile.
-                  </Text>
-                </View>
-              ) : todayQuestStatus === 'expired' ? (
-                <View style={[styles.questSparkleCallout, styles.questSparkleExpired]}>
-                  <Text style={[styles.questSparkleText, { color: '#64748B' }]}>
-                    ⏰ <Text style={{ fontWeight: '700' }}>Quest window closed.</Text> Next daily mission refreshes tomorrow at 6:00 AM.
+                    ✨ <Text style={{ fontWeight: '700' }}>Nice work!</Text> +350 XP added to your Creator Profile.
                   </Text>
                 </View>
               ) : (
                 <View style={styles.questSparkleCallout}>
                   <Text style={styles.questSparkleText}>
-                    🔥 <Text style={{ fontWeight: '700' }}>Creator insight:</Text> Creators who complete daily quests earlier maintain stronger weekly consistency.
+                    🔥 <Text style={{ fontWeight: '700' }}>Creator insight:</Text> Small, regular posts build the strongest habits. Go at your own pace.
                   </Text>
                 </View>
               )}
@@ -576,7 +527,7 @@ export const ProQuestsScreen: React.FC<ProQuestsScreenProps> = ({
                       return;
                     }
                     const reelQuestDraft = {
-                      title: 'Publish your strongest Reel before 9 PM',
+                      title: 'Publish your strongest Reel today',
                       badgeLabel: "TODAY'S PRO QUEST (+350 XP)",
                       hook: "3 creator mistakes that were secretly killing my reach (and how I fixed them):",
                       story: "1. Obsessing over views instead of saves & shares.\n2. Posting inconsistently and losing algorithmic trust.\n3. Overcomplicating production instead of prioritizing a razor-sharp opening hook.",
@@ -585,7 +536,7 @@ export const ProQuestsScreen: React.FC<ProQuestsScreenProps> = ({
                       requirements: [
                         "Format: 1 Long Reel / Short Video (<60s)",
                         "Topic: 3 Creator Mistakes I Stopped Making",
-                        `Target: Publish before 9:00 PM to lock in +350 XP & Day ${isNewUser ? '1' : '48'}`
+                        'Reward: +350 XP when you publish'
                       ],
                       xpReward: 350
                     };
@@ -600,12 +551,19 @@ export const ProQuestsScreen: React.FC<ProQuestsScreenProps> = ({
                   }}
                 >
                   <Text style={styles.startReelBtnText}>
-                    {todayQuestStatus === 'completed' ? '✓ Completed' : todayQuestStatus === 'expired' ? 'Submit Late' : 'Start Reel Quest'}
+                    {todayQuestStatus === 'completed' ? '✓ Completed' : 'Start Reel Quest'}
                   </Text>
                 </Pressable>
               </View>
             </View>
 
+          {/* DAILY CHECK-IN (+ metrics and level for returning creators; none on day 0) */}
+          <View style={{ marginBottom: 16 }}>
+            <CheckInCard persona={isNewUser ? 'new' : 'returning'} />
+          </View>
+
+          {!isNewUser && (
+          <>
           {/* ============================================================ */}
           {/* ROW 2: DUAL METRIC CARDS (Quests Completed & Creator XP)     */}
           {/* ============================================================ */}
@@ -652,12 +610,7 @@ export const ProQuestsScreen: React.FC<ProQuestsScreenProps> = ({
             </View>
 
             <View style={styles.levelProgressTrackBg}>
-              <LinearGradient
-                colors={['#582CDB', '#8B5CF6']}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 0 }}
-                style={[styles.levelProgressTrackFill, { width: isNewUser ? '0%' : '82%' }]}
-              />
+              <View style={[[styles.levelProgressTrackFill, { width: isNewUser ? '0%' : '82%' }], { backgroundColor: '#5B3EE8' }]} />
             </View>
 
             <View style={styles.levelBottomCalloutRow}>
@@ -677,14 +630,16 @@ export const ProQuestsScreen: React.FC<ProQuestsScreenProps> = ({
               </Pressable>
             </View>
           </View>
-
+          </>
+          )}
             </>
           )}
 
           {/* ============================================================ */}
           {/* SQUAD QUESTS SECTION (Hidden for new users)                  */}
           {/* ============================================================ */}
-          {!isNewUser && (selectedQuestFilter === 'all' || selectedQuestFilter === 'squad') && (
+          {/* Squad Quests + Live Duels are Stage 2 */}
+          {STAGE_2_ENABLED && !isNewUser && (selectedQuestFilter === 'all' || selectedQuestFilter === 'squad') && (
             <>
               {/* SQUAD FILTER BANNER */}
               {selectedQuestFilter === 'squad' && (
@@ -955,8 +910,8 @@ export const ProQuestsScreen: React.FC<ProQuestsScreenProps> = ({
               </View>
             </Pressable>
 
-            {/* Quest 3: Verified Creator profile (Hidden for new users) */}
-            {!isNewUser && (
+            {/* Quest 3: Verified Creator profile — feeds Creator Passport (Stage 2) */}
+            {STAGE_2_ENABLED && !isNewUser && (
               <Pressable
                 style={({ pressed }) => [styles.premiumQuestItemCard, pressed && styles.btnPressed]}
                 onPress={() => {
@@ -1000,8 +955,8 @@ export const ProQuestsScreen: React.FC<ProQuestsScreenProps> = ({
           {/* ============================================================ */}
           {(isNewUser || selectedQuestFilter === 'all') && (
             <>
-              {/* CARD 7: PRIORITY OPPORTUNITY MATCHING (Hidden for new users) */}
-              {!isNewUser && (
+              {/* CARD 7: PRIORITY OPPORTUNITY MATCHING — Creator Match / brands (Stage 2) */}
+              {STAGE_2_ENABLED && !isNewUser && (
                 <View style={styles.darkOpportunityCard}>
                   <View style={styles.darkCardHeaderRow}>
                     <Text
@@ -1216,7 +1171,9 @@ export const ProQuestsScreen: React.FC<ProQuestsScreenProps> = ({
                       onPress={() => {
                         if (Platform.OS !== 'web') Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                         triggerModalPop();
-                        setShowOpportunityModal(true);
+                        setSelectedBrandName('Viral Reel Hook Sprint');
+                        setSelectedBrandBounty('+350 XP');
+                        setShowBrandQuestModal(true);
                       }}
                     >
                       <Text
@@ -1419,16 +1376,14 @@ export const ProQuestsScreen: React.FC<ProQuestsScreenProps> = ({
                         {isNewUser ? '0 / 60 Days' : '48 / 60 Days'}
                       </Text>
                       <Text style={styles.brandSpecRowSub}>
-                        {isNewUser
-                          ? `60 days remaining to claim ${selectedBrandBounty} milestone`
-                          : `12 days remaining to claim ${selectedBrandBounty} milestone`}
+                        {`Check in at your own pace. ${selectedBrandBounty} when you reach the milestone.`}
                       </Text>
                     </View>
                   </View>
 
+                  {/* Spec Row 4: Passport Match — Creator Match is Stage 2 */}
+                  {STAGE_2_ENABLED && (<>
                   <View style={styles.brandSpecDivider} />
-
-                  {/* Spec Row 4: Passport Match */}
                   <View style={styles.brandSpecSheetRow}>
                     <View style={styles.brandSpecIconCircleGreen}>
                       <Text style={{ fontSize: 13 }}>🪪</Text>
@@ -1444,6 +1399,7 @@ export const ProQuestsScreen: React.FC<ProQuestsScreenProps> = ({
                       <Text style={styles.brandSpecRowSub}>Verified Creator Level readiness</Text>
                     </View>
                   </View>
+                  </>)}
                 </View>
 
                 {/* Expandable Quest Perks Toggle Button */}
@@ -1480,10 +1436,7 @@ export const ProQuestsScreen: React.FC<ProQuestsScreenProps> = ({
                     showToast(`🎉 Quest activated! Progress is now tracking for ${selectedBrandName}.`);
                   }}
                 >
-                  <LinearGradient
-                    colors={['#784DF0', '#582CDB']}
-                    style={styles.brandModalApplyGradient}
-                  >
+                  <View style={[styles.brandModalApplyGradient, { backgroundColor: '#5B3EE8' }]}>
                     <Text
                       style={styles.brandModalApplyBtnText}
                       numberOfLines={1}
@@ -1492,7 +1445,7 @@ export const ProQuestsScreen: React.FC<ProQuestsScreenProps> = ({
                     >
                       Start Quest ({selectedBrandBounty}) ➔
                     </Text>
-                  </LinearGradient>
+                  </View>
                 </Pressable>
 
                 <Text
@@ -2341,12 +2294,7 @@ export const ProQuestsScreen: React.FC<ProQuestsScreenProps> = ({
                   </Text>
                 </View>
                 <View style={[styles.levelProgressTrackBg, { marginBottom: 6 }]}>
-                  <LinearGradient
-                    colors={['#582CDB', '#8B5CF6']}
-                    start={{ x: 0, y: 0 }}
-                    end={{ x: 1, y: 0 }}
-                    style={[styles.levelProgressTrackFill, { width: isNewUser ? '0%' : '82%' }]}
-                  />
+                  <View style={[[styles.levelProgressTrackFill, { width: isNewUser ? '0%' : '82%' }], { backgroundColor: '#5B3EE8' }]} />
                 </View>
                 <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
                   <Text style={styles.perksProgressSubText}>
@@ -2425,7 +2373,7 @@ export const ProQuestsScreen: React.FC<ProQuestsScreenProps> = ({
                   onPress={() => {
                     setShowLevelPerksModal(false);
                     const reelQuestDraft = {
-                      title: 'Publish your Reel before 9 PM',
+                      title: 'Publish a Reel today',
                       badgeLabel: "TODAY'S PRO QUEST (+350 XP)",
                       hook: "3 creator mistakes that were secretly killing my reach (and how I fixed them):",
                       story: "1. Obsessing over views instead of saves & shares.\n2. Posting inconsistently and losing algorithmic trust.\n3. Overcomplicating production instead of prioritizing a razor-sharp opening hook.",
@@ -2434,7 +2382,7 @@ export const ProQuestsScreen: React.FC<ProQuestsScreenProps> = ({
                       requirements: [
                         "Format: 1 Long Reel / Short Video (<60s)",
                         "Topic: 3 Creator Mistakes I Stopped Making",
-                        `Target: Publish before 9:00 PM to lock in +350 XP & Day ${isNewUser ? '1' : '48'}`
+                        'Reward: +350 XP when you publish'
                       ],
                       xpReward: 350
                     };
@@ -2916,7 +2864,7 @@ const styles = StyleSheet.create({
   rewardValGold: {
     fontSize: 12.5,
     fontWeight: '700',
-    color: '#D97706',
+    color: '#5B3EE8',
     textAlign: 'center',
   },
   rewardValPurple: {

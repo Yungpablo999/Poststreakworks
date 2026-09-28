@@ -29,7 +29,7 @@ export interface CheckInStreak {
 
 const mondayFirstIndex = (date: Date) => (date.getDay() + 6) % 7;
 
-export function getCheckInStreak(persona: Persona): CheckInStreak {
+function initialCheckInStreak(persona: Persona): CheckInStreak {
   const todayIndex = mondayFirstIndex(new Date());
   if (persona === 'new') {
     return { currentDays: 0, week: Array(7).fill(false), todayIndex, checkedInToday: false };
@@ -41,6 +41,31 @@ export function getCheckInStreak(persona: Persona): CheckInStreak {
     todayIndex,
     checkedInToday: false,
   };
+}
+
+// In-memory mock store so Home and Quests share the same check-in state.
+// A real backend would persist this; screens only use the functions below.
+const checkInStore: Partial<Record<Persona, CheckInStreak>> = {};
+const checkInListeners = new Set<() => void>();
+
+export function getCheckInStreak(persona: Persona): CheckInStreak {
+  if (!checkInStore[persona]) checkInStore[persona] = initialCheckInStreak(persona);
+  return checkInStore[persona]!;
+}
+
+export function checkInToday(persona: Persona): CheckInStreak {
+  const current = getCheckInStreak(persona);
+  if (current.checkedInToday) return current;
+  const week = [...current.week];
+  week[current.todayIndex] = true;
+  checkInStore[persona] = { ...current, week, checkedInToday: true, currentDays: current.currentDays + 1 };
+  checkInListeners.forEach((listener) => listener());
+  return checkInStore[persona]!;
+}
+
+export function subscribeToCheckIns(listener: () => void): () => void {
+  checkInListeners.add(listener);
+  return () => checkInListeners.delete(listener);
 }
 
 // ---------------------------------------------------------------------------

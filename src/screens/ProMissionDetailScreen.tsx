@@ -85,9 +85,9 @@ export const ProMissionDetailScreen: React.FC<ProMissionDetailScreenProps> = ({
     if (Platform.OS !== 'web') {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     }
-    const title = customTitle || 'Publish a personal lesson Reel before 9 PM';
+    const title = customTitle || 'Publish a personal lesson Reel today';
     const draftPayload = {
-      title: 'Publish your strongest Reel before 9 PM',
+      title: 'Publish your strongest Reel today',
       badgeLabel: "TODAY'S PRO QUEST (+350 XP)",
       hook: "3 creator mistakes that were secretly killing my reach (and how I fixed them):",
       story: "1. Obsessing over views instead of saves & shares.\n2. Posting inconsistently and losing algorithmic trust.\n3. Overcomplicating production instead of prioritizing a razor-sharp opening hook.",
@@ -96,7 +96,7 @@ export const ProMissionDetailScreen: React.FC<ProMissionDetailScreenProps> = ({
       requirements: [
         "Format: 1 Long Reel / Short Video (<60s)",
         "Topic: 3 Creator Mistakes I Stopped Making",
-        "Target: Publish before 9:00 PM to lock in +350 XP & Day 48"
+        "Reward: +350 XP when you publish"
       ],
       xpReward: 350
     };
@@ -473,7 +473,7 @@ export const ProMissionDetailScreen: React.FC<ProMissionDetailScreenProps> = ({
                 <Text style={styles.traitBadgeText}>Low Time Friction</Text>
               </View>
               <View style={styles.traitBadge}>
-                <Text style={styles.traitBadgeText}>Streak Protection</Text>
+                <Text style={styles.traitBadgeText}>Habit Builder</Text>
               </View>
             </View>
 

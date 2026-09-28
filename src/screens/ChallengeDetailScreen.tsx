@@ -389,7 +389,7 @@ export const ChallengeDetailScreen: React.FC<ChallengeDetailScreenProps> = ({
                 <Text style={styles.badgeRewardPillText}>🏆 Storyteller Badge</Text>
               </View>
               <View style={styles.passportRewardPill}>
-                <Text style={styles.passportRewardPillText}>Creator Passport +6%</Text>
+                <Text style={styles.passportRewardPillText}>Creator Level +6%</Text>
               </View>
             </View>
 
@@ -649,7 +649,7 @@ export const ChallengeDetailScreen: React.FC<ChallengeDetailScreenProps> = ({
           <Text style={styles.sectionHeading}>Why this quest matters</Text>
           <View style={styles.whyMattersCard}>
             <Text style={styles.whyMattersText}>
-              Storytelling builds audience trust. Complete this quest to strengthen your Creator Passport and show brands that you create consistently.
+              Storytelling builds audience trust. Complete this quest to level up and build a steady posting rhythm.
             </Text>
 
             <View style={styles.whyMattersPillRow}>
@@ -660,7 +660,7 @@ export const ChallengeDetailScreen: React.FC<ChallengeDetailScreenProps> = ({
                 <Text style={styles.whyMattersPillText}>Consistency</Text>
               </View>
               <View style={styles.whyMattersPill}>
-                <Text style={styles.whyMattersPillText}>Creator Passport</Text>
+                <Text style={styles.whyMattersPillText}>Creator Level</Text>
               </View>
             </View>
           </View>
@@ -674,7 +674,7 @@ export const ChallengeDetailScreen: React.FC<ChallengeDetailScreenProps> = ({
                 <Text style={styles.reputationTileValuePurple}>+4%</Text>
               </View>
               <View style={styles.reputationTile}>
-                <Text style={styles.reputationTileLabel}>Passport</Text>
+                <Text style={styles.reputationTileLabel}>Creator Level</Text>
                 <Text style={styles.reputationTileValuePurple}>+6%</Text>
               </View>
             </View>
@@ -744,7 +744,7 @@ export const ChallengeDetailScreen: React.FC<ChallengeDetailScreenProps> = ({
               <Text style={styles.rewardPreviewValuePurple}>🏆 Storyteller</Text>
             </View>
             <View style={[styles.rewardPreviewRow, { borderBottomWidth: 0 }]}>
-              <Text style={styles.rewardPreviewLabel}>Creator Passport</Text>
+              <Text style={styles.rewardPreviewLabel}>Creator Level</Text>
               <Text style={styles.rewardPreviewValueDark}>+1 Activity</Text>
             </View>
           </View>

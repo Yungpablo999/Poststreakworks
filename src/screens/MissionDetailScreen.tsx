@@ -155,10 +155,10 @@ export const MissionDetailScreen: React.FC<MissionDetailScreenProps> = ({
             style={styles.mainHeading}
             numberOfLines={2}
           >
-            Post once before 9 PM.
+            Share one post today.
           </Text>
           <Text style={styles.mainSubtitle}>
-            Protect your <Text style={{ fontWeight: '800', color: '#171420' }}>{userProfile?.streakCount || 1}-day streak</Text> and keep your momentum alive.
+            Whenever suits you. One post keeps your <Text style={{ fontWeight: '800', color: '#171420' }}>rhythm</Text> going.
           </Text>
 
           {/* 1. MISSION PROGRESS CARD */}
@@ -214,7 +214,7 @@ export const MissionDetailScreen: React.FC<MissionDetailScreenProps> = ({
               } else if (hoursLeft <= 0 || hoursLeft <= 2) {
                 banner = {
                   icon: '🔴',
-                  text: 'Post before 9 PM to save your streak.',
+                  text: 'Post whenever suits you today.',
                   bg: '#FEF2F2',
                   border: '#FECACA',
                   color: '#DC2626',
@@ -301,7 +301,7 @@ export const MissionDetailScreen: React.FC<MissionDetailScreenProps> = ({
               </View>
             </Pressable>
 
-            {/* Step 3: Publish before 9 PM (Milestone Status Step) */}
+            {/* Step 3: Publish (Milestone Status Step) */}
             <View style={[styles.stepRow, { marginBottom: 0 }]}>
               <View style={[styles.stepCircle, (step3Done || isCompleted) && styles.stepCircleActive]}>
                 {isCompleted ? (
@@ -312,7 +312,7 @@ export const MissionDetailScreen: React.FC<MissionDetailScreenProps> = ({
               </View>
               <View style={styles.stepContent}>
                 <View style={styles.stepTitleRow}>
-                  <Text style={styles.stepTitle}>Publish before 9 PM</Text>
+                  <Text style={styles.stepTitle}>Publish when you're ready</Text>
                   {isCompleted ? (
                     <View style={styles.stepStatusBadge}>
                       <Text style={styles.stepStatusBadgeText}>Done ✓</Text>
@@ -429,7 +429,7 @@ export const MissionDetailScreen: React.FC<MissionDetailScreenProps> = ({
                 <Text style={styles.improvesPillGoldText}>Growth</Text>
               </View>
               <View style={styles.improvesPillPassport}>
-                <Text style={styles.improvesPillPassportText}>Creator Passport</Text>
+                <Text style={styles.improvesPillPassportText}>Creator Level</Text>
               </View>
             </View>
           </View>
@@ -490,7 +490,7 @@ export const MissionDetailScreen: React.FC<MissionDetailScreenProps> = ({
           visible={showCelebrationModal}
           title="Mission Accomplished!"
           subtitle="Your daily post is live & your streak momentum is 100% protected."
-          speechBubble="Ghost says: Consistency is your superpower Amara! +80 XP added to your Passport!"
+          speechBubble="Ghost says: Consistency is your superpower! +80 XP added to your profile!"
           badgeText="MISSION COMPLETE"
           xpEarned={80}
           streakCount={userProfile?.streakCount || 1}
@@ -513,7 +513,7 @@ export const MissionDetailScreen: React.FC<MissionDetailScreenProps> = ({
               <View style={styles.modalHeaderRow}>
                 <View style={{ flex: 1, marginRight: 8 }}>
                   <Text style={styles.modalTitle} numberOfLines={1}>Create Mission Post</Text>
-                  <Text style={styles.modalSubtitle} numberOfLines={1}>Post before 9 PM to protect your streak.</Text>
+                  <Text style={styles.modalSubtitle} numberOfLines={1}>Post whenever suits you today.</Text>
                 </View>
                 <Pressable
                   onPress={() => setShowCreateModal(false)}
@@ -714,7 +714,7 @@ export const MissionDetailScreen: React.FC<MissionDetailScreenProps> = ({
               <View style={styles.notifCard}>
                 <Text style={{ fontSize: 18 }}>🔥</Text>
                 <View style={{ flex: 1 }}>
-                  <Text style={styles.notifTitle}>Post before 9 PM</Text>
+                  <Text style={styles.notifTitle}>Today's post idea is ready</Text>
                   <Text style={styles.notifBody}>Your {userProfile?.streakCount || 1}-day streak requires 1 post today.</Text>
                 </View>
               </View>

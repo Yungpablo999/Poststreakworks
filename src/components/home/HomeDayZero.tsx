@@ -1,10 +1,10 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { View, Image, Pressable, StyleSheet, Platform } from 'react-native';
 import Svg, { Path, Rect } from 'react-native-svg';
 import * as Haptics from 'expo-haptics';
 import { Text } from '../ui/AppText';
 import { getTheme, goldTokens } from '../../theme/colors';
-import { getCheckInStreak } from '../../data';
+import { CheckInCard } from '../CheckInCard';
 
 // Day-0 Home for brand-new creators. No stats, no streak counts, no fake
 // numbers: a warm welcome, one clear next step, and a gentle check-in.
@@ -20,8 +20,6 @@ interface HomeDayZeroProps {
   onOpenVoiceStudio?: () => void;
 }
 
-const DAY_LABELS = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
-
 export function HomeDayZero({
   tier,
   firstName,
@@ -33,17 +31,8 @@ export function HomeDayZero({
   onOpenVoiceStudio,
 }: HomeDayZeroProps) {
   const t = getTheme(isDark);
-  const streak = getCheckInStreak('new');
-  const [checkedIn, setCheckedIn] = useState(streak.checkedInToday);
-
   const tap = (style = Haptics.ImpactFeedbackStyle.Light) => {
     if (Platform.OS !== 'web') Haptics.impactAsync(style);
-  };
-
-  const handleCheckIn = () => {
-    if (checkedIn) return;
-    if (Platform.OS !== 'web') Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-    setCheckedIn(true);
   };
 
   const previews: { key: string; title: string; body: string; icon: React.ReactNode; onPress?: () => void; pro?: boolean }[] = [
@@ -136,56 +125,7 @@ export function HomeDayZero({
       </View>
 
       {/* 2. Gentle daily check-in */}
-      <View style={[styles.card, { backgroundColor: t.card, borderColor: t.border }]}>
-        <View style={styles.checkInHeader}>
-          <Text style={[styles.cardTitle, { color: t.text }]}>Daily check-in</Text>
-          {checkedIn && (
-            <View style={[styles.softPill, { backgroundColor: t.primaryLight }]}>
-              <Text style={[styles.softPillText, { color: t.primary }]}>Done for today</Text>
-            </View>
-          )}
-        </View>
-
-        <View style={styles.weekRow}>
-          {DAY_LABELS.map((label, i) => {
-            const isToday = i === streak.todayIndex;
-            const filled = isToday && checkedIn;
-            return (
-              <View key={`${label}-${i}`} style={styles.dayCol}>
-                <View
-                  style={[
-                    styles.dayDot,
-                    { borderColor: isToday ? t.primary : t.border, backgroundColor: filled ? t.primary : 'transparent' },
-                  ]}
-                >
-                  {filled && (
-                    <Svg width={12} height={12} viewBox="0 0 24 24" fill="none">
-                      <Path d="M20 6L9 17l-5-5" stroke="#FFFFFF" strokeWidth={3} strokeLinecap="round" strokeLinejoin="round" />
-                    </Svg>
-                  )}
-                </View>
-                <Text style={[styles.dayLabel, { color: isToday ? t.primary : t.textMuted }]}>{label}</Text>
-              </View>
-            );
-          })}
-        </View>
-
-        <Text style={[styles.checkInBody, { color: t.textSecondary }]}>
-          {checkedIn
-            ? 'Nice start! Come back whenever you can. Every check-in counts.'
-            : 'Check in once a day to build a gentle habit. Missed a day? Just pick up again.'}
-        </Text>
-
-        {!checkedIn && (
-          <Pressable
-            onPress={handleCheckIn}
-            style={({ pressed }) => [styles.secondaryBtn, { borderColor: t.primary }, pressed && styles.pressed]}
-            accessibilityRole="button"
-          >
-            <Text style={[styles.secondaryBtnText, { color: t.primary }]}>Check in for today</Text>
-          </Pressable>
-        )}
-      </View>
+      <CheckInCard persona="new" isDark={isDark} />
 
       {/* 3. What will appear here — a preview with no numbers */}
       <View style={[styles.card, { backgroundColor: t.card, borderColor: t.border }]}>
@@ -293,60 +233,8 @@ const styles = StyleSheet.create({
     opacity: 0.9,
     transform: [{ scale: 0.98 }],
   },
-  checkInHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
   cardTitle: {
     fontSize: 17,
-    fontWeight: '700',
-  },
-  softPill: {
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 100,
-  },
-  softPillText: {
-    fontSize: 12,
-    fontWeight: '700',
-  },
-  weekRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginTop: 14,
-  },
-  dayCol: {
-    alignItems: 'center',
-    gap: 6,
-  },
-  dayDot: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    borderWidth: 1.5,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  dayLabel: {
-    fontSize: 12,
-    fontWeight: '600',
-  },
-  checkInBody: {
-    fontSize: 14,
-    lineHeight: 20,
-    marginTop: 14,
-  },
-  secondaryBtn: {
-    marginTop: 14,
-    minHeight: 46,
-    borderRadius: 14,
-    borderWidth: 1.5,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  secondaryBtnText: {
-    fontSize: 15,
     fontWeight: '700',
   },
   previewRow: {

@@ -12,9 +12,9 @@ import {
   Modal,
 } from 'react-native';
 import { Text } from '../components/ui/AppText';
+import { CheckInCard } from '../components/CheckInCard';
 import Svg, { Path, Circle, Rect } from 'react-native-svg';
 import * as Haptics from 'expo-haptics';
-import { LinearGradient } from 'expo-linear-gradient';
 import { FloatingTabBar, TabType } from '../components/FloatingTabBar';
 import { UserProfileModal, UserProfileData } from '../components/UserProfileModal';
 import { AnimatedCompletionModal } from '../components/AnimatedCompletionModal';
@@ -204,7 +204,7 @@ export const QuestsScreen: React.FC<QuestsScreenProps> = ({
             </View>
 
             <View style={styles.earnRankPill}>
-              <Text style={styles.earnRankPillText}>EARN RANK</Text>
+              <Text style={styles.earnRankPillText}>LEVEL UP</Text>
             </View>
           </View>
 
@@ -226,12 +226,12 @@ export const QuestsScreen: React.FC<QuestsScreenProps> = ({
             </View>
 
             <Text style={styles.todayQuestTitle}>
-              {isNewUser ? 'Complete your first Studio session' : 'Post once before 9 PM'}
+              {isNewUser ? 'Complete your first Studio session' : 'Share one post today'}
             </Text>
             <Text style={styles.todayQuestSub}>
               {isNewUser
-                ? 'Connect an account and try one tool to kick off your streak.'
-                : `Protect your ${userProfile?.streakCount || 1}-day streak and keep your momentum alive.`}
+                ? 'Try one Studio tool to get your first idea ready.'
+                : 'Whenever suits you. One post keeps your rhythm going.'}
             </Text>
 
             {/* Progress Row & Bar */}
@@ -253,10 +253,10 @@ export const QuestsScreen: React.FC<QuestsScreenProps> = ({
             {/* Bottom Row */}
             <View style={styles.todayQuestFooterRow}>
               <Text style={styles.todayQuestRewardsText}>
-                <Text style={{ fontWeight: '800', color: completedQuests.includes('today_quest') ? '#10B981' : '#D97706' }}>
+                <Text style={{ fontWeight: '800', color: completedQuests.includes('today_quest') ? '#10B981' : '#5B3EE8' }}>
                   {completedQuests.includes('today_quest') ? '✓ +80 XP' : '+80 XP'}
                 </Text>
-                {!isNewUser && '  •  Streak Protected'}
+                
               </Text>
 
               <Pressable
@@ -274,6 +274,13 @@ export const QuestsScreen: React.FC<QuestsScreenProps> = ({
             </View>
           </View>
 
+          {/* 2. DAILY CHECK-IN (+ stats for returning creators; none on day 0) */}
+          <View style={{ marginBottom: 16 }}>
+            <CheckInCard persona={isNewUser ? 'new' : 'returning'} isDark={isDark} />
+          </View>
+
+          {!isNewUser && (
+          <>
           {/* 2. CREATOR STATS 3-COLUMN BAR & LEVEL PROGRESS */}
           <View style={styles.statsBarContainer}>
             <View style={styles.statsRow}>
@@ -293,7 +300,7 @@ export const QuestsScreen: React.FC<QuestsScreenProps> = ({
 
               <View style={styles.statCol}>
                 <Text style={styles.statColLabel}>LEVEL</Text>
-                <Text style={[styles.statColValue, { color: '#D97706' }]}>{isNewUser ? '1' : '12'}</Text>
+                <Text style={[styles.statColValue, { color: '#5B3EE8' }]}>{isNewUser ? '1' : '12'}</Text>
               </View>
             </View>
 
@@ -301,16 +308,13 @@ export const QuestsScreen: React.FC<QuestsScreenProps> = ({
             <View style={styles.levelProgressContainer}>
               <Text style={styles.levelProgressLabel}>{isNewUser ? 'LV 1' : 'LV 12'}</Text>
               <View style={styles.levelTrack}>
-                <LinearGradient
-                  colors={['#F59E0B', '#F59E0B', '#F59E0B']}
-                  start={{ x: 0, y: 0 }}
-                  end={{ x: 1, y: 0 }}
-                  style={[styles.levelFill, { width: isNewUser ? '0%' : '65%' }]}
-                />
+                <View style={[[styles.levelFill, { width: isNewUser ? '0%' : '65%' }], { backgroundColor: '#5B3EE8' }]} />
               </View>
               <Text style={styles.levelProgressLabel}>{isNewUser ? 'LV 2' : 'LV 13'}</Text>
             </View>
           </View>
+          </>
+          )}
 
           {/* 3. STARTER QUESTS SECTION */}
           <View style={styles.sectionHeaderRow}>
@@ -428,7 +432,7 @@ export const QuestsScreen: React.FC<QuestsScreenProps> = ({
             <View style={styles.communityBody}>
               <Text style={styles.communityTitle}>7-Day Consistency Challenge</Text>
               <Text style={styles.communitySub}>
-                Post 3 times this week and climb the creator leaderboard.
+                Post 3 times this week, at your own pace, alongside other creators.
               </Text>
 
               {/* Progress */}
@@ -449,7 +453,7 @@ export const QuestsScreen: React.FC<QuestsScreenProps> = ({
                   <Image source={require('../../assets/images/marcus-avatar.jpg')} style={[styles.miniAvatar, { marginLeft: -8, zIndex: 2 }]} />
                   <Image source={require('../../assets/images/david-avatar.jpg')} style={[styles.miniAvatar, { marginLeft: -8, zIndex: 1 }]} />
                 </View>
-                <Text style={styles.socialProofText}>42 creators are competing</Text>
+                <Text style={styles.socialProofText}>42 creators are joining in</Text>
               </View>
 
               {/* Bottom Row */}
@@ -470,14 +474,9 @@ export const QuestsScreen: React.FC<QuestsScreenProps> = ({
                   style={({ pressed }) => [styles.joinChallengeBtn, pressed && styles.btnPressed]}
                   onPress={handleJoinCommunityChallenge}
                 >
-                  <LinearGradient
-                    colors={['#F59E0B', '#EAB308']}
-                    start={{ x: 0, y: 0 }}
-                    end={{ x: 1, y: 1 }}
-                    style={styles.joinChallengeGradient}
-                  >
+                  <View style={[styles.joinChallengeGradient, { backgroundColor: '#5B3EE8' }]}>
                     <Text style={styles.joinChallengeBtnText}>Join Challenge</Text>
-                  </LinearGradient>
+                  </View>
                 </Pressable>
               </View>
             </View>
@@ -507,14 +506,9 @@ export const QuestsScreen: React.FC<QuestsScreenProps> = ({
               style={({ pressed }) => [styles.exploreProBtn, pressed && styles.btnPressed]}
               onPress={handleExplorePro}
             >
-              <LinearGradient
-                colors={['#F59E0B', '#F59E0B', '#F59E0B', '#A16207']}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 1 }}
-                style={styles.exploreProGradient}
-              >
+              <View style={[styles.exploreProGradient, { backgroundColor: '#F59E0B' }]}>
                 <Text style={styles.exploreProBtnText}>Explore Pro</Text>
-              </LinearGradient>
+              </View>
             </Pressable>
           </View>
 
@@ -591,7 +585,7 @@ export const QuestsScreen: React.FC<QuestsScreenProps> = ({
                 <Text style={{ fontSize: 18 }}>🔥</Text>
                 <View style={{ flex: 1 }}>
                   <Text style={styles.notifTitle}>
-                    {isNewUser ? 'Complete your first Studio session' : 'Post once before 9 PM'}
+                    {isNewUser ? 'Complete your first Studio session' : 'Share one post today'}
                   </Text>
                   <Text style={styles.notifBody}>
                     {isNewUser ? 'Try one Studio tool to start your streak.' : 'Ends tonight • Streak protection ready.'}
@@ -722,7 +716,7 @@ const styles = StyleSheet.create({
     letterSpacing: 0.4,
   },
   earnRankPill: {
-    backgroundColor: '#FEF3C7',
+    backgroundColor: '#EDE9FE',
     paddingVertical: 4,
     paddingHorizontal: 12,
     borderRadius: 100,
@@ -730,7 +724,7 @@ const styles = StyleSheet.create({
   earnRankPillText: {
     fontSize: 11,
     fontWeight: '800',
-    color: '#D97706',
+    color: '#5B3EE8',
     letterSpacing: 0.4,
   },
 
@@ -986,7 +980,7 @@ const styles = StyleSheet.create({
   xpPillGold: {
     fontSize: 11,
     fontWeight: '800',
-    color: '#D97706',
+    color: '#5B3EE8',
   },
   typePillDot: {
     fontSize: 11,
@@ -1145,7 +1139,7 @@ const styles = StyleSheet.create({
   joinChallengeBtnText: {
     fontSize: sFont(12),
     fontWeight: '800',
-    color: '#171420',
+    color: '#FFFFFF',
     letterSpacing: -0.2,
   },
 
