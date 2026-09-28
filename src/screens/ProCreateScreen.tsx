@@ -13,6 +13,7 @@ import {
   Dimensions,
 } from 'react-native';
 import { Text, TextInput } from '../components/ui/AppText';
+import { getScheduleSummary } from '../data';
 import { BrandLogo } from '../components/BrandLogo';
 import Svg, { Path, Circle, Rect } from 'react-native-svg';
 import * as Haptics from 'expo-haptics';
@@ -201,6 +202,7 @@ export const ProCreateScreen: React.FC<ProCreateScreenProps> = ({
   onSaveProfile,
 }) => {
   const isNewUser = (userPersona || userProfile?.userPersona) === 'new';
+  const schedule = getScheduleSummary(isNewUser ? 'new' : 'returning');
   const [activeTab, setActiveTab] = useState<TabType>('create');
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [showNotificationModal, setShowNotificationModal] = useState(false);
@@ -939,22 +941,28 @@ export const ProCreateScreen: React.FC<ProCreateScreenProps> = ({
 
             <View style={styles.scheduleDivider} />
 
-            <View style={styles.scheduledStatusRow}>
-              <View>
-                <Text style={styles.scheduledBigStat}>{isNewUser ? '0' : '6'}</Text>
-                <Text style={styles.scheduledStatLabel}>SCHEDULED</Text>
-              </View>
-
-              <View style={{ alignItems: 'flex-end' }}>
-                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-                  <View style={[styles.greenActiveDot, isNewUser && { backgroundColor: '#94A3B8' }]} />
-                  <Text style={[styles.autopilotActiveLabel, isNewUser && { color: '#64748B' }]}>
-                    {isNewUser ? 'Not set up' : 'Active'}
-                  </Text>
+            {isNewUser ? (
+              <Text style={styles.scheduleEmptyText}>
+                Nothing scheduled yet. Pick a time once your first post is ready.
+              </Text>
+            ) : (
+              <View style={styles.scheduledStatusRow}>
+                <View>
+                  <Text style={styles.scheduledBigStat}>{schedule.scheduledCount}</Text>
+                  <Text style={styles.scheduledStatLabel}>SCHEDULED</Text>
                 </View>
-                <Text style={styles.scheduledStatLabel}>AUTOPILOT</Text>
+
+                <View style={{ alignItems: 'flex-end' }}>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                    <View style={[styles.greenActiveDot, isNewUser && { backgroundColor: '#94A3B8' }]} />
+                    <Text style={[styles.autopilotActiveLabel, isNewUser && { color: '#64748B' }]}>
+                      {isNewUser ? 'Not set up' : 'Active'}
+                    </Text>
+                  </View>
+                  <Text style={styles.scheduledStatLabel}>AUTOPILOT</Text>
+                </View>
               </View>
-            </View>
+            )}
 
             <Pressable
               style={({ pressed }) => [styles.openScheduleFullBtn, pressed && styles.btnPressed]}
@@ -1348,6 +1356,12 @@ export const ProCreateScreen: React.FC<ProCreateScreenProps> = ({
 };
 
 const styles = StyleSheet.create({
+  scheduleEmptyText: {
+    fontSize: 14,
+    lineHeight: 20,
+    color: '#5E576E',
+    marginBottom: 16,
+  },
   safeArea: {
     flex: 1,
     backgroundColor: '#FAF8F5',
@@ -1622,9 +1636,9 @@ const styles = StyleSheet.create({
     color: '#5E576E',
   },
   projectTagGold: {
-    backgroundColor: '#FFFBEB',
+    backgroundColor: '#F5F3FF',
     borderWidth: 1,
-    borderColor: '#FEF3C7',
+    borderColor: '#EDE9FE',
     paddingHorizontal: 8,
     paddingVertical: 3,
     borderRadius: 6,
@@ -1632,7 +1646,7 @@ const styles = StyleSheet.create({
   projectTagGoldText: {
     fontSize: 10,
     fontWeight: '700',
-    color: '#D97706',
+    color: '#5B3EE8',
   },
   workflowActionsRow: {
     flexDirection: 'row',

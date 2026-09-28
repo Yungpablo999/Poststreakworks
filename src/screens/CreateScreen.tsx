@@ -12,9 +12,9 @@ import {
   Modal,
 } from 'react-native';
 import { Text, TextInput } from '../components/ui/AppText';
+import { getRepurposeAllowance, getScheduleSummary } from '../data';
 import Svg, { Path, Circle, Rect } from 'react-native-svg';
 import * as Haptics from 'expo-haptics';
-import { LinearGradient } from 'expo-linear-gradient';
 import { FloatingTabBar, TabType } from '../components/FloatingTabBar';
 import { UserProfileModal, UserProfileData } from '../components/UserProfileModal';
 import { AnimatedCompletionModal } from '../components/AnimatedCompletionModal';
@@ -347,6 +347,9 @@ export const CreateScreen: React.FC<CreateScreenProps> = ({
 }) => {
   const isDark = false;
   const isNewUser = (userPersona || userProfile?.userPersona || 'new') === 'new';
+  const schedule = getScheduleSummary(isNewUser ? 'new' : 'returning');
+  const repurpose = getRepurposeAllowance(isNewUser ? 'new' : 'returning', 'free');
+  const repurposesLeft = Math.max(0, (repurpose.monthlyLimit ?? 0) - repurpose.usedThisMonth);
   const [activeTab, setActiveTab] = useState<TabType>('create');
   const [drafts, setDrafts] = useState<DraftItem[]>(INITIAL_DRAFTS);
   const displayedDrafts = isNewUser ? drafts : (drafts.length > 0 ? drafts : RETURNING_DRAFTS);
@@ -599,14 +602,9 @@ export const CreateScreen: React.FC<CreateScreenProps> = ({
         >
           {/* TOP PILL BADGES */}
           <View style={styles.topBadgesRow}>
-            <LinearGradient
-              colors={['#7C3AED', '#582CDB']}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 0 }}
-              style={styles.createPill}
-            >
+            <View style={[styles.createPill, { backgroundColor: '#5B3EE8' }]}>
               <Text style={styles.createPillText}>Create</Text>
-            </LinearGradient>
+            </View>
 
             <View style={styles.freeToolsPill}>
               <Text style={styles.freeToolsPillText}>Free Tools</Text>
@@ -630,7 +628,7 @@ export const CreateScreen: React.FC<CreateScreenProps> = ({
                 </View>
                 <View style={styles.streakTitlesContainer}>
                   <Text style={styles.streakDaysTitle} numberOfLines={1}>
-                    Your first idea
+                    {isNewUser ? 'Your first idea' : "Today's idea"}
                   </Text>
                 </View>
               </View>
@@ -670,14 +668,9 @@ export const CreateScreen: React.FC<CreateScreenProps> = ({
                 }
               }}
             >
-              <LinearGradient
-                colors={['#6366F1', '#582CDB']}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 0 }}
-                style={styles.useIdeaGradient}
-              >
+              <View style={[styles.useIdeaGradient, { backgroundColor: '#5B3EE8' }]}>
                 <Text style={styles.useIdeaBtnText}>Use This Idea ➔</Text>
-              </LinearGradient>
+              </View>
             </Pressable>
           </View>
 
@@ -724,15 +717,15 @@ export const CreateScreen: React.FC<CreateScreenProps> = ({
               style={({ pressed }) => [styles.toolGridCard, pressed && styles.btnPressed]}
               onPress={openIdeas}
             >
-              <View style={[styles.toolIconBox, { backgroundColor: '#FEF3C7' }]}>
+              <View style={[styles.toolIconBox, { backgroundColor: '#EDE9FE' }]}>
                 <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
                   <Path
                     d="M12 2L14.4 7.6L20 10L14.4 12.4L12 18L9.6 12.4L4 10L9.6 7.6L12 2Z"
-                    fill="#D97706"
+                    fill="#5B3EE8"
                   />
                   <Path
                     d="M19 16L20.2 18.8L23 20L20.2 21.2L19 24L17.8 21.2L15 20L17.8 18.8L19 16Z"
-                    fill="#D97706"
+                    fill="#5B3EE8"
                   />
                 </Svg>
               </View>
@@ -822,17 +815,14 @@ export const CreateScreen: React.FC<CreateScreenProps> = ({
               <View style={styles.repurposeBannerContent}>
                 <View style={styles.repurposeTitleRow}>
                   <Text style={styles.repurposeBannerTitle}>Repurpose</Text>
-                  <LinearGradient
-                    colors={['#10B981', '#059669']}
-                    start={{ x: 0, y: 0 }}
-                    end={{ x: 1, y: 1 }}
-                    style={styles.repurposeLimitBadge}
-                  >
-                    <Text style={styles.repurposeLimitBadgeText}>2 free/mo</Text>
-                  </LinearGradient>
+                  <View style={[styles.repurposeLimitBadge, { backgroundColor: '#5B3EE8' }]}>
+                    <Text style={styles.repurposeLimitBadgeText}>
+                      {repurposesLeft} of {repurpose.monthlyLimit} free left
+                    </Text>
+                  </View>
                 </View>
                 <Text style={styles.repurposeBannerSubtitle} numberOfLines={1}>
-                  Turn one asset into multiple formats
+                  One post, many formats
                 </Text>
               </View>
             </View>
@@ -854,9 +844,15 @@ export const CreateScreen: React.FC<CreateScreenProps> = ({
                 </Svg>
               </View>
               <View style={styles.scheduledTextGroup}>
-                <Text style={styles.scheduledTitle} numberOfLines={1}>No posts scheduled yet</Text>
+                <Text style={styles.scheduledTitle} numberOfLines={1}>
+                  {schedule.scheduledCount === 0
+                    ? 'No posts scheduled yet'
+                    : `${schedule.scheduledCount} post${schedule.scheduledCount === 1 ? '' : 's'} scheduled`}
+                </Text>
                 <Text style={styles.scheduledSub} numberOfLines={2}>
-                  Plan your first post once you&rsquo;ve picked an idea above
+                  {schedule.nextPostLabel
+                    ? `Next up: ${schedule.nextPostLabel}`
+                    : 'Plan your first post once you’ve picked an idea above'}
                 </Text>
               </View>
             </View>
@@ -929,14 +925,9 @@ export const CreateScreen: React.FC<CreateScreenProps> = ({
               style={({ pressed }) => [styles.unlockVoiceBtn, pressed && styles.btnPressed]}
               onPress={handleOpenVoiceStudioPro}
             >
-              <LinearGradient
-                colors={['#F59E0B', '#F59E0B', '#F59E0B', '#A16207']}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 1 }}
-                style={styles.unlockVoiceGradient}
-              >
+              <View style={[styles.unlockVoiceGradient, { backgroundColor: '#F59E0B' }]}>
                 <Text style={styles.unlockVoiceBtnText}>Unlock Voice Studio</Text>
-              </LinearGradient>
+              </View>
             </Pressable>
           </View>
 
@@ -1180,14 +1171,9 @@ export const CreateScreen: React.FC<CreateScreenProps> = ({
                 </Pressable>
 
                 <Pressable style={styles.modalPrimaryBtn} onPress={handleCreatePostSubmit}>
-                  <LinearGradient
-                    colors={['#6366F1', '#582CDB']}
-                    start={{ x: 0, y: 0 }}
-                    end={{ x: 1, y: 1 }}
-                    style={styles.modalPrimaryGradient}
-                  >
+                  <View style={[styles.modalPrimaryGradient, { backgroundColor: '#5B3EE8' }]}>
                     <Text style={styles.modalPrimaryBtnText}>Save &amp; Schedule</Text>
-                  </LinearGradient>
+                  </View>
                 </Pressable>
               </View>
             </Animated.View>
@@ -1425,14 +1411,9 @@ export const CreateScreen: React.FC<CreateScreenProps> = ({
                     handleOpenScheduleView();
                   }}
                 >
-                  <LinearGradient
-                    colors={['#6366F1', '#582CDB']}
-                    start={{ x: 0, y: 0 }}
-                    end={{ x: 1, y: 1 }}
-                    style={styles.modalPrimaryGradient}
-                  >
+                  <View style={[styles.modalPrimaryGradient, { backgroundColor: '#5B3EE8' }]}>
                     <Text style={styles.modalPrimaryBtnText}>Open in Schedule</Text>
-                  </LinearGradient>
+                  </View>
                 </Pressable>
               </View>
             </Animated.View>
@@ -1720,9 +1701,9 @@ const styles = StyleSheet.create({
     letterSpacing: 0.2,
   },
   freeToolsPill: {
-    backgroundColor: '#FEF3C7',
+    backgroundColor: '#EDE9FE',
     borderWidth: 1,
-    borderColor: '#FDE68A',
+    borderColor: '#DDD6FE',
     paddingVertical: 3,
     paddingHorizontal: 9,
     borderRadius: 100,
@@ -1730,7 +1711,7 @@ const styles = StyleSheet.create({
   freeToolsPillText: {
     fontSize: 10,
     fontWeight: '700',
-    color: '#B45309',
+    color: '#5B3EE8',
     letterSpacing: 0.2,
   },
 
@@ -1783,9 +1764,9 @@ const styles = StyleSheet.create({
     width: 32,
     height: 32,
     borderRadius: 16,
-    backgroundColor: '#FFFBEB',
+    backgroundColor: '#F5F3FF',
     borderWidth: 1,
-    borderColor: '#FEF3C7',
+    borderColor: '#EDE9FE',
     justifyContent: 'center',
     alignItems: 'center',
     flexShrink: 0,
@@ -1800,7 +1781,7 @@ const styles = StyleSheet.create({
   streakSaverTag: {
     fontSize: 9.5,
     fontWeight: '800',
-    color: '#D97706',
+    color: '#5B3EE8',
     letterSpacing: 0.4,
   },
   streakDaysTitle: {
@@ -1851,9 +1832,9 @@ const styles = StyleSheet.create({
     letterSpacing: -0.2,
   },
   bestTimeBadge: {
-    backgroundColor: '#FFFBEB',
+    backgroundColor: '#F5F3FF',
     borderWidth: 1,
-    borderColor: '#FEF3C7',
+    borderColor: '#EDE9FE',
     paddingVertical: 3.5,
     paddingHorizontal: 8,
     borderRadius: 6,
@@ -1862,7 +1843,7 @@ const styles = StyleSheet.create({
   bestTimeBadgeText: {
     fontSize: 10.5,
     fontWeight: '700',
-    color: '#D97706',
+    color: '#5B3EE8',
     letterSpacing: -0.2,
   },
   useIdeaBtn: {
@@ -1907,7 +1888,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: '#FEF3C7',
+    borderColor: '#EDE9FE',
   },
   jarvisFlameIcon: {
     width: 24,

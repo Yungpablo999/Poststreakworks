@@ -11,6 +11,9 @@ import {
   Modal,
 } from 'react-native';
 import { Text, TextInput } from '../components/ui/AppText';
+import { getRepurposeAllowance } from '../data';
+import { BrandLogo } from '../components/BrandLogo';
+import { STAGE_2_ENABLED } from '../config/features';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as Haptics from 'expo-haptics';
 import Svg, { Path, Circle, Rect } from 'react-native-svg';
@@ -97,12 +100,6 @@ export const CORE_POSTSTREAK_PLATFORMS: PostStreakPlatform[] = [
     name: 'Facebook',
     platformType: 'facebook',
     desc: 'Creator posts, reels & communities',
-  },
-  {
-    id: 'pinterest',
-    name: 'Pinterest',
-    platformType: 'pinterest',
-    desc: 'Idea pins & visual infographics',
   },
 ];
 
@@ -317,6 +314,9 @@ export const ProRepurposeScreen: React.FC<ProRepurposeScreenProps> = ({
   onBack,
   initialIdeaTitle = '3 mistakes that slow down new creators',
 }) => {
+  // Free users can open Repurpose too (2 per month); Pro is unlimited.
+  const isPro = userProfile?.tier === 'pro' || userProfile?.tier === 'founding';
+  const repurpose = getRepurposeAllowance(userProfile?.userPersona === 'returning' ? 'returning' : 'new', isPro ? 'pro' : 'free');
   // Core State
   const [originalIdea, setOriginalIdea] = useState(initialIdeaTitle);
   const [selectedPlatforms, setSelectedPlatforms] = useState<string[]>([
@@ -729,49 +729,36 @@ export const ProRepurposeScreen: React.FC<ProRepurposeScreenProps> = ({
             onPress={() => (onBack ? onBack() : onNavigate ? onNavigate('dashboard') : null)}
             hitSlop={8}
           >
-            <Image
-              source={require('../../assets/images/jarvis-ghost-clean.png')}
-              style={styles.topGhostLogo}
-              resizeMode="contain"
-            />
+            <BrandLogo size="sm" />
           </Pressable>
 
           {/* Pro Badge Pill */}
-          <Pressable
-            onPress={() => {
-              if (Platform.OS !== 'web') {
-                Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-              }
-            }}
-            hitSlop={8}
-          >
-            <LinearGradient
-              colors={['#F59E0B', '#F59E0B', '#F59E0B']}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 0 }}
-              style={styles.proHeaderBadge}
-            >
+          {isPro && (
+            <View style={[styles.proHeaderBadge, { backgroundColor: '#F59E0B' }]}>
               <Text style={styles.proHeaderBadgeText}>👑 PRO</Text>
-            </LinearGradient>
-          </Pressable>
+            </View>
+          )}
         </View>
 
         <View style={styles.topRightRow}>
-          <Pressable
-            style={({ pressed }) => [styles.topIconBtn, pressed && styles.btnPressed]}
-            onPress={() => onNavigate && onNavigate('messages')}
-            hitSlop={8}
-          >
-            <Svg width={19} height={19} viewBox="0 0 24 24" fill="none">
-              <Path
-                d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"
-                stroke="#171420"
-                strokeWidth="2.2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </Svg>
-          </Pressable>
+          {/* Creator messages are a Stage 2 feature */}
+          {STAGE_2_ENABLED && (
+            <Pressable
+              style={({ pressed }) => [styles.topIconBtn, pressed && styles.btnPressed]}
+              onPress={() => onNavigate && onNavigate('messages')}
+              hitSlop={8}
+            >
+              <Svg width={19} height={19} viewBox="0 0 24 24" fill="none">
+                <Path
+                  d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"
+                  stroke="#171420"
+                  strokeWidth="2.2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </Svg>
+            </Pressable>
+          )}
 
           <Pressable
             style={({ pressed }) => [styles.topIconBtn, pressed && styles.btnPressed]}
@@ -798,8 +785,9 @@ export const ProRepurposeScreen: React.FC<ProRepurposeScreenProps> = ({
           </Pressable>
 
           <Pressable
-            style={({ pressed }) => [styles.topAvatarBox, pressed && styles.btnPressed]}
-            onPress={() => onNavigate && onNavigate('creator-passport')}
+            style={({ pressed }) => [styles.topAvatarBox, !isPro && { borderColor: '#DDD6FE' }, pressed && styles.btnPressed]}
+            // Creator Passport is a Stage 2 feature
+            onPress={() => STAGE_2_ENABLED && onNavigate && onNavigate('creator-passport')}
             hitSlop={8}
           >
             {userProfile?.customAvatarUri ? (
@@ -818,7 +806,7 @@ export const ProRepurposeScreen: React.FC<ProRepurposeScreenProps> = ({
               <Svg width={19} height={19} viewBox="0 0 24 24" fill="none">
                 <Path
                   d="M20 21V19C20 17.9 19.5 16.9 18.7 16.2C17.9 15.5 16.9 15 15.8 15H8.2C7.1 15 6.1 15.5 5.3 16.2C4.5 16.9 4 17.9 4 19V21"
-                  stroke="#F59E0B"
+                  stroke={isPro ? '#F59E0B' : '#5B3EE8'}
                   strokeWidth="2.3"
                   strokeLinecap="round"
                   strokeLinejoin="round"
@@ -827,14 +815,16 @@ export const ProRepurposeScreen: React.FC<ProRepurposeScreenProps> = ({
                   cx="12"
                   cy="7"
                   r="4"
-                  stroke="#F59E0B"
+                  stroke={isPro ? '#F59E0B' : '#5B3EE8'}
                   strokeWidth="2.3"
                 />
               </Svg>
             )}
-            <View style={{ position: 'absolute', bottom: -2, right: -2 }}>
-              <TinyGoldCheck size={14} />
-            </View>
+            {isPro && (
+              <View style={{ position: 'absolute', bottom: -2, right: -2 }}>
+                <TinyGoldCheck size={14} />
+              </View>
+            )}
           </Pressable>
         </View>
       </View>
@@ -850,6 +840,15 @@ export const ProRepurposeScreen: React.FC<ProRepurposeScreenProps> = ({
           <View style={styles.repurposeStudioBadge}>
             <Text style={styles.repurposeStudioBadgeText}>REPURPOSE STUDIO</Text>
           </View>
+
+          {/* Free plan: 2 repurposes per month */}
+          {!isPro && repurpose.monthlyLimit !== null && (
+            <View style={styles.freeAllowancePill}>
+              <Text style={styles.freeAllowanceText}>
+                Free plan · {Math.max(0, repurpose.monthlyLimit - repurpose.usedThisMonth)} of {repurpose.monthlyLimit} repurposes left this month
+              </Text>
+            </View>
+          )}
 
           <Text
             style={styles.heroTitle}
@@ -921,7 +920,7 @@ export const ProRepurposeScreen: React.FC<ProRepurposeScreenProps> = ({
             </View>
             <Pressable onPress={handleToggleSelectAll} hitSlop={8} style={{ flexShrink: 0 }}>
               <Text style={styles.selectAllLinkText}>
-                {selectedPlatforms.length === 6 ? 'Deselect All' : 'Select All (6)'}
+                {selectedPlatforms.length === CORE_POSTSTREAK_PLATFORMS.length ? 'Deselect All' : `Select All (${CORE_POSTSTREAK_PLATFORMS.length})`}
               </Text>
             </Pressable>
           </View>
@@ -1980,6 +1979,21 @@ export const ProRepurposeScreen: React.FC<ProRepurposeScreenProps> = ({
 };
 
 const styles = StyleSheet.create({
+  freeAllowancePill: {
+    alignSelf: 'center',
+    marginTop: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 100,
+    backgroundColor: '#F5F3FF',
+    borderWidth: 1,
+    borderColor: '#EDE9FE',
+  },
+  freeAllowanceText: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#5B3EE8',
+  },
   container: {
     flex: 1,
     width: '100%',
@@ -2001,14 +2015,8 @@ const styles = StyleSheet.create({
     backgroundColor: '#F7F5F0',
   },
   topGhostLogoBtn: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: '#FFFFFF',
     justifyContent: 'center',
     alignItems: 'center',
-    borderWidth: 1,
-    borderColor: '#EFECE6',
   },
   topGhostLogo: {
     width: 26,
@@ -2098,7 +2106,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   repurposeStudioBadge: {
-    backgroundColor: '#FEF3C7',
+    backgroundColor: '#EDE9FE',
     alignSelf: 'flex-start',
     paddingHorizontal: 8,
     paddingVertical: 3.5,
@@ -2108,7 +2116,7 @@ const styles = StyleSheet.create({
   repurposeStudioBadgeText: {
     fontSize: 9,
     fontWeight: '700',
-    color: '#D97706',
+    color: '#5B3EE8',
     letterSpacing: 0.4,
   },
   heroTitle: {

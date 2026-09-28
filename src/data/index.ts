@@ -1,3 +1,5 @@
+import { FREE_REPURPOSES_PER_MONTH } from '../config/features';
+
 // Single place screens get their data from.
 //
 // Everything here is mock data for now. When the real backend (the web app
@@ -60,4 +62,34 @@ export function getVoiceCloneSummary(persona: Persona): VoiceCloneSummary {
     return { minutesUsed: 0, minutesIncluded: 150, accuracy: null, voiceName: null };
   }
   return { minutesUsed: 118, minutesIncluded: 150, accuracy: 78, voiceName: 'Energetic Narrator' };
+}
+
+// ---------------------------------------------------------------------------
+// Repurpose (Free: FREE_REPURPOSES_PER_MONTH per month; Pro: unlimited)
+// ---------------------------------------------------------------------------
+
+export interface RepurposeAllowance {
+  usedThisMonth: number;
+  /** null = unlimited (Pro). */
+  monthlyLimit: number | null;
+}
+
+export function getRepurposeAllowance(persona: Persona, tier: 'free' | 'pro'): RepurposeAllowance {
+  const usedThisMonth = persona === 'new' ? 0 : 1;
+  return { usedThisMonth, monthlyLimit: tier === 'pro' ? null : FREE_REPURPOSES_PER_MONTH };
+}
+
+// ---------------------------------------------------------------------------
+// Schedule
+// ---------------------------------------------------------------------------
+
+export interface ScheduleSummary {
+  scheduledCount: number;
+  /** Human label for the next scheduled post, or null when nothing is planned. */
+  nextPostLabel: string | null;
+}
+
+export function getScheduleSummary(persona: Persona): ScheduleSummary {
+  if (persona === 'new') return { scheduledCount: 0, nextPostLabel: null };
+  return { scheduledCount: 1, nextPostLabel: 'Today · 7:30 PM' };
 }
