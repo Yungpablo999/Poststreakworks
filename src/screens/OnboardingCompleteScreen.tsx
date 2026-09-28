@@ -316,22 +316,21 @@ export const OnboardingCompleteScreen: React.FC<OnboardingCompleteScreenProps> =
               <Text style={styles.tileSubtitle}>Personalised prompt</Text>
             </View>
 
-            {/* Tile 2: Collabs */}
+            {/* Tile 2: Insights */}
             <View style={styles.milestoneTile}>
               <View style={styles.milestoneIconCircle}>
                 <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
                   <Path
-                    d="M17 21V19C17 17.9 16.5 16.9 15.7 16.2C14.9 15.5 13.9 15 12.8 15H5.2C4.1 15 3.1 15.5 2.3 16.2C1.5 16.9 1 17.9 1 19V21"
+                    d="M3 17L9 11L13 15L21 7M21 7H15M21 7V13"
                     stroke="#582CDB"
                     strokeWidth="2"
                     strokeLinecap="round"
                     strokeLinejoin="round"
                   />
-                  <Circle cx="9" cy="7" r="4" stroke="#582CDB" strokeWidth="2" />
                 </Svg>
               </View>
-              <Text style={styles.tileTitle}>Collabs</Text>
-              <Text style={styles.tileSubtitle}>Curated creators</Text>
+              <Text style={styles.tileTitle}>Insights</Text>
+              <Text style={styles.tileSubtitle}>What's working</Text>
             </View>
 
             {/* Tile 3: Starter Quests */}
@@ -348,7 +347,7 @@ export const OnboardingCompleteScreen: React.FC<OnboardingCompleteScreenProps> =
                 </Svg>
               </View>
               <Text style={styles.tileTitle}>Quests</Text>
-              <Text style={styles.tileSubtitle}>Brand challenges</Text>
+              <Text style={styles.tileSubtitle}>Weekly goals</Text>
             </View>
           </View>
 
@@ -419,10 +418,10 @@ export const OnboardingCompleteScreen: React.FC<OnboardingCompleteScreenProps> =
               {/* Step 2 */}
               <View style={styles.roadmapStep}>
                 <View style={styles.roadmapDot}>
-                  <Text style={styles.roadmapDotText}>👥</Text>
+                  <Text style={styles.roadmapDotText}>📈</Text>
                 </View>
                 <Text style={styles.roadmapStepDay}>Day 3</Text>
-                <Text style={styles.roadmapStepLabel}>AI Collabs</Text>
+                <Text style={styles.roadmapStepLabel}>First insight</Text>
               </View>
 
               <View style={styles.roadmapLine} />
@@ -430,10 +429,10 @@ export const OnboardingCompleteScreen: React.FC<OnboardingCompleteScreenProps> =
               {/* Step 3 */}
               <View style={styles.roadmapStep}>
                 <View style={styles.roadmapDot}>
-                  <Text style={styles.roadmapDotText}>💎</Text>
+                  <Text style={styles.roadmapDotText}>🎉</Text>
                 </View>
                 <Text style={styles.roadmapStepDay}>Day 7</Text>
-                <Text style={styles.roadmapStepLabel}>Monetize</Text>
+                <Text style={styles.roadmapStepLabel}>Week 1 check-in</Text>
               </View>
             </View>
 

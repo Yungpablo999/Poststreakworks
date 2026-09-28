@@ -17,6 +17,7 @@ import {
 } from 'react-native';
 import { Text } from '../components/ui/AppText';
 import { BrandLogo } from '../components/BrandLogo';
+import { HomeDayZero } from '../components/home/HomeDayZero';
 import Svg, { Path, Circle, Rect } from 'react-native-svg';
 import * as Haptics from 'expo-haptics';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -194,7 +195,7 @@ const CALENDAR_DATA_CHRONOLOGICAL: MonthData[] = [
     startOffset: 4,
     completedDays: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31],
     scheduledDays: [],
-    freezeDays: [11],
+    freezeDays: [],
   },
   {
     id: 'jun',
@@ -214,7 +215,7 @@ const CALENDAR_DATA_CHRONOLOGICAL: MonthData[] = [
     startOffset: 2,
     completedDays: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31],
     scheduledDays: [],
-    freezeDays: [18],
+    freezeDays: [],
   },
   {
     id: 'aug',
@@ -1011,6 +1012,19 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
           showsVerticalScrollIndicator={false}
           bounces={true}
         >
+          {/* New creators get a true day-0 Home: no stats, one clear next step. */}
+          {isNewUser ? (
+            <HomeDayZero
+              tier="free"
+              firstName={userProfile?.name?.split(' ')[0]}
+              isDark={isDark}
+              onPlanFirstPost={() => (onNavigateTab ? onNavigateTab('create') : undefined)}
+              onOpenSchedule={onOpenSchedule}
+              onOpenGrowth={() => (onNavigateTab ? onNavigateTab('growth') : undefined)}
+              onOpenQuests={() => (onNavigateTab ? onNavigateTab('quests') : undefined)}
+            />
+          ) : (
+          <>
           {/* 3. TODAY'S FOCUS HERO BANNER */}
           <View style={styles.focusHeroSection}>
             <View style={styles.focusPillRow}>
@@ -1031,7 +1045,7 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
             >
               {isNewUser
                 ? 'Publish your Day 1 Reel to start your habit 🚀'
-                : 'Post 1 Reel to protect your streak'}
+                : 'Ready for today? One Reel keeps your rhythm going'}
             </Text>
 
             {/* Streak Motivation Typography */}
@@ -1053,7 +1067,7 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
                   <>
                     <Text style={styles.streakMotivationHighlight}>
                       {userProfile?.streakCount ? `${userProfile.streakCount}-day streak` : '17-day streak'}
-                    </Text> · Keep it alive today
+                    </Text> · You're on a roll
                   </>
                 )}
               </Text>
@@ -1434,6 +1448,9 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
           </Pressable>
 
 
+          </>
+          )}
+
           {/* 9. CARD 6: UNLOCK JARVIS PRO */}
           <View style={[styles.proCard, isDark && styles.proCardDark]}>
             <View style={styles.proHeaderRow}>
@@ -1724,9 +1741,6 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
                     <View style={styles.brandVerifiedPill}>
                       <Text style={styles.brandVerifiedText}>⚡ CREATOR QUEST</Text>
                     </View>
-                    <View style={styles.escrowBadge}>
-                      <Text style={styles.escrowBadgeText}>🛡️ Streak Shield</Text>
-                    </View>
                   </View>
                   <Text style={[styles.brandBriefMainTitle, isDark && styles.textWhite]} numberOfLines={1}>
                     Viral Reel Sprint
@@ -1762,7 +1776,7 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
                   <View>
                     <Text style={styles.brandBriefBountyLabel}>TOTAL XP REWARD</Text>
                     <Text style={styles.brandBriefBountyAmount}>+250 XP</Text>
-                    <Text style={styles.brandBriefBountySub}>+1 Bonus Streak Shield upon completion</Text>
+                    <Text style={styles.brandBriefBountySub}>Plus a new badge for your profile</Text>
                   </View>
                   <View style={styles.brandBriefBountyIconBox}>
                     <Text style={{ fontSize: 26 }}>⚡</Text>
@@ -2146,10 +2160,6 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
                     <View style={styles.legendItem}>
                       <View style={[styles.legendDot, { backgroundColor: '#DDD6FE' }]} />
                       <Text style={styles.legendLabel}>Scheduled (⏰)</Text>
-                    </View>
-                    <View style={styles.legendItem}>
-                      <View style={[styles.legendDot, { backgroundColor: '#93C5FD' }]} />
-                      <Text style={styles.legendLabel}>Streak Freeze (❄️)</Text>
                     </View>
                     <View style={styles.legendItem}>
                       <View style={[styles.legendDot, { backgroundColor: '#FAF8FF', borderWidth: 1, borderColor: '#ECE6F6' }]} />

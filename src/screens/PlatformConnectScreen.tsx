@@ -27,13 +27,13 @@ const PRIMARY_PLATFORMS: PlatformItem[] = [
   {
     id: 'tiktok',
     name: 'TikTok',
-    description: 'Schedule videos, track growth and discover opportunities.',
+    description: 'Schedule videos, track growth and get posting insights.',
     iconType: 'tiktok',
   },
   {
     id: 'instagram',
     name: 'Instagram',
-    description: 'Schedule content, track growth and manage collaborations.',
+    description: 'Schedule posts and reels, and see what your audience loves.',
     iconType: 'instagram',
   },
   {
@@ -47,7 +47,6 @@ const PRIMARY_PLATFORMS: PlatformItem[] = [
 const MORE_PLATFORMS: PlatformItem[] = [
   { id: 'facebook', name: 'Facebook', description: 'Pages, Groups and community engagement.', iconType: 'facebook' },
   { id: 'threads', name: 'Threads', description: 'Text updates and creator conversations.', iconType: 'threads' },
-  { id: 'pinterest', name: 'Pinterest', description: 'Pins, visual inspiration and aesthetic curation.', iconType: 'pinterest' },
 ];
 
 interface PlatformConnectScreenProps {
@@ -331,7 +330,7 @@ export const PlatformConnectScreen: React.FC<PlatformConnectScreenProps> = ({
           <View style={styles.headingSection}>
             <Text style={styles.mainHeading}>Connect your creator platforms</Text>
             <Text style={styles.subHeading}>
-              Connect your accounts so PostStreak can personalise your experience, track your growth and find better opportunities.
+              Connect your accounts so PostStreak can personalise your experience, track your growth and suggest what to post next.
             </Text>
 
             {/* Instruction Badge */}

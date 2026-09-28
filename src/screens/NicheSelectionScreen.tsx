@@ -522,7 +522,7 @@ export const NicheSelectionScreen: React.FC<NicheSelectionScreenProps> = ({
             {/* Speech / Advice Bubble */}
             <View style={styles.adviceBubble}>
               <Text style={styles.adviceText}>
-                &ldquo;Your niche helps PostStreak recommend the right creators, missions and Brand Quests.&rdquo;
+                &ldquo;Your niche helps PostStreak recommend the right ideas, missions and posting times.&rdquo;
               </Text>
             </View>
           </View>

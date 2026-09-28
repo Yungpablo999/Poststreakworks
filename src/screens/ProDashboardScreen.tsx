@@ -17,6 +17,8 @@ import {
 } from 'react-native';
 import { Text, TextInput } from '../components/ui/AppText';
 import { BrandLogo } from '../components/BrandLogo';
+import { HomeDayZero } from '../components/home/HomeDayZero';
+import { getVoiceCloneSummary } from '../data';
 import Svg, { Path, Circle, Rect } from 'react-native-svg';
 import * as Haptics from 'expo-haptics';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -109,7 +111,7 @@ const FULL_YEAR_CALENDAR: MonthData[] = [
     startOffset: 6,
     completedDays: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28],
     scheduledDays: [],
-    freezeDays: [14],
+    freezeDays: [],
   },
   {
     id: 'mar',
@@ -129,7 +131,7 @@ const FULL_YEAR_CALENDAR: MonthData[] = [
     startOffset: 2,
     completedDays: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30],
     scheduledDays: [],
-    freezeDays: [8],
+    freezeDays: [],
   },
   {
     id: 'may',
@@ -139,7 +141,7 @@ const FULL_YEAR_CALENDAR: MonthData[] = [
     startOffset: 4,
     completedDays: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31],
     scheduledDays: [],
-    freezeDays: [11],
+    freezeDays: [],
   },
   {
     id: 'jun',
@@ -159,7 +161,7 @@ const FULL_YEAR_CALENDAR: MonthData[] = [
     startOffset: 2,
     completedDays: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31],
     scheduledDays: [],
-    freezeDays: [18],
+    freezeDays: [],
   },
   {
     id: 'aug',
@@ -232,6 +234,8 @@ export const ProDashboardScreen: React.FC<ProDashboardScreenProps> = ({
   onSaveProfile,
 }) => {
   const isNewUser = (userPersona || userProfile?.userPersona) === 'new';
+  const voiceClone = getVoiceCloneSummary(isNewUser ? 'new' : 'returning');
+  const streakDays = userProfile?.streakCount && userProfile.streakCount > 1 ? userProfile.streakCount : 48;
   const [activeTab, setActiveTab] = useState<TabType>('home');
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [showNotificationModal, setShowNotificationModal] = useState(false);
@@ -652,6 +656,18 @@ export const ProDashboardScreen: React.FC<ProDashboardScreenProps> = ({
           showsVerticalScrollIndicator={false}
           bounces={true}
         >
+          {/* New creators get a true day-0 Home: no stats, one clear next step. */}
+          {isNewUser ? (
+            <HomeDayZero
+              tier="pro"
+              firstName={userProfile?.name?.split(' ')[0]}
+              onPlanFirstPost={() => onOpenCreate?.()}
+              onOpenSchedule={onOpenSchedule}
+              onOpenGrowth={onOpenGrowth}
+              onOpenVoiceStudio={onOpenVoiceStudio}
+            />
+          ) : (
+          <>
           {/* CARD 1: TODAY'S PRO PLAN HERO */}
           <View style={styles.proPlanHeroCard}>
             <View style={styles.proPlanHeaderRow}>
@@ -692,7 +708,7 @@ export const ProDashboardScreen: React.FC<ProDashboardScreenProps> = ({
 
               <View style={styles.proPillGold}>
                 <Text style={styles.proPillGoldText}>
-                  {isNewUser ? "Start Streak 🔥" : "30-Day Streak"}
+                  {isNewUser ? "Start Streak 🔥" : `${streakDays}-Day Streak`}
                 </Text>
               </View>
 
@@ -1139,7 +1155,7 @@ export const ProDashboardScreen: React.FC<ProDashboardScreenProps> = ({
                 </View>
                 <Text style={styles.brandQuestTitle}>Viral Hook Sprint Challenge</Text>
                 <Text style={styles.brandQuestSubText}>
-                  3-Hook Storytelling Challenge • +350 XP &amp; Streak Shield
+                  3-Hook Storytelling Challenge • +350 XP
                 </Text>
               </View>
 
@@ -1176,13 +1192,21 @@ export const ProDashboardScreen: React.FC<ProDashboardScreenProps> = ({
 
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginVertical: 14 }}>
               <View style={{ flex: 1, paddingRight: 8 }}>
-                <Text style={styles.voiceMinsCount}>{isNewUser ? '0' : '118'} <Text style={styles.voiceMinsTotal}>/ 150 min used</Text></Text>
-                <Text style={styles.savedVoiceSub}>{isNewUser ? 'Ready to clone your voice' : 'Saved Voice — Energetic Narrator'}</Text>
+                <Text style={styles.voiceMinsCount}>{voiceClone.minutesUsed} <Text style={styles.voiceMinsTotal}>/ {voiceClone.minutesIncluded} min used</Text></Text>
+                <Text style={styles.savedVoiceSub}>
+                  {voiceClone.voiceName ? `Saved voice: ${voiceClone.voiceName}` : 'Not cloned yet'}
+                </Text>
+                {voiceClone.accuracy !== null && (
+                  <Text style={styles.voiceAccuracyHint}>Voice accuracy: how closely your AI voice sounds like you.</Text>
+                )}
               </View>
 
-              <View style={styles.voiceProgressCircle}>
-                <Text style={styles.voiceProgressText}>{isNewUser ? '0%' : '78%'}</Text>
-                <Text style={styles.voiceProgressSub}>{isNewUser ? 'READY' : 'MATCH'}</Text>
+              {/* Voice-clone accuracy score (not Creator Match) */}
+              <View style={styles.voiceAccuracyCol} accessibilityLabel={voiceClone.accuracy !== null ? `Voice accuracy ${voiceClone.accuracy} percent` : 'Voice not cloned yet'}>
+                <View style={styles.voiceProgressCircle}>
+                  <Text style={styles.voiceProgressText}>{voiceClone.accuracy !== null ? `${voiceClone.accuracy}%` : '–'}</Text>
+                </View>
+                <Text style={styles.voiceProgressSub}>VOICE{'\n'}ACCURACY</Text>
               </View>
             </View>
 
@@ -1227,6 +1251,8 @@ export const ProDashboardScreen: React.FC<ProDashboardScreenProps> = ({
               </Pressable>
             </View>
           </View>
+          </>
+          )}
         </ScrollView>
 
         {/* 10. FLOATING LIQUID GLASS BOTTOM NAVIGATION BAR */}
@@ -1330,10 +1356,10 @@ export const ProDashboardScreen: React.FC<ProDashboardScreenProps> = ({
                       adjustsFontSizeToFit
                       minimumFontScale={0.85}
                     >
-                      2 Freezes 🛡️
+                      {isNewUser ? 'Day 1' : '21 days'}
                     </Text>
                     <Text style={[styles.calendarStatLabel, { color: '#6D28D9' }]} numberOfLines={1}>
-                      Available
+                      Best run
                     </Text>
                   </View>
                 </View>
@@ -1566,12 +1592,8 @@ export const ProDashboardScreen: React.FC<ProDashboardScreenProps> = ({
                       <Text style={styles.legendLabel}>Autopilot (⚡)</Text>
                     </View>
                     <View style={styles.legendItem}>
-                      <View style={[styles.legendDot, { backgroundColor: '#0284C7' }]} />
-                      <Text style={styles.legendLabel}>Pro Shield (🛡️)</Text>
-                    </View>
-                    <View style={styles.legendItem}>
-                      <View style={[styles.legendDot, { backgroundColor: '#EF4444' }]} />
-                      <Text style={styles.legendLabel}>Today (🔴)</Text>
+                      <View style={[styles.legendDot, { backgroundColor: '#5B3EE8' }]} />
+                      <Text style={styles.legendLabel}>Today</Text>
                     </View>
                   </View>
                 </View>
@@ -1701,7 +1723,7 @@ export const ProDashboardScreen: React.FC<ProDashboardScreenProps> = ({
                     </View>
                     <View style={{ flex: 1 }}>
                       <Text style={{ fontSize: 17, fontWeight: '700', color: '#FFFFFF' }}>Viral Hook Sprint Challenge</Text>
-                      <Text style={{ fontSize: 11, color: '#C7D2FE', marginTop: 1, fontWeight: '700' }}>Creator Milestone Sprint • 2 Days Remaining</Text>
+                      <Text style={{ fontSize: 11, color: '#C7D2FE', marginTop: 1, fontWeight: '700' }}>Creator Milestone Sprint • Go at your own pace</Text>
                     </View>
                   </View>
 
@@ -1723,7 +1745,7 @@ export const ProDashboardScreen: React.FC<ProDashboardScreenProps> = ({
                         style={{ fontSize: sFont(11), fontWeight: '700', color: '#FDE68A', textAlign: 'center' }}
                         numberOfLines={1}
                       >
-                        🛡️ 7-Day Shield
+                        ⚡ +350 XP
                       </Text>
                     </View>
                     <View
@@ -2226,13 +2248,14 @@ const styles = StyleSheet.create({
     letterSpacing: -0.1,
     lineHeight: 14,
   },
+  // Streak pill — brand purple (gold is reserved for Pro badges).
   proPillGold: {
-    backgroundColor: '#FFFBEB',
+    backgroundColor: '#F5F3FF',
     paddingHorizontal: 9,
     paddingVertical: 4.5,
     borderRadius: 10,
     borderWidth: 1,
-    borderColor: '#FEF3C7',
+    borderColor: '#EDE9FE',
     minHeight: 26,
     justifyContent: 'center',
     alignItems: 'center',
@@ -2240,7 +2263,7 @@ const styles = StyleSheet.create({
   proPillGoldText: {
     fontSize: sFont(10.5),
     fontWeight: '700',
-    color: '#D97706',
+    color: '#5B3EE8',
     letterSpacing: -0.1,
     lineHeight: 14,
   },
@@ -2774,17 +2797,28 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   voiceProgressText: {
-    fontSize: 12,
+    fontSize: 14,
     fontWeight: '800',
     color: '#7C3AED',
     lineHeight: 14,
   },
   voiceProgressSub: {
-    fontSize: 8,
+    fontSize: 9,
     fontWeight: '800',
-    color: '#8B5CF6',
-    letterSpacing: 0.4,
-    marginTop: 1,
+    color: '#6D28D9',
+    letterSpacing: 0.5,
+    lineHeight: 11,
+    marginTop: 5,
+    textAlign: 'center',
+  },
+  voiceAccuracyCol: {
+    alignItems: 'center',
+  },
+  voiceAccuracyHint: {
+    fontSize: 12,
+    lineHeight: 16,
+    color: '#8E869E',
+    marginTop: 4,
   },
   createVoiceBtn: {
     backgroundColor: '#582CDB',
@@ -3141,7 +3175,7 @@ const styles = StyleSheet.create({
   },
   calendarCellToday: {
     borderWidth: 2,
-    borderColor: '#EF4444',
+    borderColor: '#5B3EE8',
     backgroundColor: '#FEF2F2',
   },
   calendarCellPressed: {
@@ -3162,7 +3196,7 @@ const styles = StyleSheet.create({
     color: '#0284C7',
   },
   calendarCellTextToday: {
-    color: '#DC2626',
+    color: '#5B3EE8',
     fontWeight: '800',
   },
   cellMiniIcon: {
@@ -3183,7 +3217,7 @@ const styles = StyleSheet.create({
     width: 5,
     height: 5,
     borderRadius: 2.5,
-    backgroundColor: '#EF4444',
+    backgroundColor: '#5B3EE8',
     position: 'absolute',
     bottom: 2,
   },
