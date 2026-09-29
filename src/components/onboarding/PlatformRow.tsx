@@ -9,7 +9,7 @@ import { ds } from '../../theme/colors';
 import { PlatformLogo, type PlatformLogoType } from './PlatformLogo';
 
 // A glass platform card. "Connect" shows a short connecting spinner, then a
-// green "Connected" pill pops in. Tapping "Connected" disconnects.
+// green tick pops in. Tapping the tick disconnects.
 // (Mock: a real backend would run the platform's sign-in here.)
 
 interface PlatformRowProps {
@@ -25,7 +25,7 @@ const SPRING = { damping: 15, stiffness: 320 };
 
 export function PlatformRow({ name, description, logo, connected, onToggle }: PlatformRowProps) {
   const [connecting, setConnecting] = useState(false);
-  // Narrow phones: slimmer button, and a tick instead of the word "Connected"
+  // Narrow phones: slimmer Connect button
   const compact = useWindowDimensions().width < 360;
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const scale = useSharedValue(1);
@@ -70,16 +70,16 @@ export function PlatformRow({ name, description, logo, connected, onToggle }: Pl
         accessibilityRole="button"
         accessibilityLabel={connected ? `${name} connected. Tap to disconnect` : `Connect ${name}`}
         accessibilityState={{ busy: connecting, checked: connected }}
-        style={[styles.action, compact && styles.actionCompact, connected ? styles.actionConnected : styles.actionIdle, connected && compact && styles.actionTickOnly]}
+        style={[styles.action, compact && styles.actionCompact, connected ? styles.actionConnected : styles.actionIdle, connected && styles.actionTickOnly]}
       >
         {connecting ? (
           <ActivityIndicator size="small" color={ds.purple} />
         ) : connected ? (
+          // Connected = a green tick on every screen size (user preference)
           <Animated.View entering={ZoomIn.springify().damping(12)} style={styles.connectedInner}>
-            <Svg width={14} height={14} viewBox="0 0 24 24" fill="none">
+            <Svg width={16} height={16} viewBox="0 0 24 24" fill="none">
               <Path d="M20 6L9 17l-5-5" stroke="#FFFFFF" strokeWidth={3.2} strokeLinecap="round" strokeLinejoin="round" />
             </Svg>
-            {!compact && <Text style={styles.actionTextConnected}>Connected</Text>}
           </Animated.View>
         ) : (
           <Text style={styles.actionText}>Connect</Text>
@@ -157,10 +157,5 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 5,
-  },
-  actionTextConnected: {
-    fontSize: 13.5,
-    fontWeight: '800',
-    color: '#FFFFFF',
   },
 });
