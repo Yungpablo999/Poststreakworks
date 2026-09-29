@@ -300,6 +300,14 @@ export default function App() {
     navigateTo('verify-code');
   };
 
+  // One-tap Apple / Google sign-up (mock): the provider has already verified the
+  // person, so skip the email code and finish onboarding
+  const handleSocialSignUp = (_provider: 'apple' | 'google') => {
+    setVerifyMode('signup');
+    setUserProfile(prev => ({ ...prev, tier: 'free' }));
+    navigateTo('complete');
+  };
+
   // Sign In Screen actions
   const handleBackFromSignIn = () => {
     setCurrentScreen(previousScreen === 'signin' ? 'welcome' : previousScreen);
@@ -483,6 +491,8 @@ export default function App() {
             onBack={handleBackFromSignUp}
             onSignIn={handleOpenSignInFromSignUp}
             onSubmit={handleSignUpSubmit}
+            onSocialSignUp={handleSocialSignUp}
+            savedIdeaTitle={selectedIdeaTitle}
           />
         )}
 

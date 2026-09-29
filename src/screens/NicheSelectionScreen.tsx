@@ -471,6 +471,7 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   sheetInput: {
+    ...(Platform.OS === 'web' ? ({ outlineStyle: 'none' } as object) : {}),
     marginTop: 16,
     height: 52,
     borderRadius: 16,
