@@ -18,6 +18,10 @@ import {
 import { Text } from '../components/ui/AppText';
 import { BrandLogo } from '../components/BrandLogo';
 import { HomeDayZero } from '../components/home/HomeDayZero';
+import { ProUpsellCard } from '../components/home/ProUpsellCard';
+import { BellButton } from '../components/home/BellButton';
+import { GlassBackdrop } from '../components/glass/GlassBackdrop';
+import Reanimated, { FadeInUp } from 'react-native-reanimated';
 import Svg, { Path, Circle, Rect } from 'react-native-svg';
 import * as Haptics from 'expo-haptics';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -919,6 +923,7 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
     <SafeAreaView style={[styles.safeArea, isDark && { backgroundColor: '#0C0A12' }]}>
       <StatusBar barStyle={isDark ? "light-content" : "dark-content"} backgroundColor={isDark ? "#0C0A12" : "#FAF8F5"} />
       <View style={[styles.container, isDark && { backgroundColor: '#0C0A12' }]}>
+        {!isDark && <GlassBackdrop />}
         {/* 1. TOP APP BAR: Ghost Mascot on Left & Notification/Profile on Right */}
         <View style={styles.headerBar}>
           {/* Top-Left: Ghost Logo Mascot + Mode Switcher */}
@@ -936,30 +941,8 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
 
           {/* Right: Notification & Person Profile Photo Upload */}
           <View style={styles.headerRightGroup}>
-            {/* Notification Bell with Glowing Badge -> Opens Notification Modal */}
-            <Pressable
-              onPress={openNotificationModal}
-              style={({ pressed }) => [styles.headerIconBtn, isDark && styles.headerIconBtnDark, pressed && styles.headerIconBtnPressed]}
-              hitSlop={8}
-            >
-              <Svg width={20} height={20} viewBox="0 0 24 24" fill="none">
-                <Path
-                  d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"
-                  stroke="#1A1626"
-                  strokeWidth="2.2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-                <Path
-                  d="M13.73 21a2 2 0 0 1-3.46 0"
-                  stroke="#1A1626"
-                  strokeWidth="2.2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </Svg>
-              {unreadCount > 0 && <View style={styles.notificationDot} />}
-            </Pressable>
+            {/* Notification bell: swings on tap, unread dot breathes */}
+            <BellButton unread={unreadCount > 0} onPress={openNotificationModal} />
 
             {/* Top-Right: Person Icon Placeholder where users add their profile picture */}
             <Pressable
@@ -1451,49 +1434,10 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
           </>
           )}
 
-          {/* 9. CARD 6: UNLOCK JARVIS PRO */}
-          <View style={[styles.proCard, isDark && styles.proCardDark]}>
-            <View style={styles.proHeaderRow}>
-              <Image
-                source={require('../../assets/images/jarvis-core-flame.png')}
-                style={styles.proIconImage}
-                resizeMode="contain"
-              />
-              <View style={styles.proTitleGroup}>
-                <Text style={[styles.proTitle, isDark && styles.textWhite]}>Unlock Jarvis Pro</Text>
-              </View>
-            </View>
-
-            <Text style={[styles.proDescription, isDark && styles.textMutedDark]}>
-              Get autonomous growth strategy, viral script generation, and deeper analytics.
-            </Text>
-
-            <Pressable
-              onPress={() => {
-                if (Platform.OS !== 'web') {
-                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-                }
-                if (onOpenJarvisPro) {
-                  onOpenJarvisPro();
-                } else {
-                  openProModal();
-                }
-              }}
-              style={({ pressed }) => [
-                styles.metallicGoldUpgradeBtn,
-                pressed && styles.upgradeButtonPressed,
-              ]}
-            >
-              <LinearGradient
-                colors={['#F59E0B', '#F59E0B', '#F59E0B', '#A16207']}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 1 }}
-                style={styles.metallicGoldGradient}
-              >
-                <Text style={styles.metallicGoldUpgradeBtnText}>Upgrade to Pro →</Text>
-              </LinearGradient>
-            </Pressable>
-          </View>
+          {/* 9. UNLOCK JARVIS PRO (gold = Pro only) */}
+          <Reanimated.View entering={FadeInUp.delay(isNewUser ? 360 : 0).duration(550)} style={styles.proUpsell}>
+            <ProUpsellCard onUpgrade={() => (onOpenJarvisPro ? onOpenJarvisPro() : openProModal())} />
+          </Reanimated.View>
         </ScrollView>
 
         {/* 10. FLOATING LIQUID GLASS BOTTOM NAVIGATION BAR */}
@@ -2295,12 +2239,14 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#FAF8F5',
+    backgroundColor: '#F7F5F0',
   },
   container: {
     flex: 1,
     width: '100%',
-    backgroundColor: '#FAF8F5',
+  },
+  proUpsell: {
+    marginTop: 14,
   },
 
   // 1. TOP HEADER BAR
@@ -2311,7 +2257,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: sPadding(14),
     paddingTop: 8,
     paddingBottom: 10,
-    backgroundColor: '#FAF8F5',
     width: '100%',
     maxWidth: '100%',
   },
@@ -2358,7 +2303,7 @@ const styles = StyleSheet.create({
   headerRightGroup: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 5,
+    gap: 8,
     flexShrink: 0,
   },
   headerIconBtn: {
@@ -2393,9 +2338,9 @@ const styles = StyleSheet.create({
     borderColor: '#FFFFFF',
   },
   profilePhotoBtn: {
-    width: 34,
-    height: 34,
-    borderRadius: 17,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
     backgroundColor: 'rgba(237, 232, 252, 0.9)',
     borderWidth: 1.5,
     borderColor: '#582CDB',
@@ -2413,9 +2358,9 @@ const styles = StyleSheet.create({
     borderColor: '#582CDB',
   },
   headerCustomAvatarImage: {
-    width: 30,
-    height: 30,
-    borderRadius: 15,
+    width: 36,
+    height: 36,
+    borderRadius: 18,
   },
   addPhotoPlusBadge: {
     position: 'absolute',
@@ -2441,7 +2386,7 @@ const styles = StyleSheet.create({
   scrollContent: {
     paddingHorizontal: 20,
     paddingTop: 6,
-    paddingBottom: Platform.OS === 'ios' ? 88 : 80,
+    paddingBottom: 120,
   },
   focusHeroSection: {
     marginBottom: 16,

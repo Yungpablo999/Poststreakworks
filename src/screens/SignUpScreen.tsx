@@ -152,9 +152,11 @@ export const SignUpScreen: React.FC<SignUpScreenProps> = ({
                   />
                 </View>
                 {showHint && (
-                  <Animated.Text entering={FadeIn.duration(200)} style={styles.hint}>
-                    That doesn't look quite right. Try something like you@example.com
-                  </Animated.Text>
+                  <Animated.View entering={FadeIn.duration(200)}>
+                    <Text style={styles.hint}>
+                      That doesn't look quite right. Try something like you@example.com
+                    </Text>
+                  </Animated.View>
                 )}
                 <View style={styles.createBtn}>
                   <AppButton title="Create account" onPress={handleCreate} disabled={!valid} />

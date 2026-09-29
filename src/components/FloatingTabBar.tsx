@@ -1,18 +1,21 @@
-import React, { useEffect, useRef, useState } from 'react';
-import {
-  StyleSheet,
-  View,
-  Pressable,
-  Platform,
-  ViewStyle,
-  Animated,
-  Easing,
-  LayoutChangeEvent,
-} from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { StyleSheet, View, Pressable, Platform, ViewStyle, LayoutChangeEvent } from 'react-native';
+import Animated, {
+  useAnimatedStyle,
+  useReducedMotion,
+  useSharedValue,
+  withSequence,
+  withSpring,
+  withTiming,
+} from 'react-native-reanimated';
+import { BlurView } from 'expo-blur';
 import { Text } from './ui/AppText';
 import Svg, { Path, Circle } from 'react-native-svg';
 import * as Haptics from 'expo-haptics';
 import { LinearGradient } from 'expo-linear-gradient';
+
+// The floating glass tab bar shared by every main screen. A purple pill springs
+// to the chosen tab and its icon pops; on web, tabs brighten on hover.
 
 export type TabType = 'home' | 'create' | 'quests' | 'growth';
 
@@ -87,98 +90,110 @@ const TAB_INDICES: Record<TabType, number> = {
   growth: 3,
 };
 
-export const FloatingTabBar: React.FC<FloatingTabBarProps> = ({
-  activeTab,
-  onTabPress,
-  style,
-}) => {
+const PAD_X = 6;
+// Each screen mounts its own tab bar, so remember the last tab across mounts:
+// the pill then starts where it was and slides to the new tab.
+let lastIndex = 0;
+const PILL_SPRING = { damping: 18, stiffness: 220, mass: 0.8 };
+const INACTIVE = '#6E677F';
+const HOVER = '#3F3854';
+
+function TabSlot({
+  tab,
+  active,
+  onPress,
+}: {
+  tab: (typeof TABS)[number];
+  active: boolean;
+  onPress: () => void;
+}) {
+  const reduceMotion = useReducedMotion();
+  const pop = useSharedValue(1);
+  const press = useSharedValue(0);
+  const [hovered, setHovered] = useState(false);
+
+  // Icon pops when this tab becomes active
+  useEffect(() => {
+    if (!active || reduceMotion) return;
+    pop.value = withSequence(withTiming(0.8, { duration: 90 }), withSpring(1, { damping: 8, stiffness: 300 }));
+  }, [active, reduceMotion, pop]);
+
+  const iconStyle = useAnimatedStyle(() => ({ transform: [{ scale: pop.value * (1 - 0.08 * press.value) }] }));
+  const color = active ? '#FFFFFF' : hovered ? HOVER : INACTIVE;
+
+  return (
+    <Pressable
+      onPress={onPress}
+      onPressIn={() => (press.value = withTiming(1, { duration: 80 }))}
+      onPressOut={() => (press.value = withTiming(0, { duration: 160 }))}
+      onHoverIn={() => setHovered(true)}
+      onHoverOut={() => setHovered(false)}
+      style={[styles.tabSlot, Platform.OS === 'web' && ({ cursor: 'pointer' } as object)]}
+      hitSlop={8}
+      accessibilityRole="tab"
+      accessibilityLabel={`${tab.label} tab`}
+      accessibilityState={{ selected: active }}
+    >
+      <Animated.View style={[styles.iconWrapper, iconStyle]}>{tab.icon(color)}</Animated.View>
+      <Text style={[active ? styles.tabLabelActive : styles.tabLabelInactive, !active && { color }]} numberOfLines={1}>
+        {tab.label}
+      </Text>
+    </Pressable>
+  );
+}
+
+export const FloatingTabBar: React.FC<FloatingTabBarProps> = ({ activeTab, onTabPress, style }) => {
   const [rowWidth, setRowWidth] = useState(0);
   const activeIndex = TAB_INDICES[activeTab] ?? 0;
-  const tabWidth = rowWidth > 0 ? (rowWidth - 12) / 4 : 0;
-  const pillTranslateX = useRef(new Animated.Value(0)).current;
+  const tabWidth = rowWidth > 0 ? (rowWidth - PAD_X * 2) / 4 : 0;
+  const pillX = useSharedValue(0);
+  const stretch = useSharedValue(1);
 
   const handleLayout = (e: LayoutChangeEvent) => {
     const width = e.nativeEvent.layout.width;
     if (width > 0 && width !== rowWidth) {
       setRowWidth(width);
-      const singleWidth = (width - 12) / 4;
-      pillTranslateX.setValue(activeIndex * singleWidth);
+      pillX.value = lastIndex * ((width - PAD_X * 2) / 4);
     }
   };
 
   useEffect(() => {
-    if (tabWidth > 0) {
-      Animated.timing(pillTranslateX, {
-        toValue: activeIndex * tabWidth,
-        duration: 240,
-        easing: Easing.bezier(0.16, 1, 0.3, 1),
-        useNativeDriver: Platform.OS !== 'web',
-      }).start();
+    if (tabWidth <= 0) return;
+    const moved = lastIndex !== activeIndex;
+    lastIndex = activeIndex;
+    if (!moved) {
+      pillX.value = activeIndex * tabWidth;
+      return;
     }
-  }, [activeIndex, tabWidth]);
+    pillX.value = withSpring(activeIndex * tabWidth, PILL_SPRING);
+    // A little squash-and-stretch while it travels
+    stretch.value = withSequence(withTiming(1.12, { duration: 120 }), withSpring(1, { damping: 12, stiffness: 240 }));
+  }, [activeIndex, tabWidth, pillX, stretch]);
+
+  const pillStyle = useAnimatedStyle(() => ({
+    transform: [{ translateX: pillX.value }, { scaleX: stretch.value }, { scaleY: 2 - stretch.value }],
+  }));
 
   const handlePress = (tab: TabType) => {
-    if (Platform.OS !== 'web') {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    }
+    if (Platform.OS !== 'web') Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     onTabPress(tab);
   };
 
   return (
-    <View style={[styles.floatingWrapper, style]}>
-      {/* Refined Floating iOS Glass Bar */}
+    <View style={[styles.floatingWrapper, style]} pointerEvents="box-none">
       <View style={styles.glassBarContainer}>
+        {Platform.OS !== 'web' && (
+          <BlurView intensity={40} tint="light" style={[StyleSheet.absoluteFill, { borderRadius: 30, overflow: 'hidden' }]} />
+        )}
         <View style={styles.tabsRow} onLayout={handleLayout}>
-          {/* Animated Gliding Purple Pill Indicator */}
           {tabWidth > 0 && (
-            <Animated.View
-              style={[
-                styles.slidingPillContainer,
-                {
-                  width: tabWidth,
-                  transform: [{ translateX: pillTranslateX }],
-                },
-              ]}
-              pointerEvents="none"
-            >
-              <LinearGradient
-                colors={['#6A3EE6', '#582CDB']}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 1 }}
-                style={styles.activeCapsule}
-              />
+            <Animated.View style={[styles.slidingPillContainer, { width: tabWidth }, pillStyle]} pointerEvents="none">
+              <LinearGradient colors={['#6A4BF0', '#5B3EE8']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.activeCapsule} />
             </Animated.View>
           )}
-
-          {/* Interactive Tab Slots */}
-          {TABS.map((tab) => {
-            const isActive = activeTab === tab.id;
-
-            return (
-              <Pressable
-                key={tab.id}
-                onPress={() => handlePress(tab.id)}
-                style={({ pressed }) => [
-                  styles.tabSlot,
-                  pressed && styles.tabSlotPressed,
-                ]}
-                hitSlop={8}
-                accessibilityRole="tab"
-                accessibilityLabel={`${tab.label} tab`}
-                accessibilityState={{ selected: isActive }}
-              >
-                <View style={styles.iconWrapper}>
-                  {tab.icon(isActive ? '#FFFFFF' : '#6E677F')}
-                </View>
-                <Text
-                  style={isActive ? styles.tabLabelActive : styles.tabLabelInactive}
-                  numberOfLines={1}
-                >
-                  {tab.label}
-                </Text>
-              </Pressable>
-            );
-          })}
+          {TABS.map((tab) => (
+            <TabSlot key={tab.id} tab={tab} active={activeTab === tab.id} onPress={() => handlePress(tab.id)} />
+          ))}
         </View>
       </View>
     </View>
@@ -193,12 +208,11 @@ const styles = StyleSheet.create({
     right: 16,
     zIndex: 999,
     alignItems: 'center',
-    pointerEvents: 'box-none',
   },
   glassBarContainer: {
     width: '100%',
     maxWidth: 480,
-    backgroundColor: 'rgba(255, 255, 255, 0.92)',
+    backgroundColor: Platform.OS === 'web' ? 'rgba(255, 255, 255, 0.72)' : 'rgba(255, 255, 255, 0.6)',
     borderRadius: 30,
     borderWidth: 1,
     borderColor: 'rgba(255, 255, 255, 0.95)',
@@ -247,7 +261,7 @@ const styles = StyleSheet.create({
     width: '100%',
     height: '100%',
     borderRadius: 20,
-    shadowColor: '#582CDB',
+    shadowColor: '#5B3EE8',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.22,
     shadowRadius: 10,

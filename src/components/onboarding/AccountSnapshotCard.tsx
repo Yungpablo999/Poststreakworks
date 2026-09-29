@@ -87,9 +87,9 @@ export function AccountSnapshotCard({ snapshots }: { snapshots: AccountSnapshot[
           </View>
         </View>
 
-        <Animated.Text entering={FadeInUp.delay(120).duration(350)} style={styles.missed}>
-          {missed}
-        </Animated.Text>
+        <Animated.View entering={FadeInUp.delay(120).duration(350)}>
+          <Text style={styles.missed}>{missed}</Text>
+        </Animated.View>
       </Animated.View>
 
       {/* What unlocks — one slim line */}

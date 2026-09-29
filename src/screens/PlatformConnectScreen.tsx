@@ -114,9 +114,11 @@ export const PlatformConnectScreen: React.FC<PlatformConnectScreenProps> = ({ on
             ))}
           </View>
 
-          <Animated.Text entering={FadeIn.delay(700).duration(400)} style={styles.moreSoon}>
-            More platforms are on the way. You can connect or remove any of these later.
-          </Animated.Text>
+          <Animated.View entering={FadeIn.delay(700).duration(400)}>
+            <Text style={styles.moreSoon}>
+              More platforms are on the way. You can connect or remove any of these later.
+            </Text>
+          </Animated.View>
 
           {/* Jarvis note */}
           <Animated.View entering={FadeIn.delay(850).duration(500)} style={styles.jarvisNote}>

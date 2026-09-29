@@ -78,9 +78,11 @@ function CodeBox({ digit, index, active, status }: { digit: string; index: numbe
       {/* iOS's blur ignores the parent's rounded clip, so it gets its own corners */}
       <BlurView intensity={24} tint="light" style={styles.boxBlur} />
       {digit ? (
-        <Animated.Text entering={ZoomIn.duration(160)} style={[styles.digit, verified && { color: '#FFFFFF' }]}>
-          {digit}
-        </Animated.Text>
+        <Animated.View entering={ZoomIn.duration(160)}>
+          <Text style={[styles.digit, verified && { color: '#FFFFFF' }]}>
+            {digit}
+          </Text>
+        </Animated.View>
       ) : active && status === 'entering' ? (
         <Animated.View style={[styles.caret, caretStyle]} />
       ) : null}

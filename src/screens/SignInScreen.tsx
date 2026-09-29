@@ -135,9 +135,11 @@ export const SignInScreen: React.FC<SignInScreenProps> = ({ onBack, onCreateAcco
                   />
                 </View>
                 {showHint && (
-                  <Animated.Text entering={FadeIn.duration(200)} style={styles.hint}>
-                    That doesn't look quite right. Try something like you@example.com
-                  </Animated.Text>
+                  <Animated.View entering={FadeIn.duration(200)}>
+                    <Text style={styles.hint}>
+                      That doesn't look quite right. Try something like you@example.com
+                    </Text>
+                  </Animated.View>
                 )}
                 <View style={styles.sendBtn}>
                   <AppButton title="Send me a code" onPress={handleSendCode} disabled={!valid} />
