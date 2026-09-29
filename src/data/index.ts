@@ -274,7 +274,7 @@ export interface CalendarPost {
   title: string;
   platform: CalendarPlatform;
   time: string;
-  status: 'posted' | 'scheduled';
+  status: 'posted' | 'scheduled' | 'draft';
 }
 
 export interface CalendarDay {
@@ -345,7 +345,7 @@ export function getCalendarMonth(persona: Persona, year: number, month: number):
         posts.push({ id: `s-${dayKey(date)}`, ...pick, status: 'scheduled' });
       }
       if (isToday) {
-        posts.push({ id: `s-${dayKey(date)}-t`, ...MOCK_POSTS[1], time: '7:30 PM', status: 'scheduled' });
+        posts.push({ id: `d-${dayKey(date)}-t`, ...MOCK_POSTS[4], time: '7:30 PM', status: 'draft' });
       }
     }
 
@@ -360,7 +360,53 @@ export function getCalendarMonth(persona: Persona, year: number, month: number):
     startOffset,
     days,
     postedCount: all.filter((p) => p.status === 'posted').length,
-    scheduledCount: all.filter((p) => p.status === 'scheduled').length,
+    scheduledCount: all.filter((p) => p.status !== 'posted').length,
     checkInCount: days.filter((x) => x.checkedIn).length,
+  };
+}
+
+// ---------------------------------------------------------------------------
+// Schedule (this week at a glance)
+// ---------------------------------------------------------------------------
+
+export interface WeekSchedule {
+  /** Monday → Sunday of the current week. */
+  days: CalendarDay[];
+  todayIndex: number;
+  plannedCount: number;
+  draftCount: number;
+  /** Future days this week with nothing planned. */
+  openDays: number;
+  /** Posts per platform this week, most first. */
+  platformMix: { platform: CalendarPlatform; count: number }[];
+  /** Suggested posting time (mock until real audience data). */
+  bestTime: string;
+}
+
+export function getWeekSchedule(persona: Persona): WeekSchedule {
+  const today = startOfDay(new Date());
+  const todayIndex = mondayFirstIndex(today);
+  const monday = new Date(today.getFullYear(), today.getMonth(), today.getDate() - todayIndex);
+  const cache: Record<string, CalendarMonth> = {};
+  const days: CalendarDay[] = [];
+  for (let i = 0; i < 7; i++) {
+    const d = new Date(monday.getFullYear(), monday.getMonth(), monday.getDate() + i);
+    const k = `${d.getFullYear()}-${d.getMonth()}`;
+    if (!cache[k]) cache[k] = getCalendarMonth(persona, d.getFullYear(), d.getMonth());
+    days.push(cache[k].days[d.getDate() - 1]);
+  }
+  const all = days.flatMap((d) => d.posts);
+  const counts: Partial<Record<CalendarPlatform, number>> = {};
+  all.forEach((p) => (counts[p.platform] = (counts[p.platform] ?? 0) + 1));
+  return {
+    days,
+    todayIndex,
+    plannedCount: all.length,
+    draftCount: all.filter((p) => p.status === 'draft').length,
+    openDays: days.filter((d) => !d.isPast && !d.isToday && d.posts.length === 0).length,
+    platformMix: (Object.keys(counts) as CalendarPlatform[])
+      .map((platform) => ({ platform, count: counts[platform]! }))
+      .sort((a, b) => b.count - a.count),
+    bestTime: '7:30 PM',
   };
 }

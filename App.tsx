@@ -696,6 +696,8 @@ export default function App() {
             />
           ) : (
             <ScheduleScreen
+              userPersona={userPersona}
+              onTogglePersona={handleTogglePersona}
               onBack={() => navigateTo(previousScreen ? previousScreen : 'dashboard')}
               onLogout={handleLogout}
               onOpenJarvisPro={() => navigateTo('jarvis-pro')}

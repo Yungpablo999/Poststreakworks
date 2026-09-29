@@ -59,7 +59,7 @@ function Chevron({ dir, color }: { dir: 'left' | 'right'; color: string }) {
 
 function DayCell({ day, selected, onPress }: { day: CalendarDay; selected: boolean; onPress: () => void }) {
   const posted = day.posts.some((p) => p.status === 'posted');
-  const scheduled = !posted && day.posts.some((p) => p.status === 'scheduled');
+  const scheduled = !posted && day.posts.length > 0; // scheduled or draft
   return (
     <Pressable
       onPress={onPress}
@@ -124,9 +124,14 @@ function DayDetails({ day, label, onPlanPost }: { day: CalendarDay; label: strin
                 {PLATFORM_NAMES[p.platform]} · {p.time}
               </Text>
             </View>
-            <View style={[styles.statusChip, p.status === 'posted' ? styles.statusPosted : styles.statusScheduled]}>
-              <Text style={[styles.statusText, { color: p.status === 'posted' ? ds.greenFill : ds.purple }]}>
-                {p.status === 'posted' ? 'Posted' : 'Scheduled'}
+            <View
+              style={[
+                styles.statusChip,
+                p.status === 'posted' ? styles.statusPosted : p.status === 'draft' ? styles.statusDraft : styles.statusScheduled,
+              ]}
+            >
+              <Text style={[styles.statusText, { color: p.status === 'posted' ? ds.greenFill : p.status === 'draft' ? ds.text2 : ds.purple }]}>
+                {p.status === 'posted' ? 'Posted' : p.status === 'draft' ? 'Draft' : 'Scheduled'}
               </Text>
             </View>
           </Animated.View>
@@ -492,6 +497,7 @@ const styles = StyleSheet.create({
   statusChip: { paddingHorizontal: 8, height: 22, justifyContent: 'center', borderRadius: 999 },
   statusPosted: { backgroundColor: ds.greenBg },
   statusScheduled: { backgroundColor: ds.lavender },
+  statusDraft: { backgroundColor: ds.cream },
   statusText: { fontSize: 11, fontWeight: '800' },
   emptyText: { fontSize: 13.5, lineHeight: 19, color: ds.text2 },
   planBtn: { marginTop: 12 },
