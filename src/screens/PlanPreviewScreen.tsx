@@ -13,7 +13,8 @@ import { GlassCard } from '../components/glass/GlassCard';
 import { OnboardingProgress } from '../components/onboarding/OnboardingProgress';
 import { PlatformLogo, type PlatformLogoType } from '../components/onboarding/PlatformLogo';
 import { JarvisOrb } from '../components/JarvisOrb';
-import { getStarterIdeas, type StarterIdea } from '../data';
+import { getAccountSnapshot, getStarterIdeas, type StarterIdea } from '../data';
+import { AccountSnapshotCard } from '../components/onboarding/AccountSnapshotCard';
 import { ds } from '../theme/colors';
 
 // Onboarding step 3: value before sign-up. Jarvis turns the creator's niches +
@@ -51,6 +52,7 @@ interface PlanPreviewScreenProps {
 
 export const PlanPreviewScreen: React.FC<PlanPreviewScreenProps> = ({ niches, platforms, onBack, onContinue }) => {
   const ideas = useMemo(() => getStarterIdeas(niches, platforms), [niches, platforms]);
+  const snapshot = useMemo(() => getAccountSnapshot(platforms), [platforms]);
   const [index, setIndex] = useState(0);
   const [thinking, setThinking] = useState(false);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -110,11 +112,18 @@ export const PlanPreviewScreen: React.FC<PlanPreviewScreenProps> = ({ niches, pl
               maxFontSize={40}
               accessibilityLabel="Jarvis made you a starter plan"
             />
-            <Text style={styles.subtitle}>Built from what you picked. Like the idea? Keep it. If not, shuffle for another.</Text>
+            <Text style={styles.subtitle}>Here's where your account is today, and the plan to grow it.</Text>
           </Animated.View>
 
+          {/* Their account right now (from the platform they connected) */}
+          {snapshot && (
+            <Animated.View entering={FadeInUp.delay(240).duration(600)} style={styles.section}>
+              <AccountSnapshotCard snapshot={snapshot} />
+            </Animated.View>
+          )}
+
           {/* First post idea */}
-          <Animated.View entering={FadeInUp.delay(280).duration(600)} style={styles.section}>
+          <Animated.View entering={FadeInUp.delay(380).duration(600)} style={styles.section}>
             <GlassCard strong radius={24} padding={18}>
               <View style={styles.ideaHeader}>
                 <JarvisOrb size={28} />
@@ -159,7 +168,7 @@ export const PlanPreviewScreen: React.FC<PlanPreviewScreenProps> = ({ niches, pl
           </Animated.View>
 
           {/* 3-day starter plan */}
-          <Animated.View entering={FadeInUp.delay(420).duration(600)} style={styles.section}>
+          <Animated.View entering={FadeInUp.delay(500).duration(600)} style={styles.section}>
             <GlassCard radius={24} padding={18}>
               <Text style={styles.planTitle}>Your first 3 days</Text>
               <Text style={styles.planSub}>Small steps, no pressure. Miss a day? Just pick up again.</Text>

@@ -202,3 +202,44 @@ export function getStarterIdeas(niches: string[], platforms: string[]): StarterI
   const general = GENERAL_IDEAS.map((idea, i) => ({ ...idea, id: `general-${i}`, niche: 'general', format }));
   return [...byIndex, ...general];
 }
+
+// ---------------------------------------------------------------------------
+// Connected-account snapshot (onboarding "Your plan" step)
+// When a platform is connected for real, the backend returns the creator's own
+// recent numbers. Until then this returns sample data with isSample = true,
+// and the UI labels it "Sample data". Return null if nothing could be read.
+// ---------------------------------------------------------------------------
+
+export interface AccountSnapshot {
+  platform: string;
+  isSample: boolean;
+  /** Days with at least one post in the last 30 days. */
+  postingDaysLast30: number;
+  /** Which of the last 30 days had a post (index 0 = 30 days ago). */
+  postedDays: boolean[];
+  avgViews: string;
+  bestTime: string;
+  /** How many of the recent posts went out near the best time. */
+  postsAtBestTime: number;
+  recentPosts: number;
+  topFormat: string;
+}
+
+const SAMPLE_SNAPSHOTS: Record<string, Omit<AccountSnapshot, 'platform' | 'isSample' | 'postedDays'>> = {
+  tiktok: { postingDaysLast30: 4, avgViews: '1.2K', bestTime: '7 PM', postsAtBestTime: 1, recentPosts: 4, topFormat: 'Short videos' },
+  instagram: { postingDaysLast30: 3, avgViews: '640', bestTime: '6 PM', postsAtBestTime: 1, recentPosts: 3, topFormat: 'Reels' },
+  youtube: { postingDaysLast30: 2, avgViews: '890', bestTime: '5 PM', postsAtBestTime: 0, recentPosts: 2, topFormat: 'Shorts' },
+  facebook: { postingDaysLast30: 3, avgViews: '410', bestTime: '8 PM', postsAtBestTime: 1, recentPosts: 3, topFormat: 'Short videos' },
+  threads: { postingDaysLast30: 5, avgViews: '320', bestTime: '9 AM', postsAtBestTime: 2, recentPosts: 5, topFormat: 'Text posts' },
+};
+
+export function getAccountSnapshot(platforms: string[]): AccountSnapshot | null {
+  const platform = platforms.find((p) => p in SAMPLE_SNAPSHOTS);
+  if (!platform) return null;
+  const sample = SAMPLE_SNAPSHOTS[platform];
+  // Spread the sample posting days across the month
+  const postedDays = Array.from({ length: 30 }, (_, i) =>
+    Array.from({ length: sample.postingDaysLast30 }, (_, k) => Math.round((k + 0.5) * (30 / sample.postingDaysLast30))).includes(i),
+  );
+  return { platform, isSample: true, postedDays, ...sample };
+}
