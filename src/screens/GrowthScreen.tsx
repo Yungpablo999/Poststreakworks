@@ -25,6 +25,15 @@ import { AnimatedCompletionModal } from '../components/AnimatedCompletionModal';
 import { FreeAppHeader } from '../components/FreeAppHeader';
 import { UserPersona } from '../components/HeaderDualModePills';
 import { sFont, isNarrowScreen } from '../utils/responsive';
+import Reanimated, { FadeInUp } from 'react-native-reanimated';
+import { GlassBackdrop } from '../components/glass/GlassBackdrop';
+import { FitLines } from '../components/ui/FitLines';
+import { JarvisOrb } from '../components/JarvisOrb';
+import { PlatformRow } from '../components/onboarding/PlatformRow';
+import { type PlatformLogoType } from '../components/onboarding/PlatformLogo';
+import { ProUpsellCard } from '../components/home/ProUpsellCard';
+import { AudienceEmptyHero, ComingUpCard, JarvisStrategyCard, FirstReportCard } from '../components/growth/GrowthBlocks';
+import { ds } from '../theme/colors';
 
 
 // AUTHENTIC BRAND SVG ICONS
@@ -452,8 +461,10 @@ export const GrowthScreen: React.FC<GrowthScreenProps> = ({
     <SafeAreaView style={[styles.safeArea, isDark && { backgroundColor: '#0C0A12' }]}>
       <StatusBar barStyle={isDark ? "light-content" : "dark-content"} backgroundColor={isDark ? "#0C0A12" : "#FAF8F5"} />
       <View style={[styles.container, isDark && { backgroundColor: '#0C0A12' }]}>
+        <GlassBackdrop />
         {/* 1. TOP AIRY HEADER BAR */}
         <FreeAppHeader
+          backgroundColor="transparent"
           onSwitchToPro={onSwitchToPro || onOpenJarvisPro}
           onOpenJarvisPro={onOpenJarvisPro}
           onTogglePersona={onTogglePersona}
@@ -476,44 +487,26 @@ export const GrowthScreen: React.FC<GrowthScreenProps> = ({
           showsVerticalScrollIndicator={false}
           bounces={true}
         >
-          {/* TOP PILL BADGES */}
-          <View style={styles.topBadgesRow}>
-            <View style={styles.growthPill}>
-              <Text style={styles.growthPillText}>GROWTH</Text>
-            </View>
+          {/* HEADLINE — same two-line structure on every screen size */}
+          <Reanimated.View entering={FadeInUp.duration(500)} style={styles.headline}>
+            <FitLines
+              lines={['See your growth', <Text key="c" style={styles.headlineAccent}>clearly</Text>]}
+              textStyle={styles.headlineText}
+              maxFontSize={34}
+              align="left"
+              accessibilityLabel="See your growth clearly"
+            />
+          </Reanimated.View>
 
-            <View style={styles.analyticsPill}>
-              <Text style={styles.analyticsPillText}>ANALYTICS HUB</Text>
-            </View>
-          </View>
-
-          {/* HEADLINE */}
-          <Text
-            style={styles.mainHeading}
-            numberOfLines={2}
-          >
-            See your growth clearly.
-          </Text>
-
-          {/* 1. TOTAL AUDIENCE GROWTH HERO CARD */}
+          {/* 1. TOTAL AUDIENCE */}
+          <Reanimated.View entering={FadeInUp.delay(100).duration(550)} style={styles.section0}>
+          {isNewUser ? (
+            <AudienceEmptyHero
+              connectedCount={platformsList.filter((p) => p.connected && isStage1Platform(p.id)).length}
+              onConnect={handleOpenConnectPlatforms}
+            />
+          ) : (
           <View style={styles.audienceHeroCard}>
-            {isNewUser ? (
-              <View style={styles.audienceEmptyContainer}>
-                <Text style={styles.audienceLabel}>TOTAL AUDIENCE</Text>
-                <Text style={styles.audienceEmptyHeadline}>No data yet</Text>
-                <Text style={styles.audienceEmptySubtext}>
-                  Connect an account and your first stats show up within minutes
-                </Text>
-                <Pressable
-                  style={({ pressed }) => [styles.connectAccountBtn, pressed && styles.btnPressed]}
-                  onPress={handleOpenConnectPlatforms}
-                >
-                  <View style={[styles.connectAccountGradient, { backgroundColor: '#5B3EE8' }]}>
-                    <Text style={styles.connectAccountBtnText}>Connect an Account</Text>
-                  </View>
-                </Pressable>
-              </View>
-            ) : (
               <>
                 <View style={styles.audienceHeaderRow}>
                   <View>
@@ -671,140 +664,40 @@ export const GrowthScreen: React.FC<GrowthScreenProps> = ({
                   <Text style={styles.viewFullAudienceText}>View Full Audience Breakdown ➔</Text>
                 </Pressable>
               </>
-            )}
           </View>
+          )}
+          </Reanimated.View>
 
-          {/* 2. CONNECTED PLATFORMS */}
-          <View style={styles.sectionHeaderRow}>
-            <Text style={styles.sectionHeading}>CONNECTED PLATFORMS</Text>
-          </View>
-
-          <View style={styles.platformsCard}>
-            {/* TikTok */}
-            <View style={styles.platformRow}>
-              <View style={styles.platformLeft}>
-                <View style={[styles.platformIconBox, { backgroundColor: '#000000' }]}>
-                  <Svg width={16} height={16} viewBox="0 0 24 24">
-                    <Path
-                      d="M17.5 4.5a4.5 4.5 0 0 1-3.5-4h-2.5v13.5a2.5 2.5 0 1 1-2.5-2.5c.3 0 .5.05.7.15V8.5a5.5 5.5 0 1 0 4.8 5.4V7.2a7.5 7.5 0 0 0 4.5 1.3V5.5c-.5 0-1-.3-1.5-1z"
-                      fill="#25F4EE"
-                      transform="translate(-0.8, -0.8)"
-                    />
-                    <Path
-                      d="M17.5 4.5a4.5 4.5 0 0 1-3.5-4h-2.5v13.5a2.5 2.5 0 1 1-2.5-2.5c.3 0 .5.05.7.15V8.5a5.5 5.5 0 1 0 4.8 5.4V7.2a7.5 7.5 0 0 0 4.5 1.3V5.5c-.5 0-1-.3-1.5-1z"
-                      fill="#FE2C55"
-                      transform="translate(0.8, 0.8)"
-                    />
-                    <Path
-                      d="M17.5 4.5a4.5 4.5 0 0 1-3.5-4h-2.5v13.5a2.5 2.5 0 1 1-2.5-2.5c.3 0 .5.05.7.15V8.5a5.5 5.5 0 1 0 4.8 5.4V7.2a7.5 7.5 0 0 0 4.5 1.3V5.5c-.5 0-1-.3-1.5-1z"
-                      fill="#FFFFFF"
-                    />
-                  </Svg>
-                </View>
-                <View>
-                  <Text style={styles.platformName}>TikTok</Text>
-                  {!isNewUser && <Text style={styles.platformFollowers}>14.2k followers</Text>}
-                </View>
-              </View>
-              {isNewUser ? (
-                <Pressable
-                  style={({ pressed }) => [styles.connectPlatformSmallBtn, pressed && styles.btnPressed]}
-                  onPress={() => handleConnectSinglePlatform('tiktok')}
-                  hitSlop={6}
-                >
-                  <Text style={styles.connectPlatformSmallBtnText}>Connect</Text>
-                </Pressable>
-              ) : (
-                <Text style={styles.platformGrowthGreen}>+8.2%  ▲</Text>
-              )}
+          {/* 2. PLATFORMS — tap Connect: spinner, then a green tick */}
+          <Reanimated.View entering={FadeInUp.delay(200).duration(550)}>
+            <Text style={styles.sectionLabel}>Your platforms</Text>
+            <View style={styles.stack}>
+              {platformsList
+                .filter((p) => isStage1Platform(p.id))
+                .map((p) => (
+                  <PlatformRow
+                    key={p.id}
+                    name={p.name}
+                    logo={p.id as PlatformLogoType}
+                    description={
+                      p.connected
+                        ? isNewUser
+                          ? 'Connected · syncing'
+                          : p.handle || 'Connected'
+                        : 'Tap to connect'
+                    }
+                    connected={p.connected}
+                    onToggle={() => (p.connected ? handleRemoveSinglePlatform(p.id) : handleConnectSinglePlatform(p.id))}
+                  />
+                ))}
             </View>
+          </Reanimated.View>
 
-            {/* Instagram */}
-            <View style={styles.platformRow}>
-              <View style={styles.platformLeft}>
-                <LinearGradient
-                  colors={['#833AB4', '#FD1D1D', '#F77737']}
-                  start={{ x: 0, y: 0 }}
-                  end={{ x: 1, y: 1 }}
-                  style={styles.platformIconBox}
-                >
-                  <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
-                    <Rect x="2" y="2" width="20" height="20" rx="6" stroke="#FFFFFF" strokeWidth="2.2" />
-                    <Circle cx="12" cy="12" r="4.5" stroke="#FFFFFF" strokeWidth="2.2" />
-                    <Circle cx="17.5" cy="6.5" r="1.2" fill="#FFFFFF" />
-                  </Svg>
-                </LinearGradient>
-                <View>
-                  <Text style={styles.platformName}>Instagram</Text>
-                  {!isNewUser && <Text style={styles.platformFollowers}>7.8k followers</Text>}
-                </View>
-              </View>
-              {isNewUser ? (
-                <Pressable
-                  style={({ pressed }) => [styles.connectPlatformSmallBtn, pressed && styles.btnPressed]}
-                  onPress={() => handleConnectSinglePlatform('instagram')}
-                  hitSlop={6}
-                >
-                  <Text style={styles.connectPlatformSmallBtnText}>Connect</Text>
-                </Pressable>
-              ) : (
-                <Text style={styles.platformGrowthGreen}>+3.4%  ▲</Text>
-              )}
-            </View>
-
-            {/* YouTube */}
-            <View style={styles.platformRow}>
-              <View style={styles.platformLeft}>
-                <View style={[styles.platformIconBox, { backgroundColor: '#FF0000' }]}>
-                  <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
-                    <Path
-                      d="M21.58 7.19a2.5 2.5 0 0 0-1.76-1.77C18.26 5 12 5 12 5s-6.26 0-7.82.42A2.5 2.5 0 0 0 2.42 7.19C2 8.76 2 12 2 12s0 3.24.42 4.81a2.5 2.5 0 0 0 1.76 1.77C22 15.24 22 12 22 12s0-3.24-.42-4.81z"
-                      fill="#FFFFFF"
-                    />
-                    <Path d="M10 15.5l5.5-3.5L10 8.5v7z" fill="#FF0000" />
-                  </Svg>
-                </View>
-                <View>
-                  <Text style={styles.platformName}>YouTube</Text>
-                  {!isNewUser && <Text style={styles.platformFollowers}>2.8k subs</Text>}
-                </View>
-              </View>
-              {isNewUser ? (
-                <Pressable
-                  style={({ pressed }) => [styles.connectPlatformSmallBtn, pressed && styles.btnPressed]}
-                  onPress={() => handleConnectSinglePlatform('youtube')}
-                  hitSlop={6}
-                >
-                  <Text style={styles.connectPlatformSmallBtnText}>Connect</Text>
-                </Pressable>
-              ) : (
-                <Text style={styles.platformGrowthGreen}>+1.1%  ▲</Text>
-              )}
-            </View>
-
-            {/* Connect more platforms */}
-            <Pressable
-              style={({ pressed }) => [
-                styles.platformRow,
-                { borderBottomWidth: 0 },
-                pressed && styles.btnPressed,
-              ]}
-              onPress={handleOpenConnectPlatforms}
-            >
-              <View style={styles.platformLeft}>
-                <View style={[styles.platformIconBox, { backgroundColor: '#FAF5FF', borderColor: '#E9D5FF', borderWidth: 1 }]}>
-                  <Text style={{ fontSize: 13, fontWeight: '700', color: '#582CDB' }}>＋</Text>
-                </View>
-                <View style={{ flex: 1, marginRight: 8 }}>
-                  <Text style={styles.platformName} numberOfLines={1}>Connect more platforms</Text>
-                  <Text style={styles.platformFollowers} numberOfLines={1}>Facebook · Threads</Text>
-                </View>
-              </View>
-              <View style={styles.connectPillBtn}>
-                <Text style={styles.connectPillBtnText}>Connect →</Text>
-              </View>
-            </Pressable>
-          </View>
+          {isNewUser && (
+            <Reanimated.View entering={FadeInUp.delay(300).duration(550)} style={styles.section}>
+              <ComingUpCard />
+            </Reanimated.View>
+          )}
 
           {/* 3. BEST PERFORMING POST HERO CARD (RETURNING USERS ONLY) */}
           {!isNewUser && (
@@ -1001,43 +894,17 @@ export const GrowthScreen: React.FC<GrowthScreenProps> = ({
             </>
           )}
 
-          {/* 6. JARVIS GROWTH STRATEGY (LUXURY DARK NAVY) */}
-          <View style={styles.jarvisStrategyCard}>
-            <View style={styles.jarvisHeaderRow}>
-              <Animated.View
-                style={[
-                  styles.jarvisFlameCircle,
-                  { transform: [{ translateY: flameFloatY }] },
-                ]}
-              >
-                <Image
-                  source={require('../../assets/images/jarvis-core-flame.png')}
-                  style={styles.jarvisFlameIcon}
-                  resizeMode="contain"
-                />
-              </Animated.View>
-              <View style={styles.jarvisTitleCol}>
-                <Text style={styles.jarvisTagText}>JARVIS AI STRATEGY</Text>
-                <Text style={styles.jarvisTitle}>Growth Strategy</Text>
-              </View>
-            </View>
-
-            <Text style={styles.jarvisBodyQuote}>
-              {isNewUser
-                ? '“Jarvis learns your patterns as you post — your first strategy tip shows up after a few Reels.”'
-                : '“Posts that deliver their main value within 4 seconds show your strongest retention. Double down on mistake-based hooks.”'}
-            </Text>
-
-            <Pressable
-              style={({ pressed }) => [styles.viewStrategyBtn, pressed && styles.btnPressed]}
-              onPress={() => {
+          {/* 6. JARVIS STRATEGY */}
+          <Reanimated.View entering={FadeInUp.delay(400).duration(550)} style={styles.section}>
+            <JarvisStrategyCard
+              orb={<JarvisOrb size={34} />}
+              isNewUser={isNewUser}
+              onOpen={() => {
                 triggerModalPop();
                 setShowStrategyModal(true);
               }}
-            >
-              <Text style={styles.viewStrategyBtnText}>See the Breakdown ➔</Text>
-            </Pressable>
-          </View>
+            />
+          </Reanimated.View>
 
           {/* 7. MILESTONES SECTION (RETURNING USERS ONLY) */}
           {!isNewUser && (
@@ -1130,6 +997,12 @@ export const GrowthScreen: React.FC<GrowthScreenProps> = ({
           )}
 
           {/* 8. WEEKLY GROWTH REPORT */}
+          {isNewUser ? (
+            <Reanimated.View entering={FadeInUp.delay(500).duration(550)} style={styles.section}>
+              <FirstReportCard daysOfData={0} />
+            </Reanimated.View>
+          ) : (
+          <>
           <View style={styles.sectionHeaderRow}>
             <Text style={styles.sectionHeading}>WEEKLY GROWTH REPORT</Text>
           </View>
@@ -1200,51 +1073,18 @@ export const GrowthScreen: React.FC<GrowthScreenProps> = ({
             )}
           </View>
 
-          {/* 9. UNLOCK DEEPER GROWTH ANALYTICS PRO CARD */}
-          <View style={styles.unlockProCard}>
-            <Text style={styles.unlockProTitle}>Unlock deeper growth analytics</Text>
+          </>
+          )}
 
-            <View style={styles.proPillarsList}>
-              <View style={styles.proPillarItem}>
-                <Text style={styles.proPillarCheck}>🔒</Text>
-                <Text style={styles.proPillarText}>Deeper Retention Analysis</Text>
-              </View>
-              <View style={styles.proPillarItem}>
-                <Text style={styles.proPillarCheck}>🔒</Text>
-                <Text style={styles.proPillarText}>AI Content Performance Score</Text>
-              </View>
-              <View style={styles.proPillarItem}>
-                <Text style={styles.proPillarCheck}>🔒</Text>
-                <Text style={styles.proPillarText}>Historical Trend Export</Text>
-              </View>
-            </View>
-
-            {/* Glowing Equalizer Graphic with Lock */}
-            <View style={styles.proWaveGraphicBox}>
-              <View style={styles.proGraphicBarWrapper}>
-                <View style={[styles.proGraphicBar, { height: 28 }]} />
-                <View style={[styles.proGraphicBar, { height: 42 }]} />
-                <View style={styles.proGraphicCenterLock}>
-                  <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
-                    <Rect x="4" y="11" width="16" height="11" rx="2" stroke="#FFFFFF" strokeWidth="2" />
-                    <Path d="M7 11V7a5 5 0 0 1 10 0v4" stroke="#FFFFFF" strokeWidth="2" strokeLinecap="round" />
-                  </Svg>
-                </View>
-                <View style={[styles.proGraphicBar, { height: 42 }]} />
-                <View style={[styles.proGraphicBar, { height: 28 }]} />
-              </View>
-            </View>
-
-            {/* Explore Pro Plans Metallic Gold Button */}
-            <Pressable
-              style={({ pressed }) => [styles.exploreProBtn, pressed && styles.btnPressed]}
-              onPress={handleOpenPro}
-            >
-              <View style={[styles.exploreProGradient, { backgroundColor: '#F59E0B' }]}>
-                <Text style={styles.exploreProBtnText}>Explore Pro Plans</Text>
-              </View>
-            </Pressable>
-          </View>
+          {/* 9. PRO (gold = Pro only) */}
+          <Reanimated.View entering={FadeInUp.delay(600).duration(550)} style={styles.section}>
+            <ProUpsellCard
+              title="Unlock deeper analytics"
+              benefits={['Deeper retention analysis', 'AI content performance score', 'Historical trend export']}
+              buttonTitle="Explore Pro plans"
+              onUpgrade={handleOpenPro}
+            />
+          </Reanimated.View>
 
           {/* Bottom Space for Floating Tab Bar */}
           <View style={{ height: 110 }} />
@@ -1649,14 +1489,20 @@ export const GrowthScreen: React.FC<GrowthScreenProps> = ({
 };
 
 const styles = StyleSheet.create({
+  headline: { marginTop: 4, marginBottom: 16 },
+  headlineText: { fontWeight: '800', letterSpacing: -0.8, color: ds.ink },
+  headlineAccent: { color: ds.purple },
+  sectionLabel: { fontSize: 17, fontWeight: '800', color: ds.ink, letterSpacing: -0.2, marginTop: 24 },
+  stack: { gap: 10, marginTop: 12 },
+  section: { marginTop: 24 },
+  section0: { marginBottom: 0 },
   safeArea: {
     flex: 1,
-    backgroundColor: '#FAF8F5',
+    backgroundColor: '#F7F5F0',
   },
   container: {
     flex: 1,
     width: '100%',
-    backgroundColor: '#FAF8F5',
   },
   btnPressed: {
     opacity: 0.9,
@@ -1781,10 +1627,10 @@ const styles = StyleSheet.create({
 
   // 1. TOTAL AUDIENCE HERO CARD
   audienceHeroCard: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: 'rgba(255, 255, 255, 0.72)',
     borderRadius: 24,
     borderWidth: 1,
-    borderColor: '#EFEBF8',
+    borderColor: 'rgba(255, 255, 255, 0.95)',
     padding: 20,
     marginBottom: 20,
     shadowColor: '#582CDB',
@@ -2075,10 +1921,10 @@ const styles = StyleSheet.create({
 
   // 3. BEST PERFORMING POST
   bestPostCard: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: 'rgba(255, 255, 255, 0.72)',
     borderRadius: 24,
     borderWidth: 1,
-    borderColor: '#EFEBF8',
+    borderColor: 'rgba(255, 255, 255, 0.95)',
     padding: 18,
     marginBottom: 20,
     shadowColor: '#000000',
@@ -2191,10 +2037,10 @@ const styles = StyleSheet.create({
 
   // 4. TOTAL POST REACH CARD
   reachCard: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: 'rgba(255, 255, 255, 0.72)',
     borderRadius: 24,
     borderWidth: 1,
-    borderColor: '#EFEBF8',
+    borderColor: 'rgba(255, 255, 255, 0.95)',
     padding: 20,
     marginBottom: 20,
   },
@@ -2276,10 +2122,10 @@ const styles = StyleSheet.create({
 
   // 5. FORMAT PERFORMANCE
   formatCard: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: 'rgba(255, 255, 255, 0.72)',
     borderRadius: 24,
     borderWidth: 1,
-    borderColor: '#EFEBF8',
+    borderColor: 'rgba(255, 255, 255, 0.95)',
     padding: 20,
     marginBottom: 20,
   },
@@ -2396,10 +2242,10 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   milestoneCard: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: 'rgba(255, 255, 255, 0.72)',
     borderRadius: 18,
     borderWidth: 1,
-    borderColor: '#EFEBF8',
+    borderColor: 'rgba(255, 255, 255, 0.95)',
     padding: 14,
     shadowColor: '#171420',
     shadowOffset: { width: 0, height: 2 },
@@ -2500,10 +2346,10 @@ const styles = StyleSheet.create({
 
   // 8. WEEKLY GROWTH REPORT
   reportCard: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: 'rgba(255, 255, 255, 0.72)',
     borderRadius: 24,
     borderWidth: 1,
-    borderColor: '#EFEBF8',
+    borderColor: 'rgba(255, 255, 255, 0.95)',
     padding: 18,
     marginBottom: 20,
   },

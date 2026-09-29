@@ -44,7 +44,7 @@ export function ProUpsellCard({
 
       <View style={styles.headerRow}>
         <JarvisOrb size={34} />
-        <Text style={styles.title} numberOfLines={1}>
+        <Text style={styles.title} numberOfLines={2}>
           {title}
         </Text>
         <View style={styles.proChip}>
