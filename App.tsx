@@ -478,6 +478,10 @@ export default function App() {
             onBack={handleBackFromSignIn}
             onCreateAccount={handleCreateAccountFromSignIn}
             onSubmit={handleSignInSubmit}
+            onSocialSignIn={() => {
+              setUserProfile(prev => ({ ...prev, tier: 'free' }));
+              navigateTo('dashboard');
+            }}
           />
         )}
 
