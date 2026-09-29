@@ -18,6 +18,8 @@ interface WelcomeScreenProps {
 
 // One smooth curve for every entrance, as on the website
 const ENTER_MS = 650;
+const MASCOT_DELAY = 120;
+const MASCOT_ENTER_MS = 800;
 
 // Headline words rise in one after another; "Earn." uses the Playfair accent
 const HEADLINE = [
@@ -57,17 +59,19 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onGetStarted = () 
         <View style={styles.container}>
           {/* Brand: ghost + wordmark together */}
           <Animated.View entering={FadeIn.duration(500)} style={styles.topBar}>
-            <BrandLogo size="sm" />
+            <BrandLogo size="sm" wordmarkOnly />
           </Animated.View>
 
           {/* Mascot floats up, then keeps its gentle idle bob (tap it to make it bounce) */}
-          <Animated.View entering={FadeInUp.delay(120).duration(ENTER_MS + 150)} style={styles.hero}>
-            <HeroMascot />
+          <Animated.View entering={FadeInUp.delay(MASCOT_DELAY).duration(MASCOT_ENTER_MS)} style={styles.hero}>
+            {/* The ghost rises into place and stays there (no idle float); tapping it still makes it bounce */}
+            <HeroMascot idleFloat={false} />
           </Animated.View>
 
           {/* Headline: word-by-word rise */}
           <View
-            style={styles.headlineRow}
+            // Fixed height: shrinking the words to fit must never shift the ghost or buttons
+            style={[styles.headlineRow, { height: Math.round(maxHeadlineSize * 1.25) }]}
             accessible
             accessibilityRole="header"
             accessibilityLabel="Create. Grow. Earn."

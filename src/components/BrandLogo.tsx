@@ -17,9 +17,11 @@ const SIZES: Record<BrandLogoSize, { badge: number; ghost: number; word: number;
 interface BrandLogoProps {
   size?: BrandLogoSize;
   isDark?: boolean;
+  /** Wordmark only, for screens where the big mascot is already on show (e.g. Welcome). */
+  wordmarkOnly?: boolean;
 }
 
-export function BrandLogo({ size = 'md', isDark = false }: BrandLogoProps) {
+export function BrandLogo({ size = 'md', isDark = false, wordmarkOnly = false }: BrandLogoProps) {
   const s = SIZES[size];
   return (
     <View
@@ -28,6 +30,7 @@ export function BrandLogo({ size = 'md', isDark = false }: BrandLogoProps) {
       accessibilityRole="image"
       accessibilityLabel="PostStreak"
     >
+      {!wordmarkOnly && (
       <View
         style={[
           styles.badge,
@@ -41,6 +44,7 @@ export function BrandLogo({ size = 'md', isDark = false }: BrandLogoProps) {
           resizeMode="contain"
         />
       </View>
+      )}
       <Text
         style={[styles.wordmark, { fontSize: s.word }, isDark && styles.wordmarkDark]}
         numberOfLines={1}

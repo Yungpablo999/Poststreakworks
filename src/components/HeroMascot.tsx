@@ -11,7 +11,12 @@ import {
 import Svg, { Defs, RadialGradient, Stop, Circle } from 'react-native-svg';
 import * as Haptics from 'expo-haptics';
 
-export const HeroMascot: React.FC = () => {
+interface HeroMascotProps {
+  /** Idle float/breathing loop. Turn off when the screen has its own entrance so the ghost stays where it lands. */
+  idleFloat?: boolean;
+}
+
+export const HeroMascot: React.FC<HeroMascotProps> = ({ idleFloat = true }) => {
   const { width, height } = useWindowDimensions();
   const isCompact = height < 750;
   
@@ -120,9 +125,10 @@ export const HeroMascot: React.FC = () => {
       ])
     );
 
+    if (!idleFloat) return;
     floatLoop.start();
     return () => floatLoop.stop();
-  }, [hoverY, bodyStretchY, bodySquishX, bodyTilt]);
+  }, [hoverY, bodyStretchY, bodySquishX, bodyTilt, idleFloat]);
 
   // Interactive Tap Reaction (Anticipation Squash -> Spring Leap -> Joyful Air Wobble)
   const handleMascotTap = () => {
