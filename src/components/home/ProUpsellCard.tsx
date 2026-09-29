@@ -7,7 +7,7 @@ import { GlassCard } from '../glass/GlassCard';
 import { JarvisOrb } from '../JarvisOrb';
 import { ds, goldTokens } from '../../theme/colors';
 
-// Free-tier Home: a calm glass card for Jarvis Pro. Gold is used only here
+// Free tier: a calm glass card for Jarvis Pro (Home, Quests…). Gold is used only here
 // (Pro), as a faint glow, the tick marks and the button.
 
 const BENEFITS = [
@@ -16,7 +16,17 @@ const BENEFITS = [
   'Deeper growth insights',
 ];
 
-export function ProUpsellCard({ onUpgrade }: { onUpgrade: () => void }) {
+export function ProUpsellCard({
+  onUpgrade,
+  title = 'Unlock Jarvis Pro',
+  benefits = BENEFITS,
+  buttonTitle = 'Upgrade to Pro',
+}: {
+  onUpgrade: () => void;
+  title?: string;
+  benefits?: string[];
+  buttonTitle?: string;
+}) {
   return (
     <GlassCard strong radius={26} padding={20}>
       {/* Faint gold glow in the corner */}
@@ -35,7 +45,7 @@ export function ProUpsellCard({ onUpgrade }: { onUpgrade: () => void }) {
       <View style={styles.headerRow}>
         <JarvisOrb size={34} />
         <Text style={styles.title} numberOfLines={1}>
-          Unlock Jarvis Pro
+          {title}
         </Text>
         <View style={styles.proChip}>
           <Text style={styles.proChipText}>PRO</Text>
@@ -43,7 +53,7 @@ export function ProUpsellCard({ onUpgrade }: { onUpgrade: () => void }) {
       </View>
 
       <View style={styles.list}>
-        {BENEFITS.map((b) => (
+        {benefits.map((b) => (
           <View key={b} style={styles.item}>
             <View style={styles.tick}>
               <Svg width={11} height={11} viewBox="0 0 24 24" fill="none">
@@ -55,7 +65,7 @@ export function ProUpsellCard({ onUpgrade }: { onUpgrade: () => void }) {
         ))}
       </View>
 
-      <AppButton title="Upgrade to Pro" variant="gold" onPress={onUpgrade} />
+      <AppButton title={buttonTitle} variant="gold" onPress={onUpgrade} />
     </GlassCard>
   );
 }

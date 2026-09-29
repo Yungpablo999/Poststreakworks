@@ -22,6 +22,14 @@ import { FreeAppHeader } from '../components/FreeAppHeader';
 import { sFont, isNarrowScreen, isSmallScreen, sPadding } from '../utils/responsive';
 
 import { UserPersona } from '../components/HeaderDualModePills';
+import Reanimated, { FadeInUp } from 'react-native-reanimated';
+import { GlassBackdrop } from '../components/glass/GlassBackdrop';
+import { FitLines } from '../components/ui/FitLines';
+import { JarvisOrb } from '../components/JarvisOrb';
+import { CalendarSheet } from '../components/home/CalendarSheet';
+import { ProUpsellCard } from '../components/home/ProUpsellCard';
+import { TodayQuestCard, QuestRow, LevelCard, ChallengeCard, JarvisTip } from '../components/quests/QuestBlocks';
+import { ds } from '../theme/colors';
 
 interface QuestsScreenProps {
   onBackToDashboard?: () => void;
@@ -67,29 +75,11 @@ export const QuestsScreen: React.FC<QuestsScreenProps> = ({
 
   const [showNotificationModal, setShowNotificationModal] = useState(false);
   const [showProfileModal, setShowProfileModal] = useState(false);
+  const [calendarOpen, setCalendarOpen] = useState(false);
 
   // Animations
-  const flameFloatY = useRef(new Animated.Value(0)).current;
   const modalPopScale = useRef(new Animated.Value(0.88)).current;
 
-  useEffect(() => {
-    const flameLoop = Animated.loop(
-      Animated.sequence([
-        Animated.timing(flameFloatY, {
-          toValue: -3,
-          duration: 1300,
-          useNativeDriver: true,
-        }),
-        Animated.timing(flameFloatY, {
-          toValue: 3,
-          duration: 1300,
-          useNativeDriver: true,
-        }),
-      ])
-    );
-    flameLoop.start();
-    return () => flameLoop.stop();
-  }, [flameFloatY]);
 
   const triggerModalPop = () => {
     if (Platform.OS !== 'web') {
@@ -172,8 +162,10 @@ export const QuestsScreen: React.FC<QuestsScreenProps> = ({
     <SafeAreaView style={[styles.safeArea, isDark && { backgroundColor: '#0C0A12' }]}>
       <StatusBar barStyle={isDark ? "light-content" : "dark-content"} backgroundColor={isDark ? "#0C0A12" : "#FAF8F5"} />
       <View style={[styles.container, isDark && { backgroundColor: '#0C0A12' }]}>
+        <GlassBackdrop />
         {/* 1. TOP AIRY HEADER BAR */}
         <FreeAppHeader
+          backgroundColor="transparent"
           onSwitchToPro={onSwitchToPro}
           onOpenJarvisPro={onOpenJarvisPro}
           onTogglePersona={onTogglePersona}
@@ -197,354 +189,110 @@ export const QuestsScreen: React.FC<QuestsScreenProps> = ({
           showsVerticalScrollIndicator={false}
           bounces={true}
         >
-          {/* TOP PILL BADGES */}
-          <View style={styles.topBadgesRow}>
-            <View style={styles.questsPill}>
-              <Text style={styles.questsPillText}>QUESTS</Text>
-            </View>
+          {/* HEADLINE — same two-line structure on every screen size */}
+          <Reanimated.View entering={FadeInUp.duration(500)} style={styles.headline}>
+            <FitLines
+              lines={['Small quests,', <Text key="r" style={styles.headlineAccent}>steady rhythm</Text>]}
+              textStyle={styles.headlineText}
+              maxFontSize={34}
+              align="left"
+              accessibilityLabel="Small quests, steady rhythm"
+            />
+          </Reanimated.View>
 
-            <View style={styles.earnRankPill}>
-              <Text style={styles.earnRankPillText}>LEVEL UP</Text>
-            </View>
-          </View>
+          {/* 1. TODAY'S QUEST */}
+          <Reanimated.View entering={FadeInUp.delay(100).duration(550)}>
+            <TodayQuestCard
+              title={isNewUser ? 'Complete your first Studio session' : 'Share one post today'}
+              body={
+                isNewUser
+                  ? 'Try one Studio tool to get your first idea ready.'
+                  : 'Whenever suits you. One post keeps your rhythm going.'
+              }
+              xp={80}
+              done={completedQuests.includes('today_quest')}
+              onStart={handleStartTodayQuest}
+            />
+          </Reanimated.View>
 
-          {/* HEADLINE & SUBTITLE */}
-          <Text
-            style={styles.mainHeading}
-            numberOfLines={2}
-          >
-            Complete quests. Build your streak.
-          </Text>
+          {/* 2. LEVEL (returning only) + CHECK-IN */}
+          <Reanimated.View entering={FadeInUp.delay(200).duration(550)} style={styles.stack}>
+            {!isNewUser && <LevelCard level={12} xp="8.4k" active={3} progress={0.65} />}
+            <CheckInCard
+              persona={isNewUser ? 'new' : 'returning'}
+              isDark={isDark}
+              onOpenCalendar={() => setCalendarOpen(true)}
+            />
+          </Reanimated.View>
 
-          {/* 1. TODAY'S QUEST HERO CARD */}
-          <View style={styles.todayQuestCard}>
-            <View style={styles.todayQuestHeaderRow}>
-              <Text style={styles.todayQuestTag}>TODAY&apos;S QUEST</Text>
-              <View style={styles.flameIconCircle}>
-                <Text style={{ fontSize: 16 }}>🔥</Text>
-              </View>
-            </View>
-
-            <Text style={styles.todayQuestTitle}>
-              {isNewUser ? 'Complete your first Studio session' : 'Share one post today'}
-            </Text>
-            <Text style={styles.todayQuestSub}>
-              {isNewUser
-                ? 'Try one Studio tool to get your first idea ready.'
-                : 'Whenever suits you. One post keeps your rhythm going.'}
-            </Text>
-
-            {/* Progress Row & Bar */}
-            <View style={styles.progressLabelRow}>
-              <Text style={styles.progressLabelLeft}>PROGRESS</Text>
-              <Text style={styles.progressLabelRight}>
-                {completedQuests.includes('today_quest') ? '1 / 1 COMPLETED' : '0 / 1 COMPLETED'}
-              </Text>
-            </View>
-            <View style={styles.progressBarTrack}>
-              <View
-                style={[
-                  styles.progressBarFill,
-                  { width: completedQuests.includes('today_quest') ? '100%' : '0%' },
-                ]}
+          {/* 3. QUESTS LIST */}
+          <Reanimated.View entering={FadeInUp.delay(300).duration(550)}>
+            <Text style={styles.sectionLabel}>{isNewUser ? 'Starter quests' : 'This week'}</Text>
+            <View style={styles.stack}>
+              <QuestRow
+                icon="idea"
+                title="Create your next post idea"
+                xp={60}
+                cadence="Daily"
+                action="Start"
+                onPress={() => handleStartStarterQuest('q1', 'Create your next post idea', 60, 'create')}
+              />
+              <QuestRow
+                icon="audience"
+                title="See what your audience likes"
+                xp={90}
+                cadence="Suggested"
+                action="View"
+                onPress={() => handleStartStarterQuest('q2', 'See what your audience likes', 90, 'growth')}
+              />
+              <QuestRow
+                icon="calendar"
+                title="Schedule your next post"
+                xp={50}
+                cadence="Weekly"
+                action="Plan"
+                onPress={() => {
+                  if (Platform.OS !== 'web') Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                  if (onOpenSchedule) onOpenSchedule();
+                  else if (onNavigateTab) onNavigateTab('schedule' as TabType);
+                }}
               />
             </View>
+          </Reanimated.View>
 
-            {/* Bottom Row */}
-            <View style={styles.todayQuestFooterRow}>
-              <Text style={styles.todayQuestRewardsText}>
-                <Text style={{ fontWeight: '800', color: completedQuests.includes('today_quest') ? '#10B981' : '#5B3EE8' }}>
-                  {completedQuests.includes('today_quest') ? '✓ +80 XP' : '+80 XP'}
-                </Text>
-                
-              </Text>
+          {/* 4. WEEKLY CHALLENGE */}
+          <Reanimated.View entering={FadeInUp.delay(400).duration(550)} style={styles.section}>
+            <ChallengeCard done={isNewUser ? 0 : 1} goal={3} onJoin={handleJoinCommunityChallenge} />
+          </Reanimated.View>
 
-              <Pressable
-                style={({ pressed }) => [
-                  styles.startQuestBtn,
-                  completedQuests.includes('today_quest') && styles.completedQuestBtn,
-                  pressed && styles.btnPressed,
-                ]}
-                onPress={handleStartTodayQuest}
-              >
-                <Text style={[styles.startQuestBtnText, completedQuests.includes('today_quest') && styles.completedQuestBtnText]}>
-                  {completedQuests.includes('today_quest') ? '✓ Completed' : 'Start Quest'}
-                </Text>
-              </Pressable>
-            </View>
-          </View>
+          {/* 5. PRO (gold = Pro only) */}
+          <Reanimated.View entering={FadeInUp.delay(500).duration(550)} style={styles.section}>
+            <ProUpsellCard
+              title="Unlock Pro quests"
+              benefits={['Deeper analytics', 'Advanced AI strategy', 'Priority quest board']}
+              buttonTitle="Explore Pro"
+              onUpgrade={handleExplorePro}
+            />
+          </Reanimated.View>
 
-          {/* 2. DAILY CHECK-IN (+ stats for returning creators; none on day 0) */}
-          <View style={{ marginBottom: 16 }}>
-            <CheckInCard persona={isNewUser ? 'new' : 'returning'} isDark={isDark} />
-          </View>
-
-          {!isNewUser && (
-          <>
-          {/* 2. CREATOR STATS 3-COLUMN BAR & LEVEL PROGRESS */}
-          <View style={styles.statsBarContainer}>
-            <View style={styles.statsRow}>
-              <View style={styles.statCol}>
-                <Text style={styles.statColLabel}>ACTIVE QUESTS</Text>
-                <Text style={[styles.statColValue, { color: '#582CDB' }]}>{isNewUser ? '1' : '3'}</Text>
-              </View>
-
-              <View style={styles.statColDivider} />
-
-              <View style={styles.statCol}>
-                <Text style={styles.statColLabel}>TOTAL XP</Text>
-                <Text style={styles.statColValue}>{isNewUser ? '0 XP' : '8.4k'}</Text>
-              </View>
-
-              <View style={styles.statColDivider} />
-
-              <View style={styles.statCol}>
-                <Text style={styles.statColLabel}>LEVEL</Text>
-                <Text style={[styles.statColValue, { color: '#5B3EE8' }]}>{isNewUser ? '1' : '12'}</Text>
-              </View>
-            </View>
-
-            {/* Level Progress Indicator */}
-            <View style={styles.levelProgressContainer}>
-              <Text style={styles.levelProgressLabel}>{isNewUser ? 'LV 1' : 'LV 12'}</Text>
-              <View style={styles.levelTrack}>
-                <View style={[[styles.levelFill, { width: isNewUser ? '0%' : '65%' }], { backgroundColor: '#5B3EE8' }]} />
-              </View>
-              <Text style={styles.levelProgressLabel}>{isNewUser ? 'LV 2' : 'LV 13'}</Text>
-            </View>
-          </View>
-          </>
-          )}
-
-          {/* 3. STARTER QUESTS SECTION */}
-          <View style={styles.sectionHeaderRow}>
-            <Text style={styles.sectionHeading}>Starter Quests</Text>
-          </View>
-
-          <View style={styles.starterQuestsList}>
-            {/* Quest 1 */}
-            <Pressable
-              style={({ pressed }) => [
-                styles.starterQuestCard,
-                pressed && { opacity: 0.9, transform: [{ scale: 0.99 }] },
-              ]}
-              onPress={() => handleStartStarterQuest('q1', 'Create your next post idea', 60, 'create')}
-            >
-              <View style={styles.starterQuestLeft}>
-                <View style={styles.starterQuestBadgeRow}>
-                  <Text style={styles.xpPillGold}>+60 XP</Text>
-                  <Text style={styles.typePillDot}>·</Text>
-                  <Text style={styles.typePill}>Daily</Text>
-                </View>
-                <Text style={styles.starterQuestTitle}>Create your next post idea</Text>
-              </View>
-              <Pressable
-                style={({ pressed }) => [styles.starterQuestActionBtn, pressed && styles.btnPressed]}
-                onPress={(e) => {
-                  e.stopPropagation?.();
-                  handleStartStarterQuest('q1', 'Create your next post idea', 60, 'create');
-                }}
-                hitSlop={8}
-              >
-                <Text style={styles.starterQuestActionText}>Start</Text>
-              </Pressable>
-            </Pressable>
-
-            {/* Quest 2 */}
-            <Pressable
-              style={({ pressed }) => [
-                styles.starterQuestCard,
-                pressed && { opacity: 0.9, transform: [{ scale: 0.99 }] },
-              ]}
-              onPress={() => handleStartStarterQuest('q2', 'Analyze your audience velocity', 90, 'growth')}
-            >
-              <View style={styles.starterQuestLeft}>
-                <View style={styles.starterQuestBadgeRow}>
-                  <Text style={styles.xpPillGold}>+90 XP</Text>
-                  <Text style={styles.typePillDot}>·</Text>
-                  <Text style={styles.typePill}>Recommended</Text>
-                </View>
-                <Text style={styles.starterQuestTitle}>Analyze your audience velocity</Text>
-              </View>
-              <Pressable
-                style={({ pressed }) => [styles.starterQuestActionBtn, pressed && styles.btnPressed]}
-                onPress={(e) => {
-                  e.stopPropagation?.();
-                  handleStartStarterQuest('q2', 'Analyze your audience velocity', 90, 'growth');
-                }}
-                hitSlop={8}
-              >
-                <Text style={styles.starterQuestActionText}>View Growth</Text>
-              </Pressable>
-            </Pressable>
-
-            {/* Quest 3 */}
-            <Pressable
-              style={({ pressed }) => [
-                styles.starterQuestCard,
-                pressed && { opacity: 0.9, transform: [{ scale: 0.99 }] },
-              ]}
-              onPress={() => {
-                if (Platform.OS !== 'web') {
-                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-                }
-                if (onOpenSchedule) {
-                  onOpenSchedule();
-                } else if (onNavigateTab) {
-                  onNavigateTab('schedule' as TabType);
-                }
-              }}
-            >
-              <View style={styles.starterQuestLeft}>
-                <View style={styles.starterQuestBadgeRow}>
-                  <Text style={styles.xpPillGold}>+50 XP</Text>
-                  <Text style={styles.typePillDot}>·</Text>
-                  <Text style={styles.typePill}>Weekly</Text>
-                </View>
-                <Text style={styles.starterQuestTitle}>Schedule your next post</Text>
-              </View>
-              <Pressable
-                style={({ pressed }) => [styles.starterQuestActionBtn, pressed && styles.btnPressed]}
-                onPress={(e) => {
-                  e.stopPropagation?.();
-                  if (Platform.OS !== 'web') {
-                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-                  }
-                  if (onOpenSchedule) {
-                    onOpenSchedule();
-                  } else if (onNavigateTab) {
-                    onNavigateTab('schedule' as TabType);
-                  }
-                }}
-                hitSlop={8}
-              >
-                <Text style={styles.starterQuestActionText}>Schedule</Text>
-              </Pressable>
-            </Pressable>
-          </View>
-
-          {/* 4. COMMUNITY CHALLENGE HERO CARD (ROYAL PURPLE GRADIENT) */}
-          <View style={styles.communityCard}>
-            <View style={styles.communityTopBanner}>
-              <Text style={styles.communityTopBannerText}>COMMUNITY CHALLENGE</Text>
-            </View>
-
-            <View style={styles.communityBody}>
-              <Text style={styles.communityTitle}>7-Day Consistency Challenge</Text>
-              <Text style={styles.communitySub}>
-                Post 3 times this week, at your own pace, alongside other creators.
-              </Text>
-
-              {/* Progress */}
-              <View style={styles.communityProgressLabelRow}>
-                <Text style={styles.communityProgressLabel}>PROGRESS</Text>
-                <Text style={styles.communityProgressLabel}>
-                  {isNewUser ? '0 / 3 POSTS' : '1 / 3 POSTS'}
-                </Text>
-              </View>
-              <View style={styles.communityProgressTrack}>
-                <View style={[styles.communityProgressFill, { width: isNewUser ? '0%' : '33%' }]} />
-              </View>
-
-              {/* Social Proof Pill */}
-              <View style={styles.socialProofPill}>
-                <View style={styles.stackedAvatarsRow}>
-                  <Image source={require('../../assets/images/elena-avatar.jpg')} style={[styles.miniAvatar, { zIndex: 3 }]} />
-                  <Image source={require('../../assets/images/marcus-avatar.jpg')} style={[styles.miniAvatar, { marginLeft: -8, zIndex: 2 }]} />
-                  <Image source={require('../../assets/images/david-avatar.jpg')} style={[styles.miniAvatar, { marginLeft: -8, zIndex: 1 }]} />
-                </View>
-                <Text style={styles.socialProofText}>42 creators are joining in</Text>
-              </View>
-
-              {/* Bottom Row */}
-              <View style={styles.communityFooterRow}>
-                <View style={styles.challengeRewardBox}>
-                  <Text
-                    style={styles.challengeRewardTitle}
-                    numberOfLines={1}
-                    adjustsFontSizeToFit={true}
-                    minimumFontScale={0.75}
-                  >
-                    🏆 Consistency Badge
-                  </Text>
-                  <Text style={styles.challengeRewardSub}>+250 XP Reward</Text>
-                </View>
-
-                <Pressable
-                  style={({ pressed }) => [styles.joinChallengeBtn, pressed && styles.btnPressed]}
-                  onPress={handleJoinCommunityChallenge}
-                >
-                  <View style={[styles.joinChallengeGradient, { backgroundColor: '#5B3EE8' }]}>
-                    <Text style={styles.joinChallengeBtnText}>Join Challenge</Text>
-                  </View>
-                </Pressable>
-              </View>
-            </View>
-          </View>
-
-          {/* 5. UNLOCK PRO QUESTS CARD */}
-          <View style={styles.unlockProCard}>
-            <View style={styles.unlockProHeaderRow}>
-              <Text style={styles.unlockProTitle}>Unlock Pro Quests</Text>
-              <View style={styles.proGoldBadge}>
-                <Text style={styles.proGoldBadgeText}>PRO</Text>
-              </View>
-            </View>
-
-            <Text style={styles.unlockProSubtitle}>
-              Pro gives you deeper analytics, advanced AI strategy, and a priority quest board.
-            </Text>
-
-            <View style={styles.proFeaturesList}>
-              <Text style={styles.proFeatureItem}>📊  Deeper Analytics</Text>
-              <Text style={styles.proFeatureItem}>🧠  Advanced AI Strategy</Text>
-              <Text style={styles.proFeatureItem}>⭐  Priority Quest Board</Text>
-            </View>
-
-            {/* Explore Pro Metallic Gold Button */}
-            <Pressable
-              style={({ pressed }) => [styles.exploreProBtn, pressed && styles.btnPressed]}
-              onPress={handleExplorePro}
-            >
-              <View style={[styles.exploreProGradient, { backgroundColor: '#F59E0B' }]}>
-                <Text style={styles.exploreProBtnText}>Explore Pro</Text>
-              </View>
-            </Pressable>
-          </View>
-
-          {/* 6. JARVIS FLOATING INSIGHT FOOTER */}
-          <View style={styles.jarvisFooterContainer}>
-            <Animated.View
-              style={[
-                styles.jarvisFooterFlameWrapper,
-                { transform: [{ translateY: flameFloatY }] },
-              ]}
-            >
-              <Image
-                source={require('../../assets/images/jarvis-core-flame.png')}
-                style={styles.jarvisFooterFlame}
-                resizeMode="contain"
-              />
-            </Animated.View>
-
-            <Text style={styles.jarvisFooterQuote}>
-              &ldquo;Start with today&apos;s quest. Completing daily quests builds reputation and unlocks better opportunities over time.&rdquo;
-            </Text>
-
-            <Pressable
-              onPress={() => {
-                triggerModalPop();
-                setShowNotificationModal(true);
-              }}
-              hitSlop={6}
-            >
-              <Text style={styles.jarvisFooterLink}>View Insight ➔</Text>
-            </Pressable>
-          </View>
+          {/* 6. JARVIS TIP */}
+          <Reanimated.View entering={FadeInUp.delay(600).duration(550)} style={styles.section}>
+            <JarvisTip
+              orb={<JarvisOrb size={30} />}
+              text="Start with today's quest. Small daily steps add up faster than you'd think."
+            />
+          </Reanimated.View>
 
           {/* Bottom Space for Floating Tab Bar */}
           <View style={{ height: 110 }} />
         </ScrollView>
+
+        <CalendarSheet
+          visible={calendarOpen}
+          onClose={() => setCalendarOpen(false)}
+          persona={isNewUser ? 'new' : 'returning'}
+          onPlanPost={() => onNavigateTab?.('create')}
+        />
 
         {/* FLOATING LIQUID GLASS TAB BAR */}
         <FloatingTabBar activeTab={activeTab} onTabPress={handleTabPress} />
@@ -617,13 +365,18 @@ export const QuestsScreen: React.FC<QuestsScreenProps> = ({
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#FAF8F5',
+    backgroundColor: ds.bg,
   },
   container: {
     flex: 1,
     width: '100%',
-    backgroundColor: '#FAF8F5',
   },
+  headline: { marginTop: 4, marginBottom: 16 },
+  headlineText: { fontWeight: '800', letterSpacing: -0.8, color: ds.ink },
+  headlineAccent: { color: ds.purple },
+  sectionLabel: { fontSize: 17, fontWeight: '800', color: ds.ink, letterSpacing: -0.2, marginTop: 24 },
+  stack: { gap: 12, marginTop: 12 },
+  section: { marginTop: 24 },
   btnPressed: {
     opacity: 0.9,
     transform: [{ scale: 0.98 }],
