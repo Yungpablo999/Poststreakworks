@@ -76,7 +76,6 @@ export function PlatformChip({ id, name, selected, onPress }: { id: string; name
   const style = useAnimatedStyle(() => ({
     borderColor: interpolateColor(on.value, [0, 1], ['rgba(255,255,255,0.95)', ds.purple]),
     backgroundColor: interpolateColor(on.value, [0, 1], ['rgba(255,255,255,0.7)', 'rgba(237,233,254,0.95)']),
-    transform: [{ scale: 1 + 0.03 * on.value }],
   }));
   return (
     <Pressable
@@ -87,17 +86,24 @@ export function PlatformChip({ id, name, selected, onPress }: { id: string; name
       accessibilityRole="checkbox"
       accessibilityState={{ checked: selected }}
       accessibilityLabel={name}
-      style={Platform.OS === 'web' ? ({ cursor: 'pointer' } as object) : undefined}
+      style={[styles.platSlot, Platform.OS === 'web' && ({ cursor: 'pointer' } as object)]}
     >
-      <Animated.View style={[styles.platChip, style]}>
-        <PlatformLogo type={id as PlatformLogoType} size={24} />
-        <Text style={[styles.platName, selected && { color: ds.purple }]}>{name}</Text>
-        {selected && (
-          <Animated.View entering={ZoomIn.duration(180)} exiting={ZoomOut.duration(120)} style={styles.platCheck}>
-            <Check size={9} />
-          </Animated.View>
-        )}
-      </Animated.View>
+      {({ pressed }) => (
+        <Animated.View style={[styles.platChip, style, pressed && { transform: [{ scale: 0.97 }] }]}>
+          {/* The tick sits on the logo's corner, so selecting never changes the chip's size */}
+          <View>
+            <PlatformLogo type={id as PlatformLogoType} size={26} />
+            {selected && (
+              <Animated.View entering={ZoomIn.duration(180)} exiting={ZoomOut.duration(120)} style={styles.platCheck}>
+                <Check size={8} />
+              </Animated.View>
+            )}
+          </View>
+          <Text style={[styles.platName, selected && { color: ds.purple }]} numberOfLines={1}>
+            {name}
+          </Text>
+        </Animated.View>
+      )}
     </Pressable>
   );
 }
@@ -550,25 +556,31 @@ const styles = StyleSheet.create({
   stepNumDone: { backgroundColor: ds.greenFill },
   stepNumText: { fontSize: 12, fontWeight: '800', color: ds.purple },
   stepTitle: { flex: 1, fontSize: 17, fontWeight: '800', color: ds.ink, letterSpacing: -0.2 },
+  // Two equal columns: chips keep their place whatever is selected
+  platSlot: { width: '48.5%' },
   platChip: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
-    height: 44,
+    gap: 9,
+    height: 46,
     paddingLeft: 8,
-    paddingRight: 14,
+    paddingRight: 10,
     borderRadius: 999,
     borderWidth: 1.5,
   },
-  platName: { fontSize: 14, fontWeight: '800', color: ds.ink },
+  platName: { flex: 1, fontSize: 14, fontWeight: '800', color: ds.ink },
   platCheck: {
-    width: 18,
-    height: 18,
-    borderRadius: 9,
+    position: 'absolute',
+    right: -5,
+    bottom: -4,
+    width: 16,
+    height: 16,
+    borderRadius: 8,
+    borderWidth: 1.5,
+    borderColor: '#FFFFFF',
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: ds.purple,
-    marginLeft: -2,
   },
   recCard: {
     flexDirection: 'row',

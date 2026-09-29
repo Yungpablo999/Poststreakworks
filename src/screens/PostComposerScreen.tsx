@@ -1902,7 +1902,7 @@ const styles = StyleSheet.create({
   questReq: { flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 6 },
   questReqDot: { width: 6, height: 6, borderRadius: 3, backgroundColor: ds.purple },
   questReqText: { flex: 1, fontSize: 13.5, lineHeight: 19, color: ds.text2 },
-  chipsWrap: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
+  chipsWrap: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between', rowGap: 8 },
   note: { fontSize: 12.5, lineHeight: 18, color: ds.text3, marginTop: 10 },
   tilesGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10, marginTop: 10 },
   captionCard: {
