@@ -23,7 +23,10 @@ import { AnimatedCompletionModal } from '../components/AnimatedCompletionModal';
 import { FreeAppHeader } from '../components/FreeAppHeader';
 import { sFont, sPadding, isNarrowScreen } from '../utils/responsive';
 import Reanimated, { FadeIn, FadeInUp, Easing, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
-import { getStarterIdeas } from '../data';
+import { getStarterIdeas, getFilmPlan, getSoundIdeas, checkInToday } from '../data';
+import { FilmMethodPicker, FilmPlanCard, PostedCheck, type FilmMethod } from '../components/composer/FilmBlocks';
+import { handOffToPlatform, isHandoffPlatform, HANDOFF_NAMES, type HandoffPlatform } from '../utils/handoff';
+import { AppState } from 'react-native';
 import { GlassBackdrop } from '../components/glass/GlassBackdrop';
 import { GlassCard } from '../components/glass/GlassCard';
 import { FitLines } from '../components/ui/FitLines';
@@ -432,6 +435,8 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
 
   // Content Format State (Intelligent Content Type)
   const [selectedFormat, setSelectedFormat] = useState<ContentFormatType>(initialFormat || 'short_video');
+  // Short video only: film in TikTok / Reels / Shorts, or upload a finished video
+  const [filmMethod, setFilmMethod] = useState<FilmMethod>('native');
 
   // Media State
   const [hasMedia, setHasMedia] = useState(false);
@@ -801,6 +806,11 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
     }
 
     // 3. Post is 100% Ready
+    if (publishMode === 'now' && isNativeFilm) {
+      if (handoffPlatforms[0]) openPlatformToFilm(handoffPlatforms[0]);
+      else showToastNotice('Pick TikTok, Instagram or YouTube to film there');
+      return;
+    }
     if (Platform.OS !== 'web') {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     }
@@ -808,6 +818,10 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
       setCelebrationTitle('Published Live!');
       setCelebrationSubtitle('Your content is live across your connected platforms.');
       setCelebrationSpeech('Streak preserved! Great consistency today.');
+    } else if (publishMode === 'schedule' && isNativeFilm) {
+      setCelebrationTitle('Reminder set!');
+      setCelebrationSubtitle(`We'll nudge you at ${scheduledTime} with your hook, shots and caption ready.`);
+      setCelebrationSpeech('Your plan is saved. Film it when the time comes.');
     } else if (publishMode === 'schedule') {
       setCelebrationTitle('Post Scheduled!');
       setCelebrationSubtitle(`Your post is locked in for ${scheduledTime}.`);
@@ -929,7 +943,8 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
   const isFormatReady = Boolean(selectedFormat);
   const isCaptionReady = caption.trim().length >= 10;
   const isPlatformsReady = selectedPlatforms.length > 0;
-  const isMediaReady = selectedFormat === 'text' || hasMedia;
+  const isNativeFilm = selectedFormat === 'short_video' && filmMethod === 'native';
+  const isMediaReady = selectedFormat === 'text' || hasMedia || isNativeFilm;
   const isScheduleReady =
     publishMode === 'now' ||
     publishMode === 'draft' ||
@@ -983,6 +998,46 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
     return Array.from(new Set([...starter, ...SAMPLE_IDEAS]));
   }, [userProfile?.niches, userProfile?.connectedPlatforms]);
   const [ideaThinking, setIdeaThinking] = useState(false);
+
+  // Short video: film in TikTok / Reels / Shorts (sounds + filters) or upload
+  const [pendingHandoff, setPendingHandoff] = useState<HandoffPlatform | null>(null);
+  const [showPostedCheck, setShowPostedCheck] = useState(false);
+  const handoffPlatforms = selectedPlatforms.filter(isHandoffPlatform);
+  const filmPlan = React.useMemo(() => getFilmPlan(currentIdea ?? ''), [currentIdea]);
+  const soundIdeas = React.useMemo(() => getSoundIdeas(), []);
+
+  // When the creator comes back after filming, ask if it went out
+  useEffect(() => {
+    if (!pendingHandoff) return;
+    const sub = AppState.addEventListener('change', (state) => {
+      if (state === 'active') setShowPostedCheck(true);
+    });
+    // Web: the platform opens in a new tab, so ask shortly after
+    const t = Platform.OS === 'web' ? setTimeout(() => setShowPostedCheck(true), 1500) : null;
+    return () => {
+      sub.remove();
+      if (t) clearTimeout(t);
+    };
+  }, [pendingHandoff]);
+
+  const openPlatformToFilm = async (p: HandoffPlatform) => {
+    if (Platform.OS !== 'web') Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    const text = [caption.trim(), tags.join(' ')].filter(Boolean).join('\n\n');
+    showToastNotice(`Caption copied. Paste it in ${HANDOFF_NAMES[p]}.`);
+    setPendingHandoff(p);
+    await handOffToPlatform(p, text);
+  };
+
+  const confirmPosted = () => {
+    setShowPostedCheck(false);
+    setPendingHandoff(null);
+    checkInToday(userProfile?.userPersona === 'returning' ? 'returning' : 'new');
+    if (Platform.OS !== 'web') Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    setCelebrationTitle('Nice work!');
+    setCelebrationSubtitle(`Your ${pendingHandoff ? HANDOFF_NAMES[pendingHandoff] : ''} post counts toward today's check-in.`);
+    setCelebrationSpeech('Posted is better than perfect.');
+    setShowCelebrationModal(true);
+  };
   const ideaTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const ideaSpin = useSharedValue(0);
   const ideaSpinStyle = useAnimatedStyle(() => ({ transform: [{ rotate: `${ideaSpin.value * 360}deg` }] }));
@@ -1017,7 +1072,7 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
   const readinessSteps = [
     { key: 'platforms', label: 'Platforms', done: isPlatformsReady },
     { key: 'format', label: 'Format', done: isFormatReady },
-    { key: 'media', label: 'Media', done: isMediaReady },
+    { key: 'media', label: isNativeFilm ? 'Film plan' : 'Media', done: isMediaReady },
     { key: 'caption', label: 'Caption', done: isCaptionReady },
     { key: 'schedule', label: 'Timing', done: isScheduleReady },
   ];
@@ -1180,6 +1235,7 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
               />
             ))}
           </View>
+          {selectedFormat === 'short_video' && <FilmMethodPicker method={filmMethod} onChange={setFilmMethod} />}
           {incompatiblePlatforms.length > 0 && (
             <Text style={styles.note}>
               {incompatiblePlatforms.map((p) => ALL_AVAILABLE_PLATFORMS.find((x) => x.id === p)?.name).join(' & ')} will adapt your{' '}
@@ -1190,12 +1246,15 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
           {/* 3. MEDIA */}
           <StepHeader
             n={3}
-            title="Media"
+            title={isNativeFilm ? 'Film it' : 'Media'}
             done={isMediaReady}
             onLayout={(e) => {
               sectionPositions.current.media = e.nativeEvent.layout.y;
             }}
           />
+          {isNativeFilm ? (
+            <FilmPlanCard plan={filmPlan} sounds={soundIdeas} platforms={handoffPlatforms} onOpen={openPlatformToFilm} />
+          ) : (
           <MediaZone
             isText={selectedFormat === 'text'}
             hasMedia={hasMedia}
@@ -1210,6 +1269,7 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
               setHasThumbnail(false);
             }}
           />
+          )}
 
           {/* 4. CAPTION */}
           <StepHeader
@@ -1308,7 +1368,7 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
             }}
           />
           <GlassCard strong radius={22} padding={16}>
-            <ModeSwitch mode={publishMode} onChange={setPublishMode} />
+            <ModeSwitch mode={publishMode} onChange={setPublishMode} labels={isNativeFilm ? { now: 'Film now', schedule: 'Remind me' } : undefined} />
             {publishMode === 'schedule' && (
               <Reanimated.View entering={FadeInUp.duration(250)}>
                 <Pressable
@@ -1326,7 +1386,7 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
                     <Path d="M16 2v4M8 2v4M3 10h18" stroke={ds.purple} strokeWidth={2.1} strokeLinecap="round" />
                   </Svg>
                   <View style={styles.flex1}>
-                    <Text style={styles.whenLabel}>Scheduled for</Text>
+                    <Text style={styles.whenLabel}>{isNativeFilm ? 'Remind me at' : 'Scheduled for'}</Text>
                     <Text style={styles.whenValue}>{scheduledTime}</Text>
                   </View>
                   <Text style={styles.whenChange}>Change</Text>
@@ -1348,7 +1408,17 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
           {composerToast && <ComposerToast message={composerToast} />}
           <View style={styles.actions}>
             <AppButton
-              title={publishMode === 'now' ? 'Post now' : publishMode === 'schedule' ? 'Schedule post' : 'Save draft'}
+              title={
+                publishMode === 'draft'
+                  ? 'Save draft'
+                  : isNativeFilm
+                  ? publishMode === 'now'
+                    ? `Film in ${handoffPlatforms[0] ? HANDOFF_NAMES[handoffPlatforms[0]] : 'the app'}`
+                    : 'Set reminder'
+                  : publishMode === 'now'
+                  ? 'Post now'
+                  : 'Schedule post'
+              }
               size="lg"
               onPress={handlePublishOrSchedule}
               iconRight={
@@ -1367,6 +1437,18 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
           {/* Bottom spacing to clear floating tab bar */}
           <View style={{ height: 110 }} />
         </ScrollView>
+
+        {showPostedCheck && pendingHandoff && (
+          <PostedCheck
+            platform={pendingHandoff}
+            onYes={confirmPosted}
+            onNotYet={() => {
+              setShowPostedCheck(false);
+              setPendingHandoff(null);
+              showToastNotice(`No rush. It's saved here when you're ready.`);
+            }}
+          />
+        )}
 
         {/* UNIFIED SIGNATURE FLOATING TAB BAR */}
         <FloatingTabBar activeTab={activeTab} onTabPress={handleTabPress} />

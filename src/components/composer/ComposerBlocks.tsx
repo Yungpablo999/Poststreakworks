@@ -419,7 +419,16 @@ const MODES: { id: PublishMode; label: string }[] = [
   { id: 'draft', label: 'Draft' },
 ];
 
-export function ModeSwitch({ mode, onChange }: { mode: PublishMode; onChange: (m: PublishMode) => void }) {
+export function ModeSwitch({
+  mode,
+  onChange,
+  labels,
+}: {
+  mode: PublishMode;
+  onChange: (m: PublishMode) => void;
+  /** Optional wording per mode (e.g. "Film now" / "Remind me" for filming in-app). */
+  labels?: Partial<Record<PublishMode, string>>;
+}) {
   const [w, setW] = useState(0);
   const idx = MODES.findIndex((m) => m.id === mode);
   const x = useSharedValue(0);
@@ -454,7 +463,9 @@ export function ModeSwitch({ mode, onChange }: { mode: PublishMode; onChange: (m
             accessibilityRole="tab"
             accessibilityState={{ selected: on }}
           >
-            <Text style={[styles.modeText, on && styles.modeTextOn]}>{m.label}</Text>
+            <Text style={[styles.modeText, on && styles.modeTextOn]} numberOfLines={1}>
+              {labels?.[m.id] ?? m.label}
+            </Text>
           </Pressable>
         );
       })}

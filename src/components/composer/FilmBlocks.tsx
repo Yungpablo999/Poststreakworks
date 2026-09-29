@@ -1,0 +1,275 @@
+import React from 'react';
+import { View, Pressable, StyleSheet, Platform } from 'react-native';
+import Animated, { FadeIn, FadeInUp, SlideInDown, SlideOutDown } from 'react-native-reanimated';
+import Svg, { Path, Rect, Circle } from 'react-native-svg';
+import * as Haptics from 'expo-haptics';
+import { Text } from '../ui/AppText';
+import { AppButton } from '../ui/AppButton';
+import { GlassCard } from '../glass/GlassCard';
+import { PlatformLogo } from '../onboarding/PlatformLogo';
+import { ds } from '../../theme/colors';
+import type { FilmPlan, SoundIdea } from '../../data';
+import { HANDOFF_NAMES, type HandoffPlatform } from '../../utils/handoff';
+
+// Short video only: film inside TikTok / Reels / Shorts (for trending sounds
+// and filters) or upload a finished video. The "film it" path keeps PostStreak
+// as the plan before and the tracker after.
+
+export type FilmMethod = 'native' | 'upload';
+
+function MethodCard({
+  selected,
+  title,
+  body,
+  icon,
+  onPress,
+}: {
+  selected: boolean;
+  title: string;
+  body: string;
+  icon: React.ReactNode;
+  onPress: () => void;
+}) {
+  return (
+    <Pressable
+      onPress={() => {
+        if (Platform.OS !== 'web') Haptics.selectionAsync();
+        onPress();
+      }}
+      accessibilityRole="radio"
+      accessibilityState={{ checked: selected }}
+      style={[styles.methodWrap, Platform.OS === 'web' && ({ cursor: 'pointer' } as object)]}
+    >
+      {({ pressed }) => (
+        <View style={[styles.method, selected && styles.methodOn, pressed && { transform: [{ scale: 0.97 }] }]}>
+          <View style={[styles.methodIcon, selected && styles.methodIconOn]}>{icon}</View>
+          <Text style={styles.methodTitle}>{title}</Text>
+          <Text style={styles.methodBody}>{body}</Text>
+        </View>
+      )}
+    </Pressable>
+  );
+}
+
+export function FilmMethodPicker({ method, onChange }: { method: FilmMethod; onChange: (m: FilmMethod) => void }) {
+  const on = (m: FilmMethod) => (method === m ? '#FFFFFF' : ds.purple);
+  return (
+    <Animated.View entering={FadeInUp.duration(300)}>
+      <Text style={styles.pickerLabel}>How will you film it?</Text>
+      <View style={styles.methods}>
+        <MethodCard
+          selected={method === 'native'}
+          title="Film in the app"
+          body="TikTok, Reels or Shorts, with trending sounds and filters"
+          onPress={() => onChange('native')}
+          icon={
+            <Svg width={20} height={20} viewBox="0 0 24 24" fill="none">
+              <Rect x="3" y="6" width="13" height="12" rx="3" stroke={on('native')} strokeWidth={2} />
+              <Path d="M16 10l5-3v10l-5-3" stroke={on('native')} strokeWidth={2} strokeLinejoin="round" />
+            </Svg>
+          }
+        />
+        <MethodCard
+          selected={method === 'upload'}
+          title="Upload a video"
+          body="Original audio, voiceover or an edited video"
+          onPress={() => onChange('upload')}
+          icon={
+            <Svg width={20} height={20} viewBox="0 0 24 24" fill="none">
+              <Path d="M12 16V4M7 9l5-5 5 5M4 20h16" stroke={on('upload')} strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round" />
+            </Svg>
+          }
+        />
+      </View>
+    </Animated.View>
+  );
+}
+
+export function FilmPlanCard({
+  plan,
+  sounds,
+  platforms,
+  onOpen,
+}: {
+  plan: FilmPlan;
+  sounds: SoundIdea[];
+  platforms: HandoffPlatform[];
+  onOpen: (p: HandoffPlatform) => void;
+}) {
+  return (
+    <Animated.View entering={FadeIn.duration(250)}>
+      <GlassCard strong radius={22} padding={16}>
+        <View style={styles.hookBox}>
+          <Text style={styles.hookLabel}>OPEN WITH</Text>
+          <Text style={styles.hookText}>{plan.hook}</Text>
+        </View>
+
+        <Text style={styles.subLabel}>Shots</Text>
+        {plan.shots.map((s, i) => (
+          <Animated.View key={s} entering={FadeInUp.delay(80 * i).duration(260)} style={styles.shot}>
+            <View style={styles.shotNum}>
+              <Text style={styles.shotNumText}>{i + 1}</Text>
+            </View>
+            <Text style={styles.shotText}>{s}</Text>
+          </Animated.View>
+        ))}
+
+        <View style={styles.soundHead}>
+          <Text style={[styles.subLabel, styles.flex]}>Sound ideas</Text>
+          <Text style={styles.sample}>Sample</Text>
+        </View>
+        <View style={styles.sounds}>
+          {sounds.map((s) => (
+            <View key={s.id} style={styles.sound}>
+              <Svg width={12} height={12} viewBox="0 0 24 24" fill="none">
+                <Path d="M9 18V5l12-2v13" stroke={ds.purple} strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round" />
+                <Circle cx="6" cy="18" r="3" stroke={ds.purple} strokeWidth={2.2} />
+                <Circle cx="18" cy="16" r="3" stroke={ds.purple} strokeWidth={2.2} />
+              </Svg>
+              <View style={styles.flex}>
+                <Text style={styles.soundName} numberOfLines={1}>
+                  {s.name}
+                </Text>
+                <Text style={styles.soundVibe} numberOfLines={1}>
+                  {s.vibe}
+                </Text>
+              </View>
+            </View>
+          ))}
+        </View>
+        <Text style={styles.soundNote}>Search the sound in the app. Some trending sounds aren't available to business accounts.</Text>
+        {platforms.length > 0 && <Text style={styles.copyNote}>Opening an app copies your caption and tags, ready to paste.</Text>}
+
+        {platforms.length > 0 ? (
+          <View style={styles.openList}>
+            {platforms.map((p) => (
+              <Pressable
+                key={p}
+                onPress={() => onOpen(p)}
+                style={({ pressed }) => [styles.openBtn, pressed && { transform: [{ scale: 0.97 }] }, Platform.OS === 'web' && ({ cursor: 'pointer' } as object)]}
+                accessibilityRole="button"
+                accessibilityLabel={`Copy caption and open ${HANDOFF_NAMES[p]}`}
+              >
+                <PlatformLogo type={p} size={26} />
+                <Text style={styles.openText} numberOfLines={1}>
+                  Open {HANDOFF_NAMES[p]}
+                </Text>
+                {/* Copy icon: the caption is copied on the way out */}
+                <Svg width={16} height={16} viewBox="0 0 24 24" fill="none">
+                  <Rect x="8" y="8" width="12" height="12" rx="2.5" stroke={ds.text3} strokeWidth={2} />
+                  <Path d="M16 8V6a2 2 0 00-2-2H6a2 2 0 00-2 2v8a2 2 0 002 2h2" stroke={ds.text3} strokeWidth={2} />
+                </Svg>
+              </Pressable>
+            ))}
+          </View>
+        ) : (
+          <Text style={styles.soundNote}>Pick TikTok, Instagram or YouTube above to film there.</Text>
+        )}
+      </GlassCard>
+    </Animated.View>
+  );
+}
+
+// "Did you post it?" — shown when the creator comes back after a handoff
+export function PostedCheck({
+  platform,
+  onYes,
+  onNotYet,
+}: {
+  platform: HandoffPlatform;
+  onYes: () => void;
+  onNotYet: () => void;
+}) {
+  return (
+    <Animated.View entering={SlideInDown.springify().damping(18)} exiting={SlideOutDown.duration(200)} style={styles.checkWrap}>
+      <GlassCard strong radius={24} padding={16}>
+        <View style={styles.checkTop}>
+          <PlatformLogo type={platform} size={34} />
+          <View style={styles.flex}>
+            <Text style={styles.checkTitle}>Did you post it on {HANDOFF_NAMES[platform]}?</Text>
+            <Text style={styles.checkBody}>We'll count it toward today's check-in.</Text>
+          </View>
+        </View>
+        <View style={styles.checkBtns}>
+          <View style={styles.flex}>
+            <AppButton title="Not yet" variant="outline" onPress={onNotYet} />
+          </View>
+          <View style={styles.flex}>
+            <AppButton title="I posted it" onPress={onYes} />
+          </View>
+        </View>
+      </GlassCard>
+    </Animated.View>
+  );
+}
+
+const styles = StyleSheet.create({
+  flex: { flex: 1 },
+  pickerLabel: { fontSize: 14, fontWeight: '800', color: ds.ink, marginTop: 16, marginBottom: 10 },
+  methods: { flexDirection: 'row', gap: 10 },
+  methodWrap: { flex: 1 },
+  method: {
+    flex: 1,
+    padding: 14,
+    borderRadius: 20,
+    borderWidth: 1.5,
+    borderColor: 'rgba(255, 255, 255, 0.95)',
+    backgroundColor: 'rgba(255, 255, 255, 0.72)',
+  },
+  methodOn: { borderColor: ds.purple, backgroundColor: 'rgba(237, 233, 254, 0.85)' },
+  methodIcon: {
+    width: 38,
+    height: 38,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(237, 233, 254, 0.95)',
+    marginBottom: 10,
+  },
+  methodIconOn: { backgroundColor: ds.purple },
+  methodTitle: { fontSize: 14.5, fontWeight: '800', color: ds.ink },
+  methodBody: { fontSize: 12, lineHeight: 16, color: ds.text2, marginTop: 3 },
+  hookBox: { padding: 14, borderRadius: 16, backgroundColor: 'rgba(237, 233, 254, 0.65)' },
+  hookLabel: { fontSize: 10.5, fontWeight: '800', letterSpacing: 1, color: ds.purple },
+  hookText: { fontSize: 15, lineHeight: 21, fontWeight: '700', color: ds.ink, marginTop: 4 },
+  subLabel: { fontSize: 13, fontWeight: '800', color: ds.text2, marginTop: 14, marginBottom: 8 },
+  shot: { flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 8 },
+  shotNum: { width: 22, height: 22, borderRadius: 11, alignItems: 'center', justifyContent: 'center', backgroundColor: ds.purple },
+  shotNumText: { fontSize: 11, fontWeight: '800', color: '#FFFFFF' },
+  shotText: { flex: 1, fontSize: 13.5, lineHeight: 19, color: ds.ink },
+  soundHead: { flexDirection: 'row', alignItems: 'center' },
+  sample: { fontSize: 10.5, fontWeight: '700', color: ds.text3, marginTop: 6 },
+  sounds: { gap: 6 },
+  sound: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: 12,
+    backgroundColor: 'rgba(23, 20, 32, 0.04)',
+  },
+  soundName: { fontSize: 13, fontWeight: '800', color: ds.ink },
+  soundVibe: { fontSize: 12, color: ds.text3, marginTop: 1 },
+  soundNote: { fontSize: 12, lineHeight: 17, color: ds.text3, marginTop: 8 },
+  openList: { gap: 8, marginTop: 8 },
+  openBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    height: 50,
+    paddingHorizontal: 12,
+    borderRadius: 16,
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1.5,
+    borderColor: ds.line,
+    borderBottomWidth: 3,
+  },
+  openText: { flex: 1, fontSize: 14.5, fontWeight: '800', color: ds.ink },
+  copyNote: { fontSize: 12, lineHeight: 17, color: ds.text2, fontWeight: '600', marginTop: 12 },
+  checkWrap: { position: 'absolute', left: 16, right: 16, bottom: 110 },
+  checkTop: { flexDirection: 'row', alignItems: 'center', gap: 12 },
+  checkTitle: { fontSize: 15, fontWeight: '800', color: ds.ink },
+  checkBody: { fontSize: 12.5, color: ds.text2, marginTop: 2 },
+  checkBtns: { flexDirection: 'row', gap: 8, marginTop: 14 },
+});

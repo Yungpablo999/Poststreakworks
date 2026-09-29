@@ -410,3 +410,45 @@ export function getWeekSchedule(persona: Persona): WeekSchedule {
     bestTime: '7:30 PM',
   };
 }
+
+// ---------------------------------------------------------------------------
+// Film-it plan (short video filmed inside TikTok / Reels / Shorts)
+// Trending sounds and filters only exist inside those apps, so PostStreak
+// plans the post and hands off. Sound ideas are SAMPLE data: official trend
+// data needs TikTok's Discovery/Research API approval, and organic trending
+// sounds aren't always licensed for business accounts.
+// ---------------------------------------------------------------------------
+
+export interface FilmPlan {
+  hook: string;
+  shots: string[];
+}
+
+export interface SoundIdea {
+  id: string;
+  name: string;
+  vibe: string;
+  isSample: true;
+}
+
+export function getFilmPlan(ideaTitle: string): FilmPlan {
+  const topic = ideaTitle.replace(/[“”"]/g, '').trim();
+  return {
+    hook: `Say this in the first 2 seconds: “${topic}.”`,
+    shots: [
+      'Face the camera, say the hook with energy',
+      'Show one real moment or example (5–10s)',
+      'End with one takeaway and a question',
+    ],
+  };
+}
+
+const SOUND_IDEAS: Omit<SoundIdea, 'isSample'>[] = [
+  { id: 's1', name: 'Soft lo-fi beat', vibe: 'Calm talking-head' },
+  { id: 's2', name: 'Upbeat pop build-up', vibe: 'Quick cuts, reveals' },
+  { id: 's3', name: 'Viral voiceover trend', vibe: 'Storytelling' },
+];
+
+export function getSoundIdeas(): SoundIdea[] {
+  return SOUND_IDEAS.map((s) => ({ ...s, isSample: true as const }));
+}
