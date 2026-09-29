@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { Image, StyleSheet, View } from 'react-native';
+import { Platform, StyleSheet, View } from 'react-native';
 import Animated, {
   Easing,
   useAnimatedStyle,
@@ -8,11 +8,19 @@ import Animated, {
   withRepeat,
   withTiming,
 } from 'react-native-reanimated';
-import Svg, { Defs, RadialGradient, Stop, Circle } from 'react-native-svg';
 
 // Jarvis, the AI assistant, is the glowing flame orb (as on the website).
 // The ghost is the PostStreak brand mascot — don't use it to represent Jarvis.
-// The orb gently "breathes": a slow scale + glow pulse, off when Reduce Motion is on.
+//
+// Matches the website's orb: no backdrop behind it; the flame itself glows and
+// "breathes" every 2.6s (grows ~8%, glow brightens and picks up pink + gold).
+//   • Web: the website's exact CSS drop-shadow filter, animated.
+//   • iOS/Android: drop-shadow filters aren't available, so blurred, tinted
+//     copies of the flame sit behind it to make a glow that hugs its shape.
+// Reduce Motion keeps the resting glow and stops the breathing.
+
+const FLAME = require('../../assets/images/jarvis-core-flame.png');
+const BREATH_MS = 1300; // half of the website's 2.6s cycle
 
 interface JarvisOrbProps {
   size?: number;
@@ -24,46 +32,57 @@ export function JarvisOrb({ size = 32 }: JarvisOrbProps) {
 
   useEffect(() => {
     if (reduceMotion) return;
-    breath.value = withRepeat(withTiming(1, { duration: 1300, easing: Easing.inOut(Easing.sin) }), -1, true);
+    breath.value = withRepeat(withTiming(1, { duration: BREATH_MS, easing: Easing.inOut(Easing.ease) }), -1, true);
   }, [reduceMotion, breath]);
 
+  const img = size * 1.2; // the site renders the flame at 1.2× the orb box
+  const layer = { width: img, height: img };
+
+  // Website values: rest → peak (see PostIT-web home.css @keyframes ap-orb-glow)
+  const webFlameStyle = useAnimatedStyle(() => {
+    const b = breath.value;
+    return {
+      transform: [{ scale: 1 + b * 0.08 }],
+      filter:
+        `saturate(${1.4 + b * 0.2}) brightness(${1.05 + b * 0.15}) ` +
+        `drop-shadow(0 0 ${2 + b * 2}px rgba(124, 92, 255, ${0.9 + b * 0.1})) ` +
+        `drop-shadow(0 0 ${5 + b * 5}px rgba(167, 139, 250, 0.7)) ` +
+        `drop-shadow(0 0 ${10 * b}px rgba(236, 72, 153, ${0.75 * b})) ` +
+        `drop-shadow(0 0 ${16 * b}px rgba(245, 181, 30, ${0.45 * b}))`,
+    } as object;
+  });
+
   const flameStyle = useAnimatedStyle(() => ({ transform: [{ scale: 1 + breath.value * 0.08 }] }));
-  const glowStyle = useAnimatedStyle(() => ({
-    opacity: 0.55 + breath.value * 0.45,
-    transform: [{ scale: 1 + breath.value * 0.15 }],
+  const innerGlowStyle = useAnimatedStyle(() => ({
+    opacity: 0.75 + breath.value * 0.25,
+    transform: [{ scale: 1.04 + breath.value * 0.08 }],
+  }));
+  const outerGlowStyle = useAnimatedStyle(() => ({
+    opacity: breath.value * 0.55,
+    transform: [{ scale: 1.12 + breath.value * 0.1 }],
   }));
 
-  const glow = size * 1.6;
   return (
-    <View style={{ width: size, height: size, alignItems: 'center', justifyContent: 'center' }} accessibilityElementsHidden importantForAccessibility="no-hide-descendants">
-      <Animated.View pointerEvents="none" style={[styles.center, { width: glow, height: glow }, glowStyle]}>
-        <Svg width={glow} height={glow}>
-          <Defs>
-            <RadialGradient id="jarvisOrbGlow" cx="50%" cy="50%" r="50%">
-              <Stop offset="0%" stopColor="#7C5CFF" stopOpacity={0.55} />
-              <Stop offset="45%" stopColor="#A78BFA" stopOpacity={0.3} />
-              <Stop offset="75%" stopColor="#EC4899" stopOpacity={0.1} />
-              <Stop offset="100%" stopColor="#A78BFA" stopOpacity={0} />
-            </RadialGradient>
-          </Defs>
-          <Circle cx={glow / 2} cy={glow / 2} r={glow / 2} fill="url(#jarvisOrbGlow)" />
-        </Svg>
-      </Animated.View>
-      <Animated.View style={flameStyle}>
-        <Image
-          source={require('../../assets/images/jarvis-core-flame.png')}
-          style={{ width: size * 1.2, height: size * 1.2 }}
-          resizeMode="contain"
-        />
-      </Animated.View>
+    <View
+      style={{ width: size, height: size, alignItems: 'center', justifyContent: 'center' }}
+      accessibilityElementsHidden
+      importantForAccessibility="no-hide-descendants"
+    >
+      {Platform.OS === 'web' ? (
+        <Animated.Image source={FLAME} resizeMode="contain" style={[layer, webFlameStyle]} />
+      ) : (
+        <>
+          <Animated.Image source={FLAME} resizeMode="contain" blurRadius={Math.max(4, size * 0.22)} style={[styles.layer, layer, { tintColor: '#EC4899' }, outerGlowStyle]} />
+          <Animated.Image source={FLAME} resizeMode="contain" blurRadius={Math.max(2, size * 0.1)} style={[styles.layer, layer, { tintColor: '#7C5CFF' }, innerGlowStyle]} />
+          <Animated.Image source={FLAME} resizeMode="contain" style={[layer, flameStyle]} />
+        </>
+      )}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  center: {
+  layer: {
     position: 'absolute',
-    alignItems: 'center',
-    justifyContent: 'center',
   },
 });

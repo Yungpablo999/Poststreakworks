@@ -129,6 +129,8 @@ export const NicheSelectionScreen: React.FC<NicheSelectionScreenProps> = ({ onBa
   };
 
   const allNiches = [...DEFAULT_NICHES, ...customNiches];
+  // With an even number of niches the "Add your own" tile would sit alone on the last row
+  const addTileAlone = allNiches.length % 2 === 0;
   const count = selectedNiches.length;
 
   return (
@@ -191,11 +193,18 @@ export const NicheSelectionScreen: React.FC<NicheSelectionScreenProps> = ({ onBa
               </Animated.View>
             ))}
 
-            {/* Add your own */}
-            <Animated.View entering={FadeInUp.delay(300 + allNiches.length * 55).duration(500)} style={styles.gridItem}>
+            {/* Add your own: full-width bar when it would sit alone on its row, half tile otherwise */}
+            <Animated.View
+              entering={FadeInUp.delay(300 + allNiches.length * 55).duration(500)}
+              style={addTileAlone ? styles.gridItemFull : styles.gridItem}
+            >
               <Pressable
                 onPress={() => setShowCustomSheet(true)}
-                style={({ pressed }) => [styles.addTile, pressed && { opacity: 0.7, transform: [{ scale: 0.97 }] }]}
+                style={({ pressed }) => [
+                  styles.addTile,
+                  addTileAlone && styles.addTileWide,
+                  pressed && { opacity: 0.7, transform: [{ scale: 0.98 }] },
+                ]}
                 accessibilityRole="button"
                 accessibilityLabel="Add your own niche"
               >
@@ -391,6 +400,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     gap: 8,
+  },
+  gridItemFull: {
+    width: '100%',
+  },
+  addTileWide: {
+    minHeight: 64,
+    flexDirection: 'row',
+    gap: 10,
   },
   addTileText: {
     fontSize: 14,
