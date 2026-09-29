@@ -11,6 +11,7 @@ import {
   Dimensions,
   SafeAreaView,
   StatusBar,
+  ActivityIndicator,
 } from 'react-native';
 import { Text, TextInput } from '../components/ui/AppText';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -21,7 +22,8 @@ import { UserProfileModal, UserProfileData } from '../components/UserProfileModa
 import { AnimatedCompletionModal } from '../components/AnimatedCompletionModal';
 import { FreeAppHeader } from '../components/FreeAppHeader';
 import { sFont, sPadding, isNarrowScreen } from '../utils/responsive';
-import Reanimated, { FadeInUp } from 'react-native-reanimated';
+import Reanimated, { FadeIn, FadeInUp, Easing, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
+import { getStarterIdeas } from '../data';
 import { GlassBackdrop } from '../components/glass/GlassBackdrop';
 import { GlassCard } from '../components/glass/GlassCard';
 import { FitLines } from '../components/ui/FitLines';
@@ -971,6 +973,37 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
 
   const unreadNotifCount = notificationsList.filter((n) => n.unread).length;
 
+  // "Another" swaps the idea in place (same as the Create tab): the icon spins,
+  // Jarvis "picks" for a beat, then the next idea slides in.
+  const ideaPool = React.useMemo(() => {
+    const starter = getStarterIdeas(
+      userProfile?.niches?.length ? userProfile.niches : ['lifestyle'],
+      userProfile?.connectedPlatforms?.length ? userProfile.connectedPlatforms : ['tiktok', 'instagram'],
+    ).map((i) => i.title);
+    return Array.from(new Set([...starter, ...SAMPLE_IDEAS]));
+  }, [userProfile?.niches, userProfile?.connectedPlatforms]);
+  const [ideaThinking, setIdeaThinking] = useState(false);
+  const ideaTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const ideaSpin = useSharedValue(0);
+  const ideaSpinStyle = useAnimatedStyle(() => ({ transform: [{ rotate: `${ideaSpin.value * 360}deg` }] }));
+  useEffect(
+    () => () => {
+      if (ideaTimer.current) clearTimeout(ideaTimer.current);
+    },
+    [],
+  );
+  const shuffleIdea = () => {
+    if (ideaThinking) return;
+    if (Platform.OS !== 'web') Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    ideaSpin.value = withTiming(ideaSpin.value + 1, { duration: 500, easing: Easing.out(Easing.cubic) });
+    setIdeaThinking(true);
+    ideaTimer.current = setTimeout(() => {
+      const i = ideaPool.indexOf(currentIdea ?? '');
+      setCurrentIdea(ideaPool[(i + 1) % ideaPool.length]);
+      setIdeaThinking(false);
+    }, 550);
+  };
+
   const saveDraft = () => {
     if (Platform.OS !== 'web') Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     setCelebrationTitle('Draft saved!');
@@ -1050,23 +1083,30 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
                 <JarvisOrb size={26} />
                 <Text style={styles.ideaEyebrow}>YOUR IDEA</Text>
                 <Pressable
-                  onPress={() => {
-                    triggerModalAnim();
-                    setShowChangeIdeaModal(true);
-                  }}
+                  onPress={shuffleIdea}
                   hitSlop={8}
-                  style={styles.changeBtn}
+                  style={({ pressed }) => [styles.changeBtn, pressed && { transform: [{ scale: 0.92 }] }]}
                   accessibilityRole="button"
+                  accessibilityLabel="Show me another idea"
                 >
-                  <Svg width={13} height={13} viewBox="0 0 24 24" fill="none">
-                    <Path d="M4 12a8 8 0 0113.7-5.7L20 8M20 3v5h-5M20 12a8 8 0 01-13.7 5.7L4 16M4 21v-5h5" stroke={ds.purple} strokeWidth={2.4} strokeLinecap="round" strokeLinejoin="round" />
-                  </Svg>
-                  <Text style={styles.changeBtnText}>Change</Text>
+                  <Reanimated.View style={ideaSpinStyle}>
+                    <Svg width={13} height={13} viewBox="0 0 24 24" fill="none">
+                      <Path d="M4 12a8 8 0 0113.7-5.7L20 8M20 3v5h-5M20 12a8 8 0 01-13.7 5.7L4 16M4 21v-5h5" stroke={ds.purple} strokeWidth={2.4} strokeLinecap="round" strokeLinejoin="round" />
+                    </Svg>
+                  </Reanimated.View>
+                  <Text style={styles.changeBtnText}>Another</Text>
                 </Pressable>
               </View>
-              <Reanimated.View key={currentIdea} entering={FadeInUp.duration(300)}>
-                <Text style={styles.ideaTitle}>“{currentIdea}”</Text>
-              </Reanimated.View>
+              {ideaThinking ? (
+                <Reanimated.View entering={FadeIn.duration(120)} style={styles.ideaThinking}>
+                  <ActivityIndicator color={ds.purple} />
+                  <Text style={styles.ideaThinkingText}>Jarvis is picking…</Text>
+                </Reanimated.View>
+              ) : (
+                <Reanimated.View key={currentIdea} entering={FadeInUp.duration(300)} style={styles.ideaTitleWrap}>
+                  <Text style={styles.ideaTitle}>“{currentIdea}”</Text>
+                </Reanimated.View>
+              )}
               <Text style={styles.ideaBody}>Shape this idea into a post your audience will want to see.</Text>
             </GlassCard>
           </Reanimated.View>
@@ -1850,7 +1890,10 @@ const styles = StyleSheet.create({
   ideaEyebrow: { flex: 1, fontSize: 11, fontWeight: '800', letterSpacing: 1, color: ds.purple },
   changeBtn: { flexDirection: 'row', alignItems: 'center', gap: 5, height: 30, paddingHorizontal: 10, borderRadius: 999, backgroundColor: 'rgba(237, 233, 254, 0.9)' },
   changeBtnText: { fontSize: 12.5, fontWeight: '800', color: ds.purple },
+  ideaTitleWrap: { minHeight: 68, justifyContent: 'center' },
   ideaTitle: { fontSize: 22, lineHeight: 28, fontWeight: '800', color: ds.ink, letterSpacing: -0.5, marginTop: 12 },
+  ideaThinking: { minHeight: 68, marginTop: 12, flexDirection: 'row', alignItems: 'center', gap: 8 },
+  ideaThinkingText: { fontSize: 13, fontWeight: '700', color: ds.text3 },
   ideaBody: { fontSize: 14, lineHeight: 20, color: ds.text2, marginTop: 6 },
   questCard: { marginTop: 12 },
   questHead: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 },
