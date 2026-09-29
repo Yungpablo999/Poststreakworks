@@ -18,6 +18,7 @@ import { GlassCard } from '../glass/GlassCard';
 import { JarvisOrb } from '../JarvisOrb';
 import { ds, goldTokens } from '../../theme/colors';
 import { CheckInCard } from '../CheckInCard';
+import { CalendarSheet } from './CalendarSheet';
 
 // Day-0 Home for brand-new creators. No stats, no streak counts, no fake
 // numbers: a warm welcome, one clear next step, and a gentle check-in.
@@ -201,6 +202,7 @@ export function HomeDayZero({
   onOpenQuests,
   onOpenVoiceStudio,
 }: HomeDayZeroProps) {
+  const [calendarOpen, setCalendarOpen] = useState(false);
   const previews: { key: string; title: string; body: string; icon: React.ReactNode; onPress?: () => void; pro?: boolean }[] = [
     {
       key: 'schedule',
@@ -296,7 +298,7 @@ export function HomeDayZero({
 
       {/* 2. Gentle daily check-in */}
       <Animated.View entering={FadeInUp.delay(120).duration(550)}>
-        <CheckInCard persona="new" isDark={isDark} />
+        <CheckInCard persona="new" isDark={isDark} onOpenCalendar={() => setCalendarOpen(true)} />
       </Animated.View>
 
       {/* 3. What will appear here — a preview with no numbers */}
@@ -311,6 +313,8 @@ export function HomeDayZero({
           ))}
         </GlassCard>
       </Animated.View>
+
+      <CalendarSheet visible={calendarOpen} onClose={() => setCalendarOpen(false)} persona="new" onPlanPost={onPlanFirstPost} />
     </View>
   );
 }

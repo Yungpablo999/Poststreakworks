@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { View, StyleSheet, Platform } from 'react-native';
+import { View, StyleSheet, Platform, Pressable } from 'react-native';
 import Animated, {
   Easing,
   FadeIn,
@@ -13,7 +13,7 @@ import Animated, {
   withSpring,
   withTiming,
 } from 'react-native-reanimated';
-import Svg, { Path } from 'react-native-svg';
+import Svg, { Path, Rect } from 'react-native-svg';
 import * as Haptics from 'expo-haptics';
 import { Text } from './ui/AppText';
 import { AppButton } from './ui/AppButton';
@@ -37,6 +37,8 @@ interface CheckInCardProps {
   /** Kept for older callers; the card is always light glass now. */
   isDark?: boolean;
   title?: string;
+  /** When set, the week row and a calendar button open the full calendar. */
+  onOpenCalendar?: () => void;
 }
 
 function Spark({ index, fire }: { index: number; fire: number }) {
@@ -102,7 +104,7 @@ function TodayDot({ filled, fire }: { filled: boolean; fire: number }) {
   );
 }
 
-export function CheckInCard({ persona, title = 'Daily check-in' }: CheckInCardProps) {
+export function CheckInCard({ persona, title = 'Daily check-in', onOpenCalendar }: CheckInCardProps) {
   const { streak, checkIn } = useCheckInStreak(persona);
   const checkedIn = streak.checkedInToday;
   const [fire, setFire] = React.useState(0);
@@ -112,6 +114,12 @@ export function CheckInCard({ persona, title = 'Daily check-in' }: CheckInCardPr
     if (Platform.OS !== 'web') Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     setFire((f) => f + 1);
     checkIn();
+  };
+
+  const openCalendar = () => {
+    if (!onOpenCalendar) return;
+    if (Platform.OS !== 'web') Haptics.selectionAsync();
+    onOpenCalendar();
   };
 
   const message = (() => {
@@ -131,17 +139,30 @@ export function CheckInCard({ persona, title = 'Daily check-in' }: CheckInCardPr
         <Text style={styles.title} numberOfLines={1}>
           {title}
         </Text>
-        {checkedIn && (
-          <Animated.View entering={ZoomIn.springify().damping(14)} style={styles.donePill}>
-            <Svg width={12} height={12} viewBox="0 0 24 24" fill="none">
-              <Path d="M20 6L9 17l-5-5" stroke={ds.purple} strokeWidth={3} strokeLinecap="round" strokeLinejoin="round" />
+        {onOpenCalendar && (
+          <Pressable
+            onPress={openCalendar}
+            hitSlop={8}
+            accessibilityRole="button"
+            accessibilityLabel="Open your calendar"
+            style={({ pressed }) => [styles.calBtn, pressed && { transform: [{ scale: 0.92 }] }, Platform.OS === 'web' && ({ cursor: 'pointer' } as object)]}
+          >
+            <Svg width={14} height={14} viewBox="0 0 24 24" fill="none">
+              <Rect x="3" y="4" width="18" height="17" rx="3" stroke={ds.purple} strokeWidth={2.2} />
+              <Path d="M16 2v4M8 2v4M3 10h18" stroke={ds.purple} strokeWidth={2.2} strokeLinecap="round" />
             </Svg>
-            <Text style={styles.donePillText}>Done today</Text>
-          </Animated.View>
+            <Text style={styles.calBtnText}>Calendar</Text>
+          </Pressable>
         )}
       </View>
 
-      <View style={styles.weekRow}>
+      <Pressable
+        onPress={openCalendar}
+        disabled={!onOpenCalendar}
+        accessibilityRole={onOpenCalendar ? 'button' : undefined}
+        accessibilityLabel={onOpenCalendar ? 'This week. Open your calendar' : undefined}
+        style={[styles.weekRow, onOpenCalendar && Platform.OS === 'web' && ({ cursor: 'pointer' } as object)]}
+      >
         {DAY_LABELS.map((label, i) => {
           const isToday = i === streak.todayIndex;
           const filled = streak.week[i];
@@ -164,13 +185,20 @@ export function CheckInCard({ persona, title = 'Daily check-in' }: CheckInCardPr
             </Animated.View>
           );
         })}
-      </View>
+      </Pressable>
 
       <Animated.View key={checkedIn ? 'done' : 'todo'} entering={FadeIn.duration(350)}>
         <Text style={styles.body}>{message}</Text>
       </Animated.View>
 
-      {!checkedIn && (
+      {checkedIn ? (
+        <Animated.View entering={ZoomIn.springify().damping(14)} style={styles.donePill}>
+          <Svg width={13} height={13} viewBox="0 0 24 24" fill="none">
+            <Path d="M20 6L9 17l-5-5" stroke={ds.purple} strokeWidth={3} strokeLinecap="round" strokeLinejoin="round" />
+          </Svg>
+          <Text style={styles.donePillText}>Checked in today</Text>
+        </Animated.View>
+      ) : (
         <View style={styles.button}>
           <AppButton title="Check in for today" variant="outline" onPress={handleCheckIn} />
         </View>
@@ -182,16 +210,27 @@ export function CheckInCard({ persona, title = 'Daily check-in' }: CheckInCardPr
 const styles = StyleSheet.create({
   header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 8, minHeight: 28 },
   title: { flexShrink: 1, fontSize: 17, fontWeight: '800', color: ds.ink, letterSpacing: -0.2 },
-  donePill: {
+  calBtn: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 5,
     paddingHorizontal: 10,
-    height: 26,
+    height: 28,
     borderRadius: 999,
     backgroundColor: ds.lavender,
   },
-  donePillText: { fontSize: 12, fontWeight: '800', color: ds.purple },
+  calBtnText: { fontSize: 12, fontWeight: '800', color: ds.purple },
+  donePill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    height: 44,
+    marginTop: 16,
+    borderRadius: 16,
+    backgroundColor: 'rgba(237, 233, 254, 0.8)',
+  },
+  donePillText: { fontSize: 14, fontWeight: '800', color: ds.purple },
   weekRow: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 16 },
   dayCol: { alignItems: 'center', gap: 6 },
   dotBox: { width: DOT, height: DOT, alignItems: 'center', justifyContent: 'center' },

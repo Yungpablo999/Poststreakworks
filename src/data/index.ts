@@ -258,3 +258,109 @@ export function postsPerWeek(snapshot: AccountSnapshot): number {
 
 /** The starter plan's posting rhythm. */
 export const PLAN_POSTS_PER_WEEK = 3;
+
+// ---------------------------------------------------------------------------
+// Calendar (the pop-up behind the Home check-in card)
+// One month at a time: which days had a check-in, what was posted, and what's
+// scheduled. Mock posts are generated relative to today so the calendar always
+// looks current; check-ins come from the check-in store above so tapping
+// "Check in" on Home shows up here straight away.
+// ---------------------------------------------------------------------------
+
+export type CalendarPlatform = 'tiktok' | 'instagram' | 'youtube' | 'threads' | 'facebook';
+
+export interface CalendarPost {
+  id: string;
+  title: string;
+  platform: CalendarPlatform;
+  time: string;
+  status: 'posted' | 'scheduled';
+}
+
+export interface CalendarDay {
+  /** YYYY-MM-DD */
+  key: string;
+  day: number;
+  isToday: boolean;
+  isPast: boolean;
+  checkedIn: boolean;
+  posts: CalendarPost[];
+}
+
+export interface CalendarMonth {
+  year: number;
+  /** 0 = January */
+  month: number;
+  label: string;
+  /** Empty cells before day 1 in a Monday-first grid. */
+  startOffset: number;
+  days: CalendarDay[];
+  postedCount: number;
+  scheduledCount: number;
+  checkInCount: number;
+}
+
+const MONTH_NAMES = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+
+const MOCK_POSTS: { title: string; platform: CalendarPlatform; time: string }[] = [
+  { title: 'My 5-minute morning reset', platform: 'tiktok', time: '7:30 AM' },
+  { title: '3 small habits that changed my week', platform: 'instagram', time: '8:00 PM' },
+  { title: 'A day in my life, honestly', platform: 'youtube', time: '6:00 PM' },
+  { title: 'How I plan my week in 10 minutes', platform: 'tiktok', time: '7:00 PM' },
+  { title: 'What I wish I knew before starting', platform: 'instagram', time: '7:30 PM' },
+  { title: 'Quick tip: hooks that hold attention', platform: 'threads', time: '12:30 PM' },
+];
+
+const startOfDay = (d: Date) => new Date(d.getFullYear(), d.getMonth(), d.getDate());
+const dayKey = (d: Date) =>
+  `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+
+export function getCalendarMonth(persona: Persona, year: number, month: number): CalendarMonth {
+  const today = startOfDay(new Date());
+  const streak = getCheckInStreak(persona);
+  const first = new Date(year, month, 1);
+  const daysCount = new Date(year, month + 1, 0).getDate();
+  const startOffset = mondayFirstIndex(first);
+  // Days before today that count toward the current run of check-ins
+  const priorRun = streak.currentDays - (streak.checkedInToday ? 1 : 0);
+
+  const days: CalendarDay[] = [];
+  for (let d = 1; d <= daysCount; d++) {
+    const date = new Date(year, month, d);
+    const diff = Math.round((date.getTime() - today.getTime()) / 86400000); // days from today
+    const isToday = diff === 0;
+    const isPast = diff < 0;
+
+    const checkedIn = isToday ? streak.checkedInToday : isPast && persona === 'returning' && -diff <= priorRun;
+
+    const posts: CalendarPost[] = [];
+    if (persona === 'returning') {
+      const pick = MOCK_POSTS[(d + month * 3) % MOCK_POSTS.length];
+      const weekday = mondayFirstIndex(date);
+      // About three posts a week: Mon / Wed / Fri, within ~10 weeks of today
+      const onPlan = weekday === 0 || weekday === 2 || weekday === 4;
+      if (onPlan && isPast && diff >= -70) {
+        posts.push({ id: `p-${dayKey(date)}`, ...pick, status: 'posted' });
+      } else if (onPlan && !isPast && diff <= 21) {
+        posts.push({ id: `s-${dayKey(date)}`, ...pick, status: 'scheduled' });
+      }
+      if (isToday) {
+        posts.push({ id: `s-${dayKey(date)}-t`, ...MOCK_POSTS[1], time: '7:30 PM', status: 'scheduled' });
+      }
+    }
+
+    days.push({ key: dayKey(date), day: d, isToday, isPast, checkedIn, posts });
+  }
+
+  const all = days.flatMap((x) => x.posts);
+  return {
+    year,
+    month,
+    label: `${MONTH_NAMES[month]} ${year}`,
+    startOffset,
+    days,
+    postedCount: all.filter((p) => p.status === 'posted').length,
+    scheduledCount: all.filter((p) => p.status === 'scheduled').length,
+    checkInCount: days.filter((x) => x.checkedIn).length,
+  };
+}

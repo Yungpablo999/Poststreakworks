@@ -20,6 +20,7 @@ import { BrandLogo } from '../components/BrandLogo';
 import { HomeDayZero } from '../components/home/HomeDayZero';
 import { ProUpsellCard } from '../components/home/ProUpsellCard';
 import { BellButton } from '../components/home/BellButton';
+import { CalendarSheet } from '../components/home/CalendarSheet';
 import { GlassBackdrop } from '../components/glass/GlassBackdrop';
 import Reanimated, { FadeInUp } from 'react-native-reanimated';
 import Svg, { Path, Circle, Rect } from 'react-native-svg';
@@ -555,6 +556,7 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
   const [showProModal, setShowProModal] = useState(false);
   const [showMissionModal, setShowMissionModal] = useState(false);
   const [showCalendarModal, setShowCalendarModal] = useState(false);
+  const [showCalendarSheet, setShowCalendarSheet] = useState(false);
   const [showPhotoModal, setShowPhotoModal] = useState(false);
   const [showNotificationModal, setShowNotificationModal] = useState(false);
   const [showCreatorLevelModal, setShowCreatorLevelModal] = useState(false);
@@ -1164,7 +1166,10 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
 
           {/* 4. CARD 1: YOUR STREAK HEATMAP */}
           <Pressable
-            onPress={openCalendarModal}
+            onPress={() => {
+              if (Platform.OS !== 'web') Haptics.selectionAsync();
+              setShowCalendarSheet(true);
+            }}
             style={({ pressed }) => [
               styles.dashboardCard, isDark && styles.dashboardCardDark,
               pressed && styles.cardPressed,
@@ -1842,6 +1847,14 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
             if (onSaveProfile) onSaveProfile(updated);
             setSelectedAvatarId(updated.avatarId || null);
           }}
+        />
+
+        {/* Calendar sheet (returning view; the new-creator Home has its own) */}
+        <CalendarSheet
+          visible={showCalendarSheet}
+          onClose={() => setShowCalendarSheet(false)}
+          persona="returning"
+          onPlanPost={() => onNavigateTab?.('create')}
         />
 
         {/* 13. SWIPEABLE STREAK CALENDAR MODAL */}
