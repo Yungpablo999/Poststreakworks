@@ -140,7 +140,7 @@ export const NicheSelectionScreen: React.FC<NicheSelectionScreenProps> = ({ onBa
         {/* Top: back + progress */}
         <View style={styles.header}>
           <Pressable onPress={onBack} hitSlop={10} accessibilityRole="button" accessibilityLabel="Go back" style={styles.backBtn}>
-            <BlurView intensity={30} tint="light" style={StyleSheet.absoluteFill} />
+            <BlurView intensity={30} tint="light" style={[StyleSheet.absoluteFill, { borderRadius: 20, overflow: 'hidden' }]} />
             {/* Wrapped so the arrow always draws above the frosted layer */}
             <View>
               <Svg width={20} height={20} viewBox="0 0 24 24" fill="none">

@@ -27,7 +27,8 @@ export function GlassCard({ children, style, strong = false, radius = dsRadius.l
   return (
     <View style={[styles.shadow, { borderRadius: radius }, style]}>
       <View style={[styles.clip, { borderRadius: radius }]}>
-        <BlurView intensity={glass.blur} tint="light" style={StyleSheet.absoluteFill} />
+        {/* iOS's blur ignores the parent's rounded clip, so it gets its own corners */}
+        <BlurView intensity={glass.blur} tint="light" style={[StyleSheet.absoluteFill, { borderRadius: radius, overflow: 'hidden' }]} />
         <View style={[StyleSheet.absoluteFill, { backgroundColor: strong ? glass.fillStrong : glass.fill }]} />
         {/* Bright top edge + faint outer hairline give the glass its rim */}
         <View

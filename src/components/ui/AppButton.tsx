@@ -126,7 +126,7 @@ export function AppButton({
           faceStyle,
         ]}
       >
-        {variant === 'glass' && <BlurView intensity={30} tint="light" style={StyleSheet.absoluteFill} />}
+        {variant === 'glass' && <BlurView intensity={30} tint="light" style={styles.glassBlur} />}
         {/* Hover shine and press shade, faded in by the animation */}
         <Animated.View pointerEvents="none" style={[styles.overlay, { backgroundColor: SHINE[variant] }, shineStyle]} />
         <Animated.View pointerEvents="none" style={[styles.overlay, { backgroundColor: v.bgPressed }, shadeStyle]} />
@@ -177,6 +177,8 @@ const styles = StyleSheet.create({
   clip: {
     overflow: 'hidden',
   },
+  // iOS's blur ignores the parent's rounded clip, so it gets its own corners
+  glassBlur: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, borderRadius: dsRadius.md - 1, overflow: 'hidden' },
   overlay: {
     position: 'absolute',
     left: 0,

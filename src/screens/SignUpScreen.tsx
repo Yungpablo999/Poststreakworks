@@ -74,7 +74,7 @@ export const SignUpScreen: React.FC<SignUpScreenProps> = ({
         <KeyboardAvoidingView style={styles.flex} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
           <View style={styles.header}>
             <Pressable onPress={onBack} hitSlop={10} accessibilityRole="button" accessibilityLabel="Go back" style={styles.backBtn}>
-              <BlurView intensity={30} tint="light" style={StyleSheet.absoluteFill} />
+              <BlurView intensity={30} tint="light" style={[StyleSheet.absoluteFill, { borderRadius: 20, overflow: 'hidden' }]} />
               <View>
                 <Svg width={20} height={20} viewBox="0 0 24 24" fill="none">
                   <Path d="M15 18l-6-6 6-6" stroke={ds.ink} strokeWidth={2.4} strokeLinecap="round" strokeLinejoin="round" />

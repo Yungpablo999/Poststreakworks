@@ -39,7 +39,7 @@ export function NicheTile({ title, subtitle, icon, selected, onPress }: NicheTil
       style={styles.pressable}
     >
       <Animated.View style={[styles.tile, selected && styles.tileSelected, pressStyle]}>
-        <BlurView intensity={28} tint="light" style={StyleSheet.absoluteFill} />
+        <BlurView intensity={28} tint="light" style={[StyleSheet.absoluteFill, { borderRadius: 20.5, overflow: 'hidden' }]} />
         <View style={[StyleSheet.absoluteFill, { backgroundColor: selected ? 'rgba(237, 233, 254, 0.78)' : 'rgba(255, 255, 255, 0.58)' }]} />
 
         <View style={[styles.iconBox, selected && styles.iconBoxSelected]}>

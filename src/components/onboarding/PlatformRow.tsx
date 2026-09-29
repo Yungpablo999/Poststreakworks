@@ -53,7 +53,7 @@ export function PlatformRow({ name, description, logo, connected, onToggle }: Pl
 
   return (
     <Animated.View style={[styles.card, connected && styles.cardConnected, pressStyle]}>
-      <BlurView intensity={28} tint="light" style={StyleSheet.absoluteFill} />
+      <BlurView intensity={28} tint="light" style={[StyleSheet.absoluteFill, { borderRadius: 20.5, overflow: 'hidden' }]} />
       <View style={[StyleSheet.absoluteFill, { backgroundColor: connected ? 'rgba(234, 247, 238, 0.7)' : 'rgba(255, 255, 255, 0.58)' }]} />
 
       <PlatformLogo type={logo} size={44} />

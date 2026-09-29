@@ -75,7 +75,8 @@ function CodeBox({ digit, index, active, status }: { digit: string; index: numbe
         popStyle,
       ]}
     >
-      <BlurView intensity={24} tint="light" style={StyleSheet.absoluteFill} />
+      {/* iOS's blur ignores the parent's rounded clip, so it gets its own corners */}
+      <BlurView intensity={24} tint="light" style={styles.boxBlur} />
       {digit ? (
         <Animated.Text entering={ZoomIn.duration(160)} style={[styles.digit, verified && { color: '#FFFFFF' }]}>
           {digit}
@@ -144,7 +145,7 @@ export const VerifyCodeScreen: React.FC<VerifyCodeScreenProps> = ({ mode, email,
         <KeyboardAvoidingView style={styles.flex} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
           <View style={styles.header}>
             <Pressable onPress={onBack} hitSlop={10} accessibilityRole="button" accessibilityLabel="Go back" style={styles.backBtn}>
-              <BlurView intensity={30} tint="light" style={StyleSheet.absoluteFill} />
+              <BlurView intensity={30} tint="light" style={[StyleSheet.absoluteFill, { borderRadius: 20, overflow: 'hidden' }]} />
               <View>
                 <Svg width={20} height={20} viewBox="0 0 24 24" fill="none">
                   <Path d="M15 18l-6-6 6-6" stroke={ds.ink} strokeWidth={2.4} strokeLinecap="round" strokeLinejoin="round" />
@@ -284,6 +285,7 @@ const styles = StyleSheet.create({
     borderWidth: 1.5,
     borderColor: ds.line,
   },
+  boxBlur: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, borderRadius: 12.5, overflow: 'hidden' },
   boxActive: { borderColor: ds.purple, backgroundColor: '#FFFFFF' },
   boxFilled: { borderColor: '#B9ACF7' },
   boxVerified: { backgroundColor: ds.greenFill, borderColor: ds.greenFill },
