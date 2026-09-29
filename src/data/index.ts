@@ -118,3 +118,87 @@ export function getScheduleSummary(persona: Persona): ScheduleSummary {
   if (persona === 'new') return { scheduledCount: 0, nextPostLabel: null };
   return { scheduledCount: 1, nextPostLabel: 'Today · 7:30 PM' };
 }
+
+// ---------------------------------------------------------------------------
+// Starter plan (onboarding "Your plan" step)
+// Built only from what the creator told us (niches + platforms) — no stats.
+// Mock ideas for now; the real Jarvis idea generator replaces getStarterIdeas.
+// ---------------------------------------------------------------------------
+
+export interface StarterIdea {
+  id: string;
+  niche: string;
+  title: string;
+  hook: string;
+  format: string;
+  bestTime: string;
+}
+
+const IDEAS_BY_NICHE: Record<string, Omit<StarterIdea, 'id' | 'niche' | 'format'>[]> = {
+  lifestyle: [
+    { title: 'My 5-minute morning reset', hook: 'I stopped scrolling first thing in the morning. Here is what I do instead.', bestTime: '7:30 AM' },
+    { title: 'A day in my life, honestly', hook: 'Not the aesthetic version. The real one.', bestTime: '6:00 PM' },
+    { title: '3 small habits that changed my week', hook: 'None of these take more than two minutes.', bestTime: '8:00 PM' },
+  ],
+  comedy: [
+    { title: 'When the group chat goes silent', hook: 'Everyone has sent this exact message at least once.', bestTime: '8:30 PM' },
+    { title: 'Things my mum says, ranked', hook: 'Number one is non-negotiable.', bestTime: '7:00 PM' },
+    { title: 'Me trying to be productive', hook: 'Step one: make a to-do list. Step two: lose it.', bestTime: '9:00 PM' },
+  ],
+  education: [
+    { title: 'One thing school never taught you', hook: 'I wish someone told me this at 16.', bestTime: '7:00 PM' },
+    { title: 'Explain it like I am five', hook: 'The simplest way to understand this in 30 seconds.', bestTime: '6:30 PM' },
+    { title: '3 myths people still believe', hook: 'Number two surprised me too.', bestTime: '8:00 PM' },
+  ],
+  beauty: [
+    { title: 'My 3-product everyday look', hook: 'Five minutes, three products, done.', bestTime: '7:30 AM' },
+    { title: 'Outfit formula that always works', hook: 'Use this when you have nothing to wear.', bestTime: '6:00 PM' },
+    { title: 'Budget swap vs. the real thing', hook: 'Can you spot the difference?', bestTime: '8:00 PM' },
+  ],
+  food: [
+    { title: 'A 10-minute dinner I make weekly', hook: 'Cheap, fast, and better than takeaway.', bestTime: '5:30 PM' },
+    { title: 'Rating the viral recipe honestly', hook: 'Is it actually worth it?', bestTime: '7:00 PM' },
+    { title: 'What I eat in a busy day', hook: 'Real food for a real schedule.', bestTime: '12:30 PM' },
+  ],
+  fitness: [
+    { title: 'A 10-minute workout, no equipment', hook: 'You can do this in your bedroom tonight.', bestTime: '6:30 AM' },
+    { title: 'One mistake beginners make', hook: 'I did this for a year before I noticed.', bestTime: '7:00 PM' },
+    { title: 'What I eat after training', hook: 'Simple, filling and it actually helps.', bestTime: '6:00 PM' },
+  ],
+  tech: [
+    { title: '3 apps that save me an hour a day', hook: 'Number three is free.', bestTime: '8:00 AM' },
+    { title: 'How I plan my week in 10 minutes', hook: 'The Sunday system that keeps me on track.', bestTime: '7:00 PM' },
+    { title: 'A money lesson I learned late', hook: 'I wish I started this in my first job.', bestTime: '8:30 PM' },
+  ],
+  music: [
+    { title: 'Learn this 8-count in 30 seconds', hook: 'Slow version first, then full speed.', bestTime: '7:00 PM' },
+    { title: 'The song stuck in my head this week', hook: 'My cover, one take, no edits.', bestTime: '8:30 PM' },
+    { title: 'Behind the scenes of my practice', hook: 'What an hour of practice really looks like.', bestTime: '6:00 PM' },
+  ],
+};
+
+const GENERAL_IDEAS: Omit<StarterIdea, 'id' | 'niche' | 'format'>[] = [
+  { title: 'Why I started creating', hook: 'This is the reason I finally hit post.', bestTime: '7:30 PM' },
+  { title: 'One thing I wish I knew before I started', hook: 'Perfection is the enemy of posting.', bestTime: '7:00 PM' },
+  { title: 'Introduce yourself in 30 seconds', hook: 'Hi, I am new here. Here is what to expect.', bestTime: '6:30 PM' },
+];
+
+function formatFor(platforms: string[]): string {
+  if (platforms.includes('tiktok') || platforms.includes('instagram')) return '30-second Reel';
+  if (platforms.includes('youtube')) return 'YouTube Short';
+  if (platforms.includes('threads')) return 'Text post';
+  if (platforms.includes('facebook')) return 'Short video';
+  return '30-second Reel';
+}
+
+/** Ideas that match the creator's niches first, then general starters. */
+export function getStarterIdeas(niches: string[], platforms: string[]): StarterIdea[] {
+  const format = formatFor(platforms);
+  const fromNiches = niches.flatMap((n) =>
+    (IDEAS_BY_NICHE[n] ?? []).map((idea, i) => ({ ...idea, id: `${n}-${i}`, niche: n, format })),
+  );
+  // Interleave niches so shuffling moves between them
+  const byIndex = [0, 1, 2].flatMap((i) => fromNiches.filter((idea) => idea.id.endsWith(`-${i}`)));
+  const general = GENERAL_IDEAS.map((idea, i) => ({ ...idea, id: `general-${i}`, niche: 'general', format }));
+  return [...byIndex, ...general];
+}

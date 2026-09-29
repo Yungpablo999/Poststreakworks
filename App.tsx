@@ -12,6 +12,7 @@ import { SignInScreen } from './src/screens/SignInScreen';
 import { VerifyCodeScreen } from './src/screens/VerifyCodeScreen';
 import { NicheSelectionScreen } from './src/screens/NicheSelectionScreen';
 import { PlatformConnectScreen } from './src/screens/PlatformConnectScreen';
+import { PlanPreviewScreen } from './src/screens/PlanPreviewScreen';
 import { OnboardingCompleteScreen } from './src/screens/OnboardingCompleteScreen';
 import { DashboardScreen } from './src/screens/DashboardScreen';
 import { ProDashboardScreen } from './src/screens/ProDashboardScreen';
@@ -57,6 +58,7 @@ type Screen =
   | 'reset-password'
   | 'niche'
   | 'platforms'
+  | 'plan'
   | 'complete'
   | 'dashboard'
   | 'mission-detail'
@@ -263,6 +265,17 @@ export default function App() {
 
   const handlePlatformsContinue = (platforms: string[]) => {
     setConnectedPlatforms(platforms);
+    navigateTo('plan');
+  };
+
+  // "Your plan" (value before sign-up): keep the chosen idea for their first post
+  const handleBackFromPlan = () => {
+    setCurrentScreen('platforms');
+  };
+
+  const handlePlanContinue = (idea: { title: string }) => {
+    setSelectedIdeaTitle(idea.title);
+    setComposerIdeaTitle(idea.title);
     navigateTo('signup');
   };
 
@@ -272,7 +285,7 @@ export default function App() {
 
   // Sign Up Screen actions (Step 3 of Onboarding - 75%)
   const handleBackFromSignUp = () => {
-    setCurrentScreen('platforms');
+    setCurrentScreen('plan');
   };
 
   const handleOpenSignInFromSignUp = () => {
@@ -364,6 +377,7 @@ export default function App() {
       screen === 'signin' ||
       screen === 'niche' ||
       screen === 'platforms' ||
+      screen === 'plan' ||
       screen === 'complete' ||
       screen === 'verify-code'
     ) {
@@ -375,6 +389,8 @@ export default function App() {
   const getBackScreen = (screen: Screen): Screen | null => {
     switch (screen) {
       case 'signup':
+        return 'plan';
+      case 'plan':
         return 'platforms';
       case 'signin':
         return 'welcome';
@@ -452,6 +468,15 @@ export default function App() {
               onSignIn={handleOpenSignInFromWelcome}
             />
           )}
+
+        {currentScreen === 'plan' && (
+          <PlanPreviewScreen
+            niches={selectedNiches}
+            platforms={connectedPlatforms}
+            onBack={handleBackFromPlan}
+            onContinue={handlePlanContinue}
+          />
+        )}
 
         {currentScreen === 'signup' && (
           <SignUpScreen

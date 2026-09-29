@@ -20,7 +20,7 @@ import { ds } from '../../theme/colors';
 // Sign-up progress: frosted card with a smoothly filling bar and step dots
 // (done = purple tick, current = pulsing ring, upcoming = soft lavender).
 
-export const ONBOARDING_STEPS = ['Niche', 'Platforms', 'Account', 'Verify', 'Done'] as const;
+export const ONBOARDING_STEPS = ['Niche', 'Platforms', 'Your plan', 'Account', 'Verify'] as const;
 
 interface OnboardingProgressProps {
   /** Index of the step the user is on (0 = Niche). */
