@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { StyleSheet, View, ScrollView, Pressable, Modal, Platform, KeyboardAvoidingView, Image } from 'react-native';
+import { StyleSheet, View, ScrollView, Pressable, Modal, Platform, KeyboardAvoidingView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Animated, {
   FadeIn,
@@ -19,6 +19,7 @@ import { GlassCard } from '../components/glass/GlassCard';
 import { BlurView } from 'expo-blur';
 import { OnboardingProgress } from '../components/onboarding/OnboardingProgress';
 import { NicheTile } from '../components/onboarding/NicheTile';
+import { JarvisOrb } from '../components/JarvisOrb';
 import type { NicheIconType } from '../components/onboarding/NicheIcon';
 import { ds } from '../theme/colors';
 
@@ -36,7 +37,7 @@ const DEFAULT_NICHES: NicheItem[] = [
   { id: 'beauty', title: 'Beauty & Fashion', subtitle: 'Makeup, style and grooming', iconType: 'beauty' },
   { id: 'food', title: 'Food', subtitle: 'Recipes, reviews and cooking', iconType: 'food' },
   { id: 'fitness', title: 'Fitness', subtitle: 'Workouts and healthy living', iconType: 'fitness' },
-  { id: 'tech', title: 'Tech & Business', subtitle: 'Tools, productivity and money', iconType: 'tech' },
+  { id: 'tech', title: 'Tech & Business', subtitle: 'Productivity and money', iconType: 'tech' },
   { id: 'music', title: 'Music & Dance', subtitle: 'Performance and rhythm', iconType: 'music' },
 ];
 
@@ -203,7 +204,7 @@ export const NicheSelectionScreen: React.FC<NicheSelectionScreenProps> = ({ onBa
 
           {/* Jarvis note */}
           <Animated.View entering={FadeIn.delay(800).duration(500)} style={styles.jarvisNote}>
-            <Image source={require('../../assets/images/jarvis-ghost-clean.png')} style={styles.jarvisGhost} resizeMode="contain" />
+            <JarvisOrb size={30} />
             <Text style={styles.jarvisText}>
               <Text style={styles.jarvisName}>Jarvis: </Text>
               no wrong answers here. Pick what you enjoy making most.
@@ -374,6 +375,7 @@ const styles = StyleSheet.create({
   },
   gridItem: {
     width: '48%',
+    alignSelf: 'stretch',
   },
   addTile: {
     minHeight: 132,
@@ -397,10 +399,6 @@ const styles = StyleSheet.create({
     gap: 10,
     marginTop: 20,
     paddingHorizontal: 4,
-  },
-  jarvisGhost: {
-    width: 34,
-    height: 34,
   },
   jarvisText: {
     flex: 1,

@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { StyleSheet, View, useWindowDimensions } from 'react-native';
 import Animated, {
   Easing,
   FadeIn,
@@ -30,7 +30,7 @@ interface OnboardingProgressProps {
 
 const EASE = Easing.bezier(0.2, 0.8, 0.2, 1);
 
-function StepDot({ state, index }: { state: 'done' | 'current' | 'next'; index: number }) {
+function StepDot({ state, index, dot }: { state: 'done' | 'current' | 'next'; index: number; dot: number }) {
   const reduceMotion = useReducedMotion();
   const pulse = useSharedValue(0);
 
@@ -48,22 +48,22 @@ function StepDot({ state, index }: { state: 'done' | 'current' | 'next'; index: 
   }));
 
   return (
-    <Animated.View entering={FadeIn.delay(250 + index * 70).duration(400)} style={styles.dotWrap}>
-      {state === 'current' && <Animated.View style={[styles.halo, haloStyle]} />}
+    <Animated.View entering={FadeIn.delay(250 + index * 70).duration(400)} style={[styles.dotWrap, { width: dot, height: dot }]}>
+      {state === 'current' && <Animated.View style={[styles.halo, { width: dot, height: dot, borderRadius: dot / 2 }, haloStyle]} />}
       {state === 'done' && (
-        <Animated.View entering={ZoomIn.delay(300 + index * 70).springify().damping(14)} style={[styles.dot, styles.dotDone]}>
+        <Animated.View entering={ZoomIn.delay(300 + index * 70).springify().damping(14)} style={[styles.dot, { width: dot, height: dot, borderRadius: dot / 2 }, styles.dotDone]}>
           <Svg width={14} height={14} viewBox="0 0 24 24" fill="none">
             <Path d="M20 6L9 17l-5-5" stroke="#FFFFFF" strokeWidth={3} strokeLinecap="round" strokeLinejoin="round" />
           </Svg>
         </Animated.View>
       )}
       {state === 'current' && (
-        <View style={[styles.dot, styles.dotCurrent]}>
+        <View style={[styles.dot, { width: dot, height: dot, borderRadius: dot / 2 }, styles.dotCurrent]}>
           <View style={styles.dotCurrentCore} />
         </View>
       )}
       {state === 'next' && (
-        <View style={[styles.dot, styles.dotNext]}>
+        <View style={[styles.dot, { width: dot, height: dot, borderRadius: dot / 2 }, styles.dotNext]}>
           <View style={styles.dotNextRing} />
         </View>
       )}
@@ -73,6 +73,10 @@ function StepDot({ state, index }: { state: 'done' | 'current' | 'next'; index: 
 
 export function OnboardingProgress({ current, steps = ONBOARDING_STEPS }: OnboardingProgressProps) {
   const total = steps.length;
+  // Narrow phones (e.g. 320 pt): smaller dots and labels so all steps fit
+  const { width } = useWindowDimensions();
+  const compact = width < 360;
+  const dot = compact ? 24 : 30;
   const percent = Math.round(((current + 1) / total) * 100);
 
   // Bar fills from where the previous step left off to this step
@@ -107,10 +111,11 @@ export function OnboardingProgress({ current, steps = ONBOARDING_STEPS }: Onboar
           const state = i < current ? 'done' : i === current ? 'current' : 'next';
           return (
             <View key={label} style={styles.stepCol}>
-              <StepDot state={state} index={i} />
+              <StepDot state={state} index={i} dot={dot} />
               <Text
                 style={[
                   styles.stepLabel,
+                  compact && styles.stepLabelCompact,
                   state === 'current' && styles.stepLabelCurrent,
                   state === 'done' && styles.stepLabelDone,
                 ]}
@@ -125,8 +130,6 @@ export function OnboardingProgress({ current, steps = ONBOARDING_STEPS }: Onboar
     </GlassCard>
   );
 }
-
-const DOT = 30;
 
 const styles = StyleSheet.create({
   headerRow: {
@@ -170,27 +173,20 @@ const styles = StyleSheet.create({
     marginTop: 14,
   },
   stepCol: {
+    flex: 1, // steps share the card width evenly on every screen size
     alignItems: 'center',
-    width: 58,
     gap: 6,
+    minWidth: 0,
   },
   dotWrap: {
-    width: DOT,
-    height: DOT,
     alignItems: 'center',
     justifyContent: 'center',
   },
   halo: {
     position: 'absolute',
-    width: DOT,
-    height: DOT,
-    borderRadius: DOT / 2,
     backgroundColor: ds.purple,
   },
   dot: {
-    width: DOT,
-    height: DOT,
-    borderRadius: DOT / 2,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -224,6 +220,9 @@ const styles = StyleSheet.create({
     fontSize: 11.5,
     fontWeight: '600',
     color: ds.text3,
+  },
+  stepLabelCompact: {
+    fontSize: 10,
   },
   stepLabelCurrent: {
     color: ds.ink,

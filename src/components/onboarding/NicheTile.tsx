@@ -45,7 +45,7 @@ export function NicheTile({ title, subtitle, icon, selected, onPress }: NicheTil
         <View style={[styles.iconBox, selected && styles.iconBoxSelected]}>
           <NicheIcon type={icon} color={selected ? '#FFFFFF' : ds.purple} />
         </View>
-        <Text style={[styles.title, selected && styles.titleSelected]} numberOfLines={1}>
+        <Text style={[styles.title, selected && styles.titleSelected]} numberOfLines={2}>
           {title}
         </Text>
         <Text style={styles.subtitle} numberOfLines={2}>
@@ -67,8 +67,10 @@ export function NicheTile({ title, subtitle, icon, selected, onPress }: NicheTil
 const styles = StyleSheet.create({
   pressable: {
     width: '100%',
+    flex: 1, // fill the row height so tiles side by side match
   },
   tile: {
+    flex: 1,
     minHeight: 132,
     borderRadius: 22,
     padding: 14,
