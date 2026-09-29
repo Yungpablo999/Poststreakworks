@@ -14,6 +14,7 @@ import * as Haptics from 'expo-haptics';
 import Svg, { Path } from 'react-native-svg';
 import { Text, TextInput } from '../components/ui/AppText';
 import { AppButton } from '../components/ui/AppButton';
+import { FitLines } from '../components/ui/FitLines';
 import { GlassBackdrop } from '../components/glass/GlassBackdrop';
 import { GlassCard } from '../components/glass/GlassCard';
 import { BlurView } from 'expo-blur';
@@ -153,9 +154,13 @@ export const NicheSelectionScreen: React.FC<NicheSelectionScreenProps> = ({ onBa
         <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
           {/* Title */}
           <Animated.View entering={FadeInUp.delay(120).duration(550)}>
-            <Text style={styles.title} accessibilityRole="header">
-              What kind of creator are <Text style={styles.titleAccent}>you?</Text>
-            </Text>
+            {/* Always two lines: "What kind of creator are" / "you?", scaled to the screen */}
+            <FitLines
+              lines={['What kind of creator are', <Text key="you" style={styles.titleAccent}>you?</Text>]}
+              textStyle={styles.title}
+              maxFontSize={40}
+              accessibilityLabel="What kind of creator are you?"
+            />
             <Text style={styles.subtitle}>Pick up to 3. Jarvis uses them to suggest ideas and the best times to post. You can change them later.</Text>
           </Animated.View>
 
@@ -309,8 +314,6 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
   },
   title: {
-    fontSize: 28,
-    lineHeight: 34,
     fontWeight: '800',
     letterSpacing: -0.6,
     color: ds.ink,
@@ -322,7 +325,8 @@ const styles = StyleSheet.create({
     fontSize: 15,
     lineHeight: 22,
     color: ds.text2,
-    marginTop: 8,
+    marginTop: 10,
+    textAlign: 'center',
   },
   counterRow: {
     flexDirection: 'row',
