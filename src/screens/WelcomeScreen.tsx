@@ -1,5 +1,6 @@
-import React from 'react';
-import { StyleSheet, View, SafeAreaView, StatusBar, useWindowDimensions, Platform } from 'react-native';
+import React, { useRef, useState } from 'react';
+import { StyleSheet, View, StatusBar, useWindowDimensions, Platform } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import Animated, { FadeIn, FadeInUp } from 'react-native-reanimated';
 import Svg, { Path } from 'react-native-svg';
 import { Text } from '../components/ui/AppText';
@@ -28,9 +29,24 @@ const HEADLINE = [
 export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onGetStarted = () => {}, onSignIn = () => {} }) => {
   const { width, height } = useWindowDimensions();
   const isSmallScreen = height < 740;
-  // Size the headline from the available width so all three words fit on one line
+  // Headline starts at its ideal size, then shrinks to fit once we've measured it.
+  // Measuring (instead of guessing) matters because fonts render at slightly
+  // different widths on iPhone, Android and the web.
   const contentWidth = Math.min(width, 480) - 40;
-  const headlineSize = Math.min(isSmallScreen ? 38 : 42, Math.floor(contentWidth / 9.2));
+  const maxHeadlineSize = isSmallScreen ? 38 : 42;
+  const WORD_GAP = 10;
+  const [fitScale, setFitScale] = useState(1);
+  const headlineSize = Math.floor(maxHeadlineSize * fitScale);
+  const wordWidths = useRef<number[]>([]);
+  const handleWordLayout = (index: number, w: number) => {
+    wordWidths.current[index] = w;
+    const measured = wordWidths.current.filter((x) => x > 0);
+    if (measured.length < HEADLINE.length) return;
+    const total = measured.reduce((a, b) => a + b, 0) + WORD_GAP * (HEADLINE.length - 1);
+    const naturalWidth = total / fitScale; // width at the ideal size
+    const next = Math.min(1, (contentWidth * 0.96) / naturalWidth);
+    if (Math.abs(next - fitScale) > 0.01) setFitScale(next);
+  };
 
   return (
     <View style={styles.root}>
@@ -50,9 +66,19 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onGetStarted = () 
           </Animated.View>
 
           {/* Headline: word-by-word rise */}
-          <View style={styles.headlineRow} accessible accessibilityRole="header" accessibilityLabel="Create. Grow. Earn.">
+          <View
+            style={styles.headlineRow}
+            accessible
+            accessibilityRole="header"
+            accessibilityLabel="Create. Grow. Earn."
+          >
             {HEADLINE.map(({ word, accent }, i) => (
-              <Animated.View key={word} entering={FadeInUp.delay(380 + i * 130).duration(ENTER_MS)}>
+              <Animated.View
+                key={word}
+                entering={FadeInUp.delay(380 + i * 130).duration(ENTER_MS)}
+                onLayout={(e) => handleWordLayout(i, e.nativeEvent.layout.width)}
+                style={styles.word}
+              >
                 <Text
                   style={[
                     styles.headline,
@@ -123,9 +149,12 @@ const styles = StyleSheet.create({
   },
   headlineRow: {
     flexDirection: 'row',
-    justifyContent: 'center',
+    alignSelf: 'center',
     alignItems: 'baseline',
     gap: 10,
+  },
+  word: {
+    flexShrink: 0, // keep each word's natural width so it can be measured
   },
   headline: {
     fontWeight: '800',
