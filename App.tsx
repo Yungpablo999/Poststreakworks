@@ -13,7 +13,6 @@ import { VerifyCodeScreen } from './src/screens/VerifyCodeScreen';
 import { NicheSelectionScreen } from './src/screens/NicheSelectionScreen';
 import { PlatformConnectScreen } from './src/screens/PlatformConnectScreen';
 import { PlanPreviewScreen } from './src/screens/PlanPreviewScreen';
-import { OnboardingCompleteScreen } from './src/screens/OnboardingCompleteScreen';
 import { DashboardScreen } from './src/screens/DashboardScreen';
 import { ProDashboardScreen } from './src/screens/ProDashboardScreen';
 import { MissionDetailScreen } from './src/screens/MissionDetailScreen';
@@ -59,7 +58,6 @@ type Screen =
   | 'niche'
   | 'platforms'
   | 'plan'
-  | 'complete'
   | 'dashboard'
   | 'mission-detail'
   | 'create'
@@ -301,11 +299,11 @@ export default function App() {
   };
 
   // One-tap Apple / Google sign-up (mock): the provider has already verified the
-  // person, so skip the email code and finish onboarding
+  // person, so skip the email code and go straight to Home
   const handleSocialSignUp = (_provider: 'apple' | 'google') => {
     setVerifyMode('signup');
     setUserProfile(prev => ({ ...prev, tier: 'free' }));
-    navigateTo('complete');
+    navigateTo('dashboard');
   };
 
   // Sign In Screen actions
@@ -343,25 +341,7 @@ export default function App() {
 
   const handleVerifyCodeSuccess = (_email: string) => {
     setUserProfile(prev => ({ ...prev, tier: 'free' }));
-    if (verifyMode === 'signup') {
-      navigateTo('complete');
-    } else {
-      navigateTo('dashboard');
-    }
-  };
-
-  // Onboarding Complete actions (Step 4 of Onboarding - 100%)
-  const handleBackFromComplete = () => {
-    setCurrentScreen('signup');
-  };
-
-  const handleStartFirstMission = () => {
-    setUserProfile(prev => ({ ...prev, tier: 'free' }));
-    navigateTo('mission-detail');
-  };
-
-  const handleGoToDashboard = () => {
-    setUserProfile(prev => ({ ...prev, tier: 'free' }));
+    // Sign-up and sign-in both land on Home; Home's day-0 welcome greets new creators
     navigateTo('dashboard');
   };
 
@@ -386,7 +366,6 @@ export default function App() {
       screen === 'niche' ||
       screen === 'platforms' ||
       screen === 'plan' ||
-      screen === 'complete' ||
       screen === 'verify-code'
     ) {
       return 'push';
@@ -408,8 +387,6 @@ export default function App() {
         return 'welcome';
       case 'platforms':
         return 'niche';
-      case 'complete':
-        return 'signup';
       case 'mission-detail':
         return 'dashboard';
       case 'challenge-detail':
@@ -530,15 +507,6 @@ export default function App() {
           />
         )}
 
-        {currentScreen === 'complete' && (
-          <OnboardingCompleteScreen
-            onBack={handleBackFromComplete}
-            onStartMission={handleStartFirstMission}
-            onGoToDashboard={handleGoToDashboard}
-            selectedNiches={selectedNiches}
-            connectedPlatforms={connectedPlatforms}
-          />
-        )}
 
         {currentScreen === 'dashboard' && (
           (userProfile?.tier === 'pro' || userProfile?.tier === 'founding') ? (
