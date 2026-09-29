@@ -1,7 +1,7 @@
 import React, { useMemo, useRef, useState } from 'react';
 import { StyleSheet, View, ScrollView, Pressable, Platform, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import Animated, { FadeIn, FadeInUp, FadeOut } from 'react-native-reanimated';
+import Animated, { FadeIn, FadeInUp, useAnimatedStyle, useSharedValue, withTiming, Easing } from 'react-native-reanimated';
 import * as Haptics from 'expo-haptics';
 import { BlurView } from 'expo-blur';
 import Svg, { Path, Circle } from 'react-native-svg';
@@ -11,37 +11,15 @@ import { FitLines } from '../components/ui/FitLines';
 import { GlassBackdrop } from '../components/glass/GlassBackdrop';
 import { GlassCard } from '../components/glass/GlassCard';
 import { OnboardingProgress } from '../components/onboarding/OnboardingProgress';
-import { PlatformLogo, type PlatformLogoType } from '../components/onboarding/PlatformLogo';
-import { JarvisOrb } from '../components/JarvisOrb';
-import { getAccountSnapshot, getStarterIdeas, type StarterIdea } from '../data';
 import { AccountSnapshotCard } from '../components/onboarding/AccountSnapshotCard';
+import { JarvisOrb } from '../components/JarvisOrb';
+import { getAccountSnapshots, getStarterIdeas, type StarterIdea } from '../data';
 import { ds } from '../theme/colors';
 
-// Onboarding step 3: value before sign-up. Jarvis turns the creator's niches +
-// platforms into a first post idea and a gentle 3-day starter plan. Nothing here
-// is a stat or a score — only what they told us.
+// Onboarding step 3: value before sign-up, built to be scanned in seconds —
+// (1) where their account is and what they're missing, (2) their first post.
 
-const NICHE_LABELS: Record<string, string> = {
-  lifestyle: 'Lifestyle',
-  comedy: 'Comedy',
-  education: 'Education',
-  beauty: 'Beauty & Fashion',
-  food: 'Food',
-  fitness: 'Fitness',
-  tech: 'Tech & Business',
-  music: 'Music & Dance',
-  general: 'Getting started',
-};
-
-const PLATFORM_NAMES: Record<string, string> = {
-  tiktok: 'TikTok',
-  instagram: 'Instagram',
-  youtube: 'YouTube',
-  facebook: 'Facebook',
-  threads: 'Threads',
-};
-
-const THINK_MS = 650;
+const THINK_MS = 600;
 
 interface PlanPreviewScreenProps {
   niches: string[];
@@ -52,22 +30,24 @@ interface PlanPreviewScreenProps {
 
 export const PlanPreviewScreen: React.FC<PlanPreviewScreenProps> = ({ niches, platforms, onBack, onContinue }) => {
   const ideas = useMemo(() => getStarterIdeas(niches, platforms), [niches, platforms]);
-  const snapshot = useMemo(() => getAccountSnapshot(platforms), [platforms]);
+  const snapshots = useMemo(() => getAccountSnapshots(platforms), [platforms]);
   const [index, setIndex] = useState(0);
   const [thinking, setThinking] = useState(false);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const idea = ideas[index % ideas.length];
 
-  const mainPlatform = (platforms.find((p) => p in PLATFORM_NAMES) ?? 'tiktok') as PlatformLogoType;
+  // Shuffle icon spins a full turn on each tap
+  const spin = useSharedValue(0);
+  const spinStyle = useAnimatedStyle(() => ({ transform: [{ rotate: `${spin.value * 360}deg` }] }));
 
   const shuffle = () => {
     if (thinking) return;
     if (Platform.OS !== 'web') Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    spin.value = withTiming(spin.value + 1, { duration: 500, easing: Easing.out(Easing.cubic) });
     setThinking(true);
     timer.current = setTimeout(() => {
       setIndex((i) => i + 1);
       setThinking(false);
-      if (Platform.OS !== 'web') Haptics.selectionAsync();
     }, THINK_MS);
   };
 
@@ -79,12 +59,6 @@ export const PlanPreviewScreen: React.FC<PlanPreviewScreenProps> = ({ niches, pl
     if (Platform.OS !== 'web') Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     onContinue(idea);
   };
-
-  const plan = [
-    { day: 'Day 1', title: 'Post your first idea', body: idea.title, highlight: true },
-    { day: 'Day 2', title: 'Check in', body: 'A quick hello. Jarvis shares a tip.', highlight: false },
-    { day: 'Day 3', title: 'Post idea #2', body: 'Jarvis will have one ready for you.', highlight: false },
-  ];
 
   return (
     <View style={styles.root}>
@@ -112,78 +86,58 @@ export const PlanPreviewScreen: React.FC<PlanPreviewScreenProps> = ({ niches, pl
               maxFontSize={40}
               accessibilityLabel="Jarvis made you a starter plan"
             />
-            <Text style={styles.subtitle}>Here's where your account is today, and the plan to grow it.</Text>
           </Animated.View>
 
-          {/* Their account right now (from the platform they connected) */}
-          {snapshot && (
+          {/* 1. Where they are + what they're missing */}
+          {snapshots.length > 0 && (
             <Animated.View entering={FadeInUp.delay(240).duration(600)} style={styles.section}>
-              <AccountSnapshotCard snapshot={snapshot} />
+              <AccountSnapshotCard snapshots={snapshots} />
             </Animated.View>
           )}
 
-          {/* First post idea */}
+          {/* 2. Their first post */}
           <Animated.View entering={FadeInUp.delay(380).duration(600)} style={styles.section}>
-            <GlassCard strong radius={24} padding={18}>
+            <GlassCard strong radius={26} padding={20}>
               <View style={styles.ideaHeader}>
-                <JarvisOrb size={28} />
-                <Text style={styles.eyebrow}>YOUR FIRST POST IDEA</Text>
+                <JarvisOrb size={26} />
+                <Text style={styles.eyebrow} numberOfLines={1}>FIRST POST</Text>
+                <Pressable
+                  onPress={shuffle}
+                  hitSlop={10}
+                  accessibilityRole="button"
+                  accessibilityLabel="Show me another idea"
+                  style={({ pressed }) => [styles.shuffleBtn, pressed && { transform: [{ scale: 0.92 }] }]}
+                >
+                  <Animated.View style={spinStyle}>
+                    <Svg width={16} height={16} viewBox="0 0 24 24" fill="none">
+                      <Path d="M4 12a8 8 0 0113.7-5.7L20 8M20 3v5h-5M20 12a8 8 0 01-13.7 5.7L4 16M4 21v-5h5" stroke={ds.purple} strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round" />
+                    </Svg>
+                  </Animated.View>
+                  <Text style={styles.shuffleText}>Another</Text>
+                </Pressable>
               </View>
 
               {thinking ? (
-                <Animated.View entering={FadeIn.duration(150)} exiting={FadeOut.duration(120)} style={styles.thinking}>
+                <Animated.View entering={FadeIn.duration(120)} style={styles.thinking}>
                   <ActivityIndicator color={ds.purple} />
-                  <Text style={styles.thinkingText}>Jarvis is thinking…</Text>
                 </Animated.View>
               ) : (
-                <Animated.View key={idea.id} entering={FadeInUp.duration(380)}>
-                  <Text style={styles.nicheTag}>{NICHE_LABELS[idea.niche] ?? 'Your niche'}</Text>
+                <Animated.View key={idea.id} entering={FadeInUp.duration(350)} style={styles.ideaBody}>
                   <Text style={styles.ideaTitle}>{idea.title}</Text>
-
-                  <View style={styles.hookBox}>
-                    <Text style={styles.hookLabel}>OPENING LINE</Text>
-                    <Text style={styles.hookText}>“{idea.hook}”</Text>
-                  </View>
-
+                  <Text style={styles.hook} numberOfLines={2}>“{idea.hook}”</Text>
                   <View style={styles.metaRow}>
-                    <View style={styles.metaChip}>
-                      <PlatformLogo type={mainPlatform} size={18} />
-                      <Text style={styles.metaText}>{idea.format}</Text>
-                    </View>
-                    <View style={styles.metaChip}>
-                      <Svg width={14} height={14} viewBox="0 0 24 24" fill="none">
-                        <Circle cx="12" cy="12" r="9" stroke={ds.purple} strokeWidth={2.2} />
-                        <Path d="M12 7v5l3 2" stroke={ds.purple} strokeWidth={2.2} strokeLinecap="round" />
-                      </Svg>
-                      <Text style={styles.metaText}>Try {idea.bestTime}</Text>
-                    </View>
+                    <Text style={styles.meta}>{idea.format}</Text>
+                    <View style={styles.metaDot} />
+                    <Svg width={13} height={13} viewBox="0 0 24 24" fill="none">
+                      <Circle cx="12" cy="12" r="9" stroke={ds.text2} strokeWidth={2.2} />
+                      <Path d="M12 7v5l3 2" stroke={ds.text2} strokeWidth={2.2} strokeLinecap="round" />
+                    </Svg>
+                    <Text style={styles.meta}>{idea.bestTime}</Text>
                   </View>
                 </Animated.View>
               )}
-
-              <View style={styles.shuffleRow}>
-                <AppButton title="Show me another" variant="glass" onPress={shuffle} disabled={thinking} />
-              </View>
             </GlassCard>
-          </Animated.View>
-
-          {/* 3-day starter plan */}
-          <Animated.View entering={FadeInUp.delay(500).duration(600)} style={styles.section}>
-            <GlassCard radius={24} padding={18}>
-              <Text style={styles.planTitle}>Your first 3 days</Text>
-              <Text style={styles.planSub}>Small steps, no pressure. Miss a day? Just pick up again.</Text>
-              {plan.map((row, i) => (
-                <Animated.View key={row.day} entering={FadeInUp.delay(560 + i * 110).duration(450)} style={[styles.planRow, i > 0 && styles.planRowBorder]}>
-                  <View style={[styles.dayBadge, row.highlight && styles.dayBadgeActive]}>
-                    <Text style={[styles.dayBadgeText, row.highlight && styles.dayBadgeTextActive]}>{row.day.replace('Day ', '')}</Text>
-                  </View>
-                  <View style={styles.planText}>
-                    <Text style={styles.planRowTitle}>{row.title}</Text>
-                    <Text style={styles.planRowBody} numberOfLines={2}>{row.body}</Text>
-                  </View>
-                </Animated.View>
-              ))}
-            </GlassCard>
+            <Text style={styles.nextSteps}>Then a quick check-in on day 2, and idea #2 on day 3.</Text>
           </Animated.View>
         </ScrollView>
 
@@ -223,69 +177,30 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: 'rgba(255, 255, 255, 0.9)',
   },
-  scroll: { paddingHorizontal: 20, paddingTop: 20, paddingBottom: 140, width: '100%', maxWidth: 520, alignSelf: 'center' },
+  scroll: { paddingHorizontal: 20, paddingTop: 18, paddingBottom: 140, width: '100%', maxWidth: 520, alignSelf: 'center' },
   title: { fontWeight: '800', letterSpacing: -0.6, color: ds.ink },
   titleAccent: { color: ds.purple },
-  subtitle: { fontSize: 15, lineHeight: 22, color: ds.text2, marginTop: 10, textAlign: 'center' },
-  section: { marginTop: 18 },
-  ideaHeader: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 12 },
-  eyebrow: { fontSize: 11, fontWeight: '800', letterSpacing: 1, color: ds.purple },
-  thinking: { minHeight: 172, alignItems: 'center', justifyContent: 'center', gap: 10 },
-  thinkingText: { fontSize: 14, fontWeight: '700', color: ds.purple },
-  nicheTag: {
-    alignSelf: 'flex-start',
-    fontSize: 11.5,
-    fontWeight: '800',
-    color: ds.purple,
-    backgroundColor: 'rgba(237, 233, 254, 0.9)',
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 999,
-    overflow: 'hidden',
-  },
-  ideaTitle: { fontSize: 20, lineHeight: 26, fontWeight: '800', color: ds.ink, marginTop: 10, letterSpacing: -0.3 },
-  hookBox: {
-    marginTop: 12,
-    padding: 12,
-    borderRadius: 14,
-    backgroundColor: 'rgba(245, 243, 255, 0.9)',
-    borderLeftWidth: 3,
-    borderLeftColor: ds.purple,
-  },
-  hookLabel: { fontSize: 10, fontWeight: '800', letterSpacing: 1, color: ds.text3 },
-  hookText: { fontSize: 14.5, lineHeight: 21, color: ds.ink, marginTop: 4, fontWeight: '600' },
-  metaRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 12 },
-  metaChip: {
+  section: { marginTop: 16 },
+  ideaHeader: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  eyebrow: { fontSize: 11, fontWeight: '800', letterSpacing: 1, color: ds.purple, flex: 1 },
+  shuffleBtn: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
+    gap: 5,
+    height: 32,
     paddingHorizontal: 10,
-    paddingVertical: 6,
     borderRadius: 999,
-    backgroundColor: 'rgba(255, 255, 255, 0.8)',
-    borderWidth: 1,
-    borderColor: ds.line,
-  },
-  metaText: { fontSize: 12.5, fontWeight: '700', color: ds.ink },
-  shuffleRow: { marginTop: 16 },
-  planTitle: { fontSize: 17, fontWeight: '800', color: ds.ink },
-  planSub: { fontSize: 13, lineHeight: 19, color: ds.text2, marginTop: 4, marginBottom: 6 },
-  planRow: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingVertical: 12 },
-  planRowBorder: { borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: ds.line },
-  dayBadge: {
-    width: 38,
-    height: 38,
-    borderRadius: 19,
-    alignItems: 'center',
-    justifyContent: 'center',
     backgroundColor: 'rgba(237, 233, 254, 0.9)',
   },
-  dayBadgeActive: { backgroundColor: ds.purple },
-  dayBadgeText: { fontSize: 15, fontWeight: '800', color: ds.purple },
-  dayBadgeTextActive: { color: '#FFFFFF' },
-  planText: { flex: 1, minWidth: 0 },
-  planRowTitle: { fontSize: 15, fontWeight: '800', color: ds.ink },
-  planRowBody: { fontSize: 13, lineHeight: 18, color: ds.text2, marginTop: 2 },
+  shuffleText: { fontSize: 12.5, fontWeight: '800', color: ds.purple },
+  thinking: { height: 104, alignItems: 'center', justifyContent: 'center' },
+  ideaBody: { minHeight: 104, marginTop: 12 },
+  ideaTitle: { fontSize: 20, lineHeight: 26, fontWeight: '800', color: ds.ink, letterSpacing: -0.3 },
+  hook: { fontSize: 14.5, lineHeight: 21, color: ds.text2, marginTop: 6 },
+  metaRow: { flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 12 },
+  meta: { fontSize: 12.5, fontWeight: '700', color: ds.text2 },
+  metaDot: { width: 3, height: 3, borderRadius: 2, backgroundColor: ds.text3 },
+  nextSteps: { fontSize: 13, color: ds.text3, textAlign: 'center', marginTop: 12 },
   footer: {
     position: 'absolute',
     left: 0,

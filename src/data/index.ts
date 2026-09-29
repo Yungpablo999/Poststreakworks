@@ -243,3 +243,18 @@ export function getAccountSnapshot(platforms: string[]): AccountSnapshot | null 
   );
   return { platform, isSample: true, postedDays, ...sample };
 }
+
+/** Snapshots for every connected platform, in the order they were connected. */
+export function getAccountSnapshots(platforms: string[]): AccountSnapshot[] {
+  return platforms
+    .map((p) => getAccountSnapshot([p]))
+    .filter((s): s is AccountSnapshot => s !== null);
+}
+
+/** Posts per week, rounded, from days posted in the last 30 days (min 0). */
+export function postsPerWeek(snapshot: AccountSnapshot): number {
+  return Math.max(0, Math.round(snapshot.postingDaysLast30 / (30 / 7)));
+}
+
+/** The starter plan's posting rhythm. */
+export const PLAN_POSTS_PER_WEEK = 3;
