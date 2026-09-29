@@ -1,6 +1,7 @@
 import React from 'react';
 import { Pressable, View, StyleSheet, Platform, type StyleProp, type ViewStyle } from 'react-native';
 import * as Haptics from 'expo-haptics';
+import { BlurView } from 'expo-blur';
 import { Text } from './AppText';
 import { ds, dsRadius } from '../../theme/colors';
 
@@ -10,8 +11,9 @@ import { ds, dsRadius } from '../../theme/colors';
 //   outline — white with a warm border (secondary action)
 //   quiet   — lavender, no ledge (low-emphasis)
 //   gold    — Pro only (upgrade / Pro features)
+//   glass   — frosted, for secondary actions on glass screens
 
-type Variant = 'primary' | 'outline' | 'quiet' | 'gold';
+type Variant = 'primary' | 'outline' | 'quiet' | 'gold' | 'glass';
 type Size = 'md' | 'lg';
 
 interface AppButtonProps {
@@ -32,6 +34,7 @@ const VARIANTS: Record<Variant, { bg: string; bgPressed: string; ledge: string |
   outline: { bg: ds.surface, bgPressed: ds.surface, ledge: ds.line, text: ds.ink, border: ds.line },
   quiet: { bg: ds.lavender, bgPressed: '#E4DEFD', ledge: null, text: ds.purple },
   gold: { bg: ds.gold, bgPressed: '#EA9606', ledge: ds.goldLedge, text: ds.goldInk },
+  glass: { bg: 'rgba(255, 255, 255, 0.55)', bgPressed: 'rgba(255, 255, 255, 0.75)', ledge: 'rgba(63, 37, 191, 0.14)', text: ds.ink, border: 'rgba(255, 255, 255, 0.9)' },
 };
 
 export function AppButton({
@@ -74,9 +77,11 @@ export function AppButton({
                 backgroundColor: pressed ? v.bgPressed : v.bg,
                 transform: [{ translateY: pressed && v.ledge ? LEDGE - 1 : 0 }],
               },
-              v.border && { borderWidth: 1.5, borderColor: v.border },
+              v.border && { borderWidth: variant === 'glass' ? 1 : 1.5, borderColor: v.border },
+              variant === 'glass' && styles.glassClip,
             ]}
           >
+            {variant === 'glass' && <BlurView intensity={30} tint="light" style={StyleSheet.absoluteFill} />}
             <Text style={[styles.label, { color: v.text, fontSize: size === 'lg' ? 16 : 15 }]} numberOfLines={1}>
               {title}
             </Text>
@@ -113,5 +118,8 @@ const styles = StyleSheet.create({
   },
   disabled: {
     opacity: 0.5,
+  },
+  glassClip: {
+    overflow: 'hidden',
   },
 });
