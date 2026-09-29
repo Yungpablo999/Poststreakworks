@@ -21,6 +21,12 @@ import { AnimatedCompletionModal } from '../components/AnimatedCompletionModal';
 import { FreeAppHeader } from '../components/FreeAppHeader';
 import { UserPersona } from '../components/HeaderDualModePills';
 import { sFont, sPadding, moderateScale, isNarrowScreen } from '../utils/responsive';
+import Reanimated, { FadeInUp } from 'react-native-reanimated';
+import { GlassBackdrop } from '../components/glass/GlassBackdrop';
+import { FitLines } from '../components/ui/FitLines';
+import { IdeaHeroCard } from '../components/create/IdeaHeroCard';
+import { ToolTile, GlassRow, AllowanceMeter, DraftRow, DraftsEmpty, VoiceStudioProCard } from '../components/create/CreateBlocks';
+import { ds } from '../theme/colors';
 
 const SCHEDULE_DATE_OPTIONS = (() => {
   const arr: string[] = [];
@@ -195,137 +201,6 @@ const NOTIFICATIONS: NotificationItem[] = [
   },
 ];
 
-// Live Animated Studio Audio Waveform Visualizer
-const LiveVoiceWaveform: React.FC = () => {
-  const bar0 = useRef(new Animated.Value(0.35)).current;
-  const bar1 = useRef(new Animated.Value(0.55)).current;
-  const bar2 = useRef(new Animated.Value(0.75)).current;
-  const bar3 = useRef(new Animated.Value(0.95)).current;
-  const bar4 = useRef(new Animated.Value(1.0)).current;
-  const bar5 = useRef(new Animated.Value(0.85)).current;
-  const bar6 = useRef(new Animated.Value(0.65)).current;
-  const bar7 = useRef(new Animated.Value(0.45)).current;
-  const bar8 = useRef(new Animated.Value(0.3)).current;
-
-  const auraOpacity = useRef(new Animated.Value(0.35)).current;
-
-  useEffect(() => {
-    const createWaveLoop = (
-      anim: Animated.Value,
-      minVal: number,
-      maxVal: number,
-      midVal: number,
-      duration: number,
-      delay: number
-    ) => {
-      return Animated.loop(
-        Animated.sequence([
-          Animated.timing(anim, {
-            toValue: maxVal,
-            duration: duration * 0.4,
-            delay: delay,
-            useNativeDriver: true,
-          }),
-          Animated.timing(anim, {
-            toValue: minVal,
-            duration: duration * 0.35,
-            useNativeDriver: true,
-          }),
-          Animated.timing(anim, {
-            toValue: midVal,
-            duration: duration * 0.25,
-            useNativeDriver: true,
-          }),
-        ])
-      );
-    };
-
-    const l0 = createWaveLoop(bar0, 0.2, 0.65, 0.35, 620, 0);
-    const l1 = createWaveLoop(bar1, 0.28, 0.85, 0.5, 540, 60);
-    const l2 = createWaveLoop(bar2, 0.38, 0.95, 0.65, 480, 120);
-    const l3 = createWaveLoop(bar3, 0.42, 1.0, 0.72, 430, 80);
-    const l4 = createWaveLoop(bar4, 0.52, 1.0, 0.82, 390, 40); // Center gold peak
-    const l5 = createWaveLoop(bar5, 0.4, 0.95, 0.7, 460, 100);
-    const l6 = createWaveLoop(bar6, 0.32, 0.88, 0.58, 520, 140);
-    const l7 = createWaveLoop(bar7, 0.25, 0.75, 0.42, 580, 80);
-    const l8 = createWaveLoop(bar8, 0.18, 0.58, 0.3, 640, 20);
-
-    const auraLoop = Animated.loop(
-      Animated.sequence([
-        Animated.timing(auraOpacity, {
-          toValue: 0.8,
-          duration: 900,
-          useNativeDriver: true,
-        }),
-        Animated.timing(auraOpacity, {
-          toValue: 0.35,
-          duration: 900,
-          useNativeDriver: true,
-        }),
-      ])
-    );
-
-    l0.start();
-    l1.start();
-    l2.start();
-    l3.start();
-    l4.start();
-    l5.start();
-    l6.start();
-    l7.start();
-    l8.start();
-    auraLoop.start();
-
-    return () => {
-      l0.stop();
-      l1.stop();
-      l2.stop();
-      l3.stop();
-      l4.stop();
-      l5.stop();
-      l6.stop();
-      l7.stop();
-      l8.stop();
-      auraLoop.stop();
-    };
-  }, [bar0, bar1, bar2, bar3, bar4, bar5, bar6, bar7, bar8, auraOpacity]);
-
-  const barsData = [
-    { anim: bar0, color: '#6366F1', baseHeight: 22 }, // Purple
-    { anim: bar1, color: '#8B5CF6', baseHeight: 28 }, // Violet Purple
-    { anim: bar2, color: '#FBBF24', baseHeight: 32 }, // Rich Gold
-    { anim: bar3, color: '#F59E0B', baseHeight: 30 }, // Amber Gold
-    { anim: bar4, color: '#8B5CF6', baseHeight: 34 }, // Center Purple Peak
-    { anim: bar5, color: '#FBBF24', baseHeight: 32 }, // Rich Gold
-    { anim: bar6, color: '#F59E0B', baseHeight: 30 }, // Amber Gold
-    { anim: bar7, color: '#8B5CF6', baseHeight: 28 }, // Violet Purple
-    { anim: bar8, color: '#6366F1', baseHeight: 22 }, // Purple
-  ];
-
-  return (
-    <View style={styles.waveformWrapper}>
-      {/* Glowing Backdrop Aura */}
-      <Animated.View style={[styles.waveformAura, { opacity: auraOpacity }]} />
-
-      <View style={styles.waveformContainer}>
-        {barsData.map((b, i) => (
-          <Animated.View
-            key={i}
-            style={[
-              styles.waveBar,
-              {
-                backgroundColor: b.color,
-                height: b.baseHeight,
-                transform: [{ scaleY: b.anim }],
-              },
-            ]}
-          />
-        ))}
-      </View>
-    </View>
-  );
-};
-
 export const CreateScreen: React.FC<CreateScreenProps> = ({
   onLogout,
   onNavigateTab,
@@ -395,27 +270,8 @@ export const CreateScreen: React.FC<CreateScreenProps> = ({
   );
 
   // Animations
-  const flameFloatY = useRef(new Animated.Value(0)).current;
   const modalPopScale = useRef(new Animated.Value(0.88)).current;
 
-  useEffect(() => {
-    const flameLoop = Animated.loop(
-      Animated.sequence([
-        Animated.timing(flameFloatY, {
-          toValue: -3,
-          duration: 1300,
-          useNativeDriver: true,
-        }),
-        Animated.timing(flameFloatY, {
-          toValue: 3,
-          duration: 1300,
-          useNativeDriver: true,
-        }),
-      ])
-    );
-    flameLoop.start();
-    return () => flameLoop.stop();
-  }, [flameFloatY]);
 
   const triggerModalPop = () => {
     if (Platform.OS !== 'web') {
@@ -580,8 +436,10 @@ export const CreateScreen: React.FC<CreateScreenProps> = ({
     <SafeAreaView style={[styles.safeArea, isDark && { backgroundColor: '#0C0A12' }]}>
       <StatusBar barStyle={isDark ? "light-content" : "dark-content"} backgroundColor={isDark ? "#0C0A12" : "#FAF8F5"} />
       <View style={[styles.container, isDark && { backgroundColor: '#0C0A12' }]}>
+        <GlassBackdrop />
         {/* 1. TOP AIRY HEADER BAR */}
         <FreeAppHeader
+          backgroundColor="transparent"
           onSwitchToPro={onSwitchToPro}
           onSwitchToFree={onSwitchToFree}
           onTogglePersona={onTogglePersona}
@@ -600,336 +458,146 @@ export const CreateScreen: React.FC<CreateScreenProps> = ({
           showsVerticalScrollIndicator={false}
           bounces={true}
         >
-          {/* TOP PILL BADGES */}
-          <View style={styles.topBadgesRow}>
-            <View style={[styles.createPill, { backgroundColor: '#5B3EE8' }]}>
-              <Text style={styles.createPillText}>Create</Text>
-            </View>
+          {/* HEADLINE — same two-line structure on every screen size */}
+          <Reanimated.View entering={FadeInUp.duration(500)} style={styles.headline}>
+            <FitLines
+              lines={['Create your', <Text key="n" style={styles.headlineAccent}>next post</Text>]}
+              textStyle={styles.headlineText}
+              maxFontSize={34}
+              align="left"
+              accessibilityLabel="Create your next post"
+            />
+          </Reanimated.View>
 
-            <View style={styles.freeToolsPill}>
-              <Text style={styles.freeToolsPillText}>Free Tools</Text>
-            </View>
-          </View>
-
-          {/* HEADLINE */}
-          <Text
-            style={styles.mainHeading}
-            numberOfLines={2}
-          >
-            Create your next post.
-          </Text>
-
-          {/* 1. HERO STREAK SAVER CARD */}
-          <View style={styles.streakSaverCard}>
-            <View style={styles.streakHeaderRow}>
-              <View style={styles.streakLeftGroup}>
-                <View style={styles.flameIconCircle}>
-                  <Text style={styles.flameEmoji}>💡</Text>
-                </View>
-                <View style={styles.streakTitlesContainer}>
-                  <Text style={styles.streakDaysTitle} numberOfLines={1}>
-                    {isNewUser ? 'Your first idea' : "Today's idea"}
-                  </Text>
-                </View>
-              </View>
-            </View>
-
-            {/* Prompt Inner Box */}
-            <View style={styles.promptInnerBox}>
-              <Text style={styles.promptLabel}>Create a 30-second Reel:</Text>
-              <Text style={styles.promptText}>
-                &ldquo;One thing I wish I knew before I started creating.&rdquo;
-              </Text>
-            </View>
-
-            {/* Platform & Best Time Row (Single Clean Line) */}
-            <View style={styles.streakMetaRow}>
-              <View style={styles.streakPlatformsBadge}>
-                <Text style={styles.streakPlatformsText} numberOfLines={1}>TikTok · Instagram Reel</Text>
-              </View>
-              <View style={styles.bestTimeBadge}>
-                <Text style={styles.bestTimeBadgeText} numberOfLines={1}>⚡ Best time: 7:30 PM</Text>
-              </View>
-            </View>
-
-            {/* Primary Action Button: Use This Idea -> Post Composer */}
-            <Pressable
-              style={({ pressed }) => [styles.useIdeaBtn, pressed && styles.btnPressed]}
-              onPress={() => {
-                if (Platform.OS !== 'web') {
-                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-                }
-                if (onOpenPostComposer) {
-                  onOpenPostComposer('One thing I wish I knew before I started creating');
-                } else if (onOpenIdeaDetail) {
-                  onOpenIdeaDetail('One thing I wish I knew before I started creating');
-                } else {
-                  openNewPost('One thing I wish I knew before I started creating');
-                }
+          {/* 1. TODAY'S IDEA (with Jarvis shuffle) */}
+          <Reanimated.View entering={FadeInUp.delay(100).duration(550)}>
+            <IdeaHeroCard
+              isNewUser={isNewUser}
+              niches={userProfile?.niches?.length ? userProfile.niches : ['lifestyle']}
+              platforms={userProfile?.connectedPlatforms?.length ? userProfile.connectedPlatforms : ['tiktok', 'instagram']}
+              onUseIdea={(idea) => {
+                if (Platform.OS !== 'web') Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                if (onOpenPostComposer) onOpenPostComposer(idea.title);
+                else if (onOpenIdeaDetail) onOpenIdeaDetail(idea.title);
+                else openNewPost(idea.title);
               }}
-            >
-              <View style={[styles.useIdeaGradient, { backgroundColor: '#5B3EE8' }]}>
-                <Text style={styles.useIdeaBtnText}>Use This Idea ➔</Text>
-              </View>
-            </Pressable>
-          </View>
+            />
+          </Reanimated.View>
 
-          {/* 2. JARVIS SUGGESTION CARD */}
-          <View style={styles.jarvisSuggestionCard}>
-            <Animated.View
-              style={[
-                styles.jarvisFlameCircle,
-                { transform: [{ translateY: flameFloatY }] },
-              ]}
-            >
-              <Image
-                source={require('../../assets/images/jarvis-core-flame.png')}
-                style={styles.jarvisFlameIcon}
-                resizeMode="contain"
+          {/* 2. TOOLS */}
+          <Reanimated.View entering={FadeInUp.delay(200).duration(550)}>
+            <Text style={styles.sectionLabel}>Tools</Text>
+            <View style={styles.toolRow}>
+              <ToolTile
+                featured
+                title="New post"
+                subtitle="Start from scratch"
+                onPress={() => openNewPost()}
+                icon={
+                  <Svg width={20} height={20} viewBox="0 0 24 24" fill="none">
+                    <Path d="M12 5v14M5 12h14" stroke="#FFFFFF" strokeWidth={2.6} strokeLinecap="round" />
+                  </Svg>
+                }
               />
-            </Animated.View>
-            <View style={styles.jarvisSuggestionContent}>
-              <Text style={styles.jarvisSuggestionTitle}>Jarvis Suggestion</Text>
-              <Text style={styles.jarvisSuggestionText}>
-                Jarvis learns your style as you post &mdash; this gets sharper after your first few Reels.
-              </Text>
+              <ToolTile
+                title="Ideas"
+                subtitle="Find your next angle"
+                onPress={openIdeas}
+                icon={
+                  <Svg width={20} height={20} viewBox="0 0 24 24" fill="none">
+                    <Path d="M12 2l2.4 5.6L20 10l-5.6 2.4L12 18l-2.4-5.6L4 10l5.6-2.4L12 2z" fill={ds.purple} />
+                    <Path d="M19 16l1 2.3 2.3 1-2.3 1-1 2.3-1-2.3-2.3-1 2.3-1 1-2.3z" fill={ds.purple} />
+                  </Svg>
+                }
+              />
             </View>
-          </View>
+            <View style={styles.toolRow}>
+              <ToolTile
+                title="Script"
+                subtitle="Build a story"
+                onPress={openScript}
+                icon={
+                  <Svg width={20} height={20} viewBox="0 0 24 24" fill="none">
+                    <Rect x="3" y="3" width="18" height="18" rx="3" stroke={ds.purple} strokeWidth={2.1} />
+                    <Path d="M8 3v18M16 3v18M3 8h5M3 16h5M16 8h5M16 16h5" stroke={ds.purple} strokeWidth={2.1} />
+                  </Svg>
+                }
+              />
+              <ToolTile
+                title="Caption"
+                subtitle="Write in your voice"
+                onPress={openCaption}
+                icon={
+                  <Svg width={20} height={20} viewBox="0 0 24 24" fill="none">
+                    <Path d="M17 3a2.83 2.83 0 114 4L7.5 20.5 2 22l1.5-5.5L17 3z" stroke={ds.purple} strokeWidth={2.1} strokeLinecap="round" strokeLinejoin="round" />
+                  </Svg>
+                }
+              />
+            </View>
+          </Reanimated.View>
 
-          {/* 3. 2x2 CREATION TOOLS GRID */}
-          <View style={styles.toolsGrid}>
-            {/* Tool 1: New Post */}
-            <Pressable
-              style={({ pressed }) => [styles.toolGridCard, pressed && styles.btnPressed]}
-              onPress={() => openNewPost()}
-            >
-              <View style={[styles.toolIconBox, { backgroundColor: '#582CDB' }]}>
-                <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
-                  <Path d="M12 5V19M5 12H19" stroke="#FFFFFF" strokeWidth="2.6" strokeLinecap="round" />
-                </Svg>
-              </View>
-              <Text style={styles.toolTitle} numberOfLines={1}>New Post</Text>
-              <Text style={styles.toolSubtitle} numberOfLines={1}>Create from scratch</Text>
-            </Pressable>
-
-            {/* Tool 2: Ideas */}
-            <Pressable
-              style={({ pressed }) => [styles.toolGridCard, pressed && styles.btnPressed]}
-              onPress={openIdeas}
-            >
-              <View style={[styles.toolIconBox, { backgroundColor: '#EDE9FE' }]}>
-                <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
-                  <Path
-                    d="M12 2L14.4 7.6L20 10L14.4 12.4L12 18L9.6 12.4L4 10L9.6 7.6L12 2Z"
-                    fill="#5B3EE8"
-                  />
-                  <Path
-                    d="M19 16L20.2 18.8L23 20L20.2 21.2L19 24L17.8 21.2L15 20L17.8 18.8L19 16Z"
-                    fill="#5B3EE8"
-                  />
-                </Svg>
-              </View>
-              <Text style={styles.toolTitle} numberOfLines={1}>Ideas</Text>
-              <Text style={styles.toolSubtitle} numberOfLines={1}>Find your next angle</Text>
-            </Pressable>
-
-            {/* Tool 3: Script */}
-            <Pressable
-              style={({ pressed }) => [styles.toolGridCard, pressed && styles.btnPressed]}
-              onPress={openScript}
-            >
-              <View style={[styles.toolIconBox, { backgroundColor: '#EDE9FE' }]}>
-                <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
-                  <Path
-                    d="M19.82 2H4.18C2.97 2 2 2.97 2 4.18v15.64C2 21.03 2.97 22 4.18 22h15.64c1.21 0 2.18-.97 2.18-2.18V4.18C22 2.97 21.03 2 19.82 2z"
-                    stroke="#582CDB"
-                    strokeWidth="2.2"
-                  />
-                  <Path d="M7 2v20M17 2v20M2 12h20M2 7h5M2 17h5M17 7h5M17 17h5" stroke="#582CDB" strokeWidth="2.2" />
-                </Svg>
-              </View>
-              <Text style={styles.toolTitle} numberOfLines={1}>Script</Text>
-              <Text style={styles.toolSubtitle} numberOfLines={1}>Build a story</Text>
-            </Pressable>
-
-            {/* Tool 4: Caption */}
-            <Pressable
-              style={({ pressed }) => [styles.toolGridCard, pressed && styles.btnPressed]}
-              onPress={openCaption}
-            >
-              <View style={[styles.toolIconBox, { backgroundColor: '#EDE9FE' }]}>
-                <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
-                  <Path
-                    d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"
-                    stroke="#582CDB"
-                    strokeWidth="2.2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                  <Path d="M15 5l4 4" stroke="#582CDB" strokeWidth="2.2" strokeLinecap="round" />
-                </Svg>
-              </View>
-              <Text style={styles.toolTitle} numberOfLines={1}>Caption</Text>
-              <Text style={styles.toolSubtitle} numberOfLines={1}>Write in your voice</Text>
-            </Pressable>
-          </View>
-
-          {/* 3.5 REPURPOSE SPOTLIGHT BANNER */}
-          <Pressable
-            style={({ pressed }) => [styles.repurposeBannerCard, pressed && styles.btnPressed]}
-            onPress={openRepurpose}
-          >
-            <View style={styles.repurposeBannerLeft}>
-              <View style={styles.repurposeIconBox}>
+          {/* 3. REPURPOSE + SCHEDULE */}
+          <Reanimated.View entering={FadeInUp.delay(300).duration(550)} style={styles.stack}>
+            <GlassRow
+              title="Repurpose"
+              subtitle="Turn one post into many formats"
+              onPress={openRepurpose}
+              extra={<AllowanceMeter left={repurposesLeft} limit={repurpose.monthlyLimit ?? 0} />}
+              icon={
                 <Svg width={20} height={20} viewBox="0 0 24 24" fill="none">
-                  <Path
-                    d="M21 2v6h-6"
-                    stroke="#582CDB"
-                    strokeWidth="2.2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                  <Path
-                    d="M3 12a9 9 0 0 1 15-6.7L21 8"
-                    stroke="#582CDB"
-                    strokeWidth="2.2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                  <Path
-                    d="M3 22v-6h6"
-                    stroke="#582CDB"
-                    strokeWidth="2.2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                  <Path
-                    d="M21 12a9 9 0 0 1-15 6.7L3 16"
-                    stroke="#582CDB"
-                    strokeWidth="2.2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
+                  <Path d="M21 2v6h-6M3 12a9 9 0 0115-6.7L21 8M3 22v-6h6M21 12a9 9 0 01-15 6.7L3 16" stroke={ds.purple} strokeWidth={2.1} strokeLinecap="round" strokeLinejoin="round" />
                 </Svg>
-              </View>
-              <View style={styles.repurposeBannerContent}>
-                <View style={styles.repurposeTitleRow}>
-                  <Text style={styles.repurposeBannerTitle}>Repurpose</Text>
-                  <View style={[styles.repurposeLimitBadge, { backgroundColor: '#5B3EE8' }]}>
-                    <Text style={styles.repurposeLimitBadgeText}>
-                      {repurposesLeft} of {repurpose.monthlyLimit} free left
-                    </Text>
-                  </View>
-                </View>
-                <Text style={styles.repurposeBannerSubtitle} numberOfLines={1}>
-                  One post, many formats
-                </Text>
-              </View>
-            </View>
-            <View style={styles.repurposeActionBtn}>
-              <Text style={styles.repurposeActionText}>Try Free ➔</Text>
-            </View>
-          </Pressable>
-
-          {/* 4. SCHEDULED POSTS CARD (Empty State) */}
-          <Pressable
-            style={({ pressed }) => [styles.scheduledBannerCard, pressed && styles.btnPressed]}
-            onPress={handleOpenScheduleView}
-          >
-            <View style={styles.scheduledLeft}>
-              <View style={[styles.calendarIconBox, { backgroundColor: '#EDE9FE' }]}>
+              }
+            />
+            <GlassRow
+              title={
+                schedule.scheduledCount === 0
+                  ? 'Nothing scheduled yet'
+                  : `${schedule.scheduledCount} post${schedule.scheduledCount === 1 ? '' : 's'} scheduled`
+              }
+              subtitle={schedule.nextPostLabel ? `Next up: ${schedule.nextPostLabel}` : 'Pick an idea above, then choose a time'}
+              onPress={handleOpenScheduleView}
+              icon={
                 <Svg width={20} height={20} viewBox="0 0 24 24" fill="none">
-                  <Rect x="3" y="4" width="18" height="18" rx="3" stroke="#582CDB" strokeWidth="2.2" />
-                  <Path d="M16 2v4M8 2v4M3 10h18" stroke="#582CDB" strokeWidth="2.2" strokeLinecap="round" />
+                  <Rect x="3" y="4" width="18" height="17" rx="3" stroke={ds.purple} strokeWidth={2.1} />
+                  <Path d="M16 2v4M8 2v4M3 10h18" stroke={ds.purple} strokeWidth={2.1} strokeLinecap="round" />
                 </Svg>
-              </View>
-              <View style={styles.scheduledTextGroup}>
-                <Text style={styles.scheduledTitle} numberOfLines={1}>
-                  {schedule.scheduledCount === 0
-                    ? 'No posts scheduled yet'
-                    : `${schedule.scheduledCount} post${schedule.scheduledCount === 1 ? '' : 's'} scheduled`}
-                </Text>
-                <Text style={styles.scheduledSub} numberOfLines={2}>
-                  {schedule.nextPostLabel
-                    ? `Next up: ${schedule.nextPostLabel}`
-                    : 'Plan your first post once you’ve picked an idea above'}
-                </Text>
-              </View>
-            </View>
+              }
+            />
+          </Reanimated.View>
 
-            <Pressable onPress={handleOpenScheduleView} hitSlop={10} style={styles.scheduledOpenBtn}>
-              <Text style={styles.scheduledOpenLink}>Open</Text>
-            </Pressable>
-          </Pressable>
-
-          {/* 5. YOUR DRAFTS SECTION */}
-          <View style={styles.draftsHeaderRow}>
-            <Text style={styles.draftsSectionTitle}>Your Drafts</Text>
-            {displayedDrafts.length > 0 && (
-              <Pressable onPress={openAllDrafts} hitSlop={6}>
-                <Text style={styles.viewAllDraftsLink}>View all drafts</Text>
-              </Pressable>
-            )}
-          </View>
-
-          <View style={styles.draftsList}>
-            {displayedDrafts.length === 0 ? (
-              <View style={styles.draftsEmptyCard}>
-                <Text style={styles.draftsEmptyText}>
-                  No drafts yet &mdash; start with New Post or Ideas above.
-                </Text>
-              </View>
-            ) : (
-              displayedDrafts.map((draft) => (
-                <Pressable
-                  key={draft.id}
-                  style={({ pressed }) => [styles.draftCard, pressed && styles.btnPressed]}
-                  onPress={() => openDraft(draft)}
-                >
-                  <Image source={draft.imageSource} style={styles.draftThumbnail} resizeMode="cover" />
-                  <View style={styles.draftContentCol}>
-                    <Text style={styles.draftTitle} numberOfLines={2}>
-                      {draft.title}
-                    </Text>
-                    <Text style={styles.draftMeta}>
-                      {draft.platform === 'TikTok' ? '💬' : '📷'} {draft.platform} • {draft.editedTime}
-                    </Text>
-                  </View>
-                  <Pressable
-                    hitSlop={8}
-                    onPress={() => openDraft(draft)}
-                  >
-                    <Text style={styles.draftMoreDots}>⋮</Text>
-                  </Pressable>
+          {/* 4. DRAFTS */}
+          <Reanimated.View entering={FadeInUp.delay(400).duration(550)}>
+            <View style={styles.sectionHeader}>
+              <Text style={[styles.sectionLabel, styles.sectionLabelInline]}>Your drafts</Text>
+              {displayedDrafts.length > 0 && (
+                <Pressable onPress={openAllDrafts} hitSlop={8} accessibilityRole="button">
+                  <Text style={styles.sectionLink}>See all</Text>
                 </Pressable>
-              ))
-            )}
-          </View>
-
-          {/* 6. VOICE STUDIO PRO CARD */}
-          <View style={styles.voiceStudioCard}>
-            <View style={styles.voiceStudioProPill}>
-              <Text style={styles.voiceStudioProPillText}>🔒 PRO FEATURE</Text>
+              )}
             </View>
+            <View style={styles.stack}>
+              {displayedDrafts.length === 0 ? (
+                <DraftsEmpty onStart={() => openNewPost()} />
+              ) : (
+                displayedDrafts.slice(0, 3).map((draft) => (
+                  <DraftRow
+                    key={draft.id}
+                    title={draft.title}
+                    platform={draft.platform}
+                    edited={draft.editedTime}
+                    image={draft.imageSource}
+                    onPress={() => openDraft(draft)}
+                  />
+                ))
+              )}
+            </View>
+          </Reanimated.View>
 
-            <Text style={styles.voiceStudioTitle}>Voice Studio</Text>
-            <Text style={styles.voiceStudioSubtitle}>
-              Turn scripts into voiceovers with Pro.
-            </Text>
-
-            {/* Live Animated Audio Waveform Graphic */}
-            <LiveVoiceWaveform />
-
-            {/* Unlock Voice Studio Metallic Gold Button */}
-            <Pressable
-              style={({ pressed }) => [styles.unlockVoiceBtn, pressed && styles.btnPressed]}
-              onPress={handleOpenVoiceStudioPro}
-            >
-              <View style={[styles.unlockVoiceGradient, { backgroundColor: '#F59E0B' }]}>
-                <Text style={styles.unlockVoiceBtnText}>Unlock Voice Studio</Text>
-              </View>
-            </Pressable>
-          </View>
+          {/* 5. VOICE STUDIO (Pro only) */}
+          <Reanimated.View entering={FadeInUp.delay(500).duration(550)} style={styles.voiceStudio}>
+            <VoiceStudioProCard onUnlock={handleOpenVoiceStudioPro} />
+          </Reanimated.View>
 
           {/* Bottom Space for Floating Tab Bar */}
           <View style={{ height: 110 }} />
@@ -1602,13 +1270,22 @@ export const CreateScreen: React.FC<CreateScreenProps> = ({
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#FAF8F5',
+    backgroundColor: ds.bg,
   },
   container: {
     flex: 1,
     width: '100%',
-    backgroundColor: '#FAF8F5',
   },
+  headline: { marginTop: 4, marginBottom: 16 },
+  headlineText: { fontWeight: '800', letterSpacing: -0.8, color: ds.ink },
+  headlineAccent: { color: ds.purple },
+  sectionHeader: { flexDirection: 'row', alignItems: 'baseline', justifyContent: 'space-between', marginTop: 24, marginBottom: 10 },
+  sectionLabel: { fontSize: 17, fontWeight: '800', color: ds.ink, letterSpacing: -0.2, marginTop: 24, marginBottom: 10 },
+  sectionLabelInline: { marginTop: 0, marginBottom: 0 },
+  sectionLink: { fontSize: 13.5, fontWeight: '800', color: ds.purple },
+  toolRow: { flexDirection: 'row', gap: 12, marginBottom: 12 },
+  stack: { gap: 12 },
+  voiceStudio: { marginTop: 24 },
   btnPressed: {
     opacity: 0.9,
     transform: [{ scale: 0.98 }],

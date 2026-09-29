@@ -9,6 +9,7 @@ import {
 } from 'react-native';
 import { Text } from './ui/AppText';
 import { BrandLogo } from './BrandLogo';
+import { BellButton } from './home/BellButton';
 import Svg, { Path, Circle } from 'react-native-svg';
 import * as Haptics from 'expo-haptics';
 import { sFont, sPadding, isNarrowScreen } from '../utils/responsive';
@@ -141,36 +142,8 @@ export const FreeAppHeader: React.FC<FreeAppHeaderProps> = ({
 
       {/* Right: Notification & Person Profile Photo */}
       <View style={styles.headerRightGroup}>
-        {/* Notification Bell with Red Dot */}
-        <Pressable
-          onPress={handleNotifPress}
-          style={({ pressed }) => [
-            styles.headerIconBtn,
-            isDark && styles.headerIconBtnDark,
-            pressed && styles.headerIconBtnPressed,
-          ]}
-          hitSlop={10}
-          accessibilityRole="button"
-          accessibilityLabel={unreadCount > 0 ? `Notifications, ${unreadCount} unread` : 'Notifications'}
-        >
-          <Svg width={20} height={20} viewBox="0 0 24 24" fill="none">
-            <Path
-              d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"
-              stroke={isDark ? '#FFFFFF' : '#1A1626'}
-              strokeWidth="2.2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-            <Path
-              d="M13.73 21a2 2 0 0 1-3.46 0"
-              stroke={isDark ? '#FFFFFF' : '#1A1626'}
-              strokeWidth="2.2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </Svg>
-          {unreadCount > 0 && <View style={styles.notificationDot} />}
-        </Pressable>
+        {/* Notification bell: swings on tap, unread dot breathes */}
+        <BellButton unread={unreadCount > 0} onPress={handleNotifPress} />
 
         {/* Top-Right: Person Icon / Avatar Placeholder */}
         <Pressable
@@ -307,7 +280,7 @@ const styles = StyleSheet.create({
   headerRightGroup: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
+    gap: 8,
     flexShrink: 0,
   },
   headerIconBtn: {
@@ -346,9 +319,9 @@ const styles = StyleSheet.create({
     borderColor: '#FFFFFF',
   },
   profilePhotoBtn: {
-    width: 34,
-    height: 34,
-    borderRadius: 17,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
     backgroundColor: '#F4F0FF',
     borderWidth: 1.5,
     borderColor: '#582CDB',
@@ -366,9 +339,9 @@ const styles = StyleSheet.create({
     borderColor: '#582CDB',
   },
   headerCustomAvatarImage: {
-    width: 30,
-    height: 30,
-    borderRadius: 15,
+    width: 36,
+    height: 36,
+    borderRadius: 18,
   },
   addPhotoPlusBadge: {
     position: 'absolute',
