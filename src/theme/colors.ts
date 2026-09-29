@@ -141,3 +141,67 @@ export const colors = {
   glassViolet: 'rgba(91, 62, 232, 0.06)',
   glassVioletBorder: 'rgba(91, 62, 232, 0.14)',
 };
+
+// ---------------------------------------------------------------------------
+// Design system (shared look with the PostStreak website, app gold kept).
+// New and refreshed components should use these instead of raw hex values.
+// ---------------------------------------------------------------------------
+export const ds = {
+  // Surfaces
+  bg: '#F7F5F0',
+  surface: '#FFFFFF',
+  cream: '#EFEBE3', // tinted fills
+  sand: '#F0EBE1',
+  line: '#E7E2D8', // warm hairline borders
+
+  // Text
+  ink: '#171420',
+  text2: '#5E576E',
+  text3: '#8E869E',
+
+  // Brand purple
+  purple: '#5B3EE8',
+  purplePressed: '#4F33DB',
+  purpleLedge: '#3F25BF', // the solid edge under primary buttons
+  lavender: '#EDE9FE',
+  lavenderSoft: '#F5F3FF',
+
+  // Pro gold (app gold, Pro only)
+  gold: '#F59E0B',
+  goldLedge: '#B45309',
+  goldInk: '#3D2607',
+
+  // Feedback
+  green: '#15803D',
+  greenFill: '#1F9D55',
+  greenBg: '#EAF7EE',
+};
+
+export const dsRadius = {
+  sm: 12,
+  md: 16,
+  lg: 24,
+  xl: 32,
+  pill: 999,
+};
+
+// 8-point spacing rhythm
+export const dsSpace = {
+  1: 4,
+  2: 8,
+  3: 12,
+  4: 16,
+  5: 24,
+  6: 32,
+  7: 48,
+  8: 64,
+};
+
+// One soft shadow for cards
+export const dsShadow = {
+  shadowColor: '#171420',
+  shadowOffset: { width: 0, height: 12 },
+  shadowOpacity: 0.08,
+  shadowRadius: 24,
+  elevation: 2,
+};

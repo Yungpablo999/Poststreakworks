@@ -1,158 +1,120 @@
 import React from 'react';
-import {
-  StyleSheet,
-  View,
-  Image,
-  SafeAreaView,
-  StatusBar,
-  useWindowDimensions,
-  Platform,
-} from 'react-native';
+import { StyleSheet, View, SafeAreaView, StatusBar, useWindowDimensions, Platform } from 'react-native';
+import Svg, { Defs, Pattern, Circle, Rect, Mask, RadialGradient, Stop, Path } from 'react-native-svg';
 import { Text } from '../components/ui/AppText';
-import { colors } from '../theme/colors';
-import { typography } from '../theme/typography';
-import { GlassBadge } from '../components/GlassBadge';
+import { AppButton } from '../components/ui/AppButton';
+import { BrandLogo } from '../components/BrandLogo';
 import { HeroMascot } from '../components/HeroMascot';
-import { PrimaryButton } from '../components/PrimaryButton';
-import { SecondaryButton } from '../components/SecondaryButton';
-
-// Exact Figma SVG Vector Icons with Micro-Animations
-import { AnimatedFireIcon } from '../components/icons/AnimatedFireIcon';
-import { AnimatedAudioWaveIcon } from '../components/icons/AnimatedAudioWaveIcon';
-import { AnimatedGrowthIcon } from '../components/icons/AnimatedGrowthIcon';
-import { AnimatedSparklesIcon } from '../components/icons/AnimatedSparklesIcon';
+import { SocialBrandIcon } from '../components/SocialBrandIcon';
+import { ds, dsRadius } from '../theme/colors';
+import { typography } from '../theme/typography';
+import { STAGE_1_PLATFORMS } from '../config/features';
 
 interface WelcomeScreenProps {
   onGetStarted?: () => void;
   onSignIn?: () => void;
 }
 
-export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
-  onGetStarted = () => {},
-  onSignIn = () => {},
-}) => {
-  const { height } = useWindowDimensions();
-  const isSmallScreen = height < 740;
-  const isMediumScreen = height >= 740 && height < 860;
+const PLATFORM_LABELS: Record<(typeof STAGE_1_PLATFORMS)[number], string> = {
+  tiktok: 'TikTok',
+  instagram: 'Instagram',
+  youtube: 'YouTube',
+  threads: 'Threads',
+  facebook: 'Facebook',
+};
 
-  const badgeSize = isSmallScreen ? 34 : 38;
-  const iconSize = isSmallScreen ? 15 : 17;
+// Display order for the "Works with" row
+const PLATFORM_ORDER = ['tiktok', 'instagram', 'youtube', 'threads', 'facebook'] as const;
+
+// Soft dot grid behind the mascot, fading out towards the edges (as on the website hero)
+function DotField({ width, height }: { width: number; height: number }) {
+  return (
+    <Svg width={width} height={height} style={StyleSheet.absoluteFill} pointerEvents="none">
+      <Defs>
+        <Pattern id="welcomeDots" width={22} height={22} patternUnits="userSpaceOnUse">
+          <Circle cx={11} cy={11} r={1.2} fill={ds.ink} fillOpacity={0.12} />
+        </Pattern>
+        <RadialGradient id="welcomeDotsFade" cx="50%" cy="48%" rx="55%" ry="50%">
+          <Stop offset="0%" stopColor="#FFFFFF" stopOpacity={1} />
+          <Stop offset="55%" stopColor="#FFFFFF" stopOpacity={0.6} />
+          <Stop offset="100%" stopColor="#FFFFFF" stopOpacity={0} />
+        </RadialGradient>
+        <Mask id="welcomeDotsMask">
+          <Rect width={width} height={height} fill="url(#welcomeDotsFade)" />
+        </Mask>
+      </Defs>
+      <Rect width={width} height={height} fill="url(#welcomeDots)" mask="url(#welcomeDotsMask)" />
+    </Svg>
+  );
+}
+
+export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onGetStarted = () => {}, onSignIn = () => {} }) => {
+  const { width, height } = useWindowDimensions();
+  const isSmallScreen = height < 740;
+  const heroHeight = isSmallScreen ? 280 : 320;
+  // Size the headline from the available width so "Earn." always fits on one line
+  const contentWidth = Math.min(width, 480) - 40;
+  const headlineSize = Math.min(isSmallScreen ? 36 : 40, Math.floor(contentWidth / 9.6));
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <StatusBar barStyle="dark-content" backgroundColor={colors.background} />
+      <StatusBar barStyle="dark-content" backgroundColor={ds.bg} />
 
-      {/* Main Screen Flex Container */}
-      <View style={styles.mainContainer}>
-        {/* HERO SECTION: Mascot Character with Soft Halo & Flanking Ambient Orbit Badges */}
-        <View style={styles.heroSection}>
-          {/* Left Orbit Badge */}
-          <View style={styles.heroOrbitBadgeLeft}>
-            <GlassBadge floatDelay={0} floatDistance={3.5} size={badgeSize}>
-              <AnimatedFireIcon size={iconSize} color="#D97706" opacity={0.8} />
-            </GlassBadge>
-          </View>
+      <View style={styles.container}>
+        {/* Brand: ghost + wordmark together */}
+        <View style={styles.topBar}>
+          <BrandLogo size="sm" />
+        </View>
 
+        {/* Hero mascot over a soft dot field */}
+        <View style={[styles.hero, { height: heroHeight }]}>
+          <DotField width={Math.min(width, 520)} height={heroHeight} />
           <HeroMascot />
-
-          {/* Right Orbit Badge */}
-          <View style={styles.heroOrbitBadgeRight}>
-            <GlassBadge floatDelay={400} floatDistance={4} size={badgeSize}>
-              <AnimatedAudioWaveIcon size={iconSize - 1} color={colors.primary} />
-            </GlassBadge>
-          </View>
         </View>
 
-        {/* CONTENT SECTION: Tall Editorial Luxury Headline & Social Proof */}
-        <View style={styles.contentSection}>
-          <View style={styles.tallHeadlineContainer}>
-            <Text
-              style={[
-                styles.mainHeadline,
-                isSmallScreen && styles.mainHeadlineSmall,
-                isMediumScreen && styles.mainHeadlineMedium,
-              ]}
-              numberOfLines={1}
-              adjustsFontSizeToFit
-              minimumFontScale={0.7}
-            >
-              Create. Grow. <Text style={styles.streakAccent}>Earn.</Text>
-            </Text>
-          </View>
+        {/* Headline + what the app does */}
+        <View style={styles.copy}>
+          <Text
+            style={[styles.headline, { fontSize: headlineSize, lineHeight: Math.round(headlineSize * 1.2) }]}
+            accessibilityRole="header"
+          >
+            Create. Grow. <Text style={styles.earn}>Earn.</Text>
+          </Text>
+          <Text style={styles.subhead}>
+            Your daily creator habit. Plan, post and grow with Jarvis by your side.
+          </Text>
+        </View>
 
-          {/* Social Proof Pill: Apple-grade restraint */}
-          <View style={styles.socialProofChip}>
-            <View style={styles.avatarStack}>
-              <Image
-                source={{ uri: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80' }}
-                style={[styles.avatarImg, { zIndex: 3 }]}
-              />
-              <Image
-                source={{ uri: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&auto=format&fit=crop&q=80' }}
-                style={[styles.avatarImg, { marginLeft: -5, zIndex: 2 }]}
-              />
-              <Image
-                source={{ uri: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=100&auto=format&fit=crop&q=80' }}
-                style={[styles.avatarImg, { marginLeft: -5, zIndex: 1 }]}
-              />
-            </View>
-
-            <View style={styles.socialProofDivider} />
-
-            <View style={styles.socialProofMeta}>
-              <View style={styles.starsRow}>
-                <Text style={styles.starIcon}>★★★★★</Text>
-                <Text style={styles.ratingNumber}>4.9</Text>
+        {/* Honest proof: the platforms PostStreak works with */}
+        <View style={styles.worksWith} accessible accessibilityLabel="Works with TikTok, Instagram, YouTube, Threads and Facebook">
+          <Text style={styles.worksWithLabel}>WORKS WITH</Text>
+          <View style={styles.platformRow}>
+            {PLATFORM_ORDER.map((id) => (
+              <View key={id} style={styles.platformBadge} accessibilityLabel={PLATFORM_LABELS[id]}>
+                <SocialBrandIcon platform={id} size={20} />
               </View>
-              <Text style={styles.socialProofLabel} numberOfLines={1}>
-                Trusted by 15K+ creators
-              </Text>
-            </View>
+            ))}
           </View>
         </View>
 
-        {/* ACTION BUTTONS CLUSTER */}
-        <View style={styles.actionCluster}>
-          <PrimaryButton
-            title="Get Started"
+        {/* Actions */}
+        <View style={styles.actions}>
+          <AppButton
+            title="Get started, it's free"
+            size="lg"
             onPress={onGetStarted}
-            style={[
-              styles.primaryActionBtn,
-              isSmallScreen && { height: 48 },
-            ]}
+            iconRight={
+              <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
+                <Path d="M5 12h14M13 6l6 6-6 6" stroke="#FFFFFF" strokeWidth={2.4} strokeLinecap="round" strokeLinejoin="round" />
+              </Svg>
+            }
           />
-          <SecondaryButton
-            title="Sign In"
-            onPress={onSignIn}
-            style={styles.secondaryActionBtn}
-          />
+          <AppButton title="I already have an account" variant="outline" onPress={onSignIn} />
         </View>
 
-        {/* FOOTER & FLANKING AMBIENT BADGES */}
-        <View style={styles.footerContainer}>
-          {/* Bottom Left Floating Badge: Growth Trend */}
-          <View style={styles.bottomLeftBadge}>
-            <GlassBadge floatDelay={600} floatDistance={3.5} size={badgeSize}>
-              <AnimatedGrowthIcon size={iconSize - 1} color={colors.primary} />
-            </GlassBadge>
-          </View>
-
-          {/* Center Footer Attribution: Subtle Companion Introduction */}
-          <View style={styles.footerTextContainer}>
-            <Text style={styles.poweredBy}>POWERED BY</Text>
-            <View style={styles.jarvisRow}>
-              <Text style={styles.jarvisCore}>JARVIS CORE</Text>
-              <Text style={styles.sparkleGlyph}>✦</Text>
-            </View>
-          </View>
-
-          {/* Bottom Right Floating Badge: Twinkling Sparkles */}
-          <View style={styles.bottomRightBadge}>
-            <GlassBadge floatDelay={900} floatDistance={4} size={badgeSize}>
-              <AnimatedSparklesIcon size={iconSize} color="#D97706" opacity={0.8} />
-            </GlassBadge>
-          </View>
-        </View>
+        <Text style={styles.footer}>
+          Powered by <Text style={styles.footerStrong}>Jarvis</Text>, your AI creative partner
+        </Text>
       </View>
     </SafeAreaView>
   );
@@ -161,205 +123,91 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: colors.background,
+    backgroundColor: ds.bg,
   },
-  mainContainer: {
+  container: {
     flex: 1,
-    paddingHorizontal: 20,
-    paddingTop: Platform.OS === 'ios' ? 4 : 12,
-    paddingBottom: Platform.OS === 'ios' ? 8 : 16,
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-
-  /* Center Hero with Symmetrically Flanking Orbit Badges */
-  heroSection: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginVertical: 4,
     width: '100%',
-    position: 'relative',
-  },
-  heroOrbitBadgeLeft: {
-    position: 'absolute',
-    left: 18,
-    top: 14,
-    zIndex: 5,
-  },
-  heroOrbitBadgeRight: {
-    position: 'absolute',
-    right: 18,
-    top: 14,
-    zIndex: 5,
-  },
-
-  /* Content & Typography */
-  contentSection: {
-    alignItems: 'center',
-    paddingHorizontal: 8,
-    marginVertical: 4,
-    width: '100%',
-  },
-  tallHeadlineContainer: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginVertical: 12,
-  },
-  mainHeadline: {
-    fontSize: 40,
-    fontWeight: '800',
-    color: colors.textPrimary,
-    textAlign: 'center',
-    letterSpacing: -1,
-    lineHeight: 48,
-    ...(Platform.OS === 'web' ? { whiteSpace: 'nowrap' } : {}),
-  },
-  mainHeadlineMedium: {
-    fontSize: 36,
-    lineHeight: 44,
-  },
-  mainHeadlineSmall: {
-    fontSize: 32,
-    lineHeight: 40,
-  },
-  streakAccent: {
-    fontFamily: typography.earnAccent,
-    letterSpacing: -0.5,
-    color: colors.primary, // Signature Royal Purple
-  },
-
-  /* Apple-grade Restrained Social Proof Pill */
-  socialProofChip: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: 'rgba(255, 255, 255, 0.75)',
-    paddingLeft: 14,
-    paddingRight: 18,
-    paddingVertical: 6,
-    borderRadius: 100,
-    borderWidth: 1,
-    borderColor: 'rgba(23, 20, 32, 0.05)',
-    shadowColor: '#171420',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.02,
-    shadowRadius: 6,
-    marginTop: 8,
-    gap: 10,
+    maxWidth: 480,
     alignSelf: 'center',
-    ...(Platform.OS === 'web'
-      ? ({
-          boxShadow: '0 2px 10px rgba(23, 20, 32, 0.03)',
-        } as any)
-      : {}),
-  },
-  avatarStack: {
-    flexDirection: 'row',
+    paddingHorizontal: 20,
+    paddingTop: Platform.OS === 'ios' ? 4 : 16,
+    paddingBottom: 16,
     alignItems: 'center',
-  },
-  avatarImg: {
-    width: 19,
-    height: 19,
-    borderRadius: 9.5,
-    borderWidth: 1.2,
-    borderColor: '#FFFFFF',
-    backgroundColor: '#ECE8F6',
-  },
-  socialProofDivider: {
-    width: 1,
-    height: 14,
-    backgroundColor: 'rgba(23, 20, 32, 0.06)',
-  },
-  socialProofMeta: {
-    alignItems: 'flex-start',
-    gap: 1,
-  },
-  starsRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-  },
-  starIcon: {
-    color: '#D97706',
-    fontSize: 10,
-    letterSpacing: 1,
-  },
-  ratingNumber: {
-    fontSize: 11,
-    fontWeight: '700',
-    color: '#171420',
-  },
-  socialProofLabel: {
-    fontSize: 10.5,
-    fontWeight: '500',
-    color: '#5E576E',
-    letterSpacing: -0.1,
-  },
-
-  /* Action Buttons */
-  actionCluster: {
-    width: '100%',
-    alignItems: 'center',
-    gap: 6,
-    marginVertical: 6,
-    zIndex: 10,
-  },
-  primaryActionBtn: {
-    width: '100%',
-    maxWidth: 360,
-    height: 50,
-  },
-  secondaryActionBtn: {
-    width: '100%',
-    maxWidth: 360,
-    height: 40,
-  },
-
-  /* Footer & Flanking Badges */
-  footerContainer: {
-    width: '100%',
-    flexDirection: 'row',
     justifyContent: 'space-between',
+  },
+  topBar: {
+    width: '100%',
     alignItems: 'center',
-    paddingHorizontal: 12,
-    marginTop: 4,
-    marginBottom: 4,
-    minHeight: 44,
+    paddingVertical: 4,
   },
-  bottomLeftBadge: {
-    width: 44,
-    alignItems: 'flex-start',
-  },
-  footerTextContainer: {
+  hero: {
+    width: '100%',
     alignItems: 'center',
     justifyContent: 'center',
+    overflow: 'hidden',
   },
-  jarvisRow: {
-    flexDirection: 'row',
+  copy: {
+    width: '100%',
     alignItems: 'center',
-    justifyContent: 'center',
-    gap: 5,
+    gap: 10,
   },
-  bottomRightBadge: {
-    width: 44,
-    alignItems: 'flex-end',
-  },
-  poweredBy: {
-    fontSize: 9.5,
-    fontWeight: '600',
-    color: '#8E869E',
-    letterSpacing: 1.5,
-    marginBottom: 2,
+  headline: {
+    fontSize: 40,
+    lineHeight: 48,
+    fontWeight: '800',
+    letterSpacing: -1,
+    color: ds.ink,
     textAlign: 'center',
   },
-  jarvisCore: {
-    fontSize: 14.5,
-    fontWeight: '700',
-    color: colors.primary,
-    letterSpacing: 0.8,
+  earn: {
+    fontFamily: typography.earnAccent,
+    color: ds.purple,
+    letterSpacing: -0.5,
   },
-  sparkleGlyph: {
+  subhead: {
+    fontSize: 16,
+    lineHeight: 24,
+    color: ds.text2,
+    textAlign: 'center',
+    maxWidth: 320,
+  },
+  worksWith: {
+    alignItems: 'center',
+    gap: 10,
+  },
+  worksWithLabel: {
     fontSize: 11,
-    color: '#D97706',
-    marginTop: -1,
+    fontWeight: '800',
+    letterSpacing: 1.2,
+    color: ds.text3,
+  },
+  platformRow: {
+    flexDirection: 'row',
+    gap: 10,
+  },
+  platformBadge: {
+    width: 40,
+    height: 40,
+    borderRadius: dsRadius.sm,
+    backgroundColor: ds.surface,
+    borderWidth: 1,
+    borderColor: ds.line,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  actions: {
+    width: '100%',
+    maxWidth: 400,
+    gap: 12,
+  },
+  footer: {
+    fontSize: 12,
+    color: ds.text3,
+    textAlign: 'center',
+  },
+  footerStrong: {
+    fontWeight: '700',
+    color: ds.purple,
   },
 });
