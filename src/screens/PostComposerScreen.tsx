@@ -21,6 +21,28 @@ import { UserProfileModal, UserProfileData } from '../components/UserProfileModa
 import { AnimatedCompletionModal } from '../components/AnimatedCompletionModal';
 import { FreeAppHeader } from '../components/FreeAppHeader';
 import { sFont, sPadding, isNarrowScreen } from '../utils/responsive';
+import Reanimated, { FadeInUp } from 'react-native-reanimated';
+import { GlassBackdrop } from '../components/glass/GlassBackdrop';
+import { GlassCard } from '../components/glass/GlassCard';
+import { FitLines } from '../components/ui/FitLines';
+import { AppButton } from '../components/ui/AppButton';
+import { JarvisOrb } from '../components/JarvisOrb';
+import { STAGE_1_PLATFORMS } from '../config/features';
+import {
+  StepHeader,
+  PlatformChip,
+  RecommendedFormat,
+  FormatTile,
+  MediaZone,
+  CyclePill,
+  AiAction,
+  EditsMeter,
+  TagChip,
+  ModeSwitch,
+  ReadinessCard,
+  ComposerToast,
+} from '../components/composer/ComposerBlocks';
+import { ds } from '../theme/colors';
 
 interface PostComposerScreenProps {
   ideaTitle?: string;
@@ -949,6 +971,24 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
 
   const unreadNotifCount = notificationsList.filter((n) => n.unread).length;
 
+  const saveDraft = () => {
+    if (Platform.OS !== 'web') Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    setCelebrationTitle('Draft saved!');
+    setCelebrationSubtitle('Your draft with media and tags is saved. Pick it up any time.');
+    setCelebrationSpeech('Nice work getting ahead!');
+    setShowCelebrationModal(true);
+  };
+  const captionTones: ('Helpful' | 'Viral' | 'Story')[] = ['Helpful', 'Viral', 'Story'];
+  const captionCtas: ('Ask Question' | 'Save Post' | 'Share Thoughts')[] = ['Ask Question', 'Save Post', 'Share Thoughts'];
+  const stage1Platforms = ALL_AVAILABLE_PLATFORMS.filter((p) => (STAGE_1_PLATFORMS as readonly string[]).includes(p.id));
+  const readinessSteps = [
+    { key: 'platforms', label: 'Platforms', done: isPlatformsReady },
+    { key: 'format', label: 'Format', done: isFormatReady },
+    { key: 'media', label: 'Media', done: isMediaReady },
+    { key: 'caption', label: 'Caption', done: isCaptionReady },
+    { key: 'schedule', label: 'Timing', done: isScheduleReady },
+  ];
+
   // Filter the display platforms: show only what the user selected. If none selected yet, show starter placeholders.
   const displayedPlatforms =
     selectedPlatforms.length > 0
@@ -959,8 +999,10 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
     <SafeAreaView style={[styles.safeArea, isDark && { backgroundColor: '#0C0A12' }]}>
       <StatusBar barStyle={isDark ? "light-content" : "dark-content"} backgroundColor={isDark ? "#0C0A12" : "#FAF8F5"} />
       <View style={[styles.container, isDark && { backgroundColor: '#0C0A12' }]}>
+        <GlassBackdrop />
         {/* 1. TOP AIRY HEADER BAR */}
         <FreeAppHeader
+          backgroundColor="transparent"
           onBack={onBack}
           onOpenJarvisPro={onOpenJarvisPro}
           onOpenNotifications={() => {
@@ -985,1030 +1027,301 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
           keyboardShouldPersistTaps="handled"
           keyboardDismissMode="on-drag"
         >
-          {/* Top Pill Badges (Gold Gradient & Draft / Quest Draft) */}
-          <View style={styles.topBadgesRow}>
-            <LinearGradient
-              colors={['#F59E0B', '#D97706']}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 0 }}
-              style={styles.createPostPill}
-            >
-              <Text style={styles.createPostPillText}>CREATE POST</Text>
-            </LinearGradient>
-
-            {questDraft ? (
-              <View style={styles.questDraftBadge}>
-                <Text style={styles.questDraftBadgeText}>{questDraft.badgeLabel || '🔥 STORYTELLER QUEST DRAFT'}</Text>
-              </View>
-            ) : (
-              <View style={styles.draftPill}>
-                <Text style={styles.draftPillText}>DRAFT</Text>
+          {/* HEADLINE — same two-line structure on every screen size */}
+          <Reanimated.View entering={FadeInUp.duration(500)} style={styles.headlineWrap}>
+            {questDraft && (
+              <View style={styles.questChip}>
+                <Text style={styles.questChipText}>{(questDraft.badgeLabel || 'Quest draft').replace(/^[^A-Za-z0-9]+/, '')}</Text>
               </View>
             )}
-          </View>
+            <FitLines
+              lines={['Shape your', <Text key="n" style={styles.headlineAccent}>next post</Text>]}
+              textStyle={styles.headlineText}
+              maxFontSize={34}
+              align="left"
+              accessibilityLabel="Shape your next post"
+            />
+          </Reanimated.View>
 
-          {/* Main Headline */}
-          <Text
-            style={styles.mainTitle}
-            numberOfLines={2}
-          >
-            Shape your next post.
-          </Text>
-
-          {/* 1. POST IDEA CARD */}
-          <View style={styles.postIdeaCard}>
-            <View style={styles.postIdeaHeaderRow}>
-              <Text style={styles.postIdeaSectionTitle}>Post Idea</Text>
-              <Pressable
-                onPress={() => {
-                  triggerModalAnim();
-                  setShowChangeIdeaModal(true);
-                }}
-                hitSlop={8}
-              >
-                <Text style={styles.changeIdeaLink}>CHANGE IDEA</Text>
-              </Pressable>
-            </View>
-
-            <Text style={styles.postIdeaTitle}>&ldquo;{currentIdea}&rdquo;</Text>
-            <Text style={styles.postIdeaDesc}>
-              Shape this idea into a post your audience will want to see.
-            </Text>
-
-            <View style={styles.ideaTagsRow}>
-              <View style={styles.ideaTagPill}>
-                <Text style={styles.ideaTagPillText}>Personal Lesson</Text>
+          {/* IDEA */}
+          <Reanimated.View entering={FadeInUp.delay(100).duration(550)}>
+            <GlassCard strong radius={26} padding={20}>
+              <View style={styles.ideaTop}>
+                <JarvisOrb size={26} />
+                <Text style={styles.ideaEyebrow}>YOUR IDEA</Text>
+                <Pressable
+                  onPress={() => {
+                    triggerModalAnim();
+                    setShowChangeIdeaModal(true);
+                  }}
+                  hitSlop={8}
+                  style={styles.changeBtn}
+                  accessibilityRole="button"
+                >
+                  <Svg width={13} height={13} viewBox="0 0 24 24" fill="none">
+                    <Path d="M4 12a8 8 0 0113.7-5.7L20 8M20 3v5h-5M20 12a8 8 0 01-13.7 5.7L4 16M4 21v-5h5" stroke={ds.purple} strokeWidth={2.4} strokeLinecap="round" strokeLinejoin="round" />
+                  </Svg>
+                  <Text style={styles.changeBtnText}>Change</Text>
+                </Pressable>
               </View>
-              <View style={styles.ideaTagPill}>
-                <Text style={styles.ideaTagPillText}>Creator Advice</Text>
-              </View>
-              <View style={styles.ideaTagPill}>
-                <Text style={styles.ideaTagPillText}>Consistency</Text>
-              </View>
-            </View>
-          </View>
+              <Reanimated.View key={currentIdea} entering={FadeInUp.duration(300)}>
+                <Text style={styles.ideaTitle}>“{currentIdea}”</Text>
+              </Reanimated.View>
+              <Text style={styles.ideaBody}>Shape this idea into a post your audience will want to see.</Text>
+            </GlassCard>
+          </Reanimated.View>
 
-          {/* ATTACHED PRO QUEST REQUIREMENTS CARD */}
+          {/* QUEST REQUIREMENTS (when started from a quest) */}
           {questDraft?.requirements && questDraft.requirements.length > 0 && (
-            <View style={styles.attachedQuestRequirementsCard}>
-              <View style={styles.attachedQuestHeaderRow}>
-                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-                  <Text style={{ fontSize: 14 }}>🎯</Text>
-                  <Text style={styles.attachedQuestHeaderTitle}>QUEST REQUIREMENTS ATTACHED</Text>
+            <View style={styles.questCard}>
+              <GlassCard strong radius={22} padding={16}>
+                <View style={styles.questHead}>
+                  <Text style={styles.questHeadText}>Quest requirements</Text>
+                  {questDraft.xpReward ? <Text style={styles.questXp}>+{questDraft.xpReward} XP</Text> : null}
                 </View>
-                {questDraft.xpReward && (
-                  <View style={styles.attachedQuestXpBadge}>
-                    <Text style={styles.attachedQuestXpText}>+{questDraft.xpReward} XP</Text>
+                {questDraft.requirements.map((req, idx) => (
+                  <View key={idx} style={styles.questReq}>
+                    <View style={styles.questReqDot} />
+                    <Text style={styles.questReqText}>{req}</Text>
                   </View>
-                )}
-              </View>
-              {questDraft.requirements.map((req, idx) => (
-                <View key={idx} style={styles.attachedQuestRequirementItem}>
-                  <View style={styles.attachedQuestCheckCircle}>
-                    <Text style={styles.attachedQuestCheckMark}>✓</Text>
-                  </View>
-                  <Text style={styles.attachedQuestRequirementText}>{req}</Text>
-                </View>
-              ))}
+                ))}
+              </GlassCard>
             </View>
           )}
 
-          {/* 2. CHOOSE PLATFORMS WITH MORE PLATFORMS TRIGGER */}
-          <View
-            style={styles.sectionLabelRow}
+          {/* 1. PLATFORMS */}
+          <StepHeader
+            n={1}
+            title="Where it goes"
+            done={isPlatformsReady}
             onLayout={(e) => {
               sectionPositions.current.platforms = e.nativeEvent.layout.y;
             }}
-          >
-            <Text style={styles.sectionLabel}>CHOOSE PLATFORMS</Text>
-            <Pressable
-              style={({ pressed }) => [styles.morePlatformsHeaderBtn, pressed && styles.btnPressed]}
-              onPress={() => {
-                triggerModalAnim();
-                setShowPlatformsModal(true);
-              }}
-              hitSlop={8}
-            >
-              <LinearGradient
-                colors={['#7C3AED', '#582CDB']}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 0 }}
-                style={styles.morePlatformsHeaderGradient}
-              >
-                <Svg width={13} height={13} viewBox="0 0 24 24" fill="none">
-                  <Path d="M12 5V19M5 12H19" stroke="#FFFFFF" strokeWidth="2.8" strokeLinecap="round" />
-                </Svg>
-                <Text style={styles.morePlatformsHeaderText}>More Platforms</Text>
-              </LinearGradient>
-            </Pressable>
+          />
+          <View style={styles.chipsWrap}>
+            {stage1Platforms.map((plat) => (
+              <PlatformChip
+                key={plat.id}
+                id={plat.id}
+                name={plat.name}
+                selected={selectedPlatforms.includes(plat.id)}
+                onPress={() => togglePlatform(plat.id)}
+              />
+            ))}
           </View>
+          <Text style={styles.note}>Free plans prepare posts for each platform. Auto-publishing is part of Pro.</Text>
 
-          {/* Clean Platforms Row / Grid */}
-          <View style={styles.platformsRow}>
-            {displayedPlatforms.map((plat) => {
-              const isSelected = selectedPlatforms.includes(plat.id);
-              const isSingle = displayedPlatforms.length === 1;
-
-              if (isSingle) {
-                return (
-                  <Pressable
-                    key={plat.id}
-                    style={[
-                      styles.platformCardSingle,
-                      isSelected && styles.platformCardActive,
-                    ]}
-                    onPress={() => togglePlatform(plat.id)}
-                  >
-                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, flex: 1 }}>
-                      <PlatformIcon iconType={plat.iconType} size={36} />
-                      <View style={{ flex: 1 }}>
-                        <Text style={styles.platformCardNameSingle}>{plat.name}</Text>
-                        <Text style={styles.platformCardFormatSingle}>{plat.format}</Text>
-                      </View>
-                    </View>
-                    {isSelected ? (
-                      <View style={styles.platformActiveBadge}>
-                        <Text style={{ fontSize: 10, color: '#FFFFFF', fontWeight: '700' }}>✓</Text>
-                      </View>
-                    ) : (
-                      <View style={styles.platformInactiveBadge} />
-                    )}
-                  </Pressable>
-                );
-              }
-
-              return (
-                <Pressable
-                  key={plat.id}
-                  style={[
-                    styles.platformCard,
-                    isSelected && styles.platformCardActive,
-                  ]}
-                  onPress={() => togglePlatform(plat.id)}
-                >
-                  <PlatformIcon iconType={plat.iconType} size={38} />
-                  <Text style={styles.platformCardName} numberOfLines={1}>{plat.name}</Text>
-                  {isSelected ? (
-                    <View style={styles.platformActiveBadge}>
-                      <Text style={{ fontSize: 10, color: '#FFFFFF', fontWeight: '700' }}>✓</Text>
-                    </View>
-                  ) : (
-                    <View style={styles.platformInactiveBadge} />
-                  )}
-                </Pressable>
-              );
-            })}
-          </View>
-
-          <Text style={styles.platformsDisclaimer}>
-            Free users can prepare posts for selected platforms. Auto-publishing may require <Text style={{ color: '#D97706', fontWeight: '800' }}>Pro</Text>.
-          </Text>
-
-          {/* 3. CONTENT FORMAT (RECOMMENDED + OTHER FORMATS) */}
-          <View
-            style={styles.sectionLabelRow}
+          {/* 2. FORMAT */}
+          <StepHeader
+            n={2}
+            title="Format"
+            done={isFormatReady}
             onLayout={(e) => {
               sectionPositions.current.format = e.nativeEvent.layout.y;
             }}
-          >
-            <Text style={styles.sectionLabel}>CONTENT FORMAT</Text>
-            <View style={styles.aiBadge}>
-              <Text style={styles.aiBadgeText}>SMART RECOMMENDATION</Text>
-            </View>
+          />
+          <RecommendedFormat
+            id={recommendedFormatConfig.id}
+            title={recommendedFormatConfig.title}
+            badge={recommendedFormatConfig.badge}
+            description={recommendedFormatConfig.recommendedDescription}
+            selected={selectedFormat === recommendedFormatConfig.id}
+            onPress={() => setSelectedFormat(recommendedFormatConfig.id)}
+          />
+          <View style={styles.tilesGrid}>
+            {otherFormats.map((f) => (
+              <FormatTile
+                key={f.id}
+                id={f.id}
+                title={f.title}
+                badge={f.badge}
+                selected={selectedFormat === f.id}
+                onPress={() => setSelectedFormat(f.id)}
+              />
+            ))}
           </View>
-
-          {/* 1. Recommended Format Spotlight */}
-          <View style={styles.formatRecommendedSection}>
-            <Text style={styles.formatGroupHeaderLabel}>RECOMMENDED</Text>
-            <Pressable
-              style={[
-                styles.formatRecommendedCard,
-                selectedFormat === recommendedFormatConfig.id && styles.formatRecommendedCardActive,
-              ]}
-              onPress={() => {
-                if (Platform.OS !== 'web') {
-                  Haptics.selectionAsync();
-                }
-                setSelectedFormat(recommendedFormatConfig.id);
-              }}
-            >
-              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, flex: 1 }}>
-                <View
-                  style={[
-                    styles.formatIconBox,
-                    selectedFormat === recommendedFormatConfig.id && styles.formatIconBoxActive,
-                  ]}
-                >
-                  <Text style={{ fontSize: 20 }}>{recommendedFormatConfig.icon}</Text>
-                </View>
-
-                <View style={{ flex: 1 }}>
-                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 2 }}>
-                    <Text
-                      style={[
-                        styles.formatCardTitle,
-                        selectedFormat === recommendedFormatConfig.id && styles.formatCardTitleActive,
-                      ]}
-                    >
-                      {recommendedFormatConfig.title}
-                    </Text>
-                    <View style={styles.formatBestFitPill}>
-                      <Text style={styles.formatBestFitPillText}>★ Best Fit</Text>
-                    </View>
-                  </View>
-                  <Text style={styles.formatRatioTag}>{recommendedFormatConfig.badge}</Text>
-                  <Text style={styles.formatCardDesc}>{recommendedFormatConfig.recommendedDescription}</Text>
-                </View>
-              </View>
-
-              <View
-                style={[
-                  styles.formatCheckCircle,
-                  selectedFormat === recommendedFormatConfig.id && styles.formatCheckCircleActive,
-                ]}
-              >
-                {selectedFormat === recommendedFormatConfig.id && (
-                  <Text style={{ color: '#FFFFFF', fontSize: 10, fontWeight: '800' }}>✓</Text>
-                )}
-              </View>
-            </Pressable>
-          </View>
-
-          {/* 2. Other Formats Section (2x2 Grid) */}
-          <View style={styles.otherFormatsSection}>
-            <Text style={styles.formatGroupHeaderLabel}>OTHER FORMATS</Text>
-            <View style={styles.formatsGrid}>
-              {otherFormats.map((fmt) => {
-                const isFmtSelected = selectedFormat === fmt.id;
-
-                return (
-                  <Pressable
-                    key={fmt.id}
-                    style={[
-                      styles.formatCard,
-                      isFmtSelected && styles.formatCardActive,
-                    ]}
-                    onPress={() => {
-                      if (Platform.OS !== 'web') {
-                        Haptics.selectionAsync();
-                      }
-                      setSelectedFormat(fmt.id);
-                    }}
-                  >
-                    <View style={styles.formatCardTop}>
-                      <View style={[styles.formatIconBox, isFmtSelected && styles.formatIconBoxActive]}>
-                        <Text style={{ fontSize: 18 }}>{fmt.icon}</Text>
-                      </View>
-                      <View style={[styles.formatCheckCircle, isFmtSelected && styles.formatCheckCircleActive]}>
-                        {isFmtSelected && <Text style={{ color: '#FFFFFF', fontSize: 10, fontWeight: '800' }}>✓</Text>}
-                      </View>
-                    </View>
-
-                    <View style={{ marginTop: 8 }}>
-                      <Text style={[styles.formatCardTitle, isFmtSelected && styles.formatCardTitleActive]}>
-                        {fmt.title}
-                      </Text>
-                      <Text style={styles.formatRatioTag}>{fmt.badge}</Text>
-                    </View>
-                  </Pressable>
-                );
-              })}
-            </View>
-          </View>
-
-          {/* Smart Compatibility Adaption Note */}
           {incompatiblePlatforms.length > 0 && (
-            <View style={styles.formatIncompatibleNotice}>
-              <Svg width={13} height={13} viewBox="0 0 24 24" fill="none">
-                <Circle cx="12" cy="12" r="10" stroke="#D97706" strokeWidth="2" />
-                <Path d="M12 8v4M12 16h.01" stroke="#D97706" strokeWidth="2" strokeLinecap="round" />
-              </Svg>
-              <Text style={styles.formatIncompatibleText}>
-                {incompatiblePlatforms
-                  .map((p) => ALL_AVAILABLE_PLATFORMS.find((x) => x.id === p)?.name)
-                  .join(' & ')}{' '}
-                will adapt your {currentFormatConfig.title.toLowerCase()} for optimal feed display.
-              </Text>
-            </View>
+            <Text style={styles.note}>
+              {incompatiblePlatforms.map((p) => ALL_AVAILABLE_PLATFORMS.find((x) => x.id === p)?.name).join(' & ')} will adapt your{' '}
+              {currentFormatConfig.title.toLowerCase()} to fit its feed.
+            </Text>
           )}
 
-          {/* 4. MEDIA / ATTACHMENT ZONE (CONTEXTUAL TO SELECTED FORMAT) */}
-          <Text
-            style={styles.sectionLabel}
+          {/* 3. MEDIA */}
+          <StepHeader
+            n={3}
+            title="Media"
+            done={isMediaReady}
             onLayout={(e) => {
               sectionPositions.current.media = e.nativeEvent.layout.y;
             }}
-          >
-            MEDIA
-          </Text>
-          <View style={styles.mediaUploadBox}>
-            {selectedFormat === 'text' && !hasMedia ? (
-              /* Text Post Active (No mandatory media required) */
-              <View style={styles.textFirstFormatBanner}>
-                <View style={styles.textFirstIconCircle}>
-                  <Text style={{ fontSize: 20 }}>✍️</Text>
-                </View>
-                <View style={{ flex: 1 }}>
-                  <Text style={styles.textFirstTitle}>Text-First Format Active</Text>
-                  <Text style={styles.textFirstSubtitle}>
-                    No media upload is required for text takes & insights. Write your post below!
-                  </Text>
-                </View>
-                <Pressable
-                  style={styles.textFirstAddMediaBtn}
-                  onPress={() => handleUploadMedia('image')}
-                >
-                  <Svg width={12} height={12} viewBox="0 0 24 24" fill="none">
-                    <Path d="M12 5v14M5 12h14" stroke="#582CDB" strokeWidth="2.5" strokeLinecap="round" />
-                  </Svg>
-                  <Text style={styles.textFirstAddMediaBtnText}>Add Visual</Text>
-                </Pressable>
-              </View>
-            ) : hasMedia ? (
-              /* Attached Media Preview Box */
-              <View style={styles.mediaAttachedContainer}>
-                <View style={styles.mediaAttachedHeaderRow}>
-                  {/* Thumbnail / Video Icon Box */}
-                  <View style={styles.mediaAttachedThumbBox}>
-                    {selectedFormat === 'carousel' ? (
-                      <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
-                        <Rect x="4" y="4" width="16" height="16" rx="3" stroke="#FFFFFF" strokeWidth="2" />
-                        <Path d="M9 4v16" stroke="#FFFFFF" strokeWidth="2" />
-                      </Svg>
-                    ) : selectedFormat === 'image' ? (
-                      <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
-                        <Rect x="3" y="3" width="18" height="18" rx="4" stroke="#FFFFFF" strokeWidth="2" />
-                        <Circle cx="8.5" cy="8.5" r="1.5" fill="#FFFFFF" />
-                        <Path d="M21 15l-5-5L5 21" stroke="#FFFFFF" strokeWidth="2" strokeLinecap="round" />
-                      </Svg>
-                    ) : (
-                      <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
-                        <Path d="M8 5v14l11-7z" fill="#FFFFFF" />
-                      </Svg>
-                    )}
-                    <View style={styles.mediaThumbDurationTag}>
-                      <Text style={styles.mediaThumbDurationText}>
-                        {selectedFormat === 'carousel' ? '5 Slides' : selectedFormat === 'image' ? '1 Visual' : '0:30'}
-                      </Text>
-                    </View>
-                  </View>
+          />
+          <MediaZone
+            isText={selectedFormat === 'text'}
+            hasMedia={hasMedia}
+            hasThumbnail={hasThumbnail}
+            label={currentFormatConfig.mediaLabel}
+            sub={dynamicMediaSub}
+            addLabel={currentFormatConfig.primaryMediaActionText}
+            onAdd={() => handleUploadMedia(selectedFormat === 'image' || selectedFormat === 'text' ? 'image' : 'video')}
+            onThumbnail={() => setHasThumbnail(!hasThumbnail)}
+            onRemove={() => {
+              setHasMedia(false);
+              setHasThumbnail(false);
+            }}
+          />
 
-                  <View style={{ flex: 1, marginLeft: 12 }}>
-                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 3 }}>
-                      <View style={styles.mediaAttachedStatusBadge}>
-                        <Text style={styles.mediaAttachedStatusText}>✓ ATTACHED</Text>
-                      </View>
-                      <Text style={styles.mediaAttachedSizeText}>
-                        {selectedFormat === 'carousel' ? '12.8 MB (5 slides)' : '24.5 MB'}
-                      </Text>
-                    </View>
-                    <Text style={styles.mediaAttachedFileName} numberOfLines={1}>
-                      {selectedFormat === 'carousel'
-                        ? 'Swipe_Carousel_Deck_V1'
-                        : selectedFormat === 'image'
-                        ? 'Creative_Visual_V1.jpg'
-                        : selectedFormat === 'long_video'
-                        ? 'Longform_Tutorial_16x9.mp4'
-                        : 'ShortForm_Reel_V1.mp4'}
-                    </Text>
-                    <Text style={styles.mediaAttachedSpecsText}>
-                      {selectedFormat === 'carousel'
-                        ? '4:5 Aspect • 5 High-Res Slides • Optimized'
-                        : selectedFormat === 'image'
-                        ? '1080×1350 • 4:5 Portrait • High Quality'
-                        : selectedFormat === 'long_video'
-                        ? '1920×1080 • 16:9 Landscape • 4K 60FPS'
-                        : '1080×1920 • 9:16 Vertical • 30s • 4K HDR'}
-                    </Text>
-                  </View>
-                </View>
-
-                {/* Sub-actions Row: Replace, Thumbnail, Remove */}
-                <View style={styles.mediaAttachedActionsRow}>
-                  <Pressable
-                    style={({ pressed }) => [styles.mediaSubActionBtn, pressed && styles.btnPressed]}
-                    onPress={() => handleUploadMedia(selectedFormat === 'image' ? 'image' : 'video')}
-                  >
-                    <Svg width={13} height={13} viewBox="0 0 24 24" fill="none">
-                      <Path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" stroke="#582CDB" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                    </Svg>
-                    <Text style={styles.mediaSubActionBtnText}>Replace Media</Text>
-                  </Pressable>
-
-                  <Pressable
-                    style={({ pressed }) => [styles.mediaSubActionBtn, pressed && styles.btnPressed]}
-                    onPress={() => {
-                      if (Platform.OS !== 'web') {
-                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                      }
-                      setHasThumbnail(!hasThumbnail);
-                    }}
-                  >
-                    <Svg width={13} height={13} viewBox="0 0 24 24" fill="none">
-                      <Rect x="3" y="3" width="18" height="18" rx="4" stroke={hasThumbnail ? '#15803D' : '#582CDB'} strokeWidth="2" />
-                      <Circle cx="8.5" cy="8.5" r="1.5" fill={hasThumbnail ? '#15803D' : '#582CDB'} />
-                      <Path d="M21 15L16 10L5 21" stroke={hasThumbnail ? '#15803D' : '#582CDB'} strokeWidth="2" strokeLinecap="round" />
-                    </Svg>
-                    <Text style={[styles.mediaSubActionBtnText, hasThumbnail && { color: '#15803D' }]}>
-                      {hasThumbnail ? 'Thumbnail Added ✓' : 'Add Thumbnail'}
-                    </Text>
-                  </Pressable>
-
-                  <Pressable
-                    style={({ pressed }) => [styles.mediaSubActionRemoveBtn, pressed && styles.btnPressed]}
-                    onPress={() => {
-                      if (Platform.OS !== 'web') {
-                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-                      }
-                      setHasMedia(false);
-                      setHasThumbnail(false);
-                    }}
-                  >
-                    <Svg width={12} height={12} viewBox="0 0 24 24" fill="none">
-                      <Path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" stroke="#EF4444" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                    </Svg>
-                    <Text style={styles.mediaSubActionRemoveText}>Remove</Text>
-                  </Pressable>
-                </View>
-              </View>
-            ) : (
-              /* Empty Format-Adapted Dropzone */
-              <View>
-                <Pressable
-                  style={styles.mediaDashedDropzone}
-                  onPress={() => handleUploadMedia(selectedFormat === 'image' ? 'image' : 'video')}
-                >
-                  <View style={styles.mediaIconCircle}>
-                    {selectedFormat === 'carousel' ? (
-                      <Svg width={24} height={24} viewBox="0 0 24 24" fill="none">
-                        <Rect x="4" y="4" width="16" height="16" rx="3" stroke="#582CDB" strokeWidth="2" />
-                        <Path d="M9 4v16" stroke="#582CDB" strokeWidth="2" />
-                      </Svg>
-                    ) : selectedFormat === 'image' ? (
-                      <Svg width={24} height={24} viewBox="0 0 24 24" fill="none">
-                        <Rect x="3" y="3" width="18" height="18" rx="4" stroke="#582CDB" strokeWidth="2" />
-                        <Circle cx="8.5" cy="8.5" r="1.5" fill="#582CDB" />
-                        <Path d="M21 15l-5-5L5 21" stroke="#582CDB" strokeWidth="2" strokeLinecap="round" />
-                      </Svg>
-                    ) : (
-                      <Svg width={24} height={24} viewBox="0 0 24 24" fill="none">
-                        <Path d="M12 4v12m0 0l-4-4m4 4l4-4M4 17v3a1 1 0 001 1h14a1 1 0 001-1v-3" stroke="#582CDB" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                      </Svg>
-                    )}
-                  </View>
-
-                  <Text style={styles.mediaDropzoneTitle}>
-                    {selectedFormat === 'carousel'
-                      ? 'Add carousel slides or deck'
-                      : selectedFormat === 'image'
-                      ? 'Add high-res image visual'
-                      : selectedFormat === 'long_video'
-                      ? 'Add your long-form video'
-                      : 'Add your short-form video'}
-                  </Text>
-                  <Text style={styles.mediaDropzoneSubtitle}>{dynamicMediaSub}</Text>
-                </Pressable>
-
-                <View style={styles.mediaButtonsRow}>
-                  <Pressable
-                    style={({ pressed }) => [styles.mediaActionBtn, pressed && styles.btnPressed]}
-                    onPress={() => handleUploadMedia(selectedFormat === 'image' ? 'image' : 'video')}
-                  >
-                    <Svg width={14} height={14} viewBox="0 0 24 24" fill="none">
-                      <Path
-                        d="M4 16L8.586 11.414C9.367 10.633 10.633 10.633 11.414 11.414L16 16M14 14L15.586 12.414C16.367 11.633 17.633 11.633 18.414 12.414L20 14M14 8H14.01M6 20H18C19.105 20 20 19.105 20 18V6C20 4.895 19.105 4 18 4H6C4.895 4 4 4.895 4 6V18C4 19.105 4.895 20 6 20Z"
-                        stroke="#582CDB"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                    </Svg>
-                    <Text style={styles.mediaActionBtnText}>{currentFormatConfig.primaryMediaActionText}</Text>
-                  </Pressable>
-
-                  <Pressable
-                    style={({ pressed }) => [styles.mediaActionBtn, pressed && styles.btnPressed]}
-                    onPress={() => handleUploadMedia('thumbnail')}
-                  >
-                    <Svg width={14} height={14} viewBox="0 0 24 24" fill="none">
-                      <Rect x="3" y="3" width="18" height="18" rx="4" stroke="#582CDB" strokeWidth="2" />
-                      <Circle cx="8.5" cy="8.5" r="1.5" fill="#582CDB" />
-                      <Path d="M21 15L16 10L5 21" stroke="#582CDB" strokeWidth="2" strokeLinecap="round" />
-                    </Svg>
-                    <Text style={styles.mediaActionBtnText}>Add Thumbnail</Text>
-                  </Pressable>
-                </View>
-              </View>
-            )}
-          </View>
-
-          {/* 4. CAPTION WRITING */}
-          <View
-            style={styles.sectionLabelRow}
+          {/* 4. CAPTION */}
+          <StepHeader
+            n={4}
+            title="Caption"
+            done={isCaptionReady}
+            right={<EditsMeter left={aiEditsLeft} total={3} />}
             onLayout={(e) => {
               sectionPositions.current.caption = e.nativeEvent.layout.y;
             }}
-          >
-            <Text style={styles.sectionLabel}>CAPTION WRITING</Text>
-            <View style={styles.aiBadge}>
-              <Text style={styles.aiBadgeText}>{aiEditsLeft} AI EDITS LEFT</Text>
-            </View>
-          </View>
-
-          <View style={[styles.captionContainer, isCaptionFocused && styles.captionContainerFocused]}>
+          />
+          <View style={[styles.captionCard, isCaptionFocused && styles.captionCardFocused]}>
             <TextInput
               ref={captionInputRef}
-              style={styles.captionInput}
+              style={styles.captionField}
               multiline
               value={caption}
               onChangeText={setCaption}
               onFocus={() => setIsCaptionFocused(true)}
               onBlur={() => setIsCaptionFocused(false)}
-              placeholder="Write or tap to edit your post caption..."
-              placeholderTextColor="#94A3B8"
-              selectionColor="#7C3AED"
-              cursorColor="#7C3AED"
+              placeholder="Write your caption…"
+              placeholderTextColor={ds.text3}
+              selectionColor={ds.purple}
+              cursorColor={ds.purple}
             />
-
-            <View style={styles.captionMetaRow}>
-              <View style={styles.captionMetaLeft}>
-                <Pressable
-                  onPress={() => {
-                    const tones: ('Helpful' | 'Viral' | 'Story')[] = ['Helpful', 'Viral', 'Story'];
-                    const next = tones[(tones.indexOf(captionTone) + 1) % tones.length];
-                    setCaptionTone(next);
-                  }}
-                  style={styles.tonePill}
-                >
-                  <Text style={styles.toneLabel}>TONE</Text>
-                  <Text style={styles.toneDivider}>·</Text>
-                  <Text style={styles.toneValue}>💡 {captionTone}</Text>
-                </Pressable>
-
-                <Pressable
-                  onPress={() => {
-                    const ctas: ('Ask Question' | 'Save Post' | 'Share Thoughts')[] = [
-                      'Ask Question',
-                      'Save Post',
-                      'Share Thoughts',
-                    ];
-                    const next = ctas[(ctas.indexOf(captionCta) + 1) % ctas.length];
-                    setCaptionCta(next);
-                  }}
-                  style={styles.tonePill}
-                >
-                  <Text style={styles.toneLabel}>CTA</Text>
-                  <Text style={styles.toneDivider}>·</Text>
-                  <Text style={styles.toneValue}>
-                    {captionCta === 'Ask Question' ? 'Question' : captionCta === 'Save Post' ? 'Save' : 'Share'}
-                  </Text>
-                </Pressable>
-              </View>
-
-              <Text style={styles.charCountText}>{caption.length} chars</Text>
-            </View>
-
-            {/* 3 AI Action Pills */}
-            <View style={styles.aiButtonsRow}>
-              <Pressable
-                style={({ pressed }) => [styles.aiPillBtn, pressed && styles.btnPressed]}
-                onPress={() => handleAiAction('rewrite')}
-                disabled={isAiProcessing}
-              >
-                <Text style={styles.aiPillBtnText}>
-                  {isAiProcessing ? '...' : 'Rewrite'}
-                </Text>
-              </Pressable>
-
-              <Pressable
-                style={({ pressed }) => [styles.aiPillBtn, pressed && styles.btnPressed]}
-                onPress={() => handleAiAction('shorter')}
-                disabled={isAiProcessing}
-              >
-                <Text style={styles.aiPillBtnText}>Shorten</Text>
-              </Pressable>
-
-              <Pressable
-                style={({ pressed }) => [styles.aiPillBtn, pressed && styles.btnPressed]}
-                onPress={() => handleAiAction('cta')}
-                disabled={isAiProcessing}
-              >
-                <Text style={styles.aiPillBtnText}>Add CTA</Text>
-              </Pressable>
-            </View>
-          </View>
-
-          {/* 5. HASHTAGS & TAGS */}
-          <View style={styles.sectionLabelRow}>
-            <Text style={styles.sectionLabel}>HASHTAGS &amp; TAGS</Text>
-            {selectedPlatforms.length > 0 && (
-              <View style={styles.platformTagsBadgeRow}>
-                {selectedPlatforms.map((platId) => {
-                  const plat = ALL_AVAILABLE_PLATFORMS.find((p) => p.id === platId);
-                  if (!plat) return null;
-                  return (
-                    <View key={plat.id} style={[styles.platformMiniTagPill, { backgroundColor: plat.bgColor }]}>
-                      <Text style={styles.platformMiniTagText}>{plat.name}</Text>
-                    </View>
-                  );
-                })}
+            {isAiProcessing && (
+              <View style={styles.aiWorking}>
+                <JarvisOrb size={22} />
+                <Text style={styles.aiWorkingText}>Jarvis is rewriting…</Text>
               </View>
             )}
+            <View style={styles.captionMeta}>
+              <CyclePill
+                label="TONE"
+                value={captionTone}
+                onPress={() => setCaptionTone(captionTones[(captionTones.indexOf(captionTone) + 1) % captionTones.length])}
+              />
+              <CyclePill
+                label="ASK"
+                value={captionCta === 'Ask Question' ? 'Question' : captionCta === 'Save Post' ? 'Save' : 'Share'}
+                onPress={() => setCaptionCta(captionCtas[(captionCtas.indexOf(captionCta) + 1) % captionCtas.length])}
+              />
+              <Text style={styles.charCount}>{caption.length}</Text>
+            </View>
+            <View style={styles.aiRow}>
+              <AiAction label="Rewrite" onPress={() => handleAiAction('rewrite')} disabled={isAiProcessing || aiEditsLeft === 0} />
+              <AiAction label="Shorten" onPress={() => handleAiAction('shorter')} disabled={isAiProcessing || aiEditsLeft === 0} />
+              <AiAction label="Add ask" onPress={() => handleAiAction('cta')} disabled={isAiProcessing || aiEditsLeft === 0} />
+            </View>
           </View>
+          <Text style={styles.note}>Tip: name the exact moment or mistake, and one thing people can try.</Text>
 
-          <View style={styles.tagsContainer}>
-            <View style={styles.tagsContextRow}>
-              <Text style={styles.tagsContextSparkle}>✨</Text>
-              <Text style={styles.tagsContextText}>
-                Jarvis selected these based on your post &amp; {selectedPlatforms.length > 0 ? selectedPlatforms.map(p => ALL_AVAILABLE_PLATFORMS.find(x => x.id === p)?.name).join(' + ') : 'channels'}
-              </Text>
-            </View>
-
-            <View style={styles.tagsPillsRow}>
+          {/* 5. TAGS */}
+          <StepHeader n={5} title="Tags" done={tags.length > 0} />
+          <GlassCard strong radius={22} padding={16}>
+            <View style={styles.tagsWrap}>
               {tags.map((tag) => (
-                <Pressable
-                  key={tag}
-                  onPress={() => removeTag(tag)}
-                  style={styles.tagPill}
-                >
-                  <Text style={styles.tagPillText}>{tag}</Text>
-                  <Text style={styles.tagPillCross}>×</Text>
-                </Pressable>
+                <TagChip key={tag} tag={tag} onRemove={() => removeTag(tag)} />
               ))}
+              {tags.length === 0 && <Text style={styles.noTags}>No tags yet</Text>}
             </View>
-
             {showAddTagInput && (
-              <View style={styles.addTagInputRow}>
+              <View style={styles.addTagRow}>
                 <TextInput
-                  style={styles.addTagInput}
-                  placeholder="Enter tag (e.g. #growth)"
-                  placeholderTextColor="#94A3B8"
+                  style={styles.addTagField}
+                  placeholder="#yourtag"
+                  placeholderTextColor={ds.text3}
                   value={newTagInput}
                   onChangeText={setNewTagInput}
                   onSubmitEditing={handleAddCustomTag}
                   autoFocus
+                  autoCapitalize="none"
                 />
-                <Pressable onPress={handleAddCustomTag} style={styles.addTagConfirmBtn}>
-                  <Text style={styles.addTagConfirmText}>Add</Text>
+                <Pressable onPress={handleAddCustomTag} style={styles.addTagBtn} accessibilityRole="button">
+                  <Text style={styles.addTagBtnText}>Add</Text>
                 </Pressable>
               </View>
             )}
-
-            <View style={styles.tagActionsRow}>
-              {/* Secondary Outlined Custom Tag Button */}
-              <Pressable
-                style={({ pressed }) => [styles.tagActionCustomBtn, pressed && styles.btnPressed]}
-                onPress={() => setShowAddTagInput(!showAddTagInput)}
-              >
-                <Svg width={12} height={12} viewBox="0 0 24 24" fill="none">
-                  <Path d="M12 5v14M5 12h14" stroke="#582CDB" strokeWidth="2.4" strokeLinecap="round" />
-                </Svg>
-                <Text style={styles.tagActionCustomBtnText} numberOfLines={1}>Add Custom Tag</Text>
-              </Pressable>
-
-              {/* Stronger Primary Purple Filled Generate Tags Button */}
-              <Pressable
-                style={({ pressed }) => [styles.tagActionGenerateBtn, pressed && styles.btnPressed]}
-                onPress={handleGenerateTags}
-              >
-                <LinearGradient
-                  colors={['#582CDB', '#7C3AED']}
-                  start={{ x: 0, y: 0 }}
-                  end={{ x: 1, y: 1 }}
-                  style={styles.tagActionGenerateGradient}
-                >
-                  <Text style={{ fontSize: 12 }}>✨</Text>
-                  <Text style={styles.tagActionGenerateBtnText} numberOfLines={1}>Generate Tags</Text>
-                </LinearGradient>
-              </Pressable>
+            <View style={styles.tagActions}>
+              <View style={styles.flex1}>
+                <AppButton title={showAddTagInput ? 'Cancel' : 'Add tag'} variant="outline" onPress={() => setShowAddTagInput(!showAddTagInput)} />
+              </View>
+              <View style={styles.flex1}>
+                <AppButton title="Suggest" variant="quiet" onPress={handleGenerateTags} />
+              </View>
             </View>
-          </View>
+          </GlassCard>
 
-          {/* 6. PUBLISHING & SCHEDULE TIMING */}
-          <View
-            style={styles.timingCard}
+          {/* 6. WHEN */}
+          <StepHeader
+            n={6}
+            title="When to post"
+            done={isScheduleReady}
             onLayout={(e) => {
               sectionPositions.current.schedule = e.nativeEvent.layout.y;
             }}
-          >
-            <View style={styles.timingHeaderRow}>
-              <Text style={styles.timingSuggestedLightbulb}>💡</Text>
-              <View style={{ flex: 1 }}>
-                <Text style={styles.timingSuggestedTitle}>Jarvis recommends 7:30 PM</Text>
-                <Text style={styles.timingSuggestedSub}>Your audience is usually more active around this time.</Text>
-              </View>
-            </View>
-
-            {/* 3 Timing Tabs */}
-            <View style={styles.timingTabsRow}>
-              {(['now', 'schedule', 'draft'] as const).map((m) => {
-                const isActive = publishMode === m;
-                const label = m === 'now' ? 'POST NOW' : m === 'schedule' ? 'SCHEDULE' : 'DRAFT';
-                return (
-                  <Pressable
-                    key={m}
-                    onPress={() => {
-                      if (Platform.OS !== 'web') {
-                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                      }
-                      setPublishMode(m);
-                    }}
-                    style={[
-                      styles.timingTabBtn,
-                      isActive && styles.timingTabBtnActive,
-                    ]}
-                  >
-                    <Text
-                      style={[
-                        styles.timingTabBtnText,
-                        isActive && styles.timingTabBtnTextActive,
-                      ]}
-                    >
-                      {label}
-                    </Text>
-                  </Pressable>
-                );
-              })}
-            </View>
-
+          />
+          <GlassCard strong radius={22} padding={16}>
+            <ModeSwitch mode={publishMode} onChange={setPublishMode} />
             {publishMode === 'schedule' && (
-              <View style={styles.scheduledInfoBox}>
-                <View>
-                  <Text style={styles.scheduledLabel}>SCHEDULED FOR</Text>
-                  <Text style={styles.scheduledValue}>{scheduledTime}</Text>
-                </View>
+              <Reanimated.View entering={FadeInUp.duration(250)}>
                 <Pressable
                   onPress={() => {
                     setShowCustomCalendarView(false);
                     triggerModalAnim();
                     setShowCalendarModal(true);
                   }}
-                  hitSlop={8}
+                  style={styles.whenRow}
+                  accessibilityRole="button"
+                  accessibilityLabel={`Scheduled for ${scheduledTime}. Change`}
                 >
-                  <Text style={styles.scheduledChangeLink}>CHANGE</Text>
+                  <Svg width={20} height={20} viewBox="0 0 24 24" fill="none">
+                    <Rect x="3" y="4" width="18" height="17" rx="3" stroke={ds.purple} strokeWidth={2.1} />
+                    <Path d="M16 2v4M8 2v4M3 10h18" stroke={ds.purple} strokeWidth={2.1} strokeLinecap="round" />
+                  </Svg>
+                  <View style={styles.flex1}>
+                    <Text style={styles.whenLabel}>Scheduled for</Text>
+                    <Text style={styles.whenValue}>{scheduledTime}</Text>
+                  </View>
+                  <Text style={styles.whenChange}>Change</Text>
                 </Pressable>
+              </Reanimated.View>
+            )}
+            <View style={styles.jarvisTime}>
+              <JarvisOrb size={22} />
+              <Text style={styles.jarvisTimeText}>
+                Jarvis suggests <Text style={styles.jarvisTimeBold}>7:30 PM</Text>, when your audience is usually around.
+              </Text>
+            </View>
+          </GlassCard>
+
+          {/* READINESS + ACTIONS */}
+          <View style={styles.readyWrap}>
+            <ReadinessCard percent={readinessPercent} steps={readinessSteps} onStep={(k) => navigateToSection(k as 'format' | 'caption' | 'platforms' | 'media' | 'schedule')} />
+          </View>
+          {composerToast && <ComposerToast message={composerToast} />}
+          <View style={styles.actions}>
+            <AppButton
+              title={publishMode === 'now' ? 'Post now' : publishMode === 'schedule' ? 'Schedule post' : 'Save draft'}
+              size="lg"
+              onPress={handlePublishOrSchedule}
+              iconRight={
+                <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
+                  <Path d="M5 12h14M13 6l6 6-6 6" stroke="#FFFFFF" strokeWidth={2.4} strokeLinecap="round" strokeLinejoin="round" />
+                </Svg>
+              }
+            />
+            {publishMode !== 'draft' && (
+              <View style={styles.secondaryAction}>
+                <AppButton title="Save as draft" variant="glass" onPress={saveDraft} />
               </View>
             )}
-          </View>
-
-          {/* 7. POST READINESS CHECKLIST (WEIGHTED & INTERACTIVE NAVIGATOR) */}
-          <View style={[styles.readinessCard, isAllReady && styles.readinessCardComplete]}>
-            <View style={styles.readinessHeaderRow}>
-              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 7, flexWrap: 'wrap' }}>
-                <Text style={styles.readinessTitle}>POST READINESS</Text>
-                {isAllReady && (
-                  <View style={styles.readinessReadyBadge}>
-                    <Text style={styles.readinessReadyBadgeText}>100% READY TO POST 🎉</Text>
-                  </View>
-                )}
-              </View>
-              <Text style={[styles.readinessPercent, isAllReady && styles.readinessPercentComplete]}>
-                {readinessPercent}%
-              </Text>
-            </View>
-
-            <View style={styles.readinessProgressBarTrack}>
-              <LinearGradient
-                colors={isAllReady ? ['#10B981', '#059669'] : ['#7C3AED', '#582CDB']}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 0 }}
-                style={[styles.readinessProgressBarFill, { width: `${readinessPercent}%` }]}
-              />
-            </View>
-
-            {/* Checklist Items as Tappable Navigation Rows */}
-            <View style={styles.checklistContainer}>
-              {/* 1. Content Format (10%) */}
-              <Pressable
-                style={({ pressed }) => [styles.checklistRowInteractive, pressed && styles.btnPressed]}
-                onPress={() => navigateToSection('format')}
-                hitSlop={4}
-              >
-                <View style={isFormatReady ? styles.checkIconFilled : styles.checkIconEmpty}>
-                  {isFormatReady && <Text style={styles.checkMarkWhite}>✓</Text>}
-                </View>
-                <View style={styles.checklistTextContainer}>
-                  <Text style={[styles.checklistText, !isFormatReady && styles.checklistTextIncomplete]}>
-                    {isFormatReady
-                      ? `Content format selected (${currentFormatConfig.title})`
-                      : 'Content format not selected'}
-                  </Text>
-                </View>
-                {!isFormatReady && <Text style={styles.checklistNavChevron}>›</Text>}
-              </Pressable>
-
-              {/* 2. Caption (20%) */}
-              <Pressable
-                style={({ pressed }) => [styles.checklistRowInteractive, pressed && styles.btnPressed]}
-                onPress={() => navigateToSection('caption')}
-                hitSlop={4}
-              >
-                <View style={isCaptionReady ? styles.checkIconFilled : styles.checkIconEmpty}>
-                  {isCaptionReady && <Text style={styles.checkMarkWhite}>✓</Text>}
-                </View>
-                <View style={styles.checklistTextContainer}>
-                  <Text style={[styles.checklistText, !isCaptionReady && styles.checklistTextIncomplete]}>
-                    {isCaptionReady ? 'Caption added & optimized' : 'Caption not added'}
-                  </Text>
-                </View>
-                {!isCaptionReady && <Text style={styles.checklistNavChevron}>›</Text>}
-              </Pressable>
-
-              {/* 3. Platforms (25%) */}
-              <Pressable
-                style={({ pressed }) => [styles.checklistRowInteractive, pressed && styles.btnPressed]}
-                onPress={() => navigateToSection('platforms')}
-                hitSlop={4}
-              >
-                <View style={isPlatformsReady ? styles.checkIconFilled : styles.checkIconEmpty}>
-                  {isPlatformsReady && <Text style={styles.checkMarkWhite}>✓</Text>}
-                </View>
-                <View style={styles.checklistTextContainer}>
-                  <Text style={[styles.checklistText, !isPlatformsReady && styles.checklistTextIncomplete]}>
-                    {isPlatformsReady
-                      ? `Platforms selected (${selectedPlatforms.map((p) => {
-                          const match = ALL_AVAILABLE_PLATFORMS.find((item) => item.id === p);
-                          return match ? match.shortName : p;
-                        }).join(', ')})`
-                      : 'Platforms not selected'}
-                  </Text>
-                </View>
-                {!isPlatformsReady && <Text style={styles.checklistNavChevron}>›</Text>}
-              </Pressable>
-
-              {/* 4. Media (30%) */}
-              <Pressable
-                style={({ pressed }) => [styles.checklistRowInteractive, pressed && styles.btnPressed]}
-                onPress={() => navigateToSection('media')}
-                hitSlop={4}
-              >
-                <View style={isMediaReady ? styles.checkIconFilled : styles.checkIconEmpty}>
-                  {isMediaReady && <Text style={styles.checkMarkWhite}>✓</Text>}
-                </View>
-                <View style={styles.checklistTextContainer}>
-                  <Text style={[styles.checklistText, !isMediaReady && styles.checklistTextIncomplete]}>
-                    {selectedFormat === 'text'
-                      ? 'Text-first format (no media required)'
-                      : hasMedia
-                      ? 'Media uploaded & attached'
-                      : 'Media not added'}
-                  </Text>
-                </View>
-                {!isMediaReady && <Text style={styles.checklistNavChevron}>›</Text>}
-              </Pressable>
-
-              {/* 5. Schedule (15%) */}
-              <Pressable
-                style={({ pressed }) => [styles.checklistRowInteractive, pressed && styles.btnPressed]}
-                onPress={() => navigateToSection('schedule')}
-                hitSlop={4}
-              >
-                <View style={isScheduleReady ? styles.checkIconFilled : styles.checkIconEmpty}>
-                  {isScheduleReady && <Text style={styles.checkMarkWhite}>✓</Text>}
-                </View>
-                <View style={styles.checklistTextContainer}>
-                  <Text style={[styles.checklistText, !isScheduleReady && styles.checklistTextIncomplete]}>
-                    {publishMode === 'now'
-                      ? 'Post immediately on publish'
-                      : publishMode === 'draft'
-                      ? 'Save as draft'
-                      : `Schedule time selected (${scheduledTime})`}
-                  </Text>
-                </View>
-                {!isScheduleReady && <Text style={styles.checklistNavChevron}>›</Text>}
-              </Pressable>
-            </View>
-          </View>
-
-          {/* 8. STREAK IMPACT BANNER */}
-          <View style={styles.streakBannerCard}>
-            <View style={styles.streakBannerIconCircle}>
-              <Text style={{ fontSize: 16 }}>⚡</Text>
-            </View>
-            <View style={{ flex: 1 }}>
-              <Text style={styles.streakBannerTitle}>
-                Scheduling this post today protects your <Text style={{ fontWeight: '700' }}>{userProfile?.streakCount || 1}-day streak</Text>.
-              </Text>
-              <View style={styles.streakBannerBadgesRow}>
-                <View style={styles.streakXpPill}>
-                  <Text style={styles.streakXpText}>+50 CREATOR XP</Text>
-                </View>
-                <Text style={styles.streakMissionFraction}>STREAK MISSION: 0 / 1</Text>
-              </View>
-            </View>
-          </View>
-
-          {/* 9. JARVIS WRITING INSIGHT (LUXURY LAVENDER-CREAM DESIGN) */}
-          <LinearGradient
-            colors={['#FFFFFF', '#F8F5FE']}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 0, y: 1 }}
-            style={styles.jarvisWritingCard}
-          >
-            <View style={styles.jarvisWritingHeaderRow}>
-              <View style={styles.jarvisWritingHeaderLeft}>
-                <Animated.View
-                  style={[
-                    styles.jarvisWritingFlameIconBox,
-                    { transform: [{ translateY: flameFloatY }] },
-                  ]}
-                >
-                  <Image
-                    source={require('../../assets/images/jarvis-core-flame.png')}
-                    style={styles.jarvisWritingFlame}
-                    resizeMode="contain"
-                  />
-                </Animated.View>
-                <View style={styles.jarvisInsightBadge}>
-                  <Text style={styles.jarvisInsightTag}>⚡ WRITING INSIGHT</Text>
-                </View>
-              </View>
-
-              <View style={styles.jarvisScorePill}>
-                <Text style={styles.jarvisScoreText}>95% Predicted Retention</Text>
-              </View>
-            </View>
-
-            <Text style={styles.jarvisWritingTitle}>Hook Polish &amp; Audience Retention</Text>
-            <Text style={styles.jarvisWritingBody}>
-              This caption is stronger when it stays specific. Mention the exact mistake, what changed, and one actionable lesson other creators can bookmark.
-            </Text>
-
-            {/* Interactive Quick Filter Chips */}
-            <ScrollView
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              contentContainerStyle={styles.jarvisChipsRow}
-              style={{ flexGrow: 0, marginBottom: 14 }}
-            >
-              {[
-                { id: 'rewrite', label: '🔥 Stronger Hook' },
-                { id: 'cta', label: '🎯 Add Viral CTA' },
-                { id: 'shorter', label: '⚡ Make Shorter' },
-              ].map((chip) => (
-                <Pressable
-                  key={chip.id}
-                  onPress={() => handleAiAction(chip.id as 'rewrite' | 'cta' | 'shorter')}
-                  style={styles.jarvisChip}
-                >
-                  <Text style={styles.jarvisChipText}>{chip.label}</Text>
-                </Pressable>
-              ))}
-            </ScrollView>
-
-            <Pressable
-              style={({ pressed }) => [styles.improveWithJarvisBtn, pressed && styles.btnPressed]}
-              onPress={() => handleAiAction('rewrite')}
-              disabled={isAiProcessing}
-            >
-              <LinearGradient
-                colors={['#7C3AED', '#582CDB']}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 0 }}
-                style={styles.improveWithJarvisGradient}
-              >
-                <Text style={styles.improveWithJarvisBtnText}>
-                  {isAiProcessing ? 'Refining with AI...' : '🪄 Improve Caption with Jarvis AI'}
-                </Text>
-              </LinearGradient>
-            </Pressable>
-          </LinearGradient>
-
-          {/* Readiness Notice Toast */}
-          {composerToast && (
-            <View style={styles.composerToastBanner}>
-              <Text style={styles.composerToastIcon}>💡</Text>
-              <Text style={styles.composerToastText}>{composerToast}</Text>
-            </View>
-          )}
-
-          {/* 10. PRIMARY & SECONDARY ACTION BUTTONS */}
-          <View style={styles.composerActionRow}>
-            <Pressable
-              style={({ pressed }) => [styles.primaryComposerBtn, pressed && styles.btnPressed]}
-              onPress={handlePublishOrSchedule}
-            >
-              <LinearGradient
-                colors={['#7C3AED', '#582CDB']}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 0 }}
-                style={styles.primaryComposerGradient}
-              >
-                <Text style={styles.primaryComposerBtnText}>
-                  {publishMode === 'now' ? 'Post Now ➔' : publishMode === 'schedule' ? 'Schedule Post' : 'Save as Draft'}
-                </Text>
-              </LinearGradient>
-            </Pressable>
-
-            <Pressable
-              style={({ pressed }) => [styles.secondaryComposerBtn, pressed && styles.btnPressed]}
-              onPress={() => {
-                setPublishMode('draft');
-                handlePublishOrSchedule();
-              }}
-            >
-              <Text style={styles.secondaryComposerBtnText}>Save Draft</Text>
-            </Pressable>
           </View>
 
           {/* Bottom spacing to clear floating tab bar */}
@@ -2521,13 +1834,92 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#FAF8F5',
+    backgroundColor: '#F7F5F0',
   },
   container: {
     flex: 1,
     width: '100%',
-    backgroundColor: '#FAF8F5',
   },
+  flex1: { flex: 1 },
+  headlineWrap: { marginTop: 4, marginBottom: 16 },
+  headlineText: { fontWeight: '800', letterSpacing: -0.8, color: ds.ink },
+  headlineAccent: { color: ds.purple },
+  questChip: { alignSelf: 'flex-start', paddingHorizontal: 10, height: 24, justifyContent: 'center', borderRadius: 999, backgroundColor: ds.lavender, marginBottom: 10 },
+  questChipText: { fontSize: 11, fontWeight: '800', letterSpacing: 0.6, color: ds.purple },
+  ideaTop: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  ideaEyebrow: { flex: 1, fontSize: 11, fontWeight: '800', letterSpacing: 1, color: ds.purple },
+  changeBtn: { flexDirection: 'row', alignItems: 'center', gap: 5, height: 30, paddingHorizontal: 10, borderRadius: 999, backgroundColor: 'rgba(237, 233, 254, 0.9)' },
+  changeBtnText: { fontSize: 12.5, fontWeight: '800', color: ds.purple },
+  ideaTitle: { fontSize: 22, lineHeight: 28, fontWeight: '800', color: ds.ink, letterSpacing: -0.5, marginTop: 12 },
+  ideaBody: { fontSize: 14, lineHeight: 20, color: ds.text2, marginTop: 6 },
+  questCard: { marginTop: 12 },
+  questHead: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 },
+  questHeadText: { fontSize: 15, fontWeight: '800', color: ds.ink },
+  questXp: { fontSize: 12.5, fontWeight: '800', color: ds.purple },
+  questReq: { flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 6 },
+  questReqDot: { width: 6, height: 6, borderRadius: 3, backgroundColor: ds.purple },
+  questReqText: { flex: 1, fontSize: 13.5, lineHeight: 19, color: ds.text2 },
+  chipsWrap: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
+  note: { fontSize: 12.5, lineHeight: 18, color: ds.text3, marginTop: 10 },
+  tilesGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10, marginTop: 10 },
+  captionCard: {
+    borderRadius: 22,
+    borderWidth: 1.5,
+    borderColor: 'rgba(255, 255, 255, 0.95)',
+    backgroundColor: 'rgba(255, 255, 255, 0.8)',
+    padding: 16,
+  },
+  captionCardFocused: { borderColor: ds.purple, backgroundColor: '#FFFFFF' },
+  captionField: {
+    minHeight: 120,
+    maxHeight: 220,
+    fontSize: 15.5,
+    lineHeight: 23,
+    color: ds.ink,
+    textAlignVertical: 'top',
+    ...(Platform.OS === 'web' ? ({ outlineStyle: 'none' } as object) : {}),
+  },
+  aiWorking: { flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 8 },
+  aiWorkingText: { fontSize: 12.5, fontWeight: '700', color: ds.purple },
+  captionMeta: { flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 12, paddingTop: 12, borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: 'rgba(23, 20, 32, 0.1)' },
+  charCount: { marginLeft: 'auto', fontSize: 12, fontWeight: '700', color: ds.text3 },
+  aiRow: { flexDirection: 'row', gap: 8, marginTop: 12 },
+  tagsWrap: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
+  noTags: { fontSize: 13, color: ds.text3 },
+  addTagRow: { flexDirection: 'row', gap: 8, marginTop: 12 },
+  addTagField: {
+    flex: 1,
+    height: 42,
+    borderRadius: 12,
+    paddingHorizontal: 12,
+    fontSize: 14,
+    color: ds.ink,
+    borderWidth: 1.5,
+    borderColor: ds.line,
+    backgroundColor: '#FFFFFF',
+    ...(Platform.OS === 'web' ? ({ outlineStyle: 'none' } as object) : {}),
+  },
+  addTagBtn: { height: 42, paddingHorizontal: 16, borderRadius: 12, alignItems: 'center', justifyContent: 'center', backgroundColor: ds.purple },
+  addTagBtnText: { fontSize: 14, fontWeight: '800', color: '#FFFFFF' },
+  tagActions: { flexDirection: 'row', gap: 8, marginTop: 14 },
+  whenRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    marginTop: 12,
+    padding: 14,
+    borderRadius: 16,
+    backgroundColor: 'rgba(237, 233, 254, 0.6)',
+  },
+  whenLabel: { fontSize: 11.5, fontWeight: '800', color: ds.text3, letterSpacing: 0.4 },
+  whenValue: { fontSize: 16, fontWeight: '800', color: ds.ink, marginTop: 1 },
+  whenChange: { fontSize: 13, fontWeight: '800', color: ds.purple },
+  jarvisTime: { flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 12 },
+  jarvisTimeText: { flex: 1, fontSize: 13, lineHeight: 18, color: ds.text2 },
+  jarvisTimeBold: { fontWeight: '800', color: ds.ink },
+  readyWrap: { marginTop: 26 },
+  actions: { marginTop: 16, gap: 10 },
+  secondaryAction: {},
   scrollContent: {
     paddingHorizontal: 20,
     paddingTop: 8,
