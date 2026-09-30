@@ -22,7 +22,7 @@ import { UserProfileModal, UserProfileData } from '../components/UserProfileModa
 import { AnimatedCompletionModal } from '../components/AnimatedCompletionModal';
 import { FreeAppHeader } from '../components/FreeAppHeader';
 import { sFont, sPadding, isNarrowScreen } from '../utils/responsive';
-import Reanimated, { FadeIn, FadeInUp, Easing, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
+import Reanimated, { FadeIn, FadeInUp, FadeOut, Easing, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 import { getStarterIdeas, getFilmPlan, getSoundIdeas, checkInToday, getDefaultFilmStyle, type FilmStyle } from '../data';
 import { FilmMethodPicker, FilmPlanCard, PostedCheck, type FilmMethod } from '../components/composer/FilmBlocks';
 import { handOffToPlatform, isHandoffPlatform, HANDOFF_NAMES, type HandoffPlatform } from '../utils/handoff';
@@ -1024,6 +1024,8 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
   const filmPlan = React.useMemo(() => getFilmPlan(currentIdea ?? '', filmStyle), [currentIdea, filmStyle]);
   const soundIdeas = React.useMemo(() => getSoundIdeas(filmStyle), [filmStyle]);
   const [overlayText, setOverlayText] = useState('');
+  // Filming a dance / trend: the trend is the idea, so the idea card fades away
+  const hideIdea = (isNativeFilm || isCameraFilm) && filmStyle === 'dance';
 
   // When the creator comes back after filming, ask if it went out
   useEffect(() => {
@@ -1150,40 +1152,44 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
             />
           </Reanimated.View>
 
-          {/* IDEA */}
-          <Reanimated.View entering={FadeInUp.delay(100).duration(550)}>
-            <GlassCard strong radius={26} padding={20}>
-              <View style={styles.ideaTop}>
-                <JarvisOrb size={26} />
-                <Text style={styles.ideaEyebrow}>YOUR IDEA</Text>
-                <Pressable
-                  onPress={shuffleIdea}
-                  hitSlop={8}
-                  style={({ pressed }) => [styles.changeBtn, pressed && { transform: [{ scale: 0.92 }] }]}
-                  accessibilityRole="button"
-                  accessibilityLabel="Show me another idea"
-                >
-                  <Reanimated.View style={ideaSpinStyle}>
-                    <Svg width={13} height={13} viewBox="0 0 24 24" fill="none">
-                      <Path d="M4 12a8 8 0 0113.7-5.7L20 8M20 3v5h-5M20 12a8 8 0 01-13.7 5.7L4 16M4 21v-5h5" stroke={ds.purple} strokeWidth={2.4} strokeLinecap="round" strokeLinejoin="round" />
-                    </Svg>
-                  </Reanimated.View>
-                  <Text style={styles.changeBtnText}>Another</Text>
-                </Pressable>
-              </View>
-              {ideaThinking ? (
-                <Reanimated.View entering={FadeIn.duration(120)} style={styles.ideaThinking}>
-                  <ActivityIndicator color={ds.purple} />
-                  <Text style={styles.ideaThinkingText}>Jarvis is picking…</Text>
-                </Reanimated.View>
-              ) : (
-                <Reanimated.View key={currentIdea} entering={FadeInUp.duration(300)} style={styles.ideaTitleWrap}>
-                  <Text style={styles.ideaTitle}>“{currentIdea}”</Text>
-                </Reanimated.View>
-              )}
-              <Text style={styles.ideaBody}>Shape this idea into a post your audience will want to see.</Text>
-            </GlassCard>
-          </Reanimated.View>
+          {/* IDEA (fades away when filming a dance / trend: the trend is the idea) */}
+          {!hideIdea && (
+            <Reanimated.View exiting={FadeOut.duration(200)} entering={FadeIn.duration(250)}>
+              <Reanimated.View entering={FadeInUp.delay(100).duration(550)}>
+                <GlassCard strong radius={26} padding={20}>
+                  <View style={styles.ideaTop}>
+                    <JarvisOrb size={26} />
+                    <Text style={styles.ideaEyebrow}>YOUR IDEA</Text>
+                    <Pressable
+                      onPress={shuffleIdea}
+                      hitSlop={8}
+                      style={({ pressed }) => [styles.changeBtn, pressed && { transform: [{ scale: 0.92 }] }]}
+                      accessibilityRole="button"
+                      accessibilityLabel="Show me another idea"
+                    >
+                      <Reanimated.View style={ideaSpinStyle}>
+                        <Svg width={13} height={13} viewBox="0 0 24 24" fill="none">
+                          <Path d="M4 12a8 8 0 0113.7-5.7L20 8M20 3v5h-5M20 12a8 8 0 01-13.7 5.7L4 16M4 21v-5h5" stroke={ds.purple} strokeWidth={2.4} strokeLinecap="round" strokeLinejoin="round" />
+                        </Svg>
+                      </Reanimated.View>
+                      <Text style={styles.changeBtnText}>Another</Text>
+                    </Pressable>
+                  </View>
+                  {ideaThinking ? (
+                    <Reanimated.View entering={FadeIn.duration(120)} style={styles.ideaThinking}>
+                      <ActivityIndicator color={ds.purple} />
+                      <Text style={styles.ideaThinkingText}>Jarvis is picking…</Text>
+                    </Reanimated.View>
+                  ) : (
+                    <Reanimated.View key={currentIdea} entering={FadeInUp.duration(300)} style={styles.ideaTitleWrap}>
+                      <Text style={styles.ideaTitle}>“{currentIdea}”</Text>
+                    </Reanimated.View>
+                  )}
+                  <Text style={styles.ideaBody}>Shape this idea into a post your audience will want to see.</Text>
+                </GlassCard>
+              </Reanimated.View>
+            </Reanimated.View>
+          )}
 
           {/* QUEST REQUIREMENTS (when started from a quest) */}
           {questDraft?.requirements && questDraft.requirements.length > 0 && (
@@ -1331,6 +1337,7 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
                 <Text style={styles.aiWorkingText}>Jarvis is rewriting…</Text>
               </View>
             )}
+            <Text style={styles.charCount}>{caption.length} characters</Text>
             <View style={styles.captionMeta}>
               <CyclePill
                 label="TONE"
@@ -1342,7 +1349,6 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
                 value={captionCta === 'Ask Question' ? 'Question' : captionCta === 'Save Post' ? 'Save' : 'Share'}
                 onPress={() => setCaptionCta(captionCtas[(captionCtas.indexOf(captionCta) + 1) % captionCtas.length])}
               />
-              <Text style={styles.charCount}>{caption.length}</Text>
             </View>
             <View style={styles.aiRow}>
               <AiAction label="Rewrite" onPress={() => handleAiAction('rewrite')} disabled={isAiProcessing || aiEditsLeft === 0} />
@@ -2036,8 +2042,8 @@ const styles = StyleSheet.create({
   },
   aiWorking: { flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 8 },
   aiWorkingText: { fontSize: 12.5, fontWeight: '700', color: ds.purple },
-  captionMeta: { flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 12, paddingTop: 12, borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: 'rgba(23, 20, 32, 0.1)' },
-  charCount: { marginLeft: 'auto', fontSize: 12, fontWeight: '700', color: ds.text3 },
+  captionMeta: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', gap: 6, marginTop: 8, paddingTop: 12, borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: 'rgba(23, 20, 32, 0.1)' },
+  charCount: { alignSelf: 'flex-end', fontSize: 11.5, fontWeight: '700', color: ds.text3, marginTop: 6 },
   aiRow: { flexDirection: 'row', gap: 8, marginTop: 12 },
   tagsWrap: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
   noTags: { fontSize: 13, color: ds.text3 },
