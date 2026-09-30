@@ -77,8 +77,13 @@ export function TodayCard({
             <Text style={{ color: ds.purple }}>{posts.length}</Text> post{posts.length === 1 ? '' : 's'} today
           </Text>
           <Text style={styles.heroBody}>
-            {next ? `Next up at ${next.time}` : 'All done for today'}
-            {drafts > 0 ? ` · ${drafts} draft${drafts === 1 ? '' : 's'} to finish` : ''}
+            {[
+              next ? `Next up at ${next.time}` : null,
+              posted > 0 ? `${posted} posted` : null,
+              drafts > 0 ? `${drafts} draft${drafts === 1 ? '' : 's'} to finish` : null,
+            ]
+              .filter(Boolean)
+              .join(' · ') || 'All done for today'}
           </Text>
           <Segments total={posts.length} done={posted} />
         </>

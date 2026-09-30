@@ -268,8 +268,8 @@ export const QuestsScreen: React.FC<QuestsScreenProps> = ({
           {/* 5. PRO (gold = Pro only) */}
           <Reanimated.View entering={FadeInUp.delay(500).duration(550)} style={styles.section}>
             <ProUpsellCard
-              title="Unlock Pro quests"
-              benefits={['Deeper analytics', 'Advanced AI strategy', 'Priority quest board']}
+              title="Get more with Jarvis Pro"
+              benefits={['A daily brief from Jarvis', 'Unlimited repurposing', 'Voice Studio']}
               buttonTitle="Explore Pro"
               onUpgrade={handleExplorePro}
             />
