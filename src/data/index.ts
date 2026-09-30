@@ -691,3 +691,63 @@ export function draftAgo(savedAt: number): string {
   const h = Math.round(mins / 60);
   return h < 24 ? `${h} h ago` : `${Math.round(h / 24)} d ago`;
 }
+
+// ---------------------------------------------------------------------------
+// Caption writer (Create → Caption): three options for a topic, shaped by the
+// goal (the ending) and tone. Mock copywriting until Jarvis writes it.
+// ---------------------------------------------------------------------------
+
+export const CAPTION_TONES = ['Helpful', 'Honest', 'Motivational', 'Funny', 'Professional'] as const;
+export type CaptionTone = (typeof CAPTION_TONES)[number];
+
+export interface CaptionOption {
+  id: string;
+  label: string;
+  body: string;
+  ending: string;
+  hashtags: string;
+}
+
+const ENDING_BY_GOAL: Record<IdeaGoal, string[]> = {
+  followers: ['Send this to someone who needs to hear it.', 'Share this with a friend who gets it.'],
+  saves: ['Save this for later so you don’t forget it.', 'Save this for your next filming day.'],
+  comments: ['What would you add? Tell me in the comments.', 'Which one are you trying first?'],
+  often: ['What’s yours?', 'Your turn. What’s one small win today?'],
+};
+
+const TAGS_BY_GOAL: Record<IdeaGoal, string> = {
+  followers: '#CreatorCommunity',
+  saves: '#SaveThis',
+  comments: '#LetsTalk',
+  often: '#PostDaily',
+};
+
+const toneTouch = (text: string, tones: string[]) => {
+  let t = text;
+  if (tones.includes('Funny')) t += ' (Yes, really.)';
+  if (tones.includes('Motivational')) t += ' You’ve got this.';
+  return t;
+};
+
+export function getCaptionOptions(topic: string, goal: IdeaGoal, tones: string[], round = 0): CaptionOption[] {
+  const t = topic.replace(/[“”"]/g, '').trim() || 'My creator journey';
+  const lower = t.charAt(0).toLowerCase() + t.slice(1);
+  const bodies = [
+    { label: 'Story', body: `${t}. I used to wait until everything felt perfect before posting. Sharing small, honest lessons made it so much easier.` },
+    { label: 'Quick tips', body: `${t}:\n1. Start small\n2. Keep it under 5 minutes\n3. Post it the same day` },
+    { label: 'Honest take', body: `Honest moment: ${lower}. Nobody tells you this part, so here it is.` },
+    { label: 'Before & after', body: `Before: overthinking every post. After: ${lower}, and posting feels light again.` },
+    { label: 'One lesson', body: `If I could tell my past self one thing about ${lower}, it would be this: done beats perfect.` },
+  ];
+  const endings = ENDING_BY_GOAL[goal];
+  return [0, 1, 2].map((i) => {
+    const b = bodies[(i + round * 3) % bodies.length];
+    return {
+      id: `${round}-${i}`,
+      label: b.label,
+      body: toneTouch(b.body, tones),
+      ending: endings[(i + round) % endings.length],
+      hashtags: `#CreatorTips #ContentCreation ${TAGS_BY_GOAL[goal]}`,
+    };
+  });
+}

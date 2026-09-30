@@ -110,7 +110,8 @@ export default function App() {
   const [selectedIdeaTitle, setSelectedIdeaTitle] = useState('One thing I wish I knew before I started creating');
   const [composerIdeaTitle, setComposerIdeaTitle] = useState('One thing I wish I knew before I started creating');
   // Goal picked on the Ideas page shapes the composer's caption
-  const [composerIdeaGoal, setComposerIdeaGoal] = useState<{ goal: IdeaGoal; hook?: string } | null>(null);
+  // Also carries a ready caption + tags from the Caption writer
+  const [composerIdeaGoal, setComposerIdeaGoal] = useState<{ goal?: IdeaGoal; hook?: string; caption?: string; tags?: string[] } | null>(null);
   const [composerIdeaFormat, setComposerIdeaFormat] = useState<'short_video' | 'carousel' | 'image' | 'long_video' | 'text' | undefined>(undefined);
   const [composerQuestDraft, setComposerQuestDraft] = useState<{
     title: string;
@@ -956,9 +957,13 @@ export default function App() {
               onLogout={handleLogout}
               onOpenSchedule={() => navigateTo('schedule')}
               onOpenJarvisPro={() => navigateTo('jarvis-pro')}
-              onAddToPost={(captionText) => {
-                if (captionText) setComposerIdeaTitle(captionText);
-                setComposerIdeaGoal(null);
+              onAddToPost={(captionText, hashtags, topic) => {
+                // The caption goes into the composer's caption box (not the idea title)
+                if (topic) setComposerIdeaTitle(topic);
+                setComposerIdeaGoal({
+                  caption: captionText,
+                  tags: (hashtags || '').split(/\s+/).filter((t) => t.startsWith('#')),
+                });
                 navigateTo('composer');
               }}
               onNavigateTab={handleTabNavigation}

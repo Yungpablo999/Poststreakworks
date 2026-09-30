@@ -66,7 +66,7 @@ import { ds } from '../theme/colors';
 interface PostComposerScreenProps {
   ideaTitle?: string;
   /** Goal picked on the Ideas page; the caption is written for it. */
-  ideaGoal?: { goal: IdeaGoal; hook?: string } | null;
+  ideaGoal?: { goal?: IdeaGoal; hook?: string; caption?: string; tags?: string[] } | null;
   questDraft?: {
     title: string;
     hook: string;
@@ -502,8 +502,15 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
   }, [ideaTitle]);
 
   // Idea picked on the Ideas page with a goal: write the caption for that goal
+  // …or a finished caption + tags from the Caption writer
   useEffect(() => {
-    if (!ideaGoal || !ideaTitle) return;
+    if (!ideaGoal) return;
+    if (ideaGoal.caption) {
+      setCaption(ideaGoal.caption);
+      if (ideaGoal.tags?.length) setTags(ideaGoal.tags);
+      return;
+    }
+    if (!ideaGoal.goal || !ideaTitle) return;
     const g = getGoalCaption(ideaTitle, ideaGoal.goal, ideaGoal.hook);
     setCaption(g.caption);
     setCaptionTone(g.tone);
@@ -1279,7 +1286,9 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
             </View>
           </View>
           <Text style={styles.note}>
-            {ideaGoal
+            {ideaGoal?.caption
+              ? 'From the Caption writer. Edit it here any time.'
+              : ideaGoal?.goal
               ? `Written to ${IDEA_GOALS.find((g) => g.id === ideaGoal.goal)?.label.toLowerCase()}. Tone and ending are set for that.`
               : 'Tip: name the exact moment or mistake, and one thing people can try.'}
           </Text>
