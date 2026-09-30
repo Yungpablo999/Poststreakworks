@@ -25,6 +25,7 @@ import { sFont, sPadding, isNarrowScreen } from '../utils/responsive';
 import Reanimated, { FadeIn, FadeInUp, FadeOut, Easing, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 import { getStarterIdeas, getFilmPlan, getSoundIdeas, checkInToday, getDefaultFilmStyle, type FilmStyle } from '../data';
 import { ScheduleSheet } from '../components/composer/ScheduleSheet';
+import { PlatformLogo } from '../components/onboarding/PlatformLogo';
 import { FilmMethodPicker, FilmPlanCard, PostedCheck, type FilmMethod } from '../components/composer/FilmBlocks';
 import { handOffToPlatform, isHandoffPlatform, HANDOFF_NAMES, type HandoffPlatform } from '../utils/handoff';
 import { captureWithCamera, pickFromLibrary, type PickedMedia } from '../utils/media';
@@ -766,7 +767,7 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
 
     // 3. Post is 100% Ready
     if (publishMode === 'now' && isNativeFilm) {
-      if (handoffPlatforms[0]) openPlatformToFilm(handoffPlatforms[0]);
+      if (filmApp) openPlatformToFilm(filmApp);
       else showToastNotice('Pick TikTok, Instagram or YouTube to film there');
       return;
     }
@@ -909,6 +910,11 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
   const [pendingHandoff, setPendingHandoff] = useState<HandoffPlatform | null>(null);
   const [showPostedCheck, setShowPostedCheck] = useState(false);
   const handoffPlatforms = selectedPlatforms.filter(isHandoffPlatform);
+  // With several platforms picked, the creator chooses which app to film in
+  // (the one whose sound they want); the same video can go to the others after.
+  const [filmAppChoice, setFilmAppChoice] = useState<HandoffPlatform | null>(null);
+  const filmApp: HandoffPlatform | undefined =
+    filmAppChoice && handoffPlatforms.includes(filmAppChoice) ? filmAppChoice : handoffPlatforms[0];
   // Talking / dance / skit / text-on-screen, pre-picked from the creator's niche
   const [filmStyle, setFilmStyle] = useState<FilmStyle>(() => getDefaultFilmStyle(userProfile?.niches));
   const filmPlan = React.useMemo(() => getFilmPlan(currentIdea ?? '', filmStyle), [currentIdea, filmStyle]);
@@ -1325,13 +1331,49 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
           </View>
           {composerToast && <ComposerToast message={composerToast} />}
           <View style={styles.actions}>
+            {isNativeFilm && publishMode === 'now' && handoffPlatforms.length > 1 && filmApp && (
+              <Reanimated.View entering={FadeIn.duration(200)}>
+                <Text style={styles.filmInLabel}>Film in</Text>
+                <View style={styles.filmInRow}>
+                  {handoffPlatforms.map((p) => {
+                    const on = p === filmApp;
+                    return (
+                      <Pressable
+                        key={p}
+                        onPress={() => {
+                          if (Platform.OS !== 'web') Haptics.selectionAsync();
+                          setFilmAppChoice(p);
+                        }}
+                        accessibilityRole="radio"
+                        accessibilityState={{ checked: on }}
+                        accessibilityLabel={`Film in ${HANDOFF_NAMES[p]}`}
+                        style={[styles.filmInChip, on && styles.filmInChipOn]}
+                      >
+                        <PlatformLogo type={p} size={22} />
+                        <Text style={[styles.filmInText, on && { color: ds.purple }]} numberOfLines={1}>
+                          {HANDOFF_NAMES[p]}
+                        </Text>
+                      </Pressable>
+                    );
+                  })}
+                </View>
+                <Text style={styles.filmInNote}>
+                  Film once where you want the sound, then share the same video to{' '}
+                  {handoffPlatforms
+                    .filter((p) => p !== filmApp)
+                    .map((p) => HANDOFF_NAMES[p])
+                    .join(' and ')}
+                  .
+                </Text>
+              </Reanimated.View>
+            )}
             <AppButton
               title={
                 publishMode === 'draft'
                   ? 'Save draft'
                   : isNativeFilm
                   ? publishMode === 'now'
-                    ? `Film in ${handoffPlatforms[0] ? HANDOFF_NAMES[handoffPlatforms[0]] : 'the app'}`
+                    ? `Film in ${filmApp ? HANDOFF_NAMES[filmApp] : 'the app'}`
                     : 'Set reminder'
                   : publishMode === 'now'
                   ? 'Post now'
@@ -1694,6 +1736,24 @@ const styles = StyleSheet.create({
   jarvisTimeBold: { fontWeight: '800', color: ds.ink },
   readyWrap: { marginTop: 26 },
   actions: { marginTop: 16, gap: 10 },
+  filmInLabel: { fontSize: 13, fontWeight: '800', color: ds.text2, marginBottom: 8 },
+  filmInRow: { flexDirection: 'row', gap: 8 },
+  // Logo above name so three platforms fit side by side on 320
+  filmInChip: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 4,
+    paddingVertical: 8,
+    paddingHorizontal: 4,
+    borderRadius: 14,
+    borderWidth: 1.5,
+    borderColor: 'rgba(255, 255, 255, 0.95)',
+    backgroundColor: 'rgba(255, 255, 255, 0.75)',
+  },
+  filmInChipOn: { borderColor: ds.purple, backgroundColor: 'rgba(237, 233, 254, 0.9)' },
+  filmInText: { fontSize: 12, fontWeight: '800', color: ds.ink },
+  filmInNote: { fontSize: 12.5, lineHeight: 18, color: ds.text3, marginTop: 8, marginBottom: 4 },
   secondaryAction: {},
   scrollContent: {
     paddingHorizontal: 20,
