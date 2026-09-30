@@ -194,7 +194,7 @@ function formatFor(platforms: string[]): string {
 /** Ideas that match the creator's niches first, then general starters. */
 export function getStarterIdeas(niches: string[], platforms: string[]): StarterIdea[] {
   const format = formatFor(platforms);
-  const fromNiches = niches.flatMap((n) =>
+  const fromNiches = normalizeNiches(niches).flatMap((n) =>
     (IDEAS_BY_NICHE[n] ?? []).map((idea, i) => ({ ...idea, id: `${n}-${i}`, niche: n, format })),
   );
   // Interleave niches so shuffling moves between them
@@ -548,4 +548,60 @@ const SOUND_IDEAS: Record<FilmStyle, Omit<SoundIdea, 'isSample'>[]> = {
 
 export function getSoundIdeas(style: FilmStyle = 'talking'): SoundIdea[] {
   return SOUND_IDEAS[style].map((s) => ({ ...s, isSample: true as const }));
+}
+
+// ---------------------------------------------------------------------------
+// Ideas feed (Create → Ideas)
+// Ideas for the creator's chosen niches, each with a one-line reason tied to
+// the goal they picked. Mock until the real Jarvis idea generator.
+// ---------------------------------------------------------------------------
+
+export type IdeaGoal = 'followers' | 'saves' | 'comments' | 'often';
+
+export const IDEA_GOALS: { id: IdeaGoal; label: string }[] = [
+  { id: 'followers', label: 'Grow followers' },
+  { id: 'saves', label: 'Get saves' },
+  { id: 'comments', label: 'Get comments' },
+  { id: 'often', label: 'Post more often' },
+];
+
+export const NICHE_LABELS: Record<string, string> = {
+  lifestyle: 'Lifestyle',
+  comedy: 'Comedy',
+  education: 'Education',
+  beauty: 'Beauty & Fashion',
+  food: 'Food',
+  fitness: 'Fitness',
+  tech: 'Tech & Business',
+  music: 'Music & Dance',
+};
+
+const WHY_BY_GOAL: Record<IdeaGoal, string> = {
+  followers: 'Relatable ideas get shared, which puts you in front of new people.',
+  saves: 'Useful and quick to follow, so people save it for later.',
+  comments: 'Ends on a question people actually want to answer.',
+  often: 'Fast to film and easy to post today.',
+};
+
+export interface FeedIdea extends StarterIdea {
+  why: string;
+}
+
+export function getIdeaFeed(niches: string[], goal: IdeaGoal, platforms: string[] = []): FeedIdea[] {
+  const list = getStarterIdeas(niches.length ? niches : ['lifestyle'], platforms);
+  return list.map((i) => ({ ...i, why: WHY_BY_GOAL[goal] }));
+}
+
+/** Niche ids from either ids ("tech") or display names ("Tech & AI"). */
+export function normalizeNiches(input: string[] = []): string[] {
+  const ids = Object.keys(NICHE_LABELS);
+  const out = input
+    .map((raw) => {
+      const v = raw.trim().toLowerCase();
+      if (ids.includes(v)) return v;
+      const first = v.split(/[\s&]+/)[0];
+      return ids.find((id) => id === first || NICHE_LABELS[id].toLowerCase().startsWith(first)) ?? null;
+    })
+    .filter((x): x is string => !!x);
+  return Array.from(new Set(out));
 }
