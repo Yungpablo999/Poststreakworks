@@ -794,7 +794,7 @@ export const ScriptScreen: React.FC<ScriptScreenProps> = ({
             </View>
           </ScrollView>
 
-          {toast && <ComposerToast message={toast} floating />}
+          {toast && <ComposerToast message={toast} />}
 
           {/* UNIFIED SIGNATURE FLOATING TAB BAR */}
           <FloatingTabBar activeTab={activeTab} onTabPress={handleTabPress} />

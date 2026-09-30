@@ -577,7 +577,6 @@ export const ContentAngleScreen: React.FC<ContentAngleScreenProps> = ({
             />
           </Reanimated.View>
 
-          {actionToast && <ComposerToast message={actionToast} />}
 
           {/* MORE IDEAS */}
           <Text style={styles.sectionLabel}>More ideas</Text>
@@ -634,6 +633,8 @@ export const ContentAngleScreen: React.FC<ContentAngleScreenProps> = ({
             </>
           )}
         </ScrollView>
+
+        {actionToast && <ComposerToast message={actionToast} />}
 
         {/* UNIFIED SIGNATURE FLOATING TAB BAR */}
         <FloatingTabBar activeTab={activeTab} onTabPress={handleTabPress} />

@@ -1363,7 +1363,6 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
           <View style={styles.readyWrap}>
             <ReadinessCard percent={readinessPercent} steps={readinessSteps} onStep={(k) => navigateToSection(k as 'format' | 'caption' | 'platforms' | 'media' | 'schedule')} />
           </View>
-          {composerToast && <ComposerToast message={composerToast} />}
           <View style={styles.actions}>
             {isNativeFilm && publishMode === 'now' && handoffPlatforms.length > 1 && filmApp && (
               <Reanimated.View entering={FadeIn.duration(200)}>
@@ -1429,6 +1428,8 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
           </View>
 
         </ScrollView>
+
+        {composerToast && <ComposerToast message={composerToast} />}
 
         {showPostedCheck && pendingHandoff && (
           <PostedCheck

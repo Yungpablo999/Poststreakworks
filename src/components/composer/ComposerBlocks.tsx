@@ -21,6 +21,7 @@ import { Text } from '../ui/AppText';
 import { GlassCard } from '../glass/GlassCard';
 import { PlatformLogo, type PlatformLogoType } from '../onboarding/PlatformLogo';
 import { ds } from '../../theme/colors';
+import { AppToast } from '../ui/AppToast';
 
 // Building blocks for the post composer. Each step shows a number that turns
 // into a green tick once that part is done, so progress is visible as you go.
@@ -575,18 +576,10 @@ export function ReadinessCard({
   );
 }
 
-export function ComposerToast({ message, floating }: { message: string; floating?: boolean }) {
-  return (
-    <Animated.View
-      entering={FadeIn.duration(200)}
-      exiting={FadeOut.duration(200)}
-      pointerEvents="none"
-      // floating: pinned just above the tab bar, visible wherever you've scrolled
-      style={[styles.toast, floating && styles.toastFloating]}
-    >
-      <Text style={styles.toastText}>{message}</Text>
-    </Animated.View>
-  );
+// Same frosted-glass message as the rest of the app, pinned above the tab bar.
+// Render it at the screen root (not inside a ScrollView).
+export function ComposerToast({ message }: { message: string; floating?: boolean }) {
+  return <AppToast message={message} />;
 }
 
 const styles = StyleSheet.create({
@@ -818,14 +811,4 @@ const styles = StyleSheet.create({
   readyStepDone: { backgroundColor: ds.greenBg },
   readyDot: { width: 6, height: 6, borderRadius: 3, backgroundColor: ds.text3 },
   readyStepText: { fontSize: 12, fontWeight: '800', color: ds.text2 },
-  toast: {
-    alignSelf: 'center',
-    marginTop: 12,
-    paddingHorizontal: 14,
-    paddingVertical: 9,
-    borderRadius: 999,
-    backgroundColor: ds.ink,
-  },
-  toastFloating: { position: 'absolute', bottom: 108, marginTop: 0, maxWidth: '90%' },
-  toastText: { fontSize: 13, fontWeight: '700', color: '#FFFFFF', textAlign: 'center' },
 });
