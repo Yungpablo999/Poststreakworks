@@ -14,7 +14,15 @@
           "launchMode": "launcher"
         }
       ],
-      "expo-font"
+      "expo-font",
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "PostStreak uses your photos so you can add videos and images to your posts.",
+          "cameraPermission": "PostStreak uses your camera so you can film posts without leaving the app.",
+          "microphonePermission": "PostStreak uses your microphone to record sound with your videos."
+        }
+      ]
     ],
     "ios": {
       "supportsTablet": true,

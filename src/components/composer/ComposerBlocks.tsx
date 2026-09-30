@@ -265,6 +265,8 @@ export function MediaZone({
   sub,
   addLabel,
   onAdd,
+  onCamera,
+  cameraLabel,
   onThumbnail,
   onRemove,
 }: {
@@ -275,6 +277,9 @@ export function MediaZone({
   sub: string;
   addLabel: string;
   onAdd: () => void;
+  /** Take a photo / record with the phone camera instead of uploading */
+  onCamera?: () => void;
+  cameraLabel?: string;
   onThumbnail: () => void;
   onRemove: () => void;
 }) {
@@ -326,6 +331,22 @@ export function MediaZone({
           <Text style={styles.dropBtnText}>{isText ? 'Add a visual' : addLabel}</Text>
         </View>
       </Pressable>
+      {onCamera && (
+        <Pressable
+          onPress={() => {
+            tick();
+            onCamera();
+          }}
+          accessibilityRole="button"
+          style={({ pressed }) => [styles.cameraBtn, pressed && { transform: [{ scale: 0.97 }] }, Platform.OS === 'web' && ({ cursor: 'pointer' } as object)]}
+        >
+          <Svg width={16} height={16} viewBox="0 0 24 24" fill="none">
+            <Rect x="3" y="6" width="13" height="12" rx="3" stroke={ds.purple} strokeWidth={2} />
+            <Path d="M16 10l5-3v10l-5-3" stroke={ds.purple} strokeWidth={2} strokeLinejoin="round" />
+          </Svg>
+          <Text style={styles.cameraBtnText}>{cameraLabel ?? 'Use camera'}</Text>
+        </Pressable>
+      )}
     </GlassCard>
   );
 }
@@ -672,6 +693,17 @@ const styles = StyleSheet.create({
   dropSub: { fontSize: 12.5, lineHeight: 17, color: ds.text2, marginTop: 3, textAlign: 'center' },
   dropBtn: { marginTop: 14, paddingHorizontal: 16, height: 38, justifyContent: 'center', borderRadius: 999, backgroundColor: ds.purple },
   dropBtnText: { fontSize: 13.5, fontWeight: '800', color: '#FFFFFF' },
+  cameraBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    height: 42,
+    marginTop: 10,
+    borderRadius: 14,
+    backgroundColor: ds.lavender,
+  },
+  cameraBtnText: { fontSize: 13.5, fontWeight: '800', color: ds.purple },
   mediaRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },
   mediaThumb: {
     width: 48,

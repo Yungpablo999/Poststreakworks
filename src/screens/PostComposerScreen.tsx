@@ -22,10 +22,11 @@ import { UserProfileModal, UserProfileData } from '../components/UserProfileModa
 import { AnimatedCompletionModal } from '../components/AnimatedCompletionModal';
 import { FreeAppHeader } from '../components/FreeAppHeader';
 import { sFont, sPadding, isNarrowScreen } from '../utils/responsive';
-import Reanimated, { FadeIn, FadeInUp, Easing, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
+import Reanimated, { FadeIn, FadeInUp, FadeOut, Easing, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 import { getStarterIdeas, getFilmPlan, getSoundIdeas, checkInToday, getDefaultFilmStyle, type FilmStyle } from '../data';
 import { FilmMethodPicker, FilmPlanCard, PostedCheck, type FilmMethod } from '../components/composer/FilmBlocks';
 import { handOffToPlatform, isHandoffPlatform, HANDOFF_NAMES, type HandoffPlatform } from '../utils/handoff';
+import { captureWithCamera, pickFromLibrary, type PickedMedia } from '../utils/media';
 import { AppState } from 'react-native';
 import { GlassBackdrop } from '../components/glass/GlassBackdrop';
 import { GlassCard } from '../components/glass/GlassCard';
@@ -758,6 +759,24 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
     }
   };
 
+  // Real camera / camera roll (expo-image-picker)
+  const [pickedMedia, setPickedMedia] = useState<PickedMedia | null>(null);
+  const wantsVideo = selectedFormat === 'short_video' || selectedFormat === 'long_video';
+  const acceptMedia = (m: PickedMedia | null) => {
+    if (!m) return;
+    if (Platform.OS !== 'web') Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    setPickedMedia(m);
+    setHasMedia(true);
+    setMediaType(m.kind);
+  };
+  const addFromLibrary = async () => acceptMedia(await pickFromLibrary(wantsVideo ? 'video' : 'image'));
+  const addFromCamera = async () => acceptMedia(await captureWithCamera(wantsVideo ? 'video' : 'image'));
+  const clearMedia = () => {
+    setPickedMedia(null);
+    setHasMedia(false);
+    setHasThumbnail(false);
+  };
+
   const [composerToast, setComposerToast] = useState<string | null>(null);
 
   const showToastNotice = (msg: string) => {
@@ -944,6 +963,7 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
   const isCaptionReady = caption.trim().length >= 10;
   const isPlatformsReady = selectedPlatforms.length > 0;
   const isNativeFilm = selectedFormat === 'short_video' && filmMethod === 'native';
+  const isCameraFilm = selectedFormat === 'short_video' && filmMethod === 'camera';
   const isMediaReady = selectedFormat === 'text' || hasMedia || isNativeFilm;
   const isScheduleReady =
     publishMode === 'now' ||
@@ -979,10 +999,6 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
         triggerModalAnim();
         setShowCalendarModal(true);
       }, 350);
-    } else if (section === 'media' && !isMediaReady) {
-      setTimeout(() => {
-        handleUploadMedia(selectedFormat === 'image' ? 'image' : 'video');
-      }, 350);
     }
   };
 
@@ -1007,6 +1023,9 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
   const [filmStyle, setFilmStyle] = useState<FilmStyle>(() => getDefaultFilmStyle(userProfile?.niches));
   const filmPlan = React.useMemo(() => getFilmPlan(currentIdea ?? '', filmStyle), [currentIdea, filmStyle]);
   const soundIdeas = React.useMemo(() => getSoundIdeas(filmStyle), [filmStyle]);
+  const [overlayText, setOverlayText] = useState('');
+  // Filming a dance trend: the trend is the idea, so the idea card steps aside
+  const hideIdea = (isNativeFilm || isCameraFilm) && filmStyle === 'dance';
 
   // When the creator comes back after filming, ask if it went out
   useEffect(() => {
@@ -1074,7 +1093,7 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
   const readinessSteps = [
     { key: 'platforms', label: 'Platforms', done: isPlatformsReady },
     { key: 'format', label: 'Format', done: isFormatReady },
-    { key: 'media', label: isNativeFilm ? 'Film plan' : 'Media', done: isMediaReady },
+    { key: 'media', label: isNativeFilm ? 'Film plan' : isCameraFilm ? 'Video' : 'Media', done: isMediaReady },
     { key: 'caption', label: 'Caption', done: isCaptionReady },
     { key: 'schedule', label: 'Timing', done: isScheduleReady },
   ];
@@ -1133,40 +1152,44 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
             />
           </Reanimated.View>
 
-          {/* IDEA */}
-          <Reanimated.View entering={FadeInUp.delay(100).duration(550)}>
-            <GlassCard strong radius={26} padding={20}>
-              <View style={styles.ideaTop}>
-                <JarvisOrb size={26} />
-                <Text style={styles.ideaEyebrow}>YOUR IDEA</Text>
-                <Pressable
-                  onPress={shuffleIdea}
-                  hitSlop={8}
-                  style={({ pressed }) => [styles.changeBtn, pressed && { transform: [{ scale: 0.92 }] }]}
-                  accessibilityRole="button"
-                  accessibilityLabel="Show me another idea"
-                >
-                  <Reanimated.View style={ideaSpinStyle}>
-                    <Svg width={13} height={13} viewBox="0 0 24 24" fill="none">
-                      <Path d="M4 12a8 8 0 0113.7-5.7L20 8M20 3v5h-5M20 12a8 8 0 01-13.7 5.7L4 16M4 21v-5h5" stroke={ds.purple} strokeWidth={2.4} strokeLinecap="round" strokeLinejoin="round" />
-                    </Svg>
+          {/* IDEA (hidden when filming a dance trend: the trend is the idea) */}
+          {!hideIdea && (
+            <Reanimated.View exiting={FadeOut.duration(180)}>
+            <Reanimated.View entering={FadeInUp.delay(100).duration(550)}>
+              <GlassCard strong radius={26} padding={20}>
+                <View style={styles.ideaTop}>
+                  <JarvisOrb size={26} />
+                  <Text style={styles.ideaEyebrow}>YOUR IDEA</Text>
+                  <Pressable
+                    onPress={shuffleIdea}
+                    hitSlop={8}
+                    style={({ pressed }) => [styles.changeBtn, pressed && { transform: [{ scale: 0.92 }] }]}
+                    accessibilityRole="button"
+                    accessibilityLabel="Show me another idea"
+                  >
+                    <Reanimated.View style={ideaSpinStyle}>
+                      <Svg width={13} height={13} viewBox="0 0 24 24" fill="none">
+                        <Path d="M4 12a8 8 0 0113.7-5.7L20 8M20 3v5h-5M20 12a8 8 0 01-13.7 5.7L4 16M4 21v-5h5" stroke={ds.purple} strokeWidth={2.4} strokeLinecap="round" strokeLinejoin="round" />
+                      </Svg>
+                    </Reanimated.View>
+                    <Text style={styles.changeBtnText}>Another</Text>
+                  </Pressable>
+                </View>
+                {ideaThinking ? (
+                  <Reanimated.View entering={FadeIn.duration(120)} style={styles.ideaThinking}>
+                    <ActivityIndicator color={ds.purple} />
+                    <Text style={styles.ideaThinkingText}>Jarvis is picking…</Text>
                   </Reanimated.View>
-                  <Text style={styles.changeBtnText}>Another</Text>
-                </Pressable>
-              </View>
-              {ideaThinking ? (
-                <Reanimated.View entering={FadeIn.duration(120)} style={styles.ideaThinking}>
-                  <ActivityIndicator color={ds.purple} />
-                  <Text style={styles.ideaThinkingText}>Jarvis is picking…</Text>
-                </Reanimated.View>
-              ) : (
-                <Reanimated.View key={currentIdea} entering={FadeInUp.duration(300)} style={styles.ideaTitleWrap}>
-                  <Text style={styles.ideaTitle}>“{currentIdea}”</Text>
-                </Reanimated.View>
-              )}
-              <Text style={styles.ideaBody}>Shape this idea into a post your audience will want to see.</Text>
-            </GlassCard>
-          </Reanimated.View>
+                ) : (
+                  <Reanimated.View key={currentIdea} entering={FadeInUp.duration(300)} style={styles.ideaTitleWrap}>
+                    <Text style={styles.ideaTitle}>“{currentIdea}”</Text>
+                  </Reanimated.View>
+                )}
+                <Text style={styles.ideaBody}>Shape this idea into a post your audience will want to see.</Text>
+              </GlassCard>
+            </Reanimated.View>
+            </Reanimated.View>
+          )}
 
           {/* QUEST REQUIREMENTS (when started from a quest) */}
           {questDraft?.requirements && questDraft.requirements.length > 0 && (
@@ -1248,19 +1271,25 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
           {/* 3. MEDIA */}
           <StepHeader
             n={3}
-            title={isNativeFilm ? 'Film it' : 'Media'}
+            title={isNativeFilm || isCameraFilm ? 'Film it' : 'Media'}
             done={isMediaReady}
             onLayout={(e) => {
               sectionPositions.current.media = e.nativeEvent.layout.y;
             }}
           />
-          {isNativeFilm ? (
+          {isNativeFilm || isCameraFilm ? (
             <FilmPlanCard
               plan={filmPlan}
               sounds={soundIdeas}
               platforms={handoffPlatforms}
               onOpen={openPlatformToFilm}
               onStyleChange={setFilmStyle}
+              mode={isCameraFilm ? 'camera' : 'native'}
+              overlayText={overlayText}
+              onOverlayChange={setOverlayText}
+              recording={hasMedia && pickedMedia?.kind === 'video' ? { duration: pickedMedia.duration } : null}
+              onRecord={addFromCamera}
+              onRemoveRecording={clearMedia}
             />
           ) : (
           <MediaZone
@@ -1270,12 +1299,11 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
             label={currentFormatConfig.mediaLabel}
             sub={dynamicMediaSub}
             addLabel={currentFormatConfig.primaryMediaActionText}
-            onAdd={() => handleUploadMedia(selectedFormat === 'image' || selectedFormat === 'text' ? 'image' : 'video')}
+            onAdd={addFromLibrary}
+            onCamera={addFromCamera}
+            cameraLabel={wantsVideo ? 'Record with camera' : 'Take a photo'}
             onThumbnail={() => setHasThumbnail(!hasThumbnail)}
-            onRemove={() => {
-              setHasMedia(false);
-              setHasThumbnail(false);
-            }}
+            onRemove={clearMedia}
           />
           )}
 

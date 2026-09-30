@@ -3,7 +3,7 @@ import { View, Pressable, StyleSheet, Platform } from 'react-native';
 import Animated, { Easing, FadeIn, FadeInUp, FadeOutDown } from 'react-native-reanimated';
 import Svg, { Path, Rect, Circle } from 'react-native-svg';
 import * as Haptics from 'expo-haptics';
-import { Text } from '../ui/AppText';
+import { Text, TextInput } from '../ui/AppText';
 import { AppButton } from '../ui/AppButton';
 import { GlassCard } from '../glass/GlassCard';
 import { PlatformLogo } from '../onboarding/PlatformLogo';
@@ -15,9 +15,9 @@ import { HANDOFF_NAMES, type HandoffPlatform } from '../../utils/handoff';
 // and filters) or upload a finished video. The "film it" path keeps PostStreak
 // as the plan before and the tracker after.
 
-export type FilmMethod = 'native' | 'upload';
+export type FilmMethod = 'native' | 'camera' | 'upload';
 
-function MethodCard({
+function MethodRow({
   selected,
   title,
   body,
@@ -27,7 +27,7 @@ function MethodCard({
   selected: boolean;
   title: string;
   body: string;
-  icon: React.ReactNode;
+  icon: (color: string) => React.ReactNode;
   onPress: () => void;
 }) {
   return (
@@ -38,13 +38,17 @@ function MethodCard({
       }}
       accessibilityRole="radio"
       accessibilityState={{ checked: selected }}
-      style={[styles.methodWrap, Platform.OS === 'web' && ({ cursor: 'pointer' } as object)]}
+      accessibilityLabel={`${title}. ${body}`}
+      style={Platform.OS === 'web' ? ({ cursor: 'pointer' } as object) : undefined}
     >
       {({ pressed }) => (
-        <View style={[styles.method, selected && styles.methodOn, pressed && { transform: [{ scale: 0.97 }] }]}>
-          <View style={[styles.methodIcon, selected && styles.methodIconOn]}>{icon}</View>
-          <Text style={styles.methodTitle}>{title}</Text>
-          <Text style={styles.methodBody}>{body}</Text>
+        <View style={[styles.method, selected && styles.methodOn, pressed && { transform: [{ scale: 0.98 }] }]}>
+          <View style={[styles.methodIcon, selected && styles.methodIconOn]}>{icon(selected ? '#FFFFFF' : ds.purple)}</View>
+          <View style={styles.flex}>
+            <Text style={styles.methodTitle}>{title}</Text>
+            <Text style={styles.methodBody}>{body}</Text>
+          </View>
+          <View style={[styles.radio, selected && styles.radioOn]}>{selected && <View style={styles.radioDot} />}</View>
         </View>
       )}
     </Pressable>
@@ -52,33 +56,45 @@ function MethodCard({
 }
 
 export function FilmMethodPicker({ method, onChange }: { method: FilmMethod; onChange: (m: FilmMethod) => void }) {
-  const on = (m: FilmMethod) => (method === m ? '#FFFFFF' : ds.purple);
   return (
     <Animated.View entering={FadeInUp.duration(300)}>
       <Text style={styles.pickerLabel}>How will you film it?</Text>
       <View style={styles.methods}>
-        <MethodCard
+        <MethodRow
           selected={method === 'native'}
-          title="Film in the app"
-          body="TikTok, Reels or Shorts, with trending sounds and filters"
+          title="Film in TikTok, Reels or Shorts"
+          body="Use their trending sounds and filters"
           onPress={() => onChange('native')}
-          icon={
+          icon={(c) => (
             <Svg width={20} height={20} viewBox="0 0 24 24" fill="none">
-              <Rect x="3" y="6" width="13" height="12" rx="3" stroke={on('native')} strokeWidth={2} />
-              <Path d="M16 10l5-3v10l-5-3" stroke={on('native')} strokeWidth={2} strokeLinejoin="round" />
+              <Path d="M9 18V5l12-2v13" stroke={c} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
+              <Circle cx="6" cy="18" r="3" stroke={c} strokeWidth={2} />
+              <Circle cx="18" cy="16" r="3" stroke={c} strokeWidth={2} />
             </Svg>
-          }
+          )}
         />
-        <MethodCard
+        <MethodRow
+          selected={method === 'camera'}
+          title="Film with PostStreak"
+          body="Record here with your camera, then schedule it"
+          onPress={() => onChange('camera')}
+          icon={(c) => (
+            <Svg width={20} height={20} viewBox="0 0 24 24" fill="none">
+              <Rect x="3" y="6" width="13" height="12" rx="3" stroke={c} strokeWidth={2} />
+              <Path d="M16 10l5-3v10l-5-3" stroke={c} strokeWidth={2} strokeLinejoin="round" />
+            </Svg>
+          )}
+        />
+        <MethodRow
           selected={method === 'upload'}
           title="Upload a video"
-          body="Original audio, voiceover or an edited video"
+          body="From your camera roll: edited, voiceover or original audio"
           onPress={() => onChange('upload')}
-          icon={
+          icon={(c) => (
             <Svg width={20} height={20} viewBox="0 0 24 24" fill="none">
-              <Path d="M12 16V4M7 9l5-5 5 5M4 20h16" stroke={on('upload')} strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round" />
+              <Path d="M12 16V4M7 9l5-5 5 5M4 20h16" stroke={c} strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round" />
             </Svg>
-          }
+          )}
         />
       </View>
     </Animated.View>
@@ -146,19 +162,46 @@ export function FilmPlanCard({
   platforms,
   onOpen,
   onStyleChange,
+  mode,
+  overlayText,
+  onOverlayChange,
+  recording,
+  onRecord,
+  onRemoveRecording,
 }: {
   plan: FilmPlan;
   sounds: SoundIdea[];
   platforms: HandoffPlatform[];
   onOpen: (p: HandoffPlatform) => void;
   onStyleChange: (s: FilmStyle) => void;
+  /** native: hand off to TikTok etc.; camera: record inside PostStreak */
+  mode: 'native' | 'camera';
+  overlayText: string;
+  onOverlayChange: (t: string) => void;
+  recording: { duration?: number } | null;
+  onRecord: () => void;
+  onRemoveRecording: () => void;
 }) {
-  const hookBox = (
-    <View style={styles.hookBox}>
-      <Text style={styles.hookLabel}>{plan.hookLabel}</Text>
-      <Text style={styles.hookText}>{plan.hook}</Text>
-    </View>
-  );
+  // Dance: the on-screen line is the creator's own and optional (no idea needed)
+  const hookBox =
+    plan.style === 'dance' ? (
+      <View style={styles.hookBox}>
+        <Text style={styles.hookLabel}>ON-SCREEN TEXT (OPTIONAL)</Text>
+        <TextInput
+          value={overlayText}
+          onChangeText={onOverlayChange}
+          placeholder="e.g. POV: dancing at work"
+          placeholderTextColor={ds.text3}
+          style={styles.overlayInput}
+          maxLength={80}
+        />
+      </View>
+    ) : (
+      <View style={styles.hookBox}>
+        <Text style={styles.hookLabel}>{plan.hookLabel}</Text>
+        <Text style={styles.hookText}>{plan.hook}</Text>
+      </View>
+    );
   const soundBlock = (
     <>
       <View style={styles.soundHead}>
@@ -232,32 +275,74 @@ export function FilmPlanCard({
             </>
           )}
         </Animated.View>
-        {platforms.length > 0 && <Text style={styles.copyNote}>Opening an app copies your caption and tags, ready to paste.</Text>}
-
-        {platforms.length > 0 ? (
-          <View style={styles.openList}>
-            {platforms.map((p) => (
-              <Pressable
-                key={p}
-                onPress={() => onOpen(p)}
-                style={({ pressed }) => [styles.openBtn, pressed && { transform: [{ scale: 0.97 }] }, Platform.OS === 'web' && ({ cursor: 'pointer' } as object)]}
-                accessibilityRole="button"
-                accessibilityLabel={`Copy caption and open ${HANDOFF_NAMES[p]}`}
-              >
-                <PlatformLogo type={p} size={26} />
-                <Text style={styles.openText} numberOfLines={1}>
-                  Open {HANDOFF_NAMES[p]}
-                </Text>
-                {/* Copy icon: the caption is copied on the way out */}
-                <Svg width={16} height={16} viewBox="0 0 24 24" fill="none">
-                  <Rect x="8" y="8" width="12" height="12" rx="2.5" stroke={ds.text3} strokeWidth={2} />
-                  <Path d="M16 8V6a2 2 0 00-2-2H6a2 2 0 00-2 2v8a2 2 0 002 2h2" stroke={ds.text3} strokeWidth={2} />
-                </Svg>
-              </Pressable>
-            ))}
+        {mode === 'camera' ? (
+          <View style={styles.recordArea}>
+            {plan.soundFirst && (
+              <Text style={styles.copyNote}>Play the sound out loud while you film, or add it later in the app you post to.</Text>
+            )}
+            {recording ? (
+              <Animated.View entering={FadeIn.duration(250)} style={styles.recorded}>
+                <View style={styles.recordedThumb}>
+                  <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
+                    <Path d="M8 5v14l11-7L8 5z" fill="#FFFFFF" />
+                  </Svg>
+                </View>
+                <View style={styles.flex}>
+                  <Text style={styles.recordedTitle}>Video recorded</Text>
+                  <Text style={styles.recordedSub}>
+                    {recording.duration ? `${Math.floor(recording.duration / 60)}:${String(recording.duration % 60).padStart(2, '0')}` : 'Ready to post'}
+                  </Text>
+                </View>
+                <Pressable onPress={onRecord} hitSlop={6} style={styles.recordedAction} accessibilityRole="button">
+                  <Text style={styles.recordedActionText}>Retake</Text>
+                </Pressable>
+                <Pressable onPress={onRemoveRecording} hitSlop={6} style={[styles.recordedAction, styles.recordedRemove]} accessibilityRole="button">
+                  <Text style={[styles.recordedActionText, { color: ds.text2 }]}>Remove</Text>
+                </Pressable>
+              </Animated.View>
+            ) : (
+              <AppButton
+                title="Open camera"
+                onPress={onRecord}
+                iconRight={
+                  <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
+                    <Rect x="3" y="6" width="13" height="12" rx="3" stroke="#FFFFFF" strokeWidth={2} />
+                    <Path d="M16 10l5-3v10l-5-3" stroke="#FFFFFF" strokeWidth={2} strokeLinejoin="round" />
+                  </Svg>
+                }
+              />
+            )}
           </View>
         ) : (
-          <Text style={styles.soundNote}>Pick TikTok, Instagram or YouTube above to film there.</Text>
+          <>
+        {platforms.length > 0 && <Text style={styles.copyNote}>Opening an app copies your caption and tags, ready to paste.</Text>}
+  
+          {platforms.length > 0 ? (
+            <View style={styles.openList}>
+              {platforms.map((p) => (
+                <Pressable
+                  key={p}
+                  onPress={() => onOpen(p)}
+                  style={({ pressed }) => [styles.openBtn, pressed && { transform: [{ scale: 0.97 }] }, Platform.OS === 'web' && ({ cursor: 'pointer' } as object)]}
+                  accessibilityRole="button"
+                  accessibilityLabel={`Copy caption and open ${HANDOFF_NAMES[p]}`}
+                >
+                  <PlatformLogo type={p} size={26} />
+                  <Text style={styles.openText} numberOfLines={1}>
+                    Open {HANDOFF_NAMES[p]}
+                  </Text>
+                  {/* Copy icon: the caption is copied on the way out */}
+                  <Svg width={16} height={16} viewBox="0 0 24 24" fill="none">
+                    <Rect x="8" y="8" width="12" height="12" rx="2.5" stroke={ds.text3} strokeWidth={2} />
+                    <Path d="M16 8V6a2 2 0 00-2-2H6a2 2 0 00-2 2v8a2 2 0 002 2h2" stroke={ds.text3} strokeWidth={2} />
+                  </Svg>
+                </Pressable>
+              ))}
+            </View>
+          ) : (
+            <Text style={styles.soundNote}>Pick TikTok, Instagram or YouTube above to film there.</Text>
+          )}
+          </>
         )}
       </GlassCard>
     </Animated.View>
@@ -305,11 +390,12 @@ export function PostedCheck({
 const styles = StyleSheet.create({
   flex: { flex: 1 },
   pickerLabel: { fontSize: 14, fontWeight: '800', color: ds.ink, marginTop: 16, marginBottom: 10 },
-  methods: { flexDirection: 'row', gap: 10 },
-  methodWrap: { flex: 1 },
+  methods: { gap: 8 },
   method: {
-    flex: 1,
-    padding: 14,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    padding: 12,
     borderRadius: 20,
     borderWidth: 1.5,
     borderColor: 'rgba(255, 255, 255, 0.95)',
@@ -323,11 +409,36 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: 'rgba(237, 233, 254, 0.95)',
-    marginBottom: 10,
   },
   methodIconOn: { backgroundColor: ds.purple },
   methodTitle: { fontSize: 14.5, fontWeight: '800', color: ds.ink },
-  methodBody: { fontSize: 12, lineHeight: 16, color: ds.text2, marginTop: 3 },
+  methodBody: { fontSize: 12, lineHeight: 16, color: ds.text2, marginTop: 2 },
+  radio: { width: 20, height: 20, borderRadius: 10, borderWidth: 1.5, borderColor: ds.line, alignItems: 'center', justifyContent: 'center', backgroundColor: '#FFFFFF' },
+  radioOn: { borderColor: ds.purple },
+  radioDot: { width: 10, height: 10, borderRadius: 5, backgroundColor: ds.purple },
+  overlayInput: {
+    fontSize: 15,
+    fontWeight: '700',
+    color: ds.ink,
+    marginTop: 4,
+    paddingVertical: 4,
+    ...(Platform.OS === 'web' ? ({ outlineStyle: 'none' } as object) : {}),
+  },
+  recordArea: { marginTop: 14, gap: 10 },
+  recorded: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    padding: 10,
+    borderRadius: 16,
+    backgroundColor: ds.greenBg,
+  },
+  recordedThumb: { width: 38, height: 48, borderRadius: 10, alignItems: 'center', justifyContent: 'center', backgroundColor: '#8B72F5' },
+  recordedTitle: { fontSize: 14, fontWeight: '800', color: ds.ink },
+  recordedSub: { fontSize: 12, color: ds.text2, marginTop: 1 },
+  recordedAction: { paddingHorizontal: 8, height: 30, justifyContent: 'center', borderRadius: 10, backgroundColor: '#FFFFFF' },
+  recordedRemove: { backgroundColor: 'rgba(255, 255, 255, 0.6)' },
+  recordedActionText: { fontSize: 12, fontWeight: '800', color: ds.purple },
   styleLabel: { fontSize: 13, fontWeight: '800', color: ds.text2, marginBottom: 8 },
   styles: { flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginBottom: 14 },
   styleChip: {
