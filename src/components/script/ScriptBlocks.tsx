@@ -141,18 +141,23 @@ export function PartCard({
               <Text style={styles.rewritingText}>Jarvis is rewriting…</Text>
             </Animated.View>
           ) : (
-            <Animated.View key={value.slice(0, 24)} entering={FadeIn.duration(250)}>
+            <Animated.View key={value.slice(0, 24)} entering={FadeIn.duration(250)} style={styles.inputWrap}>
               <TextInput
                 value={value}
                 onChangeText={onChange}
                 multiline
                 onFocus={() => setFocused(true)}
                 onBlur={() => setFocused(false)}
-                onContentSizeChange={(e) => setInputH(Math.max(50, Math.ceil(e.nativeEvent.contentSize.height)))}
-                scrollEnabled={false}
+                // Web textareas don't grow on their own, so size them from their
+                // content; iPhone / Android multiline inputs grow by themselves
+                // (forcing a height there stopped the text wrapping).
+                onContentSizeChange={
+                  Platform.OS === 'web' ? (e) => setInputH(Math.max(50, Math.ceil(e.nativeEvent.contentSize.height))) : undefined
+                }
+                scrollEnabled={Platform.OS !== 'web'}
                 placeholder={optional ? 'Add one line people can remember (optional)' : 'Write this part…'}
                 placeholderTextColor={ds.text3}
-                style={[styles.input, { height: inputH }]}
+                style={[styles.input, Platform.OS === 'web' && { height: inputH }]}
                 selectionColor={ds.purple}
               />
             </Animated.View>
@@ -279,12 +284,14 @@ const styles = StyleSheet.create({
     minHeight: 76,
   },
   fieldOn: { borderColor: ds.purple, backgroundColor: '#FFFFFF' },
+  inputWrap: { alignSelf: 'stretch', width: '100%' },
   input: {
     fontSize: 15.5,
     lineHeight: 22,
     fontWeight: '600',
     color: ds.ink,
     minHeight: 50,
+    width: '100%',
     textAlignVertical: 'top',
     ...(Platform.OS === 'web' ? ({ outlineStyle: 'none' } as object) : {}),
   },
