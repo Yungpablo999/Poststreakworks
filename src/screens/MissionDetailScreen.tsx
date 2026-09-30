@@ -64,6 +64,8 @@ interface Step {
   /** Button label; none = tracked automatically */
   action?: string;
   onPress?: () => void;
+  /** Done from Jarvis's pick below, so no button of its own */
+  hint?: boolean;
 }
 
 function StepGlyph({ id, color }: { id: StepIcon; color: string }) {
@@ -130,7 +132,7 @@ function StepRow({
               <Text style={styles.nextChipText}>Next up</Text>
             </View>
           )}
-          {!step.action && (
+          {!step.action && !step.hint && (
             <View style={styles.autoChip}>
               <Text style={styles.autoChipText}>Automatic</Text>
             </View>
@@ -234,12 +236,12 @@ export const MissionDetailScreen: React.FC<MissionDetailScreenProps> = ({
   const steps: Step[] = isNew
     ? [
         { id: 'idea', title: 'Pick an idea', body: 'Use Jarvis’s pick below, or look through more ideas.', action: 'Find ideas', onPress: findIdeas },
-        { id: 'make', title: 'Shape it in the Studio', body: 'Turn your idea into a short script. A few minutes is enough.', action: 'Write the script', onPress: useIdea },
+        { id: 'make', title: 'Write the script', body: 'Tap “Use this idea” below and Jarvis helps you turn it into a short script.', hint: true },
         { id: 'post', title: 'Save it', body: 'We tick this off when you save a draft or schedule it.' },
       ]
     : [
         { id: 'idea', title: 'Pick an idea', body: 'Use Jarvis’s pick below, or find one that fits today.', action: 'Find ideas', onPress: findIdeas },
-        { id: 'make', title: 'Make your post', body: 'Film, write or design it in the composer.', action: 'Open the composer', onPress: useIdea },
+        { id: 'make', title: 'Make your post', body: 'Tap “Use this idea” below to film, write or design it.', hint: true },
         { id: 'post', title: 'Post it', body: 'We tick this off when your post goes live. Whenever suits you.' },
       ];
 
@@ -380,18 +382,6 @@ export const MissionDetailScreen: React.FC<MissionDetailScreenProps> = ({
             </View>
           </Animated.View>
 
-          <Animated.View entering={FadeInUp.delay(380).duration(500).easing(Easing.out(Easing.cubic))} style={styles.mainCta}>
-            <AppButton
-              title={isNew ? 'Write the script' : 'Make today’s post'}
-              size="lg"
-              onPress={useIdea}
-              iconRight={
-                <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
-                  <Path d="M5 12h14M13 6l6 6-6 6" stroke="#FFFFFF" strokeWidth={2.4} strokeLinecap="round" strokeLinejoin="round" />
-                </Svg>
-              }
-            />
-          </Animated.View>
         </ScrollView>
       </SafeAreaView>
 
@@ -488,5 +478,4 @@ const styles = StyleSheet.create({
   rewardValue: { fontSize: 16, fontWeight: '800', color: ds.ink },
   rewardSub: { fontSize: 12.5, lineHeight: 17, color: ds.text2, marginTop: 2 },
 
-  mainCta: { marginTop: 24 },
 });
