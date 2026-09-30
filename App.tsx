@@ -563,9 +563,17 @@ export default function App() {
             />
           ) : (
             <MissionDetailScreen
-              onBackToDashboard={() => navigateTo('dashboard')}
+              onBack={() => navigateTo(previousScreen ? previousScreen : 'quests')}
+              userPersona={userPersona}
+              onTogglePersona={handleTogglePersona}
+              onOpenJarvisPro={() => navigateTo('jarvis-pro')}
+              onSwitchToPro={() => setUserProfile(prev => ({ ...prev, tier: 'pro' }))}
               onLogout={handleLogout}
               onOpenCreateIdea={() => navigateTo('create')}
+              onOpenScript={(title) => {
+                setSelectedIdeaTitle(title);
+                navigateTo('script');
+              }}
               onOpenIdeaAngle={() => navigateTo('content-angle')}
               onOpenPostComposer={(title, platform) => {
                 if (title) setComposerIdeaTitle(title);

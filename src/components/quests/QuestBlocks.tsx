@@ -26,7 +26,7 @@ import { ds } from '../../theme/colors';
 const AnimatedCircle = Animated.createAnimatedComponent(Circle);
 
 // ─── Progress ring ──────────────────────────────────────────────────────────
-function ProgressRing({ progress, size = 76, done }: { progress: number; size?: number; done?: boolean }) {
+export function ProgressRing({ progress, size = 76, done }: { progress: number; size?: number; done?: boolean }) {
   const stroke = 7;
   const r = (size - stroke) / 2;
   const c = 2 * Math.PI * r;
@@ -55,7 +55,7 @@ function ProgressRing({ progress, size = 76, done }: { progress: number; size?: 
 }
 
 // Target icon that gently pulses to invite a tap
-function PulsingTarget() {
+export function PulsingTarget() {
   const reduceMotion = useReducedMotion();
   const t = useSharedValue(0);
   useEffect(() => {
