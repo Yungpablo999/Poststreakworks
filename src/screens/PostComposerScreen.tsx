@@ -2042,10 +2042,10 @@ const styles = StyleSheet.create({
   },
   aiWorking: { flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 8 },
   aiWorkingText: { fontSize: 12.5, fontWeight: '700', color: ds.purple },
-  captionMeta: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', gap: 6, marginTop: 8, paddingTop: 12, borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: 'rgba(23, 20, 32, 0.1)' },
+  captionMeta: { flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 8, paddingTop: 12, borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: 'rgba(23, 20, 32, 0.1)' },
   charCount: { alignSelf: 'flex-end', fontSize: 11.5, fontWeight: '700', color: ds.text3, marginTop: 6 },
   aiRow: { flexDirection: 'row', gap: 8, marginTop: 12 },
-  tagsWrap: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
+  tagsWrap: { gap: 8 },
   noTags: { fontSize: 13, color: ds.text3 },
   addTagRow: { flexDirection: 'row', gap: 8, marginTop: 12 },
   addTagField: {

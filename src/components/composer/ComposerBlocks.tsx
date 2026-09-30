@@ -376,14 +376,19 @@ export function CyclePill({ label, value, onPress }: { label: string; value: str
         tick();
         onPress();
       }}
-      style={({ pressed }) => [styles.cyclePill, pressed && { transform: [{ scale: 0.96 }] }]}
+      style={({ pressed }) => [styles.cyclePill, pressed && { transform: [{ scale: 0.97 }] }]}
       accessibilityRole="button"
       accessibilityLabel={`${label}: ${value}. Tap to change`}
     >
-      <Text style={styles.cycleLabel}>{label}</Text>
-      <Animated.View key={value} entering={FadeIn.duration(200)}>
-        <Text style={styles.cycleValue}>{value}</Text>
-      </Animated.View>
+      {/* Small label above the value keeps both pills side by side on 320 */}
+      <View style={styles.flex}>
+        <Text style={styles.cycleLabel}>{label}</Text>
+        <Animated.View key={value} entering={FadeIn.duration(200)}>
+          <Text style={styles.cycleValue} numberOfLines={1}>
+            {value}
+          </Text>
+        </Animated.View>
+      </View>
       <Svg width={10} height={10} viewBox="0 0 24 24" fill="none">
         <Path d="M7 10l5 5 5-5" stroke={ds.text3} strokeWidth={2.6} strokeLinecap="round" strokeLinejoin="round" />
       </Svg>
@@ -399,10 +404,9 @@ export function AiAction({ label, onPress, disabled }: { label: string; onPress:
       style={({ pressed }) => [styles.aiAction, disabled && { opacity: 0.45 }, pressed && { transform: [{ scale: 0.96 }] }]}
       accessibilityRole="button"
     >
-      <Svg width={12} height={12} viewBox="0 0 24 24" fill="none">
-        <Path d="M12 2l2.4 7.6L22 12l-7.6 2.4L12 22l-2.4-7.6L2 12l7.6-2.4L12 2z" fill={ds.purple} />
-      </Svg>
-      <Text style={styles.aiActionText}>{label}</Text>
+      <Text style={styles.aiActionText} numberOfLines={1}>
+        {label}
+      </Text>
     </Pressable>
   );
 }
@@ -422,7 +426,9 @@ export function EditsMeter({ left, total }: { left: number; total: number }) {
 export function TagChip({ tag, onRemove }: { tag: string; onRemove: () => void }) {
   return (
     <Animated.View entering={ZoomIn.duration(200)} exiting={ZoomOut.duration(150)} layout={LinearTransition.springify().damping(18)} style={styles.tag}>
-      <Text style={styles.tagText}>{tag}</Text>
+      <Text style={styles.tagText} numberOfLines={1}>
+        {tag}
+      </Text>
       <Pressable onPress={onRemove} hitSlop={8} accessibilityRole="button" accessibilityLabel={`Remove ${tag}`}>
         <Svg width={10} height={10} viewBox="0 0 24 24" fill="none">
           <Path d="M18 6L6 18M6 6l12 12" stroke={ds.purple} strokeWidth={3} strokeLinecap="round" />
@@ -722,23 +728,25 @@ const styles = StyleSheet.create({
   smallActionSubtle: { backgroundColor: 'rgba(23, 20, 32, 0.05)' },
   smallActionText: { fontSize: 12.5, fontWeight: '800', color: ds.purple },
   cyclePill: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 5,
-    height: 30,
-    paddingHorizontal: 10,
-    borderRadius: 999,
-    backgroundColor: 'rgba(23, 20, 32, 0.05)',
-  },
-  cycleLabel: { fontSize: 10.5, fontWeight: '800', color: ds.text3, letterSpacing: 0.5 },
-  cycleValue: { fontSize: 12.5, fontWeight: '800', color: ds.ink },
-  aiAction: {
     flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
+    gap: 6,
+    height: 44,
+    paddingHorizontal: 12,
+    borderRadius: 14,
+    backgroundColor: 'rgba(23, 20, 32, 0.05)',
+  },
+  cycleLabel: { fontSize: 10, fontWeight: '800', color: ds.text3, letterSpacing: 0.6 },
+  cycleValue: { fontSize: 13.5, fontWeight: '800', color: ds.ink, marginTop: 1 },
+  // Buttons size to their word so "Ask viewers" fits on 320
+  aiAction: {
+    flexGrow: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
     justifyContent: 'center',
-    gap: 5,
     height: 38,
+    paddingHorizontal: 8,
     borderRadius: 12,
     backgroundColor: ds.lavender,
   },
@@ -747,16 +755,21 @@ const styles = StyleSheet.create({
   editsDot: { width: 12, height: 5, borderRadius: 3, backgroundColor: 'rgba(91, 62, 232, 0.15)' },
   editsDotOn: { backgroundColor: ds.purple },
   editsText: { fontSize: 11.5, fontWeight: '700', color: ds.text3, marginLeft: 5 },
+  // One tag per row, all the same width: a tidy list instead of ragged,
+  // scattered chips (and long hashtags never get cut off).
   tag: {
+    width: '100%',
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 7,
-    height: 32,
-    paddingHorizontal: 12,
-    borderRadius: 999,
+    justifyContent: 'space-between',
+    gap: 10,
+    height: 34,
+    paddingLeft: 12,
+    paddingRight: 10,
+    borderRadius: 12,
     backgroundColor: 'rgba(237, 233, 254, 0.95)',
   },
-  tagText: { fontSize: 13, fontWeight: '800', color: ds.purple },
+  tagText: { fontSize: 13, fontWeight: '800', color: ds.purple, flexShrink: 1 },
   modeTrack: {
     flexDirection: 'row',
     padding: 4,
