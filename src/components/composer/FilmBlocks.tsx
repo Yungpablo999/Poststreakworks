@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Pressable, StyleSheet, Platform } from 'react-native';
-import Animated, { FadeIn, FadeInUp, SlideInDown, SlideOutDown } from 'react-native-reanimated';
+import Animated, { Easing, FadeIn, FadeInUp, FadeOutDown } from 'react-native-reanimated';
 import Svg, { Path, Rect, Circle } from 'react-native-svg';
 import * as Haptics from 'expo-haptics';
 import { Text } from '../ui/AppText';
@@ -275,7 +275,12 @@ export function PostedCheck({
   onNotYet: () => void;
 }) {
   return (
-    <Animated.View entering={SlideInDown.springify().damping(18)} exiting={SlideOutDown.duration(200)} style={styles.checkWrap}>
+    <Animated.View
+      // Calm entrance: a short rise with a fade, no spring overshoot
+      entering={FadeInUp.duration(280).easing(Easing.out(Easing.cubic))}
+      exiting={FadeOutDown.duration(180)}
+      style={styles.checkWrap}
+    >
       <GlassCard strong radius={24} padding={16}>
         <View style={styles.checkTop}>
           <PlatformLogo type={platform} size={34} />
