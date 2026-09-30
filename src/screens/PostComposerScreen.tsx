@@ -24,6 +24,7 @@ import { FreeAppHeader } from '../components/FreeAppHeader';
 import { sFont, sPadding, isNarrowScreen } from '../utils/responsive';
 import Reanimated, { FadeIn, FadeInUp, FadeOut, Easing, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 import { getStarterIdeas, getFilmPlan, getSoundIdeas, checkInToday, getDefaultFilmStyle, type FilmStyle } from '../data';
+import { ScheduleSheet } from '../components/composer/ScheduleSheet';
 import { FilmMethodPicker, FilmPlanCard, PostedCheck, type FilmMethod } from '../components/composer/FilmBlocks';
 import { handOffToPlatform, isHandoffPlatform, HANDOFF_NAMES, type HandoffPlatform } from '../utils/handoff';
 import { captureWithCamera, pickFromLibrary, type PickedMedia } from '../utils/media';
@@ -274,61 +275,7 @@ export const CONTENT_FORMATS: ContentFormatOption[] = [
   },
 ];
 
-const MONTH_NAMES = [
-  'January',
-  'February',
-  'March',
-  'April',
-  'May',
-  'June',
-  'July',
-  'August',
-  'September',
-  'October',
-  'November',
-  'December',
-];
 
-interface SmartScheduleSlot {
-  time: string;
-  isRecommended: boolean;
-  reason?: string;
-}
-
-interface SmartScheduleGroup {
-  dayLabel: string;
-  dateStr: string;
-  slots: SmartScheduleSlot[];
-}
-
-const SMART_SCHEDULE_GROUPS: SmartScheduleGroup[] = [
-  {
-    dayLabel: 'Today',
-    dateStr: 'Aug 18',
-    slots: [
-      { time: '7:30 PM', isRecommended: true, reason: 'Peak Audience' },
-      { time: '8:00 PM', isRecommended: false },
-      { time: '8:30 PM', isRecommended: false },
-    ],
-  },
-  {
-    dayLabel: 'Tomorrow',
-    dateStr: 'Aug 19',
-    slots: [
-      { time: '11:30 AM', isRecommended: true, reason: 'High Engagement' },
-      { time: '1:00 PM', isRecommended: false },
-      { time: '7:30 PM', isRecommended: false },
-    ],
-  },
-];
-
-const TIME_SLOTS = [
-  { id: 't1', time: '7:30 PM', label: '⚡ Peak Reach', peak: true },
-  { id: 't2', time: '9:00 AM', label: 'Morning Wave', peak: false },
-  { id: 't3', time: '12:30 PM', label: 'Lunch Break', peak: false },
-  { id: 't4', time: '6:00 PM', label: 'Evening Prime', peak: false },
-  { id: 't5', time: '8:30 PM', label: 'Night Spike', peak: false },
-];
 
 // Official Real Social Media SVG Logos
 const PlatformIcon = ({ iconType, size = 38 }: { iconType: string; size?: number }) => {
@@ -467,17 +414,10 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
   const [publishMode, setPublishMode] = useState<'now' | 'schedule' | 'draft'>('schedule');
   const [scheduledTime, setScheduledTime] = useState('Today, 7:30 PM');
 
-  // Calendar State
-  const [calMonthIndex, setCalMonthIndex] = useState(7); // August (0-indexed)
-  const [calYear, setCalYear] = useState(2026);
-  const [selectedCalDay, setSelectedCalDay] = useState(18); // Today = 18th
-  const [selectedTimeSlot, setSelectedTimeSlot] = useState('7:30 PM');
-
   // Modals
   const [showPlatformsModal, setShowPlatformsModal] = useState(false);
   const [showChangeIdeaModal, setShowChangeIdeaModal] = useState(false);
-  const [showCalendarModal, setShowCalendarModal] = useState(false);
-  const [showCustomCalendarView, setShowCustomCalendarView] = useState(false);
+  const [showScheduleSheet, setShowScheduleSheet] = useState(false);
   const [showNotificationModal, setShowNotificationModal] = useState(false);
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [showChatModal, setShowChatModal] = useState(false);
@@ -849,64 +789,6 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
     setShowCelebrationModal(true);
   };
 
-  // Calendar calculations
-  const daysInMonth = new Date(calYear, calMonthIndex + 1, 0).getDate();
-  const firstDayOfWeek = (new Date(calYear, calMonthIndex, 1).getDay() + 6) % 7; // Monday-first
-  
-  const handlePrevMonth = () => {
-    if (Platform.OS !== 'web') {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    }
-    if (calMonthIndex === 0) {
-      setCalMonthIndex(11);
-      setCalYear((y) => y - 1);
-    } else {
-      setCalMonthIndex((m) => m - 1);
-    }
-  };
-
-  const handleNextMonth = () => {
-    if (Platform.OS !== 'web') {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    }
-    if (calMonthIndex === 11) {
-      setCalMonthIndex(0);
-      setCalYear((y) => y + 1);
-    } else {
-      setCalMonthIndex((m) => m + 1);
-    }
-  };
-
-  const handleConfirmCalendarSchedule = () => {
-    if (Platform.OS !== 'web') {
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-    }
-    const isToday = selectedCalDay === 18 && calMonthIndex === 7 && calYear === 2026;
-    const isTomorrow = selectedCalDay === 19 && calMonthIndex === 7 && calYear === 2026;
-    
-    let formattedStr = '';
-    if (isToday) {
-      formattedStr = `Today, ${selectedTimeSlot}`;
-    } else if (isTomorrow) {
-      formattedStr = `Tomorrow, ${selectedTimeSlot}`;
-    } else {
-      const monthShort = MONTH_NAMES[calMonthIndex].substring(0, 3);
-      formattedStr = `${monthShort} ${selectedCalDay}, ${selectedTimeSlot}`;
-    }
-
-    setScheduledTime(formattedStr);
-    setPublishMode('schedule');
-    setShowCalendarModal(false);
-
-    // Trigger celebration animation popup
-    setCelebrationTitle('Post Scheduled!');
-    setCelebrationSubtitle(`Your post has been locked in for ${formattedStr}.`);
-    setCelebrationSpeech('Day 1 post scheduled! +50 XP added to your creator level.');
-    setTimeout(() => {
-      setShowCelebrationModal(true);
-    }, 250);
-  };
-
   // Content Format Resolution & Intelligence
   const getRecommendedFormatId = (platforms: string[]): ContentFormatType => {
     if (platforms.length === 1 && platforms[0] === 'threads') return 'text';
@@ -995,9 +877,7 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
       }, 350);
     } else if (section === 'schedule') {
       setTimeout(() => {
-        setShowCustomCalendarView(false);
-        triggerModalAnim();
-        setShowCalendarModal(true);
+        setShowScheduleSheet(true);
       }, 350);
     }
   };
@@ -1409,9 +1289,7 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
               <Reanimated.View entering={FadeInUp.duration(250)}>
                 <Pressable
                   onPress={() => {
-                    setShowCustomCalendarView(false);
-                    triggerModalAnim();
-                    setShowCalendarModal(true);
+                    setShowScheduleSheet(true);
                   }}
                   style={styles.whenRow}
                   accessibilityRole="button"
@@ -1630,284 +1508,18 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
           </View>
         </Modal>
 
-        {/* MODAL 2: FULL INTERACTIVE CALENDAR & TIME SCHEDULER */}
-        <Modal
-          visible={showCalendarModal}
-          transparent={true}
-          animationType="fade"
-          onRequestClose={() => setShowCalendarModal(false)}
-        >
-          <View style={styles.modalOverlay}>
-            <Animated.View style={[styles.calendarModalCard, { transform: [{ scale: modalPopScale }] }]}>
-              {/* Header */}
-              <View style={styles.modalHeaderRow}>
-                <View style={styles.modalTitleContainer}>
-                  <Text style={styles.modalTitle}>Schedule Post</Text>
-                  <Text style={styles.modalSubtitle}>
-                    {showCustomCalendarView
-                      ? 'Pick a custom date & audience window'
-                      : 'Jarvis recommended audience windows'}
-                  </Text>
-                </View>
-                <Pressable onPress={() => setShowCalendarModal(false)} style={styles.modalCloseCircle} hitSlop={8}>
-                  <Text style={styles.modalCloseCross}>✕</Text>
-                </Pressable>
-              </View>
-
-              {!showCustomCalendarView ? (
-                /* 1. SMART RECOMMENDED SCHEDULE SLOTS */
-                <ScrollView showsVerticalScrollIndicator={false} style={{ maxHeight: 440 }}>
-                  {SMART_SCHEDULE_GROUPS.map((group) => (
-                    <View key={group.dayLabel} style={styles.smartScheduleGroup}>
-                      <Text style={styles.smartScheduleGroupHeader}>{group.dayLabel.toUpperCase()}</Text>
-                      <View style={styles.smartSlotRow}>
-                        {group.slots.map((slot) => {
-                          const slotFullStr = `${group.dayLabel}, ${slot.time}`;
-                          const isSlotSelected = scheduledTime === slotFullStr;
-
-                          return (
-                            <Pressable
-                              key={slot.time}
-                              style={[
-                                styles.smartSlotCard,
-                                isSlotSelected && styles.smartSlotCardActive,
-                              ]}
-                              onPress={() => {
-                                if (Platform.OS !== 'web') {
-                                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-                                }
-                                setScheduledTime(slotFullStr);
-                                setShowCalendarModal(false);
-                              }}
-                            >
-                              <View style={styles.smartSlotCardLeft}>
-                                <Text
-                                  style={[
-                                    styles.smartSlotTimeText,
-                                    isSlotSelected && styles.smartSlotTimeTextActive,
-                                  ]}
-                                >
-                                  {slot.time}
-                                </Text>
-                                {slot.isRecommended && (
-                                  <View style={styles.smartSlotRecBadge}>
-                                    <Text style={styles.smartSlotRecBadgeText}>
-                                      ⭐ Recommended{slot.reason ? ` (${slot.reason})` : ''}
-                                    </Text>
-                                  </View>
-                                )}
-                              </View>
-
-                              <View
-                                style={[
-                                  styles.smartSlotRadioCircle,
-                                  isSlotSelected && styles.smartSlotRadioCircleActive,
-                                ]}
-                              >
-                                {isSlotSelected && (
-                                  <Text style={{ color: '#FFFFFF', fontSize: 10, fontWeight: '800' }}>✓</Text>
-                                )}
-                              </View>
-                            </Pressable>
-                          );
-                        })}
-                      </View>
-                    </View>
-                  ))}
-
-                  {/* Choose Custom Date & Time Option */}
-                  <Pressable
-                    style={({ pressed }) => [styles.chooseCustomDateBtn, pressed && styles.btnPressed]}
-                    onPress={() => {
-                      if (Platform.OS !== 'web') {
-                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                      }
-                      setShowCustomCalendarView(true);
-                    }}
-                  >
-                    <Svg width={15} height={15} viewBox="0 0 24 24" fill="none">
-                      <Rect x="3" y="4" width="18" height="18" rx="3" stroke="#582CDB" strokeWidth="2" />
-                      <Path d="M16 2v4M8 2v4M3 10h18" stroke="#582CDB" strokeWidth="2" strokeLinecap="round" />
-                    </Svg>
-                    <Text style={styles.chooseCustomDateBtnText}>Choose Date &amp; Time...</Text>
-                  </Pressable>
-                </ScrollView>
-              ) : (
-                /* 2. CUSTOM CALENDAR & TIME PICKER */
-                <ScrollView showsVerticalScrollIndicator={false} style={{ maxHeight: 460 }}>
-                  <Pressable
-                    onPress={() => setShowCustomCalendarView(false)}
-                    style={styles.backToSmartSlotsBtn}
-                  >
-                    <Svg width={12} height={12} viewBox="0 0 24 24" fill="none">
-                      <Path d="M19 12H5M12 19l-7-7 7-7" stroke="#6D28D9" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
-                    </Svg>
-                    <Text style={styles.backToSmartSlotsBtnText}>Back to Recommended Slots</Text>
-                  </Pressable>
-
-                  {/* Month Selector Bar */}
-                  <View style={styles.calMonthNavRow}>
-                    <Pressable
-                      onPress={handlePrevMonth}
-                      style={({ pressed }) => [styles.calMonthNavBtn, pressed && styles.btnPressed]}
-                      hitSlop={8}
-                    >
-                      <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
-                        <Path d="M15 18L9 12L15 6" stroke="#171420" strokeWidth="2.5" strokeLinecap="round" />
-                      </Svg>
-                    </Pressable>
-
-                    <View style={{ alignItems: 'center' }}>
-                      <Text style={styles.calMonthNavTitle}>
-                        {MONTH_NAMES[calMonthIndex]} {calYear}
-                      </Text>
-                      {calMonthIndex === 7 && calYear === 2026 && (
-                        <Text style={styles.calMonthNavBadge}>CURRENT MONTH</Text>
-                      )}
-                    </View>
-
-                    <Pressable
-                      onPress={handleNextMonth}
-                      style={({ pressed }) => [styles.calMonthNavBtn, pressed && styles.btnPressed]}
-                      hitSlop={8}
-                    >
-                      <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
-                        <Path d="M9 18L15 12L9 6" stroke="#171420" strokeWidth="2.5" strokeLinecap="round" />
-                      </Svg>
-                    </Pressable>
-                  </View>
-
-                  {/* Day of Week Headers */}
-                  <View style={styles.calWeekDaysRow}>
-                    {['M', 'T', 'W', 'T', 'F', 'S', 'S'].map((dayChar, dIdx) => (
-                      <Text key={dIdx} style={styles.calWeekDayText}>
-                        {dayChar}
-                      </Text>
-                    ))}
-                  </View>
-
-                  {/* Days Grid */}
-                  <View style={styles.calDaysGrid}>
-                    {/* Empty cells before month start */}
-                    {Array.from({ length: firstDayOfWeek }).map((_, emptyIdx) => (
-                      <View key={`empty_${emptyIdx}`} style={styles.calDayCell} />
-                    ))}
-
-                    {/* Day numbers */}
-                    {Array.from({ length: daysInMonth }).map((_, dayIdx) => {
-                      const dayNum = dayIdx + 1;
-                      const isSelected = selectedCalDay === dayNum;
-                      const isToday = dayNum === 18 && calMonthIndex === 7 && calYear === 2026;
-                      const isPeakDay = dayNum % 3 === 0 || dayNum === 18 || dayNum === 19;
-
-                      return (
-                        <Pressable
-                          key={`day_${dayNum}`}
-                          onPress={() => {
-                            if (Platform.OS !== 'web') {
-                              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                            }
-                            setSelectedCalDay(dayNum);
-                          }}
-                          style={[
-                            styles.calDayCell,
-                            isSelected && styles.calDayCellSelected,
-                          ]}
-                        >
-                          <Text
-                            style={[
-                              styles.calDayNumText,
-                              isSelected && styles.calDayNumTextSelected,
-                              isToday && !isSelected && styles.calDayNumTextToday,
-                            ]}
-                          >
-                            {dayNum}
-                          </Text>
-                          {isToday && !isSelected && <View style={styles.calTodayDot} />}
-                          {isPeakDay && !isSelected && !isToday && (
-                            <View style={styles.calPeakDot} />
-                          )}
-                        </Pressable>
-                      );
-                    })}
-                  </View>
-
-                  {/* Time Slots Section */}
-                  <Text style={styles.calSectionHeader}>SELECT TIME SLOT</Text>
-                  <View style={styles.calTimeSlotsGrid}>
-                    {TIME_SLOTS.map((slot) => {
-                      const isSlotSelected = selectedTimeSlot === slot.time;
-                      return (
-                        <Pressable
-                          key={slot.id}
-                          onPress={() => {
-                            if (Platform.OS !== 'web') {
-                              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                            }
-                            setSelectedTimeSlot(slot.time);
-                          }}
-                          style={[
-                            styles.calTimeSlotCard,
-                            isSlotSelected && styles.calTimeSlotCardActive,
-                          ]}
-                        >
-                          <Text
-                            style={[
-                              styles.calTimeSlotTime,
-                              isSlotSelected && styles.calTimeSlotTimeActive,
-                            ]}
-                          >
-                            {slot.time}
-                          </Text>
-                          <Text
-                            style={[
-                              styles.calTimeSlotLabel,
-                              isSlotSelected && styles.calTimeSlotLabelActive,
-                            ]}
-                          >
-                            {slot.label}
-                          </Text>
-                        </Pressable>
-                      );
-                    })}
-                  </View>
-
-                  {/* Selected Slot Preview Callout */}
-                  <View style={styles.calPreviewBox}>
-                    <View style={styles.calPreviewIconCircle}>
-                      <Text style={{ fontSize: 16 }}>⚡</Text>
-                    </View>
-                    <View style={{ flex: 1 }}>
-                      <Text style={styles.calPreviewTitle}>
-                        {MONTH_NAMES[calMonthIndex].substring(0, 3)} {selectedCalDay}, {calYear} at {selectedTimeSlot}
-                      </Text>
-                      <Text style={styles.calPreviewSub}>
-                        Peak audience active window • Streak protection preserved
-                      </Text>
-                    </View>
-                  </View>
-
-                  {/* Schedule Confirmation CTA */}
-                  <Pressable
-                    style={styles.modalPrimaryActionBtn}
-                    onPress={handleConfirmCalendarSchedule}
-                  >
-                    <LinearGradient
-                      colors={['#7C3AED', '#582CDB']}
-                      start={{ x: 0, y: 0 }}
-                      end={{ x: 1, y: 0 }}
-                      style={styles.modalPrimaryGradient}
-                    >
-                      <Text style={styles.modalPrimaryActionText}>
-                        Schedule Post ({MONTH_NAMES[calMonthIndex].substring(0, 3)} {selectedCalDay}, {selectedTimeSlot}) ✓
-                      </Text>
-                    </LinearGradient>
-                  </Pressable>
-                </ScrollView>
-              )}
-            </Animated.View>
-          </View>
-        </Modal>
+        {/* WHEN TO POST: Jarvis's best times + any day / time in the next two weeks */}
+        <ScheduleSheet
+          visible={showScheduleSheet}
+          onClose={() => setShowScheduleSheet(false)}
+          mode={isNativeFilm ? 'remind' : 'schedule'}
+          onConfirm={(label) => {
+            setScheduledTime(label);
+            setPublishMode('schedule');
+            setShowScheduleSheet(false);
+            showToastNotice(`${isNativeFilm ? 'Reminder set for' : 'Scheduled for'} ${label}`);
+          }}
+        />
 
         {/* MODAL 3: NOTIFICATIONS CENTER */}
         <Modal
