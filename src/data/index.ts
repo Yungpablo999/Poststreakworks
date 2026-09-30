@@ -99,9 +99,25 @@ export interface RepurposeAllowance {
   monthlyLimit: number | null;
 }
 
+// Repurposes used this month (mock store; a real backend would count them)
+const repurposeUsed: Record<Persona, number> = { new: 0, returning: 1 };
+const repurposeListeners = new Set<() => void>();
+
 export function getRepurposeAllowance(persona: Persona, tier: 'free' | 'pro'): RepurposeAllowance {
-  const usedThisMonth = persona === 'new' ? 0 : 1;
-  return { usedThisMonth, monthlyLimit: tier === 'pro' ? null : FREE_REPURPOSES_PER_MONTH };
+  return { usedThisMonth: repurposeUsed[persona], monthlyLimit: tier === 'pro' ? null : FREE_REPURPOSES_PER_MONTH };
+}
+
+/** Uses one repurpose. Returns false when a free plan has none left. */
+export function spendRepurpose(persona: Persona, tier: 'free' | 'pro'): boolean {
+  if (tier !== 'pro' && repurposeUsed[persona] >= FREE_REPURPOSES_PER_MONTH) return false;
+  repurposeUsed[persona] += 1;
+  repurposeListeners.forEach((l) => l());
+  return true;
+}
+
+export function subscribeToRepurposes(listener: () => void): () => void {
+  repurposeListeners.add(listener);
+  return () => repurposeListeners.delete(listener);
 }
 
 // ---------------------------------------------------------------------------
@@ -808,4 +824,54 @@ export function getCaptionOptions(topic: string, goal: IdeaGoal, tones: string[]
       hashtags,
     };
   });
+}
+
+// ---------------------------------------------------------------------------
+// Repurpose: one idea written the way each platform works. Mock copy until
+// Jarvis writes it for real.
+// ---------------------------------------------------------------------------
+
+export interface RepurposeVersion {
+  platform: string;
+  format: string;
+  title: string;
+  body: string;
+}
+
+export function getRepurposeVersions(idea: string, platforms: string[]): RepurposeVersion[] {
+  const t = idea.replace(/[“”"]/g, '').trim() || 'My creator journey';
+  const l = t.charAt(0).toLowerCase() + t.slice(1);
+  const by: Record<string, RepurposeVersion> = {
+    tiktok: {
+      platform: 'tiktok',
+      format: 'Video · 9:16',
+      title: 'Hook first, 20–30 seconds',
+      body: `Stop scrolling if this is you: ${l}.\n\nHere's the one thing that changed it for me. Watch to the end.`,
+    },
+    instagram: {
+      platform: 'instagram',
+      format: 'Reel · caption',
+      title: 'Reel caption',
+      body: `${t}.\n\nI used to overthink every post.\nNow I share one small lesson at a time.\n\nSave this for your next filming day.`,
+    },
+    youtube: {
+      platform: 'youtube',
+      format: 'Short · title + description',
+      title: t.length > 60 ? `${t.slice(0, 57)}…` : t,
+      body: `${t}, in under a minute. The short version of what I wish someone had told me sooner.`,
+    },
+    threads: {
+      platform: 'threads',
+      format: 'Text post',
+      title: 'Conversation starter',
+      body: `${t}.\n\nHonestly, nobody talks about this part. What would you add?`,
+    },
+    facebook: {
+      platform: 'facebook',
+      format: 'Post',
+      title: 'Longer post',
+      body: `${t}.\n\nWhen I started, I waited for everything to be perfect. Sharing small, honest lessons made it easier, and people related to it more.\n\nHas this happened to you?`,
+    },
+  };
+  return platforms.filter((p) => by[p]).map((p) => by[p]);
 }
