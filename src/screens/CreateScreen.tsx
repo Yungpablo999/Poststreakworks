@@ -226,7 +226,7 @@ export const CreateScreen: React.FC<CreateScreenProps> = ({
   const isNewUser = (userPersona || userProfile?.userPersona || 'new') === 'new';
   const schedule = getScheduleSummary(isNewUser ? 'new' : 'returning');
   const repurpose = getRepurposeAllowance(isNewUser ? 'new' : 'returning', 'free');
-  const repurposesLeft = Math.max(0, (repurpose.monthlyLimit ?? 0) - repurpose.usedThisMonth);
+  const repurposesLeft = Math.max(0, (repurpose.weeklyLimit ?? 0) - repurpose.usedThisWeek);
   const [activeTab, setActiveTab] = useState<TabType>('create');
   const [drafts, setDrafts] = useState<DraftItem[]>(INITIAL_DRAFTS);
   // Drafts saved from Script / the composer (shared store) come first
@@ -557,9 +557,9 @@ export const CreateScreen: React.FC<CreateScreenProps> = ({
           <Reanimated.View entering={FadeInUp.delay(300).duration(550)} style={styles.stack}>
             <GlassRow
               title="Repurpose"
-              subtitle="Turn one post into many formats"
+              subtitle="Turn an idea or a video into more posts"
               onPress={openRepurpose}
-              extra={<AllowanceMeter left={repurposesLeft} limit={repurpose.monthlyLimit ?? 0} />}
+              extra={<AllowanceMeter left={repurposesLeft} limit={repurpose.weeklyLimit ?? 0} />}
               icon={
                 <Svg width={20} height={20} viewBox="0 0 24 24" fill="none">
                   <Path d="M21 2v6h-6M3 12a9 9 0 0115-6.7L21 8M3 22v-6h6M21 12a9 9 0 01-15 6.7L3 16" stroke={ds.purple} strokeWidth={2.1} strokeLinecap="round" strokeLinejoin="round" />

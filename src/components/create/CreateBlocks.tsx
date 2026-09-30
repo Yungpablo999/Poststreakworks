@@ -112,14 +112,14 @@ export function GlassRow({
 // Free repurposes left this month, as small segments (no pressure copy)
 export function AllowanceMeter({ left, limit }: { left: number; limit: number }) {
   return (
-    <View style={styles.meterRow} accessibilityLabel={`${left} of ${limit} free this month`}>
+    <View style={styles.meterRow} accessibilityLabel={`${left} of ${limit} free this week`}>
       <View style={styles.meterBars}>
         {Array.from({ length: limit }).map((_, i) => (
           <View key={i} style={[styles.meterBar, i < left && styles.meterBarOn]} />
         ))}
       </View>
       <Text style={styles.meterText}>
-        {left} of {limit} free this month
+        {left} of {limit} free this week
       </Text>
     </View>
   );

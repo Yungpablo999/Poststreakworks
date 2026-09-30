@@ -841,11 +841,11 @@ export const ProRepurposeScreen: React.FC<ProRepurposeScreenProps> = ({
             <Text style={styles.repurposeStudioBadgeText}>REPURPOSE STUDIO</Text>
           </View>
 
-          {/* Free plan: 2 repurposes per month */}
-          {!isPro && repurpose.monthlyLimit !== null && (
+          {/* Free plan: 1 repurpose a week */}
+          {!isPro && repurpose.weeklyLimit !== null && (
             <View style={styles.freeAllowancePill}>
               <Text style={styles.freeAllowanceText}>
-                Free plan · {Math.max(0, repurpose.monthlyLimit - repurpose.usedThisMonth)} of {repurpose.monthlyLimit} repurposes left this month
+                Free plan · {Math.max(0, repurpose.weeklyLimit - repurpose.usedThisWeek)} of {repurpose.weeklyLimit} repurposes left this week
               </Text>
             </View>
           )}

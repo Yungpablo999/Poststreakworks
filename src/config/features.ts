@@ -11,7 +11,8 @@ export const STAGE_1_PLATFORMS = ['youtube', 'threads', 'instagram', 'facebook',
 export type Stage1Platform = (typeof STAGE_1_PLATFORMS)[number];
 
 // Free-tier limits.
-export const FREE_REPURPOSES_PER_MONTH = 2;
+// One free repurpose a week (a video breakdown costs real AI time per run).
+export const FREE_REPURPOSES_PER_WEEK = 1;
 
 export const isStage1Platform = (id: string): id is Stage1Platform =>
   (STAGE_1_PLATFORMS as readonly string[]).includes(id);

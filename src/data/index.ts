@@ -1,4 +1,4 @@
-import { FREE_REPURPOSES_PER_MONTH } from '../config/features';
+import { FREE_REPURPOSES_PER_WEEK } from '../config/features';
 
 // Single place screens get their data from.
 //
@@ -90,26 +90,26 @@ export function getVoiceCloneSummary(persona: Persona): VoiceCloneSummary {
 }
 
 // ---------------------------------------------------------------------------
-// Repurpose (Free: FREE_REPURPOSES_PER_MONTH per month; Pro: unlimited)
+// Repurpose (Free: FREE_REPURPOSES_PER_WEEK per week; Pro: unlimited)
 // ---------------------------------------------------------------------------
 
 export interface RepurposeAllowance {
-  usedThisMonth: number;
+  usedThisWeek: number;
   /** null = unlimited (Pro). */
-  monthlyLimit: number | null;
+  weeklyLimit: number | null;
 }
 
-// Repurposes used this month (mock store; a real backend would count them)
-const repurposeUsed: Record<Persona, number> = { new: 0, returning: 1 };
+// Repurposes used this week (mock store; a real backend would count them)
+const repurposeUsed: Record<Persona, number> = { new: 0, returning: 0 };
 const repurposeListeners = new Set<() => void>();
 
 export function getRepurposeAllowance(persona: Persona, tier: 'free' | 'pro'): RepurposeAllowance {
-  return { usedThisMonth: repurposeUsed[persona], monthlyLimit: tier === 'pro' ? null : FREE_REPURPOSES_PER_MONTH };
+  return { usedThisWeek: repurposeUsed[persona], weeklyLimit: tier === 'pro' ? null : FREE_REPURPOSES_PER_WEEK };
 }
 
 /** Uses one repurpose. Returns false when a free plan has none left. */
 export function spendRepurpose(persona: Persona, tier: 'free' | 'pro'): boolean {
-  if (tier !== 'pro' && repurposeUsed[persona] >= FREE_REPURPOSES_PER_MONTH) return false;
+  if (tier !== 'pro' && repurposeUsed[persona] >= FREE_REPURPOSES_PER_WEEK) return false;
   repurposeUsed[persona] += 1;
   repurposeListeners.forEach((l) => l());
   return true;
@@ -874,4 +874,194 @@ export function getRepurposeVersions(idea: string, platforms: string[]): Repurpo
     },
   };
   return platforms.filter((p) => by[p]).map((p) => by[p]);
+}
+
+// ---------------------------------------------------------------------------
+// Video studio: Jarvis watches a video the creator made (frame by frame, then
+// a second pass for anything missed), describes what stands out, and suggests
+// new videos with the same shape. Mock breakdowns until the video model is
+// connected. It describes the video; it never claims to know why a post did well.
+// ---------------------------------------------------------------------------
+
+export interface StudioVideo {
+  uri?: string;
+  /** "Your video" / the post title when it came from Growth */
+  name: string;
+  seconds: number;
+  source: 'upload' | 'camera' | 'post';
+  platform?: string;
+}
+
+export interface VideoMoment {
+  at: number;
+  label: string;
+  note: string;
+}
+
+export interface VideoRecipePart {
+  id: 'opening' | 'sound' | 'pace' | 'tone';
+  label: string;
+  value: string;
+}
+
+export interface VideoBreakdown {
+  style: FilmStyle;
+  moments: VideoMoment[];
+  recipe: VideoRecipePart[];
+}
+
+export interface LikeThisIdea {
+  id: string;
+  title: string;
+  /** What carries over from the original, as short chips */
+  keeps: string[];
+  /** One small change per platform */
+  tweaks: Record<string, string>;
+}
+
+const at = (s: number, f: number) => Math.max(0, Math.round(s * f));
+
+export function getVideoBreakdown(style: FilmStyle, seconds: number): VideoBreakdown {
+  const s = Math.max(5, seconds);
+  const cuts = Math.max(2, Math.round(s / 6));
+  const by: Record<FilmStyle, VideoBreakdown> = {
+    talking: {
+      style,
+      moments: [
+        { at: 0, label: 'Opening', note: 'You start with a question, no hello or intro.' },
+        { at: at(s, 0.15), label: 'The point', note: 'The main point lands early, before people decide to scroll.' },
+        { at: at(s, 0.5), label: 'Example', note: 'A real example from your own experience.' },
+        { at: at(s, 0.9), label: 'Ending', note: 'You end by asking viewers what they think.' },
+      ],
+      recipe: [
+        { id: 'opening', label: 'Opening', value: 'A question in the first second' },
+        { id: 'sound', label: 'Sound', value: 'Your voice, light music under it' },
+        { id: 'pace', label: 'Pace', value: `${s}s, ${cuts} cuts` },
+        { id: 'tone', label: 'Tone', value: 'Honest and relatable' },
+      ],
+    },
+    dance: {
+      style,
+      moments: [
+        { at: 0, label: 'Opening', note: 'You are already moving on the first beat.' },
+        { at: at(s, 0.35), label: 'The drop', note: 'Outfit or place changes right on the drop.' },
+        { at: at(s, 0.7), label: 'Close-up', note: 'The camera moves in for the last part.' },
+        { at: at(s, 0.95), label: 'Loop', note: 'The last frame matches the first, so it replays smoothly.' },
+      ],
+      recipe: [
+        { id: 'opening', label: 'Opening', value: 'Straight in on the beat' },
+        { id: 'sound', label: 'Sound', value: 'Trending sound, still rising' },
+        { id: 'pace', label: 'Pace', value: `${s}s, cuts on the beat` },
+        { id: 'tone', label: 'Tone', value: 'Confident and playful' },
+      ],
+    },
+    skit: {
+      style,
+      moments: [
+        { at: 0, label: 'Opening', note: 'Drops straight into the situation.' },
+        { at: at(s, 0.4), label: 'The turn', note: 'The moment the situation flips.' },
+        { at: at(s, 0.85), label: 'Punchline', note: 'The payoff lands right at the end.' },
+      ],
+      recipe: [
+        { id: 'opening', label: 'Opening', value: 'Mid-scene, no setup' },
+        { id: 'sound', label: 'Sound', value: 'Your voice and a sound effect' },
+        { id: 'pace', label: 'Pace', value: `${s}s, ${cuts} cuts` },
+        { id: 'tone', label: 'Tone', value: 'Funny and familiar' },
+      ],
+    },
+    text: {
+      style,
+      moments: [
+        { at: 0, label: 'Opening', note: 'Big text on the first frame says what the video is.' },
+        { at: at(s, 0.3), label: 'Text change', note: 'New text on every cut keeps people reading.' },
+        { at: at(s, 0.9), label: 'Ending', note: 'The last line gives people a reason to save it.' },
+      ],
+      recipe: [
+        { id: 'opening', label: 'Opening', value: 'Text that names the topic' },
+        { id: 'sound', label: 'Sound', value: 'Calm trending audio' },
+        { id: 'pace', label: 'Pace', value: `${s}s, text on each cut` },
+        { id: 'tone', label: 'Tone', value: 'Calm and useful' },
+      ],
+    },
+  };
+  return by[style];
+}
+
+const IDEAS_BY_STYLE: Record<FilmStyle, { title: string; keeps: string[] }[]> = {
+  talking: [
+    { title: 'Answer the top question from the comments', keeps: ['Question opening', 'Same length'] },
+    { title: 'The opposite version: what to avoid', keeps: ['Early point', 'Ask at the end'] },
+    { title: 'Same opening, a new topic from your niche', keeps: ['Question opening', 'Same pace'] },
+    { title: 'Part 2: what happened next', keeps: ['Same tone', 'Same length'] },
+    { title: 'Your quick take on this week’s news in your niche', keeps: ['Early point', 'Same pace'] },
+    { title: 'Story time: when this went wrong for you', keeps: ['Honest tone', 'Ask at the end'] },
+  ],
+  dance: [
+    { title: 'Same trend, somewhere unexpected', keeps: ['Change on the drop', 'Same sound'] },
+    { title: 'Do it with a friend or family member', keeps: ['Straight in', 'Same length'] },
+    { title: 'A rising trend with a similar sound', keeps: ['Cuts on the beat', 'Smooth loop'] },
+    { title: 'Behind the scenes: your takes that didn’t work', keeps: ['Same sound', 'Playful tone'] },
+    { title: 'Same trend in a new outfit theme', keeps: ['Change on the drop', 'Close-up ending'] },
+    { title: 'A duet-ready version others can join', keeps: ['Same sound', 'Smooth loop'] },
+  ],
+  skit: [
+    { title: 'Same character, a new situation', keeps: ['Mid-scene opening', 'Late punchline'] },
+    { title: 'Swap the roles', keeps: ['Same turn', 'Same length'] },
+    { title: 'Part 2 of the same story', keeps: ['Same character', 'Same pace'] },
+    { title: 'The version your followers asked for', keeps: ['Mid-scene opening', 'Same tone'] },
+    { title: 'Same joke, set somewhere new', keeps: ['Same turn', 'Late punchline'] },
+    { title: 'The other person’s point of view', keeps: ['Same situation', 'Same length'] },
+  ],
+  text: [
+    { title: 'Same format, the next step of the topic', keeps: ['Text opening', 'Text on each cut'] },
+    { title: 'A list version: 3 quick tips', keeps: ['Same audio vibe', 'Save-worthy ending'] },
+    { title: 'Before and after with the same text style', keeps: ['Text opening', 'Same pace'] },
+    { title: 'Myths vs facts in your niche', keeps: ['Text on each cut', 'Calm tone'] },
+    { title: 'A day-in-the-life with the same captions', keeps: ['Same audio vibe', 'Same length'] },
+    { title: 'Your most asked question, answered in text', keeps: ['Text opening', 'Save-worthy ending'] },
+  ],
+};
+
+const TWEAKS: Record<FilmStyle, Record<string, string>> = {
+  talking: {
+    tiktok: 'Keep the question as on-screen text too.',
+    instagram: 'Pick a cover frame with your face and the question.',
+    youtube: 'Put the question in the Shorts title so it shows in search.',
+    threads: 'Post the question as text and link the video in a reply.',
+    facebook: 'Upload natively; a longer caption works well here.',
+  },
+  dance: {
+    tiktok: 'Post while the sound is still rising.',
+    instagram: 'Use the same sound from Reels audio and pick a cover mid-move.',
+    youtube: 'Add a short title on screen so Shorts can show it in search.',
+    threads: 'Share a still and ask which place to do it next.',
+    facebook: 'Post as a Reel; these get shared to groups.',
+  },
+  skit: {
+    tiktok: 'Put the situation as text on the first frame.',
+    instagram: 'Cover frame on the funniest face, not the start.',
+    youtube: 'Name the situation in the title, like “When your…”.',
+    threads: 'Write the situation as a one-liner and ask for their version.',
+    facebook: 'Tag it as relatable in the caption so people share it.',
+  },
+  text: {
+    tiktok: 'Keep text inside the safe middle of the screen.',
+    instagram: 'Try it as a carousel too, one line per slide.',
+    youtube: 'Use the first text line as the Shorts title.',
+    threads: 'Post the text lines as a thread, no video needed.',
+    facebook: 'Use a bigger font; many watch on small screens.',
+  },
+};
+
+export function getLikeThisIdeas(style: FilmStyle, seconds: number, platforms: string[], round = 0): LikeThisIdea[] {
+  const pool = IDEAS_BY_STYLE[style];
+  const len = `About ${Math.max(5, seconds)}s`;
+  return [0, 1, 2].map((i) => {
+    const base = pool[(round * 3 + i) % pool.length];
+    const tweaks: Record<string, string> = {};
+    platforms.forEach((p) => {
+      if (TWEAKS[style][p]) tweaks[p] = TWEAKS[style][p];
+    });
+    return { id: `${style}-${round}-${i}`, title: base.title, keeps: [...base.keeps, len], tweaks };
+  });
 }

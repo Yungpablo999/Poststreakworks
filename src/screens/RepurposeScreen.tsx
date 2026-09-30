@@ -1,7 +1,7 @@
-import React, { useState, useSyncExternalStore } from 'react';
+import React, { useCallback, useMemo, useState, useSyncExternalStore } from 'react';
 import { View, ScrollView, Pressable, StyleSheet, Platform, KeyboardAvoidingView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import Animated, { FadeIn, FadeInUp } from 'react-native-reanimated';
+import Animated, { Easing, FadeIn, FadeInUp } from 'react-native-reanimated';
 import Svg, { Path, Rect } from 'react-native-svg';
 import * as Haptics from 'expo-haptics';
 import * as Clipboard from 'expo-clipboard';
@@ -21,6 +21,24 @@ import { PlatformLogo, type PlatformLogoType } from '../components/onboarding/Pl
 import type { UserProfileData } from '../components/UserProfileModal';
 import type { UserPersona } from '../components/HeaderDualModePills';
 import {
+  SourceSwitch,
+  VideoPicker,
+  WatchingCard,
+  MomentTimeline,
+  RecipeGrid,
+  IdeaDeck,
+  type StudioSource,
+} from '../components/repurpose/VideoStudio';
+import { captureWithCamera, pickFromLibrary, type PickedMedia } from '../utils/media';
+import {
+  getDefaultFilmStyle,
+  getLikeThisIdeas,
+  getVideoBreakdown,
+  removeDraft,
+  saveDraft,
+  type FilmStyle,
+  type LikeThisIdea,
+  type StudioVideo,
   getRepurposeAllowance,
   getRepurposeVersions,
   spendRepurpose,
@@ -30,9 +48,12 @@ import {
 import { STAGE_1_PLATFORMS } from '../config/features';
 import { ds } from '../theme/colors';
 
-// Free Repurpose: one idea, written the way each platform works.
-// Uses one of the free monthly repurposes per batch; gold only appears for
-// the Pro upgrade once they're used up. No scores or streak numbers.
+// Free Repurpose, two ways in:
+//  - An idea: written the way each platform works.
+//  - A video I made: Jarvis watches it (two passes), shows what stands out,
+//    and deals out new video ideas with the same shape.
+// Each run uses the free weekly repurpose; gold only appears for the Pro
+// upgrade once it's used. No scores or streak numbers.
 
 const NAMES: Record<string, string> = {
   tiktok: 'TikTok',
@@ -52,6 +73,9 @@ interface RepurposeScreenProps {
   userPersona?: UserPersona;
   onTogglePersona?: () => void;
   onSwitchToPro?: () => void;
+  /** Open on the video side with this video already added (e.g. from Growth). */
+  initialVideo?: StudioVideo;
+  onFilmIdea?: (title: string, style: FilmStyle) => void;
 }
 
 function VersionCard({
@@ -128,12 +152,14 @@ export const RepurposeScreen: React.FC<RepurposeScreenProps> = ({
   userPersona,
   onTogglePersona,
   onSwitchToPro,
+  initialVideo,
+  onFilmIdea,
 }) => {
   const persona = (userPersona || userProfile?.userPersona) === 'returning' ? 'returning' : 'new';
-  useSyncExternalStore(subscribeToRepurposes, () => getRepurposeAllowance(persona, 'free').usedThisMonth);
+  useSyncExternalStore(subscribeToRepurposes, () => getRepurposeAllowance(persona, 'free').usedThisWeek);
   const allowance = getRepurposeAllowance(persona, 'free');
-  const limit = allowance.monthlyLimit ?? 0;
-  const left = Math.max(0, limit - allowance.usedThisMonth);
+  const limit = allowance.weeklyLimit ?? 0;
+  const left = Math.max(0, limit - allowance.usedThisWeek);
 
   const [idea, setIdea] = useState(ideaTitle);
   const [ideaFocused, setIdeaFocused] = useState(false);
@@ -141,6 +167,14 @@ export const RepurposeScreen: React.FC<RepurposeScreenProps> = ({
   const [versions, setVersions] = useState<RepurposeVersion[]>([]);
   const [working, setWorking] = useState<string[]>([]);
   const [toast, setToast] = useState<string | null>(null);
+
+  // Video side
+  const [source, setSource] = useState<StudioSource>(initialVideo ? 'video' : 'idea');
+  const [video, setVideo] = useState<StudioVideo | null>(initialVideo ?? null);
+  const [vStyle, setVStyle] = useState<FilmStyle>(() => getDefaultFilmStyle(userProfile?.niches));
+  const [phase, setPhase] = useState<'idle' | 'watching' | 'done'>('idle');
+  const [round, setRound] = useState(0);
+  const [savedIds, setSavedIds] = useState<string[]>([]);
 
   const showToast = (m: string) => {
     setToast(m);
@@ -170,6 +204,67 @@ export const RepurposeScreen: React.FC<RepurposeScreenProps> = ({
         if (i === next.length - 1 && Platform.OS !== 'web') Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       }, 450 + i * 380);
     });
+  };
+
+  const addVideo = async (how: 'library' | 'camera') => {
+    let picked: PickedMedia | null = null;
+    try {
+      picked = how === 'camera' && Platform.OS !== 'web' ? await captureWithCamera('video') : await pickFromLibrary('video');
+    } catch {
+      picked = null;
+    }
+    if (!picked) return;
+    if (picked.kind !== 'video') {
+      showToast('Pick a video, not a photo');
+      return;
+    }
+    setVideo({ uri: picked.uri, name: 'Your video', seconds: picked.duration ?? 30, source: how === 'camera' ? 'camera' : 'upload' });
+    setPhase('idle');
+  };
+
+  const watch = () => {
+    if (!video) {
+      showToast('Add a video first');
+      return;
+    }
+    if (!platforms.length) {
+      showToast('Pick at least one platform');
+      return;
+    }
+    if (!spendRepurpose(persona, 'free')) {
+      onOpenJarvisPro?.();
+      return;
+    }
+    if (Platform.OS !== 'web') Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    setRound(0);
+    setPhase('watching');
+  };
+
+  const finishWatching = useCallback(() => setPhase('done'), []);
+
+  // Ideas follow the platforms picked; "different ideas" is free once watched
+  const seconds = video?.seconds ?? 30;
+  const breakdown = useMemo(() => getVideoBreakdown(vStyle, seconds), [vStyle, seconds]);
+  const platformKey = platforms.join(',');
+  const ideas = useMemo(
+    () => getLikeThisIdeas(vStyle, seconds, platformKey ? platformKey.split(',') : [], round),
+    [vStyle, seconds, platformKey, round],
+  );
+  const moreIdeas = () => {
+    if (Platform.OS !== 'web') Haptics.selectionAsync();
+    setRound((r) => r + 1);
+  };
+  const toggleSave = (idea: LikeThisIdea) => {
+    const id = `like-${idea.id}`;
+    if (savedIds.includes(idea.id)) {
+      removeDraft(id);
+      setSavedIds((s) => s.filter((x) => x !== idea.id));
+      showToast('Removed from drafts');
+    } else {
+      saveDraft({ id, title: idea.title, kind: 'post', format: 'Video idea', platform: platforms[0] });
+      setSavedIds((s) => [...s, idea.id]);
+      showToast('Saved to drafts');
+    }
   };
 
   const copy = async (v: RepurposeVersion) => {
@@ -202,19 +297,29 @@ export const RepurposeScreen: React.FC<RepurposeScreenProps> = ({
           <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
             <Animated.View entering={FadeInUp.duration(500)} style={styles.headline}>
               <FitLines
-                lines={['One idea,', <Text key="e" style={styles.accent}>every platform</Text>]}
+                key={source}
+                lines={
+                  source === 'idea'
+                    ? ['One idea,', <Text key="e" style={styles.accent}>every platform</Text>]
+                    : ['Your video,', <Text key="e" style={styles.accent}>your next one</Text>]
+                }
                 textStyle={styles.headlineText}
                 maxFontSize={34}
                 align="left"
-                accessibilityLabel="One idea, every platform"
+                accessibilityLabel={source === 'idea' ? 'One idea, every platform' : 'Your video, your next one'}
               />
               <View style={styles.meter}>
                 <AllowanceMeter left={left} limit={limit} />
               </View>
             </Animated.View>
 
+            <Animated.View entering={FadeInUp.delay(40).duration(500)} style={styles.switchWrap}>
+              <SourceSwitch value={source} onChange={setSource} />
+            </Animated.View>
+
             {/* Idea */}
-            <Animated.View entering={FadeInUp.delay(80).duration(500)}>
+            {source === 'idea' && (
+            <Animated.View key="idea" entering={FadeIn.duration(260)}>
               <GlassCard strong radius={24} padding={16}>
                 <View style={styles.ideaHead}>
                   <JarvisOrb size={24} />
@@ -233,6 +338,31 @@ export const RepurposeScreen: React.FC<RepurposeScreenProps> = ({
                 </View>
               </GlassCard>
             </Animated.View>
+            )}
+
+            {/* Video */}
+            {source === 'video' && (
+              <Animated.View key="video" entering={FadeIn.duration(260)}>
+                {phase === 'watching' && video ? (
+                  <WatchingCard video={video} onDone={finishWatching} />
+                ) : (
+                  <VideoPicker
+                    video={video}
+                    style={vStyle}
+                    onChoose={() => addVideo('library')}
+                    onFilm={() => addVideo('camera')}
+                    onClear={() => {
+                      setVideo(null);
+                      setPhase('idle');
+                    }}
+                    onStyle={(st) => {
+                      setVStyle(st);
+                      setRound(0);
+                    }}
+                  />
+                )}
+              </Animated.View>
+            )}
 
             {/* Platforms */}
             <Text style={styles.section}>Where should it go?</Text>
@@ -242,8 +372,21 @@ export const RepurposeScreen: React.FC<RepurposeScreenProps> = ({
               ))}
             </View>
 
+            {!(source === 'video' && phase !== 'idle') && (
             <View style={styles.cta}>
-              {left > 0 ? (
+              {left > 0 && source === 'video' ? (
+                <AppButton
+                  title="Watch my video"
+                  size="lg"
+                  onPress={watch}
+                  iconRight={
+                    <Svg width={16} height={16} viewBox="0 0 24 24" fill="none">
+                      <Path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z" stroke="#FFFFFF" strokeWidth={2.2} strokeLinejoin="round" />
+                      <Path d="M12 15a3 3 0 100-6 3 3 0 000 6z" fill="#FFFFFF" />
+                    </Svg>
+                  }
+                />
+              ) : left > 0 ? (
                 <AppButton
                   title={
                     working.length
@@ -261,15 +404,40 @@ export const RepurposeScreen: React.FC<RepurposeScreenProps> = ({
                 />
               ) : (
                 <>
-                  <Text style={styles.outText}>You've used this month's free repurposes. They reset next month.</Text>
+                  <Text style={styles.outText}>You've used this week's free repurpose. You get a new one next week.</Text>
                   <AppButton title="Get unlimited with Pro" variant="gold" size="lg" onPress={() => onOpenJarvisPro?.()} />
                 </>
               )}
-              {left > 0 && <Text style={styles.useNote}>Uses 1 of {left} free {left === 1 ? 'repurpose' : 'repurposes'} left this month</Text>}
+              {left > 0 && <Text style={styles.useNote}>Uses your free repurpose for this week</Text>}
             </View>
+            )}
+
+            {/* Video results */}
+            {source === 'video' && phase === 'done' && video && (
+              <Animated.View entering={FadeInUp.duration(420).easing(Easing.out(Easing.cubic))}>
+                <View style={styles.doneHead}>
+                  <JarvisOrb size={26} />
+                  <Text style={styles.doneText}>Watched twice. Here's what stands out.</Text>
+                </View>
+                <RecipeGrid recipe={breakdown.recipe} />
+
+                <Text style={styles.section}>Moments in your video</Text>
+                <MomentTimeline key={`${vStyle}-${seconds}`} seconds={seconds} moments={breakdown.moments} />
+
+                <Text style={styles.section}>Make another like this</Text>
+                <IdeaDeck
+                  ideas={ideas}
+                  platforms={platforms}
+                  savedIds={savedIds}
+                  onFilm={(idea) => onFilmIdea?.(idea.title, vStyle)}
+                  onToggleSave={toggleSave}
+                  onMore={moreIdeas}
+                />
+              </Animated.View>
+            )}
 
             {/* Versions */}
-            {(versions.length > 0 || working.length > 0) && (
+            {source === 'idea' && (versions.length > 0 || working.length > 0) && (
               <>
                 <Text style={styles.section}>Your versions</Text>
                 <View style={styles.stack}>
@@ -325,6 +493,9 @@ const styles = StyleSheet.create({
   headlineText: { fontWeight: '800', letterSpacing: -0.8, color: ds.ink },
   accent: { color: ds.purple },
   meter: { marginTop: 4 },
+  switchWrap: { marginBottom: 14 },
+  doneHead: { flexDirection: 'row', alignItems: 'center', gap: 10, marginTop: 20, marginBottom: 12 },
+  doneText: { flex: 1, fontSize: 15, lineHeight: 20, fontWeight: '800', color: ds.ink },
   ideaHead: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 10 },
   eyebrow: { fontSize: 11, fontWeight: '800', letterSpacing: 1, color: ds.purple },
   field: {

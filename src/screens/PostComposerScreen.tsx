@@ -79,6 +79,8 @@ interface PostComposerScreenProps {
   } | null;
   initialFormat?: ContentFormatType;
   initialPlatform?: string;
+  /** Pre-pick the kind of video (e.g. from the Repurpose video studio). */
+  initialFilmStyle?: FilmStyle;
   attachedAudio?: {
     title: string;
     voiceName: string;
@@ -379,6 +381,7 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
   questDraft,
   initialFormat,
   initialPlatform = '',
+  initialFilmStyle,
   attachedAudio,
   onClearAttachedAudio,
   onBack,
@@ -946,7 +949,7 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
   const filmApp: HandoffPlatform | undefined =
     filmAppChoice && handoffPlatforms.includes(filmAppChoice) ? filmAppChoice : handoffPlatforms[0];
   // Talking / dance / skit / text-on-screen, pre-picked from the creator's niche
-  const [filmStyle, setFilmStyle] = useState<FilmStyle>(() => getDefaultFilmStyle(userProfile?.niches));
+  const [filmStyle, setFilmStyle] = useState<FilmStyle>(() => initialFilmStyle ?? getDefaultFilmStyle(userProfile?.niches));
   const filmPlan = React.useMemo(() => getFilmPlan(currentIdea ?? '', filmStyle), [currentIdea, filmStyle]);
   const soundIdeas = React.useMemo(() => getSoundIdeas(filmStyle), [filmStyle]);
   const [overlayText, setOverlayText] = useState('');

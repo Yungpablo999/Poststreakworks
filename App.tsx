@@ -13,7 +13,7 @@ import { VerifyCodeScreen } from './src/screens/VerifyCodeScreen';
 import { NicheSelectionScreen } from './src/screens/NicheSelectionScreen';
 import { PlatformConnectScreen } from './src/screens/PlatformConnectScreen';
 import { PlanPreviewScreen } from './src/screens/PlanPreviewScreen';
-import type { IdeaGoal } from './src/data';
+import type { FilmStyle, IdeaGoal, StudioVideo } from './src/data';
 import { DashboardScreen } from './src/screens/DashboardScreen';
 import { RepurposeScreen } from './src/screens/RepurposeScreen';
 import { ProDashboardScreen } from './src/screens/ProDashboardScreen';
@@ -114,6 +114,9 @@ export default function App() {
   // Also carries a ready caption + tags from the Caption writer
   // Platform to pre-select in the composer (e.g. from Repurpose)
   const [composerIdeaPlatform, setComposerIdeaPlatform] = useState<string | undefined>(undefined);
+  const [composerFilmStyle, setComposerFilmStyle] = useState<FilmStyle | undefined>(undefined);
+  // A post sent from Growth into the Repurpose video studio
+  const [studioVideo, setStudioVideo] = useState<StudioVideo | undefined>(undefined);
   const [composerIdeaGoal, setComposerIdeaGoal] = useState<{ goal?: IdeaGoal; hook?: string; caption?: string; tags?: string[] } | null>(null);
   const [composerIdeaFormat, setComposerIdeaFormat] = useState<'short_video' | 'carousel' | 'image' | 'long_video' | 'text' | undefined>(undefined);
   const [composerQuestDraft, setComposerQuestDraft] = useState<{
@@ -136,7 +139,7 @@ export default function App() {
   const handleUseIdea = (title: string, format?: string, goal?: IdeaGoal, hook?: string) => {
     setComposerQuestDraft(null);
     setComposerIdeaGoal(goal ? { goal, hook } : null);
-    setComposerIdeaPlatform(undefined);
+    setComposerIdeaPlatform(undefined); setComposerFilmStyle(undefined);
     setComposerAttachedAudio(null);
     if (title) setComposerIdeaTitle(title);
     if (format) {
@@ -250,7 +253,7 @@ export default function App() {
     setSelectedIdeaTitle(idea.title);
     setComposerIdeaTitle(idea.title);
     setComposerIdeaGoal(null);
-                setComposerIdeaPlatform(undefined);
+                setComposerIdeaPlatform(undefined); setComposerFilmStyle(undefined);
     navigateTo('signup');
   };
 
@@ -503,7 +506,7 @@ export default function App() {
               onOpenPostComposer={(ideaTitle) => {
                 if (ideaTitle) setComposerIdeaTitle(ideaTitle);
                 setComposerIdeaGoal(null);
-                setComposerIdeaPlatform(undefined);
+                setComposerIdeaPlatform(undefined); setComposerFilmStyle(undefined);
                 navigateTo('composer');
               }}
               onSwitchToFree={() => {
@@ -544,7 +547,7 @@ export default function App() {
               onOpenPostComposer={(ideaTitle, platform, questDraft, format) => {
                 if (ideaTitle) setComposerIdeaTitle(ideaTitle);
                 setComposerIdeaGoal(null);
-                setComposerIdeaPlatform(undefined);
+                setComposerIdeaPlatform(undefined); setComposerFilmStyle(undefined);
                 if (questDraft) setComposerQuestDraft(questDraft);
                 if (format) setComposerIdeaFormat(format as any);
                 navigateTo('composer');
@@ -567,7 +570,7 @@ export default function App() {
               onOpenPostComposer={(title, platform) => {
                 if (title) setComposerIdeaTitle(title);
                 setComposerIdeaGoal(null);
-                setComposerIdeaPlatform(undefined);
+                setComposerIdeaPlatform(undefined); setComposerFilmStyle(undefined);
                 navigateTo('composer');
               }}
               onNavigateTab={handleTabNavigation}
@@ -590,7 +593,7 @@ export default function App() {
               onOpenPostComposer={(title, platform) => {
                 if (title) setComposerIdeaTitle(title);
                 setComposerIdeaGoal(null);
-                setComposerIdeaPlatform(undefined);
+                setComposerIdeaPlatform(undefined); setComposerFilmStyle(undefined);
                 navigateTo('composer');
               }}
               onOpenIdeaAngle={() => navigateTo('content-angle')}
@@ -606,6 +609,7 @@ export default function App() {
               }}
               onOpenRepurpose={(title?: string) => {
                 if (title) setSelectedIdeaTitle(title);
+                setStudioVideo(undefined);
                 navigateTo('repurpose');
               }}
               onSwitchToFree={() => {
@@ -629,7 +633,7 @@ export default function App() {
               onOpenPostComposer={(title, platform) => {
                 if (title) setComposerIdeaTitle(title);
                 setComposerIdeaGoal(null);
-                setComposerIdeaPlatform(undefined);
+                setComposerIdeaPlatform(undefined); setComposerFilmStyle(undefined);
                 navigateTo('composer');
               }}
               onOpenIdeaAngle={() => navigateTo('content-angle')}
@@ -643,6 +647,7 @@ export default function App() {
               }}
               onOpenRepurpose={(title?: string) => {
                 if (title) setSelectedIdeaTitle(title);
+                setStudioVideo(undefined);
                 navigateTo('repurpose');
               }}
               onNavigateTab={handleTabNavigation}
@@ -671,7 +676,7 @@ export default function App() {
               onOpenPostComposer={(title, platform) => {
                 if (title) setComposerIdeaTitle(title);
                 setComposerIdeaGoal(null);
-                setComposerIdeaPlatform(undefined);
+                setComposerIdeaPlatform(undefined); setComposerFilmStyle(undefined);
                 navigateTo('composer');
               }}
               onSwitchToFree={() => {
@@ -694,7 +699,7 @@ export default function App() {
               onOpenPostComposer={(title, platform) => {
                 if (title) setComposerIdeaTitle(title);
                 setComposerIdeaGoal(null);
-                setComposerIdeaPlatform(undefined);
+                setComposerIdeaPlatform(undefined); setComposerFilmStyle(undefined);
                 navigateTo('composer');
               }}
               onNavigateTab={handleTabNavigation}
@@ -717,7 +722,7 @@ export default function App() {
               onOpenPostComposer={(title, platform) => {
                 if (title) setComposerIdeaTitle(title);
                 setComposerIdeaGoal(null);
-                setComposerIdeaPlatform(undefined);
+                setComposerIdeaPlatform(undefined); setComposerFilmStyle(undefined);
                 navigateTo('composer');
               }}
               onOpenScript={() => navigateTo('script')}
@@ -744,6 +749,11 @@ export default function App() {
               onOpenPostPerformance={() => navigateTo('post-performance')}
               onOpenPlatformGrowth={() => navigateTo('platform-growth')}
               onNavigateTab={handleTabNavigation}
+              onMakeMoreLikeThis={(video) => {
+                setStudioVideo(video);
+                setSelectedIdeaTitle(video.name);
+                navigateTo('repurpose');
+              }}
               userProfile={userProfile}
               onSaveProfile={(updated) => setUserProfile(prev => ({ ...prev, ...updated, tier: updated.tier || prev.tier || 'free' }))}
             />
@@ -772,7 +782,7 @@ export default function App() {
               onOpenPostComposer={(title, platform, questDraft, format) => {
                 if (title) setComposerIdeaTitle(title);
                 setComposerIdeaGoal(null);
-                setComposerIdeaPlatform(undefined);
+                setComposerIdeaPlatform(undefined); setComposerFilmStyle(undefined);
                 if (questDraft) setComposerQuestDraft(questDraft);
                 if (format) setComposerIdeaFormat(format as any);
                 navigateTo('composer');
@@ -813,7 +823,7 @@ export default function App() {
             onOpenComposer={(idea?: string, platform?: string, questDraft?: any) => {
               if (idea) setComposerIdeaTitle(idea);
               setComposerIdeaGoal(null);
-                setComposerIdeaPlatform(undefined);
+                setComposerIdeaPlatform(undefined); setComposerFilmStyle(undefined);
               if (questDraft) {
                 setComposerQuestDraft(questDraft);
               } else {
@@ -837,7 +847,7 @@ export default function App() {
             onOpenPostComposer={(title) => {
               if (title) setComposerIdeaTitle(title);
               setComposerIdeaGoal(null);
-                setComposerIdeaPlatform(undefined);
+                setComposerIdeaPlatform(undefined); setComposerFilmStyle(undefined);
               setComposerQuestDraft(null);
               navigateTo('composer');
             }}
@@ -852,6 +862,7 @@ export default function App() {
             ideaTitle={composerIdeaTitle}
             ideaGoal={composerIdeaGoal}
             initialPlatform={composerIdeaPlatform}
+            initialFilmStyle={composerFilmStyle}
             questDraft={composerQuestDraft}
             initialFormat={composerIdeaFormat}
             attachedAudio={composerAttachedAudio}
@@ -912,7 +923,7 @@ export default function App() {
               onOpenPostComposer={(title, platform) => {
                 if (title) setComposerIdeaTitle(title);
                 setComposerIdeaGoal(null);
-                setComposerIdeaPlatform(undefined);
+                setComposerIdeaPlatform(undefined); setComposerFilmStyle(undefined);
                 navigateTo('composer');
               }}
               onOpenIdeaAngle={() => navigateTo('content-angle')}
@@ -936,7 +947,7 @@ export default function App() {
               onUseAsPost={(scriptData) => {
                 if (scriptData.hook) setComposerIdeaTitle(scriptData.hook);
                 setComposerIdeaGoal(null);
-                setComposerIdeaPlatform(undefined);
+                setComposerIdeaPlatform(undefined); setComposerFilmStyle(undefined);
                 navigateTo('composer');
               }}
               onNavigateTab={handleTabNavigation}
@@ -957,7 +968,7 @@ export default function App() {
               onAddToPost={(captionText, hashtags) => {
                 if (captionText) setComposerIdeaTitle(captionText);
                 setComposerIdeaGoal(null);
-                setComposerIdeaPlatform(undefined);
+                setComposerIdeaPlatform(undefined); setComposerFilmStyle(undefined);
                 navigateTo('composer');
               }}
               onOpenIdeaAngle={() => navigateTo('content-angle')}
@@ -1002,7 +1013,7 @@ export default function App() {
               onNavigate={(screen) => navigateTo(screen as Screen)}
             />
           ) : (
-            // Free plan: the new glass Repurpose page (2 free a month)
+            // Free plan: the glass Repurpose studio (1 free a week)
             <RepurposeScreen
               ideaTitle={selectedIdeaTitle}
               userProfile={userProfile}
@@ -1012,10 +1023,16 @@ export default function App() {
               onBack={() => navigateTo(previousScreen ? previousScreen : 'create')}
               onNavigateTab={handleTabNavigation}
               onOpenJarvisPro={() => navigateTo('jarvis-pro')}
+              initialVideo={studioVideo}
+              onFilmIdea={(title, style) => {
+                handleUseIdea(title, 'short video');
+                setComposerFilmStyle(style);
+              }}
               onUseVersion={(caption, platform, idea) => {
                 setComposerIdeaTitle(idea);
                 setComposerIdeaGoal({ caption });
                 setComposerIdeaPlatform(platform);
+                setComposerFilmStyle(undefined);
                 navigateTo('composer');
               }}
             />
@@ -1030,7 +1047,7 @@ export default function App() {
             onOpenPostComposer={(prefillTitle, attachedAudio) => {
               if (prefillTitle) setComposerIdeaTitle(prefillTitle);
               setComposerIdeaGoal(null);
-                setComposerIdeaPlatform(undefined);
+                setComposerIdeaPlatform(undefined); setComposerFilmStyle(undefined);
               if (attachedAudio) setComposerAttachedAudio(attachedAudio);
               navigateTo('composer');
             }}
@@ -1054,7 +1071,7 @@ export default function App() {
             onOpenPostComposer={(prefillTitle, prefillPlatform) => {
               if (prefillTitle) setComposerIdeaTitle(prefillTitle);
               setComposerIdeaGoal(null);
-                setComposerIdeaPlatform(undefined);
+                setComposerIdeaPlatform(undefined); setComposerFilmStyle(undefined);
               navigateTo('composer');
             }}
             onOpenScript={(title) => {
@@ -1076,7 +1093,7 @@ export default function App() {
             onOpenComposer={(prefillTitle) => {
               if (prefillTitle) setComposerIdeaTitle(prefillTitle);
               setComposerIdeaGoal(null);
-                setComposerIdeaPlatform(undefined);
+                setComposerIdeaPlatform(undefined); setComposerFilmStyle(undefined);
               navigateTo('composer');
             }}
             onOpenScript={(prefillTitle) => {
@@ -1100,7 +1117,7 @@ export default function App() {
             onOpenComposer={(prefillTitle) => {
               if (prefillTitle) setComposerIdeaTitle(prefillTitle);
               setComposerIdeaGoal(null);
-                setComposerIdeaPlatform(undefined);
+                setComposerIdeaPlatform(undefined); setComposerFilmStyle(undefined);
               navigateTo('composer');
             }}
             onOpenScript={(prefillTitle) => {
@@ -1126,13 +1143,13 @@ export default function App() {
             onOpenCreate={(prefillTopic) => {
               if (prefillTopic) setComposerIdeaTitle(prefillTopic);
               setComposerIdeaGoal(null);
-                setComposerIdeaPlatform(undefined);
+                setComposerIdeaPlatform(undefined); setComposerFilmStyle(undefined);
               navigateTo('create');
             }}
             onOpenPostComposer={(prefillTitle) => {
               if (prefillTitle) setComposerIdeaTitle(prefillTitle);
               setComposerIdeaGoal(null);
-                setComposerIdeaPlatform(undefined);
+                setComposerIdeaPlatform(undefined); setComposerFilmStyle(undefined);
               navigateTo('composer');
             }}
             onNavigateTab={handleTabNavigation}

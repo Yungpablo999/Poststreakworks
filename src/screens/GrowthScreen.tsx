@@ -15,6 +15,7 @@ import {
 } from 'react-native';
 import { Text, TextInput } from '../components/ui/AppText';
 import { isStage1Platform } from '../config/features';
+import type { StudioVideo } from '../data';
 import Svg, { Path, Circle, Rect, Defs, LinearGradient as SvgLinearGradient, Stop } from 'react-native-svg';
 import * as Haptics from 'expo-haptics';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -188,6 +189,8 @@ interface GrowthScreenProps {
   onBackToDashboard?: () => void;
   onOpenPostPerformance?: () => void;
   onOpenPlatformGrowth?: () => void;
+  /** Send this post into the Repurpose video studio. */
+  onMakeMoreLikeThis?: (video: StudioVideo) => void;
   onLogout?: () => void;
   onNavigateTab?: (tab: TabType) => void;
   onOpenJarvisPro?: () => void;
@@ -220,6 +223,7 @@ export const GrowthScreen: React.FC<GrowthScreenProps> = ({
   onBackToDashboard,
   onOpenPostPerformance,
   onOpenPlatformGrowth,
+  onMakeMoreLikeThis,
   onLogout,
   onNavigateTab,
   onOpenJarvisPro,
@@ -784,6 +788,27 @@ export const GrowthScreen: React.FC<GrowthScreenProps> = ({
                     <Text style={styles.analyzeBtnText}>Analyze Why It Worked</Text>
                   </View>
                 </Pressable>
+
+                {onMakeMoreLikeThis && (
+                  <Pressable
+                    style={({ pressed }) => [styles.moreLikeBtn, pressed && styles.btnPressed]}
+                    onPress={() => {
+                      if (Platform.OS !== 'web') Haptics.selectionAsync();
+                      onMakeMoreLikeThis({
+                        name: '3 creator mistakes I stopped making this year',
+                        seconds: 42,
+                        source: 'post',
+                        platform: 'tiktok',
+                      });
+                    }}
+                    accessibilityRole="button"
+                  >
+                    <Svg width={15} height={15} viewBox="0 0 24 24" fill="none">
+                      <Path d="M21 2v6h-6M3 12a9 9 0 0115-6.7L21 8M3 22v-6h6M21 12a9 9 0 01-15 6.7L3 16" stroke="#5B3EE8" strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round" />
+                    </Svg>
+                    <Text style={styles.moreLikeText}>Make more like this</Text>
+                  </Pressable>
+                )}
               </View>
             </>
           )}
@@ -2029,6 +2054,17 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
+  moreLikeBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    height: 48,
+    marginTop: 10,
+    borderRadius: 16,
+    backgroundColor: '#EDE9FE',
+  },
+  moreLikeText: { fontSize: 15, fontWeight: '800', color: '#5B3EE8' },
   analyzeBtnText: {
     fontSize: 14,
     fontWeight: '800',
