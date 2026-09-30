@@ -42,15 +42,18 @@ export function StepHeader({
   done,
   right,
   onLayout,
+  viewRef,
 }: {
   n: number;
   title: string;
   done: boolean;
   right?: React.ReactNode;
   onLayout?: (e: LayoutChangeEvent) => void;
+  /** Lets the screen measure where this step is right now (to scroll to it). */
+  viewRef?: (v: View | null) => void;
 }) {
   return (
-    <View style={styles.stepHeader} onLayout={onLayout}>
+    <View style={styles.stepHeader} onLayout={onLayout} ref={viewRef}>
       <View style={[styles.stepNum, done && styles.stepNumDone]}>
         {done ? (
           <Animated.View key="d" entering={ZoomIn.springify().damping(12)}>

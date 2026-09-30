@@ -433,13 +433,9 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
   const modalPopScale = useRef(new Animated.Value(0.9)).current;
   const mainScrollViewRef = useRef<ScrollView>(null);
   const captionInputRef = useRef<TextInput>(null);
-  const sectionPositions = useRef<{ [key: string]: number }>({
-    platforms: 260,
-    format: 480,
-    media: 860,
-    caption: 1180,
-    schedule: 1540,
-  });
+  // Steps are measured when tapped (sections above can change height)
+  const sectionRefs = useRef<{ [key: string]: View | null }>({});
+  const scrollY = useRef(0);
 
   // Sync prop changes for frictionless idea adoption
   useEffect(() => {
@@ -865,16 +861,23 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
     if (Platform.OS !== 'web') {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     }
-    const targetY = sectionPositions.current[section] ?? 0;
-    mainScrollViewRef.current?.scrollTo({ y: Math.max(0, targetY - 20), animated: true });
+    // Measure where the step is right now inside the scroll content
+    // (sections above can change height after the page first lays out)
+    const target = sectionRefs.current[section];
+    const sv = mainScrollViewRef.current as
+      | (ScrollView & { getInnerViewRef?: () => unknown; getInnerViewNode?: () => unknown })
+      | null;
+    const content = sv?.getInnerViewRef?.() ?? sv?.getInnerViewNode?.();
+    if (target && sv && content) {
+      target.measureLayout(
+        content as never,
+        (_x, y) => sv.scrollTo({ y: Math.max(0, y - 12), animated: true }),
+        () => {},
+      );
+    }
 
     if (section === 'caption') {
       setTimeout(() => captionInputRef.current?.focus(), 350);
-    } else if (section === 'platforms' && !isPlatformsReady) {
-      setTimeout(() => {
-        triggerModalAnim();
-        setShowPlatformsModal(true);
-      }, 350);
     } else if (section === 'schedule') {
       setTimeout(() => {
         setShowScheduleSheet(true);
@@ -1010,6 +1013,8 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
         {/* 2. MAIN SCROLLABLE CONTENT */}
         <ScrollView
           ref={mainScrollViewRef}
+          onScroll={(e) => (scrollY.current = e.nativeEvent.contentOffset.y)}
+          scrollEventThrottle={32}
           contentContainerStyle={styles.scrollContent}
           showsVerticalScrollIndicator={false}
           bounces={true}
@@ -1094,9 +1099,7 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
             n={1}
             title="Where it goes"
             done={isPlatformsReady}
-            onLayout={(e) => {
-              sectionPositions.current.platforms = e.nativeEvent.layout.y;
-            }}
+            viewRef={(v) => (sectionRefs.current.platforms = v)}
           />
           <View style={styles.chipsWrap}>
             {stage1Platforms.map((plat) => (
@@ -1116,9 +1119,7 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
             n={2}
             title="Format"
             done={isFormatReady}
-            onLayout={(e) => {
-              sectionPositions.current.format = e.nativeEvent.layout.y;
-            }}
+            viewRef={(v) => (sectionRefs.current.format = v)}
           />
           <RecommendedFormat
             id={recommendedFormatConfig.id}
@@ -1153,9 +1154,7 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
             n={3}
             title={isNativeFilm || isCameraFilm ? 'Film it' : 'Media'}
             done={isMediaReady}
-            onLayout={(e) => {
-              sectionPositions.current.media = e.nativeEvent.layout.y;
-            }}
+            viewRef={(v) => (sectionRefs.current.media = v)}
           />
           {isNativeFilm || isCameraFilm ? (
             <FilmPlanCard
@@ -1193,9 +1192,7 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
             title="Caption"
             done={isCaptionReady}
             right={<EditsMeter left={aiEditsLeft} total={3} />}
-            onLayout={(e) => {
-              sectionPositions.current.caption = e.nativeEvent.layout.y;
-            }}
+            viewRef={(v) => (sectionRefs.current.caption = v)}
           />
           <View style={[styles.captionCard, isCaptionFocused && styles.captionCardFocused]}>
             <TextInput
@@ -1279,9 +1276,7 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
             n={6}
             title="When to post"
             done={isScheduleReady}
-            onLayout={(e) => {
-              sectionPositions.current.schedule = e.nativeEvent.layout.y;
-            }}
+            viewRef={(v) => (sectionRefs.current.schedule = v)}
           />
           <GlassCard strong radius={22} padding={16}>
             <ModeSwitch mode={publishMode} onChange={setPublishMode} labels={isNativeFilm ? { now: 'Film now', schedule: 'Remind me' } : undefined} />
@@ -1348,8 +1343,6 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
             )}
           </View>
 
-          {/* Bottom spacing to clear floating tab bar */}
-          <View style={{ height: 110 }} />
         </ScrollView>
 
         {showPostedCheck && pendingHandoff && (
@@ -1696,7 +1689,8 @@ const styles = StyleSheet.create({
   scrollContent: {
     paddingHorizontal: 20,
     paddingTop: 8,
-    paddingBottom: 135,
+    // Clears the floating tab bar, no extra gap
+    paddingBottom: 120,
   },
   btnPressed: {
     opacity: 0.9,
