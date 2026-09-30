@@ -13,7 +13,6 @@ import Animated, {
   useReducedMotion,
   useSharedValue,
   withRepeat,
-  withSpring,
   withTiming,
 } from 'react-native-reanimated';
 import Svg, { Path, Rect, Circle } from 'react-native-svg';
@@ -71,7 +70,7 @@ export function StepHeader({
 export function PlatformChip({ id, name, selected, onPress }: { id: string; name: string; selected: boolean; onPress: () => void }) {
   const on = useSharedValue(selected ? 1 : 0);
   useEffect(() => {
-    on.value = withSpring(selected ? 1 : 0, { damping: 16, stiffness: 260 });
+    on.value = withTiming(selected ? 1 : 0, { duration: 200, easing: Easing.out(Easing.cubic) });
   }, [selected, on]);
   const style = useAnimatedStyle(() => ({
     borderColor: interpolateColor(on.value, [0, 1], ['rgba(255,255,255,0.95)', ds.purple]),
@@ -461,7 +460,8 @@ export function ModeSwitch({
   const x = useSharedValue(0);
   const cell = w / MODES.length;
   useEffect(() => {
-    if (cell > 0) x.value = withSpring(idx * cell, { damping: 18, stiffness: 240 });
+    // Smooth glide, no overshoot
+    if (cell > 0) x.value = withTiming(idx * cell, { duration: 260, easing: Easing.out(Easing.cubic) });
   }, [idx, cell, x]);
   const pill = useAnimatedStyle(() => ({ transform: [{ translateX: x.value }] }));
   return (

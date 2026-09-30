@@ -6,7 +6,6 @@ import Animated, {
   useAnimatedStyle,
   useSharedValue,
   withDelay,
-  withSpring,
   withTiming,
 } from 'react-native-reanimated';
 import Svg, { Path, Circle } from 'react-native-svg';
@@ -111,7 +110,8 @@ export function WeekStrip({
   const cell = w / 7;
   const x = useSharedValue(0);
   useEffect(() => {
-    if (cell > 0) x.value = withSpring(selected * cell, { damping: 18, stiffness: 220 });
+    // Smooth glide, no overshoot
+    if (cell > 0) x.value = withTiming(selected * cell, { duration: 260, easing: Easing.out(Easing.cubic) });
   }, [selected, cell, x]);
   const pill = useAnimatedStyle(() => ({ transform: [{ translateX: x.value }] }));
 
