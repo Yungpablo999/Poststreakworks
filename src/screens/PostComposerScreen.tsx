@@ -1345,7 +1345,7 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
                 onPress={() => setCaptionTone(captionTones[(captionTones.indexOf(captionTone) + 1) % captionTones.length])}
               />
               <CyclePill
-                label="ASK"
+                label="ENDS WITH"
                 value={captionCta === 'Ask Question' ? 'Question' : captionCta === 'Save Post' ? 'Save' : 'Share'}
                 onPress={() => setCaptionCta(captionCtas[(captionCtas.indexOf(captionCta) + 1) % captionCtas.length])}
               />
@@ -1353,7 +1353,7 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
             <View style={styles.aiRow}>
               <AiAction label="Rewrite" onPress={() => handleAiAction('rewrite')} disabled={isAiProcessing || aiEditsLeft === 0} />
               <AiAction label="Shorten" onPress={() => handleAiAction('shorter')} disabled={isAiProcessing || aiEditsLeft === 0} />
-              <AiAction label="Add ask" onPress={() => handleAiAction('cta')} disabled={isAiProcessing || aiEditsLeft === 0} />
+              <AiAction label="Ask viewers" onPress={() => handleAiAction('cta')} disabled={isAiProcessing || aiEditsLeft === 0} />
             </View>
           </View>
           <Text style={styles.note}>Tip: name the exact moment or mistake, and one thing people can try.</Text>
