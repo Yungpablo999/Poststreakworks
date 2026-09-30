@@ -757,6 +757,9 @@ export default function App() {
               onOpenPostPerformance={() => navigateTo('post-performance')}
               onOpenPlatformGrowth={() => navigateTo('platform-growth')}
               onNavigateTab={handleTabNavigation}
+              onOpenSchedule={() => navigateTo('schedule')}
+              onOpenIdeas={() => navigateTo('content-angle')}
+              onOpenChallenge={() => navigateTo('challenge-detail')}
               onMakeMoreLikeThis={(video) => {
                 setStudioVideo(video);
                 setSelectedIdeaTitle(video.name);

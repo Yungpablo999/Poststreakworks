@@ -191,7 +191,7 @@ export function JarvisStrategyCard({
             : 'Posts that deliver their main value within 4 seconds keep people watching longest. Lean into mistake-based hooks.'}
         </Text>
       </View>
-      <AppButton title="See the breakdown" variant="quiet" onPress={onOpen} />
+      <AppButton title={isNewUser ? "See your starter plan" : "See this week’s plan"} variant="quiet" onPress={onOpen} />
     </GlassCard>
   );
 }
@@ -202,7 +202,7 @@ function DayDot({ index, filled }: { index: number; filled: boolean }) {
   const s = useSharedValue(reduceMotion ? 1 : 0);
   useEffect(() => {
     if (reduceMotion) return;
-    s.value = withDelay(200 + index * 70, withTiming(1, { duration: 260, easing: Easing.out(Easing.back(2)) }));
+    s.value = withDelay(200 + index * 70, withTiming(1, { duration: 260, easing: Easing.out(Easing.cubic) }));
   }, [reduceMotion, index, s]);
   const style = useAnimatedStyle(() => ({ transform: [{ scale: s.value }], opacity: s.value }));
   return <Animated.View style={[styles.dayDot, filled && styles.dayDotOn, style]} />;

@@ -32,6 +32,7 @@ import { FitLines } from '../components/ui/FitLines';
 import { JarvisOrb } from '../components/JarvisOrb';
 import { PlatformRow } from '../components/onboarding/PlatformRow';
 import { ConnectAccountsSheet } from '../components/growth/ConnectAccountsSheet';
+import { WeeklyPlanSheet } from '../components/growth/WeeklyPlanSheet';
 import { type PlatformLogoType } from '../components/onboarding/PlatformLogo';
 import { ProUpsellCard } from '../components/home/ProUpsellCard';
 import { PressableCard } from '../components/ui/PressableCard';
@@ -191,6 +192,9 @@ interface GrowthScreenProps {
   onBackToDashboard?: () => void;
   onOpenPostPerformance?: () => void;
   onOpenPlatformGrowth?: () => void;
+  onOpenSchedule?: () => void;
+  onOpenIdeas?: () => void;
+  onOpenChallenge?: () => void;
   /** Send this post into the Repurpose video studio. */
   onMakeMoreLikeThis?: (video: StudioVideo) => void;
   onLogout?: () => void;
@@ -226,6 +230,9 @@ export const GrowthScreen: React.FC<GrowthScreenProps> = ({
   onOpenPostPerformance,
   onOpenPlatformGrowth,
   onMakeMoreLikeThis,
+  onOpenSchedule,
+  onOpenIdeas,
+  onOpenChallenge,
   onLogout,
   onNavigateTab,
   onOpenJarvisPro,
@@ -272,6 +279,13 @@ export const GrowthScreen: React.FC<GrowthScreenProps> = ({
       triggerModalPop();
       setShowAudienceModal(true);
     }
+  };
+
+  // Close the plan, then go where the step is done
+  const leavePlan = (go: (() => void) | undefined, fallback: TabType) => {
+    setShowStrategyModal(false);
+    if (go) go();
+    else onNavigateTab?.(fallback);
   };
 
   const handleOpenConnectPlatforms = () => {
@@ -876,10 +890,7 @@ export const GrowthScreen: React.FC<GrowthScreenProps> = ({
             <JarvisStrategyCard
               orb={<JarvisOrb size={34} />}
               isNewUser={isNewUser}
-              onOpen={() => {
-                triggerModalPop();
-                setShowStrategyModal(true);
-              }}
+              onOpen={() => setShowStrategyModal(true)}
             />
           </Reanimated.View>
 
@@ -1159,83 +1170,64 @@ export const GrowthScreen: React.FC<GrowthScreenProps> = ({
           </View>
         </Modal>
 
-        {/* MODAL: JARVIS AI STRATEGY */}
-        <Modal
+        {/* Jarvis's plan for the week */}
+        <WeeklyPlanSheet
           visible={showStrategyModal}
-          transparent={true}
-          animationType="fade"
-          onRequestClose={() => setShowStrategyModal(false)}
-        >
-          <View style={styles.modalOverlay}>
-            <Animated.View style={[styles.modalCard, { transform: [{ scale: modalPopScale }] }]}>
-              <View style={styles.modalHeaderRow}>
-                <View>
-                  <Text style={styles.modalTitle}>Jarvis Weekly Action Plan</Text>
-                  <Text style={styles.modalSubtitle}>Recommended next steps for Amara</Text>
-                </View>
-                <Pressable onPress={() => setShowStrategyModal(false)} style={styles.modalCloseCircle} hitSlop={8}>
-                  <Text style={styles.modalCloseCross}>✕</Text>
-                </Pressable>
-              </View>
-
-              <View style={styles.modalActionItemCard}>
-                <View style={styles.modalActionContent}>
-                  <Text style={styles.modalDetailTitle}>⚡ Action 1: Batch 2 Shorts</Text>
-                  <Text style={styles.modalDetailBody}>
-                    Schedule for Wed + Fri · 7:30 PM
-                  </Text>
-                </View>
-                <Pressable
-                  style={({ pressed }) => [styles.modalActionMiniBtn, pressed && styles.btnPressed]}
-                  onPress={() => {
-                    setShowStrategyModal(false);
-                    if (onNavigateTab) {
-                      onNavigateTab('create');
-                    } else {
-                      showToast('Scheduled for Wed + Fri at 7:30 PM');
-                    }
-                  }}
-                  hitSlop={6}
-                >
-                  <Text style={styles.modalActionMiniBtnText}>Schedule ➔</Text>
-                </Pressable>
-              </View>
-
-              <View style={[styles.modalActionItemCard, { marginTop: 10 }]}>
-                <View style={styles.modalActionContent}>
-                  <Text style={styles.modalDetailTitle}>🤝 Action 2: Challenge Quest</Text>
-                  <Text style={styles.modalDetailBody}>
-                    Join 7-Day Consistency Challenge
-                  </Text>
-                </View>
-                <Pressable
-                  style={({ pressed }) => [styles.modalActionMiniBtn, pressed && styles.btnPressed]}
-                  onPress={() => {
-                    setShowStrategyModal(false);
-                    if (onNavigateTab) {
-                      onNavigateTab('quests');
-                    } else {
-                      showToast('Opening Quests...');
-                    }
-                  }}
-                  hitSlop={6}
-                >
-                  <Text style={styles.modalActionMiniBtnText}>Join ➔</Text>
-                </Pressable>
-              </View>
-
-              <Pressable
-                style={styles.modalFullBtn}
-                onPress={() => {
-                  setShowStrategyModal(false);
-                  if (onNavigateTab) onNavigateTab('create');
-                }}
-              >
-                <Text style={styles.modalFullBtnText}>✨ Apply Strategy Now ➔</Text>
-              </Pressable>
-            </Animated.View>
-          </View>
-        </Modal>
+          onClose={() => setShowStrategyModal(false)}
+          isNewUser={isNewUser}
+          steps={
+            isNewUser
+              ? [
+                  {
+                    id: 'connect',
+                    title: 'Connect one account',
+                    body: 'So Jarvis can start learning what works for you.',
+                    action: 'Connect',
+                    onAction: () => {
+                      setShowStrategyModal(false);
+                      setShowConnectPlatformModal(true);
+                    },
+                  },
+                  {
+                    id: 'idea',
+                    title: 'Pick your first idea',
+                    body: 'Choose one that feels easy to make.',
+                    action: 'See ideas',
+                    onAction: () => leavePlan(onOpenIdeas, 'create'),
+                  },
+                  {
+                    id: 'post',
+                    title: 'Post once this week',
+                    body: 'Any day, any format. One post gives Jarvis something to learn from.',
+                    action: 'Start a post',
+                    onAction: () => leavePlan(undefined, 'create'),
+                  },
+                ]
+              : [
+                  {
+                    id: 'shorts',
+                    title: 'Post 2 short videos',
+                    body: 'Wednesday and Friday around 7:30 PM, when your audience is most active.',
+                    action: 'Plan them',
+                    onAction: () => leavePlan(onOpenSchedule, 'create'),
+                  },
+                  {
+                    id: 'hooks',
+                    title: 'Open with a mistake',
+                    body: 'Hooks like “The mistake I made…” kept people watching longest.',
+                    action: 'Get hook ideas',
+                    onAction: () => leavePlan(onOpenIdeas, 'create'),
+                  },
+                  {
+                    id: 'challenge',
+                    title: 'Join this week’s challenge',
+                    body: 'Post 3 times this week, at your own pace.',
+                    action: 'See the challenge',
+                    onAction: () => leavePlan(onOpenChallenge, 'quests'),
+                  },
+                ]
+          }
+        />
 
         {/* NOTIFICATION MODAL */}
         <Modal
