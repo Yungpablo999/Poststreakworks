@@ -23,6 +23,7 @@ import { FreeAppHeader } from '../components/FreeAppHeader';
 import { FloatingTabBar, TabType } from '../components/FloatingTabBar';
 import { UserProfileModal, UserProfileData } from '../components/UserProfileModal';
 import { ProUpsellCard } from '../components/home/ProUpsellCard';
+import { ConnectAccountsSheet, useConnectedAccounts } from '../components/growth/ConnectAccountsSheet';
 import { PlatformLogo, type PlatformLogoType } from '../components/onboarding/PlatformLogo';
 import { ds } from '../theme/colors';
 
@@ -234,11 +235,12 @@ export const AudienceBreakdownScreen: React.FC<AudienceBreakdownScreenProps> = (
   onNavigateTab,
   onOpenCreate,
   onOpenPostComposer,
-  onOpenPlatformConnect,
   userProfile,
   onSaveProfile,
 }) => {
   const [showProfile, setShowProfile] = useState(false);
+  const [showAccounts, setShowAccounts] = useState(false);
+  const accounts = useConnectedAccounts(userProfile, onSaveProfile);
   const [focus, setFocus] = useState<string | null>(null);
   const [period, setPeriod] = useState<Period>('week');
   const bars = BARS[period];
@@ -383,8 +385,8 @@ export const AudienceBreakdownScreen: React.FC<AudienceBreakdownScreenProps> = (
                 </PressableCard>
               ))}
             </View>
-            {onOpenPlatformConnect && (
-              <Pressable onPress={onOpenPlatformConnect} accessibilityRole="button" style={({ pressed }) => [styles.manage, pressed && styles.pressed, pointer]}>
+            {(
+              <Pressable onPress={() => setShowAccounts(true)} accessibilityRole="button" style={({ pressed }) => [styles.manage, pressed && styles.pressed, pointer]}>
                 <Text style={styles.manageText}>Add or remove accounts</Text>
               </Pressable>
             )}
@@ -455,6 +457,7 @@ export const AudienceBreakdownScreen: React.FC<AudienceBreakdownScreenProps> = (
       </SafeAreaView>
 
       <FloatingTabBar activeTab="growth" onTabPress={(t) => onNavigateTab?.(t)} />
+      <ConnectAccountsSheet visible={showAccounts} onClose={() => setShowAccounts(false)} platforms={accounts.platforms} onToggle={accounts.toggle} />
       <UserProfileModal visible={showProfile} onClose={() => setShowProfile(false)} onLogout={onLogout} initialProfile={userProfile} onSaveProfile={onSaveProfile} />
     </View>
   );

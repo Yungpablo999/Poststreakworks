@@ -187,3 +187,33 @@ const styles = StyleSheet.create({
   privacyText: { flex: 1, fontSize: 12.5, lineHeight: 18, color: ds.text2 },
   footer: { paddingHorizontal: 20, paddingTop: 10 },
 });
+
+// ─── Shared connected-accounts state (reads / saves the profile) ────────────
+const STAGE1: { id: string; name: string }[] = [
+  { id: 'tiktok', name: 'TikTok' },
+  { id: 'instagram', name: 'Instagram' },
+  { id: 'youtube', name: 'YouTube' },
+  { id: 'facebook', name: 'Facebook' },
+  { id: 'threads', name: 'Threads' },
+];
+
+type ProfileLike = { connectedPlatforms?: string[] } & Partial<Record<`${'tiktok' | 'instagram' | 'youtube' | 'facebook' | 'threads'}Handle`, string>>;
+
+/** Connected accounts from the creator's profile; toggling saves it back. */
+export function useConnectedAccounts<P extends ProfileLike>(profile: P | undefined, onSave?: (p: P) => void, fallback: string[] = ['tiktok', 'instagram', 'youtube']) {
+  const [local, setLocal] = useState<string[]>(profile?.connectedPlatforms ?? fallback);
+  useEffect(() => {
+    if (profile?.connectedPlatforms) setLocal(profile.connectedPlatforms);
+  }, [profile?.connectedPlatforms]);
+  const platforms: SheetPlatform[] = STAGE1.map((p) => ({
+    ...p,
+    connected: local.includes(p.id),
+    handle: (profile as Record<string, string | undefined> | undefined)?.[`${p.id}Handle`],
+  }));
+  const toggle = (id: string) => {
+    const next = local.includes(id) ? local.filter((x) => x !== id) : [...local, id];
+    setLocal(next);
+    if (profile && onSave) onSave({ ...profile, connectedPlatforms: next });
+  };
+  return { platforms, connectedIds: local, toggle };
+}

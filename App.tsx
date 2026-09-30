@@ -1105,7 +1105,11 @@ export default function App() {
 
         {currentScreen === 'platform-growth' && (
           <PlatformGrowthScreen
-            onBack={() => navigateTo('growth')}
+            onBack={() => navigateTo(previousScreen ? previousScreen : 'growth')}
+            onOpenRepurpose={() => {
+              setStudioVideo(undefined);
+              navigateTo('repurpose');
+            }}
             onLogout={handleLogout}
             onOpenSchedule={() => navigateTo('schedule')}
             onOpenJarvisPro={() => navigateTo('jarvis-pro')}
