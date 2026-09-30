@@ -1,18 +1,28 @@
-import React, { useEffect, useRef } from 'react';
-import {
-  StyleSheet,
-  View,
-  Animated,
-  Image,
-  Modal,
-  Pressable,
-  Platform,
-} from 'react-native';
-import { Text } from './ui/AppText';
+import React, { useEffect, useState } from 'react';
+import { StyleSheet, View, Image, Modal, Pressable, Platform } from 'react-native';
+import Animated, {
+  Easing,
+  FadeIn,
+  FadeInUp,
+  runOnJS,
+  useAnimatedProps,
+  useAnimatedStyle,
+  useReducedMotion,
+  useSharedValue,
+  withDelay,
+  withTiming,
+} from 'react-native-reanimated';
 import Svg, { Path, Circle } from 'react-native-svg';
 import * as Haptics from 'expo-haptics';
 import { BlurView } from 'expo-blur';
-import { LinearGradient } from 'expo-linear-gradient';
+import { Text } from './ui/AppText';
+import { AppButton } from './ui/AppButton';
+import { ds } from '../theme/colors';
+
+// The app's celebration pop-up (post scheduled, quest started, draft saved…).
+// Calm and warm: the card eases in (no spring bounce), a ring draws itself
+// around the ghost, a tick appears, a few sparkles drift out once and the XP
+// counts up. No gold (Pro only), no emoji, no streak-loss language.
 
 export interface AnimatedCompletionModalProps {
   visible: boolean;
@@ -27,11 +37,65 @@ export interface AnimatedCompletionModalProps {
   onDismiss: () => void;
 }
 
+const EASE = Easing.out(Easing.cubic);
+const RING = 132;
+const RING_STROKE = 4;
+const R = (RING - RING_STROKE) / 2;
+const CIRC = 2 * Math.PI * R;
+const SPARKS = 10;
+
+// Older callers pass emoji / arrows in their strings; show clean text
+const clean = (t: string) =>
+  t
+    .replace(/[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{2B00}-\u{2BFF}\u{FE0F}]/gu, '')
+    .replace(/[➔→]/g, '')
+    .replace(/^Ghost says:\s*/i, '')
+    .replace(/\s{2,}/g, ' ')
+    .trim();
+
+const AnimatedCircle = Animated.createAnimatedComponent(Circle);
+
+function Spark({ index, play }: { index: number; play: number }) {
+  const t = useSharedValue(0);
+  useEffect(() => {
+    if (!play) return;
+    t.value = 0;
+    t.value = withDelay(420 + (index % 3) * 60, withTiming(1, { duration: 900, easing: EASE }));
+  }, [play, index, t]);
+  const angle = (index / SPARKS) * Math.PI * 2 + 0.3;
+  const dist = 78 + (index % 3) * 12;
+  const style = useAnimatedStyle(() => ({
+    opacity: t.value === 0 ? 0 : (1 - t.value) * 0.9,
+    transform: [
+      { translateX: Math.cos(angle) * dist * t.value },
+      { translateY: Math.sin(angle) * dist * t.value },
+      { scale: 1 - 0.4 * t.value },
+    ],
+  }));
+  return <Animated.View pointerEvents="none" style={[styles.spark, index % 3 === 0 && styles.sparkLight, style]} />;
+}
+
+function CountUp({ to, play }: { to: number; play: number }) {
+  const [n, setN] = useState(0);
+  useEffect(() => {
+    if (!play) return;
+    setN(0);
+    const start = Date.now() + 500;
+    const id = setInterval(() => {
+      const p = Math.min(1, Math.max(0, (Date.now() - start) / 700));
+      setN(Math.round(to * (1 - Math.pow(1 - p, 3))));
+      if (p >= 1) clearInterval(id);
+    }, 30);
+    return () => clearInterval(id);
+  }, [to, play]);
+  return <Text style={styles.chipValue}>+{n} XP</Text>;
+}
+
 export const AnimatedCompletionModal: React.FC<AnimatedCompletionModalProps> = ({
   visible,
-  title = 'Mission Accomplished!',
-  subtitle = 'Your post has been scheduled & streak is protected.',
-  badgeText = 'POST COMPLETED',
+  title = 'Nice work!',
+  subtitle = 'Your post is saved.',
+  badgeText = 'DONE',
   xpEarned = 50,
   streakCount = 1,
   speechBubble,
@@ -39,289 +103,142 @@ export const AnimatedCompletionModal: React.FC<AnimatedCompletionModalProps> = (
   onAction,
   onDismiss,
 }) => {
-  // Animation values
-  const scaleAnim = useRef(new Animated.Value(0.65)).current;
-  const opacityAnim = useRef(new Animated.Value(0)).current;
-  const ghostBounceY = useRef(new Animated.Value(0)).current;
-  const checkmarkScale = useRef(new Animated.Value(0)).current;
-  const sparkleRotate = useRef(new Animated.Value(0)).current;
-  const particleBurst = useRef(new Animated.Value(0)).current;
+  const reduceMotion = useReducedMotion();
+  const [mounted, setMounted] = useState(visible);
+  const [play, setPlay] = useState(0);
+
+  const card = useSharedValue(0);
+  const ring = useSharedValue(0);
+  const tick = useSharedValue(0);
 
   useEffect(() => {
     if (visible) {
-      if (Platform.OS !== 'web') {
-        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-      }
-
-      // Reset values
-      scaleAnim.setValue(0.65);
-      opacityAnim.setValue(0);
-      checkmarkScale.setValue(0);
-      particleBurst.setValue(0);
-
-      // Entrance spring sequence
-      Animated.parallel([
-        Animated.spring(scaleAnim, {
-          toValue: 1,
-          friction: 6,
-          tension: 70,
-          useNativeDriver: true,
-        }),
-        Animated.timing(opacityAnim, {
-          toValue: 1,
-          duration: 220,
-          useNativeDriver: true,
-        }),
-        Animated.sequence([
-          Animated.delay(160),
-          Animated.spring(checkmarkScale, {
-            toValue: 1,
-            friction: 4,
-            tension: 85,
-            useNativeDriver: true,
-          }),
-        ]),
-        Animated.timing(particleBurst, {
-          toValue: 1,
-          duration: 900,
-          useNativeDriver: true,
-        }),
-      ]).start();
-
-      // Ghost Joyful Bounce loop
-      const ghostLoop = Animated.loop(
-        Animated.sequence([
-          Animated.timing(ghostBounceY, {
-            toValue: -8,
-            duration: 750,
-            useNativeDriver: true,
-          }),
-          Animated.timing(ghostBounceY, {
-            toValue: 2,
-            duration: 750,
-            useNativeDriver: true,
-          }),
-        ])
-      );
-
-      // Sparkle rotation
-      const spinLoop = Animated.loop(
-        Animated.timing(sparkleRotate, {
-          toValue: 1,
-          duration: 4000,
-          useNativeDriver: true,
-        })
-      );
-
-      ghostLoop.start();
-      spinLoop.start();
-
-      return () => {
-        ghostLoop.stop();
-        spinLoop.stop();
-      };
+      setMounted(true);
+      setPlay((p) => p + 1);
+      if (Platform.OS !== 'web') Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      card.value = 0;
+      ring.value = 0;
+      tick.value = 0;
+      card.value = withTiming(1, { duration: reduceMotion ? 1 : 280, easing: EASE });
+      ring.value = withDelay(150, withTiming(1, { duration: reduceMotion ? 1 : 700, easing: EASE }));
+      tick.value = withDelay(reduceMotion ? 0 : 650, withTiming(1, { duration: 220, easing: EASE }));
+    } else if (mounted) {
+      card.value = withTiming(0, { duration: 180, easing: Easing.in(Easing.cubic) }, (done) => {
+        if (done) runOnJS(setMounted)(false);
+      });
     }
-  }, [visible, scaleAnim, opacityAnim, ghostBounceY, checkmarkScale, sparkleRotate, particleBurst]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [visible]);
 
-  if (!visible) return null;
+  const scrimStyle = useAnimatedStyle(() => ({ opacity: card.value }));
+  const cardStyle = useAnimatedStyle(() => ({
+    opacity: card.value,
+    transform: [{ scale: 0.94 + 0.06 * card.value }, { translateY: 12 * (1 - card.value) }],
+  }));
+  const ringProps = useAnimatedProps(() => ({ strokeDashoffset: CIRC * (1 - ring.value) }));
+  const tickStyle = useAnimatedStyle(() => ({ opacity: tick.value, transform: [{ scale: 0.6 + 0.4 * tick.value }] }));
 
-  const spin = sparkleRotate.interpolate({
-    inputRange: [0, 1],
-    outputRange: ['0deg', '360deg'],
-  });
+  if (!mounted) return null;
 
-  const p1_x = particleBurst.interpolate({ inputRange: [0, 1], outputRange: [0, -70] });
-  const p1_y = particleBurst.interpolate({ inputRange: [0, 1], outputRange: [0, -60] });
-  const p2_x = particleBurst.interpolate({ inputRange: [0, 1], outputRange: [0, 70] });
-  const p2_y = particleBurst.interpolate({ inputRange: [0, 1], outputRange: [0, -60] });
-  const p3_x = particleBurst.interpolate({ inputRange: [0, 1], outputRange: [0, -80] });
-  const p3_y = particleBurst.interpolate({ inputRange: [0, 1], outputRange: [0, 30] });
-  const p4_x = particleBurst.interpolate({ inputRange: [0, 1], outputRange: [0, 80] });
-  const p4_y = particleBurst.interpolate({ inputRange: [0, 1], outputRange: [0, 30] });
-  const pOpacity = particleBurst.interpolate({ inputRange: [0, 0.7, 1], outputRange: [1, 1, 0] });
+  const badge = clean(badgeText);
+  const quote = speechBubble ? clean(speechBubble) : '';
+  const buttonTitle = clean(actionText) || 'Continue';
 
   return (
-    <Modal visible={visible} transparent={true} animationType="fade">
-      <View style={styles.modalOverlay}>
-        <BlurView
-          intensity={Platform.OS === 'ios' ? 75 : 90}
-          tint="dark"
-          style={StyleSheet.absoluteFill}
-        />
+    <Modal visible transparent animationType="none" onRequestClose={onDismiss} statusBarTranslucent>
+      <View style={styles.root}>
+        <Animated.View style={[StyleSheet.absoluteFill, scrimStyle]}>
+          <BlurView intensity={20} tint="dark" style={StyleSheet.absoluteFill} />
+          <View style={[StyleSheet.absoluteFill, styles.scrim]} />
+          <Pressable style={StyleSheet.absoluteFill} onPress={onDismiss} accessibilityLabel="Close" />
+        </Animated.View>
 
-        <Animated.View
-          style={[
-            styles.modalCard,
-            {
-              transform: [{ scale: scaleAnim }],
-              opacity: opacityAnim,
-            },
-          ]}
-        >
-          {/* Confetti Explosion Particles */}
-          <Animated.View
-            style={[
-              styles.particle,
-              {
-                transform: [{ translateX: p1_x }, { translateY: p1_y }],
-                opacity: pOpacity,
-              },
-            ]}
-          >
-            <Text style={{ fontSize: 20 }}>✨</Text>
-          </Animated.View>
+        <Animated.View style={[styles.card, cardStyle]} accessibilityViewIsModal>
+          <BlurView intensity={40} tint="light" style={[StyleSheet.absoluteFill, { borderRadius: 32, overflow: 'hidden' }]} />
+          <View style={[StyleSheet.absoluteFill, styles.cardFill]} />
 
-          <Animated.View
-            style={[
-              styles.particle,
-              {
-                transform: [{ translateX: p2_x }, { translateY: p2_y }],
-                opacity: pOpacity,
-              },
-            ]}
-          >
-            <Text style={{ fontSize: 20 }}>⭐</Text>
-          </Animated.View>
-
-          <Animated.View
-            style={[
-              styles.particle,
-              {
-                transform: [{ translateX: p3_x }, { translateY: p3_y }],
-                opacity: pOpacity,
-              },
-            ]}
-          >
-            <Text style={{ fontSize: 18 }}>🎉</Text>
-          </Animated.View>
-
-          <Animated.View
-            style={[
-              styles.particle,
-              {
-                transform: [{ translateX: p4_x }, { translateY: p4_y }],
-                opacity: pOpacity,
-              },
-            ]}
-          >
-            <Text style={{ fontSize: 18 }}>🔥</Text>
-          </Animated.View>
-
-          {/* Top Badge */}
-          <View style={styles.completionBadge}>
-            <Text style={styles.completionBadgeIcon}>🏆</Text>
-            <Text style={styles.completionBadgeText}>{badgeText}</Text>
-          </View>
-
-          {/* Pure Ghost Logo Mascot Container */}
-          <View style={styles.mascotArea}>
-            {/* Spinning Glow Ring */}
-            <Animated.View
-              style={[
-                styles.sparkleRing,
-                { transform: [{ rotate: spin }] },
-              ]}
-            >
-              <Svg width={130} height={130} viewBox="0 0 130 130">
-                <Circle
-                  cx="65"
-                  cy="65"
-                  r="58"
-                  stroke="rgba(253, 224, 71, 0.45)"
-                  strokeWidth="2"
-                  strokeDasharray="12 12"
-                  fill="none"
-                />
+          {badge ? (
+            <View style={styles.badge}>
+              <Svg width={12} height={12} viewBox="0 0 24 24" fill="none">
+                <Path d="M20 6L9 17l-5-5" stroke={ds.purple} strokeWidth={3.2} strokeLinecap="round" strokeLinejoin="round" />
               </Svg>
-            </Animated.View>
-
-            {/* Glowing Backdrop */}
-            <View style={styles.ghostAuraBackdrop} />
-
-            {/* Ghost Logo */}
-            <Animated.View
-              style={[
-                styles.ghostWrapper,
-                { transform: [{ translateY: ghostBounceY }] },
-              ]}
-            >
-              <Image
-                source={require('../../assets/images/jarvis-ghost-clean.png')}
-                style={styles.ghostLogoImg}
-                resizeMode="contain"
-              />
-            </Animated.View>
-
-            {/* Glowing Checkmark Badge */}
-            <Animated.View
-              style={[
-                styles.checkmarkBadge,
-                { transform: [{ scale: checkmarkScale }] },
-              ]}
-            >
-              <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
-                <Path
-                  d="M20 6L9 17L4 12"
-                  stroke="#FFFFFF"
-                  strokeWidth="3"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </Svg>
-            </Animated.View>
-          </View>
-
-          {/* Optional Ghost Speech Bubble */}
-          {speechBubble ? (
-            <View style={styles.speechBubbleContainer}>
-              <View style={styles.speechBubblePointer} />
-              <Text style={styles.speechBubbleText}>&ldquo;{speechBubble}&rdquo;</Text>
+              <Text style={styles.badgeText}>{badge}</Text>
             </View>
           ) : null}
-          {/* Title & Subtitle */}
-          <Text style={styles.modalTitle}>{title}</Text>
-          <Text style={styles.modalSubtitle}>{subtitle}</Text>
 
-          {/* Reward Metrics Row */}
-          <View style={styles.rewardsRow}>
-            {xpEarned > 0 ? (
-              <View style={styles.rewardChipXp}>
-                <Text style={styles.rewardChipEmoji}>⚡</Text>
-                <Text style={styles.rewardChipValue}>+{xpEarned} XP</Text>
-              </View>
-            ) : null}
-
-            {streakCount > 0 ? (
-              <View style={styles.rewardChipStreak}>
-                <Text style={styles.rewardChipEmoji}>🔥</Text>
-                <Text style={styles.rewardChipValue}>Day {streakCount}</Text>
-              </View>
-            ) : null}
+          {/* Ghost with a ring that draws itself, a tick and a few sparkles */}
+          <View style={styles.hero}>
+            {Array.from({ length: SPARKS }).map((_, i) => (
+              <Spark key={i} index={i} play={reduceMotion ? 0 : play} />
+            ))}
+            <Svg width={RING} height={RING} style={styles.ring}>
+              <Circle cx={RING / 2} cy={RING / 2} r={R} stroke="rgba(91, 62, 232, 0.12)" strokeWidth={RING_STROKE} fill="none" />
+              <AnimatedCircle
+                cx={RING / 2}
+                cy={RING / 2}
+                r={R}
+                stroke={ds.purple}
+                strokeWidth={RING_STROKE}
+                strokeLinecap="round"
+                fill="none"
+                strokeDasharray={`${CIRC} ${CIRC}`}
+                animatedProps={ringProps}
+              />
+            </Svg>
+            <View style={styles.ghostCircle}>
+              <Image source={require('../../assets/images/jarvis-ghost-clean.png')} style={styles.ghost} resizeMode="contain" />
+            </View>
+            <Animated.View style={[styles.tick, tickStyle]}>
+              <Svg width={16} height={16} viewBox="0 0 24 24" fill="none">
+                <Path d="M20 6L9 17l-5-5" stroke="#FFFFFF" strokeWidth={3.4} strokeLinecap="round" strokeLinejoin="round" />
+              </Svg>
+            </Animated.View>
           </View>
 
-          {/* Continue / Action Button */}
-          <Pressable
-            style={({ pressed }) => [styles.continueBtn, pressed && styles.btnPressed]}
-            onPress={() => {
-              if (Platform.OS !== 'web') {
-                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+          <Animated.View entering={FadeInUp.delay(250).duration(350)}>
+            <Text style={styles.title}>{clean(title)}</Text>
+            <Text style={styles.subtitle}>{clean(subtitle)}</Text>
+          </Animated.View>
+
+          {quote ? (
+            <Animated.View entering={FadeIn.delay(400).duration(350)} style={styles.quote}>
+              <View style={styles.quoteBar} />
+              <Text style={styles.quoteText}>{quote}</Text>
+            </Animated.View>
+          ) : null}
+
+          <Animated.View entering={FadeIn.delay(450).duration(300)} style={styles.chips}>
+            {xpEarned > 0 && (
+              <View style={styles.chip}>
+                <Svg width={13} height={13} viewBox="0 0 24 24" fill={ds.purple}>
+                  <Path d="M13 2L4 14h7l-1 8 9-12h-7l1-8z" />
+                </Svg>
+                <CountUp to={xpEarned} play={play} />
+              </View>
+            )}
+            {streakCount > 0 && (
+              <View style={styles.chip}>
+                <Svg width={13} height={13} viewBox="0 0 24 24" fill="none">
+                  <Circle cx="12" cy="12" r="9" stroke={ds.purple} strokeWidth={2.4} />
+                  <Path d="M8 12.5l2.5 2.5L16 9.5" stroke={ds.purple} strokeWidth={2.4} strokeLinecap="round" strokeLinejoin="round" />
+                </Svg>
+                <Text style={styles.chipValue}>Day {streakCount}</Text>
+              </View>
+            )}
+          </Animated.View>
+
+          <View style={styles.cta}>
+            <AppButton
+              title={buttonTitle}
+              size="lg"
+              onPress={() => (onAction ? onAction() : onDismiss())}
+              iconRight={
+                <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
+                  <Path d="M5 12h14M13 6l6 6-6 6" stroke="#FFFFFF" strokeWidth={2.4} strokeLinecap="round" strokeLinejoin="round" />
+                </Svg>
               }
-              if (onAction) {
-                onAction();
-              } else {
-                onDismiss();
-              }
-            }}
-          >
-            <LinearGradient
-              colors={['#7048EC', '#582CDB']}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 1 }}
-              style={styles.continueGradient}
-            >
-              <Text style={styles.continueBtnText}>{actionText}</Text>
-            </LinearGradient>
-          </Pressable>
+            />
+          </View>
         </Animated.View>
       </View>
     </Modal>
@@ -329,212 +246,88 @@ export const AnimatedCompletionModal: React.FC<AnimatedCompletionModalProps> = (
 };
 
 const styles = StyleSheet.create({
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(23, 20, 32, 0.65)',
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 24,
-    zIndex: 9999,
-  },
-  modalCard: {
+  root: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 20 },
+  scrim: { backgroundColor: 'rgba(23, 20, 32, 0.35)' },
+  card: {
     width: '100%',
-    maxWidth: 320,
-    backgroundColor: 'rgba(255, 255, 255, 0.98)',
-    borderRadius: 28,
-    padding: 24,
+    maxWidth: 360,
     alignItems: 'center',
-    borderWidth: 1.2,
-    borderColor: 'rgba(235, 230, 248, 0.95)',
-    shadowColor: '#582CDB',
-    shadowOffset: { width: 0, height: 16 },
-    shadowOpacity: 0.08,
-    shadowRadius: 32,
-    elevation: 16,
+    paddingHorizontal: 22,
+    paddingTop: 22,
+    paddingBottom: 20,
+    borderRadius: 32,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.95)',
+    overflow: 'hidden',
+    shadowColor: '#3F25BF',
+    shadowOffset: { width: 0, height: 20 },
+    shadowOpacity: 0.2,
+    shadowRadius: 40,
+    elevation: 12,
   },
-  particle: {
-    position: 'absolute',
-    top: '32%',
-    left: '50%',
-    zIndex: 100,
-  },
-  completionBadge: {
+  cardFill: { backgroundColor: 'rgba(250, 248, 255, 0.9)' },
+  badge: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 5,
-    backgroundColor: 'rgba(237, 232, 252, 0.95)',
-    paddingVertical: 5,
+    gap: 6,
     paddingHorizontal: 12,
-    borderRadius: 100,
-    marginBottom: 12,
-    borderWidth: 1,
-    borderColor: 'rgba(221, 214, 254, 0.9)',
-  },
-  completionBadgeIcon: {
-    fontSize: 12,
-  },
-  completionBadgeText: {
-    fontSize: 10.5,
-    fontWeight: '800',
-    color: '#582CDB',
-    letterSpacing: 0.8,
-  },
-  mascotArea: {
-    position: 'relative',
-    width: 130,
-    height: 130,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 14,
-  },
-  sparkleRing: {
-    position: 'absolute',
-    width: 130,
-    height: 130,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  ghostAuraBackdrop: {
-    position: 'absolute',
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    backgroundColor: 'rgba(112, 72, 236, 0.2)',
-  },
-  ghostWrapper: {
-    width: 76,
-    height: 76,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  ghostLogoImg: {
-    width: 72,
-    height: 72,
-  },
-  checkmarkBadge: {
-    position: 'absolute',
-    bottom: 6,
-    right: 14,
-    width: 28,
     height: 28,
-    borderRadius: 14,
-    backgroundColor: '#10B981',
-    justifyContent: 'center',
+    borderRadius: 999,
+    backgroundColor: ds.lavender,
+  },
+  badgeText: { fontSize: 11.5, fontWeight: '800', letterSpacing: 1, color: ds.purple },
+  hero: { width: RING, height: RING, alignItems: 'center', justifyContent: 'center', marginTop: 16, marginBottom: 14 },
+  ring: { position: 'absolute', transform: [{ rotate: '-90deg' }] },
+  ghostCircle: {
+    width: RING - 26,
+    height: RING - 26,
+    borderRadius: (RING - 26) / 2,
     alignItems: 'center',
-    borderWidth: 2.5,
-    borderColor: '#FFFFFF',
-    shadowColor: '#10B981',
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.12,
-    shadowRadius: 6,
-    elevation: 4,
+    justifyContent: 'center',
+    backgroundColor: 'rgba(237, 233, 254, 0.9)',
   },
-  speechBubbleContainer: {
-    backgroundColor: 'rgba(255, 255, 255, 0.95)',
-    borderRadius: 16,
-    borderWidth: 1,
-    borderColor: '#E9D5FF',
-    paddingVertical: 10,
-    paddingHorizontal: 16,
-    marginBottom: 14,
-    maxWidth: 290,
-    alignSelf: 'center',
-    shadowColor: '#582CDB',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 10,
-    elevation: 3,
-  },
-  speechBubblePointer: {
+  ghost: { width: 72, height: 72 },
+  tick: {
     position: 'absolute',
-    top: -6,
-    alignSelf: 'center',
-    width: 12,
-    height: 12,
-    backgroundColor: '#FFFFFF',
-    transform: [{ rotate: '45deg' }],
-    borderTopWidth: 1,
-    borderLeftWidth: 1,
-    borderColor: '#E9D5FF',
+    right: 8,
+    bottom: 8,
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: ds.greenFill,
+    borderWidth: 3,
+    borderColor: '#FFFFFF',
   },
-  speechBubbleText: {
-    fontSize: 13,
-    color: '#582CDB',
-    fontWeight: '700',
-    textAlign: 'center',
-    fontStyle: 'italic',
-    lineHeight: 18,
-  },
-  modalTitle: {
-    fontSize: 20,
-    fontWeight: '800',
-    color: '#171420',
-    letterSpacing: -0.3,
-    marginBottom: 6,
-    textAlign: 'center',
-  },
-  modalSubtitle: {
-    fontSize: 12.5,
-    fontWeight: '500',
-    color: '#7F7894',
-    textAlign: 'center',
-    lineHeight: 18,
-    marginBottom: 16,
-    paddingHorizontal: 8,
-  },
-  rewardsRow: {
+  spark: { position: 'absolute', width: 7, height: 7, borderRadius: 4, backgroundColor: ds.purple },
+  sparkLight: { backgroundColor: '#A99BFF' },
+  title: { fontSize: 24, lineHeight: 30, fontWeight: '800', color: ds.ink, textAlign: 'center', letterSpacing: -0.5 },
+  subtitle: { fontSize: 14.5, lineHeight: 21, color: ds.text2, textAlign: 'center', marginTop: 6 },
+  quote: {
     flexDirection: 'row',
     gap: 10,
-    marginBottom: 18,
+    alignSelf: 'stretch',
+    marginTop: 14,
+    paddingVertical: 12,
+    paddingHorizontal: 14,
+    borderRadius: 16,
+    backgroundColor: 'rgba(237, 233, 254, 0.6)',
   },
-  rewardChipXp: {
+  quoteBar: { width: 3, borderRadius: 2, backgroundColor: '#C9BDFB' },
+  quoteText: { flex: 1, fontSize: 14, lineHeight: 20, fontWeight: '600', color: ds.purple },
+  chips: { flexDirection: 'row', gap: 8, marginTop: 16 },
+  chip: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 4,
-    backgroundColor: '#EDE8FC',
-    paddingVertical: 6,
+    gap: 6,
+    height: 34,
     paddingHorizontal: 12,
-    borderRadius: 100,
+    borderRadius: 999,
+    backgroundColor: '#FFFFFF',
     borderWidth: 1,
-    borderColor: '#DDD6FE',
+    borderColor: 'rgba(91, 62, 232, 0.15)',
   },
-  rewardChipStreak: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-    backgroundColor: '#FEF3C7',
-    paddingVertical: 6,
-    paddingHorizontal: 12,
-    borderRadius: 100,
-    borderWidth: 1,
-    borderColor: '#FDE68A',
-  },
-  rewardChipEmoji: {
-    fontSize: 12,
-  },
-  rewardChipValue: {
-    fontSize: 12,
-    fontWeight: '800',
-    color: '#171420',
-  },
-  continueBtn: {
-    width: '100%',
-    height: 46,
-    borderRadius: 14,
-    overflow: 'hidden',
-  },
-  continueGradient: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  continueBtnText: {
-    color: '#FFFFFF',
-    fontSize: 14,
-    fontWeight: '700',
-  },
-  btnPressed: {
-    opacity: 0.88,
-    transform: [{ scale: 0.98 }],
-  },
+  chipValue: { fontSize: 14, fontWeight: '800', color: ds.ink },
+  cta: { alignSelf: 'stretch', marginTop: 20 },
 });
