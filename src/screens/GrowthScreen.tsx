@@ -33,6 +33,7 @@ import { JarvisOrb } from '../components/JarvisOrb';
 import { PlatformRow } from '../components/onboarding/PlatformRow';
 import { type PlatformLogoType } from '../components/onboarding/PlatformLogo';
 import { ProUpsellCard } from '../components/home/ProUpsellCard';
+import { PressableCard } from '../components/ui/PressableCard';
 import { AudienceEmptyHero, ComingUpCard, JarvisStrategyCard, FirstReportCard } from '../components/growth/GrowthBlocks';
 import { ds } from '../theme/colors';
 
@@ -263,6 +264,15 @@ export const GrowthScreen: React.FC<GrowthScreenProps> = ({
     setTimeout(() => {
       setToastMessage(null);
     }, 2400);
+  };
+
+  const openAudience = () => {
+    if (onOpenAudienceBreakdown) {
+      onOpenAudienceBreakdown();
+    } else {
+      triggerModalPop();
+      setShowAudienceModal(true);
+    }
   };
 
   const handleOpenConnectPlatforms = () => {
@@ -510,6 +520,7 @@ export const GrowthScreen: React.FC<GrowthScreenProps> = ({
               onConnect={handleOpenConnectPlatforms}
             />
           ) : (
+          <PressableCard onPress={openAudience} accessibilityLabel="Total audience 24.8K. See the full breakdown">
           <View style={styles.audienceHeroCard}>
               <>
                 <View style={styles.audienceHeaderRow}>
@@ -649,26 +660,16 @@ export const GrowthScreen: React.FC<GrowthScreenProps> = ({
                   );
                 })()}
 
-                {/* Bottom Link */}
-                <Pressable
-                  style={styles.viewFullAudienceLink}
-                  onPress={() => {
-                    if (Platform.OS !== 'web') {
-                      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                    }
-                    if (onOpenAudienceBreakdown) {
-                      onOpenAudienceBreakdown();
-                    } else {
-                      triggerModalPop();
-                      setShowAudienceModal(true);
-                    }
-                  }}
-                  hitSlop={8}
-                >
-                  <Text style={styles.viewFullAudienceText}>View Full Audience Breakdown ➔</Text>
-                </Pressable>
+                {/* The whole card opens the breakdown; this row just says so */}
+                <View style={styles.viewFullAudienceLink}>
+                  <Text style={styles.viewFullAudienceText}>See full breakdown</Text>
+                  <Svg width={14} height={14} viewBox="0 0 24 24" fill="none">
+                    <Path d="M9 6l6 6-6 6" stroke="#5B3EE8" strokeWidth={2.6} strokeLinecap="round" strokeLinejoin="round" />
+                  </Svg>
+                </View>
               </>
           </View>
+          </PressableCard>
           )}
           </Reanimated.View>
 
@@ -1859,13 +1860,16 @@ const styles = StyleSheet.create({
     letterSpacing: 0.5,
   },
   viewFullAudienceLink: {
+    flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'center',
+    gap: 4,
     paddingVertical: 6,
   },
   viewFullAudienceText: {
-    fontSize: 12.5,
+    fontSize: 13.5,
     fontWeight: '800',
-    color: '#171420',
+    color: '#5B3EE8',
   },
 
   // 2. CONNECTED PLATFORMS
