@@ -31,7 +31,7 @@ import { JarvisOrb } from '../components/JarvisOrb';
 import { ChipRow, SaveButton } from '../components/ideas/IdeasBlocks';
 import { CaptionOptionCard } from '../components/caption/CaptionBlocks';
 import { ComposerToast } from '../components/composer/ComposerBlocks';
-import { getCaptionOptions, saveDraft, IDEA_GOALS, CAPTION_TONES, type IdeaGoal } from '../data';
+import { getCaptionOptions, describeCaptionShape, saveDraft, IDEA_GOALS, CAPTION_TONES, type IdeaGoal } from '../data';
 import { ds } from '../theme/colors';
 
 interface CaptionScreenProps {
@@ -359,11 +359,24 @@ export const CaptionScreen: React.FC<CaptionScreenProps> = ({
     setEnding(o.ending);
     setTags(o.hashtags);
   };
-  // New goal / tone / topic: options change, and the first one fills the editor
+  // New goal / tone: show Jarvis rewriting for a beat, then the reshaped
+  // options arrive and the first one fills the editor
+  const firstShape = useRef(true);
+  useEffect(() => {
+    applyOption(options[0]);
+    if (firstShape.current) {
+      firstShape.current = false;
+      return;
+    }
+    setThinking(true);
+    const id = setTimeout(() => setThinking(false), 500);
+    return () => clearTimeout(id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [goal, tones.join('|')]);
   useEffect(() => {
     applyOption(options[0]);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [goal, tones.join('|'), round]);
+  }, [round]);
 
   const newOptions = () => {
     if (thinking) return;
@@ -489,13 +502,16 @@ export const CaptionScreen: React.FC<CaptionScreenProps> = ({
                 <Text style={styles.newBtnText}>New options</Text>
               </Pressable>
             </View>
+            <Reanimated.View key={`${goal}-${tones.join('')}`} entering={FadeIn.duration(250)}>
+              <Text style={styles.shape}>{describeCaptionShape(goal, tones)}</Text>
+            </Reanimated.View>
             {thinking ? (
               <Reanimated.View entering={FadeIn.duration(120)} style={styles.thinking}>
                 <JarvisOrb size={22} />
-                <Text style={styles.thinkingText}>Jarvis is writing new options…</Text>
+                <Text style={styles.thinkingText}>Jarvis is rewriting for you…</Text>
               </Reanimated.View>
             ) : (
-              <ScrollView key={round} horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.options}>
+              <ScrollView key={`${round}-${goal}-${tones.join('')}`} horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.options}>
                 {options.map((o, i) => (
                   <CaptionOptionCard key={o.id} option={o} index={i} selected={(pickedId ?? options[0].id) === o.id} onPress={() => applyOption(o)} />
                 ))}
@@ -755,6 +771,7 @@ const styles = StyleSheet.create({
   filters: { gap: 14, marginTop: 18 },
   optionsHead: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: 24, marginBottom: 10 },
   sectionLabel: { fontSize: 17, fontWeight: '800', color: ds.ink, letterSpacing: -0.2 },
+  shape: { fontSize: 12.5, fontWeight: '700', color: ds.text3, marginTop: -4, marginBottom: 10 },
   newBtn: { flexDirection: 'row', alignItems: 'center', gap: 5, height: 30, paddingHorizontal: 10, borderRadius: 999, backgroundColor: ds.lavender },
   newBtnText: { fontSize: 12.5, fontWeight: '800', color: ds.purple },
   options: { gap: 10, paddingRight: 20, paddingBottom: 4 },

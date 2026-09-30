@@ -722,32 +722,85 @@ const TAGS_BY_GOAL: Record<IdeaGoal, string> = {
   often: '#PostDaily',
 };
 
-const toneTouch = (text: string, tones: string[]) => {
-  let t = text;
-  if (tones.includes('Funny')) t += ' (Yes, really.)';
-  if (tones.includes('Motivational')) t += ' You’ve got this.';
-  return t;
+// Goal decides the KIND of caption (structure); tone decides the WORDING.
+const BODIES_BY_GOAL: Record<IdeaGoal, { label: string; body: (t: string, l: string) => string }[]> = {
+  followers: [
+    { label: 'Relatable', body: (t, l) => `If you've ever felt this, you're not alone: ${l}.` },
+    { label: 'Story', body: (t) => `${t}. A year ago I'd never have posted this. Now it's the one people send to their friends.` },
+    { label: 'Hot take', body: (_t, l) => `Unpopular opinion: ${l} matters more than any trend.` },
+    { label: 'Before & after', body: (_t, l) => `Before: overthinking every post. After: ${l}, and posting feels light again.` },
+  ],
+  saves: [
+    { label: 'Quick tips', body: (t) => `${t}:\n1. Start small\n2. Keep it under 5 minutes\n3. Post it the same day` },
+    { label: 'Checklist', body: (t) => `${t}, a quick checklist:\n• One clear point\n• A strong first line\n• One thing to try` },
+    { label: 'Step by step', body: (_t, l) => `How I handle ${l}:\nStep 1: Pick one lesson\nStep 2: Film it in one take\nStep 3: Post before you overthink it` },
+    { label: 'Cheat sheet', body: (t) => `${t}. The short version:\n→ Less planning\n→ More posting\n→ Learn from each one` },
+  ],
+  comments: [
+    { label: 'Question first', body: (_t, l) => `Quick question: ${l}. Where do you stand?` },
+    { label: 'Honest take', body: (_t, l) => `Honest moment: ${l}. Nobody talks about this part.` },
+    { label: 'This or that', body: (t) => `${t}: plan everything, or just post? I've tried both.` },
+    { label: 'Hot take', body: (_t, l) => `Maybe unpopular: ${l} is overrated. Change my mind.` },
+  ],
+  often: [
+    { label: 'One-liner', body: (t) => `${t}. That's the post.` },
+    { label: 'Tiny win', body: (_t, l) => `Small win today: ${l}.` },
+    { label: 'Quick thought', body: (_t, l) => `Quick thought on ${l}: done beats perfect.` },
+    { label: 'Daily note', body: (t) => `Day's note: ${t.toLowerCase()}. Short and honest.` },
+  ],
 };
+
+const TONE_TAGS: Record<string, string> = {
+  Helpful: '#CreatorTips',
+  Honest: '#RealTalk',
+  Motivational: '#Motivation',
+  Funny: '#CreatorLife',
+  Professional: '#ContentStrategy',
+};
+
+function applyTone(text: string, tones: string[], goal: IdeaGoal): string {
+  let t = text;
+  const pro = tones.includes('Professional');
+  if (tones.includes('Honest') && !/^honest/i.test(t)) t = `Honestly? ${t}`;
+  if (tones.includes('Helpful') && (goal === 'saves' || goal === 'followers')) t += `\n\nTry it this week and see what changes.`;
+  if (tones.includes('Motivational')) t += ` You've got this.`;
+  if (tones.includes('Funny') && !pro) t += ` (My coffee agrees.)`;
+  if (pro) {
+    t = t
+      .replace(/Honest moment:/g, 'A candid note:')
+      .replace(/Honestly\? (\S)/g, (_m, c: string) => `To be candid, ${c === 'I' ? c : c.toLowerCase()}`)
+      .replace(/Unpopular opinion:/g, 'A contrarian view:')
+      .replace(/Change my mind\./g, 'I would like to hear other views.')
+      .replace(/!/g, '.')
+      .replace(/You've got this\./g, 'Keep going.');
+  }
+  return t;
+}
+
+export function describeCaptionShape(goal: IdeaGoal, tones: string[]): string {
+  const g = IDEA_GOALS.find((x) => x.id === goal)?.label.toLowerCase() ?? '';
+  const t = tones.map((x) => x.toLowerCase());
+  const toneText = t.length > 1 ? `${t.slice(0, -1).join(', ')} and ${t[t.length - 1]}` : t[0];
+  // "an honest", "an upbeat"… (silent h in "honest")
+  const article = /^([aeiou]|hon)/i.test(toneText) ? 'an' : 'a';
+  return `Written to ${g}, in ${article} ${toneText} tone.`;
+}
 
 export function getCaptionOptions(topic: string, goal: IdeaGoal, tones: string[], round = 0): CaptionOption[] {
   const t = topic.replace(/[“”"]/g, '').trim() || 'My creator journey';
   const lower = t.charAt(0).toLowerCase() + t.slice(1);
-  const bodies = [
-    { label: 'Story', body: `${t}. I used to wait until everything felt perfect before posting. Sharing small, honest lessons made it so much easier.` },
-    { label: 'Quick tips', body: `${t}:\n1. Start small\n2. Keep it under 5 minutes\n3. Post it the same day` },
-    { label: 'Honest take', body: `Honest moment: ${lower}. Nobody tells you this part, so here it is.` },
-    { label: 'Before & after', body: `Before: overthinking every post. After: ${lower}, and posting feels light again.` },
-    { label: 'One lesson', body: `If I could tell my past self one thing about ${lower}, it would be this: done beats perfect.` },
-  ];
+  const bodies = BODIES_BY_GOAL[goal];
   const endings = ENDING_BY_GOAL[goal];
+  const toneTags = tones.map((x) => TONE_TAGS[x]).filter(Boolean).slice(0, 2);
+  const hashtags = Array.from(new Set([...toneTags, '#ContentCreation', TAGS_BY_GOAL[goal]])).join(' ');
   return [0, 1, 2].map((i) => {
-    const b = bodies[(i + round * 3) % bodies.length];
+    const b = bodies[(i + round) % bodies.length];
     return {
-      id: `${round}-${i}`,
+      id: `${goal}-${tones.join('')}-${round}-${i}`,
       label: b.label,
-      body: toneTouch(b.body, tones),
-      ending: endings[(i + round) % endings.length],
-      hashtags: `#CreatorTips #ContentCreation ${TAGS_BY_GOAL[goal]}`,
+      body: applyTone(b.body(t, lower), tones, goal),
+      ending: applyTone(endings[(i + round) % endings.length], tones.filter((x) => x === 'Professional'), goal),
+      hashtags,
     };
   });
 }
