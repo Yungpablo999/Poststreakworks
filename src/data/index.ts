@@ -470,15 +470,13 @@ export function getFilmPlan(ideaTitle: string, style: FilmStyle = 'talking'): Fi
     case 'dance':
       return {
         style,
+        // No advice about the dance itself: creators have already seen and
+        // learnt it. Only the sound, its timing and the text line.
         hookLabel: 'ON-SCREEN TEXT',
         hook: `${topic}`,
-        listLabel: 'Make it yours',
-        shots: [
-          'Film it somewhere nobody expects: work, the kitchen, the gym',
-          'Pull in a friend, sibling or pet for the second half',
-          'Add your own move or reaction at the end of the loop',
-        ],
-        soundTip: 'Trends move fast. Jump on sounds that are still rising.',
+        listLabel: '',
+        shots: [],
+        soundTip: 'Post while it’s rising. Rising sounds are best used in the next 2–3 days.',
         soundFirst: true,
       };
     case 'skit':

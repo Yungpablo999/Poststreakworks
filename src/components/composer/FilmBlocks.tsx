@@ -153,6 +153,42 @@ export function FilmPlanCard({
   onOpen: (p: HandoffPlatform) => void;
   onStyleChange: (s: FilmStyle) => void;
 }) {
+  const hookBox = (
+    <View style={styles.hookBox}>
+      <Text style={styles.hookLabel}>{plan.hookLabel}</Text>
+      <Text style={styles.hookText}>{plan.hook}</Text>
+    </View>
+  );
+  const soundBlock = (
+    <>
+      <View style={styles.soundHead}>
+        <Text style={[styles.subLabel, styles.flex]}>{plan.style === 'dance' ? 'The sound' : plan.soundFirst ? 'Pick the sound first' : 'Sound ideas'}</Text>
+        <Text style={styles.sample}>Sample</Text>
+      </View>
+      <Text style={[styles.soundTip, plan.soundFirst && styles.soundTipStrong]}>{plan.soundTip}</Text>
+      <View style={styles.sounds}>
+        {sounds.map((s) => (
+          <View key={s.id} style={styles.sound}>
+            <Svg width={12} height={12} viewBox="0 0 24 24" fill="none">
+              <Path d="M9 18V5l12-2v13" stroke={ds.purple} strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round" />
+              <Circle cx="6" cy="18" r="3" stroke={ds.purple} strokeWidth={2.2} />
+              <Circle cx="18" cy="16" r="3" stroke={ds.purple} strokeWidth={2.2} />
+            </Svg>
+            <View style={styles.flex}>
+              <Text style={styles.soundName} numberOfLines={1}>
+                {s.name}
+              </Text>
+              <Text style={styles.soundVibe} numberOfLines={1}>
+                {s.vibe}
+              </Text>
+            </View>
+            {s.stage && <StageChip stage={s.stage} />}
+          </View>
+        ))}
+      </View>
+      <Text style={styles.soundNote}>Search the sound in the app. Some trending sounds aren't available to business accounts.</Text>
+    </>
+  );
   return (
     <Animated.View entering={FadeIn.duration(250)}>
       <GlassCard strong radius={22} padding={16}>
@@ -160,56 +196,41 @@ export function FilmPlanCard({
 
         {/* Everything below re-animates when the style changes */}
         <Animated.View key={plan.style} entering={FadeIn.duration(250)}>
-        <View style={styles.hookBox}>
-          <Text style={styles.hookLabel}>{plan.hookLabel}</Text>
-          <Text style={styles.hookText}>{plan.hook}</Text>
-        </View>
-
-        <Text style={styles.subLabel}>{plan.listLabel}</Text>
-        {plan.shots.map((s, i) => (
-          <Animated.View key={s} entering={FadeInUp.delay(80 * i).duration(260)} style={styles.shot}>
-            {plan.style === 'dance' || plan.style === 'skit' ? (
-              // Ideas, not steps: these creators already know the trend
-              <View style={styles.ideaDot}>
-                <Svg width={11} height={11} viewBox="0 0 24 24" fill="none">
-                  <Path d="M12 2l2.4 7.6L22 12l-7.6 2.4L12 22l-2.4-7.6L2 12l7.6-2.4L12 2z" fill={ds.purple} />
-                </Svg>
-              </View>
-            ) : (
-              <View style={styles.shotNum}>
-                <Text style={styles.shotNumText}>{i + 1}</Text>
-              </View>
-            )}
-            <Text style={styles.shotText}>{s}</Text>
-          </Animated.View>
-        ))}
-
-        <View style={styles.soundHead}>
-          <Text style={[styles.subLabel, styles.flex]}>{plan.soundFirst ? 'Pick the sound first' : 'Sound ideas'}</Text>
-          <Text style={styles.sample}>Sample</Text>
-        </View>
-        <Text style={[styles.soundTip, plan.soundFirst && styles.soundTipStrong]}>{plan.soundTip}</Text>
-        <View style={styles.sounds}>
-          {sounds.map((s) => (
-            <View key={s.id} style={styles.sound}>
-              <Svg width={12} height={12} viewBox="0 0 24 24" fill="none">
-                <Path d="M9 18V5l12-2v13" stroke={ds.purple} strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round" />
-                <Circle cx="6" cy="18" r="3" stroke={ds.purple} strokeWidth={2.2} />
-                <Circle cx="18" cy="16" r="3" stroke={ds.purple} strokeWidth={2.2} />
-              </Svg>
-              <View style={styles.flex}>
-                <Text style={styles.soundName} numberOfLines={1}>
-                  {s.name}
-                </Text>
-                <Text style={styles.soundVibe} numberOfLines={1}>
-                  {s.vibe}
-                </Text>
-              </View>
-              {s.stage && <StageChip stage={s.stage} />}
-            </View>
-          ))}
-        </View>
-        <Text style={styles.soundNote}>Search the sound in the app. Some trending sounds aren't available to business accounts.</Text>
+          {plan.style === 'dance' ? (
+            // Dance: only the sound, its timing and the text line — nothing
+            // about the moves; creators have already seen and learnt the trend
+            <>
+              {soundBlock}
+              <View style={styles.danceText}>{hookBox}</View>
+            </>
+          ) : (
+            <>
+              {hookBox}
+              {plan.shots.length > 0 && (
+                <>
+                  <Text style={styles.subLabel}>{plan.listLabel}</Text>
+                  {plan.shots.map((s, i) => (
+                    <Animated.View key={s} entering={FadeInUp.delay(80 * i).duration(260)} style={styles.shot}>
+                      {plan.style === 'skit' ? (
+                        // Ideas, not steps
+                        <View style={styles.ideaDot}>
+                          <Svg width={11} height={11} viewBox="0 0 24 24" fill="none">
+                            <Path d="M12 2l2.4 7.6L22 12l-7.6 2.4L12 22l-2.4-7.6L2 12l7.6-2.4L12 2z" fill={ds.purple} />
+                          </Svg>
+                        </View>
+                      ) : (
+                        <View style={styles.shotNum}>
+                          <Text style={styles.shotNumText}>{i + 1}</Text>
+                        </View>
+                      )}
+                      <Text style={styles.shotText}>{s}</Text>
+                    </Animated.View>
+                  ))}
+                </>
+              )}
+              {soundBlock}
+            </>
+          )}
         </Animated.View>
         {platforms.length > 0 && <Text style={styles.copyNote}>Opening an app copies your caption and tags, ready to paste.</Text>}
 
@@ -320,6 +341,7 @@ const styles = StyleSheet.create({
   stageText: { fontSize: 10.5, fontWeight: '800' },
   soundTip: { fontSize: 12.5, lineHeight: 17, color: ds.text2, marginBottom: 8 },
   soundTipStrong: { color: ds.purple, fontWeight: '700' },
+  danceText: { marginTop: 14 },
   hookBox: { padding: 14, borderRadius: 16, backgroundColor: 'rgba(237, 233, 254, 0.65)' },
   hookLabel: { fontSize: 10.5, fontWeight: '800', letterSpacing: 1, color: ds.purple },
   hookText: { fontSize: 15, lineHeight: 21, fontWeight: '700', color: ds.ink, marginTop: 4 },
