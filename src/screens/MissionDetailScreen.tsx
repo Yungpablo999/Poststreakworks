@@ -5,7 +5,6 @@ import Animated, {
   Easing,
   FadeIn,
   FadeInUp,
-  LinearTransition,
   useAnimatedStyle,
   useReducedMotion,
   useSharedValue,
@@ -107,7 +106,7 @@ function StepRow({
 }) {
   const [hover, setHover] = useState(false);
   return (
-    <Animated.View layout={LinearTransition.duration(240).easing(Easing.out(Easing.cubic))} style={styles.stepRow}>
+    <Animated.View style={styles.stepRow}>
       {/* Rail */}
       <View style={styles.rail}>
         <View style={[styles.stepCircle, next && styles.stepCircleNext]}>

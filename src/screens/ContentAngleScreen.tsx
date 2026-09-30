@@ -20,7 +20,7 @@ import { UserProfileModal, UserProfileData } from '../components/UserProfileModa
 import { AnimatedCompletionModal } from '../components/AnimatedCompletionModal';
 import { FreeAppHeader } from '../components/FreeAppHeader';
 import { sFont, sPadding, isNarrowScreen } from '../utils/responsive';
-import Reanimated, { FadeIn, FadeInUp, FadeOut, LinearTransition } from 'react-native-reanimated';
+import Reanimated, { FadeIn, FadeInUp, FadeOut } from 'react-native-reanimated';
 import { GlassBackdrop } from '../components/glass/GlassBackdrop';
 import { FitLines } from '../components/ui/FitLines';
 import { ChipRow, TopPickCard, IdeaRow, IdeaRowSkeleton, QuotaCard, SavedRow } from '../components/ideas/IdeasBlocks';
@@ -587,7 +587,7 @@ export const ContentAngleScreen: React.FC<ContentAngleScreenProps> = ({
                 key={`${goal}-${idea.id}`}
                 entering={FadeInUp.delay(i < 3 ? 60 * i : 0).duration(320)}
                 exiting={FadeOut.duration(150)}
-                layout={LinearTransition.duration(250)}
+               
               >
                 <IdeaRow
                   idea={idea}
@@ -617,7 +617,7 @@ export const ContentAngleScreen: React.FC<ContentAngleScreenProps> = ({
               </View>
               <View style={styles.stack}>
                 {displayedSavedIdeas.map((s) => (
-                  <Reanimated.View key={s.id} entering={FadeIn.duration(250)} exiting={FadeOut.duration(150)} layout={LinearTransition.duration(250)}>
+                  <Reanimated.View key={s.id} entering={FadeIn.duration(250)} exiting={FadeOut.duration(150)}>
                     <SavedRow
                       title={s.title}
                       meta={`${s.savedTime} · ${s.format}`}

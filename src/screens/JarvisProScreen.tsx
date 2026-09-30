@@ -5,7 +5,6 @@ import Animated, {
   Easing,
   FadeIn,
   FadeInUp,
-  LinearTransition,
   useAnimatedStyle,
   useReducedMotion,
   useSharedValue,
@@ -189,7 +188,6 @@ export const JarvisProScreen: React.FC<JarvisProScreenProps> = ({ onLogout, onNa
   const [welcome, setWelcome] = useState(false);
 
   const enter = (d: number) => FadeInUp.delay(d).duration(500).easing(Easing.out(Easing.cubic));
-  const layout = LinearTransition.duration(240).easing(Easing.out(Easing.cubic));
 
   const start = () => {
     if (Platform.OS !== 'web') Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
@@ -251,7 +249,7 @@ export const JarvisProScreen: React.FC<JarvisProScreenProps> = ({ onLogout, onNa
                 {BRIEF.map((b, i) => {
                   const open = openStep === b.id;
                   return (
-                    <Animated.View key={b.id} layout={layout} style={[styles.briefItem, open && styles.briefItemOpen]}>
+                    <Animated.View key={b.id} style={[styles.briefItem, open && styles.briefItemOpen]}>
                       <Pressable
                         onPress={() => {
                           tick();
@@ -350,7 +348,7 @@ export const JarvisProScreen: React.FC<JarvisProScreenProps> = ({ onLogout, onNa
               {FAQ.map((f, i) => {
                 const open = openFaq === i;
                 return (
-                  <Animated.View key={f.q} layout={layout} style={[styles.faq, i < FAQ.length - 1 && styles.faqLine]}>
+                  <Animated.View key={f.q} style={[styles.faq, i < FAQ.length - 1 && styles.faqLine]}>
                     <Pressable
                       onPress={() => {
                         tick();

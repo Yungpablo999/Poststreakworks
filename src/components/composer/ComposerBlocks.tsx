@@ -6,7 +6,6 @@ import Animated, {
   FadeOut,
   ZoomIn,
   ZoomOut,
-  LinearTransition,
   interpolateColor,
   useAnimatedProps,
   useAnimatedStyle,
@@ -428,7 +427,7 @@ export function EditsMeter({ left, total }: { left: number; total: number }) {
 // ─── Tags ───────────────────────────────────────────────────────────────────
 export function TagChip({ tag, onRemove }: { tag: string; onRemove: () => void }) {
   return (
-    <Animated.View entering={ZoomIn.duration(200)} exiting={ZoomOut.duration(150)} layout={LinearTransition.springify().damping(18)} style={styles.tag}>
+    <Animated.View entering={ZoomIn.duration(200)} exiting={ZoomOut.duration(150)} style={styles.tag}>
       <Text style={styles.tagText} numberOfLines={1}>
         {tag}
       </Text>

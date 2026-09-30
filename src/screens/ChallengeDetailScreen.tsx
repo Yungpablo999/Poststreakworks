@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import { View, ScrollView, Pressable, StyleSheet, Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import Animated, { Easing, FadeIn, FadeInUp, LinearTransition } from 'react-native-reanimated';
+import Animated, { Easing, FadeIn, FadeInUp } from 'react-native-reanimated';
 import Svg, { Path } from 'react-native-svg';
 import * as Haptics from 'expo-haptics';
 import { Text } from '../components/ui/AppText';
@@ -57,7 +57,7 @@ const listDays = (days: number[]) => {
 // ─── One of the 3 posts ─────────────────────────────────────────────────────
 function PostRow({ n, state, sub }: { n: number; state: 'done' | 'next' | 'later'; sub: string }) {
   return (
-    <Animated.View layout={LinearTransition.duration(240).easing(Easing.out(Easing.cubic))} style={styles.postRow}>
+    <Animated.View style={styles.postRow}>
       <View style={[styles.postDot, state === 'done' && styles.postDotDone, state === 'next' && styles.postDotNext]}>
         {state === 'done' ? (
           <Svg width={14} height={14} viewBox="0 0 24 24" fill="none">
