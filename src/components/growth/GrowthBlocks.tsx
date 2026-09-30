@@ -23,7 +23,7 @@ import { ds } from '../../theme/colors';
 const AnimatedPath = Animated.createAnimatedComponent(Path);
 
 // ─── A preview line that draws itself (no real data) ───────────────────────
-function PreviewChart({ width, height }: { width: number; height: number }) {
+export function PreviewChart({ width, height, color = '#A99BFF' }: { width: number; height: number; color?: string }) {
   const reduceMotion = useReducedMotion();
   const draw = useSharedValue(reduceMotion ? 1 : 0);
   const shimmer = useSharedValue(0);
@@ -58,7 +58,7 @@ function PreviewChart({ width, height }: { width: number; height: number }) {
       <Svg width={w} height={h} style={StyleSheet.absoluteFill}>
         <AnimatedPath
           d={d}
-          stroke="#A99BFF"
+          stroke={color}
           strokeWidth={3}
           strokeLinecap="round"
           fill="none"
