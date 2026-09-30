@@ -1,7 +1,8 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, StyleSheet, Platform, Pressable } from 'react-native';
 import Animated, {
   Easing,
+  FadeIn,
   useAnimatedProps,
   useAnimatedStyle,
   useReducedMotion,
@@ -13,6 +14,7 @@ import Animated, {
   type SharedValue,
 } from 'react-native-reanimated';
 import { LinearGradient } from 'expo-linear-gradient';
+import * as Haptics from 'expo-haptics';
 import Svg, { Circle, Path, Rect } from 'react-native-svg';
 import { Text } from '../ui/AppText';
 import { AppButton } from '../ui/AppButton';
@@ -247,7 +249,7 @@ function PostSlot({ index, filled }: { index: number; filled: boolean }) {
   const s = useSharedValue(reduceMotion ? 1 : 0.4);
   useEffect(() => {
     if (reduceMotion) return;
-    s.value = withDelay(350 + index * 110, withSequence(withTiming(1.15, { duration: 200 }), withTiming(1, { duration: 160 })));
+    s.value = withDelay(350 + index * 110, withTiming(1, { duration: 320, easing: Easing.out(Easing.cubic) }));
   }, [reduceMotion, index, s]);
   const style = useAnimatedStyle(() => ({ transform: [{ scale: s.value }] }));
   return (
@@ -263,7 +265,8 @@ function PostSlot({ index, filled }: { index: number; filled: boolean }) {
   );
 }
 
-export function ChallengeCard({ done, goal, onJoin }: { done: number; goal: number; onJoin: () => void }) {
+/** Without onJoin (the challenge page itself) the join button is hidden. */
+export function ChallengeCard({ done, goal, onJoin }: { done: number; goal: number; onJoin?: () => void }) {
   return (
     <View style={styles.challenge}>
       <LinearGradient colors={['#6A4BF0', '#4B2FD6']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={StyleSheet.absoluteFill} />
@@ -291,8 +294,8 @@ export function ChallengeCard({ done, goal, onJoin }: { done: number; goal: numb
         <View style={styles.rewardRow}>
           <View style={styles.badgeIcon}>
             <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
-              <Circle cx="12" cy="9" r="6" stroke={ds.gold} strokeWidth={2.2} />
-              <Path d="M8.5 13.5L7 22l5-3 5 3-1.5-8.5" stroke={ds.gold} strokeWidth={2.2} strokeLinejoin="round" />
+              <Circle cx="12" cy="9" r="6" stroke="#FFFFFF" strokeWidth={2.2} />
+              <Path d="M8.5 13.5L7 22l5-3 5 3-1.5-8.5" stroke="#FFFFFF" strokeWidth={2.2} strokeLinejoin="round" />
             </Svg>
           </View>
           <View style={styles.rowText}>
@@ -301,15 +304,89 @@ export function ChallengeCard({ done, goal, onJoin }: { done: number; goal: numb
           </View>
         </View>
 
-        <Pressable
-          onPress={onJoin}
-          accessibilityRole="button"
-          style={({ pressed }) => [styles.joinBtn, pressed && { transform: [{ translateY: 2 }] }, Platform.OS === 'web' && ({ cursor: 'pointer' } as object)]}
-        >
-          <Text style={styles.joinText}>Join the challenge</Text>
-        </Pressable>
+        {onJoin && (
+          <Pressable
+            onPress={onJoin}
+            accessibilityRole="button"
+            style={({ pressed }) => [styles.joinBtn, pressed && { transform: [{ translateY: 2 }] }, Platform.OS === 'web' && ({ cursor: 'pointer' } as object)]}
+          >
+            <Text style={styles.joinText}>Join the challenge</Text>
+          </Pressable>
+        )}
       </View>
     </View>
+  );
+}
+
+// ─── Jarvis's idea pick (shuffle through a few) ─────────────────────────────
+function ShuffleButton({ onPress }: { onPress: () => void }) {
+  const turn = useSharedValue(0);
+  const style = useAnimatedStyle(() => ({ transform: [{ rotate: `${turn.value}deg` }] }));
+  return (
+    <Pressable
+      onPress={() => {
+        turn.value = withTiming(turn.value + 180, { duration: 320, easing: Easing.out(Easing.cubic) });
+        onPress();
+      }}
+      hitSlop={6}
+      accessibilityRole="button"
+      accessibilityLabel="Show another idea"
+      style={({ pressed }) => [styles.shuffle, pressed && { transform: [{ scale: 0.94 }] }, Platform.OS === 'web' && ({ cursor: 'pointer' } as object)]}
+    >
+      <Animated.View style={style}>
+        <Svg width={16} height={16} viewBox="0 0 24 24" fill="none">
+          <Path d="M21 2v6h-6M3 12a9 9 0 0115-6.7L21 8M3 22v-6h6M21 12a9 9 0 01-15 6.7L3 16" stroke={ds.purple} strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round" />
+        </Svg>
+      </Animated.View>
+    </Pressable>
+  );
+}
+
+export interface PickIdea {
+  id: string;
+  title: string;
+  hook: string;
+  format: string;
+}
+
+export function JarvisPickCard({ orb, ideas, onUse }: { orb: React.ReactNode; ideas: PickIdea[]; onUse: (idea: PickIdea) => void }) {
+  const [pick, setPick] = useState(0);
+  if (!ideas.length) return null;
+  const idea = ideas[pick % ideas.length];
+  return (
+    <GlassCard strong radius={24} padding={18}>
+      <View style={styles.pickHead}>
+        {orb}
+        <Text style={styles.pickCount}>
+          Idea {(pick % ideas.length) + 1} of {ideas.length}
+        </Text>
+        <ShuffleButton
+          onPress={() => {
+            if (Platform.OS !== 'web') Haptics.selectionAsync();
+            setPick((p) => p + 1);
+          }}
+        />
+      </View>
+      <Animated.View key={idea.id} entering={FadeIn.duration(260)}>
+        <Text style={styles.pickTitle}>“{idea.title}”</Text>
+        <View style={styles.hookBox}>
+          <Text style={styles.hookLabel}>OPEN WITH</Text>
+          <Text style={styles.hookText}>{idea.hook}</Text>
+        </View>
+        <View style={styles.formatChip}>
+          <Text style={styles.formatText}>{idea.format}</Text>
+        </View>
+      </Animated.View>
+      <View style={styles.pickCta}>
+        <AppButton
+          title="Use this idea"
+          onPress={() => {
+            if (Platform.OS !== 'web') Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+            onUse(idea);
+          }}
+        />
+      </View>
+    </GlassCard>
   );
 }
 
@@ -444,5 +521,25 @@ const styles = StyleSheet.create({
     borderBottomColor: 'rgba(23, 20, 32, 0.18)',
   },
   joinText: { fontSize: 15.5, fontWeight: '800', color: ds.purple },
+  pickHead: { flexDirection: 'row', alignItems: 'center', gap: 10 },
+  pickCount: { flex: 1, fontSize: 12.5, fontWeight: '800', color: ds.text3 },
+  shuffle: { width: 40, height: 40, borderRadius: 20, backgroundColor: ds.lavender, alignItems: 'center', justifyContent: 'center' },
+  pickTitle: { fontSize: 19, lineHeight: 25, fontWeight: '800', color: ds.ink, letterSpacing: -0.3, marginTop: 14 },
+  hookBox: { marginTop: 12, padding: 12, borderRadius: 16, backgroundColor: 'rgba(245, 243, 255, 0.9)' },
+  hookLabel: { fontSize: 10.5, fontWeight: '800', letterSpacing: 0.8, color: ds.purple },
+  hookText: { fontSize: 14, lineHeight: 20, color: ds.ink, marginTop: 4 },
+  formatChip: {
+    alignSelf: 'flex-start',
+    marginTop: 10,
+    paddingHorizontal: 10,
+    height: 26,
+    borderRadius: 999,
+    justifyContent: 'center',
+    backgroundColor: 'rgba(255, 255, 255, 0.8)',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.95)',
+  },
+  formatText: { fontSize: 12, fontWeight: '800', color: ds.text2 },
+  pickCta: { marginTop: 16 },
   tipText: { flex: 1, fontSize: 13.5, lineHeight: 19, color: ds.text2, fontWeight: '600' },
 });

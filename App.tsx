@@ -827,6 +827,10 @@ export default function App() {
         {currentScreen === 'challenge-detail' && (
           <ChallengeDetailScreen
             onBackToDashboard={() => navigateTo('quests')}
+            userPersona={userPersona}
+            onTogglePersona={handleTogglePersona}
+            onOpenJarvisPro={() => navigateTo('jarvis-pro')}
+            onSwitchToPro={() => setUserProfile(prev => ({ ...prev, tier: 'pro' }))}
             onLogout={handleLogout}
             onOpenComposer={(idea?: string, platform?: string, questDraft?: any) => {
               if (idea) setComposerIdeaTitle(idea);

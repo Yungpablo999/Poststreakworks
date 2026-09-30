@@ -24,7 +24,7 @@ import { FreeAppHeader } from '../components/FreeAppHeader';
 import { FloatingTabBar, TabType } from '../components/FloatingTabBar';
 import { UserProfileModal, UserProfileData } from '../components/UserProfileModal';
 import type { UserPersona } from '../components/HeaderDualModePills';
-import { ProgressRing, PulsingTarget } from '../components/quests/QuestBlocks';
+import { JarvisPickCard, ProgressRing, PulsingTarget, type PickIdea } from '../components/quests/QuestBlocks';
 import { getStarterIdeas } from '../data';
 import { ds } from '../theme/colors';
 
@@ -154,36 +154,6 @@ function StepRow({
   );
 }
 
-// ─── Shuffle button (turns as the pick changes) ─────────────────────────────
-function ShuffleButton({ onPress }: { onPress: () => void }) {
-  const turn = useSharedValue(0);
-  const style = useAnimatedStyle(() => ({ transform: [{ rotate: `${turn.value}deg` }] }));
-  return (
-    <Pressable
-      onPress={() => {
-        turn.value = withTiming(turn.value + 180, { duration: 320, easing: Easing.out(Easing.cubic) });
-        onPress();
-      }}
-      hitSlop={6}
-      accessibilityRole="button"
-      accessibilityLabel="Show another idea"
-      style={({ pressed }) => [styles.shuffle, pressed && styles.pressed, pointer]}
-    >
-      <Animated.View style={style}>
-        <Svg width={16} height={16} viewBox="0 0 24 24" fill="none">
-          <Path
-            d="M21 2v6h-6M3 12a9 9 0 0115-6.7L21 8M3 22v-6h6M21 12a9 9 0 01-15 6.7L3 16"
-            stroke={ds.purple}
-            strokeWidth={2.2}
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-        </Svg>
-      </Animated.View>
-    </Pressable>
-  );
-}
-
 // Soft glow behind the finish badge
 function BadgeGlow() {
   const reduce = useReducedMotion();
@@ -213,23 +183,20 @@ export const MissionDetailScreen: React.FC<MissionDetailScreenProps> = ({
   const isNew = (userPersona || userProfile?.userPersona || 'new') === 'new';
   const [showProfile, setShowProfile] = useState(false);
   const [open, setOpen] = useState(0);
-  const [pick, setPick] = useState(0);
 
   const ideas = useMemo(
     () => getStarterIdeas(userProfile?.niches ?? [], (userProfile as { platforms?: string[] } | undefined)?.platforms ?? []).slice(0, 5),
     [userProfile],
   );
-  const idea = ideas[pick % Math.max(1, ideas.length)];
 
   const findIdeas = () => (onOpenIdeaAngle ? onOpenIdeaAngle() : onOpenCreateIdea ? onOpenCreateIdea() : onNavigateTab?.('create'));
-  const useIdea = () => {
-    if (Platform.OS !== 'web') Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+  const useIdea = (idea: PickIdea) => {
     if (isNew) {
-      if (onOpenScript && idea) onOpenScript(idea.title);
+      if (onOpenScript) onOpenScript(idea.title);
       else if (onOpenCreateIdea) onOpenCreateIdea();
       else onNavigateTab?.('create');
     } else {
-      onOpenPostComposer?.(idea?.title);
+      onOpenPostComposer?.(idea.title);
     }
   };
 
@@ -322,36 +289,10 @@ export const MissionDetailScreen: React.FC<MissionDetailScreenProps> = ({
           </Animated.View>
 
           {/* Jarvis's pick */}
-          {idea && (
+          {ideas.length > 0 && (
             <Animated.View entering={FadeInUp.delay(200).duration(500).easing(Easing.out(Easing.cubic))}>
               <Text style={styles.section}>Jarvis’s pick for today</Text>
-              <GlassCard strong radius={24} padding={18}>
-                <View style={styles.pickHead}>
-                  <JarvisOrb size={30} />
-                  <Text style={styles.pickCount}>
-                    Idea {(pick % ideas.length) + 1} of {ideas.length}
-                  </Text>
-                  <ShuffleButton
-                    onPress={() => {
-                      tick();
-                      setPick((p) => p + 1);
-                    }}
-                  />
-                </View>
-                <Animated.View key={idea.id} entering={FadeIn.duration(260)}>
-                  <Text style={styles.pickTitle}>“{idea.title}”</Text>
-                  <View style={styles.hookBox}>
-                    <Text style={styles.hookLabel}>OPEN WITH</Text>
-                    <Text style={styles.hookText}>{idea.hook}</Text>
-                  </View>
-                  <View style={styles.formatChip}>
-                    <Text style={styles.formatText}>{idea.format}</Text>
-                  </View>
-                </Animated.View>
-                <View style={styles.pickCta}>
-                  <AppButton title="Use this idea" onPress={useIdea} />
-                </View>
-              </GlassCard>
+              <JarvisPickCard orb={<JarvisOrb size={30} />} ideas={ideas} onUse={useIdea} />
             </Animated.View>
           )}
 
@@ -398,16 +339,9 @@ export const MissionDetailScreen: React.FC<MissionDetailScreenProps> = ({
   );
 };
 
-const glass = {
-  backgroundColor: 'rgba(255, 255, 255, 0.8)',
-  borderWidth: 1,
-  borderColor: 'rgba(255, 255, 255, 0.95)',
-};
-
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: ds.bg },
   flex: { flex: 1 },
-  pressed: { transform: [{ scale: 0.94 }] },
   scroll: { paddingHorizontal: 20, paddingTop: 8, paddingBottom: 130, width: '100%', maxWidth: 560, alignSelf: 'center' },
 
   heroTop: { flexDirection: 'row', alignItems: 'flex-start', gap: 12 },
@@ -460,16 +394,6 @@ const styles = StyleSheet.create({
   stepText: { fontSize: 13.5, lineHeight: 19, color: ds.text2, marginTop: 4 },
   stepAction: { marginTop: 12 },
 
-  pickHead: { flexDirection: 'row', alignItems: 'center', gap: 10 },
-  pickCount: { flex: 1, fontSize: 12.5, fontWeight: '800', color: ds.text3 },
-  shuffle: { width: 40, height: 40, borderRadius: 20, backgroundColor: ds.lavender, alignItems: 'center', justifyContent: 'center' },
-  pickTitle: { fontSize: 19, lineHeight: 25, fontWeight: '800', color: ds.ink, letterSpacing: -0.3, marginTop: 14 },
-  hookBox: { marginTop: 12, padding: 12, borderRadius: 16, backgroundColor: 'rgba(245, 243, 255, 0.9)' },
-  hookLabel: { fontSize: 10.5, fontWeight: '800', letterSpacing: 0.8, color: ds.purple },
-  hookText: { fontSize: 14, lineHeight: 20, color: ds.ink, marginTop: 4 },
-  formatChip: { alignSelf: 'flex-start', marginTop: 10, paddingHorizontal: 10, height: 26, borderRadius: 999, justifyContent: 'center', ...glass },
-  formatText: { fontSize: 12, fontWeight: '800', color: ds.text2 },
-  pickCta: { marginTop: 16 },
 
   rewards: { flexDirection: 'row', gap: 10 },
   rewardTile: { flex: 1 },
