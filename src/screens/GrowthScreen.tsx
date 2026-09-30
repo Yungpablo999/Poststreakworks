@@ -31,6 +31,7 @@ import { GlassBackdrop } from '../components/glass/GlassBackdrop';
 import { FitLines } from '../components/ui/FitLines';
 import { JarvisOrb } from '../components/JarvisOrb';
 import { PlatformRow } from '../components/onboarding/PlatformRow';
+import { ConnectAccountsSheet } from '../components/growth/ConnectAccountsSheet';
 import { type PlatformLogoType } from '../components/onboarding/PlatformLogo';
 import { ProUpsellCard } from '../components/home/ProUpsellCard';
 import { PressableCard } from '../components/ui/PressableCard';
@@ -255,8 +256,6 @@ export const GrowthScreen: React.FC<GrowthScreenProps> = ({
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [showConnectPlatformModal, setShowConnectPlatformModal] = useState(false);
   const [platformsList, setPlatformsList] = useState<GrowthPlatformAccount[]>(INITIAL_GROWTH_PLATFORMS);
-  const [customHandleInput, setCustomHandleInput] = useState('');
-  const [selectedPlatformToAdd, setSelectedPlatformToAdd] = useState('threads');
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   const showToast = (msg: string) => {
@@ -279,7 +278,6 @@ export const GrowthScreen: React.FC<GrowthScreenProps> = ({
     if (Platform.OS !== 'web') {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     }
-    triggerModalPop();
     setShowConnectPlatformModal(true);
   };
 
@@ -358,53 +356,6 @@ export const GrowthScreen: React.FC<GrowthScreenProps> = ({
     }
   };
 
-  const handleAddCustomPlatform = () => {
-    if (!customHandleInput.trim()) {
-      showToast('Please enter your handle');
-      return;
-    }
-    if (Platform.OS !== 'web') {
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-    }
-    const formatted = customHandleInput.startsWith('@') ? customHandleInput : `@${customHandleInput.trim()}`;
-    setPlatformsList((prev) =>
-      prev.map((p) =>
-        p.id === selectedPlatformToAdd
-          ? { ...p, connected: true, handle: formatted }
-          : p
-      )
-    );
-    const targetPlat = platformsList.find((p) => p.id === selectedPlatformToAdd);
-    showToast(`✓ ${targetPlat?.name} linked to ${formatted}!`);
-    setCustomHandleInput('');
-
-    if (onSaveProfile && userProfile) {
-      const current = userProfile.connectedPlatforms || ['tiktok', 'instagram', 'youtube'];
-      const nextConnected = current.includes(selectedPlatformToAdd)
-        ? current
-        : [...current, selectedPlatformToAdd];
-      const handleKey =
-        selectedPlatformToAdd === 'tiktok'
-          ? 'tiktokHandle'
-          : selectedPlatformToAdd === 'instagram'
-          ? 'instagramHandle'
-          : selectedPlatformToAdd === 'youtube'
-          ? 'youtubeHandle'
-          : selectedPlatformToAdd === 'facebook'
-          ? 'facebookHandle'
-          : selectedPlatformToAdd === 'threads'
-          ? 'threadsHandle'
-          : selectedPlatformToAdd === 'pinterest'
-          ? 'pinterestHandle'
-          : undefined;
-
-      onSaveProfile({
-        ...userProfile,
-        connectedPlatforms: nextConnected,
-        ...(handleKey ? { [handleKey]: formatted } : {}),
-      });
-    }
-  };
 
   // Animations
   const flameFloatY = useRef(new Animated.Value(0)).current;
@@ -1321,181 +1272,17 @@ export const GrowthScreen: React.FC<GrowthScreenProps> = ({
         </Modal>
 
         
-        {/* COMPREHENSIVE CONNECT PLATFORMS & SYNC HUB POPUP MODAL */}
-        <Modal
+        {/* Connect accounts: glass sheet */}
+        <ConnectAccountsSheet
           visible={showConnectPlatformModal}
-          transparent={true}
-          animationType="fade"
-          onRequestClose={() => setShowConnectPlatformModal(false)}
-        >
-          <View style={styles.modalOverlay}>
-            <View style={styles.modalCardLarge}>
-              {/* Modal Top Header */}
-              <View style={styles.modalHeaderRow}>
-                <View style={{ flex: 1, marginRight: 8 }}>
-                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, flexWrap: 'wrap', marginBottom: 2 }}>
-                    <Text style={styles.modalTitle}>Connected Platforms</Text>
-                    <View style={styles.activePlatformsCountBadge}>
-                      <Text style={styles.activePlatformsCountText}>
-                        {platformsList.filter((p) => p.connected).length} Connected
-                      </Text>
-                    </View>
-                  </View>
-                  <Text style={styles.modalSubtitle}>
-                    Manage connected channels or add more platforms to sync your audience.
-                  </Text>
-                </View>
-                <Pressable
-                  onPress={() => setShowConnectPlatformModal(false)}
-                  style={styles.modalCloseCircle}
-                  hitSlop={8}
-                >
-                  <Text style={styles.modalCloseCross}>✕</Text>
-                </Pressable>
-              </View>
-
-              <ScrollView
-                style={{ maxHeight: Dimensions.get('window').height * 0.58 }}
-                showsVerticalScrollIndicator={false}
-              >
-                {/* 1. ACTIVE CONNECTED ACCOUNTS */}
-                <Text style={styles.modalSectionTitle}>ACTIVE CONNECTED PLATFORMS</Text>
-
-                <View style={{ gap: 8, marginBottom: 16 }}>
-                  {platformsList
-                    .filter((p) => p.connected)
-                    .map((plat) => (
-                      <View key={plat.id} style={styles.connectedPlatformRow}>
-                        <View style={[styles.platformIconCircle, { backgroundColor: plat.bgTint }]}>
-                          {renderGrowthPlatformBrandIcon(plat.id, 20)}
-                        </View>
-                        <View style={styles.platformMiddleCol}>
-                          <View style={styles.platformNameRow}>
-                            <Text style={styles.platformNameText} numberOfLines={1}>{plat.name}</Text>
-                            <View style={styles.autoSyncBadge}>
-                              <View style={styles.autoSyncDot} />
-                              <Text style={styles.autoSyncText}>Auto-Sync</Text>
-                            </View>
-                          </View>
-                          <Text style={styles.platformSubText} numberOfLines={1}>
-                            {plat.handle} • ⚡ {plat.followers}
-                          </Text>
-                        </View>
-                        {/* REMOVE BUTTON */}
-                        <Pressable
-                          style={styles.removePlatformBtn}
-                          onPress={() => handleRemoveSinglePlatform(plat.id)}
-                          hitSlop={6}
-                        >
-                          <Text style={styles.removePlatformBtnText}>Remove</Text>
-                        </Pressable>
-                      </View>
-                    ))}
-                </View>
-
-                {/* 2. AVAILABLE PLATFORMS TO ADD MORE */}
-                <Text style={styles.modalSectionTitle}>
-                  AVAILABLE PLATFORMS TO ADD ({platformsList.filter((p) => !p.connected).length})
-                </Text>
-                <Text style={styles.modalSubDescription}>
-                  Connect more platforms to aggregate your cross-channel creator reach:
-                </Text>
-
-                <View style={{ gap: 8, marginBottom: 16 }}>
-                  {platformsList
-                    .filter((p) => !p.connected)
-                    .map((plat) => (
-                      <View key={plat.id} style={styles.availablePlatformRow}>
-                        <View style={[styles.platformIconCircle, { backgroundColor: plat.bgTint }]}>
-                          {renderGrowthPlatformBrandIcon(plat.id, 20)}
-                        </View>
-                        <View style={{ flex: 1 }}>
-                          <Text style={styles.platformNameText}>{plat.name}</Text>
-                          <Text style={styles.platformSubText}>
-                            Sync video metrics &amp; audience velocity
-                          </Text>
-                        </View>
-                        <Pressable
-                          style={styles.addPlatformActionBtn}
-                          onPress={() => handleConnectSinglePlatform(plat.id)}
-                        >
-                          <Text style={styles.addPlatformActionBtnText}>+ Connect</Text>
-                        </Pressable>
-                      </View>
-                    ))}
-                </View>
-
-                {/* 3. CUSTOM ACCOUNT LINKER BOX */}
-                <View style={styles.customAddAccountBox}>
-                  <Text style={styles.customAddTitle}>LINK CUSTOM ACCOUNT HANDLE</Text>
-                  <Text style={styles.customAddSub}>
-                    Select channel and enter your creator username:
-                  </Text>
-
-                  {/* Channel Chips with Real Icons */}
-                  <ScrollView
-                    horizontal
-                    showsHorizontalScrollIndicator={false}
-                    contentContainerStyle={{ gap: 6, marginVertical: 8 }}
-                  >
-                    {platformsList.map((p) => {
-                      const isChosen = selectedPlatformToAdd === p.id;
-                      return (
-                        <Pressable
-                          key={p.id}
-                          style={[
-                            styles.platformSelectChip,
-                            isChosen && styles.platformSelectChipActive,
-                          ]}
-                          onPress={() => setSelectedPlatformToAdd(p.id)}
-                        >
-                          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
-                            {renderGrowthPlatformBrandIcon(p.id, 14)}
-                            <Text
-                              style={[
-                                styles.platformSelectChipText,
-                                isChosen && styles.platformSelectChipTextActive,
-                              ]}
-                            >
-                              {p.name.split(' ')[0]}
-                            </Text>
-                          </View>
-                        </Pressable>
-                      );
-                    })}
-                  </ScrollView>
-
-                  {/* Input and Add Button */}
-                  <View style={styles.customInputRow}>
-                    <TextInput
-                      value={customHandleInput}
-                      onChangeText={setCustomHandleInput}
-                      placeholder="@your_username"
-                      placeholderTextColor="#94A3B8"
-                      autoCapitalize="none"
-                      style={styles.customTextInput}
-                    />
-                    <Pressable
-                      style={styles.linkAccountConfirmBtn}
-                      onPress={handleAddCustomPlatform}
-                      hitSlop={6}
-                    >
-                      <Text style={styles.linkAccountConfirmBtnText} numberOfLines={1}>Link Account ➔</Text>
-                    </Pressable>
-                  </View>
-                </View>
-              </ScrollView>
-
-              {/* Done Button */}
-              <Pressable
-                style={styles.modalDoneBtn}
-                onPress={() => setShowConnectPlatformModal(false)}
-              >
-                <Text style={styles.modalDoneBtnText}>Save &amp; Close ✓</Text>
-              </Pressable>
-            </View>
-          </View>
-        </Modal>
+          onClose={() => setShowConnectPlatformModal(false)}
+          platforms={platformsList.filter((p) => isStage1Platform(p.id))}
+          onToggle={(id) => {
+            const p = platformsList.find((x) => x.id === id);
+            if (p?.connected) handleRemoveSinglePlatform(id);
+            else handleConnectSinglePlatform(id);
+          }}
+        />
 
         {/* PROFILE MODAL */}
         {/* UNIVERSAL CREATOR PASSPORT & PROFILE MODAL */}

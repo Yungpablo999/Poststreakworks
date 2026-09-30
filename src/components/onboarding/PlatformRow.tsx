@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, Platform, Pressable, StyleSheet, View, useWindowDimensions } from 'react-native';
-import Animated, { ZoomIn, useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
+import Animated, { Easing, ZoomIn, useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
 import { BlurView } from 'expo-blur';
 import * as Haptics from 'expo-haptics';
 import Svg, { Path } from 'react-native-svg';
@@ -76,7 +76,7 @@ export function PlatformRow({ name, description, logo, connected, onToggle }: Pl
           <ActivityIndicator size="small" color={ds.purple} />
         ) : connected ? (
           // Connected = a green tick on every screen size (user preference)
-          <Animated.View entering={ZoomIn.springify().damping(12)} style={styles.connectedInner}>
+          <Animated.View entering={ZoomIn.duration(240).easing(Easing.out(Easing.cubic))} style={styles.connectedInner}>
             <Svg width={16} height={16} viewBox="0 0 24 24" fill="none">
               <Path d="M20 6L9 17l-5-5" stroke="#FFFFFF" strokeWidth={3.2} strokeLinecap="round" strokeLinejoin="round" />
             </Svg>
