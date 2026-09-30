@@ -278,18 +278,15 @@ export function QuotaCard({
 }
 
 // ─── Saved row ──────────────────────────────────────────────────────────────
-export function SavedRow({ title, meta, onPress }: { title: string; meta: string; onPress: () => void }) {
+export function SavedRow({ title, meta, onPress, onUnsave }: { title: string; meta: string; onPress: () => void; onUnsave: () => void }) {
   return (
     <PressableCard onPress={onPress} accessibilityLabel={`${title}. ${meta}`}>
       <GlassCard strong radius={18} padding={12}>
         <View style={styles.row}>
-          <View style={styles.savedIcon}>
-            <Svg width={14} height={14} viewBox="0 0 24 24" fill={ds.purple}>
-              <Path d="M6 3h12a1 1 0 011 1v17l-7-4-7 4V4a1 1 0 011-1z" />
-            </Svg>
-          </View>
+          {/* Filled bookmark: tap to unsave */}
+          <SaveButton saved onPress={onUnsave} size={36} />
           <View style={styles.flex}>
-            <Text style={styles.savedTitle} numberOfLines={1}>
+            <Text style={styles.savedTitle} numberOfLines={2}>
               {title}
             </Text>
             <Text style={styles.rowMeta} numberOfLines={1}>
@@ -370,6 +367,5 @@ const styles = StyleSheet.create({
   quotaBtn: { marginTop: 14 },
   quotaDone: { fontSize: 13, color: ds.text2, textAlign: 'center' },
   proLink: { fontSize: 13.5, fontWeight: '800', color: ds.goldLedge, textAlign: 'center', marginTop: 6 },
-  savedIcon: { width: 34, height: 34, borderRadius: 11, alignItems: 'center', justifyContent: 'center', backgroundColor: ds.lavender },
   savedTitle: { fontSize: 14.5, fontWeight: '800', color: ds.ink },
 });

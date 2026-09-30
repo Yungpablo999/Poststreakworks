@@ -23,7 +23,17 @@ import { AnimatedCompletionModal } from '../components/AnimatedCompletionModal';
 import { FreeAppHeader } from '../components/FreeAppHeader';
 import { sFont, sPadding, isNarrowScreen } from '../utils/responsive';
 import Reanimated, { FadeIn, FadeInUp, FadeOut, Easing, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
-import { getStarterIdeas, getFilmPlan, getSoundIdeas, checkInToday, getDefaultFilmStyle, type FilmStyle } from '../data';
+import {
+  getStarterIdeas,
+  getFilmPlan,
+  getSoundIdeas,
+  checkInToday,
+  getDefaultFilmStyle,
+  getGoalCaption,
+  IDEA_GOALS,
+  type FilmStyle,
+  type IdeaGoal,
+} from '../data';
 import { ScheduleSheet } from '../components/composer/ScheduleSheet';
 import { PlatformLogo } from '../components/onboarding/PlatformLogo';
 import { FilmMethodPicker, FilmPlanCard, PostedCheck, type FilmMethod } from '../components/composer/FilmBlocks';
@@ -54,6 +64,8 @@ import { ds } from '../theme/colors';
 
 interface PostComposerScreenProps {
   ideaTitle?: string;
+  /** Goal picked on the Ideas page; the caption is written for it. */
+  ideaGoal?: { goal: IdeaGoal; hook?: string } | null;
   questDraft?: {
     title: string;
     hook: string;
@@ -362,6 +374,7 @@ const PlatformIcon = ({ iconType, size = 38 }: { iconType: string; size?: number
 
 export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
   ideaTitle = 'One thing I wish I knew before I started creating',
+  ideaGoal,
   questDraft,
   initialFormat,
   initialPlatform = '',
@@ -486,6 +499,15 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
       }
     }
   }, [ideaTitle]);
+
+  // Idea picked on the Ideas page with a goal: write the caption for that goal
+  useEffect(() => {
+    if (!ideaGoal || !ideaTitle) return;
+    const g = getGoalCaption(ideaTitle, ideaGoal.goal, ideaGoal.hook);
+    setCaption(g.caption);
+    setCaptionTone(g.tone);
+    setCaptionCta(g.cta);
+  }, [ideaTitle, ideaGoal]);
 
   // Sync incoming Quest Draft from Jarvis
   useEffect(() => {
@@ -1248,7 +1270,11 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
               <AiAction label="Ask viewers" onPress={() => handleAiAction('cta')} disabled={isAiProcessing || aiEditsLeft === 0} />
             </View>
           </View>
-          <Text style={styles.note}>Tip: name the exact moment or mistake, and one thing people can try.</Text>
+          <Text style={styles.note}>
+            {ideaGoal
+              ? `Written to ${IDEA_GOALS.find((g) => g.id === ideaGoal.goal)?.label.toLowerCase()}. Tone and ending are set for that.`
+              : 'Tip: name the exact moment or mistake, and one thing people can try.'}
+          </Text>
 
           {/* 5. TAGS */}
           <StepHeader n={5} title="Tags" done={tags.length > 0} />

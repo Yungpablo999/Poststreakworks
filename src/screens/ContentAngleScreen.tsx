@@ -34,7 +34,7 @@ interface ContentAngleScreenProps {
   onOpenSchedule?: () => void;
   onOpenJarvisPro?: () => void;
   onNavigateTab?: (tab: TabType) => void;
-  onUseIdea?: (ideaTitle: string, format?: string) => void;
+  onUseIdea?: (ideaTitle: string, format?: string, goal?: IdeaGoal, hook?: string) => void;
   userProfile?: UserProfileData;
   onSaveProfile?: (updated: UserProfileData) => void;
 }
@@ -391,12 +391,12 @@ export const ContentAngleScreen: React.FC<ContentAngleScreenProps> = ({
     }
   };
 
-  const handleSelectIdea = (ideaTitle: string, format?: string) => {
+  const handleSelectIdea = (ideaTitle: string, format?: string, hook?: string) => {
     if (Platform.OS !== 'web') {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     }
     if (onUseIdea) {
-      onUseIdea(ideaTitle, format);
+      onUseIdea(ideaTitle, format, goal, hook);
     }
   };
 
@@ -444,6 +444,7 @@ export const ContentAngleScreen: React.FC<ContentAngleScreenProps> = ({
     return n.length ? n : ['lifestyle'];
   });
   const [goal, setGoal] = useState<IdeaGoal>('followers');
+  const [editNiches, setEditNiches] = useState(false);
   const feed = React.useMemo(
     () => getIdeaFeed(niches, goal, userProfile?.connectedPlatforms ?? []),
     [niches, goal, userProfile?.connectedPlatforms],
@@ -542,12 +543,25 @@ export const ContentAngleScreen: React.FC<ContentAngleScreenProps> = ({
 
           {/* NICHES + GOAL */}
           <Reanimated.View entering={FadeInUp.delay(80).duration(500)} style={styles.filters}>
-            <ChipRow
-              label="Your niches"
-              items={Object.keys(NICHE_LABELS).map((id) => ({ id, label: NICHE_LABELS[id] }))}
-              selected={niches}
-              onToggle={toggleNicheId}
-            />
+            {/* Niches come from onboarding; one line, with Change if they want other ideas */}
+            <View style={styles.nicheLine}>
+              <Text style={styles.nicheText} numberOfLines={1}>
+                Ideas for <Text style={styles.nicheBold}>{niches.map((n) => NICHE_LABELS[n]).join(' · ')}</Text>
+              </Text>
+              <Pressable onPress={() => setEditNiches((v) => !v)} hitSlop={8} accessibilityRole="button">
+                <Text style={styles.link}>{editNiches ? 'Done' : 'Change'}</Text>
+              </Pressable>
+            </View>
+            {editNiches && (
+              <Reanimated.View entering={FadeInUp.duration(220)} exiting={FadeOut.duration(150)}>
+                <ChipRow
+                  label="Pick your niches"
+                  items={Object.keys(NICHE_LABELS).map((id) => ({ id, label: NICHE_LABELS[id] }))}
+                  selected={niches}
+                  onToggle={toggleNicheId}
+                />
+              </Reanimated.View>
+            )}
             <ChipRow label="Goal" items={IDEA_GOALS} selected={[goal]} onToggle={(id) => setGoal(id as IdeaGoal)} />
           </Reanimated.View>
 
@@ -558,7 +572,7 @@ export const ContentAngleScreen: React.FC<ContentAngleScreenProps> = ({
               thinking={pickThinking}
               saved={isSaved(top.id)}
               onAnother={showAnotherPick}
-              onUse={() => handleSelectIdea(top.title, top.format)}
+              onUse={() => handleSelectIdea(top.title, top.format, top.hook)}
               onSave={() => toggleSaveIdea(top)}
             />
           </Reanimated.View>
@@ -579,7 +593,7 @@ export const ContentAngleScreen: React.FC<ContentAngleScreenProps> = ({
                 <IdeaRow
                   idea={idea}
                   saved={isSaved(idea.id)}
-                  onUse={() => handleSelectIdea(idea.title, idea.format)}
+                  onUse={() => handleSelectIdea(idea.title, idea.format, idea.hook)}
                   onSave={() => toggleSaveIdea(idea)}
                 />
               </Reanimated.View>
@@ -605,7 +619,15 @@ export const ContentAngleScreen: React.FC<ContentAngleScreenProps> = ({
               <View style={styles.stack}>
                 {displayedSavedIdeas.map((s) => (
                   <Reanimated.View key={s.id} entering={FadeIn.duration(250)} exiting={FadeOut.duration(150)} layout={LinearTransition.duration(250)}>
-                    <SavedRow title={s.title} meta={`${s.savedTime} · ${s.format}`} onPress={() => handleSelectIdea(s.title, s.format)} />
+                    <SavedRow
+                      title={s.title}
+                      meta={`${s.savedTime} · ${s.format}`}
+                      onPress={() => handleSelectIdea(s.title, s.format)}
+                      onUnsave={() => {
+                        setSavedIdeasList((prev) => prev.filter((x) => x.id !== s.id));
+                        triggerToast('Removed from saved ideas');
+                      }}
+                    />
                   </Reanimated.View>
                 ))}
               </View>
@@ -819,6 +841,9 @@ const styles = StyleSheet.create({
   sectionLabelInline: { marginTop: 0, marginBottom: 0 },
   savedHead: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: 24, marginBottom: 10 },
   link: { fontSize: 13.5, fontWeight: '800', color: ds.purple },
+  nicheLine: { flexDirection: 'row', alignItems: 'center', gap: 10 },
+  nicheText: { flex: 1, fontSize: 13.5, color: ds.text2 },
+  nicheBold: { fontWeight: '800', color: ds.ink },
   stack: { gap: 10 },
   scrollContent: {
     paddingHorizontal: 20,

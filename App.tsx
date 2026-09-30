@@ -13,6 +13,7 @@ import { VerifyCodeScreen } from './src/screens/VerifyCodeScreen';
 import { NicheSelectionScreen } from './src/screens/NicheSelectionScreen';
 import { PlatformConnectScreen } from './src/screens/PlatformConnectScreen';
 import { PlanPreviewScreen } from './src/screens/PlanPreviewScreen';
+import type { IdeaGoal } from './src/data';
 import { DashboardScreen } from './src/screens/DashboardScreen';
 import { ProDashboardScreen } from './src/screens/ProDashboardScreen';
 import { MissionDetailScreen } from './src/screens/MissionDetailScreen';
@@ -111,6 +112,8 @@ export default function App() {
   const [verifyMode, setVerifyMode] = useState<'signup' | 'signin'>('signup');
   const [selectedIdeaTitle, setSelectedIdeaTitle] = useState('One thing I wish I knew before I started creating');
   const [composerIdeaTitle, setComposerIdeaTitle] = useState('One thing I wish I knew before I started creating');
+  // Goal picked on the Ideas page shapes the composer's caption
+  const [composerIdeaGoal, setComposerIdeaGoal] = useState<{ goal: IdeaGoal; hook?: string } | null>(null);
   const [composerIdeaFormat, setComposerIdeaFormat] = useState<'short_video' | 'carousel' | 'image' | 'long_video' | 'text' | undefined>(undefined);
   const [composerQuestDraft, setComposerQuestDraft] = useState<{
     title: string;
@@ -129,8 +132,9 @@ export default function App() {
     speed: string;
   } | null>(null);
 
-  const handleUseIdea = (title: string, format?: string) => {
+  const handleUseIdea = (title: string, format?: string, goal?: IdeaGoal, hook?: string) => {
     setComposerQuestDraft(null);
+    setComposerIdeaGoal(goal ? { goal, hook } : null);
     setComposerAttachedAudio(null);
     if (title) setComposerIdeaTitle(title);
     if (format) {
@@ -274,6 +278,7 @@ export default function App() {
   const handlePlanContinue = (idea: { title: string }) => {
     setSelectedIdeaTitle(idea.title);
     setComposerIdeaTitle(idea.title);
+    setComposerIdeaGoal(null);
     navigateTo('signup');
   };
 
@@ -525,6 +530,7 @@ export default function App() {
               onOpenVoiceStudio={() => navigateTo('voice-studio')}
               onOpenPostComposer={(ideaTitle) => {
                 if (ideaTitle) setComposerIdeaTitle(ideaTitle);
+                setComposerIdeaGoal(null);
                 navigateTo('composer');
               }}
               onSwitchToFree={() => {
@@ -564,6 +570,7 @@ export default function App() {
               onOpenJarvisPro={() => navigateTo('jarvis-pro')}
               onOpenPostComposer={(ideaTitle, platform, questDraft, format) => {
                 if (ideaTitle) setComposerIdeaTitle(ideaTitle);
+                setComposerIdeaGoal(null);
                 if (questDraft) setComposerQuestDraft(questDraft);
                 if (format) setComposerIdeaFormat(format as any);
                 navigateTo('composer');
@@ -585,6 +592,7 @@ export default function App() {
               onOpenIdeaAngle={() => navigateTo('content-angle')}
               onOpenPostComposer={(title, platform) => {
                 if (title) setComposerIdeaTitle(title);
+                setComposerIdeaGoal(null);
                 navigateTo('composer');
               }}
               onNavigateTab={handleTabNavigation}
@@ -606,6 +614,7 @@ export default function App() {
               }}
               onOpenPostComposer={(title, platform) => {
                 if (title) setComposerIdeaTitle(title);
+                setComposerIdeaGoal(null);
                 navigateTo('composer');
               }}
               onOpenIdeaAngle={() => navigateTo('content-angle')}
@@ -643,6 +652,7 @@ export default function App() {
               }}
               onOpenPostComposer={(title, platform) => {
                 if (title) setComposerIdeaTitle(title);
+                setComposerIdeaGoal(null);
                 navigateTo('composer');
               }}
               onOpenIdeaAngle={() => navigateTo('content-angle')}
@@ -683,6 +693,7 @@ export default function App() {
               onStartMission={() => navigateTo('mission-detail')}
               onOpenPostComposer={(title, platform) => {
                 if (title) setComposerIdeaTitle(title);
+                setComposerIdeaGoal(null);
                 navigateTo('composer');
               }}
               onSwitchToFree={() => {
@@ -704,6 +715,7 @@ export default function App() {
               onOpenCreateIdea={() => navigateTo('create')}
               onOpenPostComposer={(title, platform) => {
                 if (title) setComposerIdeaTitle(title);
+                setComposerIdeaGoal(null);
                 navigateTo('composer');
               }}
               onNavigateTab={handleTabNavigation}
@@ -725,6 +737,7 @@ export default function App() {
               onOpenSchedule={() => navigateTo('schedule')}
               onOpenPostComposer={(title, platform) => {
                 if (title) setComposerIdeaTitle(title);
+                setComposerIdeaGoal(null);
                 navigateTo('composer');
               }}
               onOpenScript={() => navigateTo('script')}
@@ -778,6 +791,7 @@ export default function App() {
               onOpenJarvisPro={() => navigateTo('jarvis-pro')}
               onOpenPostComposer={(title, platform, questDraft, format) => {
                 if (title) setComposerIdeaTitle(title);
+                setComposerIdeaGoal(null);
                 if (questDraft) setComposerQuestDraft(questDraft);
                 if (format) setComposerIdeaFormat(format as any);
                 navigateTo('composer');
@@ -817,6 +831,7 @@ export default function App() {
             onLogout={handleLogout}
             onOpenComposer={(idea?: string, platform?: string, questDraft?: any) => {
               if (idea) setComposerIdeaTitle(idea);
+              setComposerIdeaGoal(null);
               if (questDraft) {
                 setComposerQuestDraft(questDraft);
               } else {
@@ -839,6 +854,7 @@ export default function App() {
             onOpenJarvisPro={() => navigateTo('jarvis-pro')}
             onOpenPostComposer={(title) => {
               if (title) setComposerIdeaTitle(title);
+              setComposerIdeaGoal(null);
               setComposerQuestDraft(null);
               navigateTo('composer');
             }}
@@ -851,6 +867,7 @@ export default function App() {
         {currentScreen === 'composer' && (
           <PostComposerScreen
             ideaTitle={composerIdeaTitle}
+            ideaGoal={composerIdeaGoal}
             questDraft={composerQuestDraft}
             initialFormat={composerIdeaFormat}
             attachedAudio={composerAttachedAudio}
@@ -910,6 +927,7 @@ export default function App() {
               }}
               onOpenPostComposer={(title, platform) => {
                 if (title) setComposerIdeaTitle(title);
+                setComposerIdeaGoal(null);
                 navigateTo('composer');
               }}
               onOpenIdeaAngle={() => navigateTo('content-angle')}
@@ -932,6 +950,7 @@ export default function App() {
               onOpenJarvisPro={() => navigateTo('jarvis-pro')}
               onUseAsPost={(scriptData) => {
                 if (scriptData.hook) setComposerIdeaTitle(scriptData.hook);
+                setComposerIdeaGoal(null);
                 navigateTo('composer');
               }}
               onNavigateTab={handleTabNavigation}
@@ -951,6 +970,7 @@ export default function App() {
               onOpenJarvisPro={() => navigateTo('jarvis-pro')}
               onAddToPost={(captionText, hashtags) => {
                 if (captionText) setComposerIdeaTitle(captionText);
+                setComposerIdeaGoal(null);
                 navigateTo('composer');
               }}
               onOpenIdeaAngle={() => navigateTo('content-angle')}
@@ -972,6 +992,7 @@ export default function App() {
               onOpenJarvisPro={() => navigateTo('jarvis-pro')}
               onAddToPost={(captionText) => {
                 if (captionText) setComposerIdeaTitle(captionText);
+                setComposerIdeaGoal(null);
                 navigateTo('composer');
               }}
               onNavigateTab={handleTabNavigation}
@@ -998,6 +1019,7 @@ export default function App() {
             onOpenJarvisPro={() => navigateTo('jarvis-pro')}
             onOpenPostComposer={(prefillTitle, attachedAudio) => {
               if (prefillTitle) setComposerIdeaTitle(prefillTitle);
+              setComposerIdeaGoal(null);
               if (attachedAudio) setComposerAttachedAudio(attachedAudio);
               navigateTo('composer');
             }}
@@ -1020,6 +1042,7 @@ export default function App() {
             onOpenJarvisPro={() => navigateTo('jarvis-pro')}
             onOpenPostComposer={(prefillTitle, prefillPlatform) => {
               if (prefillTitle) setComposerIdeaTitle(prefillTitle);
+              setComposerIdeaGoal(null);
               navigateTo('composer');
             }}
             onOpenScript={(title) => {
@@ -1040,6 +1063,7 @@ export default function App() {
             onOpenJarvisPro={() => navigateTo('jarvis-pro')}
             onOpenComposer={(prefillTitle) => {
               if (prefillTitle) setComposerIdeaTitle(prefillTitle);
+              setComposerIdeaGoal(null);
               navigateTo('composer');
             }}
             onOpenScript={(prefillTitle) => {
@@ -1062,6 +1086,7 @@ export default function App() {
             onOpenJarvisPro={() => navigateTo('jarvis-pro')}
             onOpenComposer={(prefillTitle) => {
               if (prefillTitle) setComposerIdeaTitle(prefillTitle);
+              setComposerIdeaGoal(null);
               navigateTo('composer');
             }}
             onOpenScript={(prefillTitle) => {
@@ -1086,10 +1111,12 @@ export default function App() {
             onOpenPlatformGrowth={() => navigateTo('platform-growth')}
             onOpenCreate={(prefillTopic) => {
               if (prefillTopic) setComposerIdeaTitle(prefillTopic);
+              setComposerIdeaGoal(null);
               navigateTo('create');
             }}
             onOpenPostComposer={(prefillTitle) => {
               if (prefillTitle) setComposerIdeaTitle(prefillTitle);
+              setComposerIdeaGoal(null);
               navigateTo('composer');
             }}
             onNavigateTab={handleTabNavigation}

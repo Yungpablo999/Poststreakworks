@@ -605,3 +605,45 @@ export function normalizeNiches(input: string[] = []): string[] {
     .filter((x): x is string => !!x);
   return Array.from(new Set(out));
 }
+
+// ---------------------------------------------------------------------------
+// Goal-shaped captions: "Use this idea" from Ideas writes the caption for the
+// goal the creator picked (mock copywriting until Jarvis writes it for real).
+// ---------------------------------------------------------------------------
+
+export interface GoalCaption {
+  caption: string;
+  tone: 'Helpful' | 'Viral' | 'Story';
+  cta: 'Ask Question' | 'Save Post' | 'Share Thoughts';
+}
+
+export function getGoalCaption(title: string, goal: IdeaGoal, hook?: string): GoalCaption {
+  const t = title.replace(/[“”"]/g, '').trim();
+  const h = hook ? hook.trim() : '';
+  switch (goal) {
+    case 'saves':
+      return {
+        caption: `${t}\n\n1. Start small\n2. Do it the same time each day\n3. Keep it under 5 minutes\n\nSave this for later so you don't forget it.`,
+        tone: 'Helpful',
+        cta: 'Save Post',
+      };
+    case 'comments':
+      return {
+        caption: `${h || t}\n\nHonestly, this changed more than I expected.\n\nWhat would you add? Tell me in the comments.`,
+        tone: 'Story',
+        cta: 'Ask Question',
+      };
+    case 'often':
+      return {
+        caption: `${t}. That's it, that's the post.\n\nWhat's yours?`,
+        tone: 'Helpful',
+        cta: 'Ask Question',
+      };
+    default:
+      return {
+        caption: `${h || t}\n\nIf this is you too, you're not alone.\n\nSend this to someone who needs to hear it.`,
+        tone: 'Viral',
+        cta: 'Share Thoughts',
+      };
+  }
+}
