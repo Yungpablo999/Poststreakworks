@@ -39,7 +39,7 @@ interface HomeDayZeroProps {
 const STEP_MS = 1400;
 
 // ─── Floating ghost ─────────────────────────────────────────────────────────
-function FloatingGhost() {
+export function FloatingGhost() {
   const reduceMotion = useReducedMotion();
   const t = useSharedValue(0);
   useEffect(() => {
@@ -133,7 +133,7 @@ function StepPath() {
 }
 
 // ─── A "coming up" row with hover / press feedback ──────────────────────────
-function PreviewRow({
+export function PreviewRow({
   title,
   body,
   icon,
