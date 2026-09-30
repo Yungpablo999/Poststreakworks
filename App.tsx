@@ -200,8 +200,9 @@ export default function App() {
       Boolean(customMessage) ||
       nextScreen === 'caption' ||
       nextScreen === 'script' ||
-      nextScreen === 'content-angle' ||
       nextScreen === 'repurpose';
+    // (Ideas opens straight away: the page shows Jarvis thinking in place
+    // when it's actually generating, so a fake loading screen only slowed it.)
 
     if (isAiWorkflow) {
       const msg =
@@ -210,8 +211,6 @@ export default function App() {
           ? 'Writing Caption & Hashtags...'
           : nextScreen === 'script'
           ? 'Crafting Video Script...'
-          : nextScreen === 'content-angle'
-          ? 'Finding Content Angles...'
           : nextScreen === 'repurpose'
           ? 'Formatting Multi-Platform Assets...'
           : 'Jarvis Co-Pilot Processing...');
