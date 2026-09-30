@@ -436,16 +436,23 @@ export interface FilmPlan {
   /** Label over the hook box, e.g. "SAY IN THE FIRST 2 SECONDS". */
   hookLabel: string;
   hook: string;
+  /** Heading for the list: "Shots" for talking / text, ideas for dance and skits
+   *  (those creators already know the trend or how to act — they need an angle). */
+  listLabel: string;
   shots: string[];
   /** Shown above the sound ideas; stronger for styles built on the sound. */
   soundTip: string;
   soundFirst: boolean;
 }
 
+export type TrendStage = 'rising' | 'peaking' | 'fading';
+
 export interface SoundIdea {
   id: string;
   name: string;
   vibe: string;
+  /** Where the sound is in its trend life (sample until real trend data). */
+  stage?: TrendStage;
   isSample: true;
 }
 
@@ -463,25 +470,27 @@ export function getFilmPlan(ideaTitle: string, style: FilmStyle = 'talking'): Fi
     case 'dance':
       return {
         style,
-        hookLabel: 'FIRST 2 SECONDS',
-        hook: 'Start mid-move, right on the beat. No slow intro.',
+        hookLabel: 'ON-SCREEN TEXT',
+        hook: `${topic}`,
+        listLabel: 'Make it yours',
         shots: [
-          'Pick the sound first and learn the part that loops',
-          'Film full body, phone at chest height, good light',
-          'Hit your best move on the drop, then cut',
+          'Film it somewhere nobody expects: work, the kitchen, the gym',
+          'Pull in a friend, sibling or pet for the second half',
+          'Add your own move or reaction at the end of the loop',
         ],
-        soundTip: 'Choose it before you film. Your moves follow the beat.',
+        soundTip: 'Trends move fast. Jump on sounds that are still rising.',
         soundFirst: true,
       };
     case 'skit':
       return {
         style,
-        hookLabel: 'ON-SCREEN TEXT',
+        hookLabel: 'PREMISE',
+        listLabel: 'Punchline ideas',
         hook: `POV: ${/^I\b/.test(topic) ? topic : topic.charAt(0).toLowerCase() + topic.slice(1)}`,
         shots: [
-          'Start in the middle of the funny moment, not the setup',
-          'Play every character: switch sides, props or outfits',
-          'Land the punchline in under 15 seconds, cut right after',
+          'Flip it: end on the opposite of what everyone expects',
+          'Let the quiet character get the last word',
+          'Freeze on the reaction face for the final beat',
         ],
         soundTip: 'A trending comedy audio or your own voice both work. Timing is everything.',
         soundFirst: true,
@@ -491,6 +500,7 @@ export function getFilmPlan(ideaTitle: string, style: FilmStyle = 'talking'): Fi
         style,
         hookLabel: 'ON-SCREEN TEXT (FIRST 2 SECONDS)',
         hook: topic,
+        listLabel: 'Shots',
         shots: [
           'Open on the most satisfying close-up',
           '3–5 quick clips, 1–2 seconds each, cut to the beat',
@@ -504,6 +514,7 @@ export function getFilmPlan(ideaTitle: string, style: FilmStyle = 'talking'): Fi
         style: 'talking',
         hookLabel: 'SAY IN THE FIRST 2 SECONDS',
         hook: `“${topic}.”`,
+        listLabel: 'Shots',
         shots: [
           'Face the camera, say the hook with energy',
           'Show one real moment or example (5–10s)',
@@ -521,17 +532,17 @@ const SOUND_IDEAS: Record<FilmStyle, Omit<SoundIdea, 'isSample'>[]> = {
     { id: 't2', name: 'Light acoustic loop', vibe: 'Warm, calm tips' },
   ],
   dance: [
-    { id: 'd1', name: 'Trending dance challenge', vibe: 'Follow the choreo' },
-    { id: 'd2', name: 'Sped-up pop remix', vibe: 'Fast footwork' },
-    { id: 'd3', name: 'Afrobeats drop', vibe: 'Big move on the drop' },
+    { id: 'd1', name: 'Afrobeats drop', vibe: 'Picking up this week', stage: 'rising' },
+    { id: 'd2', name: 'Sped-up pop remix', vibe: 'Everyone is on it', stage: 'peaking' },
+    { id: 'd3', name: 'Old challenge sound', vibe: 'Late now, skip it', stage: 'fading' },
   ],
   skit: [
-    { id: 'k1', name: 'Trending comedy audio', vibe: 'Lip-sync the joke' },
-    { id: 'k2', name: 'Dramatic reveal sound', vibe: 'For the punchline' },
+    { id: 'k1', name: 'Trending comedy audio', vibe: 'Lip-sync the joke', stage: 'rising' },
+    { id: 'k2', name: 'Dramatic reveal sound', vibe: 'For the punchline', stage: 'peaking' },
     { id: 'k3', name: 'Your own voice', vibe: 'Original audio' },
   ],
   text: [
-    { id: 'x1', name: 'Aesthetic trending song', vibe: 'Slow, satisfying clips' },
+    { id: 'x1', name: 'Aesthetic trending song', vibe: 'Slow, satisfying clips', stage: 'rising' },
     { id: 'x2', name: 'Upbeat build-up', vibe: 'Quick cuts to the beat' },
     { id: 'x3', name: 'Calm acoustic', vibe: 'Routines and recipes' },
   ],

@@ -8,7 +8,7 @@ import { AppButton } from '../ui/AppButton';
 import { GlassCard } from '../glass/GlassCard';
 import { PlatformLogo } from '../onboarding/PlatformLogo';
 import { ds } from '../../theme/colors';
-import { FILM_STYLES, type FilmPlan, type FilmStyle, type SoundIdea } from '../../data';
+import { FILM_STYLES, type FilmPlan, type FilmStyle, type SoundIdea, type TrendStage } from '../../data';
 import { HANDOFF_NAMES, type HandoffPlatform } from '../../utils/handoff';
 
 // Short video only: film inside TikTok / Reels / Shorts (for trending sounds
@@ -85,6 +85,26 @@ export function FilmMethodPicker({ method, onChange }: { method: FilmMethod; onC
   );
 }
 
+const STAGES: Record<TrendStage, { label: string; bg: string; fg: string }> = {
+  rising: { label: 'Rising', bg: ds.greenBg, fg: ds.greenFill },
+  peaking: { label: 'Peaking', bg: ds.lavender, fg: ds.purple },
+  fading: { label: 'Fading', bg: 'rgba(23, 20, 32, 0.06)', fg: ds.text3 },
+};
+
+function StageChip({ stage }: { stage: TrendStage }) {
+  const c = STAGES[stage];
+  return (
+    <View style={[styles.stage, { backgroundColor: c.bg }]}>
+      {stage === 'rising' && (
+        <Svg width={9} height={9} viewBox="0 0 24 24" fill="none">
+          <Path d="M4 16l6-6 4 4 6-6M20 8v5M20 8h-5" stroke={c.fg} strokeWidth={3} strokeLinecap="round" strokeLinejoin="round" />
+        </Svg>
+      )}
+      <Text style={[styles.stageText, { color: c.fg }]}>{c.label}</Text>
+    </View>
+  );
+}
+
 // What kind of video is it? Most TikToks aren't talking to camera.
 function StylePicker({ style, onChange }: { style: FilmStyle; onChange: (s: FilmStyle) => void }) {
   return (
@@ -145,12 +165,21 @@ export function FilmPlanCard({
           <Text style={styles.hookText}>{plan.hook}</Text>
         </View>
 
-        <Text style={styles.subLabel}>Shots</Text>
+        <Text style={styles.subLabel}>{plan.listLabel}</Text>
         {plan.shots.map((s, i) => (
           <Animated.View key={s} entering={FadeInUp.delay(80 * i).duration(260)} style={styles.shot}>
-            <View style={styles.shotNum}>
-              <Text style={styles.shotNumText}>{i + 1}</Text>
-            </View>
+            {plan.style === 'dance' || plan.style === 'skit' ? (
+              // Ideas, not steps: these creators already know the trend
+              <View style={styles.ideaDot}>
+                <Svg width={11} height={11} viewBox="0 0 24 24" fill="none">
+                  <Path d="M12 2l2.4 7.6L22 12l-7.6 2.4L12 22l-2.4-7.6L2 12l7.6-2.4L12 2z" fill={ds.purple} />
+                </Svg>
+              </View>
+            ) : (
+              <View style={styles.shotNum}>
+                <Text style={styles.shotNumText}>{i + 1}</Text>
+              </View>
+            )}
             <Text style={styles.shotText}>{s}</Text>
           </Animated.View>
         ))}
@@ -176,6 +205,7 @@ export function FilmPlanCard({
                   {s.vibe}
                 </Text>
               </View>
+              {s.stage && <StageChip stage={s.stage} />}
             </View>
           ))}
         </View>
@@ -286,6 +316,8 @@ const styles = StyleSheet.create({
   styleChipOn: { borderColor: ds.purple, backgroundColor: ds.purple },
   styleChipText: { fontSize: 12.5, fontWeight: '800', color: ds.text2 },
   styleChipTextOn: { color: '#FFFFFF' },
+  stage: { flexDirection: 'row', alignItems: 'center', gap: 3, paddingHorizontal: 7, height: 20, borderRadius: 999 },
+  stageText: { fontSize: 10.5, fontWeight: '800' },
   soundTip: { fontSize: 12.5, lineHeight: 17, color: ds.text2, marginBottom: 8 },
   soundTipStrong: { color: ds.purple, fontWeight: '700' },
   hookBox: { padding: 14, borderRadius: 16, backgroundColor: 'rgba(237, 233, 254, 0.65)' },
@@ -294,6 +326,7 @@ const styles = StyleSheet.create({
   subLabel: { fontSize: 13, fontWeight: '800', color: ds.text2, marginTop: 14, marginBottom: 8 },
   shot: { flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 8 },
   shotNum: { width: 22, height: 22, borderRadius: 11, alignItems: 'center', justifyContent: 'center', backgroundColor: ds.purple },
+  ideaDot: { width: 22, height: 22, borderRadius: 11, alignItems: 'center', justifyContent: 'center', backgroundColor: ds.lavender },
   shotNumText: { fontSize: 11, fontWeight: '800', color: '#FFFFFF' },
   shotText: { flex: 1, fontSize: 13.5, lineHeight: 19, color: ds.ink },
   soundHead: { flexDirection: 'row', alignItems: 'center' },
