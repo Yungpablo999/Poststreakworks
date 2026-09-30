@@ -43,7 +43,6 @@ import { PostPerformanceScreen } from './src/screens/PostPerformanceScreen';
 import { PlatformGrowthScreen } from './src/screens/PlatformGrowthScreen';
 import { ProVoiceStudioScreen } from './src/screens/ProVoiceStudioScreen';
 import { ProHookStudioScreen } from './src/screens/ProHookStudioScreen';
-import { GhostLoadingScreen } from './src/components/GhostLoadingScreen';
 import { ScreenTransitionContainer, ScreenTransitionType } from './src/components/ScreenTransitionContainer';
 import { EdgeSwipeBackWrapper } from './src/components/EdgeSwipeBackWrapper';
 import { TabType } from './src/components/FloatingTabBar';
@@ -85,8 +84,6 @@ export default function App() {
   const [showSplash, setShowSplash] = useState(true);
   const [currentScreen, setCurrentScreen] = useState<Screen>('welcome');
   const [previousScreen, setPreviousScreen] = useState<Screen>('welcome');
-  const [isPageLoading, setIsPageLoading] = useState(false);
-  const [loadingMessage, setLoadingMessage] = useState('Loading Studio...');
 
   // Lock horizontal shift/pan on web/mobile browsers to keep layout fixed and centralized
   React.useEffect(() => {
@@ -189,47 +186,17 @@ export default function App() {
   });
 
   // Smart Navigation Handler: Instant (0ms) for bottom tabs & regular screens; Smart AI loader for generation workflows
-  const navigateTo = (nextScreen: Screen, customMessage?: string) => {
+  // Every page opens straight away. (There used to be a timed "Jarvis is
+  // working..." screen before Ideas, Caption, Script and Repurpose; it wasn't
+  // real loading, so it only slowed things down. Pages show Jarvis thinking
+  // in place when they actually generate something.)
+  const navigateTo = (nextScreen: Screen) => {
     if (nextScreen !== 'composer') {
       setComposerQuestDraft(null);
     }
     if (nextScreen === currentScreen) return;
-
-    // AI Generation workflows that genuinely benefit from showing Jarvis AI at work
-    const isAiWorkflow =
-      Boolean(customMessage) ||
-      nextScreen === 'caption' ||
-      nextScreen === 'script' ||
-      nextScreen === 'repurpose';
-    // (Ideas opens straight away: the page shows Jarvis thinking in place
-    // when it's actually generating, so a fake loading screen only slowed it.)
-
-    if (isAiWorkflow) {
-      const msg =
-        customMessage ||
-        (nextScreen === 'caption'
-          ? 'Writing Caption & Hashtags...'
-          : nextScreen === 'script'
-          ? 'Crafting Video Script...'
-          : nextScreen === 'repurpose'
-          ? 'Formatting Multi-Platform Assets...'
-          : 'Jarvis Co-Pilot Processing...');
-
-      setLoadingMessage(msg);
-      setIsPageLoading(true);
-
-      setTimeout(() => {
-        setPreviousScreen(currentScreen);
-        setCurrentScreen(nextScreen);
-        setTimeout(() => {
-          setIsPageLoading(false);
-        }, 150);
-      }, 400);
-    } else {
-      // Instant, snappy native transition for bottom tabs, dashboards, and standard views
-      setPreviousScreen(currentScreen);
-      setCurrentScreen(nextScreen);
-    }
+    setPreviousScreen(currentScreen);
+    setCurrentScreen(nextScreen);
   };
 
   const handleTabNavigation = (tab: TabType) => {
@@ -1131,7 +1098,6 @@ export default function App() {
         )}
 
         {/* Global Animated Ghost Page Transition Loader */}
-        <GhostLoadingScreen visible={isPageLoading} message={loadingMessage} />
       </View>
     </SafeAreaProvider>
   );
