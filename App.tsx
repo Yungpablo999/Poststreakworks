@@ -773,7 +773,11 @@ export default function App() {
 
         {currentScreen === 'jarvis-pro' && (
           <JarvisProScreen
-            onBack={() => navigateTo('growth')}
+            onBack={() => navigateTo(previousScreen ? previousScreen : 'growth')}
+            onUpgraded={() => {
+              setUserProfile(prev => ({ ...prev, tier: 'pro' }));
+              navigateTo('dashboard');
+            }}
             onLogout={handleLogout}
             onNavigateTab={handleTabNavigation}
             userProfile={userProfile}

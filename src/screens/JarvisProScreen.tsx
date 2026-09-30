@@ -1,27 +1,173 @@
-import React, { useState, useRef, useEffect } from 'react';
-import {
-  StyleSheet,
-  View,
-  ScrollView,
-  SafeAreaView,
-  StatusBar,
-  Pressable,
-  Animated,
-  Modal,
-  Image,
-  Platform,
-} from 'react-native';
-import { Text } from '../components/ui/AppText';
-import { BrandLogo } from '../components/BrandLogo';
-import Svg, { Path, Circle } from 'react-native-svg';
+import React, { useEffect, useRef, useState } from 'react';
+import { View, ScrollView, Pressable, StyleSheet, Platform } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import Animated, {
+  Easing,
+  FadeIn,
+  FadeInUp,
+  LinearTransition,
+  useAnimatedStyle,
+  useReducedMotion,
+  useSharedValue,
+  withRepeat,
+  withTiming,
+} from 'react-native-reanimated';
+import Svg, { Circle, Defs, Path, RadialGradient, Stop } from 'react-native-svg';
 import * as Haptics from 'expo-haptics';
-import { LinearGradient } from 'expo-linear-gradient';
+import { Text } from '../components/ui/AppText';
+import { AppButton } from '../components/ui/AppButton';
+import { FitLines } from '../components/ui/FitLines';
+import { GlassBackdrop } from '../components/glass/GlassBackdrop';
+import { GlassCard } from '../components/glass/GlassCard';
+import { JarvisOrb } from '../components/JarvisOrb';
+import { FreeAppHeader } from '../components/FreeAppHeader';
 import { FloatingTabBar, TabType } from '../components/FloatingTabBar';
-import { BrandToast } from '../components/BrandToast';
 import { UserProfileModal, UserProfileData } from '../components/UserProfileModal';
 import { AnimatedCompletionModal } from '../components/AnimatedCompletionModal';
-import { TinyGoldCheck } from '../components/CreatorStoryModal';
-import { sFont, sPadding, moderateScale, isNarrowScreen } from '../utils/responsive';
+import { ds, goldTokens } from '../theme/colors';
+
+// Jarvis Pro, for free creators. Light glass like the rest of the app; gold
+// only marks Pro. One upgrade button (in the plan card); the hero's button
+// just scrolls to it. Free vs Pro is a switch, not a put-down of the free plan.
+// Stage 1 features only.
+
+const PRICE = '$9.99';
+const pointer = Platform.OS === 'web' ? ({ cursor: 'pointer' } as object) : null;
+const smooth = { duration: 260, easing: Easing.out(Easing.cubic) };
+const tick = () => {
+  if (Platform.OS !== 'web') Haptics.selectionAsync();
+};
+
+// ─── Content ────────────────────────────────────────────────────────────────
+const BRIEF = [
+  {
+    id: 'hook',
+    title: 'Write the hook',
+    detail: '“3 creator mistakes that quietly slow your growth.” Jarvis drafts it in your style.',
+  },
+  {
+    id: 'time',
+    title: 'Post at 7:30 PM',
+    detail: 'That’s when your audience is most active on TikTok this week.',
+  },
+  {
+    id: 'versions',
+    title: 'Make 3 script versions',
+    detail: 'Try a funny, a calm and a bold take, then keep the one that sounds like you.',
+  },
+];
+
+const COMPARE: { feature: string; free: string; pro: string }[] = [
+  { feature: 'Jarvis guidance', free: 'A weekly plan', pro: 'A daily brief made for you' },
+  { feature: 'Repurpose', free: '1 a week', pro: 'Unlimited' },
+  { feature: 'Script and caption rewrites', free: 'A few per post', pro: 'Unlimited' },
+  { feature: 'Voice Studio', free: 'Not included', pro: 'Voiceovers in your own voice' },
+  { feature: 'Audience details', free: 'Totals and platforms', pro: 'Ages, places and online times' },
+  { feature: 'Posting', free: 'Get posts ready', pro: 'Post for you at the best time' },
+];
+
+const PLAN = ['Daily brief from Jarvis', 'Unlimited repurposing and rewrites', 'Voice Studio', 'Deeper audience insights', 'Auto-posting at your best times'];
+
+const FAQ = [
+  {
+    q: 'What is Jarvis Pro?',
+    a: 'Jarvis looks at how your posts do and tells you what to post next, when to post it, and how to open it. Pro gives you that every day, plus the tools to make it faster.',
+  },
+  {
+    q: 'Do I lose anything on the free plan?',
+    a: 'No. Everything you use now stays free. Pro adds more on top.',
+  },
+  {
+    q: 'Can I cancel any time?',
+    a: 'Yes. Cancel from your profile whenever you like, and you keep Pro until the end of the month you paid for.',
+  },
+  {
+    q: 'Is Voice Studio included?',
+    a: 'Yes. Voice Studio is only in Pro. It makes voiceovers that sound like you.',
+  },
+];
+
+// ─── Pieces ─────────────────────────────────────────────────────────────────
+function GoldGlow({ size = 240, style }: { size?: number; style?: object }) {
+  const reduce = useReducedMotion();
+  const t = useSharedValue(0);
+  useEffect(() => {
+    if (!reduce) t.value = withRepeat(withTiming(1, { duration: 2600, easing: Easing.inOut(Easing.sin) }), -1, true);
+  }, [reduce, t]);
+  const anim = useAnimatedStyle(() => ({ opacity: 0.6 + 0.4 * t.value, transform: [{ scale: 0.94 + 0.08 * t.value }] }));
+  return (
+    <Animated.View pointerEvents="none" style={[{ position: 'absolute' }, style, anim]}>
+      <Svg width={size} height={size}>
+        <Defs>
+          <RadialGradient id="jpGlow" cx="50%" cy="50%" r="50%">
+            <Stop offset="0%" stopColor={ds.gold} stopOpacity={0.28} />
+            <Stop offset="100%" stopColor={ds.gold} stopOpacity={0} />
+          </RadialGradient>
+        </Defs>
+        <Circle cx={size / 2} cy={size / 2} r={size / 2} fill="url(#jpGlow)" />
+      </Svg>
+    </Animated.View>
+  );
+}
+
+function Chevron({ open }: { open: boolean }) {
+  const r = useSharedValue(open ? 1 : 0);
+  useEffect(() => {
+    r.value = withTiming(open ? 1 : 0, smooth);
+  }, [open, r]);
+  const style = useAnimatedStyle(() => ({ transform: [{ rotate: `${r.value * 180}deg` }] }));
+  return (
+    <Animated.View style={style}>
+      <Svg width={16} height={16} viewBox="0 0 24 24" fill="none">
+        <Path d="M6 9l6 6 6-6" stroke={ds.purple} strokeWidth={2.6} strokeLinecap="round" strokeLinejoin="round" />
+      </Svg>
+    </Animated.View>
+  );
+}
+
+function PlanSwitch({ value, onChange }: { value: 'free' | 'pro'; onChange: (v: 'free' | 'pro') => void }) {
+  const [w, setW] = useState(0);
+  const cell = w / 2;
+  const x = useSharedValue(0);
+  useEffect(() => {
+    if (cell > 0) x.value = withTiming(value === 'pro' ? cell : 0, smooth);
+  }, [value, cell, x]);
+  const pill = useAnimatedStyle(() => ({ transform: [{ translateX: x.value }] }));
+  return (
+    <View
+      style={styles.switchTrack}
+      accessibilityRole="tablist"
+      onLayout={(e) => {
+        const nw = e.nativeEvent.layout.width - 8;
+        if (Math.abs(nw - w) > 1) {
+          setW(nw);
+          x.value = value === 'pro' ? nw / 2 : 0;
+        }
+      }}
+    >
+      {cell > 0 && <Animated.View pointerEvents="none" style={[styles.switchPill, value === 'pro' && styles.switchPillPro, { width: cell }, pill]} />}
+      {(['free', 'pro'] as const).map((id) => {
+        const on = id === value;
+        return (
+          <Pressable
+            key={id}
+            onPress={() => {
+              tick();
+              onChange(id);
+            }}
+            style={[styles.switchCell, pointer]}
+            accessibilityRole="tab"
+            accessibilityState={{ selected: on }}
+          >
+            <Text style={[styles.switchText, on && (id === 'pro' ? styles.switchTextPro : styles.switchTextOn)]}>
+              {id === 'free' ? 'Free' : 'Pro'}
+            </Text>
+          </Pressable>
+        );
+      })}
+    </View>
+  );
+}
 
 interface JarvisProScreenProps {
   onLogout?: () => void;
@@ -29,1471 +175,295 @@ interface JarvisProScreenProps {
   onBack?: () => void;
   userProfile?: UserProfileData;
   onSaveProfile?: (updated: UserProfileData) => void;
+  /** Mock checkout: switch this creator to Pro. */
+  onUpgraded?: () => void;
 }
 
-interface FaqItem {
-  id: string;
-  question: string;
-  answer: string;
-}
+export const JarvisProScreen: React.FC<JarvisProScreenProps> = ({ onLogout, onNavigateTab, onBack, userProfile, onSaveProfile, onUpgraded }) => {
+  const scrollRef = useRef<ScrollView>(null);
+  const planY = useRef(0);
+  const [showProfile, setShowProfile] = useState(false);
+  const [openStep, setOpenStep] = useState<string | null>('hook');
+  const [openFaq, setOpenFaq] = useState<number | null>(null);
+  const [view, setView] = useState<'free' | 'pro'>('pro');
+  const [welcome, setWelcome] = useState(false);
 
-const FAQ_DATA: FaqItem[] = [
-  {
-    id: 'faq_1',
-    question: 'What is Jarvis Pro?',
-    answer:
-      'Jarvis Pro is your AI creator strategist that analyzes your audience, generates content ideas and hooks, optimizes posting times, and accelerates your content growth and streak velocity.',
-  },
-  {
-    id: 'faq_2',
-    question: 'How does Jarvis help creators?',
-    answer:
-      'It eliminates guesswork by generating daily action briefs, protecting your streak with automated contingency drafts, and analyzing creator market trends.',
-  },
-  {
-    id: 'faq_3',
-    question: 'Can I cancel anytime?',
-    answer:
-      'Yes! You can cancel or pause your Jarvis Pro subscription at any time with 1 tap from your profile settings. No lock-ins or hidden fees.',
-  },
-  {
-    id: 'faq_4',
-    question: 'Is Voice Studio included?',
-    answer:
-      'Yes. Voice Studio is included with Jarvis Pro, giving you access to AI voice tools, transcription, and audio mastering.',
-  },
-];
+  const enter = (d: number) => FadeInUp.delay(d).duration(500).easing(Easing.out(Easing.cubic));
+  const layout = LinearTransition.duration(240).easing(Easing.out(Easing.cubic));
 
-export const JarvisProScreen: React.FC<JarvisProScreenProps> = ({
-  onLogout,
-  onNavigateTab,
-  onBack,
-  userProfile,
-  onSaveProfile,
-}) => {
-  const isDark = false;
-  const [activeTab, setActiveTab] = useState<TabType>('growth');
-  const [expandedBriefStep, setExpandedBriefStep] = useState<string | null>('step_1');
-  const [expandedFaqId, setExpandedFaqId] = useState<string | null>(null);
-
-  // Modals & Celebrations
-  const [showCheckoutSuccessModal, setShowCheckoutSuccessModal] = useState(false);
-  const [showNotificationModal, setShowNotificationModal] = useState(false);
-  const [showProfileModal, setShowProfileModal] = useState(false);
-  const [toastMessage, setToastMessage] = useState<string | null>(null);
-
-  // Animations
-  const toastOpacity = useRef(new Animated.Value(0)).current;
-  const flameFloatY = useRef(new Animated.Value(0)).current;
-  const pulseScale = useRef(new Animated.Value(1)).current;
-
-  useEffect(() => {
-    // Flame floating buoyancy loop
-    const floatLoop = Animated.loop(
-      Animated.sequence([
-        Animated.timing(flameFloatY, {
-          toValue: -4,
-          duration: 1600,
-          useNativeDriver: true,
-        }),
-        Animated.timing(flameFloatY, {
-          toValue: 3,
-          duration: 1600,
-          useNativeDriver: true,
-        }),
-      ])
-    );
-    floatLoop.start();
-
-    // Pulse animation
-    const pulseLoop = Animated.loop(
-      Animated.sequence([
-        Animated.timing(pulseScale, {
-          toValue: 1.05,
-          duration: 1200,
-          useNativeDriver: true,
-        }),
-        Animated.timing(pulseScale, {
-          toValue: 1,
-          duration: 1200,
-          useNativeDriver: true,
-        }),
-      ])
-    );
-    pulseLoop.start();
-
-    return () => {
-      floatLoop.stop();
-      pulseLoop.stop();
-    };
-  }, [flameFloatY, pulseScale]);
-
-  const showToast = (msg: string) => {
-    setToastMessage(msg);
-    Animated.sequence([
-      Animated.timing(toastOpacity, { toValue: 1, duration: 180, useNativeDriver: true }),
-      Animated.delay(2200),
-      Animated.timing(toastOpacity, { toValue: 0, duration: 250, useNativeDriver: true }),
-    ]).start(() => setToastMessage(null));
-  };
-
-  const handleToggleBriefStep = (stepId: string) => {
-    if (Platform.OS !== 'web') {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    }
-    setExpandedBriefStep((prev) => (prev === stepId ? null : stepId));
-  };
-
-  const handleToggleFaq = (faqId: string) => {
-    if (Platform.OS !== 'web') {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    }
-    setExpandedFaqId((prev) => (prev === faqId ? null : faqId));
-  };
-
-  const handleUnlockPro = () => {
-    if (Platform.OS !== 'web') {
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-    }
-    setShowCheckoutSuccessModal(true);
+  const start = () => {
+    if (Platform.OS !== 'web') Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    setWelcome(true);
   };
 
   return (
-    <SafeAreaView style={[styles.safeArea, isDark && { backgroundColor: '#0C0A12' }]}>
-      <StatusBar barStyle="dark-content" backgroundColor="#FAF9F6" />
-      <View style={[styles.container, isDark && { backgroundColor: '#0C0A12' }]}>
-        {/* 1. TOP HEADER APP BAR */}
-        <View style={styles.headerBar}>
-          <View style={styles.headerLeftGroup}>
-            {onBack && (
-              <Pressable
-                onPress={onBack}
-                style={({ pressed }) => [{ marginRight: 4, padding: 4 }, pressed && styles.btnPressed]}
-                hitSlop={10}
-              >
-                <Svg width={20} height={20} viewBox="0 0 24 24" fill="none">
-                  <Path d="M15 18l-6-6 6-6" stroke="#171420" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" />
-                </Svg>
-              </Pressable>
-            )}
-            <BrandLogo size="sm" isDark={isDark} />
-
-            {/* Free Plan / Pro Badge Pill */}
-            <Pressable
-              onPress={() => {
-                if (Platform.OS !== 'web') {
-                  Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-                }
-              }}
-              hitSlop={8}
-            >
-              {(userProfile?.tier === 'pro' || userProfile?.tier === 'founding' || showCheckoutSuccessModal) ? (
-                <LinearGradient
-                  colors={['#F59E0B', '#F59E0B', '#F59E0B']}
-                  start={{ x: 0, y: 0 }}
-                  end={{ x: 1, y: 0 }}
-                  style={styles.proHeaderBadge}
-                >
-                  <Text style={styles.proHeaderBadgeText}>👑 PRO</Text>
-                </LinearGradient>
-              ) : (
-                <View style={styles.freeHeaderBadge}>
-                  <Text style={styles.freeHeaderBadgeText}>🔒 FREE PLAN</Text>
-                </View>
-              )}
-            </Pressable>
-          </View>
-
-          <View style={styles.headerRightGroup}>
-            {/* Notification Bell */}
-            <Pressable
-              style={({ pressed }) => [styles.headerIconBtn, pressed && styles.btnPressed]}
-              hitSlop={8}
-              onPress={() => setShowNotificationModal(true)}
-            >
-              <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
-                <Path
-                  d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"
-                  stroke="#171420"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-                <Path
-                  d="M13.73 21a2 2 0 0 1-3.46 0"
-                  stroke="#171420"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </Svg>
-              <View style={styles.unreadBadgeDot} />
-            </Pressable>
-
-            {/* Top-Right: User Profile Avatar */}
-            <Pressable
-              style={({ pressed }) => [styles.headerProfileBtn, pressed && styles.btnPressed]}
-              hitSlop={6}
-              onPress={() => setShowProfileModal(true)}
-            >
-              {userProfile?.customAvatarUri ? (
-                <Image
-                  source={{ uri: userProfile.customAvatarUri }}
-                  style={styles.headerProfileImg}
-                  resizeMode="cover"
-                />
-              ) : (userProfile?.avatarSource && userProfile.avatarId && userProfile.avatarId !== 'ghost') ? (
-                <Image
-                  source={userProfile.avatarSource}
-                  style={styles.headerProfileImg}
-                  resizeMode="cover"
-                />
-              ) : (
-                <Svg width={19} height={19} viewBox="0 0 24 24" fill="none">
-                  <Path
-                    d="M20 21V19C20 17.9 19.5 16.9 18.7 16.2C17.9 15.5 16.9 15 15.8 15H8.2C7.1 15 6.1 15.5 5.3 16.2C4.5 16.9 4 17.9 4 19V21"
-                    stroke="#F59E0B"
-                    strokeWidth="2.3"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                  <Circle
-                    cx="12"
-                    cy="7"
-                    r="4"
-                    stroke="#F59E0B"
-                    strokeWidth="2.3"
-                  />
-                </Svg>
-              )}
-              <View style={{ position: 'absolute', bottom: -2, right: -2 }}>
-                <TinyGoldCheck size={14} />
-              </View>
-            </Pressable>
-          </View>
-        </View>
-
-        {/* 2. MAIN SCROLLABLE CONTENT */}
-        <ScrollView
-          style={styles.scrollView}
-          contentContainerStyle={styles.scrollContent}
-          showsVerticalScrollIndicator={false}
-        >
-          {/* SECTION 1: HERO DARK PURPLE CARD (MEET JARVIS PRO) */}
-          <View style={styles.heroCardContainer}>
-            <LinearGradient
-              colors={['#1F1147', '#120A2E', '#090517']}
-              start={{ x: 0.1, y: 0 }}
-              end={{ x: 0.9, y: 1 }}
-              style={styles.heroGradient}
-            >
-              {/* Golden PRO ACCESS Badge */}
-              <View style={styles.proAccessBadge}>
-                <LinearGradient
-                  colors={['#F59E0B', '#F59E0B', '#F59E0B']}
-                  start={{ x: 0, y: 0 }}
-                  end={{ x: 1, y: 1 }}
-                  style={styles.proAccessGradient}
-                >
-                  <Text style={styles.proAccessText}>PRO ACCESS</Text>
-                </LinearGradient>
-              </View>
-
-              {/* Main Hero Headline */}
-              <Text style={styles.heroHeadline}>Meet Jarvis Pro</Text>
-              <Text style={styles.heroSubtitle}>
-                Your AI growth companion inside PostStreak.
-              </Text>
-
-              {/* Frosted Pill Chips */}
-              <View style={styles.heroChipsRow}>
-                <View style={styles.heroChip}>
-                  <Text style={styles.heroChipText}>Content Strategy</Text>
-                </View>
-                <View style={styles.heroChip}>
-                  <Text style={styles.heroChipText}>Growth Intelligence</Text>
-                </View>
-                <View style={styles.heroChip}>
-                  <Text style={styles.heroChipText}>Viral Formats</Text>
+    <View style={styles.root}>
+      <GlassBackdrop />
+      <SafeAreaView style={styles.flex} edges={['top']}>
+        <FreeAppHeader backgroundColor="transparent" onBack={onBack} onOpenProfile={() => setShowProfile(true)} userProfile={userProfile} />
+        <ScrollView ref={scrollRef} contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
+          {/* Hero */}
+          <Animated.View entering={enter(0)}>
+            <GlassCard strong radius={28} padding={22}>
+              <GoldGlow style={{ top: -110, right: -90 }} />
+              <View style={styles.heroTop}>
+                <JarvisOrb size={56} />
+                <View style={styles.proChip}>
+                  <Text style={styles.proChipText}>PRO</Text>
                 </View>
               </View>
-
-              {/* Golden Metallic CTA Button */}
-              <Pressable
-                style={({ pressed }) => [styles.unlockProBtn, pressed && styles.btnPressed]}
-                onPress={handleUnlockPro}
-              >
-                <LinearGradient
-                  colors={['#F59E0B', '#F59E0B', '#D97706']}
-                  start={{ x: 0, y: 0 }}
-                  end={{ x: 1, y: 1 }}
-                  style={styles.unlockProGradient}
-                >
-                  <Text style={styles.unlockProBtnText}>Unlock Jarvis Pro</Text>
-                </LinearGradient>
-              </Pressable>
-            </LinearGradient>
-          </View>
-
-          {/* SECTION 2: TODAY'S JARVIS BRIEF */}
-          <View style={styles.sectionHeaderRow}>
-            <Text style={styles.sectionHeading}>Today’s Jarvis Brief</Text>
-          </View>
-
-          <View style={styles.briefCard}>
-            {/* Top Row with Flame and Advice */}
-            <View style={styles.briefTopRow}>
-              <View style={styles.briefFlameWrapper}>
-                <Image
-                  source={require('../../assets/images/jarvis-core-flame.png')}
-                  style={styles.briefFlameImage}
-                  resizeMode="contain"
+              <FitLines
+                lines={['Meet', <Text key="p" style={styles.accent}>Jarvis Pro</Text>]}
+                textStyle={styles.heroTitle}
+                maxFontSize={38}
+                align="left"
+                accessibilityLabel="Meet Jarvis Pro"
+              />
+              <Text style={styles.heroBody}>Your partner for what to post, when to post it, and how to start it.</Text>
+              <View style={styles.heroPrice}>
+                <Text style={styles.heroPriceNum}>{PRICE}</Text>
+                <Text style={styles.heroPriceSub}>a month · cancel any time</Text>
+              </View>
+              <View style={styles.heroCta}>
+                <AppButton
+                  title="See what’s included"
+                  variant="glass"
+                  onPress={() => scrollRef.current?.scrollTo({ y: Math.max(0, planY.current - 12), animated: true })}
                 />
               </View>
-              <Text style={styles.briefAdviceText}>
-                Your strongest move today: create one creator-advice Reel and post it at 7:30 PM, then generate viral script variations.
-              </Text>
-            </View>
+            </GlassCard>
+          </Animated.View>
 
-            {/* 3 Expandable Action Rows */}
-            <View style={styles.briefStepsContainer}>
-              {/* Step 1: Create reel hook */}
-              <Pressable
-                style={styles.briefStepItem}
-                onPress={() => handleToggleBriefStep('step_1')}
-              >
-                <View style={styles.briefStepHeader}>
-                  <View style={styles.briefStepLeft}>
-                    <View style={styles.briefStepIconBox}>
-                      <Text style={styles.briefStepIcon}>▷</Text>
-                    </View>
-                    <Text style={styles.briefStepTitle}>Create reel hook</Text>
+          {/* Example brief */}
+          <Animated.View entering={enter(100)}>
+            <View style={styles.sectionRow}>
+              <Text style={styles.section}>A day with Pro</Text>
+              <View style={styles.exampleChip}>
+                <Text style={styles.exampleText}>Example</Text>
+              </View>
+            </View>
+            <GlassCard strong radius={24} padding={16}>
+              <View style={styles.briefHead}>
+                <JarvisOrb size={30} />
+                <Text style={styles.briefLead}>Your best move today: one creator-advice Reel, posted this evening.</Text>
+              </View>
+              <View style={styles.briefList}>
+                {BRIEF.map((b, i) => {
+                  const open = openStep === b.id;
+                  return (
+                    <Animated.View key={b.id} layout={layout} style={[styles.briefItem, open && styles.briefItemOpen]}>
+                      <Pressable
+                        onPress={() => {
+                          tick();
+                          setOpenStep(open ? null : b.id);
+                        }}
+                        accessibilityRole="button"
+                        accessibilityState={{ expanded: open }}
+                        style={[styles.briefRow, pointer]}
+                      >
+                        <View style={[styles.briefNum, open && styles.briefNumOn]}>
+                          <Text style={[styles.briefNumText, open && { color: '#FFFFFF' }]}>{i + 1}</Text>
+                        </View>
+                        <Text style={styles.briefTitle}>{b.title}</Text>
+                        <Chevron open={open} />
+                      </Pressable>
+                      {open && (
+                        <Animated.View entering={FadeIn.duration(220)}>
+                          <Text style={styles.briefDetail}>{b.detail}</Text>
+                        </Animated.View>
+                      )}
+                    </Animated.View>
+                  );
+                })}
+              </View>
+            </GlassCard>
+          </Animated.View>
+
+          {/* Free vs Pro */}
+          <Animated.View entering={enter(200)}>
+            <Text style={styles.section}>Free and Pro, side by side</Text>
+            <GlassCard strong radius={24} padding={16}>
+              <PlanSwitch value={view} onChange={setView} />
+              <View style={styles.compare}>
+                {COMPARE.map((c) => (
+                  <View key={c.feature} style={styles.compareRow}>
+                    <Text style={styles.compareFeature}>{c.feature}</Text>
+                    <Animated.View key={`${c.feature}-${view}`} entering={FadeIn.duration(220)} style={styles.compareValueWrap}>
+                      {view === 'pro' && (
+                        <View style={styles.goldTick}>
+                          <Svg width={10} height={10} viewBox="0 0 24 24" fill="none">
+                            <Path d="M20 6L9 17l-5-5" stroke={goldTokens.dark} strokeWidth={3.6} strokeLinecap="round" strokeLinejoin="round" />
+                          </Svg>
+                        </View>
+                      )}
+                      <Text style={[styles.compareValue, view === 'pro' && styles.compareValuePro, c.free === 'Not included' && view === 'free' && styles.compareValueOff]}>
+                        {view === 'free' ? c.free : c.pro}
+                      </Text>
+                    </Animated.View>
                   </View>
-                  <Text style={styles.briefStepChevron}>
-                    {expandedBriefStep === 'step_1' ? '∧' : '∨'}
-                  </Text>
+                ))}
+              </View>
+            </GlassCard>
+          </Animated.View>
+
+          {/* Plan (the one upgrade button) */}
+          <Animated.View
+            entering={enter(300)}
+            onLayout={(e) => {
+              planY.current = e.nativeEvent.layout.y;
+            }}
+          >
+            <Text style={styles.section}>Your plan</Text>
+            <GlassCard strong radius={26} padding={20}>
+              <GoldGlow size={200} style={{ bottom: -90, left: -70 }} />
+              <View style={styles.planHead}>
+                <Text style={styles.planName}>Jarvis Pro</Text>
+                <View style={styles.proChip}>
+                  <Text style={styles.proChipText}>PRO</Text>
                 </View>
-                {expandedBriefStep === 'step_1' && (
-                  <View style={styles.briefStepExpandedContent}>
-                    <Text style={styles.briefExpandedText}>
-                      💡 Hook Draft: “3 creator mistakes that are quietly killing your growth…”
-                    </Text>
-                  </View>
-                )}
-              </Pressable>
-
-              {/* Step 2: Post at 7:30 PM */}
-              <Pressable
-                style={styles.briefStepItem}
-                onPress={() => handleToggleBriefStep('step_2')}
-              >
-                <View style={styles.briefStepHeader}>
-                  <View style={styles.briefStepLeft}>
-                    <View style={styles.briefStepIconBox}>
-                      <Text style={styles.briefStepIcon}>🕒</Text>
-                    </View>
-                    <Text style={styles.briefStepTitle}>Post at 7:30 PM</Text>
-                  </View>
-                  <Text style={styles.briefStepChevron}>
-                    {expandedBriefStep === 'step_2' ? '∧' : '∨'}
-                  </Text>
-                </View>
-                {expandedBriefStep === 'step_2' && (
-                  <View style={styles.briefStepExpandedContent}>
-                    <Text style={styles.briefExpandedText}>
-                      📈 Peak Window: Your audience engagement spikes 3.4x between 7:15 PM and 8:00 PM on weekdays.
-                    </Text>
-                  </View>
-                )}
-              </Pressable>
-
-              {/* Step 3: Complete Growth Mission */}
-              <Pressable
-                style={styles.briefStepItem}
-                onPress={() => handleToggleBriefStep('step_3')}
-              >
-                <View style={styles.briefStepHeader}>
-                  <View style={styles.briefStepLeft}>
-                    <View style={styles.briefStepIconBox}>
-                      <Text style={styles.briefStepIcon}>⚡</Text>
-                    </View>
-                    <Text style={styles.briefStepTitle}>Execute Growth Mission</Text>
-                  </View>
-                  <Text style={styles.briefStepChevron}>
-                    {expandedBriefStep === 'step_3' ? '∧' : '∨'}
-                  </Text>
-                </View>
-                {expandedBriefStep === 'step_3' && (
-                  <View style={styles.briefStepExpandedContent}>
-                    <Text style={styles.briefExpandedText}>
-                      ✨ Complete today's quest for +50 XP and streak multiplier bonus.
-                    </Text>
-                  </View>
-                )}
-              </Pressable>
-            </View>
-
-            {/* Metallic Gold Action Button */}
-            <Pressable
-              style={({ pressed }) => [styles.usePlanBtn, pressed && styles.btnPressed]}
-              onPress={handleUnlockPro}
-            >
-              <LinearGradient
-                colors={['#F59E0B', '#F59E0B', '#F59E0B', '#A16207']}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 1 }}
-                style={styles.usePlanGradient}
-              >
-                <Text style={styles.usePlanBtnText}>Use This Plan With Pro ⚡</Text>
-              </LinearGradient>
-            </Pressable>
-          </View>
-
-          {/* SECTION 3: WHAT JARVIS PRO UNLOCKS (2x3 GRID) */}
-          <View style={styles.sectionHeaderRow}>
-            <Text style={styles.sectionHeading}>What Jarvis Pro Unlocks</Text>
-          </View>
-
-          <View style={styles.featuresGrid}>
-            {/* Feature 1: AI Strategy */}
-            <View style={styles.featureGridCard}>
-              <View style={styles.featureIconContainer}>
-                <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
-                  <Path
-                    d="M12 2L14.4 7.6L20 10L14.4 12.4L12 18L9.6 12.4L4 10L9.6 7.6L12 2Z"
-                    stroke="#582CDB"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                  <Path
-                    d="M18 16L19 18.5L21.5 19.5L19 20.5L18 23L17 20.5L14.5 19.5L17 18.5L18 16Z"
-                    stroke="#784DF0"
-                    strokeWidth="1.6"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </Svg>
               </View>
-              <Text style={styles.featureTitle} numberOfLines={1}>AI Strategy</Text>
-              <Text style={styles.featureDescription} numberOfLines={3}>
-                Custom roadmap based on your niche.
-              </Text>
-            </View>
-
-            {/* Feature 2: Script Generator */}
-            <View style={styles.featureGridCard}>
-              <View style={styles.featureIconContainer}>
-                <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
-                  <Path
-                    d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"
-                    stroke="#582CDB"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                  <Path d="M14 2v6h6" stroke="#582CDB" strokeWidth="2" />
-                  <Path d="M16 13H8" stroke="#784DF0" strokeWidth="2" strokeLinecap="round" />
-                  <Path d="M16 17H8" stroke="#784DF0" strokeWidth="2" strokeLinecap="round" />
-                </Svg>
+              <View style={styles.planPriceRow}>
+                <Text style={styles.planPrice}>{PRICE}</Text>
+                <Text style={styles.planPer}>/ month</Text>
               </View>
-              <Text style={styles.featureTitle} numberOfLines={1}>Script Generator</Text>
-              <Text style={styles.featureDescription} numberOfLines={3}>
-                Viral hooks generated in your style.
-              </Text>
-            </View>
-
-            {/* Feature 3: Growth Radar */}
-            <View style={styles.featureGridCard}>
-              <View style={styles.featureIconContainer}>
-                <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
-                  <Path
-                    d="M3 3v18h18"
-                    stroke="#582CDB"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                  <Path
-                    d="M19 9l-5 5-4-4-3 3"
-                    stroke="#582CDB"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </Svg>
-              </View>
-              <Text style={styles.featureTitle} numberOfLines={1}>Growth Radar</Text>
-              <Text style={styles.featureDescription} numberOfLines={3}>
-                Competitor analysis and trend alerts.
-              </Text>
-            </View>
-
-            {/* Feature 4: Voice & Hook Studio */}
-            <View style={styles.featureGridCard}>
-              <View style={styles.featureIconContainer}>
-                <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
-                  <Path
-                    d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"
-                    stroke="#582CDB"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                  <Path
-                    d="M19 10v2a7 7 0 0 1-14 0v-2"
-                    stroke="#582CDB"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </Svg>
-              </View>
-              <Text style={styles.featureTitle} numberOfLines={1}>Voice & Hook Studio</Text>
-              <Text style={styles.featureDescription} numberOfLines={3}>
-                Generate high-converting hooks and AI voice variations.
-              </Text>
-            </View>
-
-            {/* Feature 5: Accountability */}
-            <View style={styles.featureGridCard}>
-              <View style={styles.featureIconContainer}>
-                <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
-                  <Path
-                    d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"
-                    stroke="#582CDB"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                  <Path
-                    d="M9 12l2 2 4-4"
-                    stroke="#784DF0"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </Svg>
-              </View>
-              <Text style={styles.featureTitle} numberOfLines={1}>Accountability</Text>
-              <Text style={styles.featureDescription} numberOfLines={3}>
-                Stay consistent with goals, streaks and weekly actions.
-              </Text>
-            </View>
-
-            {/* Feature 6: Squad Missions */}
-            <View style={styles.featureGridCard}>
-              <View style={styles.featureIconContainer}>
-                <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
-                  <Path
-                    d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"
-                    stroke="#582CDB"
-                    strokeWidth="2"
-                  />
-                  <Path
-                    d="M12 15l-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"
-                    stroke="#582CDB"
-                    strokeWidth="2"
-                  />
-                </Svg>
-              </View>
-              <Text style={styles.featureTitle} numberOfLines={1}>Squad Missions</Text>
-              <Text style={styles.featureDescription} numberOfLines={3}>
-                Exclusive challenges that push your growth further.
-              </Text>
-            </View>
-          </View>
-
-          {/* SECTION 4: PRICING CARD ($9.99 / MONTH) */}
-          <View style={styles.pricingCard}>
-            <Text style={styles.pricingPlanName}>Jarvis Pro</Text>
-            <View style={styles.priceRow}>
-              <Text style={styles.priceBigText}>$9.99</Text>
-              <Text style={styles.pricePeriodText}> / MONTH</Text>
-            </View>
-
-            {/* Feature Checklist */}
-            <View style={styles.pricingChecklistCol}>
-              <View style={styles.pricingCheckItem}>
-                <Text style={styles.pricingCheckIcon}>✓</Text>
-                <Text style={styles.pricingCheckText}>Full access to Jarvis AI</Text>
-              </View>
-
-              <View style={styles.pricingCheckItem}>
-                <Text style={styles.pricingCheckIcon}>✓</Text>
-                <Text style={styles.pricingCheckText}>Advanced growth analytics</Text>
-              </View>
-
-              <View style={styles.pricingCheckItem}>
-                <Text style={styles.pricingCheckIcon}>✓</Text>
-                <Text style={styles.pricingCheckText}>Unlimited AI script generations</Text>
-              </View>
-
-              <View style={styles.pricingCheckItem}>
-                <Text style={styles.pricingCheckIcon}>✓</Text>
-                <Text style={styles.pricingCheckText}>Voice & Hook Studio access</Text>
-              </View>
-
-              <View style={styles.pricingCheckItem}>
-                <Text style={styles.pricingCheckIcon}>✓</Text>
-                <Text style={styles.pricingCheckText}>Custom AI prompt templates</Text>
-              </View>
-            </View>
-
-            {/* Golden Metallic Action Button */}
-            <Pressable
-              style={({ pressed }) => [styles.startProBtn, pressed && styles.btnPressed]}
-              onPress={handleUnlockPro}
-            >
-              <LinearGradient
-                colors={['#F59E0B', '#F59E0B', '#F59E0B', '#A16207']}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 1 }}
-                style={styles.startProGradient}
-              >
-                <Text style={styles.startProBtnText}>Start Pro Now</Text>
-              </LinearGradient>
-            </Pressable>
-
-            <Text style={styles.pricingGuaranteeText}>
-              CANCEL ANYTIME • SECURE PAYMENT
-            </Text>
-          </View>
-
-          {/* SECTION 5: FROM GUESSING TO GUIDED GROWTH (BEFORE vs AFTER) */}
-          <View style={styles.sectionHeaderRow}>
-            <Text style={styles.sectionHeading}>From Guessing to Guided Growth</Text>
-          </View>
-
-          <View style={styles.comparisonCard}>
-            {/* Top Box: Without Pro */}
-            <View style={styles.withoutProBox}>
-              <View style={styles.comparisonHeaderRow}>
-                <Text style={styles.withoutProHeader}>✕ Without Pro</Text>
-              </View>
-              <Text style={styles.withoutProItem}>• Guess what to post</Text>
-              <Text style={styles.withoutProItem}>• Track stats manually</Text>
-              <Text style={styles.withoutProItem}>• Produce content in isolation</Text>
-            </View>
-
-            {/* Bottom Box: With Jarvis Pro */}
-            <View style={styles.withProBox}>
-              <View style={styles.comparisonHeaderRow}>
-                <Text style={styles.withProHeader}>✓ With Jarvis Pro</Text>
-              </View>
-              <Text style={styles.withProItem}>• Get precise daily recommendations</Text>
-              <Text style={styles.withProItem}>• Know what to improve next</Text>
-              <Text style={styles.withProItem}>• Automated viral script generation</Text>
-            </View>
-          </View>
-
-          {/* SECTION 6: FAQ ACCORDION SECTION */}
-          <View style={styles.faqContainer}>
-            <Text style={styles.faqPreHeading}>BUILT TO HELP YOU MOVE FASTER</Text>
-
-            <View style={styles.faqCard}>
-              {FAQ_DATA.map((faq, index) => {
-                const isExpanded = expandedFaqId === faq.id;
-                const isLast = index === FAQ_DATA.length - 1;
-                return (
-                  <View key={faq.id} style={[styles.faqItemWrapper, isLast && { borderBottomWidth: 0 }]}>
-                    <Pressable
-                      style={styles.faqQuestionRow}
-                      onPress={() => handleToggleFaq(faq.id)}
-                    >
-                      <Text style={styles.faqQuestionText}>{faq.question}</Text>
-                      <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
-                        <Path
-                          d={isExpanded ? 'M6 9l6 6 6-6' : 'M9 18l6-6-6-6'}
-                          stroke="#582CDB"
-                          strokeWidth="2.4"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        />
+              <View style={styles.planList}>
+                {PLAN.map((p) => (
+                  <View key={p} style={styles.planItem}>
+                    <View style={styles.goldTick}>
+                      <Svg width={10} height={10} viewBox="0 0 24 24" fill="none">
+                        <Path d="M20 6L9 17l-5-5" stroke={goldTokens.dark} strokeWidth={3.6} strokeLinecap="round" strokeLinejoin="round" />
                       </Svg>
-                    </Pressable>
-                    {isExpanded && (
-                      <View style={styles.faqAnswerBox}>
-                        <Text style={styles.faqAnswerText}>{faq.answer}</Text>
-                      </View>
-                    )}
+                    </View>
+                    <Text style={styles.planItemText}>{p}</Text>
                   </View>
+                ))}
+              </View>
+              <AppButton title="Start Jarvis Pro" variant="gold" size="lg" onPress={start} />
+              <Text style={styles.planNote}>Cancel any time from your profile.</Text>
+            </GlassCard>
+          </Animated.View>
+
+          {/* FAQ */}
+          <Animated.View entering={enter(400)}>
+            <Text style={styles.section}>Questions</Text>
+            <GlassCard radius={24} padding={6}>
+              {FAQ.map((f, i) => {
+                const open = openFaq === i;
+                return (
+                  <Animated.View key={f.q} layout={layout} style={[styles.faq, i < FAQ.length - 1 && styles.faqLine]}>
+                    <Pressable
+                      onPress={() => {
+                        tick();
+                        setOpenFaq(open ? null : i);
+                      }}
+                      accessibilityRole="button"
+                      accessibilityState={{ expanded: open }}
+                      style={[styles.faqRow, pointer]}
+                    >
+                      <Text style={styles.faqQ}>{f.q}</Text>
+                      <Chevron open={open} />
+                    </Pressable>
+                    {open && (
+                      <Animated.View entering={FadeIn.duration(220)}>
+                        <Text style={styles.faqA}>{f.a}</Text>
+                      </Animated.View>
+                    )}
+                  </Animated.View>
                 );
               })}
-            </View>
-          </View>
+            </GlassCard>
+          </Animated.View>
         </ScrollView>
+      </SafeAreaView>
 
-        {/* 3. TOAST OVERLAY */}
-        <BrandToast message={toastMessage} />
+      <FloatingTabBar activeTab="growth" onTabPress={(t) => onNavigateTab?.(t)} />
 
-        {/* 4. FLOATING LIQUID GLASS BOTTOM NAVIGATION BAR */}
-        <FloatingTabBar
-          activeTab={activeTab}
-          onTabPress={(tab) => {
-            setActiveTab(tab);
-            if (onNavigateTab) onNavigateTab(tab);
-          }}
-        />
-
-        {/* 5. ANIMATED COMPLETION CELEBRATION MODAL (ON PRO UNLOCKED) */}
-        <AnimatedCompletionModal
-          visible={showCheckoutSuccessModal}
-          title="Welcome to Jarvis Pro! ⚡"
-          subtitle="All autonomous AI strategies, viral script generators, and growth engines are now unlocked."
-          badgeText="JARVIS PRO UNLOCKED"
-          xpEarned={250}
-          streakCount={userProfile?.streakCount || 1}
-          actionText="Start Exploring Pro"
-          onDismiss={() => setShowCheckoutSuccessModal(false)}
-        />
-
-        {/* 6. NOTIFICATIONS MODAL */}
-        <Modal
-          visible={showNotificationModal}
-          transparent={true}
-          animationType="fade"
-          onRequestClose={() => setShowNotificationModal(false)}
-        >
-          <View style={styles.modalOverlay}>
-            <View style={styles.modalCard}>
-              <Text style={styles.modalTitle}>Jarvis Pro Alerts</Text>
-              <Text style={styles.modalSubtitle}>Autonomous intelligence feed</Text>
-
-              <View style={styles.notifCard}>
-                <Text style={styles.notifTitle}>✨ Pro Brief Ready</Text>
-                <Text style={styles.notifBody}>
-                  Your high-retention Friday posting blueprint is generated and ready to execute.
-                </Text>
-              </View>
-
-              <Pressable
-                style={[styles.modalPrimaryBtn, { width: '100%', marginTop: 10 }]}
-                onPress={() => setShowNotificationModal(false)}
-              >
-                <Text style={styles.modalPrimaryBtnText}>Close</Text>
-              </Pressable>
-            </View>
-          </View>
-        </Modal>
-
-        {/* 7. PROFILE MODAL */}
-        {/* UNIVERSAL CREATOR PASSPORT & PROFILE MODAL */}
-        <UserProfileModal
-          visible={showProfileModal}
-          onClose={() => setShowProfileModal(false)}
-          onLogout={onLogout}
-          initialProfile={userProfile}
-          onSaveProfile={onSaveProfile}
-        />
-      </View>
-    </SafeAreaView>
+      <AnimatedCompletionModal
+        visible={welcome}
+        title="Welcome to Jarvis Pro"
+        subtitle="Your daily brief, Voice Studio and unlimited repurposing are ready."
+        badgeText="PRO UNLOCKED"
+        actionText="Start exploring"
+        onDismiss={() => {
+          setWelcome(false);
+          onUpgraded?.();
+        }}
+      />
+      <UserProfileModal visible={showProfile} onClose={() => setShowProfile(false)} onLogout={onLogout} initialProfile={userProfile} onSaveProfile={onSaveProfile} />
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: '#FAF9F6',
-  },
-  container: {
-    flex: 1,
-    width: '100%',
-    backgroundColor: '#FAF9F6',
-  },
-  // 1. TOP HEADER APP BAR
-  headerBar: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 20,
-    paddingTop: 8,
-    paddingBottom: 12,
-    backgroundColor: '#FAF9F6',
-  },
-  headerLeftGroup: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-  },
-  headerLogoWrapper: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: 'rgba(255, 255, 255, 0.95)',
-    justifyContent: 'center',
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.06,
-    shadowRadius: 6,
-    elevation: 2,
-  },
-  headerGhostLogo: {
-    width: 26,
-    height: 26,
-  },
-  proHeaderBadge: {
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: 8,
-    backgroundColor: '#F59E0B',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  proHeaderBadgeText: {
-    fontSize: 10,
-    fontWeight: '900',
-    color: '#78350F',
-    letterSpacing: 0.4,
-  },
-  freeHeaderBadge: {
-    paddingHorizontal: 8,
-    paddingVertical: 3.5,
-    borderRadius: 8,
-    backgroundColor: '#F1F5F9',
-    borderWidth: 1,
-    borderColor: '#E2E8F0',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  freeHeaderBadgeText: {
-    fontSize: 9.5,
-    fontWeight: '800',
-    color: '#64748B',
-    letterSpacing: 0.3,
-  },
-  headerRightGroup: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  headerIconBtn: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: '#FFFFFF',
-    borderWidth: 1,
-    borderColor: '#EFECE6',
-    justifyContent: 'center',
-    alignItems: 'center',
-    position: 'relative',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.04,
-    shadowRadius: 4,
-    elevation: 1,
-  },
-  headerProfileBtn: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    borderWidth: 2,
-    borderColor: '#F59E0B',
-    justifyContent: 'center',
-    alignItems: 'center',
-    position: 'relative',
-  },
-  headerProfileImg: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-  },
-  unreadBadgeDot: {
-    position: 'absolute',
-    top: 8,
-    right: 8,
-    width: 7,
-    height: 7,
-    borderRadius: 3.5,
-    backgroundColor: '#E11D48',
-    borderWidth: 1.2,
-    borderColor: '#FFFFFF',
-  },
+  root: { flex: 1, backgroundColor: ds.bg },
+  flex: { flex: 1 },
+  scroll: { paddingHorizontal: 20, paddingTop: 8, paddingBottom: 130, width: '100%', maxWidth: 560, alignSelf: 'center' },
+  accent: { color: ds.purple },
+  section: { fontSize: 17, fontWeight: '800', color: ds.ink, letterSpacing: -0.2, marginTop: 24, marginBottom: 12 },
+  sectionRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
 
-  // 2. MAIN SCROLLABLE CONTENT
-  scrollView: {
-    flex: 1,
-    width: '100%',
-  },
-  scrollContent: {
-    paddingHorizontal: sPadding(20),
-    paddingTop: 10,
-    paddingBottom: 130,
-  },
-
-  // SECTION 1: HERO DARK PURPLE CARD
-  heroCardContainer: {
-    borderRadius: 26,
-    overflow: 'hidden',
-    marginBottom: 24,
-    shadowColor: '#582CDB',
-    shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 0.08,
-    shadowRadius: 24,
-    elevation: 8,
-  },
-  heroGradient: {
-    padding: 24,
-    alignItems: 'center',
-  },
-  proAccessBadge: {
-    borderRadius: 100,
-    overflow: 'hidden',
-    marginBottom: 16,
-  },
-  proAccessGradient: {
-    paddingVertical: 5,
-    paddingHorizontal: 14,
-  },
-  proAccessText: {
-    fontSize: 11,
-    fontWeight: '700',
-    color: '#171420',
-    letterSpacing: 0.8,
-  },
-  heroHeadline: {
-    fontSize: 34,
-    fontWeight: '700',
-    color: '#FFFFFF',
-    textAlign: 'center',
-    letterSpacing: -0.6,
-    lineHeight: 40,
-    marginBottom: 10,
-  },
-  heroSubtitle: {
-    fontSize: 14,
-    fontWeight: '500',
-    color: 'rgba(255, 255, 255, 0.85)',
-    textAlign: 'center',
-    lineHeight: 20,
-    marginBottom: 18,
-  },
-  heroChipsRow: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
+  proChip: {
+    paddingHorizontal: 9,
+    height: 24,
     justifyContent: 'center',
-    gap: 8,
-    marginBottom: 24,
-  },
-  heroChip: {
-    backgroundColor: 'rgba(255, 255, 255, 0.12)',
-    paddingVertical: 6,
-    paddingHorizontal: 12,
-    borderRadius: 100,
+    borderRadius: 999,
+    backgroundColor: goldTokens.light,
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.2)',
+    borderColor: goldTokens.border,
   },
-  heroChipText: {
-    fontSize: 12,
-    fontWeight: '700',
-    color: '#FFFFFF',
-  },
-  unlockProBtn: {
-    width: '100%',
-    height: 50,
-    borderRadius: 16,
-    overflow: 'hidden',
-    shadowColor: '#F59E0B',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.12,
-    shadowRadius: 12,
-    elevation: 4,
-  },
-  unlockProGradient: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  unlockProBtnText: {
-    fontSize: 15,
-    fontWeight: '700',
-    color: '#171420',
-    letterSpacing: -0.2,
-  },
+  proChipText: { fontSize: 11, fontWeight: '800', letterSpacing: 0.8, color: goldTokens.dark },
+  goldTick: { width: 20, height: 20, borderRadius: 10, alignItems: 'center', justifyContent: 'center', backgroundColor: goldTokens.light },
 
-  // SECTION HEADERS
-  sectionHeaderRow: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 12,
-    width: '100%',
-  },
-  sectionHeading: {
-    fontSize: sFont(18),
-    fontWeight: '700',
-    color: '#171420',
-    letterSpacing: -0.3,
-    textAlign: 'center',
-  },
+  heroTop: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 },
+  heroTitle: { fontWeight: '800', letterSpacing: -1, color: ds.ink },
+  heroBody: { fontSize: 15, lineHeight: 22, color: ds.text2, marginTop: 8 },
+  heroPrice: { flexDirection: 'row', alignItems: 'baseline', gap: 6, marginTop: 16, flexWrap: 'wrap' },
+  heroPriceNum: { fontSize: 22, fontWeight: '800', color: ds.ink, letterSpacing: -0.5 },
+  heroPriceSub: { fontSize: 13, fontWeight: '600', color: ds.text3 },
+  heroCta: { marginTop: 16 },
 
-  // SECTION 2: TODAY'S JARVIS BRIEF CARD
-  briefCard: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 20,
-    padding: 18,
-    borderWidth: 1,
-    borderColor: 'rgba(23, 20, 32, 0.07)',
-    marginBottom: 20,
-    shadowColor: '#171420',
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.04,
-    shadowRadius: 16,
-    elevation: 3,
-  },
-  briefTopRow: {
-    flexDirection: 'row',
-    gap: 12,
-    alignItems: 'flex-start',
-    marginBottom: 16,
-  },
-  briefFlameWrapper: {
-    width: 38,
-    height: 38,
-    borderRadius: 12,
-    backgroundColor: '#FAF9FF',
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: 'rgba(88, 44, 219, 0.12)',
-  },
-  briefFlameImage: {
-    width: 26,
-    height: 26,
-  },
-  briefAdviceText: {
-    flex: 1,
-    fontSize: 13,
-    color: '#171420',
-    lineHeight: 19,
-    fontWeight: '500',
-  },
-  briefStepsContainer: {
-    gap: 8,
-    marginBottom: 16,
-  },
-  briefStepItem: {
-    backgroundColor: '#FAF9FF',
-    borderRadius: 14,
-    paddingVertical: 10,
-    paddingHorizontal: 14,
-    borderWidth: 1,
-    borderColor: 'rgba(88, 44, 219, 0.08)',
-  },
-  briefStepHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  briefStepLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  briefStepIconBox: {
-    width: 22,
-    height: 22,
-    borderRadius: 6,
-    backgroundColor: '#F4F0FF',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  briefStepIcon: {
-    fontSize: 11,
-    color: '#582CDB',
-  },
-  briefStepTitle: {
-    fontSize: 13,
-    fontWeight: '700',
-    color: '#171420',
-  },
-  briefStepChevron: {
-    fontSize: 12,
-    fontWeight: '700',
-    color: '#8E869E',
-  },
-  briefStepExpandedContent: {
-    marginTop: 8,
-    paddingTop: 8,
-    borderTopWidth: 1,
-    borderTopColor: 'rgba(88, 44, 219, 0.08)',
-  },
-  briefExpandedText: {
-    fontSize: 12,
-    color: '#582CDB',
-    lineHeight: 17,
-    fontWeight: '600',
-  },
-  usePlanBtn: {
-    height: 46,
-    borderRadius: 14,
-    overflow: 'hidden',
-  },
-  usePlanGradient: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  usePlanBtnText: {
-    fontSize: 14.5,
-    fontWeight: '700',
-    color: '#171420',
-  },
+  exampleChip: { paddingHorizontal: 8, height: 22, borderRadius: 999, justifyContent: 'center', backgroundColor: 'rgba(23, 20, 32, 0.06)', marginTop: 12 },
+  exampleText: { fontSize: 11, fontWeight: '800', color: ds.text3 },
+  briefHead: { flexDirection: 'row', alignItems: 'center', gap: 10 },
+  briefLead: { flex: 1, fontSize: 14.5, lineHeight: 20, fontWeight: '700', color: ds.ink },
+  briefList: { gap: 8, marginTop: 14 },
+  briefItem: { borderRadius: 16, padding: 12, backgroundColor: 'rgba(255, 255, 255, 0.7)', borderWidth: 1, borderColor: 'rgba(255, 255, 255, 0.95)' },
+  briefItemOpen: { backgroundColor: ds.lavenderSoft, borderColor: ds.lavender },
+  briefRow: { flexDirection: 'row', alignItems: 'center', gap: 10 },
+  briefNum: { width: 26, height: 26, borderRadius: 13, backgroundColor: ds.lavender, alignItems: 'center', justifyContent: 'center' },
+  briefNumOn: { backgroundColor: ds.purple },
+  briefNumText: { fontSize: 12.5, fontWeight: '800', color: ds.purple },
+  briefTitle: { flex: 1, fontSize: 15, fontWeight: '800', color: ds.ink },
+  briefDetail: { fontSize: 13.5, lineHeight: 19, color: ds.text2, marginTop: 8, marginLeft: 36 },
 
-  // SECTION 3: FEATURES 2x3 GRID
-  featuresGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'space-between',
-    rowGap: 10,
-    marginBottom: 20,
-    width: '100%',
-  },
-  featureGridCard: {
-    width: '48.2%',
-    backgroundColor: '#FFFFFF',
-    borderRadius: 16,
-    padding: sPadding(12),
-    borderWidth: 1,
-    borderColor: 'rgba(23, 20, 32, 0.07)',
-    shadowColor: '#171420',
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.03,
-    shadowRadius: 8,
-    elevation: 2,
-    overflow: 'hidden',
-  },
-  featureIconContainer: {
-    width: 34,
-    height: 34,
-    borderRadius: 10,
-    backgroundColor: '#F4F0FF',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 8,
-  },
-  featureTitle: {
-    fontSize: sFont(12.5),
-    fontWeight: '700',
-    color: '#171420',
-    marginBottom: 3,
-  },
-  featureDescription: {
-    fontSize: sFont(10.5),
-    color: '#5E576E',
-    lineHeight: 14.5,
-    fontWeight: '400',
-  },
+  switchTrack: { flexDirection: 'row', padding: 4, height: 46, borderRadius: 999, backgroundColor: ds.lavenderSoft, borderWidth: 1, borderColor: ds.lavender },
+  switchPill: { position: 'absolute', top: 4, left: 4, bottom: 4, borderRadius: 999, backgroundColor: ds.purple },
+  switchPillPro: { backgroundColor: goldTokens.light, borderWidth: 1, borderColor: goldTokens.border },
+  switchCell: { flex: 1, alignItems: 'center', justifyContent: 'center' },
+  switchText: { fontSize: 14, fontWeight: '800', color: ds.text2 },
+  switchTextOn: { color: '#FFFFFF' },
+  switchTextPro: { color: goldTokens.dark },
+  compare: { marginTop: 8 },
+  compareRow: { paddingVertical: 12, borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: 'rgba(23, 20, 32, 0.08)' },
+  compareFeature: { fontSize: 12, fontWeight: '800', letterSpacing: 0.3, color: ds.text3 },
+  compareValueWrap: { flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 4 },
+  compareValue: { flex: 1, fontSize: 14.5, lineHeight: 20, fontWeight: '700', color: ds.ink },
+  compareValuePro: { fontWeight: '800' },
+  compareValueOff: { color: ds.text3 },
 
-  // SECTION 4: PRICING CARD (.99 / MONTH)
-  pricingCard: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 20,
-    padding: 22,
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: 'rgba(23, 20, 32, 0.07)',
-    marginBottom: 20,
-    shadowColor: '#171420',
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.04,
-    shadowRadius: 16,
-    elevation: 3,
-  },
-  pricingPlanName: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: '#171420',
-    marginBottom: 4,
-  },
-  priceRow: {
-    flexDirection: 'row',
-    alignItems: 'baseline',
-    marginBottom: 18,
-  },
-  priceBigText: {
-    fontSize: 32,
-    fontWeight: '700',
-    color: '#171420',
-    letterSpacing: -0.5,
-  },
-  pricePeriodText: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: '#5E576E',
-  },
-  pricingChecklistCol: {
-    width: '100%',
-    gap: 10,
-    marginBottom: 20,
-  },
-  pricingCheckItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-  },
-  pricingCheckIcon: {
-    fontSize: 12,
-    fontWeight: '700',
-    color: '#582CDB',
-  },
-  pricingCheckText: {
-    fontSize: 13,
-    fontWeight: '500',
-    color: '#171420',
-  },
-  startProBtn: {
-    width: '100%',
-    height: 48,
-    borderRadius: 14,
-    overflow: 'hidden',
-    marginBottom: 12,
-    shadowColor: '#F59E0B',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.12,
-    shadowRadius: 10,
-    elevation: 3,
-  },
-  startProGradient: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  startProBtnText: {
-    fontSize: 15,
-    fontWeight: '700',
-    color: '#171420',
-    letterSpacing: -0.2,
-  },
-  pricingGuaranteeText: {
-    fontSize: 11,
-    fontWeight: '800',
-    color: '#7F7894',
-    letterSpacing: 0.8,
-  },
+  planHead: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  planName: { fontSize: 18, fontWeight: '800', color: ds.ink },
+  planPriceRow: { flexDirection: 'row', alignItems: 'baseline', gap: 6, marginTop: 6 },
+  planPrice: { fontSize: 40, lineHeight: 46, fontWeight: '800', color: ds.ink, letterSpacing: -1.4 },
+  planPer: { fontSize: 14, fontWeight: '700', color: ds.text3 },
+  planList: { gap: 10, marginTop: 14, marginBottom: 18 },
+  planItem: { flexDirection: 'row', alignItems: 'center', gap: 10 },
+  planItemText: { flex: 1, fontSize: 14.5, lineHeight: 20, fontWeight: '600', color: ds.text2 },
+  planNote: { fontSize: 12.5, color: ds.text3, textAlign: 'center', marginTop: 10 },
 
-  // SECTION 5: FROM GUESSING TO GUIDED GROWTH
-  comparisonCard: {
-    borderRadius: 22,
-    overflow: 'hidden',
-    borderWidth: 1.2,
-    borderColor: '#E8E3FA',
-    marginBottom: 24,
-    shadowColor: '#582CDB',
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.08,
-    shadowRadius: 14,
-    elevation: 3,
-  },
-  withoutProBox: {
-    backgroundColor: '#FFFFFF',
-    padding: 18,
-    borderBottomWidth: 1,
-    borderBottomColor: '#E8E3FA',
-  },
-  withoutProHeader: {
-    fontSize: 14,
-    fontWeight: '800',
-    color: '#6B7280',
-    marginBottom: 10,
-  },
-  withoutProItem: {
-    fontSize: 12.5,
-    color: '#9CA3AF',
-    lineHeight: 20,
-    fontWeight: '500',
-  },
-  withProBox: {
-    backgroundColor: '#582CDB',
-    padding: 18,
-  },
-  withProHeader: {
-    fontSize: 14,
-    fontWeight: '800',
-    color: '#FFFFFF',
-    marginBottom: 10,
-  },
-  withProItem: {
-    fontSize: 12.5,
-    color: 'rgba(255, 255, 255, 0.95)',
-    lineHeight: 20,
-    fontWeight: '600',
-  },
-  comparisonHeaderRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 4,
-  },
-
-  // SECTION 6: FAQ ACCORDION
-  faqContainer: {
-    marginBottom: 24,
-  },
-  faqPreHeading: {
-    fontSize: 11,
-    fontWeight: '800',
-    color: '#7F7894',
-    letterSpacing: 0.8,
-    textAlign: 'center',
-    marginBottom: 12,
-  },
-  faqCard: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 22,
-    paddingHorizontal: 16,
-    paddingVertical: 6,
-    borderWidth: 1.2,
-    borderColor: '#E8E3FA',
-    shadowColor: '#582CDB',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.05,
-    shadowRadius: 12,
-    elevation: 2,
-  },
-  faqItemWrapper: {
-    paddingVertical: 14,
-    borderBottomWidth: 1,
-    borderBottomColor: '#E8E3FA',
-  },
-  faqQuestionRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  faqQuestionText: {
-    fontSize: 14,
-    fontWeight: '700',
-    color: '#171420',
-    flex: 1,
-    marginRight: 10,
-  },
-  faqAnswerBox: {
-    marginTop: 10,
-    paddingTop: 8,
-    borderTopWidth: 1,
-    borderTopColor: '#FAF8FF',
-  },
-  faqAnswerText: {
-    fontSize: 12.5,
-    color: '#524C62',
-    lineHeight: 18,
-    fontWeight: '500',
-  },
-
-  // MODALS
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(23, 20, 32, 0.55)',
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 24,
-    zIndex: 9999,
-  },
-  modalCard: {
-    width: '100%',
-    maxWidth: 320,
-    backgroundColor: '#FFFFFF',
-    borderRadius: 24,
-    padding: 22,
-    alignItems: 'center',
-    borderWidth: 1.2,
-    borderColor: 'rgba(235, 230, 248, 0.95)',
-    shadowColor: '#582CDB',
-    shadowOffset: { width: 0, height: 12 },
-    shadowOpacity: 0.18,
-    shadowRadius: 28,
-    elevation: 10,
-  },
-  modalTitle: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: '#171420',
-    letterSpacing: -0.2,
-    marginBottom: 4,
-    textAlign: 'center',
-  },
-  modalSubtitle: {
-    fontSize: 12,
-    fontWeight: '500',
-    color: '#7F7894',
-    textAlign: 'center',
-    lineHeight: 16,
-    marginBottom: 14,
-  },
-  modalCancelBtn: {
-    flex: 1,
-    height: 42,
-    borderRadius: 12,
-    borderWidth: 1.2,
-    borderColor: '#E5E1F0',
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#FAF9F6',
-  },
-  modalCancelBtnText: {
-    fontSize: 13,
-    fontWeight: '700',
-    color: '#7F7894',
-  },
-  modalPrimaryBtn: {
-    flex: 1,
-    height: 42,
-    borderRadius: 12,
-    backgroundColor: '#582CDB',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  modalPrimaryBtnText: {
-    fontSize: 13,
-    fontWeight: '800',
-    color: '#FFFFFF',
-  },
-  notifCard: {
-    backgroundColor: 'rgba(250, 248, 255, 0.85)',
-    borderRadius: 14,
-    padding: 12,
-    borderWidth: 1,
-    borderColor: 'rgba(237, 232, 252, 0.9)',
-    marginBottom: 10,
-  },
-  notifTitle: {
-    fontSize: 13,
-    fontWeight: '700',
-    color: '#171420',
-    marginBottom: 4,
-  },
-  notifBody: {
-    fontSize: 12,
-    color: '#524C62',
-    lineHeight: 16,
-  },
-  toastContainer: {
-    position: 'absolute',
-    bottom: 95,
-    alignSelf: 'center',
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#582CDB',
-    paddingHorizontal: 18,
-    paddingVertical: 10,
-    borderRadius: 24,
-    borderWidth: 1.5,
-    borderColor: '#7C3AED',
-    shadowColor: '#582CDB',
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.12,
-    shadowRadius: 12,
-    elevation: 8,
-    zIndex: 9999,
-  },
-  toastText: {
-    color: '#FFFFFF',
-    fontSize: 12.5,
-    fontWeight: '700',
-    letterSpacing: 0.2,
-  },
-  btnPressed: {
-    opacity: 0.9,
-    transform: [{ scale: 0.98 }],
-  },
+  faq: { paddingHorizontal: 12 },
+  faqLine: { borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: 'rgba(23, 20, 32, 0.08)' },
+  faqRow: { flexDirection: 'row', alignItems: 'center', gap: 10, minHeight: 52 },
+  faqQ: { flex: 1, fontSize: 15, fontWeight: '800', color: ds.ink },
+  faqA: { fontSize: 14, lineHeight: 20, color: ds.text2, paddingBottom: 14 },
 });
