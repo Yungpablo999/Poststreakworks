@@ -23,7 +23,7 @@ import { AnimatedCompletionModal } from '../components/AnimatedCompletionModal';
 import { FreeAppHeader } from '../components/FreeAppHeader';
 import { sFont, sPadding, isNarrowScreen } from '../utils/responsive';
 import Reanimated, { FadeIn, FadeInUp, Easing, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
-import { getStarterIdeas, getFilmPlan, getSoundIdeas, checkInToday } from '../data';
+import { getStarterIdeas, getFilmPlan, getSoundIdeas, checkInToday, getDefaultFilmStyle, type FilmStyle } from '../data';
 import { FilmMethodPicker, FilmPlanCard, PostedCheck, type FilmMethod } from '../components/composer/FilmBlocks';
 import { handOffToPlatform, isHandoffPlatform, HANDOFF_NAMES, type HandoffPlatform } from '../utils/handoff';
 import { AppState } from 'react-native';
@@ -1003,8 +1003,10 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
   const [pendingHandoff, setPendingHandoff] = useState<HandoffPlatform | null>(null);
   const [showPostedCheck, setShowPostedCheck] = useState(false);
   const handoffPlatforms = selectedPlatforms.filter(isHandoffPlatform);
-  const filmPlan = React.useMemo(() => getFilmPlan(currentIdea ?? ''), [currentIdea]);
-  const soundIdeas = React.useMemo(() => getSoundIdeas(), []);
+  // Talking / dance / skit / text-on-screen, pre-picked from the creator's niche
+  const [filmStyle, setFilmStyle] = useState<FilmStyle>(() => getDefaultFilmStyle(userProfile?.niches));
+  const filmPlan = React.useMemo(() => getFilmPlan(currentIdea ?? '', filmStyle), [currentIdea, filmStyle]);
+  const soundIdeas = React.useMemo(() => getSoundIdeas(filmStyle), [filmStyle]);
 
   // When the creator comes back after filming, ask if it went out
   useEffect(() => {
@@ -1253,7 +1255,13 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
             }}
           />
           {isNativeFilm ? (
-            <FilmPlanCard plan={filmPlan} sounds={soundIdeas} platforms={handoffPlatforms} onOpen={openPlatformToFilm} />
+            <FilmPlanCard
+              plan={filmPlan}
+              sounds={soundIdeas}
+              platforms={handoffPlatforms}
+              onOpen={openPlatformToFilm}
+              onStyleChange={setFilmStyle}
+            />
           ) : (
           <MediaZone
             isText={selectedFormat === 'text'}

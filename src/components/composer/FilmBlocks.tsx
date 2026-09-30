@@ -8,7 +8,7 @@ import { AppButton } from '../ui/AppButton';
 import { GlassCard } from '../glass/GlassCard';
 import { PlatformLogo } from '../onboarding/PlatformLogo';
 import { ds } from '../../theme/colors';
-import type { FilmPlan, SoundIdea } from '../../data';
+import { FILM_STYLES, type FilmPlan, type FilmStyle, type SoundIdea } from '../../data';
 import { HANDOFF_NAMES, type HandoffPlatform } from '../../utils/handoff';
 
 // Short video only: film inside TikTok / Reels / Shorts (for trending sounds
@@ -85,22 +85,63 @@ export function FilmMethodPicker({ method, onChange }: { method: FilmMethod; onC
   );
 }
 
+// What kind of video is it? Most TikToks aren't talking to camera.
+function StylePicker({ style, onChange }: { style: FilmStyle; onChange: (s: FilmStyle) => void }) {
+  return (
+    <View>
+      <Text style={styles.styleLabel}>What kind of video?</Text>
+      <View style={styles.styles}>
+        {FILM_STYLES.map((f) => {
+          const on = f.id === style;
+          return (
+            <Pressable
+              key={f.id}
+              onPress={() => {
+                if (Platform.OS !== 'web') Haptics.selectionAsync();
+                onChange(f.id);
+              }}
+              accessibilityRole="radio"
+              accessibilityState={{ checked: on }}
+              style={({ pressed }) => [
+                styles.styleChip,
+                on && styles.styleChipOn,
+                pressed && { transform: [{ scale: 0.96 }] },
+                Platform.OS === 'web' && ({ cursor: 'pointer' } as object),
+              ]}
+            >
+              <Text style={[styles.styleChipText, on && styles.styleChipTextOn]} numberOfLines={1}>
+                {f.label}
+              </Text>
+            </Pressable>
+          );
+        })}
+      </View>
+    </View>
+  );
+}
+
 export function FilmPlanCard({
   plan,
   sounds,
   platforms,
   onOpen,
+  onStyleChange,
 }: {
   plan: FilmPlan;
   sounds: SoundIdea[];
   platforms: HandoffPlatform[];
   onOpen: (p: HandoffPlatform) => void;
+  onStyleChange: (s: FilmStyle) => void;
 }) {
   return (
     <Animated.View entering={FadeIn.duration(250)}>
       <GlassCard strong radius={22} padding={16}>
+        <StylePicker style={plan.style} onChange={onStyleChange} />
+
+        {/* Everything below re-animates when the style changes */}
+        <Animated.View key={plan.style} entering={FadeIn.duration(250)}>
         <View style={styles.hookBox}>
-          <Text style={styles.hookLabel}>OPEN WITH</Text>
+          <Text style={styles.hookLabel}>{plan.hookLabel}</Text>
           <Text style={styles.hookText}>{plan.hook}</Text>
         </View>
 
@@ -115,9 +156,10 @@ export function FilmPlanCard({
         ))}
 
         <View style={styles.soundHead}>
-          <Text style={[styles.subLabel, styles.flex]}>Sound ideas</Text>
+          <Text style={[styles.subLabel, styles.flex]}>{plan.soundFirst ? 'Pick the sound first' : 'Sound ideas'}</Text>
           <Text style={styles.sample}>Sample</Text>
         </View>
+        <Text style={[styles.soundTip, plan.soundFirst && styles.soundTipStrong]}>{plan.soundTip}</Text>
         <View style={styles.sounds}>
           {sounds.map((s) => (
             <View key={s.id} style={styles.sound}>
@@ -138,6 +180,7 @@ export function FilmPlanCard({
           ))}
         </View>
         <Text style={styles.soundNote}>Search the sound in the app. Some trending sounds aren't available to business accounts.</Text>
+        </Animated.View>
         {platforms.length > 0 && <Text style={styles.copyNote}>Opening an app copies your caption and tags, ready to paste.</Text>}
 
         {platforms.length > 0 ? (
@@ -229,6 +272,22 @@ const styles = StyleSheet.create({
   methodIconOn: { backgroundColor: ds.purple },
   methodTitle: { fontSize: 14.5, fontWeight: '800', color: ds.ink },
   methodBody: { fontSize: 12, lineHeight: 16, color: ds.text2, marginTop: 3 },
+  styleLabel: { fontSize: 13, fontWeight: '800', color: ds.text2, marginBottom: 8 },
+  styles: { flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginBottom: 14 },
+  styleChip: {
+    height: 32,
+    paddingHorizontal: 12,
+    justifyContent: 'center',
+    borderRadius: 999,
+    borderWidth: 1.5,
+    borderColor: ds.line,
+    backgroundColor: '#FFFFFF',
+  },
+  styleChipOn: { borderColor: ds.purple, backgroundColor: ds.purple },
+  styleChipText: { fontSize: 12.5, fontWeight: '800', color: ds.text2 },
+  styleChipTextOn: { color: '#FFFFFF' },
+  soundTip: { fontSize: 12.5, lineHeight: 17, color: ds.text2, marginBottom: 8 },
+  soundTipStrong: { color: ds.purple, fontWeight: '700' },
   hookBox: { padding: 14, borderRadius: 16, backgroundColor: 'rgba(237, 233, 254, 0.65)' },
   hookLabel: { fontSize: 10.5, fontWeight: '800', letterSpacing: 1, color: ds.purple },
   hookText: { fontSize: 15, lineHeight: 21, fontWeight: '700', color: ds.ink, marginTop: 4 },

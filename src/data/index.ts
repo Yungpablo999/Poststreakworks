@@ -419,9 +419,27 @@ export function getWeekSchedule(persona: Persona): WeekSchedule {
 // sounds aren't always licensed for business accounts.
 // ---------------------------------------------------------------------------
 
+// Most short video isn't talking to camera: dance and trend videos, skits and
+// silent "text on screen" edits are just as common, so the plan follows the
+// style of video, pre-picked from the creator's niche.
+export type FilmStyle = 'talking' | 'dance' | 'skit' | 'text';
+
+export const FILM_STYLES: { id: FilmStyle; label: string }[] = [
+  { id: 'talking', label: 'Talking' },
+  { id: 'dance', label: 'Dance / trend' },
+  { id: 'skit', label: 'Skit' },
+  { id: 'text', label: 'Text on screen' },
+];
+
 export interface FilmPlan {
+  style: FilmStyle;
+  /** Label over the hook box, e.g. "SAY IN THE FIRST 2 SECONDS". */
+  hookLabel: string;
   hook: string;
   shots: string[];
+  /** Shown above the sound ideas; stronger for styles built on the sound. */
+  soundTip: string;
+  soundFirst: boolean;
 }
 
 export interface SoundIdea {
@@ -431,24 +449,94 @@ export interface SoundIdea {
   isSample: true;
 }
 
-export function getFilmPlan(ideaTitle: string): FilmPlan {
-  const topic = ideaTitle.replace(/[“”"]/g, '').trim();
-  return {
-    hook: `Say this in the first 2 seconds: “${topic}.”`,
-    shots: [
-      'Face the camera, say the hook with energy',
-      'Show one real moment or example (5–10s)',
-      'End with one takeaway and a question',
-    ],
-  };
+export function getDefaultFilmStyle(niches: string[] = []): FilmStyle {
+  const n = niches[0];
+  if (n === 'music') return 'dance';
+  if (n === 'comedy') return 'skit';
+  if (n === 'lifestyle' || n === 'beauty' || n === 'food') return 'text';
+  return 'talking';
 }
 
-const SOUND_IDEAS: Omit<SoundIdea, 'isSample'>[] = [
-  { id: 's1', name: 'Soft lo-fi beat', vibe: 'Calm talking-head' },
-  { id: 's2', name: 'Upbeat pop build-up', vibe: 'Quick cuts, reveals' },
-  { id: 's3', name: 'Viral voiceover trend', vibe: 'Storytelling' },
-];
+export function getFilmPlan(ideaTitle: string, style: FilmStyle = 'talking'): FilmPlan {
+  const topic = ideaTitle.replace(/[“”"]/g, '').trim();
+  switch (style) {
+    case 'dance':
+      return {
+        style,
+        hookLabel: 'FIRST 2 SECONDS',
+        hook: 'Start mid-move, right on the beat. No slow intro.',
+        shots: [
+          'Pick the sound first and learn the part that loops',
+          'Film full body, phone at chest height, good light',
+          'Hit your best move on the drop, then cut',
+        ],
+        soundTip: 'Choose it before you film. Your moves follow the beat.',
+        soundFirst: true,
+      };
+    case 'skit':
+      return {
+        style,
+        hookLabel: 'ON-SCREEN TEXT',
+        hook: `POV: ${/^I\b/.test(topic) ? topic : topic.charAt(0).toLowerCase() + topic.slice(1)}`,
+        shots: [
+          'Start in the middle of the funny moment, not the setup',
+          'Play every character: switch sides, props or outfits',
+          'Land the punchline in under 15 seconds, cut right after',
+        ],
+        soundTip: 'A trending comedy audio or your own voice both work. Timing is everything.',
+        soundFirst: true,
+      };
+    case 'text':
+      return {
+        style,
+        hookLabel: 'ON-SCREEN TEXT (FIRST 2 SECONDS)',
+        hook: topic,
+        shots: [
+          'Open on the most satisfying close-up',
+          '3–5 quick clips, 1–2 seconds each, cut to the beat',
+          'End on the result with one line of text',
+        ],
+        soundTip: 'No talking needed. A trending song carries the video.',
+        soundFirst: false,
+      };
+    default:
+      return {
+        style: 'talking',
+        hookLabel: 'SAY IN THE FIRST 2 SECONDS',
+        hook: `“${topic}.”`,
+        shots: [
+          'Face the camera, say the hook with energy',
+          'Show one real moment or example (5–10s)',
+          'End with one takeaway and a question',
+        ],
+        soundTip: 'Keep music low under your voice, or skip it.',
+        soundFirst: false,
+      };
+  }
+}
 
-export function getSoundIdeas(): SoundIdea[] {
-  return SOUND_IDEAS.map((s) => ({ ...s, isSample: true as const }));
+const SOUND_IDEAS: Record<FilmStyle, Omit<SoundIdea, 'isSample'>[]> = {
+  talking: [
+    { id: 't1', name: 'Soft lo-fi beat', vibe: 'Quiet under your voice' },
+    { id: 't2', name: 'Light acoustic loop', vibe: 'Warm, calm tips' },
+  ],
+  dance: [
+    { id: 'd1', name: 'Trending dance challenge', vibe: 'Follow the choreo' },
+    { id: 'd2', name: 'Sped-up pop remix', vibe: 'Fast footwork' },
+    { id: 'd3', name: 'Afrobeats drop', vibe: 'Big move on the drop' },
+  ],
+  skit: [
+    { id: 'k1', name: 'Trending comedy audio', vibe: 'Lip-sync the joke' },
+    { id: 'k2', name: 'Dramatic reveal sound', vibe: 'For the punchline' },
+    { id: 'k3', name: 'Your own voice', vibe: 'Original audio' },
+  ],
+  text: [
+    { id: 'x1', name: 'Aesthetic trending song', vibe: 'Slow, satisfying clips' },
+    { id: 'x2', name: 'Upbeat build-up', vibe: 'Quick cuts to the beat' },
+    { id: 'x3', name: 'Calm acoustic', vibe: 'Routines and recipes' },
+  ],
+};
+
+export function getSoundIdeas(style: FilmStyle = 'talking'): SoundIdea[] {
+  return SOUND_IDEAS[style].map((s) => ({ ...s, isSample: true as const }));
 }
