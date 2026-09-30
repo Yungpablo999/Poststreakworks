@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Modal, View, Pressable, ScrollView, StyleSheet, Platform, useWindowDimensions } from 'react-native';
-import Animated, { Easing, FadeIn, runOnJS, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
+import Animated, { Easing, FadeIn, FadeInUp, runOnJS, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { BlurView } from 'expo-blur';
 import Svg, { Path } from 'react-native-svg';
@@ -25,6 +25,35 @@ const TIMES: Slot[] = [
   { minutes: 20 * 60 + 30, label: 'Night' },
 ];
 const DAYS_AHEAD = 14;
+const MINUTE_STEP = 5;
+
+// Small − value + control for the custom time picker
+function Stepper({ label, value, onMinus, onPlus }: { label: string; value: string; onMinus: () => void; onPlus: () => void }) {
+  const tap = (fn: () => void) => () => {
+    if (Platform.OS !== 'web') Haptics.selectionAsync();
+    fn();
+  };
+  return (
+    <View style={styles.stepper}>
+      <Text style={styles.stepperLabel}>{label}</Text>
+      <View style={styles.stepperCol}>
+        <Pressable onPress={tap(onPlus)} hitSlop={6} style={styles.stepBtn} accessibilityRole="button" accessibilityLabel={`${label} up`}>
+          <Svg width={14} height={14} viewBox="0 0 24 24" fill="none">
+            <Path d="M6 15l6-6 6 6" stroke={ds.purple} strokeWidth={2.8} strokeLinecap="round" strokeLinejoin="round" />
+          </Svg>
+        </Pressable>
+        <Animated.View key={value} entering={FadeIn.duration(150)}>
+          <Text style={styles.stepValue}>{value}</Text>
+        </Animated.View>
+        <Pressable onPress={tap(onMinus)} hitSlop={6} style={styles.stepBtn} accessibilityRole="button" accessibilityLabel={`${label} down`}>
+          <Svg width={14} height={14} viewBox="0 0 24 24" fill="none">
+            <Path d="M6 9l6 6 6-6" stroke={ds.purple} strokeWidth={2.8} strokeLinecap="round" strokeLinejoin="round" />
+          </Svg>
+        </Pressable>
+      </View>
+    </View>
+  );
+}
 
 const startOfDay = (d: Date) => new Date(d.getFullYear(), d.getMonth(), d.getDate());
 const addDays = (d: Date, n: number) => new Date(d.getFullYear(), d.getMonth(), d.getDate() + n);
@@ -76,12 +105,18 @@ export function ScheduleSheet({ visible, onClose, onConfirm, mode = 'schedule' }
   const defaultPick = picks.find((p) => p.minutes === 19 * 60 + 30) ?? picks[0];
   const [dayIndex, setDayIndex] = useState(defaultPick?.dayIndex ?? 0);
   const [minutes, setMinutes] = useState(defaultPick?.minutes ?? 19 * 60 + 30);
+  // Custom time: any hour, 5-minute steps, AM / PM
+  const [customOpen, setCustomOpen] = useState(false);
+  const setCustom = (m: number) => setMinutes(((m % 1440) + 1440) % 1440);
+  const hour12 = ((Math.floor(minutes / 60) + 11) % 12) + 1;
+  const isPM = minutes >= 12 * 60;
 
   // open / close: glide, no bounce
   const progress = useSharedValue(0);
   useEffect(() => {
     if (visible) {
       setMounted(true);
+      setCustomOpen(false);
       if (defaultPick) {
         setDayIndex(defaultPick.dayIndex);
         setMinutes(defaultPick.minutes);
@@ -145,6 +180,7 @@ export function ScheduleSheet({ visible, onClose, onConfirm, mode = 'schedule' }
                       tick();
                       setDayIndex(p.dayIndex);
                       setMinutes(p.minutes);
+                      setCustomOpen(false);
                     }}
                     accessibilityRole="radio"
                     accessibilityState={{ checked: on }}
@@ -198,7 +234,7 @@ export function ScheduleSheet({ visible, onClose, onConfirm, mode = 'schedule' }
             <Text style={[styles.sectionLabel, styles.ownLabel]}>And a time</Text>
             <View style={styles.times}>
               {TIMES.map((t) => {
-                const on = t.minutes === minutes;
+                const on = !customOpen && t.minutes === minutes;
                 const past = isPast(dayIndex, t.minutes);
                 return (
                   <Pressable
@@ -207,6 +243,7 @@ export function ScheduleSheet({ visible, onClose, onConfirm, mode = 'schedule' }
                     onPress={() => {
                       tick();
                       setMinutes(t.minutes);
+                      setCustomOpen(false);
                     }}
                     accessibilityRole="radio"
                     accessibilityState={{ checked: on, disabled: past }}
@@ -217,7 +254,61 @@ export function ScheduleSheet({ visible, onClose, onConfirm, mode = 'schedule' }
                   </Pressable>
                 );
               })}
+              {/* Custom time tile */}
+              <Pressable
+                onPress={() => {
+                  tick();
+                  setCustomOpen(true);
+                }}
+                accessibilityRole="radio"
+                accessibilityState={{ checked: customOpen }}
+                accessibilityLabel="Custom time"
+                style={[styles.time, customOpen && styles.timeOn]}
+              >
+                <Text style={[styles.timeText, customOpen && { color: ds.purple }]}>{customOpen ? timeLabel(minutes) : 'Custom'}</Text>
+                <Text style={[styles.timeSub, customOpen && styles.timeSubBest]}>{customOpen ? 'Your time' : 'Any time'}</Text>
+              </Pressable>
             </View>
+
+            {customOpen && (
+              <Animated.View entering={FadeInUp.duration(220)} style={styles.custom}>
+                <Stepper
+                  label="Hour"
+                  value={String(hour12)}
+                  onMinus={() => setCustom(minutes - 60)}
+                  onPlus={() => setCustom(minutes + 60)}
+                />
+                <Stepper
+                  label="Minutes"
+                  value={String(minutes % 60).padStart(2, '0')}
+                  onMinus={() => setCustom(Math.floor(minutes / 60) * 60 + (((minutes % 60) - MINUTE_STEP + 60) % 60))}
+                  onPlus={() => setCustom(Math.floor(minutes / 60) * 60 + (((minutes % 60) + MINUTE_STEP) % 60))}
+                />
+                <View style={styles.stepper}>
+                  <Text style={styles.stepperLabel}> </Text>
+                  <View style={styles.ampm}>
+                    {(['AM', 'PM'] as const).map((x) => {
+                      const on = (x === 'PM') === isPM;
+                      return (
+                        <Pressable
+                          key={x}
+                          onPress={() => {
+                            tick();
+                            if (!on) setCustom(minutes + (x === 'PM' ? 720 : -720));
+                          }}
+                          accessibilityRole="radio"
+                          accessibilityState={{ checked: on }}
+                          style={[styles.ampmBtn, on && styles.ampmOn]}
+                        >
+                          <Text style={[styles.ampmText, on && styles.ampmTextOn]}>{x}</Text>
+                        </Pressable>
+                      );
+                    })}
+                  </View>
+                </View>
+              </Animated.View>
+            )}
+            {customOpen && selectedPast && <Text style={styles.pastNote}>That time has already passed today. Pick a later time or another day.</Text>}
           </ScrollView>
 
           <View style={styles.footer}>
@@ -309,6 +400,26 @@ const styles = StyleSheet.create({
   dayMonth: { fontSize: 10.5, fontWeight: '700', color: ds.text3 },
   dayTextOn: { color: '#FFFFFF' },
   times: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
+  custom: {
+    flexDirection: 'row',
+    gap: 8,
+    marginTop: 10,
+    padding: 12,
+    borderRadius: 18,
+    backgroundColor: 'rgba(237, 233, 254, 0.6)',
+  },
+  stepper: { flex: 1, alignItems: 'center' },
+  stepperLabel: { fontSize: 10.5, fontWeight: '800', color: ds.text3, letterSpacing: 0.5, marginBottom: 6 },
+  // Vertical wheels (up, value, down) so all three fit side by side on 320
+  stepperCol: { alignItems: 'center', gap: 4 },
+  stepBtn: { width: 44, height: 30, borderRadius: 10, alignItems: 'center', justifyContent: 'center', backgroundColor: '#FFFFFF' },
+  stepValue: { fontSize: 24, fontWeight: '800', color: ds.ink, minWidth: 40, textAlign: 'center', letterSpacing: -0.5 },
+  ampm: { padding: 3, gap: 3, borderRadius: 12, backgroundColor: '#FFFFFF' },
+  ampmBtn: { width: 52, height: 36, alignItems: 'center', justifyContent: 'center', borderRadius: 9 },
+  ampmOn: { backgroundColor: ds.purple },
+  ampmText: { fontSize: 12.5, fontWeight: '800', color: ds.text2 },
+  ampmTextOn: { color: '#FFFFFF' },
+  pastNote: { fontSize: 12.5, lineHeight: 17, color: ds.text2, marginTop: 8, textAlign: 'center' },
   time: {
     width: '31%',
     flexGrow: 1,
