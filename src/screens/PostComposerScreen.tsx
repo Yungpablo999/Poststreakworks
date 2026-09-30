@@ -436,6 +436,10 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
   // Steps are measured when tapped (sections above can change height)
   const sectionRefs = useRef<{ [key: string]: View | null }>({});
   const scrollY = useRef(0);
+  // Sizes used to keep jumps inside the page (scrolling past the end
+  // overshoots and springs back on iPhone)
+  const contentH = useRef(0);
+  const viewportH = useRef(0);
 
   // Sync prop changes for frictionless idea adoption
   useEffect(() => {
@@ -871,14 +875,17 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
     if (target && sv && content) {
       target.measureLayout(
         content as never,
-        (_x, y) => sv.scrollTo({ y: Math.max(0, y - 12), animated: true }),
+        (_x, y) => {
+          const maxY = Math.max(0, contentH.current - viewportH.current);
+          sv.scrollTo({ y: Math.min(maxY, Math.max(0, y - 12)), animated: true });
+        },
         () => {},
       );
     }
 
-    if (section === 'caption') {
-      setTimeout(() => captionInputRef.current?.focus(), 350);
-    } else if (section === 'schedule') {
+    // No auto-focus on the caption: opening the keyboard scrolled the page a
+    // second time right after landing, which looked like a bounce.
+    if (section === 'schedule') {
       setTimeout(() => {
         setShowScheduleSheet(true);
       }, 350);
@@ -1014,6 +1021,8 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
         <ScrollView
           ref={mainScrollViewRef}
           onScroll={(e) => (scrollY.current = e.nativeEvent.contentOffset.y)}
+          onContentSizeChange={(_w, h) => (contentH.current = h)}
+          onLayout={(e) => (viewportH.current = e.nativeEvent.layout.height)}
           scrollEventThrottle={32}
           contentContainerStyle={styles.scrollContent}
           showsVerticalScrollIndicator={false}
