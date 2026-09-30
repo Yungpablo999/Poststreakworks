@@ -12,7 +12,7 @@ import {
   Modal,
 } from 'react-native';
 import { Text, TextInput } from '../components/ui/AppText';
-import { getRepurposeAllowance, getScheduleSummary } from '../data';
+import { getRepurposeAllowance, getScheduleSummary, getDrafts, subscribeToDrafts, draftAgo } from '../data';
 import Svg, { Path, Circle, Rect } from 'react-native-svg';
 import * as Haptics from 'expo-haptics';
 import { FloatingTabBar, TabType } from '../components/FloatingTabBar';
@@ -126,9 +126,11 @@ interface CreateScreenProps {
 interface DraftItem {
   id: string;
   title: string;
-  platform: 'TikTok' | 'Instagram' | 'YouTube';
+  platform: string;
   editedTime: string;
   imageSource: any;
+  /** Saved from the Script page: reopens there instead of the composer */
+  isScript?: boolean;
 }
 
 interface NotificationItem {
@@ -227,7 +229,20 @@ export const CreateScreen: React.FC<CreateScreenProps> = ({
   const repurposesLeft = Math.max(0, (repurpose.monthlyLimit ?? 0) - repurpose.usedThisMonth);
   const [activeTab, setActiveTab] = useState<TabType>('create');
   const [drafts, setDrafts] = useState<DraftItem[]>(INITIAL_DRAFTS);
-  const displayedDrafts = isNewUser ? drafts : (drafts.length > 0 ? drafts : RETURNING_DRAFTS);
+  // Drafts saved from Script / the composer (shared store) come first
+  const storeDrafts = React.useSyncExternalStore(subscribeToDrafts, getDrafts, getDrafts);
+  const localDrafts = isNewUser ? drafts : drafts.length > 0 ? drafts : RETURNING_DRAFTS;
+  const displayedDrafts = [
+    ...storeDrafts.map((d) => ({
+      id: d.id,
+      title: d.title,
+      platform: d.platform ? d.platform.charAt(0).toUpperCase() + d.platform.slice(1) : d.format,
+      editedTime: draftAgo(d.savedAt),
+      imageSource: undefined,
+      isScript: d.kind === 'script',
+    })),
+    ...localDrafts,
+  ];
   const [notificationsList, setNotificationsList] = useState<NotificationItem[]>(NOTIFICATIONS);
 
   // Modal Visibility States
@@ -335,7 +350,9 @@ export const CreateScreen: React.FC<CreateScreenProps> = ({
 
   const openDraft = (draft: DraftItem) => {
     setSelectedDraft(draft);
-    if (onOpenPostComposer) {
+    if (draft.isScript && onOpenScript) {
+      onOpenScript(draft.title);
+    } else if (onOpenPostComposer) {
       onOpenPostComposer(draft.title, draft.platform.toLowerCase());
     } else if (onOpenIdeaDetail) {
       onOpenIdeaDetail(draft.title);

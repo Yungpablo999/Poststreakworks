@@ -575,9 +575,15 @@ export function ReadinessCard({
   );
 }
 
-export function ComposerToast({ message }: { message: string }) {
+export function ComposerToast({ message, floating }: { message: string; floating?: boolean }) {
   return (
-    <Animated.View entering={FadeIn.duration(200)} exiting={FadeOut.duration(200)} style={styles.toast}>
+    <Animated.View
+      entering={FadeIn.duration(200)}
+      exiting={FadeOut.duration(200)}
+      pointerEvents="none"
+      // floating: pinned just above the tab bar, visible wherever you've scrolled
+      style={[styles.toast, floating && styles.toastFloating]}
+    >
       <Text style={styles.toastText}>{message}</Text>
     </Animated.View>
   );
@@ -820,5 +826,6 @@ const styles = StyleSheet.create({
     borderRadius: 999,
     backgroundColor: ds.ink,
   },
+  toastFloating: { position: 'absolute', bottom: 108, marginTop: 0, maxWidth: '90%' },
   toastText: { fontSize: 13, fontWeight: '700', color: '#FFFFFF', textAlign: 'center' },
 });

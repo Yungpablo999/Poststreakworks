@@ -647,3 +647,47 @@ export function getGoalCaption(title: string, goal: IdeaGoal, hook?: string): Go
       };
   }
 }
+
+// ---------------------------------------------------------------------------
+// Drafts (saved from Script and the post composer, listed on Create)
+// In-memory mock store; a real backend would persist these.
+// ---------------------------------------------------------------------------
+
+export interface SavedDraft {
+  id: string;
+  title: string;
+  kind: 'script' | 'post';
+  /** e.g. "Script", "30-second Reel" */
+  format: string;
+  /** Platform id when known ('tiktok' | 'instagram' | …) */
+  platform?: string;
+  savedAt: number;
+}
+
+let draftStore: SavedDraft[] = [];
+const draftListeners = new Set<() => void>();
+
+export function getDrafts(): SavedDraft[] {
+  return draftStore;
+}
+
+/** Adds a draft, or updates it (same id) and moves it to the top. */
+export function saveDraft(d: Omit<SavedDraft, 'savedAt'>): SavedDraft {
+  const saved = { ...d, savedAt: Date.now() };
+  draftStore = [saved, ...draftStore.filter((x) => x.id !== d.id)];
+  draftListeners.forEach((l) => l());
+  return saved;
+}
+
+export function subscribeToDrafts(listener: () => void): () => void {
+  draftListeners.add(listener);
+  return () => draftListeners.delete(listener);
+}
+
+export function draftAgo(savedAt: number): string {
+  const mins = Math.round((Date.now() - savedAt) / 60000);
+  if (mins < 1) return 'Just now';
+  if (mins < 60) return `${mins} min ago`;
+  const h = Math.round(mins / 60);
+  return h < 24 ? `${h} h ago` : `${Math.round(h / 24)} d ago`;
+}

@@ -30,6 +30,7 @@ import {
   checkInToday,
   getDefaultFilmStyle,
   getGoalCaption,
+  saveDraft as saveDraftToStore,
   IDEA_GOALS,
   type FilmStyle,
   type IdeaGoal,
@@ -999,6 +1000,13 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
   };
 
   const saveDraft = () => {
+    saveDraftToStore({
+      id: `post-${currentIdea}`,
+      title: currentIdea ?? 'Untitled post',
+      kind: 'post',
+      format: currentFormatConfig.title,
+      platform: selectedPlatforms[0],
+    });
     if (Platform.OS !== 'web') Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     setCelebrationTitle('Draft saved!');
     setCelebrationSubtitle('Your draft with media and tags is saved. Pick it up any time.');

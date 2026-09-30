@@ -30,6 +30,7 @@ import { AppButton } from '../components/ui/AppButton';
 import { JarvisOrb } from '../components/JarvisOrb';
 import { ScriptTimeline, PartCard, ReadThrough, secondsFor, type PartKey } from '../components/script/ScriptBlocks';
 import { ComposerToast } from '../components/composer/ComposerBlocks';
+import { saveDraft } from '../data';
 import { ds } from '../theme/colors';
 
 interface ScriptScreenProps {
@@ -527,6 +528,14 @@ export const ScriptScreen: React.FC<ScriptScreenProps> = ({
     setTimeout(() => setToast((t) => (t === msg ? null : t)), 2400);
   };
   const [rewritingPart, setRewritingPart] = useState<PartKey | null>(null);
+  const [justSaved, setJustSaved] = useState(false);
+  const saveScriptDraft = () => {
+    saveDraft({ id: `script-${ideaTitle}`, title: ideaTitle, kind: 'script', format: 'Script' });
+    if (Platform.OS !== 'web') Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    setJustSaved(true);
+    showToast('Saved to drafts. Find it on Create.');
+    setTimeout(() => setJustSaved(false), 2200);
+  };
   const partRefs = useRef<{ [k: string]: View | null }>({});
   const scrollRef = useRef<ScrollView>(null);
 
@@ -671,7 +680,6 @@ export const ScriptScreen: React.FC<ScriptScreenProps> = ({
               <ScriptTimeline parts={parts} onJump={jumpTo} />
             </Reanimated.View>
 
-            {toast && <ComposerToast message={toast} />}
 
             {/* PARTS */}
             <View style={styles.partsStack}>
@@ -771,9 +779,22 @@ export const ScriptScreen: React.FC<ScriptScreenProps> = ({
                   </Svg>
                 }
               />
-              <AppButton title="Save draft" variant="glass" onPress={() => showToast('Draft saved. Pick it up any time.')} />
+              <AppButton
+                title={justSaved ? 'Saved to drafts' : 'Save draft'}
+                variant="glass"
+                onPress={saveScriptDraft}
+                iconRight={
+                  justSaved ? (
+                    <Svg width={16} height={16} viewBox="0 0 24 24" fill="none">
+                      <Path d="M20 6L9 17l-5-5" stroke={ds.greenFill} strokeWidth={3} strokeLinecap="round" strokeLinejoin="round" />
+                    </Svg>
+                  ) : undefined
+                }
+              />
             </View>
           </ScrollView>
+
+          {toast && <ComposerToast message={toast} floating />}
 
           {/* UNIFIED SIGNATURE FLOATING TAB BAR */}
           <FloatingTabBar activeTab={activeTab} onTabPress={handleTabPress} />

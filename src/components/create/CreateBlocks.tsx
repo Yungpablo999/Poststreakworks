@@ -134,26 +134,36 @@ export function DraftRow({
   onPress,
 }: {
   title: string;
-  platform: string;
+  platform?: string;
   edited: string;
   image?: ImageSourcePropType;
   onPress: () => void;
 }) {
-  const logo = platform.toLowerCase() as PlatformLogoType;
+  const logo = platform ? (platform.toLowerCase() as PlatformLogoType) : null;
+  const isPlatform = !!logo && ['tiktok', 'instagram', 'youtube', 'threads', 'facebook'].includes(logo);
   return (
     <PressableCard onPress={onPress} accessibilityLabel={`Draft: ${title}`}>
       {(hover) => (
         <GlassCard strong radius={20} padding={12}>
           <View style={styles.row}>
-            {image ? <Image source={image} style={styles.draftThumb} resizeMode="cover" /> : <View style={styles.draftThumb} />}
+            {image ? (
+              <Image source={image} style={styles.draftThumb} resizeMode="cover" />
+            ) : (
+              <View style={[styles.draftThumb, styles.draftDoc]}>
+                <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
+                  <Path d="M14 3H7a2 2 0 00-2 2v14a2 2 0 002 2h10a2 2 0 002-2V8l-5-5z" stroke={ds.purple} strokeWidth={2} strokeLinejoin="round" />
+                  <Path d="M14 3v5h5M9 13h6M9 17h4" stroke={ds.purple} strokeWidth={2} strokeLinecap="round" />
+                </Svg>
+              </View>
+            )}
             <View style={styles.rowText}>
               <Text style={styles.rowTitle} numberOfLines={2}>
                 {title}
               </Text>
               <View style={styles.draftMeta}>
-                <PlatformLogo type={logo} size={16} />
+                {isPlatform && logo && <PlatformLogo type={logo} size={16} />}
                 <Text style={styles.rowSub}>
-                  {platform} · {edited}
+                  {platform ?? 'Draft'} · {edited}
                 </Text>
               </View>
             </View>
@@ -274,6 +284,7 @@ const styles = StyleSheet.create({
   meterBarOn: { backgroundColor: ds.purple },
   meterText: { fontSize: 11.5, fontWeight: '700', color: ds.text3 },
   draftThumb: { width: 48, height: 48, borderRadius: 12, backgroundColor: ds.lavender },
+  draftDoc: { alignItems: 'center', justifyContent: 'center' },
   draftMeta: { flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 4 },
   emptyWrap: { alignItems: 'center' },
   emptyIcon: {
