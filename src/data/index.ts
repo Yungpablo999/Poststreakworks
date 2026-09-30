@@ -679,6 +679,11 @@ export function saveDraft(d: Omit<SavedDraft, 'savedAt'>): SavedDraft {
   return saved;
 }
 
+export function removeDraft(id: string): void {
+  draftStore = draftStore.filter((x) => x.id !== id);
+  draftListeners.forEach((l) => l());
+}
+
 export function subscribeToDrafts(listener: () => void): () => void {
   draftListeners.add(listener);
   return () => draftListeners.delete(listener);

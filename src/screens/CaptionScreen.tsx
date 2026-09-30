@@ -31,7 +31,7 @@ import { JarvisOrb } from '../components/JarvisOrb';
 import { ChipRow, SaveButton } from '../components/ideas/IdeasBlocks';
 import { CaptionOptionCard } from '../components/caption/CaptionBlocks';
 import { ComposerToast } from '../components/composer/ComposerBlocks';
-import { getCaptionOptions, describeCaptionShape, saveDraft, IDEA_GOALS, CAPTION_TONES, type IdeaGoal } from '../data';
+import { getCaptionOptions, describeCaptionShape, saveDraft, removeDraft, IDEA_GOALS, CAPTION_TONES, type IdeaGoal } from '../data';
 import { ds } from '../theme/colors';
 
 interface CaptionScreenProps {
@@ -403,8 +403,19 @@ export const CaptionScreen: React.FC<CaptionScreenProps> = ({
 
   const fullCaption = [body.trim(), ending.trim()].filter(Boolean).join('\n\n');
 
+  // Save toggles: tap again to take it back out of drafts
+  const savedDraftId = useRef<string | null>(null);
   const saveCaption = () => {
-    saveDraft({ id: `caption-${postTopic}`, title: postTopic, kind: 'post', format: 'Caption' });
+    if (saved && savedDraftId.current) {
+      removeDraft(savedDraftId.current);
+      savedDraftId.current = null;
+      setSaved(false);
+      showToast('Removed from drafts');
+      return;
+    }
+    const id = `caption-${postTopic}`;
+    saveDraft({ id, title: postTopic, kind: 'post', format: 'Caption' });
+    savedDraftId.current = id;
     setSaved(true);
     showToast('Saved to drafts. Find it on Create.');
   };
