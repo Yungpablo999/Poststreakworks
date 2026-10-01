@@ -36,7 +36,8 @@ export function WebTopBar({
   /** Inner pages show their name next to Back instead of the greeting */
   title?: string;
   onBack?: () => void;
-  onNewPost: () => void;
+  /** Leave out to hide New post (e.g. while already writing one) */
+  onNewPost?: () => void;
 }) {
   const [notesOpen, setNotesOpen] = useState(false);
   const [backHover, setBackHover] = useState(false);
@@ -77,6 +78,7 @@ export function WebTopBar({
 
       <View style={styles.right}>
         <BellButton unread={unread > 0} onPress={() => setNotesOpen(true)} />
+        {onNewPost && (
         <View style={styles.newPost}>
         <AppButton
           title="New post"
@@ -88,6 +90,7 @@ export function WebTopBar({
           }
         />
         </View>
+        )}
       </View>
 
       <NotificationsSheet visible={notesOpen} onClose={() => setNotesOpen(false)} persona={persona} tier={tier} />

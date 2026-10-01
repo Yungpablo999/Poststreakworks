@@ -470,7 +470,12 @@ export default function App() {
   // on the right of the main pages when the window is wide enough
   const { width: windowW } = useWindowDimensions();
   const MAIN_PAGES: Screen[] = ['dashboard', 'create', 'quests', 'growth', 'schedule', 'repurpose', 'hook-studio', 'voice-studio'];
-  const RAIL_PAGES: Screen[] = ['dashboard', 'create', 'quests', 'growth', 'schedule'];
+  // Every signed-in page except the studios (they have their own panel) gets the Today panel
+  const RAIL_PAGES: Screen[] = [
+    'dashboard', 'create', 'quests', 'growth', 'schedule',
+    'composer', 'idea-detail', 'content-angle', 'script', 'caption', 'mission-detail', 'challenge-detail',
+    'jarvis-pro', 'audience-breakdown', 'post-performance', 'platform-growth',
+  ];
   const wideEnough = windowW >= 1360;
   const showRail = showSidebar && RAIL_PAGES.includes(currentScreen) && wideEnough;
   const STUDIO_FOR: Partial<Record<Screen, StudioKind>> = { repurpose: 'repurpose', 'hook-studio': 'hook', 'voice-studio': 'voice' };
@@ -489,7 +494,8 @@ export default function App() {
     setComposerIdeaPlatform(undefined);
     setComposerFilmStyle(undefined);
     setComposerIdeaFormat(undefined);
-    setComposerIdeaTitle(title ?? '');
+    // A blank post still starts from a friendly idea Jarvis can reshape
+    setComposerIdeaTitle(title || 'One thing I wish I knew before I started creating');
     navigateTo('composer');
   };
   setComposerOpener(openBlankComposer);
@@ -539,7 +545,7 @@ export default function App() {
                 tier={desktopTier}
                 title={innerBack ? PAGE_TITLE[currentScreen] : undefined}
                 onBack={innerBack ? () => navigateTo(innerBack) : undefined}
-                onNewPost={() => openBlankComposer()}
+                onNewPost={currentScreen === 'composer' ? undefined : () => openBlankComposer()}
               />
             )}
             <View style={showSidebar ? styles.desktopRow : styles.fill}>
