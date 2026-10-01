@@ -7,9 +7,9 @@ import { ds } from '../../theme/colors';
 import type { CaptionOption } from '../../data';
 
 // One of Jarvis's caption options: tap to use it. Selected = purple border.
-export function CaptionOptionCard({ option, index, selected, onPress }: { option: CaptionOption; index: number; selected: boolean; onPress: () => void }) {
+export function CaptionOptionCard({ option, index, selected, onPress, fill }: { option: CaptionOption; index: number; selected: boolean; onPress: () => void; /** Desktop: share the row's width instead of a fixed card width */ fill?: boolean }) {
   return (
-    <Animated.View entering={FadeInUp.delay(70 * index).duration(300)}>
+    <Animated.View entering={FadeInUp.delay(70 * index).duration(300)} style={fill ? { flex: 1, minWidth: 0 } : undefined}>
       <Pressable
         onPress={() => {
           if (Platform.OS !== 'web') Haptics.selectionAsync();
@@ -20,6 +20,7 @@ export function CaptionOptionCard({ option, index, selected, onPress }: { option
         accessibilityLabel={`${option.label}. ${option.body}`}
         style={({ pressed }) => [
           styles.card,
+          fill && { width: '100%', flex: 1 },
           selected && styles.cardOn,
           pressed && { transform: [{ scale: 0.98 }] },
           Platform.OS === 'web' && ({ cursor: 'pointer' } as object),

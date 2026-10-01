@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { useBreakpoint } from '../hooks/useBreakpoint';
 import {
   StyleSheet,
   View,
@@ -162,6 +163,7 @@ export const CaptionScreen: React.FC<CaptionScreenProps> = ({
   tier = 'free',
   onSwitchToFree,
 }) => {
+  const onDesktop = useBreakpoint() === 'desktop';
   const isDark = false;
   const [activeTab, setActiveTab] = useState<TabType>('create');
 
@@ -529,11 +531,20 @@ export const CaptionScreen: React.FC<CaptionScreenProps> = ({
                 <Text style={styles.thinkingText}>Jarvis is rewriting for you…</Text>
               </Reanimated.View>
             ) : (
+              onDesktop ? (
+                // Desktop: the options share the full width, side by side
+                <View key={`${round}-${goal}-${tones.join('')}`} style={styles.optionsRow}>
+                  {options.map((o, i) => (
+                    <CaptionOptionCard key={o.id} fill option={o} index={i} selected={(pickedId ?? options[0].id) === o.id} onPress={() => applyOption(o)} />
+                  ))}
+                </View>
+              ) : (
               <ScrollView key={`${round}-${goal}-${tones.join('')}`} horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.options}>
                 {options.map((o, i) => (
                   <CaptionOptionCard key={o.id} option={o} index={i} selected={(pickedId ?? options[0].id) === o.id} onPress={() => applyOption(o)} />
                 ))}
               </ScrollView>
+              )
             )}
 
             {/* YOUR CAPTION */}
@@ -801,6 +812,7 @@ const styles = StyleSheet.create({
   newBtn: { flexDirection: 'row', alignItems: 'center', gap: 5, height: 30, paddingHorizontal: 10, borderRadius: 999, backgroundColor: ds.lavender },
   newBtnText: { fontSize: 12.5, fontWeight: '800', color: ds.purple },
   options: { gap: 10, paddingRight: 20, paddingBottom: 4 },
+  optionsRow: { flexDirection: 'row', alignItems: 'stretch', gap: 12 },
   thinking: { height: 160, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8 },
   thinkingInline: { minHeight: 80, flexDirection: 'row', alignItems: 'center', gap: 8 },
   thinkingText: { fontSize: 13, fontWeight: '700', color: ds.purple },
