@@ -42,3 +42,17 @@ export async function pickFromLibrary(want: Want): Promise<PickedMedia | null> {
   });
   return toPicked(res);
 }
+
+/** Several photos at once (for a carousel). Returns their URIs, or [] if cancelled. */
+export async function pickPhotos(limit = 10): Promise<string[]> {
+  const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
+  if (!perm.granted) return [];
+  const res = await ImagePicker.launchImageLibraryAsync({
+    mediaTypes: ['images'],
+    allowsMultipleSelection: true,
+    selectionLimit: limit,
+    quality: 1,
+  });
+  if (res.canceled || !res.assets?.length) return [];
+  return res.assets.map((a) => a.uri);
+}

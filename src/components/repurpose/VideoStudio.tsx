@@ -47,7 +47,7 @@ export const clock = (s: number) => `${Math.floor(s / 60)}:${String(Math.round(s
 export type StudioSource = 'idea' | 'video' | 'link';
 const SOURCES: { id: StudioSource; label: string }[] = [
   { id: 'idea', label: 'An idea' },
-  { id: 'video', label: 'My video' },
+  { id: 'video', label: 'My post' },
   { id: 'link', label: 'A link' },
 ];
 

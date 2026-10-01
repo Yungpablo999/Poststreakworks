@@ -1,5 +1,5 @@
 import React, { useCallback, useMemo, useState, useSyncExternalStore } from 'react';
-import { View, ScrollView, Pressable, StyleSheet, Platform, KeyboardAvoidingView } from 'react-native';
+import { View, ScrollView, Pressable, StyleSheet, Platform, KeyboardAvoidingView, Image } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Animated, { Easing, FadeIn, FadeInUp } from 'react-native-reanimated';
 import Svg, { Path, Rect } from 'react-native-svg';
@@ -29,9 +29,12 @@ import {
   IdeaDeck,
   type StudioSource,
 } from '../components/repurpose/VideoStudio';
-import { captureWithCamera, pickFromLibrary, type PickedMedia } from '../utils/media';
+import { captureWithCamera, pickFromLibrary, pickPhotos, type PickedMedia } from '../utils/media';
 import {
   readLink,
+  makeVersion,
+  PLATFORM_FORMATS,
+  type OutFormat,
   getDefaultFilmStyle,
   getLikeThisIdeas,
   getVideoBreakdown,
@@ -88,14 +91,17 @@ function VersionCard({
   onChange,
   onCopy,
   onUse,
+  onFormat,
 }: {
   v: RepurposeVersion;
   index: number;
   onChange: (body: string) => void;
   onCopy: () => void;
   onUse: () => void;
+  onFormat: (f: OutFormat) => void;
 }) {
   const [focused, setFocused] = useState(false);
+  const formats = PLATFORM_FORMATS[v.platform] ?? [];
   return (
     <Animated.View entering={FadeInUp.delay(140 * index).duration(360)}>
       <GlassCard strong radius={24} padding={16}>
@@ -112,7 +118,55 @@ function VersionCard({
             <Text style={styles.readyText}>Ready</Text>
           </View>
         </View>
+        {formats.length > 1 && (
+          <View style={styles.fmtRow} accessibilityRole="radiogroup">
+            {formats.map((f) => {
+              const on = f.id === v.formatId;
+              return (
+                <Pressable
+                  key={f.id}
+                  onPress={() => {
+                    if (Platform.OS !== 'web') Haptics.selectionAsync();
+                    onFormat(f.id);
+                  }}
+                  accessibilityRole="radio"
+                  accessibilityState={{ checked: on }}
+                  style={({ pressed }) => [styles.fmt, on && styles.fmtOn, pressed && { transform: [{ scale: 0.96 }] }, Platform.OS === 'web' && ({ cursor: 'pointer' } as object)]}
+                >
+                  <Text style={[styles.fmtText, on && styles.fmtTextOn]}>{f.label}</Text>
+                </Pressable>
+              );
+            })}
+          </View>
+        )}
+        <Animated.View key={v.formatId} entering={FadeIn.duration(220)}>
         <Text style={styles.vTitle}>{v.title}</Text>
+        {v.slides && (
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.slidesBar} contentContainerStyle={styles.slides}>
+            {v.slides.map((sl, i) => (
+              <View key={i} style={[styles.slide, i === 0 && styles.slideCover]}>
+                <Text style={[styles.slideNum, i === 0 && { color: 'rgba(255,255,255,0.8)' }]}>{i + 1}/{v.slides!.length}</Text>
+                <Text style={[styles.slideText, i === 0 && { color: '#FFFFFF' }]}>{sl}</Text>
+              </View>
+            ))}
+          </ScrollView>
+        )}
+        {v.posts && (
+          <View style={styles.thread}>
+            {v.posts.map((pt, i) => (
+              <View key={i} style={styles.threadRow}>
+                <View style={styles.threadRail}>
+                  <View style={styles.threadDot}>
+                    <Text style={styles.threadNum}>{i + 1}</Text>
+                  </View>
+                  {i < v.posts!.length - 1 && <View style={styles.threadLine} />}
+                </View>
+                <Text style={styles.threadText}>{pt}</Text>
+              </View>
+            ))}
+          </View>
+        )}
+        {(v.slides || v.posts) && <Text style={styles.captionLabel}>Caption</Text>}
         <View style={[styles.field, focused && styles.fieldOn]}>
           <AutoGrowInput
             value={v.body}
@@ -124,6 +178,7 @@ function VersionCard({
             accessibilityLabel={`${NAMES[v.platform]} version`}
           />
         </View>
+        </Animated.View>
         <View style={styles.vActions}>
           <Pressable
             onPress={onCopy}
@@ -191,7 +246,7 @@ export const RepurposeScreen: React.FC<RepurposeScreenProps> = ({
   const toggle = (id: string) =>
     setPlatforms((prev) => (prev.includes(id) ? prev.filter((p) => p !== id) : [...prev, id]));
 
-  const make = (opts?: { text?: string; spent?: boolean }) => {
+  const make = (opts?: { text?: string; spent?: boolean; prefer?: 'video' | 'carousel' | 'text' }) => {
     if (!platforms.length) {
       showToast('Pick at least one platform');
       return;
@@ -201,7 +256,9 @@ export const RepurposeScreen: React.FC<RepurposeScreenProps> = ({
       return;
     }
     if (Platform.OS !== 'web') Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    const next = getRepurposeVersions(opts?.text ?? idea, platforms);
+    const src = opts?.text ?? idea;
+    setVersionSource(src);
+    const next = getRepurposeVersions(src, platforms, opts?.prefer ?? 'video');
     setScheduled(false);
     setVersions([]);
     // Jarvis "writes" each platform in turn
@@ -251,6 +308,31 @@ export const RepurposeScreen: React.FC<RepurposeScreenProps> = ({
 
   const finishWatching = useCallback(() => setPhase('done'), []);
 
+  // ── My post: video, photos (carousel) or text ────────────────────────────
+  const [versionSource, setVersionSource] = useState(ideaTitle);
+  const [postKind, setPostKind] = useState<'video' | 'photos' | 'text'>('video');
+  const [photos, setPhotos] = useState<string[]>([]);
+  const [postAbout, setPostAbout] = useState('');
+  const [postText, setPostText] = useState('');
+  const addPhotos = async () => {
+    try {
+      const uris = await pickPhotos(10);
+      if (uris.length) setPhotos(uris);
+    } catch {
+      showToast('Couldn’t open your photos');
+    }
+  };
+  const makeFromPost = () => {
+    if (postKind === 'photos') {
+      if (!photos.length) return showToast('Add your photos first');
+      make({ text: postAbout.trim() || 'My latest carousel', prefer: 'carousel' });
+    } else {
+      if (!postText.trim()) return showToast('Paste your post first');
+      const first = postText.trim().match(/^[^.!?\n]*[.!?]?/)?.[0]?.trim() ?? '';
+      make({ text: first.length > 8 ? first : postText.trim(), prefer: 'text' });
+    }
+  };
+
   // ── From a link ──────────────────────────────────────────────────────────
   const [linkText, setLinkText] = useState('');
   const [linkFocused, setLinkFocused] = useState(false);
@@ -290,7 +372,7 @@ export const RepurposeScreen: React.FC<RepurposeScreenProps> = ({
     [1, 2, 3].forEach((n) => setTimeout(() => setReadStep(n), n * 600));
     setTimeout(() => {
       setLinkPhase('done');
-      if (owner === 'mine') make({ text: preview.title, spent: true });
+      if (owner === 'mine') make({ text: preview.title, spent: true, prefer: preview.kind === 'carousel' ? 'carousel' : preview.kind === 'video' ? 'video' : 'text' });
     }, 2100);
   };
   const linkIdeas = useMemo(
@@ -355,13 +437,15 @@ export const RepurposeScreen: React.FC<RepurposeScreenProps> = ({
           <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
             <Animated.View entering={FadeInUp.duration(500)} style={styles.headline}>
               <FitLines
-                key={source}
+                key={`${source}-${postKind}`}
                 lines={
                   source === 'idea'
                     ? ['One idea,', <Text key="e" style={styles.accent}>every platform</Text>]
                     : source === 'link'
                       ? ['Paste a link,', <Text key="e" style={styles.accent}>make it yours</Text>]
-                      : ['Your video,', <Text key="e" style={styles.accent}>your next one</Text>]
+                      : postKind === 'video'
+                        ? ['Your video,', <Text key="e" style={styles.accent}>your next one</Text>]
+                        : ['Your post,', <Text key="e" style={styles.accent}>every platform</Text>]
                 }
                 textStyle={styles.headlineText}
                 maxFontSize={34}
@@ -402,6 +486,74 @@ export const RepurposeScreen: React.FC<RepurposeScreenProps> = ({
 
             {/* Video */}
             {source === 'video' && (
+              <View style={styles.kindRow} accessibilityRole="radiogroup">
+                {([['video', 'Video'], ['photos', 'Photos / carousel'], ['text', 'Text']] as const).map(([k, label]) => {
+                  const on = postKind === k;
+                  return (
+                    <Pressable
+                      key={k}
+                      onPress={() => {
+                        if (Platform.OS !== 'web') Haptics.selectionAsync();
+                        setPostKind(k);
+                        setVersions([]);
+                      }}
+                      accessibilityRole="radio"
+                      accessibilityState={{ checked: on }}
+                      style={({ pressed }) => [styles.kindChip, on && styles.kindChipOn, pressed && { transform: [{ scale: 0.96 }] }]}
+                    >
+                      <Text style={[styles.kindText, on && styles.kindTextOn]}>{label}</Text>
+                    </Pressable>
+                  );
+                })}
+              </View>
+            )}
+            {source === 'video' && postKind === 'photos' && (
+              <Animated.View key="photos" entering={FadeIn.duration(240)}>
+                <GlassCard strong radius={24} padding={16}>
+                  {photos.length ? (
+                    <>
+                      <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.slidesBar} contentContainerStyle={styles.slides}>
+                        {photos.map((u, i) => (
+                          <View key={u} style={styles.photoThumb}>
+                            <Image source={{ uri: u }} style={styles.photoImg} resizeMode="cover" />
+                            <View style={styles.photoNum}>
+                              <Text style={styles.photoNumText}>{i + 1}</Text>
+                            </View>
+                          </View>
+                        ))}
+                      </ScrollView>
+                      <Pressable onPress={addPhotos} accessibilityRole="button">
+                        <Text style={styles.changeLink}>Change photos ({photos.length})</Text>
+                      </Pressable>
+                    </>
+                  ) : (
+                    <>
+                      <Text style={styles.eyebrow}>YOUR PHOTOS</Text>
+                      <Text style={styles.linkHelp}>Pick the photos from your carousel or post, in order.</Text>
+                      <View style={styles.photoBtn}>
+                        <AppButton title="Choose photos" onPress={addPhotos} />
+                      </View>
+                    </>
+                  )}
+                  <Text style={styles.ownerQ}>What’s it about?</Text>
+                  <View style={styles.field}>
+                    <AutoGrowInput value={postAbout} onChangeText={setPostAbout} placeholder="e.g. my 5-step posting system" minHeight={24} accessibilityLabel="What the post is about" />
+                  </View>
+                </GlassCard>
+              </Animated.View>
+            )}
+            {source === 'video' && postKind === 'text' && (
+              <Animated.View key="text" entering={FadeIn.duration(240)}>
+                <GlassCard strong radius={24} padding={16}>
+                  <Text style={styles.eyebrow}>YOUR POST</Text>
+                  <Text style={styles.linkHelp}>Paste a caption, thread or text post you wrote.</Text>
+                  <View style={[styles.field, { marginTop: 10 }]}>
+                    <AutoGrowInput value={postText} onChangeText={setPostText} placeholder="Paste your post here" minHeight={90} accessibilityLabel="Your post" />
+                  </View>
+                </GlassCard>
+              </Animated.View>
+            )}
+            {source === 'video' && postKind === 'video' && (
               <Animated.View key="video" entering={FadeIn.duration(260)}>
                 {phase === 'watching' && video ? (
                   <WatchingCard video={video} onDone={finishWatching} />
@@ -513,7 +665,7 @@ export const RepurposeScreen: React.FC<RepurposeScreenProps> = ({
               ))}
             </View>
 
-            {!(source === 'video' && phase !== 'idle') && !(source === 'link' && linkPhase !== 'idle') && (
+            {!(source === 'video' && postKind === 'video' && phase !== 'idle') && !(source === 'link' && linkPhase !== 'idle') && (
             <View style={styles.cta}>
               {left > 0 && source === 'link' ? (
                 <AppButton
@@ -521,6 +673,18 @@ export const RepurposeScreen: React.FC<RepurposeScreenProps> = ({
                   size="lg"
                   disabled={!preview}
                   onPress={readLinkNow}
+                  iconRight={
+                    <Svg width={16} height={16} viewBox="0 0 24 24" fill="none">
+                      <Path d="M12 2l2.4 7.6L22 12l-7.6 2.4L12 22l-2.4-7.6L2 12l7.6-2.4L12 2z" fill="#FFFFFF" />
+                    </Svg>
+                  }
+                />
+              ) : left > 0 && source === 'video' && postKind !== 'video' ? (
+                <AppButton
+                  title={working.length ? 'Jarvis is writing…' : `Make ${platforms.length} version${platforms.length === 1 ? '' : 's'}`}
+                  size="lg"
+                  disabled={!!working.length}
+                  onPress={makeFromPost}
                   iconRight={
                     <Svg width={16} height={16} viewBox="0 0 24 24" fill="none">
                       <Path d="M12 2l2.4 7.6L22 12l-7.6 2.4L12 22l-2.4-7.6L2 12l7.6-2.4L12 2z" fill="#FFFFFF" />
@@ -566,7 +730,7 @@ export const RepurposeScreen: React.FC<RepurposeScreenProps> = ({
             )}
 
             {/* Video results */}
-            {source === 'video' && phase === 'done' && video && (
+            {source === 'video' && postKind === 'video' && phase === 'done' && video && (
               <Animated.View entering={FadeInUp.duration(420).easing(Easing.out(Easing.cubic))}>
                 <View style={styles.doneHead}>
                   <JarvisOrb size={26} />
@@ -638,7 +802,7 @@ export const RepurposeScreen: React.FC<RepurposeScreenProps> = ({
             )}
 
             {/* Versions */}
-            {(source === 'idea' || (source === 'link' && owner === 'mine' && linkPhase === 'done')) && (versions.length > 0 || working.length > 0) && (
+            {(source === 'idea' || (source === 'video' && postKind !== 'video') || (source === 'link' && owner === 'mine' && linkPhase === 'done')) && (versions.length > 0 || working.length > 0) && (
               <>
                 <Text style={styles.section}>Your versions</Text>
                 <View style={styles.stack}>
@@ -648,8 +812,9 @@ export const RepurposeScreen: React.FC<RepurposeScreenProps> = ({
                       v={v}
                       index={0}
                       onChange={(body) => setVersions((prev) => prev.map((x, j) => (j === i ? { ...x, body } : x)))}
+                      onFormat={(f) => setVersions((prev) => prev.map((x, j) => (j === i ? makeVersion(versionSource, x.platform, f) : x)))}
                       onCopy={() => copy(v)}
-                      onUse={() => onUseVersion?.(v.body, v.platform, source === 'link' && preview ? preview.title : idea)}
+                      onUse={() => onUseVersion?.(v.body, v.platform, versionSource)}
                     />
                   ))}
                   {working.map((p) => (
@@ -741,6 +906,36 @@ const styles = StyleSheet.create({
   headlineText: { fontWeight: '800', letterSpacing: -0.8, color: ds.ink },
   accent: { color: ds.purple },
   meter: { marginTop: 4 },
+  kindRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 12 },
+  kindChip: { paddingHorizontal: 14, height: 38, borderRadius: 999, justifyContent: 'center', backgroundColor: 'rgba(255, 255, 255, 0.85)', borderWidth: 1.5, borderColor: 'rgba(255, 255, 255, 0.95)' },
+  kindChipOn: { backgroundColor: ds.purple, borderColor: ds.purple },
+  kindText: { fontSize: 13.5, fontWeight: '800', color: ds.text2 },
+  kindTextOn: { color: '#FFFFFF' },
+  photoThumb: { width: 90, height: 112, borderRadius: 14, overflow: 'hidden', backgroundColor: ds.lavender },
+  photoImg: { position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' },
+  photoNum: { position: 'absolute', top: 6, left: 6, width: 20, height: 20, borderRadius: 10, backgroundColor: 'rgba(0,0,0,0.5)', alignItems: 'center', justifyContent: 'center' },
+  photoNumText: { fontSize: 11, fontWeight: '800', color: '#FFFFFF' },
+  changeLink: { fontSize: 13, fontWeight: '800', color: ds.purple },
+  photoBtn: { marginTop: 12 },
+  fmtRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginTop: 12 },
+  fmt: { paddingHorizontal: 12, height: 32, borderRadius: 999, justifyContent: 'center', backgroundColor: 'rgba(255, 255, 255, 0.85)', borderWidth: 1.5, borderColor: ds.lavender },
+  fmtOn: { backgroundColor: ds.purple, borderColor: ds.purple },
+  fmtText: { fontSize: 12.5, fontWeight: '800', color: ds.text2 },
+  fmtTextOn: { color: '#FFFFFF' },
+  slidesBar: { flexGrow: 0, marginHorizontal: -16, marginBottom: 10 },
+  slides: { gap: 8, paddingHorizontal: 16 },
+  slide: { width: 120, height: 150, borderRadius: 16, padding: 10, justifyContent: 'space-between', backgroundColor: 'rgba(245, 243, 255, 0.95)', borderWidth: 1, borderColor: ds.lavender },
+  slideCover: { backgroundColor: ds.purple, borderColor: ds.purple },
+  slideNum: { fontSize: 10.5, fontWeight: '800', color: ds.text3 },
+  slideText: { fontSize: 14, lineHeight: 18, fontWeight: '800', color: ds.ink },
+  thread: { marginBottom: 10 },
+  threadRow: { flexDirection: 'row', gap: 10 },
+  threadRail: { alignItems: 'center', width: 24 },
+  threadDot: { width: 24, height: 24, borderRadius: 12, backgroundColor: ds.lavender, alignItems: 'center', justifyContent: 'center' },
+  threadNum: { fontSize: 11.5, fontWeight: '800', color: ds.purple },
+  threadLine: { flex: 1, width: 2, minHeight: 10, backgroundColor: ds.lavender, marginVertical: 2 },
+  threadText: { flex: 1, fontSize: 14, lineHeight: 20, color: ds.ink, paddingBottom: 12, paddingTop: 2 },
+  captionLabel: { fontSize: 12, fontWeight: '800', color: ds.text3, marginBottom: 6 },
   linkHelp: { fontSize: 13, color: ds.text2, marginTop: 4 },
   linkRow: { flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 12 },
   linkField: { flex: 1, paddingVertical: 0, height: 48, justifyContent: 'center' },

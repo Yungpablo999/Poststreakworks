@@ -874,49 +874,111 @@ export function getCaptionOptions(topic: string, goal: IdeaGoal, tones: string[]
 // Jarvis writes it for real.
 // ---------------------------------------------------------------------------
 
+export type OutFormat = 'video' | 'carousel' | 'photo' | 'text' | 'thread' | 'community';
+
+/** The formats each platform supports, in the order we offer them. */
+export const PLATFORM_FORMATS: Record<string, { id: OutFormat; label: string }[]> = {
+  tiktok: [
+    { id: 'video', label: 'Video' },
+    { id: 'carousel', label: 'Photo carousel' },
+  ],
+  instagram: [
+    { id: 'video', label: 'Reel' },
+    { id: 'carousel', label: 'Carousel' },
+    { id: 'photo', label: 'Photo post' },
+  ],
+  youtube: [
+    { id: 'video', label: 'Short' },
+    { id: 'community', label: 'Community post' },
+  ],
+  threads: [
+    { id: 'text', label: 'Text post' },
+    { id: 'thread', label: 'Thread' },
+  ],
+  facebook: [
+    { id: 'video', label: 'Video' },
+    { id: 'text', label: 'Post' },
+  ],
+};
+
 export interface RepurposeVersion {
   platform: string;
+  formatId: OutFormat;
+  /** e.g. "Reel · 9:16" */
   format: string;
   title: string;
   body: string;
+  /** Carousel slides, when the format is a carousel */
+  slides?: string[];
+  /** Thread posts, when the format is a thread */
+  posts?: string[];
 }
 
-export function getRepurposeVersions(idea: string, platforms: string[]): RepurposeVersion[] {
-  const t = idea.replace(/[“”"]/g, '').trim() || 'My creator journey';
+// Strip quotes and any end punctuation, since templates add their own
+const clean = (idea: string) => idea.replace(/[“”"]/g, '').trim().replace(/[.!?…]+$/, '') || 'My creator journey';
+
+/** One platform's version of the idea in a chosen format. */
+export function makeVersion(idea: string, platform: string, formatId: OutFormat): RepurposeVersion {
+  const t = clean(idea);
   const l = t.charAt(0).toLowerCase() + t.slice(1);
-  const by: Record<string, RepurposeVersion> = {
-    tiktok: {
-      platform: 'tiktok',
-      format: 'Video · 9:16',
-      title: 'Hook first, 20–30 seconds',
-      body: `Stop scrolling if this is you: ${l}.\n\nHere's the one thing that changed it for me. Watch to the end.`,
-    },
-    instagram: {
-      platform: 'instagram',
-      format: 'Reel · caption',
-      title: 'Reel caption',
-      body: `${t}.\n\nI used to overthink every post.\nNow I share one small lesson at a time.\n\nSave this for your next filming day.`,
-    },
-    youtube: {
-      platform: 'youtube',
-      format: 'Short · title + description',
-      title: t.length > 60 ? `${t.slice(0, 57)}…` : t,
-      body: `${t}, in under a minute. The short version of what I wish someone had told me sooner.`,
-    },
-    threads: {
-      platform: 'threads',
-      format: 'Text post',
-      title: 'Conversation starter',
-      body: `${t}.\n\nHonestly, nobody talks about this part. What would you add?`,
-    },
-    facebook: {
-      platform: 'facebook',
-      format: 'Post',
-      title: 'Longer post',
-      body: `${t}.\n\nWhen I started, I waited for everything to be perfect. Sharing small, honest lessons made it easier, and people related to it more.\n\nHas this happened to you?`,
-    },
-  };
-  return platforms.filter((p) => by[p]).map((p) => by[p]);
+  const label = PLATFORM_FORMATS[platform]?.find((f) => f.id === formatId)?.label ?? 'Post';
+  switch (formatId) {
+    case 'video': {
+      const ratio = platform === 'facebook' ? '9:16 or 4:5' : '9:16';
+      const lines: Record<string, string> = {
+        tiktok: `Stop scrolling if this is you: ${l}.\n\nHere's the one thing that changed it for me. Watch to the end.`,
+        instagram: `${t}.\n\nI used to overthink every post.\nNow I share one small lesson at a time.\n\nSave this for your next filming day.`,
+        youtube: `${t}, in under a minute. The short version of what I wish someone had told me sooner.`,
+        facebook: `${t}. A quick video on what finally worked for me. Share it with someone who needs it.`,
+      };
+      return { platform, formatId, format: `${label} · ${ratio}`, title: platform === 'youtube' ? (t.length > 60 ? `${t.slice(0, 57)}…` : t) : 'Hook first, 20–30 seconds', body: lines[platform] ?? lines.tiktok };
+    }
+    case 'carousel':
+      return {
+        platform,
+        formatId,
+        format: `${label} · 5 slides`,
+        title: 'Swipe-through slides',
+        slides: [t, 'Here’s what nobody tells you', 'What I used to do', 'What I do now', 'Save this for later'],
+        body: `${t}. Swipe through, then save it for your next post.`,
+      };
+    case 'photo':
+      return { platform, formatId, format: `${label} · 4:5`, title: 'One photo and a caption', body: `${t}.\n\nOne photo, one honest lesson. What would you add?` };
+    case 'text':
+      return {
+        platform,
+        formatId,
+        format: label,
+        title: platform === 'threads' ? 'Conversation starter' : 'Longer post',
+        body:
+          platform === 'threads'
+            ? `${t}.\n\nHonestly, nobody talks about this part. What would you add?`
+            : `${t}.\n\nWhen I started, I waited for everything to be perfect. Sharing small, honest lessons made it easier, and people related to it more.\n\nHas this happened to you?`,
+      };
+    case 'thread':
+      return {
+        platform,
+        formatId,
+        format: `${label} · 4 posts`,
+        title: 'A short thread',
+        posts: [`${t}. A quick thread.`, 'The first thing I got wrong: waiting for the perfect idea.', 'What changed: posting small lessons, often.', 'Your turn. What’s one thing you’d add?'],
+        body: `${t}. A quick thread.`,
+      };
+    case 'community':
+      return { platform, formatId, format: label, title: 'Poll for your subscribers', body: `Quick question: ${l}. Which one is you?\n\n• Still figuring it out\n• Getting there\n• Got it sorted` };
+  }
+}
+
+/** A version for each platform, starting with the format that fits the source best. */
+export function getRepurposeVersions(idea: string, platforms: string[], prefer: 'video' | 'carousel' | 'text' = 'video'): RepurposeVersion[] {
+  return platforms
+    .filter((p) => PLATFORM_FORMATS[p])
+    .map((p) => {
+      const opts = PLATFORM_FORMATS[p].map((f) => f.id);
+      const want: OutFormat[] = prefer === 'carousel' ? ['carousel', 'photo', 'text'] : prefer === 'text' ? ['text', 'thread', 'community', 'carousel'] : ['video', 'text'];
+      const pick = want.find((f) => opts.includes(f)) ?? opts[0];
+      return makeVersion(idea, p, pick);
+    });
 }
 
 // ---------------------------------------------------------------------------
