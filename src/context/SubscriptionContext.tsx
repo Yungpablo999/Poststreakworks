@@ -7,11 +7,11 @@ export type SubscriptionTier = 'free' | 'pro' | 'founding';
 export type ProFeature =
   | 'one_click_repurpose'
   | 'unlimited_ai_scripts'
-  | 'platform_earnings_breakdown'
-  | 'dynamic_rate_card'
+  | 'platform_growth_breakdown'
+  | 'creator_momentum_audit'
   | 'premium_passport_analytics'
   | 'unlimited_connected_platforms'
-  | 'priority_brand_matching';
+  | 'priority_collab_matching';
 
 interface SubscriptionContextType {
   tier: SubscriptionTier;

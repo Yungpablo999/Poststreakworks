@@ -1,9 +1,12 @@
+// Gold is reserved for Pro: Pro badges and Pro-only features. Never use it as
+// general decoration, warnings or streak styling.
 export const goldTokens = {
   primary: '#F59E0B',       // Radiant Metallic Amber Gold
   light: '#FEF3C7',         // Soft Cream Gold Surface
   border: '#FDE68A',        // Crisp Gold Border
   dark: '#B45309',          // Deep High-Contrast Bronze Gold Text
   gradient: ['#FBBF24', '#F59E0B', '#D97706'] as [string, string, string],
+  lightGradient: ['#FFFBEB', '#FEF3C7'] as [string, string],
   darkSurface: 'rgba(245, 158, 11, 0.15)',
   darkBorder: 'rgba(245, 158, 11, 0.30)',
 };
@@ -33,25 +36,25 @@ export interface ThemeColors {
 
 export const lightTheme: ThemeColors = {
   isDark: false,
-  bg: '#FAF9FD',
-  bgSecondary: '#F4F2F9',
+  bg: '#F7F5F0',
+  bgSecondary: '#F0ECE1',
   card: '#FFFFFF',
   cardElevated: '#FFFFFF',
-  cardSurface: '#F9F8FD',
-  border: 'rgba(23, 20, 32, 0.08)',
+  cardSurface: '#FAF9F6',
+  border: '#ECE8E0',
   borderSubtle: 'rgba(23, 20, 32, 0.04)',
   text: '#171420',
   textSecondary: '#5E576E',
   textMuted: '#8E869E',
-  primary: '#582CDB',
-  primaryLight: '#F4F0FF',
+  primary: '#5B3EE8',
+  primaryLight: '#EDE9FE',
   gold: '#F59E0B',
   goldLight: '#FEF3C7',
-  surfacePill: '#F2EFF9',
-  headerBg: '#FAF9FD',
+  surfacePill: '#EDE9FE',
+  headerBg: '#F7F5F0',
   inputBg: '#FFFFFF',
-  inputBorder: 'rgba(23, 20, 32, 0.09)',
-  tabBarBg: 'rgba(255, 255, 255, 0.88)',
+  inputBorder: '#ECE8E0',
+  tabBarBg: 'rgba(255, 255, 255, 0.92)',
 };
 
 export const darkTheme: ThemeColors = {
@@ -66,7 +69,7 @@ export const darkTheme: ThemeColors = {
   text: '#F8FAFC', // Pure Crisp White
   textSecondary: '#CBD5E1', // High Contrast Light Slate
   textMuted: '#94A3B8', // Refined Muted Slate
-  primary: '#7C3AED', // Vivid Royal Purple
+  primary: '#5B3EE8', // Single-accent Purple
   primaryLight: '#2A1D4E',
   gold: '#F59E0B', // Glowing Amber Gold
   goldLight: '#382606',
@@ -80,33 +83,125 @@ export const darkTheme: ThemeColors = {
 export const getTheme = (isDark: boolean): ThemeColors => (isDark ? darkTheme : lightTheme);
 
 export const colors = {
-  primary: '#582CDB',
+  // Brand single-accent purple
+  primary: '#5B3EE8',
   primaryDark: '#451FB8',
-  primaryLight: '#F4F0FF',
-  purpleGlow: '#7C3AED',
+  primaryLight: '#EDE9FE',
+  purpleGlow: '#5B3EE8',
+  
+  // Pro Gold — Pro badges and Pro-only features only
   gold: '#F59E0B',
   goldLight: '#FEF3C7',
   amberDark: '#B45309',
-  background: '#FAF9FD',
+  proGoldGradient: ['#FBBF24', '#F59E0B', '#D97706'] as [string, string, string],
+  
+  // Layout & Surfaces
+  background: '#F7F5F0',
   backgroundCard: '#FFFFFF',
   card: '#FFFFFF',
-  cardBorder: 'rgba(23, 20, 32, 0.07)',
-  cardBorderLight: 'rgba(255, 255, 255, 0.8)',
+  cardBorder: '#ECE8E0',
+  cardBorderLight: '#ECE8E0',
+  
+  // Typography
   text: '#171420',
   textPrimary: '#171420',
   textSecondary: '#5E576E',
   textMuted: '#8E869E',
   textWhite: '#FFFFFF',
-  border: 'rgba(23, 20, 32, 0.08)',
-  borderLight: 'rgba(23, 20, 32, 0.04)',
+  
+  // Borders
+  border: '#ECE8E0',
+  borderLight: '#ECE8E0',
+  
+  // Base
   white: '#FFFFFF',
   black: '#000000',
+  
+  // Feedback
   success: '#10B981',
+  successDark: '#15803D',
   error: '#EF4444',
   warning: '#F59E0B',
+  warningDark: '#D97706',
+  
+  // Pill backgrounds
+  purplePillBg: '#EDE9FE',
+  purplePillText: '#5B3EE8',
+  goldPillBg: '#FEF3C7',
+  goldPillText: '#D97706',
+  successPillBg: '#DCFCE7',
+  successPillText: '#15803D',
+  grayPillBg: '#F1F5F9',
+  grayPillText: '#475569',
+  
+  // Glass tokens (subtle only)
   glassLight: 'rgba(255, 255, 255, 0.70)',
   glassMedium: 'rgba(255, 255, 255, 0.85)',
   glassUltra: 'rgba(255, 255, 255, 0.94)',
-  glassViolet: 'rgba(88, 44, 219, 0.06)',
-  glassVioletBorder: 'rgba(88, 44, 219, 0.14)',
+  glassViolet: 'rgba(91, 62, 232, 0.06)',
+  glassVioletBorder: 'rgba(91, 62, 232, 0.14)',
+};
+
+// ---------------------------------------------------------------------------
+// Design system (shared look with the PostStreak website, app gold kept).
+// New and refreshed components should use these instead of raw hex values.
+// ---------------------------------------------------------------------------
+export const ds = {
+  // Surfaces
+  bg: '#F7F5F0',
+  surface: '#FFFFFF',
+  cream: '#EFEBE3', // tinted fills
+  sand: '#F0EBE1',
+  line: '#E7E2D8', // warm hairline borders
+
+  // Text
+  ink: '#171420',
+  text2: '#5E576E',
+  text3: '#8E869E',
+
+  // Brand purple
+  purple: '#5B3EE8',
+  purplePressed: '#4F33DB',
+  purpleLedge: '#3F25BF', // the solid edge under primary buttons
+  lavender: '#EDE9FE',
+  lavenderSoft: '#F5F3FF',
+
+  // Pro gold (app gold, Pro only)
+  gold: '#F59E0B',
+  goldLedge: '#B45309',
+  goldInk: '#3D2607',
+
+  // Feedback
+  green: '#15803D',
+  greenFill: '#1F9D55',
+  greenBg: '#EAF7EE',
+};
+
+export const dsRadius = {
+  sm: 12,
+  md: 16,
+  lg: 24,
+  xl: 32,
+  pill: 999,
+};
+
+// 8-point spacing rhythm
+export const dsSpace = {
+  1: 4,
+  2: 8,
+  3: 12,
+  4: 16,
+  5: 24,
+  6: 32,
+  7: 48,
+  8: 64,
+};
+
+// One soft shadow for cards
+export const dsShadow = {
+  shadowColor: '#171420',
+  shadowOffset: { width: 0, height: 12 },
+  shadowOpacity: 0.08,
+  shadowRadius: 24,
+  elevation: 2,
 };

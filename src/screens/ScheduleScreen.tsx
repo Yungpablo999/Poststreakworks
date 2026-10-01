@@ -2,18 +2,17 @@ import React, { useState, useRef, useEffect } from 'react';
 import {
   StyleSheet,
   View,
-  Text,
   ScrollView,
   SafeAreaView,
   StatusBar,
   Pressable,
   Animated,
   Modal,
-  TextInput,
   Image,
   Platform,
   Alert,
 } from 'react-native';
+import { Text, TextInput } from '../components/ui/AppText';
 import Svg, { Path, Circle, Rect } from 'react-native-svg';
 import * as Haptics from 'expo-haptics';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -23,17 +22,31 @@ import { AnimatedCompletionModal } from '../components/AnimatedCompletionModal';
 import { SocialBrandIcon } from '../components/SocialBrandIcon';
 import { FreeAppHeader } from '../components/FreeAppHeader';
 import { sFont, sPadding, moderateScale, isNarrowScreen, isSmallScreen } from '../utils/responsive';
+import Reanimated, { FadeIn, FadeInUp } from 'react-native-reanimated';
+import { GlassBackdrop } from '../components/glass/GlassBackdrop';
+import { FitLines } from '../components/ui/FitLines';
+import { JarvisOrb } from '../components/JarvisOrb';
+import { CalendarSheet } from '../components/home/CalendarSheet';
+import { TodayCard, WeekStrip, PostRow, EmptyDay, PlatformMixCard, BestTimeCard, AutoPostCard } from '../components/schedule/ScheduleBlocks';
+import { getWeekSchedule } from '../data';
+import type { UserPersona } from '../components/HeaderDualModePills';
+import { ds } from '../theme/colors';
 
 interface ScheduleScreenProps {
   onBack?: () => void;
   onLogout?: () => void;
   onNavigateTab?: (tab: TabType) => void;
   onOpenJarvisPro?: () => void;
-  onOpenMessages?: () => void;
   onOpenCreateIdea?: () => void;
   onOpenPostComposer?: (prefillTitle?: string, prefillPlatform?: string) => void;
   userProfile?: UserProfileData;
   onSaveProfile?: (updated: UserProfileData) => void;
+  userPersona?: UserPersona;
+  onTogglePersona?: () => void;
+  /** Pro members: auto-post card instead of the Pro note. */
+  tier?: 'free' | 'pro';
+  onSwitchToPro?: () => void;
+  onSwitchToFree?: () => void;
 }
 
 interface ScheduledPost {
@@ -196,13 +209,38 @@ export const ScheduleScreen: React.FC<ScheduleScreenProps> = ({
   onLogout,
   onNavigateTab,
   onOpenJarvisPro,
-  onOpenMessages,
   onOpenCreateIdea,
   onOpenPostComposer,
   userProfile,
   onSaveProfile,
+  userPersona,
+  onTogglePersona,
+  tier = 'free',
+  onSwitchToPro,
+  onSwitchToFree,
 }) => {
   const isDark = false;
+  const isNewUser = (userPersona || userProfile?.userPersona || 'new') === 'new';
+  const week = getWeekSchedule(isNewUser ? 'new' : 'returning');
+  const [dayIndex, setDayIndex] = useState(week.todayIndex);
+  const [calendarOpen, setCalendarOpen] = useState(false);
+  const selectedDayData = week.days[dayIndex];
+  const dayLabel = selectedDayData.isToday
+    ? 'today'
+    : new Date(selectedDayData.key + 'T12:00:00').toLocaleDateString('en-GB', { weekday: 'long' });
+
+  const openComposer = (title?: string, platform?: string) => {
+    if (Platform.OS !== 'web') Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    if (onOpenPostComposer) onOpenPostComposer(title, platform);
+    else {
+      triggerModalPop();
+      setShowScheduleModal(true);
+    }
+  };
+  const openIdeas = () => {
+    if (onOpenCreateIdea) onOpenCreateIdea();
+    else onNavigateTab?.('create');
+  };
   const [activeTab, setActiveTab] = useState<TabType>('create');
   const [selectedDay, setSelectedDay] = useState<number>(15);
   const [calendarSelectedDay, setCalendarSelectedDay] = useState<number>(15);
@@ -217,7 +255,6 @@ export const ScheduleScreen: React.FC<ScheduleScreenProps> = ({
   const [showCompletionModal, setShowCompletionModal] = useState(false);
   const [showNotificationModal, setShowNotificationModal] = useState(false);
   const [showProfileModal, setShowProfileModal] = useState(false);
-  const [showChatModal, setShowChatModal] = useState(false);
 
   // Active Post Selection
   const [selectedPost, setSelectedPost] = useState<ScheduledPost | null>(null);
@@ -340,18 +377,16 @@ export const ScheduleScreen: React.FC<ScheduleScreenProps> = ({
     <SafeAreaView style={[styles.safeArea, isDark && { backgroundColor: '#0C0A12' }]}>
       <StatusBar barStyle={isDark ? "light-content" : "dark-content"} backgroundColor={isDark ? "#0C0A12" : "#FAF8F5"} />
       <View style={[styles.container, isDark && { backgroundColor: '#0C0A12' }]}>
+        <GlassBackdrop />
         {/* 1. TOP AIRY HEADER BAR */}
         <FreeAppHeader
+          backgroundColor="transparent"
+          userPersona={userPersona}
+          onTogglePersona={onTogglePersona}
+          onSwitchToPro={onSwitchToPro}
+          onSwitchToFree={onSwitchToFree}
           onBack={onBack}
           onOpenJarvisPro={onOpenJarvisPro}
-          onOpenMessages={() => {
-            if (onOpenMessages) {
-              onOpenMessages();
-            } else {
-              triggerModalPop();
-              setShowChatModal(true);
-            }
-          }}
           onOpenNotifications={() => {
             triggerModalPop();
             setShowNotificationModal(true);
@@ -370,397 +405,93 @@ export const ScheduleScreen: React.FC<ScheduleScreenProps> = ({
           showsVerticalScrollIndicator={false}
           bounces={true}
         >
-          {/* TOP PILL BADGES */}
-          <View style={styles.topBadgesRow}>
-            <View style={styles.contentSchedulePill}>
-              <Text style={styles.contentSchedulePillText}>CONTENT SCHEDULE</Text>
+          {/* HEADLINE — same two-line structure on every screen size */}
+          <Reanimated.View entering={FadeInUp.duration(500)} style={styles.headline}>
+            <FitLines
+              lines={['Your posts,', <Text key="p" style={styles.headlineAccent}>planned clearly</Text>]}
+              textStyle={styles.headlineText}
+              maxFontSize={34}
+              align="left"
+              accessibilityLabel="Your posts, planned clearly"
+            />
+          </Reanimated.View>
+
+          {/* 1. TODAY */}
+          <Reanimated.View entering={FadeInUp.delay(100).duration(550)}>
+            <TodayCard today={week.days[week.todayIndex]} onSchedule={() => openComposer()} onIdea={openIdeas} />
+          </Reanimated.View>
+
+          {/* 2. THIS WEEK */}
+          <Reanimated.View entering={FadeInUp.delay(200).duration(550)}>
+            <View style={styles.weekHeader}>
+              <Text style={[styles.sectionLabel, styles.flex]}>This week</Text>
+              <Pressable onPress={() => setCalendarOpen(true)} hitSlop={8} style={styles.calLink} accessibilityRole="button">
+                <Svg width={14} height={14} viewBox="0 0 24 24" fill="none">
+                  <Rect x="3" y="4" width="18" height="17" rx="3" stroke={ds.purple} strokeWidth={2.2} />
+                  <Path d="M16 2v4M8 2v4M3 10h18" stroke={ds.purple} strokeWidth={2.2} strokeLinecap="round" />
+                </Svg>
+                <Text style={styles.calLinkText}>Calendar</Text>
+              </Pressable>
             </View>
-          </View>
-
-          {/* HEADLINE & SUBTITLE */}
-          <Text
-            style={styles.mainHeading}
-            numberOfLines={1}
-            adjustsFontSizeToFit={true}
-            minimumFontScale={0.8}
-          >
-            Your posts, planned clearly.
-          </Text>
-          <Text style={styles.mainSubtitle}>
-            See what’s live today, what’s next, and what needs finishing.
-          </Text>
-
-          {/* 1. TODAY HERO CARD */}
-          <View style={styles.todayHeroCard}>
-            <View style={styles.todayHeaderRow}>
-              <Text style={styles.todayMainTitle}>Today</Text>
-              <Text style={styles.todayStatusSubtle}>
-                1 scheduled <Text style={styles.todayStatusDot}>·</Text> 1 draft
-              </Text>
-            </View>
-
-            <Text style={styles.postsPlannedBig}>
-              <Text style={{ color: '#582CDB', fontWeight: '700' }}>3 </Text>
-              posts planned
+            <Text style={styles.sectionSub}>
+              {week.plannedCount === 0
+                ? 'Nothing planned yet'
+                : `${week.plannedCount} planned${week.draftCount ? ` · ${week.draftCount} draft${week.draftCount === 1 ? '' : 's'}` : ''}${
+                    week.openDays ? ` · ${week.openDays} open day${week.openDays === 1 ? '' : 's'}` : ''
+                  }`}
             </Text>
-            <Text style={styles.nextPostSub}>Next post: 11:30 AM</Text>
+            <WeekStrip days={week.days} selected={dayIndex} onSelect={setDayIndex} />
+          </Reanimated.View>
 
-            {/* Posting Progress */}
-            <Text style={styles.progressSubLabel}>Today&apos;s posting progress: 1 / 3 complete</Text>
-            <View style={styles.progressBarTrack}>
-              <View style={[styles.progressBarFill, { width: '33.3%' }]} />
-            </View>
+          {/* 3. SELECTED DAY */}
+          <Reanimated.View key={selectedDayData.key} entering={FadeIn.duration(260)} style={styles.dayList}>
+            <Text style={styles.dayTitle}>{selectedDayData.isToday ? "Today's posts" : `${dayLabel}'s posts`}</Text>
+            {selectedDayData.posts.length === 0 ? (
+              <EmptyDay label={dayLabel} isPast={selectedDayData.isPast} onPlan={() => openComposer()} />
+            ) : (
+              selectedDayData.posts.map((p, i) => (
+                <Reanimated.View key={p.id} entering={FadeInUp.delay(60 * i).duration(300)}>
+                  <PostRow post={p} onPress={() => openComposer(p.title, p.platform)} />
+                </Reanimated.View>
+              ))
+            )}
+          </Reanimated.View>
 
-            {/* Streak Shield Banner (Compact Single Line) */}
-            <View style={styles.streakBannerBox}>
-              <Text style={styles.streakBannerFlame}>🔥</Text>
-              <Text
-                style={styles.streakBannerText}
-                numberOfLines={1}
-                adjustsFontSizeToFit={true}
-                minimumFontScale={0.85}
-              >
-                Posting today protects your <Text style={{ fontWeight: '800', color: '#171420' }}>{userProfile?.streakCount || 1}-day streak</Text>
+          {/* 4. PLATFORM MIX (only once there's something planned) */}
+          {week.platformMix.length > 0 && (
+            <Reanimated.View entering={FadeInUp.delay(300).duration(550)} style={styles.section}>
+              <PlatformMixCard mix={week.platformMix} />
+            </Reanimated.View>
+          )}
+
+          {/* 5. JARVIS BEST TIME */}
+          <Reanimated.View entering={FadeInUp.delay(400).duration(550)} style={styles.section}>
+            <BestTimeCard orb={<JarvisOrb size={32} />} time={week.bestTime} isNewUser={isNewUser} onUse={() => openComposer()} />
+          </Reanimated.View>
+
+          {/* Pro: auto-post. Free: a quiet Pro note */}
+          {tier === 'pro' ? (
+            <Reanimated.View entering={FadeInUp.delay(480).duration(550)} style={styles.section}>
+              <AutoPostCard isNewUser={isNewUser} />
+            </Reanimated.View>
+          ) : (
+            <Pressable onPress={onOpenJarvisPro} hitSlop={6} style={styles.proNote} accessibilityRole="button">
+              <Text style={styles.proNoteText}>
+                Free plans let you plan and track posts. <Text style={styles.proNoteLink}>Pro posts for you at the best time.</Text>
               </Text>
-            </View>
-
-            {/* Actions: Primary Schedule Button + Quiet Secondary Link */}
-            <View style={styles.todayActionButtonsRow}>
-              <Pressable
-                style={({ pressed }) => [styles.scheduleNewPostBtn, pressed && styles.btnPressed]}
-                onPress={() => {
-                  if (Platform.OS !== 'web') {
-                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-                  }
-                  if (onOpenPostComposer) {
-                    onOpenPostComposer();
-                  } else {
-                    triggerModalPop();
-                    setShowScheduleModal(true);
-                  }
-                }}
-              >
-                <Text style={styles.scheduleNewPostBtnText}>Schedule New Post</Text>
-              </Pressable>
-
-              <Pressable
-                style={({ pressed }) => [styles.createFromIdeaQuietBtn, pressed && styles.btnPressed]}
-                onPress={() => {
-                  if (Platform.OS !== 'web') {
-                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-                  }
-                  if (onOpenCreateIdea) {
-                    onOpenCreateIdea();
-                  } else if (onNavigateTab) {
-                    onNavigateTab('create');
-                  }
-                }}
-                hitSlop={8}
-              >
-                <Text style={styles.createFromIdeaQuietText}>
-                  ✨ <Text style={{ textDecorationLine: 'underline' }}>Create from Idea</Text> →
-                </Text>
-              </Pressable>
-            </View>
-          </View>
-
-          {/* 2. THIS WEEK STRIP & VIEW FULL CALENDAR */}
-          <View style={styles.weekHeaderRow}>
-            <Text style={styles.weekTitle} numberOfLines={1} adjustsFontSizeToFit>
-              This week: 8 posts planned
-            </Text>
-            <Pressable
-              onPress={() => {
-                triggerModalPop();
-                setShowCalendarModal(true);
-              }}
-              hitSlop={8}
-            >
-              <Text style={styles.viewFullCalendarLink}>View Full Calendar</Text>
             </Pressable>
-          </View>
-
-          <View style={styles.calendarStrip}>
-            {WEEK_DAYS.map((dayItem) => {
-              const isSelected = selectedDay === dayItem.date;
-              return (
-                <Pressable
-                  key={dayItem.date}
-                  onPress={() => {
-                    if (Platform.OS !== 'web') {
-                      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                    }
-                    setSelectedDay(dayItem.date);
-                  }}
-                  style={[
-                    styles.calendarDayPill,
-                    isSelected && styles.calendarDayPillActive,
-                  ]}
-                >
-                  <Text style={[styles.calendarDayLetter, isSelected && styles.calendarDayLetterActive]}>
-                    {dayItem.day}
-                  </Text>
-                  <Text style={[styles.calendarDayNum, isSelected && styles.calendarDayNumActive]}>
-                    {dayItem.date}
-                  </Text>
-                  {dayItem.isToday && <View style={[styles.todayIndicatorDot, isSelected && { backgroundColor: '#F59E0B' }]} />}
-                </Pressable>
-              );
-            })}
-          </View>
-
-          {/* 3. TODAY'S SCHEDULE LIST */}
-          <View style={styles.sectionHeaderRow}>
-            <Text style={styles.sectionHeading}>Today&apos;s Schedule</Text>
-          </View>
-
-          <View style={styles.scheduleList}>
-            {/* Post 1: Scheduled */}
-            <View style={styles.scheduleCard}>
-              <View style={styles.scheduleCardLeft}>
-                <View style={styles.postPlatformRow}>
-                  <View style={styles.postPlatformBrandRow}>
-                    <SocialBrandIcon platform="tiktok" size={12} />
-                    <Text style={styles.postPlatformText} numberOfLines={1} ellipsizeMode="tail">
-                      TikTok · 11:30 AM
-                    </Text>
-                  </View>
-                  <View style={styles.postStatusTagPurple}>
-                    <Text style={styles.postStatusTagPurpleText}>Scheduled</Text>
-                  </View>
-                </View>
-                <Text style={styles.postItemTitle} numberOfLines={2} ellipsizeMode="tail">
-                  3 creator mistakes I stopped making this year
-                </Text>
-              </View>
-
-              <Pressable
-                style={({ pressed }) => [styles.viewPostBtn, pressed && styles.btnPressed]}
-                onPress={() => {
-                  setSelectedPost(posts[0]);
-                  triggerModalPop();
-                  setShowViewPostModal(true);
-                }}
-              >
-                <Text style={styles.viewPostBtnText}>View Post</Text>
-              </Pressable>
-            </View>
-
-            {/* Post 2: Draft */}
-            <View style={[styles.scheduleCard, { borderLeftWidth: 3.5, borderLeftColor: '#F59E0B' }]}>
-              <View style={styles.scheduleCardLeft}>
-                <View style={styles.postPlatformRow}>
-                  <View style={styles.postPlatformBrandRow}>
-                    <SocialBrandIcon platform="instagram" size={12} />
-                    <Text style={styles.postPlatformText} numberOfLines={1} ellipsizeMode="tail">
-                      Instagram · 7:30 PM
-                    </Text>
-                  </View>
-                  <View style={styles.postStatusTagYellow}>
-                    <Text style={styles.postStatusTagYellowText}>Draft</Text>
-                  </View>
-                </View>
-                <Text style={styles.postItemTitle} numberOfLines={2} ellipsizeMode="tail">
-                  One thing I wish I knew before creating
-                </Text>
-              </View>
-
-              <Pressable
-                style={({ pressed }) => [styles.finishDraftBtn, pressed && styles.btnPressed]}
-                onPress={() => {
-                  if (Platform.OS !== 'web') {
-                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                  }
-                  if (onOpenPostComposer) {
-                    onOpenPostComposer('One thing I wish I knew before creating', 'instagram');
-                  } else {
-                    triggerModalPop();
-                    setShowFinishDraftModal(true);
-                  }
-                }}
-              >
-                <Text style={styles.finishDraftBtnText}>Finish Draft</Text>
-              </Pressable>
-            </View>
-          </View>
-
-          {/* 4. WEEKLY PLATFORM MIX CARD */}
-          <View style={styles.platformLoadCard}>
-            <Text style={styles.platformLoadTitle}>Weekly Platform Mix</Text>
-
-            <View style={styles.loadRowsContainer}>
-              {/* TikTok */}
-              <View style={styles.loadRow}>
-                <View style={styles.loadLabelRow}>
-                  <View style={styles.loadPlatformNameRow}>
-                    <SocialBrandIcon platform="tiktok" size={13} />
-                    <Text style={styles.loadPlatformName}>TikTok</Text>
-                  </View>
-                  <Text style={styles.loadCountText}>3 posts</Text>
-                </View>
-                <View style={styles.loadTrack}>
-                  <View style={[styles.loadFill, { width: '60%', backgroundColor: '#582CDB' }]} />
-                </View>
-              </View>
-
-              {/* Instagram */}
-              <View style={styles.loadRow}>
-                <View style={styles.loadLabelRow}>
-                  <View style={styles.loadPlatformNameRow}>
-                    <SocialBrandIcon platform="instagram" size={13} />
-                    <Text style={styles.loadPlatformName}>Instagram</Text>
-                  </View>
-                  <Text style={styles.loadCountText}>2 posts</Text>
-                </View>
-                <View style={styles.loadTrack}>
-                  <View style={[styles.loadFill, { width: '40%', backgroundColor: '#582CDB' }]} />
-                </View>
-              </View>
-
-              {/* YouTube */}
-              <View style={styles.loadRow}>
-                <View style={styles.loadLabelRow}>
-                  <View style={styles.loadPlatformNameRow}>
-                    <SocialBrandIcon platform="youtube" size={13} />
-                    <Text style={styles.loadPlatformName}>YouTube</Text>
-                  </View>
-                  <Text style={styles.loadCountText}>2 posts</Text>
-                </View>
-                <View style={styles.loadTrack}>
-                  <View style={[styles.loadFill, { width: '40%', backgroundColor: '#582CDB' }]} />
-                </View>
-              </View>
-            </View>
-
-            <Text style={styles.loadFooterNote}>*TikTok is your focus this week.*</Text>
-          </View>
-
-          {/* 5. SCHEDULE HEALTH CARD */}
-          <View style={styles.healthCard}>
-            <Text style={styles.healthTitle}>Schedule Health</Text>
-
-            <View style={styles.healthItemsList}>
-              <View style={styles.healthItem}>
-                <View style={styles.healthItemIconWrap}>
-                  <Svg width={14} height={14} viewBox="0 0 24 24" fill="none">
-                    <Path d="M20 6L9 17L4 12" stroke="#582CDB" strokeWidth="2.8" strokeLinecap="round" strokeLinejoin="round" />
-                  </Svg>
-                </View>
-                <Text style={styles.healthItemText}>
-                  <Text style={styles.healthItemBoldNum}>8</Text> posts planned this week
-                </Text>
-              </View>
-
-              <View style={styles.healthItem}>
-                <View style={styles.healthItemIconWrap}>
-                  <Svg width={14} height={14} viewBox="0 0 24 24" fill="none">
-                    <Rect x="4" y="4" width="16" height="16" rx="3.5" stroke="#D97706" strokeWidth="2" strokeLinecap="round" />
-                    <Path d="M8 9H16M8 13H13" stroke="#D97706" strokeWidth="2" strokeLinecap="round" />
-                  </Svg>
-                </View>
-                <Text style={styles.healthItemText}>
-                  <Text style={styles.healthItemBoldNum}>2</Text> drafts need finishing
-                </Text>
-              </View>
-
-              <View style={styles.healthItem}>
-                <View style={styles.healthItemIconWrap}>
-                  <Svg width={14} height={14} viewBox="0 0 24 24" fill="none">
-                    <Circle cx="12" cy="12" r="9" stroke="#64748B" strokeWidth="2" />
-                    <Path d="M12 7V12L15 15" stroke="#64748B" strokeWidth="2" strokeLinecap="round" />
-                  </Svg>
-                </View>
-                <Text style={styles.healthItemText}>
-                  <Text style={styles.healthItemBoldNum}>1</Text> open slot tomorrow
-                </Text>
-              </View>
-            </View>
-
-            <Pressable
-              style={({ pressed }) => [styles.fillTomorrowBtn, pressed && styles.btnPressed]}
-              onPress={() => {
-                if (Platform.OS !== 'web') {
-                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-                }
-                if (onOpenPostComposer) {
-                  onOpenPostComposer('3 unexpected creator hacks that work this year', 'tiktok');
-                } else {
-                  setNewPostTitle('3 unexpected creator hacks that work this year');
-                  setSelectedScheduleDate('Tomorrow · Aug 30');
-                  triggerModalPop();
-                  setShowScheduleModal(true);
-                }
-              }}
-            >
-              <Text style={styles.fillTomorrowBtnText}>Fill Tomorrow&apos;s Slot</Text>
-            </Pressable>
-          </View>
-
-          {/* 6. JARVIS RECOMMENDATION: PEAK REACH WINDOW */}
-          <View style={styles.jarvisRecCard}>
-            <View style={styles.jarvisRecHeader}>
-              <Animated.View
-                style={[
-                  styles.jarvisFlameCircle,
-                  { transform: [{ translateY: flameFloatY }] },
-                ]}
-              >
-                <Image
-                  source={require('../../assets/images/jarvis-core-flame.png')}
-                  style={styles.jarvisFlameIcon}
-                  resizeMode="contain"
-                />
-              </Animated.View>
-              <View>
-                <Text style={styles.jarvisRecTag}>JARVIS RECOMMENDATION</Text>
-                <Text style={styles.jarvisRecTitle}>Peak Reach Window</Text>
-              </View>
-            </View>
-
-            {/* Structured Recommendation Block */}
-            <View style={styles.jarvisStructuredBlock}>
-              {/* Row 1: Strongest Window */}
-              <View style={styles.jarvisStructuredItem}>
-                <Text style={styles.jarvisItemHighlightText}>7:30 PM</Text>
-                <Text style={styles.jarvisItemSubText}>Your strongest posting window today</Text>
-              </View>
-
-              {/* Row 2: Instagram Reel Draft */}
-              <View style={styles.jarvisStructuredItem}>
-                <View style={styles.jarvisPlatformRow}>
-                  <SocialBrandIcon platform="instagram" size={13} />
-                  <Text style={styles.jarvisPlatformTitle}>Instagram Reel</Text>
-                </View>
-                <Text style={styles.jarvisItemSubText}>Draft ready to finish</Text>
-              </View>
-            </View>
-
-            <Pressable
-              style={({ pressed }) => [styles.useSuggestionBtn, pressed && styles.btnPressed]}
-              onPress={() => {
-                if (Platform.OS !== 'web') {
-                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-                }
-                if (onOpenPostComposer) {
-                  onOpenPostComposer('One thing I wish I knew before creating', 'instagram');
-                } else {
-                  triggerModalPop();
-                  setShowFinishDraftModal(true);
-                }
-              }}
-            >
-              <Text style={styles.useSuggestionBtnText}>Use Suggestion →</Text>
-            </Pressable>
-          </View>
-
-          {/* Footer Pro Note - Subtler & Quieter */}
-          <Text style={styles.footerProNote}>
-            Free users can plan and track posts · <Text style={{ color: '#7C3AED', fontWeight: '600' }}>Pro unlocks advanced AI scheduling</Text>
-          </Text>
+          )}
 
           {/* Bottom Space for Floating Tab Bar */}
           <View style={{ height: 110 }} />
         </ScrollView>
+
+        <CalendarSheet
+          visible={calendarOpen}
+          onClose={() => setCalendarOpen(false)}
+          persona={isNewUser ? 'new' : 'returning'}
+          onPlanPost={() => openComposer()}
+        />
 
         {/* FLOATING LIQUID GLASS TAB BAR */}
         <FloatingTabBar activeTab={activeTab} onTabPress={handleTabPress} />
@@ -1319,37 +1050,6 @@ export const ScheduleScreen: React.FC<ScheduleScreenProps> = ({
           initialProfile={userProfile}
           onSaveProfile={onSaveProfile}
         />
-
-        {/* CHAT MODAL */}
-        <Modal
-          visible={showChatModal}
-          transparent={true}
-          animationType="fade"
-          onRequestClose={() => setShowChatModal(false)}
-        >
-          <View style={styles.modalOverlay}>
-            <Animated.View style={[styles.modalCard, { transform: [{ scale: modalPopScale }] }]}>
-              <View style={styles.modalHeaderRow}>
-                <View>
-                  <Text style={styles.modalTitle}>Squad Chat</Text>
-                  <Text style={styles.modalSubtitle}>Schedule co-posting times</Text>
-                </View>
-                <Pressable onPress={() => setShowChatModal(false)} style={styles.modalCloseCircle} hitSlop={8}>
-                  <Text style={styles.modalCloseCross}>✕</Text>
-                </Pressable>
-              </View>
-
-              <View style={styles.chatCard}>
-                <Text style={{ fontSize: 12, fontWeight: '800', color: '#582CDB', marginBottom: 2 }}>🤖 Jarvis Assistant</Text>
-                <Text style={{ fontSize: 13, color: '#334155' }}>Your peak audience reach starts at 7:30 PM today!</Text>
-              </View>
-
-              <Pressable style={styles.modalFullBtn} onPress={() => setShowChatModal(false)}>
-                <Text style={styles.modalFullBtnText}>Close</Text>
-              </Pressable>
-            </Animated.View>
-          </View>
-        </Modal>
       </View>
     </SafeAreaView>
   );
@@ -1358,13 +1058,27 @@ export const ScheduleScreen: React.FC<ScheduleScreenProps> = ({
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#FAF8F5',
+    backgroundColor: ds.bg,
   },
   container: {
     flex: 1,
     width: '100%',
-    backgroundColor: '#FAF8F5',
   },
+  flex: { flex: 1 },
+  headline: { marginTop: 4, marginBottom: 16 },
+  headlineText: { fontWeight: '800', letterSpacing: -0.8, color: ds.ink },
+  headlineAccent: { color: ds.purple },
+  weekHeader: { flexDirection: 'row', alignItems: 'center', marginTop: 24, gap: 12 },
+  sectionLabel: { fontSize: 17, fontWeight: '800', color: ds.ink, letterSpacing: -0.2 },
+  sectionSub: { fontSize: 12.5, fontWeight: '600', color: ds.text3, marginTop: 2, marginBottom: 10 },
+  calLink: { flexDirection: 'row', alignItems: 'center', gap: 5, paddingHorizontal: 10, height: 28, borderRadius: 999, backgroundColor: ds.lavender },
+  calLinkText: { fontSize: 12, fontWeight: '800', color: ds.purple },
+  dayList: { gap: 10, marginTop: 16 },
+  dayTitle: { fontSize: 15, fontWeight: '800', color: ds.text2 },
+  section: { marginTop: 24 },
+  proNote: { marginTop: 18, alignItems: 'center', paddingHorizontal: 12 },
+  proNoteText: { fontSize: 12.5, lineHeight: 18, color: ds.text3, textAlign: 'center' },
+  proNoteLink: { color: ds.purple, fontWeight: '800' },
   btnPressed: {
     opacity: 0.9,
     transform: [{ scale: 0.98 }],
@@ -1481,10 +1195,11 @@ const styles = StyleSheet.create({
 
   // HEADLINE
   mainHeading: {
-    fontSize: Platform.OS === 'web' ? ('clamp(18px, 4.5vw, 22px)' as any) : sFont(20),
+    fontSize: Platform.OS === 'web' ? ('clamp(15px, 3.8vw, 17px)' as any) : sFont(16),
     fontWeight: '700',
     color: '#171420',
     letterSpacing: -0.35,
+    lineHeight: 22,
     marginBottom: 4,
   },
   mainSubtitle: {

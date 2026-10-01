@@ -2,7 +2,6 @@ import React, { useState, useRef, useEffect } from 'react';
 import {
   StyleSheet,
   View,
-  Text,
   ScrollView,
   Pressable,
   Platform,
@@ -13,8 +12,9 @@ import {
   useWindowDimensions,
   SafeAreaView,
   StatusBar,
-  TextInput,
 } from 'react-native';
+import { Text, TextInput } from '../components/ui/AppText';
+import { BrandLogo } from '../components/BrandLogo';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as Haptics from 'expo-haptics';
 import Svg, { Path, Circle, Rect } from 'react-native-svg';
@@ -31,7 +31,6 @@ interface ProIdeaStrategyScreenProps {
   onBack: () => void;
   onLogout?: () => void;
   onOpenSchedule?: () => void;
-  onOpenMessages?: () => void;
   onOpenJarvisPro?: () => void;
   onNavigateTab?: (tab: TabType) => void;
   onUseIdea?: (ideaTitle: string) => void;
@@ -56,7 +55,6 @@ export const ProIdeaStrategyScreen: React.FC<ProIdeaStrategyScreenProps> = ({
   onBack,
   onLogout,
   onOpenSchedule,
-  onOpenMessages,
   onOpenJarvisPro,
   onNavigateTab,
   onUseIdea,
@@ -256,18 +254,7 @@ export const ProIdeaStrategyScreen: React.FC<ProIdeaStrategyScreenProps> = ({
             </Pressable>
 
             {/* Mascot */}
-            <Animated.View
-              style={[
-                styles.headerLogoWrapper,
-                { transform: [{ translateY: flameFloatY }] },
-              ]}
-            >
-              <Image
-                source={require('../../assets/images/jarvis-ghost-clean.png')}
-                style={styles.headerGhostLogo}
-                resizeMode="contain"
-              />
-            </Animated.View>
+            <BrandLogo size="sm" />
 
             {/* Mode Switcher Pill */}
             <Pressable
@@ -296,25 +283,6 @@ export const ProIdeaStrategyScreen: React.FC<ProIdeaStrategyScreenProps> = ({
 
           {/* Right Header */}
           <View style={styles.headerRightGroup}>
-            <Pressable
-              style={({ pressed }) => [styles.headerIconBtn, pressed && styles.btnPressed]}
-              hitSlop={8}
-              onPress={() => {
-                if (onOpenMessages) onOpenMessages();
-                else if (onNavigateTab) onNavigateTab('match');
-              }}
-            >
-              <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
-                <Path
-                  d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"
-                  stroke="#171420"
-                  strokeWidth="2.2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </Svg>
-            </Pressable>
-
             <Pressable
               style={({ pressed }) => [styles.headerIconBtn, pressed && styles.btnPressed]}
               hitSlop={8}
@@ -401,10 +369,8 @@ export const ProIdeaStrategyScreen: React.FC<ProIdeaStrategyScreenProps> = ({
             </View>
 
             <Text
-              style={[
-                styles.mainTitleText,
-                { fontSize: titleFontSize, letterSpacing: -0.3 },
-              ]}
+              style={styles.mainTitleText}
+              numberOfLines={2}
             >
               Find the idea with the strongest upside.
             </Text>
@@ -1144,10 +1110,12 @@ const styles = StyleSheet.create({
     letterSpacing: 0.3,
   },
   mainTitleText: {
-    fontSize: 17,
+    fontSize: Platform.OS === 'web' ? ('clamp(15px, 3.8vw, 17px)' as any) : sFont(16),
     fontWeight: '700',
     color: '#171420',
-    letterSpacing: -0.3,
+    letterSpacing: -0.35,
+    lineHeight: 22,
+    marginBottom: 4,
   },
   mainSubText: {
     fontSize: 12.5,

@@ -3,7 +3,6 @@ import React, { useState, useRef, useEffect } from 'react';
 import {
   StyleSheet,
   View,
-  Text,
   Pressable,
   ScrollView,
   Platform,
@@ -13,14 +12,18 @@ import {
   Animated,
   Modal,
   Dimensions,
-  TextInput,
 } from 'react-native';
+import { Text, TextInput } from '../components/ui/AppText';
+import { isStage1Platform, STAGE_2_ENABLED } from '../config/features';
+import { GrowthDayZeroPreview } from '../components/growth/GrowthDayZeroPreview';
+import { BrandLogo } from '../components/BrandLogo';
 import Svg, { Path, Circle, Rect, Defs, LinearGradient as SvgLinearGradient, Stop } from 'react-native-svg';
 import * as Haptics from 'expo-haptics';
 import { LinearGradient } from 'expo-linear-gradient';
 import { FloatingTabBar, TabType } from '../components/FloatingTabBar';
 import { BrandToast } from '../components/BrandToast';
 import { UserProfileModal, UserProfileData } from '../components/UserProfileModal';
+import { HeaderDualModePills, UserPersona } from '../components/HeaderDualModePills';
 import { sFont, isNarrowScreen } from '../utils/responsive';
 
 interface GrowthPlatformAccount {
@@ -35,12 +38,13 @@ interface GrowthPlatformAccount {
   bgTint: string;
 }
 
+// Only Stage 1 platforms are shown; other entries stay for later stages.
 const INITIAL_GROWTH_PLATFORMS: GrowthPlatformAccount[] = [
   {
     id: 'tiktok',
     name: 'TikTok',
     handle: '@pablo.creates',
-    followers: '14.2k',
+    followers: '14.2K',
     growthPct: '+12.4%',
     barWidth: '74%',
     connected: true,
@@ -51,7 +55,7 @@ const INITIAL_GROWTH_PLATFORMS: GrowthPlatformAccount[] = [
     id: 'instagram',
     name: 'Instagram · Reel',
     handle: '@pablocreates',
-    followers: '25.6k',
+    followers: '25.6K',
     growthPct: '+8.1%',
     barWidth: '58%',
     connected: true,
@@ -62,7 +66,7 @@ const INITIAL_GROWTH_PLATFORMS: GrowthPlatformAccount[] = [
     id: 'youtube',
     name: 'YouTube · Short',
     handle: '@pablofilms',
-    followers: '22.4k',
+    followers: '22.4K',
     growthPct: '+4.2%',
     barWidth: '42%',
     connected: true,
@@ -70,17 +74,67 @@ const INITIAL_GROWTH_PLATFORMS: GrowthPlatformAccount[] = [
     bgTint: '#FEF2F2',
   },
   {
+    id: 'facebook',
+    name: 'Facebook',
+    handle: '@pablocreator',
+    followers: '5.2K',
+    growthPct: '+3.8%',
+    barWidth: '32%',
+    connected: false,
+    color: '#1877F2',
+    bgTint: '#EFF6FF',
+  },
+  {
     id: 'threads',
     name: 'Threads',
     handle: '@pablocreates',
-    followers: '3.6k',
+    followers: '3.6K',
     growthPct: '+5.1%',
     barWidth: '28%',
     connected: false,
     color: '#000000',
     bgTint: '#F8FAFC',
   },
-];
+  {
+    id: 'pinterest',
+    name: 'Pinterest',
+    handle: '@pablopins',
+    followers: '8.9K',
+    growthPct: '+6.4%',
+    barWidth: '36%',
+    connected: false,
+    color: '#E60023',
+    bgTint: '#FFF1F2',
+  },
+].filter((p) => isStage1Platform(p.id));
+
+const parseFollowerCount = (str: string): number => {
+  const clean = str.replace(/[^0-9.]/g, '');
+  const val = parseFloat(clean);
+  if (isNaN(val)) return 0;
+  if (str.toUpperCase().includes('K')) return Math.round(val * 1000);
+  if (str.toUpperCase().includes('M')) return Math.round(val * 1000000);
+  return Math.round(val);
+};
+
+const getPlatformApiWindow = (id: string): string => {
+  switch (id) {
+    case 'instagram':
+      return 'Instagram (7D API)';
+    case 'threads':
+      return 'Threads (7D API)';
+    case 'tiktok':
+      return 'TikTok (28D API)';
+    case 'facebook':
+      return 'Facebook (28D API)';
+    case 'youtube':
+      return 'YouTube (30D API)';
+    case 'pinterest':
+      return 'Pinterest (30D API)';
+    default:
+      return 'Recent API';
+  }
+};
 
 interface TopPostData {
   id: string;
@@ -110,11 +164,11 @@ interface TopPostData {
 const TOP_POSTS_DATA: TopPostData[] = [
   {
     id: 'tp1',
-    title: '3 creator mistakes to avoid when scaling from 10k to 50k...',
+    title: '3 creator mistakes to avoid when scaling from 10k to 50k',
     thumbnail: require('../../assets/images/elena-avatar.jpg'),
     platform: 'tiktok',
     format: 'REEL',
-    date: 'May 18, 2024 • 7:30 PM',
+    date: 'May 18 • 7:30 PM',
     views: '45.2K',
     viewsNumeric: 45200,
     likes: '3,840',
@@ -123,22 +177,22 @@ const TOP_POSTS_DATA: TopPostData[] = [
     saves: '924',
     reach: '58.4K',
     newFollowers: '+340',
-    hookRetention: '91% (Top 1%)',
-    completionRate: '68%',
-    avgWatchTime: '0:38s / 0:45s',
+    hookRetention: '91% (Top 1% of your posts)',
+    completionRate: '68% completed',
+    avgWatchTime: '38s / 45s (84% viewed)',
     trafficExplore: '82%',
     trafficFeed: '12%',
     trafficDirect: '6%',
-    jarvisAudit: 'Your 3-second pattern interrupt hook retained 91% of viewers, driving 3.8x above-average algorithm recommendation on the For You page.',
+    jarvisAudit: 'Your 3-second pattern interrupt hook retained 91% of viewers, generating 3.8× more algorithmic recommendations than your average Reel.',
     repurposeIdea: 'Convert this 3-mistakes script into a 7-slide Instagram Carousel & X Thread.',
   },
   {
     id: 'tp2',
-    title: 'Daily planning workflow that saved me 15 hours every week...',
+    title: 'Daily planning workflow that saved me 15 hours every week',
     thumbnail: require('../../assets/images/david-avatar.jpg'),
     platform: 'instagram',
     format: 'CAROUSEL',
-    date: 'May 22, 2024 • 8:15 PM',
+    date: 'May 22 • 8:15 PM',
     views: '18.4K',
     viewsNumeric: 18400,
     likes: '1,920',
@@ -147,22 +201,22 @@ const TOP_POSTS_DATA: TopPostData[] = [
     saves: '1,420',
     reach: '29.2K',
     newFollowers: '+185',
-    hookRetention: '88% Slide 1-3',
-    completionRate: '74%',
-    avgWatchTime: '1:12s',
+    hookRetention: '88% Slide 1-3 (Top 3% of your posts)',
+    completionRate: '74% completed',
+    avgWatchTime: '1m 12s / 1m 30s (80% read)',
     trafficExplore: '68%',
     trafficFeed: '24%',
     trafficDirect: '8%',
-    jarvisAudit: 'Highest save-to-reach ratio of the month (4.8%). Viewers bookmarked slide 4 & 5 templates for repeat reference.',
+    jarvisAudit: 'Highest save-to-reach ratio of the month (4.8%). Viewers bookmarked slide 4 & 5 templates for repeat reference, driving 4.2× higher saves than your average Carousel.',
     repurposeIdea: 'Record a 45s talking demo video explaining slide 4 step-by-step.',
   },
   {
     id: 'tp3',
-    title: 'The exact camera setup I used to hit 100k views in 30 days...',
+    title: 'The exact camera setup I used to hit 100k views in 30 days',
     thumbnail: require('../../assets/images/marcus-avatar.jpg'),
     platform: 'youtube',
     format: 'SHORTS',
-    date: 'May 26, 2024 • 6:45 PM',
+    date: 'May 26 • 6:45 PM',
     views: '28.6K',
     viewsNumeric: 28600,
     likes: '2,410',
@@ -171,13 +225,13 @@ const TOP_POSTS_DATA: TopPostData[] = [
     saves: '760',
     reach: '34.8K',
     newFollowers: '+220',
-    hookRetention: '89% (Top 2%)',
-    completionRate: '71%',
-    avgWatchTime: '0:42s / 0:50s',
+    hookRetention: '89% (Top 2% of your posts)',
+    completionRate: '71% completed',
+    avgWatchTime: '42s / 50s (84% viewed)',
     trafficExplore: '76%',
     trafficFeed: '16%',
     trafficDirect: '8%',
-    jarvisAudit: 'Equipment breakdowns with on-screen price callouts achieved 2.8x higher comment engagement and question volume.',
+    jarvisAudit: 'Equipment breakdowns with on-screen price callouts generated 2.8× more comments and questions than your average Short.',
     repurposeIdea: 'Create a downloadable kit checklist PDF to offer as a lead magnet.',
   },
 ];
@@ -217,16 +271,16 @@ interface ProGrowthScreenProps {
   onBackToDashboard?: () => void;
   onLogout?: () => void;
   onNavigateTab?: (tab: TabType) => void;
-  onOpenMessages?: () => void;
   onOpenJarvisPro?: () => void;
   onOpenAudienceBreakdown?: () => void;
   onOpenPostPerformance?: () => void;
   onOpenPlatformGrowth?: () => void;
-  onOpenEarnings?: () => void;
   onOpenSchedule?: () => void;
   onOpenPostComposer?: (prefillTitle?: string, prefillPlatform?: string) => void;
   onOpenScript?: () => void;
   onSwitchToFree?: () => void;
+  userPersona?: UserPersona;
+  onTogglePersona?: () => void;
   userProfile?: UserProfileData;
   onSaveProfile?: (updated: UserProfileData) => void;
 }
@@ -276,22 +330,22 @@ const TIMEFRAME_CONFIGS = {
     ],
     stepSpacing: 65,
     formatSummary: {
-      topFormat: 'Talking Reels (48% Reach)',
-      topConversion: 'Carousels (8.4% Saves)',
+      topFormat: 'Talking Reels (35% of reach)',
+      topConversion: 'Carousels (8.4% saves)',
       avgEngagement: '8.6%',
       insight: 'This week, 7-slide Carousels outperformed static posts by 3.8x in bookmarks.',
       formats: [
-        { name: 'Talking Reels', icon: '🎥', reach: '18.4K', barHeight: 85, color: '#582CDB', retention: '74%', saveRate: '4.8%', delta: '+280 Fans' },
-        { name: 'Carousels', icon: '📑', reach: '14.2K', barHeight: 70, color: '#7C3AED', retention: '82%', saveRate: '8.4% (Top Saves 🔥)', delta: '+210 Fans' },
-        { name: 'Shorts', icon: '▶️', reach: '11.8K', barHeight: 55, color: '#F59E0B', retention: '70%', saveRate: '3.6%', delta: '+120 Fans' },
-        { name: 'Text / X', icon: '💬', reach: '8.5K', barHeight: 40, color: '#64748B', retention: '65%', saveRate: '4.2%', delta: '+70 Fans' },
+        { name: 'Talking Reels', icon: '🎥', reach: '18.4K', barHeight: 85, color: '#582CDB', retention: '74%', saveRate: '4.8%', delta: '+280 followers gained' },
+        { name: 'Carousels', icon: '📑', reach: '14.2K', barHeight: 70, color: '#7C3AED', retention: '82%', saveRate: '8.4% (Top Saves 🔥)', delta: '+210 followers gained' },
+        { name: 'Shorts', icon: '▶️', reach: '11.8K', barHeight: 55, color: '#A78BFA', retention: '70%', saveRate: '3.6%', delta: '+120 followers gained' },
+        { name: 'Posts / X', icon: '💬', reach: '8.5K', barHeight: 40, color: '#64748B', retention: '65%', saveRate: '4.2%', delta: '+70 followers gained' },
       ],
     },
     reachSummary: {
       total: '34.8K',
       delta: '+12.4% vs last week',
       engagement: '4.9K',
-      retention: '0:45s avg retention',
+      retention: '45s avg retention',
       igReach: '13.9K',
       igPct: '40%',
       ttReach: '12.5K',
@@ -304,7 +358,7 @@ const TIMEFRAME_CONFIGS = {
       total: '144,320',
       delta: '+680 net this week',
       quality: '97.4%',
-      qualityLabel: 'Tier-1 verified fans',
+      qualityLabel: 'Tier-1 authentic followers',
       igGain: '+252',
       igPct: '37%',
       ttGain: '+231',
@@ -316,13 +370,16 @@ const TIMEFRAME_CONFIGS = {
     getPoint: (i: number, type: 'growth30d' | 'audience') => {
       const days = ['Mon, May 24', 'Tue, May 25', 'Wed, May 26', 'Thu, May 27', 'Fri, May 28', 'Sat, May 29', 'Sun, May 30'];
       if (type === 'growth30d') {
-        const dailyReaches = [4.2, 4.6, 4.9, 5.1, 5.8, 6.4, 3.8];
+        const dailyReaches = ['4.2K', '4.6K', '4.9K', '5.1K', '5.8K', '6.4K', '3.8K'];
         const dailyFollowers = [78, 84, 92, 98, 114, 128, 86];
         const yCoords = [135, 125, 110, 95, 65, 40, 30];
         return {
           date: days[i] || `Day ${i + 1}`,
-          reach: `${dailyReaches[i]}K Daily Reach`,
-          delta: `+${dailyFollowers[i]} Followers (34.8K 7D)`,
+          reach: `${dailyReaches[i]} Daily Reach`,
+          metricLabel: 'Daily Reach',
+          metricValue: dailyReaches[i],
+          deltaFollowers: `+${dailyFollowers[i]} Followers`,
+          periodContext: '34.8K / 7D Total',
           yPos: yCoords[i],
         };
       } else {
@@ -332,7 +389,10 @@ const TIMEFRAME_CONFIGS = {
         return {
           date: days[i] || `Day ${i + 1}`,
           reach: `${audiences[i].toLocaleString()} Total Audience`,
-          delta: `+${dailyGains[i]} Today (▲ Surge)`,
+          metricLabel: 'Total Audience',
+          metricValue: `${(audiences[i] / 1000).toFixed(1)}K`,
+          deltaFollowers: `+${dailyGains[i]} Today`,
+          periodContext: '+680 / 7D Net',
           yPos: yCoords[i],
         };
       }
@@ -364,22 +424,22 @@ const TIMEFRAME_CONFIGS = {
     ],
     stepSpacing: 44,
     formatSummary: {
-      topFormat: 'Talking Reels (50% Reach)',
-      topConversion: 'Carousels (8.6% Saves)',
+      topFormat: 'Talking Reels (36% of reach)',
+      topConversion: 'Carousels (8.6% saves)',
       avgEngagement: '9.1%',
       insight: 'Two-week sprint shows talking storytelling clips have 91% 3-second hook retention.',
       formats: [
-        { name: 'Talking Reels', icon: '🎥', reach: '22.6K', barHeight: 90, color: '#582CDB', retention: '76%', saveRate: '5.1%', delta: '+560 Fans' },
-        { name: 'Carousels', icon: '📑', reach: '16.8K', barHeight: 75, color: '#7C3AED', retention: '85%', saveRate: '8.6% (Top Saves 🔥)', delta: '+430 Fans' },
-        { name: 'Shorts', icon: '▶️', reach: '13.4K', barHeight: 58, color: '#F59E0B', retention: '72%', saveRate: '3.8%', delta: '+240 Fans' },
-        { name: 'Text / X', icon: '💬', reach: '9.8K', barHeight: 42, color: '#64748B', retention: '68%', saveRate: '4.5%', delta: '+120 Fans' },
+        { name: 'Talking Reels', icon: '🎥', reach: '22.6K', barHeight: 90, color: '#582CDB', retention: '76%', saveRate: '5.1%', delta: '+560 followers gained' },
+        { name: 'Carousels', icon: '📑', reach: '16.8K', barHeight: 75, color: '#7C3AED', retention: '85%', saveRate: '8.6% (Top Saves 🔥)', delta: '+430 followers gained' },
+        { name: 'Shorts', icon: '▶️', reach: '13.4K', barHeight: 58, color: '#A78BFA', retention: '72%', saveRate: '3.8%', delta: '+240 followers gained' },
+        { name: 'Posts / X', icon: '💬', reach: '9.8K', barHeight: 42, color: '#64748B', retention: '68%', saveRate: '4.5%', delta: '+120 followers gained' },
       ],
     },
     reachSummary: {
       total: '68.4K',
       delta: '+18.6% vs last 14d',
       engagement: '9.4K',
-      retention: '0:44s avg retention',
+      retention: '44s avg retention',
       igReach: '27.4K',
       igPct: '40%',
       ttReach: '24.6K',
@@ -392,7 +452,7 @@ const TIMEFRAME_CONFIGS = {
       total: '144,320',
       delta: '+1,350 net in 14 days',
       quality: '97.1%',
-      qualityLabel: 'Tier-1 verified fans',
+      qualityLabel: 'Tier-1 authentic followers',
       igGain: '+500',
       igPct: '37%',
       ttGain: '+459',
@@ -407,19 +467,25 @@ const TIMEFRAME_CONFIGS = {
         const dailyFollowers = [68, 72, 75, 82, 80, 86, 92, 96, 102, 108, 116, 124, 132, 97];
         const yPos = 140 - (i / 13) * 105 + Math.sin(i * 0.8) * 6;
         return {
-          date: `May ${i + 17}, 2024`,
+          date: `May ${i + 17}`,
           reach: `${dailyReaches[i] || 4.5}K Daily Reach`,
-          delta: `+${dailyFollowers[i] || 85} Followers (68.4K 14D)`,
+          metricLabel: 'Daily Reach',
+          metricValue: `${dailyReaches[i] || 4.5}K`,
+          deltaFollowers: `+${dailyFollowers[i] || 85} Followers`,
+          periodContext: '68.4K / 14D Total',
           yPos,
         };
       } else {
-        const audienceVal = (142970 + i * 104).toLocaleString();
+        const audienceVal = 142970 + i * 104;
         const dailyGain = 68 + Math.floor(i * 4.8);
         const yPos = 145 - (i / 13) * 115 + Math.sin(i * 0.5) * 5;
         return {
-          date: `May ${i + 17}, 2024`,
-          reach: `${audienceVal} Total Audience`,
-          delta: `+${dailyGain} Today (▲ Surge)`,
+          date: `May ${i + 17}`,
+          reach: `${audienceVal.toLocaleString()} Total Audience`,
+          metricLabel: 'Total Audience',
+          metricValue: `${(audienceVal / 1000).toFixed(1)}K`,
+          deltaFollowers: `+${dailyGain} Today`,
+          periodContext: '+1,350 / 14D Net',
           yPos,
         };
       }
@@ -453,22 +519,22 @@ const TIMEFRAME_CONFIGS = {
     ],
     stepSpacing: 31.5,
     formatSummary: {
-      topFormat: 'Talking Reels (54% Reach)',
-      topConversion: 'Carousels (9.2% Saves)',
+      topFormat: 'Talking Reels (38% of reach)',
+      topConversion: 'Carousels (9.2% saves)',
       avgEngagement: '9.8%',
-      insight: 'Storytelling Reels + Carousel breakdowns produced 82% of all inbound brand inquiries.',
+      insight: 'Storytelling Reels + Carousel breakdowns produced 82% of all high-retention saves and new followers.',
       formats: [
-        { name: 'Talking Reels', icon: '🎥', reach: '28.4K', barHeight: 95, color: '#582CDB', retention: '78%', saveRate: '5.4%', delta: '+1,120 Fans' },
-        { name: 'Carousels', icon: '📑', reach: '19.2K', barHeight: 80, color: '#7C3AED', retention: '88%', saveRate: '9.2% (Top Saves 🔥)', delta: '+840 Fans' },
-        { name: 'Shorts', icon: '▶️', reach: '15.8K', barHeight: 62, color: '#F59E0B', retention: '75%', saveRate: '4.1%', delta: '+360 Fans' },
-        { name: 'Text / X', icon: '💬', reach: '11.2K', barHeight: 45, color: '#64748B', retention: '72%', saveRate: '4.9%', delta: '+160 Fans' },
+        { name: 'Talking Reels', icon: '🎥', reach: '28.4K', barHeight: 95, color: '#582CDB', retention: '78%', saveRate: '5.4%', delta: '+1,120 followers gained' },
+        { name: 'Carousels', icon: '📑', reach: '19.2K', barHeight: 80, color: '#7C3AED', retention: '88%', saveRate: '9.2% (Top Saves 🔥)', delta: '+840 followers gained' },
+        { name: 'Shorts', icon: '▶️', reach: '15.8K', barHeight: 62, color: '#A78BFA', retention: '75%', saveRate: '4.1%', delta: '+360 followers gained' },
+        { name: 'Posts / X', icon: '💬', reach: '11.2K', barHeight: 45, color: '#64748B', retention: '72%', saveRate: '4.9%', delta: '+160 followers gained' },
       ],
     },
     reachSummary: {
       total: '131.0K',
       delta: '+28.4% vs last month',
       engagement: '18.0K',
-      retention: '0:42s avg retention',
+      retention: '42s avg retention',
       igReach: '52.4K',
       igPct: '40%',
       ttReach: '47.2K',
@@ -481,7 +547,7 @@ const TIMEFRAME_CONFIGS = {
       total: '144,320',
       delta: '+2,480 net this month',
       quality: '96.8%',
-      qualityLabel: 'Tier-1 verified fans',
+      qualityLabel: 'Tier-1 authentic followers',
       igGain: '+920',
       igPct: '37%',
       ttGain: '+840',
@@ -496,19 +562,25 @@ const TIMEFRAME_CONFIGS = {
         const followers = 55 + Math.floor(Math.sin(i * 0.7) * 18 + (i / 29) * 35);
         const yPos = 135 - (i / 29) * 80 + Math.sin(i * 0.7) * 16;
         return {
-          date: `May ${i + 1}, 2024`,
+          date: `May ${i + 1}`,
           reach: `${reachVal}K Daily Reach`,
-          delta: `+${followers} Followers (131.0K 30D)`,
+          metricLabel: 'Daily Reach',
+          metricValue: `${reachVal}K`,
+          deltaFollowers: `+${followers} Followers`,
+          periodContext: '131.0K / 30D Total',
           yPos,
         };
       } else {
-        const audienceVal = (141840 + Math.floor(i * 85.5)).toLocaleString();
+        const audienceVal = 141840 + Math.floor(i * 85.5);
         const deltaVal = 55 + Math.floor(Math.sin(i * 0.7) * 18 + (i / 29) * 35);
         const yPos = 145 - (i / 29) * 115 + Math.sin(i * 0.5) * 5;
         return {
-          date: `May ${i + 1}, 2024`,
-          reach: `${audienceVal} Total Audience`,
-          delta: `+${deltaVal} Today (▲ Surge)`,
+          date: `May ${i + 1}`,
+          reach: `${audienceVal.toLocaleString()} Total Audience`,
+          metricLabel: 'Total Audience',
+          metricValue: `${(audienceVal / 1000).toFixed(1)}K`,
+          deltaFollowers: `+${deltaVal} Today`,
+          periodContext: '+2,480 / 30D Net',
           yPos,
         };
       }
@@ -541,42 +613,42 @@ const TIMEFRAME_CONFIGS = {
     ],
     stepSpacing: 65,
     formatSummary: {
-      topFormat: 'Talking Reels (58% Reach)',
-      topConversion: 'Carousels (9.6% Saves)',
+      topFormat: 'Talking Reels (37% of reach)',
+      topConversion: 'Carousels (9.6% saves)',
       avgEngagement: '10.4%',
       insight: 'Quarterly macro review shows video-first portfolio generates 4.2x higher algorithm momentum.',
       formats: [
-        { name: 'Talking Reels', icon: '🎥', reach: '34.8K', barHeight: 100, color: '#582CDB', retention: '82%', saveRate: '5.8%', delta: '+3,240 Fans' },
-        { name: 'Carousels', icon: '📑', reach: '24.6K', barHeight: 85, color: '#7C3AED', retention: '92%', saveRate: '9.6% (Top Saves 🔥)', delta: '+2,380 Fans' },
-        { name: 'Shorts', icon: '▶️', reach: '19.4K', barHeight: 68, color: '#F59E0B', retention: '78%', saveRate: '4.4%', delta: '+820 Fans' },
-        { name: 'Text / X', icon: '💬', reach: '14.8K', barHeight: 48, color: '#64748B', retention: '76%', saveRate: '5.2%', delta: '+400 Fans' },
+        { name: 'Talking Reels', icon: '🎥', reach: '34.8K', barHeight: 100, color: '#582CDB', retention: '82%', saveRate: '5.8%', delta: '+3,240 followers gained' },
+        { name: 'Carousels', icon: '📑', reach: '24.6K', barHeight: 85, color: '#7C3AED', retention: '92%', saveRate: '9.6% (Top Saves 🔥)', delta: '+2,380 followers gained' },
+        { name: 'Shorts', icon: '▶️', reach: '19.4K', barHeight: 68, color: '#A78BFA', retention: '78%', saveRate: '4.4%', delta: '+820 followers gained' },
+        { name: 'Posts / X', icon: '💬', reach: '14.8K', barHeight: 48, color: '#64748B', retention: '76%', saveRate: '5.2%', delta: '+400 followers gained' },
       ],
     },
     reachSummary: {
       total: '368.0K',
       delta: '+42.1% quarterly growth',
       engagement: '52.6K',
-      retention: '0:41s avg retention',
+      retention: '41s avg retention',
       igReach: '147.2K',
       igPct: '40%',
       ttReach: '132.5K',
       ttPct: '36%',
       ytReach: '88.3K',
       ytPct: '24%',
-      insight: 'Quarterly momentum compound rate achieved Top 1% creator tier status.',
+      insight: 'Quarterly momentum compound rate achieved top 1% velocity across your niche.',
     },
     audienceSummary: {
       total: '144,320',
       delta: '+6,840 net this quarter',
       quality: '96.2%',
-      qualityLabel: 'Tier-1 verified fans',
+      qualityLabel: 'Tier-1 authentic followers',
       igGain: '+2,530',
       igPct: '37%',
       ttGain: '+2,325',
       ttPct: '34%',
       ytGain: '+1,985',
       ytPct: '29%',
-      insight: 'Multi-platform cross-pollination expanded your total creator audience by 6.8K fans.',
+      insight: 'Multi-platform cross-pollination expanded your total creator audience by 6.8K followers.',
     },
     getPoint: (i: number, type: 'growth30d' | 'audience') => {
       const weeks = ['Mar W1', 'Mar W2', 'Mar W3', 'Mar W4', 'Apr W1', 'Apr W2', 'Apr W3', 'Apr W4', 'May W1', 'May W2', 'May W3', 'May W4'];
@@ -585,9 +657,12 @@ const TIMEFRAME_CONFIGS = {
         const weeklyFollowers = [410, 440, 470, 500, 590, 630, 650, 670, 580, 620, 680, 600];
         const yPos = 150 - (i / 11) * 115;
         return {
-          date: `Quarterly ${weeks[i] || `Week ${i + 1}`}`,
+          date: weeks[i] || `Week ${i + 1}`,
           reach: `${weeklyReaches[i]}K Weekly Reach`,
-          delta: `+${weeklyFollowers[i]} Followers (368K 90D)`,
+          metricLabel: 'Weekly Reach',
+          metricValue: `${weeklyReaches[i]}K`,
+          deltaFollowers: `+${weeklyFollowers[i]} Followers`,
+          periodContext: '368K / 90D Total',
           yPos,
         };
       } else {
@@ -595,9 +670,12 @@ const TIMEFRAME_CONFIGS = {
         const deltas = [410, 440, 470, 500, 590, 630, 650, 670, 580, 620, 680, 600];
         const yPos = 155 - (i / 11) * 125;
         return {
-          date: `Quarterly ${weeks[i] || `Week ${i + 1}`}`,
+          date: weeks[i] || `Week ${i + 1}`,
           reach: `${audiences[i].toLocaleString()} Total Audience`,
-          delta: `+${deltas[i]} Followers This Week`,
+          metricLabel: 'Total Audience',
+          metricValue: `${(audiences[i] / 1000).toFixed(1)}K`,
+          deltaFollowers: `+${deltas[i]} Followers`,
+          periodContext: '+6,840 / 90D Net',
           yPos,
         };
       }
@@ -623,26 +701,33 @@ export const ProGrowthScreen: React.FC<ProGrowthScreenProps> = ({
   onBackToDashboard,
   onLogout,
   onNavigateTab,
-  onOpenMessages,
   onOpenJarvisPro,
   onOpenAudienceBreakdown,
   onOpenPostPerformance,
   onOpenPlatformGrowth,
-  onOpenEarnings,
   onOpenSchedule,
   onOpenPostComposer,
   onOpenScript,
   onSwitchToFree,
+  userPersona,
+  onTogglePersona,
   userProfile,
   onSaveProfile,
 }) => {
+  const isNewUser = (userPersona || userProfile?.userPersona) === 'new';
+  const [newUserConnectedPlatforms, setNewUserConnectedPlatforms] = useState<string[]>([]);
   const [activeTab, setActiveTab] = useState<TabType>('growth');
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [showNotificationModal, setShowNotificationModal] = useState(false);
   const [showReportModal, setShowReportModal] = useState(false);
   const [showAddPlatformModal, setShowAddPlatformModal] = useState(false);
-  const [platformsList, setPlatformsList] = useState<GrowthPlatformAccount[]>(INITIAL_GROWTH_PLATFORMS);
-  const [selectedPlatformToAdd, setSelectedPlatformToAdd] = useState<string>('x');
+  const [platformsList, setPlatformsList] = useState<GrowthPlatformAccount[]>(() =>
+    INITIAL_GROWTH_PLATFORMS.map((p) => ({
+      ...p,
+      connected: isNewUser ? false : p.connected,
+    }))
+  );
+  const [selectedPlatformToAdd, setSelectedPlatformToAdd] = useState<string>('threads');
   const [customHandleInput, setCustomHandleInput] = useState<string>('');
   const [showPostDetailModal, setShowPostDetailModal] = useState(false);
   const [selectedPost, setSelectedPost] = useState<TopPostData>(TOP_POSTS_DATA[0]);
@@ -686,27 +771,114 @@ export const ProGrowthScreen: React.FC<ProGrowthScreenProps> = ({
     ).start();
   }, []);
 
+  // Synchronize platforms list with userProfile connectedPlatforms
+  useEffect(() => {
+    if (isNewUser) {
+      const activeConnected = userProfile?.connectedPlatforms
+        ? userProfile.connectedPlatforms
+        : newUserConnectedPlatforms;
+      setPlatformsList((prev) =>
+        prev.map((p) => ({
+          ...p,
+          connected: activeConnected.includes(p.id),
+          handle:
+            p.id === 'tiktok' && userProfile?.tiktokHandle
+              ? userProfile.tiktokHandle
+              : p.id === 'instagram' && userProfile?.instagramHandle
+              ? userProfile.instagramHandle
+              : p.id === 'youtube' && userProfile?.youtubeHandle
+              ? userProfile.youtubeHandle
+              : p.id === 'facebook' && userProfile?.facebookHandle
+              ? userProfile.facebookHandle
+              : p.id === 'threads' && userProfile?.threadsHandle
+              ? userProfile.threadsHandle
+              : p.id === 'pinterest' && userProfile?.pinterestHandle
+              ? userProfile.pinterestHandle
+              : p.handle,
+        }))
+      );
+    } else {
+      setPlatformsList((prev) =>
+        prev.map((p) => ({
+          ...p,
+          connected: userProfile?.connectedPlatforms
+            ? userProfile.connectedPlatforms.includes(p.id)
+            : (INITIAL_GROWTH_PLATFORMS.find((x) => x.id === p.id)?.connected ?? true),
+          handle:
+            p.id === 'tiktok' && userProfile?.tiktokHandle
+              ? userProfile.tiktokHandle
+              : p.id === 'instagram' && userProfile?.instagramHandle
+              ? userProfile.instagramHandle
+              : p.id === 'youtube' && userProfile?.youtubeHandle
+              ? userProfile.youtubeHandle
+              : p.id === 'facebook' && userProfile?.facebookHandle
+              ? userProfile.facebookHandle
+              : p.id === 'threads' && userProfile?.threadsHandle
+              ? userProfile.threadsHandle
+              : p.id === 'pinterest' && userProfile?.pinterestHandle
+              ? userProfile.pinterestHandle
+              : p.handle,
+        }))
+      );
+    }
+  }, [
+    isNewUser,
+    newUserConnectedPlatforms,
+    userProfile?.connectedPlatforms,
+    userProfile?.connectedPlatforms?.join(','),
+    userProfile?.tiktokHandle,
+    userProfile?.instagramHandle,
+    userProfile?.youtubeHandle,
+    userProfile?.facebookHandle,
+    userProfile?.threadsHandle,
+    userProfile?.pinterestHandle,
+  ]);
+
   // Platform Connect/Disconnect Handlers
   const handleConnectSinglePlatform = (id: string) => {
     if (Platform.OS !== 'web') {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    }
+    if (isNewUser) {
+      setNewUserConnectedPlatforms((prev) => (prev.includes(id) ? prev : [...prev, id]));
     }
     setPlatformsList((prev) =>
       prev.map((p) => (p.id === id ? { ...p, connected: true } : p))
     );
     const target = platformsList.find((p) => p.id === id);
     showToast(`✓ ${target?.name || 'Platform'} connected & auto-synced!`);
+
+    if (onSaveProfile && userProfile) {
+      const current = userProfile.connectedPlatforms || (isNewUser ? [] : ['tiktok', 'instagram', 'youtube']);
+      if (!current.includes(id)) {
+        onSaveProfile({
+          ...userProfile,
+          connectedPlatforms: [...current, id],
+        });
+      }
+    }
   };
 
   const handleRemoveSinglePlatform = (id: string) => {
     if (Platform.OS !== 'web') {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     }
+    if (isNewUser) {
+      setNewUserConnectedPlatforms((prev) => prev.filter((p) => p !== id));
+    }
     setPlatformsList((prev) =>
       prev.map((p) => (p.id === id ? { ...p, connected: false } : p))
     );
     const target = platformsList.find((p) => p.id === id);
     showToast(`Removed ${target?.name || 'Platform'}`);
+
+    if (onSaveProfile && userProfile) {
+      const current = userProfile.connectedPlatforms || (isNewUser ? [] : ['tiktok', 'instagram', 'youtube']);
+      onSaveProfile({
+        ...userProfile,
+        connectedPlatforms: current.filter((p) => p !== id),
+      });
+    }
   };
 
   const handleAddCustomPlatform = () => {
@@ -728,6 +900,33 @@ export const ProGrowthScreen: React.FC<ProGrowthScreenProps> = ({
     const target = platformsList.find((p) => p.id === selectedPlatformToAdd);
     setCustomHandleInput('');
     showToast(`✓ Linked ${target?.name} account (${formatted})!`);
+
+    if (onSaveProfile && userProfile) {
+      const current = userProfile.connectedPlatforms || ['tiktok', 'instagram', 'youtube'];
+      const nextConnected = current.includes(selectedPlatformToAdd)
+        ? current
+        : [...current, selectedPlatformToAdd];
+      const handleKey =
+        selectedPlatformToAdd === 'tiktok'
+          ? 'tiktokHandle'
+          : selectedPlatformToAdd === 'instagram'
+          ? 'instagramHandle'
+          : selectedPlatformToAdd === 'youtube'
+          ? 'youtubeHandle'
+          : selectedPlatformToAdd === 'facebook'
+          ? 'facebookHandle'
+          : selectedPlatformToAdd === 'threads'
+          ? 'threadsHandle'
+          : selectedPlatformToAdd === 'pinterest'
+          ? 'pinterestHandle'
+          : undefined;
+
+      onSaveProfile({
+        ...userProfile,
+        connectedPlatforms: nextConnected,
+        ...(handleKey ? { [handleKey]: formatted } : {}),
+      });
+    }
   };
 
   const showToast = (msg: string) => {
@@ -759,6 +958,48 @@ export const ProGrowthScreen: React.FC<ProGrowthScreenProps> = ({
 
   const unreadCount = notifications.filter((n) => n.unread).length;
 
+  // Hybrid Data Model Calculations
+  const connectedPlatformsList = platformsList.filter((p) => p.connected);
+  const hasConnectedPlatforms = connectedPlatformsList.length > 0;
+  // Day 0: new creator with nothing connected — no stats, charts or extra CTAs.
+  const isDayZero = isNewUser && !hasConnectedPlatforms;
+
+  // Total followers across connected platforms
+  const totalConnectedFollowersNumeric = connectedPlatformsList.reduce(
+    (acc, p) => acc + parseFollowerCount(p.followers),
+    0
+  );
+
+  const formattedTotalFollowers =
+    totalConnectedFollowersNumeric >= 1000000
+      ? `${(totalConnectedFollowersNumeric / 1000000).toFixed(1)}M`
+      : totalConnectedFollowersNumeric >= 1000
+      ? `${(totalConnectedFollowersNumeric / 1000).toFixed(1)}K`
+      : `${totalConnectedFollowersNumeric}`;
+
+  // Blended recent trend percentage across connected platforms
+  const blendedGrowthPct =
+    totalConnectedFollowersNumeric > 0
+      ? `+${(
+          connectedPlatformsList.reduce((acc, p) => {
+            const pct = parseFloat(p.growthPct.replace(/[+%]/g, '')) || 5.0;
+            return acc + pct * parseFollowerCount(p.followers);
+          }, 0) / totalConnectedFollowersNumeric
+        ).toFixed(1)}%`
+      : '+0.0%';
+
+  // Recent new followers estimated from official API trends
+  const recentNewFollowersEstimate = Math.round(
+    connectedPlatformsList.reduce((acc, p) => {
+      const pct = (parseFloat(p.growthPct.replace(/[+%]/g, '')) || 5.0) / 100;
+      const count = parseFollowerCount(p.followers);
+      return acc + count * (pct / (1 + pct));
+    }, 0)
+  );
+
+  // Joined API window description per connected platform
+  const connectedWindowLabels = connectedPlatformsList.map((p) => getPlatformApiWindow(p.id)).join(' • ');
+
   return (
     <SafeAreaView style={styles.safeArea}>
       <StatusBar barStyle="dark-content" backgroundColor="#FAF8F5" />
@@ -768,75 +1009,26 @@ export const ProGrowthScreen: React.FC<ProGrowthScreenProps> = ({
         {/* ============================================================ */}
         <View style={styles.headerBar}>
           {/* Top-Left: Mascot + Mode Switcher */}
-          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-            <Animated.View
-              style={[
-                styles.headerLogoWrapper,
-                {
-                  transform: [
-                    { translateY: ghostFloatY },
-                    { scale: ghostScale },
-                  ],
-                },
-              ]}
-            >
-              <Image
-                source={require('../../assets/images/jarvis-ghost-clean.png')}
-                style={styles.headerGhostLogo}
-                resizeMode="contain"
-              />
-            </Animated.View>
+          <View style={{ alignItems: 'flex-start', gap: 6, flexShrink: 1 }}>
+            <BrandLogo size="sm" />
 
-            <Pressable
-              onPress={() => {
-                if (Platform.OS !== 'web') {
-                  Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-                }
+            <HeaderDualModePills
+              tier="pro"
+              persona={(userPersona || userProfile?.userPersona) === 'new' ? 'new' : 'returning'}
+              onToggleTier={() => {
                 if (onSwitchToFree) {
                   onSwitchToFree();
                 } else if (onSaveProfile && userProfile) {
                   onSaveProfile({ ...userProfile, tier: 'free' });
                 }
               }}
-              hitSlop={8}
-            >
-              <LinearGradient
-                colors={['#F59E0B', '#F59E0B', '#F59E0B']}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 0 }}
-                style={styles.proHeaderBadge}
-              >
-                <Text style={styles.proHeaderBadgeText}>👑 PRO</Text>
-              </LinearGradient>
-            </Pressable>
+              onTogglePersona={onTogglePersona}
+              isDark={false}
+            />
           </View>
 
-          {/* Right Action Icons: Messages, Notification Bell & Profile Avatar */}
+          {/* Right Action Icons: Notification Bell & Profile Avatar */}
           <View style={styles.headerRightGroup}>
-            {/* Chat Messages */}
-            <Pressable
-              style={({ pressed }) => [styles.headerIconBtn, pressed && styles.headerIconBtnPressed]}
-              hitSlop={8}
-              onPress={() => {
-                if (Platform.OS !== 'web') {
-                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                }
-                if (onOpenMessages) {
-                  onOpenMessages();
-                }
-              }}
-            >
-              <Svg width={20} height={20} viewBox="0 0 24 24" fill="none">
-                <Path
-                  d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"
-                  stroke="#1A1626"
-                  strokeWidth="2.2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </Svg>
-            </Pressable>
-
             {/* Notification Bell */}
             <Pressable
               style={({ pressed }) => [styles.headerIconBtn, pressed && styles.headerIconBtnPressed]}
@@ -930,25 +1122,28 @@ export const ProGrowthScreen: React.FC<ProGrowthScreenProps> = ({
           {/* TOP TAGS & HERO HEADLINE */}
           <View style={styles.topTagsRow}>
             <View style={styles.growthProPill}>
-              <Text style={styles.growthProPillText}>GROWTH — PRO</Text>
+              <Text style={styles.growthProPillText}>GROWTH • PRO</Text>
             </View>
           </View>
 
-          <Text style={styles.mainTitleText}>See your growth in full.</Text>
+          <Text
+            style={styles.mainTitleText}
+            numberOfLines={2}
+          >
+            See your growth in full.
+          </Text>
           <View style={styles.proAnalyticsActivePill}>
             <Text style={styles.proAnalyticsActiveText}>✨ Pro Analytics Active</Text>
           </View>
 
-          <Text style={styles.mainSubtitleText}>
-            Track advanced growth, platform performance, audience trends and content insights in one place.
-          </Text>
-
           {/* ============================================================ */}
-          {/* CARD 1: GROWTH THIS 30D (Hero Analytics Card with Wave Graph)*/}
+          {/* CARD 1: GROWTH THIS 30D (Hero Analytics & Hybrid Card)       */}
           {/* ============================================================ */}
           <Pressable
-            style={({ pressed }) => [styles.heroAnalyticsCard, pressed && styles.btnPressed]}
+            style={({ pressed }) => [styles.heroAnalyticsCard, pressed && !isNewUser && styles.btnPressed]}
+            disabled={isNewUser && !hasConnectedPlatforms}
             onPress={() => {
+              if (isNewUser && !hasConnectedPlatforms) return;
               if (Platform.OS !== 'web') {
                 Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
               }
@@ -958,66 +1153,191 @@ export const ProGrowthScreen: React.FC<ProGrowthScreenProps> = ({
             }}
           >
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-              <Text style={styles.growthThisMonthLabel}>GROWTH THIS 30D</Text>
-              <View style={styles.expandHintBadge}>
-                <Text style={styles.expandHintBadgeText}>Expand 🔍</Text>
-              </View>
-            </View>
-            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, marginVertical: 4 }}>
-              <Text style={styles.bigGrowthPercent}>+28.4%</Text>
-              <Text style={{ fontSize: 22, color: '#582CDB', fontWeight: '700' }}>↗</Text>
+              <Text style={styles.growthThisMonthLabel}>
+                {isNewUser
+                  ? hasConnectedPlatforms
+                    ? 'GROWTH (RECENT PLATFORM API)'
+                    : 'GROWTH THIS 30D'
+                  : 'GROWTH THIS 30D'}
+              </Text>
+              {isNewUser ? (
+                hasConnectedPlatforms ? (
+                  <View style={styles.platformSyncPill}>
+                    <Text style={styles.platformSyncText}>⚡ LIVE API SYNC</Text>
+                  </View>
+                ) : (
+                  <View style={styles.milestoneStarterBadge}>
+                    <Text style={styles.milestoneStarterBadgeText}>🎯 Day 1 Milestone</Text>
+                  </View>
+                )
+              ) : (
+                <View style={styles.expandHintBadge}>
+                  <Text style={styles.expandHintBadgeText}>Expand 🔍</Text>
+                </View>
+              )}
             </View>
 
-            <View style={styles.newFollowersPill}>
-              <Text style={styles.newFollowersPillText}>+2.1K NEW FOLLOWERS</Text>
-            </View>
+            {isNewUser ? (
+              hasConnectedPlatforms ? (
+                /* HYBRID STATE: AT LEAST ONE PLATFORM CONNECTED */
+                <>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, marginVertical: 4 }}>
+                    <Text style={styles.bigGrowthPercent}>{blendedGrowthPct}</Text>
+                    <Text style={{ fontSize: 22, color: '#582CDB', fontWeight: '700' }}>↗</Text>
+                    <Text style={{ fontSize: 13, fontWeight: '600', color: '#64748B', marginLeft: 4 }}>
+                      recent platform trend
+                    </Text>
+                  </View>
 
-            {/* SVG CONTINUOUS WAVE GRAPH */}
-            <View style={styles.svgChartContainer}>
-              <Svg width="100%" height={90} viewBox="0 0 340 90">
-                <Defs>
-                  <SvgLinearGradient id="waveGrad" x1="0" y1="0" x2="0" y2="1">
-                    <Stop offset="0" stopColor="#582CDB" stopOpacity="0.25" />
-                    <Stop offset="1" stopColor="#582CDB" stopOpacity="0.0" />
-                  </SvgLinearGradient>
-                </Defs>
-                <Path
-                  d="M0,60 C40,70 80,45 120,50 C160,55 200,35 240,40 C280,45 310,20 340,25 L340,90 L0,90 Z"
-                  fill="url(#waveGrad)"
-                />
-                <Path
-                  d="M0,60 C40,70 80,45 120,50 C160,55 200,35 240,40 C280,45 310,20 340,25"
-                  fill="none"
-                  stroke="#582CDB"
-                  strokeWidth="2.5"
-                  strokeLinecap="round"
-                />
-                <Circle cx={340} cy={25} r={4} fill="#582CDB" />
-              </Svg>
-            </View>
+                  <View style={styles.newFollowersPill}>
+                    <Text style={styles.newFollowersPillText}>
+                      +{recentNewFollowersEstimate.toLocaleString()} RECENT NEW FOLLOWERS · {formattedTotalFollowers} TOTAL
+                    </Text>
+                  </View>
+
+                  {/* PLATFORM-SPECIFIC API WINDOW CALLOUT */}
+                  <View style={styles.apiWindowNoticeBox}>
+                    <Text style={styles.apiWindowNoticeText}>
+                      📡 <Text style={{ fontWeight: '700', color: '#582CDB' }}>API Windows:</Text>{' '}
+                      {connectedWindowLabels}
+                    </Text>
+                    <Text style={styles.apiWindowNoticeSub}>
+                      Recent trends pulled from official platform APIs. Reach, engagement & retention calibrate over your upcoming posts.
+                    </Text>
+                  </View>
+
+                  {/* SVG CONTINUOUS WAVE GRAPH */}
+                  <View style={styles.svgChartContainer}>
+                    <Svg width="100%" height={90} viewBox="0 0 340 90">
+                      <Defs>
+                        <SvgLinearGradient id="waveGradHybrid" x1="0" y1="0" x2="0" y2="1">
+                          <Stop offset="0" stopColor="#582CDB" stopOpacity="0.25" />
+                          <Stop offset="1" stopColor="#582CDB" stopOpacity="0.0" />
+                        </SvgLinearGradient>
+                      </Defs>
+                      <Path
+                        d="M0,65 C40,72 80,50 120,55 C160,58 200,40 240,42 C280,45 310,25 340,28 L340,90 L0,90 Z"
+                        fill="url(#waveGradHybrid)"
+                      />
+                      <Path
+                        d="M0,65 C40,72 80,50 120,55 C160,58 200,40 240,42 C280,45 310,25 340,28"
+                        fill="none"
+                        stroke="#582CDB"
+                        strokeWidth="2.5"
+                        strokeLinecap="round"
+                      />
+                      <Circle cx={340} cy={28} r={4} fill="#582CDB" />
+                    </Svg>
+                  </View>
+                </>
+              ) : (
+                /* ZERO CONNECTED STATE: PURE DAY 0 */
+                <View style={styles.heroStarterBox}>
+                  <Text style={styles.starterMilestoneTitle}>No growth data yet</Text>
+                  <Text style={styles.starterMilestoneSub}>
+                    Connect YouTube, Threads, Instagram, Facebook or TikTok to start seeing your audience and what's working.
+                  </Text>
+
+                  {/* Direct Action Trigger */}
+                  <Pressable
+                    style={({ pressed }) => [styles.starterActionBtn, pressed && styles.btnPressed]}
+                    onPress={() => {
+                      if (Platform.OS !== 'web') {
+                        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+                      }
+                      setShowAddPlatformModal(true);
+                    }}
+                  >
+                    <Text style={styles.starterActionBtnText}>Connect a platform →</Text>
+                  </Pressable>
+                </View>
+              )
+            ) : (
+              /* RETURNING PRO CREATOR */
+              <>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, marginVertical: 4 }}>
+                  <Text style={styles.bigGrowthPercent}>+28.4%</Text>
+                  <Text style={{ fontSize: 22, color: '#582CDB', fontWeight: '700' }}>↗</Text>
+                </View>
+
+                <View style={styles.newFollowersPill}>
+                  <Text style={styles.newFollowersPillText}>+2,480 NEW FOLLOWERS</Text>
+                </View>
+
+                {/* SVG CONTINUOUS WAVE GRAPH */}
+                <View style={styles.svgChartContainer}>
+                  <Svg width="100%" height={90} viewBox="0 0 340 90">
+                    <Defs>
+                      <SvgLinearGradient id="waveGrad" x1="0" y1="0" x2="0" y2="1">
+                        <Stop offset="0" stopColor="#582CDB" stopOpacity="0.25" />
+                        <Stop offset="1" stopColor="#582CDB" stopOpacity="0.0" />
+                      </SvgLinearGradient>
+                    </Defs>
+                    <Path
+                      d="M0,60 C40,70 80,45 120,50 C160,55 200,35 240,40 C280,45 310,20 340,25 L340,90 L0,90 Z"
+                      fill="url(#waveGrad)"
+                    />
+                    <Path
+                      d="M0,60 C40,70 80,45 120,50 C160,55 200,35 240,40 C280,45 310,20 340,25"
+                      fill="none"
+                      stroke="#582CDB"
+                      strokeWidth="2.5"
+                      strokeLinecap="round"
+                    />
+                    <Circle cx={340} cy={25} r={4} fill="#582CDB" />
+                  </Svg>
+                </View>
+              </>
+            )}
 
             {/* 2x2 METRICS GRID */}
+            {!isDayZero && (
             <View style={styles.metricsGrid2x2}>
               <View style={styles.gridMetricItem}>
                 <Text style={styles.gridMetricLabel}>REACH</Text>
-                <Text style={styles.gridMetricVal}>131.0K</Text>
+                <Text style={styles.gridMetricVal}>{isNewUser ? '—' : '131.0K'}</Text>
+                {isNewUser && (
+                  <Text style={styles.gridMetricSub}>
+                    {hasConnectedPlatforms ? 'PostStreak Metric' : 'Target: 1.0K'}
+                  </Text>
+                )}
               </View>
 
               <View style={styles.gridMetricItem}>
                 <Text style={styles.gridMetricLabel}>ENGAGEMENT</Text>
-                <Text style={styles.gridMetricVal}>18.0K</Text>
+                <Text style={styles.gridMetricVal}>{isNewUser ? '—' : '18.0K'}</Text>
+                {isNewUser && (
+                  <Text style={styles.gridMetricSub}>
+                    {hasConnectedPlatforms ? 'PostStreak Metric' : 'Target: 100'}
+                  </Text>
+                )}
               </View>
 
               <View style={styles.gridMetricItem}>
                 <Text style={styles.gridMetricLabel}>FOLLOWERS</Text>
-                <Text style={[styles.gridMetricVal, { color: '#582CDB' }]}>+2,480</Text>
+                <Text style={[styles.gridMetricVal, (!isNewUser || hasConnectedPlatforms) && { color: '#582CDB' }]}>
+                  {isNewUser ? (hasConnectedPlatforms ? formattedTotalFollowers : '—') : '+2,480'}
+                </Text>
+                {isNewUser && (
+                  <Text style={styles.gridMetricSub}>
+                    {hasConnectedPlatforms
+                      ? `Across ${connectedPlatformsList.length} ${connectedPlatformsList.length === 1 ? 'Platform' : 'Platforms'}`
+                      : 'Not Connected'}
+                  </Text>
+                )}
               </View>
 
               <View style={styles.gridMetricItem}>
                 <Text style={styles.gridMetricLabel}>AVG. RETENTION</Text>
-                <Text style={styles.gridMetricVal}>0:42s</Text>
+                <Text style={styles.gridMetricVal}>{isNewUser ? '—' : '42s'}</Text>
+                {isNewUser && (
+                  <Text style={styles.gridMetricSub}>
+                    {hasConnectedPlatforms ? 'PostStreak Metric' : 'Target: 40s+'}
+                  </Text>
+                )}
               </View>
             </View>
+            )}
           </Pressable>
 
           {/* ============================================================ */}
@@ -1025,31 +1345,84 @@ export const ProGrowthScreen: React.FC<ProGrowthScreenProps> = ({
           {/* ============================================================ */}
           <View style={styles.sectionHeaderRow}>
             <Text style={styles.platformsSectionTitle}>Platforms</Text>
-            <View style={styles.platformSyncPill}>
-              <Text style={styles.platformSyncText}>⚡ PLATFORM SYNC</Text>
-            </View>
+            {platformsList.some((p) => p.connected) && (
+              <Pressable
+                style={({ pressed }) => [styles.platformSyncPill, pressed && styles.btnPressed]}
+                onPress={() => {
+                  if (Platform.OS !== 'web') {
+                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                  }
+                  triggerModalPop();
+                  setShowAddPlatformModal(true);
+                }}
+              >
+                <Text style={styles.platformSyncText}>⚡ LIVE PLATFORM DATA</Text>
+              </Pressable>
+            )}
           </View>
 
           <View style={styles.platformsContainerCard}>
-            {platformsList
-              .filter((p) => p.connected)
-              .map((plat) => (
+            {isNewUser ? (
+              platformsList.slice(0, 3).map((plat) => (
                 <View key={plat.id} style={styles.platformItemRow}>
                   <SocialBrandIcon platform={plat.id} size={28} />
-                  <View style={{ flex: 1, marginLeft: 10 }}>
-                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 4 }}>
-                      <Text style={styles.platformName}>{plat.name}</Text>
-                      <Text style={styles.platformGrowthPurple}>
-                        {plat.growthPct}{' '}
-                        <Text style={{ color: '#64748B', fontSize: 11 }}>{plat.followers}</Text>
-                      </Text>
+                  {plat.connected ? (
+                    <View style={{ flex: 1, minWidth: 0 }}>
+                      <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
+                        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, flex: 1, minWidth: 0, marginRight: 8 }}>
+                          <Text style={styles.platformName} numberOfLines={1}>
+                            {plat.name}
+                          </Text>
+                          <View style={styles.connectedMicroDot} />
+                        </View>
+                        <Text style={styles.platformGrowthPurple} numberOfLines={1}>
+                          {plat.growthPct}{' '}
+                          <Text style={{ color: '#64748B', fontSize: 11, fontWeight: '600' }}>· {plat.followers} followers</Text>
+                        </Text>
+                      </View>
+                      <View style={styles.platformTrackBg}>
+                        <View style={[styles.platformTrackFill, { width: plat.barWidth as any }]} />
+                      </View>
                     </View>
-                    <View style={styles.platformTrackBg}>
-                      <View style={[styles.platformTrackFill, { width: plat.barWidth as any }]} />
+                  ) : (
+                    <View style={{ flex: 1, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <Text style={styles.platformName} numberOfLines={1}>
+                        {plat.name}
+                      </Text>
+                      <Pressable
+                        style={({ pressed }) => [styles.connectPlatformSmallBtn, pressed && styles.btnPressed]}
+                        onPress={() => handleConnectSinglePlatform(plat.id)}
+                        hitSlop={6}
+                      >
+                        <Text style={styles.connectPlatformSmallBtnText}>Connect</Text>
+                      </Pressable>
+                    </View>
+                  )}
+                </View>
+              ))
+            ) : (
+              platformsList
+                .filter((p) => p.connected)
+                .map((plat) => (
+                  <View key={plat.id} style={styles.platformItemRow}>
+                    <SocialBrandIcon platform={plat.id} size={28} />
+                    <View style={{ flex: 1, minWidth: 0 }}>
+                      <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
+                        <Text style={styles.platformName} numberOfLines={1}>
+                          {plat.name}
+                        </Text>
+                        <Text style={styles.platformGrowthPurple} numberOfLines={1}>
+                          {plat.growthPct}{' '}
+                          <Text style={{ color: '#64748B', fontSize: 11, fontWeight: '600' }}>· {plat.followers} followers</Text>
+                        </Text>
+                      </View>
+                      <View style={styles.platformTrackBg}>
+                        <View style={[styles.platformTrackFill, { width: plat.barWidth as any }]} />
+                      </View>
                     </View>
                   </View>
-                </View>
-              ))}
+                ))
+            )}
 
             <Pressable
               style={({ pressed }) => [styles.addPlatformOutlineBtn, pressed && styles.btnPressed]}
@@ -1063,71 +1436,79 @@ export const ProGrowthScreen: React.FC<ProGrowthScreenProps> = ({
           </View>
 
           {/* ============================================================ */}
-          {/* CARD 3: AUDIENCE GROWTH                                      */}
+          {/* CARD 3: AUDIENCE GROWTH (RETURNING PRO USERS)                */}
           {/* ============================================================ */}
-          <Pressable
-            style={({ pressed }) => [styles.audienceGrowthCard, pressed && styles.btnPressed]}
-            onPress={() => {
-              if (Platform.OS !== 'web') {
-                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-              }
-              setExpandedGraphType('audience');
-              triggerModalPop();
-              setShowExpandedGraphModal(true);
-            }}
-          >
-            <View style={styles.audienceGrowthHeaderRow}>
-              <View style={{ flex: 1, marginRight: 8 }}>
-                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, flexWrap: 'wrap', marginBottom: 2 }}>
-                  <Text style={styles.audienceGrowthTitle}>Audience Growth</Text>
-                  <View style={styles.expandHintBadgePurple}>
-                    <Text style={styles.expandHintBadgePurpleText}>Live 🔍</Text>
+          {!isNewUser && (
+            <Pressable
+              style={({ pressed }) => [styles.audienceGrowthCard, pressed && styles.btnPressed]}
+              onPress={() => {
+                if (Platform.OS !== 'web') {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                }
+                setExpandedGraphType('audience');
+                triggerModalPop();
+                setShowExpandedGraphModal(true);
+              }}
+            >
+              <View style={styles.audienceGrowthHeaderRow}>
+                <View style={{ flex: 1, marginRight: 8 }}>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, flexWrap: 'wrap', marginBottom: 2 }}>
+                    <Text style={styles.audienceGrowthTitle}>Audience Growth</Text>
+                    <View style={styles.expandHintBadgePurple}>
+                      <Text style={styles.expandHintBadgePurpleText}>Live 🔍</Text>
+                    </View>
                   </View>
+                  <Text style={styles.audienceTotalSub}>144,320 TOTAL AUDIENCE</Text>
                 </View>
-                <Text style={styles.audienceTotalSub}>144,320 TOTAL AUDIENCE</Text>
+                <View style={{ alignItems: 'flex-end', flexShrink: 0 }}>
+                  <Text style={styles.audienceLast30dVal}>+2,480</Text>
+                  <Text style={styles.audienceLast30dLabel}>LAST 30 DAYS</Text>
+                </View>
               </View>
-              <View style={{ alignItems: 'flex-end', flexShrink: 0 }}>
-                <Text style={styles.audienceLast30dVal}>+2,480</Text>
-                <Text style={styles.audienceLast30dLabel}>LAST 30 DAYS</Text>
+
+              <View style={styles.svgChartContainer}>
+                <Svg width="100%" height={90} viewBox="0 0 340 90">
+                  <Defs>
+                    <SvgLinearGradient id="audGrad" x1="0" y1="0" x2="0" y2="1">
+                      <Stop offset="0" stopColor="#7C3AED" stopOpacity="0.3" />
+                      <Stop offset="1" stopColor="#7C3AED" stopOpacity="0.05" />
+                    </SvgLinearGradient>
+                  </Defs>
+                  <Path
+                    d="M0,70 C50,40 100,65 150,45 C200,60 250,30 340,35 L340,90 L0,90 Z"
+                    fill="url(#audGrad)"
+                  />
+                  <Path
+                    d="M0,70 C50,40 100,65 150,45 C200,60 250,30 340,35"
+                    fill="none"
+                    stroke="#7C3AED"
+                    strokeWidth="2.5"
+                    strokeLinecap="round"
+                  />
+                  <Circle cx={340} cy={35} r={4} fill="#5B3EE8" />
+                </Svg>
               </View>
-            </View>
 
-            <View style={styles.svgChartContainer}>
-              <Svg width="100%" height={90} viewBox="0 0 340 90">
-                <Defs>
-                  <SvgLinearGradient id="audGrad" x1="0" y1="0" x2="0" y2="1">
-                    <Stop offset="0" stopColor="#7C3AED" stopOpacity="0.3" />
-                    <Stop offset="1" stopColor="#7C3AED" stopOpacity="0.05" />
-                  </SvgLinearGradient>
-                </Defs>
-                <Path
-                  d="M0,70 C50,40 100,65 150,45 C200,60 250,30 340,35 L340,90 L0,90 Z"
-                  fill="url(#audGrad)"
-                />
-                <Path
-                  d="M0,70 C50,40 100,65 150,45 C200,60 250,30 340,35"
-                  fill="none"
-                  stroke="#7C3AED"
-                  strokeWidth="2.5"
-                  strokeLinecap="round"
-                />
-                <Circle cx={340} cy={35} r={4} fill="#F59E0B" />
-              </Svg>
-            </View>
+              <View style={styles.growthInsightCalloutBox}>
+                <Text style={styles.growthInsightText}>
+                  Your audience growth was 3× higher during morning short-form posting windows.
+                </Text>
+              </View>
+            </Pressable>
+          )}
 
-            <View style={styles.growthInsightCalloutBox}>
-              <Text style={styles.growthInsightText}>
-                Your audience growth spiked 3x during morning short-form posting windows.
-              </Text>
-            </View>
-          </Pressable>
-
+          {isDayZero ? (
+            <GrowthDayZeroPreview />
+          ) : (
+          <>
           {/* ============================================================ */}
-          {/* CARD 4: CONTENT FORMAT PERFORMANCE (TAP TO EXPAND)            */}
+          {/* CARD 4: CONTENT FORMAT PERFORMANCE                           */}
           {/* ============================================================ */}
           <Pressable
-            style={({ pressed }) => [styles.contentFormatCard, pressed && styles.btnPressed]}
+            style={({ pressed }) => [styles.contentFormatCard, pressed && !isNewUser && styles.btnPressed]}
+            disabled={isNewUser}
             onPress={() => {
+              if (isNewUser) return;
               if (Platform.OS !== 'web') {
                 Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
               }
@@ -1138,167 +1519,231 @@ export const ProGrowthScreen: React.FC<ProGrowthScreenProps> = ({
           >
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 6, marginBottom: 12 }}>
               <Text style={[styles.contentFormatTitle, { marginBottom: 0, flex: 1, minWidth: 150 }]}>Content Format Performance</Text>
-              <View style={styles.expandHintBadge}>
-                <Text style={styles.expandHintBadgeText}>Compare Formats 🔍</Text>
-              </View>
+              {isNewUser ? (
+                <View style={styles.milestoneStarterBadge}>
+                  <Text style={styles.milestoneStarterBadgeText}>🔓 Unlocks on 2 Posts</Text>
+                </View>
+              ) : (
+                <View style={styles.expandHintBadge}>
+                  <Text style={styles.expandHintBadgeText}>Compare Formats 🔍</Text>
+                </View>
+              )}
             </View>
 
             {/* 4-Column Bar Chart */}
-            <View style={styles.barsGroupRow}>
+            <View style={[styles.barsGroupRow, isNewUser && { height: 44, alignItems: 'flex-end', marginBottom: 12 }]}>
               {/* Col 1 */}
               <View style={styles.barColumn}>
-                <View style={[styles.barVisualBlock, { height: 60, backgroundColor: '#DDD6FE' }]} />
+                <View style={[styles.barVisualBlock, { height: isNewUser ? 6 : 60, backgroundColor: isNewUser ? '#E2E8F0' : '#DDD6FE' }]} />
                 <Text style={styles.barLabelText}>REELS</Text>
               </View>
 
               {/* Col 2 */}
               <View style={styles.barColumn}>
-                <View style={[styles.barVisualBlock, { height: 95, backgroundColor: '#582CDB' }]} />
-                <Text style={[styles.barLabelText, { color: '#582CDB', fontWeight: '700' }]}>CAROUSEL</Text>
+                <View style={[styles.barVisualBlock, { height: isNewUser ? 6 : 95, backgroundColor: isNewUser ? '#C4B5FD' : '#582CDB' }]} />
+                <Text style={[styles.barLabelText, !isNewUser && { color: '#582CDB', fontWeight: '700' }]}>CAROUSEL</Text>
               </View>
 
               {/* Col 3 */}
               <View style={styles.barColumn}>
-                <View style={[styles.barVisualBlock, { height: 48, backgroundColor: '#C4B5FD' }]} />
-                <Text style={styles.barLabelText}>TEXT / X</Text>
+                <View style={[styles.barVisualBlock, { height: isNewUser ? 6 : 48, backgroundColor: isNewUser ? '#E2E8F0' : '#C4B5FD' }]} />
+                <Text style={styles.barLabelText}>POSTS / X</Text>
               </View>
 
               {/* Col 4 */}
               <View style={styles.barColumn}>
-                <View style={[styles.barVisualBlock, { height: 32, backgroundColor: '#EDE9FE' }]} />
+                <View style={[styles.barVisualBlock, { height: isNewUser ? 6 : 32, backgroundColor: isNewUser ? '#E2E8F0' : '#EDE9FE' }]} />
                 <Text style={styles.barLabelText}>SHORTS</Text>
               </View>
             </View>
 
             <View style={styles.formatInsightCallout}>
-              <View style={{ flexDirection: 'row', gap: 6 }}>
-                <Text style={{ fontSize: 13 }}>🛡️</Text>
-                <Text style={styles.formatInsightText}>
-                  Your talk-to-camera storytelling Reels generate 32% higher retention than music-only Reels.
-                </Text>
+              <View style={{ flexDirection: 'row', gap: 6, alignItems: 'flex-start' }}>
+                <Text style={{ fontSize: 13, marginTop: 1 }}>🎯</Text>
+                <View style={{ flex: 1, minWidth: 0 }}>
+                  <Text style={{ fontSize: 9.5, fontWeight: '800', color: '#582CDB', letterSpacing: 0.4, marginBottom: 2 }}>
+                    {isNewUser ? 'FORMAT UNLOCK CHALLENGE' : 'BEST REEL STRATEGY'}
+                  </Text>
+                  <Text style={styles.formatInsightText}>
+                    {isNewUser
+                      ? 'Post 1 Reel and 1 Carousel to unlock your side-by-side retention & saves comparison.'
+                      : 'Your talk-to-camera storytelling Reels generate 32% higher retention than music-only Reels.'}
+                  </Text>
+                  {isNewUser && (
+                    <Pressable
+                      style={{ marginTop: 8, flexDirection: 'row', alignItems: 'center', gap: 4 }}
+                      onPress={() => {
+                        if (onOpenPostComposer) onOpenPostComposer('Short storytelling Reel hook', 'Instagram');
+                        else if (onNavigateTab) onNavigateTab('create');
+                      }}
+                    >
+                      <Text style={{ fontSize: 11.5, fontWeight: '700', color: '#582CDB' }}>Draft your first Reel →</Text>
+                    </Pressable>
+                  )}
+                </View>
               </View>
             </View>
           </Pressable>
 
           {/* ============================================================ */}
-          {/* SECTION 5: TOP POSTS ANALYSIS (TAP FOR FULL OVERVIEW)        */}
+          {/* SECTION 5: TOP POSTS ANALYSIS                                */}
           {/* ============================================================ */}
           <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 14, marginBottom: 8, flexWrap: 'wrap', gap: 6 }}>
             <Text style={[styles.topPostsSectionHeader, { flex: 1, minWidth: 140 }]}>Top Posts Analysis</Text>
-            <View style={styles.expandHintBadge}>
-              <Text style={styles.expandHintBadgeText}>Deep Dive 🔍</Text>
-            </View>
+            {isNewUser ? (
+              <View style={styles.milestoneStarterBadge}>
+                <Text style={styles.milestoneStarterBadgeText}>Awaiting Post 1</Text>
+              </View>
+            ) : (
+              <View style={styles.expandHintBadge}>
+                <Text style={styles.expandHintBadgeText}>Deep Dive 🔍</Text>
+              </View>
+            )}
           </View>
 
-          <View style={{ gap: 12, marginBottom: 20 }}>
-            {TOP_POSTS_DATA.map((post) => (
+          {isNewUser ? (
+            <View style={[styles.postAnalysisCard, { padding: 18, alignItems: 'center', justifyContent: 'center', marginBottom: 20 }]}>
+              <View style={styles.starterPostIconCircle}>
+                <Text style={{ fontSize: 22 }}>✨</Text>
+              </View>
+              <Text style={{ fontSize: 14, fontWeight: '700', color: '#171420', textAlign: 'center', marginTop: 8, marginBottom: 4 }}>
+                Rank Your Content Momentum
+              </Text>
+              <Text style={{ fontSize: 12.5, fontWeight: '500', color: '#64748B', textAlign: 'center', lineHeight: 18, paddingHorizontal: 12, marginBottom: 14 }}>
+                Your highest-performing posts will rank here with deep audience retention and repurposing audits.
+              </Text>
               <Pressable
-                key={post.id}
-                style={({ pressed }) => [styles.postAnalysisCard, pressed && styles.btnPressed]}
+                style={({ pressed }) => [styles.starterOutlineBtn, pressed && styles.btnPressed]}
                 onPress={() => {
-                  if (Platform.OS !== 'web') {
-                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                  }
-                  setSelectedPost(post);
-                  setSelectedPostTitle(post.title);
-                  triggerModalPop();
-                  setShowPostDetailModal(true);
+                  if (onOpenPostComposer) onOpenPostComposer('My Day 1 creator perspective', 'TikTok');
+                  else if (onNavigateTab) onNavigateTab('create');
                 }}
               >
-                <Image
-                  source={post.thumbnail}
-                  style={styles.postThumbnailImage}
-                  resizeMode="cover"
-                />
-                <View style={{ padding: 12 }}>
-                  <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
-                    <View style={post.format === 'REEL' ? styles.postTypePill : styles.postTypePillGray}>
-                      <Text style={post.format === 'REEL' ? styles.postTypePillText : styles.postTypePillGrayText}>
-                        {post.format}
-                      </Text>
-                    </View>
-                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-                      <SocialBrandIcon platform={post.platform} size={15} />
-                      <Text style={styles.postPlatformLabel}>{post.platform.toUpperCase()}</Text>
-                    </View>
-                  </View>
-
-                  <Text style={styles.postAnalysisTitle} numberOfLines={1}>{post.title}</Text>
-                  <Text style={styles.postMetricsText}>
-                    👁️ {post.views} views • 💬 {post.comments} comments • 💾 {post.saves} saves
-                  </Text>
-                </View>
+                <Text style={styles.starterOutlineBtnText}>+ Draft Post 1</Text>
               </Pressable>
-            ))}
-          </View>
+            </View>
+          ) : (
+            <View style={{ gap: 12, marginBottom: 20 }}>
+              {TOP_POSTS_DATA.map((post) => (
+                <Pressable
+                  key={post.id}
+                  style={({ pressed }) => [styles.postAnalysisCard, pressed && styles.btnPressed]}
+                  onPress={() => {
+                    if (Platform.OS !== 'web') {
+                      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                    }
+                    setSelectedPost(post);
+                    setSelectedPostTitle(post.title);
+                    triggerModalPop();
+                    setShowPostDetailModal(true);
+                  }}
+                >
+                  <Image
+                    source={post.thumbnail}
+                    style={styles.postThumbnailImage}
+                    resizeMode="cover"
+                  />
+                  <View style={{ padding: 12 }}>
+                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
+                      <View style={post.format === 'REEL' ? styles.postTypePill : styles.postTypePillGray}>
+                        <Text style={post.format === 'REEL' ? styles.postTypePillText : styles.postTypePillGrayText}>
+                          {post.format}
+                        </Text>
+                      </View>
+                      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                        <SocialBrandIcon platform={post.platform} size={15} />
+                        <Text style={styles.postPlatformLabel}>{post.platform.toUpperCase()}</Text>
+                      </View>
+                    </View>
 
-          {/* ============================================================ */}
-          {/* CREATOR EARNINGS & MONETIZATION ENTRY CARD                   */}
-          {/* ============================================================ */}
-          <View style={styles.earningsHubCard}>
-            <View style={styles.earningsHubHeader}>
-              <View style={{ flex: 1, marginRight: 8 }}>
-                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, flexWrap: 'wrap', marginBottom: 2 }}>
-                  <Text style={styles.earningsHubTitle}>Creator Earnings</Text>
-                  <View style={styles.readinessTag}>
-                    <Text style={styles.readinessTagText}>94% READY</Text>
+                    <Text style={styles.postAnalysisTitle} numberOfLines={2}>
+                      {post.title}
+                    </Text>
+                    <Text
+                      style={styles.postMetricsText}
+                      numberOfLines={1}
+                      adjustsFontSizeToFit={true}
+                      minimumFontScale={0.85}
+                    >
+                      👁️ {post.views} views • 💬 {post.comments} comments • 💾 {post.saves} saves
+                    </Text>
                   </View>
-                </View>
-                <Text style={styles.earningsHubSub} numberOfLines={1}>Build your path to paid brand campaigns</Text>
-              </View>
-              <View style={styles.earningsHubIconCircle}>
-                <Text style={{ fontSize: 18 }}>💰</Text>
-              </View>
+                </Pressable>
+              ))}
             </View>
-
-            <View style={styles.earningsHubStatsRow}>
-              <View style={styles.earningsHubStatCol}>
-                <Text style={styles.earningsHubStatLabel}>CURRENT BALANCE</Text>
-                <Text style={styles.earningsHubStatVal}>$2,450.00</Text>
-              </View>
-              <View style={styles.earningsHubDivider} />
-              <View style={styles.earningsHubStatCol}>
-                <Text style={styles.earningsHubStatLabel}>EST. POTENTIAL</Text>
-                <Text style={[styles.earningsHubStatVal, { color: '#582CDB' }]}>$5,800.00</Text>
-              </View>
-            </View>
-
-            <Pressable
-              style={({ pressed }) => [styles.earningsHubBtn, pressed && styles.btnPressed]}
-              onPress={() => {
-                if (Platform.OS !== 'web') {
-                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-                }
-                if (onOpenEarnings) {
-                  onOpenEarnings();
-                } else {
-                  showToast('Opening Creator Earnings...');
-                }
-              }}
-            >
-              <Text style={styles.earningsHubBtnText}>View Creator Earnings ➔</Text>
-            </Pressable>
-          </View>
+          )}
 
           {/* ============================================================ */}
           {/* CARD 6: PEAK AUDIENCE WINDOW                                 */}
           {/* ============================================================ */}
           <View style={styles.peakWindowCard}>
-            <Text style={styles.peakWindowTitle}>Peak Audience Window</Text>
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
+              <Text style={[styles.peakWindowTitle, { marginBottom: 0 }]}>Peak Audience Window</Text>
+              {isNewUser && (
+                <View style={styles.milestoneStarterBadge}>
+                  <Text style={styles.milestoneStarterBadgeText}>⏱️ Calibrating</Text>
+                </View>
+              )}
+            </View>
 
-            {/* 7 Heatmap day blocks */}
+            {/* 7 Heatmap day blocks with M T W T F S S labels */}
             <View style={styles.heatmapRow}>
-              {['#F1F5F9', '#DDD6FE', '#A78BFA', '#8B5CF6', '#F59E0B', '#C4B5FD', '#F1F5F9'].map((bg, idx) => (
-                <View key={idx} style={[styles.heatmapBlock, { backgroundColor: bg }]} />
+              {[
+                { day: 'M', full: 'Mon', heat: '#F1F5F9' },
+                { day: 'T', full: 'Tue', heat: '#DDD6FE' },
+                { day: 'W', full: 'Wed', heat: '#A78BFA' },
+                { day: 'T', full: 'Thu', heat: '#8B5CF6' },
+                { day: 'F', full: 'Fri', heat: '#3F2BB5' },
+                { day: 'S', full: 'Sat', heat: '#C4B5FD' },
+                { day: 'S', full: 'Sun', heat: '#F1F5F9' },
+              ].map((item, idx) => (
+                <View
+                  key={idx}
+                  style={[
+                    styles.heatmapBlock,
+                    {
+                      backgroundColor: isNewUser ? '#F8FAFC' : item.heat,
+                      borderWidth: isNewUser ? 1 : 0,
+                      borderColor: '#E2E8F0',
+                      justifyContent: 'center',
+                      alignItems: 'center',
+                      height: 40,
+                    },
+                  ]}
+                >
+                  <Text
+                    style={{
+                      fontSize: 12,
+                      fontWeight: '700',
+                      color:
+                        !isNewUser && (item.heat === '#8B5CF6' || item.heat === '#582CDB' || item.heat === '#3F2BB5')
+                          ? '#FFFFFF'
+                          : '#94A3B8',
+                    }}
+                  >
+                    {item.day}
+                  </Text>
+                </View>
               ))}
             </View>
 
             <View style={styles.peakTimeCallout}>
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
                 <Text style={{ fontSize: 16 }}>⏱️</Text>
-                <View>
-                  <Text style={styles.peakTimeHighlightText}>Tue &amp; Thu, 7:30 PM</Text>
-                  <Text style={styles.peakTimeSub}>Optimal window this week.</Text>
+                <View style={{ flex: 1 }}>
+                  {isNewUser ? (
+                    <>
+                      <Text style={styles.peakTimeHighlightText}>Calibrating Peak Window</Text>
+                      <Text style={styles.peakTimeSub}>
+                        Publish 2 posts across different days to calculate your highest-converting time slots.
+                      </Text>
+                    </>
+                  ) : (
+                    <>
+                      <Text style={styles.peakTimeHighlightText}>Tue &amp; Thu, 7:30 PM</Text>
+                      <Text style={styles.peakTimeSub}>Your strongest posting window this week.</Text>
+                    </>
+                  )}
                 </View>
               </View>
             </View>
@@ -1318,29 +1763,41 @@ export const ProGrowthScreen: React.FC<ProGrowthScreenProps> = ({
             </View>
 
             <Text style={styles.jarvisIntelligenceTitle}>
-              Scale your storytelling content by 25% this week.
+              {isNewUser
+                ? 'Day 1 Strategy: Start with a 30s talk-to-camera intro to set your baseline retention.'
+                : 'Increase your storytelling output by 25% this week.'}
             </Text>
 
             <View style={styles.jarvisBadgesRow}>
               <View style={styles.jarvisBadgeWhite}>
-                <Text style={styles.jarvisBadgeWhiteText}>🏷️ Focus: Reel Retention</Text>
+                <Text style={styles.jarvisBadgeWhiteText}>{isNewUser ? '🎯 Goal: 1st Post' : '🏷️ Focus: Reel Retention'}</Text>
               </View>
               <View style={styles.jarvisBadgeWhite}>
-                <Text style={styles.jarvisBadgeWhiteText}>⚡ Publish: 7:30 PM</Text>
+                <Text style={styles.jarvisBadgeWhiteText}>{isNewUser ? '⚡ Suggested: 7:30 PM' : '⚡ Publish: 7:30 PM'}</Text>
               </View>
               <View style={styles.jarvisBadgeWhite}>
-                <Text style={styles.jarvisBadgeWhiteText}>🔗 Audience Goal: 150K</Text>
+                <Text style={styles.jarvisBadgeWhiteText}>{isNewUser ? '🎥 Format: Short Reel' : '🔗 Audience Goal: 150K'}</Text>
               </View>
             </View>
 
             <Pressable
               style={({ pressed }) => [styles.executeRecSolidBtn, pressed && styles.btnPressed]}
               onPress={() => {
-                if (onOpenPostComposer) onOpenPostComposer('Storytelling breakdown: 3 mistakes I stopped making', 'TikTok');
-                else showToast('Applying optimal 7:30 PM storytelling preset to draft!');
+                if (onOpenPostComposer) {
+                  onOpenPostComposer(
+                    isNewUser
+                      ? 'Why I decided to start creating: 1 lesson I learned'
+                      : 'Storytelling breakdown: 3 mistakes I stopped making',
+                    'TikTok'
+                  );
+                } else {
+                  showToast('Applying optimal 7:30 PM storytelling preset to draft!');
+                }
               }}
             >
-              <Text style={styles.executeRecBtnText}>Execute Recommendations</Text>
+              <Text style={styles.executeRecBtnText}>
+                {isNewUser ? 'Use Day 1 Storytelling Prompt 🚀' : 'Execute Recommendations'}
+              </Text>
             </Pressable>
           </View>
 
@@ -1348,7 +1805,7 @@ export const ProGrowthScreen: React.FC<ProGrowthScreenProps> = ({
           {/* ROW 8: 2x2 QUICK ACTION TILES                                */}
           {/* ============================================================ */}
           <View style={styles.quickActionTilesGrid}>
-            {/* Tile 1: Repeat best format -> Post Composer */}
+            {/* Tile 1: Repeat best format or Pick Day 1 format */}
             <Pressable
               style={({ pressed }) => [styles.quickActionTile, pressed && styles.btnPressed]}
               onPress={() => {
@@ -1356,7 +1813,7 @@ export const ProGrowthScreen: React.FC<ProGrowthScreenProps> = ({
                   Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                 }
                 if (onOpenPostComposer) {
-                  onOpenPostComposer('3 creator mistakes to avoid (Short Reel formula)', 'TikTok');
+                  onOpenPostComposer('Short storytelling Reel hook', 'TikTok');
                 } else if (onNavigateTab) {
                   onNavigateTab('create');
                 } else {
@@ -1364,8 +1821,13 @@ export const ProGrowthScreen: React.FC<ProGrowthScreenProps> = ({
                 }
               }}
             >
-              <Text style={{ fontSize: 18, marginBottom: 6 }}>🔄</Text>
-              <Text style={styles.tileTitleText}>Repeat best format{'\n'}(Short Reel)</Text>
+              <View style={styles.tileHeaderRow}>
+                <Text style={{ fontSize: 18 }}>🎥</Text>
+                <Text style={styles.tileArrowText}>→</Text>
+              </View>
+              <Text style={styles.tileTitleText}>
+                {isNewUser ? 'Pick post\ntemplate' : 'Repeat best format\n(Short Reel)'}
+              </Text>
             </Pressable>
 
             {/* Tile 2: Set 7:30 PM slot in calendar -> Animated Popup */}
@@ -1379,11 +1841,16 @@ export const ProGrowthScreen: React.FC<ProGrowthScreenProps> = ({
                 setShowSlotSetModal(true);
               }}
             >
-              <Text style={{ fontSize: 18, marginBottom: 6 }}>🗓️</Text>
-              <Text style={styles.tileTitleText}>Set 7:30 PM slot in{'\n'}calendar</Text>
+              <View style={styles.tileHeaderRow}>
+                <Text style={{ fontSize: 18 }}>🗓️</Text>
+                <Text style={styles.tileArrowText}>→</Text>
+              </View>
+              <Text style={styles.tileTitleText}>
+                {isNewUser ? 'Set daily post\nreminder' : 'Set 7:30 PM slot in\ncalendar'}
+              </Text>
             </Pressable>
 
-            {/* Tile 3: Protect growth momentum -> Options Modal */}
+            {/* Tile 3: Posting helpers -> Options Modal */}
             <Pressable
               style={({ pressed }) => [styles.quickActionTile, pressed && styles.btnPressed]}
               onPress={() => {
@@ -1394,8 +1861,13 @@ export const ProGrowthScreen: React.FC<ProGrowthScreenProps> = ({
                 setShowProtectMomentumModal(true);
               }}
             >
-              <Text style={{ fontSize: 18, marginBottom: 6 }}>🛡️</Text>
-              <Text style={styles.tileTitleText}>Protect growth{'\n'}momentum</Text>
+              <View style={styles.tileHeaderRow}>
+                <Text style={{ fontSize: 18 }}>🧰</Text>
+                <Text style={styles.tileArrowText}>→</Text>
+              </View>
+              <Text style={styles.tileTitleText}>
+                {'Posting\nhelpers'}
+              </Text>
             </Pressable>
 
             {/* Tile 4: Generate script -> Script Page */}
@@ -1414,7 +1886,10 @@ export const ProGrowthScreen: React.FC<ProGrowthScreenProps> = ({
                 }
               }}
             >
-              <Text style={{ fontSize: 18, marginBottom: 6 }}>🪄</Text>
+              <View style={styles.tileHeaderRow}>
+                <Text style={{ fontSize: 18 }}>🪄</Text>
+                <Text style={styles.tileArrowText}>→</Text>
+              </View>
               <Text style={styles.tileTitleText}>Generate script</Text>
             </Pressable>
           </View>
@@ -1422,27 +1897,42 @@ export const ProGrowthScreen: React.FC<ProGrowthScreenProps> = ({
           {/* ============================================================ */}
           {/* CARD 9: MONTHLY REPORT BANNER                                */}
           {/* ============================================================ */}
-          <View style={[styles.monthlyReportCard, { marginBottom: 120 }]}>
+          <View style={styles.monthlyReportCard}>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, marginBottom: 14 }}>
               <View style={styles.reportIconSquare}>
                 <Text style={{ fontSize: 20 }}>📑</Text>
               </View>
-              <View>
+              <View style={{ flex: 1 }}>
                 <Text style={styles.monthlyReportTitle}>Monthly Report</Text>
-                <Text style={styles.monthlyReportSub}>May 01–2024 • PDF Export</Text>
+                <Text style={styles.monthlyReportSub}>Monthly Audit • PDF Export</Text>
               </View>
+              {isNewUser && (
+                <View style={styles.milestoneStarterBadge}>
+                  <Text style={styles.milestoneStarterBadgeText}>Day 30</Text>
+                </View>
+              )}
             </View>
 
-            <Pressable
-              style={({ pressed }) => [styles.generateReportSolidBtn, pressed && styles.btnPressed]}
-              onPress={() => {
-                triggerModalPop();
-                setShowReportModal(true);
-              }}
-            >
-              <Text style={styles.generateReportBtnText}>Generate Report</Text>
-            </Pressable>
+            {isNewUser ? (
+              <View style={styles.reportLockedStateBox}>
+                <Text style={styles.reportLockedStateText}>
+                  Your first monthly growth audit &amp; PDF report unlocks after 30 days of activity (Day 0 of 30).
+                </Text>
+              </View>
+            ) : (
+              <Pressable
+                style={({ pressed }) => [styles.generateReportSolidBtn, pressed && styles.btnPressed]}
+                onPress={() => {
+                  triggerModalPop();
+                  setShowReportModal(true);
+                }}
+              >
+                <Text style={styles.generateReportBtnText}>Generate Report</Text>
+              </Pressable>
+            )}
           </View>
+          </>
+          )}
         </ScrollView>
 
         {/* 10. FLOATING LIQUID GLASS BOTTOM NAVIGATION BAR */}
@@ -1461,7 +1951,7 @@ export const ProGrowthScreen: React.FC<ProGrowthScreenProps> = ({
             <Animated.View style={[styles.modalCard, styles.expandedGraphModalCard, { transform: [{ scale: modalPopScale }] }]}>
               <ScrollView
                 style={{ width: '100%' }}
-                contentContainerStyle={{ paddingBottom: 135 }}
+                contentContainerStyle={{ paddingBottom: 12 }}
                 showsVerticalScrollIndicator={false}
                 bounces={false}
               >
@@ -1474,13 +1964,13 @@ export const ProGrowthScreen: React.FC<ProGrowthScreenProps> = ({
                       style={[styles.modalTitle, { flex: 1, minWidth: 0, fontSize: 16 }]}
                       numberOfLines={1}
                       adjustsFontSizeToFit
-                      minimumFontScale={0.8}
+                      minimumFontScale={0.85}
                     >
                       {expandedGraphType === 'growth30d'
-                        ? '30-Day Growth Velocity & Reach'
+                        ? `${graphTimeframe === '30D' ? '30-Day' : graphTimeframe} Growth Velocity`
                         : expandedGraphType === 'audience'
-                        ? '144.3K Total Audience Surge'
-                        : 'Content Format ROI & Conversion'}
+                        ? '144.3K Total Audience'
+                        : 'Content Format Performance'}
                     </Text>
                   </View>
                   <Text
@@ -1490,10 +1980,10 @@ export const ProGrowthScreen: React.FC<ProGrowthScreenProps> = ({
                     minimumFontScale={0.85}
                   >
                     {expandedGraphType === 'growth30d'
-                      ? 'Live multi-point analytics stream • May 2024'
+                      ? `Live multi-point analytics stream • ${graphTimeframe}`
                       : expandedGraphType === 'audience'
-                      ? 'Cross-platform audience expansion & velocity'
-                      : 'Retention, reach, saves & conversion benchmarks'}
+                      ? `Cross-platform audience expansion • ${graphTimeframe}`
+                      : `Retention, reach & saves benchmarks • ${graphTimeframe}`}
                   </Text>
                 </View>
                 <Pressable onPress={() => setShowExpandedGraphModal(false)} style={styles.modalCloseCircle} hitSlop={8}>
@@ -1532,61 +2022,135 @@ export const ProGrowthScreen: React.FC<ProGrowthScreenProps> = ({
                   const fmt = curCfg.formatSummary.formats[selectedFormatIndex] || curCfg.formatSummary.formats[0];
                   return (
                     <View style={styles.graphActivePointCard}>
-                      <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', gap: 10 }}>
-                        <View style={{ flex: 1, minWidth: 0 }}>
-                          <Text style={styles.graphActivePointDate} numberOfLines={1} ellipsizeMode="tail">
-                            {fmt.icon} {fmt.name}
-                          </Text>
-                          <Text style={styles.graphActivePointSub} numberOfLines={1} ellipsizeMode="tail">
-                            Save Rate: {fmt.saveRate} • Ret: {fmt.retention}
+                      {/* Top Row: Format Icon & Full Name + Gain Badge */}
+                      <View style={styles.graphActivePointHeaderRow}>
+                        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, flex: 1, minWidth: 0 }}>
+                          <Text style={{ fontSize: 18 }}>{fmt.icon}</Text>
+                          <Text style={styles.graphActivePointTitleText} numberOfLines={1}>
+                            {fmt.name}
                           </Text>
                         </View>
-                        <View style={{ alignItems: 'flex-end', flexShrink: 0 }}>
-                          <Text style={styles.graphActivePointValue} numberOfLines={1}>
-                            {fmt.reach} Avg Reach
+                        <View style={styles.graphActivePointGainBadge}>
+                          <Text style={styles.graphActivePointGainBadgeText}>
+                            {fmt.delta}
                           </Text>
-                          <Text style={styles.graphActivePointDelta} numberOfLines={1}>
-                            {fmt.delta} ({graphTimeframe})
-                          </Text>
+                        </View>
+                      </View>
+
+                      {/* 3 Metric Columns with Full Words */}
+                      <View style={styles.graphActivePointMetricsGrid}>
+                        <View style={styles.graphActivePointMetricCell}>
+                          <Text style={styles.graphActivePointCellLabel}>AVERAGE REACH</Text>
+                          <Text style={[styles.graphActivePointCellVal, { color: '#582CDB' }]}>{fmt.reach}</Text>
+                        </View>
+                        <View style={styles.graphActivePointCellDivider} />
+                        <View style={styles.graphActivePointMetricCell}>
+                          <Text style={styles.graphActivePointCellLabel}>AVG WATCHED</Text>
+                          <Text style={[styles.graphActivePointCellVal, { color: '#10B981' }]}>{fmt.retention}</Text>
+                        </View>
+                        <View style={styles.graphActivePointCellDivider} />
+                        <View style={styles.graphActivePointMetricCell}>
+                          <Text style={styles.graphActivePointCellLabel}>SAVE RATE</Text>
+                          <Text style={[styles.graphActivePointCellVal, { color: '#8B5CF6' }]}>{fmt.saveRate.split(' ')[0]}</Text>
                         </View>
                       </View>
                     </View>
                   );
                 }
 
+                if (expandedGraphType === 'growth30d') {
+                  const safeIdx = Math.min(selectedGraphDayIndex, curCfg.daysCount - 1);
+                  const activePt = curCfg.getPoint(safeIdx, expandedGraphType);
+                  const gainText = activePt.deltaFollowers.includes('Followers')
+                    ? activePt.deltaFollowers.replace('Followers', 'followers today')
+                    : activePt.deltaFollowers.includes('Today')
+                    ? activePt.deltaFollowers.replace('Today', 'followers today')
+                    : `${activePt.deltaFollowers} followers today`;
+
+                  return (
+                    <View style={styles.graphActivePointCard}>
+                      {/* Top Row: Date + Daily Follower Gain Badge */}
+                      <View style={styles.graphActivePointHeaderRow}>
+                        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, flex: 1, minWidth: 0 }}>
+                          <Text style={{ fontSize: 16 }}>📅</Text>
+                          <Text style={styles.graphActivePointTitleText} numberOfLines={1}>
+                            {activePt.date}
+                          </Text>
+                        </View>
+                        <View style={styles.graphActivePointGainBadge}>
+                          <Text style={styles.graphActivePointGainBadgeText}>
+                            {gainText}
+                          </Text>
+                        </View>
+                      </View>
+
+                      {/* 3 Metric Columns with Full Words */}
+                      <View style={styles.graphActivePointMetricsGrid}>
+                        <View style={styles.graphActivePointMetricCell}>
+                          <Text style={styles.graphActivePointCellLabel}>DAILY REACH</Text>
+                          <Text style={[styles.graphActivePointCellVal, { color: '#582CDB' }]}>{activePt.metricValue}</Text>
+                        </View>
+                        <View style={styles.graphActivePointCellDivider} />
+                        <View style={styles.graphActivePointMetricCell}>
+                          <Text style={styles.graphActivePointCellLabel}>{graphTimeframe} TOTAL REACH</Text>
+                          <Text style={[styles.graphActivePointCellVal, { color: '#171420' }]}>{curCfg.reachSummary.total}</Text>
+                        </View>
+                        <View style={styles.graphActivePointCellDivider} />
+                        <View style={styles.graphActivePointMetricCell}>
+                          <Text style={styles.graphActivePointCellLabel}>ENGAGEMENT</Text>
+                          <Text style={[styles.graphActivePointCellVal, { color: '#10B981' }]}>{curCfg.reachSummary.engagement}</Text>
+                        </View>
+                      </View>
+                    </View>
+                  );
+                }
+
+                // Audience Expansion View
                 const safeIdx = Math.min(selectedGraphDayIndex, curCfg.daysCount - 1);
                 const activePt = curCfg.getPoint(safeIdx, expandedGraphType);
+                const gainText = activePt.deltaFollowers.includes('Followers')
+                  ? activePt.deltaFollowers.replace('Followers', 'followers today')
+                  : activePt.deltaFollowers.includes('Today')
+                  ? activePt.deltaFollowers.replace('Today', 'followers today')
+                  : `${activePt.deltaFollowers} followers today`;
 
                 return (
                   <View style={styles.graphActivePointCard}>
-                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', gap: 10 }}>
-                      <View style={{ flex: 1, minWidth: 0 }}>
-                        <Text style={styles.graphActivePointDate} numberOfLines={1} ellipsizeMode="tail">
-                          📅 {activePt.date}
-                        </Text>
-                        <Text style={styles.graphActivePointSub} numberOfLines={1} ellipsizeMode="tail">
-                          {expandedGraphType === 'growth30d' ? 'Daily Velocity & Reach' : 'Audience Growth Trend'}
+                    {/* Top Row: Date + Daily Follower Gain Badge */}
+                    <View style={styles.graphActivePointHeaderRow}>
+                      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, flex: 1, minWidth: 0 }}>
+                        <Text style={{ fontSize: 16 }}>📅</Text>
+                        <Text style={styles.graphActivePointTitleText} numberOfLines={1}>
+                          {activePt.date}
                         </Text>
                       </View>
-                      <View style={{ alignItems: 'flex-end', flexShrink: 0 }}>
-                        <Text style={styles.graphActivePointValue} numberOfLines={1}>
-                          {activePt.reach}
+                      <View style={styles.graphActivePointGainBadge}>
+                        <Text style={styles.graphActivePointGainBadgeText}>
+                          {gainText}
                         </Text>
-                        <Text style={styles.graphActivePointDelta} numberOfLines={1}>
-                          {activePt.delta}
-                        </Text>
+                      </View>
+                    </View>
+
+                    {/* 3 Metric Columns with Full Words */}
+                    <View style={styles.graphActivePointMetricsGrid}>
+                      <View style={styles.graphActivePointMetricCell}>
+                        <Text style={styles.graphActivePointCellLabel}>TOTAL AUDIENCE</Text>
+                        <Text style={[styles.graphActivePointCellVal, { color: '#7C3AED' }]}>{activePt.metricValue}</Text>
+                      </View>
+                      <View style={styles.graphActivePointCellDivider} />
+                      <View style={styles.graphActivePointMetricCell}>
+                        <Text style={styles.graphActivePointCellLabel}>{graphTimeframe} NET GAIN</Text>
+                        <Text style={[styles.graphActivePointCellVal, { color: '#10B981' }]}>{curCfg.audienceSummary.delta.split(' ')[0]}</Text>
+                      </View>
+                      <View style={styles.graphActivePointCellDivider} />
+                      <View style={styles.graphActivePointMetricCell}>
+                        <Text style={styles.graphActivePointCellLabel}>TIER-1 QUALITY</Text>
+                        <Text style={[styles.graphActivePointCellVal, { color: '#171420' }]}>{curCfg.audienceSummary.quality}</Text>
                       </View>
                     </View>
                   </View>
                 );
               })()}
-
-              {/* Scroll Instruction Hint */}
-              <View style={styles.scrollGraphHintRow}>
-                <Text style={styles.scrollGraphHintText}>
-                  ↔ Swipe {graphTimeframe} graph horizontally to inspect all {TIMEFRAME_CONFIGS[graphTimeframe]?.daysCount || 30} live data points
-                </Text>
-              </View>
 
               {/* HORIZONTAL SCROLLABLE LIVE GRAPH / BAR COMPARISON VIEWPORT */}
               {(() => {
@@ -1743,7 +2307,7 @@ export const ProGrowthScreen: React.FC<ProGrowthScreenProps> = ({
                                     isSelected && styles.nodeCircleDotSelected,
                                     {
                                       backgroundColor: isSelected
-                                        ? '#F59E0B'
+                                        ? '#3F2BB5'
                                         : expandedGraphType === 'growth30d'
                                         ? '#582CDB'
                                         : '#7C3AED',
@@ -1782,23 +2346,47 @@ export const ProGrowthScreen: React.FC<ProGrowthScreenProps> = ({
                       <View style={styles.audienceStatsDuoRow}>
                         <View style={styles.audienceStatDuoCard}>
                           <Text style={styles.audienceStatDuoLabel}>TOP REACH FORMAT</Text>
-                          <Text style={[styles.audienceStatDuoVal, { color: '#582CDB' }]}>
+                          <Text
+                            style={[styles.audienceStatDuoVal, { color: '#582CDB' }]}
+                            numberOfLines={1}
+                            adjustsFontSizeToFit
+                            minimumFontScale={0.8}
+                          >
                             {fmtSum.topFormat.split(' ')[0]}
                           </Text>
-                          <Text style={styles.audienceStatDuoSub}>{fmtSum.topFormat}</Text>
+                          <Text
+                            style={styles.audienceStatDuoSub}
+                            numberOfLines={1}
+                            adjustsFontSizeToFit
+                            minimumFontScale={0.8}
+                          >
+                            {fmtSum.topFormat}
+                          </Text>
                         </View>
                         <View style={styles.audienceStatDuoCard}>
                           <Text style={styles.audienceStatDuoLabel}>TOP SAVES &amp; BOOKMARKS</Text>
-                          <Text style={[styles.audienceStatDuoVal, { color: '#10B981' }]}>
+                          <Text
+                            style={[styles.audienceStatDuoVal, { color: '#10B981' }]}
+                            numberOfLines={1}
+                            adjustsFontSizeToFit
+                            minimumFontScale={0.8}
+                          >
                             {fmtSum.topConversion.split(' ')[0]}
                           </Text>
-                          <Text style={styles.audienceStatDuoSub}>{fmtSum.topConversion}</Text>
+                          <Text
+                            style={styles.audienceStatDuoSub}
+                            numberOfLines={1}
+                            adjustsFontSizeToFit
+                            minimumFontScale={0.8}
+                          >
+                            {fmtSum.topConversion}
+                          </Text>
                         </View>
                       </View>
 
                       {/* Format Detail Rows */}
                       <View style={styles.audienceChannelsCard}>
-                        <Text style={styles.audienceChannelsTitle}>FORMAT CONVERSION BREAKDOWN ({graphTimeframe})</Text>
+                        <Text style={styles.audienceChannelsTitle}>FORMAT REACH BREAKDOWN ({graphTimeframe})</Text>
 
                         {fmtSum.formats.map((f: any, fIdx: number) => (
                           <View key={fIdx} style={styles.audienceChannelRow}>
@@ -1806,9 +2394,9 @@ export const ProGrowthScreen: React.FC<ProGrowthScreenProps> = ({
                               <Text style={{ fontSize: 16 }}>{f.icon}</Text>
                             </View>
                             <View style={{ flex: 1, marginLeft: 10 }}>
-                              <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 4 }}>
+                              <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 5 }}>
                                 <Text style={styles.audienceChannelName}>{f.name}</Text>
-                                <Text style={styles.audienceChannelVal}>{f.reach} <Text style={styles.audienceChannelPct}>({f.retention} Ret)</Text></Text>
+                                <Text style={styles.audienceChannelVal}>{f.reach}</Text>
                               </View>
                               <View style={styles.audienceChannelTrackBg}>
                                 <View style={[styles.audienceChannelTrackFill, { width: `${f.barHeight}%`, backgroundColor: f.color }]} />
@@ -2000,17 +2588,17 @@ export const ProGrowthScreen: React.FC<ProGrowthScreenProps> = ({
         >
           <View style={styles.modalOverlay}>
             <Animated.View style={[styles.modalCardLarge, { maxHeight: '90%', padding: 20, transform: [{ scale: modalPopScale }] }]}>
-              <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 135 }}>
+              <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 12 }}>
                 {/* Header */}
                 <View style={styles.modalHeaderRow}>
                   <View style={{ flex: 1, minWidth: 0, paddingRight: 10 }}>
                     <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 4 }}>
                       <View style={styles.liveGreenPulseDot} />
                       <Text style={styles.reportVerifiedBadge}>VERIFIED CREATOR AUDIT</Text>
-                      <Text style={styles.reportDateBadge}>MAY 2024</Text>
+                      <Text style={styles.reportDateBadge}>CURRENT 30D</Text>
                     </View>
-                    <Text style={[styles.modalTitle, { fontSize: 17 }]} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.85}>May Executive Growth Report</Text>
-                    <Text style={styles.modalSubtitle} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.85}>Comprehensive multi-platform analytics &amp; brand deal valuation</Text>
+                    <Text style={[styles.modalTitle, { fontSize: 17 }]} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.85}>Executive Growth Report</Text>
+                    <Text style={styles.modalSubtitle} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.85}>Comprehensive multi-platform creator analytics &amp; momentum audit</Text>
                   </View>
                   <Pressable onPress={() => setShowReportModal(false)} style={styles.modalCloseCircle} hitSlop={8}>
                     <Text style={styles.modalCloseCross}>✕</Text>
@@ -2027,7 +2615,7 @@ export const ProGrowthScreen: React.FC<ProGrowthScreenProps> = ({
                   <View style={styles.reportVitalCard}>
                     <Text style={styles.reportVitalLabel}>NET AUDIENCE GAIN</Text>
                     <Text style={[styles.reportVitalVal, { color: '#10B981' }]}>+2,480</Text>
-                    <Text style={styles.reportVitalDelta}>144.3K Total Fans</Text>
+                    <Text style={styles.reportVitalDelta}>144.3K Total Followers</Text>
                   </View>
                   <View style={styles.reportVitalCard}>
                     <Text style={styles.reportVitalLabel}>ENGAGEMENT VOLUME</Text>
@@ -2035,9 +2623,9 @@ export const ProGrowthScreen: React.FC<ProGrowthScreenProps> = ({
                     <Text style={styles.reportVitalDelta}>96.8% Tier-1 Quality</Text>
                   </View>
                   <View style={styles.reportVitalCard}>
-                    <Text style={styles.reportVitalLabel}>BRAND DEAL VALUATION</Text>
-                    <Text style={[styles.reportVitalVal, { color: '#F59E0B' }]}>$3.8K – $5.2K</Text>
-                    <Text style={styles.reportVitalDelta}>Tier-1 Verified Rate</Text>
+                    <Text style={styles.reportVitalLabel}>CREATOR HEALTH SCORE</Text>
+                    <Text style={[styles.reportVitalVal, { color: '#5B3EE8' }]}>98 / 100</Text>
+                    <Text style={styles.reportVitalDelta}>Top 1% Momentum</Text>
                   </View>
                 </View>
 
@@ -2073,7 +2661,7 @@ export const ProGrowthScreen: React.FC<ProGrowthScreenProps> = ({
 
                   {/* Highlight 3: Peak Publishing Window */}
                   <View style={styles.reportHighlightItem}>
-                    <View style={[styles.reportHighlightIconCircle, { backgroundColor: '#FEF3C7' }]}>
+                    <View style={[styles.reportHighlightIconCircle, { backgroundColor: '#EDE9FE' }]}>
                       <Text style={{ fontSize: 16 }}>⚡</Text>
                     </View>
                     <View style={{ flex: 1 }}>
@@ -2092,7 +2680,7 @@ export const ProGrowthScreen: React.FC<ProGrowthScreenProps> = ({
                     <View style={{ flex: 1 }}>
                       <Text style={styles.reportHighlightTitle}>Multi-Platform Inbound Velocity</Text>
                       <Text style={styles.reportHighlightDesc}>
-                        Active distribution across TikTok (40%), Instagram (36%), and YouTube (24%) generated 4 new brand sponsorship inquiries.
+                        Active distribution across TikTok (40%), Instagram (36%), and YouTube (24%) generated 4x higher follower conversion velocity.
                       </Text>
                     </View>
                   </View>
@@ -2109,7 +2697,7 @@ export const ProGrowthScreen: React.FC<ProGrowthScreenProps> = ({
                     <Text style={styles.reportJarvisTag}>JARVIS AUDIT VERDICT</Text>
                   </View>
                   <Text style={styles.reportJarvisText}>
-                    You rank in the <Text style={{ fontWeight: '800', color: '#7C3AED' }}>Top 2.4% of creators in your niche</Text> this month. Your average watch time of 0:42s gives you maximum negotiating leverage for upcoming brand campaigns.
+                    You rank in the <Text style={{ fontWeight: '800', color: '#7C3AED' }}>Top 2.4% of creators in your niche</Text> this month. Your average watch time of 42s gives you maximum consistency and algorithmic reach across all channels.
                   </Text>
                 </View>
 
@@ -2121,7 +2709,7 @@ export const ProGrowthScreen: React.FC<ProGrowthScreenProps> = ({
                       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
                     }
                     setShowReportModal(false);
-                    showToast('✓ May 2024 Executive PDF Report downloaded!');
+                    showToast('✓ Executive Growth PDF Report downloaded!');
                   }}
                 >
                   <Text
@@ -2156,7 +2744,7 @@ export const ProGrowthScreen: React.FC<ProGrowthScreenProps> = ({
           onRequestClose={() => setShowAddPlatformModal(false)}
         >
           <View style={styles.modalOverlay}>
-            <Animated.View style={[styles.modalCardLarge, { transform: [{ scale: modalPopScale }] }]}>
+            <Animated.View style={[styles.modalCardLarge, { maxHeight: '88%', padding: 18, transform: [{ scale: modalPopScale }] }]}>
               <View style={styles.modalHeaderRow}>
                 <View style={{ flex: 1, marginRight: 8 }}>
                   <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, flexWrap: 'wrap', marginBottom: 2 }}>
@@ -2181,7 +2769,8 @@ export const ProGrowthScreen: React.FC<ProGrowthScreenProps> = ({
               </View>
 
               <ScrollView
-                style={{ maxHeight: Dimensions.get('window').height * 0.58 }}
+                style={{ flexShrink: 1 }}
+                contentContainerStyle={{ paddingBottom: 10 }}
                 showsVerticalScrollIndicator={false}
               >
                 <Text style={styles.modalSectionTitle}>ACTIVE CONNECTED PLATFORMS</Text>
@@ -2202,8 +2791,13 @@ export const ProGrowthScreen: React.FC<ProGrowthScreenProps> = ({
                               <Text style={styles.autoSyncText}>Auto-Sync</Text>
                             </View>
                           </View>
-                          <Text style={styles.platformSubText} numberOfLines={1}>
-                            {plat.handle} • ⚡ {plat.followers}
+                          <Text
+                            style={styles.platformSubText}
+                            numberOfLines={1}
+                            adjustsFontSizeToFit
+                            minimumFontScale={0.85}
+                          >
+                            {plat.handle} · ⚡ {plat.followers}
                           </Text>
                         </View>
                         <Pressable
@@ -2325,7 +2919,7 @@ export const ProGrowthScreen: React.FC<ProGrowthScreenProps> = ({
               <ScrollView
                 style={{ width: '100%' }}
                 showsVerticalScrollIndicator={false}
-                contentContainerStyle={{ paddingBottom: 135 }}
+                contentContainerStyle={{ paddingBottom: 12 }}
               >
                 {/* Header */}
                 <View style={styles.modalHeaderRow}>
@@ -2336,7 +2930,7 @@ export const ProGrowthScreen: React.FC<ProGrowthScreenProps> = ({
                         <Text style={styles.activePlatformsCountText}>{selectedPost.format} AUDIT</Text>
                       </View>
                     </View>
-                    <Text style={[styles.modalTitle, { fontSize: 16 }]} numberOfLines={2}>
+                    <Text style={[styles.modalTitle, { fontSize: 16, lineHeight: 22 }]} numberOfLines={4}>
                       {selectedPost.title}
                     </Text>
                     <Text style={styles.modalSubtitle}>{selectedPost.date}</Text>
@@ -2356,12 +2950,12 @@ export const ProGrowthScreen: React.FC<ProGrowthScreenProps> = ({
                   <View style={styles.postDetailMetricItem}>
                     <Text style={styles.postDetailMetricLabel}>NEW FOLLOWERS</Text>
                     <Text style={[styles.postDetailMetricVal, { color: '#582CDB' }]}>👤 {selectedPost.newFollowers}</Text>
-                    <Text style={styles.postDetailMetricSub}>High conversion</Text>
+                    <Text style={styles.postDetailMetricSub}>High conversion rate</Text>
                   </View>
                   <View style={styles.postDetailMetricItem}>
-                    <Text style={styles.postDetailMetricLabel}>SAVES / BOOKMARKS</Text>
+                    <Text style={styles.postDetailMetricLabel}>SAVES &amp; BOOKMARKS</Text>
                     <Text style={[styles.postDetailMetricVal, { color: '#10B981' }]}>💾 {selectedPost.saves}</Text>
-                    <Text style={styles.postDetailMetricSub}>Top 1% intent</Text>
+                    <Text style={styles.postDetailMetricSub}>Top 1% of your posts</Text>
                   </View>
                   <View style={styles.postDetailMetricItem}>
                     <Text style={styles.postDetailMetricLabel}>SHARES</Text>
@@ -2372,9 +2966,18 @@ export const ProGrowthScreen: React.FC<ProGrowthScreenProps> = ({
 
                 {/* RETENTION TIMELINE GRAPH */}
                 <View style={styles.postRetentionCard}>
-                  <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-                    <Text style={styles.postRetentionTitle}>AUDIENCE RETENTION CURVE</Text>
-                    <Text style={styles.postRetentionBadge}>Hook: {selectedPost.hookRetention}</Text>
+                  <View style={{ marginBottom: 8 }}>
+                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4, gap: 6 }}>
+                      <Text style={styles.postRetentionTitle}>AUDIENCE RETENTION</Text>
+                      <View style={styles.postRetentionBadge}>
+                        <Text style={styles.postRetentionBadgeText}>
+                          Hook: {selectedPost.hookRetention.split(' (')[0]}
+                        </Text>
+                      </View>
+                    </View>
+                    <Text style={styles.postRetentionSubText}>
+                      🔥 Top {selectedPost.hookRetention.includes('Top ') ? selectedPost.hookRetention.split('Top ')[1].replace(')', '') : '1% of your posts'}
+                    </Text>
                   </View>
 
                   <Svg width="100%" height={75} viewBox="0 0 340 75">
@@ -2396,10 +2999,30 @@ export const ProGrowthScreen: React.FC<ProGrowthScreenProps> = ({
                     <Circle cx={340} cy={42} r={4} fill="#582CDB" />
                   </Svg>
 
-                  <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 4 }}>
-                    <Text style={{ fontSize: 10, color: '#64748B', fontWeight: '700' }}>0s (Start: 100%)</Text>
-                    <Text style={{ fontSize: 10, color: '#582CDB', fontWeight: '800' }}>Avg: {selectedPost.avgWatchTime}</Text>
-                    <Text style={{ fontSize: 10, color: '#64748B', fontWeight: '700' }}>End: {selectedPost.completionRate}</Text>
+                  {/* 3 Metric Columns with Full Words */}
+                  <View style={styles.retentionMetricsGrid}>
+                    <View style={styles.retentionMetricCell}>
+                      <Text style={styles.retentionMetricLabel}>START</Text>
+                      <Text style={styles.retentionMetricVal}>100%</Text>
+                    </View>
+                    <View style={styles.retentionMetricDivider} />
+                    <View style={styles.retentionMetricCell}>
+                      <Text style={styles.retentionMetricLabel}>AVG WATCH</Text>
+                      <Text style={[styles.retentionMetricVal, { color: '#582CDB' }]}>
+                        {selectedPost.avgWatchTime.split(' (')[0]}
+                      </Text>
+                      <Text style={styles.retentionMetricSub}>
+                        {selectedPost.avgWatchTime.includes('(') ? selectedPost.avgWatchTime.split('(')[1].replace(')', '') : '84% viewed'}
+                      </Text>
+                    </View>
+                    <View style={styles.retentionMetricDivider} />
+                    <View style={styles.retentionMetricCell}>
+                      <Text style={styles.retentionMetricLabel}>COMPLETION</Text>
+                      <Text style={[styles.retentionMetricVal, { color: '#10B981' }]}>
+                        {selectedPost.completionRate.split(' ')[0]}
+                      </Text>
+                      <Text style={styles.retentionMetricSub}>completed</Text>
+                    </View>
                   </View>
                 </View>
 
@@ -2436,7 +3059,7 @@ export const ProGrowthScreen: React.FC<ProGrowthScreenProps> = ({
                       <Text style={styles.trafficSourceVal}>{selectedPost.trafficDirect}</Text>
                     </View>
                     <View style={styles.trafficTrackBg}>
-                      <View style={[styles.trafficTrackFill, { width: selectedPost.trafficDirect as any, backgroundColor: '#F59E0B' }]} />
+                      <View style={[styles.trafficTrackFill, { width: selectedPost.trafficDirect as any, backgroundColor: '#A78BFA' }]} />
                     </View>
                   </View>
                 </View>
@@ -2548,8 +3171,8 @@ export const ProGrowthScreen: React.FC<ProGrowthScreenProps> = ({
                 <View style={styles.modalHeaderRow}>
                   <View style={{ flex: 1, paddingRight: 10 }}>
                     <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 2 }}>
-                      <Text style={{ fontSize: 18 }}>🛡️</Text>
-                      <Text style={styles.modalTitle}>Protect Growth Momentum</Text>
+                      <Text style={{ fontSize: 18 }}>🧰</Text>
+                      <Text style={styles.modalTitle}>Posting Helpers</Text>
                     </View>
                     <Text style={styles.modalSubtitle}>
                       Configure autonomous safeguards to protect your streak &amp; algorithm reach
@@ -2572,11 +3195,11 @@ export const ProGrowthScreen: React.FC<ProGrowthScreenProps> = ({
                   >
                     <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
                       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, flex: 1 }}>
-                        <Text style={{ fontSize: 20 }}>🛡️</Text>
+                        <Text style={{ fontSize: 20 }}>📝</Text>
                         <View style={{ flex: 1 }}>
-                          <Text style={styles.protectOptionTitle}>Streak Autopilot Shield</Text>
+                          <Text style={styles.protectOptionTitle}>Backup Draft</Text>
                           <Text style={styles.protectOptionDesc}>
-                            Auto-queues an emergency evergreen draft if unposted by 9:00 PM.
+                            Keeps one evergreen draft ready for busy days.
                           </Text>
                         </View>
                       </View>
@@ -2598,9 +3221,9 @@ export const ProGrowthScreen: React.FC<ProGrowthScreenProps> = ({
                       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, flex: 1 }}>
                         <Text style={{ fontSize: 20 }}>⚡</Text>
                         <View style={{ flex: 1 }}>
-                          <Text style={styles.protectOptionTitle}>Algorithmic Safety Buffer</Text>
+                          <Text style={styles.protectOptionTitle}>Draft Buffer</Text>
                           <Text style={styles.protectOptionDesc}>
-                            Maintains 3 pre-rendered drafts to prevent posting velocity drops.
+                            Keeps a few drafts ready so posting feels easy.
                           </Text>
                         </View>
                       </View>
@@ -2622,9 +3245,9 @@ export const ProGrowthScreen: React.FC<ProGrowthScreenProps> = ({
                       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, flex: 1 }}>
                         <Text style={{ fontSize: 20 }}>🔔</Text>
                         <View style={{ flex: 1 }}>
-                          <Text style={styles.protectOptionTitle}>Peak Window Push Reminders</Text>
+                          <Text style={styles.protectOptionTitle}>Gentle Reminder</Text>
                           <Text style={styles.protectOptionDesc}>
-                            Sends 30-min priority notifications before optimal 7:30 PM slot.
+                            One friendly nudge before your best posting time.
                           </Text>
                         </View>
                       </View>
@@ -2634,29 +3257,31 @@ export const ProGrowthScreen: React.FC<ProGrowthScreenProps> = ({
                     </View>
                   </Pressable>
 
-                  {/* Option 4 */}
-                  <Pressable
-                    style={[styles.protectOptionCard, squadBoostActive && styles.protectOptionCardActive]}
-                    onPress={() => {
-                      if (Platform.OS !== 'web') Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                      setSquadBoostActive(!squadBoostActive);
-                    }}
-                  >
-                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, flex: 1 }}>
-                        <Text style={{ fontSize: 20 }}>👥</Text>
-                        <View style={{ flex: 1 }}>
-                          <Text style={styles.protectOptionTitle}>Squad Engagement Alert</Text>
-                          <Text style={styles.protectOptionDesc}>
-                            Pings squad members to like &amp; comment in first 15 mins.
-                          </Text>
+                  {/* Option 4: Squad alerts are a Stage 2 feature */}
+                  {STAGE_2_ENABLED && (
+                    <Pressable
+                      style={[styles.protectOptionCard, squadBoostActive && styles.protectOptionCardActive]}
+                      onPress={() => {
+                        if (Platform.OS !== 'web') Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                        setSquadBoostActive(!squadBoostActive);
+                      }}
+                    >
+                      <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, flex: 1 }}>
+                          <Text style={{ fontSize: 20 }}>👥</Text>
+                          <View style={{ flex: 1 }}>
+                            <Text style={styles.protectOptionTitle}>Squad Engagement Alert</Text>
+                            <Text style={styles.protectOptionDesc}>
+                              Pings squad members to like &amp; comment in first 15 mins.
+                            </Text>
+                          </View>
+                        </View>
+                        <View style={[styles.protectToggleCircle, squadBoostActive && styles.protectToggleCircleActive]}>
+                          <Text style={styles.protectToggleText}>{squadBoostActive ? 'ON' : 'OFF'}</Text>
                         </View>
                       </View>
-                      <View style={[styles.protectToggleCircle, squadBoostActive && styles.protectToggleCircleActive]}>
-                        <Text style={styles.protectToggleText}>{squadBoostActive ? 'ON' : 'OFF'}</Text>
-                      </View>
-                    </View>
-                  </Pressable>
+                    </Pressable>
+                  )}
                 </View>
 
                 {/* Save Button */}
@@ -2665,10 +3290,10 @@ export const ProGrowthScreen: React.FC<ProGrowthScreenProps> = ({
                   onPress={() => {
                     if (Platform.OS !== 'web') Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
                     setShowProtectMomentumModal(false);
-                    showToast('✓ Growth Momentum Safeguards updated & active!');
+                    showToast('✓ Posting helpers saved');
                   }}
                 >
-                  <Text style={styles.modalRepurposeBtnText}>Save &amp; Activate Safeguards</Text>
+                  <Text style={styles.modalRepurposeBtnText}>Save Helpers</Text>
                 </Pressable>
               </ScrollView>
             </Animated.View>
@@ -2820,8 +3445,8 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     paddingHorizontal: 20,
-    paddingTop: 8,
-    paddingBottom: 135,
+    paddingTop: 6,
+    paddingBottom: 100,
   },
 
   // HERO TAGS & HEADLINE
@@ -2829,12 +3454,12 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
-    marginBottom: 8,
+    marginBottom: 6,
   },
   growthProPill: {
     backgroundColor: '#582CDB',
     paddingHorizontal: 8,
-    paddingVertical: 3.5,
+    paddingVertical: 3,
     borderRadius: 6,
   },
   growthProPillText: {
@@ -2844,21 +3469,22 @@ const styles = StyleSheet.create({
     letterSpacing: 0.5,
   },
   mainTitleText: {
-    fontSize: 22,
+    fontSize: Platform.OS === 'web' ? ('clamp(15px, 3.8vw, 17px)' as any) : sFont(16),
     fontWeight: '700',
     color: '#171420',
-    letterSpacing: -0.4,
+    letterSpacing: -0.35,
+    lineHeight: 22,
     marginBottom: 4,
   },
   proAnalyticsActivePill: {
     alignSelf: 'flex-start',
     backgroundColor: '#FFFBEB',
-    paddingHorizontal: 8,
-    paddingVertical: 3,
+    paddingHorizontal: 7.5,
+    paddingVertical: 2.5,
     borderRadius: 6,
     borderWidth: 1,
     borderColor: '#FEF3C7',
-    marginBottom: 10,
+    marginBottom: 7,
   },
   proAnalyticsActiveText: {
     fontSize: 10,
@@ -2868,8 +3494,8 @@ const styles = StyleSheet.create({
   mainSubtitleText: {
     fontSize: 13,
     color: '#5E576E',
-    lineHeight: 18,
-    marginBottom: 16,
+    lineHeight: 17.5,
+    marginBottom: 12,
   },
 
   // CARD 1: HERO ANALYTICS
@@ -2901,10 +3527,10 @@ const styles = StyleSheet.create({
     color: '#7C3AED',
   },
   expandedGraphModalCard: {
-    width: '92%',
-    
-    maxHeight: '88%',
-    padding: 18,
+    width: '95%',
+    maxWidth: 420,
+    maxHeight: '90%',
+    padding: 16,
     borderRadius: 24,
     backgroundColor: '#FFFFFF',
     overflow: 'hidden',
@@ -2945,33 +3571,108 @@ const styles = StyleSheet.create({
   },
   graphActivePointCard: {
     backgroundColor: '#FAF8F5',
-    borderRadius: 14,
-    paddingHorizontal: 14,
-    paddingVertical: 10,
+    borderRadius: 16,
+    padding: 12,
     borderWidth: 1.5,
     borderColor: '#EFECE6',
-    marginBottom: 8,
+    marginBottom: 10,
     width: '100%',
   },
-  graphActivePointDate: {
-    fontSize: 13,
-    fontWeight: '700',
+  graphActivePointHeaderRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 8,
+    gap: 6,
+  },
+  graphActivePointTitleText: {
+    fontSize: 13.5,
+    fontWeight: '800',
     color: '#171420',
-    marginBottom: 2,
+    flexShrink: 1,
   },
-  graphActivePointSub: {
-    fontSize: 11,
-    color: '#64748B',
+  graphActivePointGainBadge: {
+    backgroundColor: '#DCFCE7',
+    paddingVertical: 3,
+    paddingHorizontal: 8,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#BBF7D0',
+    flexShrink: 0,
   },
-  graphActivePointValue: {
-    fontSize: 14,
-    fontWeight: '700',
-    color: '#582CDB',
-  },
-  graphActivePointDelta: {
+  graphActivePointGainBadgeText: {
     fontSize: 11,
     fontWeight: '800',
-    color: '#10B981',
+    color: '#15803D',
+  },
+  graphActivePointMetricsGrid: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#FFFFFF',
+    borderRadius: 12,
+    paddingVertical: 8,
+    paddingHorizontal: 6,
+    borderWidth: 1,
+    borderColor: '#EFECE6',
+  },
+  graphActivePointMetricCell: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    minWidth: 0,
+  },
+  graphActivePointCellLabel: {
+    fontSize: 8.5,
+    fontWeight: '800',
+    color: '#64748B',
+    letterSpacing: 0.3,
+    marginBottom: 2,
+    textAlign: 'center',
+  },
+  graphActivePointCellVal: {
+    fontSize: 13,
+    fontWeight: '800',
+    textAlign: 'center',
+  },
+  graphActivePointCellDivider: {
+    width: 1,
+    height: 22,
+    backgroundColor: '#E2E8F0',
+  },
+  graphActivePointTopRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 4,
+  },
+  graphActivePointBottomRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  graphActivePointDate: {
+    fontSize: 13.5,
+    fontWeight: '800',
+    color: '#171420',
+  },
+  graphActivePointGainText: {
+    fontSize: 13,
+    fontWeight: '800',
+    color: '#059669',
+  },
+  graphActivePointSub: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#64748B',
+  },
+  graphActivePointHighlight: {
+    fontWeight: '800',
+    color: '#582CDB',
+  },
+  graphActivePointPeriod: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#64748B',
   },
   scrollGraphHintRow: {
     alignItems: 'center',
@@ -3220,6 +3921,82 @@ const styles = StyleSheet.create({
   svgChartContainer: {
     marginVertical: 6,
   },
+  ghostChartOverlayPill: {
+    position: 'absolute',
+    bottom: 12,
+    left: 12,
+    right: 12,
+    backgroundColor: 'rgba(255, 255, 255, 0.92)',
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.04,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  ghostChartOverlayText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#64748B',
+    textAlign: 'center',
+  },
+  milestoneStarterBadge: {
+    backgroundColor: '#FAF5FF',
+    borderWidth: 1,
+    borderColor: '#E9D5FF',
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 6,
+  },
+  milestoneStarterBadgeText: {
+    fontSize: 10,
+    fontWeight: '700',
+    color: '#7C3AED',
+  },
+  heroStarterBox: {
+    backgroundColor: '#FAF8F5',
+    borderRadius: 14,
+    padding: 14,
+    marginVertical: 12,
+    borderWidth: 1,
+    borderColor: '#EFECE6',
+  },
+  starterMilestoneTitle: {
+    fontSize: 14,
+    fontWeight: '800',
+    color: '#171420',
+    marginBottom: 4,
+  },
+  starterMilestoneSub: {
+    fontSize: 12,
+    color: '#64748B',
+    lineHeight: 17,
+    marginBottom: 10,
+  },
+  starterActionBtn: {
+    backgroundColor: '#582CDB',
+    borderRadius: 10,
+    paddingVertical: 9,
+    paddingHorizontal: 14,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  starterActionBtnText: {
+    fontSize: 12.5,
+    fontWeight: '800',
+    color: '#FFFFFF',
+  },
+  gridMetricSub: {
+    fontSize: 9.5,
+    fontWeight: '600',
+    color: '#94A3B8',
+    marginTop: 2,
+  },
   metricsGrid2x2: {
     flexDirection: 'row',
     flexWrap: 'wrap',
@@ -3259,7 +4036,7 @@ const styles = StyleSheet.create({
     color: '#171420',
   },
   platformSyncPill: {
-    backgroundColor: '#FEF3C7',
+    backgroundColor: '#EDE9FE',
     paddingHorizontal: 7,
     paddingVertical: 3,
     borderRadius: 6,
@@ -3267,7 +4044,7 @@ const styles = StyleSheet.create({
   platformSyncText: {
     fontSize: 9,
     fontWeight: '700',
-    color: '#B45309',
+    color: '#5B3EE8',
   },
   platformsContainerCard: {
     backgroundColor: '#FFFFFF',
@@ -3294,14 +4071,17 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   platformName: {
-    fontSize: 14,
+    fontSize: 13.5,
     fontWeight: '800',
     color: '#171420',
+    flexShrink: 1,
+    marginRight: 6,
   },
   platformGrowthPurple: {
     fontSize: 12,
     fontWeight: '700',
     color: '#582CDB',
+    flexShrink: 0,
   },
   platformTrackBg: {
     height: 5,
@@ -3412,6 +4192,22 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     marginBottom: 8,
   },
+  ghostBarVisualBlock: {
+    width: '75%',
+    maxWidth: 42,
+    borderRadius: 8,
+    marginBottom: 8,
+    borderWidth: 1.5,
+    borderStyle: 'dashed',
+    borderColor: '#CBD5E1',
+    backgroundColor: '#F8FAFC',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  ghostBarIcon: {
+    fontSize: 16,
+    opacity: 0.7,
+  },
   barLabelText: {
     fontSize: 10,
     fontWeight: '800',
@@ -3485,13 +4281,67 @@ const styles = StyleSheet.create({
     letterSpacing: 0.5,
   },
   postRetentionBadge: {
-    fontSize: 10,
-    fontWeight: '800',
-    color: '#10B981',
     backgroundColor: '#ECFDF5',
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 6,
+    borderWidth: 1,
+    borderColor: '#BBF7D0',
+    flexShrink: 0,
+  },
+  postRetentionBadgeText: {
+    fontSize: 10.5,
+    fontWeight: '800',
+    color: '#15803D',
+  },
+  postRetentionSubText: {
+    fontSize: 10,
+    color: '#15803D',
+    fontWeight: '700',
+    marginTop: 2,
+  },
+  retentionMetricsGrid: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#FFFFFF',
+    borderRadius: 12,
+    paddingVertical: 8,
     paddingHorizontal: 6,
-    paddingVertical: 2,
-    borderRadius: 4,
+    marginTop: 8,
+    borderWidth: 1,
+    borderColor: '#EFECE6',
+  },
+  retentionMetricCell: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    minWidth: 0,
+  },
+  retentionMetricLabel: {
+    fontSize: 8.5,
+    fontWeight: '800',
+    color: '#64748B',
+    letterSpacing: 0.3,
+    marginBottom: 2,
+    textAlign: 'center',
+  },
+  retentionMetricVal: {
+    fontSize: 12.5,
+    fontWeight: '800',
+    color: '#171420',
+    textAlign: 'center',
+  },
+  retentionMetricSub: {
+    fontSize: 9.5,
+    color: '#64748B',
+    fontWeight: '600',
+    marginTop: 1,
+    textAlign: 'center',
+  },
+  retentionMetricDivider: {
+    width: 1,
+    height: 24,
+    backgroundColor: '#E2E8F0',
   },
   trafficSourceCard: {
     backgroundColor: '#FAF8F5',
@@ -3807,7 +4657,7 @@ const styles = StyleSheet.create({
     color: '#7C3AED',
   },
   earningsHubSub: {
-    fontSize: 11,
+    fontSize: 10,
     color: '#64748B',
     marginTop: 2,
   },
@@ -3837,11 +4687,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   earningsHubStatLabel: {
-    fontSize: 9,
+    fontSize: 8.5,
     fontWeight: '800',
     color: '#64748B',
-    letterSpacing: 0.4,
+    letterSpacing: 0.3,
     marginBottom: 2,
+    textAlign: 'center',
   },
   earningsHubStatVal: {
     fontSize: 16,
@@ -3872,6 +4723,29 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#EFECE6',
     overflow: 'hidden',
+  },
+  starterPostIconCircle: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: '#FAF5FF',
+    borderWidth: 1,
+    borderColor: '#E9D5FF',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  starterOutlineBtn: {
+    borderWidth: 1.5,
+    borderColor: '#582CDB',
+    backgroundColor: '#FFFFFF',
+    borderRadius: 10,
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+  },
+  starterOutlineBtnText: {
+    fontSize: 12,
+    fontWeight: '800',
+    color: '#582CDB',
   },
   postThumbnailImage: {
     width: '100%',
@@ -3908,10 +4782,11 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '700',
     color: '#171420',
+    lineHeight: 19.5,
     marginVertical: 4,
   },
   postMetricsText: {
-    fontSize: 11,
+    fontSize: 11.5,
     color: '#64748B',
     fontWeight: '600',
   },
@@ -3933,13 +4808,29 @@ const styles = StyleSheet.create({
   },
   heatmapRow: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
+    alignItems: 'center',
+    gap: 6,
     marginBottom: 14,
   },
   heatmapBlock: {
-    width: 38,
-    height: 38,
+    flex: 1,
+    height: 36,
     borderRadius: 8,
+  },
+  heatmapBlockGhost: {
+    height: 40,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderStyle: 'dashed',
+    borderColor: '#CBD5E1',
+    backgroundColor: '#F8FAFC',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  heatmapDayLetterGhost: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#94A3B8',
   },
   peakTimeCallout: {
     backgroundColor: '#FAF5FF',
@@ -4023,6 +4914,18 @@ const styles = StyleSheet.create({
     padding: 14,
     justifyContent: 'center',
   },
+  tileHeaderRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    width: '100%',
+    marginBottom: 6,
+  },
+  tileArrowText: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: '#94A3B8',
+  },
   tileTitleText: {
     fontSize: 12,
     fontWeight: '800',
@@ -4066,6 +4969,49 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontSize: 13,
     fontWeight: '700',
+  },
+  reportLockedStateBox: {
+    backgroundColor: '#F1F5F9',
+    borderRadius: 12,
+    paddingVertical: 12,
+    paddingHorizontal: 14,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  reportLockedStateText: {
+    color: '#64748B',
+    fontSize: 12.5,
+    fontWeight: '600',
+    textAlign: 'center',
+    lineHeight: 18,
+  },
+  connectPlatformSmallBtn: {
+    backgroundColor: '#FAF5FF',
+    borderWidth: 1,
+    borderColor: '#E9D5FF',
+    paddingVertical: 5,
+    paddingHorizontal: 14,
+    borderRadius: 100,
+    flexShrink: 0,
+  },
+  connectPlatformSmallBtnText: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#582CDB',
+  },
+  connectedBadgePill: {
+    backgroundColor: '#ECFDF5',
+    borderWidth: 1,
+    borderColor: '#A7F3D0',
+    paddingVertical: 4,
+    paddingHorizontal: 10,
+    borderRadius: 100,
+    flexShrink: 0,
+  },
+  connectedBadgePillText: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: '#059669',
   },
 
   // MODALS
@@ -4183,19 +5129,20 @@ const styles = StyleSheet.create({
     color: '#15803D',
   },
   platformSubText: {
-    fontSize: sFont(10.5),
+    fontSize: sFont(10),
     color: '#64748B',
     marginTop: 1,
+    fontWeight: '600',
   },
   removePlatformBtn: {
-    paddingVertical: 5,
-    paddingHorizontal: 9,
-    borderRadius: 8,
+    paddingVertical: 4,
+    paddingHorizontal: 8,
+    borderRadius: 7,
     backgroundColor: '#FEE2E2',
     flexShrink: 0,
   },
   removePlatformBtnText: {
-    fontSize: sFont(10),
+    fontSize: sFont(9.5),
     fontWeight: '800',
     color: '#DC2626',
   },
@@ -4400,5 +5347,32 @@ const styles = StyleSheet.create({
     fontSize: 12.5,
     fontWeight: '700',
     letterSpacing: 0.2,
+  },
+  apiWindowNoticeBox: {
+    backgroundColor: '#FAF5FF',
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#E9D5FF',
+    padding: 10,
+    marginTop: 4,
+    marginBottom: 8,
+  },
+  apiWindowNoticeText: {
+    fontSize: 11,
+    color: '#171420',
+    fontWeight: '600',
+    lineHeight: 15,
+  },
+  apiWindowNoticeSub: {
+    fontSize: 10,
+    color: '#6B21A8',
+    marginTop: 3,
+    lineHeight: 14,
+  },
+  connectedMicroDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: '#10B981',
   },
 });

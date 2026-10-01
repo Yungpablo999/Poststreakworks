@@ -1,1142 +1,515 @@
-import React, { useState, useRef, useEffect } from 'react';
-import {
-  StyleSheet,
-  View,
-  Text,
-  Pressable,
-  ScrollView,
-  TextInput,
-  Platform,
-  Alert,
-  Image,
-  SafeAreaView,
-  StatusBar,
-  Animated,
-  Modal,
-} from 'react-native';
-import Svg, { Path, Circle } from 'react-native-svg';
+import React, { useEffect, useRef, useState } from 'react';
+import { useWebFrame } from '../components/web/WebAuthHeader';
+import { StyleSheet, View, ScrollView, Pressable, Modal, Platform, KeyboardAvoidingView } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import Animated, {
+  FadeIn,
+  FadeInUp,
+  useAnimatedStyle,
+  useSharedValue,
+  withSequence,
+  withSpring,
+  withTiming,
+} from 'react-native-reanimated';
 import * as Haptics from 'expo-haptics';
+import Svg, { Path } from 'react-native-svg';
+import { Text, TextInput } from '../components/ui/AppText';
+import { AppButton } from '../components/ui/AppButton';
+import { FitLines } from '../components/ui/FitLines';
+import { GlassBackdrop } from '../components/glass/GlassBackdrop';
+import { GlassCard } from '../components/glass/GlassCard';
+import { BlurView } from 'expo-blur';
+import { OnboardingProgress } from '../components/onboarding/OnboardingProgress';
+import { NicheTile } from '../components/onboarding/NicheTile';
+import { JarvisOrb } from '../components/JarvisOrb';
+import type { NicheIconType } from '../components/onboarding/NicheIcon';
+import { ds } from '../theme/colors';
 
 interface NicheItem {
   id: string;
   title: string;
   subtitle: string;
-  iconType: 'lifestyle' | 'comedy' | 'education' | 'beauty' | 'food' | 'fitness' | 'tech' | 'music' | 'custom';
+  iconType: NicheIconType;
 }
 
 const DEFAULT_NICHES: NicheItem[] = [
-  {
-    id: 'lifestyle',
-    title: 'Lifestyle',
-    subtitle: 'Daily life, routines, self-care and personal content',
-    iconType: 'lifestyle',
-  },
-  {
-    id: 'comedy',
-    title: 'Comedy',
-    subtitle: 'Skits, humour, reactions and entertaining content',
-    iconType: 'comedy',
-  },
-  {
-    id: 'education',
-    title: 'Education',
-    subtitle: 'Tutorials, explainers, teaching and informative content',
-    iconType: 'education',
-  },
-  {
-    id: 'beauty',
-    title: 'Beauty & Fashion',
-    subtitle: 'Makeup, style, grooming and fashion-led content',
-    iconType: 'beauty',
-  },
-  {
-    id: 'food',
-    title: 'Food',
-    subtitle: 'Recipes, food reviews, dining and cooking content',
-    iconType: 'food',
-  },
-  {
-    id: 'fitness',
-    title: 'Fitness',
-    subtitle: 'Workouts, wellness, motivation and healthy living',
-    iconType: 'fitness',
-  },
-  {
-    id: 'tech',
-    title: 'Tech & Business',
-    subtitle: 'Tech, productivity, entrepreneurship and money content',
-    iconType: 'tech',
-  },
-  {
-    id: 'music',
-    title: 'Music & Dance',
-    subtitle: 'Dance, music, performance and rhythm-led content',
-    iconType: 'music',
-  },
+  { id: 'lifestyle', title: 'Lifestyle', subtitle: 'Routines, self-care, everyday life', iconType: 'lifestyle' },
+  { id: 'comedy', title: 'Comedy', subtitle: 'Skits, humour and reactions', iconType: 'comedy' },
+  { id: 'education', title: 'Education', subtitle: 'Tutorials and explainers', iconType: 'education' },
+  { id: 'beauty', title: 'Beauty & Fashion', subtitle: 'Makeup, style and grooming', iconType: 'beauty' },
+  { id: 'food', title: 'Food', subtitle: 'Recipes, reviews and cooking', iconType: 'food' },
+  { id: 'fitness', title: 'Fitness', subtitle: 'Workouts and healthy living', iconType: 'fitness' },
+  { id: 'tech', title: 'Tech & Business', subtitle: 'Productivity and money', iconType: 'tech' },
+  { id: 'music', title: 'Music & Dance', subtitle: 'Performance and rhythm', iconType: 'music' },
 ];
 
+const MAX_NICHES = 3;
+
 interface NicheSelectionScreenProps {
-  onBack: () => void;
+  /** Leave out to hide the back button (the web app's first screens) */
+  onBack?: () => void;
   onContinue: (selectedNiches: string[]) => void;
 }
 
-export const NicheSelectionScreen: React.FC<NicheSelectionScreenProps> = ({
-  onBack,
-  onContinue,
-}) => {
-  // Clean initial state (empty by default so user selects up to 3)
+export const NicheSelectionScreen: React.FC<NicheSelectionScreenProps> = ({ onBack, onContinue }) => {
+  const webFrame = useWebFrame();
   const [selectedNiches, setSelectedNiches] = useState<string[]>([]);
   const [customNiches, setCustomNiches] = useState<NicheItem[]>([]);
-  const [showCustomModal, setShowCustomModal] = useState(false);
-  const [showLimitModal, setShowLimitModal] = useState(false);
-  const [modalType, setModalType] = useState<'limit' | 'required'>('limit');
+  const [showCustomSheet, setShowCustomSheet] = useState(false);
   const [customInput, setCustomInput] = useState('');
+  const hintTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // Limit hint floats above the footer so it's visible wherever the list is scrolled
+  const hintOpacity = useSharedValue(0);
+  const hintStyle = useAnimatedStyle(() => ({
+    opacity: hintOpacity.value,
+    transform: [{ translateY: (1 - hintOpacity.value) * 8 }],
+  }));
 
-  // 1. Star-like Glowing & Floating Kinetic Physics on the Icon Alone (Zero Circles)
-  const jarvisFloatY = useRef(new Animated.Value(0)).current;
-  const jarvisStarScale = useRef(new Animated.Value(1)).current;
-  const modalPopScale = useRef(new Animated.Value(0.85)).current;
+  // Counter pill: bumps on every change, shakes when the limit is hit
+  const counterScale = useSharedValue(1);
+  const counterShake = useSharedValue(0);
+  const counterStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: counterScale.value }, { translateX: counterShake.value }],
+  }));
 
-  // 2. Responsive Niche Capacity Bar (0 = 0%, 1 = 33%, 2 = 66%, 3 = 100% full)
-  const barWidthAnim = useRef(new Animated.Value(selectedNiches.length / 3)).current;
+  useEffect(() => () => {
+    if (hintTimer.current) clearTimeout(hintTimer.current);
+  }, []);
 
-  useEffect(() => {
-    Animated.spring(barWidthAnim, {
-      toValue: Math.min(selectedNiches.length / 3, 1),
-      useNativeDriver: false,
-      speed: 20,
-      bounciness: 6,
-    }).start();
-  }, [selectedNiches.length, barWidthAnim]);
+  const bumpCounter = () => {
+    counterScale.value = withSequence(withTiming(1.12, { duration: 110 }), withSpring(1, { damping: 10 }));
+  };
 
-  useEffect(() => {
-    // Star Pulsation & Living Celestial Float Loop
-    const starLoop = Animated.loop(
-      Animated.sequence([
-        Animated.parallel([
-          Animated.timing(jarvisFloatY, {
-            toValue: -8,
-            duration: 1100,
-            useNativeDriver: true,
-          }),
-          Animated.timing(jarvisStarScale, {
-            toValue: 1.12,
-            duration: 1100,
-            useNativeDriver: true,
-          }),
-        ]),
-        Animated.parallel([
-          Animated.timing(jarvisFloatY, {
-            toValue: 5,
-            duration: 1050,
-            useNativeDriver: true,
-          }),
-          Animated.timing(jarvisStarScale, {
-            toValue: 0.95,
-            duration: 1050,
-            useNativeDriver: true,
-          }),
-        ]),
-      ])
+  const signalLimit = () => {
+    if (Platform.OS !== 'web') Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
+    counterShake.value = withSequence(
+      withTiming(-7, { duration: 50 }),
+      withTiming(7, { duration: 50 }),
+      withTiming(-5, { duration: 50 }),
+      withTiming(5, { duration: 50 }),
+      withTiming(0, { duration: 50 }),
     );
-
-    starLoop.start();
-    return () => starLoop.stop();
-  }, [jarvisFloatY, jarvisStarScale]);
-
-  const openJarvisModal = (type: 'limit' | 'required') => {
-    setModalType(type);
-    setShowLimitModal(true);
-    Animated.spring(modalPopScale, {
-      toValue: 1,
-      useNativeDriver: true,
-      speed: 22,
-      bounciness: 10,
-    }).start();
+    hintOpacity.value = withTiming(1, { duration: 180 });
+    if (hintTimer.current) clearTimeout(hintTimer.current);
+    hintTimer.current = setTimeout(() => {
+      hintOpacity.value = withTiming(0, { duration: 250 });
+    }, 2600);
   };
 
   const toggleNiche = (id: string) => {
-    if (Platform.OS !== 'web') {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    }
     if (selectedNiches.includes(id)) {
       setSelectedNiches(selectedNiches.filter((item) => item !== id));
-    } else {
-      if (selectedNiches.length >= 3) {
-        if (Platform.OS !== 'web') {
-          Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
-        }
-        openJarvisModal('limit');
-        return;
-      }
-      setSelectedNiches([...selectedNiches, id]);
+      bumpCounter();
+      return;
     }
-  };
-
-  const handleCloseLimitModal = () => {
-    if (Platform.OS !== 'web') {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    if (selectedNiches.length >= MAX_NICHES) {
+      signalLimit();
+      return;
     }
-    setShowLimitModal(false);
-    modalPopScale.setValue(0.85);
+    setSelectedNiches([...selectedNiches, id]);
+    bumpCounter();
   };
 
   const handleAddCustomNiche = () => {
     const trimmed = customInput.trim();
     if (!trimmed) return;
-    const newId = `custom_${Date.now()}`;
-    const newItem: NicheItem = {
-      id: newId,
-      title: trimmed,
-      subtitle: 'Custom creator content niche',
-      iconType: 'custom',
-    };
+    const newItem: NicheItem = { id: `custom_${Date.now()}`, title: trimmed, subtitle: 'Your own niche', iconType: 'custom' };
     setCustomNiches([...customNiches, newItem]);
-    if (selectedNiches.length < 3) {
-      setSelectedNiches([...selectedNiches, newId]);
+    if (selectedNiches.length < MAX_NICHES) {
+      setSelectedNiches([...selectedNiches, newItem.id]);
+      bumpCounter();
     } else {
-      openJarvisModal('limit');
+      signalLimit();
     }
     setCustomInput('');
-    setShowCustomModal(false);
+    setShowCustomSheet(false);
   };
 
   const handleContinue = () => {
-    if (selectedNiches.length === 0) {
-      if (Platform.OS !== 'web') {
-        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
-      }
-      openJarvisModal('required');
-      return;
-    }
-
-    if (Platform.OS !== 'web') {
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-    }
+    if (selectedNiches.length === 0) return;
+    if (Platform.OS !== 'web') Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     onContinue(selectedNiches);
   };
 
-  // Render Category Vector Icons
-  const renderNicheIcon = (type: NicheItem['iconType'], isSelected: boolean) => {
-    const strokeColor = isSelected ? '#582CDB' : '#736B88';
-
-    switch (type) {
-      case 'lifestyle':
-        return (
-          <Svg width={22} height={22} viewBox="0 0 24 24" fill="none">
-            <Path
-              d="M3 9.5L12 3L21 9.5V20C21 20.5523 20.5523 21 20 21H4C3.44772 21 3 20.5523 3 20V9.5Z"
-              stroke={strokeColor}
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-            <Path
-              d="M9 21V12H15V21"
-              stroke={strokeColor}
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </Svg>
-        );
-      case 'comedy':
-        return (
-          <Svg width={22} height={22} viewBox="0 0 24 24" fill="none">
-            <Circle cx="12" cy="12" r="9" stroke={strokeColor} strokeWidth="2" />
-            <Path
-              d="M8 14C8 14 9.5 17 12 17C14.5 17 16 14 16 14"
-              stroke={strokeColor}
-              strokeWidth="2"
-              strokeLinecap="round"
-            />
-            <Circle cx="9" cy="9.5" r="1.25" fill={strokeColor} />
-            <Circle cx="15" cy="9.5" r="1.25" fill={strokeColor} />
-          </Svg>
-        );
-      case 'education':
-        return (
-          <Svg width={22} height={22} viewBox="0 0 24 24" fill="none">
-            <Path
-              d="M22 10L12 5L2 10L12 15L22 10Z"
-              stroke={strokeColor}
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-            <Path
-              d="M6 12V17C6 18.6569 8.68629 20 12 20C15.3137 20 18 18.6569 18 17V12"
-              stroke={strokeColor}
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-            <Path d="M22 10V16" stroke={strokeColor} strokeWidth="2" strokeLinecap="round" />
-          </Svg>
-        );
-      case 'beauty':
-        return (
-          <Svg width={22} height={22} viewBox="0 0 24 24" fill="none">
-            <Circle cx="12" cy="6" r="2.5" stroke={strokeColor} strokeWidth="2" />
-            <Path
-              d="M6 21L8 10H16L18 21H6Z"
-              stroke={strokeColor}
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-            <Path d="M10 10V14" stroke={strokeColor} strokeWidth="1.8" strokeLinecap="round" />
-          </Svg>
-        );
-      case 'food':
-        return (
-          <Svg width={22} height={22} viewBox="0 0 24 24" fill="none">
-            <Path
-              d="M18 4V10C18 11.1046 17.1046 12 16 12H14C12.8954 12 12 11.1046 12 10V4M15 4V20"
-              stroke={strokeColor}
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-            <Path
-              d="M6 4V20M9 4V10C9 11.1046 8.10457 12 7 12H5C3.89543 12 3 11.1046 3 10V4"
-              stroke={strokeColor}
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </Svg>
-        );
-      case 'fitness':
-        return (
-          <Svg width={22} height={22} viewBox="0 0 24 24" fill="none">
-            <Path
-              d="M6.5 6.5L17.5 17.5M4 8L8 4M16 20L20 16M3 11L11 3M13 21L21 13"
-              stroke={strokeColor}
-              strokeWidth="2.2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </Svg>
-        );
-      case 'tech':
-        return (
-          <Svg width={22} height={22} viewBox="0 0 24 24" fill="none">
-            <Path
-              d="M3 20H21M5 16V17M10 12V17M15 8V17M20 4V17"
-              stroke={strokeColor}
-              strokeWidth="2.2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-            <Path
-              d="M4 11L9 7L14 10L20 4"
-              stroke={strokeColor}
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </Svg>
-        );
-      case 'music':
-        return (
-          <Svg width={22} height={22} viewBox="0 0 24 24" fill="none">
-            <Path
-              d="M9 18V5L20 3V16M9 9L20 7"
-              stroke={strokeColor}
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-            <Circle cx="6" cy="18" r="3" stroke={strokeColor} strokeWidth="2" />
-            <Circle cx="17" cy="16" r="3" stroke={strokeColor} strokeWidth="2" />
-          </Svg>
-        );
-      default:
-        return (
-          <Svg width={22} height={22} viewBox="0 0 24 24" fill="none">
-            <Path
-              d="M12 4V20M4 12H20"
-              stroke={strokeColor}
-              strokeWidth="2.2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </Svg>
-        );
-    }
-  };
-
   const allNiches = [...DEFAULT_NICHES, ...customNiches];
-  const hasSelection = selectedNiches.length > 0;
+  // 2 columns on phones, 4 on desktop web. When the niches fill whole rows,
+  // "Add your own" would sit alone on the last row, so it becomes a full-width bar
+  const cols = webFrame ? 4 : 2;
+  const addTileAlone = allNiches.length % cols === 0;
+  const count = selectedNiches.length;
+
+  // The one action: a sticky footer on phones, right under the content on desktop web
+  const cta = (
+    <AppButton
+      title={count === 0 ? 'Pick at least one niche' : 'Continue'}
+      size="lg"
+      disabled={count === 0}
+      onPress={handleContinue}
+      iconRight={
+        count > 0 ? (
+          <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
+            <Path d="M5 12h14M13 6l6 6-6 6" stroke="#FFFFFF" strokeWidth={2.4} strokeLinecap="round" strokeLinejoin="round" />
+          </Svg>
+        ) : undefined
+      }
+    />
+  );
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <StatusBar barStyle="dark-content" backgroundColor="#FAF8F5" />
-      <View style={styles.container}>
-        <ScrollView
-          contentContainerStyle={styles.scrollContent}
-          showsVerticalScrollIndicator={false}
-          bounces={true}
-        >
-          {/* 1. TOP BAR: Back Arrow + 4-Step Progress Indicator (Step 2 Active) */}
-          <View style={styles.topBar}>
-            <Pressable
-              onPress={onBack}
-              hitSlop={14}
-              style={({ pressed }) => [styles.backButton, pressed && styles.backButtonPressed]}
-            >
-              <Svg width={24} height={24} viewBox="0 0 24 24" fill="none">
-                <Path
-                  d="M19 12H5M5 12L12 19M5 12L12 5"
-                  stroke="#1A1626"
-                  strokeWidth="2.4"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </Svg>
-            </Pressable>
-
-            <View style={styles.progressContainer}>
-              <View style={[styles.progressSegment, styles.progressActive]} />
-              <View style={styles.progressSegment} />
-              <View style={styles.progressSegment} />
-              <View style={styles.progressSegment} />
-            </View>
-
-            {/* Placeholder to balance left arrow */}
-            <View style={styles.topBarRightPlaceholder} />
-          </View>
-
-          {/* 2. HEADINGS */}
-          <View style={styles.headingSection}>
-            <Text style={styles.mainHeading}>
-              What kind of creator are <Text style={styles.headingPurple}>you?</Text>
-            </Text>
-            <Text style={styles.helperText}>Select up to 3 niches</Text>
-          </View>
-
-          {/* 3. RESPONSIVE NICHE CAPACITY BAR */}
-          <View style={styles.horizontalBarContainer}>
-            <Animated.View
-              style={[
-                styles.horizontalBarActive,
-                {
-                  width: barWidthAnim.interpolate({
-                    inputRange: [0, 1],
-                    outputRange: ['0%', '100%'],
-                  }),
-                },
-              ]}
-            />
-          </View>
-
-          {/* 4. NICHE SELECTION CARDS */}
-          <View style={styles.nicheList}>
-            {allNiches.map((niche) => {
-              const isSelected = selectedNiches.includes(niche.id);
-              return (
-                <Pressable
-                  key={niche.id}
-                  onPress={() => toggleNiche(niche.id)}
-                  style={({ pressed }) => [
-                    styles.nicheCard,
-                    isSelected && styles.nicheCardSelected,
-                    pressed && styles.nicheCardPressed,
-                  ]}
-                >
-                  {/* Category Icon in Lavender Box */}
-                  <View style={[styles.iconBox, isSelected && styles.iconBoxSelected]}>
-                    {renderNicheIcon(niche.iconType, isSelected)}
-                  </View>
-
-                  {/* Title & Subtitle */}
-                  <View style={styles.nicheTextContainer}>
-                    <Text
-                      style={[styles.nicheTitle, isSelected && styles.nicheTitleSelected]}
-                      numberOfLines={1}
-                      adjustsFontSizeToFit
-                      minimumFontScale={0.85}
-                    >
-                      {niche.title}
-                    </Text>
-                    <Text style={styles.nicheSubtitle}>{niche.subtitle}</Text>
-                  </View>
-
-                  {/* Selected Checkmark Pill */}
-                  {isSelected && (
-                    <View style={styles.selectedCheckBadge}>
-                      <Text style={styles.selectedCheckText}>✓</Text>
-                    </View>
-                  )}
-                </Pressable>
-              );
-            })}
-
-            {/* + Add Custom Niche Button */}
-            <Pressable
-              onPress={() => setShowCustomModal(true)}
-              style={({ pressed }) => [
-                styles.addCustomCard,
-                pressed && styles.addCustomCardPressed,
-              ]}
-            >
-              <Text style={styles.addCustomText}>+ Add custom niche</Text>
-            </Pressable>
-          </View>
-
-          {/* 5. CONTINUE BUTTON */}
-          <Pressable
-            onPress={handleContinue}
-            style={({ pressed }) => [
-              styles.continueButton,
-              !hasSelection && styles.continueButtonDisabled,
-              pressed && hasSelection && styles.continueButtonPressed,
-            ]}
-          >
-            <Text style={styles.continueButtonText}>Continue</Text>
-          </Pressable>
-
-          {/* 6. JARVIS CORE SECTION: Pure Glowing Star-Flame (Zero Circles, Zero Frames) */}
-          <View style={styles.jarvisAdviceSection}>
-            <Animated.View
-              style={[
-                styles.pureStarWrapper,
-                {
-                  transform: [
-                    { translateY: jarvisFloatY },
-                    { scale: jarvisStarScale },
-                  ],
-                },
-              ]}
-            >
-              <Image
-                source={require('../../assets/images/jarvis-core-flame.png')}
-                style={styles.pureStarImage}
-                resizeMode="contain"
-              />
+    <View style={styles.root}>
+      <GlassBackdrop />
+      <SafeAreaView style={styles.safeArea} edges={['top']}>
+        {/* Top: back + progress */}
+        {/* Desktop web: the website header above replaces this */}
+        {!webFrame && (
+          <View style={styles.header}>
+            {onBack && (
+              <Pressable onPress={onBack} hitSlop={10} accessibilityRole="button" accessibilityLabel="Go back" style={styles.backBtn}>
+                <BlurView intensity={30} tint="light" style={[StyleSheet.absoluteFill, { borderRadius: 20, overflow: 'hidden' }]} />
+                {/* Wrapped so the arrow always draws above the frosted layer */}
+                <View>
+                  <Svg width={20} height={20} viewBox="0 0 24 24" fill="none">
+                    <Path d="M15 18l-6-6 6-6" stroke={ds.ink} strokeWidth={2.4} strokeLinecap="round" strokeLinejoin="round" />
+                  </Svg>
+                </View>
+              </Pressable>
+            )}
+            <Animated.View entering={FadeInUp.duration(500)} style={styles.progressWrap}>
+              <OnboardingProgress current={0} />
             </Animated.View>
-
-            {/* Jarvis Core Name */}
-            <Text style={styles.jarvisTitle}>Jarvis Core</Text>
-
-            {/* Speech / Advice Bubble */}
-            <View style={styles.adviceBubble}>
-              <Text style={styles.adviceText}>
-                &ldquo;Your niche helps PostStreak recommend the right creators, missions and Brand Quests.&rdquo;
-              </Text>
-            </View>
           </View>
+        )}
+
+        <ScrollView contentContainerStyle={[styles.scroll, webFrame && webStyles.scroll]} showsVerticalScrollIndicator={false}>
+          {/* Title */}
+          <Animated.View entering={FadeInUp.delay(120).duration(550)}>
+            {/* Always two lines: "What kind of creator are" / "you?", scaled to the screen */}
+            <FitLines
+              lines={['What kind of creator are', <Text key="you" style={styles.titleAccent}>you?</Text>]}
+              textStyle={styles.title}
+              maxFontSize={40}
+              accessibilityLabel="What kind of creator are you?"
+            />
+            <Text style={styles.subtitle}>Pick up to 3. Jarvis uses them to suggest ideas and the best times to post. You can change them later.</Text>
+          </Animated.View>
+
+          {/* Live counter */}
+          <Animated.View entering={FadeIn.delay(260).duration(400)} style={styles.counterRow}>
+            <Animated.View style={[styles.counterPill, count > 0 && styles.counterPillActive, counterStyle]}>
+              <Text style={[styles.counterText, count > 0 && styles.counterTextActive]}>
+                {count} of {MAX_NICHES} selected
+              </Text>
+            </Animated.View>
+          </Animated.View>
+
+          {/* Niche grid */}
+          <View style={styles.grid}>
+            {allNiches.map((niche, i) => (
+              <Animated.View
+                key={niche.id}
+                entering={FadeInUp.delay(300 + i * 55).duration(500)}
+                style={[styles.gridItem, webFrame && webStyles.gridItem]}
+              >
+                <NicheTile
+                  title={niche.title}
+                  subtitle={niche.subtitle}
+                  icon={niche.iconType}
+                  selected={selectedNiches.includes(niche.id)}
+                  onPress={() => toggleNiche(niche.id)}
+                />
+              </Animated.View>
+            ))}
+
+            {/* Add your own: full-width bar when it would sit alone on its row, half tile otherwise */}
+            <Animated.View
+              entering={FadeInUp.delay(300 + allNiches.length * 55).duration(500)}
+              style={addTileAlone ? styles.gridItemFull : [styles.gridItem, webFrame && webStyles.gridItem]}
+            >
+              <Pressable
+                onPress={() => setShowCustomSheet(true)}
+                style={({ pressed }) => [
+                  styles.addTile,
+                  addTileAlone && styles.addTileWide,
+                  pressed && { opacity: 0.7, transform: [{ scale: 0.98 }] },
+                ]}
+                accessibilityRole="button"
+                accessibilityLabel="Add your own niche"
+              >
+                <Svg width={22} height={22} viewBox="0 0 24 24" fill="none">
+                  <Path d="M12 5v14M5 12h14" stroke={ds.purple} strokeWidth={2.4} strokeLinecap="round" />
+                </Svg>
+                <Text style={styles.addTileText}>Add your own</Text>
+              </Pressable>
+            </Animated.View>
+          </View>
+
+          {/* Jarvis note */}
+          <Animated.View entering={FadeIn.delay(800).duration(500)} style={styles.jarvisNote}>
+            <JarvisOrb size={30} />
+            <Text style={styles.jarvisText}>
+              <Text style={styles.jarvisName}>Jarvis: </Text>
+              no wrong answers here. Pick what you enjoy making most.
+            </Text>
+          </Animated.View>
+          {webFrame && <View style={webStyles.cta}>{cta}</View>}
         </ScrollView>
 
-        {/* 7. BOTTOM STATUS BAR (Niche Step / 25% Complete) */}
-        <View style={styles.bottomStatusBar}>
-          <View style={styles.statusLeftGroup}>
-            <View style={styles.statusIconBadge}>
-              <Svg width={16} height={16} viewBox="0 0 24 24" fill="none">
-                <Path
-                  d="M12 4V20M4 12H20"
-                  stroke="#582CDB"
-                  strokeWidth="2.4"
-                  strokeLinecap="round"
-                />
-              </Svg>
-            </View>
-            <Text style={styles.statusLabelText}>Niche Step</Text>
-          </View>
-
-          <Text style={styles.statusPercentageText}>25% Complete</Text>
-        </View>
-      </View>
-
-      {/* 8. JARVIS CORE LIMIT POPUP MODAL (> 3 Niches) */}
-      <Modal
-        visible={showLimitModal}
-        transparent={true}
-        animationType="fade"
-        onRequestClose={handleCloseLimitModal}
-      >
-        <View style={styles.modalOverlay}>
-          <Animated.View
-            style={[
-              styles.limitModalCard,
-              {
-                transform: [{ scale: modalPopScale }],
-              },
-            ]}
-          >
-            {/* Pure Glowing Star-Flame in Pop-up (Zero Circles) */}
-            <Animated.View
-              style={[
-                styles.modalPureStarWrapper,
-                {
-                  transform: [
-                    { translateY: jarvisFloatY },
-                    { scale: jarvisStarScale },
-                  ],
-                },
-              ]}
-            >
-              <Image
-                source={require('../../assets/images/jarvis-core-flame.png')}
-                style={styles.modalPureStarImage}
-                resizeMode="contain"
-              />
-            </Animated.View>
-
-            {/* Jarvis Core Badge */}
-            <View style={styles.jarvisCoreBadge}>
-              <Text style={styles.jarvisBadgeSparkle}>🔥</Text>
-              <Text style={styles.jarvisBadgeText}>JARVIS CORE</Text>
-            </View>
-
-            {/* Modal Heading */}
-            <Text style={styles.limitModalTitle}>
-              {modalType === 'required' ? 'Select a niche' : '3 niches max'}
-            </Text>
-
-            {/* Modal Advice Message */}
-            <Text style={styles.limitModalText}>
-              {modalType === 'required' ? (
-                <>
-                  Please choose at least <Text style={styles.limitHighlight}>1 niche</Text> so Jarvis can personalise your creator setup.
-                </>
-              ) : (
-                <>
-                  For now, focus on your <Text style={styles.limitHighlight}>3 strongest niches</Text> so Jarvis can personalise your experience.
-                </>
-              )}
-            </Text>
-
-            <Text style={styles.limitSubNote}>
-              {modalType === 'required'
-                ? 'You can choose up to 3 niches for your creator profile.'
-                : 'You can add more later from your creator profile.'}
-            </Text>
-
-            {/* Got It Button */}
-            <Pressable
-              onPress={handleCloseLimitModal}
-              style={({ pressed }) => [
-                styles.gotItButton,
-                pressed && styles.gotItButtonPressed,
-              ]}
-            >
-              <Text style={styles.gotItButtonText}>Got it, Jarvis  ✓</Text>
-            </Pressable>
+        {/* Limit hint, floating just above the footer */}
+        <Animated.View pointerEvents="none" style={[styles.limitToast, hintStyle]} accessibilityLiveRegion="polite">
+            <Text style={styles.limitToastText}>Up to 3 for now. Tap one of yours to swap it.</Text>
           </Animated.View>
-        </View>
-      </Modal>
-
-      {/* 9. CUSTOM NICHE INPUT MODAL */}
-      <Modal
-        visible={showCustomModal}
-        transparent={true}
-        animationType="fade"
-        onRequestClose={() => setShowCustomModal(false)}
-      >
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalCard}>
-            <Text style={styles.modalTitle}>Add Custom Niche</Text>
-            <Text style={styles.modalSubtitle}>
-              Type your custom content category or specialisation
-            </Text>
-
-            <TextInput
-              style={styles.modalInput}
-              placeholder="e.g. 3D Animation, Crypto, Pets..."
-              placeholderTextColor="#A59EBA"
-              value={customInput}
-              onChangeText={setCustomInput}
-              autoFocus={true}
-            />
-
-            <View style={styles.modalBtnRow}>
-              <Pressable
-                onPress={() => setShowCustomModal(false)}
-                style={styles.modalCancelBtn}
-              >
-                <Text style={styles.modalCancelText}>Cancel</Text>
-              </Pressable>
-
-              <Pressable
-                onPress={handleAddCustomNiche}
-                style={styles.modalAddBtn}
-              >
-                <Text style={styles.modalAddText}>Add Niche</Text>
-              </Pressable>
-            </View>
+        {/* Sticky glass footer with the one clear action */}
+        {!webFrame && (
+          <View style={styles.footer}>
+            <BlurView intensity={40} tint="light" style={StyleSheet.absoluteFill} />
+            <View style={[StyleSheet.absoluteFill, styles.footerFill]} />
+            <SafeAreaView edges={['bottom']} style={styles.footerInner}>
+              {cta}
+            </SafeAreaView>
           </View>
-        </View>
+        )}
+      </SafeAreaView>
+
+      {/* Add-your-own sheet */}
+      <Modal visible={showCustomSheet} transparent animationType="fade" onRequestClose={() => setShowCustomSheet(false)}>
+        <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={styles.sheetBackdrop}>
+          <Pressable style={StyleSheet.absoluteFill} onPress={() => setShowCustomSheet(false)} accessibilityLabel="Close" />
+          <Animated.View entering={FadeInUp.duration(300)} style={styles.sheetWrap}>
+            <GlassCard strong radius={28} padding={20}>
+              <Text style={styles.sheetTitle}>Add your own niche</Text>
+              <Text style={styles.sheetSub}>What do you make? A word or two is perfect.</Text>
+              <TextInput
+                value={customInput}
+                onChangeText={setCustomInput}
+                placeholder="e.g. Pets, Travel, 3D art"
+                placeholderTextColor={ds.text3}
+                style={styles.sheetInput}
+                autoFocus
+                returnKeyType="done"
+                onSubmitEditing={handleAddCustomNiche}
+                maxLength={32}
+              />
+              <View style={styles.sheetActions}>
+                <View style={{ flex: 1 }}>
+                  <AppButton title="Cancel" variant="glass" onPress={() => setShowCustomSheet(false)} />
+                </View>
+                <View style={{ flex: 1 }}>
+                  <AppButton title="Add niche" onPress={handleAddCustomNiche} disabled={!customInput.trim()} />
+                </View>
+              </View>
+            </GlassCard>
+          </Animated.View>
+        </KeyboardAvoidingView>
       </Modal>
-    </SafeAreaView>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
+  root: {
+    flex: 1,
+    backgroundColor: ds.bg,
+  },
   safeArea: {
     flex: 1,
-    backgroundColor: '#FAF9FD',
   },
-  container: {
-    flex: 1,
-    backgroundColor: '#FAF9FD',
+  header: {
+    paddingHorizontal: 20,
+    paddingTop: 6,
+    gap: 12,
   },
-  keyboardAvoid: {
-    flex: 1,
-    backgroundColor: '#FAF9FD',
-  },
-  scrollContent: {
-    paddingHorizontal: 22,
-    paddingTop: 8,
-    paddingBottom: 24,
-  },
-  topBar: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: 8,
+  backBtn: {
+    width: 40,
     height: 40,
-  },
-  backButton: {
-    width: 36,
-    height: 36,
+    borderRadius: 20,
+    overflow: 'hidden',
+    alignItems: 'center',
     justifyContent: 'center',
-    alignItems: 'flex-start',
+    backgroundColor: 'rgba(255, 255, 255, 0.55)',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.9)',
   },
-  backButtonPressed: {
-    opacity: 0.5,
+  progressWrap: {
+    width: '100%',
   },
-  progressContainer: {
+  scroll: {
+    paddingHorizontal: 20,
+    paddingTop: 20,
+    paddingBottom: 140,
+    width: '100%',
+    maxWidth: 520,
+    alignSelf: 'center',
+  },
+  title: {
+    fontWeight: '800',
+    letterSpacing: -0.6,
+    color: ds.ink,
+  },
+  titleAccent: {
+    color: ds.purple,
+  },
+  subtitle: {
+    fontSize: 15,
+    lineHeight: 22,
+    color: ds.text2,
+    marginTop: 10,
+    textAlign: 'center',
+  },
+  counterRow: {
     flexDirection: 'row',
     alignItems: 'center',
+    gap: 10,
+    marginTop: 18,
+    marginBottom: 14,
+    minHeight: 30,
+  },
+  counterPill: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 999,
+    backgroundColor: 'rgba(255, 255, 255, 0.7)',
+    borderWidth: 1,
+    borderColor: ds.line,
+  },
+  counterPillActive: {
+    backgroundColor: ds.purple,
+    borderColor: ds.purple,
+  },
+  counterText: {
+    fontSize: 12.5,
+    fontWeight: '800',
+    color: ds.text2,
+  },
+  counterTextActive: {
+    color: '#FFFFFF',
+  },
+  limitToast: {
+    position: 'absolute',
+    bottom: 118,
+    alignSelf: 'center',
+    paddingHorizontal: 14,
+    paddingVertical: 9,
+    borderRadius: 999,
+    backgroundColor: ds.ink,
+    zIndex: 5,
+  },
+  limitToastText: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: '#FFFFFF',
+  },
+  grid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+    rowGap: 12,
+  },
+  gridItem: {
+    width: '48%',
+    alignSelf: 'stretch',
+  },
+  addTile: {
+    minHeight: 132,
+    borderRadius: 22,
+    borderWidth: 1.5,
+    borderStyle: 'dashed',
+    borderColor: '#B9ACF7',
+    backgroundColor: 'rgba(255, 255, 255, 0.35)',
+    alignItems: 'center',
+    justifyContent: 'center',
     gap: 8,
   },
-  progressSegment: {
-    width: 36,
-    height: 5,
-    borderRadius: 2.5,
-    backgroundColor: 'rgba(23, 20, 32, 0.06)',
+  gridItemFull: {
+    width: '100%',
   },
-  progressActive: {
-    width: 48,
-    backgroundColor: '#582CDB',
+  addTileWide: {
+    minHeight: 64,
+    flexDirection: 'row',
+    gap: 10,
   },
-  topBarRightPlaceholder: {
-    width: 36,
-  },
-  headingSection: {
-    alignItems: 'center',
-    marginBottom: 20,
-  },
-  mainHeading: {
-    fontSize: 26,
-    fontWeight: '700',
-    color: '#171420',
-    letterSpacing: -0.5,
-    marginBottom: 6,
-    textAlign: 'center',
-  },
-  headingPurple: {
-    color: '#582CDB',
-  },
-  subHeading: {
+  addTileText: {
     fontSize: 14,
-    fontWeight: '400',
-    color: '#5E576E',
-    textAlign: 'center',
-    lineHeight: 20,
-    maxWidth: 320,
+    fontWeight: '800',
+    color: ds.purple,
   },
-  helperText: {
+  jarvisNote: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    marginTop: 20,
+    paddingHorizontal: 4,
+  },
+  jarvisText: {
+    flex: 1,
     fontSize: 13,
-    fontWeight: '600',
-    color: '#582CDB',
-    textAlign: 'center',
+    lineHeight: 19,
+    color: ds.text2,
+  },
+  jarvisName: {
+    fontWeight: '800',
+    color: ds.purple,
+  },
+  footer: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    bottom: 0,
+    overflow: 'hidden',
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(255, 255, 255, 0.9)',
+  },
+  footerFill: {
+    backgroundColor: 'rgba(247, 245, 240, 0.6)',
+  },
+  footerInner: {
+    paddingHorizontal: 20,
+    paddingTop: 14,
+    paddingBottom: 14,
+    width: '100%',
+    maxWidth: 520,
+    alignSelf: 'center',
+  },
+  sheetBackdrop: {
+    flex: 1,
+    justifyContent: 'flex-end',
+    backgroundColor: 'rgba(23, 20, 32, 0.25)',
+  },
+  sheetWrap: {
+    padding: 16,
+    paddingBottom: 28,
+  },
+  sheetTitle: {
+    fontSize: 20,
+    fontWeight: '800',
+    color: ds.ink,
+  },
+  sheetSub: {
+    fontSize: 14,
+    color: ds.text2,
     marginTop: 4,
   },
-  horizontalBarContainer: {
-    height: 4,
-    borderRadius: 2,
-    backgroundColor: 'rgba(23, 20, 32, 0.06)',
-    marginVertical: 12,
-    overflow: 'hidden',
-    width: '100%',
-  },
-  horizontalBarActive: {
-    height: '100%',
-    backgroundColor: '#582CDB',
-    borderRadius: 2,
-  },
-  nicheList: {
-    gap: 10,
-    marginBottom: 16,
-  },
-  nicheListContainer: {
-    gap: 10,
-    marginBottom: 16,
-  },
-  nicheCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#FFFFFF',
-    borderRadius: 18,
-    borderWidth: 1,
-    borderColor: 'rgba(23, 20, 32, 0.07)',
-    padding: 16,
-    shadowColor: '#171420',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.03,
-    shadowRadius: 10,
-    elevation: 1,
-  },
-  nicheCardSelected: {
-    borderColor: '#582CDB',
-    backgroundColor: '#F8F6FF',
+  sheetInput: {
+    ...(Platform.OS === 'web' ? ({ outlineStyle: 'none' } as object) : {}),
+    marginTop: 16,
+    height: 52,
+    borderRadius: 16,
+    paddingHorizontal: 16,
+    fontSize: 16,
+    color: ds.ink,
+    backgroundColor: 'rgba(255, 255, 255, 0.85)',
     borderWidth: 1.5,
-    shadowColor: '#582CDB',
-    shadowOpacity: 0.08,
-    shadowRadius: 12,
-    elevation: 2,
+    borderColor: ds.line,
   },
-  nicheCardPressed: {
-    transform: [{ scale: 0.98 }],
-    opacity: 0.92,
-  },
-  iconBox: {
-    width: 44,
-    height: 44,
-    borderRadius: 14,
-    backgroundColor: '#F4F0FF',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 14,
-  },
-  iconBoxSelected: {
-    backgroundColor: '#ECE6FD',
-  },
-  nicheTextContainer: {
-    flex: 1,
-  },
-  nicheTitle: {
-    fontSize: 15,
-    fontWeight: '700',
-    color: '#171420',
-    marginBottom: 3,
-  },
-  nicheTitleSelected: {
-    color: '#171420',
-  },
-  nicheSubtitle: {
-    fontSize: 12.5,
-    fontWeight: '400',
-    color: '#5E576E',
-    lineHeight: 17,
-  },
-  selectedCheckBadge: {
-    width: 24,
-    height: 24,
-    borderRadius: 12,
-    backgroundColor: '#582CDB',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginLeft: 8,
-  },
-  selectedCheckText: {
-    color: '#FFFFFF',
-    fontSize: 12,
-    fontWeight: '800',
-  },
-  addCustomCard: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 16,
-    borderWidth: 1,
-    borderColor: 'rgba(23, 20, 32, 0.08)',
-    borderStyle: 'solid',
-    paddingVertical: 14,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  addCustomCardPressed: {
-    backgroundColor: '#F8F6FD',
-    transform: [{ scale: 0.98 }],
-  },
-  addCustomText: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#171420',
-  },
-  continueButton: {
-    backgroundColor: '#582CDB',
-    height: 50,
-    borderRadius: 14,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 24,
-    shadowColor: '#582CDB',
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.12,
-    shadowRadius: 14,
-    elevation: 4,
-  },
-  continueButtonDisabled: {
-    backgroundColor: 'rgba(181, 165, 232, 0.7)',
-    shadowOpacity: 0,
-    elevation: 0,
-  },
-  continueButtonPressed: {
-    opacity: 0.92,
-    transform: [{ scale: 0.98 }],
-  },
-  continueButtonText: {
-    color: '#FFFFFF',
-    fontSize: 15,
-    fontWeight: '700',
-    letterSpacing: -0.1,
-  },
-  jarvisAdviceSection: {
-    alignItems: 'center',
-    paddingBottom: 16,
-  },
-  pureStarWrapper: {
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 6,
-    backgroundColor: 'transparent',
-  },
-  pureStarImage: {
-    width: 80,
-    height: 80,
-  },
-  jarvisTitle: {
-    fontSize: 15,
-    fontWeight: '700',
-    color: '#582CDB',
-    marginBottom: 8,
-  },
-  adviceBubble: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 16,
-    borderWidth: 1,
-    borderColor: 'rgba(23, 20, 32, 0.07)',
-    paddingVertical: 14,
-    paddingHorizontal: 20,
-    width: '100%',
-    shadowColor: '#171420',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.03,
-    shadowRadius: 8,
-    elevation: 1,
-  },
-  adviceText: {
-    fontSize: 13,
-    fontWeight: '500',
-    color: '#5E576E',
-    textAlign: 'center',
-    lineHeight: 19,
-  },
-  bottomStatusBar: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: 24,
-    paddingVertical: 14,
-    borderTopWidth: 1,
-    borderTopColor: 'rgba(23, 20, 32, 0.06)',
-    backgroundColor: '#FAF9FD',
-  },
-  statusLeftGroup: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-  },
-  statusIconBadge: {
-    width: 32,
-    height: 32,
-    borderRadius: 8,
-    backgroundColor: '#F4F0FF',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  statusLabelText: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#171420',
-  },
-  statusPercentageText: {
-    fontSize: 14,
-    fontWeight: '700',
-    color: '#582CDB',
-  },
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(23, 20, 32, 0.45)',
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 24,
-  },
-  limitModalCard: {
-    width: '100%',
-    maxWidth: 340,
-    backgroundColor: '#FFFFFF',
-    borderRadius: 24,
-    paddingVertical: 26,
-    paddingHorizontal: 22,
-    alignItems: 'center',
-    shadowColor: '#171420',
-    shadowOffset: { width: 0, height: 16 },
-    shadowOpacity: 0.12,
-    shadowRadius: 30,
-    elevation: 10,
-    borderWidth: 1,
-    borderColor: 'rgba(23, 20, 32, 0.08)',
-  },
-  modalPureStarWrapper: {
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 8,
-    backgroundColor: 'transparent',
-  },
-  modalPureStarImage: {
-    width: 88,
-    height: 88,
-  },
-  jarvisCoreBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: 'rgba(237, 232, 252, 0.9)',
-    paddingVertical: 4,
-    paddingHorizontal: 12,
-    borderRadius: 100,
-    marginBottom: 10,
-    gap: 5,
-  },
-  jarvisBadgeSparkle: {
-    fontSize: 13,
-  },
-  jarvisBadgeText: {
-    fontSize: 11,
-    fontWeight: '800',
-    color: '#582CDB',
-    letterSpacing: 0.8,
-  },
-  limitModalTitle: {
-    fontSize: 19,
-    fontWeight: '700',
-    color: '#171420',
-    marginBottom: 10,
-    textAlign: 'center',
-    letterSpacing: -0.4,
-  },
-  limitModalText: {
-    fontSize: 14,
-    color: '#524C62',
-    textAlign: 'center',
-    lineHeight: 20,
-    marginBottom: 10,
-  },
-  limitHighlight: {
-    color: '#582CDB',
-    fontWeight: '700',
-  },
-  limitSubNote: {
-    fontSize: 12,
-    color: '#7F7894',
-    textAlign: 'center',
-    lineHeight: 16,
-    marginBottom: 20,
-  },
-  gotItButton: {
-    width: '100%',
-    height: 48,
-    borderRadius: 14,
-    backgroundColor: '#582CDB',
-    justifyContent: 'center',
-    alignItems: 'center',
-    shadowColor: '#582CDB',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.08,
-    shadowRadius: 10,
-    elevation: 4,
-  },
-  gotItButtonPressed: {
-    opacity: 0.92,
-    transform: [{ scale: 0.98 }],
-  },
-  gotItButtonText: {
-    color: '#FFFFFF',
-    fontSize: 15.5,
-    fontWeight: '700',
-    letterSpacing: -0.2,
-  },
-  modalCard: {
-    width: '100%',
-    maxWidth: 340,
-    backgroundColor: 'rgba(255, 255, 255, 0.96)',
-    borderRadius: 24,
-    padding: 22,
-    shadowColor: '#171420',
-    shadowOffset: { width: 0, height: 12 },
-    shadowOpacity: 0.15,
-    shadowRadius: 24,
-    elevation: 8,
-    borderWidth: 1,
-    borderColor: 'rgba(235, 230, 248, 0.95)',
-  },
-  modalTitle: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: '#171420',
-    marginBottom: 6,
-    textAlign: 'center',
-  },
-  modalSubtitle: {
-    fontSize: 13,
-    color: '#7F7894',
-    textAlign: 'center',
-    marginBottom: 16,
-    lineHeight: 18,
-  },
-  modalInput: {
-    height: 48,
-    borderWidth: 1.2,
-    borderColor: 'rgba(221, 214, 254, 0.9)',
-    borderRadius: 14,
-    paddingHorizontal: 14,
-    fontSize: 15,
-    color: '#171420',
-    backgroundColor: 'rgba(255, 255, 255, 0.9)',
-    marginBottom: 18,
-  },
-  modalBtnRow: {
+  sheetActions: {
     flexDirection: 'row',
     gap: 10,
+    marginTop: 16,
   },
-  modalCancelBtn: {
-    flex: 1,
-    height: 44,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: 'rgba(226, 220, 242, 0.9)',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  modalCancelText: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#7F7894',
-  },
-  modalAddBtn: {
-    flex: 1,
-    height: 44,
-    borderRadius: 12,
-    backgroundColor: '#582CDB',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  modalAddText: {
-    fontSize: 14,
-    fontWeight: '700',
-    color: '#FFFFFF',
-  },
+});
+
+// Desktop web: the step uses the page like a website (wider, button under the content)
+const webStyles = StyleSheet.create({
+  scroll: { maxWidth: 1000, paddingTop: 40, paddingBottom: 56 },
+  cta: { width: '100%', maxWidth: 460, alignSelf: 'center', marginTop: 32 },
+  gridItem: { width: '23.5%' },
 });

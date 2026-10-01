@@ -1,7 +1,6 @@
 import React from 'react';
 import {
   StyleSheet,
-  Text,
   Pressable,
   Platform,
   ViewStyle,
@@ -10,6 +9,7 @@ import {
   ActivityIndicator,
   View,
 } from 'react-native';
+import { Text } from './ui/AppText';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as Haptics from 'expo-haptics';
 

@@ -2,7 +2,6 @@ import React, { useState, useRef, useEffect } from 'react';
 import {
   StyleSheet,
   View,
-  Text,
   ScrollView,
   Pressable,
   Platform,
@@ -12,6 +11,7 @@ import {
   SafeAreaView,
   StatusBar,
 } from 'react-native';
+import { Text } from '../components/ui/AppText';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as Haptics from 'expo-haptics';
 import Svg, { Path, Circle } from 'react-native-svg';
@@ -20,6 +20,13 @@ import { UserProfileModal, UserProfileData } from '../components/UserProfileModa
 import { AnimatedCompletionModal } from '../components/AnimatedCompletionModal';
 import { FreeAppHeader } from '../components/FreeAppHeader';
 import { sFont, sPadding, isNarrowScreen } from '../utils/responsive';
+import Reanimated, { FadeIn, FadeInUp, FadeOut } from 'react-native-reanimated';
+import { GlassBackdrop } from '../components/glass/GlassBackdrop';
+import { FitLines } from '../components/ui/FitLines';
+import { ChipRow, TopPickCard, IdeaRow, IdeaRowSkeleton, QuotaCard, SavedRow, TopicIdeasCard, UnlimitedIdeasCard } from '../components/ideas/IdeasBlocks';
+import { ComposerToast } from '../components/composer/ComposerBlocks';
+import { getIdeaFeed, getTopicIdeas, IDEA_GOALS, NICHE_LABELS, normalizeNiches, type IdeaGoal } from '../data';
+import { ds } from '../theme/colors';
 
 interface ContentAngleScreenProps {
   onBack: () => void;
@@ -27,10 +34,12 @@ interface ContentAngleScreenProps {
   onOpenSchedule?: () => void;
   onOpenJarvisPro?: () => void;
   onNavigateTab?: (tab: TabType) => void;
-  onUseIdea?: (ideaTitle: string, format?: string) => void;
-  onOpenMessages?: () => void;
+  onUseIdea?: (ideaTitle: string, format?: string, goal?: IdeaGoal, hook?: string) => void;
   userProfile?: UserProfileData;
   onSaveProfile?: (updated: UserProfileData) => void;
+  /** Pro members: unlimited ideas and ideas about their own topic. */
+  tier?: 'free' | 'pro';
+  onSwitchToFree?: () => void;
 }
 
 interface NotificationItem {
@@ -102,7 +111,7 @@ const NOTIFICATIONS: NotificationItem[] = [
   {
     id: 'n2',
     title: 'Streak Saver Ready',
-    body: "Convert today's idea into a post to keep your 1-day streak.",
+    body: "Convert today's idea into a post to kick off your creator streak.",
     time: '2h ago',
     unread: true,
     iconEmoji: '🔥',
@@ -177,10 +186,11 @@ export const ContentAngleScreen: React.FC<ContentAngleScreenProps> = ({
   onOpenJarvisPro,
   onNavigateTab,
   onUseIdea,
-  onOpenMessages,
 
   userProfile,
-  onSaveProfile,}) => {
+  onSaveProfile,
+  tier = 'free',
+  onSwitchToFree,}) => {
   const isDark = false;
   const [activeTab, setActiveTab] = useState<TabType>('create');
 
@@ -207,7 +217,6 @@ export const ContentAngleScreen: React.FC<ContentAngleScreenProps> = ({
   // Modals
   const [showNotificationModal, setShowNotificationModal] = useState(false);
   const [showProfileModal, setShowProfileModal] = useState(false);
-  const [showChatModal, setShowChatModal] = useState(false);
   const [showCelebrationModal, setShowCelebrationModal] = useState(false);
   const [celebrationTitle, setCelebrationTitle] = useState('Idea Generated!');
   const [celebrationSubtitle, setCelebrationSubtitle] = useState('New batch of viral content angles added to your vault.');
@@ -216,27 +225,8 @@ export const ContentAngleScreen: React.FC<ContentAngleScreenProps> = ({
   const [notificationsList, setNotificationsList] = useState<NotificationItem[]>(NOTIFICATIONS);
 
   // Animations
-  const flameFloatY = useRef(new Animated.Value(0)).current;
   const modalPopScale = useRef(new Animated.Value(0.9)).current;
 
-  useEffect(() => {
-    const floatAnim = Animated.loop(
-      Animated.sequence([
-        Animated.timing(flameFloatY, {
-          toValue: -4,
-          duration: 1800,
-          useNativeDriver: true,
-        }),
-        Animated.timing(flameFloatY, {
-          toValue: 0,
-          duration: 1800,
-          useNativeDriver: true,
-        }),
-      ])
-    );
-    floatAnim.start();
-    return () => floatAnim.stop();
-  }, [flameFloatY]);
 
   const triggerModalAnim = () => {
     modalPopScale.setValue(0.9);
@@ -359,7 +349,7 @@ export const ContentAngleScreen: React.FC<ContentAngleScreenProps> = ({
       ]);
       setCelebrationTitle('Idea Saved!');
       setCelebrationSubtitle('"One thing I wish I knew before I started creating" has been saved to your vault.');
-      setCelebrationSpeech('1-day streak protected! Idea ready to turn into a post anytime.');
+      setCelebrationSpeech('Day 1 idea saved! Ready to turn into a post anytime.');
       setShowCelebrationModal(true);
     } else {
       setSavedIdeasList((prev) => prev.filter((s) => s.id !== 'saved_hero'));
@@ -399,19 +389,19 @@ export const ContentAngleScreen: React.FC<ContentAngleScreenProps> = ({
       ]);
       setCelebrationTitle('Idea Saved!');
       setCelebrationSubtitle(`"${savedTitle}" has been saved to your vault.`);
-      setCelebrationSpeech('1-day streak protected! Idea ready in your vault.');
+      setCelebrationSpeech('Day 1 idea saved! Ready in your vault.');
       setShowCelebrationModal(true);
     } else {
       setSavedIdeasList((prev) => prev.filter((s) => s.id !== `saved_${id}`));
     }
   };
 
-  const handleSelectIdea = (ideaTitle: string, format?: string) => {
+  const handleSelectIdea = (ideaTitle: string, format?: string, hook?: string) => {
     if (Platform.OS !== 'web') {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     }
     if (onUseIdea) {
-      onUseIdea(ideaTitle, format);
+      onUseIdea(ideaTitle, format, goal, hook);
     }
   };
 
@@ -447,11 +437,92 @@ export const ContentAngleScreen: React.FC<ContentAngleScreenProps> = ({
     setAllIdeas([newIdea, ...allIdeas]);
     setCelebrationTitle('New Ideas Generated!');
     setCelebrationSubtitle('Fresh angles tailored for your niche are ready to create.');
-    setCelebrationSpeech('1-day streak protected! Keep up this awesome momentum.');
+    setCelebrationSpeech('Day 1 momentum active! Keep up this awesome focus.');
     setShowCelebrationModal(true);
   };
 
   const unreadNotifCount = notificationsList.filter((n) => n.unread).length;
+
+  // ── Ideas feed: the creator's niches + one goal drive the ideas ──────────
+  const [niches, setNiches] = useState<string[]>(() => {
+    const n = normalizeNiches(userProfile?.niches);
+    return n.length ? n : ['lifestyle'];
+  });
+  const [goal, setGoal] = useState<IdeaGoal>('followers');
+  const [editNiches, setEditNiches] = useState(false);
+  const feed = React.useMemo(
+    () => getIdeaFeed(niches, goal, userProfile?.connectedPlatforms ?? []),
+    [niches, goal, userProfile?.connectedPlatforms],
+  );
+  const [topIndex, setTopIndex] = useState(0);
+  const [pickThinking, setPickThinking] = useState(false);
+  const [listCount, setListCount] = useState(3);
+  const [generating, setGenerating] = useState(false);
+  const top = feed[topIndex % feed.length];
+  const isPro = tier === 'pro';
+  const [topicIdeas, setTopicIdeas] = useState<typeof feed>([]);
+  const [topicBusy, setTopicBusy] = useState(false);
+  const [lastTopic, setLastTopic] = useState('');
+  const [topicRound, setTopicRound] = useState(0);
+  const askTopic = (t: string, g: IdeaGoal = goal, fresh = false) => {
+    if (Platform.OS !== 'web') Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    setTopicBusy(true);
+    // Same topic again = the next 3; new topic or goal = start over
+    const round = !fresh && t === lastTopic && g === goal && topicIdeas.length ? topicRound + 1 : 0;
+    setTopicRound(round);
+    setLastTopic(t);
+    setTimeout(() => {
+      setTopicIdeas(getTopicIdeas(t, g, feed[0]?.format, round));
+      setTopicBusy(false);
+    }, 800);
+  };
+  // Changing the goal reshapes the topic ideas
+  useEffect(() => {
+    if (lastTopic) askTopic(lastTopic, goal, true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [goal]);
+  const listIdeas = feed.filter((i) => i.id !== top.id).slice(0, listCount);
+  const savedIds = savedIdeasList.map((s) => s.id);
+  const isSaved = (id: string) => savedIds.includes(`feed_${id}`);
+
+  useEffect(() => {
+    setTopIndex(0);
+    setListCount(3);
+  }, [niches, goal]);
+
+  const toggleNicheId = (id: string) =>
+    setNiches((prev) => (prev.includes(id) ? (prev.length > 1 ? prev.filter((n) => n !== id) : prev) : [...prev, id]));
+
+  const showAnotherPick = () => {
+    if (pickThinking) return;
+    setPickThinking(true);
+    setTimeout(() => {
+      setTopIndex((i) => i + 1);
+      setPickThinking(false);
+    }, 550);
+  };
+
+  const toggleSaveIdea = (idea: { id: string; title: string; format: string }) => {
+    const key = `feed_${idea.id}`;
+    if (savedIds.includes(key)) {
+      setSavedIdeasList((prev) => prev.filter((s) => s.id !== key));
+      triggerToast('Removed from saved ideas');
+    } else {
+      setSavedIdeasList((prev) => [{ id: key, title: idea.title, format: idea.format, savedTime: 'Saved just now' }, ...prev]);
+      triggerToast('Saved. Find it under Saved ideas');
+    }
+  };
+
+  const generateIdeas = () => {
+    if (generating || (!isPro && quotaUsed >= 5)) return;
+    if (Platform.OS !== 'web') Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    setGenerating(true);
+    setTimeout(() => {
+      setQuotaUsed((q) => Math.min(5, q + 1));
+      setListCount((c) => c + 2);
+      setGenerating(false);
+    }, 900);
+  };
   const displayedIdeas = allIdeas
     .filter((item) => !hiddenIdeaIds.includes(item.id))
     .slice(0, showAllIdeas ? allIdeas.length : 2);
@@ -461,18 +532,13 @@ export const ContentAngleScreen: React.FC<ContentAngleScreenProps> = ({
     <SafeAreaView style={[styles.safeArea, isDark && { backgroundColor: '#0C0A12' }]}>
       <StatusBar barStyle={isDark ? "light-content" : "dark-content"} backgroundColor={isDark ? "#0C0A12" : "#FAF8F5"} />
       <View style={[styles.container, isDark && { backgroundColor: '#0C0A12' }]}>
+        <GlassBackdrop />
         {/* 1. TOP AIRY HEADER BAR */}
         <FreeAppHeader
+          backgroundColor="transparent"
           onBack={onBack}
           onOpenJarvisPro={onOpenJarvisPro}
-          onOpenMessages={() => {
-            if (onOpenMessages) {
-              onOpenMessages();
-            } else {
-              triggerModalAnim();
-              setShowChatModal(true);
-            }
-          }}
+          onSwitchToFree={onSwitchToFree}
           onOpenNotifications={() => {
             triggerModalAnim();
             setShowNotificationModal(true);
@@ -492,440 +558,130 @@ export const ContentAngleScreen: React.FC<ContentAngleScreenProps> = ({
           showsVerticalScrollIndicator={false}
           bounces={true}
         >
-          {/* Top Pill Badge (Free Ideas) */}
-          <View style={styles.topBadgesRow}>
-            <View style={styles.freeIdeasPill}>
-              <View style={styles.freeIdeasDot} />
-              <Text style={styles.freeIdeasPillText}>Free Ideas</Text>
-            </View>
-          </View>
+          {/* HEADLINE — same two-line structure on every screen size */}
+          <Reanimated.View entering={FadeInUp.duration(500)} style={styles.headline}>
+            <FitLines
+              lines={['Find your next', <Text key="i" style={styles.headlineAccent}>post idea</Text>]}
+              textStyle={styles.headlineText}
+              maxFontSize={34}
+              align="left"
+              accessibilityLabel="Find your next post idea"
+            />
+          </Reanimated.View>
 
-          {/* Main Headline & Subtitle */}
-          <Text style={styles.mainTitle}>Find your next content angle.</Text>
-          <Text style={styles.mainSubtitle}>
-            Choose your niche and goal, then generate ideas you can turn into posts.
-          </Text>
-
-          {/* 1. NICHE PILLS ROW (SELECT & UNSELECT) */}
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={styles.filterPillsRow}
-          >
-            {['Creator Advice', 'Lifestyle', 'Comedy', 'Education', 'Fitness'].map((niche) => {
-              const isSelected = selectedNiches.includes(niche);
-              return (
-                <Pressable
-                  key={niche}
-                  onPress={() => toggleNiche(niche)}
-                  style={[
-                    styles.filterPill,
-                    isSelected && styles.filterPillActive,
-                  ]}
-                >
-                  <Text
-                    style={[
-                      styles.filterPillText,
-                      isSelected && styles.filterPillTextActive,
-                    ]}
-                  >
-                    {niche}
-                  </Text>
-                </Pressable>
-              );
-            })}
-          </ScrollView>
-
-          {/* 2. GOAL PILLS ROW (SELECT & UNSELECT) */}
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={styles.filterPillsRow}
-          >
-            {[
-              { id: 'Grow engagement', label: 'Grow engagement' },
-              { id: 'Protect streak', label: '⚡ Protect streak' },
-              { id: 'Get saves', label: 'Get saves' },
-              { id: 'Start conversation', label: 'Start conversation' },
-            ].map((goal) => {
-              const isSelected = selectedGoals.includes(goal.id);
-              return (
-                <Pressable
-                  key={goal.id}
-                  onPress={() => toggleGoal(goal.id)}
-                  style={[
-                    styles.filterPill,
-                    isSelected && styles.filterPillActive,
-                  ]}
-                >
-                  <Text
-                    style={[
-                      styles.filterPillText,
-                      isSelected && styles.filterPillTextActive,
-                    ]}
-                  >
-                    {goal.label}
-                  </Text>
-                </Pressable>
-              );
-            })}
-          </ScrollView>
-
-          {/* 3. HERO STREAK SAVER PICK CARD */}
-          <View style={styles.heroIdeaCard}>
-            {/* Header Badge */}
-            <View style={styles.heroBadgeRow}>
-              <View style={styles.streakSaverPickBadge}>
-                <Text style={styles.streakSaverPickStar}>⭐</Text>
-                <Text style={styles.streakSaverPickText}>STREAK SAVER PICK</Text>
-              </View>
-            </View>
-
-            {/* Title & Desc */}
-            <Text style={styles.heroIdeaTitle}>
-              &ldquo;One thing I wish I knew before I started creating&rdquo;
-            </Text>
-            <Text style={styles.heroIdeaDesc}>
-              Share one honest lesson that would help another creator stay consistent or avoid a mistake.
-            </Text>
-
-            {/* Why It Works Inner Box */}
-            <View style={styles.whyItWorksBox}>
-              <Text style={styles.whyItWorksLabel}>WHY IT WORKS</Text>
-              <Text style={styles.whyItWorksText}>
-                Personal lessons are fast to create and easy for audiences to save.
+          {/* NICHES + GOAL */}
+          <Reanimated.View entering={FadeInUp.delay(80).duration(500)} style={styles.filters}>
+            {/* Niches come from onboarding; one line, with Change if they want other ideas */}
+            <View style={styles.nicheLine}>
+              <Text style={styles.nicheText} numberOfLines={1}>
+                Ideas for <Text style={styles.nicheBold}>{niches.map((n) => NICHE_LABELS[n]).join(' · ')}</Text>
               </Text>
-            </View>
-
-            {/* Tags Row */}
-            <View style={styles.heroTagsRow}>
-              <View style={styles.heroTagPill}>
-                <Text style={styles.heroTagPillText}>Personal Lesson</Text>
-              </View>
-              <View style={styles.heroTagPill}>
-                <Text style={styles.heroTagPillText}>30-sec Reel</Text>
-              </View>
-              <View style={styles.heroSaveTagPill}>
-                <Text style={styles.heroSaveTagPillText}>Save-Focused</Text>
-              </View>
-            </View>
-
-            {/* Action Row: Use Idea + Bookmark */}
-            <View style={styles.heroActionRow}>
-              <Pressable
-                style={({ pressed }) => [styles.useIdeaMainBtn, pressed && styles.btnPressed]}
-                onPress={() => handleSelectIdea('One thing I wish I knew before I started creating', 'Short Reel')}
-              >
-                <LinearGradient
-                  colors={['#7C3AED', '#582CDB']}
-                  start={{ x: 0, y: 0 }}
-                  end={{ x: 1, y: 0 }}
-                  style={styles.useIdeaMainGradient}
-                >
-                  <Text style={styles.useIdeaMainBtnText}>Use Idea</Text>
-                </LinearGradient>
-              </Pressable>
-
-              <Pressable
-                style={({ pressed }) => [
-                  styles.bookmarkIconBtn,
-                  isHeroSaved && styles.bookmarkIconBtnActive,
-                  pressed && styles.btnPressed,
-                ]}
-                onPress={handleToggleHeroSave}
-              >
-                <Svg width={20} height={20} viewBox="0 0 24 24" fill={isHeroSaved ? '#FFFFFF' : 'none'}>
-                  <Path
-                    d="M19 21L12 16L5 21V5C5 3.89543 5.89543 3 7 3H17C18.1046 3 19 3.89543 19 5V21Z"
-                    stroke={isHeroSaved ? '#FFFFFF' : '#582CDB'}
-                    strokeWidth="2.2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </Svg>
+              <Pressable onPress={() => setEditNiches((v) => !v)} hitSlop={8} accessibilityRole="button">
+                <Text style={styles.link}>{editNiches ? 'Done' : 'Change'}</Text>
               </Pressable>
             </View>
-          </View>
+            {editNiches && (
+              <Reanimated.View entering={FadeInUp.duration(220)} exiting={FadeOut.duration(150)}>
+                <ChipRow
+                  label="Pick your niches"
+                  items={Object.keys(NICHE_LABELS).map((id) => ({ id, label: NICHE_LABELS[id] }))}
+                  selected={niches}
+                  onToggle={toggleNicheId}
+                />
+              </Reanimated.View>
+            )}
+            <ChipRow label="Goal" items={IDEA_GOALS} selected={[goal]} onToggle={(id) => setGoal(id as IdeaGoal)} />
+          </Reanimated.View>
 
-          {/* 4. MORE IDEAS SECTION (BEAUTIFIED & SEAMLESS EXPANSION) */}
-          <View style={styles.moreIdeasHeaderRow}>
-            <Text style={styles.moreIdeasTitle}>More Ideas</Text>
-            <Pressable onPress={handleToggleViewAll} hitSlop={8}>
-              <Text style={styles.viewAllLink}>
-                {showAllIdeas ? 'Show Less ‹' : `View All (${allIdeas.length}) ›`}
-              </Text>
-            </Pressable>
-          </View>
-
-          {/* Quick Filters (Select & Unselect Support) */}
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={styles.quickFilterRow}
-            style={{ flexGrow: 0, marginBottom: 14 }}
-          >
-            {[
-              { id: 'faster', label: 'Faster formats' },
-              { id: 'saves', label: 'Save-focused' },
-              { id: 'trend', label: 'Trend-based' },
-            ].map((f) => {
-              const isActive = selectedAngleFilters.includes(f.id);
-              return (
-                <Pressable
-                  key={f.id}
-                  onPress={() => toggleAngleFilter(f.id)}
-                  style={[
-                    styles.quickFilterPill,
-                    isActive && styles.quickFilterPillActive,
-                  ]}
-                >
-                  <Text
-                    style={[
-                      styles.quickFilterPillText,
-                      isActive && styles.quickFilterPillTextActive,
-                    ]}
-                  >
-                    {f.label}
-                  </Text>
-                </Pressable>
-              );
-            })}
-          </ScrollView>
-
-          {/* Action Toast Notice */}
-          {actionToast && (
-            <View style={styles.actionToastBanner}>
-              <Text style={styles.actionToastText}>{actionToast}</Text>
-            </View>
+          {/* PRO: ideas about your own topic */}
+          {isPro && (
+            <Reanimated.View entering={FadeInUp.delay(120).duration(550)} style={styles.section}>
+              <TopicIdeasCard
+                busy={topicBusy}
+                onAsk={(t) => askTopic(t)}
+                goalLabel={IDEA_GOALS.find((g) => g.id === goal)?.label ?? 'Grow followers'}
+                results={topicIdeas}
+                isSaved={isSaved}
+                onUse={(idea) => handleSelectIdea(idea.title, idea.format, idea.hook)}
+                onSave={toggleSaveIdea}
+              />
+            </Reanimated.View>
           )}
 
-          {/* More Idea Cards (Clean & Compact) */}
-          {displayedIdeas.map((item) => (
-            <View key={item.id} style={styles.moreIdeaCard}>
-              <View style={styles.moreIdeaCardHeader}>
-                <Text style={styles.moreIdeaCardTitle}>&ldquo;{item.title}&rdquo;</Text>
-                <Pressable hitSlop={8} onPress={() => handleOpenIdeaMenu(item)}>
-                  <Text style={styles.moreIdeaDots}>•••</Text>
-                </Pressable>
-              </View>
+          {/* TOP PICK */}
+          <Reanimated.View entering={FadeInUp.delay(160).duration(550)} style={styles.section}>
+            <TopPickCard
+              idea={top}
+              thinking={pickThinking}
+              saved={isSaved(top.id)}
+              onAnother={showAnotherPick}
+              onUse={() => handleSelectIdea(top.title, top.format, top.hook)}
+              onSave={() => toggleSaveIdea(top)}
+            />
+          </Reanimated.View>
 
-              <View style={styles.moreIdeaMetaRow}>
-                <Text style={styles.moreIdeaMetaText}>🎬 {item.format}</Text>
-                <Text style={styles.moreIdeaMetaText}>📈 {item.goal}</Text>
-              </View>
 
-              <View style={styles.moreIdeaActionRow}>
-                <Pressable
-                  style={({ pressed }) => [styles.moreIdeaUseBtn, pressed && styles.btnPressed]}
-                  onPress={() => handleSelectIdea(item.title, item.format)}
-                >
-                  <Text style={styles.moreIdeaUseBtnText}>Use Idea</Text>
-                </Pressable>
-
-                <Pressable
-                  style={[
-                    styles.moreIdeaBookmarkBtn,
-                    item.bookmarked && styles.moreIdeaBookmarkBtnActive,
-                  ]}
-                  onPress={() => toggleBookmark(item.id)}
-                >
-                  <Svg width={17} height={17} viewBox="0 0 24 24" fill={item.bookmarked ? '#FFFFFF' : 'none'}>
-                    <Path
-                      d="M19 21L12 16L5 21V5C5 3.89543 5.89543 3 7 3H17C18.1046 3 19 3.89543 19 5V21Z"
-                      stroke={item.bookmarked ? '#FFFFFF' : '#582CDB'}
-                      strokeWidth="2.2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                  </Svg>
-                </Pressable>
-              </View>
-            </View>
-          ))}
-
-          {/* 5. DAILY QUOTA CARD */}
-          <View style={[styles.quotaCard, quotaUsed >= 5 && styles.quotaCardReached]}>
-            <View style={styles.quotaHeaderRow}>
-              <Text style={styles.quotaLabel}>DAILY QUOTA</Text>
-              <Pressable
-                onPress={() => {
-                  if (onOpenJarvisPro) onOpenJarvisPro();
-                }}
-                hitSlop={8}
+          {/* MORE IDEAS */}
+          <Text style={styles.sectionLabel}>More ideas</Text>
+          <View style={styles.stack}>
+            {generating && <IdeaRowSkeleton />}
+            {listIdeas.map((idea, i) => (
+              <Reanimated.View
+                key={`${goal}-${idea.id}`}
+                entering={FadeInUp.delay(i < 3 ? 60 * i : 0).duration(320)}
+                exiting={FadeOut.duration(150)}
+               
               >
-                <Text style={styles.quotaUpgradeLink}>Upgrade ⚡</Text>
-              </Pressable>
-            </View>
+                <IdeaRow
+                  idea={idea}
+                  saved={isSaved(idea.id)}
+                  onUse={() => handleSelectIdea(idea.title, idea.format, idea.hook)}
+                  onSave={() => toggleSaveIdea(idea)}
+                />
+              </Reanimated.View>
+            ))}
+          </View>
 
-            <Text style={styles.quotaCountText}>{quotaUsed} / 5 used today</Text>
-
-            {/* Gold/Amber Progress Track */}
-            <View style={styles.quotaProgressTrack}>
-              <View
-                style={[
-                  styles.quotaProgressFill,
-                  { width: `${Math.min(100, (quotaUsed / 5) * 100)}%` },
-                  quotaUsed >= 5 && styles.quotaProgressFillMax,
-                ]}
-              />
-            </View>
-
-            {quotaUsed >= 5 ? (
-              <Pressable
-                style={({ pressed }) => [styles.quotaReachedBtn, pressed && styles.btnPressed]}
-                onPress={() => {
-                  if (Platform.OS !== 'web') {
-                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-                  }
-                  if (onOpenJarvisPro) onOpenJarvisPro();
-                }}
-              >
-                <Text style={styles.quotaReachedBtnText}>
-                  Quota reached · Upgrade to generate more ⚡
-                </Text>
-              </Pressable>
+          {/* DAILY IDEAS */}
+          <View style={styles.section}>
+            {isPro ? (
+              <UnlimitedIdeasCard generating={generating} onGenerate={generateIdeas} />
             ) : (
-              <Pressable
-                style={({ pressed }) => [styles.quotaGenerateBtn, pressed && styles.btnPressed]}
-                onPress={handleGenerateMoreIdeas}
-              >
-                <Text style={styles.quotaGenerateBtnText}>Generate More</Text>
-              </Pressable>
+              <QuotaCard used={quotaUsed} limit={5} generating={generating} onGenerate={generateIdeas} onPro={() => onOpenJarvisPro?.()} />
             )}
           </View>
 
-          {/* 6. JARVIS INSIGHT CARD (HARMONIOUS LAVENDER-CREAM) */}
-          <LinearGradient
-            colors={['#FFFFFF', '#F8F5FE']}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-            style={styles.jarvisCard}
-          >
-            <View style={styles.jarvisHeaderRow}>
-              <View style={styles.jarvisFlameIconBox}>
-                <Image
-                  source={require('../../assets/images/jarvis-core-flame.png')}
-                  style={styles.jarvisFlameImage}
-                  resizeMode="contain"
-                />
-              </View>
-              <Text style={styles.jarvisTitle}>Jarvis Insight</Text>
-            </View>
-
-            <Text style={styles.jarvisBodyText}>
-              Ideas based on personal lessons are easier to finish quickly and protect your streak.
-            </Text>
-
-            {/* Jarvis Chips (Select & Unselect Support) */}
-            <View style={styles.jarvisChipsRow}>
-              {[
-                { id: 'personal', label: 'Make It Personal' },
-                { id: 'hook', label: 'Add Hook' },
-              ].map((chip) => {
-                const isChipActive = selectedJarvisChips.includes(chip.id);
-                return (
-                  <Pressable
-                    key={chip.id}
-                    onPress={() => toggleJarvisChip(chip.id)}
-                    style={[
-                      styles.jarvisChip,
-                      isChipActive && styles.jarvisChipActive,
-                    ]}
-                  >
-                    <Text
-                      style={[
-                        styles.jarvisChipText,
-                        isChipActive && styles.jarvisChipTextActive,
-                      ]}
-                    >
-                      {chip.label}
-                    </Text>
-                  </Pressable>
-                );
-              })}
-            </View>
-          </LinearGradient>
-
-          {/* 7. SAVED IDEAS SECTION */}
+          {/* SAVED IDEAS */}
           {savedIdeasList.length > 0 && (
-            <View style={styles.savedIdeasSection}>
-              <View style={styles.savedIdeasHeaderRow}>
-                <Text style={styles.sectionHeaderLabel}>SAVED IDEAS ({savedIdeasList.length})</Text>
+            <>
+              <View style={styles.savedHead}>
+                <Text style={[styles.sectionLabel, styles.sectionLabelInline]}>Saved ideas</Text>
                 {savedIdeasList.length > 2 && (
-                  <Pressable
-                    onPress={() => {
-                      if (Platform.OS !== 'web') {
-                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                      }
-                      setShowAllSavedIdeas(!showAllSavedIdeas);
-                    }}
-                    hitSlop={8}
-                  >
-                    <Text style={styles.viewAllSavedLink}>
-                      {showAllSavedIdeas ? 'Show Less ‹' : `View all (${savedIdeasList.length}) ›`}
-                    </Text>
+                  <Pressable onPress={() => setShowAllSavedIdeas((v) => !v)} hitSlop={8} accessibilityRole="button">
+                    <Text style={styles.link}>{showAllSavedIdeas ? 'Show less' : `See all ${savedIdeasList.length}`}</Text>
                   </Pressable>
                 )}
               </View>
-
-              <View style={styles.savedIdeasList}>
-                {displayedSavedIdeas.map((saved) => (
-                  <Pressable
-                    key={saved.id}
-                    style={({ pressed }) => [styles.savedIdeaItemCard, pressed && styles.btnPressed]}
-                    onPress={() => handleSelectIdea(saved.title, saved.format)}
-                  >
-                    <View style={styles.savedIdeaIconBox}>
-                      <Text style={{ fontSize: 16, color: '#582CDB' }}>≡</Text>
-                    </View>
-                    <View style={{ flex: 1 }}>
-                      <Text style={styles.savedIdeaTitle} numberOfLines={1}>
-                        {saved.title}
-                      </Text>
-                      <Text style={styles.savedIdeaTime}>{saved.savedTime} • {saved.format}</Text>
-                    </View>
-                    <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
-                      <Path d="M9 18L15 12L9 6" stroke="#94A3B8" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
-                    </Svg>
-                  </Pressable>
+              <View style={styles.stack}>
+                {displayedSavedIdeas.map((s) => (
+                  <Reanimated.View key={s.id} entering={FadeIn.duration(250)} exiting={FadeOut.duration(150)}>
+                    <SavedRow
+                      title={s.title}
+                      meta={`${s.savedTime} · ${s.format}`}
+                      onPress={() => handleSelectIdea(s.title, s.format)}
+                      onUnsave={() => {
+                        setSavedIdeasList((prev) => prev.filter((x) => x.id !== s.id));
+                        triggerToast('Removed from saved ideas');
+                      }}
+                    />
+                  </Reanimated.View>
                 ))}
               </View>
-
-              {!showAllSavedIdeas && savedIdeasList.length > 2 && (
-                <Pressable
-                  style={styles.viewAllSavedBottomBtn}
-                  onPress={() => {
-                    if (Platform.OS !== 'web') {
-                      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                    }
-                    setShowAllSavedIdeas(true);
-                  }}
-                >
-                  <Text style={styles.viewAllSavedBottomBtnText}>
-                    View all saved ideas ({savedIdeasList.length}) →
-                  </Text>
-                </Pressable>
-              )}
-            </View>
+            </>
           )}
-
-          {/* 8. PRIMARY BOTTOM ACTION: GENERATE MORE IDEAS */}
-          <Pressable
-            style={({ pressed }) => [styles.generateMoreMainBtn, pressed && styles.btnPressed]}
-            onPress={handleGenerateMoreIdeas}
-          >
-            <LinearGradient
-              colors={quotaUsed >= 5 ? ['#7C3AED', '#582CDB'] : ['#7C3AED', '#582CDB']}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 0 }}
-              style={styles.generateMoreMainGradient}
-            >
-              <Text style={styles.generateMoreMainBtnText}>
-                {quotaUsed >= 5 ? '⚡ Upgrade for Unlimited Ideas' : '✨ Generate More Ideas'}
-              </Text>
-            </LinearGradient>
-          </Pressable>
         </ScrollView>
+
+        {actionToast && <ComposerToast message={actionToast} />}
 
         {/* UNIFIED SIGNATURE FLOATING TAB BAR */}
         <FloatingTabBar activeTab={activeTab} onTabPress={handleTabPress} />
@@ -990,46 +746,6 @@ export const ContentAngleScreen: React.FC<ContentAngleScreenProps> = ({
           initialProfile={userProfile}
           onSaveProfile={onSaveProfile}
         />
-
-        {/* MODAL: CREATOR CHAT */}
-        <Modal
-          visible={showChatModal}
-          transparent={true}
-          animationType="fade"
-          onRequestClose={() => setShowChatModal(false)}
-        >
-          <View style={styles.modalOverlay}>
-            <Animated.View style={[styles.modalCard, { transform: [{ scale: modalPopScale }] }]}>
-              <View style={styles.modalHeaderRow}>
-                <View>
-                  <Text style={styles.modalTitle}>Jarvis AI Chat</Text>
-                  <Text style={styles.modalSubtitle}>Real-time creative assistant</Text>
-                </View>
-                <Pressable
-                  onPress={() => setShowChatModal(false)}
-                  style={styles.modalCloseCircle}
-                  hitSlop={8}
-                >
-                  <Text style={styles.modalCloseCross}>✕</Text>
-                </Pressable>
-              </View>
-
-              <View style={styles.chatCard}>
-                <Text style={styles.chatSpeaker}>Jarvis AI</Text>
-                <Text style={styles.chatMsg}>
-                  I filtered these angles based on your {userProfile?.streakCount || 1}-day streak history! Personal lessons have your highest completion rate.
-                </Text>
-              </View>
-
-              <Pressable
-                style={styles.modalFullBtn}
-                onPress={() => setShowChatModal(false)}
-              >
-                <Text style={styles.modalFullBtnText}>Close Chat</Text>
-              </Pressable>
-            </Animated.View>
-          </View>
-        </Modal>
 
         {/* IDEA OPTIONS THREE-DOT MENU MODAL */}
         <Modal
@@ -1158,17 +874,29 @@ export const ContentAngleScreen: React.FC<ContentAngleScreenProps> = ({
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#FAF8F5',
+    backgroundColor: ds.bg,
   },
   container: {
     flex: 1,
     width: '100%',
-    backgroundColor: '#FAF8F5',
   },
+  headline: { marginTop: 4, marginBottom: 16 },
+  headlineText: { fontWeight: '800', letterSpacing: -0.8, color: ds.ink },
+  headlineAccent: { color: ds.purple },
+  filters: { gap: 14 },
+  section: { marginTop: 20 },
+  sectionLabel: { fontSize: 17, fontWeight: '800', color: ds.ink, letterSpacing: -0.2, marginTop: 24, marginBottom: 10 },
+  sectionLabelInline: { marginTop: 0, marginBottom: 0 },
+  savedHead: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: 24, marginBottom: 10 },
+  link: { fontSize: 13.5, fontWeight: '800', color: ds.purple },
+  nicheLine: { flexDirection: 'row', alignItems: 'center', gap: 10 },
+  nicheText: { flex: 1, fontSize: 13.5, color: ds.text2 },
+  nicheBold: { fontWeight: '800', color: ds.ink },
+  stack: { gap: 10 },
   scrollContent: {
     paddingHorizontal: 20,
     paddingTop: 8,
-    paddingBottom: 100,
+    paddingBottom: 120,
   },
   btnPressed: {
     opacity: 0.9,
@@ -1280,10 +1008,11 @@ const styles = StyleSheet.create({
   },
 
   mainTitle: {
-    fontSize: Platform.OS === 'web' ? ('clamp(18px, 4.5vw, 22px)' as any) : sFont(20),
+    fontSize: Platform.OS === 'web' ? ('clamp(15px, 3.8vw, 17px)' as any) : sFont(16),
     fontWeight: '700',
     color: '#171420',
     letterSpacing: -0.35,
+    lineHeight: 22,
     marginBottom: 4,
     marginTop: 4,
   },

@@ -2,7 +2,6 @@ import React, { useState, useRef, useEffect } from 'react';
 import {
   StyleSheet,
   View,
-  Text,
   ScrollView,
   SafeAreaView,
   StatusBar,
@@ -13,6 +12,8 @@ import {
   Platform,
   Dimensions,
 } from 'react-native';
+import { Text } from '../components/ui/AppText';
+import { BrandLogo } from '../components/BrandLogo';
 import Svg, { Path, Circle, Rect } from 'react-native-svg';
 import * as Haptics from 'expo-haptics';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -30,9 +31,8 @@ interface ProMissionDetailScreenProps {
   onLogout?: () => void;
   onNavigateTab?: (tab: TabType) => void;
   onOpenJarvisPro?: () => void;
-  onOpenMessages?: () => void;
   onOpenSchedule?: () => void;
-  onOpenPostComposer?: (ideaTitle?: string) => void;
+  onOpenPostComposer?: (ideaTitle?: string, platform?: string, questDraft?: any, format?: string) => void;
   onSwitchToFree?: () => void;
   userProfile?: UserProfileData;
   onSaveProfile?: (updated: UserProfileData) => void;
@@ -43,7 +43,6 @@ export const ProMissionDetailScreen: React.FC<ProMissionDetailScreenProps> = ({
   onLogout,
   onNavigateTab,
   onOpenJarvisPro,
-  onOpenMessages,
   onOpenSchedule,
   onOpenPostComposer,
   onSwitchToFree,
@@ -86,9 +85,23 @@ export const ProMissionDetailScreen: React.FC<ProMissionDetailScreenProps> = ({
     if (Platform.OS !== 'web') {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     }
-    const title = customTitle || 'Publish a personal lesson Reel before 7:30 PM';
+    const title = customTitle || 'Publish a personal lesson Reel today';
+    const draftPayload = {
+      title: 'Publish your strongest Reel today',
+      badgeLabel: "TODAY'S PRO QUEST (+350 XP)",
+      hook: "3 creator mistakes that were secretly killing my reach (and how I fixed them):",
+      story: "1. Obsessing over views instead of saves & shares.\n2. Posting inconsistently and losing algorithmic trust.\n3. Overcomplicating production instead of prioritizing a razor-sharp opening hook.",
+      lesson: "Consistency and clarity beat high production value every single time.",
+      cta: "Which of these 3 mistakes have you made? Drop a comment below 👇",
+      requirements: [
+        "Format: 1 Long Reel / Short Video (<60s)",
+        "Topic: 3 Creator Mistakes I Stopped Making",
+        "Reward: +350 XP when you publish"
+      ],
+      xpReward: 350
+    };
     if (onOpenPostComposer) {
-      onOpenPostComposer(title);
+      onOpenPostComposer(title, 'Instagram', draftPayload, 'short_video');
     } else if (onNavigateTab) {
       onNavigateTab('create');
     }
@@ -99,8 +112,22 @@ export const ProMissionDetailScreen: React.FC<ProMissionDetailScreenProps> = ({
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     }
     showToast('Blueprint loaded into Post Composer!');
+    const draftPayload = {
+      title: 'One mistake I stopped making as a creator',
+      badgeLabel: "PRO BLUEPRINT ATTACHED (+350 XP)",
+      hook: "The single biggest mistake I made in my first year creating content:",
+      story: "I thought I needed expensive gear and daily viral hits. In reality, what actually grew my audience was solving one specific problem per post with actionable takeaways.",
+      lesson: "Audience trust is built by solving problems, not chasing algorithms.",
+      cta: "What’s one mistake you wish you avoided when you started? Let me know below 👇",
+      requirements: [
+        "Format: 1 Reel or Carousel",
+        "Topic: Personal Creator Lesson Blueprint",
+        "Target: Earn +350 XP and Day 48 Streak boost"
+      ],
+      xpReward: 350
+    };
     if (onOpenPostComposer) {
-      onOpenPostComposer('One mistake I stopped making as a creator');
+      onOpenPostComposer('One mistake I stopped making as a creator', 'Instagram', draftPayload, 'short_video');
     } else if (onNavigateTab) {
       onNavigateTab('create');
     }
@@ -133,18 +160,7 @@ export const ProMissionDetailScreen: React.FC<ProMissionDetailScreenProps> = ({
             )}
 
             {/* PostStreak 3D Ghost Mascot */}
-            <Animated.View
-              style={[
-                styles.headerLogoWrapper,
-                { transform: [{ translateY: flameFloatY }] },
-              ]}
-            >
-              <Image
-                source={require('../../assets/images/jarvis-ghost-clean.png')}
-                style={styles.headerGhostLogo}
-                resizeMode="contain"
-              />
-            </Animated.View>
+            <BrandLogo size="sm" />
 
             {/* Mode Switcher */}
             <Pressable
@@ -171,27 +187,8 @@ export const ProMissionDetailScreen: React.FC<ProMissionDetailScreenProps> = ({
             </Pressable>
           </View>
 
-          {/* Right Header: Chat, Notification Bell, User Avatar */}
+          {/* Right Header: Notification Bell, User Avatar */}
           <View style={styles.headerRightGroup}>
-            <Pressable
-              style={({ pressed }) => [styles.headerIconBtn, pressed && styles.btnPressed]}
-              hitSlop={8}
-              onPress={() => {
-                if (onOpenMessages) onOpenMessages();
-                else if (onNavigateTab) onNavigateTab('match');
-              }}
-            >
-              <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
-                <Path
-                  d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"
-                  stroke="#171420"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </Svg>
-            </Pressable>
-
             <Pressable
               style={({ pressed }) => [styles.headerIconBtn, pressed && styles.btnPressed]}
               hitSlop={8}
@@ -262,8 +259,11 @@ export const ProMissionDetailScreen: React.FC<ProMissionDetailScreenProps> = ({
             <View style={styles.proIntelligenceTagBox}>
               <Text style={styles.proIntelligenceTagText}>✨ PRO INTELLIGENCE ACTIVE</Text>
             </View>
-            <Text style={styles.mainTitleText}>
-              Create the one post most likely to move you forward.
+            <Text
+              style={styles.mainTitleText}
+              numberOfLines={2}
+            >
+              Create the post most likely to move you forward.
             </Text>
             <Text style={styles.mainSubText}>
               Your daily plan is based on your streak, recent analytics, best posting window and content performance.
@@ -274,10 +274,24 @@ export const ProMissionDetailScreen: React.FC<ProMissionDetailScreenProps> = ({
           {/* CARD 1: TODAY'S PRO PLAN (HERO PLAN CARD)                    */}
           {/* ============================================================ */}
           <View style={styles.heroPlanCard}>
-            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
-              <Text style={styles.heroPlanTag}>TODAY&apos;S PRO PLAN</Text>
+            <View style={styles.heroPlanHeaderRow}>
+              <Text
+                style={styles.heroPlanTag}
+                numberOfLines={1}
+                adjustsFontSizeToFit
+                minimumFontScale={0.85}
+              >
+                TODAY&apos;S PRO PLAN
+              </Text>
               <View style={styles.optimizedBadge}>
-                <Text style={styles.optimizedBadgeText}>⚡ Optimized for algorithm</Text>
+                <Text
+                  style={styles.optimizedBadgeText}
+                  numberOfLines={1}
+                  adjustsFontSizeToFit
+                  minimumFontScale={0.85}
+                >
+                  ⚡ Optimized for algorithm
+                </Text>
               </View>
             </View>
 
@@ -459,7 +473,7 @@ export const ProMissionDetailScreen: React.FC<ProMissionDetailScreenProps> = ({
                 <Text style={styles.traitBadgeText}>Low Time Friction</Text>
               </View>
               <View style={styles.traitBadge}>
-                <Text style={styles.traitBadgeText}>Streak Protection</Text>
+                <Text style={styles.traitBadgeText}>Habit Builder</Text>
               </View>
             </View>
 
@@ -786,11 +800,12 @@ const styles = StyleSheet.create({
     letterSpacing: 0.6,
   },
   mainTitleText: {
-    fontSize: 22,
+    fontSize: Platform.OS === 'web' ? ('clamp(15px, 3.8vw, 17px)' as any) : sFont(16),
     fontWeight: '700',
     color: '#171420',
-    letterSpacing: -0.4,
-    marginBottom: 6,
+    letterSpacing: -0.35,
+    lineHeight: 22,
+    marginBottom: 4,
   },
   mainSubText: {
     fontSize: 12.5,
@@ -802,7 +817,7 @@ const styles = StyleSheet.create({
   heroPlanCard: {
     backgroundColor: '#FFFFFF',
     borderRadius: 24,
-    padding: 20,
+    padding: 18,
     borderWidth: 1,
     borderColor: '#EFECE6',
     marginBottom: 20,
@@ -812,20 +827,29 @@ const styles = StyleSheet.create({
     shadowRadius: 10,
     elevation: 2,
   },
+  heroPlanHeaderRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    gap: 12,
+    marginBottom: 8,
+  },
   heroPlanTag: {
-    fontSize: 11,
-    fontWeight: '700',
+    fontSize: 10,
+    fontWeight: '800',
     color: '#B45309',
-    letterSpacing: 0.6,
+    letterSpacing: 0.5,
+    flexShrink: 1,
   },
   optimizedBadge: {
     backgroundColor: '#EDE9FE',
     paddingHorizontal: 8,
-    paddingVertical: 3,
+    paddingVertical: 3.5,
     borderRadius: 6,
+    flexShrink: 0,
   },
   optimizedBadgeText: {
-    fontSize: 10,
+    fontSize: 9.5,
     fontWeight: '700',
     color: '#582CDB',
   },

@@ -2,7 +2,6 @@ import React, { useState, useRef, useEffect } from 'react';
 import {
   StyleSheet,
   View,
-  Text,
   ScrollView,
   Pressable,
   Platform,
@@ -11,9 +10,9 @@ import {
   Image,
   SafeAreaView,
   StatusBar,
-  TextInput,
   KeyboardAvoidingView,
 } from 'react-native';
+import { Text, TextInput } from '../components/ui/AppText';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as Haptics from 'expo-haptics';
 import Svg, { Path, Circle, Rect } from 'react-native-svg';
@@ -22,6 +21,17 @@ import { UserProfileModal, UserProfileData } from '../components/UserProfileModa
 import { AnimatedCompletionModal } from '../components/AnimatedCompletionModal';
 import { FreeAppHeader } from '../components/FreeAppHeader';
 import { sFont, sPadding, isNarrowScreen } from '../utils/responsive';
+import Reanimated, { FadeInUp } from 'react-native-reanimated';
+import * as Clipboard from 'expo-clipboard';
+import { GlassBackdrop } from '../components/glass/GlassBackdrop';
+import { GlassCard } from '../components/glass/GlassCard';
+import { FitLines } from '../components/ui/FitLines';
+import { AppButton } from '../components/ui/AppButton';
+import { JarvisOrb } from '../components/JarvisOrb';
+import { ScriptTimeline, PartCard, ReadThrough, secondsFor, type PartKey } from '../components/script/ScriptBlocks';
+import { ComposerToast } from '../components/composer/ComposerBlocks';
+import { saveDraft } from '../data';
+import { ds } from '../theme/colors';
 
 interface ScriptScreenProps {
   ideaTitle?: string;
@@ -32,9 +42,12 @@ interface ScriptScreenProps {
   onOpenJarvisPro?: () => void;
   onNavigateTab?: (tab: TabType) => void;
   onUseAsPost?: (scriptData: { hook: string; body: string; takeaway: string; cta: string }) => void;
-  onOpenMessages?: () => void;
   userProfile?: UserProfileData;
   onSaveProfile?: (updated: UserProfileData) => void;
+  /** Pro members: unlimited rewrites and "Make a voiceover". */
+  tier?: 'free' | 'pro';
+  onSwitchToFree?: () => void;
+  onOpenVoiceStudio?: (script: string, title: string) => void;
 }
 
 export const getFormatDurationLabel = (format?: string, title?: string): string => {
@@ -42,16 +55,16 @@ export const getFormatDurationLabel = (format?: string, title?: string): string 
   const t = (title || '').toLowerCase();
 
   if (f.includes('carousel') || t.includes('carousel') || t.includes('slide') || f === 'carousel') {
-    return '🖼️ 6–8 slides • Carousel';
+    return '6–8 slides · Carousel';
   }
   if (f.includes('long') || f.includes('youtube') || t.includes('tutorial') || t.includes('deep dive') || f === 'long_video') {
-    return '🎬 3–5 min • Long-form';
+    return '3–5 min · Long-form';
   }
   if (f.includes('text') || f.includes('thread') || t.includes('thread') || t.includes('essay') || f === 'text') {
-    return '📝 Text-first • Thread';
+    return 'Text-first · Thread';
   }
   // Default to short video / reel / tiktok
-  return '🎬 30–45 sec • Short-form';
+  return '30–45 sec · Short-form';
 };
 
 interface NotificationItem {
@@ -79,7 +92,7 @@ const NOTIFICATIONS: NotificationItem[] = [
   {
     id: 'n2',
     title: 'Streak Saver Ready',
-    body: "Convert today's idea into a post to keep your 1-day streak.",
+    body: "Convert today's idea into a post to kick off your creator streak.",
     time: '2h ago',
     unread: true,
     iconEmoji: '🔥',
@@ -90,27 +103,27 @@ const NOTIFICATIONS: NotificationItem[] = [
 
 const HOOK_PRESETS = [
   {
-    type: '🔥 Negative Hook',
+    type: 'Mistake to avoid',
     text: 'Stop making this mistake if you want to stay consistent as a creator.',
-    desc: 'Triggers loss aversion & immediate scroll stopping.',
+    desc: 'Stops the scroll by naming a common mistake.',
   },
   {
-    type: '❓ Curiosity Gap',
+    type: 'Make them curious',
     text: "If you're struggling to post daily, read this.",
     desc: 'Creates an open loop that viewers need to resolve.',
   },
   {
-    type: '💡 Unpopular Truth',
+    type: 'Hot take',
     text: 'The truth about consistency that nobody tells you.',
     desc: 'Positions you as a candid, trusted insider.',
   },
   {
-    type: '⚡ High Urgency',
-    text: 'Why 90% of creators quit before month 2 (and how to avoid it).',
-    desc: 'High retention stat hook for talking-head videos.',
+    type: 'Honest truth',
+    text: 'Nobody talks about how hard the first month of posting is.',
+    desc: 'Relatable and honest, great for talking-head videos.',
   },
   {
-    type: '🎯 Relatable Story',
+    type: 'Relatable Story',
     text: 'I almost gave up posting until I discovered this 1 simple rule.',
     desc: 'Builds empathy and vulnerability right away.',
   },
@@ -119,32 +132,32 @@ const HOOK_PRESETS = [
 const BODY_PRESETS = [
   {
     id: 'original',
-    title: 'Standard Pacing (30s)',
+    title: 'Balanced (30s)',
     tag: 'Balanced',
     text: "We always think we need a massive content plan to start. But in reality, all you need is a lesson you learned yesterday. Most creators overthink the 'Big Idea' and miss the daily progress...",
   },
   {
     id: 'shorter',
     title: 'Short & Punchy (20s)',
-    tag: '⚡ Retention',
+    tag: 'Retention',
     text: 'Stop overthinking massive content plans. All you need is one small lesson you learned yesterday. Consistency comes from daily sharing, not waiting for perfection.',
   },
   {
     id: 'personal',
     title: 'Personal Story (35-45s)',
-    tag: '🎙 Relatable',
+    tag: 'Relatable',
     text: "When I first started, I used to wait days for the 'perfect idea'. That held me back for months. Once I switched to sharing raw lessons from my daily work, everything unlocked.",
   },
   {
     id: 'energetic',
     title: 'More Punchy (25s)',
-    tag: '⚡ Punchy',
+    tag: 'Punchy',
     text: 'Here is the secret top creators do not tell you: massive content plans are a trap! Share the real lesson you figured out yesterday. Speed beats perfection every single time!',
   },
   {
     id: 'stepbystep',
-    title: '3-Step Framework (45s)',
-    tag: '📑 High Saves',
+    title: '3 simple steps (45s)',
+    tag: 'High Saves',
     text: 'Step 1: Document what worked today. Step 2: Extract the single most useful takeaway. Step 3: Record in one raw take. That is how you never run out of ideas.',
   },
 ];
@@ -153,19 +166,19 @@ const LESSON_PRESETS = [
   {
     id: 'lesson_1',
     title: 'Actionable Rule',
-    tag: '⭐ Recommended',
+    tag: 'Recommended',
     text: 'Stop waiting for perfect ideas. Share the useful lessons you learn every day.',
   },
   {
     id: 'lesson_2',
     title: 'Mindset Shift',
-    tag: '🧠 Perspective',
+    tag: 'Perspective',
     text: "You don't need 100k followers to give value—you just need to share what helped you yesterday.",
   },
   {
     id: 'lesson_3',
-    title: 'Execution Golden Rule',
-    tag: '⚡ Speed First',
+    title: 'Speed first',
+    tag: 'Speed First',
     text: 'Done and posted beats perfect and unpublished every single day.',
   },
 ];
@@ -204,31 +217,31 @@ const TAKEAWAY_QUICK_ACTIONS = [
 const CTA_PRESETS = [
   {
     id: 'cta_1',
-    type: '💬 Conversation Starter',
+    type: 'Start a chat',
     text: 'What is one creator habit that helped you stay consistent?',
     goal: 'Boosts comments & algorithm rank',
   },
   {
     id: 'cta_2',
-    type: '💾 High Saves Prompt',
+    type: 'Get saves',
     text: 'Save this post so you have it ready for your next filming session.',
     goal: 'Maximizes saves & bookmarks',
   },
   {
     id: 'cta_3',
-    type: '📥 Lead Magnet / DM',
+    type: 'Comment for a freebie',
     text: 'Comment "GROWTH" and I will send you my daily batch-filming checklist!',
     goal: 'Drives direct inbound leads',
   },
   {
     id: 'cta_4',
-    type: '🔥 Quick Choice',
+    type: 'Quick Choice',
     text: 'Which of these 3 tips are you trying first this week?',
     goal: 'Low friction comment barrier',
   },
   {
     id: 'cta_5',
-    type: '👥 Share Trigger',
+    type: 'Get shares',
     text: 'Send this to a creator friend who needs to hear this today.',
     goal: 'Expands virality via DMs',
   },
@@ -243,10 +256,11 @@ export const ScriptScreen: React.FC<ScriptScreenProps> = ({
   onOpenJarvisPro,
   onNavigateTab,
   onUseAsPost,
-  onOpenMessages,
-
   userProfile,
   onSaveProfile,
+  tier = 'free',
+  onSwitchToFree,
+  onOpenVoiceStudio,
 }) => {
   const isDark = false;
   const [activeTab, setActiveTab] = useState<TabType>('create');
@@ -256,7 +270,9 @@ export const ScriptScreen: React.FC<ScriptScreenProps> = ({
 
   // Live-Editable Script Components State
   const [selectedHook, setSelectedHook] = useState(HOOK_PRESETS[0].text);
-  const [editsLeft, setEditsLeft] = useState(2);
+  const isPro = tier === 'pro';
+  const [freeEdits, setEditsLeft] = useState(2);
+  const editsLeft = isPro ? Infinity : freeEdits;
   const [bodyText, setBodyText] = useState(BODY_PRESETS[0].text);
   const [selectedBodyPresetId, setSelectedBodyPresetId] = useState('original');
   const [takeawayText, setTakeawayText] = useState(LESSON_PRESETS[0].text);
@@ -273,11 +289,10 @@ export const ScriptScreen: React.FC<ScriptScreenProps> = ({
   // General App Modals & Celebrations
   const [showNotificationModal, setShowNotificationModal] = useState(false);
   const [showProfileModal, setShowProfileModal] = useState(false);
-  const [showChatModal, setShowChatModal] = useState(false);
   const [showCelebrationModal, setShowCelebrationModal] = useState(false);
   const [celebrationTitle, setCelebrationTitle] = useState('Script Ready!');
   const [celebrationSubtitle, setCelebrationSubtitle] = useState('Your full video script is formatted and ready for filming.');
-  const [celebrationSpeech, setCelebrationSpeech] = useState('1-day streak protected! +40 XP earned.');
+  const [celebrationSpeech, setCelebrationSpeech] = useState('Day 1 script ready! +40 XP earned.');
   const [celebrationBadge, setCelebrationBadge] = useState('SCRIPT CRAFTED');
 
   const [notificationsList, setNotificationsList] = useState<NotificationItem[]>(NOTIFICATIONS);
@@ -417,7 +432,7 @@ export const ScriptScreen: React.FC<ScriptScreenProps> = ({
         'Stop waiting for inspiration—here is how to post daily effortlessly.',
         'The 60-second routine that made content creation simple.',
         'How 1 simple switch completely fixed my creator burnout.',
-        'The reason 90% of creators struggle to post consistently.',
+        'The real reason posting consistently feels so hard.',
       ];
       setSelectedHook(aiHooks[Math.floor(Math.random() * aiHooks.length)]);
     } else if (activeScriptPhase === 'body') {
@@ -438,7 +453,7 @@ export const ScriptScreen: React.FC<ScriptScreenProps> = ({
       const aiCtas = [
         'Which part of this resonates most with your creator journey?',
         'Share this with a creator who is struggling to stay consistent.',
-        'Drop a 🔥 in the comments if you needed this reminder today!',
+        'Tell me in the comments if you needed this reminder today.',
       ];
       setSelectedCtaText(aiCtas[Math.floor(Math.random() * aiCtas.length)]);
     }
@@ -483,7 +498,7 @@ export const ScriptScreen: React.FC<ScriptScreenProps> = ({
 
     setCelebrationTitle('Script Copied!');
     setCelebrationSubtitle('Full script copied to clipboard and ready for your teleprompter or notes.');
-    setCelebrationSpeech('1-day streak protected! +40 XP added.');
+    setCelebrationSpeech('Day 1 script saved! +40 XP added.');
     setCelebrationBadge('COPIED TO CLIPBOARD');
     setShowCelebrationModal(true);
   };
@@ -515,6 +530,99 @@ export const ScriptScreen: React.FC<ScriptScreenProps> = ({
 
   const unreadNotifCount = notificationsList.filter((n) => n.unread).length;
 
+  // ── New script page helpers ──────────────────────────────────────────────
+  const [toast, setToast] = useState<string | null>(null);
+  const showToast = (msg: string) => {
+    setToast(msg);
+    setTimeout(() => setToast((t) => (t === msg ? null : t)), 2400);
+  };
+  const [rewritingPart, setRewritingPart] = useState<PartKey | null>(null);
+  const [justSaved, setJustSaved] = useState(false);
+  const saveScriptDraft = () => {
+    saveDraft({ id: `script-${ideaTitle}`, title: ideaTitle, kind: 'script', format: 'Script' });
+    if (Platform.OS !== 'web') Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    setJustSaved(true);
+    showToast('Saved to drafts. Find it on Create.');
+    setTimeout(() => setJustSaved(false), 2200);
+  };
+  const partRefs = useRef<{ [k: string]: View | null }>({});
+  const scrollRef = useRef<ScrollView>(null);
+
+  const jumpTo = (k: PartKey) => {
+    const target = partRefs.current[k];
+    const sv = scrollRef.current as (ScrollView & { getInnerViewRef?: () => unknown; getInnerViewNode?: () => unknown }) | null;
+    const content = sv?.getInnerViewRef?.() ?? sv?.getInnerViewNode?.();
+    if (target && sv && content) {
+      target.measureLayout(content as never, (_x, y) => sv.scrollTo({ y: Math.max(0, y - 12), animated: true }), () => {});
+    }
+  };
+
+  // Rewrite one part with Jarvis (uses an edit), with a short thinking beat
+  const rewritePart = (k: PartKey) => {
+    if (editsLeft <= 0) {
+      onOpenJarvisPro?.();
+      return;
+    }
+    setActiveScriptPhase(k);
+    setRewritingPart(k);
+    setTimeout(() => {
+      const pools: Record<PartKey, string[]> = {
+        hook: [
+          'Stop waiting for inspiration. Here is how to post without overthinking.',
+          'The 60-second routine that made content creation simple.',
+          'How one small switch fixed my creator burnout.',
+          'The real reason posting consistently feels so hard.',
+        ],
+        body: [
+          'Creators stall because posting feels complicated. Break your idea into one problem, one shift and one action. That takes ten minutes to film.',
+          'I used to spend three hours on one short video. Then I switched to one raw, single-take lesson. It got easier, and people liked it more.',
+          'Consistency comes from making it easy to start. Share the work you are already doing instead of brainstorming from scratch.',
+        ],
+        lesson: [
+          'Share real progress, not perfect expertise.',
+          'Small, regular posts build more than one lucky viral hit.',
+          'Post today and improve tomorrow.',
+        ],
+        cta: [
+          'Which part of this sounds like you?',
+          'Send this to a creator who needs it today.',
+          'Tell me in the comments if you needed this reminder.',
+        ],
+      };
+      const pool = pools[k];
+      const pick = pool[Math.floor(Math.random() * pool.length)];
+      if (k === 'hook') setSelectedHook(pick);
+      else if (k === 'body') setBodyText(pick);
+      else if (k === 'lesson') setTakeawayText(pick);
+      else setSelectedCtaText(pick);
+      setEditsLeft((e) => Math.max(0, e - 1));
+      setRewritingPart(null);
+      if (Platform.OS !== 'web') Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    }, 700);
+  };
+
+  const copyScript = async () => {
+    const text = [
+      `HOOK:\n${selectedHook}`,
+      `BODY:\n${bodyText}`,
+      ...(takeawayText.trim() ? [`KEY LESSON:\n${takeawayText.trim()}`] : []),
+      `ASK VIEWERS:\n${selectedCtaText}`,
+    ].join('\n\n');
+    try {
+      await Clipboard.setStringAsync(text);
+      showToast('Script copied. Paste it into your notes or teleprompter.');
+    } catch {
+      showToast('Couldn’t copy. Try again.');
+    }
+  };
+
+  const parts = [
+    { key: 'hook' as PartKey, label: 'Hook', seconds: secondsFor(selectedHook) },
+    { key: 'body' as PartKey, label: 'Body', seconds: secondsFor(bodyText) },
+    ...(takeawayText.trim() ? [{ key: 'lesson' as PartKey, label: 'Lesson', seconds: secondsFor(takeawayText) }] : []),
+    { key: 'cta' as PartKey, label: 'Ask', seconds: secondsFor(selectedCtaText) },
+  ];
+
   return (
     <SafeAreaView style={[styles.safeArea, isDark && { backgroundColor: '#0C0A12' }]}>
       <StatusBar barStyle={isDark ? "light-content" : "dark-content"} backgroundColor={isDark ? "#0C0A12" : "#FAF8F5"} />
@@ -523,18 +631,13 @@ export const ScriptScreen: React.FC<ScriptScreenProps> = ({
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       >
         <View style={[styles.container, isDark && { backgroundColor: '#0C0A12' }]}>
+          <GlassBackdrop />
           {/* 1. TOP AIRY HEADER BAR */}
           <FreeAppHeader
+            backgroundColor="transparent"
             onBack={onBack}
             onOpenJarvisPro={onOpenJarvisPro}
-            onOpenMessages={() => {
-              if (onOpenMessages) {
-                onOpenMessages();
-              } else {
-                triggerModalAnim();
-                setShowChatModal(true);
-              }
-            }}
+            onSwitchToFree={onSwitchToFree}
             onOpenNotifications={() => {
               triggerModalAnim();
               setShowNotificationModal(true);
@@ -550,567 +653,173 @@ export const ScriptScreen: React.FC<ScriptScreenProps> = ({
 
           {/* 2. MAIN SCROLLABLE CONTENT */}
           <ScrollView
+            ref={scrollRef}
             contentContainerStyle={styles.scrollContent}
             showsVerticalScrollIndicator={false}
             bounces={true}
             keyboardShouldPersistTaps="handled"
             keyboardDismissMode="on-drag"
           >
-            {/* Top Pill Badge */}
-            <View style={styles.topBadgesRow}>
-              <View style={styles.freeScriptPill}>
-                <Text style={styles.freeScriptPillText}>Free Script Tool</Text>
-              </View>
+            {/* HEADLINE — same two-line structure on every screen size */}
+            <Reanimated.View entering={FadeInUp.duration(500)} style={styles.headline}>
+              <FitLines
+                lines={['Turn your idea', <Text key="s" style={styles.headlineAccent}>into a script</Text>]}
+                textStyle={styles.headlineText}
+                maxFontSize={34}
+                align="left"
+                accessibilityLabel="Turn your idea into a script"
+              />
+            </Reanimated.View>
+
+            {/* IDEA */}
+            <Reanimated.View entering={FadeInUp.delay(80).duration(500)}>
+              <GlassCard strong radius={24} padding={16}>
+                <View style={styles.ideaTop}>
+                  <JarvisOrb size={24} />
+                  <Text style={styles.ideaEyebrow}>YOUR IDEA</Text>
+                </View>
+                <Text style={styles.ideaTitle}>“{ideaTitle}”</Text>
+                <View style={styles.durationChip}>
+                  <Text style={styles.durationText}>{getFormatDurationLabel(format, ideaTitle)}</Text>
+                </View>
+              </GlassCard>
+            </Reanimated.View>
+
+            {/* TIMELINE */}
+            <Reanimated.View entering={FadeInUp.delay(160).duration(500)} style={styles.section}>
+              <ScriptTimeline parts={parts} onJump={jumpTo} />
+            </Reanimated.View>
+
+
+            {/* PARTS */}
+            <View style={styles.partsStack}>
+              <PartCard
+                n={1}
+                partKey="hook"
+                title="Hook"
+                hint="The first 3 seconds: make them stop scrolling"
+                value={selectedHook}
+                onChange={setSelectedHook}
+                options={HOOK_PRESETS.map((h) => ({ label: h.type, text: h.text }))}
+                onPickOption={(t) => {
+                  setSelectedHook(t);
+                  showToast('Hook swapped');
+                }}
+                rewriting={rewritingPart === 'hook'}
+                editsLeft={editsLeft}
+                onRewrite={() => rewritePart('hook')}
+                viewRef={(v) => (partRefs.current.hook = v)}
+              />
+              <PartCard
+                n={2}
+                partKey="body"
+                title="Body"
+                hint="The story or tips, in your own words"
+                value={bodyText}
+                onChange={setBodyText}
+                options={BODY_PRESETS.map((b) => ({ label: b.title, text: b.text }))}
+                onPickOption={(t) => {
+                  setBodyText(t);
+                  showToast('Body swapped');
+                }}
+                rewriting={rewritingPart === 'body'}
+                editsLeft={editsLeft}
+                onRewrite={() => rewritePart('body')}
+                viewRef={(v) => (partRefs.current.body = v)}
+              />
+              <PartCard
+                n={3}
+                partKey="lesson"
+                title="Key lesson"
+                optional
+                hint="One line people will remember"
+                value={takeawayText}
+                onChange={setTakeawayText}
+                options={LESSON_PRESETS.map((l) => ({ label: l.title, text: l.text }))}
+                onPickOption={(t) => {
+                  setTakeawayText(t);
+                  showToast('Lesson swapped');
+                }}
+                rewriting={rewritingPart === 'lesson'}
+                editsLeft={editsLeft}
+                onRewrite={() => rewritePart('lesson')}
+                viewRef={(v) => (partRefs.current.lesson = v)}
+              />
+              <PartCard
+                n={4}
+                partKey="cta"
+                title="Ask viewers"
+                hint="End with one thing for them to do"
+                value={selectedCtaText}
+                onChange={setSelectedCtaText}
+                options={CTA_PRESETS.map((c) => ({ label: c.type, text: c.text }))}
+                onPickOption={(t) => {
+                  setSelectedCtaText(t);
+                  showToast('Ending swapped');
+                }}
+                rewriting={rewritingPart === 'cta'}
+                editsLeft={editsLeft}
+                onRewrite={() => rewritePart('cta')}
+                viewRef={(v) => (partRefs.current.cta = v)}
+              />
             </View>
 
-            {/* Main Title */}
-            <Text style={styles.mainTitle}>Turn your idea into a script.</Text>
-
-            {/* 1. SELECTED IDEA CARD */}
-            <View style={styles.selectedIdeaCard}>
-              <View style={styles.selectedIdeaHeaderRow}>
-                <Text style={styles.selectedIdeaLabel}>SELECTED IDEA</Text>
-                <Text style={styles.selectedIdeaDuration}>
-                  {getFormatDurationLabel(format, ideaTitle)}
-                </Text>
-              </View>
-
-              <Text style={styles.selectedIdeaTitle}>&ldquo;{ideaTitle}&rdquo;</Text>
-
-              <View style={styles.selectedIdeaTagsRow}>
-                <View style={styles.ideaTagPill}>
-                  <Text style={styles.ideaTagPillText}>Personal Lesson</Text>
-                </View>
-                <View style={styles.ideaTagPill}>
-                  <Text style={styles.ideaTagPillText}>Creator Advice</Text>
-                </View>
-                <View style={styles.streakSaverPill}>
-                  <Text style={styles.streakSaverPillText}>Streak Saver</Text>
-                </View>
-              </View>
+            {/* READ-THROUGH */}
+            <View style={styles.section}>
+              <ReadThrough
+                parts={[
+                  { label: 'Hook', text: selectedHook },
+                  { label: 'Body', text: bodyText },
+                  { label: 'Key lesson', text: takeawayText },
+                  { label: 'Ask viewers', text: selectedCtaText },
+                ]}
+                onCopy={copyScript}
+              />
             </View>
 
-            {/* 2. SCRIPT PHASE TABS (SWITCHES ACTIVE STUDIO PHASE) */}
-            <View style={styles.phaseTabsRow}>
-              {[
-                { id: 'hook', emoji: '⚓', label: 'HOOK' },
-                { id: 'body', emoji: '📑', label: 'BODY' },
-                { id: 'lesson', emoji: '💡', label: 'LESSON' },
-                { id: 'cta', emoji: '📢', label: 'CTA' },
-              ].map((tab) => {
-                const isActive = activeScriptPhase === tab.id;
-                return (
-                  <Pressable
-                    key={tab.id}
-                    onPress={() => {
-                      if (Platform.OS !== 'web') {
-                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                      }
-                      setActiveScriptPhase(tab.id as 'hook' | 'body' | 'lesson' | 'cta');
-                    }}
-                    style={({ pressed }) => [
-                      styles.phaseTabBtn,
-                      isActive && styles.phaseTabBtnPrimary,
-                      pressed && styles.btnPressed,
-                    ]}
-                  >
-                    <View style={styles.phaseTabInnerRow}>
-                      <Text style={styles.phaseTabEmoji}>{tab.emoji}</Text>
-                      <Text
-                        style={[
-                          styles.phaseTabBtnText,
-                          isActive && styles.phaseTabBtnTextPrimary,
-                        ]}
-                      >
-                        {tab.label}
-                      </Text>
-                    </View>
-                  </Pressable>
-                );
-              })}
-            </View>
-
-            {/* 3. DYNAMIC SCRIPT STUDIO CARD (AFFECTED BY ACTIVE TAB) */}
-            <View style={styles.sectionCard}>
-              <View style={styles.sectionHeaderRow}>
-                <View style={styles.sectionTitleGroup}>
-                  <Text style={styles.sectionIcon}>
-                    {activeScriptPhase === 'hook' && '⚓'}
-                    {activeScriptPhase === 'body' && '📑'}
-                    {activeScriptPhase === 'lesson' && '💡'}
-                    {activeScriptPhase === 'cta' && '📢'}
-                  </Text>
-                  <Text style={styles.sectionTitle}>
-                    {activeScriptPhase === 'hook' && 'Hook'}
-                    {activeScriptPhase === 'body' && 'Body'}
-                    {activeScriptPhase === 'lesson' && 'Lesson'}
-                    {activeScriptPhase === 'cta' && 'Call to Action'}
-                  </Text>
-                  <Text style={styles.editableHintMicro}>Editable</Text>
-                </View>
-
-                {/* Subtle Quota Badge (Doesn't Compete with Hook) */}
-                <Pressable
-                  onPress={() => {
-                    if (onOpenJarvisPro) onOpenJarvisPro();
-                  }}
-                  hitSlop={8}
-                >
-                  <View style={styles.editsBadge}>
-                    <Text style={styles.editsBadgeText}>⚡ {editsLeft} edits left</Text>
-                  </View>
-                </Pressable>
-              </View>
-
-              {/* Current Selected Component (Visually Clear & Distinct) */}
-              <View style={styles.activePhaseContainer}>
-                <Text style={styles.currentSectionLabel}>
-                  CURRENT {activeScriptPhase === 'lesson' ? 'LESSON' : activeScriptPhase === 'cta' ? 'CTA' : activeScriptPhase.toUpperCase()}
-                </Text>
-                <View style={styles.activeHookBox}>
-                  {activeScriptPhase === 'hook' && (
-                    <TextInput
-                      value={selectedHook}
-                      onChangeText={setSelectedHook}
-                      placeholder="Type your hook..."
-                      placeholderTextColor="#94A3B8"
-                      multiline
-                      scrollEnabled={false}
-                      style={styles.hookInput}
-                    />
-                  )}
-                  {activeScriptPhase === 'body' && (
-                    <TextInput
-                      value={bodyText}
-                      onChangeText={setBodyText}
-                      placeholder="Write or customize script body..."
-                      placeholderTextColor="#94A3B8"
-                      multiline
-                      scrollEnabled={false}
-                      style={styles.bodyInput}
-                    />
-                  )}
-                  {activeScriptPhase === 'lesson' && (
-                    <TextInput
-                      value={takeawayText}
-                      onChangeText={setTakeawayText}
-                      placeholder="Type takeaway lesson..."
-                      placeholderTextColor="#94A3B8"
-                      multiline
-                      scrollEnabled={false}
-                      style={styles.takeawayInput}
-                    />
-                  )}
-                  {activeScriptPhase === 'cta' && (
-                    <TextInput
-                      value={selectedCtaText}
-                      onChangeText={setSelectedCtaText}
-                      placeholder="Type call to action..."
-                      placeholderTextColor="#94A3B8"
-                      multiline
-                      scrollEnabled={false}
-                      style={styles.ctaInput}
-                    />
-                  )}
-                </View>
-              </View>
-
-              {/* Action Toolbar for Current Phase */}
-              <View style={styles.studioActionRow}>
-                <Pressable
-                  style={({ pressed }) => [styles.aiRewriteBtn, pressed && styles.btnPressed]}
-                  onPress={handleAiRewriteCurrentPhase}
-                >
-                  <Text style={styles.aiRewriteBtnText} numberOfLines={1} ellipsizeMode="tail">
-                    ✨ Rewrite · 1 edit
-                  </Text>
-                </Pressable>
-                <Pressable
-                  style={({ pressed }) => [styles.studioModalBtn, pressed && styles.btnPressed]}
-                  onPress={() => handleOpenPhaseModal(activeScriptPhase)}
-                >
-                  <Text style={styles.studioModalBtnText}>Studio ➔</Text>
-                </Pressable>
-              </View>
-
-              {/* Alternatives Sub-header with Free Swap clarification */}
-              <View style={styles.altHeaderRow}>
-                <Text style={styles.alternativeHooksLabel}>
-                  ALTERNATIVE {activeScriptPhase === 'body' ? 'BODY STYLES' : activeScriptPhase === 'lesson' ? 'LESSONS' : activeScriptPhase === 'cta' ? 'CTAs' : 'HOOKS'}
-                </Text>
-                <View style={styles.freeBadgeMicro}>
-                  <Text style={styles.freeBadgeMicroText}>FREE SWAP</Text>
-                </View>
-              </View>
-
-              {/* Dynamic Alternatives List based on active tab */}
-              {activeScriptPhase === 'hook' && (
-                <View style={styles.altListContainer}>
-                  {HOOK_PRESETS.filter((h) => h.text !== selectedHook).slice(0, 3).map((hookItem, i) => (
-                    <Pressable
-                      key={i}
-                      onPress={() => {
-                        if (Platform.OS !== 'web') {
-                          Haptics.selectionAsync();
-                        }
-                        setSelectedHook(hookItem.text);
-                      }}
-                      style={styles.altHookBox}
-                    >
-                      <Text style={styles.altHookType}>{hookItem.type}</Text>
-                      <Text style={styles.altHookText}>&ldquo;{hookItem.text}&rdquo;</Text>
-                    </Pressable>
-                  ))}
-                </View>
-              )}
-
-              {activeScriptPhase === 'body' && (
-                <View style={styles.altListContainer}>
-                  {BODY_PRESETS.filter((b) => b.text !== bodyText).slice(0, 3).map((bodyItem) => (
-                    <Pressable
-                      key={bodyItem.id}
-                      onPress={() => {
-                        if (Platform.OS !== 'web') {
-                          Haptics.selectionAsync();
-                        }
-                        handleApplyBodyFromModal(bodyItem);
-                      }}
-                      style={styles.altHookBox}
-                    >
-                      <Text style={styles.altHookType}>📑 {bodyItem.title} • {bodyItem.tag}</Text>
-                      <Text style={styles.altHookText}>&ldquo;{bodyItem.text}&rdquo;</Text>
-                    </Pressable>
-                  ))}
-                </View>
-              )}
-
-              {activeScriptPhase === 'lesson' && (
-                <View style={styles.altListContainer}>
-                  {LESSON_PRESETS.filter((l) => l.text !== takeawayText).map((lessonItem) => (
-                    <Pressable
-                      key={lessonItem.id}
-                      onPress={() => {
-                        if (Platform.OS !== 'web') {
-                          Haptics.selectionAsync();
-                        }
-                        handleApplyLessonFromModal(lessonItem);
-                      }}
-                      style={styles.altHookBox}
-                    >
-                      <Text style={styles.altHookType}>💡 {lessonItem.title} • {lessonItem.tag}</Text>
-                      <Text style={styles.altHookText}>&ldquo;{lessonItem.text}&rdquo;</Text>
-                    </Pressable>
-                  ))}
-                </View>
-              )}
-
-              {activeScriptPhase === 'cta' && (
-                <View style={styles.altListContainer}>
-                  {CTA_PRESETS.filter((c) => c.text !== selectedCtaText).slice(0, 3).map((ctaItem) => (
-                    <Pressable
-                      key={ctaItem.id}
-                      onPress={() => {
-                        if (Platform.OS !== 'web') {
-                          Haptics.selectionAsync();
-                        }
-                        handleApplyCtaFromModal(ctaItem);
-                      }}
-                      style={styles.altHookBox}
-                    >
-                      <Text style={styles.altHookType}>{ctaItem.type}</Text>
-                      <Text style={styles.altHookText}>&ldquo;{ctaItem.text}&rdquo;</Text>
-                    </Pressable>
-                  ))}
-                </View>
-              )}
-            </View>
-
-            {/* 4. BODY CARD (LIVE-EDITABLE MULTILINE) */}
-            <View style={styles.sectionCard}>
-              <View style={styles.sectionHeaderRow}>
-                <View style={styles.sectionTitleGroup}>
-                  <Text style={styles.sectionIcon}>📑</Text>
-                  <Text style={styles.sectionTitle}>Body</Text>
-                  <Text style={styles.editableHintMicro}>Editable</Text>
-                </View>
-                <Pressable onPress={() => handleOpenPhaseModal('body')} hitSlop={8}>
-                  <Text style={styles.editSectionLink}>Studio ➔</Text>
-                </Pressable>
-              </View>
-
-              {/* Body Content Box */}
-              <View style={styles.bodyContentBox}>
-                <TextInput
-                  value={bodyText}
-                  onChangeText={setBodyText}
-                  placeholder="Write or customize script body..."
-                  placeholderTextColor="#94A3B8"
-                  multiline
-                  scrollEnabled={false}
-                  style={styles.bodyInput}
-                />
-              </View>
-
-              {/* Intentional AI Quick Edits Toolbar */}
-              <View style={styles.bodyQuickActionsRow}>
-                {[
-                  { id: 'shorter', icon: '✨', label: 'Shorter' },
-                  { id: 'personal', icon: '👤', label: 'Personal' },
-                  { id: 'energetic', icon: '⚡', label: 'Punchy' },
-                ].map((chip) => {
-                  const isActive = selectedBodyPresetId === chip.id;
-                  return (
-                    <Pressable
-                      key={chip.id}
-                      onPress={() => {
-                        if (Platform.OS !== 'web') {
-                          Haptics.selectionAsync();
-                        }
-                        if (isActive) {
-                          setSelectedBodyPresetId('original');
-                          setBodyText(BODY_PRESETS[0].text);
-                        } else {
-                          const found = BODY_PRESETS.find((p) => p.id === chip.id);
-                          if (found) {
-                            handleApplyBodyFromModal(found);
-                          }
-                        }
-                      }}
-                      style={({ pressed }) => [
-                        styles.bodyQuickActionChip,
-                        isActive && styles.bodyQuickActionChipActive,
-                        pressed && styles.btnPressed,
-                      ]}
-                    >
-                      <Text style={styles.bodyQuickActionIcon}>{chip.icon}</Text>
-                      <Text
-                        style={[
-                          styles.bodyQuickActionText,
-                          isActive && styles.bodyQuickActionTextActive,
-                        ]}
-                        numberOfLines={1}
-                      >
-                        {chip.label}
-                      </Text>
-                    </Pressable>
-                  );
-                })}
-              </View>
-            </View>
-
-            {/* 5. JARVIS CREATIVE ASSISTANT BANNER */}
-            <LinearGradient
-              colors={['#582CDB', '#431FA8']}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 1 }}
-              style={styles.jarvisBannerCard}
-            >
-              <View style={styles.jarvisBannerHeaderRow}>
-                <View style={styles.jarvisBannerFlameRing}>
-                  <Image
-                    source={require('../../assets/images/jarvis-core-flame.png')}
-                    style={styles.jarvisBannerFlame}
-                    resizeMode="contain"
-                  />
-                </View>
-                <Text style={styles.jarvisBannerText}>
-                  Keep your script focused on one clear lesson.{"\n"}Make it easy to remember — and worth saving.
-                </Text>
-              </View>
-
-              <View style={styles.jarvisBannerChipsRow}>
-                <Pressable
-                  style={({ pressed }) => [styles.jarvisBannerChip, pressed && styles.btnPressed]}
-                  onPress={() => handleOpenPhaseModal('hook')}
-                >
-                  <Text style={styles.jarvisBannerChipText}>Improve Hook ➔</Text>
-                </Pressable>
-                <Pressable
-                  style={({ pressed }) => [styles.jarvisBannerChip, pressed && styles.btnPressed]}
-                  onPress={() => handleOpenPhaseModal('body')}
-                >
-                  <Text style={styles.jarvisBannerChipText}>Make More Personal ➔</Text>
-                </Pressable>
-              </View>
-            </LinearGradient>
-
-            {/* 6. KEY LESSON CARD (LIVE-EDITABLE, OPTIONAL) */}
-            <View style={styles.sectionCard}>
-              <View style={styles.sectionHeaderRow}>
-                <View style={styles.sectionTitleGroup}>
-                  <Text style={styles.sectionIcon}>💡</Text>
-                  <Text style={styles.sectionTitle}>Key Lesson</Text>
-                  <Text style={styles.editableHintMicro}>Optional</Text>
-                </View>
-              </View>
-
-              <View style={styles.takeawayBox}>
-                <TextInput
-                  value={takeawayText}
-                  onChangeText={setTakeawayText}
-                  placeholder="Type the 1 core lesson to remember (or leave blank)..."
-                  placeholderTextColor="#94A3B8"
-                  multiline
-                  scrollEnabled={false}
-                  style={styles.takeawayInput}
-                />
-              </View>
-
-              <View style={styles.takeawayActionRow}>
-                <Pressable
-                  style={({ pressed }) => [styles.improveTakeawayBtn, pressed && styles.btnPressed]}
-                  onPress={() => handleOpenPhaseModal('lesson')}
-                >
-                  <Text style={styles.improveTakeawayBtnText}>Improve Key Lesson ➔</Text>
-                </Pressable>
-              </View>
-            </View>
-
-            {/* 7. CALL TO ACTION CARD (LIVE-EDITABLE) */}
-            <View style={styles.sectionCard}>
-              <View style={styles.sectionHeaderRow}>
-                <View style={styles.sectionTitleGroup}>
-                  <Text style={styles.sectionIcon}>📢</Text>
-                  <Text style={styles.sectionTitle}>Call to Action</Text>
-                  <Text style={styles.editableHintMicro}>Editable</Text>
-                </View>
-                <Pressable onPress={() => handleOpenPhaseModal('cta')} hitSlop={8}>
-                  <Text style={styles.editSectionLink}>Browse All ➔</Text>
-                </Pressable>
-              </View>
-
-              <View style={styles.ctaContentBox}>
-                <TextInput
-                  value={selectedCtaText}
-                  onChangeText={setSelectedCtaText}
-                  placeholder="Type call to action..."
-                  placeholderTextColor="#94A3B8"
-                  multiline
-                  scrollEnabled={false}
-                  style={styles.ctaInput}
-                />
-              </View>
-
-              <View style={styles.ctaActionRow}>
-                <Pressable
-                  style={({ pressed }) => [styles.useCtaBtn, pressed && styles.btnPressed]}
-                  onPress={() => handleOpenPhaseModal('cta')}
-                >
-                  <Text style={styles.useCtaBtnText}>USE CTA</Text>
-                </Pressable>
-
-                <Pressable
-                  style={({ pressed }) => [styles.shuffleCtaBtn, pressed && styles.btnPressed]}
-                  onPress={handleShuffleCta}
-                  hitSlop={8}
-                >
+            {/* ACTIONS */}
+            <View style={styles.actions}>
+              <AppButton
+                title="Use as post"
+                size="lg"
+                onPress={handleUseAsPost}
+                iconRight={
                   <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
-                    <Path
-                      d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3L21.5 8M22 12.5a10 10 0 0 1-18.8 4.2L2.5 16"
-                      stroke="#582CDB"
-                      strokeWidth="2.2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
+                    <Path d="M5 12h14M13 6l6 6-6 6" stroke="#FFFFFF" strokeWidth={2.4} strokeLinecap="round" strokeLinejoin="round" />
                   </Svg>
-                </Pressable>
-              </View>
+                }
+              />
+              {isPro && (
+                <AppButton
+                  title="Make a voiceover"
+                  variant="glass"
+                  onPress={() =>
+                    onOpenVoiceStudio?.([selectedHook, bodyText, takeawayText, selectedCtaText].filter(Boolean).join(' '), ideaTitle ?? '')
+                  }
+                  iconRight={
+                    <Svg width={16} height={16} viewBox="0 0 24 24" fill="none">
+                      <Rect x="9" y="2" width="6" height="12" rx="3" stroke={ds.purple} strokeWidth={2.2} />
+                      <Path d="M5 11a7 7 0 0014 0M12 18v4" stroke={ds.purple} strokeWidth={2.2} strokeLinecap="round" />
+                    </Svg>
+                  }
+                />
+              )}
+              <AppButton
+                title={justSaved ? 'Saved to drafts' : 'Save draft'}
+                variant="glass"
+                onPress={saveScriptDraft}
+                iconRight={
+                  justSaved ? (
+                    <Svg width={16} height={16} viewBox="0 0 24 24" fill="none">
+                      <Path d="M20 6L9 17l-5-5" stroke={ds.greenFill} strokeWidth={3} strokeLinecap="round" strokeLinejoin="round" />
+                    </Svg>
+                  ) : undefined
+                }
+              />
             </View>
-
-            {/* 8. STREAK IMPACT CARD */}
-            <View style={styles.streakImpactCard}>
-              <View style={styles.streakImpactHeaderRow}>
-                <View>
-                  <Text style={styles.streakImpactLabel}>STREAK IMPACT</Text>
-                  <Text style={styles.streakImpactSub}>Helps protect your {userProfile?.streakCount || 1}-day streak</Text>
-                </View>
-                <Text style={styles.streakImpactXp}>+40 XP</Text>
-              </View>
-
-              <View style={styles.streakProgressBarTrack}>
-                <View style={styles.streakProgressBarFill} />
-              </View>
-            </View>
-
-            {/* 9. SCRIPT PREVIEW CONTAINER */}
-            <View style={styles.scriptPreviewCard}>
-              <View style={styles.scriptPreviewHeaderRow}>
-                <Text style={styles.scriptPreviewLabel}>SCRIPT PREVIEW</Text>
-                <View style={styles.scriptPreviewPillsRow}>
-                  <Text style={styles.scriptPreviewPillText}>⏱ 30–45s</Text>
-                  <Text style={styles.scriptPreviewPillText}>💡 Educational</Text>
-                </View>
-              </View>
-
-              {/* Inner Preview Box */}
-              <View style={styles.scriptPreviewInnerBox}>
-                <Text style={styles.previewLineText}>
-                  <Text style={styles.previewLineBold}>Hook: </Text>
-                  {selectedHook}
-                </Text>
-                <Text style={[styles.previewLineText, { marginTop: 8 }]}>
-                  <Text style={styles.previewLineBold}>Body: </Text>
-                  {bodyText}
-                </Text>
-                {!!(takeawayText && takeawayText.trim().length > 0) && (
-                  <Text style={[styles.previewLineText, { marginTop: 8 }]}>
-                    <Text style={styles.previewLineBold}>Key Lesson: </Text>
-                    {takeawayText}
-                  </Text>
-                )}
-                <Text style={[styles.previewLineText, { marginTop: 8 }]}>
-                  <Text style={styles.previewLineBold}>CTA: </Text>
-                  {selectedCtaText}
-                </Text>
-              </View>
-
-              {/* Dashed Copy Full Script Button */}
-              <Pressable
-                style={({ pressed }) => [styles.copyScriptBtn, pressed && styles.btnPressed]}
-                onPress={handleCopyFullScript}
-              >
-                <Svg width={16} height={16} viewBox="0 0 24 24" fill="none">
-                  <Rect x="9" y="9" width="13" height="13" rx="2" stroke="#582CDB" strokeWidth="2.2" />
-                  <Path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" stroke="#582CDB" strokeWidth="2.2" />
-                </Svg>
-                <Text style={styles.copyScriptBtnText}>COPY FULL SCRIPT</Text>
-              </Pressable>
-            </View>
-
-            {/* 10. PRIMARY BOTTOM ACTIONS */}
-            <Pressable
-              style={({ pressed }) => [styles.useAsPostBtn, pressed && styles.btnPressed]}
-              onPress={handleUseAsPost}
-            >
-              <LinearGradient
-                colors={['#7C3AED', '#582CDB']}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 0 }}
-                style={styles.useAsPostGradient}
-              >
-                <Text style={styles.useAsPostBtnText}>USE AS POST</Text>
-              </LinearGradient>
-            </Pressable>
-
-            <View style={styles.secondaryActionsRow}>
-              <Pressable
-                style={({ pressed }) => [styles.secondaryBtn, pressed && styles.btnPressed]}
-                onPress={() => handleOpenPhaseModal('body')}
-              >
-                <Text style={styles.secondaryBtnText}>IMPROVE SCRIPT</Text>
-              </Pressable>
-
-              <Pressable
-                style={({ pressed }) => [styles.secondaryBtn, pressed && styles.btnPressed]}
-                onPress={handleSaveDraft}
-              >
-                <Text style={styles.secondaryBtnText}>SAVE DRAFT</Text>
-              </Pressable>
-            </View>
-
-            {/* Bottom spacing to clear floating tab bar */}
-            <View style={{ height: 110 }} />
           </ScrollView>
+
+          {toast && <ComposerToast message={toast} />}
 
           {/* UNIFIED SIGNATURE FLOATING TAB BAR */}
           <FloatingTabBar activeTab={activeTab} onTabPress={handleTabPress} />
@@ -1498,46 +1207,6 @@ export const ScriptScreen: React.FC<ScriptScreenProps> = ({
           onSaveProfile={onSaveProfile}
         />
 
-          {/* MODAL: CREATOR CHAT */}
-          <Modal
-            visible={showChatModal}
-            transparent={true}
-            animationType="fade"
-            onRequestClose={() => setShowChatModal(false)}
-          >
-            <View style={styles.modalOverlay}>
-              <Animated.View style={[styles.modalCard, { transform: [{ scale: modalPopScale }] }]}>
-                <View style={styles.modalHeaderRow}>
-                  <View>
-                    <Text style={styles.modalTitle}>Jarvis AI Chat</Text>
-                    <Text style={styles.modalSubtitle}>Real-time creative assistant</Text>
-                  </View>
-                  <Pressable
-                    onPress={() => setShowChatModal(false)}
-                    style={styles.modalCloseCircle}
-                    hitSlop={8}
-                  >
-                    <Text style={styles.modalCloseCross}>✕</Text>
-                  </Pressable>
-                </View>
-
-                <View style={styles.chatCard}>
-                  <Text style={styles.chatSpeaker}>Jarvis AI</Text>
-                  <Text style={styles.chatMsg}>
-                    I optimized this 30-second script for TikTok &amp; Reels retention! The first 3 seconds hook audience attention.
-                  </Text>
-                </View>
-
-                <Pressable
-                  style={styles.modalFullBtn}
-                  onPress={() => setShowChatModal(false)}
-                >
-                  <Text style={styles.modalFullBtnText}>Close Chat</Text>
-                </Pressable>
-              </Animated.View>
-            </View>
-          </Modal>
-
           {/* SIGNATURE ANIMATED GHOST CELEBRATION MODAL */}
           <AnimatedCompletionModal
             visible={showCelebrationModal}
@@ -1561,18 +1230,28 @@ export const ScriptScreen: React.FC<ScriptScreenProps> = ({
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#FAF8F5',
+    backgroundColor: ds.bg,
   },
   container: {
     flex: 1,
     width: '100%',
-    backgroundColor: '#FAF8F5',
   },
   scrollContent: {
     paddingHorizontal: 20,
     paddingTop: 8,
-    paddingBottom: 135,
+    paddingBottom: 120,
   },
+  headline: { marginTop: 4, marginBottom: 16 },
+  headlineText: { fontWeight: '800', letterSpacing: -0.8, color: ds.ink },
+  headlineAccent: { color: ds.purple },
+  ideaTop: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  ideaEyebrow: { flex: 1, fontSize: 11, fontWeight: '800', letterSpacing: 1, color: ds.purple },
+  durationChip: { alignSelf: 'flex-start', marginTop: 10, paddingHorizontal: 10, height: 26, justifyContent: 'center', borderRadius: 999, backgroundColor: ds.lavender },
+  durationText: { fontSize: 11.5, fontWeight: '800', color: ds.purple },
+  ideaTitle: { fontSize: 20, lineHeight: 26, fontWeight: '800', color: ds.ink, letterSpacing: -0.4, marginTop: 10 },
+  section: { marginTop: 16 },
+  partsStack: { gap: 14, marginTop: 16 },
+  actions: { gap: 10, marginTop: 18 },
   btnPressed: {
     opacity: 0.9,
     transform: [{ scale: 0.98 }],
@@ -1674,11 +1353,12 @@ const styles = StyleSheet.create({
   },
 
   mainTitle: {
-    fontSize: Platform.OS === 'web' ? ('clamp(18px, 4.5vw, 22px)' as any) : sFont(20),
+    fontSize: Platform.OS === 'web' ? ('clamp(15px, 3.8vw, 17px)' as any) : sFont(16),
     fontWeight: '700',
     color: '#171420',
     letterSpacing: -0.35,
-    marginBottom: 14,
+    lineHeight: 22,
+    marginBottom: 10,
     marginTop: 4,
   },
 

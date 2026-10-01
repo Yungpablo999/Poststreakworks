@@ -2,18 +2,18 @@ import React, { useState, useRef, useEffect } from 'react';
 import {
   StyleSheet,
   View,
-  Text,
   ScrollView,
   Pressable,
   Platform,
   Animated,
   Modal,
-  TextInput,
   Image,
   Dimensions,
   SafeAreaView,
   StatusBar,
+  ActivityIndicator,
 } from 'react-native';
+import { Text, TextInput } from '../components/ui/AppText';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as Haptics from 'expo-haptics';
 import Svg, { Path, Circle, Rect } from 'react-native-svg';
@@ -22,12 +22,65 @@ import { UserProfileModal, UserProfileData } from '../components/UserProfileModa
 import { AnimatedCompletionModal } from '../components/AnimatedCompletionModal';
 import { FreeAppHeader } from '../components/FreeAppHeader';
 import { sFont, sPadding, isNarrowScreen } from '../utils/responsive';
+import Reanimated, { FadeIn, FadeInUp, FadeOut, Easing, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
+import {
+  getStarterIdeas,
+  getFilmPlan,
+  getSoundIdeas,
+  checkInToday,
+  getDefaultFilmStyle,
+  getGoalCaption,
+  saveDraft as saveDraftToStore,
+  IDEA_GOALS,
+  type FilmStyle,
+  type IdeaGoal,
+} from '../data';
+import { ScheduleSheet } from '../components/composer/ScheduleSheet';
+import { PlatformLogo } from '../components/onboarding/PlatformLogo';
+import { FilmMethodPicker, FilmPlanCard, PostedCheck, type FilmMethod } from '../components/composer/FilmBlocks';
+import { handOffToPlatform, isHandoffPlatform, HANDOFF_NAMES, type HandoffPlatform } from '../utils/handoff';
+import { captureWithCamera, pickFromLibrary, type PickedMedia } from '../utils/media';
+import { AppState } from 'react-native';
+import { GlassBackdrop } from '../components/glass/GlassBackdrop';
+import { GlassCard } from '../components/glass/GlassCard';
+import { FitLines } from '../components/ui/FitLines';
+import { AppButton } from '../components/ui/AppButton';
+import { JarvisOrb } from '../components/JarvisOrb';
+import { STAGE_1_PLATFORMS } from '../config/features';
+import {
+  StepHeader,
+  PlatformChip,
+  RecommendedFormat,
+  FormatTile,
+  MediaZone,
+  CyclePill,
+  AiAction,
+  EditsMeter,
+  TagChip,
+  ModeSwitch,
+  ReadinessCard,
+  ComposerToast,
+} from '../components/composer/ComposerBlocks';
+import { ds } from '../theme/colors';
 
 interface PostComposerScreenProps {
   ideaTitle?: string;
-  questDraft?: { title: string; hook: string; story: string; lesson: string; cta: string } | null;
+  /** Goal picked on the Ideas page; the caption is written for it. */
+  ideaGoal?: { goal?: IdeaGoal; hook?: string; caption?: string; tags?: string[] } | null;
+  questDraft?: {
+    title: string;
+    hook: string;
+    story: string;
+    lesson: string;
+    cta: string;
+    badgeLabel?: string;
+    requirements?: string[];
+    xpReward?: number;
+  } | null;
   initialFormat?: ContentFormatType;
   initialPlatform?: string;
+  /** Pre-pick the kind of video (e.g. from the Repurpose video studio). */
+  initialFilmStyle?: FilmStyle;
   attachedAudio?: {
     title: string;
     voiceName: string;
@@ -38,7 +91,6 @@ interface PostComposerScreenProps {
   onBack: () => void;
   onLogout?: () => void;
   onOpenSchedule?: () => void;
-  onOpenMessages?: () => void;
   onOpenJarvisPro?: () => void;
   onNavigateTab?: (tab: TabType) => void;
   userProfile?: UserProfileData;
@@ -81,7 +133,7 @@ const NOTIFICATIONS: NotificationItem[] = [
   {
     id: 'n2',
     title: 'Streak Saver Ready',
-    body: "Convert today's idea into a post to keep your 1-day streak.",
+    body: "Convert today's idea into a post to kick off your creator streak.",
     time: '2h ago',
     unread: true,
     iconEmoji: '🔥',
@@ -239,61 +291,7 @@ export const CONTENT_FORMATS: ContentFormatOption[] = [
   },
 ];
 
-const MONTH_NAMES = [
-  'January',
-  'February',
-  'March',
-  'April',
-  'May',
-  'June',
-  'July',
-  'August',
-  'September',
-  'October',
-  'November',
-  'December',
-];
 
-interface SmartScheduleSlot {
-  time: string;
-  isRecommended: boolean;
-  reason?: string;
-}
-
-interface SmartScheduleGroup {
-  dayLabel: string;
-  dateStr: string;
-  slots: SmartScheduleSlot[];
-}
-
-const SMART_SCHEDULE_GROUPS: SmartScheduleGroup[] = [
-  {
-    dayLabel: 'Today',
-    dateStr: 'Aug 18',
-    slots: [
-      { time: '7:30 PM', isRecommended: true, reason: 'Peak Audience' },
-      { time: '8:00 PM', isRecommended: false },
-      { time: '8:30 PM', isRecommended: false },
-    ],
-  },
-  {
-    dayLabel: 'Tomorrow',
-    dateStr: 'Aug 19',
-    slots: [
-      { time: '11:30 AM', isRecommended: true, reason: 'High Engagement' },
-      { time: '1:00 PM', isRecommended: false },
-      { time: '7:30 PM', isRecommended: false },
-    ],
-  },
-];
-
-const TIME_SLOTS = [
-  { id: 't1', time: '7:30 PM', label: '⚡ Peak Reach', peak: true },
-  { id: 't2', time: '9:00 AM', label: 'Morning Wave', peak: false },
-  { id: 't3', time: '12:30 PM', label: 'Lunch Break', peak: false },
-  { id: 't4', time: '6:00 PM', label: 'Evening Prime', peak: false },
-  { id: 't5', time: '8:30 PM', label: 'Night Spike', peak: false },
-];
 
 // Official Real Social Media SVG Logos
 const PlatformIcon = ({ iconType, size = 38 }: { iconType: string; size?: number }) => {
@@ -379,15 +377,16 @@ const PlatformIcon = ({ iconType, size = 38 }: { iconType: string; size?: number
 
 export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
   ideaTitle = 'One thing I wish I knew before I started creating',
+  ideaGoal,
   questDraft,
   initialFormat,
   initialPlatform = '',
+  initialFilmStyle,
   attachedAudio,
   onClearAttachedAudio,
   onBack,
   onLogout,
   onOpenSchedule,
-  onOpenMessages,
   onOpenJarvisPro,
   onNavigateTab,
   userProfile,
@@ -402,6 +401,8 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
 
   // Content Format State (Intelligent Content Type)
   const [selectedFormat, setSelectedFormat] = useState<ContentFormatType>(initialFormat || 'short_video');
+  // Short video only: film in TikTok / Reels / Shorts, or upload a finished video
+  const [filmMethod, setFilmMethod] = useState<FilmMethod>('native');
 
   // Media State
   const [hasMedia, setHasMedia] = useState(false);
@@ -431,24 +432,17 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
   const [publishMode, setPublishMode] = useState<'now' | 'schedule' | 'draft'>('schedule');
   const [scheduledTime, setScheduledTime] = useState('Today, 7:30 PM');
 
-  // Calendar State
-  const [calMonthIndex, setCalMonthIndex] = useState(7); // August (0-indexed)
-  const [calYear, setCalYear] = useState(2026);
-  const [selectedCalDay, setSelectedCalDay] = useState(18); // Today = 18th
-  const [selectedTimeSlot, setSelectedTimeSlot] = useState('7:30 PM');
-
   // Modals
   const [showPlatformsModal, setShowPlatformsModal] = useState(false);
   const [showChangeIdeaModal, setShowChangeIdeaModal] = useState(false);
-  const [showCalendarModal, setShowCalendarModal] = useState(false);
-  const [showCustomCalendarView, setShowCustomCalendarView] = useState(false);
+  const [showScheduleSheet, setShowScheduleSheet] = useState(false);
   const [showNotificationModal, setShowNotificationModal] = useState(false);
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [showChatModal, setShowChatModal] = useState(false);
   const [showCelebrationModal, setShowCelebrationModal] = useState(false);
   const [celebrationTitle, setCelebrationTitle] = useState('Post Scheduled!');
   const [celebrationSubtitle, setCelebrationSubtitle] = useState('Your post has been scheduled for Today at 7:30 PM.');
-  const [celebrationSpeech, setCelebrationSpeech] = useState('1-day streak protected! +50 XP added to your creator level.');
+  const [celebrationSpeech, setCelebrationSpeech] = useState('Day 1 post scheduled! +50 XP added to your creator level.');
 
   const [notificationsList, setNotificationsList] = useState<NotificationItem[]>(NOTIFICATIONS);
 
@@ -457,13 +451,13 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
   const modalPopScale = useRef(new Animated.Value(0.9)).current;
   const mainScrollViewRef = useRef<ScrollView>(null);
   const captionInputRef = useRef<TextInput>(null);
-  const sectionPositions = useRef<{ [key: string]: number }>({
-    platforms: 260,
-    format: 480,
-    media: 860,
-    caption: 1180,
-    schedule: 1540,
-  });
+  // Steps are measured when tapped (sections above can change height)
+  const sectionRefs = useRef<{ [key: string]: View | null }>({});
+  const scrollY = useRef(0);
+  // Sizes used to keep jumps inside the page (scrolling past the end
+  // overshoots and springs back on iPhone)
+  const contentH = useRef(0);
+  const viewportH = useRef(0);
 
   // Sync prop changes for frictionless idea adoption
   useEffect(() => {
@@ -509,6 +503,22 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
       }
     }
   }, [ideaTitle]);
+
+  // Idea picked on the Ideas page with a goal: write the caption for that goal
+  // …or a finished caption + tags from the Caption writer
+  useEffect(() => {
+    if (!ideaGoal) return;
+    if (ideaGoal.caption) {
+      setCaption(ideaGoal.caption);
+      if (ideaGoal.tags?.length) setTags(ideaGoal.tags);
+      return;
+    }
+    if (!ideaGoal.goal || !ideaTitle) return;
+    const g = getGoalCaption(ideaTitle, ideaGoal.goal, ideaGoal.hook);
+    setCaption(g.caption);
+    setCaptionTone(g.tone);
+    setCaptionCta(g.cta);
+  }, [ideaTitle, ideaGoal]);
 
   // Sync incoming Quest Draft from Jarvis
   useEffect(() => {
@@ -723,6 +733,24 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
     }
   };
 
+  // Real camera / camera roll (expo-image-picker)
+  const [pickedMedia, setPickedMedia] = useState<PickedMedia | null>(null);
+  const wantsVideo = selectedFormat === 'short_video' || selectedFormat === 'long_video';
+  const acceptMedia = (m: PickedMedia | null) => {
+    if (!m) return;
+    if (Platform.OS !== 'web') Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    setPickedMedia(m);
+    setHasMedia(true);
+    setMediaType(m.kind);
+  };
+  const addFromLibrary = async () => acceptMedia(await pickFromLibrary(wantsVideo ? 'video' : 'image'));
+  const addFromCamera = async () => acceptMedia(await captureWithCamera(wantsVideo ? 'video' : 'image'));
+  const clearMedia = () => {
+    setPickedMedia(null);
+    setHasMedia(false);
+    setHasThumbnail(false);
+  };
+
   const [composerToast, setComposerToast] = useState<string | null>(null);
 
   const showToastNotice = (msg: string) => {
@@ -771,6 +799,11 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
     }
 
     // 3. Post is 100% Ready
+    if (publishMode === 'now' && isNativeFilm) {
+      if (filmApp) openPlatformToFilm(filmApp);
+      else showToastNotice('Pick TikTok, Instagram or YouTube to film there');
+      return;
+    }
     if (Platform.OS !== 'web') {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     }
@@ -778,70 +811,16 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
       setCelebrationTitle('Published Live!');
       setCelebrationSubtitle('Your content is live across your connected platforms.');
       setCelebrationSpeech('Streak preserved! Great consistency today.');
+    } else if (publishMode === 'schedule' && isNativeFilm) {
+      setCelebrationTitle('Reminder set!');
+      setCelebrationSubtitle(`We'll nudge you at ${scheduledTime} with your hook, shots and caption ready.`);
+      setCelebrationSpeech('Your plan is saved. Film it when the time comes.');
     } else if (publishMode === 'schedule') {
       setCelebrationTitle('Post Scheduled!');
       setCelebrationSubtitle(`Your post is locked in for ${scheduledTime}.`);
-      setCelebrationSpeech('1-day streak protected! +50 XP added to your creator level.');
+      setCelebrationSpeech('Day 1 post scheduled! +50 XP added to your creator level.');
     }
     setShowCelebrationModal(true);
-  };
-
-  // Calendar calculations
-  const daysInMonth = new Date(calYear, calMonthIndex + 1, 0).getDate();
-  const firstDayOfWeek = (new Date(calYear, calMonthIndex, 1).getDay() + 6) % 7; // Monday-first
-  
-  const handlePrevMonth = () => {
-    if (Platform.OS !== 'web') {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    }
-    if (calMonthIndex === 0) {
-      setCalMonthIndex(11);
-      setCalYear((y) => y - 1);
-    } else {
-      setCalMonthIndex((m) => m - 1);
-    }
-  };
-
-  const handleNextMonth = () => {
-    if (Platform.OS !== 'web') {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    }
-    if (calMonthIndex === 11) {
-      setCalMonthIndex(0);
-      setCalYear((y) => y + 1);
-    } else {
-      setCalMonthIndex((m) => m + 1);
-    }
-  };
-
-  const handleConfirmCalendarSchedule = () => {
-    if (Platform.OS !== 'web') {
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-    }
-    const isToday = selectedCalDay === 18 && calMonthIndex === 7 && calYear === 2026;
-    const isTomorrow = selectedCalDay === 19 && calMonthIndex === 7 && calYear === 2026;
-    
-    let formattedStr = '';
-    if (isToday) {
-      formattedStr = `Today, ${selectedTimeSlot}`;
-    } else if (isTomorrow) {
-      formattedStr = `Tomorrow, ${selectedTimeSlot}`;
-    } else {
-      const monthShort = MONTH_NAMES[calMonthIndex].substring(0, 3);
-      formattedStr = `${monthShort} ${selectedCalDay}, ${selectedTimeSlot}`;
-    }
-
-    setScheduledTime(formattedStr);
-    setPublishMode('schedule');
-    setShowCalendarModal(false);
-
-    // Trigger celebration animation popup
-    setCelebrationTitle('Post Scheduled!');
-    setCelebrationSubtitle(`Your post has been locked in for ${formattedStr}.`);
-    setCelebrationSpeech('1-day streak protected! +50 XP added to your creator level.');
-    setTimeout(() => {
-      setShowCelebrationModal(true);
-    }, 250);
   };
 
   // Content Format Resolution & Intelligence
@@ -899,7 +878,9 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
   const isFormatReady = Boolean(selectedFormat);
   const isCaptionReady = caption.trim().length >= 10;
   const isPlatformsReady = selectedPlatforms.length > 0;
-  const isMediaReady = selectedFormat === 'text' || hasMedia;
+  const isNativeFilm = selectedFormat === 'short_video' && filmMethod === 'native';
+  const isCameraFilm = selectedFormat === 'short_video' && filmMethod === 'camera';
+  const isMediaReady = selectedFormat === 'text' || hasMedia || isNativeFilm;
   const isScheduleReady =
     publishMode === 'now' ||
     publishMode === 'draft' ||
@@ -918,30 +899,140 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
     if (Platform.OS !== 'web') {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     }
-    const targetY = sectionPositions.current[section] ?? 0;
-    mainScrollViewRef.current?.scrollTo({ y: Math.max(0, targetY - 20), animated: true });
+    // Measure where the step is right now inside the scroll content
+    // (sections above can change height after the page first lays out)
+    const target = sectionRefs.current[section];
+    const sv = mainScrollViewRef.current as
+      | (ScrollView & { getInnerViewRef?: () => unknown; getInnerViewNode?: () => unknown })
+      | null;
+    const content = sv?.getInnerViewRef?.() ?? sv?.getInnerViewNode?.();
+    if (target && sv && content) {
+      target.measureLayout(
+        content as never,
+        (_x, y) => {
+          const maxY = Math.max(0, contentH.current - viewportH.current);
+          sv.scrollTo({ y: Math.min(maxY, Math.max(0, y - 12)), animated: true });
+        },
+        () => {},
+      );
+    }
 
-    if (section === 'caption') {
-      setTimeout(() => captionInputRef.current?.focus(), 350);
-    } else if (section === 'platforms' && !isPlatformsReady) {
+    // No auto-focus on the caption: opening the keyboard scrolled the page a
+    // second time right after landing, which looked like a bounce.
+    if (section === 'schedule') {
       setTimeout(() => {
-        triggerModalAnim();
-        setShowPlatformsModal(true);
-      }, 350);
-    } else if (section === 'schedule') {
-      setTimeout(() => {
-        setShowCustomCalendarView(false);
-        triggerModalAnim();
-        setShowCalendarModal(true);
-      }, 350);
-    } else if (section === 'media' && !isMediaReady) {
-      setTimeout(() => {
-        handleUploadMedia(selectedFormat === 'image' ? 'image' : 'video');
+        setShowScheduleSheet(true);
       }, 350);
     }
   };
 
   const unreadNotifCount = notificationsList.filter((n) => n.unread).length;
+
+  // "Another" swaps the idea in place (same as the Create tab): the icon spins,
+  // Jarvis "picks" for a beat, then the next idea slides in.
+  const ideaPool = React.useMemo(() => {
+    const starter = getStarterIdeas(
+      userProfile?.niches?.length ? userProfile.niches : ['lifestyle'],
+      userProfile?.connectedPlatforms?.length ? userProfile.connectedPlatforms : ['tiktok', 'instagram'],
+    ).map((i) => i.title);
+    return Array.from(new Set([...starter, ...SAMPLE_IDEAS]));
+  }, [userProfile?.niches, userProfile?.connectedPlatforms]);
+  const [ideaThinking, setIdeaThinking] = useState(false);
+
+  // Short video: film in TikTok / Reels / Shorts (sounds + filters) or upload
+  const [pendingHandoff, setPendingHandoff] = useState<HandoffPlatform | null>(null);
+  const [showPostedCheck, setShowPostedCheck] = useState(false);
+  const handoffPlatforms = selectedPlatforms.filter(isHandoffPlatform);
+  // With several platforms picked, the creator chooses which app to film in
+  // (the one whose sound they want); the same video can go to the others after.
+  const [filmAppChoice, setFilmAppChoice] = useState<HandoffPlatform | null>(null);
+  const filmApp: HandoffPlatform | undefined =
+    filmAppChoice && handoffPlatforms.includes(filmAppChoice) ? filmAppChoice : handoffPlatforms[0];
+  // Talking / dance / skit / text-on-screen, pre-picked from the creator's niche
+  const [filmStyle, setFilmStyle] = useState<FilmStyle>(() => initialFilmStyle ?? getDefaultFilmStyle(userProfile?.niches));
+  const filmPlan = React.useMemo(() => getFilmPlan(currentIdea ?? '', filmStyle), [currentIdea, filmStyle]);
+  const soundIdeas = React.useMemo(() => getSoundIdeas(filmStyle), [filmStyle]);
+  const [overlayText, setOverlayText] = useState('');
+  // Filming a dance / trend: the trend is the idea, so the idea card fades away
+  const hideIdea = (isNativeFilm || isCameraFilm) && filmStyle === 'dance';
+
+  // When the creator comes back after filming, ask if it went out
+  useEffect(() => {
+    if (!pendingHandoff) return;
+    const sub = AppState.addEventListener('change', (state) => {
+      if (state === 'active') setShowPostedCheck(true);
+    });
+    // Web: the platform opens in a new tab, so ask shortly after
+    const t = Platform.OS === 'web' ? setTimeout(() => setShowPostedCheck(true), 1500) : null;
+    return () => {
+      sub.remove();
+      if (t) clearTimeout(t);
+    };
+  }, [pendingHandoff]);
+
+  const openPlatformToFilm = async (p: HandoffPlatform) => {
+    if (Platform.OS !== 'web') Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    const text = [caption.trim(), tags.join(' ')].filter(Boolean).join('\n\n');
+    showToastNotice(`Caption copied. Paste it in ${HANDOFF_NAMES[p]}.`);
+    setPendingHandoff(p);
+    await handOffToPlatform(p, text);
+  };
+
+  const confirmPosted = () => {
+    setShowPostedCheck(false);
+    setPendingHandoff(null);
+    checkInToday(userProfile?.userPersona === 'returning' ? 'returning' : 'new');
+    if (Platform.OS !== 'web') Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    setCelebrationTitle('Nice work!');
+    setCelebrationSubtitle(`Your ${pendingHandoff ? HANDOFF_NAMES[pendingHandoff] : ''} post counts toward today's check-in.`);
+    setCelebrationSpeech('Posted is better than perfect.');
+    setShowCelebrationModal(true);
+  };
+  const ideaTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const ideaSpin = useSharedValue(0);
+  const ideaSpinStyle = useAnimatedStyle(() => ({ transform: [{ rotate: `${ideaSpin.value * 360}deg` }] }));
+  useEffect(
+    () => () => {
+      if (ideaTimer.current) clearTimeout(ideaTimer.current);
+    },
+    [],
+  );
+  const shuffleIdea = () => {
+    if (ideaThinking) return;
+    if (Platform.OS !== 'web') Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    ideaSpin.value = withTiming(ideaSpin.value + 1, { duration: 500, easing: Easing.out(Easing.cubic) });
+    setIdeaThinking(true);
+    ideaTimer.current = setTimeout(() => {
+      const i = ideaPool.indexOf(currentIdea ?? '');
+      setCurrentIdea(ideaPool[(i + 1) % ideaPool.length]);
+      setIdeaThinking(false);
+    }, 550);
+  };
+
+  const saveDraft = () => {
+    saveDraftToStore({
+      id: `post-${currentIdea}`,
+      title: currentIdea ?? 'Untitled post',
+      kind: 'post',
+      format: currentFormatConfig.title,
+      platform: selectedPlatforms[0],
+    });
+    if (Platform.OS !== 'web') Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    setCelebrationTitle('Draft saved!');
+    setCelebrationSubtitle('Your draft with media and tags is saved. Pick it up any time.');
+    setCelebrationSpeech('Nice work getting ahead!');
+    setShowCelebrationModal(true);
+  };
+  const captionTones: ('Helpful' | 'Viral' | 'Story')[] = ['Helpful', 'Viral', 'Story'];
+  const captionCtas: ('Ask Question' | 'Save Post' | 'Share Thoughts')[] = ['Ask Question', 'Save Post', 'Share Thoughts'];
+  const stage1Platforms = ALL_AVAILABLE_PLATFORMS.filter((p) => (STAGE_1_PLATFORMS as readonly string[]).includes(p.id));
+  const readinessSteps = [
+    { key: 'platforms', label: 'Platforms', done: isPlatformsReady },
+    { key: 'format', label: 'Format', done: isFormatReady },
+    { key: 'media', label: isNativeFilm ? 'Film plan' : isCameraFilm ? 'Video' : 'Media', done: isMediaReady },
+    { key: 'caption', label: 'Caption', done: isCaptionReady },
+    { key: 'schedule', label: 'Timing', done: isScheduleReady },
+  ];
 
   // Filter the display platforms: show only what the user selected. If none selected yet, show starter placeholders.
   const displayedPlatforms =
@@ -953,18 +1044,12 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
     <SafeAreaView style={[styles.safeArea, isDark && { backgroundColor: '#0C0A12' }]}>
       <StatusBar barStyle={isDark ? "light-content" : "dark-content"} backgroundColor={isDark ? "#0C0A12" : "#FAF8F5"} />
       <View style={[styles.container, isDark && { backgroundColor: '#0C0A12' }]}>
+        <GlassBackdrop />
         {/* 1. TOP AIRY HEADER BAR */}
         <FreeAppHeader
+          backgroundColor="transparent"
           onBack={onBack}
           onOpenJarvisPro={onOpenJarvisPro}
-          onOpenMessages={() => {
-            if (onOpenMessages) {
-              onOpenMessages();
-            } else {
-              triggerModalAnim();
-              setShowChatModal(true);
-            }
-          }}
           onOpenNotifications={() => {
             triggerModalAnim();
             setShowNotificationModal(true);
@@ -981,1014 +1066,420 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
         {/* 2. MAIN SCROLLABLE CONTENT */}
         <ScrollView
           ref={mainScrollViewRef}
+          onScroll={(e) => (scrollY.current = e.nativeEvent.contentOffset.y)}
+          onContentSizeChange={(_w, h) => (contentH.current = h)}
+          onLayout={(e) => (viewportH.current = e.nativeEvent.layout.height)}
+          scrollEventThrottle={32}
           contentContainerStyle={styles.scrollContent}
           showsVerticalScrollIndicator={false}
           bounces={true}
           keyboardShouldPersistTaps="handled"
           keyboardDismissMode="on-drag"
         >
-          {/* Top Pill Badges (Gold Gradient & Draft / Quest Draft) */}
-          <View style={styles.topBadgesRow}>
-            <LinearGradient
-              colors={['#F59E0B', '#D97706']}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 0 }}
-              style={styles.createPostPill}
-            >
-              <Text style={styles.createPostPillText}>CREATE POST</Text>
-            </LinearGradient>
-
-            {questDraft ? (
-              <View style={styles.questDraftBadge}>
-                <Text style={styles.questDraftBadgeText}>🔥 STORYTELLER QUEST DRAFT</Text>
-              </View>
-            ) : (
-              <View style={styles.draftPill}>
-                <Text style={styles.draftPillText}>DRAFT</Text>
+          {/* HEADLINE — same two-line structure on every screen size */}
+          <Reanimated.View entering={FadeInUp.duration(500)} style={styles.headlineWrap}>
+            {questDraft && (
+              <View style={styles.questChip}>
+                <Text style={styles.questChipText}>{(questDraft.badgeLabel || 'Quest draft').replace(/^[^A-Za-z0-9]+/, '')}</Text>
               </View>
             )}
-          </View>
+            <FitLines
+              lines={['Shape your', <Text key="n" style={styles.headlineAccent}>next post</Text>]}
+              textStyle={styles.headlineText}
+              maxFontSize={34}
+              align="left"
+              accessibilityLabel="Shape your next post"
+            />
+          </Reanimated.View>
 
-          {/* Main Headline & Subtitle */}
-          <Text style={styles.mainTitle}>Shape your next post.</Text>
-          <Text style={styles.mainSubtitle}>
-            Write your caption, choose platforms, add media, and schedule.
-          </Text>
-
-          {/* 1. POST IDEA CARD */}
-          <View style={styles.postIdeaCard}>
-            <View style={styles.postIdeaHeaderRow}>
-              <Text style={styles.postIdeaSectionTitle}>Post Idea</Text>
-              <Pressable
-                onPress={() => {
-                  triggerModalAnim();
-                  setShowChangeIdeaModal(true);
-                }}
-                hitSlop={8}
-              >
-                <Text style={styles.changeIdeaLink}>CHANGE IDEA</Text>
-              </Pressable>
-            </View>
-
-            <Text style={styles.postIdeaTitle}>&ldquo;{currentIdea}&rdquo;</Text>
-            <Text style={styles.postIdeaDesc}>
-              Shape this idea into a post your audience will want to see.
-            </Text>
-
-            <View style={styles.ideaTagsRow}>
-              <View style={styles.ideaTagPill}>
-                <Text style={styles.ideaTagPillText}>Personal Lesson</Text>
-              </View>
-              <View style={styles.ideaTagPill}>
-                <Text style={styles.ideaTagPillText}>Creator Advice</Text>
-              </View>
-              <View style={styles.ideaTagPill}>
-                <Text style={styles.ideaTagPillText}>Consistency</Text>
-              </View>
-            </View>
-          </View>
-
-          {/* 2. CHOOSE PLATFORMS WITH MORE PLATFORMS TRIGGER */}
-          <View
-            style={styles.sectionLabelRow}
-            onLayout={(e) => {
-              sectionPositions.current.platforms = e.nativeEvent.layout.y;
-            }}
-          >
-            <Text style={styles.sectionLabel}>CHOOSE PLATFORMS</Text>
-            <Pressable
-              style={({ pressed }) => [styles.morePlatformsHeaderBtn, pressed && styles.btnPressed]}
-              onPress={() => {
-                triggerModalAnim();
-                setShowPlatformsModal(true);
-              }}
-              hitSlop={8}
-            >
-              <LinearGradient
-                colors={['#7C3AED', '#582CDB']}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 0 }}
-                style={styles.morePlatformsHeaderGradient}
-              >
-                <Svg width={13} height={13} viewBox="0 0 24 24" fill="none">
-                  <Path d="M12 5V19M5 12H19" stroke="#FFFFFF" strokeWidth="2.8" strokeLinecap="round" />
-                </Svg>
-                <Text style={styles.morePlatformsHeaderText}>More Platforms</Text>
-              </LinearGradient>
-            </Pressable>
-          </View>
-
-          {/* Clean Platforms Row / Grid */}
-          <View style={styles.platformsRow}>
-            {displayedPlatforms.map((plat) => {
-              const isSelected = selectedPlatforms.includes(plat.id);
-              const isSingle = displayedPlatforms.length === 1;
-
-              if (isSingle) {
-                return (
-                  <Pressable
-                    key={plat.id}
-                    style={[
-                      styles.platformCardSingle,
-                      isSelected && styles.platformCardActive,
-                    ]}
-                    onPress={() => togglePlatform(plat.id)}
-                  >
-                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, flex: 1 }}>
-                      <PlatformIcon iconType={plat.iconType} size={36} />
-                      <View style={{ flex: 1 }}>
-                        <Text style={styles.platformCardNameSingle}>{plat.name}</Text>
-                        <Text style={styles.platformCardFormatSingle}>{plat.format}</Text>
-                      </View>
-                    </View>
-                    {isSelected ? (
-                      <View style={styles.platformActiveBadge}>
-                        <Text style={{ fontSize: 10, color: '#FFFFFF', fontWeight: '700' }}>✓</Text>
-                      </View>
-                    ) : (
-                      <View style={styles.platformInactiveBadge} />
-                    )}
-                  </Pressable>
-                );
-              }
-
-              return (
-                <Pressable
-                  key={plat.id}
-                  style={[
-                    styles.platformCard,
-                    isSelected && styles.platformCardActive,
-                  ]}
-                  onPress={() => togglePlatform(plat.id)}
-                >
-                  <PlatformIcon iconType={plat.iconType} size={38} />
-                  <Text style={styles.platformCardName} numberOfLines={1}>{plat.name}</Text>
-                  {isSelected ? (
-                    <View style={styles.platformActiveBadge}>
-                      <Text style={{ fontSize: 10, color: '#FFFFFF', fontWeight: '700' }}>✓</Text>
-                    </View>
-                  ) : (
-                    <View style={styles.platformInactiveBadge} />
-                  )}
-                </Pressable>
-              );
-            })}
-          </View>
-
-          <Text style={styles.platformsDisclaimer}>
-            Free users can prepare posts for selected platforms. Auto-publishing may require <Text style={{ color: '#D97706', fontWeight: '800' }}>Pro</Text>.
-          </Text>
-
-          {/* 3. CONTENT FORMAT (RECOMMENDED + OTHER FORMATS) */}
-          <View
-            style={styles.sectionLabelRow}
-            onLayout={(e) => {
-              sectionPositions.current.format = e.nativeEvent.layout.y;
-            }}
-          >
-            <Text style={styles.sectionLabel}>CONTENT FORMAT</Text>
-            <View style={styles.aiBadge}>
-              <Text style={styles.aiBadgeText}>SMART RECOMMENDATION</Text>
-            </View>
-          </View>
-
-          {/* 1. Recommended Format Spotlight */}
-          <View style={styles.formatRecommendedSection}>
-            <Text style={styles.formatGroupHeaderLabel}>RECOMMENDED</Text>
-            <Pressable
-              style={[
-                styles.formatRecommendedCard,
-                selectedFormat === recommendedFormatConfig.id && styles.formatRecommendedCardActive,
-              ]}
-              onPress={() => {
-                if (Platform.OS !== 'web') {
-                  Haptics.selectionAsync();
-                }
-                setSelectedFormat(recommendedFormatConfig.id);
-              }}
-            >
-              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, flex: 1 }}>
-                <View
-                  style={[
-                    styles.formatIconBox,
-                    selectedFormat === recommendedFormatConfig.id && styles.formatIconBoxActive,
-                  ]}
-                >
-                  <Text style={{ fontSize: 20 }}>{recommendedFormatConfig.icon}</Text>
-                </View>
-
-                <View style={{ flex: 1 }}>
-                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 2 }}>
-                    <Text
-                      style={[
-                        styles.formatCardTitle,
-                        selectedFormat === recommendedFormatConfig.id && styles.formatCardTitleActive,
-                      ]}
+          {/* IDEA (fades away when filming a dance / trend: the trend is the idea) */}
+          {!hideIdea && (
+            <Reanimated.View exiting={FadeOut.duration(200)} entering={FadeIn.duration(250)}>
+              <Reanimated.View entering={FadeInUp.delay(100).duration(550)}>
+                <GlassCard strong radius={26} padding={20}>
+                  <View style={styles.ideaTop}>
+                    <JarvisOrb size={26} />
+                    <Text style={styles.ideaEyebrow}>YOUR IDEA</Text>
+                    <Pressable
+                      onPress={shuffleIdea}
+                      hitSlop={8}
+                      style={({ pressed }) => [styles.changeBtn, pressed && { transform: [{ scale: 0.92 }] }]}
+                      accessibilityRole="button"
+                      accessibilityLabel="Show me another idea"
                     >
-                      {recommendedFormatConfig.title}
-                    </Text>
-                    <View style={styles.formatBestFitPill}>
-                      <Text style={styles.formatBestFitPillText}>★ Best Fit</Text>
-                    </View>
+                      <Reanimated.View style={ideaSpinStyle}>
+                        <Svg width={13} height={13} viewBox="0 0 24 24" fill="none">
+                          <Path d="M4 12a8 8 0 0113.7-5.7L20 8M20 3v5h-5M20 12a8 8 0 01-13.7 5.7L4 16M4 21v-5h5" stroke={ds.purple} strokeWidth={2.4} strokeLinecap="round" strokeLinejoin="round" />
+                        </Svg>
+                      </Reanimated.View>
+                      <Text style={styles.changeBtnText}>Another</Text>
+                    </Pressable>
                   </View>
-                  <Text style={styles.formatRatioTag}>{recommendedFormatConfig.badge}</Text>
-                  <Text style={styles.formatCardDesc}>{recommendedFormatConfig.recommendedDescription}</Text>
+                  {ideaThinking ? (
+                    <Reanimated.View entering={FadeIn.duration(120)} style={styles.ideaThinking}>
+                      <ActivityIndicator color={ds.purple} />
+                      <Text style={styles.ideaThinkingText}>Jarvis is picking…</Text>
+                    </Reanimated.View>
+                  ) : (
+                    <Reanimated.View key={currentIdea} entering={FadeInUp.duration(300)} style={styles.ideaTitleWrap}>
+                      <Text style={styles.ideaTitle}>“{currentIdea}”</Text>
+                    </Reanimated.View>
+                  )}
+                  <Text style={styles.ideaBody}>Shape this idea into a post your audience will want to see.</Text>
+                </GlassCard>
+              </Reanimated.View>
+            </Reanimated.View>
+          )}
+
+          {/* QUEST REQUIREMENTS (when started from a quest) */}
+          {questDraft?.requirements && questDraft.requirements.length > 0 && (
+            <View style={styles.questCard}>
+              <GlassCard strong radius={22} padding={16}>
+                <View style={styles.questHead}>
+                  <Text style={styles.questHeadText}>Quest requirements</Text>
+                  {questDraft.xpReward ? <Text style={styles.questXp}>+{questDraft.xpReward} XP</Text> : null}
                 </View>
-              </View>
-
-              <View
-                style={[
-                  styles.formatCheckCircle,
-                  selectedFormat === recommendedFormatConfig.id && styles.formatCheckCircleActive,
-                ]}
-              >
-                {selectedFormat === recommendedFormatConfig.id && (
-                  <Text style={{ color: '#FFFFFF', fontSize: 10, fontWeight: '800' }}>✓</Text>
-                )}
-              </View>
-            </Pressable>
-          </View>
-
-          {/* 2. Other Formats Section (2x2 Grid) */}
-          <View style={styles.otherFormatsSection}>
-            <Text style={styles.formatGroupHeaderLabel}>OTHER FORMATS</Text>
-            <View style={styles.formatsGrid}>
-              {otherFormats.map((fmt) => {
-                const isFmtSelected = selectedFormat === fmt.id;
-
-                return (
-                  <Pressable
-                    key={fmt.id}
-                    style={[
-                      styles.formatCard,
-                      isFmtSelected && styles.formatCardActive,
-                    ]}
-                    onPress={() => {
-                      if (Platform.OS !== 'web') {
-                        Haptics.selectionAsync();
-                      }
-                      setSelectedFormat(fmt.id);
-                    }}
-                  >
-                    <View style={styles.formatCardTop}>
-                      <View style={[styles.formatIconBox, isFmtSelected && styles.formatIconBoxActive]}>
-                        <Text style={{ fontSize: 18 }}>{fmt.icon}</Text>
-                      </View>
-                      <View style={[styles.formatCheckCircle, isFmtSelected && styles.formatCheckCircleActive]}>
-                        {isFmtSelected && <Text style={{ color: '#FFFFFF', fontSize: 10, fontWeight: '800' }}>✓</Text>}
-                      </View>
-                    </View>
-
-                    <View style={{ marginTop: 8 }}>
-                      <Text style={[styles.formatCardTitle, isFmtSelected && styles.formatCardTitleActive]}>
-                        {fmt.title}
-                      </Text>
-                      <Text style={styles.formatRatioTag}>{fmt.badge}</Text>
-                    </View>
-                  </Pressable>
-                );
-              })}
-            </View>
-          </View>
-
-          {/* Smart Compatibility Adaption Note */}
-          {incompatiblePlatforms.length > 0 && (
-            <View style={styles.formatIncompatibleNotice}>
-              <Svg width={13} height={13} viewBox="0 0 24 24" fill="none">
-                <Circle cx="12" cy="12" r="10" stroke="#D97706" strokeWidth="2" />
-                <Path d="M12 8v4M12 16h.01" stroke="#D97706" strokeWidth="2" strokeLinecap="round" />
-              </Svg>
-              <Text style={styles.formatIncompatibleText}>
-                {incompatiblePlatforms
-                  .map((p) => ALL_AVAILABLE_PLATFORMS.find((x) => x.id === p)?.name)
-                  .join(' & ')}{' '}
-                will adapt your {currentFormatConfig.title.toLowerCase()} for optimal feed display.
-              </Text>
+                {questDraft.requirements.map((req, idx) => (
+                  <View key={idx} style={styles.questReq}>
+                    <View style={styles.questReqDot} />
+                    <Text style={styles.questReqText}>{req}</Text>
+                  </View>
+                ))}
+              </GlassCard>
             </View>
           )}
 
-          {/* 4. MEDIA / ATTACHMENT ZONE (CONTEXTUAL TO SELECTED FORMAT) */}
-          <Text
-            style={styles.sectionLabel}
-            onLayout={(e) => {
-              sectionPositions.current.media = e.nativeEvent.layout.y;
-            }}
-          >
-            MEDIA
+          {/* 1. PLATFORMS */}
+          <StepHeader
+            n={1}
+            title="Where it goes"
+            done={isPlatformsReady}
+            viewRef={(v) => (sectionRefs.current.platforms = v)}
+          />
+          <View style={styles.chipsWrap}>
+            {stage1Platforms.map((plat) => (
+              <PlatformChip
+                key={plat.id}
+                id={plat.id}
+                name={plat.name}
+                selected={selectedPlatforms.includes(plat.id)}
+                onPress={() => togglePlatform(plat.id)}
+              />
+            ))}
+          </View>
+          <Text style={styles.note}>
+            {userProfile?.tier === 'pro' || userProfile?.tier === 'founding'
+              ? 'Pro posts to each platform for you at the time you pick.'
+              : 'Free plans prepare posts for each platform. Auto-posting is part of Pro.'}
           </Text>
-          <View style={styles.mediaUploadBox}>
-            {selectedFormat === 'text' && !hasMedia ? (
-              /* Text Post Active (No mandatory media required) */
-              <View style={styles.textFirstFormatBanner}>
-                <View style={styles.textFirstIconCircle}>
-                  <Text style={{ fontSize: 20 }}>✍️</Text>
-                </View>
-                <View style={{ flex: 1 }}>
-                  <Text style={styles.textFirstTitle}>Text-First Format Active</Text>
-                  <Text style={styles.textFirstSubtitle}>
-                    No media upload is required for text takes & insights. Write your post below!
-                  </Text>
-                </View>
-                <Pressable
-                  style={styles.textFirstAddMediaBtn}
-                  onPress={() => handleUploadMedia('image')}
-                >
-                  <Svg width={12} height={12} viewBox="0 0 24 24" fill="none">
-                    <Path d="M12 5v14M5 12h14" stroke="#582CDB" strokeWidth="2.5" strokeLinecap="round" />
-                  </Svg>
-                  <Text style={styles.textFirstAddMediaBtnText}>Add Visual</Text>
-                </Pressable>
-              </View>
-            ) : hasMedia ? (
-              /* Attached Media Preview Box */
-              <View style={styles.mediaAttachedContainer}>
-                <View style={styles.mediaAttachedHeaderRow}>
-                  {/* Thumbnail / Video Icon Box */}
-                  <View style={styles.mediaAttachedThumbBox}>
-                    {selectedFormat === 'carousel' ? (
-                      <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
-                        <Rect x="4" y="4" width="16" height="16" rx="3" stroke="#FFFFFF" strokeWidth="2" />
-                        <Path d="M9 4v16" stroke="#FFFFFF" strokeWidth="2" />
-                      </Svg>
-                    ) : selectedFormat === 'image' ? (
-                      <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
-                        <Rect x="3" y="3" width="18" height="18" rx="4" stroke="#FFFFFF" strokeWidth="2" />
-                        <Circle cx="8.5" cy="8.5" r="1.5" fill="#FFFFFF" />
-                        <Path d="M21 15l-5-5L5 21" stroke="#FFFFFF" strokeWidth="2" strokeLinecap="round" />
-                      </Svg>
-                    ) : (
-                      <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
-                        <Path d="M8 5v14l11-7z" fill="#FFFFFF" />
-                      </Svg>
-                    )}
-                    <View style={styles.mediaThumbDurationTag}>
-                      <Text style={styles.mediaThumbDurationText}>
-                        {selectedFormat === 'carousel' ? '5 Slides' : selectedFormat === 'image' ? '1 Visual' : '0:30'}
-                      </Text>
-                    </View>
-                  </View>
 
-                  <View style={{ flex: 1, marginLeft: 12 }}>
-                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 3 }}>
-                      <View style={styles.mediaAttachedStatusBadge}>
-                        <Text style={styles.mediaAttachedStatusText}>✓ ATTACHED</Text>
-                      </View>
-                      <Text style={styles.mediaAttachedSizeText}>
-                        {selectedFormat === 'carousel' ? '12.8 MB (5 slides)' : '24.5 MB'}
-                      </Text>
-                    </View>
-                    <Text style={styles.mediaAttachedFileName} numberOfLines={1}>
-                      {selectedFormat === 'carousel'
-                        ? 'Swipe_Carousel_Deck_V1'
-                        : selectedFormat === 'image'
-                        ? 'Creative_Visual_V1.jpg'
-                        : selectedFormat === 'long_video'
-                        ? 'Longform_Tutorial_16x9.mp4'
-                        : 'ShortForm_Reel_V1.mp4'}
-                    </Text>
-                    <Text style={styles.mediaAttachedSpecsText}>
-                      {selectedFormat === 'carousel'
-                        ? '4:5 Aspect • 5 High-Res Slides • Optimized'
-                        : selectedFormat === 'image'
-                        ? '1080×1350 • 4:5 Portrait • High Quality'
-                        : selectedFormat === 'long_video'
-                        ? '1920×1080 • 16:9 Landscape • 4K 60FPS'
-                        : '1080×1920 • 9:16 Vertical • 30s • 4K HDR'}
-                    </Text>
-                  </View>
-                </View>
-
-                {/* Sub-actions Row: Replace, Thumbnail, Remove */}
-                <View style={styles.mediaAttachedActionsRow}>
-                  <Pressable
-                    style={({ pressed }) => [styles.mediaSubActionBtn, pressed && styles.btnPressed]}
-                    onPress={() => handleUploadMedia(selectedFormat === 'image' ? 'image' : 'video')}
-                  >
-                    <Svg width={13} height={13} viewBox="0 0 24 24" fill="none">
-                      <Path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" stroke="#582CDB" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                    </Svg>
-                    <Text style={styles.mediaSubActionBtnText}>Replace Media</Text>
-                  </Pressable>
-
-                  <Pressable
-                    style={({ pressed }) => [styles.mediaSubActionBtn, pressed && styles.btnPressed]}
-                    onPress={() => {
-                      if (Platform.OS !== 'web') {
-                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                      }
-                      setHasThumbnail(!hasThumbnail);
-                    }}
-                  >
-                    <Svg width={13} height={13} viewBox="0 0 24 24" fill="none">
-                      <Rect x="3" y="3" width="18" height="18" rx="4" stroke={hasThumbnail ? '#15803D' : '#582CDB'} strokeWidth="2" />
-                      <Circle cx="8.5" cy="8.5" r="1.5" fill={hasThumbnail ? '#15803D' : '#582CDB'} />
-                      <Path d="M21 15L16 10L5 21" stroke={hasThumbnail ? '#15803D' : '#582CDB'} strokeWidth="2" strokeLinecap="round" />
-                    </Svg>
-                    <Text style={[styles.mediaSubActionBtnText, hasThumbnail && { color: '#15803D' }]}>
-                      {hasThumbnail ? 'Thumbnail Added ✓' : 'Add Thumbnail'}
-                    </Text>
-                  </Pressable>
-
-                  <Pressable
-                    style={({ pressed }) => [styles.mediaSubActionRemoveBtn, pressed && styles.btnPressed]}
-                    onPress={() => {
-                      if (Platform.OS !== 'web') {
-                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-                      }
-                      setHasMedia(false);
-                      setHasThumbnail(false);
-                    }}
-                  >
-                    <Svg width={12} height={12} viewBox="0 0 24 24" fill="none">
-                      <Path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" stroke="#EF4444" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                    </Svg>
-                    <Text style={styles.mediaSubActionRemoveText}>Remove</Text>
-                  </Pressable>
-                </View>
-              </View>
-            ) : (
-              /* Empty Format-Adapted Dropzone */
-              <View>
-                <Pressable
-                  style={styles.mediaDashedDropzone}
-                  onPress={() => handleUploadMedia(selectedFormat === 'image' ? 'image' : 'video')}
-                >
-                  <View style={styles.mediaIconCircle}>
-                    {selectedFormat === 'carousel' ? (
-                      <Svg width={24} height={24} viewBox="0 0 24 24" fill="none">
-                        <Rect x="4" y="4" width="16" height="16" rx="3" stroke="#582CDB" strokeWidth="2" />
-                        <Path d="M9 4v16" stroke="#582CDB" strokeWidth="2" />
-                      </Svg>
-                    ) : selectedFormat === 'image' ? (
-                      <Svg width={24} height={24} viewBox="0 0 24 24" fill="none">
-                        <Rect x="3" y="3" width="18" height="18" rx="4" stroke="#582CDB" strokeWidth="2" />
-                        <Circle cx="8.5" cy="8.5" r="1.5" fill="#582CDB" />
-                        <Path d="M21 15l-5-5L5 21" stroke="#582CDB" strokeWidth="2" strokeLinecap="round" />
-                      </Svg>
-                    ) : (
-                      <Svg width={24} height={24} viewBox="0 0 24 24" fill="none">
-                        <Path d="M12 4v12m0 0l-4-4m4 4l4-4M4 17v3a1 1 0 001 1h14a1 1 0 001-1v-3" stroke="#582CDB" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                      </Svg>
-                    )}
-                  </View>
-
-                  <Text style={styles.mediaDropzoneTitle}>
-                    {selectedFormat === 'carousel'
-                      ? 'Add carousel slides or deck'
-                      : selectedFormat === 'image'
-                      ? 'Add high-res image visual'
-                      : selectedFormat === 'long_video'
-                      ? 'Add your long-form video'
-                      : 'Add your short-form video'}
-                  </Text>
-                  <Text style={styles.mediaDropzoneSubtitle}>{dynamicMediaSub}</Text>
-                </Pressable>
-
-                <View style={styles.mediaButtonsRow}>
-                  <Pressable
-                    style={({ pressed }) => [styles.mediaActionBtn, pressed && styles.btnPressed]}
-                    onPress={() => handleUploadMedia(selectedFormat === 'image' ? 'image' : 'video')}
-                  >
-                    <Svg width={14} height={14} viewBox="0 0 24 24" fill="none">
-                      <Path
-                        d="M4 16L8.586 11.414C9.367 10.633 10.633 10.633 11.414 11.414L16 16M14 14L15.586 12.414C16.367 11.633 17.633 11.633 18.414 12.414L20 14M14 8H14.01M6 20H18C19.105 20 20 19.105 20 18V6C20 4.895 19.105 4 18 4H6C4.895 4 4 4.895 4 6V18C4 19.105 4.895 20 6 20Z"
-                        stroke="#582CDB"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                    </Svg>
-                    <Text style={styles.mediaActionBtnText}>{currentFormatConfig.primaryMediaActionText}</Text>
-                  </Pressable>
-
-                  <Pressable
-                    style={({ pressed }) => [styles.mediaActionBtn, pressed && styles.btnPressed]}
-                    onPress={() => handleUploadMedia('thumbnail')}
-                  >
-                    <Svg width={14} height={14} viewBox="0 0 24 24" fill="none">
-                      <Rect x="3" y="3" width="18" height="18" rx="4" stroke="#582CDB" strokeWidth="2" />
-                      <Circle cx="8.5" cy="8.5" r="1.5" fill="#582CDB" />
-                      <Path d="M21 15L16 10L5 21" stroke="#582CDB" strokeWidth="2" strokeLinecap="round" />
-                    </Svg>
-                    <Text style={styles.mediaActionBtnText}>Add Thumbnail</Text>
-                  </Pressable>
-                </View>
-              </View>
-            )}
+          {/* 2. FORMAT */}
+          <StepHeader
+            n={2}
+            title="Format"
+            done={isFormatReady}
+            viewRef={(v) => (sectionRefs.current.format = v)}
+          />
+          <RecommendedFormat
+            id={recommendedFormatConfig.id}
+            title={recommendedFormatConfig.title}
+            badge={recommendedFormatConfig.badge}
+            description={recommendedFormatConfig.recommendedDescription}
+            selected={selectedFormat === recommendedFormatConfig.id}
+            onPress={() => setSelectedFormat(recommendedFormatConfig.id)}
+          />
+          <View style={styles.tilesGrid}>
+            {otherFormats.map((f) => (
+              <FormatTile
+                key={f.id}
+                id={f.id}
+                title={f.title}
+                badge={f.badge}
+                selected={selectedFormat === f.id}
+                onPress={() => setSelectedFormat(f.id)}
+              />
+            ))}
           </View>
+          {selectedFormat === 'short_video' && <FilmMethodPicker method={filmMethod} onChange={setFilmMethod} />}
+          {incompatiblePlatforms.length > 0 && (
+            <Text style={styles.note}>
+              {incompatiblePlatforms.map((p) => ALL_AVAILABLE_PLATFORMS.find((x) => x.id === p)?.name).join(' & ')} will adapt your{' '}
+              {currentFormatConfig.title.toLowerCase()} to fit its feed.
+            </Text>
+          )}
 
-          {/* 4. CAPTION WRITING */}
-          <View
-            style={styles.sectionLabelRow}
-            onLayout={(e) => {
-              sectionPositions.current.caption = e.nativeEvent.layout.y;
-            }}
-          >
-            <Text style={styles.sectionLabel}>CAPTION WRITING</Text>
-            <View style={styles.aiBadge}>
-              <Text style={styles.aiBadgeText}>{aiEditsLeft} AI EDITS LEFT</Text>
-            </View>
-          </View>
+          {/* 3. MEDIA */}
+          <StepHeader
+            n={3}
+            title={isNativeFilm || isCameraFilm ? 'Film it' : 'Media'}
+            done={isMediaReady}
+            viewRef={(v) => (sectionRefs.current.media = v)}
+          />
+          {isNativeFilm || isCameraFilm ? (
+            <FilmPlanCard
+              plan={filmPlan}
+              sounds={soundIdeas}
+              platforms={handoffPlatforms}
+              onOpen={openPlatformToFilm}
+              onStyleChange={setFilmStyle}
+              mode={isCameraFilm ? 'camera' : 'native'}
+              overlayText={overlayText}
+              onOverlayChange={setOverlayText}
+              recording={hasMedia && pickedMedia?.kind === 'video' ? { duration: pickedMedia.duration } : null}
+              onRecord={addFromCamera}
+              onRemoveRecording={clearMedia}
+            />
+          ) : (
+          <MediaZone
+            isText={selectedFormat === 'text'}
+            hasMedia={hasMedia}
+            hasThumbnail={hasThumbnail}
+            label={currentFormatConfig.mediaLabel}
+            sub={dynamicMediaSub}
+            addLabel={currentFormatConfig.primaryMediaActionText}
+            onAdd={addFromLibrary}
+            onCamera={addFromCamera}
+            cameraLabel={wantsVideo ? 'Record with camera' : 'Take a photo'}
+            onThumbnail={() => setHasThumbnail(!hasThumbnail)}
+            onRemove={clearMedia}
+          />
+          )}
 
-          <View style={[styles.captionContainer, isCaptionFocused && styles.captionContainerFocused]}>
+          {attachedAudio && (
+            <Reanimated.View entering={FadeIn.duration(240)} style={styles.voiceAttached}>
+              <View style={styles.voiceAttachedIcon}>
+                <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
+                  <Rect x="9" y="2" width="6" height="12" rx="3" stroke={ds.purple} strokeWidth={2.1} />
+                  <Path d="M5 11a7 7 0 0014 0M12 18v4" stroke={ds.purple} strokeWidth={2.1} strokeLinecap="round" />
+                </Svg>
+              </View>
+              <View style={{ flex: 1 }}>
+                <Text style={styles.voiceAttachedTitle}>Voiceover added</Text>
+                <Text style={styles.voiceAttachedSub} numberOfLines={1}>
+                  {attachedAudio.voiceName} · {attachedAudio.duration}
+                </Text>
+              </View>
+              <Pressable onPress={() => onClearAttachedAudio?.()} hitSlop={8} accessibilityRole="button" accessibilityLabel="Remove voiceover">
+                <Svg width={16} height={16} viewBox="0 0 24 24" fill="none">
+                  <Path d="M18 6L6 18M6 6l12 12" stroke={ds.text3} strokeWidth={2.4} strokeLinecap="round" />
+                </Svg>
+              </Pressable>
+            </Reanimated.View>
+          )}
+
+          {/* 4. CAPTION */}
+          <StepHeader
+            n={4}
+            title="Caption"
+            done={isCaptionReady}
+            right={<EditsMeter left={aiEditsLeft} total={3} />}
+            viewRef={(v) => (sectionRefs.current.caption = v)}
+          />
+          <View style={[styles.captionCard, isCaptionFocused && styles.captionCardFocused]}>
             <TextInput
               ref={captionInputRef}
-              style={styles.captionInput}
+              style={styles.captionField}
               multiline
               value={caption}
               onChangeText={setCaption}
               onFocus={() => setIsCaptionFocused(true)}
               onBlur={() => setIsCaptionFocused(false)}
-              placeholder="Write or tap to edit your post caption..."
-              placeholderTextColor="#94A3B8"
-              selectionColor="#7C3AED"
-              cursorColor="#7C3AED"
+              placeholder="Write your caption…"
+              placeholderTextColor={ds.text3}
+              selectionColor={ds.purple}
+              cursorColor={ds.purple}
             />
-
-            <View style={styles.captionMetaRow}>
-              <View style={styles.captionMetaLeft}>
-                <Pressable
-                  onPress={() => {
-                    const tones: ('Helpful' | 'Viral' | 'Story')[] = ['Helpful', 'Viral', 'Story'];
-                    const next = tones[(tones.indexOf(captionTone) + 1) % tones.length];
-                    setCaptionTone(next);
-                  }}
-                  style={styles.tonePill}
-                >
-                  <Text style={styles.toneLabel}>TONE</Text>
-                  <Text style={styles.toneDivider}>·</Text>
-                  <Text style={styles.toneValue}>💡 {captionTone}</Text>
-                </Pressable>
-
-                <Pressable
-                  onPress={() => {
-                    const ctas: ('Ask Question' | 'Save Post' | 'Share Thoughts')[] = [
-                      'Ask Question',
-                      'Save Post',
-                      'Share Thoughts',
-                    ];
-                    const next = ctas[(ctas.indexOf(captionCta) + 1) % ctas.length];
-                    setCaptionCta(next);
-                  }}
-                  style={styles.tonePill}
-                >
-                  <Text style={styles.toneLabel}>CTA</Text>
-                  <Text style={styles.toneDivider}>·</Text>
-                  <Text style={styles.toneValue}>
-                    {captionCta === 'Ask Question' ? 'Question' : captionCta === 'Save Post' ? 'Save' : 'Share'}
-                  </Text>
-                </Pressable>
-              </View>
-
-              <Text style={styles.charCountText}>{caption.length} chars</Text>
-            </View>
-
-            {/* 3 AI Action Pills */}
-            <View style={styles.aiButtonsRow}>
-              <Pressable
-                style={({ pressed }) => [styles.aiPillBtn, pressed && styles.btnPressed]}
-                onPress={() => handleAiAction('rewrite')}
-                disabled={isAiProcessing}
-              >
-                <Text style={styles.aiPillBtnText}>
-                  {isAiProcessing ? '...' : 'Rewrite'}
-                </Text>
-              </Pressable>
-
-              <Pressable
-                style={({ pressed }) => [styles.aiPillBtn, pressed && styles.btnPressed]}
-                onPress={() => handleAiAction('shorter')}
-                disabled={isAiProcessing}
-              >
-                <Text style={styles.aiPillBtnText}>Shorten</Text>
-              </Pressable>
-
-              <Pressable
-                style={({ pressed }) => [styles.aiPillBtn, pressed && styles.btnPressed]}
-                onPress={() => handleAiAction('cta')}
-                disabled={isAiProcessing}
-              >
-                <Text style={styles.aiPillBtnText}>Add CTA</Text>
-              </Pressable>
-            </View>
-          </View>
-
-          {/* 5. HASHTAGS & TAGS */}
-          <View style={styles.sectionLabelRow}>
-            <Text style={styles.sectionLabel}>HASHTAGS &amp; TAGS</Text>
-            {selectedPlatforms.length > 0 && (
-              <View style={styles.platformTagsBadgeRow}>
-                {selectedPlatforms.map((platId) => {
-                  const plat = ALL_AVAILABLE_PLATFORMS.find((p) => p.id === platId);
-                  if (!plat) return null;
-                  return (
-                    <View key={plat.id} style={[styles.platformMiniTagPill, { backgroundColor: plat.bgColor }]}>
-                      <Text style={styles.platformMiniTagText}>{plat.name}</Text>
-                    </View>
-                  );
-                })}
+            {isAiProcessing && (
+              <View style={styles.aiWorking}>
+                <JarvisOrb size={22} />
+                <Text style={styles.aiWorkingText}>Jarvis is rewriting…</Text>
               </View>
             )}
+            <Text style={styles.charCount}>{caption.length} characters</Text>
+            <View style={styles.captionMeta}>
+              <CyclePill
+                label="TONE"
+                value={captionTone}
+                onPress={() => setCaptionTone(captionTones[(captionTones.indexOf(captionTone) + 1) % captionTones.length])}
+              />
+              <CyclePill
+                label="ENDS WITH"
+                value={captionCta === 'Ask Question' ? 'Question' : captionCta === 'Save Post' ? 'Save' : 'Share'}
+                onPress={() => setCaptionCta(captionCtas[(captionCtas.indexOf(captionCta) + 1) % captionCtas.length])}
+              />
+            </View>
+            <View style={styles.aiRow}>
+              <AiAction label="Rewrite" onPress={() => handleAiAction('rewrite')} disabled={isAiProcessing || aiEditsLeft === 0} />
+              <AiAction label="Shorten" onPress={() => handleAiAction('shorter')} disabled={isAiProcessing || aiEditsLeft === 0} />
+              <AiAction label="Ask viewers" onPress={() => handleAiAction('cta')} disabled={isAiProcessing || aiEditsLeft === 0} />
+            </View>
           </View>
+          <Text style={styles.note}>
+            {ideaGoal?.caption
+              ? 'From the Caption writer. Edit it here any time.'
+              : ideaGoal?.goal
+              ? `Written to ${IDEA_GOALS.find((g) => g.id === ideaGoal.goal)?.label.toLowerCase()}. Tone and ending are set for that.`
+              : 'Tip: name the exact moment or mistake, and one thing people can try.'}
+          </Text>
 
-          <View style={styles.tagsContainer}>
-            <View style={styles.tagsContextRow}>
-              <Text style={styles.tagsContextSparkle}>✨</Text>
-              <Text style={styles.tagsContextText}>
-                Jarvis selected these based on your post &amp; {selectedPlatforms.length > 0 ? selectedPlatforms.map(p => ALL_AVAILABLE_PLATFORMS.find(x => x.id === p)?.name).join(' + ') : 'channels'}
-              </Text>
-            </View>
-
-            <View style={styles.tagsPillsRow}>
+          {/* 5. TAGS */}
+          <StepHeader n={5} title="Tags" done={tags.length > 0} />
+          <GlassCard strong radius={22} padding={16}>
+            <View style={styles.tagsWrap}>
               {tags.map((tag) => (
-                <Pressable
-                  key={tag}
-                  onPress={() => removeTag(tag)}
-                  style={styles.tagPill}
-                >
-                  <Text style={styles.tagPillText}>{tag}</Text>
-                  <Text style={styles.tagPillCross}>×</Text>
-                </Pressable>
+                <TagChip key={tag} tag={tag} onRemove={() => removeTag(tag)} />
               ))}
+              {tags.length === 0 && <Text style={styles.noTags}>No tags yet</Text>}
             </View>
-
             {showAddTagInput && (
-              <View style={styles.addTagInputRow}>
+              <View style={styles.addTagRow}>
                 <TextInput
-                  style={styles.addTagInput}
-                  placeholder="Enter tag (e.g. #growth)"
-                  placeholderTextColor="#94A3B8"
+                  style={styles.addTagField}
+                  placeholder="#yourtag"
+                  placeholderTextColor={ds.text3}
                   value={newTagInput}
                   onChangeText={setNewTagInput}
                   onSubmitEditing={handleAddCustomTag}
                   autoFocus
+                  autoCapitalize="none"
                 />
-                <Pressable onPress={handleAddCustomTag} style={styles.addTagConfirmBtn}>
-                  <Text style={styles.addTagConfirmText}>Add</Text>
+                <Pressable onPress={handleAddCustomTag} style={styles.addTagBtn} accessibilityRole="button">
+                  <Text style={styles.addTagBtnText}>Add</Text>
                 </Pressable>
               </View>
             )}
-
-            <View style={styles.tagActionsRow}>
-              {/* Secondary Outlined Custom Tag Button */}
-              <Pressable
-                style={({ pressed }) => [styles.tagActionCustomBtn, pressed && styles.btnPressed]}
-                onPress={() => setShowAddTagInput(!showAddTagInput)}
-              >
-                <Svg width={12} height={12} viewBox="0 0 24 24" fill="none">
-                  <Path d="M12 5v14M5 12h14" stroke="#582CDB" strokeWidth="2.4" strokeLinecap="round" />
-                </Svg>
-                <Text style={styles.tagActionCustomBtnText} numberOfLines={1}>Add Custom Tag</Text>
-              </Pressable>
-
-              {/* Stronger Primary Purple Filled Generate Tags Button */}
-              <Pressable
-                style={({ pressed }) => [styles.tagActionGenerateBtn, pressed && styles.btnPressed]}
-                onPress={handleGenerateTags}
-              >
-                <LinearGradient
-                  colors={['#582CDB', '#7C3AED']}
-                  start={{ x: 0, y: 0 }}
-                  end={{ x: 1, y: 1 }}
-                  style={styles.tagActionGenerateGradient}
-                >
-                  <Text style={{ fontSize: 12 }}>✨</Text>
-                  <Text style={styles.tagActionGenerateBtnText} numberOfLines={1}>Generate Tags</Text>
-                </LinearGradient>
-              </Pressable>
-            </View>
-          </View>
-
-          {/* 6. PUBLISHING & SCHEDULE TIMING */}
-          <View
-            style={styles.timingCard}
-            onLayout={(e) => {
-              sectionPositions.current.schedule = e.nativeEvent.layout.y;
-            }}
-          >
-            <View style={styles.timingHeaderRow}>
-              <Text style={styles.timingSuggestedLightbulb}>💡</Text>
-              <View style={{ flex: 1 }}>
-                <Text style={styles.timingSuggestedTitle}>Jarvis recommends 7:30 PM</Text>
-                <Text style={styles.timingSuggestedSub}>Your audience is usually more active around this time.</Text>
+            <View style={styles.tagActions}>
+              <View style={styles.flex1}>
+                <AppButton title={showAddTagInput ? 'Cancel' : 'Add tag'} variant="outline" onPress={() => setShowAddTagInput(!showAddTagInput)} />
+              </View>
+              <View style={styles.flex1}>
+                <AppButton title="Suggest" variant="quiet" onPress={handleGenerateTags} />
               </View>
             </View>
+          </GlassCard>
 
-            {/* 3 Timing Tabs */}
-            <View style={styles.timingTabsRow}>
-              {(['now', 'schedule', 'draft'] as const).map((m) => {
-                const isActive = publishMode === m;
-                const label = m === 'now' ? 'POST NOW' : m === 'schedule' ? 'SCHEDULE' : 'DRAFT';
-                return (
-                  <Pressable
-                    key={m}
-                    onPress={() => {
-                      if (Platform.OS !== 'web') {
-                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                      }
-                      setPublishMode(m);
-                    }}
-                    style={[
-                      styles.timingTabBtn,
-                      isActive && styles.timingTabBtnActive,
-                    ]}
-                  >
-                    <Text
-                      style={[
-                        styles.timingTabBtnText,
-                        isActive && styles.timingTabBtnTextActive,
-                      ]}
-                    >
-                      {label}
-                    </Text>
-                  </Pressable>
-                );
-              })}
-            </View>
-
+          {/* 6. WHEN */}
+          <StepHeader
+            n={6}
+            title="When to post"
+            done={isScheduleReady}
+            viewRef={(v) => (sectionRefs.current.schedule = v)}
+          />
+          <GlassCard strong radius={22} padding={16}>
+            <ModeSwitch mode={publishMode} onChange={setPublishMode} labels={isNativeFilm ? { now: 'Film now', schedule: 'Remind me' } : undefined} />
             {publishMode === 'schedule' && (
-              <View style={styles.scheduledInfoBox}>
-                <View>
-                  <Text style={styles.scheduledLabel}>SCHEDULED FOR</Text>
-                  <Text style={styles.scheduledValue}>{scheduledTime}</Text>
-                </View>
+              <Reanimated.View entering={FadeInUp.duration(250)}>
                 <Pressable
                   onPress={() => {
-                    setShowCustomCalendarView(false);
-                    triggerModalAnim();
-                    setShowCalendarModal(true);
+                    setShowScheduleSheet(true);
                   }}
-                  hitSlop={8}
+                  style={styles.whenRow}
+                  accessibilityRole="button"
+                  accessibilityLabel={`Scheduled for ${scheduledTime}. Change`}
                 >
-                  <Text style={styles.scheduledChangeLink}>CHANGE</Text>
+                  <Svg width={20} height={20} viewBox="0 0 24 24" fill="none">
+                    <Rect x="3" y="4" width="18" height="17" rx="3" stroke={ds.purple} strokeWidth={2.1} />
+                    <Path d="M16 2v4M8 2v4M3 10h18" stroke={ds.purple} strokeWidth={2.1} strokeLinecap="round" />
+                  </Svg>
+                  <View style={styles.flex1}>
+                    <Text style={styles.whenLabel}>{isNativeFilm ? 'Remind me at' : 'Scheduled for'}</Text>
+                    <Text style={styles.whenValue}>{scheduledTime}</Text>
+                  </View>
+                  <Text style={styles.whenChange}>Change</Text>
                 </Pressable>
+              </Reanimated.View>
+            )}
+            <View style={styles.jarvisTime}>
+              <JarvisOrb size={22} />
+              <Text style={styles.jarvisTimeText}>
+                Jarvis suggests <Text style={styles.jarvisTimeBold}>7:30 PM</Text>, when your audience is usually around.
+              </Text>
+            </View>
+          </GlassCard>
+
+          {/* READINESS + ACTIONS */}
+          <View style={styles.readyWrap}>
+            <ReadinessCard percent={readinessPercent} steps={readinessSteps} onStep={(k) => navigateToSection(k as 'format' | 'caption' | 'platforms' | 'media' | 'schedule')} />
+          </View>
+          <View style={styles.actions}>
+            {isNativeFilm && publishMode === 'now' && handoffPlatforms.length > 1 && filmApp && (
+              <Reanimated.View entering={FadeIn.duration(200)}>
+                <Text style={styles.filmInLabel}>Film in</Text>
+                <View style={styles.filmInRow}>
+                  {handoffPlatforms.map((p) => {
+                    const on = p === filmApp;
+                    return (
+                      <Pressable
+                        key={p}
+                        onPress={() => {
+                          if (Platform.OS !== 'web') Haptics.selectionAsync();
+                          setFilmAppChoice(p);
+                        }}
+                        accessibilityRole="radio"
+                        accessibilityState={{ checked: on }}
+                        accessibilityLabel={`Film in ${HANDOFF_NAMES[p]}`}
+                        style={[styles.filmInChip, on && styles.filmInChipOn]}
+                      >
+                        <PlatformLogo type={p} size={22} />
+                        <Text style={[styles.filmInText, on && { color: ds.purple }]} numberOfLines={1}>
+                          {HANDOFF_NAMES[p]}
+                        </Text>
+                      </Pressable>
+                    );
+                  })}
+                </View>
+                <Text style={styles.filmInNote}>
+                  Film once where you want the sound, then share the same video to{' '}
+                  {handoffPlatforms
+                    .filter((p) => p !== filmApp)
+                    .map((p) => HANDOFF_NAMES[p])
+                    .join(' and ')}
+                  .
+                </Text>
+              </Reanimated.View>
+            )}
+            <AppButton
+              title={
+                publishMode === 'draft'
+                  ? 'Save draft'
+                  : isNativeFilm
+                  ? publishMode === 'now'
+                    ? `Film in ${filmApp ? HANDOFF_NAMES[filmApp] : 'the app'}`
+                    : 'Set reminder'
+                  : publishMode === 'now'
+                  ? 'Post now'
+                  : 'Schedule post'
+              }
+              size="lg"
+              onPress={handlePublishOrSchedule}
+              iconRight={
+                <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
+                  <Path d="M5 12h14M13 6l6 6-6 6" stroke="#FFFFFF" strokeWidth={2.4} strokeLinecap="round" strokeLinejoin="round" />
+                </Svg>
+              }
+            />
+            {publishMode !== 'draft' && (
+              <View style={styles.secondaryAction}>
+                <AppButton title="Save as draft" variant="glass" onPress={saveDraft} />
               </View>
             )}
           </View>
 
-          {/* 7. POST READINESS CHECKLIST (WEIGHTED & INTERACTIVE NAVIGATOR) */}
-          <View style={[styles.readinessCard, isAllReady && styles.readinessCardComplete]}>
-            <View style={styles.readinessHeaderRow}>
-              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 7, flexWrap: 'wrap' }}>
-                <Text style={styles.readinessTitle}>POST READINESS</Text>
-                {isAllReady && (
-                  <View style={styles.readinessReadyBadge}>
-                    <Text style={styles.readinessReadyBadgeText}>100% READY TO POST 🎉</Text>
-                  </View>
-                )}
-              </View>
-              <Text style={[styles.readinessPercent, isAllReady && styles.readinessPercentComplete]}>
-                {readinessPercent}%
-              </Text>
-            </View>
-
-            <View style={styles.readinessProgressBarTrack}>
-              <LinearGradient
-                colors={isAllReady ? ['#10B981', '#059669'] : ['#7C3AED', '#582CDB']}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 0 }}
-                style={[styles.readinessProgressBarFill, { width: `${readinessPercent}%` }]}
-              />
-            </View>
-
-            {/* Checklist Items as Tappable Navigation Rows */}
-            <View style={styles.checklistContainer}>
-              {/* 1. Content Format (10%) */}
-              <Pressable
-                style={({ pressed }) => [styles.checklistRowInteractive, pressed && styles.btnPressed]}
-                onPress={() => navigateToSection('format')}
-                hitSlop={4}
-              >
-                <View style={isFormatReady ? styles.checkIconFilled : styles.checkIconEmpty}>
-                  {isFormatReady && <Text style={styles.checkMarkWhite}>✓</Text>}
-                </View>
-                <View style={styles.checklistTextContainer}>
-                  <Text style={[styles.checklistText, !isFormatReady && styles.checklistTextIncomplete]}>
-                    {isFormatReady
-                      ? `Content format selected (${currentFormatConfig.title})`
-                      : 'Content format not selected'}
-                  </Text>
-                </View>
-                {!isFormatReady && <Text style={styles.checklistNavChevron}>›</Text>}
-              </Pressable>
-
-              {/* 2. Caption (20%) */}
-              <Pressable
-                style={({ pressed }) => [styles.checklistRowInteractive, pressed && styles.btnPressed]}
-                onPress={() => navigateToSection('caption')}
-                hitSlop={4}
-              >
-                <View style={isCaptionReady ? styles.checkIconFilled : styles.checkIconEmpty}>
-                  {isCaptionReady && <Text style={styles.checkMarkWhite}>✓</Text>}
-                </View>
-                <View style={styles.checklistTextContainer}>
-                  <Text style={[styles.checklistText, !isCaptionReady && styles.checklistTextIncomplete]}>
-                    {isCaptionReady ? 'Caption added & optimized' : 'Caption not added'}
-                  </Text>
-                </View>
-                {!isCaptionReady && <Text style={styles.checklistNavChevron}>›</Text>}
-              </Pressable>
-
-              {/* 3. Platforms (25%) */}
-              <Pressable
-                style={({ pressed }) => [styles.checklistRowInteractive, pressed && styles.btnPressed]}
-                onPress={() => navigateToSection('platforms')}
-                hitSlop={4}
-              >
-                <View style={isPlatformsReady ? styles.checkIconFilled : styles.checkIconEmpty}>
-                  {isPlatformsReady && <Text style={styles.checkMarkWhite}>✓</Text>}
-                </View>
-                <View style={styles.checklistTextContainer}>
-                  <Text style={[styles.checklistText, !isPlatformsReady && styles.checklistTextIncomplete]}>
-                    {isPlatformsReady
-                      ? `Platforms selected (${selectedPlatforms.map((p) => {
-                          const match = ALL_AVAILABLE_PLATFORMS.find((item) => item.id === p);
-                          return match ? match.shortName : p;
-                        }).join(', ')})`
-                      : 'Platforms not selected'}
-                  </Text>
-                </View>
-                {!isPlatformsReady && <Text style={styles.checklistNavChevron}>›</Text>}
-              </Pressable>
-
-              {/* 4. Media (30%) */}
-              <Pressable
-                style={({ pressed }) => [styles.checklistRowInteractive, pressed && styles.btnPressed]}
-                onPress={() => navigateToSection('media')}
-                hitSlop={4}
-              >
-                <View style={isMediaReady ? styles.checkIconFilled : styles.checkIconEmpty}>
-                  {isMediaReady && <Text style={styles.checkMarkWhite}>✓</Text>}
-                </View>
-                <View style={styles.checklistTextContainer}>
-                  <Text style={[styles.checklistText, !isMediaReady && styles.checklistTextIncomplete]}>
-                    {selectedFormat === 'text'
-                      ? 'Text-first format (no media required)'
-                      : hasMedia
-                      ? 'Media uploaded & attached'
-                      : 'Media not added'}
-                  </Text>
-                </View>
-                {!isMediaReady && <Text style={styles.checklistNavChevron}>›</Text>}
-              </Pressable>
-
-              {/* 5. Schedule (15%) */}
-              <Pressable
-                style={({ pressed }) => [styles.checklistRowInteractive, pressed && styles.btnPressed]}
-                onPress={() => navigateToSection('schedule')}
-                hitSlop={4}
-              >
-                <View style={isScheduleReady ? styles.checkIconFilled : styles.checkIconEmpty}>
-                  {isScheduleReady && <Text style={styles.checkMarkWhite}>✓</Text>}
-                </View>
-                <View style={styles.checklistTextContainer}>
-                  <Text style={[styles.checklistText, !isScheduleReady && styles.checklistTextIncomplete]}>
-                    {publishMode === 'now'
-                      ? 'Post immediately on publish'
-                      : publishMode === 'draft'
-                      ? 'Save as draft'
-                      : `Schedule time selected (${scheduledTime})`}
-                  </Text>
-                </View>
-                {!isScheduleReady && <Text style={styles.checklistNavChevron}>›</Text>}
-              </Pressable>
-            </View>
-          </View>
-
-          {/* 8. STREAK IMPACT BANNER */}
-          <View style={styles.streakBannerCard}>
-            <View style={styles.streakBannerIconCircle}>
-              <Text style={{ fontSize: 16 }}>⚡</Text>
-            </View>
-            <View style={{ flex: 1 }}>
-              <Text style={styles.streakBannerTitle}>
-                Scheduling this post today protects your <Text style={{ fontWeight: '700' }}>{userProfile?.streakCount || 1}-day streak</Text>.
-              </Text>
-              <View style={styles.streakBannerBadgesRow}>
-                <View style={styles.streakXpPill}>
-                  <Text style={styles.streakXpText}>+50 CREATOR XP</Text>
-                </View>
-                <Text style={styles.streakMissionFraction}>STREAK MISSION: 0 / 1</Text>
-              </View>
-            </View>
-          </View>
-
-          {/* 9. JARVIS WRITING INSIGHT (LUXURY LAVENDER-CREAM DESIGN) */}
-          <LinearGradient
-            colors={['#FFFFFF', '#F8F5FE']}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 0, y: 1 }}
-            style={styles.jarvisWritingCard}
-          >
-            <View style={styles.jarvisWritingHeaderRow}>
-              <View style={styles.jarvisWritingHeaderLeft}>
-                <Animated.View
-                  style={[
-                    styles.jarvisWritingFlameIconBox,
-                    { transform: [{ translateY: flameFloatY }] },
-                  ]}
-                >
-                  <Image
-                    source={require('../../assets/images/jarvis-core-flame.png')}
-                    style={styles.jarvisWritingFlame}
-                    resizeMode="contain"
-                  />
-                </Animated.View>
-                <View style={styles.jarvisInsightBadge}>
-                  <Text style={styles.jarvisInsightTag}>⚡ WRITING INSIGHT</Text>
-                </View>
-              </View>
-
-              <View style={styles.jarvisScorePill}>
-                <Text style={styles.jarvisScoreText}>95% Predicted Retention</Text>
-              </View>
-            </View>
-
-            <Text style={styles.jarvisWritingTitle}>Hook Polish &amp; Audience Retention</Text>
-            <Text style={styles.jarvisWritingBody}>
-              This caption is stronger when it stays specific. Mention the exact mistake, what changed, and one actionable lesson other creators can bookmark.
-            </Text>
-
-            {/* Interactive Quick Filter Chips */}
-            <ScrollView
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              contentContainerStyle={styles.jarvisChipsRow}
-              style={{ flexGrow: 0, marginBottom: 14 }}
-            >
-              {[
-                { id: 'rewrite', label: '🔥 Stronger Hook' },
-                { id: 'cta', label: '🎯 Add Viral CTA' },
-                { id: 'shorter', label: '⚡ Make Shorter' },
-              ].map((chip) => (
-                <Pressable
-                  key={chip.id}
-                  onPress={() => handleAiAction(chip.id as 'rewrite' | 'cta' | 'shorter')}
-                  style={styles.jarvisChip}
-                >
-                  <Text style={styles.jarvisChipText}>{chip.label}</Text>
-                </Pressable>
-              ))}
-            </ScrollView>
-
-            <Pressable
-              style={({ pressed }) => [styles.improveWithJarvisBtn, pressed && styles.btnPressed]}
-              onPress={() => handleAiAction('rewrite')}
-              disabled={isAiProcessing}
-            >
-              <LinearGradient
-                colors={['#7C3AED', '#582CDB']}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 0 }}
-                style={styles.improveWithJarvisGradient}
-              >
-                <Text style={styles.improveWithJarvisBtnText}>
-                  {isAiProcessing ? 'Refining with AI...' : '🪄 Improve Caption with Jarvis AI'}
-                </Text>
-              </LinearGradient>
-            </Pressable>
-          </LinearGradient>
-
-          {/* Readiness Notice Toast */}
-          {composerToast && (
-            <View style={styles.composerToastBanner}>
-              <Text style={styles.composerToastIcon}>💡</Text>
-              <Text style={styles.composerToastText}>{composerToast}</Text>
-            </View>
-          )}
-
-          {/* 10. PRIMARY & SECONDARY ACTION BUTTONS */}
-          <View style={styles.composerActionRow}>
-            <Pressable
-              style={({ pressed }) => [styles.primaryComposerBtn, pressed && styles.btnPressed]}
-              onPress={handlePublishOrSchedule}
-            >
-              <LinearGradient
-                colors={['#7C3AED', '#582CDB']}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 0 }}
-                style={styles.primaryComposerGradient}
-              >
-                <Text style={styles.primaryComposerBtnText}>
-                  {publishMode === 'now' ? 'Post Now ➔' : publishMode === 'schedule' ? 'Schedule Post' : 'Save as Draft'}
-                </Text>
-              </LinearGradient>
-            </Pressable>
-
-            <Pressable
-              style={({ pressed }) => [styles.secondaryComposerBtn, pressed && styles.btnPressed]}
-              onPress={() => {
-                setPublishMode('draft');
-                handlePublishOrSchedule();
-              }}
-            >
-              <Text style={styles.secondaryComposerBtnText}>Save Draft</Text>
-            </Pressable>
-          </View>
-
-          {/* Bottom spacing to clear floating tab bar */}
-          <View style={{ height: 110 }} />
         </ScrollView>
+
+        {composerToast && <ComposerToast message={composerToast} />}
+
+        {showPostedCheck && pendingHandoff && (
+          <PostedCheck
+            platform={pendingHandoff}
+            onYes={confirmPosted}
+            onNotYet={() => {
+              setShowPostedCheck(false);
+              setPendingHandoff(null);
+              showToastNotice(`No rush. It's saved here when you're ready.`);
+            }}
+          />
+        )}
 
         {/* UNIFIED SIGNATURE FLOATING TAB BAR */}
         <FloatingTabBar activeTab={activeTab} onTabPress={handleTabPress} />
@@ -2134,284 +1625,18 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
           </View>
         </Modal>
 
-        {/* MODAL 2: FULL INTERACTIVE CALENDAR & TIME SCHEDULER */}
-        <Modal
-          visible={showCalendarModal}
-          transparent={true}
-          animationType="fade"
-          onRequestClose={() => setShowCalendarModal(false)}
-        >
-          <View style={styles.modalOverlay}>
-            <Animated.View style={[styles.calendarModalCard, { transform: [{ scale: modalPopScale }] }]}>
-              {/* Header */}
-              <View style={styles.modalHeaderRow}>
-                <View style={styles.modalTitleContainer}>
-                  <Text style={styles.modalTitle}>Schedule Post</Text>
-                  <Text style={styles.modalSubtitle}>
-                    {showCustomCalendarView
-                      ? 'Pick a custom date & audience window'
-                      : 'Jarvis recommended audience windows'}
-                  </Text>
-                </View>
-                <Pressable onPress={() => setShowCalendarModal(false)} style={styles.modalCloseCircle} hitSlop={8}>
-                  <Text style={styles.modalCloseCross}>✕</Text>
-                </Pressable>
-              </View>
-
-              {!showCustomCalendarView ? (
-                /* 1. SMART RECOMMENDED SCHEDULE SLOTS */
-                <ScrollView showsVerticalScrollIndicator={false} style={{ maxHeight: 440 }}>
-                  {SMART_SCHEDULE_GROUPS.map((group) => (
-                    <View key={group.dayLabel} style={styles.smartScheduleGroup}>
-                      <Text style={styles.smartScheduleGroupHeader}>{group.dayLabel.toUpperCase()}</Text>
-                      <View style={styles.smartSlotRow}>
-                        {group.slots.map((slot) => {
-                          const slotFullStr = `${group.dayLabel}, ${slot.time}`;
-                          const isSlotSelected = scheduledTime === slotFullStr;
-
-                          return (
-                            <Pressable
-                              key={slot.time}
-                              style={[
-                                styles.smartSlotCard,
-                                isSlotSelected && styles.smartSlotCardActive,
-                              ]}
-                              onPress={() => {
-                                if (Platform.OS !== 'web') {
-                                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-                                }
-                                setScheduledTime(slotFullStr);
-                                setShowCalendarModal(false);
-                              }}
-                            >
-                              <View style={styles.smartSlotCardLeft}>
-                                <Text
-                                  style={[
-                                    styles.smartSlotTimeText,
-                                    isSlotSelected && styles.smartSlotTimeTextActive,
-                                  ]}
-                                >
-                                  {slot.time}
-                                </Text>
-                                {slot.isRecommended && (
-                                  <View style={styles.smartSlotRecBadge}>
-                                    <Text style={styles.smartSlotRecBadgeText}>
-                                      ⭐ Recommended{slot.reason ? ` (${slot.reason})` : ''}
-                                    </Text>
-                                  </View>
-                                )}
-                              </View>
-
-                              <View
-                                style={[
-                                  styles.smartSlotRadioCircle,
-                                  isSlotSelected && styles.smartSlotRadioCircleActive,
-                                ]}
-                              >
-                                {isSlotSelected && (
-                                  <Text style={{ color: '#FFFFFF', fontSize: 10, fontWeight: '800' }}>✓</Text>
-                                )}
-                              </View>
-                            </Pressable>
-                          );
-                        })}
-                      </View>
-                    </View>
-                  ))}
-
-                  {/* Choose Custom Date & Time Option */}
-                  <Pressable
-                    style={({ pressed }) => [styles.chooseCustomDateBtn, pressed && styles.btnPressed]}
-                    onPress={() => {
-                      if (Platform.OS !== 'web') {
-                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                      }
-                      setShowCustomCalendarView(true);
-                    }}
-                  >
-                    <Svg width={15} height={15} viewBox="0 0 24 24" fill="none">
-                      <Rect x="3" y="4" width="18" height="18" rx="3" stroke="#582CDB" strokeWidth="2" />
-                      <Path d="M16 2v4M8 2v4M3 10h18" stroke="#582CDB" strokeWidth="2" strokeLinecap="round" />
-                    </Svg>
-                    <Text style={styles.chooseCustomDateBtnText}>Choose Date &amp; Time...</Text>
-                  </Pressable>
-                </ScrollView>
-              ) : (
-                /* 2. CUSTOM CALENDAR & TIME PICKER */
-                <ScrollView showsVerticalScrollIndicator={false} style={{ maxHeight: 460 }}>
-                  <Pressable
-                    onPress={() => setShowCustomCalendarView(false)}
-                    style={styles.backToSmartSlotsBtn}
-                  >
-                    <Svg width={12} height={12} viewBox="0 0 24 24" fill="none">
-                      <Path d="M19 12H5M12 19l-7-7 7-7" stroke="#6D28D9" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
-                    </Svg>
-                    <Text style={styles.backToSmartSlotsBtnText}>Back to Recommended Slots</Text>
-                  </Pressable>
-
-                  {/* Month Selector Bar */}
-                  <View style={styles.calMonthNavRow}>
-                    <Pressable
-                      onPress={handlePrevMonth}
-                      style={({ pressed }) => [styles.calMonthNavBtn, pressed && styles.btnPressed]}
-                      hitSlop={8}
-                    >
-                      <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
-                        <Path d="M15 18L9 12L15 6" stroke="#171420" strokeWidth="2.5" strokeLinecap="round" />
-                      </Svg>
-                    </Pressable>
-
-                    <View style={{ alignItems: 'center' }}>
-                      <Text style={styles.calMonthNavTitle}>
-                        {MONTH_NAMES[calMonthIndex]} {calYear}
-                      </Text>
-                      {calMonthIndex === 7 && calYear === 2026 && (
-                        <Text style={styles.calMonthNavBadge}>CURRENT MONTH</Text>
-                      )}
-                    </View>
-
-                    <Pressable
-                      onPress={handleNextMonth}
-                      style={({ pressed }) => [styles.calMonthNavBtn, pressed && styles.btnPressed]}
-                      hitSlop={8}
-                    >
-                      <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
-                        <Path d="M9 18L15 12L9 6" stroke="#171420" strokeWidth="2.5" strokeLinecap="round" />
-                      </Svg>
-                    </Pressable>
-                  </View>
-
-                  {/* Day of Week Headers */}
-                  <View style={styles.calWeekDaysRow}>
-                    {['M', 'T', 'W', 'T', 'F', 'S', 'S'].map((dayChar, dIdx) => (
-                      <Text key={dIdx} style={styles.calWeekDayText}>
-                        {dayChar}
-                      </Text>
-                    ))}
-                  </View>
-
-                  {/* Days Grid */}
-                  <View style={styles.calDaysGrid}>
-                    {/* Empty cells before month start */}
-                    {Array.from({ length: firstDayOfWeek }).map((_, emptyIdx) => (
-                      <View key={`empty_${emptyIdx}`} style={styles.calDayCell} />
-                    ))}
-
-                    {/* Day numbers */}
-                    {Array.from({ length: daysInMonth }).map((_, dayIdx) => {
-                      const dayNum = dayIdx + 1;
-                      const isSelected = selectedCalDay === dayNum;
-                      const isToday = dayNum === 18 && calMonthIndex === 7 && calYear === 2026;
-                      const isPeakDay = dayNum % 3 === 0 || dayNum === 18 || dayNum === 19;
-
-                      return (
-                        <Pressable
-                          key={`day_${dayNum}`}
-                          onPress={() => {
-                            if (Platform.OS !== 'web') {
-                              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                            }
-                            setSelectedCalDay(dayNum);
-                          }}
-                          style={[
-                            styles.calDayCell,
-                            isSelected && styles.calDayCellSelected,
-                          ]}
-                        >
-                          <Text
-                            style={[
-                              styles.calDayNumText,
-                              isSelected && styles.calDayNumTextSelected,
-                              isToday && !isSelected && styles.calDayNumTextToday,
-                            ]}
-                          >
-                            {dayNum}
-                          </Text>
-                          {isToday && !isSelected && <View style={styles.calTodayDot} />}
-                          {isPeakDay && !isSelected && !isToday && (
-                            <View style={styles.calPeakDot} />
-                          )}
-                        </Pressable>
-                      );
-                    })}
-                  </View>
-
-                  {/* Time Slots Section */}
-                  <Text style={styles.calSectionHeader}>SELECT TIME SLOT</Text>
-                  <View style={styles.calTimeSlotsGrid}>
-                    {TIME_SLOTS.map((slot) => {
-                      const isSlotSelected = selectedTimeSlot === slot.time;
-                      return (
-                        <Pressable
-                          key={slot.id}
-                          onPress={() => {
-                            if (Platform.OS !== 'web') {
-                              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                            }
-                            setSelectedTimeSlot(slot.time);
-                          }}
-                          style={[
-                            styles.calTimeSlotCard,
-                            isSlotSelected && styles.calTimeSlotCardActive,
-                          ]}
-                        >
-                          <Text
-                            style={[
-                              styles.calTimeSlotTime,
-                              isSlotSelected && styles.calTimeSlotTimeActive,
-                            ]}
-                          >
-                            {slot.time}
-                          </Text>
-                          <Text
-                            style={[
-                              styles.calTimeSlotLabel,
-                              isSlotSelected && styles.calTimeSlotLabelActive,
-                            ]}
-                          >
-                            {slot.label}
-                          </Text>
-                        </Pressable>
-                      );
-                    })}
-                  </View>
-
-                  {/* Selected Slot Preview Callout */}
-                  <View style={styles.calPreviewBox}>
-                    <View style={styles.calPreviewIconCircle}>
-                      <Text style={{ fontSize: 16 }}>⚡</Text>
-                    </View>
-                    <View style={{ flex: 1 }}>
-                      <Text style={styles.calPreviewTitle}>
-                        {MONTH_NAMES[calMonthIndex].substring(0, 3)} {selectedCalDay}, {calYear} at {selectedTimeSlot}
-                      </Text>
-                      <Text style={styles.calPreviewSub}>
-                        Peak audience active window • Streak protection preserved
-                      </Text>
-                    </View>
-                  </View>
-
-                  {/* Schedule Confirmation CTA */}
-                  <Pressable
-                    style={styles.modalPrimaryActionBtn}
-                    onPress={handleConfirmCalendarSchedule}
-                  >
-                    <LinearGradient
-                      colors={['#7C3AED', '#582CDB']}
-                      start={{ x: 0, y: 0 }}
-                      end={{ x: 1, y: 0 }}
-                      style={styles.modalPrimaryGradient}
-                    >
-                      <Text style={styles.modalPrimaryActionText}>
-                        Schedule Post ({MONTH_NAMES[calMonthIndex].substring(0, 3)} {selectedCalDay}, {selectedTimeSlot}) ✓
-                      </Text>
-                    </LinearGradient>
-                  </Pressable>
-                </ScrollView>
-              )}
-            </Animated.View>
-          </View>
-        </Modal>
+        {/* WHEN TO POST: Jarvis's best times + any day / time in the next two weeks */}
+        <ScheduleSheet
+          visible={showScheduleSheet}
+          onClose={() => setShowScheduleSheet(false)}
+          mode={isNativeFilm ? 'remind' : 'schedule'}
+          onConfirm={(label) => {
+            setScheduledTime(label);
+            setPublishMode('schedule');
+            setShowScheduleSheet(false);
+            showToastNotice(`${isNativeFilm ? 'Reminder set for' : 'Scheduled for'} ${label}`);
+          }}
+        />
 
         {/* MODAL 3: NOTIFICATIONS CENTER */}
         <Modal
@@ -2474,46 +1699,6 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
           onSaveProfile={onSaveProfile}
         />
 
-        {/* MODAL 5: CREATOR CHAT */}
-        <Modal
-          visible={showChatModal}
-          transparent={true}
-          animationType="fade"
-          onRequestClose={() => setShowChatModal(false)}
-        >
-          <View style={styles.modalOverlay}>
-            <Animated.View style={[styles.modalCard, { transform: [{ scale: modalPopScale }] }]}>
-              <View style={styles.modalHeaderRow}>
-                <View style={styles.modalTitleContainer}>
-                  <Text style={styles.modalTitle}>Jarvis AI Chat</Text>
-                  <Text style={styles.modalSubtitle}>Real-time creative assistant</Text>
-                </View>
-                <Pressable
-                  onPress={() => setShowChatModal(false)}
-                  style={styles.modalCloseCircle}
-                  hitSlop={8}
-                >
-                  <Text style={styles.modalCloseCross}>✕</Text>
-                </Pressable>
-              </View>
-
-              <View style={styles.chatCard}>
-                <Text style={styles.chatSpeaker}>Jarvis AI</Text>
-                <Text style={styles.chatMsg}>
-                  I reviewed your draft! Adding a clear question at the end boosts comment engagement by 3.2x.
-                </Text>
-              </View>
-
-              <Pressable
-                style={styles.modalFullBtn}
-                onPress={() => setShowChatModal(false)}
-              >
-                <Text style={styles.modalFullBtnText}>Close Chat</Text>
-              </Pressable>
-            </Animated.View>
-          </View>
-        </Modal>
-
         {/* SIGNATURE ANIMATED GHOST CELEBRATION MODAL */}
         <AnimatedCompletionModal
           visible={showCelebrationModal}
@@ -2534,19 +1719,134 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
 };
 
 const styles = StyleSheet.create({
+  voiceAttached: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    marginTop: 10,
+    padding: 12,
+    borderRadius: 18,
+    backgroundColor: 'rgba(255, 255, 255, 0.85)',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.95)',
+  },
+  voiceAttachedIcon: { width: 38, height: 38, borderRadius: 12, backgroundColor: ds.lavender, alignItems: 'center', justifyContent: 'center' },
+  voiceAttachedTitle: { fontSize: 14.5, fontWeight: '800', color: ds.ink },
+  voiceAttachedSub: { fontSize: 12.5, fontWeight: '600', color: ds.text3, marginTop: 1 },
   safeArea: {
     flex: 1,
-    backgroundColor: '#FAF8F5',
+    backgroundColor: '#F7F5F0',
   },
   container: {
     flex: 1,
     width: '100%',
-    backgroundColor: '#FAF8F5',
   },
+  flex1: { flex: 1 },
+  headlineWrap: { marginTop: 4, marginBottom: 16 },
+  headlineText: { fontWeight: '800', letterSpacing: -0.8, color: ds.ink },
+  headlineAccent: { color: ds.purple },
+  questChip: { alignSelf: 'flex-start', paddingHorizontal: 10, height: 24, justifyContent: 'center', borderRadius: 999, backgroundColor: ds.lavender, marginBottom: 10 },
+  questChipText: { fontSize: 11, fontWeight: '800', letterSpacing: 0.6, color: ds.purple },
+  ideaTop: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  ideaEyebrow: { flex: 1, fontSize: 11, fontWeight: '800', letterSpacing: 1, color: ds.purple },
+  changeBtn: { flexDirection: 'row', alignItems: 'center', gap: 5, height: 30, paddingHorizontal: 10, borderRadius: 999, backgroundColor: 'rgba(237, 233, 254, 0.9)' },
+  changeBtnText: { fontSize: 12.5, fontWeight: '800', color: ds.purple },
+  ideaTitleWrap: { minHeight: 68, justifyContent: 'center' },
+  ideaTitle: { fontSize: 22, lineHeight: 28, fontWeight: '800', color: ds.ink, letterSpacing: -0.5, marginTop: 12 },
+  ideaThinking: { minHeight: 68, marginTop: 12, flexDirection: 'row', alignItems: 'center', gap: 8 },
+  ideaThinkingText: { fontSize: 13, fontWeight: '700', color: ds.text3 },
+  ideaBody: { fontSize: 14, lineHeight: 20, color: ds.text2, marginTop: 6 },
+  questCard: { marginTop: 12 },
+  questHead: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 },
+  questHeadText: { fontSize: 15, fontWeight: '800', color: ds.ink },
+  questXp: { fontSize: 12.5, fontWeight: '800', color: ds.purple },
+  questReq: { flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 6 },
+  questReqDot: { width: 6, height: 6, borderRadius: 3, backgroundColor: ds.purple },
+  questReqText: { flex: 1, fontSize: 13.5, lineHeight: 19, color: ds.text2 },
+  chipsWrap: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between', rowGap: 8 },
+  note: { fontSize: 12.5, lineHeight: 18, color: ds.text3, marginTop: 10 },
+  tilesGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10, marginTop: 10 },
+  captionCard: {
+    borderRadius: 22,
+    borderWidth: 1.5,
+    borderColor: 'rgba(255, 255, 255, 0.95)',
+    backgroundColor: 'rgba(255, 255, 255, 0.8)',
+    padding: 16,
+  },
+  captionCardFocused: { borderColor: ds.purple, backgroundColor: '#FFFFFF' },
+  captionField: {
+    minHeight: 120,
+    maxHeight: 220,
+    fontSize: 15.5,
+    lineHeight: 23,
+    color: ds.ink,
+    textAlignVertical: 'top',
+    ...(Platform.OS === 'web' ? ({ outlineStyle: 'none' } as object) : {}),
+  },
+  aiWorking: { flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 8 },
+  aiWorkingText: { fontSize: 12.5, fontWeight: '700', color: ds.purple },
+  captionMeta: { flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 8, paddingTop: 12, borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: 'rgba(23, 20, 32, 0.1)' },
+  charCount: { alignSelf: 'flex-end', fontSize: 11.5, fontWeight: '700', color: ds.text3, marginTop: 6 },
+  aiRow: { flexDirection: 'row', gap: 8, marginTop: 12 },
+  tagsWrap: { gap: 8 },
+  noTags: { fontSize: 13, color: ds.text3 },
+  addTagRow: { flexDirection: 'row', gap: 8, marginTop: 12 },
+  addTagField: {
+    flex: 1,
+    height: 42,
+    borderRadius: 12,
+    paddingHorizontal: 12,
+    fontSize: 14,
+    color: ds.ink,
+    borderWidth: 1.5,
+    borderColor: ds.line,
+    backgroundColor: '#FFFFFF',
+    ...(Platform.OS === 'web' ? ({ outlineStyle: 'none' } as object) : {}),
+  },
+  addTagBtn: { height: 42, paddingHorizontal: 16, borderRadius: 12, alignItems: 'center', justifyContent: 'center', backgroundColor: ds.purple },
+  addTagBtnText: { fontSize: 14, fontWeight: '800', color: '#FFFFFF' },
+  tagActions: { flexDirection: 'row', gap: 8, marginTop: 14 },
+  whenRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    marginTop: 12,
+    padding: 14,
+    borderRadius: 16,
+    backgroundColor: 'rgba(237, 233, 254, 0.6)',
+  },
+  whenLabel: { fontSize: 11.5, fontWeight: '800', color: ds.text3, letterSpacing: 0.4 },
+  whenValue: { fontSize: 16, fontWeight: '800', color: ds.ink, marginTop: 1 },
+  whenChange: { fontSize: 13, fontWeight: '800', color: ds.purple },
+  jarvisTime: { flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 12 },
+  jarvisTimeText: { flex: 1, fontSize: 13, lineHeight: 18, color: ds.text2 },
+  jarvisTimeBold: { fontWeight: '800', color: ds.ink },
+  readyWrap: { marginTop: 26 },
+  actions: { marginTop: 16, gap: 10 },
+  filmInLabel: { fontSize: 13, fontWeight: '800', color: ds.text2, marginBottom: 8 },
+  filmInRow: { flexDirection: 'row', gap: 8 },
+  // Logo above name so three platforms fit side by side on 320
+  filmInChip: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 4,
+    paddingVertical: 8,
+    paddingHorizontal: 4,
+    borderRadius: 14,
+    borderWidth: 1.5,
+    borderColor: 'rgba(255, 255, 255, 0.95)',
+    backgroundColor: 'rgba(255, 255, 255, 0.75)',
+  },
+  filmInChipOn: { borderColor: ds.purple, backgroundColor: 'rgba(237, 233, 254, 0.9)' },
+  filmInText: { fontSize: 12, fontWeight: '800', color: ds.ink },
+  filmInNote: { fontSize: 12.5, lineHeight: 18, color: ds.text3, marginTop: 8, marginBottom: 4 },
+  secondaryAction: {},
   scrollContent: {
     paddingHorizontal: 20,
     paddingTop: 8,
-    paddingBottom: 135,
+    // Clears the floating tab bar, no extra gap
+    paddingBottom: 120,
   },
   btnPressed: {
     opacity: 0.9,
@@ -2679,10 +1979,11 @@ const styles = StyleSheet.create({
     letterSpacing: 0.4,
   },
   mainTitle: {
-    fontSize: Platform.OS === 'web' ? ('clamp(18px, 4.5vw, 22px)' as any) : sFont(20),
+    fontSize: Platform.OS === 'web' ? ('clamp(15px, 3.8vw, 17px)' as any) : sFont(16),
     fontWeight: '700',
     color: '#171420',
     letterSpacing: -0.35,
+    lineHeight: 22,
     marginBottom: 4,
     marginTop: 4,
   },
@@ -2754,8 +2055,68 @@ const styles = StyleSheet.create({
   ideaTagPillText: {
     fontSize: sFont(11),
     fontWeight: '700',
-    color: '#6D28D9',
+    color: '#582CDB',
   },
+
+  // Attached Pro Quest Requirements Card
+  attachedQuestRequirementsCard: {
+    backgroundColor: '#FAF5FF',
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: '#E9D5FF',
+    padding: 14,
+    marginBottom: 18,
+  },
+  attachedQuestHeaderRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 10,
+  },
+  attachedQuestHeaderTitle: {
+    fontSize: 10.5,
+    fontWeight: '800',
+    color: '#6B21A8',
+    letterSpacing: 0.5,
+  },
+  attachedQuestXpBadge: {
+    backgroundColor: '#7C3AED',
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 6,
+  },
+  attachedQuestXpText: {
+    fontSize: 10,
+    fontWeight: '800',
+    color: '#FFFFFF',
+    letterSpacing: 0.4,
+  },
+  attachedQuestRequirementItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginBottom: 6,
+  },
+  attachedQuestCheckCircle: {
+    width: 18,
+    height: 18,
+    borderRadius: 9,
+    backgroundColor: '#7C3AED',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  attachedQuestCheckMark: {
+    fontSize: 10,
+    fontWeight: '900',
+    color: '#FFFFFF',
+  },
+  attachedQuestRequirementText: {
+    fontSize: 12.5,
+    fontWeight: '600',
+    color: '#3B0764',
+    flex: 1,
+  },
+
   streakSaverPill: {
     backgroundColor: '#582CDB',
     paddingVertical: 4,

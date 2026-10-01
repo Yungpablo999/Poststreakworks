@@ -1,26 +1,13 @@
-import { TextStyle, Platform } from 'react-native';
+import { TextStyle } from 'react-native';
+import { fonts } from './fonts';
 
 export const typography = {
-  fontFamily: Platform.select({
-    ios: 'System',
-    android: 'Roboto',
-    web: "'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif",
-    default: 'System',
-  }),
+  // Plus Jakarta Sans everywhere. Text/TextInput from components/ui/AppText pick the
+  // right weight file automatically from fontWeight.
+  fontFamily: fonts.regular,
 
-  editorialSerif: Platform.select({
-    ios: 'Didot',
-    android: 'serif',
-    web: "Didot, 'Didot LT STD', 'Playfair Display', 'Bodoni Moda', Georgia, serif",
-    default: 'Didot',
-  }),
-
-  tallDisplay: Platform.select({
-    ios: 'Impact',
-    android: 'sans-serif-condensed',
-    web: "'Teko', 'Antonio', 'Six Caps', 'Bebas Neue', -apple-system, sans-serif",
-    default: 'sans-serif',
-  }),
+  // Playfair Display italic is reserved for the word "Earn." only.
+  earnAccent: fonts.earn,
 
   sizes: {
     hero: 36,

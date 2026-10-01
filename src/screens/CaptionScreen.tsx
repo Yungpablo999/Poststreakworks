@@ -1,8 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { useBreakpoint } from '../hooks/useBreakpoint';
 import {
   StyleSheet,
   View,
-  Text,
   ScrollView,
   Pressable,
   Platform,
@@ -11,9 +11,9 @@ import {
   Image,
   SafeAreaView,
   StatusBar,
-  TextInput,
   KeyboardAvoidingView,
 } from 'react-native';
+import { Text, TextInput } from '../components/ui/AppText';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as Haptics from 'expo-haptics';
 import Svg, { Path, Circle, Rect } from 'react-native-svg';
@@ -22,6 +22,19 @@ import { UserProfileModal, UserProfileData } from '../components/UserProfileModa
 import { AnimatedCompletionModal } from '../components/AnimatedCompletionModal';
 import { FreeAppHeader } from '../components/FreeAppHeader';
 import { sFont, sPadding, isNarrowScreen } from '../utils/responsive';
+import Reanimated, { Easing, FadeIn, FadeInUp, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
+import { GlassBackdrop } from '../components/glass/GlassBackdrop';
+import { GlassCard } from '../components/glass/GlassCard';
+import { FitLines } from '../components/ui/FitLines';
+import { AppButton } from '../components/ui/AppButton';
+import { AutoGrowInput } from '../components/ui/AutoGrowInput';
+import { JarvisOrb } from '../components/JarvisOrb';
+import { ChipRow, SaveButton } from '../components/ideas/IdeasBlocks';
+import { PlatformFitCard } from '../components/caption/PlatformFitCard';
+import { CaptionOptionCard } from '../components/caption/CaptionBlocks';
+import { ComposerToast } from '../components/composer/ComposerBlocks';
+import { getCaptionOptions, describeCaptionShape, saveDraft, removeDraft, IDEA_GOALS, CAPTION_TONES, type IdeaGoal } from '../data';
+import { ds } from '../theme/colors';
 
 interface CaptionScreenProps {
   ideaTitle?: string;
@@ -30,10 +43,12 @@ interface CaptionScreenProps {
   onOpenSchedule?: () => void;
   onOpenJarvisPro?: () => void;
   onNavigateTab?: (tab: TabType) => void;
-  onAddToPost?: (captionText: string, hashtags: string) => void;
-  onOpenMessages?: () => void;
+  onAddToPost?: (captionText: string, hashtags: string, topic?: string) => void;
   userProfile?: UserProfileData;
   onSaveProfile?: (updated: UserProfileData) => void;
+  /** Pro members: the caption reshaped for each platform. */
+  tier?: 'free' | 'pro';
+  onSwitchToFree?: () => void;
 }
 
 interface NotificationItem {
@@ -61,7 +76,7 @@ const NOTIFICATIONS: NotificationItem[] = [
   {
     id: 'n2',
     title: 'Streak Saver Ready',
-    body: "Convert today's idea into a post to keep your 1-day streak.",
+    body: "Convert today's idea into a post to kick off your creator streak.",
     time: '2h ago',
     unread: true,
     iconEmoji: '🔥',
@@ -143,10 +158,12 @@ export const CaptionScreen: React.FC<CaptionScreenProps> = ({
   onOpenJarvisPro,
   onNavigateTab,
   onAddToPost,
-  onOpenMessages,
-
   userProfile,
-  onSaveProfile,}) => {
+  onSaveProfile,
+  tier = 'free',
+  onSwitchToFree,
+}) => {
+  const onDesktop = useBreakpoint() === 'desktop';
   const isDark = false;
   const [activeTab, setActiveTab] = useState<TabType>('create');
 
@@ -180,11 +197,10 @@ export const CaptionScreen: React.FC<CaptionScreenProps> = ({
   const [showGoalModal, setShowGoalModal] = useState(false);
   const [showNotificationModal, setShowNotificationModal] = useState(false);
   const [showProfileModal, setShowProfileModal] = useState(false);
-  const [showChatModal, setShowChatModal] = useState(false);
   const [showCelebrationModal, setShowCelebrationModal] = useState(false);
   const [celebrationTitle, setCelebrationTitle] = useState('Caption Ready!');
   const [celebrationSubtitle, setCelebrationSubtitle] = useState('Your viral caption and hashtags are primed for your post.');
-  const [celebrationSpeech, setCelebrationSpeech] = useState('1-day streak protected! +35 XP earned.');
+  const [celebrationSpeech, setCelebrationSpeech] = useState('Day 1 post ready! +35 XP earned.');
   const [celebrationBadge, setCelebrationBadge] = useState('CAPTION CRAFTED');
 
   const [notificationsList, setNotificationsList] = useState<NotificationItem[]>(NOTIFICATIONS);
@@ -307,7 +323,7 @@ export const CaptionScreen: React.FC<CaptionScreenProps> = ({
     if (next) {
       setCelebrationTitle('Caption Saved!');
       setCelebrationSubtitle('Caption and hashtags saved to your creator drafts.');
-      setCelebrationSpeech('1-day streak protected! Ready anytime.');
+      setCelebrationSpeech('Day 1 post ready! Ready anytime.');
       setCelebrationBadge('DRAFT SAVED');
       setShowCelebrationModal(true);
     }
@@ -324,6 +340,94 @@ export const CaptionScreen: React.FC<CaptionScreenProps> = ({
 
   const unreadNotifCount = notificationsList.filter((n) => n.unread).length;
 
+  // ── Caption writer ────────────────────────────────────────────────────────
+  const [goal, setGoal] = useState<IdeaGoal>('comments');
+  const [tones, setTones] = useState<string[]>(['Helpful', 'Honest']);
+  const [round, setRound] = useState(0);
+  const [thinking, setThinking] = useState(false);
+  const options = React.useMemo(() => getCaptionOptions(postTopic, goal, tones, round), [postTopic, goal, tones, round]);
+  const [pickedId, setPickedId] = useState<string | null>(null);
+  const [body, setBody] = useState(options[0].body);
+  const [ending, setEnding] = useState(options[0].ending);
+  const [tags, setTags] = useState(options[0].hashtags);
+  const [bodyFocused, setBodyFocused] = useState(false);
+  const [toast, setToast] = useState<string | null>(null);
+  const [touching, setTouching] = useState<string | null>(null);
+  const [saved, setSaved] = useState(false);
+  const showToast = (m: string) => {
+    setToast(m);
+    setTimeout(() => setToast((t) => (t === m ? null : t)), 2400);
+  };
+  const spin = useSharedValue(0);
+  const spinStyle = useAnimatedStyle(() => ({ transform: [{ rotate: `${spin.value * 360}deg` }] }));
+
+  const applyOption = (o: (typeof options)[number]) => {
+    setPickedId(o.id);
+    setBody(o.body);
+    setEnding(o.ending);
+    setTags(o.hashtags);
+  };
+  // New goal / tone: show Jarvis rewriting for a beat, then the reshaped
+  // options arrive and the first one fills the editor
+  const firstShape = useRef(true);
+  useEffect(() => {
+    applyOption(options[0]);
+    if (firstShape.current) {
+      firstShape.current = false;
+      return;
+    }
+    setThinking(true);
+    const id = setTimeout(() => setThinking(false), 500);
+    return () => clearTimeout(id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [goal, tones.join('|')]);
+  useEffect(() => {
+    applyOption(options[0]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [round]);
+
+  const newOptions = () => {
+    if (thinking) return;
+    if (Platform.OS !== 'web') Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    spin.value = withTiming(spin.value + 1, { duration: 500, easing: Easing.out(Easing.cubic) });
+    setThinking(true);
+    setTimeout(() => {
+      setRound((r) => r + 1);
+      setThinking(false);
+    }, 650);
+  };
+
+  // Quick Jarvis touches on the caption, with a short thinking beat
+  const touch = (kind: 'short' | 'personal' | 'opening') => {
+    setTouching(kind);
+    setTimeout(() => {
+      if (kind === 'short') setBody((b) => b.match(/^[^.!?\n]*[.!?]?/)?.[0]?.trim() || b);
+      if (kind === 'personal') setBody((b) => `When I started, this was me. ${b}`);
+      if (kind === 'opening') setBody((b) => `Stop scrolling if this is you. ${b}`);
+      setTouching(null);
+      if (Platform.OS !== 'web') Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    }, 600);
+  };
+
+  const fullCaption = [body.trim(), ending.trim()].filter(Boolean).join('\n\n');
+
+  // Save toggles: tap again to take it back out of drafts
+  const savedDraftId = useRef<string | null>(null);
+  const saveCaption = () => {
+    if (saved && savedDraftId.current) {
+      removeDraft(savedDraftId.current);
+      savedDraftId.current = null;
+      setSaved(false);
+      showToast('Removed from drafts');
+      return;
+    }
+    const id = `caption-${postTopic}`;
+    saveDraft({ id, title: postTopic, kind: 'post', format: 'Caption' });
+    savedDraftId.current = id;
+    setSaved(true);
+    showToast('Saved to drafts. Find it on Create.');
+  };
+
   return (
     <SafeAreaView style={[styles.safeArea, isDark && { backgroundColor: '#0C0A12' }]}>
       <StatusBar barStyle={isDark ? "light-content" : "dark-content"} backgroundColor={isDark ? "#0C0A12" : "#FAF8F5"} />
@@ -332,18 +436,13 @@ export const CaptionScreen: React.FC<CaptionScreenProps> = ({
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       >
         <View style={[styles.container, isDark && { backgroundColor: '#0C0A12' }]}>
+          <GlassBackdrop />
           {/* 1. TOP AIRY HEADER BAR */}
           <FreeAppHeader
+            backgroundColor="transparent"
             onBack={onBack}
             onOpenJarvisPro={onOpenJarvisPro}
-            onOpenMessages={() => {
-              if (onOpenMessages) {
-                onOpenMessages();
-              } else {
-                triggerModalAnim();
-                setShowChatModal(true);
-              }
-            }}
+            onSwitchToFree={onSwitchToFree}
             onOpenNotifications={() => {
               triggerModalAnim();
               setShowNotificationModal(true);
@@ -365,358 +464,170 @@ export const CaptionScreen: React.FC<CaptionScreenProps> = ({
             keyboardShouldPersistTaps="handled"
             keyboardDismissMode="on-drag"
           >
-            {/* Top Pill Badges */}
-            <View style={styles.topBadgesRow}>
-              <View style={styles.captionWriterPill}>
-                <Text style={styles.captionWriterPillText}>CAPTION WRITER</Text>
-              </View>
-              <View style={styles.freeCaptionPill}>
-                <Text style={styles.freeCaptionPillText}>Free Caption Tool</Text>
-              </View>
-            </View>
+            {/* HEADLINE — same two-line structure on every screen size */}
+            <Reanimated.View entering={FadeInUp.duration(500)} style={styles.headline}>
+              <FitLines
+                lines={['Write a caption', <Text key="c" style={styles.headlineAccent}>that fits your post</Text>]}
+                textStyle={styles.headlineText}
+                maxFontSize={32}
+                align="left"
+                accessibilityLabel="Write a caption that fits your post"
+              />
+            </Reanimated.View>
 
-            {/* Main Title & Subtitle */}
-            <Text style={styles.mainTitle}>Write a caption that fits your post.</Text>
-            <Text style={styles.mainSubtitle}>
-              Create captions, CTAs and hashtags that match your content goal and platform.
-            </Text>
-
-            {/* 1. "WHAT IS THIS POST ABOUT?" HERO CARD (LIVE-EDITABLE) */}
-            <View style={styles.topicHeroCard}>
-              <View style={styles.topicHeaderRow}>
-                <View style={styles.topicTitleGroup}>
-                  <Text style={styles.topicHeaderIcon}>✍️</Text>
-                  <Text style={styles.topicHeaderTitle}>What is this post about?</Text>
+            {/* TOPIC */}
+            <Reanimated.View entering={FadeInUp.delay(80).duration(500)}>
+              <GlassCard strong radius={24} padding={16}>
+                <View style={styles.topicHead}>
+                  <JarvisOrb size={24} />
+                  <Text style={styles.eyebrow}>WHAT'S THIS POST ABOUT?</Text>
                 </View>
-                <Text style={styles.editableHintMicro}>Editable</Text>
+                <View style={[styles.field, isTopicFocused && styles.fieldOn]}>
+                  <AutoGrowInput
+                    value={postTopic}
+                    onChangeText={setPostTopic}
+                    onFocus={() => setIsTopicFocused(true)}
+                    onBlur={() => setIsTopicFocused(false)}
+                    placeholder="e.g. My 5-minute morning reset"
+                    minHeight={26}
+                    accessibilityLabel="What this post is about"
+                  />
+                </View>
+              </GlassCard>
+            </Reanimated.View>
+
+            {/* GOAL + TONE */}
+            <Reanimated.View entering={FadeInUp.delay(140).duration(500)} style={styles.filters}>
+              <ChipRow label="Goal" items={IDEA_GOALS} selected={[goal]} onToggle={(id) => setGoal(id as IdeaGoal)} />
+              <ChipRow
+                label="Tone"
+                items={CAPTION_TONES.map((t) => ({ id: t, label: t }))}
+                selected={tones}
+                onToggle={(id) => setTones((prev) => (prev.includes(id) ? (prev.length > 1 ? prev.filter((x) => x !== id) : prev) : [...prev, id]))}
+              />
+            </Reanimated.View>
+
+            {/* OPTIONS */}
+            <View style={styles.optionsHead}>
+              <View style={styles.row}>
+                <JarvisOrb size={22} />
+                <Text style={styles.sectionLabel}>Jarvis's options</Text>
               </View>
-
-              {/* Editable Topic Box (Directly Tappable Content Box) */}
-              <Pressable
-                onPress={() => topicInputRef.current?.focus()}
-                style={[styles.topicInnerBox, isTopicFocused && styles.topicInnerBoxFocused]}
-              >
-                <TextInput
-                  ref={topicInputRef}
-                  value={postTopic}
-                  onChangeText={setPostTopic}
-                  placeholder="Type your post topic or idea..."
-                  placeholderTextColor="#94A3B8"
-                  multiline={true}
-                  scrollEnabled={false}
-                  onFocus={() => setIsTopicFocused(true)}
-                  onBlur={() => setIsTopicFocused(false)}
-                  style={styles.topicInput}
-                />
-              </Pressable>
-
-              {/* Goal Line with Dedicated Change Pill Button */}
-              <Pressable
-                style={({ pressed }) => [styles.goalRow, pressed && styles.btnPressed]}
-                onPress={() => {
-                  if (Platform.OS !== 'web') {
-                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                  }
-                  triggerModalAnim();
-                  setShowGoalModal(true);
-                }}
-                hitSlop={8}
-              >
-                <View style={styles.goalLeftGroup}>
-                  <Text style={styles.goalIcon}>🎯</Text>
-                  <Text style={styles.goalLabel}>
-                    Goal: <Text style={styles.goalValue}>{selectedGoal}</Text>
-                  </Text>
-                </View>
-                <View style={styles.goalChangePill}>
-                  <Text style={styles.goalChangePillText}>Change ➔</Text>
-                </View>
+              <Pressable onPress={newOptions} hitSlop={8} accessibilityRole="button" accessibilityLabel="Write new options" style={styles.newBtn}>
+                <Reanimated.View style={spinStyle}>
+                  <Svg width={13} height={13} viewBox="0 0 24 24" fill="none">
+                    <Path d="M4 12a8 8 0 0113.7-5.7L20 8M20 3v5h-5M20 12a8 8 0 01-13.7 5.7L4 16M4 21v-5h5" stroke={ds.purple} strokeWidth={2.4} strokeLinecap="round" strokeLinejoin="round" />
+                  </Svg>
+                </Reanimated.View>
+                <Text style={styles.newBtnText}>New options</Text>
               </Pressable>
             </View>
+            <Reanimated.View key={`${goal}-${tones.join('')}`} entering={FadeIn.duration(250)}>
+              <Text style={styles.shape}>{describeCaptionShape(goal, tones)}</Text>
+            </Reanimated.View>
+            {thinking ? (
+              <Reanimated.View entering={FadeIn.duration(120)} style={styles.thinking}>
+                <JarvisOrb size={22} />
+                <Text style={styles.thinkingText}>Jarvis is rewriting for you…</Text>
+              </Reanimated.View>
+            ) : (
+              onDesktop ? (
+                // Desktop: the options share the full width, side by side
+                <View key={`${round}-${goal}-${tones.join('')}`} style={styles.optionsRow}>
+                  {options.map((o, i) => (
+                    <CaptionOptionCard key={o.id} fill option={o} index={i} selected={(pickedId ?? options[0].id) === o.id} onPress={() => applyOption(o)} />
+                  ))}
+                </View>
+              ) : (
+              <ScrollView key={`${round}-${goal}-${tones.join('')}`} horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.options}>
+                {options.map((o, i) => (
+                  <CaptionOptionCard key={o.id} option={o} index={i} selected={(pickedId ?? options[0].id) === o.id} onPress={() => applyOption(o)} />
+                ))}
+              </ScrollView>
+              )
+            )}
 
-            {/* 2. CHOOSE A TONE SECTION */}
-            <Text style={styles.sectionLabel}>Choose A Tone</Text>
-            <ScrollView
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              contentContainerStyle={styles.tonePillsRow}
-            >
-              {TONE_OPTIONS.map((tone) => {
-                const isSelected = selectedTones.includes(tone);
-                return (
+            {/* YOUR CAPTION */}
+            <Text style={[styles.sectionLabel, { marginTop: 24, marginBottom: 10 }]}>Your caption</Text>
+            <GlassCard strong radius={24} padding={16}>
+              <View style={[styles.field, bodyFocused && styles.fieldOn]}>
+                {touching ? (
+                  <Reanimated.View entering={FadeIn.duration(120)} style={styles.thinkingInline}>
+                    <JarvisOrb size={20} />
+                    <Text style={styles.thinkingText}>Jarvis is editing…</Text>
+                  </Reanimated.View>
+                ) : (
+                  <AutoGrowInput
+                    value={body}
+                    onChangeText={setBody}
+                    onFocus={() => setBodyFocused(true)}
+                    onBlur={() => setBodyFocused(false)}
+                    minHeight={80}
+                    accessibilityLabel="Your caption"
+                  />
+                )}
+              </View>
+              <Text style={styles.count}>{fullCaption.length} / 2,200 characters</Text>
+              <View style={styles.touches}>
+                {(
+                  [
+                    ['short', 'Shorter'],
+                    ['personal', 'More personal'],
+                    ['opening', 'Better first line'],
+                  ] as const
+                ).map(([k, label]) => (
                   <Pressable
-                    key={tone}
-                    onPress={() => toggleTone(tone)}
-                    style={[
-                      styles.tonePill,
-                      isSelected && styles.tonePillActive,
-                    ]}
+                    key={k}
+                    onPress={() => touch(k)}
+                    disabled={!!touching}
+                    accessibilityRole="button"
+                    style={({ pressed }) => [styles.touch, pressed && { transform: [{ scale: 0.96 }] }]}
                   >
-                    <Text
-                      style={[
-                        styles.tonePillText,
-                        isSelected && styles.tonePillTextActive,
-                      ]}
-                    >
-                      {tone}
-                    </Text>
+                    <Text style={styles.touchText}>{label}</Text>
                   </Pressable>
-                );
-              })}
-            </ScrollView>
-
-            {/* 3. SUGGESTED CAPTIONS SECTION */}
-            <View style={styles.suggestedHeaderRow}>
-              <Text style={styles.suggestedTitle}>Suggested Captions</Text>
-              <Pressable onPress={handleRegenerate} hitSlop={8}>
-                <Text style={styles.regenerateLink}>🔄 Regenerate</Text>
-              </Pressable>
-            </View>
-
-            {/* Recommended Caption Card (Tap to Copy to Draft) */}
-            <Pressable
-              style={styles.recommendedCard}
-              onPress={() => {
-                if (Platform.OS !== 'web') {
-                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                }
-                setDraftText(currentSuggestion.text);
-              }}
-            >
-              <View style={styles.recommendedBadgeRow}>
-                <View style={styles.recommendedBadge}>
-                  <Text style={styles.recommendedBadgeText}>⭐ RECOMMENDED</Text>
-                </View>
-              </View>
-
-              <Text
-                style={styles.recommendedCaptionText}
-                numberOfLines={isCaptionExpanded ? undefined : 3}
-              >
-                {currentSuggestion.text}
-              </Text>
-
-              {/* Read More / Show Less Toggle Button */}
-              {currentSuggestion.text.length > 90 && (
-                <Pressable
-                  onPress={(e) => {
-                    e.stopPropagation();
-                    if (Platform.OS !== 'web') {
-                      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                    }
-                    setIsCaptionExpanded(!isCaptionExpanded);
-                  }}
-                  hitSlop={8}
-                  style={styles.readMoreBtn}
-                >
-                  <Text style={styles.readMoreText}>
-                    {isCaptionExpanded ? 'Show less ▴' : 'Read more ▾'}
-                  </Text>
-                </Pressable>
-              )}
-
-              {/* Tags Row */}
-              <View style={styles.recommendedTagsRow}>
-                {currentSuggestion.tags.map((tag, idx) => (
-                  <View
-                    key={idx}
-                    style={[
-                      styles.recommendedTagPill,
-                      tag === 'Strong CTA' && styles.strongCtaTagPill,
-                    ]}
-                  >
-                    <Text
-                      style={[
-                        styles.recommendedTagText,
-                        tag === 'Strong CTA' && styles.strongCtaTagText,
-                      ]}
-                    >
-                      {tag}
-                    </Text>
-                  </View>
                 ))}
               </View>
-            </Pressable>
 
-            {/* 4. QUICK CTA CARD (EDITABLE) */}
-            <Pressable
-              onPress={() => quickCtaInputRef.current?.focus()}
-              style={[styles.quickCtaCard, isQuickCtaFocused && styles.quickCtaCardFocused]}
-            >
-              <View style={styles.cardHeaderFlex}>
-                <Text style={styles.microCapLabel}>QUICK CTA</Text>
-                <View style={styles.editSignBadge}>
-                  <Text style={styles.editSignPencil}>✎</Text>
-                  <Text style={styles.editSignText}>Edit</Text>
-                </View>
-              </View>
-              <TextInput
-                ref={quickCtaInputRef}
-                value={quickCta}
-                onChangeText={setQuickCta}
-                placeholder="Type custom CTA..."
-                placeholderTextColor="#94A3B8"
-                multiline={true}
-                scrollEnabled={false}
-                onFocus={() => setIsQuickCtaFocused(true)}
-                onBlur={() => setIsQuickCtaFocused(false)}
-                style={styles.quickCtaInput}
-              />
-            </Pressable>
-
-            {/* 5. HASHTAGS CARD (EDITABLE) */}
-            <Pressable
-              onPress={() => hashtagsInputRef.current?.focus()}
-              style={[styles.hashtagsCard, isHashtagsFocused && styles.hashtagsCardFocused]}
-            >
-              <View style={styles.cardHeaderFlex}>
-                <Text style={styles.microCapLabel}>HASHTAGS</Text>
-                <View style={styles.editSignBadge}>
-                  <Text style={styles.editSignPencil}>✎</Text>
-                  <Text style={styles.editSignText}>Edit</Text>
-                </View>
-              </View>
-              <TextInput
-                ref={hashtagsInputRef}
-                value={hashtagsText}
-                onChangeText={setHashtagsText}
-                placeholder="Type hashtags..."
-                placeholderTextColor="#94A3B8"
-                multiline={true}
-                scrollEnabled={false}
-                onFocus={() => setIsHashtagsFocused(true)}
-                onBlur={() => setIsHashtagsFocused(false)}
-                style={styles.hashtagsInput}
-              />
-            </Pressable>
-
-            {/* 6. DRAFT EDITOR CARD (LIVE-EDITABLE MULTILINE) */}
-            <View style={styles.draftEditorCard}>
-              <View style={styles.draftEditorHeaderRow}>
-                <View style={styles.draftEditorBadge}>
-                  <Text style={styles.draftEditorBadgeText}>DRAFT EDITOR</Text>
-                </View>
-                <Text style={styles.draftEditorTimeLeft}>⏱ 3 WEEKS LEFT</Text>
+              <Text style={styles.subLabel}>Ending</Text>
+              <View style={styles.field}>
+                <AutoGrowInput value={ending} onChangeText={setEnding} minHeight={24} accessibilityLabel="Ending" />
               </View>
 
-              {/* Live Editable Text Input */}
-              <View style={styles.draftInputContainer}>
-                <TextInput
-                  value={draftText}
-                  onChangeText={setDraftText}
-                  placeholder="Write or refine your caption..."
-                  placeholderTextColor="#94A3B8"
-                  multiline
-                  style={styles.draftEditorInput}
+              <Text style={styles.subLabel}>Hashtags</Text>
+              <View style={styles.field}>
+                <AutoGrowInput value={tags} onChangeText={setTags} minHeight={24} style={styles.tagsInput} accessibilityLabel="Hashtags" />
+              </View>
+            </GlassCard>
+
+            {/* PRO: fit for each platform */}
+            {tier === 'pro' && (
+              <Reanimated.View entering={FadeInUp.duration(450)} style={styles.platformFit}>
+                <PlatformFitCard body={body} ending={ending} tags={tags} onCopied={showToast} />
+              </Reanimated.View>
+            )}
+
+            {/* ACTIONS */}
+            <View style={styles.actions}>
+              <View style={styles.flex}>
+                <AppButton
+                  title="Add to post"
+                  size="lg"
+                  onPress={() => {
+                    if (Platform.OS !== 'web') Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+                    onAddToPost?.(fullCaption, tags, postTopic);
+                  }}
+                  iconRight={
+                    <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
+                      <Path d="M5 12h14M13 6l6 6-6 6" stroke="#FFFFFF" strokeWidth={2.4} strokeLinecap="round" strokeLinejoin="round" />
+                    </Svg>
+                  }
                 />
               </View>
-
-              {/* Status Check & Fit Row */}
-              <View style={styles.draftStatusRow}>
-                <View style={styles.statusPill}>
-                  <Text style={styles.statusPillCheck}>✓</Text>
-                  <Text style={styles.statusPillText}>CTA OK</Text>
-                </View>
-                <View style={styles.fitPill}>
-                  <Text style={styles.fitPillText}>📑 High Fit</Text>
-                </View>
-              </View>
-
-              <Text style={styles.charCountText}>{draftText.length} / 2200 CHARS</Text>
-
-              {/* Quick Action Buttons */}
-              <View style={styles.draftActionsRow}>
-                <Pressable
-                  style={({ pressed }) => [styles.draftActionBtn, pressed && styles.btnPressed]}
-                  onPress={handleMakeShorter}
-                >
-                  <Text style={styles.draftActionBtnText}>Make Shorter</Text>
-                </Pressable>
-
-                <Pressable
-                  style={({ pressed }) => [styles.draftActionBtn, pressed && styles.btnPressed]}
-                  onPress={handleAddPersonal}
-                >
-                  <Text style={styles.draftActionBtnText}>Add Personal</Text>
-                </Pressable>
-              </View>
-
-              <Pressable
-                style={({ pressed }) => [styles.improveHookBtn, pressed && styles.btnPressed]}
-                onPress={handleImproveOpening}
-              >
-                <Text style={styles.improveHookBtnText}>Improve Opening</Text>
-              </Pressable>
-            </View>
-
-            {/* 7. JARVIS INSIGHT CARD */}
-            <View style={styles.jarvisCard}>
-              <View style={styles.jarvisCardHeaderRow}>
-                <View style={styles.jarvisFlameBox}>
-                  <Image
-                    source={require('../../assets/images/jarvis-core-flame.png')}
-                    style={styles.jarvisFlameImg}
-                    resizeMode="contain"
-                  />
-                </View>
-
-                <View style={{ flex: 1 }}>
-                  <Text style={styles.jarvisTitle}>Jarvis Insight</Text>
-                </View>
-
-                <View style={styles.aiPoweredBadge}>
-                  <Text style={styles.aiPoweredBadgeText}>AI-POWERED</Text>
-                </View>
-              </View>
-
-              <Text style={styles.jarvisBodyText}>
-                Your <Text style={{ fontWeight: '800' }}>first line</Text> could be more specific. Add one realisation that changed how you create—it’ll make this feel more personal.
-              </Text>
-
-              <Pressable
-                style={({ pressed }) => [styles.jarvisApplyBtn, pressed && styles.btnPressed]}
-                onPress={handleApplyRecommendation}
-              >
-                <Text style={styles.jarvisApplyBtnText}>Apply Recommendation</Text>
-              </Pressable>
-            </View>
-
-            {/* 8. PRIMARY BOTTOM ACTION: ADD TO POST + BOOKMARK */}
-            <View style={styles.bottomActionRow}>
-              <Pressable
-                style={({ pressed }) => [styles.addToPostMainBtn, pressed && styles.btnPressed]}
-                onPress={handleAddToPost}
-              >
-                <LinearGradient
-                  colors={['#7C3AED', '#582CDB']}
-                  start={{ x: 0, y: 0 }}
-                  end={{ x: 1, y: 0 }}
-                  style={styles.addToPostGradient}
-                >
-                  <Text style={styles.addToPostBtnText}>Add to Post</Text>
-                </LinearGradient>
-              </Pressable>
-
-              <Pressable
-                style={({ pressed }) => [
-                  styles.bookmarkBtn,
-                  isSavedBookmark && styles.bookmarkBtnActive,
-                  pressed && styles.btnPressed,
-                ]}
-                onPress={handleToggleBookmark}
-              >
-                <Svg width={20} height={20} viewBox="0 0 24 24" fill={isSavedBookmark ? '#FFFFFF' : 'none'}>
-                  <Path
-                    d="M19 21L12 16L5 21V5C5 3.89543 5.89543 3 7 3H17C18.1046 3 19 3.89543 19 5V21Z"
-                    stroke={isSavedBookmark ? '#FFFFFF' : '#582CDB'}
-                    strokeWidth="2.2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </Svg>
-              </Pressable>
+              <SaveButton saved={saved} onPress={saveCaption} size={56} />
             </View>
           </ScrollView>
+
+          {toast && <ComposerToast message={toast} />}
 
           {/* UNIFIED SIGNATURE FLOATING TAB BAR */}
           <FloatingTabBar activeTab={activeTab} onTabPress={handleTabPress} />
@@ -844,46 +755,6 @@ export const CaptionScreen: React.FC<CaptionScreenProps> = ({
           onSaveProfile={onSaveProfile}
         />
 
-          {/* MODAL: CREATOR CHAT */}
-          <Modal
-            visible={showChatModal}
-            transparent={true}
-            animationType="fade"
-            onRequestClose={() => setShowChatModal(false)}
-          >
-            <View style={styles.modalOverlay}>
-              <Animated.View style={[styles.modalCard, { transform: [{ scale: modalPopScale }] }]}>
-                <View style={styles.modalHeaderRow}>
-                  <View style={styles.modalTitleCol}>
-                    <Text style={styles.modalTitle}>Jarvis AI Chat</Text>
-                    <Text style={styles.modalSubtitle}>Real-time creative assistant</Text>
-                  </View>
-                  <Pressable
-                    onPress={() => setShowChatModal(false)}
-                    style={styles.modalCloseCircle}
-                    hitSlop={8}
-                  >
-                    <Text style={styles.modalCloseCross}>✕</Text>
-                  </Pressable>
-                </View>
-
-                <View style={styles.chatCard}>
-                  <Text style={styles.chatSpeaker}>Jarvis AI</Text>
-                  <Text style={styles.chatMsg}>
-                    I crafted these captions to maximize saves and comment discussions! The first 2 lines stop the scroll.
-                  </Text>
-                </View>
-
-                <Pressable
-                  style={styles.modalFullBtn}
-                  onPress={() => setShowChatModal(false)}
-                >
-                  <Text style={styles.modalFullBtnText}>Close Chat</Text>
-                </Pressable>
-              </Animated.View>
-            </View>
-          </Modal>
-
           {/* SIGNATURE ANIMATED GHOST CELEBRATION MODAL */}
           <AnimatedCompletionModal
             visible={showCelebrationModal}
@@ -907,18 +778,51 @@ export const CaptionScreen: React.FC<CaptionScreenProps> = ({
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#FAF8F5',
+    backgroundColor: ds.bg,
   },
   container: {
     flex: 1,
     width: '100%',
-    backgroundColor: '#FAF8F5',
   },
   scrollContent: {
     paddingHorizontal: 20,
-    paddingTop: 2,
-    paddingBottom: 130,
+    paddingTop: 8,
+    paddingBottom: 120,
   },
+  flex: { flex: 1 },
+  row: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  headline: { marginTop: 4, marginBottom: 16 },
+  headlineText: { fontWeight: '800', letterSpacing: -0.8, color: ds.ink },
+  headlineAccent: { color: ds.purple },
+  topicHead: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 10 },
+  eyebrow: { fontSize: 11, fontWeight: '800', letterSpacing: 1, color: ds.purple },
+  field: {
+    borderRadius: 16,
+    borderWidth: 1.5,
+    borderColor: 'rgba(255, 255, 255, 0.95)',
+    backgroundColor: 'rgba(255, 255, 255, 0.85)',
+    padding: 12,
+  },
+  fieldOn: { borderColor: ds.purple, backgroundColor: '#FFFFFF' },
+  filters: { gap: 14, marginTop: 18 },
+  optionsHead: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: 24, marginBottom: 10 },
+  sectionLabel: { fontSize: 17, fontWeight: '800', color: ds.ink, letterSpacing: -0.2 },
+  shape: { fontSize: 12.5, fontWeight: '700', color: ds.text3, marginTop: -4, marginBottom: 10 },
+  platformFit: { marginTop: 16 },
+  newBtn: { flexDirection: 'row', alignItems: 'center', gap: 5, height: 30, paddingHorizontal: 10, borderRadius: 999, backgroundColor: ds.lavender },
+  newBtnText: { fontSize: 12.5, fontWeight: '800', color: ds.purple },
+  options: { gap: 10, paddingRight: 20, paddingBottom: 4 },
+  optionsRow: { flexDirection: 'row', alignItems: 'stretch', gap: 12 },
+  thinking: { height: 160, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8 },
+  thinkingInline: { minHeight: 80, flexDirection: 'row', alignItems: 'center', gap: 8 },
+  thinkingText: { fontSize: 13, fontWeight: '700', color: ds.purple },
+  count: { alignSelf: 'flex-end', fontSize: 11.5, fontWeight: '700', color: ds.text3, marginTop: 6 },
+  touches: { flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginTop: 10 },
+  touch: { flexGrow: 1, height: 36, paddingHorizontal: 10, borderRadius: 12, alignItems: 'center', justifyContent: 'center', backgroundColor: ds.lavender },
+  touchText: { fontSize: 12.5, fontWeight: '800', color: ds.purple },
+  subLabel: { fontSize: 12.5, fontWeight: '800', color: ds.text2, marginTop: 14, marginBottom: 6 },
+  tagsInput: { color: ds.purple, fontWeight: '800' },
+  actions: { flexDirection: 'row', alignItems: 'center', gap: 10, marginTop: 18 },
   btnPressed: {
     opacity: 0.9,
     transform: [{ scale: 0.98 }],
@@ -1033,10 +937,11 @@ const styles = StyleSheet.create({
   },
 
   mainTitle: {
-    fontSize: Platform.OS === 'web' ? ('clamp(18px, 4.5vw, 22px)' as any) : sFont(20),
+    fontSize: Platform.OS === 'web' ? ('clamp(15px, 3.8vw, 17px)' as any) : sFont(16),
     fontWeight: '700',
     color: '#171420',
     letterSpacing: -0.35,
+    lineHeight: 22,
     marginBottom: 4,
     marginTop: 4,
   },
@@ -1170,13 +1075,6 @@ const styles = StyleSheet.create({
     letterSpacing: 0.2,
   },
 
-  // Choose a Tone Section
-  sectionLabel: {
-    fontSize: 14,
-    fontWeight: '800',
-    color: '#171420',
-    marginBottom: 8,
-  },
   tonePillsRow: {
     flexDirection: 'row',
     gap: 8,

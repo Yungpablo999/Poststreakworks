@@ -2,18 +2,18 @@ import React, { useState, useRef, useEffect } from 'react';
 import {
   StyleSheet,
   View,
-  Text,
   ScrollView,
   Pressable,
   Platform,
   Animated,
   Modal,
-  TextInput,
   Image,
   Dimensions,
   SafeAreaView,
   StatusBar,
 } from 'react-native';
+import { Text, TextInput } from '../components/ui/AppText';
+import { BrandLogo } from '../components/BrandLogo';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as Haptics from 'expo-haptics';
 import Svg, { Path, Circle, Rect } from 'react-native-svg';
@@ -23,6 +23,7 @@ import { UserProfileModal, UserProfileData } from '../components/UserProfileModa
 import { AnimatedCompletionModal } from '../components/AnimatedCompletionModal';
 import { TinyGoldCheck } from '../components/CreatorStoryModal';
 import { SocialBrandIcon } from '../components/SocialBrandIcon';
+import { sFont } from '../utils/responsive';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
@@ -42,7 +43,6 @@ interface ProPostComposerScreenProps {
   onBack: () => void;
   onLogout?: () => void;
   onOpenSchedule?: () => void;
-  onOpenMessages?: () => void;
   onOpenJarvisPro?: () => void;
   onNavigateTab?: (tab: TabType) => void;
   onSwitchToFree?: () => void;
@@ -106,7 +106,6 @@ export const ProPostComposerScreen: React.FC<ProPostComposerScreenProps> = ({
   onBack,
   onLogout,
   onOpenSchedule,
-  onOpenMessages,
   onOpenJarvisPro,
   onNavigateTab,
   onSwitchToFree,
@@ -364,18 +363,7 @@ export const ProPostComposerScreen: React.FC<ProPostComposerScreenProps> = ({
             </Pressable>
 
             {/* Mascot */}
-            <Animated.View
-              style={[
-                styles.headerLogoWrapper,
-                { transform: [{ translateY: flameFloatY }] },
-              ]}
-            >
-              <Image
-                source={require('../../assets/images/jarvis-ghost-clean.png')}
-                style={styles.headerGhostLogo}
-                resizeMode="contain"
-              />
-            </Animated.View>
+            <BrandLogo size="sm" />
 
             {/* Mode Switcher Pill */}
             <Pressable
@@ -404,25 +392,6 @@ export const ProPostComposerScreen: React.FC<ProPostComposerScreenProps> = ({
 
           {/* Right Header */}
           <View style={styles.headerRightGroup}>
-            <Pressable
-              style={({ pressed }) => [styles.headerIconBtn, pressed && styles.btnPressed]}
-              hitSlop={8}
-              onPress={() => {
-                if (onOpenMessages) onOpenMessages();
-                else if (onNavigateTab) onNavigateTab('match');
-              }}
-            >
-              <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
-                <Path
-                  d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"
-                  stroke="#171420"
-                  strokeWidth="2.2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </Svg>
-            </Pressable>
-
             <Pressable
               style={({ pressed }) => [styles.headerIconBtn, pressed && styles.btnPressed]}
               hitSlop={8}
@@ -506,7 +475,7 @@ export const ProPostComposerScreen: React.FC<ProPostComposerScreenProps> = ({
           <View style={styles.topTitlesSection}>
             <View style={{ flexDirection: 'row', gap: 8, alignItems: 'center', marginBottom: 8 }}>
               <View style={styles.createPostTagBox}>
-                <Text style={styles.createPostTagText}>✨ CREATE POST — PRO</Text>
+                <Text style={styles.createPostTagText}>✨ CREATE POST • PRO</Text>
               </View>
               {questDraft ? (
                 <View style={styles.questDraftBadge}>
@@ -519,9 +488,11 @@ export const ProPostComposerScreen: React.FC<ProPostComposerScreenProps> = ({
               )}
             </View>
 
-            <Text style={styles.mainTitleText}>Shape your next post.</Text>
-            <Text style={styles.mainSubText}>
-              Write your caption, choose platforms, add media, and schedule.
+            <Text
+              style={styles.mainTitleText}
+              numberOfLines={2}
+            >
+              Shape your next post.
             </Text>
           </View>
 
@@ -1190,10 +1161,13 @@ const styles = StyleSheet.create({
     letterSpacing: 0.3,
   },
   mainTitleText: {
-    fontSize: 23,
+    fontSize: Platform.OS === 'web' ? ('clamp(15px, 3.8vw, 17px)' as any) : sFont(16),
     fontWeight: '700',
     color: '#171420',
-    letterSpacing: -0.5,
+    letterSpacing: -0.35,
+    lineHeight: 22,
+    marginBottom: 4,
+    marginTop: 4,
   },
   mainSubText: {
     fontSize: 12.5,

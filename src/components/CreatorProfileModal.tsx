@@ -2,7 +2,6 @@ import React, { useState, useRef, useEffect } from 'react';
 import {
   StyleSheet,
   View,
-  Text,
   Pressable,
   ScrollView,
   Platform,
@@ -11,6 +10,7 @@ import {
   Modal,
   Animated,
 } from 'react-native';
+import { Text } from './ui/AppText';
 import Svg, { Path } from 'react-native-svg';
 import * as Haptics from 'expo-haptics';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -31,7 +31,7 @@ export interface CreatorProfileData {
   consistencyRating: string;
   whyFitsDescription: string;
   whyFitsPills: string[];
-  collabIdea: {
+  collabIdea?: {
     title: string;
     summary?: string;
     hook: string;
@@ -58,12 +58,12 @@ export const DEFAULT_AMARA_PROFILE: CreatorProfileData = {
   bio: 'Filming authentic travel routines & luxury getaways across West Africa. Looking for lifestyle co-creators for dynamic split-screen Reels! 🌴',
   tags: ['🌿 Travel', '✨ Lifestyle', '🎥 4K Vlogs'],
   categoryTags: ['Lifestyle', 'Travel', 'Storytelling', 'Short-form Video'],
-  streak: 44,
+  streak: 52,
   availability: 'Available This Week',
   consistencyRating: 'High',
   whyFitsDescription:
     'Strong niche overlap · Similar posting rhythm',
-  whyFitsPills: ['Audience Overlap', 'Content Style', 'Posting Rhythm'],
+  whyFitsPills: ['94% Audience Overlap', '98% Collab Match', 'High Synergy'],
   collabIdea: {
     title: '“24 Hours Creating in Lagos”',
     summary: 'Co-produce an authentic day-in-the-life Reel highlighting high-energy creator routines in Lagos.',
@@ -72,13 +72,13 @@ export const DEFAULT_AMARA_PROFILE: CreatorProfileData = {
     lesson: 'How we both built our streaks today.',
     chips: ['🎥 Reel', '30-45 sec', 'Sat 2 PM'],
   },
-  correlationPercent: 76,
+  correlationPercent: 98,
   primaryNiche: { name: 'LIFESTYLE', level: 'High', percent: '94%', color: '#10B981' },
-  secondaryNiche: { name: 'TRAVEL', level: 'Medium', percent: '68%', color: '#6366F1' },
+  secondaryNiche: { name: 'TRAVEL', level: 'High', percent: '88%', color: '#6366F1' },
   jarvisDeepInsight:
-    'Amara’s content style matches your creator journey niche. A simple day-in-the-life collab could work well for both audiences.',
+    'Her lifestyle content style aligns with your creator-journey niche, making this a strong fit for natural cross-audience engagement.',
   jarvisShortInsight:
-    'Her lifestyle content style matches your creator journey niche for natural cross-audience engagement.',
+    'Her lifestyle content style aligns with your creator-journey niche, making this a strong fit for natural cross-audience engagement.',
   readinessChecks: [
     'Profile verified & complete',
     'Active high-performance streak',
@@ -198,21 +198,6 @@ export const CreatorProfileModal: React.FC<CreatorProfileModalProps> = ({
     }
   };
 
-  const handleCollabPlan = () => {
-    if (Platform.OS !== 'web') {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    }
-    if (onBuildCollabPlan) {
-      onBuildCollabPlan(creator);
-    } else if (onConnect) {
-      onConnect(creator);
-    } else {
-      onClose();
-    }
-  };
-
-  const collabChipsFormatted = creator.collabIdea.chips.join(' · ');
-
   return (
     <Modal
       visible={visible}
@@ -269,9 +254,9 @@ export const CreatorProfileModal: React.FC<CreatorProfileModalProps> = ({
 
             <View style={styles.detailHeroBody}>
               <View style={styles.creatorIdentityHeaderRow}>
-                <View style={{ flex: 1 }}>
+                <View style={{ flex: 1, marginRight: 8 }}>
                   <View style={styles.creatorNameRow}>
-                    <Text style={styles.creatorNameText} numberOfLines={1}>
+                    <Text style={styles.creatorNameText}>
                       {creator.name}
                     </Text>
                     <View style={styles.verifiedBadge}>
@@ -292,7 +277,7 @@ export const CreatorProfileModal: React.FC<CreatorProfileModalProps> = ({
                     ]}
                   />
                   <Text style={[styles.detailAvailabilityText, isConnected && { color: '#059669', fontWeight: '800' }]}>
-                    {isConnected ? 'Connected Partner' : creator.availability}
+                    {isConnected ? 'Partner' : creator.availability}
                   </Text>
                 </View>
               </View>
@@ -337,7 +322,7 @@ export const CreatorProfileModal: React.FC<CreatorProfileModalProps> = ({
               <View style={styles.matchScoreTextCol}>
                 <Text style={styles.matchScoreValue}>{creator.correlationPercent}% Match</Text>
                 <Text style={styles.matchScoreSubtitle}>
-                  Strong niche overlap · Similar posting rhythm
+                  Collaboration Recommendation Score
                 </Text>
               </View>
               <View style={styles.matchScoreBadgeIcon}>
@@ -354,7 +339,7 @@ export const CreatorProfileModal: React.FC<CreatorProfileModalProps> = ({
               ))}
             </View>
 
-            {/* Tiny Expandable Detail Toggle: Why 94%? › */}
+            {/* Tiny Expandable Detail Toggle: Why 98%? › */}
             <Pressable
               style={styles.whyScoreToggleBtn}
               onPress={() => {
@@ -372,13 +357,13 @@ export const CreatorProfileModal: React.FC<CreatorProfileModalProps> = ({
             {showCorrelationDetails && (
               <View style={styles.correlationExpandedBox}>
                 <View style={styles.correlationIndicatorPill}>
-                  <Text style={styles.indicatorName}>{creator.primaryNiche.name}</Text>
+                  <Text style={styles.indicatorName}>Audience Overlap</Text>
                   <Text style={[styles.indicatorLevel, { color: '#6EE7B7' }]}>
                     {creator.primaryNiche.level} ({creator.primaryNiche.percent})
                   </Text>
                 </View>
                 <View style={styles.correlationIndicatorPill}>
-                  <Text style={styles.indicatorName}>{creator.secondaryNiche.name}</Text>
+                  <Text style={styles.indicatorName}>Content Synergy</Text>
                   <Text style={[styles.indicatorLevel, { color: '#C4B5FD' }]}>
                     {creator.secondaryNiche.level} ({creator.secondaryNiche.percent})
                   </Text>
@@ -387,46 +372,7 @@ export const CreatorProfileModal: React.FC<CreatorProfileModalProps> = ({
             )}
           </LinearGradient>
 
-          {/* 3. COLLAB IDEA — MAIN SECONDARY SECTION */}
-          <View style={styles.collabIdeaCard}>
-            <View style={styles.collabIdeaHeaderRow}>
-              <Text style={styles.purplePinIcon}>📍</Text>
-              <Text style={styles.collabIdeaTag}>Collab Idea</Text>
-            </View>
-
-            <Text
-              style={styles.collabIdeaTitleText}
-              numberOfLines={1}
-              adjustsFontSizeToFit={true}
-              minimumFontScale={0.8}
-            >
-              {creator.collabIdea.title}
-            </Text>
-
-            <Text style={styles.collabIdeaSummaryText}>
-              {creator.collabIdea.summary || `${creator.collabIdea.hook} ${creator.collabIdea.lesson}`}
-            </Text>
-
-            <View style={styles.collabFormatRow}>
-              <Text style={styles.collabFormatText}>{collabChipsFormatted}</Text>
-            </View>
-
-            <Pressable
-              style={({ pressed }) => [styles.buildCollabPlanBtn, pressed && styles.btnPressed]}
-              onPress={handleCollabPlan}
-            >
-              <LinearGradient
-                colors={['#784DF0', '#582CDB']}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 1 }}
-                style={styles.buildCollabPlanGradient}
-              >
-                <Text style={styles.buildCollabPlanBtnText}>Build Collab Plan →</Text>
-              </LinearGradient>
-            </Pressable>
-          </View>
-
-          {/* 4. COMPACT JARVIS INSIGHT */}
+          {/* 3. COMPACT JARVIS INSIGHT */}
           <View style={styles.jarvisCompactCard}>
             <View style={styles.jarvisCompactHeader}>
               <Text style={{ fontSize: 14 }}>✨</Text>
@@ -437,7 +383,7 @@ export const CreatorProfileModal: React.FC<CreatorProfileModalProps> = ({
             </Text>
           </View>
 
-          {/* 5. COMPACT READINESS STATUS ROW */}
+          {/* 4. COMPACT READINESS STATUS ROW */}
           <View style={styles.readinessCompactCard}>
             <View style={styles.readinessCompactHeader}>
               <View style={[styles.readinessGreenDot, isConnected && { backgroundColor: '#10B981' }]} />
@@ -447,37 +393,28 @@ export const CreatorProfileModal: React.FC<CreatorProfileModalProps> = ({
             </View>
             <Text style={styles.readinessCompactSub}>
               {isConnected
-                ? `You and ${creator.name.split(' ')[0]} are connected partners. Direct messaging and collab planning are unlocked.`
+                ? `You and ${creator.name.split(' ')[0]} are connected partners. Direct messaging is unlocked.`
                 : 'Verified · Active streak · High response likelihood'}
             </Text>
           </View>
         </ScrollView>
 
-        {/* 6. STICKY BOTTOM ACTION BAR */}
+        {/* 5. STICKY BOTTOM ACTION BAR */}
         <View style={styles.detailBottomActionBar}>
           {isConnected ? (
-            <View style={styles.connectedActionRow}>
-              <Pressable
-                style={({ pressed }) => [styles.detailMessageFullBtn, pressed && styles.btnPressed]}
-                onPress={handleMessage}
+            <Pressable
+              style={({ pressed }) => [styles.detailMessageFullBtn, { width: '100%' }, pressed && styles.btnPressed]}
+              onPress={handleMessage}
+            >
+              <LinearGradient
+                colors={['#784DF0', '#582CDB']}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 0 }}
+                style={styles.detailConnectGradient}
               >
-                <LinearGradient
-                  colors={['#784DF0', '#582CDB']}
-                  start={{ x: 0, y: 0 }}
-                  end={{ x: 1, y: 1 }}
-                  style={styles.detailConnectGradient}
-                >
-                  <Text style={styles.detailConnectBtnText}>💬 Message {creator.name.split(' ')[0]}</Text>
-                </LinearGradient>
-              </Pressable>
-
-              <Pressable
-                style={({ pressed }) => [styles.detailCollabSecondaryBtn, pressed && styles.btnPressed]}
-                onPress={handleCollabPlan}
-              >
-                <Text style={styles.detailCollabSecondaryBtnText}>🚀 Pitch Plan</Text>
-              </Pressable>
-            </View>
+                <Text style={styles.detailConnectBtnText}>💬 Message {creator.name.split(' ')[0]}</Text>
+              </LinearGradient>
+            </Pressable>
           ) : (
             <>
               <Pressable
