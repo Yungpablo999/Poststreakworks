@@ -448,9 +448,14 @@ export default function App() {
   };
   const inApp = currentScreen in SIDEBAR_FOR;
   const showSidebar = breakpoint === 'desktop' && inApp;
-  // Desktop sign-up / sign-in steps: brand panel on the left, the step on the right
-  const ONBOARDING_STEPS: Screen[] = ['signup', 'signin', 'verify-code', 'reset-password', 'niche', 'platforms', 'plan'];
-  const showBrandPanel = breakpoint === 'desktop' && ONBOARDING_STEPS.includes(currentScreen);
+  // Desktop sign-up steps: brand panel on the left, the step on the right.
+  // Sign-in is just the sign-in box (people signing in already know PostStreak).
+  const ONBOARDING_STEPS: Screen[] = ['signup', 'verify-code', 'niche', 'platforms', 'plan'];
+  const showBrandPanel =
+    breakpoint === 'desktop' &&
+    ONBOARDING_STEPS.includes(currentScreen) &&
+    // The code step after an email sign-in belongs to sign-in, so no panel there either
+    !(currentScreen === 'verify-code' && verifyMode !== 'signup');
 
   // Hold on the brand background for the split second fonts take to load,
   // so text never flashes in the system font. On error, fall back gracefully.
