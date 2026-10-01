@@ -25,7 +25,7 @@ import { react, useMascot, type Emotion } from '../../mascot/mascot';
 // says something. Motion glides (no springy overshoot); Reduce Motion keeps
 // it still and only swaps the emotion.
 
-const IMAGES: Record<Emotion, number> = {
+export const MASCOT_IMAGES: Record<Emotion, number> = {
   wave: require('../../../assets/mascot/wave.png'),
   happy: require('../../../assets/mascot/happy.png'),
   excited: require('../../../assets/mascot/excited.png'),
@@ -101,7 +101,7 @@ export function LiveMascot({
   /** Show this emotion instead of following the app's mood */
   emotion?: Emotion;
   /** Where the speech bubble appears ('auto': left, or underneath on phones), or 'none' */
-  bubble?: 'left' | 'right' | 'top' | 'bottom' | 'auto' | 'none';
+  bubble?: 'left' | 'right' | 'top' | 'bottom' | 'under' | 'auto' | 'none';
   bubbleWidth?: number;
   interactive?: boolean;
   confetti?: boolean;
@@ -172,12 +172,20 @@ export function LiveMascot({
   };
 
   const { width: screenW } = useWindowDimensions();
+  // Where the mascot sits on screen, so a bubble underneath never runs off the left edge
+  const wrap = useRef<View>(null);
+  const [rightEdge, setRightEdge] = useState<number | null>(null);
+  const measure = () => wrap.current?.measureInWindow((x) => setRightEdge(x + size));
+  useEffect(() => {
+    if (side === 'under' && mood.line) measure();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [mood.seq]);
   const side = bubble === 'auto' ? (screenW < 560 ? 'under' : 'left') : bubble;
   const speaker = useIsSpeaker(bubble !== 'none' && !fixed);
   const showBubble = speaker && !!mood.line;
   const bubblePos =
     side === 'under'
-      ? { top: size * 0.98, right: 0, width: Math.min(bubbleWidth, screenW - 64) }
+      ? { top: size * 0.98, right: 0, width: Math.min(bubbleWidth, screenW - 32, (rightEdge ?? screenW) - 12) }
       : side === 'left'
       ? { right: size + 6, top: size * 0.12 }
       : side === 'right'
@@ -196,14 +204,14 @@ export function LiveMascot({
       ))}
       <Animated.View style={[StyleSheet.absoluteFill, body]}>
         <Animated.View key={emotion} entering={FadeIn.duration(200)} exiting={FadeOut.duration(200)} style={StyleSheet.absoluteFill}>
-          <Image source={IMAGES[emotion]} style={styles.img} resizeMode="contain" accessibilityIgnoresInvertColors />
+          <Image source={MASCOT_IMAGES[emotion]} style={styles.img} resizeMode="contain" accessibilityIgnoresInvertColors />
         </Animated.View>
       </Animated.View>
     </View>
   );
 
   return (
-    <View style={{ width: size, height: size }}>
+    <View ref={wrap} onLayout={side === 'under' ? measure : undefined} style={{ width: size, height: size }}>
       {interactive ? (
         <Pressable
           onPress={tap}
@@ -238,7 +246,7 @@ export function LiveMascot({
 export function preloadMascot() {
   if (Platform.OS !== 'web') return;
   // On web a bundled image is a URL string or an object with a uri
-  Object.values(IMAGES).forEach((src) => {
+  Object.values(MASCOT_IMAGES).forEach((src) => {
     const any = src as unknown as string | { uri?: string };
     const uri = typeof any === 'string' ? any : any?.uri;
     if (uri) Image.prefetch(uri).catch(() => {});

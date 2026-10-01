@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { useMascotThinking } from '../../mascot/mascot';
 import { View, Pressable, StyleSheet, Platform, ActivityIndicator } from 'react-native';
 import Animated, { Easing, FadeIn, FadeInUp, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 import Svg, { Path, Circle } from 'react-native-svg';
@@ -27,6 +28,7 @@ export function IdeaHeroCard({ isNewUser, niches, platforms, onUseIdea }: IdeaHe
   const ideas = useMemo(() => getStarterIdeas(niches, platforms), [niches, platforms]);
   const [index, setIndex] = useState(0);
   const [thinking, setThinking] = useState(false);
+  useMascotThinking(thinking);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const idea = ideas[index % ideas.length];
   const shown = platforms.filter((p) => ['tiktok', 'instagram', 'youtube', 'threads', 'facebook'].includes(p)).slice(0, 3);

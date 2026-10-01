@@ -1,4 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { react } from '../mascot/mascot';
+import { MascotSays } from '../components/mascot/MascotSays';
 import { useWebFrame, useWideFrame } from '../components/web/WebAuthHeader';
 import { StyleSheet, View, ScrollView, Pressable, Platform, KeyboardAvoidingView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -119,6 +121,7 @@ export const VerifyCodeScreen: React.FC<VerifyCodeScreenProps> = ({ mode, email,
       setTimeout(() => {
         setStatus('verified');
         if (Platform.OS !== 'web') Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+        react('celebrate');
         timers.current.push(setTimeout(() => onSuccess(email), CELEBRATE_MS));
       }, CHECK_MS),
     );
@@ -168,6 +171,8 @@ export const VerifyCodeScreen: React.FC<VerifyCodeScreenProps> = ({ mode, email,
           )}
 
           <ScrollView contentContainerStyle={[styles.scroll, wideFrame && webStyles.scroll]} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
+            {/* The mascot guides each step and reacts to your choices */}
+            <MascotSays text={mode === 'signup' ? 'Last step! Pop in the code from your email.' : 'Check your email for your code.'} />
             <Animated.View entering={FadeInUp.delay(120).duration(550)}>
               <FitLines
                 lines={['Check your', <Text key="i" style={styles.titleAccent}>inbox</Text>]}

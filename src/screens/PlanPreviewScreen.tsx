@@ -1,4 +1,6 @@
 import React, { useMemo, useRef, useState } from 'react';
+import { MascotSays } from '../components/mascot/MascotSays';
+import { useMascotThinking } from '../mascot/mascot';
 import { useWebFrame, useWideFrame } from '../components/web/WebAuthHeader';
 import { StyleSheet, View, ScrollView, Pressable, Platform, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -36,6 +38,7 @@ export const PlanPreviewScreen: React.FC<PlanPreviewScreenProps> = ({ niches, pl
   const snapshots = useMemo(() => getAccountSnapshots(platforms), [platforms]);
   const [index, setIndex] = useState(0);
   const [thinking, setThinking] = useState(false);
+  useMascotThinking(thinking);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const idea = ideas[index % ideas.length];
 
@@ -99,6 +102,8 @@ export const PlanPreviewScreen: React.FC<PlanPreviewScreenProps> = ({ niches, pl
         )}
 
         <ScrollView contentContainerStyle={[styles.scroll, wideFrame && webStyles.scroll]} showsVerticalScrollIndicator={false}>
+          {/* The mascot guides each step and reacts to your choices */}
+          <MascotSays text={'Look! I made you a starter plan.'} />
           <Animated.View entering={FadeInUp.delay(120).duration(550)}>
             <FitLines
               lines={['Jarvis made you a', <Text key="s" style={styles.titleAccent}>starter plan</Text>]}

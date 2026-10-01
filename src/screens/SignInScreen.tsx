@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
+import { MascotSays } from '../components/mascot/MascotSays';
 import { useWebFrame, useWideFrame } from '../components/web/WebAuthHeader';
-import { StyleSheet, View, ScrollView, Pressable, Platform, KeyboardAvoidingView, Image, Alert } from 'react-native';
+import { StyleSheet, View, ScrollView, Pressable, Platform, KeyboardAvoidingView, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Animated, { FadeIn, FadeInUp } from 'react-native-reanimated';
 import * as Haptics from 'expo-haptics';
@@ -81,17 +82,8 @@ export const SignInScreen: React.FC<SignInScreenProps> = ({ onBack, onCreateAcco
           )}
 
           <ScrollView contentContainerStyle={[styles.scroll, wideFrame && webStyles.scroll]} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
-            {/* The mascot floats in to say hello */}
-            <Animated.View entering={FadeInUp.duration(650)} style={styles.mascotWrap}>
-              <View style={styles.mascotHalo}>
-                <Image
-                  source={require('../../assets/images/jarvis-ghost-clean.png')}
-                  style={styles.mascot}
-                  resizeMode="contain"
-                  accessibilityIgnoresInvertColors
-                />
-              </View>
-            </Animated.View>
+            {/* The mascot guides each step and reacts to your choices */}
+            <MascotSays text={'Welcome back! Good to see you.'} />
 
             <Animated.View entering={FadeInUp.delay(140).duration(550)}>
               <FitLines

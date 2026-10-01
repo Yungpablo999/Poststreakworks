@@ -1,4 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { react } from '../mascot/mascot';
+import { express, type Emotion } from '../mascot/mascot';
+import { MascotSays } from '../components/mascot/MascotSays';
 import { useWebFrame, useWideFrame } from '../components/web/WebAuthHeader';
 import { StyleSheet, View, ScrollView, Pressable, Modal, Platform, KeyboardAvoidingView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -31,6 +34,18 @@ interface NicheItem {
   subtitle: string;
   iconType: NicheIconType;
 }
+
+// The mascot reacts to each topic you pick
+const NICHE_REACTIONS: Record<string, [Emotion, string]> = {
+  lifestyle: ['happy', 'Ooh, day-in-my-life content. Love it!'],
+  comedy: ['excited', 'Haha, my favourite! Skits are so fun.'],
+  education: ['idea', 'Teaching is a superpower.'],
+  beauty: ['love', 'Glow-up content? Yes please!'],
+  food: ['love', 'Now I’m hungry.'],
+  fitness: ['determined', 'Let’s get moving!'],
+  tech: ['cool', 'Smart choice. Nerd high five!'],
+  music: ['party', 'Let’s dance!'],
+};
 
 const DEFAULT_NICHES: NicheItem[] = [
   { id: 'lifestyle', title: 'Lifestyle', subtitle: 'Routines, self-care, everyday life', iconType: 'lifestyle' },
@@ -82,6 +97,7 @@ export const NicheSelectionScreen: React.FC<NicheSelectionScreenProps> = ({ onBa
   };
 
   const signalLimit = () => {
+    react('oops');
     if (Platform.OS !== 'web') Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
     counterShake.value = withSequence(
       withTiming(-7, { duration: 50 }),
@@ -109,6 +125,8 @@ export const NicheSelectionScreen: React.FC<NicheSelectionScreenProps> = ({ onBa
     }
     setSelectedNiches([...selectedNiches, id]);
     bumpCounter();
+    const r = NICHE_REACTIONS[id];
+    if (r) express(r[0], r[1]);
   };
 
   const handleAddCustomNiche = () => {
@@ -182,6 +200,8 @@ export const NicheSelectionScreen: React.FC<NicheSelectionScreenProps> = ({ onBa
         )}
 
         <ScrollView contentContainerStyle={[styles.scroll, wideFrame && webStyles.scroll]} showsVerticalScrollIndicator={false}>
+          {/* The mascot guides each step and reacts to your choices */}
+          <MascotSays text={'Hi, I’m your PostStreak buddy! What do you love making?'} />
           {/* Title */}
           <Animated.View entering={FadeInUp.delay(120).duration(550)}>
             {/* Always two lines: "What kind of creator are" / "you?", scaled to the screen */}

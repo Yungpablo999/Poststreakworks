@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { useMascotThinking } from '../mascot/mascot';
 import { useBreakpoint } from '../hooks/useBreakpoint';
 import {
   StyleSheet,
@@ -353,6 +354,7 @@ export const CaptionScreen: React.FC<CaptionScreenProps> = ({
   const [bodyFocused, setBodyFocused] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
   const [touching, setTouching] = useState<string | null>(null);
+  useMascotThinking(thinking || !!touching);
   const [saved, setSaved] = useState(false);
   const showToast = (m: string) => {
     setToast(m);

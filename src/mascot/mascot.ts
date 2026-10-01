@@ -9,7 +9,7 @@
 //
 // Plain TypeScript so anything (screens, data, sheets) can call react().
 
-import { useSyncExternalStore } from 'react';
+import { useEffect, useRef, useSyncExternalStore } from 'react';
 
 export type Emotion =
   | 'wave'
@@ -41,7 +41,11 @@ export type MascotEvent =
   | 'challengeDone'
   | 'pro'
   | 'questStart'
-  | 'copied';
+  | 'copied'
+  | 'connected'
+  | 'oops'
+  | 'lastStep'
+  | 'allCaughtUp';
 
 type Reaction = { emotion: Emotion; lines: string[]; hold: number; burst?: boolean };
 
@@ -73,6 +77,10 @@ const REACTIONS: Record<MascotEvent, Reaction> = {
   pro: { emotion: 'cool', hold: 3400, burst: true, lines: ['Welcome to Pro. Let’s go big.', 'Pro unlocked. Looking good!'] },
   questStart: { emotion: 'determined', hold: 2600, lines: ['Let’s do this!', 'Quest on. I believe in you.'] },
   copied: { emotion: 'happy', hold: 1800, lines: ['Copied! Paste it anywhere.'] },
+  connected: { emotion: 'excited', hold: 2600, burst: true, lines: ['Connected! I’ll keep an eye on your numbers.', 'Yes! Now I can learn what works for you.'] },
+  oops: { emotion: 'thinking', hold: 2600, lines: ['Hmm, almost. One more thing first.', 'Not quite yet. Let’s fix that.'] },
+  lastStep: { emotion: 'determined', hold: 2600, lines: ['Last step! Nearly there.', 'One more and you’re in!'] },
+  allCaughtUp: { emotion: 'calm', hold: 2000, lines: ['All caught up. Nice!'] },
 };
 
 type State = { emotion: Emotion; line: string | null; seq: number; burst: number; baseline: Emotion };
@@ -89,14 +97,24 @@ function set(next: Partial<State>) {
   emit();
 }
 
+function timeHello(): string | null {
+  const h = new Date().getHours();
+  if (h < 5) return 'Up late? Let’s make it count.';
+  if (h < 12) return 'Good morning! Fresh day, fresh post?';
+  if (h < 18) return 'Good afternoon! Got a minute to create?';
+  return 'Good evening! Perfect time to post.';
+}
+
 /** React to something the creator did. */
 export function react(event: MascotEvent) {
+  wake();
   const r = REACTIONS[event];
   // Don't repeat the same line twice in a row
   let i = Math.floor(Math.random() * r.lines.length);
   if (r.lines.length > 1 && i === lastLine[event]) i = (i + 1) % r.lines.length;
   lastLine[event] = i;
-  set({ emotion: r.emotion, line: r.lines[i], seq: state.seq + 1, burst: r.burst ? state.burst + 1 : state.burst });
+  const line = event === 'hello' && Math.random() < 0.6 ? timeHello() ?? r.lines[i] : r.lines[i];
+  set({ emotion: r.emotion, line, seq: state.seq + 1, burst: r.burst ? state.burst + 1 : state.burst });
   if (revert) clearTimeout(revert);
   if (hideLine) clearTimeout(hideLine);
   hideLine = setTimeout(() => set({ line: null }), Math.max(2400, r.hold + 400));
@@ -112,6 +130,7 @@ export function setBaseline(emotion: Emotion) {
 
 /** Say something without changing the mood (e.g. a tip). */
 export function say(line: string, ms = 3200) {
+  wake();
   if (hideLine) clearTimeout(hideLine);
   set({ line, seq: state.seq + 1 });
   hideLine = setTimeout(() => set({ line: null }), ms);
@@ -125,4 +144,68 @@ const get = () => state;
 
 export function useMascot() {
   return useSyncExternalStore(subscribe, get, get);
+}
+
+// ─── Napping ────────────────────────────────────────────────────────────────
+// Leave the app alone for a while and the mascot dozes off; any activity wakes
+// it with a little "I’m up!". Gentle, never a nag.
+const NAP_AFTER = 75_000;
+let napTimer: ReturnType<typeof setTimeout> | null = null;
+let napping = false;
+function scheduleNap() {
+  if (napTimer) clearTimeout(napTimer);
+  napTimer = setTimeout(() => {
+    napping = true;
+    set({ emotion: 'sleepy', line: null });
+  }, NAP_AFTER);
+}
+function wake() {
+  if (napping) {
+    napping = false;
+    set({ emotion: state.baseline });
+  }
+  scheduleNap();
+}
+/** Call on any user activity (touch, click, typing) */
+export function activity() {
+  const was = napping;
+  wake();
+  if (was) {
+    set({ emotion: 'wave', line: 'Oh! I’m up, I’m up.', seq: state.seq + 1 });
+    if (revert) clearTimeout(revert);
+    if (hideLine) clearTimeout(hideLine);
+    revert = setTimeout(() => set({ emotion: state.baseline }), 1800);
+    hideLine = setTimeout(() => set({ line: null }), 2400);
+  }
+}
+
+// ─── First-visit tips ───────────────────────────────────────────────────────
+// The first time someone opens a page, the mascot points out what to do.
+// Each tip shows once (for this session until there's a backend).
+const tipsSeen = new Set<string>();
+export function tipOnce(key: string, line: string, delay = 900) {
+  if (tipsSeen.has(key)) return;
+  tipsSeen.add(key);
+  setTimeout(() => express('happy', line, 4200), delay);
+}
+
+// ─── Loading ────────────────────────────────────────────────────────────────
+/** While `busy` is true the mascot thinks; when it finishes, it lights up. */
+export function useMascotThinking(busy: boolean, readyEvent: MascotEvent = 'ideaReady') {
+  const was = useRef(false);
+  useEffect(() => {
+    if (busy && !was.current) react('thinking');
+    if (!busy && was.current) react(readyEvent);
+    was.current = busy;
+  }, [busy, readyEvent]);
+}
+
+/** A one-off reaction with its own line (e.g. reacting to the topic you picked). */
+export function express(emotion: Emotion, line: string, hold = 2600, burst = false) {
+  wake();
+  set({ emotion, line, seq: state.seq + 1, burst: burst ? state.burst + 1 : state.burst });
+  if (revert) clearTimeout(revert);
+  if (hideLine) clearTimeout(hideLine);
+  revert = setTimeout(() => set({ emotion: state.baseline }), hold);
+  hideLine = setTimeout(() => set({ line: null }), hold + 400);
 }

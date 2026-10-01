@@ -1,13 +1,16 @@
-import React from 'react';
-import { StyleSheet, View } from 'react-native';
+import React, { useEffect } from 'react';
+import { Image, StyleSheet, View } from 'react-native';
 import Animated, { Easing, FadeInUp, FadeOutDown } from 'react-native-reanimated';
 import { BlurView } from 'expo-blur';
 import Svg, { Path } from 'react-native-svg';
 import { Text } from './AppText';
 import { ds } from '../../theme/colors';
+import { MASCOT_IMAGES } from '../mascot/LiveMascot';
+import { react } from '../../mascot/mascot';
 
 // The app's one confirmation message. Frosted glass (matches the rest of the
-// app), with a small icon: green tick for things that worked, purple for tips
+// app), said by the mascot: happy with a green tick for things that worked,
+// thinking for tips
 // and "not quite yet" notes. Rises a little and fades in (no bounce), and sits
 // just above the tab bar wherever the creator has scrolled.
 
@@ -30,6 +33,10 @@ export function guessTone(message: string): ToastTone {
 }
 
 export function AppToast({ message, tone, bottom = 108 }: { message: string | null; tone?: ToastTone; bottom?: number }) {
+  // "Not yet" messages: the mascot looks puzzled too, wherever it is
+  useEffect(() => {
+    if (message && NOT_YET_WORDS.test(message) && (tone ?? guessTone(message)) === 'info') react('oops');
+  }, [message, tone]);
   if (!message) return null;
   const text = clean(message);
   const t = tone ?? guessTone(text);
@@ -46,15 +53,15 @@ export function AppToast({ message, tone, bottom = 108 }: { message: string | nu
       <View style={styles.toast}>
         <BlurView intensity={40} tint="light" style={[StyleSheet.absoluteFill, { borderRadius: 18, overflow: 'hidden' }]} />
         <View style={[StyleSheet.absoluteFill, styles.fill]} />
-        <View style={[styles.icon, t === 'success' ? styles.iconSuccess : styles.iconInfo]}>
-          {t === 'success' ? (
-            <Svg width={12} height={12} viewBox="0 0 24 24" fill="none">
-              <Path d="M20 6L9 17l-5-5" stroke="#FFFFFF" strokeWidth={3.4} strokeLinecap="round" strokeLinejoin="round" />
-            </Svg>
-          ) : (
-            <Svg width={12} height={12} viewBox="0 0 24 24" fill="none">
-              <Path d="M12 2l2.4 7.6L22 12l-7.6 2.4L12 22l-2.4-7.6L2 12l7.6-2.4L12 2z" fill={ds.purple} />
-            </Svg>
+        {/* The mascot says it: happy when something worked, thinking for tips and "not yet" */}
+        <View style={styles.face}>
+          <Image source={MASCOT_IMAGES[t === 'success' ? 'happy' : 'thinking']} style={styles.faceImg} resizeMode="contain" />
+          {t === 'success' && (
+            <View style={styles.tick}>
+              <Svg width={8} height={8} viewBox="0 0 24 24" fill="none">
+                <Path d="M20 6L9 17l-5-5" stroke="#FFFFFF" strokeWidth={4} strokeLinecap="round" strokeLinejoin="round" />
+              </Svg>
+            </View>
           )}
         </View>
         <Text style={styles.text}>{text}</Text>
@@ -83,6 +90,9 @@ const styles = StyleSheet.create({
     elevation: 8,
   },
   fill: { borderRadius: 18, backgroundColor: 'rgba(255, 255, 255, 0.88)' },
+  face: { width: 34, height: 34, marginVertical: -4 },
+  faceImg: { width: '100%', height: '100%' },
+  tick: { position: 'absolute', right: -2, bottom: 0, width: 14, height: 14, borderRadius: 7, alignItems: 'center', justifyContent: 'center', backgroundColor: ds.greenFill, borderWidth: 1.5, borderColor: '#FFFFFF' },
   icon: { width: 24, height: 24, borderRadius: 12, alignItems: 'center', justifyContent: 'center' },
   iconSuccess: { backgroundColor: ds.greenFill },
   iconInfo: { backgroundColor: ds.lavender },

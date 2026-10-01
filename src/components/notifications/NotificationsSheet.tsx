@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useSyncExternalStore } from 'react';
+import { MascotSays } from '../mascot/MascotSays';
 import { Platform, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import Animated, { Easing, FadeInUp } from 'react-native-reanimated';
 import * as Haptics from 'expo-haptics';
@@ -224,6 +225,7 @@ export function NotificationsSheet({ visible, onClose, persona, tier }: { visibl
       footer={<AppButton title="Done" size="lg" onPress={close} />}
     >
       <ScrollView style={styles.scroll} contentContainerStyle={styles.list} showsVerticalScrollIndicator={false}>
+        <MascotSays size={52} emotion={fresh.length ? 'excited' : 'calm'} text={fresh.length ? 'Here’s what’s new!' : 'All caught up. Nice!'} />
         {fresh.length > 0 ? (
           <>
             <Text style={styles.section}>New</Text>

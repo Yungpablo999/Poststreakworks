@@ -1,4 +1,5 @@
 import React, { useRef, useEffect, useState } from 'react';
+import { LiveMascot } from './mascot/LiveMascot';
 import {
   StyleSheet,
   View,
@@ -151,6 +152,10 @@ export const FreeAppHeader: React.FC<FreeAppHeaderProps> = ({
 
       {/* Right: Notification & Person Profile Photo */}
       <View style={styles.headerRightGroup}>
+        {/* The live mascot rides along on every page */}
+        <View style={{ zIndex: 50 }}>
+          <LiveMascot size={42} bubble="under" bubbleWidth={220} />
+        </View>
         {/* Notification bell: swings on tap, unread dot breathes */}
         <BellButton unread={unreadCount > 0} onPress={handleNotifPress} />
 
@@ -218,6 +223,8 @@ const styles = StyleSheet.create({
     flexShrink: 1,
   },
   headerBar: {
+    // above the page so the mascot's speech bubble can drop over it
+    zIndex: 40,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',

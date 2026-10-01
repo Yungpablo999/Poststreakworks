@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react';
+import { useMascotThinking } from '../mascot/mascot';
 import { usePageWidth } from '../hooks/useBreakpoint';
 import { View, ScrollView, Pressable, StyleSheet, Platform, KeyboardAvoidingView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -214,6 +215,7 @@ export const HookStudioScreen: React.FC<HookStudioScreenProps> = ({
   const [angle, setAngle] = useState<Angle>('mistake');
   const [round, setRound] = useState(0);
   const [thinking, setThinking] = useState(false);
+  useMascotThinking(thinking);
   const [open, setOpen] = useState<string | null>(null);
   const saved = useSyncExternalStore(subscribeToSavedHooks, getSavedHooks);
   const [toast, setToast] = useState<string | null>(null);
