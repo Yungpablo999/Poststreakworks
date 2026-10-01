@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
+import { IdeasStrip } from '../components/web/IdeasStrip';
 import {
   StyleSheet,
   View,
@@ -944,69 +945,72 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
       <View style={[styles.container, isDark && { backgroundColor: '#0C0A12' }]}>
         {!isDark && <GlassBackdrop />}
         {/* 1. TOP APP BAR: Ghost Mascot on Left & Notification/Profile on Right */}
-        <View style={styles.headerBar}>
-          {/* Top-Left: Ghost Logo Mascot + Mode Switcher */}
-          <View style={styles.headerLeftGroup}>
-            {!onDesktop && <BrandLogo size="sm" isDark={isDark} />}
+        {/* Desktop web app: the top bar and side menu replace this */}
+        {!onDesktop && (
+          <View style={styles.headerBar}>
+            {/* Top-Left: Ghost Logo Mascot + Mode Switcher */}
+            <View style={styles.headerLeftGroup}>
+              {!onDesktop && <BrandLogo size="sm" isDark={isDark} />}
 
-            <HeaderDualModePills
-              tier={tier === 'pro' ? 'pro' : 'free'}
-              persona={isNewUser ? 'new' : 'returning'}
-              onToggleTier={tier === 'pro' ? onSwitchToFree : onSwitchToPro || onOpenJarvisPro}
-              onTogglePersona={onTogglePersona}
-              isDark={isDark}
-            />
-          </View>
+              <HeaderDualModePills
+                tier={tier === 'pro' ? 'pro' : 'free'}
+                persona={isNewUser ? 'new' : 'returning'}
+                onToggleTier={tier === 'pro' ? onSwitchToFree : onSwitchToPro || onOpenJarvisPro}
+                onTogglePersona={onTogglePersona}
+                isDark={isDark}
+              />
+            </View>
 
-          {/* Right: Notification & Person Profile Photo Upload */}
-          <View style={styles.headerRightGroup}>
-            {/* Notification bell: swings on tap, unread dot breathes */}
-            <BellButton unread={sharedUnread > 0} onPress={() => setShowNotifSheet(true)} />
+            {/* Right: Notification & Person Profile Photo Upload */}
+            <View style={styles.headerRightGroup}>
+              {/* Notification bell: swings on tap, unread dot breathes */}
+              <BellButton unread={sharedUnread > 0} onPress={() => setShowNotifSheet(true)} />
 
-            {/* Top-Right: Person Icon Placeholder where users add their profile picture */}
-            <Pressable
-              onPress={openPhotoModal}
-              style={({ pressed }) => [
-                styles.profilePhotoBtn,
-                currentSelectedAvatar && styles.profilePhotoBtnActive,
-                pressed && styles.headerIconBtnPressed,
-              ]}
-              hitSlop={8}
-            >
-              {currentSelectedAvatar ? (
-                <Image
-                  source={currentSelectedAvatar.source}
-                  style={styles.headerCustomAvatarImage}
-                  resizeMode="cover"
-                />
-              ) : (
-                <Svg width={19} height={19} viewBox="0 0 24 24" fill="none">
-                  <Path
-                    d="M20 21V19C20 17.9 19.5 16.9 18.7 16.2C17.9 15.5 16.9 15 15.8 15H8.2C7.1 15 6.1 15.5 5.3 16.2C4.5 16.9 4 17.9 4 19V21"
-                    stroke="#582CDB"
-                    strokeWidth="2.3"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
+              {/* Top-Right: Person Icon Placeholder where users add their profile picture */}
+              <Pressable
+                onPress={openPhotoModal}
+                style={({ pressed }) => [
+                  styles.profilePhotoBtn,
+                  currentSelectedAvatar && styles.profilePhotoBtnActive,
+                  pressed && styles.headerIconBtnPressed,
+                ]}
+                hitSlop={8}
+              >
+                {currentSelectedAvatar ? (
+                  <Image
+                    source={currentSelectedAvatar.source}
+                    style={styles.headerCustomAvatarImage}
+                    resizeMode="cover"
                   />
-                  <Circle
-                    cx="12"
-                    cy="7"
-                    r="4"
-                    stroke="#582CDB"
-                    strokeWidth="2.3"
-                  />
-                </Svg>
-              )}
+                ) : (
+                  <Svg width={19} height={19} viewBox="0 0 24 24" fill="none">
+                    <Path
+                      d="M20 21V19C20 17.9 19.5 16.9 18.7 16.2C17.9 15.5 16.9 15 15.8 15H8.2C7.1 15 6.1 15.5 5.3 16.2C4.5 16.9 4 17.9 4 19V21"
+                      stroke="#582CDB"
+                      strokeWidth="2.3"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                    <Circle
+                      cx="12"
+                      cy="7"
+                      r="4"
+                      stroke="#582CDB"
+                      strokeWidth="2.3"
+                    />
+                  </Svg>
+                )}
 
-              {/* Small "+" Add Photo Badge */}
-              <View style={styles.addPhotoPlusBadge}>
-                <Text style={styles.addPhotoPlusText}>
-                  {currentSelectedAvatar ? '✎' : '+'}
-                </Text>
-              </View>
-            </Pressable>
+                {/* Small "+" Add Photo Badge */}
+                <View style={styles.addPhotoPlusBadge}>
+                  <Text style={styles.addPhotoPlusText}>
+                    {currentSelectedAvatar ? '✎' : '+'}
+                  </Text>
+                </View>
+              </Pressable>
+            </View>
           </View>
-        </View>
+        )}
 
         {/* 2. MAIN SCROLLABLE CONTENT */}
         <ScrollView
@@ -1037,6 +1041,14 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
               pro={tier === 'pro'}
               onOpenHookStudio={onOpenHookStudio}
               onOpenVoiceStudio={onOpenVoiceStudio}
+            />
+          )}
+
+          {/* Desktop web: ready-to-start ideas across the page */}
+          {onDesktop && (
+            <IdeasStrip
+              niches={userProfile?.niches?.length ? userProfile.niches : ['lifestyle']}
+              platforms={userProfile?.connectedPlatforms ?? []}
             />
           )}
 

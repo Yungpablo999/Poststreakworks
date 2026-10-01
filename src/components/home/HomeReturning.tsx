@@ -174,7 +174,7 @@ export function HomeReturning({ firstName, onPlanPost, onOpenSchedule, onOpenGro
   return (
     <View style={styles.stack}>
       {/* Desktop: the main card on the left, the rest beside it */}
-      <ResponsiveColumns split={pro ? 2 : 1} gap={14} leftFlex={1.15}>
+      <ResponsiveColumns fullFirst split={pro ? 2 : 1} gap={14}>
       {/* 1. Welcome back + the one next step */}
       <Animated.View entering={enter(0)}>
         <GlassCard strong radius={26} padding={20}>

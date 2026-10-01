@@ -258,7 +258,7 @@ export function HomeDayZero({
   return (
     <View style={styles.stack}>
       {/* Desktop: the main card on the left, the rest beside it */}
-      <ResponsiveColumns split={1} gap={14} leftFlex={1.15}>
+      <ResponsiveColumns fullFirst split={1} gap={14}>
       {/* 1. Welcome + the one clear next action */}
       <Animated.View entering={FadeInUp.duration(550)}>
         <GlassCard strong radius={26} padding={20}>

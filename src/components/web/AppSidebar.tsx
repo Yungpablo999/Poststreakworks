@@ -150,12 +150,19 @@ export function AppSidebar({
   onNavigate,
   onOpenProfile,
   onOpenPro,
+  persona,
+  onToggleTier,
+  onTogglePersona,
 }: {
   active: SidebarId | null;
   profile?: UserProfileData;
   onNavigate: (id: SidebarId) => void;
   onOpenProfile: () => void;
   onOpenPro: () => void;
+  /** Preview switches (sample data): free/Pro and new/returning creator */
+  persona: 'new' | 'returning';
+  onToggleTier: () => void;
+  onTogglePersona: () => void;
 }) {
   const isPro = profile?.tier === 'pro' || profile?.tier === 'founding';
   const avatar = profile?.customAvatarUri ? { uri: profile.customAvatarUri } : profile?.avatarId && profile.avatarId !== 'ghost' ? profile.avatarSource : null;
@@ -190,6 +197,15 @@ export function AppSidebar({
         ) : null}
       </ScrollView>
 
+      {/* Preview the four versions of the app (sample data for now) */}
+      <View style={styles.preview}>
+        <Text style={styles.previewLabel}>Preview as</Text>
+        <View style={styles.previewRow}>
+          <Segment options={['Free', 'Pro']} value={isPro ? 1 : 0} onChange={onToggleTier} />
+          <Segment options={['New', 'Returning']} value={persona === 'returning' ? 1 : 0} onChange={onTogglePersona} />
+        </View>
+      </View>
+
       <Pressable onPress={onOpenProfile} accessibilityRole="button" accessibilityLabel="Your profile" style={({ pressed }) => [styles.me, pointer, pressed && { opacity: 0.85 }]}>
         <View style={[styles.avatar, isPro && styles.avatarPro]}>
           {avatar ? (
@@ -217,8 +233,31 @@ export function AppSidebar({
   );
 }
 
+function Segment({ options, value, onChange }: { options: [string, string]; value: 0 | 1; onChange: () => void }) {
+  return (
+    <View style={styles.seg} accessibilityRole="radiogroup">
+      {options.map((o, i) => {
+        const on = i === value;
+        return (
+          <Pressable key={o} onPress={() => !on && onChange()} accessibilityRole="radio" accessibilityState={{ checked: on }} style={[styles.segBtn, on && styles.segOn, pointer]}>
+            <Text style={[styles.segText, on && styles.segTextOn]}>{o}</Text>
+          </Pressable>
+        );
+      })}
+    </View>
+  );
+}
+
 const styles = StyleSheet.create({
   flex: { flex: 1 },
+  preview: { marginHorizontal: 14, marginTop: 4 },
+  previewLabel: { fontSize: 10.5, fontWeight: '800', letterSpacing: 0.8, textTransform: 'uppercase', color: ds.text3, marginBottom: 6, marginLeft: 2 },
+  previewRow: { gap: 6 },
+  seg: { flex: 1, flexDirection: 'row', padding: 3, borderRadius: 10, backgroundColor: 'rgba(255, 255, 255, 0.7)', borderWidth: 1, borderColor: 'rgba(255, 255, 255, 0.95)' },
+  segBtn: { flex: 1, height: 26, borderRadius: 8, alignItems: 'center', justifyContent: 'center' },
+  segOn: { backgroundColor: ds.lavender },
+  segText: { fontSize: 11, fontWeight: '800', color: ds.text3 },
+  segTextOn: { color: ds.purple },
   root: {
     width: SIDEBAR_W,
     height: '100%',

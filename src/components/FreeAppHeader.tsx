@@ -108,6 +108,9 @@ export const FreeAppHeader: React.FC<FreeAppHeaderProps> = ({
   const [showNotifications, setShowNotifications] = useState(false);
   const unreadCount = useUnreadNotifications(currentPersona, currentTier);
 
+  // Desktop web app: the top bar and side menu replace this phone header
+  if (onDesktop) return null;
+
   return (
     <View style={[styles.headerBar, { backgroundColor: isDark ? '#0C0A12' : backgroundColor }]}>
       {/* Top-Left: Back Button (if provided) + Ghost Logo Mascot + Dual Switcher Pills */}

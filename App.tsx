@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, StyleSheet, Platform } from 'react-native';
+import { View, StyleSheet, Platform, useWindowDimensions } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider, initialWindowMetrics } from 'react-native-safe-area-context';
 
@@ -53,6 +53,9 @@ import { UserProfileData, UserProfileModal } from './src/components/UserProfileM
 import { setNotificationHandler } from './src/components/notifications/NotificationsSheet';
 import { AppSidebar, type SidebarId } from './src/components/web/AppSidebar';
 import { WebAuthHeader } from './src/components/web/WebAuthHeader';
+import { WebTopBar } from './src/components/web/WebTopBar';
+import { TodayRail } from './src/components/web/TodayRail';
+import { setComposerOpener } from './src/components/web/webActions';
 import { useBreakpoint } from './src/hooks/useBreakpoint';
 import { GlassBackdrop } from './src/components/glass/GlassBackdrop';
 import { UserPersona } from './src/components/HeaderDualModePills';
@@ -462,6 +465,31 @@ export default function App() {
   const signingUp = authStep !== null;
   const authBack = getBackScreen(currentScreen);
 
+  // Desktop web app: a top bar on every signed-in page, and the Today panel
+  // on the right of the main pages when the window is wide enough
+  const { width: windowW } = useWindowDimensions();
+  const MAIN_PAGES: Screen[] = ['dashboard', 'create', 'quests', 'growth', 'schedule', 'repurpose', 'hook-studio', 'voice-studio'];
+  const RAIL_PAGES: Screen[] = ['dashboard', 'create', 'quests', 'growth', 'schedule'];
+  const showRail = showSidebar && RAIL_PAGES.includes(currentScreen) && windowW >= 1360;
+  const PAGE_TITLE: Partial<Record<Screen, string>> = {
+    composer: 'New post', 'idea-detail': 'Idea', 'content-angle': 'Ideas', script: 'Script', caption: 'Caption',
+    'mission-detail': 'Today’s quest', 'challenge-detail': 'Weekly challenge', 'jarvis-pro': 'Jarvis Pro',
+    'audience-breakdown': 'Your audience', 'post-performance': 'Post performance', 'platform-growth': 'Platform growth',
+  };
+  const innerBack = MAIN_PAGES.includes(currentScreen) ? null : getBackScreen(currentScreen);
+  const desktopTier: 'free' | 'pro' = userProfile?.tier === 'pro' || userProfile?.tier === 'founding' ? 'pro' : 'free';
+  const desktopPersona: 'new' | 'returning' = (userPersona || userProfile?.userPersona) === 'returning' ? 'returning' : 'new';
+  const openBlankComposer = (title?: string) => {
+    setComposerQuestDraft(null);
+    setComposerIdeaGoal(null);
+    setComposerIdeaPlatform(undefined);
+    setComposerFilmStyle(undefined);
+    setComposerIdeaFormat(undefined);
+    setComposerIdeaTitle(title ?? '');
+    navigateTo('composer');
+  };
+  setComposerOpener(openBlankComposer);
+
   // Hold on the brand background for the split second fonts take to load,
   // so text never flashes in the system font. On error, fall back gracefully.
   if (!fontsLoaded && !fontError) {
@@ -481,6 +509,9 @@ export default function App() {
               onNavigate={(id) => navigateTo(SCREEN_FOR[id])}
               onOpenProfile={() => setShowProfileFromMenu(true)}
               onOpenPro={() => navigateTo('jarvis-pro')}
+              persona={desktopPersona}
+              onToggleTier={() => setUserProfile((prev) => ({ ...prev, tier: prev.tier === 'pro' || prev.tier === 'founding' ? 'free' : 'pro' }))}
+              onTogglePersona={handleTogglePersona}
             />
           )}
           <View style={styles.fill}>
@@ -493,9 +524,22 @@ export default function App() {
                 onSwitch={() => navigateTo(signingUp ? 'signin' : 'niche')}
               />
             )}
-            {/* Tablet and desktop: the page sits in a centred column over the brand glows */}
+            {/* Tablet: the page sits in a centred column over the brand glows.
+                Desktop: the page fills the space beside the side menu, under a
+                top bar, with the Today panel on the right of the main pages. */}
             {inApp && breakpoint !== 'phone' && <GlassBackdrop />}
-            <View style={inApp && breakpoint !== 'phone' ? [styles.column, { maxWidth: breakpoint === 'desktop' ? 1120 : 720 }] : styles.fill}>
+            {showSidebar && (
+              <WebTopBar
+                profile={userProfile}
+                persona={desktopPersona}
+                tier={desktopTier}
+                title={innerBack ? PAGE_TITLE[currentScreen] : undefined}
+                onBack={innerBack ? () => navigateTo(innerBack) : undefined}
+                onNewPost={() => openBlankComposer()}
+              />
+            )}
+            <View style={showSidebar ? styles.desktopRow : styles.fill}>
+            <View style={inApp && breakpoint === 'tablet' ? [styles.column, { maxWidth: 720 }] : styles.fill}>
         <EdgeSwipeBackWrapper
           enabled={Boolean(getBackScreen(currentScreen))}
           onSwipeBack={() => {
@@ -1087,6 +1131,15 @@ export default function App() {
         )}
           </ScreenTransitionContainer>
         </EdgeSwipeBackWrapper>
+            </View>
+            {showRail && (
+              <TodayRail
+                persona={desktopPersona}
+                onUseIdea={(title) => openBlankComposer(title)}
+                onPlan={() => navigateTo('schedule')}
+                onOpenChallenge={() => navigateTo('challenge-detail')}
+              />
+            )}
             </View>
           </View>
         </View>
