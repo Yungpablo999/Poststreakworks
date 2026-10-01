@@ -23,7 +23,7 @@ import { sFont, sPadding, isNarrowScreen } from '../utils/responsive';
 import Reanimated, { FadeIn, FadeInUp, FadeOut } from 'react-native-reanimated';
 import { GlassBackdrop } from '../components/glass/GlassBackdrop';
 import { FitLines } from '../components/ui/FitLines';
-import { ChipRow, TopPickCard, IdeaRow, IdeaRowSkeleton, QuotaCard, SavedRow } from '../components/ideas/IdeasBlocks';
+import { ChipRow, TopPickCard, IdeaRow, IdeaRowSkeleton, QuotaCard, SavedRow, TopicIdeasCard, UnlimitedIdeasCard } from '../components/ideas/IdeasBlocks';
 import { ComposerToast } from '../components/composer/ComposerBlocks';
 import { getIdeaFeed, IDEA_GOALS, NICHE_LABELS, normalizeNiches, type IdeaGoal } from '../data';
 import { ds } from '../theme/colors';
@@ -37,6 +37,9 @@ interface ContentAngleScreenProps {
   onUseIdea?: (ideaTitle: string, format?: string, goal?: IdeaGoal, hook?: string) => void;
   userProfile?: UserProfileData;
   onSaveProfile?: (updated: UserProfileData) => void;
+  /** Pro members: unlimited ideas and ideas about their own topic. */
+  tier?: 'free' | 'pro';
+  onSwitchToFree?: () => void;
 }
 
 interface NotificationItem {
@@ -185,7 +188,9 @@ export const ContentAngleScreen: React.FC<ContentAngleScreenProps> = ({
   onUseIdea,
 
   userProfile,
-  onSaveProfile,}) => {
+  onSaveProfile,
+  tier = 'free',
+  onSwitchToFree,}) => {
   const isDark = false;
   const [activeTab, setActiveTab] = useState<TabType>('create');
 
@@ -454,7 +459,26 @@ export const ContentAngleScreen: React.FC<ContentAngleScreenProps> = ({
   const [listCount, setListCount] = useState(3);
   const [generating, setGenerating] = useState(false);
   const top = feed[topIndex % feed.length];
-  const listIdeas = feed.filter((i) => i.id !== top.id).slice(0, listCount);
+  const isPro = tier === 'pro';
+  const [topicIdeas, setTopicIdeas] = useState<typeof feed>([]);
+  const [topicBusy, setTopicBusy] = useState(false);
+  const askTopic = (t: string) => {
+    if (Platform.OS !== 'web') Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    setTopicBusy(true);
+    const lower = t.charAt(0).toLowerCase() + t.slice(1);
+    const cap = t.charAt(0).toUpperCase() + t.slice(1);
+    const fmt = feed[0]?.format ?? '30-second Reel';
+    const stamp = Date.now();
+    setTimeout(() => {
+      setTopicIdeas([
+        { ...feed[0], id: `topic-${stamp}-0`, title: `The one thing nobody tells you about ${lower}`, hook: `Nobody warned me about this part of ${lower}.`, format: fmt },
+        { ...feed[0], id: `topic-${stamp}-1`, title: `${cap}: 3 mistakes I made so you don’t have to`, hook: `I got ${lower} wrong three times. Here’s what I learned.`, format: fmt },
+        { ...feed[0], id: `topic-${stamp}-2`, title: `I tried ${lower} for 7 days. Here’s what happened`, hook: `Seven days ago I started ${lower}. Day three surprised me.`, format: fmt },
+      ]);
+      setTopicBusy(false);
+    }, 900);
+  };
+  const listIdeas = [...topicIdeas, ...feed.filter((i) => i.id !== top.id).slice(0, listCount)];
   const savedIds = savedIdeasList.map((s) => s.id);
   const isSaved = (id: string) => savedIds.includes(`feed_${id}`);
 
@@ -487,7 +511,7 @@ export const ContentAngleScreen: React.FC<ContentAngleScreenProps> = ({
   };
 
   const generateIdeas = () => {
-    if (generating || quotaUsed >= 5) return;
+    if (generating || (!isPro && quotaUsed >= 5)) return;
     if (Platform.OS !== 'web') Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     setGenerating(true);
     setTimeout(() => {
@@ -511,6 +535,7 @@ export const ContentAngleScreen: React.FC<ContentAngleScreenProps> = ({
           backgroundColor="transparent"
           onBack={onBack}
           onOpenJarvisPro={onOpenJarvisPro}
+          onSwitchToFree={onSwitchToFree}
           onOpenNotifications={() => {
             triggerModalAnim();
             setShowNotificationModal(true);
@@ -565,6 +590,13 @@ export const ContentAngleScreen: React.FC<ContentAngleScreenProps> = ({
             <ChipRow label="Goal" items={IDEA_GOALS} selected={[goal]} onToggle={(id) => setGoal(id as IdeaGoal)} />
           </Reanimated.View>
 
+          {/* PRO: ideas about your own topic */}
+          {isPro && (
+            <Reanimated.View entering={FadeInUp.delay(120).duration(550)} style={styles.section}>
+              <TopicIdeasCard busy={topicBusy} onAsk={askTopic} />
+            </Reanimated.View>
+          )}
+
           {/* TOP PICK */}
           <Reanimated.View entering={FadeInUp.delay(160).duration(550)} style={styles.section}>
             <TopPickCard
@@ -601,7 +633,11 @@ export const ContentAngleScreen: React.FC<ContentAngleScreenProps> = ({
 
           {/* DAILY IDEAS */}
           <View style={styles.section}>
-            <QuotaCard used={quotaUsed} limit={5} generating={generating} onGenerate={generateIdeas} onPro={() => onOpenJarvisPro?.()} />
+            {isPro ? (
+              <UnlimitedIdeasCard generating={generating} onGenerate={generateIdeas} />
+            ) : (
+              <QuotaCard used={quotaUsed} limit={5} generating={generating} onGenerate={generateIdeas} onPro={() => onOpenJarvisPro?.()} />
+            )}
           </View>
 
           {/* SAVED IDEAS */}

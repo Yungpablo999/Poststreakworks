@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Pressable, ScrollView, StyleSheet, Platform, ActivityIndicator } from 'react-native';
 import Animated, {
   Easing,
@@ -15,7 +15,8 @@ import { AppButton } from '../ui/AppButton';
 import { GlassCard } from '../glass/GlassCard';
 import { PressableCard } from '../ui/PressableCard';
 import { JarvisOrb } from '../JarvisOrb';
-import { ds } from '../../theme/colors';
+import { ds, goldTokens } from '../../theme/colors';
+import { TextInput } from '../ui/AppText';
 import type { FeedIdea } from '../../data';
 
 // Building blocks for the Ideas page. Calm motion (eased, no bounce), no
@@ -277,6 +278,62 @@ export function QuotaCard({
   );
 }
 
+// ─── Pro: ideas about your own topic ───────────────────────────────────────
+export function TopicIdeasCard({ busy, onAsk }: { busy: boolean; onAsk: (topic: string) => void }) {
+  const [topic, setTopic] = useState('');
+  const [focused, setFocused] = useState(false);
+  const ask = () => {
+    if (!topic.trim() || busy) return;
+    onAsk(topic.trim());
+  };
+  return (
+    <GlassCard strong radius={22} padding={16}>
+      <View style={styles.topicHead}>
+        <JarvisOrb size={26} />
+        <Text style={styles.topicTitle}>Ideas about your own topic</Text>
+        <View style={styles.proTag}>
+          <Text style={styles.proTagText}>PRO</Text>
+        </View>
+      </View>
+      <View style={[styles.topicField, focused && styles.topicFieldOn]}>
+        <TextInput
+          value={topic}
+          onChangeText={setTopic}
+          onFocus={() => setFocused(true)}
+          onBlur={() => setFocused(false)}
+          onSubmitEditing={ask}
+          returnKeyType="go"
+          placeholder="e.g. morning routines"
+          placeholderTextColor={ds.text3}
+          selectionColor={ds.purple}
+          style={styles.topicInput}
+          accessibilityLabel="Your topic"
+        />
+      </View>
+      <View style={styles.topicBtn}>
+        <AppButton title={busy ? 'Thinking…' : 'Get 3 ideas'} onPress={ask} disabled={busy || !topic.trim()} />
+      </View>
+    </GlassCard>
+  );
+}
+
+// ─── Pro: no daily limit ────────────────────────────────────────────────────
+export function UnlimitedIdeasCard({ generating, onGenerate }: { generating: boolean; onGenerate: () => void }) {
+  return (
+    <GlassCard strong radius={22} padding={16}>
+      <View style={styles.quotaHead}>
+        <Text style={styles.quotaTitle}>New ideas</Text>
+        <View style={styles.proTag}>
+          <Text style={styles.proTagText}>UNLIMITED</Text>
+        </View>
+      </View>
+      <View style={styles.quotaBtn}>
+        <AppButton title={generating ? 'Thinking…' : 'Generate new ideas'} variant="quiet" onPress={onGenerate} disabled={generating} />
+      </View>
+    </GlassCard>
+  );
+}
+
 // ─── Saved row ──────────────────────────────────────────────────────────────
 export function SavedRow({ title, meta, onPress, onUnsave }: { title: string; meta: string; onPress: () => void; onUnsave: () => void }) {
   return (
@@ -304,6 +361,14 @@ export function SavedRow({ title, meta, onPress, onUnsave }: { title: string; me
 
 
 const styles = StyleSheet.create({
+  proTag: { paddingHorizontal: 7, height: 20, borderRadius: 999, justifyContent: 'center', backgroundColor: goldTokens.light, borderWidth: 1, borderColor: goldTokens.border },
+  proTagText: { fontSize: 10.5, fontWeight: '800', letterSpacing: 0.6, color: goldTokens.dark },
+  topicHead: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  topicTitle: { flex: 1, fontSize: 15.5, fontWeight: '800', color: ds.ink },
+  topicField: { marginTop: 12, borderRadius: 16, borderWidth: 1.5, borderColor: 'rgba(255, 255, 255, 0.95)', backgroundColor: 'rgba(255, 255, 255, 0.85)', paddingHorizontal: 14, height: 48, justifyContent: 'center' },
+  topicFieldOn: { borderColor: ds.purple, backgroundColor: '#FFFFFF' },
+  topicInput: { fontSize: 15, fontWeight: '600', color: ds.ink, ...(Platform.OS === 'web' ? ({ outlineStyle: 'none' } as object) : {}) },
+  topicBtn: { marginTop: 12 },
   flex: { flex: 1 },
   rowLabel: { fontSize: 13, fontWeight: '800', color: ds.text2, marginBottom: 8 },
   chips: { gap: 8, paddingRight: 20 },
