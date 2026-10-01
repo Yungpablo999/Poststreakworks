@@ -659,33 +659,10 @@ export default function App() {
         )}
 
         {currentScreen === 'growth' && (
-          (userProfile?.tier === 'pro' || userProfile?.tier === 'founding') ? (
-            <ProGrowthScreen
-              onBackToDashboard={() => navigateTo('dashboard')}
-              onLogout={handleLogout}
-              onOpenJarvisPro={() => navigateTo('jarvis-pro')}
-              onOpenAudienceBreakdown={() => navigateTo('audience-breakdown')}
-              onOpenPostPerformance={() => navigateTo('post-performance')}
-              onOpenPlatformGrowth={() => navigateTo('platform-growth')}
-              onOpenSchedule={() => navigateTo('schedule')}
-              onOpenPostComposer={(title, platform) => {
-                if (title) setComposerIdeaTitle(title);
-                setComposerIdeaGoal(null);
-                setComposerIdeaPlatform(undefined); setComposerFilmStyle(undefined);
-                navigateTo('composer');
-              }}
-              onOpenScript={() => navigateTo('script')}
-              onSwitchToFree={() => {
-                setUserProfile(prev => ({ ...prev, tier: 'free' }));
-              }}
-              onNavigateTab={handleTabNavigation}
-              userProfile={userProfile}
-              userPersona={userPersona}
-              onTogglePersona={handleTogglePersona}
-              onSaveProfile={(updated) => setUserProfile(prev => ({ ...prev, ...updated, tier: updated.tier || prev.tier || 'free' }))}
-            />
-          ) : (
+          (
             <GrowthScreen
+              tier={userProfile?.tier === 'pro' || userProfile?.tier === 'founding' ? 'pro' : 'free'}
+              onSwitchToFree={() => setUserProfile(prev => ({ ...prev, tier: 'free' }))}
               onBackToDashboard={() => navigateTo('dashboard')}
               onLogout={handleLogout}
               onOpenJarvisPro={() => navigateTo('jarvis-pro')}

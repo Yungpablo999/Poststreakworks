@@ -194,6 +194,9 @@ interface GrowthScreenProps {
   onOpenPostPerformance?: () => void;
   onOpenPlatformGrowth?: () => void;
   onOpenSchedule?: () => void;
+  /** Pro members: no upgrade card, Pro rows in "What you'll see here". */
+  tier?: 'free' | 'pro';
+  onSwitchToFree?: () => void;
   onOpenIdeas?: () => void;
   onOpenChallenge?: () => void;
   /** Send this post into the Repurpose video studio. */
@@ -232,6 +235,8 @@ export const GrowthScreen: React.FC<GrowthScreenProps> = ({
   onOpenPlatformGrowth,
   onMakeMoreLikeThis,
   onOpenSchedule,
+  tier = 'free',
+  onSwitchToFree,
   onOpenIdeas,
   onOpenChallenge,
   onLogout,
@@ -446,6 +451,7 @@ export const GrowthScreen: React.FC<GrowthScreenProps> = ({
         <FreeAppHeader
           backgroundColor="transparent"
           onSwitchToPro={onSwitchToPro || onOpenJarvisPro}
+          onSwitchToFree={onSwitchToFree}
           onOpenJarvisPro={onOpenJarvisPro}
           onTogglePersona={onTogglePersona}
           userPersona={userPersona || userProfile?.userPersona}
@@ -517,7 +523,7 @@ export const GrowthScreen: React.FC<GrowthScreenProps> = ({
 
           {isNewUser && (
             <Reanimated.View entering={FadeInUp.delay(300).duration(550)} style={styles.section}>
-              <ComingUpCard />
+              <ComingUpCard pro={tier === 'pro'} />
             </Reanimated.View>
           )}
 
@@ -572,7 +578,8 @@ export const GrowthScreen: React.FC<GrowthScreenProps> = ({
             </Reanimated.View>
           )}
 
-          {/* 9. PRO (gold = Pro only) */}
+          {/* 9. PRO (gold = Pro only; members don't see the upgrade) */}
+          {tier !== 'pro' && (
           <Reanimated.View entering={FadeInUp.delay(600).duration(550)} style={styles.section}>
             <ProUpsellCard
               title="Unlock deeper analytics"
@@ -581,6 +588,7 @@ export const GrowthScreen: React.FC<GrowthScreenProps> = ({
               onUpgrade={handleOpenPro}
             />
           </Reanimated.View>
+          )}
 
           {/* Bottom Space for Floating Tab Bar */}
           <View style={{ height: 110 }} />

@@ -15,7 +15,7 @@ import Svg, { Path, Rect, Circle, Defs, LinearGradient as SvgGradient, Stop } fr
 import { Text } from '../ui/AppText';
 import { AppButton } from '../ui/AppButton';
 import { GlassCard } from '../glass/GlassCard';
-import { ds } from '../../theme/colors';
+import { ds, goldTokens } from '../../theme/colors';
 
 // Building blocks for the Growth tab. Day 0 shows no fake numbers: the chart
 // is a clearly-labelled preview line, and every empty state says what's coming.
@@ -144,18 +144,53 @@ const COMING = [
   },
 ];
 
-export function ComingUpCard() {
+// Extra rows Pro members will see once data arrives (gold tag = Pro)
+const COMING_PRO = [
+  {
+    key: 'who',
+    title: 'Who your audience is',
+    body: 'Ages, places and when they’re online.',
+    icon: (
+      <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
+        <Path d="M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2M9 11a4 4 0 100-8 4 4 0 000 8zM22 21v-2a4 4 0 00-3-3.9M16 3.1a4 4 0 010 7.8" stroke={ds.purple} strokeWidth={2} strokeLinecap="round" />
+      </Svg>
+    ),
+  },
+  {
+    key: 'history',
+    title: 'Growth history',
+    body: 'Month by month, for every platform.',
+    icon: (
+      <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
+        <Rect x="3" y="4" width="18" height="17" rx="3" stroke={ds.purple} strokeWidth={2} />
+        <Path d="M7 16l3-3 3 2 4-5" stroke={ds.purple} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
+      </Svg>
+    ),
+  },
+];
+
+export function ComingUpCard({ pro = false }: { pro?: boolean }) {
+  const rows: { key: string; title: string; body: string; icon: React.ReactNode; pro?: boolean }[] = pro
+    ? [...COMING, ...COMING_PRO.map((r) => ({ ...r, pro: true }))]
+    : COMING;
   return (
     <GlassCard radius={26} padding={0}>
       <View style={styles.comingHeader}>
         <Text style={styles.cardTitle}>What you'll see here</Text>
         <Text style={styles.cardSub}>Fills in after your first posts</Text>
       </View>
-      {COMING.map((c, i) => (
+      {rows.map((c, i) => (
         <View key={c.key} style={[styles.comingRow, i > 0 && styles.divider]}>
           <View style={styles.iconBox}>{c.icon}</View>
           <View style={styles.flex}>
-            <Text style={styles.rowTitle}>{c.title}</Text>
+            <View style={styles.titleRow}>
+              <Text style={styles.rowTitle}>{c.title}</Text>
+              {c.pro && (
+                <View style={styles.proTag}>
+                  <Text style={styles.proTagText}>PRO</Text>
+                </View>
+              )}
+            </View>
             <Text style={styles.rowBody}>{c.body}</Text>
           </View>
         </View>
@@ -238,6 +273,9 @@ export function FirstReportCard({ daysOfData }: { daysOfData: number }) {
 
 const styles = StyleSheet.create({
   flex: { flex: 1 },
+  titleRow: { flexDirection: 'row', alignItems: 'center', gap: 6, flexWrap: 'wrap' },
+  proTag: { paddingHorizontal: 6, height: 18, borderRadius: 999, justifyContent: 'center', backgroundColor: goldTokens.light, borderWidth: 1, borderColor: goldTokens.border },
+  proTagText: { fontSize: 10, fontWeight: '800', letterSpacing: 0.5, color: goldTokens.dark },
   heroTop: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   eyebrow: { fontSize: 11, fontWeight: '800', letterSpacing: 1, color: ds.purple },
   previewTag: { paddingHorizontal: 8, height: 20, justifyContent: 'center', borderRadius: 999, backgroundColor: 'rgba(23, 20, 32, 0.05)' },
