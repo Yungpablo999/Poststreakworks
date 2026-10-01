@@ -173,13 +173,13 @@ export function PartCard({
             }}
             disabled={rewriting}
             accessibilityRole="button"
-            accessibilityLabel={editsLeft > 0 ? `Rewrite with Jarvis. ${editsLeft} ${editsLeft === 1 ? "edit" : "edits"} left` : 'Out of Jarvis edits. See Pro'}
+            accessibilityLabel={editsLeft === Infinity ? 'Rewrite with Jarvis' : editsLeft > 0 ? `Rewrite with Jarvis. ${editsLeft} ${editsLeft === 1 ? "edit" : "edits"} left` : 'Out of Jarvis edits. See Pro'}
             style={({ pressed }) => [styles.rewrite, pressed && { transform: [{ scale: 0.96 }] }, Platform.OS === 'web' && ({ cursor: 'pointer' } as object)]}
           >
             <Svg width={12} height={12} viewBox="0 0 24 24" fill="none">
               <Path d="M12 2l2.4 7.6L22 12l-7.6 2.4L12 22l-2.4-7.6L2 12l7.6-2.4L12 2z" fill={ds.purple} />
             </Svg>
-            <Text style={styles.rewriteText}>{editsLeft > 0 ? `Rewrite · ${editsLeft} left` : 'More with Pro'}</Text>
+            <Text style={styles.rewriteText}>{editsLeft === Infinity ? 'Rewrite' : editsLeft > 0 ? `Rewrite · ${editsLeft} left` : 'More with Pro'}</Text>
           </Pressable>
         </View>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.options}>

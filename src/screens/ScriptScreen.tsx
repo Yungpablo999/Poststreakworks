@@ -44,6 +44,10 @@ interface ScriptScreenProps {
   onUseAsPost?: (scriptData: { hook: string; body: string; takeaway: string; cta: string }) => void;
   userProfile?: UserProfileData;
   onSaveProfile?: (updated: UserProfileData) => void;
+  /** Pro members: unlimited rewrites and "Make a voiceover". */
+  tier?: 'free' | 'pro';
+  onSwitchToFree?: () => void;
+  onOpenVoiceStudio?: (script: string, title: string) => void;
 }
 
 export const getFormatDurationLabel = (format?: string, title?: string): string => {
@@ -254,6 +258,9 @@ export const ScriptScreen: React.FC<ScriptScreenProps> = ({
   onUseAsPost,
   userProfile,
   onSaveProfile,
+  tier = 'free',
+  onSwitchToFree,
+  onOpenVoiceStudio,
 }) => {
   const isDark = false;
   const [activeTab, setActiveTab] = useState<TabType>('create');
@@ -263,7 +270,9 @@ export const ScriptScreen: React.FC<ScriptScreenProps> = ({
 
   // Live-Editable Script Components State
   const [selectedHook, setSelectedHook] = useState(HOOK_PRESETS[0].text);
-  const [editsLeft, setEditsLeft] = useState(2);
+  const isPro = tier === 'pro';
+  const [freeEdits, setEditsLeft] = useState(2);
+  const editsLeft = isPro ? Infinity : freeEdits;
   const [bodyText, setBodyText] = useState(BODY_PRESETS[0].text);
   const [selectedBodyPresetId, setSelectedBodyPresetId] = useState('original');
   const [takeawayText, setTakeawayText] = useState(LESSON_PRESETS[0].text);
@@ -628,6 +637,7 @@ export const ScriptScreen: React.FC<ScriptScreenProps> = ({
             backgroundColor="transparent"
             onBack={onBack}
             onOpenJarvisPro={onOpenJarvisPro}
+            onSwitchToFree={onSwitchToFree}
             onOpenNotifications={() => {
               triggerModalAnim();
               setShowNotificationModal(true);
@@ -779,6 +789,21 @@ export const ScriptScreen: React.FC<ScriptScreenProps> = ({
                   </Svg>
                 }
               />
+              {isPro && (
+                <AppButton
+                  title="Make a voiceover"
+                  variant="glass"
+                  onPress={() =>
+                    onOpenVoiceStudio?.([selectedHook, bodyText, takeawayText, selectedCtaText].filter(Boolean).join(' '), ideaTitle ?? '')
+                  }
+                  iconRight={
+                    <Svg width={16} height={16} viewBox="0 0 24 24" fill="none">
+                      <Rect x="9" y="2" width="6" height="12" rx="3" stroke={ds.purple} strokeWidth={2.2} />
+                      <Path d="M5 11a7 7 0 0014 0M12 18v4" stroke={ds.purple} strokeWidth={2.2} strokeLinecap="round" />
+                    </Svg>
+                  }
+                />
+              )}
               <AppButton
                 title={justSaved ? 'Saved to drafts' : 'Save draft'}
                 variant="glass"

@@ -310,6 +310,8 @@ function Player({ title, voice, seconds, speed }: { title: string; voice: string
 }
 
 interface VoiceStudioScreenProps {
+  /** Script handed over from the Script page */
+  initialScript?: string;
   onBack: () => void;
   onNavigateTab?: (tab: TabType) => void;
   onOpenJarvisPro?: () => void;
@@ -323,6 +325,7 @@ interface VoiceStudioScreenProps {
 }
 
 export const VoiceStudioScreen: React.FC<VoiceStudioScreenProps> = ({
+  initialScript,
   onBack,
   onNavigateTab,
   onOpenJarvisPro,
@@ -344,7 +347,7 @@ export const VoiceStudioScreen: React.FC<VoiceStudioScreenProps> = ({
   const [showLibrary, setShowLibrary] = useState(false);
   const [showBuy, setShowBuy] = useState(false);
   const [extra, setExtra] = useState(0);
-  const [script, setScript] = useState(DEFAULT_SCRIPT);
+  const [script, setScript] = useState(initialScript || DEFAULT_SCRIPT);
   const [focused, setFocused] = useState(false);
   const [speed, setSpeed] = useState(1);
   const [phase, setPhase] = useState<'idle' | 'making' | 'ready'>('idle');

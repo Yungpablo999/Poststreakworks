@@ -118,6 +118,8 @@ export default function App() {
   const [composerFilmStyle, setComposerFilmStyle] = useState<FilmStyle | undefined>(undefined);
   // A post sent from Growth into the Repurpose video studio
   const [studioVideo, setStudioVideo] = useState<StudioVideo | undefined>(undefined);
+  // A script sent from Script into Voice Studio
+  const [voiceScript, setVoiceScript] = useState<string | undefined>(undefined);
   const [composerIdeaGoal, setComposerIdeaGoal] = useState<{ goal?: IdeaGoal; hook?: string; caption?: string; tags?: string[] } | null>(null);
   const [composerIdeaFormat, setComposerIdeaFormat] = useState<'short_video' | 'carousel' | 'image' | 'long_video' | 'text' | undefined>(undefined);
   const [composerQuestDraft, setComposerQuestDraft] = useState<{
@@ -503,7 +505,10 @@ export default function App() {
               onOpenQuests={() => navigateTo('quests')}
               onOpenGrowth={() => navigateTo('growth')}
               onOpenCreate={() => navigateTo('create')}
-              onOpenVoiceStudio={() => navigateTo('voice-studio')}
+              onOpenVoiceStudio={() => {
+                setVoiceScript(undefined);
+                navigateTo('voice-studio');
+              }}
               onOpenPostComposer={(ideaTitle) => {
                 if (ideaTitle) setComposerIdeaTitle(ideaTitle);
                 setComposerIdeaGoal(null);
@@ -571,7 +576,10 @@ export default function App() {
           (
             <CreateScreen
               tier={userProfile?.tier === 'pro' || userProfile?.tier === 'founding' ? 'pro' : 'free'}
-              onOpenVoiceStudio={() => navigateTo('voice-studio')}
+              onOpenVoiceStudio={() => {
+                setVoiceScript(undefined);
+                navigateTo('voice-studio');
+              }}
               onOpenHookStudio={() => navigateTo('hook-studio')}
               onLogout={handleLogout}
               onOpenSchedule={() => navigateTo('schedule')}
@@ -689,7 +697,10 @@ export default function App() {
           (
             <QuestsScreen
               tier={userProfile?.tier === 'pro' || userProfile?.tier === 'founding' ? 'pro' : 'free'}
-              onOpenVoiceStudio={() => navigateTo('voice-studio')}
+              onOpenVoiceStudio={() => {
+                setVoiceScript(undefined);
+                navigateTo('voice-studio');
+              }}
               onOpenHookStudio={() => navigateTo('hook-studio')}
               onSwitchToFree={() => setUserProfile(prev => ({ ...prev, tier: 'free' }))}
               onBackToDashboard={() => navigateTo('dashboard')}
@@ -793,35 +804,14 @@ export default function App() {
         )}
 
         {currentScreen === 'script' && (
-          (userProfile?.tier === 'pro' || userProfile?.tier === 'founding') ? (
-            <ProScriptScreen
-              ideaTitle={selectedIdeaTitle}
-              onBack={() => navigateTo(previousScreen ? previousScreen : 'create')}
-              onLogout={handleLogout}
-              onOpenSchedule={() => navigateTo('schedule')}
-              onOpenJarvisPro={() => navigateTo('jarvis-pro')}
-              onOpenVoiceStudio={(text, title) => {
-                if (title) setSelectedIdeaTitle(title);
+          (
+            <ScriptScreen
+              tier={userProfile?.tier === 'pro' || userProfile?.tier === 'founding' ? 'pro' : 'free'}
+              onSwitchToFree={() => setUserProfile(prev => ({ ...prev, tier: 'free' }))}
+              onOpenVoiceStudio={(script) => {
+                setVoiceScript(script);
                 navigateTo('voice-studio');
               }}
-              onOpenPostComposer={(title, platform) => {
-                if (title) setComposerIdeaTitle(title);
-                setComposerIdeaGoal(null);
-                setComposerIdeaPlatform(undefined); setComposerFilmStyle(undefined);
-                navigateTo('composer');
-              }}
-              onOpenIdeaAngle={() => navigateTo('content-angle')}
-              onSwitchToFree={() => {
-                if (userProfile) {
-                  setUserProfile({ ...userProfile, tier: 'free' });
-                }
-              }}
-              onNavigateTab={handleTabNavigation}
-              userProfile={userProfile}
-              onSaveProfile={(updated) => setUserProfile(prev => ({ ...prev, ...updated, tier: updated.tier || prev.tier || 'free' }))}
-            />
-          ) : (
-            <ScriptScreen
               ideaTitle={selectedIdeaTitle}
               format={composerIdeaFormat}
               onBack={() => navigateTo(previousScreen ? previousScreen : 'create')}
@@ -924,6 +914,7 @@ export default function App() {
 
         {currentScreen === 'voice-studio' && (
           <VoiceStudioScreen
+            initialScript={voiceScript}
             userPersona={userPersona}
             onTogglePersona={handleTogglePersona}
             onBack={() => navigateTo(previousScreen ? previousScreen : 'create')}
