@@ -1241,6 +1241,28 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
           />
           )}
 
+          {attachedAudio && (
+            <Reanimated.View entering={FadeIn.duration(240)} style={styles.voiceAttached}>
+              <View style={styles.voiceAttachedIcon}>
+                <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
+                  <Rect x="9" y="2" width="6" height="12" rx="3" stroke={ds.purple} strokeWidth={2.1} />
+                  <Path d="M5 11a7 7 0 0014 0M12 18v4" stroke={ds.purple} strokeWidth={2.1} strokeLinecap="round" />
+                </Svg>
+              </View>
+              <View style={{ flex: 1 }}>
+                <Text style={styles.voiceAttachedTitle}>Voiceover added</Text>
+                <Text style={styles.voiceAttachedSub} numberOfLines={1}>
+                  {attachedAudio.voiceName} · {attachedAudio.duration}
+                </Text>
+              </View>
+              <Pressable onPress={() => onClearAttachedAudio?.()} hitSlop={8} accessibilityRole="button" accessibilityLabel="Remove voiceover">
+                <Svg width={16} height={16} viewBox="0 0 24 24" fill="none">
+                  <Path d="M18 6L6 18M6 6l12 12" stroke={ds.text3} strokeWidth={2.4} strokeLinecap="round" />
+                </Svg>
+              </Pressable>
+            </Reanimated.View>
+          )}
+
           {/* 4. CAPTION */}
           <StepHeader
             n={4}
@@ -1693,6 +1715,20 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
 };
 
 const styles = StyleSheet.create({
+  voiceAttached: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    marginTop: 10,
+    padding: 12,
+    borderRadius: 18,
+    backgroundColor: 'rgba(255, 255, 255, 0.85)',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.95)',
+  },
+  voiceAttachedIcon: { width: 38, height: 38, borderRadius: 12, backgroundColor: ds.lavender, alignItems: 'center', justifyContent: 'center' },
+  voiceAttachedTitle: { fontSize: 14.5, fontWeight: '800', color: ds.ink },
+  voiceAttachedSub: { fontSize: 12.5, fontWeight: '600', color: ds.text3, marginTop: 1 },
   safeArea: {
     flex: 1,
     backgroundColor: '#F7F5F0',

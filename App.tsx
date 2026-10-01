@@ -43,6 +43,7 @@ import { AudienceBreakdownScreen } from './src/screens/AudienceBreakdownScreen';
 import { PostPerformanceScreen } from './src/screens/PostPerformanceScreen';
 import { PlatformGrowthScreen } from './src/screens/PlatformGrowthScreen';
 import { ProVoiceStudioScreen } from './src/screens/ProVoiceStudioScreen';
+import { VoiceStudioScreen } from './src/screens/VoiceStudioScreen';
 import { ProHookStudioScreen } from './src/screens/ProHookStudioScreen';
 import { ScreenTransitionContainer, ScreenTransitionType } from './src/components/ScreenTransitionContainer';
 import { EdgeSwipeBackWrapper } from './src/components/EdgeSwipeBackWrapper';
@@ -936,10 +937,11 @@ export default function App() {
           ))}
 
         {currentScreen === 'voice-studio' && (
-          <ProVoiceStudioScreen
+          <VoiceStudioScreen
+            userPersona={userPersona}
+            onTogglePersona={handleTogglePersona}
             onBack={() => navigateTo(previousScreen ? previousScreen : 'create')}
             onLogout={handleLogout}
-            onOpenSchedule={() => navigateTo('schedule')}
             onOpenJarvisPro={() => navigateTo('jarvis-pro')}
             onOpenPostComposer={(prefillTitle, attachedAudio) => {
               if (prefillTitle) setComposerIdeaTitle(prefillTitle);
