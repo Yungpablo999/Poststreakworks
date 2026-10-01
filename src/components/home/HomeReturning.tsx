@@ -1,4 +1,8 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import { Pressable, Platform } from 'react-native';
+import * as Haptics from 'expo-haptics';
+import { JarvisOrb } from '../JarvisOrb';
+import { useSharedValue, useAnimatedStyle, withTiming } from 'react-native-reanimated';
 import { View, StyleSheet } from 'react-native';
 import Animated, { Easing, FadeInUp } from 'react-native-reanimated';
 import Svg, { Path, Rect } from 'react-native-svg';
@@ -10,8 +14,8 @@ import { CheckInCard } from '../CheckInCard';
 import { CalendarSheet } from './CalendarSheet';
 import { FloatingGhost, PreviewRow } from './HomeDayZero';
 import { TodayQuestCard } from '../quests/QuestBlocks';
-import { getScheduleSummary, getWeekSchedule } from '../../data';
-import { ds } from '../../theme/colors';
+import { getScheduleSummary, getVoiceCloneSummary, getWeekSchedule } from '../../data';
+import { ds, goldTokens } from '../../theme/colors';
 
 // Home for creators who've been posting: the same glass design as day 0, now
 // with their own numbers. One clear next step, the calm check-in, today's
@@ -25,9 +29,89 @@ interface HomeReturningProps {
   onOpenGrowth?: () => void;
   onOpenQuests?: () => void;
   onStartQuest?: () => void;
+  /** Pro members: today's brief from Jarvis and a Voice Studio row. */
+  pro?: boolean;
+  onOpenHookStudio?: () => void;
+  onOpenVoiceStudio?: () => void;
 }
 
-export function HomeReturning({ firstName, onPlanPost, onOpenSchedule, onOpenGrowth, onOpenQuests, onStartQuest }: HomeReturningProps) {
+// ─── Pro: today's brief from Jarvis (tick the steps off) ────────────────────
+const BRIEF = [
+  { id: 'hook', title: 'Open with a mistake', body: 'Your mistake-style openings kept people watching longest last week.', action: 'Write the hook' },
+  { id: 'film', title: 'Film one short video', body: 'About 30 seconds, talking to camera. TikTok first.', action: 'Plan it' },
+  { id: 'time', title: 'Post at 7:30 PM', body: 'When your audience is most active today.', action: null },
+] as const;
+
+function BriefCheck({ done }: { done: boolean }) {
+  const t = useSharedValue(done ? 1 : 0);
+  useEffect(() => {
+    t.value = withTiming(done ? 1 : 0, { duration: 220, easing: Easing.out(Easing.cubic) });
+  }, [done, t]);
+  const fill = useAnimatedStyle(() => ({ opacity: t.value, transform: [{ scale: 0.6 + 0.4 * t.value }] }));
+  return (
+    <View style={styles.check}>
+      <Animated.View style={[StyleSheet.absoluteFill, styles.checkFill, fill]}>
+        <Svg width={12} height={12} viewBox="0 0 24 24" fill="none">
+          <Path d="M20 6L9 17l-5-5" stroke="#FFFFFF" strokeWidth={3.4} strokeLinecap="round" strokeLinejoin="round" />
+        </Svg>
+      </Animated.View>
+    </View>
+  );
+}
+
+function DailyBrief({ onHook, onPlan }: { onHook: () => void; onPlan: () => void }) {
+  const [done, setDone] = useState<string[]>([]);
+  const count = done.length;
+  return (
+    <GlassCard strong radius={26} padding={18}>
+      <View style={styles.briefHead}>
+        <JarvisOrb size={32} />
+        <View style={styles.flex}>
+          <Text style={styles.briefTitle}>Today’s brief</Text>
+          <Text style={styles.briefSub}>{count === BRIEF.length ? 'All done. Nice work.' : `${count} of ${BRIEF.length} done`}</Text>
+        </View>
+        <View style={styles.proTag}>
+          <Text style={styles.proTagText}>PRO</Text>
+        </View>
+      </View>
+      <Text style={styles.briefLead}>Your best move today: one creator-advice video, posted this evening.</Text>
+      {BRIEF.map((b) => {
+        const on = done.includes(b.id);
+        return (
+          <View key={b.id} style={styles.briefRow}>
+            <Pressable
+              onPress={() => {
+                if (Platform.OS !== 'web') Haptics.selectionAsync();
+                setDone((d) => (d.includes(b.id) ? d.filter((x) => x !== b.id) : [...d, b.id]));
+              }}
+              hitSlop={8}
+              accessibilityRole="checkbox"
+              accessibilityState={{ checked: on }}
+              accessibilityLabel={b.title}
+            >
+              <BriefCheck done={on} />
+            </Pressable>
+            <View style={[styles.flex, { opacity: on ? 0.55 : 1 }]}>
+              <Text style={[styles.briefStep, on && styles.briefStepDone]}>{b.title}</Text>
+              <Text style={styles.briefBody}>{b.body}</Text>
+              {!on && b.action && (
+                <Pressable onPress={b.id === 'hook' ? onHook : onPlan} hitSlop={6} accessibilityRole="button" style={styles.briefAction}>
+                  <Text style={styles.briefActionText}>{b.action}</Text>
+                  <Svg width={12} height={12} viewBox="0 0 24 24" fill="none">
+                    <Path d="M9 6l6 6-6 6" stroke={ds.purple} strokeWidth={2.8} strokeLinecap="round" strokeLinejoin="round" />
+                  </Svg>
+                </Pressable>
+              )}
+            </View>
+          </View>
+        );
+      })}
+    </GlassCard>
+  );
+}
+
+export function HomeReturning({ firstName, onPlanPost, onOpenSchedule, onOpenGrowth, onOpenQuests, onStartQuest, pro = false, onOpenHookStudio, onOpenVoiceStudio }: HomeReturningProps) {
+  const voice = getVoiceCloneSummary('returning');
   const [calendarOpen, setCalendarOpen] = useState(false);
   const week = getWeekSchedule('returning');
   const next = getScheduleSummary('returning').nextPostLabel;
@@ -68,6 +152,22 @@ export function HomeReturning({ firstName, onPlanPost, onOpenSchedule, onOpenGro
       ),
       onPress: onOpenQuests,
     },
+    ...(pro
+      ? [
+          {
+            key: 'voice',
+            title: 'Voice Studio',
+            body: `${voice.voiceName ?? 'Your voice'} · ${Math.max(0, voice.minutesIncluded - voice.minutesUsed)} of ${voice.minutesIncluded} minutes left`,
+            icon: (
+              <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
+                <Rect x="9" y="2" width="6" height="12" rx="3" stroke={ds.purple} strokeWidth={2} />
+                <Path d="M5 11a7 7 0 0014 0M12 18v4" stroke={ds.purple} strokeWidth={2} strokeLinecap="round" />
+              </Svg>
+            ),
+            onPress: onOpenVoiceStudio,
+          },
+        ]
+      : []),
   ];
 
   return (
@@ -119,6 +219,13 @@ export function HomeReturning({ firstName, onPlanPost, onOpenSchedule, onOpenGro
         </GlassCard>
       </Animated.View>
 
+      {/* Pro: today's brief from Jarvis */}
+      {pro && (
+        <Animated.View entering={enter(80)}>
+          <DailyBrief onHook={() => onOpenHookStudio?.()} onPlan={onPlanPost} />
+        </Animated.View>
+      )}
+
       {/* 2. Gentle daily check-in */}
       <Animated.View entering={enter(120)}>
         <CheckInCard persona="returning" onOpenCalendar={() => setCalendarOpen(true)} />
@@ -148,6 +255,20 @@ export function HomeReturning({ firstName, onPlanPost, onOpenSchedule, onOpenGro
 }
 
 const styles = StyleSheet.create({
+  proTag: { paddingHorizontal: 7, height: 20, borderRadius: 999, justifyContent: 'center', backgroundColor: goldTokens.light, borderWidth: 1, borderColor: goldTokens.border },
+  proTagText: { fontSize: 10.5, fontWeight: '800', letterSpacing: 0.6, color: goldTokens.dark },
+  briefHead: { flexDirection: 'row', alignItems: 'center', gap: 10 },
+  briefTitle: { fontSize: 17, fontWeight: '800', color: ds.ink },
+  briefSub: { fontSize: 12.5, fontWeight: '700', color: ds.text3, marginTop: 1 },
+  briefLead: { fontSize: 14, lineHeight: 20, fontWeight: '700', color: ds.ink, marginTop: 12, marginBottom: 4 },
+  briefRow: { flexDirection: 'row', alignItems: 'flex-start', gap: 12, marginTop: 12 },
+  check: { width: 24, height: 24, borderRadius: 12, borderWidth: 2, borderColor: '#C4B5FD', overflow: 'hidden', marginTop: 1 },
+  checkFill: { backgroundColor: ds.greenFill, alignItems: 'center', justifyContent: 'center' },
+  briefStep: { fontSize: 15, fontWeight: '800', color: ds.ink },
+  briefStepDone: { textDecorationLine: 'line-through' },
+  briefBody: { fontSize: 13, lineHeight: 18, color: ds.text2, marginTop: 2 },
+  briefAction: { flexDirection: 'row', alignItems: 'center', gap: 4, alignSelf: 'flex-start', marginTop: 8, paddingHorizontal: 10, height: 30, borderRadius: 999, backgroundColor: ds.lavender },
+  briefActionText: { fontSize: 12.5, fontWeight: '800', color: ds.purple },
   stack: { gap: 14 },
   flex: { flex: 1 },
   welcomeRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },

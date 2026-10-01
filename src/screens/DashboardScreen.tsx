@@ -45,6 +45,11 @@ interface DashboardScreenProps {
   onOpenSchedule?: () => void;
   userProfile?: UserProfileData;
   onSaveProfile?: (updated: UserProfileData) => void;
+  /** Pro members: Pro home (brief, Voice Studio), no upgrade card. */
+  tier?: 'free' | 'pro';
+  onSwitchToFree?: () => void;
+  onOpenVoiceStudio?: () => void;
+  onOpenHookStudio?: () => void;
 }
 type NotificationFilter = 'all' | 'unread' | 'quests';
 
@@ -550,6 +555,10 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
   onOpenSchedule,
   userProfile,
   onSaveProfile,
+  tier = 'free',
+  onSwitchToFree,
+  onOpenVoiceStudio,
+  onOpenHookStudio,
 }) => {
   const isDark = false;
   const isNewUser = (userPersona || userProfile?.userPersona) === 'new';
@@ -934,9 +943,9 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
             <BrandLogo size="sm" isDark={isDark} />
 
             <HeaderDualModePills
-              tier="free"
+              tier={tier === 'pro' ? 'pro' : 'free'}
               persona={isNewUser ? 'new' : 'returning'}
-              onToggleTier={onSwitchToPro || onOpenJarvisPro}
+              onToggleTier={tier === 'pro' ? onSwitchToFree : onSwitchToPro || onOpenJarvisPro}
               onTogglePersona={onTogglePersona}
               isDark={isDark}
             />
@@ -1001,7 +1010,8 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
           {/* New creators get a true day-0 Home: no stats, one clear next step. */}
           {isNewUser ? (
             <HomeDayZero
-              tier="free"
+              tier={tier}
+              onOpenVoiceStudio={onOpenVoiceStudio}
               firstName={userProfile?.name?.split(' ')[0]}
               isDark={isDark}
               onPlanFirstPost={() => (onNavigateTab ? onNavigateTab('create') : undefined)}
@@ -1017,13 +1027,18 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
               onOpenGrowth={() => onNavigateTab?.('growth')}
               onOpenQuests={() => onNavigateTab?.('quests')}
               onStartQuest={() => (onStartMission ? onStartMission() : openMissionModal())}
+              pro={tier === 'pro'}
+              onOpenHookStudio={onOpenHookStudio}
+              onOpenVoiceStudio={onOpenVoiceStudio}
             />
           )}
 
-          {/* 9. UNLOCK JARVIS PRO (gold = Pro only) */}
+          {/* 9. UNLOCK JARVIS PRO (gold = Pro only; members don't see it) */}
+          {tier !== 'pro' && (
           <Reanimated.View entering={FadeInUp.delay(360).duration(550)} style={styles.proUpsell}>
             <ProUpsellCard onUpgrade={() => (onOpenJarvisPro ? onOpenJarvisPro() : openProModal())} />
           </Reanimated.View>
+          )}
         </ScrollView>
 
         {/* 10. FLOATING LIQUID GLASS BOTTOM NAVIGATION BAR */}

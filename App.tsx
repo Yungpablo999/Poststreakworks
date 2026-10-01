@@ -497,36 +497,15 @@ export default function App() {
 
 
         {currentScreen === 'dashboard' && (
-          (userProfile?.tier === 'pro' || userProfile?.tier === 'founding') ? (
-            <ProDashboardScreen
-              onLogout={handleLogout}
-              onStartMission={() => navigateTo('mission-detail')}
-              onOpenJarvisPro={() => navigateTo('jarvis-pro')}
-              onOpenSchedule={() => navigateTo('schedule')}
-              onOpenQuests={() => navigateTo('quests')}
-              onOpenGrowth={() => navigateTo('growth')}
-              onOpenCreate={() => navigateTo('create')}
+          (
+            <DashboardScreen
+              tier={userProfile?.tier === 'pro' || userProfile?.tier === 'founding' ? 'pro' : 'free'}
+              onSwitchToFree={() => setUserProfile(prev => ({ ...prev, tier: 'free' }))}
               onOpenVoiceStudio={() => {
                 setVoiceScript(undefined);
                 navigateTo('voice-studio');
               }}
-              onOpenPostComposer={(ideaTitle) => {
-                if (ideaTitle) setComposerIdeaTitle(ideaTitle);
-                setComposerIdeaGoal(null);
-                setComposerIdeaPlatform(undefined); setComposerFilmStyle(undefined);
-                navigateTo('composer');
-              }}
-              onSwitchToFree={() => {
-                setUserProfile(prev => ({ ...prev, tier: 'free' }));
-              }}
-              onNavigateTab={handleTabNavigation}
-              userProfile={userProfile}
-              userPersona={userPersona}
-              onTogglePersona={handleTogglePersona}
-              onSaveProfile={(updated) => setUserProfile(prev => ({ ...prev, ...updated, tier: updated.tier || prev.tier || 'free' }))}
-            />
-          ) : (
-            <DashboardScreen
+              onOpenHookStudio={() => navigateTo('hook-studio')}
               onLogout={handleLogout}
               onStartMission={() => navigateTo('mission-detail')}
               onOpenQuest={() => navigateTo('quests')}
