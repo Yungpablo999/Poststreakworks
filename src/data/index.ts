@@ -603,9 +603,52 @@ export interface FeedIdea extends StarterIdea {
   why: string;
 }
 
+// Topics per niche: the goal turns these into its own kind of idea
+const NICHE_TOPICS: Record<string, string[]> = {
+  lifestyle: ['morning routines', 'staying organised', 'slow weekends'],
+  comedy: ['group chats', 'work meetings', 'family dinners'],
+  education: ['studying', 'learning faster', 'note taking'],
+  beauty: ['skincare', 'everyday makeup', 'outfit ideas'],
+  food: ['quick dinners', 'meal prep', 'cheap eats'],
+  fitness: ['home workouts', 'staying consistent at the gym', 'stretching'],
+  tech: ['productivity apps', 'side hustles', 'working from home'],
+  music: ['dance trends', 'learning choreography', 'practice sessions'],
+};
+
+// Each goal suits a different format
+function goalFormat(goal: IdeaGoal, base: string): string {
+  if (goal === 'saves') return base === 'Text post' ? 'Text post' : 'Carousel';
+  if (goal === 'often') return base === 'Text post' ? 'Text post' : '15-second video';
+  return base;
+}
+
 export function getIdeaFeed(niches: string[], goal: IdeaGoal, platforms: string[] = []): FeedIdea[] {
   const list = getStarterIdeas(niches.length ? niches : ['lifestyle'], platforms);
-  return list.map((i) => ({ ...i, why: WHY_BY_GOAL[goal] }));
+  const base = list[0]?.format ?? '30-second Reel';
+  // Followers: the hand-written starter ideas are already built to be shared
+  if (goal === 'followers') return list.map((i) => ({ ...i, why: WHY_BY_GOAL[goal] }));
+  // Other goals: ideas written for that goal from the creator's niche topics
+  const ns = normalizeNiches(niches.length ? niches : ['lifestyle']);
+  const topics = ns.flatMap((n) => (NICHE_TOPICS[n] ?? []).map((t) => ({ n, t })));
+  const pool = TOPIC_TEMPLATES[goal];
+  const made: FeedIdea[] = topics.flatMap(({ n, t }, ti) =>
+    [0, 1].map((k) => {
+      const tpl = pool[(ti * 2 + k) % pool.length];
+      const cap = t.charAt(0).toUpperCase() + t.slice(1);
+      return {
+        id: `${goal}-${n}-${ti}-${k}`,
+        niche: n,
+        title: tpl.title(t, cap),
+        hook: tpl.hook(t),
+        format: goalFormat(goal, base),
+        bestTime: list[ti % Math.max(1, list.length)]?.bestTime ?? '7:30 PM',
+        why: WHY_BY_GOAL[goal],
+      };
+    }),
+  );
+  // Mix niches so the top pick and list move between them
+  const byRound = [0, 1].flatMap((k) => made.filter((m) => m.id.endsWith(`-${k}`)));
+  return byRound.length ? byRound : list.map((i) => ({ ...i, why: WHY_BY_GOAL[goal] }));
 }
 
 /** Niche ids from either ids ("tech") or display names ("Tech & AI"). */
@@ -1075,33 +1118,33 @@ const TOPIC_TEMPLATES: Record<IdeaGoal, { title: (t: string, T: string) => strin
   followers: [
     { title: (t) => `Things nobody tells you about ${t}`, hook: (t) => `Nobody warned me about this part of ${t}.` },
     { title: (_t, T) => `${T}: the side nobody shows you`, hook: () => `Here’s what it really looks like behind the scenes.` },
-    { title: (t) => `POV: you just started ${t}`, hook: () => `If this is you right now, keep watching.` },
+    { title: (t) => `POV: you’re new to ${t}`, hook: () => `If this is you right now, keep watching.` },
     { title: (t) => `How ${t} changed my week`, hook: () => `I didn’t expect this to make such a difference.` },
-    { title: (t) => `Rating every ${t} tip I tried`, hook: () => `Number three was a total waste of time.` },
-    { title: (t) => `The ${t} mistake everyone makes`, hook: () => `I did this for months before I noticed.` },
+    { title: (t) => `Rating every tip on ${t} I tried`, hook: () => `Number three was a total waste of time.` },
+    { title: (t) => `The mistake everyone makes with ${t}`, hook: () => `I did this for months before I noticed.` },
   ],
   saves: [
-    { title: (t) => `5 ${t} tips worth saving`, hook: () => `Save this so you have it next time.` },
-    { title: (t) => `My simple ${t} checklist`, hook: () => `I use this every single time. Here it is.` },
+    { title: (t) => `5 tips on ${t} worth saving`, hook: () => `Save this so you have it next time.` },
+    { title: (t) => `My simple checklist for ${t}`, hook: () => `I use this every single time. Here it is.` },
     { title: (_t, T) => `${T}, step by step for beginners`, hook: () => `Step one is the one most people skip.` },
     { title: (t) => `The tools I use for ${t}`, hook: () => `All of these are free. Save the list.` },
-    { title: (t) => `${t.charAt(0).toUpperCase() + t.slice(1)} cheat sheet`, hook: () => `Everything in one place. Screenshot this.` },
-    { title: (t) => `3 ${t} habits that actually stuck`, hook: () => `These are the only ones I kept doing.` },
+    { title: (t) => `A cheat sheet for ${t}`, hook: () => `Everything in one place. Screenshot this.` },
+    { title: (t) => `3 habits that made ${t} easier`, hook: () => `These are the only ones I kept doing.` },
   ],
   comments: [
     { title: (t) => `Unpopular opinion about ${t}`, hook: () => `I know people will disagree with this one.` },
     { title: (t) => `${t.charAt(0).toUpperCase() + t.slice(1)}: which side are you on?`, hook: () => `Tell me in the comments which one you pick.` },
     { title: (t) => `What I’d tell myself before starting ${t}`, hook: () => `What would you add to this list?` },
-    { title: (t) => `Am I doing ${t} wrong?`, hook: () => `Be honest with me in the comments.` },
-    { title: (t) => `The ${t} question I get asked most`, hook: () => `Drop your answer before you watch mine.` },
+    { title: (t) => `Tell me if I’m wrong about ${t}`, hook: () => `Be honest with me in the comments.` },
+    { title: (t) => `The question I get asked most about ${t}`, hook: () => `Drop your answer before you watch mine.` },
     { title: (t) => `${t.charAt(0).toUpperCase() + t.slice(1)}: overrated or worth it?`, hook: () => `I changed my mind on this one.` },
   ],
   often: [
-    { title: (t) => `One quick ${t} tip in 30 seconds`, hook: () => `Here’s one thing you can try today.` },
+    { title: (t) => `One quick tip on ${t}, in 30 seconds`, hook: () => `Here’s one thing you can try today.` },
     { title: (t) => `A day of ${t} in 3 short clips`, hook: () => `No talking, just the day.` },
     { title: (t) => `${t.charAt(0).toUpperCase() + t.slice(1)}: today’s small win`, hook: () => `Small win today, and here’s how.` },
     { title: (t) => `${t.charAt(0).toUpperCase() + t.slice(1)} in one photo and one line`, hook: () => `Today, in one picture.` },
-    { title: (t) => `My 5-minute ${t} routine`, hook: () => `Five minutes, that’s all it takes.` },
+    { title: (t) => `${t.charAt(0).toUpperCase() + t.slice(1)} in 5 minutes a day`, hook: () => `Five minutes, that’s all it takes.` },
     { title: (t) => `Before and after: ${t}`, hook: () => `Here’s where I started.` },
   ],
 };
