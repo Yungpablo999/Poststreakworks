@@ -615,30 +615,11 @@ export default function App() {
         )}
 
         {currentScreen === 'schedule' && (
-          (userProfile?.tier === 'pro' || userProfile?.tier === 'founding') ? (
-            <ProScheduleScreen
-              onBack={() => navigateTo(previousScreen ? previousScreen : 'dashboard')}
-              onLogout={handleLogout}
-              onOpenJarvisPro={() => navigateTo('jarvis-pro')}
-              onOpenCreateIdea={() => navigateTo('create')}
-              onStartMission={() => navigateTo('mission-detail')}
-              onOpenPostComposer={(title, platform) => {
-                if (title) setComposerIdeaTitle(title);
-                setComposerIdeaGoal(null);
-                setComposerIdeaPlatform(undefined); setComposerFilmStyle(undefined);
-                navigateTo('composer');
-              }}
-              onSwitchToFree={() => {
-                if (userProfile) {
-                  setUserProfile({ ...userProfile, tier: 'free' });
-                }
-              }}
-              onNavigateTab={handleTabNavigation}
-              userProfile={userProfile}
-              onSaveProfile={(updated) => setUserProfile(prev => ({ ...prev, ...updated, tier: updated.tier || prev.tier || 'free' }))}
-            />
-          ) : (
+          (
             <ScheduleScreen
+              tier={userProfile?.tier === 'pro' || userProfile?.tier === 'founding' ? 'pro' : 'free'}
+              onSwitchToPro={() => setUserProfile(prev => ({ ...prev, tier: 'pro' }))}
+              onSwitchToFree={() => setUserProfile(prev => ({ ...prev, tier: 'free' }))}
               userPersona={userPersona}
               onTogglePersona={handleTogglePersona}
               onBack={() => navigateTo(previousScreen ? previousScreen : 'dashboard')}

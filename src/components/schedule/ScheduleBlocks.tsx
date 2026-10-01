@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { View, Pressable, StyleSheet, Platform, type LayoutChangeEvent } from 'react-native';
 import Animated, {
   Easing,
+  FadeIn,
   FadeInUp,
   useAnimatedStyle,
   useSharedValue,
@@ -15,7 +16,7 @@ import { AppButton } from '../ui/AppButton';
 import { GlassCard } from '../glass/GlassCard';
 import { PressableCard } from '../ui/PressableCard';
 import { PlatformLogo, type PlatformLogoType } from '../onboarding/PlatformLogo';
-import { ds } from '../../theme/colors';
+import { ds, goldTokens } from '../../theme/colors';
 import type { CalendarDay, CalendarPost } from '../../data';
 
 // Building blocks for the Schedule screen. Calm by design: no streak-protection
@@ -276,6 +277,15 @@ export function BestTimeCard({ orb, time, isNewUser, onUse }: { orb: React.React
 
 const styles = StyleSheet.create({
   flex: { flex: 1 },
+  autoTop: { flexDirection: 'row', alignItems: 'center', gap: 12 },
+  autoProTag: { alignSelf: 'flex-start', paddingHorizontal: 7, height: 20, borderRadius: 999, justifyContent: 'center', backgroundColor: goldTokens.light, borderWidth: 1, borderColor: goldTokens.border },
+  autoProText: { fontSize: 10.5, fontWeight: '800', letterSpacing: 0.6, color: goldTokens.dark },
+  autoTitle: { fontSize: 17, fontWeight: '800', color: ds.ink, marginTop: 6 },
+  autoBody: { fontSize: 13.5, lineHeight: 19, color: ds.text2, marginTop: 8 },
+  switchWrap: { width: 50, height: 30, borderRadius: 15, overflow: 'hidden', justifyContent: 'center' },
+  switchBase: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(23, 20, 32, 0.12)' },
+  switchOn: { backgroundColor: ds.purple },
+  switchKnob: { position: 'absolute', left: 3, width: 24, height: 24, borderRadius: 12, backgroundColor: '#FFFFFF', shadowColor: '#000', shadowOpacity: 0.15, shadowRadius: 4, shadowOffset: { width: 0, height: 2 } },
   eyebrow: { fontSize: 11, fontWeight: '800', letterSpacing: 1, color: ds.purple },
   heroTitle: { fontSize: 28, lineHeight: 34, fontWeight: '800', color: ds.ink, letterSpacing: -0.8, marginTop: 8 },
   heroBody: { fontSize: 14.5, lineHeight: 21, color: ds.text2, marginTop: 4 },
@@ -336,3 +346,59 @@ const styles = StyleSheet.create({
   timeBig: { fontSize: 30, fontWeight: '800', color: ds.ink, letterSpacing: -1, marginTop: 4 },
   timeSub: { fontSize: 12.5, fontWeight: '700', color: ds.text3 },
 });
+
+// ─── Pro: auto-post (posts go out on their own at their time) ───────────────
+function Switch({ on, onToggle }: { on: boolean; onToggle: () => void }) {
+  const t = useSharedValue(on ? 1 : 0);
+  useEffect(() => {
+    t.value = withTiming(on ? 1 : 0, { duration: 220, easing: Easing.out(Easing.cubic) });
+  }, [on, t]);
+  const knob = useAnimatedStyle(() => ({ transform: [{ translateX: 20 * t.value }] }));
+  const track = useAnimatedStyle(() => ({ opacity: t.value }));
+  return (
+    <Pressable
+      onPress={onToggle}
+      hitSlop={8}
+      accessibilityRole="switch"
+      accessibilityState={{ checked: on }}
+      accessibilityLabel="Auto-post"
+      style={styles.switchWrap}
+    >
+      <View style={styles.switchBase} />
+      <Animated.View style={[StyleSheet.absoluteFill, styles.switchOn, track]} />
+      <Animated.View style={[styles.switchKnob, knob]} />
+    </Pressable>
+  );
+}
+
+export function AutoPostCard({ isNewUser }: { isNewUser: boolean }) {
+  const [on, setOn] = useState(!isNewUser);
+  return (
+    <GlassCard strong radius={24} padding={16}>
+      <View style={styles.autoTop}>
+        <View style={styles.flex}>
+          <View style={styles.autoProTag}>
+            <Text style={styles.autoProText}>PRO</Text>
+          </View>
+          <Text style={styles.autoTitle}>Auto-post</Text>
+        </View>
+        <Switch
+          on={on}
+          onToggle={() => {
+            if (Platform.OS !== 'web') Haptics.selectionAsync();
+            setOn((v) => !v);
+          }}
+        />
+      </View>
+      <Animated.View key={on ? 'on' : 'off'} entering={FadeIn.duration(200)}>
+        <Text style={styles.autoBody}>
+          {on
+            ? 'Scheduled posts go out on their own at their time. You get a note when each one is live.'
+            : isNewUser
+              ? 'Turn this on and your scheduled posts go out on their own, so you don’t have to be online.'
+              : 'Off. We’ll remind you when it’s time to post instead.'}
+        </Text>
+      </Animated.View>
+    </GlassCard>
+  );
+}

@@ -27,7 +27,7 @@ import { GlassBackdrop } from '../components/glass/GlassBackdrop';
 import { FitLines } from '../components/ui/FitLines';
 import { JarvisOrb } from '../components/JarvisOrb';
 import { CalendarSheet } from '../components/home/CalendarSheet';
-import { TodayCard, WeekStrip, PostRow, EmptyDay, PlatformMixCard, BestTimeCard } from '../components/schedule/ScheduleBlocks';
+import { TodayCard, WeekStrip, PostRow, EmptyDay, PlatformMixCard, BestTimeCard, AutoPostCard } from '../components/schedule/ScheduleBlocks';
 import { getWeekSchedule } from '../data';
 import type { UserPersona } from '../components/HeaderDualModePills';
 import { ds } from '../theme/colors';
@@ -43,6 +43,10 @@ interface ScheduleScreenProps {
   onSaveProfile?: (updated: UserProfileData) => void;
   userPersona?: UserPersona;
   onTogglePersona?: () => void;
+  /** Pro members: auto-post card instead of the Pro note. */
+  tier?: 'free' | 'pro';
+  onSwitchToPro?: () => void;
+  onSwitchToFree?: () => void;
 }
 
 interface ScheduledPost {
@@ -211,6 +215,9 @@ export const ScheduleScreen: React.FC<ScheduleScreenProps> = ({
   onSaveProfile,
   userPersona,
   onTogglePersona,
+  tier = 'free',
+  onSwitchToPro,
+  onSwitchToFree,
 }) => {
   const isDark = false;
   const isNewUser = (userPersona || userProfile?.userPersona || 'new') === 'new';
@@ -376,6 +383,8 @@ export const ScheduleScreen: React.FC<ScheduleScreenProps> = ({
           backgroundColor="transparent"
           userPersona={userPersona}
           onTogglePersona={onTogglePersona}
+          onSwitchToPro={onSwitchToPro}
+          onSwitchToFree={onSwitchToFree}
           onBack={onBack}
           onOpenJarvisPro={onOpenJarvisPro}
           onOpenNotifications={() => {
@@ -460,12 +469,18 @@ export const ScheduleScreen: React.FC<ScheduleScreenProps> = ({
             <BestTimeCard orb={<JarvisOrb size={32} />} time={week.bestTime} isNewUser={isNewUser} onUse={() => openComposer()} />
           </Reanimated.View>
 
-          {/* Quiet Pro note */}
-          <Pressable onPress={onOpenJarvisPro} hitSlop={6} style={styles.proNote} accessibilityRole="button">
-            <Text style={styles.proNoteText}>
-              Free plans let you plan and track posts. <Text style={styles.proNoteLink}>Pro adds AI scheduling.</Text>
-            </Text>
-          </Pressable>
+          {/* Pro: auto-post. Free: a quiet Pro note */}
+          {tier === 'pro' ? (
+            <Reanimated.View entering={FadeInUp.delay(480).duration(550)} style={styles.section}>
+              <AutoPostCard isNewUser={isNewUser} />
+            </Reanimated.View>
+          ) : (
+            <Pressable onPress={onOpenJarvisPro} hitSlop={6} style={styles.proNote} accessibilityRole="button">
+              <Text style={styles.proNoteText}>
+                Free plans let you plan and track posts. <Text style={styles.proNoteLink}>Pro posts for you at the best time.</Text>
+              </Text>
+            </Pressable>
+          )}
 
           {/* Bottom Space for Floating Tab Bar */}
           <View style={{ height: 110 }} />
