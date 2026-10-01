@@ -39,7 +39,13 @@
       "predictiveBackGestureEnabled": false
     },
     "web": {
-      "favicon": "./assets/favicon.png"
+      "favicon": "./assets/favicon.png",
+      "output": "single",
+      "bundler": "metro",
+      "name": "PostStreak",
+      "shortName": "PostStreak",
+      "themeColor": "#5B3EE8",
+      "backgroundColor": "#F7F5F0"
     }
   }
 }
