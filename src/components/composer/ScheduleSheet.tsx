@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
+import { dialogStyles, useDialogMode } from '../glass/dialog';
 import { Modal, View, Pressable, ScrollView, StyleSheet, Platform, useWindowDimensions } from 'react-native';
 import Animated, { Easing, FadeIn, FadeInUp, runOnJS, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -130,7 +131,12 @@ export function ScheduleSheet({ visible, onClose, onConfirm, mode = 'schedule' }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [visible]);
   const scrim = useAnimatedStyle(() => ({ opacity: progress.value }));
-  const sheet = useAnimatedStyle(() => ({ transform: [{ translateY: (1 - progress.value) * screenH * 0.6 }] }));
+  const dialog = useDialogMode();
+  const sheet = useAnimatedStyle(() =>
+    dialog
+      ? { opacity: progress.value, transform: [{ translateY: (1 - progress.value) * 24 }, { scale: 0.97 + progress.value * 0.03 }] }
+      : { transform: [{ translateY: (1 - progress.value) * screenH * 0.6 }] }
+  );
 
   const tick = () => {
     if (Platform.OS !== 'web') Haptics.selectionAsync();
@@ -142,15 +148,15 @@ export function ScheduleSheet({ visible, onClose, onConfirm, mode = 'schedule' }
 
   return (
     <Modal visible transparent animationType="none" onRequestClose={onClose} statusBarTranslucent>
-      <View style={styles.root}>
+      <View style={[styles.root, dialog && dialogStyles.root]}>
         <Animated.View style={[StyleSheet.absoluteFill, styles.scrim, scrim]}>
           <Pressable style={StyleSheet.absoluteFill} onPress={onClose} accessibilityLabel="Close" />
         </Animated.View>
 
-        <Animated.View style={[styles.sheet, { maxHeight: screenH * 0.9, paddingBottom: insets.bottom + 16 }, sheet]}>
-          <BlurView intensity={50} tint="light" style={[StyleSheet.absoluteFill, styles.sheetBlur]} />
+        <Animated.View style={[styles.sheet, dialog && dialogStyles.sheet, { maxHeight: screenH * 0.9, paddingBottom: insets.bottom + 16 }, sheet]}>
+          <BlurView intensity={50} tint="light" style={[StyleSheet.absoluteFill, styles.sheetBlur, dialog && dialogStyles.round]} />
           <View style={[StyleSheet.absoluteFill, styles.sheetFill]} />
-          <View style={styles.handle} />
+          <View style={[styles.handle, dialog && dialogStyles.hidden]} />
 
           <View style={styles.header}>
             <View style={styles.flex}>

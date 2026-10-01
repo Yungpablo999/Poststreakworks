@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { dialogStyles, useDialogMode } from '../glass/dialog';
 import { Modal, View, Pressable, ScrollView, StyleSheet, Platform, PanResponder, useWindowDimensions } from 'react-native';
 import Animated, {
   Easing,
@@ -187,7 +188,12 @@ export function CalendarSheet({ visible, onClose, persona, onPlanPost }: Calenda
   }, [visible]);
 
   const scrimStyle = useAnimatedStyle(() => ({ opacity: progress.value }));
-  const sheetStyle = useAnimatedStyle(() => ({ transform: [{ translateY: (1 - progress.value) * screenH * 0.9 }] }));
+  const dialog = useDialogMode();
+  const sheetStyle = useAnimatedStyle(() =>
+    dialog
+      ? { opacity: progress.value, transform: [{ translateY: (1 - progress.value) * 24 }, { scale: 0.97 + progress.value * 0.03 }] }
+      : { transform: [{ translateY: (1 - progress.value) * screenH * 0.9 }] }
+  );
 
   // ── month navigation (arrows + swipe) ─────────────────────────────────────
   const go = (step: 1 | -1) => {
@@ -222,15 +228,15 @@ export function CalendarSheet({ visible, onClose, persona, onPlanPost }: Calenda
 
   return (
     <Modal visible transparent animationType="none" onRequestClose={onClose} statusBarTranslucent>
-      <View style={styles.root}>
+      <View style={[styles.root, dialog && dialogStyles.root]}>
         <Animated.View style={[StyleSheet.absoluteFill, styles.scrim, scrimStyle]}>
           <Pressable style={StyleSheet.absoluteFill} onPress={onClose} accessibilityLabel="Close calendar" />
         </Animated.View>
 
-        <Animated.View style={[styles.sheet, { maxHeight: screenH * 0.9, paddingBottom: insets.bottom + 16 }, sheetStyle]}>
-          <BlurView intensity={50} tint="light" style={[StyleSheet.absoluteFill, styles.sheetBlur]} />
+        <Animated.View style={[styles.sheet, dialog && dialogStyles.sheet, { maxHeight: screenH * 0.9, paddingBottom: insets.bottom + 16 }, sheetStyle]}>
+          <BlurView intensity={50} tint="light" style={[StyleSheet.absoluteFill, styles.sheetBlur, dialog && dialogStyles.round]} />
           <View style={[StyleSheet.absoluteFill, styles.sheetFill]} />
-          <View style={styles.handle} />
+          <View style={[styles.handle, dialog && dialogStyles.hidden]} />
 
           <View style={styles.header}>
             <View style={styles.flex}>

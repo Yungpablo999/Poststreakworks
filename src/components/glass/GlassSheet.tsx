@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { dialogStyles, useDialogMode } from './dialog';
 import { KeyboardAvoidingView, Modal, Platform, Pressable, StyleSheet, View, useWindowDimensions } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Animated, { Easing, runOnJS, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
@@ -46,22 +47,27 @@ export function GlassSheet({ visible, onClose, title, subtitle, badge, children,
   }, [visible]);
 
   const scrim = useAnimatedStyle(() => ({ opacity: progress.value }));
-  const sheet = useAnimatedStyle(() => ({ transform: [{ translateY: (1 - progress.value) * screenH * 0.8 }] }));
+  const dialog = useDialogMode();
+  const sheet = useAnimatedStyle(() =>
+    dialog
+      ? { opacity: progress.value, transform: [{ translateY: (1 - progress.value) * 24 }, { scale: 0.97 + progress.value * 0.03 }] }
+      : { transform: [{ translateY: (1 - progress.value) * screenH * 0.8 }] }
+  );
 
   if (!mounted) return null;
   const h = screenH * maxHeight - insets.top;
 
   return (
     <Modal visible transparent animationType="none" onRequestClose={onClose} statusBarTranslucent>
-      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={styles.root}>
+      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={[styles.root, dialog && dialogStyles.root]}>
         <Animated.View style={[StyleSheet.absoluteFill, styles.scrim, scrim]}>
           <Pressable style={StyleSheet.absoluteFill} onPress={onClose} accessibilityLabel="Close" />
         </Animated.View>
 
-        <Animated.View style={[styles.sheet, fill ? { height: h } : { maxHeight: h }, { paddingBottom: insets.bottom + 14 }, sheet]}>
-          <BlurView intensity={50} tint="light" style={[StyleSheet.absoluteFill, styles.round]} />
+        <Animated.View style={[styles.sheet, dialog && dialogStyles.sheet, fill ? { height: h } : { maxHeight: h }, { paddingBottom: insets.bottom + 14 }, sheet]}>
+          <BlurView intensity={50} tint="light" style={[StyleSheet.absoluteFill, styles.round, dialog && dialogStyles.round]} />
           <View style={[StyleSheet.absoluteFill, styles.sheetFill]} />
-          <View style={styles.handle} />
+          <View style={[styles.handle, dialog && dialogStyles.hidden]} />
 
           <View style={styles.header}>
             <View style={styles.flex}>
