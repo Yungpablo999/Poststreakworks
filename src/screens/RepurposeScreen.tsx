@@ -16,7 +16,7 @@ import { JarvisOrb } from '../components/JarvisOrb';
 import { FreeAppHeader } from '../components/FreeAppHeader';
 import { FloatingTabBar, TabType } from '../components/FloatingTabBar';
 import { PlatformChip } from '../components/composer/ComposerBlocks';
-import { AllowanceMeter } from '../components/create/CreateBlocks';
+import { AllowanceMeter, UnlimitedChip } from '../components/create/CreateBlocks';
 import { PlatformLogo, type PlatformLogoType } from '../components/onboarding/PlatformLogo';
 import type { UserProfileData } from '../components/UserProfileModal';
 import type { UserPersona } from '../components/HeaderDualModePills';
@@ -46,7 +46,7 @@ import {
   type RepurposeVersion,
 } from '../data';
 import { STAGE_1_PLATFORMS } from '../config/features';
-import { ds } from '../theme/colors';
+import { ds, goldTokens } from '../theme/colors';
 
 // Free Repurpose, two ways in:
 //  - An idea: written the way each platform works.
@@ -75,6 +75,9 @@ interface RepurposeScreenProps {
   onSwitchToPro?: () => void;
   /** Open on the video side with this video already added (e.g. from Growth). */
   initialVideo?: StudioVideo;
+  /** Pro members: unlimited runs and "Plan the order" scheduling. */
+  tier?: 'free' | 'pro';
+  onSwitchToFree?: () => void;
   onFilmIdea?: (title: string, style: FilmStyle) => void;
 }
 
@@ -154,12 +157,16 @@ export const RepurposeScreen: React.FC<RepurposeScreenProps> = ({
   onSwitchToPro,
   initialVideo,
   onFilmIdea,
+  tier = 'free',
+  onSwitchToFree,
 }) => {
+  const isPro = tier === 'pro';
   const persona = (userPersona || userProfile?.userPersona) === 'returning' ? 'returning' : 'new';
   useSyncExternalStore(subscribeToRepurposes, () => getRepurposeAllowance(persona, 'free').usedThisWeek);
   const allowance = getRepurposeAllowance(persona, 'free');
   const limit = allowance.weeklyLimit ?? 0;
-  const left = Math.max(0, limit - allowance.usedThisWeek);
+  const left = isPro ? Infinity : Math.max(0, limit - allowance.usedThisWeek);
+  const [scheduled, setScheduled] = useState(false);
 
   const [idea, setIdea] = useState(ideaTitle);
   const [ideaFocused, setIdeaFocused] = useState(false);
@@ -188,12 +195,13 @@ export const RepurposeScreen: React.FC<RepurposeScreenProps> = ({
       showToast('Pick at least one platform');
       return;
     }
-    if (!spendRepurpose(persona, 'free')) {
+    if (!spendRepurpose(persona, isPro ? 'pro' : 'free')) {
       onOpenJarvisPro?.();
       return;
     }
     if (Platform.OS !== 'web') Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     const next = getRepurposeVersions(idea, platforms);
+    setScheduled(false);
     setVersions([]);
     // Jarvis "writes" each platform in turn
     setWorking(next.map((v) => v.platform));
@@ -231,7 +239,7 @@ export const RepurposeScreen: React.FC<RepurposeScreenProps> = ({
       showToast('Pick at least one platform');
       return;
     }
-    if (!spendRepurpose(persona, 'free')) {
+    if (!spendRepurpose(persona, isPro ? 'pro' : 'free')) {
       onOpenJarvisPro?.();
       return;
     }
@@ -289,6 +297,7 @@ export const RepurposeScreen: React.FC<RepurposeScreenProps> = ({
           onBack={onBack}
           onOpenJarvisPro={onOpenJarvisPro}
           onSwitchToPro={onSwitchToPro}
+          onSwitchToFree={onSwitchToFree}
           onTogglePersona={onTogglePersona}
           userPersona={userPersona}
           userProfile={userProfile}
@@ -309,7 +318,7 @@ export const RepurposeScreen: React.FC<RepurposeScreenProps> = ({
                 accessibilityLabel={source === 'idea' ? 'One idea, every platform' : 'Your video, your next one'}
               />
               <View style={styles.meter}>
-                <AllowanceMeter left={left} limit={limit} />
+                {isPro ? <UnlimitedChip /> : <AllowanceMeter left={left} limit={limit} />}
               </View>
             </Animated.View>
 
@@ -408,7 +417,7 @@ export const RepurposeScreen: React.FC<RepurposeScreenProps> = ({
                   <AppButton title="Get unlimited with Pro" variant="gold" size="lg" onPress={() => onOpenJarvisPro?.()} />
                 </>
               )}
-              {left > 0 && <Text style={styles.useNote}>Uses your free repurpose for this week</Text>}
+              {left > 0 && !isPro && <Text style={styles.useNote}>Uses your free repurpose for this week</Text>}
             </View>
             )}
 
@@ -464,7 +473,54 @@ export const RepurposeScreen: React.FC<RepurposeScreenProps> = ({
                   ))}
                 </View>
 
-                {!working.length && order.length > 1 && (
+                {/* Pro: post them in order, one tap */}
+                {isPro && !working.length && versions.length > 0 && (
+                  <Animated.View entering={FadeInUp.duration(350)}>
+                    <GlassCard strong radius={22} padding={16} style={styles.planCard}>
+                      <View style={styles.planHead}>
+                        <JarvisOrb size={26} />
+                        <Text style={styles.planTitle}>Plan the order</Text>
+                        <View style={styles.planPro}>
+                          <Text style={styles.planProText}>PRO</Text>
+                        </View>
+                      </View>
+                      <Text style={styles.planSub}>Jarvis spaces them 30 minutes apart so each platform gets its moment.</Text>
+                      {versions.map((v, i) => {
+                        const mins = 19 * 60 + 30 + i * 30;
+                        const time = `${((Math.floor(mins / 60) + 11) % 12) + 1}:${String(mins % 60).padStart(2, '0')} PM`;
+                        return (
+                          <View key={v.platform} style={styles.planRow}>
+                            <Text style={styles.planNum}>{i + 1}</Text>
+                            <PlatformLogo type={v.platform as PlatformLogoType} size={26} />
+                            <Text style={styles.planName}>{NAMES[v.platform]}</Text>
+                            <View style={[styles.planTime, scheduled && styles.planTimeDone]}>
+                              {scheduled && (
+                                <Svg width={10} height={10} viewBox="0 0 24 24" fill="none">
+                                  <Path d="M20 6L9 17l-5-5" stroke={ds.greenFill} strokeWidth={3.4} strokeLinecap="round" strokeLinejoin="round" />
+                                </Svg>
+                              )}
+                              <Text style={[styles.planTimeText, scheduled && { color: ds.greenFill }]}>{time}</Text>
+                            </View>
+                          </View>
+                        );
+                      })}
+                      <View style={styles.planCta}>
+                        <AppButton
+                          title={scheduled ? 'All scheduled for tonight' : `Schedule all ${versions.length}`}
+                          variant={scheduled ? 'quiet' : 'primary'}
+                          disabled={scheduled}
+                          onPress={() => {
+                            if (Platform.OS !== 'web') Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+                            setScheduled(true);
+                            showToast(`${versions.length} posts scheduled for tonight`);
+                          }}
+                        />
+                      </View>
+                    </GlassCard>
+                  </Animated.View>
+                )}
+
+                {!isPro && !working.length && order.length > 1 && (
                   <Animated.View entering={FadeInUp.duration(350)} style={styles.tip}>
                     <JarvisOrb size={24} />
                     <Text style={styles.tipText}>
@@ -493,6 +549,19 @@ const styles = StyleSheet.create({
   headlineText: { fontWeight: '800', letterSpacing: -0.8, color: ds.ink },
   accent: { color: ds.purple },
   meter: { marginTop: 4 },
+  planCard: { marginTop: 16 },
+  planHead: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  planTitle: { flex: 1, fontSize: 16, fontWeight: '800', color: ds.ink },
+  planPro: { paddingHorizontal: 7, height: 20, borderRadius: 999, justifyContent: 'center', backgroundColor: goldTokens.light, borderWidth: 1, borderColor: goldTokens.border },
+  planProText: { fontSize: 10.5, fontWeight: '800', letterSpacing: 0.6, color: goldTokens.dark },
+  planSub: { fontSize: 13, lineHeight: 18, color: ds.text2, marginTop: 6, marginBottom: 6 },
+  planRow: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingVertical: 8 },
+  planNum: { width: 18, fontSize: 13, fontWeight: '800', color: ds.text3 },
+  planName: { flex: 1, fontSize: 14.5, fontWeight: '800', color: ds.ink },
+  planTime: { flexDirection: 'row', alignItems: 'center', gap: 4, paddingHorizontal: 10, height: 28, borderRadius: 999, backgroundColor: ds.lavender },
+  planTimeDone: { backgroundColor: ds.greenBg },
+  planTimeText: { fontSize: 12.5, fontWeight: '800', color: ds.purple },
+  planCta: { marginTop: 12 },
   switchWrap: { marginBottom: 14 },
   doneHead: { flexDirection: 'row', alignItems: 'center', gap: 10, marginTop: 20, marginBottom: 12 },
   doneText: { flex: 1, fontSize: 15, lineHeight: 20, fontWeight: '800', color: ds.ink },

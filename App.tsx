@@ -858,16 +858,11 @@ export default function App() {
         )}
 
         {currentScreen === 'repurpose' &&
-          (userProfile?.tier === 'pro' || userProfile?.tier === 'founding' ? (
-            <ProRepurposeScreen
-              userProfile={userProfile}
-              initialIdeaTitle={selectedIdeaTitle}
-              onBack={() => navigateTo(previousScreen ? previousScreen : 'create')}
-              onNavigate={(screen) => navigateTo(screen as Screen)}
-            />
-          ) : (
-            // Free plan: the glass Repurpose studio (1 free a week)
+          ((
+            // Free and Pro share the glass Repurpose studio (Pro: unlimited + plan the order)
             <RepurposeScreen
+              tier={userProfile?.tier === 'pro' || userProfile?.tier === 'founding' ? 'pro' : 'free'}
+              onSwitchToFree={() => setUserProfile(prev => ({ ...prev, tier: 'free' }))}
               ideaTitle={selectedIdeaTitle}
               userProfile={userProfile}
               userPersona={userPersona}
