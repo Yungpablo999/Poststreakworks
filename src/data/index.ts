@@ -1134,7 +1134,7 @@ const TOPIC_TEMPLATES: Record<IdeaGoal, { title: (t: string, T: string) => strin
   comments: [
     { title: (t) => `Unpopular opinion about ${t}`, hook: () => `I know people will disagree with this one.` },
     { title: (t) => `${t.charAt(0).toUpperCase() + t.slice(1)}: which side are you on?`, hook: () => `Tell me in the comments which one you pick.` },
-    { title: (t) => `What I’d tell myself before starting ${t}`, hook: () => `What would you add to this list?` },
+    { title: (t) => `What I wish I’d known sooner about ${t}`, hook: () => `What would you add to this list?` },
     { title: (t) => `Tell me if I’m wrong about ${t}`, hook: () => `Be honest with me in the comments.` },
     { title: (t) => `The question I get asked most about ${t}`, hook: () => `Drop your answer before you watch mine.` },
     { title: (t) => `${t.charAt(0).toUpperCase() + t.slice(1)}: overrated or worth it?`, hook: () => `I changed my mind on this one.` },
