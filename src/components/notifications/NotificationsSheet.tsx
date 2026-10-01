@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useSyncExternalStore } from 'react';
 import { Platform, Pressable, ScrollView, StyleSheet, View } from 'react-native';
-import Animated, { Easing, FadeIn, FadeInUp, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
+import Animated, { Easing, FadeInUp } from 'react-native-reanimated';
 import * as Haptics from 'expo-haptics';
 import Svg, { Circle, Path, Rect } from 'react-native-svg';
 import { Text } from '../ui/AppText';
@@ -13,42 +13,54 @@ import { ds, goldTokens } from '../../theme/colors';
 // creator: new creators get a few getting-started notes; returning creators
 // get real updates (numbers match the Growth page). Pro adds Jarvis's daily
 // brief. No countdowns or "don't lose your streak" messages.
-// Tap a note to mark it read; "Mark all as read" clears the dots.
+// Notes about something to do say where they lead and open it when tapped.
+// Plain news has no action. Opening the sheet counts as reading: the new
+// ones stay highlighted while it's open, then the bell's dot clears.
 
 type Kind = 'jarvis' | 'growth' | 'star' | 'clock' | 'flag' | 'link' | 'mic' | 'calendar' | 'pro';
+/** Where a note can take the creator. App.tsx decides how to get there. */
+export type NoteTarget = 'create' | 'accounts' | 'challenge' | 'jarvis-pro' | 'voice-studio' | 'platform-growth' | 'post-performance' | 'schedule' | 'home';
 interface Note {
   id: string;
   kind: Kind;
   title: string;
   body: string;
   time: string;
+  /** Notes about something to do open it; plain news has no action. */
+  action?: { label: string; target: NoteTarget };
+}
+
+let handler: ((t: NoteTarget) => void) | null = null;
+/** App.tsx registers how to open each target. */
+export function setNotificationHandler(fn: ((t: NoteTarget) => void) | null) {
+  handler = fn;
 }
 
 type Persona = 'new' | 'returning';
 type Tier = 'free' | 'pro';
 
-const JARVIS_HI: Note = { id: 'hi', kind: 'jarvis', title: 'Hi, I’m Jarvis', body: 'Tap Create whenever you have an idea and I’ll help you shape it into a post.', time: 'Just now' };
-const CONNECT: Note = { id: 'connect', kind: 'link', title: 'Connect where you post', body: 'Link TikTok, Instagram or YouTube to see your stats here.', time: '1h ago' };
-const CHALLENGE: Note = { id: 'challenge', kind: 'flag', title: 'This week’s challenge is open', body: 'Post 3 times this week, at your own pace.', time: 'Today' };
+const JARVIS_HI: Note = { id: 'hi', kind: 'jarvis', title: 'Hi, I’m Jarvis', body: 'Whenever you have an idea, I’ll help you shape it into a post.', time: 'Just now', action: { label: 'Start a post', target: 'create' } };
+const CONNECT: Note = { id: 'connect', kind: 'link', title: 'Connect where you post', body: 'Link TikTok, Instagram or YouTube to see your stats here.', time: '1h ago', action: { label: 'Connect an account', target: 'accounts' } };
+const CHALLENGE: Note = { id: 'challenge', kind: 'flag', title: 'This week’s challenge is open', body: 'Post 3 times this week, at your own pace.', time: 'Today', action: { label: 'See the challenge', target: 'challenge' } };
 
 const FEEDS: Record<`${Persona}-${Tier}`, Note[]> = {
   'new-free': [JARVIS_HI, CONNECT, CHALLENGE],
   'new-pro': [
-    { id: 'pro', kind: 'pro', title: 'Welcome to Pro', body: 'Unlimited ideas, repurposing and Voice Studio are ready for you.', time: 'Just now' },
-    { id: 'voice', kind: 'mic', title: 'Set up your voice', body: 'Record a short clip in Voice Studio and Jarvis can read your scripts in your voice.', time: 'Just now' },
+    { id: 'pro', kind: 'pro', title: 'Welcome to Pro', body: 'Unlimited ideas, repurposing and Voice Studio are ready for you.', time: 'Just now', action: { label: 'See what’s in Pro', target: 'jarvis-pro' } },
+    { id: 'voice', kind: 'mic', title: 'Set up your voice', body: 'Record a short clip and Jarvis can read your scripts in your voice.', time: 'Just now', action: { label: 'Open Voice Studio', target: 'voice-studio' } },
     CONNECT,
     CHALLENGE,
   ],
   'returning-free': [
-    { id: 'followers', kind: 'growth', title: '1,280 new followers this week', body: 'Across TikTok, Instagram and YouTube.', time: '2h ago' },
-    { id: 'best', kind: 'star', title: 'Your best post passed 14.2K views', body: '“3 creator mistakes I stopped making this year” has 84 shares so far.', time: '5h ago' },
+    { id: 'followers', kind: 'growth', title: '1,280 new followers this week', body: 'Across TikTok, Instagram and YouTube.', time: '2h ago', action: { label: 'See your growth', target: 'platform-growth' } },
+    { id: 'best', kind: 'star', title: 'Your best post passed 14.2K views', body: '“3 creator mistakes I stopped making this year” has 84 shares so far.', time: '5h ago', action: { label: 'See how it did', target: 'post-performance' } },
     { id: 'time', kind: 'clock', title: 'Your audience is online tonight', body: 'Most of them are on between 7 and 9 PM.', time: 'Today' },
-    { id: 'challenge', kind: 'flag', title: 'New weekly challenge', body: 'Post 3 times this week, at your own pace.', time: 'Yesterday' },
+    { id: 'challenge', kind: 'flag', title: 'New weekly challenge', body: 'Post 3 times this week, at your own pace.', time: 'Yesterday', action: { label: 'See the challenge', target: 'challenge' } },
   ],
   'returning-pro': [
-    { id: 'brief', kind: 'jarvis', title: 'Today’s brief is ready', body: 'Jarvis has 3 ideas for today, based on what worked for you last week.', time: '1h ago' },
-    { id: 'followers', kind: 'growth', title: '1,280 new followers this week', body: 'Across TikTok, Instagram and YouTube.', time: '2h ago' },
-    { id: 'best', kind: 'star', title: 'Your best post passed 14.2K views', body: '“3 creator mistakes I stopped making this year” has 84 shares so far.', time: '5h ago' },
+    { id: 'brief', kind: 'jarvis', title: 'Today’s brief is ready', body: 'Jarvis has 3 ideas for today, based on what worked for you last week.', time: '1h ago', action: { label: 'Read the brief', target: 'home' } },
+    { id: 'followers', kind: 'growth', title: '1,280 new followers this week', body: 'Across TikTok, Instagram and YouTube.', time: '2h ago', action: { label: 'See your growth', target: 'platform-growth' } },
+    { id: 'best', kind: 'star', title: 'Your best post passed 14.2K views', body: '“3 creator mistakes I stopped making this year” has 84 shares so far.', time: '5h ago', action: { label: 'See how it did', target: 'post-performance' } },
     { id: 'posted', kind: 'calendar', title: 'Your TikTok went out', body: 'Scheduled for 7:30 PM and posted on time.', time: 'Yesterday' },
     { id: 'time', kind: 'clock', title: 'Your audience is online tonight', body: 'Most of them are on between 7 and 9 PM.', time: 'Yesterday' },
   ],
@@ -125,145 +137,113 @@ function KindIcon({ kind }: { kind: Kind }) {
   );
 }
 
-function NoteRow({ note, unread, index, onPress }: { note: Note; unread: boolean; index: number; onPress: () => void }) {
-  const dot = useSharedValue(unread ? 1 : 0);
-  useEffect(() => {
-    dot.value = withTiming(unread ? 1 : 0, { duration: 260, easing: Easing.out(Easing.cubic) });
-  }, [unread, dot]);
-  const dotStyle = useAnimatedStyle(() => ({ opacity: dot.value, transform: [{ scale: 0.5 + dot.value * 0.5 }] }));
-  const tint = useAnimatedStyle(() => ({ opacity: dot.value }));
+const pointer = Platform.OS === 'web' ? ({ cursor: 'pointer' } as object) : null;
+
+function NoteRow({ note, unread, index, onAction }: { note: Note; unread: boolean; index: number; onAction: () => void }) {
+  const content = (
+    <>
+      {unread ? <View pointerEvents="none" style={[StyleSheet.absoluteFill, styles.rowUnread]} /> : null}
+      <KindIcon kind={note.kind} />
+      <View style={styles.flex}>
+        <View style={styles.rowHead}>
+          <Text style={styles.rowTitle}>{note.title}</Text>
+          {unread ? <View style={styles.dot} /> : null}
+        </View>
+        <Text style={styles.rowBody}>{note.body}</Text>
+        <View style={styles.rowFoot}>
+          <Text style={styles.rowTime}>{note.time}</Text>
+          {note.action ? (
+            <View style={styles.go}>
+              <Text style={styles.goText}>{note.action.label}</Text>
+              <Svg width={12} height={12} viewBox="0 0 24 24" fill="none">
+                <Path d="M9 6l6 6-6 6" stroke={ds.purple} strokeWidth={2.8} strokeLinecap="round" strokeLinejoin="round" />
+              </Svg>
+            </View>
+          ) : null}
+        </View>
+      </View>
+    </>
+  );
   return (
     <Animated.View entering={FadeInUp.delay(80 + index * 60).duration(280).easing(Easing.out(Easing.cubic))}>
-      <Pressable
-        onPress={onPress}
-        accessibilityRole="button"
-        accessibilityLabel={`${unread ? 'Unread. ' : ''}${note.title}. ${note.body}`}
-        style={({ pressed }) => [styles.row, Platform.OS === 'web' && ({ cursor: 'pointer' } as object), pressed && { transform: [{ scale: 0.98 }] }]}
-      >
-        <Animated.View pointerEvents="none" style={[StyleSheet.absoluteFill, styles.rowUnread, tint]} />
-        <KindIcon kind={note.kind} />
-        <View style={styles.flex}>
-          <View style={styles.rowHead}>
-            <Text style={styles.rowTitle}>{note.title}</Text>
-            <Animated.View style={[styles.dot, dotStyle]} />
-          </View>
-          <Text style={styles.rowBody}>{note.body}</Text>
-          <Text style={styles.rowTime}>{note.time}</Text>
+      {note.action ? (
+        <Pressable
+          onPress={onAction}
+          accessibilityRole="button"
+          accessibilityLabel={`${unread ? 'New. ' : ''}${note.title}. ${note.body} ${note.action.label}`}
+          style={({ pressed }) => [styles.row, pointer, pressed && { transform: [{ scale: 0.98 }] }]}
+        >
+          {content}
+        </Pressable>
+      ) : (
+        <View accessible accessibilityLabel={`${unread ? 'New. ' : ''}${note.title}. ${note.body}`} style={styles.row}>
+          {content}
         </View>
-      </Pressable>
+      )}
     </Animated.View>
   );
 }
 
-function Filter({ value, onChange, unread }: { value: 'all' | 'unread'; onChange: (v: 'all' | 'unread') => void; unread: number }) {
-  const [w, setW] = useState(0);
-  const cell = w / 2;
-  const x = useSharedValue(0);
-  useEffect(() => {
-    if (cell > 0) x.value = withTiming(value === 'all' ? 0 : cell, { duration: 260, easing: Easing.out(Easing.cubic) });
-  }, [value, cell, x]);
-  const pill = useAnimatedStyle(() => ({ transform: [{ translateX: x.value }] }));
-  return (
-    <View
-      style={styles.tabs}
-      accessibilityRole="tablist"
-      onLayout={(e) => {
-        const nw = e.nativeEvent.layout.width - 8;
-        if (Math.abs(nw - w) > 1) {
-          setW(nw);
-          x.value = value === 'all' ? 0 : nw / 2;
-        }
-      }}
-    >
-      {cell > 0 && <Animated.View pointerEvents="none" style={[styles.tabPill, { width: cell }, pill]} />}
-      {(['all', 'unread'] as const).map((t) => (
-        <Pressable
-          key={t}
-          onPress={() => {
-            if (Platform.OS !== 'web') Haptics.selectionAsync();
-            onChange(t);
-          }}
-          accessibilityRole="tab"
-          accessibilityState={{ selected: value === t }}
-          style={[styles.tab, Platform.OS === 'web' && ({ cursor: 'pointer' } as object)]}
-        >
-          <Text style={[styles.tabText, value === t && styles.tabTextOn]}>{t === 'all' ? 'All' : unread > 0 ? `Unread (${unread})` : 'Unread'}</Text>
-        </Pressable>
-      ))}
-    </View>
-  );
-}
-
 export function NotificationsSheet({ visible, onClose, persona, tier }: { visible: boolean; onClose: () => void; persona?: string; tier?: string }) {
-  const r = useSyncExternalStore(subscribe, getRead, getRead);
+  useSyncExternalStore(subscribe, getRead, getRead);
   const feed = feedKey(persona, tier);
   const notes = FEEDS[feed];
-  const [filter, setFilter] = useState<'all' | 'unread'>('all');
+
+  // What was new when the sheet opened stays highlighted while it's open.
+  // Opening the sheet counts as seeing them: they're marked read on close.
+  const [newIds, setNewIds] = useState<string[]>([]);
   useEffect(() => {
-    if (visible) setFilter('all');
-  }, [visible]);
+    if (visible) setNewIds(notes.filter((n, i) => isUnread(feed, i, n.id, getRead())).map((n) => n.id));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [visible, feed]);
 
-  const unreadIds = notes.filter((n, i) => isUnread(feed, i, n.id, r)).map((n) => n.id);
-  const shown = notes.map((n, i) => ({ n, unread: isUnread(feed, i, n.id, r) })).filter((x) => filter === 'all' || x.unread);
+  const close = () => {
+    if (newIds.length) markRead(feed, newIds);
+    onClose();
+  };
 
+  const open = (note: Note) => {
+    if (!note.action) return;
+    if (Platform.OS !== 'web') Haptics.selectionAsync();
+    const target = note.action.target;
+    close();
+    // Let the sheet start gliding away, then go
+    setTimeout(() => handler?.(target), 180);
+  };
+
+  const fresh = notes.filter((n) => newIds.includes(n.id));
+  const earlier = notes.filter((n) => !newIds.includes(n.id));
+  
   return (
     <GlassSheet
       visible={visible}
-      onClose={onClose}
+      onClose={close}
       title="Notifications"
-      subtitle={unreadIds.length ? `${unreadIds.length} new` : 'You’re all caught up'}
+      subtitle={fresh.length ? `${fresh.length} new` : 'You’re all caught up'}
       maxHeight={0.86}
-      footer={<AppButton title="Done" size="lg" onPress={onClose} />}
+      footer={<AppButton title="Done" size="lg" onPress={close} />}
     >
-      <View style={styles.top}>
-        <View style={styles.flex}>
-          <Filter value={filter} onChange={setFilter} unread={unreadIds.length} />
-        </View>
-        {unreadIds.length > 0 ? (
-          <Animated.View entering={FadeIn.duration(200)}>
-            <Pressable
-              onPress={() => {
-                if (Platform.OS !== 'web') Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-                markRead(feed, unreadIds);
-              }}
-              hitSlop={8}
-              accessibilityRole="button"
-              style={[styles.markAll, Platform.OS === 'web' && ({ cursor: 'pointer' } as object)]}
-            >
-              <Svg width={14} height={14} viewBox="0 0 24 24" fill="none">
-                <Path d="M2 13l4 4 8-9M10 17l1 0 9-10" stroke={ds.purple} strokeWidth={2.4} strokeLinecap="round" strokeLinejoin="round" />
-              </Svg>
-              <Text style={styles.markAllText}>Mark all as read</Text>
-            </Pressable>
-          </Animated.View>
-        ) : null}
-      </View>
-
       <ScrollView style={styles.scroll} contentContainerStyle={styles.list} showsVerticalScrollIndicator={false}>
-        {shown.length === 0 ? (
-          <Animated.View entering={FadeIn.duration(260)} style={styles.empty}>
-            <JarvisOrb size={56} />
-            <Text style={styles.emptyTitle}>Nothing unread</Text>
-            <Text style={styles.emptyBody}>New updates will show up here.</Text>
-          </Animated.View>
-        ) : (
-          <View key={filter} style={styles.rows}>
-            {shown.map(({ n, unread }, i) => (
-              <NoteRow
-                key={n.id}
-                note={n}
-                unread={unread}
-                index={i}
-                onPress={() => {
-                  if (unread) {
-                    if (Platform.OS !== 'web') Haptics.selectionAsync();
-                    markRead(feed, [n.id]);
-                  }
-                }}
-              />
-            ))}
-          </View>
-        )}
+        {fresh.length > 0 ? (
+          <>
+            <Text style={styles.section}>New</Text>
+            <View style={styles.rows}>
+              {fresh.map((n, i) => (
+                <NoteRow key={n.id} note={n} unread index={i} onAction={() => open(n)} />
+              ))}
+            </View>
+          </>
+        ) : null}
+        {earlier.length > 0 ? (
+          <>
+            <Text style={[styles.section, fresh.length > 0 && { marginTop: 18 }]}>Earlier</Text>
+            <View style={styles.rows}>
+              {earlier.map((n, i) => (
+                <NoteRow key={n.id} note={n} unread={false} index={fresh.length + i} onAction={() => open(n)} />
+              ))}
+            </View>
+          </>
+        ) : null}
       </ScrollView>
     </GlassSheet>
   );
@@ -271,14 +251,6 @@ export function NotificationsSheet({ visible, onClose, persona, tier }: { visibl
 
 const styles = StyleSheet.create({
   flex: { flex: 1 },
-  top: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingHorizontal: 20, paddingTop: 8 },
-  tabs: { flexDirection: 'row', padding: 4, height: 40, borderRadius: 999, backgroundColor: 'rgba(255, 255, 255, 0.7)', borderWidth: 1, borderColor: 'rgba(255, 255, 255, 0.95)', maxWidth: 220 },
-  tabPill: { position: 'absolute', top: 4, left: 4, bottom: 4, borderRadius: 999, backgroundColor: ds.purple },
-  tab: { flex: 1, alignItems: 'center', justifyContent: 'center' },
-  tabText: { fontSize: 12.5, fontWeight: '800', color: ds.text2 },
-  tabTextOn: { color: '#FFFFFF' },
-  markAll: { flexDirection: 'row', alignItems: 'center', gap: 4, height: 40 },
-  markAllText: { fontSize: 12.5, fontWeight: '800', color: ds.purple },
   scroll: { flexShrink: 1 },
   list: { paddingHorizontal: 20, paddingTop: 12, paddingBottom: 12 },
   rows: { gap: 10 },
@@ -291,8 +263,9 @@ const styles = StyleSheet.create({
   rowTitle: { flex: 1, fontSize: 14.5, fontWeight: '800', color: ds.ink, lineHeight: 19 },
   dot: { width: 8, height: 8, borderRadius: 4, backgroundColor: ds.purple, marginTop: 5 },
   rowBody: { fontSize: 13, lineHeight: 18, color: ds.text2, marginTop: 3 },
-  rowTime: { fontSize: 11.5, fontWeight: '700', color: ds.text3, marginTop: 6 },
-  empty: { alignItems: 'center', paddingVertical: 28, gap: 6 },
-  emptyTitle: { fontSize: 16, fontWeight: '800', color: ds.ink, marginTop: 10 },
-  emptyBody: { fontSize: 13, color: ds.text3, fontWeight: '600' },
+  rowFoot: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8, marginTop: 8 },
+  rowTime: { fontSize: 11.5, fontWeight: '700', color: ds.text3 },
+  go: { flexDirection: 'row', alignItems: 'center', gap: 3, height: 28, paddingHorizontal: 10, borderRadius: 999, backgroundColor: ds.lavender },
+  goText: { fontSize: 12.5, fontWeight: '800', color: ds.purple },
+  section: { fontSize: 13, fontWeight: '800', color: ds.text3, letterSpacing: 0.3, marginBottom: 8 },
 });

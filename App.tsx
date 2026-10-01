@@ -49,7 +49,8 @@ import { HookStudioScreen } from './src/screens/HookStudioScreen';
 import { ScreenTransitionContainer, ScreenTransitionType } from './src/components/ScreenTransitionContainer';
 import { EdgeSwipeBackWrapper } from './src/components/EdgeSwipeBackWrapper';
 import { TabType } from './src/components/FloatingTabBar';
-import { UserProfileData } from './src/components/UserProfileModal';
+import { UserProfileData, UserProfileModal } from './src/components/UserProfileModal';
+import { setNotificationHandler } from './src/components/notifications/NotificationsSheet';
 import { UserPersona } from './src/components/HeaderDualModePills';
 
 type Screen =
@@ -210,6 +211,18 @@ export default function App() {
     setPreviousScreen(currentScreen);
     setCurrentScreen(nextScreen);
   };
+
+  // Notifications that involve doing something open the right place
+  const [showAccountsFromNote, setShowAccountsFromNote] = useState(false);
+  React.useEffect(() => {
+    setNotificationHandler((target) => {
+      if (target === 'accounts') setShowAccountsFromNote(true);
+      else if (target === 'home') navigateTo('dashboard');
+      else if (target === 'challenge') navigateTo('challenge-detail');
+      else navigateTo(target);
+    });
+    return () => setNotificationHandler(null);
+  });
 
   const handleTabNavigation = (tab: TabType) => {
     if (tab === 'home') {
@@ -1008,6 +1021,15 @@ export default function App() {
         )}
           </ScreenTransitionContainer>
         </EdgeSwipeBackWrapper>
+
+        <UserProfileModal
+          visible={showAccountsFromNote}
+          initialSubTab="accounts"
+          onClose={() => setShowAccountsFromNote(false)}
+          onLogout={handleLogout}
+          initialProfile={userProfile}
+          onSaveProfile={(updated) => setUserProfile(prev => ({ ...prev, ...updated, tier: updated.tier || prev.tier || 'free' }))}
+        />
 
         {showSplash && (
           <SplashScreen onFinish={() => setShowSplash(false)} />
