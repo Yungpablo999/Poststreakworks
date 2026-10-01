@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { useWebFrame } from '../components/web/WebAuthHeader';
+import { useWebFrame, useWideFrame } from '../components/web/WebAuthHeader';
 import { StyleSheet, View, ScrollView, Pressable, Modal, Platform, KeyboardAvoidingView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Animated, {
@@ -53,6 +53,7 @@ interface NicheSelectionScreenProps {
 
 export const NicheSelectionScreen: React.FC<NicheSelectionScreenProps> = ({ onBack, onContinue }) => {
   const webFrame = useWebFrame();
+  const wideFrame = useWideFrame();
   const [selectedNiches, setSelectedNiches] = useState<string[]>([]);
   const [customNiches, setCustomNiches] = useState<NicheItem[]>([]);
   const [showCustomSheet, setShowCustomSheet] = useState(false);
@@ -134,7 +135,7 @@ export const NicheSelectionScreen: React.FC<NicheSelectionScreenProps> = ({ onBa
   const allNiches = [...DEFAULT_NICHES, ...customNiches];
   // 2 columns on phones, 4 on desktop web. When the niches fill whole rows,
   // "Add your own" would sit alone on the last row, so it becomes a full-width bar
-  const cols = webFrame ? 4 : 2;
+  const cols = wideFrame ? 4 : 2;
   const addTileAlone = allNiches.length % cols === 0;
   const count = selectedNiches.length;
 
@@ -180,7 +181,7 @@ export const NicheSelectionScreen: React.FC<NicheSelectionScreenProps> = ({ onBa
           </View>
         )}
 
-        <ScrollView contentContainerStyle={[styles.scroll, webFrame && webStyles.scroll]} showsVerticalScrollIndicator={false}>
+        <ScrollView contentContainerStyle={[styles.scroll, wideFrame && webStyles.scroll]} showsVerticalScrollIndicator={false}>
           {/* Title */}
           <Animated.View entering={FadeInUp.delay(120).duration(550)}>
             {/* Always two lines: "What kind of creator are" / "you?", scaled to the screen */}
@@ -208,7 +209,7 @@ export const NicheSelectionScreen: React.FC<NicheSelectionScreenProps> = ({ onBa
               <Animated.View
                 key={niche.id}
                 entering={FadeInUp.delay(300 + i * 55).duration(500)}
-                style={[styles.gridItem, webFrame && webStyles.gridItem]}
+                style={[styles.gridItem, wideFrame && webStyles.gridItem]}
               >
                 <NicheTile
                   title={niche.title}
@@ -223,7 +224,7 @@ export const NicheSelectionScreen: React.FC<NicheSelectionScreenProps> = ({ onBa
             {/* Add your own: full-width bar when it would sit alone on its row, half tile otherwise */}
             <Animated.View
               entering={FadeInUp.delay(300 + allNiches.length * 55).duration(500)}
-              style={addTileAlone ? styles.gridItemFull : [styles.gridItem, webFrame && webStyles.gridItem]}
+              style={addTileAlone ? styles.gridItemFull : [styles.gridItem, wideFrame && webStyles.gridItem]}
             >
               <Pressable
                 onPress={() => setShowCustomSheet(true)}
@@ -251,7 +252,7 @@ export const NicheSelectionScreen: React.FC<NicheSelectionScreenProps> = ({ onBa
               no wrong answers here. Pick what you enjoy making most.
             </Text>
           </Animated.View>
-          {webFrame && <View style={webStyles.cta}>{cta}</View>}
+          {wideFrame && <View style={webStyles.cta}>{cta}</View>}
         </ScrollView>
 
         {/* Limit hint, floating just above the footer */}
@@ -259,7 +260,7 @@ export const NicheSelectionScreen: React.FC<NicheSelectionScreenProps> = ({ onBa
             <Text style={styles.limitToastText}>Up to 3 for now. Tap one of yours to swap it.</Text>
           </Animated.View>
         {/* Sticky glass footer with the one clear action */}
-        {!webFrame && (
+        {!wideFrame && (
           <View style={styles.footer}>
             <BlurView intensity={40} tint="light" style={StyleSheet.absoluteFill} />
             <View style={[StyleSheet.absoluteFill, styles.footerFill]} />

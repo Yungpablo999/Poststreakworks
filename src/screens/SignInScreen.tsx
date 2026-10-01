@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useWebFrame } from '../components/web/WebAuthHeader';
+import { useWebFrame, useWideFrame } from '../components/web/WebAuthHeader';
 import { StyleSheet, View, ScrollView, Pressable, Platform, KeyboardAvoidingView, Image, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Animated, { FadeIn, FadeInUp } from 'react-native-reanimated';
@@ -30,6 +30,7 @@ interface SignInScreenProps {
 
 export const SignInScreen: React.FC<SignInScreenProps> = ({ onBack, onCreateAccount, onSubmit, onSocialSignIn }) => {
   const webFrame = useWebFrame();
+  const wideFrame = useWideFrame();
   const [email, setEmail] = useState('');
   const [focused, setFocused] = useState(false);
   const [touched, setTouched] = useState(false);
@@ -79,7 +80,7 @@ export const SignInScreen: React.FC<SignInScreenProps> = ({ onBack, onCreateAcco
             </View>
           )}
 
-          <ScrollView contentContainerStyle={[styles.scroll, webFrame && webStyles.scroll]} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
+          <ScrollView contentContainerStyle={[styles.scroll, wideFrame && webStyles.scroll]} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
             {/* The mascot floats in to say hello */}
             <Animated.View entering={FadeInUp.duration(650)} style={styles.mascotWrap}>
               <View style={styles.mascotHalo}>

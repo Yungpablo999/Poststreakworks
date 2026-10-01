@@ -1,5 +1,5 @@
 import React, { useMemo, useRef, useState } from 'react';
-import { useWebFrame } from '../components/web/WebAuthHeader';
+import { useWebFrame, useWideFrame } from '../components/web/WebAuthHeader';
 import { StyleSheet, View, ScrollView, Pressable, Platform, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Animated, { FadeIn, FadeInUp, useAnimatedStyle, useSharedValue, withTiming, Easing } from 'react-native-reanimated';
@@ -31,6 +31,7 @@ interface PlanPreviewScreenProps {
 
 export const PlanPreviewScreen: React.FC<PlanPreviewScreenProps> = ({ niches, platforms, onBack, onContinue }) => {
   const webFrame = useWebFrame();
+  const wideFrame = useWideFrame();
   const ideas = useMemo(() => getStarterIdeas(niches, platforms), [niches, platforms]);
   const snapshots = useMemo(() => getAccountSnapshots(platforms), [platforms]);
   const [index, setIndex] = useState(0);
@@ -97,7 +98,7 @@ export const PlanPreviewScreen: React.FC<PlanPreviewScreenProps> = ({ niches, pl
           </View>
         )}
 
-        <ScrollView contentContainerStyle={[styles.scroll, webFrame && webStyles.scroll]} showsVerticalScrollIndicator={false}>
+        <ScrollView contentContainerStyle={[styles.scroll, wideFrame && webStyles.scroll]} showsVerticalScrollIndicator={false}>
           <Animated.View entering={FadeInUp.delay(120).duration(550)}>
             <FitLines
               lines={['Jarvis made you a', <Text key="s" style={styles.titleAccent}>starter plan</Text>]}
@@ -158,10 +159,10 @@ export const PlanPreviewScreen: React.FC<PlanPreviewScreenProps> = ({ niches, pl
             </GlassCard>
             <Text style={styles.nextSteps}>Then a quick check-in on day 2, and idea #2 on day 3.</Text>
           </Animated.View>
-          {webFrame && <View style={webStyles.cta}>{cta}</View>}
+          {wideFrame && <View style={webStyles.cta}>{cta}</View>}
         </ScrollView>
 
-        {!webFrame && (
+        {!wideFrame && (
           <View style={styles.footer}>
             <BlurView intensity={40} tint="light" style={StyleSheet.absoluteFill} />
             <View style={[StyleSheet.absoluteFill, styles.footerFill]} />

@@ -13,7 +13,7 @@ import { Text } from './ui/AppText';
 import Svg, { Path, Circle } from 'react-native-svg';
 import * as Haptics from 'expo-haptics';
 import { LinearGradient } from 'expo-linear-gradient';
-import { useBreakpoint } from '../hooks/useBreakpoint';
+import { IS_WEB_APP, useBreakpoint } from '../hooks/useBreakpoint';
 
 // The floating glass tab bar shared by every main screen (phones and tablets;
 // on desktop the side menu takes over, so it renders nothing). A purple pill springs
@@ -146,7 +146,8 @@ function TabSlot({
 
 export const FloatingTabBar: React.FC<FloatingTabBarProps> = (props) => {
   const bp = useBreakpoint();
-  if (bp === 'desktop') return null;
+  // In a browser the web header and menu replace the app's tab bar
+  if (bp === 'desktop' || IS_WEB_APP) return null;
   return <FloatingTabBarInner {...props} />;
 };
 

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useWebFrame } from '../components/web/WebAuthHeader';
+import { useWebFrame, useWideFrame } from '../components/web/WebAuthHeader';
 import { StyleSheet, View, ScrollView, Pressable, Platform, KeyboardAvoidingView, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Animated, { FadeIn, FadeInUp } from 'react-native-reanimated';
@@ -39,6 +39,7 @@ export const SignUpScreen: React.FC<SignUpScreenProps> = ({
   savedIdeaTitle,
 }) => {
   const webFrame = useWebFrame();
+  const wideFrame = useWideFrame();
   const [email, setEmail] = useState('');
   const [focused, setFocused] = useState(false);
   const [touched, setTouched] = useState(false);
@@ -91,7 +92,7 @@ export const SignUpScreen: React.FC<SignUpScreenProps> = ({
             </View>
           )}
 
-          <ScrollView contentContainerStyle={[styles.scroll, webFrame && webStyles.scroll]} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
+          <ScrollView contentContainerStyle={[styles.scroll, wideFrame && webStyles.scroll]} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
             <Animated.View entering={FadeInUp.delay(120).duration(550)}>
               <FitLines
                 lines={['Save your', <Text key="p" style={styles.titleAccent}>starter plan</Text>]}

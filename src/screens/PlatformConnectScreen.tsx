@@ -1,5 +1,5 @@
 import React from 'react';
-import { useWebFrame } from '../components/web/WebAuthHeader';
+import { useWebFrame, useWideFrame } from '../components/web/WebAuthHeader';
 import { StyleSheet, View, ScrollView, Pressable, Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Animated, { FadeIn, FadeInUp, useAnimatedStyle, useSharedValue, withSequence, withSpring, withTiming } from 'react-native-reanimated';
@@ -41,6 +41,7 @@ interface PlatformConnectScreenProps {
 
 export const PlatformConnectScreen: React.FC<PlatformConnectScreenProps> = ({ onBack, onContinue }) => {
   const webFrame = useWebFrame();
+  const wideFrame = useWideFrame();
   const [connected, setConnected] = React.useState<string[]>([]);
   const count = connected.length;
 
@@ -98,7 +99,7 @@ export const PlatformConnectScreen: React.FC<PlatformConnectScreenProps> = ({ on
           </View>
         )}
 
-        <ScrollView contentContainerStyle={[styles.scroll, webFrame && webStyles.scroll]} showsVerticalScrollIndicator={false}>
+        <ScrollView contentContainerStyle={[styles.scroll, wideFrame && webStyles.scroll]} showsVerticalScrollIndicator={false}>
           {/* Title: always "Connect your creator" / "platforms" */}
           <Animated.View entering={FadeInUp.delay(120).duration(550)}>
             <FitLines
@@ -122,9 +123,9 @@ export const PlatformConnectScreen: React.FC<PlatformConnectScreenProps> = ({ on
           </Animated.View>
 
           {/* Platforms */}
-          <View style={[styles.list, webFrame && webStyles.list]}>
+          <View style={[styles.list, wideFrame && webStyles.list]}>
             {PLATFORMS.map((p, i) => (
-              <Animated.View key={p.id} entering={FadeInUp.delay(300 + i * 70).duration(500)} style={webFrame ? webStyles.listItem : undefined}>
+              <Animated.View key={p.id} entering={FadeInUp.delay(300 + i * 70).duration(500)} style={wideFrame ? webStyles.listItem : undefined}>
                 <PlatformRow
                   name={p.name}
                   description={p.description}
@@ -150,11 +151,11 @@ export const PlatformConnectScreen: React.FC<PlatformConnectScreenProps> = ({ on
               start with the one you post on most. I'll learn what works for you from there.
             </Text>
           </Animated.View>
-          {webFrame && <View style={webStyles.cta}>{cta}</View>}
+          {wideFrame && <View style={webStyles.cta}>{cta}</View>}
         </ScrollView>
 
         {/* Sticky glass footer with the one clear action */}
-        {!webFrame && (
+        {!wideFrame && (
           <View style={styles.footer}>
             <BlurView intensity={40} tint="light" style={StyleSheet.absoluteFill} />
             <View style={[StyleSheet.absoluteFill, styles.footerFill]} />
