@@ -89,8 +89,16 @@ type Screen =
 export default function App() {
   // Brand fonts (Plus Jakarta Sans + Playfair Display italic for "Earn.").
   const [fontsLoaded, fontError] = useFonts(fontAssets);
-  const [showSplash, setShowSplash] = useState(true);
-  const [currentScreen, setCurrentScreen] = useState<Screen>('welcome');
+  // Web: the website's buttons open the app at the right place
+  // (?start=signup → the first sign-up step, ?start=signin → sign in),
+  // and skip the splash since the visitor has just seen the brand.
+  const webStart: Screen | null = (() => {
+    if (Platform.OS !== 'web' || typeof window === 'undefined') return null;
+    const start = new URLSearchParams(window.location.search).get('start');
+    return start === 'signup' ? 'niche' : start === 'signin' ? 'signin' : null;
+  })();
+  const [showSplash, setShowSplash] = useState(!webStart);
+  const [currentScreen, setCurrentScreen] = useState<Screen>(webStart ?? 'welcome');
   const [previousScreen, setPreviousScreen] = useState<Screen>('welcome');
 
   // Lock horizontal shift/pan on web/mobile browsers to keep layout fixed and centralized
