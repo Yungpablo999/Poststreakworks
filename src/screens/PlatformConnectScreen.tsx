@@ -1,4 +1,5 @@
 import React from 'react';
+import { useWebFrame } from '../components/web/WebAuthHeader';
 import { StyleSheet, View, ScrollView, Pressable, Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Animated, { FadeIn, FadeInUp, useAnimatedStyle, useSharedValue, withSequence, withSpring, withTiming } from 'react-native-reanimated';
@@ -39,6 +40,7 @@ interface PlatformConnectScreenProps {
 }
 
 export const PlatformConnectScreen: React.FC<PlatformConnectScreenProps> = ({ onBack, onContinue }) => {
+  const webFrame = useWebFrame();
   const [connected, setConnected] = React.useState<string[]>([]);
   const count = connected.length;
 
@@ -57,26 +59,46 @@ export const PlatformConnectScreen: React.FC<PlatformConnectScreenProps> = ({ on
     onContinue(connected);
   };
 
+  // The one action: a sticky footer on phones, right under the content on desktop web
+  const cta = (
+    <AppButton
+      title={count === 0 ? 'Connect one to continue' : 'Continue'}
+      size="lg"
+      disabled={count === 0}
+      onPress={handleContinue}
+      iconRight={
+        count > 0 ? (
+          <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
+            <Path d="M5 12h14M13 6l6 6-6 6" stroke="#FFFFFF" strokeWidth={2.4} strokeLinecap="round" strokeLinejoin="round" />
+          </Svg>
+        ) : undefined
+      }
+    />
+  );
+
   return (
     <View style={styles.root}>
       <GlassBackdrop />
       <SafeAreaView style={styles.safeArea} edges={['top']}>
         {/* Top: back + progress (step 2 of 5) */}
-        <View style={styles.header}>
-          <Pressable onPress={onBack} hitSlop={10} accessibilityRole="button" accessibilityLabel="Go back" style={styles.backBtn}>
-            <BlurView intensity={30} tint="light" style={[StyleSheet.absoluteFill, { borderRadius: 20, overflow: 'hidden' }]} />
-            <View>
-              <Svg width={20} height={20} viewBox="0 0 24 24" fill="none">
-                <Path d="M15 18l-6-6 6-6" stroke={ds.ink} strokeWidth={2.4} strokeLinecap="round" strokeLinejoin="round" />
-              </Svg>
-            </View>
-          </Pressable>
-          <Animated.View entering={FadeInUp.duration(500)}>
-            <OnboardingProgress current={1} />
-          </Animated.View>
-        </View>
+        {/* Desktop web: the website header above replaces this */}
+        {!webFrame && (
+          <View style={styles.header}>
+            <Pressable onPress={onBack} hitSlop={10} accessibilityRole="button" accessibilityLabel="Go back" style={styles.backBtn}>
+              <BlurView intensity={30} tint="light" style={[StyleSheet.absoluteFill, { borderRadius: 20, overflow: 'hidden' }]} />
+              <View>
+                <Svg width={20} height={20} viewBox="0 0 24 24" fill="none">
+                  <Path d="M15 18l-6-6 6-6" stroke={ds.ink} strokeWidth={2.4} strokeLinecap="round" strokeLinejoin="round" />
+                </Svg>
+              </View>
+            </Pressable>
+            <Animated.View entering={FadeInUp.duration(500)}>
+              <OnboardingProgress current={1} />
+            </Animated.View>
+          </View>
+        )}
 
-        <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
+        <ScrollView contentContainerStyle={[styles.scroll, webFrame && webStyles.scroll]} showsVerticalScrollIndicator={false}>
           {/* Title: always "Connect your creator" / "platforms" */}
           <Animated.View entering={FadeInUp.delay(120).duration(550)}>
             <FitLines
@@ -100,9 +122,9 @@ export const PlatformConnectScreen: React.FC<PlatformConnectScreenProps> = ({ on
           </Animated.View>
 
           {/* Platforms */}
-          <View style={styles.list}>
+          <View style={[styles.list, webFrame && webStyles.list]}>
             {PLATFORMS.map((p, i) => (
-              <Animated.View key={p.id} entering={FadeInUp.delay(300 + i * 70).duration(500)}>
+              <Animated.View key={p.id} entering={FadeInUp.delay(300 + i * 70).duration(500)} style={webFrame ? webStyles.listItem : undefined}>
                 <PlatformRow
                   name={p.name}
                   description={p.description}
@@ -128,28 +150,19 @@ export const PlatformConnectScreen: React.FC<PlatformConnectScreenProps> = ({ on
               start with the one you post on most. I'll learn what works for you from there.
             </Text>
           </Animated.View>
+          {webFrame && <View style={webStyles.cta}>{cta}</View>}
         </ScrollView>
 
         {/* Sticky glass footer with the one clear action */}
-        <View style={styles.footer}>
-          <BlurView intensity={40} tint="light" style={StyleSheet.absoluteFill} />
-          <View style={[StyleSheet.absoluteFill, styles.footerFill]} />
-          <SafeAreaView edges={['bottom']} style={styles.footerInner}>
-            <AppButton
-              title={count === 0 ? 'Connect one to continue' : 'Continue'}
-              size="lg"
-              disabled={count === 0}
-              onPress={handleContinue}
-              iconRight={
-                count > 0 ? (
-                  <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
-                    <Path d="M5 12h14M13 6l6 6-6 6" stroke="#FFFFFF" strokeWidth={2.4} strokeLinecap="round" strokeLinejoin="round" />
-                  </Svg>
-                ) : undefined
-              }
-            />
-          </SafeAreaView>
-        </View>
+        {!webFrame && (
+          <View style={styles.footer}>
+            <BlurView intensity={40} tint="light" style={StyleSheet.absoluteFill} />
+            <View style={[StyleSheet.absoluteFill, styles.footerFill]} />
+            <SafeAreaView edges={['bottom']} style={styles.footerInner}>
+              {cta}
+            </SafeAreaView>
+          </View>
+        )}
       </SafeAreaView>
     </View>
   );
@@ -274,4 +287,12 @@ const styles = StyleSheet.create({
     maxWidth: 520,
     alignSelf: 'center',
   },
+});
+
+// Desktop web: the step uses the page like a website (wider, button under the content)
+const webStyles = StyleSheet.create({
+  scroll: { maxWidth: 980, paddingTop: 40, paddingBottom: 56 },
+  cta: { width: '100%', maxWidth: 460, alignSelf: 'center', marginTop: 32 },
+  list: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between' },
+  listItem: { width: '49%' },
 });

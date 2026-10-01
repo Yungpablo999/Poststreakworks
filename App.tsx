@@ -52,6 +52,7 @@ import { TabType } from './src/components/FloatingTabBar';
 import { UserProfileData, UserProfileModal } from './src/components/UserProfileModal';
 import { setNotificationHandler } from './src/components/notifications/NotificationsSheet';
 import { AppSidebar, type SidebarId } from './src/components/web/AppSidebar';
+import { WebAuthHeader } from './src/components/web/WebAuthHeader';
 import { useBreakpoint } from './src/hooks/useBreakpoint';
 import { GlassBackdrop } from './src/components/glass/GlassBackdrop';
 import { UserPersona } from './src/components/HeaderDualModePills';
@@ -450,6 +451,16 @@ export default function App() {
   };
   const inApp = currentScreen in SIDEBAR_FOR;
   const showSidebar = breakpoint === 'desktop' && inApp;
+  // Desktop web: sign-up and sign-in get a website header across the top
+  const AUTH_STEP: Partial<Record<Screen, number | null>> = {
+    niche: 0, platforms: 1, plan: 2, signup: 3,
+    'verify-code': verifyMode === 'signup' ? 4 : null,
+    signin: null, 'reset-password': null,
+  };
+  const showAuthHeader = Platform.OS === 'web' && breakpoint === 'desktop' && currentScreen in AUTH_STEP;
+  const authStep = AUTH_STEP[currentScreen] ?? null;
+  const signingUp = authStep !== null;
+  const authBack = getBackScreen(currentScreen);
 
   // Hold on the brand background for the split second fonts take to load,
   // so text never flashes in the system font. On error, fall back gracefully.
@@ -473,6 +484,15 @@ export default function App() {
             />
           )}
           <View style={styles.fill}>
+            {showAuthHeader && (
+              <WebAuthHeader
+                step={authStep}
+                onBack={authBack ? () => navigateTo(authBack) : undefined}
+                switchLabel={signingUp ? 'Already have an account?' : 'New here?'}
+                switchAction={signingUp ? 'Sign in' : 'Create an account'}
+                onSwitch={() => navigateTo(signingUp ? 'signin' : 'niche')}
+              />
+            )}
             {/* Tablet and desktop: the page sits in a centred column over the brand glows */}
             {inApp && breakpoint !== 'phone' && <GlassBackdrop />}
             <View style={inApp && breakpoint !== 'phone' ? [styles.column, { maxWidth: breakpoint === 'desktop' ? 1120 : 720 }] : styles.fill}>

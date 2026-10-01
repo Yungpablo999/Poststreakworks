@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { useWebFrame } from '../components/web/WebAuthHeader';
 import { StyleSheet, View, ScrollView, Pressable, Platform, KeyboardAvoidingView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Animated, {
@@ -91,6 +92,7 @@ function CodeBox({ digit, index, active, status }: { digit: string; index: numbe
 }
 
 export const VerifyCodeScreen: React.FC<VerifyCodeScreenProps> = ({ mode, email, onBack, onEditEmail, onSuccess }) => {
+  const webFrame = useWebFrame();
   const [code, setCode] = useState('');
   const [focused, setFocused] = useState(true);
   const [status, setStatus] = useState<Status>('entering');
@@ -145,23 +147,26 @@ export const VerifyCodeScreen: React.FC<VerifyCodeScreenProps> = ({ mode, email,
       <GlassBackdrop />
       <SafeAreaView style={styles.safeArea} edges={['top', 'bottom']}>
         <KeyboardAvoidingView style={styles.flex} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-          <View style={styles.header}>
-            <Pressable onPress={onBack} hitSlop={10} accessibilityRole="button" accessibilityLabel="Go back" style={styles.backBtn}>
-              <BlurView intensity={30} tint="light" style={[StyleSheet.absoluteFill, { borderRadius: 20, overflow: 'hidden' }]} />
-              <View>
-                <Svg width={20} height={20} viewBox="0 0 24 24" fill="none">
-                  <Path d="M15 18l-6-6 6-6" stroke={ds.ink} strokeWidth={2.4} strokeLinecap="round" strokeLinejoin="round" />
-                </Svg>
-              </View>
-            </Pressable>
-            {mode === 'signup' && (
-              <Animated.View entering={FadeInUp.duration(500)}>
-                <OnboardingProgress current={4} />
-              </Animated.View>
-            )}
-          </View>
+          {/* Desktop web: the website header above replaces this */}
+          {!webFrame && (
+            <View style={styles.header}>
+              <Pressable onPress={onBack} hitSlop={10} accessibilityRole="button" accessibilityLabel="Go back" style={styles.backBtn}>
+                <BlurView intensity={30} tint="light" style={[StyleSheet.absoluteFill, { borderRadius: 20, overflow: 'hidden' }]} />
+                <View>
+                  <Svg width={20} height={20} viewBox="0 0 24 24" fill="none">
+                    <Path d="M15 18l-6-6 6-6" stroke={ds.ink} strokeWidth={2.4} strokeLinecap="round" strokeLinejoin="round" />
+                  </Svg>
+                </View>
+              </Pressable>
+              {mode === 'signup' && (
+                <Animated.View entering={FadeInUp.duration(500)}>
+                  <OnboardingProgress current={4} />
+                </Animated.View>
+              )}
+            </View>
+          )}
 
-          <ScrollView contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
+          <ScrollView contentContainerStyle={[styles.scroll, webFrame && webStyles.scroll]} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
             <Animated.View entering={FadeInUp.delay(120).duration(550)}>
               <FitLines
                 lines={['Check your', <Text key="i" style={styles.titleAccent}>inbox</Text>]}
@@ -321,4 +326,10 @@ const styles = StyleSheet.create({
   resendLink: { fontSize: 14, fontWeight: '800', color: ds.purple },
   resendSent: { fontSize: 14, fontWeight: '700', color: ds.green },
   tip: { fontSize: 12.5, color: ds.text3, textAlign: 'center', marginTop: 6 },
+});
+
+// Desktop web: the step uses the page like a website (wider, button under the content)
+const webStyles = StyleSheet.create({
+  scroll: { flexGrow: 1, justifyContent: 'center', maxWidth: 460, paddingTop: 40, paddingBottom: 56 },
+  cta: { width: '100%', maxWidth: 460, alignSelf: 'center', marginTop: 32 },
 });

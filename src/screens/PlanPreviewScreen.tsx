@@ -1,4 +1,5 @@
 import React, { useMemo, useRef, useState } from 'react';
+import { useWebFrame } from '../components/web/WebAuthHeader';
 import { StyleSheet, View, ScrollView, Pressable, Platform, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Animated, { FadeIn, FadeInUp, useAnimatedStyle, useSharedValue, withTiming, Easing } from 'react-native-reanimated';
@@ -29,6 +30,7 @@ interface PlanPreviewScreenProps {
 }
 
 export const PlanPreviewScreen: React.FC<PlanPreviewScreenProps> = ({ niches, platforms, onBack, onContinue }) => {
+  const webFrame = useWebFrame();
   const ideas = useMemo(() => getStarterIdeas(niches, platforms), [niches, platforms]);
   const snapshots = useMemo(() => getAccountSnapshots(platforms), [platforms]);
   const [index, setIndex] = useState(0);
@@ -60,25 +62,42 @@ export const PlanPreviewScreen: React.FC<PlanPreviewScreenProps> = ({ niches, pl
     onContinue(idea);
   };
 
+  // The one action: a sticky footer on phones, right under the content on desktop web
+  const cta = (
+    <AppButton
+      title="Save my plan"
+      size="lg"
+      onPress={handleSave}
+      iconRight={
+        <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
+          <Path d="M5 12h14M13 6l6 6-6 6" stroke="#FFFFFF" strokeWidth={2.4} strokeLinecap="round" strokeLinejoin="round" />
+        </Svg>
+      }
+    />
+  );
+
   return (
     <View style={styles.root}>
       <GlassBackdrop />
       <SafeAreaView style={styles.safeArea} edges={['top']}>
-        <View style={styles.header}>
-          <Pressable onPress={onBack} hitSlop={10} accessibilityRole="button" accessibilityLabel="Go back" style={styles.backBtn}>
-            <BlurView intensity={30} tint="light" style={[StyleSheet.absoluteFill, { borderRadius: 20, overflow: 'hidden' }]} />
-            <View>
-              <Svg width={20} height={20} viewBox="0 0 24 24" fill="none">
-                <Path d="M15 18l-6-6 6-6" stroke={ds.ink} strokeWidth={2.4} strokeLinecap="round" strokeLinejoin="round" />
-              </Svg>
-            </View>
-          </Pressable>
-          <Animated.View entering={FadeInUp.duration(500)}>
-            <OnboardingProgress current={2} />
-          </Animated.View>
-        </View>
+        {/* Desktop web: the website header above replaces this */}
+        {!webFrame && (
+          <View style={styles.header}>
+            <Pressable onPress={onBack} hitSlop={10} accessibilityRole="button" accessibilityLabel="Go back" style={styles.backBtn}>
+              <BlurView intensity={30} tint="light" style={[StyleSheet.absoluteFill, { borderRadius: 20, overflow: 'hidden' }]} />
+              <View>
+                <Svg width={20} height={20} viewBox="0 0 24 24" fill="none">
+                  <Path d="M15 18l-6-6 6-6" stroke={ds.ink} strokeWidth={2.4} strokeLinecap="round" strokeLinejoin="round" />
+                </Svg>
+              </View>
+            </Pressable>
+            <Animated.View entering={FadeInUp.duration(500)}>
+              <OnboardingProgress current={2} />
+            </Animated.View>
+          </View>
+        )}
 
-        <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
+        <ScrollView contentContainerStyle={[styles.scroll, webFrame && webStyles.scroll]} showsVerticalScrollIndicator={false}>
           <Animated.View entering={FadeInUp.delay(120).duration(550)}>
             <FitLines
               lines={['Jarvis made you a', <Text key="s" style={styles.titleAccent}>starter plan</Text>]}
@@ -139,24 +158,18 @@ export const PlanPreviewScreen: React.FC<PlanPreviewScreenProps> = ({ niches, pl
             </GlassCard>
             <Text style={styles.nextSteps}>Then a quick check-in on day 2, and idea #2 on day 3.</Text>
           </Animated.View>
+          {webFrame && <View style={webStyles.cta}>{cta}</View>}
         </ScrollView>
 
-        <View style={styles.footer}>
-          <BlurView intensity={40} tint="light" style={StyleSheet.absoluteFill} />
-          <View style={[StyleSheet.absoluteFill, styles.footerFill]} />
-          <SafeAreaView edges={['bottom']} style={styles.footerInner}>
-            <AppButton
-              title="Save my plan"
-              size="lg"
-              onPress={handleSave}
-              iconRight={
-                <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
-                  <Path d="M5 12h14M13 6l6 6-6 6" stroke="#FFFFFF" strokeWidth={2.4} strokeLinecap="round" strokeLinejoin="round" />
-                </Svg>
-              }
-            />
-          </SafeAreaView>
-        </View>
+        {!webFrame && (
+          <View style={styles.footer}>
+            <BlurView intensity={40} tint="light" style={StyleSheet.absoluteFill} />
+            <View style={[StyleSheet.absoluteFill, styles.footerFill]} />
+            <SafeAreaView edges={['bottom']} style={styles.footerInner}>
+              {cta}
+            </SafeAreaView>
+          </View>
+        )}
       </SafeAreaView>
     </View>
   );
@@ -212,4 +225,10 @@ const styles = StyleSheet.create({
   },
   footerFill: { backgroundColor: 'rgba(247, 245, 240, 0.6)' },
   footerInner: { paddingHorizontal: 20, paddingTop: 14, paddingBottom: 14, width: '100%', maxWidth: 520, alignSelf: 'center' },
+});
+
+// Desktop web: the step uses the page like a website (wider, button under the content)
+const webStyles = StyleSheet.create({
+  scroll: { maxWidth: 760, paddingTop: 40, paddingBottom: 56 },
+  cta: { width: '100%', maxWidth: 460, alignSelf: 'center', marginTop: 32 },
 });

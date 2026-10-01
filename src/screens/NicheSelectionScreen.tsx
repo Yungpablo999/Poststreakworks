@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { useWebFrame } from '../components/web/WebAuthHeader';
 import { StyleSheet, View, ScrollView, Pressable, Modal, Platform, KeyboardAvoidingView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Animated, {
@@ -51,6 +52,7 @@ interface NicheSelectionScreenProps {
 }
 
 export const NicheSelectionScreen: React.FC<NicheSelectionScreenProps> = ({ onBack, onContinue }) => {
+  const webFrame = useWebFrame();
   const [selectedNiches, setSelectedNiches] = useState<string[]>([]);
   const [customNiches, setCustomNiches] = useState<NicheItem[]>([]);
   const [showCustomSheet, setShowCustomSheet] = useState(false);
@@ -130,33 +132,55 @@ export const NicheSelectionScreen: React.FC<NicheSelectionScreenProps> = ({ onBa
   };
 
   const allNiches = [...DEFAULT_NICHES, ...customNiches];
-  // With an even number of niches the "Add your own" tile would sit alone on the last row
-  const addTileAlone = allNiches.length % 2 === 0;
+  // 2 columns on phones, 4 on desktop web. When the niches fill whole rows,
+  // "Add your own" would sit alone on the last row, so it becomes a full-width bar
+  const cols = webFrame ? 4 : 2;
+  const addTileAlone = allNiches.length % cols === 0;
   const count = selectedNiches.length;
+
+  // The one action: a sticky footer on phones, right under the content on desktop web
+  const cta = (
+    <AppButton
+      title={count === 0 ? 'Pick at least one niche' : 'Continue'}
+      size="lg"
+      disabled={count === 0}
+      onPress={handleContinue}
+      iconRight={
+        count > 0 ? (
+          <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
+            <Path d="M5 12h14M13 6l6 6-6 6" stroke="#FFFFFF" strokeWidth={2.4} strokeLinecap="round" strokeLinejoin="round" />
+          </Svg>
+        ) : undefined
+      }
+    />
+  );
 
   return (
     <View style={styles.root}>
       <GlassBackdrop />
       <SafeAreaView style={styles.safeArea} edges={['top']}>
         {/* Top: back + progress */}
-        <View style={styles.header}>
-          {onBack && (
-            <Pressable onPress={onBack} hitSlop={10} accessibilityRole="button" accessibilityLabel="Go back" style={styles.backBtn}>
-              <BlurView intensity={30} tint="light" style={[StyleSheet.absoluteFill, { borderRadius: 20, overflow: 'hidden' }]} />
-              {/* Wrapped so the arrow always draws above the frosted layer */}
-              <View>
-                <Svg width={20} height={20} viewBox="0 0 24 24" fill="none">
-                  <Path d="M15 18l-6-6 6-6" stroke={ds.ink} strokeWidth={2.4} strokeLinecap="round" strokeLinejoin="round" />
-                </Svg>
-              </View>
-            </Pressable>
-          )}
-          <Animated.View entering={FadeInUp.duration(500)} style={styles.progressWrap}>
-            <OnboardingProgress current={0} />
-          </Animated.View>
-        </View>
+        {/* Desktop web: the website header above replaces this */}
+        {!webFrame && (
+          <View style={styles.header}>
+            {onBack && (
+              <Pressable onPress={onBack} hitSlop={10} accessibilityRole="button" accessibilityLabel="Go back" style={styles.backBtn}>
+                <BlurView intensity={30} tint="light" style={[StyleSheet.absoluteFill, { borderRadius: 20, overflow: 'hidden' }]} />
+                {/* Wrapped so the arrow always draws above the frosted layer */}
+                <View>
+                  <Svg width={20} height={20} viewBox="0 0 24 24" fill="none">
+                    <Path d="M15 18l-6-6 6-6" stroke={ds.ink} strokeWidth={2.4} strokeLinecap="round" strokeLinejoin="round" />
+                  </Svg>
+                </View>
+              </Pressable>
+            )}
+            <Animated.View entering={FadeInUp.duration(500)} style={styles.progressWrap}>
+              <OnboardingProgress current={0} />
+            </Animated.View>
+          </View>
+        )}
 
-        <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
+        <ScrollView contentContainerStyle={[styles.scroll, webFrame && webStyles.scroll]} showsVerticalScrollIndicator={false}>
           {/* Title */}
           <Animated.View entering={FadeInUp.delay(120).duration(550)}>
             {/* Always two lines: "What kind of creator are" / "you?", scaled to the screen */}
@@ -184,7 +208,7 @@ export const NicheSelectionScreen: React.FC<NicheSelectionScreenProps> = ({ onBa
               <Animated.View
                 key={niche.id}
                 entering={FadeInUp.delay(300 + i * 55).duration(500)}
-                style={styles.gridItem}
+                style={[styles.gridItem, webFrame && webStyles.gridItem]}
               >
                 <NicheTile
                   title={niche.title}
@@ -199,7 +223,7 @@ export const NicheSelectionScreen: React.FC<NicheSelectionScreenProps> = ({ onBa
             {/* Add your own: full-width bar when it would sit alone on its row, half tile otherwise */}
             <Animated.View
               entering={FadeInUp.delay(300 + allNiches.length * 55).duration(500)}
-              style={addTileAlone ? styles.gridItemFull : styles.gridItem}
+              style={addTileAlone ? styles.gridItemFull : [styles.gridItem, webFrame && webStyles.gridItem]}
             >
               <Pressable
                 onPress={() => setShowCustomSheet(true)}
@@ -227,6 +251,7 @@ export const NicheSelectionScreen: React.FC<NicheSelectionScreenProps> = ({ onBa
               no wrong answers here. Pick what you enjoy making most.
             </Text>
           </Animated.View>
+          {webFrame && <View style={webStyles.cta}>{cta}</View>}
         </ScrollView>
 
         {/* Limit hint, floating just above the footer */}
@@ -234,25 +259,15 @@ export const NicheSelectionScreen: React.FC<NicheSelectionScreenProps> = ({ onBa
             <Text style={styles.limitToastText}>Up to 3 for now. Tap one of yours to swap it.</Text>
           </Animated.View>
         {/* Sticky glass footer with the one clear action */}
-        <View style={styles.footer}>
-          <BlurView intensity={40} tint="light" style={StyleSheet.absoluteFill} />
-          <View style={[StyleSheet.absoluteFill, styles.footerFill]} />
-          <SafeAreaView edges={['bottom']} style={styles.footerInner}>
-            <AppButton
-              title={count === 0 ? 'Pick at least one niche' : 'Continue'}
-              size="lg"
-              disabled={count === 0}
-              onPress={handleContinue}
-              iconRight={
-                count > 0 ? (
-                  <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
-                    <Path d="M5 12h14M13 6l6 6-6 6" stroke="#FFFFFF" strokeWidth={2.4} strokeLinecap="round" strokeLinejoin="round" />
-                  </Svg>
-                ) : undefined
-              }
-            />
-          </SafeAreaView>
-        </View>
+        {!webFrame && (
+          <View style={styles.footer}>
+            <BlurView intensity={40} tint="light" style={StyleSheet.absoluteFill} />
+            <View style={[StyleSheet.absoluteFill, styles.footerFill]} />
+            <SafeAreaView edges={['bottom']} style={styles.footerInner}>
+              {cta}
+            </SafeAreaView>
+          </View>
+        )}
       </SafeAreaView>
 
       {/* Add-your-own sheet */}
@@ -490,4 +505,11 @@ const styles = StyleSheet.create({
     gap: 10,
     marginTop: 16,
   },
+});
+
+// Desktop web: the step uses the page like a website (wider, button under the content)
+const webStyles = StyleSheet.create({
+  scroll: { maxWidth: 1000, paddingTop: 40, paddingBottom: 56 },
+  cta: { width: '100%', maxWidth: 460, alignSelf: 'center', marginTop: 32 },
+  gridItem: { width: '23.5%' },
 });

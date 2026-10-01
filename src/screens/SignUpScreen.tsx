@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useWebFrame } from '../components/web/WebAuthHeader';
 import { StyleSheet, View, ScrollView, Pressable, Platform, KeyboardAvoidingView, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Animated, { FadeIn, FadeInUp } from 'react-native-reanimated';
@@ -37,6 +38,7 @@ export const SignUpScreen: React.FC<SignUpScreenProps> = ({
   onSocialSignUp,
   savedIdeaTitle,
 }) => {
+  const webFrame = useWebFrame();
   const [email, setEmail] = useState('');
   const [focused, setFocused] = useState(false);
   const [touched, setTouched] = useState(false);
@@ -72,21 +74,24 @@ export const SignUpScreen: React.FC<SignUpScreenProps> = ({
       <GlassBackdrop />
       <SafeAreaView style={styles.safeArea} edges={['top', 'bottom']}>
         <KeyboardAvoidingView style={styles.flex} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-          <View style={styles.header}>
-            <Pressable onPress={onBack} hitSlop={10} accessibilityRole="button" accessibilityLabel="Go back" style={styles.backBtn}>
-              <BlurView intensity={30} tint="light" style={[StyleSheet.absoluteFill, { borderRadius: 20, overflow: 'hidden' }]} />
-              <View>
-                <Svg width={20} height={20} viewBox="0 0 24 24" fill="none">
-                  <Path d="M15 18l-6-6 6-6" stroke={ds.ink} strokeWidth={2.4} strokeLinecap="round" strokeLinejoin="round" />
-                </Svg>
-              </View>
-            </Pressable>
-            <Animated.View entering={FadeInUp.duration(500)}>
-              <OnboardingProgress current={3} />
-            </Animated.View>
-          </View>
+          {/* Desktop web: the website header above replaces this */}
+          {!webFrame && (
+            <View style={styles.header}>
+              <Pressable onPress={onBack} hitSlop={10} accessibilityRole="button" accessibilityLabel="Go back" style={styles.backBtn}>
+                <BlurView intensity={30} tint="light" style={[StyleSheet.absoluteFill, { borderRadius: 20, overflow: 'hidden' }]} />
+                <View>
+                  <Svg width={20} height={20} viewBox="0 0 24 24" fill="none">
+                    <Path d="M15 18l-6-6 6-6" stroke={ds.ink} strokeWidth={2.4} strokeLinecap="round" strokeLinejoin="round" />
+                  </Svg>
+                </View>
+              </Pressable>
+              <Animated.View entering={FadeInUp.duration(500)}>
+                <OnboardingProgress current={3} />
+              </Animated.View>
+            </View>
+          )}
 
-          <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
+          <ScrollView contentContainerStyle={[styles.scroll, webFrame && webStyles.scroll]} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
             <Animated.View entering={FadeInUp.delay(120).duration(550)}>
               <FitLines
                 lines={['Save your', <Text key="p" style={styles.titleAccent}>starter plan</Text>]}
@@ -164,12 +169,15 @@ export const SignUpScreen: React.FC<SignUpScreenProps> = ({
               </GlassCard>
             </Animated.View>
 
-            <Animated.View entering={FadeIn.delay(650).duration(400)} style={styles.signInRow}>
-              <Text style={styles.signInText}>Already have an account? </Text>
-              <Pressable onPress={onSignIn} hitSlop={8} accessibilityRole="button">
-                <Text style={styles.signInLink}>Sign in</Text>
-              </Pressable>
-            </Animated.View>
+            {/* Desktop web shows this switch in the header, so it isn't repeated */}
+            {!webFrame && (
+              <Animated.View entering={FadeIn.delay(650).duration(400)} style={styles.signInRow}>
+                <Text style={styles.signInText}>Already have an account? </Text>
+                <Pressable onPress={onSignIn} hitSlop={8} accessibilityRole="button">
+                  <Text style={styles.signInLink}>Sign in</Text>
+                </Pressable>
+              </Animated.View>
+            )}
 
             <Text style={styles.legal}>
               By continuing you agree to our{' '}
@@ -243,4 +251,10 @@ const styles = StyleSheet.create({
   signInLink: { fontSize: 14, fontWeight: '800', color: ds.purple },
   legal: { fontSize: 12, lineHeight: 17, color: ds.text3, textAlign: 'center', marginTop: 14 },
   legalLink: { fontWeight: '700', color: ds.text2, textDecorationLine: 'underline' },
+});
+
+// Desktop web: the step uses the page like a website (wider, button under the content)
+const webStyles = StyleSheet.create({
+  scroll: { flexGrow: 1, justifyContent: 'center', maxWidth: 460, paddingTop: 40, paddingBottom: 56 },
+  cta: { width: '100%', maxWidth: 460, alignSelf: 'center', marginTop: 32 },
 });
