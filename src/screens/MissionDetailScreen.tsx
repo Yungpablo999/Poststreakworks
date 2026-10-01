@@ -52,6 +52,7 @@ interface MissionDetailScreenProps {
   userPersona?: UserPersona;
   onTogglePersona?: () => void;
   onSwitchToPro?: () => void;
+  onSwitchToFree?: () => void;
 }
 
 type StepIcon = 'idea' | 'make' | 'post';
@@ -178,6 +179,7 @@ export const MissionDetailScreen: React.FC<MissionDetailScreenProps> = ({
   userPersona,
   onTogglePersona,
   onSwitchToPro,
+  onSwitchToFree,
 }) => {
   const isNew = (userPersona || userProfile?.userPersona || 'new') === 'new';
   const [showProfile, setShowProfile] = useState(false);
@@ -222,6 +224,7 @@ export const MissionDetailScreen: React.FC<MissionDetailScreenProps> = ({
           onBack={onBack}
           onOpenJarvisPro={onOpenJarvisPro}
           onSwitchToPro={onSwitchToPro}
+          onSwitchToFree={onSwitchToFree}
           onTogglePersona={onTogglePersona}
           onOpenProfile={() => setShowProfile(true)}
           userPersona={userPersona}

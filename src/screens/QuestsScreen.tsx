@@ -40,6 +40,11 @@ interface QuestsScreenProps {
   onOpenSchedule?: () => void;
   onOpenJarvisPro?: () => void;
   onSwitchToPro?: () => void;
+  onSwitchToFree?: () => void;
+  /** Pro members: Pro quests instead of the upgrade card. */
+  tier?: 'free' | 'pro';
+  onOpenVoiceStudio?: () => void;
+  onOpenHookStudio?: () => void;
   onTogglePersona?: () => void;
   userPersona?: UserPersona;
   userProfile?: UserProfileData;
@@ -55,6 +60,10 @@ export const QuestsScreen: React.FC<QuestsScreenProps> = ({
   onOpenSchedule,
   onOpenJarvisPro,
   onSwitchToPro,
+  onSwitchToFree,
+  tier = 'free',
+  onOpenVoiceStudio,
+  onOpenHookStudio,
   onTogglePersona,
   userPersona,
   userProfile,
@@ -167,6 +176,7 @@ export const QuestsScreen: React.FC<QuestsScreenProps> = ({
         <FreeAppHeader
           backgroundColor="transparent"
           onSwitchToPro={onSwitchToPro}
+          onSwitchToFree={onSwitchToFree}
           onOpenJarvisPro={onOpenJarvisPro}
           onTogglePersona={onTogglePersona}
           userPersona={userPersona}
@@ -265,7 +275,32 @@ export const QuestsScreen: React.FC<QuestsScreenProps> = ({
             <ChallengeCard done={isNewUser ? 0 : 1} goal={3} onJoin={handleJoinCommunityChallenge} />
           </Reanimated.View>
 
-          {/* 5. PRO (gold = Pro only) */}
+          {/* 5. PRO: Pro quests for members, the upgrade card for free (gold = Pro only) */}
+          {tier === 'pro' ? (
+            <Reanimated.View entering={FadeInUp.delay(500).duration(550)}>
+              <Text style={styles.sectionLabel}>Pro quests</Text>
+              <View style={styles.stack}>
+                <QuestRow
+                  pro
+                  icon="voice"
+                  title={isNewUser ? 'Set up your voice' : 'Make a voiceover for your next post'}
+                  xp={120}
+                  cadence={isNewUser ? 'One time' : 'Weekly'}
+                  action="Start"
+                  onPress={() => onOpenVoiceStudio?.()}
+                />
+                <QuestRow
+                  pro
+                  icon="hook"
+                  title="Try 3 openings for one idea"
+                  xp={80}
+                  cadence="Weekly"
+                  action="Start"
+                  onPress={() => onOpenHookStudio?.()}
+                />
+              </View>
+            </Reanimated.View>
+          ) : (
           <Reanimated.View entering={FadeInUp.delay(500).duration(550)} style={styles.section}>
             <ProUpsellCard
               title="Get more with Jarvis Pro"
@@ -274,6 +309,7 @@ export const QuestsScreen: React.FC<QuestsScreenProps> = ({
               onUpgrade={handleExplorePro}
             />
           </Reanimated.View>
+          )}
 
           {/* 6. JARVIS TIP */}
           <Reanimated.View entering={FadeInUp.delay(600).duration(550)} style={styles.section}>

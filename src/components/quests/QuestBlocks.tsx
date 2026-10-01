@@ -20,7 +20,7 @@ import { Text } from '../ui/AppText';
 import { AppButton } from '../ui/AppButton';
 import { GlassCard } from '../glass/GlassCard';
 import { PressableCard } from '../ui/PressableCard';
-import { ds } from '../../theme/colors';
+import { ds, goldTokens } from '../../theme/colors';
 
 // Building blocks for the Quests tab. Rewards are XP and badges only — no
 // streak-loss warnings, no countdowns.
@@ -129,7 +129,7 @@ export function TodayQuestCard({
 }
 
 // ─── Quest row ──────────────────────────────────────────────────────────────
-export type QuestIcon = 'idea' | 'audience' | 'calendar';
+export type QuestIcon = 'idea' | 'audience' | 'calendar' | 'voice' | 'hook';
 
 const ICONS: Record<QuestIcon, React.ReactNode> = {
   idea: (
@@ -140,6 +140,17 @@ const ICONS: Record<QuestIcon, React.ReactNode> = {
   audience: (
     <Svg width={20} height={20} viewBox="0 0 24 24" fill="none">
       <Path d="M3 17l6-6 4 4 8-8M21 7h-6M21 7v6" stroke={ds.purple} strokeWidth={2.1} strokeLinecap="round" strokeLinejoin="round" />
+    </Svg>
+  ),
+  voice: (
+    <Svg width={20} height={20} viewBox="0 0 24 24" fill="none">
+      <Rect x="9" y="2" width="6" height="12" rx="3" stroke={ds.purple} strokeWidth={2} />
+      <Path d="M5 11a7 7 0 0014 0M12 18v4" stroke={ds.purple} strokeWidth={2} strokeLinecap="round" />
+    </Svg>
+  ),
+  hook: (
+    <Svg width={20} height={20} viewBox="0 0 24 24" fill="none">
+      <Path d="M13 2L4 14h7l-1 8 9-12h-7l1-8z" stroke={ds.purple} strokeWidth={2} strokeLinejoin="round" />
     </Svg>
   ),
   calendar: (
@@ -173,6 +184,7 @@ export function QuestRow({
   cadence,
   action,
   onPress,
+  pro,
 }: {
   icon: QuestIcon;
   title: string;
@@ -180,6 +192,8 @@ export function QuestRow({
   cadence: string;
   action: string;
   onPress: () => void;
+  /** Pro-only quest: small gold PRO tag */
+  pro?: boolean;
 }) {
   return (
     <PressableCard onPress={onPress} accessibilityLabel={`${title}. ${cadence}, plus ${xp} XP. ${action}`}>
@@ -188,6 +202,11 @@ export function QuestRow({
           <View style={styles.row}>
             <View style={styles.rowIcon}>{ICONS[icon]}</View>
             <View style={styles.rowText}>
+              {pro && (
+                <View style={styles.proTag}>
+                  <Text style={styles.proTagText}>PRO</Text>
+                </View>
+              )}
               <Text style={styles.rowTitle} numberOfLines={2}>
                 {title}
               </Text>
@@ -199,6 +218,7 @@ export function QuestRow({
                 <Text style={styles.rowCadence} numberOfLines={1}>
                   {cadence}
                 </Text>
+
               </View>
             </View>
             <ActionPill label={action} hover={hover} />
@@ -541,5 +561,7 @@ const styles = StyleSheet.create({
   },
   formatText: { fontSize: 12, fontWeight: '800', color: ds.text2 },
   pickCta: { marginTop: 16 },
+  proTag: { paddingHorizontal: 6, height: 18, borderRadius: 999, justifyContent: 'center', alignSelf: 'flex-start', backgroundColor: goldTokens.light, borderWidth: 1, borderColor: goldTokens.border, marginBottom: 4 },
+  proTagText: { fontSize: 10, fontWeight: '800', letterSpacing: 0.5, color: goldTokens.dark },
   tipText: { flex: 1, fontSize: 13.5, lineHeight: 19, color: ds.text2, fontWeight: '600' },
 });

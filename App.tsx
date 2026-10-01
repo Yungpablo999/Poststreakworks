@@ -538,32 +538,10 @@ export default function App() {
         )}
 
         {currentScreen === 'mission-detail' && (
-          (userProfile?.tier === 'pro' || userProfile?.tier === 'founding') ? (
-            <ProMissionDetailScreen
-              onBack={() => navigateTo(previousScreen ? previousScreen : 'dashboard')}
-              onLogout={handleLogout}
-              onOpenSchedule={() => navigateTo('schedule')}
-              onOpenJarvisPro={() => navigateTo('jarvis-pro')}
-              onOpenPostComposer={(ideaTitle, platform, questDraft, format) => {
-                if (ideaTitle) setComposerIdeaTitle(ideaTitle);
-                setComposerIdeaGoal(null);
-                setComposerIdeaPlatform(undefined); setComposerFilmStyle(undefined);
-                if (questDraft) setComposerQuestDraft(questDraft);
-                if (format) setComposerIdeaFormat(format as any);
-                navigateTo('composer');
-              }}
-              onSwitchToFree={() => {
-                if (userProfile) {
-                  setUserProfile({ ...userProfile, tier: 'free' });
-                }
-              }}
-              onNavigateTab={handleTabNavigation}
-              userProfile={userProfile}
-              onSaveProfile={(updated) => setUserProfile(prev => ({ ...prev, ...updated, tier: updated.tier || prev.tier || 'free' }))}
-            />
-          ) : (
+          (
             <MissionDetailScreen
               onBack={() => navigateTo(previousScreen ? previousScreen : 'quests')}
+              onSwitchToFree={() => setUserProfile(prev => ({ ...prev, tier: 'free' }))}
               userPersona={userPersona}
               onTogglePersona={handleTogglePersona}
               onOpenJarvisPro={() => navigateTo('jarvis-pro')}
@@ -749,33 +727,12 @@ export default function App() {
         )}
 
         {currentScreen === 'quests' && (
-          (userProfile?.tier === 'pro' || userProfile?.tier === 'founding') ? (
-            <ProQuestsScreen
-              onBackToDashboard={() => navigateTo('dashboard')}
-              onLogout={handleLogout}
-              onOpenMissionDetail={() => navigateTo('mission-detail')}
-              onOpenCommunityChallenge={() => navigateTo('challenge-detail')}
-              onOpenSchedule={() => navigateTo('schedule')}
-              onOpenJarvisPro={() => navigateTo('jarvis-pro')}
-              onOpenPostComposer={(title, platform, questDraft, format) => {
-                if (title) setComposerIdeaTitle(title);
-                setComposerIdeaGoal(null);
-                setComposerIdeaPlatform(undefined); setComposerFilmStyle(undefined);
-                if (questDraft) setComposerQuestDraft(questDraft);
-                if (format) setComposerIdeaFormat(format as any);
-                navigateTo('composer');
-              }}
-              onSwitchToFree={() => {
-                setUserProfile(prev => ({ ...prev, tier: 'free' }));
-              }}
-              onNavigateTab={handleTabNavigation}
-              userProfile={userProfile}
-              userPersona={userPersona}
-              onTogglePersona={handleTogglePersona}
-              onSaveProfile={(updated) => setUserProfile(prev => ({ ...prev, ...updated, tier: updated.tier || prev.tier || 'free' }))}
-            />
-          ) : (
+          (
             <QuestsScreen
+              tier={userProfile?.tier === 'pro' || userProfile?.tier === 'founding' ? 'pro' : 'free'}
+              onOpenVoiceStudio={() => navigateTo('voice-studio')}
+              onOpenHookStudio={() => navigateTo('hook-studio')}
+              onSwitchToFree={() => setUserProfile(prev => ({ ...prev, tier: 'free' }))}
               onBackToDashboard={() => navigateTo('dashboard')}
               onLogout={handleLogout}
               onOpenMissionDetail={() => navigateTo('mission-detail')}
