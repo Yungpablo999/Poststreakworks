@@ -252,7 +252,113 @@ export function VoiceStudioProCard({ onUnlock }: { onUnlock: () => void }) {
   );
 }
 
+// Small gold "PRO" chip for Pro-only rows (gold = Pro)
+export function ProTag({ label = 'PRO' }: { label?: string }) {
+  return (
+    <View style={styles.proTag}>
+      <Text style={styles.proChipText}>{label}</Text>
+    </View>
+  );
+}
+
+// Pro: Repurpose has no weekly limit
+export function UnlimitedChip() {
+  return (
+    <View style={styles.unlimited}>
+      <Svg width={10} height={10} viewBox="0 0 24 24" fill="none">
+        <Path d="M20 6L9 17l-5-5" stroke={goldTokens.dark} strokeWidth={3.4} strokeLinecap="round" strokeLinejoin="round" />
+      </Svg>
+      <Text style={styles.unlimitedText}>Unlimited with Pro</Text>
+    </View>
+  );
+}
+
+// Voice Studio for Pro members: set up (new) or open (returning)
+export function VoiceStudioCard({
+  isNew,
+  voiceName,
+  minutesUsed,
+  minutesIncluded,
+  onOpen,
+}: {
+  isNew: boolean;
+  voiceName: string | null;
+  minutesUsed: number;
+  minutesIncluded: number;
+  onOpen: () => void;
+}) {
+  const left = Math.max(0, minutesIncluded - minutesUsed);
+  return (
+    <GlassCard strong radius={26} padding={20}>
+      <View pointerEvents="none" style={styles.goldGlow}>
+        <Svg width={240} height={240}>
+          <Defs>
+            <RadialGradient id="vsGlow2" cx="50%" cy="50%" r="50%">
+              <Stop offset="0%" stopColor={ds.gold} stopOpacity={0.18} />
+              <Stop offset="100%" stopColor={ds.gold} stopOpacity={0} />
+            </RadialGradient>
+          </Defs>
+          <Circle cx={120} cy={120} r={120} fill="url(#vsGlow2)" />
+        </Svg>
+      </View>
+      <View style={styles.vsTop}>
+        <View style={styles.vsText}>
+          <ProTag />
+          <Text style={styles.vsTitle}>Voice Studio</Text>
+          <Text style={styles.vsSub}>
+            {isNew || !voiceName
+              ? 'Read one short script aloud and Jarvis learns your voice. Takes about a minute.'
+              : `Your voice “${voiceName}” is ready for your next voiceover.`}
+          </Text>
+        </View>
+      </View>
+      <View style={styles.wave} accessibilityElementsHidden importantForAccessibility="no-hide-descendants">
+        {BARS.map((b, i) => (
+          <WaveBar key={i} index={i} base={b} />
+        ))}
+      </View>
+      {!isNew && voiceName && (
+        <View style={styles.minutes}>
+          <View style={styles.minutesTrack}>
+            <View style={[styles.minutesFill, { width: `${(left / minutesIncluded) * 100}%` }]} />
+          </View>
+          <Text style={styles.minutesText}>
+            {left} of {minutesIncluded} minutes left this month
+          </Text>
+        </View>
+      )}
+      <AppButton title={isNew || !voiceName ? 'Set up my voice' : 'Open Voice Studio'} onPress={onOpen} />
+    </GlassCard>
+  );
+}
+
 const styles = StyleSheet.create({
+  proTag: {
+    alignSelf: 'flex-start',
+    paddingHorizontal: 7,
+    height: 20,
+    justifyContent: 'center',
+    borderRadius: 999,
+    backgroundColor: goldTokens.light,
+    borderWidth: 1,
+    borderColor: goldTokens.border,
+  },
+  unlimited: {
+    alignSelf: 'flex-start',
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    marginTop: 8,
+    paddingHorizontal: 8,
+    height: 22,
+    borderRadius: 999,
+    backgroundColor: goldTokens.light,
+  },
+  unlimitedText: { fontSize: 11.5, fontWeight: '800', color: goldTokens.dark },
+  minutes: { marginBottom: 14 },
+  minutesTrack: { height: 6, borderRadius: 3, backgroundColor: ds.lavender, overflow: 'hidden' },
+  minutesFill: { height: 6, borderRadius: 3, backgroundColor: ds.purple },
+  minutesText: { fontSize: 12, fontWeight: '700', color: ds.text3, marginTop: 6 },
   toolWrap: { flex: 1 },
   toolIcon: {
     width: 42,

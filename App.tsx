@@ -589,48 +589,11 @@ export default function App() {
         )}
 
         {currentScreen === 'create' && (
-          (userProfile?.tier === 'pro' || userProfile?.tier === 'founding') ? (
-            <ProCreateScreen
-              onLogout={handleLogout}
-              onOpenSchedule={() => navigateTo('schedule')}
-              onOpenJarvisPro={() => navigateTo('jarvis-pro')}
-              onOpenIdeaDetail={(title) => {
-                if (title) setSelectedIdeaTitle(title);
-                navigateTo('idea-detail');
-              }}
-              onOpenPostComposer={(title, platform) => {
-                if (title) setComposerIdeaTitle(title);
-                setComposerIdeaGoal(null);
-                setComposerIdeaPlatform(undefined); setComposerFilmStyle(undefined);
-                navigateTo('composer');
-              }}
-              onOpenIdeaAngle={() => navigateTo('content-angle')}
+          (
+            <CreateScreen
+              tier={userProfile?.tier === 'pro' || userProfile?.tier === 'founding' ? 'pro' : 'free'}
               onOpenVoiceStudio={() => navigateTo('voice-studio')}
               onOpenHookStudio={() => navigateTo('hook-studio')}
-              onOpenScript={(title) => {
-                if (title) setSelectedIdeaTitle(title);
-                navigateTo('script');
-              }}
-              onOpenCaption={(title) => {
-                if (title) setSelectedIdeaTitle(title);
-                navigateTo('caption');
-              }}
-              onOpenRepurpose={(title?: string) => {
-                if (title) setSelectedIdeaTitle(title);
-                setStudioVideo(undefined);
-                navigateTo('repurpose');
-              }}
-              onSwitchToFree={() => {
-                setUserProfile(prev => ({ ...prev, tier: 'free' }));
-              }}
-              onNavigateTab={handleTabNavigation}
-              userProfile={userProfile}
-              userPersona={userPersona}
-              onTogglePersona={handleTogglePersona}
-              onSaveProfile={(updated) => setUserProfile(prev => ({ ...prev, ...updated, tier: updated.tier || prev.tier || 'free' }))}
-            />
-          ) : (
-            <CreateScreen
               onLogout={handleLogout}
               onOpenSchedule={() => navigateTo('schedule')}
               onOpenJarvisPro={() => navigateTo('jarvis-pro')}

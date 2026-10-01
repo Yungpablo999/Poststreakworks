@@ -12,7 +12,7 @@ import {
   Modal,
 } from 'react-native';
 import { Text, TextInput } from '../components/ui/AppText';
-import { getRepurposeAllowance, getScheduleSummary, getDrafts, subscribeToDrafts, draftAgo } from '../data';
+import { getVoiceCloneSummary, getRepurposeAllowance, getScheduleSummary, getDrafts, subscribeToDrafts, draftAgo } from '../data';
 import Svg, { Path, Circle, Rect } from 'react-native-svg';
 import * as Haptics from 'expo-haptics';
 import { FloatingTabBar, TabType } from '../components/FloatingTabBar';
@@ -25,7 +25,7 @@ import Reanimated, { FadeInUp } from 'react-native-reanimated';
 import { GlassBackdrop } from '../components/glass/GlassBackdrop';
 import { FitLines } from '../components/ui/FitLines';
 import { IdeaHeroCard } from '../components/create/IdeaHeroCard';
-import { ToolTile, GlassRow, AllowanceMeter, DraftRow, DraftsEmpty, VoiceStudioProCard } from '../components/create/CreateBlocks';
+import { ToolTile, GlassRow, AllowanceMeter, DraftRow, DraftsEmpty, VoiceStudioProCard, VoiceStudioCard, UnlimitedChip, ProTag } from '../components/create/CreateBlocks';
 import { ds } from '../theme/colors';
 
 const SCHEDULE_DATE_OPTIONS = (() => {
@@ -119,6 +119,10 @@ interface CreateScreenProps {
   onTogglePersona?: () => void;
   onSwitchToPro?: () => void;
   onSwitchToFree?: () => void;
+  /** Pro members: Voice Studio unlocked, Hook Studio, unlimited Repurpose. */
+  tier?: 'free' | 'pro';
+  onOpenVoiceStudio?: () => void;
+  onOpenHookStudio?: () => void;
   userProfile?: UserProfileData;
   onSaveProfile?: (updated: UserProfileData) => void;
 }
@@ -219,13 +223,18 @@ export const CreateScreen: React.FC<CreateScreenProps> = ({
   onTogglePersona,
   onSwitchToPro,
   onSwitchToFree,
+  tier = 'free',
+  onOpenVoiceStudio,
+  onOpenHookStudio,
   userProfile,
   onSaveProfile,
 }) => {
   const isDark = false;
   const isNewUser = (userPersona || userProfile?.userPersona || 'new') === 'new';
   const schedule = getScheduleSummary(isNewUser ? 'new' : 'returning');
+  const isPro = tier === 'pro';
   const repurpose = getRepurposeAllowance(isNewUser ? 'new' : 'returning', 'free');
+  const voice = getVoiceCloneSummary(isNewUser ? 'new' : 'returning');
   const repurposesLeft = Math.max(0, (repurpose.weeklyLimit ?? 0) - repurpose.usedThisWeek);
   const [activeTab, setActiveTab] = useState<TabType>('create');
   const [drafts, setDrafts] = useState<DraftItem[]>(INITIAL_DRAFTS);
@@ -559,13 +568,26 @@ export const CreateScreen: React.FC<CreateScreenProps> = ({
               title="Repurpose"
               subtitle="Turn an idea or a video into more posts"
               onPress={openRepurpose}
-              extra={<AllowanceMeter left={repurposesLeft} limit={repurpose.weeklyLimit ?? 0} />}
+              extra={isPro ? <UnlimitedChip /> : <AllowanceMeter left={repurposesLeft} limit={repurpose.weeklyLimit ?? 0} />}
               icon={
                 <Svg width={20} height={20} viewBox="0 0 24 24" fill="none">
                   <Path d="M21 2v6h-6M3 12a9 9 0 0115-6.7L21 8M3 22v-6h6M21 12a9 9 0 01-15 6.7L3 16" stroke={ds.purple} strokeWidth={2.1} strokeLinecap="round" strokeLinejoin="round" />
                 </Svg>
               }
             />
+            {isPro && (
+              <GlassRow
+                title="Hook Studio"
+                subtitle="Strong first lines for your next video"
+                onPress={() => onOpenHookStudio?.()}
+                extra={<View style={{ marginTop: 8 }}><ProTag /></View>}
+                icon={
+                  <Svg width={20} height={20} viewBox="0 0 24 24" fill="none">
+                    <Path d="M13 2L4 14h7l-1 8 9-12h-7l1-8z" stroke={ds.purple} strokeWidth={2.1} strokeLinejoin="round" />
+                  </Svg>
+                }
+              />
+            )}
             <GlassRow
               title={
                 schedule.scheduledCount === 0
@@ -613,7 +635,17 @@ export const CreateScreen: React.FC<CreateScreenProps> = ({
 
           {/* 5. VOICE STUDIO (Pro only) */}
           <Reanimated.View entering={FadeInUp.delay(500).duration(550)} style={styles.voiceStudio}>
-            <VoiceStudioProCard onUnlock={handleOpenVoiceStudioPro} />
+            {isPro ? (
+              <VoiceStudioCard
+                isNew={isNewUser}
+                voiceName={voice.voiceName}
+                minutesUsed={voice.minutesUsed}
+                minutesIncluded={voice.minutesIncluded}
+                onOpen={() => onOpenVoiceStudio?.()}
+              />
+            ) : (
+              <VoiceStudioProCard onUnlock={handleOpenVoiceStudioPro} />
+            )}
           </Reanimated.View>
 
           {/* Bottom Space for Floating Tab Bar */}
