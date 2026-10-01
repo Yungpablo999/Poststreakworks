@@ -23,6 +23,7 @@ import { FreeAppHeader } from '../components/FreeAppHeader';
 import { FloatingTabBar, TabType } from '../components/FloatingTabBar';
 import { UserProfileModal, UserProfileData } from '../components/UserProfileModal';
 import { ProUpsellCard } from '../components/home/ProUpsellCard';
+import { MonthlyHistoryCard, WhoAudienceCard } from '../components/growth/ProInsights';
 import { ConnectAccountsSheet, useConnectedAccounts } from '../components/growth/ConnectAccountsSheet';
 import { PlatformLogo, type PlatformLogoType } from '../components/onboarding/PlatformLogo';
 import { ds } from '../theme/colors';
@@ -213,6 +214,8 @@ function GrowthBar({ bar, ratio, index, on, onPress }: { bar: Bar; ratio: number
 }
 
 interface AudienceBreakdownScreenProps {
+  /** Pro members see the Pro insight instead of the upgrade card. */
+  tier?: 'free' | 'pro';
   onBack: () => void;
   onOpenPostPerformance?: () => void;
   onOpenPlatformGrowth?: () => void;
@@ -237,6 +240,7 @@ export const AudienceBreakdownScreen: React.FC<AudienceBreakdownScreenProps> = (
   onOpenPostComposer,
   userProfile,
   onSaveProfile,
+  tier = 'free',
 }) => {
   const [showProfile, setShowProfile] = useState(false);
   const [showAccounts, setShowAccounts] = useState(false);
@@ -446,12 +450,16 @@ export const AudienceBreakdownScreen: React.FC<AudienceBreakdownScreenProps> = (
 
           {/* Pro */}
           <Animated.View entering={enter(480)} style={styles.pro}>
+            {tier === 'pro' ? (
+              <WhoAudienceCard />
+            ) : (
             <ProUpsellCard
               title="See who your audience is"
               benefits={['Ages and locations', 'When they’re online', 'What else they like']}
               buttonTitle="Explore Pro"
               onUpgrade={() => onOpenJarvisPro?.()}
             />
+            )}
           </Animated.View>
         </ScrollView>
       </SafeAreaView>

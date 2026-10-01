@@ -14,6 +14,7 @@ import { FreeAppHeader } from '../components/FreeAppHeader';
 import { FloatingTabBar, TabType } from '../components/FloatingTabBar';
 import { UserProfileModal, UserProfileData } from '../components/UserProfileModal';
 import { ProUpsellCard } from '../components/home/ProUpsellCard';
+import { MonthlyHistoryCard, WhoAudienceCard } from '../components/growth/ProInsights';
 import { PlatformLogo, type PlatformLogoType } from '../components/onboarding/PlatformLogo';
 import { ConnectAccountsSheet, useConnectedAccounts } from '../components/growth/ConnectAccountsSheet';
 import { ds } from '../theme/colors';
@@ -112,6 +113,8 @@ function CompareBar({ p, ratio, index, on, onPress }: { p: PlatStats; ratio: num
 }
 
 interface PlatformGrowthScreenProps {
+  /** Pro members see the Pro insight instead of the upgrade card. */
+  tier?: 'free' | 'pro';
   onBack: () => void;
   onNavigateTab?: (tab: TabType) => void;
   onOpenJarvisPro?: () => void;
@@ -133,6 +136,7 @@ export const PlatformGrowthScreen: React.FC<PlatformGrowthScreenProps> = ({
   onOpenRepurpose,
   userProfile,
   onSaveProfile,
+  tier = 'free',
   onLogout,
 }) => {
   const [showProfile, setShowProfile] = useState(false);
@@ -310,12 +314,16 @@ export const PlatformGrowthScreen: React.FC<PlatformGrowthScreenProps> = ({
           </Pressable>
 
           <Animated.View entering={enter(400)} style={styles.pro}>
+            {tier === 'pro' ? (
+              <MonthlyHistoryCard />
+            ) : (
             <ProUpsellCard
               title="See every month of growth"
               benefits={['Growth history by month', 'Who follows you on each platform', 'Best time to post on each one']}
               buttonTitle="Explore Pro"
               onUpgrade={() => onOpenJarvisPro?.()}
             />
+            )}
           </Animated.View>
         </ScrollView>
       </SafeAreaView>

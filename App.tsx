@@ -915,6 +915,7 @@ export default function App() {
 
         {currentScreen === 'platform-growth' && (
           <PlatformGrowthScreen
+            tier={userProfile?.tier === 'pro' || userProfile?.tier === 'founding' ? 'pro' : 'free'}
             onBack={() => navigateTo(previousScreen ? previousScreen : 'growth')}
             onOpenRepurpose={() => {
               setStudioVideo(undefined);
@@ -966,6 +967,7 @@ export default function App() {
 
         {currentScreen === 'audience-breakdown' && (
           <AudienceBreakdownScreen
+            tier={userProfile?.tier === 'pro' || userProfile?.tier === 'founding' ? 'pro' : 'free'}
             onBack={() => navigateTo('growth')}
             onLogout={handleLogout}
             onOpenSchedule={() => navigateTo('schedule')}

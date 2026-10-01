@@ -1167,7 +1167,11 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
               />
             ))}
           </View>
-          <Text style={styles.note}>Free plans prepare posts for each platform. Auto-publishing is part of Pro.</Text>
+          <Text style={styles.note}>
+            {userProfile?.tier === 'pro' || userProfile?.tier === 'founding'
+              ? 'Pro posts to each platform for you at the time you pick.'
+              : 'Free plans prepare posts for each platform. Auto-posting is part of Pro.'}
+          </Text>
 
           {/* 2. FORMAT */}
           <StepHeader
