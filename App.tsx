@@ -45,6 +45,7 @@ import { PlatformGrowthScreen } from './src/screens/PlatformGrowthScreen';
 import { ProVoiceStudioScreen } from './src/screens/ProVoiceStudioScreen';
 import { VoiceStudioScreen } from './src/screens/VoiceStudioScreen';
 import { ProHookStudioScreen } from './src/screens/ProHookStudioScreen';
+import { HookStudioScreen } from './src/screens/HookStudioScreen';
 import { ScreenTransitionContainer, ScreenTransitionType } from './src/components/ScreenTransitionContainer';
 import { EdgeSwipeBackWrapper } from './src/components/EdgeSwipeBackWrapper';
 import { TabType } from './src/components/FloatingTabBar';
@@ -913,20 +914,19 @@ export default function App() {
         )}
 
         {currentScreen === 'hook-studio' && (
-          <ProHookStudioScreen
+          <HookStudioScreen
+            ideaTitle={selectedIdeaTitle}
             onBack={() => navigateTo(previousScreen ? previousScreen : 'create')}
             onLogout={handleLogout}
-            onOpenSchedule={() => navigateTo('schedule')}
             onOpenJarvisPro={() => navigateTo('jarvis-pro')}
-            onOpenPostComposer={(prefillTitle, prefillPlatform) => {
-              if (prefillTitle) setComposerIdeaTitle(prefillTitle);
-              setComposerIdeaGoal(null);
-                setComposerIdeaPlatform(undefined); setComposerFilmStyle(undefined);
+            onSwitchToFree={() => setUserProfile(prev => ({ ...prev, tier: 'free' }))}
+            onUseHook={(title, hook, style) => {
+              setComposerQuestDraft(null);
+              setComposerIdeaTitle(title);
+              setComposerIdeaGoal({ hook });
+              setComposerIdeaPlatform(undefined);
+              setComposerFilmStyle(style);
               navigateTo('composer');
-            }}
-            onOpenScript={(title) => {
-              if (title) setSelectedIdeaTitle(title);
-              navigateTo('script');
             }}
             onNavigateTab={handleTabNavigation}
             userProfile={userProfile}
