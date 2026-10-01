@@ -32,6 +32,7 @@ import { UserProfileModal, UserProfileData } from '../components/UserProfileModa
 import { BrandToast } from '../components/BrandToast';
 import { sFont, sPadding, moderateScale, isNarrowScreen } from '../utils/responsive';
 import { HeaderDualModePills, UserPersona } from '../components/HeaderDualModePills';
+import { NotificationsSheet, useUnreadNotifications } from '../components/notifications/NotificationsSheet';
 
 interface DashboardScreenProps {
   onLogout?: () => void;
@@ -562,6 +563,9 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
 }) => {
   const isDark = false;
   const isNewUser = (userPersona || userProfile?.userPersona) === 'new';
+  // The bell opens the shared notifications sheet (same as every other screen)
+  const [showNotifSheet, setShowNotifSheet] = useState(false);
+  const sharedUnread = useUnreadNotifications(userPersona || userProfile?.userPersona, userProfile?.tier);
   const [activeTab, setActiveTab] = useState<TabType>('home');
   const [showProModal, setShowProModal] = useState(false);
   const [showMissionModal, setShowMissionModal] = useState(false);
@@ -954,7 +958,7 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
           {/* Right: Notification & Person Profile Photo Upload */}
           <View style={styles.headerRightGroup}>
             {/* Notification bell: swings on tap, unread dot breathes */}
-            <BellButton unread={unreadCount > 0} onPress={openNotificationModal} />
+            <BellButton unread={sharedUnread > 0} onPress={() => setShowNotifSheet(true)} />
 
             {/* Top-Right: Person Icon Placeholder where users add their profile picture */}
             <Pressable
@@ -1044,7 +1048,9 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
         {/* 10. FLOATING LIQUID GLASS BOTTOM NAVIGATION BAR */}
         <FloatingTabBar activeTab={activeTab} onTabPress={handleTabPress} />
 
-        {/* 11. NOTIFICATION CENTER POP-UP MODAL */}
+        <NotificationsSheet visible={showNotifSheet} onClose={() => setShowNotifSheet(false)} persona={userPersona || userProfile?.userPersona} tier={userProfile?.tier} />
+
+        {/* 11. NOTIFICATION CENTER POP-UP MODAL (old, no longer opened) */}
         <Modal
           visible={showNotificationModal}
           transparent={true}

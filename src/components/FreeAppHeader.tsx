@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import {
   StyleSheet,
   View,
@@ -14,6 +14,7 @@ import Svg, { Path, Circle } from 'react-native-svg';
 import * as Haptics from 'expo-haptics';
 import { sFont, sPadding, isNarrowScreen } from '../utils/responsive';
 import { UserProfileData } from './UserProfileModal';
+import { NotificationsSheet, useUnreadNotifications } from './notifications/NotificationsSheet';
 
 import { HeaderDualModePills, UserPersona, UserTier } from './HeaderDualModePills';
 
@@ -24,9 +25,11 @@ export interface FreeAppHeaderProps {
   onTogglePersona?: () => void;
   userPersona?: UserPersona;
   onOpenJarvisPro?: () => void;
+  /** @deprecated The bell now opens the shared notifications sheet itself. */
   onOpenNotifications?: () => void;
   onOpenProfile?: () => void;
   userProfile?: UserProfileData;
+  /** @deprecated The unread dot now comes from the shared notifications. */
   unreadCount?: number;
   backgroundColor?: string;
   isDark?: boolean;
@@ -39,10 +42,8 @@ export const FreeAppHeader: React.FC<FreeAppHeaderProps> = ({
   onTogglePersona,
   userPersona,
   onOpenJarvisPro,
-  onOpenNotifications,
   onOpenProfile,
   userProfile,
-  unreadCount = 2,
   backgroundColor = '#FAF8F5',
   isDark = false,
 }) => {
@@ -86,9 +87,7 @@ export const FreeAppHeader: React.FC<FreeAppHeaderProps> = ({
     if (Platform.OS !== 'web') {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     }
-    if (onOpenNotifications) {
-      onOpenNotifications();
-    }
+    setShowNotifications(true);
   };
 
   const handleProfilePress = () => {
@@ -102,6 +101,9 @@ export const FreeAppHeader: React.FC<FreeAppHeaderProps> = ({
 
   const currentPersona = userPersona || userProfile?.userPersona || 'returning';
   const currentTier = (userProfile?.tier as UserTier) || 'free';
+  // The bell opens the shared notifications sheet on every screen
+  const [showNotifications, setShowNotifications] = useState(false);
+  const unreadCount = useUnreadNotifications(currentPersona, currentTier);
 
   return (
     <View style={[styles.headerBar, { backgroundColor: isDark ? '#0C0A12' : backgroundColor }]}>
@@ -196,6 +198,8 @@ export const FreeAppHeader: React.FC<FreeAppHeaderProps> = ({
           </View>
         </Pressable>
       </View>
+
+      <NotificationsSheet visible={showNotifications} onClose={() => setShowNotifications(false)} persona={currentPersona} tier={currentTier} />
     </View>
   );
 };
