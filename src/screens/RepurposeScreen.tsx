@@ -1,4 +1,5 @@
 import React, { useCallback, useMemo, useState, useSyncExternalStore } from 'react';
+import { usePageWidth } from '../hooks/useBreakpoint';
 import { View, ScrollView, Pressable, StyleSheet, Platform, KeyboardAvoidingView, Image } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Animated, { Easing, FadeIn, FadeInUp } from 'react-native-reanimated';
@@ -216,6 +217,7 @@ export const RepurposeScreen: React.FC<RepurposeScreenProps> = ({
   tier = 'free',
   onSwitchToFree,
 }) => {
+  const pageWidth = usePageWidth();
   const isPro = tier === 'pro';
   const persona = (userPersona || userProfile?.userPersona) === 'returning' ? 'returning' : 'new';
   useSyncExternalStore(subscribeToRepurposes, () => getRepurposeAllowance(persona, 'free').usedThisWeek);
@@ -434,7 +436,7 @@ export const RepurposeScreen: React.FC<RepurposeScreenProps> = ({
           userProfile={userProfile}
         />
         <KeyboardAvoidingView style={styles.flex} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-          <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
+          <ScrollView contentContainerStyle={[styles.scroll, pageWidth]} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
             <Animated.View entering={FadeInUp.duration(500)} style={styles.headline}>
               <FitLines
                 key={`${source}-${postKind}`}

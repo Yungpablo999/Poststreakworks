@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
+import { usePageWidth } from '../hooks/useBreakpoint';
 import { View, ScrollView, Pressable, StyleSheet, Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Animated, {
@@ -242,6 +243,7 @@ export const AudienceBreakdownScreen: React.FC<AudienceBreakdownScreenProps> = (
   onSaveProfile,
   tier = 'free',
 }) => {
+  const pageWidth = usePageWidth();
   const [showProfile, setShowProfile] = useState(false);
   const [showAccounts, setShowAccounts] = useState(false);
   const accounts = useConnectedAccounts(userProfile, onSaveProfile);
@@ -267,7 +269,7 @@ export const AudienceBreakdownScreen: React.FC<AudienceBreakdownScreenProps> = (
       <GlassBackdrop />
       <SafeAreaView style={styles.flex} edges={['top']}>
         <FreeAppHeader backgroundColor="transparent" onBack={onBack} onOpenJarvisPro={onOpenJarvisPro} onOpenProfile={() => setShowProfile(true)} userProfile={userProfile} />
-        <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
+        <ScrollView contentContainerStyle={[styles.scroll, pageWidth]} showsVerticalScrollIndicator={false}>
           <Animated.View entering={enter(0)} style={styles.headline}>
             <FitLines
               lines={['Your audience,', <Text key="a" style={styles.accent}>up close</Text>]}

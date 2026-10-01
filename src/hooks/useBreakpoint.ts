@@ -27,3 +27,9 @@ export function useContentWidth(): number {
   const { width } = useWindowDimensions();
   return breakpointFor(width) === 'desktop' ? width - SIDEBAR_W : width;
 }
+
+/** Focused pages (studios, details) sit in a 560px column on phones and
+ *  tablets; on desktop they open up to 780px so a big screen isn't mostly empty. */
+export function usePageWidth(): { maxWidth: number } | null {
+  return useBreakpoint() === 'desktop' ? { maxWidth: 780 } : null;
+}

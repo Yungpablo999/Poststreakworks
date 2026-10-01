@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { usePageWidth } from '../hooks/useBreakpoint';
 import { View, ScrollView, Pressable, StyleSheet, Platform, Image } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Animated, { Easing, FadeIn, FadeInUp, useAnimatedProps, useSharedValue, withDelay, withTiming } from 'react-native-reanimated';
@@ -177,6 +178,7 @@ export const PostPerformanceScreen: React.FC<PostPerformanceScreenProps> = ({
   onSaveProfile,
   onLogout,
 }) => {
+  const pageWidth = usePageWidth();
   const [showProfile, setShowProfile] = useState(false);
   const [open, setOpen] = useState<string>('open');
   const enter = (d: number) => FadeInUp.delay(d).duration(500).easing(Easing.out(Easing.cubic));
@@ -186,7 +188,7 @@ export const PostPerformanceScreen: React.FC<PostPerformanceScreenProps> = ({
       <GlassBackdrop />
       <SafeAreaView style={styles.flex} edges={['top']}>
         <FreeAppHeader backgroundColor="transparent" onBack={onBack} onOpenJarvisPro={onOpenJarvisPro} onOpenProfile={() => setShowProfile(true)} userProfile={userProfile} />
-        <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
+        <ScrollView contentContainerStyle={[styles.scroll, pageWidth]} showsVerticalScrollIndicator={false}>
           <Animated.View entering={enter(0)} style={styles.headline}>
             <FitLines lines={['Why it', <Text key="a" style={styles.accent}>worked</Text>]} textStyle={styles.headlineText} maxFontSize={38} align="left" accessibilityLabel="Why it worked" />
             <Text style={styles.sub}>A closer look at your best post lately.</Text>

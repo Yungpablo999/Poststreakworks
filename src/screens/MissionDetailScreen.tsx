@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
+import { usePageWidth } from '../hooks/useBreakpoint';
 import { View, ScrollView, Pressable, StyleSheet, Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Animated, {
@@ -181,6 +182,7 @@ export const MissionDetailScreen: React.FC<MissionDetailScreenProps> = ({
   onSwitchToPro,
   onSwitchToFree,
 }) => {
+  const pageWidth = usePageWidth();
   const isNew = (userPersona || userProfile?.userPersona || 'new') === 'new';
   const [showProfile, setShowProfile] = useState(false);
   const [open, setOpen] = useState(0);
@@ -230,7 +232,7 @@ export const MissionDetailScreen: React.FC<MissionDetailScreenProps> = ({
           userPersona={userPersona}
           userProfile={userProfile}
         />
-        <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
+        <ScrollView contentContainerStyle={[styles.scroll, pageWidth]} showsVerticalScrollIndicator={false}>
           {/* Hero */}
           <Animated.View entering={FadeInUp.duration(500).easing(Easing.out(Easing.cubic))}>
             <GlassCard strong radius={28} padding={20}>

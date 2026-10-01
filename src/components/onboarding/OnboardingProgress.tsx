@@ -87,7 +87,8 @@ export function OnboardingProgress({ current, steps = ONBOARDING_STEPS }: Onboar
   const fillStyle = useAnimatedStyle(() => ({ width: `${fill.value * 100}%` }));
 
   return (
-    <GlassCard strong padding={16} radius={22}>
+    // Same width as the step's content on wide screens
+    <GlassCard strong padding={16} radius={22} style={styles.card}>
       <View
         style={styles.headerRow}
         accessible
@@ -132,6 +133,7 @@ export function OnboardingProgress({ current, steps = ONBOARDING_STEPS }: Onboar
 }
 
 const styles = StyleSheet.create({
+  card: { width: '100%', maxWidth: 520, alignSelf: 'center' },
   headerRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',

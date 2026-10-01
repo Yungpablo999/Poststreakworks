@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { usePageWidth } from '../hooks/useBreakpoint';
 import { View, ScrollView, Pressable, StyleSheet, Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Animated, { Easing, FadeIn, FadeInUp, useAnimatedStyle, useSharedValue, withDelay, withTiming } from 'react-native-reanimated';
@@ -139,6 +140,7 @@ export const PlatformGrowthScreen: React.FC<PlatformGrowthScreenProps> = ({
   tier = 'free',
   onLogout,
 }) => {
+  const pageWidth = usePageWidth();
   const [showProfile, setShowProfile] = useState(false);
   const [showAccounts, setShowAccounts] = useState(false);
   const [focus, setFocus] = useState<string | null>(null);
@@ -161,7 +163,7 @@ export const PlatformGrowthScreen: React.FC<PlatformGrowthScreenProps> = ({
       <GlassBackdrop />
       <SafeAreaView style={styles.flex} edges={['top']}>
         <FreeAppHeader backgroundColor="transparent" onBack={onBack} onOpenJarvisPro={onOpenJarvisPro} onOpenProfile={() => setShowProfile(true)} userProfile={userProfile} />
-        <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
+        <ScrollView contentContainerStyle={[styles.scroll, pageWidth]} showsVerticalScrollIndicator={false}>
           <Animated.View entering={enter(0)} style={styles.headline}>
             <FitLines
               lines={['Your platforms,', <Text key="a" style={styles.accent}>side by side</Text>]}

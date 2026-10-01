@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { usePageWidth } from '../hooks/useBreakpoint';
 import { View, ScrollView, Pressable, StyleSheet, Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Animated, {
@@ -179,6 +180,7 @@ interface JarvisProScreenProps {
 }
 
 export const JarvisProScreen: React.FC<JarvisProScreenProps> = ({ onLogout, onNavigateTab, onBack, userProfile, onSaveProfile, onUpgraded }) => {
+  const pageWidth = usePageWidth();
   const scrollRef = useRef<ScrollView>(null);
   const planY = useRef(0);
   const [showProfile, setShowProfile] = useState(false);
@@ -199,7 +201,7 @@ export const JarvisProScreen: React.FC<JarvisProScreenProps> = ({ onLogout, onNa
       <GlassBackdrop />
       <SafeAreaView style={styles.flex} edges={['top']}>
         <FreeAppHeader backgroundColor="transparent" onBack={onBack} onOpenProfile={() => setShowProfile(true)} userProfile={userProfile} />
-        <ScrollView ref={scrollRef} contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
+        <ScrollView ref={scrollRef} contentContainerStyle={[styles.scroll, pageWidth]} showsVerticalScrollIndicator={false}>
           {/* Hero */}
           <Animated.View entering={enter(0)}>
             <GlassCard strong radius={28} padding={22}>

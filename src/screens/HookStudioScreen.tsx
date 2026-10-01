@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react';
+import { usePageWidth } from '../hooks/useBreakpoint';
 import { View, ScrollView, Pressable, StyleSheet, Platform, KeyboardAvoidingView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Animated, { Easing, FadeIn, FadeInUp, cancelAnimation, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
@@ -205,6 +206,7 @@ export const HookStudioScreen: React.FC<HookStudioScreenProps> = ({
   onSaveProfile,
   onLogout,
 }) => {
+  const pageWidth = usePageWidth();
   const [showProfile, setShowProfile] = useState(false);
   const [idea, setIdea] = useState(ideaTitle);
   const [focused, setFocused] = useState(false);
@@ -250,7 +252,7 @@ export const HookStudioScreen: React.FC<HookStudioScreenProps> = ({
       <SafeAreaView style={styles.flex} edges={['top']}>
         <FreeAppHeader backgroundColor="transparent" onBack={onBack} onOpenJarvisPro={onOpenJarvisPro} onSwitchToFree={onSwitchToFree} onOpenProfile={() => setShowProfile(true)} userProfile={userProfile} />
         <KeyboardAvoidingView style={styles.flex} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-          <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
+          <ScrollView contentContainerStyle={[styles.scroll, pageWidth]} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
             <Animated.View entering={enter(0)} style={styles.headline}>
               <FitLines lines={['The first', <Text key="a" style={styles.accent}>3 seconds</Text>]} textStyle={styles.headlineText} maxFontSize={38} align="left" accessibilityLabel="The first 3 seconds" />
               <Text style={styles.sub}>Openings that make people stop scrolling.</Text>

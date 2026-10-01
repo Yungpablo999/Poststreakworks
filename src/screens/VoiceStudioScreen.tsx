@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { usePageWidth } from '../hooks/useBreakpoint';
 import { View, ScrollView, Pressable, StyleSheet, Platform, KeyboardAvoidingView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Animated, {
@@ -337,6 +338,7 @@ export const VoiceStudioScreen: React.FC<VoiceStudioScreenProps> = ({
   onSaveProfile,
   onLogout,
 }) => {
+  const pageWidth = usePageWidth();
   const isNew = (userPersona || userProfile?.userPersona || 'new') === 'new';
   const summary = getVoiceCloneSummary(isNew ? 'new' : 'returning');
   const [showProfile, setShowProfile] = useState(false);
@@ -404,7 +406,7 @@ export const VoiceStudioScreen: React.FC<VoiceStudioScreenProps> = ({
           userProfile={userProfile}
         />
         <KeyboardAvoidingView style={styles.flex} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-          <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
+          <ScrollView contentContainerStyle={[styles.scroll, pageWidth]} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
             <Animated.View entering={enter(0)} style={styles.headline}>
               <FitLines
                 lines={['Your voice,', <Text key="a" style={styles.accent}>on every video</Text>]}

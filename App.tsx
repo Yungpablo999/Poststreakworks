@@ -52,6 +52,7 @@ import { TabType } from './src/components/FloatingTabBar';
 import { UserProfileData, UserProfileModal } from './src/components/UserProfileModal';
 import { setNotificationHandler } from './src/components/notifications/NotificationsSheet';
 import { AppSidebar, type SidebarId } from './src/components/web/AppSidebar';
+import { OnboardingBrandPanel } from './src/components/web/OnboardingBrandPanel';
 import { useBreakpoint } from './src/hooks/useBreakpoint';
 import { GlassBackdrop } from './src/components/glass/GlassBackdrop';
 import { UserPersona } from './src/components/HeaderDualModePills';
@@ -439,6 +440,9 @@ export default function App() {
   };
   const inApp = currentScreen in SIDEBAR_FOR;
   const showSidebar = breakpoint === 'desktop' && inApp;
+  // Desktop sign-up / sign-in steps: brand panel on the left, the step on the right
+  const ONBOARDING_STEPS: Screen[] = ['signup', 'signin', 'verify-code', 'reset-password', 'niche', 'platforms', 'plan'];
+  const showBrandPanel = breakpoint === 'desktop' && ONBOARDING_STEPS.includes(currentScreen);
 
   // Hold on the brand background for the split second fonts take to load,
   // so text never flashes in the system font. On error, fall back gracefully.
@@ -451,7 +455,9 @@ export default function App() {
       <View style={styles.container}>
         <StatusBar style="dark" />
 
-        <View style={showSidebar ? styles.desktopRow : styles.fill}>
+        <View style={showSidebar || showBrandPanel ? styles.desktopRow : styles.fill}>
+          {showBrandPanel && <GlassBackdrop />}
+          {showBrandPanel && <OnboardingBrandPanel />}
           {showSidebar && (
             <AppSidebar
               active={SIDEBAR_FOR[currentScreen] ?? null}

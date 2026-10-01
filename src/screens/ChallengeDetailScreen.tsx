@@ -1,4 +1,5 @@
 import React, { useMemo, useState } from 'react';
+import { usePageWidth } from '../hooks/useBreakpoint';
 import { View, ScrollView, Pressable, StyleSheet, Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Animated, { Easing, FadeIn, FadeInUp } from 'react-native-reanimated';
@@ -128,6 +129,7 @@ export const ChallengeDetailScreen: React.FC<ChallengeDetailScreenProps> = ({
   onTogglePersona,
   onSwitchToPro,
 }) => {
+  const pageWidth = usePageWidth();
   const isNew = (userPersona || userProfile?.userPersona || 'new') === 'new';
   const done = isNew ? 0 : 1;
   const left = GOAL - done;
@@ -203,7 +205,7 @@ export const ChallengeDetailScreen: React.FC<ChallengeDetailScreenProps> = ({
           userPersona={userPersona}
           userProfile={userProfile}
         />
-        <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
+        <ScrollView contentContainerStyle={[styles.scroll, pageWidth]} showsVerticalScrollIndicator={false}>
           {/* Same card they tapped on Quests */}
           <Animated.View entering={enter(0)}>
             <ChallengeCard done={done} goal={GOAL} />
