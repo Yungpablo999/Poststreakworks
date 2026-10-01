@@ -57,7 +57,8 @@ import { WebTopBar } from './src/components/web/WebTopBar';
 import { TodayRail } from './src/components/web/TodayRail';
 import { StudioRail, type StudioKind } from './src/components/web/StudioRail';
 import { setComposerOpener } from './src/components/web/webActions';
-import { useBreakpoint } from './src/hooks/useBreakpoint';
+import { IS_WEB_APP, useBreakpoint, useWebSidebar } from './src/hooks/useBreakpoint';
+import { MobileWebBar } from './src/components/web/MobileWebBar';
 import { GlassBackdrop } from './src/components/glass/GlassBackdrop';
 import { UserPersona } from './src/components/HeaderDualModePills';
 
@@ -454,14 +455,18 @@ export default function App() {
     schedule: 'schedule', repurpose: 'repurpose', 'hook-studio': 'hook-studio', 'voice-studio': 'voice-studio',
   };
   const inApp = currentScreen in SIDEBAR_FOR;
-  const showSidebar = breakpoint === 'desktop' && inApp;
+  // Side menu: desktop, and tablets in a browser. Phones in a browser get the
+  // slim web header with a menu drawer instead of the app's tab bar.
+  const webSidebar = useWebSidebar();
+  const showSidebar = webSidebar && inApp;
+  const showMobileBar = IS_WEB_APP && inApp && !webSidebar;
   // Desktop web: sign-up and sign-in get a website header across the top
   const AUTH_STEP: Partial<Record<Screen, number | null>> = {
     niche: 0, platforms: 1, plan: 2, signup: 3,
     'verify-code': verifyMode === 'signup' ? 4 : null,
     signin: null, 'reset-password': null,
   };
-  const showAuthHeader = Platform.OS === 'web' && breakpoint === 'desktop' && currentScreen in AUTH_STEP;
+  const showAuthHeader = (IS_WEB_APP || breakpoint === 'desktop') && currentScreen in AUTH_STEP;
   const authStep = AUTH_STEP[currentScreen] ?? null;
   const signingUp = authStep !== null;
   const authBack = getBackScreen(currentScreen);
@@ -500,6 +505,21 @@ export default function App() {
   };
   setComposerOpener(openBlankComposer);
 
+  // The side menu (desktop/tablet), also shown in the phone menu drawer
+  const renderMenu = (close?: () => void) => (
+    <AppSidebar
+      fill={!!close}
+      active={SIDEBAR_FOR[currentScreen] ?? null}
+      profile={userProfile}
+      onNavigate={(id) => { close?.(); navigateTo(SCREEN_FOR[id]); }}
+      onOpenProfile={() => { close?.(); setShowProfileFromMenu(true); }}
+      onOpenPro={() => { close?.(); navigateTo('jarvis-pro'); }}
+      persona={desktopPersona}
+      onToggleTier={() => setUserProfile((prev) => ({ ...prev, tier: prev.tier === 'pro' || prev.tier === 'founding' ? 'free' : 'pro' }))}
+      onTogglePersona={handleTogglePersona}
+    />
+  );
+
   // Hold on the brand background for the split second fonts take to load,
   // so text never flashes in the system font. On error, fall back gracefully.
   if (!fontsLoaded && !fontError) {
@@ -512,18 +532,7 @@ export default function App() {
         <StatusBar style="dark" />
 
         <View style={showSidebar ? styles.desktopRow : styles.fill}>
-          {showSidebar && (
-            <AppSidebar
-              active={SIDEBAR_FOR[currentScreen] ?? null}
-              profile={userProfile}
-              onNavigate={(id) => navigateTo(SCREEN_FOR[id])}
-              onOpenProfile={() => setShowProfileFromMenu(true)}
-              onOpenPro={() => navigateTo('jarvis-pro')}
-              persona={desktopPersona}
-              onToggleTier={() => setUserProfile((prev) => ({ ...prev, tier: prev.tier === 'pro' || prev.tier === 'founding' ? 'free' : 'pro' }))}
-              onTogglePersona={handleTogglePersona}
-            />
-          )}
+          {showSidebar && renderMenu()}
           <View style={styles.fill}>
             {showAuthHeader && (
               <WebAuthHeader
@@ -548,8 +557,18 @@ export default function App() {
                 onNewPost={currentScreen === 'composer' ? undefined : () => openBlankComposer()}
               />
             )}
+            {showMobileBar && (
+              <MobileWebBar
+                persona={desktopPersona}
+                tier={desktopTier}
+                title={innerBack ? PAGE_TITLE[currentScreen] : undefined}
+                onBack={innerBack ? () => navigateTo(innerBack) : undefined}
+                onNewPost={currentScreen === 'composer' ? undefined : () => openBlankComposer()}
+                menu={(close) => renderMenu(close)}
+              />
+            )}
             <View style={showSidebar ? styles.desktopRow : styles.fill}>
-            <View style={inApp && breakpoint === 'tablet' ? [styles.column, { maxWidth: 720 }] : styles.fill}>
+            <View style={inApp && breakpoint === 'tablet' && !showSidebar ? [styles.column, { maxWidth: 720 }] : styles.fill}>
         <EdgeSwipeBackWrapper
           enabled={Boolean(getBackScreen(currentScreen))}
           onSwipeBack={() => {

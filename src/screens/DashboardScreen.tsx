@@ -18,7 +18,7 @@ import {
 } from 'react-native';
 import { Text } from '../components/ui/AppText';
 import { BrandLogo } from '../components/BrandLogo';
-import { useBreakpoint } from '../hooks/useBreakpoint';
+import { useBreakpoint, useWebChrome } from '../hooks/useBreakpoint';
 import { HomeDayZero } from '../components/home/HomeDayZero';
 import { HomeReturning } from '../components/home/HomeReturning';
 import { ProUpsellCard } from '../components/home/ProUpsellCard';
@@ -566,7 +566,9 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
   const isDark = false;
   const isNewUser = (userPersona || userProfile?.userPersona) === 'new';
   // Desktop shows the logo in the side menu
-  const onDesktop = useBreakpoint() === 'desktop';
+  const onDesktop = useWebChrome();
+  // Two-column extras (ideas row) only where there's room
+  const wideHome = useBreakpoint() === 'desktop';
   // The bell opens the shared notifications sheet (same as every other screen)
   const [showNotifSheet, setShowNotifSheet] = useState(false);
   const sharedUnread = useUnreadNotifications(userPersona || userProfile?.userPersona, userProfile?.tier);
@@ -1045,7 +1047,7 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
           )}
 
           {/* Desktop web: ready-to-start ideas across the page */}
-          {onDesktop && (
+          {wideHome && (
             <IdeasStrip
               niches={userProfile?.niches?.length ? userProfile.niches : ['lifestyle']}
               platforms={userProfile?.connectedPlatforms ?? []}

@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { useWebFrame } from '../components/web/WebAuthHeader';
+import { useWebFrame, useWideFrame } from '../components/web/WebAuthHeader';
 import { StyleSheet, View, ScrollView, Pressable, Platform, KeyboardAvoidingView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Animated, {
@@ -93,6 +93,7 @@ function CodeBox({ digit, index, active, status }: { digit: string; index: numbe
 
 export const VerifyCodeScreen: React.FC<VerifyCodeScreenProps> = ({ mode, email, onBack, onEditEmail, onSuccess }) => {
   const webFrame = useWebFrame();
+  const wideFrame = useWideFrame();
   const [code, setCode] = useState('');
   const [focused, setFocused] = useState(true);
   const [status, setStatus] = useState<Status>('entering');
@@ -166,7 +167,7 @@ export const VerifyCodeScreen: React.FC<VerifyCodeScreenProps> = ({ mode, email,
             </View>
           )}
 
-          <ScrollView contentContainerStyle={[styles.scroll, webFrame && webStyles.scroll]} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
+          <ScrollView contentContainerStyle={[styles.scroll, wideFrame && webStyles.scroll]} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
             <Animated.View entering={FadeInUp.delay(120).duration(550)}>
               <FitLines
                 lines={['Check your', <Text key="i" style={styles.titleAccent}>inbox</Text>]}

@@ -153,6 +153,7 @@ export function AppSidebar({
   persona,
   onToggleTier,
   onTogglePersona,
+  fill = false,
 }: {
   active: SidebarId | null;
   profile?: UserProfileData;
@@ -163,12 +164,14 @@ export function AppSidebar({
   persona: 'new' | 'returning';
   onToggleTier: () => void;
   onTogglePersona: () => void;
+  /** Fill its container (the phone menu drawer) instead of the fixed desktop width */
+  fill?: boolean;
 }) {
   const isPro = profile?.tier === 'pro' || profile?.tier === 'founding';
   const avatar = profile?.customAvatarUri ? { uri: profile.customAvatarUri } : profile?.avatarId && profile.avatarId !== 'ghost' ? profile.avatarSource : null;
 
   return (
-    <View style={styles.root}>
+    <View style={[styles.root, fill && { width: '100%', borderRightWidth: 0 }]}>
       <BlurView intensity={40} tint="light" style={StyleSheet.absoluteFill} />
       <View style={[StyleSheet.absoluteFill, styles.fill]} />
 
