@@ -29,6 +29,7 @@ import { AppButton } from '../components/ui/AppButton';
 import { AutoGrowInput } from '../components/ui/AutoGrowInput';
 import { JarvisOrb } from '../components/JarvisOrb';
 import { ChipRow, SaveButton } from '../components/ideas/IdeasBlocks';
+import { PlatformFitCard } from '../components/caption/PlatformFitCard';
 import { CaptionOptionCard } from '../components/caption/CaptionBlocks';
 import { ComposerToast } from '../components/composer/ComposerBlocks';
 import { getCaptionOptions, describeCaptionShape, saveDraft, removeDraft, IDEA_GOALS, CAPTION_TONES, type IdeaGoal } from '../data';
@@ -44,6 +45,9 @@ interface CaptionScreenProps {
   onAddToPost?: (captionText: string, hashtags: string, topic?: string) => void;
   userProfile?: UserProfileData;
   onSaveProfile?: (updated: UserProfileData) => void;
+  /** Pro members: the caption reshaped for each platform. */
+  tier?: 'free' | 'pro';
+  onSwitchToFree?: () => void;
 }
 
 interface NotificationItem {
@@ -155,6 +159,8 @@ export const CaptionScreen: React.FC<CaptionScreenProps> = ({
   onAddToPost,
   userProfile,
   onSaveProfile,
+  tier = 'free',
+  onSwitchToFree,
 }) => {
   const isDark = false;
   const [activeTab, setActiveTab] = useState<TabType>('create');
@@ -434,6 +440,7 @@ export const CaptionScreen: React.FC<CaptionScreenProps> = ({
             backgroundColor="transparent"
             onBack={onBack}
             onOpenJarvisPro={onOpenJarvisPro}
+            onSwitchToFree={onSwitchToFree}
             onOpenNotifications={() => {
               triggerModalAnim();
               setShowNotificationModal(true);
@@ -580,6 +587,13 @@ export const CaptionScreen: React.FC<CaptionScreenProps> = ({
                 <AutoGrowInput value={tags} onChangeText={setTags} minHeight={24} style={styles.tagsInput} accessibilityLabel="Hashtags" />
               </View>
             </GlassCard>
+
+            {/* PRO: fit for each platform */}
+            {tier === 'pro' && (
+              <Reanimated.View entering={FadeInUp.duration(450)} style={styles.platformFit}>
+                <PlatformFitCard body={body} ending={ending} tags={tags} onCopied={showToast} />
+              </Reanimated.View>
+            )}
 
             {/* ACTIONS */}
             <View style={styles.actions}>
@@ -783,6 +797,7 @@ const styles = StyleSheet.create({
   optionsHead: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: 24, marginBottom: 10 },
   sectionLabel: { fontSize: 17, fontWeight: '800', color: ds.ink, letterSpacing: -0.2 },
   shape: { fontSize: 12.5, fontWeight: '700', color: ds.text3, marginTop: -4, marginBottom: 10 },
+  platformFit: { marginTop: 16 },
   newBtn: { flexDirection: 'row', alignItems: 'center', gap: 5, height: 30, paddingHorizontal: 10, borderRadius: 999, backgroundColor: ds.lavender },
   newBtnText: { fontSize: 12.5, fontWeight: '800', color: ds.purple },
   options: { gap: 10, paddingRight: 20, paddingBottom: 4 },

@@ -832,31 +832,10 @@ export default function App() {
         )}
 
         {currentScreen === 'caption' && (
-          (userProfile?.tier === 'pro' || userProfile?.tier === 'founding') ? (
-            <ProCaptionScreen
-              ideaTitle={selectedIdeaTitle}
-              onBack={() => navigateTo(previousScreen ? previousScreen : 'create')}
-              onLogout={handleLogout}
-              onOpenSchedule={() => navigateTo('schedule')}
-              onOpenJarvisPro={() => navigateTo('jarvis-pro')}
-              onAddToPost={(captionText, hashtags) => {
-                if (captionText) setComposerIdeaTitle(captionText);
-                setComposerIdeaGoal(null);
-                setComposerIdeaPlatform(undefined); setComposerFilmStyle(undefined);
-                navigateTo('composer');
-              }}
-              onOpenIdeaAngle={() => navigateTo('content-angle')}
-              onSwitchToFree={() => {
-                if (userProfile) {
-                  setUserProfile({ ...userProfile, tier: 'free' });
-                }
-              }}
-              onNavigateTab={handleTabNavigation}
-              userProfile={userProfile}
-              onSaveProfile={(updated) => setUserProfile(prev => ({ ...prev, ...updated, tier: updated.tier || prev.tier || 'free' }))}
-            />
-          ) : (
+          (
             <CaptionScreen
+              tier={userProfile?.tier === 'pro' || userProfile?.tier === 'founding' ? 'pro' : 'free'}
+              onSwitchToFree={() => setUserProfile(prev => ({ ...prev, tier: 'free' }))}
               ideaTitle={selectedIdeaTitle}
               onBack={() => navigateTo(previousScreen ? previousScreen : 'create')}
               onLogout={handleLogout}
