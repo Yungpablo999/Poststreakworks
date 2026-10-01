@@ -101,7 +101,7 @@ function Thumb({ video, width = 64 }: { video: StudioVideo; width?: number }) {
   return (
     <View style={[styles.thumb, { width, height: h }]}>
       {video.source === 'post' ? (
-        <Image source={require('../../../assets/images/amara-portrait.jpg')} style={StyleSheet.absoluteFill} resizeMode="cover" />
+        <Image source={require('../../../assets/images/amara-portrait.jpg')} style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' }} resizeMode="cover" />
       ) : (
         <LinearGradient colors={['#2A1F66', '#5B3EE8', '#A78BFA']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={StyleSheet.absoluteFill} />
       )}

@@ -943,7 +943,21 @@ export default function App() {
 
         {currentScreen === 'post-performance' && (
           <PostPerformanceScreen
-            onBack={() => navigateTo('growth')}
+            tier={userProfile?.tier === 'pro' || userProfile?.tier === 'founding' ? 'pro' : 'free'}
+            onBack={() => navigateTo(previousScreen ? previousScreen : 'growth')}
+            onMakeMoreLikeThis={(video) => {
+              setStudioVideo(video);
+              setSelectedIdeaTitle(video.name);
+              navigateTo('repurpose');
+            }}
+            onReuseOpening={(title, hook) => {
+              setComposerQuestDraft(null);
+              setComposerIdeaTitle(title);
+              setComposerIdeaGoal({ hook });
+              setComposerIdeaPlatform('tiktok');
+              setComposerFilmStyle('talking');
+              navigateTo('composer');
+            }}
             onLogout={handleLogout}
             onOpenSchedule={() => navigateTo('schedule')}
             onOpenAudienceBreakdown={() => navigateTo('audience-breakdown')}
