@@ -438,12 +438,12 @@ export const VoiceStudioScreen: React.FC<VoiceStudioScreenProps> = ({
                     </View>
                     <View style={styles.minutesRow}>
                       <Text style={styles.minutesBig}>{left}</Text>
-                      <Text style={styles.minutesOf}>of {included} minutes left this month</Text>
+                      <Text style={styles.minutesOf}>{extra > 0 ? 'minutes left' : `of ${included} minutes left this month`}</Text>
                     </View>
                     <View style={styles.meterTrack}>
                       <Animated.View style={[styles.meterFill, meterStyle]} />
                     </View>
-                    {extra > 0 && <Text style={styles.extraNote}>Includes {extra} extra minutes you bought</Text>}
+                    {extra > 0 && <Text style={styles.extraNote}>{Math.max(0, included - used)} monthly + {extra} extra you bought</Text>}
                     <Pressable onPress={() => setShowBuy(true)} accessibilityRole="button" style={({ pressed }) => [styles.buyLink, pressed && styles.pressed, pointer]}>
                       <Svg width={14} height={14} viewBox="0 0 24 24" fill="none">
                         <Path d="M12 5v14M5 12h14" stroke={goldTokens.dark} strokeWidth={2.6} strokeLinecap="round" />
