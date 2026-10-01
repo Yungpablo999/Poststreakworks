@@ -55,6 +55,7 @@ import { AppSidebar, type SidebarId } from './src/components/web/AppSidebar';
 import { WebAuthHeader } from './src/components/web/WebAuthHeader';
 import { WebTopBar } from './src/components/web/WebTopBar';
 import { TodayRail } from './src/components/web/TodayRail';
+import { StudioRail, type StudioKind } from './src/components/web/StudioRail';
 import { setComposerOpener } from './src/components/web/webActions';
 import { useBreakpoint } from './src/hooks/useBreakpoint';
 import { GlassBackdrop } from './src/components/glass/GlassBackdrop';
@@ -470,7 +471,10 @@ export default function App() {
   const { width: windowW } = useWindowDimensions();
   const MAIN_PAGES: Screen[] = ['dashboard', 'create', 'quests', 'growth', 'schedule', 'repurpose', 'hook-studio', 'voice-studio'];
   const RAIL_PAGES: Screen[] = ['dashboard', 'create', 'quests', 'growth', 'schedule'];
-  const showRail = showSidebar && RAIL_PAGES.includes(currentScreen) && windowW >= 1360;
+  const wideEnough = windowW >= 1360;
+  const showRail = showSidebar && RAIL_PAGES.includes(currentScreen) && wideEnough;
+  const STUDIO_FOR: Partial<Record<Screen, StudioKind>> = { repurpose: 'repurpose', 'hook-studio': 'hook', 'voice-studio': 'voice' };
+  const studioRail = showSidebar && wideEnough ? STUDIO_FOR[currentScreen] : undefined;
   const PAGE_TITLE: Partial<Record<Screen, string>> = {
     composer: 'New post', 'idea-detail': 'Idea', 'content-angle': 'Ideas', script: 'Script', caption: 'Caption',
     'mission-detail': 'Today’s quest', 'challenge-detail': 'Weekly challenge', 'jarvis-pro': 'Jarvis Pro',
@@ -1132,6 +1136,7 @@ export default function App() {
           </ScreenTransitionContainer>
         </EdgeSwipeBackWrapper>
             </View>
+            {studioRail && <StudioRail kind={studioRail} persona={desktopPersona} tier={desktopTier} />}
             {showRail && (
               <TodayRail
                 persona={desktopPersona}

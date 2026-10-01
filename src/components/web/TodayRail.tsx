@@ -238,8 +238,8 @@ const TIPS: Record<'new' | 'returning', string[]> = {
   ],
 };
 
-function Tips({ persona }: { persona: 'new' | 'returning' }) {
-  const tips = TIPS[persona];
+/** Rotating tips from Jarvis (every 7s, or tap a dot) */
+export function TipsCard({ tips }: { tips: string[] }) {
   const [i, setI] = useState(0);
   useEffect(() => {
     const id = setInterval(() => setI((v) => (v + 1) % tips.length), 7000);
@@ -289,7 +289,7 @@ export function TodayRail({
           <Challenge posted={persona === 'new' ? 0 : 2} onOpen={onOpenChallenge} />
         </Animated.View>
         <Animated.View entering={FadeInUp.delay(240).duration(450).easing(ease)}>
-          <Tips persona={persona} />
+          <TipsCard tips={TIPS[persona]} />
         </Animated.View>
       </ScrollView>
     </View>
