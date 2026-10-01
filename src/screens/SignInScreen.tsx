@@ -19,7 +19,8 @@ import { ds } from '../theme/colors';
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 interface SignInScreenProps {
-  onBack: () => void;
+  /** Leave out to hide the back button (the web app's first screens) */
+  onBack?: () => void;
   onCreateAccount: () => void;
   onSubmit?: (email: string) => void;
   /** One-tap sign-in (mock: goes straight in; a real app runs the provider's sign-in). */
@@ -61,14 +62,16 @@ export const SignInScreen: React.FC<SignInScreenProps> = ({ onBack, onCreateAcco
       <SafeAreaView style={styles.safeArea} edges={['top', 'bottom']}>
         <KeyboardAvoidingView style={styles.flex} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
           <View style={styles.header}>
-            <Pressable onPress={onBack} hitSlop={10} accessibilityRole="button" accessibilityLabel="Go back" style={styles.backBtn}>
-              <BlurView intensity={30} tint="light" style={[StyleSheet.absoluteFill, { borderRadius: 20, overflow: 'hidden' }]} />
-              <View>
-                <Svg width={20} height={20} viewBox="0 0 24 24" fill="none">
-                  <Path d="M15 18l-6-6 6-6" stroke={ds.ink} strokeWidth={2.4} strokeLinecap="round" strokeLinejoin="round" />
-                </Svg>
-              </View>
-            </Pressable>
+            {onBack && (
+              <Pressable onPress={onBack} hitSlop={10} accessibilityRole="button" accessibilityLabel="Go back" style={styles.backBtn}>
+                <BlurView intensity={30} tint="light" style={[StyleSheet.absoluteFill, { borderRadius: 20, overflow: 'hidden' }]} />
+                <View>
+                  <Svg width={20} height={20} viewBox="0 0 24 24" fill="none">
+                    <Path d="M15 18l-6-6 6-6" stroke={ds.ink} strokeWidth={2.4} strokeLinecap="round" strokeLinejoin="round" />
+                  </Svg>
+                </View>
+              </Pressable>
+            )}
           </View>
 
           <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">

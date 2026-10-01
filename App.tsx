@@ -95,7 +95,9 @@ export default function App() {
   const webStart: Screen | null = (() => {
     if (Platform.OS !== 'web' || typeof window === 'undefined') return null;
     const start = new URLSearchParams(window.location.search).get('start');
-    return start === 'signup' ? 'niche' : start === 'signin' ? 'signin' : null;
+    // The web app has no welcome page (the website is the front door):
+    // without ?start it opens on sign-in
+    return start === 'signup' ? 'niche' : 'signin';
   })();
   const [showSplash, setShowSplash] = useState(!webStart);
   const [currentScreen, setCurrentScreen] = useState<Screen>(webStart ?? 'welcome');
@@ -322,8 +324,9 @@ export default function App() {
     setCurrentScreen(previousScreen === 'signin' ? 'welcome' : previousScreen);
   };
 
+  // New here? Start sign-up from step 1 (topics), like Get started does
   const handleCreateAccountFromSignIn = () => {
-    navigateTo('signup');
+    navigateTo('niche');
   };
 
   const handleSignInSubmit = (_email: string) => {
@@ -357,7 +360,7 @@ export default function App() {
   };
 
   const handleLogout = () => {
-    navigateTo('welcome');
+    navigateTo(Platform.OS === 'web' ? 'signin' : 'welcome');
   };
 
   const getTransitionType = (screen: Screen): ScreenTransitionType => {
@@ -391,11 +394,11 @@ export default function App() {
       case 'plan':
         return 'platforms';
       case 'signin':
-        return 'welcome';
+        return Platform.OS === 'web' ? null : 'welcome';
       case 'verify-code':
         return verifyMode === 'signup' ? 'signup' : 'signin';
       case 'niche':
-        return 'welcome';
+        return Platform.OS === 'web' ? null : 'welcome';
       case 'platforms':
         return 'niche';
       case 'mission-detail':
@@ -526,7 +529,7 @@ export default function App() {
 
         {currentScreen === 'signin' && (
           <SignInScreen
-            onBack={handleBackFromSignIn}
+            onBack={Platform.OS === 'web' ? undefined : handleBackFromSignIn}
             onCreateAccount={handleCreateAccountFromSignIn}
             onSubmit={handleSignInSubmit}
             onSocialSignIn={() => {
@@ -549,7 +552,7 @@ export default function App() {
 
         {currentScreen === 'niche' && (
           <NicheSelectionScreen
-            onBack={handleBackFromNiche}
+            onBack={Platform.OS === 'web' ? undefined : handleBackFromNiche}
             onContinue={handleNicheContinue}
           />
         )}
