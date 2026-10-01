@@ -1172,3 +1172,41 @@ export function getTopicIdeas(topic: string, goal: IdeaGoal, format = '30-second
     why: TOPIC_WHY[goal],
   }));
 }
+
+// ---------------------------------------------------------------------------
+// Saved hooks (Hook Studio hearts). In-memory until there's a backend.
+// ---------------------------------------------------------------------------
+
+export interface SavedHook {
+  line: string;
+  /** 'talking' | 'dance' | 'skit' | 'text' */
+  style: string;
+  idea: string;
+  savedAt: number;
+}
+
+let savedHooks: SavedHook[] = [];
+const savedHookListeners = new Set<() => void>();
+const emitHooks = () => savedHookListeners.forEach((l) => l());
+
+export function getSavedHooks(): SavedHook[] {
+  return savedHooks;
+}
+export function isHookSaved(line: string): boolean {
+  return savedHooks.some((h) => h.line === line);
+}
+/** Saves or un-saves a hook; returns true when it's now saved. */
+export function toggleSavedHook(h: Omit<SavedHook, 'savedAt'>): boolean {
+  if (isHookSaved(h.line)) {
+    savedHooks = savedHooks.filter((x) => x.line !== h.line);
+    emitHooks();
+    return false;
+  }
+  savedHooks = [{ ...h, savedAt: Date.now() }, ...savedHooks];
+  emitHooks();
+  return true;
+}
+export function subscribeToSavedHooks(listener: () => void): () => void {
+  savedHookListeners.add(listener);
+  return () => savedHookListeners.delete(listener);
+}

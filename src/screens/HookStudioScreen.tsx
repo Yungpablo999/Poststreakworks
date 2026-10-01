@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react';
 import { View, ScrollView, Pressable, StyleSheet, Platform, KeyboardAvoidingView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Animated, { Easing, FadeIn, FadeInUp, cancelAnimation, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
@@ -15,7 +15,8 @@ import { JarvisOrb } from '../components/JarvisOrb';
 import { FreeAppHeader } from '../components/FreeAppHeader';
 import { FloatingTabBar, TabType } from '../components/FloatingTabBar';
 import { UserProfileModal, UserProfileData } from '../components/UserProfileModal';
-import { FILM_STYLES, getDefaultFilmStyle, type FilmStyle } from '../data';
+import { FILM_STYLES, getDefaultFilmStyle, getSavedHooks, isHookSaved, subscribeToSavedHooks, toggleSavedHook, type FilmStyle } from '../data';
+import { AppToast } from '../components/ui/AppToast';
 import { ds, goldTokens } from '../theme/colors';
 
 // Hook Studio (Pro): the first 3 seconds. Pick the kind of video and the kind
@@ -150,7 +151,7 @@ function HookCard({
             }}
             hitSlop={8}
             accessibilityRole="button"
-            accessibilityLabel={liked ? 'Unlike' : 'Like'}
+            accessibilityLabel={liked ? 'Remove from saved hooks' : 'Save hook'}
             accessibilityState={{ selected: liked }}
             style={pointer}
           >
@@ -212,7 +213,20 @@ export const HookStudioScreen: React.FC<HookStudioScreenProps> = ({
   const [round, setRound] = useState(0);
   const [thinking, setThinking] = useState(false);
   const [open, setOpen] = useState<string | null>(null);
-  const [liked, setLiked] = useState<string[]>([]);
+  const saved = useSyncExternalStore(subscribeToSavedHooks, getSavedHooks);
+  const [toast, setToast] = useState<string | null>(null);
+  const showToast = (m: string) => {
+    setToast(m);
+    setTimeout(() => setToast((t) => (t === m ? null : t)), 2200);
+  };
+  const toggleSave = (line: string) => {
+    const now = toggleSavedHook({ line, style, idea: idea.trim() || ideaTitle });
+    showToast(now ? 'Saved to your hooks' : 'Removed from your hooks');
+  };
+  const pickHook = (line: string, st: FilmStyle) => {
+    if (Platform.OS !== 'web') Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    onUseHook?.(idea.trim() || ideaTitle, line, st);
+  };
   const hooks = useMemo(() => makeHooks(style, angle, round), [style, angle, round]);
 
   // Changing the video type or angle reshapes the hooks, with a short beat
@@ -315,21 +329,46 @@ export const HookStudioScreen: React.FC<HookStudioScreenProps> = ({
                     index={i}
                     style={style}
                     open={open === h.id}
-                    liked={liked.includes(h.id)}
+                    liked={saved.some((x) => x.line === h.line)}
                     onToggle={() => setOpen(open === h.id ? null : h.id)}
-                    onLike={() => setLiked((l) => (l.includes(h.id) ? l.filter((x) => x !== h.id) : [...l, h.id]))}
-                    onUse={() => {
-                      if (Platform.OS !== 'web') Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-                      onUseHook?.(idea.trim() || ideaTitle, h.line, style);
-                    }}
+                    onLike={() => toggleSave(h.line)}
+                    onUse={() => pickHook(h.line, style)}
                   />
                 ))}
               </View>
+            )}
+
+            {/* Saved hooks: hearts land here */}
+            {saved.length > 0 && (
+              <Animated.View entering={FadeInUp.duration(320)}>
+                <Text style={styles.section}>Your saved hooks</Text>
+                <GlassCard radius={22} padding={0}>
+                  {saved.map((h, i) => (
+                    <Animated.View key={h.line} entering={FadeIn.duration(220)} style={[styles.savedRow, i < saved.length - 1 && styles.savedLine]}>
+                      <View style={styles.flex}>
+                        <Text style={styles.savedText}>“{h.line}”</Text>
+                        <Text style={styles.savedMeta} numberOfLines={1}>
+                          {FILM_STYLES.find((f) => f.id === h.style)?.label ?? 'Talking'} · {h.idea}
+                        </Text>
+                      </View>
+                      <Pressable onPress={() => pickHook(h.line, h.style as FilmStyle)} hitSlop={6} accessibilityRole="button" style={({ pressed }) => [styles.savedUse, pressed && styles.pressed, pointer]}>
+                        <Text style={styles.savedUseText}>Use</Text>
+                      </Pressable>
+                      <Pressable onPress={() => { tick(); toggleSave(h.line); }} hitSlop={8} accessibilityRole="button" accessibilityLabel="Remove from saved hooks" style={pointer}>
+                        <Svg width={18} height={18} viewBox="0 0 24 24" fill="#E5484D">
+                          <Path d="M12 21s-7-4.4-9.3-9A5.2 5.2 0 0112 6.6 5.2 5.2 0 0121.3 12C19 16.6 12 21 12 21z" stroke="#E5484D" strokeWidth={2} strokeLinejoin="round" />
+                        </Svg>
+                      </Pressable>
+                    </Animated.View>
+                  ))}
+                </GlassCard>
+              </Animated.View>
             )}
           </ScrollView>
         </KeyboardAvoidingView>
       </SafeAreaView>
 
+      {toast && <AppToast message={toast} />}
       <FloatingTabBar activeTab="create" onTabPress={(t) => onNavigateTab?.(t)} />
       <UserProfileModal visible={showProfile} onClose={() => setShowProfile(false)} onLogout={onLogout} initialProfile={userProfile} onSaveProfile={onSaveProfile} />
     </View>
@@ -369,6 +408,12 @@ const styles = StyleSheet.create({
   thinking: { flexDirection: 'row', alignItems: 'center', gap: 10, padding: 16, borderRadius: 20, backgroundColor: 'rgba(255, 255, 255, 0.8)' },
   thinkingText: { fontSize: 14, fontWeight: '700', color: ds.purple },
   stack: { gap: 10 },
+  savedRow: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingHorizontal: 14, paddingVertical: 12 },
+  savedLine: { borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: 'rgba(23, 20, 32, 0.08)' },
+  savedText: { fontSize: 14.5, lineHeight: 20, fontWeight: '800', color: ds.ink },
+  savedMeta: { fontSize: 12, fontWeight: '600', color: ds.text3, marginTop: 2 },
+  savedUse: { paddingHorizontal: 12, height: 32, borderRadius: 999, justifyContent: 'center', backgroundColor: ds.lavender },
+  savedUseText: { fontSize: 12.5, fontWeight: '800', color: ds.purple },
 
   hookTop: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   hookTag: { paddingHorizontal: 8, height: 22, borderRadius: 999, justifyContent: 'center', backgroundColor: ds.lavender },
