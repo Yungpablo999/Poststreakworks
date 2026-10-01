@@ -44,10 +44,11 @@ export const PLATFORM_NAMES: Record<string, string> = {
 export const clock = (s: number) => `${Math.floor(s / 60)}:${String(Math.round(s) % 60).padStart(2, '0')}`;
 
 // ─── Source switch ──────────────────────────────────────────────────────────
-export type StudioSource = 'idea' | 'video';
+export type StudioSource = 'idea' | 'video' | 'link';
 const SOURCES: { id: StudioSource; label: string }[] = [
   { id: 'idea', label: 'An idea' },
-  { id: 'video', label: 'A video I made' },
+  { id: 'video', label: 'My video' },
+  { id: 'link', label: 'A link' },
 ];
 
 export function SourceSwitch({ value, onChange }: { value: StudioSource; onChange: (v: StudioSource) => void }) {

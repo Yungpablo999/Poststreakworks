@@ -5,7 +5,7 @@ import Animated, { Easing, FadeIn, FadeInUp } from 'react-native-reanimated';
 import Svg, { Path, Rect } from 'react-native-svg';
 import * as Haptics from 'expo-haptics';
 import * as Clipboard from 'expo-clipboard';
-import { Text } from '../components/ui/AppText';
+import { Text, TextInput } from '../components/ui/AppText';
 import { AppButton } from '../components/ui/AppButton';
 import { AutoGrowInput } from '../components/ui/AutoGrowInput';
 import { FitLines } from '../components/ui/FitLines';
@@ -31,6 +31,7 @@ import {
 } from '../components/repurpose/VideoStudio';
 import { captureWithCamera, pickFromLibrary, type PickedMedia } from '../utils/media';
 import {
+  readLink,
   getDefaultFilmStyle,
   getLikeThisIdeas,
   getVideoBreakdown,
@@ -190,17 +191,17 @@ export const RepurposeScreen: React.FC<RepurposeScreenProps> = ({
   const toggle = (id: string) =>
     setPlatforms((prev) => (prev.includes(id) ? prev.filter((p) => p !== id) : [...prev, id]));
 
-  const make = () => {
+  const make = (opts?: { text?: string; spent?: boolean }) => {
     if (!platforms.length) {
       showToast('Pick at least one platform');
       return;
     }
-    if (!spendRepurpose(persona, isPro ? 'pro' : 'free')) {
+    if (!opts?.spent && !spendRepurpose(persona, isPro ? 'pro' : 'free')) {
       onOpenJarvisPro?.();
       return;
     }
     if (Platform.OS !== 'web') Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    const next = getRepurposeVersions(idea, platforms);
+    const next = getRepurposeVersions(opts?.text ?? idea, platforms);
     setScheduled(false);
     setVersions([]);
     // Jarvis "writes" each platform in turn
@@ -249,6 +250,54 @@ export const RepurposeScreen: React.FC<RepurposeScreenProps> = ({
   };
 
   const finishWatching = useCallback(() => setPhase('done'), []);
+
+  // ── From a link ──────────────────────────────────────────────────────────
+  const [linkText, setLinkText] = useState('');
+  const [linkFocused, setLinkFocused] = useState(false);
+  const [owner, setOwner] = useState<'mine' | 'other'>('mine');
+  const [linkPhase, setLinkPhase] = useState<'idle' | 'reading' | 'done'>('idle');
+  const [readStep, setReadStep] = useState(0);
+  const preview = useMemo(() => readLink(linkText), [linkText]);
+  const pasteLink = async () => {
+    try {
+      const t = await Clipboard.getStringAsync();
+      if (t) {
+        setLinkText(t.trim());
+        setLinkPhase('idle');
+      } else showToast('Nothing copied yet');
+    } catch {
+      showToast('Couldn’t paste. Try typing it.');
+    }
+  };
+  const readLinkNow = () => {
+    if (!preview) {
+      showToast('That doesn’t look like a link');
+      return;
+    }
+    if (!platforms.length) {
+      showToast('Pick at least one platform');
+      return;
+    }
+    if (!spendRepurpose(persona, isPro ? 'pro' : 'free')) {
+      onOpenJarvisPro?.();
+      return;
+    }
+    if (Platform.OS !== 'web') Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    setVersions([]);
+    setRound(0);
+    setLinkPhase('reading');
+    setReadStep(0);
+    [1, 2, 3].forEach((n) => setTimeout(() => setReadStep(n), n * 600));
+    setTimeout(() => {
+      setLinkPhase('done');
+      if (owner === 'mine') make({ text: preview.title, spent: true });
+    }, 2100);
+  };
+  const linkIdeas = useMemo(
+    () => (preview ? getLikeThisIdeas(preview.style, 30, platforms, round) : []),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [preview?.style, platforms.join(','), round],
+  );
 
   // Ideas follow the platforms picked; "different ideas" is free once watched
   const seconds = video?.seconds ?? 30;
@@ -310,12 +359,14 @@ export const RepurposeScreen: React.FC<RepurposeScreenProps> = ({
                 lines={
                   source === 'idea'
                     ? ['One idea,', <Text key="e" style={styles.accent}>every platform</Text>]
-                    : ['Your video,', <Text key="e" style={styles.accent}>your next one</Text>]
+                    : source === 'link'
+                      ? ['Paste a link,', <Text key="e" style={styles.accent}>make it yours</Text>]
+                      : ['Your video,', <Text key="e" style={styles.accent}>your next one</Text>]
                 }
                 textStyle={styles.headlineText}
                 maxFontSize={34}
                 align="left"
-                accessibilityLabel={source === 'idea' ? 'One idea, every platform' : 'Your video, your next one'}
+                accessibilityLabel={source === 'idea' ? 'One idea, every platform' : source === 'link' ? 'Paste a link, make it yours' : 'Your video, your next one'}
               />
               <View style={styles.meter}>
                 {isPro ? <UnlimitedChip /> : <AllowanceMeter left={left} limit={limit} />}
@@ -373,6 +424,87 @@ export const RepurposeScreen: React.FC<RepurposeScreenProps> = ({
               </Animated.View>
             )}
 
+            {/* Link */}
+            {source === 'link' && (
+              <Animated.View key="link" entering={FadeIn.duration(260)}>
+                <GlassCard strong radius={24} padding={16}>
+                  <Text style={styles.eyebrow}>PASTE ANY LINK</Text>
+                  <Text style={styles.linkHelp}>A video, reel, carousel, text post or web page.</Text>
+                  <View style={styles.linkRow}>
+                    <View style={[styles.field, styles.linkField, linkFocused && styles.fieldOn]}>
+                      <TextInput
+                        value={linkText}
+                        onChangeText={(t) => {
+                          setLinkText(t);
+                          setLinkPhase('idle');
+                        }}
+                        onFocus={() => setLinkFocused(true)}
+                        onBlur={() => setLinkFocused(false)}
+                        placeholder="https://"
+                        placeholderTextColor={ds.text3}
+                        autoCapitalize="none"
+                        autoCorrect={false}
+                        keyboardType="url"
+                        selectionColor={ds.purple}
+                        style={styles.linkInput}
+                        accessibilityLabel="Link"
+                      />
+                    </View>
+                    <Pressable onPress={pasteLink} accessibilityRole="button" style={({ pressed }) => [styles.pasteBtn, pressed && { transform: [{ scale: 0.96 }] }]}>
+                      <Text style={styles.pasteText}>Paste</Text>
+                    </Pressable>
+                  </View>
+                  {preview && (
+                    <Animated.View key={`${preview.platform}-${preview.kind}`} entering={FadeIn.duration(220)} style={styles.detected}>
+                      {preview.platform !== 'web' && preview.platform !== 'x' ? (
+                        <PlatformLogo type={preview.platform as PlatformLogoType} size={28} />
+                      ) : (
+                        <View style={styles.webIcon}>
+                          <Svg width={16} height={16} viewBox="0 0 24 24" fill="none">
+                            <Path d="M10 13a5 5 0 007.5.5l3-3a5 5 0 00-7-7l-1.7 1.7M14 11a5 5 0 00-7.5-.5l-3 3a5 5 0 007 7l1.7-1.7" stroke={ds.purple} strokeWidth={2.2} strokeLinecap="round" />
+                          </Svg>
+                        </View>
+                      )}
+                      <View style={styles.flex}>
+                        <Text style={styles.detectedTitle}>{preview.platformName} · {preview.kindLabel}</Text>
+                        <Text style={styles.detectedSub} numberOfLines={1}>{preview.url.replace(/^https?:\/\//, '')}</Text>
+                      </View>
+                    </Animated.View>
+                  )}
+                  {linkText.trim().length > 6 && !preview && <Text style={styles.linkError}>That doesn’t look like a link yet.</Text>}
+
+                  <Text style={styles.ownerQ}>Is this yours?</Text>
+                  <View style={styles.ownerRow}>
+                    {(['mine', 'other'] as const).map((o) => {
+                      const on = owner === o;
+                      return (
+                        <Pressable
+                          key={o}
+                          onPress={() => {
+                            if (Platform.OS !== 'web') Haptics.selectionAsync();
+                            setOwner(o);
+                            setLinkPhase('idle');
+                          }}
+                          accessibilityRole="radio"
+                          accessibilityState={{ checked: on }}
+                          style={({ pressed }) => [styles.ownerChip, on && styles.ownerChipOn, pressed && { transform: [{ scale: 0.97 }] }]}
+                        >
+                          <Text style={[styles.ownerText, on && styles.ownerTextOn]}>{o === 'mine' ? 'Yes, it’s mine' : 'Someone else’s'}</Text>
+                        </Pressable>
+                      );
+                    })}
+                  </View>
+                  <Animated.View key={owner} entering={FadeIn.duration(200)}>
+                    <Text style={styles.ownerNote}>
+                      {owner === 'mine'
+                        ? 'Jarvis turns it into a version for each platform you pick.'
+                        : 'Jarvis gives you new ideas in the same style, in your own words. It won’t copy their words or re-post their content.'}
+                    </Text>
+                  </Animated.View>
+                </GlassCard>
+              </Animated.View>
+            )}
+
             {/* Platforms */}
             <Text style={styles.section}>Where should it go?</Text>
             <View style={styles.chips}>
@@ -381,9 +513,21 @@ export const RepurposeScreen: React.FC<RepurposeScreenProps> = ({
               ))}
             </View>
 
-            {!(source === 'video' && phase !== 'idle') && (
+            {!(source === 'video' && phase !== 'idle') && !(source === 'link' && linkPhase !== 'idle') && (
             <View style={styles.cta}>
-              {left > 0 && source === 'video' ? (
+              {left > 0 && source === 'link' ? (
+                <AppButton
+                  title={owner === 'mine' ? 'Read and repurpose' : 'Get ideas from it'}
+                  size="lg"
+                  disabled={!preview}
+                  onPress={readLinkNow}
+                  iconRight={
+                    <Svg width={16} height={16} viewBox="0 0 24 24" fill="none">
+                      <Path d="M12 2l2.4 7.6L22 12l-7.6 2.4L12 22l-2.4-7.6L2 12l7.6-2.4L12 2z" fill="#FFFFFF" />
+                    </Svg>
+                  }
+                />
+              ) : left > 0 && source === 'video' ? (
                 <AppButton
                   title="Watch my video"
                   size="lg"
@@ -404,7 +548,7 @@ export const RepurposeScreen: React.FC<RepurposeScreenProps> = ({
                   }
                   size="lg"
                   disabled={!!working.length}
-                  onPress={make}
+                  onPress={() => make()}
                   iconRight={
                     <Svg width={16} height={16} viewBox="0 0 24 24" fill="none">
                       <Path d="M12 2l2.4 7.6L22 12l-7.6 2.4L12 22l-2.4-7.6L2 12l7.6-2.4L12 2z" fill="#FFFFFF" />
@@ -445,8 +589,56 @@ export const RepurposeScreen: React.FC<RepurposeScreenProps> = ({
               </Animated.View>
             )}
 
+            {/* Link: reading, then what's in it */}
+            {source === 'link' && linkPhase === 'reading' && preview && (
+              <Animated.View entering={FadeIn.duration(220)} style={styles.readCard}>
+                <GlassCard strong radius={22} padding={16}>
+                  <View style={styles.writing}>
+                    <JarvisOrb size={28} />
+                    <Text style={styles.readTitle}>Jarvis is reading your link</Text>
+                  </View>
+                  {['Opening the link', 'Reading the caption', preview.kind === 'video' ? 'Watching the video' : preview.kind === 'carousel' ? 'Looking at each slide' : 'Reading the post', 'Finding what stands out'].map((st, i) => (
+                    <View key={st} style={styles.readRow}>
+                      <View style={[styles.readDot, i < readStep && styles.readDotDone, i === readStep && styles.readDotNow]} />
+                      <Text style={[styles.readText, i > readStep && { color: ds.text3 }]}>{st}</Text>
+                    </View>
+                  ))}
+                </GlassCard>
+              </Animated.View>
+            )}
+            {source === 'link' && linkPhase === 'done' && preview && (
+              <Animated.View entering={FadeInUp.duration(380).easing(Easing.out(Easing.cubic))}>
+                <Text style={styles.section}>{owner === 'mine' ? 'What’s in it' : 'What stands out'}</Text>
+                <GlassCard strong radius={22} padding={14}>
+                  <View style={styles.detected}>
+                    {preview.platform !== 'web' && preview.platform !== 'x' ? <PlatformLogo type={preview.platform as PlatformLogoType} size={30} /> : <JarvisOrb size={28} />}
+                    <View style={styles.flex}>
+                      <Text style={styles.detectedTitle}>“{preview.title}”</Text>
+                      <Text style={styles.detectedSub}>{preview.platformName} · {preview.kindLabel}</Text>
+                    </View>
+                  </View>
+                </GlassCard>
+                {owner === 'other' && (
+                  <>
+                    <Text style={styles.section}>New ideas in the same style</Text>
+                    <IdeaDeck
+                      ideas={linkIdeas}
+                      platforms={platforms}
+                      savedIds={savedIds}
+                      onFilm={(it) => onFilmIdea?.(it.title, preview.style)}
+                      onToggleSave={toggleSave}
+                      onMore={moreIdeas}
+                    />
+                  </>
+                )}
+                <Pressable onPress={() => { setLinkText(''); setLinkPhase('idle'); setVersions([]); }} accessibilityRole="button" style={styles.anotherLink}>
+                  <Text style={styles.anotherLinkText}>Try another link</Text>
+                </Pressable>
+              </Animated.View>
+            )}
+
             {/* Versions */}
-            {source === 'idea' && (versions.length > 0 || working.length > 0) && (
+            {(source === 'idea' || (source === 'link' && owner === 'mine' && linkPhase === 'done')) && (versions.length > 0 || working.length > 0) && (
               <>
                 <Text style={styles.section}>Your versions</Text>
                 <View style={styles.stack}>
@@ -457,7 +649,7 @@ export const RepurposeScreen: React.FC<RepurposeScreenProps> = ({
                       index={0}
                       onChange={(body) => setVersions((prev) => prev.map((x, j) => (j === i ? { ...x, body } : x)))}
                       onCopy={() => copy(v)}
-                      onUse={() => onUseVersion?.(v.body, v.platform, idea)}
+                      onUse={() => onUseVersion?.(v.body, v.platform, source === 'link' && preview ? preview.title : idea)}
                     />
                   ))}
                   {working.map((p) => (
@@ -549,6 +741,33 @@ const styles = StyleSheet.create({
   headlineText: { fontWeight: '800', letterSpacing: -0.8, color: ds.ink },
   accent: { color: ds.purple },
   meter: { marginTop: 4 },
+  linkHelp: { fontSize: 13, color: ds.text2, marginTop: 4 },
+  linkRow: { flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 12 },
+  linkField: { flex: 1, paddingVertical: 0, height: 48, justifyContent: 'center' },
+  linkInput: { fontSize: 15, fontWeight: '600', color: ds.ink, ...(Platform.OS === 'web' ? ({ outlineStyle: 'none' } as object) : {}) },
+  pasteBtn: { height: 48, paddingHorizontal: 16, borderRadius: 16, justifyContent: 'center', backgroundColor: ds.purple },
+  pasteText: { fontSize: 14, fontWeight: '800', color: '#FFFFFF' },
+  detected: { flexDirection: 'row', alignItems: 'center', gap: 10, marginTop: 12 },
+  webIcon: { width: 28, height: 28, borderRadius: 8, backgroundColor: ds.lavender, alignItems: 'center', justifyContent: 'center' },
+  detectedTitle: { fontSize: 14.5, fontWeight: '800', color: ds.ink },
+  detectedSub: { fontSize: 12, fontWeight: '600', color: ds.text3, marginTop: 1 },
+  linkError: { fontSize: 12.5, fontWeight: '700', color: '#B45309', marginTop: 8 },
+  ownerQ: { fontSize: 13.5, fontWeight: '800', color: ds.ink, marginTop: 16, marginBottom: 8 },
+  ownerRow: { flexDirection: 'row', gap: 8 },
+  ownerChip: { flex: 1, height: 42, borderRadius: 14, alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(255, 255, 255, 0.85)', borderWidth: 1.5, borderColor: 'rgba(255, 255, 255, 0.95)' },
+  ownerChipOn: { borderColor: ds.purple, backgroundColor: ds.lavenderSoft },
+  ownerText: { fontSize: 13.5, fontWeight: '700', color: ds.text2 },
+  ownerTextOn: { color: ds.purple, fontWeight: '800' },
+  ownerNote: { fontSize: 12.5, lineHeight: 18, color: ds.text2, marginTop: 10 },
+  readCard: { marginTop: 18 },
+  readTitle: { fontSize: 15, fontWeight: '800', color: ds.ink },
+  readRow: { flexDirection: 'row', alignItems: 'center', gap: 10, marginTop: 10 },
+  readDot: { width: 12, height: 12, borderRadius: 6, borderWidth: 2, borderColor: ds.lavender },
+  readDotNow: { borderColor: ds.purple },
+  readDotDone: { backgroundColor: ds.greenFill, borderColor: ds.greenFill },
+  readText: { fontSize: 13.5, fontWeight: '700', color: ds.ink },
+  anotherLink: { alignSelf: 'center', height: 44, justifyContent: 'center', marginTop: 6 },
+  anotherLinkText: { fontSize: 13.5, fontWeight: '800', color: ds.purple },
   planCard: { marginTop: 16 },
   planHead: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   planTitle: { flex: 1, fontSize: 16, fontWeight: '800', color: ds.ink },

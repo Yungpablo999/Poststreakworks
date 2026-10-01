@@ -1210,3 +1210,66 @@ export function subscribeToSavedHooks(listener: () => void): () => void {
   savedHookListeners.add(listener);
   return () => savedHookListeners.delete(listener);
 }
+
+// ---------------------------------------------------------------------------
+// Repurpose from a link: work out the platform and kind of post from a URL.
+// Mock: a real backend reads the post (the creator's own posts through their
+// connected accounts; other people's only for ideas, never to copy).
+// ---------------------------------------------------------------------------
+
+export type LinkKind = 'video' | 'carousel' | 'text' | 'article';
+
+export interface LinkPreview {
+  url: string;
+  platform: 'tiktok' | 'instagram' | 'youtube' | 'threads' | 'facebook' | 'x' | 'web';
+  platformName: string;
+  kind: LinkKind;
+  kindLabel: string;
+  title: string;
+  style: FilmStyle;
+}
+
+const LINK_TITLES: Record<LinkKind, string> = {
+  video: '3 creator mistakes I stopped making',
+  carousel: 'My simple posting system, in 5 slides',
+  text: 'Nobody talks about how lonely creating can feel',
+  article: 'How to stay consistent as a creator',
+};
+
+export function readLink(raw: string): LinkPreview | null {
+  const text = raw.trim();
+  const m = text.match(/(https?:\/\/)?([a-z0-9-]+\.)+[a-z]{2,}(\/[^\s]*)?/i);
+  if (!m) return null;
+  const url = m[0].startsWith('http') ? m[0] : `https://${m[0]}`;
+  let host = '';
+  let path = '';
+  try {
+    const u = new URL(url);
+    host = u.hostname.replace(/^www\.|^m\./, '').toLowerCase();
+    path = u.pathname.toLowerCase();
+  } catch {
+    return null;
+  }
+  const make = (platform: LinkPreview['platform'], platformName: string, kind: LinkKind, kindLabel: string): LinkPreview => ({
+    url,
+    platform,
+    platformName,
+    kind,
+    kindLabel,
+    title: LINK_TITLES[kind],
+    style: kind === 'carousel' || kind === 'text' || kind === 'article' ? 'text' : 'talking',
+  });
+  if (host.endsWith('tiktok.com')) return make('tiktok', 'TikTok', path.includes('/photo/') ? 'carousel' : 'video', path.includes('/photo/') ? 'Photo carousel' : 'Video');
+  if (host.endsWith('instagram.com')) {
+    if (path.startsWith('/reel')) return make('instagram', 'Instagram', 'video', 'Reel');
+    return make('instagram', 'Instagram', 'carousel', 'Post or carousel');
+  }
+  if (host.endsWith('youtube.com') || host === 'youtu.be') return make('youtube', 'YouTube', 'video', path.startsWith('/shorts') ? 'Short' : 'Video');
+  if (host.endsWith('threads.net') || host.endsWith('threads.com')) return make('threads', 'Threads', 'text', 'Text post');
+  if (host.endsWith('facebook.com') || host === 'fb.watch') {
+    const vid = host === 'fb.watch' || /\/(watch|reel|videos)/.test(path);
+    return make('facebook', 'Facebook', vid ? 'video' : 'text', vid ? 'Video' : 'Post');
+  }
+  if (host === 'x.com' || host.endsWith('twitter.com')) return make('x', 'X', 'text', 'Post');
+  return make('web', host, 'article', 'Web page');
+}

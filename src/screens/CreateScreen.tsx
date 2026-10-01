@@ -566,7 +566,7 @@ export const CreateScreen: React.FC<CreateScreenProps> = ({
           <Reanimated.View entering={FadeInUp.delay(300).duration(550)} style={styles.stack}>
             <GlassRow
               title="Repurpose"
-              subtitle="Turn an idea or a video into more posts"
+              subtitle="Turn an idea, a video or a link into more posts"
               onPress={openRepurpose}
               extra={isPro ? <UnlimitedChip /> : <AllowanceMeter left={repurposesLeft} limit={repurpose.weeklyLimit ?? 0} />}
               icon={
