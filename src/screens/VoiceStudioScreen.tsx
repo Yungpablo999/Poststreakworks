@@ -28,6 +28,7 @@ import { FloatingTabBar, TabType } from '../components/FloatingTabBar';
 import { UserProfileModal, UserProfileData } from '../components/UserProfileModal';
 import type { UserPersona } from '../components/HeaderDualModePills';
 import { getVoiceCloneSummary } from '../data';
+import { BuyMinutesSheet, VoiceAvatar, VoiceLibrarySheet, VOICES } from '../components/voice/VoiceSheets';
 import { ds, goldTokens } from '../theme/colors';
 
 // Voice Studio (Pro). New creators set up their voice first (read a short
@@ -53,10 +54,7 @@ const SETUP_SCRIPT =
 const DEFAULT_SCRIPT =
   'Stop making this mistake if you want to stay consistent. Consistency isn’t about working all day. It’s about a simple system that still works on slow days. Here are the three steps I use.';
 
-const NARRATORS = [
-  { id: 'calm', name: 'Calm narrator' },
-  { id: 'bright', name: 'Bright narrator' },
-];
+const EXPRESSION = ['Steady', 'Natural', 'Lively'] as const;
 const SPEEDS = [0.9, 1, 1.1, 1.2];
 
 const clock = (s: number) => `${Math.floor(s / 60)}:${String(Math.round(s) % 60).padStart(2, '0')}`;
@@ -91,6 +89,7 @@ function Wave({ active, count = 24, height = 56 }: { active: boolean; count?: nu
 function VoiceSetup({ onDone }: { onDone: () => void }) {
   const [phase, setPhase] = useState<'ready' | 'recording' | 'learning'>('ready');
   const [secs, setSecs] = useState(0);
+  const [tooShort, setTooShort] = useState(false);
   const pulse = useSharedValue(0);
   const learn = useSharedValue(0);
   const timer = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -103,13 +102,21 @@ function VoiceSetup({ onDone }: { onDone: () => void }) {
     if (Platform.OS !== 'web') Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     setPhase('recording');
     setSecs(0);
+    setTooShort(false);
     pulse.value = withRepeat(withTiming(1, { duration: 1100, easing: Easing.out(Easing.cubic) }), -1, false);
     timer.current = setInterval(() => setSecs((s) => s + 1), 1000);
   };
+  // Stops the moment it's tapped; too short just asks for another go
   const stop = () => {
     if (timer.current) clearInterval(timer.current);
     cancelAnimation(pulse);
     pulse.value = 0;
+    if (secs < 5) {
+      if (Platform.OS !== 'web') Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
+      setTooShort(true);
+      setPhase('ready');
+      return;
+    }
     if (Platform.OS !== 'web') Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     setPhase('learning');
     learn.value = withTiming(1, { duration: 2600, easing: Easing.inOut(Easing.cubic) });
@@ -118,7 +125,6 @@ function VoiceSetup({ onDone }: { onDone: () => void }) {
 
   const ring = useAnimatedStyle(() => ({ opacity: 0.5 * (1 - pulse.value), transform: [{ scale: 1 + 0.5 * pulse.value }] }));
   const bar = useAnimatedStyle(() => ({ width: `${learn.value * 100}%` }));
-  const canStop = secs >= 5;
 
   return (
     <GlassCard strong radius={26} padding={20}>
@@ -140,7 +146,7 @@ function VoiceSetup({ onDone }: { onDone: () => void }) {
             <View style={styles.recBtnWrap}>
               {phase === 'recording' && <Animated.View pointerEvents="none" style={[styles.recRing, ring]} />}
               <Pressable
-                onPress={phase === 'ready' ? start : canStop ? stop : undefined}
+                onPress={phase === 'ready' ? start : stop}
                 accessibilityRole="button"
                 accessibilityLabel={phase === 'ready' ? 'Start recording' : 'Stop recording'}
                 style={({ pressed }) => [styles.recBtn, phase === 'recording' && styles.recBtnOn, pressed && styles.pressed, pointer]}
@@ -156,7 +162,11 @@ function VoiceSetup({ onDone }: { onDone: () => void }) {
               </Pressable>
             </View>
             <Text style={styles.recHint}>
-              {phase === 'ready' ? 'Tap to start. Somewhere quiet works best.' : canStop ? `${clock(secs)} · tap to finish` : `${clock(secs)} · keep reading`}
+              {phase === 'recording'
+                ? `${clock(secs)} · tap to stop`
+                : tooShort
+                  ? 'That was a little short. Read the whole sentence, then stop.'
+                  : 'Tap to start. Somewhere quiet works best.'}
             </Text>
           </View>
         </>
@@ -329,7 +339,11 @@ export const VoiceStudioScreen: React.FC<VoiceStudioScreenProps> = ({
   const [showProfile, setShowProfile] = useState(false);
   const [myVoice, setMyVoice] = useState<string | null>(summary.voiceName ? 'My voice' : null);
   const [used, setUsed] = useState(summary.minutesUsed);
-  const [voice, setVoice] = useState<string>(summary.voiceName ? 'mine' : 'calm');
+  const [voice, setVoice] = useState<string>(summary.voiceName ? 'mine' : 'ava');
+  const [expression, setExpression] = useState<(typeof EXPRESSION)[number]>('Natural');
+  const [showLibrary, setShowLibrary] = useState(false);
+  const [showBuy, setShowBuy] = useState(false);
+  const [extra, setExtra] = useState(0);
   const [script, setScript] = useState(DEFAULT_SCRIPT);
   const [focused, setFocused] = useState(false);
   const [speed, setSpeed] = useState(1);
@@ -338,10 +352,11 @@ export const VoiceStudioScreen: React.FC<VoiceStudioScreenProps> = ({
   const [toast, setToast] = useState<string | null>(null);
 
   const included = summary.minutesIncluded;
-  const left = Math.max(0, included - used);
+  const left = Math.max(0, included - used) + extra;
   const words = script.trim() ? script.trim().split(/\s+/).length : 0;
   const seconds = Math.max(3, Math.round(words / 2.6 / speed));
-  const voiceName = voice === 'mine' ? 'My voice' : NARRATORS.find((n) => n.id === voice)?.name ?? 'Narrator';
+  const libVoice = VOICES.find((v) => v.id === voice);
+  const voiceName = voice === 'mine' ? 'My voice' : libVoice?.name ?? 'Narrator';
   const title = script.trim().split(/[.!?]/)[0]?.slice(0, 60) || 'Voiceover';
 
   const showToast = (m: string) => {
@@ -367,7 +382,7 @@ export const VoiceStudioScreen: React.FC<VoiceStudioScreenProps> = ({
   const enter = (d: number) => FadeInUp.delay(d).duration(500).easing(Easing.out(Easing.cubic));
   const meter = useSharedValue(0);
   useEffect(() => {
-    meter.value = withTiming(left / included, { duration: 700, easing: Easing.out(Easing.cubic) });
+    meter.value = withTiming(Math.min(1, left / included), { duration: 700, easing: Easing.out(Easing.cubic) });
   }, [left, included, meter]);
   const meterStyle = useAnimatedStyle(() => ({ width: `${meter.value * 100}%` }));
 
@@ -428,6 +443,13 @@ export const VoiceStudioScreen: React.FC<VoiceStudioScreenProps> = ({
                     <View style={styles.meterTrack}>
                       <Animated.View style={[styles.meterFill, meterStyle]} />
                     </View>
+                    {extra > 0 && <Text style={styles.extraNote}>Includes {extra} extra minutes you bought</Text>}
+                    <Pressable onPress={() => setShowBuy(true)} accessibilityRole="button" style={({ pressed }) => [styles.buyLink, pressed && styles.pressed, pointer]}>
+                      <Svg width={14} height={14} viewBox="0 0 24 24" fill="none">
+                        <Path d="M12 5v14M5 12h14" stroke={goldTokens.dark} strokeWidth={2.6} strokeLinecap="round" />
+                      </Svg>
+                      <Text style={styles.buyLinkText}>Get more minutes</Text>
+                    </Pressable>
                   </GlassCard>
                 </Animated.View>
 
@@ -458,39 +480,58 @@ export const VoiceStudioScreen: React.FC<VoiceStudioScreenProps> = ({
                 {/* Voice + speed */}
                 <Animated.View entering={enter(240)}>
                   <Text style={styles.section}>Voice</Text>
-                  <View style={styles.voices}>
-                    {[...(myVoice !== 'skip' ? [{ id: 'mine', name: 'My voice' }] : []), ...NARRATORS].map((v) => {
-                      const on = voice === v.id;
-                      return (
-                        <Pressable
-                          key={v.id}
-                          onPress={() => {
-                            tick();
-                            setVoice(v.id);
-                            if (phase === 'ready') setPhase('idle');
-                          }}
-                          accessibilityRole="radio"
-                          accessibilityState={{ checked: on }}
-                          style={({ pressed }) => [styles.voiceChip, on && styles.voiceChipOn, pressed && styles.pressed, pointer]}
-                        >
-                          {v.id === 'mine' ? (
-                            <JarvisOrb size={18} />
-                          ) : (
-                            <Svg width={14} height={14} viewBox="0 0 24 24" fill="none">
-                              <Rect x="9" y="2" width="6" height="12" rx="3" stroke={on ? ds.purple : ds.text3} strokeWidth={2.2} />
-                              <Path d="M5 11a7 7 0 0014 0M12 18v4" stroke={on ? ds.purple : ds.text3} strokeWidth={2.2} strokeLinecap="round" />
-                            </Svg>
-                          )}
-                          <Text style={[styles.voiceText, on && styles.voiceTextOn]}>{v.name}</Text>
-                        </Pressable>
-                      );
-                    })}
-                  </View>
+                  <Pressable
+                    onPress={() => {
+                      tick();
+                      setShowLibrary(true);
+                    }}
+                    accessibilityRole="button"
+                    accessibilityLabel={`Voice: ${voiceName}. Change voice`}
+                    style={({ pressed }) => [styles.voiceCard, pressed && { transform: [{ scale: 0.98 }] }, pointer]}
+                  >
+                    {voice === 'mine' || !libVoice ? (
+                      <View style={styles.mineAvatar}>
+                        <JarvisOrb size={30} />
+                      </View>
+                    ) : (
+                      <VoiceAvatar voice={libVoice} />
+                    )}
+                    <View style={styles.flex}>
+                      <Text style={styles.voiceCardName}>{voiceName}</Text>
+                      <Text style={styles.voiceCardFeel} numberOfLines={1}>
+                        {voice === 'mine' ? 'Your own voice' : `${libVoice?.feel} · ${libVoice?.accent}`}
+                      </Text>
+                    </View>
+                    <View style={styles.changePill}>
+                      <Text style={styles.changeText}>Change</Text>
+                    </View>
+                  </Pressable>
                   {myVoice === 'skip' && (
                     <Pressable onPress={() => setMyVoice(null)} accessibilityRole="button" style={pointer}>
                       <Text style={styles.setupLink}>Set up your own voice</Text>
                     </Pressable>
                   )}
+                  <Text style={styles.subSection}>Expression</Text>
+                  <View style={styles.exprRow}>
+                    {EXPRESSION.map((e) => {
+                      const on = e === expression;
+                      return (
+                        <Pressable
+                          key={e}
+                          onPress={() => {
+                            tick();
+                            setExpression(e);
+                            if (phase === 'ready') setPhase('idle');
+                          }}
+                          accessibilityRole="radio"
+                          accessibilityState={{ checked: on }}
+                          style={({ pressed }) => [styles.expr, on && styles.exprOn, pressed && styles.pressed, pointer]}
+                        >
+                          <Text style={[styles.exprText, on && styles.exprTextOn]}>{e}</Text>
+                        </Pressable>
+                      );
+                    })}
+                  </View>
                   <Text style={styles.subSection}>Speed</Text>
                   <SpeedSwitch
                     value={speed}
@@ -569,6 +610,27 @@ export const VoiceStudioScreen: React.FC<VoiceStudioScreenProps> = ({
         </KeyboardAvoidingView>
       </SafeAreaView>
 
+      <VoiceLibrarySheet
+        visible={showLibrary}
+        onClose={() => setShowLibrary(false)}
+        selected={voice}
+        hasMyVoice={!!myVoice && myVoice !== 'skip'}
+        onPick={(id) => {
+          setVoice(id);
+          if (phase === 'ready') setPhase('idle');
+          setTimeout(() => setShowLibrary(false), 250);
+        }}
+      />
+      <BuyMinutesSheet
+        visible={showBuy}
+        onClose={() => setShowBuy(false)}
+        minutesLeft={left}
+        onBuy={(m) => {
+          setExtra((x) => x + m);
+          setShowBuy(false);
+          showToast(`${m} minutes added`);
+        }}
+      />
       {toast && <AppToast message={toast} />}
       <FloatingTabBar activeTab="create" onTabPress={(t) => onNavigateTab?.(t)} />
       <UserProfileModal visible={showProfile} onClose={() => setShowProfile(false)} onLogout={onLogout} initialProfile={userProfile} onSaveProfile={onSaveProfile} />
@@ -625,6 +687,20 @@ const styles = StyleSheet.create({
   scriptInput: { fontSize: 15.5, lineHeight: 23, fontWeight: '600' },
 
   voices: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
+  voiceCard: { flexDirection: 'row', alignItems: 'center', gap: 12, padding: 12, borderRadius: 20, backgroundColor: 'rgba(255, 255, 255, 0.85)', borderWidth: 1.5, borderColor: 'rgba(255, 255, 255, 0.95)' },
+  mineAvatar: { width: 44, height: 44, borderRadius: 22, backgroundColor: ds.lavender, alignItems: 'center', justifyContent: 'center' },
+  voiceCardName: { fontSize: 15.5, fontWeight: '800', color: ds.ink },
+  voiceCardFeel: { fontSize: 12.5, fontWeight: '600', color: ds.text2, marginTop: 2 },
+  changePill: { paddingHorizontal: 12, height: 32, borderRadius: 999, justifyContent: 'center', backgroundColor: ds.lavender },
+  changeText: { fontSize: 13, fontWeight: '800', color: ds.purple },
+  exprRow: { flexDirection: 'row', gap: 8 },
+  expr: { flex: 1, height: 40, borderRadius: 14, alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(255, 255, 255, 0.85)', borderWidth: 1.5, borderColor: 'rgba(255, 255, 255, 0.95)' },
+  exprOn: { borderColor: ds.purple, backgroundColor: ds.lavenderSoft },
+  exprText: { fontSize: 13.5, fontWeight: '700', color: ds.text2 },
+  exprTextOn: { color: ds.purple, fontWeight: '800' },
+  extraNote: { fontSize: 12, fontWeight: '700', color: goldTokens.dark, marginTop: 8 },
+  buyLink: { alignSelf: 'flex-start', flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 12, paddingHorizontal: 12, height: 34, borderRadius: 999, backgroundColor: goldTokens.light, borderWidth: 1, borderColor: goldTokens.border },
+  buyLinkText: { fontSize: 13, fontWeight: '800', color: goldTokens.dark },
   voiceChip: {
     flexDirection: 'row',
     alignItems: 'center',
