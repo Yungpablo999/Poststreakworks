@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { ResponsiveColumns } from '../ui/ResponsiveColumns';
 import { View, Image, Pressable, StyleSheet, Platform } from 'react-native';
 import Animated, {
   Easing,
@@ -256,6 +257,8 @@ export function HomeDayZero({
 
   return (
     <View style={styles.stack}>
+      {/* Desktop: the main card on the left, the rest beside it */}
+      <ResponsiveColumns split={1} gap={14} leftFlex={1.15}>
       {/* 1. Welcome + the one clear next action */}
       <Animated.View entering={FadeInUp.duration(550)}>
         <GlassCard strong radius={26} padding={20}>
@@ -313,6 +316,8 @@ export function HomeDayZero({
           ))}
         </GlassCard>
       </Animated.View>
+
+      </ResponsiveColumns>
 
       <CalendarSheet visible={calendarOpen} onClose={() => setCalendarOpen(false)} persona="new" onPlanPost={onPlanFirstPost} />
     </View>

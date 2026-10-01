@@ -1,6 +1,11 @@
 import { Dimensions, PixelRatio, Platform } from 'react-native';
 
-const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
+const { width: WINDOW_WIDTH, height: WINDOW_HEIGHT } = Dimensions.get('window');
+// Sizes scale between phone widths only. On tablets and desktop (the web
+// app) the window is far wider, which would blow text and padding up, so
+// scaling stops at a large phone and the layout widens instead.
+const SCREEN_WIDTH = Math.min(WINDOW_WIDTH, 430);
+const SCREEN_HEIGHT = Math.min(WINDOW_HEIGHT, 932);
 
 // Baseline guideline dimensions (based on standard iPhone 16 / modern Android ~390px width)
 const GUIDELINE_BASE_WIDTH = 390;

@@ -1,4 +1,5 @@
 import { SocialBrandIcon } from '../components/SocialBrandIcon';
+import { ResponsiveColumns } from '../components/ui/ResponsiveColumns';
 import React, { useState, useRef, useEffect } from 'react';
 import {
   StyleSheet,
@@ -484,6 +485,8 @@ export const GrowthScreen: React.FC<GrowthScreenProps> = ({
             />
           </Reanimated.View>
 
+          {/* Desktop: audience and platforms on the left, the rest beside them */}
+          <ResponsiveColumns split={2} gap={16}>
           {/* 1. TOTAL AUDIENCE */}
           <Reanimated.View entering={FadeInUp.delay(100).duration(550)} style={styles.section0}>
           {isNewUser ? (
@@ -590,6 +593,7 @@ export const GrowthScreen: React.FC<GrowthScreenProps> = ({
           </Reanimated.View>
           )}
 
+          </ResponsiveColumns>
           {/* Bottom Space for Floating Tab Bar */}
           <View style={{ height: 110 }} />
         </ScrollView>

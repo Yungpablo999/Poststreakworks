@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { ResponsiveColumns } from '../components/ui/ResponsiveColumns';
 import {
   StyleSheet,
   View,
@@ -210,6 +211,8 @@ export const QuestsScreen: React.FC<QuestsScreenProps> = ({
             />
           </Reanimated.View>
 
+          {/* Desktop: today's quest and check-in on the left, the rest beside them */}
+          <ResponsiveColumns split={2} gap={16}>
           {/* 1. TODAY'S QUEST */}
           <Reanimated.View entering={FadeInUp.delay(100).duration(550)}>
             <TodayQuestCard
@@ -319,6 +322,7 @@ export const QuestsScreen: React.FC<QuestsScreenProps> = ({
             />
           </Reanimated.View>
 
+          </ResponsiveColumns>
           {/* Bottom Space for Floating Tab Bar */}
           <View style={{ height: 110 }} />
         </ScrollView>

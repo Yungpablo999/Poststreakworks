@@ -13,8 +13,10 @@ import { Text } from './ui/AppText';
 import Svg, { Path, Circle } from 'react-native-svg';
 import * as Haptics from 'expo-haptics';
 import { LinearGradient } from 'expo-linear-gradient';
+import { useBreakpoint } from '../hooks/useBreakpoint';
 
-// The floating glass tab bar shared by every main screen. A purple pill springs
+// The floating glass tab bar shared by every main screen (phones and tablets;
+// on desktop the side menu takes over, so it renders nothing). A purple pill springs
 // to the chosen tab and its icon pops; on web, tabs brighten on hover.
 
 export type TabType = 'home' | 'create' | 'quests' | 'growth';
@@ -26,7 +28,7 @@ export interface FloatingTabBarProps {
 }
 
 // Vector SVG Icons for Bottom Navigation
-const HomeNavIcon = ({ color }: { color: string }) => (
+export const HomeNavIcon = ({ color }: { color: string }) => (
   <Svg width={20} height={20} viewBox="0 0 24 24" fill={color}>
     <Path
       d="M12 2.5L2 11.5H5.5V21.5H9.5V14.5C9.5 13.67 10.17 13 11 13H13C13.83 13 14.5 13.67 14.5 14.5V21.5H18.5V11.5H22L12 2.5Z"
@@ -35,14 +37,14 @@ const HomeNavIcon = ({ color }: { color: string }) => (
   </Svg>
 );
 
-const CreateNavIcon = ({ color }: { color: string }) => (
+export const CreateNavIcon = ({ color }: { color: string }) => (
   <Svg width={20} height={20} viewBox="0 0 24 24" fill="none">
     <Circle cx="12" cy="12" r="9.5" stroke={color} strokeWidth="2.4" />
     <Path d="M12 7.5V16.5M7.5 12H16.5" stroke={color} strokeWidth="2.4" strokeLinecap="round" />
   </Svg>
 );
 
-const QuestsNavIcon = ({ color }: { color: string }) => (
+export const QuestsNavIcon = ({ color }: { color: string }) => (
   <Svg width={20} height={20} viewBox="0 0 24 24" fill="none">
     <Path d="M3.5 3.5L5.8 2L13.2 9.4L11.4 11.2L4 3.8V3.5Z" fill={color} />
     <Path d="M3.5 3.5L2 5.8L9.4 13.2L11.2 11.4L3.8 4H3.5Z" fill={color} />
@@ -57,7 +59,7 @@ const QuestsNavIcon = ({ color }: { color: string }) => (
   </Svg>
 );
 
-const GrowthNavIcon = ({ color }: { color: string }) => (
+export const GrowthNavIcon = ({ color }: { color: string }) => (
   <Svg width={20} height={20} viewBox="0 0 24 24" fill="none">
     <Path
       d="M3.5 17L9 11.5L13 15L20.5 7"
@@ -142,7 +144,13 @@ function TabSlot({
   );
 }
 
-export const FloatingTabBar: React.FC<FloatingTabBarProps> = ({ activeTab, onTabPress, style }) => {
+export const FloatingTabBar: React.FC<FloatingTabBarProps> = (props) => {
+  const bp = useBreakpoint();
+  if (bp === 'desktop') return null;
+  return <FloatingTabBarInner {...props} />;
+};
+
+const FloatingTabBarInner: React.FC<FloatingTabBarProps> = ({ activeTab, onTabPress, style }) => {
   const [rowWidth, setRowWidth] = useState(0);
   const activeIndex = TAB_INDICES[activeTab] ?? 0;
   const tabWidth = rowWidth > 0 ? (rowWidth - PAD_X * 2) / 4 : 0;

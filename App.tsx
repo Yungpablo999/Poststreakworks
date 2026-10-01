@@ -51,6 +51,9 @@ import { EdgeSwipeBackWrapper } from './src/components/EdgeSwipeBackWrapper';
 import { TabType } from './src/components/FloatingTabBar';
 import { UserProfileData, UserProfileModal } from './src/components/UserProfileModal';
 import { setNotificationHandler } from './src/components/notifications/NotificationsSheet';
+import { AppSidebar, type SidebarId } from './src/components/web/AppSidebar';
+import { useBreakpoint } from './src/hooks/useBreakpoint';
+import { GlassBackdrop } from './src/components/glass/GlassBackdrop';
 import { UserPersona } from './src/components/HeaderDualModePills';
 
 type Screen =
@@ -214,6 +217,8 @@ export default function App() {
 
   // Notifications that involve doing something open the right place
   const [showAccountsFromNote, setShowAccountsFromNote] = useState(false);
+  // The profile sheet opened from the desktop side menu
+  const [showProfileFromMenu, setShowProfileFromMenu] = useState(false);
   React.useEffect(() => {
     setNotificationHandler((target) => {
       if (target === 'accounts') setShowAccountsFromNote(true);
@@ -419,6 +424,22 @@ export default function App() {
     }
   };
 
+  // Desktop: the side menu replaces the bottom tab bar once you're in the app
+  const breakpoint = useBreakpoint();
+  const SIDEBAR_FOR: Partial<Record<Screen, SidebarId>> = {
+    dashboard: 'home', 'mission-detail': 'home', 'jarvis-pro': 'home',
+    create: 'create', 'idea-detail': 'create', composer: 'create', 'content-angle': 'create', script: 'create', caption: 'create',
+    quests: 'quests', 'challenge-detail': 'quests',
+    growth: 'growth', 'audience-breakdown': 'growth', 'post-performance': 'growth', 'platform-growth': 'growth',
+    schedule: 'schedule', repurpose: 'repurpose', 'hook-studio': 'hook-studio', 'voice-studio': 'voice-studio',
+  };
+  const SCREEN_FOR: Record<SidebarId, Screen> = {
+    home: 'dashboard', create: 'create', quests: 'quests', growth: 'growth',
+    schedule: 'schedule', repurpose: 'repurpose', 'hook-studio': 'hook-studio', 'voice-studio': 'voice-studio',
+  };
+  const inApp = currentScreen in SIDEBAR_FOR;
+  const showSidebar = breakpoint === 'desktop' && inApp;
+
   // Hold on the brand background for the split second fonts take to load,
   // so text never flashes in the system font. On error, fall back gracefully.
   if (!fontsLoaded && !fontError) {
@@ -430,6 +451,20 @@ export default function App() {
       <View style={styles.container}>
         <StatusBar style="dark" />
 
+        <View style={showSidebar ? styles.desktopRow : styles.fill}>
+          {showSidebar && (
+            <AppSidebar
+              active={SIDEBAR_FOR[currentScreen] ?? null}
+              profile={userProfile}
+              onNavigate={(id) => navigateTo(SCREEN_FOR[id])}
+              onOpenProfile={() => setShowProfileFromMenu(true)}
+              onOpenPro={() => navigateTo('jarvis-pro')}
+            />
+          )}
+          <View style={styles.fill}>
+            {/* Tablet and desktop: the page sits in a centred column over the brand glows */}
+            {inApp && breakpoint !== 'phone' && <GlassBackdrop />}
+            <View style={inApp && breakpoint !== 'phone' ? [styles.column, { maxWidth: breakpoint === 'desktop' ? 1120 : 720 }] : styles.fill}>
         <EdgeSwipeBackWrapper
           enabled={Boolean(getBackScreen(currentScreen))}
           onSwipeBack={() => {
@@ -1021,11 +1056,22 @@ export default function App() {
         )}
           </ScreenTransitionContainer>
         </EdgeSwipeBackWrapper>
+            </View>
+          </View>
+        </View>
 
         <UserProfileModal
           visible={showAccountsFromNote}
           initialSubTab="accounts"
           onClose={() => setShowAccountsFromNote(false)}
+          onLogout={handleLogout}
+          initialProfile={userProfile}
+          onSaveProfile={(updated) => setUserProfile(prev => ({ ...prev, ...updated, tier: updated.tier || prev.tier || 'free' }))}
+        />
+
+        <UserProfileModal
+          visible={showProfileFromMenu}
+          onClose={() => setShowProfileFromMenu(false)}
           onLogout={handleLogout}
           initialProfile={userProfile}
           onSaveProfile={(updated) => setUserProfile(prev => ({ ...prev, ...updated, tier: updated.tier || prev.tier || 'free' }))}
@@ -1050,4 +1096,7 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     backgroundColor: '#FAF8F5',
   },
+  fill: { flex: 1 },
+  column: { flex: 1, width: '100%', alignSelf: 'center' },
+  desktopRow: { flex: 1, flexDirection: 'row' },
 });

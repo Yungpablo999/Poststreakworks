@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { ResponsiveColumns } from '../components/ui/ResponsiveColumns';
 import {
   StyleSheet,
   View,
@@ -495,6 +496,8 @@ export const CreateScreen: React.FC<CreateScreenProps> = ({
             />
           </Reanimated.View>
 
+          {/* Desktop: idea and tools on the left, the rest beside them */}
+          <ResponsiveColumns split={2} gap={16}>
           {/* 1. TODAY'S IDEA (with Jarvis shuffle) */}
           <Reanimated.View entering={FadeInUp.delay(100).duration(550)}>
             <IdeaHeroCard
@@ -648,6 +651,7 @@ export const CreateScreen: React.FC<CreateScreenProps> = ({
             )}
           </Reanimated.View>
 
+          </ResponsiveColumns>
           {/* Bottom Space for Floating Tab Bar */}
           <View style={{ height: 110 }} />
         </ScrollView>

@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { ResponsiveColumns } from '../ui/ResponsiveColumns';
 import { Pressable, Platform } from 'react-native';
 import * as Haptics from 'expo-haptics';
 import { JarvisOrb } from '../JarvisOrb';
@@ -172,6 +173,8 @@ export function HomeReturning({ firstName, onPlanPost, onOpenSchedule, onOpenGro
 
   return (
     <View style={styles.stack}>
+      {/* Desktop: the main card on the left, the rest beside it */}
+      <ResponsiveColumns split={pro ? 2 : 1} gap={14} leftFlex={1.15}>
       {/* 1. Welcome back + the one next step */}
       <Animated.View entering={enter(0)}>
         <GlassCard strong radius={26} padding={20}>
@@ -248,6 +251,8 @@ export function HomeReturning({ firstName, onPlanPost, onOpenSchedule, onOpenGro
           ))}
         </GlassCard>
       </Animated.View>
+
+      </ResponsiveColumns>
 
       <CalendarSheet visible={calendarOpen} onClose={() => setCalendarOpen(false)} persona="returning" onPlanPost={onPlanPost} />
     </View>

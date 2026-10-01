@@ -9,6 +9,7 @@ import {
 } from 'react-native';
 import { Text } from './ui/AppText';
 import { BrandLogo } from './BrandLogo';
+import { useBreakpoint } from '../hooks/useBreakpoint';
 import { BellButton } from './home/BellButton';
 import Svg, { Path, Circle } from 'react-native-svg';
 import * as Haptics from 'expo-haptics';
@@ -99,6 +100,8 @@ export const FreeAppHeader: React.FC<FreeAppHeaderProps> = ({
     }
   };
 
+  // Desktop shows the logo in the side menu, so the header doesn't repeat it
+  const onDesktop = useBreakpoint() === 'desktop';
   const currentPersona = userPersona || userProfile?.userPersona || 'returning';
   const currentTier = (userProfile?.tier as UserTier) || 'free';
   // The bell opens the shared notifications sheet on every screen
@@ -130,7 +133,7 @@ export const FreeAppHeader: React.FC<FreeAppHeaderProps> = ({
         )}
 
         <View style={styles.headerBrandStack}>
-          <BrandLogo size="sm" isDark={isDark} />
+          {!onDesktop && <BrandLogo size="sm" isDark={isDark} />}
 
           <HeaderDualModePills
             tier={currentTier}

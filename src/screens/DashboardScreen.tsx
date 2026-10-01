@@ -17,6 +17,7 @@ import {
 } from 'react-native';
 import { Text } from '../components/ui/AppText';
 import { BrandLogo } from '../components/BrandLogo';
+import { useBreakpoint } from '../hooks/useBreakpoint';
 import { HomeDayZero } from '../components/home/HomeDayZero';
 import { HomeReturning } from '../components/home/HomeReturning';
 import { ProUpsellCard } from '../components/home/ProUpsellCard';
@@ -563,6 +564,8 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
 }) => {
   const isDark = false;
   const isNewUser = (userPersona || userProfile?.userPersona) === 'new';
+  // Desktop shows the logo in the side menu
+  const onDesktop = useBreakpoint() === 'desktop';
   // The bell opens the shared notifications sheet (same as every other screen)
   const [showNotifSheet, setShowNotifSheet] = useState(false);
   const sharedUnread = useUnreadNotifications(userPersona || userProfile?.userPersona, userProfile?.tier);
@@ -944,7 +947,7 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
         <View style={styles.headerBar}>
           {/* Top-Left: Ghost Logo Mascot + Mode Switcher */}
           <View style={styles.headerLeftGroup}>
-            <BrandLogo size="sm" isDark={isDark} />
+            {!onDesktop && <BrandLogo size="sm" isDark={isDark} />}
 
             <HeaderDualModePills
               tier={tier === 'pro' ? 'pro' : 'free'}
@@ -1037,8 +1040,9 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
             />
           )}
 
-          {/* 9. UNLOCK JARVIS PRO (gold = Pro only; members don't see it) */}
-          {tier !== 'pro' && (
+          {/* 9. UNLOCK JARVIS PRO (gold = Pro only; members don't see it).
+              On desktop the side menu already offers Pro, so it isn't repeated here. */}
+          {tier !== 'pro' && !onDesktop && (
           <Reanimated.View entering={FadeInUp.delay(360).duration(550)} style={styles.proUpsell}>
             <ProUpsellCard onUpgrade={() => (onOpenJarvisPro ? onOpenJarvisPro() : openProModal())} />
           </Reanimated.View>
