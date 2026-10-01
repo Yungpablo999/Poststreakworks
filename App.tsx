@@ -57,6 +57,8 @@ import { WebTopBar } from './src/components/web/WebTopBar';
 import { TodayRail } from './src/components/web/TodayRail';
 import { StudioRail, type StudioKind } from './src/components/web/StudioRail';
 import { setComposerOpener } from './src/components/web/webActions';
+import { react as mascotReact, setBaseline as setMascotBaseline, type Emotion } from './src/mascot/mascot';
+import { preloadMascot } from './src/components/mascot/LiveMascot';
 import { IS_WEB_APP, useBreakpoint, useWebSidebar } from './src/hooks/useBreakpoint';
 import { MobileWebBar } from './src/components/web/MobileWebBar';
 import { GlassBackdrop } from './src/components/glass/GlassBackdrop';
@@ -519,6 +521,30 @@ export default function App() {
       onTogglePersona={handleTogglePersona}
     />
   );
+
+  // The mascot's resting mood follows where you are, and it says hello when you
+  // arrive (welcome back for returning creators). Never guilt, only warmth.
+  const MASCOT_MOOD: Partial<Record<Screen, Emotion>> = {
+    dashboard: 'calm', create: 'idea', 'idea-detail': 'idea', 'content-angle': 'thinking',
+    composer: 'working', script: 'working', caption: 'working',
+    quests: 'determined', 'mission-detail': 'determined', 'challenge-detail': 'determined',
+    growth: 'happy', 'audience-breakdown': 'happy', 'post-performance': 'love', 'platform-growth': 'happy',
+    schedule: 'calm', repurpose: 'idea', 'hook-studio': 'idea', 'voice-studio': 'happy', 'jarvis-pro': 'cool',
+  };
+  const greeted = React.useRef(false);
+  React.useEffect(() => {
+    preloadMascot();
+  }, []);
+  React.useEffect(() => {
+    const mood = MASCOT_MOOD[currentScreen];
+    if (mood) setMascotBaseline(mood);
+    if (currentScreen === 'dashboard' && !greeted.current) {
+      greeted.current = true;
+      const returning = (userPersona || userProfile?.userPersona) === 'returning';
+      setTimeout(() => mascotReact(returning ? 'welcomeBack' : 'hello'), 700);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentScreen]);
 
   // Hold on the brand background for the split second fonts take to load,
   // so text never flashes in the system font. On error, fall back gracefully.

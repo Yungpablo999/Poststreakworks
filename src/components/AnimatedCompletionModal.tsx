@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { StyleSheet, View, Image, Modal, Pressable, Platform } from 'react-native';
+import { StyleSheet, View, Modal, Pressable, Platform } from 'react-native';
 import Animated, {
   Easing,
   FadeIn,
@@ -18,6 +18,8 @@ import { BlurView } from 'expo-blur';
 import { Text } from './ui/AppText';
 import { AppButton } from './ui/AppButton';
 import { ds } from '../theme/colors';
+import { LiveMascot } from './mascot/LiveMascot';
+import { react, type Emotion, type MascotEvent } from '../mascot/mascot';
 
 // The app's celebration pop-up (post scheduled, quest started, draft saved…).
 // Calm and warm: the card eases in (no spring bounce), a ring draws itself
@@ -35,6 +37,8 @@ export interface AnimatedCompletionModalProps {
   actionText?: string;
   onAction?: () => void;
   onDismiss: () => void;
+  /** The mascot's emotion (worked out from the title when not given) */
+  emotion?: Emotion;
 }
 
 const EASE = Easing.out(Easing.cubic);
@@ -54,6 +58,18 @@ const clean = (t: string) =>
     .trim();
 
 const AnimatedCircle = Animated.createAnimatedComponent(Circle);
+
+// Which emotion fits this win, from what the pop-up says
+function pick(text: string): [Emotion, MascotEvent] {
+  const t = text.toLowerCase();
+  if (/draft|saved/.test(t)) return ['happy', 'saved'];
+  if (/pro\b|upgrade/.test(t)) return ['cool', 'pro'];
+  if (/challenge|badge|level/.test(t)) return ['party', 'challengeDone'];
+  if (/quest|mission|started/.test(t)) return ['determined', 'questStart'];
+  if (/schedul|queued|planned/.test(t)) return ['excited', 'scheduled'];
+  if (/posted|published|live/.test(t)) return ['party', 'posted'];
+  return ['party', 'celebrate'];
+}
 
 function Spark({ index, play }: { index: number; play: number }) {
   const t = useSharedValue(0);
@@ -102,7 +118,10 @@ export const AnimatedCompletionModal: React.FC<AnimatedCompletionModalProps> = (
   actionText = 'Continue',
   onAction,
   onDismiss,
+  emotion,
 }) => {
+  const [autoEmotion, event] = pick(`${title} ${badgeText}`);
+  const mascotEmotion = emotion ?? autoEmotion;
   const reduceMotion = useReducedMotion();
   const [mounted, setMounted] = useState(visible);
   const [play, setPlay] = useState(0);
@@ -116,6 +135,7 @@ export const AnimatedCompletionModal: React.FC<AnimatedCompletionModalProps> = (
       setMounted(true);
       setPlay((p) => p + 1);
       if (Platform.OS !== 'web') Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      react(event);
       card.value = 0;
       ring.value = 0;
       tick.value = 0;
@@ -186,7 +206,7 @@ export const AnimatedCompletionModal: React.FC<AnimatedCompletionModalProps> = (
               />
             </Svg>
             <View style={styles.ghostCircle}>
-              <Image source={require('../../assets/images/jarvis-ghost-clean.png')} style={styles.ghost} resizeMode="contain" />
+              <LiveMascot size={96} emotion={mascotEmotion} interactive={false} confetti={false} />
             </View>
             <Animated.View style={[styles.tick, tickStyle]}>
               <Svg width={16} height={16} viewBox="0 0 24 24" fill="none">

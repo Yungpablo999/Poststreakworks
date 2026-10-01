@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { LiveMascot } from '../mascot/LiveMascot';
 import { Image, Platform, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import Animated, { Easing, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 import { BlurView } from 'expo-blur';
@@ -201,11 +202,17 @@ export function AppSidebar({
       </ScrollView>
 
       {/* Preview the four versions of the app (sample data for now) */}
-      <View style={styles.preview}>
-        <Text style={styles.previewLabel}>Preview as</Text>
-        <View style={styles.previewRow}>
-          <Segment options={['Free', 'Pro']} value={isPro ? 1 : 0} onChange={onToggleTier} />
-          <Segment options={['New', 'Returning']} value={persona === 'returning' ? 1 : 0} onChange={onTogglePersona} />
+      {/* The live mascot keeps you company, next to the preview switches */}
+      <View style={styles.buddyRow}>
+        <View style={styles.buddy}>
+          <LiveMascot size={64} bubble="top" bubbleWidth={220} />
+        </View>
+        <View style={[styles.preview, styles.flex]}>
+          <Text style={styles.previewLabel}>Preview as</Text>
+          <View style={styles.previewRow}>
+            <Segment options={['Free', 'Pro']} value={isPro ? 1 : 0} onChange={onToggleTier} />
+            <Segment options={['New', 'Returning']} value={persona === 'returning' ? 1 : 0} onChange={onTogglePersona} />
+          </View>
         </View>
       </View>
 
@@ -253,7 +260,7 @@ function Segment({ options, value, onChange }: { options: [string, string]; valu
 
 const styles = StyleSheet.create({
   flex: { flex: 1 },
-  preview: { marginHorizontal: 14, marginTop: 4 },
+  preview: { marginLeft: 6, marginRight: 14, marginTop: 4 },
   previewLabel: { fontSize: 10.5, fontWeight: '800', letterSpacing: 0.8, textTransform: 'uppercase', color: ds.text3, marginBottom: 6, marginLeft: 2 },
   previewRow: { gap: 6 },
   seg: { flex: 1, flexDirection: 'row', padding: 3, borderRadius: 10, backgroundColor: 'rgba(255, 255, 255, 0.7)', borderWidth: 1, borderColor: 'rgba(255, 255, 255, 0.95)' },
@@ -264,7 +271,8 @@ const styles = StyleSheet.create({
   root: {
     width: SIDEBAR_W,
     height: '100%',
-    overflow: 'hidden',
+    // visible so the mascot's speech bubble can pop out over the page
+    overflow: 'visible',
     borderRightWidth: 1,
     borderRightColor: 'rgba(255, 255, 255, 0.95)',
     shadowColor: '#3F25BF',
@@ -274,6 +282,8 @@ const styles = StyleSheet.create({
     zIndex: 10,
   },
   fill: { backgroundColor: 'rgba(247, 245, 240, 0.72)' },
+  buddyRow: { flexDirection: 'row', alignItems: 'flex-end', paddingLeft: 10, zIndex: 30 },
+  buddy: { marginBottom: 6, zIndex: 30 },
   brand: { paddingHorizontal: 22, paddingTop: 24, paddingBottom: 18 },
   scroll: { paddingHorizontal: 14, paddingBottom: 16 },
   section: { marginTop: 22, marginBottom: 6, marginLeft: 12, fontSize: 11, fontWeight: '800', letterSpacing: 1, textTransform: 'uppercase', color: ds.text3 },

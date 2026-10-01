@@ -1,3 +1,4 @@
+import { react } from '../mascot/mascot';
 import React, { useEffect, useRef, useState } from 'react';
 import { usePageWidth } from '../hooks/useBreakpoint';
 import { View, ScrollView, Pressable, StyleSheet, Platform } from 'react-native';
@@ -387,6 +388,7 @@ export const JarvisProScreen: React.FC<JarvisProScreenProps> = ({ onLogout, onNa
         onDismiss={() => {
           setWelcome(false);
           onUpgraded?.();
+          react('pro');
         }}
       />
       <UserProfileModal visible={showProfile} onClose={() => setShowProfile(false)} onLogout={onLogout} initialProfile={userProfile} onSaveProfile={onSaveProfile} />

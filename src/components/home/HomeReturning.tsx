@@ -276,7 +276,7 @@ const styles = StyleSheet.create({
   briefActionText: { fontSize: 12.5, fontWeight: '800', color: ds.purple },
   stack: { gap: 14 },
   flex: { flex: 1 },
-  welcomeRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },
+  welcomeRow: { flexDirection: 'row', alignItems: 'center', gap: 12, zIndex: 5 },
   chip: {
     alignSelf: 'flex-start',
     flexDirection: 'row',

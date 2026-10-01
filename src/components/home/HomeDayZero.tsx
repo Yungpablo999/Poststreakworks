@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { LiveMascot } from '../mascot/LiveMascot';
 import { ResponsiveColumns } from '../ui/ResponsiveColumns';
 import { View, Image, Pressable, StyleSheet, Platform } from 'react-native';
 import Animated, {
@@ -39,23 +40,11 @@ interface HomeDayZeroProps {
 
 const STEP_MS = 1400;
 
-// ─── Floating ghost ─────────────────────────────────────────────────────────
+// ─── The live mascot (floats, reacts, talks; tap it) ─────────────────────────
 export function FloatingGhost() {
-  const reduceMotion = useReducedMotion();
-  const t = useSharedValue(0);
-  useEffect(() => {
-    if (reduceMotion) return;
-    t.value = withRepeat(withTiming(1, { duration: 2600, easing: Easing.inOut(Easing.sin) }), -1, true);
-  }, [reduceMotion, t]);
-  const float = useAnimatedStyle(() => ({ transform: [{ translateY: -6 * t.value }, { rotate: `${-3 + 6 * t.value}deg` }] }));
-  const shadow = useAnimatedStyle(() => ({ transform: [{ scaleX: 1 - 0.18 * t.value }], opacity: 0.55 - 0.2 * t.value }));
-
   return (
-    <View style={styles.ghostWrap} accessibilityElementsHidden importantForAccessibility="no-hide-descendants">
-      <Animated.View style={float}>
-        <Image source={require('../../../assets/images/jarvis-ghost-clean.png')} style={styles.ghostImage} resizeMode="contain" />
-      </Animated.View>
-      <Animated.View style={[styles.ghostShadow, shadow]} />
+    <View style={styles.ghostWrap}>
+      <LiveMascot size={96} bubble="auto" bubbleWidth={190} />
     </View>
   );
 }
@@ -326,7 +315,8 @@ export function HomeDayZero({
 
 const styles = StyleSheet.create({
   stack: { gap: 14 },
-  welcomeRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },
+  // above the lines below it, so the mascot's speech bubble isn't covered
+  welcomeRow: { flexDirection: 'row', alignItems: 'center', gap: 12, zIndex: 5 },
   welcomeText: { flex: 1 },
   dayChip: {
     alignSelf: 'flex-start',
@@ -343,7 +333,7 @@ const styles = StyleSheet.create({
   dayChipText: { fontSize: 11, fontWeight: '800', letterSpacing: 1, color: ds.purple },
   welcomeTitle: { fontSize: 28, lineHeight: 33, fontWeight: '800', letterSpacing: -0.8, color: ds.ink },
   welcomeName: { color: ds.purple },
-  ghostWrap: { width: 72, height: 78, alignItems: 'center', justifyContent: 'center' },
+  ghostWrap: { width: 96, height: 100, alignItems: 'center', justifyContent: 'center', zIndex: 5 },
   ghostImage: { width: 64, height: 64 },
   ghostShadow: { width: 30, height: 5, borderRadius: 3, backgroundColor: 'rgba(63, 37, 191, 0.14)', marginTop: 0 },
   welcomeBody: { fontSize: 15.5, lineHeight: 22, color: ds.text2, marginTop: 10 },

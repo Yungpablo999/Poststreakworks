@@ -1,3 +1,4 @@
+import { react } from '../../mascot/mascot';
 import React, { useEffect, useState } from 'react';
 import { View, Pressable, StyleSheet, Platform } from 'react-native';
 import Animated, { Easing, FadeIn, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
@@ -114,6 +115,7 @@ export function PlatformFitCard({ body, ending, tags, onCopied }: { body: string
       await Clipboard.setStringAsync(out.extra ? `${out.main}\n\n${out.extra}` : out.main);
       if (Platform.OS !== 'web') Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       onCopied(`${meta.name} caption copied`);
+      react('copied');
     } catch {
       onCopied('Couldn’t copy. Try again.');
     }

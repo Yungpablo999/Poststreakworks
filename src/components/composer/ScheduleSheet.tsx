@@ -1,3 +1,4 @@
+import { react } from '../../mascot/mascot';
 import React, { useEffect, useMemo, useState } from 'react';
 import { dialogStyles, useDialogMode } from '../glass/dialog';
 import { Modal, View, Pressable, ScrollView, StyleSheet, Platform, useWindowDimensions } from 'react-native';
@@ -331,6 +332,7 @@ export function ScheduleSheet({ visible, onClose, onConfirm, mode = 'schedule' }
               onPress={() => {
                 if (Platform.OS !== 'web') Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
                 onConfirm(chosenLabel);
+                react('scheduled');
               }}
             />
           </View>
