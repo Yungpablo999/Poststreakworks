@@ -25,7 +25,7 @@ import { GlassBackdrop } from '../components/glass/GlassBackdrop';
 import { FitLines } from '../components/ui/FitLines';
 import { ChipRow, TopPickCard, IdeaRow, IdeaRowSkeleton, QuotaCard, SavedRow, TopicIdeasCard, UnlimitedIdeasCard } from '../components/ideas/IdeasBlocks';
 import { ComposerToast } from '../components/composer/ComposerBlocks';
-import { getIdeaFeed, IDEA_GOALS, NICHE_LABELS, normalizeNiches, type IdeaGoal } from '../data';
+import { getIdeaFeed, getTopicIdeas, IDEA_GOALS, NICHE_LABELS, normalizeNiches, type IdeaGoal } from '../data';
 import { ds } from '../theme/colors';
 
 interface ContentAngleScreenProps {
@@ -462,23 +462,26 @@ export const ContentAngleScreen: React.FC<ContentAngleScreenProps> = ({
   const isPro = tier === 'pro';
   const [topicIdeas, setTopicIdeas] = useState<typeof feed>([]);
   const [topicBusy, setTopicBusy] = useState(false);
-  const askTopic = (t: string) => {
+  const [lastTopic, setLastTopic] = useState('');
+  const [topicRound, setTopicRound] = useState(0);
+  const askTopic = (t: string, g: IdeaGoal = goal, fresh = false) => {
     if (Platform.OS !== 'web') Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     setTopicBusy(true);
-    const lower = t.charAt(0).toLowerCase() + t.slice(1);
-    const cap = t.charAt(0).toUpperCase() + t.slice(1);
-    const fmt = feed[0]?.format ?? '30-second Reel';
-    const stamp = Date.now();
+    // Same topic again = the next 3; new topic or goal = start over
+    const round = !fresh && t === lastTopic && g === goal && topicIdeas.length ? topicRound + 1 : 0;
+    setTopicRound(round);
+    setLastTopic(t);
     setTimeout(() => {
-      setTopicIdeas([
-        { ...feed[0], id: `topic-${stamp}-0`, title: `The one thing nobody tells you about ${lower}`, hook: `Nobody warned me about this part of ${lower}.`, format: fmt },
-        { ...feed[0], id: `topic-${stamp}-1`, title: `${cap}: 3 mistakes I made so you don’t have to`, hook: `I got ${lower} wrong three times. Here’s what I learned.`, format: fmt },
-        { ...feed[0], id: `topic-${stamp}-2`, title: `I tried ${lower} for 7 days. Here’s what happened`, hook: `Seven days ago I started ${lower}. Day three surprised me.`, format: fmt },
-      ]);
+      setTopicIdeas(getTopicIdeas(t, g, feed[0]?.format, round));
       setTopicBusy(false);
-    }, 900);
+    }, 800);
   };
-  const listIdeas = [...topicIdeas, ...feed.filter((i) => i.id !== top.id).slice(0, listCount)];
+  // Changing the goal reshapes the topic ideas
+  useEffect(() => {
+    if (lastTopic) askTopic(lastTopic, goal, true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [goal]);
+  const listIdeas = feed.filter((i) => i.id !== top.id).slice(0, listCount);
   const savedIds = savedIdeasList.map((s) => s.id);
   const isSaved = (id: string) => savedIds.includes(`feed_${id}`);
 
@@ -593,7 +596,15 @@ export const ContentAngleScreen: React.FC<ContentAngleScreenProps> = ({
           {/* PRO: ideas about your own topic */}
           {isPro && (
             <Reanimated.View entering={FadeInUp.delay(120).duration(550)} style={styles.section}>
-              <TopicIdeasCard busy={topicBusy} onAsk={askTopic} />
+              <TopicIdeasCard
+                busy={topicBusy}
+                onAsk={(t) => askTopic(t)}
+                goalLabel={IDEA_GOALS.find((g) => g.id === goal)?.label ?? 'Grow followers'}
+                results={topicIdeas}
+                isSaved={isSaved}
+                onUse={(idea) => handleSelectIdea(idea.title, idea.format, idea.hook)}
+                onSave={toggleSaveIdea}
+              />
             </Reanimated.View>
           )}
 

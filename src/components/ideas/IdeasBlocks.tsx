@@ -279,7 +279,23 @@ export function QuotaCard({
 }
 
 // ─── Pro: ideas about your own topic ───────────────────────────────────────
-export function TopicIdeasCard({ busy, onAsk }: { busy: boolean; onAsk: (topic: string) => void }) {
+export function TopicIdeasCard({
+  busy,
+  onAsk,
+  goalLabel,
+  results,
+  isSaved,
+  onUse,
+  onSave,
+}: {
+  busy: boolean;
+  onAsk: (topic: string) => void;
+  goalLabel: string;
+  results: FeedIdea[];
+  isSaved: (id: string) => boolean;
+  onUse: (idea: FeedIdea) => void;
+  onSave: (idea: FeedIdea) => void;
+}) {
   const [topic, setTopic] = useState('');
   const [focused, setFocused] = useState(false);
   const ask = () => {
@@ -310,9 +326,39 @@ export function TopicIdeasCard({ busy, onAsk }: { busy: boolean; onAsk: (topic: 
           accessibilityLabel="Your topic"
         />
       </View>
+      <Text style={styles.topicGoal}>
+        Ideas made to <Text style={styles.topicGoalBold}>{goalLabel.toLowerCase()}</Text>
+      </Text>
       <View style={styles.topicBtn}>
-        <AppButton title={busy ? 'Thinking…' : 'Get 3 ideas'} onPress={ask} disabled={busy || !topic.trim()} />
+        <AppButton title={busy ? 'Thinking…' : results.length ? 'Get 3 more' : 'Get 3 ideas'} onPress={ask} disabled={busy || !topic.trim()} />
       </View>
+      {busy && (
+        <View style={styles.topicResults}>
+          <IdeaRowSkeleton />
+        </View>
+      )}
+      {!busy && results.length > 0 && (
+        <View style={styles.topicResults}>
+          <Text style={styles.topicWhy}>{results[0].why}</Text>
+          {results.map((idea, i) => (
+            <Animated.View key={idea.id} entering={FadeInUp.delay(i * 90).duration(320).easing(Easing.out(Easing.cubic))}>
+              <View style={styles.topicIdea}>
+                <View style={styles.flex}>
+                  <Text style={styles.rowTitle}>{idea.title}</Text>
+                  <Text style={styles.topicHook}>“{idea.hook}”</Text>
+                  <Pressable onPress={() => onUse(idea)} hitSlop={6} accessibilityRole="button" style={styles.topicUse}>
+                    <Text style={styles.useText}>Use this idea</Text>
+                    <Svg width={14} height={14} viewBox="0 0 24 24" fill="none">
+                      <Path d="M5 12h14M13 6l6 6-6 6" stroke={ds.purple} strokeWidth={2.4} strokeLinecap="round" strokeLinejoin="round" />
+                    </Svg>
+                  </Pressable>
+                </View>
+                <SaveButton saved={isSaved(idea.id)} onPress={() => onSave(idea)} />
+              </View>
+            </Animated.View>
+          ))}
+        </View>
+      )}
     </GlassCard>
   );
 }
@@ -369,6 +415,13 @@ const styles = StyleSheet.create({
   topicFieldOn: { borderColor: ds.purple, backgroundColor: '#FFFFFF' },
   topicInput: { fontSize: 15, fontWeight: '600', color: ds.ink, ...(Platform.OS === 'web' ? ({ outlineStyle: 'none' } as object) : {}) },
   topicBtn: { marginTop: 12 },
+  topicGoal: { fontSize: 12.5, fontWeight: '600', color: ds.text3, marginTop: 8 },
+  topicGoalBold: { fontWeight: '800', color: ds.purple },
+  topicResults: { marginTop: 14, gap: 8 },
+  topicWhy: { fontSize: 12.5, fontWeight: '700', color: ds.text2 },
+  topicIdea: { flexDirection: 'row', alignItems: 'flex-start', gap: 10, padding: 12, borderRadius: 16, backgroundColor: 'rgba(245, 243, 255, 0.9)' },
+  topicHook: { fontSize: 13, lineHeight: 18, color: ds.text2, marginTop: 4, fontStyle: 'italic' },
+  topicUse: { flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 8, alignSelf: 'flex-start' },
   flex: { flex: 1 },
   rowLabel: { fontSize: 13, fontWeight: '800', color: ds.text2, marginBottom: 8 },
   chips: { gap: 8, paddingRight: 20 },

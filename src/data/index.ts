@@ -1065,3 +1065,67 @@ export function getLikeThisIdeas(style: FilmStyle, seconds: number, platforms: s
     return { id: `${style}-${round}-${i}`, title: base.title, keeps: [...base.keeps, len], tweaks };
   });
 }
+
+// ---------------------------------------------------------------------------
+// Pro: ideas about the creator's own topic, shaped by the chosen goal.
+// Template-based mock until Jarvis writes them.
+// ---------------------------------------------------------------------------
+
+const TOPIC_TEMPLATES: Record<IdeaGoal, { title: (t: string, T: string) => string; hook: (t: string) => string }[]> = {
+  followers: [
+    { title: (t) => `Things nobody tells you about ${t}`, hook: (t) => `Nobody warned me about this part of ${t}.` },
+    { title: (_t, T) => `${T}: the side nobody shows you`, hook: () => `Here’s what it really looks like behind the scenes.` },
+    { title: (t) => `POV: you just started ${t}`, hook: () => `If this is you right now, keep watching.` },
+    { title: (t) => `How ${t} changed my week`, hook: () => `I didn’t expect this to make such a difference.` },
+    { title: (t) => `Rating every ${t} tip I tried`, hook: () => `Number three was a total waste of time.` },
+    { title: (t) => `The ${t} mistake everyone makes`, hook: () => `I did this for months before I noticed.` },
+  ],
+  saves: [
+    { title: (t) => `5 ${t} tips worth saving`, hook: () => `Save this so you have it next time.` },
+    { title: (t) => `My simple ${t} checklist`, hook: () => `I use this every single time. Here it is.` },
+    { title: (_t, T) => `${T}, step by step for beginners`, hook: () => `Step one is the one most people skip.` },
+    { title: (t) => `The tools I use for ${t}`, hook: () => `All of these are free. Save the list.` },
+    { title: (t) => `${t.charAt(0).toUpperCase() + t.slice(1)} cheat sheet`, hook: () => `Everything in one place. Screenshot this.` },
+    { title: (t) => `3 ${t} habits that actually stuck`, hook: () => `These are the only ones I kept doing.` },
+  ],
+  comments: [
+    { title: (t) => `Unpopular opinion about ${t}`, hook: () => `I know people will disagree with this one.` },
+    { title: (t) => `${t.charAt(0).toUpperCase() + t.slice(1)}: which side are you on?`, hook: () => `Tell me in the comments which one you pick.` },
+    { title: (t) => `What I’d tell myself before starting ${t}`, hook: () => `What would you add to this list?` },
+    { title: (t) => `Am I doing ${t} wrong?`, hook: () => `Be honest with me in the comments.` },
+    { title: (t) => `The ${t} question I get asked most`, hook: () => `Drop your answer before you watch mine.` },
+    { title: (t) => `${t.charAt(0).toUpperCase() + t.slice(1)}: overrated or worth it?`, hook: () => `I changed my mind on this one.` },
+  ],
+  often: [
+    { title: (t) => `One quick ${t} tip in 30 seconds`, hook: () => `Here’s one thing you can try today.` },
+    { title: (t) => `A day of ${t} in 3 short clips`, hook: () => `No talking, just the day.` },
+    { title: (t) => `${t.charAt(0).toUpperCase() + t.slice(1)}: today’s small win`, hook: () => `Small win today, and here’s how.` },
+    { title: (t) => `${t.charAt(0).toUpperCase() + t.slice(1)} in one photo and one line`, hook: () => `Today, in one picture.` },
+    { title: (t) => `My 5-minute ${t} routine`, hook: () => `Five minutes, that’s all it takes.` },
+    { title: (t) => `Before and after: ${t}`, hook: () => `Here’s where I started.` },
+  ],
+};
+
+const TOPIC_WHY: Record<IdeaGoal, string> = {
+  followers: 'Relatable ideas get shared, which brings new people',
+  saves: 'Useful lists and steps are what people save',
+  comments: 'Opinions and questions get people talking',
+  often: 'Quick to make, so posting stays easy',
+};
+
+export function getTopicIdeas(topic: string, goal: IdeaGoal, format = '30-second Reel', round = 0): FeedIdea[] {
+  const t = topic.trim().replace(/[.!?]+$/, '');
+  const lower = t.charAt(0).toLowerCase() + t.slice(1);
+  const cap = t.charAt(0).toUpperCase() + t.slice(1);
+  const stamp = Date.now();
+  const pool = TOPIC_TEMPLATES[goal];
+  return [0, 1, 2].map((i) => pool[(round * 3 + i) % pool.length]).map((tpl, i) => ({
+    id: `topic-${goal}-${stamp}-${i}`,
+    niche: 'topic',
+    title: tpl.title(lower, cap),
+    hook: tpl.hook(lower),
+    format,
+    bestTime: '7:30 PM',
+    why: TOPIC_WHY[goal],
+  }));
+}
