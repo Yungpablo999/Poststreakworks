@@ -113,10 +113,44 @@ let seq = 0;
 const nid = (p: string) => `${p}-${Date.now()}-${++seq}`;
 let lastTopic: string | null = null;
 
+// Jarvis's real brain. When the app is connected to the backend (src/backend)
+// this asks the server, which answers with the same reply shape. It returns null
+// when the server can't be reached, and the built-in brain below answers instead,
+// so the chat always works.
+export type JarvisReply = Omit<ChatMessage, 'id' | 'from'>;
+export interface JarvisAsk {
+  message: string;
+  history: { from: 'me' | 'jarvis'; text: string }[];
+  context: { persona: Persona; niches: string[]; platforms: string[]; lastTopic?: string };
+}
+let brain: ((req: JarvisAsk) => Promise<JarvisReply | null>) | null = null;
+export function setJarvisBrain(fn: typeof brain) {
+  brain = fn;
+}
+
+let askToken = 0;
+
 export function ask(raw: string) {
   const q = raw.trim();
   if (!q || state.thinking) return;
+  const history = state.messages
+    .filter((m) => m.id !== 'intro')
+    .slice(-8)
+    .map((m) => ({ from: m.from, text: m.text }));
   set({ messages: [...state.messages, { id: nid('me'), from: 'me', text: q }], thinking: true });
+  const token = ++askToken;
+
+  if (brain) {
+    brain({ message: q, history, context: { ...ctx, lastTopic: lastTopic ?? undefined } })
+      .catch(() => null)
+      .then((reply) => {
+        if (token !== askToken) return; // the chat was cleared while Jarvis was thinking
+        const message: ChatMessage = reply ? { id: nid('j'), from: 'jarvis', ...reply } : think(q);
+        set({ messages: [...state.messages, message], thinking: false });
+      });
+    return;
+  }
+
   // A short pause so it reads like Jarvis is thinking
   setTimeout(() => {
     const reply = think(q);
@@ -127,6 +161,7 @@ export function ask(raw: string) {
 /** Clear the chat and start over */
 export function resetJarvis() {
   lastTopic = null;
+  askToken++;
   set({ messages: [INTRO], tasks: {}, thinking: false });
 }
 

@@ -1,0 +1,72 @@
+name: App CI
+
+# The Expo app (web + phone share one codebase): type-check it and make sure the
+# web build still bundles, both as the sample-data app and connected to a backend.
+# (The backend has its own workflow, ci.yml.)
+
+on:
+  push:
+    branches: [master, main]
+    paths:
+      - "App.tsx"
+      - "index.ts"
+      - "src/**"
+      - "assets/**"
+      - "frontend/shared/**"
+      - "package.json"
+      - "package-lock.json"
+      - "app.json"
+      - "tsconfig.json"
+      - ".github/workflows/app-ci.yml"
+  pull_request:
+    branches: [master, main]
+    paths:
+      - "App.tsx"
+      - "index.ts"
+      - "src/**"
+      - "assets/**"
+      - "frontend/shared/**"
+      - "package.json"
+      - "package-lock.json"
+      - "app.json"
+      - "tsconfig.json"
+      - ".github/workflows/app-ci.yml"
+
+jobs:
+  typecheck:
+    name: Typecheck
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npx tsc --noEmit
+
+  web-build:
+    name: Web build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      # As deployed with no backend settings: the app runs on its sample data.
+      - name: Sample-data build
+        run: npx expo export -p web --output-dir dist-sample
+      # As deployed with the three backend settings. These are placeholders: the build only has to
+      # bundle. (--clear because Expo bakes EXPO_PUBLIC_* values into its cache.)
+      - name: Connected build
+        run: npx expo export -p web --clear --output-dir dist-connected
+        env:
+          EXPO_PUBLIC_API_URL: https://api.example.test
+          EXPO_PUBLIC_SUPABASE_URL: https://example.supabase.test
+          EXPO_PUBLIC_SUPABASE_ANON_KEY: placeholder-anon-key
+      - name: The connected build really is connected, the sample build really is not
+        run: |
+          grep -rl "example.supabase.test" dist-connected/_expo/static/js/web >/dev/null
+          ! grep -rl "example.supabase.test" dist-sample/_expo/static/js/web

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, StyleSheet, Platform, useWindowDimensions } from 'react-native';
+import { View, StyleSheet, Platform, Linking, AppState, useWindowDimensions } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider, initialWindowMetrics } from 'react-native-safe-area-context';
 
@@ -62,11 +62,51 @@ import { preloadMascot } from './src/components/mascot/LiveMascot';
 import { JarvisChatPanel, JarvisLauncher } from './src/components/jarvis/JarvisChat';
 import { GhostTour } from './src/components/tour/GhostTour';
 import { setTourNavigator, startTour } from './src/tour/tour';
-import { closeJarvis, setGhostHands, setJarvisContext, type GhostPlace } from './src/jarvis/chat';
+import { closeJarvis, resetJarvis, setGhostHands, setJarvisContext, type GhostPlace } from './src/jarvis/chat';
 import { IS_WEB_APP, useBreakpoint, useWebSidebar } from './src/hooks/useBreakpoint';
 import { MobileWebBar } from './src/components/web/MobileWebBar';
 import { GlassBackdrop } from './src/components/glass/GlassBackdrop';
 import { UserPersona } from './src/components/HeaderDualModePills';
+import { BrandToast } from './src/components/BrandToast';
+import { BackendBootScreen } from './src/screens/BackendBootScreen';
+// The backend connection: inert unless the app is given the backend's address (src/config/backend.ts).
+import { BACKEND } from './src/config/backend';
+import {
+  getSessionState,
+  handleAuthLink,
+  initSession,
+  onSessionLost,
+  sendEmailCode,
+  signInWithProvider,
+  signOut,
+  verifyEmailCode,
+} from './src/backend/session';
+import {
+  applyBootstrap,
+  clearAccountData,
+  connectBackend,
+  connectionsPatch,
+  isDataLoaded,
+  loadBootstrap,
+  profileFromBootstrap,
+  rememberOnboarding,
+  saveOnboarding,
+  saveProfile,
+  syncTimezone,
+  takeOnboarding,
+} from './src/backend/sync';
+import {
+  appReturnLink,
+  clearTikTokReturn,
+  completeTikTokConnect,
+  getAccounts,
+  parseTikTokLink,
+  readTikTokReturn,
+  startedInPhoneApp,
+  subscribeToAccounts,
+  type TikTokReturn,
+} from './src/backend/accounts';
+import { notify, useNotice } from './src/backend/notice';
 
 type Screen =
   | 'welcome'
@@ -96,6 +136,39 @@ type Screen =
   | 'platform-growth'
   | 'voice-studio'
   | 'hook-studio';
+
+// The sample creator the app shows when it isn't connected to a backend.
+const SAMPLE_PROFILE: UserProfileData = {
+  name: 'Pablo',
+  handle: '@pablocreates',
+  bio: 'Consistency is my superpower. Building my creator streak with Jarvis AI.',
+  niche: 'Tech & Lifestyle Creator • Lagos',
+  tier: 'free',
+  userPersona: 'new',
+  streakCount: 1,
+  level: 1,
+  xp: 0,
+  postsCount: 0,
+  connectedPlatforms: [],
+  niches: ['Lifestyle', 'Tech & AI', 'Storytelling'],
+};
+
+// Connected to the backend, nothing of the sample creator shows: this is what the
+// app holds before sign-in and after sign-out, until the creator's own profile loads.
+const BLANK_PROFILE: UserProfileData = {
+  name: '',
+  handle: '',
+  bio: '',
+  niche: '',
+  tier: 'free',
+  userPersona: 'new',
+  streakCount: 0,
+  level: 1,
+  xp: 0,
+  postsCount: 0,
+  connectedPlatforms: [],
+  niches: [],
+};
 
 export default function App() {
   // Brand fonts (Plus Jakarta Sans + Playfair Display italic for "Earn.").
@@ -198,6 +271,8 @@ export default function App() {
   const [userPersona, setUserPersona] = useState<UserPersona>('new');
 
   const handleTogglePersona = () => {
+    // A signed-in account has one real history; the sample "returning" view is only for the preview build
+    if (BACKEND.enabled) return;
     setUserPersona((prev) => {
       const nextPersona = prev === 'returning' ? 'new' : 'returning';
       setUserProfile((profile) => ({
@@ -213,20 +288,43 @@ export default function App() {
     });
   };
 
-  const [userProfile, setUserProfile] = useState<UserProfileData>({
-    name: 'Pablo',
-    handle: '@pablocreates',
-    bio: 'Consistency is my superpower. Building my creator streak with Jarvis AI.',
-    niche: 'Tech & Lifestyle Creator • Lagos',
-    tier: 'free',
-    userPersona: 'new',
-    streakCount: 1,
-    level: 1,
-    xp: 0,
-    postsCount: 0,
-    connectedPlatforms: [],
-    niches: ['Lifestyle', 'Tech & AI', 'Storytelling'],
-  });
+  const [userProfile, setUserProfileRaw] = useState<UserProfileData>(BACKEND.enabled ? BLANK_PROFILE : SAMPLE_PROFILE);
+  // Every place in the app that edits the profile goes through this. Connected to the
+  // backend, the plan (tier) and the New/Returning view are the server's to decide, so
+  // no screen can change them locally (the many "switch to Pro" handlers become no-ops).
+  const setUserProfile: typeof setUserProfileRaw = (action) =>
+    setUserProfileRaw((prev) => {
+      const next = typeof action === 'function' ? action(prev) : action;
+      return BACKEND.enabled ? { ...next, tier: prev.tier, userPersona: prev.userPersona } : next;
+    });
+
+  // ─── Backend state ────────────────────────────────────────────────────────
+  // Whether we're still restoring the saved sign-in at launch (a holding page shows meanwhile)
+  const [booting, setBooting] = useState(BACKEND.enabled);
+  const [bootMessage, setBootMessage] = useState('One moment…');
+  // Sending a code / why it couldn't be sent, for the sign-up and sign-in forms
+  const [authBusy, setAuthBusy] = useState(false);
+  const [authError, setAuthError] = useState<string | null>(null);
+  // Phone creators approve TikTok in a browser; this page then hands them back to the app
+  const [phoneHandoff, setPhoneHandoff] = useState<TikTokReturn | null>(null);
+  const notice = useNotice();
+  // What the account holds of the editable profile fields, to save only real changes
+  const savedProfile = React.useRef<UserProfileData | null>(null);
+  // The sign-in in progress, kept in refs so async handlers always see the latest values
+  const authRef = React.useRef({ email: '', username: '', niches: [] as string[], signingUp: false });
+  const enteringApp = React.useRef<Promise<boolean> | null>(null);
+  // Supabase sends one code per address per minute. Going back and forth between the form and the
+  // code page shouldn't hit that limit: a code sent under a minute ago still works, so don't send another.
+  const lastCodeSent = React.useRef<{ email: string; at: number; signingUp: boolean } | null>(null);
+  const sendCode = async (email: string, signingUp: boolean, force = false) => {
+    const last = lastCodeSent.current;
+    if (!force && last && last.signingUp === signingUp && last.email.toLowerCase() === email.toLowerCase() && Date.now() - last.at < 55_000) {
+      return { ok: true } as const;
+    }
+    const sent = await sendEmailCode(email, signingUp);
+    if (sent.ok) lastCodeSent.current = { email, at: Date.now(), signingUp };
+    return sent;
+  };
 
   // Smart Navigation Handler: Instant (0ms) for bottom tabs & regular screens; Smart AI loader for generation workflows
   // Every page opens straight away. (There used to be a timed "Jarvis is
@@ -238,6 +336,7 @@ export default function App() {
       setComposerQuestDraft(null);
     }
     if (nextScreen === currentScreen) return;
+    setAuthError(null);
     setPreviousScreen(currentScreen);
     setCurrentScreen(nextScreen);
   };
@@ -246,6 +345,205 @@ export default function App() {
   const [showAccountsFromNote, setShowAccountsFromNote] = useState(false);
   // The profile sheet opened from the desktop side menu
   const [showProfileFromMenu, setShowProfileFromMenu] = useState(false);
+
+  // ─── Backend: signing in, loading the creator's account, TikTok ─────────────
+  // None of this runs unless the app was given the backend's address (src/config/backend.ts).
+
+  // Loads the signed-in creator's account into the app (profile, drafts, saved hooks,
+  // check-ins, connected accounts…). Resolves false if it couldn't be loaded.
+  const enterInFlight = React.useRef<Promise<boolean> | null>(null);
+  const enterApp = (opts: { newAccount?: boolean; niches?: string[] } = {}): Promise<boolean> => {
+    if (enterInFlight.current) return enterInFlight.current;
+    const run = (async () => {
+      try {
+        const res = await loadBootstrap();
+        if (!res.ok) return false;
+        let b = res.data;
+        if (opts.newAccount && !b.profile.name && b.profile.niches.length === 0) {
+          // First time in: keep what they picked while signing up
+          const picked = opts.niches ?? authRef.current.niches;
+          await saveOnboarding({ displayName: authRef.current.username || b.profile.email.split('@')[0], niches: picked });
+          const again = await loadBootstrap();
+          if (again.ok) b = again.data;
+        }
+        applyBootstrap(b);
+        // The account is the whole truth: start from a blank profile so nothing of a previous creator or the sample one survives
+        const profile = profileFromBootstrap(b, BLANK_PROFILE, authRef.current.username);
+        savedProfile.current = profile;
+        setUserProfileRaw(profile);
+        setUserPersona('new');
+        void syncTimezone(b);
+        // Ghost's welcome tour is once per account
+        justSignedUp.current = !b.tour.done;
+        return true;
+      } catch (err) {
+        // An unexpected reply from the server must not strand the creator on a spinner
+        console.warn('Could not load the account', err);
+        return false;
+      }
+    })().finally(() => {
+      enterInFlight.current = null;
+    });
+    enterInFlight.current = run;
+    return run;
+  };
+
+  // TikTok has sent the creator back (web: this page load; phone: an app link): finish the connection
+  const finishTikTok = async (ret: TikTokReturn) => {
+    if (ret.error || !ret.code || !ret.state) {
+      notify('TikTok wasn’t connected. You can try again any time.');
+      return;
+    }
+    const r = await completeTikTokConnect(ret.code, ret.state);
+    if (r.ok) {
+      notify(r.name ? `TikTok connected: ${r.name}` : 'TikTok connected');
+      setShowAccountsFromNote(true); // shows the account that just connected
+    } else {
+      notify(r.message);
+    }
+  };
+
+  // Launch: restore the saved sign-in and the creator's account, and finish a TikTok round trip if one is landing.
+  // App links that arrive while this runs (a phone opened by TikTok's "allowed") wait on `bootDone`.
+  const bootGate = React.useRef<{ done: Promise<void>; finish: () => void } | null>(null);
+  if (!bootGate.current) {
+    let finish: () => void = () => {};
+    const done = new Promise<void>((resolve) => {
+      finish = resolve;
+    });
+    bootGate.current = { done, finish };
+  }
+  React.useEffect(() => {
+    if (!BACKEND.enabled) return;
+    let alive = true;
+    (async () => {
+      connectBackend();
+      const ret = readTikTokReturn();
+      if (ret && startedInPhoneApp(ret)) {
+        // Approved in a phone browser: this page only hands the creator back to the app
+        setPhoneHandoff(ret);
+        try {
+          window.location.replace(appReturnLink(ret));
+        } catch {
+          // the page's "Open PostStreak" button does the same
+        }
+        return;
+      }
+      await initSession();
+      if (getSessionState().status === 'signedIn') {
+        setBootMessage(ret ? 'Connecting your TikTok…' : 'Signing you in…');
+        const remembered = takeOnboarding(); // set when they signed up with Google / Apple on the web
+        const loaded = await enterApp({ newAccount: remembered !== null, niches: remembered?.niches });
+        if (!alive) return;
+        if (!loaded) notify('We couldn’t load your account. Check your connection.');
+        setCurrentScreen('dashboard');
+        if (ret) {
+          clearTikTokReturn(); // so a refresh can't replay the one-time code
+          await finishTikTok(ret);
+        }
+      } else if (ret) {
+        clearTikTokReturn();
+        notify('Sign in, then connect TikTok again.');
+      }
+    })().finally(() => {
+      if (alive) setBooting(false);
+      bootGate.current?.finish();
+    });
+    return () => {
+      alive = false;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Signed out (here, or from another tab): forget the last creator's data and go back to sign-in
+  React.useEffect(() => {
+    if (!BACKEND.enabled) return;
+    return onSessionLost(() => {
+      clearAccountData();
+      savedProfile.current = null;
+      setUserProfileRaw(BLANK_PROFILE);
+      setSelectedNiches([]);
+      setConnectedPlatforms([]);
+      resetJarvis();
+      closeJarvis();
+      setShowAccountsFromNote(false);
+      setShowProfileFromMenu(false);
+      setCurrentScreen(Platform.OS === 'web' ? 'signin' : 'welcome');
+    });
+  }, []);
+
+  // A real connection changed (TikTok connected, disconnected, needs reconnecting): update the profile's list
+  React.useEffect(() => {
+    if (!BACKEND.enabled) return;
+    return subscribeToAccounts(() => setUserProfileRaw((prev) => ({ ...prev, ...connectionsPatch(getAccounts()) })));
+  }, []);
+
+  // Edits to the profile (name, @handle, topics, bio) are saved to the account a moment after they're made
+  const nichesKey = userProfile.niches.join('|');
+  React.useEffect(() => {
+    const saved = savedProfile.current;
+    if (!BACKEND.enabled || !saved || getSessionState().status !== 'signedIn') return;
+    const same =
+      saved.name === userProfile.name && saved.handle === userProfile.handle && saved.bio === userProfile.bio &&
+      saved.niche === userProfile.niche && saved.niches.join('|') === nichesKey;
+    if (same) return;
+    const next = userProfile;
+    const timer = setTimeout(async () => {
+      const problem = await saveProfile(next, saved);
+      const res = await loadBootstrap(); // the account is the truth either way
+      if (res.ok) {
+        const fresh = profileFromBootstrap(res.data, BLANK_PROFILE);
+        savedProfile.current = fresh;
+        setUserProfileRaw((prev) => ({ ...prev, name: fresh.name, handle: fresh.handle, bio: fresh.bio, niche: fresh.niche, niches: fresh.niches }));
+      }
+      if (problem) notify(problem);
+    }, 500);
+    return () => clearTimeout(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [userProfile.name, userProfile.handle, userProfile.bio, userProfile.niche, nichesKey]);
+
+  // Came back online / back to the app and the account never loaded: try again
+  React.useEffect(() => {
+    if (!BACKEND.enabled) return;
+    const retry = () => {
+      if (getSessionState().status === 'signedIn' && !isDataLoaded()) void enterApp();
+    };
+    if (Platform.OS === 'web') {
+      window.addEventListener('focus', retry);
+      window.addEventListener('online', retry);
+      return () => {
+        window.removeEventListener('focus', retry);
+        window.removeEventListener('online', retry);
+      };
+    }
+    const sub = AppState.addEventListener('change', (s) => s === 'active' && retry());
+    return () => sub.remove();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Phone: links back into the app — TikTok's "allowed" (poststreak://tiktok?…) and Google / Apple sign-in
+  React.useEffect(() => {
+    if (!BACKEND.enabled || Platform.OS === 'web') return;
+    const handle = async (url: string | null) => {
+      if (!url) return;
+      await bootGate.current?.done; // the saved sign-in is back before we act on a link
+      if (await handleAuthLink(url)) {
+        if (getSessionState().status === 'signedIn') {
+          const loaded = await enterApp({ newAccount: authRef.current.signingUp });
+          if (!loaded) notify('We couldn’t load your account. Check your connection.');
+          setCurrentScreen('dashboard');
+        }
+        return;
+      }
+      const ret = parseTikTokLink(url);
+      if (ret) await finishTikTok(ret);
+    };
+    void Linking.getInitialURL().then(handle);
+    const sub = Linking.addEventListener('url', (e) => void handle(e.url));
+    return () => sub.remove();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   React.useEffect(() => {
     const openPlace = (target: NoteTarget | GhostPlace) => {
       if (target === 'accounts') setShowAccountsFromNote(true);
@@ -327,17 +625,40 @@ export default function App() {
     navigateTo('signin');
   };
 
-  const handleSignUpSubmit = (_username: string, _email: string) => {
+  const handleSignUpSubmit = async (_username: string, _email: string) => {
+    if (BACKEND.enabled) {
+      // The backend emails a 6-digit code
+      if (authBusy) return;
+      setAuthBusy(true);
+      setAuthError(null);
+      const sent = await sendCode(_email, true);
+      setAuthBusy(false);
+      if (!sent.ok) {
+        setAuthError(sent.message);
+        return;
+      }
+    }
+    authRef.current = { email: _email, username: _username, niches: selectedNiches, signingUp: true };
     setAuthUsername(_username);
     setAuthEmail(_email);
     setVerifyMode('signup');
-    setUserProfile(prev => ({ ...prev, name: _username || prev.name, tier: 'free' }));
+    if (!BACKEND.enabled) setUserProfile(prev => ({ ...prev, name: _username || prev.name, tier: 'free' }));
     navigateTo('verify-code');
   };
 
-  // One-tap Apple / Google sign-up (mock): the provider has already verified the
-  // person, so skip the email code and go straight to Home
-  const handleSocialSignUp = (_provider: 'apple' | 'google') => {
+  // One-tap Apple / Google sign-up. Sample build: the provider has already verified
+  // the person, so skip the email code and go straight to Home. Connected: hands off
+  // to the provider (the web page leaves and comes back signed in; on a phone the
+  // session arrives through an app link).
+  const handleSocialSignUp = async (_provider: 'apple' | 'google') => {
+    if (BACKEND.enabled) {
+      setAuthError(null);
+      authRef.current = { email: '', username: '', niches: selectedNiches, signingUp: true };
+      rememberOnboarding(selectedNiches);
+      const r = await signInWithProvider(_provider);
+      if (!r.ok) setAuthError(r.message);
+      return;
+    }
     justSignedUp.current = true;
     setVerifyMode('signup');
     setUserProfile(prev => ({ ...prev, tier: 'free' }));
@@ -354,11 +675,35 @@ export default function App() {
     navigateTo('niche');
   };
 
-  const handleSignInSubmit = (_email: string) => {
+  const handleSignInSubmit = async (_email: string) => {
+    if (BACKEND.enabled) {
+      if (authBusy) return;
+      setAuthBusy(true);
+      setAuthError(null);
+      const sent = await sendCode(_email, false);
+      setAuthBusy(false);
+      if (!sent.ok) {
+        setAuthError(sent.message);
+        return;
+      }
+    }
+    authRef.current = { email: _email, username: '', niches: [], signingUp: false };
     setAuthEmail(_email);
     setVerifyMode('signin');
-    setUserProfile(prev => ({ ...prev, tier: 'free' }));
+    if (!BACKEND.enabled) setUserProfile(prev => ({ ...prev, tier: 'free' }));
     navigateTo('verify-code');
+  };
+
+  const handleSocialSignIn = async (provider: 'apple' | 'google') => {
+    if (BACKEND.enabled) {
+      setAuthError(null);
+      authRef.current = { email: '', username: '', niches: [], signingUp: false };
+      const r = await signInWithProvider(provider);
+      if (!r.ok) setAuthError(r.message);
+      return;
+    }
+    setUserProfile(prev => ({ ...prev, tier: 'free' }));
+    navigateTo('dashboard');
   };
 
   // Verify Code Screen actions
@@ -378,7 +723,29 @@ export default function App() {
     }
   };
 
-  const handleVerifyCodeSuccess = (_email: string) => {
+  // Connected: checks the 6-digit code with the backend. null = it was right, otherwise
+  // the message to show. The creator's account starts loading straight away, so the
+  // "You're verified" celebration covers the wait.
+  const verifyCode = async (code: string): Promise<string | null> => {
+    const r = await verifyEmailCode(authRef.current.email, code);
+    if (!r.ok) return r.message;
+    enteringApp.current = enterApp({ newAccount: authRef.current.signingUp });
+    return null;
+  };
+
+  const resendCode = async (): Promise<string | null> => {
+    const r = await sendCode(authRef.current.email, authRef.current.signingUp, true);
+    return r.ok ? null : r.message;
+  };
+
+  const handleVerifyCodeSuccess = async (_email: string) => {
+    if (BACKEND.enabled) {
+      const loaded = (await enteringApp.current) ?? false;
+      enteringApp.current = null;
+      if (!loaded) notify('We couldn’t load your account yet. Check your connection.');
+      navigateTo('dashboard');
+      return;
+    }
     if (verifyMode === 'signup') justSignedUp.current = true;
     setUserProfile(prev => ({ ...prev, tier: 'free' }));
     // Sign-up and sign-in both land on Home; Home's day-0 welcome greets new creators
@@ -386,6 +753,8 @@ export default function App() {
   };
 
   const handleLogout = () => {
+    // The session-lost listener below clears the account's data from memory
+    if (BACKEND.enabled) void signOut();
     navigateTo(Platform.OS === 'web' ? 'signin' : 'welcome');
   };
 
@@ -557,7 +926,9 @@ export default function App() {
   const phoneTabBar = !IS_WEB_APP && !webSidebar;
   const jarvisBottom = (initialWindowMetrics?.insets.bottom ?? 0) + (phoneTabBar ? 104 : 20);
   React.useEffect(() => {
-    setJarvisContext({ persona: desktopPersona, niches: selectedNiches.length ? selectedNiches : userProfile?.niches ?? [], platforms: connectedPlatforms });
+    // Connected: what Jarvis knows is the creator's real connected accounts (their sign-up picks until then)
+    const jarvisPlatforms = BACKEND.enabled && userProfile?.connectedPlatforms?.length ? userProfile.connectedPlatforms : connectedPlatforms;
+    setJarvisContext({ persona: desktopPersona, niches: selectedNiches.length ? selectedNiches : userProfile?.niches ?? [], platforms: jarvisPlatforms });
   });
   React.useEffect(() => {
     if (!inApp) closeJarvis();
@@ -609,6 +980,28 @@ export default function App() {
   // so text never flashes in the system font. On error, fall back gracefully.
   if (!fontsLoaded && !fontError) {
     return <View style={styles.container} />;
+  }
+
+  // Connected to the backend: a holding page while the saved sign-in is restored, and
+  // the page that hands a phone creator back to the app after TikTok's "allow".
+  if (BACKEND.enabled && (booting || phoneHandoff)) {
+    return (
+      <SafeAreaProvider initialMetrics={initialWindowMetrics}>
+        <View style={styles.container}>
+          <StatusBar style="dark" />
+          {phoneHandoff ? (
+            <BackendBootScreen
+              message="Taking you back to PostStreak…"
+              busy={false}
+              action={{ label: 'Open the PostStreak app', href: appReturnLink(phoneHandoff) }}
+            />
+          ) : (
+            <BackendBootScreen message={bootMessage} />
+          )}
+          {showSplash && <SplashScreen onFinish={() => setShowSplash(false)} />}
+        </View>
+      </SafeAreaProvider>
+    );
   }
 
   return (
@@ -691,6 +1084,9 @@ export default function App() {
             onSubmit={handleSignUpSubmit}
             onSocialSignUp={handleSocialSignUp}
             savedIdeaTitle={selectedIdeaTitle}
+            busy={authBusy}
+            error={authError}
+            providers={BACKEND.enabled ? [...BACKEND.socialProviders] : undefined}
           />
         )}
 
@@ -699,10 +1095,10 @@ export default function App() {
             onBack={Platform.OS === 'web' ? undefined : handleBackFromSignIn}
             onCreateAccount={handleCreateAccountFromSignIn}
             onSubmit={handleSignInSubmit}
-            onSocialSignIn={() => {
-              setUserProfile(prev => ({ ...prev, tier: 'free' }));
-              navigateTo('dashboard');
-            }}
+            onSocialSignIn={handleSocialSignIn}
+            busy={authBusy}
+            error={authError}
+            providers={BACKEND.enabled ? [...BACKEND.socialProviders] : undefined}
           />
         )}
 
@@ -714,6 +1110,8 @@ export default function App() {
             onBack={handleBackFromVerifyCode}
             onEditEmail={handleEditEmailFromVerifyCode}
             onSuccess={handleVerifyCodeSuccess}
+            onVerify={BACKEND.enabled ? verifyCode : undefined}
+            onResend={BACKEND.enabled ? resendCode : undefined}
           />
         )}
 
@@ -1281,6 +1679,9 @@ export default function App() {
         {inApp && <JarvisChatPanel />}
         {/* Ghost's welcome tour for brand-new creators */}
         {inApp && <GhostTour />}
+
+        {/* Messages from the backend connection ("Couldn't save that…", "TikTok connected") */}
+        {BACKEND.enabled && <BrandToast message={notice} />}
 
         {showSplash && (
           <SplashScreen onFinish={() => setShowSplash(false)} />

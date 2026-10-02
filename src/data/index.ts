@@ -13,6 +13,29 @@ import { FREE_REPURPOSES_PER_WEEK } from '../config/features';
 export type Persona = 'new' | 'returning';
 
 // ---------------------------------------------------------------------------
+// Backend connection
+// With no backend (the default) everything below lives in memory, as it always
+// has. When the app is connected (src/backend), it registers these callbacks so
+// every change is also saved to the creator's account, and fills the stores from
+// their account at sign-in with the hydrate* functions further down. Screens
+// only ever call the functions in this file.
+// ---------------------------------------------------------------------------
+
+export interface DataBackend {
+  draftSaved?: (draft: SavedDraft) => void;
+  draftRemoved?: (id: string) => void;
+  /** `nowSaved` is the new state: false = the hook was just removed. */
+  hookToggled?: (hook: SavedHook, nowSaved: boolean) => void;
+  checkedIn?: () => void;
+  repurposeSpent?: () => void;
+}
+
+let dataBackend: DataBackend | null = null;
+export function setDataBackend(next: DataBackend | null) {
+  dataBackend = next;
+}
+
+// ---------------------------------------------------------------------------
 // Check-in streak
 // A gentle daily check-in habit. Missing a day never "breaks" anything in the
 // copy — there are no freezes, countdowns or warnings.
@@ -62,12 +85,39 @@ export function checkInToday(persona: Persona): CheckInStreak {
   checkInStore[persona] = { ...current, week, checkedInToday: true, currentDays: current.currentDays + 1 };
   checkInListeners.forEach((listener) => listener());
   react('checkIn');
+  dataBackend?.checkedIn?.();
   return checkInStore[persona]!;
 }
 
 export function subscribeToCheckIns(listener: () => void): () => void {
   checkInListeners.add(listener);
   return () => checkInListeners.delete(listener);
+}
+
+/**
+ * Replaces the check-in state with the creator's real one. A signed-in account
+ * has one history, so both personas show it (the New / Returning preview switch
+ * is hidden when the app is connected).
+ */
+export function hydrateCheckIn(streak: CheckInStreak): void {
+  checkInStore.new = streak;
+  checkInStore.returning = streak;
+  checkInListeners.forEach((listener) => listener());
+}
+
+/** Days of a month the creator checked in (from the backend), keyed "YYYY-MM". Fills the calendar's past days. */
+const checkInMonths = new Map<string, Set<string>>();
+export function hydrateCheckInMonth(year: number, month: number, days: string[]): void {
+  checkInMonths.set(`${year}-${month}`, new Set(days));
+  checkInListeners.forEach((listener) => listener());
+}
+export function hasCheckInMonth(year: number, month: number): boolean {
+  return checkInMonths.has(`${year}-${month}`);
+}
+/** A check-in just happened on this date (YYYY-MM-DD, the creator's own day): add it to a month that was already loaded. */
+export function markCheckInDay(localDate: string): void {
+  const [y, m] = localDate.split('-').map(Number);
+  checkInMonths.get(`${y}-${m - 1}`)?.add(localDate);
 }
 
 // ---------------------------------------------------------------------------
@@ -115,12 +165,20 @@ export function spendRepurpose(persona: Persona, tier: 'free' | 'pro'): boolean 
   repurposeUsed[persona] += 1;
   repurposeListeners.forEach((l) => l());
   react('repurposed');
+  dataBackend?.repurposeSpent?.();
   return true;
 }
 
 export function subscribeToRepurposes(listener: () => void): () => void {
   repurposeListeners.add(listener);
   return () => repurposeListeners.delete(listener);
+}
+
+/** The week's real count from the backend (it is the one that enforces the limit). */
+export function hydrateRepurposeUsed(usedThisWeek: number): void {
+  repurposeUsed.new = usedThisWeek;
+  repurposeUsed.returning = usedThisWeek;
+  repurposeListeners.forEach((l) => l());
 }
 
 // ---------------------------------------------------------------------------
@@ -350,7 +408,13 @@ export function getCalendarMonth(persona: Persona, year: number, month: number):
     const isToday = diff === 0;
     const isPast = diff < 0;
 
-    const checkedIn = isToday ? streak.checkedInToday : isPast && persona === 'returning' && -diff <= priorRun;
+    // A signed-in creator's real check-ins (loaded month by month) win over the sample run
+    const realDays = checkInMonths.get(`${year}-${month}`);
+    const checkedIn = isToday
+      ? streak.checkedInToday
+      : realDays
+        ? realDays.has(dayKey(date))
+        : isPast && persona === 'returning' && -diff <= priorRun;
 
     const posts: CalendarPost[] = [];
     if (persona === 'returning') {
@@ -738,11 +802,19 @@ export function saveDraft(d: Omit<SavedDraft, 'savedAt'>): SavedDraft {
   const saved = { ...d, savedAt: Date.now() };
   draftStore = [saved, ...draftStore.filter((x) => x.id !== d.id)];
   draftListeners.forEach((l) => l());
+  dataBackend?.draftSaved?.(saved);
   return saved;
 }
 
 export function removeDraft(id: string): void {
   draftStore = draftStore.filter((x) => x.id !== id);
+  draftListeners.forEach((l) => l());
+  dataBackend?.draftRemoved?.(id);
+}
+
+/** Replaces the drafts with the creator's saved ones (newest first). */
+export function hydrateDrafts(list: SavedDraft[]): void {
+  draftStore = [...list].sort((a, b) => b.savedAt - a.savedAt);
   draftListeners.forEach((l) => l());
 }
 
@@ -1263,14 +1335,39 @@ export function isHookSaved(line: string): boolean {
 /** Saves or un-saves a hook; returns true when it's now saved. */
 export function toggleSavedHook(h: Omit<SavedHook, 'savedAt'>): boolean {
   if (isHookSaved(h.line)) {
+    const removed = savedHooks.find((x) => x.line === h.line)!;
     savedHooks = savedHooks.filter((x) => x.line !== h.line);
     emitHooks();
+    dataBackend?.hookToggled?.(removed, false);
     return false;
   }
-  savedHooks = [{ ...h, savedAt: Date.now() }, ...savedHooks];
+  const added = { ...h, savedAt: Date.now() };
+  savedHooks = [added, ...savedHooks];
   emitHooks();
   react('hookSaved');
+  dataBackend?.hookToggled?.(added, true);
   return true;
+}
+
+/** Replaces the saved hooks with the creator's (newest first). */
+export function hydrateSavedHooks(list: SavedHook[]): void {
+  savedHooks = [...list].sort((a, b) => b.savedAt - a.savedAt);
+  emitHooks();
+}
+
+/** Signed out: forget everything that belonged to the last creator, back to a clean slate. */
+export function resetUserData(): void {
+  draftStore = [];
+  savedHooks = [];
+  checkInStore.new = undefined;
+  checkInStore.returning = undefined;
+  checkInMonths.clear();
+  repurposeUsed.new = 0;
+  repurposeUsed.returning = 0;
+  draftListeners.forEach((l) => l());
+  emitHooks();
+  checkInListeners.forEach((l) => l());
+  repurposeListeners.forEach((l) => l());
 }
 export function subscribeToSavedHooks(listener: () => void): () => void {
   savedHookListeners.add(listener);

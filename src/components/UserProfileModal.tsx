@@ -362,6 +362,13 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({ visible, onC
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [visible]);
 
+  // A real connection can change while the sheet is open (e.g. TikTok disconnected
+  // from its row): follow the profile's list.
+  const connectedKey = (initialProfile?.connectedPlatforms ?? []).join(',');
+  useEffect(() => {
+    setConnected(connectedKey ? connectedKey.split(',') : []);
+  }, [connectedKey]);
+
   useEffect(
     () => () => {
       if (toastTimer.current) clearTimeout(toastTimer.current);

@@ -23,6 +23,7 @@ import { AppButton } from '../ui/AppButton';
 import { PlatformLogo } from '../onboarding/PlatformLogo';
 import { ds } from '../../theme/colors';
 import { getCalendarMonth, subscribeToCheckIns, type CalendarDay, type Persona } from '../../data';
+import { loadCheckInMonth } from '../../backend/sync';
 
 // The calendar behind the Home check-in card: a glass sheet that slides up.
 // Month by month (swipe or arrows), each day shows check-ins, posts and
@@ -175,6 +176,11 @@ export function CalendarSheet({ visible, onClose, persona, onPlanPost }: Calenda
 
   const target = new Date(now.getFullYear(), now.getMonth() + offset, 1);
   const month = getCalendarMonth(persona, target.getFullYear(), target.getMonth());
+  // A signed-in creator's real check-ins for the month on show (a no-op without a backend)
+  const [shownYear, shownMonth] = [target.getFullYear(), target.getMonth()];
+  useEffect(() => {
+    if (visible) void loadCheckInMonth(shownYear, shownMonth);
+  }, [visible, shownYear, shownMonth]);
   const today = month.days.find((d) => d.isToday);
   const selected = month.days.find((d) => d.key === selectedKey) ?? today ?? null;
 

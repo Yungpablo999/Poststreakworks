@@ -27,9 +27,18 @@ interface SignInScreenProps {
   onSubmit?: (email: string) => void;
   /** One-tap sign-in (mock: goes straight in; a real app runs the provider's sign-in). */
   onSocialSignIn?: (provider: SocialProvider) => void;
+  /** The code is being sent. */
+  busy?: boolean;
+  /** Why the code couldn't be sent (shown under the email box). */
+  error?: string | null;
+  /** Which one-tap buttons to show. Leave out for both; an empty list hides them (and "or use your email"). */
+  providers?: SocialProvider[];
 }
 
-export const SignInScreen: React.FC<SignInScreenProps> = ({ onBack, onCreateAccount, onSubmit, onSocialSignIn }) => {
+export const SignInScreen: React.FC<SignInScreenProps> = ({ onBack, onCreateAccount, onSubmit, onSocialSignIn, busy = false, error, providers }) => {
+  const showApple = !providers || providers.includes('apple');
+  const showGoogle = !providers || providers.includes('google');
+  const showSocial = showApple || showGoogle;
   const webFrame = useWebFrame();
   const wideFrame = useWideFrame();
   const [email, setEmail] = useState('');
@@ -46,6 +55,7 @@ export const SignInScreen: React.FC<SignInScreenProps> = ({ onBack, onCreateAcco
   };
 
   const handleSendCode = () => {
+    if (busy) return;
     if (!valid) {
       setTouched(true);
       return;
@@ -95,16 +105,21 @@ export const SignInScreen: React.FC<SignInScreenProps> = ({ onBack, onCreateAcco
               <Text style={styles.subtitle}>One tap, or a code by email.</Text>
             </Animated.View>
 
-            <Animated.View entering={FadeInUp.delay(280).duration(500)} style={styles.socialStack}>
-              <SocialButton provider="apple" onPress={() => handleSocial('apple')} />
-              <SocialButton provider="google" onPress={() => handleSocial('google')} />
-            </Animated.View>
+            {showSocial && (
+              <>
+                <Animated.View entering={FadeInUp.delay(280).duration(500)} style={styles.socialStack}>
+                  {showApple && <SocialButton provider="apple" onPress={() => handleSocial('apple')} />}
+                  {showGoogle && <SocialButton provider="google" onPress={() => handleSocial('google')} />}
+                </Animated.View>
 
-            <Animated.View entering={FadeIn.delay(400).duration(400)} style={styles.dividerRow}>
-              <View style={styles.dividerLine} />
-              <Text style={styles.dividerText}>or use your email</Text>
-              <View style={styles.dividerLine} />
-            </Animated.View>
+                <Animated.View entering={FadeIn.delay(400).duration(400)} style={styles.dividerRow}>
+                  <View style={styles.dividerLine} />
+                  <Text style={styles.dividerText}>or use your email</Text>
+                  <View style={styles.dividerLine} />
+                </Animated.View>
+              </>
+            )}
+            {!showSocial && <View style={{ height: 20 }} />}
 
             <Animated.View entering={FadeInUp.delay(480).duration(500)}>
               <GlassCard strong radius={24} padding={16}>
@@ -142,8 +157,13 @@ export const SignInScreen: React.FC<SignInScreenProps> = ({ onBack, onCreateAcco
                     </Text>
                   </Animated.View>
                 )}
+                {error ? (
+                  <Animated.View entering={FadeIn.duration(200)}>
+                    <Text style={styles.error} accessibilityRole="alert" accessibilityLiveRegion="polite">{error}</Text>
+                  </Animated.View>
+                ) : null}
                 <View style={styles.sendBtn}>
-                  <AppButton title="Send me a code" onPress={handleSendCode} disabled={!valid} />
+                  <AppButton title={busy ? 'Sending your code…' : 'Send me a code'} onPress={handleSendCode} disabled={!valid || busy} />
                 </View>
               </GlassCard>
             </Animated.View>
@@ -227,6 +247,7 @@ const styles = StyleSheet.create({
   // The glass field's purple border shows focus; drop the browser's own outline on web
   input: { flex: 1, fontSize: 16, color: ds.ink, height: '100%', ...(Platform.OS === 'web' ? ({ outlineStyle: 'none' } as object) : {}) },
   hint: { fontSize: 12.5, lineHeight: 17, color: ds.purple, marginTop: 8, fontWeight: '600' },
+  error: { fontSize: 13, lineHeight: 18, color: '#B3261E', marginTop: 10, fontWeight: '600' },
   sendBtn: { marginTop: 14 },
   switchRow: { flexDirection: 'row', justifyContent: 'center', alignItems: 'center', marginTop: 20 },
   switchText: { fontSize: 14, color: ds.text2 },

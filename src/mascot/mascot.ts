@@ -182,11 +182,23 @@ export function activity() {
 
 // ─── First-visit tips ───────────────────────────────────────────────────────
 // The first time someone opens a page, the mascot points out what to do.
-// Each tip shows once (for this session until there's a backend).
+// Each tip shows once: for this session, and, when the app is connected to the
+// backend, once per account (the connection seeds what's been seen and hears
+// about new ones through `onTipSeen`).
 const tipsSeen = new Set<string>();
+let tipSeenListener: ((key: string) => void) | null = null;
+export function onTipSeen(fn: ((key: string) => void) | null) {
+  tipSeenListener = fn;
+}
+/** Tips this creator has already seen (from their account). `reset` first when switching accounts. */
+export function seedTipsSeen(keys: string[], reset = false) {
+  if (reset) tipsSeen.clear();
+  keys.forEach((k) => tipsSeen.add(k));
+}
 export function tipOnce(key: string, line: string, delay = 900) {
   if (tipsSeen.has(key)) return;
   tipsSeen.add(key);
+  tipSeenListener?.(key);
   setTimeout(() => {
     // Not during the welcome tour (the tour already explains the page)
     if (isTourActive()) return;

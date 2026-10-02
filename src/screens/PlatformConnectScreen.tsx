@@ -17,6 +17,7 @@ import { PlatformRow } from '../components/onboarding/PlatformRow';
 import type { PlatformLogoType } from '../components/onboarding/PlatformLogo';
 import { JarvisOrb } from '../components/JarvisOrb';
 import { ds } from '../theme/colors';
+import { BACKEND } from '../config/backend';
 
 interface PlatformItem {
   id: string;
@@ -66,7 +67,7 @@ export const PlatformConnectScreen: React.FC<PlatformConnectScreenProps> = ({ on
   // The one action: a sticky footer on phones, right under the content on desktop web
   const cta = (
     <AppButton
-      title={count === 0 ? 'Connect one to continue' : 'Continue'}
+      title={count === 0 ? (BACKEND.enabled ? 'Pick one to continue' : 'Connect one to continue') : 'Continue'}
       size="lg"
       disabled={count === 0}
       onPress={handleContinue}
@@ -113,8 +114,12 @@ export const PlatformConnectScreen: React.FC<PlatformConnectScreenProps> = ({ on
               maxFontSize={40}
               accessibilityLabel="Connect your creator platforms"
             />
+            {/* There's no account yet to attach a real connection to, so with a backend this step is a pick-list;
+                the real TikTok connection happens right after sign-up. */}
             <Text style={styles.subtitle}>
-              Connect at least one. PostStreak uses it to track your growth and suggest what to post next.
+              {BACKEND.enabled
+                ? 'Pick the ones you post on. You’ll connect them for real once your account is ready.'
+                : 'Connect at least one. PostStreak uses it to track your growth and suggest what to post next.'}
             </Text>
           </Animated.View>
 
@@ -122,7 +127,7 @@ export const PlatformConnectScreen: React.FC<PlatformConnectScreenProps> = ({ on
           <Animated.View entering={FadeIn.delay(260).duration(400)} style={styles.counterRow}>
             <Animated.View style={[styles.counterPill, count > 0 && styles.counterPillActive, counterStyle]}>
               <Text style={[styles.counterText, count > 0 && styles.counterTextActive]}>
-                {count === 0 ? 'None connected yet' : `${count} connected`}
+                {count === 0 ? (BACKEND.enabled ? 'None picked yet' : 'None connected yet') : `${count} ${BACKEND.enabled ? 'picked' : 'connected'}`}
               </Text>
             </Animated.View>
           </Animated.View>

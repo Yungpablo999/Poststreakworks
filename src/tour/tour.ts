@@ -213,7 +213,18 @@ export function isTourActive() {
   return state.active;
 }
 
+// Once per session, and, when the app is connected to the backend, once per
+// account: the connection seeds `finishedOnce` from the account and hears about
+// the tour ending through `onTourEnded`.
 let finishedOnce = false;
+let tourEndedListener: (() => void) | null = null;
+export function onTourEnded(fn: (() => void) | null) {
+  tourEndedListener = fn;
+}
+/** Whether this creator has already had the tour (from their account). */
+export function setTourFinished(done: boolean) {
+  finishedOnce = done;
+}
 /** Start the tour (once per session until there's a backend to remember it) */
 export function startTour() {
   if (state.active || finishedOnce) return;
@@ -230,8 +241,10 @@ export function prevStep() {
   if (state.index > 0) set({ index: state.index - 1, tried: false });
 }
 export function endTour() {
+  const wasActive = state.active;
   finishedOnce = true;
   set({ active: false, index: 0, tried: false });
+  if (wasActive) tourEndedListener?.();
 }
 
 /** A tour target was tapped: on a "try it" step that counts as doing it */

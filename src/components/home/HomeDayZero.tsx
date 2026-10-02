@@ -23,6 +23,10 @@ import { JarvisOrb } from '../JarvisOrb';
 import { ds, goldTokens } from '../../theme/colors';
 import { CheckInCard } from '../CheckInCard';
 import { CalendarSheet } from './CalendarSheet';
+import { PlatformRow } from '../onboarding/PlatformRow';
+import { BACKEND } from '../../config/backend';
+import { useSession } from '../../backend/session';
+import { useAccounts } from '../../backend/accounts';
 
 // Day-0 Home for brand-new creators. No stats, no streak counts, no fake
 // numbers: a warm welcome, one clear next step, and a gentle check-in.
@@ -195,6 +199,10 @@ export function HomeDayZero({
   onOpenVoiceStudio,
 }: HomeDayZeroProps) {
   const [calendarOpen, setCalendarOpen] = useState(false);
+  // Signed in to the real backend: offer the real TikTok connection right here
+  const session = useSession();
+  const realAccount = BACKEND.enabled && session.status === 'signedIn';
+  const tiktokConnected = useAccounts().some((a) => a.platform === 'tiktok');
   const previews: { key: string; title: string; body: string; icon: React.ReactNode; onPress?: () => void; pro?: boolean }[] = [
     {
       key: 'schedule',
@@ -298,6 +306,20 @@ export function HomeDayZero({
       <Animated.View entering={FadeInUp.delay(120).duration(550)}>
         <CheckInCard persona="new" isDark={isDark} onOpenCalendar={() => setCalendarOpen(true)} />
       </Animated.View>
+
+      {/* 2b. Signed in to the real backend: connect TikTok right from Home. The row does the whole
+          trip (TikTok's own sign-in page) and shows the account once it's connected. */}
+      {realAccount && (
+        <Animated.View entering={FadeInUp.delay(180).duration(550)}>
+          <GlassCard radius={26} padding={16}>
+            <Text style={styles.cardTitle}>{tiktokConnected ? 'Your TikTok' : 'Connect your TikTok'}</Text>
+            <Text style={styles.cardSub}>{tiktokConnected ? 'Jarvis can now see what works for you' : 'So Jarvis can see what works for you'}</Text>
+            <View style={{ marginTop: 12 }}>
+              <PlatformRow name="TikTok" logo="tiktok" description="Sign in with TikTok" connected={tiktokConnected} onToggle={() => {}} />
+            </View>
+          </GlassCard>
+        </Animated.View>
+      )}
 
       {/* 3. What will appear here — a preview with no numbers */}
       <Animated.View entering={FadeInUp.delay(240).duration(550)}>

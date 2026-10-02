@@ -5,6 +5,7 @@ import * as Haptics from 'expo-haptics';
 import { Text } from './ui/AppText';
 import { ds, goldTokens } from '../theme/colors';
 import { isNarrowScreen, sFont } from '../utils/responsive';
+import { BACKEND } from '../config/backend';
 
 // Two small preview switches in the header: Free ↔ Pro and Returning ↔ New.
 // Glass chips with drawn icons (no emoji); gold only appears in Pro mode.
@@ -94,6 +95,10 @@ export const HeaderDualModePills: React.FC<HeaderDualModePillsProps> = ({
   const buzz = () => {
     if (Platform.OS !== 'web') Haptics.selectionAsync();
   };
+
+  // These are preview switches for the sample-data build. A signed-in account's
+  // plan comes from the server, so there's nothing to switch.
+  if (BACKEND.enabled) return null;
 
   return (
     <View style={styles.container}>

@@ -30,10 +30,11 @@ import { ds } from '../theme/colors';
 // Email code step (sign-up step 5 of 5, and sign-in). Six glass boxes backed by
 // one hidden input, so paste and one-time-code autofill work. Verifies itself
 // on the 6th digit, then celebrates (boxes turn green in sequence) and moves on.
-// Mock: any 6 digits are accepted.
+// With no backend (onVerify not given) it is a mock: any 6 digits are accepted.
 
 const CODE_LENGTH = 6;
-const RESEND_SECONDS = 45;
+// Supabase Auth allows one code email per address per minute, so asking sooner would only be refused.
+const RESEND_SECONDS = 60;
 const CHECK_MS = 700;
 const CELEBRATE_MS = 1100;
 
@@ -44,6 +45,10 @@ interface VerifyCodeScreenProps {
   onBack: () => void;
   onEditEmail: () => void;
   onSuccess: (email: string) => void;
+  /** Checks the code for real. Resolves null when it was right, or the message to show when it wasn't. */
+  onVerify?: (code: string) => Promise<string | null>;
+  /** Sends a fresh code. Resolves null when sent, or the message to show. */
+  onResend?: () => Promise<string | null>;
 }
 
 type Status = 'entering' | 'checking' | 'verified';
@@ -93,7 +98,7 @@ function CodeBox({ digit, index, active, status }: { digit: string; index: numbe
   );
 }
 
-export const VerifyCodeScreen: React.FC<VerifyCodeScreenProps> = ({ mode, email, onBack, onEditEmail, onSuccess }) => {
+export const VerifyCodeScreen: React.FC<VerifyCodeScreenProps> = ({ mode, email, onBack, onEditEmail, onSuccess, onVerify, onResend }) => {
   const webFrame = useWebFrame();
   const wideFrame = useWideFrame();
   const [code, setCode] = useState('');
@@ -101,10 +106,18 @@ export const VerifyCodeScreen: React.FC<VerifyCodeScreenProps> = ({ mode, email,
   const [status, setStatus] = useState<Status>('entering');
   const [secondsLeft, setSecondsLeft] = useState(RESEND_SECONDS);
   const [resentNote, setResentNote] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const inputRef = useRef<TextInput>(null);
   const timers = useRef<ReturnType<typeof setTimeout>[]>([]);
+  const mounted = useRef(true);
 
-  useEffect(() => () => timers.current.forEach(clearTimeout), []);
+  useEffect(() => {
+    mounted.current = true;
+    return () => {
+      mounted.current = false;
+      timers.current.forEach(clearTimeout);
+    };
+  }, []);
 
   // Resend countdown (a normal code cooldown; nothing expires for the user)
   useEffect(() => {
@@ -113,24 +126,42 @@ export const VerifyCodeScreen: React.FC<VerifyCodeScreenProps> = ({ mode, email,
     return () => clearTimeout(t);
   }, [secondsLeft]);
 
+  const celebrate = () => {
+    setStatus('verified');
+    if (Platform.OS !== 'web') Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    react('celebrate');
+    timers.current.push(setTimeout(() => onSuccess(email), CELEBRATE_MS));
+  };
+
   const verify = (value: string) => {
     if (value.length !== CODE_LENGTH || status !== 'entering') return;
     setStatus('checking');
+    setError(null);
     inputRef.current?.blur();
-    timers.current.push(
-      setTimeout(() => {
-        setStatus('verified');
-        if (Platform.OS !== 'web') Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-        react('celebrate');
-        timers.current.push(setTimeout(() => onSuccess(email), CELEBRATE_MS));
-      }, CHECK_MS),
-    );
+    if (onVerify) {
+      // The real thing: the backend checks the code.
+      onVerify(value).then((problem) => {
+        if (!mounted.current) return;
+        if (problem) {
+          if (Platform.OS !== 'web') Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+          setError(problem);
+          setCode('');
+          setStatus('entering');
+          setTimeout(() => inputRef.current?.focus(), 50);
+          return;
+        }
+        celebrate();
+      });
+      return;
+    }
+    timers.current.push(setTimeout(celebrate, CHECK_MS));
   };
 
   const handleChange = (text: string) => {
     if (status !== 'entering') return;
     const digits = text.replace(/\D/g, '').slice(0, CODE_LENGTH);
     if (digits.length > code.length && Platform.OS !== 'web') Haptics.selectionAsync();
+    if (error && digits.length > 0) setError(null);
     setCode(digits);
     if (digits.length === CODE_LENGTH) verify(digits);
   };
@@ -139,8 +170,17 @@ export const VerifyCodeScreen: React.FC<VerifyCodeScreenProps> = ({ mode, email,
     if (secondsLeft > 0) return;
     if (Platform.OS !== 'web') Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     setCode('');
+    setError(null);
     setSecondsLeft(RESEND_SECONDS);
-    setResentNote(true);
+    if (onResend) {
+      onResend().then((problem) => {
+        if (!mounted.current) return;
+        if (problem) setError(problem);
+        else setResentNote(true);
+      });
+    } else {
+      setResentNote(true);
+    }
     inputRef.current?.focus();
   };
 
@@ -215,6 +255,12 @@ export const VerifyCodeScreen: React.FC<VerifyCodeScreenProps> = ({ mode, email,
                     style={styles.hiddenInput}
                   />
                 </View>
+
+                {error ? (
+                  <Animated.View entering={FadeIn.duration(200)}>
+                    <Text style={styles.error} accessibilityRole="alert" accessibilityLiveRegion="polite">{error}</Text>
+                  </Animated.View>
+                ) : null}
 
                 <View style={styles.action}>
                   {status === 'verified' ? (
@@ -315,6 +361,7 @@ const styles = StyleSheet.create({
     fontSize: 1,
     ...(Platform.OS === 'web' ? ({ outlineStyle: 'none', caretColor: 'transparent' } as object) : {}),
   },
+  error: { fontSize: 13.5, lineHeight: 19, fontWeight: '600', color: '#B3261E', textAlign: 'center', marginTop: 12 },
   action: { marginTop: 16, minHeight: 49, justifyContent: 'center' },
   verified: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 10, height: 49 },
   verifiedTick: {

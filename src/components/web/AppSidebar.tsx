@@ -11,6 +11,7 @@ import { HomeNavIcon, CreateNavIcon, QuestsNavIcon, GrowthNavIcon } from '../Flo
 import type { UserProfileData } from '../UserProfileModal';
 import { ds, goldTokens } from '../../theme/colors';
 import { SIDEBAR_W } from '../../hooks/useBreakpoint';
+import { BACKEND } from '../../config/backend';
 
 // Desktop side menu (the web app on big screens). Replaces the bottom tab
 // bar: the four main pages, the studios, a Pro card for free creators and
@@ -212,13 +213,16 @@ export function AppSidebar({
         <TourTarget id="ghost" style={styles.buddy}>
           <LiveMascot size={64} bubble="top" bubbleWidth={220} />
         </TourTarget>
-        <View style={[styles.preview, styles.flex]}>
-          <Text style={styles.previewLabel}>Preview as</Text>
-          <View style={styles.previewRow}>
-            <Segment options={['Free', 'Pro']} value={isPro ? 1 : 0} onChange={onToggleTier} />
-            <Segment options={['New', 'Returning']} value={persona === 'returning' ? 1 : 0} onChange={onTogglePersona} />
+        {/* Preview switches are for the sample-data build; a signed-in account's plan comes from the server */}
+        {!BACKEND.enabled && (
+          <View style={[styles.preview, styles.flex]}>
+            <Text style={styles.previewLabel}>Preview as</Text>
+            <View style={styles.previewRow}>
+              <Segment options={['Free', 'Pro']} value={isPro ? 1 : 0} onChange={onToggleTier} />
+              <Segment options={['New', 'Returning']} value={persona === 'returning' ? 1 : 0} onChange={onTogglePersona} />
+            </View>
           </View>
-        </View>
+        )}
       </View>
 
       <Pressable onPress={onOpenProfile} accessibilityRole="button" accessibilityLabel="Your profile" style={({ pressed }) => [styles.me, pointer, pressed && { opacity: 0.85 }]}>

@@ -4,7 +4,7 @@
 get reset, new chats start cold. This is the actual source of truth for what's been built, what's
 real vs. stub, and what to do next. Keep it updated as work progresses; don't let it go stale.
 
-Last updated: 2026-10-02.
+Last updated: 2026-10-03.
 
 ### Direction update (2026-10-02) — read before anything else in this file
 
@@ -30,6 +30,31 @@ backend (the 127 commits on `main` since Aug 21; `master` has none of them):
   "Security" section of PHASE1_CONTRACT.md.
 - **Secrets:** the demo accounts' password was committed in this file. It has been removed below;
   treat it as exposed and **rotate it**. Credentials live in the team password vault, never in the repo.
+
+### Update (2026-10-03) — the app is wired to the backend; tested end to end on a local full stack
+
+- **Done and on `master` (staging):** Phase 1 + the real TikTok connection (migrations `…19`–`…22`), and now
+  the **Expo app connected to it** (`src/backend/*`, small hooks in `src/data`, `src/jarvis`, `src/mascot`,
+  `src/tour`). It is **inert unless** `EXPO_PUBLIC_API_URL`, `EXPO_PUBLIC_SUPABASE_URL` and
+  `EXPO_PUBLIC_SUPABASE_ANON_KEY` are set, so merging to `main` changes nothing for users until those are set
+  on the production app project. How it behaves and what is still sample data:
+  [PHASE1_CONTRACT.md](backend/PHASE1_CONTRACT.md) §5. New: `CORS_ALLOWED_ORIGINS` (set it on every deployed API),
+  `.github/workflows/app-ci.yml` (app typecheck + web builds).
+- **Verified on a real local Supabase** (CLI, empty project): all 23 migrations apply; email-code sign-up and
+  sign-in; 55 API checks (`backend/scripts/e2e-local.mjs`) including cross-creator isolation with real tokens; a
+  browser walkthrough (desktop and phone width) of sign-up → Home → check-in, hooks, drafts, Repurpose limit,
+  profile, sign-out/in, TikTok redirect/cancel/failure/connected/disconnect. `next build` and the web, Android
+  and iOS bundles build. See [STAGING_RUNBOOK.md](backend/STAGING_RUNBOOK.md) for the exact list and for how to
+  run it yourself.
+- **Not verifiable without accounts or a phone:** a hosted staging project, real email (Resend), Google/Apple,
+  a real TikTok login (sandbox Target user), Ask Jarvis with a real AI key, the cron, native device behaviour.
+- **Needs a human (the owner of each account):** create the staging Supabase + two Vercel projects and set the env
+  vars; add the staging redirect URI and Target users on the TikTok sandbox app; Resend SMTP; Google/Apple
+  credentials; **rotate the TikTok client secret that was shared in a screenshot** and the demo-account password
+  that was committed; the repo is public, so keep secrets out of it.
+- **Decision for the product owner:** a signed-in account always sees the "new creator" Home (real streak, real
+  drafts) because the "returning" Home is still sample content with made-up numbers. Wiring the Growth/Home
+  numbers to the synced TikTok data is the next backend-to-screen job.
 
 ### Dummy test accounts (2026-09-11) — use these for any manual/frontend testing
 

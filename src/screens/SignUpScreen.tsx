@@ -30,6 +30,12 @@ interface SignUpScreenProps {
   onSocialSignUp?: (provider: SocialProvider) => void;
   /** The idea they kept on the "Your plan" step, shown as what they're saving. */
   savedIdeaTitle?: string;
+  /** The code is being sent. */
+  busy?: boolean;
+  /** Why the code couldn't be sent (shown under the email box). */
+  error?: string | null;
+  /** Which one-tap buttons to show. Leave out for both; an empty list hides them (and "or use your email"). */
+  providers?: SocialProvider[];
 }
 
 export const SignUpScreen: React.FC<SignUpScreenProps> = ({
@@ -38,7 +44,13 @@ export const SignUpScreen: React.FC<SignUpScreenProps> = ({
   onSubmit,
   onSocialSignUp,
   savedIdeaTitle,
+  busy = false,
+  error,
+  providers,
 }) => {
+  const showApple = !providers || providers.includes('apple');
+  const showGoogle = !providers || providers.includes('google');
+  const showSocial = showApple || showGoogle;
   const webFrame = useWebFrame();
   const wideFrame = useWideFrame();
   const [email, setEmail] = useState('');
@@ -55,6 +67,7 @@ export const SignUpScreen: React.FC<SignUpScreenProps> = ({
   };
 
   const handleCreate = () => {
+    if (busy) return;
     if (!valid) {
       setTouched(true);
       return;
@@ -119,16 +132,21 @@ export const SignUpScreen: React.FC<SignUpScreenProps> = ({
             ) : null}
 
             {/* One tap first */}
-            <Animated.View entering={FadeInUp.delay(320).duration(500)} style={styles.socialStack}>
-              <SocialButton provider="apple" onPress={() => handleSocial('apple')} />
-              <SocialButton provider="google" onPress={() => handleSocial('google')} />
-            </Animated.View>
+            {showSocial && (
+              <>
+                <Animated.View entering={FadeInUp.delay(320).duration(500)} style={styles.socialStack}>
+                  {showApple && <SocialButton provider="apple" onPress={() => handleSocial('apple')} />}
+                  {showGoogle && <SocialButton provider="google" onPress={() => handleSocial('google')} />}
+                </Animated.View>
 
-            <Animated.View entering={FadeIn.delay(440).duration(400)} style={styles.dividerRow}>
-              <View style={styles.dividerLine} />
-              <Text style={styles.dividerText}>or use your email</Text>
-              <View style={styles.dividerLine} />
-            </Animated.View>
+                <Animated.View entering={FadeIn.delay(440).duration(400)} style={styles.dividerRow}>
+                  <View style={styles.dividerLine} />
+                  <Text style={styles.dividerText}>or use your email</Text>
+                  <View style={styles.dividerLine} />
+                </Animated.View>
+              </>
+            )}
+            {!showSocial && <View style={{ height: 20 }} />}
 
             {/* Email */}
             <Animated.View entering={FadeInUp.delay(520).duration(500)}>
@@ -167,8 +185,13 @@ export const SignUpScreen: React.FC<SignUpScreenProps> = ({
                     </Text>
                   </Animated.View>
                 )}
+                {error ? (
+                  <Animated.View entering={FadeIn.duration(200)}>
+                    <Text style={styles.error} accessibilityRole="alert" accessibilityLiveRegion="polite">{error}</Text>
+                  </Animated.View>
+                ) : null}
                 <View style={styles.createBtn}>
-                  <AppButton title="Create account" onPress={handleCreate} disabled={!valid} />
+                  <AppButton title={busy ? 'Sending your code…' : 'Create account'} onPress={handleCreate} disabled={!valid || busy} />
                 </View>
               </GlassCard>
             </Animated.View>
@@ -249,6 +272,7 @@ const styles = StyleSheet.create({
   // The glass field's purple border shows focus; drop the browser's own outline on web
   input: { flex: 1, fontSize: 16, color: ds.ink, height: '100%', ...(Platform.OS === 'web' ? ({ outlineStyle: 'none' } as object) : {}) },
   hint: { fontSize: 12.5, lineHeight: 17, color: ds.purple, marginTop: 8, fontWeight: '600' },
+  error: { fontSize: 13, lineHeight: 18, color: '#B3261E', marginTop: 10, fontWeight: '600' },
   createBtn: { marginTop: 14 },
   signInRow: { flexDirection: 'row', justifyContent: 'center', alignItems: 'center', marginTop: 20 },
   signInText: { fontSize: 14, color: ds.text2 },
