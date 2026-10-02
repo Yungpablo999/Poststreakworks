@@ -5,11 +5,13 @@ on:
     branches: [master, main]
     paths:
       - "backend/**"
+      - "frontend/shared/**"
       - ".github/workflows/ci.yml"
   pull_request:
     branches: [master, main]
     paths:
       - "backend/**"
+      - "frontend/shared/**"
       - ".github/workflows/ci.yml"
 
 defaults:
@@ -48,3 +50,22 @@ jobs:
           cache-dependency-path: backend/pnpm-lock.yaml
       - run: pnpm install --frozen-lockfile
       - run: pnpm lint
+
+  # Applies every migration to an in-process Postgres (PGlite), checks row-level
+  # security as the real authenticated / service_role roles, and runs the
+  # unit tests (Jarvis chat, platform mapping, frontend-contract drift).
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+          cache-dependency-path: backend/pnpm-lock.yaml
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm test
