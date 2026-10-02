@@ -4,17 +4,42 @@
 get reset, new chats start cold. This is the actual source of truth for what's been built, what's
 real vs. stub, and what to do next. Keep it updated as work progresses; don't let it go stale.
 
-Last updated: 2026-09-11.
+Last updated: 2026-10-02.
+
+### Direction update (2026-10-02) — read before anything else in this file
+
+The product direction changed after this file was last written, and the frontend moved ahead of the
+backend (the 127 commits on `main` since Aug 21; `master` has none of them):
+
+- **PostStreak is now Jarvis (the AI that thinks up posts) + Ghost (the mascot who guides and does the
+  jobs).** The Expo app is finished against **in-memory sample data** (`src/data/index.ts`,
+  `src/jarvis/chat.ts`); the backend's job is to make that data real, in the order the app calls it.
+  Gentle daily check-in; **never guilt a missed day** — the old streak freeze / rescue / "worried →
+  heartbroken" Jarvis ladder is retired, and Ghost's 12 emotions (`assets/mascot/`) replace the
+  8-vs-9 Jarvis emotion question.
+- **Backend plan and phases:** the team's *PostStreak Backend: Step-by-Step Build Plan* (2026-10-02).
+  Our reconciliation with it — what we adopt, where we deliberately differ (we keep tRPC + the Next.js
+  API on Supabase rather than moving to direct-from-app + Edge Functions), the 14-table mapping, the
+  who-may-write matrix, and the wiring recipe for `src/data/index.ts` — is
+  **[backend/PHASE1_CONTRACT.md](backend/PHASE1_CONTRACT.md)**.
+- **Phase 1 backend is built and tested on branch `backend/phase1-saved-work`** (migrations
+  `…19`–`…21`, new endpoints under `/api/v1`, `pnpm test`). It is **not applied to any database
+  yet** — apply to a dev project first, then review the data-modifying steps in `…20` before prod.
+- **Security fixes in that branch matter regardless of architecture** (any signed-in user could make
+  themselves admin, grant themselves Pro, or mint XP through the database directly). See the
+  "Security" section of PHASE1_CONTRACT.md.
+- **Secrets:** the demo accounts' password was committed in this file. It has been removed below;
+  treat it as exposed and **rotate it**. Credentials live in the team password vault, never in the repo.
 
 ### Dummy test accounts (2026-09-11) — use these for any manual/frontend testing
 
 Two real, fully-seeded accounts exist in the live Supabase project so every wired screen has
 something real to render:
-- **Primary**: `demo@poststreak.app` / `DemoUser2026!` — "Amara Demo", pro tier, 12-day streak,
+- **Primary**: `demo@poststreak.app` (password: team vault) — "Amara Demo", pro tier, 12-day streak,
   level 4, connected LinkedIn+Twitter, 8 posts (published/scheduled/draft), an active subscription,
   earnings history, an active duel + squad + match + conversation with the counterparty below,
   quest progress, notifications, milestones, referral history.
-- **Counterparty**: `demo-creator-2@poststreak.app` / `DemoUser2026!` — "Kwame Creates", exists purely
+- **Counterparty**: `demo-creator-2@poststreak.app` (password: team vault) — "Kwame Creates", exists purely
   so Amara's matches/duels/squad/messages have a real counterpart — deliberately NOT a reused real v1
   user (don't attach fake social data to a real founder's account).
 - Seed script: `backend/scripts/seed-dummy-data.js` (run once already; not idempotent — see its header
@@ -120,7 +145,16 @@ Exactly two branches on GitHub: **`master` = staging**, **`main` = production**.
 - All work lands on `master` first (direct commits are fine — this is the working branch).
 - Only promote `master` → `main` after staging has been validated (CI green **and**, ideally, a real
   deploy smoke-tested — CI alone is code-correctness, not a live-environment check).
-- CI (`.github/workflows/ci.yml`) runs typecheck + lint on push/PR to both branches.
+- CI (`.github/workflows/ci.yml`) runs typecheck + lint + tests (`pnpm test`: migrations on an in-process
+  Postgres, RLS, unit tests, frontend-contract drift) on push/PR to both branches.
+- **Proposed working agreement (team backend plan, 2026-10-02) — adopt unless the team decides
+  otherwise:** one branch per task named `backend/<task>`; a pull request with one reviewer before
+  anything merges (a second pair of eyes on every security/RLS change); database changes only as
+  migration files, tried on a dev project first, never by clicking in the dashboard of the real
+  project. This replaces "direct commits to master are fine" above.
+- `main` currently holds the frontend and `master` the newer backend; they diverged on 2026-08-21.
+  A trial merge conflicts in only 5 frontend files (App.tsx, UserProfileModal, DashboardScreen,
+  ProDashboardScreen, SignInScreen). Reconcile into one trunk before the apps call the backend.
 - No other long-lived branches — feature branches get merged into `master` and deleted, not kept
   around (this was a deliberate cleanup; `wire-auth-dashboard` / PR #2 was merged then deleted).
 
