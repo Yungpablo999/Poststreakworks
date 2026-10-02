@@ -81,6 +81,7 @@ Environment variables (Settings → Environment Variables; all in the vault too)
 | `TIKTOK_CLIENT_KEY`, `TIKTOK_CLIENT_SECRET` | the TikTok **sandbox** app's (step 6) |
 | `TIKTOK_REDIRECT_URI` | `https://staging.poststreak.app/auth/tiktok/callback` — exactly as registered in TikTok |
 | `GROQ_API_KEY` (and `GEMINI_API_KEY` as fallback) | for Ask Jarvis. Without them Jarvis shows its gentle "having trouble" reply |
+| `CORS_ALLOWED_ORIGINS` | the app's address(es) from step 4, comma-separated, no trailing slash, e.g. `https://staging.poststreak.app`. Only these websites can call the API from a browser. **Set it on every deployed environment**; left unset, any website is allowed (local development only) |
 | `AUTH_DEV_AUTOCONFIRM` | **leave unset** (it skips email verification) |
 
 Cron jobs come from `backend/apps/web/vercel.json`: the post dispatcher every 15 minutes and the TikTok stats refresh daily at 04:00 UTC. (Sub-daily crons need Vercel's Pro plan.)
@@ -96,6 +97,7 @@ The existing project deploys the production app from `main`. For staging, create
 | `EXPO_PUBLIC_API_URL` | the staging API's address, e.g. `https://api-staging.poststreak.app` |
 | `EXPO_PUBLIC_SUPABASE_URL` | staging project URL |
 | `EXPO_PUBLIC_SUPABASE_ANON_KEY` | staging `anon` key (public by design) |
+| `EXPO_PUBLIC_AUTH_PROVIDERS` | *(optional)* which one-tap buttons to show: `google`, `apple`, or `google,apple`. Only list a provider once it is switched on in Supabase (step 2). Left unset, those buttons are hidden and email code is the only way in |
 
 All `EXPO_PUBLIC_*` values ship inside the app, so they must be safe to publish: the `anon` key is; the `service_role` key never is.
 
@@ -143,8 +145,31 @@ Only after the staging checks pass. In this order:
 
 ---
 
+## Check it all on your machine (no accounts needed)
+
+Docker Desktop is the only requirement. This runs a real Supabase (database, sign-in, the REST layer and a mail catcher), the real API and the real app, so you can try everything before any of the cloud steps above.
+
+```bash
+cd backend
+npx supabase start -x studio,imgproxy,vector,logflare,edge-runtime,storage-api,realtime,postgres-meta,supavisor
+npx supabase status -o env        # the URL and keys to copy below
+```
+
+The first start downloads the images (about 4 GB on disk; on a slow connection that can take an hour or more) and after that it takes a few seconds. It applies all 23 migrations to the empty database itself.
+
+1. **API:** in `backend/apps/web` copy `../../.env.example` to `.env.local` and fill `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY` and `SUPABASE_SERVICE_ROLE_KEY` from the status output, plus a `TOKEN_ENCRYPTION_KEY` and `CRON_SECRET`. The TikTok values can be made up locally. Then `node_modules/.bin/next dev -p 3000` (or `pnpm dev`).
+2. **App:** from the repo root, with the same URL and the anon key:
+   `EXPO_PUBLIC_API_URL=http://localhost:3000 EXPO_PUBLIC_SUPABASE_URL=http://127.0.0.1:54321 EXPO_PUBLIC_SUPABASE_ANON_KEY=<anon key> npm run web`
+   (Expo remembers these values between runs: add `--clear` when you change them.)
+3. Sign up in the browser. The 6-digit code arrives in the mail catcher at <http://127.0.0.1:54324>.
+4. **Automated pass:** `ANON=<anon key> SERVICE=<service_role key> node scripts/e2e-local.mjs` in `backend` signs two creators in with real codes and runs 55 checks against the API and the database (their data, the free limits, TikTok's sign-in address, and that one creator cannot reach or forge another's data).
+
+`npx supabase stop` shuts it down.
+
 ## What has and hasn't been verified
 
-Verified by automated tests (run `pnpm test` in `backend`): every migration on an empty database and on a v1-shaped one with data in it; row-level security as the real roles; the attacks that used to work (admin takeover, free Pro, minted XP, reading tokens) now refused; the TikTok flow against a faked TikTok (forged callbacks, expired and reused states, token refresh and rotation, failures); Ask Jarvis's reply handling.
+**Verified by automated tests** (`pnpm test` in `backend`, 253 tests): every migration on an empty database and on a v1-shaped one with data in it; row-level security as the real roles; the attacks that used to work (admin takeover, free Pro, minted XP, reading tokens) now refused; the TikTok flow against a faked TikTok (forged callbacks, expired and reused states, token refresh and rotation, failures); Ask Jarvis's reply handling; the browser-origin rules.
 
-**Not** verified until you do the steps above: real email delivery, Google/Apple sign-in, a real TikTok account connecting, the cron job, behaviour on a real phone. The tests run in an in-process Postgres, not a Supabase project — the smoke test is what proves the deployed system.
+**Verified on a real local Supabase** (steps above, 2026-10-03): all 23 migrations applying to an empty project through the Supabase CLI; sign-up and sign-in with real emailed codes (wrong code, unknown email, expired session); the 55 API checks; and a browser walkthrough of the connected app on desktop and phone width: sign-up from the topic picker to Home, the welcome tour once, check-in, saved hooks, drafts saved by Ghost, the free Repurpose limit, profile edits, sign-out and back in with everything still there, TikTok's sign-in redirect, a cancelled TikTok sign-in (the creator stays signed in), a rejected one, a connected account shown with its followers, and disconnecting it (tokens and saved numbers deleted). The sample-data app (no backend settings) was checked unchanged. The API (`next build`) and the web, Android and iOS app bundles all build.
+
+**Not** verified until you do the steps above: real email delivery (Resend), Google/Apple sign-in, a real TikTok account connecting (needs a Target user on the sandbox app), the nightly cron job, Ask Jarvis with a real AI key, and behaviour on a real phone (the phone-only paths are the TikTok hand-back link `poststreak://tiktok…`, session storage on the device and the in-app keyboard). The smoke test in step 6 is what proves the deployed system.

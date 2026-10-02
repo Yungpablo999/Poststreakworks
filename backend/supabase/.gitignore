@@ -1,0 +1,4 @@
+# Supabase CLI working files (created by `supabase start` / `supabase link`)
+.branches
+.temp
+.env

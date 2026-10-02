@@ -135,6 +135,26 @@ Not in the plan but in the app: **XP and level** (shown everywhere). They are `s
 
 ## 5. Wiring the app (Track A's Phase 2 task)
 
+**Status: done in the app, switched off by default.** Everything below is implemented in `src/backend/*`
+and a handful of small hooks in `src/data`, `src/jarvis`, `src/mascot` and `src/tour`. It does nothing
+until the app is given `EXPO_PUBLIC_API_URL`, `EXPO_PUBLIC_SUPABASE_URL` and `EXPO_PUBLIC_SUPABASE_ANON_KEY`
+(see `src/config/backend.ts`); without them the app runs on its sample data exactly as before. Connected,
+it differs from the sample build in these ways:
+
+- **Sign-in is real.** Email code (6 digits, via Supabase Auth); Google / Apple only if
+  `EXPO_PUBLIC_AUTH_PROVIDERS` lists them. The session persists across reloads and launches.
+- **The signed-in creator is the data.** Nothing of the sample creator ("Pablo") shows; the profile,
+  drafts, saved hooks, check-ins, repurpose count, tour/tips state and connected accounts come from
+  `GET /me/bootstrap`, and each change is saved as it happens (in order; if a save fails the creator is
+  told and the screen is put back in step with their account).
+- **A signed-in account always shows the "new creator" Home**, with real streak and drafts: the "returning"
+  Home is still sample content, so it isn't shown to real accounts. The Free/Pro and New/Returning
+  *preview switches are hidden*, and the plan always comes from the server.
+- **TikTok connects for real** (§5.4); the other platforms say "coming soon" instead of pretending.
+- **Ask Jarvis** asks the server and falls back to the built-in replies when it can't be reached.
+- Still sample data (not wired yet): Schedule, Growth numbers, Quests/XP, Voice Studio, Pro screens' own
+  connect buttons. Profile photo choices stay on the device.
+
 ### 5.1 Sign-in
 
 The app signs in with the **Supabase client** (email code, Google, Apple) and keeps the session. After
