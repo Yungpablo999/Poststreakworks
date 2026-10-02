@@ -178,7 +178,7 @@ export async function dispatchScheduledPosts() {
     if (aggregateStatus === "published") {
       // Awaited, not fire-and-forget — a streak update failure must surface
       // in cron logs, not vanish silently (v1's own stated reasoning).
-      await recordStreakEvent(supabase, post.user_id, "publish", {
+      await recordStreakEvent(post.user_id, "publish", {
         post_id: post.id,
         platforms: post.target_platforms,
       });

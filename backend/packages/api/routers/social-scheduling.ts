@@ -111,7 +111,9 @@ export const socialSchedulingRouter = createTRPCRouter({
           access_token: input.accessToken,
           refresh_token: input.refreshToken,
         })
-        .select()
+        // Never echo OAuth tokens back to the client; creators can't read the
+        // token columns at all (migration …21_rls_hardening).
+        .select("id, platform, publish_mode, platform_user_id, connected_at")
         .single();
 
       if (error) {
@@ -122,11 +124,7 @@ export const socialSchedulingRouter = createTRPCRouter({
       }
 
       // Track analytics
-      await ctx.supabase.from("analytics_events").insert({
-        user_id: ctx.user.id,
-        event_name: "platform_connected",
-        properties: { platform: input.platform },
-      });
+      await ctx.track("platform_connected", { platform: input.platform });
 
       return data;
     }),
@@ -142,7 +140,7 @@ export const socialSchedulingRouter = createTRPCRouter({
         .update({ disconnected_at: new Date().toISOString() })
         .eq("id", input.connectionId)
         .eq("user_id", ctx.user.id)
-        .select()
+        .select("id, platform, disconnected_at")
         .single();
 
       if (error) {
@@ -156,14 +154,18 @@ export const socialSchedulingRouter = createTRPCRouter({
     }),
 
   /**
-   * List scheduled posts with optional status filter.
+   * List scheduled posts, newest first. `from` / `to` bound scheduled_at (from
+   * inclusive, to exclusive) — the calendar and the week view ask for one
+   * month / one week at a time.
    */
   getPosts: protectedProcedure
     .input(
       z.object({
         status: z
-          .enum(["draft", "scheduled", "publishing", "published", "failed"])
+          .enum(["draft", "scheduled", "publishing", "pending_confirmation", "published", "failed"])
           .optional(),
+        from: z.string().datetime({ offset: true }).optional(),
+        to: z.string().datetime({ offset: true }).optional(),
         limit: z.number().min(1).max(100).default(20),
         offset: z.number().min(0).default(0),
       }),
@@ -178,6 +180,12 @@ export const socialSchedulingRouter = createTRPCRouter({
 
       if (input.status) {
         query = query.eq("status", input.status);
+      }
+      if (input.from) {
+        query = query.gte("scheduled_at", input.from);
+      }
+      if (input.to) {
+        query = query.lt("scheduled_at", input.to);
       }
 
       const { data, error } = await query;
@@ -274,14 +282,10 @@ export const socialSchedulingRouter = createTRPCRouter({
       }
 
       // Track analytics
-      await ctx.supabase.from("analytics_events").insert({
-        user_id: ctx.user.id,
-        event_name: "post_created",
-        properties: {
+      await ctx.track("post_created", {
           platforms: input.targetPlatforms,
           has_media: (input.mediaUrls?.length ?? 0) > 0,
-        },
-      });
+        });
 
       return data;
     }),
@@ -405,7 +409,7 @@ export const socialSchedulingRouter = createTRPCRouter({
       }
 
       if (allPublished) {
-        await recordStreakEvent(ctx.supabase, ctx.user.id, "publish", {
+        await recordStreakEvent(ctx.user.id, "publish", {
           post_id: post.id,
           platform: input.platform,
           source: "confirm_manual",

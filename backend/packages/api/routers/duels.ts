@@ -140,11 +140,7 @@ export const duelsRouter = createTRPCRouter({
       }
 
       // Track analytics
-      await ctx.supabase.from("analytics_events").insert({
-        user_id: ctx.user.id,
-        event_name: "duel_proposed",
-        properties: { partner_id: input.partnerId },
-      });
+      await ctx.track("duel_proposed", { partner_id: input.partnerId });
 
       return data;
     }),

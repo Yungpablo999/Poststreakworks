@@ -1,5 +1,6 @@
 import { appRouter } from "@poststreak/api/root";
 import { createContext } from "@poststreak/api/context";
+import { TRPCError } from "@trpc/server";
 import { NextResponse, type NextRequest } from "next/server";
 
 // REST route handlers under app/api/v1/* are thin wrappers over the same
@@ -13,6 +14,19 @@ import { NextResponse, type NextRequest } from "next/server";
 export async function getCaller(req: NextRequest) {
   const ctx = await createContext({ req, resHeaders: new Headers() });
   return appRouter.createCaller(ctx);
+}
+
+/**
+ * Parses a JSON request body. A malformed body is the client's mistake (400),
+ * not a server error (500) — which is what a bare `await request.json()`
+ * turned it into. Shape validation is left to the tRPC procedure's zod input.
+ */
+export async function readJsonBody(req: NextRequest): Promise<unknown> {
+  try {
+    return await req.json();
+  } catch {
+    throw new TRPCError({ code: "BAD_REQUEST", message: "Request body must be valid JSON" });
+  }
 }
 
 /**

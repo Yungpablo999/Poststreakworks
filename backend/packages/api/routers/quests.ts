@@ -176,7 +176,7 @@ export const questsRouter = createTRPCRouter({
         throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Failed to complete quest" });
       }
 
-      await awardXp(ctx.supabase, ctx.user.id, quest.xp_reward, "quest_completed", quest.title);
+      await awardXp(ctx.user.id, quest.xp_reward, "quest_completed", quest.title);
 
       return { xpGained: quest.xp_reward };
     }),

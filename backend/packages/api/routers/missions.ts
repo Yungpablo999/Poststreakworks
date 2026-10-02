@@ -2,6 +2,7 @@ import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "../context";
 import { TRPCError } from "@trpc/server";
 import { recommendMission } from "@poststreak/ai/mission-recommender";
+import { awardXp, recordStreakEvent } from "@poststreak/workflows";
 
 export const missionsRouter = createTRPCRouter({
   /**
@@ -158,58 +159,14 @@ export const missionsRouter = createTRPCRouter({
         });
       }
 
-      // Record streak event (mission completion advances streak)
-      const today = new Date()
-        .toLocaleDateString("en-CA", { timeZone: "Africa/Lagos" })
-        .split("T")[0]!;
+      // Mission completion advances the streak (atomic, idempotent per local
+      // day) and awards XP. Both write with the service role — creators can't
+      // write streaks or credits directly (migration …21_rls_hardening).
+      await recordStreakEvent(ctx.user.id, "mission_completion", {
+        mission_id: input.missionId,
+        mission_type: mission.type,
+      });
 
-      const { data: existingEvent } = await ctx.supabase
-        .from("streak_events")
-        .select("id")
-        .eq("user_id", ctx.user.id)
-        .eq("event_date", today)
-        .limit(1)
-        .single();
-
-      if (!existingEvent) {
-        await ctx.supabase.from("streak_events").insert({
-          user_id: ctx.user.id,
-          event_type: "mission_completion",
-          event_date: today,
-          metadata: { mission_id: input.missionId, mission_type: mission.type },
-        });
-
-        // Update streak state
-        const { data: state } = await ctx.supabase
-          .from("streak_states")
-          .select("current_streak, longest_streak, last_qualifying_day")
-          .eq("user_id", ctx.user.id)
-          .single();
-
-        if (state) {
-          const yesterday = new Date();
-          yesterday.setDate(yesterday.getDate() - 1);
-          const yesterdayStr = yesterday
-            .toLocaleDateString("en-CA", { timeZone: "Africa/Lagos" })
-            .split("T")[0]!;
-
-          const isConsecutive =
-            state.last_qualifying_day === yesterdayStr ||
-            state.current_streak === 0;
-          const newStreak = isConsecutive ? state.current_streak + 1 : 1;
-
-          await ctx.supabase
-            .from("streak_states")
-            .update({
-              current_streak: newStreak,
-              longest_streak: Math.max(newStreak, state.longest_streak),
-              last_qualifying_day: today,
-            })
-            .eq("user_id", ctx.user.id);
-        }
-      }
-
-      // Award credits for completion
       const creditAmount =
         mission.difficulty === "hard"
           ? 15
@@ -217,23 +174,12 @@ export const missionsRouter = createTRPCRouter({
             ? 10
             : 5;
 
-      await ctx.supabase.from("credits").insert({
-        user_id: ctx.user.id,
-        type: "earn",
-        amount: creditAmount,
-        source: "mission_completion",
-        description: `Completed ${mission.type} mission`,
-      });
+      await awardXp(ctx.user.id, creditAmount, "mission_completion", `Completed ${mission.type} mission`);
 
-      // Track analytics
-      await ctx.supabase.from("analytics_events").insert({
-        user_id: ctx.user.id,
-        event_name: "mission_completed",
-        properties: {
-          mission_type: mission.type,
-          difficulty: mission.difficulty,
-          credits_earned: creditAmount,
-        },
+      await ctx.track("mission_completed", {
+        mission_type: mission.type,
+        difficulty: mission.difficulty,
+        credits_earned: creditAmount,
       });
 
       return { success: true, creditsEarned: creditAmount };

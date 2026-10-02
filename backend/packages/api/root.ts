@@ -18,6 +18,10 @@ import { notificationsRouter } from "./routers/notifications";
 import { passportRouter } from "./routers/passport";
 import { earningsRouter } from "./routers/earnings";
 import { questsRouter } from "./routers/quests";
+import { draftsRouter } from "./routers/drafts";
+import { savedHooksRouter } from "./routers/saved-hooks";
+import { repurposeRouter } from "./routers/repurpose";
+import { jarvisRouter } from "./routers/jarvis";
 
 export const appRouter = createTRPCRouter({
   accounts: accountsRouter,
@@ -42,6 +46,12 @@ export const appRouter = createTRPCRouter({
   passport: passportRouter,
   earnings: earningsRouter,
   quests: questsRouter,
+  // Phase 1 (October 2026): what the finished app kept in memory — see
+  // backend/PHASE1_CONTRACT.md and supabase/migrations/20260814000020
+  drafts: draftsRouter,
+  savedHooks: savedHooksRouter,
+  repurpose: repurposeRouter,
+  jarvis: jarvisRouter,
 });
 
 export type AppRouter = typeof appRouter;

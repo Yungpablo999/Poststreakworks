@@ -1,10 +1,3 @@
-export {
-  recordStreakEvent,
-  calculateJarvisEmotion,
-  todayWAT,
-  yesterdayWAT,
-  levelForXp,
-  awardXp,
-  getXpBalance,
-} from "./streak-engine";
-export type { StreakEventType, RecordStreakEventResult } from "./streak-engine";
+export { recordStreakEvent, getCheckInSummary, levelForXp, awardXp, getXpBalance } from "./streak-engine";
+export type { StreakEventType, RecordStreakEventResult, CheckInSummary } from "./streak-engine";
+export { getServiceClient } from "./service-client";

@@ -133,11 +133,7 @@ export const safetyModerationRouter = createTRPCRouter({
       }
 
       // Track analytics
-      await ctx.supabase.from("analytics_events").insert({
-        user_id: ctx.user.id,
-        event_name: "report_submitted",
-        properties: { target_type: input.targetType, category: input.category },
-      });
+      await ctx.track("report_submitted", { target_type: input.targetType, category: input.category });
 
       return data;
     }),

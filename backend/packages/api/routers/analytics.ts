@@ -4,29 +4,21 @@ import { TRPCError } from "@trpc/server";
 
 export const analyticsRouter = createTRPCRouter({
   /**
-   * Track a custom analytics event.
+   * Track an event that originates in the app (a share tap, a screen view).
+   *
+   * Stored by the server under a "client." prefix so an app-sent event can
+   * never impersonate one the server records itself — the free-tier AI quota
+   * and the growth metrics are computed from those names.
    */
   track: protectedProcedure
     .input(
       z.object({
-        eventName: z.string().min(1).max(100),
+        eventName: z.string().regex(/^[a-z][a-z0-9_]{0,59}$/),
         properties: z.record(z.any()).optional(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      const { error } = await ctx.supabase.from("analytics_events").insert({
-        user_id: ctx.user.id,
-        event_name: input.eventName,
-        properties: input.properties ?? {},
-      });
-
-      if (error) {
-        throw new TRPCError({
-          code: "INTERNAL_SERVER_ERROR",
-          message: "Failed to track event",
-        });
-      }
-
+      await ctx.track(`client.${input.eventName}`, input.properties ?? {});
       return { success: true };
     }),
 

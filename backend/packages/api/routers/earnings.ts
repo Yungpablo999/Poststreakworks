@@ -99,7 +99,7 @@ export const earningsRouter = createTRPCRouter({
 
       const xpAwarded = isFirstGoal ? 100 : 0;
       if (xpAwarded > 0) {
-        await awardXp(ctx.supabase, ctx.user.id, xpAwarded, "income_goal_set", input.label);
+        await awardXp(ctx.user.id, xpAwarded, "income_goal_set", input.label);
       }
 
       return { ...data, xpAwarded };

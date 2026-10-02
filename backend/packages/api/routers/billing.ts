@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { createTRPCRouter, protectedProcedure } from "../context";
+import { createTRPCRouter, protectedProcedure, createSupabaseServiceClient } from "../context";
 import { TRPCError } from "@trpc/server";
 import { initiatePaystackTransaction, createStripeCheckoutSession } from "@poststreak/integrations";
 
@@ -144,16 +144,12 @@ export const billingRouter = createTRPCRouter({
       }
 
       // Track analytics
-      await ctx.supabase.from("analytics_events").insert({
-        user_id: ctx.user.id,
-        event_name: "checkout_initiated",
-        properties: {
+      await ctx.track("checkout_initiated", {
           plan: plan.slug,
           processor: input.processor,
           amount: amountMinorUnits,
           currency,
-        },
-      });
+        });
 
       return {
         checkoutUrl,
@@ -168,7 +164,10 @@ export const billingRouter = createTRPCRouter({
    * Cancel subscription (takes effect at period end).
    */
   cancelSubscription: protectedProcedure.mutation(async ({ ctx }) => {
-    const { data, error } = await ctx.supabase
+    // Subscriptions are server-written (migration …21_rls_hardening): a creator
+    // may not edit their own row, so this goes through the service role,
+    // scoped to the caller by id.
+    const { data, error } = await createSupabaseServiceClient()
       .from("subscriptions")
       .update({ cancel_at_period_end: true })
       .eq("user_id", ctx.user.id)
@@ -190,10 +189,7 @@ export const billingRouter = createTRPCRouter({
     }
 
     // Track analytics
-    await ctx.supabase.from("analytics_events").insert({
-      user_id: ctx.user.id,
-      event_name: "subscription_cancel_initiated",
-    });
+    await ctx.track("subscription_cancel_initiated");
 
     return data;
   }),
@@ -202,7 +198,7 @@ export const billingRouter = createTRPCRouter({
    * Reactivate a cancelled subscription (if still within period).
    */
   reactivateSubscription: protectedProcedure.mutation(async ({ ctx }) => {
-    const { data, error } = await ctx.supabase
+    const { data, error } = await createSupabaseServiceClient()
       .from("subscriptions")
       .update({ cancel_at_period_end: false })
       .eq("user_id", ctx.user.id)

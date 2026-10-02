@@ -94,11 +94,7 @@ export const contentStudioRouter = createTRPCRouter({
         const ideas = await generateIdeas(input);
 
         // Track usage
-        await ctx.supabase.from("analytics_events").insert({
-          user_id: ctx.user.id,
-          event_name: "ai_idea_builder_used",
-          properties: { platform: input.platform, niche: input.niche },
-        });
+        await ctx.track("ai_idea_builder_used", { platform: input.platform, niche: input.niche });
 
         return { ideas };
       } catch (err) {
@@ -119,11 +115,7 @@ export const contentStudioRouter = createTRPCRouter({
       try {
         const hooks = await generateHooks(input);
 
-        await ctx.supabase.from("analytics_events").insert({
-          user_id: ctx.user.id,
-          event_name: "ai_hook_lab_used",
-          properties: { tone: input.tone, format: input.format },
-        });
+        await ctx.track("ai_hook_lab_used", { tone: input.tone, format: input.format });
 
         return { hooks };
       } catch (err) {
@@ -144,11 +136,7 @@ export const contentStudioRouter = createTRPCRouter({
       try {
         const script = await generateScript(input);
 
-        await ctx.supabase.from("analytics_events").insert({
-          user_id: ctx.user.id,
-          event_name: "ai_script_builder_used",
-          properties: { style: input.style, length: input.length },
-        });
+        await ctx.track("ai_script_builder_used", { style: input.style, length: input.length });
 
         return { script };
       } catch (err) {
@@ -169,14 +157,10 @@ export const contentStudioRouter = createTRPCRouter({
       try {
         const caption = await generateCaption(input);
 
-        await ctx.supabase.from("analytics_events").insert({
-          user_id: ctx.user.id,
-          event_name: "ai_caption_studio_used",
-          properties: {
+        await ctx.track("ai_caption_studio_used", {
             platform: input.platform,
             include_hashtags: input.includeHashtags,
-          },
-        });
+          });
 
         return { caption };
       } catch (err) {

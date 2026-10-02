@@ -1,80 +1,110 @@
 import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "../context";
 import { TRPCError } from "@trpc/server";
-import { recordStreakEvent, calculateJarvisEmotion, todayWAT, yesterdayWAT, levelForXp, getXpBalance } from "@poststreak/workflows";
+import { getCheckInSummary, levelForXp, getXpBalance, recordStreakEvent } from "@poststreak/workflows";
 
-// Jarvis emotion calc and WAT date math live in packages/workflows/streak-engine.ts
-// (ported from v1's src/lib/streak.ts) — shared with the cron dispatch job,
-// which has no tRPC context to call this router through. Previously this
-// file had its own copy of both; that duplication is what got removed here.
-
-// ============================================================================
-// Router
-// ============================================================================
+// The streak is read from the check-in log and advanced by ONE database
+// function (record_qualifying_action) — see packages/workflows/streak-engine.ts.
+//
+// Removed in the October 2026 realignment, on purpose:
+//   - recordEvent: let any signed-in user advance their own streak on demand.
+//     Streaks advance only from real actions (check-in, publish, missions).
+//   - getFreezes / useFreeze: the freeze mechanic never worked (it deleted rows
+//     RLS didn't allow) and the product is now "never guilt for a missed day".
+//   - the Jarvis emotion ladder (worried / devastated / heartbroken): Jarvis has
+//     no emotions any more; Ghost's mood is decided by the app from what the
+//     creator does.
 
 export const streakGamificationRouter = createTRPCRouter({
   /**
-   * Get the current user's streak state.
-   * Creates a default row if none exists.
+   * Streak + level summary. Shape kept compatible with the earlier
+   * GET /quests/streak response, plus the new `checkIn` block.
    */
   getState: protectedProcedure.query(async ({ ctx }) => {
-    const { data: initialData, error } = await ctx.supabase
-      .from("streak_states")
-      .select("*")
-      .eq("user_id", ctx.user.id)
-      .single();
-    let data = initialData;
-
-    // Auto-create on first access
-    if (error?.code === "PGRST116") {
-      const { data: created, error: createErr } = await ctx.supabase
+    const [checkIn, xp, { data: state }] = await Promise.all([
+      getCheckInSummary(ctx.user.id),
+      getXpBalance(ctx.supabase, ctx.user.id),
+      ctx.supabase
         .from("streak_states")
-        .insert({ user_id: ctx.user.id })
-        .select()
-        .single();
-
-      if (createErr) {
-        throw new TRPCError({
-          code: "INTERNAL_SERVER_ERROR",
-          message: "Failed to initialize streak state",
-        });
-      }
-      data = created;
-    } else if (error) {
-      throw new TRPCError({
-        code: "INTERNAL_SERVER_ERROR",
-        message: "Failed to fetch streak state",
-      });
-    }
-
-    // Update Jarvis emotion based on current state
-    const emotion = calculateJarvisEmotion(
-      data!.current_streak,
-      data!.last_qualifying_day,
-    );
-
-    if (emotion !== data!.jarvis_emotion) {
-      await ctx.supabase
-        .from("streak_states")
-        .update({ jarvis_emotion: emotion })
-        .eq("user_id", ctx.user.id);
-      data!.jarvis_emotion = emotion;
-    }
-
-    // Simplified 3-state status the frontend actually renders (active/at_risk/
-    // frozen) vs. the 9-state jarvis_emotion enum it doesn't directly consume.
-    const streakStatus =
-      emotion === "thriving" || emotion === "happy" || emotion === "content" || emotion === "neutral"
-        ? "active"
-        : emotion === "concerned" || emotion === "worried"
-          ? "at_risk"
-          : "frozen";
-
-    const xp = await getXpBalance(ctx.supabase, ctx.user.id);
+        .select("last_qualifying_day")
+        .eq("user_id", ctx.user.id)
+        .maybeSingle(),
+    ]);
     const { level, nextLevelXp } = levelForXp(xp);
 
-    return { ...data, streakStatus, xp, level, nextLevelXp };
+    return {
+      current_streak: checkIn.currentDays,
+      longest_streak: checkIn.longestDays,
+      last_qualifying_day: (state?.last_qualifying_day as string | null | undefined) ?? null,
+      // The earlier 'at_risk' / 'frozen' states are gone; kept so existing
+      // clients that read the field keep working.
+      streakStatus: "active" as const,
+      xp,
+      level,
+      nextLevelXp,
+      checkIn,
+    };
   }),
+
+  /** The check-in streak as Home / Quests show it. */
+  getCheckIn: protectedProcedure.query(({ ctx }) => getCheckInSummary(ctx.user.id)),
+
+  /**
+   * Check in for the creator's local today. Idempotent: checking in twice in a
+   * day returns the same summary with `newlyCheckedIn: false`.
+   */
+  checkIn: protectedProcedure.mutation(async ({ ctx }) => {
+    const result = await recordStreakEvent(ctx.user.id, "check_in");
+    if (!result.qualified && result.reason === "error") {
+      throw new TRPCError({
+        code: "INTERNAL_SERVER_ERROR",
+        message: "Couldn't save your check-in. Please try again.",
+      });
+    }
+    const summary = await getCheckInSummary(ctx.user.id);
+
+    if (result.qualified) {
+      await ctx.track("check_in", { streak: result.newStreak, is_milestone: result.isMilestone });
+    }
+
+    return {
+      newlyCheckedIn: result.qualified,
+      isMilestone: result.qualified ? result.isMilestone : false,
+      summary,
+    };
+  }),
+
+  /** Days with a check-in in one calendar month (for the calendar pop-up). */
+  getCheckInMonth: protectedProcedure
+    .input(z.object({ year: z.number().int().min(2020).max(2100), month: z.number().int().min(0).max(11) }))
+    .query(async ({ ctx, input }) => {
+      // `month` is 0-based like JavaScript's Date. Pure date arithmetic, no
+      // time zone involved: event_date is already the creator's local date.
+      const from = new Date(Date.UTC(input.year, input.month, 1));
+      const to = new Date(Date.UTC(input.year, input.month + 1, 0));
+      const iso = (d: Date) => d.toISOString().slice(0, 10);
+
+      const { data, error } = await ctx.supabase
+        .from("streak_events")
+        .select("event_date")
+        .eq("user_id", ctx.user.id)
+        .gte("event_date", iso(from))
+        .lte("event_date", iso(to))
+        .order("event_date");
+
+      if (error) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Failed to fetch check-ins",
+        });
+      }
+
+      return {
+        year: input.year,
+        month: input.month,
+        days: (data ?? []).map((r) => r.event_date as string),
+      };
+    }),
 
   /**
    * Get recent streak events.
@@ -175,110 +205,4 @@ export const streakGamificationRouter = createTRPCRouter({
 
     return data;
   }),
-
-  /**
-   * Get available streak freezes.
-   */
-  getFreezes: protectedProcedure.query(async ({ ctx }) => {
-    const { data, error } = await ctx.supabase
-      .from("streak_freezes")
-      .select("*")
-      .eq("user_id", ctx.user.id)
-      .gt("expires_at", new Date().toISOString())
-      .order("created_at", { ascending: false });
-
-    if (error) {
-      throw new TRPCError({
-        code: "INTERNAL_SERVER_ERROR",
-        message: "Failed to fetch freezes",
-      });
-    }
-
-    return data;
-  }),
-
-  /**
-   * Use a streak freeze to protect today's streak.
-   */
-  useFreeze: protectedProcedure.mutation(async ({ ctx }) => {
-    const today = todayWAT();
-
-    // Check if already qualified today
-    const { data: existingEvent } = await ctx.supabase
-      .from("streak_events")
-      .select("id")
-      .eq("user_id", ctx.user.id)
-      .eq("event_date", today)
-      .limit(1)
-      .single();
-
-    if (existingEvent) {
-      throw new TRPCError({
-        code: "BAD_REQUEST",
-        message: "Already qualified today, no need to use a freeze",
-      });
-    }
-
-    // Find an available freeze
-    const { data: freeze } = await ctx.supabase
-      .from("streak_freezes")
-      .select("id")
-      .eq("user_id", ctx.user.id)
-      .gt("expires_at", new Date().toISOString())
-      .limit(1)
-      .single();
-
-    if (!freeze) {
-      throw new TRPCError({
-        code: "BAD_REQUEST",
-        message: "No streak freezes available",
-      });
-    }
-
-    // Consume the freeze
-    const { error: deleteErr } = await ctx.supabase
-      .from("streak_freezes")
-      .delete()
-      .eq("id", freeze.id);
-
-    if (deleteErr) {
-      throw new TRPCError({
-        code: "INTERNAL_SERVER_ERROR",
-        message: "Failed to use freeze",
-      });
-    }
-
-    // Update last_qualifying_day to yesterday to keep streak alive
-    await ctx.supabase
-      .from("streak_states")
-      .update({ last_qualifying_day: yesterdayWAT() })
-      .eq("user_id", ctx.user.id);
-
-    // Track analytics
-    await ctx.supabase.from("analytics_events").insert({
-      user_id: ctx.user.id,
-      event_name: "streak_freeze_used",
-    });
-
-    return { success: true };
-  }),
-
-  /**
-   * Record a qualifying streak event (called by workflows, not directly by users).
-   * This is the core streak advancement logic.
-   */
-  recordEvent: protectedProcedure
-    .input(
-      z.object({
-        eventType: z.enum([
-          "publish",
-          "mission_completion",
-          "collaboration_completion",
-        ]),
-        metadata: z.record(z.any()).optional(),
-      }),
-    )
-    .mutation(async ({ ctx, input }) => {
-      return recordStreakEvent(ctx.supabase, ctx.user.id, input.eventType, input.metadata);
-    }),
 });

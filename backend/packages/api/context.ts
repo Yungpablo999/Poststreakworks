@@ -3,6 +3,7 @@ import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { initTRPC, TRPCError } from "@trpc/server";
 import superjson from "superjson";
 import { type NextRequest } from "next/server";
+import { getServiceClient } from "@poststreak/workflows";
 import { enforceRateLimit } from "./rate-limit";
 
 // ============================================================================
@@ -21,8 +22,16 @@ export type User = {
 };
 
 export type Context = {
+  /** The caller's own client: RLS applies. Use for reads and user-authored rows. */
   supabase: SupabaseClient;
   user: User | null;
+  /**
+   * Records an analytics event for the caller. Written with the service role —
+   * analytics_events has no client insert policy on purpose (the free-tier AI
+   * quota counts these rows, so clients must not be able to write them). Never
+   * throws: analytics must not break the request it describes.
+   */
+  track: (eventName: string, properties?: Record<string, unknown>) => Promise<void>;
 };
 
 // ============================================================================
@@ -66,15 +75,13 @@ export function createSupabaseServerClient(
 }
 
 /**
- * Server-side client using service role key.
- * Used for webhook verification and privileged operations.
+ * Server-side client using service role key (bypasses RLS).
+ * Used for webhook verification and server-authoritative writes — always
+ * filter by an explicit user id. Shared, memoised instance; see
+ * packages/workflows/service-client.ts.
  */
 export function createSupabaseServiceClient() {
-  return createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!,
-    { auth: { autoRefreshToken: false, persistSession: false } },
-  );
+  return getServiceClient();
 }
 
 /**
@@ -132,6 +139,22 @@ async function resolveUser(
 // tRPC context creation
 // ============================================================================
 
+function makeTracker(user: User | null): Context["track"] {
+  return async (eventName, properties = {}) => {
+    if (!user) return;
+    try {
+      const { error } = await getServiceClient().from("analytics_events").insert({
+        user_id: user.id,
+        event_name: eventName,
+        properties,
+      });
+      if (error) console.error(`analytics insert failed (${eventName}):`, error.message);
+    } catch (err) {
+      console.error(`analytics insert failed (${eventName}):`, err instanceof Error ? err.message : err);
+    }
+  };
+}
+
 export async function createContext({
   req,
   resHeaders,
@@ -146,7 +169,7 @@ export async function createContext({
     try {
       const supabase = createSupabaseBearerClient(token);
       const user = await resolveUser(supabase);
-      if (user) return { supabase, user };
+      if (user) return { supabase, user, track: makeTracker(user) };
     } catch {
       // Fall through to cookie auth
     }
@@ -155,7 +178,7 @@ export async function createContext({
   // 2. Cookie session (web client)
   const supabase = createSupabaseServerClient(req.headers, resHeaders);
   const user = await resolveUser(supabase);
-  return { supabase, user };
+  return { supabase, user, track: makeTracker(user) };
 }
 
 // ============================================================================
@@ -228,10 +251,35 @@ export const staffProcedure = t.procedure.use(
 // "what does free vs. pro get" has a single source of truth instead of a
 // magic number re-guessed in every router that needs one.
 
+//
+// freeRepurposesPerWeek / jarvisChatPerDay come from the October 2026 product
+// brief. Repurposes: "1 free per week" (an open decision — keep or change; this
+// is the one place to change it). Jarvis chat is a SEPARATE budget from the
+// four content tools above (ideas/hooks/scripts/captions): chat is open to
+// everyone, so these numbers are abuse/cost guards. They are PLACEHOLDERS until
+// product sets real ones.
 export const TIER_LIMITS = {
-  free: { maxConnectedPlatforms: 2, aiGenerationsPerDay: 3, passportBoostPct: 0 },
-  pro: { maxConnectedPlatforms: Infinity, aiGenerationsPerDay: Infinity, passportBoostPct: 15 },
-  founding: { maxConnectedPlatforms: Infinity, aiGenerationsPerDay: Infinity, passportBoostPct: 15 },
+  free: {
+    maxConnectedPlatforms: 2,
+    aiGenerationsPerDay: 3,
+    passportBoostPct: 0,
+    repurposesPerWeek: 1 as number | null,
+    jarvisChatPerDay: 30,
+  },
+  pro: {
+    maxConnectedPlatforms: Infinity,
+    aiGenerationsPerDay: Infinity,
+    passportBoostPct: 15,
+    repurposesPerWeek: null as number | null,
+    jarvisChatPerDay: 300,
+  },
+  founding: {
+    maxConnectedPlatforms: Infinity,
+    aiGenerationsPerDay: Infinity,
+    passportBoostPct: 15,
+    repurposesPerWeek: null as number | null,
+    jarvisChatPerDay: 300,
+  },
 } as const;
 
 /**

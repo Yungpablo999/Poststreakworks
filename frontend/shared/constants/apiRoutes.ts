@@ -13,6 +13,40 @@ export const API_ROUTES = {
     UPDATE_PROFILE: '/api/v1/user/profile',
     PASSPORT: '/api/v1/user/passport',
     READINESS: '/api/v1/user/opportunity-readiness',
+    // Phase 1: onboarding state the app used to keep in memory
+    ONBOARDING: '/api/v1/user/onboarding', // PUT { displayName?, handle?, niches?, timezone? }
+    TOUR_DONE: '/api/v1/user/tour', // POST — Ghost's welcome tour finished or skipped
+    TIP_SEEN: '/api/v1/user/tips', // POST { key } — a first-visit tip was shown
+  },
+  // Everything the app needs at launch, in one call (profile, plan, connected
+  // platforms, check-in streak, drafts, saved hooks, repurpose allowance, tour/tips)
+  ME: {
+    BOOTSTRAP: '/api/v1/me/bootstrap',
+  },
+  // Drafts: the app's own string id is the key — URL-encode it
+  DRAFTS: {
+    LIST: '/api/v1/drafts',
+    ITEM: (id: string) => `/api/v1/drafts/${encodeURIComponent(id)}`, // PUT upserts, DELETE removes
+  },
+  // Hook Studio hearts
+  HOOKS: {
+    LIST: '/api/v1/hooks',
+    TOGGLE: '/api/v1/hooks', // POST { line, style, idea } -> { saved }
+  },
+  // Daily check-in and the streak
+  CHECK_INS: {
+    SUMMARY: '/api/v1/check-ins', // GET
+    CHECK_IN: '/api/v1/check-ins', // POST — idempotent per local day
+    MONTH: (year: number, month: number) => `/api/v1/check-ins/month?year=${year}&month=${month}`, // month is 0-based
+  },
+  // Weekly Repurpose allowance
+  REPURPOSE: {
+    ALLOWANCE: '/api/v1/repurpose',
+    SPEND: '/api/v1/repurpose/spend',
+  },
+  // Event tracking (recorded as "client.<eventName>")
+  ANALYTICS: {
+    TRACK: '/api/v1/analytics/track',
   },
   // Social Platforms Sync
   PLATFORMS: {
@@ -57,10 +91,11 @@ export const API_ROUTES = {
     GENERATE_CAPTION: '/api/v1/jarvis/caption',
     OPTIMIZE_HOOK: '/api/v1/jarvis/optimize-hook',
     RATE_CARD: '/api/v1/jarvis/rate-card',
+    CHAT: '/api/v1/jarvis/chat', // "Ask Jarvis" — see frontend/shared/types/phase1.ts
   },
   // Scheduling & Calendar
   SCHEDULE: {
-    POSTS: '/api/v1/schedule/posts',
+    POSTS: '/api/v1/schedule/posts', // GET ?from=&to=&status=&limit=&offset=
     CREATE_POST: '/api/v1/schedule/posts',
     UPDATE_POST: (id: string) => `/api/v1/schedule/posts/${id}`,
     DELETE_POST: (id: string) => `/api/v1/schedule/posts/${id}`,
