@@ -540,8 +540,9 @@ export default function App() {
     schedule: 'calm', repurpose: 'idea', 'hook-studio': 'idea', 'voice-studio': 'happy', 'jarvis-pro': 'cool',
   };
   // Jarvis chat: the button shows on every signed-in page on wide screens, and
-  // on the main pages on phones (inner pages have their own bottom buttons)
-  const showJarvisButton = inApp && (webSidebar || MAIN_PAGES.includes(currentScreen));
+  // on the main pages on phones (inner pages have their own bottom buttons).
+  // Not where the right panel already has its Ask Jarvis card (no doubles).
+  const showJarvisButton = inApp && !showRail && (webSidebar || MAIN_PAGES.includes(currentScreen));
   const phoneTabBar = !IS_WEB_APP && !webSidebar;
   const jarvisBottom = (initialWindowMetrics?.insets.bottom ?? 0) + (phoneTabBar ? 104 : 20);
   React.useEffect(() => {
