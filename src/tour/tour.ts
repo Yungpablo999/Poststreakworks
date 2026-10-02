@@ -176,7 +176,11 @@ export function setTourNavigator(fn: typeof navigator) {
 export function goToTourPage(page: TourPage) {
   navigator?.(page);
 }
-type Scroller = { scrollBy: (dy: number) => void };
+type Scroller = {
+  scrollBy: (dy: number) => void;
+  /** Where the page's scroll area sits on screen (top and bottom, in window points) */
+  viewport: (cb: (top: number, bottom: number) => void) => void;
+};
 let scrollers: Scroller[] = [];
 export function registerTourScroller(s: Scroller) {
   scrollers = [...scrollers, s];
@@ -184,12 +188,9 @@ export function registerTourScroller(s: Scroller) {
 export function unregisterTourScroller(s: Scroller) {
   scrollers = scrollers.filter((x) => x !== s);
 }
-/** The page that's showing now scrolls (the most recently opened one) */
-export function tourScrollBy(dy: number) {
-  const s = scrollers[scrollers.length - 1];
-  if (!s) return false;
-  s.scrollBy(dy);
-  return true;
+/** The page that's showing now (the most recently opened one) */
+export function currentTourScroller(): Scroller | null {
+  return scrollers[scrollers.length - 1] ?? null;
 }
 
 // ─── State ──────────────────────────────────────────────────────────────────

@@ -26,7 +26,7 @@ import {
   prevStep,
   registerTourScroller,
   registerTourTarget,
-  tourScrollBy,
+  currentTourScroller,
   tourTargetTapped,
   unregisterTourScroller,
   unregisterTourTarget,
@@ -74,7 +74,14 @@ export function useTourScroll() {
   const ref = useRef<ScrollView>(null);
   const y = useRef(0);
   useEffect(() => {
-    const scroller = { scrollBy: (dy: number) => ref.current?.scrollTo({ y: Math.max(0, y.current + dy), animated: true }) };
+    const scroller = {
+      scrollBy: (dy: number) => ref.current?.scrollTo({ y: Math.max(0, y.current + dy), animated: true }),
+      viewport: (cb: (top: number, bottom: number) => void) => {
+        const view = ref.current as unknown as { measureInWindow?: (f: (x: number, y: number, w: number, h: number) => void) => void } | null;
+        if (view?.measureInWindow) view.measureInWindow((_x, top, _w, h) => cb(top, top + h));
+        else cb(0, Number.MAX_SAFE_INTEGER);
+      },
+    };
     registerTourScroller(scroller);
     return () => unregisterTourScroller(scroller);
   }, []);
@@ -146,20 +153,35 @@ export function GhostTour() {
         settling.current = false;
         return measureRef.current();
       }
-      view.measureInWindow((_x, y, _w, h) => {
-        // Keep it below the header and above the tab bar / bottom buttons
-        const topSafe = 90;
-        const bottomSafe = height - (width < 768 ? 150 : 40);
-        let dy = 0;
-        if (y + h > bottomSafe || y < topSafe) dy = y - topSafe - 30;
-        if (Math.abs(dy) > 4 && !tourScrollBy(dy)) {
-          const node = view as unknown as { scrollIntoView?: (o: object) => void };
-          node.scrollIntoView?.({ block: 'center', behavior: reduce ? 'auto' : 'smooth' });
-        }
-        later(() => {
-          settling.current = false;
-          measureRef.current();
-        }, Math.abs(dy) > 4 && !reduce ? 450 : 30);
+      // The visible part of the page: below the header, above the tab bar
+      const scroller = currentTourScroller();
+      const visibleArea = (cb: (top: number, bottom: number) => void) => {
+        const withTabBar = (top: number, bottom: number) => {
+          const bar = getTourTarget('tab-bar');
+          if (!bar) return cb(top, bottom);
+          bar.measureInWindow((_x, barTop, _w, barH) => cb(top, barH ? Math.min(bottom, barTop) : bottom));
+        };
+        if (scroller) scroller.viewport((t, b) => withTabBar(t, Math.min(b, height)));
+        else withTabBar(0, height);
+      };
+      visibleArea((top, bottom) => {
+        view.measureInWindow((_x, y, _w, h) => {
+          // Already clear of the bars? Leave the page where it is.
+          if (y >= top + 8 && y + h <= bottom - 8) {
+            settling.current = false;
+            return measureRef.current();
+          }
+          // Otherwise bring it to just under the header
+          const dy = y - (top + 20);
+          if (scroller) scroller.scrollBy(dy);
+          else (view as unknown as { scrollIntoView?: (o: object) => void }).scrollIntoView?.({ block: 'center', behavior: reduce ? 'auto' : 'smooth' });
+          // Measure once the scroll has settled (and again, in case it was slow)
+          later(() => measureRef.current(), reduce ? 30 : 450);
+          later(() => {
+            settling.current = false;
+            measureRef.current();
+          }, reduce ? 60 : 850);
+        });
       });
     };
     later(place, moved ? 650 : 40);
