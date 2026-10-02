@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { TourTarget, useTourScroll } from '../components/tour/GhostTour';
 import {
   StyleSheet,
   View,
@@ -219,6 +220,8 @@ export const ScheduleScreen: React.FC<ScheduleScreenProps> = ({
   onSwitchToPro,
   onSwitchToFree,
 }) => {
+  // Lets Ghost's tour scroll this page
+  const tourScroll = useTourScroll();
   const isDark = false;
   const isNewUser = (userPersona || userProfile?.userPersona || 'new') === 'new';
   const week = getWeekSchedule(isNewUser ? 'new' : 'returning');
@@ -401,6 +404,7 @@ export const ScheduleScreen: React.FC<ScheduleScreenProps> = ({
 
         {/* 2. MAIN SCROLLABLE CONTENT */}
         <ScrollView
+          {...tourScroll}
           contentContainerStyle={styles.scrollContent}
           showsVerticalScrollIndicator={false}
           bounces={true}
@@ -418,7 +422,9 @@ export const ScheduleScreen: React.FC<ScheduleScreenProps> = ({
 
           {/* 1. TODAY */}
           <Reanimated.View entering={FadeInUp.delay(100).duration(550)}>
-            <TodayCard today={week.days[week.todayIndex]} onSchedule={() => openComposer()} onIdea={openIdeas} />
+            <TourTarget id="schedule-card">
+              <TodayCard today={week.days[week.todayIndex]} onSchedule={() => openComposer()} onIdea={openIdeas} />
+            </TourTarget>
           </Reanimated.View>
 
           {/* 2. THIS WEEK */}

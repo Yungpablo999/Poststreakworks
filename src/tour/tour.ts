@@ -11,10 +11,22 @@ import { useSyncExternalStore } from 'react';
 import type { View } from 'react-native';
 import type { Emotion } from '../mascot/mascot';
 
-export type TourTargetId = 'first-post' | 'check-in' | 'nav' | 'menu-button' | 'tab-bar' | 'studios' | 'ask-jarvis' | 'bell' | 'ghost' | 'home-ghost';
+export type TourTargetId =
+  | 'first-post' | 'check-in' | 'nav' | 'menu-button' | 'tab-bar' | 'studios' | 'ask-jarvis' | 'bell' | 'ghost' | 'home-ghost'
+  | 'create-idea' | 'quest-card' | 'growth-card' | 'schedule-card';
+
+/** Parts that sit inside the page (scroll them into view); the rest are fixed bars and menus */
+export const IN_PAGE: TourTargetId[] = ['first-post', 'check-in', 'home-ghost', 'create-idea', 'quest-card', 'growth-card', 'schedule-card'];
+
+/** The main pages the tour visits */
+export type TourPage = 'dashboard' | 'create' | 'quests' | 'growth' | 'schedule';
 
 export interface TourStep {
   key: string;
+  /** The page this step is on (Ghost takes you there) */
+  page: TourPage;
+  /** On other pages the step always shows (centred if its part isn't there) */
+  always?: boolean;
   /** Spotlight the first of these that's on screen; none = a card in the middle */
   targets?: TourTargetId[];
   emotion: Emotion;
@@ -29,12 +41,14 @@ export interface TourStep {
 export const TOUR_STEPS: TourStep[] = [
   {
     key: 'hello',
+    page: 'dashboard',
     emotion: 'wave',
     title: 'Hi, I’m Ghost!',
-    body: 'I’ll be your buddy here. Want a quick look around? It takes about a minute.',
+    body: 'I’ll be your buddy here. Want me to show you around? It takes about a minute.',
   },
   {
     key: 'first-post',
+    page: 'dashboard',
     targets: ['first-post'],
     emotion: 'idea',
     title: 'Every post starts here',
@@ -42,6 +56,7 @@ export const TOUR_STEPS: TourStep[] = [
   },
   {
     key: 'check-in',
+    page: 'dashboard',
     targets: ['check-in'],
     emotion: 'determined',
     title: 'Check in once a day',
@@ -50,24 +65,64 @@ export const TOUR_STEPS: TourStep[] = [
   },
   {
     key: 'nav',
+    page: 'dashboard',
     targets: ['nav', 'tab-bar', 'menu-button'],
     emotion: 'happy',
     title: 'Find your way around',
-    body: 'Create for new posts, Quests for small weekly goals, and Growth to see how your posts are doing.',
+    body: 'Home, Create, Quests and Growth live here. Let me show you each one.',
     bodyFor: {
-      'menu-button': 'Tap here any time for Create, Quests, Growth and the studios.',
-      'tab-bar': 'Home, Create, Quests and Growth are always down here.',
+      'menu-button': 'Tap here any time for Create, Quests, Growth and the studios. Let me show you each one.',
+      'tab-bar': 'Home, Create, Quests and Growth are always down here. Let me show you each one.',
     },
   },
   {
+    key: 'create',
+    page: 'create',
+    always: true,
+    targets: ['create-idea'],
+    emotion: 'idea',
+    title: 'Create: ideas made for you',
+    body: 'Jarvis picks ideas that fit what you make. Tap Another for a fresh one, or use it to start your post.',
+  },
+  {
+    key: 'quests',
+    page: 'quests',
+    always: true,
+    targets: ['quest-card'],
+    emotion: 'determined',
+    title: 'Quests: small goals',
+    body: 'Little goals that keep you going. Finish one to earn XP and badges.',
+  },
+  {
+    key: 'growth',
+    page: 'growth',
+    always: true,
+    targets: ['growth-card'],
+    emotion: 'happy',
+    title: 'Growth: see what works',
+    body: 'Connect your accounts and I’ll show you which posts people loved, so you can make more like them.',
+  },
+  {
+    key: 'schedule',
+    page: 'schedule',
+    always: true,
+    targets: ['schedule-card'],
+    emotion: 'calm',
+    title: 'Schedule: plan ahead',
+    body: 'Pick a time and your post lines up here. I’ll remind you when it’s time.',
+  },
+  {
     key: 'studios',
+    page: 'schedule',
     targets: ['studios'],
     emotion: 'working',
-    title: 'Your studios',
-    body: 'Plan posts in Schedule, turn one video into posts for every platform with Repurpose, and find strong first lines in Hook Studio.',
+    title: 'More studios',
+    body: 'Turn one video into posts for every platform with Repurpose, and find strong first lines in Hook Studio.',
   },
   {
     key: 'jarvis',
+    page: 'schedule',
+    always: true,
     targets: ['ask-jarvis'],
     emotion: 'cool',
     title: 'Ask Jarvis anything',
@@ -75,6 +130,7 @@ export const TOUR_STEPS: TourStep[] = [
   },
   {
     key: 'bell',
+    page: 'dashboard',
     targets: ['bell'],
     emotion: 'calm',
     title: 'News and nudges',
@@ -82,6 +138,7 @@ export const TOUR_STEPS: TourStep[] = [
   },
   {
     key: 'ghost',
+    page: 'dashboard',
     targets: ['ghost', 'home-ghost'],
     emotion: 'love',
     title: 'And that’s me!',
@@ -90,6 +147,7 @@ export const TOUR_STEPS: TourStep[] = [
   },
   {
     key: 'done',
+    page: 'dashboard',
     emotion: 'party',
     title: 'You’re all set!',
     body: 'That’s the tour. Let’s make your first post together.',
@@ -107,6 +165,31 @@ export function unregisterTourTarget(id: TourTargetId, view: View) {
 }
 export function getTourTarget(id: TourTargetId) {
   return targets.get(id) ?? null;
+}
+
+// ─── Getting around ─────────────────────────────────────────────────────────
+// App.tsx says how to open a page; pages say how to scroll themselves
+let navigator: ((page: TourPage) => void) | null = null;
+export function setTourNavigator(fn: typeof navigator) {
+  navigator = fn;
+}
+export function goToTourPage(page: TourPage) {
+  navigator?.(page);
+}
+type Scroller = { scrollBy: (dy: number) => void };
+let scrollers: Scroller[] = [];
+export function registerTourScroller(s: Scroller) {
+  scrollers = [...scrollers, s];
+}
+export function unregisterTourScroller(s: Scroller) {
+  scrollers = scrollers.filter((x) => x !== s);
+}
+/** The page that's showing now scrolls (the most recently opened one) */
+export function tourScrollBy(dy: number) {
+  const s = scrollers[scrollers.length - 1];
+  if (!s) return false;
+  s.scrollBy(dy);
+  return true;
 }
 
 // ─── State ──────────────────────────────────────────────────────────────────
@@ -133,7 +216,9 @@ let finishedOnce = false;
 /** Start the tour (once per session until there's a backend to remember it) */
 export function startTour() {
   if (state.active || finishedOnce) return;
-  const steps = TOUR_STEPS.filter((s) => !s.targets || s.targets.some((t) => targets.has(t)));
+  // Home's steps are checked now; other pages' steps always come along.
+  // The studios step only shows where the side menu is (it's on every page).
+  const steps = TOUR_STEPS.filter((s) => !s.targets || s.always || s.targets.some((t) => targets.has(t)));
   set({ active: true, steps, index: 0, tried: false });
 }
 export function nextStep() {

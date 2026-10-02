@@ -188,8 +188,8 @@ export function tipOnce(key: string, line: string, delay = 900) {
   if (tipsSeen.has(key)) return;
   tipsSeen.add(key);
   setTimeout(() => {
-    // Not during the welcome tour; it shows next time instead
-    if (isTourActive()) return tipsSeen.delete(key);
+    // Not during the welcome tour (the tour already explains the page)
+    if (isTourActive()) return;
     express('happy', line, 4200);
   }, delay);
 }

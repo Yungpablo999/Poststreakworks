@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { Image, Platform, Pressable, StyleSheet, View, useWindowDimensions, type StyleProp, type ViewStyle } from 'react-native';
+import { Image, Platform, Pressable, ScrollView, StyleSheet, View, useWindowDimensions, type NativeScrollEvent, type NativeSyntheticEvent, type StyleProp, type ViewStyle } from 'react-native';
 import Animated, {
   Easing,
   FadeIn,
@@ -17,7 +17,22 @@ import { Text } from '../ui/AppText';
 import { MASCOT_IMAGES } from '../mascot/LiveMascot';
 import { ds } from '../../theme/colors';
 import { express, react } from '../../mascot/mascot';
-import { endTour, getTourTarget, nextStep, prevStep, registerTourTarget, tourTargetTapped, unregisterTourTarget, useTour, type TourTargetId } from '../../tour/tour';
+import {
+  IN_PAGE,
+  endTour,
+  getTourTarget,
+  goToTourPage,
+  nextStep,
+  prevStep,
+  registerTourScroller,
+  registerTourTarget,
+  tourScrollBy,
+  tourTargetTapped,
+  unregisterTourScroller,
+  unregisterTourTarget,
+  useTour,
+  type TourTargetId,
+} from '../../tour/tour';
 
 // The tour on screen: the page dims except for a spotlight on the real thing
 // Ghost is talking about, and Ghost's card sits beside it. The spotlight
@@ -54,6 +69,21 @@ export function TourTarget({ id, children, style }: { id: TourTargetId; children
   );
 }
 
+/** Give a page's main ScrollView to the tour so it can scroll things into view: <ScrollView {...useTourScroll()}> */
+export function useTourScroll() {
+  const ref = useRef<ScrollView>(null);
+  const y = useRef(0);
+  useEffect(() => {
+    const scroller = { scrollBy: (dy: number) => ref.current?.scrollTo({ y: Math.max(0, y.current + dy), animated: true }) };
+    registerTourScroller(scroller);
+    return () => unregisterTourScroller(scroller);
+  }, []);
+  const onScroll = useCallback((e: NativeSyntheticEvent<NativeScrollEvent>) => {
+    y.current = e.nativeEvent.contentOffset.y;
+  }, []);
+  return { ref, onScroll, scrollEventThrottle: 16 };
+}
+
 type Rect = { x: number; y: number; w: number; h: number };
 
 export function GhostTour() {
@@ -80,7 +110,9 @@ export function GhostTour() {
     const id = step.targets.find((t) => getTourTarget(t));
     const view = id ? getTourTarget(id) : null;
     if (!id || !view) {
-      nextStep(); // not on screen any more
+      // Not on this screen: Ghost explains it in the middle instead
+      setRect(null);
+      setTargetId(null);
       return;
     }
     view.measureInWindow((x, y, w, h) => {
@@ -89,31 +121,66 @@ export function GhostTour() {
       setRect({ x: x - PAD, y: y - PAD, w: w + PAD * 2, h: h + PAD * 2 });
     });
   }, [step]);
+  const measureRef = useRef(measure);
+  measureRef.current = measure;
+  const settling = useRef(false);
+  const page = useRef<string | null>(null);
 
-  // New step: bring the target into view (web), then measure it
+  // New step: go to its page, scroll its part clear of the bars, then spotlight it
   useEffect(() => {
     if (!active || !step) return;
-    const id = step.targets?.find((t) => getTourTarget(t));
-    const node = id ? (getTourTarget(id) as unknown as { scrollIntoView?: (o: object) => void }) : null;
-    let wait = 0;
-    if (Platform.OS === 'web' && node?.scrollIntoView) {
-      node.scrollIntoView({ block: 'center', behavior: reduce ? 'auto' : 'smooth' });
-      wait = reduce ? 30 : 380;
-    }
-    const t = setTimeout(measure, wait);
+    let cancelled = false;
+    const timers: ReturnType<typeof setTimeout>[] = [];
+    const later = (fn: () => void, ms: number) => timers.push(setTimeout(() => !cancelled && fn(), ms));
+    settling.current = true;
     express(step.emotion, '', 2400);
-    return () => clearTimeout(t);
-  }, [active, step, measure, reduce]);
 
-  // Keep the spotlight on target when the window changes or the page scrolls
+    const moved = page.current !== null && page.current !== step.page;
+    if (page.current !== step.page) goToTourPage(step.page);
+    page.current = step.page;
+
+    const place = () => {
+      const id = step.targets?.find((t) => getTourTarget(t));
+      const view = id ? getTourTarget(id) : null;
+      if (!id || !view || !IN_PAGE.includes(id)) {
+        settling.current = false;
+        return measureRef.current();
+      }
+      view.measureInWindow((_x, y, _w, h) => {
+        // Keep it below the header and above the tab bar / bottom buttons
+        const topSafe = 90;
+        const bottomSafe = height - (width < 768 ? 150 : 40);
+        let dy = 0;
+        if (y + h > bottomSafe || y < topSafe) dy = y - topSafe - 30;
+        if (Math.abs(dy) > 4 && !tourScrollBy(dy)) {
+          const node = view as unknown as { scrollIntoView?: (o: object) => void };
+          node.scrollIntoView?.({ block: 'center', behavior: reduce ? 'auto' : 'smooth' });
+        }
+        later(() => {
+          settling.current = false;
+          measureRef.current();
+        }, Math.abs(dy) > 4 && !reduce ? 450 : 30);
+      });
+    };
+    later(place, moved ? 650 : 40);
+    return () => {
+      cancelled = true;
+      timers.forEach(clearTimeout);
+    };
+  }, [active, step, width, height, reduce]);
+
+  // When the tour ends, forget which page it was on
   useEffect(() => {
-    if (!active) return;
-    measure();
-    if (Platform.OS !== 'web' || typeof document === 'undefined') return;
-    const onScroll = () => measure();
+    if (!active) page.current = null;
+  }, [active]);
+
+  // Keep the spotlight on target when the page scrolls (web)
+  useEffect(() => {
+    if (!active || Platform.OS !== 'web' || typeof document === 'undefined') return;
+    const onScroll = () => !settling.current && measureRef.current();
     document.addEventListener('scroll', onScroll, true);
     return () => document.removeEventListener('scroll', onScroll, true);
-  }, [active, width, height, measure]);
+  }, [active]);
 
   // Glide the spotlight
   useEffect(() => {

@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
-import { TourTarget } from '../components/tour/GhostTour';
+import { TourTarget, useTourScroll } from '../components/tour/GhostTour';
 import { IdeasStrip } from '../components/web/IdeasStrip';
 import {
   StyleSheet,
@@ -564,6 +564,8 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
   onOpenVoiceStudio,
   onOpenHookStudio,
 }) => {
+  // Lets Ghost's tour scroll this page
+  const tourScroll = useTourScroll();
   const isDark = false;
   const isNewUser = (userPersona || userProfile?.userPersona) === 'new';
   // Desktop shows the logo in the side menu
@@ -1019,6 +1021,7 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
 
         {/* 2. MAIN SCROLLABLE CONTENT */}
         <ScrollView
+          {...tourScroll}
           contentContainerStyle={styles.scrollContent}
           showsVerticalScrollIndicator={false}
           bounces={true}

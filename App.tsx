@@ -61,7 +61,7 @@ import { activity as mascotActivity, react as mascotReact, setBaseline as setMas
 import { preloadMascot } from './src/components/mascot/LiveMascot';
 import { JarvisChatPanel, JarvisLauncher } from './src/components/jarvis/JarvisChat';
 import { GhostTour } from './src/components/tour/GhostTour';
-import { startTour } from './src/tour/tour';
+import { setTourNavigator, startTour } from './src/tour/tour';
 import { closeJarvis, setGhostHands, setJarvisContext, type GhostPlace } from './src/jarvis/chat';
 import { IS_WEB_APP, useBreakpoint, useWebSidebar } from './src/hooks/useBreakpoint';
 import { MobileWebBar } from './src/components/web/MobileWebBar';
@@ -254,6 +254,8 @@ export default function App() {
       else navigateTo(target);
     };
     setNotificationHandler(openPlace);
+    // Ghost's tour visits the main pages
+    setTourNavigator((page) => navigateTo(page));
     // Jarvis's chat sends Ghost to the same places, or to start a post
     setGhostHands({ open: openPlace, compose: (title) => openBlankComposer(title) });
     return () => {
