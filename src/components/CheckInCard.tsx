@@ -1,4 +1,5 @@
 import React, { useEffect } from 'react';
+import { TourTarget } from './tour/GhostTour';
 import { View, StyleSheet, Platform, Pressable } from 'react-native';
 import Animated, {
   Easing,
@@ -199,9 +200,9 @@ export function CheckInCard({ persona, title = 'Daily check-in', onOpenCalendar 
           <Text style={styles.donePillText}>Checked in today</Text>
         </Animated.View>
       ) : (
-        <View style={styles.button}>
+        <TourTarget id="check-in" style={styles.button}>
           <AppButton title="Check in for today" variant="outline" onPress={handleCheckIn} />
-        </View>
+        </TourTarget>
       )}
     </GlassCard>
   );

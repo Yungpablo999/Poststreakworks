@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { TourTarget } from './tour/GhostTour';
 import { StyleSheet, View, Pressable, Platform, ViewStyle, LayoutChangeEvent } from 'react-native';
 import Animated, {
   useAnimatedStyle,
@@ -190,7 +191,7 @@ const FloatingTabBarInner: React.FC<FloatingTabBarProps> = ({ activeTab, onTabPr
 
   return (
     <View style={[styles.floatingWrapper, style]} pointerEvents="box-none">
-      <View style={styles.glassBarContainer}>
+      <TourTarget id="tab-bar" style={styles.glassBarContainer}>
         {Platform.OS !== 'web' && (
           <BlurView intensity={40} tint="light" style={[StyleSheet.absoluteFill, { borderRadius: 30, overflow: 'hidden' }]} />
         )}
@@ -204,7 +205,7 @@ const FloatingTabBarInner: React.FC<FloatingTabBarProps> = ({ activeTab, onTabPr
             <TabSlot key={tab.id} tab={tab} active={activeTab === tab.id} onPress={() => handlePress(tab.id)} />
           ))}
         </View>
-      </View>
+      </TourTarget>
     </View>
   );
 };

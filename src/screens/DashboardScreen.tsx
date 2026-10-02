@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
+import { TourTarget } from '../components/tour/GhostTour';
 import { IdeasStrip } from '../components/web/IdeasStrip';
 import {
   StyleSheet,
@@ -966,7 +967,9 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
             {/* Right: Notification & Person Profile Photo Upload */}
             <View style={styles.headerRightGroup}>
               {/* Notification bell: swings on tap, unread dot breathes */}
-              <BellButton unread={sharedUnread > 0} onPress={() => setShowNotifSheet(true)} />
+              <TourTarget id="bell">
+                <BellButton unread={sharedUnread > 0} onPress={() => setShowNotifSheet(true)} />
+              </TourTarget>
 
               {/* Top-Right: Person Icon Placeholder where users add their profile picture */}
               <Pressable

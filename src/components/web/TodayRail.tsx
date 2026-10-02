@@ -1,4 +1,5 @@
 import { react } from '../../mascot/mascot';
+import { TourTarget } from '../tour/GhostTour';
 import React, { useEffect, useMemo, useState } from 'react';
 import { ActivityIndicator, Platform, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import Animated, { Easing, FadeIn, FadeInUp } from 'react-native-reanimated';
@@ -51,6 +52,7 @@ function AskJarvis({ onUseIdea }: { onUseIdea: (title: string) => void }) {
   const idea: FeedIdea | null = useMemo(() => (asked ? getTopicIdeas(asked, 'often', '30-second Reel', round)[0] ?? null : null), [asked, round]);
 
   return (
+    <TourTarget id="ask-jarvis">
     <GlassCard strong radius={22} padding={16}>
       <View style={styles.head}>
         <JarvisOrb size={24} />
@@ -112,6 +114,7 @@ function AskJarvis({ onUseIdea }: { onUseIdea: (title: string) => void }) {
         </View>
       )}
     </GlassCard>
+    </TourTarget>
   );
 }
 

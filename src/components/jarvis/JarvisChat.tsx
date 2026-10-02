@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { TourTarget } from '../tour/GhostTour';
 import { Image, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, View, useWindowDimensions } from 'react-native';
 import Animated, {
   Easing,
@@ -40,6 +41,7 @@ export function JarvisLauncher({ bottom = 20, compact }: { bottom?: number; comp
   if (open) return null;
   return (
     <Animated.View entering={FadeInUp.duration(320).easing(ease)} style={[styles.launcherWrap, { bottom }]} pointerEvents="box-none">
+      <TourTarget id="ask-jarvis">
       <Pressable
         onPress={() => {
           if (Platform.OS !== 'web') Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -54,6 +56,7 @@ export function JarvisLauncher({ bottom = 20, compact }: { bottom?: number; comp
         <JarvisOrb size={compact ? 30 : 26} />
         {!compact && <Text style={styles.launcherText}>Ask Jarvis</Text>}
       </Pressable>
+      </TourTarget>
     </Animated.View>
   );
 }

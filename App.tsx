@@ -60,6 +60,8 @@ import { setComposerOpener } from './src/components/web/webActions';
 import { activity as mascotActivity, react as mascotReact, setBaseline as setMascotBaseline, tipOnce, type Emotion } from './src/mascot/mascot';
 import { preloadMascot } from './src/components/mascot/LiveMascot';
 import { JarvisChatPanel, JarvisLauncher } from './src/components/jarvis/JarvisChat';
+import { GhostTour } from './src/components/tour/GhostTour';
+import { startTour } from './src/tour/tour';
 import { closeJarvis, setGhostHands, setJarvisContext, type GhostPlace } from './src/jarvis/chat';
 import { IS_WEB_APP, useBreakpoint, useWebSidebar } from './src/hooks/useBreakpoint';
 import { MobileWebBar } from './src/components/web/MobileWebBar';
@@ -134,6 +136,11 @@ export default function App() {
   const [authEmail, setAuthEmail] = useState('');
   const [authUsername, setAuthUsername] = useState('');
   const [verifyMode, setVerifyMode] = useState<'signup' | 'signin'>('signup');
+  // Brand-new sign-ups (free) get Ghost's tour when they first reach Home.
+  // On web, ?tour=1 shows it any time (to preview it).
+  const justSignedUp = React.useRef(
+    Platform.OS === 'web' && typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('tour') === '1'
+  );
   const [selectedIdeaTitle, setSelectedIdeaTitle] = useState('One thing I wish I knew before I started creating');
   const [composerIdeaTitle, setComposerIdeaTitle] = useState('One thing I wish I knew before I started creating');
   // Goal picked on the Ideas page shapes the composer's caption
@@ -329,6 +336,7 @@ export default function App() {
   // One-tap Apple / Google sign-up (mock): the provider has already verified the
   // person, so skip the email code and go straight to Home
   const handleSocialSignUp = (_provider: 'apple' | 'google') => {
+    justSignedUp.current = true;
     setVerifyMode('signup');
     setUserProfile(prev => ({ ...prev, tier: 'free' }));
     navigateTo('dashboard');
@@ -369,6 +377,7 @@ export default function App() {
   };
 
   const handleVerifyCodeSuccess = (_email: string) => {
+    if (verifyMode === 'signup') justSignedUp.current = true;
     setUserProfile(prev => ({ ...prev, tier: 'free' }));
     // Sign-up and sign-in both land on Home; Home's day-0 welcome greets new creators
     navigateTo('dashboard');
@@ -577,6 +586,15 @@ export default function App() {
     if (mood) setMascotBaseline(mood);
     const tip = MASCOT_TIPS[currentScreen];
     if (tip) tipOnce(currentScreen, tip);
+    if (currentScreen === 'dashboard' && justSignedUp.current) {
+      justSignedUp.current = false;
+      if (desktopPersona === 'new' && desktopTier === 'free') {
+        // Ghost says hello through the tour instead
+        greeted.current = true;
+        closeJarvis();
+        setTimeout(startTour, 1100);
+      }
+    }
     if (currentScreen === 'dashboard' && !greeted.current) {
       greeted.current = true;
       const returning = (userPersona || userProfile?.userPersona) === 'returning';
@@ -1259,6 +1277,8 @@ export default function App() {
         {/* Ask Jarvis from anywhere in the app; Ghost does the jobs */}
         {showJarvisButton && <JarvisLauncher compact={breakpoint === 'phone'} bottom={jarvisBottom} />}
         {inApp && <JarvisChatPanel />}
+        {/* Ghost's welcome tour for brand-new creators */}
+        {inApp && <GhostTour />}
 
         {showSplash && (
           <SplashScreen onFinish={() => setShowSplash(false)} />

@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { TourTarget } from '../tour/GhostTour';
 import { LiveMascot } from '../mascot/LiveMascot';
 import { Modal, Platform, Pressable, StyleSheet, View, useWindowDimensions } from 'react-native';
 import Animated, { Easing, runOnJS, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
@@ -66,20 +67,24 @@ export function MobileWebBar({
         </View>
       ) : (
         <View style={styles.left}>
-          <IconButton onPress={() => setMenuOpen(true)} label="Open menu">
-            <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
-              <Path d="M4 7h16M4 12h16M4 17h10" stroke={ds.ink} strokeWidth={2.4} strokeLinecap="round" />
-            </Svg>
-          </IconButton>
+          <TourTarget id="menu-button">
+            <IconButton onPress={() => setMenuOpen(true)} label="Open menu">
+              <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
+                <Path d="M4 7h16M4 12h16M4 17h10" stroke={ds.ink} strokeWidth={2.4} strokeLinecap="round" />
+              </Svg>
+            </IconButton>
+          </TourTarget>
           <BrandLogo size="sm" wordmarkOnly={narrow} />
         </View>
       )}
 
       <View style={styles.right}>
-        <View style={{ zIndex: 50 }}>
+        <TourTarget id="ghost" style={{ zIndex: 50 }}>
           <LiveMascot size={40} bubble="under" bubbleWidth={220} />
-        </View>
-        <BellButton unread={unread > 0} onPress={() => setNotesOpen(true)} />
+        </TourTarget>
+        <TourTarget id="bell">
+          <BellButton unread={unread > 0} onPress={() => setNotesOpen(true)} />
+        </TourTarget>
         {onNewPost ? (
           <Pressable onPress={onNewPost} accessibilityRole="button" accessibilityLabel="New post" style={({ pressed }) => [styles.newPost, pointer, pressed && { transform: [{ translateY: 2 }] }]}>
             <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">

@@ -10,6 +10,7 @@
 // Plain TypeScript so anything (screens, data, sheets) can call react().
 
 import { useEffect, useRef, useSyncExternalStore } from 'react';
+import { isTourActive } from '../tour/tour';
 
 export type Emotion =
   | 'wave'
@@ -186,7 +187,11 @@ const tipsSeen = new Set<string>();
 export function tipOnce(key: string, line: string, delay = 900) {
   if (tipsSeen.has(key)) return;
   tipsSeen.add(key);
-  setTimeout(() => express('happy', line, 4200), delay);
+  setTimeout(() => {
+    // Not during the welcome tour; it shows next time instead
+    if (isTourActive()) return tipsSeen.delete(key);
+    express('happy', line, 4200);
+  }, delay);
 }
 
 // ─── Loading ────────────────────────────────────────────────────────────────

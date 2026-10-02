@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { TourTarget } from '../tour/GhostTour';
 import { Platform, Pressable, StyleSheet, View } from 'react-native';
 import Animated, { Easing, FadeIn } from 'react-native-reanimated';
 import Svg, { Path } from 'react-native-svg';
@@ -77,7 +78,9 @@ export function WebTopBar({
       </View>
 
       <View style={styles.right}>
-        <BellButton unread={unread > 0} onPress={() => setNotesOpen(true)} />
+        <TourTarget id="bell">
+          <BellButton unread={unread > 0} onPress={() => setNotesOpen(true)} />
+        </TourTarget>
         {onNewPost && (
         <View style={styles.newPost}>
         <AppButton
