@@ -48,6 +48,9 @@ export async function withErrorHandling<T>(fn: () => Promise<T>): Promise<NextRe
       code === "NOT_FOUND" ? 404 :
       code === "CONFLICT" ? 409 :
       code === "TOO_MANY_REQUESTS" ? 429 :
+      code === "PAYMENT_REQUIRED" ? 402 :
+      code === "BAD_GATEWAY" ? 502 :
+      code === "SERVICE_UNAVAILABLE" ? 503 :
       code === "BAD_REQUEST" ? 400 :
       500;
 

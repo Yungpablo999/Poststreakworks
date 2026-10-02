@@ -22,6 +22,7 @@ import { draftsRouter } from "./routers/drafts";
 import { savedHooksRouter } from "./routers/saved-hooks";
 import { repurposeRouter } from "./routers/repurpose";
 import { jarvisRouter } from "./routers/jarvis";
+import { platformConnectRouter } from "./routers/platform-connect";
 
 export const appRouter = createTRPCRouter({
   accounts: accountsRouter,
@@ -52,6 +53,8 @@ export const appRouter = createTRPCRouter({
   savedHooks: savedHooksRouter,
   repurpose: repurposeRouter,
   jarvis: jarvisRouter,
+  // Real social-account connections (TikTok first) — see routers/platform-connect.ts
+  platformConnect: platformConnectRouter,
 });
 
 export type AppRouter = typeof appRouter;

@@ -7,7 +7,7 @@ import {
   TIER_LIMITS,
 } from "../context";
 import { TRPCError } from "@trpc/server";
-import { getCheckInSummary, getXpBalance, levelForXp } from "@poststreak/workflows";
+import { getCheckInSummary, getXpBalance, levelForXp, listConnectedAccounts } from "@poststreak/workflows";
 import { saveOnboardingInput } from "../lib/onboarding";
 import { toAppPlatform } from "../lib/platforms";
 
@@ -346,7 +346,7 @@ export const accountsRouter = createTRPCRouter({
   bootstrap: protectedProcedure.query(async ({ ctx }) => {
     const userId = ctx.user.id;
 
-    const [userRes, profileRes, platformsRes, draftsRes, hooksRes, checkIn, xp, usedRes] = await Promise.all([
+    const [userRes, profileRes, platformsRes, draftsRes, hooksRes, checkIn, xp, usedRes, accountsList] = await Promise.all([
       ctx.supabase
         .from("users")
         .select("display_name, email, avatar_url, timezone, tour_done_at, tips_seen, created_at")
@@ -369,6 +369,7 @@ export const accountsRouter = createTRPCRouter({
       getCheckInSummary(userId),
       getXpBalance(ctx.supabase, userId),
       createSupabaseServiceClient().rpc("repurpose_used_this_week", { p_user_id: userId }),
+      listConnectedAccounts(ctx.supabase, userId),
     ]);
 
     if (userRes.error || !userRes.data) {
@@ -425,6 +426,12 @@ export const accountsRouter = createTRPCRouter({
           ? ("returning" as const)
           : ("new" as const),
       connectedPlatforms,
+      // Real accounts (name, followers, health). Only platforms with a real
+      // connection appear here — `connectedPlatforms` above also lists older ones.
+      accounts: accountsList.flatMap((a) => {
+        const platform = toAppPlatform(a.platform);
+        return platform ? [{ ...a, platform }] : [];
+      }),
       checkIn,
       drafts,
       savedHooks,

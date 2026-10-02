@@ -3,8 +3,11 @@ import { createTRPCRouter, protectedProcedure, TIER_LIMITS } from "../context";
 import { TRPCError } from "@trpc/server";
 import { recordStreakEvent } from "@poststreak/workflows";
 
+// Every platform the database knows (platform_type). The app's "x" is stored as "twitter".
+const platformSchema = z.enum(["linkedin", "twitter", "meta", "tiktok", "instagram", "youtube", "threads", "facebook"]);
+
 const connectPlatformSchema = z.object({
-  platform: z.enum(["linkedin", "twitter", "meta", "tiktok"]),
+  platform: platformSchema,
   accessToken: z.string().min(1),
   refreshToken: z.string().optional(),
   platformUserId: z.string().min(1),
@@ -14,9 +17,9 @@ const schedulePostSchema = z.object({
   content: z.string().min(1).max(5000),
   mediaUrls: z.array(z.string().url()).max(10).optional(),
   targetPlatforms: z
-    .array(z.enum(["linkedin", "twitter", "meta", "tiktok"]))
+    .array(platformSchema)
     .min(1)
-    .max(4),
+    .max(5),
   scheduledAt: z.string().datetime(),
 });
 
@@ -25,9 +28,9 @@ const updatePostSchema = z.object({
   content: z.string().min(1).max(5000).optional(),
   mediaUrls: z.array(z.string().url()).max(10).optional(),
   targetPlatforms: z
-    .array(z.enum(["linkedin", "twitter", "meta", "tiktok"]))
+    .array(platformSchema)
     .min(1)
-    .max(4)
+    .max(5)
     .optional(),
   scheduledAt: z.string().datetime().optional(),
 });
@@ -60,6 +63,16 @@ export const socialSchedulingRouter = createTRPCRouter({
   connect: protectedProcedure
     .input(connectPlatformSchema)
     .mutation(async ({ ctx, input }) => {
+      // TikTok connects through its own sign-in (platformConnect.tiktokAuthorize).
+      // This path stores whatever string the caller sends as the token, which for
+      // a platform with real OAuth would be a fake connection.
+      if (input.platform === "tiktok") {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "TikTok connects through TikTok's own sign-in. Use the Connect TikTok button.",
+        });
+      }
+
       // Check if already connected
       const { data: existing } = await ctx.supabase
         .from("platform_connections")
@@ -365,7 +378,7 @@ export const socialSchedulingRouter = createTRPCRouter({
     .input(
       z.object({
         postId: z.string().uuid(),
-        platform: z.enum(["linkedin", "twitter", "meta", "tiktok"]),
+        platform: platformSchema,
         postUrl: z.string().url(),
       }),
     )

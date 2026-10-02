@@ -33,7 +33,26 @@ describe("upgrading a database that already has creators", () => {
       [withDuplicates],
     );
 
+    // Before real OAuth, "connecting" TikTok stored whatever string the app sent.
+    const withPlaceholder = await createUser(db);
+    await db.query(
+      `insert into platform_connections (user_id, platform, platform_user_id, access_token) values
+         ($1, 'tiktok',   'my_handle',  'my_handle'),
+         ($1, 'linkedin', 'li-user-1',  'real-linkedin-token')`,
+      [withPlaceholder],
+    );
+
     await applyRemaining(db, BEFORE_PHASE1);
+
+    // Placeholder TikTok connections are retired; real connections to other platforms are untouched.
+    const connections = await db.query<{ platform: string; access_token: string | null; disconnected: boolean; status: string }>(
+      "select platform, access_token, disconnected_at is not null as disconnected, status from platform_connections where user_id = $1 order by platform",
+      [withPlaceholder],
+    );
+    expect(connections.rows).toEqual([
+      { platform: "linkedin", access_token: "real-linkedin-token", disconnected: false, status: "connected" },
+      { platform: "tiktok", access_token: null, disconnected: true, status: "needs_reauth" },
+    ]);
 
     // The 3-day streak became three check-ins on the three days it covered.
     const days = await db.query<{ d: string }>(

@@ -119,6 +119,64 @@ export interface SaveOnboardingBody {
   timezone?: string;
 }
 
+// ─── Connected accounts (TikTok first) ──────────────────────────────────────
+
+export type ConnectionStatus = 'connected' | 'needs_reauth' | 'error';
+
+/** GET /api/v1/platforms/accounts, and `bootstrap.accounts`. */
+export interface ConnectedAccount {
+  platform: AppPlatform;
+  /** The account's display name on that platform. */
+  name: string | null;
+  /** The @handle, when the platform gives it to us (TikTok needs an extra permission for it). */
+  handle: string | null;
+  avatarUrl: string | null;
+  followers: number | null;
+  /** `needs_reauth`: show "Reconnect"; `error`: a sync hiccup, nothing for the creator to do. */
+  status: ConnectionStatus;
+  lastSyncedAt: string | null;
+  scopes: string[];
+}
+
+export interface TikTokAuthorizeBody {
+  /** Which app the creator is in; the callback page uses it to decide where to hand the code back. */
+  client?: 'web' | 'mobile';
+}
+
+/** Send the creator here (web: `window.location.assign`; phone: an in-app browser session). */
+export interface TikTokAuthorizeResult {
+  url: string;
+}
+
+/** What TikTok sends to the callback page, passed straight on. */
+export interface TikTokCallbackBody {
+  code: string;
+  state: string;
+}
+
+export interface TikTokCallbackResult {
+  connected: true;
+  account: Pick<ConnectedAccount, 'name' | 'avatarUrl' | 'followers' | 'status' | 'scopes'> & { platform: 'tiktok' };
+}
+
+export type TikTokSyncResult =
+  | { status: 'synced'; posts: number; followers: number | null }
+  | { status: 'busy' | 'not_connected' | 'needs_reauth' | 'error' };
+
+/** `AccountSnapshot` in src/data/index.ts, built from real synced posts (`isSample` is always false). */
+export interface AccountSnapshotDto {
+  platform: AppPlatform;
+  isSample: false;
+  postingDaysLast30: number;
+  /** 30 entries; index 0 = 29 days ago, index 29 = today. */
+  postedDays: boolean[];
+  avgViews: string;
+  bestTime: string;
+  postsAtBestTime: number;
+  recentPosts: number;
+  topFormat: string;
+}
+
 // ─── Launch payload ─────────────────────────────────────────────────────────
 
 export interface BootstrapProfile {
@@ -147,6 +205,8 @@ export interface Bootstrap {
   /** "returning" once they've done anything real (checked in, saved something, connected a platform). */
   persona: Persona;
   connectedPlatforms: AppPlatform[];
+  /** Real connections with details and health. A subset of `connectedPlatforms`. */
+  accounts: ConnectedAccount[];
   checkIn: CheckInSummary;
   drafts: SavedDraft[];
   savedHooks: SavedHook[];

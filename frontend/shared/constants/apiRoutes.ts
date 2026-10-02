@@ -54,6 +54,13 @@ export const API_ROUTES = {
     CONNECT: (id: string) => `/api/v1/platforms/${id}/connect`,
     DISCONNECT: (id: string) => `/api/v1/platforms/${id}/disconnect`,
     SYNC_ALL: '/api/v1/platforms/sync-all',
+    // Connected accounts with details: name, avatar, followers, health, last sync
+    ACCOUNTS: '/api/v1/platforms/accounts',
+    // TikTok signs in on TikTok's own page: authorize -> (TikTok) -> callback
+    TIKTOK_AUTHORIZE: '/api/v1/platforms/tiktok/authorize', // POST { client? } -> { url }
+    TIKTOK_CALLBACK: '/api/v1/platforms/tiktok/callback', // POST { code, state }
+    TIKTOK_SYNC: '/api/v1/platforms/tiktok/sync', // POST — refresh the numbers now
+    TIKTOK_DISCONNECT: '/api/v1/platforms/tiktok/disconnect', // POST
   },
   // Growth Analytics
   GROWTH: {
@@ -61,6 +68,8 @@ export const API_ROUTES = {
     POST_PERFORMANCE: (postId: string) => `/api/v1/growth/posts/${postId}`,
     AUDIENCE_BREAKDOWN: '/api/v1/growth/audience',
     PLATFORM_COMPARISON: '/api/v1/growth/comparison',
+    // AccountSnapshot[] from real synced posts (onboarding's account card, Growth)
+    SNAPSHOTS: '/api/v1/growth/snapshots',
   },
   // Quests & Gamification
   QUESTS: {

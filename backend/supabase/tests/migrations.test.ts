@@ -506,6 +506,140 @@ describe("analytics_events: the server writes, the creator reads", () => {
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
+describe("TikTok connection data", () => {
+  /** What the OAuth callback writes (server side). */
+  const connectTikTok = (userId: string, openId: string) =>
+    db.query(
+      `insert into platform_connections
+         (user_id, platform, platform_user_id, access_token, refresh_token, account_name, scopes, status)
+       values ($1, 'tiktok', $2, 'v1.iv.tag.data', 'v1.iv.tag.data', 'Amara', '{user.info.basic,video.list}', 'connected')`,
+      [userId, openId],
+    );
+
+  it("lets a creator see their own connection's details, never its tokens", async () => {
+    const [id, other] = [await createUser(db), await createUser(db)];
+    await connectTikTok(id, `open-${id}`);
+
+    const own = await asUser(db, id, () =>
+      db.query("select platform, account_name, status, scopes from platform_connections"),
+    );
+    expect(own.rows).toEqual([{ platform: "tiktok", account_name: "Amara", status: "connected", scopes: ["user.info.basic", "video.list"] }]);
+
+    await expect(asUser(db, id, () => db.query("select access_token from platform_connections"))).rejects.toThrow(/permission denied/);
+    await expect(asUser(db, id, () => db.query("select refresh_token from platform_connections"))).rejects.toThrow(/permission denied/);
+    await expect(asUser(db, id, () => db.query("select sync_locked_until from platform_connections"))).rejects.toThrow(/permission denied/);
+    expect((await asUser(db, other, () => db.query("select platform from platform_connections"))).rows).toEqual([]);
+  });
+
+  it("will not let a creator create, edit or remove a TikTok connection themselves", async () => {
+    const id = await createUser(db);
+    // Faking "connected", or claiming someone else's TikTok account id first:
+    await expect(
+      asUser(db, id, () =>
+        db.query("insert into platform_connections (user_id, platform, platform_user_id) values ($1, 'tiktok', 'someone-elses-open-id')", [id]),
+      ),
+    ).rejects.toThrow(/row-level security/);
+
+    await connectTikTok(id, `open-${id}`);
+    await asUser(db, id, () => db.query("update platform_connections set status = 'connected', account_name = 'Hacked' where platform = 'tiktok'"));
+    await asUser(db, id, () => db.query("delete from platform_connections where platform = 'tiktok'"));
+    const row = await one<{ account_name: string }>(db, "select account_name from platform_connections where user_id = $1", [id]);
+    expect(row.account_name).toBe("Amara");
+  });
+
+  it("still lets a creator manage connections to platforms without real OAuth yet", async () => {
+    const id = await createUser(db);
+    await asUser(db, id, () =>
+      db.query("insert into platform_connections (user_id, platform, platform_user_id, access_token) values ($1, 'linkedin', 'x', 't')", [id]),
+    );
+    expect(await count(db, "select 1 from platform_connections where user_id = $1", [id])).toBe(1);
+  });
+
+  it("allows one PostStreak account per TikTok account, until it is disconnected", async () => {
+    const [first, second] = [await createUser(db), await createUser(db)];
+    const shared = `open-shared-${first}`;
+    await connectTikTok(first, shared);
+    await expect(connectTikTok(second, shared)).rejects.toThrow(/duplicate key|uq_platform_connections_tiktok_account/);
+
+    await db.query("update platform_connections set disconnected_at = now() where user_id = $1", [first]);
+    await connectTikTok(second, shared);
+    expect(await count(db, "select 1 from platform_connections where platform_user_id = $1 and disconnected_at is null", [shared])).toBe(1);
+  });
+
+  describe("oauth_states", () => {
+    const newState = () => `w.${crypto.randomUUID().replaceAll("-", "")}`;
+
+    it("is invisible to creators and cannot be planted by them", async () => {
+      const id = await createUser(db);
+      const state = newState();
+      await asService(db, () => db.query("insert into oauth_states (state, user_id, platform) values ($1, $2, 'tiktok')", [state, id]));
+
+      expect((await asUser(db, id, () => db.query("select * from oauth_states"))).rows).toEqual([]);
+      await expect(
+        asUser(db, id, () => db.query("insert into oauth_states (state, user_id, platform) values ($1, $2, 'tiktok')", [newState(), id])),
+      ).rejects.toThrow(/row-level security/);
+      await asUser(db, id, () => db.query("delete from oauth_states"));
+      expect(await count(db, "select 1 from oauth_states where state = $1", [state])).toBe(1);
+    });
+
+    it("expires after ten minutes and rejects short, guessable values", async () => {
+      const id = await createUser(db);
+      const state = newState();
+      await db.query("insert into oauth_states (state, user_id, platform) values ($1, $2, 'tiktok')", [state, id]);
+      const { minutes } = await one<{ minutes: number }>(
+        db,
+        "select round(extract(epoch from (expires_at - created_at)) / 60)::int as minutes from oauth_states where state = $1",
+        [state],
+      );
+      expect(minutes).toBe(10);
+      await expect(db.query("insert into oauth_states (state, user_id, platform) values ('short', $1, 'tiktok')", [id])).rejects.toThrow(/check constraint/);
+    });
+  });
+
+  describe("account and post stats", () => {
+    const snapshot = (userId: string, followers: number | null, videos: number | null = null) =>
+      asService(db, () =>
+        db.query("select public.record_account_snapshot($1, 'tiktok', $2, null, null, $3)", [userId, followers, videos]),
+      );
+
+    it("are readable by their owner only, and never writable", async () => {
+      const [id, other] = [await createUser(db), await createUser(db)];
+      await snapshot(id, 1200, 45);
+      await db.query("insert into post_stats (user_id, platform, platform_post_id, title, views) values ($1, 'tiktok', 'v1', 'First', 1500)", [id]);
+
+      expect((await asUser(db, id, () => db.query("select followers::int from account_stats"))).rows).toEqual([{ followers: 1200 }]);
+      expect((await asUser(db, id, () => db.query("select views::int from post_stats"))).rows).toEqual([{ views: 1500 }]);
+      expect((await asUser(db, other, () => db.query("select * from account_stats"))).rows).toEqual([]);
+      expect((await asUser(db, other, () => db.query("select * from post_stats"))).rows).toEqual([]);
+
+      await expect(
+        asUser(db, id, () => db.query("insert into account_stats (user_id, platform, day, followers) values ($1, 'tiktok', '2020-01-01', 999999)", [id])),
+      ).rejects.toThrow(/row-level security/);
+      await expect(
+        asUser(db, id, () => db.query("insert into post_stats (user_id, platform, platform_post_id, views) values ($1, 'tiktok', 'fake', 99999999)", [id])),
+      ).rejects.toThrow(/row-level security/);
+      await asUser(db, id, () => db.query("update post_stats set views = 99999999"));
+      expect((await one<{ views: number }>(db, "select views::int as views from post_stats where user_id = $1", [id])).views).toBe(1500);
+    });
+
+    it("keeps one snapshot per creator-local day, and never overwrites a count with 'unknown'", async () => {
+      const id = await createUser(db);
+      await snapshot(id, 1000, 40);
+      await snapshot(id, 1100, null); // this sync couldn't read the video count
+      const rows = await db.query<{ followers: number; videos: number }>("select followers::int as followers, videos from account_stats where user_id = $1", [id]);
+      expect(rows.rows).toEqual([{ followers: 1100, videos: 40 }]);
+    });
+
+    it("cannot be recorded by a creator", async () => {
+      const id = await createUser(db);
+      await expect(
+        asUser(db, id, () => db.query("select public.record_account_snapshot($1, 'tiktok', 1, 1, 1, 1)", [id])),
+      ).rejects.toThrow(/permission denied/);
+    });
+  });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
 // The hardening migration, proved by running each attack before and after it.
 describe("RLS hardening: before and after", () => {
   const HARDENING = "20260814000021";
