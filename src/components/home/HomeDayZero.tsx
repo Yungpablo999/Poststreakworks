@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { TourTarget } from '../tour/GhostTour';
 import { LiveMascot } from '../mascot/LiveMascot';
 import { ResponsiveColumns } from '../ui/ResponsiveColumns';
 import { View, Image, Pressable, StyleSheet, Platform } from 'react-native';
@@ -44,9 +45,9 @@ const STEP_MS = 1400;
 // ─── The live mascot (floats, reacts, talks; tap it) ─────────────────────────
 export function FloatingGhost() {
   return (
-    <View style={styles.ghostWrap}>
+    <TourTarget id="home-ghost" style={styles.ghostWrap}>
       <LiveMascot size={96} bubble="auto" bubbleWidth={190} />
-    </View>
+    </TourTarget>
   );
 }
 
@@ -278,7 +279,7 @@ export function HomeDayZero({
           </View>
           <StepPath />
 
-          <View style={styles.cta}>
+          <TourTarget id="first-post" style={styles.cta}>
             <AppButton
               title="Plan your first post"
               size="lg"
@@ -289,7 +290,7 @@ export function HomeDayZero({
                 </Svg>
               }
             />
-          </View>
+          </TourTarget>
         </GlassCard>
       </Animated.View>
 

@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { TourTarget, useTourScroll } from '../components/tour/GhostTour';
 import { ResponsiveColumns } from '../components/ui/ResponsiveColumns';
 import {
   StyleSheet,
@@ -70,6 +71,8 @@ export const QuestsScreen: React.FC<QuestsScreenProps> = ({
   userProfile,
   onSaveProfile,
 }) => {
+  // Lets Ghost's tour scroll this page
+  const tourScroll = useTourScroll();
   const isNewUser = (userPersona || userProfile?.userPersona) === 'new';
   const isDark = false;
   const [activeTab, setActiveTab] = useState<TabType>('quests');
@@ -195,6 +198,7 @@ export const QuestsScreen: React.FC<QuestsScreenProps> = ({
 
         {/* 2. MAIN SCROLLABLE CONTENT */}
         <ScrollView
+          {...tourScroll}
           style={{ flex: 1 }}
           contentContainerStyle={styles.scrollContent}
           showsVerticalScrollIndicator={false}
@@ -215,6 +219,7 @@ export const QuestsScreen: React.FC<QuestsScreenProps> = ({
           <ResponsiveColumns split={2} gap={16}>
           {/* 1. TODAY'S QUEST */}
           <Reanimated.View entering={FadeInUp.delay(100).duration(550)}>
+            <TourTarget id="quest-card">
             <TodayQuestCard
               title={isNewUser ? 'Complete your first Studio session' : 'Share one post today'}
               body={
@@ -226,6 +231,7 @@ export const QuestsScreen: React.FC<QuestsScreenProps> = ({
               done={completedQuests.includes('today_quest')}
               onStart={handleStartTodayQuest}
             />
+            </TourTarget>
           </Reanimated.View>
 
           {/* 2. LEVEL (returning only) + CHECK-IN */}

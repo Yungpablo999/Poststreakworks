@@ -1,4 +1,5 @@
 import { SocialBrandIcon } from '../components/SocialBrandIcon';
+import { TourTarget, useTourScroll } from '../components/tour/GhostTour';
 import { ResponsiveColumns } from '../components/ui/ResponsiveColumns';
 import React, { useState, useRef, useEffect } from 'react';
 import {
@@ -250,6 +251,8 @@ export const GrowthScreen: React.FC<GrowthScreenProps> = ({
   userProfile,
   onSaveProfile,
 }) => {
+  // Lets Ghost's tour scroll this page
+  const tourScroll = useTourScroll();
   const isDark = false;
   const isNewUser = (userPersona || userProfile?.userPersona || 'new') === 'new';
   const [activeTab, setActiveTab] = useState<TabType>('growth');
@@ -470,6 +473,7 @@ export const GrowthScreen: React.FC<GrowthScreenProps> = ({
 
         {/* 2. MAIN SCROLLABLE CONTENT */}
         <ScrollView
+          {...tourScroll}
           contentContainerStyle={styles.scrollContent}
           showsVerticalScrollIndicator={false}
           bounces={true}
@@ -489,6 +493,7 @@ export const GrowthScreen: React.FC<GrowthScreenProps> = ({
           <ResponsiveColumns split={2} gap={16}>
           {/* 1. TOTAL AUDIENCE */}
           <Reanimated.View entering={FadeInUp.delay(100).duration(550)} style={styles.section0}>
+          <TourTarget id="growth-card">
           {isNewUser ? (
             <AudienceEmptyHero
               connectedCount={platformsList.filter((p) => p.connected && isStage1Platform(p.id)).length}
@@ -497,6 +502,7 @@ export const GrowthScreen: React.FC<GrowthScreenProps> = ({
           ) : (
             <AudienceHero onOpen={openAudience} />
           )}
+          </TourTarget>
           </Reanimated.View>
 
           {/* 2. PLATFORMS — tap Connect: spinner, then a green tick */}

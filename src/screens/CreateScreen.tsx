@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { TourTarget, useTourScroll } from '../components/tour/GhostTour';
 import { ResponsiveColumns } from '../components/ui/ResponsiveColumns';
 import {
   StyleSheet,
@@ -230,6 +231,8 @@ export const CreateScreen: React.FC<CreateScreenProps> = ({
   userProfile,
   onSaveProfile,
 }) => {
+  // Lets Ghost's tour scroll this page
+  const tourScroll = useTourScroll();
   const isDark = false;
   const isNewUser = (userPersona || userProfile?.userPersona || 'new') === 'new';
   const schedule = getScheduleSummary(isNewUser ? 'new' : 'returning');
@@ -481,6 +484,7 @@ export const CreateScreen: React.FC<CreateScreenProps> = ({
 
         {/* 2. MAIN SCROLLABLE CONTENT */}
         <ScrollView
+          {...tourScroll}
           contentContainerStyle={styles.scrollContent}
           showsVerticalScrollIndicator={false}
           bounces={true}
@@ -500,6 +504,7 @@ export const CreateScreen: React.FC<CreateScreenProps> = ({
           <ResponsiveColumns split={2} gap={16}>
           {/* 1. TODAY'S IDEA (with Jarvis shuffle) */}
           <Reanimated.View entering={FadeInUp.delay(100).duration(550)}>
+            <TourTarget id="create-idea">
             <IdeaHeroCard
               isNewUser={isNewUser}
               niches={userProfile?.niches?.length ? userProfile.niches : ['lifestyle']}
@@ -511,6 +516,7 @@ export const CreateScreen: React.FC<CreateScreenProps> = ({
                 else openNewPost(idea.title);
               }}
             />
+            </TourTarget>
           </Reanimated.View>
 
           {/* 2. TOOLS */}

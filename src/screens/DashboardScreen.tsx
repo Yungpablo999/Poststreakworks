@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
+import { TourTarget, useTourScroll } from '../components/tour/GhostTour';
 import { IdeasStrip } from '../components/web/IdeasStrip';
 import {
   StyleSheet,
@@ -563,6 +564,8 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
   onOpenVoiceStudio,
   onOpenHookStudio,
 }) => {
+  // Lets Ghost's tour scroll this page
+  const tourScroll = useTourScroll();
   const isDark = false;
   const isNewUser = (userPersona || userProfile?.userPersona) === 'new';
   // Desktop shows the logo in the side menu
@@ -966,7 +969,9 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
             {/* Right: Notification & Person Profile Photo Upload */}
             <View style={styles.headerRightGroup}>
               {/* Notification bell: swings on tap, unread dot breathes */}
-              <BellButton unread={sharedUnread > 0} onPress={() => setShowNotifSheet(true)} />
+              <TourTarget id="bell">
+                <BellButton unread={sharedUnread > 0} onPress={() => setShowNotifSheet(true)} />
+              </TourTarget>
 
               {/* Top-Right: Person Icon Placeholder where users add their profile picture */}
               <Pressable
@@ -1016,6 +1021,7 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
 
         {/* 2. MAIN SCROLLABLE CONTENT */}
         <ScrollView
+          {...tourScroll}
           contentContainerStyle={styles.scrollContent}
           showsVerticalScrollIndicator={false}
           bounces={true}

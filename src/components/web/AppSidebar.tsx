@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { TourTarget } from '../tour/GhostTour';
 import { LiveMascot } from '../mascot/LiveMascot';
 import { Image, Platform, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import Animated, { Easing, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
@@ -181,9 +182,13 @@ export function AppSidebar({
       </View>
 
       <ScrollView style={styles.flex} contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
-        <NavGroup items={MAIN} active={active} onNavigate={onNavigate} />
-        <Text style={styles.section}>Studios</Text>
-        <NavGroup items={STUDIOS} active={active} onNavigate={onNavigate} />
+        <TourTarget id="nav">
+          <NavGroup items={MAIN} active={active} onNavigate={onNavigate} />
+        </TourTarget>
+        <TourTarget id="studios">
+          <Text style={styles.section}>Studios</Text>
+          <NavGroup items={STUDIOS} active={active} onNavigate={onNavigate} />
+        </TourTarget>
 
         {!isPro ? (
           <Pressable onPress={onOpenPro} accessibilityRole="button" style={({ pressed }) => [styles.proCard, pointer, pressed && { transform: [{ scale: 0.98 }] }]}>
@@ -204,9 +209,9 @@ export function AppSidebar({
       {/* Preview the four versions of the app (sample data for now) */}
       {/* The live mascot keeps you company, next to the preview switches */}
       <View style={styles.buddyRow}>
-        <View style={styles.buddy}>
+        <TourTarget id="ghost" style={styles.buddy}>
           <LiveMascot size={64} bubble="top" bubbleWidth={220} />
-        </View>
+        </TourTarget>
         <View style={[styles.preview, styles.flex]}>
           <Text style={styles.previewLabel}>Preview as</Text>
           <View style={styles.previewRow}>
