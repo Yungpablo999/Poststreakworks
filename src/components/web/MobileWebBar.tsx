@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { LiveMascot } from '../mascot/LiveMascot';
 import { Modal, Platform, Pressable, StyleSheet, View, useWindowDimensions } from 'react-native';
 import Animated, { Easing, runOnJS, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 import Svg, { Path } from 'react-native-svg';
@@ -45,6 +46,8 @@ export function MobileWebBar({
   const [notesOpen, setNotesOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const unread = useUnreadNotifications(persona, tier);
+  // Small phones: just the word, so the mascot and buttons fit beside it
+  const narrow = useWindowDimensions().width < 380;
 
   return (
     <View style={styles.root}>
@@ -68,11 +71,14 @@ export function MobileWebBar({
               <Path d="M4 7h16M4 12h16M4 17h10" stroke={ds.ink} strokeWidth={2.4} strokeLinecap="round" />
             </Svg>
           </IconButton>
-          <BrandLogo size="sm" />
+          <BrandLogo size="sm" wordmarkOnly={narrow} />
         </View>
       )}
 
       <View style={styles.right}>
+        <View style={{ zIndex: 50 }}>
+          <LiveMascot size={40} bubble="under" bubbleWidth={220} />
+        </View>
         <BellButton unread={unread > 0} onPress={() => setNotesOpen(true)} />
         {onNewPost ? (
           <Pressable onPress={onNewPost} accessibilityRole="button" accessibilityLabel="New post" style={({ pressed }) => [styles.newPost, pointer, pressed && { transform: [{ translateY: 2 }] }]}>
@@ -132,7 +138,7 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: 'rgba(255, 255, 255, 0.9)',
     backgroundColor: 'rgba(247, 245, 240, 0.75)',
-    zIndex: 5,
+    zIndex: 40,
   },
   left: { flexDirection: 'row', alignItems: 'center', gap: 8, flex: 1, minWidth: 0 },
   right: { flexDirection: 'row', alignItems: 'center', gap: 8 },

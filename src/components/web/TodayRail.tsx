@@ -1,3 +1,4 @@
+import { react } from '../../mascot/mascot';
 import React, { useEffect, useMemo, useState } from 'react';
 import { ActivityIndicator, Platform, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import Animated, { Easing, FadeIn, FadeInUp } from 'react-native-reanimated';
@@ -36,10 +37,14 @@ function AskJarvis({ onUseIdea }: { onUseIdea: (title: string) => void }) {
     setAsked(q);
     setRound(0);
     setThinking(true);
+    react('thinking');
   };
   useEffect(() => {
     if (!thinking) return;
-    const id = setTimeout(() => setThinking(false), 700);
+    const id = setTimeout(() => {
+      setThinking(false);
+      react('ideaReady');
+    }, 700);
     return () => clearTimeout(id);
   }, [thinking]);
 

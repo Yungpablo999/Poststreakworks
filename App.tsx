@@ -57,6 +57,8 @@ import { WebTopBar } from './src/components/web/WebTopBar';
 import { TodayRail } from './src/components/web/TodayRail';
 import { StudioRail, type StudioKind } from './src/components/web/StudioRail';
 import { setComposerOpener } from './src/components/web/webActions';
+import { activity as mascotActivity, react as mascotReact, setBaseline as setMascotBaseline, tipOnce, type Emotion } from './src/mascot/mascot';
+import { preloadMascot } from './src/components/mascot/LiveMascot';
 import { IS_WEB_APP, useBreakpoint, useWebSidebar } from './src/hooks/useBreakpoint';
 import { MobileWebBar } from './src/components/web/MobileWebBar';
 import { GlassBackdrop } from './src/components/glass/GlassBackdrop';
@@ -520,6 +522,49 @@ export default function App() {
     />
   );
 
+  // The mascot's resting mood follows where you are, and it says hello when you
+  // arrive (welcome back for returning creators). Never guilt, only warmth.
+  const MASCOT_MOOD: Partial<Record<Screen, Emotion>> = {
+    dashboard: 'calm', create: 'idea', 'idea-detail': 'idea', 'content-angle': 'thinking',
+    composer: 'working', script: 'working', caption: 'working',
+    quests: 'determined', 'mission-detail': 'determined', 'challenge-detail': 'determined',
+    growth: 'happy', 'audience-breakdown': 'happy', 'post-performance': 'love', 'platform-growth': 'happy',
+    schedule: 'calm', repurpose: 'idea', 'hook-studio': 'idea', 'voice-studio': 'happy', 'jarvis-pro': 'cool',
+  };
+  const greeted = React.useRef(false);
+  // The first time you open a page, the mascot points out what it's for
+  const MASCOT_TIPS: Partial<Record<Screen, string>> = {
+    create: 'Pick an idea you like, or ask Jarvis for a fresh one.',
+    quests: 'Quests are small goals. Finish one to earn a badge!',
+    growth: 'This is how your posts are doing. I’ll point out what works.',
+    schedule: 'Plan your posts here and I’ll remind you when it’s time.',
+    repurpose: 'Turn one video into posts for every platform.',
+    'hook-studio': 'A strong first line keeps people watching. Let’s find yours.',
+    'voice-studio': 'Teach me how you talk so everything sounds like you.',
+  };
+  React.useEffect(() => {
+    preloadMascot();
+    // Any activity keeps the mascot awake; leave the app alone and it naps
+    mascotActivity();
+    if (Platform.OS !== 'web' || typeof document === 'undefined') return;
+    const wake = () => mascotActivity();
+    const events = ['pointerdown', 'keydown', 'wheel'] as const;
+    events.forEach((e) => document.addEventListener(e, wake, { passive: true }));
+    return () => events.forEach((e) => document.removeEventListener(e, wake));
+  }, []);
+  React.useEffect(() => {
+    const mood = MASCOT_MOOD[currentScreen];
+    if (mood) setMascotBaseline(mood);
+    const tip = MASCOT_TIPS[currentScreen];
+    if (tip) tipOnce(currentScreen, tip);
+    if (currentScreen === 'dashboard' && !greeted.current) {
+      greeted.current = true;
+      const returning = (userPersona || userProfile?.userPersona) === 'returning';
+      setTimeout(() => mascotReact(returning ? 'welcomeBack' : 'hello'), 700);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentScreen]);
+
   // Hold on the brand background for the split second fonts take to load,
   // so text never flashes in the system font. On error, fall back gracefully.
   if (!fontsLoaded && !fontError) {
@@ -528,7 +573,7 @@ export default function App() {
 
   return (
     <SafeAreaProvider initialMetrics={initialWindowMetrics}>
-      <View style={styles.container}>
+      <View style={styles.container} onStartShouldSetResponderCapture={() => { if (Platform.OS !== 'web') mascotActivity(); return false; }}>
         <StatusBar style="dark" />
 
         <View style={showSidebar ? styles.desktopRow : styles.fill}>

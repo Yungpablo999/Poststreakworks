@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { useMascotThinking } from '../mascot/mascot';
 import {
   StyleSheet,
   View,
@@ -458,6 +459,7 @@ export const ContentAngleScreen: React.FC<ContentAngleScreenProps> = ({
   const [pickThinking, setPickThinking] = useState(false);
   const [listCount, setListCount] = useState(3);
   const [generating, setGenerating] = useState(false);
+  useMascotThinking(generating);
   const top = feed[topIndex % feed.length];
   const isPro = tier === 'pro';
   const [topicIdeas, setTopicIdeas] = useState<typeof feed>([]);

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { MascotSays } from '../components/mascot/MascotSays';
 import { useWebFrame, useWideFrame } from '../components/web/WebAuthHeader';
 import { StyleSheet, View, ScrollView, Pressable, Platform, KeyboardAvoidingView, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -93,6 +94,8 @@ export const SignUpScreen: React.FC<SignUpScreenProps> = ({
           )}
 
           <ScrollView contentContainerStyle={[styles.scroll, wideFrame && webStyles.scroll]} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
+            {/* The mascot guides each step and reacts to your choices */}
+            <MascotSays text={'Almost there! Let’s make your account.'} />
             <Animated.View entering={FadeInUp.delay(120).duration(550)}>
               <FitLines
                 lines={['Save your', <Text key="p" style={styles.titleAccent}>starter plan</Text>]}

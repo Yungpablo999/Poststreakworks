@@ -1,3 +1,4 @@
+import { react } from '../mascot/mascot';
 import { FREE_REPURPOSES_PER_WEEK } from '../config/features';
 
 // Single place screens get their data from.
@@ -60,6 +61,7 @@ export function checkInToday(persona: Persona): CheckInStreak {
   week[current.todayIndex] = true;
   checkInStore[persona] = { ...current, week, checkedInToday: true, currentDays: current.currentDays + 1 };
   checkInListeners.forEach((listener) => listener());
+  react('checkIn');
   return checkInStore[persona]!;
 }
 
@@ -112,6 +114,7 @@ export function spendRepurpose(persona: Persona, tier: 'free' | 'pro'): boolean 
   if (tier !== 'pro' && repurposeUsed[persona] >= FREE_REPURPOSES_PER_WEEK) return false;
   repurposeUsed[persona] += 1;
   repurposeListeners.forEach((l) => l());
+  react('repurposed');
   return true;
 }
 
@@ -1266,6 +1269,7 @@ export function toggleSavedHook(h: Omit<SavedHook, 'savedAt'>): boolean {
   }
   savedHooks = [{ ...h, savedAt: Date.now() }, ...savedHooks];
   emitHooks();
+  react('hookSaved');
   return true;
 }
 export function subscribeToSavedHooks(listener: () => void): () => void {

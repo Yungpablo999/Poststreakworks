@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { LiveMascot } from '../mascot/LiveMascot';
 import { View, Pressable, StyleSheet, Platform, type LayoutChangeEvent } from 'react-native';
 import Animated, {
   Easing,
@@ -69,8 +70,13 @@ export function TodayCard({
       <Text style={styles.eyebrow}>TODAY · {label.toUpperCase()}</Text>
       {empty ? (
         <>
-          <Text style={styles.heroTitle}>Nothing planned yet</Text>
-          <Text style={styles.heroBody}>Pick an idea, choose a time, and it lines up here.</Text>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+            <View style={{ flex: 1 }}>
+              <Text style={styles.heroTitle}>Nothing planned yet</Text>
+              <Text style={styles.heroBody}>Pick an idea, choose a time, and it lines up here.</Text>
+            </View>
+            <LiveMascot size={72} emotion="calm" />
+          </View>
         </>
       ) : (
         <>

@@ -1,4 +1,5 @@
 import React, { useEffect } from 'react';
+import { LiveMascot } from '../mascot/LiveMascot';
 import { View, Image, StyleSheet, type ImageSourcePropType } from 'react-native';
 import Animated, {
   Easing,
@@ -179,12 +180,7 @@ export function DraftsEmpty({ onStart }: { onStart: () => void }) {
   return (
     <GlassCard radius={22} padding={18}>
       <View style={styles.emptyWrap}>
-        <View style={styles.emptyIcon}>
-          <Svg width={20} height={20} viewBox="0 0 24 24" fill="none">
-            <Path d="M14 3H7a2 2 0 00-2 2v14a2 2 0 002 2h10a2 2 0 002-2V8l-5-5z" stroke={ds.purple} strokeWidth={2} strokeLinejoin="round" />
-            <Path d="M14 3v5h5M9 13h6M9 17h4" stroke={ds.purple} strokeWidth={2} strokeLinecap="round" />
-          </Svg>
-        </View>
+        <LiveMascot size={76} emotion="calm" />
         <Text style={styles.emptyTitle}>No drafts yet</Text>
         <Text style={styles.emptyText}>Anything you start is saved here automatically.</Text>
         <View style={styles.emptyBtn}>

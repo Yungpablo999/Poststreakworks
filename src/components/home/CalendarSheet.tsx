@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { LiveMascot } from '../mascot/LiveMascot';
 import { dialogStyles, useDialogMode } from '../glass/dialog';
 import { Modal, View, Pressable, ScrollView, StyleSheet, Platform, PanResponder, useWindowDimensions } from 'react-native';
 import Animated, {
@@ -138,10 +139,16 @@ function DayDetails({ day, label, onPlanPost }: { day: CalendarDay; label: strin
           </Animated.View>
         ))
       ) : day.isPast ? (
-        <Text style={styles.emptyText}>A quiet day. Rest is part of the rhythm.</Text>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+          <LiveMascot size={48} emotion="sleepy" interactive={false} />
+          <Text style={[styles.emptyText, { flex: 1 }]}>A quiet day. Rest is part of the rhythm.</Text>
+        </View>
       ) : (
         <View>
-          <Text style={styles.emptyText}>{day.isToday ? 'Nothing planned for today yet.' : 'Nothing planned yet.'}</Text>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+            <LiveMascot size={48} emotion="calm" interactive={false} />
+            <Text style={[styles.emptyText, { flex: 1 }]}>{day.isToday ? 'Nothing planned for today yet.' : 'Nothing planned yet.'}</Text>
+          </View>
           {onPlanPost && (
             <View style={styles.planBtn}>
               <AppButton title={day.isToday ? 'Plan a post for today' : 'Plan a post for this day'} variant="outline" onPress={onPlanPost} />

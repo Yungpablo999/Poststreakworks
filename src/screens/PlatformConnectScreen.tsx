@@ -1,4 +1,6 @@
 import React from 'react';
+import { react } from '../mascot/mascot';
+import { MascotSays } from '../components/mascot/MascotSays';
 import { useWebFrame, useWideFrame } from '../components/web/WebAuthHeader';
 import { StyleSheet, View, ScrollView, Pressable, Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -50,6 +52,7 @@ export const PlatformConnectScreen: React.FC<PlatformConnectScreenProps> = ({ on
   const counterStyle = useAnimatedStyle(() => ({ transform: [{ scale: counterScale.value }] }));
 
   const togglePlatform = (id: string) => {
+    if (!connected.includes(id)) react('connected');
     setConnected((prev) => (prev.includes(id) ? prev.filter((p) => p !== id) : [...prev, id]));
     counterScale.value = withSequence(withTiming(1.12, { duration: 110 }), withSpring(1, { damping: 10 }));
   };
@@ -100,6 +103,8 @@ export const PlatformConnectScreen: React.FC<PlatformConnectScreenProps> = ({ on
         )}
 
         <ScrollView contentContainerStyle={[styles.scroll, wideFrame && webStyles.scroll]} showsVerticalScrollIndicator={false}>
+          {/* The mascot guides each step and reacts to your choices */}
+          <MascotSays text={'Connect where you post and I’ll learn what works for you.'} />
           {/* Title: always "Connect your creator" / "platforms" */}
           <Animated.View entering={FadeInUp.delay(120).duration(550)}>
             <FitLines
