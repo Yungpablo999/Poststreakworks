@@ -50,7 +50,7 @@ import { ScreenTransitionContainer, ScreenTransitionType } from './src/component
 import { EdgeSwipeBackWrapper } from './src/components/EdgeSwipeBackWrapper';
 import { TabType } from './src/components/FloatingTabBar';
 import { UserProfileData, UserProfileModal } from './src/components/UserProfileModal';
-import { setNotificationHandler } from './src/components/notifications/NotificationsSheet';
+import { setNotificationHandler, type NoteTarget } from './src/components/notifications/NotificationsSheet';
 import { AppSidebar, type SidebarId } from './src/components/web/AppSidebar';
 import { WebAuthHeader } from './src/components/web/WebAuthHeader';
 import { WebTopBar } from './src/components/web/WebTopBar';
@@ -59,6 +59,8 @@ import { StudioRail, type StudioKind } from './src/components/web/StudioRail';
 import { setComposerOpener } from './src/components/web/webActions';
 import { activity as mascotActivity, react as mascotReact, setBaseline as setMascotBaseline, tipOnce, type Emotion } from './src/mascot/mascot';
 import { preloadMascot } from './src/components/mascot/LiveMascot';
+import { JarvisChatPanel, JarvisLauncher } from './src/components/jarvis/JarvisChat';
+import { closeJarvis, setGhostHands, setJarvisContext, type GhostPlace } from './src/jarvis/chat';
 import { IS_WEB_APP, useBreakpoint, useWebSidebar } from './src/hooks/useBreakpoint';
 import { MobileWebBar } from './src/components/web/MobileWebBar';
 import { GlassBackdrop } from './src/components/glass/GlassBackdrop';
@@ -238,13 +240,19 @@ export default function App() {
   // The profile sheet opened from the desktop side menu
   const [showProfileFromMenu, setShowProfileFromMenu] = useState(false);
   React.useEffect(() => {
-    setNotificationHandler((target) => {
+    const openPlace = (target: NoteTarget | GhostPlace) => {
       if (target === 'accounts') setShowAccountsFromNote(true);
       else if (target === 'home') navigateTo('dashboard');
       else if (target === 'challenge') navigateTo('challenge-detail');
       else navigateTo(target);
-    });
-    return () => setNotificationHandler(null);
+    };
+    setNotificationHandler(openPlace);
+    // Jarvis's chat sends Ghost to the same places, or to start a post
+    setGhostHands({ open: openPlace, compose: (title) => openBlankComposer(title) });
+    return () => {
+      setNotificationHandler(null);
+      setGhostHands(null);
+    };
   });
 
   const handleTabNavigation = (tab: TabType) => {
@@ -531,6 +539,18 @@ export default function App() {
     growth: 'happy', 'audience-breakdown': 'happy', 'post-performance': 'love', 'platform-growth': 'happy',
     schedule: 'calm', repurpose: 'idea', 'hook-studio': 'idea', 'voice-studio': 'happy', 'jarvis-pro': 'cool',
   };
+  // Jarvis chat: the button shows on every signed-in page on wide screens, and
+  // on the main pages on phones (inner pages have their own bottom buttons).
+  // Not where the right panel already has its Ask Jarvis card (no doubles).
+  const showJarvisButton = inApp && !showRail && (webSidebar || MAIN_PAGES.includes(currentScreen));
+  const phoneTabBar = !IS_WEB_APP && !webSidebar;
+  const jarvisBottom = (initialWindowMetrics?.insets.bottom ?? 0) + (phoneTabBar ? 104 : 20);
+  React.useEffect(() => {
+    setJarvisContext({ persona: desktopPersona, niches: selectedNiches.length ? selectedNiches : userProfile?.niches ?? [], platforms: connectedPlatforms });
+  });
+  React.useEffect(() => {
+    if (!inApp) closeJarvis();
+  }, [inApp]);
   const greeted = React.useRef(false);
   // The first time you open a page, the mascot points out what it's for
   const MASCOT_TIPS: Partial<Record<Screen, string>> = {
@@ -1235,6 +1255,10 @@ export default function App() {
           initialProfile={userProfile}
           onSaveProfile={(updated) => setUserProfile(prev => ({ ...prev, ...updated, tier: updated.tier || prev.tier || 'free' }))}
         />
+
+        {/* Ask Jarvis from anywhere in the app; Ghost does the jobs */}
+        {showJarvisButton && <JarvisLauncher compact={breakpoint === 'phone'} bottom={jarvisBottom} />}
+        {inApp && <JarvisChatPanel />}
 
         {showSplash && (
           <SplashScreen onFinish={() => setShowSplash(false)} />

@@ -15,6 +15,7 @@ import Animated, {
 import Svg, { Path, Rect, Circle } from 'react-native-svg';
 import * as Haptics from 'expo-haptics';
 import { Text } from '../ui/AppText';
+import { FitLines } from '../ui/FitLines';
 import { AppButton } from '../ui/AppButton';
 import { GlassCard } from '../glass/GlassCard';
 import { JarvisOrb } from '../JarvisOrb';
@@ -257,10 +258,14 @@ export function HomeDayZero({
                 <View style={styles.dayChipDot} />
                 <Text style={styles.dayChipText}>DAY 1</Text>
               </View>
-              <Text style={styles.welcomeTitle} numberOfLines={2}>
-                Welcome{firstName ? ',' : ' to'}{'\n'}
-                <Text style={styles.welcomeName}>{firstName ?? 'PostStreak'}</Text>
-              </Text>
+              <FitLines
+                lines={[firstName ? 'Welcome,' : 'Welcome to', <Text key="n" style={styles.welcomeName}>{firstName ?? 'PostStreak'}</Text>]}
+                textStyle={styles.welcomeTitle}
+                maxFontSize={30}
+                minFontSize={22}
+                align="left"
+                accessibilityLabel={`Welcome${firstName ? `, ${firstName}` : ' to PostStreak'}`}
+              />
             </View>
             <FloatingGhost />
           </View>
