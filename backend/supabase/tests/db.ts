@@ -6,8 +6,9 @@
 //   + roles anon / authenticated / service_role, the auth.users table and
 //     auth.uid(), and Supabase's default grants (so "RLS, not table privileges,
 //     is the gate" holds exactly as on a real project);
-//   + empty copies of the v1 tables the migrations read from (the live project
-//     is v1's database; a fresh one has none of them);
+//   + a database that starts EMPTY (what a new dev / staging project is) or, via
+//     `beforeMigrations`, already holds v1's tables and data (what the live
+//     project is) — see V1_TABLES;
 //   - it is NOT a substitute for testing against a real Supabase project
 //     (BACKEND_BUILD_PLAN Phase 7): no PostgREST, no JWT verification, no
 //     Realtime, one connection.
@@ -48,12 +49,21 @@ const SUPABASE_STUB = `
   alter default privileges in schema public grant all on tables    to anon, authenticated, service_role;
   alter default privileges in schema public grant all on sequences to anon, authenticated, service_role;
   alter default privileges in schema public grant all on functions to anon, authenticated, service_role;
+`;
 
-  -- v1 (PostIT-web) tables the migrations read from or write to on signup.
-  -- Empty here; on the live project they hold real data.
-  create table user_plans   (user_id uuid primary key, plan text not null default 'free');
+/**
+ * v1 (PostIT-web)'s tables as they exist on the live project, which the first
+ * migration adopts in place. A fresh database doesn't have them (the first
+ * migration creates empty ones); pass this to createDatabase's
+ * `beforeMigrations` to start from a v1-shaped database instead.
+ */
+export const V1_TABLES = `
+  create table user_plans (
+    user_id uuid primary key references auth.users(id) on delete cascade,
+    plan text not null default 'free', paystack_customer_code text, pro_expires_at timestamptz
+  );
   create table user_streaks (
-    user_id        uuid primary key,
+    user_id        uuid primary key references auth.users(id) on delete cascade,
     current_streak integer not null default 0,
     longest_streak integer not null default 0,
     last_post_date date,
@@ -61,7 +71,8 @@ const SUPABASE_STUB = `
   );
   create table user_tokens (
     user_id uuid, platform text, access_token text, refresh_token text,
-    expires_at timestamptz, created_at timestamptz not null default now()
+    expires_at timestamptz, created_at timestamptz not null default now(),
+    unique (user_id, platform)
   );
   create table posts (
     id uuid primary key default gen_random_uuid(), user_id uuid, content text, platform text,
@@ -87,11 +98,15 @@ export async function applyMigration(db: Db, file: string): Promise<void> {
 /**
  * A fresh database. `through` stops after that migration (a prefix of its file
  * name, e.g. "20260814000019"), to test upgrading a database that already holds
- * data.
+ * data. `beforeMigrations` runs before the first migration, to set up a database
+ * that already has things in it (e.g. v1's tables and rows).
  */
-export async function createDatabase(opts: { through?: string } = {}): Promise<Db> {
+export async function createDatabase(
+  opts: { through?: string; beforeMigrations?: (db: Db) => Promise<void> } = {},
+): Promise<Db> {
   const db = new PGlite();
   await db.exec(SUPABASE_STUB);
+  await opts.beforeMigrations?.(db);
   for (const file of migrationFiles()) {
     await applyMigration(db, file);
     if (opts.through && file.startsWith(opts.through)) break;

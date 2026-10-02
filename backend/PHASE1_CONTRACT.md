@@ -23,7 +23,7 @@ whichever architecture we end up with.
   *not* enough for any table that carries a limit or an entitlement. Today, through the database
   directly, any signed-in creator can make themselves an admin, grant themselves Pro, or mint XP.
   Fixed in this branch and proven by tests that run each attack before and after. See §3 and §7.
-- **What's done:** 3 migrations, 16 new endpoints, the Jarvis chat, 149 automated tests, CI job.
+- **What's done:** 4 migrations, 22 new endpoints, the Jarvis chat, a real TikTok connection (sign-in, sync, nightly refresh), 260+ automated tests, CI job.
   **What isn't:** nothing here is deployed; the app isn't wired yet; platform connections, payments,
   push, stats and real AI quality are the team's later phases (§6).
 - **Needs a decision this week:** §8.
@@ -122,8 +122,8 @@ Two consequences for the plan as written:
 | `quest_progress` | `quest_progress` | **Exists** | ⚠ still creator-writable — §7.2 |
 | `jarvis_messages` | — | **Not built** (Phase 3) | The daily cap works today via rate-limit buckets; history + per-reply cost logging come with this table |
 | `repurpose_jobs` | `repurpose_jobs` | **Built** | Each allowed Repurpose is a row; **the weekly count is the number of rows this week**, so the count can't drift from the work. `source`/`versions` fill in when the AI lands |
-| `platform_connections` | `platform_connections` | **Exists; token columns now unreadable** | Still accepts a token string from the app — a real server-side OAuth callback is Track C |
-| `post_stats` | — | **Not built** (Phase 4) | |
+| `platform_connections` | `platform_connections` | **Extended; token columns unreadable** | New: account name/avatar/scopes, `status` (`connected` / `needs_reauth` / `error`), last sync + error. **TikTok is now a real server-side OAuth connection** (§5.4), its tokens sealed at rest, and creators can't write TikTok rows at all. LinkedIn/X still take a token string from the app until their OAuth is built |
+| `post_stats` | `post_stats` (+ `account_stats`) | **Built for TikTok** | Per-video views/likes/comments/shares, plus a daily account snapshot (followers…). Server-written, owner-read. Instagram/YouTube fill the same tables |
 | `subscriptions` | `subscriptions` | **Exists; creators can no longer write it** | Needs `apple`/`google` added to `processor_type` for RevenueCat (Track C) |
 | `notifications` | `notifications` | **Exists** | Ours has `read` (boolean) and `action_text`/`metadata`; the plan wants `read_at` and a target. Track C to reconcile |
 | `push_tokens` | — | **Not built** (Track C) | |
@@ -219,6 +219,46 @@ The model sits behind one function (`complete` in `packages/ai/jarvis-chat.ts`);
 fallback today. Switching to Claude Haiku/Sonnet is one function, which is what makes the plan's
 20-prompt comparison cheap to run.
 
+### 5.4 Connecting TikTok (Login Kit + Display API)
+
+```
+App ── POST /platforms/tiktok/authorize {client} ──▶ API: mints a single-use state tied to THIS creator
+App ◀── { url } ───────────────────────────────────  (stored server-side, 10 min)
+App ── sends the creator to TikTok ───────────────▶ TikTok: "Allow PostStreak?"
+TikTok ── redirects to  <app>/auth/tiktok/callback?code=…&state=… ──▶ the app's callback page
+App ── POST /platforms/tiktok/callback {code,state} ▶ API: checks the state is theirs and unused,
+                                                      exchanges the code, seals + stores the tokens,
+                                                      pulls the first stats
+```
+
+- **Scopes** (exactly these three; they must match what's approved on the TikTok app):
+  `user.info.basic` (name, photo), `user.info.stats` (followers, likes), `video.list` (videos + their views/likes/comments/shares).
+  The creator's **@handle** needs a fourth scope, `user.info.profile`; until it's added to the TikTok app and
+  the list above, the app shows the display name.
+- **Redirect URI:** TikTok requires https, no query string, no fragment, ≤ 10 per app, each registered in the
+  TikTok portal. Ours is the app's own page, `https://app.poststreak.app/auth/tiktok/callback` (already served by
+  the web app's rewrite). **Register a second one for staging** — TikTok doesn't take `localhost`.
+- **Web vs phone:** the state starts `w.` (web) or `m.` (phone app). On `m.` the callback page hands `code` and
+  `state` to the phone app (`poststreak://tiktok…`), because only the app holds the creator's session; on `w.`
+  the page posts them itself. Either way the `/callback` call must come from the same signed-in creator.
+- **Security:** the state is unguessable, single-use, expires in 10 minutes, and is bound to the creator who started
+  it, so a forged callback can't attach someone else's TikTok to a victim. Tokens are sealed with AES-256-GCM
+  (`TOKEN_ENCRYPTION_KEY`), bound to creator + platform, and creators can't read them. One TikTok account can be
+  linked to one PostStreak account. Disconnecting revokes the token at TikTok and deletes the data we pulled.
+- **Sync:** on connect, on `POST /platforms/tiktok/sync` (6/hour), and nightly (`/api/cron/sync-platforms`,
+  04:00 UTC). Access tokens last 24 h and are refreshed early; a dead grant marks the connection
+  `needs_reauth` so the app can show "Reconnect". Syncs of one creator never overlap (token refresh can rotate
+  the refresh token, so two at once could lock a creator out).
+- **What the app gets:** `GET /platforms/accounts` (and `bootstrap.accounts`) for the Connect screens;
+  `GET /growth/snapshots` for the onboarding "Your account" card (best posting time, posting days, average
+  views — in the creator's time zone). The richer Growth screens are still sample data.
+- **Sandbox vs production:** the sandbox keys only work for TikTok accounts added as "Target users". For any
+  creator to connect, TikTok must approve the Production app, which needs a screen recording of this flow working
+  — so build and demo it on staging first. Posting stays "assisted" (copy + open TikTok); direct posting needs a
+  separate TikTok audit.
+- **Setup:** see [STAGING_RUNBOOK.md](STAGING_RUNBOOK.md). Env vars: `TIKTOK_CLIENT_KEY`,
+  `TIKTOK_CLIENT_SECRET`, `TIKTOK_REDIRECT_URI`, `TOKEN_ENCRYPTION_KEY`, `CRON_SECRET`.
+
 ---
 
 ## 6. Phase gates — what the backend provides and what's left
@@ -229,7 +269,7 @@ fallback today. Switching to Claude Haiku/Sonnet is one function, which is what 
 | **1** — sign up, close the app, reopen: still signed in with name and niches; the tour doesn't return | Sign-up trigger, `PUT /user/onboarding`, `POST /user/tour`, `bootstrap` | App: Supabase Auth screens + session persistence; apply bootstrap on launch |
 | **2** — everything a creator makes survives a reload and appears on a second phone | Drafts, hooks, check-ins, calendar range, Repurpose count | App: swap `src/data/index.ts` insides (§5.2), add loading/offline messages |
 | **3** — three real creators say Jarvis feels made for them | Chat endpoint, prompt, safety (§5.3) | Model choice + the 20-prompt test; history table; stats-aware advice (Phase 4) |
-| **4** — real views on Growth, daily | — | Track C: TikTok/Instagram/YouTube OAuth + `post_stats` + nightly job |
+| **4** — real views on Growth, daily | TikTok connect, sync, nightly job, `post_stats`/`account_stats`, snapshots (§5.4) | Instagram + YouTube; wire the Growth screens beyond the onboarding card; TikTok production approval |
 | **5** — a purchase unlocks Pro, cancelling locks it | `subscriptions` is server-only and the tier is derived from it; signature-checked Stripe/Paystack webhooks exist | RevenueCat + the web checkout; restore/cancel/expiry |
 | **6** — beta with no lost data | Migrations are tested on fresh *and* on populated databases | Prod project, backup-restore test, TestFlight/Play |
 
@@ -281,7 +321,7 @@ Also fixed, found along the way:
 |---|---|---|
 | `quests.complete` awards XP on **every** call and never checks the quest's requirements; `quest_progress` and `challenge_participants` are creator-writable | Unlimited XP | One atomic `complete_quest()` function; make both tables server-written |
 | `missions` and `duels` insert/update policies; `referrals_insert_own` | XP farming (replace → complete loop); forced duels; fake referrals once rewards exist | Same pattern as §3 |
-| OAuth tokens are stored in plaintext, and `connect` accepts any string the app sends | A leaked database dump leaks every creator's social access | Supabase Vault + a server-side OAuth callback (Track C) |
+| **TikTok** tokens are now sealed at rest and connected through a real server-side OAuth callback (§5.4). **LinkedIn and X** tokens are still stored in plaintext and `connect` still accepts any string the app sends for them | A leaked database dump leaks those creators' social access; a creator can fake a LinkedIn/X connection | Give LinkedIn/X the same treatment: server-side OAuth callback + `sealToken` (the pieces exist in `packages/integrations/token-vault.ts`) |
 | CORS reflects any `Origin` with credentials allowed | Low today (Bearer tokens aren't sent automatically), but wrong for production | Allowlist `poststreak.app`, `app.poststreak.app`, localhost in dev |
 | Admin feature flags are stored in (and read back from) `analytics_events` with the staff member's own client — they don't persist, and the reader keeps the oldest value | Dead feature | A real `feature_flags` table |
 | `scheduled_posts` status/`platform_post_ids` are creator-editable | A creator can fake a "published" post (skews stats) | Server-only status transitions when Growth ships |
@@ -322,7 +362,7 @@ cd backend
 pnpm install
 pnpm typecheck     # also type-checks the test files
 pnpm lint
-pnpm test          # 149 tests, ~30 s, no database or network needed
+pnpm test          # 260+ tests, ~40 s, no database or network needed
 ```
 
 The tests apply every migration to an in-process Postgres (PGlite) with Supabase's roles, check

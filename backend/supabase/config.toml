@@ -1,0 +1,69 @@
+# Supabase project config for LOCAL development (`supabase start`, from backend/).
+# Hosted projects (staging, production) are configured in the Supabase dashboard
+# — see STAGING_RUNBOOK.md — but `supabase config push` can apply the [auth]
+# section of this file to a hosted project too.
+#
+# This is deliberately short: anything not listed uses the CLI's default.
+
+project_id = "poststreak"
+
+[api]
+enabled = true
+port = 54321
+schemas = ["public", "graphql_public"]
+extra_search_path = ["public", "extensions"]
+max_rows = 1000
+
+[db]
+port = 54322
+shadow_port = 54320
+# `supabase link` updates this to match the hosted project's version.
+major_version = 17
+
+[db.migrations]
+enabled = true
+
+# No seed data: sign up through the app (the code arrives in the local mail
+# catcher at http://127.0.0.1:54324).
+[db.seed]
+enabled = false
+
+[studio]
+enabled = true
+port = 54323
+
+# Local mail catcher: every email the stack sends (including the 6-digit sign-in
+# code) appears at http://127.0.0.1:54324 instead of going out for real.
+[local_smtp]
+enabled = true
+port = 54324
+
+[auth]
+enabled = true
+# The Expo web app in development (`npm run web`).
+site_url = "http://localhost:8081"
+additional_redirect_urls = ["http://localhost:8081/**", "poststreak://**"]
+jwt_expiry = 3600
+enable_refresh_token_rotation = true
+refresh_token_reuse_interval = 10
+enable_signup = true
+enable_anonymous_sign_ins = false
+
+[auth.rate_limit]
+# Local only. The hosted limits are in the dashboard (Authentication → Rate Limits).
+email_sent = 100
+
+# PostStreak signs in with a 6-digit emailed code. Both templates a sign-in can
+# use must show {{ .Token }}, or creators receive a link the app can't use.
+[auth.email]
+enable_signup = true
+enable_confirmations = true
+double_confirm_changes = true
+
+[auth.email.template.magic_link]
+subject = "Your PostStreak code"
+content_path = "./supabase/templates/code.html"
+
+[auth.email.template.confirmation]
+subject = "Your PostStreak code"
+content_path = "./supabase/templates/code.html"
